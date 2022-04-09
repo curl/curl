@@ -33,7 +33,7 @@
 #include "h2h3.h"
 #include "msh3.h"
 
-/* #define DEBUG_HTTP3 */
+/* #define DEBUG_HTTP3 1 */
 #ifdef DEBUG_HTTP3
 #define H3BUGF(x) x
 #else
@@ -429,7 +429,6 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
   struct HTTP *stream = data->req.p.http;
   size_t outsize = 0;
   size_t size;
-  bool close_stream = false;
   (void)sockindex;
   H3BUGF(infof(data, "msh3_stream_recv %zu", buffersize));
 
@@ -447,7 +446,7 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
       size = stream->recv_header_len;
     }
     memcpy(buf, stream->recv_buf, size);
-    if(buffersize < stream->recv_header_len + stream->recv_data_len) {
+    if(size < stream->recv_header_len + stream->recv_data_len) {
       memmove(stream->recv_buf, stream->recv_buf + size,
               stream->recv_header_len + stream->recv_data_len - size);
     }
@@ -457,14 +456,13 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
     buffersize -= size;
     outsize += size;
   }
-
-  if(stream->recv_data_len && buffersize) {
+  else if(stream->recv_data_len) {
     size = buffersize;
     if(stream->recv_data_len < size) {
       size = stream->recv_data_len;
     }
     memcpy(buf, stream->recv_buf, size);
-    if(buffersize < stream->recv_data_len) {
+    if(size < stream->recv_data_len) {
       memmove(stream->recv_buf, stream->recv_buf + size,
               stream->recv_data_len - size);
     }
@@ -473,15 +471,7 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
     outsize += size;
   }
 
-  close_stream = stream->recv_data_complete && stream->recv_header_len == 0 &&
-    stream->recv_data_len == 0;
-
   msh3_lock_release(&stream->recv_lock);
-
-  if(close_stream) {
-    H3BUGF(infof(data, "request complete"));
-    streamclose(conn, "End of stream");
-  }
 
   H3BUGF(infof(data, "returned %zu total bytes in recv", outsize));
 
@@ -509,9 +499,9 @@ void Curl_quic_done(struct Curl_easy *data, bool premature)
 
 bool Curl_quic_data_pending(const struct Curl_easy *data)
 {
-  (void)data;
+  struct HTTP *stream = data->req.p.http;
   H3BUGF(infof((struct Curl_easy *)data, "Curl_quic_data_pending"));
-  return FALSE;
+  return stream->recv_header_len || stream->recv_data_len;
 }
 
 #endif /* USE_MSH3 */
