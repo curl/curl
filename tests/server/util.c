@@ -809,3 +809,66 @@ void restore_signal_handlers(bool keep_sigalrm)
   }
 #endif
 }
+
+#ifdef USE_UNIX_SOCKETS
+
+int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
+        struct sockaddr_un *sau) {
+    int error;
+    int rc;
+
+    memset(sau, 0, sizeof(struct sockaddr_un));
+    sau->sun_family = AF_UNIX;
+    strncpy(sau->sun_path, unix_socket, sizeof(sau->sun_path) - 1);
+    rc = bind(sock, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
+    if(0 != rc && errno == EADDRINUSE) {
+      struct_stat statbuf;
+      /* socket already exists. Perhaps it is stale? */
+      curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
+      if(CURL_SOCKET_BAD == unixfd) {
+        error = SOCKERRNO;
+        logmsg("Error binding socket, failed to create socket at %s: (%d) %s",
+               unix_socket, error, strerror(error));
+        return rc;
+      }
+      /* check whether the server is alive */
+      rc = connect(unixfd, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
+      error = errno;
+      sclose(unixfd);
+      if(ECONNREFUSED != error) {
+        logmsg("Error binding socket, failed to connect to %s: (%d) %s",
+               unix_socket, error, strerror(error));
+        return rc;
+      }
+      /* socket server is not alive, now check if it was actually a socket. */
+#ifdef WIN32
+      /* Windows does not have lstat function. */
+      rc = curlx_win32_stat(unix_socket, &statbuf);
+#else
+      rc = lstat(unix_socket, &statbuf);
+#endif
+      if(0 != rc) {
+        logmsg("Error binding socket, failed to stat %s: (%d) %s",
+               unix_socket, errno, strerror(errno));
+        return rc;
+      }
+#ifdef S_IFSOCK
+      if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
+        logmsg("Error binding socket, failed to stat %s: (%d) %s",
+               unix_socket, error, strerror(error));
+        return rc;
+      }
+#endif
+      /* dead socket, cleanup and retry bind */
+      rc = unlink(unix_socket);
+      if(0 != rc) {
+        logmsg("Error binding socket, failed to unlink %s: (%d) %s",
+               unix_socket, errno, strerror(errno));
+        return rc;
+      }
+      /* stale socket is gone, retry bind */
+      rc = bind(sock, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
+    }
+    return rc;
+}
+#endif
