@@ -177,10 +177,6 @@ static int msh3_getsock(struct Curl_easy *data,
   if(stream->recv_error) {
     bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
     data->state.drain = 1;
-    if(stream->recv_buf) {
-      free(stream->recv_buf);
-      stream->recv_buf = ZERO_NULL;
-    }
   }
   else if(stream->recv_header_len || stream->recv_data_len) {
     bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
@@ -202,6 +198,7 @@ static CURLcode msh3_do_it(struct Curl_easy *data, bool *done)
     return CURLE_OUT_OF_MEMORY;
   }
   stream->req = ZERO_NULL;
+  msh3_lock_initialize(&stream->recv_lock);
   stream->recv_buf_alloc = MSH3_REQ_INIT_BUF_LEN;
   stream->recv_header_len = 0;
   stream->recv_header_complete = false;
@@ -222,13 +219,13 @@ static unsigned int msh3_conncheck(struct Curl_easy *data,
   return CONNRESULT_NONE;
 }
 
-static CURLcode msh3_disconnect(struct Curl_easy *data,
-                                struct connectdata *conn, bool dead_connection)
+static void msh3_cleanup(struct quicsocket *qs, struct HTTP *stream)
 {
-  struct quicsocket *qs = conn->quic;
-  H3BUGF(infof(data, "disconnecting (msh3)"));
-  (void)data;
-  (void)dead_connection;
+  if(stream && stream->recv_buf) {
+    free(stream->recv_buf);
+    stream->recv_buf = ZERO_NULL;
+    msh3_lock_uninitialize(&stream->recv_lock);
+  }
   if(qs->conn) {
     MsH3ConnectionClose(qs->conn);
     qs->conn = ZERO_NULL;
@@ -237,27 +234,27 @@ static CURLcode msh3_disconnect(struct Curl_easy *data,
     MsH3ApiClose(qs->api);
     qs->api = ZERO_NULL;
   }
+}
+
+static CURLcode msh3_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn, bool dead_connection)
+{
+  (void)dead_connection;
+  H3BUGF(infof(data, "disconnecting (msh3)"));
+  msh3_cleanup(conn->quic, data->req.p.http);
   return CURLE_OK;
 }
 
 void Curl_quic_disconnect(struct Curl_easy *data, struct connectdata *conn,
                           int tempindex)
 {
-  struct quicsocket *qs = &conn->hequic[tempindex];
-  (void)data;
   if(conn->transport == TRNSPRT_QUIC) {
     H3BUGF(infof(data, "disconnecting (curl)"));
-    if(qs->conn) {
-      MsH3ConnectionClose(qs->conn);
-      qs->conn = ZERO_NULL;
-    }
-    if(qs->api) {
-      MsH3ApiClose(qs->api);
-      qs->api = ZERO_NULL;
-    }
+    msh3_cleanup(&conn->hequic[tempindex], data->req.p.http);
   }
 }
 
+/* Requires stream->recv_lock to be held */
 static bool msh3request_ensure_room(struct HTTP *stream, size_t len)
 {
   uint8_t *new_recv_buf;
@@ -295,12 +292,14 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
     return;
   }
 
+  msh3_lock_acquire(&stream->recv_lock);
+
   if((Header->NameLength == 7) &&
      !strncmp(H2H3_PSEUDO_STATUS, (char *)Header->Name, 7)) {
      total_len = 9 + Header->ValueLength;
     if(!msh3request_ensure_room(stream, total_len)) {
       /* TODO - handle error */
-      return;
+      goto release_lock;
     }
     msnprintf((char *)stream->recv_buf + stream->recv_header_len,
               stream->recv_buf_alloc - stream->recv_header_len,
@@ -310,7 +309,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
     total_len = Header->NameLength + 4 + Header->ValueLength;
     if(!msh3request_ensure_room(stream, total_len)) {
       /* TODO - handle error */
-      return;
+      goto release_lock;
     }
     msnprintf((char *)stream->recv_buf + stream->recv_header_len,
               stream->recv_buf_alloc - stream->recv_header_len,
@@ -320,6 +319,9 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
   }
 
   stream->recv_header_len += total_len - 1; /* don't include null-terminator */
+
+release_lock:
+  msh3_lock_release(&stream->recv_lock);
 }
 
 static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
@@ -332,11 +334,12 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
   (void)Request;
   H3BUGF(printf("* msh3_data_received %u. %zu buffered, %zu allocated\n",
                 Length, cur_recv_len, stream->recv_buf_alloc));
+  msh3_lock_acquire(&stream->recv_lock);
   if(!stream->recv_header_complete) {
     H3BUGF(printf("* Headers complete!\n"));
     if(!msh3request_ensure_room(stream, 2)) {
       /* TODO - handle error */
-      return;
+      goto release_lock;
     }
     stream->recv_buf[stream->recv_header_len++] = '\r';
     stream->recv_buf[stream->recv_header_len++] = '\n';
@@ -344,10 +347,12 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
   }
   if(!msh3request_ensure_room(stream, Length)) {
     /* TODO - handle error */
-    return;
+    goto release_lock;
   }
   memcpy(stream->recv_buf + cur_recv_len, Data, Length);
   stream->recv_data_len += (size_t)Length;
+release_lock:
+  msh3_lock_release(&stream->recv_lock);
 }
 
 static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
@@ -389,12 +394,12 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
   H3BUGF(infof(data, "msh3_stream_send %zu", len));
 
   if(!stream->req) {
-    H3BUGF(infof(data, "starting request with %zu headers", hreq->entries));
     *curlcode = Curl_pseudo_headers(data, mem, len, &hreq);
     if(*curlcode) {
       failf(data, "Curl_pseudo_headers failed");
       return -1;
     }
+    H3BUGF(infof(data, "starting request with %zu headers", hreq->entries));
     stream->req = MsH3RequestOpen(qs->conn, &msh3_request_if, stream,
                                  (MSH3_HEADER*)hreq->header, hreq->entries);
     Curl_pseudo_free(hreq);
@@ -407,7 +412,7 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
     return len;
   }
   H3BUGF(infof(data, "send %zd body bytes on request %p", len,
-               (void *)stream->stream3_id));
+               (void *)stream->req));
   *curlcode = CURLE_SEND_ERROR;
   return -1;
 }
@@ -429,6 +434,8 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
     *curlcode = stream->recv_error;
     return -1;
   }
+
+  msh3_lock_acquire(&stream->recv_lock);
 
   if(stream->recv_header_len) {
     outsize = buffersize;
@@ -461,13 +468,11 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
     H3BUGF(infof(data, "returned %zu bytes of data", outsize));
   }
 
+  msh3_lock_release(&stream->recv_lock);
+
   if(stream->recv_data_complete) {
     H3BUGF(infof(data, "request complete"));
     streamclose(conn, "End of stream");
-    if(stream->recv_buf) {
-      free(stream->recv_buf);
-      stream->recv_buf = ZERO_NULL;
-    }
   }
 
   return (ssize_t)outsize;

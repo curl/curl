@@ -167,6 +167,31 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
 struct h3out; /* see ngtcp2 */
 #endif
 
+#ifdef USE_MSH3
+#ifdef _WIN32
+#define msh3_lock CRITICAL_SECTION
+#define msh3_lock_initialize(lock) InitializeCriticalSection(lock)
+#define msh3_lock_uninitialize(lock) DeleteCriticalSection(lock)
+#define msh3_lock_acquire(lock) EnterCriticalSection(lock)
+#define msh3_lock_release(lock) LeaveCriticalSection(lock)
+#else /* !_WIN32 */
+struct posix_lock {
+    alignas(16) pthread_mutex_t mutex;
+};
+#define msh3_lock posix_lock
+#define msh3_lock_initialize(lock) { \
+    pthread_mutexattr_t attr; \
+    pthread_mutexattr_init(&attr); \
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE); \
+    pthread_mutex_init(&(lock)->mutex, &attr); \
+    pthread_mutexattr_destroy(&attr); \
+}
+#define msh3_lock_uninitialize(lock) pthread_mutex_destroy(&(lock)->mutex)
+#define msh3_lock_acquire(lock) pthread_mutex_lock(&(lock)->mutex)
+#define msh3_lock_release(lock) pthread_mutex_unlock(&(lock)->mutex)
+#endif /* _WIN32 */
+#endif /* USE_MSH3 */
+
 /****************************************************************************
  * HTTP unique setup
  ***************************************************************************/
@@ -248,6 +273,7 @@ struct HTTP {
 #endif
 #ifdef USE_MSH3
   struct MSH3_REQUEST *req;
+  msh3_lock recv_lock;
   /* Receive Buffer (Headers and Data) */
   uint8_t* recv_buf;
   size_t recv_buf_alloc;
