@@ -461,7 +461,7 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
     stream->recv_data_len -= outsize;
     H3BUGF(infof(data, "returned %zu bytes of data", outsize));
   }
-  else if (stream->recv_data_complete) {
+  else if(stream->recv_data_complete) {
     H3BUGF(infof(data, "receive complete"));
   }
 
