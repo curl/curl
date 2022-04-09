@@ -19,7 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#define USE_MSH3 1
+
 #include "curl_setup.h"
 
 #ifdef USE_MSH3
