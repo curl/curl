@@ -458,7 +458,7 @@ static ssize_t msh3_stream_recv(struct Curl_easy *data,
     outsize += size;
   }
 
-  if(stream->recv_data_len && buffersize != 0) {
+  if(stream->recv_data_len && buffersize) {
     size = buffersize;
     if(stream->recv_data_len < size) {
       size = stream->recv_data_len;
