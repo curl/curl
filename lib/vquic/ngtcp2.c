@@ -1844,6 +1844,7 @@ void Curl_quic_done(struct Curl_easy *data, bool premature)
     /* only for HTTP/3 transfers */
     struct HTTP *stream = data->req.p.http;
     Curl_dyn_free(&stream->overflow);
+    free(stream->h3out);
   }
 }
 
