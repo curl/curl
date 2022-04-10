@@ -1814,7 +1814,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
   int rv;
   ssize_t sent;
   ngtcp2_ssize outlen;
-  uint8_t out[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
+  uint8_t out[NGTCP2_MAX_PMTUD_UDP_PAYLOAD_SIZE];
   ngtcp2_path_storage ps;
   ngtcp2_tstamp ts = timestamp();
   ngtcp2_tstamp expiry;
@@ -1924,7 +1924,10 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       else {
         failf(data, "send() returned %zd (errno %d)", sent,
               SOCKERRNO);
-        return CURLE_SEND_ERROR;
+        if(SOCKERRNO != EMSGSIZE) {
+          return CURLE_SEND_ERROR;
+        }
+        /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
       }
     }
   }
