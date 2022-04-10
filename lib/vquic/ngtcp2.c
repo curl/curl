@@ -1718,7 +1718,6 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
   uint8_t out[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
   ngtcp2_path_storage ps;
   ngtcp2_tstamp ts = timestamp();
-  struct sockaddr_storage remote_addr;
   ngtcp2_tstamp expiry;
   ngtcp2_duration timeout;
   int64_t stream_id;
@@ -1807,7 +1806,6 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       }
     }
 
-    memcpy(&remote_addr, ps.path.remote.addr, ps.path.remote.addrlen);
     while((sent = send(sockfd, (const char *)out, outlen, 0)) == -1 &&
           SOCKERRNO == EINTR)
       ;
