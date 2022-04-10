@@ -92,10 +92,6 @@ rm -f "$HEADER.bak"
 sed -i.bak 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER
 rm -f "$CHEADER.bak"
 
-# Replace version number in plist file:
-sed -i.bak "s/7\.12\.3/$libversion/g" $PLIST
-rm -f "$PLIST.bak"
-
 if test -n "$only"; then
   # done!
   exit;

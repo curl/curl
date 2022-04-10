@@ -60,7 +60,7 @@ my @skiplist=(
     'options-in-versions',
 
     # macos-framework files
-    '^lib\/libcurl.plist',
+    '^lib\/libcurl.plist.in',
     '^lib\/libcurl.vers.in',
 
     # vms files
