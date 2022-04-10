@@ -140,6 +140,7 @@
  17.3 Read keys from ~/.ssh/id_ecdsa, id_ed25519
  17.4 Support CURLOPT_PREQUOTE
  17.5 SSH over HTTPS proxy with more backends
+ 17.6 SFTP with SCP://
 
  18. Command line tool
  18.1 sync
@@ -940,6 +941,12 @@
  all until PR https://github.com/curl/curl/pull/6021 brought the
  functionality with the libssh2 backend. Presumably, this support
  can/could be added for the other backends as well.
+
+17.6 SFTP with SCP://
+
+ OpenSSH 9 switched their 'scp' tool to speak SFTP under the hood. Going
+ forward it might be worth having curl or libcurl attempt SFTP if SCP fails to
+ follow suite.
 
 18. Command line tool
 
