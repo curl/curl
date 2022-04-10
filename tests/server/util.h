@@ -83,8 +83,6 @@ void restore_signal_handlers(bool keep_sigalrm);
 
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
-#else
-#error "USE_UNIX_SOCKETS defined but not HAVE_SYS_UN_H"
 #endif /* HAVE_SYS_UN_H */
 
 int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
