@@ -73,7 +73,7 @@
  * the far end, then start over at index 0 again.
  */
 
-#define H3_SEND_SIZE (20*1024)
+#define H3_SEND_SIZE (256*1024)
 struct h3out {
   uint8_t buf[H3_SEND_SIZE];
   size_t used;   /* number of bytes used in the buffer */
