@@ -1638,6 +1638,24 @@ CURLcode Curl_socket(struct Curl_easy *data,
   if(conn->transport == TRNSPRT_QUIC) {
     /* QUIC sockets need to be nonblocking */
     (void)curlx_nonblock(*sockfd, TRUE);
+    switch(addr->family) {
+#if defined(__linux__) && defined(IP_MTU_DISCOVER)
+    case AF_INET: {
+      int val = IP_PMTUDISC_DO;
+      (void)setsockopt(*sockfd, IPPROTO_IP, IP_MTU_DISCOVER, &val,
+                       sizeof(val));
+      break;
+    }
+#endif
+#if defined(__linux__) && defined(IPV6_MTU_DISCOVER)
+    case AF_INET6: {
+      int val = IPV6_PMTUDISC_DO;
+      (void)setsockopt(*sockfd, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
+                       sizeof(val));
+      break;
+    }
+#endif
+    }
   }
 
 #if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
