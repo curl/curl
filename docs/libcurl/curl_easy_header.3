@@ -52,7 +52,7 @@ want. See the descriptions below.
 
 The \fIrequest\fP argument tells libcurl from which request you want headers
 from. A single transfer might consist of a series of HTTP requests and this
-argument lets you specify which particular invidual request you want the
+argument lets you specify which particular individual request you want the
 headers from. 0 being the first request and then the number increases for
 further redirects or when multi-state authentication is used. Passing in -1 is
 a shortcut to "the last" request in the series, independently of the actual
@@ -131,7 +131,7 @@ CURLHcode h =
 .SH AVAILABILITY
 Added in 7.83.0
 .SH RETURN VALUE
-This function returns a CURLHcode indiciating success or error.
+This function returns a CURLHcode indicating success or error.
 .IP "CURLHE_BADINDEX (1)"
 There is no header with the requested index.
 .IP "CURLHE_MISSING (2)"
@@ -145,7 +145,7 @@ Out of resources
 .IP "CURLHE_BAD_ARGUMENT (6)"
 One or more of the given arguments are bad.
 .IP "CURLHE_NOT_BUILT_IN (7)"
-HTTP or the header API has been disbled in the build.
+HTTP or the header API has been disabled in the build.
 .SH "SEE ALSO"
 .BR curl_easy_nextheader "(3), " curl_easy_perform "(3), "
 .BR CURLOPT_HEADERFUNCTION "(3), " CURLINFO_CONTENT_TYPE "(3) "
