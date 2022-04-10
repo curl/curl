@@ -164,6 +164,26 @@ NGHTTP2_LIBS     = nghttp2.lib
 !ENDIF
 !ENDIF
 
+!IFDEF MSH3_PATH
+MSH3_INC_DIR     = $(MSH3_PATH)\include
+MSH3_LIB_DIR     = $(MSH3_PATH)\lib
+MSH3_LFLAGS      = $(MSH3_LFLAGS) "/LIBPATH:$(MSH3_LIB_DIR)"
+!ELSE
+MSH3_INC_DIR     = $(DEVEL_INCLUDE)
+MSH3_LIB_DIR     = $(DEVEL_LIB)
+!ENDIF
+
+!IF "$(WITH_MSH3)"=="dll"
+MSH3_CFLAGS      = /DUSE_MSH3 /I"$(MSH3_INC_DIR)"
+MSH3_LIBS        = msh3.lib
+!ELSEIF "$(WITH_MSH3)"=="static"
+MSH3_CFLAGS      = /DUSE_MSH3 /DMSH3_STATICLIB /I"$(MSH3_INC_DIR)"
+!IF EXISTS("$(NGHTTP2_LIB_DIR)\msh3_static.lib")
+MSH3_LIBS        = msh3_static.lib
+!ELSE
+MSH3_LIBS        = msh3.lib
+!ENDIF
+!ENDIF
 
 !IFDEF MBEDTLS_PATH
 MBEDTLS_INC_DIR  = $(MBEDTLS_PATH)\include
@@ -492,6 +512,11 @@ CFLAGS = $(CFLAGS) $(NGHTTP2_CFLAGS)
 LFLAGS = $(LFLAGS) $(NGHTTP2_LFLAGS) $(NGHTTP2_LIBS)
 !ENDIF
 
+!IF "$(USE_MSH3)"=="true"
+CFLAGS = $(CFLAGS) $(MSH3_CFLAGS)
+LFLAGS = $(LFLAGS) $(MSH3_LFLAGS) $(MSH3_LIBS)
+!ENDIF
+
 !IF "$(GEN_PDB)"=="true"
 CFLAGS = $(CFLAGS) $(CFLAGS_PDB) /Fd"$(LIB_DIROBJ)\$(PDB)"
 LFLAGS = $(LFLAGS) $(LFLAGS_PDB)
@@ -545,6 +570,7 @@ package: $(TARGET)
 $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DIRDIST)
 	@echo Using SSL: $(USE_SSL)
 	@echo Using NGHTTP2: $(USE_NGHTTP2)
+	@echo Using MSH3: $(USE_MSH3)
 	@echo Using c-ares: $(USE_CARES)
 	@echo Using SSH2: $(USE_SSH2)
 	@echo Using SSH: $(USE_SSH)

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,6 +30,9 @@
 #endif
 #ifdef USE_QUICHE
 #include "vquic/quiche.h"
+#endif
+#ifdef USE_MSH3
+#include "vquic/msh3.h"
 #endif
 
 #include "urldata.h"

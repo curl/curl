@@ -19,6 +19,8 @@ QUIC libraries we are experimenting with:
 
 [quiche](https://github.com/cloudflare/quiche)
 
+[msquic](https://github.com/microsoft/msquic) & [msh3](https://github.com/nibanks/msh3)
+
 ## Experimental
 
 HTTP/3 and QUIC support in curl is considered **EXPERIMENTAL** until further
@@ -135,6 +137,53 @@ Build curl:
      % make install
 
  If `make install` results in `Permission denied` error, you will need to prepend it with `sudo`.
+
+# msh3 (msquic) version
+
+## Build Linux (with quictls fork of OpenSSL)
+
+Build msh3:
+
+     % git clone -b v0.1.0 --single-branch --recursive https://github.com/nibanks/msh3
+     % cd msh3 && mkdir build && cd build
+     % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+     % cmake --build .
+     % cmake --install .
+
+Build curl:
+
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % ./configure LDFLAGS="-Wl,-rpath,/usr/local/lib" --with-msh3=/usr/local --with-openssl
+     % make
+     % make install
+
+Run from `/usr/local/bin/curl`.
+
+## Build Windows
+
+Build msh3:
+
+     % git clone -b v0.2.0 --single-branch --recursive https://github.com/nibanks/msh3
+     % cd msh3 && mkdir build && cd build
+     % cmake -G 'Visual Studio 17 2022' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+     % cmake --build . --config Release
+     % cmake --install . --config Release
+
+> **Note** - On Windows, Schannel will be used for TLS support by default. If you with to use (the quictls fork of) OpenSSL, specify the `-DQUIC_TLS=openssl` option to the generate command above. Also note that OpenSSL brings with it an additional set of build dependencies not specified here.
+
+Build curl (in [Visual Studio Command prompt](../winbuild/README.md#open-a-command-prompt)):
+
+     % git clone https://github.com/curl/curl
+     % cd curl/winbuild
+     % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
+
+Note: If you encouter a build error with `tool_hugehelp.c` being missing, rename `tool_hugehelp.c.cvs` in the same directory to `tool_hugehelp.c` and then run `nmake` again.
+
+Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that directory, or copy `msquic.dll` and `msh3.dll` from that directory to the `curl.exe` directory. For example:
+
+     % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://www.google.com
 
 # `--http3`
 
