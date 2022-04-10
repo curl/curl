@@ -879,19 +879,12 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
        port we actually got and update the listener port value with it. */
     curl_socklen_t la_size;
     srvr_sockaddr_union_t localaddr;
-    switch(socket_domain) {
-      case AF_INET:
-        la_size = sizeof(localaddr.sa4);
-        break;
 #ifdef ENABLE_IPV6
-      case AF_INET6:
-        la_size = sizeof(localaddr.sa6);
-        break;
+    if(socket_domain == AF_INET6)
+      la_size = sizeof(localaddr.sa6);
+    else
 #endif
-      default:
-        break;
-    }
-
+      la_size = sizeof(localaddr.sa4);
     memset(&localaddr.sa, 0, (size_t)la_size);
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
