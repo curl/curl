@@ -1222,6 +1222,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         infof(data, "Done waiting for 100-continue");
       }
     }
+
+#ifdef ENABLE_QUIC
+    if(conn->transport == TRNSPRT_QUIC) {
+      result = Curl_quic_idle(data);
+      if(result)
+        return result;
+    }
+#endif
   }
 
   if(Curl_pgrsUpdate(data))
