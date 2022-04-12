@@ -48,9 +48,9 @@ option.
 SSL session IDs will be shared across the easy handles using this shared
 object. This will reduce the time spent in the SSL handshake when reconnecting
 to the same server. Note SSL session IDs are reused within the same easy
-handle by default. The size of the cache can be changed with
-\fICURLSHOPT_SSL_SESSIONID_CACHE_SIZE(3)\fP. Note this symbol was added in
-7.10.3 but was not implemented until 7.23.0.
+handle by default. This symbol was added in 7.10.3 but was not implemented until
+7.23.0. The size of the cache can be changed with
+\fICURLSHOPT_SSL_SESSIONID_CACHE_SIZE(3)\fP.
 .IP CURL_LOCK_DATA_CONNECT
 Put the connection cache in the share object and make all easy handles using
 this share object share the connection cache.
