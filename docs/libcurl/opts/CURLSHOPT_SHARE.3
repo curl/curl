@@ -80,7 +80,7 @@ multi handle will share PSL cache by default without using this option.
 All
 .SH EXAMPLE
 .nf
-  CURLSHcode sh
+  CURLSHcode sh;
   share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
   if(sh)
