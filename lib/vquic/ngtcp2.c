@@ -1883,4 +1883,26 @@ bool Curl_quic_data_pending(const struct Curl_easy *data)
   return Curl_dyn_len(&stream->overflow) > 0;
 }
 
+/*
+ * Called from transfer.c:Curl_readwrite when neither HTTP level read
+ * nor write is performed. It is a good place to handle timer expiry
+ * for QUIC transport.
+ */
+CURLcode Curl_quic_idle(struct Curl_easy *data)
+{
+  struct connectdata *conn = data->conn;
+  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+  struct quicsocket *qs = conn->quic;
+
+  if(ngtcp2_conn_get_expiry(qs->qconn) > timestamp()) {
+    return CURLE_OK;
+  }
+
+  if(ng_flush_egress(data, sockfd, qs)) {
+    return CURLE_SEND_ERROR;
+  }
+
+  return CURLE_OK;
+}
+
 #endif
