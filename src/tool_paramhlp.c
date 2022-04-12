@@ -97,7 +97,7 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
       if(nread)
         if(curlx_dyn_addn(&dyn, buffer, nread))
           return PARAM_NO_MEM;
-    } while(nread);
+    } while(!feof(file) && !ferror(file));
     *size = curlx_dyn_len(&dyn);
     *bufp = curlx_dyn_ptr(&dyn);
   }
