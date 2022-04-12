@@ -39,6 +39,7 @@ curl_share_init(void)
   if(share) {
     share->magic = CURL_GOOD_SHARE;
     share->specifier |= (1<<CURL_LOCK_DATA_SHARE);
+    /* Set the default size of the shared SSL session ID cache */
     share->max_ssl_sessions = 8;
     Curl_init_dnscache(&share->hostcache);
   }
