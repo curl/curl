@@ -434,7 +434,7 @@ static char *dup_nickname(struct Curl_easy *data, const char *str)
   /* search the first slash; we require at least one slash in a file name */
   n = strchr(str, '/');
   if(!n) {
-    infof(data, "warning: certificate file name \"%s\" handled as nickname; "
+    infof(data, "WARNING: certificate file name \"%s\" handled as nickname; "
           "please use \"./%s\" to force file name", str, str);
     return strdup(str);
   }
@@ -1748,7 +1748,7 @@ static CURLcode nss_load_ca_certificates(struct Curl_easy *data,
       PR_CloseDir(dir);
     }
     else
-      infof(data, "warning: CURLOPT_CAPATH not a directory (%s)", capath);
+      infof(data, "WARNING: CURLOPT_CAPATH not a directory (%s)", capath);
   }
 
   return CURLE_OK;
@@ -1985,11 +1985,11 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
   /* unless the user explicitly asks to allow the protocol vulnerability, we
      use the work-around */
   if(SSL_OptionSet(model, SSL_CBC_RANDOM_IV, ssl_cbc_random_iv) != SECSuccess)
-    infof(data, "warning: failed to set SSL_CBC_RANDOM_IV = %d",
+    infof(data, "WARNING: failed to set SSL_CBC_RANDOM_IV = %d",
           ssl_cbc_random_iv);
 #else
   if(ssl_cbc_random_iv)
-    infof(data, "warning: support for SSL_CBC_RANDOM_IV not compiled in");
+    infof(data, "WARNING: support for SSL_CBC_RANDOM_IV not compiled in");
 #endif
 
   if(SSL_CONN_CONFIG(cipher_list)) {
@@ -2000,7 +2000,7 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
   }
 
   if(!SSL_CONN_CONFIG(verifypeer) && SSL_CONN_CONFIG(verifyhost))
-    infof(data, "warning: ignoring value of ssl.verifyhost");
+    infof(data, "WARNING: ignoring value of ssl.verifyhost");
 
   /* bypass the default SSL_AuthCertificate() hook in case we do not want to
    * verify peer */
@@ -2020,7 +2020,7 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
     const CURLcode rv = nss_load_ca_certificates(data, conn, sockindex);
     if((rv == CURLE_SSL_CACERT_BADFILE) && !SSL_CONN_CONFIG(verifypeer))
       /* not a fatal error because we are not going to verify the peer */
-      infof(data, "warning: CA certificates failed to load");
+      infof(data, "WARNING: CA certificates failed to load");
     else if(rv) {
       result = rv;
       goto error;

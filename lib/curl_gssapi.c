@@ -60,7 +60,7 @@ OM_uint32 Curl_gss_init_sec_context(
 #ifdef GSS_C_DELEG_POLICY_FLAG
     req_flags |= GSS_C_DELEG_POLICY_FLAG;
 #else
-    infof(data, "warning: support for CURLGSSAPI_DELEGATION_POLICY_FLAG not "
+    infof(data, "WARNING: support for CURLGSSAPI_DELEGATION_POLICY_FLAG not "
         "compiled in");
 #endif
   }
