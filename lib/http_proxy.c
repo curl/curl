@@ -767,6 +767,9 @@ static CURLcode CONNECT(struct Curl_easy *data,
       }
 
       options = hyper_clientconn_options_new();
+      hyper_clientconn_options_set_preserve_header_case(options, 1);
+      hyper_clientconn_options_set_preserve_header_order(options, 1);
+
       if(!options) {
         failf(data, "Couldn't create hyper client options");
         result = CURLE_OUT_OF_MEMORY;
