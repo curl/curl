@@ -4,7 +4,7 @@ curl and libcurl 7.83.0
  Command line options:         247
  curl_easy_setopt() options:   295
  Public functions in libcurl:  88
- Contributors:                 2612
+ Contributors:                 2616
 
 This release includes the following changes:
 
@@ -13,9 +13,12 @@ This release includes the following changes:
  o curl: add --no-clobber [28]
  o curl: add --remove-on-error [11]
  o header api: add curl_easy_header and curl_easy_nextheader [56]
+ o msh3: add support for QUIC and HTTP/3 using msh3 [84]
 
 This release includes the following bugfixes:
 
+ o appveyor: add Cygwin build [77]
+ o appveyor: only add MSYS2 to PATH where required [78]
  o BearSSL: add CURLOPT_SSL_CIPHER_LIST support [27]
  o BearSSL: add CURLOPT_SSL_CTX_FUNCTION support [26]
  o BINDINGS.md: add Hollywood binding [34]
@@ -23,11 +26,13 @@ This release includes the following bugfixes:
  o CI: install Python package impacket to run SMB test 1451 [5]
  o configure.ac: move -pthread CFLAGS setting back where it used to be [14]
  o configure: bump the copyright year range int the generated output
+ o connecache: remove duplicate connc->closure_handle check [90]
  o connect: make Curl_getconnectinfo work with conn cache from share handle [22]
  o connect: use TCP_KEEPALIVE only if TCP_KEEPIDLE is not defined [6]
  o curl/system.h: update ifdef condition for MCST-LCC compiler [4]
  o curl: error out when options need features not present in libcurl [18]
  o curl: fix segmentation fault for empty output file names. [60]
+ o curl_easy_header: fix typos in documentation [74]
  o CURLOPT_DISALLOW_USERNAME_IN_URL.3: use uppercase URL
  o CURLOPT_PREQUOTE.3: only works for FTP file transfers, not dirs [79]
  o CURLOPT_PROGRESSFUNCTION.3: fix typo in example [63]
@@ -35,9 +40,12 @@ This release includes the following bugfixes:
  o docs/HYPER.md: updated to reflect current hyper build needs
  o docs/opts: Mention Schannel client cert type is P12 [50]
  o docs: lots of minor language polish [51]
+ o English: use American spelling consistently [95]
  o firefox-db2pem.sh: make the shell script safer [47]
  o ftp: fix error message for partial file upload [61]
+ o GHA: add openssl3 jobs moved over from zuul [88]
  o GHA: build hyper with nightly rustc [7]
+ o GHA: move bearssl jobs over from zuul [85]
  o gha: move the event-based test over from Zuul [59]
  o gtls: fix build for disabled TLS-SRP [48]
  o http2: handle DONE called for the paused stream [69]
@@ -59,23 +67,34 @@ This release includes the following bugfixes:
  o libssh: Improve fix for missing SSH_S_ stat macros [10]
  o libssh: unstick SFTP transfers when done event-based [58]
  o mbedtls: remove 'protocols' array from backend when ALPN is not used [66]
+ o mbedtls: remove server_fd from backend [91]
  o mk-ca-bundle.pl: Use stricter logic to process the certificates [39]
  o mk-ca-bundle.vbs: delete this script in favor of mk-ca-bundle.pl [8]
  o mlc_config.json: add file to ignore known troublesome URLs [35]
  o mqtt: better handling of TCP disconnect mid-message [55]
  o ngtcp2: add client certificate authentication for OpenSSL [15]
  o ngtcp2: disconnect the QUIC connection proper [19]
+ o ngtcp2: enlarge H3_SEND_SIZE [82]
+ o ngtcp2: fix HTTP/3 upload stall and avoid busy loop [83]
+ o ngtcp2: fix memory leak [80]
+ o ngtcp2: fix QUIC_IDLE_TIMEOUT [94]
+ o ngtcp2: make curl 1ms faster [93]
+ o ngtcp2: remove remote_addr which is not used in a meaningful way [81]
  o ngtcp2: update to work after recent ngtcp2 updates [62]
+ o ngtcp2: use token when detecting :status header field [92]
  o nonblock: restore setsockopt method to curlx_nonblock [20]
  o openssl: check SSL_get_peer_cert_chain return value [1]
  o openssl: enable CURLOPT_SSL_EC_CURVES with BoringSSL [23]
  o openssl: fix CN check error code [21]
  o options: remove mistaken space before paren in prototype
+ o perl: removed a double semicolon at end of line [64]
  o pop3/smtp: return *WEIRD_SERVER_REPLY when not understood [43]
  o projects/README: converted to markdown [76]
  o projects: Update VC version names for VS2017, VS2022 [52]
  o rtsp: don't let CSeq error override earlier errors [37]
+ o runtests: add 'bearssl' as testable feature [87]
  o runtests: make 'oldlibssh' be before 0.9.4 [2]
+ o schannel: remove dead code that will never run [89]
  o scripts/copyright.pl: ignore the new mlc_config.json file
  o scripts: move three scripts from lib/ to scripts/ [44]
  o test1135: sync with recent API updates [54]
@@ -87,6 +106,7 @@ This release includes the following bugfixes:
  o tls: make mbedtls and NSS check for h2, not nghttp2 [70]
  o tool and tests: force flush of all buffers at end of program [17]
  o tool_cb_hdr: Turn the Location: into a terminal hyperlink [30]
+ o tool_listhelp.c: uppercase URL
  o tool_operate: fix a scan-build warning [16]
  o vtls: provide a unified APLN-disagree string for all backends [75]
  o vtls: use a backend standard message for "ALPN: offers %s" [73]
@@ -102,17 +122,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, Andreas Falkenhahn, anon00000000 on github,
-  Christian Schmitz, Colin Leroy, Dan Fandrich, Daniel Stenberg,
-  Daniel Valenzuela, Don J Olmstead, Evangelos Foutras, Francisco Olarte,
-  Frank Meier, Gisle Vanem, Ian Blanes, Jan Venekamp, Jean-Philippe Menil,
-  Jenny Heino, Joseph Chen, jurisuk on github, Kristoffer Gleditsch,
-  Leandro Coutinho, Marcel Raad, Marc Hörsken, mehatzri on github,
-  Michał Antoniak, Nick Coghlan, Paul Howarth, Paweł Kowalski, Peter Korsgaard,
+  Alejandro R. Sedeño, Andreas Falkenhahn, Andrey Alifanov,
+  anon00000000 on github, Christian Schmitz, Colin Leroy, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, Daniel Valenzuela, Don J Olmstead,
+  Evangelos Foutras, Francisco Olarte, Frank Meier, Gisle Vanem, Ian Blanes,
+  Jan Venekamp, Jean-Philippe Menil, Jenny Heino, Joseph Chen,
+  jurisuk on github, Kristoffer Gleditsch, Leandro Coutinho, Marcel Raad,
+  Marc Hörsken, Matteo Baccan, mehatzri on github, Michał Antoniak,
+  Nick Banks, Nick Coghlan, Paul Howarth, Paweł Kowalski, Peter Korsgaard,
   pheiduck on github, r-a-sattarov on github, Ray Satiro, Rianov Viacheslav,
-  Robert Brose, Samuel Henrique, Taras Kushnir, Tatsuhiro Tsujikawa,
-  Timothe Litt, Viktor Szakats, HexTheDragon
-  (40 contributors)
+  Robert Brose, Samuel Henrique, Sascha Zengler, Taras Kushnir,
+  Tatsuhiro Tsujikawa, Timothe Litt, Viktor Szakats,
+  (44 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -179,6 +200,7 @@ References to bug reports and discussions on issues:
  [61] = https://curl.se/bug/?i=8637
  [62] = https://curl.se/bug/?i=8638
  [63] = https://curl.se/bug/?i=8636
+ [64] = https://curl.se/bug/?i=8709
  [65] = https://curl.se/bug/?i=8661
  [66] = https://curl.se/bug/?i=8663
  [67] = https://curl.se/bug/?i=8664
@@ -188,6 +210,24 @@ References to bug reports and discussions on issues:
  [71] = https://curl.se/bug/?i=8660
  [72] = https://curl.se/bug/?i=8657
  [73] = https://curl.se/bug/?i=8657
+ [74] = https://curl.se/bug/?i=8694
  [75] = https://curl.se/bug/?i=8643
  [76] = https://curl.se/bug/?i=8652
+ [77] = https://curl.se/bug/?i=8693
+ [78] = https://curl.se/bug/?i=8693
  [79] = https://curl.se/bug/?i=8602
+ [80] = https://curl.se/bug/?i=8691
+ [81] = https://curl.se/bug/?i=8689
+ [82] = https://curl.se/bug/?i=8690
+ [83] = https://curl.se/bug/?i=8688
+ [84] = https://curl.se/bug/?i=8517
+ [85] = https://curl.se/bug/?i=8684
+ [87] = https://curl.se/bug/?i=8684
+ [88] = https://curl.se/bug/?i=8683
+ [89] = https://curl.se/bug/?i=8677
+ [90] = https://curl.se/bug/?i=8676
+ [91] = https://curl.se/bug/?i=8682
+ [92] = https://curl.se/bug/?i=8679
+ [93] = https://curl.se/bug/?i=8678
+ [94] = https://curl.se/bug/?i=8678
+ [95] = https://curl.se/bug/?i=8673
