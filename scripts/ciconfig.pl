@@ -164,7 +164,7 @@ print "Never used configure options\n";
 for my $w (sort keys %avail) {
     if(!$used{$w}) {
         printf "  %s%s\n", $w,
-            $defaulton{$w} ? " (auto)":"";;
+            $defaulton{$w} ? " (auto)":"";
     }
 }
 
