@@ -87,7 +87,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 
   if(!seeded) {
     struct curltime now = Curl_now();
-    infof(data, "WARNING: Using weak random seed");
+    infof(data, "WARNING: using weak random seed");
     randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
     randseed = randseed * 1103515245 + 12345;
     randseed = randseed * 1103515245 + 12345;
