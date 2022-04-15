@@ -246,7 +246,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
       /* protocols that work without network cannot be paused. This is
          actually only FILE:// just now, and it can't pause since the transfer
          isn't done using the "normal" procedure. */
-      failf(data, "Read callback asked for PAUSE when not supported!");
+      failf(data, "Read callback asked for PAUSE when not supported");
       return CURLE_READ_ERROR;
     }
 
@@ -571,7 +571,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     else {
       /* read nothing but since we wanted nothing we consider this an OK
          situation to proceed from */
-      DEBUGF(infof(data, "readwrite_data: we're done!"));
+      DEBUGF(infof(data, "readwrite_data: we're done"));
       nread = 0;
     }
 
@@ -995,7 +995,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
         if(!data->state.scratch) {
           data->state.scratch = malloc(2 * data->set.upload_buffer_size);
           if(!data->state.scratch) {
-            failf(data, "Failed to alloc scratch buffer!");
+            failf(data, "Failed to alloc scratch buffer");
 
             return CURLE_OUT_OF_MEMORY;
           }
@@ -1360,7 +1360,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
   if(!data->state.url && !data->set.uh) {
     /* we can't do anything without URL */
-    failf(data, "No URL set!");
+    failf(data, "No URL set");
     return CURLE_URL_MALFORMAT;
   }
 
@@ -1377,7 +1377,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     uc = curl_url_get(data->set.uh,
                       CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
     if(uc) {
-      failf(data, "No URL set!");
+      failf(data, "No URL set");
       return CURLE_URL_MALFORMAT;
     }
   }

@@ -497,7 +497,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
         break;
 #endif
       default:
-        infof(data, "unsupported key type, can't check knownhosts!");
+        infof(data, "unsupported key type, can't check knownhosts");
         keybit = 0;
         break;
       }
@@ -592,7 +592,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
                                           LIBSSH2_KNOWNHOST_KEYENC_RAW|
                                           keybit, NULL);
         if(addrc)
-          infof(data, "WARNING: adding the known host %s failed!",
+          infof(data, "WARNING: adding the known host %s failed",
                 conn->host.name);
         else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE ||
                 rc == CURLKHSTAT_FINE_REPLACE) {
@@ -603,7 +603,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
                                         data->set.str[STRING_SSH_KNOWNHOSTS],
                                         LIBSSH2_KNOWNHOST_FILE_OPENSSH);
           if(wrc) {
-            infof(data, "WARNING: writing %s failed!",
+            infof(data, "WARNING: writing %s failed",
                   data->set.str[STRING_SSH_KNOWNHOSTS]);
           }
         }
@@ -707,7 +707,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
 
     free(fingerprint_b64);
 
-    infof(data, "SHA256 checksum match!");
+    infof(data, "SHA256 checksum match");
   }
 
   if(pubkey_md5) {
@@ -746,7 +746,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
         sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
         return sshc->actualcode;
       }
-      infof(data, "MD5 checksum match!");
+      infof(data, "MD5 checksum match");
     }
   }
 
@@ -1470,7 +1470,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
          */
         cp = strchr(cmd, ' ');
         if(!cp) {
-          failf(data, "Syntax error command '%s'. Missing parameter!",
+          failf(data, "Syntax error command '%s', missing parameter",
                 cmd);
           state(data, SSH_SFTP_CLOSE);
           sshc->nextstate = SSH_NO_STATE;
@@ -3229,7 +3229,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     sshrecv.recvptr = ssh_tls_recv;
     sshsend.sendptr = ssh_tls_send;
 
-    infof(data, "Uses HTTPS proxy!");
+    infof(data, "Uses HTTPS proxy");
     /*
       Setup libssh2 callbacks to make it read/write TLS from the socket.
 

@@ -524,7 +524,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   /* Get the machine's un-qualified host name as NTLM doesn't like the fully
      qualified domain name */
   if(Curl_gethostname(host, sizeof(host))) {
-    infof(data, "gethostname() failed, continuing without!");
+    infof(data, "gethostname() failed, continuing without");
     hostlen = 0;
   }
   else {

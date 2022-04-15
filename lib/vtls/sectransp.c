@@ -1701,7 +1701,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
       CFRelease(backend->ssl_ctx);
     backend->ssl_ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
     if(!backend->ssl_ctx) {
-      failf(data, "SSL: couldn't create a context!");
+      failf(data, "SSL: couldn't create a context");
       return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -2788,7 +2788,7 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
         pkp_pin_peer_pubkey(data, backend->ssl_ctx,
                             data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
       if(result) {
-        failf(data, "SSL: public key does not match pinned public key!");
+        failf(data, "SSL: public key does not match pinned public key");
         return result;
       }
     }

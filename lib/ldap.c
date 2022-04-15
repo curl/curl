@@ -361,7 +361,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
          (strcasecompare(data->set.ssl.cert_type, "DER")))
         cert_type = LDAPSSL_CERT_FILETYPE_DER;
       if(!ldap_ca) {
-        failf(data, "LDAP local: ERROR %s CA cert not set!",
+        failf(data, "LDAP local: ERROR %s CA cert not set",
               (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"));
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
@@ -400,12 +400,12 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       /* OpenLDAP SDK supports BASE64 files. */
       if((data->set.ssl.cert_type) &&
          (!strcasecompare(data->set.ssl.cert_type, "PEM"))) {
-        failf(data, "LDAP local: ERROR OpenLDAP only supports PEM cert-type!");
+        failf(data, "LDAP local: ERROR OpenLDAP only supports PEM cert-type");
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
       if(!ldap_ca) {
-        failf(data, "LDAP local: ERROR PEM CA cert not set!");
+        failf(data, "LDAP local: ERROR PEM CA cert not set");
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }

@@ -172,7 +172,7 @@ static CURLcode connect_init(struct Curl_easy *data, bool reinit)
     s = calloc(1, sizeof(struct http_connect_state));
     if(!s)
       return CURLE_OUT_OF_MEMORY;
-    infof(data, "allocate connect buffer!");
+    infof(data, "allocate connect buffer");
     conn->connect_state = s;
     Curl_dyn_init(&s->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
 
@@ -220,7 +220,7 @@ void Curl_connect_done(struct Curl_easy *data)
 #ifdef USE_HYPER
     data->state.hconnect = FALSE;
 #endif
-    infof(data, "CONNECT phase completed!");
+    infof(data, "CONNECT phase completed");
   }
 }
 
@@ -473,7 +473,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         }
 
         if(Curl_dyn_addn(&s->rcvbuf, &byte, 1)) {
-          failf(data, "CONNECT response too large!");
+          failf(data, "CONNECT response too large");
           return CURLE_RECV_ERROR;
         }
 

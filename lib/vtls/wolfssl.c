@@ -324,7 +324,7 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   }
 
   if(!req_method) {
-    failf(data, "SSL: couldn't create a method!");
+    failf(data, "SSL: couldn't create a method");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -333,7 +333,7 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   backend->ctx = SSL_CTX_new(req_method);
 
   if(!backend->ctx) {
-    failf(data, "SSL: couldn't create a context!");
+    failf(data, "SSL: couldn't create a context");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -503,7 +503,7 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     SSL_free(backend->handle);
   backend->handle = SSL_new(backend->ctx);
   if(!backend->handle) {
-    failf(data, "SSL: couldn't create a context (handle)!");
+    failf(data, "SSL: couldn't create a context");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -739,7 +739,7 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
                                   (const unsigned char *)pubkey->header,
                                   (size_t)(pubkey->end - pubkey->header));
     if(result) {
-      failf(data, "SSL: public key does not match pinned public key!");
+      failf(data, "SSL: public key does not match pinned public key");
       return result;
     }
 #else

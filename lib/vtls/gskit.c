@@ -1094,7 +1094,7 @@ static CURLcode gskit_connect_step3(struct Curl_easy *data,
     p = &x509.subjectPublicKeyInfo;
     result = Curl_pin_peer_pubkey(data, ptr, p->header, p->end - p->header);
     if(result) {
-      failf(data, "SSL: public key does not match pinned public key!");
+      failf(data, "SSL: public key does not match pinned public key");
       return result;
     }
   }
