@@ -1188,12 +1188,15 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     fp = stdin;
     fromfile = FALSE;
   }
-  else if(file && !*file) {
-    /* points to a "" string */
+  else if(!file || !*file) {
+    /* points to an empty string or NULL */
     fp = NULL;
   }
-  else
-    fp = file?fopen(file, FOPEN_READTEXT):NULL;
+  else {
+    fp = fopen(file, FOPEN_READTEXT);
+    if(!fp)
+      infof(data, "WARNING: failed to open cookie file \"%s\"", file);
+  }
 
   c->newsession = newsession; /* new session? */
 
@@ -1227,7 +1230,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
      */
     remove_expired(c);
 
-    if(fromfile)
+    if(fromfile && fp)
       fclose(fp);
   }
 
