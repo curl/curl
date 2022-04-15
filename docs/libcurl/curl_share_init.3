@@ -39,7 +39,7 @@ This \fIshare handle\fP is what you pass to curl using the
 specific curl handle use the data in this share.
 .SH EXAMPLE
 .nf
-  CURLSHcode sh
+  CURLSHcode sh;
   share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
   if(sh)

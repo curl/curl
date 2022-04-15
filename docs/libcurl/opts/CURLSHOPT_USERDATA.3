@@ -36,7 +36,7 @@ and \fICURLSHOPT_UNLOCKFUNC(3)\fP.
 All
 .SH EXAMPLE
 .nf
-  CURLSHcode sh
+  CURLSHcode sh;
   struct secrets private_stuff;
   share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_USERDATA, &private_stuff);

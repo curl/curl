@@ -43,7 +43,7 @@ See \fICURLSHOPT_UNSHARE(3)\fP.
 See \fICURLSHOPT_USERDATA(3)\fP.
 .SH EXAMPLE
 .nf
-  CURLSHcode sh
+  CURLSHcode sh;
   share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
   if(sh)

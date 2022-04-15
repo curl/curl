@@ -31,7 +31,7 @@ The curl_share_strerror() function returns a string describing the CURLSHcode
 error code passed in the argument \fIerrornum\fP.
 .SH EXAMPLE
 .nf
-  CURLSHcode sh
+  CURLSHcode sh;
   share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
   if(sh)

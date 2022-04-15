@@ -53,7 +53,7 @@ This pointer is not used by libcurl itself.
 All
 .SH EXAMPLE
 .nf
-  CURLSHcode sh
+  CURLSHcode sh;
   share = curl_share_init();
   sh = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, mutex_lock);
   if(sh)
