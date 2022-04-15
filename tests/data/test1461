@@ -33,7 +33,7 @@ curl important --help
 <stdout mode="text">
 Usage: curl [options...] <url>
  -d, --data <data>          HTTP POST data
- -f, --fail                 Fail silently (no output at all) on HTTP errors
+ -f, --fail                 Fail fast with no output on HTTP errors
  -h, --help <category>      Get help for commands
  -i, --include              Include protocol response headers in the output
  -o, --output <file>        Write to file instead of stdout
