@@ -179,7 +179,7 @@ const struct helptxt helptext[] = {
    "How long to wait for 100-continue",
    CURLHELP_HTTP},
   {"-f, --fail",
-   "Fail silently (no output at all) on HTTP errors",
+   "Fail fast with no output on HTTP errors",
    CURLHELP_IMPORTANT | CURLHELP_HTTP},
   {"    --fail-early",
    "Fail on first transfer error, do not continue",
