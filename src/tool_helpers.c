@@ -110,7 +110,8 @@ void customrequest_helper(struct OperationConfig *config, HttpReq req,
     "GET",
     "HEAD",
     "POST",
-    "POST"
+    "POST",
+    "PUT"
   };
 
   if(!method)
