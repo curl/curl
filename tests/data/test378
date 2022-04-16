@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+HTTP PUT
+HTTP POST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+Reject using -T and -d at once
+ </name>
+ <command>
+-T log/%TESTNUMBER -d input http://never-accessed
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+2
+</errorcode>
+<stderr mode="text">
+Warning: You can only select one HTTP request method! You asked for both PUT 
+Warning: (-T, --upload-file) and POST (-d, --data).
+</stderr>
+</verify>
+</testcase>
