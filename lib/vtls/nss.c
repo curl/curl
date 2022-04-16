@@ -1146,7 +1146,7 @@ static CURLcode cmp_peer_pubkey(struct ssl_connect_data *connssl,
   /* report the resulting status */
   switch(result) {
   case CURLE_OK:
-    infof(data, "pinned public key verified successfully!");
+    infof(data, "pinned public key verified successfully");
     break;
   case CURLE_SSL_PINNEDPUBKEYNOTMATCH:
     failf(data, "failed to verify pinned public key");

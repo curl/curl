@@ -1563,7 +1563,7 @@ CURLcode Curl_mime_set_subparts(curl_mimepart *part,
         root = root->parent->parent;
       if(subparts == root) {
         if(part->easy)
-          failf(part->easy, "Can't add itself as a subpart!");
+          failf(part->easy, "Can't add itself as a subpart");
         return CURLE_BAD_FUNCTION_ARGUMENT;
       }
     }

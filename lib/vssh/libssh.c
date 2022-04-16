@@ -2698,7 +2698,7 @@ static void sftp_quote(struct Curl_easy *data)
    */
   cp = strchr(cmd, ' ');
   if(!cp) {
-    failf(data, "Syntax error in SFTP command. Supply parameter(s)!");
+    failf(data, "Syntax error in SFTP command. Supply parameter(s)");
     state(data, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     sshc->actualcode = CURLE_QUOTE_ERROR;

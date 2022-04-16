@@ -1102,7 +1102,7 @@ static CURLcode easy_connection(struct Curl_easy *data,
 
   /* only allow these to be called on handles with CURLOPT_CONNECT_ONLY */
   if(!data->set.connect_only) {
-    failf(data, "CONNECT_ONLY is required!");
+    failf(data, "CONNECT_ONLY is required");
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 

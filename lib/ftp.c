@@ -591,7 +591,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
      * This response code can come at any point so having it treated
      * generically is a good idea.
      */
-    infof(data, "We got a 421 - timeout!");
+    infof(data, "We got a 421 - timeout");
     state(data, FTP_STOP);
     return CURLE_OPERATION_TIMEDOUT;
   }
@@ -1165,7 +1165,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   /* maybe all ports were in use already*/
   if(port > port_max) {
-    failf(data, "bind() failed, we ran out of ports!");
+    failf(data, "bind() failed, we ran out of ports");
     Curl_closesocket(data, conn, portsock);
     return CURLE_FTP_PORT_FAILED;
   }
@@ -2702,7 +2702,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
         Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
 
         if(Curl_sec_login(data, conn))
-          infof(data, "Logging in with password in cleartext!");
+          infof(data, "Logging in with password in cleartext");
         else
           infof(data, "Authentication successful");
       }
@@ -3404,7 +3404,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     else if(!ftpc->dont_check &&
             !data->req.bytecount &&
             (data->req.size>0)) {
-      failf(data, "No data was received!");
+      failf(data, "No data was received");
       result = CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
@@ -4235,7 +4235,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
 
   if(data->set.upload && !ftpc->file && (ftp->transfer == PPTRANSFER_BODY)) {
     /* We need a file name when uploading. Return error! */
-    failf(data, "Uploading to a URL without a file name!");
+    failf(data, "Uploading to a URL without a file name");
     free(rawPath);
     return CURLE_URL_MALFORMAT;
   }

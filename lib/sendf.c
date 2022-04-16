@@ -566,7 +566,7 @@ static CURLcode chop_write(struct Curl_easy *data,
           /* Protocols that work without network cannot be paused. This is
              actually only FILE:// just now, and it can't pause since the
              transfer isn't done using the "normal" procedure. */
-          failf(data, "Write callback asked for PAUSE when not supported!");
+          failf(data, "Write callback asked for PAUSE when not supported");
           return CURLE_WRITE_ERROR;
         }
         return pausewrite(data, type, ptr, len);

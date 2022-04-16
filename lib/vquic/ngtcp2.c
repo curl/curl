@@ -1418,7 +1418,7 @@ static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
   }
   if(stream->upload_done && !stream->upload_len &&
      (stream->upload_left <= 0)) {
-    H3BUGF(infof(data, "!!!!!!!!! cb_h3_readfunction sets EOF"));
+    H3BUGF(infof(data, "cb_h3_readfunction sets EOF"));
     *pflags = NGHTTP3_DATA_FLAG_EOF;
     return nread ? 1 : 0;
   }

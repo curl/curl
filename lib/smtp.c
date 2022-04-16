@@ -505,7 +505,7 @@ static CURLcode smtp_perform_authentication(struct Curl_easy *data)
       state(data, SMTP_AUTH);
     else {
       /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported!");
+      infof(data, "No known authentication mechanisms supported");
       result = CURLE_LOGIN_DENIED;
     }
   }
@@ -1840,7 +1840,7 @@ CURLcode Curl_smtp_escape_eob(struct Curl_easy *data, const ssize_t nread)
 
     scratch = newscratch = malloc(2 * data->set.upload_buffer_size);
     if(!newscratch) {
-      failf(data, "Failed to alloc scratch buffer!");
+      failf(data, "Failed to alloc scratch buffer");
 
       return CURLE_OUT_OF_MEMORY;
     }

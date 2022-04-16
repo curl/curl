@@ -557,7 +557,7 @@ static CURLcode ossl_seed(struct Curl_easy *data)
     }
   }
 
-  infof(data, "libcurl is now using a weak random seed!");
+  infof(data, "libcurl is now using a weak random seed");
   return (rand_enough() ? CURLE_OK :
           CURLE_SSL_CONNECT_ERROR /* confusing error code */);
 #endif
@@ -3231,7 +3231,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     SSL_free(backend->handle);
   backend->handle = SSL_new(backend->ctx);
   if(!backend->handle) {
-    failf(data, "SSL: couldn't create a context (handle)!");
+    failf(data, "SSL: couldn't create a context (handle)");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -3922,7 +3922,7 @@ static CURLcode servercert(struct Curl_easy *data,
     if(!strict)
       return CURLE_OK;
 
-    failf(data, "SSL: couldn't get peer certificate!");
+    failf(data, "SSL: couldn't get peer certificate");
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -3962,7 +3962,7 @@ static CURLcode servercert(struct Curl_easy *data,
                          buffer, sizeof(buffer));
   if(rc) {
     if(strict)
-      failf(data, "SSL: couldn't get X509-issuer name!");
+      failf(data, "SSL: couldn't get X509-issuer name");
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
@@ -4080,7 +4080,7 @@ static CURLcode servercert(struct Curl_easy *data,
   if(!result && ptr) {
     result = pkp_pin_peer_pubkey(data, backend->server_cert, ptr);
     if(result)
-      failf(data, "SSL: public key does not match pinned public key!");
+      failf(data, "SSL: public key does not match pinned public key");
   }
 
   X509_free(backend->server_cert);

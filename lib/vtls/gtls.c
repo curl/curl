@@ -1206,7 +1206,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   if(ptr) {
     result = pkp_pin_peer_pubkey(data, x509_cert, ptr);
     if(result != CURLE_OK) {
-      failf(data, "SSL: public key does not match pinned public key!");
+      failf(data, "SSL: public key does not match pinned public key");
       gnutls_x509_crt_deinit(x509_cert);
       return result;
     }

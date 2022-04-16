@@ -427,7 +427,7 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
   if(quiche_conn_is_established(qs->conn)) {
     *done = TRUE;
     result = quiche_has_connected(data, conn, 0, sockindex);
-    DEBUGF(infof(data, "quiche established connection!"));
+    DEBUGF(infof(data, "quiche established connection"));
   }
 
   return result;
@@ -781,7 +781,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
                                          (uint8_t *)data->set.postfields,
                                          stream->upload_left, TRUE);
       if(sent <= 0) {
-        failf(data, "quiche_h3_send_body failed!");
+        failf(data, "quiche_h3_send_body failed");
         result = CURLE_SEND_ERROR;
       }
       stream->upload_left = 0; /* nothing left to send */

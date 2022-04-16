@@ -1286,7 +1286,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   if(pubkey_ptr) {
     result = pkp_pin_peer_pubkey(data, conn, sockindex, pubkey_ptr);
     if(result) {
-      failf(data, "SSL: public key does not match pinned public key!");
+      failf(data, "SSL: public key does not match pinned public key");
       return result;
     }
   }
@@ -2371,7 +2371,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                   (const unsigned char *)pubkey->header,
                                   (size_t)(pubkey->end - pubkey->header));
     if(result) {
-      failf(data, "SSL: public key does not match pinned public key!");
+      failf(data, "SSL: public key does not match pinned public key");
     }
   } while(0);
 

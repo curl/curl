@@ -326,7 +326,7 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
     if(proxy_user) {
       size_t plen = strlen(proxy_user);
       if(plen >= (size_t)data->set.buffer_size - 8) {
-        failf(data, "Too long SOCKS proxy user name, can't use!");
+        failf(data, "Too long SOCKS proxy user name, can't use");
         return CURLPX_LONG_USER;
       }
       /* copy the proxy name WITH trailing zero */
