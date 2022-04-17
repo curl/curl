@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2066,59 +2066,7 @@ int main(int argc, char *argv[])
 #endif /* ENABLE_IPV6 */
 #ifdef USE_UNIX_SOCKETS
   case AF_UNIX:
-    memset(&me.sau, 0, sizeof(me.sau));
-    me.sau.sun_family = AF_UNIX;
-    strncpy(me.sau.sun_path, unix_socket, sizeof(me.sau.sun_path) - 1);
-    rc = bind(sock, &me.sa, sizeof(me.sau));
-    if(0 != rc && errno == EADDRINUSE) {
-      struct_stat statbuf;
-      /* socket already exists. Perhaps it is stale? */
-      curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
-      if(CURL_SOCKET_BAD == unixfd) {
-        error = SOCKERRNO;
-        logmsg("Error binding socket, failed to create socket at %s: (%d) %s",
-               unix_socket, error, strerror(error));
-        goto sws_cleanup;
-      }
-      /* check whether the server is alive */
-      rc = connect(unixfd, &me.sa, sizeof(me.sau));
-      error = errno;
-      sclose(unixfd);
-      if(ECONNREFUSED != error) {
-        logmsg("Error binding socket, failed to connect to %s: (%d) %s",
-               unix_socket, error, strerror(error));
-        goto sws_cleanup;
-      }
-      /* socket server is not alive, now check if it was actually a socket. */
-#ifdef WIN32
-      /* Windows does not have lstat function. */
-      rc = curlx_win32_stat(unix_socket, &statbuf);
-#else
-      rc = lstat(unix_socket, &statbuf);
-#endif
-      if(0 != rc) {
-        logmsg("Error binding socket, failed to stat %s: (%d) %s",
-               unix_socket, errno, strerror(errno));
-        goto sws_cleanup;
-      }
-#ifdef S_IFSOCK
-      if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
-        logmsg("Error binding socket, failed to stat %s: (%d) %s",
-               unix_socket, error, strerror(error));
-        goto sws_cleanup;
-      }
-#endif
-      /* dead socket, cleanup and retry bind */
-      rc = unlink(unix_socket);
-      if(0 != rc) {
-        logmsg("Error binding socket, failed to unlink %s: (%d) %s",
-               unix_socket, errno, strerror(errno));
-        goto sws_cleanup;
-      }
-      /* stale socket is gone, retry bind */
-      rc = bind(sock, &me.sa, sizeof(me.sau));
-    }
-    break;
+    rc = bind_unix_socket(sock, unix_socket, &me.sau);
 #endif /* USE_UNIX_SOCKETS */
   }
   if(0 != rc) {

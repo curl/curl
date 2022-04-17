@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -78,5 +78,15 @@ extern HANDLE exit_event;
 
 void install_signal_handlers(bool keep_sigalrm);
 void restore_signal_handlers(bool keep_sigalrm);
+
+#ifdef USE_UNIX_SOCKETS
+
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h> /* for sockaddr_un */
+#endif /* HAVE_SYS_UN_H */
+
+int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
+        struct sockaddr_un *sau);
+#endif  /* USE_UNIX_SOCKETS */
 
 #endif  /* HEADER_CURL_SERVER_UTIL_H */
