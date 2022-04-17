@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,7 +85,8 @@ int SetHTTPrequest(struct OperationConfig *config, HttpReq req, HttpReq *store)
     "GET (-G, --get)",
     "HEAD (-I, --head)",
     "multipart formpost (-F, --form)",
-    "POST (-d, --data)"
+    "POST (-d, --data)",
+    "PUT (-T, --upload-file)"
   };
 
   if((*store == HTTPREQ_UNSPEC) ||
@@ -109,7 +110,8 @@ void customrequest_helper(struct OperationConfig *config, HttpReq req,
     "GET",
     "HEAD",
     "POST",
-    "POST"
+    "POST",
+    "PUT"
   };
 
   if(!method)
