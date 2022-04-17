@@ -72,6 +72,8 @@ const char *param2text(int res)
     return "showing headers and --remote-header-name cannot be combined";
   case PARAM_CONTDISP_RESUME_FROM:
     return "--continue-at and --remote-header-name cannot be combined";
+  case PARAM_READ_ERROR:
+    return "error encountered when reading a file";
   default:
     return "unknown error";
   }

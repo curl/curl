@@ -2621,6 +2621,8 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
         tool_list_engines();
       else if(res == PARAM_LIBCURL_UNSUPPORTED_PROTOCOL)
         result = CURLE_UNSUPPORTED_PROTOCOL;
+      else if(res == PARAM_READ_ERROR)
+        result = CURLE_READ_ERROR;
       else
         result = CURLE_FAILED_INIT;
     }
