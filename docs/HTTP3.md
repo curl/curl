@@ -171,7 +171,10 @@ Build msh3:
      % cmake --build . --config Release
      % cmake --install . --config Release
 
-> **Note** - On Windows, Schannel will be used for TLS support by default. If you with to use (the quictls fork of) OpenSSL, specify the `-DQUIC_TLS=openssl` option to the generate command above. Also note that OpenSSL brings with it an additional set of build dependencies not specified here.
+**Note** - On Windows, Schannel will be used for TLS support by default. If
+you with to use (the quictls fork of) OpenSSL, specify the `-DQUIC_TLS=openssl`
+option to the generate command above. Also note that OpenSSL brings with it an
+additional set of build dependencies not specified here.
 
 Build curl (in [Visual Studio Command prompt](../winbuild/README.md#open-a-command-prompt)):
 
@@ -179,9 +182,13 @@ Build curl (in [Visual Studio Command prompt](../winbuild/README.md#open-a-comma
      % cd curl/winbuild
      % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
 
-Note: If you encouter a build error with `tool_hugehelp.c` being missing, rename `tool_hugehelp.c.cvs` in the same directory to `tool_hugehelp.c` and then run `nmake` again.
+**Note** - If you encounter a build error with `tool_hugehelp.c` being missing,
+rename `tool_hugehelp.c.cvs` in the same directory to `tool_hugehelp.c` and
+then run `nmake` again.
 
-Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that directory, or copy `msquic.dll` and `msh3.dll` from that directory to the `curl.exe` directory. For example:
+Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that
+directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
+`curl.exe` directory. For example:
 
      % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://www.google.com
 
