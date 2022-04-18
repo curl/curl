@@ -4,7 +4,7 @@ curl and libcurl 7.83.0
  Command line options:         247
  curl_easy_setopt() options:   295
  Public functions in libcurl:  88
- Contributors:                 2616
+ Contributors:                 2620
 
 This release includes the following changes:
 
@@ -30,6 +30,7 @@ This release includes the following bugfixes:
  o connect: make Curl_getconnectinfo work with conn cache from share handle [22]
  o connect: use TCP_KEEPALIVE only if TCP_KEEPIDLE is not defined [6]
  o curl/system.h: update ifdef condition for MCST-LCC compiler [4]
+ o curl: error out if -T and -d are used for the same URL [99]
  o curl: error out when options need features not present in libcurl [18]
  o curl: fix segmentation fault for empty output file names. [60]
  o curl_easy_header: fix typos in documentation [74]
@@ -39,10 +40,13 @@ This release includes the following bugfixes:
  o CURLSHOPT_UNLOCKFUNC.3: fix the callback prototype [9]
  o docs/HYPER.md: updated to reflect current hyper build needs
  o docs/opts: Mention Schannel client cert type is P12 [50]
+ o docs: Fix missing semicolon in example code [102]
  o docs: lots of minor language polish [51]
  o English: use American spelling consistently [95]
+ o fail.d: tweak the description [101]
  o firefox-db2pem.sh: make the shell script safer [47]
  o ftp: fix error message for partial file upload [61]
+ o gen.pl: change wording for mutexed options [98]
  o GHA: add openssl3 jobs moved over from zuul [88]
  o GHA: build hyper with nightly rustc [7]
  o GHA: move bearssl jobs over from zuul [85]
@@ -56,6 +60,7 @@ This release includes the following bugfixes:
  o http: streamclose "already downloaded" [57]
  o hyper: fix status_line() return code [13]
  o hyper: no h2c support [33]
+ o infof: consistent capitalization of warning messages [103]
  o ipv4/6.d: clarify that they are about using IP addresses [3]
  o json.d: fix typo (overriden -> overridden) [24]
  o keepalive-time.d: It takes many probes to detect brokenness [29]
@@ -63,6 +68,7 @@ This release includes the following bugfixes:
  o lib670: avoid double check result [71]
  o lib: #ifdef on USE_HTTP2 better [65]
  o lib: fix some misuse of curlx_convert_wchar_to_UTF8 [38]
+ o lib: remove exclamation marks [100]
  o libssh: fix build with old libssh versions [12]
  o libssh: Improve fix for missing SSH_S_ stat macros [10]
  o libssh: unstick SFTP transfers when done event-based [58]
@@ -103,11 +109,14 @@ This release includes the following bugfixes:
  o test386: Fix an incorrect test markup tag
  o test718: edited slightly to return better HTTP [32]
  o tests/server/util.h: align WIN32 condition with util.c [46]
+ o tests: refactor server/socksd.c to support --unix-socket [96]
+ o timediff.[ch]: add curlx helper functions for timeval conversions [86]
  o tls: make mbedtls and NSS check for h2, not nghttp2 [70]
  o tool and tests: force flush of all buffers at end of program [17]
  o tool_cb_hdr: Turn the Location: into a terminal hyperlink [30]
  o tool_listhelp.c: uppercase URL
  o tool_operate: fix a scan-build warning [16]
+ o tool_paramhlp: use feof(3) to identify EOF correctly when using fread(3) [97]
  o vtls: provide a unified APLN-disagree string for all backends [75]
  o vtls: use a backend standard message for "ALPN: offers %s" [73]
  o vtls: use a generic "ALPN, server accepted" message [72]
@@ -123,17 +132,19 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alejandro R. Sedeño, Andreas Falkenhahn, Andrey Alifanov,
-  anon00000000 on github, Christian Schmitz, Colin Leroy, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Daniel Valenzuela, Don J Olmstead,
+  anon00000000 on github, Balakrishnan Balasubramanian, Boris Verkhovskiy,
+  Christian Schmitz, Colin Leroy, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Daniel Valenzuela, Don J Olmstead, Emanuele Torre,
   Evangelos Foutras, Francisco Olarte, Frank Meier, Gisle Vanem, Ian Blanes,
   Jan Venekamp, Jean-Philippe Menil, Jenny Heino, Joseph Chen,
   jurisuk on github, Kristoffer Gleditsch, Leandro Coutinho, Marcel Raad,
-  Marc Hörsken, Matteo Baccan, mehatzri on github, Michał Antoniak,
-  Nick Banks, Nick Coghlan, Paul Howarth, Paweł Kowalski, Peter Korsgaard,
-  pheiduck on github, r-a-sattarov on github, Ray Satiro, Rianov Viacheslav,
-  Robert Brose, Samuel Henrique, Sascha Zengler, Taras Kushnir,
-  Tatsuhiro Tsujikawa, Timothe Litt, Viktor Szakats,
-  (44 contributors)
+  Marc Hörsken, Matteo Baccan, mehatzri on github, Michael Kaufmann,
+  Michał Antoniak, Nick Banks, Nick Coghlan, Paul Howarth, Paweł Kowalski,
+  Peter Korsgaard, pheiduck on github, r-a-sattarov on github, Ray Satiro,
+  Rianov Viacheslav, Robert Brose, Robert Charles Muir, Samuel Henrique,
+  Sascha Zengler, Taras Kushnir, Tatsuhiro Tsujikawa, Timothe Litt,
+  Viktor Szakats, HexTheDragon
+  (50 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -222,6 +233,7 @@ References to bug reports and discussions on issues:
  [83] = https://curl.se/bug/?i=8688
  [84] = https://curl.se/bug/?i=8517
  [85] = https://curl.se/bug/?i=8684
+ [86] = https://curl.se/bug/?i=8595
  [87] = https://curl.se/bug/?i=8684
  [88] = https://curl.se/bug/?i=8683
  [89] = https://curl.se/bug/?i=8677
@@ -231,3 +243,11 @@ References to bug reports and discussions on issues:
  [93] = https://curl.se/bug/?i=8678
  [94] = https://curl.se/bug/?i=8678
  [95] = https://curl.se/bug/?i=8673
+ [96] = https://curl.se/bug/?i=8687
+ [97] = https://curl.se/bug/?i=8701
+ [98] = https://curl.se/bug/?i=8716
+ [99] = https://curl.se/bug/?i=8704
+ [100] = https://curl.se/bug/?i=8713
+ [101] = https://curl.se/bug/?i=8714
+ [102] = https://curl.se/bug/?i=8697
+ [103] = https://curl.se/bug/?i=8711
