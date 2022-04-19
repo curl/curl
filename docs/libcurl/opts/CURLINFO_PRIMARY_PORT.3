@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -32,6 +32,11 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRIMARY_PORT, long *portp);
 .SH DESCRIPTION
 Pass a pointer to a long to receive the destination port of the most recent
 connection done with this \fBcurl\fP handle.
+
+This is the destination port of the actual TCP or UDP connection libcurl used.
+If a proxy was used for the most recent transfer, this is the port number of
+the proxy, if no proxy was used it is the port number of the most resently
+accessed URL.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
