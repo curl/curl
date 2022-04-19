@@ -1970,6 +1970,10 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       ssh_disconnect(sshc->ssh_session);
+      /* conn->sock[FIRSTSOCKET] is closed by ssh_disconnect behind our back,
+         explicitly mark it as closed with the memdebug macro: */
+      fake_sclose(conn->sock[FIRSTSOCKET]);
+      conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;
 
       SSH_STRING_FREE_CHAR(sshc->homedir);
       data->state.most_recent_ftp_entrypath = NULL;
