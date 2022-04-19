@@ -162,6 +162,7 @@ my $SMBPORT=$noport;     # SMB server port
 my $SMBSPORT=$noport;    # SMBS server port
 my $TELNETPORT=$noport;  # TELNET server port with negotiation
 my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
+my $SOCKSUNIXPATH;       # socks server Unix domain socket path
 
 my $use_external_proxy = 0;
 my $proxy_address;
@@ -1435,6 +1436,7 @@ my %protofunc = ('http' => \&verifyhttp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
                  'socks' => \&verifysocks,
+                 'socks5unix' => \&verifysocks,
                  'gopher' => \&verifyhttp,
                  'httptls' => \&verifyhttptls,
                  'dict' => \&verifyftp,
@@ -2379,7 +2381,7 @@ sub runmqttserver {
 # Start the socks server
 #
 sub runsocksserver {
-    my ($id, $verbose, $ipv6) = @_;
+    my ($id, $verbose, $ipv6, $is_unix) = @_;
     my $ip=$HOSTIP;
     my $proto = 'socks';
     my $ipvnum = 4;
@@ -2411,12 +2413,21 @@ sub runsocksserver {
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     # start our socks server, get commands from the FTP cmd file
-    my $cmd="server/socksd".exe_ext('SRV').
-        " --port 0 ".
-        " --pidfile $pidfile".
-        " --portfile $portfile".
-        " --backend $HOSTIP".
-        " --config $FTPDCMD";
+    my $cmd="";
+    if($is_unix) {
+        $cmd="server/socksd".exe_ext('SRV').
+            " --pidfile $pidfile".
+            " --unix-socket $SOCKSUNIXPATH".
+            " --backend $HOSTIP".
+            " --config $FTPDCMD";
+    } else {
+        $cmd="server/socksd".exe_ext('SRV').
+            " --port 0 ".
+            " --pidfile $pidfile".
+            " --portfile $portfile".
+            " --backend $HOSTIP".
+            " --config $FTPDCMD";
+    }
     my ($sockspid, $pid2) = startnew($cmd, $pidfile, 30, 0);
 
     if($sockspid <= 0 || !pidexists($sockspid)) {
@@ -3337,6 +3348,7 @@ sub checksystem {
             logmsg "* Unix socket paths:\n";
             if($http_unix) {
                 logmsg sprintf("*   HTTP-Unix:%s\n", $HTTPUNIXPATH);
+                logmsg sprintf("*   Socks-Unix:%s\n", $SOCKSUNIXPATH);
             }
         }
     }
@@ -3397,6 +3409,7 @@ sub subVariables {
 
     # server Unix domain socket paths
     $$thing =~ s/${prefix}HTTPUNIXPATH/$HTTPUNIXPATH/g;
+    $$thing =~ s/${prefix}SOCKSUNIXPATH/$SOCKSUNIXPATH/g;
 
     # client IP addresses
     $$thing =~ s/${prefix}CLIENT6IP/$CLIENT6IP/g;
@@ -5273,6 +5286,16 @@ sub startservers {
                 $run{'socks'}="$pid $pid2";
             }
         }
+        elsif($what eq "socks5unix") {
+            if(!$run{'socks5unix'}) {
+                ($pid, $pid2) = runsocksserver("2", $verbose, "", "unix");
+                if($pid <= 0) {
+                    return "failed starting socks5unix server";
+                }
+                printf ("* pid socks5unix => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'socks5unix'}="$pid $pid2";
+            }
+        }
         elsif($what eq "mqtt" ) {
             if(!$run{'mqtt'}) {
                 ($pid, $pid2) = runmqttserver("", $verbose);
@@ -5867,6 +5890,7 @@ if ($gdbthis) {
 }
 
 $HTTPUNIXPATH    = "http$$.sock"; # HTTP server Unix domain socket path
+$SOCKSUNIXPATH    = $pwd."/socks$$.sock"; # HTTP server Unix domain socket path, absolute path
 
 #######################################################################
 # clear and create logging directory:

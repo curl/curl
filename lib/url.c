@@ -147,6 +147,10 @@ static void conn_free(struct connectdata *conn);
 # error READBUFFER_SIZE is too small
 #endif
 
+#ifdef USE_UNIX_SOCKETS
+#define UNIX_SOCKET_PREFIX "localhost"
+#endif
+
 /*
 * get_protocol_family()
 *
@@ -2414,6 +2418,11 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   CURLU *uhp = curl_url();
   CURLcode result = CURLE_OK;
   char *scheme = NULL;
+#ifdef USE_UNIX_SOCKETS
+  char *path = NULL;
+  bool is_unix_proxy = FALSE;
+#endif
+
 
   if(!uhp) {
     result = CURLE_OUT_OF_MEMORY;
@@ -2538,6 +2547,30 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+#ifdef USE_UNIX_SOCKETS
+  if(sockstype && strcmp(UNIX_SOCKET_PREFIX, host) == 0) {
+    uc = curl_url_get(uhp, CURLUPART_PATH, &path, CURLU_URLDECODE);
+    if(uc) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto error;
+    }
+    /* path will be "/", if no path was was found */
+    if(!(path[0]=='/' && path[1]=='\0')) {
+      is_unix_proxy = TRUE;
+      free(host);
+      host = aprintf(UNIX_SOCKET_PREFIX"%s", path);
+      if(!host) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto error;
+      }
+      Curl_safefree(proxyinfo->host.rawalloc);
+      proxyinfo->host.rawalloc = host;
+      proxyinfo->host.name = host;
+    }
+  }
+
+  if(!is_unix_proxy) {
+#endif
   Curl_safefree(proxyinfo->host.rawalloc);
   proxyinfo->host.rawalloc = host;
   if(host[0] == '[') {
@@ -2548,11 +2581,17 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     zonefrom_url(uhp, data, conn);
   }
   proxyinfo->host.name = host;
+#ifdef USE_UNIX_SOCKETS
+  }
+#endif
 
   error:
   free(proxyuser);
   free(proxypasswd);
   free(scheme);
+#ifdef USE_UNIX_SOCKETS
+  free(path);
+#endif
   curl_url_cleanup(uhp);
   return result;
 }
@@ -3384,25 +3423,35 @@ static CURLcode resolve_server(struct Curl_easy *data,
     struct Curl_dns_entry *hostaddr = NULL;
 
 #ifdef USE_UNIX_SOCKETS
-    if(conn->unix_domain_socket) {
+    char *unix_path = NULL;
+
+    if(conn->unix_domain_socket)
+      unix_path = conn->unix_domain_socket;
+#ifndef CURL_DISABLE_PROXY
+    else if(conn->socks_proxy.host.name
+        && strncmp(UNIX_SOCKET_PREFIX"/",
+          conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)) == 0)
+      unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
+#endif
+
+    if(unix_path) {
       /* Unix domain sockets are local. The host gets ignored, just use the
        * specified domain socket address. Do not cache "DNS entries". There is
        * no DNS involved and we already have the filesystem path available */
-      const char *path = conn->unix_domain_socket;
 
       hostaddr = calloc(1, sizeof(struct Curl_dns_entry));
       if(!hostaddr)
         result = CURLE_OUT_OF_MEMORY;
       else {
         bool longpath = FALSE;
-        hostaddr->addr = Curl_unix2addr(path, &longpath,
+        hostaddr->addr = Curl_unix2addr(unix_path, &longpath,
                                         conn->bits.abstract_unix_socket);
         if(hostaddr->addr)
           hostaddr->inuse++;
         else {
           /* Long paths are not supported for now */
           if(longpath) {
-            failf(data, "Unix socket path too long: '%s'", path);
+            failf(data, "Unix socket path too long: '%s'", unix_path);
             result = CURLE_COULDNT_RESOLVE_HOST;
           }
           else
