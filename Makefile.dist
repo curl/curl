@@ -81,7 +81,7 @@ linux: all
 
 linux-ssl: ssl
 
-ca-bundle: lib/mk-ca-bundle.pl
+ca-bundle: scripts/mk-ca-bundle.pl
 	@echo "generate a fresh ca-bundle.crt"
 	@perl $< -b -l -u lib/ca-bundle.crt
 
