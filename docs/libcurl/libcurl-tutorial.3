@@ -77,9 +77,8 @@ for different libcurls.
 See also the "Features libcurl Provides" further down.
 .IP "autoconf macro"
 When you write your configure script to detect libcurl and setup variables
-accordingly, we offer a prewritten macro that probably does everything you
-need in this area. See docs/libcurl/libcurl.m4 file - it includes docs on how
-to use it.
+accordingly, we offer a macro that probably does everything you need in this
+area. See docs/libcurl/libcurl.m4 file - it includes docs on how to use it.
 
 .SH "Portable Code in a Portable World"
 The people behind libcurl have put a considerable effort to make libcurl work
@@ -443,12 +442,12 @@ Simple enough, huh? Since you set the POST options with the
 \fICURLOPT_POSTFIELDS(3)\fP, this automatically switches the handle to use
 POST in the upcoming request.
 
-Ok, so what if you want to post binary data that also requires you to set the
-Content-Type: header of the post? Well, binary posts prevent libcurl from
-being able to do strlen() on the data to figure out the size, so therefore we
-must tell libcurl the size of the post data. Setting headers in libcurl
-requests are done in a generic way, by building a list of our own headers and
-then passing that list to libcurl.
+What if you want to post binary data that also requires you to set the
+Content-Type: header of the post? Well, binary posts prevent libcurl from being
+able to do strlen() on the data to figure out the size, so therefore we must
+tell libcurl the size of the post data. Setting headers in libcurl requests are
+done in a generic way, by building a list of our own headers and then passing
+that list to libcurl.
 
 .nf
  struct curl_slist *headers=NULL;
@@ -851,7 +850,7 @@ SSL is for secure point-to-point connections. This involves strong encryption
 and similar things, which effectively makes it impossible for a proxy to
 operate as a "man in between" which the proxy's task is, as previously
 discussed. Instead, the only way to have SSL work over an HTTP proxy is to ask
-the proxy to tunnel trough everything without being able to check or fiddle
+the proxy to tunnel everything through without being able to check or fiddle
 with the traffic.
 
 Opening an SSL connection over an HTTP proxy is therefore a matter of asking the
