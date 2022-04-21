@@ -36,7 +36,7 @@ struct curl_header {
 #define CURLH_TRAILER   (1<<1) /* trailers */
 #define CURLH_CONNECT   (1<<2) /* CONNECT headers */
 #define CURLH_1XX       (1<<3) /* 1xx headers */
-#define CURLH_PSEUDO    (1<<4) /* psuedo headers */
+#define CURLH_PSEUDO    (1<<4) /* pseudo headers */
 
 typedef enum {
   CURLHE_OK,

@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 100
 
-      - name: Check wether repo participates in Hacktoberfest
+      - name: Check whether repo participates in Hacktoberfest
         run: |
           gh config set prompt disabled && echo "::set-output name=label::$(
             gh repo view --json repositoryTopics --jq '.repositoryTopics[].name' | grep '^hacktoberfest$')"

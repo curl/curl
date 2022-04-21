@@ -6198,7 +6198,7 @@ if($all) {
 if($skipped && !$short) {
     my $s=0;
     # Temporary hash to print the restraints sorted by the number
-    # of their occurences
+    # of their occurrences
     my %restraints;
     logmsg "TESTINFO: $skipped tests were skipped due to these restraints:\n";
 
