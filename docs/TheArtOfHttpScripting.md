@@ -435,7 +435,7 @@
  applications use this information to decide how to display pages. Silly web
  programmers try to make different pages for users of different browsers to
  make them look the best possible for their particular browsers. They usually
- also do different kinds of javascript, vbscript etc.
+ also do different kinds of JavaScript, VBScript etc.
 
  At times, you will see that getting a page with curl will not return the same
  page that you see when getting the page with your browser. Then you know it
@@ -479,7 +479,7 @@
  Browsers typically support at least two other ways of redirects that curl
  does not: first the html may contain a meta refresh tag that asks the browser
  to load a specific URL after a set number of seconds, or it may use
- javascript to do it.
+ JavaScript to do it.
 
 # Cookies
 
@@ -648,13 +648,13 @@
  make sure you got there through their login page) so you should make a habit
  of first getting the login-form page to capture the cookies set there.
 
- Some web-based login systems feature various amounts of javascript, and
+ Some web-based login systems feature various amounts of JavaScript, and
  sometimes they use such code to set or modify cookie contents. Possibly they
  do that to prevent programmed logins, like this manual describes how to...
  Anyway, if reading the code is not enough to let you repeat the behavior
  manually, capturing the HTTP requests done by your browsers and analyzing the
  sent cookies is usually a working method to work out how to shortcut the
- javascript need.
+ JavaScript need.
 
  In the actual `<form>` tag for the login, lots of sites fill-in
  random/session or otherwise secretly generated hidden tags and you may need

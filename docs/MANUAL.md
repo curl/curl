@@ -292,7 +292,7 @@ How to post a form with curl, lesson #1:
 
 Dig out all the `<input>` tags in the form that you want to fill in.
 
-If there's a "normal" post, you use `-d` to post. `-d` takes a full "post
+If there is a "normal" post, you use `-d` to post. `-d` takes a full "post
 string", which is in the format
 
     <variable1>=<data1>&<variable2>=<data2>&...
@@ -832,7 +832,7 @@ Unix introduced the `.netrc` concept a long time ago. It is a way for a user
 to specify name and password for commonly visited FTP sites in a file so that
 you do not have to type them in each time you visit those sites. You realize
 this is a big security risk if someone else gets hold of your passwords, so
-therefore most unix programs will not read this file unless it is only readable
+therefore most Unix programs will not read this file unless it is only readable
 by yourself (curl does not care though).
 
 Curl supports `.netrc` files if told to (using the `-n`/`--netrc` and
@@ -864,7 +864,7 @@ Then use curl in way similar to:
 
     curl --krb private ftp://krb4site.com -u username:fakepwd
 
-There's no use for a password on the `-u` switch, but a blank one will make
+There is no use for a password on the `-u` switch, but a blank one will make
 curl ask for one and you already entered the real password to kinit/kauth.
 
 ## TELNET

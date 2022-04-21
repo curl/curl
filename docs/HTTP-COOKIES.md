@@ -120,14 +120,14 @@
   Extract cookie information from the internal cookie storage as a linked
   list.
 
-## Cookies with javascript
+## Cookies with JavaScript
 
-  These days a lot of the web is built up by javascript. The webbrowser loads
-  complete programs that render the page you see. These javascript programs
+  These days a lot of the web is built up by JavaScript. The webbrowser loads
+  complete programs that render the page you see. These JavaScript programs
   can also set and access cookies.
 
   Since curl and libcurl are plain HTTP clients without any knowledge of or
-  capability to handle javascript, such cookies will not be detected or used.
+  capability to handle JavaScript, such cookies will not be detected or used.
 
   Often, if you want to mimic what a browser does on such websites, you can
   record web browser HTTP traffic when using such a site and then repeat the

@@ -42,10 +42,10 @@ FAQ
   3.11 How do I POST with a different Content-Type?
   3.12 Why do FTP-specific features over HTTP proxy fail?
   3.13 Why do my single/double quotes fail?
-  3.14 Does curl support Javascript or PAC (automated proxy config)?
+  3.14 Does curl support JavaScript or PAC (automated proxy config)?
   3.15 Can I do recursive fetches with curl?
   3.16 What certificates do I need when I use SSL?
-  3.17 How do I list the root dir of an FTP server?
+  3.17 How do I list the root directory of an FTP server?
   3.18 Can I use curl to send a POST/PUT and not wait for a response?
   3.19 How do I get HTTP from a host using a specific IP address?
   3.20 How to SFTP from my user's home directory?
@@ -225,7 +225,7 @@ FAQ
   implement it for you, that is not a friendly attitude. We spend a
   considerable time already on maintaining and developing curl. In order to
   get more out of us, you should consider trading in some of your time and
-  effort in return. Simply go to the GitHub repo which resides at
+  effort in return. Simply go to the GitHub repository which resides at
   https://github.com/curl/curl, fork the project, and create pull requests
   with your proposed changes.
 
@@ -327,7 +327,7 @@ FAQ
   In the cURL project we have decided not to attempt to keep this file updated
   (or even present) since deciding what to add to a ca cert bundle is an
   undertaking we have not been ready to accept, and the one we can get from
-  Mozilla is perfectly fine so there's no need to duplicate that work.
+  Mozilla is perfectly fine so there is no need to duplicate that work.
 
   Today, with many services performed over HTTPS, every operating system
   should come with a default ca cert bundle that can be deemed somewhat
@@ -341,7 +341,7 @@ FAQ
 
   1.12 I have a problem who, can I chat with?
 
-  There's a bunch of friendly people hanging out in the #curl channel on the
+  There is a bunch of friendly people hanging out in the #curl channel on the
   IRC network libera.chat. If you are polite and nice, chances are good that
   you can get -- or provide -- help instantly.
 
@@ -493,10 +493,10 @@ FAQ
 
   To curl, all contents are alike. It does not matter how the page was
   generated. It may be ASP, PHP, Perl, shell-script, SSI or plain HTML
-  files. There's no difference to curl and it does not even know what kind of
+  files. There is no difference to curl and it does not even know what kind of
   language that generated the page.
 
-  See also item 3.14 regarding javascript.
+  See also item 3.14 regarding JavaScript.
 
   3.7 Can I use curl to delete/rename a file through FTP?
 
@@ -597,27 +597,27 @@ FAQ
   Remember that curl works and runs on more operating systems than most single
   individuals have ever tried.
 
-  3.14 Does curl support Javascript or PAC (automated proxy config)?
+  3.14 Does curl support JavaScript or PAC (automated proxy config)?
 
-  Many web pages do magic stuff using embedded Javascript. curl and libcurl
+  Many web pages do magic stuff using embedded JavaScript. curl and libcurl
   have no built-in support for that, so it will be treated just like any other
   contents.
 
   .pac files are a Netscape invention and are sometimes used by organizations
   to allow them to differentiate which proxies to use. The .pac contents is
-  just a Javascript program that gets invoked by the browser and that returns
-  the name of the proxy to connect to. Since curl does not support Javascript,
+  just a JavaScript program that gets invoked by the browser and that returns
+  the name of the proxy to connect to. Since curl does not support JavaScript,
   it cannot support .pac proxy configuration either.
 
-  Some workarounds usually suggested to overcome this Javascript dependency:
+  Some workarounds usually suggested to overcome this JavaScript dependency:
 
-  Depending on the Javascript complexity, write up a script that translates it
+  Depending on the JavaScript complexity, write up a script that translates it
   to another language and execute that.
 
-  Read the Javascript code and rewrite the same logic in another language.
+  Read the JavaScript code and rewrite the same logic in another language.
 
-  Implement a Javascript interpreter, people have successfully used the
-  Mozilla Javascript engine in the past.
+  Implement a JavaScript interpreter, people have successfully used the
+  Mozilla JavaScript engine in the past.
 
   Ask your admins to stop this, for a static proxy setup or similar.
 
@@ -668,10 +668,10 @@ FAQ
   refused access. You then need to explicitly disable the verification to
   connect to the server.
 
-  3.17 How do I list the root dir of an FTP server?
+  3.17 How do I list the root directory of an FTP server?
 
   There are two ways. The way defined in the RFC is to use an encoded slash
-  in the first path part. List the "/tmp" dir like this:
+  in the first path part. List the "/tmp" directory like this:
 
      curl ftp://ftp.sunet.se/%2ftmp/
 
@@ -765,7 +765,7 @@ FAQ
 
   4.2 Why do I get problems when I use & or % in the URL?
 
-  In general unix shells, the & symbol is treated specially and when used, it
+  In general Unix shells, the & symbol is treated specially and when used, it
   runs the specified command in the background. To safely send the & as a part
   of a URL, you should quote the entire URL by using single (') or double (")
   quotes around it. Similar problems can also occur on some shells with other
@@ -962,7 +962,7 @@ FAQ
   Meta tags. You can write an HTML tag that will cause the browser to redirect
   to another given URL after a certain time.
 
-  Javascript. You can write a Javascript program embedded in an HTML page that
+  JavaScript. You can write a JavaScript program embedded in an HTML page that
   redirects the browser to another given URL.
 
   There is no way to make curl follow these redirects. You must either
@@ -1227,7 +1227,7 @@ FAQ
     should check for libs
 
   * Adjust the system's config to check for libs in the directory where you have
-    put the dir (like Linux's /etc/ld.so.conf)
+    put the library (like Linux's /etc/ld.so.conf)
 
   'man ld.so' and 'man ld' will tell you more details
 
@@ -1325,15 +1325,16 @@ FAQ
   to list the files.
 
   The follow-up question tends to be how is a program supposed to parse the
-  directory listing. How does it know what's a file and what's a dir and what's
-  a symlink etc. If the FTP server supports the MLSD command then it will
-  return data in a machine-readable format that can be parsed for type. The
-  types are specified by RFC3659 section 7.5.1. If MLSD is not supported then
-  you have to work with what you are given. The LIST output format is entirely
-  at the server's own liking and the NLST output does not reveal any types and
-  in many cases does not even include all the directory entries. Also, both LIST
-  and NLST tend to hide unix-style hidden files (those that start with a dot)
-  by default so you need to do "LIST -a" or similar to see them.
+  directory listing. How does it know what's a file and what's a directory and
+  what's a symlink etc. If the FTP server supports the MLSD command then it
+  will return data in a machine-readable format that can be parsed for type.
+  The types are specified by RFC3659 section 7.5.1. If MLSD is not supported
+  then you have to work with what you are given. The LIST output format is
+  entirely at the server's own liking and the NLST output does not reveal any
+  types and in many cases does not even include all the directory entries.
+  Also, both LIST and NLST tend to hide unix-style hidden files (those that
+  start with a dot) by default so you need to do "LIST -a" or similar to see
+  them.
 
   Example - List only directories.
   ftp.funet.fi supports MLSD and ftp.kernel.org does not:
@@ -1372,7 +1373,7 @@ FAQ
   libraries, you need to continue your search elsewhere but there exist many
   good open source ones out there for most protocols you could want a server
   for. There are also really good stand-alone servers that have been tested
-  and proven for many years. There's no need for you to reinvent them.
+  and proven for many years. There is no need for you to reinvent them.
 
   5.18 Does libcurl use threads?
 
@@ -1505,7 +1506,7 @@ FAQ
 
  8.1 Why does curl use C89?
 
- As with everything in curl, there's a history and we keep using what we have
+ As with everything in curl, there is a history and we keep using what we have
  used before until someone brings up the subject and argues for and works on
  changing it.
 

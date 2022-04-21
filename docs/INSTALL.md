@@ -149,7 +149,7 @@ debug multithreaded dynamic C runtime.
 
 ## MingW32
 
-Make sure that MinGW32's bin dir is in the search path, for example:
+Make sure that MinGW32's bin directory is in the search path, for example:
 
 ```cmd
 set PATH=c:\mingw32\bin;%PATH%
@@ -194,7 +194,7 @@ If you want to enable LDAPS support then set LDAPS=1.
 
 ## Cygwin
 
-Almost identical to the unix installation. Run the configure script in the
+Almost identical to the Unix installation. Run the configure script in the
 curl source tree root with `sh configure`. Make sure you have the `sh`
 executable in `/bin/` or you will see the configure fail toward the end.
 
@@ -523,7 +523,7 @@ the `--disable` statements suggested above. Use will cause tests relying on
 those features to fail. The test harness can be manually forced to skip the
 relevant tests by specifying certain key words on the `runtests.pl` command
 line. Following is a list of appropriate key words for those configure options
-that aren't automatically detected:
+that are not automatically detected:
 
  - `--disable-cookies`          !cookies
  - `--disable-dateparse`        !RETRY-AFTER !CURLOPT_TIMECONDITION !CURLINFO_FILETIME !If-Modified-Since !getdate !-z

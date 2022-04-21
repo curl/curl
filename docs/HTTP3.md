@@ -213,7 +213,7 @@ Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTT
 This is not advice on how to run anything in production. This is for
 development and experimenting.
 
-## Prereqs
+## Prerequisite(s)
 
 An existing local HTTP/1.1 server that hosts files. Preferably also a few huge
 ones.  You can easily create huge local files like `truncate -s=8G 8GB` - they
