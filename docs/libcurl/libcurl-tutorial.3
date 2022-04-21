@@ -891,24 +891,24 @@ stand in the way for such innovative actions either!
 .IP "Proxy Auto-Config"
 
 Netscape first came up with this. It is basically a web page (usually using a
-\&.pac extension) with a Javascript that when executed by the browser with the
+\&.pac extension) with a JavaScript that when executed by the browser with the
 requested URL as input, returns information to the browser on how to connect
 to the URL. The returned information might be "DIRECT" (which means no proxy
 should be used), "PROXY host:port" (to tell the browser where the proxy for
 this particular URL is) or "SOCKS host:port" (to direct the browser to a SOCKS
 proxy).
 
-libcurl has no means to interpret or evaluate Javascript and thus it does not
+libcurl has no means to interpret or evaluate JavaScript and thus it does not
 support this. If you get yourself in a position where you face this nasty
 invention, the following advice have been mentioned and used in the past:
 
-- Depending on the Javascript complexity, write up a script that translates it
+- Depending on the JavaScript complexity, write up a script that translates it
 to another language and execute that.
 
-- Read the Javascript code and rewrite the same logic in another language.
+- Read the JavaScript code and rewrite the same logic in another language.
 
-- Implement a Javascript interpreter; people have successfully used the
-Mozilla Javascript engine in the past.
+- Implement a JavaScript interpreter; people have successfully used the
+Mozilla JavaScript engine in the past.
 
 - Ask your admins to stop this, for a static proxy setup or similar.
 
