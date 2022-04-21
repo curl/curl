@@ -34,7 +34,7 @@ curl: option -K: error encountered when reading a file
 curl: try 'curl --help' or 'curl --manual' for more information
 %else
 curl: try 'curl --help' for more information
-%fi
+%endif
 </stderr>
 <errorcode>
 26
