@@ -2,7 +2,7 @@
   "_comment": "Config file for linkcheck: If urls have some issues we can not fix on our end past it in here. MLC will ignore this.",
   "ignorePatterns": [
     {
-      "pattern": "^https://curl.zuul.vexxhost.dev"
+      "pattern": ""
     }
   ]
 }
