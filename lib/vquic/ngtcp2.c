@@ -1830,6 +1830,9 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
     }
     else {
       timeout = expiry - ts;
+      if(timeout / NGTCP2_MILLISECONDS * NGTCP2_MILLISECONDS < timeout) {
+        timeout += NGTCP2_MILLISECONDS;
+      }
     }
     Curl_expire(data, timeout / NGTCP2_MILLISECONDS, EXPIRE_QUIC);
   }
