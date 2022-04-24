@@ -273,6 +273,12 @@ static char *c_escape(const char *str, curl_off_t len)
       strcpy(e, "\\\"");
       e += 2;
     }
+    else if(c == '?') {
+      /* escape question marks as well, to prevent generating accidental
+         trigraphs */
+      strcpy(e, "\\?");
+      e += 2;
+    }
     else if(!isprint(c)) {
       msnprintf(e, 5, "\\x%02x", (unsigned)c);
       e += 4;
