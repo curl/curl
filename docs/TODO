@@ -81,6 +81,7 @@
  6.1 ditch stdin
  6.2 ditch telnet-specific select
  6.3 feature negotiation debug data
+ 6.4 exit immediately upon connection if stdin is /dev/null
 
  7. SMTP
  7.1 Passing NOTIFY option to CURLOPT_MAIL_RCPT
@@ -636,6 +637,13 @@
 
  Add telnet feature negotiation data to the debug callback as header data.
 
+6.4 exit immediately upon connection if stdin is /dev/null
+
+ If it did, curl could be used to probe if there's an server there listening
+ on a specific port. That is, the following command would exit immediately
+ after the connection is established with exit code 0:
+
+    curl -s --connect-timeout 2 telnet://example.com:80 </dev/null
 
 7. SMTP
 
