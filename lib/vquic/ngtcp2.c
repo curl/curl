@@ -879,6 +879,7 @@ static int ng_getsock(struct Curl_easy *data, struct connectdata *conn,
   /* we're still uploading or the HTTP/2 layer wants to send data */
   if((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND &&
      (!stream->h3out || stream->h3out->used < H3_SEND_SIZE) &&
+     ngtcp2_conn_get_cwnd_left(qs->qconn) &&
      ngtcp2_conn_get_max_data_left(qs->qconn) &&
      nghttp3_conn_is_stream_writable(qs->h3conn, stream->stream3_id))
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
