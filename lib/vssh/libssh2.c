@@ -727,27 +727,24 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
       infof(data, "SSH MD5 fingerprint: %s", md5buffer);
     }
 
-    /* Before we authenticate we check the hostkey's MD5 fingerprint
-     * against a known fingerprint, if available.
-     */
-    if(pubkey_md5 && strlen(pubkey_md5) == 32) {
-      if(!fingerprint || !strcasecompare(md5buffer, pubkey_md5)) {
-        if(fingerprint) {
-          failf(data,
+    /* This does NOT verify the length of 'pubkey_md5' separately, which will
+       make the comparison below fail unless it is exactly 32 characters */
+    if(!fingerprint || !strcasecompare(md5buffer, pubkey_md5)) {
+      if(fingerprint) {
+        failf(data,
               "Denied establishing ssh session: mismatch md5 fingerprint. "
               "Remote %s is not equal to %s", md5buffer, pubkey_md5);
-        }
-        else {
-          failf(data,
+      }
+      else {
+        failf(data,
               "Denied establishing ssh session: md5 fingerprint "
               "not available");
-        }
-        state(data, SSH_SESSION_FREE);
-        sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
-        return sshc->actualcode;
       }
-      infof(data, "MD5 checksum match");
+      state(data, SSH_SESSION_FREE);
+      sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
+      return sshc->actualcode;
     }
+    infof(data, "MD5 checksum match");
   }
 
   if(!pubkey_md5 && !pubkey_sha256) {
