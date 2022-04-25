@@ -9,9 +9,12 @@ Example: -b cookiefile -c cookiefile $URL
 See-also: cookie-jar junk-session-cookies
 Added: 4.9
 ---
-Pass the data to the HTTP server in the Cookie header. It is supposedly
-the data previously received from the server in a "Set-Cookie:" line. The
-data should be in the format "NAME1=VALUE1; NAME2=VALUE2".
+Pass the data to the HTTP server in the Cookie header. It is supposedly the
+data previously received from the server in a "Set-Cookie:" line. The data
+should be in the format "NAME1=VALUE1; NAME2=VALUE2". This makes curl use the
+cookie header with this content explicitly in all outgoing request(s). If
+multiple requests are done due to authentication, followed redirects or
+similar, they will all get this cookie passed on.
 
 If no '=' symbol is used in the argument, it is instead treated as a filename
 to read previously stored cookie from. This option also activates the cookie
