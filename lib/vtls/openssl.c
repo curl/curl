@@ -2924,7 +2924,8 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 #endif
 
 #ifdef USE_OPENSSL_SRP
-  if(ssl_authtype == CURL_TLSAUTH_SRP) {
+  if((ssl_authtype == CURL_TLSAUTH_SRP) &&
+     Curl_allow_auth_to_host(data)) {
     char * const ssl_username = SSL_SET_OPTION(username);
 
     infof(data, "Using TLS-SRP username: %s", ssl_username);

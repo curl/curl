@@ -776,10 +776,10 @@ output_auth_headers(struct Curl_easy *data,
 }
 
 /*
- * allow_auth_to_host() tells if autentication, cookies or other "sensitive
- * data" can (still) be sent to this host.
+ * Curl_allow_auth_to_host() tells if authentication, cookies or other
+ * "sensitive data" can (still) be sent to this host.
  */
-static bool allow_auth_to_host(struct Curl_easy *data)
+bool Curl_allow_auth_to_host(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   return (!data->state.this_is_a_follow ||
@@ -864,7 +864,7 @@ Curl_http_output_auth(struct Curl_easy *data,
 
   /* To prevent the user+password to get sent to other than the original host
      due to a location-follow */
-  if(allow_auth_to_host(data)
+  if(Curl_allow_auth_to_host(data)
 #ifndef CURL_DISABLE_NETRC
      || conn->bits.netrc
 #endif
@@ -1917,7 +1917,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                    checkprefix("Cookie:", compare)) &&
                   /* be careful of sending this potentially sensitive header to
                      other hosts */
-                  !allow_auth_to_host(data))
+                  !Curl_allow_auth_to_host(data))
             ;
           else {
 #ifdef USE_HYPER
