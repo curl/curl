@@ -131,6 +131,16 @@ void Curl_strntolower(char *dest, const char *src, size_t n)
   } while(*src++ && --n);
 }
 
+/* Compare case-sensitive NUL-terminated strings, taking care of possible
+ * null pointers. Return true if arguments match.
+ */
+bool Curl_safecmp(char *a, char *b)
+{
+  if(a && b)
+    return !strcmp(a, b);
+  return !a && !b;
+}
+
 /* --- public functions --- */
 
 int curl_strequal(const char *first, const char *second)

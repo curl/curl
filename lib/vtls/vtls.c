@@ -125,15 +125,6 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
   return !memcmp(first->data, second->data, first->len); /* same data */
 }
 
-static bool safecmp(char *a, char *b)
-{
-  if(a && b)
-    return !strcmp(a, b);
-  else if(!a && !b)
-    return TRUE; /* match */
-  return FALSE; /* no match */
-}
-
 
 bool
 Curl_ssl_config_matches(struct ssl_primary_config *data,
@@ -147,12 +138,12 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      blobcmp(data->cert_blob, needle->cert_blob) &&
      blobcmp(data->ca_info_blob, needle->ca_info_blob) &&
      blobcmp(data->issuercert_blob, needle->issuercert_blob) &&
-     safecmp(data->CApath, needle->CApath) &&
-     safecmp(data->CAfile, needle->CAfile) &&
-     safecmp(data->issuercert, needle->issuercert) &&
-     safecmp(data->clientcert, needle->clientcert) &&
-     safecmp(data->random_file, needle->random_file) &&
-     safecmp(data->egdsocket, needle->egdsocket) &&
+     Curl_safecmp(data->CApath, needle->CApath) &&
+     Curl_safecmp(data->CAfile, needle->CAfile) &&
+     Curl_safecmp(data->issuercert, needle->issuercert) &&
+     Curl_safecmp(data->clientcert, needle->clientcert) &&
+     Curl_safecmp(data->random_file, needle->random_file) &&
+     Curl_safecmp(data->egdsocket, needle->egdsocket) &&
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list) &&
      Curl_safe_strcasecompare(data->cipher_list13, needle->cipher_list13) &&
      Curl_safe_strcasecompare(data->curves, needle->curves) &&
