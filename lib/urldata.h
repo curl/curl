@@ -1160,7 +1160,11 @@ struct PureInfo {
      reused, in the connection cache. */
 
   char conn_primary_ip[MAX_IPADR_LEN];
-  int conn_primary_port;
+  int conn_primary_port; /* this is the destination port to the connection,
+                            which might have been a proxy */
+  int conn_remote_port;  /* this is the "remote port", which is the port
+                            number of the used URL, independent of proxy or
+                            not */
   char conn_local_ip[MAX_IPADR_LEN];
   int conn_local_port;
   const char *conn_scheme;
