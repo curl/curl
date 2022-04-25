@@ -775,6 +775,21 @@ output_auth_headers(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+/*
+ * allow_auth_to_host() tells if autentication, cookies or other "sensitive
+ * data" can (still) be sent to this host.
+ */
+static bool allow_auth_to_host(struct Curl_easy *data)
+{
+  struct connectdata *conn = data->conn;
+  return (!data->state.this_is_a_follow ||
+          data->set.allow_auth_to_other_hosts ||
+          (data->state.first_host &&
+           strcasecompare(data->state.first_host, conn->host.name) &&
+           (data->state.first_remote_port == conn->remote_port) &&
+           (data->state.first_remote_protocol == conn->handler->protocol)));
+}
+
 /**
  * Curl_http_output_auth() setups the authentication headers for the
  * host/proxy and the correct authentication
@@ -847,17 +862,14 @@ Curl_http_output_auth(struct Curl_easy *data,
        with it */
     authproxy->done = TRUE;
 
-  /* To prevent the user+password to get sent to other than the original
-     host due to a location-follow, we do some weirdo checks here */
-  if(!data->state.this_is_a_follow ||
+  /* To prevent the user+password to get sent to other than the original host
+     due to a location-follow */
+  if(allow_auth_to_host(data)
 #ifndef CURL_DISABLE_NETRC
-     conn->bits.netrc ||
+     || conn->bits.netrc
 #endif
-     !data->state.first_host ||
-     data->set.allow_auth_to_other_hosts ||
-     strcasecompare(data->state.first_host, conn->host.name)) {
+    )
     result = output_auth_headers(data, conn, authhost, request, path, FALSE);
-  }
   else
     authhost->done = TRUE;
 
@@ -1905,10 +1917,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                    checkprefix("Cookie:", compare)) &&
                   /* be careful of sending this potentially sensitive header to
                      other hosts */
-                  (data->state.this_is_a_follow &&
-                   data->state.first_host &&
-                   !data->set.allow_auth_to_other_hosts &&
-                   !strcasecompare(data->state.first_host, conn->host.name)))
+                  !allow_auth_to_host(data))
             ;
           else {
 #ifdef USE_HYPER
@@ -2084,6 +2093,7 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
       return CURLE_OUT_OF_MEMORY;
 
     data->state.first_remote_port = conn->remote_port;
+    data->state.first_remote_protocol = conn->handler->protocol;
   }
   Curl_safefree(data->state.aptr.host);
 
