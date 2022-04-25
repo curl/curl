@@ -1,0 +1,88 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+FTP
+--location
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 redirect
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+Connection: close
+Content-Type: text/html
+Location: ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER0002
+
+</data>
+<data2>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data2>
+
+<datacheck>
+HTTP/1.1 301 redirect
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+Connection: close
+Content-Type: text/html
+Location: ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER0002
+
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+ftp
+</server>
+ <name>
+HTTP with auth redirected to FTP w/o auth
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -L -u joe:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic am9lOnNlY3JldA==
+User-Agent: curl/%VERSION
+Accept: */*
+
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD a
+CWD path
+EPSV
+TYPE I
+SIZE %TESTNUMBER0002
+RETR %TESTNUMBER0002
+QUIT
+</protocol>
+</verify>
+</testcase>
