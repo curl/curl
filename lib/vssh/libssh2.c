@@ -694,12 +694,12 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
      * against a known fingerprint, if available.
      */
     if((pub_pos != b64_pos) ||
-        Curl_strncasecompare(fingerprint_b64, pubkey_sha256, pub_pos) != 1) {
+       strncmp(fingerprint_b64, pubkey_sha256, pub_pos)) {
       free(fingerprint_b64);
 
       failf(data,
-          "Denied establishing ssh session: mismatch sha256 fingerprint. "
-          "Remote %s is not equal to %s", fingerprint_b64, pubkey_sha256);
+            "Denied establishing ssh session: mismatch sha256 fingerprint. "
+            "Remote %s is not equal to %s", fingerprint_b64, pubkey_sha256);
       state(data, SSH_SESSION_FREE);
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       return sshc->actualcode;
