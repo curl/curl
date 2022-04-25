@@ -1948,9 +1948,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->insecure_ok = toggle;
       break;
     case 'K': /* parse config file */
-      if(parseconfig(nextarg, global))
-        warnf(global, "error trying read config from the '%s' file\n",
-              nextarg);
+      if(parseconfig(nextarg, global)) {
+        errorf(global, "cannot read config from '%s'\n", nextarg);
+        return PARAM_READ_ERROR;
+      }
       break;
     case 'l':
       config->dirlistonly = toggle; /* only list the names of the FTP dir */
