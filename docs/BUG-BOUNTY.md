@@ -20,7 +20,7 @@ The curl project offers monetary compensation for reported and published
 security vulnerabilities. The amount of money that is rewarded depends on how
 serious the flaw is determined to be.
 
-Since 2021, the Bug Bounty is manged in assocation with the Internet Bug
+Since 2021, the Bug Bounty is managed in association with the Internet Bug
 Bounty and they will set the reward amounts. If it would turn out that they
 set amounts that are way lower than we can accept, the curl project intends to
 "top up" rewards.
