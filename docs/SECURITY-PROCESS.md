@@ -147,7 +147,8 @@ growing memory usage, be it leaks or just increased use. A small memory or
 resource leak is then expected to *not* cause a security problem.
 
 Of course there can be a discussion if a leak is small or not. A large leak
-can be considered a security problem due to the DOS risk.
+can be considered a security problem due to the DOS risk. If leaked memory
+contains sensitive data it might also qualify as a security problem.
 
 ## Never-ending transfers
 

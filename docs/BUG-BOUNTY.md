@@ -12,7 +12,7 @@ HackerOne program](https://hackerone.com/curl).
 After you have reported a security issue, it has been deemed credible, and a
 patch and advisory has been made public, you may be eligible for a bounty from
 this program. See the [SECURITY-PROCESS](SECURITY-PROCESS.md) document for how
-we work on security issues.
+we work with security issues.
 
 # What are the reward amounts?
 
