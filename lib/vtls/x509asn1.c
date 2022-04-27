@@ -945,6 +945,29 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
 
   /* Generate all information records for the public key. */
 
+  if(strcasecompare(algo, "ecPublicKey")) {
+    /*
+     * ECC public key is all the data, a value of type BIT STRING mapped to
+     * OCTET STRING. The first octet of the OCTET STRING indicates whether the
+     * key is compressed or uncompressed.
+     */
+    const unsigned long len =
+      (unsigned long)((pubkey->end - pubkey->beg - 2) * 4);
+    if(!certnum)
+      infof(data, "   ECC Public Key (%lu bits)", len);
+    if(data->set.ssl.certinfo) {
+      const char *q = curl_maprintf("%lu", len);
+      if(q) {
+        CURLcode result =
+          Curl_ssl_push_certinfo(data, certnum, "ECC Public Key", q);
+        free((char *) q);
+        if(result)
+          return 1;
+      }
+    }
+    return do_pubkey_field(data, certnum, "ecPublicKey", pubkey);
+  }
+
   /* Get the public key (single element). */
   if(!getASN1Element(&pk, pubkey->beg + 1, pubkey->end))
     return 1;
