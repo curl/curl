@@ -1,11 +1,9 @@
-curl security process
-=====================
+# curl security process
 
 This document describes how security vulnerabilities should be handled in the
 curl project.
 
-Publishing Information
-----------------------
+## Publishing Information
 
 All known and public curl or libcurl related vulnerabilities are listed on
 [the curl website security page](https://curl.se/docs/security.html).
@@ -13,8 +11,7 @@ All known and public curl or libcurl related vulnerabilities are listed on
 Security vulnerabilities **should not** be entered in the project's public bug
 tracker.
 
-Vulnerability Handling
-----------------------
+## Vulnerability Handling
 
 The typical process for handling a new security vulnerability is as follows.
 
@@ -38,7 +35,8 @@ announcement.
   that a human has seen the report.
 
 - The security team investigates the report and either rejects it or accepts
-  it.
+  it. See below for examples of problems that are not considered
+  vulnerabilities.
 
 - If the report is rejected, the team writes to the reporter to explain why.
 
@@ -92,8 +90,7 @@ announcement.
 - The security web page on the website should get the new vulnerability
   mentioned.
 
-security (at curl dot se)
-------------------------------
+## security (at curl dot se)
 
 This is a private mailing list for discussions on and about curl security
 issues.
@@ -108,8 +105,7 @@ have no plans of vanishing in the near future.
 We do not make the list of participants public mostly because it tends to vary
 somewhat over time and a list somewhere will only risk getting outdated.
 
-Publishing Security Advisories
-------------------------------
+## Publishing Security Advisories
 
 1. Write up the security advisory, using markdown syntax. Use the same
    subtitles as last time to maintain consistency.
@@ -119,23 +115,76 @@ Publishing Security Advisories
 3. Add a line on the top of the array in `curl-www/docs/vuln.pm'.
 
 4. Put the new advisory markdown file in the curl-www/docs/ directory. Add it
-   to the git repo.
+   to the git repository.
 
 5. Run `make` in your local web checkout and verify that things look fine.
 
 6. On security advisory release day, push the changes on the curl-www
    repository's remote master branch.
 
-Hackerone
----------
+## Hackerone
 
 Request the issue to be disclosed. If there are sensitive details present in
 the report and discussion, those should be redacted from the disclosure. The
 default policy is to disclose as much as possible as soon as the vulnerability
 has been published.
 
-Bug Bounty
-----------
+## Bug Bounty
 
 See [BUG-BOUNTY](https://curl.se/docs/bugbounty.html) for details on the
 bug bounty program.
+
+# Not security issues
+
+This is an incomplete list of issues that are not considered vulnerabilities.
+
+## Small memory leaks
+
+We do not consider a small memory leak a security problem; even if the amount
+of allocated memory grows by a small amount every now and then. Long-living
+applications and services already need to have counter-measures and deal with
+growing memory usage, be it leaks or just increased use. A small memory or
+resource leak is then expected to *not* cause a security problem.
+
+Of course there can be a discussion if a leak is small or not. A large leak
+can be considered a security problem due to the DOS risk. If leaked memory
+contains sensitive data it might also qualify as a security problem.
+
+## Never-ending transfers
+
+We do not consider flaws that cause a transfer to never end to be a security
+problem. There are already several benign and likely reasons for transfers to
+stall and never end, so applications that cannot deal with never-ending
+transfers already need to have counter-measures established.
+
+If the problem avoids the regular counter-measures when it causes a never-
+ending transfer, it might very well be a security problem.
+
+## Not practically possible
+
+If the flaw or vulnerability cannot practically get executed on existing
+hardware it is not a security problem.
+
+## API misuse
+
+If a reported issue only triggers by an application using the API in a way
+that is not documented to work or even documented to not work, it is probably
+not going to be considered a security problem. We only guarantee secure and
+proper functionality when the APIs are used as expected and documented.
+
+There can be a discussion about what the documentation actually means and how
+to interpret the text, which might end up with us still agreeing that it is a
+security problem.
+
+## Local attackers already present
+
+When an issue can only be attacked or misused by an attacker present on the
+local system or network, the bar is raised. If a local user wrongfully has
+elevated rights on your system enough to attack curl, they can probably
+already do much worse harm and the problem is not really in curl.
+
+## Experiments
+
+Vulnerabilities in features which are off by default (in the build) and
+documented as experimental, are not eligible for a reward and we do not
+consider them security problems.
