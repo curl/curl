@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,9 +31,9 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
 CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
-void Curl_attach_connnection(struct Curl_easy *data,
+void Curl_attach_connection(struct Curl_easy *data,
                              struct connectdata *conn);
-void Curl_detach_connnection(struct Curl_easy *data);
+void Curl_detach_connection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);

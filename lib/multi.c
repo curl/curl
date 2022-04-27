@@ -118,7 +118,7 @@ static void init_completed(struct Curl_easy *data)
 
   /* Important: reset the conn pointer so that we don't point to memory
      that could be freed anytime */
-  Curl_detach_connnection(data);
+  Curl_detach_connection(data);
   Curl_expire_clear(data); /* stop all timers */
 }
 
@@ -635,7 +635,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   process_pending_handles(data->multi); /* connection / multiplex */
 
   CONNCACHE_LOCK(data);
-  Curl_detach_connnection(data);
+  Curl_detach_connection(data);
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
     CONNCACHE_UNLOCK(data);
@@ -824,7 +824,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
                                       that vanish with this handle */
 
   /* Remove the association between the connection and the handle */
-  Curl_detach_connnection(data);
+  Curl_detach_connection(data);
 
   if(data->state.lastconnect_id != -1) {
     /* Mark any connect-only connection for closure */
@@ -899,12 +899,12 @@ bool Curl_multiplex_wanted(const struct Curl_multi *multi)
 }
 
 /*
- * Curl_detach_connnection() removes the given transfer from the connection.
+ * Curl_detach_connection() removes the given transfer from the connection.
  *
  * This is the only function that should clear data->conn. This will
  * occasionally be called with the data->conn pointer already cleared.
  */
-void Curl_detach_connnection(struct Curl_easy *data)
+void Curl_detach_connection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   if(conn) {
@@ -916,11 +916,11 @@ void Curl_detach_connnection(struct Curl_easy *data)
 }
 
 /*
- * Curl_attach_connnection() attaches this transfer to this connection.
+ * Curl_attach_connection() attaches this transfer to this connection.
  *
  * This is the only function that should assign data->conn
  */
-void Curl_attach_connnection(struct Curl_easy *data,
+void Curl_attach_connection(struct Curl_easy *data,
                              struct connectdata *conn)
 {
   DEBUGASSERT(!data->conn);
@@ -1540,7 +1540,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 
     /* take this handle to the perform state right away */
     multistate(data, MSTATE_PERFORMING);
-    Curl_attach_connnection(data, conn);
+    Curl_attach_connection(data, conn);
     k->keepon |= KEEP_RECV; /* setup to receive! */
   }
   return rc;
@@ -2558,7 +2558,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             /* This is where we make sure that the conn pointer is reset.
                We don't have to do this in every case block above where a
                failure is detected */
-            Curl_detach_connnection(data);
+            Curl_detach_connection(data);
 
             /* remove connection from cache */
             Curl_conncache_remove_conn(data, conn, TRUE);
