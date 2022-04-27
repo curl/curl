@@ -4,7 +4,7 @@ curl and libcurl 7.83.0
  Command line options:         247
  curl_easy_setopt() options:   295
  Public functions in libcurl:  88
- Contributors:                 2620
+ Contributors:                 2625
 
 This release includes the following changes:
 
@@ -26,17 +26,24 @@ This release includes the following bugfixes:
  o CI: install Python package impacket to run SMB test 1451 [5]
  o configure.ac: move -pthread CFLAGS setting back where it used to be [14]
  o configure: bump the copyright year range int the generated output
+ o conncache: include the zone id in the "bundle" hashkey [112]
  o connecache: remove duplicate connc->closure_handle check [90]
  o connect: make Curl_getconnectinfo work with conn cache from share handle [22]
  o connect: use TCP_KEEPALIVE only if TCP_KEEPIDLE is not defined [6]
+ o cookie.d: clarify when cookies are sent
+ o cookies: improve errorhandling for reading cookiefile [123]
  o curl/system.h: update ifdef condition for MCST-LCC compiler [4]
  o curl: error out if -T and -d are used for the same URL [99]
  o curl: error out when options need features not present in libcurl [18]
+ o curl: escape '?' in generated --libcurl code [117]
  o curl: fix segmentation fault for empty output file names. [60]
  o curl_easy_header: fix typos in documentation [74]
+ o CURLINFO_PRIMARY_PORT.3: clarify which port this is [126]
+ o CURLOPT*TLSAUTH.3: they only work with OpenSSL or GnuTLS [105]
  o CURLOPT_DISALLOW_USERNAME_IN_URL.3: use uppercase URL
  o CURLOPT_PREQUOTE.3: only works for FTP file transfers, not dirs [79]
  o CURLOPT_PROGRESSFUNCTION.3: fix typo in example [63]
+ o CURLOPT_UNRESTRICTED_AUTH.3: extended explanation [127]
  o CURLSHOPT_UNLOCKFUNC.3: fix the callback prototype [9]
  o docs/HYPER.md: updated to reflect current hyper build needs
  o docs/opts: Mention Schannel client cert type is P12 [50]
@@ -54,11 +61,13 @@ This release includes the following bugfixes:
  o gtls: fix build for disabled TLS-SRP [48]
  o http2: handle DONE called for the paused stream [69]
  o http2: RST the stream if we stop it on our own will [67]
+ o http: avoid auth/cookie on redirects same host diff port [110]
  o http: close the stream (not connection) on time condition abort [68]
  o http: reject header contents with nul bytes [41]
  o http: return error on colon-less HTTP headers [31]
  o http: streamclose "already downloaded" [57]
  o hyper: fix status_line() return code [13]
+ o hyper: fix tests 580 and 581 for hyper [107]
  o hyper: no h2c support [33]
  o infof: consistent capitalization of warning messages [103]
  o ipv4/6.d: clarify that they are about using IP addresses [3]
@@ -69,9 +78,13 @@ This release includes the following bugfixes:
  o lib: #ifdef on USE_HTTP2 better [65]
  o lib: fix some misuse of curlx_convert_wchar_to_UTF8 [38]
  o lib: remove exclamation marks [100]
+ o libssh2: compare sha256 strings case sensitively [114]
+ o libssh2: make the md5 comparison fail if wrong length [111]
  o libssh: fix build with old libssh versions [12]
+ o libssh: fix double close [124]
  o libssh: Improve fix for missing SSH_S_ stat macros [10]
  o libssh: unstick SFTP transfers when done event-based [58]
+ o macos: set .plist version in autoconf [122]
  o mbedtls: remove 'protocols' array from backend when ALPN is not used [66]
  o mbedtls: remove server_fd from backend [91]
  o mk-ca-bundle.pl: Use stricter logic to process the certificates [39]
@@ -79,6 +92,8 @@ This release includes the following bugfixes:
  o mlc_config.json: add file to ignore known troublesome URLs [35]
  o mqtt: better handling of TCP disconnect mid-message [55]
  o ngtcp2: add client certificate authentication for OpenSSL [15]
+ o ngtcp2: avoid busy loop in low CWND situation [119]
+ o ngtcp2: deal with sub-millisecond timeout [116]
  o ngtcp2: disconnect the QUIC connection proper [19]
  o ngtcp2: enlarge H3_SEND_SIZE [82]
  o ngtcp2: fix HTTP/3 upload stall and avoid busy loop [83]
@@ -114,9 +129,13 @@ This release includes the following bugfixes:
  o tls: make mbedtls and NSS check for h2, not nghttp2 [70]
  o tool and tests: force flush of all buffers at end of program [17]
  o tool_cb_hdr: Turn the Location: into a terminal hyperlink [30]
+ o tool_getparam: error out on missing -K file [115]
  o tool_listhelp.c: uppercase URL
  o tool_operate: fix a scan-build warning [16]
  o tool_paramhlp: use feof(3) to identify EOF correctly when using fread(3) [97]
+ o transfer: redirects to other protocols or ports clear auth [109]
+ o unit1620: call global_init before calling Curl_open [125]
+ o url: check sasl additional parameters for connection reuse. [113]
  o vtls: provide a unified APLN-disagree string for all backends [75]
  o vtls: use a backend standard message for "ALPN: offers %s" [73]
  o vtls: use a generic "ALPN, server accepted" message [72]
@@ -133,18 +152,20 @@ advice from friends like these:
 
   Alejandro R. Sedeño, Andreas Falkenhahn, Andrey Alifanov,
   anon00000000 on github, Balakrishnan Balasubramanian, Boris Verkhovskiy,
-  Christian Schmitz, Colin Leroy, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Daniel Valenzuela, Don J Olmstead, Emanuele Torre,
-  Evangelos Foutras, Francisco Olarte, Frank Meier, Gisle Vanem, Ian Blanes,
-  Jan Venekamp, Jean-Philippe Menil, Jenny Heino, Joseph Chen,
-  jurisuk on github, Kristoffer Gleditsch, Leandro Coutinho, Marcel Raad,
-  Marc Hörsken, Matteo Baccan, mehatzri on github, Michael Kaufmann,
-  Michał Antoniak, Nick Banks, Nick Coghlan, Paul Howarth, Paweł Kowalski,
-  Peter Korsgaard, pheiduck on github, r-a-sattarov on github, Ray Satiro,
-  Rianov Viacheslav, Robert Brose, Robert Charles Muir, Samuel Henrique,
-  Sascha Zengler, Taras Kushnir, Tatsuhiro Tsujikawa, Timothe Litt,
-  Viktor Szakats, HexTheDragon
-  (50 contributors)
+  Brad Spencer, Christian Schmitz, Christopher Degawa, Colin Leroy,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Daniel Valenzuela,
+  Don J Olmstead, Emanuele Torre, Evangelos Foutras, Francisco Olarte,
+  Frank Meier, Gisle Vanem, Harry Sintonen, Ian Blanes, Jan Venekamp,
+  Jay Dommaschk, Jean-Philippe Menil, Jenny Heino, Joseph Chen,
+  jurisuk on github, Kristoffer Gleditsch, Kushal Das, Leandro Coutinho,
+  Liam Warfield, Marcel Raad, Marc Hörsken, Matteo Baccan,
+  Median Median Stride, mehatzri on github, Michael Kaufmann, Michał Antoniak,
+  Nick Banks, Nick Coghlan, Nick Zitzmann, Patrick Monnerat, Paul Howarth,
+  Paweł Kowalski, Peter Korsgaard, pheiduck on github, r-a-sattarov on github,
+  Ray Satiro, Rianov Viacheslav, Robert Brose, Robert Charles Muir,
+  Robin A. Meade, Samuel Henrique, Sascha Zengler, Taras Kushnir,
+  Tatsuhiro Tsujikawa, Timothe Litt, Viktor Szakats, HexTheDragon
+  (60 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -251,3 +272,21 @@ References to bug reports and discussions on issues:
  [101] = https://curl.se/bug/?i=8714
  [102] = https://curl.se/bug/?i=8697
  [103] = https://curl.se/bug/?i=8711
+ [105] = https://curl.se/bug/?i=8753
+ [107] = https://curl.se/bug/?i=8707
+ [109] = https://curl.se/docs/CVE-2022-27774.html
+ [110] = https://curl.se/docs/CVE-2022-27776.html
+ [111] = https://hackerone.com/reports/1549461
+ [112] = https://curl.se/docs/CVE-2022-27775.html
+ [113] = https://curl.se/docs/CVE-2022-22576.html
+ [114] = https://hackerone.com/reports/1549435
+ [115] = https://hackerone.com/reports/1542881
+ [116] = https://curl.se/bug/?i=8738
+ [117] = https://hackerone.com/reports/1548535
+ [119] = https://curl.se/bug/?i=8739
+ [122] = https://curl.se/bug/?i=8692
+ [123] = https://curl.se/bug/?i=8699
+ [124] = https://curl.se/bug/?i=8708
+ [125] = https://curl.se/bug/?i=8719
+ [126] = https://curl.se/bug/?i=8725
+ [127] = https://curl.se/bug/?i=8724
