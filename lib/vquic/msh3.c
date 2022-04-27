@@ -95,7 +95,7 @@ static const MSH3_REQUEST_IF msh3_request_if = {
 
 void Curl_quic_ver(char *p, size_t len)
 {
-  (void)msnprintf(p, len, "msh3/%s", "0.0.1");
+  (void)msnprintf(p, len, "msh3/%s", "0.3.0");
 }
 
 CURLcode Curl_quic_connect(struct Curl_easy *data,
@@ -121,7 +121,10 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
   }
 
-  qs->conn = MsH3ConnectionOpen(qs->api, conn->host.name, unsecure);
+  qs->conn = MsH3ConnectionOpen(qs->api,
+                                conn->host.name,
+                                (uint16_t)conn->remote_port,
+                                unsecure);
   if(!qs->conn) {
     failf(data, "can't create msh3 connection");
     if(qs->api) {
