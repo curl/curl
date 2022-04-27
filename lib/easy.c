@@ -1139,7 +1139,7 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
   if(!data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connnection(data, c);
+    Curl_attach_connection(data, c);
 
   *n = 0;
   result = Curl_read(data, sfd, buffer, buflen, &n1);
@@ -1175,7 +1175,7 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
   if(!data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connnection(data, c);
+    Curl_attach_connection(data, c);
 
   *n = 0;
   sigpipe_ignore(data, &pipe_st);
@@ -1209,12 +1209,12 @@ static int conn_upkeep(struct Curl_easy *data,
   if(conn->handler->connection_check) {
     /* briefly attach the connection to this transfer for the purpose of
        checking it */
-    Curl_attach_connnection(data, conn);
+    Curl_attach_connection(data, conn);
 
     /* Do a protocol-specific keepalive check on the connection. */
     conn->handler->connection_check(data, conn, CONNCHECK_KEEPALIVE);
     /* detach the connection again */
-    Curl_detach_connnection(data);
+    Curl_detach_connection(data);
   }
 
   return 0; /* continue iteration */
