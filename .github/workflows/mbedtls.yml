@@ -29,7 +29,7 @@ jobs:
 
     steps:
     - run: |
-        sudo apt-get install libtool autoconf automake pkg-config clang stunnel4
+        sudo apt-get install libtool autoconf automake pkg-config clang stunnel4 libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev
         sudo python3 -m pip install impacket
       name: install prereqs and impacket
 
