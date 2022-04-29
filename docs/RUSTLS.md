@@ -21,6 +21,6 @@ Now configure and build curl with rustls:
 
     % git clone https://github.com/curl/curl
     % cd curl
-    % ./buildconf
+    % autoreconf -fi
     % ./configure --with-rustls=${HOME}/rustls-ffi-built
     % make
