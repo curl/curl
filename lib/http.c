@@ -651,6 +651,21 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   return result;
 }
 
+/*
+ * Curl_allow_auth_to_host() tells if authentication, cookies or other
+ * "sensitive data" can (still) be sent to this host.
+ */
+bool Curl_allow_auth_to_host(struct Curl_easy *data)
+{
+  struct connectdata *conn = data->conn;
+  return (!data->state.this_is_a_follow ||
+          data->set.allow_auth_to_other_hosts ||
+          (data->state.first_host &&
+           strcasecompare(data->state.first_host, conn->host.name) &&
+           (data->state.first_remote_port == conn->remote_port) &&
+           (data->state.first_remote_protocol == conn->handler->protocol)));
+}
+
 #ifndef CURL_DISABLE_HTTP_AUTH
 /*
  * Output the correct authentication header depending on the auth type
@@ -773,21 +788,6 @@ output_auth_headers(struct Curl_easy *data,
     authstatus->multipass = FALSE;
 
   return CURLE_OK;
-}
-
-/*
- * Curl_allow_auth_to_host() tells if authentication, cookies or other
- * "sensitive data" can (still) be sent to this host.
- */
-bool Curl_allow_auth_to_host(struct Curl_easy *data)
-{
-  struct connectdata *conn = data->conn;
-  return (!data->state.this_is_a_follow ||
-          data->set.allow_auth_to_other_hosts ||
-          (data->state.first_host &&
-           strcasecompare(data->state.first_host, conn->host.name) &&
-           (data->state.first_remote_port == conn->remote_port) &&
-           (data->state.first_remote_protocol == conn->handler->protocol)));
 }
 
 /**
