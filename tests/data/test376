@@ -32,7 +32,7 @@ Funny-head: yesyes
 http
 </server>
  <name>
-HTTP GET
+--remove-on-error
  </name>
  <command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/save-%TESTNUMBER --remove-on-error
