@@ -357,7 +357,7 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
   struct HTTP *stream = IfContext;
   (void)Request;
   (void)AbortError;
-  H3BUGF(printf("* msh3_complete, aborted=%hhu\n", Aborted));
+  H3BUGF(printf("* msh3_complete, aborted=%s\n", Aborted ? "true" : "false"));
   msh3_lock_acquire(&stream->recv_lock);
   if(Aborted) {
     stream->recv_error = CURLE_HTTP3; /* TODO - how do we pass AbortError? */
