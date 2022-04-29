@@ -81,7 +81,7 @@ jobs:
     # Run this command with retries because of spurious failures seen
     # while running the tests, for example
     # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
-    - run: brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done && brew upgrade
+    - run: brew upgrade && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
       name: 'brew install'
 
     - run: python3 -m pip install impacket
