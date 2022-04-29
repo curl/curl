@@ -215,11 +215,10 @@
  * OpenSSL: supported since 1.0.2, see
  *   https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set1_groups.html
  * BoringSSL: supported since 5fd1807d95f7 (committed 2016-09-30)
- * LibreSSL: not tested.
+ * LibreSSL: since 2.5.3 (April 12, 2017)
  */
-#if ((OPENSSL_VERSION_NUMBER >= 0x10002000L) && \
-     !defined(LIBRESSL_VERSION_NUMBER)) || \
-    defined(OPENSSL_IS_BORINGSSL)
+#if (OPENSSL_VERSION_NUMBER >= 0x10002000L) ||  \
+  defined(OPENSSL_IS_BORINGSSL)
 #define HAVE_SSL_CTX_SET_EC_CURVES
 #endif
 
