@@ -91,6 +91,7 @@ bool tool_create_output_file(struct OutStruct *outs,
       char *newname = malloc(len + 13); /* nul + 1-11 digits + dot */
       if(!newname) {
         errorf(global, "out of memory\n");
+        free(aname);
         return FALSE;
       }
       memcpy(newname, fname, len);
