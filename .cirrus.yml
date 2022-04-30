@@ -41,11 +41,10 @@ freebsd_task:
   pkginstall_script:
     - pkg update -f
     - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel py38-pip
-    - pip install easy_install
     - pkg delete -y curl
-    - easy_install "cryptography<3.2"
-    - easy_install "pyOpenSSL<20.0"
-    - easy_install "impacket"
+    - pip install "cryptography<3.2"
+    - pip install "pyOpenSSL<20.0"
+    - pip install "impacket"
   configure_script:
     - autoreconf -fi
     # Building with the address sanitizer is causing unexplainable test issues due to timeouts
