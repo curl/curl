@@ -39,9 +39,8 @@ freebsd_task:
     MAKE_FLAGS: -j 2
 
   pkginstall_scripti:
-    - IGNORE_OSVERSION=yes
-    - pkg update -f
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - env IGNORE_OSVERSION=yes pkg update -f
+    - env IGNORE_OSVERSION=yes pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
     - pkg delete -y curl
     - easy_install "cryptography<3.2"
     - easy_install "pyOpenSSL<20.0"
