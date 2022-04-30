@@ -88,7 +88,15 @@ bool tool_create_output_file(struct OutStruct *outs,
     if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
       int next_num = 1;
       size_t len = strlen(fname);
-      char *newname = malloc(len + 13); /* nul + 1-11 digits + dot */
+      size_t newlen = len + 13; /* nul + 1-11 digits + dot */
+      char *newname;
+      /* Guard against wraparound in new filename */
+      if(newlen < len) {
+        free(aname);
+        errorf(global, "overflow in filename generation\n");
+        return FALSE;
+      }
+      newname = malloc(newlen);
       if(!newname) {
         errorf(global, "out of memory\n");
         return FALSE;
