@@ -21,7 +21,7 @@
 #
 ###########################################################################
 
-/usr/bin/autoreconf -fi
+autoreconf -fi
 mkdir -p cvr
 cd cvr
 ../configure --disable-shared --enable-debug --enable-maintainer-mode --enable-code-coverage
