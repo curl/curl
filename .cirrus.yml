@@ -38,7 +38,8 @@ freebsd_task:
     CRYPTOGRAPHY_DONT_BUILD_RUST: 1
     MAKE_FLAGS: -j 2
 
-  pkginstall_script:
+  pkginstall_scripti:
+    - IGNORE_OSVERSION=yes
     - pkg update -f
     - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
     - pkg delete -y curl
