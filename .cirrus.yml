@@ -40,7 +40,9 @@ freebsd_task:
 
   pkginstall_script:
     - pkg update -f
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel py38-pip
+    - ln -s /usr/local/bin/pip-3.8 /usr/local/bin/pip
+    - pip install easy_install
     - pkg delete -y curl
     - easy_install "cryptography<3.2"
     - easy_install "pyOpenSSL<20.0"
