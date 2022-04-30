@@ -1,0 +1,57 @@
+name: Linux
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: msh3
+          install:
+          configure: --with-msh3=$HOME/msh3 --enable-debug --enable-werror --with-openssl=$HOME/quictls
+
+    steps:
+    - run: |
+        sudo apt-get install libtool autoconf automake pkg-config clang stunnel4 libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+        sudo python3 -m pip install impacket
+      name: install prereqs and impacket
+
+    - run: |
+        git clone --depth 1 -b OpenSSL_1_1_1j+quic https://github.com/quictls/openssl ossl
+        cd ossl
+        ./config enable-tls1_3 --prefix=$HOME/quictls
+        make
+        make install_sw
+      name: 'build and install quictls'
+
+    - run: |
+        git clone --depth 1 --recursive https://github.com/nibanks/msh3
+        cd msh3 && mkdir build && cd build
+        cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3 ..
+        cmake --build .
+        cmake --install .
+      name: 'build and install msh3'
+
+    - uses: actions/checkout@v2
+
+    - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.configure }} && make V=1
+      name: 'configure and build curl'
+
+    - run: make V=1 test-ci
+      name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
