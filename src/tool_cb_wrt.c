@@ -99,6 +99,7 @@ bool tool_create_output_file(struct OutStruct *outs,
       newname = malloc(newlen);
       if(!newname) {
         errorf(global, "out of memory\n");
+        free(aname);
         return FALSE;
       }
       memcpy(newname, fname, len);
