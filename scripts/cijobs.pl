@@ -495,7 +495,8 @@ sub zuul {
     return $c;
 }
 
-my $tag = "origin/master";
+my $tag = `git rev-parse --abbrev-ref HEAD 2>/dev/null` || "master";
+chomp $tag;
 githubactions($tag);
 azurepipelines($tag);
 appveyor($tag);
