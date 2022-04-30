@@ -29,9 +29,9 @@ freebsd_task:
     - name: FreeBSD 13.0
       freebsd_instance:
         image_family: freebsd-13-0
-    - name: FreeBSD 12.2
+    - name: FreeBSD 12.3
       freebsd_instance:
-        image_family: freebsd-12-2
+        image_family: freebsd-12-3
 
   env:
     CIRRUS_CLONE_DEPTH: 10
@@ -40,11 +40,11 @@ freebsd_task:
 
   pkginstall_script:
     - pkg update -f
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel py38-pip
     - pkg delete -y curl
-    - easy_install "cryptography<3.2"
-    - easy_install "pyOpenSSL<20.0"
-    - easy_install "impacket"
+    - pip install "cryptography<3.2"
+    - pip install "pyOpenSSL<20.0"
+    - pip install "impacket"
   configure_script:
     - autoreconf -fi
     # Building with the address sanitizer is causing unexplainable test issues due to timeouts
