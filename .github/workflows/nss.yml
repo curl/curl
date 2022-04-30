@@ -26,7 +26,13 @@ jobs:
 
     steps:
     - run: |
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4 libnss3-dev clang-9 libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        . /etc/lsb-release
+        sudo add-apt-repository -y "deb http://apt.llvm.org/${DISTRIB_CODENAME}/ llvm-toolchain-${DISTRIB_CODENAME}-14 main"
+        sudo apt install -y clang-14 llvm-14
+        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-14 100
+        sudo update-alternatives --set clang /usr/bin/clang-14
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 libnss3-dev libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
         sudo python3 -m pip install impacket
       name: install prereqs and impacket
 
@@ -35,7 +41,7 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: CC=clang-9 CPPFLAGS="-isystem /usr/include/nss" ./configure ${{ matrix.build.configure }}
+    - run: CC=clang CPPFLAGS="-isystem /usr/include/nss" ./configure ${{ matrix.build.configure }}
       name: 'configure with clang'
 
     - run: make V=1
