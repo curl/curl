@@ -135,6 +135,8 @@
         - libp11-kit-dev
         - libtasn1-6-dev
         - nettle-dev
+        - gtk-doc-tools
+        - gnulib
       curl_env:
         CC: gcc-8
         CXX: g++-8
