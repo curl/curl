@@ -4,7 +4,7 @@ curl and libcurl 7.83.1
  Command line options:         247
  curl_easy_setopt() options:   295
  Public functions in libcurl:  88
- Contributors:                 2625
+ Contributors:                 2628
 
 This release includes the following changes:
 
@@ -13,6 +13,18 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o conn: fix typo 'connnection' -> 'connection' in two function names [1]
+ o curl: free resource in error path [3]
+ o curl: guard against size_t wraparound in no-clobber code [4]
+ o data/test376: set a proper name
+ o GHA/mbedtls: enabled nghttp2 in the build [11]
+ o gha: build msh3 [5]
+ o gskit: remove unused function set_callback [2]
+ o http: move Curl_allow_auth_to_host() [9]
+ o mbedtls: fix compile when h2-enabled [12]
+ o msh3: get msh3 version from MsH3Version [6]
+ o msh3: print boolean value as text representation [10]
+ o msh3: psss remote_port to MsH3ConnectionOpen [7]
+ o openssl: define HAVE_SSL_CTX_SET_EC_CURVES for libressl [8]
 
 This release includes the following known bugs:
 
@@ -21,9 +33,22 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Rosenfield, Daniel Stenberg,
-  (2 contributors)
+  Adam Rosenfield, Christian Weisgerber, Daniel Gustafsson, Daniel Stenberg,
+  LigH-de on github, Michael Olbrich, Nick Banks, Patrick Monnerat,
+  Yusuke Nakamura
+  (9 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=8759
+ [2] = https://curl.se/bug/?i=8782
+ [3] = https://curl.se/bug/?i=8770
+ [4] = https://curl.se/bug/?i=8771
+ [5] = https://curl.se/bug/?i=8779
+ [6] = https://curl.se/bug/?i=8762
+ [7] = https://curl.se/bug/?i=8762
+ [8] = https://curl.se/mail/lib-2022-04/0059.html
+ [9] = https://curl.se/bug/?i=8772
+ [10] = https://curl.se/bug/?i=8763
+ [11] = https://curl.se/bug/?i=8767
+ [12] = https://curl.se/bug/?i=8766
