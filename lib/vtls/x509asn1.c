@@ -948,22 +948,21 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
   if(strcasecompare(algo, "ecPublicKey")) {
     /*
      * ECC public key is all the data, a value of type BIT STRING mapped to
-     * OCTET STRING. The first octet of the OCTET STRING indicates whether the
-     * key is compressed or uncompressed.
+     * OCTET STRING and should not be parsed as an ASN.1 value.
      */
     const unsigned long len =
       (unsigned long)((pubkey->end - pubkey->beg - 2) * 4);
     if(!certnum)
       infof(data, "   ECC Public Key (%lu bits)", len);
     if(data->set.ssl.certinfo) {
-      const char *q = curl_maprintf("%lu", len);
-      if(q) {
-        CURLcode result =
-          Curl_ssl_push_certinfo(data, certnum, "ECC Public Key", q);
-        free((char *) q);
-        if(result)
-          return 1;
-      }
+      CURLcode result;
+      p = curl_maprintf("%lu", len);
+      if(!p)
+        return 1;
+      result = Curl_ssl_push_certinfo(data, certnum, "ECC Public Key", p);
+      free((char *) p);
+      if(result)
+        return 1;
     }
     return do_pubkey_field(data, certnum, "ecPublicKey", pubkey);
   }
@@ -994,14 +993,14 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     if(!certnum)
       infof(data, "   RSA Public Key (%lu bits)", len);
     if(data->set.ssl.certinfo) {
+      CURLcode result;
       q = curl_maprintf("%lu", len);
-      if(q) {
-        CURLcode result =
-          Curl_ssl_push_certinfo(data, certnum, "RSA Public Key", q);
-        free((char *) q);
-        if(result)
-          return 1;
-      }
+      if(!q)
+        return 1;
+      result = Curl_ssl_push_certinfo(data, certnum, "RSA Public Key", q);
+      free((char *) q);
+      if(result)
+        return 1;
     }
     /* Generate coefficients. */
     if(do_pubkey_field(data, certnum, "rsa(n)", &elem))
