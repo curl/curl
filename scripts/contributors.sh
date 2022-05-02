@@ -91,7 +91,8 @@ awk '{
 }
 
  END {
-   printf("  %s\n", p);
+   pp=substr(p,1,length(p)-1);
+   printf("  %s\n", pp);
    printf("  (%d contributors)\n", num);
  }
 
