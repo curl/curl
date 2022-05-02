@@ -420,10 +420,9 @@ void parse_cert_parameter(const char *cert_parameter,
          separator, but we try to detect when it is used for a file name! On
          windows. */
 #ifdef WIN32
-      if(param_place &&
-          (param_place == &cert_parameter[1]) &&
-          (cert_parameter[2] == '\\' || cert_parameter[2] == '/') &&
-          (ISALPHA(cert_parameter[0])) ) {
+      if((param_place == &cert_parameter[1]) &&
+         (cert_parameter[2] == '\\' || cert_parameter[2] == '/') &&
+         (ISALPHA(cert_parameter[0])) ) {
         /* colon in the second column, followed by a backslash, and the
            first character is an alphabetic letter:
 
