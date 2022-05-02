@@ -312,7 +312,7 @@
       - curl-novalgrind-boringssl-with-openssl-quiche
       - curl-novalgrind-libressl
       - curl-novalgrind-ngtcp2-with-openssl
-      #- curl-novalgrind-ngtcp2-gnutls
+      - curl-novalgrind-ngtcp2-gnutls
       - curl-debug-clang-disable-alt-svc-with-openssl
       - curl-debug-clang-with-gnutls
       - curl-cmake-boringssl-quiche
