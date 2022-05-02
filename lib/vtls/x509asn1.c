@@ -955,13 +955,9 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     if(!certnum)
       infof(data, "   ECC Public Key (%lu bits)", len);
     if(data->set.ssl.certinfo) {
-      CURLcode result;
-      p = curl_maprintf("%lu", len);
-      if(!p)
-        return 1;
-      result = Curl_ssl_push_certinfo(data, certnum, "ECC Public Key", p);
-      free((char *) p);
-      if(result)
+      char q[sizeof(len) * 8 / 3 + 1];
+      msnprintf(q, sizeof(q), "%lu", len);
+      if(Curl_ssl_push_certinfo(data, certnum, "ECC Public Key", q))
         return 1;
     }
     return do_pubkey_field(data, certnum, "ecPublicKey", pubkey);
@@ -993,13 +989,9 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     if(!certnum)
       infof(data, "   RSA Public Key (%lu bits)", len);
     if(data->set.ssl.certinfo) {
-      CURLcode result;
-      q = curl_maprintf("%lu", len);
-      if(!q)
-        return 1;
-      result = Curl_ssl_push_certinfo(data, certnum, "RSA Public Key", q);
-      free((char *) q);
-      if(result)
+      char r[sizeof(len) * 8 / 3 + 1];
+      msnprintf(r, sizeof(r), "%lu", len);
+      if(Curl_ssl_push_certinfo(data, certnum, "RSA Public Key", r))
         return 1;
     }
     /* Generate coefficients. */
