@@ -80,7 +80,3 @@
 %if bearssl
 313
 %endif
-#The CRL test doesn't work with NSS
-%if NSS
-3001
-%endif
