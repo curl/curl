@@ -66,6 +66,7 @@
       - ninja-build
       - libgsasl7-dev
       - libnghttp2-dev
+      - gtk-doc-tools
 
   - name: Install job-specific packages
     when: curl_apt_packages is defined
