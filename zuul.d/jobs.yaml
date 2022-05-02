@@ -117,36 +117,36 @@
           --with-nghttp3={{ ansible_user_dir }}/ngbuild
         NOTESTS:
 
-#- job:
-#    name: curl-novalgrind-ngtcp2-gnutls
-#    parent: curl-base
-#    vars:
-#      curl_apt_packages:
-#        - libpsl-dev
-#        - libbrotli-dev
-#        - libzstd-dev
-#        - autogen
-#        - automake
-#        - autopoint
-#        - bison
-#        - gperf
-#        - libgmp-dev
-#        - libopts25-dev
-#        - libp11-kit-dev
-#        - libtasn1-6-dev
-#        - nettle-dev
-#      curl_env:
-#        CC: gcc-8
-#        CXX: g++-8
-#        T: novalgrind
-#        NGTCP2: "yes"
-#        GNUTLS: "yes"
-#        C: >-
-#          PKG_CONFIG_PATH={{ ansible_user_dir }}/ngbuild 
-#          --with-gnutls={{ ansible_user_dir }}/ngbuild
-#          --with-ngtcp2={{ ansible_user_dir }}/ngbuild
-#          --with-nghttp3={{ ansible_user_dir }}/ngbuild
-#        NOTESTS:
+- job:
+    name: curl-novalgrind-ngtcp2-gnutls
+    parent: curl-base
+    vars:
+      curl_apt_packages:
+        - libpsl-dev
+        - libbrotli-dev
+        - libzstd-dev
+        - autogen
+        - automake
+        - autopoint
+        - bison
+        - gperf
+        - libgmp-dev
+        - libopts25-dev
+        - libp11-kit-dev
+        - libtasn1-6-dev
+        - nettle-dev
+      curl_env:
+        CC: gcc-8
+        CXX: g++-8
+        T: novalgrind
+        NGTCP2: "yes"
+        GNUTLS: "yes"
+        C: >-
+          PKG_CONFIG_PATH={{ ansible_user_dir }}/ngbuild 
+          --with-gnutls={{ ansible_user_dir }}/ngbuild
+          --with-ngtcp2={{ ansible_user_dir }}/ngbuild
+          --with-nghttp3={{ ansible_user_dir }}/ngbuild
+        NOTESTS:
 
 - job:
     name: curl-debug-clang-disable-alt-svc-with-openssl
