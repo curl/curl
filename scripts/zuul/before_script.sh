@@ -37,7 +37,6 @@ if [ "$NGTCP2" = yes ]; then
     cd $HOME
     git clone --depth 1 https://gitlab.com/gnutls/gnutls.git pgtls
     cd pgtls
-    sudo apt update; sudo install -y gtk-doc-tools
     git submodule update --init
     ./bootstrap
     ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --with-included-libtasn1 --with-included-unistring --disable-guile --disable-doc --prefix=$HOME/ngbuild
