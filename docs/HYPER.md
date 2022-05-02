@@ -33,7 +33,7 @@ Build curl to use hyper's C API:
 
      % git clone https://github.com/curl/curl
      % cd curl
-     % ./buildconf
+     % autoreconf -fi
      % ./configure --with-hyper=<hyper dir>
      % make
 
