@@ -197,3 +197,18 @@ considered security vulnerabilities. The WHATWG URL Specification and RFC
 interoperable](https://github.com/bagder/docs/blob/master/URL-interop.md).
 
 Obvious parser bugs can still be vulnerabilities of course.
+
+## Visible command line arguments
+
+The curl command blanks the contents of a number of command line arguments to
+prevent them from appearing in process listings. It does not blank all
+arguments even if some of them that are not blanked might contain sensitive
+data. We consider this functionality a best-effort and omissions are not
+security vulnerabilities.
+
+ - not all systems allow the arguments to be blanked in the first place
+ - since curl blanks the argument itself they will be readable for a short
+   moment in time no matter what
+ - virtually every argument can contain sensitive data, depending on use
+ - blanking all arguments would make it impractical for users to differentiate
+   curl command lines in process listings
