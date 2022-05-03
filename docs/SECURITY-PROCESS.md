@@ -188,3 +188,12 @@ already do much worse harm and the problem is not really in curl.
 Vulnerabilities in features which are off by default (in the build) and
 documented as experimental, are not eligible for a reward and we do not
 consider them security problems.
+
+## URL inconsistencies
+
+URL parser inconsistencies between browsers and curl are expected and are not
+considered security vulnerabilities. The WHATWG URL Specification and RFC
+3986+ (the plus meaning that it is an extended version) [are not completely
+interoperable](https://github.com/bagder/docs/blob/master/URL-interop.md).
+
+Obvious parser bugs can still be vulnerabilities of course.
