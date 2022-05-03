@@ -28,7 +28,11 @@
 #include <nghttp3/nghttp3.h>
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
+#ifdef OPENSSL_IS_BORINGSSL
+#include <ngtcp2/ngtcp2_crypto_boringssl.h>
+#else
 #include <ngtcp2/ngtcp2_crypto_openssl.h>
+#endif
 #include "vtls/openssl.h"
 #elif defined(USE_GNUTLS)
 #include <ngtcp2/ngtcp2_crypto_gnutls.h>
@@ -207,6 +211,58 @@ static int write_client_handshake(struct quicsocket *qs,
 }
 
 #ifdef USE_OPENSSL
+#ifdef OPENSSL_IS_BORINGSSL
+static int quic_set_read_secret(SSL *ssl,
+                         enum ssl_encryption_level_t ssl_level,
+                         const SSL_CIPHER *cipher UNUSED_PARAM,
+                         const uint8_t *secret,
+                         size_t secretlen)
+{
+  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_boringssl_from_ssl_encryption_level(ssl_level);
+
+  if(ngtcp2_crypto_derive_and_install_rx_key(
+       qs->qconn, NULL, NULL, NULL, level, secret, secretlen) != 0)
+    return 0;
+
+  if(level == NGTCP2_CRYPTO_LEVEL_APPLICATION) {
+    if(init_ngh3_conn(qs) != CURLE_OK)
+      return 0;
+  }
+
+  return 1;
+}
+
+static int quic_set_write_secret(SSL *ssl,
+                     enum ssl_encryption_level_t ssl_level,
+                     const SSL_CIPHER *cipher UNUSED_PARAM,
+                     const uint8_t *secret,
+                     size_t secretlen)
+{
+  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_boringssl_from_ssl_encryption_level(ssl_level);
+
+  if(ngtcp2_crypto_derive_and_install_tx_key(
+       qs->qconn, NULL, NULL, NULL, level, secret, secretlen) != 0)
+    return 0;
+
+  return 1;
+}
+
+static int quic_add_handshake_data(SSL *ssl,
+                                   enum ssl_encryption_level_t ssl_level,
+                                   const uint8_t *data,
+                                   size_t len)
+{
+  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_boringssl_from_ssl_encryption_level(ssl_level);
+
+  return write_client_handshake(qs, level, data, len);
+}
+#else
 static int quic_set_encryption_secrets(SSL *ssl,
                                        OSSL_ENCRYPTION_LEVEL ossl_level,
                                        const uint8_t *rx_secret,
@@ -214,7 +270,8 @@ static int quic_set_encryption_secrets(SSL *ssl,
                                        size_t secretlen)
 {
   struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  int level = ngtcp2_crypto_openssl_from_ossl_encryption_level(ossl_level);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_openssl_from_ossl_encryption_level(ossl_level);
 
   if(ngtcp2_crypto_derive_and_install_rx_key(
        qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
@@ -241,6 +298,7 @@ static int quic_add_handshake_data(SSL *ssl, OSSL_ENCRYPTION_LEVEL ossl_level,
 
   return write_client_handshake(qs, level, data, len);
 }
+#endif
 
 static int quic_flush_flight(SSL *ssl)
 {
@@ -258,7 +316,13 @@ static int quic_send_alert(SSL *ssl, enum ssl_encryption_level_t level,
   return 1;
 }
 
-static SSL_QUIC_METHOD quic_method = {quic_set_encryption_secrets,
+static SSL_QUIC_METHOD quic_method = {
+#ifdef OPENSSL_IS_BORINGSSL
+                                      quic_set_read_secret,
+                                      quic_set_write_secret,
+#else
+                                      quic_set_encryption_secrets,
+#endif
                                       quic_add_handshake_data,
                                       quic_flush_flight, quic_send_alert};
 
@@ -272,6 +336,12 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 
   SSL_CTX_set_default_verify_paths(ssl_ctx);
 
+#ifdef OPENSSL_IS_BORINGSSL
+  if(SSL_CTX_set1_curves_list(ssl_ctx, QUIC_GROUPS) != 1) {
+    failf(data, "SSL_CTX_set1_curves_list failed");
+    return NULL;
+  }
+#else
   if(SSL_CTX_set_ciphersuites(ssl_ctx, QUIC_CIPHERS) != 1) {
     char error_buffer[256];
     ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
@@ -283,6 +353,7 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
     failf(data, "SSL_CTX_set1_groups_list failed");
     return NULL;
   }
+#endif
 
   SSL_CTX_set_quic_method(ssl_ctx, &quic_method);
 
