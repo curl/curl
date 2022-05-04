@@ -59,8 +59,8 @@ A set \fICURLOPT_OPENSOCKETFUNCTION(3)\fP callback is not inherited.
 Even when DoH is set to be used with this option, there are still some name
 resolves that are performed without it, using the default name resolver
 mechanism. This includes name resolves done for \fICURLOPT_INTERFACE(3)\fP,
-\fICURLOPT_FTPPORT(3)\fP, \fICURLPROXY_SOCKS4(3)\fP, \fICURLPROXY_SOCKS5(3)\fP
-and probably some more.
+\fICURLOPT_FTPPORT(3)\fP, a proxy type set to \fBCURLPROXY_SOCKS4\fP or
+\fBCURLPROXY_SOCKS5\fP and probably some more.
 .SH DEFAULT
 NULL - there is no default DoH URL. If this option is not set, libcurl will use
 the default name resolver.
