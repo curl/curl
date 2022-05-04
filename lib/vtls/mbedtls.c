@@ -305,6 +305,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
     failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
           -ret, errorbuf);
+    return CURLE_FAILED_INIT;
   }
 #else
   mbedtls_entropy_init(&backend->entropy);
@@ -316,6 +317,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
     failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
           -ret, errorbuf);
+    return CURLE_FAILED_INIT;
   }
 #endif /* THREADING_SUPPORT */
 
