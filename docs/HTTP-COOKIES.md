@@ -115,6 +115,11 @@
   details set, or pass in a line from a Netscape cookie file. This option can
   also be used to flush the cookies etc.
 
+  `CURLOPT_COOKIESESSION`
+
+  Tell libcurl to ignore all cookies it is about to load that are session
+  cookies.
+
   `CURLINFO_COOKIELIST`
 
   Extract cookie information from the internal cookie storage as a linked
