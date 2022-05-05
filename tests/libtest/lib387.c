@@ -50,7 +50,7 @@ int test(char *URL)
   res = curl_easy_perform(curl);
   if(res == CURLE_OK) {
     res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-    if(!res == CURLE_OK) {
+    if(res == CURLE_OK) {
       iter = cookies;
       numcookies = 0;
       while(iter) {
