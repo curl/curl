@@ -303,7 +303,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                               &ts_entropy, NULL, 0);
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
+    failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
           -ret, errorbuf);
     return CURLE_FAILED_INIT;
   }
@@ -315,7 +315,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                               &backend->entropy, NULL, 0);
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
+    failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
           -ret, errorbuf);
     return CURLE_FAILED_INIT;
   }
@@ -1017,7 +1017,7 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
 
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "Failed - mbedTLS: ctr_drbg_seed returned (-0x%04X) %s",
+    failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
           -ret, errorbuf);
   }
   else {
@@ -1025,7 +1025,7 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
+      failf(data, "mbedtls_ctr_drbg_random returned (-0x%04X) %s",
             -ret, errorbuf);
     }
   }
