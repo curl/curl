@@ -168,7 +168,7 @@
     make test-torture
 
   The graphical tool ggcov can be used to browse the source and create
-  coverage reports on *NIX hosts:
+  coverage reports on \*nix hosts:
 
     ggcov -r lib src
 
