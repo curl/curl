@@ -377,8 +377,10 @@
 
 1.25 Expose tried IP addresses that failed
 
- When libcurl fails to connect to a host, it should be able to offer the
- application the list of IP addresses that were used in the attempt.
+ When libcurl fails to connect to a host, it could offer the application the
+ addresses that were used in the attempt. Source + dest IP, source + dest port
+ and protocol (UDP or TCP) for each failure. Possibly as a callback. Perhaps
+ also provide "reason".
 
  https://github.com/curl/curl/issues/2126
 
