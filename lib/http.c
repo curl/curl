@@ -3562,12 +3562,20 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
       !strcmp(host, "127.0.0.1") ||
       !strcmp(host, "[::1]") ? TRUE : FALSE;
 
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
-                    CURL_LOCK_ACCESS_SINGLE);
-    Curl_cookie_add(data, data->cookies, TRUE, FALSE,
-                    headp + strlen("Set-Cookie:"), host,
-                    data->state.up.path, secure_context);
-    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+    /*
+     * Add the cookie to the internal cookie storage if the user allows
+     * cookies from informational HTTP or if the current code is 200 or
+     * higher.
+     */
+    if((k->httpcode < 200 && data->set.cookieinformational == 1)
+       || k->httpcode >= 200) {
+      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
+                      CURL_LOCK_ACCESS_SINGLE);
+      Curl_cookie_add(data, data->cookies, TRUE, FALSE,
+                      headp + strlen("Set-Cookie:"), host,
+                      data->state.up.path, secure_context);
+      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+    }
   }
 #endif
   else if(!k->http_bodyless && checkprefix("Last-Modified:", headp) &&

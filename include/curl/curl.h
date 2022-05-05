@@ -2122,6 +2122,9 @@ typedef enum {
   /* Set MIME option flags. */
   CURLOPT(CURLOPT_MIME_OPTIONS, CURLOPTTYPE_LONG, 315),
 
+  /* Allow cookies from 100-informational responses */
+  CURLOPT(CURLOPT_COOKIEINFORMATIONAL, CURLOPTTYPE_LONG, 316),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

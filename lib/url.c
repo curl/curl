@@ -619,6 +619,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->maxage_conn = 118;
   set->maxlifetime_conn = 0;
   set->http09_allowed = FALSE;
+  set->cookieinformational = TRUE;
   set->httpwant =
 #ifdef USE_HTTP2
     CURL_HTTP_VERSION_2TLS

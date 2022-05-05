@@ -1800,6 +1800,7 @@ struct UserDefined {
   BIT(tftp_no_options); /* do not send TFTP options requests */
   BIT(sep_headers);     /* handle host and proxy headers separately */
   BIT(cookiesession);   /* new cookie session? */
+  BIT(cookieinformational); /* allow cookies from 100-informational */
   BIT(crlf);            /* convert crlf on ftp upload(?) */
   BIT(strip_path_slash); /* strip off initial slash from path */
   BIT(ssh_compression);            /* enable SSH compression */

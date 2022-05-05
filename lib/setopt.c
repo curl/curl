@@ -805,6 +805,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.cookiesession = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 
+  case CURLOPT_COOKIEINFORMATIONAL:
+    data->set.cookieinformational = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
   case CURLOPT_COOKIELIST:
     argptr = va_arg(param, char *);
 

@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+cookies
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 103 Early Hints
+Link: </stylesheet.css>; rel=preload; as=style
+Set-Cookie: cookie=yummy; path=/;
+
+HTTP/1.1 200 Mooo swsclose
+Connection: close
+Content-Length: 8
+
+biscuit
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+ <name>
+Disallow cookie from 100-level headers
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
+

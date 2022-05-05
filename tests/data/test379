@@ -1,0 +1,54 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+cookies
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 103 Early Hints
+Link: </stylesheet.css>; rel=preload; as=style
+Set-Cookie: cookie=yummy; path=/;
+
+HTTP/1.1 200 Mooo swsclose
+Connection: close
+Set-Cookie: thewinneris=nowayyouwin; path=/;
+Content-Length: 8
+
+biscuit
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Get cookies set by 100-level and 200-level headers
+ </name>
+ <command>
+"http://%HOSTIP:%HTTPPORT/want/{%TESTNUMBER,%TESTNUMBER}" -b none
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Cookie: thewinneris=nowayyouwin; cookie=yummy
+
+</protocol>
+</verify>
+</testcase>

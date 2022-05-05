@@ -135,6 +135,7 @@ man_MANS =                                      \
   CURLOPT_COOKIEJAR.3                           \
   CURLOPT_COOKIELIST.3                          \
   CURLOPT_COOKIESESSION.3                       \
+  CURLOPT_COOKIEINFORMATIONAL.3                 \
   CURLOPT_COPYPOSTFIELDS.3                      \
   CURLOPT_CRLF.3                                \
   CURLOPT_CRLFILE.3                             \

@@ -37,6 +37,7 @@ SUPPORTFILES = ../../lib/timediff.c ../../lib/timediff.h first.c test.h
 # These are all libcurl test programs
 noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  chkdecimalpoint libprereq                                               \
+ lib387                                                                  \
  lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509   \
  lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519   \
  lib520 lib521 lib523 lib524 lib525 lib526 lib527 lib529 lib530 lib532   \
@@ -85,6 +86,9 @@ libauthretry_CPPFLAGS = $(AM_CPPFLAGS)
 libprereq_SOURCES = libprereq.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libprereq_LDADD = $(TESTUTIL_LIBS)
 libprereq_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib387_SOURCES = lib387.c $(SUPPORTFILES)
+lib387_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib500_SOURCES = lib500.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(MULTIBYTE)
 lib500_LDADD = $(TESTUTIL_LIBS)
