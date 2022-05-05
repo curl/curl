@@ -282,9 +282,9 @@ ca-bundle: scripts/mk-ca-bundle.pl
 	@echo "generating a fresh ca-bundle.crt"
 	@perl $< -b -l -u lib/ca-bundle.crt
 
-ca-firefox: lib/firefox-db2pem.sh
+ca-firefox: scripts/firefox-db2pem.sh
 	@echo "generating a fresh ca-bundle.crt"
-	./lib/firefox-db2pem.sh lib/ca-bundle.crt
+	$< lib/ca-bundle.crt
 
 checksrc:
 	(cd lib && $(MAKE) checksrc)
