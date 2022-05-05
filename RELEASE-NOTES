@@ -4,7 +4,7 @@ curl and libcurl 7.83.1
  Command line options:         247
  curl_easy_setopt() options:   295
  Public functions in libcurl:  88
- Contributors:                 2628
+ Contributors:                 2631
 
 This release includes the following changes:
 
@@ -12,19 +12,30 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o cirrus: Update to FreeBSD 12.3 [24]
+ o cirrus: Use pip for Python packages on FreeBSD [23]
  o conn: fix typo 'connnection' -> 'connection' in two function names [1]
  o curl: free resource in error path [3]
  o curl: guard against size_t wraparound in no-clobber code [4]
+ o CURLOPT_DOH_URL.3: mention the known bug [19]
+ o CURLOPT_HSTS*FUNCTION.3: document the involved structs as well [20]
+ o CURLOPT_SSH_AUTH_TYPES.3: fix the default [18]
  o data/test376: set a proper name
  o GHA/mbedtls: enabled nghttp2 in the build [11]
  o gha: build msh3 [5]
+ o gskit: fixed bogus setsockopt calls [17]
  o gskit: remove unused function set_callback [2]
  o http: move Curl_allow_auth_to_host() [9]
+ o mbedtls: bail out if rng init fails [14]
  o mbedtls: fix compile when h2-enabled [12]
+ o misc: use "autoreconf -fi" instead buildconf [22]
  o msh3: get msh3 version from MsH3Version [6]
  o msh3: print boolean value as text representation [10]
  o msh3: psss remote_port to MsH3ConnectionOpen [7]
  o openssl: define HAVE_SSL_CTX_SET_EC_CURVES for libressl [8]
+ o test{898,974,976}: add 'HTTP proxy' keywords [16]
+ o urlapi: address (harmless) UndefinedBehavior sanitizer warning [15]
+ o x509asn1: make do_pubkey handle EC public keys [13]
 
 This release includes the following known bugs:
 
@@ -33,10 +44,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Rosenfield, Christian Weisgerber, Daniel Gustafsson, Daniel Stenberg,
+  Adam Rosenfield, Axel Chong, Christian Weisgerber, Daniel Gustafsson,
+  Daniel Stenberg, Fabian Keil, Florian Kohnhäuser, Harry Sintonen,
   LigH-de on github, Michael Olbrich, Nick Banks, Patrick Monnerat,
-  Yusuke Nakamura
-  (9 contributors)
+  pheiduck on github, Philip H, Sergey Markelov, Yusuke Nakamura
+  (16 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -52,3 +64,14 @@ References to bug reports and discussions on issues:
  [10] = https://curl.se/bug/?i=8763
  [11] = https://curl.se/bug/?i=8767
  [12] = https://curl.se/bug/?i=8766
+ [13] = https://curl.se/bug/?i=8757
+ [14] = https://curl.se/bug/?i=8796
+ [15] = https://curl.se/bug/?i=8797
+ [16] = https://curl.se/bug/?i=8791
+ [17] = https://curl.se/bug/?i=8793
+ [18] = https://curl.se/bug/?i=8792
+ [19] = https://curl.se/bug/?i=8790
+ [20] = https://curl.se/bug/?i=8788
+ [22] = https://curl.se/bug/?i=8777
+ [23] = https://curl.se/bug/?i=8783
+ [24] = https://curl.se/bug/?i=8783
