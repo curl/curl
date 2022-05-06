@@ -967,6 +967,13 @@ static CURLcode CONNECT(struct Curl_easy *data,
       break;
     }
 
+    if(conn->bits.close && data->req.newurl) {
+      /* Connection closed by server. Don't use it anymore */
+      Curl_closesocket(data, conn, conn->sock[sockindex]);
+      conn->sock[sockindex] = CURL_SOCKET_BAD;
+      break;
+    }
+
     /* If we are supposed to continue and request a new URL, which basically
      * means the HTTP authentication is still going on so if the tunnel
      * is complete we start over in INIT state */
