@@ -2045,8 +2045,9 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
     err = SSLSetPeerDomainName(backend->ssl_ctx, snihost, snilen);
 
     if(err != noErr) {
-      infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d",
+      failf(data, "SSL: SSLSetPeerDomainName() failed: OSStatus %d",
             err);
+      return CURLE_SSL_CONNECT_ERROR;
     }
 
     if((Curl_inet_pton(AF_INET, hostname, &addr))
