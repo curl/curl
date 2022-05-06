@@ -158,8 +158,9 @@ problems may have been fixed or changed somewhat since this was written.
 
  18. HTTP/3
  18.1 If the HTTP/3 server closes connection during upload curl hangs
- 18.3 configure --with-ca-fallback is not supported by h3
  18.2 Transfer closed with n bytes remaining to read
+ 18.3 configure --with-ca-fallback is not supported by h3
+ 18.4 timeout when reusing a http3 connection
  18.9 connection migration does not work
 
 ==============================================================================
@@ -1128,6 +1129,13 @@ problems may have been fixed or changed somewhat since this was written.
 18.3 configure --with-ca-fallback is not supported by h3
 
  https://github.com/curl/curl/issues/8696
+
+18.4 timeout when reusing a http3 connection
+
+ HTTP/3 with quiche seems to not work and always timeout a subsequent transfer
+ that reuses an already established connection
+
+ https://github.com/curl/curl/issues/8764
 
 18.9 connection migration does not work
 
