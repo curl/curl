@@ -439,6 +439,13 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     reasonp = hyper_response_reason_phrase(resp);
     reason_len = hyper_response_reason_phrase_len(resp);
 
+    if(http_status == 417 && data->state.expect100header) {
+      infof(data, "Got 417 while waiting for a 100");
+      data->state.disableexpect = TRUE;
+      data->req.newurl = strdup(data->state.url);
+      Curl_done_sending(data, k);
+    }
+
     result = status_line(data, conn,
                          http_status, http_version, reasonp, reason_len);
     if(result)
@@ -949,6 +956,11 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       failf(data, "error setting HTTP version");
       result = CURLE_OUT_OF_MEMORY;
       goto error;
+    }
+  }
+  else {
+    if(!h2 && !data->state.disableexpect) {
+      data->state.expect100header = TRUE;
     }
   }
 
