@@ -264,6 +264,7 @@ static SSL_QUIC_METHOD quic_method = {quic_set_encryption_secrets,
 
 static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 {
+  struct connectdata *conn = data->conn;
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
 
   SSL_CTX_set_min_proto_version(ssl_ctx, TLS1_3_VERSION);
@@ -291,12 +292,11 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
     SSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
   }
 
-  {
-    struct connectdata *conn = data->conn;
+  if(conn->ssl_config.verifypeer) {
     const char * const ssl_cafile = conn->ssl_config.CAfile;
     const char * const ssl_capath = conn->ssl_config.CApath;
 
-    if(conn->ssl_config.verifypeer) {
+    if(ssl_cafile || ssl_capath) {
       SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
       /* tell OpenSSL where to find CA certificates that are used to verify
          the server's certificate. */
@@ -311,6 +311,13 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
       infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
       infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
     }
+#ifdef CURL_CA_FALLBACK
+    else {
+      /* verifying the peer without any CA certificates won't work so
+         use openssl's built-in default as fallback */
+      SSL_CTX_set_default_verify_paths(ssl_ctx);
+    }
+#endif
   }
   return ssl_ctx;
 }
