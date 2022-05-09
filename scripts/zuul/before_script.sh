@@ -39,7 +39,8 @@ if [ "$NGTCP2" = yes ]; then
     cd pgtls
     ./bootstrap
     ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --with-included-libtasn1 --with-included-unistring --disable-guile --disable-doc --prefix=$HOME/ngbuild
-    make
+    ls -l /usr/include/zstd.h
+    make V=1
     make install
   else
     cd $HOME
