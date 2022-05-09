@@ -279,7 +279,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
   char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
   const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
-  const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
+  const char * const ssl_crlfile = SSL_SET_OPTION(primary.CRLfile);
   const char * const hostname = SSL_HOST_NAME();
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   const long int port = SSL_HOST_PORT();
