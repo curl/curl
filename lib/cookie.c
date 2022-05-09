@@ -427,7 +427,15 @@ static void remove_expired(struct CookieInfo *cookies)
 /* Make sure domain contains a dot or is localhost. */
 static bool bad_domain(const char *domain)
 {
-  return !strchr(domain, '.') && !strcasecompare(domain, "localhost");
+  if(strcasecompare(domain, "localhost"))
+    return FALSE;
+  else {
+    /* there must be a dot present, but that dot must not be a trailing dot */
+    char *dot = strchr(domain, '.');
+    if(dot)
+      return dot[1] ? FALSE : TRUE;
+  }
+  return TRUE;
 }
 
 /*
