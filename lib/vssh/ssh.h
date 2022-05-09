@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -131,8 +131,8 @@ struct ssh_conn {
 
   /* common */
   const char *passphrase;     /* pass-phrase to use */
-  char *rsa_pub;              /* path name */
-  char *rsa;                  /* path name */
+  char *rsa_pub;              /* strdup'ed public key file */
+  char *rsa;                  /* strdup'ed private key file */
   bool authed;                /* the connection has been authenticated fine */
   bool acceptfail;            /* used by the SFTP_QUOTE (continue if
                                  quote command fails) */

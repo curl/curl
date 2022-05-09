@@ -1100,6 +1100,12 @@ static void prune_dead_connections(struct Curl_easy *data)
   }
 }
 
+static bool ssh_config_matches(struct connectdata *one,
+                               struct connectdata *two)
+{
+  return (Curl_safecmp(one->proto.sshc.rsa, two->proto.sshc.rsa) &&
+          Curl_safecmp(one->proto.sshc.rsa_pub, two->proto.sshc.rsa_pub));
+}
 /*
  * Given one filled in connection struct (named needle), this function should
  * detect if there already is one that has all the significant details
@@ -1355,6 +1361,11 @@ ConnectionExists(struct Curl_easy *data,
          (check->httpversion >= 20) &&
          (data->state.httpwant < CURL_HTTP_VERSION_2_0))
         continue;
+
+      if(get_protocol_family(needle->handler) == PROTO_FAMILY_SSH) {
+        if(!ssh_config_matches(needle, check))
+          continue;
+      }
 
       if((needle->handler->flags&PROTOPT_SSL)
 #ifndef CURL_DISABLE_PROXY
