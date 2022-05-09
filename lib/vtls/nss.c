@@ -983,6 +983,9 @@ static void display_cert_info(struct Curl_easy *data,
   PR_Free(common_name);
 }
 
+/* A number of certs that will never occur in a real server handshake */
+#define TOO_MANY_CERTS 300
+
 static CURLcode display_conn_info(struct Curl_easy *data, PRFileDesc *sock)
 {
   CURLcode result = CURLE_OK;
@@ -1018,6 +1021,11 @@ static CURLcode display_conn_info(struct Curl_easy *data, PRFileDesc *sock)
         cert2 = CERT_FindCertIssuer(cert, now, certUsageSSLCA);
         while(cert2) {
           i++;
+          if(i >= TOO_MANY_CERTS) {
+            CERT_DestroyCertificate(cert2);
+            failf(data, "certificate loop");
+            return CURLE_SSL_CERTPROBLEM;
+          }
           if(cert2->isRoot) {
             CERT_DestroyCertificate(cert2);
             break;
