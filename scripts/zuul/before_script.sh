@@ -38,7 +38,7 @@ if [ "$NGTCP2" = yes ]; then
     git clone --depth 1 -b 3.7.4 https://gitlab.com/gnutls/gnutls.git pgtls
     cd pgtls
     ./bootstrap
-    ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --with-included-libtasn1 --with-included-unistring --disable-guile --disable-doc --without-zstd --prefix=$HOME/ngbuild
+    ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --with-included-libtasn1 --with-included-unistring --disable-guile --disable-doc --without-zstd --disable-psk-authentication --prefix=$HOME/ngbuild
     make
     make install
   else
