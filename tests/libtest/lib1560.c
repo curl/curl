@@ -374,6 +374,13 @@ static const struct testcase get_parts_list[] ={
 
 static const struct urltestcase get_url_list[] = {
   /* percent encoded host names */
+  {"http://example.com%40127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://example.com%21127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://example.com%3f127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://example.com%23127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://example.com%3a127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://example.com%09127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://example.com%2F127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://%this", "https://%25this/", 0, 0, CURLUE_OK},
   {"https://h%c", "https://h%25c/", 0, 0, CURLUE_OK},
   {"https://%%%%%%", "https://%25%25%25%25%25%25/", 0, 0, CURLUE_OK},
