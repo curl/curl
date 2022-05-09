@@ -2662,7 +2662,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 #endif
   const long int ssl_version = SSL_CONN_CONFIG(version);
 #ifdef USE_OPENSSL_SRP
-  const enum CURL_TLSAUTH ssl_authtype = SSL_SET_OPTION(authtype);
+  const enum CURL_TLSAUTH ssl_authtype = SSL_SET_OPTION(primary.authtype);
 #endif
   char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
   const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
@@ -2673,7 +2673,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     (ca_info_blob ? NULL : SSL_CONN_CONFIG(CAfile));
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
-  const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
+  const char * const ssl_crlfile = SSL_SET_OPTION(primary.CRLfile);
   char error_buffer[256];
   struct ssl_backend_data *backend = connssl->backend;
   bool imported_native_ca = false;
@@ -2925,15 +2925,15 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 #ifdef USE_OPENSSL_SRP
   if((ssl_authtype == CURL_TLSAUTH_SRP) &&
      Curl_allow_auth_to_host(data)) {
-    char * const ssl_username = SSL_SET_OPTION(username);
-
+    char * const ssl_username = SSL_SET_OPTION(primary.username);
+    char * const ssl_password = SSL_SET_OPTION(primary.password);
     infof(data, "Using TLS-SRP username: %s", ssl_username);
 
     if(!SSL_CTX_set_srp_username(backend->ctx, ssl_username)) {
       failf(data, "Unable to set SRP user name");
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    if(!SSL_CTX_set_srp_password(backend->ctx, SSL_SET_OPTION(password))) {
+    if(!SSL_CTX_set_srp_password(backend->ctx, ssl_password)) {
       failf(data, "failed setting SRP password");
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }

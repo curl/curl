@@ -132,6 +132,7 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
 {
   if((data->version == needle->version) &&
      (data->version_max == needle->version_max) &&
+     (data->ssl_options == needle->ssl_options) &&
      (data->verifypeer == needle->verifypeer) &&
      (data->verifyhost == needle->verifyhost) &&
      (data->verifystatus == needle->verifystatus) &&
@@ -144,9 +145,15 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      Curl_safecmp(data->clientcert, needle->clientcert) &&
      Curl_safecmp(data->random_file, needle->random_file) &&
      Curl_safecmp(data->egdsocket, needle->egdsocket) &&
+#ifdef USE_TLS_SRP
+     Curl_safecmp(data->username, needle->username) &&
+     Curl_safecmp(data->password, needle->password) &&
+     (data->authtype == needle->authtype) &&
+#endif
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list) &&
      Curl_safe_strcasecompare(data->cipher_list13, needle->cipher_list13) &&
      Curl_safe_strcasecompare(data->curves, needle->curves) &&
+     Curl_safe_strcasecompare(data->CRLfile, needle->CRLfile) &&
      Curl_safe_strcasecompare(data->pinned_key, needle->pinned_key))
     return TRUE;
 
@@ -163,6 +170,10 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   dest->verifyhost = source->verifyhost;
   dest->verifystatus = source->verifystatus;
   dest->sessionid = source->sessionid;
+  dest->ssl_options = source->ssl_options;
+#ifdef USE_TLS_SRP
+  dest->authtype = source->authtype;
+#endif
 
   CLONE_BLOB(cert_blob);
   CLONE_BLOB(ca_info_blob);
@@ -177,6 +188,11 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_STRING(cipher_list13);
   CLONE_STRING(pinned_key);
   CLONE_STRING(curves);
+  CLONE_STRING(CRLfile);
+#ifdef USE_TLS_SRP
+  CLONE_STRING(username);
+  CLONE_STRING(password);
+#endif
 
   return TRUE;
 }
@@ -196,6 +212,11 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->ca_info_blob);
   Curl_safefree(sslc->issuercert_blob);
   Curl_safefree(sslc->curves);
+  Curl_safefree(sslc->CRLfile);
+#ifdef USE_TLS_SRP
+  Curl_safefree(sslc->username);
+  Curl_safefree(sslc->password);
+#endif
 }
 
 #ifdef USE_SSL
