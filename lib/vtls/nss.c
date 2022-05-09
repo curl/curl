@@ -2035,13 +2035,13 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
     }
   }
 
-  if(SSL_SET_OPTION(CRLfile)) {
-    const CURLcode rv = nss_load_crl(SSL_SET_OPTION(CRLfile));
+  if(SSL_SET_OPTION(primary.CRLfile)) {
+    const CURLcode rv = nss_load_crl(SSL_SET_OPTION(primary.CRLfile));
     if(rv) {
       result = rv;
       goto error;
     }
-    infof(data, "  CRLfile: %s", SSL_SET_OPTION(CRLfile));
+    infof(data, "  CRLfile: %s", SSL_SET_OPTION(primary.CRLfile));
   }
 
   if(SSL_SET_OPTION(primary.clientcert)) {

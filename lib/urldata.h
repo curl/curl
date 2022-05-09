@@ -253,10 +253,17 @@ struct ssl_primary_config {
   char *cipher_list;     /* list of ciphers to use */
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
   char *pinned_key;
+  char *CRLfile;         /* CRL to check certificate revocation */
   struct curl_blob *cert_blob;
   struct curl_blob *ca_info_blob;
   struct curl_blob *issuercert_blob;
+#ifdef USE_TLS_SRP
+  char *username; /* TLS username (for, e.g., SRP) */
+  char *password; /* TLS password (for, e.g., SRP) */
+  enum CURL_TLSAUTH authtype; /* TLS authentication type (default SRP) */
+#endif
   char *curves;          /* list of curves to use */
+  unsigned char ssl_options;  /* the CURLOPT_SSL_OPTIONS bitmask */
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
   BIT(verifystatus);     /* set TRUE if certificate status must be checked */
@@ -266,7 +273,6 @@ struct ssl_primary_config {
 struct ssl_config_data {
   struct ssl_primary_config primary;
   long certverifyresult; /* result from the certificate verification */
-  char *CRLfile;   /* CRL to check certificate revocation */
   curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
   void *fsslctxp;        /* parameter for call back */
   char *cert_type; /* format for certificate (default: PEM)*/
@@ -274,11 +280,6 @@ struct ssl_config_data {
   struct curl_blob *key_blob;
   char *key_type; /* format for private key (default: PEM) */
   char *key_passwd; /* plain text private key password */
-#ifdef USE_TLS_SRP
-  char *username; /* TLS username (for, e.g., SRP) */
-  char *password; /* TLS password (for, e.g., SRP) */
-  enum CURL_TLSAUTH authtype; /* TLS authentication type (default SRP) */
-#endif
   BIT(certinfo);     /* gather lots of certificate info */
   BIT(falsestart);
   BIT(enable_beast); /* allow this flaw for interoperability's sake*/

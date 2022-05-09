@@ -2294,6 +2294,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_SSL_OPTIONS:
     arg = va_arg(param, long);
+    data->set.ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
     data->set.ssl.enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
     data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     data->set.ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
@@ -2307,6 +2308,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_OPTIONS:
     arg = va_arg(param, long);
+    data->set.proxy_ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
     data->set.proxy_ssl.enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
     data->set.proxy_ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     data->set.proxy_ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
@@ -2745,49 +2747,52 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_TLSAUTH_USERNAME:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME],
                             va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME] && !data->set.ssl.authtype)
-      data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+    if(data->set.str[STRING_TLSAUTH_USERNAME] &&
+       !data->set.ssl.primary.authtype)
+      data->set.ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_USERNAME:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_PROXY],
                             va_arg(param, char *));
     if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
-       !data->set.proxy_ssl.authtype)
-      data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+       !data->set.proxy_ssl.primary.authtype)
+      data->set.proxy_ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default to
+                                                                  SRP */
     break;
 #endif
   case CURLOPT_TLSAUTH_PASSWORD:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD],
                             va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME] && !data->set.ssl.authtype)
-      data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+    if(data->set.str[STRING_TLSAUTH_USERNAME] &&
+       !data->set.ssl.primary.authtype)
+      data->set.ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default */
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_PASSWORD:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY],
                             va_arg(param, char *));
     if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
-       !data->set.proxy_ssl.authtype)
-      data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+       !data->set.proxy_ssl.primary.authtype)
+      data->set.proxy_ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default */
     break;
 #endif
   case CURLOPT_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
     if(!argptr ||
        strncasecompare(argptr, "SRP", strlen("SRP")))
-      data->set.ssl.authtype = CURL_TLSAUTH_SRP;
+      data->set.ssl.primary.authtype = CURL_TLSAUTH_SRP;
     else
-      data->set.ssl.authtype = CURL_TLSAUTH_NONE;
+      data->set.ssl.primary.authtype = CURL_TLSAUTH_NONE;
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
     if(!argptr ||
        strncasecompare(argptr, "SRP", strlen("SRP")))
-      data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP;
+      data->set.proxy_ssl.primary.authtype = CURL_TLSAUTH_SRP;
     else
-      data->set.proxy_ssl.authtype = CURL_TLSAUTH_NONE;
+      data->set.proxy_ssl.primary.authtype = CURL_TLSAUTH_NONE;
     break;
 #endif
 #endif
