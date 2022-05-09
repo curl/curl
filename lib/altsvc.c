@@ -102,12 +102,17 @@ static struct altsvc *altsvc_createid(const char *srchost,
                                       unsigned int dstport)
 {
   struct altsvc *as = calloc(sizeof(struct altsvc), 1);
+  size_t hlen;
   if(!as)
     return NULL;
-
+  hlen = strlen(srchost);
+  DEBUGASSERT(hlen);
   as->src.host = strdup(srchost);
   if(!as->src.host)
     goto error;
+  if(hlen && (srchost[hlen - 1] == '.'))
+    /* strip off trailing any dot */
+    as->src.host[--hlen] = 0;
   as->dst.host = strdup(dsthost);
   if(!as->dst.host)
     goto error;
@@ -398,6 +403,22 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
   return CURLE_OK;
 }
 
+/* hostcompare() returns true if 'host' matches 'check'. The first host
+ * argument may have a trailing dot present that will be ignored.
+ */
+static bool hostcompare(const char *host, const char *check)
+{
+  size_t hlen = strlen(host);
+  size_t clen = strlen(check);
+
+  if(hlen && (host[hlen - 1] == '.'))
+    hlen--;
+  if(hlen != clen)
+    /* they can't match if they have different lengths */
+    return FALSE;
+  return strncasecompare(host, check, hlen);
+}
+
 /* altsvc_flush() removes all alternatives for this source origin from the
    list */
 static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
@@ -410,7 +431,7 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
     n = e->next;
     if((srcalpnid == as->src.alpnid) &&
        (srcport == as->src.port) &&
-       strcasecompare(srchost, as->src.host)) {
+       hostcompare(srchost, as->src.host)) {
       Curl_llist_remove(&asi->list, e, NULL);
       altsvc_free(as);
     }
@@ -635,7 +656,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
       continue;
     }
     if((as->src.alpnid == srcalpnid) &&
-       strcasecompare(as->src.host, srchost) &&
+       hostcompare(srchost, as->src.host) &&
        (as->src.port == srcport) &&
        (versions & as->dst.alpnid)) {
       /* match */
