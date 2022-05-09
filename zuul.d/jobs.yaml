@@ -125,6 +125,7 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+        - zlib1g-dev
         - autogen
         - automake
         - autopoint
