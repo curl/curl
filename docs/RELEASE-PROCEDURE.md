@@ -95,12 +95,12 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- January 5, 2022 (7.81.0)
-- March 2, 2022
-- April 27, 2022
-- June 22, 2022
-- August 17, 2022
-- October 12, 2022
-- December 7, 2022
-- February 1, 2023
-- March 20, 2023 (8.0.0)
+- May 11, 2022 (7.83.1)
+- July 6, 2022
+- August 31, 2022
+- October 25, 2022
+- December 21, 2022
+- February 15, 2023 (last version 7 release, no feature window after)
+- March 20, 2023 (8.0.0 - curl 25 years)
+- April 17, 2023
+- July 12, 2023
