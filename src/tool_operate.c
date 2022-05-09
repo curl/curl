@@ -596,8 +596,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         fprintf(global->errors, "curl: (%d) Failed writing body\n", result);
     }
     if(result && config->rm_partial) {
-      notef(global, "Removing output file: %s", per->outfile);
-      unlink(per->outfile);
+      notef(global, "Removing output file: %s\n", outs->filename);
+      unlink(outs->filename);
     }
   }
 
