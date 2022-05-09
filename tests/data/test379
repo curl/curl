@@ -1,0 +1,71 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Crafted to cause error
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 75
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<file name="log/save">
+exists before command runs
+</file>
+<server>
+http
+</server>
+ <name>
+--remove-on-error with --no-clobber and an added number
+ </name>
+ <command option="no-output">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/save --remove-on-error --no-clobber
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot". hyper doesn't do error 18
+<verify>
+<errorcode>
+%if hyper
+56
+%else
+18
+%endif
+</errorcode>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+# this file should be untouched
+<file name="log/save">
+exists before command runs
+</file>
+# the file should be empty now
+<file2 name="log/save.1">
+</file2>
+</verify>
+</testcase>
