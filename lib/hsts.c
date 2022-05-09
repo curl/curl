@@ -114,16 +114,25 @@ static CURLcode hsts_create(struct hsts *h,
                             curl_off_t expires)
 {
   struct stsentry *sts = hsts_entry();
+  char *duphost;
+  size_t hlen;
   if(!sts)
     return CURLE_OUT_OF_MEMORY;
 
-  sts->expires = expires;
-  sts->includeSubDomains = subdomains;
-  sts->host = strdup(hostname);
-  if(!sts->host) {
+  duphost = strdup(hostname);
+  if(!duphost) {
     free(sts);
     return CURLE_OUT_OF_MEMORY;
   }
+
+  hlen = strlen(duphost);
+  if(duphost[hlen - 1] == '.')
+    /* strip off trailing any dot */
+    duphost[--hlen] = 0;
+
+  sts->host = duphost;
+  sts->expires = expires;
+  sts->includeSubDomains = subdomains;
   Curl_llist_insert_next(&h->list, h->list.tail, sts, &sts->node);
   return CURLE_OK;
 }
@@ -238,10 +247,21 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
                            bool subdomain)
 {
   if(h) {
+    char buffer[MAX_HSTS_HOSTLEN + 1];
     time_t now = time(NULL);
     size_t hlen = strlen(hostname);
     struct Curl_llist_element *e;
     struct Curl_llist_element *n;
+
+    if((hlen > MAX_HSTS_HOSTLEN) || !hlen)
+      return NULL;
+    memcpy(buffer, hostname, hlen);
+    if(hostname[hlen-1] == '.')
+      /* remove the trailing dot */
+      --hlen;
+    buffer[hlen] = 0;
+    hostname = buffer;
+
     for(e = h->list.head; e; e = n) {
       struct stsentry *sts = e->ptr;
       n = e->next;
@@ -440,7 +460,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
     CURLSTScode sc;
     DEBUGASSERT(h);
     do {
-      char buffer[257];
+      char buffer[MAX_HSTS_HOSTLEN + 1];
       struct curl_hstsentry e;
       e.name = buffer;
       e.namelen = sizeof(buffer)-1;
