@@ -137,6 +137,7 @@
         - nettle-dev
         - gtk-doc-tools
         - gnulib
+        - libtasn1-bin
       curl_env:
         CC: gcc-8
         CXX: g++-8
