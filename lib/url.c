@@ -2411,7 +2411,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   int port = -1;
   char *proxyuser = NULL;
   char *proxypasswd = NULL;
-  char *host;
+  char *host = NULL;
   bool sockstype;
   CURLUcode uc;
   struct proxy_info *proxyinfo;
@@ -2548,14 +2548,14 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     goto error;
   }
 #ifdef USE_UNIX_SOCKETS
-  if(sockstype && strcmp(UNIX_SOCKET_PREFIX, host) == 0) {
+  if(sockstype && strcasecompare(UNIX_SOCKET_PREFIX, host)) {
     uc = curl_url_get(uhp, CURLUPART_PATH, &path, CURLU_URLDECODE);
     if(uc) {
       result = CURLE_OUT_OF_MEMORY;
       goto error;
     }
     /* path will be "/", if no path was was found */
-    if(!(path[0]=='/' && path[1]=='\0')) {
+    if(strcmp("/", path)) {
       is_unix_proxy = TRUE;
       free(host);
       host = aprintf(UNIX_SOCKET_PREFIX"%s", path);
@@ -2566,21 +2566,23 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       Curl_safefree(proxyinfo->host.rawalloc);
       proxyinfo->host.rawalloc = host;
       proxyinfo->host.name = host;
+      host = NULL;
     }
   }
 
   if(!is_unix_proxy) {
 #endif
-  Curl_safefree(proxyinfo->host.rawalloc);
-  proxyinfo->host.rawalloc = host;
-  if(host[0] == '[') {
-    /* this is a numerical IPv6, strip off the brackets */
-    size_t len = strlen(host);
-    host[len-1] = 0; /* clear the trailing bracket */
-    host++;
-    zonefrom_url(uhp, data, conn);
-  }
-  proxyinfo->host.name = host;
+    Curl_safefree(proxyinfo->host.rawalloc);
+    proxyinfo->host.rawalloc = host;
+    if(host[0] == '[') {
+      /* this is a numerical IPv6, strip off the brackets */
+      size_t len = strlen(host);
+      host[len-1] = 0; /* clear the trailing bracket */
+      host++;
+      zonefrom_url(uhp, data, conn);
+    }
+    proxyinfo->host.name = host;
+    host = NULL;
 #ifdef USE_UNIX_SOCKETS
   }
 #endif
@@ -2588,6 +2590,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   error:
   free(proxyuser);
   free(proxypasswd);
+  free(host);
   free(scheme);
 #ifdef USE_UNIX_SOCKETS
   free(path);
@@ -3429,8 +3432,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
       unix_path = conn->unix_domain_socket;
 #ifndef CURL_DISABLE_PROXY
     else if(conn->socks_proxy.host.name
-        && strncmp(UNIX_SOCKET_PREFIX"/",
-          conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)) == 0)
+        && !strncmp(UNIX_SOCKET_PREFIX"/",
+          conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
       unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
 #endif
 
