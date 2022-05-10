@@ -125,6 +125,7 @@
         - libpsl-dev
         - libbrotli-dev
         - libzstd-dev
+        - zlib1g-dev
         - autogen
         - automake
         - autopoint
@@ -135,6 +136,9 @@
         - libp11-kit-dev
         - libtasn1-6-dev
         - nettle-dev
+        - gtk-doc-tools
+        - gnulib
+        - libtasn1-bin
       curl_env:
         CC: gcc-8
         CXX: g++-8
