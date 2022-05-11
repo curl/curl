@@ -31,7 +31,7 @@ partial body
 </data1>
 
 <servercmd>
-writedelay: 1
+writedelay: 1000
 </servercmd>
 </reply>
 
