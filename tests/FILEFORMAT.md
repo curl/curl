@@ -315,7 +315,7 @@ about to issue.
   server will NOT wait for the full request body to get sent
 - `idle` - do nothing after receiving the request, just "sit idle"
 - `stream` - continuously send data to the client, never-ending
-- `writedelay: [secs]` delay this amount between reply packets
+- `writedelay: [msecs]` delay this amount between reply packets
 - `skip: [num]` - instructs the server to ignore reading this many bytes from
   a PUT or POST request
 - `rtp: part [num] channel [num] size [num]` - stream a fake RTP packet for
