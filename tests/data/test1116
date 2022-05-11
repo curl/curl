@@ -41,6 +41,9 @@ chunky-trailer: header data
 another-header: yes
 %endif
 </datacheck>
+<servercmd>
+writedelay: 10
+</servercmd>
 </reply>
 
 #
