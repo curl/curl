@@ -89,7 +89,7 @@ static size_t display_gss_error(OM_uint32 status, int type,
   OM_uint32 maj_stat;
   OM_uint32 min_stat;
   OM_uint32 msg_ctx = 0;
-  gss_buffer_desc status_string;
+  gss_buffer_desc status_string = GSS_C_EMPTY_BUFFER;
 
   do {
     maj_stat = gss_display_status(&min_stat,
