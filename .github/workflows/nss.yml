@@ -26,6 +26,7 @@ jobs:
 
     steps:
     - run: |
+        sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 libnss3-dev clang-9 libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
         sudo python3 -m pip install impacket
       name: install prereqs and impacket
