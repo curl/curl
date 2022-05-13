@@ -40,7 +40,7 @@ jobs:
         make && make install_sw
       name: 'build and install openssl3'
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.configure }} && make V=1
       name: 'configure and build'
