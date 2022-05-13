@@ -3530,9 +3530,10 @@ static void reuse_conn(struct Curl_easy *data,
   }
 #endif
 
-  Curl_safefree(conn->host.rawalloc);
   Curl_free_idnconverted_hostname(&conn->host);
   Curl_free_idnconverted_hostname(&conn->conn_to_host);
+  Curl_safefree(conn->host.rawalloc);
+  Curl_safefree(conn->conn_to_host.rawalloc);
   conn->host = old_conn->host;
   old_conn->host.rawalloc = NULL;
   old_conn->host.encalloc = NULL;
