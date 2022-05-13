@@ -3538,6 +3538,7 @@ static void reuse_conn(struct Curl_easy *data,
   old_conn->host.rawalloc = NULL;
   old_conn->host.encalloc = NULL;
   conn->conn_to_host = old_conn->conn_to_host;
+  old_conn->conn_to_host.rawalloc = NULL;
   conn->conn_to_port = old_conn->conn_to_port;
   conn->remote_port = old_conn->remote_port;
   Curl_safefree(conn->hostname_resolve);
