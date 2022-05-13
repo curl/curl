@@ -435,7 +435,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         retry = RETRY_CONNREFUSED;
     }
     else if((CURLE_OK == result) ||
-            (config->failonerror &&
+            ((config->failonerror || config->failwithbody) &&
              (CURLE_HTTP_RETURNED_ERROR == result))) {
       /* If it returned OK. _or_ failonerror was enabled and it
          returned due to such an error, check for HTTP transient
