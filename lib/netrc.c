@@ -235,6 +235,9 @@ int Curl_parsenetrc(const char *host,
   char *filealloc = NULL;
 
   if(!netrcfile) {
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
+    char pwbuf[1024];
+#endif
     char *home = NULL;
     char *homea = curl_getenv("HOME"); /* portable environment reader */
     if(homea) {
@@ -243,7 +246,6 @@ int Curl_parsenetrc(const char *host,
     }
     else {
       struct passwd pw, *pw_res;
-      char pwbuf[1024];
       if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res)
          && pw_res) {
         home = pw.pw_dir;
