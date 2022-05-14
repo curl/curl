@@ -41,7 +41,7 @@ jobs:
         RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib)
       name: 'install hyper'
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
       name: 'configure and build'

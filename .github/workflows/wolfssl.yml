@@ -44,7 +44,7 @@ jobs:
         make && make install
       name: 'install wolfssl'
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.curl-configure }} && make V=1
       name: 'configure and build'

@@ -46,7 +46,7 @@ jobs:
         cmake --install .
       name: 'build and install msh3'
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.configure }} && make V=1
       name: 'configure and build curl'

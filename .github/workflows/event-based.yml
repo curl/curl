@@ -31,7 +31,7 @@ jobs:
         sudo python3 -m pip install impacket
       name: install prereqs and impacket
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: autoreconf -fi && ./configure ${{ matrix.build.configure }} && make V=1
       name: 'configure and build'

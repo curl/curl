@@ -39,7 +39,7 @@ jobs:
         make DESTDIR=$HOME/rustls install
       name: 'install rustls'
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: autoreconf -fi && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
       name: 'configure and build'
