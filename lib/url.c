@@ -3498,17 +3498,6 @@ static void reuse_conn(struct Curl_easy *data,
      **established** from the primary socket to a remote address. */
   char local_ip[MAX_IPADR_LEN] = "";
   int local_port = -1;
-#ifndef CURL_DISABLE_PROXY
-  Curl_free_idnconverted_hostname(&old_conn->http_proxy.host);
-  Curl_free_idnconverted_hostname(&old_conn->socks_proxy.host);
-
-  free(old_conn->http_proxy.host.rawalloc);
-  free(old_conn->socks_proxy.host.rawalloc);
-  Curl_free_primary_ssl_config(&old_conn->proxy_ssl_config);
-#endif
-  /* free the SSL config struct from this connection struct as this was
-     allocated in vain and is targeted for destruction */
-  Curl_free_primary_ssl_config(&old_conn->ssl_config);
 
   /* get the user+password information from the old_conn struct since it may
    * be new for this request even when we re-use an existing connection */
@@ -3539,20 +3528,17 @@ static void reuse_conn(struct Curl_easy *data,
     old_conn->http_proxy.passwd = NULL;
     old_conn->socks_proxy.passwd = NULL;
   }
-  Curl_safefree(old_conn->http_proxy.user);
-  Curl_safefree(old_conn->socks_proxy.user);
-  Curl_safefree(old_conn->http_proxy.passwd);
-  Curl_safefree(old_conn->socks_proxy.passwd);
 #endif
 
-  /* host can change, when doing keepalive with a proxy or if the case is
-     different this time etc */
   Curl_free_idnconverted_hostname(&conn->host);
   Curl_free_idnconverted_hostname(&conn->conn_to_host);
   Curl_safefree(conn->host.rawalloc);
   Curl_safefree(conn->conn_to_host.rawalloc);
   conn->host = old_conn->host;
+  old_conn->host.rawalloc = NULL;
+  old_conn->host.encalloc = NULL;
   conn->conn_to_host = old_conn->conn_to_host;
+  old_conn->conn_to_host.rawalloc = NULL;
   conn->conn_to_port = old_conn->conn_to_port;
   conn->remote_port = old_conn->remote_port;
   Curl_safefree(conn->hostname_resolve);
@@ -3572,15 +3558,7 @@ static void reuse_conn(struct Curl_easy *data,
   /* re-use init */
   conn->bits.reuse = TRUE; /* yes, we're re-using here */
 
-  Curl_safefree(old_conn->user);
-  Curl_safefree(old_conn->passwd);
-  Curl_safefree(old_conn->options);
-  Curl_safefree(old_conn->localdev);
-  Curl_llist_destroy(&old_conn->easyq, NULL);
-
-#ifdef USE_UNIX_SOCKETS
-  Curl_safefree(old_conn->unix_domain_socket);
-#endif
+  conn_free(old_conn);
 }
 
 /**
@@ -3930,10 +3908,6 @@ static CURLcode create_conn(struct Curl_easy *data,
      * allocated before we can move along and use the previously existing one.
      */
     reuse_conn(data, conn, conn_temp);
-#ifdef USE_SSL
-    free(conn->ssl_extra);
-#endif
-    free(conn);          /* we don't need this anymore */
     conn = conn_temp;
     *in_connect = conn;
 
