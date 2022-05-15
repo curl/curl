@@ -423,7 +423,7 @@ static int alert_read_func(gnutls_session_t ssl,
   (void)alert_level;
 
   qs->tls_alert = alert_desc;
-  return 1;
+  return 0;
 }
 
 static int tp_recv_func(gnutls_session_t ssl, const uint8_t *data,
