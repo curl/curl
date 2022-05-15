@@ -448,7 +448,7 @@ static int tp_send_func(gnutls_session_t ssl, gnutls_buffer_t extdata)
   struct quicsocket *qs = gnutls_session_get_ptr(ssl);
   uint8_t paramsbuf[64];
   ngtcp2_transport_params params;
-  ssize_t nwrite;
+  ngtcp2_ssize nwrite;
   int rc;
 
   ngtcp2_conn_get_local_transport_params(qs->qconn, &params);
@@ -571,7 +571,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
                                void *user_data, void *stream_user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
-  ssize_t nconsumed;
+  nghttp3_ssize nconsumed;
   int fin = (flags & NGTCP2_STREAM_DATA_FLAG_FIN) ? 1 : 0;
   (void)offset;
   (void)stream_user_data;
@@ -1368,10 +1368,10 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
-                                  nghttp3_vec *vec, size_t veccnt,
-                                  uint32_t *pflags, void *user_data,
-                                  void *stream_user_data)
+static nghttp3_ssize cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
+                                        nghttp3_vec *vec, size_t veccnt,
+                                        uint32_t *pflags, void *user_data,
+                                        void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
   size_t nread;
@@ -1722,17 +1722,17 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
 {
   int rv;
   ssize_t sent;
-  ssize_t outlen;
+  ngtcp2_ssize outlen;
   uint8_t out[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
   ngtcp2_path_storage ps;
   ngtcp2_tstamp ts = timestamp();
   ngtcp2_tstamp expiry;
   ngtcp2_duration timeout;
   int64_t stream_id;
-  ssize_t veccnt;
+  nghttp3_ssize veccnt;
   int fin;
   nghttp3_vec vec[16];
-  ssize_t ndatalen;
+  ngtcp2_ssize ndatalen;
   uint32_t flags;
 
   rv = ngtcp2_conn_handle_expiry(qs->qconn, ts);
