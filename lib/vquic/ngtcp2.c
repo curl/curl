@@ -502,14 +502,21 @@ static int tp_recv_func(gnutls_session_t ssl, const uint8_t *data,
 {
   struct quicsocket *qs = gnutls_session_get_ptr(ssl);
   ngtcp2_transport_params params;
+  int rv;
 
-  if(ngtcp2_decode_transport_params(
+  rv = ngtcp2_decode_transport_params(
        &params, NGTCP2_TRANSPORT_PARAMS_TYPE_ENCRYPTED_EXTENSIONS,
-       data, data_size) != 0)
+       data, data_size);
+  if(rv) {
+    ngtcp2_conn_set_tls_error(qs->qconn, rv);
     return -1;
+  }
 
-  if(ngtcp2_conn_set_remote_transport_params(qs->qconn, &params) != 0)
+  rv = ngtcp2_conn_set_remote_transport_params(qs->qconn, &params);
+  if(rv) {
+    ngtcp2_conn_set_tls_error(qs->qconn, rv);
     return -1;
+  }
 
   return 0;
 }
@@ -650,6 +657,9 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   nconsumed =
     nghttp3_conn_read_stream(qs->h3conn, stream_id, buf, buflen, fin);
   if(nconsumed < 0) {
+    ngtcp2_connection_close_error_set_application_error(
+        &qs->last_error, nghttp3_err_infer_quic_app_error_code((int)nconsumed),
+        NULL, 0);
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -700,6 +710,8 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
   rv = nghttp3_conn_close_stream(qs->h3conn, stream_id,
                                  app_error_code);
   if(rv) {
+    ngtcp2_connection_close_error_set_application_error(
+        &qs->last_error, nghttp3_err_infer_quic_app_error_code(rv), NULL, 0);
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -926,6 +938,8 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 
   ngtcp2_conn_set_tls_native_handle(qs->qconn, qs->ssl);
 
+  ngtcp2_connection_close_error_default(&qs->last_error);
+
   return CURLE_OK;
 }
 
@@ -970,18 +984,14 @@ static void qs_disconnect(struct quicsocket *qs)
   char buffer[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
   ngtcp2_tstamp ts;
   ngtcp2_ssize rc;
-  ngtcp2_connection_close_error errorcode;
 
   if(!qs->conn) /* already closed */
     return;
-  ngtcp2_connection_close_error_set_application_error(&errorcode,
-                                                      NGHTTP3_H3_NO_ERROR,
-                                                      NULL, 0);
   ts = timestamp();
   rc = ngtcp2_conn_write_connection_close(qs->qconn, NULL, /* path */
                                           NULL, /* pkt_info */
                                           (uint8_t *)buffer, sizeof(buffer),
-                                          &errorcode, ts);
+                                          &qs->last_error, ts);
   if(rc > 0) {
     while((send(qs->conn->sock[FIRSTSOCKET], buffer, rc, 0) == -1) &&
           SOCKERRNO == EINTR);
@@ -1775,7 +1785,17 @@ static CURLcode ng_process_ingress(struct Curl_easy *data,
 
     rv = ngtcp2_conn_read_pkt(qs->qconn, &path, &pi, buf, recvd, ts);
     if(rv) {
-      /* TODO Send CONNECTION_CLOSE if possible */
+      if(!qs->last_error.error_code) {
+        if(rv == NGTCP2_ERR_CRYPTO) {
+          ngtcp2_connection_close_error_set_transport_error_tls_alert(
+              &qs->last_error, qs->tls_alert, NULL, 0);
+        }
+        else {
+          ngtcp2_connection_close_error_set_transport_error_liberr(
+              &qs->last_error, rv, NULL, 0);
+        }
+      }
+
       if(rv == NGTCP2_ERR_CRYPTO)
         /* this is a "TLS problem", but a failed certificate verification
            is a common reason for this */
@@ -1810,6 +1830,8 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
   if(rv) {
     failf(data, "ngtcp2_conn_handle_expiry returned error: %s",
           ngtcp2_strerror(rv));
+    ngtcp2_connection_close_error_set_transport_error_liberr(&qs->last_error,
+                                                             rv, NULL, 0);
     return CURLE_SEND_ERROR;
   }
 
@@ -1826,6 +1848,9 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       if(veccnt < 0) {
         failf(data, "nghttp3_conn_writev_stream returned error: %s",
               nghttp3_strerror((int)veccnt));
+        ngtcp2_connection_close_error_set_application_error(
+            &qs->last_error,
+            nghttp3_err_infer_quic_app_error_code((int)veccnt), NULL, 0);
         return CURLE_SEND_ERROR;
       }
     }
@@ -1873,6 +1898,8 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
         assert(ndatalen == -1);
         failf(data, "ngtcp2_conn_writev_stream returned error: %s",
               ngtcp2_strerror((int)outlen));
+        ngtcp2_connection_close_error_set_transport_error_liberr(
+            &qs->last_error, (int)outlen, NULL, 0);
         return CURLE_SEND_ERROR;
       }
     }
