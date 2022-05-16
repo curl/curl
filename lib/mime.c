@@ -1729,7 +1729,9 @@ const char *Curl_mime_contenttype(const char *filename)
     {".htm",  "text/html"},
     {".html", "text/html"},
     {".pdf",  "application/pdf"},
-    {".xml",  "application/xml"}
+    {".xml",  "application/xml"},
+    {".yaml",  "application/x-yaml"},
+    {".yml",  "application/x-yaml"},
   };
 
   if(filename) {
