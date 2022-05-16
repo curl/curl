@@ -470,8 +470,10 @@ static CURLcode bindlocal(struct Curl_easy *data,
     }
 
     if(--portnum > 0) {
-      infof(data, "Bind to local port %hu failed, trying next", port);
       port++; /* try next port */
+      if(port == 0)
+        break;
+      infof(data, "Bind to local port %hu failed, trying next", port - 1);
       /* We re-use/clobber the port variable here below */
       if(sock->sa_family == AF_INET)
         si4->sin_port = ntohs(port);
