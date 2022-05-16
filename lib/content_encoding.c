@@ -1028,12 +1028,16 @@ static const struct content_encoding *find_encoding(const char *name,
   return NULL;
 }
 
+/* allow no more than 5 "chained" compression steps */
+#define MAX_ENCODE_STACK 5
+
 /* Set-up the unencoding stack from the Content-Encoding header value.
  * See RFC 7231 section 3.1.2.2. */
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int maybechunked)
 {
   struct SingleRequest *k = &data->req;
+  int counter = 0;
 
   do {
     const char *name;
@@ -1068,6 +1072,11 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       if(!encoding)
         encoding = &error_encoding;  /* Defer error at stack use. */
 
+      if(++counter >= MAX_ENCODE_STACK) {
+        failf(data, "Reject response due to %u content encodings",
+              counter);
+        return CURLE_BAD_CONTENT_ENCODING;
+      }
       /* Stack the unencoding stage. */
       writer = new_unencoding_writer(data, encoding, k->writer_stack);
       if(!writer)
