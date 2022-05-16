@@ -72,10 +72,6 @@ my @skiplist=(
     # XML junk
     '^projects\/wolfssl_override.props',
 
-    # macos framework generated files
-    '^src\/macos\/curl.mcp.xml.sit.hqx',
-    '^src\/macos\/src\/curl_GUSIConfig.cpp',
-
     # checksrc control files
     '\.checksrc$',
 
