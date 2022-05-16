@@ -41,8 +41,8 @@ to remove a previously attached custom header list.
 replacement or mime structure deletion; in this case the list must not be
 freed explicitly.
 
-Setting a part's custom headers list twice is valid: only the value set by
-the last call is retained.
+Setting a part's custom headers list multiple times is valid: only the value
+set by the last call is retained.
 .SH EXAMPLE
 .nf
  struct curl_slist *headers = NULL;

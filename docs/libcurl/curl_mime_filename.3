@@ -42,7 +42,7 @@ to NULL to remove a previously attached remote file name.
 
 The remote file name string is copied into the part, thus the associated
 storage may safely be released or reused after call. Setting a part's file
-name twice is valid: only the value set by the last call is retained.
+name multiple times is valid: only the value set by the last call is retained.
 .SH EXAMPLE
 .nf
  curl_mime *mime;
