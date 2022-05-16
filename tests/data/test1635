@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+RETRY-AFTER
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 429 too many requests swsbounce
+Retry-After: 1
+Content-Length: 4
+
+moo
+</data>
+<data1 nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 4
+Connection: close
+
+hey
+</data1>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+--retry with a 429 response and Retry-After: and --fail-with-body
+</name>
+<command option="no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 1  --fail-with-body
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout>
+moo
+hey
+</stdout>
+</verify>
+</testcase>
