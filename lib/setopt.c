@@ -203,19 +203,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif
   case CURLOPT_RANDOM_FILE:
-    /*
-     * This is the path name to a file that contains random data to seed
-     * the random SSL stuff with. The file is only used for reading.
-     */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_RANDOM_FILE],
-                            va_arg(param, char *));
     break;
   case CURLOPT_EGDSOCKET:
-    /*
-     * The Entropy Gathering Daemon socket pathname
-     */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_EGDSOCKET],
-                            va_arg(param, char *));
     break;
   case CURLOPT_MAXCONNECTS:
     /*
