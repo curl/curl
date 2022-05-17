@@ -136,19 +136,6 @@ if test "x$OPT_WOLFSSL" != xno; then
         [
             AC_DEFINE(HAVE_WOLFSSL_DES_ECB_ENCRYPT, 1,
                       [if you have wolfSSL_DES_ecb_encrypt])
-            if test -n "$addcflags"; then
-              dnl use a for loop to strip off whitespace
-              for f in $addcflags; do
-                CPPFLAGS="$f/wolfssl $CPPFLAGS"
-                AC_MSG_NOTICE([Add $f/wolfssl to CPPFLAGS])
-                break
-              done
-            else
-              dnl user didn't give a path, so guess/hope they installed wolfssl
-              dnl headers to system default location
-              CPPFLAGS="-I/usr/include/wolfssl $CPPFLAGS"
-              AC_MSG_NOTICE([Add /usr/include/wolfssl to CPPFLAGS])
-            fi
             WOLFSSL_NTLM=1
         ]
         )
