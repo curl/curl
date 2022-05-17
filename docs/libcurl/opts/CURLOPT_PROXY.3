@@ -73,6 +73,9 @@ use of a proxy, even if there is an environment variable set for it.
 A proxy host string can also include protocol scheme (http://) and embedded
 user + password.
 
+Unix domain sockets are supported for socks proxy. Set localhost for the host
+part. e.g. socks5h://localhost/path/to/socket.sock
+
 The application does not have to keep the string around after setting this
 option.
 .SH "Environment variables"
