@@ -524,7 +524,7 @@ static int tp_recv_func(gnutls_session_t ssl, const uint8_t *data,
 static int tp_send_func(gnutls_session_t ssl, gnutls_buffer_t extdata)
 {
   struct quicsocket *qs = gnutls_session_get_ptr(ssl);
-  uint8_t paramsbuf[64];
+  uint8_t paramsbuf[256];
   ngtcp2_transport_params params;
   ngtcp2_ssize nwrite;
   int rc;
