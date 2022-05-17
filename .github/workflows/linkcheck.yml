@@ -1,5 +1,3 @@
-# Docs: https://github.com/marketplace/actions/markdown-link-check
-
 name: Markdown links
 
 on:
@@ -14,6 +12,7 @@ on:
     - master
 
 jobs:
+  # Docs: https://github.com/marketplace/actions/markdown-link-check
   check:
     runs-on: ubuntu-latest
     steps:

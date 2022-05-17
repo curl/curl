@@ -21,17 +21,18 @@ jobs:
       matrix:
         build:
         - name: bearssl
-          install:
-          configure: --with-bearssl=$HOME/bear --enable-debug --enable-werror
-        - name: clang-bearssl
-          install:
-          configure: CC=clang --with-bearssl=$HOME/bear --enable-debug --enable-werror
+          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          configure: LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
+        - name: bearssl-clang
+          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev clang
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
 
     steps:
     - run: |
-        sudo apt-get install libtool autoconf automake pkg-config clang stunnel4 libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
         sudo python3 -m pip install impacket
-      name: install prereqs and impacket
+      name: 'install prereqs and impacket'
 
     - run: |
         curl -LO https://bearssl.org/bearssl-0.6.tar.gz
@@ -41,13 +42,21 @@ jobs:
         mkdir -p $HOME/bear/lib $HOME/bear/include
         cp inc/*.h $HOME/bear/include
         cp build/libbearssl.* $HOME/bear/lib
-
-      name: 'get, build and install bearssl'
+      name: 'install bearssl'
 
     - uses: actions/checkout@v3
 
-    - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/bear/lib" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.configure }} && make V=1
-      name: 'configure and build'
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} --enable-headers-api
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
 
     - run: make V=1 test-ci
       name: 'test'
