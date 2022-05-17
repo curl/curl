@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2005 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2005 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (c) 1983, Regents of the University of California.
  * All rights reserved.
  *
@@ -46,6 +46,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
+ *
+ * SPDX-License-Identifier: BSD-4-Clause-UC
  */
 
 #include "server_setup.h"

@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  * RFC2831 DIGEST-MD5 authentication
  * RFC7616 DIGEST-SHA256, DIGEST-SHA512-256 authentication
  *

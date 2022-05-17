@@ -1,3 +1,9 @@
+<!--
+Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Building curl with Visual C++
 
  This document describes how to compile, build and install curl and libcurl

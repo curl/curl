@@ -1,1 +1,5 @@
+# Copyright (C) 2011 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
 /unit1[36][0-9][0-9]

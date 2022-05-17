@@ -1,3 +1,9 @@
+<!--
+Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Security Policy
 
 See [docs/SECURITY-PROCESS.md](docs/SECURITY-PROCESS.md) for full details.
