@@ -84,6 +84,8 @@
 #   Macro released by the Autoconf Archive. When you make and distribute a
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
+#
+#   SPDX-License-Identifier: GPL-3.0-or-later
 
 #serial 7
 

@@ -19,6 +19,8 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 #
 # Invoke script in the root of the git checkout. Scans all files in git unless
@@ -36,8 +38,6 @@ my @skiplist=(
     # the man pages:
     '(\/|^)[A-Z0-9_.-]+[^31]$',
     '(\/|^)[A-Z0-9_-]+\.md$', # all uppercase file name with .md extension
-    '.gitignore', # wherever they are
-    '.gitattributes', # wherever they are
     '^tests/certs/.*', # generated certs
     '^tests/stunnel.pem', # generated cert
     '^tests/valgrind.supp', # valgrind suppressions
@@ -48,9 +48,6 @@ my @skiplist=(
     '^m4/ax_compile_check_sizeof.m4$', # imported, leave be
     '^.mailmap', # git control file
     '\/readme',
-    '^.github/', # github instruction files
-    '^.dcignore', # deepcode.ai instruction file
-    '^.lift/', # muse-CI control files
     "buildconf", # its nothing to copyright
 
     # docs/ files we're okay with without copyright
@@ -83,6 +80,10 @@ my @skiplist=(
 
     # markdown linkchecker config
     "mlc_config.json",
+
+    # License texts and REUSE-specific files
+    ".reuse/dep5",
+    "LICENSES/.*"
 
     );
 

@@ -1,3 +1,9 @@
+<!--
+  Copyright (C) 2000 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+
+  SPDX-License-Identifier: curl
+-->
+
 ---
 name: Bug report
 about: Create a report to help us improve

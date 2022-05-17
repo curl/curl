@@ -19,6 +19,8 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 # This script performs all of the steps needed to build a
 # universal binary libcurl.framework for Mac OS X 10.4 or greater.

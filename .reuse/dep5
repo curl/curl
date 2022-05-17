@@ -1,0 +1,92 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: curl
+Upstream-Contact: Daniel Stenberg <daniel@haxx.se>
+Source: https://curl.se
+
+# Tests
+Files: tests/*
+Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+# Documentation
+Files: docs/*
+Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+# Windows
+Files: projects/Windows/*
+Copyright: 2014 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+# Single files we do not want to edit directly
+Files: CHANGES
+Copyright: 2019 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: GIT-INFO
+Copyright: 2010 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: RELEASE-NOTES
+Copyright: 2003 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: lib/.checksrc
+Copyright: 2021 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: lib/libcurl.plist.in
+Copyright: 2022 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: lib/libcurl.vers.in
+Copyright: 2011 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: mlc_config.json
+Copyright: 2022 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: packages/DOS/README
+Copyright: 2003 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: packages/OS400/README.OS400
+Copyright: 2007 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: packages/README
+Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: packages/vms/build_vms.com
+Copyright: 2004 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: packages/vms/curl_release_note_start.txt
+Copyright: 2013 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: packages/vms/curlmsg.sdl
+Copyright: 2004 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: packages/vms/macro32_exactcase.patch
+Copyright: 2013 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: packages/vms/readme
+Copyright: 2004 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: plan9/README
+Copyright: 2020 - 2020 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: projects/wolfssl_override.props
+Copyright: 2015 - 2018 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+Files: README
+Copyright: 1999 - 2021 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl

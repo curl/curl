@@ -19,6 +19,8 @@ rem *
 rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
 rem *
+rem * SPDX-License-Identifier: curl
+rem *
 rem ***************************************************************************
 
 rem NOTES
