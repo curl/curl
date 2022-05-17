@@ -143,8 +143,6 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      Curl_safecmp(data->CAfile, needle->CAfile) &&
      Curl_safecmp(data->issuercert, needle->issuercert) &&
      Curl_safecmp(data->clientcert, needle->clientcert) &&
-     Curl_safecmp(data->random_file, needle->random_file) &&
-     Curl_safecmp(data->egdsocket, needle->egdsocket) &&
 #ifdef USE_TLS_SRP
      Curl_safecmp(data->username, needle->username) &&
      Curl_safecmp(data->password, needle->password) &&
@@ -182,8 +180,6 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_STRING(CAfile);
   CLONE_STRING(issuercert);
   CLONE_STRING(clientcert);
-  CLONE_STRING(random_file);
-  CLONE_STRING(egdsocket);
   CLONE_STRING(cipher_list);
   CLONE_STRING(cipher_list13);
   CLONE_STRING(pinned_key);
@@ -203,8 +199,6 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->CAfile);
   Curl_safefree(sslc->issuercert);
   Curl_safefree(sslc->clientcert);
-  Curl_safefree(sslc->random_file);
-  Curl_safefree(sslc->egdsocket);
   Curl_safefree(sslc->cipher_list);
   Curl_safefree(sslc->cipher_list13);
   Curl_safefree(sslc->pinned_key);
