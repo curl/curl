@@ -204,8 +204,8 @@ static int write_client_handshake(struct quicsocket *qs,
   rv = ngtcp2_conn_submit_crypto_data(qs->qconn, level, data, len);
   if(rv) {
     H3BUGF(fprintf(stderr, "write_client_handshake failed\n"));
+    return 0;
   }
-  assert(0 == rv);
 
   return 1;
 }
