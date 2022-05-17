@@ -59,13 +59,18 @@
 #if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
 
 #ifdef USE_WOLFSSL
-#include <wolfssl/options.h>
-#endif
-
+#  include <wolfssl/options.h>
+#  include <wolfssl/openssl/des.h>
+#  include <wolfssl/openssl/md5.h>
+#  include <wolfssl/openssl/ssl.h>
+#  include <wolfssl/openssl/rand.h>
+#else
 #  include <openssl/des.h>
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
+#endif
+
 #  if (defined(OPENSSL_VERSION_NUMBER) && \
        (OPENSSL_VERSION_NUMBER < 0x00907001L)) && !defined(USE_WOLFSSL)
 #    define DES_key_schedule des_key_schedule

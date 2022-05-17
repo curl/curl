@@ -39,7 +39,7 @@
 #ifdef USE_WOLFSSL
 #include <wolfssl/options.h>
 #ifdef NO_MD4
-#define OPENSSL_NO_MD4
+#define WOLFSSL_NO_MD4
 #endif
 #endif
 
@@ -82,9 +82,11 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   md4_digest(ctx, MD4_DIGEST_SIZE, result);
 }
 
-#elif (defined(USE_OPENSSL) || defined(USE_WOLFSSL)) && \
-      !defined(OPENSSL_NO_MD4)
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
+#elif defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
+#include <wolfssl/openssl/md4.h>
+
+#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 #include <openssl/md4.h>
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
