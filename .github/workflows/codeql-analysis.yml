@@ -1,15 +1,15 @@
-name: codeql
+name: CodeQL
 
 on:
   # Trigger the workflow on push or pull requests, but only for the
   # master branch
   push:
     branches:
-      - master
-      - '*/ci'
+    - master
+    - '*/ci'
   pull_request:
     branches:
-      - master
+    - master
   schedule:
     - cron: '0 0 * * 4'
 

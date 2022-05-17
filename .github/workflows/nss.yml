@@ -21,22 +21,22 @@ jobs:
       matrix:
         build:
         - name: NSS
-          install:
-          configure: --with-nss --enable-debug --enable-werror --with-nss-deprecated --enable-headers-api
+          install: clang-9 libnss3-dev libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
+          configure: CC=clang-9 CPPFLAGS="-isystem /usr/include/nss" --with-nss --enable-debug --with-nss-deprecated --enable-headers-api
 
     steps:
     - run: |
         sudo apt-get update
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4 libnss3-dev clang-9 libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
         sudo python3 -m pip install impacket
-      name: install prereqs and impacket
+      name: 'install prereqs and impacket'
 
     - uses: actions/checkout@v3
 
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: CC=clang-9 CPPFLAGS="-isystem /usr/include/nss" ./configure ${{ matrix.build.configure }}
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
       name: 'configure with clang'
 
     - run: make V=1

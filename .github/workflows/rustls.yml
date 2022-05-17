@@ -21,14 +21,15 @@ jobs:
       matrix:
         build:
         - name: rustls
-          install:
-          configure: --with-rustls=$HOME/rustls --enable-debug --enable-werror --enable-headers-api
+          install: libpsl-dev libbrotli-dev libzstd-dev
+          configure: --with-rustls=$HOME/rustls --enable-debug
 
     steps:
     - run: |
-        sudo apt-get install libtool autoconf automake pkg-config libpsl-dev libbrotli-dev libzstd-dev stunnel4
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
         sudo python3 -m pip install impacket
-      name: install prereqs and impacket
+      name: 'install prereqs and impacket'
 
     - run: |
         git clone --depth=1 --recursive https://github.com/rustls/rustls-ffi.git -b v0.8.2
@@ -41,8 +42,17 @@ jobs:
 
     - uses: actions/checkout@v3
 
-    - run: autoreconf -fi && ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} && make V=1
-      name: 'configure and build'
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} --enable-headers-api
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
 
     - run: make V=1 test-ci
       name: 'test'

@@ -22,18 +22,19 @@ jobs:
         build:
         - name: wolfssl (configured with --enable-all)
           install:
+          configure: LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" --with-wolfssl=$HOME/wssl --enable-debug
           wolfssl-configure: --enable-all
-          curl-configure: --with-wolfssl=$HOME/wssl --enable-debug --enable-werror
         - name: wolfssl (configured with --enable-opensslextra)
           install:
+          configure: LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" --with-wolfssl=$HOME/wssl --enable-debug
           wolfssl-configure: --enable-opensslextra
-          curl-configure: --with-wolfssl=$HOME/wssl --enable-debug --enable-werror
 
     steps:
     - run: |
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
         sudo python3 -m pip install impacket
-      name: install prereqs and impacket
+      name: 'install prereqs and impacket'
 
     - run: |
         curl -LO https://github.com/wolfSSL/wolfssl/archive/v5.0.0-stable.tar.gz
@@ -46,8 +47,17 @@ jobs:
 
     - uses: actions/checkout@v3
 
-    - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.curl-configure }} && make V=1
-      name: 'configure and build'
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} --enable-headers-api
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
 
     - run: make V=1 test-ci
       name: 'test'

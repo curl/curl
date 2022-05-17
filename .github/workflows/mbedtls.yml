@@ -21,17 +21,18 @@ jobs:
       matrix:
         build:
         - name: mbedtls
-          install:
-          configure: --with-mbedtls=$HOME/mbed --enable-debug --enable-werror
-        - name: clang-mbedtls
-          install:
-          configure: CC=clang --with-mbedtls=$HOME/mbed --enable-debug --enable-werror
+          install: libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev
+          configure: LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
+        - name: mbedtls-clang
+          install: libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev clang
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
 
     steps:
     - run: |
-        sudo apt-get install libtool autoconf automake pkg-config clang stunnel4 libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
         sudo python3 -m pip install impacket
-      name: install prereqs and impacket
+      name: 'install prereqs and impacket'
 
     - run: |
         git clone --depth=1 -b v3.1.0 https://github.com/ARMmbed/mbedtls
@@ -42,8 +43,17 @@ jobs:
 
     - uses: actions/checkout@v3
 
-    - run: autoreconf -fi && LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" ./configure --enable-warnings --enable-werror --enable-headers-api ${{ matrix.build.configure }} && make V=1
-      name: 'configure and build'
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} --enable-headers-api
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
 
     - run: make V=1 test-ci
       name: 'test'
