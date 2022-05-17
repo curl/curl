@@ -667,10 +667,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->dns_ipv6_addr, nextarg);
         break;
       case 'a': /* random-file */
-        GetStr(&config->random_file, nextarg);
         break;
       case 'b': /* egd-file */
-        GetStr(&config->egd_file, nextarg);
         break;
       case 'B': /* OAuth 2.0 bearer token */
         GetStr(&config->oauth_bearer, nextarg);

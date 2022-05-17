@@ -50,8 +50,6 @@ struct State {
 
 struct OperationConfig {
   bool remote_time;
-  char *random_file;
-  char *egd_file;
   char *useragent;
   struct curl_slist *cookies;  /* cookies to serialize into a single line */
   char *cookiejar;          /* write to this file */
