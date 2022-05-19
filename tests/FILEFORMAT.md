@@ -128,6 +128,7 @@ Available substitute variables include:
 - `%HTTPTLS6PORT` - IPv6 port number of the HTTP TLS server
 - `%HTTPTLSPORT` - Port number of the HTTP TLS server
 - `%HTTPUNIXPATH` - Path to the Unix socket of the HTTP server
+- `%SOCKSUNIXPATH` - Absolute Path to the Unix socket of the SOCKS server
 - `%IMAP6PORT` - IPv6 port number of the IMAP server
 - `%IMAPPORT` - Port number of the IMAP server
 - `%MQTTPORT` - Port number of the MQTT server

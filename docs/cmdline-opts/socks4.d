@@ -10,6 +10,9 @@ Use the specified SOCKS4 proxy. If the port number is not specified, it is
 assumed at port 1080. Using this socket type make curl resolve the host name
 and passing the address on to the proxy.
 
+To specify proxy on a unix domain socket, use localhost for host, e.g.
+socks4://localhost/path/to/socket.sock
+
 This option overrides any previous use of --proxy, as they are mutually
 exclusive.
 
