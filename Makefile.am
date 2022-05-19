@@ -34,6 +34,7 @@ CMAKE_DIST =                                    \
  CMake/FindBrotli.cmake                         \
  CMake/FindCARES.cmake                          \
  CMake/FindGSS.cmake                            \
+ CMake/FindLibPSL.cmake                         \
  CMake/FindLibSSH2.cmake                        \
  CMake/FindMbedTLS.cmake                        \
  CMake/FindMSH3.cmake                           \

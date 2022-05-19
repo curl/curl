@@ -742,6 +742,31 @@ if(CURL_ZSTD)
   endif()
 endif()
 
+#libpsl
+option(CURL_USE_LIBPSL "Use libPSL" ON)
+mark_as_advanced(CURL_USE_LIBPSL)
+set(USE_LIBPSL OFF)
+set(HAVE_LIBPSL OFF)
+set(HAVE_LIBSPSL_H OFF)
+
+if(CURL_USE_LIBPSL)
+  find_package(LibPSL)
+  if(LIBPSL_FOUND)
+    list(APPEND CURL_LIBS ${LIBPSL_LIBRARY})
+    set(CMAKE_REQUIRED_LIBRARIES ${LIBPSL_LIBRARY})
+    list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBPSL_INCLUDE_DIR}")
+    include_directories("${LIBPSL_INCLUDE_DIR}")
+    set(HAVE_LIBPSL ON)
+    set(USE_LIBPSL ON)
+
+    # find_package has already found the headers
+    set(HAVE_LIBPSL_H ON)
+    set(CURL_INCLUDES ${CURL_INCLUDES} "${LIBPSL_INCLUDE_DIR}/libpsl.h")
+    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -DHAVE_LIBPSL_H")
+    unset(CMAKE_REQUIRED_LIBRARIES)
+  endif()
+endif()
+
 #libSSH2
 option(CURL_USE_LIBSSH2 "Use libSSH2" ON)
 mark_as_advanced(CURL_USE_LIBSSH2)
