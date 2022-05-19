@@ -503,7 +503,7 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     SSL_free(backend->handle);
   backend->handle = SSL_new(backend->ctx);
   if(!backend->handle) {
-    failf(data, "SSL: couldn't create a context");
+    failf(data, "SSL: couldn't create a handle");
     return CURLE_OUT_OF_MEMORY;
   }
 
