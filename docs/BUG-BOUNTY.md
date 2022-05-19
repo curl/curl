@@ -4,7 +4,7 @@ The curl project runs a bug bounty program in association with
 [HackerOne](https://www.hackerone.com) and the [Internet Bug
 Bounty](https://internetbugbounty.org).
 
-# How does it work?
+## How does it work?
 
 Start out by posting your suspected security vulnerability directly to [curl's
 HackerOne program](https://hackerone.com/curl).
@@ -14,7 +14,7 @@ patch and advisory has been made public, you may be eligible for a bounty from
 this program. See the [SECURITY-PROCESS](SECURITY-PROCESS.md) document for how
 we work with security issues.
 
-# What are the reward amounts?
+## What are the reward amounts?
 
 The curl project offers monetary compensation for reported and published
 security vulnerabilities. The amount of money that is rewarded depends on how
@@ -25,10 +25,16 @@ Bounty and they will set the reward amounts. If it would turn out that they
 set amounts that are way lower than we can accept, the curl project intends to
 "top up" rewards.
 
-# Who is eligible for a reward?
+In 2022, typical "Medium" rated vulnerabilities have been rewarded 2,400 USD
+each.
+
+## Who is eligible for a reward?
 
 Everyone and anyone who reports a security problem in a released curl version
 that has not already been reported can ask for a bounty.
+
+Dedicated - paid for - security audits that are performed in collaboration
+with curl developers are not eligible for bounties.
 
 Vulnerabilities in features that are off by default and documented as
 experimental are not eligible for a reward.
@@ -42,7 +48,7 @@ their bounty from the [Internet Bug Bounty](https://hackerone.com/ibb).
 Bounties need to be requested within twelve months from the publication of the
 vulnerability.
 
-# Product vulnerabilities only
+## Product vulnerabilities only
 
 This bug bounty only concerns the curl and libcurl products and thus their
 respective source codes - when running on existing hardware. It does not
@@ -52,20 +58,19 @@ infrastructure.
 The curl security team is the sole arbiter if a reported flaw is subject to a
 bounty or not.
 
-# How are vulnerabilities graded?
+## How are vulnerabilities graded?
 
 The grading of each reported vulnerability that makes a reward claim will be
 performed by the curl security team. The grading will be based on the CVSS
 (Common Vulnerability Scoring System) 3.0.
 
-# How are reward amounts determined?
+## How are reward amounts determined?
 
-The curl security team first gives the vulnerability a score, as mentioned
-above, and based on that level we set an amount depending on the specifics of
-the individual case. Other sponsors of the program might also get involved and
-can raise the amounts depending on the particular issue.
+The curl security team gives the vulnerability a score or severity level, as
+mentioned above. The actual monetary reward amount is decided and paid by the
+Internet Bug Bounty..
 
-# Regarding taxes, etc. on the bounties
+## Regarding taxes, etc. on the bounties
 
 In the event that the individual receiving a bug bounty needs to pay taxes on
 the reward money, the responsibility lies with the receiver. The curl project
