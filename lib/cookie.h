@@ -83,9 +83,25 @@ struct CookieInfo {
 */
 #define MAX_COOKIE_LINE 5000
 
-/* This is the maximum length of a cookie name or content we deal with: */
+/* Maximum length of an incoming cookie name or content we deal with. Longer
+   cookies are ignored. */
 #define MAX_NAME 4096
 #define MAX_NAME_TXT "4095"
+
+/* Maximum size for an outgoing cookie line libcurl will use in an http
+   request. This is the default maximum length used in some versions of Apache
+   httpd. */
+#define MAX_COOKIE_HEADER_LEN 8190
+
+/* Maximum number of cookies libcurl will send in a single request, even if
+   there might be more cookies that match. One reason to cap the number is to
+   keep the maximum HTTP request within the maximum allowed size. */
+#define MAX_COOKIE_SEND_AMOUNT 150
+
+/* Maximum number of Set-Cookie: lines accepted in a single response. If more
+   such header lines are received, they are ignored. This value must be less
+   than 256 since an unsigned char is used to count. */
+#define MAX_SET_COOKIE_AMOUNT 50
 
 struct Curl_easy;
 /*
@@ -99,7 +115,8 @@ struct Cookie *Curl_cookie_add(struct Curl_easy *data,
                                const char *domain, const char *path,
                                bool secure);
 
-struct Cookie *Curl_cookie_getlist(struct CookieInfo *c, const char *host,
+struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
+                                   struct CookieInfo *c, const char *host,
                                    const char *path, bool secure);
 void Curl_cookie_freelist(struct Cookie *cookies);
 void Curl_cookie_clearall(struct CookieInfo *cookies);

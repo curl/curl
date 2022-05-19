@@ -698,6 +698,7 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_DOH
   struct dohdata *doh; /* DoH specific data for this request */
 #endif
+  unsigned char setcookies;
   BIT(header);        /* incoming data has HTTP header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
   BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding
