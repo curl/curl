@@ -1,29 +1,52 @@
-curl and libcurl 7.83.2
+curl and libcurl 7.84.0
 
  Public curl releases:         209
  Command line options:         247
  curl_easy_setopt() options:   295
  Public functions in libcurl:  88
- Contributors:                 2632
+ Contributors:                 2638
 
 This release includes the following changes:
 
- o
+ o curl: deprecate --random-file and --egd-file [12]
+ o opts: deprecate RANDOM_FILE and EGDSOCKET [13]
+ o socks: support unix sockets for socks proxy [2]
 
 This release includes the following bugfixes:
 
  o aws-sigv4: fix potentional NULL pointer arithmetic [48]
+ o bindlocal: don't use a random port if port number would wrap [14]
  o ci: update github actions [36]
+ o cmake: add libpsl support [3]
+ o cookie: address secure domain overlay [7]
  o curl.1: mention exit code zero too [44]
+ o Curl_parsenetrc: don't access local pwbuf outside of scope [27]
+ o docs: clarify data replacement policy for MIME API [16]
  o FAQ: Clarify Windows double quote usage [42]
  o gssapi: improve handling of errors from gss_display_status [45]
  o gssapi: initialize gss_buffer_desc strings
  o http2: always debug print stream id in decimal with %u [46]
+ o macos9: remove partial support [22]
+ o Makefile.am: fix portability issues [1]
+ o mprintf: ignore clang non-literal format string [19]
+ o ngtcp2: Correct use of ngtcp2 and nghttp3 signed integer types [25]
+ o ngtcp2: extend QUIC transport parameters buffer [4]
+ o ngtcp2: Fix alert_read_func return value [26]
+ o ngtcp2: handle error from ngtcp2_conn_submit_crypto_data [5]
+ o ngtcp2: send appropriate connection close error code [6]
+ o ngtcp2: support boringssl crypto backend [17]
+ o quic: add Curl_quic_idle [18]
  o quiche: support ca-fallback [49]
+ o sectransp: check for a function defined when __BLOCKS__ is undefined [20]
+ o strcase: some optimisations [8]
  o tests 266, 116 and 1540: add a small write delay
  o tests/server/sws.c: change the HTTP writedelay unit to milliseconds [47]
+ o tool_operate: make sure --fail-with-body works with --retry [24]
+ o transfer: Fix potential NULL pointer dereference [15]
  o url: free old conn better on reuse [41]
  o url: remove redundant #ifdefs in allocate_conn()
+ o wolfssh.h: removed [10]
+ o wolfSSL: explicitly use compatibility layer [11]
  o x509asn1: mark msnprintf return as unchecked [50]
 
 This release includes the following known bugs:
@@ -33,12 +56,40 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrea Pappacoda, Daniel Gustafsson, Daniel Stenberg, Fabian Keil,
-  Frazer Smith, Kamil Dudka, KotlinIsland on github, Ray Satiro
-  (8 contributors)
+  Andrea Pappacoda, Balakrishnan Balasubramanian,
+  Christian Weisgerber via curl-library, Daniel Gustafsson, Daniel Stenberg,
+  Egor Pugin, Fabian Keil, Frank Gevaerts, Frazer Smith, Gregor Jasny,
+  Harry Sintonen, Illarion Taev, Jakub Bochenski, Kamil Dudka,
+  KotlinIsland on github, Nick Zitzmann, Ray Satiro, Tatsuhiro Tsujikawa,
+  Vincent Torri, vvb2060 on github, Elms
+  (21 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/mail/lib-2022-05/0024.html
+ [2] = https://curl.se/bug/?i=8668
+ [3] = https://curl.se/bug/?i=8865
+ [4] = https://curl.se/bug/?i=8872
+ [5] = https://curl.se/bug/?i=8871
+ [6] = https://curl.se/bug/?i=8870
+ [7] = https://hackerone.com/reports/1560324
+ [8] = https://curl.se/bug/?i=8875
+ [10] = https://curl.se/bug/?i=8863
+ [11] = https://curl.se/bug/?i=8864
+ [12] = https://curl.se/bug/?i=8670
+ [13] = https://curl.se/bug/?i=8670
+ [14] = https://curl.se/bug/?i=8862
+ [15] = https://curl.se/bug/?i=8857
+ [16] = https://curl.se/bug/?i=8860
+ [17] = https://curl.se/bug/?i=8789
+ [18] = https://curl.se/bug/?i=8698
+ [19] = https://curl.se/bug/?i=8740
+ [20] = https://curl.se/bug/?i=8846
+ [22] = https://curl.se/bug/?i=8836
+ [24] = https://curl.se/bug/?i=8845
+ [25] = https://curl.se/bug/?i=8851
+ [26] = https://curl.se/bug/?i=8852
+ [27] = https://curl.se/bug/?i=8850
  [36] = https://curl.se/bug/?i=8843
  [41] = https://curl.se/bug/?i=8841
  [42] = https://curl.se/bug/?i=8823
