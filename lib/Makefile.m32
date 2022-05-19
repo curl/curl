@@ -320,8 +320,7 @@ ifdef SSL
     OPENSSL_LIBS += -lgdi32 -lcrypt32
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
-  CFLAGS += -DUSE_OPENSSL -DHAVE_OPENSSL_PKCS12_H \
-            -DOPENSSL_NO_KRB5
+  CFLAGS += -DUSE_OPENSSL
   DLL_LIBS += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
   ifdef SRP
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
