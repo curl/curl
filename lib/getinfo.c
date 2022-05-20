@@ -172,7 +172,11 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
 #endif
     break;
   case CURLINFO_CAINFO:
+#ifdef CURL_CA_BUNDLE
     *param_charp = CURL_CA_BUNDLE;
+#else
+    *param_charp = NULL;
+#endif
     break;
 
   default:
