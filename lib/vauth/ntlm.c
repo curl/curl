@@ -62,6 +62,10 @@
 /* "NTLMSSP" signature is always in ASCII regardless of the platform */
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
 
+/* The fixed host name we provide, in order to not leak our real local host
+   name. Copy the name used by Firefox. */
+#define NTLM_HOSTNAME "WORKSTATION"
+
 #if DEBUG_ME
 # define DEBUG_OUT(x) x
 static void ntlm_print_flags(FILE *handle, unsigned long flags)
@@ -521,6 +525,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
   userlen = strlen(user);
 
+#ifndef NTLM_HOSTNAME
   /* Get the machine's un-qualified host name as NTLM doesn't like the fully
      qualified domain name */
   if(Curl_gethostname(host, sizeof(host))) {
@@ -530,6 +535,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   else {
     hostlen = strlen(host);
   }
+#else
+  hostlen = sizeof(NTLM_HOSTNAME)-1;
+#endif
 
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
     unsigned char ntbuffer[0x18];
