@@ -10,6 +10,7 @@ POST callback
 HTTP proxy
 HTTP proxy NTLM auth
 multi
+NTLM
 </keywords>
 </info>
 
@@ -86,21 +87,12 @@ SSL
 debug
 proxy
 </features>
- <name>
+<name>
 HTTP proxy auth NTLM with POST data from read callback multi-if
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
+</name>
+<command>
 http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT testuser:testpass
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
