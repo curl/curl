@@ -619,7 +619,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 6.11 Negotiate on Windows fails
 
- When using --negotiate (or NTLM) with curl on Windows, SSL/TSL handshake
+ When using --negotiate (or NTLM) with curl on Windows, SSL/TLS handshake
  fails despite having a valid kerberos ticket cached. Works without any issue
  in Unix/Linux.
 
