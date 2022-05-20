@@ -63,8 +63,8 @@
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
 
 /* The fixed host name we provide, in order to not leak our real local host
-   name. */
-#define NTLM_HOSTNAME "curlhost"
+   name. Copy the name used by Firefox. */
+#define NTLM_HOSTNAME "WORKSTATION"
 
 #if DEBUG_ME
 # define DEBUG_OUT(x) x
