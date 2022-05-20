@@ -66,7 +66,7 @@ FAQ
   4.6 Can you tell me what error code 142 means?
   4.7 How do I keep user names and passwords secret in curl command lines?
   4.8 I found a bug
-  4.9 curl cannot authenticate to the server that requires NTLM?
+  4.9 curl cannot authenticate to a server that requires NTLM?
   4.10 My HTTP request using HEAD, PUT or DELETE does not work
   4.11 Why do my HTTP range requests return the full document?
   4.12 Why do I get "certificate verify failed" ?
@@ -899,13 +899,10 @@ FAQ
   If there is a bug, read the BUGS document first. Then report it as described
   in there.
 
-  4.9 curl cannot authenticate to the server that requires NTLM?
+  4.9 curl cannot authenticate to a server that requires NTLM?
 
   NTLM support requires OpenSSL, GnuTLS, mbedTLS, NSS, Secure Transport, or
   Microsoft Windows libraries at build-time to provide this functionality.
-
-  NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
-  should not use such ones.
 
   4.10 My HTTP request using HEAD, PUT or DELETE does not work
 
