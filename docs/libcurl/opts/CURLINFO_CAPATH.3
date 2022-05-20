@@ -44,9 +44,10 @@ All
 CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode res;
-  curl_easy_getinfo(curl, CURLINFO_CAPATH, &cainfo);
-  if(cainfo)
-      printf("default ca path: %s\\n", cainfo);
+  char *capath = NULL;
+  curl_easy_getinfo(curl, CURLINFO_CAPATH, &capath);
+  if(capath)
+      printf("default ca path: %s\\n", capath);
   }
   curl_easy_cleanup(curl);
 }

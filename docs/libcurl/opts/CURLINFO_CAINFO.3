@@ -44,6 +44,7 @@ All
 CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode res;
+  char *cainfo = NULL;
   curl_easy_getinfo(curl, CURLINFO_CAINFO, &cainfo);
   if(cainfo)
       printf("default ca info path: %s\\n", cainfo);
