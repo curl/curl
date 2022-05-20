@@ -30,7 +30,6 @@ smtp
 NTLM
 SSL
 !SSPI
-debug
 </features>
 <name>
 SMTP NTLM authentication with initial response

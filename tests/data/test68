@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 HTTP NTLM auth
+NTLM
 </keywords>
 </info>
 # Server-side
@@ -57,7 +58,6 @@ Wrong password dude. Get it fixed and return.
 NTLM
 SSL
 !SSPI
-debug
 </features>
 <server>
 http

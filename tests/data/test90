@@ -6,6 +6,7 @@ HTTP GET
 HTTP NTLM auth
 --anyauth
 followlocation
+NTLM
 </keywords>
 </info>
 # Server-side
@@ -129,7 +130,6 @@ Finally, this is the real page!
 NTLM
 SSL
 !SSPI
-debug
 </features>
 <server>
 http

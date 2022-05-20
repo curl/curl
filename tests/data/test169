@@ -6,6 +6,7 @@ HTTP GET
 HTTP proxy
 HTTP proxy NTLM auth
 HTTP Digest auth
+NTLM
 </keywords>
 </info>
 
@@ -79,7 +80,6 @@ http
 NTLM
 SSL
 !SSPI
-debug
 proxy
 </features>
 <name>

@@ -40,7 +40,6 @@ pop3
 NTLM
 SSL
 !SSPI
-debug
 </features>
 <name>
 POP3 NTLM authentication

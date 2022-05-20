@@ -4,6 +4,7 @@
 HTTP
 HTTP PUT
 HTTP NTLM auth
+NTLM
 </keywords>
 </info>
 
@@ -78,7 +79,6 @@ Finally, this is the real page!
 NTLM
 SSL
 !SSPI
-debug
 </features>
 <server>
 http

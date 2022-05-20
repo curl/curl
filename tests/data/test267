@@ -59,7 +59,6 @@ Finally, this is the real page!
 NTLM
 SSL
 !SSPI
-debug
 </features>
 <server>
 http

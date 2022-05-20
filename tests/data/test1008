@@ -89,7 +89,6 @@ http
 NTLM
 SSL
 !SSPI
-debug
 proxy
 </features>
 <name>

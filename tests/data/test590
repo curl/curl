@@ -77,7 +77,6 @@ lib%TESTNUMBER
 NTLM
 SSL
 !SSPI
-debug
 proxy
 </features>
 <name>
