@@ -184,8 +184,7 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
 
 /*
  * Load alt-svc entries from the given file. The text based line-oriented file
- * format is documented here:
- * https://github.com/curl/curl/wiki/QUIC-implementation
+ * format is documented here: https://curl.se/docs/alt-svc.html
  *
  * This function only returns error on major problems that prevents alt-svc
  * handling to work completely. It will ignore individual syntactical errors

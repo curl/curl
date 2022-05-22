@@ -494,8 +494,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
 
 /*
  * Load the HSTS cache from the given file. The text based line-oriented file
- * format is documented here:
- * https://github.com/curl/curl/wiki/HSTS
+ * format is documented here: https://curl.se/docs/hsts.html
  *
  * This function only returns error on major problems that prevent hsts
  * handling to work completely. It will ignore individual syntactical errors
