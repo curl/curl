@@ -5,10 +5,6 @@
 [HTTP/3 Explained](https://http3-explained.haxx.se/en/) - the online free
 book describing the protocols involved.
 
-[QUIC implementation](https://github.com/curl/curl/wiki/QUIC-implementation) -
-the wiki page describing the plan for how to support QUIC and HTTP/3 in curl
-and libcurl.
-
 [quicwg.org](https://quicwg.org/) - home of the official protocol drafts
 
 ## QUIC libraries
