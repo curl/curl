@@ -323,6 +323,8 @@ struct GlobalConfig {
   char *libcurl;                  /* Output libcurl code to this file name */
   bool fail_early;                /* exit on first transfer error */
   bool styled_output;             /* enable fancy output style detection */
+  long ms_per_transfer;           /* start next transfer after (at least) this
+                                     many milliseconds */
 #ifdef CURLDEBUG
   bool test_event_based;
 #endif

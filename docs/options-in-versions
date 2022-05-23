@@ -186,6 +186,7 @@
 --quote (-Q)                         5.3
 --random-file                        7.7
 --range (-r)                         4.0
+--rate                               7.84.0
 --raw                                7.16.2
 --referer (-e)                       4.0
 --remote-header-name (-J)            7.20.0

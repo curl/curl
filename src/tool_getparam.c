@@ -93,6 +93,7 @@ static const struct LongShort aliases[]= {
   {"*h", "trace-ascii",              ARG_FILENAME},
   {"*H", "alpn",                     ARG_BOOL},
   {"*i", "limit-rate",               ARG_STRING},
+  {"*I", "rate",                     ARG_STRING},
   {"*j", "compressed",               ARG_BOOL},
   {"*J", "tr-encoding",              ARG_BOOL},
   {"*k", "digest",                   ARG_BOOL},
@@ -736,6 +737,51 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
            return pe;
         config->recvpersecond = value;
         config->sendpersecond = value;
+      }
+      break;
+      case 'I': /* --rate (request rate) */
+      {
+        /* support a few different suffixes, extract the suffix first, then
+           get the number and convert to per hour.
+           /s == per second
+           /m == per minute
+           /h == per hour (default)
+           /d == per day (24 hours)
+        */
+        char *div = strchr(nextarg, '/');
+        char number[26];
+        long denominator;
+        long numerator = 60*60*1000; /* default per hour */
+        size_t numlen = div ? (size_t)(div - nextarg) : strlen(nextarg);
+        if(numlen > sizeof(number)-1)
+          return PARAM_NUMBER_TOO_LARGE;
+        strncpy(number, nextarg, numlen);
+        number[numlen] = 0;
+        err = str2unum(&denominator, number);
+        if(err)
+          return err;
+        if(denominator < 1)
+          return PARAM_BAD_USE;
+        if(div) {
+          char unit = div[1];
+          switch(unit) {
+          case 's': /* per second */
+            numerator = 1000;
+            break;
+          case 'm': /* per minute */
+            numerator = 60*1000;
+            break;
+          case 'h': /* per hour */
+            break;
+          case 'd': /* per day */
+            numerator = 24*60*60*1000;
+            break;
+          default:
+            errorf(global, "unsupported --rate unit\n");
+            return PARAM_BAD_USE;
+          }
+        }
+        global->ms_per_transfer = numerator/denominator;
       }
       break;
 

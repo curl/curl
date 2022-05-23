@@ -198,6 +198,7 @@ DPAGES = \
   quote.d \
   random-file.d \
   range.d \
+  rate.d \
   raw.d \
   referer.d \
   remote-header-name.d \
