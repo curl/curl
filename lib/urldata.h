@@ -1780,6 +1780,7 @@ struct UserDefined {
   struct Curl_easy *stream_depends_on;
   int stream_weight;
   struct Curl_http2_dep *stream_dependents;
+  unsigned int stream_window_size;
 
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */

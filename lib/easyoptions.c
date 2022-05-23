@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             ___|___/|_| ______|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -309,6 +309,7 @@ struct curl_easyoption Curl_easyopts[] = {
   {"STREAM_DEPENDS", CURLOPT_STREAM_DEPENDS, CURLOT_OBJECT, 0},
   {"STREAM_DEPENDS_E", CURLOPT_STREAM_DEPENDS_E, CURLOT_OBJECT, 0},
   {"STREAM_WEIGHT", CURLOPT_STREAM_WEIGHT, CURLOT_LONG, 0},
+  {"STREAM_WINDOW_SIZE", CURLOPT_STREAM_WINDOW_SIZE, CURLOT_LONG, 0},
   {"SUPPRESS_CONNECT_HEADERS", CURLOPT_SUPPRESS_CONNECT_HEADERS,
    CURLOT_LONG, 0},
   {"TCP_FASTOPEN", CURLOPT_TCP_FASTOPEN, CURLOT_LONG, 0},
@@ -360,6 +361,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return ((CURLOPT_LASTENTRY%10000) != (315 + 1));
+  return ((CURLOPT_LASTENTRY%10000) != (316 + 1));
 }
 #endif

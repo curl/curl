@@ -1,0 +1,62 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_STREAM_WINDOW_SIZE 3 "17 Nov 2021" "libcurl 7.82.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_STREAM_WINDOW_SIZE \- set stream window size for http2
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLMcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_WINDOW_SIZE,
+                           long size);
+.fi
+.SH DESCRIPTION
+Pass a long indicating the sender's HTTP/2 initial stream window \fBsize\fP in
+bytes. This setting affects the initial window size of all streams. When using
+\fIcurl_easy_pause(3)\fP, this value is also the maximum number of bytes
+libcurl has to buffer for a paused stream.
+
+If you add this easy handle to a multi handle, this setting is not
+acknowledged, and you must instead use \fIcurl_multi_setopt(3)\fP and the
+\fICURLMOPT_STREAM_WINDOW_SIZE(3)\fP option.
+
+Valid values range from 1 to 2147483647 (0x7FFFFFFF).
+.SH DEFAULT
+33554432 (32 megabytes)
+.SH PROTOCOLS
+HTTP/2
+.SH EXAMPLE
+.nf
+  CURL *curl = curl_easy_init();
+  /* set stream window size to HTTP/2 default 2^16-1 */
+  curl_easy_setopt(curl, CURLOPT_STREAM_WINDOW_SIZE, 65535L);
+.fi
+.SH AVAILABILITY
+Added in 7.82.0
+.SH RETURN VALUE
+
+Returns CURLE_OK of the option is supported and window size is within range,
+CURLE_BAD_FUNCTION_ARGUMENT if not within range. Returns CURLE_UNKNOWN_OPTION
+if the option is not supported.
+.SH "SEE ALSO"
+.BR curl_easy_pause "(3), " CURLMOPT_STREAM_WINDOW_SIZE "(3)"

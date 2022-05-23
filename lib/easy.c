@@ -674,6 +674,12 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   /* Copy the MAXCONNECTS option to the multi handle */
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
 
+#ifdef USE_HTTP2
+  /* Copy the STREAM_WINDOW_SIZE option to the multi handle */
+  curl_multi_setopt(multi, CURLMOPT_STREAM_WINDOW_SIZE,
+                    data->set.stream_window_size);
+#endif
+
   mcode = curl_multi_add_handle(multi, data);
   if(mcode) {
     curl_multi_cleanup(multi);

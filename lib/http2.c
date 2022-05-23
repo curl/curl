@@ -59,8 +59,6 @@
 #define NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE 1
 #endif
 
-#define HTTP2_HUGE_WINDOW_SIZE (32 * 1024 * 1024) /* 32 MB */
-
 #ifdef DEBUG_HTTP2
 #define H2BUGF(x) x
 #else
@@ -1208,7 +1206,7 @@ static void populate_settings(struct Curl_easy *data,
   iv[0].value = Curl_multi_max_concurrent_streams(data->multi);
 
   iv[1].settings_id = NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE;
-  iv[1].value = HTTP2_HUGE_WINDOW_SIZE;
+  iv[1].value = data->multi->stream_window_size;
 
   iv[2].settings_id = NGHTTP2_SETTINGS_ENABLE_PUSH;
   iv[2].value = data->multi->push_cb != NULL;
@@ -2162,7 +2160,7 @@ CURLcode Curl_http2_stream_pause(struct Curl_easy *data, bool pause)
   else {
     struct HTTP *stream = data->req.p.http;
     struct http_conn *httpc = &data->conn->proto.httpc;
-    uint32_t window = !pause * HTTP2_HUGE_WINDOW_SIZE;
+    uint32_t window = !pause * data->multi->stream_window_size;
     int rv = nghttp2_session_set_local_window_size(httpc->h2,
                                                    NGHTTP2_FLAG_NONE,
                                                    stream->stream_id,
