@@ -3189,6 +3189,7 @@ AC_CHECK_HEADERS(
         sys/un.h \
         linux/tcp.h \
         netinet/tcp.h \
+        netinet/udp.h \
         netdb.h \
         sys/sockio.h \
         sys/stat.h \
