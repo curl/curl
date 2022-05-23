@@ -69,12 +69,6 @@ static const char *doh_strerror(DOHcode code)
 }
 #endif
 
-#ifdef DEBUGBUILD
-#define UNITTEST
-#else
-#define UNITTEST static
-#endif
-
 /* @unittest 1655
  */
 UNITTEST DOHcode doh_encode(const char *host,
