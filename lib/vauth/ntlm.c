@@ -536,7 +536,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     hostlen = strlen(host);
   }
 #else
-  msnprintf(host, sizeof(host), "%s", NTLM_HOSTNAME);
+  (void)msnprintf(host, sizeof(host), "%s", NTLM_HOSTNAME);
   hostlen = sizeof(NTLM_HOSTNAME)-1;
 #endif
 
