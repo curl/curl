@@ -102,6 +102,10 @@ struct h3out {
   "%DISABLE_TLS13_COMPAT_MODE"
 #endif
 
+/* ngtcp2 default congestion controller does not perform pacing. Limit
+   the maximum packet burst to MAX_PKT_BURST packets. */
+#define MAX_PKT_BURST 10
+
 static CURLcode ng_process_ingress(struct Curl_easy *data,
                                    curl_socket_t sockfd,
                                    struct quicsocket *qs);
@@ -940,6 +944,24 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 
   ngtcp2_connection_close_error_default(&qs->last_error);
 
+#if defined(__linux__) && defined(UDP_SEGMENT)
+  qs->no_gso = FALSE;
+#else
+  qs->no_gso = TRUE;
+#endif
+
+  qs->num_blocked_pkt = 0;
+  qs->num_blocked_pkt_sent = 0;
+  memset(&qs->blocked_pkt, 0, sizeof(qs->blocked_pkt));
+
+  qs->pktbuflen = NGTCP2_MAX_PMTUD_UDP_PAYLOAD_SIZE * MAX_PKT_BURST;
+  qs->pktbuf = malloc(qs->pktbuflen);
+  if(!qs->pktbuf) {
+    ngtcp2_conn_del(qs->qconn);
+    qs->qconn = NULL;
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   return CURLE_OK;
 }
 
@@ -1015,6 +1037,7 @@ static void qs_disconnect(struct quicsocket *qs)
     qs->cred = NULL;
   }
 #endif
+  free(qs->pktbuf);
   nghttp3_conn_del(qs->h3conn);
   ngtcp2_conn_del(qs->qconn);
 #ifdef USE_OPENSSL
@@ -1807,14 +1830,172 @@ static CURLcode ng_process_ingress(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static CURLcode do_sendmsg(size_t *sent, struct Curl_easy *data, int sockfd,
+                           struct quicsocket *qs, const uint8_t *pkt,
+                           size_t pktlen, size_t gsolen);
+
+static CURLcode send_packet_no_gso(size_t *psent, struct Curl_easy *data,
+                                   int sockfd, struct quicsocket *qs,
+                                   const uint8_t *pkt, size_t pktlen,
+                                   size_t gsolen)
+{
+  const uint8_t *p, *end = pkt + pktlen;
+  size_t sent;
+
+  *psent = 0;
+
+  for(p = pkt; p < end; p += gsolen) {
+    size_t len = CURLMIN(gsolen, (size_t)(end - p));
+    CURLcode curlcode = do_sendmsg(&sent, data, sockfd, qs, p, len, len);
+    if(curlcode != CURLE_OK) {
+      return curlcode;
+    }
+    *psent += sent;
+  }
+
+  return CURLE_OK;
+}
+
+static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
+                           struct quicsocket *qs, const uint8_t *pkt,
+                           size_t pktlen, size_t gsolen)
+{
+  struct iovec msg_iov = {(void *)pkt, pktlen};
+  struct msghdr msg = {0};
+  uint8_t msg_ctrl[CMSG_SPACE(sizeof(uint16_t))] = {0};
+  size_t ctrllen = 0;
+  ssize_t sent;
+#if defined(__linux__) && defined(UDP_SEGMENT)
+  struct cmsghdr *cm;
+#endif
+
+  *psent = 0;
+
+  msg.msg_iov = &msg_iov;
+  msg.msg_iovlen = 1;
+
+  msg.msg_control = msg_ctrl;
+  msg.msg_controllen = sizeof(msg_ctrl);
+
+#if defined(__linux__) && defined(UDP_SEGMENT)
+  if(pktlen > gsolen) {
+    ctrllen += CMSG_SPACE(sizeof(uint16_t));
+    cm = CMSG_FIRSTHDR(&msg);
+    cm->cmsg_level = SOL_UDP;
+    cm->cmsg_type = UDP_SEGMENT;
+    cm->cmsg_len = CMSG_LEN(sizeof(uint16_t));
+    *(uint16_t *)(void *)CMSG_DATA(cm) = gsolen & 0xffff;
+  }
+#endif
+
+  msg.msg_controllen = ctrllen;
+
+  while((sent = sendmsg(sockfd, &msg, 0)) == -1 && SOCKERRNO == EINTR)
+    ;
+
+  if(sent == -1) {
+    switch(SOCKERRNO) {
+    case EAGAIN:
+#if EAGAIN != EWOULDBLOCK
+    case EWOULDBLOCK:
+#endif
+      return CURLE_AGAIN;
+    case EMSGSIZE:
+      /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
+      break;
+    case EIO:
+      if(pktlen > gsolen) {
+        /* GSO failure */
+        failf(data, "sendmsg() returned %zd (errno %d); disable GSO", sent,
+              SOCKERRNO);
+        qs->no_gso = TRUE;
+        return send_packet_no_gso(psent, data, sockfd, qs, pkt, pktlen,
+                                  gsolen);
+      }
+      /* FALLTHROUGH */
+    default:
+      failf(data, "sendmsg() returned %zd (errno %d)", sent, SOCKERRNO);
+      return CURLE_SEND_ERROR;
+    }
+  }
+
+  assert(pktlen == (size_t)sent);
+
+  *psent = pktlen;
+
+  return CURLE_OK;
+}
+
+static CURLcode send_packet(size_t *psent, struct Curl_easy *data, int sockfd,
+                            struct quicsocket *qs, const uint8_t *pkt,
+                            size_t pktlen, size_t gsolen)
+{
+  if(qs->no_gso && pktlen > gsolen) {
+    return send_packet_no_gso(psent, data, sockfd, qs, pkt, pktlen, gsolen);
+  }
+
+  return do_sendmsg(psent, data, sockfd, qs, pkt, pktlen, gsolen);
+}
+
+static void push_blocked_pkt(struct quicsocket *qs, const uint8_t *pkt,
+                             size_t pktlen, size_t gsolen)
+{
+  struct blocked_pkt *blkpkt;
+
+  assert(qs->num_blocked_pkt <
+         sizeof(qs->blocked_pkt) / sizeof(qs->blocked_pkt[0]));
+
+  blkpkt = &qs->blocked_pkt[qs->num_blocked_pkt++];
+
+  blkpkt->pkt = pkt;
+  blkpkt->pktlen = pktlen;
+  blkpkt->gsolen = gsolen;
+}
+
+static CURLcode send_blocked_pkt(struct Curl_easy *data, int sockfd,
+                                 struct quicsocket *qs)
+{
+  size_t sent;
+  CURLcode curlcode;
+  struct blocked_pkt *blkpkt;
+
+  for(; qs->num_blocked_pkt_sent < qs->num_blocked_pkt;
+      ++qs->num_blocked_pkt_sent) {
+    blkpkt = &qs->blocked_pkt[qs->num_blocked_pkt_sent];
+    curlcode = send_packet(&sent, data, sockfd, qs, blkpkt->pkt,
+                           blkpkt->pktlen, blkpkt->gsolen);
+
+    if(curlcode) {
+      if(curlcode == CURLE_AGAIN) {
+        blkpkt->pkt += sent;
+        blkpkt->pktlen -= sent;
+      }
+      return curlcode;
+    }
+  }
+
+  qs->num_blocked_pkt = 0;
+  qs->num_blocked_pkt_sent = 0;
+
+  return CURLE_OK;
+}
+
 static CURLcode ng_flush_egress(struct Curl_easy *data,
                                 int sockfd,
                                 struct quicsocket *qs)
 {
   int rv;
-  ssize_t sent;
+  size_t sent;
   ngtcp2_ssize outlen;
-  uint8_t out[NGTCP2_MAX_PMTUD_UDP_PAYLOAD_SIZE];
+  uint8_t *outpos = qs->pktbuf;
+  size_t max_udp_payload_size =
+      ngtcp2_conn_get_max_udp_payload_size(qs->qconn);
+  size_t path_max_udp_payload_size =
+      ngtcp2_conn_get_path_max_udp_payload_size(qs->qconn);
+  size_t max_pktcnt =
+      CURLMIN(MAX_PKT_BURST, qs->pktbuflen / max_udp_payload_size);
+  size_t pktcnt = 0;
+  size_t gsolen;
   ngtcp2_path_storage ps;
   ngtcp2_tstamp ts = timestamp();
   ngtcp2_tstamp expiry;
@@ -1825,6 +2006,7 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
   nghttp3_vec vec[16];
   ngtcp2_ssize ndatalen;
   uint32_t flags;
+  CURLcode curlcode;
 
   rv = ngtcp2_conn_handle_expiry(qs->qconn, ts);
   if(rv) {
@@ -1833,6 +2015,17 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
     ngtcp2_connection_close_error_set_transport_error_liberr(&qs->last_error,
                                                              rv, NULL, 0);
     return CURLE_SEND_ERROR;
+  }
+
+  if(qs->num_blocked_pkt) {
+    curlcode = send_blocked_pkt(data, sockfd, qs);
+    if(curlcode) {
+      if(curlcode == CURLE_AGAIN) {
+        Curl_expire(data, 1, EXPIRE_QUIC);
+        return CURLE_OK;
+      }
+      return curlcode;
+    }
   }
 
   ngtcp2_path_storage_zero(&ps);
@@ -1857,11 +2050,25 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
 
     flags = NGTCP2_WRITE_STREAM_FLAG_MORE |
             (fin ? NGTCP2_WRITE_STREAM_FLAG_FIN : 0);
-    outlen = ngtcp2_conn_writev_stream(qs->qconn, &ps.path, NULL, out,
-                                       sizeof(out),
+    outlen = ngtcp2_conn_writev_stream(qs->qconn, &ps.path, NULL, outpos,
+                                       max_udp_payload_size,
                                        &ndatalen, flags, stream_id,
                                        (const ngtcp2_vec *)vec, veccnt, ts);
     if(outlen == 0) {
+      if(outpos != qs->pktbuf) {
+        curlcode = send_packet(&sent, data, sockfd, qs, qs->pktbuf,
+                               outpos - qs->pktbuf, gsolen);
+        if(curlcode) {
+          if(curlcode == CURLE_AGAIN) {
+            push_blocked_pkt(qs, qs->pktbuf + sent, outpos - qs->pktbuf - sent,
+                             gsolen);
+            Curl_expire(data, 1, EXPIRE_QUIC);
+            return CURLE_OK;
+          }
+          return curlcode;
+        }
+      }
+
       break;
     }
     if(outlen < 0) {
@@ -1912,23 +2119,61 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       }
     }
 
-    while((sent = send(sockfd, (const char *)out, outlen, 0)) == -1 &&
-          SOCKERRNO == EINTR)
-      ;
+    outpos += outlen;
 
-    if(sent == -1) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
-        /* TODO Cache packet */
-        break;
-      }
-      else {
-        failf(data, "send() returned %zd (errno %d)", sent,
-              SOCKERRNO);
-        if(SOCKERRNO != EMSGSIZE) {
-          return CURLE_SEND_ERROR;
+    if(pktcnt == 0) {
+      gsolen = outlen;
+    }
+    else if((size_t)outlen > gsolen ||
+            (gsolen > path_max_udp_payload_size &&
+             (size_t)outlen != gsolen)) {
+      /* Packet larger than path_max_udp_payload_size is PMTUD probe
+         packet and it might not be sent because of EMSGSIZE. Send
+         them separately to minimize the loss. */
+      curlcode = send_packet(&sent, data, sockfd, qs, qs->pktbuf,
+                             outpos - outlen - qs->pktbuf, gsolen);
+      if(curlcode) {
+        if(curlcode == CURLE_AGAIN) {
+          push_blocked_pkt(qs, qs->pktbuf + sent,
+                           outpos - outlen - qs->pktbuf - sent, gsolen);
+          push_blocked_pkt(qs, outpos - outlen, outlen, outlen);
+          Curl_expire(data, 1, EXPIRE_QUIC);
+          return CURLE_OK;
         }
-        /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
+        return curlcode;
       }
+      curlcode = send_packet(&sent, data, sockfd, qs, outpos - outlen, outlen,
+                             outlen);
+      if(curlcode) {
+        if(curlcode == CURLE_AGAIN) {
+          assert(0 == sent);
+          push_blocked_pkt(qs, outpos - outlen, outlen, outlen);
+          Curl_expire(data, 1, EXPIRE_QUIC);
+          return CURLE_OK;
+        }
+        return curlcode;
+      }
+
+      pktcnt = 0;
+      outpos = qs->pktbuf;
+      continue;
+    }
+
+    if(++pktcnt >= max_pktcnt || (size_t)outlen < gsolen) {
+      curlcode = send_packet(&sent, data, sockfd, qs, qs->pktbuf,
+                             outpos - qs->pktbuf, gsolen);
+      if(curlcode) {
+        if(curlcode == CURLE_AGAIN) {
+          push_blocked_pkt(qs, qs->pktbuf + sent, outpos - qs->pktbuf - sent,
+                           gsolen);
+          Curl_expire(data, 1, EXPIRE_QUIC);
+          return CURLE_OK;
+        }
+        return curlcode;
+      }
+
+      pktcnt = 0;
+      outpos = qs->pktbuf;
     }
   }
 

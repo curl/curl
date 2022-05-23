@@ -26,6 +26,10 @@
 
 #ifdef USE_NGTCP2
 
+#ifdef HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
+
 #include <ngtcp2/ngtcp2.h>
 #include <nghttp3/nghttp3.h>
 #ifdef USE_OPENSSL
@@ -33,6 +37,12 @@
 #elif defined(USE_GNUTLS)
 #include <gnutls/gnutls.h>
 #endif
+
+struct blocked_pkt {
+  const uint8_t *pkt;
+  size_t pktlen;
+  size_t gsolen;
+};
 
 struct quicsocket {
   struct connectdata *conn; /* point back to the connection */
@@ -54,6 +64,15 @@ struct quicsocket {
   uint8_t tls_alert;
   struct sockaddr_storage local_addr;
   socklen_t local_addrlen;
+  bool no_gso;
+  uint8_t *pktbuf;
+  size_t pktbuflen;
+  /* the number of entries in blocked_pkt */
+  size_t num_blocked_pkt;
+  /* the number of processed entries in blocked_pkt */
+  size_t num_blocked_pkt_sent;
+  /* the packets blocked by sendmsg (EAGAIN or EWOULDBLOCK) */
+  struct blocked_pkt blocked_pkt[2];
 
   nghttp3_conn *h3conn;
   nghttp3_settings h3settings;
