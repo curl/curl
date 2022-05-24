@@ -1423,6 +1423,7 @@ struct UrlState {
                                  headers */
   struct Curl_llist httphdrs; /* received headers */
   struct curl_header headerout; /* for external purposes */
+  struct Curl_header_store *prevhead; /* the latest added header */
 #endif
   trailers_state trailers_state; /* whether we are sending trailers
                                        and what stage are we at */

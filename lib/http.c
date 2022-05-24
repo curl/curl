@@ -3799,11 +3799,16 @@ static CURLcode verify_header(struct Curl_easy *data)
   if(k->headerline < 2)
     /* the first "header" is the status-line and it has no colon */
     return CURLE_OK;
-  ptr = memchr(header, ':', hlen);
-  if(!ptr) {
-    /* this is bad, bail out */
-    failf(data, "Header without colon");
-    return CURLE_WEIRD_SERVER_REPLY;
+  if(((header[0] == ' ') || (header[0] == '\t')) && k->headerline > 2)
+    /* line folding, can't happen on line 2 */
+    ;
+  else {
+    ptr = memchr(header, ':', hlen);
+    if(!ptr) {
+      /* this is bad, bail out */
+      failf(data, "Header without colon");
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
   }
   return CURLE_OK;
 }
