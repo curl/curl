@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -113,10 +113,8 @@ CURL_AR := $(CROSSPREFIX)ar
 endif
 
 CC = $(CURL_CC)
-CFLAGS = $(CURL_CFLAG_EXTRAS) -g -O2 -Wall -W
-CFLAGS += -fno-strict-aliasing
-# comment LDFLAGS below to keep debug info
-LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE) -s
+CFLAGS = -O3 $(CURL_CFLAG_EXTRAS) -W -Wall
+LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
 AR = $(CURL_AR)
 RC = $(CROSSPREFIX)windres
 RCFLAGS = --include-dir=$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST
@@ -136,7 +134,7 @@ endif
 endif
 
 ifeq ($(ARCH),w64)
-CFLAGS  += -m64 -D_AMD64_
+CFLAGS  += -m64
 LDFLAGS += -m64
 RCFLAGS += -F pe-x86-64
 else
