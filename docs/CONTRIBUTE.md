@@ -169,6 +169,12 @@ actual content changed also allows you to retrigger the tests for that commit.
 When you adjust your pull requests after review, consider squashing the
 commits so that we can review the full updated version more easily.
 
+A pull request sent to the project might get labeled `needs-votes` by a
+project maintainer. This label means that in addition to meeting all other
+checks and qualifications this pull request must also receive more "votes" of
+user support. More signs that people want this to happen. It could be in the
+form of messages saying so, or thumbs-up reactions on GitHub.
+
 ### Making quality patches
 
 Make the patch against as recent source versions as possible.
