@@ -469,7 +469,7 @@ Curl_cookie_add(struct Curl_easy *data,
   struct Cookie *co;
   struct Cookie *lastc = NULL;
   struct Cookie *replace_co = NULL;
-  struct Cookie *replace_clist;
+  struct Cookie *replace_clist = NULL;
   time_t now = time(NULL);
   bool replace_old = FALSE;
   bool badcookie = FALSE; /* cookies are good by default. mmmmm yummy */
