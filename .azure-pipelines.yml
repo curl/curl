@@ -101,11 +101,6 @@ stages:
     timeoutInMinutes: 30
     pool:
       vmImage: 'ubuntu-latest'
-    strategy:
-      matrix:
-        default:
-          name: default
-          install:
     steps:
     - script: autoreconf -fi && ./configure --without-ssl
       displayName: 'configure $(name)'
@@ -159,12 +154,6 @@ stages:
     timeoutInMinutes: 30
     pool:
       vmImage: 'ubuntu-latest'
-    strategy:
-      matrix:
-        default:
-          name: default
-          install:
-
     steps:
     - script: sudo apt-get update && sudo apt-get install -y clang-tools-10 clang-9 libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
       displayName: 'apt install'
