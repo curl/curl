@@ -54,6 +54,10 @@ nss, openssl, rustls, schannel, secure-transport, wolfssl
 When the netrc feature is used (\fICURLOPT_NETRC(3)\fP), this variable is
 checked as the primary way to find the "current" home directory in which
 the .netrc file is likely to exist.
+.IP USERPROFILE
+When the netrc feature is used (\fICURLOPT_NETRC(3)\fP), this variable is
+checked as the secondary way to find the "current" home directory (on Windows
+only) in which the .netrc file is likely to exist.
 .IP LOGNAME
 User name to use when invoking the ntlm-wb tool, if NTLMUSER was not set.
 .IP NO_PROXY
