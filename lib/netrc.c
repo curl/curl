@@ -258,7 +258,7 @@ int Curl_parsenetrc(const char *host,
       if(pw) {
         home = pw->pw_dir;
       }
-#elif defined(CURL_WIN32)
+#elif defined(_WIN32)
     }
     else {
       homea = curl_getenv("USERPROFILE");
