@@ -288,7 +288,7 @@ static CURLcode status_line(struct Curl_easy *data,
              len);
 
   if(!data->state.hconnect || !data->set.suppress_connect_headers) {
-    writetype = CLIENTWRITE_HEADER;
+    writetype = CLIENTWRITE_HEADER|CLIENTWRITE_STATUS;
     if(data->set.include_header)
       writetype |= CLIENTWRITE_BODY;
     result = Curl_client_write(data, writetype,
