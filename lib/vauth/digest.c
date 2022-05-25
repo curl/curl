@@ -695,7 +695,7 @@ static CURLcode auth_create_digest_http_message(
   }
 
   if(digest->userhash) {
-    hashthis = aprintf("%s:%s", userp, digest->realm);
+    hashthis = aprintf("%s:%s", userp, digest->realm ? digest->realm : "");
     if(!hashthis)
       return CURLE_OUT_OF_MEMORY;
 
@@ -715,7 +715,8 @@ static CURLcode auth_create_digest_http_message(
            unq(nonce-value) ":" unq(cnonce-value)
   */
 
-  hashthis = aprintf("%s:%s:%s", userp, digest->realm, passwdp);
+  hashthis = aprintf("%s:%s:%s", userp, digest->realm ? digest->realm : "",
+                     passwdp);
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
@@ -804,7 +805,13 @@ static CURLcode auth_create_digest_http_message(
   userp_quoted = auth_digest_string_quoted(digest->userhash ? userh : userp);
   if(!userp_quoted)
     return CURLE_OUT_OF_MEMORY;
-  realm_quoted = auth_digest_string_quoted(digest->realm);
+  if(digest->realm)
+    realm_quoted = auth_digest_string_quoted(digest->realm);
+  else {
+    realm_quoted = malloc(1);
+    if(realm_quoted)
+      realm_quoted[0] = 0;
+  }
   if(!realm_quoted) {
     free(userp_quoted);
     return CURLE_OUT_OF_MEMORY;
