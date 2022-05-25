@@ -99,8 +99,8 @@ Example set of cookies:
 #include "curl_get_line.h"
 #include "curl_memrchr.h"
 #include "parsedate.h"
-#include "rand.h"
 #include "rename.h"
+#include "fopen.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1631,20 +1631,9 @@ static CURLcode cookie_output(struct Curl_easy *data,
     use_stdout = TRUE;
   }
   else {
-    unsigned char randsuffix[9];
-
-    if(Curl_rand_hex(data, randsuffix, sizeof(randsuffix)))
-      return 2;
-
-    tempstore = aprintf("%s.%s.tmp", filename, randsuffix);
-    if(!tempstore)
-      return CURLE_OUT_OF_MEMORY;
-
-    out = fopen(tempstore, FOPEN_WRITETEXT);
-    if(!out) {
-      error = CURLE_WRITE_ERROR;
+    error = Curl_fopen(data, filename, &out, &tempstore);
+    if(error)
       goto error;
-    }
   }
 
   fputs("# Netscape HTTP Cookie File\n"
@@ -1691,7 +1680,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
   if(!use_stdout) {
     fclose(out);
     out = NULL;
-    if(Curl_rename(tempstore, filename)) {
+    if(tempstore && Curl_rename(tempstore, filename)) {
       unlink(tempstore);
       error = CURLE_WRITE_ERROR;
       goto error;
