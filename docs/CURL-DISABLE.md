@@ -37,6 +37,10 @@ about existing options to `curl_easy_setopt`.
 
 Disable the GOPHER protocol.
 
+## CURL_DISABLE_HEADERS_API
+
+Disable the HTTP header API.
+
 ## CURL_DISABLE_HSTS
 
 Disable the HTTP Strict Transport Security support.

@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HEADERS_API)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
 
 struct Curl_header_store {
   struct Curl_llist_element node;
