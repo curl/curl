@@ -49,10 +49,16 @@
 671
 672
 673
+1117
+1274
 1417
 1533
 1540
 1591
+1940
+1941
+1942
+1943
 %endif
 2043
 # Tests that are disabled here for rustls are SUPPOSED to work
