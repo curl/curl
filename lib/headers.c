@@ -216,16 +216,18 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
   return CURLE_OK;
 }
 
-static CURLcode append_value(struct Curl_easy *data, const char *value,
+static CURLcode unfold_value(struct Curl_easy *data, const char *value,
                              size_t vlen)  /* length of the incoming header */
 {
   struct Curl_header_store *hs;
   struct Curl_header_store *newhs;
   size_t olen; /* length of the old value */
+  size_t oalloc; /* length of the old name + value + separator */
   size_t offset;
   DEBUGASSERT(data->state.prevhead);
   hs = data->state.prevhead;
   olen = strlen(hs->value);
+  oalloc = olen + strlen(hs->name) + 1;
   offset = hs->value - hs->buffer;
 
   /* skip all trailing space letters */
@@ -243,7 +245,8 @@ static CURLcode append_value(struct Curl_easy *data, const char *value,
      realloc */
   Curl_llist_remove(&data->state.httphdrs, &hs->node, NULL);
 
-  newhs = Curl_saferealloc(hs, sizeof(*hs) + vlen + olen + 1);
+  /* new size = struct + new value length + old name+value length */
+  newhs = Curl_saferealloc(hs, sizeof(*hs) + vlen + oalloc + 1);
   if(!newhs)
     return CURLE_OUT_OF_MEMORY;
   /* ->name' and ->value point into ->buffer (to keep the header allocation
@@ -292,7 +295,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
 
   if((header[0] == ' ') || (header[0] == '\t'))
     /* line folding, append value to the previous header's value */
-    return append_value(data, header, hlen);
+    return unfold_value(data, header, hlen);
 
   hs = calloc(1, sizeof(*hs) + hlen);
   if(!hs)
