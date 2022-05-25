@@ -79,44 +79,50 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
   }
 
   for(c = DIGEST_MAX_CONTENT_LENGTH - 1; *str && c--; str++) {
-    switch(*str) {
-    case '\\':
-      if(starts_with_quote) {
-        if(!escape) {
+    if(!escape) {
+      switch(*str) {
+      case '\\':
+        if(starts_with_quote) {
           /* the start of an escaped quote */
           escape = TRUE;
           continue;
         }
-      }
-      break;
+        break;
 
-    case ',':
-      if(!starts_with_quote) {
-        /* This signals the end of the content if we didn't get a starting
-           quote and then we do "sloppy" parsing */
-        c = 0; /* the end */
-        continue;
-      }
-      break;
+      case ',':
+        if(!starts_with_quote) {
+          /* This signals the end of the content if we didn't get a starting
+             quote and then we do "sloppy" parsing */
+          c = 0; /* the end */
+          continue;
+        }
+        break;
 
-    case '\r':
-    case '\n':
-      /* end of string */
-      c = 0;
-      continue;
-
-    case '\"':
-      if(!escape && starts_with_quote) {
+      case '\r':
+      case '\n':
         /* end of string */
+        if(starts_with_quote)
+          return FALSE; /* No closing quote */
         c = 0;
         continue;
+
+      case '\"':
+        if(starts_with_quote) {
+          /* end of string */
+          c = 0;
+          continue;
+        }
+        else
+          return FALSE;
+        break;
       }
-      break;
     }
 
     escape = FALSE;
     *content++ = *str;
   }
+  if(escape)
+    return FALSE; /* No character after backslash */
 
   *content = 0;
   *endptr = str;
