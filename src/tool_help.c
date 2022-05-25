@@ -197,6 +197,8 @@ featcomp(const void *p1, const void *p2)
   return strcasecmp(* (char * const *) p1, * (char * const *) p2);
 #elif defined(HAVE_STRCMPI)
   return strcmpi(* (char * const *) p1, * (char * const *) p2);
+#elif defined(HAVE_STRICMP)
+  return stricmp(* (char * const *) p1, * (char * const *) p2);
 #else
   return strcmp(* (char * const *) p1, * (char * const *) p2);
 #endif
