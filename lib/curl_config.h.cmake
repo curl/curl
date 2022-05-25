@@ -159,6 +159,9 @@
 /* Define to 1 if you have the <assert.h> header file. */
 #cmakedefine HAVE_ASSERT_H 1
 
+/* Define to 1 if you have the `fchmod' function. */
+#cmakedefine HAVE_FCHMOD 1
+
 /* Define to 1 if you have the `basename' function. */
 #cmakedefine HAVE_BASENAME 1
 
