@@ -81,12 +81,12 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
   for(c = DIGEST_MAX_CONTENT_LENGTH - 1; *str && c--; str++) {
     switch(*str) {
     case '\\':
-      if(!escape) {
-        /* possibly the start of an escaped quote */
-        escape = TRUE;
-        *content++ = '\\'; /* Even though this is an escape character, we still
-                              store it as-is in the target buffer */
-        continue;
+      if(starts_with_quote) {
+        if(!escape) {
+          /* the start of an escaped quote */
+          escape = TRUE;
+          continue;
+        }
       }
       break;
 
@@ -664,6 +664,8 @@ static CURLcode auth_create_digest_http_message(
   char *cnonce = NULL;
   size_t cnonce_sz = 0;
   char *userp_quoted;
+  char *realm_quoted;
+  char *nonce_quoted;
   char *response = NULL;
   char *hashthis = NULL;
   char *tmp = NULL;
@@ -786,16 +788,27 @@ static CURLcode auth_create_digest_http_message(
      nonce="1053604145", uri="/64", response="c55f7f30d83d774a3d2dcacf725abaca"
 
      Digest parameters are all quoted strings.  Username which is provided by
-     the user will need double quotes and backslashes within it escaped.  For
-     the other fields, this shouldn't be an issue.  realm, nonce, and opaque
-     are copied as is from the server, escapes and all.  cnonce is generated
-     with web-safe characters.  uri is already percent encoded.  nc is 8 hex
+     the user will need double quotes and backslashes within it escaped.
+     realm, nonce, and opaque will need backslashes as well as they were
+     de-escaped when copied from request header.  cnonce is generated with
+     web-safe characters.  uri is already percent encoded.  nc is 8 hex
      characters.  algorithm and qop with standard values only contain web-safe
      characters.
   */
   userp_quoted = auth_digest_string_quoted(digest->userhash ? userh : userp);
   if(!userp_quoted)
     return CURLE_OUT_OF_MEMORY;
+  realm_quoted = auth_digest_string_quoted(digest->realm);
+  if(!realm_quoted) {
+    free(userp_quoted);
+    return CURLE_OUT_OF_MEMORY;
+  }
+  nonce_quoted = auth_digest_string_quoted(digest->nonce);
+  if(!nonce_quoted) {
+    free(realm_quoted);
+    free(userp_quoted);
+    return CURLE_OUT_OF_MEMORY;
+  }
 
   if(digest->qop) {
     response = aprintf("username=\"%s\", "
@@ -807,8 +820,8 @@ static CURLcode auth_create_digest_http_message(
                        "qop=%s, "
                        "response=\"%s\"",
                        userp_quoted,
-                       digest->realm,
-                       digest->nonce,
+                       realm_quoted,
+                       nonce_quoted,
                        uripath,
                        digest->cnonce,
                        digest->nc,
@@ -827,18 +840,26 @@ static CURLcode auth_create_digest_http_message(
                        "uri=\"%s\", "
                        "response=\"%s\"",
                        userp_quoted,
-                       digest->realm,
-                       digest->nonce,
+                       realm_quoted,
+                       nonce_quoted,
                        uripath,
                        request_digest);
   }
+  free(nonce_quoted);
+  free(realm_quoted);
   free(userp_quoted);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
   /* Add the optional fields */
   if(digest->opaque) {
+    char *opaque_quoted;
     /* Append the opaque */
+    opaque_quoted = auth_digest_string_quoted(digest->opaque);
+    if(!opaque_quoted) {
+      free(response);
+      return CURLE_OUT_OF_MEMORY;
+    }
     tmp = aprintf("%s, opaque=\"%s\"", response, digest->opaque);
     free(response);
     if(!tmp)
