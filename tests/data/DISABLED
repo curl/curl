@@ -49,10 +49,19 @@
 671
 672
 673
+1117
+1274
 1417
 1533
 1540
 1591
+# Test that are disabled here for Cirrus CI Windows builds
+%if Windows
+1940
+%endif
+1941
+1942
+1943
 %endif
 2043
 # Tests that are disabled here for rustls are SUPPOSED to work
