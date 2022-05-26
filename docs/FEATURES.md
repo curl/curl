@@ -31,7 +31,7 @@
  - replaceable memory functions (malloc, free, realloc, etc)
  - asynchronous name resolving (6)
  - both a push and a pull style interface
- - international domain names (11)
+ - international domain names (10)
 
 ## HTTP
 
@@ -62,7 +62,7 @@
  - retrieve file modification date
  - Content-Encoding support for deflate and gzip
  - "Transfer-Encoding: chunked" support in uploads
- - automatic data compression (12)
+ - automatic data compression (11)
 
 ## HTTPS (1)
 
@@ -78,7 +78,7 @@
 
  - download
  - authentication
- - Kerberos 5 (13)
+ - Kerberos 5 (12)
  - active/passive using PORT, EPRT, PASV or EPSV
  - single file size information (compare to HTTP HEAD)
  - 'type=' URL support
@@ -212,9 +212,8 @@
   6. requires c-ares
   7. requires libssh2, libssh or wolfSSH
   8. requires libssh2 or libssh
-  9. requires OpenSSL, GnuTLS, mbedTLS, NSS, yassl, Secure Transport or SSPI
+  9. requires OpenSSL, GnuTLS, mbedTLS, NSS, Secure Transport or SSPI
      (native Windows)
-  10. -
-  11. requires libidn2 or Windows
-  12. requires libz, brotli and/or zstd
-  13. requires a GSS-API implementation (such as Heimdal or MIT Kerberos)
+  10. requires libidn2 or Windows
+  11. requires libz, brotli and/or zstd
+  12. requires a GSS-API implementation (such as Heimdal or MIT Kerberos)

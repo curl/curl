@@ -159,7 +159,6 @@ problems may have been fixed or changed somewhat since this was written.
  18. HTTP/3
  18.1 If the HTTP/3 server closes connection during upload curl hangs
  18.2 Transfer closed with n bytes remaining to read
- 18.3 configure --with-ca-fallback is not supported by h3
  18.4 timeout when reusing a http3 connection
  18.9 connection migration does not work
 
@@ -620,7 +619,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 6.11 Negotiate on Windows fails
 
- When using --negotiate (or NTLM) with curl on Windows, SSL/TSL handshake
+ When using --negotiate (or NTLM) with curl on Windows, SSL/TLS handshake
  fails despite having a valid kerberos ticket cached. Works without any issue
  in Unix/Linux.
 
@@ -1125,10 +1124,6 @@ problems may have been fixed or changed somewhat since this was written.
  HTTP/3 transfers with the Jetty HTTP/3 server seem to not work.
 
  https://github.com/curl/curl/issues/8523
-
-18.3 configure --with-ca-fallback is not supported by h3
-
- https://github.com/curl/curl/issues/8696
 
 18.4 timeout when reusing a http3 connection
 

@@ -35,10 +35,10 @@
 #define NTLM_NEEDS_NSS_INIT
 #endif
 
-#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
 #ifdef USE_WOLFSSL
 #  include <wolfssl/options.h>
-#endif
+#  include <wolfssl/openssl/ssl.h>
+#elif defined(USE_OPENSSL)
 #  include <openssl/ssl.h>
 #endif
 

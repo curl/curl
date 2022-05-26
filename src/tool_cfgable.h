@@ -50,8 +50,6 @@ struct State {
 
 struct OperationConfig {
   bool remote_time;
-  char *random_file;
-  char *egd_file;
   char *useragent;
   struct curl_slist *cookies;  /* cookies to serialize into a single line */
   char *cookiejar;          /* write to this file */
@@ -325,6 +323,8 @@ struct GlobalConfig {
   char *libcurl;                  /* Output libcurl code to this file name */
   bool fail_early;                /* exit on first transfer error */
   bool styled_output;             /* enable fancy output style detection */
+  long ms_per_transfer;           /* start next transfer after (at least) this
+                                     many milliseconds */
 #ifdef CURLDEBUG
   bool test_event_based;
 #endif

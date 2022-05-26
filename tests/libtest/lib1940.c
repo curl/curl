@@ -32,6 +32,7 @@ static const char *show[]={
   "location",
   "set-cookie",
   "silly-thing",
+  "fold",
   NULL
 };
 

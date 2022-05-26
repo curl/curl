@@ -2964,7 +2964,7 @@ collect_server_cert(struct Curl_easy *data,
      private API and doesn't work as expected. So we have to look for
      a different symbol to make sure this code is only executed under
      Lion or later. */
-  if(SecTrustEvaluateAsync) {
+  if(SecTrustCopyPublicKey) {
 #pragma unused(server_certs)
     err = SSLCopyPeerTrust(backend->ssl_ctx, &trust);
     /* For some reason, SSLCopyPeerTrust() can return noErr and yet return

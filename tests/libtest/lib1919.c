@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_WOLFSSH_H
-#define HEADER_CURL_WOLFSSH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,7 +19,33 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "test.h"
 
-extern const struct Curl_handler Curl_handler_sftp;
+#include "testutil.h"
+#include "warnless.h"
+#include "memdebug.h"
 
-#endif /* HEADER_CURL_WOLFSSH_H */
+int test(char *URL)
+{
+  CURL *curl;
+  curl_global_init(CURL_GLOBAL_ALL);
+
+  curl = curl_easy_init();
+  if(curl) {
+    int i;
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
+    curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER,
+                     "c4e448d652a961fda0ab64f882c8c161d5985f805d45d80c9ddca1");
+    curl_easy_setopt(curl, CURLOPT_SASL_AUTHZID,
+                     "c4e448d652a961fda0ab64f882c8c161d5985f805d45d80c9ddca2");
+    curl_easy_setopt(curl, CURLOPT_URL, URL);
+
+    for(i = 0; i < 2; i++)
+      /* the second request needs to do connection reuse */
+      curl_easy_perform(curl);
+
+    curl_easy_cleanup(curl);
+  }
+  curl_global_cleanup();
+  return 0;
+}

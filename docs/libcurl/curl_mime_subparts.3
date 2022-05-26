@@ -39,9 +39,9 @@ structure.
 multipart part and must not be freed explicitly. It may however be updated by
 subsequent calls to mime API functions.
 
-Setting a part's contents twice is valid: only the value set by the last call
-is retained. It is possible to unassign previous part's contents by setting
-\fIsubparts\fP to NULL.
+Setting a part's contents multiple times is valid: only the value set by the
+last call is retained. It is possible to unassign previous part's contents by
+setting \fIsubparts\fP to NULL.
 .SH EXAMPLE
 .nf
  /* The inline part is an alternative proposing the html and the text

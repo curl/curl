@@ -52,8 +52,8 @@ If the file size cannot be determined before actually reading it (such as for
 a device or named pipe), the whole mime structure containing the part
 will be transferred as chunks by HTTP and rejected by IMAP.
 
-Setting a part's contents twice is valid: only the value set by the last call
-is retained.
+Setting a part's contents multiple times is valid: only the value set by the
+last call is retained.
 .SH EXAMPLE
 .nf
  curl_mime *mime;

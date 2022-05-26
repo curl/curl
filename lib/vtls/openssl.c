@@ -484,36 +484,19 @@ static CURLcode ossl_seed(struct Curl_easy *data)
   return CURLE_SSL_CONNECT_ERROR;
 #else
 
-#ifndef RANDOM_FILE
-  /* if RANDOM_FILE isn't defined, we only perform this if an option tells
-     us to! */
-  if(data->set.str[STRING_SSL_RANDOM_FILE])
-#define RANDOM_FILE "" /* doesn't matter won't be used */
+#ifdef RANDOM_FILE
+  RAND_load_file(RANDOM_FILE, RAND_LOAD_LENGTH);
+  if(rand_enough())
+    return CURLE_OK;
 #endif
-  {
-    /* let the option override the define */
-    RAND_load_file((data->set.str[STRING_SSL_RANDOM_FILE]?
-                    data->set.str[STRING_SSL_RANDOM_FILE]:
-                    RANDOM_FILE),
-                   RAND_LOAD_LENGTH);
-    if(rand_enough())
-      return CURLE_OK;
-  }
 
-#if defined(HAVE_RAND_EGD)
-  /* only available in OpenSSL 0.9.5 and later */
+#if defined(HAVE_RAND_EGD) && defined(EGD_SOCKET)
+  /* available in OpenSSL 0.9.5 and later */
   /* EGD_SOCKET is set at configure time or not at all */
-#ifndef EGD_SOCKET
-  /* If we don't have the define set, we only do this if the egd-option
-     is set */
-  if(data->set.str[STRING_SSL_EGDSOCKET])
-#define EGD_SOCKET "" /* doesn't matter won't be used */
-#endif
   {
     /* If there's an option and a define, the option overrides the
        define */
-    int ret = RAND_egd(data->set.str[STRING_SSL_EGDSOCKET]?
-                       data->set.str[STRING_SSL_EGDSOCKET]:EGD_SOCKET);
+    int ret = RAND_egd(EGD_SOCKET);
     if(-1 != ret) {
       if(rand_enough())
         return CURLE_OK;

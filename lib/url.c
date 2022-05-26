@@ -147,6 +147,10 @@ static void conn_free(struct connectdata *conn);
 # error READBUFFER_SIZE is too small
 #endif
 
+#ifdef USE_UNIX_SOCKETS
+#define UNIX_SOCKET_PREFIX "localhost"
+#endif
+
 /*
 * get_protocol_family()
 *
@@ -1770,16 +1774,12 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->ssl_config.verifypeer = data->set.ssl.primary.verifypeer;
   conn->ssl_config.verifyhost = data->set.ssl.primary.verifyhost;
   conn->ssl_config.ssl_options = data->set.ssl.primary.ssl_options;
-#ifdef USE_TLS_SRP
-#endif
 #ifndef CURL_DISABLE_PROXY
   conn->proxy_ssl_config.verifystatus =
     data->set.proxy_ssl.primary.verifystatus;
   conn->proxy_ssl_config.verifypeer = data->set.proxy_ssl.primary.verifypeer;
   conn->proxy_ssl_config.verifyhost = data->set.proxy_ssl.primary.verifyhost;
   conn->proxy_ssl_config.ssl_options = data->set.proxy_ssl.primary.ssl_options;
-#ifdef USE_TLS_SRP
-#endif
 #endif
   conn->ip_version = data->set.ipver;
   conn->bits.connect_only = data->set.connect_only;
@@ -2411,13 +2411,18 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   int port = -1;
   char *proxyuser = NULL;
   char *proxypasswd = NULL;
-  char *host;
+  char *host = NULL;
   bool sockstype;
   CURLUcode uc;
   struct proxy_info *proxyinfo;
   CURLU *uhp = curl_url();
   CURLcode result = CURLE_OK;
   char *scheme = NULL;
+#ifdef USE_UNIX_SOCKETS
+  char *path = NULL;
+  bool is_unix_proxy = FALSE;
+#endif
+
 
   if(!uhp) {
     result = CURLE_OUT_OF_MEMORY;
@@ -2542,21 +2547,54 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
-  Curl_safefree(proxyinfo->host.rawalloc);
-  proxyinfo->host.rawalloc = host;
-  if(host[0] == '[') {
-    /* this is a numerical IPv6, strip off the brackets */
-    size_t len = strlen(host);
-    host[len-1] = 0; /* clear the trailing bracket */
-    host++;
-    zonefrom_url(uhp, data, conn);
+#ifdef USE_UNIX_SOCKETS
+  if(sockstype && strcasecompare(UNIX_SOCKET_PREFIX, host)) {
+    uc = curl_url_get(uhp, CURLUPART_PATH, &path, CURLU_URLDECODE);
+    if(uc) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto error;
+    }
+    /* path will be "/", if no path was was found */
+    if(strcmp("/", path)) {
+      is_unix_proxy = TRUE;
+      free(host);
+      host = aprintf(UNIX_SOCKET_PREFIX"%s", path);
+      if(!host) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto error;
+      }
+      Curl_safefree(proxyinfo->host.rawalloc);
+      proxyinfo->host.rawalloc = host;
+      proxyinfo->host.name = host;
+      host = NULL;
+    }
   }
-  proxyinfo->host.name = host;
+
+  if(!is_unix_proxy) {
+#endif
+    Curl_safefree(proxyinfo->host.rawalloc);
+    proxyinfo->host.rawalloc = host;
+    if(host[0] == '[') {
+      /* this is a numerical IPv6, strip off the brackets */
+      size_t len = strlen(host);
+      host[len-1] = 0; /* clear the trailing bracket */
+      host++;
+      zonefrom_url(uhp, data, conn);
+    }
+    proxyinfo->host.name = host;
+    host = NULL;
+#ifdef USE_UNIX_SOCKETS
+  }
+#endif
 
   error:
   free(proxyuser);
   free(proxypasswd);
+  free(host);
   free(scheme);
+#ifdef USE_UNIX_SOCKETS
+  free(path);
+#endif
   curl_url_cleanup(uhp);
   return result;
 }
@@ -3388,25 +3426,35 @@ static CURLcode resolve_server(struct Curl_easy *data,
     struct Curl_dns_entry *hostaddr = NULL;
 
 #ifdef USE_UNIX_SOCKETS
-    if(conn->unix_domain_socket) {
+    char *unix_path = NULL;
+
+    if(conn->unix_domain_socket)
+      unix_path = conn->unix_domain_socket;
+#ifndef CURL_DISABLE_PROXY
+    else if(conn->socks_proxy.host.name
+        && !strncmp(UNIX_SOCKET_PREFIX"/",
+          conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
+      unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
+#endif
+
+    if(unix_path) {
       /* Unix domain sockets are local. The host gets ignored, just use the
        * specified domain socket address. Do not cache "DNS entries". There is
        * no DNS involved and we already have the filesystem path available */
-      const char *path = conn->unix_domain_socket;
 
       hostaddr = calloc(1, sizeof(struct Curl_dns_entry));
       if(!hostaddr)
         result = CURLE_OUT_OF_MEMORY;
       else {
         bool longpath = FALSE;
-        hostaddr->addr = Curl_unix2addr(path, &longpath,
+        hostaddr->addr = Curl_unix2addr(unix_path, &longpath,
                                         conn->bits.abstract_unix_socket);
         if(hostaddr->addr)
           hostaddr->inuse++;
         else {
           /* Long paths are not supported for now */
           if(longpath) {
-            failf(data, "Unix socket path too long: '%s'", path);
+            failf(data, "Unix socket path too long: '%s'", unix_path);
             result = CURLE_COULDNT_RESOLVE_HOST;
           }
           else
@@ -3502,17 +3550,6 @@ static void reuse_conn(struct Curl_easy *data,
      **established** from the primary socket to a remote address. */
   char local_ip[MAX_IPADR_LEN] = "";
   int local_port = -1;
-#ifndef CURL_DISABLE_PROXY
-  Curl_free_idnconverted_hostname(&old_conn->http_proxy.host);
-  Curl_free_idnconverted_hostname(&old_conn->socks_proxy.host);
-
-  free(old_conn->http_proxy.host.rawalloc);
-  free(old_conn->socks_proxy.host.rawalloc);
-  Curl_free_primary_ssl_config(&old_conn->proxy_ssl_config);
-#endif
-  /* free the SSL config struct from this connection struct as this was
-     allocated in vain and is targeted for destruction */
-  Curl_free_primary_ssl_config(&old_conn->ssl_config);
 
   /* get the user+password information from the old_conn struct since it may
    * be new for this request even when we re-use an existing connection */
@@ -3543,20 +3580,17 @@ static void reuse_conn(struct Curl_easy *data,
     old_conn->http_proxy.passwd = NULL;
     old_conn->socks_proxy.passwd = NULL;
   }
-  Curl_safefree(old_conn->http_proxy.user);
-  Curl_safefree(old_conn->socks_proxy.user);
-  Curl_safefree(old_conn->http_proxy.passwd);
-  Curl_safefree(old_conn->socks_proxy.passwd);
 #endif
 
-  /* host can change, when doing keepalive with a proxy or if the case is
-     different this time etc */
   Curl_free_idnconverted_hostname(&conn->host);
   Curl_free_idnconverted_hostname(&conn->conn_to_host);
   Curl_safefree(conn->host.rawalloc);
   Curl_safefree(conn->conn_to_host.rawalloc);
   conn->host = old_conn->host;
+  old_conn->host.rawalloc = NULL;
+  old_conn->host.encalloc = NULL;
   conn->conn_to_host = old_conn->conn_to_host;
+  old_conn->conn_to_host.rawalloc = NULL;
   conn->conn_to_port = old_conn->conn_to_port;
   conn->remote_port = old_conn->remote_port;
   Curl_safefree(conn->hostname_resolve);
@@ -3576,15 +3610,7 @@ static void reuse_conn(struct Curl_easy *data,
   /* re-use init */
   conn->bits.reuse = TRUE; /* yes, we're re-using here */
 
-  Curl_safefree(old_conn->user);
-  Curl_safefree(old_conn->passwd);
-  Curl_safefree(old_conn->options);
-  Curl_safefree(old_conn->localdev);
-  Curl_llist_destroy(&old_conn->easyq, NULL);
-
-#ifdef USE_UNIX_SOCKETS
-  Curl_safefree(old_conn->unix_domain_socket);
-#endif
+  conn_free(old_conn);
 }
 
 /**
@@ -3834,8 +3860,6 @@ static CURLcode create_conn(struct Curl_easy *data,
   data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE];
   data->set.ssl.primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
   data->set.ssl.primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT];
-  data->set.ssl.primary.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
-  data->set.ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
   data->set.ssl.primary.cipher_list =
     data->set.str[STRING_SSL_CIPHER_LIST];
   data->set.ssl.primary.cipher_list13 =
@@ -3849,9 +3873,6 @@ static CURLcode create_conn(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
   data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
   data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
-  data->set.proxy_ssl.primary.random_file =
-    data->set.str[STRING_SSL_RANDOM_FILE];
-  data->set.proxy_ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
   data->set.proxy_ssl.primary.cipher_list =
     data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
   data->set.proxy_ssl.primary.cipher_list13 =
@@ -3934,10 +3955,6 @@ static CURLcode create_conn(struct Curl_easy *data,
      * allocated before we can move along and use the previously existing one.
      */
     reuse_conn(data, conn, conn_temp);
-#ifdef USE_SSL
-    free(conn->ssl_extra);
-#endif
-    free(conn);          /* we don't need this anymore */
     conn = conn_temp;
     *in_connect = conn;
 

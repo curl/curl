@@ -94,7 +94,9 @@ but it might have a different case.
 
 The data \fBvalue\fP field points to, comes exactly as delivered over the
 network but with leading and trailing whitespace and newlines stripped
-off. The `value` data is nul-terminated.
+off. The `value` data is nul-terminated. For legacy HTTP/1 "folded headers",
+this API provides the full single value in an unfolded manner with a single
+whitespace between the lines.
 
 \fBamount\fP is how many headers using this name that exist, within the origin
 and request scope asked for.

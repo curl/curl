@@ -248,8 +248,6 @@ struct ssl_primary_config {
   char *CAfile;          /* certificate to verify peer against */
   char *issuercert;      /* optional issuer certificate filename */
   char *clientcert;
-  char *random_file;     /* path to file containing "random" data */
-  char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
   char *pinned_key;
@@ -1425,6 +1423,7 @@ struct UrlState {
                                  headers */
   struct Curl_llist httphdrs; /* received headers */
   struct curl_header headerout; /* for external purposes */
+  struct Curl_header_store *prevhead; /* the latest added header */
 #endif
   trailers_state trailers_state; /* whether we are sending trailers
                                        and what stage are we at */
@@ -1548,8 +1547,6 @@ enum dupstring {
   STRING_SSL_CIPHER_LIST_PROXY, /* list of ciphers to use */
   STRING_SSL_CIPHER13_LIST, /* list of TLS 1.3 ciphers to use */
   STRING_SSL_CIPHER13_LIST_PROXY, /* list of TLS 1.3 ciphers to use */
-  STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */
-  STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */
   STRING_USERAGENT,       /* User-Agent string */
   STRING_SSL_CRLFILE,     /* crl file to check certificate */
   STRING_SSL_CRLFILE_PROXY, /* crl file to check certificate */

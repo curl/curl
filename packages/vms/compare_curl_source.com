@@ -260,19 +260,12 @@ $!  These files are in the wrong format for VMS diff, and we don't change them.
 $   ref_skip = 0
 $   if ref_type .eqs. ".PDF" then ref_skip = 1
 $   if ref_type .eqs. ".HTML" then ref_skip = 1
-$   if ref_type .eqs. ".HQX" then ref_skip = 1
 $   if ref_type .eqs. ".P12" then ref_skip = 1
 $   if ref_type .eqs. "."
 $   then
 $       if f$locate("test", ref_fname) .eq. 0 then ref_skip = 1
 $       if ref_fname .eqs. "configure." then ref_skip = 1
 $   endif
-$   if ref_fname .eqs. "MACINSTALL.TXT" then ref_skip = 1
-$   if ref_fname .eqs. "$macinstall.txt" then ref_skip = 1
-$   if ref_fname .eqs. "curl.mcp$5nxml$5nsit$5nhqx" then ref_skip = 1
-$   if ref_fname .eqs. "curl_GUSIConfig.cpp" then ref_skip = 1
-$   if ref_fname .eqs. "curl_$gusic$onfig.cpp" then ref_skip = 1
-$   if ref_fname .eqs. "macos_main.cpp" then ref_skip = 1
 $!
 $!
 $   if ref_skip .ne. 0

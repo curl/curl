@@ -6,6 +6,7 @@ HTTP POST
 POST callback
 HTTP proxy
 HTTP proxy NTLM auth
+NTLM
 </keywords>
 </info>
 # Server-side
@@ -76,24 +77,14 @@ lib%TESTNUMBER
 NTLM
 SSL
 !SSPI
-debug
 proxy
 </features>
- <name>
+<name>
 HTTP proxy offers Negotiate+NTLM, use only NTLM
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
+</name>
+<command>
 http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -113,7 +104,7 @@ Proxy-Connection: Keep-Alive
 
 GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAgACAHAAAAAIAAgAcgAAAAAAAAAAAAAAhoIBAAQt1KW5CgG4YdWWcfXyfXBz1ZMCzYp37xYjBiAizmw58O6eQS7yR66eqYGWeSwl9W1lY3VybGhvc3Q=
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAgACAHAAAAALAAsAcgAAAAAAAAAAAAAAhoIBAAQt1KW5CgG4YdWWcfXyfXBz1ZMCzYp37xYjBiAizmw58O6eQS7yR66eqYGWeSwl9W1lV09SS1NUQVRJT04=
 Accept: */*
 Proxy-Connection: Keep-Alive
 

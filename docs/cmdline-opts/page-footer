@@ -113,6 +113,8 @@ Makes it the equivalent of --socks5-hostname
 There are a bunch of different error codes and their corresponding error
 messages that may appear under error conditions. At the time of this writing,
 the exit codes are:
+.IP 0
+Success. The operation completed successfully according to the instructions.
 .IP 1
 Unsupported protocol. This build of curl has no support for this protocol.
 .IP 2

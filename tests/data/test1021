@@ -7,6 +7,7 @@ HTTP CONNECT
 HTTP proxy
 HTTP proxy NTLM auth
 --proxy-anyauth
+NTLM
 </keywords>
 </info>
 # Server-side
@@ -93,24 +94,14 @@ http
 NTLM
 SSL
 !SSPI
-debug
 proxy
 </features>
- <name>
+<name>
 HTTP proxy CONNECT with any proxyauth and proxy offers NTLM and close
- </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
- <command>
+</name>
+<command>
 http://test.remote.example.com.%TESTNUMBER:%HTTPPORT/path/%TESTNUMBER0002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-anyauth --proxytunnel
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -129,7 +120,7 @@ Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
-Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q=
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04=
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 

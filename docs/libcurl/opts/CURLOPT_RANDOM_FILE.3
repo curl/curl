@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -30,6 +30,8 @@ CURLOPT_RANDOM_FILE \- file to read random data from
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RANDOM_FILE, char *path);
 .fi
 .SH DESCRIPTION
+Deprecated option. It serves no purpose anymore.
+
 Pass a char * to a null-terminated file name. The file might be used to read
 from to seed the random engine for SSL and more.
 
@@ -50,7 +52,10 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Always
+If built with TLS enabled. Only the OpenSSL backend will use this, and only
+with OpenSSL versions before 1.1.0.
+
+This option was deprecated in 7.84.0.
 .SH RETURN VALUE
 Returns CURLE_OK on success or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

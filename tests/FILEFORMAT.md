@@ -128,6 +128,7 @@ Available substitute variables include:
 - `%HTTPTLS6PORT` - IPv6 port number of the HTTP TLS server
 - `%HTTPTLSPORT` - Port number of the HTTP TLS server
 - `%HTTPUNIXPATH` - Path to the Unix socket of the HTTP server
+- `%SOCKSUNIXPATH` - Absolute Path to the Unix socket of the SOCKS server
 - `%IMAP6PORT` - IPv6 port number of the IMAP server
 - `%IMAPPORT` - Port number of the IMAP server
 - `%MQTTPORT` - Port number of the MQTT server
@@ -315,7 +316,7 @@ about to issue.
   server will NOT wait for the full request body to get sent
 - `idle` - do nothing after receiving the request, just "sit idle"
 - `stream` - continuously send data to the client, never-ending
-- `writedelay: [secs]` delay this amount between reply packets
+- `writedelay: [msecs]` delay this amount between reply packets
 - `skip: [num]` - instructs the server to ignore reading this many bytes from
   a PUT or POST request
 - `rtp: part [num] channel [num] size [num]` - stream a fake RTP packet for

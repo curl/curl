@@ -51,7 +51,7 @@ static int check_gss_err(struct Curl_easy *data,
   if(GSS_ERROR(major_status)) {
     OM_uint32 maj_stat, min_stat;
     OM_uint32 msg_ctx = 0;
-    gss_buffer_desc status_string;
+    gss_buffer_desc status_string = GSS_C_EMPTY_BUFFER;
     char buf[1024];
     size_t len;
 

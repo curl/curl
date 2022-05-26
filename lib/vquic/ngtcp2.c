@@ -28,7 +28,11 @@
 #include <nghttp3/nghttp3.h>
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
+#ifdef OPENSSL_IS_BORINGSSL
+#include <ngtcp2/ngtcp2_crypto_boringssl.h>
+#else
 #include <ngtcp2/ngtcp2_crypto_openssl.h>
+#endif
 #include "vtls/openssl.h"
 #elif defined(USE_GNUTLS)
 #include <ngtcp2/ngtcp2_crypto_gnutls.h>
@@ -200,13 +204,65 @@ static int write_client_handshake(struct quicsocket *qs,
   rv = ngtcp2_conn_submit_crypto_data(qs->qconn, level, data, len);
   if(rv) {
     H3BUGF(fprintf(stderr, "write_client_handshake failed\n"));
+    return 0;
   }
-  assert(0 == rv);
 
   return 1;
 }
 
 #ifdef USE_OPENSSL
+#ifdef OPENSSL_IS_BORINGSSL
+static int quic_set_read_secret(SSL *ssl,
+                         enum ssl_encryption_level_t ssl_level,
+                         const SSL_CIPHER *cipher UNUSED_PARAM,
+                         const uint8_t *secret,
+                         size_t secretlen)
+{
+  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_boringssl_from_ssl_encryption_level(ssl_level);
+
+  if(ngtcp2_crypto_derive_and_install_rx_key(
+       qs->qconn, NULL, NULL, NULL, level, secret, secretlen) != 0)
+    return 0;
+
+  if(level == NGTCP2_CRYPTO_LEVEL_APPLICATION) {
+    if(init_ngh3_conn(qs) != CURLE_OK)
+      return 0;
+  }
+
+  return 1;
+}
+
+static int quic_set_write_secret(SSL *ssl,
+                     enum ssl_encryption_level_t ssl_level,
+                     const SSL_CIPHER *cipher UNUSED_PARAM,
+                     const uint8_t *secret,
+                     size_t secretlen)
+{
+  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_boringssl_from_ssl_encryption_level(ssl_level);
+
+  if(ngtcp2_crypto_derive_and_install_tx_key(
+       qs->qconn, NULL, NULL, NULL, level, secret, secretlen) != 0)
+    return 0;
+
+  return 1;
+}
+
+static int quic_add_handshake_data(SSL *ssl,
+                                   enum ssl_encryption_level_t ssl_level,
+                                   const uint8_t *data,
+                                   size_t len)
+{
+  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_boringssl_from_ssl_encryption_level(ssl_level);
+
+  return write_client_handshake(qs, level, data, len);
+}
+#else
 static int quic_set_encryption_secrets(SSL *ssl,
                                        OSSL_ENCRYPTION_LEVEL ossl_level,
                                        const uint8_t *rx_secret,
@@ -214,7 +270,8 @@ static int quic_set_encryption_secrets(SSL *ssl,
                                        size_t secretlen)
 {
   struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  int level = ngtcp2_crypto_openssl_from_ossl_encryption_level(ossl_level);
+  ngtcp2_crypto_level level =
+      ngtcp2_crypto_openssl_from_ossl_encryption_level(ossl_level);
 
   if(ngtcp2_crypto_derive_and_install_rx_key(
        qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
@@ -241,6 +298,7 @@ static int quic_add_handshake_data(SSL *ssl, OSSL_ENCRYPTION_LEVEL ossl_level,
 
   return write_client_handshake(qs, level, data, len);
 }
+#endif
 
 static int quic_flush_flight(SSL *ssl)
 {
@@ -258,7 +316,13 @@ static int quic_send_alert(SSL *ssl, enum ssl_encryption_level_t level,
   return 1;
 }
 
-static SSL_QUIC_METHOD quic_method = {quic_set_encryption_secrets,
+static SSL_QUIC_METHOD quic_method = {
+#ifdef OPENSSL_IS_BORINGSSL
+                                      quic_set_read_secret,
+                                      quic_set_write_secret,
+#else
+                                      quic_set_encryption_secrets,
+#endif
                                       quic_add_handshake_data,
                                       quic_flush_flight, quic_send_alert};
 
@@ -272,6 +336,12 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 
   SSL_CTX_set_default_verify_paths(ssl_ctx);
 
+#ifdef OPENSSL_IS_BORINGSSL
+  if(SSL_CTX_set1_curves_list(ssl_ctx, QUIC_GROUPS) != 1) {
+    failf(data, "SSL_CTX_set1_curves_list failed");
+    return NULL;
+  }
+#else
   if(SSL_CTX_set_ciphersuites(ssl_ctx, QUIC_CIPHERS) != 1) {
     char error_buffer[256];
     ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
@@ -283,6 +353,7 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
     failf(data, "SSL_CTX_set1_groups_list failed");
     return NULL;
   }
+#endif
 
   SSL_CTX_set_quic_method(ssl_ctx, &quic_method);
 
@@ -423,7 +494,7 @@ static int alert_read_func(gnutls_session_t ssl,
   (void)alert_level;
 
   qs->tls_alert = alert_desc;
-  return 1;
+  return 0;
 }
 
 static int tp_recv_func(gnutls_session_t ssl, const uint8_t *data,
@@ -431,14 +502,21 @@ static int tp_recv_func(gnutls_session_t ssl, const uint8_t *data,
 {
   struct quicsocket *qs = gnutls_session_get_ptr(ssl);
   ngtcp2_transport_params params;
+  int rv;
 
-  if(ngtcp2_decode_transport_params(
+  rv = ngtcp2_decode_transport_params(
        &params, NGTCP2_TRANSPORT_PARAMS_TYPE_ENCRYPTED_EXTENSIONS,
-       data, data_size) != 0)
+       data, data_size);
+  if(rv) {
+    ngtcp2_conn_set_tls_error(qs->qconn, rv);
     return -1;
+  }
 
-  if(ngtcp2_conn_set_remote_transport_params(qs->qconn, &params) != 0)
+  rv = ngtcp2_conn_set_remote_transport_params(qs->qconn, &params);
+  if(rv) {
+    ngtcp2_conn_set_tls_error(qs->qconn, rv);
     return -1;
+  }
 
   return 0;
 }
@@ -446,9 +524,9 @@ static int tp_recv_func(gnutls_session_t ssl, const uint8_t *data,
 static int tp_send_func(gnutls_session_t ssl, gnutls_buffer_t extdata)
 {
   struct quicsocket *qs = gnutls_session_get_ptr(ssl);
-  uint8_t paramsbuf[64];
+  uint8_t paramsbuf[256];
   ngtcp2_transport_params params;
-  ssize_t nwrite;
+  ngtcp2_ssize nwrite;
   int rc;
 
   ngtcp2_conn_get_local_transport_params(qs->qconn, &params);
@@ -571,7 +649,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
                                void *user_data, void *stream_user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
-  ssize_t nconsumed;
+  nghttp3_ssize nconsumed;
   int fin = (flags & NGTCP2_STREAM_DATA_FLAG_FIN) ? 1 : 0;
   (void)offset;
   (void)stream_user_data;
@@ -579,6 +657,9 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   nconsumed =
     nghttp3_conn_read_stream(qs->h3conn, stream_id, buf, buflen, fin);
   if(nconsumed < 0) {
+    ngtcp2_connection_close_error_set_application_error(
+        &qs->last_error, nghttp3_err_infer_quic_app_error_code((int)nconsumed),
+        NULL, 0);
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -629,6 +710,8 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
   rv = nghttp3_conn_close_stream(qs->h3conn, stream_id,
                                  app_error_code);
   if(rv) {
+    ngtcp2_connection_close_error_set_application_error(
+        &qs->last_error, nghttp3_err_infer_quic_app_error_code(rv), NULL, 0);
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -855,6 +938,8 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 
   ngtcp2_conn_set_tls_native_handle(qs->qconn, qs->ssl);
 
+  ngtcp2_connection_close_error_default(&qs->last_error);
+
   return CURLE_OK;
 }
 
@@ -899,18 +984,14 @@ static void qs_disconnect(struct quicsocket *qs)
   char buffer[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
   ngtcp2_tstamp ts;
   ngtcp2_ssize rc;
-  ngtcp2_connection_close_error errorcode;
 
   if(!qs->conn) /* already closed */
     return;
-  ngtcp2_connection_close_error_set_application_error(&errorcode,
-                                                      NGHTTP3_H3_NO_ERROR,
-                                                      NULL, 0);
   ts = timestamp();
   rc = ngtcp2_conn_write_connection_close(qs->qconn, NULL, /* path */
                                           NULL, /* pkt_info */
                                           (uint8_t *)buffer, sizeof(buffer),
-                                          &errorcode, ts);
+                                          &qs->last_error, ts);
   if(rc > 0) {
     while((send(qs->conn->sock[FIRSTSOCKET], buffer, rc, 0) == -1) &&
           SOCKERRNO == EINTR);
@@ -1368,10 +1449,10 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
-                                  nghttp3_vec *vec, size_t veccnt,
-                                  uint32_t *pflags, void *user_data,
-                                  void *stream_user_data)
+static nghttp3_ssize cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
+                                        nghttp3_vec *vec, size_t veccnt,
+                                        uint32_t *pflags, void *user_data,
+                                        void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
   size_t nread;
@@ -1704,7 +1785,17 @@ static CURLcode ng_process_ingress(struct Curl_easy *data,
 
     rv = ngtcp2_conn_read_pkt(qs->qconn, &path, &pi, buf, recvd, ts);
     if(rv) {
-      /* TODO Send CONNECTION_CLOSE if possible */
+      if(!qs->last_error.error_code) {
+        if(rv == NGTCP2_ERR_CRYPTO) {
+          ngtcp2_connection_close_error_set_transport_error_tls_alert(
+              &qs->last_error, qs->tls_alert, NULL, 0);
+        }
+        else {
+          ngtcp2_connection_close_error_set_transport_error_liberr(
+              &qs->last_error, rv, NULL, 0);
+        }
+      }
+
       if(rv == NGTCP2_ERR_CRYPTO)
         /* this is a "TLS problem", but a failed certificate verification
            is a common reason for this */
@@ -1722,23 +1813,25 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
 {
   int rv;
   ssize_t sent;
-  ssize_t outlen;
-  uint8_t out[NGTCP2_MAX_UDP_PAYLOAD_SIZE];
+  ngtcp2_ssize outlen;
+  uint8_t out[NGTCP2_MAX_PMTUD_UDP_PAYLOAD_SIZE];
   ngtcp2_path_storage ps;
   ngtcp2_tstamp ts = timestamp();
   ngtcp2_tstamp expiry;
   ngtcp2_duration timeout;
   int64_t stream_id;
-  ssize_t veccnt;
+  nghttp3_ssize veccnt;
   int fin;
   nghttp3_vec vec[16];
-  ssize_t ndatalen;
+  ngtcp2_ssize ndatalen;
   uint32_t flags;
 
   rv = ngtcp2_conn_handle_expiry(qs->qconn, ts);
   if(rv) {
     failf(data, "ngtcp2_conn_handle_expiry returned error: %s",
           ngtcp2_strerror(rv));
+    ngtcp2_connection_close_error_set_transport_error_liberr(&qs->last_error,
+                                                             rv, NULL, 0);
     return CURLE_SEND_ERROR;
   }
 
@@ -1755,6 +1848,9 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       if(veccnt < 0) {
         failf(data, "nghttp3_conn_writev_stream returned error: %s",
               nghttp3_strerror((int)veccnt));
+        ngtcp2_connection_close_error_set_application_error(
+            &qs->last_error,
+            nghttp3_err_infer_quic_app_error_code((int)veccnt), NULL, 0);
         return CURLE_SEND_ERROR;
       }
     }
@@ -1802,6 +1898,8 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
         assert(ndatalen == -1);
         failf(data, "ngtcp2_conn_writev_stream returned error: %s",
               ngtcp2_strerror((int)outlen));
+        ngtcp2_connection_close_error_set_transport_error_liberr(
+            &qs->last_error, (int)outlen, NULL, 0);
         return CURLE_SEND_ERROR;
       }
     }
@@ -1826,7 +1924,10 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       else {
         failf(data, "send() returned %zd (errno %d)", sent,
               SOCKERRNO);
-        return CURLE_SEND_ERROR;
+        if(SOCKERRNO != EMSGSIZE) {
+          return CURLE_SEND_ERROR;
+        }
+        /* UDP datagram is too large; caused by PMTUD. Just let it be lost. */
       }
     }
   }
@@ -1892,6 +1993,28 @@ bool Curl_quic_data_pending(const struct Curl_easy *data)
      until the overflow buffer is empty. */
   const struct HTTP *stream = data->req.p.http;
   return Curl_dyn_len(&stream->overflow) > 0;
+}
+
+/*
+ * Called from transfer.c:Curl_readwrite when neither HTTP level read
+ * nor write is performed. It is a good place to handle timer expiry
+ * for QUIC transport.
+ */
+CURLcode Curl_quic_idle(struct Curl_easy *data)
+{
+  struct connectdata *conn = data->conn;
+  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+  struct quicsocket *qs = conn->quic;
+
+  if(ngtcp2_conn_get_expiry(qs->qconn) > timestamp()) {
+    return CURLE_OK;
+  }
+
+  if(ng_flush_egress(data, sockfd, qs)) {
+    return CURLE_SEND_ERROR;
+  }
+
+  return CURLE_OK;
 }
 
 #endif

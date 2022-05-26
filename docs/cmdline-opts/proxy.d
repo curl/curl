@@ -14,6 +14,9 @@ specified or http:// will be treated as HTTP proxy. Use socks4://, socks4a://,
 socks5:// or socks5h:// to request a specific SOCKS version to be used.
 (Added in 7.21.7)
 
+Unix domain sockets are supported for socks proxy. Set localhost for the host
+part. e.g. socks5h://localhost/path/to/socket.sock
+
 HTTPS proxy support via https:// protocol prefix was added in 7.52.0 for
 OpenSSL, GnuTLS and NSS.
 

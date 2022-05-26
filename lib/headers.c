@@ -216,6 +216,57 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
   return CURLE_OK;
 }
 
+static CURLcode unfold_value(struct Curl_easy *data, const char *value,
+                             size_t vlen)  /* length of the incoming header */
+{
+  struct Curl_header_store *hs;
+  struct Curl_header_store *newhs;
+  size_t olen; /* length of the old value */
+  size_t oalloc; /* length of the old name + value + separator */
+  size_t offset;
+  DEBUGASSERT(data->state.prevhead);
+  hs = data->state.prevhead;
+  olen = strlen(hs->value);
+  oalloc = olen + strlen(hs->name) + 1;
+  offset = hs->value - hs->buffer;
+
+  /* skip all trailing space letters */
+  while(vlen && ISSPACE(value[vlen - 1]))
+    vlen--;
+
+  /* save only one leading space */
+  while((vlen > 1) && ISSPACE(value[0]) && ISSPACE(value[1])) {
+    vlen--;
+    value++;
+  }
+
+  /* since this header block might move in the realloc below, it needs to
+     first be unlinked from the list and then re-added again after the
+     realloc */
+  Curl_llist_remove(&data->state.httphdrs, &hs->node, NULL);
+
+  /* new size = struct + new value length + old name+value length */
+  newhs = Curl_saferealloc(hs, sizeof(*hs) + vlen + oalloc + 1);
+  if(!newhs)
+    return CURLE_OUT_OF_MEMORY;
+  /* ->name' and ->value point into ->buffer (to keep the header allocation
+     in a single memory block), which now potentially have moved. Adjust
+     them. */
+  newhs->name = newhs->buffer;
+  newhs->value = &newhs->buffer[offset];
+
+  /* put the data at the end of the previous data, not the newline */
+  memcpy(&newhs->value[olen], value, vlen);
+  newhs->value[olen + vlen] = 0; /* zero terminate at newline */
+
+  /* insert this node into the list of headers */
+  Curl_llist_insert_next(&data->state.httphdrs, data->state.httphdrs.tail,
+                         newhs, &newhs->node);
+  data->state.prevhead = newhs;
+  return CURLE_OK;
+}
+
+
 /*
  * Curl_headers_push() gets passed a full HTTP header to store. It gets called
  * immediately before the header callback. The header is CRLF terminated.
@@ -242,6 +293,10 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   }
   hlen = end - header + 1;
 
+  if((header[0] == ' ') || (header[0] == '\t'))
+    /* line folding, append value to the previous header's value */
+    return unfold_value(data, header, hlen);
+
   hs = calloc(1, sizeof(*hs) + hlen);
   if(!hs)
     return CURLE_OUT_OF_MEMORY;
@@ -260,7 +315,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   /* insert this node into the list of headers */
   Curl_llist_insert_next(&data->state.httphdrs, data->state.httphdrs.tail,
                          hs, &hs->node);
-
+  data->state.prevhead = hs;
   return CURLE_OK;
   fail:
   free(hs);

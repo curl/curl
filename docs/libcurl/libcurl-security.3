@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -393,6 +393,18 @@ libcurl itself uses `fork()` and `execl()` if told to use the
 `CURLAUTH_NTLM_WB` authentication method which then will invoke the helper
 command in a child process with file descriptors duplicated. Make sure that
 only the trusted and reliable helper program is invoked!
+.SH_"Secrets in memory"
+When applications pass user names, passwords or other sensitive data to
+libcurl to be used for upcoming transfers, those secrets will be kept around
+as-is in memory. In many cases they will be stored in heap for as long as the
+handle itself for which the options are set.
+
+If an attacker can access the heap, like maybe by reading swap space or via a
+core dump file, such data might be accessible.
+
+Further, when eventually closing a handle and the secrets are no longer
+needed, libcurl does not explicitly clear memory before freeing it, so
+crendentials may be left in freed data.
 .SH "Report Security Problems"
 Should you detect or just suspect a security problem in libcurl or curl,
 contact the project curl security team immediately. See

@@ -94,7 +94,7 @@ while(<STDIN>) {
         $oldco = $co;
         $oldc = $c;
         $olddate = $date;
-        if($line++) {
+        if($line++ && $2 ne "") {
             print "  ";
         }
         print $2."\n";

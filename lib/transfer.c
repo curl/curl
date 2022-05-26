@@ -1222,6 +1222,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         infof(data, "Done waiting for 100-continue");
       }
     }
+
+#ifdef ENABLE_QUIC
+    if(conn->transport == TRNSPRT_QUIC) {
+      result = Curl_quic_idle(data);
+      if(result)
+        return result;
+    }
+#endif
   }
 
   if(Curl_pgrsUpdate(data))
@@ -1888,10 +1896,13 @@ Curl_setup_transfer(
   struct SingleRequest *k = &data->req;
   struct connectdata *conn = data->conn;
   struct HTTP *http = data->req.p.http;
-  bool httpsending = ((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
-                      (http->sending == HTTPSEND_REQUEST));
+  bool httpsending;
+
   DEBUGASSERT(conn != NULL);
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
+
+  httpsending = ((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
+                 (http->sending == HTTPSEND_REQUEST));
 
   if(conn->bits.multiplex || conn->httpversion == 20 || httpsending) {
     /* when multiplexing, the read/write sockets need to be the same! */

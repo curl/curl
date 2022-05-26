@@ -69,12 +69,6 @@ static const char *doh_strerror(DOHcode code)
 }
 #endif
 
-#ifdef DEBUGBUILD
-#define UNITTEST
-#else
-#define UNITTEST static
-#endif
-
 /* @unittest 1655
  */
 UNITTEST DOHcode doh_encode(const char *host,
@@ -306,14 +300,6 @@ static CURLcode dohprobe(struct Curl_easy *data,
     }
     if(data->set.ssl.certinfo)
       ERROR_CHECK_SETOPT(CURLOPT_CERTINFO, 1L);
-    if(data->set.str[STRING_SSL_RANDOM_FILE]) {
-      ERROR_CHECK_SETOPT(CURLOPT_RANDOM_FILE,
-                         data->set.str[STRING_SSL_RANDOM_FILE]);
-    }
-    if(data->set.str[STRING_SSL_EGDSOCKET]) {
-      ERROR_CHECK_SETOPT(CURLOPT_EGDSOCKET,
-                         data->set.str[STRING_SSL_EGDSOCKET]);
-    }
     if(data->set.ssl.fsslctx)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
     if(data->set.ssl.fsslctxp)
