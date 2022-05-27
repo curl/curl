@@ -83,7 +83,12 @@
 #endif
 #endif
 
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)
+#ifndef BCRYPT_CHACHA20_POLY1305_ALGORITHM
+#define BCRYPT_CHACHA20_POLY1305_ALGORITHM L"CHACHA20_POLY1305"
+#endif
+
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) \
+    && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
 #endif
 
@@ -117,6 +122,10 @@
 
 #ifndef SP_PROT_TLS1_2_CLIENT
 #define SP_PROT_TLS1_2_CLIENT           0x00000800
+#endif
+
+#ifndef SP_PROT_TLS1_3_CLIENT
+#define SP_PROT_TLS1_3_CLIENT           0x00002000
 #endif
 
 #ifndef SCH_USE_STRONG_CRYPTO
@@ -173,7 +182,7 @@ static void InitSecBufferDesc(SecBufferDesc *desc, SecBuffer *BufArr,
 }
 
 static CURLcode
-set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct Curl_easy *data,
+set_ssl_version_min_max(DWORD *enabled_protocols, struct Curl_easy *data,
                         struct connectdata *conn)
 {
   long ssl_version = SSL_CONN_CONFIG(version);
@@ -183,23 +192,45 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct Curl_easy *data,
   switch(ssl_version_max) {
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_DEFAULT:
-    ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+
+    /* Windows Server 2022 and newer (including Windows 11)
+    support TLS 1.3 built-in. Previous builds of Windows 10
+    had broken TLS 1.3 implementations that could be enabled
+    via registry.
+    */
+    if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
+        VERSION_GREATER_THAN_EQUAL)) {
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
+    }
+    else /* Windows 10 and older */
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+
     break;
   }
+
   for(; i <= (ssl_version_max >> 16); ++i) {
     switch(i) {
     case CURL_SSLVERSION_TLSv1_0:
-      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
+      (*enabled_protocols) |= SP_PROT_TLS1_0_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_1:
-      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_1_CLIENT;
+      (*enabled_protocols) |= SP_PROT_TLS1_1_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_2:
-      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_2_CLIENT;
+      (*enabled_protocols) |= SP_PROT_TLS1_2_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "schannel: TLS 1.3 is not yet supported");
-      return CURLE_SSL_CONNECT_ERROR;
+
+      /* Windows Server 2022 and newer */
+      if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
+          VERSION_GREATER_THAN_EQUAL)) {
+        (*enabled_protocols) |= SP_PROT_TLS1_3_CLIENT;
+        break;
+      }
+      else { /* Windows 10 and older */
+        failf(data, "schannel: TLS 1.3 not supported on Windows prior to 11");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
     }
   }
   return CURLE_OK;
@@ -216,8 +247,12 @@ get_alg_id_by_name(char *name)
 {
   char tmp[LONGEST_ALG_ID] = { 0 };
   char *nameEnd = strchr(name, ':');
-  size_t n = nameEnd ? min((size_t)(nameEnd - name), LONGEST_ALG_ID - 1) : \
-    min(strlen(name), LONGEST_ALG_ID - 1);
+  size_t n = nameEnd ? (size_t)(nameEnd - name) : strlen(name);
+
+  /* reject too-long alg names */
+  if(n > (LONGEST_ALG_ID - 1))
+    return 0;
+
   strncpy(tmp, name, n);
   tmp[n] = 0;
   CIPHEROPTION(CALG_MD2);
@@ -421,49 +456,51 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
                                    int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  SCHANNEL_CRED schannel_cred;
-  ALG_ID algIds[NUM_CIPHERS];
+
+#ifdef HAS_CLIENT_CERT_PATH
   PCCERT_CONTEXT client_certs[1] = { NULL };
+#endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
+
+  /* setup Schannel API options */
+  DWORD flags = 0;
+  DWORD enabled_protocols = 0;
+
   struct ssl_backend_data *backend = connssl->backend;
 
   DEBUGASSERT(backend);
 
-  /* setup Schannel API options */
-  memset(&schannel_cred, 0, sizeof(schannel_cred));
-  schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
-
   if(conn->ssl_config.verifypeer) {
 #ifdef HAS_MANUAL_VERIFY_API
     if(backend->use_manual_cred_validation)
-      schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION;
+      flags = SCH_CRED_MANUAL_CRED_VALIDATION;
     else
 #endif
-      schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
+      flags = SCH_CRED_AUTO_CRED_VALIDATION;
 
     if(SSL_SET_OPTION(no_revoke)) {
-      schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+      flags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
         SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 
       DEBUGF(infof(data, "schannel: disabled server certificate revocation "
                    "checks"));
     }
     else if(SSL_SET_OPTION(revoke_best_effort)) {
-      schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+      flags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
         SCH_CRED_IGNORE_REVOCATION_OFFLINE | SCH_CRED_REVOCATION_CHECK_CHAIN;
 
       DEBUGF(infof(data, "schannel: ignore revocation offline errors"));
     }
     else {
-      schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
+      flags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
 
       DEBUGF(infof(data,
                    "schannel: checking server certificate revocation"));
     }
   }
   else {
-    schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
+    flags = SCH_CRED_MANUAL_CRED_VALIDATION |
       SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
       SCH_CRED_IGNORE_REVOCATION_OFFLINE;
     DEBUGF(infof(data,
@@ -471,15 +508,15 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   }
 
   if(!conn->ssl_config.verifyhost) {
-    schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
+    flags |= SCH_CRED_NO_SERVERNAME_CHECK;
     DEBUGF(infof(data, "schannel: verifyhost setting prevents Schannel from "
                  "comparing the supplied target name with the subject "
                  "names in server certificates."));
   }
 
   if(!SSL_SET_OPTION(auto_client_cert)) {
-    schannel_cred.dwFlags &= ~SCH_CRED_USE_DEFAULT_CREDS;
-    schannel_cred.dwFlags |= SCH_CRED_NO_DEFAULT_CREDS;
+    flags &= ~SCH_CRED_USE_DEFAULT_CREDS;
+    flags |= SCH_CRED_NO_DEFAULT_CREDS;
     infof(data, "schannel: disabled automatic use of client certificate");
   }
   else
@@ -493,7 +530,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
   {
-    result = set_ssl_version_min_max(&schannel_cred, data, conn);
+    result = set_ssl_version_min_max(&enabled_protocols, data, conn);
     if(result != CURLE_OK)
       return result;
     break;
@@ -506,16 +543,6 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
   }
-
-  if(SSL_CONN_CONFIG(cipher_list)) {
-    result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list),
-                             algIds);
-    if(CURLE_OK != result) {
-      failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
-      return result;
-    }
-  }
-
 
 #ifdef HAS_CLIENT_CERT_PATH
   /* client certificate */
@@ -650,9 +677,6 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
       }
-
-      schannel_cred.cCreds = 1;
-      schannel_cred.paCred = client_certs;
     }
     else {
       cert_store =
@@ -690,11 +714,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 
       curlx_unicodefree(cert_path);
 
-      if(client_certs[0]) {
-        schannel_cred.cCreds = 1;
-        schannel_cred.paCred = client_certs;
-      }
-      else {
+      if(!client_certs[0]) {
         /* CRYPT_E_NOT_FOUND / E_INVALIDARG */
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
@@ -715,22 +735,246 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   if(!backend->cred) {
     failf(data, "schannel: unable to allocate memory");
 
+#ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0])
       CertFreeCertificateContext(client_certs[0]);
+#endif
 
     return CURLE_OUT_OF_MEMORY;
   }
   backend->cred->refcount = 1;
 
-  sspi_status =
-    s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR *)UNISP_NAME,
-                                       SECPKG_CRED_OUTBOUND, NULL,
-                                       &schannel_cred, NULL, NULL,
-                                       &backend->cred->cred_handle,
-                                       &backend->cred->time_stamp);
+  /* Windows 10, 1809 (a.k.a. Windows 10 build 17763) */
+  if(curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
+      VERSION_GREATER_THAN_EQUAL)) {
 
+    char *ciphers13 = 0;
+
+    bool disable_aes_gcm_sha384 = FALSE;
+    bool disable_aes_gcm_sha256 = FALSE;
+
+    /* ChaCha20-Poly1305 is not enabled by default in Windows, but is
+    supported when enabled.
+    */
+    bool disable_chacha_poly = TRUE;
+
+    SCH_CREDENTIALS credentials = { 0 };
+    TLS_PARAMETERS tls_parameters = { 0 };
+    CRYPTO_SETTINGS crypto_settings[4] = { 0 };
+    UNICODE_STRING blocked_ccm_modes[1] = { 0 };
+    UNICODE_STRING blocked_gcm_modes[1] = { 0 };
+
+    /*
+     RTM Windows 2022 / Windows 11 does not support AES_CCM.
+     So disable those AES_CCM ciphers explictly (TLS 1.3
+     includes those as 2 built-in Cipher-Suites).
+
+     Add conditional curlx_verify_windows_version() calls when
+     support has been added.
+    */
+
+    int crypto_settings_idx = 0;
+
+    /*
+      Disallow AES_CCM algorithm, since there's no support for it in SChannel.
+    */
+    blocked_ccm_modes[0] = (UNICODE_STRING) {
+        sizeof(BCRYPT_CHAIN_MODE_CCM),
+        sizeof(BCRYPT_CHAIN_MODE_CCM),
+        (PWSTR) BCRYPT_CHAIN_MODE_CCM };
+
+    crypto_settings[crypto_settings_idx].eAlgorithmUsage =
+                                             TlsParametersCngAlgUsageCipher;
+    crypto_settings[crypto_settings_idx].rgstrChainingModes =
+                                             blocked_ccm_modes;
+    crypto_settings[crypto_settings_idx].cChainingModes =
+                                             ARRAYSIZE(blocked_ccm_modes);
+    crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
+        sizeof(BCRYPT_AES_ALGORITHM),
+        sizeof(BCRYPT_AES_ALGORITHM),
+        (PWSTR) BCRYPT_AES_ALGORITHM };
+    crypto_settings_idx++;
+
+
+    /* Only 3 ciphers for TLS 1.3 remain:
+    * TLS_AES_256_GCM_SHA384
+    * TLS_AES_128_GCM_SHA256
+    * TLS_CHACHA20_POLY1305_SHA256
+    */
+    ciphers13 = SSL_CONN_CONFIG(cipher_list13);
+    if(ciphers13) {
+      const int remaining_ciphers = 3;
+
+      /* detect which remaining ciphers to enable
+      and then disable everything else.
+      */
+
+      char *startCur = ciphers13;
+      int algCount = 0;
+      char tmp[LONGEST_ALG_ID] = { 0 };
+      char *nameEnd;
+      size_t n;
+
+      disable_aes_gcm_sha384 = TRUE;
+      disable_aes_gcm_sha256 = TRUE;
+
+      while(startCur && (0 != *startCur) && (algCount < remaining_ciphers)) {
+        nameEnd = strchr(startCur, ':');
+        n = nameEnd ? (size_t)(nameEnd - startCur) : strlen(startCur);
+
+        /* reject too-long cipher names */
+        if(n > (LONGEST_ALG_ID - 1)) {
+          failf(data, "Cipher name too long, not checked.");
+          return CURLE_SSL_CIPHER;
+        }
+
+        strncpy(tmp, startCur, n);
+        tmp[n] = 0;
+
+        if(strcmp("TLS_AES_256_GCM_SHA384", tmp) == 0)
+          disable_aes_gcm_sha384 = FALSE;
+        else if(strcmp("TLS_AES_128_GCM_SHA256", tmp) == 0)
+          disable_aes_gcm_sha256 = FALSE;
+        else if(strcmp("TLS_CHACHA20_POLY1305_SHA256", tmp) == 0)
+          disable_chacha_poly = FALSE;
+        else {
+          failf(data, "This TLS 1.3 cipher isn't available.");
+          return CURLE_SSL_CIPHER;
+        }
+
+        startCur = nameEnd;
+        if(startCur)
+          startCur++;
+
+        algCount++;
+      }
+    }
+
+    if(disable_aes_gcm_sha384 && disable_aes_gcm_sha256
+        && disable_chacha_poly) {
+      failf(data, "All available TLS 1.3 ciphers were disabled.");
+      return CURLE_SSL_CIPHER;
+    }
+
+    /* Disable TLS_AES_256_GCM_SHA384 and/or TLS_AES_128_GCM_SHA256 */
+    if(disable_aes_gcm_sha384 || disable_aes_gcm_sha256) {
+
+      /*
+        Disallow AES_GCM algorithm
+      */
+      blocked_gcm_modes[0] = (UNICODE_STRING) {
+          sizeof(BCRYPT_CHAIN_MODE_GCM),
+          sizeof(BCRYPT_CHAIN_MODE_GCM),
+          (PWSTR) BCRYPT_CHAIN_MODE_GCM };
+
+      /* if only one is disabled, then explictly disable the
+      digest cipher suite (sha384 or sha256) */
+      if(disable_aes_gcm_sha384 != disable_aes_gcm_sha256) {
+        crypto_settings[crypto_settings_idx].eAlgorithmUsage =
+            TlsParametersCngAlgUsageDigest;
+        crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
+            sizeof(disable_aes_gcm_sha384 ?
+                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM),
+            sizeof(disable_aes_gcm_sha384 ?
+                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM),
+            (PWSTR) (disable_aes_gcm_sha384 ?
+                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM) };
+      }
+      else { /* Disable both AES_GCM ciphers */
+        crypto_settings[crypto_settings_idx].eAlgorithmUsage =
+             TlsParametersCngAlgUsageCipher;
+        crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
+          sizeof(BCRYPT_AES_ALGORITHM),
+          sizeof(BCRYPT_AES_ALGORITHM),
+          (PWSTR) BCRYPT_AES_ALGORITHM };
+      }
+
+      crypto_settings[crypto_settings_idx].rgstrChainingModes =
+                                               blocked_gcm_modes;
+      crypto_settings[crypto_settings_idx].cChainingModes = 1;
+
+      crypto_settings_idx++;
+    }
+
+    /*
+      Disable ChaCha20-Poly1305.
+    */
+    if(disable_chacha_poly) {
+      crypto_settings[crypto_settings_idx].eAlgorithmUsage =
+          TlsParametersCngAlgUsageCipher;
+      crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
+          sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
+          sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
+          (PWSTR) BCRYPT_CHACHA20_POLY1305_ALGORITHM };
+      crypto_settings_idx++;
+    }
+
+    tls_parameters.pDisabledCrypto = crypto_settings;
+
+    /* The number of blocked suites */
+    tls_parameters.cDisabledCrypto = crypto_settings_idx;
+    credentials.pTlsParameters = &tls_parameters;
+    credentials.cTlsParameters = 1;
+
+    credentials.dwVersion = SCH_CREDENTIALS_VERSION;
+    credentials.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
+
+    credentials.pTlsParameters->grbitDisabledProtocols =
+                                                (DWORD)~enabled_protocols;
+
+#ifdef HAS_CLIENT_CERT_PATH
+    if(client_certs[0]) {
+      credentials.cCreds = 1;
+      credentials.paCred = client_certs;
+    }
+#endif
+
+    sspi_status =
+        s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
+            SECPKG_CRED_OUTBOUND, NULL,
+            &credentials, NULL, NULL,
+            &backend->cred->cred_handle,
+            &backend->cred->time_stamp);
+  }
+  else {
+    /* Pre-Windows 10 1809 */
+    ALG_ID algIds[NUM_CIPHERS];
+    char *ciphers = SSL_CONN_CONFIG(cipher_list);
+    SCHANNEL_CRED schannel_cred = { 0 };
+    schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
+    schannel_cred.dwFlags = flags;
+    schannel_cred.grbitEnabledProtocols = enabled_protocols;
+
+    if(ciphers) {
+      result = set_ssl_ciphers(&schannel_cred, ciphers, algIds);
+      if(CURLE_OK != result) {
+        failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
+        return result;
+      }
+    }
+    else {
+      schannel_cred.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
+    }
+
+#ifdef HAS_CLIENT_CERT_PATH
+    if(client_certs[0]) {
+      schannel_cred.cCreds = 1;
+      schannel_cred.paCred = client_certs;
+    }
+#endif
+
+    sspi_status =
+        s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
+            SECPKG_CRED_OUTBOUND, NULL,
+            &schannel_cred, NULL, NULL,
+            &backend->cred->cred_handle,
+            &backend->cred->time_stamp);
+  }
+
+#ifdef HAS_CLIENT_CERT_PATH
   if(client_certs[0])
     CertFreeCertificateContext(client_certs[0]);
+#endif
 
   if(sspi_status != SEC_E_OK) {
     char buffer[STRERROR_LEN];
@@ -1992,12 +2236,7 @@ schannel_recv(struct Curl_easy *data, int sockindex,
           infof(data, "schannel: can't renegotiate, an error is pending");
           goto cleanup;
         }
-        if(backend->encdata_offset) {
-          *err = CURLE_RECV_ERROR;
-          infof(data, "schannel: can't renegotiate, "
-                "encrypted data available");
-          goto cleanup;
-        }
+
         /* begin renegotiation */
         infof(data, "schannel: renegotiating SSL/TLS connection");
         connssl->state = ssl_connection_negotiating;
