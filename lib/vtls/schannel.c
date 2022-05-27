@@ -778,10 +778,9 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     /*
       Disallow AES_CCM algorithm, since there's no support for it in SChannel.
     */
-    blocked_ccm_modes[0] = (UNICODE_STRING) {
-        sizeof(BCRYPT_CHAIN_MODE_CCM),
-        sizeof(BCRYPT_CHAIN_MODE_CCM),
-        (PWSTR) BCRYPT_CHAIN_MODE_CCM };
+    blocked_ccm_modes[0].Length = sizeof(BCRYPT_CHAIN_MODE_CCM);
+    blocked_ccm_modes[0].MaximumLength = sizeof(BCRYPT_CHAIN_MODE_CCM);
+    blocked_ccm_modes[0].Buffer = (PWSTR)BCRYPT_CHAIN_MODE_CCM;
 
     crypto_settings[crypto_settings_idx].eAlgorithmUsage =
                                              TlsParametersCngAlgUsageCipher;
@@ -789,10 +788,12 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
                                              blocked_ccm_modes;
     crypto_settings[crypto_settings_idx].cChainingModes =
                                              ARRAYSIZE(blocked_ccm_modes);
-    crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
-        sizeof(BCRYPT_AES_ALGORITHM),
-        sizeof(BCRYPT_AES_ALGORITHM),
-        (PWSTR) BCRYPT_AES_ALGORITHM };
+    crypto_settings[crypto_settings_idx].strCngAlgId.Length =
+        sizeof(BCRYPT_AES_ALGORITHM);
+    crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
+        sizeof(BCRYPT_AES_ALGORITHM);
+    crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
+        (PWSTR)BCRYPT_AES_ALGORITHM;
     crypto_settings_idx++;
 
 
@@ -862,31 +863,34 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       /*
         Disallow AES_GCM algorithm
       */
-      blocked_gcm_modes[0] = (UNICODE_STRING) {
-          sizeof(BCRYPT_CHAIN_MODE_GCM),
-          sizeof(BCRYPT_CHAIN_MODE_GCM),
-          (PWSTR) BCRYPT_CHAIN_MODE_GCM };
+      blocked_gcm_modes[0].Length = sizeof(BCRYPT_CHAIN_MODE_GCM);
+      blocked_gcm_modes[0].MaximumLength = sizeof(BCRYPT_CHAIN_MODE_GCM);
+      blocked_gcm_modes[0].Buffer = (PWSTR)BCRYPT_CHAIN_MODE_GCM;
 
       /* if only one is disabled, then explictly disable the
       digest cipher suite (sha384 or sha256) */
       if(disable_aes_gcm_sha384 != disable_aes_gcm_sha256) {
         crypto_settings[crypto_settings_idx].eAlgorithmUsage =
             TlsParametersCngAlgUsageDigest;
-        crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
+        crypto_settings[crypto_settings_idx].strCngAlgId.Length =
             sizeof(disable_aes_gcm_sha384 ?
-                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM),
+                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
+        crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
             sizeof(disable_aes_gcm_sha384 ?
-                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM),
-            (PWSTR) (disable_aes_gcm_sha384 ?
-                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM) };
+                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
+        crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
+            (PWSTR)(disable_aes_gcm_sha384 ?
+                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
       }
       else { /* Disable both AES_GCM ciphers */
         crypto_settings[crypto_settings_idx].eAlgorithmUsage =
              TlsParametersCngAlgUsageCipher;
-        crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
-          sizeof(BCRYPT_AES_ALGORITHM),
-          sizeof(BCRYPT_AES_ALGORITHM),
-          (PWSTR) BCRYPT_AES_ALGORITHM };
+        crypto_settings[crypto_settings_idx].strCngAlgId.Length =
+            sizeof(BCRYPT_AES_ALGORITHM);
+        crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
+            sizeof(BCRYPT_AES_ALGORITHM);
+        crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
+            (PWSTR)BCRYPT_AES_ALGORITHM;
       }
 
       crypto_settings[crypto_settings_idx].rgstrChainingModes =
@@ -902,10 +906,12 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     if(disable_chacha_poly) {
       crypto_settings[crypto_settings_idx].eAlgorithmUsage =
           TlsParametersCngAlgUsageCipher;
-      crypto_settings[crypto_settings_idx].strCngAlgId = (UNICODE_STRING) {
-          sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
-          sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM),
-          (PWSTR) BCRYPT_CHACHA20_POLY1305_ALGORITHM };
+      crypto_settings[crypto_settings_idx].strCngAlgId.Length =
+          sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM);
+      crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
+          sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM);
+      crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
+          (PWSTR)BCRYPT_CHACHA20_POLY1305_ALGORITHM;
       crypto_settings_idx++;
     }
 
