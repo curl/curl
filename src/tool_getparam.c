@@ -312,7 +312,7 @@ static const struct LongShort aliases[]= {
   {"N",  "buffer",                   ARG_BOOL},
          /* 'buffer' listed as --no-buffer in the help */
   {"o",  "output",                   ARG_FILENAME},
-  {"O",  "remote-name",              ARG_NONE},
+  {"O",  "remote-name",              ARG_BOOL},
   {"Oa", "remote-name-all",          ARG_BOOL},
   {"Ob", "output-dir",               ARG_STRING},
   {"Oc", "clobber",                  ARG_BOOL},
