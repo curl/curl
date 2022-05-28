@@ -2337,8 +2337,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = str2unum(&global->parallel_max, nextarg);
         if(err)
           return err;
-        if((global->parallel_max > MAX_PARALLEL) ||
-           (global->parallel_max < 1))
+        if(global->parallel_max > MAX_PARALLEL)
+          global->parallel_max = MAX_PARALLEL;
+        else if(global->parallel_max < 1)
           global->parallel_max = PARALLEL_DEFAULT;
         break;
       case 'c':   /* --parallel-connect */
