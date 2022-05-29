@@ -61,7 +61,8 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER/testapi/test
 <protocol>
 GET /%TESTNUMBER/testapi/test HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/rrr/127/xxx4_request, SignedHeaders=content-type;host;x-yyy-date, Signature=240750deb9263d4c8ece71c016f3919b56e518249390ef075740f94ef8df846f
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/rrr/127/xxx4_request, SignedHeaders=content-type;x-yyy-content-sha256;host;x-yyy-date, Signature=1878ab8ef1c64ec3de9a24e5bbab62a6cf3921307815c8413f2cd0ecdb8e2471
+X-Yyy-Content-Sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 X-Yyy-Date: 19700101T000000Z
 
 </protocol>

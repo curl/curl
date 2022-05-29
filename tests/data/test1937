@@ -62,7 +62,8 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER/testapi/test
 <protocol nonewline="yes">
 POST /%TESTNUMBER/testapi/test HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: PROVIDER14-HMAC-SHA256 Credential=keyId/19700101/region/service/provider14_request, SignedHeaders=content-type;host;x-provider2-date, Signature=391e410177d0e9ee80728082446ef69d6b29157fe71f8b4805fce7c186fd956d
+Authorization: PROVIDER14-HMAC-SHA256 Credential=keyId/19700101/region/service/provider14_request, SignedHeaders=content-type;x-provider2-content-sha256;host;x-provider2-date, Signature=2323ab888d4e35d7b897149e79f5cbedd3fa78baf7cbdd6e8d7d35aaafecbc28
+X-Provider2-Content-Sha256: f1c9fa0490bcc64629357637cae18234f5869a1fc3e0841207fa30bf8393541e
 X-Provider2-Date: 19700101T000000Z
 Content-Length: 8
 

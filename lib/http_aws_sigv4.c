@@ -96,6 +96,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   const char *post_data = data->set.postfields ? data->set.postfields : "";
   unsigned char sha_hash[32];
   char sha_hex[65];
+  char payload_sha_hex[65];
   char *canonical_request = NULL;
   char *request_type = NULL;
   char *credential_scope = NULL;
@@ -250,6 +251,17 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
 
+  if(data->set.postfieldsize < 0)
+    post_data_len = strlen(post_data);
+  else
+    post_data_len = (size_t)data->set.postfieldsize;
+  if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+                   post_data_len)) {
+    goto fail;
+  }
+
+  sha256_to_hex(payload_sha_hex, sha_hash, sizeof(payload_sha_hex));
+
   if(content_type) {
     content_type = strchr(content_type, ':');
     if(!content_type) {
@@ -263,35 +275,34 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
     canonical_headers = curl_maprintf("content-type:%s\n"
                                       "host:%s\n"
+                                      "x-%s-content-sha256:%s\n"
                                       "x-%s-date:%s\n",
                                       content_type,
                                       hostname,
+                                      provider1_low, payload_sha_hex,
                                       provider1_low, timestamp);
-    signed_headers = curl_maprintf("content-type;host;x-%s-date",
-                                   provider1_low);
+    signed_headers = curl_maprintf("content-type;"
+                                   "x-%s-content-sha256;"
+                                   "host;x-%s-date",
+                                   provider1_low, provider1_low);
   }
   else {
     canonical_headers = curl_maprintf("host:%s\n"
+                                      "x-%s-content-sha256:%s\n"
                                       "x-%s-date:%s\n",
                                       hostname,
+                                      provider1_low, payload_sha_hex,
                                       provider1_low, timestamp);
-    signed_headers = curl_maprintf("host;x-%s-date", provider1_low);
+    signed_headers = curl_maprintf("host;"
+                                   "x-%s-content-sha256;"
+                                   "x-%s-date",
+                                   provider1_low,
+                                   provider1_low);
   }
 
   if(!canonical_headers || !signed_headers) {
     goto fail;
   }
-
-  if(data->set.postfieldsize < 0)
-    post_data_len = strlen(post_data);
-  else
-    post_data_len = (size_t)data->set.postfieldsize;
-  if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
-                   post_data_len)) {
-    goto fail;
-  }
-
-  sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
 
   Curl_http_method(data, conn, &method, &httpreq);
 
@@ -307,7 +318,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                   data->state.up.query ? data->state.up.query : "",
                   canonical_headers,
                   signed_headers,
-                  sha_hex);
+                  payload_sha_hex);
   if(!canonical_request) {
     goto fail;
   }
@@ -368,12 +379,15 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                                "Credential=%s/%s, "
                                "SignedHeaders=%s, "
                                "Signature=%s\r\n"
+                               "X-%s-Content-Sha256: %s\r\n"
                                "X-%s-Date: %s\r\n",
                                provider0_up,
                                user,
                                credential_scope,
                                signed_headers,
                                sha_hex,
+                               provider1_mid,
+                               payload_sha_hex,
                                provider1_mid,
                                timestamp);
   if(!auth_headers) {
