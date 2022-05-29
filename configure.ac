@@ -2445,31 +2445,36 @@ AC_ARG_WITH(libidn2,
 AS_HELP_STRING([--with-libidn2=PATH],[Enable libidn2 usage])
 AS_HELP_STRING([--without-libidn2],[Disable libidn2 usage]),
   [OPT_IDN=$withval])
-case "$OPT_IDN" in
-  no)
-    dnl --without-libidn2 option used
-    want_idn="no"
-    AC_MSG_RESULT([no])
-    ;;
-  default)
-    dnl configure option not specified
-    want_idn="yes"
-    want_idn_path="default"
-    AC_MSG_RESULT([(assumed) yes])
-    ;;
-  yes)
-    dnl --with-libidn2 option used without path
-    want_idn="yes"
-    want_idn_path="default"
-    AC_MSG_RESULT([yes])
-    ;;
-  *)
-    dnl --with-libidn2 option used with path
-    want_idn="yes"
-    want_idn_path="$withval"
-    AC_MSG_RESULT([yes ($withval)])
-    ;;
-esac
+if test "x$tst_links_winidn" = "xyes"; then
+  want_idn="no"
+  AC_MSG_RESULT([no (using winidn instead)])
+else
+  case "$OPT_IDN" in
+    no)
+      dnl --without-libidn2 option used
+      want_idn="no"
+      AC_MSG_RESULT([no])
+      ;;
+    default)
+      dnl configure option not specified
+      want_idn="yes"
+      want_idn_path="default"
+      AC_MSG_RESULT([(assumed) yes])
+      ;;
+    yes)
+      dnl --with-libidn2 option used without path
+      want_idn="yes"
+      want_idn_path="default"
+      AC_MSG_RESULT([yes])
+      ;;
+    *)
+      dnl --with-libidn2 option used with path
+      want_idn="yes"
+      want_idn_path="$withval"
+      AC_MSG_RESULT([yes ($withval)])
+      ;;
+  esac
+fi
 
 if test "$want_idn" = "yes"; then
   dnl idn library support has been requested
