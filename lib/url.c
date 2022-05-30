@@ -3011,7 +3011,8 @@ static CURLcode override_login(struct Curl_easy *data,
             conn->host.name, data->set.str[STRING_NETRC_FILE]);
     }
     else if(ret < 0) {
-      return CURLE_OUT_OF_MEMORY;
+      failf(data, ".netrc parser error");
+      return CURLE_READ_ERROR;
     }
     else {
       /* set bits.netrc TRUE to remember that we got the name from a .netrc

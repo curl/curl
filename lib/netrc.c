@@ -78,24 +78,80 @@ static int parsenetrc(const char *host,
 
   file = fopen(netrcfile, FOPEN_READTEXT);
   if(file) {
-    char *tok;
-    char *tok_buf;
     bool done = FALSE;
     char netrcbuffer[4096];
     int  netrcbuffsize = (int)sizeof(netrcbuffer);
 
     while(!done && fgets(netrcbuffer, netrcbuffsize, file)) {
+      char *tok;
+      char *tok_end;
+      bool quoted;
       if(state == MACDEF) {
         if((netrcbuffer[0] == '\n') || (netrcbuffer[0] == '\r'))
           state = NOTHING;
         else
           continue;
       }
-      tok = strtok_r(netrcbuffer, " \t\n", &tok_buf);
-      if(tok && *tok == '#')
-        /* treat an initial hash as a comment line */
-        continue;
+      tok = netrcbuffer;
       while(tok) {
+        while(ISSPACE(*tok))
+          tok++;
+        /* tok is first non-space letter */
+        if(!*tok || (*tok == '#'))
+          /* end of line or the rest is a comment */
+          break;
+
+        /* leading double-quote means quoted string */
+        quoted = (*tok == '\"');
+
+        tok_end = tok;
+        if(!quoted) {
+          while(!ISSPACE(*tok_end))
+            tok_end++;
+          *tok_end = 0;
+        }
+        else {
+          bool escape = FALSE;
+          bool endquote = FALSE;
+          char *store = tok;
+          tok_end++; /* pass the leading quote */
+          while(*tok_end) {
+            char s = *tok_end;
+            if(escape) {
+              escape = FALSE;
+              switch(s) {
+              case 'n':
+                s = '\n';
+                break;
+              case 'r':
+                s = '\r';
+                break;
+              case 't':
+                s = '\t';
+                break;
+              }
+            }
+            else if(s == '\\') {
+              escape = TRUE;
+              tok_end++;
+              continue;
+            }
+            else if(s == '\"') {
+              tok_end++; /* pass the ending quote */
+              endquote = TRUE;
+              break;
+            }
+            *store++ = s;
+            tok_end++;
+          }
+          *store = 0;
+          if(escape || !endquote) {
+            /* bad syntax, get out */
+            retcode = NETRC_FAILED;
+            goto out;
+          }
+        }
+
         if((login && *login) && (password && *password)) {
           done = TRUE;
           break;
@@ -183,9 +239,8 @@ static int parsenetrc(const char *host,
           }
           break;
         } /* switch (state) */
-
-        tok = strtok_r(NULL, " \t\n", &tok_buf);
-      } /* while(tok) */
+        tok = ++tok_end;
+      }
     } /* while fgets() */
 
     out:
