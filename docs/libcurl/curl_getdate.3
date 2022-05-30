@@ -33,6 +33,10 @@ time_t curl_getdate(char *datestring, time_t *now);
 1st 1970 00:00:00 in the UTC time zone, for the date and time that the
 \fIdatestring\fP parameter specifies. The \fInow\fP parameter is not used,
 pass a NULL there.
+
+This function works with valid dates and does not always detect and reject
+wrong dates, such as February 30.
+
 .SH PARSING DATES AND TIMES
 A "date" is a string containing several items separated by whitespace. The
 order of the items is immaterial. A date string may contain many flavors of
