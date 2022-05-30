@@ -84,14 +84,14 @@ windows_task:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2 mingw-w64-i686-python-pip mingw-w64-i686-python-wheel mingw-w64-i686-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --enable-headers-api
+        configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
         tests: "~571"
     - name: Windows 32-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2 mingw-w64-i686-python-pip mingw-w64-i686-python-wheel mingw-w64-i686-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static  --enable-headers-api
+        configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static
         tests: "~571"
         curl_LDFLAGS: -all-static
         PKG_CONFIG: pkg-config --static
@@ -100,14 +100,14 @@ windows_task:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2 mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-wheel mingw-w64-x86_64-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2  --enable-headers-api
+        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
         tests: "~571"
     - name: Windows 64-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2 mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-wheel mingw-w64-x86_64-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static  --enable-headers-api
+        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static
         tests: "~571"
         curl_LDFLAGS: -all-static
         PKG_CONFIG: pkg-config --static

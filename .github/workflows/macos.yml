@@ -92,7 +92,7 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} --enable-headers-api
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
       name: 'configure'
       env:
         # -Wvla is caused by brotli
