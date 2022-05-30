@@ -165,7 +165,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_rtmp_msg="no      (--with-librtmp)"
     curl_psl_msg="no      (--with-libpsl)"
  curl_altsvc_msg="enabled (--disable-alt-svc)"
- curl_headers_msg="no      (--enable-headers-api)"
+curl_headers_msg="enabled (--disable-headers-api)"
    curl_hsts_msg="enabled (--disable-hsts)"
     ssl_backends=
      curl_h1_msg="enabled (internal)"
@@ -4016,15 +4016,15 @@ AC_ARG_ENABLE(headers-api,
 AS_HELP_STRING([--enable-headers-api],[Enable headers-api support])
 AS_HELP_STRING([--disable-headers-api],[Disable headers-api support]),
 [ case "$enableval" in
-  yes)
+  *)
        AC_MSG_RESULT(yes)
-       AC_DEFINE(USE_HEADERS_API, 1, [enable headers-api])
-       curl_headers_msg="enabled";
        ;;
-  *) AC_MSG_RESULT(no)
+  no) AC_MSG_RESULT(no)
+       curl_headers_msg="no      (--enable-headers-api)"
+       AC_DEFINE(CURL_DISABLE_HEADERS_API, 1, [disable headers-api])
        ;;
   esac ],
-       AC_MSG_RESULT(no)
+       AC_MSG_RESULT(yes)
 )
 
 dnl only check for HSTS if there's SSL present

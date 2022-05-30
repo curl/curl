@@ -32,8 +32,6 @@ struct curl_header *curl_easy_nextheader(CURL *easy,
                                          struct curl_header *prev);
 .fi
 .SH DESCRIPTION
-EXPERIMENTAL feature!
-
 This function lets an application iterate over all previously received HTTP
 headers.
 
@@ -85,7 +83,7 @@ while((h = curl_easy_nextheader(easy, origin, -1, prev))) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.83.0
+Added in 7.83.0. Officially supported since 7.84.0.
 .SH RETURN VALUE
 This function returns the next header, or NULL when there are no more
 (matching) headers or an error occurred.

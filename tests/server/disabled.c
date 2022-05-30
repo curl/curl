@@ -70,7 +70,7 @@ static const char *disabled[]={
 #ifndef ENABLE_WAKEUP
   "wakeup",
 #endif
-#ifndef USE_HEADERS_API
+#ifdef CURL_DISABLE_HEADERS_API
   "headers-api",
 #endif
   NULL
