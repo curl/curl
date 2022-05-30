@@ -33,8 +33,9 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
         called before any cookies are set.
 
 struct Cookie *Curl_cookie_add(struct Curl_easy *data,
-                 struct CookieInfo *c, bool httpheader, char *lineptr,
-                 const char *domain, const char *path);
+                 struct CookieInfo *c, bool httpheader, bool noexpire,
+                 char *lineptr, const char *domain, const char *path,
+                 bool secure);
 
         The 'lineptr' parameter is a full "Set-cookie:" line as
         received from a server.
