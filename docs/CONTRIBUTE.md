@@ -171,8 +171,9 @@ commits so that we can review the full updated version more easily.
 
 A pull request sent to the project might get labeled `needs-votes` by a
 project maintainer. This label means that in addition to meeting all other
-checks and qualifications this pull request must also receive at least **5**
-thumbs-up reactions on GitHub to be considered for merging.
+checks and qualifications this pull request must also receive more "votes" of
+user support. More signs that people want this to happen. It could be in the
+form of messages saying so, or thumbs-up reactions on GitHub.
 
 ### Making quality patches
 
