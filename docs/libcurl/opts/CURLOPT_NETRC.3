@@ -60,6 +60,39 @@ present in the URL is ignored.  The file will be scanned for the host and user
 name (to find the password only) or for the host only, to find the first user
 name and password after that \fImachine\fP, which ever information is not
 specified.
+.SH FILE FORMAT
+The \fB.netrc\fP file format is simple: you specify lines with a machine name
+and follow the login and password that are associated with that machine.
+
+Each field is provided as a sequence of letters that ends with a space or
+newline. Starting in 7.84.0, libcurl also supports quoted strings. They start
+and end with double quotes and support the escaped special letters \\\", \\n,
+\\r, and \\t. Quoted strings are the only way a space character can be used in
+a user namd or password.
+
+.IP "machine <name>"
+Provides credentials for a host called \fBname\fP. libcurl searches the .netrc
+file for a machine token that matches the host name specified in the URL. Once
+a match is made, the subsequent tokens are processed, stopping when the end of
+file is reached or another "machine" is encountered.
+.IP default
+This is the same as "machine" name except that default matches any name. There
+can be only one default token, and it must be after all machine tokens. To
+provide a default anonymous login for hosts that are not otherwise matched,
+add a line similar to this in the end:
+
+ default login anonymous password user@domain
+.IP "login <name>"
+The user name string for the remote machine.
+.IP "password <secret>"
+Supply a password. If this token is present, curl will supply the specified
+string if the remote server requires a password as part of the login process.
+Note that if this token is present in the .netrc file you really should make
+sure the file is not readable by anyone besides the user.
+.IP "macdef <name>"
+Define a macro. This feature is not supported by libcurl. In order for the
+rest of the .netrc to still work fine, libcurl will properly skip every
+definition done with "macdef" that it finds.
 .SH DEFAULT
 CURL_NETRC_IGNORED
 .SH PROTOCOLS
