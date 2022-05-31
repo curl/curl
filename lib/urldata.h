@@ -1770,8 +1770,8 @@ struct UserDefined {
   long gssapi_delegation; /* GSS-API credential delegation, see the
                              documentation of CURLOPT_GSSAPI_DELEGATION */
 
-  long tcp_keepidle;     /* seconds in idle before sending keepalive probe */
-  long tcp_keepintvl;    /* seconds between TCP keepalive probes */
+  int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
+  int tcp_keepintvl;    /* seconds between TCP keepalive probes */
 
   size_t maxconnects;    /* Max idle connections in the connection cache */
 
