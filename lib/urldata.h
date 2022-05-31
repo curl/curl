@@ -1637,8 +1637,6 @@ struct UserDefined {
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */
 
-  int keep_post;     /* keep POSTs as POSTs after a 30x request; each
-                        bit represents a request, from 301 to 303 */
   void *postfields;  /* if POST, set the fields' values here */
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
@@ -1746,17 +1744,17 @@ struct UserDefined {
 #endif
   curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                             IMAP or POP3 or others! */
-  long new_file_perms;    /* Permissions to use when creating remote files */
-  long new_directory_perms; /* Permissions to use when creating remote dirs */
-  long ssh_auth_types;   /* allowed SSH auth types */
+  unsigned int new_file_perms;      /* when creating remote files */
+  unsigned int new_directory_perms; /* when creating remote dirs */
+  int ssh_auth_types;    /* allowed SSH auth types */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
   struct curl_blob *blobs[BLOB_LAST];
 #ifdef ENABLE_IPV6
   unsigned int scope_id;  /* Scope id for IPv6 */
 #endif
-  long allowed_protocols;
-  long redir_protocols;
-  long mime_options;      /* Mime option flags. */
+  unsigned int allowed_protocols;
+  unsigned int redir_protocols;
+  unsigned int mime_options;      /* Mime option flags. */
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
@@ -1791,6 +1789,8 @@ struct UserDefined {
   CURLU *uh; /* URL handle for the current parsed URL */
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
+  char keep_post;     /* keep POSTs as POSTs after a 30x request; each
+                         bit represents a request, from 301 to 303 */
   BIT(is_fread_set); /* has read callback been set to non-NULL? */
 #ifndef CURL_DISABLE_TFTP
   BIT(tftp_no_options); /* do not send TFTP options requests */
