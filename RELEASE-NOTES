@@ -1,13 +1,14 @@
 curl and libcurl 7.84.0
 
  Public curl releases:         209
- Command line options:         247
+ Command line options:         248
  curl_easy_setopt() options:   295
  Public functions in libcurl:  88
- Contributors:                 2639
+ Contributors:                 2642
 
 This release includes the following changes:
 
+ o curl: add --rate to set max request rate per time unit [69]
  o curl: deprecate --random-file and --egd-file [12]
  o CURLINFO_CAPATH/CAINFO: get the default CA paths from libcurl [9]
  o opts: deprecate RANDOM_FILE and EGDSOCKET [13]
@@ -17,24 +18,41 @@ This release includes the following bugfixes:
 
  o aws-sigv4: fix potentional NULL pointer arithmetic [48]
  o bindlocal: don't use a random port if port number would wrap [14]
+ o c-hyper: mark status line as status for Curl_client_write() [58]
  o ci: update github actions [36]
  o cmake: add libpsl support [3]
+ o cmake: do not add libcurl.rc to the static libcurl library [53]
+ o cmake: enable curl.rc for all Windows targets [55]
+ o cmake: fix detecting libidn2 [56]
+ o cmake: support adding a suffix to the OS value [54]
  o configure: use the SED value to invoke sed [28]
  o cookie: address secure domain overlay [7]
+ o curl.1: add a few see also --tls-max [52]
  o curl.1: mention exit code zero too [44]
+ o curl: re-enable --no-remote-name [31]
+ o curl_getdate.3: document that some illegal dates pass through [34]
  o Curl_parsenetrc: don't access local pwbuf outside of scope [27]
+ o CURLOPT_NETRC.3: document the .netrc file format
  o docs: clarify data replacement policy for MIME API [16]
+ o doh: remove UNITTEST macro definition [67]
  o FAQ: Clarify Windows double quote usage [42]
+ o GHA/hyper: enable debug in the build
  o gssapi: improve handling of errors from gss_display_status [45]
  o gssapi: initialize gss_buffer_desc strings
+ o headers api: remove EXPERIMENTAL tag [35]
  o http2: always debug print stream id in decimal with %u [46]
+ o http: restore header folding behavior [64]
+ o hyper: use 'alt-used' [71]
  o libcurl-security.3: add "Secrets in memory" [30]
  o links: update dead links to the curl-wiki [21]
  o log2changes: do not indent empty lines [ci skip] [37]
  o macos9: remove partial support [22]
  o Makefile.am: fix portability issues [1]
+ o Makefile.m32: delete obsolete options, improve -On [ci skip] [65]
  o Makefile.m32: delete two obsolete OpenSSL options [ci skip] [39]
+ o max-time.d: clarify max-time sets max transfer time [70]
  o mprintf: ignore clang non-literal format string [19]
+ o netrc: support quoted strings [33]
  o ngtcp2: Allow curl to send larger UDP datagrams [29]
  o ngtcp2: Correct use of ngtcp2 and nghttp3 signed integer types [25]
  o ngtcp2: extend QUIC transport parameters buffer [4]
@@ -48,11 +66,14 @@ This release includes the following bugfixes:
  o sectransp: check for a function defined when __BLOCKS__ is undefined [20]
  o strcase: some optimisations [8]
  o tests 266, 116 and 1540: add a small write delay
+ o tests/data/test1501: kill ftp server after slow LIST response [59]
  o tests/server/sws.c: change the HTTP writedelay unit to milliseconds [47]
+ o tool_getparam: fix --parallel-max maximum value constraint [51]
  o tool_operate: make sure --fail-with-body works with --retry [24]
  o transfer: Fix potential NULL pointer dereference [15]
  o url: free old conn better on reuse [41]
  o url: remove redundant #ifdefs in allocate_conn()
+ o version: allow stricmp() for sorting the feature list [57]
  o wolfssh.h: removed [10]
  o wolfssl: correct the failf() message when a handle can't be made [38]
  o wolfSSL: explicitly use compatibility layer [11]
@@ -65,14 +86,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrea Pappacoda, Balakrishnan Balasubramanian, Carlo Alberto,
-  Christian Weisgerber via curl-library, Daniel Gustafsson, Daniel Stenberg,
-  Egor Pugin, Fabian Keil, Frank Gevaerts, Frazer Smith, Gregor Jasny,
-  Harry Sintonen, Illarion Taev, Jakub Bochenski, Kamil Dudka,
-  KotlinIsland on github, Marcel Raad, Nick Zitzmann, Patrick Monnerat,
-  Ray Satiro, Tatsuhiro Tsujikawa, Viktor Szakats, Vincent Torri,
-  vvb2060 on github, Elms
-  (25 contributors)
+  Andrea Pappacoda, Balakrishnan Balasubramanian, Boris Verkhovskiy,
+  Carlo Alberto, Christian Weisgerber via curl-library, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, Egor Pugin, Fabian Keil, Frank Gevaerts,
+  Frazer Smith, Gisle Vanem, Gregor Jasny, Harry Sintonen, Illarion Taev,
+  ImpatientHippo on GitHub, Jakub Bochenski, Kamil Dudka, Karlson2k on github,
+  KotlinIsland on github, Marcel Raad, Marc Hörsken, Nick Zitzmann,
+  Nuru on github, Patrick Monnerat, Petr Pisar, Ray Satiro,
+  Tatsuhiro Tsujikawa, Viktor Szakats, Vincent Torri, vvb2060 on github, Elms
+  (33 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -105,7 +127,11 @@ References to bug reports and discussions on issues:
  [28] = https://curl.se/bug/?i=8891
  [29] = https://curl.se/bug/?i=8883
  [30] = https://curl.se/bug/?i=8881
+ [31] = https://curl.se/bug/?i=8931
  [32] = https://curl.se/bug/?i=8859
+ [33] = https://curl.se/bug/?i=8908
+ [34] = https://curl.se/bug/?i=8938
+ [35] = https://curl.se/bug/?i=8900
  [36] = https://curl.se/bug/?i=8843
  [37] = https://curl.se/bug/?i=8887
  [38] = https://curl.se/bug/?i=8885
@@ -119,3 +145,18 @@ References to bug reports and discussions on issues:
  [48] = https://curl.se/bug/?i=8814
  [49] = https://curl.se/bug/?i=8696
  [50] = https://curl.se/bug/?i=8831
+ [51] = https://curl.se/bug/?i=8930
+ [52] = https://curl.se/bug/?i=8929
+ [53] = https://curl.se/bug/?i=8918
+ [54] = https://curl.se/bug/?i=8919
+ [55] = https://curl.se/bug/?i=8918
+ [56] = https://curl.se/bug/?i=8917
+ [57] = https://curl.se/bug/?i=8916
+ [58] = https://curl.se/bug/?i=8894
+ [59] = https://curl.se/bug/?i=8907
+ [64] = https://curl.se/bug/?i=8844
+ [65] = https://curl.se/bug/?i=8904
+ [67] = https://curl.se/bug/?i=8902
+ [69] = https://curl.se/bug/?i=8671
+ [70] = https://curl.se/bug/?i=8877
+ [71] = https://curl.se/bug/?i=8898
