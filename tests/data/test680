@@ -16,6 +16,9 @@ netrc
 <server>
 none
 </server>
+<features>
+http
+</features>
  <name>
 netrc with quoted password but missing end quote
  </name>
