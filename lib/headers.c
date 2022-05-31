@@ -293,9 +293,14 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   }
   hlen = end - header + 1;
 
-  if((header[0] == ' ') || (header[0] == '\t'))
-    /* line folding, append value to the previous header's value */
-    return unfold_value(data, header, hlen);
+  if((header[0] == ' ') || (header[0] == '\t')) {
+    if(data->state.prevhead)
+      /* line folding, append value to the previous header's value */
+      return unfold_value(data, header, hlen);
+    else
+      /* can't unfold without a previous header */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   hs = calloc(1, sizeof(*hs) + hlen);
   if(!hs)
