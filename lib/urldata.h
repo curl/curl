@@ -1792,14 +1792,12 @@ struct UserDefined {
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
   BIT(is_fread_set); /* has read callback been set to non-NULL? */
-  BIT(is_fwrite_set); /* has write callback been set to non-NULL? */
-  BIT(free_referer); /* set TRUE if 'referer' points to a string we
-                        allocated */
+#ifndef CURL_DISABLE_TFTP
   BIT(tftp_no_options); /* do not send TFTP options requests */
+#endif
   BIT(sep_headers);     /* handle host and proxy headers separately */
   BIT(cookiesession);   /* new cookie session? */
   BIT(crlf);            /* convert crlf on ftp upload(?) */
-  BIT(strip_path_slash); /* strip off initial slash from path */
   BIT(ssh_compression);            /* enable SSH compression */
 
 /* Here follows boolean settings that define how to behave during
