@@ -19,7 +19,8 @@ Server: test-server/
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Content-Length: 6
-Connection: close
+Connection:                                              
+   close
 
 -foo-
 </data>
@@ -58,7 +59,8 @@ Server: test-server/
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Content-Length: 6
-Connection: close
+Connection:                                              
+   close
 
 </file>
 </verify>
