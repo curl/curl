@@ -227,8 +227,8 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
   DEBUGASSERT(data->state.prevhead);
   hs = data->state.prevhead;
   olen = strlen(hs->value);
-  oalloc = olen + strlen(hs->name) + 1;
   offset = hs->value - hs->buffer;
+  oalloc = olen + offset + 1;
 
   /* skip all trailing space letters */
   while(vlen && ISSPACE(value[vlen - 1]))
