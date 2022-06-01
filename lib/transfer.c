@@ -202,6 +202,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
   }
 #endif
 
+#ifndef CURL_DISABLE_HTTP
   /* if we are transmitting trailing data, we don't need to write
      a chunk size so we skip this */
   if(data->req.upload_chunky &&
@@ -211,7 +212,6 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
     data->req.upload_fromhere += (8 + 2); /* 32bit hex + CRLF */
   }
 
-#ifndef CURL_DISABLE_HTTP
   if(data->state.trailers_state == TRAILERS_SENDING) {
     /* if we're here then that means that we already sent the last empty chunk
        but we didn't send a final CR LF, so we sent 0 CR LF. We then start
@@ -267,6 +267,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
     return CURLE_READ_ERROR;
   }
 
+#ifndef CURL_DISABLE_HTTP
   if(!data->req.forbidchunk && data->req.upload_chunky) {
     /* if chunked Transfer-Encoding
      *    build chunk:
@@ -317,15 +318,12 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
 
       /* always append ASCII CRLF to the data unless
          we have a valid trailer callback */
-#ifndef CURL_DISABLE_HTTP
       if((nread-hexlen) == 0 &&
           data->set.trailer_callback != NULL &&
           data->state.trailers_state == TRAILERS_NONE) {
         data->state.trailers_state = TRAILERS_INITIALIZED;
       }
-      else
-#endif
-      {
+      else {
         memcpy(data->req.upload_fromhere + nread,
                endofline_network,
                strlen(endofline_network));
@@ -333,7 +331,6 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
       }
     }
 
-#ifndef CURL_DISABLE_HTTP
     if(data->state.trailers_state == TRAILERS_SENDING &&
        !trailers_left(data)) {
       Curl_dyn_free(&data->state.trailers_buf);
@@ -345,7 +342,6 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
       infof(data, "Signaling end of chunked upload after trailers.");
     }
     else
-#endif
       if((nread - hexlen) == 0 &&
          data->state.trailers_state != TRAILERS_INITIALIZED) {
         /* mark this as done once this chunk is transferred */
@@ -357,6 +353,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
     if(added_crlf)
       nread += strlen(endofline_network); /* for the added end of line */
   }
+#endif
 
   *nreadp = nread;
 
