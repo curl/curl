@@ -1849,6 +1849,7 @@ struct UserDefined {
   BIT(ftp_use_pret);     /* if PRET is to be used before PASV or not */
   BIT(ftp_skip_ip);      /* skip the IP address the FTP server passes on to
                             us */
+  BIT(wildcard_enabled); /* enable wildcard matching */
 #endif
   BIT(hide_progress);    /* don't use the progress meter */
   BIT(http_fail_on_error);  /* fail on HTTP error codes >= 400 */
@@ -1880,7 +1881,6 @@ struct UserDefined {
   BIT(socks5_gssapi_nec); /* Flag to support NEC SOCKS5 server */
 #endif
   BIT(sasl_ir);         /* Enable/disable SASL initial response */
-  BIT(wildcard_enabled); /* enable wildcard matching */
   BIT(tcp_keepalive);  /* use TCP keepalives */
   BIT(tcp_fastopen);   /* use TCP Fast Open */
   BIT(ssl_enable_npn); /* TLS NPN extension? */

@@ -605,9 +605,12 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 #endif
   }
 
+#ifndef CURL_DISABLE_FTP
   set->wildcard_enabled = FALSE;
   set->chunk_bgn      = ZERO_NULL;
   set->chunk_end      = ZERO_NULL;
+  set->fnmatch = ZERO_NULL;
+#endif
   set->tcp_keepalive = FALSE;
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
@@ -620,7 +623,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->buffer_size = READBUFFER_SIZE;
   set->upload_buffer_size = UPLOADBUFFER_DEFAULT;
   set->happy_eyeballs_timeout = CURL_HET_DEFAULT;
-  set->fnmatch = ZERO_NULL;
   set->upkeep_interval_ms = CURL_UPKEEP_INTERVAL_DEFAULT;
   set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
   set->maxage_conn = 118;
