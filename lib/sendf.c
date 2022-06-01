@@ -52,7 +52,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef CURL_DO_LINEEND_CONV
+#if defined(CURL_DO_LINEEND_CONV) && !defined(CURL_DISABLE_FTP)
 /*
  * convert_lineends() changes CRLF (\r\n) end-of-line markers to a single LF
  * (\n), with special processing for CRLF sequences that are split between two
@@ -132,7 +132,7 @@ static size_t convert_lineends(struct Curl_easy *data,
   }
   return size;
 }
-#endif /* CURL_DO_LINEEND_CONV */
+#endif /* CURL_DO_LINEEND_CONV && !CURL_DISABLE_FTP */
 
 #ifdef USE_RECV_BEFORE_SEND_WORKAROUND
 bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
@@ -631,22 +631,15 @@ CURLcode Curl_client_write(struct Curl_easy *data,
                            char *ptr,
                            size_t len)
 {
-  struct connectdata *conn = data->conn;
-
-  if(!len)
-    return CURLE_OK;
-
+#if !defined(CURL_DISABLE_FTP) && defined(CURL_DO_LINEEND_CONV)
   /* FTP data may need conversion. */
   if((type & CLIENTWRITE_BODY) &&
-     (conn->handler->protocol & PROTO_FAMILY_FTP) &&
-     conn->proto.ftpc.transfertype == 'A') {
-
-#ifdef CURL_DO_LINEEND_CONV
+     (data->conn->handler->protocol & PROTO_FAMILY_FTP) &&
+     data->conn->proto.ftpc.transfertype == 'A') {
     /* convert end-of-line markers */
     len = convert_lineends(data, ptr, len);
-#endif /* CURL_DO_LINEEND_CONV */
   }
-
+#endif
   return chop_write(data, type, ptr, len);
 }
 

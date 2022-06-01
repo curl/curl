@@ -180,15 +180,6 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
 
-/* the type we use for storing a single boolean bit */
-#ifdef _MSC_VER
-typedef bool bit;
-#define BIT(x) bool x
-#else
-typedef unsigned int bit;
-#define BIT(x) bit x:1
-#endif
-
 #ifdef HAVE_GSSAPI
 /* Types needed for krb5-ftp connections */
 struct krb5buffer {
@@ -1089,18 +1080,38 @@ struct connectdata {
   struct dynbuf trailer;
 
   union {
+#ifndef CURL_DISABLE_FTP
     struct ftp_conn ftpc;
+#endif
+#ifndef CURL_DISABLE_HTTP
     struct http_conn httpc;
+#endif
+#ifdef USE_SSH
     struct ssh_conn sshc;
+#endif
+#ifndef CURL_DISABLE_TFTP
     struct tftp_state_data *tftpc;
+#endif
+#ifndef CURL_DISABLE_IMAP
     struct imap_conn imapc;
+#endif
+#ifndef CURL_DISABLE_POP3
     struct pop3_conn pop3c;
+#endif
+#ifndef CURL_DISABLE_SMTP
     struct smtp_conn smtpc;
+#endif
+#ifndef CURL_DISABLE_RTSP
     struct rtsp_conn rtspc;
+#endif
+#ifndef CURL_DISABLE_SMB
     struct smb_conn smbc;
+#endif
     void *rtmp;
     struct ldapconninfo *ldapc;
+#ifndef CURL_DISABLE_MQTT
     struct mqtt_conn mqtt;
+#endif
   } proto;
 
   struct http_connect_state *connect_state; /* for HTTP CONNECT */
@@ -1354,9 +1365,10 @@ struct UrlState {
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
   void (*prev_signal)(int sig);
 #endif
+#ifndef CURL_DISABLE_CRYPTO_AUTH
   struct digestdata digest;      /* state data for host Digest auth */
   struct digestdata proxydigest; /* state data for proxy Digest auth */
-
+#endif
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
 #ifdef USE_CURL_ASYNC
@@ -1372,7 +1384,7 @@ struct UrlState {
   struct Curl_llist timeoutlist; /* list of pending timeouts */
   struct time_node expires[EXPIRE_LAST]; /* nodes for each expire type */
 
-  /* a place to store the most recently set FTP entrypath */
+  /* a place to store the most recently set (S)FTP entrypath */
   char *most_recent_ftp_entrypath;
   unsigned char httpwant; /* when non-zero, a specific HTTP version requested
                              to be used in the library's request(s) */
@@ -1391,30 +1403,36 @@ struct UrlState {
                   this syntax. */
   curl_off_t resume_from; /* continue [ftp] transfer from here */
 
+#ifndef CURL_DISABLE_RTSP
   /* This RTSP state information survives requests and connections */
   long rtsp_next_client_CSeq; /* the session's next client CSeq */
   long rtsp_next_server_CSeq; /* the session's next server CSeq */
   long rtsp_CSeq_recv; /* most recent CSeq received */
+#endif
 
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
-
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
   size_t drain; /* Increased when this stream has data to read, even if its
                    socket is not necessarily is readable. Decreased when
                    checked. */
+#endif
 
   curl_read_callback fread_func; /* read callback/function */
   void *in;                      /* CURLOPT_READDATA */
-
+#ifdef USE_HTTP2
   struct Curl_easy *stream_depends_on;
   int stream_weight;
+#endif
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
   Curl_HttpReq httpreq; /* what kind of HTTP request (if any) is this */
   char *url;        /* work URL, copied from UserDefined */
   char *referer;    /* referer string */
+#ifndef CURL_DISABLE_COOKIES
   struct curl_slist *cookielist; /* list of cookie files set by
                                     curl_easy_setopt(COOKIEFILE) calls */
+#endif
   struct curl_slist *resolve; /* set to point to the set.resolve list when
                                  this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP
@@ -1424,9 +1442,9 @@ struct UrlState {
   struct Curl_llist httphdrs; /* received headers */
   struct curl_header headerout; /* for external purposes */
   struct Curl_header_store *prevhead; /* the latest added header */
-#endif
   trailers_state trailers_state; /* whether we are sending trailers
-                                       and what stage are we at */
+                                    and what stage are we at */
+#endif
 #ifdef USE_HYPER
   bool hconnect;  /* set if a CONNECT request */
   CURLcode hresult; /* used to pass return codes back from hyper callbacks */
@@ -1470,7 +1488,6 @@ struct UrlState {
                       is always set TRUE when curl_easy_perform() is called. */
   BIT(authproblem); /* TRUE if there's some problem authenticating */
   /* set after initial USER failure, to prevent an authentication loop */
-  BIT(ftp_trying_alternative);
   BIT(wildcardmatch); /* enable wildcard matching */
   BIT(expect100header);  /* TRUE if we added Expect: 100-continue */
   BIT(disableexpect);    /* TRUE if Expect: is disabled due to a previous
@@ -1629,11 +1646,12 @@ struct UserDefined {
   void *out;         /* CURLOPT_WRITEDATA */
   void *in_set;      /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
-  void *rtp_out;     /* write RTP to this if non-NULL */
   long use_port;     /* which port to use (when not using default) */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
+#ifndef CURL_DISABLE_PROXY
   unsigned long socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
+#endif
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */
 
@@ -1676,14 +1694,15 @@ struct UserDefined {
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
   long timeout;         /* in milliseconds, 0 means no timeout */
   long connecttimeout;  /* in milliseconds, 0 means no timeout */
-  long accepttimeout;   /* in milliseconds, 0 means no timeout */
   long happy_eyeballs_timeout; /* in milliseconds, 0 is a valid value */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
   long maxage_conn;     /* in seconds, max idle time to allow a connection that
                            is to be reused */
   long maxlifetime_conn; /* in seconds, max time since creation to allow a
                             connection that is to be reused */
+#ifndef CURL_DISABLE_TFTP
   long tftp_blksize;    /* in bytes, 0 means use default */
+#endif
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
@@ -1703,7 +1722,9 @@ struct UserDefined {
                                           the transfer on source host */
   struct curl_slist *source_postquote; /* in 3rd party transfer mode - after
                                           the transfer on source host */
+#ifndef CURL_DISABLE_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
+#endif
   struct curl_slist *resolve;     /* list of names to add/remove from
                                      DNS cache */
   struct curl_slist *connect_to; /* list of host:port mappings to override
@@ -1732,6 +1753,7 @@ struct UserDefined {
   curl_ftpfile ftp_filemethod; /* how to get to a file when FTP is used  */
   curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
   curl_ftpccc ftp_ccc;   /* FTP CCC options */
+  long accepttimeout;   /* in milliseconds, 0 means no timeout */
 #endif
   int ftp_create_missing_dirs; /* 1 - create directories that don't exist
                                   2 - the same but also allow MKD to fail once
@@ -1755,10 +1777,14 @@ struct UserDefined {
   unsigned int allowed_protocols;
   unsigned int redir_protocols;
   unsigned int mime_options;      /* Mime option flags. */
-  struct curl_slist *mail_rcpt; /* linked list of mail recipients */
+
+#ifndef CURL_DISABLE_RTSP
+  void *rtp_out;     /* write RTP to this if non-NULL */
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
   long rtspversion; /* like httpversion, for RTSP */
+#endif
+#ifndef CURL_DISABLE_FTP
   curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer
                                         starts */
   curl_chunk_end_callback chunk_end; /* called after part transferring
@@ -1766,7 +1792,7 @@ struct UserDefined {
   curl_fnmatch_callback fnmatch; /* callback to decide which file corresponds
                                     to pattern (e.g. if WILDCARDMATCH is on) */
   void *fnmatch_data;
-
+#endif
   long gssapi_delegation; /* GSS-API credential delegation, see the
                              documentation of CURLOPT_GSSAPI_DELEGATION */
 
@@ -1776,21 +1802,29 @@ struct UserDefined {
   size_t maxconnects;    /* Max idle connections in the connection cache */
 
   long expect_100_timeout; /* in milliseconds */
+#ifdef USE_HTTP2
   struct Curl_easy *stream_depends_on;
   int stream_weight;
   struct Curl_http2_dep *stream_dependents;
-
+#endif
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
   multidone_func fmultidone;
+#ifndef CURL_DISABLE_DOH
   struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
+#endif
   CURLU *uh; /* URL handle for the current parsed URL */
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
   char keep_post;     /* keep POSTs as POSTs after a 30x request; each
                          bit represents a request, from 301 to 303 */
+#ifndef CURL_DISABLE_SMTP
+  struct curl_slist *mail_rcpt; /* linked list of mail recipients */
+  BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
+                                recipients */
+#endif
   BIT(is_fread_set); /* has read callback been set to non-NULL? */
 #ifndef CURL_DISABLE_TFTP
   BIT(tftp_no_options); /* do not send TFTP options requests */
@@ -1815,6 +1849,7 @@ struct UserDefined {
   BIT(ftp_use_pret);     /* if PRET is to be used before PASV or not */
   BIT(ftp_skip_ip);      /* skip the IP address the FTP server passes on to
                             us */
+  BIT(wildcard_enabled); /* enable wildcard matching */
 #endif
   BIT(hide_progress);    /* don't use the progress meter */
   BIT(http_fail_on_error);  /* fail on HTTP error codes >= 400 */
@@ -1846,7 +1881,6 @@ struct UserDefined {
   BIT(socks5_gssapi_nec); /* Flag to support NEC SOCKS5 server */
 #endif
   BIT(sasl_ir);         /* Enable/disable SASL initial response */
-  BIT(wildcard_enabled); /* enable wildcard matching */
   BIT(tcp_keepalive);  /* use TCP keepalives */
   BIT(tcp_fastopen);   /* use TCP Fast Open */
   BIT(ssl_enable_npn); /* TLS NPN extension? */
@@ -1869,8 +1903,6 @@ struct UserDefined {
   BIT(doh_verifystatus);   /* DoH certificate status verification */
 #endif
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
-  BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
-                                recipients */
 };
 
 struct Names {
@@ -1932,10 +1964,12 @@ struct Curl_easy {
 #endif
   struct SingleRequest req;    /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
+#ifndef CURL_DISABLE_COOKIES
   struct CookieInfo *cookies;  /* the cookies, read from files and servers.
                                   NOTE that the 'cookie' field in the
                                   UserDefined struct defines if the "engine"
                                   is to be used or not. */
+#endif
 #ifndef CURL_DISABLE_HSTS
   struct hsts *hsts;
 #endif
