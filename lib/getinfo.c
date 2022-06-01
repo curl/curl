@@ -299,6 +299,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
       /* return if the condition prevented the document to get transferred */
       *param_longp = data->info.timecond ? 1L : 0L;
     break;
+#ifndef CURL_DISABLE_RTSP
   case CURLINFO_RTSP_CLIENT_CSEQ:
     *param_longp = data->state.rtsp_next_client_CSeq;
     break;
@@ -308,6 +309,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_RTSP_CSEQ_RECV:
     *param_longp = data->state.rtsp_CSeq_recv;
     break;
+#endif
   case CURLINFO_HTTP_VERSION:
     switch(data->info.httpversion) {
     case 10:

@@ -783,8 +783,9 @@ static CURLcode ftp_state_user(struct Curl_easy *data,
                                   &conn->proto.ftpc.pp, "USER %s",
                                   conn->user?conn->user:"");
   if(!result) {
+    struct ftp_conn *ftpc = &conn->proto.ftpc;
+    ftpc->ftp_trying_alternative = FALSE;
     state(data, FTP_USER);
-    data->state.ftp_trying_alternative = FALSE;
   }
   return result;
 }
@@ -2622,13 +2623,13 @@ static CURLcode ftp_state_user_resp(struct Curl_easy *data,
     (the server denies to log the specified user) */
 
     if(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER] &&
-        !data->state.ftp_trying_alternative) {
+       !ftpc->ftp_trying_alternative) {
       /* Ok, USER failed.  Let's try the supplied command. */
       result =
         Curl_pp_sendf(data, &ftpc->pp, "%s",
                       data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
       if(!result) {
-        data->state.ftp_trying_alternative = TRUE;
+        ftpc->ftp_trying_alternative = TRUE;
         state(data, FTP_USER);
       }
     }

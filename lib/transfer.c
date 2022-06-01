@@ -1153,10 +1153,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     fd_write = CURL_SOCKET_BAD;
 
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
   if(data->state.drain) {
     select_res |= CURL_CSELECT_IN;
     DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data"));
   }
+#endif
 
   if(!select_res) /* Call for select()/poll() only, if read/write/error
                      status is not known. */
@@ -1821,10 +1823,12 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
     return CURLE_OK;
 
   if((data->req.bytecount + data->req.headerbytecount == 0) &&
-      conn->bits.reuse &&
-      (!data->set.opt_no_body
-        || (conn->handler->protocol & PROTO_FAMILY_HTTP)) &&
-      (data->set.rtspreq != RTSPREQ_RECEIVE))
+     conn->bits.reuse &&
+     (!data->set.opt_no_body || (conn->handler->protocol & PROTO_FAMILY_HTTP))
+#ifndef CURL_DISABLE_RTSP
+     && (data->set.rtspreq != RTSPREQ_RECEIVE)
+#endif
+    )
     /* We got no data, we attempted to re-use a connection. For HTTP this
        can be a retry so we try again regardless if we expected a body.
        For other protocols we only try again only if we expected a body.

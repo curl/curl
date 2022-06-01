@@ -307,7 +307,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_SERVER_RESPONSE_TIMEOUT:
     /*
-     * Option that specifies how quickly an server response must be obtained
+     * Option that specifies how quickly a server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
     arg = va_arg(param, long);
@@ -1104,13 +1104,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       break;
     }
     break;
-#endif   /* CURL_DISABLE_PROXY */
 
   case CURLOPT_SOCKS5_AUTH:
     data->set.socks5auth = va_arg(param, unsigned long);
     if(data->set.socks5auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
       result = CURLE_NOT_BUILT_IN;
     break;
+#endif   /* CURL_DISABLE_PROXY */
+
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CURLOPT_SOCKS5_GSSAPI_NEC:
     /*

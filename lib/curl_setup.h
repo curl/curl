@@ -796,6 +796,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 
 #if defined(USE_NGTCP2) || defined(USE_QUICHE) || defined(USE_MSH3)
 #define ENABLE_QUIC
+#define USE_HTTP3
 #endif
 
 #if defined(USE_UNIX_SOCKETS) && defined(WIN32)
