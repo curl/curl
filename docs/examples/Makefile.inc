@@ -31,7 +31,6 @@ check_PROGRAMS = \
   debug \
   externalsocket \
   fileupload \
-  fopen \
   ftp-wildcard \
   ftpget \
   ftpgetinfo \
@@ -97,7 +96,6 @@ check_PROGRAMS = \
   postit2-formadd \
   progressfunc \
   resolve \
-  rtsp \
   sendrecv \
   sepheaders \
   sftpget \
