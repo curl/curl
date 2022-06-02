@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  * To compile:
  *   gcc crawler.c $(pkg-config --cflags --libs libxml-2.0 libcurl)
  *
