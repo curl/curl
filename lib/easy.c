@@ -838,6 +838,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
 
+#ifndef CURL_DISABLE_COOKIES
   if(data->cookies) {
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
@@ -856,6 +857,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     if(!outcurl->state.cookielist)
       goto fail;
   }
+#endif
 
   if(data->state.url) {
     outcurl->state.url = strdup(data->state.url);
@@ -937,8 +939,10 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   fail:
 
   if(outcurl) {
+#ifndef CURL_DISABLE_COOKIES
     curl_slist_free_all(outcurl->state.cookielist);
     outcurl->state.cookielist = NULL;
+#endif
     Curl_safefree(outcurl->state.buffer);
     Curl_dyn_free(&outcurl->state.headerb);
     Curl_safefree(outcurl->state.url);
