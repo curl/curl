@@ -361,9 +361,11 @@ similar to the \fICURLOPT_USERPWD(3)\fP option like this:
  curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
 
 There's a long time Unix "standard" way of storing FTP user names and
-passwords, namely in the $HOME/.netrc file. The file should be made private
-so that only the user may read it (see also the "Security Considerations"
-chapter), as it might contain the password in plain text. libcurl has the
+passwords, namely in the $HOME/.netrc file (on Windows, libcurl also checks
+the %USERPROFILE% environment variable if %HOME% is unset, and tries
+_netrc as name). The file should be made private so that only the user may
+read it (see also the "Security Considerations" chapter),
+as it might contain the password in plain text. libcurl has the
 ability to use this file to figure out what set of user name and password to
 use for a particular host. As an extension to the normal functionality,
 libcurl also supports this file for non-FTP protocols such as HTTP. To make

@@ -32,9 +32,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NETRC, long level);
 .SH DESCRIPTION
 This parameter controls the preference \fIlevel\fP of libcurl between using
 user names and passwords from your \fI~/.netrc\fP file, relative to user names
-and passwords in the URL supplied with \fICURLOPT_URL(3)\fP. On Windows,
-libcurl will use the file as \fI%HOME%/_netrc\fP, but you can also tell
-libcurl a different file name to use with \fICURLOPT_NETRC_FILE(3)\fP.
+and passwords in the URL supplied with \fICURLOPT_URL(3)\fP.
+
+On Windows, libcurl will use the file as \fI%HOME%/_netrc\fP. If \fI%HOME%\fP
+is not set on Windows, libcurl falls back to \fI%USERPROFILE%\fP.
+
+You can also tell libcurl a different file name to use with
+\fICURLOPT_NETRC_FILE(3)\fP.
 
 libcurl uses a user name (and supplied or prompted password) supplied with
 \fICURLOPT_USERPWD(3)\fP or \fICURLOPT_USERNAME(3)\fP in preference to any of
