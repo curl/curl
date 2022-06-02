@@ -38,10 +38,10 @@ NULL
 SCP and SFTP
 .SH EXAMPLE
 .nf
-int sshhostkeycallback(void *clientp,/* custom pointer passed with CURLOPT_SSH_HOSTKEYDATA */
-                          int keytype, /* CURLKHTYPE */
-                          const char * key, /*hostkey to check*/
-                          size_t keylen); /*length of the key*/
+int hostkeycb(void *clientp,    /* passed with CURLOPT_SSH_HOSTKEYDATA */
+              int keytype,      /* CURLKHTYPE */
+              const char * key, /*hostkey to check*/
+              size_t keylen);   /*length of the key*/
 {
   /* 'clientp' points to the callback_data struct */
   /* investigate the situation and return the correct value */
@@ -49,14 +49,14 @@ int sshhostkeycallback(void *clientp,/* custom pointer passed with CURLOPT_SSH_H
 }
 {
   curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
-  curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYFUNCTION, sshhostkeycallback);
+  curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
   curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYDATA, &callback_data);
 
   curl_easy_perform(curl);
 }
 .fi
 .SH AVAILABILITY
-Added in 7.84.0 , work only with libssh2 backend.
+Added in 7.84.0, works only with libssh2 backend.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
