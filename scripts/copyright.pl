@@ -31,7 +31,10 @@
 my @skiplist=(
     '^tests\/data\/test(\d+)$', # test case data
     '^docs\/cmdline-opts\/[a-z]+(.*)\.d$', # curl.1 pieces
-    '(\/|^)[A-Z0-9_.-]+$', # all uppercase file name, possibly with dot and dash
+
+    # all uppercase file name, possibly with dot and dash. But do not exclude
+    # the man pages:
+    '(\/|^)[A-Z0-9_.-]+[^31]$',
     '(\/|^)[A-Z0-9_-]+\.md$', # all uppercase file name with .md extension
     '.gitignore', # wherever they are
     '.gitattributes', # wherever they are
