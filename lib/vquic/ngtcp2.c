@@ -1918,8 +1918,9 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
       return CURLE_SEND_ERROR;
     }
   }
-
-  assert(pktlen == (size_t)sent);
+  else {
+    assert(pktlen == (size_t)sent);
+  }
 
   *psent = pktlen;
 
