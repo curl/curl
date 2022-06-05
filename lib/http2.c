@@ -1050,6 +1050,12 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     else if(stream->push_headers_used ==
             stream->push_headers_alloc) {
       char **headp;
+      if(stream->push_headers_alloc > 1000) {
+        /* this is beyond crazy many headers, bail out */
+        failf(data_s, "Too many PUSH_PROMISE headers");
+        Curl_safefree(stream->push_headers);
+        return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+      }
       stream->push_headers_alloc *= 2;
       headp = Curl_saferealloc(stream->push_headers,
                                stream->push_headers_alloc * sizeof(char *));
