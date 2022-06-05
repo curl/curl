@@ -2702,10 +2702,11 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
            set a valid level */
         Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
 
-        if(Curl_sec_login(data, conn))
-          infof(data, "Logging in with password in cleartext");
-        else
-          infof(data, "Authentication successful");
+        if(Curl_sec_login(data, conn)) {
+          failf(data, "secure login failed");
+          return CURLE_WEIRD_SERVER_REPLY;
+        }
+        infof(data, "Authentication successful");
       }
 #endif
 
