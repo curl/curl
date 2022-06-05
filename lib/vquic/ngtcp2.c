@@ -24,7 +24,6 @@
 
 #ifdef USE_NGTCP2
 #include <ngtcp2/ngtcp2.h>
-#include <ngtcp2/ngtcp2_crypto.h>
 #include <nghttp3/nghttp3.h>
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
@@ -115,6 +114,12 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
                                    size_t datalen, void *user_data,
                                    void *stream_user_data);
 
+static ngtcp2_conn *get_conn(ngtcp2_crypto_conn_ref *conn_ref)
+{
+  struct quicsocket *qs = conn_ref->user_data;
+  return qs->qconn;
+}
+
 static ngtcp2_tstamp timestamp(void)
 {
   struct curltime ct = Curl_now();
@@ -199,144 +204,23 @@ static int keylog_callback(gnutls_session_t session, const char *label,
 
 static int init_ngh3_conn(struct quicsocket *qs);
 
-static int write_client_handshake(struct quicsocket *qs,
-                                  ngtcp2_crypto_level level,
-                                  const uint8_t *data, size_t len)
-{
-  int rv;
-
-  rv = ngtcp2_conn_submit_crypto_data(qs->qconn, level, data, len);
-  if(rv) {
-    H3BUGF(fprintf(stderr, "write_client_handshake failed\n"));
-    return 0;
-  }
-
-  return 1;
-}
-
 #ifdef USE_OPENSSL
-#ifdef OPENSSL_IS_BORINGSSL
-static int quic_set_read_secret(SSL *ssl,
-                         enum ssl_encryption_level_t ssl_level,
-                         const SSL_CIPHER *cipher UNUSED_PARAM,
-                         const uint8_t *secret,
-                         size_t secretlen)
-{
-  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  ngtcp2_crypto_level level =
-      ngtcp2_crypto_boringssl_from_ssl_encryption_level(ssl_level);
-
-  if(ngtcp2_crypto_derive_and_install_rx_key(
-       qs->qconn, NULL, NULL, NULL, level, secret, secretlen) != 0)
-    return 0;
-
-  if(level == NGTCP2_CRYPTO_LEVEL_APPLICATION) {
-    if(init_ngh3_conn(qs) != CURLE_OK)
-      return 0;
-  }
-
-  return 1;
-}
-
-static int quic_set_write_secret(SSL *ssl,
-                     enum ssl_encryption_level_t ssl_level,
-                     const SSL_CIPHER *cipher UNUSED_PARAM,
-                     const uint8_t *secret,
-                     size_t secretlen)
-{
-  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  ngtcp2_crypto_level level =
-      ngtcp2_crypto_boringssl_from_ssl_encryption_level(ssl_level);
-
-  if(ngtcp2_crypto_derive_and_install_tx_key(
-       qs->qconn, NULL, NULL, NULL, level, secret, secretlen) != 0)
-    return 0;
-
-  return 1;
-}
-
-static int quic_add_handshake_data(SSL *ssl,
-                                   enum ssl_encryption_level_t ssl_level,
-                                   const uint8_t *data,
-                                   size_t len)
-{
-  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  ngtcp2_crypto_level level =
-      ngtcp2_crypto_boringssl_from_ssl_encryption_level(ssl_level);
-
-  return write_client_handshake(qs, level, data, len);
-}
-#else
-static int quic_set_encryption_secrets(SSL *ssl,
-                                       OSSL_ENCRYPTION_LEVEL ossl_level,
-                                       const uint8_t *rx_secret,
-                                       const uint8_t *tx_secret,
-                                       size_t secretlen)
-{
-  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  ngtcp2_crypto_level level =
-      ngtcp2_crypto_openssl_from_ossl_encryption_level(ossl_level);
-
-  if(ngtcp2_crypto_derive_and_install_rx_key(
-       qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
-    return 0;
-
-  if(ngtcp2_crypto_derive_and_install_tx_key(
-       qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
-    return 0;
-
-  if(level == NGTCP2_CRYPTO_LEVEL_APPLICATION) {
-    if(init_ngh3_conn(qs) != CURLE_OK)
-      return 0;
-  }
-
-  return 1;
-}
-
-static int quic_add_handshake_data(SSL *ssl, OSSL_ENCRYPTION_LEVEL ossl_level,
-                                   const uint8_t *data, size_t len)
-{
-  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  ngtcp2_crypto_level level =
-      ngtcp2_crypto_openssl_from_ossl_encryption_level(ossl_level);
-
-  return write_client_handshake(qs, level, data, len);
-}
-#endif
-
-static int quic_flush_flight(SSL *ssl)
-{
-  (void)ssl;
-  return 1;
-}
-
-static int quic_send_alert(SSL *ssl, enum ssl_encryption_level_t level,
-                           uint8_t alert)
-{
-  struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
-  (void)level;
-
-  qs->tls_alert = alert;
-  return 1;
-}
-
-static SSL_QUIC_METHOD quic_method = {
-#ifdef OPENSSL_IS_BORINGSSL
-                                      quic_set_read_secret,
-                                      quic_set_write_secret,
-#else
-                                      quic_set_encryption_secrets,
-#endif
-                                      quic_add_handshake_data,
-                                      quic_flush_flight, quic_send_alert};
-
 static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
 
-  SSL_CTX_set_min_proto_version(ssl_ctx, TLS1_3_VERSION);
-  SSL_CTX_set_max_proto_version(ssl_ctx, TLS1_3_VERSION);
+#ifdef OPENSSL_IS_BORINGSSL
+  if(ngtcp2_crypto_boringssl_configure_client_context(ssl_ctx) != 0) {
+    failf(data, "ngtcp2_crypto_boringssl_configure_client_context failed");
+    return NULL;
+  }
+#else
+  if(ngtcp2_crypto_openssl_configure_client_context(ssl_ctx) != 0) {
+    failf(data, "ngtcp2_crypto_openssl_configure_client_context failed");
+    return NULL;
+  }
+#endif
 
   SSL_CTX_set_default_verify_paths(ssl_ctx);
 
@@ -358,8 +242,6 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
     return NULL;
   }
 #endif
-
-  SSL_CTX_set_quic_method(ssl_ctx, &quic_method);
 
   /* Open the file if a TLS or QUIC backend has not done this before. */
   Curl_tls_keylog_open();
@@ -428,7 +310,7 @@ static int quic_init_ssl(struct quicsocket *qs)
   DEBUGASSERT(!qs->ssl);
   qs->ssl = SSL_new(qs->sslctx);
 
-  SSL_set_app_data(qs->ssl, qs);
+  SSL_set_app_data(qs->ssl, &qs->conn_ref);
   SSL_set_connect_state(qs->ssl);
   SSL_set_quic_use_legacy_codepoint(qs->ssl, 0);
 
@@ -442,114 +324,6 @@ static int quic_init_ssl(struct quicsocket *qs)
   return 0;
 }
 #elif defined(USE_GNUTLS)
-static int secret_func(gnutls_session_t ssl,
-                       gnutls_record_encryption_level_t gtls_level,
-                       const void *rx_secret,
-                       const void *tx_secret, size_t secretlen)
-{
-  struct quicsocket *qs = gnutls_session_get_ptr(ssl);
-  int level =
-      ngtcp2_crypto_gnutls_from_gnutls_record_encryption_level(gtls_level);
-
-  if(level != NGTCP2_CRYPTO_LEVEL_EARLY &&
-     ngtcp2_crypto_derive_and_install_rx_key(
-       qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
-    return 0;
-
-  if(ngtcp2_crypto_derive_and_install_tx_key(
-       qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
-    return 0;
-
-  if(level == NGTCP2_CRYPTO_LEVEL_APPLICATION) {
-    if(init_ngh3_conn(qs) != CURLE_OK)
-      return -1;
-  }
-
-  return 0;
-}
-
-static int read_func(gnutls_session_t ssl,
-                     gnutls_record_encryption_level_t gtls_level,
-                     gnutls_handshake_description_t htype, const void *data,
-                     size_t len)
-{
-  struct quicsocket *qs = gnutls_session_get_ptr(ssl);
-  ngtcp2_crypto_level level =
-      ngtcp2_crypto_gnutls_from_gnutls_record_encryption_level(gtls_level);
-  int rv;
-
-  if(htype == GNUTLS_HANDSHAKE_CHANGE_CIPHER_SPEC)
-    return 0;
-
-  rv = write_client_handshake(qs, level, data, len);
-  if(rv == 0)
-    return -1;
-
-  return 0;
-}
-
-static int alert_read_func(gnutls_session_t ssl,
-                           gnutls_record_encryption_level_t gtls_level,
-                           gnutls_alert_level_t alert_level,
-                           gnutls_alert_description_t alert_desc)
-{
-  struct quicsocket *qs = gnutls_session_get_ptr(ssl);
-  (void)gtls_level;
-  (void)alert_level;
-
-  qs->tls_alert = alert_desc;
-  return 0;
-}
-
-static int tp_recv_func(gnutls_session_t ssl, const uint8_t *data,
-                        size_t data_size)
-{
-  struct quicsocket *qs = gnutls_session_get_ptr(ssl);
-  ngtcp2_transport_params params;
-  int rv;
-
-  rv = ngtcp2_decode_transport_params(
-       &params, NGTCP2_TRANSPORT_PARAMS_TYPE_ENCRYPTED_EXTENSIONS,
-       data, data_size);
-  if(rv) {
-    ngtcp2_conn_set_tls_error(qs->qconn, rv);
-    return -1;
-  }
-
-  rv = ngtcp2_conn_set_remote_transport_params(qs->qconn, &params);
-  if(rv) {
-    ngtcp2_conn_set_tls_error(qs->qconn, rv);
-    return -1;
-  }
-
-  return 0;
-}
-
-static int tp_send_func(gnutls_session_t ssl, gnutls_buffer_t extdata)
-{
-  struct quicsocket *qs = gnutls_session_get_ptr(ssl);
-  uint8_t paramsbuf[256];
-  ngtcp2_transport_params params;
-  ngtcp2_ssize nwrite;
-  int rc;
-
-  ngtcp2_conn_get_local_transport_params(qs->qconn, &params);
-  nwrite = ngtcp2_encode_transport_params(
-    paramsbuf, sizeof(paramsbuf), NGTCP2_TRANSPORT_PARAMS_TYPE_CLIENT_HELLO,
-    &params);
-  if(nwrite < 0) {
-    H3BUGF(fprintf(stderr, "ngtcp2_encode_transport_params: %s\n",
-                   ngtcp2_strerror((int)nwrite)));
-    return -1;
-  }
-
-  rc = gnutls_buffer_append_data(extdata, paramsbuf, nwrite);
-  if(rc < 0)
-    return rc;
-
-  return (int)nwrite;
-}
-
 static int quic_init_ssl(struct quicsocket *qs)
 {
   gnutls_datum_t alpn[2];
@@ -560,26 +334,17 @@ static int quic_init_ssl(struct quicsocket *qs)
   DEBUGASSERT(!qs->ssl);
 
   gnutls_init(&qs->ssl, GNUTLS_CLIENT);
-  gnutls_session_set_ptr(qs->ssl, qs);
+  gnutls_session_set_ptr(qs->ssl, &qs->conn_ref);
+
+  if(ngtcp2_crypto_gnutls_configure_client_session(qs->ssl) != 0) {
+    H3BUGF(fprintf(stderr,
+                   "ngtcp2_crypto_gnutls_configure_client_session failed\n"));
+    return 1;
+  }
 
   rc = gnutls_priority_set_direct(qs->ssl, QUIC_PRIORITY, NULL);
   if(rc < 0) {
     H3BUGF(fprintf(stderr, "gnutls_priority_set_direct failed: %s\n",
-                   gnutls_strerror(rc)));
-    return 1;
-  }
-
-  gnutls_handshake_set_secret_function(qs->ssl, secret_func);
-  gnutls_handshake_set_read_function(qs->ssl, read_func);
-  gnutls_alert_set_read_function(qs->ssl, alert_read_func);
-
-  rc = gnutls_session_ext_register(qs->ssl, "QUIC Transport Parameters",
-         NGTCP2_TLSEXT_QUIC_TRANSPORT_PARAMETERS_V1, GNUTLS_EXT_TLS,
-         tp_recv_func, tp_send_func, NULL, NULL, NULL,
-         GNUTLS_EXT_FLAG_TLS | GNUTLS_EXT_FLAG_CLIENT_HELLO |
-         GNUTLS_EXT_FLAG_EE);
-  if(rc < 0) {
-    H3BUGF(fprintf(stderr, "gnutls_session_ext_register failed: %s\n",
                    gnutls_strerror(rc)));
     return 1;
   }
@@ -822,6 +587,23 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
   return 0;
 }
 
+static int cb_recv_rx_key(ngtcp2_conn *tconn, ngtcp2_crypto_level level,
+                          void *user_data)
+{
+  struct quicsocket *qs = (struct quicsocket *)user_data;
+  (void)tconn;
+
+  if(level != NGTCP2_CRYPTO_LEVEL_APPLICATION) {
+    return 0;
+  }
+
+  if(init_ngh3_conn(qs) != CURLE_OK) {
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+  }
+
+  return 0;
+}
+
 static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_client_initial_cb,
   NULL, /* recv_client_initial */
@@ -860,6 +642,8 @@ static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_get_path_challenge_data_cb,
   cb_stream_stop_sending,
   NULL, /* version_negotiation */
+  cb_recv_rx_key,
+  NULL, /* recv_tx_key */
 };
 
 /*
@@ -961,6 +745,9 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
     qs->qconn = NULL;
     return CURLE_OUT_OF_MEMORY;
   }
+
+  qs->conn_ref.get_conn = get_conn;
+  qs->conn_ref.user_data = qs;
 
   return CURLE_OK;
 }
@@ -1811,7 +1598,7 @@ static CURLcode ng_process_ingress(struct Curl_easy *data,
       if(!qs->last_error.error_code) {
         if(rv == NGTCP2_ERR_CRYPTO) {
           ngtcp2_connection_close_error_set_transport_error_tls_alert(
-              &qs->last_error, qs->tls_alert, NULL, 0);
+              &qs->last_error, ngtcp2_conn_get_tls_alert(qs->qconn), NULL, 0);
         }
         else {
           ngtcp2_connection_close_error_set_transport_error_liberr(
