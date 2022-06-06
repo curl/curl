@@ -57,6 +57,14 @@ Pass a NULL to this option to disable the use of ranges.
 
 The application does not have to keep the string around after setting this
 option.
+.SH SECURITY CONCERNS
+This option (and the other options in libcurl which specify a header)
+will send the headers as-is and will not perform any special sanitization or
+normalization on them.
+
+If you allow untrusted user input into this option without sanitizing CRLF sequences in them,
+someone malicious may be able to inject new headers that you did not intend and
+perform all sorts of other bad stuff.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
