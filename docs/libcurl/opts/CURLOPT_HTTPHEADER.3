@@ -104,6 +104,14 @@ permitted with the \fICURLOPT_UNRESTRICTED_AUTH(3)\fP option.
 Starting in 7.64.0, libcurl will specifically prevent "Cookie:" headers
 from being sent to other hosts than the first used one, unless specifically
 permitted with the \fICURLOPT_UNRESTRICTED_AUTH(3)\fP option.
+
+Furthermore, this option (and the other options in libcurl which specify a header)
+will send the headers as-is and will not perform any special sanitization or
+normalization on them.
+
+If you allow untrusted user input into this option without sanitizing CRLF sequences in them,
+someone malicious may be able to inject new headers that you did not intend and
+perform all sorts of other bad stuff.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
