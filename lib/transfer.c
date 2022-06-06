@@ -899,6 +899,9 @@ static void win_update_buffer_size(curl_socket_t sockfd)
 #define win_update_buffer_size(x)
 #endif
 
+#define curl_upload_refill_watermark(data) \
+        ((ssize_t)((data)->set.upload_buffer_size >> 5))
+
 /*
  * Send data to upload to the server, when the socket is writable.
  */
@@ -920,13 +923,25 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
 
   do {
     curl_off_t nbody;
+    ssize_t offset = 0;
+
+    if(0 != k->upload_present &&
+       k->upload_present < curl_upload_refill_watermark(data) &&
+       !k->upload_chunky &&/*(variable sized chunked header; append not safe)*/
+       !k->upload_done &&  /*!(k->upload_done once k->upload_present sent)*/
+       !(k->writebytecount + k->upload_present - k->pendingheader ==
+         data->state.infilesize)) {
+      offset = k->upload_present;
+    }
 
     /* only read more data if there's no upload data already
-       present in the upload buffer */
-    if(0 == k->upload_present) {
+       present in the upload buffer, or if appending to upload buffer */
+    if(0 == k->upload_present || offset) {
       result = Curl_get_upload_buffer(data);
       if(result)
         return result;
+      if(offset && k->upload_fromhere != data->state.ulbuf)
+        memmove(data->state.ulbuf, k->upload_fromhere, offset);
       /* init the "upload from here" pointer */
       k->upload_fromhere = data->state.ulbuf;
 
@@ -959,12 +974,14 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
             sending_http_headers = FALSE;
         }
 
-        result = Curl_fillreadbuffer(data, data->set.upload_buffer_size,
+        k->upload_fromhere += offset;
+        result = Curl_fillreadbuffer(data, data->set.upload_buffer_size-offset,
                                      &fillcount);
+        k->upload_fromhere -= offset;
         if(result)
           return result;
 
-        nread = fillcount;
+        nread = offset + fillcount;
       }
       else
         nread = 0; /* we're done uploading/reading */
@@ -1006,7 +1023,9 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
          * That means the hex values for ASCII CR (0x0d) & LF (0x0a)
          * must be used instead of the escape sequences \r & \n.
          */
-        for(i = 0, si = 0; i < nread; i++, si++) {
+        if(offset)
+          memcpy(data->state.scratch, k->upload_fromhere, offset);
+        for(i = offset, si = offset; i < nread; i++, si++) {
           if(k->upload_fromhere[i] == 0x0a) {
             data->state.scratch[si++] = 0x0d;
             data->state.scratch[si] = 0x0a;
@@ -1036,12 +1055,12 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_SMTP
       if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
-        result = Curl_smtp_escape_eob(data, nread);
+        result = Curl_smtp_escape_eob(data, nread, offset);
         if(result)
           return result;
       }
 #endif /* CURL_DISABLE_SMTP */
-    } /* if 0 == k->upload_present */
+    } /* if 0 == k->upload_present or appended to upload buffer */
     else {
       /* We have a partial buffer left from a previous "round". Use
          that instead of reading more data */
