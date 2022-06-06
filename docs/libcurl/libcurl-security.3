@@ -130,6 +130,16 @@ as necessary. Alternately, an app could leave \fICURLOPT_FOLLOWLOCATION(3)\fP
 enabled but set \fICURLOPT_REDIR_PROTOCOLS(3)\fP and install a
 \fICURLOPT_OPENSOCKETFUNCTION(3)\fP or \fICURLOPT_PREREQFUNCTION(3)\fP callback
 function in which addresses are sanitized before use.
+.SH "CRLF in Headers"
+For all options in libcurl which specify headers, including but not limited to
+\fICURLOPT_HTTPHEADER(3)\fP, \fICURLOPT_PROXYHEADER(3)\fP,
+\fICURLOPT_COOKIE(3)\fP, \fICURLOPT_USERAGENT(3)\fP, \fICURLOPT_REFERER(3)\fP
+and \fICURLOPT_RANGE(3)\fP, libcurl will send the headers as-is and will not
+apply any special sanitization or normalization to them.
+
+If you allow untrusted user input into these options without sanitizing CRLF
+sequences in them, someone malicious may be able to modify the request in a way
+you didn't intend such as injecting new headers.
 .SH "Local Resources"
 A user who can control the DNS server of a domain being passed in within a URL
 can change the address of the host to a local, private address which a
