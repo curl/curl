@@ -2,15 +2,16 @@ curl and libcurl 7.84.0
 
  Public curl releases:         209
  Command line options:         248
- curl_easy_setopt() options:   295
+ curl_easy_setopt() options:   297
  Public functions in libcurl:  88
- Contributors:                 2642
+ Contributors:                 2643
 
 This release includes the following changes:
 
  o curl: add --rate to set max request rate per time unit [69]
  o curl: deprecate --random-file and --egd-file [12]
  o CURLINFO_CAPATH/CAINFO: get the default CA paths from libcurl [9]
+ o libssh2: add CURLOPT_SSH_HOSTKEYFUNCTION [78]
  o opts: deprecate RANDOM_FILE and EGDSOCKET [13]
  o socks: support unix sockets for socks proxy [2]
 
@@ -25,6 +26,7 @@ This release includes the following bugfixes:
  o cmake: enable curl.rc for all Windows targets [55]
  o cmake: fix detecting libidn2 [56]
  o cmake: support adding a suffix to the OS value [54]
+ o configure: skip libidn2 detection when winidn is used [89]
  o configure: use the SED value to invoke sed [28]
  o cookie: address secure domain overlay [7]
  o curl.1: add a few see also --tls-max [52]
@@ -32,17 +34,29 @@ This release includes the following bugfixes:
  o curl: re-enable --no-remote-name [31]
  o curl_getdate.3: document that some illegal dates pass through [34]
  o Curl_parsenetrc: don't access local pwbuf outside of scope [27]
+ o CURLOPT_FILETIME.3: fix the protocols this works with
  o CURLOPT_NETRC.3: document the .netrc file format
+ o CURLOPT_PORT.3: We discourage using this option [92]
+ o digest: added detection of more syntax error in server headers [81]
+ o digest: tolerate missing "realm" [80]
+ o digest: unquote realm and nonce before processing [82]
+ o DISABLED: disable 1021 for hyper again
+ o docs/CONTRIBUTE.md: document the 'needs-votes' concept [79]
  o docs: clarify data replacement policy for MIME API [16]
  o doh: remove UNITTEST macro definition [67]
+ o examples/crawler.c: use the curl license [73]
+ o examples: remove fopen.c and rtsp.c [76]
  o FAQ: Clarify Windows double quote usage [42]
+ o ftp: when failing to do a secure GSSAPI login, fail hard [62]
  o GHA/hyper: enable debug in the build
  o gssapi: improve handling of errors from gss_display_status [45]
  o gssapi: initialize gss_buffer_desc strings
  o headers api: remove EXPERIMENTAL tag [35]
  o http2: always debug print stream id in decimal with %u [46]
+ o http2: reject overly many push-promise headers [63]
  o http: restore header folding behavior [64]
  o hyper: use 'alt-used' [71]
+ o lib: make more protocol specific struct fields #ifdefed [84]
  o libcurl-security.3: add "Secrets in memory" [30]
  o links: update dead links to the curl-wiki [21]
  o log2changes: do not indent empty lines [ci skip] [37]
@@ -52,9 +66,11 @@ This release includes the following bugfixes:
  o Makefile.m32: delete two obsolete OpenSSL options [ci skip] [39]
  o max-time.d: clarify max-time sets max transfer time [70]
  o mprintf: ignore clang non-literal format string [19]
+ o netrc: check %USERPROFILE% as well on Windows [77]
  o netrc: support quoted strings [33]
  o ngtcp2: Allow curl to send larger UDP datagrams [29]
  o ngtcp2: Correct use of ngtcp2 and nghttp3 signed integer types [25]
+ o ngtcp2: enable Linux GSO [91]
  o ngtcp2: extend QUIC transport parameters buffer [4]
  o ngtcp2: Fix alert_read_func return value [26]
  o ngtcp2: handle error from ngtcp2_conn_submit_crypto_data [5]
@@ -63,16 +79,28 @@ This release includes the following bugfixes:
  o ntlm: provide a fixed fake host name [32]
  o quic: add Curl_quic_idle [18]
  o quiche: support ca-fallback [49]
+ o remote-name.d: mention --output-dir [88]
+ o runtests.pl: add the --repeat parameter to the --help output [43]
+ o scripts/copyright.pl: fix the exclusion to not ignore man pages [75]
  o sectransp: check for a function defined when __BLOCKS__ is undefined [20]
+ o speed-limit/time.d: mention these affect transfers in either direction [74]
  o strcase: some optimisations [8]
+ o test 2081: add a valid reply for the second request [60]
+ o test 675: add missing CR so the test passes when run through Privoxy [61]
+ o test414: add the '--resolve' keyword [23]
+ o test681: verify --no-remote-name [90]
  o tests 266, 116 and 1540: add a small write delay
  o tests/data/test1501: kill ftp server after slow LIST response [59]
  o tests/server/sws.c: change the HTTP writedelay unit to milliseconds [47]
+ o test{440,441,493,977}: add "HTTP proxy" keywords [40]
  o tool_getparam: fix --parallel-max maximum value constraint [51]
  o tool_operate: make sure --fail-with-body works with --retry [24]
  o transfer: Fix potential NULL pointer dereference [15]
  o url: free old conn better on reuse [41]
  o url: remove redundant #ifdefs in allocate_conn()
+ o urldata: reduce size of a few struct fields [86]
+ o urldata: remove three unused booleans from struct UserDefined [87]
+ o urldata: store tcp_keepidle and tcp_keepintvl as ints [85]
  o version: allow stricmp() for sorting the feature list [57]
  o wolfssh.h: removed [10]
  o wolfssl: correct the failf() message when a handle can't be made [38]
@@ -88,13 +116,14 @@ advice from friends like these:
 
   Andrea Pappacoda, Balakrishnan Balasubramanian, Boris Verkhovskiy,
   Carlo Alberto, Christian Weisgerber via curl-library, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Egor Pugin, Fabian Keil, Frank Gevaerts,
-  Frazer Smith, Gisle Vanem, Gregor Jasny, Harry Sintonen, Illarion Taev,
-  ImpatientHippo on GitHub, Jakub Bochenski, Kamil Dudka, Karlson2k on github,
-  KotlinIsland on github, Marcel Raad, Marc Hörsken, Nick Zitzmann,
-  Nuru on github, Patrick Monnerat, Petr Pisar, Ray Satiro,
-  Tatsuhiro Tsujikawa, Viktor Szakats, Vincent Torri, vvb2060 on github, Elms
-  (33 contributors)
+  Daniel Gustafsson, Daniel Stenberg, Egor Pugin, Evgeny Grin, Fabian Keil,
+  Frank Gevaerts, Frazer Smith, Gisle Vanem, Gregor Jasny, Harry Sintonen,
+  Illarion Taev, ImpatientHippo on GitHub, Jakub Bochenski, Kamil Dudka,
+  Karlson2k on github, KotlinIsland on github, Ladar Levison, Marcel Raad,
+  Marc Hörsken, michael musset, Nick Zitzmann, Nuru on github,
+  Patrick Monnerat, Petr Pisar, Ray Satiro, Tatsuhiro Tsujikawa,
+  Viktor Szakats, Vincent Torri, vvb2060 on github, Wolf Vollprecht, Elms
+  (37 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -120,6 +149,7 @@ References to bug reports and discussions on issues:
  [20] = https://curl.se/bug/?i=8846
  [21] = https://curl.se/bug/?i=8897
  [22] = https://curl.se/bug/?i=8836
+ [23] = https://curl.se/bug/?i=8959
  [24] = https://curl.se/bug/?i=8845
  [25] = https://curl.se/bug/?i=8851
  [26] = https://curl.se/bug/?i=8852
@@ -136,8 +166,10 @@ References to bug reports and discussions on issues:
  [37] = https://curl.se/bug/?i=8887
  [38] = https://curl.se/bug/?i=8885
  [39] = https://curl.se/bug/?i=8884
+ [40] = https://curl.se/bug/?i=8959
  [41] = https://curl.se/bug/?i=8841
  [42] = https://curl.se/bug/?i=8823
+ [43] = https://curl.se/bug/?i=8959
  [44] = https://curl.se/bug/?i=8833
  [45] = https://curl.se/bug/?i=8832
  [46] = https://curl.se/bug/?i=8808
@@ -154,9 +186,32 @@ References to bug reports and discussions on issues:
  [57] = https://curl.se/bug/?i=8916
  [58] = https://curl.se/bug/?i=8894
  [59] = https://curl.se/bug/?i=8907
+ [60] = https://curl.se/bug/?i=8959
+ [61] = https://curl.se/bug/?i=8959
+ [62] = https://hackerone.com/reports/1590102
+ [63] = https://hackerone.com/reports/1589847
  [64] = https://curl.se/bug/?i=8844
  [65] = https://curl.se/bug/?i=8904
  [67] = https://curl.se/bug/?i=8902
  [69] = https://curl.se/bug/?i=8671
  [70] = https://curl.se/bug/?i=8877
  [71] = https://curl.se/bug/?i=8898
+ [73] = https://curl.se/bug/?i=8950
+ [74] = https://curl.se/bug/?i=8948
+ [75] = https://curl.se/bug/?i=8952
+ [76] = https://curl.se/bug/?i=8949
+ [77] = https://curl.se/bug/?i=8855
+ [78] = https://curl.se/bug/?i=7959
+ [79] = https://curl.se/bug/?i=8910
+ [80] = https://curl.se/bug/?i=8912
+ [81] = https://curl.se/bug/?i=8912
+ [82] = https://curl.se/bug/?i=8912
+ [84] = https://curl.se/bug/?i=8944
+ [85] = https://curl.se/bug/?i=8940
+ [86] = https://curl.se/bug/?i=8940
+ [87] = https://curl.se/bug/?i=8940
+ [88] = https://curl.se/bug/?i=8945
+ [89] = https://curl.se/bug/?i=8934
+ [90] = https://curl.se/bug/?i=8942
+ [91] = https://curl.se/bug/?i=8909
+ [92] = https://curl.se/bug/?i=8941
