@@ -44,16 +44,18 @@ In normal operation, you must specify CURL_GLOBAL_ALL. Do not use any other
 value unless you are familiar with it and mean to control internal operations
 of libcurl.
 
-\fBThis function is not thread safe.\fP You must not call it when any other
+This function is thread-safe since libcurl 7.84.0 if
+\fIcurl_version_info(3)\fP has CURL_VERSION_THREADSAFE_INIT feature bit set
+(most platforms).
+
+If this is not thread-safe, you must not call this function when any other
 thread in the program (i.e. a thread sharing the same memory) is running.
 This does not just mean no other thread that is using libcurl. Because
 \fIcurl_global_init(3)\fP calls functions of other libraries that are
 similarly thread unsafe, it could conflict with any other thread that uses
-these other libraries.
-
-If you are initializing libcurl from a Windows DLL you should not initialize it
-from DllMain or a static initializer because Windows holds the loader lock
-during that time and it could cause a deadlock.
+these other libraries. If you are initializing libcurl from a Windows DLL you
+should not initialize it from DllMain or a static initializer because Windows
+holds the loader lock during that time and it could cause a deadlock.
 
 See the description in \fIlibcurl(3)\fP of global environment requirements for
 details of how to use this function.
