@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--path-as-is
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 OK
+Content-Length: 6
+Content-Type: text/html
+Location: ../%TESTNUMBER0002
+
+-foo-
+</data>
+<data2>
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/html
+
+-muu-
+</data2>
+<datacheck>
+HTTP/1.1 301 OK
+Content-Length: 6
+Content-Type: text/html
+Location: ../%TESTNUMBER0002
+
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/html
+
+-muu-
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+--path-as-is with redirect, keeping dotdots
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/../../%TESTNUMBER --path-as-is -L
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /../../%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /../%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
