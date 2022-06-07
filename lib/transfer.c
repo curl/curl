@@ -1607,7 +1607,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
   uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl,
                     (type == FOLLOW_FAKE) ? CURLU_NON_SUPPORT_SCHEME :
                     ((type == FOLLOW_REDIR) ? CURLU_URLENCODE : 0) |
-                    CURLU_ALLOW_SPACE);
+                    CURLU_ALLOW_SPACE |
+                    (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
   if(uc) {
     if(type != FOLLOW_FAKE)
       return Curl_uc_to_curlcode(uc);
