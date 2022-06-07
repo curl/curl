@@ -360,9 +360,9 @@ static int ProcessRequest(struct httprequest *req)
   char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
   static char request[REQUEST_KEYWORD_SIZE];
-  static char doc[MAXDOCNAMELEN];
   char logbuf[456];
-  int prot_major, prot_minor;
+  int prot_major = 0;
+  int prot_minor = 0;
   char *end = strstr(line, end_of_headers);
 
   req->callcount++;
@@ -381,175 +381,167 @@ static int ProcessRequest(struct httprequest *req)
     return 1; /* done */
   }
 
-  else if((req->testno == DOCNUMBER_NOTHING) &&
-     sscanf(line,
-            "%" REQUEST_KEYWORD_SIZE_TXT"s %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
-            request,
-            doc,
-            &prot_major,
-            &prot_minor) == 4) {
-    char *ptr;
+  else if(req->testno == DOCNUMBER_NOTHING) {
+    char *http;
+    bool fine = FALSE;
+    char *httppath = NULL;
+    size_t npath = 0; /* httppath length */
 
-    req->prot_version = prot_major*10 + prot_minor;
+    if(sscanf(line,
+              "%" REQUEST_KEYWORD_SIZE_TXT"s ", request)) {
+      http = strstr(line + strlen(request), "HTTP/");
 
-    /* find the last slash */
-    ptr = strrchr(doc, '/');
+      if(http && sscanf(http, "HTTP/%d.%d",
+                        &prot_major,
+                        &prot_minor) == 2) {
+        /* between the request keyword and HTTP/ there's a path */
+        httppath = line + strlen(request);
+        npath = http - httppath;
 
-    /* get the number after it */
-    if(ptr) {
-      if((strlen(doc) + strlen(request)) < 400)
-        msnprintf(logbuf, sizeof(logbuf), "Got request: %s %s HTTP/%d.%d",
-                  request, doc, prot_major, prot_minor);
-      else
-        msnprintf(logbuf, sizeof(logbuf), "Got a *HUGE* request HTTP/%d.%d",
-                  prot_major, prot_minor);
-      logmsg("%s", logbuf);
-
-      if(!strncmp("/verifiedserver", ptr, 15)) {
-        logmsg("Are-we-friendly question received");
-        req->testno = DOCNUMBER_WERULEZ;
-        return 1; /* done */
-      }
-
-      if(!strncmp("/quit", ptr, 5)) {
-        logmsg("Request-to-quit received");
-        req->testno = DOCNUMBER_QUIT;
-        return 1; /* done */
-      }
-
-      ptr++; /* skip the slash */
-
-      /* skip all non-numericals following the slash */
-      while(*ptr && !ISDIGIT(*ptr))
-        ptr++;
-
-      req->testno = strtol(ptr, &ptr, 10);
-
-      if(req->testno > 10000) {
-        req->partno = req->testno % 10000;
-        req->testno /= 10000;
-      }
-      else
-        req->partno = 0;
-
-      if(req->testno) {
-
-        msnprintf(logbuf, sizeof(logbuf), "Requested test number %ld part %ld",
-                  req->testno, req->partno);
-        logmsg("%s", logbuf);
-      }
-      else {
-        logmsg("No test number");
-        req->testno = DOCNUMBER_NOTHING;
-      }
-
-    }
-
-    if(req->testno == DOCNUMBER_NOTHING) {
-      /* didn't find any in the first scan, try alternative test case
-         number placements */
-
-      if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
-                doc, &prot_major, &prot_minor) == 3) {
-        char *portp = NULL;
-
-        msnprintf(logbuf, sizeof(logbuf),
-                  "Received a CONNECT %s HTTP/%d.%d request",
-                  doc, prot_major, prot_minor);
-        logmsg("%s", logbuf);
-
-        req->connect_request = TRUE;
-
-        if(req->prot_version == 10)
-          req->open = FALSE; /* HTTP 1.0 closes connection by default */
-
-        if(doc[0] == '[') {
-          char *p = &doc[1];
-          unsigned long part = 0;
-          /* scan through the hexgroups and store the value of the last group
-             in the 'part' variable and use as test case number!! */
-          while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.'))) {
-            char *endp;
-            part = strtoul(p, &endp, 16);
-            if(ISXDIGIT(*p))
-              p = endp;
-            else
-              p++;
-          }
-          if(*p != ']')
-            logmsg("Invalid CONNECT IPv6 address format");
-          else if(*(p + 1) != ':')
-            logmsg("Invalid CONNECT IPv6 port format");
-          else
-            portp = p + 1;
-
-          req->testno = part;
+        /* trim leading spaces */
+        while(npath && ISSPACE(*httppath)) {
+          httppath++;
+          npath--;
         }
-        else
-          portp = strchr(doc, ':');
-
-        if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
-          unsigned long ulnum = strtoul(portp + 1, NULL, 10);
-          if(!ulnum || (ulnum > 65535UL))
-            logmsg("Invalid CONNECT port received");
-          else
-            req->connect_port = curlx_ultous(ulnum);
-
+        /* trim ending spaces */
+        while(npath && ISSPACE(httppath[npath - 1])) {
+          npath--;
         }
-        logmsg("Port number: %d, test case number: %ld",
-               req->connect_port, req->testno);
+        if(npath)
+          fine = TRUE;
       }
     }
 
-    if(req->testno == DOCNUMBER_NOTHING) {
-      /* Still no test case number. Try to get the number off the last dot
-         instead, IE we consider the TLD to be the test number. Test 123 can
-         then be written as "example.com.123". */
+    if(fine) {
+      char *ptr;
 
-      /* find the last dot */
-      ptr = strrchr(doc, '.');
+      req->prot_version = prot_major*10 + prot_minor;
+
+      /* find the last slash */
+      ptr = &httppath[npath];
+      while(ptr >= httppath) {
+        if(*ptr == '/')
+          break;
+        ptr--;
+      }
 
       /* get the number after it */
-      if(ptr) {
-        long num;
-        ptr++; /* skip the dot */
+      if(*ptr == '/') {
+        if((npath + strlen(request)) < 400)
+          msnprintf(logbuf, sizeof(logbuf), "Got request: %s %.*s HTTP/%d.%d",
+                    request, npath, httppath, prot_major, prot_minor);
+        else
+          msnprintf(logbuf, sizeof(logbuf), "Got a *HUGE* request HTTP/%d.%d",
+                    prot_major, prot_minor);
+        logmsg("%s", logbuf);
 
-        num = strtol(ptr, &ptr, 10);
+        if(!strncmp("/verifiedserver", ptr, 15)) {
+          logmsg("Are-we-friendly question received");
+          req->testno = DOCNUMBER_WERULEZ;
+          return 1; /* done */
+        }
 
-        if(num) {
-          req->testno = num;
-          if(req->testno > 10000) {
-            req->partno = req->testno % 10000;
-            req->testno /= 10000;
+        if(!strncmp("/quit", ptr, 5)) {
+          logmsg("Request-to-quit received");
+          req->testno = DOCNUMBER_QUIT;
+          return 1; /* done */
+        }
 
-            logmsg("found test %d in requested host name", req->testno);
+        ptr++; /* skip the slash */
 
+        req->testno = strtol(ptr, &ptr, 10);
+
+        if(req->testno > 10000) {
+          req->partno = req->testno % 10000;
+          req->testno /= 10000;
+        }
+        else
+          req->partno = 0;
+
+        if(req->testno) {
+
+          msnprintf(logbuf, sizeof(logbuf), "Serve test number %ld part %ld",
+                    req->testno, req->partno);
+          logmsg("%s", logbuf);
+        }
+        else {
+          logmsg("No test number in path");
+          req->testno = DOCNUMBER_NOTHING;
+        }
+
+      }
+
+      if(req->testno == DOCNUMBER_NOTHING) {
+        /* didn't find any in the first scan, try alternative test case
+           number placements */
+        static char doc[MAXDOCNAMELEN];
+        if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
+                  doc, &prot_major, &prot_minor) == 3) {
+          char *portp = NULL;
+
+          msnprintf(logbuf, sizeof(logbuf),
+                    "Received a CONNECT %s HTTP/%d.%d request",
+                    doc, prot_major, prot_minor);
+          logmsg("%s", logbuf);
+
+          req->connect_request = TRUE;
+
+          if(req->prot_version == 10)
+            req->open = FALSE; /* HTTP 1.0 closes connection by default */
+
+          if(doc[0] == '[') {
+            char *p = &doc[1];
+            unsigned long part = 0;
+            /* scan through the hexgroups and store the value of the last group
+               in the 'part' variable and use as test case number!! */
+            while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.'))) {
+              char *endp;
+              part = strtoul(p, &endp, 16);
+              if(ISXDIGIT(*p))
+                p = endp;
+              else
+                p++;
+            }
+            if(*p != ']')
+              logmsg("Invalid CONNECT IPv6 address format");
+            else if(*(p + 1) != ':')
+              logmsg("Invalid CONNECT IPv6 port format");
+            else
+              portp = p + 1;
+
+            req->testno = part;
           }
           else
-            req->partno = 0;
-        }
+            portp = strchr(doc, ':');
 
-        if(req->testno != DOCNUMBER_NOTHING) {
-          logmsg("Requested test number %ld part %ld (from host name)",
-                 req->testno, req->partno);
+          if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
+            unsigned long ulnum = strtoul(portp + 1, NULL, 10);
+            if(!ulnum || (ulnum > 65535UL))
+              logmsg("Invalid CONNECT port received");
+            else
+              req->connect_port = curlx_ultous(ulnum);
+
+          }
+          logmsg("Port number: %d, test case number: %ld",
+                 req->connect_port, req->testno);
         }
       }
-    }
 
-    if(req->testno == DOCNUMBER_NOTHING)
-      /* might get the test number */
-      parse_cmdfile(req);
+      if(req->testno == DOCNUMBER_NOTHING)
+        /* might get the test number */
+        parse_cmdfile(req);
 
-    if(req->testno == DOCNUMBER_NOTHING) {
-      logmsg("Did not find test number in PATH");
-      req->testno = DOCNUMBER_404;
+      if(req->testno == DOCNUMBER_NOTHING) {
+        logmsg("Did not find test number in PATH");
+        req->testno = DOCNUMBER_404;
+      }
+      else
+        parse_servercmd(req);
     }
-    else
-      parse_servercmd(req);
-  }
-  else if((req->offset >= 3) && (req->testno == DOCNUMBER_NOTHING)) {
-    logmsg("** Unusual request. Starts with %02x %02x %02x (%c%c%c)",
-           line[0], line[1], line[2], line[0], line[1], line[2]);
+    else if((req->offset >= 3)) {
+      logmsg("** Unusual request. Starts with %02x %02x %02x (%c%c%c)",
+             line[0], line[1], line[2], line[0], line[1], line[2]);
+    }
   }
 
   if(!end) {
