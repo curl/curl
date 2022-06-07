@@ -55,7 +55,7 @@ int test(char *URL)
 #ifdef LIB1543
   /* set CURLOPT_URLU */
   {
-    CURLUcode rc;
+    CURLUcode rc = CURLUE_OK;
     urlu = curl_url();
     if(urlu)
       rc = curl_url_set(urlu, CURLUPART_URL, URL, CURLU_ALLOW_SPACE);
