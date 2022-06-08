@@ -6577,9 +6577,11 @@ AC_DEFUN([CURL_ATOMIC],[
   AC_MSG_CHECKING([if _Atomic is available])
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
+      #include <stdatomic.h>
       $curl_includes_unistd
     ]],[[
-      _Atomic int i = 0;
+      atomic_int i = 0;
+      (void) atomic_load(&i);
     ]])
   ],[
     AC_MSG_RESULT([yes])

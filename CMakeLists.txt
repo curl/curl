@@ -1055,6 +1055,31 @@ if(HAVE_SIZEOF_LONG_LONG)
   set(HAVE_LL 1)
 endif()
 
+# Check for atomics support
+check_c_source_compiles(
+  "
+  #include <stdatomic.h>
+
+  int main(void)
+  {
+    atomic_int i = 0;
+    return atomic_load(&i);
+  }" HAVE_ATOMIC
+)
+
+# Check for SRW lock support
+if(WIN32)
+  check_c_source_compiles(
+    "
+    #include <windows.h>
+
+    #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
+    #error
+    #endif
+    " HAVE_SRW_LOCK
+  )
+endif()
+
 find_file(RANDOM_FILE urandom /dev)
 mark_as_advanced(RANDOM_FILE)
 
@@ -1464,6 +1489,7 @@ _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
 _add_if("unicode"       ENABLE_UNICODE)
+_add_if("threadsafe"    (NOT WIN32 AND HAVE_ATOMIC) OR (HAVE_SRW_LOCK))
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
 
