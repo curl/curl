@@ -1863,7 +1863,7 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
 #ifdef HAVE_SENDMSG
   struct iovec msg_iov = {(void *)pkt, pktlen};
   struct msghdr msg = {0};
-  uint8_t msg_ctrl[CMSG_SPACE(sizeof(uint16_t))] = {0};
+  uint8_t msg_ctrl[32];
   size_t ctrllen = 0;
   ssize_t sent;
 #if defined(__linux__) && defined(UDP_SEGMENT)
@@ -1871,6 +1871,8 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
 #endif
 
   *psent = 0;
+
+  assert(sizeof(msg_ctrl) >= CMSG_SPACE(sizeof(uint16_t)));
 
   msg.msg_iov = &msg_iov;
   msg.msg_iovlen = 1;
