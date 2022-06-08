@@ -3446,6 +3446,7 @@ AC_CHECK_FUNCS([fnmatch \
   mach_absolute_time \
   pipe \
   sched_yield \
+  sendmsg \
   setlocale \
   setmode \
   setrlimit \
