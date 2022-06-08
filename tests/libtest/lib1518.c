@@ -60,8 +60,7 @@ int test(char *URL)
     if(urlu)
       rc = curl_url_set(urlu, CURLUPART_URL, URL, CURLU_ALLOW_SPACE);
     if(!urlu || rc) {
-      curl_url_cleanup(urlu);
-      return TEST_ERR_MAJOR_BAD;
+      goto test_cleanup;
     }
     test_setopt(curl, CURLOPT_CURLU, urlu);
   }
