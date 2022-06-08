@@ -21,7 +21,7 @@
  * RFC2195 CRAM-MD5 authentication
  * RFC2595 Using TLS with IMAP, POP3 and ACAP
  * RFC2831 DIGEST-MD5 authentication
- * RFC3501 IMAPv4 protocol
+ * RFC3501 Internet Message Access Protocol - Version 4rev1
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
  * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
@@ -29,6 +29,7 @@
  * RFC5092 IMAP URL Scheme
  * RFC6749 OAuth 2.0 Authorization Framework
  * RFC8314 Use of TLS for Email Submission and Access
+ * RFC9051 Internet Message Access Protocol (IMAP) - Version 4rev2
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
@@ -1025,6 +1026,9 @@ static CURLcode imap_state_auth_resp(struct Curl_easy *data,
     default:
       break;
     }
+  else if((!imapc->login_disabled) && (imapc->preftype & IMAP_TYPE_CLEARTEXT))
+    /* Perform clear text authentication on failure as per RFC-9051 */
+    result = imap_perform_login(data, conn);
 
   return result;
 }
