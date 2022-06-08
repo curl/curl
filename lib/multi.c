@@ -1312,6 +1312,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 #else
     pollrc = Curl_poll(ufds, nfds, timeout_ms); /* wait... */
 #endif
+    if(pollrc < 0)
+      return CURLM_UNRECOVERABLE_POLL;
 
     if(pollrc > 0) {
       retcode = pollrc;

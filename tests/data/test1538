@@ -131,7 +131,8 @@ e95: HTTP/3 error
 e96: QUIC connection error
 e97: proxy handshake error
 e98: SSL Client Certificate required
-e99: Unknown error
+e99: Unrecoverable error in select/poll
+e100: Unknown error
 m-1: Please call curl_multi_perform() soon
 m0: No error
 m1: Invalid multi handle
@@ -145,7 +146,8 @@ m8: API function called from within callback
 m9: Wakeup is unavailable or failed
 m10: A libcurl function was given a bad argument
 m11: Operation was aborted by an application callback
-m12: Unknown error
+m12: Unrecoverable error in select/poll
+m13: Unknown error
 s0: No error
 s1: Unknown share option
 s2: Share currently in use

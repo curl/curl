@@ -549,6 +549,8 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 
     /* wait for activity or timeout */
     pollrc = Curl_poll(fds, numfds, ev->ms);
+    if(pollrc < 0)
+      return CURLE_UNRECOVERABLE_POLL;
 
     after = Curl_now();
 
