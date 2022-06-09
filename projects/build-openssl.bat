@@ -73,7 +73,7 @@ rem ***************************************************************************
       set "VC_PATH=Microsoft Visual Studio 14.0\VC"
     ) else if /i "%~1" == "vc14.1" (
       set VC_VER=14.1
-      set VC_DESC=VC14.1
+      set VC_DESC=VC14.10
 
       rem Determine the VC14.1 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
@@ -86,7 +86,7 @@ rem ***************************************************************************
       )
     ) else if /i "%~1" == "vc14.2" (
       set VC_VER=14.2
-      set VC_DESC=VC14.2
+      set VC_DESC=VC14.20
 
       rem Determine the VC14.2 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
@@ -99,7 +99,7 @@ rem ***************************************************************************
       )
     ) else if /i "%~1" == "vc14.3" (
       set VC_VER=14.3
-      set VC_DESC=VC14.3
+      set VC_DESC=VC14.30
 
       rem Determine the VC14.3 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
