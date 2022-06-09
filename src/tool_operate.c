@@ -2140,6 +2140,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     }
     break;
   }
+  Curl_safefree(state->outfiles);
 
   if(!*added || result) {
     *added = FALSE;
