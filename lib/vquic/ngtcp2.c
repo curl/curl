@@ -728,7 +728,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 
   ngtcp2_connection_close_error_default(&qs->last_error);
 
-#if defined(__linux__) && defined(UDP_SEGMENT) & defined(HAVE_SENDMSG)
+#if defined(__linux__) && defined(UDP_SEGMENT) && defined(HAVE_SENDMSG)
   qs->no_gso = FALSE;
 #else
   qs->no_gso = TRUE;
