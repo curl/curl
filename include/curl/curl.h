@@ -1028,17 +1028,23 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 #define CURLPROTO_SMTPS  (1<<17)
 #define CURLPROTO_RTSP   (1<<18)
 #define CURLPROTO_RTMP   (1<<19)
-#define CURLPROTO_RTMPT  (1<<20)
-#define CURLPROTO_RTMPE  (1<<21)
-#define CURLPROTO_RTMPTE (1<<22)
+  /* 1<<20 */
+  /* 1<<21 */
+  /* 1<<22 */
 #define CURLPROTO_RTMPS  (1<<23)
-#define CURLPROTO_RTMPTS (1<<24)
+  /* 1<<24 */
 #define CURLPROTO_GOPHER (1<<25)
 #define CURLPROTO_SMB    (1<<26)
 #define CURLPROTO_SMBS   (1<<27)
 #define CURLPROTO_MQTT   (1<<28)
 #define CURLPROTO_GOPHERS (1<<29)
 #define CURLPROTO_ALL    (~0) /* enable everything */
+
+/* Deprecated aliases, do not use: */
+#define CURLPROTO_RTMPT  (1<<19)
+#define CURLPROTO_RTMPE  (1<<19)
+#define CURLPROTO_RTMPTE (1<<19)
+#define CURLPROTO_RTMPTS (1<<23)
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
