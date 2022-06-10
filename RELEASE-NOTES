@@ -10,7 +10,9 @@ This release includes the following changes:
 
  o curl: add --rate to set max request rate per time unit [69]
  o curl: deprecate --random-file and --egd-file [12]
+ o curl_version_info: add CURL_VERSION_THREADSAFE_INIT [100]
  o CURLINFO_CAPATH/CAINFO: get the default CA paths from libcurl [9]
+ o lib: make curl_global_init() threadsafe when possible [101]
  o libssh2: add CURLOPT_SSH_HOSTKEYFUNCTION [78]
  o opts: deprecate RANDOM_FILE and EGDSOCKET [13]
  o socks: support unix sockets for socks proxy [2]
@@ -37,6 +39,7 @@ This release includes the following bugfixes:
  o CURLOPT_FILETIME.3: fix the protocols this works with
  o CURLOPT_NETRC.3: document the .netrc file format
  o CURLOPT_PORT.3: We discourage using this option [92]
+ o CURLOPT_RANGE.3: remove ranged upload advice [99]
  o digest: added detection of more syntax error in server headers [81]
  o digest: tolerate missing "realm" [80]
  o digest: unquote realm and nonce before processing [82]
@@ -58,6 +61,7 @@ This release includes the following bugfixes:
  o hyper: use 'alt-used' [71]
  o lib: make more protocol specific struct fields #ifdefed [84]
  o libcurl-security.3: add "Secrets in memory" [30]
+ o libcurl-security.3: document CRLF header injection [98]
  o links: update dead links to the curl-wiki [21]
  o log2changes: do not indent empty lines [ci skip] [37]
  o macos9: remove partial support [22]
@@ -68,21 +72,25 @@ This release includes the following bugfixes:
  o mprintf: ignore clang non-literal format string [19]
  o netrc: check %USERPROFILE% as well on Windows [77]
  o netrc: support quoted strings [33]
- o ngtcp2: Allow curl to send larger UDP datagrams [29]
- o ngtcp2: Correct use of ngtcp2 and nghttp3 signed integer types [25]
+ o ngtcp2: allow curl to send larger UDP datagrams [29]
+ o ngtcp2: correct use of ngtcp2 and nghttp3 signed integer types [25]
  o ngtcp2: enable Linux GSO [91]
  o ngtcp2: extend QUIC transport parameters buffer [4]
- o ngtcp2: Fix alert_read_func return value [26]
+ o ngtcp2: fix alert_read_func return value [26]
  o ngtcp2: handle error from ngtcp2_conn_submit_crypto_data [5]
  o ngtcp2: send appropriate connection close error code [6]
  o ngtcp2: support boringssl crypto backend [17]
+ o ngtcp2: use handshake helper funcs to simplify TLS handshake integration [68]
  o ntlm: provide a fixed fake host name [32]
  o quic: add Curl_quic_idle [18]
  o quiche: support ca-fallback [49]
  o remote-name.d: mention --output-dir [88]
  o runtests.pl: add the --repeat parameter to the --help output [43]
+ o runtests: fix skipping tests not done event-based [95]
  o scripts/copyright.pl: fix the exclusion to not ignore man pages [75]
  o sectransp: check for a function defined when __BLOCKS__ is undefined [20]
+ o select: return error from "lethal" poll/select errors [93]
+ o server/sws: support spaces in the HTTP request path
  o speed-limit/time.d: mention these affect transfers in either direction [74]
  o strcase: some optimisations [8]
  o test 2081: add a valid reply for the second request [60]
@@ -91,13 +99,17 @@ This release includes the following bugfixes:
  o test681: verify --no-remote-name [90]
  o tests 266, 116 and 1540: add a small write delay
  o tests/data/test1501: kill ftp server after slow LIST response [59]
+ o tests/getpart: fix getpartattr to work with "data" and "data2"
  o tests/server/sws.c: change the HTTP writedelay unit to milliseconds [47]
  o test{440,441,493,977}: add "HTTP proxy" keywords [40]
  o tool_getparam: fix --parallel-max maximum value constraint [51]
  o tool_operate: make sure --fail-with-body works with --retry [24]
- o transfer: Fix potential NULL pointer dereference [15]
+ o transfer: fix potential NULL pointer dereference [15]
+ o transfer: maintain --path-as-is after redirects [96]
  o url: free old conn better on reuse [41]
  o url: remove redundant #ifdefs in allocate_conn()
+ o url: URL encode the path when extracted, if spaces were set
+ o urlapi: support CURLU_URLENCODE for curl_url_get()
  o urldata: reduce size of a few struct fields [86]
  o urldata: remove three unused booleans from struct UserDefined [87]
  o urldata: store tcp_keepidle and tcp_keepintvl as ints [85]
@@ -120,10 +132,11 @@ advice from friends like these:
   Frank Gevaerts, Frazer Smith, Gisle Vanem, Gregor Jasny, Harry Sintonen,
   Illarion Taev, ImpatientHippo on GitHub, Jakub Bochenski, Kamil Dudka,
   Karlson2k on github, KotlinIsland on github, Ladar Levison, Marcel Raad,
-  Marc Hörsken, michael musset, Nick Zitzmann, Nuru on github,
-  Patrick Monnerat, Petr Pisar, Ray Satiro, Tatsuhiro Tsujikawa,
-  Viktor Szakats, Vincent Torri, vvb2060 on github, Wolf Vollprecht, Elms
-  (37 contributors)
+  Marc Hörsken, Marcus T, michael musset, Nick Zitzmann, Nuru on github,
+  Patrick Monnerat, Petr Pisar, Ray Satiro, Simon Berger, Tatsuhiro Tsujikawa,
+  Thomas Guillem, Viktor Szakats, Vincent Torri, vvb2060 on github,
+  Wolf Vollprecht, Elms
+  (40 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -193,6 +206,7 @@ References to bug reports and discussions on issues:
  [64] = https://curl.se/bug/?i=8844
  [65] = https://curl.se/bug/?i=8904
  [67] = https://curl.se/bug/?i=8902
+ [68] = https://curl.se/bug/?i=8968
  [69] = https://curl.se/bug/?i=8671
  [70] = https://curl.se/bug/?i=8877
  [71] = https://curl.se/bug/?i=8898
@@ -215,3 +229,10 @@ References to bug reports and discussions on issues:
  [90] = https://curl.se/bug/?i=8942
  [91] = https://curl.se/bug/?i=8909
  [92] = https://curl.se/bug/?i=8941
+ [93] = https://curl.se/bug/?i=8921
+ [95] = https://curl.se/bug/?i=8977
+ [96] = https://curl.se/bug/?i=8974
+ [98] = https://curl.se/bug/?i=8964
+ [99] = https://curl.se/bug/?i=8969
+ [100] = https://curl.se/bug/?i=8680
+ [101] = https://curl.se/bug/?i=8680
