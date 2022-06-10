@@ -728,7 +728,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 
   ngtcp2_connection_close_error_default(&qs->last_error);
 
-#if defined(__linux__) && defined(UDP_SEGMENT)
+#if defined(__linux__) && defined(UDP_SEGMENT) & defined(HAVE_SENDMSG)
   qs->no_gso = FALSE;
 #else
   qs->no_gso = TRUE;
@@ -1647,9 +1647,10 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
                            struct quicsocket *qs, const uint8_t *pkt,
                            size_t pktlen, size_t gsolen)
 {
+#ifdef HAVE_SENDMSG
   struct iovec msg_iov = {(void *)pkt, pktlen};
   struct msghdr msg = {0};
-  uint8_t msg_ctrl[CMSG_SPACE(sizeof(uint16_t))] = {0};
+  uint8_t msg_ctrl[32];
   size_t ctrllen = 0;
   ssize_t sent;
 #if defined(__linux__) && defined(UDP_SEGMENT)
@@ -1657,6 +1658,8 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
 #endif
 
   *psent = 0;
+
+  assert(sizeof(msg_ctrl) >= CMSG_SPACE(sizeof(uint16_t)));
 
   msg.msg_iov = &msg_iov;
   msg.msg_iovlen = 1;
@@ -1708,6 +1711,31 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
   else {
     assert(pktlen == (size_t)sent);
   }
+#else
+  ssize_t sent;
+  (void)qs;
+  (void)gsolen;
+
+  *psent = 0;
+
+  while((sent = send(sockfd, (const char *)pkt, pktlen, 0)) == -1 &&
+        SOCKERRNO == EINTR)
+    ;
+
+  if(sent == -1) {
+    if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
+      return CURLE_AGAIN;
+    }
+    else {
+      failf(data, "send() returned %zd (errno %d)", sent, SOCKERRNO);
+      if(SOCKERRNO != EMSGSIZE) {
+        return CURLE_SEND_ERROR;
+      }
+      /* UDP datagram is too large; caused by PMTUD. Just let it be
+         lost. */
+    }
+  }
+#endif
 
   *psent = pktlen;
 
