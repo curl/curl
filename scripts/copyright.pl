@@ -95,7 +95,7 @@ sub scanfile {
         chomp;
         my $l = $_;
         # check for a copyright statement and save the years
-        if($l =~ /.* +copyright .* *\d\d\d\d/i) {
+        if($l =~ /.* ?copyright .* *\d\d\d\d/i) {
             while($l =~ /([\d]{4})/g) {
                 push @copyright, {
                   year => $1,
