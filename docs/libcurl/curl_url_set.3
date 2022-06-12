@@ -18,6 +18,8 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_url_set 3 "6 Aug 2018" "libcurl" "libcurl Manual"
 .SH NAME
@@ -45,6 +47,12 @@ call.
 
 Setting a part to a NULL pointer will effectively remove that part's contents
 from the CURLU handle.
+
+By default, this API only accepts URLs using schemes for protocols that are
+supported built-in. To make libcurl parse URLs generically even for schemes it
+does not know about, the \fBCURLU_NON_SUPPORT_SCHEME\fP flags bit must be
+set. Otherwise, this function returns \fICURLUE_UNSUPPORTED_SCHEME\fP on URL
+schemes it does not recognize.
 
 The \fIflags\fP argument is a bitmask with independent features.
 .SH PARTS
