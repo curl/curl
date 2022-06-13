@@ -272,9 +272,9 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_DNS_SERVERS ||                                         \
    (option) == CURLOPT_DOH_URL ||                                             \
    (option) == CURLOPT_EGDSOCKET ||                                           \
-   (option) == CURLOPT_FTPPORT ||                                             \
    (option) == CURLOPT_FTP_ACCOUNT ||                                         \
    (option) == CURLOPT_FTP_ALTERNATIVE_TO_USER ||                             \
+   (option) == CURLOPT_FTPPORT ||                                             \
    (option) == CURLOPT_HSTS ||                                                \
    (option) == CURLOPT_INTERFACE ||                                           \
    (option) == CURLOPT_ISSUERCERT ||                                          \
@@ -288,10 +288,8 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_PASSWORD ||                                            \
    (option) == CURLOPT_PINNEDPUBLICKEY ||                                     \
    (option) == CURLOPT_PRE_PROXY ||                                           \
+   (option) == CURLOPT_PROTOCOLS_STR ||                                       \
    (option) == CURLOPT_PROXY ||                                               \
-   (option) == CURLOPT_PROXYPASSWORD ||                                       \
-   (option) == CURLOPT_PROXYUSERNAME ||                                       \
-   (option) == CURLOPT_PROXYUSERPWD ||                                        \
    (option) == CURLOPT_PROXY_CAINFO ||                                        \
    (option) == CURLOPT_PROXY_CAPATH ||                                        \
    (option) == CURLOPT_PROXY_CRLFILE ||                                       \
@@ -299,17 +297,21 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_PROXY_KEYPASSWD ||                                     \
    (option) == CURLOPT_PROXY_PINNEDPUBLICKEY ||                               \
    (option) == CURLOPT_PROXY_SERVICE_NAME ||                                  \
+   (option) == CURLOPT_PROXY_SSL_CIPHER_LIST ||                               \
    (option) == CURLOPT_PROXY_SSLCERT ||                                       \
    (option) == CURLOPT_PROXY_SSLCERTTYPE ||                                   \
    (option) == CURLOPT_PROXY_SSLKEY ||                                        \
    (option) == CURLOPT_PROXY_SSLKEYTYPE ||                                    \
-   (option) == CURLOPT_PROXY_SSL_CIPHER_LIST ||                               \
    (option) == CURLOPT_PROXY_TLS13_CIPHERS ||                                 \
    (option) == CURLOPT_PROXY_TLSAUTH_PASSWORD ||                              \
    (option) == CURLOPT_PROXY_TLSAUTH_TYPE ||                                  \
    (option) == CURLOPT_PROXY_TLSAUTH_USERNAME ||                              \
+   (option) == CURLOPT_PROXYPASSWORD ||                                       \
+   (option) == CURLOPT_PROXYUSERNAME ||                                       \
+   (option) == CURLOPT_PROXYUSERPWD ||                                        \
    (option) == CURLOPT_RANDOM_FILE ||                                         \
    (option) == CURLOPT_RANGE ||                                               \
+   (option) == CURLOPT_REDIR_PROTOCOLS_STR ||                                 \
    (option) == CURLOPT_REFERER ||                                             \
    (option) == CURLOPT_REQUEST_TARGET ||                                      \
    (option) == CURLOPT_RTSP_SESSION_ID ||                                     \

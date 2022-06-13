@@ -1010,7 +1010,8 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 #define CURLHSTS_ENABLE       (long)(1<<0)
 #define CURLHSTS_READONLYFILE (long)(1<<1)
 
-/* CURLPROTO_ defines are for the CURLOPT_*PROTOCOLS options */
+/* The CURLPROTO_ defines below are for the **deprecated** CURLOPT_*PROTOCOLS
+   options. Do not use. */
 #define CURLPROTO_HTTP   (1<<0)
 #define CURLPROTO_HTTPS  (1<<1)
 #define CURLPROTO_FTP    (1<<2)
@@ -2143,6 +2144,15 @@ typedef enum {
 
   /* set the SSH host key callback custom pointer */
   CURLOPT(CURLOPT_SSH_HOSTKEYDATA, CURLOPTTYPE_CBPOINT, 317),
+
+  /* specify which protocols that are allowed to be used for the transfer,
+     which thus helps the app which takes URLs from users or other external
+     inputs and want to restrict what protocol(s) to deal with. Defaults to
+     all built-in protocols. */
+  CURLOPT(CURLOPT_PROTOCOLS_STR, CURLOPTTYPE_STRINGPOINT, 318),
+
+  /* specify which protocols that libcurl is allowed to follow directs to */
+  CURLOPT(CURLOPT_REDIR_PROTOCOLS_STR, CURLOPTTYPE_STRINGPOINT, 319),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

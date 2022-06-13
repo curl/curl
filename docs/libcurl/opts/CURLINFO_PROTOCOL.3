@@ -32,6 +32,10 @@ CURLINFO_PROTOCOL \- get the protocol used in the connection
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROTOCOL, long *p);
 .fi
 .SH DESCRIPTION
+This option is deprecated. We strongly recommend using
+\fICURLINFO_SCHEME(3)\fP instead, because this option cannot return all
+possible protocols!
+
 Pass a pointer to a long to receive the version used in the last http
 connection.  The returned value will be exactly one of the CURLPROTO_* values:
 

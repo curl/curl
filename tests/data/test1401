@@ -91,9 +91,7 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
 %endif
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_PROTOCOLS, (long)CURLPROTO_FILE |
-                                           (long)CURLPROTO_FTP |
-                                           (long)CURLPROTO_HTTP);
+  curl_easy_setopt(hnd, CURLOPT_PROTOCOLS_STR, "http,ftp,file");
 
   /* Here is a list of options the curl code used that cannot get generated
      as source easily. You may choose to either not use them or implement

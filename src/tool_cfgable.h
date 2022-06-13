@@ -67,9 +67,9 @@ struct OperationConfig {
   bool disable_epsv;
   bool disable_eprt;
   bool ftp_pret;
-  long proto;
+  char *proto_str;
   bool proto_present;
-  long proto_redir;
+  char *proto_redir_str;
   bool proto_redir_present;
   char *proto_default;
   curl_off_t resume_from;

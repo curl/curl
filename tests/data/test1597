@@ -1,0 +1,32 @@
+<testcase>
+<info>
+<keywords>
+CURLOPT_PROTOCOLS_STR
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+# Client-side
+<client>
+<server>
+none
+</server>
+<name>
+CURLOPT_PROTOCOLS_STR
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+-
+</command>
+</client>
+
+<verify>
+<stdout>
+Tested 15 strings
+</stdout>
+</verify>
+</testcase>
