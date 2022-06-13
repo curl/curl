@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: proxy-pinnedpubkey
 Arg: <hashes>
 Help: FILE/HASHES public key to verify proxy with

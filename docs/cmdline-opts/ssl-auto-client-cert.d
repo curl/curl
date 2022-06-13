@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: ssl-auto-client-cert
 Help: Use auto client certificate (Schannel)
 Added: 7.77.0

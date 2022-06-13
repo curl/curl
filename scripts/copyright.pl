@@ -32,7 +32,6 @@
 # regexes of files to not scan
 my @skiplist=(
     '^tests\/data\/test(\d+)$', # test case data
-    '^docs\/cmdline-opts\/[a-z]+(.*)\.d$', # curl.1 pieces
 
     # all uppercase file name, possibly with dot and dash. But do not exclude
     # the man pages:

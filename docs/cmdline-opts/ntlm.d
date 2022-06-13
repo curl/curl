@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: ntlm
 Help: Use HTTP NTLM authentication
 Mutexed: basic negotiate digest anyauth

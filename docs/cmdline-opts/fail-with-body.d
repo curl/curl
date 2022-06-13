@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: fail-with-body
 Protocols: HTTP
 Help: Fail on HTTP errors but save the body

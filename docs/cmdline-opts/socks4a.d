@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: socks4a
 Arg: <host[:port]>
 Help: SOCKS4a proxy on given host + port

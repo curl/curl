@@ -1,3 +1,9 @@
+<!--
+  Copyright (C) 2000 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+
+  SPDX-License-Identifier: curl
+-->
+
 # curl man page generator
 
 This is the curl man page generator. It generates a single nroff man page
@@ -29,6 +35,8 @@ Each file has a set of meta-data and a body of text.
     See-also: (space separated list of related options, no dashes)
     Help: (short text for the --help output for this option)
     Example: (example command line, without "curl" and can use `$URL`)
+    c: (copyright line)
+    SPDX-License-Identifier: curl
     --- (end of meta-data)
 
 ### Body

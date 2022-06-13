@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: resolve
 Arg: <[+]host:port:addr[,addr]...>
 Help: Resolve the host+port to this address

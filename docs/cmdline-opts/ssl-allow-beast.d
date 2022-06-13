@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: ssl-allow-beast
 Help: Allow security flaw to improve interop
 Added: 7.25.0

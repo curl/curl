@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: connect-to
 Arg: <HOST1:PORT1:HOST2:PORT2>
 Help: Connect to host
