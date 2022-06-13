@@ -110,7 +110,7 @@ static const struct feat feats[] = {
   {"alt-svc",        CURL_VERSION_ALTSVC},
   {"HSTS",           CURL_VERSION_HSTS},
   {"gsasl",          CURL_VERSION_GSASL},
-  {"threadsafe",     CURL_VERSION_THREADSAFE_INIT},
+  {"threadsafe",     CURL_VERSION_THREADSAFE},
 };
 
 static void print_category(curlhelp_t category)

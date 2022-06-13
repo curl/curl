@@ -10,7 +10,7 @@ This release includes the following changes:
 
  o curl: add --rate to set max request rate per time unit [69]
  o curl: deprecate --random-file and --egd-file [12]
- o curl_version_info: add CURL_VERSION_THREADSAFE_INIT [100]
+ o curl_version_info: add CURL_VERSION_THREADSAFE [100]
  o CURLINFO_CAPATH/CAINFO: get the default CA paths from libcurl [9]
  o lib: make curl_global_init() threadsafe when possible [101]
  o libssh2: add CURLOPT_SSH_HOSTKEYFUNCTION [78]
