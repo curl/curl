@@ -19,6 +19,7 @@ slow
 # be used for it
 <features>
 threaded-resolver
+!win32
 </features>
 <server>
 none
