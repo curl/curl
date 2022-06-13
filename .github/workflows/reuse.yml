@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: REUSE Compliance Check
+name: REUSE compliance
 
 on:
   # Trigger the workflow on push or pull requests, but only for the
@@ -17,7 +17,7 @@ on:
     - master
 
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
