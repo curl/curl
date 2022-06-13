@@ -53,9 +53,9 @@ int test(char *URL)
   (void) URL;
 
   ver = curl_version_info(CURLVERSION_NOW);
-  if((ver->features & CURL_VERSION_THREADSAFE_INIT) == 0) {
+  if((ver->features & CURL_VERSION_THREADSAFE) == 0) {
     fprintf(stderr, "%s:%d Have pthread but the "
-            "CURL_VERSION_THREADSAFE_INIT feature flag is not set\n",
+            "CURL_VERSION_THREADSAFE feature flag is not set\n",
             __FILE__, __LINE__);
     return -1;
   }
@@ -92,9 +92,9 @@ int test(char *URL)
   (void)URL;
 
   ver = curl_version_info(CURLVERSION_NOW);
-  if((ver->features & CURL_VERSION_THREADSAFE_INIT) != 0) {
+  if((ver->features & CURL_VERSION_THREADSAFE) != 0) {
     fprintf(stderr, "%s:%d No pthread but the "
-            "CURL_VERSION_THREADSAFE_INIT feature flag is set\n",
+            "CURL_VERSION_THREADSAFE feature flag is set\n",
             __FILE__, __LINE__);
     return -1;
   }
