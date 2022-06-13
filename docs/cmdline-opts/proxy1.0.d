@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: proxy1.0
 Arg: <host[:port]>
 Help: Use HTTP/1.0 proxy on given port

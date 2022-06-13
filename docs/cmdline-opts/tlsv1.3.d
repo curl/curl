@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: tlsv1.3
 Help: Use TLSv1.3 or greater
 Protocols: TLS

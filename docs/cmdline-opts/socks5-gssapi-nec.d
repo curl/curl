@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: socks5-gssapi-nec
 Help: Compatibility with NEC SOCKS5 server
 Added: 7.19.4

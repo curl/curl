@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: hostpubsha256
 Arg: <sha256>
 Help: Acceptable SHA256 hash of the host public key

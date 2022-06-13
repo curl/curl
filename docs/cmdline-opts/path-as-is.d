@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: path-as-is
 Help: Do not squash .. sequences in URL path
 Added: 7.42.0

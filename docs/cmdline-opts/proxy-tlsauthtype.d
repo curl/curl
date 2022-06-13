@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: proxy-tlsauthtype
 Arg: <type>
 Help: TLS authentication type for HTTPS proxy

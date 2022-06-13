@@ -197,6 +197,8 @@ sub single {
     my $requires;
     my $category;
     my $seealso;
+    my $copyright;
+    my $spdx;
     my @examples; # there can be more than one
     my $magic; # cmdline special option
     my $line;
@@ -238,6 +240,12 @@ sub single {
         elsif(/^Example: *(.*)/i) {
             push @examples, $1;
         }
+        elsif(/^C: (.*)/i) {
+            $copyright=$1;
+        }
+        elsif(/^SPDX-License-Identifier: (.*)/i) {
+            $spdx=$1;
+        }
         elsif(/^Help: *(.*)/i) {
             ;
         }
@@ -260,6 +268,14 @@ sub single {
             }
             if(!$seealso) {
                 print STDERR "$f:$line:1:ERROR: no 'See-also:' field present\n";
+                return 2;
+            }
+            if(!$copyright) {
+                print STDERR "$f:$line:1:ERROR: no 'C:' field present\n";
+                return 2;
+            }
+            if(!$spdx) {
+                print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
                 return 2;
             }
             last;

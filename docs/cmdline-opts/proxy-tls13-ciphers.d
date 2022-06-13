@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: proxy-tls13-ciphers
 Arg: <ciphersuite list>
 help: TLS 1.3 proxy cipher suites

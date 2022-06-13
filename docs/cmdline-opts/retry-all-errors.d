@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: retry-all-errors
 Help: Retry all errors (use with --retry)
 Added: 7.71.0

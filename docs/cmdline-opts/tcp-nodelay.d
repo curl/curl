@@ -1,3 +1,5 @@
+c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: tcp-nodelay
 Help: Use the TCP_NODELAY option
 Added: 7.11.2
