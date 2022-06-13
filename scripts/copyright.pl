@@ -81,6 +81,9 @@ my @skiplist=(
     # markdown linkchecker config
     "mlc_config.json",
 
+    # github template file
+    "^.github/ISSUE_TEMPLATE/bug_report.md",
+
     # License texts and REUSE-specific files
     ".reuse/dep5",
     "LICENSES/.*"
