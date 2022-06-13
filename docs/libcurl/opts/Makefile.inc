@@ -267,6 +267,7 @@ man_MANS =                                      \
   CURLOPT_PROGRESSDATA.3                        \
   CURLOPT_PROGRESSFUNCTION.3                    \
   CURLOPT_PROTOCOLS.3                           \
+  CURLOPT_PROTOCOLS_STR.3                       \
   CURLOPT_PROXY.3                               \
   CURLOPT_PROXYAUTH.3                           \
   CURLOPT_PROXYHEADER.3                         \
@@ -307,6 +308,7 @@ man_MANS =                                      \
   CURLOPT_READDATA.3                            \
   CURLOPT_READFUNCTION.3                        \
   CURLOPT_REDIR_PROTOCOLS.3                     \
+  CURLOPT_REDIR_PROTOCOLS_STR.3                 \
   CURLOPT_REFERER.3                             \
   CURLOPT_REQUEST_TARGET.3                      \
   CURLOPT_RESOLVE.3                             \

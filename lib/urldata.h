@@ -1781,8 +1781,8 @@ struct UserDefined {
 #ifdef ENABLE_IPV6
   unsigned int scope_id;  /* Scope id for IPv6 */
 #endif
-  unsigned int allowed_protocols;
-  unsigned int redir_protocols;
+  curl_off_t allowed_protocols;
+  curl_off_t redir_protocols;
   unsigned int mime_options;      /* Mime option flags. */
 
 #ifndef CURL_DISABLE_RTSP

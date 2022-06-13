@@ -22,60 +22,41 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_PROTOCOLS 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_PROTOCOLS_STR 3 "11 Jun 2022" "libcurl 7.85.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PROTOCOLS \- allowed protocols
+CURLOPT_PROTOCOLS_STR \- allowed protocols
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROTOCOLS, long bitmask);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROTOCOLS_STR, char *spec);
 .fi
 .SH DESCRIPTION
-This option is deprecated. We strongly recommend using
-\fICURLOPT_PROTOCOLS_STR(3)\fP instead because this option cannot control all
-available protocols!
+Pass a pointer to a string that holds a comma-separated list of case
+insensitive protocol names (URL schemes) to allow in the transfer. This
+option allows applications to use libcurl built to support a wide range of
+protocols but still limit specific transfers to only be allowed to use a
+subset of them. By default, libcurl accepts all protocols it was built with
+support for. See also \fICURLOPT_REDIR_PROTOCOLS_STR(3)\fP.
 
-Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
-limits what protocols libcurl may use in the transfer. This allows you to have
-a libcurl built to support a wide range of protocols but still limit specific
-transfers to only be allowed to use a subset of them. By default libcurl will
-accept all protocols it supports (\fICURLPROTO_ALL\fP). See also
-\fICURLOPT_REDIR_PROTOCOLS(3)\fP.
+If trying to set a non-existing protocol or if no matching protocol at all is
+set, it returns error.
 
-These are the available protocol defines:
-.nf
-CURLPROTO_DICT
-CURLPROTO_FILE
-CURLPROTO_FTP
-CURLPROTO_FTPS
-CURLPROTO_GOPHER
-CURLPROTO_HTTP
-CURLPROTO_HTTPS
-CURLPROTO_IMAP
-CURLPROTO_IMAPS
-CURLPROTO_LDAP
-CURLPROTO_LDAPS
-CURLPROTO_POP3
-CURLPROTO_POP3S
-CURLPROTO_RTMP
-CURLPROTO_RTMPE
-CURLPROTO_RTMPS
-CURLPROTO_RTMPT
-CURLPROTO_RTMPTE
-CURLPROTO_RTMPTS
-CURLPROTO_RTSP
-CURLPROTO_SCP
-CURLPROTO_SFTP
-CURLPROTO_SMB
-CURLPROTO_SMBS
-CURLPROTO_SMTP
-CURLPROTO_SMTPS
-CURLPROTO_TELNET
-CURLPROTO_TFTP
-.fi
+These are the available protocols:
+
+DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS,
+POP3, POP3S, RTMP, RTMPE, RTMPS, RTMPT, RTMPTE, RTMPTS, RTSP, SCP, SFTP, SMB,
+SMBS, SMTP, SMTPS, TELNET, TFTP
+
+You can set "ALL" as a short-cut to enable all protocols. Note that by setting
+all, you may enable protocols that were not supported the day you write this
+but are introduced in a future libcurl version.
+
+\fIcurl_version_info(3)\fP can be used to get a list of all supported
+protocols in the current libcurl. \fICURLINFO_SCHEME(3)\fP is the recommended
+way to figure out the protocol used in a previous transfer.
 .SH DEFAULT
-All protocols built-in.
+All protocols built-in
 .SH PROTOCOLS
 All
 .SH EXAMPLE
@@ -86,16 +67,16 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
 
   /* only allow HTTP, TFTP and SFTP */
-  curl_easy_setopt(curl, CURLOPT_PROTOCOLS,
-                   CURLPROTO_HTTP | CURLPROTO_TFTP | CURLPROTO_SFTP);
+  curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,tftp,sftp");
 
   /* Perform the request */
   curl_easy_perform(curl);
 }
 .fi
 .SH AVAILABILITY
-Added in 7.19.4
+Added in 7.85.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR CURLOPT_REDIR_PROTOCOLS "(3), " CURLOPT_URL "(3), "
+.BR CURLOPT_REDIR_PROTOCOLS_STR "(3), " CURLOPT_URL "(3), "
+.BR curl_version_info "(3), " CURLINFO_SCHEME "(3), "
