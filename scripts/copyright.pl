@@ -107,6 +107,9 @@ sub scanfile {
                 $found++;
             }
         }
+        if($l =~ /SPDX-License-Identifier:/) {
+            $spdx = 1;
+        }
         # allow within the first 100 lines
         if(++$line > 100) {
             last;
@@ -120,6 +123,7 @@ sub checkfile {
     my ($file) = @_;
     my $fine = 0;
     @copyright=();
+    $spdx = 0;
     my $found = scanfile($file);
 
     if($found < 1) {
@@ -130,6 +134,10 @@ sub checkfile {
         # this means the file couldn't open - it might not exist, consider
         # that fine
         return 1;
+    }
+    if(!$spdx) {
+        print "$file:1: missing SPDX-License-Identifier\n";
+        return 2;
     }
 
     my $commityear = undef;
