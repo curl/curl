@@ -20,7 +20,6 @@ slow
 <features>
 threadsafe
 threaded-resolver
-!win32
 </features>
 <server>
 none
