@@ -9,7 +9,7 @@ Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
 # Documentation
-Files: docs/*
+Files: docs/*.md
 Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
