@@ -8,8 +8,13 @@ Files: tests/*
 Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-# Documentation
+# Markdown documentation in docs/
 Files: docs/*.md
+Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
+# Docs in docs/
+Files: docs/FAQ docs/INSTALL docs/INSTALL.cmake docs/KNOWN_BUGS docs/MAIL-ETIQUETTE docs/THANKS docs/TODO docs/cmdline-opts/page-footer docs/examples/.checksrc docs/libcurl/curl_multi_socket_all.3 docs/libcurl/curl_strnequal.3 docs/libcurl/symbols-in-versions docs/options-in-versions
 Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
