@@ -76,7 +76,7 @@ freebsd_task:
 
 windows_task:
   name: Windows
-  timeout_in: 90m
+  timeout_in: 120m
   windows_container:
     image: ${container_img}
 
