@@ -81,6 +81,7 @@ stages:
     steps:
     - script: sudo apt-get update && sudo apt-get install -y stunnel4 python3-impacket libzstd-dev libbrotli-dev $(install)
       displayName: 'apt install'
+      retryCountOnTaskFailure: 3
 
     - script: autoreconf -fi && ./configure --enable-warnings --enable-werror $(configure)
       displayName: 'configure $(name)'
@@ -159,6 +160,7 @@ stages:
     steps:
     - script: sudo apt-get update && sudo apt-get install -y clang-tools-10 clang-9 libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
       displayName: 'apt install'
+      retryCountOnTaskFailure: 3
 
     - script: autoreconf -fi
       displayName: 'autoreconf'
@@ -275,6 +277,7 @@ stages:
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && $(prepare)"
       displayName: 'prepare'
       condition: variables.prepare
+      retryCountOnTaskFailure: 3
 
     - script: $(container_cmd) -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure $(configure)"
       displayName: 'configure $(name)'
