@@ -28,6 +28,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef WIN32
+#include <wincrypt.h>
+#endif
+
 #include <curl/curl.h>
 #include "vtls/vtls.h"
 #include "sendf.h"
@@ -37,6 +41,27 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#ifdef WIN32
+CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
+{
+  HCRYPTPROV hCryptProv = 0;
+
+  memset(entropy, 0, length);
+
+  if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    return CURLE_FAILED_INIT;
+
+  if(!CryptGenRandom(hCryptProv, (DWORD)length, entropy)) {
+    CryptReleaseContext(hCryptProv, 0UL);
+    return CURLE_FAILED_INIT;
+  }
+
+  CryptReleaseContext(hCryptProv, 0UL);
+  return CURLE_OK;
+}
+#endif
 
 static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 {
@@ -72,6 +97,14 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
     return result;
 
   /* ---- non-cryptographic version following ---- */
+
+#ifdef WIN32
+  if(!seeded) {
+    result = Curl_win32_random((unsigned char *)rnd, sizeof(*rnd));
+    if(result != CURLE_NOT_BUILT_IN)
+      return result;
+  }
+#endif
 
 #if defined(RANDOM_FILE) && !defined(WIN32)
   if(!seeded) {

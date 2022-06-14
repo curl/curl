@@ -476,6 +476,10 @@
 
 #  define DIR_CHAR      "\\"
 
+   /* Random generator shared between the Schannel vtls and Curl_rand*()
+      functions */
+   CURLcode Curl_win32_random(unsigned char *entropy, size_t length);
+
 #else /* WIN32 */
 
 #  ifdef MSDOS  /* Watt-32 */
