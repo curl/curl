@@ -1,3 +1,9 @@
+<!--
+Copyright (C) 1998 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # curl test suite file format
 
 The curl test suite's file format is very simple and extensible, closely

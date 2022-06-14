@@ -4,7 +4,7 @@ Upstream-Contact: Daniel Stenberg <daniel@haxx.se>
 Source: https://curl.se
 
 # Tests
-Files: tests/*
+Files: tests/data/test* tests/certs/* tests/stunnel.pem tests/valgrind.supp
 Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
@@ -14,7 +14,7 @@ Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
 # Docs in docs/
-Files: docs/FAQ docs/INSTALL docs/INSTALL.cmake docs/KNOWN_BUGS docs/MAIL-ETIQUETTE docs/THANKS docs/TODO docs/cmdline-opts/page-footer docs/examples/.checksrc docs/libcurl/curl_multi_socket_all.3 docs/libcurl/curl_strnequal.3 docs/libcurl/symbols-in-versions docs/options-in-versions
+Files: docs/FAQ docs/INSTALL docs/INSTALL.cmake docs/KNOWN_BUGS docs/MAIL-ETIQUETTE docs/THANKS docs/TODO docs/cmdline-opts/page-footer docs/libcurl/curl_multi_socket_all.3 docs/libcurl/curl_strnequal.3 docs/libcurl/symbols-in-versions docs/options-in-versions
 Copyright: 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
@@ -36,7 +36,8 @@ Files: RELEASE-NOTES
 Copyright: 2003 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-Files: lib/.checksrc
+# checksrc control files
+Files: lib/.checksrc docs/examples/.checksrc tests/libtest/.checksrc
 Copyright: 2021 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
@@ -96,10 +97,10 @@ Files: README
 Copyright: 1999 - 2021 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-FILES: .github/ISSUE_TEMPLATE/bug_report.md
+Files: .github/ISSUE_TEMPLATE/bug_report.md
 Copyright: 2020 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-FILES: .mailmap
+Files: .mailmap
 Copyright: 2017 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
