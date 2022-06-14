@@ -2195,6 +2195,11 @@ sub runsshserver {
     my $logfile;
     my $port = 20000; # no lower port
 
+    if(!$USER) {
+        logmsg "Can't start ssh server due to lack of USER name";
+        return (0,0,0);
+    }
+
     $server = servername_id($proto, $ipvnum, $idnum);
 
     $pidfile = $serverpidfile{$server};
