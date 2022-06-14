@@ -99,3 +99,7 @@ License: curl
 FILES: .github/ISSUE_TEMPLATE/bug_report.md
 Copyright: 2020 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
+
+FILES: .mailmap
+Copyright: 2017 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
