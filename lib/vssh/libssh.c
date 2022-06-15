@@ -1972,7 +1972,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       ssh_disconnect(sshc->ssh_session);
-      if(!ssh_version(SSH_VERSION_INT(0,10,0))) {
+      if(!ssh_version(SSH_VERSION_INT(0, 10, 0))) {
         /* conn->sock[FIRSTSOCKET] is closed by ssh_disconnect behind our back,
            explicitly mark it as closed with the memdebug macro. This libssh
            bug is fixed in 0.10.0. */
