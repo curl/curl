@@ -21,3 +21,4 @@ Experimental support in curl means:
  - The Hyper HTTP backend
  - HTTP/3 support and options
  - `CURLSSLOPT_NATIVE_CA` (No configure option, feature built in when supported)
+ - The rustls backend

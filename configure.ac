@@ -264,6 +264,7 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to th
   OPT_RUSTLS=$withval
   if test X"$withval" != Xno; then
     test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls")
+    experimental="$experimental rustls"
   fi
 
 OPT_NSS_AWARE=no
