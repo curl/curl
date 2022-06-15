@@ -125,6 +125,9 @@ struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
 bool Curl_none_false_start(void);
 bool Curl_ssl_tls13_ciphersuites(void);
 
+CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
+                                   const curl_ssl_backend ***avail);
+
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
 #include "nssg.h"           /* NSS versions */

@@ -1456,8 +1456,10 @@ static int multissl_setup(const struct Curl_ssl *backend)
   return 0;
 }
 
-CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
-                              const curl_ssl_backend ***avail)
+/* This function is used to select the SSL backend to use. It is called by
+   curl_global_sslset (easy.c) which uses the global init lock. */
+CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
+                                   const curl_ssl_backend ***avail)
 {
   int i;
 
@@ -1486,8 +1488,8 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
 }
 
 #else /* USE_SSL */
-CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
-                              const curl_ssl_backend ***avail)
+CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
+                                   const curl_ssl_backend ***avail)
 {
   (void)id;
   (void)name;

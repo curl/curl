@@ -81,7 +81,11 @@ function again to try to select a different backend.
 The SSL backend can be set only once. If it has already been set, a subsequent
 attempt to change it will result in a \fBCURLSSLSET_TOO_LATE\fP.
 
-\fBThis function is not thread safe.\fP You must not call it when any other
+This function is thread-safe since libcurl 7.84.0 if
+\fIcurl_version_info(3)\fP has the CURL_VERSION_THREADSAFE feature bit set
+(most platforms).
+
+If this is not thread-safe, you must not call this function when any other
 thread in the program (i.e. a thread sharing the same memory) is running.
 This does not just mean no other thread that is using libcurl.
 .SH EXAMPLE

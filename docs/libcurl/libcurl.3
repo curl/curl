@@ -154,28 +154,31 @@ that library that describes the SSL protocol.
 allocate resources (e.g. the memory for the GNU TLS tree mentioned above), so
 the companion function \fIcurl_global_cleanup(3)\fP releases them.
 
-The basic rule for constructing a program that uses libcurl is this: Call
-\fIcurl_global_init(3)\fP, with a \fICURL_GLOBAL_ALL\fP argument, immediately
-after the program starts, while it is still only one thread and before it uses
-libcurl at all. Call \fIcurl_global_cleanup(3)\fP immediately before the
-program exits, when the program is again only one thread and after its last
-use of libcurl.
+The global constant functions are thread-safe since libcurl 7.84.0 if
+\fIcurl_version_info(3)\fP has the CURL_VERSION_THREADSAFE feature bit set
+(most platforms). Read \fIlibcurl-thread(3)\fP for thread safety guidelines.
 
-You can call both of these multiple times, as long as all calls meet
-these requirements and the number of calls to each is the same.
-
-It is not actually required that the functions be called at the beginning
-and end of the program -- that is just usually the easiest way to do it.
-It \fIis\fP required that the functions be called when no other thread
-in the program is running.
-
-These global constant functions are \fInot thread safe\fP, so you must
+If the global constant functions are \fInot thread safe\fP, then you must
 not call them when any other thread in the program is running. It
 is not good enough that no other thread is using libcurl at the time,
 because these functions internally call similar functions of other
 libraries, and those functions are similarly thread-unsafe. You cannot
 generally know what these libraries are, or whether other threads are
 using them.
+
+If the global constant functions are \fInot thread safe\fP, then the basic rule
+for constructing a program that uses libcurl is this: Call
+\fIcurl_global_init(3)\fP, with a \fICURL_GLOBAL_ALL\fP argument, immediately
+after the program starts, while it is still only one thread and before it uses
+libcurl at all. Call \fIcurl_global_cleanup(3)\fP immediately before the
+program exits, when the program is again only one thread and after its last
+use of libcurl.
+
+It is not actually required that the functions be called at the beginning
+and end of the program -- that is just usually the easiest way to do it.
+
+You can call both of these multiple times, as long as all calls meet
+these requirements and the number of calls to each is the same.
 
 The global constant situation merits special consideration when the
 code you are writing to use libcurl is not the main program, but rather

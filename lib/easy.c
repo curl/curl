@@ -316,6 +316,23 @@ void curl_global_cleanup(void)
 }
 
 /*
+ * curl_global_sslset() globally initializes the SSL backend to use.
+ */
+CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
+                              const curl_ssl_backend ***avail)
+{
+  CURLsslset rc;
+
+  global_init_lock();
+
+  rc = Curl_init_sslset_nolock(id, name, avail);
+
+  global_init_unlock();
+
+  return rc;
+}
+
+/*
  * curl_easy_init() is the external interface to alloc, setup and init an
  * easy handle that is returned. If anything goes wrong, NULL is returned.
  */
