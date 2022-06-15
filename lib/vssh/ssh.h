@@ -211,11 +211,7 @@ struct ssh_conn {
 #endif /* USE_LIBSSH */
 };
 
-#if defined(USE_LIBSSH)
-
-#define CURL_LIBSSH_VERSION ssh_version(0)
-
-#elif defined(USE_LIBSSH2)
+#if defined(USE_LIBSSH2)
 
 /* Feature detection based on version numbers to better work with
    non-configure platforms */

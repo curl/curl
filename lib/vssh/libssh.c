@@ -1972,10 +1972,13 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       ssh_disconnect(sshc->ssh_session);
-      /* conn->sock[FIRSTSOCKET] is closed by ssh_disconnect behind our back,
-         explicitly mark it as closed with the memdebug macro: */
-      fake_sclose(conn->sock[FIRSTSOCKET]);
-      conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;
+      if(!ssh_version(SSH_VERSION_INT(0, 10, 0))) {
+        /* conn->sock[FIRSTSOCKET] is closed by ssh_disconnect behind our back,
+           explicitly mark it as closed with the memdebug macro. This libssh
+           bug is fixed in 0.10.0. */
+        fake_sclose(conn->sock[FIRSTSOCKET]);
+        conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;
+      }
 
       SSH_STRING_FREE_CHAR(sshc->homedir);
       data->state.most_recent_ftp_entrypath = NULL;
@@ -2958,7 +2961,7 @@ void Curl_ssh_cleanup(void)
 
 void Curl_ssh_version(char *buffer, size_t buflen)
 {
-  (void)msnprintf(buffer, buflen, "libssh/%s", CURL_LIBSSH_VERSION);
+  (void)msnprintf(buffer, buflen, "libssh/%s", ssh_version(0));
 }
 
 #endif                          /* USE_LIBSSH */
