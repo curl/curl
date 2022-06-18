@@ -4,7 +4,7 @@ curl and libcurl 7.84.0
  Command line options:         248
  curl_easy_setopt() options:   297
  Public functions in libcurl:  88
- Contributors:                 2643
+ Contributors:                 2648
 
 This release includes the following changes:
 
@@ -30,13 +30,19 @@ This release includes the following bugfixes:
  o cmake: support adding a suffix to the OS value [54]
  o configure: skip libidn2 detection when winidn is used [89]
  o configure: use the SED value to invoke sed [28]
+ o configure: warn about rustls being experimental [103]
  o cookie: address secure domain overlay [7]
+ o copyright.pl: parse and use .reuse/dep5 for skips [105]
+ o copyright: make repository REUSE compliant [119]
  o curl.1: add a few see also --tls-max [52]
  o curl.1: mention exit code zero too [44]
  o curl: re-enable --no-remote-name [31]
+ o curl_easy_pause.3: remove explanation of progress function [97]
  o curl_getdate.3: document that some illegal dates pass through [34]
  o Curl_parsenetrc: don't access local pwbuf outside of scope [27]
+ o curl_url_set.3: clarify by default using known schemes only [120]
  o CURLOPT_FILETIME.3: fix the protocols this works with
+ o CURLOPT_HTTPHEADER.3: improve comment in example [66]
  o CURLOPT_NETRC.3: document the .netrc file format
  o CURLOPT_PORT.3: We discourage using this option [92]
  o CURLOPT_RANGE.3: remove ranged upload advice [99]
@@ -44,6 +50,7 @@ This release includes the following bugfixes:
  o digest: tolerate missing "realm" [80]
  o digest: unquote realm and nonce before processing [82]
  o DISABLED: disable 1021 for hyper again
+ o docs/cmdline-opts: add copyright and license identifier to each file [112]
  o docs/CONTRIBUTE.md: document the 'needs-votes' concept [79]
  o docs: clarify data replacement policy for MIME API [16]
  o doh: remove UNITTEST macro definition [67]
@@ -62,6 +69,7 @@ This release includes the following bugfixes:
  o lib: make more protocol specific struct fields #ifdefed [84]
  o libcurl-security.3: add "Secrets in memory" [30]
  o libcurl-security.3: document CRLF header injection [98]
+ o libssh: skip the fake-close when libssh does the right thing [102]
  o links: update dead links to the curl-wiki [21]
  o log2changes: do not indent empty lines [ci skip] [37]
  o macos9: remove partial support [22]
@@ -77,16 +85,18 @@ This release includes the following bugfixes:
  o ngtcp2: enable Linux GSO [91]
  o ngtcp2: extend QUIC transport parameters buffer [4]
  o ngtcp2: fix alert_read_func return value [26]
+ o ngtcp2: fix typo in preprocessor condition [121]
  o ngtcp2: handle error from ngtcp2_conn_submit_crypto_data [5]
  o ngtcp2: send appropriate connection close error code [6]
  o ngtcp2: support boringssl crypto backend [17]
- o ngtcp2: use handshake helper funcs to simplify TLS handshake integration [68]
+ o ngtcp2: use helper funcs to simplify TLS handshake integration [68]
  o ntlm: provide a fixed fake host name [32]
  o quic: add Curl_quic_idle [18]
  o quiche: support ca-fallback [49]
  o remote-name.d: mention --output-dir [88]
  o runtests.pl: add the --repeat parameter to the --help output [43]
  o runtests: fix skipping tests not done event-based [95]
+ o runtests: skip starting the ssh server if user name is lacking [104]
  o scripts/copyright.pl: fix the exclusion to not ignore man pages [75]
  o sectransp: check for a function defined when __BLOCKS__ is undefined [20]
  o select: return error from "lethal" poll/select errors [93]
@@ -114,6 +124,7 @@ This release includes the following bugfixes:
  o urldata: remove three unused booleans from struct UserDefined [87]
  o urldata: store tcp_keepidle and tcp_keepintvl as ints [85]
  o version: allow stricmp() for sorting the feature list [57]
+ o vtls: make curl_global_sslset thread-safe [94]
  o wolfssh.h: removed [10]
  o wolfssl: correct the failf() message when a handle can't be made [38]
  o wolfSSL: explicitly use compatibility layer [11]
@@ -128,15 +139,15 @@ advice from friends like these:
 
   Andrea Pappacoda, Balakrishnan Balasubramanian, Boris Verkhovskiy,
   Carlo Alberto, Christian Weisgerber via curl-library, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Egor Pugin, Evgeny Grin, Fabian Keil,
-  Frank Gevaerts, Frazer Smith, Gisle Vanem, Gregor Jasny, Harry Sintonen,
-  Illarion Taev, ImpatientHippo on GitHub, Jakub Bochenski, Kamil Dudka,
-  Karlson2k on github, KotlinIsland on github, Ladar Levison, Marcel Raad,
-  Marc Hörsken, Marcus T, michael musset, Nick Zitzmann, Nuru on github,
-  Patrick Monnerat, Petr Pisar, Ray Satiro, Simon Berger, Tatsuhiro Tsujikawa,
-  Thomas Guillem, Viktor Szakats, Vincent Torri, vvb2060 on github,
-  Wolf Vollprecht, Elms
-  (40 contributors)
+  Daniel Gustafsson, Daniel Stenberg, Egor Pugin, Emil Engler, Evgeny Grin,
+  Fabian Keil, Frank Gevaerts, Frazer Smith, Gisle Vanem, Gregor Jasny,
+  Harry Sintonen, Illarion Taev, ImpatientHippo on GitHub, Jakub Bochenski,
+  Kamil Dudka, Karlson2k on github, KotlinIsland on github, Ladar Levison,
+  Marcel Raad, Marc Hörsken, Marcus T, Max Mehl, michael musset, Nick Zitzmann,
+  Nuru on github, Patrick Monnerat, Petr Pisar, Ray Satiro, Ricardo M. Correia,
+  Simon Berger, Tatsuhiro Tsujikawa, Thomas Guillem, Viktor Szakats,
+  Vincent Torri, vvb2060 on github, Wolf Vollprecht, Elms
+  (43 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -205,6 +216,7 @@ References to bug reports and discussions on issues:
  [63] = https://hackerone.com/reports/1589847
  [64] = https://curl.se/bug/?i=8844
  [65] = https://curl.se/bug/?i=8904
+ [66] = https://curl.se/bug/?i=9025
  [67] = https://curl.se/bug/?i=8902
  [68] = https://curl.se/bug/?i=8968
  [69] = https://curl.se/bug/?i=8671
@@ -230,9 +242,19 @@ References to bug reports and discussions on issues:
  [91] = https://curl.se/bug/?i=8909
  [92] = https://curl.se/bug/?i=8941
  [93] = https://curl.se/bug/?i=8921
+ [94] = https://curl.se/bug/?i=9016
  [95] = https://curl.se/bug/?i=8977
  [96] = https://curl.se/bug/?i=8974
+ [97] = https://curl.se/bug/?i=9015
  [98] = https://curl.se/bug/?i=8964
  [99] = https://curl.se/bug/?i=8969
  [100] = https://curl.se/bug/?i=8680
  [101] = https://curl.se/bug/?i=8680
+ [102] = https://curl.se/bug/?i=9021
+ [103] = https://curl.se/bug/?i=9019
+ [104] = https://curl.se/bug/?i=9013
+ [105] = https://curl.se/bug/?i=9006
+ [112] = https://curl.se/bug/?i=9002
+ [119] = https://curl.se/bug/?i=8869
+ [120] = https://curl.se/bug/?i=8994
+ [121] = https://curl.se/bug/?i=8981

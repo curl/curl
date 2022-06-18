@@ -96,7 +96,7 @@ Based on the description above, here are some planned release dates (at the
 time of this writing):
 
 - May 11, 2022 (7.83.1)
-- July 6, 2022
+- July 1, 2022
 - August 31, 2022
 - October 25, 2022
 - December 21, 2022
