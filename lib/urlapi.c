@@ -1518,6 +1518,10 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     if(storep && *storep) {
       Curl_safefree(*storep);
     }
+    else if(!storep) {
+      free_urlhandle(u);
+      memset(u, 0, sizeof(struct Curl_URL));
+    }
     return CURLUE_OK;
   }
 
