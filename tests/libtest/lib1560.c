@@ -130,6 +130,13 @@ struct querycase {
   CURLUcode ucode;
 };
 
+struct clearurlcase {
+  CURLUPart part;
+  const char *in;
+  const char *out;
+  CURLUcode ucode;
+};
+
 static const struct testcase get_parts_list[] ={
   {"https://user:password@example.net/get?this=and#but frag then", "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_FRAGMENT},
@@ -1235,6 +1242,54 @@ static int get_nothing(void)
   return 0;
 }
 
+static const struct clearurlcase clear_url_list[] ={
+  {CURLUPART_SCHEME, "http", NULL, CURLUE_NO_SCHEME},
+  {CURLUPART_USER, "user", NULL, CURLUE_NO_USER},
+  {CURLUPART_PASSWORD, "password", NULL, CURLUE_NO_PASSWORD},
+  {CURLUPART_OPTIONS, "options", NULL, CURLUE_NO_OPTIONS},
+  {CURLUPART_HOST, "host", NULL, CURLUE_NO_HOST},
+  {CURLUPART_ZONEID, "eth0", NULL, CURLUE_NO_ZONEID},
+  {CURLUPART_PORT, "1234", NULL, CURLUE_NO_PORT},
+  {CURLUPART_PATH, "/hello", "/", CURLUE_OK},
+  {CURLUPART_QUERY, "a=b", NULL, CURLUE_NO_QUERY},
+  {CURLUPART_FRAGMENT, "anchor", NULL, CURLUE_NO_FRAGMENT},
+  {0, NULL, NULL, CURLUE_OK},
+};
+
+static int clear_url(void)
+{
+  CURLU *u = curl_url();
+  int i, error = 0;
+  if(u) {
+    char *p = NULL;
+    CURLUcode rc;
+
+    for(i = 0; clear_url_list[i].in && !error; i++) {
+      rc = curl_url_set(u, clear_url_list[i].part, clear_url_list[i].in, 0);
+      if(rc != CURLUE_OK)
+        fprintf(stderr, "unexpected return code line %u\n", __LINE__);
+
+      rc = curl_url_set(u, CURLUPART_URL, NULL, 0);
+      if(rc != CURLUE_OK)
+        fprintf(stderr, "unexpected return code line %u\n", __LINE__);
+
+      rc = curl_url_get(u, clear_url_list[i].part, &p, 0);
+      if(rc != clear_url_list[i].ucode || (clear_url_list[i].out &&
+         0 != strcmp(p, clear_url_list[i].out))) {
+
+        fprintf(stderr, "unexpected return code line %u\n", __LINE__);
+        error++;
+      }
+      if(rc == CURLUE_OK)
+        curl_free(p);
+    }
+  }
+
+  curl_url_cleanup(u);
+
+  return error;
+}
+
 int test(char *URL)
 {
   (void)URL; /* not used */
@@ -1259,6 +1314,9 @@ int test(char *URL)
 
   if(get_parts())
     return 4;
+
+  if(clear_url())
+    return 8;
 
   printf("success\n");
   return 0;
