@@ -575,14 +575,16 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 
     ev->msbump = FALSE; /* reset here */
 
-    if(0 == pollrc) {
+    if(!pollrc) {
       /* timeout! */
       ev->ms = 0;
       /* fprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
       mcode = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
                                        &ev->running_handles);
     }
-    else if(pollrc > 0) {
+    else {
+      /* here pollrc is > 0 */
+
       /* loop over the monitored sockets to see which ones had activity */
       for(i = 0; i< numfds; i++) {
         if(fds[i].revents) {
@@ -608,8 +610,6 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         }
       }
     }
-    else
-      return CURLE_RECV_ERROR;
 
     if(mcode)
       return CURLE_URL_MALFORMAT;
