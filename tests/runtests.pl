@@ -278,6 +278,7 @@ my $has_libssh;     # set if built with libssh
 my $has_oldlibssh;  # set if built with libssh < 0.9.4
 my $has_wolfssh;    # set if built with wolfssh
 my $has_unicode;    # set if libcurl is built with Unicode support
+my $has_threadsafe; # set if libcurl is built with thread-safety support
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -2923,6 +2924,7 @@ sub setupfeatures {
     $feature{"SSLpinning"} = $has_sslpinning;
     $feature{"SSPI"} = $has_sspi;
     $feature{"threaded-resolver"} = $has_threadedres;
+    $feature{"threadsafe"} = $has_threadsafe;
     $feature{"TLS-SRP"} = $has_tls_srp;
     $feature{"TrackMemory"} = $has_memory_tracking;
     $feature{"Unicode"} = $has_unicode;
@@ -3217,6 +3219,9 @@ sub checksystem {
             }
             if($feat =~ /Unicode/i) {
                 $has_unicode = 1;
+            }
+            if($feat =~ /threadsafe/i) {
+                $has_threadsafe = 1;
             }
         }
         #
