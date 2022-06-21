@@ -4,9 +4,7 @@ This document is intended to offer guidelines on how to best contribute to the
 curl project. This concerns new features as well as corrections to existing
 flaws or bugs.
 
-## Learning curl
-
-### Join the Community
+## Join the Community
 
 Skip over to [https://curl.se/mail/](https://curl.se/mail/) and join
 the appropriate mailing list(s). Read up on details before you post
@@ -23,7 +21,7 @@ If you are at all interested in the code side of things, consider clicking
 'watch' on the [curl repo on GitHub](https://github.com/curl/curl) to be
 notified of pull requests and new issues posted there.
 
-### License and copyright
+## License and copyright
 
 When contributing with code, you agree to put your changes and new code under
 the same license curl and libcurl is already using unless stated and agreed
@@ -46,7 +44,7 @@ patch/code to us. We will credit you for your changes as far as possible, to
 give credit but also to keep a trace back to who made what changes. Please
 always provide us with your full real name when contributing,
 
-### What To Read
+## What To Read
 
 Source code, the man pages, the [INTERNALS
 document](https://curl.se/dev/internals.html),
@@ -124,7 +122,7 @@ If you do not have test cases or perhaps you have done something that is hard
 to write tests for, do explain exactly how you have otherwise tested and
 verified your changes.
 
-## Sharing Your Changes
+## Submit Your Changes
 
 ### How to get your changes into the main sources
 
@@ -133,12 +131,17 @@ GitHub](https://github.com/curl/curl/pulls), but you can also send your plain
 patch to [the curl-library mailing
 list](https://curl.se/mail/list.cgi?list=curl-library).
 
-Either way, your change will be reviewed and discussed there and you will be
-expected to correct flaws pointed out and update accordingly, or the change
-risks stalling and eventually just getting deleted without action. As a
-submitter of a change, you are the owner of that change until it has been merged.
+If you opt to post a patch on the mailing list, chances are someone will
+convert it into a pull request for you, to have the CI jobs verify it proper
+before it can be merged. Be prepared that some feedback on the proposed change
+might then come on GitHub.
 
-Respond on the list or on github about the change and answer questions and/or
+Your change will be reviewed and discussed and you will be expected to correct
+flaws pointed out and update accordingly, or the change risks stalling and
+eventually just getting deleted without action. As a submitter of a change,
+you are the owner of that change until it has been merged.
+
+Respond on the list or on GitHub about the change and answer questions and/or
 fix nits/flaws. This is important. We will take lack of replies as a sign that
 you are not anxious to get your patch accepted and we tend to simply drop such
 changes.
@@ -175,15 +178,15 @@ checks and qualifications this pull request must also receive more "votes" of
 user support. More signs that people want this to happen. It could be in the
 form of messages saying so, or thumbs-up reactions on GitHub.
 
-### Making quality patches
+### Making quality changes
 
 Make the patch against as recent source versions as possible.
 
-If you have followed the tips in this document and your patch still has not been
-incorporated or responded to after some weeks, consider resubmitting it to the
-list or better yet: change it to a pull request.
+If you have followed the tips in this document and your patch still has not
+been incorporated or responded to after some weeks, consider resubmitting it
+to the list or better yet: change it to a pull request.
 
-### Write good commit messages
+### Commit messages
 
 A short guide to how to write commit messages in the curl project.
 
@@ -278,3 +281,21 @@ For Windows:
 
 ### Useful resources
  - [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
+
+## Update copyright and license information
+
+There is a CI job called **REUSE compliance / check** that will run on every
+pull request and commit to verify that the *REUSE state* of all files are
+still fine.
+
+This means that all files need to have their license and copyright information
+clearly stated. Ideally by having the standard curl source code header, with
+an accurate copyright year range and the SPDX-License-Identifier included. If
+the header does not work, you can use a smaller header or as a last resort add
+the information for a specific file to the `.reuse/dep5` file.
+
+We update copyright year ranges to end on the year of the most recent change
+of the individual file.
+
+You can manually verify the copyright and compliance status by running the
+`./scripts/copyright.pl` script in the root of the git repository.
