@@ -478,7 +478,6 @@ AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_unittests = xyes)
 # version to Windows XP (0x501) if it hasn't already been defined by the user.
 # Without this override original MinGW defaults the version to Windows NT 4.0.
 # Note original MinGW sets _WIN32_WINNT if not defined to whatever WINVER is.
-curl_mingw_original=no
 case $host in
   *-*-mingw32*)
     AC_MSG_CHECKING([if MinGW minimum supported OS should be set to XP])
@@ -493,8 +492,29 @@ case $host in
 #endif
       ]])
     ],[
-      curl_mingw_original=yes
       CPPFLAGS="$CPPFLAGS -DWINVER=0x501"
+      AC_MSG_RESULT([yes])
+    ],[
+      AC_MSG_RESULT([no])
+    ])
+    ;;
+esac
+
+# Detect original MinGW (not MinGW-w64)
+curl_mingw_original=no
+case $host in
+  *-*-mingw32*)
+    AC_MSG_CHECKING([using original MinGW (not MinGW-w64)])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <_mingw.h>
+      ]],[[
+#if defined(__MINGW64_VERSION_MAJOR)
+#error
+#endif
+      ]])
+    ],[
+      curl_mingw_original=yes
       AC_MSG_RESULT([yes])
     ],[
       AC_MSG_RESULT([no])
