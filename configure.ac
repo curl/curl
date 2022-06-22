@@ -478,6 +478,7 @@ AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_unittests = xyes)
 # version to Windows XP (0x501) if it hasn't already been defined by the user.
 # Without this override original MinGW defaults the version to Windows NT 4.0.
 # Note original MinGW sets _WIN32_WINNT if not defined to whatever WINVER is.
+curl_mingw_original=no
 case $host in
   *-*-mingw32*)
     AC_MSG_CHECKING([if MinGW minimum supported OS should be set to XP])
@@ -492,6 +493,7 @@ case $host in
 #endif
       ]])
     ],[
+      curl_mingw_original=yes
       CPPFLAGS="$CPPFLAGS -DWINVER=0x501"
       AC_MSG_RESULT([yes])
     ],[
@@ -1918,7 +1920,8 @@ if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$USE_SCHANNEL" = "x1"; then
 fi
 
 dnl link bcrypt for BCryptGenRandom() (used when building for Vista or newer)
-if test "x$curl_cv_native_windows" = "xyes"; then
+if test "x$curl_cv_native_windows" = "xyes" &&
+   test "x$curl_mingw_original" = "xno"; then
   LIBS="-lbcrypt $LIBS"
 fi
 
