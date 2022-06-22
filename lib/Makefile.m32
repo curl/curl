@@ -277,11 +277,6 @@ ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   DLL_LIBS += -L"$(LIBSSH2_PATH)/win32" -lssh2
-  ifdef SCHANNEL
-    ifndef DYN
-      DLL_LIBS += -lbcrypt
-    endif
-  endif
 endif
 ifdef SSL
   ifdef NGHTTP3
@@ -399,7 +394,7 @@ ifndef USE_LDAP_OPENLDAP
   DLL_LIBS += -lwldap32
 endif
 endif
-DLL_LIBS += -lws2_32 -lcrypt32
+DLL_LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc

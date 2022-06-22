@@ -289,11 +289,6 @@ endif
 ifdef SSH2
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
-  ifdef SCHANNEL
-    ifndef DYN
-      curl_LDADD += -lbcrypt
-    endif
-  endif
 endif
 ifdef SSL
   ifdef NGHTTP3
@@ -398,7 +393,7 @@ ifndef USE_LDAP_OPENLDAP
 curl_LDADD += -lwldap32
 endif
 endif
-curl_LDADD += -lws2_32 -lcrypt32
+curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc

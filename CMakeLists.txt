@@ -1327,7 +1327,7 @@ if(WIN32)
     list(APPEND CURL_LIBS "advapi32")
   endif()
 
-  list(APPEND CURL_LIBS "crypt32")
+  list(APPEND CURL_LIBS "crypt32" "bcrypt")
 endif()
 
 if(MSVC)

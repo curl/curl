@@ -28,10 +28,6 @@
 #include <fcntl.h>
 #endif
 
-#ifdef WIN32
-#include <wincrypt.h>
-#endif
-
 #include <curl/curl.h>
 #include "vtls/vtls.h"
 #include "sendf.h"
@@ -43,8 +39,32 @@
 #include "memdebug.h"
 
 #ifdef WIN32
+
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
+#  define HAVE_BCRYPTGENRANDOM
+#endif
+
+#ifdef HAVE_BCRYPTGENRANDOM
+#  include <bcrypt.h>
+#  ifdef _MSC_VER
+#    pragma comment(lib, "bcrypt.lib")
+#  endif
+#  ifndef STATUS_SUCCESS
+#  define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
+#  endif
+#else
+#  include <wincrypt.h>
+#endif
+
 CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 {
+#ifdef HAVE_BCRYPTGENRANDOM
+  memset(entropy, 0, length);
+
+  if(BCryptGenRandom(NULL, entropy, length,
+                     BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
+    return CURLE_FAILED_INIT;
+#else
   HCRYPTPROV hCryptProv = 0;
 
   memset(entropy, 0, length);
@@ -59,6 +79,8 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
   }
 
   CryptReleaseContext(hCryptProv, 0UL);
+#endif
+
   return CURLE_OK;
 }
 #endif
