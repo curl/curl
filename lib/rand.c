@@ -73,7 +73,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 
   /* ---- non-cryptographic version following ---- */
 
-#ifdef RANDOM_FILE
+#if defined(RANDOM_FILE) && !defined(WIN32)
   if(!seeded) {
     /* if there's a random file to read a seed from, use it */
     int fd = open(RANDOM_FILE, O_RDONLY);
@@ -108,7 +108,8 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
  * 'rndptr' points to.
  *
  * If libcurl is built without TLS support or with a TLS backend that lacks a
- * proper random API (Gskit or mbedTLS), this function will use "weak" random.
+ * proper random API (rustls, Gskit or mbedTLS), this function will use "weak"
+ * random.
  *
  * When built *with* TLS support and a backend that offers strong random, it
  * will return error if it cannot provide strong random values.
