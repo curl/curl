@@ -1666,21 +1666,23 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
   msg.msg_iov = &msg_iov;
   msg.msg_iovlen = 1;
 
-  msg.msg_control = msg_ctrl;
-  msg.msg_controllen = sizeof(msg_ctrl);
-
 #if defined(__linux__) && defined(UDP_SEGMENT)
   if(pktlen > gsolen) {
+    /* Only set this, when we need it. macOS, for example,
+     * does not seem to like a msg_control of length 0. */
+    msg.msg_control = msg_ctrl;
+    msg.msg_controllen = sizeof(msg_ctrl);
+
     ctrllen += CMSG_SPACE(sizeof(uint16_t));
     cm = CMSG_FIRSTHDR(&msg);
     cm->cmsg_level = SOL_UDP;
     cm->cmsg_type = UDP_SEGMENT;
     cm->cmsg_len = CMSG_LEN(sizeof(uint16_t));
     *(uint16_t *)(void *)CMSG_DATA(cm) = gsolen & 0xffff;
+    msg.msg_controllen = ctrllen;
   }
 #endif
 
-  msg.msg_controllen = ctrllen;
 
   while((sent = sendmsg(sockfd, &msg, 0)) == -1 && SOCKERRNO == EINTR)
     ;
