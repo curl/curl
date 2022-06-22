@@ -1324,8 +1324,10 @@ if(WIN32)
 
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
-    list(APPEND CURL_LIBS "advapi32" "crypt32")
+    list(APPEND CURL_LIBS "advapi32")
   endif()
+
+  list(APPEND CURL_LIBS "crypt32")
 endif()
 
 if(MSVC)
