@@ -41,10 +41,7 @@
 #ifdef WIN32
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
-#  define HAVE_BCRYPTGENRANDOM
-#endif
-
-#ifdef HAVE_BCRYPTGENRANDOM
+#  define HAVE_WIN_BCRYPTGENRANDOM
 #  include <bcrypt.h>
 #  ifdef _MSC_VER
 #    pragma comment(lib, "bcrypt.lib")
@@ -52,7 +49,7 @@
 #  ifndef STATUS_SUCCESS
 #  define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 #  endif
-#else
+#elif defined(USE_WIN32_CRYPTO)
 #  include <wincrypt.h>
 #  ifdef _MSC_VER
 #    pragma comment(lib, "advapi32.lib")
@@ -61,30 +58,33 @@
 
 CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 {
-#ifdef HAVE_BCRYPTGENRANDOM
   memset(entropy, 0, length);
 
+#if defined(HAVE_WIN_BCRYPTGENRANDOM)
   if(BCryptGenRandom(NULL, entropy, length,
                      BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
     return CURLE_FAILED_INIT;
-#else
-  HCRYPTPROV hCryptProv = 0;
-
-  memset(entropy, 0, length);
-
-  if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
-    return CURLE_FAILED_INIT;
-
-  if(!CryptGenRandom(hCryptProv, (DWORD)length, entropy)) {
-    CryptReleaseContext(hCryptProv, 0UL);
-    return CURLE_FAILED_INIT;
-  }
-
-  CryptReleaseContext(hCryptProv, 0UL);
-#endif
 
   return CURLE_OK;
+#elif defined(USE_WIN32_CRYPTO)
+  {
+    HCRYPTPROV hCryptProv = 0;
+
+    if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                            CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+      return CURLE_FAILED_INIT;
+
+    if(!CryptGenRandom(hCryptProv, (DWORD)length, entropy)) {
+      CryptReleaseContext(hCryptProv, 0UL);
+      return CURLE_FAILED_INIT;
+    }
+
+    CryptReleaseContext(hCryptProv, 0UL);
+  }
+  return CURLE_OK;
+#else
+  return CURLE_NOT_BUILT_IN;
+#endif
 }
 #endif
 
