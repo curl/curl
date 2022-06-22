@@ -1916,8 +1916,11 @@ dnl link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$USE_SCHANNEL" = "x1"; then
   LIBS="-ladvapi32 -lcrypt32 $LIBS"
 fi
-# FIXME: Enable this for Windows targets
-#LIBS="-lbcrypt $LIBS"
+
+dnl link bcrypt for BCryptGenRandom() (used when building for Vista or newer)
+if test "x$curl_cv_native_windows" = "xyes"; then
+  LIBS="-lbcrypt $LIBS"
+fi
 
 case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$AMISSL_ENABLED$RUSTLS_ENABLED"
 in
