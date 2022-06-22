@@ -46,6 +46,9 @@
 #  ifdef _MSC_VER
 #    pragma comment(lib, "bcrypt.lib")
 #  endif
+#  ifndef BCRYPT_USE_SYSTEM_PREFERRED_RNG
+#  define BCRYPT_USE_SYSTEM_PREFERRED_RNG 0x00000002
+#  endif
 #  ifndef STATUS_SUCCESS
 #  define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 #  endif
@@ -61,7 +64,7 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
   memset(entropy, 0, length);
 
 #if defined(HAVE_WIN_BCRYPTGENRANDOM)
-  if(BCryptGenRandom(NULL, entropy, length,
+  if(BCryptGenRandom(NULL, entropy, (ULONG)length,
                      BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
     return CURLE_FAILED_INIT;
 
