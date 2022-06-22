@@ -62,7 +62,6 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
 #ifdef EXPOSE_SCHANNEL_INTERNAL_STRUCTS
 
 #ifdef __MINGW32__
-#include <_mingw.h>
 #ifdef __MINGW64_VERSION_MAJOR
 #define HAS_MANUAL_VERIFY_API
 #endif
