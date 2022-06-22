@@ -54,6 +54,9 @@
 #  endif
 #else
 #  include <wincrypt.h>
+#  ifdef _MSC_VER
+#    pragma comment(lib, "advapi32.lib")
+#  endif
 #endif
 
 CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
