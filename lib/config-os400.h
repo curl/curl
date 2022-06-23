@@ -111,9 +111,6 @@
 /* Define if you have the `getpwuid' function. */
 #define HAVE_GETPWUID
 
-/* Define if you have the `getservbyname' function. */
-#define HAVE_GETSERVBYNAME
-
 /* Define to 1 if you have the getsockname function. */
 #define HAVE_GETSOCKNAME 1
 

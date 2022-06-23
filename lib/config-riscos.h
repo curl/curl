@@ -118,9 +118,6 @@
 /* Define if you have the `getpwuid' function. */
 #undef HAVE_GETPWUID
 
-/* Define if you have the `getservbyname' function. */
-#undef HAVE_GETSERVBYNAME
-
 /* Define if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY
 

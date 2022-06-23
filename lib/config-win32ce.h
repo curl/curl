@@ -144,9 +144,6 @@
 /* Define if you have the getpass function.  */
 /* #define HAVE_GETPASS 1 */
 
-/* Define if you have the getservbyname function.  */
-#define HAVE_GETSERVBYNAME 1
-
 /* Define if you have the gettimeofday function.  */
 /*  #define HAVE_GETTIMEOFDAY 1 */
 
