@@ -1466,6 +1466,8 @@ _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
 _add_if("unicode"       ENABLE_UNICODE)
+# TODO also enabled when built for Vista or newer
+_add_if("threadsafe"    HAVE_ATOMIC)
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
 
