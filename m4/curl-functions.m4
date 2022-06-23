@@ -266,27 +266,6 @@ curl_includes_socket="\
 ])
 
 
-dnl CURL_INCLUDES_STDIO
-dnl -------------------------------------------------
-dnl Set up variable with list of headers that must be
-dnl included when stdio.h is to be included.
-
-AC_DEFUN([CURL_INCLUDES_STDIO], [
-curl_includes_stdio="\
-/* includes start */
-#ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-#endif
-#ifdef HAVE_STDIO_H
-#  include <stdio.h>
-#endif
-/* includes end */"
-  AC_CHECK_HEADERS(
-    sys/types.h stdio.h,
-    [], [], [$curl_includes_stdio])
-])
-
-
 dnl CURL_INCLUDES_STDLIB
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
