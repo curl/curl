@@ -119,7 +119,6 @@ endif()
 
 if(WIN32)
   if(BUILD_SHARED_LIBS)
-    set_property(TARGET ${LIB_NAME} APPEND PROPERTY COMPILE_DEFINITIONS "_USRDLL")
     if(MSVC)
       # Add "_imp" as a suffix before the extension to avoid conflicting with
       # the statically linked "libcurl.lib"
