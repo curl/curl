@@ -70,9 +70,6 @@ if(NOT UNIX)
     set(HAVE_X509_H 0)
     set(HAVE_ZLIB_H 0)
 
-    set(HAVE_SIZEOF_LONG_DOUBLE 1)
-    set(SIZEOF_LONG_DOUBLE 8)
-
     set(HAVE_SOCKET 1)
     set(HAVE_POLL 0)
     set(HAVE_SELECT 1)

@@ -299,9 +299,6 @@
 /* The size of `int', as computed by sizeof. */
 #define SIZEOF_INT              4
 
-/* The size of a `long double', as computed by sizeof. */
-#define SIZEOF_LONG_DOUBLE      8
-
 /* Define if the compiler supports the 'long long' data type. */
 #define HAVE_LONGLONG
 

@@ -277,9 +277,6 @@
 /* The size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
 
-/* The size of `long double', as computed by sizeof. */
-#undef SIZEOF_LONG_DOUBLE
-
 /* The size of `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
 
