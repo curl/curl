@@ -219,9 +219,6 @@
 /* Define if you have the stricmp function. */
 #define HAVE_STRICMP 1
 
-/* Define if you have the strnicmp function. */
-#define HAVE_STRNICMP 1
-
 /* Define if you have the strstr function. */
 #define HAVE_STRSTR 1
 
