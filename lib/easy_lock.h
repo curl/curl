@@ -38,7 +38,7 @@
 #include <stdatomic.h>
 
 #define curl_simple_lock atomic_bool
-#define CURL_SIMPLE_LOCK_INIT ATOMIC_VAR_INIT(false)
+#define CURL_SIMPLE_LOCK_INIT false
 
 static inline void curl_simple_lock_lock(curl_simple_lock *lock)
 {
