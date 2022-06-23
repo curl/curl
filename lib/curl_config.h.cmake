@@ -406,9 +406,6 @@
 /* if zstd is available */
 #cmakedefine HAVE_ZSTD 1
 
-/* if your compiler supports LL */
-#cmakedefine HAVE_LL 1
-
 /* Define to 1 if you have the <locale.h> header file. */
 #cmakedefine HAVE_LOCALE_H 1
 

@@ -3312,21 +3312,6 @@ AC_CHECK_TYPE(long long,
    longlong="yes"
 )
 
-if test "xyes" = "x$longlong"; then
-  AC_MSG_CHECKING([if numberLL works])
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-    ]],[[
-      long long val = 1000LL;
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_LL, 1, [if your compiler supports LL])
-  ],[
-    AC_MSG_RESULT([no])
-  ])
-fi
-
 
 # check for ssize_t
 AC_CHECK_TYPE(ssize_t, ,

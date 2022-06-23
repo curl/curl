@@ -1048,7 +1048,6 @@ endif()
 
 if(HAVE_SIZEOF_LONG_LONG)
   set(HAVE_LONGLONG 1)
-  set(HAVE_LL 1)
 endif()
 
 if(NOT CMAKE_CROSSCOMPILING)

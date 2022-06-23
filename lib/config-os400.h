@@ -344,10 +344,6 @@
 /* The size of `curl_off_t', as computed by sizeof. */
 #define SIZEOF_CURL_OFF_T       8
 
-/* Whether long long constants must be suffixed by LL. */
-
-#define HAVE_LL
-
 /* Define this if you have struct sockaddr_storage */
 #define HAVE_STRUCT_SOCKADDR_STORAGE
 
