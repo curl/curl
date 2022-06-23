@@ -63,7 +63,6 @@
 #define RECV_TYPE_ARG4 int
 #define RECV_TYPE_RETV int
 
-#define HAVE_RECVFROM 1
 #define RECVFROM_TYPE_ARG1 int
 #define RECVFROM_TYPE_ARG2 void
 #define RECVFROM_TYPE_ARG2_IS_VOID 1

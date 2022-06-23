@@ -60,7 +60,6 @@
 #define HAVE_NET_IF_H          1
 #define HAVE_PROCESS_H         1
 #define HAVE_RECV              1
-#define HAVE_RECVFROM          1
 #define HAVE_SELECT            1
 #define HAVE_SEND              1
 #define HAVE_SETJMP_H          1

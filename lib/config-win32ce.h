@@ -200,9 +200,6 @@
 /* Define to the function return type for recv. */
 #define RECV_TYPE_RETV int
 
-/* Define if you have the recvfrom function. */
-#define HAVE_RECVFROM 1
-
 /* Define to the type of arg 1 for recvfrom. */
 #define RECVFROM_TYPE_ARG1 SOCKET
 

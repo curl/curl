@@ -493,9 +493,6 @@
 /* Define to 1 if you have the recv function. */
 #cmakedefine HAVE_RECV 1
 
-/* Define to 1 if you have the recvfrom function. */
-#cmakedefine HAVE_RECVFROM 1
-
 /* Define to 1 if you have the select function. */
 #cmakedefine HAVE_SELECT 1
 
