@@ -3565,8 +3565,10 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
   bool connected = FALSE;
   bool complete = FALSE;
 
-  /* the ftp struct is inited in ftp_connect() */
-  struct FTP *ftp = data->req.p.ftp;
+  /* the ftp struct is inited in ftp_connect(). If we are connecting to an HTTP
+   * proxy then the state will not be valid until after that connection is
+   * complete */
+  struct FTP *ftp = NULL;
 
   /* if the second connection isn't done yet, wait for it */
   if(!conn->bits.tcpconnect[SECONDARYSOCKET]) {
@@ -3606,6 +3608,9 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
      Curl_connect_ongoing(conn))
     return result;
 #endif
+
+  /* Curl_proxy_connect might have moved the protocol state */
+  ftp = data->req.p.ftp;
 
   if(ftpc->state) {
     /* already in a state so skip the initial commands.
