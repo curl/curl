@@ -54,7 +54,6 @@
 #define HAVE_IOCTLSOCKET_FIONBIO   1
 #define HAVE_LOCALE_H          1
 #define HAVE_LONGLONG          1
-#define HAVE_MEMORY_H          1
 #define HAVE_NETDB_H           1
 #define HAVE_NETINET_IN_H      1
 #define HAVE_NETINET_TCP_H     1

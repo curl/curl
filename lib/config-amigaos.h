@@ -40,7 +40,6 @@
 #define HAVE_LIBZ 1
 #define HAVE_LONGLONG 1
 #define HAVE_MALLOC_H 1
-#define HAVE_MEMORY_H 1
 #define HAVE_NETDB_H 1
 #define HAVE_NETINET_IN_H 1
 #define HAVE_NET_IF_H 1

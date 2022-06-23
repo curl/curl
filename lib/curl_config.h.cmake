@@ -418,9 +418,6 @@
 /* Define to 1 if you have the malloc.h header file. */
 #cmakedefine HAVE_MALLOC_H 1
 
-/* Define to 1 if you have the <memory.h> header file. */
-#cmakedefine HAVE_MEMORY_H 1
-
 /* Define to 1 if you have the MSG_NOSIGNAL flag. */
 #cmakedefine HAVE_MSG_NOSIGNAL 1
 
