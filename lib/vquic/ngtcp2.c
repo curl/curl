@@ -1653,16 +1653,12 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
   struct iovec msg_iov = {(void *)pkt, pktlen};
   struct msghdr msg = {0};
   uint8_t msg_ctrl[32];
-  size_t ctrllen = 0;
   ssize_t sent;
 #if defined(__linux__) && defined(UDP_SEGMENT)
   struct cmsghdr *cm;
 #endif
 
   *psent = 0;
-
-  assert(sizeof(msg_ctrl) >= CMSG_SPACE(sizeof(uint16_t)));
-
   msg.msg_iov = &msg_iov;
   msg.msg_iovlen = 1;
 
@@ -1671,15 +1667,13 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
     /* Only set this, when we need it. macOS, for example,
      * does not seem to like a msg_control of length 0. */
     msg.msg_control = msg_ctrl;
-    msg.msg_controllen = sizeof(msg_ctrl);
-
-    ctrllen += CMSG_SPACE(sizeof(uint16_t));
+    assert(sizeof(msg_ctrl) >= CMSG_SPACE(sizeof(uint16_t)));
+    msg.msg_controllen = CMSG_SPACE(sizeof(uint16_t));
     cm = CMSG_FIRSTHDR(&msg);
     cm->cmsg_level = SOL_UDP;
     cm->cmsg_type = UDP_SEGMENT;
     cm->cmsg_len = CMSG_LEN(sizeof(uint16_t));
     *(uint16_t *)(void *)CMSG_DATA(cm) = gsolen & 0xffff;
-    msg.msg_controllen = ctrllen;
   }
 #endif
 
