@@ -63,17 +63,6 @@
 #define RECV_TYPE_ARG4 int
 #define RECV_TYPE_RETV int
 
-#define RECVFROM_TYPE_ARG1 int
-#define RECVFROM_TYPE_ARG2 void
-#define RECVFROM_TYPE_ARG2_IS_VOID 1
-#define RECVFROM_TYPE_ARG3 int
-#define RECVFROM_TYPE_ARG4 int
-#define RECVFROM_TYPE_ARG5 void
-#define RECVFROM_TYPE_ARG5_IS_VOID 1
-#define RECVFROM_TYPE_ARG6 int
-#define RECVFROM_TYPE_ARG6_IS_VOID 1
-#define RECVFROM_TYPE_RETV int
-
 #define HAVE_SELECT 1
 #define SELECT_TYPE_ARG1 int
 #define SELECT_TYPE_ARG234 fd_set *

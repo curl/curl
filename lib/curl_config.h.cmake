@@ -752,36 +752,6 @@
 /* a suitable file to read random data from */
 #cmakedefine RANDOM_FILE "${RANDOM_FILE}"
 
-/* Define to the type of arg 1 for recvfrom. */
-#cmakedefine RECVFROM_TYPE_ARG1 ${RECVFROM_TYPE_ARG1}
-
-/* Define to the type pointed by arg 2 for recvfrom. */
-#cmakedefine RECVFROM_TYPE_ARG2 ${RECVFROM_TYPE_ARG2}
-
-/* Define to 1 if the type pointed by arg 2 for recvfrom is void. */
-#cmakedefine RECVFROM_TYPE_ARG2_IS_VOID 1
-
-/* Define to the type of arg 3 for recvfrom. */
-#cmakedefine RECVFROM_TYPE_ARG3 ${RECVFROM_TYPE_ARG3}
-
-/* Define to the type of arg 4 for recvfrom. */
-#cmakedefine RECVFROM_TYPE_ARG4 ${RECVFROM_TYPE_ARG4}
-
-/* Define to the type pointed by arg 5 for recvfrom. */
-#cmakedefine RECVFROM_TYPE_ARG5 ${RECVFROM_TYPE_ARG5}
-
-/* Define to 1 if the type pointed by arg 5 for recvfrom is void. */
-#cmakedefine RECVFROM_TYPE_ARG5_IS_VOID 1
-
-/* Define to the type pointed by arg 6 for recvfrom. */
-#cmakedefine RECVFROM_TYPE_ARG6 ${RECVFROM_TYPE_ARG6}
-
-/* Define to 1 if the type pointed by arg 6 for recvfrom is void. */
-#cmakedefine RECVFROM_TYPE_ARG6_IS_VOID 1
-
-/* Define to the function return type for recvfrom. */
-#cmakedefine RECVFROM_TYPE_RETV ${RECVFROM_TYPE_RETV}
-
 /* Define to the type of arg 1 for recv. */
 #cmakedefine RECV_TYPE_ARG1 ${RECV_TYPE_ARG1}
 
