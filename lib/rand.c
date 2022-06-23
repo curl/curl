@@ -40,11 +40,8 @@
 
 #ifdef WIN32
 
-#if defined(__MINGW32__)
-#  include <_mingw.h>
-#  if !defined(__MINGW64_VERSION_MAJOR)
-#    define HAVE_MINGW_ORIGINAL
-#  endif
+#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+#  define HAVE_MINGW_ORIGINAL
 #endif
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600 && \
