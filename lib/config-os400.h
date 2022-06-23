@@ -216,9 +216,6 @@
 /* Define if you have the `RAND_egd' function. */
 #undef HAVE_RAND_EGD
 
-/* Define if you have the `RAND_screen' function. */
-#undef HAVE_RAND_SCREEN
-
 /* Define if you have the `RAND_status' function. */
 #undef HAVE_RAND_STATUS
 

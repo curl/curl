@@ -499,9 +499,6 @@
 /* Define to 1 if you have the `RAND_egd' function. */
 #cmakedefine HAVE_RAND_EGD 1
 
-/* Define to 1 if you have the `RAND_screen' function. */
-#cmakedefine HAVE_RAND_SCREEN 1
-
 /* Define to 1 if you have the `RAND_status' function. */
 #cmakedefine HAVE_RAND_STATUS 1
 

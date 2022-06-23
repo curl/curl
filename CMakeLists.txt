@@ -453,7 +453,6 @@ if(CURL_USE_OPENSSL)
   check_include_file("openssl/x509.h"   HAVE_OPENSSL_X509_H)
   check_include_file("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
   check_symbol_exists(RAND_status "${CURL_INCLUDES}" HAVE_RAND_STATUS)
-  check_symbol_exists(RAND_screen "${CURL_INCLUDES}" HAVE_RAND_SCREEN)
   check_symbol_exists(RAND_egd    "${CURL_INCLUDES}" HAVE_RAND_EGD)
   check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
 
