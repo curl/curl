@@ -445,9 +445,6 @@
 /* Define to 1 if you have the <openssl/pkcs12.h> header file. */
 #cmakedefine HAVE_OPENSSL_PKCS12_H 1
 
-/* Define to 1 if you have the <openssl/x509.h> header file. */
-#cmakedefine HAVE_OPENSSL_X509_H 1
-
 /* Define to 1 if you have the <pem.h> header file. */
 #cmakedefine HAVE_PEM_H 1
 

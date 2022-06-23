@@ -445,7 +445,6 @@ if(CURL_USE_OPENSSL)
   endif()
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
-  check_include_file("openssl/x509.h"   HAVE_OPENSSL_X509_H)
   check_include_file("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
   check_symbol_exists(RAND_egd    "${CURL_INCLUDES}" HAVE_RAND_EGD)
   check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)

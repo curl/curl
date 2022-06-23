@@ -180,9 +180,6 @@
 /* Define if you have the <net/if.h> header file. */
 #define HAVE_NET_IF_H
 
-/* Define if you have the <openssl/x509.h> header file. */
-#undef HAVE_OPENSSL_X509_H
-
 /* Define if you have the <pem.h> header file. */
 #undef HAVE_PEM_H
 
