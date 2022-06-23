@@ -238,9 +238,6 @@
 /* Define if you have the `strdup' function. */
 #define HAVE_STRDUP
 
-/* Define if you have the `strftime' function. */
-#define HAVE_STRFTIME
-
 /* Define if you have the `stricmp' function. */
 #define HAVE_STRICMP
 

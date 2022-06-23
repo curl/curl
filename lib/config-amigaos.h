@@ -59,7 +59,6 @@
 #define HAVE_SOCKET 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
-#define HAVE_STRFTIME 1
 #define HAVE_STRICMP 1
 #define HAVE_STRINGS_H 1
 #define HAVE_STRING_H 1

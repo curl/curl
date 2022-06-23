@@ -254,10 +254,6 @@
 /* Define if you have the `strdup' function. */
 #define HAVE_STRDUP
 
-
-/* Define if you have the `strftime' function. */
-#define HAVE_STRFTIME
-
 /* Define if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H
 
