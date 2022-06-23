@@ -177,9 +177,6 @@
 /* Define to 1 if you have the `closesocket' function. */
 #cmakedefine HAVE_CLOSESOCKET 1
 
-/* Define to 1 if you have the `CRYPTO_cleanup_all_ex_data' function. */
-#cmakedefine HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H 1
 

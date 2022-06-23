@@ -94,7 +94,6 @@
 #define HAVE_ASSERT_H 1
 #define HAVE_BASENAME 1
 #define HAVE_BOOL_T 1
-#define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
 #define HAVE_ERRNO_H 1
 #define HAVE_FCNTL 1
 #define HAVE_FCNTL_H 1

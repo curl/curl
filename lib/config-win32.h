@@ -207,10 +207,6 @@
 /* Define if you have the `RAND_status' function when using SSL. */
 #define HAVE_RAND_STATUS 1
 
-/* Define if you have the `CRYPTO_cleanup_all_ex_data' function.
-   This is present in OpenSSL versions after 0.9.6b */
-#define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
-
 /* Define if you have the select function. */
 #define HAVE_SELECT 1
 

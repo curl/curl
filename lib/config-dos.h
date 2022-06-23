@@ -129,7 +129,6 @@
 
 /* USE_OPENSSL on cmd-line */
 #ifdef USE_OPENSSL
-  #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
   #define OPENSSL_NO_KRB5        1
 #endif
 
