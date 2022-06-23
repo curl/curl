@@ -113,7 +113,6 @@
 
 #define USE_OPENSSL 1
 #define HAVE_OPENSSL_PKCS12_H 1
-#define HAVE_OPENSSL_SSL_H 1
 #define HAVE_OPENSSL_X509_H 1
 
 #define HAVE_PIPE 1
