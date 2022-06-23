@@ -44,11 +44,6 @@
 /* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
-/* Define if you have the <getopt.h> header file. */
-#if defined(__MINGW32__) || defined(__POCC__)
-#define HAVE_GETOPT_H 1
-#endif
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
 #define HAVE_INTTYPES_H 1

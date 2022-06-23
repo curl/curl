@@ -44,9 +44,6 @@
 /* Define if you have the <fcntl.h> header file.  */
 #define HAVE_FCNTL_H 1
 
-/* Define if you have the <getopt.h> header file.  */
-/* #define HAVE_GETOPT_H 1 */
-
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
 

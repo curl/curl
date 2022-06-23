@@ -109,9 +109,6 @@
 /* Define if you have the `gethostname' function. */
 #define HAVE_GETHOSTNAME
 
-/* Define if you have the <getopt.h> header file. */
-#define HAVE_GETOPT_H
-
 /* Define if you have the `getpass_r' function. */
 #undef HAVE_GETPASS_R
 
