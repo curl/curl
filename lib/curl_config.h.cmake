@@ -442,9 +442,6 @@
 /* if you have an old MIT gssapi library, lacking GSS_C_NT_HOSTBASED_SERVICE */
 #cmakedefine HAVE_OLD_GSSMIT 1
 
-/* Define to 1 if you have the <openssl/crypto.h> header file. */
-#cmakedefine HAVE_OPENSSL_CRYPTO_H 1
-
 /* Define to 1 if you have the <openssl/pkcs12.h> header file. */
 #cmakedefine HAVE_OPENSSL_PKCS12_H 1
 
