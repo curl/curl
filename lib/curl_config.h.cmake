@@ -520,9 +520,6 @@
 /* Define to 1 if you have the `setrlimit' function. */
 #cmakedefine HAVE_SETRLIMIT 1
 
-/* Define to 1 if you have the setsockopt function. */
-#cmakedefine HAVE_SETSOCKOPT 1
-
 /* Define to 1 if you have a working setsockopt SO_NONBLOCK function. */
 #cmakedefine HAVE_SETSOCKOPT_SO_NONBLOCK 1
 
