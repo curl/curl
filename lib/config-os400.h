@@ -183,9 +183,6 @@
 /* Define if you have the <openssl/crypto.h> header file. */
 #undef HAVE_OPENSSL_CRYPTO_H
 
-/* Define if you have the <openssl/pem.h> header file. */
-#undef HAVE_OPENSSL_PEM_H
-
 /* Define if you have the <openssl/rsa.h> header file. */
 #undef HAVE_OPENSSL_RSA_H
 

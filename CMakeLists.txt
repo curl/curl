@@ -446,7 +446,6 @@ if(CURL_USE_OPENSSL)
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   check_include_file("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
-  check_include_file("openssl/pem.h"    HAVE_OPENSSL_PEM_H)
   check_include_file("openssl/rsa.h"    HAVE_OPENSSL_RSA_H)
   check_include_file("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
   check_include_file("openssl/x509.h"   HAVE_OPENSSL_X509_H)
