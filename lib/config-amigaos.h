@@ -43,7 +43,6 @@
 #define HAVE_NETDB_H 1
 #define HAVE_NETINET_IN_H 1
 #define HAVE_NET_IF_H 1
-#define HAVE_OPENSSL_RSA_H 1
 #define HAVE_OPENSSL_SSL_H 1
 #define HAVE_OPENSSL_X509_H 1
 #define HAVE_PWD_H 1
