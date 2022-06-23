@@ -499,9 +499,6 @@
 /* Define to 1 if you have the `RAND_egd' function. */
 #cmakedefine HAVE_RAND_EGD 1
 
-/* Define to 1 if you have the `RAND_status' function. */
-#cmakedefine HAVE_RAND_STATUS 1
-
 /* Define to 1 if you have the recv function. */
 #cmakedefine HAVE_RECV 1
 

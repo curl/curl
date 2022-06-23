@@ -76,7 +76,6 @@
 
 #define CURL_DISABLE_LDAP       1
 
-#define HAVE_RAND_STATUS        1
 #define HAVE_RAND_EGD           1
 
 #define HAVE_IOCTL              1

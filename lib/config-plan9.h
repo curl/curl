@@ -139,7 +139,6 @@
 #define HAVE_POLL_FINE 1
 #define HAVE_POLL_H 1
 #define HAVE_PTHREAD_H 1
-#define HAVE_RAND_STATUS 1
 #define HAVE_SETJMP_H 1
 #define HAVE_SETLOCALE 1
 

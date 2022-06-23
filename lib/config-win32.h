@@ -201,9 +201,6 @@
 /* Define if you have a working ioctlsocket FIONBIO function. */
 #define HAVE_IOCTLSOCKET_FIONBIO 1
 
-/* Define if you have the `RAND_status' function when using SSL. */
-#define HAVE_RAND_STATUS 1
-
 /* Define if you have the select function. */
 #define HAVE_SELECT 1
 
