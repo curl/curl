@@ -144,9 +144,6 @@
 /* Define if you have the gettimeofday function.  */
 /*  #define HAVE_GETTIMEOFDAY 1 */
 
-/* Define if you have the inet_addr function.  */
-#define HAVE_INET_ADDR 1
-
 /* Define if you have the ioctlsocket function. */
 #define HAVE_IOCTLSOCKET 1
 

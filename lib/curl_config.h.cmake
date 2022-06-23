@@ -294,9 +294,6 @@
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #cmakedefine HAVE_IFADDRS_H 1
 
-/* Define to 1 if you have the `inet_addr' function. */
-#cmakedefine HAVE_INET_ADDR 1
-
 /* Define to 1 if you have a IPv6 capable working inet_ntop function. */
 #cmakedefine HAVE_INET_NTOP 1
 

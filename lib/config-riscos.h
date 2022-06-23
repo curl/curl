@@ -121,9 +121,6 @@
 /* Define if you have the `timeval' struct. */
 #define HAVE_STRUCT_TIMEVAL
 
-/* Define if you have the `inet_addr' function. */
-#undef HAVE_INET_ADDR
-
 /* Define if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H
 

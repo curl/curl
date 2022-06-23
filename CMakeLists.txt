@@ -1075,7 +1075,6 @@ check_symbol_exists(getppid       "${CURL_INCLUDES}" HAVE_GETPPID)
 check_symbol_exists(utimes        "${CURL_INCLUDES}" HAVE_UTIMES)
 
 check_symbol_exists(gettimeofday  "${CURL_INCLUDES}" HAVE_GETTIMEOFDAY)
-check_symbol_exists(inet_addr     "${CURL_INCLUDES}" HAVE_INET_ADDR)
 check_symbol_exists(closesocket   "${CURL_INCLUDES}" HAVE_CLOSESOCKET)
 check_symbol_exists(sigsetjmp     "${CURL_INCLUDES}" HAVE_SIGSETJMP)
 check_symbol_exists(getpass_r     "${CURL_INCLUDES}" HAVE_GETPASS_R)

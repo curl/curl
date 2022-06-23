@@ -95,7 +95,6 @@
 #define HAVE_GETPWUID 1
 #define HAVE_GETTIMEOFDAY 1
 #define HAVE_GMTIME_R 1
-#define HAVE_INET_ADDR 1
 #define HAVE_INET_NTOP 1
 #define HAVE_INET_PTON 1
 #define HAVE_INTTYPES_H 1
