@@ -202,9 +202,6 @@
 /* Define if you have the setmode function. */
 #define HAVE_SETMODE 1
 
-/* Define if you have the setvbuf function. */
-#define HAVE_SETVBUF 1
-
 /* Define if you have the socket function. */
 #define HAVE_SOCKET 1
 

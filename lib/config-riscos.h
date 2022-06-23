@@ -184,9 +184,6 @@
 /* Define if you have the `select' function. */
 #define HAVE_SELECT
 
-/* Define if you have the `setvbuf' function. */
-#undef HAVE_SETVBUF
-
 /* Define if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
 

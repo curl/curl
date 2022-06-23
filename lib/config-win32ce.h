@@ -156,9 +156,6 @@
 /* Define if you have the select function.  */
 #define HAVE_SELECT 1
 
-/* Define if you have the setvbuf function.  */
-#define HAVE_SETVBUF 1
-
 /* Define if you have the socket function.  */
 #define HAVE_SOCKET 1
 
