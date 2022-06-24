@@ -29,7 +29,7 @@ GSS-API
 curl --fail --negotiate to unauthenticated service fails
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u : --fail --negotiate
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail --negotiate
 </command>
 </client>
 
