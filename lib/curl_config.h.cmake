@@ -231,9 +231,6 @@
 /* Define to 1 if you have the `getppid' function. */
 #cmakedefine HAVE_GETPPID 1
 
-/* Define to 1 if you have the `getprotobyname' function. */
-#cmakedefine HAVE_GETPROTOBYNAME 1
-
 /* Define to 1 if you have the `getpeername' function. */
 #cmakedefine HAVE_GETPEERNAME 1
 

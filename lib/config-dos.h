@@ -45,7 +45,6 @@
 #define HAVE_FCNTL_H           1
 #define HAVE_FREEADDRINFO      1
 #define HAVE_GETADDRINFO       1
-#define HAVE_GETPROTOBYNAME    1
 #define HAVE_GETTIMEOFDAY      1
 #define HAVE_IO_H              1
 #define HAVE_IOCTL             1
