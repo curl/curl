@@ -138,8 +138,8 @@ if test "x$OPT_OPENSSL" != xno; then
   fi
 
   dnl finally, set flags to use SSL
-  CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
-  LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
+  CPPFLAGS="$SSL_CPPFLAGS $CPPFLAGS"
+  LDFLAGS="$SSL_LDFLAGS $LDFLAGS"
 
   AC_CHECK_LIB(crypto, HMAC_Update,[
      HAVECRYPTO="yes"
