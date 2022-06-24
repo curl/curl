@@ -53,6 +53,7 @@
 #include "curl_printf.h"
 #include "multiif.h"
 #include "version_win32.h"
+#include "rand.h"
 
 /* The last #include file should be: */
 #include "curl_memory.h"
