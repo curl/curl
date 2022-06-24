@@ -385,48 +385,6 @@ AC_DEFUN([CURL_CHECK_HEADER_WINLDAP], [
 ])
 
 
-dnl CURL_CHECK_HEADER_WINBER
-dnl -------------------------------------------------
-dnl Check for compilable and valid winber.h header
-
-AC_DEFUN([CURL_CHECK_HEADER_WINBER], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINLDAP])dnl
-  AC_CACHE_CHECK([for winber.h], [curl_cv_header_winber_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#endif
-#include <winldap.h>
-#include <winber.h>
-      ]],[[
-#if defined(__CYGWIN__) || defined(__CEGCC__)
-        HAVE_WINBER_H shall not be defined.
-#else
-        BERVAL *bvp = NULL;
-        BerElement *bep = ber_init(bvp);
-        ber_free(bep, 1);
-#endif
-      ]])
-    ],[
-      curl_cv_header_winber_h="yes"
-    ],[
-      curl_cv_header_winber_h="no"
-    ])
-  ])
-  case "$curl_cv_header_winber_h" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_WINBER_H, 1,
-        [Define to 1 if you have the winber.h header file.])
-      ;;
-  esac
-])
-
-
 dnl CURL_CHECK_HEADER_LBER
 dnl -------------------------------------------------
 dnl Check for compilable and valid lber.h header,

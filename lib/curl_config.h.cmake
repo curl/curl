@@ -655,9 +655,6 @@
 /* Define to 1 if compiler supports old gcc variadic macro style. */
 #cmakedefine HAVE_VARIADIC_MACROS_GCC 1
 
-/* Define to 1 if you have the winber.h header file. */
-#cmakedefine HAVE_WINBER_H 1
-
 /* Define to 1 if you have the windows.h header file. */
 #cmakedefine HAVE_WINDOWS_H 1
 
