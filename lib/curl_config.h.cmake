@@ -682,10 +682,6 @@
 /* if you have the zlib.h header file */
 #cmakedefine HAVE_ZLIB_H 1
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
-#cmakedefine LT_OBJDIR ${LT_OBJDIR}
-
 /* If you lack a fine basename() prototype */
 #cmakedefine NEED_BASENAME_PROTO 1
 
