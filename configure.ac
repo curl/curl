@@ -541,14 +541,12 @@ case X-"$curl_cv_native_windows" in
     CURL_CHECK_HEADER_WS2TCPIP
     CURL_CHECK_HEADER_WINCRYPT
     CURL_CHECK_HEADER_WINLDAP
-    CURL_CHECK_HEADER_WINBER
     ;;
   *)
     curl_cv_header_winsock2_h="no"
     curl_cv_header_ws2tcpip_h="no"
     curl_cv_header_wincrypt_h="no"
     curl_cv_header_winldap_h="no"
-    curl_cv_header_winber_h="no"
     ;;
 esac
 CURL_CHECK_WIN32_LARGEFILE
