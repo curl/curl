@@ -112,11 +112,6 @@
   #define HAVE_LIBZ              1
 #endif
 
-/* USE_OPENSSL on cmd-line */
-#ifdef USE_OPENSSL
-  #define OPENSSL_NO_KRB5        1
-#endif
-
 /* to disable LDAP */
 #define CURL_DISABLE_LDAP        1
 
