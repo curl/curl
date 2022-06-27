@@ -643,9 +643,6 @@
 /* if you have the zlib.h header file */
 #cmakedefine HAVE_ZLIB_H 1
 
-/* If you lack a fine basename() prototype */
-#cmakedefine NEED_BASENAME_PROTO 1
-
 /* Define to 1 if you need the lber.h header file even with ldap.h */
 #cmakedefine NEED_LBER_H 1
 
