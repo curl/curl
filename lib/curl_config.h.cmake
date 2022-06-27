@@ -421,9 +421,6 @@
 /* Define to 1 if you have the <net/if.h> header file. */
 #cmakedefine HAVE_NET_IF_H 1
 
-/* Define to 1 if NI_WITHSCOPEID exists and works. */
-#cmakedefine HAVE_NI_WITHSCOPEID 1
-
 /* if you have an old MIT gssapi library, lacking GSS_C_NT_HOSTBASED_SERVICE */
 #cmakedefine HAVE_OLD_GSSMIT 1
 
