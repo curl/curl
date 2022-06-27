@@ -263,9 +263,6 @@
 /* Define if you have the <time.h> header file. */
 #define HAVE_TIME_H
 
-/* Define if you have the `uname' function. */
-#undef HAVE_UNAME
-
 /* Define if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H
 
