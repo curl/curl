@@ -316,9 +316,6 @@
 /* Define to 1 if you have the <io.h> header file. */
 #cmakedefine HAVE_IO_H 1
 
-/* Define to 1 if you have the <krb.h> header file. */
-#cmakedefine HAVE_KRB_H 1
-
 /* Define to 1 if you have the lber.h header file. */
 #cmakedefine HAVE_LBER_H 1
 
