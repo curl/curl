@@ -142,9 +142,6 @@
 /* Define if you have the <net/if.h> header file. */
 #define HAVE_NET_IF_H
 
-/* Define if you have the <pem.h> header file. */
-#undef HAVE_PEM_H
-
 /* Define if you have the <pwd.h> header file. */
 #undef HAVE_PWD_H
 

@@ -409,9 +409,6 @@
 /* Define to 1 if you have the <openssl/pkcs12.h> header file. */
 #cmakedefine HAVE_OPENSSL_PKCS12_H 1
 
-/* Define to 1 if you have the <pem.h> header file. */
-#cmakedefine HAVE_PEM_H 1
-
 /* Define to 1 if you have the `pipe' function. */
 #cmakedefine HAVE_PIPE 1
 

@@ -979,7 +979,6 @@ check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)
 check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 
-check_include_file_concat("pem.h"            HAVE_PEM_H)
 check_include_file_concat("poll.h"           HAVE_POLL_H)
 check_include_file_concat("pwd.h"            HAVE_PWD_H)
 check_include_file_concat("setjmp.h"         HAVE_SETJMP_H)
