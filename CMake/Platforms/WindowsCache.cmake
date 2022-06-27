@@ -27,8 +27,6 @@ if(NOT UNIX)
     set(HAVE_GETHOSTNAME 1)
     set(HAVE_LIBZ 0)
 
-    set(HAVE_DLOPEN 0)
-
     set(HAVE_ALLOCA_H 0)
     set(HAVE_ARPA_INET_H 0)
     set(HAVE_DLFCN_H 0)
