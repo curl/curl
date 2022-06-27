@@ -23,7 +23,6 @@
 ###########################################################################
 if(NOT UNIX)
   if(WIN32)
-    set(HAVE_LIBUCB 0)
     set(HAVE_LIBSOCKET 0)
     set(HAVE_GETHOSTNAME 1)
     set(HAVE_LIBZ 0)

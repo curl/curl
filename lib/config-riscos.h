@@ -142,9 +142,6 @@
 /* Define if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
 
-/* Define if you have the `ucb' library (-lucb). */
-#undef HAVE_LIBUCB
-
 /* Define if you have the `localtime_r' function. */
 #undef HAVE_LOCALTIME_R
 

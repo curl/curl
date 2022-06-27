@@ -150,9 +150,6 @@
 /* Define if you have the MIT gssapi libraries */
 #undef HAVE_GSSMIT
 
-/* Define if you have the `ucb' library (-lucb). */
-#undef HAVE_LIBUCB
-
 /* Define if you have the `localtime_r' function. */
 #define HAVE_LOCALTIME_R
 
