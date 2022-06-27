@@ -406,9 +406,6 @@
 /* Define to 1 if you have the `pipe' function. */
 #cmakedefine HAVE_PIPE 1
 
-/* Define to 1 if you have a working poll function. */
-#cmakedefine HAVE_POLL 1
-
 /* If you have a fine poll */
 #cmakedefine HAVE_POLL_FINE 1
 

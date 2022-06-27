@@ -4191,10 +4191,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
 dnl CURL_CHECK_FUNC_POLL
 dnl -------------------------------------------------
 dnl Verify if poll is available, prototyped, can
-dnl be compiled and seems to work. If all of these are
-dnl true, and usage has not been previously disallowed
-dnl with shell variable curl_disallow_poll, then
-dnl HAVE_POLL will be defined.
+dnl be compiled and seems to work.
 
 AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
@@ -4324,8 +4321,6 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
      test "$tst_allow_poll" = "yes" &&
      test "$tst_works_poll" != "no"; then
     AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_POLL, 1,
-      [Define to 1 if you have a working poll function.])
     AC_DEFINE_UNQUOTED(HAVE_POLL_FINE, 1,
       [If you have a fine poll])
     curl_cv_func_poll="yes"

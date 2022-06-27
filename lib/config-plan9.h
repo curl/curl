@@ -111,7 +111,6 @@
 #define USE_OPENSSL 1
 
 #define HAVE_PIPE 1
-#define HAVE_POLL 1
 #define HAVE_POLL_FINE 1
 #define HAVE_POLL_H 1
 #define HAVE_PTHREAD_H 1
