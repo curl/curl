@@ -151,7 +151,6 @@
 
 #define HAVE_POSIX_STRERROR_R 1
 #define HAVE_STRERROR_R 1
-#define STRERROR_R_TYPE_ARG3 int
 
 #define TIME_WITH_SYS_TIME 1
 #define USE_MANUAL 1

@@ -727,9 +727,6 @@ ${SIZEOF_TIME_T_CODE}
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS 1
 
-/* Define to the type of arg 3 for strerror_r. */
-#cmakedefine STRERROR_R_TYPE_ARG3 ${STRERROR_R_TYPE_ARG3}
-
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #cmakedefine TIME_WITH_SYS_TIME 1
 

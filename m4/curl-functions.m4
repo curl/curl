@@ -5443,8 +5443,8 @@ dnl -------------------------------------------------
 dnl Verify if strerror_r is available, prototyped, can be compiled and
 dnl seems to work. If all of these are true, and usage has not been
 dnl previously disallowed with shell variable curl_disallow_strerror_r,
-dnl then HAVE_STRERROR_R and STRERROR_R_TYPE_ARG3 will be defined, as
-dnl well as one of HAVE_GLIBC_STRERROR_R or HAVE_POSIX_STRERROR_R.
+dnl then HAVE_STRERROR_R will be defined, as well as one of
+dnl HAVE_GLIBC_STRERROR_R or HAVE_POSIX_STRERROR_R.
 dnl
 dnl glibc-style strerror_r:
 dnl
@@ -5678,16 +5678,12 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         [Define to 1 if you have the strerror_r function.])
       AC_DEFINE_UNQUOTED(HAVE_GLIBC_STRERROR_R, 1,
         [Define to 1 if you have a working glibc-style strerror_r function.])
-      AC_DEFINE_UNQUOTED(STRERROR_R_TYPE_ARG3, $tst_glibc_strerror_r_type_arg3,
-        [Define to the type of arg 3 for strerror_r.])
     fi
     if test "$tst_posix_strerror_r" = "yes"; then
       AC_DEFINE_UNQUOTED(HAVE_STRERROR_R, 1,
         [Define to 1 if you have the strerror_r function.])
       AC_DEFINE_UNQUOTED(HAVE_POSIX_STRERROR_R, 1,
         [Define to 1 if you have a working POSIX-style strerror_r function.])
-      AC_DEFINE_UNQUOTED(STRERROR_R_TYPE_ARG3, $tst_posix_strerror_r_type_arg3,
-        [Define to the type of arg 3 for strerror_r.])
     fi
     curl_cv_func_strerror_r="yes"
   else
