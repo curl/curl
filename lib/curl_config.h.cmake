@@ -334,9 +334,6 @@
 /* if you have the Kerberos4 libraries (including -ldes) */
 #cmakedefine HAVE_KRB4 1
 
-/* Define to 1 if you have the `krb_get_our_ip_for_realm' function. */
-#cmakedefine HAVE_KRB_GET_OUR_IP_FOR_REALM 1
-
 /* Define to 1 if you have the <krb.h> header file. */
 #cmakedefine HAVE_KRB_H 1
 

@@ -123,9 +123,6 @@
 /* Define if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
-/* Define if you have the `krb_get_our_ip_for_realm' function. */
-#undef HAVE_KRB_GET_OUR_IP_FOR_REALM
-
 /* Define if you have the <krb.h> header file. */
 #undef HAVE_KRB_H
 
