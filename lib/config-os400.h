@@ -144,9 +144,6 @@
 /* Define if you have the <netdb.h> header file. */
 #define HAVE_NETDB_H
 
-/* Define if you have the <netinet/if_ether.h> header file. */
-#undef HAVE_NETINET_IF_ETHER_H
-
 /* Define if you have the <netinet/in.h> header file. */
 #define HAVE_NETINET_IN_H
 
