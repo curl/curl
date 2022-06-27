@@ -244,9 +244,6 @@
 /* Define if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H
 
-/* Define if you have the <x509.h> header file. */
-#undef HAVE_X509_H
-
 /* Name of package */
 #undef PACKAGE
 

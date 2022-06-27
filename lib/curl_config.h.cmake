@@ -637,9 +637,6 @@
 /* Define to 1 if you have the ws2tcpip.h header file. */
 #cmakedefine HAVE_WS2TCPIP_H 1
 
-/* Define to 1 if you have the <x509.h> header file. */
-#cmakedefine HAVE_X509_H 1
-
 /* Define if you have the <process.h> header file. */
 #cmakedefine HAVE_PROCESS_H 1
 

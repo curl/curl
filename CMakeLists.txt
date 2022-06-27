@@ -997,7 +997,6 @@ check_include_file_concat("termios.h"        HAVE_TERMIOS_H)
 check_include_file_concat("time.h"           HAVE_TIME_H)
 check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
 check_include_file_concat("utime.h"          HAVE_UTIME_H)
-check_include_file_concat("x509.h"           HAVE_X509_H)
 
 check_include_file_concat("process.h"        HAVE_PROCESS_H)
 check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
