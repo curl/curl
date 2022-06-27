@@ -109,7 +109,6 @@
 #define HAVE_SYS_SELECT_H 1
 
 #define USE_OPENSSL 1
-#define HAVE_OPENSSL_PKCS12_H 1
 
 #define HAVE_PIPE 1
 #define HAVE_POLL 1

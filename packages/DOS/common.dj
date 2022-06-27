@@ -146,7 +146,6 @@ ifeq ($(USE_OPENSSL),1)
   #
   # CFLAGS += -DUSE_TLS_SRP=1                    \
   #           -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES \
-  #           -DHAVE_OPENSSL_PKCS12_H            \
   #           -DHAVE_SSLV2_CLIENT_METHOD         \
   #           -DOPENSSL_NO_DEPRECATED
 
