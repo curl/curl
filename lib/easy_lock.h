@@ -36,6 +36,9 @@
 
 #elif defined (HAVE_ATOMIC)
 #include <stdatomic.h>
+#if defined(HAVE_SCHED_YIELD)
+#include <sched.h>
+#endif
 
 #define curl_simple_lock atomic_bool
 #define CURL_SIMPLE_LOCK_INIT false
