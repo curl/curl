@@ -88,7 +88,7 @@
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 
-/* Qualifiers for send(), recv(), and recvfrom() */
+/* Qualifiers for send() and recv() */
 
 #define SEND_TYPE_ARG1         int
 #define SEND_QUAL_ARG2         const
