@@ -151,7 +151,6 @@
 #define HAVE_UNISTD_H 1
 #define HAVE_UTIME 1
 #define HAVE_UTIME_H 1
-#define HAVE_WRITEV 1
 
 #define HAVE_ZLIB_H 1
 
