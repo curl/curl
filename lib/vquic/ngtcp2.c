@@ -113,7 +113,7 @@ static CURLcode ng_process_ingress(struct Curl_easy *data,
 static CURLcode ng_flush_egress(struct Curl_easy *data, int sockfd,
                                 struct quicsocket *qs);
 static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
-                                   size_t datalen, void *user_data,
+                                   uint64_t datalen, void *user_data,
                                    void *stream_user_data);
 
 static ngtcp2_conn *get_conn(ngtcp2_crypto_conn_ref *conn_ref)
@@ -1237,7 +1237,7 @@ static ssize_t ngh3_stream_recv(struct Curl_easy *data,
 
 /* this amount of data has now been acked on this stream */
 static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
-                                   size_t datalen, void *user_data,
+                                   uint64_t datalen, void *user_data,
                                    void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
