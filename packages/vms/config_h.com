@@ -797,14 +797,6 @@ $	    write tf "#endif"
 $	    goto cfgh_in_loop1
 $	endif
 $!
-$	if key2 .eqs. "HAVE_LIBDL"
-$	then
-$	    write tf "#ifndef ''key2'"
-$	    write tf "#define ''key2' 1"
-$	    write tf "#endif"
-$	    goto cfgh_in_loop1
-$	endif
-$!
 $	if key2b .eqs. "RAND" .and. key2c .nes. "" .and. key2d .eqs. ""
 $	then
 $	    if (key2c .eqs. "EGD") .or. -
