@@ -29,7 +29,6 @@ if(NOT UNIX)
 
     set(HAVE_ALLOCA_H 0)
     set(HAVE_ARPA_INET_H 0)
-    set(HAVE_DLFCN_H 0)
     set(HAVE_FCNTL_H 1)
     set(HAVE_INTTYPES_H 0)
     set(HAVE_IO_H 1)
