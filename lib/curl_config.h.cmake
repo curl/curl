@@ -523,9 +523,6 @@
 /* Define to 1 if you have the strcasecmp function. */
 #cmakedefine HAVE_STRCASECMP 1
 
-/* Define to 1 if you have the strcasestr function. */
-#cmakedefine HAVE_STRCASESTR 1
-
 /* Define to 1 if you have the strcmpi function. */
 #cmakedefine HAVE_STRCMPI 1
 
