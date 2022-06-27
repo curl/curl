@@ -175,9 +175,6 @@
 /* Define if you have the gethostname function. */
 #define HAVE_GETHOSTNAME 1
 
-/* Define if you have the getpass function. */
-/* #define HAVE_GETPASS 1 */
-
 /* Define if you have the gettimeofday function. */
 /* #define HAVE_GETTIMEOFDAY 1 */
 
