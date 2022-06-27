@@ -54,7 +54,7 @@ static inline void curl_simple_lock_lock(curl_simple_lock *lock)
 #if defined(__i386__) || defined(__x86_64__)
       __builtin_ia32_pause();
 #elif defined(__aarch64__)
-      asm volatile("yield" ::: "memory");
+      __asm__ volatile("yield" ::: "memory");
 #elif defined(HAVE_SCHED_YIELD)
       sched_yield();
 #endif
