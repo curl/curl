@@ -331,10 +331,6 @@ check_library_exists_concat("${CMAKE_DL_LIBS}" dlopen HAVE_LIBDL)
 check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
 check_library_exists("c" gethostbyname "" NOT_NEED_LIBNSL)
 
-if(NOT NOT_NEED_LIBNSL)
-  check_library_exists_concat("nsl"    gethostbyname  HAVE_LIBNSL)
-endif()
-
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
 if(WIN32)

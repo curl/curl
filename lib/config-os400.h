@@ -129,9 +129,6 @@
 /* Define if you have the <krb.h> header file. */
 #undef HAVE_KRB_H
 
-/* Define if you have the `nsl' library (-lnsl). */
-#undef HAVE_LIBNSL
-
 /* Define if you have the `resolv' library (-lresolv). */
 #undef HAVE_LIBRESOLV
 
