@@ -541,9 +541,6 @@
 /* Define to 1 if you have the <string.h> header file. */
 #cmakedefine HAVE_STRING_H 1
 
-/* Define to 1 if you have the strncmpi function. */
-#cmakedefine HAVE_STRNCMPI 1
-
 /* Define to 1 if you have the <stropts.h> header file. */
 #cmakedefine HAVE_STROPTS_H 1
 
