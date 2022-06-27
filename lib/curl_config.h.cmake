@@ -316,9 +316,6 @@
 /* Define to 1 if you have the <io.h> header file. */
 #cmakedefine HAVE_IO_H 1
 
-/* if you have the Kerberos4 libraries (including -ldes) */
-#cmakedefine HAVE_KRB4 1
-
 /* Define to 1 if you have the <krb.h> header file. */
 #cmakedefine HAVE_KRB_H 1
 
