@@ -405,7 +405,7 @@ libcurl itself uses `fork()` and `execl()` if told to use the
 `CURLAUTH_NTLM_WB` authentication method which then will invoke the helper
 command in a child process with file descriptors duplicated. Make sure that
 only the trusted and reliable helper program is invoked!
-.SH_"Secrets in memory"
+.SH "Secrets in memory"
 When applications pass user names, passwords or other sensitive data to
 libcurl to be used for upcoming transfers, those secrets will be kept around
 as-is in memory. In many cases they will be stored in heap for as long as the
