@@ -58,7 +58,6 @@
 #define HAVE_ALARM              1
 #define HAVE_FTRUNCATE          1
 #define HAVE_UTIME              1
-#define HAVE_MEMCPY             1
 #define HAVE_SELECT             1
 #define HAVE_SOCKET             1
 #define HAVE_STRUCT_TIMEVAL     1
