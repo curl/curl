@@ -26,7 +26,6 @@ if(NOT UNIX)
     set(HAVE_LIBDL 0)
     set(HAVE_LIBUCB 0)
     set(HAVE_LIBSOCKET 0)
-    set(NOT_NEED_LIBNSL 0)
     set(HAVE_GETHOSTNAME 1)
     set(HAVE_LIBZ 0)
 
