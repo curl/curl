@@ -47,7 +47,6 @@
 #define HAVE_GETADDRINFO       1
 #define HAVE_GETTIMEOFDAY      1
 #define HAVE_IO_H              1
-#define HAVE_IOCTL             1
 #define HAVE_IOCTL_FIONBIO     1
 #define HAVE_IOCTLSOCKET       1
 #define HAVE_IOCTLSOCKET_FIONBIO   1

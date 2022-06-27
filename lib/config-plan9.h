@@ -97,7 +97,6 @@
 #define HAVE_INET_NTOP 1
 #define HAVE_INET_PTON 1
 #define HAVE_INTTYPES_H 1
-#define HAVE_IOCTL 1
 #define HAVE_LIBGEN_H 1
 #define HAVE_LIBZ 1
 #define HAVE_LOCALE_H 1

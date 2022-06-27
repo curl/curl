@@ -284,9 +284,6 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef ssize_t
 
-/* Define if you have the ioctl function. */
-#define HAVE_IOCTL
-
 /* Define if you have a working ioctl FIONBIO function. */
 #define HAVE_IOCTL_FIONBIO
 
