@@ -132,9 +132,6 @@
 /* Define if you have the closesocket function.  */
 #define HAVE_CLOSESOCKET 1
 
-/* Define if you don't have vprintf but do have _doprnt.  */
-/* #define HAVE_DOPRNT 1 */
-
 /* Define if you have the gethostname function.  */
 #define HAVE_GETHOSTNAME 1
 
