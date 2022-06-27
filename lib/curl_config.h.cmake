@@ -364,12 +364,6 @@
 /* Define to 1 if you have the idn2.h header file. */
 #cmakedefine HAVE_IDN2_H 1
 
-/* Define to 1 if you have the `resolv' library (-lresolv). */
-#cmakedefine HAVE_LIBRESOLV 1
-
-/* Define to 1 if you have the `resolve' library (-lresolve). */
-#cmakedefine HAVE_LIBRESOLVE 1
-
 /* Define to 1 if you have the `socket' library (-lsocket). */
 #cmakedefine HAVE_LIBSOCKET 1
 

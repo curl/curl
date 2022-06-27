@@ -130,12 +130,6 @@
 /* Define if you have the <krb.h> header file. */
 #undef HAVE_KRB_H
 
-/* Define if you have the `resolv' library (-lresolv). */
-#undef HAVE_LIBRESOLV
-
-/* Define if you have the `resolve' library (-lresolve). */
-#undef HAVE_LIBRESOLVE
-
 /* Define if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
 
