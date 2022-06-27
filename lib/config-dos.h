@@ -70,7 +70,6 @@
 #define HAVE_STRICMP           1
 #define HAVE_STRTOLL           1
 #define HAVE_STRUCT_TIMEVAL    1
-#define HAVE_STRUCT_IN6_ADDR   1
 #define HAVE_SYS_IOCTL_H       1
 #define HAVE_SYS_SOCKET_H      1
 #define HAVE_SYS_STAT_H        1
