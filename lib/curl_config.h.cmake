@@ -385,9 +385,6 @@
 /* Define to 1 if the compiler supports the 'long long' data type. */
 #cmakedefine HAVE_LONGLONG 1
 
-/* Define to 1 if you have the malloc.h header file. */
-#cmakedefine HAVE_MALLOC_H 1
-
 /* Define to 1 if you have the MSG_NOSIGNAL flag. */
 #cmakedefine HAVE_MSG_NOSIGNAL 1
 

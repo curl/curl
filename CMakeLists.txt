@@ -999,7 +999,6 @@ check_include_file_concat("utime.h"          HAVE_UTIME_H)
 
 check_include_file_concat("process.h"        HAVE_PROCESS_H)
 check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
-check_include_file_concat("malloc.h"         HAVE_MALLOC_H)
 check_include_file_concat("netinet/if_ether.h" HAVE_NETINET_IF_ETHER_H)
 check_include_file_concat("stdint.h"        HAVE_STDINT_H)
 check_include_file_concat("sockio.h"        HAVE_SOCKIO_H)

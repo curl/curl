@@ -816,57 +816,6 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
 ])
 
 
-dnl CURL_CHECK_HEADER_MALLOC
-dnl -------------------------------------------------
-dnl Check for compilable and valid malloc.h header,
-dnl and check if it is needed even with stdlib.h
-
-AC_DEFUN([CURL_CHECK_HEADER_MALLOC], [
-  AC_CACHE_CHECK([for malloc.h], [curl_cv_header_malloc_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#include <malloc.h>
-      ]],[[
-        void *p = malloc(10);
-        void *q = calloc(10,10);
-        free(p);
-        free(q);
-      ]])
-    ],[
-      curl_cv_header_malloc_h="yes"
-    ],[
-      curl_cv_header_malloc_h="no"
-    ])
-  ])
-  if test "$curl_cv_header_malloc_h" = "yes"; then
-    AC_DEFINE_UNQUOTED(HAVE_MALLOC_H, 1,
-      [Define to 1 if you have the malloc.h header file.])
-    #
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#include <stdlib.h>
-      ]],[[
-        void *p = malloc(10);
-        void *q = calloc(10,10);
-        free(p);
-        free(q);
-      ]])
-    ],[
-      curl_cv_need_header_malloc_h="no"
-    ],[
-      curl_cv_need_header_malloc_h="yes"
-    ])
-    #
-    case "$curl_cv_need_header_malloc_h" in
-      yes)
-        AC_DEFINE_UNQUOTED(NEED_MALLOC_H, 1,
-          [Define to 1 if you need the malloc.h header file even with stdlib.h])
-        ;;
-    esac
-  fi
-])
-
-
 dnl TYPE_SOCKADDR_STORAGE
 dnl -------------------------------------------------
 dnl Check for struct sockaddr_storage. Most IPv6-enabled
