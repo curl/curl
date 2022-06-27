@@ -173,8 +173,7 @@ ifeq ($(USE_ARES),1)
 endif
 
 ifeq ($(USE_IDNA),1)
-  CFLAGS += -DHAVE_LIBIDN -DHAVE_IDN_FREE_H -DHAVE_IDN_FREE \
-            -I$(LIBIDN_ROOT)/lib
+  CFLAGS += -DHAVE_LIBIDN -I$(LIBIDN_ROOT)/lib
 endif
 
 ifeq ($(USE_DEBUG),1)

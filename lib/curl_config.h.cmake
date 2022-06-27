@@ -276,12 +276,6 @@
 /* Define to 1 if you have the `idna_strerror' function. */
 #cmakedefine HAVE_IDNA_STRERROR 1
 
-/* Define to 1 if you have the `idn_free' function. */
-#cmakedefine HAVE_IDN_FREE 1
-
-/* Define to 1 if you have the <idn-free.h> header file. */
-#cmakedefine HAVE_IDN_FREE_H 1
-
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #cmakedefine HAVE_IFADDRS_H 1
 
