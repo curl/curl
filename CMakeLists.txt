@@ -999,7 +999,6 @@ check_include_file_concat("utime.h"          HAVE_UTIME_H)
 check_include_file_concat("process.h"        HAVE_PROCESS_H)
 check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
 check_include_file_concat("stdint.h"        HAVE_STDINT_H)
-check_include_file_concat("sockio.h"        HAVE_SOCKIO_H)
 check_include_file_concat("sys/utsname.h"   HAVE_SYS_UTSNAME_H)
 
 check_type_size(size_t  SIZEOF_SIZE_T)
