@@ -3232,7 +3232,6 @@ AC_CHECK_HEADERS(
         termios.h \
         termio.h \
         fcntl.h \
-        alloca.h \
         io.h \
         pwd.h \
         utime.h \

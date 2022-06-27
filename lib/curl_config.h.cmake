@@ -147,9 +147,6 @@
 /* Define to 1 if you have the alarm function. */
 #cmakedefine HAVE_ALARM 1
 
-/* Define to 1 if you have the <alloca.h> header file. */
-#cmakedefine HAVE_ALLOCA_H 1
-
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #cmakedefine HAVE_ARPA_INET_H 1
 
