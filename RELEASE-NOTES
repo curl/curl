@@ -4,7 +4,7 @@ curl and libcurl 7.84.0
  Command line options:         248
  curl_easy_setopt() options:   297
  Public functions in libcurl:  88
- Contributors:                 2648
+ Contributors:                 2652
 
 This release includes the following changes:
 
@@ -22,6 +22,8 @@ This release includes the following bugfixes:
  o aws-sigv4: fix potentional NULL pointer arithmetic [48]
  o bindlocal: don't use a random port if port number would wrap [14]
  o c-hyper: mark status line as status for Curl_client_write() [58]
+ o ci: avoid `cmake -Hpath` [114]
+ o CI: bump FreeBSD 13.0 to 13.1 [127]
  o ci: update github actions [36]
  o cmake: add libpsl support [3]
  o cmake: do not add libcurl.rc to the static libcurl library [53]
@@ -31,7 +33,9 @@ This release includes the following bugfixes:
  o configure: skip libidn2 detection when winidn is used [89]
  o configure: use the SED value to invoke sed [28]
  o configure: warn about rustls being experimental [103]
+ o content_encoding: return error on too many compression steps [106]
  o cookie: address secure domain overlay [7]
+ o cookie: apply limits [83]
  o copyright.pl: parse and use .reuse/dep5 for skips [105]
  o copyright: make repository REUSE compliant [119]
  o curl.1: add a few see also --tls-max [52]
@@ -41,6 +45,7 @@ This release includes the following bugfixes:
  o curl_getdate.3: document that some illegal dates pass through [34]
  o Curl_parsenetrc: don't access local pwbuf outside of scope [27]
  o curl_url_set.3: clarify by default using known schemes only [120]
+ o CURLOPT_ALTSVC.3: document the file format [118]
  o CURLOPT_FILETIME.3: fix the protocols this works with
  o CURLOPT_HTTPHEADER.3: improve comment in example [66]
  o CURLOPT_NETRC.3: document the .netrc file format
@@ -57,6 +62,8 @@ This release includes the following bugfixes:
  o examples/crawler.c: use the curl license [73]
  o examples: remove fopen.c and rtsp.c [76]
  o FAQ: Clarify Windows double quote usage [42]
+ o fopen: add Curl_fopen() for better overwriting of files [72]
+ o ftp: restore protocol state after http proxy CONNECT [110]
  o ftp: when failing to do a secure GSSAPI login, fail hard [62]
  o GHA/hyper: enable debug in the build
  o gssapi: improve handling of errors from gss_display_status [45]
@@ -66,6 +73,7 @@ This release includes the following bugfixes:
  o http2: reject overly many push-promise headers [63]
  o http: restore header folding behavior [64]
  o hyper: use 'alt-used' [71]
+ o krb5: return error properly on decode errors [107]
  o lib: make more protocol specific struct fields #ifdefed [84]
  o libcurl-security.3: add "Secrets in memory" [30]
  o libcurl-security.3: document CRLF header injection [98]
@@ -76,6 +84,7 @@ This release includes the following bugfixes:
  o Makefile.am: fix portability issues [1]
  o Makefile.m32: delete obsolete options, improve -On [ci skip] [65]
  o Makefile.m32: delete two obsolete OpenSSL options [ci skip] [39]
+ o Makefile.m32: stop forcing XP target with ipv6 enabled [ci skip] [116]
  o max-time.d: clarify max-time sets max transfer time [70]
  o mprintf: ignore clang non-literal format string [19]
  o netrc: check %USERPROFILE% as well on Windows [77]
@@ -91,8 +100,10 @@ This release includes the following bugfixes:
  o ngtcp2: support boringssl crypto backend [17]
  o ngtcp2: use helper funcs to simplify TLS handshake integration [68]
  o ntlm: provide a fixed fake host name [32]
+ o projects: fix third-party SSL library build paths for Visual Studio [125]
  o quic: add Curl_quic_idle [18]
  o quiche: support ca-fallback [49]
+ o rand: stop detecting /dev/urandom in cross-builds [113]
  o remote-name.d: mention --output-dir [88]
  o runtests.pl: add the --repeat parameter to the --help output [43]
  o runtests: fix skipping tests not done event-based [95]
@@ -116,9 +127,11 @@ This release includes the following bugfixes:
  o tool_operate: make sure --fail-with-body works with --retry [24]
  o transfer: fix potential NULL pointer dereference [15]
  o transfer: maintain --path-as-is after redirects [96]
+ o transfer: upload performance; avoid tiny send [124]
  o url: free old conn better on reuse [41]
  o url: remove redundant #ifdefs in allocate_conn()
  o url: URL encode the path when extracted, if spaces were set
+ o urlapi: make curl_url_set(url, CURLUPART_URL, NULL, 0) clear all parts [126]
  o urlapi: support CURLU_URLENCODE for curl_url_get()
  o urldata: reduce size of a few struct fields [86]
  o urldata: remove three unused booleans from struct UserDefined [87]
@@ -138,16 +151,18 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andrea Pappacoda, Balakrishnan Balasubramanian, Boris Verkhovskiy,
-  Carlo Alberto, Christian Weisgerber via curl-library, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Egor Pugin, Emil Engler, Evgeny Grin,
-  Fabian Keil, Frank Gevaerts, Frazer Smith, Gisle Vanem, Gregor Jasny,
-  Harry Sintonen, Illarion Taev, ImpatientHippo on GitHub, Jakub Bochenski,
-  Kamil Dudka, Karlson2k on github, KotlinIsland on github, Ladar Levison,
-  Marcel Raad, Marc Hörsken, Marcus T, Max Mehl, michael musset, Nick Zitzmann,
-  Nuru on github, Patrick Monnerat, Petr Pisar, Ray Satiro, Ricardo M. Correia,
-  Simon Berger, Tatsuhiro Tsujikawa, Thomas Guillem, Viktor Szakats,
-  Vincent Torri, vvb2060 on github, Wolf Vollprecht, Elms
-  (43 contributors)
+  Carlo Alberto, Christian Weisgerber, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Egor Pugin, Emanuele Torre, Emil Engler, Evgeny Grin,
+  Fabian Keil, Frank Gevaerts, Frazer Smith, Gisle Vanem, Glenn Strauss,
+  Gregor Jasny, Harry Sintonen, Illarion Taev, ImpatientHippo on GitHub,
+  Jakub Bochenski, Kamil Dudka, Karlson2k on github, KotlinIsland on github,
+  Ladar Levison, Marcel Raad, Marc Hörsken, Marcus T, Max Mehl, michael musset,
+  Nick Zitzmann, Nuru on github, Patrick Monnerat, Petr Pisar, Philip H,
+  Pierrick Charron, Ray Satiro, Ricardo M. Correia, Simon Berger,
+  Stefan Eissing, Steve Holme, Tatsuhiro Tsujikawa, Thomas Guillem, Tom Eccles,
+  Viktor Szakats, Vincent Torri, vvb2060 on github, Willem Hoek,
+  Wolf Vollprecht, Elms
+  (51 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -222,6 +237,7 @@ References to bug reports and discussions on issues:
  [69] = https://curl.se/bug/?i=8671
  [70] = https://curl.se/bug/?i=8877
  [71] = https://curl.se/bug/?i=8898
+ [72] = https://curl.se/docs/CVE-2022-32207.html
  [73] = https://curl.se/bug/?i=8950
  [74] = https://curl.se/bug/?i=8948
  [75] = https://curl.se/bug/?i=8952
@@ -232,6 +248,7 @@ References to bug reports and discussions on issues:
  [80] = https://curl.se/bug/?i=8912
  [81] = https://curl.se/bug/?i=8912
  [82] = https://curl.se/bug/?i=8912
+ [83] = https://curl.se/docs/CVE-2022-32205.html
  [84] = https://curl.se/bug/?i=8944
  [85] = https://curl.se/bug/?i=8940
  [86] = https://curl.se/bug/?i=8940
@@ -254,7 +271,18 @@ References to bug reports and discussions on issues:
  [103] = https://curl.se/bug/?i=9019
  [104] = https://curl.se/bug/?i=9013
  [105] = https://curl.se/bug/?i=9006
+ [106] = https://curl.se/docs/CVE-2022-32206.html
+ [107] = https://curl.se/docs/CVE-2022-32208.html
+ [110] = https://curl.se/bug/?i=8737
  [112] = https://curl.se/bug/?i=9002
+ [113] = https://curl.se/bug/?i=9038
+ [114] = https://curl.se/bug/?i=9008
+ [116] = https://curl.se/bug/?i=9035
+ [118] = https://curl.se/bug/?i=9033
  [119] = https://curl.se/bug/?i=8869
  [120] = https://curl.se/bug/?i=8994
  [121] = https://curl.se/bug/?i=8981
+ [124] = https://curl.se/bug/?i=8965
+ [125] = https://curl.se/bug/?i=8991
+ [126] = https://curl.se/bug/?i=9028
+ [127] = https://curl.se/bug/?i=8815
