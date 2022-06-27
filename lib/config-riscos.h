@@ -124,9 +124,6 @@
 /* Define if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
 
-/* Define if you have the `localtime_r' function. */
-#undef HAVE_LOCALTIME_R
-
 /* Define if you need the malloc.h header file even with stdlib.h  */
 /* #define NEED_MALLOC_H 1 */
 

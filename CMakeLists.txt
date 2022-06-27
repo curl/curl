@@ -1057,7 +1057,6 @@ check_symbol_exists(getpwuid_r    "${CURL_INCLUDES}" HAVE_GETPWUID_R)
 check_symbol_exists(geteuid       "${CURL_INCLUDES}" HAVE_GETEUID)
 check_symbol_exists(utime         "${CURL_INCLUDES}" HAVE_UTIME)
 check_symbol_exists(gmtime_r      "${CURL_INCLUDES}" HAVE_GMTIME_R)
-check_symbol_exists(localtime_r   "${CURL_INCLUDES}" HAVE_LOCALTIME_R)
 
 check_symbol_exists(gethostbyname_r "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME_R)
 

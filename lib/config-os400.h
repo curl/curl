@@ -132,9 +132,6 @@
 /* Define if you have the MIT gssapi libraries */
 #undef HAVE_GSSMIT
 
-/* Define if you have the `localtime_r' function. */
-#define HAVE_LOCALTIME_R
-
 /* Define if you need the malloc.h header file even with stdlib.h  */
 /* #define NEED_MALLOC_H 1 */
 

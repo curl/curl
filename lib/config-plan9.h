@@ -100,7 +100,6 @@
 #define HAVE_LIBGEN_H 1
 #define HAVE_LIBZ 1
 #define HAVE_LOCALE_H 1
-#define HAVE_LOCALTIME_R 1
 #define HAVE_LONGLONG 1
 #define HAVE_NETDB_H 1
 #define HAVE_NETINET_IN_H 1
