@@ -174,7 +174,7 @@ endif
 
 ifeq ($(USE_IDNA),1)
   CFLAGS += -DHAVE_LIBIDN -DHAVE_IDN_FREE_H -DHAVE_IDN_FREE -DHAVE_TLD_H \
-            -DHAVE_TLD_STRERROR -I$(LIBIDN_ROOT)/lib
+            -I$(LIBIDN_ROOT)/lib
 endif
 
 ifeq ($(USE_DEBUG),1)
