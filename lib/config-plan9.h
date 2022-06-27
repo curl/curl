@@ -145,7 +145,6 @@
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TIME_H 1
 #define HAVE_SYS_TYPES_H 1
-#define HAVE_SYS_UIO_H 1
 #define HAVE_SYS_UN_H 1
 #define HAVE_TERMIOS_H 1
 #define HAVE_TIME_H 1
