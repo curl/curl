@@ -117,8 +117,6 @@
 #define HAVE_SETJMP_H 1
 #define HAVE_SETLOCALE 1
 
-#define HAVE_SOCK_OPTS 1 /* for /sys/include/ape/sys/socket.h */
-
 #define HAVE_SIGACTION 1
 #define HAVE_SIGNAL 1
 #define HAVE_SIGNAL_H 1
