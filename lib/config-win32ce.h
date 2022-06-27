@@ -165,9 +165,6 @@
 /* Define if you have the stricmp function. */
 /* #define HAVE_STRICMP 1 */
 
-/* Define if you have the strstr function.  */
-#define HAVE_STRSTR 1
-
 /* Define if you have the strtoll function.  */
 #if defined(__MINGW32__)
 #define HAVE_STRTOLL 1

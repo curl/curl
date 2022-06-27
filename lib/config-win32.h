@@ -210,9 +210,6 @@
 /* Define if you have the stricmp function. */
 #define HAVE_STRICMP 1
 
-/* Define if you have the strstr function. */
-#define HAVE_STRSTR 1
-
 /* Define if you have the strtoll function. */
 #if defined(__MINGW32__) || defined(__POCC__) || \
     (defined(_MSC_VER) && (_MSC_VER >= 1800))

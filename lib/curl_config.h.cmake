@@ -544,9 +544,6 @@
 /* Define to 1 if you have the <stropts.h> header file. */
 #cmakedefine HAVE_STROPTS_H 1
 
-/* Define to 1 if you have the strstr function. */
-#cmakedefine HAVE_STRSTR 1
-
 /* Define to 1 if you have the strtok_r function. */
 #cmakedefine HAVE_STRTOK_R 1
 

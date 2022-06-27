@@ -221,9 +221,6 @@
 /* Define if you have the <stropts.h> header file. */
 #undef HAVE_STROPTS_H
 
-/* Define if you have the `strstr' function. */
-#define HAVE_STRSTR
-
 /* Define if you have the `strtok_r' function. */
 #define HAVE_STRTOK_R
 

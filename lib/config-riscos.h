@@ -205,9 +205,6 @@
 /* Define if you have the <string.h> header file. */
 #define HAVE_STRING_H
 
-/* Define if you have the `strstr' function. */
-#define HAVE_STRSTR
-
 /* Define if you have the `strtok_r' function. */
 #undef HAVE_STRTOK_R
 
