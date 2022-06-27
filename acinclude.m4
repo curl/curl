@@ -560,58 +560,6 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
 ])
 
 
-dnl CURL_CHECK_HEADER_LDAPSSL
-dnl -------------------------------------------------
-dnl Check for compilable and valid ldapssl.h header
-
-AC_DEFUN([CURL_CHECK_HEADER_LDAPSSL], [
-  AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
-  AC_CACHE_CHECK([for ldapssl.h], [curl_cv_header_ldapssl_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#endif
-#ifndef NULL
-#define NULL (void *)0
-#endif
-#ifndef LDAP_DEPRECATED
-#define LDAP_DEPRECATED 1
-#endif
-#ifdef NEED_LBER_H
-#include <lber.h>
-#endif
-#ifdef HAVE_LDAP_H
-#include <ldap.h>
-#endif
-#include <ldapssl.h>
-      ]],[[
-        char *cert_label = NULL;
-        LDAP *ldp = ldap_ssl_init("dummy", LDAPS_PORT, cert_label);
-      ]])
-    ],[
-      curl_cv_header_ldapssl_h="yes"
-    ],[
-      curl_cv_header_ldapssl_h="no"
-    ])
-  ])
-  case "$curl_cv_header_ldapssl_h" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_LDAPSSL_H, 1,
-        [Define to 1 if you have the ldapssl.h header file.])
-      ;;
-  esac
-])
-
-
 dnl CURL_CHECK_LIBS_WINLDAP
 dnl -------------------------------------------------
 dnl Check for libraries needed for WINLDAP support,
