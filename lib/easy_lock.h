@@ -43,6 +43,16 @@
 #define curl_simple_lock atomic_bool
 #define CURL_SIMPLE_LOCK_INIT false
 
+/* a clang-thing */
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
+
+#if (defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))) || \
+  __has_builtin(__builtin_ia32_pause)
+#define HAVE_BUILTIN_IA32_PAUSE
+#endif
+
 static inline void curl_simple_lock_lock(curl_simple_lock *lock)
 {
   for(;;) {
@@ -51,7 +61,7 @@ static inline void curl_simple_lock_lock(curl_simple_lock *lock)
     /* Reduce cache coherency traffic */
     while(atomic_load_explicit(lock, memory_order_relaxed)) {
       /* Reduce load (not mandatory) */
-#if defined(__i386__) || defined(__x86_64__)
+#ifdef HAVE_BUILTIN_IA32_PAUSE
       __builtin_ia32_pause();
 #elif defined(__aarch64__)
       __asm__ volatile("yield" ::: "memory");
