@@ -40,8 +40,8 @@
 #include <sched.h>
 #endif
 
-#define curl_simple_lock atomic_bool
-#define CURL_SIMPLE_LOCK_INIT false
+#define curl_simple_lock atomic_int
+#define CURL_SIMPLE_LOCK_INIT 0
 
 static inline void curl_simple_lock_lock(curl_simple_lock *lock)
 {
