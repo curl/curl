@@ -48,7 +48,9 @@
 #define __has_builtin(x) 0
 #endif
 
-#if (defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))) || \
+/* if GCC on i386/x86_64 or if the built-in is present */
+#if ( (defined(__GNUC__) && !defined(__clang__)) &&     \
+      (defined(__i386__) || defined(__x86_64__))) ||    \
   __has_builtin(__builtin_ia32_pause)
 #define HAVE_BUILTIN_IA32_PAUSE
 #endif
