@@ -1755,15 +1755,20 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           struct curl_slist *cl;
 
           /* The maximum size needs to match MAX_NAME in cookie.h */
-          curlx_dyn_init(&cookies, 4096);
+#define MAX_COOKIE_LINE 4096
+          curlx_dyn_init(&cookies, MAX_COOKIE_LINE);
           for(cl = config->cookies; cl; cl = cl->next) {
             if(cl == config->cookies)
               result = curlx_dyn_addf(&cookies, "%s", cl->data);
             else
               result = curlx_dyn_addf(&cookies, ";%s", cl->data);
 
-            if(result)
+            if(result) {
+              warnf(global,
+                    "skipped provided cookie, the cookie header "
+                    "would go over %u bytes\n", MAX_COOKIE_LINE);
               break;
+            }
           }
 
           my_setopt_str(curl, CURLOPT_COOKIE, curlx_dyn_ptr(&cookies));
