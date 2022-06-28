@@ -34,12 +34,15 @@ CURLcode curl_mime_data(curl_mimepart *part, const char *data,
 .SH DESCRIPTION
 \fIcurl_mime_data(3)\fP sets a mime part's body content from memory data.
 
-\fIdata\fP points to the data bytes: those are copied to the part and their
-storage may safely be reused after call.
-\fIdatasize\fP is the number of data bytes: it can be set to
+\fIpart\fP is the mime part to assign contents to, created with
+\fIcurl_mime_addpart(3)\fP.
+
+\fIdata\fP points to the data that gets copied by this function. The storage
+may safely be reused after the call.
+
+\fIdatasize\fP is the number of bytes \fIdata\fP points to. It can be set to
 \fICURL_ZERO_TERMINATED\fP to indicate \fIdata\fP is a null-terminated
 character string.
-\fIpart\fP is the part's to assign contents to.
 
 Setting a part's contents multiple times is valid: only the value set by the
 last call is retained. It is possible to unassign part's contents by setting
