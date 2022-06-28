@@ -6570,24 +6570,26 @@ AC_DEFUN([CURL_COVERAGE],[
 ])
 
 dnl CURL_ATOMIC
-dnl --------------------------------------------------
-dnl Check if _Atomic works
+dnl -------------------------------------------------------------
+dnl Check if _Atomic works. But only check if stdatomic.h exists.
 dnl
 AC_DEFUN([CURL_ATOMIC],[
-  AC_MSG_CHECKING([if _Atomic is available])
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_unistd
-    ]],[[
-      _Atomic int i = 0;
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_ATOMIC, 1,
-      [Define to 1 if you have _Atomic support.])
-    tst_atomic="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_atomic="no"
+  AC_CHECK_HEADERS(stdatomic.h, [
+    AC_MSG_CHECKING([if _Atomic is available])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_unistd
+      ]],[[
+        _Atomic int i = 0;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      AC_DEFINE_UNQUOTED(HAVE_ATOMIC, 1,
+        [Define to 1 if you have _Atomic support.])
+      tst_atomic="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_atomic="no"
+    ])
   ])
 ])
