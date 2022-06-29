@@ -3041,6 +3041,12 @@ static CURLcode override_login(struct Curl_easy *data,
       /* don't update the user name below */
       userp = NULL;
     }
+    /* no user was set but a password, set a blank user */
+    if(userp && !*userp && *passwdp) {
+      *userp = strdup("");
+      if(!*userp)
+        return CURLE_OUT_OF_MEMORY;
+    }
   }
 #endif
 
