@@ -96,6 +96,8 @@ does not match the previously given size.
 .IP "CURLE_FTP_COULDNT_RETR_FILE (19)"
 This was either a weird reply to a 'RETR' command or a zero byte transfer
 complete.
+.IP "Obsolete error (20)"
+Not used in modern versions.
 .IP "CURLE_QUOTE_ERROR (21)"
 When sending custom "QUOTE" commands to the remote server, one of the commands
 returned an error code that was 400 or higher (for FTP) or otherwise
@@ -106,6 +108,8 @@ server returns an error code that is >= 400.
 .IP "CURLE_WRITE_ERROR (23)"
 An error occurred when writing received data to a local file, or an error was
 returned to libcurl from a write callback.
+.IP "Obsolete error (24)"
+Not used in modern versions.
 .IP "CURLE_UPLOAD_FAILED (25)"
 Failed starting the upload. For FTP, the server typically denied the STOR
 command. The error buffer usually contains the server's explanation for this.
@@ -118,6 +122,8 @@ things are severely screwed up if this ever occurs.
 .IP "CURLE_OPERATION_TIMEDOUT (28)"
 Operation timeout. The specified time-out period was reached according to the
 conditions.
+.IP "Obsolete error (29)"
+Not used in modern versions.
 .IP "CURLE_FTP_PORT_FAILED (30)"
 The FTP PORT command returned error. This mostly happens when you have not
 specified a good enough address for libcurl to use. See
@@ -125,6 +131,8 @@ specified a good enough address for libcurl to use. See
 .IP "CURLE_FTP_COULDNT_USE_REST (31)"
 The FTP REST command returned error. This should never happen if the server is
 sane.
+.IP "Obsolete error (32)"
+Not used in modern versions.
 .IP "CURLE_RANGE_ERROR (33)"
 The server does not support or accept range requests.
 .IP "CURLE_HTTP_POST_ERROR (34)"
@@ -144,16 +152,22 @@ path does not identify an existing file. Did you check file permissions?
 LDAP cannot bind. LDAP bind operation failed.
 .IP "CURLE_LDAP_SEARCH_FAILED (39)"
 LDAP search failed.
+.IP "Obsolete error (40)"
+Not used in modern versions.
 .IP "CURLE_FUNCTION_NOT_FOUND (41)"
 Function not found. A required zlib function was not found.
 .IP "CURLE_ABORTED_BY_CALLBACK (42)"
 Aborted by callback. A callback returned "abort" to libcurl.
 .IP "CURLE_BAD_FUNCTION_ARGUMENT (43)"
 A function was called with a bad parameter.
+.IP "Obsolete error (44)"
+Not used in modern versions.
 .IP "CURLE_INTERFACE_FAILED (45)"
 Interface error. A specified outgoing interface could not be used. Set which
 interface to use for outgoing connections' source IP address with
 \fICURLOPT_INTERFACE(3)\fP.
+.IP "Obsolete error (46)"
+Not used in modern versions.
 .IP "CURLE_TOO_MANY_REDIRECTS (47)"
 Too many redirects. When following redirects, libcurl hit the maximum amount.
 Set your limit with \fICURLOPT_MAXREDIRS(3)\fP.
@@ -165,6 +179,8 @@ exact option it concerns.
 .IP "CURLE_SETOPT_OPTION_SYNTAX (49)"
 An option passed in to a setopt was wrongly formatted. See error message for
 details about what option.
+.IP "Obsolete errors (50-51)"
+Not used in modern versions.
 .IP "CURLE_GOT_NOTHING (52)"
 Nothing was returned from the server, and under the circumstances, getting
 nothing is considered an error.
@@ -176,6 +192,8 @@ Failed setting the selected SSL crypto engine as default.
 Failed sending network data.
 .IP "CURLE_RECV_ERROR (56)"
 Failure with receiving network data.
+.IP "Obsolete error (57)"
+Not used in modern versions.
 .IP "CURLE_SSL_CERTPROBLEM (58)"
 problem with the local client certificate.
 .IP "CURLE_SSL_CIPHER (59)"
@@ -186,8 +204,8 @@ This error code has been unified with CURLE_SSL_CACERT since 7.62.0. Its
 previous value was 51.
 .IP "CURLE_BAD_CONTENT_ENCODING (61)"
 Unrecognized transfer encoding.
-.IP "CURLE_LDAP_INVALID_URL (62)"
-This error code is deprecated since 7.82.0 and cannot be returned anymore.
+.IP "Obsolete error (62)"
+Not used in modern versions.
 .IP "CURLE_FILESIZE_EXCEEDED (63)"
 Maximum file size exceeded.
 .IP "CURLE_USE_SSL_FAILED (64)"
@@ -213,10 +231,8 @@ Unknown TFTP transfer ID.
 File already exists and will not be overwritten.
 .IP "CURLE_TFTP_NOSUCHUSER (74)"
 This error should never be returned by a properly functioning TFTP server.
-.IP "CURLE_CONV_FAILED (75)"
-Character conversion failed.
-.IP "CURLE_CONV_REQD (76)"
-Caller must register conversion callbacks.
+.IP "Obsolete error (75-76)"
+Not used in modern versions.
 .IP "CURLE_SSL_CACERT_BADFILE (77)"
 Problem with reading the SSL CA cert (path? access rights?)
 .IP "CURLE_REMOTE_FILE_NOT_FOUND (78)"
@@ -265,6 +281,9 @@ be one out of several problems, see the error buffer for details.
 .IP "CURLE_QUIC_CONNECT_ERROR (96)"
 QUIC connection error. This error may be caused by an SSL library error. QUIC
 is the protocol used for HTTP/3 transfers.
+.IP "CURLE_PROXY (97)"
+Proxy handshake error. \fICURLINFO_PROXY_ERROR(3)\fP provides extra details on
+the specific problem.
 .IP "CURLE_SSL_CLIENTCERT (98)"
 SSL Client Certificate required.
 .IP "CURLE_UNRECOVERABLE_POLL (99)"

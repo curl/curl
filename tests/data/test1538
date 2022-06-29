@@ -107,7 +107,7 @@ e71: TFTP: Illegal operation
 e72: TFTP: Unknown transfer ID
 e73: Remote file already exists
 e74: TFTP: No such user
-e75: Conversion failed
+e75: Unknown error
 e76: Unknown error
 e77: Problem with the SSL CA cert (path? access rights?)
 e78: Remote file not found
