@@ -265,9 +265,6 @@ curl_easy_strerror(CURLcode error)
   case CURLE_TFTP_NOSUCHUSER:
     return "TFTP: No such user";
 
-  case CURLE_CONV_FAILED:
-    return "Conversion failed";
-
   case CURLE_REMOTE_FILE_NOT_FOUND:
     return "Remote file not found";
 
@@ -334,6 +331,7 @@ curl_easy_strerror(CURLcode error)
   case CURLE_OBSOLETE51:
   case CURLE_OBSOLETE57:
   case CURLE_OBSOLETE62:
+  case CURLE_OBSOLETE75:
   case CURLE_OBSOLETE76:
   case CURL_LAST:
     break;

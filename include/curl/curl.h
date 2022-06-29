@@ -577,7 +577,7 @@ typedef enum {
   CURLE_TFTP_UNKNOWNID,          /* 72 - Unknown transfer ID */
   CURLE_REMOTE_FILE_EXISTS,      /* 73 - File already exists */
   CURLE_TFTP_NOSUCHUSER,         /* 74 - No such user */
-  CURLE_CONV_FAILED,             /* 75 - conversion failed */
+  CURLE_OBSOLETE75,              /* 75 - NOT IN USE since 7.82.0 */
   CURLE_OBSOLETE76,              /* 76 - NOT IN USE since 7.82.0 */
   CURLE_SSL_CACERT_BADFILE,      /* 77 - could not load CACERT file, missing
                                     or wrong format */
@@ -680,6 +680,7 @@ typedef enum {
 #define CURLE_FTP_BAD_DOWNLOAD_RESUME CURLE_BAD_DOWNLOAD_RESUME
 #define CURLE_LDAP_INVALID_URL CURLE_OBSOLETE62
 #define CURLE_CONV_REQD CURLE_OBSOLETE76
+#define CURLE_CONV_FAILED CURLE_OBSOLETE75
 
 /* This was the error code 50 in 7.7.3 and a few earlier versions, this
    is no longer used by libcurl but is instead #defined here only to not
