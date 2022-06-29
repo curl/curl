@@ -127,6 +127,7 @@ LIB_CFILES =         \
   curl_gethostname.c \
   curl_gssapi.c      \
   curl_log.c         \
+  curl_libproxy.c    \
   curl_memrchr.c     \
   curl_multibyte.c   \
   curl_ntlm_core.c   \
@@ -262,6 +263,7 @@ LIB_HFILES =         \
   curl_krb5.h        \
   curl_ldap.h        \
   curl_log.h         \
+  curl_libproxy.h    \
   curl_md4.h         \
   curl_md5.h         \
   curl_memory.h      \

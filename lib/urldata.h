@@ -192,6 +192,10 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #include <libssh2_sftp.h>
 #endif /* USE_LIBSSH2 */
 
+#ifndef CURL_DISABLE_LIBPROXY
+#include "curl_libproxy.h"
+#endif
+
 #define READBUFFER_SIZE CURL_MAX_WRITE_SIZE
 #define READBUFFER_MAX  CURL_MAX_READ_SIZE
 #define READBUFFER_MIN  1024
@@ -1972,6 +1976,9 @@ struct Curl_easy {
                                      valid after a client has asked for it */
 #ifdef USE_HYPER
   struct hyptransfer hyp;
+#endif
+#ifndef CURL_DISABLE_LIBPROXY
+  pxProxyFactory *proxy_factory;
 #endif
 };
 

@@ -224,6 +224,13 @@ option(CURL_DISABLE_TFTP "disables TFTP" OFF)
 mark_as_advanced(CURL_DISABLE_TFTP)
 option(CURL_DISABLE_VERBOSE_STRINGS "disables verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
+option(CURL_DISABLE_LIBPROXY "disables Libproxy support" OFF)
+mark_as_advanced(CURL_DISABLE_LIBPROXY)
+
+if (NOT CONFIG_DISABLE_LIBPROXY)
+  find_package(libproxy REQUIRED)
+  list(APPEND CURL_LIBS ${LIBPROXY_LIBRARIES})
+endif()
 
 # Corresponds to HTTP_ONLY in lib/curl_setup.h
 option(HTTP_ONLY "disables all protocols except HTTP (This overrides all CURL_DISABLE_* options)" OFF)
@@ -1476,6 +1483,7 @@ _add_if("unicode"       ENABLE_UNICODE)
 _add_if("threadsafe"    HAVE_ATOMIC OR (WIN32 AND
                         HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
 _add_if("PSL"           USE_LIBPSL)
+_add_if("libproxy"      NOT CURL_DISABLE_LIBPROXY)
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
 

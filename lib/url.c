@@ -457,6 +457,11 @@ CURLcode Curl_close(struct Curl_easy **datap)
   }
 #endif
 
+#ifndef CURL_DISABLE_LIBPROXY
+  Curl_libproxy_cleanup(data->proxy_factory);
+  data->proxy_factory = NULL;
+#endif
+
   /* destruct wildcard structures if it is needed */
   Curl_wildcard_dtor(&data->wildcard);
   Curl_freeset(data);
@@ -2113,6 +2118,11 @@ static char *detect_proxy(struct Curl_easy *data,
   }
   if(proxy)
     infof(data, "Uses proxy env variable %s == '%s'", envp, proxy);
+#ifndef CURL_DISABLE_LIBPROXY
+  if(!proxy) {
+    proxy = Curl_libproxy_detect_proxy(data, data->state.url);
+  }
+#endif
 
   return proxy;
 }
