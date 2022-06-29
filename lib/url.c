@@ -2404,8 +2404,17 @@ static char *detect_proxy(struct Curl_easy *data,
       proxy = curl_getenv(envp);
     }
   }
+
   if(proxy)
     infof(data, "Uses proxy env variable %s == '%s'", envp, proxy);
+#ifdef ENABLE_LIBPROXY
+  if(/*data->set.libproxy && */!proxy) {
+    char *libproxy_proxy = Curl_libproxy_detect_proxy(data->state.url);
+    if (strcmp(libproxy_proxy, "direct://"))
+      proxy = strdup(libproxy_proxy);
+  }
+
+#endif
 
   return proxy;
 }

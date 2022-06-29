@@ -23,10 +23,10 @@
 #***************************************************************************
 dnl Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.59)
+AC_PREREQ([2.71])
 
 dnl We don't know the version number "statically" so we use a dash here
-AC_INIT([curl], [-], [a suitable curl mailing list: https://curl.se/mail/])
+AC_INIT([curl],[-],[a suitable curl mailing list: https://curl.se/mail/])
 
 XC_OVR_ZZ50
 XC_OVR_ZZ60
@@ -1369,6 +1369,90 @@ if test X"$OPT_BROTLI" != Xno; then
     fi
   else
     dnl no brotli, revert back to clean variables
+    LDFLAGS=$CLEANLDFLAGS
+    CPPFLAGS=$CLEANCPPFLAGS
+    LIBS=$CLEANLIBS
+  fi
+fi
+
+dnl **********************************************************************
+dnl Check for the presence of LIBPROXY libraries and headers
+dnl **********************************************************************
+
+dnl Default to compiler & linker defaults for LIBPROXY files & libraries.
+OPT_LIBPROXY=off
+AC_ARG_WITH(libproxy,dnl
+AS_HELP_STRING([--with-libproxy=PATH],[Where to look for libproxy, PATH points to the LIBPROXY installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--without-libproxy],[disable LIBPROXY]),
+  OPT_LIBPROXY=$withval)
+
+if test X"$OPT_LIBPROXY" != Xno; then
+  dnl backup the pre-libproxy variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBPROXY" in
+  yes)
+    dnl --with-libproxy (without path) used
+    CURL_CHECK_PKGCONFIG(libproxy)
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_PROXY=`$PKGCONFIG --libs-only-l libproxy`
+      LD_PROXY=`$PKGCONFIG --libs-only-L libproxy`
+      CPP_PROXY=`$PKGCONFIG --cflags-only-I libproxy`
+      version=`$PKGCONFIG --modversion libproxy`
+      DIR_PROXY=`echo $LD_PROXY | $SED -e 's/-L//'`
+    fi
+
+    ;;
+  off)
+    dnl no --with-libproxy option given, just check default places
+    ;;
+  *)
+    dnl use the given --with-libproxy spot
+    PREFIX_PROXY=$OPT_LIBPROXY
+    ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_PROXY"; then
+    LIB_PROXY="-lproxy"
+    LD_PROXY=-L${PREFIX_PROXY}/lib$libsuff
+    CPP_PROXY=-I${PREFIX_PROXY}/include
+    DIR_PROXY=${PREFIX_PROXY}/lib$libsuff
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_PROXY"
+  CPPFLAGS="$CPPFLAGS $CPP_PROXY"
+  LIBS="$LIB_PROXY $LIBS"
+
+  AC_CHECK_LIB(proxy, px_proxy_factory_new)
+
+  AC_CHECK_HEADERS(proxy.h,
+    curl_libproxy_msg="enabled"
+    LIBPROXY_ENABLED=1
+  )
+
+  if test X"$OPT_LIBPROXY" != Xoff &&
+     test "$LIBPROXY_ENABLED" != "1"; then
+    AC_MSG_ERROR([libproxy libs and/or directories were not found where specified!])
+  fi
+
+  if test "$LIBPROXY_ENABLED" = "1"; then
+    if test -n "$DIR_LIBPROXY"; then
+       dnl when the libproxy shared libs were found in a path that the run-time
+       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl to prevent further configure tests to fail due to this
+
+       if test "x$cross_compiling" != "xyes"; then
+         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_LIBPROXY"
+         export LD_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $DIR_LIBPROXY to LD_LIBRARY_PATH])
+       fi
+    fi
+  else
+    dnl no libproxy; revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
@@ -4479,6 +4563,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
   ECH:              ${curl_ech_msg}
+  libproxy support: ${curl_libproxy_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])

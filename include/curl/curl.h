@@ -2143,6 +2143,9 @@ typedef enum {
   /* set the SSH host key callback custom pointer */
   CURLOPT(CURLOPT_SSH_HOSTKEYDATA, CURLOPTTYPE_CBPOINT, 317),
 
+  /* Use libproxy to determine which proxy to use */
+  CURLOPT(CURLOPT_LIBPROXY, CURLOPTTYPE_LONG, 318),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

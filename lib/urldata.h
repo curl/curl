@@ -162,6 +162,10 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #include <libssh2_sftp.h>
 #endif /* HAVE_LIBSSH2_H */
 
+#ifdef ENABLE_LIBPROXY
+#include "curl_libproxy.h"
+#endif
+
 #define READBUFFER_SIZE CURL_MAX_WRITE_SIZE
 #define READBUFFER_MAX  CURL_MAX_READ_SIZE
 #define READBUFFER_MIN  1024
@@ -1896,6 +1900,7 @@ struct UserDefined {
   BIT(path_as_is);     /* allow dotdots? */
   BIT(pipewait);       /* wait for multiplex status before starting a new
                           connection */
+  BIT(libproxy);       /* use libproxy to discover proxies */
   BIT(suppress_connect_headers); /* suppress proxy CONNECT response headers
                                     from user callbacks */
   BIT(dns_shuffle_addresses); /* whether to shuffle addresses before use */

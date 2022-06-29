@@ -1027,3 +1027,5 @@ ${SIZEOF_TIME_T_CODE}
 
 /* to make the compiler know the prototypes of Windows IDN APIs */
 #cmakedefine WANT_IDN_PROTOTYPES 1
+
+#cmakedefine ENABLE_LIBPROXY 1

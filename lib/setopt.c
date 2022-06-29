@@ -3032,6 +3032,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_PREREQDATA:
     data->set.prereq_userp = va_arg(param, void *);
     break;
+ case CURLOPT_LIBPROXY:
+#ifdef ENABLE_LIBPROXY
+    data->set.libproxy = (0 != va_arg(param, long))?TRUE:FALSE;
+#else
+    result = CURLE_NOT_BUILT_IN;
+#endif
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

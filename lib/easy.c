@@ -194,6 +194,10 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
+#ifdef ENABLE_LIBPROXY
+  Curl_libproxy_global_init();
+#endif
+
 #ifdef USE_WOLFSSH
   if(WS_SUCCESS != wolfSSH_Init()) {
     DEBUGF(fprintf(stderr, "Error: wolfSSH_Init failed\n"));
@@ -308,6 +312,10 @@ void curl_global_cleanup(void)
 #endif
 #ifdef DEBUGBUILD
   free(leakpointer);
+#endif
+
+#ifdef ENABLE_LIBPROXY
+  Curl_libproxy_global_cleanup();
 #endif
 
   init_flags  = 0;
