@@ -349,6 +349,7 @@ struct digestdata {
   char *opaque;
   char *qop;
   char *algorithm;
+  char *h_a1; /* H(A1) for "<algo>-sess" protocols */
   int nc; /* nonce count */
   unsigned char algo;
   BIT(stale); /* set true for re-negotiation */

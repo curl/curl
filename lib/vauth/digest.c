@@ -722,35 +722,49 @@ static CURLcode auth_create_digest_http_message(
     convert_to_ascii(hashbuf, (unsigned char *)userh);
   }
 
-  /*
-    If the algorithm is "MD5" or unspecified (which then defaults to MD5):
+  if((digest->algo & SESSION_ALGO) &&
+     (digest->h_a1)) {
+    /*
+       <algo>-sess protocol, the "session key" must be calculated with
+       the first nonce and cnonce and then re-used until new challenge received
+    */
+    strcpy((char *) ha1, digest->h_a1);
+  }
+  else {
+    /*
+      If the algorithm is not "-sess" :
 
-      A1 = unq(username-value) ":" unq(realm-value) ":" passwd
+        A1 = unq(username-value) ":" unq(realm-value) ":" passwd
 
-    If the algorithm is "MD5-sess" then:
+      If the algorithm is "<algo>-sess" then:
 
-      A1 = H(unq(username-value) ":" unq(realm-value) ":" passwd) ":"
-           unq(nonce-value) ":" unq(cnonce-value)
-  */
+        A1 = H(unq(username-value) ":" unq(realm-value) ":" passwd) ":"
+             unq(nonce-value) ":" unq(cnonce-value)
+    */
 
-  hashthis = aprintf("%s:%s:%s", userp, digest->realm ? digest->realm : "",
-                     passwdp);
-  if(!hashthis)
-    return CURLE_OUT_OF_MEMORY;
-
-  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
-  free(hashthis);
-  convert_to_ascii(hashbuf, ha1);
-
-  if(digest->algo & SESSION_ALGO) {
-    /* nonce and cnonce are OUTSIDE the hash */
-    tmp = aprintf("%s:%s:%s", ha1, digest->nonce, digest->cnonce);
-    if(!tmp)
+    hashthis = aprintf("%s:%s:%s", userp, digest->realm ? digest->realm : "",
+                       passwdp);
+    if(!hashthis)
       return CURLE_OUT_OF_MEMORY;
 
-    hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
-    free(tmp);
+    hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+    free(hashthis);
     convert_to_ascii(hashbuf, ha1);
+
+    if(digest->algo & SESSION_ALGO) {
+      /* nonce and cnonce are OUTSIDE the hash */
+      tmp = aprintf("%s:%s:%s", ha1, digest->nonce, digest->cnonce);
+      if(!tmp)
+        return CURLE_OUT_OF_MEMORY;
+
+      hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
+      free(tmp);
+      convert_to_ascii(hashbuf, ha1);
+      /* Store H(A1) to re-use during the session */
+      digest->h_a1 = strdup((char *) ha1);
+      if(!digest->h_a1)
+        return CURLE_OUT_OF_MEMORY;
+    }
   }
 
   /*
@@ -983,6 +997,7 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
   Curl_safefree(digest->opaque);
   Curl_safefree(digest->qop);
   Curl_safefree(digest->algorithm);
+  Curl_safefree(digest->h_a1);
 
   digest->nc = 0;
   digest->algo = ALGO_MD5; /* default algorithm */
