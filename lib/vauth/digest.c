@@ -637,6 +637,10 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   if(!digest->nonce)
     return CURLE_BAD_CONTENT_ENCODING;
 
+  /* "<algo>-sess" protocol versions require "auth" or "auth-int" qop */
+  if(!digest->qop && (digest->algo & SESSION_ALGO))
+    return CURLE_BAD_CONTENT_ENCODING;
+
   return CURLE_OK;
 }
 
