@@ -72,6 +72,7 @@
 #include "url.h"
 #include "getinfo.h"
 #include "vtls/vtls.h"
+#include "vauth/vauth.h"
 #include "select.h"
 #include "multiif.h"
 #include "connect.h"
@@ -1487,12 +1488,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     Curl_pgrsResetTransferSizes(data);
     Curl_pgrsStartNow(data);
 
-    /* In case the handle is re-used and an authentication method was picked
-       in the session we need to make sure we only use the one(s) we now
-       consider to be fine */
-    data->state.authhost.picked &= data->state.authhost.want;
-    data->state.authproxy.picked &= data->state.authproxy.want;
-
 #ifndef CURL_DISABLE_FTP
     data->state.wildcardmatch = data->set.wildcard_enabled;
     if(data->state.wildcardmatch) {
@@ -1506,6 +1501,156 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 #endif
     Curl_http2_init_state(&data->state);
     result = Curl_hsts_loadcb(data, data->hsts);
+
+    data->state.authhost.avail = CURLAUTH_NONE;
+    if(data->state.authhost.picked) {
+      bool reset_auth = FALSE;
+      bool reset_digest = FALSE;
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+      bool digest_cleared = FALSE;
+#endif
+      if((data->state.authhost.picked & data->state.authhost.want) == 0) {
+        /* Different auth type */
+        if(data->state.authhost.done) {
+          reset_auth = TRUE;
+          data->state.authhost.done = FALSE;
+        }
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+        if(data->state.authhost.picked == CURLAUTH_DIGEST) {
+          reset_digest = TRUE;
+          Curl_auth_digest_cleanup(&data->state.digest);
+          digest_cleared = TRUE;
+        }
+#endif
+        if(reset_auth || reset_digest) {
+          infof(data, "Reset auth %s%s%s due to new auth type",
+                reset_auth ? "state" : "",
+                (reset_auth && reset_digest) ? " and " : "",
+                reset_digest ? "Digest" : "");
+
+        }
+      }
+
+      if(((data->set.str[STRING_USERNAME] ||
+           data->state.aptr.user) &&
+          (!data->set.str[STRING_USERNAME] || !data->state.aptr.user ||
+           strcmp(data->set.str[STRING_USERNAME],
+                  data->state.aptr.user) != 0)) ||
+         ((data->set.str[STRING_PASSWORD] ||
+           data->state.aptr.passwd) &&
+          (!data->set.str[STRING_PASSWORD] || !data->state.aptr.passwd ||
+           strcmp(data->set.str[STRING_PASSWORD],
+                  data->state.aptr.passwd) != 0))) {
+        reset_auth = FALSE;
+        reset_digest = FALSE;
+        /* Different username or password, reset auth */
+        if(data->state.authhost.done) {
+          reset_auth = TRUE;
+          data->state.authhost.done = FALSE;
+        }
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+        if(!digest_cleared &&
+           data->state.authhost.picked == CURLAUTH_DIGEST) {
+          reset_digest = TRUE;
+          Curl_auth_digest_cleanup(&data->state.digest);
+        }
+#endif
+        if(reset_auth || reset_digest) {
+          infof(data, "Reset auth %s%s%s due to new user/password",
+                reset_auth ? "state" : "",
+                (reset_auth && reset_digest) ? " and " : "",
+                reset_digest ? "Digest" : "");
+        }
+      }
+    }
+    else
+      data->state.authhost.done = FALSE;
+
+#ifndef CURL_DISABLE_PROXY
+    data->state.authproxy.avail = CURLAUTH_NONE;
+    if(data->state.authproxy.picked) {
+      bool reset_auth = FALSE;
+      bool reset_digest = FALSE;
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+      bool digest_cleared = FALSE;
+#endif
+      if((data->state.authproxy.picked & data->state.authproxy.want) == 0) {
+        /* Different auth type */
+        if(data->state.authproxy.done) {
+          reset_auth = TRUE;
+          data->state.authproxy.done = FALSE;
+        }
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+        if(data->state.authproxy.picked == CURLAUTH_DIGEST) {
+          reset_digest = TRUE;
+          digest_cleared = TRUE;
+          Curl_auth_digest_cleanup(&data->state.proxydigest);
+        }
+#endif
+        if(reset_auth || reset_digest) {
+          infof(data, "Reset proxy auth %s%s%s due to new auth type",
+                reset_auth ? "state" : "",
+                (reset_auth && reset_digest) ? " and " : "",
+                reset_digest ? "Digest" : "");
+
+        }
+      }
+
+      if(((data->set.str[STRING_PROXYUSERNAME] ||
+           data->state.aptr.proxyuser) &&
+          (!data->set.str[STRING_PROXYUSERNAME] ||
+           !data->state.aptr.proxyuser ||
+           strcmp(data->set.str[STRING_PROXYUSERNAME],
+                  data->state.aptr.proxyuser) != 0)) ||
+         ((data->set.str[STRING_PROXYPASSWORD] ||
+           data->state.aptr.proxypasswd) &&
+          (!data->set.str[STRING_PROXYPASSWORD] ||
+           !data->state.aptr.proxypasswd ||
+           strcmp(data->set.str[STRING_PROXYPASSWORD],
+                      data->state.aptr.proxypasswd) != 0))) {
+        reset_auth = FALSE;
+        reset_digest = FALSE;
+        if(data->state.authproxy.done) {
+          reset_auth = TRUE;
+          data->state.authproxy.done = FALSE;
+        }
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+        if(!digest_cleared &&
+           data->state.authproxy.picked == CURLAUTH_DIGEST) {
+          reset_digest = TRUE;
+          Curl_auth_digest_cleanup(&data->state.proxydigest);
+        }
+#endif
+        if(reset_auth || reset_digest) {
+          infof(data, "Reset proxy auth %s%s%s due to new user/password",
+                reset_auth ? "state" : "",
+                (reset_auth && reset_digest) ? " and " : "",
+                reset_digest ? "Digest" : "");
+        }
+      }
+    }
+    else
+      data->state.authproxy.done = FALSE;
+#endif
+
+    /* In case the handle is re-used and an authentication method was picked
+       in the session we need to make sure we only use the one(s) we now
+       consider to be fine */
+    data->state.authhost.picked &= data->state.authhost.want;
+    data->state.authproxy.picked &= data->state.authproxy.want;
+
+    if(!result)
+      result = Curl_setstropt(&data->state.aptr.user,
+                              data->set.str[STRING_USERNAME]);
+    if(!result)
+      result = Curl_setstropt(&data->state.aptr.passwd,
+                              data->set.str[STRING_PASSWORD]);
+    if(!result)
+      result = Curl_setstropt(&data->state.aptr.proxyuser,
+                              data->set.str[STRING_PROXYUSERNAME]);
+    if(!result)
+      result = Curl_setstropt(&data->state.aptr.proxypasswd,
+                              data->set.str[STRING_PROXYPASSWORD]);
   }
 
   /*
@@ -1520,19 +1665,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     if(!data->state.aptr.uagent)
       return CURLE_OUT_OF_MEMORY;
   }
-
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.user,
-                            data->set.str[STRING_USERNAME]);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.passwd,
-                            data->set.str[STRING_PASSWORD]);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxyuser,
-                            data->set.str[STRING_PROXYUSERNAME]);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxypasswd,
-                            data->set.str[STRING_PROXYPASSWORD]);
 
   data->req.headerbytecount = 0;
   Curl_headers_cleanup(data);

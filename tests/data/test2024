@@ -60,6 +60,18 @@ This is a bad password page!
 </data1400>
 
 <!-- Fifth request has Digest auth, right password -->
+<data500>
+HTTP/1.1 401 Sorry wrong password (4)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="4"
+
+This is a bad password page!
+</data500>
+
+<!-- Sixth request has Digest auth, right password -->
 <data1500>
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
@@ -100,6 +112,13 @@ WWW-Authenticate: Digest realm="testrealm", nonce="3"
 WWW-Authenticate: Basic realm="testrealm"
 
 This is a bad password page!
+HTTP/1.1 401 Sorry wrong password (4)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="4"
+
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -165,7 +184,11 @@ Accept: */*
 
 GET /%TESTNUMBER0500 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="3", uri="/%TESTNUMBER0500", response="5bc77ec8c2d443b27a1b55f1fd8fbb13"
+Accept: */*
+
+GET /%TESTNUMBER0500 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="4", uri="/%TESTNUMBER0500", response="04718a72eb7c0cf5217cb8d9d60360c2"
 Accept: */*
 
 </protocol>
