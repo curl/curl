@@ -697,7 +697,7 @@ static CURLcode auth_create_digest_http_message(
   if(!digest->nc)
     digest->nc = 1;
 
-  if(!digest->cnonce && digest->qop) {
+  if(digest->qop) {
     char cnoncebuf[33];
     result = Curl_rand_hex(data, (unsigned char *)cnoncebuf,
                            sizeof(cnoncebuf));
@@ -708,14 +708,14 @@ static CURLcode auth_create_digest_http_message(
                                 &cnonce, &cnonce_sz);
     if(result)
       return result;
-
-    digest->cnonce = cnonce;
   }
 
   if(digest->userhash) {
     hashthis = aprintf("%s:%s", userp, digest->realm ? digest->realm : "");
-    if(!hashthis)
+    if(!hashthis) {
+      free(cnonce);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
     free(hashthis);
@@ -744,8 +744,10 @@ static CURLcode auth_create_digest_http_message(
 
     hashthis = aprintf("%s:%s:%s", userp, digest->realm ? digest->realm : "",
                        passwdp);
-    if(!hashthis)
+    if(!hashthis) {
+      free(cnonce);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
     free(hashthis);
@@ -753,17 +755,21 @@ static CURLcode auth_create_digest_http_message(
 
     if(digest->algo & SESSION_ALGO) {
       /* nonce and cnonce are OUTSIDE the hash */
-      tmp = aprintf("%s:%s:%s", ha1, digest->nonce, digest->cnonce);
-      if(!tmp)
+      tmp = aprintf("%s:%s:%s", ha1, digest->nonce, cnonce);
+      if(!tmp) {
+        free(cnonce);
         return CURLE_OUT_OF_MEMORY;
+      }
 
       hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
       free(tmp);
       convert_to_ascii(hashbuf, ha1);
       /* Store H(A1) to re-use during the session */
       digest->h_a1 = strdup((char *) ha1);
-      if(!digest->h_a1)
+      if(!digest->h_a1) {
+        free(cnonce);
         return CURLE_OUT_OF_MEMORY;
+      }
     }
   }
 
@@ -781,8 +787,10 @@ static CURLcode auth_create_digest_http_message(
   */
 
   hashthis = aprintf("%s:%s", request, uripath);
-  if(!hashthis)
+  if(!hashthis) {
+    free(cnonce);
     return CURLE_OUT_OF_MEMORY;
+  }
 
   if(digest->qop && strcasecompare(digest->qop, "auth-int")) {
     /* We don't support auth-int for PUT or POST */
@@ -797,8 +805,10 @@ static CURLcode auth_create_digest_http_message(
     hashthis = hashthis2;
   }
 
-  if(!hashthis)
+  if(!hashthis) {
+    free(cnonce);
     return CURLE_OUT_OF_MEMORY;
+  }
 
   hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
@@ -806,14 +816,16 @@ static CURLcode auth_create_digest_http_message(
 
   if(digest->qop) {
     hashthis = aprintf("%s:%s:%08x:%s:%s:%s", ha1, digest->nonce, digest->nc,
-                       digest->cnonce, digest->qop, ha2);
+                       cnonce, digest->qop, ha2);
   }
   else {
     hashthis = aprintf("%s:%s:%s", ha1, digest->nonce, ha2);
   }
 
-  if(!hashthis)
+  if(!hashthis) {
+    free(cnonce);
     return CURLE_OUT_OF_MEMORY;
+  }
 
   hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
@@ -833,8 +845,10 @@ static CURLcode auth_create_digest_http_message(
      characters.
   */
   userp_quoted = auth_digest_string_quoted(digest->userhash ? userh : userp);
-  if(!userp_quoted)
+  if(!userp_quoted) {
+    free(cnonce);
     return CURLE_OUT_OF_MEMORY;
+  }
   if(digest->realm)
     realm_quoted = auth_digest_string_quoted(digest->realm);
   else {
@@ -843,11 +857,13 @@ static CURLcode auth_create_digest_http_message(
       realm_quoted[0] = 0;
   }
   if(!realm_quoted) {
+    free(cnonce);
     free(userp_quoted);
     return CURLE_OUT_OF_MEMORY;
   }
   nonce_quoted = auth_digest_string_quoted(digest->nonce);
   if(!nonce_quoted) {
+    free(cnonce);
     free(realm_quoted);
     free(userp_quoted);
     return CURLE_OUT_OF_MEMORY;
@@ -866,10 +882,12 @@ static CURLcode auth_create_digest_http_message(
                        realm_quoted,
                        nonce_quoted,
                        uripath,
-                       digest->cnonce,
+                       cnonce,
                        digest->nc,
                        digest->qop,
                        request_digest);
+
+    free(cnonce);
 
     /* Increment nonce-count to use another nc value for the next request */
     digest->nc++;
@@ -992,7 +1010,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 void Curl_auth_digest_cleanup(struct digestdata *digest)
 {
   Curl_safefree(digest->nonce);
-  Curl_safefree(digest->cnonce);
   Curl_safefree(digest->realm);
   Curl_safefree(digest->opaque);
   Curl_safefree(digest->qop);

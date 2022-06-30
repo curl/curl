@@ -344,7 +344,6 @@ struct digestdata {
   char *passwd;
 #else
   char *nonce;
-  char *cnonce;
   char *realm;
   char *opaque;
   char *qop;
