@@ -697,7 +697,7 @@ static CURLcode auth_create_digest_http_message(
   if(!digest->nc)
     digest->nc = 1;
 
-  if(!digest->cnonce) {
+  if(!digest->cnonce && digest->qop) {
     char cnoncebuf[33];
     result = Curl_rand_hex(data, (unsigned char *)cnoncebuf,
                            sizeof(cnoncebuf));
