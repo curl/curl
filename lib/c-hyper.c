@@ -692,9 +692,18 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     data->state.hresult = result;
     return HYPER_POLL_ERROR;
   }
-  if(!fillcount)
-    /* done! */
-    *chunk = NULL;
+  if(!fillcount) {
+    if((data->req.keepon & KEEP_SEND_PAUSE) != KEEP_SEND_PAUSE)
+      /* done! */
+      *chunk = NULL;
+    else {
+      /* paused, save a waker */
+      if(data->hyp.send_body_waker)
+        hyper_waker_free(data->hyp.send_body_waker);
+      data->hyp.send_body_waker = hyper_context_waker(ctx);
+      return HYPER_POLL_PENDING;
+    }
+  }
   else {
     hyper_buf *copy = hyper_buf_copy((uint8_t *)data->state.ulbuf, fillcount);
     if(copy)

@@ -1132,6 +1132,16 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     }
   }
 
+#ifdef USE_HYPER
+  if(!(newstate & KEEP_SEND_PAUSE)) {
+    /* need to wake the send body waker */
+    if(data->hyp.send_body_waker) {
+      hyper_waker_wake(data->hyp.send_body_waker);
+      data->hyp.send_body_waker = NULL;
+    }
+  }
+#endif
+
   /* if there's no error and we're not pausing both directions, we want
      to have this handle checked soon */
   if((newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
