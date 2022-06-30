@@ -29,7 +29,7 @@
 # When removing dupes that aren't identical names from THANKS, add a line
 # here!
 #
-# Used-by: contributor.sh
+# Used-by: contributors.sh
 s/Andres Garcia/Andrés García/
 s/Chris Conroy/Christopher Conroy/
 s/Francois Charlier/François Charlier/
@@ -130,3 +130,5 @@ s/jonrumsey on github/Jon Rumsey/
 s/Travis Burtrum on github//
 s/i-ky on github/Gleb Ivanovsky/
 s/ *via curl-library *//
+s/Evgeny Grin$/Evgeny Grin (Karlson2k)/
+s/Karlson2k on github/Evgeny Grin (Karlson2k)/
