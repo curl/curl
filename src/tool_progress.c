@@ -268,6 +268,8 @@ bool progress_meter(struct GlobalConfig *global,
         dl = all_dlnow;
         ul = all_ulnow;
       }
+      if(!deltams) /* no division by zero please */
+        deltams++;
       dls = (curl_off_t)((double)dl / ((double)deltams/1000.0));
       uls = (curl_off_t)((double)ul / ((double)deltams/1000.0));
       speed = dls > uls ? dls : uls;
