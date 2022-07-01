@@ -28,6 +28,19 @@
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
 
+#ifdef __MINGW32__
+#ifndef __MINGW64_VERSION_MAJOR
+#if (__MINGW32_MAJOR_VERSION < 5) || \
+    (__MINGW32_MAJOR_VERSION == 5 && __MINGW32_MINOR_VERSION == 0)
+/* mingw >= 5.0.1 defines SRWLOCK, and slightly different from MS define */
+typedef PVOID SRWLOCK, *PSRWLOCK;
+#endif
+#endif
+#ifndef SRWLOCK_INIT
+#define SRWLOCK_INIT NULL
+#endif
+#endif /* __MINGW32__ */
+
 #define curl_simple_lock SRWLOCK
 #define CURL_SIMPLE_LOCK_INIT SRWLOCK_INIT
 
