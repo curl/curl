@@ -31,15 +31,6 @@
 #define DIGEST_MAX_VALUE_LENGTH           256
 #define DIGEST_MAX_CONTENT_LENGTH         1024
 
-enum {
-  CURLDIGESTALGO_MD5,
-  CURLDIGESTALGO_MD5SESS,
-  CURLDIGESTALGO_SHA256,
-  CURLDIGESTALGO_SHA256SESS,
-  CURLDIGESTALGO_SHA512_256,
-  CURLDIGESTALGO_SHA512_256SESS
-};
-
 /* This is used to extract the realm from a challenge message */
 bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
                                const char **endptr);
