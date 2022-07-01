@@ -945,28 +945,18 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               struct digestdata *digest,
                                               char **outptr, size_t *outlen)
 {
-  switch(digest->algo) {
-  case ALGO_MD5:
-  case ALGO_MD5SESS:
+  if(digest->algo <= ALGO_MD5SESS)
     return auth_create_digest_http_message(data, userp, passwdp,
                                            request, uripath, digest,
                                            outptr, outlen,
                                            auth_digest_md5_to_ascii,
                                            Curl_md5it);
-
-  case ALGO_SHA256:
-  case ALGO_SHA256SESS:
-  case ALGO_SHA512_256:
-  case ALGO_SHA512_256SESS:
-    return auth_create_digest_http_message(data, userp, passwdp,
-                                           request, uripath, digest,
-                                           outptr, outlen,
-                                           auth_digest_sha256_to_ascii,
-                                           Curl_sha256it);
-
-  default:
-    return CURLE_UNSUPPORTED_PROTOCOL;
-  }
+  DEBUGASSERT(digest->algo <= ALGO_SHA512_256SESS);
+  return auth_create_digest_http_message(data, userp, passwdp,
+                                         request, uripath, digest,
+                                         outptr, outlen,
+                                         auth_digest_sha256_to_ascii,
+                                         Curl_sha256it);
 }
 
 /*

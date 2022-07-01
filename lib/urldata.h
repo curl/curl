@@ -318,11 +318,11 @@ struct digestdata {
   char *nonce;
   char *cnonce;
   char *realm;
-  int algo;
   char *opaque;
   char *qop;
   char *algorithm;
   int nc; /* nonce count */
+  unsigned char algo;
   BIT(stale); /* set true for re-negotiation */
   BIT(userhash);
 #endif
