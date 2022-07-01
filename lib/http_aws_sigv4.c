@@ -29,8 +29,6 @@
 #include "urldata.h"
 #include "strcase.h"
 #include "strdup.h"
-#include "vauth/vauth.h"
-#include "vauth/digest.h"
 #include "http_aws_sigv4.h"
 #include "curl_sha256.h"
 #include "transfer.h"
