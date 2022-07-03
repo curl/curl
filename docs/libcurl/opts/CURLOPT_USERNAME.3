@@ -39,24 +39,29 @@ user name to use for the transfer.
 authentication. You should not use this option together with the (older)
 \fICURLOPT_USERPWD(3)\fP option.
 
-When using Kerberos V5 authentication with a Windows based server, you should
-include the domain name in order for the server to successfully obtain a
-Kerberos Ticket. If you do not then the initial part of the authentication
+To specify the password and login options, along with the user name, use the
+\fICURLOPT_PASSWORD(3)\fP and \fICURLOPT_LOGIN_OPTIONS(3)\fP options.
+
+When using Kerberos V5 with a Windows based server you should include the
+Windows domain name in the user name, in order for the server to successfully
+obtain a Kerberos Ticket. If you do not, then the initial authentication
 handshake may fail.
 
-When using NTLM, the user name can be specified simply as the user name
-without the domain name should the server be part of a single domain and
-forest.
+When using NTLM, the user name can be specified simply as the user name,
+without the domain, if there is a single domain and forest in your setup
+for example.
 
-To include the domain name use either Down-Level Logon Name or UPN (User
+To specify the domain name use either Down-Level Logon Name or UPN (User
 Principal Name) formats. For example, EXAMPLE\\user and user@example.com
 respectively.
 
 Some HTTP servers (on Windows) support inclusion of the domain for Basic
 authentication as well.
 
-To specify the password and login options, along with the user name, use the
-\fICURLOPT_PASSWORD(3)\fP and \fICURLOPT_LOGIN_OPTIONS(3)\fP options.
+If you use a Windows SSPI-enabled libcurl binary and perform Kerberos V5,
+Negotiate, NTLM or Digest authentication then you can tell libcurl to select
+the user name from your environment by specifying an empty string with this
+option: "".
 
 The application does not have to keep the string around after setting this
 option.

@@ -11,9 +11,23 @@ See-also: proxy-pass
 ---
 Specify the user name and password to use for proxy authentication.
 
-If you use a Windows SSPI-enabled curl binary and do either Negotiate or NTLM
-authentication then you can tell curl to select the user name and password
-from your environment by specifying a single colon with this option: "-U :".
+When using Kerberos V5 with a Windows based server you should include the
+Windows domain name in the user name, in order for the server to successfully
+obtain a Kerberos Ticket. If you do not, then the initial authentication
+handshake may fail.
+
+When using NTLM, the user name can be specified simply as the user name,
+without the domain, if there is a single domain and forest in your setup
+for example.
+
+To specify the domain name use either Down-Level Logon Name or UPN (User
+Principal Name) formats. For example, EXAMPLE\\user and user@example.com
+respectively.
+
+If you use a Windows SSPI-enabled curl binary and perform Kerberos V5,
+Negotiate, NTLM or Digest authentication then you can tell curl to select
+the user name and password from your environment by specifying a single colon
+with this option: "-U :".
 
 On systems where it works, curl will hide the given option argument from
 process listings. This is not enough to protect credentials from possibly

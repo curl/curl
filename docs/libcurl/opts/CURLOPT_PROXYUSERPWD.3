@@ -40,6 +40,27 @@ used - beware.)
 
 Use \fICURLOPT_PROXYAUTH(3)\fP to specify the authentication method.
 
+When using Kerberos V5 with a Windows based server you should include the
+Windows domain name in the user name, in order for the server to successfully
+obtain a Kerberos Ticket. If you do not, then the initial authentication
+handshake may fail.
+
+When using NTLM, the user name can be specified simply as the user name,
+without the domain, if there is a single domain and forest in your setup
+for example.
+
+To specify the domain name use either Down-Level Logon Name or UPN (User
+Principal Name) formats. For example, EXAMPLE\\user and user@example.com
+respectively.
+
+Some HTTP servers (on Windows) support inclusion of the domain for Basic
+authentication as well.
+
+If you use a Windows SSPI-enabled libcurl binary and perform Kerberos V5,
+Negotiate, NTLM or Digest authentication then you can tell libcurl to select
+the user name and password from your environment by specifying a single colon
+with this option: ":".
+
 The application does not have to keep the string around after setting this
 option.
 .SH DEFAULT
