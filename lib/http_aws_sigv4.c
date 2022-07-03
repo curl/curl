@@ -66,6 +66,38 @@ static void sha256_to_hex(char *dst, unsigned char *sha, size_t dst_l)
   }
 }
 
+static char *aws_canonical_value(const char *hdr)
+{
+  /*
+   * per AWS:
+   *   CanonicalHeadersEntry =
+   *     Lowercase(HeaderName) + ':' + Trimall(HeaderValue)  + '\n'
+   *   The Trimall function removes excess white space before and
+   *   after values, and converts sequential spaces to a single space.
+   * Curl_copy_header_value() handles the first part; we do the rest
+   */
+
+  char *v;
+  char *r;
+  char *w;
+
+  r = w = v = Curl_copy_header_value(hdr)
+  if(!v) {
+    return NULL;
+  }
+
+  while(*r) {
+    if(w != r) {
+      *w++ = *r++;
+    }
+    while(*r == ' ') {
+      ++r;
+    }
+  }
+  *w = '\0';
+  return v;
+}
+
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 {
   CURLcode ret = CURLE_OUT_OF_MEMORY;
@@ -79,7 +111,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *provider1_mid = NULL;
   char *region = NULL;
   char *service = NULL;
-  const char *hostname = conn->host.name;
+  /* we need the *actual* Host header value */
+  const char *hostname = data->aptr.host;
 #ifdef DEBUGBUILD
   char *force_timestamp;
 #endif
@@ -87,7 +120,9 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   struct tm tm;
   char timestamp[17];
   char date[9];
+  char *canonical_host = NULL;
   const char *content_type = Curl_checkheaders(data, STRCONST("Content-Type"));
+  char *canonical_ctype = NULL;
   char *canonical_headers = NULL;
   char *signed_headers = NULL;
   Curl_HttpReq httpreq;
@@ -231,6 +266,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     }
   }
 
+  canonical_host = Curl_copy_header_value(hostname);
+  if(!canonical_host) {
+    goto fail;
+  }
+
 #ifdef DEBUGBUILD
   force_timestamp = getenv("CURL_FORCETIME");
   if(force_timestamp)
@@ -251,20 +291,16 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   date[sizeof(date) - 1] = 0;
 
   if(content_type) {
-    content_type = strchr(content_type, ':');
-    if(!content_type) {
+    canonical_ctype = aws_canonical_value(content_type);
+    if(!canonical_ctype) {
       ret = CURLE_FAILED_INIT;
       goto fail;
     }
-    content_type++;
-    /* Skip whitespace now */
-    while(*content_type == ' ' || *content_type == '\t')
-      ++content_type;
 
     canonical_headers = curl_maprintf("content-type:%s\n"
                                       "host:%s\n"
                                       "x-%s-date:%s\n",
-                                      content_type,
+                                      canonical_ctype,
                                       hostname,
                                       provider1_low, timestamp);
     signed_headers = curl_maprintf("content-type;host;x-%s-date",
@@ -392,6 +428,8 @@ fail:
   free(provider1_mid);
   free(region);
   free(service);
+  free(canonical_host);
+  free(canonical_ctype);
   free(canonical_headers);
   free(signed_headers);
   free(canonical_request);
