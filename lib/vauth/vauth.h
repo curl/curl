@@ -111,6 +111,9 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               struct digestdata *digest,
                                               char **outptr, size_t *outlen);
 
+/* Check whether server provided nonce has been used at least one time */
+bool Curl_auth_digest_nonce_used(const struct digestdata *digest);
+
 /* This is used to clean up the digest specific data */
 void Curl_auth_digest_cleanup(struct digestdata *digest);
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */

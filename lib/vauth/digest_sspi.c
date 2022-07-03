@@ -600,6 +600,21 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 }
 
 /*
+ * Curl_auth_digest_nonce_used()
+ *
+ * Check whether server provided nonce has been used at least one time
+ *
+ * Parameters:
+ *
+ * digest    [in] - The digest data struct being cleaned up.
+ *
+ */
+bool Curl_auth_digest_nonce_used(const struct digestdata *digest)
+{
+  return digest->http_context != NULL;
+}
+
+/*
  * Curl_auth_digest_cleanup()
  *
  * This is used to clean up the digest specific data.
