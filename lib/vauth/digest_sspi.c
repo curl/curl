@@ -427,20 +427,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  /* If the user/passwd that was used to make the identity for http_context
-     has changed then delete that context. */
-  if((userp && !digest->user) || (!userp && digest->user) ||
-     (passwdp && !digest->passwd) || (!passwdp && digest->passwd) ||
-     (userp && digest->user && strcmp(userp, digest->user)) ||
-     (passwdp && digest->passwd && strcmp(passwdp, digest->passwd))) {
-    if(digest->http_context) {
-      s_pSecFn->DeleteSecurityContext(digest->http_context);
-      Curl_safefree(digest->http_context);
-    }
-    Curl_safefree(digest->user);
-    Curl_safefree(digest->passwd);
-  }
-
   if(digest->http_context) {
     chlg_desc.ulVersion    = SECBUFFER_VERSION;
     chlg_desc.cBuffers     = 5;
