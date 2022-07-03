@@ -310,8 +310,12 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   else
     pending_ms = 0;
   r = poll(ufds, nfds, pending_ms);
-  if(r <= 0)
+  if(r <= 0) {
+    if((r == -1) && (SOCKERRNO == EINTR))
+      /* make EINTR from select or poll not a "lethal" error */
+      r = 0;
     return r;
+  }
 
   for(i = 0; i < nfds; i++) {
     if(ufds[i].fd == CURL_SOCKET_BAD)
