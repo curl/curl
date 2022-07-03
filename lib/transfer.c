@@ -1506,9 +1506,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     if(data->state.authhost.picked) {
       bool reset_auth = FALSE;
       bool reset_digest = FALSE;
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-      bool digest_cleared = FALSE;
-#endif
       if((data->state.authhost.picked & data->state.authhost.want) == 0) {
         /* Different auth type */
         if(data->state.authhost.done) {
@@ -1516,10 +1513,10 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
           data->state.authhost.done = FALSE;
         }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-        if(data->state.authhost.picked == CURLAUTH_DIGEST) {
+        if(data->state.authhost.picked == CURLAUTH_DIGEST &&
+            Curl_auth_digest_nonce_used(&data->state.digest)) {
           reset_digest = TRUE;
           Curl_auth_digest_cleanup(&data->state.digest);
-          digest_cleared = TRUE;
         }
 #endif
         if(reset_auth || reset_digest) {
@@ -1549,8 +1546,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
           data->state.authhost.done = FALSE;
         }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-        if(!digest_cleared &&
-           data->state.authhost.picked == CURLAUTH_DIGEST) {
+        if(data->state.authhost.picked == CURLAUTH_DIGEST &&
+           Curl_auth_digest_nonce_used(&data->state.digest)) {
           reset_digest = TRUE;
           Curl_auth_digest_cleanup(&data->state.digest);
         }
@@ -1571,9 +1568,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     if(data->state.authproxy.picked) {
       bool reset_auth = FALSE;
       bool reset_digest = FALSE;
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-      bool digest_cleared = FALSE;
-#endif
       if((data->state.authproxy.picked & data->state.authproxy.want) == 0) {
         /* Different auth type */
         if(data->state.authproxy.done) {
@@ -1581,9 +1575,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
           data->state.authproxy.done = FALSE;
         }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-        if(data->state.authproxy.picked == CURLAUTH_DIGEST) {
+        if(data->state.authproxy.picked == CURLAUTH_DIGEST &&
+           Curl_auth_digest_nonce_used(&data->state.proxydigest)) {
           reset_digest = TRUE;
-          digest_cleared = TRUE;
           Curl_auth_digest_cleanup(&data->state.proxydigest);
         }
 #endif
@@ -1615,8 +1609,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
           data->state.authproxy.done = FALSE;
         }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-        if(!digest_cleared &&
-           data->state.authproxy.picked == CURLAUTH_DIGEST) {
+        if(data->state.authproxy.picked == CURLAUTH_DIGEST &&
+           Curl_auth_digest_nonce_used(&data->state.proxydigest)) {
           reset_digest = TRUE;
           Curl_auth_digest_cleanup(&data->state.proxydigest);
         }

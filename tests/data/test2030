@@ -188,13 +188,6 @@ WWW-Authenticate: NTLM
 WWW-Authenticate: Digest realm="testrealm", nonce="7"
 
 This is a bad password page!
-HTTP/1.1 401 Need Digest or NTLM auth (5)
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 27
-WWW-Authenticate: Digest realm="testrealm", nonce="8"
-WWW-Authenticate: NTLM
-
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -262,11 +255,7 @@ Accept: */*
 
 GET /%TESTNUMBER0500 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Accept: */*
-
-GET /%TESTNUMBER0500 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="8", uri="/%TESTNUMBER0500", response="1f7e94dc3e5fa115ccecced1cde5c163"
+Authorization: Digest username="testuser", realm="testrealm", nonce="7", uri="/%TESTNUMBER0500", response="198757e61163a779cf24ed4c49c1ad7d"
 Accept: */*
 
 </protocol>
