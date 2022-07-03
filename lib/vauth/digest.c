@@ -850,10 +850,8 @@ static CURLcode auth_create_digest_http_message(
                        digest->qop,
                        request_digest);
 
-    if(strcasecompare(digest->qop, "auth"))
-      digest->nc++; /* The nc (from RFC) has to be a 8 hex digit number 0
-                       padded which tells to the server how many times you are
-                       using the same nonce in the qop=auth mode */
+    /* Increment nonce-count to use another nc value for the next request */
+    digest->nc++;
   }
   else {
     response = aprintf("username=\"%s\", "
