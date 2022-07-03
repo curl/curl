@@ -81,7 +81,7 @@ static char *aws_canonical_value(const char *hdr)
   char *r;
   char *w;
 
-  r = w = v = Curl_copy_header_value(hdr)
+  r = w = v = Curl_copy_header_value(hdr);
   if(!v) {
     return NULL;
   }
@@ -112,7 +112,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *region = NULL;
   char *service = NULL;
   /* we need the *actual* Host header value */
-  const char *hostname = data->aptr.host;
+  const char *hostname = data->state.aptr.host;
 #ifdef DEBUGBUILD
   char *force_timestamp;
 #endif
