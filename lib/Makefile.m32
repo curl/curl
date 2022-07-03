@@ -115,7 +115,7 @@ LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL)
 AR = $(CURL_AR)
 RANLIB = $(CURL_RANLIB)
 RC = $(CROSSPREFIX)windres
-RCFLAGS = --include-dir=$(PROOT)/include -O coff
+RCFLAGS = --include-dir=$(PROOT)/include -O coff $(CURL_RCFLAG_EXTRAS)
 STRIP   = $(CROSSPREFIX)strip -g
 
 # Set environment var ARCH to your architecture to override autodetection.
@@ -127,6 +127,7 @@ ARCH = w32
 endif
 endif
 
+ifneq ($(ARCH),custom)
 ifeq ($(ARCH),w64)
 CFLAGS  += -m64
 LDFLAGS += -m64
@@ -135,6 +136,7 @@ else
 CFLAGS  += -m32
 LDFLAGS += -m32
 RCFLAGS += -F pe-i386
+endif
 endif
 
 # Platform-dependent helper tool macros
