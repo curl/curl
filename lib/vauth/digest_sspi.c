@@ -468,10 +468,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
     TCHAR *spn;
 
-    /* free the copy of user/passwd used to make the previous identity */
-    Curl_safefree(digest->user);
-    Curl_safefree(digest->passwd);
-
     if(userp && *userp) {
       /* Populate our identity structure */
       if(Curl_create_sspi_identity(userp, passwdp, &identity)) {
@@ -492,25 +488,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     else
       /* Use the current Windows user */
       p_identity = NULL;
-
-    if(userp) {
-      digest->user = strdup(userp);
-
-      if(!digest->user) {
-        free(output_token);
-        return CURLE_OUT_OF_MEMORY;
-      }
-    }
-
-    if(passwdp) {
-      digest->passwd = strdup(passwdp);
-
-      if(!digest->passwd) {
-        free(output_token);
-        Curl_safefree(digest->user);
-        return CURLE_OUT_OF_MEMORY;
-      }
-    }
 
     /* Acquire our credentials handle */
     status = s_pSecFn->AcquireCredentialsHandle(NULL,
@@ -645,10 +622,6 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
     s_pSecFn->DeleteSecurityContext(digest->http_context);
     Curl_safefree(digest->http_context);
   }
-
-  /* Free the copy of user/passwd used to make the identity for http_context */
-  Curl_safefree(digest->user);
-  Curl_safefree(digest->passwd);
 }
 
 #endif /* USE_WINDOWS_SSPI && !CURL_DISABLE_CRYPTO_AUTH */
