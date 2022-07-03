@@ -266,7 +266,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     }
   }
 
-  canonical_host = Curl_copy_header_value(hostname);
+  canonical_host = aws_canonical_value(hostname);
   if(!canonical_host) {
     goto fail;
   }
