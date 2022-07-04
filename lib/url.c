@@ -2128,7 +2128,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     unsigned long port = strtoul(data->state.up.port, NULL, 10);
     conn->port = conn->remote_port =
       (data->set.use_port && data->state.allow_port) ?
-      (int)data->set.use_port : curlx_ultous(port);
+      data->set.use_port : curlx_ultous(port);
   }
 
   (void)curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
@@ -2964,7 +2964,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
     /* if set, we use this instead of the port possibly given in the URL */
     char portbuf[16];
     CURLUcode uc;
-    conn->remote_port = (unsigned short)data->set.use_port;
+    conn->remote_port = data->set.use_port;
     msnprintf(portbuf, sizeof(portbuf), "%d", conn->remote_port);
     uc = curl_url_set(data->state.uh, CURLUPART_PORT, portbuf, 0);
     if(uc)

@@ -1649,7 +1649,7 @@ struct UserDefined {
   void *out;         /* CURLOPT_WRITEDATA */
   void *in_set;      /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
-  long use_port;     /* which port to use (when not using default) */
+  unsigned short use_port; /* which port to use (when not using default) */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
 #ifndef CURL_DISABLE_PROXY
