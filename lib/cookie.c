@@ -1436,7 +1436,7 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
 
             matches++;
             if(matches >= MAX_COOKIE_SEND_AMOUNT) {
-              infof(data, "Included max number of cookies (%u) in request!",
+              infof(data, "Included max number of cookies (%zu) in request!",
                     matches);
               break;
             }
