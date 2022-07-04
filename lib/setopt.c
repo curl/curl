@@ -393,7 +393,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     arg = va_arg(param, long);
     if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.server_response_timeout = arg * 1000;
+      data->set.server_response_timeout = (unsigned int)arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
@@ -1445,16 +1445,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     arg = va_arg(param, long);
     if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.timeout = arg * 1000;
+      data->set.timeout = (unsigned int)arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case CURLOPT_TIMEOUT_MS:
     arg = va_arg(param, long);
-    if(arg < 0)
+    if((arg < 0) || (arg > UINT_MAX))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.timeout = arg;
+    data->set.timeout = (unsigned int)arg;
     break;
 
   case CURLOPT_CONNECTTIMEOUT:
@@ -1463,16 +1463,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     arg = va_arg(param, long);
     if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.connecttimeout = arg * 1000;
+      data->set.connecttimeout = (unsigned int)arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case CURLOPT_CONNECTTIMEOUT_MS:
     arg = va_arg(param, long);
-    if(arg < 0)
+    if((arg < 0) || (arg > UINT_MAX))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.connecttimeout = arg;
+    data->set.connecttimeout = (unsigned int)arg;
     break;
 
 #ifndef CURL_DISABLE_FTP
@@ -3008,9 +3008,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
     arg = va_arg(param, long);
-    if(arg < 0)
+    if((arg < 0) || (arg > UINT_MAX))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.happy_eyeballs_timeout = arg;
+    data->set.happy_eyeballs_timeout = (unsigned int)arg;
     break;
 #ifndef CURL_DISABLE_SHUFFLE_DNS
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
