@@ -899,7 +899,7 @@ char *Curl_ssl_snihost(struct Curl_easy *data, const char *host, size_t *olen)
   size_t len = strlen(host);
   if(len && (host[len-1] == '.'))
     len--;
-  if((long)len >= data->set.buffer_size)
+  if(len >= data->set.buffer_size)
     return NULL;
 
   Curl_strntolower(data->state.buffer, host, len);

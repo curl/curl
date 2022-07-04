@@ -1744,7 +1744,7 @@ struct UserDefined {
 #endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   int dns_cache_timeout; /* DNS cache timeout (seconds) */
-  long buffer_size;      /* size of receive buffer to use */
+  unsigned int buffer_size;      /* size of receive buffer to use */
   unsigned int upload_buffer_size; /* size of upload buffer to use,
                                       keep it >= CURL_MAX_WRITE_SIZE */
   void *private_data; /* application-private data */
