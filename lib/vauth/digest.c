@@ -849,9 +849,6 @@ static CURLcode auth_create_digest_http_message(
                        digest->nc,
                        digest->qop,
                        request_digest);
-
-    /* Increment nonce-count to use another nc value for the next request */
-    digest->nc++;
   }
   else {
     response = aprintf("username=\"%s\", "
@@ -907,6 +904,12 @@ static CURLcode auth_create_digest_http_message(
 
     response = tmp;
   }
+
+  /*
+     Increment nonce-count to use another nc value for the next request
+     and indicate that nonce has been used already.
+   */
+  digest->nc++;
 
   /* Return the output */
   *outptr = response;
