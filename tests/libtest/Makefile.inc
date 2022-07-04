@@ -37,7 +37,7 @@ MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
 SUPPORTFILES = ../../lib/timediff.c ../../lib/timediff.h first.c test.h
 
 # These are all libcurl test programs
-noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
+noinst_PROGRAMS = chkhostname libauthretry libauthrepeat libntlmconnect  \
  chkdecimalpoint libprereq                                               \
  lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509   \
  lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519   \
@@ -84,6 +84,9 @@ libntlmconnect_CPPFLAGS = $(AM_CPPFLAGS)
 
 libauthretry_SOURCES = libauthretry.c $(SUPPORTFILES)
 libauthretry_CPPFLAGS = $(AM_CPPFLAGS)
+
+libauthrepeat_SOURCES = libauthrepeat.c $(SUPPORTFILES)
+libauthrepeat_CPPFLAGS = $(AM_CPPFLAGS)
 
 libprereq_SOURCES = libprereq.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libprereq_LDADD = $(TESTUTIL_LIBS)

@@ -80,6 +80,7 @@ void wait_ms(int ms)
 
 char *libtest_arg2 = NULL;
 char *libtest_arg3 = NULL;
+char *libtest_arg4 = NULL;
 int test_argc;
 char **test_argv;
 
@@ -172,6 +173,9 @@ int main(int argc, char **argv)
 
   if(argc>3)
     libtest_arg3 = argv[3];
+
+  if(argc > 4)
+    libtest_arg4 = argv[4];
 
   URL = argv[1]; /* provide this to the rest */
 

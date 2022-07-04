@@ -1,0 +1,232 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Basic auth
+HTTP Digest auth
+</keywords>
+</info>
+# Server-side
+<reply>
+
+<!-- Request number 1: Basic auth -->
+<data100>
+HTTP/1.1 200 Things are fine in server land (#100)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data100>
+
+<!-- Request number 2: Digest auth -->
+<data200>
+HTTP/1.1 401 Need Basic or Digest auth (#200)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="200"
+
+This is not the real page!
+</data200>
+
+<data1200>
+HTTP/1.1 200 Things are fine in server land (#200)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data1200>
+
+<!-- Requests number 3: Basic auth -->
+<data300>
+HTTP/1.1 200 Things are fine in server land (#300)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data300>
+
+<!-- Requests number 4: Basic auth -->
+<data310>
+HTTP/1.1 200 Things are fine in server land (#310)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data310>
+
+<!-- Requests number 5: Digest auth -->
+<data400>
+HTTP/1.1 401 Need Basic or Digest auth (#400)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="400"
+
+This is not the real page!
+</data400>
+<data1400>
+HTTP/1.1 200 Things are fine in server land (#400)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data1400>
+
+<!-- Requests number 6: Digest auth -->
+<!-- This 401 response should not be sent, as the request should have Digest Auth header -->
+<data410>
+HTTP/1.1 401 Need Basic or Digest auth (#410)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="410"
+
+This is not the real page!
+</data410>
+<data1410>
+HTTP/1.1 200 Things are fine in server land (#410)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data1410>
+<datacheck>
+HTTP/1.1 200 Things are fine in server land (#100)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+HTTP/1.1 401 Need Basic or Digest auth (#200)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="200"
+
+HTTP/1.1 200 Things are fine in server land (#200)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+HTTP/1.1 200 Things are fine in server land (#300)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+HTTP/1.1 200 Things are fine in server land (#310)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+HTTP/1.1 401 Need Basic or Digest auth (#400)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="400"
+
+HTTP/1.1 200 Things are fine in server land (#400)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+HTTP/1.1 200 Things are fine in server land (#410)
+Server: libmicrohttpd
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<features>
+crypto
+!SSPI
+</features>
+<server>
+http
+</server>
+<tool>
+libauthrepeat
+</tool>
+
+<name>
+HTTP Basic then Digest auth repeat
+</name>
+<setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+</setenv>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER basic-digest
+</command>
+<precheck>
+chkhostname curlhost
+</precheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER0100 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Accept: */*
+
+GET /%TESTNUMBER0200 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0200 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="200", uri="/%TESTNUMBER0200", response="8e52efe415591db19333761d3c54e121"
+Accept: */*
+
+GET /%TESTNUMBER0300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Accept: */*
+
+GET /%TESTNUMBER0310 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Accept: */*
+
+GET /%TESTNUMBER0400 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0400 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="400", uri="/%TESTNUMBER0400", response="9eeca93aecc7f1a072673bff9581399c"
+Accept: */*
+
+GET /%TESTNUMBER0410 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="400", uri="/%TESTNUMBER0410", response="b80fc90f5f467a8751cf81a23034ccba"
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
