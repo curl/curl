@@ -1769,8 +1769,7 @@ struct UserDefined {
   curl_sshkeycallback ssh_keyfunc; /* key matching callback */
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
 #ifndef CURL_DISABLE_NETRC
-  enum CURL_NETRC_OPTION
-       use_netrc;        /* defined in include/curl.h */
+  unsigned char use_netrc;        /* enum CURL_NETRC_OPTION values  */
 #endif
   curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                             IMAP or POP3 or others! */
