@@ -86,7 +86,7 @@ static int upload(CURL *curlhandle, const char *remotepath,
   curl_easy_setopt(curlhandle, CURLOPT_URL, remotepath);
 
   if(timeout)
-    curl_easy_setopt(curlhandle, CURLOPT_FTP_RESPONSE_TIMEOUT, timeout);
+    curl_easy_setopt(curlhandle, CURLOPT_SERVER_RESPONSE_TIMEOUT, timeout);
 
   curl_easy_setopt(curlhandle, CURLOPT_HEADERFUNCTION, getcontentlengthfunc);
   curl_easy_setopt(curlhandle, CURLOPT_HEADERDATA, &uploaded_len);
