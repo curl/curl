@@ -1342,7 +1342,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
        (arg > CURLFTP_CREATE_DIR_RETRY))
       result = CURLE_BAD_FUNCTION_ARGUMENT;
     else
-      data->set.ftp_create_missing_dirs = (int)arg;
+      data->set.ftp_create_missing_dirs = (unsigned char)arg;
     break;
   case CURLOPT_READDATA:
     /*
