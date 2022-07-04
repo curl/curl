@@ -1481,10 +1481,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * The maximum time for curl to wait for FTP server connect
      */
-    arg = va_arg(param, long);
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.accepttimeout = arg;
+    uarg = va_arg(param, unsigned long);
+    if(uarg >= UINT_MAX)
+      uarg = UINT_MAX;
+    data->set.accepttimeout = (unsigned int)uarg;
     break;
 #endif
 
