@@ -53,6 +53,7 @@
 #include "curl_printf.h"
 #include "multiif.h"
 #include "version_win32.h"
+#include "rand.h"
 
 /* The last #include file should be: */
 #include "curl_memory.h"
@@ -2298,21 +2299,9 @@ static size_t schannel_version(char *buffer, size_t size)
 static CURLcode schannel_random(struct Curl_easy *data UNUSED_PARAM,
                                 unsigned char *entropy, size_t length)
 {
-  HCRYPTPROV hCryptProv = 0;
-
   (void)data;
 
-  if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
-    return CURLE_FAILED_INIT;
-
-  if(!CryptGenRandom(hCryptProv, (DWORD)length, entropy)) {
-    CryptReleaseContext(hCryptProv, 0UL);
-    return CURLE_FAILED_INIT;
-  }
-
-  CryptReleaseContext(hCryptProv, 0UL);
-  return CURLE_OK;
+  return Curl_win32_random(entropy, length);
 }
 
 static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,

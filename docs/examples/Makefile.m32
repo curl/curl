@@ -266,7 +266,7 @@ ifdef SSH2
   curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
   ifdef SCHANNEL
     ifndef DYN
-      curl_LDADD += -lbcrypt -lcrypt32
+      curl_LDADD += -lcrypt32
     endif
   endif
 endif
@@ -374,7 +374,7 @@ ifndef USE_LDAP_OPENLDAP
   curl_LDADD += -lwldap32
 endif
 endif
-curl_LDADD += -lws2_32
+curl_LDADD += -lws2_32 -lbcrypt
 
 # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
 include Makefile.inc

@@ -1327,6 +1327,8 @@ if(WIN32)
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
     list(APPEND CURL_LIBS "advapi32" "crypt32")
   endif()
+
+  list(APPEND CURL_LIBS "bcrypt")
 endif()
 
 if(MSVC)
