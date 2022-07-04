@@ -291,7 +291,7 @@ ParameterError proto2num(struct OperationConfig *config,
   char *buffer;
   const char *sep = ",";
   char *token;
-  char obuf[256];
+  char obuf[256] = "";
   size_t olen = sizeof(obuf);
   char *optr;
   struct sprotos const *pp;
