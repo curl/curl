@@ -1695,10 +1695,10 @@ struct UserDefined {
 #endif
   void *progress_client; /* pointer to pass to the progress callback */
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
-  long timeout;         /* in milliseconds, 0 means no timeout */
-  long connecttimeout;  /* in milliseconds, 0 means no timeout */
-  long happy_eyeballs_timeout; /* in milliseconds, 0 is a valid value */
-  long server_response_timeout; /* in milliseconds, 0 means no timeout */
+  unsigned int timeout;        /* ms, 0 means no timeout */
+  unsigned int connecttimeout; /* ms, 0 means no timeout */
+  unsigned int happy_eyeballs_timeout; /* ms, 0 is a valid value */
+  unsigned int server_response_timeout; /* ms, 0 means no timeout */
   long maxage_conn;     /* in seconds, max idle time to allow a connection that
                            is to be reused */
   long maxlifetime_conn; /* in seconds, max time since creation to allow a
