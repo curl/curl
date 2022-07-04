@@ -1477,12 +1477,11 @@ typedef enum {
      Note that setting multiple bits may cause extra network round-trips. */
   CURLOPT(CURLOPT_PROXYAUTH, CURLOPTTYPE_VALUES, 111),
 
-  /* FTP option that changes the timeout, in seconds, associated with
-     getting a response.  This is different from transfer timeout time and
-     essentially places a demand on the FTP server to acknowledge commands
-     in a timely manner. */
-  CURLOPT(CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPTTYPE_LONG, 112),
-#define CURLOPT_SERVER_RESPONSE_TIMEOUT CURLOPT_FTP_RESPONSE_TIMEOUT
+  /* Option that changes the timeout, in seconds, associated with getting a
+     response.  This is different from transfer timeout time and essentially
+     places a demand on the server to acknowledge commands in a timely
+     manner. For FTP, SMTP, IMAP and POP3. */
+  CURLOPT(CURLOPT_SERVER_RESPONSE_TIMEOUT, CURLOPTTYPE_LONG, 112),
 
   /* Set this option to one of the CURL_IPRESOLVE_* defines (see below) to
      tell libcurl to use those IP versions only. This only has effect on
@@ -2179,6 +2178,9 @@ typedef enum {
 #define CURLOPT_SSLCERTPASSWD CURLOPT_KEYPASSWD
 #define CURLOPT_KRB4LEVEL CURLOPT_KRBLEVEL
 
+/* */
+#define CURLOPT_FTP_RESPONSE_TIMEOUT CURLOPT_SERVER_RESPONSE_TIMEOUT
+
 #else
 /* This is set if CURL_NO_OLDIES is defined at compile-time */
 #undef CURLOPT_DNS_USE_GLOBAL_CACHE /* soon obsolete */
@@ -2193,7 +2195,7 @@ typedef enum {
 #define CURL_IPRESOLVE_V4       1 /* uses only IPv4 addresses/connections */
 #define CURL_IPRESOLVE_V6       2 /* uses only IPv6 addresses/connections */
 
-  /* three convenient "aliases" that follow the name scheme better */
+  /* Convenient "aliases" */
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
 
   /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
