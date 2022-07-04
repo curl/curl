@@ -236,9 +236,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   char *argptr;
   CURLcode result = CURLE_OK;
   long arg;
-#ifdef ENABLE_IPV6
   unsigned long uarg;
-#endif
   curl_off_t bigsize;
 
   switch(option) {
@@ -1451,10 +1449,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_TIMEOUT_MS:
-    arg = va_arg(param, long);
-    if((arg < 0) || (arg > UINT_MAX))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.timeout = (unsigned int)arg;
+    uarg = va_arg(param, unsigned long);
+    if(uarg >= UINT_MAX)
+      uarg = UINT_MAX;
+    data->set.timeout = (unsigned int)uarg;
     break;
 
   case CURLOPT_CONNECTTIMEOUT:
@@ -1469,10 +1467,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_CONNECTTIMEOUT_MS:
-    arg = va_arg(param, long);
-    if((arg < 0) || (arg > UINT_MAX))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.connecttimeout = (unsigned int)arg;
+    uarg = va_arg(param, unsigned long);
+    if(uarg >= UINT_MAX)
+      uarg = UINT_MAX;
+    data->set.connecttimeout = (unsigned int)uarg;
     break;
 
 #ifndef CURL_DISABLE_FTP
@@ -3007,10 +3005,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.suppress_connect_headers = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
   case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
-    arg = va_arg(param, long);
-    if((arg < 0) || (arg > UINT_MAX))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.happy_eyeballs_timeout = (unsigned int)arg;
+    uarg = va_arg(param, unsigned long);
+    if(uarg >= UINT_MAX)
+      uarg = UINT_MAX;
+    data->set.happy_eyeballs_timeout = (unsigned int)uarg;
     break;
 #ifndef CURL_DISABLE_SHUFFLE_DNS
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
