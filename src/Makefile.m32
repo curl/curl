@@ -119,7 +119,7 @@ CFLAGS = -O3 $(CURL_CFLAG_EXTRAS) -W -Wall
 LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
 AR = $(CURL_AR)
 RC = $(CROSSPREFIX)windres
-RCFLAGS = --include-dir=$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST
+RCFLAGS = --include-dir=$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST $(CURL_RCFLAG_EXTRAS)
 STRIP   = $(CROSSPREFIX)strip -g
 
 # We may need these someday
@@ -135,6 +135,7 @@ ARCH = w32
 endif
 endif
 
+ifneq ($(ARCH),custom)
 ifeq ($(ARCH),w64)
 CFLAGS  += -m64
 LDFLAGS += -m64
@@ -143,6 +144,7 @@ else
 CFLAGS  += -m32
 LDFLAGS += -m32
 RCFLAGS += -F pe-i386
+endif
 endif
 
 # Platform-dependent helper tool macros
