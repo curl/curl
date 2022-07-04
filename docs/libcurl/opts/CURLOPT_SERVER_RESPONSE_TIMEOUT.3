@@ -22,14 +22,14 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_FTP_RESPONSE_TIMEOUT 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SERVER_RESPONSE_TIMEOUT 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_FTP_RESPONSE_TIMEOUT \- time allowed to wait for FTP response
+CURLOPT_SERVER_RESPONSE_TIMEOUT \- time allowed to wait for server response
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_RESPONSE_TIMEOUT,
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SERVER_RESPONSE_TIMEOUT,
                           long timeout);
 .fi
 .SH DESCRIPTION
@@ -38,28 +38,30 @@ amount of time that the server is allowed to take in order to send a response
 message for a command before the session is considered dead.  While libcurl is
 waiting for a response, this value overrides \fICURLOPT_TIMEOUT(3)\fP. It is
 recommended that if used in conjunction with \fICURLOPT_TIMEOUT(3)\fP, you set
-\fICURLOPT_FTP_RESPONSE_TIMEOUT(3)\fP to a value smaller than
+\fICURLOPT_SERVER_RESPONSE_TIMEOUT(3)\fP to a value smaller than
 \fICURLOPT_TIMEOUT(3)\fP.
+
+This option was formerly known as \fBCURLOPT_FTP_RESPONSE_TIMEOUT\fP.
 .SH DEFAULT
 None
 .SH PROTOCOLS
-FTP
+FTP, IMAP, POP3 and SMTP
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/slow.txt");
   /* wait no more than 23 seconds */
-  curl_easy_setopt(curl, CURLOPT_FTP_RESPONSE_TIMEOUT, 23L);
+  curl_easy_setopt(curl, CURLOPT_SERVER_RESPONSE_TIMEOUT, 23L);
   ret = curl_easy_perform(curl);
 
   curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY
-Added in 7.10.8
+Added in 7.10.8. Used under this name since 7.20.0
 .SH RETURN VALUE
-Returns CURLE_OK if FTP is supported, and CURLE_UNKNOWN_OPTION if not. Returns
+Returns CURLE_OK if supported, and CURLE_UNKNOWN_OPTION if not. Returns
 CURLE_BAD_FUNCTION_ARGUMENT if set to a negative value or a value that when
 converted to milliseconds is too large.
 .SH "SEE ALSO"
