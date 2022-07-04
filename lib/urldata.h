@@ -1790,7 +1790,6 @@ struct UserDefined {
   void *rtp_out;     /* write RTP to this if non-NULL */
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
-  long rtspversion; /* like httpversion, for RTSP */
 #endif
 #ifndef CURL_DISABLE_FTP
   curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer
