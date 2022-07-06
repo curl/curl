@@ -327,7 +327,8 @@ about to issue.
   a PUT or POST request
 - `rtp: part [num] channel [num] size [num]` - stream a fake RTP packet for
   the given part on a chosen channel with the given payload size
-- `connection-monitor` - When used, this will log `[DISCONNECT]` to the
+- `connection-monitor` - When used, this will log `[DISCONNECT]` (or 
+  `[DISCONNECT #x]` if `connection-number` is activated as well) to the
   `server.input` log when the connection is disconnected.
 - `connection-number` - Prefix actual input reports in the `server.input`
    with `[CONNECTION #x]` to refer the connection's number in test.

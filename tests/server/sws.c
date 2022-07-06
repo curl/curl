@@ -880,32 +880,79 @@ static void init_httprequest(struct httprequest *req)
   req->upgrade_request = 0;
 }
 
+static bool get_conn_number(curl_socket_t sock, unsigned int *conn_num)
+{
+  size_t socket_idx;
+
+  if(sock == CURL_SOCKET_BAD)
+    return FALSE;
+
+  for(socket_idx = 1; socket_idx < num_sockets; ++socket_idx) {
+    if(all_sockets[socket_idx] == sock) {
+      *conn_num = connect_num[socket_idx];
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
 static void store_conn_number(curl_socket_t sock, long testno)
 {
-  char buf[60];
-  int len;
-  size_t socket_idx;
-  for(socket_idx = 1; socket_idx < num_sockets; ++socket_idx) {
-    if(all_sockets[socket_idx] == sock)
-      break;
-  }
-  len = 0;
-  if(socket_idx != num_sockets) {
-    if(connect_num[socket_idx] != last_recv_conn_num) {
-      last_recv_conn_num = connect_num[socket_idx];
-      if(last_recv_test_num != testno) {
-        test_first_conn_num = last_recv_conn_num;
+  unsigned int conn_num;
+
+  if(get_conn_number(sock, &conn_num)) {
+    if(conn_num != last_recv_conn_num) {
+      char buf[60];
+      int len;
+
+      last_recv_conn_num = conn_num;
+      if(last_recv_test_num != testno &&
+         testno > 0) {
+        test_first_conn_num = conn_num;
         last_recv_test_num = testno;
       }
       len = msnprintf(buf, sizeof(buf), "[CONNECTION #%u]\n",
-                      (last_recv_conn_num - test_first_conn_num) + 1);
+                      (conn_num - test_first_conn_num) + 1);
+      if(len > 0)
+        storerequest(buf, (size_t)len);
     }
   }
   else {
-    len = msnprintf(buf, sizeof(buf), "[CONNECTION unknown]\n");
+    const char *msg = "[CONNECTION #unknown]\n";
+    storerequest(msg, strlen(msg));
   }
-  if(len > 0)
-    storerequest(buf, (size_t)len);
+}
+
+static void store_disconnect(size_t socket_idx, long testno, bool use_number)
+{
+  unsigned int conn_num = connect_num[socket_idx];
+
+  if(!use_number) {
+    const char *keepopen = "[DISCONNECT]\n";
+    storerequest(keepopen, strlen(keepopen));
+    return;
+  }
+  if(last_recv_test_num == testno ||
+      /* test number was not detected but connection's number
+       * seems to be valid */
+     (testno <= 0 && conn_num - test_first_conn_num < 256)) {
+    char buf[60];
+    int len;
+
+    last_recv_conn_num = conn_num; /* Force print [CONNECTION #x] for any
+                                      data received later */
+    len = msnprintf(buf, sizeof(buf), "[DISCONNECT #%u]\n",
+                    (conn_num - test_first_conn_num) + 1);
+    if(len > 0)
+      storerequest(buf, (size_t)len);
+    return;
+  }
+  else {
+    const char *msg = "[DISCONNECT untracked connection]\n";
+    storerequest(msg, strlen(msg));
+    return;
+  }
 }
 
 /* returns 1 if the connection should be serviced again immediately, 0 if there
@@ -2311,10 +2358,8 @@ int main(int argc, char *argv[])
           if(rc < 0) {
             logmsg("====> Client disconnect %d", req->connmon);
 
-            if(req->connmon) {
-              const char *keepopen = "[DISCONNECT]\n";
-              storerequest(keepopen, strlen(keepopen));
-            }
+            if(req->connmon)
+              store_disconnect(socket_idx, req->testno, req->connnum);
 
             if(!req->open)
               /* When instructed to close connection after server-reply we
