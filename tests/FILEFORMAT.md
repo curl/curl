@@ -329,6 +329,8 @@ about to issue.
   the given part on a chosen channel with the given payload size
 - `connection-monitor` - When used, this will log `[DISCONNECT]` to the
   `server.input` log when the connection is disconnected.
+- `connection-number` - Prefix actual input reports in the `server.input`
+   with `[CONNECTION #x]` to refer the connection's number in test.
 - `upgrade` - when an HTTP upgrade header is found, the server will upgrade to
   http2
 - `swsclose` - instruct server to close connection after response

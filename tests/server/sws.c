@@ -97,6 +97,13 @@ static bool prevbounce = FALSE; /* instructs the server to increase the part
 #define RCMD_IDLE      1 /* told to sit idle */
 #define RCMD_STREAM    2 /* told to stream */
 
+enum {
+  DOCNUMBER_NOTHING = -4,
+  DOCNUMBER_QUIT    = -3,
+  DOCNUMBER_WERULEZ = -2,
+  DOCNUMBER_404     = -1
+};
+
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
   bool connect_request; /* if a CONNECT */
@@ -124,6 +131,7 @@ struct httprequest {
   bool skipall;   /* skip all incoming data */
   bool noexpect;  /* refuse Expect: (don't read the body) */
   bool connmon;   /* monitor the state of the connection, log disconnects */
+  bool connnum;   /* log connection's number before printing data */
   bool upgrade;   /* test case allows upgrade to http2 */
   bool upgrade_request; /* upgrade request found and allowed */
   bool close;     /* similar to swsclose in response: close connection after
@@ -135,6 +143,16 @@ struct httprequest {
 
 static curl_socket_t all_sockets[MAX_SOCKETS];
 static size_t num_sockets = 0;
+/* Mapping from current socket index to the number of received connection */
+static unsigned int connect_num[MAX_SOCKETS];
+/* The last received connection's number */
+static unsigned int last_conn_num = 0;
+/* The connection's number on which data was received last time */
+static unsigned int last_recv_conn_num = 0;
+/* The test number for the last reported connection's number */
+static long last_recv_test_num = DOCNUMBER_NOTHING;
+/* The number of the first connection received in current test */
+static unsigned int test_first_conn_num = 0;
 
 static int ProcessRequest(struct httprequest *req);
 static void storerequest(const char *reqbuf, size_t totalsize);
@@ -182,6 +200,12 @@ const char *cmdfile = DEFAULT_CMDFILE;
    proper point - like with NTLM */
 #define CMD_CONNECTIONMONITOR "connection-monitor"
 
+/* 'connection-number' will output connection's number before printing
+   any data from the connection. Useful to identify situation when libcurl
+   switches from one connection to another, for example when connections
+   are authorised with NTLM */
+#define CMD_CONNECTIONNUMBER "connection-number"
+
 /* upgrade to http2 */
 #define CMD_UPGRADE "upgrade"
 
@@ -192,13 +216,6 @@ const char *cmdfile = DEFAULT_CMDFILE;
 #define CMD_NOEXPECT "no-expect"
 
 #define END_OF_HEADERS "\r\n\r\n"
-
-enum {
-  DOCNUMBER_NOTHING = -4,
-  DOCNUMBER_QUIT    = -3,
-  DOCNUMBER_WERULEZ = -2,
-  DOCNUMBER_404     = -1
-};
 
 static const char *end_of_headers = END_OF_HEADERS;
 
@@ -265,6 +282,7 @@ static int parse_servercmd(struct httprequest *req)
   stream = test2fopen(req->testno);
   req->close = FALSE;
   req->connmon = FALSE;
+  req->connnum = FALSE;
 
   if(!stream) {
     error = errno;
@@ -309,6 +327,11 @@ static int parse_servercmd(struct httprequest *req)
                        strlen(CMD_CONNECTIONMONITOR))) {
         logmsg("enabled connection monitoring");
         req->connmon = TRUE;
+      }
+      else if(!strncmp(CMD_CONNECTIONNUMBER, cmd,
+                       strlen(CMD_CONNECTIONNUMBER))) {
+        logmsg("enabled connection number printing");
+        req->connnum = TRUE;
       }
       else if(!strncmp(CMD_UPGRADE, cmd, strlen(CMD_UPGRADE))) {
         logmsg("enabled upgrade to http2");
@@ -857,6 +880,34 @@ static void init_httprequest(struct httprequest *req)
   req->upgrade_request = 0;
 }
 
+static void store_conn_number(curl_socket_t sock, long testno)
+{
+  char buf[60];
+  int len;
+  size_t socket_idx;
+  for(socket_idx = 1; socket_idx < num_sockets; ++socket_idx) {
+    if(all_sockets[socket_idx] == sock)
+      break;
+  }
+  len = 0;
+  if(socket_idx != num_sockets) {
+    if(connect_num[socket_idx] != last_recv_conn_num) {
+      last_recv_conn_num = connect_num[socket_idx];
+      if(last_recv_test_num != testno) {
+        test_first_conn_num = last_recv_conn_num;
+        last_recv_test_num = testno;
+      }
+      len = msnprintf(buf, sizeof(buf), "[CONNECTION #%u]\n",
+                      (last_recv_conn_num - test_first_conn_num) + 1);
+    }
+  }
+  else {
+    len = msnprintf(buf, sizeof(buf), "[CONNECTION unknown]\n");
+  }
+  if(len > 0)
+    storerequest(buf, (size_t)len);
+}
+
 /* returns 1 if the connection should be serviced again immediately, 0 if there
    is no data waiting, or < 0 if it should be closed */
 static int get_request(curl_socket_t sock, struct httprequest *req)
@@ -895,6 +946,8 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       fail = 1;
     }
     if(fail) {
+      if(req->connnum && reqbuf && req->offset)
+        store_conn_number(sock, req->testno);
       /* dump the request received so far to the external file */
       reqbuf[req->offset] = '\0';
       storerequest(reqbuf, req->offset);
@@ -927,8 +980,11 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     reqbuf[req->offset] = '\0';
 
   /* at the end of a request dump it to an external file */
-  if(fail || req->done_processing)
+  if(fail || req->done_processing) {
+    if(req->connnum && reqbuf && req->offset)
+      store_conn_number(sock, req->testno);
     storerequest(reqbuf, req->offset);
+  }
   if(got_exit_signal)
     return -1;
 
@@ -1778,6 +1834,10 @@ static curl_socket_t accept_connection(curl_socket_t sock)
   logmsg("====> Client connect");
 
   all_sockets[num_sockets] = msgsock;
+  /* Numbers are zero-based. Connection number zero is typically
+     a ping for check whether server is responding, actual client
+     connections numbers typically starts from one. */
+  connect_num[num_sockets] = last_conn_num++;
   num_sockets += 1;
 
 #ifdef TCP_NODELAY
@@ -2175,6 +2235,10 @@ int main(int argc, char *argv[])
         char *dst = (char *) (all_sockets + socket_idx);
         char *src = (char *) (all_sockets + socket_idx + 1);
         char *end = (char *) (all_sockets + num_sockets);
+        memmove(dst, src, end - src);
+        dst = (char *) (connect_num + socket_idx);
+        src = (char *) (connect_num + socket_idx + 1);
+        end = (char *) (connect_num + num_sockets);
         memmove(dst, src, end - src);
         num_sockets -= 1;
       }
