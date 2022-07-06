@@ -1,0 +1,253 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Basic auth
+HTTP Digest auth
+HTTP NTLM auth
+</keywords>
+</info>
+# Server-side
+<reply>
+<servercmd>
+connection-number
+</servercmd>
+
+<!-- Request number 1: Basic auth -->
+<data100>
+HTTP/1.1 200 Things are fine in server land (#100)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#100)
+</data100>
+
+<!-- Request number 2: NTLM auth -->
+<!-- This 401 response should not be sent, as the request should have NTLM Auth header -->
+<data200>
+HTTP/1.1 401 Need Basic or NTLM or Digest auth (#200)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+WWW-Authenticate: NTLM
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm"
+
+This is not the real page! (#200)
+</data200>
+<data1201>
+HTTP/1.1 401 NTLM intermediate (#200)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 40
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
+
+This is still not the real page! (#200)
+</data1201>
+<data1202>
+HTTP/1.1 200 Things are fine in server land (#200)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#200)
+</data1202>
+
+
+<!-- Requests number 3: Digest auth -->
+<data300>
+HTTP/1.1 401 Need NTLM or Digest or Basic auth (#300)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="300"
+WWW-Authenticate: NTLM
+
+This is not the real page! (#300)
+</data300>
+<data1300>
+HTTP/1.1 200 Things are fine in server land (#300)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#300)
+</data1300>
+
+<!-- Requests number 4: Digest auth -->
+<!-- This 401 response should not be sent, as the request should have Digest Auth header -->
+<data310>
+HTTP/1.1 401 Need NTLM or Digest or Basic auth (#310)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+WWW-Authenticate: Digest realm="testrealm", nonce="310"
+WWW-Authenticate: NTLM
+
+This is not the real page! (#310)
+</data310>
+<data1310>
+HTTP/1.1 200 Things are fine in server land (#310)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#310)
+</data1310>
+
+<!-- Requests number 5: NTLM auth -->
+<!-- The same (already authorised) connection must be reused, no authentication headers -->
+<data400>
+HTTP/1.1 200 Things are fine in server land (#400)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#400)
+</data400>
+
+<!-- Requests number 6: NTLM auth -->
+<!-- The same (already authorised) connection must be reused, no authentication headers -->
+<data410>
+HTTP/1.1 200 Things are fine in server land (#410)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#410)
+</data410>
+<datacheck>
+HTTP/1.1 200 Things are fine in server land (#100)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#100)
+HTTP/1.1 401 NTLM intermediate (#200)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 40
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
+
+HTTP/1.1 200 Things are fine in server land (#200)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#200)
+HTTP/1.1 401 Need NTLM or Digest or Basic auth (#300)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="300"
+WWW-Authenticate: NTLM
+
+HTTP/1.1 200 Things are fine in server land (#300)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#300)
+HTTP/1.1 200 Things are fine in server land (#310)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#310)
+HTTP/1.1 200 Things are fine in server land (#400)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#400)
+HTTP/1.1 200 Things are fine in server land (#410)
+Server: Microsoft-IIS/10.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 39
+
+Finally, this is the real page! (#410)
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<features>
+crypto
+NTLM
+!SSPI
+</features>
+<server>
+http
+</server>
+<tool>
+libauthrepeat
+</tool>
+
+<name>
+HTTP Basic-NTLM-Digest-NTLM auth repeat with the same credentials
+</name>
+<setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+</setenv>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER basic-NTLM-digest-NTLM
+</command>
+<precheck>
+chkhostname curlhost
+</precheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+[CONNECTION #1]
+GET /%TESTNUMBER0100 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Accept: */*
+
+GET /%TESTNUMBER0200 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+Accept: */*
+
+GET /%TESTNUMBER0200 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoABAI+/Fp9IERAQ74OsdNPbBpg7o8CVwLSO4DtFyIcZHUMKVktWIu92s2892OVpd2JzqnRlc3R1c2VyV09SS1NUQVRJT04=
+Accept: */*
+
+[CONNECTION #2]
+GET /%TESTNUMBER0300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="300", uri="/%TESTNUMBER0300", response="24a72f3362d3d5c496becb223587f285"
+Accept: */*
+
+GET /%TESTNUMBER0310 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="300", uri="/%TESTNUMBER0310", response="4d1658648f76bae952d200df283f3d79"
+Accept: */*
+
+[CONNECTION #1]
+GET /%TESTNUMBER0400 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0410 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
