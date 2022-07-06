@@ -2392,14 +2392,21 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
     CURL *curltls = curl_easy_init();
     struct curl_tlssessioninfo *tls_backend_info = NULL;
 
+    if(!curltls) {
+      errorf(global, "out of memory\n");
+      return CURLE_OUT_OF_MEMORY;
+    }
+
     /* With the addition of CAINFO support for Schannel, this search could find
      * a certificate bundle that was previously ignored. To maintain backward
      * compatibility, only perform this search if not using Schannel.
      */
     result = curl_easy_getinfo(curltls, CURLINFO_TLS_SSL_PTR,
                                &tls_backend_info);
-    if(result)
+    if(result) {
+      curl_easy_cleanup(curltls);
       return result;
+    }
 
     /* Set the CA cert locations specified in the environment. For Windows if
      * no environment-specified filename is found then check for CA bundle
@@ -2416,6 +2423,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
         config->cacert = strdup(env);
         if(!config->cacert) {
           curl_free(env);
+          curl_easy_cleanup(curltls);
           errorf(global, "out of memory\n");
           return CURLE_OUT_OF_MEMORY;
         }
@@ -2426,6 +2434,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
           config->capath = strdup(env);
           if(!config->capath) {
             curl_free(env);
+            curl_easy_cleanup(curltls);
             helpf(global->errors, "out of memory\n");
             return CURLE_OUT_OF_MEMORY;
           }
@@ -2437,6 +2446,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
             config->cacert = strdup(env);
             if(!config->cacert) {
               curl_free(env);
+              curl_easy_cleanup(curltls);
               errorf(global, "out of memory\n");
               return CURLE_OUT_OF_MEMORY;
             }
