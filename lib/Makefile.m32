@@ -293,7 +293,12 @@ ifdef SSL
     ifdef NGTCP2
       INCLUDES += -I"$(NGTCP2_PATH)/include"
       CFLAGS += -DUSE_NGTCP2
-      DLL_LIBS += -L"$(NGTCP2_PATH)/lib" -lngtcp2 -lngtcp2_crypto_openssl
+      DLL_LIBS += -L"$(NGTCP2_PATH)/lib"
+      ifdef NGTCP2_LIBS
+        DLL_LIBS += $(NGTCP2_LIBS)
+      else
+        DLL_LIBS += -lngtcp2 -lngtcp2_crypto_openssl
+      endif
     endif
   endif
 
