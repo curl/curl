@@ -22,4 +22,4 @@ could look similar to:
 
  machine host.domain.com
  login myself
- password secret"
+ password secret
