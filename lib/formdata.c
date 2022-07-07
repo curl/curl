@@ -716,7 +716,7 @@ int curl_formget(struct curl_httppost *form, void *arg,
   curl_mimepart toppart;
 
   Curl_mime_initpart(&toppart, NULL); /* default form is empty */
-  result = Curl_getformdata(NULL, &toppart, form, NULL);
+  result = Curl_getformdata(NULL, &toppart, form, NULL, NULL);
   if(!result)
     result = Curl_mime_prepare_headers(&toppart, "multipart/form-data",
                                        NULL, MIMESTRATEGY_FORM);
@@ -802,7 +802,8 @@ static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
 CURLcode Curl_getformdata(struct Curl_easy *data,
                           curl_mimepart *finalform,
                           struct curl_httppost *post,
-                          curl_read_callback fread_func)
+                          curl_read_callback fread_func,
+                          curl_seek_callback seek_func)
 {
   CURLcode result = CURLE_OK;
   curl_mime *form = NULL;
@@ -892,7 +893,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
           if(!clen)
             clen = -1;
           result = curl_mime_data_cb(part, clen,
-                                     fread_func, NULL, NULL, post->userp);
+                                     fread_func, seek_func, NULL, post->userp);
         }
         else {
           size_t uclen;

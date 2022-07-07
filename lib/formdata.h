@@ -52,7 +52,8 @@ struct FormInfo {
 CURLcode Curl_getformdata(struct Curl_easy *data,
                           curl_mimepart *,
                           struct curl_httppost *post,
-                          curl_read_callback fread_func);
+                          curl_read_callback fread_func,
+                          curl_seek_callback seek_func);
 #else
 /* disabled */
 #define Curl_getformdata(a,b,c,d) CURLE_NOT_BUILT_IN

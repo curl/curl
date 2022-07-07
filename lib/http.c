@@ -2305,7 +2305,8 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
     /* Convert the form structure into a mime structure. */
     Curl_mime_cleanpart(&http->form);
     result = Curl_getformdata(data, &http->form, data->set.httppost,
-                              data->state.fread_func);
+                              data->state.fread_func,
+                              data->state.seek_func);
     if(result)
       return result;
     http->sendit = &http->form;

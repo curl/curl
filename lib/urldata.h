@@ -1423,6 +1423,7 @@ struct UrlState {
 
   curl_read_callback fread_func; /* read callback/function */
   void *in;                      /* CURLOPT_READDATA */
+  curl_seek_callback seek_func;
 #ifdef USE_HTTP2
   struct Curl_easy *stream_depends_on;
   int stream_weight;
