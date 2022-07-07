@@ -1375,6 +1375,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
       nva[i].namelen = hreq->header[i].namelen;
       nva[i].value = (unsigned char *)hreq->header[i].value;
       nva[i].valuelen = hreq->header[i].valuelen;
+      nva[i].flags = NGHTTP3_NV_FLAG_NONE;
     }
   }
 
