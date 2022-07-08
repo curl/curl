@@ -2392,11 +2392,6 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
     CURL *curltls = curl_easy_init();
     struct curl_tlssessioninfo *tls_backend_info = NULL;
 
-    if(!curltls) {
-      errorf(global, "out of memory\n");
-      return CURLE_OUT_OF_MEMORY;
-    }
-
     /* With the addition of CAINFO support for Schannel, this search could find
      * a certificate bundle that was previously ignored. To maintain backward
      * compatibility, only perform this search if not using Schannel.
