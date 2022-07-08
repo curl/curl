@@ -118,8 +118,6 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
  * Returns a pointer to a malloced string in *ostring with length given in
  * *olen. If length == 0, the length is assumed to be strlen(string).
  *
- * 'data' can be set to NULL
- *
  * ctrl options:
  * - REJECT_NADA: accept everything
  * - REJECT_CTRL: rejects control characters (byte codes lower than 32) in
