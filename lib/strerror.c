@@ -319,6 +319,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_UNRECOVERABLE_POLL:
     return "Unrecoverable error in select/poll";
 
+  case CURLE_HTTP3_STREAM:
+    return "Stream error in the HTTP/3 framing layer";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:
