@@ -111,6 +111,6 @@ target_link_libraries(${EXE_NAME} libcurl ${CURL_LIBS})
 
 install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 export(TARGETS ${EXE_NAME}
-       APPEND FILE ${PROJECT_BINARY_DIR}/curl-target.cmake
+       FILE ${PROJECT_BINARY_DIR}/curl-target.cmake
        NAMESPACE ${PROJECT_NAME}::
 )
