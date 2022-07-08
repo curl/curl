@@ -899,6 +899,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   H3BUGF(infof(data, "cb_h3_stream_close CALLED"));
 
   stream->closed = TRUE;
+  stream->error3 = app_error_code;
   Curl_expire(data, 0, EXPIRE_QUIC);
   /* make sure that ngh3_stream_recv is called again to complete the transfer
      even if there are no more packets to be received from the server. */
@@ -1010,6 +1011,10 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
       return -1;
     }
   }
+
+  if(stream->status_code / 100 != 1) {
+    stream->bodystarted = TRUE;
+  }
   return 0;
 }
 
@@ -1032,9 +1037,10 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   if(token == NGHTTP3_QPACK_TOKEN__STATUS) {
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
-    int status = decode_status_code(h3val.base, h3val.len);
-    DEBUGASSERT(status != -1);
-    ncopy = msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n", status);
+    stream->status_code = decode_status_code(h3val.base, h3val.len);
+    DEBUGASSERT(stream->status_code != -1);
+    ncopy = msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n",
+                      stream->status_code);
     result = write_data(stream, line, ncopy);
     if(result) {
       return -1;
@@ -1226,6 +1232,24 @@ static ssize_t ngh3_stream_recv(struct Curl_easy *data,
   }
 
   if(stream->closed) {
+    if(stream->error3 != NGHTTP3_H3_NO_ERROR) {
+      failf(data,
+            "HTTP/3 stream %" PRId64 " was not closed cleanly: (err %" PRIu64
+            ")",
+            stream->stream3_id, stream->error3);
+      *curlcode = CURLE_HTTP3;
+      return -1;
+    }
+
+    if(!stream->bodystarted) {
+      failf(data,
+            "HTTP/3 stream %" PRId64 " was closed cleanly, but before getting"
+            " all response header fields, treated as error",
+            stream->stream3_id);
+      *curlcode = CURLE_HTTP3;
+      return -1;
+    }
+
     *curlcode = CURLE_OK;
     return 0;
   }
@@ -1443,6 +1467,11 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
   struct quicsocket *qs = conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct HTTP *stream = data->req.p.http;
+
+  if(stream->closed) {
+    *curlcode = CURLE_HTTP3;
+    return -1;
+  }
 
   if(!stream->h3req) {
     CURLcode result = http_request(data, mem, len);

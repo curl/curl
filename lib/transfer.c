@@ -539,6 +539,13 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     bool is_http2 = ((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
                      (conn->httpversion == 20));
 #endif
+    bool is_http3 =
+#ifdef ENABLE_QUIC
+      ((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+       (conn->httpversion == 30));
+#else
+      FALSE;
+#endif
 
     if(
 #ifdef USE_NGHTTP2
@@ -549,6 +556,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
          for a particular stream. */
       !is_http2 &&
 #endif
+      !is_http3 && /* Same reason mentioned above. */
       k->size != -1 && !k->header) {
       /* make sure we don't read too much */
       curl_off_t totalleft = k->size - k->bytecount;
@@ -596,6 +604,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
 #endif
+      if(is_http3 && !nread)
+        DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
+      else
         DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
       k->keepon &= ~KEEP_RECV;
       break;
@@ -753,7 +764,13 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         if(nread < 0) /* this should be unusual */
           nread = 0;
 
-        k->keepon &= ~KEEP_RECV; /* we're done reading */
+        /* HTTP/3 over QUIC should keep reading until QUIC connection
+           is closed.  In contrast to HTTP/2 which can stop reading
+           from TCP connection, HTTP/3 over QUIC needs ACK from server
+           to ensure stream closure.  It should keep reading. */
+        if(!is_http3) {
+          k->keepon &= ~KEEP_RECV; /* we're done reading */
+        }
       }
 
       k->bytecount += nread;
