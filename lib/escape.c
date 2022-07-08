@@ -77,6 +77,9 @@ char *curl_unescape(const char *string, int length)
   return curl_easy_unescape(NULL, string, length, NULL);
 }
 
+/* Escapes for URL the given unescaped string of given length.
+ * 'data' is ignored since 7.82.0.
+ */
 char *curl_easy_escape(struct Curl_easy *data, const char *string,
                        int inlength)
 {
@@ -191,6 +194,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
  * pointer to a malloced string with length given in *olen.
  * If length == 0, the length is assumed to be strlen(string).
  * If olen == NULL, no output length is stored.
+ * 'data' is ignored since 7.82.0.
  */
 char *curl_easy_unescape(struct Curl_easy *data, const char *string,
                          int length, int *olen)
