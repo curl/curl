@@ -113,14 +113,20 @@ endif
 ifeq ($(CURL_AR),)
 CURL_AR := $(CROSSPREFIX)ar
 endif
+ifeq ($(CURL_RC),)
+CURL_RC := $(CROSSPREFIX)windres
+endif
+ifeq ($(CURL_STRIP),)
+CURL_STRIP := $(CROSSPREFIX)strip
+endif
 
 CC = $(CURL_CC)
 CFLAGS = -O3 $(CURL_CFLAG_EXTRAS) -W -Wall
 LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
 AR = $(CURL_AR)
-RC = $(CROSSPREFIX)windres
+RC = $(CURL_RC)
 RCFLAGS = --include-dir=$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST $(CURL_RCFLAG_EXTRAS)
-STRIP   = $(CROSSPREFIX)strip -g
+STRIP   = $(CURL_STRIP) -g
 
 # We may need these someday
 # PERL = perl
