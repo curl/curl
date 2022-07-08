@@ -1237,7 +1237,7 @@ static ssize_t ngh3_stream_recv(struct Curl_easy *data,
             "HTTP/3 stream %" PRId64 " was not closed cleanly: (err %" PRIu64
             ")",
             stream->stream3_id, stream->error3);
-      *curlcode = CURLE_HTTP3_STREAM;
+      *curlcode = CURLE_HTTP3;
       return -1;
     }
 
@@ -1246,7 +1246,7 @@ static ssize_t ngh3_stream_recv(struct Curl_easy *data,
             "HTTP/3 stream %" PRId64 " was closed cleanly, but before getting"
             " all response header fields, treated as error",
             stream->stream3_id);
-      *curlcode = CURLE_HTTP3_STREAM;
+      *curlcode = CURLE_HTTP3;
       return -1;
     }
 
@@ -1469,7 +1469,7 @@ static ssize_t ngh3_stream_send(struct Curl_easy *data,
   struct HTTP *stream = data->req.p.http;
 
   if(stream->closed) {
-    *curlcode = CURLE_HTTP3_STREAM;
+    *curlcode = CURLE_HTTP3;
     return -1;
   }
 

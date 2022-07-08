@@ -616,8 +616,6 @@ typedef enum {
   CURLE_PROXY,                   /* 97 - proxy handshake error */
   CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
   CURLE_UNRECOVERABLE_POLL,      /* 99 - poll/select returned fatal error */
-  CURLE_HTTP3_STREAM,            /* 100 - stream error in HTTP/3 framing layer
-                                    */
   CURL_LAST /* never use! */
 } CURLcode;
 
