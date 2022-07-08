@@ -140,6 +140,6 @@ install(TARGETS ${LIB_NAME}
 )
 
 export(TARGETS ${LIB_NAME}
-       APPEND FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
+       FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
        NAMESPACE ${PROJECT_NAME}::
 )
