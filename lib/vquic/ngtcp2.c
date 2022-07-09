@@ -1070,16 +1070,36 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static int cb_h3_send_stop_sending(nghttp3_conn *conn, int64_t stream_id,
-                                   uint64_t app_error_code,
-                                   void *user_data,
-                                   void *stream_user_data)
+static int cb_h3_stop_sending(nghttp3_conn *conn, int64_t stream_id,
+                              uint64_t app_error_code, void *user_data,
+                              void *stream_user_data)
 {
+  struct quicsocket *qs = user_data;
+  int rv;
   (void)conn;
-  (void)stream_id;
-  (void)app_error_code;
-  (void)user_data;
   (void)stream_user_data;
+
+  rv = ngtcp2_conn_shutdown_stream_read(qs->qconn, stream_id, app_error_code);
+  if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+  }
+
+  return 0;
+}
+
+static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t stream_id,
+                              uint64_t app_error_code, void *user_data,
+                              void *stream_user_data) {
+  struct quicsocket *qs = user_data;
+  int rv;
+  (void)conn;
+  (void)stream_user_data;
+
+  rv = ngtcp2_conn_shutdown_stream_write(qs->qconn, stream_id, app_error_code);
+  if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+  }
+
   return 0;
 }
 
@@ -1094,9 +1114,9 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL, /* begin_trailers */
   cb_h3_recv_header,
   NULL, /* end_trailers */
-  cb_h3_send_stop_sending,
+  cb_h3_stop_sending,
   NULL, /* end_stream */
-  NULL, /* reset_stream */
+  cb_h3_reset_stream,
   NULL /* shutdown */
 };
 
