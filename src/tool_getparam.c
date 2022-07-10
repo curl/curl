@@ -2443,8 +2443,10 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
         char *clear = NULL;
         if(i < (argc - 1)) {
           nextarg = curlx_convert_tchar_to_UTF8(argv[i + 1]);
-          if(!nextarg)
+          if(!nextarg) {
+            curlx_unicodefree(orig_opt);
             return PARAM_NO_MEM;
+          }
           clear = argv[i + 1];
         }
 
