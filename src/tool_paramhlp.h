@@ -31,8 +31,6 @@ ParameterError file2string(char **bufp, FILE *file);
 
 ParameterError file2memory(char **bufp, size_t *size, FILE *file);
 
-void cleanarg(char *str);
-
 ParameterError str2num(long *val, const char *str);
 ParameterError str2unum(long *val, const char *str);
 ParameterError oct2nummax(long *val, const char *str, long max);
