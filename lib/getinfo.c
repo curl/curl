@@ -578,7 +578,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   CURLcode result = CURLE_UNKNOWN_OPTION;
 
   if(!data)
-    return result;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, info);
 
