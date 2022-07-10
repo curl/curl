@@ -544,7 +544,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       ((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
        (conn->httpversion == 30));
 #else
-      0;
+      FALSE;
 #endif
 
     if(
