@@ -727,6 +727,7 @@ sub torture {
                 $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
                 # $valgrindcmd .= "--gen-suppressions=all ";
                 $valgrindcmd .= "--num-callers=16 ";
+                $valgrindcmd .= "--max-threads=1030 ";
                 $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
                 $cmd = "$valgrindcmd $testcmd";
             }
@@ -4197,6 +4198,7 @@ sub singletest {
             $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
            # $valgrindcmd .= "--gen-suppressions=all ";
             $valgrindcmd .= "--num-callers=16 ";
+            $valgrindcmd .= "--max-threads=1030 ";
             $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
             $CMDLINE = "$valgrindcmd $CMDLINE";
         }
