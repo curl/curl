@@ -4,7 +4,7 @@ curl and libcurl 7.85.0
  Command line options:         248
  curl_easy_setopt() options:   297
  Public functions in libcurl:  88
- Contributors:                 2656
+ Contributors:                 2659
 
 This release includes the following changes:
 
@@ -12,6 +12,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o build: improve OS string in CMake and `config-win32.h` [15]
  o cmake: do not force Windows target versions [28]
  o cmake: fix build for mingw cross compile [33]
  o cmake: support ngtcp2 boringssl backend [18]
@@ -21,20 +22,32 @@ This release includes the following bugfixes:
  o curl: output warning when a cookie is dropped due to size [5]
  o curl_mime_data.3: polish the wording [6]
  o CURLOPT_SERVER_RESPONSE_TIMEOUT: the new name [16]
+ o digest: fix missing increment of 'nc' value for auth-int [39]
+ o docs: explain curl_easy_escape/unescape curl handle is ignored [23]
  o easy_lock.h: include sched.h if available to fix build [13]
  o easy_lock.h: use __asm__ instead of asm to fix build [11]
  o easy_lock: fix build for mingw [34]
  o easy_lock: fix the #ifdef conditional for ia32_pause [8]
  o easy_lock: switch to using atomic_int instead of bool [9]
+ o escape: remove outdated comment [25]
+ o getinfo: return better error on NULL as first argument [21]
  o http_aws_sigv4.c: remove two unusued includes [36]
  o hyper: use wakers for curl pause/resume [2]
  o lib/curl_path.c: add ISC to license expression [1]
  o libcurl-security.3: fix typo on macro "SH_" [12]
+ o Makefile.m32: add `CURL_RC` and `CURL_STRIP` variables [ci skip] [17]
+ o Makefile.m32: add `NGTCP2_LIBS` option [ci skip] [38]
  o makefile.m32: add support for custom ARCH [ci skip] [27]
  o Makefile.m32: do not set the libcurl.rc debug flag [ci skip] [3]
+ o netrc.d: remove spurious quote [37]
  o ngtcp2: fix incompatible function pointer types [10]
+ o ngtcp2: Fix missing initialization of nghttp3_nv.flags [31]
+ o ngtcp2: fix stall or busy loop on STOP_SENDING with upload data [19]
+ o openssl: add `CURL_BORINGSSL_VERSION` to identify BoringSSL [24]
  o select: do not return fatal error on EINTR from poll() [32]
  o THANKS: merged two entries for Evgeny Grin
+ o tool_getparam: repair cleanarg [22]
+ o tool_operate: better cleanup of easy handle in exit path [20]
  o tool_progress: avoid division by zero in parallel progress meter [35]
  o urldata: reduce size of several struct fields [14]
  o windows: improve random source [29]
@@ -46,12 +59,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Sampson, Alexandre Bury, Brian Carpenter, Daniel Stenberg,
-  Don J Olmstead, Evgeny Grin (Karlson2k), Harry Sintonen, Jakub Zakrzewski,
-  Jilayne Lovejoy, Joshua Root, Kai Pastor, Marcel Raad, Ray Satiro,
-  Ryan Schmidt, Samuel Henrique, Sean McArthur, Thomas Weißschuh,
-  Viktor Szakats
-  (18 contributors)
+  Adam Sampson, Alexandre Bury, Brad Forschinger, Brian Carpenter,
+  Daniel Stenberg, Don J Olmstead, Evgeny Grin (Karlson2k), Harry Sintonen,
+  Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root, Kai Pastor, Litter White,
+  Marcel Raad, Ray Satiro, Ryan Schmidt, Samuel Henrique, Sean McArthur,
+  Tatsuhiro Tsujikawa, Ted Lyngmo, Thomas Weißschuh, Viktor Szakats,
+  Xiaoke Wang
+  (23 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -69,15 +83,28 @@ References to bug reports and discussions on issues:
  [12] = https://curl.se/bug/?i=9057
  [13] = https://curl.se/bug/?i=9054
  [14] = https://curl.se/bug/?i=9106
+ [15] = https://curl.se/bug/?i=9117
  [16] = https://curl.se/bug/?i=9104
+ [17] = https://curl.se/bug/?i=9132
  [18] = https://curl.se/bug/?i=9065
+ [19] = https://curl.se/bug/?i=9122
+ [20] = https://curl.se/bug/?i=9114
+ [21] = https://curl.se/bug/?i=9114
+ [22] = https://curl.se/bug/?i=9128
+ [23] = https://curl.se/bug/?i=9115
+ [24] = https://curl.se/bug/?i=9113
+ [25] = https://curl.se/bug/?i=9115
  [26] = https://curl.se/bug/?i=9095
  [27] = https://curl.se/bug/?i=9092
  [28] = https://curl.se/bug/?i=9046
  [29] = https://curl.se/bug/?i=9027
  [30] = https://curl.se/bug/?i=8992
+ [31] = https://curl.se/bug/?i=9118
  [32] = https://bugs.archlinux.org/task/75201
  [33] = https://curl.se/bug/?i=9084
  [34] = https://curl.se/bug/?i=8997
  [35] = https://curl.se/bug/?i=9082
  [36] = https://curl.se/bug/?i=9080
+ [37] = https://curl.se/bug/?i=9111
+ [38] = https://curl.se/bug/?i=9109
+ [39] = https://curl.se/bug/?i=9090
