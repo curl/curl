@@ -67,7 +67,11 @@ message(STATUS "curl version=[${CURL_VERSION}]")
 # SET(PACKAGE_STRING "curl-")
 # SET(PACKAGE_BUGREPORT "a suitable curl mailing list => https://curl.se/mail/")
 set(OPERATING_SYSTEM "${CMAKE_SYSTEM_NAME}")
-set(OS "\"${CMAKE_SYSTEM_NAME}${CURL_OS_SUFFIX}\"")
+if(CMAKE_C_COMPILER_TARGET)
+  set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
+else()
+  set(OS "\"${CMAKE_SYSTEM_NAME}\"")
+endif()
 
 include_directories(${CURL_SOURCE_DIR}/include)
 
