@@ -269,18 +269,18 @@ int init_thread_sync_data(struct thread_data *td,
   return 0;
 }
 
-static int getaddrinfo_complete(struct Curl_easy *data)
+static CURLcode getaddrinfo_complete(struct Curl_easy *data)
 {
   struct thread_sync_data *tsd = conn_thread_sync_data(data);
-  int rc;
+  CURLcode result;
 
-  rc = Curl_addrinfo_callback(data, tsd->sock_error, tsd->res);
+  result = Curl_addrinfo_callback(data, tsd->sock_error, tsd->res);
   /* The tsd->res structure has been copied to async.dns and perhaps the DNS
      cache.  Set our copy to NULL so destroy_thread_sync_data doesn't free it.
   */
   tsd->res = NULL;
 
-  return rc;
+  return result;
 }
 
 
