@@ -43,8 +43,9 @@
 #include "memdebug.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
+/* Padding character string starts at offset 64. */
 static const char base64[]=
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 /* The Base 64 encoding with an URL and filename safe alphabet, RFC 4648
    section 5 */
@@ -54,25 +55,18 @@ static const char base64url[]=
 static size_t decodeQuantum(unsigned char *dest, const char *src)
 {
   size_t padding = 0;
-  const char *s, *p;
+  const char *s;
   unsigned long i, x = 0;
 
   for(i = 0, s = src; i < 4; i++, s++) {
     if(*s == '=') {
-      x = (x << 6);
+      x <<= 6;
       padding++;
     }
     else {
-      unsigned long v = 0;
-      p = base64;
-
-      while(*p && (*p != *s)) {
-        v++;
-        p++;
-      }
-
-      if(*p == *s)
-        x = (x << 6) + v;
+      const char *p = strchr(base64, *s);
+      if(p)
+        x = (x << 6) + curlx_uztoul(p - base64);
       else
         return 0;
     }
@@ -109,11 +103,11 @@ CURLcode Curl_base64_decode(const char *src,
                             unsigned char **outptr, size_t *outlen)
 {
   size_t srclen = 0;
-  size_t length = 0;
   size_t padding = 0;
   size_t i;
   size_t numQuantums;
   size_t rawlen = 0;
+  const char *padptr;
   unsigned char *pos;
   unsigned char *newstr;
 
@@ -126,19 +120,17 @@ CURLcode Curl_base64_decode(const char *src,
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Find the position of any = padding characters */
-  while((src[length] != '=') && src[length])
-    length++;
-
-  /* A maximum of two = padding characters is allowed */
-  if(src[length] == '=') {
+  padptr = strchr(src, '=');
+  if(padptr) {
     padding++;
-    if(src[length + 1] == '=')
+    /* A maximum of two = padding characters is allowed */
+    if(padptr[1] == '=')
       padding++;
-  }
 
-  /* Check the = padding characters weren't part way through the input */
-  if(length + padding != srclen)
-    return CURLE_BAD_CONTENT_ENCODING;
+    /* Check the = padding characters weren't part way through the input */
+    if(padptr + padding != src + srclen)
+      return CURLE_BAD_CONTENT_ENCODING;
+  }
 
   /* Calculate the number of quantums */
   numQuantums = srclen / 4;
@@ -187,6 +179,7 @@ static CURLcode base64_encode(const char *table64,
   char *output;
   char *base64data;
   const char *indata = inputbuff;
+  const char *padstr = &table64[64];    /* Point to padding string. */
 
   *outptr = NULL;
   *outlen = 0;
@@ -224,27 +217,30 @@ static CURLcode base64_encode(const char *table64,
 
     switch(inputparts) {
     case 1: /* only one byte read */
-      msnprintf(output, 5, "%c%c==",
-                table64[obuf[0]],
-                table64[obuf[1]]);
+      i = msnprintf(output, 5, "%c%c%s%s",
+                    table64[obuf[0]],
+                    table64[obuf[1]],
+                    padstr,
+                    padstr);
       break;
 
     case 2: /* two bytes read */
-      msnprintf(output, 5, "%c%c%c=",
-                table64[obuf[0]],
-                table64[obuf[1]],
-                table64[obuf[2]]);
+      i = msnprintf(output, 5, "%c%c%c%s",
+                    table64[obuf[0]],
+                    table64[obuf[1]],
+                    table64[obuf[2]],
+                    padstr);
       break;
 
     default:
-      msnprintf(output, 5, "%c%c%c%c",
-                table64[obuf[0]],
-                table64[obuf[1]],
-                table64[obuf[2]],
-                table64[obuf[3]]);
+      i = msnprintf(output, 5, "%c%c%c%c",
+                    table64[obuf[0]],
+                    table64[obuf[1]],
+                    table64[obuf[2]],
+                    table64[obuf[3]]);
       break;
     }
-    output += 4;
+    output += i;
   }
 
   /* Zero terminate */
@@ -272,8 +268,6 @@ static CURLcode base64_encode(const char *table64,
  * Returns CURLE_OK on success, otherwise specific error code. Function
  * output shall not be considered valid unless CURLE_OK is returned.
  *
- * When encoded data length is 0, returns NULL in *outptr.
- *
  * @unittest: 1302
  */
 CURLcode Curl_base64_encode(const char *inputbuff, size_t insize,
@@ -294,8 +288,6 @@ CURLcode Curl_base64_encode(const char *inputbuff, size_t insize,
  *
  * Returns CURLE_OK on success, otherwise specific error code. Function
  * output shall not be considered valid unless CURLE_OK is returned.
- *
- * When encoded data length is 0, returns NULL in *outptr.
  *
  * @unittest: 1302
  */
