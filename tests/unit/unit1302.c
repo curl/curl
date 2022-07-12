@@ -89,14 +89,14 @@ Curl_safefree(output);
 
 rc = Curl_base64url_encode("\xff\x01\xfe\x02", 4, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
-fail_unless(size == 8, "size should be 8");
-verify_memory(output, "_wH-Ag==", 8);
+fail_unless(size == 6, "size should be 6");
+verify_memory(output, "_wH-Ag", 6);
 Curl_safefree(output);
 
 rc = Curl_base64url_encode("iiii", 4, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
-fail_unless(size == 8, "size should be 8");
-verify_memory(output, "aWlpaQ==", 8);
+fail_unless(size == 6, "size should be 6");
+verify_memory(output, "aWlpaQ", 6);
 Curl_safefree(output);
 
 /* 0 length makes it do strlen() */
@@ -104,6 +104,18 @@ rc = Curl_base64_encode("iiii", 0, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 8, "size should be 8");
 verify_memory(output, "aWlpaQ==", 8);
+Curl_safefree(output);
+
+rc = Curl_base64_encode("", 0, &output, &size);
+fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
+fail_unless(size == 0, "size should be 0");
+fail_unless(output && !output[0], "output should be a zero-length string");
+Curl_safefree(output);
+
+rc = Curl_base64url_encode("", 0, &output, &size);
+fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
+fail_unless(size == 0, "size should be 0");
+fail_unless(output && !output[0], "output should be a zero-length string");
 Curl_safefree(output);
 
 rc = Curl_base64_decode("aWlpaQ==", &decoded, &size);
