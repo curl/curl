@@ -4057,12 +4057,12 @@ AC_ARG_ENABLE(headers-api,
 AS_HELP_STRING([--enable-headers-api],[Enable headers-api support])
 AS_HELP_STRING([--disable-headers-api],[Disable headers-api support]),
 [ case "$enableval" in
-  *)
-       AC_MSG_RESULT(yes)
-       ;;
   no) AC_MSG_RESULT(no)
        curl_headers_msg="no      (--enable-headers-api)"
        AC_DEFINE(CURL_DISABLE_HEADERS_API, 1, [disable headers-api])
+       ;;
+  *)
+       AC_MSG_RESULT(yes)
        ;;
   esac ],
        AC_MSG_RESULT(yes)
