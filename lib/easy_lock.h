@@ -61,11 +61,17 @@ typedef PVOID SRWLOCK, *PSRWLOCK;
 #define __has_builtin(x) 0
 #endif
 
+#ifndef __INTEL_COMPILER
+/* The Intel compiler tries to look like GCC *and* clang *and* lies in its
+   __has_builtin() function, so override it. */
+
 /* if GCC on i386/x86_64 or if the built-in is present */
 #if ( (defined(__GNUC__) && !defined(__clang__)) &&     \
       (defined(__i386__) || defined(__x86_64__))) ||    \
   __has_builtin(__builtin_ia32_pause)
 #define HAVE_BUILTIN_IA32_PAUSE
+#endif
+
 #endif
 
 static inline void curl_simple_lock_lock(curl_simple_lock *lock)
