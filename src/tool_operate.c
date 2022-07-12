@@ -1237,6 +1237,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         use_proto = url_proto(per->this_url);
 
+        /* We'll clean everything up via exit(), so don't bother with slow cleanups */
+        /* Note: avoid having this setopt added to the --libcurl source output. */
+        result = curl_easy_setopt(curl, CURLOPT_MAY_LEAK, 1L);
+        if(result)
+          break;
+
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
 

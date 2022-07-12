@@ -2201,6 +2201,9 @@ typedef enum {
   /* CA cache timeout */
   CURLOPT(CURLOPT_CA_CACHE_TIMEOUT, CURLOPTTYPE_LONG, 321),
 
+  /* Can leak things, gonna exit() soon */
+  CURLOPT(CURLOPT_MAY_LEAK, CURLOPTTYPE_LONG, 322),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

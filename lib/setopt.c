@@ -3116,6 +3116,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   }
 #endif
+  case CURLOPT_MAY_LEAK:
+    data->set.may_leak = (0 != va_arg(param, long)) ? TRUE:FALSE;
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
