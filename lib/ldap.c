@@ -38,7 +38,7 @@
  */
 
 /* Wincrypt must be included before anything that could include OpenSSL. */
-#if defined(WIN32)
+#if defined(USE_WIN32_CRYPTO)
 #include <wincrypt.h>
 /* Undefine wincrypt conflicting symbols for BoringSSL. */
 #undef X509_NAME
