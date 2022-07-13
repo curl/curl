@@ -338,8 +338,8 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
       else {
         /* this is meant as a variable to output */
         char *end;
+        size_t vlen;
         if('{' == ptr[1]) {
-          char keepit;
           int i;
           bool match = FALSE;
           end = strchr(ptr, '}');
@@ -348,10 +348,10 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
             fputs("%{", stream);
             continue;
           }
-          keepit = *end;
-          *end = 0; /* null-terminate */
+          vlen = end - ptr;
           for(i = 0; variables[i].name; i++) {
-            if(curl_strequal(ptr, variables[i].name)) {
+            if((strlen(variables[i].name) == vlen) &&
+               curl_strnequal(ptr, variables[i].name, vlen)) {
               match = TRUE;
               switch(variables[i].id) {
               case VAR_ONERROR:
@@ -380,21 +380,26 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
             }
           }
           if(!match) {
-            fprintf(stderr, "curl: unknown --write-out variable: '%s'\n", ptr);
+            fprintf(stderr, "curl: unknown --write-out variable: '%.*s'\n",
+                    (int)vlen, ptr);
           }
           ptr = end + 1; /* pass the end */
-          *end = keepit;
         }
         else if(!strncmp("header{", &ptr[1], 7)) {
           ptr += 8;
           end = strchr(ptr, '}');
           if(end) {
+            char hname[256]; /* holds the longest header field name */
             struct curl_header *header;
-            *end = 0;
-            if(CURLHE_OK == curl_easy_header(per->curl, ptr, 0, CURLH_HEADER,
-                                             -1, &header))
-              fputs(header->value, stream);
-            ptr = end + 1; /* pass the end */
+            vlen = end - ptr;
+            if(vlen < sizeof(hname)) {
+              memcpy(hname, ptr, vlen);
+              hname[vlen] = 0;
+              if(CURLHE_OK == curl_easy_header(per->curl, hname, 0,
+                                               CURLH_HEADER, -1, &header))
+                fputs(header->value, stream);
+            }
+            ptr = end + 1;
           }
           else
             fputs("%header{", stream);
