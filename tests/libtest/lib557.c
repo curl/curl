@@ -1532,8 +1532,8 @@ static int test_weird_arguments(void)
                       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* 10 11 */
                       0, 1, 2, 3, 4, 5, 6, 7, 8);   /* 9 */
 
-  if(rc != -1) {
-    printf("curl_mprintf() returned %d and not -1!\n", rc);
+  if(rc) {
+    printf("curl_mprintf() returned %d and not 0\n", rc);
     errors++;
   }
 
