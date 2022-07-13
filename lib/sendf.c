@@ -245,7 +245,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   DEBUGASSERT(!strchr(fmt, '\n'));
   if(data && data->set.verbose) {
     va_list ap;
-    size_t len;
+    int len;
     char buffer[MAXINFO + 2];
     va_start(ap, fmt);
     len = mvsnprintf(buffer, MAXINFO, fmt, ap);
@@ -265,7 +265,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   DEBUGASSERT(!strchr(fmt, '\n'));
   if(data->set.verbose || data->set.errorbuffer) {
     va_list ap;
-    size_t len;
+    int len;
     char error[CURL_ERROR_SIZE + 2];
     va_start(ap, fmt);
     len = mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);

@@ -594,7 +594,7 @@ static int dprintf_formatf(
 
   /* Do the actual %-code parsing */
   if(dprintf_Pass1(format, vto, endpos, ap_save))
-    return -1;
+    return 0;
 
   end = &endpos[0]; /* the initial end-position from the list dprintf_Pass1()
                        created for us */
@@ -1025,11 +1025,12 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
   info.max = maxlength;
 
   retcode = dprintf_formatf(&info, addbyter, format, ap_save);
-  if((retcode != -1) && info.max) {
+  if(info.max) {
     /* we terminate this with a zero byte */
     if(info.max == info.length) {
       /* we're at maximum, scrap the last letter */
       info.buffer[-1] = 0;
+      DEBUGASSERT(retcode);
       retcode--; /* don't count the nul byte */
     }
     else
@@ -1073,7 +1074,7 @@ int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
   info.fail = 0;
 
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
-  if((-1 == retcode) || info.fail) {
+  if(!retcode && info.fail) {
     Curl_dyn_free(info.b);
     return 1;
   }
@@ -1082,15 +1083,14 @@ int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
 
 char *curl_mvaprintf(const char *format, va_list ap_save)
 {
-  int retcode;
   struct asprintf info;
   struct dynbuf dyn;
   info.b = &dyn;
   Curl_dyn_init(info.b, DYN_APRINTF);
   info.fail = 0;
 
-  retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
-  if((-1 == retcode) || info.fail) {
+  (void)dprintf_formatf(&info, alloc_addbyter, format, ap_save);
+  if(info.fail) {
     Curl_dyn_free(info.b);
     return NULL;
   }
