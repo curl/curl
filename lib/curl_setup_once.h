@@ -456,10 +456,16 @@ typedef unsigned int bit;
 
 #ifdef __VMS
 #define argv_item_t  __char_ptr32
+#define argv_strlen_func  strlen
+#define argv_fill_char  ' '
 #elif defined(_UNICODE)
-#define argv_item_t wchar_t *
+#define argv_item_t  wchar_t *
+#define argv_strlen_func  wcslen
+#define argv_fill_char  L' '
 #else
 #define argv_item_t  char *
+#define argv_strlen_func  strlen
+#define argv_fill_char  ' '
 #endif
 
 
