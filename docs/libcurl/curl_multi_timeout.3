@@ -45,9 +45,9 @@ The timeout value returned in the long \fBtimeout\fP points to, is in number
 of milliseconds at this moment. If 0, it means you should proceed immediately
 without waiting for anything. If it returns -1, there's no timeout at all set.
 
-An application that uses the multi_socket API SHOULD NOT use this function, but
-SHOULD instead use \fIcurl_multi_setopt(3)\fP and its
-\fPCURLMOPT_TIMERFUNCTION\fP option for proper and desired behavior.
+An application that uses the multi_socket API SHOULD NOT use this function,
+but SHOULD instead use the \fICURLMOPT_TIMERFUNCTION(3)\fP option for proper
+and desired behavior.
 
 Note: if libcurl returns a -1 timeout here, it just means that libcurl
 currently has no stored timeout value. You must not wait too long (more than a
@@ -69,9 +69,11 @@ timeout.tv_usec = (timeo % 1000) * 1000;
 select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 .fi
 .SH TYPICAL USAGE
-Call \fIcurl_multi_timeout(3)\fP, then wait for action on the sockets. You
-figure out which sockets to wait for by calling \fIcurl_multi_fdset(3)\fP or
-by a previous call to \fIcurl_multi_socket(3)\fP.
+Call \fIcurl_multi_timeout(3)\fP, then wait for action on the sockets. Figure
+out which sockets to wait for by calling \fIcurl_multi_fdset(3)\fP.
+
+When there is activity or timeout, call \fIcurl_multi_perform(3)\fP and then
+loop - until all transfers are complete.
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4.
 .SH RETURN VALUE
