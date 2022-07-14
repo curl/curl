@@ -46,7 +46,7 @@ of milliseconds at this moment. If 0, it means you should proceed immediately
 without waiting for anything. If it returns -1, there's no timeout at all set.
 
 An application that uses the multi_socket API SHOULD NOT use this function,
-but SHOULD instead use the \fPCURLMOPT_TIMERFUNCTION(3)\fP option for proper
+but SHOULD instead use the \fICURLMOPT_TIMERFUNCTION(3)\fP option for proper
 and desired behavior.
 
 Note: if libcurl returns a -1 timeout here, it just means that libcurl
