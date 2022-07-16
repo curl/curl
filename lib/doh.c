@@ -243,6 +243,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
        the gcc typecheck helpers */
     struct dynbuf *resp = &p->serverdoh;
     ERROR_CHECK_SETOPT(CURLOPT_URL, url);
+    ERROR_CHECK_SETOPT(CURLOPT_DEFAULT_PROTOCOL, "https");
     ERROR_CHECK_SETOPT(CURLOPT_WRITEFUNCTION, doh_write_cb);
     ERROR_CHECK_SETOPT(CURLOPT_WRITEDATA, resp);
     ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDS, p->dohbuffer);
