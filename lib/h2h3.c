@@ -258,9 +258,6 @@ CURLcode Curl_pseudo_headers(struct Curl_easy *data,
       nva[i].valuelen = (end - hdbuf);
     }
 
-    nva[i].value = hdbuf;
-    nva[i].valuelen = (end - hdbuf);
-
     ++i;
   }
 
