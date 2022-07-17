@@ -459,6 +459,3 @@ clean:
 
 distclean vclean: clean
 	@$(call DEL, $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY))
-
-$(LIBCARES_PATH)/libcares.a:
-	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.m32
