@@ -77,6 +77,7 @@
 bool curl_win32_idn_to_ascii(const char *in, char **out);
 #endif  /* USE_LIBIDN2 */
 
+#include "doh.h"
 #include "urldata.h"
 #include "netrc.h"
 

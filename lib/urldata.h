@@ -598,23 +598,6 @@ enum doh_slots {
   DOH_PROBE_SLOTS
 };
 
-/* one of these for each DoH request */
-struct dnsprobe {
-  CURL *easy;
-  int dnstype;
-  unsigned char dohbuffer[512];
-  size_t dohlen;
-  struct dynbuf serverdoh;
-};
-
-struct dohdata {
-  struct curl_slist *headers;
-  struct dnsprobe probe[DOH_PROBE_SLOTS];
-  unsigned int pending; /* still outstanding requests */
-  int port;
-  const char *host;
-};
-
 /*
  * Request specific data in the easy handle (Curl_easy).  Previously,
  * these members were on the connectdata struct but since a conn struct may

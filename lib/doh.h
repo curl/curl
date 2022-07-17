@@ -29,21 +29,6 @@
 
 #ifndef CURL_DISABLE_DOH
 
-/*
- * Curl_doh() resolve a name using DoH (DNS-over-HTTPS). It resolves a name
- * and returns a 'Curl_addrinfo *' with the address information.
- */
-
-struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
-                               const char *hostname,
-                               int port,
-                               int *waitp);
-
-CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
-                              struct Curl_dns_entry **dns);
-
-int Curl_doh_getsock(struct connectdata *conn, curl_socket_t *socks);
-
 typedef enum {
   DOH_OK,
   DOH_DNS_BAD_LABEL,    /* 1 */
@@ -68,6 +53,38 @@ typedef enum {
   DNS_TYPE_AAAA = 28,
   DNS_TYPE_DNAME = 39           /* RFC6672 */
 } DNStype;
+
+/* one of these for each DoH request */
+struct dnsprobe {
+  CURL *easy;
+  DNStype dnstype;
+  unsigned char dohbuffer[512];
+  size_t dohlen;
+  struct dynbuf serverdoh;
+};
+
+struct dohdata {
+  struct curl_slist *headers;
+  struct dnsprobe probe[DOH_PROBE_SLOTS];
+  unsigned int pending; /* still outstanding requests */
+  int port;
+  const char *host;
+};
+
+/*
+ * Curl_doh() resolve a name using DoH (DNS-over-HTTPS). It resolves a name
+ * and returns a 'Curl_addrinfo *' with the address information.
+ */
+
+struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
+                               const char *hostname,
+                               int port,
+                               int *waitp);
+
+CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
+                              struct Curl_dns_entry **dns);
+
+int Curl_doh_getsock(struct connectdata *conn, curl_socket_t *socks);
 
 #define DOH_MAX_ADDR 24
 #define DOH_MAX_CNAME 4
