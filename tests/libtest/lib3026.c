@@ -30,7 +30,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define NUM_THREADS 1000
+#define NUM_THREADS 100
 
 static void *run_thread(void *ptr)
 {
