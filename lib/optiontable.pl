@@ -103,7 +103,7 @@ for my $name (sort @names) {
 }
 
 print <<FOOT
-  {NULL, CURLOPT_LASTENTRY, 0, 0} /* end of table */
+  {NULL, CURLOPT_LASTENTRY, CURLOT_LONG, 0} /* end of table */
 };
 
 #ifdef DEBUGBUILD
