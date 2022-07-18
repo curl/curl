@@ -22,6 +22,7 @@ Server: test-server/fake
 Content-Length: 4
 Content-Type: text/html
 Funny-head: yesyes
+Set-Cookie: blankdomain=sure; domain=; path=/
 %if !hyper
 Set-Cookie: foobar=name; domain=anything.com; path=/ ; secure
 Set-Cookie:ismatch=this  ; domain=test31.curl; path=/silly/
@@ -162,6 +163,7 @@ test31.curl	FALSE	/we/want/	FALSE	2118138987	nodomain	value
 #HttpOnly_.test31.curl	TRUE	/p1/	FALSE	0	httpo1	value1
 .test31.curl	TRUE	/overwrite	FALSE	0	overwrite	this2
 .test31.curl	TRUE	/silly/	FALSE	0	ismatch	this
+test31.curl	FALSE	/	FALSE	0	blankdomain	sure
 </file>
 </verify>
 </testcase>
