@@ -34,9 +34,6 @@
 /* Version number of this archive. */
 #undef VERSION
 
-/* Define if you have the getpass function.  */
-#undef HAVE_GETPASS
-
 /* Define cpu-machine-OS */
 #define OS "ARM-RISC OS"
 
@@ -54,9 +51,6 @@
 
 /* Define if you need the _REENTRANT define for some functions */
 #undef NEED_REENTRANT
-
-/* Define if you have the Kerberos4 libraries (including -ldes) */
-#undef HAVE_KRB4
 
 /* Define if you want to enable IPv6 support */
 #undef ENABLE_IPV6
@@ -78,9 +72,6 @@
 
 /* Define if you have the alarm function. */
 #define HAVE_ALARM
-
-/* Define if you have the <alloca.h> header file. */
-#define HAVE_ALLOCA_H
 
 /* Define if you have the <arpa/inet.h> header file. */
 #define HAVE_ARPA_INET_H
@@ -109,17 +100,11 @@
 /* Define if you have the `gethostname' function. */
 #define HAVE_GETHOSTNAME
 
-/* Define if you have the <getopt.h> header file. */
-#define HAVE_GETOPT_H
-
 /* Define if you have the `getpass_r' function. */
 #undef HAVE_GETPASS_R
 
 /* Define if you have the `getpwuid' function. */
 #undef HAVE_GETPWUID
-
-/* Define if you have the `getservbyname' function. */
-#undef HAVE_GETSERVBYNAME
 
 /* Define if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY
@@ -127,53 +112,20 @@
 /* Define if you have the `timeval' struct. */
 #define HAVE_STRUCT_TIMEVAL
 
-/* Define if you have the `inet_addr' function. */
-#undef HAVE_INET_ADDR
-
 /* Define if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H
 
 /* Define if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
-/* Define if you have the `krb_get_our_ip_for_realm' function. */
-#undef HAVE_KRB_GET_OUR_IP_FOR_REALM
-
-/* Define if you have the <krb.h> header file. */
-#undef HAVE_KRB_H
-
-/* Define if you have the `nsl' library (-lnsl). */
-#undef HAVE_LIBNSL
-
-/* Define if you have the `resolv' library (-lresolv). */
-#undef HAVE_LIBRESOLV
-
-/* Define if you have the `resolve' library (-lresolve). */
-#undef HAVE_LIBRESOLVE
-
 /* Define if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
-
-/* Define if you have the `ucb' library (-lucb). */
-#undef HAVE_LIBUCB
-
-/* Define if you have the `localtime_r' function. */
-#undef HAVE_LOCALTIME_R
-
-/* Define if you have the <malloc.h> header file. */
-#define HAVE_MALLOC_H
 
 /* Define if you need the malloc.h header file even with stdlib.h  */
 /* #define NEED_MALLOC_H 1 */
 
-/* Define if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
 /* Define if you have the <netdb.h> header file. */
 #define HAVE_NETDB_H
-
-/* Define if you have the <netinet/if_ether.h> header file. */
-#undef HAVE_NETINET_IF_ETHER_H
 
 /* Define if you have the <netinet/in.h> header file. */
 #define HAVE_NETINET_IN_H
@@ -181,44 +133,14 @@
 /* Define if you have the <net/if.h> header file. */
 #define HAVE_NET_IF_H
 
-/* Define if you have the <openssl/crypto.h> header file. */
-#undef HAVE_OPENSSL_CRYPTO_H
-
-/* Define if you have the <openssl/err.h> header file. */
-#undef HAVE_OPENSSL_ERR_H
-
-/* Define if you have the <openssl/pem.h> header file. */
-#undef HAVE_OPENSSL_PEM_H
-
-/* Define if you have the <openssl/rsa.h> header file. */
-#undef HAVE_OPENSSL_RSA_H
-
-/* Define if you have the <openssl/ssl.h> header file. */
-#undef HAVE_OPENSSL_SSL_H
-
-/* Define if you have the <openssl/x509.h> header file. */
-#undef HAVE_OPENSSL_X509_H
-
-/* Define if you have the <pem.h> header file. */
-#undef HAVE_PEM_H
-
 /* Define if you have the <pwd.h> header file. */
 #undef HAVE_PWD_H
 
 /* Define if you have the `RAND_egd' function. */
 #undef HAVE_RAND_EGD
 
-/* Define if you have the `RAND_screen' function. */
-#undef HAVE_RAND_SCREEN
-
-/* Define if you have the `RAND_status' function. */
-#undef HAVE_RAND_STATUS
-
 /* Define if you have the `select' function. */
 #define HAVE_SELECT
-
-/* Define if you have the `setvbuf' function. */
-#undef HAVE_SETVBUF
 
 /* Define if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
@@ -250,9 +172,6 @@
 /* Define if you have the `strdup' function. */
 #define HAVE_STRDUP
 
-/* Define if you have the `strftime' function. */
-#define HAVE_STRFTIME
-
 /* Define if you have the `stricmp' function. */
 #define HAVE_STRICMP
 
@@ -261,9 +180,6 @@
 
 /* Define if you have the <string.h> header file. */
 #define HAVE_STRING_H
-
-/* Define if you have the `strstr' function. */
-#define HAVE_STRSTR
 
 /* Define if you have the `strtok_r' function. */
 #undef HAVE_STRTOK_R
@@ -301,23 +217,14 @@
 /* Define if you have the <time.h> header file. */
 #undef HAVE_TIME_H
 
-/* Define if you have the `uname' function. */
-#define HAVE_UNAME
-
 /* Define if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H
-
-/* Define if you have the <x509.h> header file. */
-#undef HAVE_X509_H
 
 /* Name of package */
 #undef PACKAGE
 
 /* The size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
-
-/* The size of `long double', as computed by sizeof. */
-#undef SIZEOF_LONG_DOUBLE
 
 /* The size of `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
@@ -359,9 +266,6 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef ssize_t
 
-/* Define if you have the ioctl function. */
-#define HAVE_IOCTL
-
 /* Define if you have a working ioctl FIONBIO function. */
 #define HAVE_IOCTL_FIONBIO
 
@@ -385,33 +289,6 @@
 
 /* Define to the function return type for recv. */
 #define RECV_TYPE_RETV ssize_t
-
-/* Define 1 if you have the recvfrom function. */
-#define HAVE_RECVFROM 1
-
-/* Define to the type of arg 1 for recvfrom. */
-#define RECVFROM_TYPE_ARG1 int
-
-/* Define to the type pointed by arg 2 for recvfrom. */
-#define RECVFROM_TYPE_ARG2 void
-
-/* Define if the type pointed by arg 2 for recvfrom is void. */
-#define RECVFROM_TYPE_ARG2_IS_VOID
-
-/* Define to the type of arg 3 for recvfrom. */
-#define RECVFROM_TYPE_ARG3 size_t
-
-/* Define to the type of arg 4 for recvfrom. */
-#define RECVFROM_TYPE_ARG4 int
-
-/* Define to the type pointed by arg 5 for recvfrom. */
-#define RECVFROM_TYPE_ARG5 struct sockaddr
-
-/* Define to the type pointed by arg 6 for recvfrom. */
-#define RECVFROM_TYPE_ARG6 int
-
-/* Define to the function return type for recvfrom. */
-#define RECVFROM_TYPE_RETV ssize_t
 
 /* Define if you have the send function. */
 #define HAVE_SEND 1

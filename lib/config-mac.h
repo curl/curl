@@ -47,7 +47,6 @@
 #define HAVE_GETTIMEOFDAY       1
 #define HAVE_FCNTL_H            1
 #define HAVE_SYS_STAT_H         1
-#define HAVE_ALLOCA_H           1
 #define HAVE_STDLIB_H           1
 #define HAVE_TIME_H             1
 #define HAVE_UTIME_H            1
@@ -59,10 +58,6 @@
 #define HAVE_ALARM              1
 #define HAVE_FTRUNCATE          1
 #define HAVE_UTIME              1
-#define HAVE_SETVBUF            1
-#define HAVE_STRFTIME           1
-#define HAVE_INET_ADDR          1
-#define HAVE_MEMCPY             1
 #define HAVE_SELECT             1
 #define HAVE_SOCKET             1
 #define HAVE_STRUCT_TIMEVAL     1
@@ -76,10 +71,8 @@
 
 #define CURL_DISABLE_LDAP       1
 
-#define HAVE_RAND_STATUS        1
 #define HAVE_RAND_EGD           1
 
-#define HAVE_IOCTL              1
 #define HAVE_IOCTL_FIONBIO      1
 
 #define SIZEOF_INT              4
@@ -92,16 +85,6 @@
 #define RECV_TYPE_ARG3 size_t
 #define RECV_TYPE_ARG4 int
 #define RECV_TYPE_RETV ssize_t
-
-#define HAVE_RECVFROM 1
-#define RECVFROM_TYPE_ARG1 int
-#define RECVFROM_TYPE_ARG2 void
-#define RECVFROM_TYPE_ARG3 size_t
-#define RECVFROM_TYPE_ARG4 int
-#define RECVFROM_TYPE_ARG5 struct sockaddr
-#define RECVFROM_TYPE_ARG6 int
-#define RECVFROM_TYPE_RETV ssize_t
-#define RECVFROM_TYPE_ARG2_IS_VOID 1
 
 #define HAVE_SEND 1
 #define SEND_TYPE_ARG1 int

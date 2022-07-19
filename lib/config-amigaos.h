@@ -33,26 +33,16 @@
 #define HAVE_ARPA_INET_H 1
 #define HAVE_CLOSESOCKET_CAMEL 1
 #define HAVE_ERRNO_H 1
-#define HAVE_INET_ADDR 1
 #define HAVE_INTTYPES_H 1
 #define HAVE_IOCTLSOCKET_CAMEL 1
 #define HAVE_IOCTLSOCKET_CAMEL_FIONBIO 1
 #define HAVE_LIBZ 1
 #define HAVE_LONGLONG 1
-#define HAVE_MALLOC_H 1
-#define HAVE_MEMORY_H 1
 #define HAVE_NETDB_H 1
 #define HAVE_NETINET_IN_H 1
 #define HAVE_NET_IF_H 1
-#define HAVE_OPENSSL_CRYPTO_H 1
-#define HAVE_OPENSSL_ERR_H 1
-#define HAVE_OPENSSL_PEM_H 1
-#define HAVE_OPENSSL_RSA_H 1
-#define HAVE_OPENSSL_SSL_H 1
-#define HAVE_OPENSSL_X509_H 1
 #define HAVE_PWD_H 1
 #define HAVE_RAND_EGD 1
-#define HAVE_RAND_STATUS 1
 #define HAVE_SELECT 1
 #define HAVE_SETJMP_H 1
 #define HAVE_SIGNAL 1
@@ -60,11 +50,9 @@
 #define HAVE_SOCKET 1
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
-#define HAVE_STRFTIME 1
 #define HAVE_STRICMP 1
 #define HAVE_STRINGS_H 1
 #define HAVE_STRING_H 1
-#define HAVE_STRSTR 1
 #define HAVE_STRUCT_TIMEVAL 1
 #define HAVE_SYS_PARAM_H 1
 #define HAVE_SYS_SOCKET_H 1
@@ -73,7 +61,6 @@
 #define HAVE_SYS_TIME_H 1
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_TIME_H 1
-#define HAVE_UNAME 1
 #define HAVE_UNISTD_H 1
 #define HAVE_UTIME 1
 #define HAVE_UTIME_H 1
@@ -132,15 +119,6 @@
 #define RECV_TYPE_ARG3 long
 #define RECV_TYPE_ARG4 long
 #define RECV_TYPE_RETV long
-
-#define HAVE_RECVFROM 1
-#define RECVFROM_TYPE_ARG1 long
-#define RECVFROM_TYPE_ARG2 char
-#define RECVFROM_TYPE_ARG3 long
-#define RECVFROM_TYPE_ARG4 long
-#define RECVFROM_TYPE_ARG5 struct sockaddr
-#define RECVFROM_TYPE_ARG6 long
-#define RECVFROM_TYPE_RETV long
 
 #define HAVE_SEND 1
 #define SEND_TYPE_ARG1 int

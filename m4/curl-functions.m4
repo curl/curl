@@ -266,27 +266,6 @@ curl_includes_socket="\
 ])
 
 
-dnl CURL_INCLUDES_STDIO
-dnl -------------------------------------------------
-dnl Set up variable with list of headers that must be
-dnl included when stdio.h is to be included.
-
-AC_DEFUN([CURL_INCLUDES_STDIO], [
-curl_includes_stdio="\
-/* includes start */
-#ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-#endif
-#ifdef HAVE_STDIO_H
-#  include <stdio.h>
-#endif
-/* includes end */"
-  AC_CHECK_HEADERS(
-    sys/types.h stdio.h,
-    [], [], [$curl_includes_stdio])
-])
-
-
 dnl CURL_INCLUDES_STDLIB
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
@@ -3461,93 +3440,6 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
 ])
 
 
-dnl CURL_CHECK_FUNC_IOCTL
-dnl -------------------------------------------------
-dnl Verify if ioctl is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_ioctl, then
-dnl HAVE_IOCTL will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
-  AC_REQUIRE([CURL_INCLUDES_STROPTS])dnl
-  #
-  tst_links_ioctl="unknown"
-  tst_proto_ioctl="unknown"
-  tst_compi_ioctl="unknown"
-  tst_allow_ioctl="unknown"
-  #
-  AC_MSG_CHECKING([if ioctl can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([ioctl])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_ioctl="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_ioctl="no"
-  ])
-  #
-  if test "$tst_links_ioctl" = "yes"; then
-    AC_MSG_CHECKING([if ioctl is prototyped])
-    AC_EGREP_CPP([ioctl],[
-      $curl_includes_stropts
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_ioctl="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_ioctl="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_ioctl" = "yes"; then
-    AC_MSG_CHECKING([if ioctl is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_stropts
-      ]],[[
-        if(0 != ioctl(0, 0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_ioctl="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_ioctl="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_ioctl" = "yes"; then
-    AC_MSG_CHECKING([if ioctl usage allowed])
-    if test "x$curl_disallow_ioctl" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_ioctl="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_ioctl="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if ioctl might be used])
-  if test "$tst_links_ioctl" = "yes" &&
-     test "$tst_proto_ioctl" = "yes" &&
-     test "$tst_compi_ioctl" = "yes" &&
-     test "$tst_allow_ioctl" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_IOCTL, 1,
-      [Define to 1 if you have the ioctl function.])
-    curl_cv_func_ioctl="yes"
-    CURL_CHECK_FUNC_IOCTL_FIONBIO
-    CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_ioctl="no"
-  fi
-])
-
-
 dnl CURL_CHECK_FUNC_IOCTL_FIONBIO
 dnl -------------------------------------------------
 dnl Verify if ioctl with the FIONBIO command is
@@ -4075,122 +3967,6 @@ AC_DEFUN([CURL_CHECK_FUNC_LISTXATTR], [
 ])
 
 
-dnl CURL_CHECK_FUNC_LOCALTIME_R
-dnl -------------------------------------------------
-dnl Verify if localtime_r is available, prototyped, can
-dnl be compiled and seems to work. If all of these are
-dnl true, and usage has not been previously disallowed
-dnl with shell variable curl_disallow_localtime_r, then
-dnl HAVE_LOCALTIME_R will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  AC_REQUIRE([CURL_INCLUDES_TIME])dnl
-  #
-  tst_links_localtime_r="unknown"
-  tst_proto_localtime_r="unknown"
-  tst_compi_localtime_r="unknown"
-  tst_works_localtime_r="unknown"
-  tst_allow_localtime_r="unknown"
-  #
-  AC_MSG_CHECKING([if localtime_r can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([localtime_r])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_localtime_r="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_localtime_r="no"
-  ])
-  #
-  if test "$tst_links_localtime_r" = "yes"; then
-    AC_MSG_CHECKING([if localtime_r is prototyped])
-    AC_EGREP_CPP([localtime_r],[
-      $curl_includes_time
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_localtime_r="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_localtime_r="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_localtime_r" = "yes"; then
-    AC_MSG_CHECKING([if localtime_r is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_time
-      ]],[[
-        if(0 != localtime_r(0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_localtime_r="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_localtime_r="no"
-    ])
-  fi
-  #
-  dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
-    test "$tst_compi_localtime_r" = "yes"; then
-    AC_MSG_CHECKING([if localtime_r seems to work])
-    CURL_RUN_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_stdlib
-        $curl_includes_time
-      ]],[[
-        time_t clock = 1170352587;
-        struct tm *tmp = 0;
-        struct tm result;
-        tmp = localtime_r(&clock, &result);
-        if(tmp)
-          exit(0);
-        else
-          exit(1);
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_works_localtime_r="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_works_localtime_r="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_localtime_r" = "yes" &&
-    test "$tst_works_localtime_r" != "no"; then
-    AC_MSG_CHECKING([if localtime_r usage allowed])
-    if test "x$curl_disallow_localtime_r" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_localtime_r="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_localtime_r="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if localtime_r might be used])
-  if test "$tst_links_localtime_r" = "yes" &&
-     test "$tst_proto_localtime_r" = "yes" &&
-     test "$tst_compi_localtime_r" = "yes" &&
-     test "$tst_allow_localtime_r" = "yes" &&
-     test "$tst_works_localtime_r" != "no"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_LOCALTIME_R, 1,
-      [Define to 1 if you have a working localtime_r function.])
-    curl_cv_func_localtime_r="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_localtime_r="no"
-  fi
-])
-
-
 dnl CURL_CHECK_FUNC_MEMRCHR
 dnl -------------------------------------------------
 dnl Verify if memrchr is available, prototyped, and
@@ -4299,10 +4075,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
 dnl CURL_CHECK_FUNC_POLL
 dnl -------------------------------------------------
 dnl Verify if poll is available, prototyped, can
-dnl be compiled and seems to work. If all of these are
-dnl true, and usage has not been previously disallowed
-dnl with shell variable curl_disallow_poll, then
-dnl HAVE_POLL will be defined.
+dnl be compiled and seems to work.
 
 AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
@@ -4432,8 +4205,6 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
      test "$tst_allow_poll" = "yes" &&
      test "$tst_works_poll" != "no"; then
     AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_POLL, 1,
-      [Define to 1 if you have a working poll function.])
     AC_DEFINE_UNQUOTED(HAVE_POLL_FINE, 1,
       [If you have a fine poll])
     curl_cv_func_poll="yes"
@@ -4562,104 +4333,6 @@ AC_DEFUN([CURL_CHECK_FUNC_REMOVEXATTR], [
   else
     AC_MSG_RESULT([no])
     curl_cv_func_removexattr="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_SETSOCKOPT
-dnl -------------------------------------------------
-dnl Verify if setsockopt is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_setsockopt, then
-dnl HAVE_SETSOCKOPT will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  #
-  tst_links_setsockopt="unknown"
-  tst_proto_setsockopt="unknown"
-  tst_compi_setsockopt="unknown"
-  tst_allow_setsockopt="unknown"
-  #
-  AC_MSG_CHECKING([if setsockopt can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_winsock2
-      $curl_includes_bsdsocket
-      $curl_includes_sys_socket
-    ]],[[
-      if(0 != setsockopt(0, 0, 0, 0, 0))
-        return 1;
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_setsockopt="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_setsockopt="no"
-  ])
-  #
-  if test "$tst_links_setsockopt" = "yes"; then
-    AC_MSG_CHECKING([if setsockopt is prototyped])
-    AC_EGREP_CPP([setsockopt],[
-      $curl_includes_winsock2
-      $curl_includes_bsdsocket
-      $curl_includes_sys_socket
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_setsockopt="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_setsockopt="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_setsockopt" = "yes"; then
-    AC_MSG_CHECKING([if setsockopt is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_winsock2
-      $curl_includes_bsdsocket
-        $curl_includes_sys_socket
-      ]],[[
-        if(0 != setsockopt(0, 0, 0, 0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_setsockopt="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_setsockopt="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_setsockopt" = "yes"; then
-    AC_MSG_CHECKING([if setsockopt usage allowed])
-    if test "x$curl_disallow_setsockopt" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_setsockopt="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_setsockopt="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if setsockopt might be used])
-  if test "$tst_links_setsockopt" = "yes" &&
-     test "$tst_proto_setsockopt" = "yes" &&
-     test "$tst_compi_setsockopt" = "yes" &&
-     test "$tst_allow_setsockopt" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_SETSOCKOPT, 1,
-      [Define to 1 if you have the setsockopt function.])
-    curl_cv_func_setsockopt="yes"
-    CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_setsockopt="no"
   fi
 ])
 
@@ -5654,8 +5327,8 @@ dnl -------------------------------------------------
 dnl Verify if strerror_r is available, prototyped, can be compiled and
 dnl seems to work. If all of these are true, and usage has not been
 dnl previously disallowed with shell variable curl_disallow_strerror_r,
-dnl then HAVE_STRERROR_R and STRERROR_R_TYPE_ARG3 will be defined, as
-dnl well as one of HAVE_GLIBC_STRERROR_R or HAVE_POSIX_STRERROR_R.
+dnl then HAVE_STRERROR_R will be defined, as well as one of
+dnl HAVE_GLIBC_STRERROR_R or HAVE_POSIX_STRERROR_R.
 dnl
 dnl glibc-style strerror_r:
 dnl
@@ -5889,16 +5562,12 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         [Define to 1 if you have the strerror_r function.])
       AC_DEFINE_UNQUOTED(HAVE_GLIBC_STRERROR_R, 1,
         [Define to 1 if you have a working glibc-style strerror_r function.])
-      AC_DEFINE_UNQUOTED(STRERROR_R_TYPE_ARG3, $tst_glibc_strerror_r_type_arg3,
-        [Define to the type of arg 3 for strerror_r.])
     fi
     if test "$tst_posix_strerror_r" = "yes"; then
       AC_DEFINE_UNQUOTED(HAVE_STRERROR_R, 1,
         [Define to 1 if you have the strerror_r function.])
       AC_DEFINE_UNQUOTED(HAVE_POSIX_STRERROR_R, 1,
         [Define to 1 if you have a working POSIX-style strerror_r function.])
-      AC_DEFINE_UNQUOTED(STRERROR_R_TYPE_ARG3, $tst_posix_strerror_r_type_arg3,
-        [Define to the type of arg 3 for strerror_r.])
     fi
     curl_cv_func_strerror_r="yes"
   else
@@ -5995,261 +5664,6 @@ AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
   else
     AC_MSG_RESULT([no])
     curl_cv_func_stricmp="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_STRNCMPI
-dnl -------------------------------------------------
-dnl Verify if strncmpi is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_strncmpi, then
-dnl HAVE_STRNCMPI will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_STRNCMPI], [
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
-  #
-  tst_links_strncmpi="unknown"
-  tst_proto_strncmpi="unknown"
-  tst_compi_strncmpi="unknown"
-  tst_allow_strncmpi="unknown"
-  #
-  AC_MSG_CHECKING([if strncmpi can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([strncmpi])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_strncmpi="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_strncmpi="no"
-  ])
-  #
-  if test "$tst_links_strncmpi" = "yes"; then
-    AC_MSG_CHECKING([if strncmpi is prototyped])
-    AC_EGREP_CPP([strncmpi],[
-      $curl_includes_string
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_strncmpi="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_strncmpi="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_strncmpi" = "yes"; then
-    AC_MSG_CHECKING([if strncmpi is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_string
-      ]],[[
-        if(0 != strncmpi(0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_strncmpi="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_strncmpi="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_strncmpi" = "yes"; then
-    AC_MSG_CHECKING([if strncmpi usage allowed])
-    if test "x$curl_disallow_strncmpi" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_strncmpi="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_strncmpi="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if strncmpi might be used])
-  if test "$tst_links_strncmpi" = "yes" &&
-     test "$tst_proto_strncmpi" = "yes" &&
-     test "$tst_compi_strncmpi" = "yes" &&
-     test "$tst_allow_strncmpi" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_STRNCMPI, 1,
-      [Define to 1 if you have the strncmpi function.])
-    curl_cv_func_strncmpi="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_strncmpi="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_STRNICMP
-dnl -------------------------------------------------
-dnl Verify if strnicmp is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_strnicmp, then
-dnl HAVE_STRNICMP will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_STRNICMP], [
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
-  #
-  tst_links_strnicmp="unknown"
-  tst_proto_strnicmp="unknown"
-  tst_compi_strnicmp="unknown"
-  tst_allow_strnicmp="unknown"
-  #
-  AC_MSG_CHECKING([if strnicmp can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([strnicmp])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_strnicmp="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_strnicmp="no"
-  ])
-  #
-  if test "$tst_links_strnicmp" = "yes"; then
-    AC_MSG_CHECKING([if strnicmp is prototyped])
-    AC_EGREP_CPP([strnicmp],[
-      $curl_includes_string
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_strnicmp="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_strnicmp="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_strnicmp" = "yes"; then
-    AC_MSG_CHECKING([if strnicmp is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_string
-      ]],[[
-        if(0 != strnicmp(0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_strnicmp="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_strnicmp="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_strnicmp" = "yes"; then
-    AC_MSG_CHECKING([if strnicmp usage allowed])
-    if test "x$curl_disallow_strnicmp" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_strnicmp="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_strnicmp="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if strnicmp might be used])
-  if test "$tst_links_strnicmp" = "yes" &&
-     test "$tst_proto_strnicmp" = "yes" &&
-     test "$tst_compi_strnicmp" = "yes" &&
-     test "$tst_allow_strnicmp" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_STRNICMP, 1,
-      [Define to 1 if you have the strnicmp function.])
-    curl_cv_func_strnicmp="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_strnicmp="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_STRSTR
-dnl -------------------------------------------------
-dnl Verify if strstr is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_strstr, then
-dnl HAVE_STRSTR will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_STRSTR], [
-  AC_REQUIRE([CURL_INCLUDES_STRING])dnl
-  #
-  tst_links_strstr="unknown"
-  tst_proto_strstr="unknown"
-  tst_compi_strstr="unknown"
-  tst_allow_strstr="unknown"
-  #
-  AC_MSG_CHECKING([if strstr can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([strstr])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_strstr="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_strstr="no"
-  ])
-  #
-  if test "$tst_links_strstr" = "yes"; then
-    AC_MSG_CHECKING([if strstr is prototyped])
-    AC_EGREP_CPP([strstr],[
-      $curl_includes_string
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_strstr="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_strstr="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_strstr" = "yes"; then
-    AC_MSG_CHECKING([if strstr is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_string
-      ]],[[
-        if(0 != strstr(0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_strstr="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_strstr="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_strstr" = "yes"; then
-    AC_MSG_CHECKING([if strstr usage allowed])
-    if test "x$curl_disallow_strstr" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_strstr="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_strstr="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if strstr might be used])
-  if test "$tst_links_strstr" = "yes" &&
-     test "$tst_proto_strstr" = "yes" &&
-     test "$tst_compi_strstr" = "yes" &&
-     test "$tst_allow_strstr" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_STRSTR, 1,
-      [Define to 1 if you have the strstr function.])
-    curl_cv_func_strstr="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_strstr="no"
   fi
 ])
 
@@ -6420,91 +5834,6 @@ AC_DEFUN([CURL_CHECK_FUNC_STRTOLL], [
   else
     AC_MSG_RESULT([no])
     curl_cv_func_strtoll="no"
-  fi
-])
-
-
-dnl CURL_CHECK_FUNC_WRITEV
-dnl -------------------------------------------------
-dnl Verify if writev is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_writev, then
-dnl HAVE_WRITEV will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_WRITEV], [
-  AC_REQUIRE([CURL_INCLUDES_SYS_UIO])dnl
-  #
-  tst_links_writev="unknown"
-  tst_proto_writev="unknown"
-  tst_compi_writev="unknown"
-  tst_allow_writev="unknown"
-  #
-  AC_MSG_CHECKING([if writev can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([writev])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_writev="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_writev="no"
-  ])
-  #
-  if test "$tst_links_writev" = "yes"; then
-    AC_MSG_CHECKING([if writev is prototyped])
-    AC_EGREP_CPP([writev],[
-      $curl_includes_sys_uio
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_writev="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_writev="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_writev" = "yes"; then
-    AC_MSG_CHECKING([if writev is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_sys_uio
-      ]],[[
-        if(0 != writev(0, 0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_writev="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_writev="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_writev" = "yes"; then
-    AC_MSG_CHECKING([if writev usage allowed])
-    if test "x$curl_disallow_writev" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_writev="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_writev="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if writev might be used])
-  if test "$tst_links_writev" = "yes" &&
-     test "$tst_proto_writev" = "yes" &&
-     test "$tst_compi_writev" = "yes" &&
-     test "$tst_allow_writev" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_WRITEV, 1,
-      [Define to 1 if you have the writev function.])
-    curl_cv_func_writev="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_writev="no"
   fi
 ])
 

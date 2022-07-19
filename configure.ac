@@ -541,14 +541,12 @@ case X-"$curl_cv_native_windows" in
     CURL_CHECK_HEADER_WS2TCPIP
     CURL_CHECK_HEADER_WINCRYPT
     CURL_CHECK_HEADER_WINLDAP
-    CURL_CHECK_HEADER_WINBER
     ;;
   *)
     curl_cv_header_winsock2_h="no"
     curl_cv_header_ws2tcpip_h="no"
     curl_cv_header_wincrypt_h="no"
     curl_cv_header_winldap_h="no"
-    curl_cv_header_winber_h="no"
     ;;
 esac
 CURL_CHECK_WIN32_LARGEFILE
@@ -1558,7 +1556,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
 fi
 
 if test x$CURL_DISABLE_LDAP != x1 ; then
-  AC_CHECK_FUNCS([ldap_url_parse ldap_init_fd])
+  AC_CHECK_FUNCS([ldap_url_parse])
 
   if test "$LDAPLIBNAME" = "wldap32"; then
     curl_ldap_msg="enabled (winldap)"
@@ -3234,7 +3232,6 @@ AC_CHECK_HEADERS(
         termios.h \
         termio.h \
         fcntl.h \
-        alloca.h \
         io.h \
         pwd.h \
         utime.h \
@@ -3311,21 +3308,6 @@ AC_CHECK_TYPE(long long,
       [Define to 1 if the compiler supports the 'long long' data type.])]
    longlong="yes"
 )
-
-if test "xyes" = "x$longlong"; then
-  AC_MSG_CHECKING([if numberLL works])
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-    ]],[[
-      long long val = 1000LL;
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_LL, 1, [if your compiler supports LL])
-  ],[
-    AC_MSG_RESULT([no])
-  ])
-fi
 
 
 # check for ssize_t
@@ -3433,7 +3415,6 @@ CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL
 CURL_CHECK_FUNC_LOCALTIME_R
 CURL_CHECK_FUNC_MEMRCHR
 CURL_CHECK_FUNC_POLL
-CURL_CHECK_FUNC_SETSOCKOPT
 CURL_CHECK_FUNC_SIGACTION
 CURL_CHECK_FUNC_SIGINTERRUPT
 CURL_CHECK_FUNC_SIGNAL
@@ -3445,8 +3426,6 @@ CURL_CHECK_FUNC_STRCMPI
 CURL_CHECK_FUNC_STRDUP
 CURL_CHECK_FUNC_STRERROR_R
 CURL_CHECK_FUNC_STRICMP
-CURL_CHECK_FUNC_STRNCMPI
-CURL_CHECK_FUNC_STRNICMP
 CURL_CHECK_FUNC_STRSTR
 CURL_CHECK_FUNC_STRTOK_R
 CURL_CHECK_FUNC_STRTOLL
@@ -3482,7 +3461,6 @@ AC_CHECK_FUNCS([fnmatch \
   setlocale \
   setmode \
   setrlimit \
-  usleep \
   utime \
   utimes
 ],[

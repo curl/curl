@@ -797,14 +797,6 @@ $	    write tf "#endif"
 $	    goto cfgh_in_loop1
 $	endif
 $!
-$	if key2 .eqs. "HAVE_LIBDL"
-$	then
-$	    write tf "#ifndef ''key2'"
-$	    write tf "#define ''key2' 1"
-$	    write tf "#endif"
-$	    goto cfgh_in_loop1
-$	endif
-$!
 $	if key2b .eqs. "RAND" .and. key2c .nes. "" .and. key2d .eqs. ""
 $	then
 $	    if (key2c .eqs. "EGD") .or. -
@@ -1669,68 +1661,6 @@ $		goto cfgh_in_loop1
 $	    endif
 $	endif
 $!
-$!
-$!	Process RECVFROM directives
-$!-------------------------------------
-$	if key2a .eqs. "RECVFROM"
-$	then
-$	    if key2 .eqs. "RECVFROM_QUAL_ARG5"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2'"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "RECVFROM_TYPE_ARG1"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' int"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "RECVFROM_TYPE_ARG2"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' void *"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "RECVFROM_TYPE_ARG3"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' size_t"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "RECVFROM_TYPE_ARG4"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' int"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "RECVFROM_TYPE_ARG5"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' struct sockaddr"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "RECVFROM_TYPE_ARG6"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' unsigned int"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "RECVFROM_TYPE_RETV"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' int"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	endif
 $!
 $!	Process SELECT directives
 $!-------------------------------------

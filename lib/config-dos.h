@@ -45,23 +45,19 @@
 #define HAVE_FCNTL_H           1
 #define HAVE_FREEADDRINFO      1
 #define HAVE_GETADDRINFO       1
-#define HAVE_GETPROTOBYNAME    1
 #define HAVE_GETTIMEOFDAY      1
 #define HAVE_IO_H              1
-#define HAVE_IOCTL             1
 #define HAVE_IOCTL_FIONBIO     1
 #define HAVE_IOCTLSOCKET       1
 #define HAVE_IOCTLSOCKET_FIONBIO   1
 #define HAVE_LOCALE_H          1
 #define HAVE_LONGLONG          1
-#define HAVE_MEMORY_H          1
 #define HAVE_NETDB_H           1
 #define HAVE_NETINET_IN_H      1
 #define HAVE_NETINET_TCP_H     1
 #define HAVE_NET_IF_H          1
 #define HAVE_PROCESS_H         1
 #define HAVE_RECV              1
-#define HAVE_RECVFROM          1
 #define HAVE_SELECT            1
 #define HAVE_SEND              1
 #define HAVE_SETJMP_H          1
@@ -73,7 +69,6 @@
 #define HAVE_STRICMP           1
 #define HAVE_STRTOLL           1
 #define HAVE_STRUCT_TIMEVAL    1
-#define HAVE_STRUCT_IN6_ADDR   1
 #define HAVE_SYS_IOCTL_H       1
 #define HAVE_SYS_SOCKET_H      1
 #define HAVE_SYS_STAT_H        1
@@ -85,14 +80,13 @@
 
 #define SIZEOF_INT             4
 #define SIZEOF_LONG            4
-#define SIZEOF_LONG_DOUBLE     16
 #define SIZEOF_SHORT           2
 #define SIZEOF_SIZE_T          4
 #define SIZEOF_CURL_OFF_T      4
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 
-/* Qualifiers for send(), recv(), and recvfrom() */
+/* Qualifiers for send() and recv() */
 
 #define SEND_TYPE_ARG1         int
 #define SEND_QUAL_ARG2         const
@@ -107,15 +101,6 @@
 #define RECV_TYPE_ARG4         int
 #define RECV_TYPE_RETV         int
 
-#define RECVFROM_TYPE_ARG1     int
-#define RECVFROM_TYPE_ARG2     void
-#define RECVFROM_TYPE_ARG3     int
-#define RECVFROM_TYPE_ARG4     int
-#define RECVFROM_TYPE_ARG5     struct sockaddr
-#define RECVFROM_TYPE_ARG6     int
-#define RECVFROM_TYPE_RETV     int
-#define RECVFROM_TYPE_ARG2_IS_VOID 1
-
 #define BSD
 
 /* CURLDEBUG definition enables memory tracking */
@@ -125,12 +110,6 @@
 #ifdef USE_ZLIB
   #define HAVE_ZLIB_H            1
   #define HAVE_LIBZ              1
-#endif
-
-/* USE_OPENSSL on cmd-line */
-#ifdef USE_OPENSSL
-  #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
-  #define OPENSSL_NO_KRB5        1
 #endif
 
 /* to disable LDAP */

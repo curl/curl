@@ -146,7 +146,6 @@ ifeq ($(USE_OPENSSL),1)
   #
   # CFLAGS += -DUSE_TLS_SRP=1                    \
   #           -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES \
-  #           -DHAVE_OPENSSL_PKCS12_H            \
   #           -DHAVE_SSLV2_CLIENT_METHOD         \
   #           -DOPENSSL_NO_DEPRECATED
 
@@ -173,8 +172,7 @@ ifeq ($(USE_ARES),1)
 endif
 
 ifeq ($(USE_IDNA),1)
-  CFLAGS += -DHAVE_LIBIDN -DHAVE_IDN_FREE_H -DHAVE_IDN_FREE -DHAVE_TLD_H \
-            -DHAVE_TLD_STRERROR -I$(LIBIDN_ROOT)/lib
+  CFLAGS += -DHAVE_LIBIDN -I$(LIBIDN_ROOT)/lib
 endif
 
 ifeq ($(USE_DEBUG),1)
