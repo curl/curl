@@ -2,9 +2,9 @@ curl and libcurl 7.85.0
 
  Public curl releases:         210
  Command line options:         248
- curl_easy_setopt() options:   297
+ curl_easy_setopt() options:   299
  Public functions in libcurl:  88
- Contributors:                 2659
+ Contributors:                 2668
 
 This release includes the following changes:
 
@@ -12,43 +12,63 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o asyn-thread: make getaddrinfo_complete return CURLcode [53]
+ o base64: base64url encoding has no padding [41]
  o build: improve OS string in CMake and `config-win32.h` [15]
  o cmake: do not force Windows target versions [28]
  o cmake: fix build for mingw cross compile [33]
+ o cmake: link curl to its dependencies with PRIVATE [57]
+ o cmake: remove APPEND in export(TARGETS) [58]
  o cmake: support ngtcp2 boringssl backend [18]
  o configure: check for the stdatomic.h header in configure [7]
+ o configure: fix --disable-headers-api [55]
+ o cookie: treat a blank domain in Set-Cookie: as non-existing [40]
  o cookie: use %zu to infof() for size_t values [26]
  o curl.h: CURLE_CONV_FAILED is obsoleted [4]
  o curl: output warning when a cookie is dropped due to size [5]
+ o curl: writeout: fix repeated header outputs [47]
  o curl_mime_data.3: polish the wording [6]
+ o curl_multi_timeout.3: clarify usage [48]
  o CURLOPT_SERVER_RESPONSE_TIMEOUT: the new name [16]
  o digest: fix missing increment of 'nc' value for auth-int [39]
  o docs: explain curl_easy_escape/unescape curl handle is ignored [23]
+ o doh: move doh related struct definitions to doh.h [45]
+ o doh: use https protocol by default [51]
  o easy_lock.h: include sched.h if available to fix build [13]
  o easy_lock.h: use __asm__ instead of asm to fix build [11]
  o easy_lock: fix build for mingw [34]
+ o easy_lock: fix build with icc [54]
  o easy_lock: fix the #ifdef conditional for ia32_pause [8]
  o easy_lock: switch to using atomic_int instead of bool [9]
+ o easyoptions: fix icc warning [42]
  o escape: remove outdated comment [25]
  o getinfo: return better error on NULL as first argument [21]
+ o h2h3: fix overriding the 'TE: Trailers' header [43]
  o http_aws_sigv4.c: remove two unusued includes [36]
  o hyper: use wakers for curl pause/resume [2]
  o lib/curl_path.c: add ISC to license expression [1]
+ o lib3026: reduce the number of threads to 100 [44]
  o libcurl-security.3: fix typo on macro "SH_" [12]
  o Makefile.m32: add `CURL_RC` and `CURL_STRIP` variables [ci skip] [17]
  o Makefile.m32: add `NGTCP2_LIBS` option [ci skip] [38]
  o makefile.m32: add support for custom ARCH [ci skip] [27]
  o Makefile.m32: do not set the libcurl.rc debug flag [ci skip] [3]
+ o Makefile.m32: stop trying to build libcares.a [ci skip] [46]
+ o mprintf: make dprintf_formatf never return negative [49]
  o netrc.d: remove spurious quote [37]
  o ngtcp2: fix incompatible function pointer types [10]
  o ngtcp2: Fix missing initialization of nghttp3_nv.flags [31]
  o ngtcp2: fix stall or busy loop on STOP_SENDING with upload data [19]
+ o ngtcp2: implement cb_h3_stop_sending and cb_h3_reset_stream callbacks [59]
  o openssl: add `CURL_BORINGSSL_VERSION` to identify BoringSSL [24]
+ o openssl: fix BoringSSL symbol conflicts with LDAP and Schannel [52]
  o select: do not return fatal error on EINTR from poll() [32]
+ o test3026: require 'threadsafe' [56]
  o THANKS: merged two entries for Evgeny Grin
  o tool_getparam: repair cleanarg [22]
  o tool_operate: better cleanup of easy handle in exit path [20]
  o tool_progress: avoid division by zero in parallel progress meter [35]
+ o trace: 0x7F character is non-printable [50]
  o urldata: reduce size of several struct fields [14]
  o windows: improve random source [29]
 
@@ -60,12 +80,15 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adam Sampson, Alexandre Bury, Brad Forschinger, Brian Carpenter,
-  Daniel Stenberg, Don J Olmstead, Evgeny Grin (Karlson2k), Harry Sintonen,
-  Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root, Kai Pastor, Litter White,
-  Marcel Raad, Ray Satiro, Ryan Schmidt, Samuel Henrique, Sean McArthur,
-  Tatsuhiro Tsujikawa, Ted Lyngmo, Thomas Weißschuh, Viktor Szakats,
-  Xiaoke Wang
-  (23 contributors)
+  Daniel Stenberg, Don J Olmstead, Érico Nogueira Rolim, Even Rouault,
+  Evgeny Grin (Karlson2k), Gwen Shapira, Harry Sintonen, highmtworks on github,
+  Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root, jvvprasad78 on github,
+  Kai Pastor, Litter White, lwthiker on github, Marcel Raad,
+  MasterInQuestion on github, Matthew Thompson, Michał Antoniak,
+  Patrick Monnerat, Ray Satiro, Ryan Schmidt, Samuel Henrique, Sean McArthur,
+  Sukanya Hanumanthu, Tatsuhiro Tsujikawa, Ted Lyngmo, Thomas Weißschuh,
+  Viktor Szakats, Xiaoke Wang, yiyuaner on github
+  (35 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -108,3 +131,23 @@ References to bug reports and discussions on issues:
  [37] = https://curl.se/bug/?i=9111
  [38] = https://curl.se/bug/?i=9109
  [39] = https://curl.se/bug/?i=9090
+ [40] = https://curl.se/bug/?i=9164
+ [41] = https://curl.se/bug/?i=9139
+ [42] = https://curl.se/bug/?i=9176
+ [43] = https://curl.se/bug/?i=9170
+ [44] = https://curl.se/bug/?i=9172
+ [45] = https://curl.se/bug/?i=9174
+ [46] = https://curl.se/bug/?i=9169
+ [47] = https://curl.se/bug/?i=9150
+ [48] = https://curl.se/bug/?i=9155
+ [49] = https://curl.se/bug/?i=9149
+ [50] = https://curl.se/bug/?i=9162
+ [51] = https://curl.se/bug/?i=9163
+ [52] = https://curl.se/bug/?i=9110
+ [53] = https://curl.se/bug/?i=9081
+ [54] = https://curl.se/bug/?i=9081
+ [55] = https://curl.se/bug/?i=9134
+ [56] = https://curl.se/bug/?i=9141
+ [57] = https://curl.se/bug/?i=9125
+ [58] = https://curl.se/bug/?i=9124
+ [59] = https://curl.se/bug/?i=9135
