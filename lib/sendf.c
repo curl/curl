@@ -496,6 +496,9 @@ static CURLcode pausewrite(struct Curl_easy *data,
       }
     }
     DEBUGASSERT(i < 3);
+    if(i >= 3)
+      /* There are more types to store than what fits: very bad */
+      return CURLE_OUT_OF_MEMORY;
   }
   else
     i = 0;
@@ -607,8 +610,10 @@ static CURLcode chop_write(struct Curl_easy *data,
       /* here we pass in the HEADER bit only since if this was body as well
          then it was passed already and clearly that didn't trigger the
          pause, so this is saved for later with the HEADER bit only */
-      return pausewrite(data, CLIENTWRITE_HEADER, optr, olen);
-
+      return pausewrite(data, CLIENTWRITE_HEADER |
+                        (type & (CLIENTWRITE_STATUS|CLIENTWRITE_CONNECT|
+                                 CLIENTWRITE_1XX|CLIENTWRITE_TRAILER)),
+                        optr, olen);
     if(wrote != olen) {
       failf(data, "Failed writing header");
       return CURLE_WRITE_ERROR;
