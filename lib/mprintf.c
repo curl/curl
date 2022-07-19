@@ -1068,13 +1068,12 @@ extern int Curl_dyn_vprintf(struct dynbuf *dyn,
 /* appends the formatted string, returns 0 on success, 1 on error */
 int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
 {
-  int retcode;
   struct asprintf info;
   info.b = dyn;
   info.fail = 0;
 
-  retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
-  if(!retcode && info.fail) {
+  (void)dprintf_formatf(&info, alloc_addbyter, format, ap_save);
+  if(info.fail) {
     Curl_dyn_free(info.b);
     return 1;
   }
