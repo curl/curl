@@ -236,7 +236,7 @@ static CURLcode file_disconnect(struct Curl_easy *data,
 {
   (void)dead_connection; /* not used */
   (void)conn;
-  return file_done(data, 0, 0);
+  return file_done(data, CURLE_OK, FALSE);
 }
 
 #ifdef DOS_FILESYSTEM
