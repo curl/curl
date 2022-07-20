@@ -1413,7 +1413,8 @@ struct UrlState {
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
-  Curl_HttpReq httpreq; /* what kind of HTTP request (if any) is this */
+  unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
+                            is this */
   char *url;        /* work URL, copied from UserDefined */
   char *referer;    /* referer string */
 #ifndef CURL_DISABLE_COOKIES
