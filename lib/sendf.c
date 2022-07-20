@@ -586,6 +586,7 @@ static CURLcode chop_write(struct Curl_easy *data,
     len -= chunklen;
   }
 
+#ifndef CURL_DISABLE_HTTP
   /* HTTP header, but not status-line */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
      (type & CLIENTWRITE_HEADER) && !(type & CLIENTWRITE_STATUS) ) {
@@ -598,6 +599,7 @@ static CURLcode chop_write(struct Curl_easy *data,
     if(result)
       return result;
   }
+#endif
 
   if(writeheader) {
     size_t wrote;
