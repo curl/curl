@@ -28,12 +28,6 @@
 #include "tool_urlglob.h"
 #include "tool_formparse.h"
 
-typedef enum {
-  ERR_NONE,
-  ERR_BINARY_TERMINAL = 1, /* binary to terminal detected */
-  ERR_LAST
-} curl_error;
-
 struct GlobalConfig;
 
 struct State {
@@ -282,8 +276,7 @@ struct OperationConfig {
   double expect100timeout;
   bool suppress_connect_headers;  /* suppress proxy CONNECT response headers
                                      from user callbacks */
-  curl_error synthetic_error;     /* if non-zero, it overrides any libcurl
-                                     error */
+  bool synthetic_error;           /* if TRUE, this is tool-internal error */
   bool ssh_compression;           /* enable/disable SSH compression */
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
                                      0 is valid. default: CURL_HET_DEFAULT. */

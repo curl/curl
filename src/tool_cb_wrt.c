@@ -234,7 +234,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       warnf(config->global, "Binary output can mess up your terminal. "
             "Use \"--output -\" to tell curl to output it to your terminal "
             "anyway, or consider \"--output <FILE>\" to save to a file.\n");
-      config->synthetic_error = ERR_BINARY_TERMINAL;
+      config->synthetic_error = TRUE;
       return failure;
     }
   }
