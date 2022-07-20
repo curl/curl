@@ -2032,7 +2032,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *reqp)
 {
-  Curl_HttpReq httpreq = data->state.httpreq;
+  Curl_HttpReq httpreq = (Curl_HttpReq)data->state.httpreq;
   const char *request;
   if((conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
      data->set.upload)
