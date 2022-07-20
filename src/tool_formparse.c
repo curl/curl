@@ -409,7 +409,7 @@ static int read_field_headers(struct OperationConfig *config,
   size_t pos = 0;
   bool incomment = FALSE;
   int lineno = 1;
-  char hdrbuf[999]; /* Max. header length + 1. */
+  char hdrbuf[999] = ""; /* Max. header length + 1. */
 
   for(;;) {
     int c = getc(fp);
