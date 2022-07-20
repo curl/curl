@@ -839,7 +839,8 @@ struct postponed_data {
 struct proxy_info {
   struct hostname host;
   long port;
-  curl_proxytype proxytype; /* what kind of proxy that is in use */
+  unsigned char proxytype; /* curl_proxytype: what kind of proxy that is in
+                              use */
   char *user;    /* proxy user name string, allocated */
   char *passwd;  /* proxy password string, allocated */
 };
