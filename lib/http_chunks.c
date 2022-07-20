@@ -100,7 +100,7 @@ void Curl_httpchunk_init(struct Curl_easy *data)
 CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
                               char *datap,
                               ssize_t datalen,
-                              ssize_t *wrotep,
+                              ssize_t *wrote,
                               CURLcode *extrap)
 {
   CURLcode result = CURLE_OK;
@@ -109,7 +109,6 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
   struct SingleRequest *k = &data->req;
   size_t piece;
   curl_off_t length = (curl_off_t)datalen;
-  size_t *wrote = (size_t *)wrotep;
 
   *wrote = 0; /* nothing's written yet */
 
