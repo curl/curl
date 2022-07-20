@@ -32,7 +32,7 @@ static struct Curl_easy *data;
 
 static CURLcode unit_setup(void)
 {
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   data = curl_easy_init();

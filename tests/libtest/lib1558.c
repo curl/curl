@@ -29,7 +29,7 @@
 
 int test(char *URL)
 {
-  CURLcode res = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   long protocol = 0;
 

@@ -30,7 +30,7 @@
 #define EXCESSIVE 10*1000*1000
 int test(char *URL)
 {
-  CURLcode res = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   char *longurl = malloc(EXCESSIVE);
   CURLU *u;

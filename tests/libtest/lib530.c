@@ -249,7 +249,7 @@ static int checkFdSet(CURLM *curl,
                       int evBitmask, const char *name)
 {
   int i;
-  CURLMcode result = CURLM_OK;
+  int result = 0;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
       result = socket_action(curl, sockets->sockets[i], evBitmask, name);
@@ -257,7 +257,7 @@ static int checkFdSet(CURLM *curl,
         break;
     }
   }
-  return (int)result;
+  return result;
 }
 
 static int testone(char *URL, int timercb, int socketcb)
