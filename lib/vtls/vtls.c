@@ -219,13 +219,13 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
 static int multissl_setup(const struct Curl_ssl *backend);
 #endif
 
-int Curl_ssl_backend(void)
+curl_sslbackend Curl_ssl_backend(void)
 {
 #ifdef USE_SSL
   multissl_setup(NULL);
   return Curl_ssl->info.id;
 #else
-  return (int)CURLSSLBACKEND_NONE;
+  return CURLSSLBACKEND_NONE;
 #endif
 }
 

@@ -200,7 +200,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc);
    ssl_connect_2_writing. */
 int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks);
 
-int Curl_ssl_backend(void);
+curl_sslbackend Curl_ssl_backend(void);
 
 #ifdef USE_SSL
 int Curl_ssl_init(void);
