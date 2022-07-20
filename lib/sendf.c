@@ -589,12 +589,12 @@ static CURLcode chop_write(struct Curl_easy *data,
   /* HTTP header, but not status-line */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
      (type & CLIENTWRITE_HEADER) && !(type & CLIENTWRITE_STATUS) ) {
-    CURLcode result =
-      Curl_headers_push(data, optr,
-                        type & CLIENTWRITE_CONNECT ? CURLH_CONNECT :
-                        (type & CLIENTWRITE_1XX ? CURLH_1XX :
-                         (type & CLIENTWRITE_TRAILER ? CURLH_TRAILER :
-                          CURLH_HEADER)));
+    unsigned char htype = (unsigned char)
+      (type & CLIENTWRITE_CONNECT ? CURLH_CONNECT :
+       (type & CLIENTWRITE_1XX ? CURLH_1XX :
+        (type & CLIENTWRITE_TRAILER ? CURLH_TRAILER :
+         CURLH_HEADER)));
+    CURLcode result = Curl_headers_push(data, optr, htype);
     if(result)
       return result;
   }
