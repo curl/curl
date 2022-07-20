@@ -95,6 +95,7 @@ if test "x$OPT_WOLFSSL" != xno; then
    They are set up properly later if it is detected.  */
 #undef SIZEOF_LONG
 #undef SIZEOF_LONG_LONG
+#include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
 	]],[[
 	  return wolfSSL_Init();
