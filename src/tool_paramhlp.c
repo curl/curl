@@ -395,7 +395,7 @@ ParameterError proto2num(struct OperationConfig *config,
  * @return PARAM_LIBCURL_UNSUPPORTED_PROTOCOL  protocol not supported
  * @return PARAM_REQUIRES_PARAMETER   missing parameter
  */
-int check_protocol(const char *str)
+ParameterError check_protocol(const char *str)
 {
   const char * const *pp;
   const curl_version_info_data *curlinfo = curl_version_info(CURLVERSION_NOW);
