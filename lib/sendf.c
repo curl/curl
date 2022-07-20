@@ -714,16 +714,15 @@ CURLcode Curl_read(struct Curl_easy *data,   /* transfer */
 }
 
 /* return 0 on success */
-int Curl_debug(struct Curl_easy *data, curl_infotype type,
-               char *ptr, size_t size)
+void Curl_debug(struct Curl_easy *data, curl_infotype type,
+                char *ptr, size_t size)
 {
-  int rc = 0;
   if(data->set.verbose) {
     static const char s_infotype[CURLINFO_END][3] = {
       "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
     if(data->set.fdebug) {
       Curl_set_in_callback(data, true);
-      rc = (*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+      (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
       Curl_set_in_callback(data, false);
     }
     else {
@@ -739,5 +738,4 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
       }
     }
   }
-  return rc;
 }

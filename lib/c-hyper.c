@@ -1013,10 +1013,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     /* For HTTP/2, we show the Host: header as if we sent it, to make it look
        like for HTTP/1 but it isn't actually sent since :authority is then
        used. */
-    result = Curl_debug(data, CURLINFO_HEADER_OUT, data->state.aptr.host,
-                        strlen(data->state.aptr.host));
-    if(result)
-      goto error;
+    Curl_debug(data, CURLINFO_HEADER_OUT, data->state.aptr.host,
+               strlen(data->state.aptr.host));
   }
 
   if(data->state.aptr.proxyuserpwd) {
@@ -1136,9 +1134,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(result)
     goto error;
 
-  result = Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"\r\n", 2);
-  if(result)
-    goto error;
+  Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"\r\n", 2);
 
   data->req.upload_chunky = FALSE;
   sendtask = hyper_clientconn_send(client, req);
