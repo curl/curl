@@ -314,11 +314,11 @@ ParameterError proto2num(struct OperationConfig *config,
   };
 
   if(!str)
-    return 1;
+    return PARAM_OPTION_AMBIGUOUS;
 
   buffer = strdup(str); /* because strtok corrupts it */
   if(!buffer)
-    return 1;
+    return PARAM_NO_MEM;
 
   /* Allow strtok() here since this isn't used threaded */
   /* !checksrc! disable BANNEDFUNC 2 */
@@ -341,7 +341,7 @@ ParameterError proto2num(struct OperationConfig *config,
         break;
       default: /* Includes case of terminating NULL */
         Curl_safefree(buffer);
-        return 1;
+        return PARAM_BAD_USE;
       }
     }
 
