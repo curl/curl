@@ -103,7 +103,7 @@ struct Curl_tree *Curl_splayinsert(struct curltime i,
                                    struct Curl_tree *node)
 {
   static const struct curltime KEY_NOTUSED = {
-    (time_t)-1, (unsigned int)-1
+    ~0, -1
   }; /* will *NEVER* appear */
 
   if(!node)
@@ -213,7 +213,7 @@ int Curl_splayremove(struct Curl_tree *t,
                      struct Curl_tree **newroot)
 {
   static const struct curltime KEY_NOTUSED = {
-    (time_t)-1, (unsigned int)-1
+    ~0, -1
   }; /* will *NEVER* appear */
   struct Curl_tree *x;
 
