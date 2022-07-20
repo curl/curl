@@ -58,7 +58,7 @@ int test(char *URL)
      "POP3,POP3S,RTMP,RTMPE,RTMPS,RTMPT,RTMPTE,RTMPTS,RTSP,SCP,SFTP,SMB,"
      "SMBS,SMTP,SMTPS,TELNET,TFTP", CURLE_OK},
     {"all", CURLE_OK},
-    {NULL, FALSE},
+    {NULL, CURLE_OK},
   };
   (void)URL;
 

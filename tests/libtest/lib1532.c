@@ -31,7 +31,7 @@ int test(char *URL)
 {
   CURL *curl;
   long httpcode;
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -78,5 +78,5 @@ int test(char *URL)
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return (int)res;
 }

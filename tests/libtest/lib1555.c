@@ -37,7 +37,7 @@ static int progressCallback(void *arg,
                             double ultotal,
                             double ulnow)
 {
-  CURLcode res = 0;
+  CURLcode res = CURLE_OK;
   char buffer[256];
   size_t n = 0;
   (void)arg;

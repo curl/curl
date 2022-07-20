@@ -103,7 +103,7 @@ static const struct testit headers[] = {
 
   /* make this live for 7 seconds */
   { "expire.example", NULL, "max-age=\"7\"\r\n", CURLE_OK },
-  { NULL, NULL, NULL, 0 }
+  { NULL, NULL, NULL, CURLE_OK }
 };
 
 static void showsts(struct stsentry *e, const char *chost)

@@ -77,7 +77,7 @@ int test(char *URL)
   if(ret != CURLE_OPERATION_TIMEDOUT)
     fprintf(stderr, "error %d: %s\n", ret, buffer);
   else
-    ret = 0;
+    ret = CURLE_OK;
 
   printf("End: %d\n", time(NULL));
   curl_easy_cleanup(hnd);

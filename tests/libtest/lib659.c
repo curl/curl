@@ -34,7 +34,7 @@
 int test(char *URL)
 {
   CURL *handle = NULL;
-  CURLcode res = 0;
+  CURLcode res = CURLE_OK;
   CURLU *urlp = NULL;
 
   global_init(CURL_GLOBAL_ALL);

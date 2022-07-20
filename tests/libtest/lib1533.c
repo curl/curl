@@ -131,7 +131,7 @@ int test(char *URL)
 {
   struct cb_data data;
   CURL *curl = NULL;
-  CURLcode res = CURLE_FAILED_INIT;
+  int res = TEST_ERR_FAILURE;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");

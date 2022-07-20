@@ -31,7 +31,7 @@ int test(char *URL)
 {
   CURL *curl, *dupe = NULL;
   long filetime;
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -127,5 +127,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dupe);
   curl_global_cleanup();
-  return res;
+  return (int)res;
 }
