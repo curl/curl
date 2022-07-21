@@ -5905,11 +5905,12 @@ dnl
 AC_DEFUN([CURL_ATOMIC],[
   AC_CHECK_HEADERS(stdatomic.h, [
     AC_MSG_CHECKING([if _Atomic is available])
-    AC_COMPILE_IFELSE([
+    AC_LINK_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_unistd
       ]],[[
         _Atomic int i = 0;
+        i = 4;  // Force an atomic-write operation.
       ]])
     ],[
       AC_MSG_RESULT([yes])
