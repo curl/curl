@@ -41,8 +41,8 @@ you will find more details about cipher lists on this URL:
  https://curl.se/docs/ssl-ciphers.html
 
 This option is currently used only when curl is built to use OpenSSL 1.1.1 or
-later. If you are using a different SSL backend you can try setting TLS 1.3
-cipher suites by using the CURLOPT_SSL_CIPHER_LIST option.
+later or SChannel. If you are using a different SSL backend you can try
+setting TLS 1.3 cipher suites by using the CURLOPT_SSL_CIPHER_LIST option.
 
 The application does not have to keep the string around after setting this
 option.
@@ -56,14 +56,15 @@ CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
   curl_easy_setopt(curl, CURLOPT_TLS13_CIPHERS,
-                   "TLS13-CHACHA20-POLY1305-SHA256");
+                   "TLS_CHACHA20_POLY1305_SHA256");
   ret = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY
-Added in 7.61.0.
-Available when built with OpenSSL >= 1.1.1.
+Added in 7.61.0 for OpenSSL. Available when built with OpenSSL >= 1.1.1.
+
+Added in 7.85.0 for SChannel.
 .SH RETURN VALUE
 Returns CURLE_OK if supported, CURLE_NOT_BUILT_IN otherwise.
 .SH "SEE ALSO"

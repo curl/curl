@@ -28,6 +28,16 @@
 
 #ifdef USE_SCHANNEL
 
+#define SCHANNEL_USE_BLACKLISTS 1
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4201)
+#endif
+#include <subauth.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 /* Wincrypt must be included before anything that could include OpenSSL. */
 #if defined(USE_WIN32_CRYPTO)
 #include <wincrypt.h>
@@ -82,6 +92,63 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
 #ifdef CERT_CHAIN_REVOCATION_CHECK_CHAIN
 #define HAS_MANUAL_VERIFY_API
 #endif
+#endif
+
+#ifndef SCH_CREDENTIALS_VERSION
+
+#define SCH_CREDENTIALS_VERSION  0x00000005
+
+typedef enum _eTlsAlgorithmUsage
+{
+    TlsParametersCngAlgUsageKeyExchange,
+    TlsParametersCngAlgUsageSignature,
+    TlsParametersCngAlgUsageCipher,
+    TlsParametersCngAlgUsageDigest,
+    TlsParametersCngAlgUsageCertSig
+} eTlsAlgorithmUsage;
+
+typedef struct _CRYPTO_SETTINGS
+{
+    eTlsAlgorithmUsage  eAlgorithmUsage;
+    UNICODE_STRING      strCngAlgId;
+    DWORD               cChainingModes;
+    PUNICODE_STRING     rgstrChainingModes;
+    DWORD               dwMinBitLength;
+    DWORD               dwMaxBitLength;
+} CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
+
+typedef struct _TLS_PARAMETERS
+{
+    DWORD               cAlpnIds;
+    PUNICODE_STRING     rgstrAlpnIds;
+    DWORD               grbitDisabledProtocols;
+    DWORD               cDisabledCrypto;
+    PCRYPTO_SETTINGS    pDisabledCrypto;
+    DWORD               dwFlags;
+} TLS_PARAMETERS, * PTLS_PARAMETERS;
+
+typedef struct _SCH_CREDENTIALS
+{
+    DWORD               dwVersion;
+    DWORD               dwCredFormat;
+    DWORD               cCreds;
+    PCCERT_CONTEXT* paCred;
+    HCERTSTORE          hRootStore;
+
+    DWORD               cMappers;
+    struct _HMAPPER **aphMappers;
+
+    DWORD               dwSessionLifespan;
+    DWORD               dwFlags;
+    DWORD               cTlsParameters;
+    PTLS_PARAMETERS     pTlsParameters;
+} SCH_CREDENTIALS, * PSCH_CREDENTIALS;
+
+#define SCH_CRED_MAX_SUPPORTED_PARAMETERS 16
+#define SCH_CRED_MAX_SUPPORTED_ALPN_IDS 16
+#define SCH_CRED_MAX_SUPPORTED_CRYPTO_SETTINGS 16
+#define SCH_CRED_MAX_SUPPORTED_CHAINING_MODES 16
+
 #endif
 
 struct Curl_schannel_cred {

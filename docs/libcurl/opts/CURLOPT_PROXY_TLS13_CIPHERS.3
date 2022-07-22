@@ -58,7 +58,7 @@ CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
   curl_easy_setopt(curl, CURLOPT_PROXY_TLS13_CIPHERS,
-                   "TLS13-CHACHA20-POLY1305-SHA256");
+                   "TLS_CHACHA20_POLY1305_SHA256");
   ret = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }

@@ -6,7 +6,8 @@ and
 [`--ciphers`](https://curl.se/docs/manpage.html#--ciphers)
 users can control which ciphers to consider when negotiating TLS connections.
 
-TLS 1.3 ciphers are supported since curl 7.61 for OpenSSL 1.1.1+ with options
+TLS 1.3 ciphers are supported since curl 7.61 for OpenSSL 1.1.1+, and since
+curl 7.85 for SChannel with options
 [`CURLOPT_TLS13_CIPHERS`](https://curl.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
 and
 [`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
@@ -520,6 +521,16 @@ to [constrain the set of available ciphers as specified in the schannel
 documentation](https://docs.microsoft.com/en-us/windows/win32/secauthn/tls-cipher-suites-in-windows-server-2022).
 Note that the supported ciphers in this case follow the OS version, so if you
 are running an outdated OS you might still be supporting weak ciphers.
+
+### TLS 1.3 cipher suites
+
+(Note these ciphers are set with `CURLOPT_TLS13_CIPHERS` and `--tls13-ciphers`)
+
+`TLS_AES_256_GCM_SHA384`
+`TLS_AES_128_GCM_SHA256`
+`TLS_CHACHA20_POLY1305_SHA256`
+`TLS_AES_128_CCM_8_SHA256`
+`TLS_AES_128_CCM_SHA256`
 
 ## BearSSL
 
