@@ -541,24 +541,26 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
-static void cleanarg(char *str)
-{
 #ifdef HAVE_WRITABLE_ARGV
+static void cleanarg(argv_item_t str)
+{
   /* now that GetStr has copied the contents of nextarg, wipe the next
    * argument out so that the username:password isn't displayed in the
    * system process list */
   if(str) {
-    size_t len = strlen(str);
+    size_t len = strlen((char *)str);
     memset(str, ' ', len);
   }
-#else
-  (void)str;
-#endif
 }
+#else
+#define cleanarg(x)
+#endif
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
-                            char *clearthis,
+#ifdef HAVE_WRITABLE_ARGV
+                            argv_item_t clearthis,
+#endif
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
@@ -2440,7 +2442,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
         stillflags = FALSE;
       else {
         char *nextarg = NULL;
-        char *clear = NULL;
+        argv_item_t clear = NULL;
         if(i < (argc - 1)) {
           nextarg = curlx_convert_tchar_to_UTF8(argv[i + 1]);
           if(!nextarg) {
