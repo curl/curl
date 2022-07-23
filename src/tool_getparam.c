@@ -558,9 +558,7 @@ static void cleanarg(argv_item_t str)
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
-#ifdef HAVE_WRITABLE_ARGV
                             argv_item_t clearthis,
-#endif
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
@@ -578,7 +576,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   ParameterError err;
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
-
+  (void)clearthis; /* for !HAVE_WRITABLE_ARGV builds */
   *usedarg = FALSE; /* default is that we don't use the arg */
 
   if(('-' != flag[0]) || ('-' == flag[1])) {
