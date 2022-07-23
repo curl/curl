@@ -54,7 +54,8 @@ typedef enum {
 struct GlobalConfig;
 struct OperationConfig;
 
-ParameterError getparameter(const char *flag, char *nextarg, char *clearthis,
+ParameterError getparameter(const char *flag, char *nextarg,
+                            argv_item_t clearthis,
                             bool *usedarg,
                             struct GlobalConfig *global,
                             struct OperationConfig *operation);
