@@ -1176,6 +1176,9 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   bool ufds_malloc = FALSE;
 #ifdef USE_WINSOCK
   WSANETWORKEVENTS wsa_events;
+  DWORD stype;
+  int ltype = sizeof(stype);
+  char *ptype = (char *)&stype;
   DEBUGASSERT(multi->wsa_event != WSA_INVALID_EVENT);
 #endif
 #ifndef ENABLE_WAKEUP
@@ -1274,7 +1277,10 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
           s = sockbunch[i];
 #ifdef USE_WINSOCK
           mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-          send(s, NULL, 0, 0); /* reset FD_WRITE */
+          if(getsockopt(s, SOL_SOCKET, SO_TYPE, ptype, &ltype) == SOCKET_ERROR)
+            stype = SOCK_STREAM; /* assume TCP */
+          if(stype == SOCK_STREAM)
+            send(s, NULL, 0, 0); /* reset FD_WRITE */
 #endif
           ufds[nfds].fd = s;
           ufds[nfds].events = POLLOUT;
@@ -1300,6 +1306,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 
   /* Add external file descriptions from poll-like struct curl_waitfd */
   for(i = 0; i < extra_nfds; i++) {
+    curl_socket_t s = extra_fds[i].fd;
 #ifdef USE_WINSOCK
     long mask = 0;
     if(extra_fds[i].events & CURL_WAIT_POLLIN)
@@ -1308,15 +1315,18 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       mask |= FD_OOB;
     if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
       mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-      send(extra_fds[i].fd, NULL, 0, 0); /* reset FD_WRITE */
+      if(getsockopt(s, SOL_SOCKET, SO_TYPE, ptype, &ltype) == SOCKET_ERROR)
+        stype = SOCK_STREAM; /* assume TCP */
+      if(stype == SOCK_STREAM)
+        send(s, NULL, 0, 0); /* reset FD_WRITE */
     }
-    if(WSAEventSelect(extra_fds[i].fd, multi->wsa_event, mask) != 0) {
+    if(WSAEventSelect(s, multi->wsa_event, mask) != 0) {
       if(ufds_malloc)
         free(ufds);
       return CURLM_INTERNAL_ERROR;
     }
 #endif
-    ufds[nfds].fd = extra_fds[i].fd;
+    ufds[nfds].fd = s;
     ufds[nfds].events = 0;
     if(extra_fds[i].events & CURL_WAIT_POLLIN)
       ufds[nfds].events |= POLLIN;
