@@ -30,11 +30,15 @@ CURLOPT_QUICK_EXIT \- allow to exit quickly
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_QUICK_EXIT,
-                          boolean value);
+                          long value);
 .SH DESCRIPTION
-Pass a boolean as a parameter, true meaning libcurl should skip lengthy cleanups
-that are intended to avoid all kinds of leaks (threads etc.), as the caller program
-is about to call exit() anyway. This allows for a swift termination after a DNS timeout for example.
+Pass a long as a parameter, 1L meaning that when recovering from a
+timeout, libcurl should skip lengthy cleanups that are intended to
+avoid all kinds of leaks (threads etc.), as the caller program is
+about to call exit() anyway. This allows for a swift termination of
+curl(1) after a DNS timeout for example, by cancelling and/or
+forgetting about a resolver thread, at the expense of a possible (though
+short-lived) leak of associated kernel resources.
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -44,7 +48,7 @@ All
 CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode ret;
-  curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1);
+  curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
   ret = curl_easy_perform(curl);
 }
 .fi
@@ -53,4 +57,4 @@ Added in 7.85.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR Nothing
+.BR CURLOPT_RESOLVE "(3), "

@@ -655,7 +655,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 #endif
     ;
   Curl_http2_init_userset(set);
-  set->quick_exit = 0;
+  set->quick_exit = 0L;
   return result;
 }
 

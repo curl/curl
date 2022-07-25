@@ -3117,7 +3117,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   }
 #endif
   case CURLOPT_QUICK_EXIT:
-    data->set.quick_exit = (0 != va_arg(param, long)) ? TRUE:FALSE;
+    data->set.quick_exit = (0 != va_arg(param, long)) ? 1L:0L;
     break;
   default:
     /* unknown tag and its companion, just ignore: */
