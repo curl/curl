@@ -1939,22 +1939,11 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
       switch(outlen) {
       case NGTCP2_ERR_STREAM_DATA_BLOCKED:
         assert(ndatalen == -1);
-        rv = nghttp3_conn_block_stream(qs->h3conn, stream_id);
-        if(rv) {
-          failf(data, "nghttp3_conn_block_stream returned error: %s\n",
-                nghttp3_strerror(rv));
-          return CURLE_SEND_ERROR;
-        }
+        nghttp3_conn_block_stream(qs->h3conn, stream_id);
         continue;
       case NGTCP2_ERR_STREAM_SHUT_WR:
         assert(ndatalen == -1);
-        rv = nghttp3_conn_shutdown_stream_write(qs->h3conn, stream_id);
-        if(rv) {
-          failf(data,
-                "nghttp3_conn_shutdown_stream_write returned error: %s\n",
-                nghttp3_strerror(rv));
-          return CURLE_SEND_ERROR;
-        }
+        nghttp3_conn_shutdown_stream_write(qs->h3conn, stream_id);
         continue;
       case NGTCP2_ERR_WRITE_MORE:
         assert(ndatalen >= 0);
