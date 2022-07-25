@@ -1247,7 +1247,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(result)
           break;
 #endif
-        
+
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
 
