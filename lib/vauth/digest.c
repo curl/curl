@@ -880,8 +880,9 @@ static CURLcode auth_create_digest_http_message(
       free(response);
       return CURLE_OUT_OF_MEMORY;
     }
-    tmp = aprintf("%s, opaque=\"%s\"", response, digest->opaque);
+    tmp = aprintf("%s, opaque=\"%s\"", response, opaque_quoted);
     free(response);
+    free(opaque_quoted);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
 
