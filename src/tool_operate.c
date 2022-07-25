@@ -1237,14 +1237,17 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         use_proto = url_proto(per->this_url);
 
-        /* We'll clean everything up via exit(), so don't bother with
+#if defined(__unix) || defined (WIN32)
+        /* On OSes where we know exiting works thoroughly,
+           we'll clean everything up via exit(), so don't bother with
            slow cleanups.
            Note: avoid having this setopt added to the --libcurl source
            output. */
         result = curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
         if(result)
           break;
-
+#endif
+        
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
 
