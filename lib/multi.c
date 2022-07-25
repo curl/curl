@@ -1366,8 +1366,9 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         unsigned r = ufds[curlfds + i].revents;
         unsigned short mask = 0;
 #ifdef USE_WINSOCK
+        curl_socket_t s = extra_fds[i].fd;
         wsa_events.lNetworkEvents = 0;
-        if(WSAEnumNetworkEvents(extra_fds[i].fd, NULL, &wsa_events) == 0) {
+        if(WSAEnumNetworkEvents(s, NULL, &wsa_events) == 0) {
           if(wsa_events.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE))
             mask |= CURL_WAIT_POLLIN;
           if(wsa_events.lNetworkEvents & (FD_WRITE|FD_CONNECT|FD_CLOSE))
@@ -1377,9 +1378,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
           if(ret && pollrc <= 0 && wsa_events.lNetworkEvents)
             retcode++;
         }
-        WSAEventSelect(extra_fds[i].fd, multi->wsa_event, 0);
-        if(pollrc <= 0)
+        WSAEventSelect(s, multi->wsa_event, 0);
+        if(pollrc <= 0) {
+          extra_fds[i].revents = mask;
           continue;
+        }
 #endif
         if(r & POLLIN)
           mask |= CURL_WAIT_POLLIN;
