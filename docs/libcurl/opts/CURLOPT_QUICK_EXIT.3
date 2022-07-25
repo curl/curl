@@ -22,14 +22,14 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_MAY_LEAK 3 "12 Jul 2022" "libcurl 7.85.0" "curl_easy_setopt options"
+.TH CURLOPT_QUICK_EXIT 3 "12 Jul 2022" "libcurl 7.85.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_MAY_LEAK \- allow to exit quickly
+CURLOPT_QUICK_EXIT \- allow to exit quickly
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAY_LEAK,
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_QUICK_EXIT,
                           boolean value);
 .SH DESCRIPTION
 Pass a boolean as a parameter, true meaning libcurl should skip lengthy cleanups
@@ -44,7 +44,7 @@ All
 CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode ret;
-  curl_easy_setopt(curl, CURLOPT_MAY_LEAK, 1);
+  curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1);
   ret = curl_easy_perform(curl);
 }
 .fi

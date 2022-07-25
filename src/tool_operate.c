@@ -1241,7 +1241,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
            slow cleanups.
            Note: avoid having this setopt added to the --libcurl source
            output. */
-        result = curl_easy_setopt(curl, CURLOPT_MAY_LEAK, 1L);
+        result = curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
         if(result)
           break;
 

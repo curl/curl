@@ -1826,7 +1826,7 @@ struct UserDefined {
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
    and they don't change during operations. */
-  BIT(may_leak);         /* set TRUE when it is okay to leak things (like
+  BIT(quick_exit);         /* set TRUE when it is okay to leak things (like
                             threads), as we're about to exit() anyway and
                             don't want lengthy cleanups to delay termination */
   BIT(get_filetime);     /* get the time and get of the remote file */
