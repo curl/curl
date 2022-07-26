@@ -701,6 +701,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'C': /* doh-url */
         GetStr(&config->doh_url, nextarg);
+        if(config->doh_url && !config->doh_url[0])
+          /* if given a blank string, we make it NULL again */
+          Curl_safefree(config->doh_url);
         break;
       case 'd': /* ciphers */
         GetStr(&config->cipher_list, nextarg);
