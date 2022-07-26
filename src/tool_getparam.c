@@ -541,9 +541,9 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
-static void cleanarg(char *str)
-{
 #ifdef HAVE_WRITABLE_ARGV
+static void cleanarg(argv_item_t str)
+{
   /* now that GetStr has copied the contents of nextarg, wipe the next
    * argument out so that the username:password isn't displayed in the
    * system process list */
@@ -551,14 +551,14 @@ static void cleanarg(char *str)
     size_t len = strlen(str);
     memset(str, ' ', len);
   }
-#else
-  (void)str;
-#endif
 }
+#else
+#define cleanarg(x)
+#endif
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
-                            char *clearthis,
+                            argv_item_t clearthis,
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
@@ -576,7 +576,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   ParameterError err;
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
-
+  (void)clearthis; /* for !HAVE_WRITABLE_ARGV builds */
   *usedarg = FALSE; /* default is that we don't use the arg */
 
   if(('-' != flag[0]) || ('-' == flag[1])) {
@@ -2440,7 +2440,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
         stillflags = FALSE;
       else {
         char *nextarg = NULL;
-        char *clear = NULL;
+        argv_item_t clear = NULL;
         if(i < (argc - 1)) {
           nextarg = curlx_convert_tchar_to_UTF8(argv[i + 1]);
           if(!nextarg) {

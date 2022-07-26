@@ -3,7 +3,7 @@
 ## There are still bugs
 
  Curl and libcurl keep being developed. Adding features and changing code
- means that bugs will sneak in, no matter how hard we try not to.
+ means that bugs will sneak in, no matter how hard we try to keep them out.
 
  Of course there are lots of bugs left. And lots of misfeatures.
 
@@ -44,7 +44,7 @@
 ## What to report
 
  When reporting a bug, you should include all information that will help us
- understand what's wrong, what you expected to happen and how to repeat the
+ understand what is wrong, what you expected to happen and how to repeat the
  bad behavior. You therefore need to tell us:
 
  - your operating system's name and version number
@@ -199,14 +199,13 @@
 
 ## Not reproducible
 
- For problems that we cannot reproduce and cannot understand even after having
- gotten all the info we need and having studied the source code over again,
- are really hard to solve so then we may require further work from you who
- actually see or experience the problem.
+ We may require further work from you who actually see or experience the 
+ problem if we cannot reproduce it and cannot understand it even after having
+ gotten all the info we need and having studied the source code over again.
 
 ## Unresponsive
 
- If the problem have not been understood or reproduced, and there's nobody
+ If the problem have not been understood or reproduced, and there is nobody
  responding to follow-up questions or questions asking for clarifications or
  for discussing possible ways to move forward with the task, we take that as a
  strong suggestion that the bug is unimportant.
