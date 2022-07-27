@@ -924,6 +924,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   hyper_clientconn_options_set_preserve_header_case(options, 1);
   hyper_clientconn_options_set_preserve_header_order(options, 1);
+  hyper_clientconn_options_http1_allow_multiline_headers(options, 1);
 
   hyper_clientconn_options_exec(options, h->exec);
 
