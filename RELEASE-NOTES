@@ -4,7 +4,7 @@ curl and libcurl 7.85.0
  Command line options:         248
  curl_easy_setopt() options:   299
  Public functions in libcurl:  88
- Contributors:                 2668
+ Contributors:                 2671
 
 This release includes the following changes:
 
@@ -14,7 +14,9 @@ This release includes the following bugfixes:
 
  o asyn-thread: make getaddrinfo_complete return CURLcode [53]
  o base64: base64url encoding has no padding [41]
+ o BUGS.md: improve language [62]
  o build: improve OS string in CMake and `config-win32.h` [15]
+ o cirrus.yml: replace py38-pip with py39-pip [63]
  o cmake: do not force Windows target versions [28]
  o cmake: fix build for mingw cross compile [33]
  o cmake: link curl to its dependencies with PRIVATE [57]
@@ -24,12 +26,17 @@ This release includes the following bugfixes:
  o configure: fix --disable-headers-api [55]
  o cookie: treat a blank domain in Set-Cookie: as non-existing [40]
  o cookie: use %zu to infof() for size_t values [26]
+ o curl-compilers.m4: make icc use -diag* options and disable two warnings [84]
+ o curl-confopts: remove leftover AC_REQUIREs [91]
+ o curl-functions.m4: check whether atomics can link [86]
+ o curl-wolfssl.m4: add options header when building test code [87]
  o curl.h: CURLE_CONV_FAILED is obsoleted [4]
  o curl: output warning when a cookie is dropped due to size [5]
  o curl: writeout: fix repeated header outputs [47]
  o curl_mime_data.3: polish the wording [6]
  o curl_multi_timeout.3: clarify usage [48]
  o CURLOPT_SERVER_RESPONSE_TIMEOUT: the new name [16]
+ o digest: fix memory leak, fix not quoted 'opaque' [66]
  o digest: fix missing increment of 'nc' value for auth-int [39]
  o docs: explain curl_easy_escape/unescape curl handle is ignored [23]
  o doh: move doh related struct definitions to doh.h [45]
@@ -42,9 +49,14 @@ This release includes the following bugfixes:
  o easy_lock: switch to using atomic_int instead of bool [9]
  o easyoptions: fix icc warning [42]
  o escape: remove outdated comment [25]
+ o file: fix icc enumerated type mixed with another type warning [92]
+ o ftp: use a correct expire ID for timer expiry [88]
  o getinfo: return better error on NULL as first argument [21]
+ o GHA: add two Intel compiler CI jobs [85]
  o h2h3: fix overriding the 'TE: Trailers' header [43]
+ o http: typecast the httpreq assignment to avoid icc compiler warning [76]
  o http_aws_sigv4.c: remove two unusued includes [36]
+ o http_chunks: remove an assign + typecast [82]
  o hyper: use wakers for curl pause/resume [2]
  o lib/curl_path.c: add ISC to license expression [1]
  o lib3026: reduce the number of threads to 100 [44]
@@ -54,8 +66,11 @@ This release includes the following bugfixes:
  o makefile.m32: add support for custom ARCH [ci skip] [27]
  o Makefile.m32: do not set the libcurl.rc debug flag [ci skip] [3]
  o Makefile.m32: stop trying to build libcares.a [ci skip] [46]
+ o mprintf: fix *dyn_vprintf() when out-of-memory [90]
  o mprintf: make dprintf_formatf never return negative [49]
+ o multi: fix the return code from Curl_pgrsDone() [80]
  o netrc.d: remove spurious quote [37]
+ o ngtcp2: Fix build error due to change in nghttp3 prototypes [61]
  o ngtcp2: fix incompatible function pointer types [10]
  o ngtcp2: Fix missing initialization of nghttp3_nv.flags [31]
  o ngtcp2: fix stall or busy loop on STOP_SENDING with upload data [19]
@@ -63,13 +78,31 @@ This release includes the following bugfixes:
  o openssl: add `CURL_BORINGSSL_VERSION` to identify BoringSSL [24]
  o openssl: fix BoringSSL symbol conflicts with LDAP and Schannel [52]
  o select: do not return fatal error on EINTR from poll() [32]
+ o sendf: fix paused header writes since after the header API [89]
+ o sendf: make Curl_debug a void function [81]
+ o sendf: skip storing HTTP headers if HTTP disabled [73]
+ o sendf: store the header type in an usigned char to avoid icc warnings [79]
+ o splay: avoid using -1 in unsigned variable [78]
+ o test3026: add support for Windows using native Win32 threads [65]
  o test3026: require 'threadsafe' [56]
+ o tests: several enumerated type cleanups [67]
  o THANKS: merged two entries for Evgeny Grin
+ o tidy-up: delete unused build configuration macros [93]
+ o tool_cfgable: make 'synthetic_error' a plain bool [70]
+ o tool_formparse: fix variable may be used before its value is set [72]
+ o tool_getparam: make --doh-url "" switch it off [60]
  o tool_getparam: repair cleanarg [22]
  o tool_operate: better cleanup of easy handle in exit path [20]
+ o tool_paramhlp: fix "enumerated type mixed with another type" [68]
+ o tool_paramhlp: make check_protocol return ParameterError [71]
  o tool_progress: avoid division by zero in parallel progress meter [35]
+ o tool_writeout: fix enumerated type mixed with another type [69]
  o trace: 0x7F character is non-printable [50]
+ o url: enumerated type mixed with another type [74]
+ o urldata: change second proxytype field to unsigned char to match [75]
+ o urldata: make state.httpreq an unsigned char [77]
  o urldata: reduce size of several struct fields [14]
+ o vtls: make Curl_ssl_backend() return the enum type curl_sslbackend [83]
  o windows: improve random source [29]
 
 This release includes the following known bugs:
@@ -79,16 +112,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Sampson, Alexandre Bury, Brad Forschinger, Brian Carpenter,
+  Adam Sampson, Alexandre Bury, Brad Forschinger, Brian Carpenter, Daniel Katz,
   Daniel Stenberg, Don J Olmstead, Érico Nogueira Rolim, Even Rouault,
   Evgeny Grin (Karlson2k), Gwen Shapira, Harry Sintonen, highmtworks on github,
-  Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root, jvvprasad78 on github,
-  Kai Pastor, Litter White, lwthiker on github, Marcel Raad,
-  MasterInQuestion on github, Matthew Thompson, Michał Antoniak,
-  Patrick Monnerat, Ray Satiro, Ryan Schmidt, Samuel Henrique, Sean McArthur,
-  Sukanya Hanumanthu, Tatsuhiro Tsujikawa, Ted Lyngmo, Thomas Weißschuh,
-  Viktor Szakats, Xiaoke Wang, yiyuaner on github
-  (35 contributors)
+  Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root, jurisuk on github,
+  jvvprasad78 on github, Kai Pastor, Litter White, lwthiker on github,
+  Marcel Raad, Marc Hörsken, MasterInQuestion on github, Matthew Thompson,
+  Michał Antoniak, Patrick Monnerat, Philip H, Ray Satiro, Rosen Penev,
+  Ryan Schmidt, rzrymiak on github, Samuel Henrique, Sean McArthur,
+  Sergey Ogryzkov, Sukanya Hanumanthu, Tatsuhiro Tsujikawa, Ted Lyngmo,
+  Thomas Weißschuh, Viktor Szakats, Xiaoke Wang, yiyuaner on github
+  (42 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -151,3 +185,36 @@ References to bug reports and discussions on issues:
  [57] = https://curl.se/bug/?i=9125
  [58] = https://curl.se/bug/?i=9124
  [59] = https://curl.se/bug/?i=9135
+ [60] = https://curl.se/bug/?i=9207
+ [61] = https://curl.se/bug/?i=9204
+ [62] = https://curl.se/bug/?i=9205
+ [63] = https://curl.se/bug/?i=9201
+ [65] = https://curl.se/bug/?i=9012
+ [66] = https://curl.se/bug/?i=9199
+ [67] = https://curl.se/bug/?i=9179
+ [68] = https://curl.se/bug/?i=9179
+ [69] = https://curl.se/bug/?i=9179
+ [70] = https://curl.se/bug/?i=9179
+ [71] = https://curl.se/bug/?i=9179
+ [72] = https://curl.se/bug/?i=9179
+ [73] = https://curl.se/bug/?i=9179
+ [74] = https://curl.se/bug/?i=9179
+ [75] = https://curl.se/bug/?i=9179
+ [76] = https://curl.se/bug/?i=9179
+ [77] = https://curl.se/bug/?i=9179
+ [78] = https://curl.se/bug/?i=9179
+ [79] = https://curl.se/bug/?i=9179
+ [80] = https://curl.se/bug/?i=9179
+ [81] = https://curl.se/bug/?i=9179
+ [82] = https://curl.se/bug/?i=9179
+ [83] = https://curl.se/bug/?i=9179
+ [84] = https://curl.se/bug/?i=9179
+ [85] = https://curl.se/bug/?i=9179
+ [86] = https://curl.se/bug/?i=9190
+ [87] = https://curl.se/bug/?i=9187
+ [88] = https://curl.se/bug/?i=9184
+ [89] = https://curl.se/bug/?i=9180
+ [90] = https://curl.se/bug/?i=9185
+ [91] = https://curl.se/bug/?i=9183
+ [92] = https://curl.se/bug/?i=9181
+ [93] = https://curl.se/bug/?i=9044
