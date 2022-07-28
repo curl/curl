@@ -6,6 +6,7 @@ Help: Fail on HTTP errors but save the body
 Category: http output
 Added: 7.76.0
 See-also: fail
+Mutexed: fail
 Example: --fail-with-body $URL
 ---
 Return an error on server errors where the HTTP response code is 400 or
