@@ -49,6 +49,8 @@ struct quicsocket {
   SSL_CTX *sslctx;
   SSL *ssl;
   bool h3_recving; /* TRUE when in h3-body-reading state */
+  struct sockaddr_storage local_addr;
+  socklen_t local_addrlen;
 };
 
 #endif
