@@ -872,8 +872,9 @@ int cert_stuff(struct Curl_easy *data,
           }
 
           if(SSL_CTX_use_certificate(ctx, params.cert) != 1) {
-            failf(data, "unable to set client certificate");
-            X509_free(params.cert);
+            failf(data, "unable to set client certificate [%s]",
+                  ossl_strerror(ERR_get_error(), error_buffer,
+                                sizeof(error_buffer)));
             return 0;
           }
           X509_free(params.cert); /* we don't need the handle any more... */
