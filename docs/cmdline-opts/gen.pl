@@ -106,7 +106,7 @@ sub printdesc {
         if($d =~ /^[^ ]/) {
             for my $k (keys %optlong) {
                 my $l = manpageify($k);
-                $d =~ s/--$k([^a-z0-9_-])(\W)/$l$1$2/;
+                $d =~ s/--\Q$k\E([^a-z0-9_-])\b/$l$1/;
             }
         }
         # quote "bare" minuses in the output
