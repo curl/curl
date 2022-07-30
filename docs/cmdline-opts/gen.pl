@@ -103,10 +103,10 @@ sub printdesc {
             print ".fi\n"; # fill-in
         }
         # skip lines starting with space (examples)
-        if($d =~ /^[^ ]/) {
+        if($d =~ /^[^ ]/ && $d =~ /--/) {
             for my $k (keys %optlong) {
                 my $l = manpageify($k);
-                $d =~ s/--$k([^a-z0-9_-])(\W)/$l$1$2/;
+                $d =~ s/--\Q$k\E([^a-z0-9_-])([^a-zA-Z0-9_])/$l$1$2/;
             }
         }
         # quote "bare" minuses in the output
