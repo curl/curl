@@ -4,7 +4,7 @@ Long: resolve
 Arg: <[+]host:port:addr[,addr]...>
 Help: Resolve the host+port to this address
 Added: 7.21.3
-Category: connection
+Category: connection dns
 Example: --resolve example.com:443:127.0.0.1 $URL
 See-also: connect-to alt-svc
 ---
