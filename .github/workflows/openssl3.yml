@@ -38,6 +38,12 @@ jobs:
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
 
+    # for a faster gen.pl
+    - uses: perl-actions/install-with-cpm@v1.3
+      with:
+        install: |
+          Proc::ParallelLoop
+
     - run: |
         git clone --depth=1 https://github.com/openssl/openssl
         cd openssl

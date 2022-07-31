@@ -39,6 +39,20 @@ Unfortunately it seems some perls like msysgit can't handle a global input-only
 =end comment
 =cut
 
+# Load the Proc::ParallelLoop module only if it's available
+my $haveparallel = eval {
+  require Proc::ParallelLoop;
+  Proc::ParallelLoop->import();
+  1;
+};
+if(!$haveparallel) {
+  # Stub to avoid a syntax error when the module isn't loaded
+  sub pareach {
+    die "Not supported"
+  };
+}
+my $parallel = 8;  # number of parallel tasks to use
+
 my %optshort;
 my %optlong;
 my %helplong;
@@ -561,17 +575,29 @@ sub listcats {
 
 sub mainpage {
     my (@files) = @_;
-    my $ret;
+    my @ret;
     # show the page header
     header("page-header");
 
-    # output docs for all options
-    foreach my $f (sort @files) {
-        $ret += single($f, 0);
+    if($haveparallel) {
+        # output docs for all options, in parallel threads
+        @ret = pareach [sort @files], sub{
+            my $f=shift;
+            exit single($f, 0);
+        }, {"Max_Workers"=>$parallel};
+    }
+    else {
+        # output docs for all options, serially
+        foreach my $f (sort @files) {
+            $ret += single($f, 0);
+        }
     }
 
     header("page-footer");
-    exit $ret if($ret);
+
+    # return the first error code encountered, if any
+    my @errs = grep($_ > 0, @ret);
+    exit $errs[0] if(scalar @errs);
 }
 
 sub showonly {
