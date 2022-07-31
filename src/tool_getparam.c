@@ -61,7 +61,7 @@
 } while(0)
 
 struct LongShort {
-  const char *letter; /* short name option */
+  const char *letter; /* "short" name option (see comment in aliases) */
   const char *lname;  /* long name option */
   enum {
     ARG_NONE,   /* stand-alone but not a boolean */
@@ -556,7 +556,8 @@ static void cleanarg(argv_item_t str)
 #define cleanarg(x)
 #endif
 
-ParameterError getparameter(const char *flag, /* f or -long-flag */
+ParameterError getparameter(const char *flag, /* "-a", "-ab", "--long" or "long"
+                                               */
                             char *nextarg,    /* NULL if unset */
                             argv_item_t clearthis,
                             bool *usedarg,    /* set to TRUE if the arg
@@ -581,8 +582,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
   if(('-' != flag[0]) || ('-' == flag[1])) {
     /* this should be a long name */
-    const char *word = ('-' == flag[0]) ? flag + 2 : flag;
-    size_t fnam = strlen(word);
+    const char *word = flag + 2;
     int numhits = 0;
     bool noflagged = FALSE;
 
@@ -593,8 +593,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       noflagged = TRUE;
     }
 
+    /* search for the accompanying internal short letter */
     for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
-      if(curl_strnequal(aliases[j].lname, word, fnam)) {
+      /* treat word like a prefix in aliases and be happy with a unique hit */
+      if(curl_strnequal(aliases[j].lname, word, strlen(word))) {
         longopt = TRUE;
         numhits++;
         if(curl_strequal(aliases[j].lname, word)) {
@@ -607,36 +609,26 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         hit = j;
       }
     }
-    if(numhits > 1) {
-      /* this is at least the second match! */
-      return PARAM_OPTION_AMBIGUOUS;
-    }
-    if(hit < 0) {
-      return PARAM_OPTION_UNKNOWN;
+    if(numhits != 1) {
+      /* ambiguous or unknown */
+      return numhits > 1 ? PARAM_OPTION_AMBIGUOUS : PARAM_OPTION_UNKNOWN;
     }
     if(noflagged && (aliases[hit].desc != ARG_BOOL))
       /* --no- prefixed an option that isn't boolean! */
       return PARAM_NO_NOT_BOOLEAN;
   }
-  else {
-    flag++; /* prefixed with one dash, pass it */
-    hit = -1;
-    parse = flag;
-  }
+  else
+    parse = ++flag; /* prefixed with one dash, pass it */
 
   do {
-    /* we can loop here if we have multiple single-letters */
+    /* we can loop here if we have multiple single-letters, such as -Os */
 
-    if(!longopt) {
-      letter = (char)*parse;
-      subletter = '\0';
-    }
-    else {
-      letter = parse[0];
-      subletter = parse[1];
-    }
+    letter = parse[0];
+    subletter = longopt ? parse[1] : '\0';
 
-    if(hit < 0) {
+    /* search for the accompanying entry in aliases (already done for longopt)
+       above */
+    if(!longopt && hit < 0) {
       for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
         if(letter == aliases[j].letter[0]) {
           hit = j;
@@ -648,7 +640,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
     }
 
-    if(aliases[hit].desc >= ARG_STRING) {
+    if(aliases[hit].desc == ARG_STRING || aliases[hit].desc == ARG_FILENAME) {
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
@@ -995,7 +987,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&url->url, nextarg);
         url->flags |= GETOUT_URL;
       }
-      }
+      } /* end of switch(subletter) { */
       break;
     case '$': /* more options without a short option */
       switch(subletter) {

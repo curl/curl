@@ -44,6 +44,8 @@ struct State {
   unsigned long li;
 };
 
+/* configuration options for a single transfer stored in a doubly-linked list
+ * with each node containing the relevant options */
 struct OperationConfig {
   bool remote_time;
   char *useragent;
@@ -300,6 +302,7 @@ struct OperationConfig {
                                      files */
 };
 
+/* transfer independent configuration options for the process */
 struct GlobalConfig {
   int showerror;                  /* -1 == unset, default => show errors
                                       0 => -s is used to NOT show errors
