@@ -51,7 +51,7 @@ if(curl) {
     double speed;
     res = curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed);
     if(!res) {
-      printf("Upload speed %.0f bytes/sec\\n", ul);
+      printf("Upload speed %.0f bytes/sec\\n", speed);
     }
   }
 }
