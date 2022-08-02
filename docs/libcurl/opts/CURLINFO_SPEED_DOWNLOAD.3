@@ -52,7 +52,7 @@ if(curl) {
     double speed;
     res = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &speed);
     if(!res) {
-      printf("Download speed %.0f bytes/sec\\n", ul);
+      printf("Download speed %.0f bytes/sec\\n", speed);
     }
   }
 }
