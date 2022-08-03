@@ -75,8 +75,7 @@ CURLHcode curl_easy_header(CURL *easy,
   struct Curl_header_store *pick = NULL;
   if(!name || !hout || !data ||
      (type > (CURLH_HEADER|CURLH_TRAILER|CURLH_CONNECT|CURLH_1XX|\
-     CURLH_PSEUDO)) ||
-     !type || (request < -1))
+     CURLH_PSEUDO)) || !type || (request < -1))
     return CURLHE_BAD_ARGUMENT;
   if(!Curl_llist_count(&data->state.httphdrs))
     return CURLHE_NOHEADERS; /* no headers available */
