@@ -73,8 +73,8 @@ static int parsenetrc(const char *host,
 
   char state_login = 0;      /* Found a login keyword */
   char state_password = 0;   /* Found a password keyword */
-  int state_our_login = FALSE;  /* With specific_login, found *our* login
-                                   name */
+  int state_our_login = TRUE;  /* With specific_login, found *our* login
+                                  name (or login-less line) */
 
   DEBUGASSERT(netrcfile);
 
