@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+netrc
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Fri, 05 Aug 2022 10:09:00 GMT
+Server: test-server/fake
+Content-Type: text/plain
+Content-Length: 6
+Connection: close
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+netrc with multiple logins - pick second
+ </name>
+ <command>
+--netrc-optional --netrc-file log/netrc%TESTNUMBER http://user2@%HOSTIP:%HTTPPORT/
+</command>
+<file name="log/netrc%TESTNUMBER" >
+machine %HOSTIP login user1 password passwd1
+machine %HOSTIP login user2 password passwd2
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET / HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic %b64[user2:passwd2]b64%
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
