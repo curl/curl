@@ -327,6 +327,22 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
   return result;
 }
 
+#ifdef __AMIGA__
+static void AmigaSetComment(struct per_transfer *per,
+                            CURLcode result)
+{
+  struct OutStruct *outs = &per->outs;
+  if(!result && outs->s_isreg && outs->filename) {
+    /* Set the url (up to 80 chars) as comment for the file */
+    if(strlen(per->this_url) > 78)
+      per->this_url[79] = '\0';
+    SetComment(outs->filename, per->this_url);
+  }
+}
+#else
+#define AmigaSetComment(x,y) Curl_nop_stmt
+#endif
+
 /*
  * Call this after a transfer has completed.
  */
@@ -602,6 +618,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       unlink(outs->filename);
     }
   }
+
+  AmigaSetComment(per, result);
 
   /* File time can only be set _after_ the file has been closed */
   if(!result && config->remote_time && outs->s_isreg && outs->filename) {
