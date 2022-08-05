@@ -4480,6 +4480,11 @@ sub singletest {
         # check if there's any attributes on the verify/protocol section
         my %hash = getpartattr("verify", "protocol");
 
+        if($has_textaware) {
+            # text mode when running on windows: fix line endings
+            map s/\r\n/\n/g, @protstrip;
+            map s/\n/\r\n/g, @protstrip;
+        }
         if($hash{'nonewline'}) {
             # Yes, we must cut off the final newline from the final line
             # of the protocol data
