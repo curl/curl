@@ -177,7 +177,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
 
 #ifdef __AMIGA__
-  if(!Curl_amiga_init()) {
+  if(Curl_amiga_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_amiga_init failed\n"));
     goto fail;
   }

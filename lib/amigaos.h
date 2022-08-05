@@ -25,22 +25,18 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(__AMIGA__) && defined(HAVE_BSDSOCKET_H) && !defined(USE_AMISSL)
+#if defined(__AMIGA__) && defined(HAVE_PROTO_BSDSOCKET_H) && \
+  (!defined(USE_AMISSL) || defined(__amigaos4__))
 
-bool Curl_amiga_init();
-void Curl_amiga_cleanup();
+CURLcode Curl_amiga_init(void);
+void Curl_amiga_cleanup(void);
 
 #else
 
-#define Curl_amiga_init() 1
+#define Curl_amiga_init() CURLE_OK
 #define Curl_amiga_cleanup() Curl_nop_stmt
 
 #endif
-
-#ifdef USE_AMISSL
-#include <openssl/x509v3.h>
-void Curl_amiga_X509_free(X509 *a);
-#endif /* USE_AMISSL */
 
 #endif /* HEADER_CURL_AMIGAOS_H */
 
