@@ -603,6 +603,15 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     }
   }
 
+#ifdef __AMIGA__
+  if(!result && outs->s_isreg && outs->filename) {
+    /* Set the url (up to 80 chars) as comment for the file */
+    if(strlen(per->this_url) > 78)
+      per->this_url[79] = '\0';
+    SetComment(outs->filename, per->this_url);
+  }
+#endif
+
   /* File time can only be set _after_ the file has been closed */
   if(!result && config->remote_time && outs->s_isreg && outs->filename) {
     /* Ask libcurl if we got a remote file time */
