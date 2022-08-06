@@ -44,6 +44,12 @@ transfers.
 
 Transfers marked connect only will not reuse any existing connections and
 connections marked connect only will not be allowed to get reused.
+
+If the connect only transfer is done using the multi interface, the particular
+easy handle must remain added to the multi handle for as long as the
+application wants to use it. Once it has been removed with
+\fIcurl_multi_remove_handle(3)\fP, \fIcurl_easy_send(3)\fP and
+\fIcurl_easy_recv(3)\fP do not function.
 .SH DEFAULT
 0
 .SH PROTOCOLS
