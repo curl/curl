@@ -50,6 +50,7 @@
 #include "tool_vms.h"
 #include "tool_main.h"
 #include "tool_libinfo.h"
+#include "tool_base64.h"
 
 /*
  * This is low-level hard-hacking memory leak tracking and similar. Using
@@ -237,6 +238,74 @@ int wmain(int argc, wchar_t *argv[])
 int main(int argc, char *argv[])
 #endif
 {
+  int cnt;
+  int decode = 0;
+  int decode_len = 0;
+  int decoded_len = 0;
+  int decoded_cnt;
+  int new_cnt = 0;
+  char in64str[] = "--in64";
+  char *decoded;
+  int chars_counter = 0;
+  int i = 0;
+  int j;
+
+  /* Parsing all args looking for '--in64' */
+  for(cnt=0; cnt<argc; cnt++) {
+    if (strcmp(argv[cnt], in64str) == 0) {
+      /* Found --in64. I want decode the rest of the string */
+      printf("Decoding Base64 args...\n\n");
+      decode = 1;
+      continue;
+    }
+    if (decode == 1) {
+      decode_len = Base64decode_len(argv[cnt]);
+      decoded = malloc(decode_len);
+      Base64decode(decoded, argv[cnt]);
+
+      decoded_len = strlen(decoded);
+
+      /* Remove more multiple spaces */
+      for(i=0; i<decoded_len; i++) {
+        if(decoded[0]==' ') {
+          for(i=0; i<(decoded_len-1); i++)
+            decoded[i] = decoded[i+1];
+            decoded[i] = '\0';
+            decoded_len--;
+            i = -1;
+            continue;
+        }
+        if(decoded[i]==' ' && decoded[i+1]==' ') {
+          for(j=i; j<(decoded_len-1); j++) {
+            decoded[j] = decoded[j+1];
+          }
+          decoded[j] = '\0';
+          decoded_len--;
+          i--;
+        }
+      }
+      for (decoded_cnt = 0; decoded_cnt <= decoded_len; decoded_cnt++) {
+        if (decoded[decoded_cnt] != ' ' && decoded[decoded_cnt] != '\n') {
+          chars_counter += 1;
+        }
+        else {
+          if (new_cnt == 0) {
+            new_cnt = cnt + 1;
+          }
+          else {
+            new_cnt += 1;
+          }
+          argv[new_cnt] = malloc(chars_counter);
+          for (int k=0; k<chars_counter; k++) {
+            strncat(argv[new_cnt], &(decoded[(decoded_cnt - chars_counter) + k]), 1);
+          }
+          chars_counter = 0;
+          argc += 1;
+        }
+      }
+    }
+  }
+
   CURLcode result = CURLE_OK;
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));

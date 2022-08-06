@@ -777,5 +777,8 @@ const struct helptxt helptext[] = {
   {"    --xattr",
    "Store metadata in extended file attributes",
    CURLHELP_MISC},
+  {"    --in64",
+   "Receive base64 encoded strings as args",
+   CURLHELP_MISC},
   { NULL, NULL, CURLHELP_HIDDEN }
 };
