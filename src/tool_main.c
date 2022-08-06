@@ -249,6 +249,7 @@ int main(int argc, char *argv[])
   int chars_counter = 0;
   int i = 0;
   int j;
+  int k;
 
   /* Parsing all args looking for '--in64' */
   for(cnt=0; cnt<argc; cnt++) {
@@ -296,7 +297,7 @@ int main(int argc, char *argv[])
             new_cnt += 1;
           }
           argv[new_cnt] = malloc(chars_counter);
-          for (int k=0; k<chars_counter; k++) {
+          for (k=0; k<chars_counter; k++) {
             strncat(argv[new_cnt], &(decoded[(decoded_cnt - chars_counter) + k]), 1);
           }
           chars_counter = 0;
