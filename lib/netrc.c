@@ -53,6 +53,22 @@ enum host_lookup_state {
 #define NETRC_SUCCESS 0
 
 /*
+ * Return the file size as an integer (max. ~2GB) or a -1 in case of a failure.
+ */
+static int get_file_sz(FILE *fp)
+{
+  long sz;
+
+  fseek(fp, 0L, SEEK_END); /* Go to the end */
+  sz = ftell(fp); /* Get the position of the end which is the file size */
+  fseek(fp, 0L, SEEK_SET); /* Go back to the position from where we started */
+
+  if(sz > INT_MAX - 1) /* -1 because we add +1 later for '\0' */
+    return -1;
+  return (int)sz;
+}
+
+/*
  * Returns zero on success.
  */
 static int parsenetrc(const char *host,
@@ -81,8 +97,20 @@ static int parsenetrc(const char *host,
   file = fopen(netrcfile, FOPEN_READTEXT);
   if(file) {
     bool done = FALSE;
-    char netrcbuffer[4096];
-    int  netrcbuffsize = (int)sizeof(netrcbuffer);
+    char *netrcbuffer = NULL;
+    int  netrcbuffsize;
+
+    netrcbuffsize = get_file_sz(file);
+    if(netrcbuffsize++ == -1) {
+      retcode = NETRC_FAILED;
+      goto out;
+    }
+
+    netrcbuffer = malloc(netrcbuffsize);
+    if(!netrcbuffer) {
+      retcode = NETRC_FAILED;
+      goto out;
+    }
 
     while(!done && fgets(netrcbuffer, netrcbuffsize, file)) {
       char *tok;
@@ -269,6 +297,7 @@ static int parsenetrc(const char *host,
       if(password_alloc)
         free(password);
     }
+    free(netrcbuffer);
     fclose(file);
   }
 
