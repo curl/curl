@@ -593,7 +593,7 @@ const struct helptxt helptext[] = {
    CURLHELP_HTTP},
   {"    --resolve <[+]host:port:addr[,addr]...>",
    "Resolve the host+port to this address",
-   CURLHELP_CONNECTION},
+   CURLHELP_CONNECTION | CURLHELP_DNS},
   {"    --retry <num>",
    "Retry request if transient problems occur",
    CURLHELP_CURL},
