@@ -274,6 +274,18 @@
 #endif
 
 #ifdef __AMIGA__
+#  ifdef __amigaos4__
+#    define __USE_INLINE__
+     /* use our own resolver which uses runtime feature detection */
+#    define CURLRES_AMIGA
+     /* getaddrinfo() currently crashes bsdsocket.library, so disable */
+#    undef HAVE_GETADDRINFO
+#    if !(defined(__NEWLIB__) || \
+          (defined(__CLIB2__) && defined(__THREAD_SAFE)))
+       /* disable threaded resolver with clib2 - requires newlib or clib-ts */
+#      undef USE_THREADS_POSIX
+#    endif
+#  endif
 #  include <exec/types.h>
 #  include <exec/execbase.h>
 #  include <proto/exec.h>

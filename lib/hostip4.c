@@ -112,7 +112,8 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 #endif /* CURLRES_SYNCH */
 #endif /* CURLRES_IPV4 */
 
-#if defined(CURLRES_IPV4) && !defined(CURLRES_ARES)
+#if defined(CURLRES_IPV4) && \
+   !defined(CURLRES_ARES) && !defined(CURLRES_AMIGA)
 
 /*
  * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
@@ -297,4 +298,5 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 
   return ai;
 }
-#endif /* defined(CURLRES_IPV4) && !defined(CURLRES_ARES) */
+#endif /* defined(CURLRES_IPV4) && !defined(CURLRES_ARES) &&
+                                   !defined(CURLRES_AMIGA) */
