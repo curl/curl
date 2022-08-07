@@ -3617,6 +3617,9 @@ if test "$want_pthreads" != "no"; then
       dnl if it wasn't found without lib, search for it in pthread lib
       if test "$USE_THREADS_POSIX" != "1"
       then
+        # assign PTHREAD for pkg-config use
+        PTHREAD=" -pthread"
+
         case $host in
         *-ibm-aix*)
            dnl Check if compiler is xlC
@@ -3627,12 +3630,14 @@ if test "$want_pthreads" != "no"; then
              CFLAGS="$CFLAGS -qthreaded"
            fi
            ;;
+        powerpc-*amigaos*)
+           dnl No -pthread option, but link with -lpthread
+           PTHREAD=" -lpthread"
+           ;;
         *)
            CFLAGS="$CFLAGS -pthread"
            ;;
         esac
-        # assign PTHREAD for pkg-config use
-        PTHREAD=" -pthread"
         AC_CHECK_LIB(pthread, pthread_create,
                      [USE_THREADS_POSIX=1],
                      [ CFLAGS="$save_CFLAGS"])
