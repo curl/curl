@@ -37,10 +37,5 @@ void Curl_amiga_cleanup();
 
 #endif
 
-#ifdef USE_AMISSL
-#include <openssl/x509v3.h>
-void Curl_amiga_X509_free(X509 *a);
-#endif /* USE_AMISSL */
-
 #endif /* HEADER_CURL_AMIGAOS_H */
 

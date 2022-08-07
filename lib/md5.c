@@ -41,7 +41,7 @@
 #endif
 #endif /* USE_MBEDTLS */
 
-#if defined(USE_OPENSSL) && !defined(USE_AMISSL)
+#ifdef USE_OPENSSL
   #include <openssl/opensslconf.h>
   #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
     #define USE_OPENSSL_MD5
