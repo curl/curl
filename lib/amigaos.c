@@ -39,7 +39,22 @@
 #include "memdebug.h"
 
 #ifdef __AMIGA__
-#if defined(HAVE_PROTO_BSDSOCKET_H) && !defined(USE_AMISSL)
+
+#ifdef __amigaos4__
+
+#ifdef USE_AMISSL
+int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
+                      fd_set *errorfds, struct timeval *timeout)
+{
+  int r = WaitSelect(nfds, readfds, writefds, errorfds, timeout, 0);
+  /* Ensure Ctrl-C signal is actioned */
+  if((r == -1) && (SOCKERRNO == EINTR))
+    raise(SIGINT);
+  return r;
+}
+#endif /* USE_AMISSL */
+
+#elif defined(HAVE_PROTO_BSDSOCKET_H) && !defined(USE_AMISSL)
 struct Library *SocketBase = NULL;
 extern int errno, h_errno;
 
