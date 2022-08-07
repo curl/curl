@@ -560,6 +560,9 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 
         token = strtok_r(tmp, ",", &tok_buf);
         while(token) {
+          /* Pass additional spaces here */
+          while(*token && ISSPACE(*token))
+            token++;
           if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH)) {
             foundAuth = TRUE;
           }
