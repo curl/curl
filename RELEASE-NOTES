@@ -4,10 +4,11 @@ curl and libcurl 7.85.0
  Command line options:         248
  curl_easy_setopt() options:   299
  Public functions in libcurl:  88
- Contributors:                 2671
+ Contributors:                 2675
 
 This release includes the following changes:
 
+ o schannel: Add TLS 1.3 support [96]
  o setopt: add CURLOPT_PROTOCOLS_STR and CURLOPT_REDIR_PROTOCOLS_STR [30]
 
 This release includes the following bugfixes:
@@ -22,8 +23,10 @@ This release includes the following bugfixes:
  o cmake: link curl to its dependencies with PRIVATE [57]
  o cmake: remove APPEND in export(TARGETS) [58]
  o cmake: support ngtcp2 boringssl backend [18]
+ o cmdline-opts/gen.pl: improve performance [97]
  o configure: check for the stdatomic.h header in configure [7]
  o configure: fix --disable-headers-api [55]
+ o connect: revert the use of IP*_RECVERR [102]
  o cookie: treat a blank domain in Set-Cookie: as non-existing [40]
  o cookie: use %zu to infof() for size_t values [26]
  o curl-compilers.m4: make icc use -diag* options and disable two warnings [84]
@@ -33,12 +36,17 @@ This release includes the following bugfixes:
  o curl.h: CURLE_CONV_FAILED is obsoleted [4]
  o curl: output warning when a cookie is dropped due to size [5]
  o curl: writeout: fix repeated header outputs [47]
+ o curl_easy_header: Add CURLH_PSEUDO to sanity check [94]
  o curl_mime_data.3: polish the wording [6]
  o curl_multi_timeout.3: clarify usage [48]
+ o CURLOPT_CONNECT_ONLY.3: clarify multi API use [64]
  o CURLOPT_SERVER_RESPONSE_TIMEOUT: the new name [16]
  o digest: fix memory leak, fix not quoted 'opaque' [66]
  o digest: fix missing increment of 'nc' value for auth-int [39]
+ o docs/cmdline: mark fail and fail-with-body as mutually exclusive [98]
+ o docs: add dns category to --resolve [95]
  o docs: explain curl_easy_escape/unescape curl handle is ignored [23]
+ o docs: remove him/her/he/she from documentation [103]
  o doh: move doh related struct definitions to doh.h [45]
  o doh: use https protocol by default [51]
  o easy_lock.h: include sched.h if available to fix build [13]
@@ -57,6 +65,7 @@ This release includes the following bugfixes:
  o http: typecast the httpreq assignment to avoid icc compiler warning [76]
  o http_aws_sigv4.c: remove two unusued includes [36]
  o http_chunks: remove an assign + typecast [82]
+ o hyper: enable obs-folded multiline headers [101]
  o hyper: use wakers for curl pause/resume [2]
  o lib/curl_path.c: add ISC to license expression [1]
  o lib3026: reduce the number of threads to 100 [44]
@@ -77,6 +86,7 @@ This release includes the following bugfixes:
  o ngtcp2: implement cb_h3_stop_sending and cb_h3_reset_stream callbacks [59]
  o openssl: add `CURL_BORINGSSL_VERSION` to identify BoringSSL [24]
  o openssl: fix BoringSSL symbol conflicts with LDAP and Schannel [52]
+ o quiche: fix build failure [99]
  o select: do not return fatal error on EINTR from poll() [32]
  o sendf: fix paused header writes since after the header API [89]
  o sendf: make Curl_debug a void function [81]
@@ -112,17 +122,20 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Sampson, Alexandre Bury, Brad Forschinger, Brian Carpenter, Daniel Katz,
-  Daniel Stenberg, Don J Olmstead, Érico Nogueira Rolim, Even Rouault,
-  Evgeny Grin (Karlson2k), Gwen Shapira, Harry Sintonen, highmtworks on github,
-  Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root, jurisuk on github,
-  jvvprasad78 on github, Kai Pastor, Litter White, lwthiker on github,
-  Marcel Raad, Marc Hörsken, MasterInQuestion on github, Matthew Thompson,
-  Michał Antoniak, Patrick Monnerat, Philip H, Ray Satiro, Rosen Penev,
-  Ryan Schmidt, rzrymiak on github, Samuel Henrique, Sean McArthur,
-  Sergey Ogryzkov, Sukanya Hanumanthu, Tatsuhiro Tsujikawa, Ted Lyngmo,
-  Thomas Weißschuh, Viktor Szakats, Xiaoke Wang, yiyuaner on github
-  (42 contributors)
+  Adam Sampson, Alessandro Ghedini, Alexandre Bury, Andreas Sommer,
+  Andrew Lambert, Brad Forschinger, Brian Carpenter, Daniel Katz,
+  Daniel Stenberg, Don J Olmstead, Emanuele Torre, Emil Engler,
+  Érico Nogueira Rolim, Even Rouault, Evgeny Grin (Karlson2k), Gwen Shapira,
+  Harry Sintonen, highmtworks on github, Jakub Zakrzewski, Jilayne Lovejoy,
+  Joshua Root, jurisuk on github, jvvprasad78 on github, Kai Pastor,
+  Litter White, lwthiker on github, Marcel Raad, Marc Hörsken, Marco Kamner,
+  MasterInQuestion on github, Matthew Thompson, Maxim Ivanov, Michał Antoniak,
+  Nao Yonashiro, Oliver Roberts, Patrick Monnerat, Philip H, Ray Satiro,
+  Rosen Penev, Ryan Schmidt, rzrymiak on github, Samuel Henrique,
+  Sean McArthur, Sergey Ogryzkov, Sukanya Hanumanthu, Tatsuhiro Tsujikawa,
+  Ted Lyngmo, Thomas Weißschuh, Viktor Szakats, Wyatt O'Day, Xiaoke Wang,
+  yiyuaner on github
+  (52 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -189,6 +202,7 @@ References to bug reports and discussions on issues:
  [61] = https://curl.se/bug/?i=9204
  [62] = https://curl.se/bug/?i=9205
  [63] = https://curl.se/bug/?i=9201
+ [64] = https://curl.se/bug/?i=9244
  [65] = https://curl.se/bug/?i=9012
  [66] = https://curl.se/bug/?i=9199
  [67] = https://curl.se/bug/?i=9179
@@ -218,3 +232,12 @@ References to bug reports and discussions on issues:
  [91] = https://curl.se/bug/?i=9183
  [92] = https://curl.se/bug/?i=9181
  [93] = https://curl.se/bug/?i=9044
+ [94] = https://curl.se/bug/?i=9235
+ [95] = https://curl.se/bug/?i=9229
+ [96] = https://curl.se/bug/?i=8419
+ [97] = https://curl.se/bug/?i=9230
+ [98] = https://curl.se/bug/?i=9221
+ [99] = https://curl.se/bug/?i=9223
+ [101] = https://curl.se/bug/?i=9216
+ [102] = https://curl.se/bug/?i=9209
+ [103] = https://curl.se/bug/?i=9208
