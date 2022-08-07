@@ -279,9 +279,24 @@
 #  include <proto/exec.h>
 #  include <proto/dos.h>
 #  include <unistd.h>
-#  ifdef HAVE_PROTO_BSDSOCKET_H
-#    include <proto/bsdsocket.h> /* ensure bsdsocket.library use */
-#    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#  if defined(HAVE_PROTO_BSDSOCKET_H) && \
+    (!defined(__amigaos4__) || defined(USE_AMISSL))
+     /* use bsdsocket.library directly, instead of libc networking functions */
+#    include <proto/bsdsocket.h>
+#    ifdef __amigaos4__
+       int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
+                             fd_set *errorfds, struct timeval *timeout);
+#      define select(a,b,c,d,e) Curl_amiga_select(a,b,c,d,e)
+#    else
+#      define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#    endif
+     /* must not use libc's fcntl() on bsdsocket.library sockfds! */
+#    undef HAVE_FCNTL
+#    undef HAVE_FCNTL_O_NONBLOCK
+#  else
+     /* use libc networking and hence close() and fnctl() */
+#    undef HAVE_CLOSESOCKET_CAMEL
+#    undef HAVE_IOCTLSOCKET_CAMEL
 #  endif
 /*
  * In clib2 arpa/inet.h warns that some prototypes may clash
