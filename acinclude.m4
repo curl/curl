@@ -813,6 +813,7 @@ dnl return value in RECV_TYPE_RETV.
 
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for recv])
@@ -828,10 +829,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #include <winsock2.h>
 #endif
 #else
-#ifdef HAVE_PROTO_BSDSOCKET_H
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
-#endif
+$curl_includes_bsdsocket
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -873,10 +871,7 @@ struct Library *SocketBase = NULL;
 #endif
 #define RECVCALLCONV PASCAL
 #else
-#ifdef HAVE_PROTO_BSDSOCKET_H
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
-#endif
+$curl_includes_bsdsocket
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -948,6 +943,7 @@ dnl type qualifier of second argument in SEND_QUAL_ARG2.
 
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   #
   AC_MSG_CHECKING([for send])
@@ -963,10 +959,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #include <winsock2.h>
 #endif
 #else
-#ifdef HAVE_PROTO_BSDSOCKET_H
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
-#endif
+$curl_includes_bsdsocket
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -1008,10 +1001,7 @@ struct Library *SocketBase = NULL;
 #endif
 #define SENDCALLCONV PASCAL
 #else
-#ifdef HAVE_PROTO_BSDSOCKET_H
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
-#endif
+$curl_includes_bsdsocket
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -1121,10 +1111,6 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
 #include <winsock2.h>
 #endif
 #else
-#ifdef HAVE_PROTO_BSDSOCKET_H
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
-#endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -1544,6 +1530,7 @@ dnl in SELECT_QUAL_ARG5.
 
 AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
   AC_REQUIRE([CURL_CHECK_STRUCT_TIMEVAL])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_CHECK_HEADERS(sys/select.h sys/socket.h)
   #
   AC_MSG_CHECKING([for select])
@@ -1575,11 +1562,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_PROTO_BSDSOCKET_H
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
-#define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
-#endif
+$curl_includes_bsdsocket
 #endif
     ]],[[
       select(0, 0, 0, 0, 0);
@@ -1630,11 +1613,7 @@ struct Library *SocketBase = NULL;
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_PROTO_BSDSOCKET_H
-#include <proto/bsdsocket.h>
-struct Library *SocketBase = NULL;
-#define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
-#endif
+$curl_includes_bsdsocket
 #define SELECTCALLCONV
 #endif
 #ifndef HAVE_STRUCT_TIMEVAL
