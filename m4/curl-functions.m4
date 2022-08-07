@@ -522,14 +522,24 @@ dnl included when bsdsocket.h is to be included.
 AC_DEFUN([CURL_INCLUDES_BSDSOCKET], [
 curl_includes_bsdsocket="\
 /* includes start */
-#ifdef HAVE_PROTO_BSDSOCKET_H
+#if defined(HAVE_PROTO_BSDSOCKET_H)
+#  define __NO_NET_API
+#  define __USE_INLINE__
 #  include <proto/bsdsocket.h>
-  struct Library *SocketBase = NULL;
+#  ifdef HAVE_SYS_IOCTL_H
+#    include <sys/ioctl.h>
+#  endif
+#  ifdef __amigaos4__
+struct SocketIFace *ISocket = NULL;
+#  else
+struct Library *SocketBase = NULL;
+#  endif
+#  define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
     proto/bsdsocket.h,
-    [], [], [      $curl_includes_bsdsocket])
+    [], [], [$curl_includes_bsdsocket])
 ])
 
 dnl CURL_INCLUDES_NETIF
@@ -764,7 +774,6 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
-      $curl_includes_bsdsocket
       $curl_includes_socket
     ]],[[
       if(0 != closesocket(0))
@@ -782,7 +791,6 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_MSG_CHECKING([if closesocket is prototyped])
     AC_EGREP_CPP([closesocket],[
       $curl_includes_winsock2
-      $curl_includes_bsdsocket
       $curl_includes_socket
     ],[
       AC_MSG_RESULT([yes])
@@ -798,7 +806,6 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
-      $curl_includes_bsdsocket
         $curl_includes_socket
       ]],[[
         if(0 != closesocket(0))
@@ -850,6 +857,7 @@ dnl then HAVE_CLOSESOCKET_CAMEL will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
   tst_links_closesocket_camel="unknown"
   tst_proto_closesocket_camel="unknown"
@@ -859,6 +867,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   AC_MSG_CHECKING([if CloseSocket can be linked])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
       if(0 != CloseSocket(0))
@@ -875,6 +884,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   if test "$tst_links_closesocket_camel" = "yes"; then
     AC_MSG_CHECKING([if CloseSocket is prototyped])
     AC_EGREP_CPP([CloseSocket],[
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ],[
       AC_MSG_RESULT([yes])
@@ -889,6 +899,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
     AC_MSG_CHECKING([if CloseSocket is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
+        $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
         if(0 != CloseSocket(0))
@@ -941,6 +952,7 @@ dnl HAVE_CONNECT will be defined.
 AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
   #
   tst_links_connect="unknown"
@@ -988,7 +1000,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
-      $curl_includes_bsdsocket
+        $curl_includes_bsdsocket
         $curl_includes_sys_socket
         $curl_includes_socket
       ]],[[
@@ -2171,7 +2183,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
-      $curl_includes_bsdsocket
+        $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gethostbyname(0))
@@ -2260,6 +2272,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
           $curl_includes_netdb
+          $curl_includes_bsdsocket
         ]],[[
           if(0 != gethostbyname_r(0, 0, 0))
             return 1;
@@ -2278,6 +2291,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
           $curl_includes_netdb
+          $curl_includes_bsdsocket
         ]],[[
           if(0 != gethostbyname_r(0, 0, 0, 0, 0))
             return 1;
@@ -2296,6 +2310,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
           $curl_includes_netdb
+          $curl_includes_bsdsocket
         ]],[[
           if(0 != gethostbyname_r(0, 0, 0, 0, 0, 0))
             return 1;
@@ -2365,9 +2380,9 @@ dnl HAVE_GETHOSTNAME will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
   AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
-  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
   tst_links_gethostname="unknown"
   tst_proto_gethostname="unknown"
@@ -2378,8 +2393,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
-      $curl_includes_bsdsocket
       $curl_includes_unistd
+      $curl_includes_bsdsocket
     ]],[[
       if(0 != gethostname(0, 0))
         return 1;
@@ -2396,8 +2411,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_MSG_CHECKING([if gethostname is prototyped])
     AC_EGREP_CPP([gethostname],[
       $curl_includes_winsock2
-      $curl_includes_bsdsocket
       $curl_includes_unistd
+      $curl_includes_bsdsocket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_gethostname="yes"
@@ -2412,8 +2427,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
-      $curl_includes_bsdsocket
         $curl_includes_unistd
+        $curl_includes_bsdsocket
       ]],[[
         if(0 != gethostname(0, 0))
           return 1;
@@ -2436,8 +2451,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
           AC_COMPILE_IFELSE([
             AC_LANG_PROGRAM([[
               $curl_includes_winsock2
-      $curl_includes_bsdsocket
               $curl_includes_unistd
+              $curl_includes_bsdsocket
               $curl_preprocess_callconv
               extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
@@ -3573,7 +3588,6 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
-      $curl_includes_bsdsocket
     ]],[[
       if(0 != ioctlsocket(0, 0, 0))
         return 1;
@@ -3590,7 +3604,6 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_MSG_CHECKING([if ioctlsocket is prototyped])
     AC_EGREP_CPP([ioctlsocket],[
       $curl_includes_winsock2
-      $curl_includes_bsdsocket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_ioctlsocket="yes"
@@ -3605,7 +3618,6 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
-      $curl_includes_bsdsocket
       ]],[[
         if(0 != ioctlsocket(0, 0, 0))
           return 1;
@@ -3664,7 +3676,6 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
-      $curl_includes_bsdsocket
       ]],[[
         int flags = 0;
         if(0 != ioctlsocket(0, FIONBIO, &flags))
@@ -3713,7 +3724,7 @@ dnl shell variable curl_disallow_ioctlsocket_camel,
 dnl then HAVE_IOCTLSOCKET_CAMEL will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
-  AC_REQUIRE([CURL_INCLUDES_STROPTS])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
   tst_links_ioctlsocket_camel="unknown"
   tst_proto_ioctlsocket_camel="unknown"
@@ -3722,7 +3733,11 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   #
   AC_MSG_CHECKING([if IoctlSocket can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([IoctlSocket])
+    AC_LANG_PROGRAM([[
+      $curl_includes_bsdsocket
+    ]],[[
+      IoctlSocket(0, 0, 0);
+    ]])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_ioctlsocket_camel="yes"
@@ -3734,7 +3749,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   if test "$tst_links_ioctlsocket_camel" = "yes"; then
     AC_MSG_CHECKING([if IoctlSocket is prototyped])
     AC_EGREP_CPP([IoctlSocket],[
-      $curl_includes_stropts
+      $curl_includes_bsdsocket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_ioctlsocket_camel="yes"
@@ -3748,7 +3763,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
     AC_MSG_CHECKING([if IoctlSocket is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-        $curl_includes_stropts
+        $curl_includes_bsdsocket
       ]],[[
         if(0 != IoctlSocket(0, 0, 0))
           return 1;
@@ -3797,6 +3812,7 @@ dnl can be compiled, and seems to work. If all of these are
 dnl true, then HAVE_IOCTLSOCKET_CAMEL_FIONBIO will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
   tst_compi_ioctlsocket_camel_fionbio="unknown"
   tst_allow_ioctlsocket_camel_fionbio="unknown"
@@ -3805,7 +3821,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
     AC_MSG_CHECKING([if IoctlSocket FIONBIO is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-        $curl_includes_stropts
+        $curl_includes_bsdsocket
       ]],[[
         long flags = 0;
         if(0 != IoctlSocket(0, FIONBIO, &flags))
@@ -4354,7 +4370,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
-      $curl_includes_bsdsocket
+        $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
         if(0 != setsockopt(0, SOL_SOCKET, SO_NONBLOCK, 0, 0))
@@ -4936,7 +4952,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
-      $curl_includes_bsdsocket
+        $curl_includes_bsdsocket
         $curl_includes_sys_socket
         $curl_includes_socket
       ]],[[
