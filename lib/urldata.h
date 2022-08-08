@@ -1119,7 +1119,8 @@ struct connectdata {
   int localportrange;
   int cselect_bits; /* bitmask of socket events */
   int waitfor;      /* current READ/WRITE bits to wait for */
-  int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
+  unsigned char negnpn; /* APLN or NPN TLS negotiated protocol,
+                           a CURL_HTTP_VERSION* value */
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
