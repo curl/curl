@@ -871,7 +871,7 @@ $curl_includes_bsdsocket
 #endif
 #define RECVCALLCONV PASCAL
 #else
-                      $curl_includes_bsdsocket
+$curl_includes_bsdsocket
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
