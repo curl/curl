@@ -879,6 +879,11 @@ struct connstate {
   unsigned char *outp; /* send from this pointer */
 };
 
+#define TRNSPRT_TCP 3
+#define TRNSPRT_UDP 4
+#define TRNSPRT_QUIC 5
+#define TRNSPRT_UNIX 6
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -919,12 +924,7 @@ struct connectdata {
 #ifdef ENABLE_IPV6
   unsigned int scope_id;  /* Scope id for IPv6 */
 #endif
-
-  enum {
-    TRNSPRT_TCP = 3,
-    TRNSPRT_UDP = 4,
-    TRNSPRT_QUIC = 5
-  } transport;
+  unsigned char transport; /* one of the TRNSPRT_* defines */
 
 #ifdef ENABLE_QUIC
   struct quicsocket hequic[2]; /* two, for happy eyeballs! */

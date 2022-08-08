@@ -3477,6 +3477,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
           free(hostaddr);
           hostaddr = NULL;
         }
+        conn->transport = TRNSPRT_UNIX;
       }
     }
     else
