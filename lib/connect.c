@@ -1604,9 +1604,20 @@ CURLcode Curl_socket(struct Curl_easy *data,
    */
 
   addr->family = ai->ai_family;
-  addr->socktype = (conn->transport == TRNSPRT_TCP) ? SOCK_STREAM : SOCK_DGRAM;
-  addr->protocol = conn->transport != TRNSPRT_TCP ? IPPROTO_UDP :
-    ai->ai_protocol;
+  switch(conn->transport) {
+  case TRNSPRT_TCP:
+    addr->socktype = SOCK_STREAM;
+    addr->protocol = IPPROTO_TCP;
+    break;
+  case TRNSPRT_UNIX:
+    addr->socktype = SOCK_STREAM;
+    addr->protocol = IPPROTO_IP;
+    break;
+  default: /* UDP and QUIC */
+    addr->socktype = SOCK_DGRAM;
+    addr->protocol = IPPROTO_UDP;
+    break;
+  }
   addr->addrlen = ai->ai_addrlen;
 
   if(addr->addrlen > sizeof(struct Curl_sockaddr_storage))
