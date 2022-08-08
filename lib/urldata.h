@@ -921,10 +921,6 @@ struct connectdata {
      cache entry remains locked. It gets unlocked in multi_done() */
   struct Curl_addrinfo *ip_addr;
   struct Curl_addrinfo *tempaddr[2]; /* for happy eyeballs */
-#ifdef ENABLE_IPV6
-  unsigned int scope_id;  /* Scope id for IPv6 */
-#endif
-  unsigned char transport; /* one of the TRNSPRT_* defines */
 
 #ifdef ENABLE_QUIC
   struct quicsocket hequic[2]; /* two, for happy eyeballs! */
@@ -940,13 +936,6 @@ struct connectdata {
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
 #endif
-  int port;        /* which port to use locally - to connect to */
-  int remote_port; /* the remote port, not the proxy port! */
-  int conn_to_port; /* the remote port to connect to. valid only if
-                       bits.conn_to_port is set */
-  unsigned short secondary_port; /* secondary socket remote port to connect to
-                                    (ftp) */
-
   /* 'primary_ip' and 'primary_port' get filled with peer's numerical
      ip address and port number whenever an outgoing connection is
      *attempted* from the primary socket to a remote address. When more
@@ -955,14 +944,11 @@ struct connectdata {
      these are updated with data which comes directly from the socket. */
 
   char primary_ip[MAX_IPADR_LEN];
-  unsigned char ip_version; /* copied from the Curl_easy at creation time */
-
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
   char *sasl_authzid;     /* authorization identity string, allocated */
   char *oauth_bearer; /* OAUTH2 bearer, allocated */
-  unsigned char httpversion; /* the HTTP version*10 reported by the server */
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection cache */
@@ -989,8 +975,6 @@ struct connectdata {
 #endif
   struct ConnectBits bits;    /* various state-flags for this connection */
 
-  /* The field below gets set in Curl_connecthost */
-  int num_addr; /* number of addresses to try to connect to */
  /* connecttime: when connect() is called on the current IP address. Used to
     be able to track when to move on to try next IP - but only when the multi
     interface is used. */
@@ -1119,13 +1103,26 @@ struct connectdata {
   int localportrange;
   int cselect_bits; /* bitmask of socket events */
   int waitfor;      /* current READ/WRITE bits to wait for */
-  unsigned char negnpn; /* APLN or NPN TLS negotiated protocol,
-                           a CURL_HTTP_VERSION* value */
-
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
 #endif
+  /* The field below gets set in Curl_connecthost */
+  int num_addr; /* number of addresses to try to connect to */
+  int port;        /* which port to use locally - to connect to */
+  int remote_port; /* the remote port, not the proxy port! */
+  int conn_to_port; /* the remote port to connect to. valid only if
+                       bits.conn_to_port is set */
+#ifdef ENABLE_IPV6
+  unsigned int scope_id;  /* Scope id for IPv6 */
+#endif
   unsigned short localport;
+  unsigned short secondary_port; /* secondary socket remote port to connect to
+                                    (ftp) */
+  unsigned char negnpn; /* APLN or NPN TLS negotiated protocol,
+                           a CURL_HTTP_VERSION* value */
+  unsigned char transport; /* one of the TRNSPRT_* defines */
+  unsigned char ip_version; /* copied from the Curl_easy at creation time */
+  unsigned char httpversion; /* the HTTP version*10 reported by the server */
 };
 
 /* The end of connectdata. */
