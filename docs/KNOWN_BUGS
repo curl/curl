@@ -75,6 +75,7 @@ problems may have been fixed or changed somewhat since this was written.
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
  6.12 cannot use Secure Transport with Crypto Token Kit
+ 6.13 Negotiate against Hadoop HDFS
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -629,6 +630,10 @@ problems may have been fixed or changed somewhat since this was written.
 6.12 cannot use Secure Transport with Crypto Token Kit
 
  https://github.com/curl/curl/issues/7048
+
+6.13 Negotiate authentication against Hadoop HDFS
+
+ https://github.com/curl/curl/issues/8264
 
 7. FTP
 
