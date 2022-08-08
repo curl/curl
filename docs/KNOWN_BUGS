@@ -146,6 +146,7 @@ problems may have been fixed or changed somewhat since this was written.
  15.11 ExternalProject_Add does not set CURL_CA_PATH
  15.12 cannot enable LDAPS on Windows
  15.13 CMake build with MIT Kerberos does not work
+ 15.14 cmake build is not thread-safe
 
  16. Applications
 
@@ -1073,6 +1074,15 @@ problems may have been fixed or changed somewhat since this was written.
  cannot be built.
 
  https://github.com/curl/curl/issues/6904
+
+15.14 cmake build is not thread-safe
+
+ The cmake build does not check for and verify presence of a working Atomic
+ type, which then makes curl_global_init() to not build thread-safe on
+ non-Windows platforms.
+
+ Bug: https://github.com/curl/curl/issues/8973
+ Partial fix: https://github.com/curl/curl/pull/8982
 
 16. Applications
 
