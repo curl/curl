@@ -1018,9 +1018,9 @@ struct connectdata {
 
 #ifdef HAVE_GSSAPI
   BIT(sec_complete); /* if Kerberos is enabled for this connection */
-  enum protection_level command_prot;
-  enum protection_level data_prot;
-  enum protection_level request_data_prot;
+  unsigned char command_prot; /* enum protection_level */
+  unsigned char data_prot; /* enum protection_level */
+  unsigned char request_data_prot; /* enum protection_level */
   size_t buffer_size;
   struct krb5buffer in_buffer;
   void *app_data;
