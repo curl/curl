@@ -226,6 +226,9 @@ struct Curl_sh_entry {
   void *socketp; /* settable by users with curl_multi_assign() */
   unsigned int readers; /* this many transfers want to read */
   unsigned int writers; /* this many transfers want to write */
+#ifdef USE_WINSOCK
+  DWORD socketype; /* used to differentiate TCP and UDP in multi_wait */
+#endif
 };
 /* bits for 'action' having no bits means this socket is not expecting any
    action */
@@ -1155,6 +1158,32 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 
 #define NUM_POLLS_ON_STACK 10
 
+#ifdef USE_WINSOCK
+static DWORD multi_getsocktype(struct Curl_multi *multi, curl_socket_t s)
+{
+  DWORD socketype;
+  int len = sizeof(socketype);
+  int res;
+
+  struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
+  fprintf(stderr, "entry=%d\n", entry);
+  if(!entry)
+    return SOCK_STREAM;
+
+  fprintf(stderr, "entry->socketype=%d\n", entry->socketype);
+  if(entry->socketype)
+    return entry->socketype;
+
+  res = getsockopt(s, SOL_SOCKET, SO_TYPE, (char *)&socketype, &len);
+  if(res == SOCKET_ERROR)
+    return SOCK_STREAM;
+
+  entry->socketype = socketype;
+  fprintf(stderr, "entry->socketype=%d\n", entry->socketype);
+  return socketype;
+}
+#endif
+
 static CURLMcode multi_wait(struct Curl_multi *multi,
                             struct curl_waitfd extra_fds[],
                             unsigned int extra_nfds,
@@ -1176,9 +1205,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   bool ufds_malloc = FALSE;
 #ifdef USE_WINSOCK
   WSANETWORKEVENTS wsa_events;
-  DWORD stype;
-  int ltype = sizeof(stype);
-  char *ptype = (char *)&stype;
   DEBUGASSERT(multi->wsa_event != WSA_INVALID_EVENT);
 #endif
 #ifndef ENABLE_WAKEUP
@@ -1277,9 +1303,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
           s = sockbunch[i];
 #ifdef USE_WINSOCK
           mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-          if(getsockopt(s, SOL_SOCKET, SO_TYPE, ptype, &ltype) == SOCKET_ERROR)
-            stype = SOCK_STREAM; /* assume TCP */
-          if(stype == SOCK_STREAM)
+          if(multi_getsocktype(multi, s) == SOCK_STREAM)
             send(s, NULL, 0, 0); /* reset FD_WRITE */
 #endif
           ufds[nfds].fd = s;
@@ -1315,9 +1339,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       mask |= FD_OOB;
     if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
       mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-      if(getsockopt(s, SOL_SOCKET, SO_TYPE, ptype, &ltype) == SOCKET_ERROR)
-        stype = SOCK_STREAM; /* assume TCP */
-      if(stype == SOCK_STREAM)
+      if(multi_getsocktype(multi, s) == SOCK_STREAM)
         send(s, NULL, 0, 0); /* reset FD_WRITE */
     }
     if(WSAEventSelect(s, multi->wsa_event, mask) != 0) {
