@@ -61,6 +61,7 @@ problems may have been fixed or changed somewhat since this was written.
  5.10 curl hangs on SMB upload over stdin
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky Windows CI builds
+ 5.13 long paths are not fully supported on Windows
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -536,6 +537,15 @@ problems may have been fixed or changed somewhat since this was written.
  the project who (rightfully) do not expect this.
 
  See https://github.com/curl/curl/issues/6972
+
+5.13 long paths are not fully supported on Windows
+
+ curl on Windows cannot access long paths (paths longer than 260 characters).
+ However, as a workaround, the Windows path prefix \\?\ which disables all path
+ interpretation may work to allow curl to access the path. For example:
+ \\?\c:\longpath.
+
+ See https://github.com/curl/curl/issues/8361
 
 6. Authentication
 
