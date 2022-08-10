@@ -110,6 +110,46 @@ Build curl
      % make
      % make install
 
+## Build with wolfSSL
+
+Build wolfSSL
+
+     % git clone https://github.com/wolfSSL/wolfssl.git
+     % cd wolfssl
+     % ./configure --prefix=<somewhere1> --enable-quic --enable-session-ticket --enable-earlydata --enable-psk --enable-harden --enable-altcertchains
+     % make
+     % make install
+
+Build nghttp3
+
+     % cd ..
+     % git clone https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % autoreconf -fi
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
+
+Build ngtcp2 (once https://github.com/ngtcp2/ngtcp2/pull/505 is merged)
+
+     % cd ..
+     % git clone https://github.com/ngtcp2/ngtcp2
+     % cd ngtcp2
+     % autoreconf -fi
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-wolfssl
+     % make
+     % make install
+
+Build curl
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % ./configure --without-openssl --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % make
+     % make install
+
 # quiche version
 
 ## build
