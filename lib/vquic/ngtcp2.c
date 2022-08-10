@@ -38,6 +38,9 @@
 #elif defined(USE_GNUTLS)
 #include <ngtcp2/ngtcp2_crypto_gnutls.h>
 #include "vtls/gtls.h"
+#elif defined(USE_WOLFSSL)
+#include <ngtcp2/ngtcp2_crypto_wolfssl.h>
+#include "vtls/wolfssl.h"
 #endif
 #include "urldata.h"
 #include "sendf.h"
@@ -101,6 +104,11 @@ struct h3out {
   "+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:+GROUP-SECP256R1:" \
   "+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
   "%DISABLE_TLS13_COMPAT_MODE"
+#elif defined(USE_WOLFSSL)
+#define QUIC_CIPHERS                                                          \
+  "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_"               \
+  "POLY1305_SHA256:TLS_AES_128_CCM_SHA256"
+#define QUIC_GROUPS "P-256:P-384:P-521"
 #endif
 
 /* ngtcp2 default congestion controller does not perform pacing. Limit
@@ -201,6 +209,12 @@ static int keylog_callback(gnutls_session_t session, const char *label,
 
   Curl_tls_keylog_write(label, crandom.data, secret->data, secret->size);
   return 0;
+}
+#elif defined(USE_WOLFSSL)
+static void keylog_callback(const WOLFSSL *ssl, const char *line)
+{
+  (void)ssl;
+  Curl_tls_keylog_write_line(line);
 }
 #endif
 
@@ -395,7 +409,117 @@ static int quic_init_ssl(struct quicsocket *qs)
   gnutls_server_name_set(qs->ssl, GNUTLS_NAME_DNS, hostname, strlen(hostname));
   return 0;
 }
+#elif defined(USE_WOLFSSL)
+
+static void wolfssl_logging(const int logLevel, const char *const logMessage)
+{
+    fprintf(stderr, " ** wolfssl[%d]: %s\n", logLevel, logMessage);
+}
+
+static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
+{
+  struct connectdata *conn = data->conn;
+  WOLFSSL_CTX *ssl_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
+
+#if 0
+  wolfSSL_SetLoggingCb(wolfssl_logging);
+  wolfSSL_Debugging_ON();
+#else
+  (void)wolfssl_logging;
 #endif
+
+  if(ngtcp2_crypto_wolfssl_configure_client_context(ssl_ctx) != 0) {
+    failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
+    return NULL;
+  }
+
+  wolfSSL_CTX_set_default_verify_paths(ssl_ctx);
+
+  if(wolfSSL_CTX_set_cipher_list(ssl_ctx, QUIC_CIPHERS) != 1) {
+    char error_buffer[256];
+    ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
+    failf(data, "SSL_CTX_set_ciphersuites: %s", error_buffer);
+    return NULL;
+  }
+
+  if(wolfSSL_CTX_set1_groups_list(ssl_ctx, QUIC_GROUPS) != 1) {
+    failf(data, "SSL_CTX_set1_groups_list failed");
+    return NULL;
+  }
+
+  /* Open the file if a TLS or QUIC backend has not done this before. */
+  Curl_tls_keylog_open();
+  if(Curl_tls_keylog_enabled()) {
+#if defined(HAVE_SECRET_CALLBACK)
+    wolfSSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
+#else
+    failf(data, "wolfSSL was built without keylog callback");
+    return NULL;
+#endif
+  }
+
+  if(conn->ssl_config.verifypeer) {
+    const char * const ssl_cafile = conn->ssl_config.CAfile;
+    const char * const ssl_capath = conn->ssl_config.CApath;
+
+    if(ssl_cafile || ssl_capath) {
+      wolfSSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
+      /* tell wolfSSL where to find CA certificates that are used to verify
+         the server's certificate. */
+      if(!wolfSSL_CTX_load_verify_locations(ssl_ctx, ssl_cafile, ssl_capath)) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error setting certificate verify locations:"
+              "  CAfile: %s CApath: %s",
+              ssl_cafile ? ssl_cafile : "none",
+              ssl_capath ? ssl_capath : "none");
+        return NULL;
+      }
+      infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
+      infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
+    }
+#ifdef CURL_CA_FALLBACK
+    else {
+      /* verifying the peer without any CA certificates won't work so
+         use wolfssl's built-in default as fallback */
+      wolfSSL_CTX_set_default_verify_paths(ssl_ctx);
+    }
+#endif
+  }
+  else {
+    wolfSSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_NONE, NULL);
+  }
+
+  return ssl_ctx;
+}
+
+/** SSL callbacks ***/
+
+static int quic_init_ssl(struct quicsocket *qs)
+{
+  const uint8_t *alpn = NULL;
+  size_t alpnlen = 0;
+  /* this will need some attention when HTTPS proxy over QUIC get fixed */
+  const char * const hostname = qs->conn->host.name;
+
+  DEBUGASSERT(!qs->ssl);
+  qs->ssl = SSL_new(qs->sslctx);
+
+  wolfSSL_set_app_data(qs->ssl, &qs->conn_ref);
+  wolfSSL_set_connect_state(qs->ssl);
+  wolfSSL_set_quic_use_legacy_codepoint(qs->ssl, 0);
+
+  alpn = (const uint8_t *)H3_ALPN_H3_29 H3_ALPN_H3;
+  alpnlen = sizeof(H3_ALPN_H3_29) - 1 + sizeof(H3_ALPN_H3) - 1;
+  if(alpn)
+    wolfSSL_set_alpn_protos(qs->ssl, alpn, (int)alpnlen);
+
+  /* set SNI */
+  wolfSSL_UseSNI(qs->ssl, WOLFSSL_SNI_HOST_NAME,
+                 hostname, strlen(hostname));
+
+  return 0;
+}
+#endif /* defined(USE_WOLFSSL) */
 
 static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 {
@@ -691,6 +815,10 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   result = quic_set_client_cert(data, qs);
   if(result)
     return result;
+#elif defined(USE_WOLFSSL)
+  qs->sslctx = quic_ssl_ctx(data);
+  if(!qs->sslctx)
+    return CURLE_QUIC_CONNECT_ERROR;
 #endif
 
   if(quic_init_ssl(qs))
@@ -818,6 +946,8 @@ static void qs_disconnect(struct quicsocket *qs)
     SSL_free(qs->ssl);
 #elif defined(USE_GNUTLS)
     gnutls_deinit(qs->ssl);
+#elif defined(USE_WOLFSSL)
+    wolfSSL_free(qs->ssl);
 #endif
   qs->ssl = NULL;
 #ifdef USE_GNUTLS
@@ -831,6 +961,8 @@ static void qs_disconnect(struct quicsocket *qs)
   ngtcp2_conn_del(qs->qconn);
 #ifdef USE_OPENSSL
   SSL_CTX_free(qs->sslctx);
+#elif defined(USE_WOLFSSL)
+  wolfSSL_CTX_free(qs->sslctx);
 #endif
 }
 
@@ -1569,8 +1701,14 @@ static CURLcode ng_has_connected(struct Curl_easy *data,
     if(result)
       return result;
     infof(data, "Verified certificate just fine");
-#else
+#elif defined(USE_GNUTLS)
     result = Curl_gtls_verifyserver(data, conn, conn->quic->ssl, FIRSTSOCKET);
+#elif defined(USE_WOLFSSL)
+    char *snihost = Curl_ssl_snihost(data, SSL_HOST_NAME(), NULL);
+    if(!snihost ||
+       (wolfSSL_check_domain_name(conn->quic->ssl, snihost) == SSL_FAILURE))
+      return CURLE_PEER_FAILED_VERIFICATION;
+    infof(data, "Verified certificate just fine");
 #endif
   }
   else
