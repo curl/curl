@@ -5953,8 +5953,8 @@ AC_DEFUN([CURL_ATOMIC],[
 # duplicated case label. If the boolean equals true, it becomes a one, the
 # code compiles and we know it was a match.
 #
-# The check iterates over all possible sizes and stops as soon once it
-# compiles error-free.
+# The check iterates over all possible sizes and stops as soon it compiles
+# error-free.
 #
 # Usage:
 #
