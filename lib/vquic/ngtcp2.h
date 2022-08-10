@@ -38,6 +38,10 @@
 #include <openssl/ssl.h>
 #elif defined(USE_GNUTLS)
 #include <gnutls/gnutls.h>
+#elif defined(USE_WOLFSSL)
+#include <wolfssl/options.h>
+#include <wolfssl/ssl.h>
+#include <wolfssl/quic.h>
 #endif
 
 struct blocked_pkt {
@@ -62,6 +66,9 @@ struct quicsocket {
 #elif defined(USE_GNUTLS)
   gnutls_certificate_credentials_t cred;
   gnutls_session_t ssl;
+#elif defined(USE_WOLFSSL)
+  WOLFSSL_CTX *sslctx;
+  WOLFSSL *ssl;
 #endif
   struct sockaddr_storage local_addr;
   socklen_t local_addrlen;
