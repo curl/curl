@@ -76,7 +76,6 @@
 #define HAVE_IOCTL_FIONBIO      1
 
 #define SIZEOF_INT              4
-#define SIZEOF_SHORT            2
 #define SIZEOF_SIZE_T           4
 
 #define HAVE_RECV 1

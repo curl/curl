@@ -48,7 +48,6 @@
 #error not implement
 #else
 #define SIZEOF_INT 4
-#define SIZEOF_SHORT 2
 #define SIZEOF_LONG 4
 #define SIZEOF_OFF_T 8
 #define SIZEOF_CURL_OFF_T 4 /* curl_off_t = timediff_t = int */

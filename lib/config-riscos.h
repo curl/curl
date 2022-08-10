@@ -229,9 +229,6 @@
 /* The size of `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
 
-/* The size of `short', as computed by sizeof. */
-#define SIZEOF_SHORT 2
-
 /* The size of `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T 4
 
