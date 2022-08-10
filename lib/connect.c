@@ -766,6 +766,13 @@ void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
       Curl_conninfo_remote(data, conn, sockfd);
     Curl_conninfo_local(data, sockfd, local_ip, &local_port);
   } /* end of TCP-only section */
+#ifdef ENABLE_QUIC
+  else if(conn->transport == TRNSPRT_QUIC) {
+    if(!conn->bits.reuse)
+      Curl_conninfo_remote(data, conn, sockfd);
+    Curl_conninfo_local(data, sockfd, local_ip, &local_port);
+  }
+#endif
 
   /* persist connection info in session handle */
   Curl_persistconninfo(data, conn, local_ip, local_port);
