@@ -5951,7 +5951,7 @@ AC_DEFUN([CURL_ATOMIC],[
 # By making the second case number a boolean check, it fails to compile the
 # test code when the boolean is false and thus creating a zero, making it a
 # duplicated case label. If the boolean equals true, it becomes a one, the
-# code compiles and we knmow it was a match.
+# code compiles and we know it was a match.
 #
 # The check iterates over all possible sizes and stops as soon once it
 # compiles error-free.
