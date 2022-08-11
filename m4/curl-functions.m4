@@ -5939,3 +5939,62 @@ AC_DEFUN([CURL_ATOMIC],[
     ])
   ])
 ])
+
+# Rewrite inspired by the functionality once provided by
+# AX_COMPILE_CHECK_SIZEOF. Uses the switch() "trick" to find the size of the
+# given type.
+#
+# This code fails to compile:
+#
+#   switch() { case 0: case 0: }
+#
+# By making the second case number a boolean check, it fails to compile the
+# test code when the boolean is false and thus creating a zero, making it a
+# duplicated case label. If the boolean equals true, it becomes a one, the
+# code compiles and we know it was a match.
+#
+# The check iterates over all possible sizes and stops as soon it compiles
+# error-free.
+#
+# Usage:
+#
+#   CURL_SIZEOF(TYPE, [HEADERS])
+#
+
+AC_DEFUN([CURL_SIZEOF], [
+  dnl The #define name to make autoheader put the name in curl_config.h.in
+  define(TYPE, translit(sizeof_$1, [a-z *], [A-Z_P]))dnl
+
+  AC_MSG_CHECKING(size of $1)
+  r=0
+  dnl Check the sizes in a reasonable order
+  for typesize in 8 4 2 16 1; do
+     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/types.h>
+$2
+]],
+     [switch(0) {
+       case 0:
+       case (sizeof($1) == $typesize):;
+     }
+    ]) ],
+      [
+       r=$typesize],
+      [
+       r=0])
+    dnl get out of the loop once matched
+    if test $r -gt 0; then
+      break;
+    fi
+  done
+  if test $r -eq 0; then
+    AC_MSG_ERROR([Failed to find size of $1])
+  fi
+  AC_MSG_RESULT($r)
+  dnl lowercase and underscore instead of space
+  tname=$(echo "ac_cv_sizeof_$1" | tr A-Z a-z | tr " " "_")
+  eval "$tname=$r"
+
+  AC_DEFINE_UNQUOTED(TYPE, [$r], [Size of $1 in number of bytes])
+
+])

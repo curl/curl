@@ -123,7 +123,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       check_for_ca_bundle=1
 
       dnl wolfssl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
-      AX_COMPILE_CHECK_SIZEOF(long long)
+      CURL_SIZEOF(long long)
 
       LIBS="$addlib -lm $LIBS"
 
