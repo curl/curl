@@ -497,7 +497,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   return ca;
 }
 #else
-#define get_localhost6(x) NULL
+#define get_localhost6(x,y) NULL
 #endif
 
 /* return a static IPv4 127.0.0.1 for the given name */
