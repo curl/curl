@@ -140,7 +140,7 @@ Build curl:
 
 Build msh3:
 
-     % git clone --depth 1 --recursive https://github.com/nibanks/msh3
+     % git clone -b v0.4.0 --depth 1 --recursive https://github.com/nibanks/msh3
      % cd msh3 && mkdir build && cd build
      % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
      % cmake --build .
@@ -161,7 +161,7 @@ Run from `/usr/local/bin/curl`.
 
 Build msh3:
 
-     % git clone --depth 1 --recursive https://github.com/nibanks/msh3
+     % git clone -b v0.4.0 --depth 1 --recursive https://github.com/nibanks/msh3
      % cd msh3 && mkdir build && cd build
      % cmake -G 'Visual Studio 17 2022' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
      % cmake --build . --config Release
