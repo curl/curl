@@ -80,7 +80,6 @@
 
 #define SIZEOF_INT             4
 #define SIZEOF_LONG            4
-#define SIZEOF_SHORT           2
 #define SIZEOF_SIZE_T          4
 #define SIZEOF_CURL_OFF_T      4
 #define STDC_HEADERS           1
