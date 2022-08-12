@@ -37,7 +37,7 @@ my %skiplist = (
     ".reuse/dep5" => "<built-in>",
 
     # License texts
-    "LICENSES/BSD-3-Clause.txt" => "<built-in>",
+    "LICENSES/LicenseRef-BSD-3-KTH.txt" => "<built-in>",
     "LICENSES/BSD-4-Clause-UC.txt" => "<built-in>",
     "LICENSES/ISC.txt" => "<built-in>",
     "LICENSES/LicenseRef-OpenEvidence.txt" => "<built-in>",

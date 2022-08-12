@@ -5,7 +5,7 @@
  * Copyright (c) 2004 - 2022 Daniel Stenberg
  * All rights reserved.
  *
- * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-License-Identifier: LicenseRef-BSD-3-KTH
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
