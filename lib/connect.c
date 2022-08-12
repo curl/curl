@@ -910,6 +910,8 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
         conn->tempsock[i] = CURL_SOCKET_BAD;
         post_SOCKS(data, conn, sockindex, connected);
         connkeep(conn, "HTTP/3 default");
+        if(conn->tempsock[other] != CURL_SOCKET_BAD)
+          Curl_quic_disconnect(data, conn, other);
         return CURLE_OK;
       }
       /* When a QUIC connect attempt fails, the better error explanation is in
