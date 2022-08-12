@@ -34,6 +34,7 @@ problems may have been fixed or changed somewhat since this was written.
  2.10 Store TLS context per transfer instead of per connection
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
+ 2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
  2.14 Secure Transport disabling hostname validation also disables SNI
  2.15 Renegotiate from server may cause hang for OpenSSL backend
 
@@ -333,6 +334,10 @@ problems may have been fixed or changed somewhat since this was written.
  "Instead of the command completing, it just sits there until the timeout
  expires." - the same command line seems to work with other TLS backends and
  other operating systems. See https://github.com/curl/curl/issues/5284.
+
+2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
+
+ https://github.com/curl/curl/issues/8741
 
 2.14 Secure Transport disabling hostname validation also disables SNI
 
