@@ -197,7 +197,7 @@ const struct helptxt helptext[] = {
    CURLHELP_HTTP | CURLHELP_UPLOAD},
   {"    --form-escape",
    "Escape multipart form field/file names using backslash",
-   CURLHELP_HTTP | CURLHELP_POST},
+   CURLHELP_HTTP | CURLHELP_UPLOAD},
   {"    --form-string <name=string>",
    "Specify multipart MIME data",
    CURLHELP_HTTP | CURLHELP_UPLOAD},
