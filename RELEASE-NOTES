@@ -4,7 +4,7 @@ curl and libcurl 7.85.0
  Command line options:         248
  curl_easy_setopt() options:   299
  Public functions in libcurl:  88
- Contributors:                 2679
+ Contributors:                 2680
 
 This release includes the following changes:
 
@@ -13,6 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o amigaos: fix threaded resolver on AmigaOS 4.x [133]
  o amissl: allow AmiSSL to be used with AmigaOS 4.x builds [115]
  o amissl: make AmiSSL v5 a minimum requirement [117]
  o asyn-thread: make getaddrinfo_complete return CURLcode [53]
@@ -27,16 +28,20 @@ This release includes the following bugfixes:
  o cmake: remove APPEND in export(TARGETS) [58]
  o cmake: support ngtcp2 boringssl backend [18]
  o cmdline-opts/gen.pl: improve performance [97]
+ o config: remove the check for and use of SIZEOF_SHORT [129]
  o configure: -pthread not available on AmigaOS 4.x [118]
  o configure: check for the stdatomic.h header in configure [7]
  o configure: fix --disable-headers-api [55]
  o configure: fixup bsdsocket detection code for AmigaOS 4.x [110]
+ o configure: introduce CURL_SIZEOF [130]
  o connect: add quic connection information [100]
+ o connect: close the happy eyeballs loser connection when using QUIC [109]
  o connect: revert the use of IP*_RECVERR [102]
  o connect: set socktype/protocol correctly [114]
  o cookie: treat a blank domain in Set-Cookie: as non-existing [40]
  o cookie: use %zu to infof() for size_t values [26]
  o curl-compilers.m4: make icc use -diag* options and disable two warnings [84]
+ o curl-config: quote directories with potential space [132]
  o curl-confopts: remove leftover AC_REQUIREs [91]
  o curl-functions.m4: check whether atomics can link [86]
  o curl-wolfssl.m4: add options header when building test code [87]
@@ -53,6 +58,7 @@ This release includes the following bugfixes:
  o digest: fix missing increment of 'nc' value for auth-int [39]
  o digest: pass over leading spaces in qop values [119]
  o digest: reject broken header with session protocol but without qop [120]
+ o docs/cmdline-opts: fix example and categories for --form-escape [125]
  o docs/cmdline: mark fail and fail-with-body as mutually exclusive [98]
  o docs: add dns category to --resolve [95]
  o docs: explain curl_easy_escape/unescape curl handle is ignored [23]
@@ -73,11 +79,15 @@ This release includes the following bugfixes:
  o getinfo: return better error on NULL as first argument [21]
  o GHA: add two Intel compiler CI jobs [85]
  o h2h3: fix overriding the 'TE: Trailers' header [43]
+ o hostip: resolve *.localhost to 127.0.0.1/::1 [127]
+ o HTTP3.md: update to msh3 v0.4.0 [126]
  o http: typecast the httpreq assignment to avoid icc compiler warning [76]
  o http_aws_sigv4.c: remove two unusued includes [36]
  o http_chunks: remove an assign + typecast [82]
+ o hyper: customize test1274 to how hyper unfolds headers [131]
  o hyper: enable obs-folded multiline headers [101]
  o hyper: use wakers for curl pause/resume [2]
+ o imap: use ISALNUM() for alphanumeric checks [134]
  o ldap: adapt to conn->port now being an 'int' [106]
  o lib/curl_path.c: add ISC to license expression [1]
  o lib3026: reduce the number of threads to 100 [44]
@@ -89,6 +99,7 @@ This release includes the following bugfixes:
  o Makefile.m32: stop trying to build libcares.a [ci skip] [46]
  o mprintf: fix *dyn_vprintf() when out-of-memory [90]
  o mprintf: make dprintf_formatf never return negative [49]
+ o msh3: fix the QUIC disconnect function [107]
  o multi: fix the return code from Curl_pgrsDone() [80]
  o netrc.d: remove spurious quote [37]
  o ngtcp2: Fix build error due to change in nghttp3 prototypes [61]
@@ -144,17 +155,19 @@ advice from friends like these:
   Andrew Lambert, Brad Forschinger, Brian Carpenter, Cering on github,
   Chris Young, Daniel Katz, Daniel Stenberg, Don J Olmstead, Emanuele Torre,
   Emil Engler, Érico Nogueira Rolim, Even Rouault, Evgeny Grin (Karlson2k),
-  Fabian Keil, Gwen Shapira, Harry Sintonen, highmtworks on github,
-  Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root, jurisuk on github,
-  jvvprasad78 on github, Kai Pastor, Litter White, lwthiker on github,
-  Marcel Raad, Marc Hörsken, Marco Kamner, MasterInQuestion on github,
-  Matthew Thompson, Maxim Ivanov, Michael Trebilcock, Michał Antoniak,
-  Nao Yonashiro, Oliver Roberts, opensignature on github, Patrick Monnerat,
+  Fabian Keil, Gisle Vanem, Gwen Shapira, Harry Sintonen,
+  highmtworks on github, Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root,
+  jurisuk on github, jvvprasad78 on github, Kai Pastor, Litter White,
+  lwthiker on github, Marcel Raad, Marc Hörsken, Marco Kamner,
+  MasterInQuestion on github, Matthew Thompson, Maxim Ivanov,
+  Michael Trebilcock, Michał Antoniak, Nao Yonashiro, Nick Banks,
+  Oliver Roberts, opensignature on github, Orgad Shaneh, Patrick Monnerat,
   Philip H, Ray Satiro, Rosen Penev, Ryan Schmidt, rzrymiak on github,
   Samuel Henrique, Sean McArthur, Sergey Ogryzkov, Sukanya Hanumanthu,
-  Tatsuhiro Tsujikawa, Ted Lyngmo, Thomas Weißschuh, Viktor Szakats,
-  vlubart on github, Wyatt O'Day, Xiaoke Wang, yiyuaner on github
-  (58 contributors)
+  Tatsuhiro Tsujikawa, Ted Lyngmo, TheKnarf on github, Thomas Weißschuh,
+  Viktor Szakats, vlubart on github, Wyatt O'Day, Xiaoke Wang,
+  yiyuaner on github
+  (62 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -264,7 +277,9 @@ References to bug reports and discussions on issues:
  [104] = https://curl.se/bug/?i=9213
  [105] = https://curl.se/bug/?i=9280
  [106] = https://curl.se/bug/?i=9281
+ [107] = https://curl.se/bug/?i=8915
  [108] = https://curl.se/bug/?i=9259
+ [109] = https://curl.se/bug/?i=9303
  [110] = https://curl.se/bug/?i=9268
  [111] = https://curl.se/bug/?i=9258
  [112] = https://curl.se/bug/?i=9279
@@ -278,3 +293,12 @@ References to bug reports and discussions on issues:
  [120] = https://curl.se/bug/?i=9077
  [121] = https://curl.se/bug/?i=9239
  [122] = https://curl.se/bug/?i=9250
+ [125] = https://curl.se/bug/?i=9298
+ [126] = https://curl.se/bug/?i=9297
+ [127] = https://curl.se/bug/?i=9192
+ [129] = https://curl.se/bug/?i=9291
+ [130] = https://curl.se/bug/?i=9291
+ [131] = https://curl.se/bug/?i=9217
+ [132] = https://curl.se/bug/?i=9253
+ [133] = https://curl.se/bug/?i=9265
+ [134] = https://curl.se/bug/?i=9289
