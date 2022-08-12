@@ -108,6 +108,15 @@ bool Curl_ipv6works(struct Curl_easy *data);
 #define Curl_ipv6works(x) FALSE
 #endif
 
+#ifdef MPTCP
+/*
+ * Curl_mptcpworks() returns TRUE if Multipath TCP seems to work.
+ */
+bool Curl_mptcpworks(struct Curl_easy *data);
+#else
+#define Curl_mptcpworks(x) FALSE
+#endif
+
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.

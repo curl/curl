@@ -42,6 +42,8 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* IPPROTO_TCP */
 #endif
+
+
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -73,8 +75,8 @@ int Curl_socketpair(int domain, int type, int protocol,
   (void)domain;
   (void)type;
   (void)protocol;
-
-  listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  printf("mptcp\n");
+  listener = socket(AF_INET, SOCK_STREAM, IPPROTO_MPTCP);
   if(listener == CURL_SOCKET_BAD)
     return -1;
 
@@ -95,7 +97,7 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   if(listen(listener, 1) == -1)
     goto error;
-  socks[0] = socket(AF_INET, SOCK_STREAM, 0);
+  socks[0] = socket(AF_INET, SOCK_STREAM, IPPROTO_MPTCP);
   if(socks[0] == CURL_SOCKET_BAD)
     goto error;
   if(connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)

@@ -34,4 +34,11 @@ int Curl_socketpair(int domain, int type, int protocol,
 #define Curl_socketpair(a,b,c,d) socketpair(a,b,c,d)
 #endif
 
+#ifdef MPTCP
+#ifndef IPPROTO_MPTCP
+#define IPPROTO_MPTCP 262
+#endif
+#endif
+
+
 #endif /* HEADER_CURL_SOCKETPAIR_H */

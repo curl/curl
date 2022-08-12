@@ -2157,6 +2157,11 @@ typedef enum {
   /* websockets options */
   CURLOPT(CURLOPT_WS_OPTIONS, CURLOPTTYPE_LONG, 320),
 
+#ifdef MPTCP
+  /* Set Multipath TCP */
+  CURLOPT(CURLOPT_TCP_MULTIPATH, CURLOPTTYPE_LONG, 316),
+#endif
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

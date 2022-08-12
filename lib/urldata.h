@@ -535,6 +535,10 @@ struct ConnectBits {
                  connection */
   BIT(multiplex); /* connection is multiplexed */
   BIT(tcp_fastopen); /* use TCP Fast Open */
+#ifdef MPTCP
+  BIT(tcp_multipath); /* use Multipath TCP */
+#endif
+  BIT(tls_enable_npn);  /* TLS NPN extension? */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
 #ifndef CURL_DISABLE_DOH
   BIT(doh);
@@ -1904,6 +1908,10 @@ struct UserDefined {
   BIT(sasl_ir);         /* Enable/disable SASL initial response */
   BIT(tcp_keepalive);  /* use TCP keepalives */
   BIT(tcp_fastopen);   /* use TCP Fast Open */
+#ifdef MPTCP
+  BIT(tcp_multipath);   /* use Multipath TCP */
+#endif  
+  BIT(ssl_enable_npn); /* TLS NPN extension? */
   BIT(ssl_enable_alpn);/* TLS ALPN extension? */
   BIT(path_as_is);     /* allow dotdots? */
   BIT(pipewait);       /* wait for multiplex status before starting a new

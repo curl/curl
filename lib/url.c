@@ -627,6 +627,9 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
   set->tcp_fastopen = FALSE;
+#ifdef MPTCP
+  set->tcp_multipath = FALSE;
+#endif
   set->tcp_nodelay = TRUE;
   set->ssl_enable_alpn = TRUE;
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
@@ -1561,7 +1564,7 @@ ConnectionExists(struct Curl_easy *data,
 void Curl_verboseconnect(struct Curl_easy *data,
                          struct connectdata *conn)
 {
-  if(data->set.verbose)
+  if(data->set.verbose) {
     infof(data, "Connected to %s (%s) port %u (#%ld)",
 #ifndef CURL_DISABLE_PROXY
           conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
@@ -1570,6 +1573,22 @@ void Curl_verboseconnect(struct Curl_easy *data,
           conn->bits.conn_to_host ? conn->conn_to_host.dispname :
           conn->host.dispname,
           conn->primary_ip, conn->port, conn->connection_id);
+
+#ifdef MPTCP
+    struct mptcp_info inf;
+    socklen_t optlen;
+    int ret;
+    if(conn->transport == TRNSPRT_TCP && conn->bits.tcp_multipath) {
+      optlen = sizeof(inf);
+
+      if(!getsockopt(conn->sock[FIRSTSOCKET], SOL_MPTCP, MPTCP_INFO, &inf, &optlen))
+        infof(data,"Multipath TCP was accepted by the remote server.");
+      else
+        infof(data,"Multipath TCP was REFUSED by the remote server.");
+#endif
+    }
+  }
+
 }
 #endif
 
@@ -3857,6 +3876,21 @@ static CURLcode create_conn(struct Curl_easy *data,
   conn->send[SECONDARYSOCKET] = Curl_send_plain;
 
   conn->bits.tcp_fastopen = data->set.tcp_fastopen;
+
+#ifdef MPTCP
+  if(data->set.tcp_multipath && Curl_mptcpworks(NULL))  {
+    conn->bits.tcp_multipath = data->set.tcp_multipath;
+    infof(data, "Multipath TCP is enabled.");
+  }
+  else {
+    infof(data, "You tried to use Multipath TCP, but your kernel does not seem to enable it.");
+    infof(data, "Please check that you have a recent Linux kernel (>5.12) and that the ");
+    infof(data, "net.mptcp.enabled sysctl variable is set to 1.");
+    infof(data, "Curl fallsback to TCP to continue the transfer.");
+    conn->bits.tcp_multipath = FALSE;
+  }
+
+#endif
 
   /***********************************************************************
    * file: is a special case in that it doesn't need a network connection

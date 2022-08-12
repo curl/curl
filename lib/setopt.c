@@ -3107,6 +3107,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   }
 #endif
+#ifdef MPTCP
+  case CURLOPT_TCP_MULTIPATH:
+    data->set.tcp_multipath = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
+#endif
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

@@ -1550,6 +1550,24 @@ bool Curl_connalive(struct connectdata *conn)
 int Curl_closesocket(struct Curl_easy *data, struct connectdata *conn,
                      curl_socket_t sock)
 {
+#ifdef MPTCP
+  struct mptcp_info inf;
+  socklen_t optlen;
+  int ret;
+  if(data->set.verbose &&
+     conn->transport == TRNSPRT_TCP && conn->bits.tcp_multipath) {
+    optlen = sizeof(inf);
+    if(!getsockopt(sock, SOL_MPTCP, MPTCP_INFO, &inf, &optlen)) {
+      infof(data,"Multipath TCP used %d subflows on this connection",inf.mptcpi_subflows);
+    }
+    else {
+      infof(data,"Multipath TCP was DISABLED on this connection");
+    }
+  }
+#endif /* MPTCP */
+
+
+
   if(conn && conn->fclosesocket) {
     if((sock == conn->sock[SECONDARYSOCKET]) && conn->bits.sock_accepted)
       /* if this socket matches the second socket, and that was created with
@@ -1591,7 +1609,6 @@ CURLcode Curl_socket(struct Curl_easy *data,
 {
   struct connectdata *conn = data->conn;
   struct Curl_sockaddr_ex dummy;
-
   if(!addr)
     /* if the caller doesn't want info back, use a local temp copy */
     addr = &dummy;
@@ -1608,7 +1625,12 @@ CURLcode Curl_socket(struct Curl_easy *data,
   switch(conn->transport) {
   case TRNSPRT_TCP:
     addr->socktype = SOCK_STREAM;
-    addr->protocol = IPPROTO_TCP;
+#ifdef MPTCP
+    if(conn->bits.tcp_multipath)
+      addr->protocol = IPPROTO_MPTCP;
+    else
+#endif
+      addr->protocol = IPPROTO_TCP;
     break;
   case TRNSPRT_UNIX:
     addr->socktype = SOCK_STREAM;
@@ -1641,7 +1663,7 @@ CURLcode Curl_socket(struct Curl_easy *data,
                                     (struct curl_sockaddr *)addr);
     Curl_set_in_callback(data, false);
   }
-  else
+  else 
     /* opensocket callback not set, so simply create the socket now */
     *sockfd = socket(addr->family, addr->socktype, addr->protocol);
 
@@ -1680,6 +1702,7 @@ CURLcode Curl_socket(struct Curl_easy *data,
 #endif
 
   return CURLE_OK;
+  
 }
 
 /*
@@ -1709,6 +1732,7 @@ void Curl_conncontrol(struct connectdata *conn,
     conn->bits.close = closeit; /* the only place in the source code that
                                    should assign this bit */
   }
+
 }
 
 /* Data received can be cached at various levels, so check them all here. */

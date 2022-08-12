@@ -81,4 +81,38 @@ void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
   !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
 #endif /* !CURL_DISABLE_PROXY */
 
+
+#ifdef MPTCP
+#include <linux/types.h>
+#ifndef SOL_MPTCP
+#define SOL_MPTCP 284
+#endif
+
+#ifndef MPTCP_INFO
+struct mptcp_info {
+	__u8	mptcpi_subflows;
+	__u8	mptcpi_add_addr_signal;
+	__u8	mptcpi_add_addr_accepted;
+	__u8	mptcpi_subflows_max;
+	__u8	mptcpi_add_addr_signal_max;
+	__u8	mptcpi_add_addr_accepted_max;
+	__u32	mptcpi_flags;
+	__u32	mptcpi_token;
+	__u64	mptcpi_write_seq;
+	__u64	mptcpi_snd_una;
+	__u64	mptcpi_rcv_nxt;
+	__u8	mptcpi_local_addr_used;
+	__u8	mptcpi_local_addr_max;
+	__u8	mptcpi_csum_enabled;
+};
+
+
+#define MPTCP_INFO		1
+#define MPTCP_TCPINFO		2
+#define MPTCP_SUBFLOW_ADDRS	3
+#endif
+
+
+#endif /* MPTCP */
+
 #endif /* HEADER_CURL_URL_H */

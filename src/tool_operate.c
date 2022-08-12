@@ -1257,6 +1257,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->tcp_fastopen)
           my_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
 
+#ifdef MPTCP
+        if(config->tcp_multipath)
+          my_setopt(curl, CURLOPT_TCP_MULTIPATH, 1L);
+#endif
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, per);
         my_setopt(curl, CURLOPT_INTERLEAVEDATA, per);

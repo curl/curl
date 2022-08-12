@@ -591,6 +591,38 @@ bool Curl_ipv6works(struct Curl_easy *data)
 }
 #endif /* ENABLE_IPV6 */
 
+
+
+#ifdef MPTCP
+/*
+ * Curl_mptcpworks() returns TRUE if Multipath TCP seems to work.
+ */
+bool Curl_mptcpworks(struct Curl_easy *data)
+{
+  if(data) {
+    /* the nature of most system is that Multipath TCP status doesn't come and go
+       during a program's lifetime so we only probe the first time and then we
+       have the info kept for fast re-use */
+    DEBUGASSERT(data);
+    DEBUGASSERT(data->set.tcp_multipath);
+    return data->set.tcp_multipath;
+  }
+  else {
+    int mptcp_works = -1;
+    /* probe to see if we have a working Multipath TCP stack */
+    curl_socket_t s = socket(PF_INET6, SOCK_STREAM, IPPROTO_MPTCP);
+    if(s == CURL_SOCKET_BAD)
+      /* Multipath TCP is not included in the kernel or disabled */ 
+      mptcp_works = 0;
+    else {
+      mptcp_works = 1;
+      sclose(s);
+    }
+    return (mptcp_works>0)?TRUE:FALSE;
+  }
+}
+#endif /* MPTCP */
+
 /*
  * Curl_host_is_ipnum() returns TRUE if the given string is a numerical IPv4
  * (or IPv6 if supported) address.
