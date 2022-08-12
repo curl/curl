@@ -27,13 +27,17 @@
 #ifdef USE_MSH3
 
 #include "urldata.h"
-#include "curl_printf.h"
 #include "timeval.h"
 #include "multiif.h"
 #include "sendf.h"
 #include "connect.h"
 #include "h2h3.h"
 #include "msh3.h"
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /* #define DEBUG_HTTP3 1 */
 #ifdef DEBUG_HTTP3
@@ -222,13 +226,8 @@ static unsigned int msh3_conncheck(struct Curl_easy *data,
   return CONNRESULT_NONE;
 }
 
-static void msh3_cleanup(struct quicsocket *qs, struct HTTP *stream)
+static void disconnect(struct quicsocket *qs)
 {
-  if(stream && stream->recv_buf) {
-    free(stream->recv_buf);
-    stream->recv_buf = ZERO_NULL;
-    msh3_lock_uninitialize(&stream->recv_lock);
-  }
   if(qs->conn) {
     MsH3ConnectionClose(qs->conn);
     qs->conn = ZERO_NULL;
@@ -242,18 +241,20 @@ static void msh3_cleanup(struct quicsocket *qs, struct HTTP *stream)
 static CURLcode msh3_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead_connection)
 {
+  (void)data;
   (void)dead_connection;
   H3BUGF(infof(data, "disconnecting (msh3)"));
-  msh3_cleanup(conn->quic, data->req.p.http);
+  disconnect(conn->quic);
   return CURLE_OK;
 }
 
 void Curl_quic_disconnect(struct Curl_easy *data, struct connectdata *conn,
                           int tempindex)
 {
+  (void)data;
   if(conn->transport == TRNSPRT_QUIC) {
-    H3BUGF(infof(data, "disconnecting (curl)"));
-    msh3_cleanup(&conn->hequic[tempindex], data->req.p.http);
+    H3BUGF(infof(data, "disconnecting QUIC index %u", tempindex));
+    disconnect(&conn->hequic[tempindex]);
   }
 }
 
@@ -288,7 +289,6 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
   struct HTTP *stream = IfContext;
   size_t total_len;
   (void)Request;
-  H3BUGF(printf("* msh3_header_received\n"));
 
   if(stream->recv_header_complete) {
     H3BUGF(printf("* ignoring header after data\n"));
@@ -490,9 +490,19 @@ CURLcode Curl_quic_done_sending(struct Curl_easy *data)
 
 void Curl_quic_done(struct Curl_easy *data, bool premature)
 {
-  (void)data;
+  struct HTTP *stream = data->req.p.http;
   (void)premature;
   H3BUGF(infof(data, "Curl_quic_done"));
+  if(stream) {
+    if(stream->recv_buf) {
+      Curl_safefree(stream->recv_buf);
+      msh3_lock_uninitialize(&stream->recv_lock);
+    }
+    if(stream->req) {
+      MsH3RequestClose(stream->req);
+      stream->req = ZERO_NULL;
+    }
+  }
 }
 
 bool Curl_quic_data_pending(const struct Curl_easy *data)
