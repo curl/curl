@@ -109,14 +109,14 @@
 #endif
 
 /* Workaround broken compilers like MingW.
-Return the number of elements in a statically sized array.
+   Return the number of elements in a statically sized array.
 */
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) \
-    && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)   \
+  && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
 #endif
 
@@ -221,13 +221,12 @@ set_ssl_version_min_max(DWORD *enabled_protocols, struct Curl_easy *data,
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_DEFAULT:
 
-    /* Windows Server 2022 and newer (including Windows 11)
-    support TLS 1.3 built-in. Previous builds of Windows 10
-    had broken TLS 1.3 implementations that could be enabled
-    via registry.
+    /* Windows Server 2022 and newer (including Windows 11) support TLS 1.3
+       built-in. Previous builds of Windows 10 had broken TLS 1.3
+       implementations that could be enabled via registry.
     */
     if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
-        VERSION_GREATER_THAN_EQUAL)) {
+                                    VERSION_GREATER_THAN_EQUAL)) {
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
     }
     else /* Windows 10 and older */
@@ -251,7 +250,7 @@ set_ssl_version_min_max(DWORD *enabled_protocols, struct Curl_easy *data,
 
       /* Windows Server 2022 and newer */
       if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
-          VERSION_GREATER_THAN_EQUAL)) {
+                                      VERSION_GREATER_THAN_EQUAL)) {
         (*enabled_protocols) |= SP_PROT_TLS1_3_CLIENT;
         break;
       }
@@ -448,13 +447,13 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   else if(_tcsncmp(path, TEXT("Users"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_USERS;
   else if(_tcsncmp(path, TEXT("CurrentUserGroupPolicy"),
-                    store_name_len) == 0)
+                   store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY;
   else if(_tcsncmp(path, TEXT("LocalMachineGroupPolicy"),
-                    store_name_len) == 0)
+                   store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY;
   else if(_tcsncmp(path, TEXT("LocalMachineEnterprise"),
-                    store_name_len) == 0)
+                   store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE;
   else
     return CURLE_SSL_CERTPROBLEM;
@@ -597,7 +596,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
 
       result = get_cert_location(cert_path, &cert_store_name,
-        &cert_store_path, &cert_thumbprint_str);
+                                 &cert_store_path, &cert_thumbprint_str);
 
       if(result && (data->set.ssl.primary.clientcert[0]!='\0'))
         fInCert = fopen(data->set.ssl.primary.clientcert, "rb");
@@ -612,18 +611,18 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     }
 
     if((fInCert || blob) && (data->set.ssl.cert_type) &&
-        (!strcasecompare(data->set.ssl.cert_type, "P12"))) {
+       (!strcasecompare(data->set.ssl.cert_type, "P12"))) {
       failf(data, "schannel: certificate format compatibility error "
-              " for %s",
-              blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
+            " for %s",
+            blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
       curlx_unicodefree(cert_path);
       return CURLE_SSL_CERTPROBLEM;
     }
 
     if(fInCert || blob) {
       /* Reading a .P12 or .pfx file, like the example at bottom of
-           https://social.msdn.microsoft.com/Forums/windowsdesktop/
-                          en-US/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
+         https://social.msdn.microsoft.com/Forums/windowsdesktop/
+         en-US/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
       */
       CRYPT_DATA_BLOB datablob;
       WCHAR* pszPassword;
@@ -651,7 +650,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         fclose(fInCert);
         if(!continue_reading) {
           failf(data, "schannel: Failed to read cert file %s",
-              data->set.ssl.primary.clientcert);
+                data->set.ssl.primary.clientcert);
           free(certdata);
           return CURLE_SSL_CERTPROBLEM;
         }
@@ -667,9 +666,10 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       if(pszPassword) {
         if(pwd_len > 0)
           str_w_len = MultiByteToWideChar(CP_UTF8,
-             MB_ERR_INVALID_CHARS,
-             data->set.ssl.key_passwd, (int)pwd_len,
-             pszPassword, (int)(pwd_len + 1));
+                                          MB_ERR_INVALID_CHARS,
+                                          data->set.ssl.key_passwd,
+                                          (int)pwd_len,
+                                          pszPassword, (int)(pwd_len + 1));
 
         if((str_w_len >= 0) && (str_w_len <= (int)pwd_len))
           pszPassword[str_w_len] = 0;
@@ -774,7 +774,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 
   /* Windows 10, 1809 (a.k.a. Windows 10 build 17763) */
   if(curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
-      VERSION_GREATER_THAN_EQUAL)) {
+                                  VERSION_GREATER_THAN_EQUAL)) {
 
     char *ciphers13 = 0;
 
@@ -794,15 +794,15 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 
 
     /* If TLS 1.3 ciphers are explictly listed, then
-    * disable all the ciphers and re-enable which
-    * ciphers the user has provided.
-    */
+     * disable all the ciphers and re-enable which
+     * ciphers the user has provided.
+     */
     ciphers13 = SSL_CONN_CONFIG(cipher_list13);
     if(ciphers13) {
       const int remaining_ciphers = 5;
 
       /* detect which remaining ciphers to enable
-      and then disable everything else.
+         and then disable everything else.
       */
 
       char *startCur = ciphers13;
@@ -831,23 +831,23 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         tmp[n] = 0;
 
         if(disable_aes_gcm_sha384
-            && !strcmp("TLS_AES_256_GCM_SHA384", tmp)) {
+           && !strcmp("TLS_AES_256_GCM_SHA384", tmp)) {
           disable_aes_gcm_sha384 = FALSE;
         }
         else if(disable_aes_gcm_sha256
-            && !strcmp("TLS_AES_128_GCM_SHA256", tmp)) {
+                && !strcmp("TLS_AES_128_GCM_SHA256", tmp)) {
           disable_aes_gcm_sha256 = FALSE;
         }
         else if(disable_chacha_poly
-            && !strcmp("TLS_CHACHA20_POLY1305_SHA256", tmp)) {
+                && !strcmp("TLS_CHACHA20_POLY1305_SHA256", tmp)) {
           disable_chacha_poly = FALSE;
         }
         else if(disable_aes_ccm_8_sha256
-            && !strcmp("TLS_AES_128_CCM_8_SHA256", tmp)) {
+                && !strcmp("TLS_AES_128_CCM_8_SHA256", tmp)) {
           disable_aes_ccm_8_sha256 = FALSE;
         }
         else if(disable_aes_ccm_sha256
-            && !strcmp("TLS_AES_128_CCM_SHA256", tmp)) {
+                && !strcmp("TLS_AES_128_CCM_SHA256", tmp)) {
           disable_aes_ccm_sha256 = FALSE;
         }
         else {
@@ -864,8 +864,8 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     }
 
     if(disable_aes_gcm_sha384 && disable_aes_gcm_sha256
-        && disable_chacha_poly && disable_aes_ccm_8_sha256
-        && disable_aes_ccm_sha256) {
+       && disable_chacha_poly && disable_aes_ccm_8_sha256
+       && disable_aes_ccm_sha256) {
       failf(data, "All available TLS 1.3 ciphers were disabled.");
       return CURLE_SSL_CIPHER;
     }
@@ -880,17 +880,17 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       blocked_ccm_modes[0].Buffer = (PWSTR)BCRYPT_CHAIN_MODE_CCM;
 
       crypto_settings[crypto_settings_idx].eAlgorithmUsage =
-                                               TlsParametersCngAlgUsageCipher;
+        TlsParametersCngAlgUsageCipher;
       crypto_settings[crypto_settings_idx].rgstrChainingModes =
-                                               blocked_ccm_modes;
+        blocked_ccm_modes;
       crypto_settings[crypto_settings_idx].cChainingModes =
-                                               ARRAYSIZE(blocked_ccm_modes);
+        ARRAYSIZE(blocked_ccm_modes);
       crypto_settings[crypto_settings_idx].strCngAlgId.Length =
-          sizeof(BCRYPT_AES_ALGORITHM);
+        sizeof(BCRYPT_AES_ALGORITHM);
       crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
-          sizeof(BCRYPT_AES_ALGORITHM);
+        sizeof(BCRYPT_AES_ALGORITHM);
       crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
-          (PWSTR)BCRYPT_AES_ALGORITHM;
+        (PWSTR)BCRYPT_AES_ALGORITHM;
 
       /* only disabling one of the CCM modes */
       if(disable_aes_ccm_8_sha256 != disable_aes_ccm_sha256) {
@@ -914,23 +914,23 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       blocked_gcm_modes[0].Buffer = (PWSTR)BCRYPT_CHAIN_MODE_GCM;
 
       /* if only one is disabled, then explictly disable the
-      digest cipher suite (sha384 or sha256) */
+         digest cipher suite (sha384 or sha256) */
       if(disable_aes_gcm_sha384 != disable_aes_gcm_sha256) {
         crypto_settings[crypto_settings_idx].eAlgorithmUsage =
-            TlsParametersCngAlgUsageDigest;
+          TlsParametersCngAlgUsageDigest;
         crypto_settings[crypto_settings_idx].strCngAlgId.Length =
-            sizeof(disable_aes_gcm_sha384 ?
-                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
+          sizeof(disable_aes_gcm_sha384 ?
+                 BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
         crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
-            sizeof(disable_aes_gcm_sha384 ?
-                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
+          sizeof(disable_aes_gcm_sha384 ?
+                 BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
         crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
-            (PWSTR)(disable_aes_gcm_sha384 ?
-                      BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
+          (PWSTR)(disable_aes_gcm_sha384 ?
+                  BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
       }
       else { /* Disable both AES_GCM ciphers */
         crypto_settings[crypto_settings_idx].eAlgorithmUsage =
-             TlsParametersCngAlgUsageCipher;
+          TlsParametersCngAlgUsageCipher;
         crypto_settings[crypto_settings_idx].strCngAlgId.Length =
           sizeof(BCRYPT_AES_ALGORITHM);
         crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
@@ -940,7 +940,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       }
 
       crypto_settings[crypto_settings_idx].rgstrChainingModes =
-                                               blocked_gcm_modes;
+        blocked_gcm_modes;
       crypto_settings[crypto_settings_idx].cChainingModes = 1;
 
       crypto_settings_idx++;
@@ -951,13 +951,13 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     */
     if(disable_chacha_poly) {
       crypto_settings[crypto_settings_idx].eAlgorithmUsage =
-          TlsParametersCngAlgUsageCipher;
+        TlsParametersCngAlgUsageCipher;
       crypto_settings[crypto_settings_idx].strCngAlgId.Length =
-          sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM);
+        sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM);
       crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
-          sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM);
+        sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM);
       crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
-          (PWSTR)BCRYPT_CHACHA20_POLY1305_ALGORITHM;
+        (PWSTR)BCRYPT_CHACHA20_POLY1305_ALGORITHM;
       crypto_settings_idx++;
     }
 
@@ -972,7 +972,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     credentials.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
 
     credentials.pTlsParameters->grbitDisabledProtocols =
-                                                (DWORD)~enabled_protocols;
+      (DWORD)~enabled_protocols;
 
 #ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0]) {
@@ -982,11 +982,11 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 #endif
 
     sspi_status =
-        s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
-            SECPKG_CRED_OUTBOUND, NULL,
-            &credentials, NULL, NULL,
-            &backend->cred->cred_handle,
-            &backend->cred->time_stamp);
+      s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
+                                         SECPKG_CRED_OUTBOUND, NULL,
+                                         &credentials, NULL, NULL,
+                                         &backend->cred->cred_handle,
+                                         &backend->cred->time_stamp);
   }
   else {
     /* Pre-Windows 10 1809 */
@@ -1016,11 +1016,11 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 #endif
 
     sspi_status =
-        s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
-            SECPKG_CRED_OUTBOUND, NULL,
-            &schannel_cred, NULL, NULL,
-            &backend->cred->cred_handle,
-            &backend->cred->time_stamp);
+      s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
+                                         SECPKG_CRED_OUTBOUND, NULL,
+                                         &schannel_cred, NULL, NULL,
+                                         &backend->cred->cred_handle,
+                                         &backend->cred->time_stamp);
   }
 
 #ifdef HAS_CLIENT_CERT_PATH
