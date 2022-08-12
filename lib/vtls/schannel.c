@@ -667,7 +667,8 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         if(pwd_len > 0)
           str_w_len = MultiByteToWideChar(CP_UTF8,
                                           MB_ERR_INVALID_CHARS,
-                                          data->set.ssl.key_passwd, (int)pwd_len,
+                                          data->set.ssl.key_passwd,
+                                          (int)pwd_len,
                                           pszPassword, (int)(pwd_len + 1));
 
         if((str_w_len >= 0) && (str_w_len <= (int)pwd_len))
