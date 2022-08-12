@@ -99,6 +99,7 @@ problems may have been fixed or changed somewhat since this was written.
  9.1 SFTP does not do CURLOPT_POSTQUOTE correct
  9.2 wolfssh: publickey auth does not work
  9.3 Remote recursive folder creation with SFTP
+ 9.4 libssh blocking and infinite loop problem
 
  10. SOCKS
  10.3 FTPS over SOCKS
@@ -797,6 +798,14 @@ problems may have been fixed or changed somewhat since this was written.
  even when the CURLOPT_FTP_CREATE_MISSING_DIRS option is set.
 
  See https://github.com/curl/curl/issues/5204
+
+9.4 libssh blocking and infinite loop problem
+
+ In the SSH_SFTP_INIT state for libssh, the ssh session working mode is set to
+ blocking mode. If the network is suddenly disconnected during sftp
+ transmission, curl will be stuck, even if curl is configured with a timeout.
+
+ https://github.com/curl/curl/issues/8632
 
 
 10. SOCKS
