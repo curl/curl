@@ -63,6 +63,7 @@ problems may have been fixed or changed somewhat since this was written.
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky Windows CI builds
  5.13 long paths are not fully supported on Windows
+ 5.14 Windows Unicode builds use homedir in current locale
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -553,6 +554,16 @@ problems may have been fixed or changed somewhat since this was written.
  \\?\c:\longpath.
 
  See https://github.com/curl/curl/issues/8361
+
+5.14 Windows Unicode builds use homedir in current locale
+
+ The Windows Unicode builds of curl use the current locale, but expect Unicode
+ UTF-8 encoded paths for internal use such as open, access and stat. The user's
+ home directory is retrieved via curl_getenv in the current locale and not as
+ UTF-8 encoded Unicode.
+
+ See https://github.com/curl/curl/pull/7252 and
+     https://github.com/curl/curl/pull/7281
 
 6. Authentication
 
