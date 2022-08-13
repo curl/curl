@@ -94,16 +94,6 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
   export LIBS=-lpthread
 fi
 
-if [ "$TRAVIS_OS_NAME" = linux -a "$LIBRESSL" ]; then
-  cd $HOME
-  git clone --depth=1 -b v3.1.4 https://github.com/libressl-portable/portable.git libressl-git
-  cd libressl-git
-  ./autogen.sh
-  ./configure --prefix=$HOME/libressl
-  make
-  make install
-fi
-
 if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   cd $HOME
   git clone --depth=1 --recursive https://github.com/cloudflare/quiche.git
