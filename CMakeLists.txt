@@ -982,6 +982,7 @@ check_include_file_concat("pwd.h"            HAVE_PWD_H)
 check_include_file_concat("setjmp.h"         HAVE_SETJMP_H)
 check_include_file_concat("signal.h"         HAVE_SIGNAL_H)
 check_include_file_concat("ssl.h"            HAVE_SSL_H)
+check_include_file_concat("stdatomic.h"      HAVE_STDATOMIC_H)
 check_include_file_concat("stdbool.h"        HAVE_STDBOOL_H)
 check_include_file_concat("stdint.h"         HAVE_STDINT_H)
 check_include_file_concat("stdlib.h"         HAVE_STDLIB_H)
@@ -1143,6 +1144,7 @@ foreach(CURL_TEST
     HAVE_FILE_OFFSET_BITS
     HAVE_VARIADIC_MACROS_C99
     HAVE_VARIADIC_MACROS_GCC
+    HAVE_ATOMIC
     )
   curl_internal_test(${CURL_TEST})
 endforeach()
@@ -1158,6 +1160,19 @@ set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
 check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "")
+
+if(WIN32)
+  # detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
+  curl_internal_test(HAVE_WIN32_WINNT)
+  if(HAVE_WIN32_WINNT)
+    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" OUTPUT "${OUTPUT}")
+    string(REGEX REPLACE ".*_WIN32_WINNT=" "" OUTPUT "${OUTPUT}")
+    math(EXPR HAVE_WIN32_WINNT "${OUTPUT}" OUTPUT_FORMAT DECIMAL)
+    message(STATUS "Found _WIN32_WINNT=${OUTPUT} (${HAVE_WIN32_WINNT})")
+  endif()
+  # avoid storing HAVE_WIN32_WINNT in CMake cache
+  unset(HAVE_WIN32_WINNT CACHE)
+endif()
 
 set(CMAKE_REQUIRED_FLAGS)
 
@@ -1417,6 +1432,8 @@ _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
 _add_if("unicode"       ENABLE_UNICODE)
+_add_if("threadsafe"    HAVE_ATOMIC OR (WIN32 AND
+                        HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
 

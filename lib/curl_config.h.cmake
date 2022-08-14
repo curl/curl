@@ -156,6 +156,9 @@
 /* Define to 1 if you have the <assert.h> header file. */
 #cmakedefine HAVE_ASSERT_H 1
 
+/* Define to 1 if you have _Atomic support. */
+#cmakedefine HAVE_ATOMIC 1
+
 /* Define to 1 if you have the `fchmod' function. */
 #cmakedefine HAVE_FCHMOD 1
 
@@ -471,6 +474,9 @@
 
 /* Define to 1 if you have the <ssl.h> header file. */
 #cmakedefine HAVE_SSL_H 1
+
+/* Define to 1 if you have the <stdatomic.h> header file. */
+#cmakedefine HAVE_STDATOMIC_H 1
 
 /* Define to 1 if you have the <stdbool.h> header file. */
 #cmakedefine HAVE_STDBOOL_H 1
