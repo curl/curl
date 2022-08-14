@@ -264,7 +264,12 @@ int init_thread_sync_data(struct thread_data *td,
   return 1;
 
  err_exit:
-  /* Memory allocation failed */
+#ifndef CURL_DISABLE_SOCKETPAIR
+  if(tsd->sock_pair[0] != CURL_SOCKET_BAD) {
+    sclose(tsd->sock_pair[0]);
+    tsd->sock_pair[0] = CURL_SOCKET_BAD;
+  }
+#endif
   destroy_thread_sync_data(tsd);
   return 0;
 }
