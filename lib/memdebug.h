@@ -34,14 +34,20 @@
 #  define ALLOC_FUNC __attribute__((malloc))
 #  define ALLOC_SIZE(s) __attribute__((alloc_size(s)))
 #  define ALLOC_SIZE2(n, s) __attribute__((alloc_size(n, s)))
+#  define ALLOC_MUL_OVERFLOW(x, y, dst) (__builtin_mul_overflow(x, y, &dst))
+#  define ALLOC_ADD_OVERFLOW(x, y, dst) (__builtin_add_overflow(x, y, &dst))
 #elif defined(_MSC_VER)
 #  define ALLOC_FUNC __declspec(restrict)
 #  define ALLOC_SIZE(s)
 #  define ALLOC_SIZE2(n, s)
+#  define ALLOC_MUL_OVERFLOW(x, y, dst) (SizeTMult(x, y, &dst) != S_OK)
+#  define ALLOC_ADD_OVERFLOW(x, y, dst) (SizeTAdd(x, y, &dst) != S_OK)
 #else
 #  define ALLOC_FUNC
 #  define ALLOC_SIZE(s)
 #  define ALLOC_SIZE2(n, s)
+#  define ALLOC_MUL_OVERFLOW(x, y, dst) (((dst = x * y) / x) != y)
+#  define ALLOC_ADD_OVERFLOW(x, y, dst) (((dst = x + y) && x > SIZE_MAX - y))
 #endif
 
 #define CURL_MT_LOGFNAME_BUFSIZE 512

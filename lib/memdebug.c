@@ -141,7 +141,12 @@ ALLOC_FUNC void *curl_dbg_malloc(size_t wantedsize,
     return NULL;
 
   /* alloc at least 64 bytes */
-  size = sizeof(struct memdebug) + wantedsize;
+  if(ALLOC_ADD_OVERFLOW(sizeof(struct memdebug), wantedsize,
+                                 size)) {
+    curl_dbg_log("MEM %s:%d malloc(%zu) overflow\n",
+                 source, line, wantedsize);
+    return NULL;
+  }
 
   mem = (Curl_cmalloc)(size);
   if(mem) {
@@ -169,8 +174,13 @@ ALLOC_FUNC void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
     return NULL;
 
   /* alloc at least 64 bytes */
-  user_size = wanted_size * wanted_elements;
-  size = sizeof(struct memdebug) + user_size;
+  if(ALLOC_MUL_OVERFLOW(wanted_size,
+                                 wanted_elements, user_size) ||
+     ALLOC_ADD_OVERFLOW(sizeof(struct memdebug), user_size, size)) {
+    curl_dbg_log("MEM %s:%d calloc(%zu, %zu) overflow\n",
+                 source, line, wanted_elements, wanted_size);
+    return NULL;
+  }
 
   mem = (Curl_ccalloc)(1, size);
   if(mem)
@@ -240,15 +250,20 @@ ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
 void *curl_dbg_realloc(void *ptr, size_t wantedsize,
                       int line, const char *source)
 {
+  size_t size;
   struct memdebug *mem = NULL;
-
-  size_t size = sizeof(struct memdebug) + wantedsize;
 
   DEBUGASSERT(wantedsize != 0);
 
   if(countcheck("realloc", line, source))
     return NULL;
 
+  if(ALLOC_ADD_OVERFLOW(sizeof(struct memdebug), wantedsize,
+                                 size)) {
+    curl_dbg_log("MEM %s:%d realloc(%zu) overflow\n",
+                 source, line, wantedsize);
+    return NULL;
+  }
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
 #  pragma warning(disable:1684)

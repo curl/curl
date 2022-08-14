@@ -51,6 +51,7 @@
 #    endif
 #  endif
 #  include <tchar.h>
+#  include <intsafe.h>
 #  ifdef UNICODE
      typedef wchar_t *(*curl_wcsdup_callback)(const wchar_t *str);
 #  endif
