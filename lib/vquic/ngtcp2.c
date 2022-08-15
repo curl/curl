@@ -505,7 +505,7 @@ static int quic_init_ssl(struct quicsocket *qs)
 
   /* set SNI */
   wolfSSL_UseSNI(qs->ssl, WOLFSSL_SNI_HOST_NAME,
-                 hostname, (short)strlen(hostname));
+                 hostname, (unsigned short)strlen(hostname));
 
   return 0;
 }
