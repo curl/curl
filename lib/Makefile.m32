@@ -291,23 +291,25 @@ ifdef SSH2
     endif
   endif
 endif
-ifdef SSL
-  ifdef NGHTTP3
-    INCLUDES += -I"$(NGHTTP3_PATH)/include"
-    CFLAGS += -DUSE_NGHTTP3
-    DLL_LIBS += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
-    ifdef NGTCP2
-      INCLUDES += -I"$(NGTCP2_PATH)/include"
-      CFLAGS += -DUSE_NGTCP2
-      DLL_LIBS += -L"$(NGTCP2_PATH)/lib"
-      ifdef NGTCP2_LIBS
-        DLL_LIBS += $(NGTCP2_LIBS)
-      else
-        DLL_LIBS += -lngtcp2 -lngtcp2_crypto_openssl
+ifdef NGHTTP3
+  INCLUDES += -I"$(NGHTTP3_PATH)/include"
+  CFLAGS += -DUSE_NGHTTP3
+  DLL_LIBS += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
+  ifdef NGTCP2
+    INCLUDES += -I"$(NGTCP2_PATH)/include"
+    CFLAGS += -DUSE_NGTCP2
+    DLL_LIBS += -L"$(NGTCP2_PATH)/lib"
+    ifdef NGTCP2_LIBS
+      DLL_LIBS += $(NGTCP2_LIBS)
+    else
+      DLL_LIBS += -lngtcp2
+      ifdef SSL
+        DLL_LIBS += -lngtcp2_crypto_openssl
       endif
     endif
   endif
-
+endif
+ifdef SSL
   ifndef OPENSSL_INCLUDE
     ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
       OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
