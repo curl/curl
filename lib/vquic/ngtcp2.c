@@ -415,7 +415,6 @@ static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   WOLFSSL_CTX *ssl_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
-  (void)wolfssl_logging;
 
   if(ngtcp2_crypto_wolfssl_configure_client_context(ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
