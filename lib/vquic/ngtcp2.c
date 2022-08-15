@@ -211,11 +211,13 @@ static int keylog_callback(gnutls_session_t session, const char *label,
   return 0;
 }
 #elif defined(USE_WOLFSSL)
+#if defined(HAVE_SECRET_CALLBACK)
 static void keylog_callback(const WOLFSSL *ssl, const char *line)
 {
   (void)ssl;
   Curl_tls_keylog_write_line(line);
 }
+#endif
 #endif
 
 static int init_ngh3_conn(struct quicsocket *qs);
@@ -430,7 +432,7 @@ static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
     return NULL;
   }
 
-  if(wolfSSL_CTX_set1_groups_list(ssl_ctx, QUIC_GROUPS) != 1) {
+  if(wolfSSL_CTX_set1_groups_list(ssl_ctx, (char *)QUIC_GROUPS) != 1) {
     failf(data, "SSL_CTX_set1_groups_list failed");
     return NULL;
   }
@@ -503,7 +505,7 @@ static int quic_init_ssl(struct quicsocket *qs)
 
   /* set SNI */
   wolfSSL_UseSNI(qs->ssl, WOLFSSL_SNI_HOST_NAME,
-                 hostname, strlen(hostname));
+                 hostname, (short)strlen(hostname));
 
   return 0;
 }
