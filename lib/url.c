@@ -2025,6 +2025,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     if(!strcasecompare("file", data->state.up.scheme))
       return CURLE_OUT_OF_MEMORY;
   }
+  else if(strlen(data->state.up.hostname) > 0xffff) {
+    failf(data, "Too long host name");
+    return CURLE_URL_MALFORMAT;
+  }
 
 #ifndef CURL_DISABLE_HSTS
   if(data->hsts && strcasecompare("http", data->state.up.scheme)) {
