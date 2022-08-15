@@ -23,7 +23,7 @@
 .\" **************************************************************************
 .TH curl_multi_perform 3 "1 March 2002" "libcurl 7.9.5" "libcurl Manual"
 .SH NAME
-curl_multi_perform - reads/writes available data from each easy handle
+curl_multi_perform - reads/writes available data from easy handles
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -32,7 +32,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles);
 .fi
 .SH DESCRIPTION
 This function performs transfers on all the added handles that need attention
-in an non-blocking fashion. The easy handles have previously been added to the
+in a non-blocking fashion. The easy handles have previously been added to the
 multi handle with \fIcurl_multi_add_handle(3)\fP.
 
 When an application has found out there's data available for the multi_handle
