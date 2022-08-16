@@ -1766,8 +1766,15 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
-        sshp->quote_attrs.atime = (unsigned long)date;
-        sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_ACMODTIME;
+#if SIZEOF_TIME_T > SIZEOF_LONG
+        if(date > 0xffffffff)
+          ;
+        else
+#endif
+        {
+          sshp->quote_attrs.atime = (unsigned long)date;
+          sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_ACMODTIME;
+        }
       }
       else if(strncasecompare(cmd, "mtime", 5)) {
         time_t date = Curl_getdate_capped(sshc->quote_path1);
@@ -1780,8 +1787,15 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
-        sshp->quote_attrs.mtime = (unsigned long)date;
-        sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_ACMODTIME;
+#if SIZEOF_TIME_T > SIZEOF_LONG
+        if(date > 0xffffffff)
+          ;
+        else
+#endif
+        {
+          sshp->quote_attrs.mtime = (unsigned long)date;
+          sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_ACMODTIME;
+        }
       }
 
       /* Now send the completed structure... */
