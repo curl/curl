@@ -4,10 +4,11 @@ curl and libcurl 7.85.0
  Command line options:         248
  curl_easy_setopt() options:   299
  Public functions in libcurl:  88
- Contributors:                 2680
+ Contributors:                 2682
 
 This release includes the following changes:
 
+ o quic: add support via wolfSSL [142]
  o schannel: Add TLS 1.3 support [96]
  o setopt: add CURLOPT_PROTOCOLS_STR and CURLOPT_REDIR_PROTOCOLS_STR [30]
 
@@ -16,6 +17,8 @@ This release includes the following bugfixes:
  o amigaos: fix threaded resolver on AmigaOS 4.x [133]
  o amissl: allow AmiSSL to be used with AmigaOS 4.x builds [115]
  o amissl: make AmiSSL v5 a minimum requirement [117]
+ o asyn-ares: make a single alloc out of hostname + async data [123]
+ o asyn-thread: fix socket leak on OOM [128]
  o asyn-thread: make getaddrinfo_complete return CURLcode [53]
  o base64: base64url encoding has no padding [41]
  o BUGS.md: improve language [62]
@@ -48,6 +51,7 @@ This release includes the following bugfixes:
  o curl.h: CURLE_CONV_FAILED is obsoleted [4]
  o curl: output warning when a cookie is dropped due to size [5]
  o curl: writeout: fix repeated header outputs [47]
+ o Curl_close: call Curl_resolver_cancel to avoid memory-leak [124]
  o curl_easy_header: Add CURLH_PSEUDO to sanity check [94]
  o curl_mime_data.3: polish the wording [6]
  o curl_multi_timeout.3: clarify usage [48]
@@ -78,6 +82,8 @@ This release includes the following bugfixes:
  o ftp: use a correct expire ID for timer expiry [88]
  o getinfo: return better error on NULL as first argument [21]
  o GHA: add two Intel compiler CI jobs [85]
+ o GHA: move libressl CI from zuul to GitHub [144]
+ o GHA: mv CI torture test from Zuul [135]
  o h2h3: fix overriding the 'TE: Trailers' header [43]
  o hostip: resolve *.localhost to 127.0.0.1/::1 [127]
  o HTTP3.md: update to msh3 v0.4.0 [126]
@@ -95,8 +101,10 @@ This release includes the following bugfixes:
  o Makefile.m32: add `CURL_RC` and `CURL_STRIP` variables [ci skip] [17]
  o Makefile.m32: add `NGTCP2_LIBS` option [ci skip] [38]
  o makefile.m32: add support for custom ARCH [ci skip] [27]
+ o Makefile.m32: allow -nghttp3/-ngtcp2 without -ssl [ci skip] [141]
  o Makefile.m32: do not set the libcurl.rc debug flag [ci skip] [3]
  o Makefile.m32: stop trying to build libcares.a [ci skip] [46]
+ o memdebug: add annotation attributes [143]
  o mprintf: fix *dyn_vprintf() when out-of-memory [90]
  o mprintf: make dprintf_formatf never return negative [49]
  o msh3: fix the QUIC disconnect function [107]
@@ -135,6 +143,7 @@ This release includes the following bugfixes:
  o tool_writeout: fix enumerated type mixed with another type [69]
  o trace: 0x7F character is non-printable [50]
  o url: enumerated type mixed with another type [74]
+ o url: reject URLs with hostnames longer than 65535 bytes [137]
  o urldata: change second proxytype field to unsigned char to match [75]
  o urldata: make 'negnpn' use less storage [112]
  o urldata: make state.httpreq an unsigned char [77]
@@ -153,21 +162,21 @@ advice from friends like these:
 
   Adam Sampson, Alessandro Ghedini, Alexandre Bury, Andreas Sommer,
   Andrew Lambert, Brad Forschinger, Brian Carpenter, Cering on github,
-  Chris Young, Daniel Katz, Daniel Stenberg, Don J Olmstead, Emanuele Torre,
-  Emil Engler, Érico Nogueira Rolim, Even Rouault, Evgeny Grin (Karlson2k),
-  Fabian Keil, Gisle Vanem, Gwen Shapira, Harry Sintonen,
-  highmtworks on github, Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root,
-  jurisuk on github, jvvprasad78 on github, Kai Pastor, Litter White,
-  lwthiker on github, Marcel Raad, Marc Hörsken, Marco Kamner,
+  Chris Young, Daniel Katz, Daniel Stenberg, David Carlier, Don J Olmstead,
+  Emanuele Torre, Emil Engler, Érico Nogueira Rolim, Even Rouault,
+  Evgeny Grin (Karlson2k), Fabian Keil, Gisle Vanem, Gwen Shapira,
+  Harry Sintonen, highmtworks on github, Jakub Zakrzewski, Jilayne Lovejoy,
+  Joshua Root, jurisuk on github, jvvprasad78 on github, Kai Pastor,
+  Litter White, lwthiker on github, Marcel Raad, Marc Hörsken, Marco Kamner,
   MasterInQuestion on github, Matthew Thompson, Maxim Ivanov,
   Michael Trebilcock, Michał Antoniak, Nao Yonashiro, Nick Banks,
   Oliver Roberts, opensignature on github, Orgad Shaneh, Patrick Monnerat,
-  Philip H, Ray Satiro, Rosen Penev, Ryan Schmidt, rzrymiak on github,
-  Samuel Henrique, Sean McArthur, Sergey Ogryzkov, Sukanya Hanumanthu,
-  Tatsuhiro Tsujikawa, Ted Lyngmo, TheKnarf on github, Thomas Weißschuh,
-  Viktor Szakats, vlubart on github, Wyatt O'Day, Xiaoke Wang,
-  yiyuaner on github
-  (62 contributors)
+  Philip H, privetryan on github, Ray Satiro, Rosen Penev, Ryan Schmidt,
+  rzrymiak on github, Samuel Henrique, Sean McArthur, Sergey Ogryzkov,
+  Stefan Eissing, Sukanya Hanumanthu, Tatsuhiro Tsujikawa, Ted Lyngmo,
+  TheKnarf on github, Thomas Weißschuh, Viktor Szakats, vlubart on github,
+  Wyatt O'Day, Xiaoke Wang, yiyuaner on github
+  (65 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -293,12 +302,21 @@ References to bug reports and discussions on issues:
  [120] = https://curl.se/bug/?i=9077
  [121] = https://curl.se/bug/?i=9239
  [122] = https://curl.se/bug/?i=9250
+ [123] = https://curl.se/bug/?i=9310
+ [124] = https://curl.se/bug/?i=9310
  [125] = https://curl.se/bug/?i=9298
  [126] = https://curl.se/bug/?i=9297
  [127] = https://curl.se/bug/?i=9192
+ [128] = https://curl.se/bug/?i=9310
  [129] = https://curl.se/bug/?i=9291
  [130] = https://curl.se/bug/?i=9291
  [131] = https://curl.se/bug/?i=9217
  [132] = https://curl.se/bug/?i=9253
  [133] = https://curl.se/bug/?i=9265
  [134] = https://curl.se/bug/?i=9289
+ [135] = https://curl.se/bug/?i=9310
+ [137] = https://curl.se/bug/?i=9317
+ [141] = https://curl.se/bug/?i=9314
+ [142] = https://curl.se/bug/?i=9290
+ [143] = https://curl.se/bug/?i=9306
+ [144] = https://curl.se/bug/?i=9309
