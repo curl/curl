@@ -2922,8 +2922,15 @@ static void sftp_quote_stat(struct Curl_easy *data)
       sshc->actualcode = CURLE_QUOTE_ERROR;
       return;
     }
-    sshc->quote_attrs->atime = (uint32_t)date;
-    sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_ACMODTIME;
+#if SIZEOF_TIME_T > 4
+    if(date > 0xffffffff)
+      ; /* avoid setting a capped time */
+    else
+#endif
+    {
+      sshc->quote_attrs->atime = (uint32_t)date;
+      sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_ACMODTIME;
+    }
   }
   else if(strncasecompare(cmd, "mtime", 5)) {
     time_t date = Curl_getdate_capped(sshc->quote_path1);
@@ -2936,8 +2943,15 @@ static void sftp_quote_stat(struct Curl_easy *data)
       sshc->actualcode = CURLE_QUOTE_ERROR;
       return;
     }
-    sshc->quote_attrs->mtime = (uint32_t)date;
-    sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_ACMODTIME;
+#if SIZEOF_TIME_T > 4
+    if(date > 0xffffffff)
+      ; /* avoid setting a capped time */
+    else
+#endif
+    {
+      sshc->quote_attrs->mtime = (uint32_t)date;
+      sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_ACMODTIME;
+    }
   }
 
   /* Now send the completed structure... */
