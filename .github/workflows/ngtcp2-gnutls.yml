@@ -1,0 +1,88 @@
+# Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: ngtcp2
+
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: gnutls
+          install:
+          configure: LDFLAGS="-Wl,-rpath,$HOME/all/lib" --with-gnutls=$HOME/all --enable-debug
+          gnutls-configure: --with-included-libtasn1 --with-included-unistring --disable-guile --disable-doc --disable-tests
+
+    steps:
+    - run: |
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }} python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools texinfo texlive texlive-extra-utils autopoint libev-dev
+        sudo python3 -m pip install impacket
+      name: 'install prereqs and impacket'
+
+    - run: |
+        git clone --depth=1 https://gitlab.com/gnutls/nettle.git
+        cd nettle
+        ./.bootstrap
+        ./configure LDFLAGS="-Wl,-rpath,$HOME/all/lib" ${{ matrix.build.nettle-configure }} --prefix=$HOME/all --libdir=$HOME/all/lib --disable-documentation
+        make && make install
+      name: 'install nettle'
+
+    - run: |
+        git clone --depth=1 -b 3.7.7 https://github.com/gnutls/gnutls.git
+        cd gnutls
+        ./bootstrap
+        ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib -L$HOME/all/lib" --prefix=$HOME/all ${{ matrix.build.gnutls-configure }} --disable-tools
+        make V=1 && make install
+      name: 'install gnutls'
+
+    - run: |
+        git clone --depth=1 https://github.com/ngtcp2/nghttp3
+        cd nghttp3
+        autoreconf -fi
+        ./configure --prefix=$HOME/all --enable-lib-only
+        make && make install
+      name: 'install nghttp3'
+
+    - run: |
+        git clone --depth=1 https://github.com/ngtcp2/ngtcp2
+        cd ngtcp2
+        autoreconf -fi
+        ./configure PKG_CONFIG_PATH=$HOME/all/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/all/lib" --prefix=$HOME/all --enable-lib-only --with-gnutls=$HOME/all
+        make && make install
+      name: 'install ngtcp2'
+
+    - uses: actions/checkout@v3
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
+
+    - run: make V=1 test-ci
+      name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
