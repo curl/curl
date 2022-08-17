@@ -8,7 +8,7 @@ how your use case cannot be satisfied properly using a workaround.
 
 ## NSS
 
-We remove support for building curl with the NSS TLS library in August 2022.
+We remove support for building curl with the NSS TLS library in August 2023.
 
 - There are very few users left who use curl+NSS
 - NSS has very few users outside of curl as well (primarily Firefox)
