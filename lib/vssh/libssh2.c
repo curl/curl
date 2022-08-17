@@ -1755,47 +1755,36 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           break;
         }
       }
-      else if(strncasecompare(cmd, "atime", 5)) {
+      else if(strncasecompare(cmd, "atime", 5) ||
+              strncasecompare(cmd, "mtime", 5)) {
         time_t date = Curl_getdate_capped(sshc->quote_path1);
+        bool fail = FALSE;
+
         if(date == -1) {
+          failf(data, "incorrect date format for %.*s", 5, cmd);
+          fail = TRUE;
+        }
+#if SIZEOF_TIME_T > SIZEOF_LONG
+        if(date > 0xffffffff) {
+          /* if 'long' can't old >32bit, this date cannot be sent */
+          failf(data, "date overflow");
+          fail = TRUE;
+        }
+#endif
+        if(fail) {
           Curl_safefree(sshc->quote_path1);
           Curl_safefree(sshc->quote_path2);
-          failf(data, "Syntax error: incorrect access date format");
           state(data, SSH_SFTP_CLOSE);
           sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
-#if SIZEOF_TIME_T > SIZEOF_LONG
-        if(date > 0xffffffff)
-          ;
-        else
-#endif
-        {
+        if(strncasecompare(cmd, "atime", 5))
           sshp->quote_attrs.atime = (unsigned long)date;
-          sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_ACMODTIME;
-        }
-      }
-      else if(strncasecompare(cmd, "mtime", 5)) {
-        time_t date = Curl_getdate_capped(sshc->quote_path1);
-        if(date == -1) {
-          Curl_safefree(sshc->quote_path1);
-          Curl_safefree(sshc->quote_path2);
-          failf(data, "Syntax error: incorrect modification date format");
-          state(data, SSH_SFTP_CLOSE);
-          sshc->nextstate = SSH_NO_STATE;
-          sshc->actualcode = CURLE_QUOTE_ERROR;
-          break;
-        }
-#if SIZEOF_TIME_T > SIZEOF_LONG
-        if(date > 0xffffffff)
-          ;
-        else
-#endif
-        {
+        else /* mtime */
           sshp->quote_attrs.mtime = (unsigned long)date;
-          sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_ACMODTIME;
-        }
+
+        sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_ACMODTIME;
       }
 
       /* Now send the completed structure... */
