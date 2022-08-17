@@ -154,6 +154,9 @@ static void conn_free(struct connectdata *conn);
 #define UNIX_SOCKET_PREFIX "localhost"
 #endif
 
+/* Reject URLs exceeding this length */
+#define MAX_URL_LEN 0xffff
+
 /*
 * get_protocol_family()
 *
@@ -2026,8 +2029,8 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     if(!strcasecompare("file", data->state.up.scheme))
       return CURLE_OUT_OF_MEMORY;
   }
-  else if(strlen(data->state.up.hostname) > 0xffff) {
-    failf(data, "Too long host name");
+  else if(strlen(data->state.up.hostname) > MAX_URL_LEN) {
+    failf(data, "Too long host name (maximum is %d)", MAX_URL_LEN);
     return CURLE_URL_MALFORMAT;
   }
 
