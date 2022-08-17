@@ -124,7 +124,6 @@ COMPLICATED_EXAMPLES = \
   cacertinmem.c \
   crawler.c \
   curlgtk.c \
-  curlx.c \
   ephiperfifo.c \
   evhiperfifo.c \
   ghiper.c \
