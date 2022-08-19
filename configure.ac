@@ -196,76 +196,84 @@ AS_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS]),
 
 OPT_SECURETRANSPORT=no
 AC_ARG_WITH(secure-transport,dnl
-AS_HELP_STRING([--with-secure-transport],[enable Apple OS native SSL/TLS]),
+AS_HELP_STRING([--with-secure-transport],[enable Apple OS native SSL/TLS]),[
   OPT_SECURETRANSPORT=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }Secure-Transport"
-)
+  TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }Secure-Transport"
+])
 
 OPT_AMISSL=no
 AC_ARG_WITH(amissl,dnl
-AS_HELP_STRING([--with-amissl],[enable Amiga native SSL/TLS (AmiSSL)]),
+AS_HELP_STRING([--with-amissl],[enable Amiga native SSL/TLS (AmiSSL)]),[
   OPT_AMISSL=$withval
-  test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }AmiSSL")
+  TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }AmiSSL"
+])
 
 OPT_OPENSSL=no
 dnl Default to no CA bundle
 ca="no"
 AC_ARG_WITH(ssl,dnl
 AS_HELP_STRING([--with-ssl=PATH],[old version of --with-openssl])
-AS_HELP_STRING([--without-ssl], [build without any TLS library]),
+AS_HELP_STRING([--without-ssl], [build without any TLS library]),[
   OPT_SSL=$withval
   OPT_OPENSSL=$withval
   if test X"$withval" != Xno; then
-    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL")
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL"
   fi
+])
 
 AC_ARG_WITH(openssl,dnl
-AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option]),
+AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option]),[
   OPT_OPENSSL=$withval
   if test X"$withval" != Xno; then
-    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL")
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL"
   fi
+])
 
 OPT_GNUTLS=no
 AC_ARG_WITH(gnutls,dnl
-AS_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root]),
+AS_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root]),[
   OPT_GNUTLS=$withval
   if test X"$withval" != Xno; then
-    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }GnuTLS")
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }GnuTLS"
   fi
+])
 
 OPT_MBEDTLS=no
 AC_ARG_WITH(mbedtls,dnl
-AS_HELP_STRING([--with-mbedtls=PATH],[where to look for mbedTLS, PATH points to the installation root]),
+AS_HELP_STRING([--with-mbedtls=PATH],[where to look for mbedTLS, PATH points to the installation root]),[
   OPT_MBEDTLS=$withval
   if test X"$withval" != Xno; then
-    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }mbedTLS")
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }mbedTLS"
   fi
+])
 
 OPT_WOLFSSL=no
 AC_ARG_WITH(wolfssl,dnl
-AS_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to the installation root (default: system lib default)]),
+AS_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to the installation root (default: system lib default)]),[
   OPT_WOLFSSL=$withval
   if test X"$withval" != Xno; then
-    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }wolfSSL")
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }wolfSSL"
   fi
+])
 
 OPT_BEARSSL=no
 AC_ARG_WITH(bearssl,dnl
-AS_HELP_STRING([--with-bearssl=PATH],[where to look for BearSSL, PATH points to the installation root]),
+AS_HELP_STRING([--with-bearssl=PATH],[where to look for BearSSL, PATH points to the installation root]),[
   OPT_BEARSSL=$withval
   if test X"$withval" != Xno; then
-    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }BearSSL")
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }BearSSL"
   fi
+])
 
 OPT_RUSTLS=no
 AC_ARG_WITH(rustls,dnl
-AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to the installation root]),
+AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to the installation root]),[
   OPT_RUSTLS=$withval
   if test X"$withval" != Xno; then
-    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls")
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls"
     experimental="$experimental rustls"
   fi
+])
 
 OPT_NSS_AWARE=no
 AC_ARG_WITH(nss-deprecated,dnl
@@ -285,7 +293,7 @@ AS_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the inst
       AC_MSG_ERROR([NSS use must be confirmed using --with-nss-deprecated. NSS support will be dropped from curl in August 2022. See docs/DEPRECATE.md])
     fi
 
-    test -z "TLSCHOICE" || TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS"
+    [TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS"]
   fi
 )
 
