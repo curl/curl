@@ -1955,6 +1955,8 @@
      d                 c                   4
      d  CURLSHOPT_USERDATA...
      d                 c                   5
+     d  CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS...
+     d                 c                   6
       *
      d CURLversion     s             10i 0 based(######ptr######)               Enum
      d  CURLVERSION_FIRST...
@@ -2058,6 +2060,8 @@
      d                 c                   10015
      d  CURLMOPT_MAX_CONCURRENT_STREAMS...
      d                 c                   10016
+     d  CURLMOPT_DNS_CACHE_HASH_TABLE_SLOTS...
+     d                 c                   10017
       *
       * Bitmask bits for CURLMOPT_PIPELING.
       *

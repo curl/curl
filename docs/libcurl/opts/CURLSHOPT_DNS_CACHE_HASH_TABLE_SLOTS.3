@@ -21,43 +21,44 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_share_setopt 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.\"
+.TH CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS 3 "21 Aug 2022" "libcurl 7.85.0" "curl_multi_setopt options"
 .SH NAME
-curl_share_setopt - Set options for a shared object
+CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS \- number of slots in the DNS cache hash table
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
+CURLSHcode curl_multi_setopt(CURLSE *share, CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS, long slots);
 .fi
 .SH DESCRIPTION
-Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
-.SH OPTIONS
-.IP CURLSHOPT_LOCKFUNC
-See \fICURLSHOPT_LOCKFUNC(3)\fP.
-.IP CURLSHOPT_UNLOCKFUNC
-See \fICURLSHOPT_UNLOCKFUNC(3)\fP.
-.IP CURLSHOPT_SHARE
-See \fICURLSHOPT_SHARE(3)\fP.
-.IP CURLSHOPT_UNSHARE
-See \fICURLSHOPT_UNSHARE(3)\fP.
-.IP CURLSHOPT_USERDATA
-See \fICURLSHOPT_USERDATA(3)\fP.
-.IP CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS
-See \fICURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS(3)\fP.
+Pass a long indicating the \fBslots\fP. The set number will be used as the
+number of slots of the DNS cache hash table. The passed value should be a
+prime number.
+
+The default value is 7. Any negative or zero value is treated as the default.
+
+Increasing the value reduces the cost of DNS cache operations when the number
+of hosts becomes large (>1k) at the cost of increased memory usage.
+
+This option is for the share interface use only, when using the multi interface
+you should instead use the \fICURLMOPT_DNS_CACHE_HASH_TABLE_SLOTS(3)\fP option.
+
+.SH DEFAULT
+7
+.SH PROTOCOLS
+All
 .SH EXAMPLE
 .nf
-  CURLSHcode sh;
-  share = curl_share_init();
-  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-  if(sh)
-    printf("Error: %s\\n", curl_share_strerror(sh));
+CURLSH *m = curl_share_init();
+/* use 1021 slots for DNS cache */
+curl_share_setopt(m, CURLMOPT_DNS_CACHE_HASH_TABLE_SLOTS, 1021L);
 .fi
 .SH AVAILABILITY
-Added in 7.10
+Added in 7.85.0
 .SH RETURN VALUE
 CURLSHE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
-man page for the full list with descriptions.
+error occurred. See \fIlibcurl-errors(3)\fP for the full list with
+descriptions.
 .SH "SEE ALSO"
-.BR curl_share_cleanup "(3), " curl_share_init "(3)"
+.BR CURLMOPT_DNS_CACHE_HASH_TABLE_SLOTS "(3), "

@@ -399,6 +399,9 @@ typedef enum {
   /* maximum number of concurrent streams to support on a connection */
   CURLOPT(CURLMOPT_MAX_CONCURRENT_STREAMS, CURLOPTTYPE_LONG, 16),
 
+  /* number of slots in dns cache hash table */
+  CURLOPT(CURLMOPT_DNS_CACHE_HASH_TABLE_SLOTS, CURLOPTTYPE_LONG, 17),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 
