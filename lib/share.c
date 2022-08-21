@@ -30,6 +30,7 @@
 #include "psl.h"
 #include "vtls/vtls.h"
 #include "curl_memory.h"
+#include "warnless.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
