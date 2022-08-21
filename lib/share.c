@@ -177,7 +177,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
   case CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS:
     {
       int dnscache_slots = curlx_sltosi(va_arg(param, long));
-      if (dnscache_slots <= 0) {
+      if(dnscache_slots <= 0) {
         dnscache_slots = CURL_DNS_CACHE_HASH_TABLE_SLOTS;
       }
       Curl_hash_destroy(&share->hostcache);
