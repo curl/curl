@@ -22,14 +22,14 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS 3 "21 Aug 2022" "libcurl 7.85.0" "curl_multi_setopt options"
+.TH CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS 3 "21 Aug 2022" "libcurl 7.85.0" "curl_share_setopt options"
 .SH NAME
 CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS \- number of slots in the DNS cache hash table
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLSHcode curl_multi_setopt(CURLSE *share, CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS, long slots);
+CURLSHcode curl_share_setopt(CURLSE *share, CURLSHOPT_DNS_CACHE_HASH_TABLE_SLOTS, long slots);
 .fi
 .SH DESCRIPTION
 Pass a long indicating the \fBslots\fP. The set number will be used as the
