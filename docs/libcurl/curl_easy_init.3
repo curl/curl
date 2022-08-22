@@ -58,8 +58,16 @@ if(curl) {
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE
-If this function returns NULL, something went wrong and you cannot use the
-other curl functions.
+Returns a valid non-null handle on success.
+
+On failure, returns NULL. If \fIcurl_global_init(3)\fP was called prior to
+\fIcurl_easy_init(3)\fP, then it means the process has ran out of memory. If
+\fIcurl_global_init(3)\fP was not called beforehand, it could also be due to a
+global initialization failure.
+
+In order to better isolate failure cases, the user is strongly advised to
+manually call \fIcurl_global_init(3)\fP instead of relying on libcurl doing it
+implicitly.
 .SH "SEE ALSO"
 .BR curl_easy_cleanup "(3), " curl_global_init "(3), " curl_easy_reset "(3), "
 .BR curl_easy_perform "(3) "
