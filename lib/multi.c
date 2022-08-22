@@ -828,6 +828,24 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* Remove the association between the connection and the handle */
   Curl_detach_connection(data);
 
+  if(data->set.connect_only && !data->multi_easy) {
+    /* This removes a handle that was part the multi inteface that used
+       CONNECT_ONLY, that connection is now left alive but since this handle
+       has bits.close set nothing can use that transfer anymore and it is
+       forbidden from reuse. And this easy handle cannot find the connection
+       anymore once removed from the multi handle
+
+       Better close the connection here, at once.
+    */
+    struct connectdata *c;
+    curl_socket_t s;
+    s = Curl_getconnectinfo(data, &c);
+    if((s != CURL_SOCKET_BAD) && c) {
+      Curl_conncache_remove_conn(data, c, TRUE);
+      Curl_disconnect(data, c, TRUE);
+    }
+  }
+
   if(data->state.lastconnect_id != -1) {
     /* Mark any connect-only connection for closure */
     Curl_conncache_foreach(data, data->state.conn_cache,
