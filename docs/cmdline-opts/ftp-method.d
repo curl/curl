@@ -23,6 +23,6 @@ curl does no CWD at all. curl will do SIZE, RETR, STOR etc and give a full
 path to the server for all these commands. This is the fastest behavior.
 .IP singlecwd
 curl does one CWD with the full target directory and then operates on the file
-\&"normally" (like in the multicwd case). This is somewhat more standards
+"normally" (like in the multicwd case). This is somewhat more standards
 compliant than 'nocwd' but without the full penalty of 'multicwd'.
 .RE

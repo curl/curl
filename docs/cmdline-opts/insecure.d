@@ -22,6 +22,6 @@ See this online resource for further details:
 
 For SFTP and SCP, this option makes curl skip the *known_hosts* verification.
 *known_hosts* is a file normally stored in the user's home directory in the
-\&.ssh subdirectory, which contains host names and their public keys.
+".ssh" subdirectory, which contains host names and their public keys.
 
 **WARNING**: using this option makes the transfer insecure.

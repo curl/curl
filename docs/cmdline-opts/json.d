@@ -25,7 +25,7 @@ the syntax is correct.
 
 If you start the data with the letter @, the rest should be a file name to
 read the data from, or a single dash (-) if you want curl to read the data
-from stdin. Posting data from a file named \&'foobar' would thus be done with
+from stdin. Posting data from a file named 'foobar' would thus be done with
 --json @foobar and to instead read the data from stdin, use --json @-.
 
 If this option is used more than once on the same command line, the additional

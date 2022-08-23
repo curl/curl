@@ -22,7 +22,7 @@ SMTP, LDAP, etc.
 Sets the proxy server to use if no protocol-specific proxy is set.
 .IP "NO_PROXY <comma-separated list of hosts/domains>"
 list of host names that should not go through any proxy. If set to an asterisk
-\&'*' only, it matches all hosts. Each name in this list is matched as either
+'*' only, it matches all hosts. Each name in this list is matched as either
 a domain name which contains the hostname, or the hostname itself.
 
 This environment variable disables use of the proxy even when specified with

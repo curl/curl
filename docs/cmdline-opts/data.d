@@ -25,12 +25,12 @@ the @ character. To post data purely binary, you should instead use the
 
 If any of these options is used more than once on the same command line, the
 data pieces specified will be merged with a separating &-symbol. Thus, using
-\&'-d name=daniel -d skill=lousy' would generate a post chunk that looks like
-\&'name=daniel&skill=lousy'.
+'-d name=daniel -d skill=lousy' would generate a post chunk that looks like
+'name=daniel&skill=lousy'.
 
 If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from stdin. Posting
-data from a file named \&'foobar' would thus be done with --data @foobar. When
+data from a file named 'foobar' would thus be done with --data @foobar. When
 --data is told to read from a file like that, carriage returns and newlines
 will be stripped out. If you do not want the @ character to have a special
 interpretation use --data-raw instead.
