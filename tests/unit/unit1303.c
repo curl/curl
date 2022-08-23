@@ -101,10 +101,10 @@ UNITTEST_START
   {BASE + 12, 0,     10000, 0, FALSE, -2000, "-2000, overdue 2 seconds"},
 
   /* no connect timeout set, connecting */
-  {BASE + 4, 0,      10000, 0, FALSE, 6000, "6 seconds should be left"},
-  {BASE + 4, 990000, 10000, 0, FALSE, 5010, "5010 ms should be left"},
-  {BASE + 10, 0,     10000, 0, FALSE, -1,   "timeout is -1, expired"},
-  {BASE + 12, 0,     10000, 0, FALSE, -2000, "-2000, overdue 2 seconds"},
+  {BASE + 4, 0,      10000, 0, TRUE, 6000, "6 seconds should be left"},
+  {BASE + 4, 990000, 10000, 0, TRUE, 5010, "5010 ms should be left"},
+  {BASE + 10, 0,     10000, 0, TRUE, -1,   "timeout is -1, expired"},
+  {BASE + 12, 0,     10000, 0, TRUE, -2000, "-2000, overdue 2 seconds"},
 
   /* only connect timeout set, not connecting */
   {BASE + 4, 0,      0, 10000, FALSE, 0, "no timeout active"},
