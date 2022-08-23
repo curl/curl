@@ -113,7 +113,9 @@ sub printdesc {
         $d =~ s/( |\\fI|^)--/$1\\-\\-/g;
         $d =~ s/([ -]|\\fI|^)-/$1\\-/g;
         # handle single quotes first on the line
-        $d =~ s/(\s*)\'/$1\\(aq/;
+        $d =~ s/^(\s*)\'/$1\\(aq/;
+        # handle double quotes first on the line
+        $d =~ s/^(\s*)\"/$1\\(dq/;
         print $d;
     }
     if($exam) {
