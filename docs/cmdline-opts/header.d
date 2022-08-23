@@ -19,9 +19,9 @@ externally set header will be used instead of the internal one. This allows
 you to make even trickier stuff than curl would normally do. You should not
 replace internally set headers without knowing perfectly well what you are
 doing. Remove an internal header by giving a replacement without content on
-the right side of the colon, as in: -H \&"Host:". If you send the custom
+the right side of the colon, as in: -H "Host:". If you send the custom
 header with no-value then its header must be terminated with a semicolon, such
-as \-H \&"X-Custom-Header;" to send "X-Custom-Header:".
+as \-H "X-Custom-Header;" to send "X-Custom-Header:".
 
 curl will make sure that each header you add/replace is sent with the proper
 end-of-line marker, you should thus **not** add that as a part of the header

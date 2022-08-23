@@ -30,7 +30,7 @@ If the port number is not specified in the proxy string, it is assumed to be
 
 This option overrides existing environment variables that set the proxy to
 use. If there's an environment variable setting a proxy, you can set proxy to
-\&"" to override it.
+"" to override it.
 
 All operations that are performed over an HTTP proxy will transparently be
 converted to HTTP. It means that certain protocol specific operations might
