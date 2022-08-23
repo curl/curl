@@ -116,6 +116,7 @@ Build wolfSSL
 
      % git clone https://github.com/wolfSSL/wolfssl.git
      % cd wolfssl
+     % autoreconf -fi
      % ./configure --prefix=<somewhere1> --enable-quic --enable-session-ticket --enable-earlydata --enable-psk --enable-harden --enable-altcertchains
      % make
      % make install
