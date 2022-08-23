@@ -4,7 +4,7 @@ curl and libcurl 7.85.0
  Command line options:         248
  curl_easy_setopt() options:   299
  Public functions in libcurl:  88
- Contributors:                 2682
+ Contributors:                 2684
 
 This release includes the following changes:
 
@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o configure: -pthread not available on AmigaOS 4.x [118]
  o configure: check for the stdatomic.h header in configure [7]
  o configure: fix --disable-headers-api [55]
+ o configure: fix broken m4 syntax in TLS options [145]
  o configure: fixup bsdsocket detection code for AmigaOS 4.x [110]
  o configure: introduce CURL_SIZEOF [130]
  o connect: add quic connection information [100]
@@ -49,6 +50,7 @@ This release includes the following bugfixes:
  o curl-functions.m4: check whether atomics can link [86]
  o curl-wolfssl.m4: add options header when building test code [87]
  o curl.h: CURLE_CONV_FAILED is obsoleted [4]
+ o curl.h: include <sys/select.h> on SunOS [151]
  o curl: output warning when a cookie is dropped due to size [5]
  o curl: writeout: fix repeated header outputs [47]
  o Curl_close: call Curl_resolver_cancel to avoid memory-leak [124]
@@ -62,6 +64,7 @@ This release includes the following bugfixes:
  o digest: fix missing increment of 'nc' value for auth-int [39]
  o digest: pass over leading spaces in qop values [119]
  o digest: reject broken header with session protocol but without qop [120]
+ o docs/cmdline-opts/gen.pl: encode leading single and double quotes [138]
  o docs/cmdline-opts: fix example and categories for --form-escape [125]
  o docs/cmdline: mark fail and fail-with-body as mutually exclusive [98]
  o docs: add dns category to --resolve [95]
@@ -77,6 +80,7 @@ This release includes the following bugfixes:
  o easy_lock: switch to using atomic_int instead of bool [9]
  o easyoptions: fix icc warning [42]
  o escape: remove outdated comment [25]
+ o examples/curlx.c: remove [150]
  o file: add handling of native AmigaOS paths [108]
  o file: fix icc enumerated type mixed with another type warning [92]
  o ftp: use a correct expire ID for timer expiry [88]
@@ -98,6 +102,8 @@ This release includes the following bugfixes:
  o lib/curl_path.c: add ISC to license expression [1]
  o lib3026: reduce the number of threads to 100 [44]
  o libcurl-security.3: fix typo on macro "SH_" [12]
+ o libssh2: make atime/mtime date overflow return error [148]
+ o libssh: make atime/mtime date overflow return error [149]
  o Makefile.m32: add `CURL_RC` and `CURL_STRIP` variables [ci skip] [17]
  o Makefile.m32: add `NGTCP2_LIBS` option [ci skip] [38]
  o makefile.m32: add support for custom ARCH [ci skip] [27]
@@ -109,6 +115,7 @@ This release includes the following bugfixes:
  o mprintf: make dprintf_formatf never return negative [49]
  o msh3: fix the QUIC disconnect function [107]
  o multi: fix the return code from Curl_pgrsDone() [80]
+ o multi: have curl_multi_remove_handle close CONNECT_ONLY transfer [136]
  o netrc.d: remove spurious quote [37]
  o ngtcp2: Fix build error due to change in nghttp3 prototypes [61]
  o ngtcp2: fix incompatible function pointer types [10]
@@ -128,6 +135,7 @@ This release includes the following bugfixes:
  o test3026: add support for Windows using native Win32 threads [65]
  o test3026: require 'threadsafe' [56]
  o test44[2-4]: add '--resolve' to the keywords [122]
+ o tests/server/sockfilt.c: avoid race condition without a mutex [139]
  o tests: several enumerated type cleanups [67]
  o THANKS: merged two entries for Evgeny Grin
  o tidy-up: delete unused build configuration macros [93]
@@ -162,7 +170,8 @@ advice from friends like these:
 
   Adam Sampson, Alessandro Ghedini, Alexandre Bury, Andreas Sommer,
   Andrew Lambert, Brad Forschinger, Brian Carpenter, Cering on github,
-  Chris Young, Daniel Katz, Daniel Stenberg, David Carlier, Don J Olmstead,
+  Chris Paulson-Ellis, Chris Young, Daniel Katz, Daniel Stenberg,
+  David Carlier, dEajL3kA on github, Dominik Thalhammer, Don J Olmstead,
   Emanuele Torre, Emil Engler, Érico Nogueira Rolim, Even Rouault,
   Evgeny Grin (Karlson2k), Fabian Keil, Gisle Vanem, Gwen Shapira,
   Harry Sintonen, highmtworks on github, Jakub Zakrzewski, Jilayne Lovejoy,
@@ -174,9 +183,9 @@ advice from friends like these:
   Philip H, privetryan on github, Ray Satiro, Rosen Penev, Ryan Schmidt,
   rzrymiak on github, Samuel Henrique, Sean McArthur, Sergey Ogryzkov,
   Stefan Eissing, Sukanya Hanumanthu, Tatsuhiro Tsujikawa, Ted Lyngmo,
-  TheKnarf on github, Thomas Weißschuh, Viktor Szakats, vlubart on github,
-  Wyatt O'Day, Xiaoke Wang, yiyuaner on github
-  (65 contributors)
+  TheKnarf on github, Thomas Weißschuh, Tobias Nygren, Viktor Szakats,
+  vlubart on github, Wyatt O'Day, Xiaoke Wang, yiyuaner on github
+  (69 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -315,8 +324,16 @@ References to bug reports and discussions on issues:
  [133] = https://curl.se/bug/?i=9265
  [134] = https://curl.se/bug/?i=9289
  [135] = https://curl.se/bug/?i=9310
+ [136] = https://curl.se/bug/?i=9335
  [137] = https://curl.se/bug/?i=9317
+ [138] = https://curl.se/bug/?i=9352
+ [139] = https://curl.se/bug/?i=9023
  [141] = https://curl.se/bug/?i=9314
  [142] = https://curl.se/bug/?i=9290
  [143] = https://curl.se/bug/?i=9306
  [144] = https://curl.se/bug/?i=9309
+ [145] = https://curl.se/bug/?i=9344
+ [148] = https://curl.se/bug/?i=9328
+ [149] = https://curl.se/bug/?i=9328
+ [150] = https://curl.se/bug/?i=9330
+ [151] = https://curl.se/bug/?i=9329
