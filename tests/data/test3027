@@ -2,16 +2,21 @@
 <info>
 <keywords>
 FTP
+CURLOPT_FILETIME
+MDTM fail
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
-REPLY MDTM 550 bluah you f00l!
-REPLY SIZE 550 bluah you f00l!
+REPLY MDTM 550 Permission denied
 </servercmd>
+<data>
+data blobb
+</data>
+
+# data is sent to stdout
 </reply>
 
 # Client-side
@@ -19,33 +24,31 @@ REPLY SIZE 550 bluah you f00l!
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
-
  <name>
-FTP with FILETIME and NOBODY but missing file
+Get a file via FTP but 550 after MDTM command
  </name>
- <command>
+<tool>
+lib3027
+</tool>
+<command option="no-include">
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
+<stdout>
+data blobb
+</stdout>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_REMOTE_FILE_NOT_FOUND
-<errorcode>
-78
-</errorcode>
 <protocol>
 USER anonymous
 PASS ftp@example.com
 PWD
 MDTM %TESTNUMBER
+EPSV
 TYPE I
 SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

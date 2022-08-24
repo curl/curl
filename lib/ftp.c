@@ -2131,9 +2131,11 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
   default:
     infof(data, "unsupported MDTM reply format");
     break;
-  case 550: /* "No such file or directory" */
-    failf(data, "Given file does not exist");
-    result = CURLE_REMOTE_FILE_NOT_FOUND;
+  case 550: /* 550 is used for several different problems, e.g.
+               "No such file or directory" or "Permission denied".
+               It does not mean that the file does not exist at all. */
+    infof(data, "MDTM failed: file does not exist or permission problem,"
+          " continuing");
     break;
   }
 
