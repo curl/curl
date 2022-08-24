@@ -95,7 +95,7 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-r $(tests)"
+        TFLAGS: "-ac /usr/bin/curl -r $(tests)"
 
 - stage: distcheck
   dependsOn: []
@@ -294,4 +294,4 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "!IDN !SCP ~612 ~1056 $(tests)"
+        TFLAGS: "-ac /usr/bin/curl.exe !IDN !SCP ~612 ~1056 $(tests)"
