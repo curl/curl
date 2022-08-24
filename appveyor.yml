@@ -306,15 +306,19 @@ build_script:
       ))
 
 test_script:
+    - if exist C:/msys64/usr/bin/curl.exe (
+        set ACURL=-ac %POSIX_PATH_PREFIX%/c/msys64/usr/bin/curl.exe )
+    - if exist C:/Windows/System32/curl.exe (
+        set ACURL=-ac %POSIX_PATH_PREFIX%/c/Windows/System32/curl.exe )
     - if %TESTING%==ON (
         if %BUILD_SYSTEM%==CMake (
-          set TFLAGS=%DISABLED_TESTS% &&
+          set TFLAGS=%ACURL% %DISABLED_TESTS% &&
           cmake --build . --config %PRJ_CFG% --target test-ci
         ) else (
         if %BUILD_SYSTEM%==autotools (
-          bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && make V=1 TFLAGS='%DISABLED_TESTS%' test-ci"
+          bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && make V=1 TFLAGS='%ACURL% %DISABLED_TESTS%' test-ci"
         ) else (
-          bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm %DISABLED_TESTS%"
+          bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm %ACURL% %DISABLED_TESTS%"
         ))
       )
 
