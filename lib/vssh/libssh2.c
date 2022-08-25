@@ -2338,7 +2338,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
                ((sshp->readdir_attrs.permissions & LIBSSH2_SFTP_S_IFMT) ==
                 LIBSSH2_SFTP_S_IFLNK)) {
               Curl_dyn_init(&sshp->readdir_link, PATH_MAX);
-              result = Curl_dyn_add(&sshp->readdir_link, sshp->path);
+              result = Curl_dyn_addf(&sshp->readdir_link, "%s%s", sshp->path,
+                                     sshp->readdir_filename);
               state(data, SSH_SFTP_READDIR_LINK);
               if(!result)
                 break;
