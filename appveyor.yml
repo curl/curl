@@ -232,19 +232,19 @@ environment:
         TESTING: ON
         DISABLED_TESTS: "!19 ~1056 !1233"
         ADD_PATH: "C:\\msys64\\usr\\bin"
-        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --with-schannel"
+        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --without-ssl"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
         ADD_PATH: "C:\\msys64\\usr\\bin"
-        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --with-schannel"
+        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --without-ssl"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
         ADD_PATH: "C:\\msys64\\usr\\bin"
-        CONFIG_ARGS: "--enable-warnings --enable-werror --with-schannel"
+        CONFIG_ARGS: "--enable-warnings --enable-werror --without-ssl"
       # autotools-based Cygwin build
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: autotools
