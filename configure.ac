@@ -1969,6 +1969,9 @@ x1)
   SSL_ENABLED="1"
   AC_MSG_NOTICE([built with one SSL backend])
   ;;
+xD)
+  # explicitly built without TLS
+  ;;
 *)
   # more than one SSL backend is enabled
   AC_SUBST(SSL_ENABLED)
