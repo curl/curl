@@ -120,7 +120,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.10 Blocking socket operations in non-blocking API
  11.11 A shared connection cache is not thread-safe
  11.12 'no_proxy' string-matches IPv6 numerical addresses
- 11.13 wakeup socket disconnect causes havoc
  11.14 Multi perform hangs waiting for threaded resolver
  11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
  11.16 libcurl uses renames instead of locking for atomic operations
@@ -938,18 +937,6 @@ problems may have been fixed or changed somewhat since this was written.
  though they are in fact the same address.
 
  See https://github.com/curl/curl/issues/5745
-
-11.13 wakeup socket disconnect causes havoc
-
- waking an iPad breaks the wakeup socket pair, triggering a POLLIN event and
- resulting in SOCKERRNO being set to ENOTCONN.
-
- This condition, and other possible error conditions on the wakeup socket, are
- not handled, so the condition remains on the FD and curl_multi_poll will
- never block again.
-
- See https://github.com/curl/curl/issues/6132 and
- https://github.com/curl/curl/pull/6133
 
 11.14 Multi perform hangs waiting for threaded resolver
 
