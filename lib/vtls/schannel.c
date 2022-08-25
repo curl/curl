@@ -186,6 +186,10 @@
 #define ALG_CLASS_DHASH ALG_CLASS_HASH
 #endif
 
+#ifndef PKCS12_NO_PERSIST_KEY
+#define PKCS12_NO_PERSIST_KEY 0x00008000
+#endif
+
 static Curl_recv schannel_recv;
 static Curl_send schannel_send;
 
@@ -676,7 +680,13 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         else
           pszPassword[0] = 0;
 
-        cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
+        if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+                                        VERSION_GREATER_THAN_EQUAL))
+          cert_store = PFXImportCertStore(&datablob, pszPassword,
+                                          PKCS12_NO_PERSIST_KEY);
+        else
+          cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
+
         free(pszPassword);
       }
       if(!blob)
