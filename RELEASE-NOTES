@@ -4,7 +4,7 @@ curl and libcurl 7.85.0
  Command line options:         248
  curl_easy_setopt() options:   299
  Public functions in libcurl:  88
- Contributors:                 2684
+ Contributors:                 2687
 
 This release includes the following changes:
 
@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o configure: fix --disable-headers-api [55]
  o configure: fix broken m4 syntax in TLS options [145]
  o configure: fixup bsdsocket detection code for AmigaOS 4.x [110]
+ o configure: if asked to use TLS, fail if no TLS lib was detected [156]
  o configure: introduce CURL_SIZEOF [130]
  o connect: add quic connection information [100]
  o connect: close the happy eyeballs loser connection when using QUIC [109]
@@ -58,6 +59,7 @@ This release includes the following bugfixes:
  o curl_mime_data.3: polish the wording [6]
  o curl_multi_timeout.3: clarify usage [48]
  o CURLINFO_SPEED_UPLOAD/DOWNLOAD.3: fix examples [121]
+ o CURLOPT_BUFFERSIZE.3: add upload buffersize to see also [159]
  o CURLOPT_CONNECT_ONLY.3: clarify multi API use [64]
  o CURLOPT_SERVER_RESPONSE_TIMEOUT: the new name [16]
  o digest: fix memory leak, fix not quoted 'opaque' [66]
@@ -103,6 +105,7 @@ This release includes the following bugfixes:
  o lib3026: reduce the number of threads to 100 [44]
  o libcurl-security.3: fix typo on macro "SH_" [12]
  o libssh2: make atime/mtime date overflow return error [148]
+ o libssh2: provide symlink name in SFTP dir listing [155]
  o libssh: make atime/mtime date overflow return error [149]
  o Makefile.m32: add `CURL_RC` and `CURL_STRIP` variables [ci skip] [17]
  o Makefile.m32: add `NGTCP2_LIBS` option [ci skip] [38]
@@ -116,6 +119,9 @@ This release includes the following bugfixes:
  o msh3: fix the QUIC disconnect function [107]
  o multi: fix the return code from Curl_pgrsDone() [80]
  o multi: have curl_multi_remove_handle close CONNECT_ONLY transfer [136]
+ o multi: use a pipe instead of a socketpair on apple platforms [154]
+ o multi_wait: fix and improve Curl_poll error handling on Windows [146]
+ o multi_wait: fix skipping to populate revents for extra_fds [147]
  o netrc.d: remove spurious quote [37]
  o ngtcp2: Fix build error due to change in nghttp3 prototypes [61]
  o ngtcp2: fix incompatible function pointer types [10]
@@ -126,6 +132,7 @@ This release includes the following bugfixes:
  o openssl: add details to "unable to set client certificate" error [116]
  o openssl: fix BoringSSL symbol conflicts with LDAP and Schannel [52]
  o quiche: fix build failure [99]
+ o schannel: when importing PFX, disable key persistence [157]
  o select: do not return fatal error on EINTR from poll() [32]
  o sendf: fix paused header writes since after the header API [89]
  o sendf: make Curl_debug a void function [81]
@@ -136,6 +143,7 @@ This release includes the following bugfixes:
  o test3026: require 'threadsafe' [56]
  o test44[2-4]: add '--resolve' to the keywords [122]
  o tests/server/sockfilt.c: avoid race condition without a mutex [139]
+ o tests: fix http2 tests to use CRLF headers [153]
  o tests: several enumerated type cleanups [67]
  o THANKS: merged two entries for Evgeny Grin
  o tidy-up: delete unused build configuration macros [93]
@@ -150,6 +158,7 @@ This release includes the following bugfixes:
  o tool_progress: avoid division by zero in parallel progress meter [35]
  o tool_writeout: fix enumerated type mixed with another type [69]
  o trace: 0x7F character is non-printable [50]
+ o unit1303: four tests should have TRUE for 'connecting' [158]
  o url: enumerated type mixed with another type [74]
  o url: reject URLs with hostnames longer than 65535 bytes [137]
  o urldata: change second proxytype field to unsigned char to match [75]
@@ -172,20 +181,21 @@ advice from friends like these:
   Andrew Lambert, Brad Forschinger, Brian Carpenter, Cering on github,
   Chris Paulson-Ellis, Chris Young, Daniel Katz, Daniel Stenberg,
   David Carlier, dEajL3kA on github, Dominik Thalhammer, Don J Olmstead,
-  Emanuele Torre, Emil Engler, Érico Nogueira Rolim, Even Rouault,
-  Evgeny Grin (Karlson2k), Fabian Keil, Gisle Vanem, Gwen Shapira,
-  Harry Sintonen, highmtworks on github, Jakub Zakrzewski, Jilayne Lovejoy,
-  Joshua Root, jurisuk on github, jvvprasad78 on github, Kai Pastor,
-  Litter White, lwthiker on github, Marcel Raad, Marc Hörsken, Marco Kamner,
-  MasterInQuestion on github, Matthew Thompson, Maxim Ivanov,
-  Michael Trebilcock, Michał Antoniak, Nao Yonashiro, Nick Banks,
-  Oliver Roberts, opensignature on github, Orgad Shaneh, Patrick Monnerat,
-  Philip H, privetryan on github, Ray Satiro, Rosen Penev, Ryan Schmidt,
-  rzrymiak on github, Samuel Henrique, Sean McArthur, Sergey Ogryzkov,
+  Dustin Howett, Emanuele Torre, Emil Engler, Érico Nogueira Rolim,
+  Even Rouault, Evgeny Grin (Karlson2k), Fabian Fischer, Fabian Keil,
+  Gisle Vanem, Gwen Shapira, Harry Sintonen, highmtworks on github,
+  Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root, jurisuk on github,
+  jvvprasad78 on github, Kai Pastor, Litter White, lwthiker on github,
+  Marcel Raad, Marc Hörsken, Marco Kamner, MasterInQuestion on github,
+  Matthew Thompson, Maxim Ivanov, Michael Trebilcock, Michał Antoniak,
+  Nao Yonashiro, Nick Banks, Oliver Roberts, opensignature on github,
+  Orgad Shaneh, Patrick Monnerat, Philip H, privetryan on github, Ray Satiro,
+  rcombs on github, Rosen Penev, Ryan Schmidt, Ryan Sleevi, rzrymiak on github,
+  Samuel Henrique, Sean McArthur, Sergey Ogryzkov, Somnath Kundu,
   Stefan Eissing, Sukanya Hanumanthu, Tatsuhiro Tsujikawa, Ted Lyngmo,
   TheKnarf on github, Thomas Weißschuh, Tobias Nygren, Viktor Szakats,
-  vlubart on github, Wyatt O'Day, Xiaoke Wang, yiyuaner on github
-  (69 contributors)
+  vlubart on github, Wu Zheng, Wyatt O'Day, Xiaoke Wang, yiyuaner on github
+  (75 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -333,7 +343,16 @@ References to bug reports and discussions on issues:
  [143] = https://curl.se/bug/?i=9306
  [144] = https://curl.se/bug/?i=9309
  [145] = https://curl.se/bug/?i=9344
+ [146] = https://curl.se/bug/?i=9372
+ [147] = https://curl.se/bug/?i=9361
  [148] = https://curl.se/bug/?i=9328
  [149] = https://curl.se/bug/?i=9328
  [150] = https://curl.se/bug/?i=9330
  [151] = https://curl.se/bug/?i=9329
+ [153] = https://curl.se/bug/?i=9364
+ [154] = https://curl.se/bug/?i=6132
+ [155] = https://curl.se/bug/?i=9369
+ [156] = https://curl.se/bug/?i=9367
+ [157] = https://curl.se/bug/?i=9300
+ [158] = https://curl.se/bug/?i=9356
+ [159] = https://curl.se/bug/?i=9354
