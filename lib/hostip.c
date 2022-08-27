@@ -1005,9 +1005,9 @@ static void freednsentry(void *freethis)
 /*
  * Curl_init_dnscache() inits a new DNS cache.
  */
-void Curl_init_dnscache(struct Curl_hash *hash)
+void Curl_init_dnscache(struct Curl_hash *hash, int size)
 {
-  Curl_hash_init(hash, 7, Curl_hash_str, Curl_str_key_compare,
+  Curl_hash_init(hash, size, Curl_hash_str, Curl_str_key_compare,
                  freednsentry);
 }
 

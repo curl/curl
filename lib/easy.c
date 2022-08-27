@@ -725,7 +725,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   else {
     /* this multi handle will only ever have a single easy handled attached
        to it, so make it use minimal hashes */
-    multi = Curl_multi_handle(1, 3);
+    multi = Curl_multi_handle(1, 3, 7);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
     data->multi_easy = multi;
