@@ -6165,7 +6165,17 @@ foreach $testnum (@at) {
     $lasttest = $testnum if($testnum > $lasttest);
     $count++;
 
+    if(pathhelp::os_is_win()) {
+        my $freemem = `wmic OS get FreePhysicalMemory`;
+        print "Free memory in bytes: $freemem\n";
+    }
+
     my $error = singletest($run_event_based, $testnum, $count, scalar(@at));
+
+    if(pathhelp::os_is_win()) {
+        my $freemem = `wmic OS get FreePhysicalMemory`;
+        print "Free memory in bytes: $freemem\n";
+    }
 
     # update test result in CI services
     if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
