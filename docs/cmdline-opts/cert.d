@@ -32,11 +32,6 @@ loaded.
 If you provide a path relative to the current directory, you must prefix the
 path with "./" in order to avoid confusion with an NSS database nickname.
 
-If the NSS nickname or certificate filename contains the character ":", it
-must be prefixed by "\\" so that it is not recognized as the password
-delimiter. Similarly, if the nickname or filename contains "\\", it must be
-escaped as "\\\\" so that it is not recognized as an escape character.
-
 If curl is built against OpenSSL library, and the engine pkcs11 is available,
 then a PKCS#11 URI (RFC 7512) can be used to specify a certificate located in
 a PKCS#11 device. A string beginning with "pkcs11:" will be interpreted as a
