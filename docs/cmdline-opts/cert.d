@@ -14,9 +14,14 @@ Tells curl to use the specified client certificate file when getting a file
 with HTTPS, FTPS or another SSL-based protocol. The certificate must be in
 PKCS#12 format if using Secure Transport, or PEM format if using any other
 engine. If the optional password is not specified, it will be queried for on
-the terminal if required. Note that this option assumes a \&"certificate"
-file that is the private key and the client certificate concatenated! See
---cert and --key to specify them independently.
+the terminal. Note that this option assumes a \&"certificate" file that is the
+private key and the client certificate concatenated! See --cert and --key to
+specify them independently.
+
+In the <certificate> portion of the argument, you must escape the character ":"
+as "\\:" so that it is not recognized as the password delimiter. Similarly, you
+must escape the character "\\" as "\\\\" so that it is not recognized as an
+escape character.
 
 If curl is built against the NSS SSL library then this option can tell
 curl the nickname of the certificate to use within the NSS database defined
@@ -24,9 +29,8 @@ by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the
 NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be
 loaded.
 
-If you intend to use a certificate file and provide a path relative to the
-current directory, you must prefix the path with "./" in order to avoid
-confusion with an NSS database nickname.
+If you provide a path relative to the current directory, you must prefix the
+path with "./" in order to avoid confusion with an NSS database nickname.
 
 If the NSS nickname or certificate filename contains the character ":", it
 must be prefixed by "\\" so that it is not recognized as the password
