@@ -54,7 +54,7 @@ static CURLcode unit_setup(void)
     return CURLE_OUT_OF_MEMORY;
   }
 
-  Curl_init_dnscache(&hp);
+  Curl_init_dnscache(&hp, 7);
   return CURLE_OK;
 }
 
