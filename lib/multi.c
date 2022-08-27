@@ -84,6 +84,10 @@
 #define CURL_CONNECTION_HASH_SIZE 97
 #endif
 
+#ifndef CURL_DNS_HASH_SIZE
+#define CURL_DNS_HASH_SIZE 71
+#endif
+
 #define CURL_MULTI_HANDLE 0x000bab1e
 
 #define GOOD_MULTI_HANDLE(x) \
@@ -388,7 +392,8 @@ static CURLMcode multi_addmsg(struct Curl_multi *multi,
 }
 
 struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
-                                     int chashsize) /* connection hash */
+                                     int chashsize, /* connection hash */
+                                     int dnssize) /* dns hash */
 {
   struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
 
@@ -397,7 +402,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   multi->magic = CURL_MULTI_HANDLE;
 
-  Curl_init_dnscache(&multi->hostcache);
+  Curl_init_dnscache(&multi->hostcache, dnssize);
 
   sh_init(&multi->sockhash, hashsize);
 
@@ -451,7 +456,8 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 struct Curl_multi *curl_multi_init(void)
 {
   return Curl_multi_handle(CURL_SOCKET_HASH_TABLE_SIZE,
-                           CURL_CONNECTION_HASH_SIZE);
+                           CURL_CONNECTION_HASH_SIZE,
+                           CURL_DNS_HASH_SIZE);
 }
 
 CURLMcode curl_multi_add_handle(struct Curl_multi *multi,

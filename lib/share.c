@@ -41,7 +41,7 @@ curl_share_init(void)
   if(share) {
     share->magic = CURL_GOOD_SHARE;
     share->specifier |= (1<<CURL_LOCK_DATA_SHARE);
-    Curl_init_dnscache(&share->hostcache);
+    Curl_init_dnscache(&share->hostcache, 23);
   }
 
   return share;
