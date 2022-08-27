@@ -47,7 +47,7 @@
  * Platform specific stuff.
  */
 
-#if defined(macintosh) && defined(__MRC__)
+#ifdef macintosh
 #  define main(x,y) curl_main(x,y)
 #endif
 
