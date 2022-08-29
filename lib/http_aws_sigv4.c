@@ -66,7 +66,7 @@ static void sha256_to_hex(char *dst, unsigned char *sha, size_t dst_l)
 
   DEBUGASSERT(dst_l >= 65);
   for(i = 0; i < 32; ++i) {
-    curl_msnprintf(dst + (i * 2), dst_l - (i * 2), "%02x", sha[i]);
+    msnprintf(dst + (i * 2), dst_l - (i * 2), "%02x", sha[i]);
   }
 }
 
@@ -115,6 +115,15 @@ static void trim_headers(struct curl_slist *head)
   }
 }
 
+/* maximum lenth for the aws sivg4 parts */
+#define MAX_SIGV4_LEN 64
+#define MAX_SIGV4_LEN_TXT "64"
+
+#define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Date"))
+
+/* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' and TIMESTAMP_SIZE */
+#define DATE_FULL_HDR_LEN (DATE_HDR_KEY_LEN + TIMESTAMP_SIZE + 1)
+
 static CURLcode make_headers(struct Curl_easy *data,
                              const char *hostname,
                              char *timestamp,
@@ -123,8 +132,8 @@ static CURLcode make_headers(struct Curl_easy *data,
                              struct dynbuf *canonical_headers,
                              struct dynbuf *signed_headers)
 {
-  char *date_hdr_key;
-  char *date_full_hdr;
+  char date_hdr_key[DATE_HDR_KEY_LEN];
+  char date_full_hdr[DATE_FULL_HDR_LEN];
   struct curl_slist *head = NULL;
   struct curl_slist *tmp_head = NULL;
   CURLcode ret = CURLE_OUT_OF_MEMORY;
@@ -136,15 +145,12 @@ static CURLcode make_headers(struct Curl_easy *data,
   Curl_strntolower(provider1, provider1, strlen(provider1));
   provider1[0] = Curl_raw_toupper(provider1[0]);
 
-  date_hdr_key =  curl_maprintf("X-%s-Date", provider1);
+  msnprintf(date_hdr_key, DATE_HDR_KEY_LEN, "X-%s-Date", provider1);
 
   /* provider1 lowercase */
   Curl_strntolower(provider1, provider1, 1); /* first byte only */
-  date_full_hdr = curl_maprintf("x-%s-date:%s",
-                                provider1, timestamp);
-
-  if(!date_hdr_key || !date_full_hdr)
-    goto fail;
+  msnprintf(date_full_hdr, DATE_FULL_HDR_LEN,
+            "x-%s-date:%s", provider1, timestamp);
 
   if(Curl_checkheaders(data, STRCONST("Host"))) {
     head = NULL;
@@ -248,16 +254,10 @@ static CURLcode make_headers(struct Curl_easy *data,
   ret = CURLE_OK;
 fail:
   free(full_host);
-  free(date_full_hdr);
-  free(date_hdr_key);
   curl_slist_free_all(head);
 
   return ret;
 }
-
-/* maximum lenth for the aws sivg4 parts */
-#define MAX_SIGV4_LEN 64
-#define MAX_SIGV4_LEN_TXT "64"
 
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 {
