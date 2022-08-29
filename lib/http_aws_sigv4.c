@@ -121,7 +121,10 @@ static void trim_headers(struct curl_slist *head)
 
 #define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Date"))
 
-/* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' and TIMESTAMP_SIZE */
+/* FQDN + host: */
+#define FULL_HOST_LEN (255 + sizeof("host:"))
+
+/* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' */
 #define DATE_FULL_HDR_LEN (DATE_HDR_KEY_LEN + TIMESTAMP_SIZE + 1)
 
 static CURLcode make_headers(struct Curl_easy *data,
@@ -139,7 +142,6 @@ static CURLcode make_headers(struct Curl_easy *data,
   CURLcode ret = CURLE_OUT_OF_MEMORY;
   struct curl_slist *l;
   int again = 1;
-  char *full_host = NULL;
 
   /* provider1 mid */
   Curl_strntolower(provider1, provider1, strlen(provider1));
@@ -156,22 +158,21 @@ static CURLcode make_headers(struct Curl_easy *data,
     head = NULL;
   }
   else {
+    char full_host[FULL_HOST_LEN];
+
     if(data->state.aptr.host) {
       size_t pos;
 
-      full_host = strdup(data->state.aptr.host);
-      if(!full_host)
-        goto fail;
+      strncpy(full_host, data->state.aptr.host, FULL_HOST_LEN);
+      full_host[FULL_HOST_LEN - 1] = 0;
       /* remove /r/n as the separator for canonical request must be '\n' */
       pos = strcspn(full_host, "\n\r");
       full_host[pos] = 0;
     }
     else {
-      full_host = curl_maprintf("host:%s", hostname);
+      msnprintf(full_host, FULL_HOST_LEN, "host:%s", hostname);
     }
 
-    if(!full_host)
-      goto fail;
     head = curl_slist_append(NULL, full_host);
     if(!head)
       goto fail;
@@ -253,7 +254,6 @@ static CURLcode make_headers(struct Curl_easy *data,
 
   ret = CURLE_OK;
 fail:
-  free(full_host);
   curl_slist_free_all(head);
 
   return ret;
