@@ -37,10 +37,10 @@
 
 #ifdef HAVE_WINDOWS_H
 #  if defined(UNICODE) && !defined(_UNICODE)
-#    define _UNICODE
+#    error "UNICODE is defined but _UNICODE is not defined"
 #  endif
 #  if defined(_UNICODE) && !defined(UNICODE)
-#    define UNICODE
+#    error "_UNICODE is defined but UNICODE is not defined"
 #  endif
 /*
  * Don't include unneeded stuff in Windows headers to avoid compiler
