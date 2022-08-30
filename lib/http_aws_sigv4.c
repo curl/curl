@@ -217,7 +217,7 @@ static CURLcode make_headers(struct Curl_easy *data,
   }
 
   /* alpha-sort in a case sensitive manner */
-  for(again = 1; again;) {
+  do {
     again = 0;
     for(l = head; l; l = l->next) {
       struct curl_slist *next = l->next;
@@ -230,7 +230,7 @@ static CURLcode make_headers(struct Curl_easy *data,
         again = 1;
       }
     }
-  }
+  } while(again);
 
   for(l = head; l; l = l->next) {
     char *tmp;
@@ -281,10 +281,10 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   size_t post_data_len = 0;
   unsigned char sha_hash[32];
   char sha_hex[65];
-  char *canonical_request;
-  char *request_type;
-  char *credential_scope;
-  char *str_to_sign;
+  char *canonical_request = NULL;
+  char *request_type = NULL;
+  char *credential_scope = NULL;
+  char *str_to_sign = NULL;
   const char *user = data->state.aptr.user ? data->state.aptr.user : "";
   char *secret = NULL;
   unsigned char sign0[32] = {0};
