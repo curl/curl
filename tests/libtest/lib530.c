@@ -92,14 +92,12 @@ static int addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
     sockets->max_count = 20;
   }
   else if(sockets->count + 1 > sockets->max_count) {
-    curl_socket_t *oldptr = sockets->sockets;
-    sockets->sockets = realloc(oldptr, sizeof(curl_socket_t) *
-                               (sockets->max_count + 20));
-    if(!sockets->sockets) {
+    curl_socket_t *ptr = realloc(sockets->sockets, sizeof(curl_socket_t) *
+                                 (sockets->max_count + 20));
+    if(!ptr)
       /* cleanup in test_cleanup */
-      sockets->sockets = oldptr;
       return 1;
-    }
+    sockets->sockets = ptr;
     sockets->max_count += 20;
   }
   /*
@@ -361,7 +359,6 @@ test_cleanup:
   /* free local memory */
   free(sockets.read.sockets);
   free(sockets.write.sockets);
-
   return res;
 }
 
