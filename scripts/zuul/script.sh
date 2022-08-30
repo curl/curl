@@ -83,12 +83,6 @@ if [ "$T" = "normal" ]; then
   fi
 fi
 
-if [ "$T" = "tidy" ]; then
-  ./configure --enable-warnings --enable-werror $C
-  make
-  make tidy
-fi
-
 if [ "$T" = "cmake" ]; then
   mkdir -p build
   cd ./build
