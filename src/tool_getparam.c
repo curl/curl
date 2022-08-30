@@ -558,7 +558,6 @@ static void cleanarg(argv_item_t str)
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
-                            argv_item_t clearthis,
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
@@ -576,7 +575,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   ParameterError err;
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
-  (void)clearthis; /* for !HAVE_WRITABLE_ARGV builds */
+#ifdef HAVE_WRITABLE_ARGV
+  argv_item_t clearthis = NULL;
+#endif
   *usedarg = FALSE; /* default is that we don't use the arg */
 
   if(('-' != flag[0]) || ('-' == flag[1])) {
@@ -652,6 +653,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
+#ifdef HAVE_WRITABLE_ARGV
+        clearthis = nextarg;
+#endif
         singleopt = TRUE;   /* don't loop anymore after this */
       }
       else if(!nextarg)
@@ -2443,17 +2447,15 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
         stillflags = FALSE;
       else {
         char *nextarg = NULL;
-        argv_item_t clear = NULL;
         if(i < (argc - 1)) {
           nextarg = curlx_convert_tchar_to_UTF8(argv[i + 1]);
           if(!nextarg) {
             curlx_unicodefree(orig_opt);
             return PARAM_NO_MEM;
           }
-          clear = argv[i + 1];
         }
 
-        result = getparameter(orig_opt, nextarg, clear, &passarg,
+        result = getparameter(orig_opt, nextarg, &passarg,
                               global, config);
 
         curlx_unicodefree(nextarg);
@@ -2492,8 +2494,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter("--url", orig_opt, NULL, &used, global,
-                            config);
+      result = getparameter("--url", orig_opt, &used, global, config);
     }
 
     if(!result)
