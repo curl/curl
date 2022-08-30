@@ -202,24 +202,6 @@
         T: fuzzer
 
 - job:
-    name: curl-tidy
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - clang
-        - clang-tidy
-        - clang-9
-        - clang-tidy-9
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-      curl_env:
-        CC: clang-9
-        CXX: clang++-9
-        T: tidy
-        C: --with-openssl
-
-- job:
     name: curl-debug-clang-with-openssl-dl-ubsan
     parent: curl-base
     vars:
@@ -258,6 +240,5 @@
       - curl-cmake-boringssl-quiche
       - curl-cmake-ngtcp2
       - curl-fuzzer
-      - curl-tidy
       - curl-debug-clang-with-openssl-dl-ubsan
 ...
