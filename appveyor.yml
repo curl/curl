@@ -157,20 +157,20 @@ environment:
         ADD_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
-        BUILD_SYSTEM: CMake
-        PRJ_GEN: "MSYS Makefiles"
-        PRJ_CFG: Debug
-        OPENSSL: OFF
-        SCHANNEL: OFF
-        ENABLE_UNICODE: OFF
-        HTTP_ONLY: OFF
-        TESTING: ON
-        SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
-        ADD_PATH: "C:\\MinGW\\bin;C:\\msys64\\usr\\bin"
-        MSYS2_ARG_CONV_EXCL: "/*"
-        BUILD_OPT: -k
+#      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
+#        BUILD_SYSTEM: CMake
+#        PRJ_GEN: "MSYS Makefiles"
+#        PRJ_CFG: Debug
+#        OPENSSL: OFF
+#        SCHANNEL: OFF
+#        ENABLE_UNICODE: OFF
+#        HTTP_ONLY: OFF
+#        TESTING: ON
+#        SHARED: OFF
+#        DISABLED_TESTS: "!1139 !1501"
+#        ADD_PATH: "C:\\MinGW\\bin;C:\\msys64\\usr\\bin"
+#        MSYS2_ARG_CONV_EXCL: "/*"
+#        BUILD_OPT: -k
       # winbuild-based builds
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: winbuild_vs2015
