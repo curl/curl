@@ -347,6 +347,9 @@ static void AmigaSetComment(struct per_transfer *per,
 #define AmigaSetComment(x,y) Curl_nop_stmt
 #endif
 
+/* When doing serial transfers, we use a single fixed error area */
+static char global_errorbuffer[CURL_ERROR_SIZE];
+
 /*
  * Call this after a transfer has completed.
  */
@@ -378,9 +381,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   else
 #endif
     if(!config->synthetic_error && result && global->showerror) {
+      const char *msg = per->errorbuffer;
       fprintf(global->errors, "curl: (%d) %s\n", result,
-              (per->errorbuffer[0]) ? per->errorbuffer :
-              curl_easy_strerror(result));
+              (msg && msg[0]) ? msg : curl_easy_strerror(result));
       if(result == CURLE_PEER_FAILED_VERIFICATION)
         fputs(CURL_CA_CERT_ERRORMSG, global->errors);
     }
@@ -656,6 +659,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   free(per->this_url);
   free(per->outfile);
   free(per->uploadfile);
+  if(global->parallel)
+    free(per->errorbuffer);
 
   return result;
 }
@@ -706,7 +711,6 @@ static long url_proto(char *url)
 }
 
 /* create the next (singular) transfer */
-
 static CURLcode single_transfer(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 CURLSH *share,
@@ -1364,7 +1368,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
         my_setopt_str(curl, CURLOPT_USERPWD, config->userpwd);
         my_setopt_str(curl, CURLOPT_RANGE, config->range);
-        my_setopt(curl, CURLOPT_ERRORBUFFER, per->errorbuffer);
+        if(!global->parallel) {
+          per->errorbuffer = global_errorbuffer;
+          my_setopt(curl, CURLOPT_ERRORBUFFER, global_errorbuffer);
+        }
         my_setopt(curl, CURLOPT_TIMEOUT_MS, (long)(config->timeout * 1000));
 
         switch(config->httpreq) {
@@ -2196,6 +2203,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
   CURLcode result = CURLE_OK;
   CURLMcode mcode;
   bool sleeping = FALSE;
+  char *errorbuf;
   *addedp = FALSE;
   *morep = FALSE;
   if(all_pers < (global->parallel_max*2)) {
@@ -2219,6 +2227,13 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     if(result)
       return result;
 
+    errorbuf = per->errorbuffer;
+    if(!errorbuf) {
+      errorbuf = malloc(CURL_ERROR_SIZE);
+      if(!errorbuf)
+        return CURLE_OUT_OF_MEMORY;
+    }
+
     /* parallel connect means that we don't set PIPEWAIT since pipewait
        will make libcurl prefer multiplexing */
     (void)curl_easy_setopt(per->curl, CURLOPT_PIPEWAIT,
@@ -2227,14 +2242,20 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFODATA, per);
     (void)curl_easy_setopt(per->curl, CURLOPT_NOPROGRESS, 0L);
+    (void)curl_easy_setopt(per->curl, CURLOPT_ERRORBUFFER, errorbuf);
 
     mcode = curl_multi_add_handle(multi, per->curl);
-    if(mcode)
+    if(mcode) {
+      free(errorbuf);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     result = create_transfer(global, share, &getadded);
-    if(result)
+    if(result) {
+      free(errorbuf);
       return result;
+    }
+    per->errorbuffer = errorbuf;
     per->added = TRUE;
     all_added++;
     *addedp = TRUE;
