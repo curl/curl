@@ -694,7 +694,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'B': /* OAuth 2.0 bearer token */
         GetStr(&config->oauth_bearer, nextarg);
+#ifdef HAVE_WRITABLE_ARGV
         cleanarg(clearthis);
+#endif
         config->authtype |= CURLAUTH_BEARER;
         break;
       case 'c': /* connect-timeout */
@@ -1659,7 +1661,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'E':
       switch(subletter) {
       case '\0': /* certificate file */
+#ifdef HAVE_WRITABLE_ARGV
         cleanarg(clearthis);
+#endif
         GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
         break;
       case 'a': /* CA info PEM file */
@@ -1676,7 +1680,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'e': /* private key passphrase */
         GetStr(&config->key_passwd, nextarg);
+#ifdef HAVE_WRITABLE_ARGV
         cleanarg(clearthis);
+#endif
         break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
@@ -1702,19 +1708,27 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'k': /* TLS username */
         if(!(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)) {
+#ifdef HAVE_WRITABLE_ARGV
           cleanarg(clearthis);
+#endif
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         }
         GetStr(&config->tls_username, nextarg);
+#ifdef HAVE_WRITABLE_ARGV
         cleanarg(clearthis);
+#endif
         break;
       case 'l': /* TLS password */
         if(!(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)) {
+#ifdef HAVE_WRITABLE_ARGV
           cleanarg(clearthis);
+#endif
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         }
         GetStr(&config->tls_password, nextarg);
+#ifdef HAVE_WRITABLE_ARGV
         cleanarg(clearthis);
+#endif
         break;
       case 'm': /* TLS authentication type */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
@@ -1775,7 +1789,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'u': /* TLS username for proxy */
+#ifdef HAVE_WRITABLE_ARGV
         cleanarg(clearthis);
+#endif
         if(!(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)) {
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         }
@@ -1783,7 +1799,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'v': /* TLS password for proxy */
+#ifdef HAVE_WRITABLE_ARGV
         cleanarg(clearthis);
+#endif
         if(!(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)) {
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         }
@@ -1801,7 +1819,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'x': /* certificate file for proxy */
+#ifdef HAVE_WRITABLE_ARGV
         cleanarg(clearthis);
+#endif
         GetFileAndPassword(nextarg, &config->proxy_cert,
                            &config->proxy_key_passwd);
         break;
@@ -1820,7 +1840,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case '1': /* private key passphrase for proxy */
         GetStr(&config->proxy_key_passwd, nextarg);
+#ifdef HAVE_WRITABLE_ARGV
         cleanarg(clearthis);
+#endif
         break;
 
       case '2': /* ciphers for proxy */
@@ -2268,12 +2290,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'u':
       /* user:password  */
       GetStr(&config->userpwd, nextarg);
+#ifdef HAVE_WRITABLE_ARGV
       cleanarg(clearthis);
+#endif
       break;
     case 'U':
       /* Proxy user:password  */
       GetStr(&config->proxyuserpwd, nextarg);
+#ifdef HAVE_WRITABLE_ARGV
       cleanarg(clearthis);
+#endif
       break;
     case 'v':
       if(toggle) {
