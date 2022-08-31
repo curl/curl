@@ -360,7 +360,7 @@ dnl and stores the result in 'PATH_SEPARATOR', unless
 dnl the user has already set it with a non-empty value.
 dnl
 dnl This path separator is the symbol used to separate
-dnl or diferentiate paths inside the 'PATH' environment
+dnl or differentiate paths inside the 'PATH' environment
 dnl variable.
 dnl
 dnl Non-empty user provided 'PATH_SEPARATOR' always
@@ -594,7 +594,7 @@ dnl and stores the result in 'PATH_SEPARATOR', unless
 dnl the user has already set it with a non-empty value.
 dnl
 dnl This path separator is the symbol used to separate
-dnl or diferentiate paths inside the 'PATH' environment
+dnl or differentiate paths inside the 'PATH' environment
 dnl variable.
 dnl
 dnl Non-empty user provided 'PATH_SEPARATOR' always

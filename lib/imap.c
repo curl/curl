@@ -1886,8 +1886,8 @@ static char *imap_atom(const char *str, bool escape_only)
  */
 static bool imap_is_bchar(char ch)
 {
-  /* Peforming the alnum check with this macro is faster because of ASCII
-     artihmetic */
+  /* Performing the alnum check with this macro is faster because of ASCII
+     arithmetic */
   if(ISALNUM(ch))
     return true;
 

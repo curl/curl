@@ -114,7 +114,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
                            socklen_t addrlen)
 {
   struct quicsocket *qs = &conn->hequic[sockindex];
-  bool unsecure = !conn->ssl_config.verifypeer;
+  bool insecure = !conn->ssl_config.verifypeer;
   memset(qs, 0, sizeof(*qs));
 
   (void)sockfd;
@@ -132,7 +132,7 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   qs->conn = MsH3ConnectionOpen(qs->api,
                                 conn->host.name,
                                 (uint16_t)conn->remote_port,
-                                unsecure);
+                                insecure);
   if(!qs->conn) {
     failf(data, "can't create msh3 connection");
     if(qs->api) {

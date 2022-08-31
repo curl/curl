@@ -39,7 +39,7 @@ int test(char *URL)
   curl_easy_setopt(curl, CURLOPT_CURLU, curlu);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  /* set a port number that makes this reqeuest fail */
+  /* set a port number that makes this request fail */
   curl_easy_setopt(curl, CURLOPT_PORT, 1L);
   curl_code = curl_easy_perform(curl);
   if(!curl_code)

@@ -124,7 +124,7 @@ struct curl_waitfd {
 /*
  * Name:    curl_multi_init()
  *
- * Desc:    inititalize multi-style curl usage
+ * Desc:    initialize multi-style curl usage
  *
  * Returns: a new CURLM handle to use in all 'curl_multi' functions.
  */

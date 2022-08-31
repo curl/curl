@@ -793,7 +793,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
     int crypto_settings_idx = 0;
 
 
-    /* If TLS 1.3 ciphers are explictly listed, then
+    /* If TLS 1.3 ciphers are explicitly listed, then
      * disable all the ciphers and re-enable which
      * ciphers the user has provided.
      */
@@ -913,7 +913,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
       blocked_gcm_modes[0].MaximumLength = sizeof(BCRYPT_CHAIN_MODE_GCM);
       blocked_gcm_modes[0].Buffer = (PWSTR)BCRYPT_CHAIN_MODE_GCM;
 
-      /* if only one is disabled, then explictly disable the
+      /* if only one is disabled, then explicitly disable the
          digest cipher suite (sha384 or sha256) */
       if(disable_aes_gcm_sha384 != disable_aes_gcm_sha256) {
         crypto_settings[crypto_settings_idx].eAlgorithmUsage =

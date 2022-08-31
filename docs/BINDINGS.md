@@ -119,7 +119,7 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 
 [SP-Forth](https://sourceforge.net/p/spf/spf/ci/master/tree/devel/~ac/lib/lin/curl/) Written by Andrey Cherezov
 
-[SPL](https://web.archive.org/web/20210203022158/http://www.clifford.at/spl/spldoc/curl.html) Written by Clifford Wolf
+[SPL](https://web.archive.org/web/20210203022158/www.clifford.at/spl/spldoc/curl.html) Written by Clifford Wolf
 
 [Tcl](https://web.archive.org/web/20160826011806/mirror.yellow5.com/tclcurl/) Tclcurl by Andrés García
 

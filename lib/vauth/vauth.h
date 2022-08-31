@@ -224,7 +224,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 CURLcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
                                          char **outptr, size_t *outlen);
 
-/* This is used to clean up the SPNEGO specifiec data */
+/* This is used to clean up the SPNEGO specific data */
 void Curl_auth_cleanup_spnego(struct negotiatedata *nego);
 
 #endif /* USE_SPNEGO */

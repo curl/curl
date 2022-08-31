@@ -39,7 +39,7 @@ if test "x$OPT_GNUTLS" != xno; then
     addcflags=""
 
     if test "x$OPT_GNUTLS" = "xyes"; then
-      dnl this is with no partiular path given
+      dnl this is with no particular path given
       CURL_CHECK_PKGCONFIG(gnutls)
 
       if test "$PKGCONFIG" != "no" ; then
