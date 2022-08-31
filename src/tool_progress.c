@@ -161,8 +161,8 @@ static bool indexwrapped;
 static struct speedcount speedstore[SPEEDCNT];
 
 /*
-  |DL% UL%  Dled  Uled  Xfers  Live   Qd Total     Current  Left    Speed
-  |  6 --   9.9G     0     2     2     0  0:00:40  0:00:02  0:00:37 4087M
+  |DL% UL%  Dled  Uled  Xfers  Live Total     Current  Left    Speed
+  |  6 --   9.9G     0     2     2   0:00:40  0:00:02  0:00:37 4087M
 */
 bool progress_meter(struct GlobalConfig *global,
                     struct timeval *start,
@@ -181,7 +181,7 @@ bool progress_meter(struct GlobalConfig *global,
 
   if(!header) {
     header = TRUE;
-    fputs("DL% UL%  Dled  Uled  Xfers  Live   Qd "
+    fputs("DL% UL%  Dled  Uled  Xfers  Live "
           "Total     Current  Left    Speed\n",
           global->errors);
   }
@@ -199,7 +199,6 @@ bool progress_meter(struct GlobalConfig *global,
     bool dlknown = TRUE;
     bool ulknown = TRUE;
     curl_off_t all_running = 0; /* in progress */
-    curl_off_t all_queued = 0;  /* pending */
     curl_off_t speed = 0;
     unsigned int i;
     stamp = now;
@@ -225,9 +224,7 @@ bool progress_meter(struct GlobalConfig *global,
         all_ultotal += per->ultotal;
         per->ultotal_added = TRUE;
       }
-      if(!per->added)
-        all_queued++;
-      else
+      if(per->added)
         all_running++;
     }
     if(dlknown && all_dltotal)
@@ -296,8 +293,7 @@ bool progress_meter(struct GlobalConfig *global,
             "%s " /* Uled */
             "%5" CURL_FORMAT_CURL_OFF_T " " /* Xfers */
             "%5" CURL_FORMAT_CURL_OFF_T " " /* Live */
-            "%5" CURL_FORMAT_CURL_OFF_T " " /* Queued */
-            "%s "  /* Total time */
+            " %s "  /* Total time */
             "%s "  /* Current time */
             "%s "  /* Time left */
             "%s "  /* Speed */
@@ -309,7 +305,6 @@ bool progress_meter(struct GlobalConfig *global,
             max5data(all_ulnow, buffer[1]),
             all_xfers,
             all_running,
-            all_queued,
             time_total,
             time_spent,
             time_left,
