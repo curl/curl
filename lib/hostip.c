@@ -584,7 +584,7 @@ bool Curl_host_is_ipnum(const char *hostname)
 }
 
 
-/* return TRUE if 'part' is a case insentive tail of 'full' */
+/* return TRUE if 'part' is a case insensitive tail of 'full' */
 static bool tailmatch(const char *full, const char *part)
 {
   size_t plen = strlen(part);

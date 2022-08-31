@@ -851,7 +851,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   Curl_detach_connection(data);
 
   if(data->set.connect_only && !data->multi_easy) {
-    /* This removes a handle that was part the multi inteface that used
+    /* This removes a handle that was part the multi interface that used
        CONNECT_ONLY, that connection is now left alive but since this handle
        has bits.close set nothing can use that transfer anymore and it is
        forbidden from reuse. And this easy handle cannot find the connection

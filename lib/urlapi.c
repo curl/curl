@@ -1675,7 +1675,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
 
     if(appendquery) {
       /* Append the string onto the old query. Add a '&' separator if none is
-         present at the end of the exsting query already */
+         present at the end of the existing query already */
       size_t querylen = u->query ? strlen(u->query) : 0;
       bool addamperand = querylen && (u->query[querylen -1] != '&');
       if(querylen) {

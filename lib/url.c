@@ -955,14 +955,16 @@ socks_proxy_info_matches(const struct proxy_info *data,
      see https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.1 */
   if(!data->user != !needle->user)
     return FALSE;
-  /* curl_strequal does a case insentive comparison, so do not use it here! */
+  /* curl_strequal does a case insensitive comparison,
+     so do not use it here! */
   if(data->user &&
      needle->user &&
      strcmp(data->user, needle->user) != 0)
     return FALSE;
   if(!data->passwd != !needle->passwd)
     return FALSE;
-  /* curl_strequal does a case insentive comparison, so do not use it here! */
+  /* curl_strequal does a case insensitive comparison,
+     so do not use it here! */
   if(data->passwd &&
      needle->passwd &&
      strcmp(data->passwd, needle->passwd) != 0)

@@ -105,7 +105,7 @@ do {
     struct demo victim;
     DOHcode d;
 
-    victim.canary1 = 87; /* magic numbers, arbritrarily picked */
+    victim.canary1 = 87; /* magic numbers, arbitrarily picked */
     victim.canary2 = 35;
     victim.canary3 = 41;
     d = doh_encode(name, DNS_TYPE_A, victim.dohbuffer,
