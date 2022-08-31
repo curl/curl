@@ -4,7 +4,7 @@ curl and libcurl 7.85.0
  Command line options:         248
  curl_easy_setopt() options:   299
  Public functions in libcurl:  88
- Contributors:                 2687
+ Contributors:                 2690
 
 This release includes the following changes:
 
@@ -23,12 +23,15 @@ This release includes the following bugfixes:
  o base64: base64url encoding has no padding [41]
  o BUGS.md: improve language [62]
  o build: improve OS string in CMake and `config-win32.h` [15]
+ o cert.d: clarify that escape character works for file paths [161]
  o cirrus.yml: replace py38-pip with py39-pip [63]
  o cirrus/freebsd-ci: bootstrap the pip installer [104]
+ o cmake: add detection of threadsafe feature [163]
  o cmake: do not force Windows target versions [28]
  o cmake: fix build for mingw cross compile [33]
  o cmake: link curl to its dependencies with PRIVATE [57]
  o cmake: remove APPEND in export(TARGETS) [58]
+ o cmake: set feature PSL if present [168]
  o cmake: support ngtcp2 boringssl backend [18]
  o cmdline-opts/gen.pl: improve performance [97]
  o config: remove the check for and use of SIZEOF_SHORT [129]
@@ -43,6 +46,7 @@ This release includes the following bugfixes:
  o connect: close the happy eyeballs loser connection when using QUIC [109]
  o connect: revert the use of IP*_RECVERR [102]
  o connect: set socktype/protocol correctly [114]
+ o cookie: reject cookies with "control bytes" [152]
  o cookie: treat a blank domain in Set-Cookie: as non-existing [40]
  o cookie: use %zu to infof() for size_t values [26]
  o curl-compilers.m4: make icc use -diag* options and disable two warnings [84]
@@ -89,6 +93,7 @@ This release includes the following bugfixes:
  o getinfo: return better error on NULL as first argument [21]
  o GHA: add two Intel compiler CI jobs [85]
  o GHA: move libressl CI from zuul to GitHub [144]
+ o gha: move over ngtcp2-gnutls CI job from zuul [162]
  o GHA: mv CI torture test from Zuul [135]
  o h2h3: fix overriding the 'TE: Trailers' header [43]
  o hostip: resolve *.localhost to 127.0.0.1/::1 [127]
@@ -106,6 +111,7 @@ This release includes the following bugfixes:
  o libcurl-security.3: fix typo on macro "SH_" [12]
  o libssh2: make atime/mtime date overflow return error [148]
  o libssh2: provide symlink name in SFTP dir listing [155]
+ o libssh: ignore deprecation warnings [157]
  o libssh: make atime/mtime date overflow return error [149]
  o Makefile.m32: add `CURL_RC` and `CURL_STRIP` variables [ci skip] [17]
  o Makefile.m32: add `NGTCP2_LIBS` option [ci skip] [38]
@@ -120,19 +126,21 @@ This release includes the following bugfixes:
  o multi: fix the return code from Curl_pgrsDone() [80]
  o multi: have curl_multi_remove_handle close CONNECT_ONLY transfer [136]
  o multi: use a pipe instead of a socketpair on apple platforms [154]
+ o multi: use larger dns hash table for multi interface [140]
  o multi_wait: fix and improve Curl_poll error handling on Windows [146]
  o multi_wait: fix skipping to populate revents for extra_fds [147]
  o netrc.d: remove spurious quote [37]
+ o netrc: Use the password from lines without login [166]
  o ngtcp2: Fix build error due to change in nghttp3 prototypes [61]
  o ngtcp2: fix incompatible function pointer types [10]
  o ngtcp2: Fix missing initialization of nghttp3_nv.flags [31]
  o ngtcp2: fix stall or busy loop on STOP_SENDING with upload data [19]
  o ngtcp2: implement cb_h3_stop_sending and cb_h3_reset_stream callbacks [59]
  o openssl: add `CURL_BORINGSSL_VERSION` to identify BoringSSL [24]
+ o openssl: add cert path in error message [160]
  o openssl: add details to "unable to set client certificate" error [116]
  o openssl: fix BoringSSL symbol conflicts with LDAP and Schannel [52]
  o quiche: fix build failure [99]
- o schannel: when importing PFX, disable key persistence [157]
  o select: do not return fatal error on EINTR from poll() [32]
  o sendf: fix paused header writes since after the header API [89]
  o sendf: make Curl_debug a void function [81]
@@ -160,7 +168,9 @@ This release includes the following bugfixes:
  o trace: 0x7F character is non-printable [50]
  o unit1303: four tests should have TRUE for 'connecting' [158]
  o url: enumerated type mixed with another type [74]
+ o url: really use the user provided in the url when netrc entry exists [165]
  o url: reject URLs with hostnames longer than 65535 bytes [137]
+ o url: treat missing usernames in netrc as empty [167]
  o urldata: change second proxytype field to unsigned char to match [75]
  o urldata: make 'negnpn' use less storage [112]
  o urldata: make state.httpreq an unsigned char [77]
@@ -178,24 +188,25 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adam Sampson, Alessandro Ghedini, Alexandre Bury, Andreas Sommer,
-  Andrew Lambert, Brad Forschinger, Brian Carpenter, Cering on github,
-  Chris Paulson-Ellis, Chris Young, Daniel Katz, Daniel Stenberg,
-  David Carlier, dEajL3kA on github, Dominik Thalhammer, Don J Olmstead,
-  Dustin Howett, Emanuele Torre, Emil Engler, Érico Nogueira Rolim,
-  Even Rouault, Evgeny Grin (Karlson2k), Fabian Fischer, Fabian Keil,
-  Gisle Vanem, Gwen Shapira, Harry Sintonen, highmtworks on github,
-  Jakub Zakrzewski, Jilayne Lovejoy, Joshua Root, jurisuk on github,
-  jvvprasad78 on github, Kai Pastor, Litter White, lwthiker on github,
-  Marcel Raad, Marc Hörsken, Marco Kamner, MasterInQuestion on github,
-  Matthew Thompson, Maxim Ivanov, Michael Trebilcock, Michał Antoniak,
-  Nao Yonashiro, Nick Banks, Oliver Roberts, opensignature on github,
-  Orgad Shaneh, Patrick Monnerat, Philip H, privetryan on github, Ray Satiro,
-  rcombs on github, Rosen Penev, Ryan Schmidt, Ryan Sleevi, rzrymiak on github,
-  Samuel Henrique, Sean McArthur, Sergey Ogryzkov, Somnath Kundu,
-  Stefan Eissing, Sukanya Hanumanthu, Tatsuhiro Tsujikawa, Ted Lyngmo,
-  TheKnarf on github, Thomas Weißschuh, Tobias Nygren, Viktor Szakats,
-  vlubart on github, Wu Zheng, Wyatt O'Day, Xiaoke Wang, yiyuaner on github
-  (75 contributors)
+  Andrew Lambert, Axel Chong, Brad Forschinger, Brian Carpenter,
+  Cering on github, Chris Paulson-Ellis, Chris Young, Daniel Katz,
+  Daniel Stenberg, David Carlier, dEajL3kA on github, Domen Kožar,
+  Dominik Thalhammer, Don J Olmstead, Dustin Howett, Emanuele Torre,
+  Emil Engler, Érico Nogueira Rolim, Even Rouault, Evgeny Grin (Karlson2k),
+  Fabian Fischer, Fabian Keil, Gisle Vanem, Gwen Shapira, Harry Sintonen,
+  highmtworks on github, Ivan Tsybulin, Jacob Tolar, Jakub Zakrzewski,
+  Jilayne Lovejoy, Joshua Root, jurisuk on github, jvvprasad78 on github,
+  Kai Pastor, Litter White, lwthiker on github, Marcel Raad, Marc Hörsken,
+  Marco Kamner, MasterInQuestion on github, Matthew Thompson, Maxim Ivanov,
+  Michael Trebilcock, Michał Antoniak, Nao Yonashiro, Nick Banks,
+  Oliver Roberts, opensignature on github, Orgad Shaneh, Patrick Monnerat,
+  Philip H, privetryan on github, Ray Satiro, rcombs on github, Rosen Penev,
+  Ryan Schmidt, Ryan Sleevi, rzrymiak on github, Samuel Henrique,
+  Sean McArthur, Sergey Ogryzkov, Somnath Kundu, Stefan Eissing,
+  Sukanya Hanumanthu, Tatsuhiro Tsujikawa, Ted Lyngmo, TheKnarf on github,
+  Thomas Weißschuh, Tobias Nygren, Viktor Szakats, vlubart on github, Wu Zheng,
+  Wyatt O'Day, Xiaoke Wang, yiyuaner on github
+  (79 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -338,6 +349,7 @@ References to bug reports and discussions on issues:
  [137] = https://curl.se/bug/?i=9317
  [138] = https://curl.se/bug/?i=9352
  [139] = https://curl.se/bug/?i=9023
+ [140] = https://curl.se/bug/?i=9376
  [141] = https://curl.se/bug/?i=9314
  [142] = https://curl.se/bug/?i=9290
  [143] = https://curl.se/bug/?i=9306
@@ -349,10 +361,19 @@ References to bug reports and discussions on issues:
  [149] = https://curl.se/bug/?i=9328
  [150] = https://curl.se/bug/?i=9330
  [151] = https://curl.se/bug/?i=9329
+ [152] = https://curl.se/docs/CVE-2022-35252.html
  [153] = https://curl.se/bug/?i=9364
  [154] = https://curl.se/bug/?i=6132
  [155] = https://curl.se/bug/?i=9369
  [156] = https://curl.se/bug/?i=9367
- [157] = https://curl.se/bug/?i=9300
+ [157] = https://curl.se/bug/?i=9382
  [158] = https://curl.se/bug/?i=9356
  [159] = https://curl.se/bug/?i=9354
+ [160] = https://curl.se/bug/?i=9349
+ [161] = https://curl.se/bug/?i=9349
+ [162] = https://curl.se/bug/?i=9331
+ [163] = https://curl.se/bug/?i=9312
+ [165] = https://curl.se/bug/?i=9243
+ [166] = https://curl.se/bug/?i=9248
+ [167] = https://curl.se/bug/?i=8653
+ [168] = https://curl.se/bug/?i=9391
