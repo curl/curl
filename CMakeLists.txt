@@ -1292,15 +1292,17 @@ if(WIN32)
   endif()
 
   # Matching logic used for Curl_win32_random()
-  check_c_source_compiles("
-    #include <_mingw.h>
-    #if defined(__MINGW64_VERSION_MAJOR)
-    #error
-    #endif
-    int main(void) {
-      return 0;
-    }"
-    HAVE_MINGW_ORIGINAL)
+  if(MINGW)
+    check_c_source_compiles("
+      #include <_mingw.h>
+      #if defined(__MINGW64_VERSION_MAJOR)
+      #error
+      #endif
+      int main(void) {
+        return 0;
+      }"
+      HAVE_MINGW_ORIGINAL)
+  endif()
 
   if(NOT HAVE_MINGW_ORIGINAL)
     list(APPEND CURL_LIBS "bcrypt")
