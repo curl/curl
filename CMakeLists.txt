@@ -1291,7 +1291,20 @@ if(WIN32)
     list(APPEND CURL_LIBS "advapi32" "crypt32")
   endif()
 
-  list(APPEND CURL_LIBS "bcrypt")
+  # Matching logic used for Curl_win32_random()
+  check_c_source_compiles("
+    #include <_mingw.h>
+    #if defined(__MINGW64_VERSION_MAJOR)
+    #error
+    #endif
+    int main(void) {
+      return 0;
+    }"
+    HAVE_MINGW_ORIGINAL)
+
+  if(NOT HAVE_MINGW_ORIGINAL)
+    list(APPEND CURL_LIBS "bcrypt")
+  endif()
 endif()
 
 if(MSVC)
