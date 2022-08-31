@@ -5,14 +5,15 @@ HTTP
 HTTP GET
 Resume
 Largefile
-FAILURE
+Not found
+SUCCESS
 </keywords>
 </info>
 #
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 OK
+HTTP/1.1 404 Nah
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 Content-Length: 13
@@ -22,12 +23,13 @@ Funny-head: yesyes
 </data>
 
 <datacheck>
-HTTP/1.1 200 OK
+HTTP/1.1 404 Nah
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 Content-Length: 13
 Funny-head: yesyes
 
+012345678912
 </datacheck>
 </reply>
 
@@ -41,7 +43,7 @@ large_file
 http
 </server>
  <name>
-HTTP GET with large-file resume point and failed resume
+HTTP GET with large-file resume point and not found is not a failure
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 9999999999
@@ -51,9 +53,8 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 9999999999
 #
 # Verify data after the test has been "shot"
 <verify>
-# 33 is CURLE_RANGE_ERROR
 <errorcode>
-33
+0
 </errorcode>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
