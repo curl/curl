@@ -1166,6 +1166,8 @@ static DWORD multi_getsocktype(struct Curl_multi *multi, curl_socket_t s)
   int res;
 
   struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
+  if(!entry)
+    entry = sh_addentry(&multi->sockhash, s);
   fprintf(stderr, "entry=%d\n", entry);
   if(!entry)
     return SOCK_STREAM;
