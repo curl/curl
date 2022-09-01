@@ -2254,72 +2254,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 #  define HAS_ALPN 1
 #endif
 
-/* Check for OpenSSL 1.0.1 which has NPN support. */
-#undef HAS_NPN
-#if OPENSSL_VERSION_NUMBER >= 0x10001000L \
-    && !defined(OPENSSL_NO_TLSEXT) \
-    && !defined(OPENSSL_NO_NEXTPROTONEG)
-#  define HAS_NPN 1
-#endif
-
-#ifdef HAS_NPN
-
-/*
- * in is a list of length prefixed strings. this function has to select
- * the protocol we want to use from the list and write its string into out.
- */
-
-static int
-select_next_protocol(unsigned char **out, unsigned char *outlen,
-                     const unsigned char *in, unsigned int inlen,
-                     const char *key, unsigned int keylen)
-{
-  unsigned int i;
-  for(i = 0; i + keylen <= inlen; i += in[i] + 1) {
-    if(memcmp(&in[i + 1], key, keylen) == 0) {
-      *out = (unsigned char *) &in[i + 1];
-      *outlen = in[i];
-      return 0;
-    }
-  }
-  return -1;
-}
-
-static int
-select_next_proto_cb(SSL *ssl,
-                     unsigned char **out, unsigned char *outlen,
-                     const unsigned char *in, unsigned int inlen,
-                     void *arg)
-{
-  struct Curl_easy *data = (struct Curl_easy *)arg;
-  struct connectdata *conn = data->conn;
-  (void)ssl;
-
-#ifdef USE_HTTP2
-  if(data->state.httpwant >= CURL_HTTP_VERSION_2 &&
-     !select_next_protocol(out, outlen, in, inlen, ALPN_H2, ALPN_H2_LENGTH)) {
-    infof(data, "NPN, negotiated HTTP2 (%s)", ALPN_H2);
-    conn->negnpn = CURL_HTTP_VERSION_2;
-    return SSL_TLSEXT_ERR_OK;
-  }
-#endif
-
-  if(!select_next_protocol(out, outlen, in, inlen, ALPN_HTTP_1_1,
-                           ALPN_HTTP_1_1_LENGTH)) {
-    infof(data, "NPN, negotiated HTTP1.1");
-    conn->negnpn = CURL_HTTP_VERSION_1_1;
-    return SSL_TLSEXT_ERR_OK;
-  }
-
-  infof(data, "NPN, no overlap, use HTTP1.1");
-  *out = (unsigned char *)ALPN_HTTP_1_1;
-  *outlen = ALPN_HTTP_1_1_LENGTH;
-  conn->negnpn = CURL_HTTP_VERSION_1_1;
-
-  return SSL_TLSEXT_ERR_OK;
-}
-#endif /* HAS_NPN */
-
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
 static CURLcode
 set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
@@ -2809,11 +2743,6 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
   }
 
   SSL_CTX_set_options(backend->ctx, ctx_options);
-
-#ifdef HAS_NPN
-  if(conn->bits.tls_enable_npn)
-    SSL_CTX_set_next_proto_select_cb(backend->ctx, select_next_proto_cb, data);
-#endif
 
 #ifdef HAS_ALPN
   if(conn->bits.tls_enable_alpn) {
@@ -3442,19 +3371,19 @@ static CURLcode ossl_connect_step2(struct Curl_easy *data,
 #ifdef USE_HTTP2
         if(len == ALPN_H2_LENGTH &&
            !memcmp(ALPN_H2, neg_protocol, len)) {
-          conn->negnpn = CURL_HTTP_VERSION_2;
+          conn->alpn = CURL_HTTP_VERSION_2;
         }
         else
 #endif
         if(len == ALPN_HTTP_1_1_LENGTH &&
            !memcmp(ALPN_HTTP_1_1, neg_protocol, ALPN_HTTP_1_1_LENGTH)) {
-          conn->negnpn = CURL_HTTP_VERSION_1_1;
+          conn->alpn = CURL_HTTP_VERSION_1_1;
         }
       }
       else
         infof(data, VTLS_INFOF_NO_ALPN);
 
-      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
 #endif

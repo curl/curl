@@ -507,7 +507,6 @@ struct ConnectBits {
                  connection */
   BIT(multiplex); /* connection is multiplexed */
   BIT(tcp_fastopen); /* use TCP Fast Open */
-  BIT(tls_enable_npn);  /* TLS NPN extension? */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
   BIT(connect_only);
 #ifndef CURL_DISABLE_DOH
@@ -803,7 +802,7 @@ struct Curl_handler {
                                         url query strings (?foo=bar) ! */
 #define PROTOPT_CREDSPERREQUEST (1<<7) /* requires login credentials per
                                           request instead of per connection */
-#define PROTOPT_ALPN_NPN (1<<8) /* set ALPN and/or NPN for this */
+#define PROTOPT_ALPN (1<<8) /* set ALPN for this */
 #define PROTOPT_STREAM (1<<9) /* a protocol with individual logical streams */
 #define PROTOPT_URLOPTIONS (1<<10) /* allow options part in the userinfo field
                                       of the URL */
@@ -1118,8 +1117,8 @@ struct connectdata {
   unsigned short localport;
   unsigned short secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
-  unsigned char negnpn; /* APLN or NPN TLS negotiated protocol,
-                           a CURL_HTTP_VERSION* value */
+  unsigned char alpn; /* APLN TLS negotiated protocol, a CURL_HTTP_VERSION*
+                         value */
   unsigned char transport; /* one of the TRNSPRT_* defines */
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
   unsigned char httpversion; /* the HTTP version*10 reported by the server */
@@ -1875,7 +1874,6 @@ struct UserDefined {
   BIT(sasl_ir);         /* Enable/disable SASL initial response */
   BIT(tcp_keepalive);  /* use TCP keepalives */
   BIT(tcp_fastopen);   /* use TCP Fast Open */
-  BIT(ssl_enable_npn); /* TLS NPN extension? */
   BIT(ssl_enable_alpn);/* TLS ALPN extension? */
   BIT(path_as_is);     /* allow dotdots? */
   BIT(pipewait);       /* wait for multiplex status before starting a new

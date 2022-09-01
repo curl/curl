@@ -918,7 +918,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
-  if(conn->negnpn == CURL_HTTP_VERSION_2) {
+  if(conn->alpn == CURL_HTTP_VERSION_2) {
     hyper_clientconn_options_http2(options, 1);
     h2 = TRUE;
   }

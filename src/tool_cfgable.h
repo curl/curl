@@ -267,7 +267,6 @@ struct OperationConfig {
                                   certificate for authentication (Schannel) */
   bool proxy_ssl_auto_client_cert; /* proxy version of ssl_auto_client_cert */
   char *oauth_bearer;             /* OAuth 2.0 bearer token */
-  bool nonpn;                     /* enable/disable TLS NPN extension */
   bool noalpn;                    /* enable/disable TLS ALPN extension */
   char *unix_socket_path;         /* path to Unix domain socket */
   bool abstract_unix_socket;      /* path to an abstract Unix domain socket */

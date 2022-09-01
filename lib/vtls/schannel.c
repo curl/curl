@@ -1720,19 +1720,19 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
 #ifdef USE_HTTP2
       if(alpn_result.ProtocolIdSize == ALPN_H2_LENGTH &&
          !memcmp(ALPN_H2, alpn_result.ProtocolId, ALPN_H2_LENGTH)) {
-        conn->negnpn = CURL_HTTP_VERSION_2;
+        conn->alpn = CURL_HTTP_VERSION_2;
       }
       else
 #endif
         if(alpn_result.ProtocolIdSize == ALPN_HTTP_1_1_LENGTH &&
            !memcmp(ALPN_HTTP_1_1, alpn_result.ProtocolId,
                    ALPN_HTTP_1_1_LENGTH)) {
-          conn->negnpn = CURL_HTTP_VERSION_1_1;
+          conn->alpn = CURL_HTTP_VERSION_1_1;
         }
     }
     else
       infof(data, VTLS_INFOF_NO_ALPN);
-    Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+    Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
                         BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif

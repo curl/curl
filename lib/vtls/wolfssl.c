@@ -763,17 +763,17 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 
       if(protocol_len == ALPN_HTTP_1_1_LENGTH &&
          !memcmp(protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH))
-        conn->negnpn = CURL_HTTP_VERSION_1_1;
+        conn->alpn = CURL_HTTP_VERSION_1_1;
 #ifdef USE_HTTP2
       else if(data->state.httpwant >= CURL_HTTP_VERSION_2 &&
               protocol_len == ALPN_H2_LENGTH &&
               !memcmp(protocol, ALPN_H2, ALPN_H2_LENGTH))
-        conn->negnpn = CURL_HTTP_VERSION_2;
+        conn->alpn = CURL_HTTP_VERSION_2;
 #endif
       else
         infof(data, "ALPN, unrecognized protocol %.*s", protocol_len,
               protocol);
-      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else if(rc == SSL_ALPN_NOT_FOUND)
