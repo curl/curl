@@ -25,18 +25,18 @@ jobs:
       matrix:
         build:
         - name: torture
-          install:
-          configure:
+          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+          configure: --with-openssl --enable-debug --enable-ares
           tflags: -n -t --shallow=25 !FTP
         - name: torture-ftp
-          install:
-          configure:
+          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+          configure: --with-openssl --enable-debug --enable-ares
           tflags: -n -t --shallow=20 FTP
 
     steps:
     - run: |
         sudo apt-get update
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4 libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev ${{ matrix.build.install }}
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
 
@@ -45,7 +45,7 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} --with-openssl --enable-debug --enable-ares
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
       name: 'configure'
 
     - run: make V=1
