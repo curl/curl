@@ -267,8 +267,7 @@ Windows you should choose another SSL backend such as OpenSSL.
 
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
-Transport for SSL/TLS, use the configure option `--with-secure-transport`. (It
-is not necessary to use the option `--without-openssl`.)
+Transport for SSL/TLS, use the configure option `--with-secure-transport`.
 
 When Secure Transport is in use, the curl options `--cacert` and `--capath`
 and their libcurl equivalents, will be ignored, because Secure Transport uses
