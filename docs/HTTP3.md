@@ -106,7 +106,7 @@ Build curl
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure --without-openssl --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % ./configure --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
      % make install
 
@@ -147,7 +147,7 @@ Build curl
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure --without-openssl --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % ./configure --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
      % make install
 
