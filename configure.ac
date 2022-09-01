@@ -1957,7 +1957,7 @@ if test "x$curl_cv_native_windows" = "xyes" &&
   LIBS="-lbcrypt $LIBS"
 fi
 
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED$SSL_DISABLED"
+case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED"
 in
 x)
   AC_MSG_ERROR([TLS not detected, you will not be able to use HTTPS, FTPS, NTLM and more.
@@ -1971,6 +1971,11 @@ x1)
   ;;
 xD)
   # explicitly built without TLS
+  ;;
+xD*)
+  AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an ssl library
+(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl, --with-rustls).
+Since these are conflicting parameters, verify which is the desired one and drop the other.])
   ;;
 *)
   # more than one SSL backend is enabled
