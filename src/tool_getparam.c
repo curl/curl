@@ -740,7 +740,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         global->tracetype = TRACE_BIN;
         break;
       case 'G': /* --npn */
-        config->nonpn = (!toggle)?TRUE:FALSE;
+        warnf(global, "--npn is no longer supported\n");
         break;
       case 'h': /* --trace-ascii */
         GetStr(&global->trace_dump, nextarg);

@@ -166,7 +166,7 @@ const struct Curl_handler Curl_handler_https = {
   PORT_HTTPS,                           /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
   CURLPROTO_HTTP,                       /* family */
-  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN_NPN | /* flags */
+  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN | /* flags */
   PROTOPT_USERPWDCTRL
 };
 #endif
@@ -3044,7 +3044,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(conn->transport != TRNSPRT_QUIC) {
     if(conn->httpversion < 20) { /* unless the connection is re-used and
                                     already http2 */
-      switch(conn->negnpn) {
+      switch(conn->alpn) {
       case CURL_HTTP_VERSION_2:
         conn->httpversion = 20; /* we know we're on HTTP/2 now */
 

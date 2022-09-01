@@ -875,14 +875,14 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
 
 #ifdef USE_HTTP2
       if(!strcmp(protocol, ALPN_H2))
-        conn->negnpn = CURL_HTTP_VERSION_2;
+        conn->alpn = CURL_HTTP_VERSION_2;
       else
 #endif
       if(!strcmp(protocol, ALPN_HTTP_1_1))
-        conn->negnpn = CURL_HTTP_VERSION_1_1;
+        conn->alpn = CURL_HTTP_VERSION_1_1;
       else
         infof(data, "ALPN, unrecognized protocol %s", protocol);
-      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else

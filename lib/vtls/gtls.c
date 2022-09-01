@@ -1274,19 +1274,19 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
       if(proto.size == ALPN_H2_LENGTH &&
          !memcmp(ALPN_H2, proto.data,
                  ALPN_H2_LENGTH)) {
-        conn->negnpn = CURL_HTTP_VERSION_2;
+        conn->alpn = CURL_HTTP_VERSION_2;
       }
       else
 #endif
       if(proto.size == ALPN_HTTP_1_1_LENGTH &&
          !memcmp(ALPN_HTTP_1_1, proto.data, ALPN_HTTP_1_1_LENGTH)) {
-        conn->negnpn = CURL_HTTP_VERSION_1_1;
+        conn->alpn = CURL_HTTP_VERSION_1_1;
       }
     }
     else
       infof(data, VTLS_INFOF_NO_ALPN);
 
-    Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+    Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
                         BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 

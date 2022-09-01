@@ -35,35 +35,16 @@ Over an https:// URL
 --------------------
 
 If `CURLOPT_HTTP_VERSION` is set to `CURL_HTTP_VERSION_2_0`, libcurl will use
-ALPN (or NPN) to negotiate which protocol to continue with. Possibly introduce
-an option that will cause libcurl to fail if not possible to use HTTP/2.
+ALPN to negotiate which protocol to continue with. Possibly introduce an
+option that will cause libcurl to fail if not possible to use HTTP/2.
 
 `CURL_HTTP_VERSION_2TLS` was added in 7.47.0 as a way to ask libcurl to prefer
 HTTP/2 for HTTPS but stick to 1.1 by default for plain old HTTP connections.
 
-ALPN is the TLS extension that HTTP/2 is expected to use. The NPN extension is
-for a similar purpose, was made prior to ALPN and is used for SPDY so early
-HTTP/2 servers are implemented using NPN before ALPN support is widespread.
+ALPN is the TLS extension that HTTP/2 is expected to use.
 
-`CURLOPT_SSL_ENABLE_ALPN` and `CURLOPT_SSL_ENABLE_NPN` are offered to allow
-applications to explicitly disable ALPN or NPN.
-
-SSL libs
---------
-
-The challenge is the ALPN and NPN support and all our different SSL
-backends. You may need a fairly updated SSL library version for it to provide
-the necessary TLS features. Right now we support:
-
-  - OpenSSL:          ALPN and NPN
-  - libressl:         ALPN and NPN
-  - BoringSSL:        ALPN and NPN
-  - NSS:              ALPN and NPN
-  - GnuTLS:           ALPN
-  - mbedTLS:          ALPN
-  - Schannel:         ALPN
-  - wolfSSL:          ALPN
-  - Secure Transport: ALPN
+`CURLOPT_SSL_ENABLE_ALPN` is offered to allow applications to explicitly
+disable ALPN.
 
 Multiplexing
 ------------
