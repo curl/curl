@@ -1159,20 +1159,20 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 #define NUM_POLLS_ON_STACK 10
 
 #ifdef USE_WINSOCK
-static DWORD multi_getsocktype(struct Curl_multi *multi, curl_socket_t s)
+static DWORD multi_getsocktype(struct Curl_multi *multi,
+                               curl_socket_t s,
+                               bool add_missing)
 {
   DWORD socketype;
   int len = sizeof(socketype);
   int res;
 
   struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
-  if(!entry)
+  if(!entry && add_missing)
     entry = sh_addentry(&multi->sockhash, s);
-  fprintf(stderr, "entry=%d\n", entry);
   if(!entry)
     return SOCK_STREAM;
 
-  fprintf(stderr, "entry->socketype=%d\n", entry->socketype);
   if(entry->socketype)
     return entry->socketype;
 
@@ -1181,7 +1181,6 @@ static DWORD multi_getsocktype(struct Curl_multi *multi, curl_socket_t s)
     return SOCK_STREAM;
 
   entry->socketype = socketype;
-  fprintf(stderr, "entry->socketype=%d\n", entry->socketype);
   return socketype;
 }
 #endif
@@ -1305,7 +1304,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
           s = sockbunch[i];
 #ifdef USE_WINSOCK
           mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-          if(multi_getsocktype(multi, s) == SOCK_STREAM)
+          if(multi_getsocktype(multi, s, TRUE) == SOCK_STREAM)
             send(s, NULL, 0, 0); /* reset FD_WRITE */
 #endif
           ufds[nfds].fd = s;
@@ -1341,7 +1340,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       mask |= FD_OOB;
     if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
       mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-      if(multi_getsocktype(multi, s) == SOCK_STREAM)
+      if(multi_getsocktype(multi, s, FALSE) == SOCK_STREAM)
         send(s, NULL, 0, 0); /* reset FD_WRITE */
     }
     if(WSAEventSelect(s, multi->wsa_event, mask) != 0) {
