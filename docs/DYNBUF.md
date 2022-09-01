@@ -76,7 +76,8 @@ CURLcode Curl_dyn_tail(struct dynbuf *s, size_t length);
 
 Keep `length` bytes of the buffer tail (the last `length` bytes of the
 buffer). The rest of the buffer is dropped. The specified `length` must not be
-larger than the buffer length.
+larger than the buffer length. To instead keep the leading part, see
+`Curl_dyn_setlen()`.
 
 ## ptr
 
@@ -106,3 +107,13 @@ size_t Curl_dyn_len(const struct dynbuf *s);
 
 Returns the length of the buffer in bytes. Does not include the terminating
 zero byte.
+
+## setlen
+
+```c
+CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t len);
+```
+
+Sets the new shorter length of the buffer in number of bytes. Keeps the
+leftmost set number of bytes, discards the rest. To instead keep the tail part
+of the buffer, see `Curl_dyn_tail()`.

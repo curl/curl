@@ -128,7 +128,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "http_proxy.h"
 #include "conncache.h"
 #include "multihandle.h"
-#include "dotdot.h"
 #include "strdup.h"
 #include "setopt.h"
 #include "altsvc.h"

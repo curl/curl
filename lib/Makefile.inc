@@ -128,7 +128,6 @@ LIB_CFILES =         \
   curl_threads.c     \
   dict.c             \
   doh.c              \
-  dotdot.c           \
   dynbuf.c           \
   easy.c             \
   easygetopt.c       \
@@ -262,7 +261,6 @@ LIB_HFILES =         \
   curlx.h            \
   dict.h             \
   doh.h              \
-  dotdot.h           \
   dynbuf.h           \
   easy_lock.h        \
   easyif.h           \
