@@ -179,9 +179,6 @@ static CURLcode make_headers(struct Curl_easy *data,
   }
 
 
-  if(!date_hdr_key || !date_full_hdr)
-    goto fail;
-
   for(l = data->set.headers; l; l = l->next) {
     tmp_head = curl_slist_append(head, l->data);
     if(!tmp_head)
