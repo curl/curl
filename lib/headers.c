@@ -213,7 +213,7 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
   *value = header;
 
   /* skip all trailing space letters */
-  while((end > header) && ISBLANK(*end))
+  while((end > header) && ISSPACE(*end))
     *end-- = 0; /* nul terminate */
   return CURLE_OK;
 }
@@ -233,7 +233,7 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
   oalloc = olen + offset + 1;
 
   /* skip all trailing space letters */
-  while(vlen && ISBLANK(value[vlen - 1]))
+  while(vlen && ISSPACE(value[vlen - 1]))
     vlen--;
 
   /* save only one leading space */
