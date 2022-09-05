@@ -43,6 +43,7 @@ int Curl_safe_strcasecompare(const char *first, const char *second);
 int Curl_strncasecompare(const char *first, const char *second, size_t max);
 
 char Curl_raw_toupper(char in);
+char Curl_raw_tolower(char in);
 
 /* checkprefix() is a shorter version of the above, used when the first
    argument is the string literal */
