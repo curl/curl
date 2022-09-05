@@ -45,8 +45,11 @@ While it may feel tempting, take care and notice that you cannot call this
 function from another thread. To unpause, you may for example call it from the
 progress callback (\fICURLOPT_PROGRESSFUNCTION(3)\fP).
 
-When this function is called to unpause receiving, the chance is high that you
-will get your write callback called before this function returns.
+When this function is called to unpause receiving, the write callback might
+get called before this function returns to deliver cached content. When
+libcurl delivers such cached data to the write callback, it will be delivered
+as fast as possible, which may overstep the boundary set in
+\fICURLOPT_MAX_RECV_SPEED_LARGE(3)\fP etc.
 
 The \fBhandle\fP argument identifies the transfer you want to pause or
 unpause.
