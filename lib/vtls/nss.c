@@ -336,7 +336,7 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc *model,
     char name[MAX_CIPHER_LENGTH + 1];
     size_t len;
     bool found = FALSE;
-    while((*cipher) && (ISSPACE(*cipher)))
+    while((*cipher) && (ISBLANK(*cipher)))
       ++cipher;
 
     end = strpbrk(cipher, ":, ");

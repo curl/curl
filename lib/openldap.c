@@ -1068,8 +1068,8 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 
         if(!binary) {
           /* check for leading or trailing whitespace */
-          if(ISSPACE(bvals[i].bv_val[0]) ||
-             ISSPACE(bvals[i].bv_val[bvals[i].bv_len - 1]))
+          if(ISBLANK(bvals[i].bv_val[0]) ||
+             ISBLANK(bvals[i].bv_val[bvals[i].bv_len - 1]))
             binval = 1;
           else {
             /* check for unprintable characters */

@@ -156,7 +156,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
     return CURLE_OK;
 
   do {
-    while(*p && ISSPACE(*p))
+    while(*p && ISBLANK(*p))
       p++;
     if(Curl_strncasecompare("max-age=", p, 8)) {
       bool quoted = FALSE;
@@ -167,7 +167,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         return CURLE_BAD_FUNCTION_ARGUMENT;
 
       p += 8;
-      while(*p && ISSPACE(*p))
+      while(*p && ISBLANK(*p))
         p++;
       if(*p == '\"') {
         p++;
@@ -200,7 +200,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         p++;
     }
 
-    while(*p && ISSPACE(*p))
+    while(*p && ISBLANK(*p))
       p++;
     if(*p == ';')
       p++;

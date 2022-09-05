@@ -96,7 +96,7 @@ static int parsenetrc(const char *host,
       }
       tok = netrcbuffer;
       while(tok) {
-        while(ISSPACE(*tok))
+        while(ISBLANK(*tok))
           tok++;
         /* tok is first non-space letter */
         if(!*tok || (*tok == '#'))

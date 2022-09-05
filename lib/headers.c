@@ -207,7 +207,7 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* skip all leading space letters */
-  while(*header && ISSPACE(*header))
+  while(*header && ISBLANK(*header))
     header++;
 
   *value = header;
@@ -237,7 +237,7 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
     vlen--;
 
   /* save only one leading space */
-  while((vlen > 1) && ISSPACE(value[0]) && ISSPACE(value[1])) {
+  while((vlen > 1) && ISBLANK(value[0]) && ISBLANK(value[1])) {
     vlen--;
     value++;
   }

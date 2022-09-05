@@ -59,7 +59,7 @@ static void voutf(struct GlobalConfig *config,
       if(len > width) {
         size_t cut = width-1;
 
-        while(!ISSPACE(ptr[cut]) && cut) {
+        while(!ISBLANK(ptr[cut]) && cut) {
           cut--;
         }
         if(0 == cut)

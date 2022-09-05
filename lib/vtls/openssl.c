@@ -4366,7 +4366,7 @@ static size_t ossl_version(char *buffer, size_t size)
   }
   count = msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
   for(p = buffer; *p; ++p) {
-    if(ISSPACE(*p))
+    if(ISBLANK(*p))
       *p = '_';
   }
   return count;
