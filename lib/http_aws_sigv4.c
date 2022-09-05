@@ -89,7 +89,10 @@ static void trim_headers(struct curl_slist *head)
     size_t colon = strcspn(l->data, ":");
     Curl_strntolower(l->data, l->data, colon);
 
-    value = &l->data[colon + 1];
+    value = &l->data[colon];
+    if(!*value)
+      continue;
+    ++value;
     store = value;
 
     /* skip leading whitespace */
