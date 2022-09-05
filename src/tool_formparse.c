@@ -499,7 +499,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
   sep = *p;
   *endpos = '\0';
   while(sep == ';') {
-    while(ISSPACE(*++p))
+    while(p++ && ISSPACE(*p))
       ;
 
     if(!endct && checkprefix("type=", p)) {
