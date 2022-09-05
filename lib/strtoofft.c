@@ -87,7 +87,7 @@ static curl_off_t strtooff(const char *nptr, char **endptr, int base)
 
   /* Skip leading whitespace. */
   end = (char *)nptr;
-  while(ISSPACE(end[0])) {
+  while(ISBLANK(end[0])) {
     end++;
   }
 
@@ -222,7 +222,7 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   errno = 0;
   *num = 0; /* clear by default */
 
-  while(*str && ISSPACE(*str))
+  while(*str && ISBLANK(*str))
     str++;
   if('-' == *str) {
     if(endp)

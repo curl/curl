@@ -1044,7 +1044,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
     size_t namelen;
 
     /* Parse a single encoding name. */
-    while(ISSPACE(*enclist) || *enclist == ',')
+    while(ISBLANK(*enclist) || *enclist == ',')
       enclist++;
 
     name = enclist;

@@ -521,7 +521,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
     char content[DIGEST_MAX_CONTENT_LENGTH];
 
     /* Pass all additional spaces here */
-    while(*chlg && ISSPACE(*chlg))
+    while(*chlg && ISBLANK(*chlg))
       chlg++;
 
     /* Extract a value=content pair */
@@ -561,7 +561,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         token = strtok_r(tmp, ",", &tok_buf);
         while(token) {
           /* Pass additional spaces here */
-          while(*token && ISSPACE(*token))
+          while(*token && ISBLANK(*token))
             token++;
           if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH)) {
             foundAuth = TRUE;
@@ -622,7 +622,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
       break; /* We're done here */
 
     /* Pass all additional spaces here */
-    while(*chlg && ISSPACE(*chlg))
+    while(*chlg && ISBLANK(*chlg))
       chlg++;
 
     /* Allow the list to be comma-separated */

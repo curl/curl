@@ -116,7 +116,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       const char *etag_h = &str[5];
       const char *eot = end - 1;
       if(*eot == '\n') {
-        while(ISSPACE(*etag_h) && (etag_h < eot))
+        while(ISBLANK(*etag_h) && (etag_h < eot))
           etag_h++;
         while(ISSPACE(*eot))
           eot--;

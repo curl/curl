@@ -58,11 +58,11 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
     digest = &data->state.digest;
   }
 
-  if(!checkprefix("Digest", header) || !ISSPACE(header[6]))
+  if(!checkprefix("Digest", header) || !ISBLANK(header[6]))
     return CURLE_BAD_CONTENT_ENCODING;
 
   header += strlen("Digest");
-  while(*header && ISSPACE(*header))
+  while(*header && ISBLANK(*header))
     header++;
 
   return Curl_auth_decode_digest_http_message(header, digest);
