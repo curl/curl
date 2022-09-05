@@ -260,7 +260,7 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
     if(buf) {
       buf[i] = 0;
       while(i--) {
-        buf[i] = (char)TOLOWER(url[i]);
+        buf[i] = Curl_raw_tolower(url[i]);
       }
     }
     return TRUE;
@@ -1664,8 +1664,8 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         /* make sure percent encoded are lower case */
         if((*p == '%') && ISXDIGIT(p[1]) && ISXDIGIT(p[2]) &&
            (ISUPPER(p[1]) || ISUPPER(p[2]))) {
-          p[1] = (char)TOLOWER(p[1]);
-          p[2] = (char)TOLOWER(p[2]);
+          p[1] = Curl_raw_tolower(p[1]);
+          p[2] = Curl_raw_tolower(p[2]);
           p += 3;
         }
         else

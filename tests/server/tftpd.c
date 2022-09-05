@@ -88,6 +88,8 @@
 #include <pwd.h>
 #endif
 
+#include <ctype.h>
+
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
    versions instead */
