@@ -908,7 +908,6 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 {
   const char *path;
   size_t pathlen;
-  bool path_alloced = FALSE;
   bool uncpath = FALSE;
   char *query = NULL;
   char *fragment = NULL;
@@ -1132,7 +1131,6 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       goto fail;
     }
     path = u->path = Curl_dyn_ptr(&enc);
-    path_alloced = TRUE;
   }
 
   fragment = strchr(path, '#');
@@ -1187,13 +1185,12 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     path = NULL;
   }
   else {
-    if(!path_alloced) {
+    if(!u->path) {
       u->path = Curl_memdup(path, pathlen + 1);
       if(!u->path) {
         result = CURLUE_OUT_OF_MEMORY;
         goto fail;
       }
-      path_alloced = TRUE;
       u->path[pathlen] = 0;
       path = u->path;
     }
