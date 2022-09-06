@@ -42,6 +42,6 @@
 #define ISLOWER(x)  (((x) >= 'a') && ((x) <= 'z'))
 #define ISDIGIT(x)  (((x) >= '0') && ((x) <= '9'))
 #define ISBLANK(x)  (((x) == ' ') || ((x) == '\t'))
-#define ISSPACE(x)  (ISBLANK(x) || (((x) >= 0xa) && ((x) <=0x0d)))
+#define ISSPACE(x)  (ISBLANK(x) || (((x) >= 0xa) && ((x) <= 0x0d)))
 
 #endif /* HEADER_CURL_CTYPE_H */
