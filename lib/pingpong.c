@@ -330,7 +330,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     else if(gotbytes <= 0) {
       keepon = FALSE;
       result = CURLE_RECV_ERROR;
-      failf(data, "response reading failed");
+      failf(data, "response reading failed (errno: %d)", SOCKERRNO);
     }
     else {
       /* we got a whole chunk of data, which can be anything from one
