@@ -1,3 +1,4 @@
+<testcase>
 # perl:
 #
 # for(1 .. 151) {
@@ -6,7 +7,6 @@
 #               "name$_", "could-be-large-$_")."\n";
 # }
 #
-<testcase>
 <info>
 <keywords>
 HTTP

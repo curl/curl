@@ -28,7 +28,7 @@ Content-Length: 0
 Set-Cookie: 1cookie=data1;
 Set-Cookie: 2cookie=data2;
 
-</data>
+</data2>
 </reply>
 
 # Client-side

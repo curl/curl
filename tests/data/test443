@@ -1,3 +1,4 @@
+<testcase>
 # perl:
 #
 #for(1 .. 20) {
@@ -6,7 +7,6 @@
 #               "huge-$_", ('a' x 500)."-$_")."\n";
 #}
 #
-<testcase>
 <info>
 <keywords>
 HTTP
