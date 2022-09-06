@@ -948,7 +948,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     /* path has been allocated large enough to hold this */
     path = (char *)&url[5];
 
-    u->scheme = strdup("file");
+    schemep = u->scheme = strdup("file");
     if(!u->scheme) {
       result = CURLUE_OUT_OF_MEMORY;
       goto fail;
