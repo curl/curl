@@ -26,6 +26,8 @@
 
 #include "curl_setup.h"
 #ifndef HAVE_SOCKETPAIR
+#include <curl/curl.h>
+
 int Curl_socketpair(int domain, int type, int protocol,
                     curl_socket_t socks[2]);
 #else
