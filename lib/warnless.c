@@ -39,6 +39,8 @@
 
 #include "warnless.h"
 
+#include <limits.h>
+
 #define CURL_MASK_UCHAR   ((unsigned char)~0)
 #define CURL_MASK_SCHAR   (CURL_MASK_UCHAR >> 1)
 

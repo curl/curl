@@ -24,6 +24,8 @@
 
 #include "timediff.h"
 
+#include <limits.h>
+
 /*
  * Converts number of milliseconds into a timeval structure.
  *
