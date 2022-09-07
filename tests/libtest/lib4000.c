@@ -53,8 +53,8 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_PASSWORD, "password");
 
   /* Ugly workaround needed after curl 7.66 */
-  curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_RTSP);
-  curl_easy_setopt(curl, CURLOPT_HTTP09_ALLOWED, 1L);
+  test_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_RTSP);
+  test_setopt(curl, CURLOPT_HTTP09_ALLOWED, 1L);
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_DESCRIBE);
 
