@@ -45,6 +45,7 @@
 #include "content_encoding.h"
 #include "strdup.h"
 #include "strcase.h"
+#include "align.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -53,6 +54,10 @@
 #ifndef CURL_DISABLE_HTTP
 
 #define DSIZ CURL_MAX_WRITE_SIZE /* buffer size for decompressed data */
+
+/* Get encoding-specific storage pointer. */
+#define CW_PARAMS(p) UPALIGNPTR((char *) (p) + sizeof(struct contenc_writer), \
+                                UALIGN)
 
 
 #ifdef HAVE_LIBZ
@@ -162,7 +167,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
                                struct contenc_writer *writer,
                                zlibInitState started)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_params *zp = (struct zlib_params *) CW_PARAMS(writer);
   z_stream *z = &zp->z;         /* zlib state structure */
   uInt nread = z->avail_in;
   Bytef *orig_in = z->next_in;
@@ -265,7 +270,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
 static CURLcode deflate_init_writer(struct Curl_easy *data,
                                     struct contenc_writer *writer)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_params *zp = (struct zlib_params *) CW_PARAMS(writer);
   z_stream *z = &zp->z;     /* zlib state structure */
 
   if(!writer->downstream)
@@ -285,7 +290,7 @@ static CURLcode deflate_unencode_write(struct Curl_easy *data,
                                        struct contenc_writer *writer,
                                        const char *buf, size_t nbytes)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_params *zp = (struct zlib_params *) CW_PARAMS(writer);
   z_stream *z = &zp->z;     /* zlib state structure */
 
   /* Set the compressed input when this function is called */
@@ -302,7 +307,7 @@ static CURLcode deflate_unencode_write(struct Curl_easy *data,
 static void deflate_close_writer(struct Curl_easy *data,
                                  struct contenc_writer *writer)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_params *zp = (struct zlib_params *) CW_PARAMS(writer);
   z_stream *z = &zp->z;     /* zlib state structure */
 
   exit_zlib(data, z, &zp->zlib_init, CURLE_OK);
@@ -322,7 +327,7 @@ static const struct content_encoding deflate_encoding = {
 static CURLcode gzip_init_writer(struct Curl_easy *data,
                                  struct contenc_writer *writer)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_params *zp = (struct zlib_params *) CW_PARAMS(writer);
   z_stream *z = &zp->z;     /* zlib state structure */
 
   if(!writer->downstream)
@@ -439,7 +444,7 @@ static CURLcode gzip_unencode_write(struct Curl_easy *data,
                                     struct contenc_writer *writer,
                                     const char *buf, size_t nbytes)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_params *zp = (struct zlib_params *) CW_PARAMS(writer);
   z_stream *z = &zp->z;     /* zlib state structure */
 
   if(zp->zlib_init == ZLIB_INIT_GZIP) {
@@ -566,7 +571,7 @@ static CURLcode gzip_unencode_write(struct Curl_easy *data,
 static void gzip_close_writer(struct Curl_easy *data,
                               struct contenc_writer *writer)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_params *zp = (struct zlib_params *) CW_PARAMS(writer);
   z_stream *z = &zp->z;     /* zlib state structure */
 
   exit_zlib(data, z, &zp->zlib_init, CURLE_OK);
@@ -631,7 +636,7 @@ static CURLcode brotli_map_error(BrotliDecoderErrorCode be)
 static CURLcode brotli_init_writer(struct Curl_easy *data,
                                    struct contenc_writer *writer)
 {
-  struct brotli_params *bp = (struct brotli_params *) &writer->params;
+  struct brotli_params *bp = (struct brotli_params *) CW_PARAMS(writer);
   (void) data;
 
   if(!writer->downstream)
@@ -645,7 +650,7 @@ static CURLcode brotli_unencode_write(struct Curl_easy *data,
                                       struct contenc_writer *writer,
                                       const char *buf, size_t nbytes)
 {
-  struct brotli_params *bp = (struct brotli_params *) &writer->params;
+  struct brotli_params *bp = (struct brotli_params *) CW_PARAMS(writer);
   const uint8_t *src = (const uint8_t *) buf;
   char *decomp;
   uint8_t *dst;
@@ -692,7 +697,7 @@ static CURLcode brotli_unencode_write(struct Curl_easy *data,
 static void brotli_close_writer(struct Curl_easy *data,
                                 struct contenc_writer *writer)
 {
-  struct brotli_params *bp = (struct brotli_params *) &writer->params;
+  struct brotli_params *bp = (struct brotli_params *) CW_PARAMS(writer);
   (void) data;
 
   if(bp->br) {
@@ -722,7 +727,7 @@ struct zstd_params {
 static CURLcode zstd_init_writer(struct Curl_easy *data,
                                  struct contenc_writer *writer)
 {
-  struct zstd_params *zp = (struct zstd_params *)&writer->params;
+  struct zstd_params *zp = (struct zstd_params *) CW_PARAMS(writer);
   (void)data;
 
   if(!writer->downstream)
@@ -738,7 +743,7 @@ static CURLcode zstd_unencode_write(struct Curl_easy *data,
                                     const char *buf, size_t nbytes)
 {
   CURLcode result = CURLE_OK;
-  struct zstd_params *zp = (struct zstd_params *)&writer->params;
+  struct zstd_params *zp = (struct zstd_params *) CW_PARAMS(writer);
   ZSTD_inBuffer in;
   ZSTD_outBuffer out;
   size_t errorCode;
@@ -777,7 +782,7 @@ static CURLcode zstd_unencode_write(struct Curl_easy *data,
 static void zstd_close_writer(struct Curl_easy *data,
                               struct contenc_writer *writer)
 {
-  struct zstd_params *zp = (struct zstd_params *)&writer->params;
+  struct zstd_params *zp = (struct zstd_params *) CW_PARAMS(writer);
   (void)data;
 
   if(zp->decomp) {
@@ -973,7 +978,8 @@ new_unencoding_writer(struct Curl_easy *data,
                       const struct content_encoding *handler,
                       struct contenc_writer *downstream)
 {
-  size_t sz = offsetof(struct contenc_writer, params) + handler->paramsize;
+  size_t sz = UPALIGNSIZE(sizeof(struct contenc_writer), UALIGN) +
+              handler->paramsize;
   struct contenc_writer *writer = (struct contenc_writer *)calloc(1, sz);
 
   if(writer) {

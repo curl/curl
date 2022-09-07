@@ -219,6 +219,7 @@ LIB_CFILES =         \
   wildcard.c
 
 LIB_HFILES =         \
+  align.h            \
   altsvc.h           \
   amigaos.h          \
   arpa_telnet.h      \

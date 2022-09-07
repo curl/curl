@@ -28,7 +28,7 @@
 struct contenc_writer {
   const struct content_encoding *handler;  /* Encoding handler. */
   struct contenc_writer *downstream;  /* Downstream writer. */
-  void *params;  /* Encoding-specific storage (variable length). */
+  /* Encoding-specific storage (variable length) follows. */
 };
 
 /* Content encoding writer. */
