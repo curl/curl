@@ -1,0 +1,85 @@
+<testcase>
+
+#Informational
+<info>
+<keywords>
+RTSP
+RTSP Basic auth
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+RTSP/1.0 401 Unauthorized please swsbounce
+Server: RTSPD/libcurl-test
+CSeq: 1
+WWW-Authenticate: Basic realm="please-auth-me"
+
+</data>
+<data1>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 2
+Content-Base: rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
+Content-Length: 80
+Curl-private: swsclose
+
+v=0
+s=rtspd SDP
+i=A fake SDP reply
+u=http://www.curl.example.com/fakesdp.ps
+</data1>
+<datacheck>
+RTSP/1.0 401 Unauthorized please swsbounce
+Server: RTSPD/libcurl-test
+CSeq: 1
+WWW-Authenticate: Basic realm="please-auth-me"
+
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 2
+Content-Base: rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
+Content-Length: 80
+Curl-private: swsclose
+
+v=0
+s=rtspd SDP
+i=A fake SDP reply
+u=http://www.curl.example.com/fakesdp.ps
+</datacheck>
+</reply>
+
+# Client-Side
+<client>
+<server>
+rtsp
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+RTSP Authentication check
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+DESCRIBE rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
+CSeq: 1
+Accept: application/sdp
+
+DESCRIBE rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
+CSeq: 2
+Accept: application/sdp
+Authorization: Basic dXNlcjpwYXNzd29yZA==
+
+</protocol>
+</verify>
+
+</testcase>
