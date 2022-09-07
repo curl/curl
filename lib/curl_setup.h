@@ -244,7 +244,7 @@
 #  include "setup-win32.h"
 #endif
 
-#include <curl/curl.h>
+#include <curl/system.h>
 
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
