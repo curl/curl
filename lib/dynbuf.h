@@ -24,6 +24,8 @@
  *
  ***************************************************************************/
 
+#include <curl/curl.h>
+
 #ifndef BUILDING_LIBCURL
 /* this renames the functions so that the tool code can use the same code
    without getting symbol collisions */
