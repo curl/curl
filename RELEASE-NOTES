@@ -1,27 +1,39 @@
-curl and libcurl 7.85.1
+curl and libcurl 7.86.0
 
  Public curl releases:         211
  Command line options:         248
  curl_easy_setopt() options:   299
  Public functions in libcurl:  88
- Contributors:                 2692
+ Contributors:                 2696
 
 This release includes the following changes:
 
- o
+ o NPN: remove support for and use of [16]
 
 This release includes the following bugfixes:
 
  o cmake: fix original MinGW builds [177]
  o configure: fail if '--without-ssl' + explicit parameter for an ssl lib [164]
+ o ctype: remove all use of <ctype.h>, use our own versions [12]
+ o curl-compilers.m4: use -O2 as default optimize for clang [6]
+ o curl_ctype: convert to macros-only [10]
+ o curl_easy_pause.3: unpausing is as fast as possible [14]
+ o CURLOPT_DNS_INTERFACE.3: mention it works for almost all protocols [15]
+ o CURLOPT_PROXY_SSLCERT_BLOB.3: this is for HTTPS proxies [9]
  o CURLOPT_WILDCARDMATCH.3: Fix backslash escaping under single quotes [172]
  o docs: remove mentions of deprecated '--without-openssl' parameter [170]
+ o ftp: ignore a 550 response to MDTM [1]
+ o lib: add required Win32 setup definitions in setup-win32.h [4]
  o manpages: Fix spelling of "allows to" -> "allows one to" [171]
+ o misc: ISSPACE() => ISBLANK() [11]
  o misc: spelling fixes [174]
+ o setup-win32: no longer define UNICODE/_UNICODE implicitly [3]
  o tests/certs/scripts: insert standard curl source headers [169]
+ o tests: fix tag syntax errors in test files
  o tool_operate: prevent over-queuing in parallel mode [176]
  o tool_operate: reduce errorbuffer allocs [173]
  o tool_progress: remove 'Qd' from the parallel progress bar [175]
+ o urlapi: leaner with fewer allocs [2]
 
 This release includes the following known bugs:
 
@@ -30,12 +42,26 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  ajak in #curl, Daniel Stenberg, James Fuller, justchen1369 on github,
-  Samuel Henrique, Viktor Szakats
-  (6 contributors)
+  ajak in #curl, Dan Fandrich, Daniel Stenberg, Emanuele Torre, James Fuller,
+  justchen1369 on github, Keitagit-kun on github, Marcel Raad, Marc Hörsken,
+  Michael Heimpold, ProceduralMan on github, Ray Satiro, Samuel Henrique,
+  ssdbest on github, Viktor Szakats
+  (15 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=9357
+ [2] = https://curl.se/bug/?i=9408
+ [3] = https://curl.se/bug/?i=9375
+ [4] = https://curl.se/bug/?i=9375
+ [6] = https://curl.se/bug/?i=9444
+ [9] = https://curl.se/bug/?i=9434
+ [10] = https://curl.se/bug/?i=9429
+ [11] = https://curl.se/bug/?i=9432
+ [12] = https://curl.se/bug/?i=9433
+ [14] = https://curl.se/bug/?i=9410
+ [15] = https://curl.se/bug/?i=9427
+ [16] = https://curl.se/bug/?i=9307
  [164] = https://curl.se/bug/?i=9414
  [169] = https://curl.se/bug/?i=9417
  [170] = https://curl.se/bug/?i=9415
