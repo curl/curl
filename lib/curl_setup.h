@@ -158,8 +158,6 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
-#include <curl/curl.h>
-
 /*
  * Disable other protocols when http is the only one desired.
  */
@@ -219,7 +217,7 @@
 
 /* ================================================================ */
 /* No system header file shall be included in this file before this */
-/* point. The only allowed ones are those included from curl/system.h */
+/* point.                                                           */
 /* ================================================================ */
 
 /*
@@ -245,6 +243,8 @@
 #ifdef HAVE_WINDOWS_H
 #  include "setup-win32.h"
 #endif
+
+#include <curl/curl.h>
 
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
