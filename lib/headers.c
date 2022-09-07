@@ -335,6 +335,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
 static void headers_init(struct Curl_easy *data)
 {
   Curl_llist_init(&data->state.httphdrs, NULL);
+  data->state.requests = 0;
 }
 
 /*
