@@ -576,6 +576,8 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   }
 
 #ifdef HAS_CLIENT_CERT_PATH
+  HCERTSTORE client_cert_store = NULL;
+
   /* client certificate */
   if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
     DWORD cert_store_name = 0;
@@ -758,7 +760,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         return CURLE_SSL_CERTPROBLEM;
       }
     }
-    CertCloseStore(cert_store, 0);
+    client_cert_store = cert_store;
   }
 #else
   if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
@@ -776,11 +778,20 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 #ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0])
       CertFreeCertificateContext(client_certs[0]);
+    if(client_cert_store)
+      CertCloseStore(client_cert_store, 0);
 #endif
 
     return CURLE_OUT_OF_MEMORY;
   }
   backend->cred->refcount = 1;
+
+#ifdef HAS_CLIENT_CERT_PATH
+  /* Since we did not persist the key, we need to extend the store's
+   * lifetime until the end of the connection
+   */
+  backend->cred->client_cert_store = client_cert_store;
+#endif
 
   /* Windows 10, 1809 (a.k.a. Windows 10 build 17763) */
   if(curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
@@ -2457,6 +2468,10 @@ static void schannel_session_free(void *ptr)
     if(cred->refcount == 0) {
       s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
       curlx_unicodefree(cred->sni_hostname);
+      if(cred->client_cert_store) {
+        CertCloseStore(cred->client_cert_store, 0);
+        cred->client_cert_store = NULL;
+      }
       Curl_safefree(cred);
     }
   }

@@ -155,6 +155,7 @@ struct Curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
   TCHAR *sni_hostname;
+  HCERTSTORE client_cert_store;
   int refcount;
 };
 
