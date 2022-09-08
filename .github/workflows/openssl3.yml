@@ -56,6 +56,9 @@ jobs:
     - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
       name: 'configure'
 
+    - run: gcc --version
+      name: 'check gcc version'
+
     - run: make V=1
       name: 'make'
 
