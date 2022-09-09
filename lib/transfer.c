@@ -1439,6 +1439,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(result)
     return result;
 
+  data->state.requests = 0;
   data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
