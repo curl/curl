@@ -65,6 +65,8 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
          lib1915 lib1916 lib1917 lib1918 lib1919 \
  lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
  lib1945 lib1946 lib1947 \
+ lib2301 lib2302 \
+>>>>>>> 265a739f6 (tests: add websockets tests)
  lib3010 lib3025 lib3026 lib3027
 
 chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
@@ -751,6 +753,12 @@ lib1946_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1946
 lib1947_SOURCES = lib1947.c $(SUPPORTFILES)
 lib1947_LDADD = $(TESTUTIL_LIBS)
 lib1947_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib2301_SOURCES = lib2301.c $(SUPPORTFILES)
+lib2301_LDADD = $(TESTUTIL_LIBS)
+
+lib2302_SOURCES = lib2302.c $(SUPPORTFILES)
+lib2302_LDADD = $(TESTUTIL_LIBS)
 
 lib3010_SOURCES = lib3010.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib3010_LDADD = $(TESTUTIL_LIBS)
