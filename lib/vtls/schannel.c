@@ -1314,6 +1314,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   backend->recv_unrecoverable_err = CURLE_OK;
   backend->recv_sspi_close_notify = false;
   backend->recv_connection_closed = false;
+  backend->recv_renegotiating = false;
   backend->encdata_is_incomplete = false;
 
   /* continue to second handshake step */
@@ -1711,8 +1712,14 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     }
 
-    if(alpn_result.ProtoNegoStatus ==
-       SecApplicationProtocolNegotiationStatus_Success) {
+    if(backend->recv_renegotiating &&
+       (alpn_result.ProtoNegoStatus !=
+        SecApplicationProtocolNegotiationStatus_None)) {
+      failf(data, "schannel: the server selected an ALPN protocol too late");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    else if(alpn_result.ProtoNegoStatus ==
+            SecApplicationProtocolNegotiationStatus_Success) {
 
       infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR,
             alpn_result.ProtocolIdSize, alpn_result.ProtocolId);
@@ -1732,8 +1739,11 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     }
     else
       infof(data, VTLS_INFOF_NO_ALPN);
-    Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
-                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+
+    if(!backend->recv_renegotiating) {
+      Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
+                          BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+    }
   }
 #endif
 
@@ -2293,7 +2303,9 @@ schannel_recv(struct Curl_easy *data, int sockindex,
         infof(data, "schannel: renegotiating SSL/TLS connection");
         connssl->state = ssl_connection_negotiating;
         connssl->connecting_state = ssl_connect_2_writing;
+        backend->recv_renegotiating = true;
         *err = schannel_connect_common(data, conn, sockindex, FALSE, &done);
+        backend->recv_renegotiating = false;
         if(*err) {
           infof(data, "schannel: renegotiation failed");
           goto cleanup;

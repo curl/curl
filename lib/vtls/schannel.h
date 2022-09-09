@@ -179,6 +179,7 @@ struct ssl_backend_data {
   CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
   bool recv_sspi_close_notify; /* true if connection closed by close_notify */
   bool recv_connection_closed; /* true if connection closed, regardless how */
+  bool recv_renegotiating;     /* true if recv is doing renegotiation */
   bool use_alpn; /* true if ALPN is used for this connection */
 #ifdef HAS_MANUAL_VERIFY_API
   bool use_manual_cred_validation; /* true if manual cred validation is used */
