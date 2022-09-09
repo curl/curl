@@ -65,4 +65,11 @@ typedef ssize_t (*curl_ws_write_callback)(void *userdata, char *data,
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
 #define CURLWS_RAW_MODE (1<<0)
 
+struct curl_ws_metadata {
+  int age;       /* zero */
+  int recvflags; /* See the CURLWS_* defines */
+};
+
+struct curl_ws_metadata *curl_ws_meta(CURL *curl);
+
 #endif /* CURLINC_WEBSOCKETS_H */
