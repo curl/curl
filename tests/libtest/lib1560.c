@@ -138,6 +138,17 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+#ifdef USE_WEBSOCKETS
+  {"ws://example.com/color/?green",
+   "ws | [11] | [12] | [13] | example.com | [15] | /color/ | green |"
+   " [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
+  {"wss://example.com/color/?green",
+   "wss | [11] | [12] | [13] | example.com | [15] | /color/ | green |"
+   " [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
+#endif
+
   {"https://user:password@example.net/get?this=and#but frag then", "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_FRAGMENT},
   {"https://user:password@example.net/get?this=and what", "",
