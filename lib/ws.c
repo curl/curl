@@ -335,8 +335,10 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
         return result;
     }
     else {
-      /* TODO: store details about the frame in a struct to be reachable with
-         curl_ws_meta() from within the write callback */
+      /* Store details about the frame to be reachable with curl_ws_meta()
+         from within the write callback */
+      ws->ws.handout.age = 0;
+      ws->ws.handout.recvflags = recvflags;
 
       /* deliver the decoded frame to the user callback */
       if(data->set.fwrite_func((char *)wsp, 1, wslen, writebody_ptr) != wslen)
@@ -354,8 +356,9 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
 }
 
 
-CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer, size_t buflen,
-                      size_t *nread, unsigned int *recvflags)
+CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
+                                  size_t buflen,
+                                  size_t *nread, unsigned int *recvflags)
 {
   size_t bytes;
   CURLcode result;
@@ -523,9 +526,9 @@ static size_t ws_packet(struct Curl_easy *data,
   return outi;
 }
 
-CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
-                      size_t buflen, size_t *sent,
-                      unsigned int sendflags)
+CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
+                                  size_t buflen, size_t *sent,
+                                  unsigned int sendflags)
 {
   size_t bytes;
   CURLcode result;
@@ -582,6 +585,16 @@ void Curl_ws_done(struct Curl_easy *data)
   Curl_dyn_free(&wsp->buf);
 }
 
+CURL_EXTERN struct curl_ws_metadata *curl_ws_meta(struct Curl_easy *data)
+{
+  /* we only return something for websockets, called from within the callback
+     when not using raw mode */
+  if(GOOD_EASY_HANDLE(data) && Curl_is_in_callback(data) && data->req.p.http &&
+     !data->set.ws_raw_mode)
+    return &data->req.p.http->ws.handout;
+  return NULL;
+}
+
 #else
 
 CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
@@ -607,4 +620,9 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
   return CURLE_OK;
 }
 
+CURL_EXTERN struct curl_ws_metadata *curl_ws_meta(struct Curl_easy *data)
+{
+  (void)data;
+  return NULL;
+}
 #endif /* USE_WEBSOCKETS */
