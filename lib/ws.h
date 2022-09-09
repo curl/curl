@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_EASYIF_H
-#define HEADER_CURL_EASYIF_H
+#ifndef HEADER_CURL_WS_H
+#define HEADER_CURL_WS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,15 +23,28 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
 
-/*
- * Prototypes for library-wide functions provided by easy.c
- */
-CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
-                       size_t buflen, size_t *n);
+#ifdef USE_WEBSOCKETS
 
-#ifdef CURLDEBUG
-CURL_EXTERN CURLcode curl_easy_perform_ev(struct Curl_easy *easy);
+#ifdef USE_HYPER
+#define REQTYPE void
+#else
+#define REQTYPE struct dynbuf
 #endif
 
-#endif /* HEADER_CURL_EASYIF_H */
+/* this is the largest single fragment size we support */
+#define MAX_WS_SIZE 65535
+
+CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req);
+CURLcode Curl_ws_accept(struct Curl_easy *data);
+
+size_t Curl_ws_writecb(char *buffer, size_t size, size_t nitems, void *userp);
+void Curl_ws_done(struct Curl_easy *data);
+
+#else
+#define Curl_ws_request(x,y) CURLE_OK
+#define Curl_ws_done(x) Curl_nop_stmt
+#endif
+
+#endif /* HEADER_CURL_WS_H */

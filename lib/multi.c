@@ -753,7 +753,7 @@ static int close_connect_only(struct Curl_easy *data,
   if(data->state.lastconnect_id != conn->connection_id)
     return 0;
 
-  if(!conn->bits.connect_only)
+  if(!conn->connect_only)
     return 1;
 
   connclose(conn, "Removing connect-only easy handle");
@@ -2144,7 +2144,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
       }
 
-      if(data->set.connect_only) {
+      if(data->set.connect_only == 1) {
         /* keep connection open for application to use the socket */
         connkeep(data->conn, "CONNECT_ONLY");
         multistate(data, MSTATE_DONE);
