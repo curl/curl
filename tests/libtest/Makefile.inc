@@ -66,7 +66,6 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
  lib1945 lib1946 lib1947 \
  lib2301 lib2302 \
->>>>>>> 265a739f6 (tests: add websockets tests)
  lib3010 lib3025 lib3026 lib3027
 
 chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
