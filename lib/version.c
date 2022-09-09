@@ -367,6 +367,12 @@ static const char * const protocols[] = {
 #ifndef CURL_DISABLE_TFTP
   "tftp",
 #endif
+#ifdef USE_WEBSOCKETS
+  "ws",
+#endif
+#if defined(USE_SSL) && defined(USE_WEBSOCKETS)
+  "wss",
+#endif
 
   NULL
 };
