@@ -50,7 +50,7 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} --enable-websockets
       name: 'configure'
 
     - run: make V=1
