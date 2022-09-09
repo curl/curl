@@ -18,7 +18,7 @@ on:
 jobs:
   autotools:
     name: ${{ matrix.build.name }}
-    runs-on: 'ubuntu-latest'
+    runs-on: 'ubuntu-22.04'
     timeout-minutes: 60
     strategy:
       fail-fast: false
