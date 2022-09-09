@@ -1176,6 +1176,16 @@ endif()
 
 set(CMAKE_REQUIRED_FLAGS)
 
+option(ENABLE_WEBSOCKETS "Set to ON to enable EXPERIMENTAL websockets" OFF)
+
+if(ENABLE_WEBSOCKETS)
+  if(${SIZEOF_CURL_OFF_T} GREATER "4")
+    set(USE_WEBSOCKETS ON)
+  else()
+    message(WARNING "curl_off_t is too small to enable WebSockets")
+  endif()
+endif()
+
 foreach(CURL_TEST
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
@@ -1486,6 +1496,8 @@ _add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH)
 _add_if("RTSP"          NOT CURL_DISABLE_RTSP)
 _add_if("RTMP"          USE_LIBRTMP)
 _add_if("MQTT"          NOT CURL_DISABLE_MQTT)
+_add_if("WS"            USE_WEBSOCKETS)
+_add_if("WSS"           USE_WEBSOCKETS)
 if(_items)
   list(SORT _items)
 endif()

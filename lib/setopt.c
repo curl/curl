@@ -2430,9 +2430,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_CONNECT_ONLY:
     /*
-     * No data transfer, set up connection and let application use the socket
+     * No data transfer.
+     * (1) - only do connection
+     * (2) - do first get request but get no content
      */
-    data->set.connect_only = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    arg = va_arg(param, long);
+    if(arg > 2)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.connect_only = (unsigned char)arg;
     break;
 
   case CURLOPT_SOCKOPTFUNCTION:
@@ -3127,6 +3132,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_PREREQDATA:
     data->set.prereq_userp = va_arg(param, void *);
     break;
+#ifdef USE_WEBSOCKETS
+  case CURLOPT_WS_OPTIONS: {
+    bool raw;
+    arg = va_arg(param, long);
+    raw = (arg & CURLWS_RAW_MODE);
+    data->set.ws_raw_mode = raw;
+    break;
+  }
+#endif
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

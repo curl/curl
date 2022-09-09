@@ -191,6 +191,16 @@ static const struct Curl_handler * const protocols[] = {
   &Curl_handler_http,
 #endif
 
+#ifdef USE_WEBSOCKETS
+#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+  &Curl_handler_wss,
+#endif
+
+#ifndef CURL_DISABLE_HTTP
+  &Curl_handler_ws,
+#endif
+#endif
+
 #ifndef CURL_DISABLE_FTP
   &Curl_handler_ftp,
 #endif
@@ -867,7 +877,7 @@ void Curl_disconnect(struct Curl_easy *data,
   /* Cleanup NEGOTIATE connection-related data */
   Curl_http_auth_cleanup_negotiate(conn);
 
-  if(conn->bits.connect_only)
+  if(conn->connect_only)
     /* treat the connection as dead in CONNECT_ONLY situations */
     dead_connection = TRUE;
 
@@ -1215,7 +1225,7 @@ ConnectionExists(struct Curl_easy *data,
       check = curr->ptr;
       curr = curr->next;
 
-      if(check->bits.connect_only || check->bits.close)
+      if(check->connect_only || check->bits.close)
         /* connect-only or to-be-closed connections will not be reused */
         continue;
 
@@ -1799,7 +1809,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->proxy_ssl_config.ssl_options = data->set.proxy_ssl.primary.ssl_options;
 #endif
   conn->ip_version = data->set.ipver;
-  conn->bits.connect_only = data->set.connect_only;
+  conn->connect_only = data->set.connect_only;
   conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \

@@ -84,6 +84,7 @@
 #include "strdup.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "ws.h"
 #include "c-hyper.h"
 
 /* The last 3 #include files should be in this order */
@@ -114,6 +115,10 @@ static int https_getsock(struct Curl_easy *data,
 #endif
 static CURLcode http_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn);
+#ifdef USE_WEBSOCKETS
+static CURLcode ws_setup_conn(struct Curl_easy *data,
+                              struct connectdata *conn);
+#endif
 
 /*
  * HTTP handler interface.
@@ -142,6 +147,32 @@ const struct Curl_handler Curl_handler_http = {
   PROTOPT_USERPWDCTRL
 };
 
+#ifdef USE_WEBSOCKETS
+const struct Curl_handler Curl_handler_ws = {
+  "WS",                                 /* scheme */
+  ws_setup_conn,                        /* setup_connection */
+  Curl_http,                            /* do_it */
+  Curl_http_done,                       /* done */
+  ZERO_NULL,                            /* do_more */
+  Curl_http_connect,                    /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ZERO_NULL,                            /* proto_getsock */
+  http_getsock_do,                      /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
+  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  PORT_HTTP,                            /* defport */
+  CURLPROTO_WS,                         /* protocol */
+  CURLPROTO_HTTP,                       /* family */
+  PROTOPT_CREDSPERREQUEST |             /* flags */
+  PROTOPT_USERPWDCTRL
+};
+#endif
+
 #ifdef USE_SSL
 /*
  * HTTPS handler interface.
@@ -169,6 +200,33 @@ const struct Curl_handler Curl_handler_https = {
   PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN | /* flags */
   PROTOPT_USERPWDCTRL
 };
+
+#ifdef USE_WEBSOCKETS
+const struct Curl_handler Curl_handler_wss = {
+  "WSS",                                /* scheme */
+  ws_setup_conn,                        /* setup_connection */
+  Curl_http,                            /* do_it */
+  Curl_http_done,                       /* done */
+  ZERO_NULL,                            /* do_more */
+  Curl_http_connect,                    /* connect_it */
+  https_connecting,                     /* connecting */
+  ZERO_NULL,                            /* doing */
+  https_getsock,                        /* proto_getsock */
+  http_getsock_do,                      /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
+  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* disconnect */
+  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
+  PORT_HTTPS,                           /* defport */
+  CURLPROTO_WSS,                        /* protocol */
+  CURLPROTO_HTTP,                       /* family */
+  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | /* flags */
+  PROTOPT_USERPWDCTRL
+};
+#endif
+
 #endif
 
 static CURLcode http_setup_conn(struct Curl_easy *data,
@@ -204,6 +262,16 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   }
   return CURLE_OK;
 }
+
+#ifdef USE_WEBSOCKETS
+static CURLcode ws_setup_conn(struct Curl_easy *data,
+                              struct connectdata *conn)
+{
+  /* websockets is 1.1 only (for now) */
+  data->state.httpwant = CURL_HTTP_VERSION_1_1;
+  return http_setup_conn(data, conn);
+}
+#endif
 
 #ifndef CURL_DISABLE_PROXY
 /*
@@ -1518,7 +1586,7 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
   }
 #endif
 
-  if(conn->given->protocol & CURLPROTO_HTTPS) {
+  if(conn->given->flags & PROTOPT_SSL) {
     /* perform SSL initialization */
     result = https_connecting(data, done);
     if(result)
@@ -1643,6 +1711,7 @@ CURLcode Curl_http_done(struct Curl_easy *data,
   Curl_mime_cleanpart(&http->form);
   Curl_dyn_reset(&data->state.headerb);
   Curl_hyper_done(data);
+  Curl_ws_done(data);
 
   if(status)
     return status;
@@ -2151,9 +2220,9 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
        [brackets] if the host name is a plain IPv6-address. RFC2732-style. */
     const char *host = conn->host.name;
 
-    if(((conn->given->protocol&CURLPROTO_HTTPS) &&
+    if(((conn->given->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS)) &&
         (conn->remote_port == PORT_HTTPS)) ||
-       ((conn->given->protocol&CURLPROTO_HTTP) &&
+       ((conn->given->protocol&(CURLPROTO_HTTP|CURLPROTO_WS)) &&
         (conn->remote_port == PORT_HTTP)) )
       /* if(HTTPS on port 443) OR (HTTP on port 80) then don't include
          the port number in the host string */
@@ -2702,6 +2771,13 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
                               FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending HTTP request");
+#ifdef USE_WEBSOCKETS
+    else if((conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) &&
+            !(data->set.connect_only))
+      /* Set up the transfer for two-way since without CONNECT_ONLY set, this
+         request probably wants to send data too post upgrade */
+      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
+#endif
     else
       /* HTTP GET/HEAD download: */
       Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, -1);
@@ -2731,7 +2807,7 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
       const char *host = data->state.aptr.cookiehost ?
         data->state.aptr.cookiehost : conn->host.name;
       const bool secure_context =
-        conn->handler->protocol&CURLPROTO_HTTPS ||
+        conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
         strcasecompare("localhost", host) ||
         !strcmp(host, "127.0.0.1") ||
         !strcmp(host, "[::1]") ? TRUE : FALSE;
@@ -3256,6 +3332,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   result = Curl_http_cookies(data, conn, &req);
+  if(!result && conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
+    result = Curl_ws_request(data, &req);
   if(!result)
     result = Curl_add_timecondition(data, &req);
   if(!result)
@@ -3568,7 +3646,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     const char *host = data->state.aptr.cookiehost?
       data->state.aptr.cookiehost:conn->host.name;
     const bool secure_context =
-      conn->handler->protocol&CURLPROTO_HTTPS ||
+      conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
       strcasecompare("localhost", host) ||
       !strcmp(host, "127.0.0.1") ||
       !strcmp(host, "[::1]") ? TRUE : FALSE;
@@ -3734,7 +3812,7 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
     connclose(conn, "HTTP/1.0 close after body");
   }
   else if(conn->httpversion == 20 ||
-          (k->upgr101 == UPGR101_REQUESTED && k->httpcode == 101)) {
+          (k->upgr101 == UPGR101_H2 && k->httpcode == 101)) {
     DEBUGF(infof(data, "HTTP/2 found, allow multiplexing"));
     /* HTTP/2 cannot avoid multiplexing since it is a core functionality
        of the protocol */
@@ -3960,9 +4038,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           break;
         case 101:
           /* Switching Protocols */
-          if(k->upgr101 == UPGR101_REQUESTED) {
+          if(k->upgr101 == UPGR101_H2) {
             /* Switching to HTTP/2 */
-            infof(data, "Received 101");
+            infof(data, "Received 101, Switching to HTTP/2");
             k->upgr101 = UPGR101_RECEIVED;
 
             /* we'll get more headers (HTTP/2 response) */
@@ -3976,8 +4054,21 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
               return result;
             *nread = 0;
           }
+#ifdef USE_WEBSOCKETS
+          else if(k->upgr101 == UPGR101_WS) {
+            /* verify the response */
+            result = Curl_ws_accept(data);
+            if(result)
+              return result;
+            k->header = FALSE; /* no more header to parse! */
+            if(data->set.connect_only) {
+              k->keepon &= ~KEEP_RECV; /* read no more content */
+              *nread = 0;
+            }
+          }
+#endif
           else {
-            /* Switching to another protocol (e.g. WebSocket) */
+            /* Not switching to another protocol */
             k->header = FALSE; /* no more header to parse! */
           }
           break;
@@ -4069,6 +4160,16 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
               k->httpcode);
         return CURLE_HTTP_RETURNED_ERROR;
       }
+
+#ifdef USE_WEBSOCKETS
+      /* All non-101 HTTP status codes are bad when wanting to upgrade to
+         websockets */
+      if(data->req.upgr101 == UPGR101_WS) {
+        failf(data, "Refused WebSockets upgrade: %d", k->httpcode);
+        return CURLE_HTTP_RETURNED_ERROR;
+      }
+#endif
+
 
       data->req.deductheadercount =
         (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;

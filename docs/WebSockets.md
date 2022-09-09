@@ -12,18 +12,20 @@ The Websockets API is described in the individual man pages for the new API.
 
 Websockets with libcurl can be done two ways.
 
-1. Get the websockets frames from the server sent to a WS write callback. You
-   can then respond with `curl_ws_send()` from within the callback or outside
-   of it.
+1. Get the websockets frames from the server sent to the write callback. You
+   can then respond with `curl_ws_send()` from within the callback (or outside
+   of it).
 
 2. Set `CURLOPT_CONNECT_ONLY` to 2L (new for websockets), which makes libcurl
-   do the `Upgrade:` dance in the `curl_easy_perform()` call and then you can
-   use `curl_ws_recv()` and `curl_ws_send()` to receive and send websocket
-   frames from and to the server.
+   do a HTTP GET + `Upgrade:` request plus response in the
+   `curl_easy_perform()` call before it returns and then you can use
+   `curl_ws_recv()` and `curl_ws_send()` to receive and send websocket frames
+   from and to the server.
 
 The new options to `curl_easy_setopt()`:
 
- `CURLOPT_WS_OPTIONS` - to control specific behavior (no bits implemented yet)
+ `CURLOPT_WS_OPTIONS` - to control specific behavior. `CURLWS_RAW_MODE` makes
+ libcurl provide all websocket traffic raw in the callback.
 
 The new function calls:
 

@@ -1392,7 +1392,7 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
                          NGHTTP2_CLEARTEXT_PROTO_VERSION_ID, base64);
   free(base64);
 
-  k->upgr101 = UPGR101_REQUESTED;
+  k->upgr101 = UPGR101_H2;
 
   return result;
 }

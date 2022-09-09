@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "ws.h"
 
 typedef enum {
   HTTPREQ_GET,
@@ -49,6 +50,15 @@ extern const struct Curl_handler Curl_handler_http;
 #ifdef USE_SSL
 extern const struct Curl_handler Curl_handler_https;
 #endif
+
+#ifdef USE_WEBSOCKETS
+extern const struct Curl_handler Curl_handler_ws;
+
+#ifdef USE_SSL
+extern const struct Curl_handler Curl_handler_wss;
+#endif
+#endif /* websockets */
+
 
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
@@ -192,6 +202,15 @@ struct h3out; /* see ngtcp2 */
 #endif /* _WIN32 */
 #endif /* USE_MSH3 */
 
+struct websockets {
+  bool contfragment; /* set TRUE if the previous fragment sent was not final */
+  unsigned char mask[4]; /* 32 bit mask for this connection */
+  struct Curl_easy *data; /* used for write callback handling */
+  struct dynbuf buf;
+  size_t usedbuf; /* number of leading bytes in 'buf' the most recent complete
+                     websocket frame uses */
+};
+
 /****************************************************************************
  * HTTP unique setup
  ***************************************************************************/
@@ -217,6 +236,10 @@ struct HTTP {
     HTTPSEND_REQUEST, /* sending a request */
     HTTPSEND_BODY     /* sending body */
   } sending;
+
+#ifdef USE_WEBSOCKETS
+  struct websockets ws;
+#endif
 
 #ifndef CURL_DISABLE_HTTP
   struct dynbuf send_buffer; /* used if the request couldn't be sent in one
