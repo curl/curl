@@ -490,6 +490,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 
 #ifdef HAS_CLIENT_CERT_PATH
   PCCERT_CONTEXT client_certs[1] = { NULL };
+  HCERTSTORE client_cert_store = NULL;
 #endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
@@ -576,8 +577,6 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
   }
 
 #ifdef HAS_CLIENT_CERT_PATH
-  HCERTSTORE client_cert_store = NULL;
-
   /* client certificate */
   if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
     DWORD cert_store_name = 0;
