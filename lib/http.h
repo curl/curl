@@ -209,6 +209,8 @@ struct websockets {
   struct dynbuf buf;
   size_t usedbuf; /* number of leading bytes in 'buf' the most recent complete
                      websocket frame uses */
+  struct curl_ws_metadata handout; /* the struct storage used for
+                                      curl_ws_meta() returns */
 };
 
 /****************************************************************************

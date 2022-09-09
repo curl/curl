@@ -50,9 +50,17 @@ This function requires an easy handle as input argument for libcurl to know
 what transfer the question is about, but as there is no such pointer provided
 to the callback by libcurl itself, applications that want to use
 \fIcurl_ws_meta(3)\fP need to pass it on to the callback on its own.
+
+.SH "struct fields"
+.IP age
+This field specify the age of this struct. It is always zero for now.
+.IP recvflags
+This is a bitmask with the exact same meaning as the \fBrecvflags\fP
+documented for \fIcurl_ws_recv(3)\fP.
 .SH EXAMPLE
 .nf
 
+/* we pass a pointer to this struct to the callback */
 struct customdata {
   CURL *easy;
   void *ptr;
@@ -70,6 +78,7 @@ static size_t writecb(unsigned char *buffer,
 {
   struct customdata custom;
   custom.easy = easy;
+  custom.ptr = NULL;
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &custom);
 }

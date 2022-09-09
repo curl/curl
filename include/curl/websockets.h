@@ -70,6 +70,6 @@ struct curl_ws_metadata {
   int recvflags; /* See the CURLWS_* defines */
 };
 
-struct curl_ws_metadata *curl_ws_meta(CURL *curl);
+CURL_EXTERN struct curl_ws_metadata *curl_ws_meta(CURL *curl);
 
 #endif /* CURLINC_WEBSOCKETS_H */
