@@ -30,7 +30,7 @@ curl_ws_recv - receive websocket data
 #include <curl/easy.h>
 
 CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
-                      size_t *nread, unsigned int *recvflags);
+                      size_t *recv, unsigned int *recvflags);
 .fi
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
