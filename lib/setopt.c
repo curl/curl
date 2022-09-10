@@ -185,6 +185,10 @@ static CURLcode protocol2num(char *str, curl_off_t *val)
     { "smtps", CURLPROTO_SMTPS },
     { "telnet", CURLPROTO_TELNET },
     { "tftp", CURLPROTO_TFTP },
+#ifdef USE_WEBSOCKETS
+    { "ws", CURLPROTO_WS },
+    { "wss", CURLPROTO_WSS },
+#endif
     { NULL, 0 }
   };
 
