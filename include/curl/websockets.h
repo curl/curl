@@ -58,10 +58,6 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
                                   size_t buflen, size_t *sent,
                                   unsigned int sendflags);
 
-typedef ssize_t (*curl_ws_write_callback)(void *userdata, char *data,
-                                          size_t len,
-                                          unsigned int flags);
-
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
 #define CURLWS_RAW_MODE (1<<0)
 
