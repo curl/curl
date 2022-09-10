@@ -32,7 +32,7 @@ jobs:
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug
         - name: openssl3-O3
           install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev gcc-11
-          configure: CC=gcc-11 CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug
+          configure: CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug
 
     steps:
     - run: |
@@ -51,14 +51,19 @@ jobs:
 
     - uses: actions/checkout@v3
 
+    - run: |
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
+        sudo update-alternatives --set gcc /usr/bin/gcc-11
+      name: 'switch to gcc-11'
+
+    - run: gcc --version
+      name: 'check gcc version'
+
     - run: autoreconf -fi
       name: 'autoreconf'
 
     - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
       name: 'configure'
-
-    - run: gcc-11 --version
-      name: 'check gcc version'
 
     - run: make V=1
       name: 'make'
