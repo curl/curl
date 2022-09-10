@@ -133,6 +133,8 @@ sub pidterm {
                 my $filter = "PID eq $pid";
                 my $result = `tasklist -fi \"$filter\" 2>nul`;
                 if(index($result, "$pid") != -1) {
+                    print("RUN: Win32 pid $pid signalled to die\n");
+                    print("RUN: Win32 pid $pid = $result\n");
                     system("taskkill -fi \"$filter\" >nul 2>&1");
                 }
                 return;
@@ -140,6 +142,9 @@ sub pidterm {
         }
 
         # signal the process to terminate
+        my $result = `ps $pid`;
+        print("RUN: Posix pid $pid signalled to die\n");
+        print("RUN: Posix pid $pid = $result\n");
         kill("TERM", $pid);
     }
 }
@@ -158,6 +163,8 @@ sub pidkill {
                 my $filter = "PID eq $pid";
                 my $result = `tasklist -fi \"$filter\" 2>nul`;
                 if(index($result, "$pid") != -1) {
+                    print("RUN: Win32 pid $pid forced to die\n");
+                    print("RUN: Win32 pid $pid = $result\n");
                     system("taskkill -f -fi \"$filter\" >nul 2>&1");
                     # Windows XP Home compatibility
                     system("tskill $pid >nul 2>&1");
@@ -167,6 +174,9 @@ sub pidkill {
         }
 
         # signal the process to terminate
+        my $result = `ps $pid`;
+        print("RUN: Posix pid $pid forced to die\n");
+        print("RUN: Posix pid $pid = $result\n");
         kill("KILL", $pid);
     }
 }
