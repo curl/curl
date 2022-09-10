@@ -31,14 +31,14 @@ jobs:
           install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev clang
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug
         - name: openssl3-O3
-          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev gcc-11
+          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
           configure: CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug
 
     steps:
     - run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
         sudo apt-get update
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }} gcc-11
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
 
