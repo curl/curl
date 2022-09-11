@@ -223,7 +223,7 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 
 #define REM0(s) ADD((&easysrc_toohard, s))
 #define REM1(f,a) ADDF((&easysrc_toohard, f,a))
-#define REM2(f,a,b) ADDF((&easysrc_toohard, f,a,b))
+#define REM3(f,a,b,c) ADDF((&easysrc_toohard, f,a,b,c))
 
 /* Escape string to C string syntax.  Return NULL if out of memory.
  * Is this correct for those wacky EBCDIC guys? */
@@ -668,7 +668,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
     /* function pointers are never printable */
     if(tag >= CURLOPTTYPE_FUNCTIONPOINT) {
       if(pval) {
-        value = "functionpointer";
+        value = "function pointer";
         remark = TRUE;
       }
       else
@@ -680,7 +680,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
       escape = TRUE;
     }
     else if(pval) {
-      value = "objectpointer";
+      value = "object pointer";
       remark = TRUE;
     }
     else
@@ -706,7 +706,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
 
     /* blobs are never printable */
     if(pblob) {
-      value = "blobpointer";
+      value = "blob pointer";
       remark = TRUE;
     }
     else
@@ -721,7 +721,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
     /* we only use this for real if --libcurl was used */
 
     if(remark)
-      REM2("%s set to a %s", name, value);
+      REM3("%s was set to a%s %s", name, (*value == 'o' ? "n" : ""), value);
     else {
       if(escape) {
         curl_off_t len = ZERO_TERMINATED;
