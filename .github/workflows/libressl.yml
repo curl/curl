@@ -43,9 +43,8 @@ jobs:
         cd libressl-git
         ./autogen.sh
         ./configure --prefix=$HOME/libressl
-        make
         make install
-      name: 'build and install libressl'
+      name: 'install libressl'
 
     - uses: actions/checkout@v3
 

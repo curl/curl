@@ -41,7 +41,7 @@ jobs:
         cd nettle
         ./.bootstrap
         ./configure LDFLAGS="-Wl,-rpath,$HOME/all/lib" ${{ matrix.build.nettle-configure }} --prefix=$HOME/all --libdir=$HOME/all/lib --disable-documentation
-        make && make install
+        make install
       name: 'install nettle'
 
     - run: |
@@ -49,7 +49,7 @@ jobs:
         cd gnutls
         ./bootstrap
         ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib -L$HOME/all/lib" --prefix=$HOME/all ${{ matrix.build.gnutls-configure }} --disable-tools
-        make V=1 && make install
+        make install
       name: 'install gnutls'
 
     - run: |
@@ -57,7 +57,7 @@ jobs:
         cd nghttp3
         autoreconf -fi
         ./configure --prefix=$HOME/all --enable-lib-only
-        make && make install
+        make install
       name: 'install nghttp3'
 
     - run: |
@@ -65,7 +65,7 @@ jobs:
         cd ngtcp2
         autoreconf -fi
         ./configure PKG_CONFIG_PATH=$HOME/all/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/all/lib" --prefix=$HOME/all --enable-lib-only --with-gnutls=$HOME/all
-        make && make install
+        make install
       name: 'install ngtcp2'
 
     - uses: actions/checkout@v3

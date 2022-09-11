@@ -41,7 +41,7 @@ jobs:
         cd wolfssl
         ./autogen.sh
         ./configure ${{ matrix.build.wolfssl-configure }} --prefix=$HOME/all
-        make && make install
+        make install
       name: 'install wolfssl'
 
     - run: |
@@ -49,7 +49,7 @@ jobs:
         cd nghttp3
         autoreconf -fi
         ./configure --prefix=$HOME/all --enable-lib-only
-        make && make install
+        make install
       name: 'install nghttp3'
 
     - run: |
@@ -57,7 +57,7 @@ jobs:
         cd ngtcp2
         autoreconf -fi
         ./configure PKG_CONFIG_PATH=$HOME/all/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/all/lib" --prefix=$HOME/all --enable-lib-only --with-wolfssl=$HOME/all
-        make && make install
+        make install
       name: 'install ngtcp2'
 
     - uses: actions/checkout@v3

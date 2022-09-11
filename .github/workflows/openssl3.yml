@@ -46,7 +46,7 @@ jobs:
         git clone --depth=1 https://github.com/openssl/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/openssl3
-        make && make install_sw
+        make install_sw
       name: 'install openssl3'
 
     - uses: actions/checkout@v3
