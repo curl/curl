@@ -153,7 +153,7 @@ static CURLcode protocol2num(char *str, curl_off_t *val)
   bool found_comma = FALSE;
   static struct scheme {
     const char *name;
-    long bit;
+    curl_off_t bit;
   } const protos[] = {
     { "dict", CURLPROTO_DICT },
     { "file", CURLPROTO_FILE },
