@@ -83,7 +83,7 @@ commands:
             cd wolfssl-5.1.1-stable
             ./autogen.sh
             ./configure --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
-            make && make install
+            make install
 
   install-wolfssh:
     steps:
@@ -94,7 +94,7 @@ commands:
             cd wolfssh-1.4.8-stable
             ./autogen.sh
             ./configure --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-examples
-            make && make install
+            make install
 
   configure-cares:
     steps:

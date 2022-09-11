@@ -39,7 +39,6 @@ jobs:
         git clone --depth 1 -b OpenSSL_1_1_1j+quic https://github.com/quictls/openssl ossl
         cd ossl
         ./config enable-tls1_3 --prefix=$HOME/quictls
-        make
         make install_sw
       name: 'install quictls'
 

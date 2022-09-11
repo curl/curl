@@ -46,7 +46,7 @@ jobs:
         cd wolfssl-5.0.0-stable
         ./autogen.sh
         ./configure --enable-tls13 ${{ matrix.build.wolfssl-configure }} --enable-harden --prefix=$HOME/wssl
-        make && make install
+        make install
       name: 'install wolfssl'
 
     - uses: actions/checkout@v3
