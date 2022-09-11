@@ -100,7 +100,7 @@ if test -z "$EGREP"; then
   fi
 fi
 if test -z "$EGREP" || test "$EGREP" = "not_found"; then
-  AC_MSG_ERROR([grep -E is not working and is egrep not found in PATH. Cannot continue.])
+  AC_MSG_ERROR([grep -E is not working and egrep is not found in PATH. Cannot continue.])
 fi
 AC_SUBST([EGREP])
 
