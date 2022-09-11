@@ -245,7 +245,7 @@
  tracker.
 
  The `TODO` document is full of ideas and suggestions of what we can add or
- fix one day. you are always encouraged and free to grab one of those items and
+ fix one day. You are always encouraged and free to grab one of those items and
  take up a discussion with the curl development team on how that could be
  implemented or provided in the project so that you can work on ticking it odd
  that document.
