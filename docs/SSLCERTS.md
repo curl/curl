@@ -22,7 +22,7 @@ It is about trust
 
 This system is about trust. In your local CA certificate store you have certs
 from *trusted* Certificate Authorities that you then can use to verify that the
-server certificates you see are valid. they are signed by one of the CAs you
+server certificates you see are valid. They are signed by one of the CAs you
 trust.
 
 Which CAs do you trust? You can decide to trust the same set of companies your
