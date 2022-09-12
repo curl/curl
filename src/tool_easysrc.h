@@ -46,6 +46,13 @@ extern CURLcode easysrc_cleanup(void);
 
 void dumpeasysrc(struct GlobalConfig *config);
 
+#else /* CURL_DISABLE_LIBCURL_OPTION is defined */
+
+#define easysrc_init() CURLE_OK
+#define easysrc_cleanup()
+#define dumpeasysrc(x)
+#define easysrc_perform(x) CURLE_OK
+
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 
 #endif /* HEADER_CURL_TOOL_EASYSRC_H */

@@ -2417,13 +2417,12 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     if(result)
       break;
 
-#ifndef CURL_DISABLE_LIBCURL_OPTION
     if(global->libcurl) {
       result = easysrc_perform();
       if(result)
         break;
     }
-#endif
+
     start = tvnow();
 #ifdef CURLDEBUG
     if(global->test_event_based)
@@ -2695,12 +2694,10 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
         result = CURLE_FAILED_INIT;
     }
     else {
-#ifndef CURL_DISABLE_LIBCURL_OPTION
       if(global->libcurl) {
         /* Initialise the libcurl source output */
         result = easysrc_init();
       }
-#endif
 
       /* Perform the main operations */
       if(!result) {
@@ -2708,12 +2705,10 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
         struct OperationConfig *operation = global->first;
         CURLSH *share = curl_share_init();
         if(!share) {
-#ifndef CURL_DISABLE_LIBCURL_OPTION
           if(global->libcurl) {
             /* Cleanup the libcurl source output */
             easysrc_cleanup();
           }
-#endif
           return CURLE_OUT_OF_MEMORY;
         }
 
@@ -2737,7 +2732,6 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
         result = run_all_transfers(global, share, result);
 
         curl_share_cleanup(share);
-#ifndef CURL_DISABLE_LIBCURL_OPTION
         if(global->libcurl) {
           /* Cleanup the libcurl source output */
           easysrc_cleanup();
@@ -2745,7 +2739,6 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
           /* Dump the libcurl code if previously enabled */
           dumpeasysrc(global);
         }
-#endif
       }
       else
         errorf(global, "out of memory\n");
