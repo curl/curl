@@ -83,12 +83,12 @@ if test $PPC64_NEEDED -gt 0
 then
   SDK64=10.5
   ARCHES64='-arch x86_64 -arch ppc64'
-  SDK64=`ls  $SDK_PATH|grep 10.5|head -1`
+  SDK64=`ls  $SDK_PATH | grep "10\.5" | head -1`
 else
  ARCHES64='-arch x86_64'
  #We "know" that 10.4 and earlier do not support 64bit
- OLD_SDK64=`ls  $SDK_PATH|egrep -v "10.[0-4]"|head -1`
- NEW_SDK64=`ls -r $SDK_PATH|egrep -v "10.[0-4][^0-9]" | head -1`
+ OLD_SDK64=`ls  $SDK_PATH | grep -v "10\.[0-4]" | head -1`
+ NEW_SDK64=`ls -r $SDK_PATH | grep -v "10\.[0-4][^0-9]" | head -1`
  if test $USE_OLD -gt 0
   then
    SDK64=$OLD_SDK64
