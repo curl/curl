@@ -625,7 +625,8 @@ void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
   else
     data->info.conn_local_ip[0] = 0;
   data->info.conn_scheme = conn->handler->scheme;
-  data->info.conn_protocol = conn->handler->protocol;
+  /* conn_protocol can only provide "old" protocols */
+  data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
   data->info.conn_primary_port = conn->port;
   data->info.conn_remote_port = conn->remote_port;
   data->info.conn_local_port = local_port;

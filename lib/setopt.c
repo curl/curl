@@ -148,12 +148,12 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
 #define C_SSLVERSION_MAX_VALUE(x) (x & 0xffff0000)
 
-static CURLcode protocol2num(char *str, curl_off_t *val)
+static CURLcode protocol2num(char *str, curl_prot_t *val)
 {
   bool found_comma = FALSE;
   static struct scheme {
     const char *name;
-    curl_off_t bit;
+    curl_prot_t bit;
   } const protos[] = {
     { "dict", CURLPROTO_DICT },
     { "file", CURLPROTO_FILE },
@@ -2649,31 +2649,35 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
        transfer, which thus helps the app which takes URLs from users or other
        external inputs and want to restrict what protocol(s) to deal
        with. Defaults to CURLPROTO_ALL. */
-    data->set.allowed_protocols = (curl_off_t)va_arg(param, long);
+    data->set.allowed_protocols = (curl_prot_t)va_arg(param, long);
     break;
 
   case CURLOPT_REDIR_PROTOCOLS:
     /* set the bitmask for the protocols that libcurl is allowed to follow to,
        as a subset of the CURLOPT_PROTOCOLS ones. That means the protocol needs
        to be set in both bitmasks to be allowed to get redirected to. */
-    data->set.redir_protocols = (curl_off_t)va_arg(param, long);
+    data->set.redir_protocols = (curl_prot_t)va_arg(param, long);
     break;
 
-  case CURLOPT_PROTOCOLS_STR:
+  case CURLOPT_PROTOCOLS_STR: {
+    curl_prot_t prot;
     argptr = va_arg(param, char *);
-    result = protocol2num(argptr, &bigsize);
+    result = protocol2num(argptr, &prot);
     if(result)
       return result;
-    data->set.allowed_protocols = bigsize;
+    data->set.allowed_protocols = prot;
     break;
+  }
 
-  case CURLOPT_REDIR_PROTOCOLS_STR:
+  case CURLOPT_REDIR_PROTOCOLS_STR: {
+    curl_prot_t prot;
     argptr = va_arg(param, char *);
-    result = protocol2num(argptr, &bigsize);
+    result = protocol2num(argptr, &prot);
     if(result)
       return result;
-    data->set.redir_protocols = bigsize;
+    data->set.redir_protocols = prot;
     break;
+  }
 
   case CURLOPT_DEFAULT_PROTOCOL:
     /* Set the protocol to use when the URL doesn't include any protocol */

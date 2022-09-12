@@ -167,7 +167,7 @@ static void conn_free(struct connectdata *conn);
 *
 * Returns the family as a single bit protocol identifier.
 */
-static unsigned int get_protocol_family(const struct Curl_handler *h)
+static curl_prot_t get_protocol_family(const struct Curl_handler *h)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(h->family);
