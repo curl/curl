@@ -25,6 +25,7 @@
 
 #ifdef USE_WEBSOCKETS
 
+#include <curl/curl.h>
 #include "urldata.h"
 #include "dynbuf.h"
 #include "rand.h"
