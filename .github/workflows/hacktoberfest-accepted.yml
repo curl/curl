@@ -36,15 +36,15 @@ jobs:
       - name: Search relevant commit message lines starting with Closes/Merges
         run: |
           git log --format=email ${{ github.event.before }}..${{ github.event.after }} | \
-            egrep -i "^Close[sd]? " | sort | uniq | tee log
+            grep -Ei "^Close[sd]? " | sort | uniq | tee log
         if: steps.check.outputs.label == 'hacktoberfest'
 
       - name: Search for Number-based PR references
         run: |
-          egrep -o "#([0-9]+)" log | cut -d# -f2 | sort | uniq | xargs -t -n1 -I{} \
+          grep -Eo "#([0-9]+)" log | cut -d# -f2 | sort | uniq | xargs -t -n1 -I{} \
             gh pr view {} --json number,createdAt \
               --jq '{number, opened: .createdAt} | [.number, .opened] | join(":")' | tee /dev/stderr | \
-            egrep -o '^([0-9]+):[0-9]{4}-(09-30T|10-|11-01T)' | cut -d: -f1 | sort | uniq | xargs -t -n1 -I {} \
+            grep -Eo '^([0-9]+):[0-9]{4}-(09-30T|10-|11-01T)' | cut -d: -f1 | sort | uniq | xargs -t -n1 -I {} \
               gh pr edit {} --add-label 'hacktoberfest-accepted'
         if: steps.check.outputs.label == 'hacktoberfest'
         env:
@@ -52,10 +52,10 @@ jobs:
 
       - name: Search for URL-based PR references
         run: |
-          egrep -o "github.com/(.+)/(.+)/pull/([0-9]+)" log | sort | uniq | xargs -t -n1 -I{} \
+          grep -Eo "github.com/(.+)/(.+)/pull/([0-9]+)" log | sort | uniq | xargs -t -n1 -I{} \
             gh pr view "https://{}" --json number,createdAt \
               --jq '{number, opened: .createdAt} | [.number, .opened] | join(":")' | tee /dev/stderr | \
-            egrep -o '^([0-9]+):[0-9]{4}-(09-30T|10-|11-01T)' | cut -d: -f1 | sort | uniq | xargs -t -n1 -I {} \
+            grep -Eo '^([0-9]+):[0-9]{4}-(09-30T|10-|11-01T)' | cut -d: -f1 | sort | uniq | xargs -t -n1 -I {} \
               gh pr edit {} --add-label 'hacktoberfest-accepted'
         if: steps.check.outputs.label == 'hacktoberfest'
         env:
