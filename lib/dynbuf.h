@@ -41,8 +41,21 @@
 #define Curl_dyn_reset(a) curlx_dyn_reset(a)
 #define Curl_dyn_tail(a,b) curlx_dyn_tail(a,b)
 #define Curl_dyn_setlen(a,b) curlx_dyn_setlen(a,b)
-#define curlx_dynbuf dynbuf /* for the struct name */
+#else
+#define curlx_dyn_init(a,b) Curl_dyn_init(a,b)
+#define curlx_dyn_add(a,b) Curl_dyn_add(a,b)
+#define curlx_dyn_addn(a,b,c) Curl_dyn_addn(a,b,c)
+#define curlx_dyn_addf Curl_dyn_addf
+#define curlx_dyn_vaddf Curl_dyn_vaddf
+#define curlx_dyn_free(a) Curl_dyn_free(a)
+#define curlx_dyn_ptr(a) Curl_dyn_ptr(a)
+#define curlx_dyn_uptr(a) Curl_dyn_uptr(a)
+#define curlx_dyn_len(a) Curl_dyn_len(a)
+#define curlx_dyn_reset(a) Curl_dyn_reset(a)
+#define curlx_dyn_tail(a,b) Curl_dyn_tail(a,b)
+#define curlx_dyn_setlen(a,b) Curl_dyn_setlen(a,b)
 #endif
+#define curlx_dynbuf dynbuf /* for the struct name */
 
 struct dynbuf {
   char *bufr;    /* point to a null-terminated allocated buffer */
