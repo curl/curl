@@ -62,11 +62,6 @@
 #define CURLPROTO_WS     (1<<30)
 #define CURLPROTO_WSS    (1LL<<31)
 
-/* This mask is for all the old protocols that are provided and defined in the
-   public header and shall exclude protocols added since which are not exposed
-   in the API */
-#define CURLPROTO_MASK   (0x3ffffff)
-
 /* This type should be bumped to a curl_off_t once we need bit 32 or higher */
 typedef unsigned int curl_prot_t;
 #else
@@ -74,6 +69,11 @@ typedef unsigned int curl_prot_t;
 #define CURLPROTO_WSS 0
 typedef unsigned int curl_prot_t;
 #endif
+
+/* This mask is for all the old protocols that are provided and defined in the
+   public header and shall exclude protocols added since which are not exposed
+   in the API */
+#define CURLPROTO_MASK   (0x3ffffff)
 
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
