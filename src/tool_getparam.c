@@ -2045,13 +2045,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'M': /* M for manual, huge help */
       if(toggle) { /* --no-manual shows no manual... */
-#ifdef USE_MANUAL
-        return PARAM_MANUAL_REQUESTED;
-#else
+#ifndef USE_MANUAL
         warnf(global,
               "built-in manual was disabled at build-time!\n");
-        return PARAM_OPTION_UNKNOWN;
 #endif
+        return PARAM_MANUAL_REQUESTED;
       }
       break;
     case 'n':
