@@ -195,7 +195,7 @@ static CURLcode protocol2num(char *str, curl_prot_t *val)
   if(!str)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   else if(curl_strequal(str, "all")) {
-    *val = ~0;
+    *val = (curl_prot_t)~0;
     return CURLE_OK;
   }
 
