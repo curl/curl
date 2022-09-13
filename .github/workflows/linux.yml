@@ -19,26 +19,34 @@ jobs:
   autotools:
     name: ${{ matrix.build.name }}
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 60
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
         build:
         - name: bearssl
-          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_steps: bearssl
           configure: LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
+
         - name: bearssl-clang
-          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev clang
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev clang
+          install_steps: bearssl
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
+
+        - name: hyper
+          install_steps: rust hyper
+          configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
 
     steps:
     - run: |
         sudo apt-get update
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install_packages }}
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
 
-    - run: |
+    - if: ${{ contains(matrix.build.install_steps, 'bearssl') }}
+      run: |
         curl -LO https://bearssl.org/bearssl-0.6.tar.gz
         tar -xzf bearssl-0.6.tar.gz
         cd bearssl-0.6
@@ -47,6 +55,23 @@ jobs:
         cp inc/*.h $HOME/bear/include
         cp build/libbearssl.* $HOME/bear/lib
       name: 'install bearssl'
+
+    - if: ${{ contains(matrix.build.install_steps, 'rust') }}
+      run: |
+        cd $HOME
+        curl https://sh.rustup.rs -sSf | sh -s -- -y
+        source $HOME/.cargo/env
+        rustup toolchain install nightly
+      name: 'install rust'
+
+    - if: ${{ contains(matrix.build.install_steps, 'hyper') }}
+      run: |
+        cd $HOME
+        git clone --depth=1 https://github.com/hyperium/hyper.git
+        cd $HOME/hyper
+        RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib
+        echo "LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib" >> $GITHUB_ENV
+      name: 'install hyper'
 
     - uses: actions/checkout@v3
 
