@@ -89,18 +89,30 @@ of common public holidays or when the lead release manager is away traveling,
 the release date can be moved forwards or backwards a full week. This is then
 advertised well in advance.
 
+Critical problems
+-----------------
+
+We can break the release cycle and do a patch release at any point if a
+critical enough problem is reported. There is no exact definition of how to
+assess such criticality, but if an issue is highly disturbing or has a
+security impact on a large enough share of the user population it might
+qualify.
+
+If you think an issue qualifies, bring it to the curl-library mailing list and
+push for it.
+
 Coming dates
 ------------
 
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- May 11, 2022 (7.83.1)
-- July 1, 2022
-- August 31, 2022
-- October 25, 2022
+- October 26, 2022 (7.86.0)
 - December 21, 2022
 - February 15, 2023 (last version 7 release, no feature window after)
 - March 20, 2023 (8.0.0 - curl 25 years)
 - April 17, 2023
 - July 12, 2023
+- September 6, 2023
+- November 1, 2023
+- December 27, 2023
