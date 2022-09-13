@@ -127,9 +127,7 @@ endif
 else # USE_MANUAL
 # built-in manual has been disabled, make a blank file
 $(HUGE):
-	$(HUGECMD)(echo "/* built-in manual is disabled, blank function */" > $(HUGE); \
-	echo '#include "tool_hugehelp.h"' >> $(HUGE); \
-	echo "void hugehelp(void) {}" >>$(HUGE) )
+	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
 
 # ignore tool_hugehelp.c since it is generated source code and it plays

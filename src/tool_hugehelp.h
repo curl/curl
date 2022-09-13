@@ -25,6 +25,11 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#ifdef USE_MANUAL
 void hugehelp(void);
+#else
+/* do nothing if not there */
+#define hugehelp()
+#endif
 
 #endif /* HEADER_CURL_TOOL_HUGEHELP_H */
