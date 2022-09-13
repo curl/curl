@@ -39,9 +39,9 @@ only enables http and https
 also only enables http and https
 .RE
 .IP
-Unknown protocols produce a warning. This allows scripts to safely rely on
-being able to disable potentially dangerous protocols, without relying upon
-support for that protocol being built into curl to avoid an error.
+Unknown and disabled protocols produce a warning. This allows scripts to
+safely rely on being able to disable potentially dangerous protocols, without
+relying upon support for that protocol being built into curl to avoid an error.
 
 This option can be used multiple times, in which case the effect is the same
 as concatenating the protocols into one instance of the option.
