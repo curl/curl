@@ -24,7 +24,7 @@
 .\"
 .TH curl_ws_recv 3 "12 Jun 2022" "libcurl 7.85.0" "libcurl Manual"
 .SH NAME
-curl_ws_recv - receive websocket data
+curl_ws_recv - receive WebSocket data
 .SH SYNOPSIS
 .nf
 #include <curl/easy.h>
@@ -35,12 +35,12 @@ CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
 
-Retrives as much as possible of a received WebSockets data fragment into the
+Retrives as much as possible of a received WebSocket data fragment into the
 \fBbuffer\fP, but not more than \fBbuflen\fP bytes. The provide
 \fIrecvflags\fP argument gets bits set to help characterize the fragment.
 .SH RECVFLAGS
 .IP CURLWS_TEXT
-The buffer contains text data. Note that this makes a difference to WebSockets
+The buffer contains text data. Note that this makes a difference to WebSocket
 but libcurl itself will not make any verification of the content or
 precautions that you actually receive valid UTF-8 content.
 .IP CURLWS_BINARY

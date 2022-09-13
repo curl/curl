@@ -4,36 +4,36 @@ Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-# WebSockets in curl
+# WebSocket in curl
 
 ## API
 
-The Websockets API is described in the individual man pages for the new API.
+The WebSocket API is described in the individual man pages for the new API.
 
-Websockets with libcurl can be done two ways.
+WebSocket with libcurl can be done two ways.
 
-1. Get the websockets frames from the server sent to the write callback. You
+1. Get the WebSocket frames from the server sent to the write callback. You
    can then respond with `curl_ws_send()` from within the callback (or outside
    of it).
 
-2. Set `CURLOPT_CONNECT_ONLY` to 2L (new for websockets), which makes libcurl
+2. Set `CURLOPT_CONNECT_ONLY` to 2L (new for WebSocket), which makes libcurl
    do a HTTP GET + `Upgrade:` request plus response in the
    `curl_easy_perform()` call before it returns and then you can use
-   `curl_ws_recv()` and `curl_ws_send()` to receive and send websocket frames
+   `curl_ws_recv()` and `curl_ws_send()` to receive and send WebSocket frames
    from and to the server.
 
 The new options to `curl_easy_setopt()`:
 
  `CURLOPT_WS_OPTIONS` - to control specific behavior. `CURLWS_RAW_MODE` makes
- libcurl provide all websocket traffic raw in the callback.
+ libcurl provide all WebSocket traffic raw in the callback.
 
 The new function calls:
 
- `curl_ws_recv()` - receive a websockets frame
+ `curl_ws_recv()` - receive a WebSocket frame
 
- `curl_ws_send()` - send a websockets frame
+ `curl_ws_send()` - send a WebSocket frame
 
- `curl_ws_meta()` - return websockets metadata within a write callback
+ `curl_ws_meta()` - return WebSocket metadata within a write callback
 
 ## Max frame size
 
@@ -55,20 +55,20 @@ since it failed to provide a WebSocket transfer.
 
 ## Test suite
 
-I looked for an existing small WebSockets server implementation with maximum
+I looked for an existing small WebSocket server implementation with maximum
 flexibility to dissect and cram into the test suite but I ended up deciding
-that extending the existing test suite server sws to deal with WebSockets
+that extending the existing test suite server sws to deal with WebSocket
 might be the better way.
 
 - This server is already integrated and working in the test suite
 
 - We want maximum control and ability to generate broken protocol and negative
   tests as well. A dumber and simpler TCP server could then be easier to
-  massage into this than a "proper" websockets server.
+  massage into this than a "proper" WebSocket server.
 
-## Command line tool websockets
+## Command line tool WebSocket
 
-The plan is to make curl do websockets similar to telnet/nc. That part of the
+The plan is to make curl do WebSocket similar to telnet/nc. That part of the
 work has not been started.
 
 Ideas:
@@ -84,29 +84,29 @@ Ideas:
 ## Future work
 
 - Verify the Sec-WebSocket-Accept response. It requires a sha-1 function.
-- Verify Sec-Websocket-Extensions and Sec-Websocket-Protocol in the response
-- Make websockets work with hyper
+- Verify Sec-WebSocket-Extensions and Sec-WebSocket-Protocol in the response
+- Make WebSocket work with hyper
 - Consider a `curl_ws_poll()`
-- Make sure Websockets code paths are fuzzed
+- Make sure WebSocket code paths are fuzzed
 - Add client-side PING interval
 - Provide option to disable PING-PONG automation
 - Support compression (`CURLWS_COMPRESS`)
 
-## Why not libwebsockets
+## Why not libWebSocket
 
-[libwebsockets](https://libwebsockets.org/) is said to be a solid, fast and
-efficient WebSockets library with a vast amount of users. My plan was
+[libWebSocket](https://libWebSocket.org/) is said to be a solid, fast and
+efficient WebSocket library with a vast amount of users. My plan was
 originally to build upon it to skip having to implement the lowlevel parts of
-WebSockets myself.
+WebSocket myself.
 
-Here are the reasons why I have decided to move forward with WebSockets in
-curl **without using libwebsockets**:
+Here are the reasons why I have decided to move forward with WebSocket in
+curl **without using libWebSocket**:
 
 - doxygen generated docs only makes them very hard to navigate. No tutorial,
   no clearly written explanatory pages for specific functions.
 
 - seems (too) tightly integrated with a specific TLS library, while we want to
-  support websockets with whatever TLS library libcurl was already made to
+  support WebSocket with whatever TLS library libcurl was already made to
   work with.
 
 - seems (too) tightly integrated with event libraries
@@ -117,5 +117,5 @@ curl **without using libwebsockets**:
 - "bloated" - it is a *huge* library that is actually more lines of code than
   libcurl itself
 
-- websockets is a fairly simple protocol on the network/framing layer so
+- WebSocket is a fairly simple protocol on the network/framing layer so
   making a homegrown handling of it should be fine

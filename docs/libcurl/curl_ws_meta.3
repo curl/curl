@@ -24,7 +24,7 @@
 .\"
 .TH curl_ws_meta 3 "12 Jun 2022" "libcurl 7.85.0" "libcurl Manual"
 .SH NAME
-curl_ws_meta - meta data websocket information
+curl_ws_meta - meta data WebSocket information
 .SH SYNOPSIS
 .nf
 #include <curl/easy.h>
@@ -44,7 +44,7 @@ received WebSocket traffic, \fIcurl_ws_meta(3)\fP can be called from within
 the callback to provide additional information about the data.
 
 This function only works from within the callback, and only when receiving
-Websocket data.
+WebSocket data.
 
 This function requires an easy handle as input argument for libcurl to know
 what transfer the question is about, but as there is no such pointer provided
