@@ -40,7 +40,6 @@ jobs:
         curl https://sh.rustup.rs -sSf | sh -s -- -y
         source $HOME/.cargo/env
         cd rustls-ffi
-        make
         make DESTDIR=$HOME/rustls install
       name: 'install rustls'
 
