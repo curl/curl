@@ -29,7 +29,7 @@
 void hugehelp(void);
 #else
 /* do nothing if not there */
-#define hugehelp(x)
+#define hugehelp()
 #endif
 
 #endif /* HEADER_CURL_TOOL_HUGEHELP_H */
