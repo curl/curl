@@ -23,9 +23,6 @@
  ***************************************************************************/
 /* lib/curl_config.h.in.  Generated somehow by cmake.  */
 
-/* when building libcurl itself */
-#cmakedefine BUILDING_LIBCURL 1
-
 /* Location of default ca bundle */
 #cmakedefine CURL_CA_BUNDLE "${CURL_CA_BUNDLE}"
 
