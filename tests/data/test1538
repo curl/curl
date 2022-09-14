@@ -160,7 +160,7 @@ u1: An invalid CURLU pointer was passed as argument
 u2: An invalid 'part' argument was passed as argument
 u3: Malformed input to a URL function
 u4: Port number was not a decimal number between 0 and 65535
-u5: This libcurl build doesn't support the given URL scheme
+u5: Unsupported URL scheme
 u6: URL decode error, most likely because of rubbish in the input
 u7: A memory function failed
 u8: Credentials was passed in the URL when prohibited
@@ -183,7 +183,7 @@ u24: Bad password
 u25: Bad path
 u26: Bad query
 u27: Bad scheme
-u28: Unsupported number of slashes
+u28: Unsupported number of slashes following scheme
 u29: Bad user
 u30: CURLUcode unknown
 </stdout>
