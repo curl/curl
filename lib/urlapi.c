@@ -184,8 +184,12 @@ static CURLUcode strcpy_url(struct dynbuf *o, const char *url, bool relative)
  * Returns the length of the scheme if the given URL is absolute (as opposed
  * to relative). Stores the scheme in the buffer if TRUE and 'buf' is
  * non-NULL. The buflen must be larger than MAX_SCHEME_LEN if buf is set.
+ *
+ * If 'guess_scheme' is TRUE, it means the URL might be provided without
+ * scheme.
  */
-size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
+size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
+                            bool guess_scheme)
 {
   int i;
   DEBUGASSERT(!buf || (buflen > MAX_SCHEME_LEN));
@@ -207,7 +211,11 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
       break;
     }
   }
-  if(i && (url[i] == ':') && (url[i + 1] == '/')) {
+  if(i && (url[i] == ':') && ((url[i + 1] == '/') || !guess_scheme)) {
+    /* If this does not guess scheme, the scheme always ends with the colon so
+       that this also detects data: URLs etc. In guessing mode, data: could
+       be the host name "data" with a specified port number. */
+
     /* the length of the scheme is the name part only */
     size_t len = i;
     if(buf) {
@@ -934,7 +942,8 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     goto fail;
   }
 
-  schemelen = Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf));
+  schemelen = Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf),
+                                   flags & CURLU_GUESS_SCHEME);
 
   /* handle the file: scheme */
   if(schemelen && !strcmp(schemebuf, "file")) {
@@ -1059,11 +1068,6 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
         p++;
         i++;
       }
-      if((i < 1) || (i>3)) {
-        /* less than one or more than three slashes */
-        result = CURLUE_BAD_SLASHES;
-        goto fail;
-      }
 
       schemep = schemebuf;
       if(!Curl_builtin_scheme(schemep) &&
@@ -1072,6 +1076,11 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
         goto fail;
       }
 
+      if((i < 1) || (i>3)) {
+        /* less than one or more than three slashes */
+        result = CURLUE_BAD_SLASHES;
+        goto fail;
+      }
       if(junkscan(schemep, flags)) {
         result = CURLUE_BAD_SCHEME;
         goto fail;
@@ -1730,7 +1739,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     /* if the new thing is absolute or the old one is not
      * (we could not get an absolute url in 'oldurl'),
      * then replace the existing with the new. */
-    if(Curl_is_absolute_url(part, NULL, 0)
+    if(Curl_is_absolute_url(part, NULL, 0, flags & CURLU_GUESS_SCHEME)
        || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
       return parseurl_and_replace(part, u, flags);
     }
