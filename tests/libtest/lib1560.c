@@ -401,6 +401,7 @@ static const struct urltestcase get_url_list[] = {
   {"example://foo", "", 0, 0, CURLUE_UNSUPPORTED_SCHEME},
   {"mailto:infobot@example.com?body=send%20current-issue", "", 0, 0,
    CURLUE_UNSUPPORTED_SCHEME},
+  {"about:80", "https://about:80/", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   /* percent encoded host names */
   {"http://example.com%40127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://example.com%21127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
