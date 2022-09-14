@@ -943,7 +943,8 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   }
 
   schemelen = Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf),
-                                   flags & CURLU_GUESS_SCHEME);
+                                   flags & (CURLU_GUESS_SCHEME|
+                                            CURLU_DEFAULT_SCHEME));
 
   /* handle the file: scheme */
   if(schemelen && !strcmp(schemebuf, "file")) {
@@ -1739,7 +1740,9 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     /* if the new thing is absolute or the old one is not
      * (we could not get an absolute url in 'oldurl'),
      * then replace the existing with the new. */
-    if(Curl_is_absolute_url(part, NULL, 0, flags & CURLU_GUESS_SCHEME)
+    if(Curl_is_absolute_url(part, NULL, 0,
+                            flags & (CURLU_GUESS_SCHEME|
+                                     CURLU_DEFAULT_SCHEME))
        || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
       return parseurl_and_replace(part, u, flags);
     }
