@@ -197,7 +197,7 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
   if(buf)
     buf[0] = 0; /* always leave a defined value in buf */
 #ifdef WIN32
-  if(STARTS_WITH_DRIVE_PREFIX(url))
+  if(guess_scheme && STARTS_WITH_DRIVE_PREFIX(url))
     return 0;
 #endif
   for(i = 0; i < MAX_SCHEME_LEN; ++i) {
