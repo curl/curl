@@ -2,9 +2,9 @@ curl and libcurl 7.86.0
 
  Public curl releases:         211
  Command line options:         248
- curl_easy_setopt() options:   299
- Public functions in libcurl:  88
- Contributors:                 2696
+ curl_easy_setopt() options:   300
+ Public functions in libcurl:  91
+ Contributors:                 2699
 
 This release includes the following changes:
 
@@ -13,6 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o cmake: define BUILDING_LIBCURL in lib/CMakeLists, not config.h [5]
  o cmake: fix original MinGW builds [177]
  o configure: correct the wording when checking grep -E [13]
  o configure: fail if '--without-ssl' + explicit parameter for an ssl lib [164]
@@ -21,25 +22,37 @@ This release includes the following bugfixes:
  o curl-compilers.m4: use -O2 as default optimize for clang [6]
  o curl_ctype: convert to macros-only [10]
  o curl_easy_pause.3: unpausing is as fast as possible [14]
+ o curl_setup: include curl.h after platform setup headers [37]
+ o curl_setup: include only system.h instead of curl.h [34]
  o CURLOPT_DNS_INTERFACE.3: mention it works for almost all protocols [15]
  o CURLOPT_PROXY_SSLCERT_BLOB.3: this is for HTTPS proxies [9]
  o CURLOPT_WILDCARDMATCH.3: Fix backslash escaping under single quotes [172]
+ o docs: correct missing uppercase in Markdown files [38]
  o docs: remove mentions of deprecated '--without-openssl' parameter [170]
+ o formdata: fix warning: 'CURLformoption' is promoted to 'int' [24]
  o ftp: ignore a 550 response to MDTM [1]
+ o getparameter: return PARAM_MANUAL_REQUESTED for -M even when disabled [17]
  o header: define public API functions as extern c [26]
  o headers: reset the requests counter at transfer start [25]
  o http2: make nghttp2 less picky about field whitespace [27]
+ o lib: add missing limits.h includes [35]
  o lib: add required Win32 setup definitions in setup-win32.h [4]
  o manpages: Fix spelling of "allows to" -> "allows one to" [171]
  o misc: ISSPACE() => ISBLANK() [11]
  o misc: spelling fixes [174]
+ o RELEASE-PROCEDURE.md: mention patch releases [21]
+ o scripts: use `grep -E` instead of `egrep` [30]
  o setup-win32: no longer define UNICODE/_UNICODE implicitly [3]
  o tests/certs/scripts: insert standard curl source headers [169]
  o tests: fix tag syntax errors in test files
+ o tool_hugehelp: make hugehelp a blank macro when disabled [7]
+ o tool_operate: avoid a few #ifdefs for disabled-libcurl builds [29]
  o tool_operate: prevent over-queuing in parallel mode [176]
  o tool_operate: reduce errorbuffer allocs [173]
  o tool_progress: remove 'Qd' from the parallel progress bar [175]
+ o tool_setopt: use better English in --libcurl source comments [39]
  o urlapi: leaner with fewer allocs [2]
+ o wolfSSL: fix session management bug. [31]
 
 This release includes the following known bugs:
 
@@ -48,12 +61,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  ajak in #curl, Andrew Lambert, Dan Fandrich, Daniel Stenberg, Emanuele Torre,
-  James Fuller, justchen1369 on github, Keitagit-kun on github, Marcel Raad,
-  Marc Hörsken, Max Dymond, Michael Heimpold, Orgad Shaneh, Patrick Monnerat,
+  a1346054 on github, ajak in #curl, Andrew Lambert, Benjamin Loison,
+  Dan Fandrich, Daniel Stenberg, Emanuele Torre, Hayden Roche, James Fuller,
+  justchen1369 on github, Keitagit-kun on github, Marcel Raad, Marc Hörsken,
+  Max Dymond, Michael Heimpold, Orgad Shaneh, Patrick Monnerat, Philip Heiduck,
   ProceduralMan on github, Ray Satiro, Samuel Henrique, ssdbest on github,
-  Viktor Szakats
-  (19 contributors)
+  Viktor Szakats, zhanghu on xiaomi
+  (24 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -61,7 +75,9 @@ References to bug reports and discussions on issues:
  [2] = https://curl.se/bug/?i=9408
  [3] = https://curl.se/bug/?i=9375
  [4] = https://curl.se/bug/?i=9375
+ [5] = https://curl.se/bug/?i=9498
  [6] = https://curl.se/bug/?i=9444
+ [7] = https://curl.se/bug/?i=9485
  [8] = https://curl.se/bug/?i=9455
  [9] = https://curl.se/bug/?i=9434
  [10] = https://curl.se/bug/?i=9429
@@ -71,10 +87,21 @@ References to bug reports and discussions on issues:
  [14] = https://curl.se/bug/?i=9410
  [15] = https://curl.se/bug/?i=9427
  [16] = https://curl.se/bug/?i=9307
+ [17] = https://curl.se/bug/?i=9485
+ [21] = https://curl.se/bug/?i=9495
  [23] = https://curl.se/bug/?i=8995
+ [24] = https://curl.se/bug/?i=9484
  [25] = https://curl.se/bug/?i=9424
  [26] = https://curl.se/bug/?i=9424
  [27] = https://curl.se/bug/?i=9448
+ [29] = https://curl.se/bug/?i=9486
+ [30] = https://curl.se/bug/?i=9491
+ [31] = https://curl.se/bug/?i=9492
+ [34] = https://curl.se/bug/?i=9453
+ [35] = https://curl.se/bug/?i=9453
+ [37] = https://curl.se/bug/?i=9453
+ [38] = https://curl.se/bug/?i=9474
+ [39] = https://curl.se/bug/?i=9475
  [164] = https://curl.se/bug/?i=9414
  [169] = https://curl.se/bug/?i=9417
  [170] = https://curl.se/bug/?i=9415
