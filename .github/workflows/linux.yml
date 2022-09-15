@@ -34,6 +34,26 @@ jobs:
           install_steps: bearssl
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
 
+        - name: libressl
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_steps: libressl
+          configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
+
+        - name: libressl-clang
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev clang
+          install_steps: libressl
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
+
+        - name: mbedtls
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev
+          install_steps: mbedtls
+          configure: LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
+
+        - name: mbedtls-clang
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev clang
+          install_steps: mbedtls
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
+
         - name: event-based
           install_packages: libpsl-dev libbrotli-dev libzstd-dev libssh-dev
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
@@ -42,6 +62,21 @@ jobs:
         - name: hyper
           install_steps: rust hyper
           configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
+
+        - name: rustls
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev
+          install_steps: rust rustls
+          configure: --with-rustls=$HOME/rustls --enable-debug
+
+        - name: Intel compiler - without SSL
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_steps: intel
+          configure: CC=icc --enable-debug --without-ssl
+
+        - name: Intel compiler - OpenSSL
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libssl-dev
+          install_steps: intel
+          configure: CC=icc --enable-debug --with-openssl
 
         - name: NSS
           install_packages: clang-9 libnss3-dev libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
@@ -65,6 +100,22 @@ jobs:
         cp build/libbearssl.* $HOME/bear/lib
       name: 'install bearssl'
 
+    - if: ${{ contains(matrix.build.install_steps, 'libressl') }}
+      run: |
+        git clone --depth=1 -b v3.5.3 https://github.com/libressl-portable/portable.git libressl-git
+        cd libressl-git
+        ./autogen.sh
+        ./configure --prefix=$HOME/libressl
+        make install
+      name: 'install libressl'
+
+    - if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
+      run: |
+        git clone --depth=1 -b v3.1.0 https://github.com/ARMmbed/mbedtls
+        cd mbedtls
+        make DESTDIR=$HOME/mbed install
+      name: 'install mbedtls'
+
     - if: ${{ contains(matrix.build.install_steps, 'rust') }}
       run: |
         cd $HOME
@@ -72,6 +123,13 @@ jobs:
         source $HOME/.cargo/env
         rustup toolchain install nightly
       name: 'install rust'
+
+    - if: ${{ contains(matrix.build.install_steps, 'rustls') }}
+      run: |
+        git clone --depth=1 -b v0.8.2 --recursive https://github.com/rustls/rustls-ffi.git
+        cd rustls-ffi
+        make DESTDIR=$HOME/rustls install
+      name: 'install rustls'
 
     - if: ${{ contains(matrix.build.install_steps, 'hyper') }}
       run: |
@@ -81,6 +139,16 @@ jobs:
         RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib
         echo "LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib" >> $GITHUB_ENV
       name: 'install hyper'
+
+    - if: ${{ contains(matrix.build.install_steps, 'intel') }}
+      run: |
+        cd /tmp
+        curl https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo apt-key add -
+        sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
+        sudo apt install --no-install-recommends intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+        source /opt/intel/oneapi/setvars.sh
+        printenv >> $GITHUB_ENV
+      name: 'install Intel compilers'
 
     - uses: actions/checkout@v3
 
