@@ -700,6 +700,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     }
     else
       data->set.method = HTTPREQ_GET;
+    data->set.upload = FALSE;
     break;
 
   case CURLOPT_HTTPPOST:
