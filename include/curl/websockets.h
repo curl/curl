@@ -24,6 +24,10 @@
  *
  ***************************************************************************/
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 /* generic in/out flag bits */
 #define CURLWS_TEXT       (1<<0)
 #define CURLWS_BINARY     (1<<1)
@@ -67,5 +71,9 @@ struct curl_ws_metadata {
 };
 
 CURL_EXTERN struct curl_ws_metadata *curl_ws_meta(CURL *curl);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* CURLINC_WEBSOCKETS_H */
