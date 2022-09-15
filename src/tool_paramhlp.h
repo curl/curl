@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "tool_libinfo.h"
 
 struct getout *new_getout(struct OperationConfig *config);
 
@@ -38,7 +39,7 @@ ParameterError str2unummax(long *val, const char *str, long max);
 ParameterError str2udouble(double *val, const char *str, long max);
 
 ParameterError proto2num(struct OperationConfig *config,
-                         unsigned int val, char **obuf,
+                         proto_set_t val, char **obuf,
                          const char *str);
 
 ParameterError check_protocol(const char *str);
