@@ -1853,15 +1853,18 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 }
 
 /* returns the handler if the given scheme is built-in */
-const struct Curl_handler *Curl_builtin_scheme(const char *scheme)
+const struct Curl_handler *Curl_builtin_scheme(const char *scheme,
+                                               size_t schemelen)
 {
   const struct Curl_handler * const *pp;
   const struct Curl_handler *p;
   /* Scan protocol handler table and match against 'scheme'. The handler may
      be changed later when the protocol specific setup function is called. */
+  if(schemelen == CURL_ZERO_TERMINATED)
+    schemelen = strlen(scheme);
   for(pp = protocols; (p = *pp) != NULL; pp++)
-    if(strcasecompare(p->scheme, scheme))
-      /* Protocol found in table. Check if allowed */
+    if(strncasecompare(p->scheme, scheme, schemelen) && !p->scheme[schemelen])
+      /* Protocol found in table. */
       return p;
   return NULL; /* not found */
 }
@@ -1871,7 +1874,8 @@ static CURLcode findprotocol(struct Curl_easy *data,
                              struct connectdata *conn,
                              const char *protostr)
 {
-  const struct Curl_handler *p = Curl_builtin_scheme(protostr);
+  const struct Curl_handler *p = Curl_builtin_scheme(protostr,
+                                                     CURL_ZERO_TERMINATED);
 
   if(p && /* Protocol found in table. Check if allowed */
      (data->set.allowed_protocols & p->protocol)) {

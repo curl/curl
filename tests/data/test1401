@@ -31,6 +31,11 @@ http
  <name>
 --libcurl for GET with various options
  </name>
+<features>
+http
+ftp
+file
+</features>
 <setenv>
 SSL_CERT_FILE=
 </setenv>

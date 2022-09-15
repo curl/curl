@@ -423,7 +423,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   /* if this is a known scheme, get some details */
   if(u->scheme)
-    h = Curl_builtin_scheme(u->scheme);
+    h = Curl_builtin_scheme(u->scheme, CURL_ZERO_TERMINATED);
 
   /* We could use the login information in the URL so extract it. Only parse
      options if the handler says we should. Note that 'h' might be NULL! */
@@ -1066,7 +1066,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       }
 
       schemep = schemebuf;
-      if(!Curl_builtin_scheme(schemep) &&
+      if(!Curl_builtin_scheme(schemep, CURL_ZERO_TERMINATED) &&
          !(flags & CURLU_NON_SUPPORT_SCHEME)) {
         result = CURLUE_UNSUPPORTED_SCHEME;
         goto fail;
@@ -1402,7 +1402,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       /* there's no stored port number, but asked to deliver
          a default one for the scheme */
       const struct Curl_handler *h =
-        Curl_builtin_scheme(u->scheme);
+        Curl_builtin_scheme(u->scheme, CURL_ZERO_TERMINATED);
       if(h) {
         msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         ptr = portbuf;
@@ -1412,7 +1412,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       /* there is a stored port number, but ask to inhibit if
          it matches the default one for the scheme */
       const struct Curl_handler *h =
-        Curl_builtin_scheme(u->scheme);
+        Curl_builtin_scheme(u->scheme, CURL_ZERO_TERMINATED);
       if(h && (h->defport == u->portnum) &&
          (flags & CURLU_NO_DEFAULT_PORT))
         ptr = NULL;
@@ -1458,7 +1458,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       else
         return CURLUE_NO_SCHEME;
 
-      h = Curl_builtin_scheme(scheme);
+      h = Curl_builtin_scheme(scheme, CURL_ZERO_TERMINATED);
       if(!port && (flags & CURLU_DEFAULT_PORT)) {
         /* there's no stored port number, but asked to deliver
            a default one for the scheme */
@@ -1664,7 +1664,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       return CURLUE_BAD_SCHEME;
     if(!(flags & CURLU_NON_SUPPORT_SCHEME) &&
        /* verify that it is a fine scheme */
-       !Curl_builtin_scheme(part))
+       !Curl_builtin_scheme(part, CURL_ZERO_TERMINATED))
       return CURLUE_UNSUPPORTED_SCHEME;
     storep = &u->scheme;
     urlencode = FALSE; /* never */
