@@ -115,11 +115,6 @@
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)   \
-  && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
-#define HAS_CLIENT_CERT_PATH
-#endif
-
 #ifdef HAS_CLIENT_CERT_PATH
 #ifdef UNICODE
 #define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_W
@@ -2467,10 +2462,12 @@ static void schannel_session_free(void *ptr)
     if(cred->refcount == 0) {
       s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
       curlx_unicodefree(cred->sni_hostname);
+#ifdef HAS_CLIENT_CERT_PATH
       if(cred->client_cert_store) {
         CertCloseStore(cred->client_cert_store, 0);
         cred->client_cert_store = NULL;
       }
+#endif
       Curl_safefree(cred);
     }
   }

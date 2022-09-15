@@ -94,6 +94,11 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
 #endif
 #endif
 
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)   \
+  && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
+#define HAS_CLIENT_CERT_PATH
+#endif
+
 #ifndef SCH_CREDENTIALS_VERSION
 
 #define SCH_CREDENTIALS_VERSION  0x00000005
@@ -155,7 +160,9 @@ struct Curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
   TCHAR *sni_hostname;
+#ifdef HAS_CLIENT_CERT_PATH
   HCERTSTORE client_cert_store;
+#endif
   int refcount;
 };
 
