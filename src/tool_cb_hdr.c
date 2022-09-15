@@ -35,6 +35,7 @@
 #include "tool_cb_hdr.h"
 #include "tool_cb_wrt.h"
 #include "tool_operate.h"
+#include "tool_libinfo.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -74,7 +75,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   const char *str = ptr;
   const size_t cb = size * nmemb;
   const char *end = (char *)ptr + cb;
-  long protocol = 0;
+  char *scheme;
+  proto_t protocol = proto_last;
 
   /*
    * Once that libcurl has called back tool_header_cb() the returned value
@@ -139,10 +141,12 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
    * Content-Disposition header specifying a filename property.
    */
 
-  curl_easy_getinfo(per->curl, CURLINFO_PROTOCOL, &protocol);
+  curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
+  if(scheme)
+    protocol = scheme2protocol(scheme);
   if(hdrcbdata->honor_cd_filename &&
      (cb > 20) && checkprefix("Content-disposition:", str) &&
-     (protocol & (CURLPROTO_HTTPS|CURLPROTO_HTTP))) {
+     (protocol == proto_https || protocol == proto_http)) {
     const char *p = str + 20;
 
     /* look for the 'filename=' parameter
@@ -202,8 +206,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       per->was_last_header_empty = TRUE;
   }
   if(hdrcbdata->config->show_headers &&
-    (protocol &
-     (CURLPROTO_HTTP|CURLPROTO_HTTPS|CURLPROTO_RTSP|CURLPROTO_FILE))) {
+    (protocol == proto_http || protocol == proto_https ||
+     protocol == proto_rtsp || protocol == proto_file)) {
     /* bold headers only for selected protocols */
     char *value = NULL;
 

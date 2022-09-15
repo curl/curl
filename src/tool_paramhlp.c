@@ -34,6 +34,7 @@
 #include "tool_getpass.h"
 #include "tool_msgs.h"
 #include "tool_paramhlp.h"
+#include "tool_libinfo.h"
 #include "tool_version.h"
 #include "dynbuf.h"
 
@@ -270,48 +271,19 @@ ParameterError str2udouble(double *valp, const char *str, long max)
  * data.
  */
 
+#define MAX_PROTOSTRING (64*11) /* Enough room for 64 10-chars proto names. */
+
 ParameterError proto2num(struct OperationConfig *config,
-                         unsigned int val, char **ostr, const char *str)
+                         proto_set_t val, char **ostr, const char *str)
 {
   char *buffer;
   const char *sep = ",";
   char *token;
-  char obuf[256] = "";
-  size_t olen = sizeof(obuf);
-  char *optr;
-  struct sprotos const *pp;
+  struct curlx_dynbuf obuf;
+  proto_t proto;
+  CURLcode result;
 
-  static struct sprotos {
-    const char *name;
-    unsigned int bit;
-  } const protos[] = {
-    { "all", (unsigned int)CURLPROTO_ALL },
-    { "http", CURLPROTO_HTTP },
-    { "https", CURLPROTO_HTTPS },
-    { "ftp", CURLPROTO_FTP },
-    { "ftps", CURLPROTO_FTPS },
-    { "scp", CURLPROTO_SCP },
-    { "sftp", CURLPROTO_SFTP },
-    { "telnet", CURLPROTO_TELNET },
-    { "ldap", CURLPROTO_LDAP },
-    { "ldaps", CURLPROTO_LDAPS },
-    { "mqtt", CURLPROTO_MQTT },
-    { "dict", CURLPROTO_DICT },
-    { "file", CURLPROTO_FILE },
-    { "tftp", CURLPROTO_TFTP },
-    { "imap", CURLPROTO_IMAP },
-    { "imaps", CURLPROTO_IMAPS },
-    { "pop3", CURLPROTO_POP3 },
-    { "pop3s", CURLPROTO_POP3S },
-    { "smtp", CURLPROTO_SMTP },
-    { "smtps", CURLPROTO_SMTPS },
-    { "rtsp", CURLPROTO_RTSP },
-    { "gopher", CURLPROTO_GOPHER },
-    { "gophers", CURLPROTO_GOPHERS },
-    { "smb", CURLPROTO_SMB },
-    { "smbs", CURLPROTO_SMBS },
-    { NULL, 0 }
-  };
+  curlx_dyn_init(&obuf, MAX_PROTOSTRING);
 
   if(!str)
     return PARAM_OPTION_AMBIGUOUS;
@@ -345,44 +317,52 @@ ParameterError proto2num(struct OperationConfig *config,
       }
     }
 
-    for(pp = protos; pp->name; pp++) {
-      if(curl_strequal(token, pp->name)) {
-        switch(action) {
-        case deny:
-          val &= ~(pp->bit);
-          break;
-        case allow:
-          val |= pp->bit;
-          break;
-        case set:
-          val = pp->bit;
-          break;
-        }
+    if(curl_strequal(token, "all")) {
+      switch(action) {
+      case deny:
+        val = 0;
+        break;
+      case allow:
+      case set:
+        val = PROTO_ALL;
         break;
       }
     }
-
-    if(!(pp->name)) { /* unknown protocol */
-      /* If they have specified only this protocol, we say treat it as
-         if no protocols are allowed */
-      if(action == set)
-        val = 0;
-      warnf(config->global, "unrecognized protocol '%s'\n", token);
+    else {
+      proto = scheme2protocol(token);
+      if(proto != PROTO_NONE) {
+        switch(action) {
+        case deny:
+          val &= ~PROTO_BIT(proto);
+          break;
+        case set:
+          val = 0;
+          /* FALLTHROUGH */
+        case allow:
+          if(proto >= PROTO_MAX)
+            warnf(config->global, "protocol '%s' enabled but not accessible\n",
+                  token);
+          val |= PROTO_BIT(proto);
+          break;
+        }
+      }
+      else { /* unknown protocol */
+        /* If they have specified only this protocol, we say treat it as
+           if no protocols are allowed */
+        if(action == set)
+          val = 0;
+        warnf(config->global, "unrecognized protocol '%s'\n", token);
+      }
     }
   }
   Curl_safefree(buffer);
 
-  optr = obuf;
-  for(pp = &protos[1]; pp->name; pp++) {
-    if(val & pp->bit) {
-      size_t n = msnprintf(optr, olen, "%s%s",
-                           olen != sizeof(obuf) ? "," : "",
-                           pp->name);
-      olen -= n;
-      optr += n;
-    }
-  }
-  *ostr = strdup(obuf);
+  result = curlx_dyn_addn(&obuf, "", 0);
+  for(proto = 0; proto < proto_last && proto < PROTO_MAX && !result; proto++)
+    if(val & PROTO_BIT(proto))
+      result = curlx_dyn_addf(&obuf, "%s,", protocol2scheme(proto));
+  curlx_dyn_setlen(&obuf, curlx_dyn_len(&obuf) - 1);
+  *ostr = curlx_dyn_ptr(&obuf);
 
   return *ostr ? PARAM_OK : PARAM_NO_MEM;
 }
@@ -397,14 +377,14 @@ ParameterError proto2num(struct OperationConfig *config,
  */
 ParameterError check_protocol(const char *str)
 {
-  const char * const *pp;
-  const curl_version_info_data *curlinfo = curl_version_info(CURLVERSION_NOW);
+  proto_t proto;
+
   if(!str)
     return PARAM_REQUIRES_PARAMETER;
-  for(pp = curlinfo->protocols; *pp; pp++) {
-    if(curl_strequal(*pp, str))
-      return PARAM_OK;
-  }
+
+  proto = scheme2protocol(str);
+  if(proto < proto_last)
+    return PARAM_OK;
   return PARAM_LIBCURL_UNSUPPORTED_PROTOCOL;
 }
 

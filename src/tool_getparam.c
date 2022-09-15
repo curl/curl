@@ -1206,15 +1206,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'D': /* --proto */
         config->proto_present = TRUE;
-        err = proto2num(config, (unsigned int)CURLPROTO_ALL,
-                        &config->proto_str, nextarg);
+        err = proto2num(config, PROTO_ALL, &config->proto_str, nextarg);
         if(err)
           return err;
         break;
       case 'E': /* --proto-redir */
         config->proto_redir_present = TRUE;
-        if(proto2num(config, CURLPROTO_HTTP|CURLPROTO_HTTPS|
-                     CURLPROTO_FTP|CURLPROTO_FTPS,
+        if(proto2num(config, PROTO_BIT(proto_http) | PROTO_BIT(proto_https) |
+                     PROTO_BIT(proto_ftp) | PROTO_BIT(proto_ftps),
                      &config->proto_redir_str, nextarg))
           return PARAM_BAD_USE;
         break;

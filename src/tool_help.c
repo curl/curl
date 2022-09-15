@@ -221,7 +221,10 @@ void tool_version_info(void)
   if(curlinfo->protocols) {
     printf("Protocols: ");
     for(proto = curlinfo->protocols; *proto; ++proto) {
-      printf("%s ", *proto);
+      /* Special case: do not list rtmp?* protocols.
+         They may only appear together with "rtmp" */
+      if(!curl_strnequal(*proto, "rtmp", 4) || !proto[0][4])
+        printf("%s ", *proto);
     }
     puts(""); /* newline */
   }
