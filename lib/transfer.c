@@ -1700,7 +1700,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
           return Curl_uc_to_curlcode(uc);
         }
 
-        p = Curl_builtin_scheme(scheme);
+        p = Curl_builtin_scheme(scheme, CURL_ZERO_TERMINATED);
         if(p && (p->protocol != data->info.conn_protocol)) {
           infof(data, "Clear auth, redirects scheme from %s to %s",
                 data->info.conn_scheme, scheme);

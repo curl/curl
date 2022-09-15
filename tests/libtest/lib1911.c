@@ -79,6 +79,7 @@ int test(char *URL)
       case CURLE_BAD_FUNCTION_ARGUMENT: /* the most normal */
       case CURLE_UNKNOWN_OPTION: /* left out from the build */
       case CURLE_NOT_BUILT_IN: /* not supported */
+      case CURLE_UNSUPPORTED_PROTOCOL: /* detected by protocol2num() */
         break;
       default:
         /* all other return codes are unexpected */

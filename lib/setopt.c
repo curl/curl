@@ -148,85 +148,36 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
 #define C_SSLVERSION_MAX_VALUE(x) (x & 0xffff0000)
 
-static CURLcode protocol2num(char *str, curl_prot_t *val)
+static CURLcode protocol2num(const char *str, curl_prot_t *val)
 {
-  bool found_comma = FALSE;
-  static struct scheme {
-    const char *name;
-    curl_prot_t bit;
-  } const protos[] = {
-    { "dict", CURLPROTO_DICT },
-    { "file", CURLPROTO_FILE },
-    { "ftp", CURLPROTO_FTP },
-    { "ftps", CURLPROTO_FTPS },
-    { "gopher", CURLPROTO_GOPHER },
-    { "gophers", CURLPROTO_GOPHERS },
-    { "http", CURLPROTO_HTTP },
-    { "https", CURLPROTO_HTTPS },
-    { "imap", CURLPROTO_IMAP },
-    { "imaps", CURLPROTO_IMAPS },
-    { "ldap", CURLPROTO_LDAP },
-    { "ldaps", CURLPROTO_LDAPS },
-    { "mqtt", CURLPROTO_MQTT },
-    { "pop3", CURLPROTO_POP3 },
-    { "pop3s", CURLPROTO_POP3S },
-    { "rtmp", CURLPROTO_RTMP },
-    { "rtmpe", CURLPROTO_RTMPE },
-    { "rtmps", CURLPROTO_RTMPS },
-    { "rtmpt", CURLPROTO_RTMPT },
-    { "rtmpte", CURLPROTO_RTMPTE },
-    { "rtmpts", CURLPROTO_RTMPTS },
-    { "rtsp", CURLPROTO_RTSP },
-    { "scp", CURLPROTO_SCP },
-    { "sftp", CURLPROTO_SFTP },
-    { "smb", CURLPROTO_SMB },
-    { "smbs", CURLPROTO_SMBS },
-    { "smtp", CURLPROTO_SMTP },
-    { "smtps", CURLPROTO_SMTPS },
-    { "telnet", CURLPROTO_TELNET },
-    { "tftp", CURLPROTO_TFTP },
-#ifdef USE_WEBSOCKETS
-    { "ws", CURLPROTO_WS },
-    { "wss", CURLPROTO_WSS },
-#endif
-    { NULL, 0 }
-  };
-
   if(!str)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  else if(curl_strequal(str, "all")) {
-    *val = (curl_prot_t)~0;
+
+  if(curl_strequal(str, "all")) {
+    *val = ~(curl_prot_t) 0;
     return CURLE_OK;
   }
 
   *val = 0;
 
   do {
+    const char *token = str;
     size_t tlen;
-    struct scheme const *pp;
-    char *token;
-    token = strchr(str, ',');
-    found_comma = token ? TRUE : FALSE;
-    if(!token)
-      token = strchr(str, '\0');
-    tlen = token - str;
+
+    str = strchr(str, ',');
+    tlen = str? (size_t) (str - token): strlen(token);
     if(tlen) {
-      for(pp = protos; pp->name; pp++) {
-        if((strlen(pp->name) == tlen) &&
-           curl_strnequal(str, pp->name, tlen)) {
-          *val |= pp->bit;
-          break;
-        }
-      }
-      if(!(pp->name))
-        /* protocol name didn't match */
-        return CURLE_BAD_FUNCTION_ARGUMENT;
+      const struct Curl_handler *h = Curl_builtin_scheme(token, tlen);
+
+      if(!h)
+        return CURLE_UNSUPPORTED_PROTOCOL;
+
+      *val |= h->protocol;
     }
-    if(found_comma)
-      str = token + 1;
-  } while(found_comma);
+  } while(str++);
+
   if(!*val)
-    /* no matching protocol */
+    /* no protocol listed */
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 }
