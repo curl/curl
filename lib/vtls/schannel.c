@@ -1714,7 +1714,7 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
 
     if(alpn_result.ProtoNegoStatus ==
        SecApplicationProtocolNegotiationStatus_Success) {
-      unsigned char alpn;
+      unsigned char alpn = 0;
 
       if(!backend->recv_renegotiating) {
         infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR,
