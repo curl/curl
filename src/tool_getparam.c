@@ -1007,6 +1007,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(toggle && !(curlinfo->features & CURL_VERSION_SSL))
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->ftp_ssl = toggle;
+        if(config->ftp_ssl)
+          warnf(global,
+                "--ssl is an insecure option, consider --ssl-reqd instead\n");
         break;
       case 'b': /* --ftp-pasv */
         Curl_safefree(config->ftpport);
