@@ -294,7 +294,7 @@ static CURLcode ws_decode(struct Curl_easy *data,
   *olen = payloadssize;
   wsp->usedbuf = total; /* number of bytes "used" from the buffer */
   *endp = &p[total];
-  infof(data, "WS: received %uz bytes payload", payloadssize);
+  infof(data, "WS: received %zu bytes payload", payloadssize);
   return CURLE_OK;
 }
 
