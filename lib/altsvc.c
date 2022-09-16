@@ -52,15 +52,7 @@
 #define MAX_ALTSVC_ALPNLENSTR "10"
 #define MAX_ALTSVC_ALPNLEN 10
 
-#if defined(USE_QUICHE) && !defined(UNITTESTS)
-#define H3VERSION "h3-29"
-#elif defined(USE_NGTCP2) && !defined(UNITTESTS)
-#define H3VERSION "h3-29"
-#elif defined(USE_MSH3) && !defined(UNITTESTS)
-#define H3VERSION "h3-29"
-#else
 #define H3VERSION "h3"
-#endif
 
 static enum alpnid alpn2alpnid(char *name)
 {
