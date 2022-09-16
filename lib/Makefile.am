@@ -75,6 +75,12 @@ AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
 AM_CFLAGS =
 
+# Makefile.inc provides the CSOURCES and HHEADERS defines
+include Makefile.inc
+
+libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
+libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
+
 libcurl_la_CPPFLAGS_EXTRA =
 libcurl_la_LDFLAGS_EXTRA =
 libcurl_la_CFLAGS_EXTRA =
@@ -102,6 +108,11 @@ endif
 
 if USE_CPPFLAG_CURL_STATICLIB
 libcurl_la_CPPFLAGS_EXTRA += -DCURL_STATICLIB
+else
+if OS_WINDOWS
+libcurl_la_SOURCES += $(LIB_RCFILES)
+$(LIB_RCFILES): $(top_srcdir)/include/curl/curlver.h
+endif
 endif
 
 if DOING_CURL_SYMBOL_HIDING
@@ -116,12 +127,6 @@ libcurl_la_CFLAGS = $(AM_CFLAGS) $(libcurl_la_CFLAGS_EXTRA)
 libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
 libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_LIBS)
 libcurlu_la_CFLAGS = $(AM_CFLAGS)
-
-# Makefile.inc provides the CSOURCES and HHEADERS defines
-include Makefile.inc
-
-libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
-libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
@@ -148,3 +153,9 @@ tidy:
 
 optiontable:
 	perl optiontable.pl < $(top_srcdir)/include/curl/curl.h > easyoptions.c
+
+if OS_WINDOWS
+# Warning is "normal": libtool:   error: ignoring unknown tag RC
+.rc.lo:
+	$(LIBTOOL) --tag=RC --mode=compile $(RC) -I$(top_srcdir)/include $(RCFLAGS) -i $< -o $@
+endif
