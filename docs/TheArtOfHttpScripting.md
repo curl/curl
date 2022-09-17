@@ -66,7 +66,7 @@
 ## See the Response
 
  By default curl sends the response to stdout. You need to redirect it
- somewhere to avoid that, most often that is done with ` -o` or `-O`.
+ somewhere to avoid that, most often that is done with `-o` or `-O`.
 
 # URL
 

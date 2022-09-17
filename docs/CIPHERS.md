@@ -177,7 +177,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `des`
 `desede3`
 
-###  SSL3/TLS cipher suites
+### SSL3/TLS cipher suites
 
 `rsa_rc4_128_md5`
 `rsa_rc4_128_sha`
