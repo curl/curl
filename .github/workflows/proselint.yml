@@ -19,6 +19,10 @@ on:
     - '.github/workflows/proselint.yml'
     - '**.md'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest

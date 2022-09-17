@@ -19,6 +19,10 @@ on:
     - '.github/workflows/linkcheck.yml'
     - '**.md'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   # Docs: https://github.com/marketplace/actions/markdown-link-check
   check:
