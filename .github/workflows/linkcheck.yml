@@ -5,15 +5,19 @@
 name: Markdown links
 
 on:
-  # Trigger the workflow on push or pull requests, but only for the
-  # master branch
   push:
     branches:
     - master
     - '*/ci'
+    paths:
+    - '.github/workflows/linkcheck.yml'
+    - '**.md'
   pull_request:
     branches:
     - master
+    paths:
+    - '.github/workflows/linkcheck.yml'
+    - '**.md'
 
 jobs:
   # Docs: https://github.com/marketplace/actions/markdown-link-check
