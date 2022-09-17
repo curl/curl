@@ -382,7 +382,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   if(!(qop_values & DIGEST_QOP_VALUE_AUTH))
     return CURLE_BAD_CONTENT_ENCODING;
 
-  /* Generate 32 random hex chars, 32 bytes + 1 zero termination */
+  /* Generate 32 random hex chars, 32 bytes + 1 null-termination */
   result = Curl_rand_hex(data, (unsigned char *)cnonce, sizeof(cnonce));
   if(result)
     return result;
