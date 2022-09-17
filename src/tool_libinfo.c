@@ -187,9 +187,10 @@ CURLcode get_libcurl_info(void)
     if(result)
       return result;
 
-    /* Sort the protocols to be sure the primary ones are always accessible and
-     * to retain their list order for testing purposes. */
-    qsort(built_in_protos, proto_last, sizeof(built_in_protos[0]), protocmp);
+    /* Sort the protocols to be sure the primary ones are always accessible
+     * and to retain their list order for testing purposes. */
+    qsort((char *)built_in_protos, proto_last,
+          sizeof(built_in_protos[0]), protocmp);
 
     /* Identify protocols we are interested in. */
     for(p = possibly_built_in; p->proto_name; p++)
