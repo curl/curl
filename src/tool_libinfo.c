@@ -114,7 +114,7 @@ const char *protocol2scheme(proto_t proto)
   return proto < proto_last? built_in_protos[proto]: NULL;
 }
 
-/* Enter a protoype in the built-in prototype table. */
+/* Enter a prototype in the built-in prototype table. */
 static CURLcode enter_proto(const char *proto)
 {
   if(scheme2protocol(proto) == PROTO_NONE) {

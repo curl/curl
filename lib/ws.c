@@ -145,7 +145,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data)
   if(result)
     return result;
 
-  infof(data, "Recevied 101, switch to WebSockets; mask %02x%02x%02x%02x",
+  infof(data, "Received 101, switch to WebSockets; mask %02x%02x%02x%02x",
         ws->ws.mask[0], ws->ws.mask[1], ws->ws.mask[2], ws->ws.mask[3]);
   k->upgr101 = UPGR101_RECEIVED;
 
