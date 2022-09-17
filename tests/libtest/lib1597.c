@@ -38,18 +38,18 @@ int test(char *URL)
   CURL *curl = NULL;
   int res = 0;
   CURLcode result = CURLE_OK;
-  CURLcode ok = CURLE_OK;
-  CURLcode bad = CURLE_BAD_FUNCTION_ARGUMENT;
-  CURLcode unsup = CURLE_UNSUPPORTED_PROTOCOL;
-  CURLcode httpcode = CURLE_UNSUPPORTED_PROTOCOL;
-  CURLcode httpscode = CURLE_UNSUPPORTED_PROTOCOL;
   curl_version_info_data *curlinfo;
   const char *const *proto;
-  char protolist[1024];
   int n;
   int i;
+  static CURLcode ok = CURLE_OK;
+  static CURLcode bad = CURLE_BAD_FUNCTION_ARGUMENT;
+  static CURLcode unsup = CURLE_UNSUPPORTED_PROTOCOL;
+  static CURLcode httpcode = CURLE_UNSUPPORTED_PROTOCOL;
+  static CURLcode httpscode = CURLE_UNSUPPORTED_PROTOCOL;
+  static char protolist[1024];
 
-  struct pair prots[] = {
+  static const struct pair prots[] = {
     {"goobar", &unsup},
     {"http ", &unsup},
     {" http", &unsup},
