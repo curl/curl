@@ -1,0 +1,101 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: dist
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+  pull_request:
+    branches:
+    - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  maketgz-and-verify-in-tree:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+
+    - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
+      name: 'remove preinstalled curl libcurl4{-doc}'
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --without-ssl
+      name: 'configure'
+
+    - run: make V=1 && make V=1 clean
+      name: 'make and clean'
+
+    - run: ./maketgz 99.98.97
+      name: 'maketgz'
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: 'release-tgz'
+        path: 'curl-99.98.97.tar.gz'
+
+    - run: |
+        echo "::stop-commands::$(uuidgen)"
+        tar xvf curl-99.98.97.tar.gz
+        pushd curl-99.98.97
+        ./configure --prefix=$HOME/temp --without-ssl
+        make
+        make TFLAGS=1 test
+        make install
+        popd
+        # basic check of the installed files
+        bash scripts/installcheck.sh $HOME/temp
+        rm -rf curl-99.98.97
+      name: 'verify in-tree configure build including install'
+
+  verify-out-of-tree-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: maketgz-and-verify-in-tree
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: 'release-tgz'
+
+    - run: |
+        echo "::stop-commands::$(uuidgen)"
+        tar xvf curl-99.98.97.tar.gz
+        touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
+        mkdir build
+        pushd build
+        ../curl-99.98.97/configure --without-ssl
+        make
+        make TFLAGS='-p 1 1139' test
+        popd
+        rm -rf build
+        rm -rf curl-99.98.97
+      name: 'verify out-of-tree configure build including docs'
+
+  verify-out-of-tree-cmake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: maketgz-and-verify-in-tree
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: 'release-tgz'
+
+    - run: |
+        echo "::stop-commands::$(uuidgen)"
+        tar xvf curl-99.98.97.tar.gz
+        pushd curl-99.98.97
+        mkdir build
+        pushd build
+        cmake ..
+        make
+      name: 'verify out-of-tree cmake build'
