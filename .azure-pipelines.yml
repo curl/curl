@@ -116,59 +116,6 @@ stages:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
         TFLAGS: "-ac /usr/bin/curl -r $(tests)"
 
-- stage: distcheck
-  dependsOn: []
-  jobs:
-  - job: ubuntu
-    timeoutInMinutes: 30
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: autoreconf -fi && ./configure --without-ssl
-      displayName: 'configure'
-
-    - script: make && ./maketgz 99.98.97
-      displayName: 'make tarball'
-
-    - script: |
-        tar xf curl-99.98.97.tar.gz
-        cd curl-99.98.97
-        ./configure --prefix=$HOME/temp --without-ssl
-        make
-        make TFLAGS=1 test
-        make install
-        # basic check of the installed files
-        cd ..
-        bash scripts/installcheck.sh $HOME/temp
-        rm -rf curl-99.98.97
-
-      displayName: 'verify in-tree configure build'
-
-    - script: |
-        # verify out-of-tree build
-        tar xf curl-99.98.97.tar.gz
-        touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
-        mkdir build
-        cd build
-        ../curl-99.98.97/configure --without-ssl
-        make
-        make TFLAGS='-p 1 1139' test
-        # verify cmake build
-        cd ..
-        rm -rf curl-99.98.97
-
-      displayName: 'verify out-of-tree configure build'
-
-    - script: |
-        tar xf curl-99.98.97.tar.gz
-        cd curl-99.98.97
-        mkdir build
-        cd build
-        cmake ..
-        make
-
-      displayName: 'verify out-of-tree cmake build'
-
 - stage: scanbuild
   dependsOn: []
   jobs:
