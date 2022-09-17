@@ -5,8 +5,6 @@
 name: Linux
 
 on:
-  # Trigger the workflow on push or pull requests, but only for the
-  # master branch
   push:
     branches:
     - master
@@ -14,6 +12,11 @@ on:
   pull_request:
     branches:
     - master
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: wolfssl-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   autotools:

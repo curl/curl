@@ -5,10 +5,14 @@
 name: Hacktoberfest
 
 on:
-  # run for all pushes to master branch
+  # this must not ever run on any other branch than master
   push:
     branches:
     - master
+
+concurrency:
+  # this should not run in parallel, so just run one at a time
+  group: ${{ github.workflow }}
 
 permissions:
   # requires issues AND pull-requests write permissions to edit labels on PRs!
