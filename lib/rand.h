@@ -42,7 +42,7 @@ CURLcode Curl_rand(struct Curl_easy *data, unsigned char *rnd, size_t num);
 
 /*
  * Curl_rand_hex() fills the 'rnd' buffer with a given 'num' size with random
- * hexadecimal digits PLUS a zero terminating byte. It must be an odd number
+ * hexadecimal digits PLUS a null-terminating byte. It must be an odd number
  * size.
  */
 CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,

@@ -56,7 +56,7 @@ the POST data from the read callback. If you want to send a zero-byte POST set
 \fICURLOPT_POSTFIELDS(3)\fP to an empty string, or set \fICURLOPT_POST(3)\fP to
 1 and \fICURLOPT_POSTFIELDSIZE(3)\fP to 0.
 
-libcurl will use assume this option points to a nul-terminated string unless
+libcurl will use assume this option points to a null-terminated string unless
 you also set \fICURLOPT_POSTFIELDSIZE(3)\fP to specify the length of the
 provided data, which then is strictly required if you want to send off nul
 bytes included in the data.

@@ -138,7 +138,7 @@ CURLcode Curl_base64_decode(const char *src,
   /* Calculate the size of the decoded string */
   rawlen = (numQuantums * 3) - padding;
 
-  /* Allocate our buffer including room for a zero terminator */
+  /* Allocate our buffer including room for a null-terminator */
   newstr = malloc(rawlen + 1);
   if(!newstr)
     return CURLE_OUT_OF_MEMORY;

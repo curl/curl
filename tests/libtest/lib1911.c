@@ -47,7 +47,7 @@ int test(char *URL)
     return 1;
   }
 
-  /* make it a zero terminated C string with just As */
+  /* make it a null-terminated C string with just As */
   memset(buffer, 'A', MAX_INPUT_LENGTH + 1);
   buffer[MAX_INPUT_LENGTH + 1] = 0;
 

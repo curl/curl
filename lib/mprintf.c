@@ -956,7 +956,7 @@ static int dprintf_formatf(
         else
           *fptr++ = 'f';
 
-        *fptr = 0; /* and a final zero termination */
+        *fptr = 0; /* and a final null-termination */
 
 #ifdef __clang__
 #pragma clang diagnostic push
