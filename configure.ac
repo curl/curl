@@ -55,6 +55,8 @@ CURL_CHECK_OPTION_ECH
 
 XC_CHECK_PATH_SEPARATOR
 
+LT_LANG([Windows Resource])
+
 #
 # save the configure arguments
 #
@@ -568,6 +570,7 @@ CURL_DARWIN_CFLAGS
 CURL_DARWIN_SYSTEMCONFIGURATION
 CURL_SUPPORTS_BUILTIN_AVAILABLE
 
+AM_CONDITIONAL([OS_WINDOWS], [test "$curl_cv_native_windows" = "yes"])
 
 dnl ************************************************************
 dnl switch off particular protocols

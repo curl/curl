@@ -55,6 +55,10 @@ include Makefile.inc
 
 # CURL_FILES comes from Makefile.inc
 curl_SOURCES = $(CURL_FILES)
+if OS_WINDOWS
+curl_SOURCES += $(CURL_RCFILES)
+$(CURL_RCFILES): tool_version.h
+endif
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
@@ -75,7 +79,7 @@ libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) \
                           -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
-libcurltool_la_SOURCES = $(curl_SOURCES)
+libcurltool_la_SOURCES = $(CURL_FILES)
 endif
 
 CLEANFILES = tool_hugehelp.c
@@ -151,3 +155,9 @@ tidy:
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && ./gen.pl listhelp *.d) > tool_listhelp.c
+
+if OS_WINDOWS
+# Warning is "normal": libtool:   error: ignoring unknown tag RC
+.rc.o:
+	$(LIBTOOL) --tag=RC --mode=compile $(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
+endif
