@@ -3618,7 +3618,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
        The second format was added since Sun's webserver
        JavaWebServer/1.1.1 obviously sends the header this way!
        The third added since some servers use that!
-       The forth means the requested range was unsatisfied.
+       The fourth means the requested range was unsatisfied.
     */
 
     char *ptr = headp + strlen("Content-Range:");
