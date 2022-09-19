@@ -297,6 +297,29 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     }
   }
 
+  /* See if the returned entry matches the required resolve mode */
+  if(dns && data->conn->ip_version != CURL_IPRESOLVE_WHATEVER) {
+    int pf = PF_INET;
+    bool found = false;
+    struct Curl_addrinfo *addr = dns->addr;
+
+    if(data->conn->ip_version == CURL_IPRESOLVE_V6)
+      pf = PF_INET6;
+
+    while(addr) {
+      if(addr->ai_family == pf) {
+        found = true;
+        break;
+      }
+      addr = addr->ai_next;
+    }
+
+    if(!found) {
+      infof(data, "Hostname in DNS cache doesn't have needed family, zapped");
+      dns = NULL; /* the memory deallocation is being handled by the hash */
+      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
+    }
+  }
   return dns;
 }
 
