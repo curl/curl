@@ -59,7 +59,7 @@ Open a Visual Studio Command prompt:
 
  Using the **'VS [version] [platform] [type] Command Prompt'** menu entry:
  where [version] is the Visual Studio version, [platform] is e.g. x64 and
- [type] Native of Cross platform build.  This type of command prompt may not
+ [type] Native of Cross platform build. This type of command prompt may not
  exist in all Visual Studio versions.
 
  See also: [Set the Path and Environment Variables for Command-Line Builds](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line)

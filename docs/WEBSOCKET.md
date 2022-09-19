@@ -102,8 +102,8 @@ WebSocket myself.
 Here are the reasons why I have decided to move forward with WebSocket in
 curl **without using libWebSocket**:
 
-- doxygen generated docs only makes them very hard to navigate. No tutorial,
-  no clearly written explanatory pages for specific functions.
+- doxygen generated docs only makes them hard to navigate. No tutorial, no
+  clearly written explanatory pages for specific functions.
 
 - seems (too) tightly integrated with a specific TLS library, while we want to
   support WebSocket with whatever TLS library libcurl was already made to

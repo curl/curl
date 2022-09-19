@@ -158,7 +158,7 @@ stall and never end, so applications that cannot deal with never-ending
 transfers already need to have counter-measures established.
 
 If the problem avoids the regular counter-measures when it causes a never-
-ending transfer, it might very well be a security problem.
+ending transfer, it might be a security problem.
 
 ## Not practically possible
 
@@ -208,7 +208,7 @@ security vulnerabilities.
 
  - not all systems allow the arguments to be blanked in the first place
  - since curl blanks the argument itself they will be readable for a short
-   moment in time no matter what
+   moment no matter what
  - virtually every argument can contain sensitive data, depending on use
  - blanking all arguments would make it impractical for users to differentiate
    curl command lines in process listings

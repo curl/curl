@@ -253,7 +253,7 @@ development and experimenting.
 ## Prerequisite(s)
 
 An existing local HTTP/1.1 server that hosts files. Preferably also a few huge
-ones.  You can easily create huge local files like `truncate -s=8G 8GB` - they
+ones. You can easily create huge local files like `truncate -s=8G 8GB` - they
 are huge but do not occupy that much space on disk since they are just big
 holes.
 

@@ -64,7 +64,7 @@ To download the latest source from the Git server do this:
 ## Security problems
 
 Report suspected security problems via [our HackerOne
-page](https://hackerone.com/curl) and not in public!
+page](https://hackerone.com/curl) and not in public.
 
 ## Notice
 

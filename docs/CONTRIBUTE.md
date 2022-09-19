@@ -291,8 +291,8 @@ still fine.
 This means that all files need to have their license and copyright information
 clearly stated. Ideally by having the standard curl source code header, with
 an accurate copyright year range and the SPDX-License-Identifier included. If
-the header does not work, you can use a smaller header or as a last resort add
-the information for a specific file to the `.reuse/dep5` file.
+the header does not work, you can use a smaller header or add the information
+for a specific file to the `.reuse/dep5` file.
 
 We update copyright year ranges to end on the year of the most recent change
 of the individual file.

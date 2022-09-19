@@ -113,15 +113,15 @@ SPDX-License-Identifier: curl
   Tests which use the ssh test server, SCP/SFTP/SOCKS tests, might be badly
   influenced by the output of system wide or user specific shell startup
   scripts, .bashrc, .profile, /etc/csh.cshrc, .login, /etc/bashrc, etc. which
-  output text messages or escape sequences on user login.  When these shell
+  output text messages or escape sequences on user login. When these shell
   startup messages or escape sequences are output they might corrupt the
   expected stream of data which flows to the sftp-server or from the ssh
-  client which can result in bad test behavior or even prevent the test
-  server from running.
+  client which can result in bad test behavior or even prevent the test server
+  from running.
 
   If the test suite ssh or sftp server fails to start up and logs the message
   'Received message too long' then you are certainly suffering the unwanted
-  output of a shell startup script.  Locate, cleanup or adjust the shell
+  output of a shell startup script. Locate, cleanup or adjust the shell
   script.
 
 ### Memory test
@@ -137,7 +137,7 @@ SPDX-License-Identifier: curl
 
   runtests.pl's `-t` option will enable torture testing mode, which runs each
   test many times and makes each different memory allocation fail on each
-  successive run.  This tests the out of memory error handling code to ensure
+  successive run. This tests the out of memory error handling code to ensure
   that memory leaks do not occur even in those situations. It can help to
   compile curl with `CPPFLAGS=-DMEMDEBUG_LOG_SYNC` when using this option, to
   ensure that the memory log file is properly written even if curl crashes.
@@ -145,10 +145,9 @@ SPDX-License-Identifier: curl
 ### Debug
 
   If a test case fails, you can conveniently get the script to invoke the
-  debugger (gdb) for you with the server running and the exact same command
-  line parameters that failed. Just invoke `runtests.pl <test number> -g` and
-  then just type 'run' in the debugger to perform the command through the
-  debugger.
+  debugger (gdb) for you with the server running and the same command line
+  parameters that failed. Just invoke `runtests.pl <test number> -g` and then
+  just type 'run' in the debugger to perform the command through the debugger.
 
 ### Logs
 
@@ -166,8 +165,8 @@ SPDX-License-Identifier: curl
 ### Code coverage
 
   gcc provides a tool that can determine the code coverage figures for the
-  test suite.  To use it, configure curl with `CFLAGS='-fprofile-arcs
-  -ftest-coverage -g -O0'`.  Make sure you run the normal and torture tests to
+  test suite. To use it, configure curl with `CFLAGS='-fprofile-arcs
+  -ftest-coverage -g -O0'`. Make sure you run the normal and torture tests to
   get more full coverage, i.e. do:
 
     make test
@@ -179,14 +178,14 @@ SPDX-License-Identifier: curl
     ggcov -r lib src
 
   The text mode tool gcov may also be used, but it doesn't handle object files
-  in more than one directory very well.
+  in more than one directory correctly.
 
 ### Remote testing
 
   The runtests.pl script provides some hooks to allow curl to be tested on a
-  machine where perl can not be run.  The test framework in this case runs on
+  machine where perl can not be run. The test framework in this case runs on
   a workstation where perl is available, while curl itself is run on a remote
-  system using ssh or some other remote execution method.  See the comments at
+  system using ssh or some other remote execution method. See the comments at
   the beginning of runtests.pl for details.
 
 ## Test case numbering

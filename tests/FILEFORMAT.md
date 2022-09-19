@@ -6,13 +6,13 @@ SPDX-License-Identifier: curl
 
 # curl test suite file format
 
-The curl test suite's file format is very simple and extensible, closely
-resembling XML. All data for a single test case resides in a single ASCII
-file. Labels mark the beginning and the end of all sections, and each label
-must be written in its own line.  Comments are either XML-style (enclosed with
-`<!--` and `-->`) or shell script style (beginning with `#`) and must appear
-on their own lines and not alongside actual test data.  Most test data files
-are syntactically valid XML, although a few files are not (lack of support for
+The curl test suite's file format is simple and extendable, closely resembling
+XML. All data for a single test case resides in a single ASCII file. Labels
+mark the beginning and the end of all sections, and each label must be written
+in its own line. Comments are either XML-style (enclosed with `<!--` and
+`-->`) or shell script style (beginning with `#`) and must appear on their own
+lines and not alongside actual test data. Most test data files are
+syntactically valid XML, although a few files are not (lack of support for
 character entities and the preservation of CR/LF characters at the end of
 lines are the biggest differences).
 
@@ -185,11 +185,11 @@ that will be checked/used if specified.
 
 ### `<keywords>`
 A newline-separated list of keywords describing what this test case uses and
-tests. Try to use already used keywords.  These keywords will be used for
+tests. Try to use already used keywords. These keywords will be used for
 statistical/informational purposes and for choosing or skipping classes of
-tests.  "Keywords" must begin with an alphabetic character, "-", "[" or "{"
-and may actually consist of multiple words separated by spaces which are
-treated together as a single identifier.
+tests. Keywords must begin with an alphabetic character, `-`, `[` or `{` and
+may actually consist of multiple words separated by spaces which are treated
+together as a single identifier.
 
 When using curl built with Hyper, the keywords must include HTTP or HTTPS for
 'hyper mode' to kick in and make line ending checks work for tests.
@@ -245,7 +245,7 @@ Send back this contents instead of the <data> one. The num is set by:
 Dynamically changing num in this way allows the test harness to be used to
 test authentication negotiation where several different requests must be sent
 to complete a transfer. The response to each request is found in its own data
-section.  Validating the entire negotiation sequence can be done by specifying
+section. Validating the entire negotiation sequence can be done by specifying
 a datacheck section.
 
 ### `<connect>`
@@ -369,7 +369,7 @@ What server(s) this test case requires/uses. Available servers:
 - `socks4`
 - `socks5`
 
-Give only one per line.  This subsection is mandatory.
+Give only one per line. This subsection is mandatory.
 
 ### `<features>`
 A list of features that MUST be present in the client/library for this test to
@@ -437,9 +437,9 @@ Features testable here are:
 - `wolfssh`
 - `wolfssl`
 
-as well as each protocol that curl supports.  A protocol only needs to be
-specified if it is different from the server (useful when the server
-is `none`).
+as well as each protocol that curl supports. A protocol only needs to be
+specified if it is different from the server (useful when the server is
+`none`).
 
 ### `<killserver>`
 Using the same syntax as in `<server>` but when mentioned here these servers
@@ -505,20 +505,20 @@ Set `option="no-include"` to prevent the test script to slap on the
 `--include` argument.
 
 Set `option="binary-trace"` to use `--trace` instead of `--trace-ascii` for
-tracing.  Suitable for binary-oriented protocols such as MQTT.
+tracing. Suitable for binary-oriented protocols such as MQTT.
 
 Set `timeout="secs"` to override default server logs advisor read lock
-timeout.  This timeout is used by the test harness, once that the command has
+timeout. This timeout is used by the test harness, once that the command has
 completed execution, to wait for the test server to write out server side log
 files and remove the lock that advised not to read them. The "secs" parameter
 is the not negative integer number of seconds for the timeout. This `timeout`
 attribute is documented for completeness sake, but is deep test harness stuff
-and only needed for very singular and specific test cases. Avoid using it.
+and only needed for singular and specific test cases. Avoid using it.
 
 Set `delay="secs"` to introduce a time delay once that the command has
 completed execution and before the `<postcheck>` section runs. The "secs"
 parameter is the not negative integer number of seconds for the delay. This
-'delay' attribute is intended for very specific test cases, and normally not
+'delay' attribute is intended for specific test cases, and normally not
 needed.
 
 ### `<file name="log/filename" [nonewline="yes"]>`
@@ -542,7 +542,7 @@ example.
 
 ### `<strip>`
 One regex per line that is removed from the protocol dumps before the
-comparison is made. This is very useful to remove dependencies on dynamically
+comparison is made. This is useful to remove dependencies on dynamically
 changing protocol data such as port numbers or user-agent strings.
 
 ### `<strippart>`
@@ -582,7 +582,7 @@ If 'nonewline' is set, we will cut off the trailing newline of this given data
 before comparing with the one actually received by the client
 
 ### `<file name="log/filename" [mode="text"]>`
-The file's contents must be identical to this after the test is complete.  Use
+The file's contents must be identical to this after the test is complete. Use
 the mode="text" attribute if the output is in text mode on platforms that have
 a text/binary difference.
 

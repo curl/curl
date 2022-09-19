@@ -184,11 +184,11 @@ curl_formparse() function
 August: Curl and libcurl 7.12.1
 
     Public curl release number:                82
-    Releases counted from the very beginning: 109
+    Releases counted from the beginning:      109
     Available command line options:            96
     Available curl_easy_setopt() options:     120
     Number of public functions in libcurl:     36
-    Amount of public website mirrors:         12
+    Amount of public website mirrors:          12
     Number of known libcurl bindings:          26
 
 2005

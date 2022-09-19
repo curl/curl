@@ -64,7 +64,6 @@ Library Symbols
 
  All symbols used internally in libcurl must use a `Curl_` prefix if they are
  used in more than a single file. Single-file symbols must be made static.
- Public ("exported") symbols must use a `curl_` prefix. (There are exceptions,
- but they are to be changed to follow this pattern in future versions.) Public
- API functions are marked with `CURL_EXTERN` in the public header files so
- that all others can be hidden on platforms where this is possible.
+ Public ("exported") symbols must use a `curl_` prefix. Public API functions
+ are marked with `CURL_EXTERN` in the public header files so that all others
+ can be hidden on platforms where this is possible.

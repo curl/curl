@@ -39,8 +39,8 @@ ABI - Application Binary Interface
  During the first seven years of libcurl releases, there have only been four
  ABI breakages.
 
- We are determined to bump the SONAME as rarely as possible.  Ideally, we
- never do it again.
+ We are determined to bump the SONAME as rarely as possible. Ideally, we never
+ do it again.
 
 ## Downgrades
 

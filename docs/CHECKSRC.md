@@ -41,7 +41,7 @@ warnings are:
    more appropriate `char *name` style. The asterisk should sit right next to
    the name without a space in between.
 
-- `BADCOMMAND`: There's a bad `!checksrc!` instruction in the code. See the
+- `BADCOMMAND`: There's a bad `checksrc` instruction in the code. See the
    **Ignore certain warnings** section below for details.
 
 - `BANNEDFUNC`: A banned function was used. The functions sprintf, vsprintf,
@@ -56,7 +56,7 @@ warnings are:
 
 - `COMMANOSPACE`: a comma without following space
 
-- `COPYRIGHT`: the file is missing a copyright statement!
+- `COPYRIGHT`: the file is missing a copyright statement
 
 - `CPPCOMMENTS`: `//` comment detected, that is not C89 compliant
 
@@ -113,7 +113,7 @@ warnings are:
 
 - `SPACESEMICOLON`: there was a space before semicolon, ` ;`.
 
-- `TABS`: TAB characters are not allowed!
+- `TABS`: TAB characters are not allowed
 
 - `TRAILINGSPACE`: Trailing whitespace on the line
 
@@ -146,10 +146,9 @@ different ways to do this.
 ### Inline ignore
 
 You can control what to ignore within a specific source file by providing
-instructions to checksrc in the source code itself. You need a magic marker
-that is `!checksrc!` followed by the instruction. The instruction can ask to
-ignore a specific warning N number of times or you ignore all of them until
-you mark the end of the ignored section.
+instructions to checksrc in the source code itself. See examples below. The
+instruction can ask to ignore a specific warning N number of times or you
+ignore all of them until you mark the end of the ignored section.
 
 Inline ignores are only done for that single specific source code file.
 

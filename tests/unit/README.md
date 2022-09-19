@@ -36,14 +36,14 @@ We put tests that focus on an area or a specific function into a single C
 source file. The source file should be named 'unitNNNN.c' where NNNN is a
 previously unused number.
 
-Add your test to `tests/unit/Makefile.inc` (if it is a unit test).  Add your
+Add your test to `tests/unit/Makefile.inc` (if it is a unit test). Add your
 test data file name to `tests/data/Makefile.inc`
 
 You also need a separate file called `tests/data/testNNNN` (using the same
 number) that describes your test case. See the test1300 file for inspiration
 and the `tests/FILEFORMAT.md` documentation.
 
-For the actual C file, here's a very simple example:
+For the actual C file, here's a simple example:
 ~~~c
 #include "curlcheck.h"
 
