@@ -83,7 +83,7 @@ sub scanheader {
     my ($f)=@_;
     open H, "<$f";
     while(<H>) {
-        if (/^#define (CURL[A-Za-z0-9_]*)/) {
+        if (/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
             push @syms, $1;
         }
     }
@@ -106,7 +106,7 @@ scanallheaders();
 
 open S, "<$root/docs/libcurl/symbols-in-versions";
 while(<S>) {
-    if(/(^CURL[^ \n]*) *(.*)/) {
+    if(/(^[^ \n]*) *(.*)/) {
         my ($sym, $rest)=($1, $2);
         if($doc{$sym}) {
             print "Detected duplicate symbol: $sym\n";
