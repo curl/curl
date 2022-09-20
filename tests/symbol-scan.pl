@@ -53,11 +53,6 @@ my $root=$ARGV[0] || ".";
 # need an include directory when building out-of-tree
 my $i = ($ARGV[1]) ? "-I$ARGV[1] " : '';
 
-my $h = "$root/include/curl/curl.h";
-my $mh = "$root/include/curl/multi.h";
-my $ua = "$root/include/curl/urlapi.h";
-my $hd = "$root/include/curl/header.h";
-
 my $verbose=0;
 my $summary=0;
 my $misses=0;
@@ -95,11 +90,19 @@ sub scanheader {
     close H;
 }
 
-scanenum($h);
-scanheader($h);
-scanheader($mh);
-scanheader($ua);
-scanheader($hd);
+sub scanallheaders {
+    my $d = "$root/include/curl";
+    opendir(my $dh, $d) ||
+        die "Can't opendir: $!";
+    my @headers = grep { /.h\z/ } readdir($dh);
+    closedir $dh;
+    foreach my $h (@headers) {
+        scanenum("$d/$h");
+        scanheader("$d/$h");
+    }
+}
+
+scanallheaders();
 
 open S, "<$root/docs/libcurl/symbols-in-versions";
 while(<S>) {
