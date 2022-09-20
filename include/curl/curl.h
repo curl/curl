@@ -840,8 +840,8 @@ enum curl_khstat {
   CURLKHSTAT_FINE_ADD_TO_FILE,
   CURLKHSTAT_FINE,
   CURLKHSTAT_REJECT, /* reject the connection, return an error */
-  CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now so
-                        this causes a CURLE_DEFER error but otherwise the
+  CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now.
+                        Causes a CURLE_PEER_FAILED_VERIFICATION error but the
                         connection will be left intact etc */
   CURLKHSTAT_FINE_REPLACE, /* accept and replace the wrong key*/
   CURLKHSTAT_LAST    /* not for use, only a marker for last-in-list */
