@@ -4,7 +4,7 @@ curl and libcurl 7.86.0
  Command line options:         248
  curl_easy_setopt() options:   300
  Public functions in libcurl:  91
- Contributors:                 2699
+ Contributors:                 2705
 
 This release includes the following changes:
 
@@ -13,6 +13,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o altsvc: use 'h3' for h3 [46]
+ o CI/GHA: cancel outdated CI runs on new PR changes [20]
+ o cli tool: do not use disabled protocols
  o cmake: define BUILDING_LIBCURL in lib/CMakeLists, not config.h [5]
  o cmake: fix original MinGW builds [177]
  o configure: correct the wording when checking grep -E [13]
@@ -20,8 +23,10 @@ This release includes the following bugfixes:
  o content_encoding: use writer struct subclasses for different encodings [8]
  o ctype: remove all use of <ctype.h>, use our own versions [12]
  o curl-compilers.m4: use -O2 as default optimize for clang [6]
+ o curl: warn for --ssl use, considered insecure [49]
  o curl_ctype: convert to macros-only [10]
  o curl_easy_pause.3: unpausing is as fast as possible [14]
+ o curl_escape.3: fix typo [50]
  o curl_setup: include curl.h after platform setup headers [37]
  o curl_setup: include only system.h instead of curl.h [34]
  o CURLOPT_DNS_INTERFACE.3: mention it works for almost all protocols [15]
@@ -29,20 +34,30 @@ This release includes the following bugfixes:
  o CURLOPT_WILDCARDMATCH.3: Fix backslash escaping under single quotes [172]
  o docs: correct missing uppercase in Markdown files [38]
  o docs: remove mentions of deprecated '--without-openssl' parameter [170]
+ o docs: tell about disabled protocols in CURLOPT_*PROTOCOLS_STR.
  o formdata: fix warning: 'CURLformoption' is promoted to 'int' [24]
  o ftp: ignore a 550 response to MDTM [1]
  o getparameter: return PARAM_MANUAL_REQUESTED for -M even when disabled [17]
+ o GHA: run proselint on markdown files [22]
+ o github: initial CODEOWNERS setup for CI configuration [52]
  o header: define public API functions as extern c [26]
  o headers: reset the requests counter at transfer start [25]
  o http2: make nghttp2 less picky about field whitespace [27]
+ o lib1560: extended to verify detect/reject of unknown schemes
  o lib: add missing limits.h includes [35]
  o lib: add required Win32 setup definitions in setup-win32.h [4]
+ o lib: the number four in a sequence is the "fourth" [28]
  o manpages: Fix spelling of "allows to" -> "allows one to" [171]
  o misc: ISSPACE() => ISBLANK() [11]
+ o misc: null-terminate [41]
  o misc: spelling fixes [174]
+ o README.md: add GHA status badges for Linux and macOS builds [40]
  o RELEASE-PROCEDURE.md: mention patch releases [21]
  o scripts: use `grep -E` instead of `egrep` [30]
+ o setopt: use the handler table for protocol name to number conversions [45]
+ o setopt: when POST is set, reset the 'upload' field [51]
  o setup-win32: no longer define UNICODE/_UNICODE implicitly [3]
+ o strerror: improve two URL API error messages
  o tests/certs/scripts: insert standard curl source headers [169]
  o tests: fix tag syntax errors in test files
  o tool_hugehelp: make hugehelp a blank macro when disabled [7]
@@ -51,7 +66,11 @@ This release includes the following bugfixes:
  o tool_operate: reduce errorbuffer allocs [173]
  o tool_progress: remove 'Qd' from the parallel progress bar [175]
  o tool_setopt: use better English in --libcurl source comments [39]
+ o urlapi: detect scheme better when not guessing [56]
  o urlapi: leaner with fewer allocs [2]
+ o winbuild/MakefileBuild.vc: handle spaces in libssh(2) include paths [18]
+ o winbuild: Use NMake batch-rules for compilation [47]
+ o windows: add .rc support to autotools builds [33]
  o wolfSSL: fix session management bug. [31]
 
 This release includes the following known bugs:
@@ -63,11 +82,12 @@ advice from friends like these:
 
   a1346054 on github, ajak in #curl, Andrew Lambert, Benjamin Loison,
   Dan Fandrich, Daniel Stenberg, Emanuele Torre, Hayden Roche, James Fuller,
-  justchen1369 on github, Keitagit-kun on github, Marcel Raad, Marc Hörsken,
-  Max Dymond, Michael Heimpold, Orgad Shaneh, Patrick Monnerat, Philip Heiduck,
-  ProceduralMan on github, Ray Satiro, Samuel Henrique, ssdbest on github,
-  Viktor Szakats, zhanghu on xiaomi
-  (24 contributors)
+  John Bampton, justchen1369 on github, Keitagit-kun on github, Marcel Raad,
+  Marc Hörsken, Mark Itzcovitz, Max Dymond, Michael Drake, Michael Heimpold,
+  n0name321 on github, Orgad Shaneh, Patrick Monnerat, Philip Heiduck,
+  ProceduralMan on github, Ray Satiro, RobBotic1 on github, Samuel Henrique,
+  Sergey Bronnikov, ssdbest on github, Viktor Szakats, zhanghu on xiaomi
+  (30 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -88,20 +108,35 @@ References to bug reports and discussions on issues:
  [15] = https://curl.se/bug/?i=9427
  [16] = https://curl.se/bug/?i=9307
  [17] = https://curl.se/bug/?i=9485
+ [18] = https://curl.se/mail/lib-2022-09/0038.html
+ [20] = https://curl.se/bug/?i=9533
  [21] = https://curl.se/bug/?i=9495
+ [22] = https://curl.se/bug/?i=9520
  [23] = https://curl.se/bug/?i=8995
  [24] = https://curl.se/bug/?i=9484
  [25] = https://curl.se/bug/?i=9424
  [26] = https://curl.se/bug/?i=9424
  [27] = https://curl.se/bug/?i=9448
+ [28] = https://curl.se/bug/?i=9535
  [29] = https://curl.se/bug/?i=9486
  [30] = https://curl.se/bug/?i=9491
  [31] = https://curl.se/bug/?i=9492
+ [33] = https://curl.se/bug/?i=9521
  [34] = https://curl.se/bug/?i=9453
  [35] = https://curl.se/bug/?i=9453
  [37] = https://curl.se/bug/?i=9453
  [38] = https://curl.se/bug/?i=9474
  [39] = https://curl.se/bug/?i=9475
+ [40] = https://curl.se/bug/?i=9530
+ [41] = https://curl.se/bug/?i=9527
+ [45] = https://curl.se/bug/?i=9472
+ [46] = https://curl.se/bug/?i=9515
+ [47] = https://curl.se/bug/?i=9512
+ [49] = https://curl.se/bug/?i=9519
+ [50] = https://curl.se/bug/?i=9517
+ [51] = https://curl.se/bug/?i=9507
+ [52] = https://curl.se/bug/?i=9505
+ [56] = https://curl.se/bug/?i=9503
  [164] = https://curl.se/bug/?i=9414
  [169] = https://curl.se/bug/?i=9417
  [170] = https://curl.se/bug/?i=9415
