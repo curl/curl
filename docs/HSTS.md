@@ -19,7 +19,7 @@ HTTP-only requests to a host name present in the cache will get internally
  - `CURLOPT_HSTS` - specify file name where to store the HSTS cache on close
   (and possibly read from at startup)
 
-## curl cmdline options
+## curl command line options
 
  - `--hsts [filename]` - enable HSTS, use the file as HSTS cache. If filename
    is `""` (no length) then no file will be used, only in-memory cache.
@@ -32,13 +32,11 @@ For each hsts entry:
 
     [host name] "YYYYMMDD HH:MM:SS"
 
-The `[host name]` is dot-prefixed if it is a includeSubDomain.
+The `[host name]` is dot-prefixed if it includes subdomains.
 
 The time stamp is when the entry expires.
 
-I considered using wget's file format for the HSTS cache. However, they store the time stamp as the epoch (number of seconds since 1970) and I strongly disagree with using that format. Instead I opted to use a format similar to the curl alt-svc cache file format.
-
 ## Possible future additions
 
- - `CURLOPT_HSTS_PRELOAD` - provide a set of preloaded HSTS host names
+ - `CURLOPT_HSTS_PRELOAD` - provide a set of HSTS host names to load first
  - ability to save to something else than a file

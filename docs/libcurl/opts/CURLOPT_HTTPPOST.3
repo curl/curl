@@ -32,10 +32,10 @@ CURLOPT_HTTPPOST \- multipart formpost content
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPPOST,
                           struct curl_httppost *formpost);
 .SH DESCRIPTION
-Tells libcurl you want a multipart/formdata HTTP POST to be made and you
+Tells libcurl you want a \fBmultipart/formdata\fP HTTP POST to be made and you
 instruct what data to pass on to the server in the \fIformpost\fP argument.
-Pass a pointer to a linked list of curl_httppost structs as parameter.  The
-easiest way to create such a list, is to use \fIcurl_formadd(3)\fP as
+Pass a pointer to a linked list of \fIcurl_httppost\fP structs as parameter.
+The easiest way to create such a list, is to use \fIcurl_formadd(3)\fP as
 documented. The data in this list must remain intact as long as the curl
 transfer is alive and is using it.
 

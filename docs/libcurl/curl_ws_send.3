@@ -24,13 +24,13 @@
 .\"
 .TH curl_ws_send 3 "12 Jun 2022" "libcurl 7.85.0" "libcurl Manual"
 .SH NAME
-curl_ws_send - receive websocket data
+curl_ws_send - receive WebSocket data
 .SH SYNOPSIS
 .nf
 #include <curl/easy.h>
 
 CURLcode curl_ws_send(CURL *curl, const void *buffer, size_t buflen,
-                      size_t *sent, unsigned int sendflags);
+                      size_t *sent, unsigned int flags);
 .fi
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
@@ -38,9 +38,9 @@ This function call is EXPERIMENTAL.
 Send the specific message fragment over the established WebSocket connection.
 
 If \fBCURLWS_RAW_MODE\fP is enabled in \fICURLOPT_WS_OPTIONS(3)\fP, the
-\fBsendflags\fP argument should be set to 0.
+\fBflags\fP argument should be set to 0.
 
-.SH SENDFLAGS
+.SH FLAGS
 .IP CURLWS_TEXT
 The buffer contains text data. Note that this makes a difference to WebSocket
 but libcurl itself will not make any verification of the content or

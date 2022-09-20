@@ -95,8 +95,8 @@ days). Some operating systems that are known to have solid and working thread
 support are Linux, Solaris and Windows.
 .IP "curl_global_* functions"
 These functions are thread-safe since libcurl 7.84.0 if
-\fIcurl_version_info(3)\fP has the CURL_VERSION_THREADSAFE feature bit set
-(most platforms).
+\fIcurl_version_info(3)\fP has the \fBCURL_VERSION_THREADSAFE\fP feature bit
+set (most platforms).
 
 If these functions are not thread-safe and you are using libcurl with multiple
 threads it is especially important that before use you call

@@ -96,7 +96,7 @@ Ideas:
 
 [libWebSocket](https://libWebSocket.org/) is said to be a solid, fast and
 efficient WebSocket library with a vast amount of users. My plan was
-originally to build upon it to skip having to implement the lowlevel parts of
+originally to build upon it to skip having to implement the low level parts of
 WebSocket myself.
 
 Here are the reasons why I have decided to move forward with WebSocket in

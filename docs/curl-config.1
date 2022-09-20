@@ -82,23 +82,24 @@ major, minor, and patch. So that libcurl 7.7.4 would appear as 070704 and libcur
 omitted. (This option was broken in the 7.15.0 release.)
 .SH "EXAMPLES"
 What linker options do I need when I link with libcurl?
-
+.nf
   $ curl-config --libs
-
+.fi
 What compiler options do I need when I compile using libcurl functions?
-
+.nf
   $ curl-config --cflags
-
+.fi
 How do I know if libcurl was built with SSL support?
-
+.nf
   $ curl-config --feature | grep SSL
-
+.fi
 What's the installed libcurl version?
-
+.nf
   $ curl-config --version
-
+.fi
 How do I build a single file with a one-line command?
-
+.nf
   $ `curl-config --cc --cflags` -o example example.c `curl-config --libs`
+.fi
 .SH "SEE ALSO"
 .BR curl (1)

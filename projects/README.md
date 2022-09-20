@@ -92,10 +92,10 @@ use `VC14.30\curl-all.sln` to build curl and libcurl.
 
 ## Running DLL based configurations
 
-If you are a developer and plan to run the curl tool from Visual Studio (eg
-you are debugging) with any third-party libraries (such as OpenSSL, wolfSSL or
-LibSSH2) then you will need to add the search path of these DLLs to the
-configuration's PATH environment. To do that:
+If you are a developer and plan to run the curl tool from Visual Studio with
+any third-party libraries (such as OpenSSL, wolfSSL or LibSSH2) then you will
+need to add the search path of these DLLs to the configuration's PATH
+environment. To do that:
 
  1. Open the 'curl-all.sln' or 'curl.sln' solutions
  2. Right-click on the 'curl' project and select Properties

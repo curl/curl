@@ -24,7 +24,7 @@
 .\"
 .TH CURLOPT_CURLU 3 "28 Oct 2018" "libcurl 7.63.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_CURLU \- URL in CURLU * format
+CURLOPT_CURLU \- URL in URL handle format
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CURLU, void *pointer);
 .fi
 .SH DESCRIPTION
 Pass in a pointer to the \fIURL\fP to work with. The parameter should be a
-CURLU *. Setting \fICURLOPT_CURLU(3)\fP will explicitly override
+\fICURLU *\fP. Setting \fICURLOPT_CURLU(3)\fP will explicitly override
 \fICURLOPT_URL(3)\fP.
 
 \fICURLOPT_URL(3)\fP or \fICURLOPT_CURLU(3)\fP \fBmust\fP be set before a

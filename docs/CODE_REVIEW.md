@@ -70,7 +70,7 @@ on final or release builds.
 Can the mallocs be avoided? Do not introduce mallocs in any hot paths. If
 there are (new) mallocs, can they be combined into fewer calls?
 
-Are all allocations handled in errorpaths to avoid leaks and crashes?
+Are all allocations handled in error paths to avoid leaks and crashes?
 
 ## Thread-safety
 
@@ -164,5 +164,5 @@ used as input to string functions.
 Tightly coupled with a code review is making sure that the commit message is
 good. It is the responsibility of the person who merges the code to make sure
 that the commit message follows our standard (detailed in the
-[CONTRIBUTE.md](CONTRIBUTE.md) document). This includes making sure the PR
+[CONTRIBUTE](CONTRIBUTE.md) document). This includes making sure the PR
 identifies related issues and giving credit to reporters and helpers.

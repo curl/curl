@@ -16,14 +16,14 @@ in the source code repo
   tag and we use underscores instead of dots in the version number. Make sure
   the tag is GPG signed (using -s).
 
-- run "./maketgz 7.34.0" to build the release tarballs. It is important that
+- run `./maketgz 7.34.0` to build the release tarballs. It is important that
   you run this on a machine with the correct set of autotools etc installed
   as this is what then will be shipped and used by most users on \*nix like
   systems.
 
 - push the git commits and the new tag
 
-- gpg sign the 4 tarballs as maketgz suggests
+- GPG sign the 4 tarballs as `maketgz` suggests
 
 - upload the 8 resulting files to the primary download directory
 

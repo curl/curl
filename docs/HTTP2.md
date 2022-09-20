@@ -59,12 +59,12 @@ attempt to re-use existing HTTP/2 connections and just add a new stream over
 that when doing subsequent parallel requests.
 
 While libcurl sets up a connection to an HTTP server there is a period during
-which it does not know if it can pipeline or do multiplexing and if you add new
-transfers in that period, libcurl will default to start new connections for
-those transfers. With the new option `CURLOPT_PIPEWAIT` (added in 7.43.0), you
-can ask that a transfer should rather wait and see in case there's a
+which it does not know if it can pipeline or do multiplexing and if you add
+new transfers in that period, libcurl will default to start new connections
+for those transfers. With the new option `CURLOPT_PIPEWAIT` (added in 7.43.0),
+you can ask that a transfer should rather wait and see in case there's a
 connection for the same host in progress that might end up being possible to
-multiplex on. It favours keeping the number of connections low to the cost of
+multiplex on. It favors keeping the number of connections low to the cost of
 slightly longer time to first byte transferred.
 
 Applications

@@ -53,7 +53,7 @@ SPDX-License-Identifier: curl
   continue to work independent on what port numbers the test servers actually
   use.
 
-  See [FILEFORMAT](FILEFORMAT.md) for the port number variables.
+  See [`FILEFORMAT`](FILEFORMAT.md) for the port number variables.
 
 ### Test servers
 
@@ -129,13 +129,13 @@ SPDX-License-Identifier: curl
   The test script will check that all allocated memory is freed properly IF
   curl has been built with the `CURLDEBUG` define set. The script will
   automatically detect if that is the case, and it will use the
-  'memanalyze.pl' script to analyze the memory debugging output.
+  `memanalyze.pl` script to analyze the memory debugging output.
 
   Also, if you run tests on a machine where valgrind is found, the script will
   use valgrind to run the test with (unless you use `-n`) to further verify
   correctness.
 
-  runtests.pl's `-t` option will enable torture testing mode, which runs each
+  The `runtests.pl` `-t` option enables torture testing mode. It runs each
   test many times and makes each different memory allocation fail on each
   successive run. This tests the out of memory error handling code to ensure
   that memory leaks do not occur even in those situations. It can help to
@@ -159,7 +159,7 @@ SPDX-License-Identifier: curl
   All test cases are put in the `data/` subdirectory. Each test is stored in
   the file named according to the test number.
 
-  See [FILEFORMAT.md](FILEFORMAT.md) for a description of the test case file
+  See [`FILEFORMAT`](FILEFORMAT.md) for a description of the test case file
   format.
 
 ### Code coverage
@@ -172,13 +172,13 @@ SPDX-License-Identifier: curl
     make test
     make test-torture
 
-  The graphical tool ggcov can be used to browse the source and create
+  The graphical tool `ggcov` can be used to browse the source and create
   coverage reports on \*nix hosts:
 
     ggcov -r lib src
 
-  The text mode tool gcov may also be used, but it doesn't handle object files
-  in more than one directory correctly.
+  The text mode tool `gcov` may also be used, but it doesn't handle object
+  files in more than one directory correctly.
 
 ### Remote testing
 
@@ -211,7 +211,7 @@ SPDX-License-Identifier: curl
 
   These files are `tests/data/test[num]` where `[num]` is just a unique
   identifier described above, and the XML-like file format of them is
-  described in the separate [FILEFORMAT.md](FILEFORMAT.md) document.
+  described in the separate [`FILEFORMAT`](FILEFORMAT.md) document.
 
 ### curl tests
 

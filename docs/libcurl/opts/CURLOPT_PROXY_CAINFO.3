@@ -41,8 +41,8 @@ If \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is zero and you avoid verifying the
 server's certificate, \fICURLOPT_PROXY_CAINFO(3)\fP need not even indicate an
 accessible file.
 
-This option is by default set to the system path where libcurl's cacert bundle
-is assumed to be stored, as established at build time.
+This option is by default set to the system path where libcurl's CA
+certificate bundle is assumed to be stored, as established at build time.
 
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
 (libnsspem.so) needs to be available for this option to work properly.

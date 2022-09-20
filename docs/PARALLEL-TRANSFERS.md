@@ -27,8 +27,8 @@ completely different than the regular one used for each single transfer.
  o total time all transfers are expected to take (if sizes are known)
  o current time the transfers have spent so far
  o estimated time left (if sizes are known)
- o current transfer speed (the faster of UL/DL speeds measured over the last
-   few seconds)
+ o current transfer speed (the faster of upload/download speeds measured over
+   the last few seconds)
 
 Example:
 

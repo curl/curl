@@ -64,9 +64,9 @@ The functions \fBcurl_mvprintf()\fP, \fBcurl_mvfprintf()\fP,
 \fBcurl_mvsprintf()\fP, \fBcurl_mvsnprintf()\fP are equivalent to the
 functions \fBcurl_mprintf()\fP, \fBcurl_mfprintf()\fP, \fBcurl_msprintf()\fP,
 \fBcurl_msnprintf()\fP, respectively, except that they are called with a
-va_list instead of a variable number of arguments. These functions do not
-call the va_end macro. Because they invoke the va_arg macro, the value of ap
-is undefined after the call.
+\fIva_list\fP instead of a variable number of arguments. These functions do
+not call the \fIva_end\fP macro. Because they invoke the \fIva_arg\fP macro,
+the value of \fIap\fP is undefined after the call.
 
 The functions \fBcurl_maprintf()\fP and \fBcurl_mvaprintf()\fP return the
 output string as pointer to a newly allocated memory area. The returned string
@@ -93,21 +93,21 @@ can also specify explicitly which argument is taken, at each place where an
 argument is required, by writing "%m$" instead of '%' and "*m$" instead
 of '*', where the decimal integer m denotes the position in the argument list
 of the desired argument, indexed starting from 1. Thus,
-
+.nf
     curl_mprintf("%*d", width, num);
-
+.fi
 and
-
+.nf
     curl_mprintf("%2$*1$d", width, num);
-
+.fi
 are equivalent. The second style allows repeated references to the same
 argument.
 
 If the style using '$' is used, it must be used throughout for all conversions
 taking an argument and all width and precision arguments, but it may be mixed
 with "%%" formats, which do not consume an argument. There may be no gaps in
-the numbers of argu‐ ments specified using '$'; for example, if arguments 1
-and 3 are specified, argument 2 must also be specified somewhere in the format
+the numbers of arguments specified using '$'; for example, if arguments 1 and
+3 are specified, argument 2 must also be specified somewhere in the format
 string.
 
 .SH "Flag characters"
@@ -139,17 +139,17 @@ minimum field width. If the converted value has fewer characters than the
 field width, it will be padded with spaces on the left (or right, if the
 left-adjustment flag has been given). Instead of a decimal digit string one
 may write "*" or "*m$" (for some decimal integer m) to specify that the field
-width is given in the next argument, or in the m-th argument, respec‐ tively,
-which must be of type int. A negative field width is taken as a '-' flag
-followed by a positive field width. In no case does a nonexistent or small
-field width cause truncation of a field; if the result of a conversion is
-wider than the field width, the field is expanded to contain the conversion
-result.
+width is given in the next argument, or in the \fIm-th\fP argument,
+respectively, which must be of type int. A negative field width is taken as
+a '-' flag followed by a positive field width. In no case does a nonexistent
+or small field width cause truncation of a field; if the result of a
+conversion is wider than the field width, the field is expanded to contain the
+conversion result.
 .SH "Precision"
 An optional precision in the form of a period ('.') followed by an optional
 decimal digit string. Instead of a decimal digit string one may write "*" or
 "*m$" (for some decimal integer m) to specify that the precision is given in
-the next argument, or in the m-th argument, respectively, which must be of
+the next argument, or in the \fIm-th\fP argument, respectively, which must be of
 type int. If the precision is given as just '.', the precision is taken to be
 zero. A negative precision is taken as if the precision were omitted. This
 gives the minimum number of digits to appear for \fBd\fP, \fBi\fP, \fBo\fP,
@@ -198,18 +198,18 @@ empty.
 .B o, u, x, X
 The unsigned int argument is converted to unsigned octal (o), unsigned decimal
 (u), or unsigned hexadecimal (\fBx\fP and \fBX\fP) notation. The letters
-abcdef are used for \fBx\fP conversions; the letters ABCDEF are used for
-\fBX\fP conversions. The precision, if any, gives the minimum number of digits
-that must appear; if the converted value requires fewer digits, it is padded
-on the left with zeros. The default precision is 1. When 0 is printed with
-an explicit precision 0, the output is empty.
+\fIabcdef\fP are used for \fBx\fP conversions; the letters \fIABCDEF\fP are
+used for \fBX\fP conversions. The precision, if any, gives the minimum number
+of digits that must appear; if the converted value requires fewer digits, it
+is padded on the left with zeros. The default precision is 1. When 0 is
+printed with an explicit precision 0, the output is empty.
 .TP
 .B e, E
-The double argument is rounded and output in the style "[-]d.ddde±dd"
+The double argument is rounded and output in the style \fB"[-]d.ddde±dd"\fP
 .TP
 .B f, F
-The double argument is rounded and output to decimal notiation in the style
-[-]ddd.ddd.
+The double argument is rounded and output to decimal notation in the style
+\fB"[-]ddd.ddd"\fP.
 .TP
 .B g, G
 The double argument is converted in style f or e.
@@ -219,12 +219,12 @@ The int argument is converted to an unsigned char, and the resulting character
 is written.
 .TP
 .B s
-The const char * argument is expected to be a pointer to an array of character
-type (pointer to a string). Characters from the array are written up to (but
-not including) a terminating null byte. If a precision is specified, no more
-than the number specified are written. If a precision is given, no null byte
-need be present; if the precision is not specified, or is greater than the
-size of the array, the array must contain a terminating null byte.
+The \fIconst char *\fP argument is expected to be a pointer to an array of
+character type (pointer to a string). Characters from the array are written up
+to (but not including) a terminating null byte. If a precision is specified,
+no more than the number specified are written. If a precision is given, no
+null byte need be present; if the precision is not specified, or is greater
+than the size of the array, the array must contain a terminating null byte.
 .TP
 .B p
 The \fIvoid *\fP pointer argument is printed in hexadecimal.

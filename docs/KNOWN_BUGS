@@ -969,10 +969,10 @@ problems may have been fixed or changed somewhat since this was written.
 
 12.1 OpenLDAP hangs after returning results
 
- By configuration defaults, openldap automatically chase referrals on
+ By configuration defaults, OpenLDAP automatically chase referrals on
  secondary socket descriptors. The OpenLDAP backend is asynchronous and thus
  should monitor all socket descriptors involved. Currently, these secondary
- descriptors are not monitored, causing openldap library to never receive
+ descriptors are not monitored, causing OpenLDAP library to never receive
  data from them.
 
  As a temporary workaround, disable referrals chasing by configuration.

@@ -98,7 +98,7 @@ will try to debug something five years from now can figure out functionality a
 little easier!
 
 The protocol specification itself should be freely available without requiring
-any NDA or similar.
+a non-disclosure agreement or similar.
 
 ## Do not compare
 
