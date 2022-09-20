@@ -17,7 +17,7 @@ We remove support for building curl with the NSS TLS library in August 2023.
   features on top of the regular NSS that is not shipped by the vanilla library
 
 Starting in 7.82.0, building curl to use NSS configure requires the additional
-flag --with-nss-deprecated in an attempt to highlight these plans.
+flag `--with-nss-deprecated` in an attempt to highlight these plans.
 
 ## past removals
 

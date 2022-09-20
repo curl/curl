@@ -57,10 +57,10 @@ Set the \fIuserp\fP argument with the \fICURLOPT_HSTSWRITEDATA(3)\fP option or
 it will be NULL.
 
 When the callback is invoked, the \fIsts\fP pointer points to a populated
-struct: Read the host name to 'name' (it is 'namelen' bytes long and null
-terminated. The 'includeSubDomains' field is non-zero if the entry matches
-subdomains. The 'expire' string is a date stamp null-terminated string using
-the syntax YYYYMMDD HH:MM:SS.
+struct: Read the host name to 'name' (it is \fInamelen\fP bytes long and null
+terminated. The \fIincludeSubDomains\fP field is non-zero if the entry matches
+subdomains. The \fIexpire\fP string is a date stamp null-terminated string
+using the syntax YYYYMMDD HH:MM:SS.
 
 The callback should return \fICURLSTS_OK\fP if it succeeded and is prepared to
 be called again (for another host) or \fICURLSTS_DONE\fP if there's nothing

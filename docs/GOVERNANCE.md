@@ -116,7 +116,7 @@ admin of all things curl related server stuff, but Björn Stenberg and Linus
 Feltzing serve as backup admins for when Daniel is gone or unable.
 
 The primary server is paid for by Haxx. The machine is physically located in a
-server bunker in Stockholm Sweden, operated by the company Portlane.
+server bunker in Stockholm Sweden, operated by the company Glesys.
 
 The website contents are served to the web via Fastly and Daniel is the
 primary curl contact with Fastly.
@@ -152,7 +152,7 @@ within the area of personal expertise and experience.
 
 ### Merge advice
 
-When you are merging patches/PRs...
+When you are merging patches/pull requests...
 
 - make sure the commit messages follow our template
 - squash patch sets into a few logical commits even if the PR did not, if

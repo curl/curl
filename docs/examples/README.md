@@ -15,8 +15,9 @@ them for submission in future packages and on the website.
 
 ## Building
 
-The Makefile.example is an example makefile that could be used to build these
-examples. Just edit the file according to your system and requirements first.
+The `Makefile.example` is an example Makefile that could be used to build
+these examples. Just edit the file according to your system and requirements
+first.
 
 Most examples should build fine using a command line like this:
 

@@ -35,9 +35,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SOCKS5_GSSAPI_SERVICE,
 .SH DESCRIPTION
 Deprecated since 7.49.0. Use \fICURLOPT_PROXY_SERVICE_NAME(3)\fP instead.
 
-Pass a char * as parameter to a string holding the \fIname\fP of the service.
-The default service name for a SOCKS5 server is "rcmd". This option allows you
-to change it.
+Pass a \fBchar *\fP as parameter to a string holding the \fIname\fP of the
+service.  The default service name for a SOCKS5 server is \fI"rcmd"\fP. This
+option allows you to change it.
 
 The application does not have to keep the string around after setting this
 option.

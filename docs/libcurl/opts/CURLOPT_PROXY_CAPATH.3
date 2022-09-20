@@ -34,9 +34,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAPATH, char *capath);
 .SH DESCRIPTION
 Pass a char * to a null-terminated string naming a directory holding multiple
 CA certificates to verify the HTTPS proxy with. If libcurl is built against
-OpenSSL, the certificate directory must be prepared using the openssl c_rehash
-utility. This makes sense only when \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is
-enabled (which it is by default).
+OpenSSL, the certificate directory must be prepared using the OpenSSL
+\fBc_rehash\fP utility. This makes sense only when
+\fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is enabled (which it is by default).
 
 The application does not have to keep the string around after setting this
 option.

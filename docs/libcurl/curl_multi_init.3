@@ -31,9 +31,9 @@ curl_multi_init - create a multi handle
 CURLM *curl_multi_init();
 .fi
 .SH DESCRIPTION
-This function returns a CURLM handle to be used as input to all the other
-multi-functions, sometimes referred to as a multi handle in some places in the
-documentation. This init call MUST have a corresponding call to
+This function returns a pointer to a \fICURLM\fP handle to be used as input to
+all the other multi-functions, sometimes referred to as a multi handle in some
+places in the documentation. This init call MUST have a corresponding call to
 \fIcurl_multi_cleanup(3)\fP when the operation is complete.
 .SH EXAMPLE
 .nf

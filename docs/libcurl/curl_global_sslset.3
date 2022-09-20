@@ -64,17 +64,17 @@ The backend can be identified by the \fIid\fP
 both \fIid\fP and \fIname\fP are specified, the \fIname\fP will be ignored.
 
 If neither \fIid\fP nor \fPname\fP are specified, the function will fail with
-CURLSSLSET_UNKNOWN_BACKEND and set the \fIavail\fP pointer to the
+\fBCURLSSLSET_UNKNOWN_BACKEND\fP and set the \fIavail\fP pointer to the
 NULL-terminated list of available backends. The available backends are those
 that this particular build of libcurl supports.
 
 Since libcurl 7.60.0, the \fIavail\fP pointer will always be set to the list
 of alternatives if non-NULL.
 
-Upon success, the function returns CURLSSLSET_OK.
+Upon success, the function returns \fBCURLSSLSET_OK\fP.
 
 If the specified SSL backend is not available, the function returns
-CURLSSLSET_UNKNOWN_BACKEND and sets the \fIavail\fP pointer to a
+\fBCURLSSLSET_UNKNOWN_BACKEND\fP and sets the \fIavail\fP pointer to a
 NULL-terminated list of available SSL backends. In this case, you may call the
 function again to try to select a different backend.
 
@@ -105,7 +105,8 @@ This does not just mean no other thread that is using libcurl.
 This function was added in libcurl 7.56.0. Before this version, there was no
 support for choosing SSL backends at runtime.
 .SH RETURN VALUE
-If this function returns CURLSSLSET_OK, the backend was successfully selected.
+If this function returns \fICURLSSLSET_OK\fP, the backend was successfully
+selected.
 
 If the chosen backend is unknown (or support for the chosen backend has not
 been compiled into libcurl), the function returns

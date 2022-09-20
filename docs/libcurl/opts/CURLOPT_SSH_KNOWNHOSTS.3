@@ -37,7 +37,7 @@ known_host file to use.  The known_hosts file should use the OpenSSH file
 format as supported by libssh2. If this file is specified, libcurl will only
 accept connections with hosts that are known and present in that file, with a
 matching public key. Use \fICURLOPT_SSH_KEYFUNCTION(3)\fP to alter the default
-behavior on host and key (mis)matching.
+behavior on host and key matches and mismatches.
 
 The application does not have to keep the string around after setting this
 option.

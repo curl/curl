@@ -46,10 +46,10 @@ the use of signals.
 Setting \fICURLOPT_NOSIGNAL(3)\fP to 1 makes libcurl NOT ask the system to
 ignore SIGPIPE signals, which otherwise are sent by the system when trying to
 send data to a socket which is closed in the other end. libcurl makes an
-effort to never cause such SIGPIPEs to trigger, but some operating systems
-have no way to avoid them and even on those that have there are some corner
-cases when they may still happen, contrary to our desire. In addition, using
-\fICURLAUTH_NTLM_WB\fP authentication could cause a SIGCHLD signal to be
+effort to never cause such SIGPIPE signals to trigger, but some operating
+systems have no way to avoid them and even on those that have there are some
+corner cases when they may still happen, contrary to our desire. In addition,
+using \fICURLAUTH_NTLM_WB\fP authentication could cause a SIGCHLD signal to be
 raised.
 .SH DEFAULT
 0

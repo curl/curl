@@ -45,7 +45,7 @@ should be aware.
 .SH "Command Lines"
 If you use a command line tool (such as curl) that uses libcurl, and you give
 options to the tool on the command line those options can get read by other
-users of your system when they use 'ps' or other tools to list currently
+users of your system when they use \fIps\fP or other tools to list currently
 running processes.
 
 To avoid these problems, never feed sensitive things to programs using command
@@ -76,23 +76,22 @@ To avoid this problem, use an authentication mechanism or other protocol that
 does not let snoopers see your password: Digest, CRAM-MD5, Kerberos, SPNEGO or
 NTLM authentication. Or even better: use authenticated protocols that protect
 the entire connection and everything sent over it.
-.SH "Un-authenticated Connections"
+.SH "Unauthenticated Connections"
 Protocols that do not have any form of cryptographic authentication cannot
 with any certainty know that they communicate with the right remote server.
 
 If your application is using a fixed scheme or fixed host name, it is not safe
-as long as the connection is un-authenticated. There can be a
-man-in-the-middle or in fact the whole server might have been replaced by an
-evil actor.
+as long as the connection is unauthenticated. There can be a man-in-the-middle
+or in fact the whole server might have been replaced by an evil actor.
 
-Un-authenticated protocols are unsafe. The data that comes back to curl may
+Unauthenticated protocols are unsafe. The data that comes back to curl may
 have been injected by an attacker. The data that curl sends might be modified
 before it reaches the intended server. If it even reaches the intended server
 at all.
 
 Remedies:
 .IP "Restrict operations to authenticated transfers"
-Ie use authenticated protocols protected with HTTPS or SSH.
+Use authenticated protocols protected with HTTPS or SSH.
 .IP "Make sure the server's certificate etc is verified"
 Never ever switch off certificate verification.
 .SH "Redirects"
@@ -106,7 +105,7 @@ A redirect to a file: URL would cause the libcurl to read (or write) arbitrary
 files from the local filesystem. If the application returns the data back to
 the user (as would happen in some kinds of CGI scripts), an attacker could
 leverage this to read otherwise forbidden data (e.g.
-file://localhost/etc/passwd).
+\fBfile://localhost/etc/passwd\fP).
 
 If authentication credentials are stored in the ~/.netrc file, or Kerberos is
 in use, any other URL type (not just file:) that requires authentication is
@@ -116,7 +115,7 @@ then return data even when the server is password protected.
 In the same way, if an unencrypted SSH private key has been configured for the
 user running the libcurl application, SCP: or SFTP: URLs could access password
 or private-key protected resources,
-e.g. sftp://user@some-internal-server/etc/passwd
+e.g. \fBsftp://user@some-internal-server/etc/passwd\fP
 
 The \fICURLOPT_REDIR_PROTOCOLS(3)\fP and \fICURLOPT_NETRC(3)\fP options can be
 used to mitigate against this kind of attack.
@@ -137,26 +136,26 @@ For all options in libcurl which specify headers, including but not limited to
 \fICURLOPT_HTTPHEADER(3)\fP, \fICURLOPT_PROXYHEADER(3)\fP,
 \fICURLOPT_COOKIE(3)\fP, \fICURLOPT_USERAGENT(3)\fP, \fICURLOPT_REFERER(3)\fP
 and \fICURLOPT_RANGE(3)\fP, libcurl will send the headers as-is and will not
-apply any special sanitization or normalization to them.
+apply any special sanitation or normalization to them.
 
 If you allow untrusted user input into these options without sanitizing CRLF
-sequences in them, someone malicious may be able to modify the request in a way
-you didn't intend such as injecting new headers.
+sequences in them, someone malicious may be able to modify the request in a
+way you did not intend such as injecting new headers.
 .SH "Local Resources"
 A user who can control the DNS server of a domain being passed in within a URL
 can change the address of the host to a local, private address which a
 server-side libcurl-using application could then use. e.g. the innocuous URL
-http://fuzzybunnies.example.com/ could actually resolve to the IP address of a
-server behind a firewall, such as 127.0.0.1 or 10.1.2.3. Applications can
-mitigate against this by setting a \fICURLOPT_OPENSOCKETFUNCTION(3)\fP
-or \fICURLOPT_PREREQFUNCTION(3)\fP and checking the address before a
-connection.
+\fBhttp://fuzzybunnies.example.com/\fP could actually resolve to the IP
+address of a server behind a firewall, such as 127.0.0.1 or
+10.1.2.3. Applications can mitigate against this by setting a
+\fICURLOPT_OPENSOCKETFUNCTION(3)\fP or \fICURLOPT_PREREQFUNCTION(3)\fP and
+checking the address before a connection.
 
 All the malicious scenarios regarding redirected URLs apply just as well to
 non-redirected URLs, if the user is allowed to specify an arbitrary URL that
 could point to a private resource. For example, a web app providing a
-translation service might happily translate file://localhost/etc/passwd and
-display the result. Applications can mitigate against this with the
+translation service might happily translate \fBfile://localhost/etc/passwd\fP
+and display the result. Applications can mitigate against this with the
 \fICURLOPT_PROTOCOLS(3)\fP option as well as by similar mitigation techniques
 for redirections.
 
@@ -183,16 +182,16 @@ or a mix of decimal, octal or hexadecimal encoding.
 .SH "IPv6 Addresses"
 libcurl will normally handle IPv6 addresses transparently and just as easily
 as IPv4 addresses. That means that a sanitizing function that filters out
-addresses like 127.0.0.1 is not sufficient--the equivalent IPv6 addresses ::1,
-::, 0:00::0:1, ::127.0.0.1 and ::ffff:7f00:1 supplied somehow by an attacker
-would all bypass a naive filter and could allow access to undesired local
-resources. IPv6 also has special address blocks like link-local and site-local
-that generally should not be accessed by a server-side libcurl-using
-application. A poorly configured firewall installed in a data center,
-organization or server may also be configured to limit IPv4 connections but
-leave IPv6 connections wide open. In some cases, setting
-\fICURLOPT_IPRESOLVE(3)\fP to CURL_IPRESOLVE_V4 can be used to limit resolved
-addresses to IPv4 only and bypass these issues.
+addresses like 127.0.0.1 is not sufficient--the equivalent IPv6 addresses
+\fB::1\fP, \fB::\fP, \fB0:00::0:1\fP, \fB::127.0.0.1\fP and
+\fB::ffff:7f00:1\fP supplied somehow by an attacker would all bypass a naive
+filter and could allow access to undesired local resources. IPv6 also has
+special address blocks like link-local and site-local that generally should
+not be accessed by a server-side libcurl-using application. A poorly
+configured firewall installed in a data center, organization or server may
+also be configured to limit IPv4 connections but leave IPv6 connections wide
+open. In some cases, setting \fICURLOPT_IPRESOLVE(3)\fP to CURL_IPRESOLVE_V4
+can be used to limit resolved addresses to IPv4 only and bypass these issues.
 .SH Uploads
 When uploading, a redirect can cause a local (or remote) file to be
 overwritten. Applications must not allow any unsanitized URL to be passed in
@@ -223,9 +222,9 @@ between requests.
 .SH "Dangerous SCP URLs"
 SCP URLs can contain raw commands within the scp: URL, which is a side effect
 of how the SCP protocol is designed. e.g.
-
+.nf
   scp://user:pass@host/a;date >/tmp/test;
-
+.fi
 Applications must not allow unsanitized SCP: URLs to be passed in for
 downloads.
 .SH "file://"
@@ -305,13 +304,13 @@ as within libcurl itself.
 When performing an FTP transfer, two TCP connections are used: one for setting
 up the transfer and one for the actual data.
 
-FTP is not only un-authenticated, but the setting up of the second transfer is
+FTP is not only unauthenticated, but the setting up of the second transfer is
 also a weak spot. The second connection to use for data, is either setup with
 the PORT/EPRT command that makes the server connect back to the client on the
 given IP+PORT, or with PASV/EPSV that makes the server setup a port to listen
 to and tells the client to connect to a given IP+PORT.
 
-Again, un-authenticated means that the connection might be meddled with by a
+Again, unauthenticated means that the connection might be meddled with by a
 man-in-the-middle or that there's a malicious server pretending to be the
 right one.
 
@@ -360,7 +359,8 @@ file name. The curl command-line tool does this with
 a file name. An application could also use \fICURLINFO_EFFECTIVE_URL(3)\fP to
 generate a file name from a server-supplied redirect URL. Special care must be
 taken to sanitize such names to avoid the possibility of a malicious server
-supplying one like "/etc/passwd", "\\autoexec.bat", "prn:" or even ".bashrc".
+supplying one like \fB"/etc/passwd"\fP, \fB"\\autoexec.bat"\fP, \fB"prn:"\fP
+or even \fB".bashrc"\fP.
 .SH "Server Certificates"
 A secure application should never use the \fICURLOPT_SSL_VERIFYPEER(3)\fP
 option to disable certificate validation. There are numerous attacks that are
@@ -384,7 +384,7 @@ sensitive data.
 To avoid this problem, you must of course use your common sense. Often, you
 can just edit out the sensitive data or just search/replace your true
 information with faked data.
-.SH "Setuid applications using libcurl"
+.SH "setuid applications using libcurl"
 libcurl-using applications that set the 'setuid' bit to run with elevated or
 modified rights also implicitly give that extra power to libcurl and this
 should only be done after careful considerations.
@@ -396,13 +396,13 @@ that the user is otherwise not able to view (like credentials for a login
 etc), it should be noted that libcurl still might understand proxy environment
 variables that allow the user to redirect libcurl operations to use a proxy
 controlled by the user.
-.SH "File descriptors, fork and ntlm_wb"
-An application that uses libcurl and invokes `fork()` will get all file
+.SH "File descriptors, fork and NTLM"
+An application that uses libcurl and invokes \fIfork()\fP will get all file
 descriptors duplicated in the child process, including the ones libcurl
 created.
 
-libcurl itself uses `fork()` and `execl()` if told to use the
-`CURLAUTH_NTLM_WB` authentication method which then will invoke the helper
+libcurl itself uses \fIfork()\fP and \fIexecl()\fP if told to use the
+\fBCURLAUTH_NTLM_WB\fP authentication method which then will invoke the helper
 command in a child process with file descriptors duplicated. Make sure that
 only the trusted and reliable helper program is invoked!
 .SH "Secrets in memory"
@@ -416,7 +416,7 @@ core dump file, such data might be accessible.
 
 Further, when eventually closing a handle and the secrets are no longer
 needed, libcurl does not explicitly clear memory before freeing it, so
-crendentials may be left in freed data.
+credentials may be left in freed data.
 .SH "Report Security Problems"
 Should you detect or just suspect a security problem in libcurl or curl,
 contact the project curl security team immediately. See

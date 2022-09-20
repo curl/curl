@@ -25,7 +25,7 @@ versions of libs, tools and operating systems.
  - c-ares       1.16.0
  - libidn2      2.0.0
  - wolfSSL      2.0.0
- - openldap     2.0
+ - OpenLDAP     2.0
  - MIT Kerberos 1.2.4
  - GSKit        V5R3M0
  - NSS          3.14.x

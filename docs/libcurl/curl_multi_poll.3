@@ -43,7 +43,8 @@ shorter expiry time than \fItimeout_ms\fP, that shorter time will be used
 instead to make sure timeout accuracy is reasonably kept.
 
 The calling application may pass additional curl_waitfd structures which are
-similar to \fIpoll(2)\fP's pollfd structure to be waited on in the same call.
+similar to \fIpoll(2)\fP's \fIpollfd\fP structure to be waited on in the same
+call.
 
 On completion, if \fInumfds\fP is non-NULL, it will be populated with the
 total number of file descriptors on which interesting events occurred. This

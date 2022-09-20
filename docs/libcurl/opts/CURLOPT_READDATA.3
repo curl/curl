@@ -34,7 +34,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_READDATA, void *pointer);
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the file read function. If you use the
 \fICURLOPT_READFUNCTION(3)\fP option, this is the pointer you will get as
-input in the 4th argument to the callback.
+input in the fourth argument to the callback.
 
 If you do not specify a read callback but instead rely on the default internal
 read function, this data must be a valid readable FILE * (cast to 'void *').

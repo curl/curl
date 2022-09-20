@@ -31,10 +31,11 @@ curl_share_init - Create a shared object
 CURLSH *curl_share_init();
 .fi
 .SH DESCRIPTION
-This function returns a CURLSH handle to be used as input to all the other
-share-functions, sometimes referred to as a share handle in some places in the
-documentation. This init call MUST have a corresponding call to
-\fIcurl_share_cleanup\fP when all operations using the share are complete.
+This function returns a pointer to a \fICURLSH\fP handle to be used as input
+to all the other share-functions, sometimes referred to as a share handle in
+some places in the documentation. This init call MUST have a corresponding
+call to \fIcurl_share_cleanup(3)\fP when all operations using the share are
+complete.
 
 This \fIshare handle\fP is what you pass to curl using the
 \fICURLOPT_SHARE(3)\fP option with \fIcurl_easy_setopt(3)\fP, to make that
