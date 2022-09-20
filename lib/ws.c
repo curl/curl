@@ -56,7 +56,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req)
   size_t randlen;
   char keyval[40];
   struct SingleRequest *k = &data->req;
-  const struct wsfield heads[]= {
+  struct wsfield heads[]= {
     {
       /* The request MUST contain an |Upgrade| header field whose value
          MUST include the "websocket" keyword. */
@@ -79,9 +79,10 @@ CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req)
          consisting of a randomly selected 16-byte value that has been
          base64-encoded (see Section 4 of [RFC4648]). The nonce MUST be
          selected randomly for each connection. */
-      "Sec-WebSocket-Key:", &keyval[0]
+      "Sec-WebSocket-Key:", NULL,
     }
   };
+  heads[3].val = &keyval[0];
 
   /* 16 bytes random */
   result = Curl_rand(data, (unsigned char *)rand, sizeof(rand));
