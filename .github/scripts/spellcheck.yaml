@@ -1,0 +1,32 @@
+# Copyright (C) 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+#
+# Docs: https://github.com/UnicornGlobal/spellcheck-github-actions
+matrix:
+- name: Markdown
+  expect_match: false
+  apsell:
+    mode: en
+  dictionary:
+    wordlists:
+    - wordlist.txt
+    output: wordlist.dic
+    encoding: utf-8
+  pipeline:
+  - pyspelling.filters.markdown:
+      markdown_extensions:
+      - markdown.extensions.extra:
+  - pyspelling.filters.html:
+      comments: true
+      attributes:
+      - title
+      - alt
+      ignores:
+      - ':matches(code, pre)'
+      - 'code'
+      - 'pre'
+      - 'strong'
+      - 'em'
+  sources:
+  - '**/*.md|!docs/BINDINGS.md'
