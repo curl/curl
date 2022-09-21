@@ -47,7 +47,7 @@ UNITTEST_START
  * Prove detection of other invalid input.
  */
 do {
-  const char *max =
+  static const char max[] =
     /* ..|....1.........2.........3.........4.........5.........6... */
     /* 3456789012345678901234567890123456789012345678901234567890123 */
     "this.is.a.maximum-length.hostname."                  /* 34:  34 */
@@ -59,7 +59,7 @@ do {
     "that.is.two-hundred.and.fifty-six."                  /* 34: 231 */
     "including.the.last.null."                            /* 24: 255 */
     "";
-  const char *toolong =
+  static const char toolong[] =
     /* ..|....1.........2.........3.........4.........5.........6... */
     /* 3456789012345678901234567890123456789012345678901234567890123 */
     "here.is.a.hostname.which.is.just.barely.too.long."   /* 49:  49 */
@@ -70,10 +70,10 @@ do {
     "a.trailing.dot.may.have.up.to."                      /* 30: 230 */
     "255.characters.never.more."                          /* 26: 256 */
     "";
-  const char *emptylabel =
+  static const char emptylabel[] =
     "this.is.an.otherwise-valid.hostname."
     ".with.an.empty.label.";
-  const char *outsizelabel =
+  static const char outsizelabel[] =
     "this.is.an.otherwise-valid.hostname."
     "with-a-label-of-greater-length-than-the-sixty-three-characters-"
     "specified.in.the.RFCs.";
