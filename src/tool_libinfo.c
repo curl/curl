@@ -35,121 +35,43 @@
 
 /* global variable definitions, for libcurl run-time info */
 
-#define MAX_PROTOS      64      /* Maximum number of supported protocols. */
+static const char *no_protos = NULL;
 
 curl_version_info_data *curlinfo = NULL;
+const char * const *built_in_protos = &no_protos;
 
-proto_t proto_last = 0;
+size_t proto_count = 0;
 
-proto_t proto_ftp = PROTO_NONE;
-proto_t proto_ftps = PROTO_NONE;
-proto_t proto_http = PROTO_NONE;
-proto_t proto_https = PROTO_NONE;
-proto_t proto_file = PROTO_NONE;
-proto_t proto_rtsp = PROTO_NONE;
-proto_t proto_scp = PROTO_NONE;
-proto_t proto_sftp = PROTO_NONE;
-proto_t proto_tftp = PROTO_NONE;
+const char *proto_file = NULL;
+const char *proto_ftp = NULL;
+const char *proto_ftps = NULL;
+const char *proto_http = NULL;
+const char *proto_https = NULL;
+const char *proto_rtsp = NULL;
+const char *proto_scp = NULL;
+const char *proto_sftp = NULL;
+const char *proto_tftp = NULL;
 
-static struct proto_name_nump {
-  const char    *proto_name;
-  proto_t       *proto_nump;
+static struct proto_name_tokenp {
+  const char   *proto_name;
+  const char  **proto_tokenp;
 } const possibly_built_in[] = {
-  /* Keep entries in CURLPROTO_* order for sorting purpose. */
-  { "http",     &proto_http  },
-  { "https",    &proto_https },
+  { "file",     &proto_file  },
   { "ftp",      &proto_ftp   },
   { "ftps",     &proto_ftps  },
+  { "http",     &proto_http  },
+  { "https",    &proto_https },
+  { "rtsp",     &proto_rtsp  },
   { "scp",      &proto_scp   },
   { "sftp",     &proto_sftp  },
-  { "telnet",   NULL         },
-  { "ldap",     NULL         },
-  { "ldaps",    NULL         },
-  { "dict",     NULL         },
-  { "file",     &proto_file  },
   { "tftp",     &proto_tftp  },
-  { "imap",     NULL         },
-  { "imaps",    NULL         },
-  { "pop3",     NULL         },
-  { "pop3s",    NULL         },
-  { "smtp",     NULL         },
-  { "smtps",    NULL         },
-  { "rtsp",     &proto_rtsp  },
-  { "rtmp",     NULL         },
-  { "rtmpt",    NULL         },
-  { "rtmpe",    NULL         },
-  { "rtmpte",   NULL         },
-  { "rtmps",    NULL         },
-  { "rtmpts",   NULL         },
-  { "gopher",   NULL         },
-  { "smb",      NULL         },
-  { "smbs",     NULL         },
-  { "mqtt",     NULL         },
-  { "gophers",  NULL         },
-  { "ws",       NULL         },
-  { "wss",      NULL         },
   {  NULL,      NULL         }
 };
-
-static const char *built_in_protos[MAX_PROTOS + 1] = {NULL};
-
-/*
- * scheme2protocol() returns the protocol number for the specified URL scheme
- */
-proto_t scheme2protocol(const char *scheme)
-{
-  proto_t p;
-
-  for(p = 0; built_in_protos[p]; p++)
-    if(curl_strequal(scheme, built_in_protos[p]))
-      return p;
-  return PROTO_NONE;
-}
-
-/*
- * protocol2scheme() returns the name of the specified protocol.
- */
-const char *protocol2scheme(proto_t proto)
-{
-  return proto < proto_last? built_in_protos[proto]: NULL;
-}
-
-/* Enter a prototype in the built-in prototype table. */
-static CURLcode enter_proto(const char *proto)
-{
-  if(scheme2protocol(proto) == PROTO_NONE) {
-    if(proto_last >= MAX_PROTOS)
-      return CURLE_OUT_OF_MEMORY;
-    built_in_protos[proto_last] = proto;
-    built_in_protos[++proto_last] = NULL;
-  }
-
-  return CURLE_OK;
-}
-
-/* qsort helper functions for prototype array. */
-static int sortkey(const void *arg)
-{
-  const char *proto = *(const char **) arg;
-  const struct proto_name_nump *p;
-
-  for(p = possibly_built_in; p->proto_name; p++)
-    if(curl_strequal(p->proto_name, proto))
-      break;
-
-  return (int) (p - possibly_built_in);
-}
-
-static int protocmp(const void *p1, const void *p2)
-{
-  return sortkey(p1) - sortkey(p2);
-}
 
 /*
  * libcurl_info_init: retrieves run-time information about libcurl,
  * setting a global pointer 'curlinfo' to libcurl's run-time info
- * struct, Assigning numbers to specific protocols and identifying protocols
- * we are interested in.
+ * struct, count protocols and flag those we are interested in.
  */
 
 CURLcode get_libcurl_info(void)
@@ -163,40 +85,40 @@ CURLcode get_libcurl_info(void)
 
   if(curlinfo->protocols) {
     const char *const *builtin;
-    const struct proto_name_nump *p;
+    const struct proto_name_tokenp *p;
 
-    /* Copy protocols to local table. */
-    for(builtin = curlinfo->protocols; !result && *builtin; builtin++)
-      result = enter_proto(*builtin);
+    built_in_protos = curlinfo->protocols;
 
-    /* Special case: if RTMP is present, also include RTMPE, RTMPS, RTMPT,
-       RTMPTE and RTMPTS. */
-    if(scheme2protocol("rtmp") != PROTO_NONE) {
-      if(!result)
-        result = enter_proto("rtmpe");
-      if(!result)
-        result = enter_proto("rtmps");
-      if(!result)
-        result = enter_proto("rtmpt");
-      if(!result)
-        result = enter_proto("rtmpte");
-      if(!result)
-        result = enter_proto("rtmpts");
+    for(builtin = built_in_protos; !result && *builtin; builtin++) {
+      /* Identify protocols we are interested in. */
+      for(p = possibly_built_in; p->proto_name; p++)
+        if(curl_strequal(p->proto_name, *builtin)) {
+          *p->proto_tokenp = *builtin;
+          break;
+        }
     }
-
-    if(result)
-      return result;
-
-    /* Sort the protocols to be sure the primary ones are always accessible
-     * and to retain their list order for testing purposes. */
-    qsort((char *)built_in_protos, proto_last,
-          sizeof(built_in_protos[0]), protocmp);
-
-    /* Identify protocols we are interested in. */
-    for(p = possibly_built_in; p->proto_name; p++)
-      if(p->proto_nump)
-        *p->proto_nump = scheme2protocol(p->proto_name);
+    proto_count = builtin - built_in_protos;
   }
 
   return CURLE_OK;
+}
+
+/* Tokenize a protocol name.
+ * Return the address of the protocol name listed by the library, or NULL if
+ * not found.
+ * Although this may seem useless, this always returns the same address for
+ * a given protocol and thus allows comparing pointers rather than strings.
+ * In addition, the returned pointer is not deallocated until the program ends.
+ */
+
+const char *proto_token(const char *proto)
+{
+  const char * const *builtin;
+
+  if(!proto)
+    return NULL;
+  for(builtin = built_in_protos; *builtin; builtin++)
+    if(curl_strequal(*builtin, proto))
+      break;
+  return *builtin;
 }

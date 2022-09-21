@@ -27,38 +27,22 @@
 
 /* global variable declarations, for libcurl run-time info */
 
-typedef unsigned int proto_t;   /* A protocol number.*/
-
-#define PROTO_NONE ((proto_t) -1)
-
-/* Protocol numbers set type. This should have enough bits for all
- * enabled protocols.
- */
-typedef unsigned int proto_set_t;
-
-#define PROTO_MAX       ((proto_t) (8 * sizeof(proto_set_t)))
-
-#define PROTO_BIT(p)    ((p) < PROTO_MAX? (proto_set_t) 1 << (p):       \
-                                          (proto_set_t) 0)
-
-#define PROTO_ALL       (PROTO_BIT(proto_last) - (proto_set_t) 1)
-
 
 extern curl_version_info_data *curlinfo;
-extern proto_t proto_last;
+extern const char * const *built_in_protos;
+extern size_t proto_count;
 
-extern proto_t proto_ftp;
-extern proto_t proto_ftps;
-extern proto_t proto_http;
-extern proto_t proto_https;
-extern proto_t proto_file;
-extern proto_t proto_rtsp;
-extern proto_t proto_scp;
-extern proto_t proto_sftp;
-extern proto_t proto_tftp;
+extern const char *proto_file;
+extern const char *proto_ftp;
+extern const char *proto_ftps;
+extern const char *proto_http;
+extern const char *proto_https;
+extern const char *proto_rtsp;
+extern const char *proto_scp;
+extern const char *proto_sftp;
+extern const char *proto_tftp;
 
 CURLcode get_libcurl_info(void);
-proto_t scheme2protocol(const char *scheme);
-const char *protocol2scheme(proto_t proto);
+const char *proto_token(const char *proto);
 
 #endif /* HEADER_CURL_TOOL_LIBINFO_H */

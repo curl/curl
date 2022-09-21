@@ -23,6 +23,10 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#if defined(HAVE_STRCASECMP) && defined(HAVE_STRINGS_H)
+#include <strings.h>
+#endif
+
 #include "tool_util.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -134,4 +138,28 @@ long tvdiff(struct timeval newer, struct timeval older)
 {
   return (long)(newer.tv_sec-older.tv_sec)*1000+
     (long)(newer.tv_usec-older.tv_usec)/1000;
+}
+
+/* Case insensitive compare. Accept NULL pointers. */
+int struplocompare(const char *p1, const char *p2)
+{
+  if(!p1)
+    return p2? -1: 0;
+  if(!p2)
+    return 1;
+#ifdef HAVE_STRCASECMP
+  return strcasecmp(p1, p2);
+#elif defined(HAVE_STRCMPI)
+  return strcmpi(p1, p2);
+#elif defined(HAVE_STRICMP)
+  return stricmp(p1, p2);
+#else
+  return strcmp(p1, p2);
+#endif
+}
+
+/* Indirect version to use as qsort callback. */
+int struplocompare4sort(const void *p1, const void *p2)
+{
+  return struplocompare(* (char * const *) p1, * (char * const *) p2);
 }
