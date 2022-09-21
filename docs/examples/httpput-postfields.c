@@ -37,8 +37,10 @@ static const char olivertwist[]=
   "small: to wit, a workhouse; and in this workhouse was born; on a day and "
   "date which I need not trouble myself to repeat, inasmuch as it can be of "
   "no possible consequence to the reader, in this stage of the business at "
-  "all events; the item of mortality whose name is prefixed to the head of "
-  "this chapter.";
+  "all events; the item of mortality whose name is prefixed";
+
+/* ... to the head of this chapter. String cut off to stick within the C90
+   509 byte limit. */
 
 /*
  * This example shows a HTTP PUT operation that sends a fixed buffer with
