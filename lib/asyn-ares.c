@@ -779,10 +779,9 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
       int pf = PF_INET;
       memset(&hints, 0, sizeof(hints));
 #ifdef CURLRES_IPV6
-      if(Curl_ipv6works(data))
+      if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
         /* The stack seems to be IPv6-enabled */
-        if(data->conn->ip_version != CURL_IPRESOLVE_V4)
-          pf = PF_UNSPEC;
+        pf = PF_UNSPEC;
 #endif /* CURLRES_IPV6 */
       hints.ai_family = pf;
       hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP)?
@@ -795,7 +794,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 #else
 
 #ifdef HAVE_CARES_IPV6
-    if(Curl_ipv6works(data) && data->conn->ip_version != CURL_IPRESOLVE_V4) {
+    if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
       /* The stack seems to be IPv6-enabled */
       res->num_pending = 2;
 
