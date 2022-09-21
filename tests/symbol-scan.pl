@@ -141,7 +141,7 @@ scanman3dir("$root/docs/libcurl/opts");
 
 open S, "<$root/docs/libcurl/symbols-in-versions";
 while(<S>) {
-    if(/(^[^ \n]+) *(.*)/) {
+    if(/(^[^ \n]+) +(.*)/) {
         my ($sym, $rest)=($1, $2);
         if($doc{$sym}) {
             print "Detected duplicate symbol: $sym\n";
