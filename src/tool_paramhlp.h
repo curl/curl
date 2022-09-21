@@ -39,7 +39,7 @@ ParameterError str2unummax(long *val, const char *str, long max);
 ParameterError str2udouble(double *val, const char *str, long max);
 
 ParameterError proto2num(struct OperationConfig *config,
-                         proto_set_t val, char **obuf,
+                         const char * const *val, char **obuf,
                          const char *str);
 
 ParameterError check_protocol(const char *str);

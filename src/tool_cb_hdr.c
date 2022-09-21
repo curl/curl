@@ -75,8 +75,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   const char *str = ptr;
   const size_t cb = size * nmemb;
   const char *end = (char *)ptr + cb;
-  char *scheme;
-  proto_t protocol = proto_last;
+  const char *scheme = NULL;
 
   /*
    * Once that libcurl has called back tool_header_cb() the returned value
@@ -142,11 +141,10 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
    */
 
   curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
-  if(scheme)
-    protocol = scheme2protocol(scheme);
+  scheme = proto_token(scheme);
   if(hdrcbdata->honor_cd_filename &&
      (cb > 20) && checkprefix("Content-disposition:", str) &&
-     (protocol == proto_https || protocol == proto_http)) {
+     (scheme == proto_http || scheme == proto_https)) {
     const char *p = str + 20;
 
     /* look for the 'filename=' parameter
@@ -206,8 +204,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       per->was_last_header_empty = TRUE;
   }
   if(hdrcbdata->config->show_headers &&
-    (protocol == proto_http || protocol == proto_https ||
-     protocol == proto_rtsp || protocol == proto_file)) {
+    (scheme == proto_http || scheme == proto_https ||
+     scheme == proto_rtsp || scheme == proto_file)) {
     /* bold headers only for selected protocols */
     char *value = NULL;
 
