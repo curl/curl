@@ -82,11 +82,12 @@
 #include "altsvc.h"
 #include "hsts.h"
 
+#include "easy_lock.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-#include "easy_lock.h"
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
