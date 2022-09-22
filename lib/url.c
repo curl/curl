@@ -577,11 +577,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   set->new_file_perms = 0644;    /* Default permissions */
   set->new_directory_perms = 0755; /* Default permissions */
-
-  /* for the *protocols fields we don't use the CURLPROTO_ALL convenience
-     define since we internally only use the lower 16 bits for the passed
-     in bitmask to not conflict with the private bits */
-  set->allowed_protocols = (unsigned int)CURLPROTO_ALL;
+  set->allowed_protocols = (curl_prot_t) CURLPROTO_ALL;
   set->redir_protocols = CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_FTP |
                          CURLPROTO_FTPS;
 
