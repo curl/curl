@@ -1716,10 +1716,8 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
        SecApplicationProtocolNegotiationStatus_Success) {
       unsigned char alpn = 0;
 
-      if(!backend->recv_renegotiating) {
-        infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR,
-              alpn_result.ProtocolIdSize, alpn_result.ProtocolId);
-      }
+      infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR,
+            alpn_result.ProtocolIdSize, alpn_result.ProtocolId);
 
 #ifdef USE_HTTP2
       if(alpn_result.ProtocolIdSize == ALPN_H2_LENGTH &&
@@ -1733,11 +1731,14 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
                    ALPN_HTTP_1_1_LENGTH)) {
           alpn = CURL_HTTP_VERSION_1_1;
         }
-      if(backend->recv_renegotiating && alpn != conn->alpn) {
-        failf(data, "schannel: server selected an ALPN protocol too late");
-        return CURLE_SSL_CONNECT_ERROR;
+      if(backend->recv_renegotiating) {
+        if(alpn != conn->alpn) {
+          failf(data, "schannel: server selected an ALPN protocol too late");
+          return CURLE_SSL_CONNECT_ERROR;
+        }
       }
-      conn->alpn = alpn;
+      else
+        conn->alpn = alpn;
     }
     else {
       if(!backend->recv_renegotiating)
