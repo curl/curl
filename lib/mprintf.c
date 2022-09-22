@@ -964,7 +964,7 @@ static int dprintf_formatf(
 #endif
         /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
            output characters */
-        (sprintf)(work, formatbuf, p->data.dnum);
+        (snprintf)(work, formatbuf, p->data.dnum);
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
