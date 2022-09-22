@@ -40,9 +40,9 @@ This option is exactly the same as \fICURLINFO_TLS_SSL_PTR(3)\fP except in the
 case of OpenSSL. If the session \fIbackend\fP is CURLSSLBACKEND_OPENSSL the
 session \fIinternals\fP pointer varies depending on the option:
 
-CURLINFO_TLS_SESSION OpenSSL session \fIinternals\fP is \fBSSL_CTX *\fP.
+\fICURLINFO_TLS_SESSION(3)\fP OpenSSL session \fIinternals\fP is \fBSSL_CTX *\fP.
 
-CURLINFO_TLS_SSL_PTR OpenSSL session \fIinternals\fP is \fBSSL *\fP.
+\fICURLINFO_TLS_SSL_PTR(3)\fP OpenSSL session \fIinternals\fP is \fBSSL *\fP.
 
 You can obtain an \fBSSL_CTX\fP pointer from an SSL pointer using OpenSSL
 function \fISSL_get_SSL_CTX(3)\fP. Therefore unless you need compatibility
