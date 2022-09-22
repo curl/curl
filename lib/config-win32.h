@@ -254,6 +254,11 @@
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
 
+/* Define to 1 if you have the snprintf function. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#define HAVE_SNPRINTF 1
+#endif
+
 /* ---------------------------------------------------------------- */
 /*                       TYPEDEF REPLACEMENTS                       */
 /* ---------------------------------------------------------------- */
