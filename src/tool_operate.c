@@ -1249,14 +1249,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(result)
           break;
 
-        /* here */
         use_proto = url_proto(per->this_url);
-#if 0
-        if(!use_proto) {
-          warnf(global, "URL is '%s' but no support for the scheme\n",
-                per->this_url);
-        }
-#endif
 
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
