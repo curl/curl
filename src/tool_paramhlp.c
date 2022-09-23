@@ -271,6 +271,8 @@ static size_t protoset_index(const char * const *protoset, const char *proto)
 {
   const char * const *p = protoset;
 
+  DEBUGASSERT(proto == proto_token(proto));     /* Ensure it is tokenized. */
+
   for(; *p; p++)
     if(proto == *p)
       break;
