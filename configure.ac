@@ -55,8 +55,6 @@ CURL_CHECK_OPTION_ECH
 
 XC_CHECK_PATH_SEPARATOR
 
-LT_LANG([Windows Resource])
-
 #
 # save the configure arguments
 #
@@ -350,6 +348,8 @@ dnl check for how to do large files
 AC_SYS_LARGEFILE
 
 XC_LIBTOOL
+
+LT_LANG([Windows Resource])
 
 #
 # Automake conditionals based on libtool related checks
