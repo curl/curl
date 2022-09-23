@@ -570,7 +570,7 @@
 
  When curl receives a body response from a CONNECT request to a proxy, it will
  always just read and ignore it. It would make some users happy if curl
- instead optionally would be able to make that responsible availabe. Via a new
+ instead optionally would be able to make that responsible available. Via a new
  callback? Through some other means?
 
  See https://github.com/curl/curl/issues/9513
