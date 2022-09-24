@@ -519,6 +519,9 @@
 #    ifdef byte
 #      undef byte
 #    endif
+#    ifdef resolve_ip
+#      undef resolve_ip
+#    endif
 
 #  endif /* MSDOS */
 
