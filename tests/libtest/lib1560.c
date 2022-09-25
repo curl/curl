@@ -138,6 +138,14 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  /* blank user is blank */
+  {"https://:password@example.net",
+   "https |  | password | [13] | example.net | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK},
+  /* blank user + blank password */
+  {"https://:@example.net",
+   "https |  |  | [13] | example.net | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK},
 #ifdef USE_WEBSOCKETS
   {"ws://example.com/color/?green",
    "ws | [11] | [12] | [13] | example.com | [15] | /color/ | green |"
@@ -528,7 +536,7 @@ static const struct urltestcase get_url_list[] = {
    "",
    CURLU_DISALLOW_USER, 0, CURLUE_USER_NOT_ALLOWED},
   {"http:/@example.com:123",
-   "http://example.com:123/",
+   "http://@example.com:123/",
    0, 0, CURLUE_OK},
   {"http:/:password@example.com",
    "http://:password@example.com/",
@@ -1253,7 +1261,7 @@ static int get_nothing(void)
       fprintf(stderr, "unexpected return code line %u\n", __LINE__);
 
     rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
-    if(rc != CURLUE_OK)
+    if(rc != CURLUE_NO_ZONEID)
       fprintf(stderr, "unexpected return code %u on line %u\n", (int)rc,
               __LINE__);
 
