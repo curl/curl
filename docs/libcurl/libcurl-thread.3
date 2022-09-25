@@ -111,3 +111,5 @@ replacements, must be thread safe. You can use \fIcurl_global_init_mem(3)\fP
 to set your own replacement memory functions.
 .IP "Non-safe functions"
 \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP is not thread-safe.
+
+\fIcurl_version_info(3)\fP is not thread-safe before libcurl initialization.
