@@ -2912,15 +2912,15 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
           (psep && psep > osep ? (size_t)(psep - osep) :
                                  (size_t)(login + len - osep)) - 1 : 0);
 
-  /* Allocate the user portion buffer */
-  if(userp && ulen) {
+  /* Allocate the user portion buffer, which can be zero length */
+  if(userp) {
     ubuf = malloc(ulen + 1);
     if(!ubuf)
       result = CURLE_OUT_OF_MEMORY;
   }
 
   /* Allocate the password portion buffer */
-  if(!result && passwdp && plen) {
+  if(!result && passwdp && psep) {
     pbuf = malloc(plen + 1);
     if(!pbuf) {
       free(ubuf);
