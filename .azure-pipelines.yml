@@ -59,7 +59,7 @@ stages:
       matrix:
         default:
           name: default
-          install: jsonlint
+          install:
           configure: --enable-debug --with-openssl
         disable_ipv6:
           name: w/o IPv6

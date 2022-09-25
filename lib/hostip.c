@@ -569,7 +569,11 @@ bool Curl_ipv6works(struct Curl_easy *data)
        have the info kept for fast re-use */
     DEBUGASSERT(data);
     DEBUGASSERT(data->multi);
-    return data->multi->ipv6_works;
+    if(data->multi->ipv6_up == IPV6_UNKNOWN) {
+      bool works = Curl_ipv6works(NULL);
+      data->multi->ipv6_up = works ? IPV6_WORKS : IPV6_DEAD;
+    }
+    return data->multi->ipv6_up == IPV6_WORKS;
   }
   else {
     int ipv6_works = -1;

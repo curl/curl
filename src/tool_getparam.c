@@ -578,6 +578,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 #ifdef HAVE_WRITABLE_ARGV
   argv_item_t clearthis = NULL;
 #endif
+
+  static const char *redir_protos[] = {
+    "http",
+    "https",
+    "ftp",
+    "ftps",
+    NULL
+  };
+
   *usedarg = FALSE; /* default is that we don't use the arg */
 
   if(('-' != flag[0]) || ('-' == flag[1])) {
@@ -1209,15 +1218,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'D': /* --proto */
         config->proto_present = TRUE;
-        err = proto2num(config, PROTO_ALL, &config->proto_str, nextarg);
+        err = proto2num(config, built_in_protos, &config->proto_str, nextarg);
         if(err)
           return err;
         break;
       case 'E': /* --proto-redir */
         config->proto_redir_present = TRUE;
-        if(proto2num(config, PROTO_BIT(proto_http) | PROTO_BIT(proto_https) |
-                     PROTO_BIT(proto_ftp) | PROTO_BIT(proto_ftps),
-                     &config->proto_redir_str, nextarg))
+        if(proto2num(config, redir_protos, &config->proto_redir_str, nextarg))
           return PARAM_BAD_USE;
         break;
       case 'F': /* --resolve */

@@ -60,13 +60,18 @@
  * protocol fields in the protocol handler.
  */
 #define CURLPROTO_WS     (1<<30)
-#define CURLPROTO_WSS    (1LL<<31)
-
-/* This type should be bumped to a curl_off_t once we need bit 32 or higher */
-typedef unsigned int curl_prot_t;
+#define CURLPROTO_WSS    ((curl_prot_t)1<<31)
 #else
 #define CURLPROTO_WS 0
 #define CURLPROTO_WSS 0
+#endif
+
+/* This should be undefined once we need bit 32 or higher */
+#define PROTO_TYPE_SMALL
+
+#ifndef PROTO_TYPE_SMALL
+typedef curl_off_t curl_prot_t;
+#else
 typedef unsigned int curl_prot_t;
 #endif
 

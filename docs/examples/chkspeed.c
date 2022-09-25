@@ -37,7 +37,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 #include <curl/curl.h>
@@ -73,58 +72,66 @@ int main(int argc, char *argv[])
   if(argc > 1) {
     /* parse input parameters */
     for(argc--, argv++; *argv; argc--, argv++) {
-      if(strncasecmp(*argv, "-", 1) == 0) {
-        if(strncasecmp(*argv, "-H", 2) == 0) {
+      if(argv[0][0] == '-') {
+        switch(argv[0][1]) {
+        case 'h':
+        case 'H':
           fprintf(stderr,
                   "\rUsage: %s [-m=1|2|5|10|20|50|100] [-t] [-x] [url]\n",
                   appname);
           exit(1);
-        }
-        else if(strncasecmp(*argv, "-V", 2) == 0) {
+        case 'v':
+        case 'V':
           fprintf(stderr, "\r%s %s - %s\n",
                   appname, CHKSPEED_VERSION, curl_version());
           exit(1);
-        }
-        else if(strncasecmp(*argv, "-A", 2) == 0) {
+        case 'a':
+        case 'A':
           prtall = 1;
-        }
-        else if(strncasecmp(*argv, "-X", 2) == 0) {
+          break;
+        case 'x':
+        case 'X':
           prtsep = 1;
-        }
-        else if(strncasecmp(*argv, "-T", 2) == 0) {
+          break;
+        case 't':
+        case 'T':
           prttime = 1;
-        }
-        else if(strncasecmp(*argv, "-M=", 3) == 0) {
-          long m = strtol((*argv) + 3, NULL, 10);
-          switch(m) {
-          case 1:
-            url = URL_1M;
+          break;
+        case 'm':
+        case 'M':
+          if(argv[0][2] == '=') {
+            long m = strtol((*argv) + 3, NULL, 10);
+            switch(m) {
+            case 1:
+              url = URL_1M;
+              break;
+            case 2:
+              url = URL_2M;
+              break;
+            case 5:
+              url = URL_5M;
+              break;
+            case 10:
+              url = URL_10M;
+              break;
+            case 20:
+              url = URL_20M;
+              break;
+            case 50:
+              url = URL_50M;
+              break;
+            case 100:
+              url = URL_100M;
+              break;
+            default:
+              fprintf(stderr, "\r%s: invalid parameter %s\n",
+                      appname, *argv + 3);
+              exit(1);
+            }
             break;
-          case 2:
-            url = URL_2M;
-            break;
-          case 5:
-            url = URL_5M;
-            break;
-          case 10:
-            url = URL_10M;
-            break;
-          case 20:
-            url = URL_20M;
-            break;
-          case 50:
-            url = URL_50M;
-            break;
-          case 100:
-            url = URL_100M;
-            break;
-          default:
-            fprintf(stderr, "\r%s: invalid parameter %s\n",
-                    appname, *argv + 3);
-            exit(1);
           }
-        }
-        else {
+          /* FALLTHROUGH */
+        default:
           fprintf(stderr, "\r%s: invalid or unknown option %s\n",
                   appname, *argv);
           exit(1);
