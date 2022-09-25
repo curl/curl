@@ -851,11 +851,21 @@ $curl_includes_bsdsocket
   if test "$curl_cv_recv" = "yes"; then
     AC_CACHE_CHECK([types of args and return type for recv],
       [curl_cv_func_recv_args], [
+      if test "$curl_cv_native_windows" = "yes"; then
+        # Win32: int (SOCKET, char *, int, int)
+        retv_test1='int'    ; arg1_test1='SOCKET' ; arg2_test1='char *'; arg3_test1='int'
+        retv_test2='ssize_t'; arg1_test2='int'    ; arg2_test2='void *'; arg3_test2='size_t'
+      else
+        # POSIX: ssize_t (int, void *, size_t, int)
+        retv_test1='ssize_t'; arg1_test1='int'    ; arg2_test1='void *'; arg3_test1='size_t'
+        retv_test2='int'    ; arg1_test2='ssize_t'; arg2_test2='char *'; arg3_test2='int'
+      fi
       curl_cv_func_recv_args="unknown"
-      for recv_retv in 'int' 'ssize_t'; do
-        for recv_arg1 in 'int' 'ssize_t' 'SOCKET'; do
-          for recv_arg2 in 'char *' 'void *'; do
-            for recv_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
+      # Brute-force tests: 2 * 3 * 2 * 4 * 2 -> 96 runs max
+      for recv_retv in "${retv_test1}" "${retv_test2}"; do
+        for recv_arg1 in "${arg1_test1}" "${arg1_test2}"; do
+          for recv_arg2 in "${arg2_test1}" "${arg2_test2}"; do
+            for recv_arg3 in "${arg3_test1}" "${arg3_test2}" 'socklen_t' 'unsigned int'; do
               for recv_arg4 in 'int' 'unsigned int'; do
                 if test "$curl_cv_func_recv_args" = "unknown"; then
                   AC_COMPILE_IFELSE([
@@ -981,11 +991,21 @@ $curl_includes_bsdsocket
   if test "$curl_cv_send" = "yes"; then
     AC_CACHE_CHECK([types of args and return type for send],
       [curl_cv_func_send_args], [
+      if test "$curl_cv_native_windows" = "yes"; then
+        # Win32: int (SOCKET, const char *, int, int)
+        retv_test1='int'    ; arg1_test1='SOCKET' ; arg2_test1='const char *'; arg3_test1='int'
+        retv_test2='ssize_t'; arg1_test2='int'    ; arg2_test2='const void *'; arg3_test2='size_t'
+      else
+        # POSIX: ssize_t (int, const void *, size_t, int)
+        retv_test1='ssize_t'; arg1_test1='int'    ; arg2_test1='const void *'; arg3_test1='size_t'
+        retv_test2='int'    ; arg1_test2='ssize_t'; arg2_test2='const char *'; arg3_test2='int'
+      fi
       curl_cv_func_send_args="unknown"
-      for send_retv in 'int' 'ssize_t'; do
-        for send_arg1 in 'int' 'ssize_t' 'SOCKET'; do
-          for send_arg2 in 'char *' 'void *' 'const char *' 'const void *'; do
-            for send_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
+      # Brute-force tests: 2 * 3 * 4 * 4 * 2 -> 192 runs max
+      for send_retv in "${retv_test1}" "${retv_test2}"; do
+        for send_arg1 in "${arg1_test1}" "${arg1_test2}"; do
+          for send_arg2 in "${arg2_test1}" "${arg2_test2}" 'void *' 'char *'; do
+            for send_arg3 in "${arg3_test1}" "${arg3_test2}" 'socklen_t' 'unsigned int'; do
               for send_arg4 in 'int' 'unsigned int'; do
                 if test "$curl_cv_func_send_args" = "unknown"; then
                   AC_COMPILE_IFELSE([
@@ -1579,6 +1599,8 @@ $curl_includes_bsdsocket
     AC_CACHE_CHECK([types of args and return type for select],
       [curl_cv_func_select_args], [
       curl_cv_func_select_args="unknown"
+      # POSIX/Win32: int (int, fd_set *, fd_set *, fd_set *, struct timeval *)
+      # Brute-force tests: 2 * 5 * 3 * 2 -> 60 runs max
       for sel_retv in 'int' 'ssize_t'; do
         for sel_arg1 in 'int' 'ssize_t' 'size_t' 'unsigned long int' 'unsigned int'; do
           for sel_arg234 in 'fd_set *' 'int *' 'void *'; do
