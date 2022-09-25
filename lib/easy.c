@@ -326,7 +326,7 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
 
   global_init_lock();
 
-  rc = Curl_init_sslset_nolock(id, name, avail);
+  rc = Curl_init_sslset(id, name, avail);
 
   global_init_unlock();
 

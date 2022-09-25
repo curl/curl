@@ -67,9 +67,28 @@
 #include "curl_printf.h"
 #include "strdup.h"
 
+#include "easy_lock.h"
+
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#ifdef GLOBAL_INIT_IS_THREADSAFE
+
+/* This lock is used for multissl setup. Note some multissl functions are
+   used even when libcurl is not built with CURL_WITH_MULTI_SSL therefore this
+   lock must be available even when that symbol is not defined. */
+
+static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
+#define multissl_init_lock() curl_simple_lock_lock(&s_lock)
+#define multissl_init_unlock() curl_simple_lock_unlock(&s_lock)
+
+#else
+
+#define multissl_init_lock()
+#define multissl_init_unlock()
+
+#endif
 
 /* convenience macro to check if this handle is using a shared SSL session */
 #define SSLSESSION_SHARED(data) (data->share &&                        \
@@ -1374,7 +1393,11 @@ static const struct Curl_ssl *available_backends[] = {
   NULL
 };
 
-static size_t multissl_version(char *buffer, size_t size)
+
+/* This function concatenates the version info of all available SSL backends to
+   'buffer'. It should only be called by functions that hold the multissl
+   lock, such as multissl_version(). */
+static size_t multissl_version_nolock(char *buffer, size_t size)
 {
   static const struct Curl_ssl *selected;
   static char backends[200];
@@ -1418,7 +1441,22 @@ static size_t multissl_version(char *buffer, size_t size)
   return backends_len;
 }
 
-static int multissl_setup(const struct Curl_ssl *backend)
+static size_t multissl_version(char *buffer, size_t size)
+{
+  size_t rc;
+
+  multissl_init_lock();
+
+  rc = multissl_version_nolock(buffer, size);
+
+  multissl_init_unlock();
+
+  return rc;
+}
+
+/* This function selects an SSL backend. It should only be called by functions
+   that hold the multissl lock, such as multissl_setup(). */
+static int multissl_setup_nolock(const struct Curl_ssl *backend)
 {
   const char *env;
   char *env_tmp;
@@ -1456,10 +1494,23 @@ static int multissl_setup(const struct Curl_ssl *backend)
   return 0;
 }
 
-/* This function is used to select the SSL backend to use. It is called by
-   curl_global_sslset (easy.c) which uses the global init lock. */
-CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
-                                   const curl_ssl_backend ***avail)
+static int multissl_setup(const struct Curl_ssl *backend)
+{
+  int rc;
+
+  multissl_init_lock();
+
+  rc = multissl_setup_nolock(backend);
+
+  multissl_init_unlock();
+
+  return rc;
+}
+
+/* This function selects an SSL backend. It should only be called by
+   Curl_init_sslset. */
+static CURLsslset init_sslset_nolock(curl_sslbackend id, const char *name,
+                                     const curl_ssl_backend ***avail)
 {
   int i;
 
@@ -1479,7 +1530,7 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
   for(i = 0; available_backends[i]; i++) {
     if(available_backends[i]->info.id == id ||
        (name && strcasecompare(available_backends[i]->info.name, name))) {
-      multissl_setup(available_backends[i]);
+      multissl_setup_nolock(available_backends[i]);
       return CURLSSLSET_OK;
     }
   }
@@ -1487,9 +1538,25 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
   return CURLSSLSET_UNKNOWN_BACKEND;
 }
 
+/* This function selects an SSL backend. It should only be called by
+   by curl_global_sslset. */
+CURLsslset Curl_init_sslset(curl_sslbackend id, const char *name,
+                            const curl_ssl_backend ***avail)
+{
+  CURLsslset rc;
+
+  multissl_init_lock();
+
+  rc = init_sslset_nolock(id, name, avail);
+
+  multissl_init_unlock();
+
+  return rc;
+}
+
 #else /* USE_SSL */
-CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
-                                   const curl_ssl_backend ***avail)
+CURLsslset Curl_init_sslset(curl_sslbackend id, const char *name,
+                            const curl_ssl_backend ***avail)
 {
   (void)id;
   (void)name;
