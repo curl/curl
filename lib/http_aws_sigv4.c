@@ -263,16 +263,25 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
 
-  if(data->set.postfieldsize < 0)
-    post_data_len = strlen(post_data);
-  else
-    post_data_len = (size_t)data->set.postfieldsize;
-  if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
-                   post_data_len)) {
-    goto fail;
-  }
+  Curl_http_method(data, conn, &method, &httpreq);
 
-  sha256_to_hex(content_sha256, sha_hash, sizeof(content_sha256));
+  if(strcasecompare(service, "s3") && httpreq == HTTPREQ_PUT) {
+    /* Use UNSIGNED-PAYLOAD for s3 if we don't know the body */
+    memcpy(content_sha256, "UNSIGNED-PAYLOAD", 16);
+    content_sha256[16] = 0;
+  }
+  else {
+    if(data->set.postfieldsize < 0)
+      post_data_len = strlen(post_data);
+    else
+      post_data_len = (size_t)data->set.postfieldsize;
+    if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+                     post_data_len)) {
+      goto fail;
+    }
+
+    sha256_to_hex(content_sha256, sha_hash, sizeof(content_sha256));
+  }
 
   if(content_type) {
     content_type = strchr(content_type, ':');
@@ -310,8 +319,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(!canonical_headers || !signed_headers) {
     goto fail;
   }
-
-  Curl_http_method(data, conn, &method, &httpreq);
 
   canonical_request =
     curl_maprintf("%s\n" /* HTTPRequestMethod */
