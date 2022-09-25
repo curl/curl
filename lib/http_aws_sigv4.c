@@ -80,6 +80,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *region = NULL;
   char *service = NULL;
   const char *hostname = conn->host.name;
+  const char *host = NULL;
+  size_t host_len = 0;
 #ifdef DEBUGBUILD
   char *force_timestamp;
 #endif
@@ -113,6 +115,16 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(Curl_checkheaders(data, STRCONST("Authorization"))) {
     /* Authorization already present, Bailing out */
     return CURLE_OK;
+  }
+
+  /* Use the real Host header if we have it */
+  if(data->state.aptr.host && strlen(data->state.aptr.host) > 8) {
+    host = data->state.aptr.host + 6; /* skip "Host: " */
+    host_len = strlen(host) - 2; /* skip trailing "\r\n" */
+  }
+  else {
+    host = hostname;
+    host_len = strlen(hostname);
   }
 
   /*
@@ -262,18 +274,18 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       ++content_type;
 
     canonical_headers = curl_maprintf("content-type:%s\n"
-                                      "host:%s\n"
+                                      "host:%.*s\n"
                                       "x-%s-date:%s\n",
                                       content_type,
-                                      hostname,
+                                      host_len, host,
                                       provider1_low, timestamp);
     signed_headers = curl_maprintf("content-type;host;x-%s-date",
                                    provider1_low);
   }
   else {
-    canonical_headers = curl_maprintf("host:%s\n"
+    canonical_headers = curl_maprintf("host:%.*s\n"
                                       "x-%s-date:%s\n",
-                                      hostname,
+                                      host_len, host,
                                       provider1_low, timestamp);
     signed_headers = curl_maprintf("host;x-%s-date", provider1_low);
   }
