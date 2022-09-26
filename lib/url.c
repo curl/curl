@@ -3503,9 +3503,9 @@ static CURLcode resolve_proxy(struct Curl_easy *data,
 }
 #endif
 
-static CURLcode resolve_ip(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           bool *async)
+static CURLcode resolve_host(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             bool *async)
 {
   struct Curl_dns_entry *hostaddr = NULL;
   struct hostname *connhost;
@@ -3571,7 +3571,7 @@ static CURLcode resolve_fresh(struct Curl_easy *data,
     return resolve_proxy(data, conn, async);
 #endif
 
-  return resolve_ip(data, conn, async);
+  return resolve_host(data, conn, async);
 }
 
 /*************************************************************
