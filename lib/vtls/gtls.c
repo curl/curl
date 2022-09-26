@@ -45,6 +45,7 @@
 #include "inet_pton.h"
 #include "gtls.h"
 #include "vtls.h"
+#include "vauth/vauth.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
@@ -448,7 +449,7 @@ gtls_connect_step1(struct Curl_easy *data,
 
 #ifdef USE_GNUTLS_SRP
   if((SSL_SET_OPTION(primary.authtype) == CURL_TLSAUTH_SRP) &&
-     Curl_allow_auth_to_host(data)) {
+     Curl_auth_allowed_to_host(data)) {
     infof(data, "Using TLS-SRP username: %s",
           SSL_SET_OPTION(primary.username));
 

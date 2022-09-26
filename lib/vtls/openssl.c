@@ -55,6 +55,7 @@
 #include "slist.h"
 #include "select.h"
 #include "vtls.h"
+#include "vauth/vauth.h"
 #include "keylog.h"
 #include "strcase.h"
 #include "hostcheck.h"
@@ -3171,7 +3172,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 
 #ifdef USE_OPENSSL_SRP
   if((ssl_authtype == CURL_TLSAUTH_SRP) &&
-     Curl_allow_auth_to_host(data)) {
+     Curl_auth_allowed_to_host(data)) {
     char * const ssl_username = SSL_SET_OPTION(primary.username);
     char * const ssl_password = SSL_SET_OPTION(primary.password);
     infof(data, "Using TLS-SRP username: %s", ssl_username);
