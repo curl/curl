@@ -1703,6 +1703,11 @@ static CURLcode ng_has_connected(struct Curl_easy *data,
   }
   else
     infof(data, "Skipped certificate verification");
+#ifdef USE_OPENSSL
+  if(data->set.ssl.certinfo)
+    /* asked to gather certificate info */
+    (void)Curl_ossl_certchain(data, qs->ssl);
+#endif
   return result;
 }
 
