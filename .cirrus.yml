@@ -133,7 +133,7 @@ windows_task:
     %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
 
 macos_task:
-  name: macOS normal
+  name: macOS arm64 normal
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
 
@@ -157,7 +157,7 @@ macos_task:
     - sudo make V=1 install
 
 macos_task:
-  name: macOS debug
+  name: macOS arm64 debug
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
 
