@@ -392,10 +392,4 @@ Curl_http_output_auth(struct Curl_easy *data,
                       bool proxytunnel); /* TRUE if this is the request setting
                                             up the proxy tunnel */
 
-/*
- * Curl_allow_auth_to_host() tells if authentication, cookies or other
- * "sensitive data" can (still) be sent to this host.
- */
-bool Curl_allow_auth_to_host(struct Curl_easy *data);
-
 #endif /* HEADER_CURL_HTTP_H */
