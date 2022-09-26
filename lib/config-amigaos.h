@@ -86,11 +86,6 @@
 #define PACKAGE_TARNAME "curl"
 #define PACKAGE_VERSION "-"
 #define CURL_CA_BUNDLE "s:curl-ca-bundle.crt"
-
-#define SELECT_TYPE_ARG1 int
-#define SELECT_TYPE_ARG234 (fd_set *)
-#define SELECT_TYPE_ARG5 (struct timeval *)
-
 #define STDC_HEADERS 1
 #define TIME_WITH_SYS_TIME 1
 
