@@ -640,54 +640,6 @@
 /* a suitable file to read random data from */
 #cmakedefine RANDOM_FILE "${RANDOM_FILE}"
 
-/* Define to the type of arg 1 for recv. */
-#cmakedefine RECV_TYPE_ARG1 ${RECV_TYPE_ARG1}
-
-/* Define to the type of arg 2 for recv. */
-#cmakedefine RECV_TYPE_ARG2 ${RECV_TYPE_ARG2}
-
-/* Define to the type of arg 3 for recv. */
-#cmakedefine RECV_TYPE_ARG3 ${RECV_TYPE_ARG3}
-
-/* Define to the type of arg 4 for recv. */
-#cmakedefine RECV_TYPE_ARG4 ${RECV_TYPE_ARG4}
-
-/* Define to the function return type for recv. */
-#cmakedefine RECV_TYPE_RETV ${RECV_TYPE_RETV}
-
-/* Define to the type qualifier of arg 5 for select. */
-#cmakedefine SELECT_QUAL_ARG5 ${SELECT_QUAL_ARG5}
-
-/* Define to the type of arg 1 for select. */
-#cmakedefine SELECT_TYPE_ARG1 ${SELECT_TYPE_ARG1}
-
-/* Define to the type of args 2, 3 and 4 for select. */
-#cmakedefine SELECT_TYPE_ARG234 ${SELECT_TYPE_ARG234}
-
-/* Define to the type of arg 5 for select. */
-#cmakedefine SELECT_TYPE_ARG5 ${SELECT_TYPE_ARG5}
-
-/* Define to the function return type for select. */
-#cmakedefine SELECT_TYPE_RETV ${SELECT_TYPE_RETV}
-
-/* Define to the type qualifier of arg 2 for send. */
-#cmakedefine SEND_QUAL_ARG2 ${SEND_QUAL_ARG2}
-
-/* Define to the type of arg 1 for send. */
-#cmakedefine SEND_TYPE_ARG1 ${SEND_TYPE_ARG1}
-
-/* Define to the type of arg 2 for send. */
-#cmakedefine SEND_TYPE_ARG2 ${SEND_TYPE_ARG2}
-
-/* Define to the type of arg 3 for send. */
-#cmakedefine SEND_TYPE_ARG3 ${SEND_TYPE_ARG3}
-
-/* Define to the type of arg 4 for send. */
-#cmakedefine SEND_TYPE_ARG4 ${SEND_TYPE_ARG4}
-
-/* Define to the function return type for send. */
-#cmakedefine SEND_TYPE_RETV ${SEND_TYPE_RETV}
-
 /*
  Note: SIZEOF_* variables are fetched with CMake through check_type_size().
  As per CMake documentation on CheckTypeSize, C preprocessor code is
