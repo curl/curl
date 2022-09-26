@@ -31,6 +31,7 @@
  * This header should only be needed to get included by vtls.c, openssl.c
  * and ngtcp2.c
  */
+#include <openssl/ssl.h>
 
 #include "urldata.h"
 
@@ -52,6 +53,8 @@ CURLcode Curl_ossl_set_client_cert(struct Curl_easy *data,
                                    const char *cert_type, char *key_file,
                                    const struct curl_blob *key_blob,
                                    const char *key_type, char *key_passwd);
+
+CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl);
 
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */

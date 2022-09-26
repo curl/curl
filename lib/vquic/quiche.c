@@ -416,6 +416,10 @@ static CURLcode quiche_has_connected(struct Curl_easy *data,
     qs->cfg = NULL;
     qs->conn = NULL;
   }
+  if(data->set.ssl.certinfo)
+    /* asked to gather certificate info */
+    (void)Curl_ossl_certchain(data, qs->ssl);
+
   return CURLE_OK;
   fail:
   quiche_h3_config_free(qs->h3config);
