@@ -153,6 +153,7 @@ static const struct testcase get_parts_list[] ={
   {"https://exam>ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://exam=ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://exam;ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://example,net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://example.net/}",
    "https | [11] | [12] | [13] | example.net | [15] | /} | [16] | [17]",
    0, 0, CURLUE_OK},
