@@ -1706,7 +1706,7 @@ static CURLcode ng_has_connected(struct Curl_easy *data,
 #ifdef USE_OPENSSL
   if(data->set.ssl.certinfo)
     /* asked to gather certificate info */
-    (void)Curl_ossl_certchain(data, qs->ssl);
+    (void)Curl_ossl_certchain(data, conn->quic->ssl);
 #endif
   return result;
 }
