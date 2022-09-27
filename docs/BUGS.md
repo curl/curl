@@ -162,7 +162,7 @@
  experimental build or similar, to get this confirmed or not.
 
  At times people insist that they cannot upgrade to a modern curl version, but
- instead they "just want the bug fixed". That is fine, just do not count on us
+ instead, they "just want the bug fixed". That is fine, just do not count on us
  spending many cycles on trying to identify which single commit, if that is
  even possible, that at some point in the past fixed the problem you are now
  experiencing.
@@ -181,7 +181,7 @@
  maybe they are off in the woods hunting. Have patience. Allow at least a few
  days before expecting someone to have responded.
 
- In the issue tracker you can expect that some labels will be set on the issue
+ In the issue tracker, you can expect that some labels will be set on the issue
  to help categorize it.
 
 ## First response

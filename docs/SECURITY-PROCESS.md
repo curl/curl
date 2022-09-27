@@ -19,7 +19,7 @@ No information should be made public about a vulnerability until it is
 formally announced at the end of this process. That means, for example, that a
 bug tracker entry must NOT be created to track the issue since that will make
 the issue public and it should not be discussed on any of the project's public
-mailing lists. Also messages associated with any commits should not make any
+mailing lists. Messages associated with any commits should not make any
 reference to the security nature of the commit if done prior to the public
 announcement.
 

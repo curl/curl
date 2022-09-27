@@ -1,6 +1,6 @@
 # Adding a new protocol?
 
-Every once in a while someone comes up with the idea of adding support for yet
+Every once in a while, someone comes up with the idea of adding support for yet
 another protocol to curl. After all, curl already supports 25 something
 protocols and it is the Internet transfer machine for the world.
 
