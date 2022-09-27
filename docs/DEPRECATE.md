@@ -9,11 +9,10 @@ how your use case cannot be satisfied properly using a workaround.
 ## Support for systems without 64 bit data types
 
 curl will *require* support for a 64 bit data type (like `long long` or an
-alternative) to build. These days, very few systems are used where no such
-type is around so the cost of maintaining this support is increasingly
-unnecessary to spent effort and time on, while at the same time supporting 32
-bit values for some of those fields is complicated and it is getting hard to
-test.
+alternative) to build. These days, few systems are used where no such type is
+around so the cost of maintaining this support is increasingly unnecessary to
+spent effort and time on, while supporting 32 bit values for some of those
+fields is complicated and hard to test.
 
 Adding this requirement will make the code simpler, easier to maintain and the
 test coverage better. At very low price, since virtually no users are still
