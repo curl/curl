@@ -6,6 +6,23 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
+## Support for systems without 64 bit data types
+
+curl will *require* support for a 64 bit data type (like `long long` or an
+alternative) to build. These days, few systems are used where no such type is
+around so the cost of maintaining this support is increasingly unnecessary to
+spent effort and time on, while supporting 32 bit values for some of those
+fields is complicated and hard to test.
+
+Adding this requirement will make the code simpler, easier to maintain and the
+test coverage better. It is a low price too, since virtually no users are
+still building curl on such systems.
+
+`long long` was not a standard type until C99, but has been supported by C89
+compilers since the 1990s.
+
+Starting in 8.0.0 (March 2023), the plan is to drop support.
+
 ## NSS
 
 We remove support for building curl with the NSS TLS library in August 2023.
