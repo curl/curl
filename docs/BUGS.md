@@ -5,7 +5,7 @@
  Curl and libcurl keep being developed. Adding features and changing code
  means that bugs will sneak in, no matter how hard we try to keep them out.
 
- Of course there are lots of bugs left. And lots of misfeatures.
+ Of course, there are lots of bugs left. And lots of misfeatures.
 
  To help us make curl the stable and solid product we want it to be, we need
  bug reports and bug fixes.
@@ -25,7 +25,7 @@
 ## Security bugs
 
  If you find a bug or problem in curl or libcurl that you think has a security
- impact, for example a bug that can put users in danger or make them
+ impact, for example, a bug that can put users in danger or make them
  vulnerable if the bug becomes public knowledge, then please report that bug
  using our security development process.
 
@@ -162,7 +162,7 @@
  experimental build or similar, to get this confirmed or not.
 
  At times people insist that they cannot upgrade to a modern curl version, but
- instead they "just want the bug fixed". That is fine, just do not count on us
+ instead, they "just want the bug fixed". That is fine, just do not count on us
  spending many cycles on trying to identify which single commit, if that is
  even possible, that at some point in the past fixed the problem you are now
  experiencing.
@@ -181,7 +181,7 @@
  maybe they are off in the woods hunting. Have patience. Allow at least a few
  days before expecting someone to have responded.
 
- In the issue tracker you can expect that some labels will be set on the issue
+ In the issue tracker, you can expect that some labels will be set on the issue
  to help categorize it.
 
 ## First response
