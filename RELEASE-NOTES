@@ -11,7 +11,7 @@ This release includes the following changes:
  o NPN: remove support for and use of [16]
  o Websockets: initial support [23]
 
-This release includes the following bugfixes:
+This release includes the following bug fixes:
 
  o altsvc: use 'h3' for h3 [46]
  o autotools: allow --enable-symbol-hiding with windows [65]
