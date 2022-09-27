@@ -15,8 +15,8 @@ spent effort and time on, while supporting 32 bit values for some of those
 fields is complicated and hard to test.
 
 Adding this requirement will make the code simpler, easier to maintain and the
-test coverage better. At very low price, since virtually no users are still
-building curl on such systems.
+test coverage better. It is a low price too, since virtually no users are
+still building curl on such systems.
 
 `long long` was not a standard type until C99, but has been supported by C89
 compilers since the 1990s.
