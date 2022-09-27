@@ -23,6 +23,10 @@ compilers since the 1990s.
 
 Starting in 8.0.0 (March 2023), the plan is to drop support.
 
+Starting in 7.86.0, building curl with configure requires the additional flag
+`--with-n64-deprecated` if the `curl_off_t` type on your system is smaller
+than 8 bytes, in an attempt to highlight these plans to affected users.
+
 ## NSS
 
 We remove support for building curl with the NSS TLS library in August 2023.
