@@ -36,7 +36,7 @@ WEBSITE
 
 GIT
 
-  To download the latest source code off the GIT server do this:
+  To download the latest source code off the GIT server, do this:
 
     git clone https://github.com/curl/curl.git
 
