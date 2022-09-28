@@ -269,11 +269,6 @@ endif
 ifdef SSH2
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
-  ifdef SCHANNEL
-    ifndef DYN
-      curl_LDADD += -lcrypt32
-    endif
-  endif
 endif
 ifdef NGHTTP3
   CFLAGS += -DUSE_NGHTTP3
@@ -316,7 +311,10 @@ ifdef SSL
     endif
   endif
   ifndef DYN
-    OPENSSL_LIBS += -lgdi32 -lcrypt32
+    OPENSSL_LIBS += -lgdi32
+    ifndef SCHANNEL
+      OPENSSL_LIBS += -lcrypt32
+    endif
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL
