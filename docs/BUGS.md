@@ -25,7 +25,7 @@
 ## Security bugs
 
  If you find a bug or problem in curl or libcurl that you think has a security
- impact, for example, a bug that can put users in danger or make them
+ impact, for example a bug that can put users in danger or make them
  vulnerable if the bug becomes public knowledge, then please report that bug
  using our security development process.
 
