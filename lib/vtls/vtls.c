@@ -655,6 +655,12 @@ void Curl_ssl_detach_conn(struct Curl_easy *data,
   }
 }
 
+void Curl_free_multi_ssl_backend_data(struct multi_ssl_backend_data *mbackend)
+{
+  if(Curl_ssl->free_multi_ssl_backend_data && mbackend)
+    Curl_ssl->free_multi_ssl_backend_data(mbackend);
+}
+
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
   /* kill the session ID cache if not shared */
@@ -1310,7 +1316,8 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_false_start,             /* false_start */
   NULL,                              /* sha256sum */
   NULL,                              /* associate_connection */
-  NULL                               /* disassociate_connection */
+  NULL,                              /* disassociate_connection */
+  NULL                               /* free_multi_ssl_backend_data */
 };
 
 const struct Curl_ssl *Curl_ssl =

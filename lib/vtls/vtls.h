@@ -47,6 +47,10 @@ struct ssl_connect_data;
 #define VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR       \
   ALPN_ACCEPTED "%.*s"
 
+/* Curl_multi SSL backend-specific data; declared differently by each SSL
+   backend */
+struct multi_ssl_backend_data;
+
 struct Curl_ssl {
   /*
    * This *must* be the first entry to allow returning the list of available
@@ -102,6 +106,8 @@ struct Curl_ssl {
                                struct connectdata *conn,
                                int sockindex);
   void (*disassociate_connection)(struct Curl_easy *data, int sockindex);
+
+  void (*free_multi_ssl_backend_data)(struct multi_ssl_backend_data *mbackend);
 };
 
 #ifdef USE_SSL
@@ -310,6 +316,8 @@ void Curl_ssl_associate_conn(struct Curl_easy *data,
                              struct connectdata *conn);
 void Curl_ssl_detach_conn(struct Curl_easy *data,
                           struct connectdata *conn);
+
+void Curl_free_multi_ssl_backend_data(struct multi_ssl_backend_data *mbackend);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 

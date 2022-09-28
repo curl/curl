@@ -79,6 +79,10 @@ typedef enum {
 /* value for MAXIMUM CONCURRENT STREAMS upper limit */
 #define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
 
+/* Curl_multi SSL backend-specific data; declared differently by each SSL
+   backend */
+struct multi_ssl_backend_data;
+
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
@@ -117,6 +121,10 @@ struct Curl_multi {
   /* timetree points to the splay-tree of time nodes to figure out expire
      times of all currently set timers */
   struct Curl_tree *timetree;
+
+#if defined(USE_SSL)
+  struct multi_ssl_backend_data *ssl_backend_data;
+#endif
 
   /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
      the pluralis form, there can be more than one easy handle waiting on the
