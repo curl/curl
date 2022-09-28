@@ -654,6 +654,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.upload = FALSE;
     break;
 
+#ifndef CURL_DISABLE_MIME
   case CURLOPT_HTTPPOST:
     /*
      * Set to make us do HTTP POST
@@ -662,6 +663,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.method = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
     break;
+#endif
 
   case CURLOPT_AWS_SIGV4:
     /*
@@ -675,18 +677,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     if(data->set.str[STRING_AWS_SIGV4])
       data->set.httpauth = CURLAUTH_AWS_SIGV4;
-    break;
-
-  case CURLOPT_MIMEPOST:
-    /*
-     * Set to make us do MIME/form POST
-     */
-    result = Curl_mime_set_subparts(&data->set.mimepost,
-                                    va_arg(param, curl_mime *), FALSE);
-    if(!result) {
-      data->set.method = HTTPREQ_POST_MIME;
-      data->set.opt_no_body = FALSE; /* this is implied */
-    }
     break;
 
   case CURLOPT_REFERER:
@@ -708,13 +698,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     result = Curl_setstropt(&data->set.str[STRING_USERAGENT],
                             va_arg(param, char *));
-    break;
-
-  case CURLOPT_HTTPHEADER:
-    /*
-     * Set a list with HTTP headers to use (or replace internals with)
-     */
-    data->set.headers = va_arg(param, struct curl_slist *);
     break;
 
 #ifndef CURL_DISABLE_PROXY
@@ -953,6 +936,36 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
     break;
 #endif   /* CURL_DISABLE_HTTP */
+
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) ||       \
+    !defined(CURL_DISABLE_IMAP)
+# if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MIME)
+  case CURLOPT_HTTPHEADER:
+    /*
+     * Set a list with HTTP headers to use (or replace internals with)
+     */
+    data->set.headers = va_arg(param, struct curl_slist *);
+    break;
+# endif
+
+# ifndef CURL_DISABLE_MIME
+  case CURLOPT_MIMEPOST:
+    /*
+     * Set to make us do MIME POST
+     */
+    result = Curl_mime_set_subparts(&data->set.mimepost,
+                                    va_arg(param, curl_mime *), FALSE);
+    if(!result) {
+      data->set.method = HTTPREQ_POST_MIME;
+      data->set.opt_no_body = FALSE; /* this is implied */
+    }
+    break;
+
+  case CURLOPT_MIME_OPTIONS:
+    data->set.mime_options = (unsigned int)va_arg(param, long);
+    break;
+# endif
+#endif
 
   case CURLOPT_HTTPAUTH:
     /*
@@ -2656,13 +2669,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_MAIL_RCPT_ALLLOWFAILS:
     /* allow RCPT TO command to fail for some recipients */
     data->set.mail_rcpt_allowfails = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    break;
-#endif
-
-#if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)) || \
-  !defined(CURL_DISABLE_SMTP) || !defined(CURL_DISABLE_IMAP)
-  case CURLOPT_MIME_OPTIONS:
-    data->set.mime_options = (unsigned int)va_arg(param, long);
     break;
 #endif
 
