@@ -1323,7 +1323,8 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_none_false_start,          /* false_start */
   NULL,                           /* sha256sum */
   NULL,                           /* associate_connection */
-  NULL                            /* disassociate_connection */
+  NULL,                           /* disassociate_connection */
+  NULL                            /* free_multi_ssl_backend_data */
 };
 
 #endif /* USE_GSKIT */
