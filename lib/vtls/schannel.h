@@ -83,12 +83,13 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
 /* structs to expose only in schannel.c and schannel_verify.c */
 #ifdef EXPOSE_SCHANNEL_INTERNAL_STRUCTS
 
+#include <wincrypt.h>
+
 #ifdef __MINGW32__
 #ifdef __MINGW64_VERSION_MAJOR
 #define HAS_MANUAL_VERIFY_API
 #endif
 #else
-#include <wincrypt.h>
 #ifdef CERT_CHAIN_REVOCATION_CHECK_CHAIN
 #define HAS_MANUAL_VERIFY_API
 #endif
