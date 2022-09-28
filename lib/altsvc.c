@@ -462,6 +462,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   struct altsvc *as;
   unsigned short dstport = srcport; /* the same by default */
   CURLcode result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
+  size_t entries = 0;
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
 #endif
@@ -474,6 +475,8 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
 
   /* "clear" is a magic keyword */
   if(strcasecompare(alpnbuf, "clear")) {
+    /* Flush cached alternatives for this source origin */
+    altsvc_flush(asi, srcalpnid, srchost, srcport);
     return CURLE_OK;
   }
 
@@ -575,8 +578,10 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           }
         }
         if(dstalpnid && valid) {
-          /* Flush cached alternatives for this source origin, if any */
-          altsvc_flush(asi, srcalpnid, srchost, srcport);
+          if(!entries++)
+            /* Flush cached alternatives for this source origin, if any - when
+               this is the first entry of the line. */
+            altsvc_flush(asi, srcalpnid, srchost, srcport);
 
           as = altsvc_createid(srchost, dsthost,
                                srcalpnid, dstalpnid,
