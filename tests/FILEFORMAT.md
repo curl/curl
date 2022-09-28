@@ -344,33 +344,43 @@ about to issue.
 ### `<server>`
 What server(s) this test case requires/uses. Available servers:
 
+- `dict`
 - `file`
-- `ftp-ipv6`
 - `ftp`
+- `ftp-ipv6`
 - `ftps`
 - `gopher`
+- `gopher-ipv6`
 - `gophers`
+- `http`
+- `http/2`
 - `http-ipv6`
 - `http-proxy`
-- `http-unix`
-- `http/2`
-- `http`
 - `https`
-- `httptls+srp-ipv6`
+- `https-proxy`
 - `httptls+srp`
+- `httptls+srp-ipv6`
+- `http-unix`
 - `imap`
 - `mqtt`
 - `none`
 - `pop3`
-- `rtsp-ipv6`
 - `rtsp`
+- `rtsp-ipv6`
 - `scp`
 - `sftp`
+- `smb`
 - `smtp`
 - `socks4`
 - `socks5`
+- `socks5unix`
+- `telnet`
+- `tftp`
 
-Give only one per line. This subsection is mandatory.
+Give only one per line. This subsection is mandatory (use `none` if no servers
+are required). Servers that require a special server certificate can have the
+PEM certificate file name (found in the `certs` directory) appended to the
+server name separated by a space.
 
 ### `<features>`
 A list of features that MUST be present in the client/library for this test to
