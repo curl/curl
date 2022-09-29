@@ -60,14 +60,6 @@ endif
 ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.4
 endif
-# Edit the path below to point to the base of your libexpat package.
-ifndef LIBEXPAT_PATH
-LIBEXPAT_PATH = ../../expat-2.1.0
-endif
-# Edit the path below to point to the base of your libxml2 package.
-ifndef LIBXML2_PATH
-LIBXML2_PATH = ../../libxml2-2.9.2
-endif
 # Edit the path below to point to the base of your libgsasl package.
 ifndef LIBGSASL_PATH
 LIBGSASL_PATH = ../../libgsasl-1.10.0
