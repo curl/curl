@@ -149,9 +149,9 @@ multi-threaded dynamic C runtime.
 
  If you get linkage errors read section 5.7 of the FAQ document.
 
-## MingW32
+## MinGW32
 
-Make sure that MingW32's bin directory is in the search path, for example:
+Make sure that MinGW32's bin directory is in the search path, for example:
 
 ```cmd
 set PATH=c:\mingw32\bin;%PATH%
