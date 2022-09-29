@@ -742,12 +742,12 @@
 #define SHUT_RDWR 0x02
 #endif
 
-/* Define S_ISREG if not defined by system headers, f.e. MSVC */
+/* Define S_ISREG if not defined by system headers, e.g. MSVC */
 #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 
-/* Define S_ISDIR if not defined by system headers, f.e. MSVC */
+/* Define S_ISDIR if not defined by system headers, e.g. MSVC */
 #if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
