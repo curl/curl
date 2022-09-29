@@ -340,9 +340,6 @@ ifdef SSL
   endif
   ifndef DYN
     OPENSSL_LIBS += -lgdi32
-    ifndef SCHANNEL
-      OPENSSL_LIBS += -lcrypt32
-    endif
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL
@@ -350,7 +347,6 @@ ifdef SSL
 endif
 ifdef SCHANNEL
   CFLAGS += -DUSE_SCHANNEL
-  curl_LDADD += -lcrypt32
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
@@ -412,7 +408,7 @@ ifndef USE_LDAP_OPENLDAP
 curl_LDADD += -lwldap32
 endif
 endif
-curl_LDADD += -lws2_32 -lbcrypt
+curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
