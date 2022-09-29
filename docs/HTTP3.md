@@ -291,26 +291,21 @@ that exists in curl's test dir.
 
 ### Caddy
 
-[Install Caddy](https://caddyserver.com/docs/install), you can even put the
-single binary in a separate directory if you prefer.
+[Install Caddy](https://caddyserver.com/docs/install). For easiest use, the binary
+should be either in your PATH or your current directory.
 
-In the same directory you put Caddy, create a `Caddyfile` with the following
-content to run an HTTP/3 reverse-proxy on port 7443:
+Create a `Caddyfile` with the following content:
 ~~~
-{
-    auto_https disable_redirects
-	servers :7443 {
-		protocol {
-			experimental_http3
-		}
-	}
-}
-
 localhost:7443 {
-	reverse_proxy localhost:80
+	respond "Hello, world! You're using {http.request.proto}"
 }
 ~~~
 
 Then run Caddy:
 
     ./caddy start
+
+Making requests to `https://localhost:7443` should tell you which protocol is being used.
+
+You can change the hard-coded response to something more useful by replacing `respond`
+with `reverse_proxy` or `file_server`, for example: `reverse_proxy localhost:80`
