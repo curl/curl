@@ -24,8 +24,8 @@
 
 ###########################################################################
 #
-# Makefile for building libcurl.a with MinGW and optionally
-# openssl, libssh2, librtmp, zlib, brotli, zstd
+# Makefile for building curl examples with MinGW and optionally openssl, libssh2
+# librtmp, zlib, brotli, zstd, gsasl, libidn2, nghttp2, ngttp3, ngtcp2
 #
 # Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
