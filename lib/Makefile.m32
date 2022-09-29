@@ -38,35 +38,35 @@
 
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.8
+ZLIB_PATH = ../../zlib
 endif
 # Edit the path below to point to the base of your Zstandard sources.
 ifndef ZSTD_PATH
-ZSTD_PATH = ../../zstd-1.4.5
+ZSTD_PATH = ../../zstd
 endif
 # Edit the path below to point to the base of your Brotli sources.
 ifndef BROTLI_PATH
-BROTLI_PATH = ../../brotli-1.0.1
+BROTLI_PATH = ../../brotli
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-1.0.2a
+OPENSSL_PATH = ../../openssl
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.5.0
+LIBSSH2_PATH = ../../libssh2
 endif
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH
-LIBRTMP_PATH = ../../librtmp-2.4
+LIBRTMP_PATH = ../../librtmp
 endif
 # Edit the path below to point to the base of your libgsasl package.
 ifndef LIBGSASL_PATH
-LIBGSASL_PATH = ../../libgsasl-1.10.0
+LIBGSASL_PATH = ../../libgsasl
 endif
 # Edit the path below to point to the base of your libidn2 package.
 ifndef LIBIDN2_PATH
-LIBIDN2_PATH = ../../libidn2-2.0.3
+LIBIDN2_PATH = ../../libidn2
 endif
 # Edit the path below to point to the base of your MS IDN package.
 # Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
@@ -76,19 +76,19 @@ WINIDN_PATH = ../../Microsoft IDN Mitigation APIs
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
-LDAP_SDK = c:/novell/ndk/cldapsdk/win32
+LDAP_SDK = C:/novell/ndk/cldapsdk/win32
 endif
 # Edit the path below to point to the base of your nghttp2 package.
 ifndef NGHTTP2_PATH
-NGHTTP2_PATH = ../../nghttp2-1.0.0
+NGHTTP2_PATH = ../../nghttp2
 endif
 # Edit the path below to point to the base of your nghttp3 package.
 ifndef NGHTTP3_PATH
-NGHTTP3_PATH = ../../nghttp3-1.0.0
+NGHTTP3_PATH = ../../nghttp3
 endif
 # Edit the path below to point to the base of your ngtcp2 package.
 ifndef NGTCP2_PATH
-NGTCP2_PATH = ../../ngtcp2-1.0.0
+NGTCP2_PATH = ../../ngtcp2
 endif
 
 PROOT = ..
