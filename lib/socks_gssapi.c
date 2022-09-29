@@ -25,7 +25,7 @@
 
 #include "curl_setup.h"
 
-#if defined(HAVE_GSSAPI) && !defined(CURL_DISABLE_PROXY)
+#if defined(HAVE_GSSAPI) && defined(FEAT_PROXY)
 
 #include "curl_gssapi.h"
 #include "urldata.h"
@@ -531,4 +531,4 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   return CURLE_OK;
 }
 
-#endif /* HAVE_GSSAPI && !CURL_DISABLE_PROXY */
+#endif /* HAVE_GSSAPI && FEAT_PROXY */

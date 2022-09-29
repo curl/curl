@@ -202,7 +202,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
                                              const struct bufref *type2,
                                              struct ntlmdata *ntlm)
 {
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef FEAT_VERBOSE_STRINGS
   (void) data;
 #endif
 
@@ -255,7 +255,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   unsigned long attrs;
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef FEAT_VERBOSE_STRINGS
   (void) data;
 #endif
   (void) passwdp;

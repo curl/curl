@@ -164,7 +164,7 @@ struct thread_sync_data {
   int port;
   char *hostname;        /* hostname to resolve, Curl_async.hostname
                             duplicate */
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
   struct Curl_easy *data;
   curl_socket_t sock_pair[2]; /* socket pair */
 #endif
@@ -202,7 +202,7 @@ void destroy_thread_sync_data(struct thread_sync_data *tsd)
   if(tsd->res)
     Curl_freeaddrinfo(tsd->res);
 
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
   /*
    * close one end of the socket pair (may be done in resolver thread);
    * the other end (for reading) is always closed in the parent thread.
@@ -244,7 +244,7 @@ int init_thread_sync_data(struct thread_data *td,
 
   Curl_mutex_init(tsd->mtx);
 
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
   /* create socket pair, avoid AF_LOCAL since it doesn't build on Solaris */
   if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, &tsd->sock_pair[0]) < 0) {
     tsd->sock_pair[0] = CURL_SOCKET_BAD;
@@ -264,7 +264,7 @@ int init_thread_sync_data(struct thread_data *td,
   return 1;
 
  err_exit:
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
   if(tsd->sock_pair[0] != CURL_SOCKET_BAD) {
     sclose(tsd->sock_pair[0]);
     tsd->sock_pair[0] = CURL_SOCKET_BAD;
@@ -303,7 +303,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
   struct thread_data *td = tsd->td;
   char service[12];
   int rc;
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
   char buf[1];
 #endif
 
@@ -328,7 +328,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
     free(td);
   }
   else {
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
       /* DNS has been resolved, signal client task */
       buf[0] = 1;
@@ -388,7 +388,7 @@ static void destroy_async_data(struct Curl_async *async)
   if(async->tdata) {
     struct thread_data *td = async->tdata;
     int done;
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
     curl_socket_t sock_rd = td->tsd.sock_pair[0];
     struct Curl_easy *data = td->tsd.data;
 #endif
@@ -413,7 +413,7 @@ static void destroy_async_data(struct Curl_async *async)
 
       free(async->tdata);
     }
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
     /*
      * ensure CURLMOPT_SOCKETFUNCTION fires CURL_POLL_REMOVE
      * before the FD is invalidated to avoid EBADF on EPOLL_CTL_DEL
@@ -631,13 +631,13 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
   timediff_t milli;
   timediff_t ms;
   struct resdata *reslv = (struct resdata *)data->state.async.resolver;
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
   struct thread_data *td = data->state.async.tdata;
 #else
   (void)socks;
 #endif
 
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
   if(td) {
     /* return read fd to client for polling the DNS resolution status */
     socks[0] = td->tsd.sock_pair[0];
@@ -656,7 +656,7 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
     else
       milli = 200;
     Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
-#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef FEAT_SOCKETPAIR
   }
 #endif
 

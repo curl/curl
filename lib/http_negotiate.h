@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
+#if defined(FEAT_HTTP) && defined(USE_SPNEGO)
 
 /* this is for Negotiate header input */
 CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
@@ -36,7 +36,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
 void Curl_http_auth_cleanup_negotiate(struct connectdata *conn);
 
-#else /* !CURL_DISABLE_HTTP && USE_SPNEGO */
+#else /* FEAT_HTTP && USE_SPNEGO */
 #define Curl_http_auth_cleanup_negotiate(x)
 #endif
 

@@ -97,7 +97,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 {
   struct Curl_addrinfo *ai = NULL;
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FEAT_VERBOSE_STRINGS
   (void)data;
 #endif
 

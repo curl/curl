@@ -1616,19 +1616,19 @@ static void nss_close(struct Curl_easy *data, struct connectdata *conn,
                       int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   struct ssl_connect_data *connssl_proxy = &conn->proxy_ssl[sockindex];
 #endif
   struct ssl_backend_data *backend = connssl->backend;
   (void)data;
 
   DEBUGASSERT(backend);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   DEBUGASSERT(connssl_proxy->backend != NULL);
 #endif
 
   if(backend->handle
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     || connssl_proxy->backend->handle
 #endif
     ) {
@@ -1638,7 +1638,7 @@ static void nss_close(struct Curl_easy *data, struct connectdata *conn,
     conn->sock[sockindex] = CURL_SOCKET_BAD;
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(backend->handle)
     /* nss_close(connssl) will transitively close also
        connssl_proxy->backend->handle if both are used. Clear it to avoid
@@ -2075,7 +2075,7 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
     goto error;
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->proxy_ssl[sockindex].use) {
     struct ssl_backend_data *proxy_backend;
     proxy_backend = conn->proxy_ssl[sockindex].backend;
@@ -2161,7 +2161,7 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
 
 #ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
        && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
       ) {

@@ -172,7 +172,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     NULL               /* MSGSENT */
   };
 
-#if defined(DEBUGBUILD) && defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && !defined(FEAT_VERBOSE_STRINGS)
   (void) lineno;
 #endif
 
@@ -182,7 +182,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 
   data->mstate = state;
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   if(data->mstate >= MSTATE_PENDING &&
      data->mstate < MSTATE_COMPLETED) {
     long connection_id = -5000;
@@ -718,7 +718,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   else {
     char buffer[256];
     const char *host =
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
       conn->bits.socksproxy ?
       conn->socks_proxy.host.dispname :
       conn->bits.httpproxy ? conn->http_proxy.host.dispname :
@@ -982,7 +982,7 @@ static int waitconnect_getsock(struct connectdata *conn,
   int rc = 0;
 
 #ifdef USE_SSL
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(CONNECT_FIRSTSOCKET_PROXY_SSL())
     return Curl_ssl->getsock(conn, sock);
 #endif
@@ -1752,7 +1752,7 @@ static CURLcode protocol_connect(struct Curl_easy *data,
   }
 
   if(!conn->bits.protoconnstart) {
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     result = Curl_proxy_connect(data, FIRSTSOCKET);
     if(result)
       return result;
@@ -1933,7 +1933,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           if(protocol_connected)
             multistate(data, MSTATE_DO);
           else {
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
             if(Curl_connect_ongoing(data->conn))
               multistate(data, MSTATE_TUNNELING);
             else
@@ -1952,7 +1952,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       const char *hostname;
 
       DEBUGASSERT(conn);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
       if(conn->bits.httpproxy)
         hostname = conn->http_proxy.host.name;
       else
@@ -2002,7 +2002,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           if(protocol_connected)
             multistate(data, MSTATE_DO);
           else {
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
             if(Curl_connect_ongoing(data->conn))
               multistate(data, MSTATE_TUNNELING);
             else
@@ -2020,12 +2020,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
     break;
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
     case MSTATE_TUNNELING:
       /* this is HTTP-specific, but sending CONNECT to a proxy is HTTP... */
       DEBUGASSERT(data->conn);
       result = Curl_http_connect(data, &protocol_connected);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
       if(data->conn->bits.proxy_connect_closed) {
         rc = CURLM_CALL_MULTI_PERFORM;
         /* connect back to proxy again */
@@ -2037,7 +2037,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 #endif
         if(!result) {
           if(
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
             (data->conn->http_proxy.proxytype != CURLPROXY_HTTPS ||
              data->conn->bits.proxy_ssl_connected[FIRSTSOCKET]) &&
 #endif
@@ -2057,9 +2057,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       DEBUGASSERT(data->conn);
       result = Curl_is_connected(data, data->conn, FIRSTSOCKET, &connected);
       if(connected && !result) {
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
         if(
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
           (data->conn->http_proxy.proxytype == CURLPROXY_HTTPS &&
            !data->conn->bits.proxy_ssl_connected[FIRSTSOCKET]) ||
 #endif
@@ -2069,7 +2069,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
 #endif
         rc = CURLM_CALL_MULTI_PERFORM;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
         multistate(data,
                    data->conn->bits.tunnel_proxy?
                    MSTATE_TUNNELING : MSTATE_PROTOCONNECT);
@@ -2158,7 +2158,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         if(!result) {
           if(!dophase_done) {
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
             /* some steps needed for wildcard matching */
             if(data->state.wildcardmatch) {
               struct WildcardData *wc = &data->wildcard;
@@ -2310,7 +2310,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          (data->conn->writesockfd != CURL_SOCKET_BAD))
         multistate(data, MSTATE_PERFORMING);
       else {
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
         if(data->state.wildcardmatch &&
            ((data->conn->handler->flags & PROTOPT_WILDCARD) == 0)) {
           data->wildcard.state = CURLWC_DONE;
@@ -2541,7 +2541,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           result = res;
       }
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
       if(data->state.wildcardmatch) {
         if(data->wildcard.state != CURLWC_DONE) {
           /* if a wildcard is set and we are not ending -> lets start again

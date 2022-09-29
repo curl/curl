@@ -25,7 +25,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_MQTT
+#ifdef FEAT_MQTT
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -812,4 +812,4 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
   return result;
 }
 
-#endif /* CURL_DISABLE_MQTT */
+#endif /* FEAT_MQTT */

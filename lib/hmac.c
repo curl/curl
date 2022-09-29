@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
 
 #include <curl/curl.h>
 
@@ -169,4 +169,4 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_CRYPTO_AUTH */
+#endif /* FEAT_CRYPTO_AUTH */

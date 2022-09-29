@@ -790,7 +790,7 @@ static CURLcode connect_SOCKS(struct Curl_easy *data, int sockindex,
                               bool *done)
 {
   CURLcode result = CURLE_OK;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   CURLproxycode pxresult = CURLPX_OK;
   struct connectdata *conn = data->conn;
   if(conn->bits.socksproxy) {
@@ -835,7 +835,7 @@ static CURLcode connect_SOCKS(struct Curl_easy *data, int sockindex,
 #else
     (void)data;
     (void)sockindex;
-#endif /* CURL_DISABLE_PROXY */
+#endif /* FEAT_PROXY */
     *done = TRUE; /* no SOCKS proxy, so consider us connected */
 
   return result;
@@ -995,7 +995,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
       SET_SOCKERRNO(error);
       if(conn->tempaddr[i]) {
         CURLcode status;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
         char ipaddress[MAX_IPADR_LEN];
         char buffer[STRERROR_LEN];
         Curl_printable_address(conn->tempaddr[i], ipaddress,
@@ -1057,7 +1057,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
 
     result = failreason;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     if(conn->bits.socksproxy)
       hostname = conn->socks_proxy.host.name;
     else if(conn->bits.httpproxy)
@@ -1094,10 +1094,10 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
 
 static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
 {
-#if defined(TCP_NODELAY)
+#ifdef TCP_NODELAY
   curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef FEAT_VERBOSE_STRINGS
   char buffer[STRERROR_LEN];
 #else
   (void) data;
@@ -1124,7 +1124,7 @@ static void nosigpipe(struct Curl_easy *data,
   int onoff = 1;
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
                 sizeof(onoff)) < 0) {
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef FEAT_VERBOSE_STRINGS
     char buffer[STRERROR_LEN];
     infof(data, "Could not set SO_NOSIGPIPE: %s",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
@@ -1691,7 +1691,7 @@ CURLcode Curl_socket(struct Curl_easy *data,
  */
 void Curl_conncontrol(struct connectdata *conn,
                       int ctrl /* see defines in header */
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
                       , const char *reason
 #endif
   )
@@ -1701,7 +1701,7 @@ void Curl_conncontrol(struct connectdata *conn,
      associated with a transfer. */
   bool closeit;
   DEBUGASSERT(conn);
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   (void)reason; /* useful for debugging */
 #endif
   closeit = (ctrl == CONNCTRL_CONNECTION) ||

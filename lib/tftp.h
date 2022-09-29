@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_TFTP
+#ifdef FEAT_TFTP
 extern const struct Curl_handler Curl_handler_tftp;
 #endif
 

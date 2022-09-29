@@ -105,7 +105,7 @@
 struct ssl_backend_data {
   gsk_handle handle;
   int iocport;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   int localfd;
   int remotefd;
 #endif
@@ -512,7 +512,7 @@ static void close_async_handshake(struct ssl_connect_data *connssl)
 static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
                            int directions)
 {
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_connect_data *connproxyssl = &conn->proxy_ssl[sockindex];
   struct pollfd fds[2];
@@ -597,7 +597,7 @@ static void close_one(struct ssl_connect_data *connssl, struct Curl_easy *data,
     while(pipe_ssloverssl(conn, sockindex, SOS_WRITE) > 0)
       ;
     BACKEND->handle = (gsk_handle) NULL;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     if(BACKEND->localfd >= 0) {
       close(BACKEND->localfd);
       BACKEND->localfd = -1;
@@ -717,7 +717,7 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
   const char *sni;
   unsigned int protoflags = 0;
   Qso_OverlappedIO_t commarea;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   int sockpair[2];
   static const int sobufsize = CURL_MAX_WRITE_SIZE;
 #endif
@@ -727,7 +727,7 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
 
   BACKEND->handle = (gsk_handle) NULL;
   BACKEND->iocport = -1;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   BACKEND->localfd = -1;
   BACKEND->remotefd = -1;
 #endif
@@ -769,7 +769,7 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
   if(result)
     return result;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   /* Establish a pipelining socket pair for SSL over SSL. */
   if(conn->proxy_ssl[sockindex].use) {
     if(Curl_socketpair(0, 0, 0, sockpair))
@@ -845,7 +845,7 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
   if(!result)
     result = set_numeric(data, BACKEND->handle, GSK_OS400_READ_TIMEOUT, 1);
   if(!result)
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     result = set_numeric(data, BACKEND->handle, GSK_FD, BACKEND->localfd >= 0?
                          BACKEND->localfd: conn->sock[sockindex]);
 #else
@@ -920,7 +920,7 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
     else if(errno != ENOBUFS)
       result = gskit_status(data, GSK_ERROR_IO,
                             "QsoCreateIOCompletionPort()", 0);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     else if(conn->proxy_ssl[sockindex].use) {
       /* Cannot pipeline while handshaking synchronously. */
       result = CURLE_SSL_CONNECT_ERROR;
@@ -1189,7 +1189,7 @@ static void gskit_close(struct Curl_easy *data, struct connectdata *conn,
                         int sockindex)
 {
   close_one(&conn->ssl[sockindex], data, conn, sockindex);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   close_one(&conn->proxy_ssl[sockindex], data, conn, sockindex);
 #endif
 }
@@ -1209,7 +1209,7 @@ static int gskit_shutdown(struct Curl_easy *data,
   if(!BACKEND->handle)
     return 0;
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
     return 0;
 #endif

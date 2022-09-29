@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#ifdef FEAT_CRYPTO_AUTH
 
 #include "curl_md4.h"
 #include "warnless.h"
@@ -517,4 +517,4 @@ void Curl_md4it(unsigned char *output, const unsigned char *input,
   MD4_Final(output, &ctx);
 }
 
-#endif /* CURL_DISABLE_CRYPTO_AUTH */
+#endif /* FEAT_CRYPTO_AUTH */

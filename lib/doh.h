@@ -27,7 +27,7 @@
 #include "urldata.h"
 #include "curl_addrinfo.h"
 
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
 
 typedef enum {
   DOH_OK,

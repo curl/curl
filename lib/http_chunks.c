@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
 
 #include "urldata.h" /* it includes http_chunks.h */
 #include "sendf.h"   /* for the client write stuff */
@@ -316,4 +316,4 @@ const char *Curl_chunked_strerror(CHUNKcode code)
   }
 }
 
-#endif /* CURL_DISABLE_HTTP */
+#endif /* FEAT_HTTP */

@@ -53,7 +53,7 @@ struct Curl_share {
   void *clientdata;
   struct conncache conn_cache;
   struct Curl_hash hostcache;
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+#if defined(FEAT_HTTP) && defined(FEAT_COOKIES)
   struct CookieInfo *cookies;
 #endif
 #ifdef USE_LIBPSL

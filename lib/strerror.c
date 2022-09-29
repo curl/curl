@@ -55,7 +55,7 @@
 const char *
 curl_easy_strerror(CURLcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   switch(error) {
   case CURLE_OK:
     return "No error";
@@ -362,7 +362,7 @@ curl_easy_strerror(CURLcode error)
 const char *
 curl_multi_strerror(CURLMcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   switch(error) {
   case CURLM_CALL_MULTI_PERFORM:
     return "Please call curl_multi_perform() soon";
@@ -422,7 +422,7 @@ curl_multi_strerror(CURLMcode error)
 const char *
 curl_share_strerror(CURLSHcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   switch(error) {
   case CURLSHE_OK:
     return "No error";
@@ -458,7 +458,7 @@ curl_share_strerror(CURLSHcode error)
 const char *
 curl_url_strerror(CURLUcode error)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   switch(error) {
   case CURLUE_OK:
     return "No error";
@@ -571,7 +571,7 @@ curl_url_strerror(CURLUcode error)
 static const char *
 get_winsock_error (int err, char *buf, size_t len)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   const char *p;
 #endif
 
@@ -580,7 +580,7 @@ get_winsock_error (int err, char *buf, size_t len)
 
   *buf = '\0';
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FEAT_VERBOSE_STRINGS
   (void)err;
   return NULL;
 #else
@@ -933,7 +933,7 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
   *buf = '\0';
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   if(!get_winapi_error(err, buf, buflen)) {
     msnprintf(buf, buflen, "Unknown error %u (0x%08X)", err, err);
   }
@@ -975,7 +975,7 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
 
   *buf = '\0';
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 
   switch(err) {
     case SEC_E_OK:

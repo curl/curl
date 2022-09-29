@@ -39,7 +39,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
 
 #include <curl/curl.h>
 
@@ -1017,4 +1017,4 @@ fail:
   return retsize;
 }
 
-#endif /* CURL_DISABLE_FTP */
+#endif /* FEAT_FTP */

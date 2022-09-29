@@ -25,7 +25,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-#ifndef CURL_DISABLE_NETRC
+#ifdef FEAT_NETRC
 
 /* returns -1 on failure, 0 if the host is found, 1 is the host isn't found */
 int Curl_parsenetrc(const char *host,

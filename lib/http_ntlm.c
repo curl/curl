@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
+#if defined(FEAT_HTTP) && defined(USE_NTLM)
 
 /*
  * NTLM details:
@@ -153,7 +153,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   DEBUGASSERT(data);
 
   if(proxy) {
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     allocuserpwd = &data->state.aptr.proxyuserpwd;
     userp = data->state.aptr.proxyuser;
     passwdp = data->state.aptr.proxypasswd;
@@ -272,4 +272,4 @@ void Curl_http_auth_cleanup_ntlm(struct connectdata *conn)
 #endif
 }
 
-#endif /* !CURL_DISABLE_HTTP && USE_NTLM */
+#endif /* FEAT_HTTP && USE_NTLM */

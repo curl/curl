@@ -102,8 +102,7 @@ static int parsedate(const char *date, time_t *output);
 #define PARSEDATE_LATER  1
 #define PARSEDATE_SOONER 2
 
-#if !defined(CURL_DISABLE_PARSEDATE) || !defined(CURL_DISABLE_FTP) || \
-  !defined(CURL_DISABLE_FILE)
+#if defined(FEAT_PARSEDATE) || defined(FEAT_FTP) || defined(FEAT_FILE)
 /* These names are also used by FTP and FILE code */
 const char * const Curl_wkday[] =
 {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
@@ -112,7 +111,7 @@ const char * const Curl_month[]=
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 #endif
 
-#ifndef CURL_DISABLE_PARSEDATE
+#ifdef FEAT_PARSEDATE
 static const char * const weekday[] =
 { "Monday", "Tuesday", "Wednesday", "Thursday",
   "Friday", "Saturday", "Sunday" };

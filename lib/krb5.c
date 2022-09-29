@@ -36,7 +36,7 @@
 
 #include "curl_setup.h"
 
-#if defined(HAVE_GSSAPI) && !defined(CURL_DISABLE_FTP)
+#if defined(HAVE_GSSAPI) && defined(FEAT_FTP)
 
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -896,4 +896,4 @@ Curl_sec_end(struct connectdata *conn)
   conn->mech = NULL;
 }
 
-#endif /* HAVE_GSSAPI && !CURL_DISABLE_FTP */
+#endif /* HAVE_GSSAPI && FEAT_FTP */

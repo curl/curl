@@ -27,7 +27,7 @@
 #include "curl_setup.h"
 #include "urldata.h"
 
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+#if defined(FEAT_PROXY) && defined(FEAT_HTTP)
 /* ftp can use this as well */
 CURLcode Curl_proxyCONNECT(struct Curl_easy *data,
                            int tunnelsocket,

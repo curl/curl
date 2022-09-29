@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
+#if defined(FEAT_HTTP) && defined(USE_NTLM)
 
 /* this is for ntlm header input */
 CURLcode Curl_input_ntlm(struct Curl_easy *data, bool proxy,
@@ -37,7 +37,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy);
 
 void Curl_http_auth_cleanup_ntlm(struct connectdata *conn);
 
-#else /* !CURL_DISABLE_HTTP && USE_NTLM */
+#else /* FEAT_HTTP && USE_NTLM */
 #define Curl_http_auth_cleanup_ntlm(x)
 #endif
 

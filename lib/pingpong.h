@@ -26,8 +26,8 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_FTP) || \
-  !defined(CURL_DISABLE_POP3) || !defined(CURL_DISABLE_SMTP)
+#if defined(FEAT_IMAP) || defined(FEAT_FTP) || defined(FEAT_POP3) ||    \
+  defined(FEAT_SMTP)
 #define USE_PINGPONG
 #endif
 

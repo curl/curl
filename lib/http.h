@@ -35,7 +35,7 @@ typedef enum {
   HTTPREQ_HEAD
 } Curl_HttpReq;
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
 
 #ifdef USE_NGHTTP2
 #include <nghttp2/nghttp2.h>
@@ -116,7 +116,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
                             struct dynbuf *r, Curl_HttpReq httpreq);
 bool Curl_use_http_1_1plus(const struct Curl_easy *data,
                            const struct connectdata *conn);
-#ifndef CURL_DISABLE_COOKIES
+#ifdef FEAT_COOKIES
 CURLcode Curl_http_cookies(struct Curl_easy *data,
                            struct connectdata *conn,
                            struct dynbuf *r);
@@ -173,7 +173,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
 #define EXPECT_100_THRESHOLD (1024*1024)
 #endif
 
-#endif /* CURL_DISABLE_HTTP */
+#endif /* FEAT_HTTP */
 
 #ifdef USE_NGHTTP3
 struct h3out; /* see ngtcp2 */
@@ -243,7 +243,7 @@ struct HTTP {
   struct websockets ws;
 #endif
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
   struct dynbuf send_buffer; /* used if the request couldn't be sent in one
                                 chunk, points to an allocated send_buffer
                                 struct */

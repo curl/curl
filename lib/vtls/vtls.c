@@ -291,7 +291,7 @@ static bool ssl_prefs_check(struct Curl_easy *data)
   return TRUE;
 }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
 static CURLcode
 ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
 {
@@ -325,7 +325,7 @@ Curl_ssl_connect(struct Curl_easy *data, struct connectdata *conn,
 {
   CURLcode result;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
     result = ssl_connect_init_proxy(conn, sockindex);
     if(result)
@@ -356,7 +356,7 @@ Curl_ssl_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
 {
   CURLcode result;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
     result = ssl_connect_init_proxy(conn, sockindex);
     if(result)
@@ -410,7 +410,7 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
   long *general_age;
   bool no_match = TRUE;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
@@ -426,7 +426,7 @@ bool Curl_ssl_getsessionid(struct Curl_easy *data,
   (void)sockindex;
   *ssl_sessionid = NULL;
 
-#ifdef CURL_DISABLE_PROXY
+#ifndef FEAT_PROXY
   if(isProxy)
     return TRUE;
 #endif
@@ -536,7 +536,7 @@ CURLcode Curl_ssl_addsessionid(struct Curl_easy *data,
   char *clone_conn_to_host;
   int conn_to_port;
   long *general_age;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;

@@ -24,10 +24,10 @@
  *
  ***************************************************************************/
 #ifdef USE_HYPER
-#define CURL_DISABLE_RTSP 1
+#undef FEAT_RTSP
 #endif
 
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
 
 extern const struct Curl_handler Curl_handler_rtsp;
 
@@ -37,7 +37,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header);
 /* disabled */
 #define Curl_rtsp_parseheader(x,y) CURLE_NOT_BUILT_IN
 
-#endif /* CURL_DISABLE_RTSP */
+#endif /* FEAT_RTSP */
 
 /*
  * RTSP Connection data

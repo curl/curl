@@ -26,7 +26,7 @@
 
 #include "http_proxy.h"
 
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+#if defined(FEAT_PROXY) && defined(FEAT_HTTP)
 
 #include <curl/curl.h>
 #ifdef USE_HYPER
@@ -89,7 +89,7 @@ CURLcode Curl_proxy_connect(struct Curl_easy *data, int sockindex)
   }
 
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     /* for [protocol] tunneled through HTTP proxy */
     const char *hostname;
     int remote_port;
@@ -1076,4 +1076,4 @@ void Curl_connect_free(struct Curl_easy *data)
   (void)data;
 }
 
-#endif /* CURL_DISABLE_PROXY */
+#endif /* FEAT_PROXY */

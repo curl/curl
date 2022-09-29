@@ -85,7 +85,7 @@ Example set of cookies:
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+#if defined(FEAT_HTTP) && defined(FEAT_COOKIES)
 
 #include "urldata.h"
 #include "cookie.h"
@@ -502,7 +502,7 @@ Curl_cookie_add(struct Curl_easy *data,
   bool badcookie = FALSE; /* cookies are good by default. mmmmm yummy */
   size_t myhash;
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FEAT_VERBOSE_STRINGS
   (void)data;
 #endif
 
@@ -1820,4 +1820,4 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
   Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 }
 
-#endif /* CURL_DISABLE_HTTP || CURL_DISABLE_COOKIES */
+#endif /* FEAT_HTTP || FEAT_COOKIES */

@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_TELNET
+#ifdef FEAT_TELNET
 /*
  * Telnet option defines. Add more here if in need.
  */
@@ -39,7 +39,7 @@
 #define CURL_NEW_ENV_VAR   0
 #define CURL_NEW_ENV_VALUE 1
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 /*
  * The telnet options represented as strings
  */
@@ -80,7 +80,7 @@ static const char * const telnetoptions[]=
 #define CURL_DONT 254 /* DON'T use this option! */
 #define CURL_IAC  255 /* Interpret As Command */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 /*
  * Then those numbers represented as strings:
  */
@@ -105,6 +105,6 @@ static const char * const telnetcmds[]=
                        ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM) )
 #define CURL_TELCMD(x)    telnetcmds[(x)-CURL_TELCMD_MINIMUM]
 
-#endif /* CURL_DISABLE_TELNET */
+#endif /* FEAT_TELNET */
 
 #endif /* HEADER_CURL_ARPA_TELNET_H */

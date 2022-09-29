@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -91,7 +91,7 @@
 #define INET_ADDRSTRLEN 16
 #endif
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FEAT_VERBOSE_STRINGS
 #define ftp_pasv_verbose(a,b,c,d)  Curl_nop_stmt
 #endif
 
@@ -113,7 +113,7 @@ static CURLcode ftp_sendquote(struct Curl_easy *data,
 static CURLcode ftp_quit(struct Curl_easy *data, struct connectdata *conn);
 static CURLcode ftp_parse_url_path(struct Curl_easy *data);
 static CURLcode ftp_regular_transfer(struct Curl_easy *data, bool *done);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 static void ftp_pasv_verbose(struct Curl_easy *data,
                              struct Curl_addrinfo *ai,
                              char *newhost, /* ascii version */
@@ -224,7 +224,7 @@ static void close_secondarysocket(struct Curl_easy *data,
     conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
   }
   conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   conn->bits.proxy_ssl_connected[SECONDARYSOCKET] = FALSE;
 #endif
 }
@@ -712,7 +712,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
   return result;
 }
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   /* for debug purposes */
 static const char * const ftp_state_names[]={
   "STOP",
@@ -765,8 +765,7 @@ static void _state(struct Curl_easy *data,
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
 #if defined(DEBUGBUILD)
-
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef FEAT_VERBOSE_STRINGS
   (void) lineno;
 #else
   if(ftpc->state != newstate)
@@ -1794,7 +1793,7 @@ static CURLcode ftp_epsv_disable(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   if(conn->bits.ipv6
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
      && !(conn->bits.tunnel_proxy || conn->bits.socksproxy)
 #endif
     ) {
@@ -1824,7 +1823,7 @@ static char *control_address(struct connectdata *conn)
      If a proxy tunnel is used, returns the original host name instead, because
      the effective control connection address is the proxy address,
      not the ftp host. */
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
     return conn->host.name;
 #endif
@@ -1944,7 +1943,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     return CURLE_FTP_WEIRD_PASV_REPLY;
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->bits.proxy) {
     /*
      * This connection uses a proxy and we need to connect to the proxy again
@@ -3536,7 +3535,7 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
  * possibly new IP address.
  *
  */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 static void
 ftp_pasv_verbose(struct Curl_easy *data,
                  struct Curl_addrinfo *ai,
@@ -3599,7 +3598,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
     }
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   result = Curl_proxy_connect(data, SECONDARYSOCKET);
   if(result)
     return result;
@@ -4420,4 +4419,4 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_FTP */
+#endif /* FEAT_FTP */

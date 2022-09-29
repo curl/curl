@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_DICT
+#ifdef FEAT_DICT
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -319,4 +319,4 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
   return CURLE_OK;
 }
-#endif /*CURL_DISABLE_DICT*/
+#endif /* FEAT_DICT */

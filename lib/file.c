@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_FILE
+#ifdef FEAT_FILE
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>

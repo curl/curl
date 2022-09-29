@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
 
 #include <curl/curl.h>
 

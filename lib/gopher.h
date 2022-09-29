@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#ifndef CURL_DISABLE_GOPHER
+#ifdef FEAT_GOPHER
 extern const struct Curl_handler Curl_handler_gopher;
 #ifdef USE_SSL
 extern const struct Curl_handler Curl_handler_gophers;

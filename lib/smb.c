@@ -25,7 +25,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) &&  \
+#if defined(FEAT_SMB) && defined(USE_CURL_NTLM_CORE) &&  \
   (SIZEOF_CURL_OFF_T > 4)
 
 #define BUILDING_CURL_SMB_C
@@ -194,7 +194,7 @@ struct smb_request {
 static void conn_state(struct Curl_easy *data, enum smb_conn_state newstate)
 {
   struct smb_conn *smbc = &data->conn->proto.smbc;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   /* For debug purposes */
   static const char * const names[] = {
     "SMB_NOT_CONNECTED",
@@ -217,7 +217,7 @@ static void request_state(struct Curl_easy *data,
                           enum smb_req_state newstate)
 {
   struct smb_request *req = data->req.p.smb;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   /* For debug purposes */
   static const char * const names[] = {
     "SMB_REQUESTING",
@@ -1023,5 +1023,4 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
-          SIZEOF_CURL_OFF_T > 4 */
+#endif /* FEAT_SMB && USE_CURL_NTLM_CORE && SIZEOF_CURL_OFF_T > 4 */

@@ -103,7 +103,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     if(!m) {
       if(data->set.opt_no_body)
         m = "HEAD";
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
       else {
         switch(data->state.httpreq) {
         case HTTPREQ_POST:
@@ -249,7 +249,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_SSL_VERIFYRESULT:
     *param_longp = data->set.ssl.certverifyresult;
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLINFO_PROXY_SSL_VERIFYRESULT:
     *param_longp = data->set.proxy_ssl.certverifyresult;
     break;
@@ -301,7 +301,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
       /* return if the condition prevented the document to get transferred */
       *param_longp = data->info.timecond ? 1L : 0L;
     break;
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
   case CURLINFO_RTSP_CLIENT_CSEQ:
     *param_longp = data->state.rtsp_next_client_CSeq;
     break;

@@ -31,9 +31,9 @@
 #include "urldata.h"
 #include "sendf.h"
 
-#if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
-                                    !defined(CURL_DISABLE_SMTP) ||      \
-                                    !defined(CURL_DISABLE_IMAP))
+#if defined(FEAT_MIME) && (defined(FEAT_HTTP) ||      \
+                           defined(FEAT_SMTP) ||      \
+                           defined(FEAT_IMAP))
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
@@ -1925,8 +1925,7 @@ void Curl_mime_unpause(curl_mimepart *part)
 }
 
 
-#else /* !CURL_DISABLE_MIME && (!CURL_DISABLE_HTTP ||
-                                !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP) */
+#else /* FEAT_MIME && (FEAT_HTTP || FEAT_SMTP || FEAT_IMAP) */
 
 /* Mime not compiled in: define stubs for externally-referenced functions. */
 curl_mime *curl_mime_init(CURL *easy)

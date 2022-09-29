@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#ifndef CURL_DISABLE_MQTT
+#ifdef FEAT_MQTT
 extern const struct Curl_handler Curl_handler_mqtt;
 #endif
 

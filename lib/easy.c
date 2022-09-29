@@ -454,7 +454,7 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
   struct socketmonitor *m;
   struct socketmonitor *prev = NULL;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef FEAT_VERBOSE_STRINGS
   (void) easy;
 #endif
   (void)socketp;
@@ -902,7 +902,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
 
-#ifndef CURL_DISABLE_COOKIES
+#ifdef FEAT_COOKIES
   if(data->cookies) {
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
@@ -944,7 +944,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
       goto fail;
   }
 
-#ifndef CURL_DISABLE_ALTSVC
+#ifdef FEAT_ALTSVC
   if(data->asi) {
     outcurl->asi = Curl_altsvc_init();
     if(!outcurl->asi)
@@ -953,7 +953,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
       (void)Curl_altsvc_load(outcurl->asi, outcurl->set.str[STRING_ALTSVC]);
   }
 #endif
-#ifndef CURL_DISABLE_HSTS
+#ifdef FEAT_HSTS
   if(data->hsts) {
     outcurl->hsts = Curl_hsts_init();
     if(!outcurl->hsts)
@@ -1003,7 +1003,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   fail:
 
   if(outcurl) {
-#ifndef CURL_DISABLE_COOKIES
+#ifdef FEAT_COOKIES
     curl_slist_free_all(outcurl->state.cookielist);
     outcurl->state.cookielist = NULL;
 #endif
@@ -1047,7 +1047,7 @@ void curl_easy_reset(struct Curl_easy *data)
   memset(&data->state.authhost, 0, sizeof(struct auth));
   memset(&data->state.authproxy, 0, sizeof(struct auth));
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if defined(FEAT_HTTP) && defined(FEAT_CRYPTO_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
 }

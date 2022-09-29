@@ -315,7 +315,7 @@ static void state(struct Curl_easy *data, sshstate nowstate)
 {
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[] = {
     "SSH_STOP",
@@ -3172,7 +3172,7 @@ static CURLcode ssh_setup_connection(struct Curl_easy *data,
 static Curl_recv scp_recv, sftp_recv;
 static Curl_send scp_send, sftp_send;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
 static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
                             size_t length, int flags, void **abstract)
 {
@@ -3266,7 +3266,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
     /*
      * This crazy union dance is here to avoid assigning a void pointer a
@@ -3311,7 +3311,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     sshc->tls_send = conn->send[FIRSTSOCKET];
   }
 
-#endif /* CURL_DISABLE_PROXY */
+#endif /* FEAT_PROXY */
   if(conn->handler->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;

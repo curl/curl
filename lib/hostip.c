@@ -358,7 +358,7 @@ Curl_fetch_addr(struct Curl_easy *data,
   return dns;
 }
 
-#ifndef CURL_DISABLE_SHUFFLE_DNS
+#ifdef FEAT_SHUFFLE_DNS
 UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                                     struct Curl_addrinfo **addr);
 /*
@@ -447,7 +447,7 @@ Curl_cache_addr(struct Curl_easy *data,
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
-#ifndef CURL_DISABLE_SHUFFLE_DNS
+#ifdef FEAT_SHUFFLE_DNS
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses) {
     CURLcode result = Curl_shuffle_addr(data, &addr);
@@ -649,7 +649,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
   struct connectdata *conn = data->conn;
   *entry = NULL;
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   conn->bits.doh = FALSE; /* default is not */
 #else
   (void)allowDOH;
@@ -674,15 +674,11 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 
     struct Curl_addrinfo *addr = NULL;
     int respwait = 0;
-#if !defined(CURL_DISABLE_DOH) || !defined(USE_RESOLVE_ON_IPS)
+#if defined(FEAT_DOH) || !defined(USE_RESOLVE_ON_IPS)
     struct in_addr in;
-#endif
-#ifndef CURL_DISABLE_DOH
-#ifndef USE_RESOLVE_ON_IPS
     const
 #endif
       bool ipnum = FALSE;
-#endif
 
     /* notify the resolver start callback */
     if(data->set.resolver_start) {
@@ -734,7 +730,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 #endif /* ENABLE_IPV6 */
 
 #else /* if USE_RESOLVE_ON_IPS */
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
     /* First check if this is an IPv4 address string */
     if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
       /* This is a dotted IP address 123.123.123.123-style */
@@ -748,7 +744,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
         ipnum = TRUE;
     }
 #endif /* ENABLE_IPV6 */
-#endif /* CURL_DISABLE_DOH */
+#endif /* FEAT_DOH */
 
 #endif /* !USE_RESOLVE_ON_IPS */
 
@@ -759,7 +755,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       if(strcasecompare(hostname, "localhost") ||
          tailmatch(hostname, ".localhost"))
         addr = get_localhost(port, hostname);
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
       else if(allowDOH && data->set.doh && !ipnum)
         addr = Curl_doh(data, hostname, port, &respwait);
 #endif
@@ -1098,7 +1094,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       struct Curl_addrinfo *head = NULL, *tail = NULL;
       size_t entry_len;
       char address[64];
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef FEAT_VERBOSE_STRINGS
       char *addresses = NULL;
 #endif
       char *addr_begin;
@@ -1130,7 +1126,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         goto err;
 
       port = (int)tmp_port;
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef FEAT_VERBOSE_STRINGS
       addresses = end_ptr + 1;
 #endif
 
@@ -1260,11 +1256,11 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 CURLcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns)
 {
-#if defined(CURL_DISABLE_DOH) && !defined(CURLRES_ASYNCH)
+#if !defined(FEAT_DOH) && !defined(CURLRES_ASYNCH)
   (void)data;
   (void)dns;
 #endif
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   if(data->conn->bits.doh)
     return Curl_doh_is_resolved(data, dns);
 #endif
@@ -1275,7 +1271,7 @@ int Curl_resolv_getsock(struct Curl_easy *data,
                         curl_socket_t *socks)
 {
 #ifdef CURLRES_ASYNCH
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   if(data->conn->bits.doh)
     /* nothing to wait for during DoH resolve, those handles have their own
        sockets */
@@ -1327,7 +1323,7 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
   const char *host_or_proxy;
   CURLcode result;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   struct connectdata *conn = data->conn;
   if(conn->bits.httpproxy) {
     host_or_proxy = "proxy";

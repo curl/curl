@@ -27,7 +27,7 @@
  */
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
+#if defined(FEAT_HTTP) && defined(FEAT_HSTS)
 #include <curl/curl.h>
 #include "urldata.h"
 #include "llist.h"
@@ -552,4 +552,4 @@ CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */
+#endif /* FEAT_HTTP && FEAT_HSTS */

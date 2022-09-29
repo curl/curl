@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
 
 #include "urldata.h"
 #include "curl_addrinfo.h"
@@ -45,7 +45,7 @@
 
 #define DNS_CLASS_IN 0x01
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 static const char * const errors[]={
   "",
   "Bad label",
@@ -727,7 +727,7 @@ UNITTEST DOHcode doh_decode(const unsigned char *doh,
   return DOH_OK; /* ok */
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 static void showdoh(struct Curl_easy *data,
                     const struct dohentry *d)
 {
@@ -873,7 +873,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
   return firstai;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 static const char *type2name(DNStype dnstype)
 {
   return (dnstype == DNS_TYPE_A)?"A":"AAAA";
@@ -979,4 +979,4 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_DOH */
+#endif /* FEAT_DOH */

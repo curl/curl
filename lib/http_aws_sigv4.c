@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if defined(FEAT_HTTP) && defined(FEAT_CRYPTO_AUTH)
 
 #include "urldata.h"
 #include "strcase.h"
@@ -402,4 +402,4 @@ fail:
   return ret;
 }
 
-#endif /* !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH) */
+#endif /* FEAT_HTTP) && FEAT_CRYPTO_AUTH */

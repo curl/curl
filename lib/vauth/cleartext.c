@@ -27,8 +27,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) ||       \
-  !defined(CURL_DISABLE_POP3)
+#if defined(FEAT_IMAP) || defined(FEAT_SMTP) || defined(FEAT_POP3)
 
 #include <curl/curl.h>
 #include "urldata.h"

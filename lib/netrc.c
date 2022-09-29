@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-#ifndef CURL_DISABLE_NETRC
+#ifdef FEAT_NETRC
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>

@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_TELNET
+#ifdef FEAT_TELNET
 extern const struct Curl_handler Curl_handler_telnet;
 #endif
 

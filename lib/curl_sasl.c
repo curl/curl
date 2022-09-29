@@ -35,8 +35,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
-  !defined(CURL_DISABLE_POP3)
+#if defined(FEAT_IMAP) || defined(FEAT_SMTP) || defined(FEAT_POP3)
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -226,7 +225,7 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
 static void state(struct SASL *sasl, struct Curl_easy *data,
                   saslstate newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[]={
     "STOP",
@@ -417,7 +416,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
     }
     else
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
     if((enabledmechs & SASL_MECH_DIGEST_MD5) &&
        Curl_auth_is_digest_supported()) {
       mech = SASL_MECH_STRING_DIGEST_MD5;
@@ -527,8 +526,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   struct bufref resp;
   const char * const hostname = SSL_HOST_NAME();
   const long int port = SSL_HOST_PORT();
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) ||     \
-  defined(USE_NTLM)
+#if defined(FEAT_CRYPTO_AUTH) || defined(USE_KERBEROS5) || defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;
@@ -573,7 +571,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_EXTERNAL:
     result = Curl_auth_create_external_message(conn->user, &resp);
     break;
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
 #ifdef USE_GSASL
   case SASL_GSASL:
     result = get_server_message(sasl, data, &serverdata);

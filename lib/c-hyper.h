@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HYPER)
+#if defined(FEAT_HTTP) && defined(USE_HYPER)
 
 #include <hyper.h>
 
@@ -56,5 +56,5 @@ void Curl_hyper_done(struct Curl_easy *);
 #else
 #define Curl_hyper_done(x)
 
-#endif /* !defined(CURL_DISABLE_HTTP) && defined(USE_HYPER) */
+#endif /* defined(FEAT_HTTP) && defined(USE_HYPER) */
 #endif /* HEADER_CURL_HYPER_H */

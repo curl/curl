@@ -88,8 +88,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
-    !defined(CURL_DISABLE_IMAP)
+#if defined(FEAT_HTTP) || defined(FEAT_SMTP) || defined(FEAT_IMAP)
 /*
  * checkheaders() checks the linked list of custom headers for a
  * particular header (prefix). Provide the prefix without colon!
@@ -124,7 +123,7 @@ CURLcode Curl_get_upload_buffer(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
 /*
  * This function will be called to loop through the trailers buffer
  * until no more data is available for sending.
@@ -167,7 +166,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
   curl_read_callback readfunc = NULL;
   void *extra_data = NULL;
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
   if(data->state.trailers_state == TRAILERS_INITIALIZED) {
     struct curl_slist *trailers = NULL;
     CURLcode result;
@@ -204,7 +203,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
   }
 #endif
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
   /* if we are transmitting trailing data, we don't need to write
      a chunk size so we skip this */
   if(data->req.upload_chunky &&
@@ -269,7 +268,7 @@ CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
     return CURLE_READ_ERROR;
   }
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
   if(!data->req.forbidchunk && data->req.upload_chunky) {
     /* if chunked Transfer-Encoding
      *    build chunk:
@@ -624,7 +623,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         break;
     }
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
     /* Since this is a two-state thing, we check if we are parsing
        headers at the moment or not. */
     if(k->header) {
@@ -657,7 +656,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         break;
       }
     }
-#endif /* CURL_DISABLE_HTTP */
+#endif /* FEAT_HTTP */
 
 
     /* This is not an 'else if' since it may be a rest from the header
@@ -672,7 +671,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         return CURLE_WEIRD_SERVER_REPLY;
       }
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
       if(0 == k->bodywrites && !is_empty_data) {
         /* These checks are only made the first time we are about to
            write a piece of the body */
@@ -683,7 +682,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
             return result;
         }
       } /* this is the first time we write a body part */
-#endif /* CURL_DISABLE_HTTP */
+#endif /* FEAT_HTTP */
 
       k->bodywrites++;
 
@@ -702,7 +701,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                      k->str, (size_t)nread);
       }
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
       if(k->chunk) {
         /*
          * Here comes a chunked transfer flying and we need to decode this
@@ -736,7 +735,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         }
         /* If it returned OK, we just keep going */
       }
-#endif   /* CURL_DISABLE_HTTP */
+#endif   /* FEAT_HTTP */
 
       /* Account for body content stored in the header buffer */
       if((k->badheader == HEADER_PARTHEADER) && !k->ignorebody) {
@@ -806,11 +805,11 @@ static CURLcode readwrite_data(struct Curl_easy *data,
              encodings handled here. */
           if(data->set.http_ce_skip || !k->writer_stack) {
             if(!k->ignorebody && nread) {
-#ifndef CURL_DISABLE_POP3
+#ifdef FEAT_POP3
               if(conn->handler->protocol & PROTO_FAMILY_POP3)
                 result = Curl_pop3_write(data, k->str, nread);
               else
-#endif /* CURL_DISABLE_POP3 */
+#endif /* FEAT_POP3 */
                 result = Curl_client_write(data, CLIENTWRITE_BODY, k->str,
                                            nread);
             }
@@ -1070,13 +1069,13 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
         }
       }
 
-#ifndef CURL_DISABLE_SMTP
+#ifdef FEAT_SMTP
       if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
         result = Curl_smtp_escape_eob(data, nread, offset);
         if(result)
           return result;
       }
-#endif /* CURL_DISABLE_SMTP */
+#endif /* FEAT_SMTP */
     } /* if 0 == k->upload_present or appended to upload buffer */
     else {
       /* We have a partial buffer left from a previous "round". Use
@@ -1461,7 +1460,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   else
     data->state.infilesize = 0;
 
-#ifndef CURL_DISABLE_COOKIES
+#ifdef FEAT_COOKIES
   /* If there is a list of cookie files to read, do it now! */
   if(data->state.cookielist)
     Curl_cookie_loadfiles(data);
@@ -1494,7 +1493,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     data->state.authhost.picked &= data->state.authhost.want;
     data->state.authproxy.picked &= data->state.authproxy.want;
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
     data->state.wildcardmatch = data->set.wildcard_enabled;
     if(data->state.wildcardmatch) {
       struct WildcardData *wc = &data->wildcard;
@@ -1566,7 +1565,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
                      char *newurl,    /* the Location: string */
                      followtype type) /* see transfer.h */
 {
-#ifdef CURL_DISABLE_HTTP
+#ifndef FEAT_HTTP
   (void)data;
   (void)newurl;
   (void)type;
@@ -1845,7 +1844,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
   Curl_pgrsResetTransferSizes(data);
 
   return CURLE_OK;
-#endif /* CURL_DISABLE_HTTP */
+#endif /* FEAT_HTTP */
 }
 
 /* Returns CURLE_OK *and* sets '*url' if a request retry is wanted.
@@ -1866,7 +1865,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
   if((data->req.bytecount + data->req.headerbytecount == 0) &&
      conn->bits.reuse &&
      (!data->set.opt_no_body || (conn->handler->protocol & PROTO_FAMILY_HTTP))
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
      && (data->set.rtspreq != RTSPREQ_RECEIVE)
 #endif
     )

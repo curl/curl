@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_PROXY)
+#ifdef FEAT_PROXY
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -102,7 +102,7 @@ int Curl_blockread_all(struct Curl_easy *data,   /* transfer */
 }
 #endif
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
 #define DEBUG_AND_VERBOSE
 #define sxstate(x,y) socksstate(x,y, __LINE__)
 #else
@@ -1055,4 +1055,4 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
   return CURLPX_OK; /* Proxy was successful! */
 }
 
-#endif /* CURL_DISABLE_PROXY */
+#endif /* FEAT_PROXY */

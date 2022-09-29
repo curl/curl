@@ -39,7 +39,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_POP3
+#ifdef FEAT_POP3
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -293,7 +293,7 @@ static CURLcode pop3_get_message(struct Curl_easy *data, struct bufref *out)
 static void state(struct Curl_easy *data, pop3state newstate)
 {
   struct pop3_conn *pop3c = &data->conn->proto.pop3c;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -418,7 +418,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
   return result;
 }
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
 /***********************************************************************
  *
  * pop3_perform_apop()
@@ -562,7 +562,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
   }
 
   if(!result && progress == SASL_IDLE) {
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
     if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_APOP)
       /* Perform APOP authentication */
       result = pop3_perform_apop(data, conn);
@@ -830,7 +830,7 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
       state(data, POP3_STOP);  /* Authenticated */
       break;
     case SASL_IDLE:            /* No mechanism left after cancellation */
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
       if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_APOP)
         /* Perform APOP authentication */
         result = pop3_perform_apop(data, conn);
@@ -851,7 +851,7 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
   return result;
 }
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
 /* For APOP responses */
 static CURLcode pop3_state_apop_resp(struct Curl_easy *data, int pop3code,
                                      pop3state instate)
@@ -1014,7 +1014,7 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
       result = pop3_state_auth_resp(data, pop3code, pop3c->state);
       break;
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
     case POP3_APOP:
       result = pop3_state_apop_resp(data, pop3code, pop3c->state);
       break;
@@ -1583,4 +1583,4 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread)
   return result;
 }
 
-#endif /* CURL_DISABLE_POP3 */
+#endif /* FEAT_POP3 */

@@ -28,6 +28,8 @@
 #define CURL_NO_OLDIES
 #endif
 
+#include "feat.h"
+
 /* define mingw version macros, eg __MINGW{32,64}_{MINOR,MAJOR}_VERSION */
 #ifdef __MINGW32__
 #include <_mingw.h>
@@ -157,63 +159,6 @@
 /*  If you need to include a system header file for your platform,  */
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
-
-/*
- * Disable other protocols when http is the only one desired.
- */
-
-#ifdef HTTP_ONLY
-#  ifndef CURL_DISABLE_DICT
-#    define CURL_DISABLE_DICT
-#  endif
-#  ifndef CURL_DISABLE_FILE
-#    define CURL_DISABLE_FILE
-#  endif
-#  ifndef CURL_DISABLE_FTP
-#    define CURL_DISABLE_FTP
-#  endif
-#  ifndef CURL_DISABLE_GOPHER
-#    define CURL_DISABLE_GOPHER
-#  endif
-#  ifndef CURL_DISABLE_IMAP
-#    define CURL_DISABLE_IMAP
-#  endif
-#  ifndef CURL_DISABLE_LDAP
-#    define CURL_DISABLE_LDAP
-#  endif
-#  ifndef CURL_DISABLE_LDAPS
-#    define CURL_DISABLE_LDAPS
-#  endif
-#  ifndef CURL_DISABLE_MQTT
-#    define CURL_DISABLE_MQTT
-#  endif
-#  ifndef CURL_DISABLE_POP3
-#    define CURL_DISABLE_POP3
-#  endif
-#  ifndef CURL_DISABLE_RTSP
-#    define CURL_DISABLE_RTSP
-#  endif
-#  ifndef CURL_DISABLE_SMB
-#    define CURL_DISABLE_SMB
-#  endif
-#  ifndef CURL_DISABLE_SMTP
-#    define CURL_DISABLE_SMTP
-#  endif
-#  ifndef CURL_DISABLE_TELNET
-#    define CURL_DISABLE_TELNET
-#  endif
-#  ifndef CURL_DISABLE_TFTP
-#    define CURL_DISABLE_TFTP
-#  endif
-#endif
-
-/*
- * When http is disabled rtsp is not supported.
- */
-
-#if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_RTSP)
-#  define CURL_DISABLE_RTSP
-#endif
 
 /* ================================================================ */
 /* No system header file shall be included in this file before this */
@@ -625,7 +570,7 @@
 #      error MSVC 6.0 requires "February 2003 Platform SDK" a.k.a. \
              "Windows Server 2003 PSDK"
 #    else
-#      define CURL_DISABLE_LDAP 1
+#      undef FEAT_LDAP
 #    endif
 #  endif
 #endif
@@ -650,23 +595,23 @@
 #endif
 
 /* Single point where USE_SPNEGO definition might be defined */
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) && \
-    (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
+#if defined(FEAT_CRYPTO_AUTH) &&                        \
+  (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_SPNEGO
 #endif
 
 /* Single point where USE_KERBEROS5 definition might be defined */
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) && \
-    (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
+#if defined(FEAT_CRYPTO_AUTH) && \
+  (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_KERBEROS5
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(CURL_DISABLE_NTLM)
-#  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                       \
-      defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
-      defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
-      (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
+#if defined(FEAT_CRYPTO_AUTH) && defined(FEAT_NTLM)
+#  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                   \
+  defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
+  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
+  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
 #    define USE_CURL_NTLM_CORE
 #  endif
 #  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)

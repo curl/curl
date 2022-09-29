@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
+#if defined(FEAT_HTTP) && defined(USE_SPNEGO)
 
 #include "urldata.h"
 #include "sendf.h"
@@ -53,7 +53,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   curlnegotiate state;
 
   if(proxy) {
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
@@ -221,4 +221,4 @@ void Curl_http_auth_cleanup_negotiate(struct connectdata *conn)
   Curl_auth_cleanup_spnego(&conn->proxyneg);
 }
 
-#endif /* !CURL_DISABLE_HTTP && USE_SPNEGO */
+#endif /* FEAT_HTTP && USE_SPNEGO */

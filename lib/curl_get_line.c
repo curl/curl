@@ -24,8 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
-  !defined(CURL_DISABLE_HSTS)
+#if defined(FEAT_COOKIES) || defined(FEAT_ALTSVC) || defined(FEAT_HSTS)
 
 #include "curl_get_line.h"
 #include "curl_memory.h"

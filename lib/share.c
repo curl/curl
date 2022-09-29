@@ -78,13 +78,13 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_COOKIE:
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+#if defined(FEAT_HTTP) && defined(FEAT_COOKIES)
       if(!share->cookies) {
         share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE);
         if(!share->cookies)
           res = CURLSHE_NOMEM;
       }
-#else   /* CURL_DISABLE_HTTP */
+#else   /* FEAT_HTTP && FEAT_COOKIES */
       res = CURLSHE_NOT_BUILT_IN;
 #endif
       break;
@@ -131,12 +131,12 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_COOKIE:
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+#if defined(FEAT_HTTP) && defined(FEAT_COOKIES)
       if(share->cookies) {
         Curl_cookie_cleanup(share->cookies);
         share->cookies = NULL;
       }
-#else   /* CURL_DISABLE_HTTP */
+#else   /* FEAT_HTTP && FEAT_COOKIES */
       res = CURLSHE_NOT_BUILT_IN;
 #endif
       break;
@@ -203,7 +203,7 @@ curl_share_cleanup(struct Curl_share *share)
   Curl_conncache_destroy(&share->conn_cache);
   Curl_hash_destroy(&share->hostcache);
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+#if defined(FEAT_HTTP) && defined(FEAT_COOKIES)
   Curl_cookie_cleanup(share->cookies);
 #endif
 

@@ -183,29 +183,29 @@ static curl_prot_t get_protocol_family(const struct Curl_handler *h)
  */
 static const struct Curl_handler * const protocols[] = {
 
-#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+#if defined(USE_SSL) && defined(FEAT_HTTP)
   &Curl_handler_https,
 #endif
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
   &Curl_handler_http,
 #endif
 
 #ifdef USE_WEBSOCKETS
-#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+#if defined(USE_SSL) && defined(FEAT_WSS)
   &Curl_handler_wss,
 #endif
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_WS
   &Curl_handler_ws,
 #endif
 #endif
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   &Curl_handler_ftp,
 #endif
 
-#if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)
+#if defined(USE_SSL) && defined(FEAT_FTP)
   &Curl_handler_ftps,
 #endif
 
@@ -213,7 +213,7 @@ static const struct Curl_handler * const protocols[] = {
   &Curl_handler_sftp,
 #endif
 
-#ifndef CURL_DISABLE_FILE
+#ifdef FEAT_FILE
   &Curl_handler_file,
 #endif
 
@@ -221,61 +221,60 @@ static const struct Curl_handler * const protocols[] = {
   &Curl_handler_scp,
 #endif
 
-#ifndef CURL_DISABLE_SMTP
+#ifdef FEAT_SMTP
   &Curl_handler_smtp,
 #ifdef USE_SSL
   &Curl_handler_smtps,
 #endif
 #endif
 
-#ifndef CURL_DISABLE_LDAP
+#ifdef FEAT_LDAP
   &Curl_handler_ldap,
-#if !defined(CURL_DISABLE_LDAPS) && \
+#if defined(FEAT_LDAPS) && \
     ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
      (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
   &Curl_handler_ldaps,
 #endif
 #endif
 
-#ifndef CURL_DISABLE_IMAP
+#ifdef FEAT_IMAP
   &Curl_handler_imap,
 #ifdef USE_SSL
   &Curl_handler_imaps,
 #endif
 #endif
 
-#ifndef CURL_DISABLE_TELNET
+#ifdef FEAT_TELNET
   &Curl_handler_telnet,
 #endif
 
-#ifndef CURL_DISABLE_TFTP
+#ifdef FEAT_TFTP
   &Curl_handler_tftp,
 #endif
 
-#ifndef CURL_DISABLE_POP3
+#ifdef FEAT_POP3
   &Curl_handler_pop3,
 #ifdef USE_SSL
   &Curl_handler_pop3s,
 #endif
 #endif
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-   (SIZEOF_CURL_OFF_T > 4)
+#if defined(FEAT_SMB) && defined(USE_CURL_NTLM_CORE) && (SIZEOF_CURL_OFF_T > 4)
   &Curl_handler_smb,
 #ifdef USE_SSL
   &Curl_handler_smbs,
 #endif
 #endif
 
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
   &Curl_handler_rtsp,
 #endif
 
-#ifndef CURL_DISABLE_MQTT
+#ifdef FEAT_MQTT
   &Curl_handler_mqtt,
 #endif
 
-#ifndef CURL_DISABLE_GOPHER
+#ifdef FEAT_GOPHER
   &Curl_handler_gopher,
 #ifdef USE_SSL
   &Curl_handler_gophers,
@@ -291,7 +290,7 @@ static const struct Curl_handler * const protocols[] = {
   &Curl_handler_rtmpts,
 #endif
 
-#ifndef CURL_DISABLE_DICT
+#ifdef FEAT_DICT
   &Curl_handler_dict,
 #endif
 
@@ -445,7 +444,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_altsvc_cleanup(&data->asi);
   Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
   Curl_hsts_cleanup(&data->hsts);
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if defined(FEAT_HTTP) && !defined(FEAT_CRYPTO_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
   Curl_safefree(data->info.contenttype);
@@ -479,7 +478,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.aptr.proxyuser);
   Curl_safefree(data->state.aptr.proxypasswd);
 
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   if(data->req.doh) {
     Curl_dyn_free(&data->req.doh->probe[0].serverdoh);
     Curl_dyn_free(&data->req.doh->probe[1].serverdoh);
@@ -524,10 +523,10 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->maxredirs = -1;       /* allow any amount by default */
 
   set->method = HTTPREQ_GET; /* Default HTTP request */
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
   set->rtspreq = RTSPREQ_OPTIONS; /* Default RTSP request */
 #endif
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   set->ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
   set->ftp_use_eprt = TRUE;   /* FTP defaults to EPRT operations */
   set->ftp_use_pret = FALSE;  /* mainly useful for drftpd servers */
@@ -543,7 +542,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
   set->httpauth = CURLAUTH_BASIC;  /* defaults to basic */
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   set->proxyauth = CURLAUTH_BASIC; /* defaults to basic */
   /* SOCKS5 proxy auth defaults to username/password + GSS-API */
   set->socks5auth = CURLAUTH_BASIC | CURLAUTH_GSSAPI;
@@ -558,7 +557,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
    * libcurl 7.10 introduced SSL verification *by default*! This needs to be
    * switched off unless wanted.
    */
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   set->doh_verifyhost = TRUE;
   set->doh_verifypeer = TRUE;
 #endif
@@ -571,7 +570,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->ssh_auth_types = CURLSSH_AUTH_DEFAULT;
   set->ssl.primary.sessionid = TRUE; /* session ID caching enabled by
                                         default */
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   set->proxy_ssl = set->ssl;
 #endif
 
@@ -617,7 +616,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 #endif
   }
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   set->wildcard_enabled = FALSE;
   set->chunk_bgn      = ZERO_NULL;
   set->chunk_end      = ZERO_NULL;
@@ -765,7 +764,7 @@ static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
   /* close the SSL stuff before we close any sockets since they will/may
      write to the sockets */
   Curl_ssl_close(data, conn, FIRSTSOCKET);
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   Curl_ssl_close(data, conn, SECONDARYSOCKET);
 #endif
 
@@ -786,7 +785,7 @@ static void conn_free(struct connectdata *conn)
 
   Curl_free_idnconverted_hostname(&conn->host);
   Curl_free_idnconverted_hostname(&conn->conn_to_host);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   Curl_free_idnconverted_hostname(&conn->http_proxy.host);
   Curl_free_idnconverted_hostname(&conn->socks_proxy.host);
   Curl_safefree(conn->http_proxy.user);
@@ -934,7 +933,7 @@ static int IsMultiplexingPossible(const struct Curl_easy *handle,
   return avail;
 }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
 static bool
 proxy_info_matches(const struct proxy_info *data,
                    const struct proxy_info *needle)
@@ -1161,7 +1160,7 @@ ConnectionExists(struct Curl_easy *data,
   bool wantNTLMhttp = ((data->state.authhost.want &
                         (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
                        (needle->handler->protocol & PROTO_FAMILY_HTTP));
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   bool wantProxyNTLMhttp = (needle->bits.proxy_user_passwd &&
                             ((data->state.authproxy.want &
                               (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
@@ -1289,7 +1288,7 @@ ConnectionExists(struct Curl_easy *data,
           /* except protocols that have been upgraded via TLS */
           continue;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
       if(needle->bits.httpproxy != check->bits.httpproxy ||
          needle->bits.socksproxy != check->bits.socksproxy)
         continue;
@@ -1309,7 +1308,7 @@ ConnectionExists(struct Curl_easy *data,
          * connections that don't use this feature */
         continue;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
       if(needle->bits.httpproxy) {
         if(!proxy_info_matches(&needle->http_proxy, &check->http_proxy))
           continue;
@@ -1395,7 +1394,7 @@ ConnectionExists(struct Curl_easy *data,
       }
 
       if((needle->handler->flags&PROTOPT_SSL)
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
          || !needle->bits.httpproxy || needle->bits.tunnel_proxy
 #endif
         ) {
@@ -1467,7 +1466,7 @@ ConnectionExists(struct Curl_easy *data,
           continue;
         }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
         /* Same for Proxy NTLM authentication */
         if(wantProxyNTLMhttp) {
           /* Both check->http_proxy.user and check->http_proxy.passwd can be
@@ -1565,13 +1564,13 @@ ConnectionExists(struct Curl_easy *data,
 /*
  * verboseconnect() displays verbose information after a connect
  */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 void Curl_verboseconnect(struct Curl_easy *data,
                          struct connectdata *conn)
 {
   if(data->set.verbose)
     infof(data, "Connected to %s (%s) port %u (#%ld)",
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
           conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
           conn->bits.httpproxy ? conn->http_proxy.host.dispname :
 #endif
@@ -1608,7 +1607,7 @@ CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,
 #ifndef USE_LIBIDN2
   (void)data;
   (void)data;
-#elif defined(CURL_DISABLE_VERBOSE_STRINGS)
+#elif !defined(FEAT_VERBOSE_STRINGS)
   (void)data;
 #endif
 
@@ -1705,10 +1704,10 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
     size_t totalsize = onesize;
     char *ssl;
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
     totalsize *= 2;
 #endif
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     totalsize *= 2;
 #endif
 
@@ -1719,14 +1718,14 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
     }
     conn->ssl_extra = ssl;
     conn->ssl[FIRSTSOCKET].backend = (void *)ssl;
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
     ssl += onesize;
     conn->ssl[SECONDARYSOCKET].backend = (void *)ssl;
 #endif
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     ssl += onesize;
     conn->proxy_ssl[FIRSTSOCKET].backend = (void *)ssl;
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
     ssl += onesize;
     conn->proxy_ssl[SECONDARYSOCKET].backend = (void *)ssl;
 #endif
@@ -1763,7 +1762,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   /* Store current time to give a baseline to keepalive connection times. */
   conn->keepalive = Curl_now();
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   conn->http_proxy.proxytype = data->set.proxytype;
   conn->socks_proxy.proxytype = CURLPROXY_SOCKS4;
 
@@ -1787,9 +1786,9 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->bits.proxy_user_passwd =
     (data->state.aptr.proxyuser) ? TRUE : FALSE;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
-#endif /* CURL_DISABLE_PROXY */
+#endif /* FEAT_PROXY */
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
 #endif
@@ -1797,7 +1796,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->ssl_config.verifypeer = data->set.ssl.primary.verifypeer;
   conn->ssl_config.verifyhost = data->set.ssl.primary.verifyhost;
   conn->ssl_config.ssl_options = data->set.ssl.primary.ssl_options;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   conn->proxy_ssl_config.verifystatus =
     data->set.proxy_ssl.primary.verifystatus;
   conn->proxy_ssl_config.verifypeer = data->set.proxy_ssl.primary.verifypeer;
@@ -1808,8 +1807,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->connect_only = data->set.connect_only;
   conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
-    defined(NTLM_WB_ENABLED)
+#if defined(FEAT_HTTP) && defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   conn->ntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
   conn->proxyntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
 #endif
@@ -1926,7 +1924,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 {
   char *zoneid;
   CURLUcode uc = curl_url_get(uh, CURLUPART_ZONEID, &zoneid, 0);
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FEAT_VERBOSE_STRINGS
   (void)data;
 #endif
 
@@ -1951,7 +1949,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
       scopeidx = if_nametoindex(zoneid);
 #endif
       if(!scopeidx) {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
         char buffer[STRERROR_LEN];
         infof(data, "Invalid zoneid: %s; %s", zoneid,
               Curl_strerror(errno, buffer, sizeof(buffer)));
@@ -2044,7 +2042,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     return CURLE_URL_MALFORMAT;
   }
 
-#ifndef CURL_DISABLE_HSTS
+#ifdef FEAT_HSTS
   if(data->hsts && strcasecompare("http", data->state.up.scheme)) {
     if(Curl_hsts(data->hsts, data->state.up.hostname, TRUE)) {
       char *url;
@@ -2259,7 +2257,7 @@ void Curl_free_request_state(struct Curl_easy *data)
   Curl_safefree(data->req.p.http);
   Curl_safefree(data->req.newurl);
 
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   if(data->req.doh) {
     Curl_close(&data->req.doh->probe[0].easy);
     Curl_close(&data->req.doh->probe[1].easy);
@@ -2268,7 +2266,7 @@ void Curl_free_request_state(struct Curl_easy *data)
 }
 
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
 /****************************************************************
 * Checks if the host is in the noproxy list. returns true if it matches
 * and therefore the proxy should NOT be used.
@@ -2347,7 +2345,7 @@ static bool check_noproxy(const char *name, const char *no_proxy)
   return FALSE;
 }
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
 /****************************************************************
 * Detect what (if any) proxy to use. Remember that this selects a host
 * name and is not limited to HTTP proxies only.
@@ -2379,7 +2377,7 @@ static char *detect_proxy(struct Curl_easy *data,
   const char *protop = conn->handler->scheme;
   char *envp = proxy_env;
   char *prox;
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FEAT_VERBOSE_STRINGS
   (void)data;
 #endif
 
@@ -2428,7 +2426,7 @@ static char *detect_proxy(struct Curl_easy *data,
 
   return proxy;
 }
-#endif /* CURL_DISABLE_HTTP */
+#endif /* FEAT_HTTP */
 
 /*
  * If this is supposed to use a proxy, we need to figure out the proxy
@@ -2719,11 +2717,11 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
     Curl_safefree(proxy);
     Curl_safefree(socksproxy);
   }
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
   else if(!proxy && !socksproxy)
     /* if the host is not in the noproxy list, detect proxy. */
     proxy = detect_proxy(data, conn);
-#endif /* CURL_DISABLE_HTTP */
+#endif /* FEAT_HTTP */
 
   Curl_safefree(no_proxy);
 
@@ -2770,7 +2768,7 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
     }
 
     if(conn->http_proxy.host.rawalloc) {
-#ifdef CURL_DISABLE_HTTP
+#ifndef FEAT_HTTP
       /* asking for a HTTP proxy is a bit funny when HTTP is disabled... */
       result = CURLE_UNSUPPORTED_PROTOCOL;
       goto out;
@@ -2832,7 +2830,7 @@ out:
   free(proxy);
   return result;
 }
-#endif /* CURL_DISABLE_PROXY */
+#endif /* FEAT_PROXY */
 
 /*
  * Curl_parse_login_details()
@@ -3005,7 +3003,7 @@ static CURLcode override_login(struct Curl_easy *data,
   char **passwdp = &conn->passwd;
   char **optionsp = &conn->options;
 
-#ifndef CURL_DISABLE_NETRC
+#ifdef FEAT_NETRC
   if(data->set.use_netrc == CURL_NETRC_REQUIRED && data->state.aptr.user) {
     Curl_safefree(*userp);
     Curl_safefree(*passwdp);
@@ -3020,7 +3018,7 @@ static CURLcode override_login(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
   }
 
-#ifndef CURL_DISABLE_NETRC
+#ifdef FEAT_NETRC
   conn->bits.netrc = FALSE;
   if(data->set.use_netrc && !data->set.str[STRING_USERNAME]) {
     bool netrc_user_changed = FALSE;
@@ -3155,7 +3153,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
   int port = -1;
   CURLcode result = CURLE_OK;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef FEAT_VERBOSE_STRINGS
   (void) data;
 #endif
 
@@ -3357,7 +3355,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     conn_to_host = conn_to_host->next;
   }
 
-#ifndef CURL_DISABLE_ALTSVC
+#ifdef FEAT_ALTSVC
   if(data->asi && !host && (port == -1) &&
      ((conn->handler->protocol == CURLPROTO_HTTPS) ||
 #ifdef CURLDEBUG
@@ -3468,7 +3466,7 @@ static CURLcode resolve_unix(struct Curl_easy *data,
 }
 #endif
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
 static CURLcode resolve_proxy(struct Curl_easy *data,
                               struct connectdata *conn,
                               bool *async)
@@ -3553,7 +3551,7 @@ static CURLcode resolve_fresh(struct Curl_easy *data,
 #ifdef USE_UNIX_SOCKETS
   char *unix_path = conn->unix_domain_socket;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(!unix_path && conn->socks_proxy.host.name &&
      !strncmp(UNIX_SOCKET_PREFIX"/",
               conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
@@ -3566,7 +3564,7 @@ static CURLcode resolve_fresh(struct Curl_easy *data,
   }
 #endif
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(CONN_IS_PROXIED(conn))
     return resolve_proxy(data, conn, async);
 #endif
@@ -3623,7 +3621,7 @@ static void reuse_conn(struct Curl_easy *data,
     old_conn->passwd = NULL;
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   conn->bits.proxy_user_passwd = old_conn->bits.proxy_user_passwd;
   if(conn->bits.proxy_user_passwd) {
     /* use the new proxy user name and proxy password though */
@@ -3762,7 +3760,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
   /* After the unix socket init but before the proxy vars are used, parse and
      initialize the proxy vars */
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   result = create_conn_helper_init_proxy(data, conn);
   if(result)
     goto out;
@@ -3811,7 +3809,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     if(result)
       goto out;
   }
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->bits.httpproxy) {
     result = Curl_idnconvert_hostname(data, &conn->http_proxy.host);
     if(result)
@@ -3841,7 +3839,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     conn->bits.conn_to_port = FALSE;
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   /*************************************************************
    * If the "connect to" feature is used with an HTTP proxy,
    * we set the tunnel_proxy bit.
@@ -3869,7 +3867,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   /***********************************************************************
    * file: is a special case in that it doesn't need a network connection
    ***********************************************************************/
-#ifndef CURL_DISABLE_FILE
+#ifdef FEAT_FILE
   if(conn->handler->flags & PROTOPT_NONETWORK) {
     bool done;
     /* this is supposed to be the connect function so we better at least check
@@ -3930,7 +3928,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   data->set.ssl.primary.ca_info_blob = data->set.blobs[BLOB_CAINFO];
   data->set.ssl.primary.curves = data->set.str[STRING_SSL_EC_CURVES];
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
   data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
   data->set.proxy_ssl.primary.cipher_list =
@@ -3964,7 +3962,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 #ifdef USE_TLS_SRP
   data->set.ssl.primary.username = data->set.str[STRING_TLSAUTH_USERNAME];
   data->set.ssl.primary.password = data->set.str[STRING_TLSAUTH_PASSWORD];
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   data->set.proxy_ssl.primary.username =
     data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
   data->set.proxy_ssl.primary.password =
@@ -3979,7 +3977,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     goto out;
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(!Curl_clone_primary_ssl_config(&data->set.proxy_ssl.primary,
                                     &conn->proxy_ssl_config)) {
     result = CURLE_OUT_OF_MEMORY;
@@ -4018,7 +4016,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     conn = conn_temp;
     *in_connect = conn;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     infof(data, "Re-using existing connection #%ld with %s %s",
           conn->connection_id,
           conn->bits.proxy?"proxy":"host",
@@ -4175,7 +4173,7 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
   }
   *protocol_done = FALSE; /* default to not done */
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   /* set proxy_connect_closed to false unconditionally already here since it
      is used strictly to provide extra information to a parent function in the
      case of proxy CONNECT failures and we must make sure we don't have it

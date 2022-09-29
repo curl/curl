@@ -25,7 +25,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
 
 #include "warnless.h"
 #include "curl_sha256.h"
@@ -546,4 +546,4 @@ const struct HMAC_params Curl_HMAC_SHA256[] = {
 };
 
 
-#endif /* CURL_DISABLE_CRYPTO_AUTH */
+#endif /* FEAT_CRYPTO_AUTH */

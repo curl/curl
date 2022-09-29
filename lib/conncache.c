@@ -139,7 +139,7 @@ static void hashkey(struct connectdata *conn, char *buf, size_t len)
   const char *hostname;
   long port = conn->remote_port;
   DEBUGASSERT(len >= HASHKEY_SIZE);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
     hostname = conn->http_proxy.host.name;
     port = conn->port;

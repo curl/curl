@@ -72,7 +72,7 @@ typedef enum {
 
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
 
-#if !defined(CURL_DISABLE_SOCKETPAIR)
+#ifdef FEAT_SOCKETPAIR
 #define ENABLE_WAKEUP
 #endif
 

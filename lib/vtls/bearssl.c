@@ -695,7 +695,7 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
 
 #ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
       && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
       ) {

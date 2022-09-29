@@ -1542,10 +1542,10 @@ static int ossl_init(void)
     /* not present in BoringSSL */
     OPENSSL_INIT_ENGINE_ALL_BUILTIN |
 #endif
-#ifdef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
-    OPENSSL_INIT_NO_LOAD_CONFIG |
-#else
+#ifdef FEAT_OPENSSL_AUTO_LOAD_CONFIG
     OPENSSL_INIT_LOAD_CONFIG |
+#else
+    OPENSSL_INIT_NO_LOAD_CONFIG |
 #endif
     0;
   OPENSSL_init_ssl(flags, NULL);
@@ -1562,7 +1562,7 @@ static int ossl_init(void)
 #define CONF_MFLAGS_DEFAULT_SECTION 0x0
 #endif
 
-#ifndef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+#ifdef FEAT_OPENSSL_AUTO_LOAD_CONFIG
   CONF_modules_load_file(NULL, NULL,
                          CONF_MFLAGS_DEFAULT_SECTION|
                          CONF_MFLAGS_IGNORE_MISSING_FILE);
@@ -1810,7 +1810,7 @@ static void ossl_close(struct Curl_easy *data, struct connectdata *conn,
                        int sockindex)
 {
   ossl_closeone(data, conn, &conn->ssl[sockindex]);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   ossl_closeone(data, conn, &conn->proxy_ssl[sockindex]);
 #endif
 }
@@ -1836,7 +1836,7 @@ static int ossl_shutdown(struct Curl_easy *data,
 
   DEBUGASSERT(backend);
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   /* This has only been tested on the proftpd server, and the mod_tls code
      sends a close notify alert without waiting for a close notify alert in
      response. Thus we wait for a close notify alert from the server, but
@@ -1966,7 +1966,7 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
                                size_t hostlen,
                                const char *dispname)
 {
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FEAT_VERBOSE_STRINGS
   (void)dispname;
   (void)data;
 #endif
@@ -3090,7 +3090,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
 
 #ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
        && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
       ) {
@@ -3226,7 +3226,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
         BYTE key_usage[2];
         DWORD req_size;
         const unsigned char *encoded_cert;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
         char cert_name[256];
 #endif
 
@@ -3234,7 +3234,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
         if(!pContext)
           break;
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
         if(!CertGetNameStringA(pContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0,
                                NULL, cert_name, sizeof(cert_name))) {
           strcpy(cert_name, "Unknown");
@@ -3320,7 +3320,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
            such as duplicate certificate, which is allowed by MS but not
            OpenSSL. */
         if(X509_STORE_add_cert(store, x509) == 1) {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
           infof(data, "SSL: Imported cert \"%s\"", cert_name);
 #endif
           imported_native_ca = true;
@@ -3536,7 +3536,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
     Curl_ssl_sessionid_unlock(data);
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->proxy_ssl[sockindex].use) {
     BIO *const bio = BIO_new(BIO_f_ssl());
     struct ssl_backend_data *proxy_backend;
@@ -3844,7 +3844,7 @@ static CURLcode servercert(struct Curl_easy *data,
                          buffer, sizeof(buffer));
   infof(data, " subject: %s", rc?"[NONE]":buffer);
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   {
     long len;
     ASN1_TIME_print(mem, X509_get0_notBefore(backend->server_cert));
@@ -4168,7 +4168,7 @@ static bool ossl_data_pending(const struct connectdata *conn,
   DEBUGASSERT(connssl->backend);
   if(connssl->backend->handle && SSL_pending(connssl->backend->handle))
     return TRUE;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   {
     const struct ssl_connect_data *proxyssl = &conn->proxy_ssl[connindex];
     DEBUGASSERT(proxyssl->backend);
@@ -4241,7 +4241,7 @@ static ssize_t ossl_send(struct Curl_easy *data,
       if(ERR_GET_LIB(sslerror) == ERR_LIB_SSL &&
          ERR_GET_REASON(sslerror) == SSL_R_BIO_NOT_SET &&
          conn->ssl[sockindex].state == ssl_connection_complete
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
          && conn->proxy_ssl[sockindex].state == ssl_connection_complete
 #endif
         ) {
@@ -4519,7 +4519,7 @@ static bool ossl_associate_connection(struct Curl_easy *data,
       conn_status = SSL_set_ex_data(backend->handle, connectdata_idx, conn);
       sockindex_status = SSL_set_ex_data(backend->handle, sockindex_idx,
                                          conn->sock + sockindex);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
       proxy_status = SSL_set_ex_data(backend->handle, proxy_idx,
                                      SSL_IS_PROXY() ? (void *) 1 : NULL);
 #else

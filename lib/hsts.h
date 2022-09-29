@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
+#if defined(FEAT_HTTP) && defined(FEAT_HSTS)
 #include <curl/curl.h>
 #include "llist.h"
 
@@ -63,5 +63,5 @@ CURLcode Curl_hsts_loadcb(struct Curl_easy *data,
 #define Curl_hsts_cleanup(x)
 #define Curl_hsts_loadcb(x,y) CURLE_OK
 #define Curl_hsts_save(x,y,z)
-#endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */
+#endif /* FEAT_HTTP && FEAT_HSTS */
 #endif /* HEADER_CURL_HSTS_H */

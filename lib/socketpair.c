@@ -25,7 +25,7 @@
 #include "curl_setup.h"
 #include "socketpair.h"
 
-#if !defined(HAVE_SOCKETPAIR) && !defined(CURL_DISABLE_SOCKETPAIR)
+#if !defined(HAVE_SOCKETPAIR) && defined(FEAT_SOCKETPAIR)
 #ifdef WIN32
 /*
  * This is a socketpair() implementation for Windows.

@@ -28,7 +28,7 @@
 
 #include "pingpong.h"
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
 extern const struct Curl_handler Curl_handler_ftp;
 
 #ifdef USE_SSL
@@ -37,7 +37,7 @@ extern const struct Curl_handler Curl_handler_ftps;
 
 CURLcode Curl_GetFTPResponse(struct Curl_easy *data, ssize_t *nread,
                              int *ftpcode);
-#endif /* CURL_DISABLE_FTP */
+#endif /* FEAT_FTP */
 
 /****************************************************************************
  * FTP unique setup

@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_TELNET
+#ifdef FEAT_TELNET
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -85,7 +85,7 @@
 #define  CURL_SB_PEEK(x) ((*x->subpointer)&0xff)
 #define  CURL_SB_EOF(x) (x->subpointer >= x->subend) */
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef FEAT_VERBOSE_STRINGS
 #define printoption(a,b,c,d)  Curl_nop_stmt
 #endif
 
@@ -94,7 +94,7 @@ CURLcode telrcv(struct Curl_easy *data,
                 const unsigned char *inbuf, /* Data received from socket */
                 ssize_t count);             /* Number of bytes received */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 static void printoption(struct Curl_easy *data,
                         const char *direction,
                         int cmd, int option);
@@ -263,7 +263,7 @@ static void negotiate(struct Curl_easy *data)
   }
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 static void printoption(struct Curl_easy *data,
                         const char *direction, int cmd, int option)
 {

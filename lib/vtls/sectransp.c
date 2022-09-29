@@ -937,7 +937,7 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
   return ortn;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
 {
   /* The first ciphers in the ciphertable are continuous. Here we do small
@@ -956,7 +956,7 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
   }
   return ciphertable[SSL_NULL_WITH_NULL_NULL].name;
 }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* FEAT_VERBOSE_STRINGS */
 
 #if CURL_BUILD_MAC
 CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
@@ -1848,7 +1848,7 @@ static CURLcode sectransp_connect_step1(struct Curl_easy *data,
 
 #ifdef USE_HTTP2
       if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
          && (!isproxy || !conn->bits.tunnel_proxy)
 #endif
         ) {
@@ -2899,7 +2899,7 @@ collect_server_cert_single(struct Curl_easy *data,
                            CFIndex idx)
 {
   CURLcode result = CURLE_OK;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   if(data->set.verbose) {
     char *certp;
     result = CopyCertSubject(data, server_cert, &certp);
@@ -2920,7 +2920,7 @@ collect_server_cert(struct Curl_easy *data,
                     struct connectdata *conn,
                     int sockindex)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   const bool show_verbose_server_cert = data->set.verbose;
 #else
   const bool show_verbose_server_cert = false;
@@ -3216,7 +3216,7 @@ static int sectransp_shutdown(struct Curl_easy *data,
   if(!backend->ssl_ctx)
     return 0;
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
     return 0;
 #endif

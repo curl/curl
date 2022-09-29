@@ -466,10 +466,10 @@ struct negotiatedata {
 };
 #endif
 
-#ifdef CURL_DISABLE_PROXY
-#define CONN_IS_PROXIED(x) 0
-#else
+#ifdef FEAT_PROXY
 #define CONN_IS_PROXIED(x) x->bits.proxy
+#else
+#define CONN_IS_PROXIED(x) 0
 #endif
 
 /*
@@ -478,7 +478,7 @@ struct negotiatedata {
 struct ConnectBits {
   bool tcpconnect[2]; /* the TCP layer (or similar) is connected, this is set
                          the first time on the first connect function call */
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
                                   is complete */
   BIT(httpproxy);  /* if set, this transfer is done through a http proxy */
@@ -518,7 +518,7 @@ struct ConnectBits {
                           though it will be discarded. When the whole send
                           operation is done, we must call the data rewind
                           callback. */
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   BIT(ftp_use_epsv);  /* As set with CURLOPT_FTP_USE_EPSV, but if we find out
                          EPSV doesn't work we disable it for the forthcoming
                          requests */
@@ -528,7 +528,7 @@ struct ConnectBits {
   BIT(ftp_use_data_ssl); /* Enabled SSL for the data connection */
   BIT(ftp_use_control_ssl); /* Enabled SSL for the control connection */
 #endif
-#ifndef CURL_DISABLE_NETRC
+#ifdef FEAT_NETRC
   BIT(netrc);         /* name+password provided by netrc */
 #endif
   BIT(bound); /* set true if bind() has already been done on this socket/
@@ -536,7 +536,7 @@ struct ConnectBits {
   BIT(multiplex); /* connection is multiplexed */
   BIT(tcp_fastopen); /* use TCP Fast Open */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   BIT(doh);
 #endif
 #ifdef USE_UNIX_SOCKETS
@@ -573,7 +573,7 @@ struct hostname {
 #define KEEP_RECVBITS (KEEP_RECV | KEEP_RECV_HOLD | KEEP_RECV_PAUSE)
 #define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
-#if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
+#if defined(CURLRES_ASYNCH) || defined(FEAT_DOH)
 #define USE_CURL_ASYNC
 struct Curl_async {
   char *hostname;
@@ -705,7 +705,7 @@ struct SingleRequest {
     struct SSHPROTO *ssh;
     struct TELNET *telnet;
   } p;
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   struct dohdata *doh; /* DoH specific data for this request */
 #endif
   unsigned char setcookies;
@@ -959,7 +959,7 @@ struct connectdata {
   char *secondaryhostname; /* secondary socket host name (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
 #endif
@@ -990,14 +990,14 @@ struct connectdata {
   struct postponed_data postponed[2]; /* two buffers for two sockets */
 #endif /* USE_RECV_BEFORE_SEND_WORKAROUND */
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   struct ssl_connect_data proxy_ssl[2]; /* this is for proxy ssl-stuff */
 #endif
 #ifdef USE_SSL
   void *ssl_extra; /* separately allocated backend-specific data */
 #endif
   struct ssl_primary_config ssl_config;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   struct ssl_primary_config proxy_ssl_config;
 #endif
   struct ConnectBits bits;    /* various state-flags for this connection */
@@ -1078,36 +1078,36 @@ struct connectdata {
   struct dynbuf trailer;
 
   union {
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
     struct ftp_conn ftpc;
 #endif
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
     struct http_conn httpc;
 #endif
 #ifdef USE_SSH
     struct ssh_conn sshc;
 #endif
-#ifndef CURL_DISABLE_TFTP
+#ifdef FEAT_TFTP
     struct tftp_state_data *tftpc;
 #endif
-#ifndef CURL_DISABLE_IMAP
+#ifdef FEAT_IMAP
     struct imap_conn imapc;
 #endif
-#ifndef CURL_DISABLE_POP3
+#ifdef FEAT_POP3
     struct pop3_conn pop3c;
 #endif
-#ifndef CURL_DISABLE_SMTP
+#ifdef FEAT_SMTP
     struct smtp_conn smtpc;
 #endif
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
     struct rtsp_conn rtspc;
 #endif
-#ifndef CURL_DISABLE_SMB
+#ifdef FEAT_SMB
     struct smb_conn smbc;
 #endif
     void *rtmp;
     struct ldapconninfo *ldapc;
-#ifndef CURL_DISABLE_MQTT
+#ifdef FEAT_MQTT
     struct mqtt_conn mqtt;
 #endif
   } proto;
@@ -1379,7 +1379,7 @@ struct UrlState {
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
   void (*prev_signal)(int sig);
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifdef FEAT_CRYPTO_AUTH
   struct digestdata digest;      /* state data for host Digest auth */
   struct digestdata proxydigest; /* state data for proxy Digest auth */
 #endif
@@ -1417,7 +1417,7 @@ struct UrlState {
                   this syntax. */
   curl_off_t resume_from; /* continue [ftp] transfer from here */
 
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
   /* This RTSP state information survives requests and connections */
   long rtsp_next_client_CSeq; /* the session's next client CSeq */
   long rtsp_next_server_CSeq; /* the session's next server CSeq */
@@ -1444,13 +1444,13 @@ struct UrlState {
                             is this */
   char *url;        /* work URL, copied from UserDefined */
   char *referer;    /* referer string */
-#ifndef CURL_DISABLE_COOKIES
+#ifdef FEAT_COOKIES
   struct curl_slist *cookielist; /* list of cookie files set by
                                     curl_easy_setopt(COOKIEFILE) calls */
 #endif
   struct curl_slist *resolve; /* set to point to the set.resolve list when
                                  this should be dealt with in pretransfer */
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
                                  headers */
@@ -1664,7 +1664,7 @@ struct UserDefined {
   unsigned short use_port; /* which port to use (when not using default) */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   unsigned long socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
@@ -1699,7 +1699,7 @@ struct UserDefined {
   void *prereq_userp; /* pre-initial request user data */
 
   void *seek_client;    /* pointer to pass to the seek callback */
-#ifndef CURL_DISABLE_HSTS
+#ifdef FEAT_HSTS
   curl_hstsread_callback hsts_read;
   void *hsts_read_userp;
   curl_hstswrite_callback hsts_write;
@@ -1715,7 +1715,7 @@ struct UserDefined {
                            is to be reused */
   long maxlifetime_conn; /* in seconds, max time since creation to allow a
                             connection that is to be reused */
-#ifndef CURL_DISABLE_TFTP
+#ifdef FEAT_TFTP
   long tftp_blksize;    /* in bytes, 0 means use default */
 #endif
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
@@ -1737,7 +1737,7 @@ struct UserDefined {
                                           the transfer on source host */
   struct curl_slist *source_postquote; /* in 3rd party transfer mode - after
                                           the transfer on source host */
-#ifndef CURL_DISABLE_TELNET
+#ifdef FEAT_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
 #endif
   struct curl_slist *resolve;     /* list of names to add/remove from
@@ -1751,7 +1751,7 @@ struct UserDefined {
   unsigned char httpwant; /* when non-zero, a specific HTTP version requested
                              to be used in the library's request(s) */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
 #endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
@@ -1764,7 +1764,7 @@ struct UserDefined {
   unsigned char ipver; /* the CURL_IPRESOLVE_* defines in the public header
                           file 0 - whatever, 1 - v2, 2 - v6 */
   curl_off_t max_filesize; /* Maximum file size to download */
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   unsigned char ftp_filemethod; /* how to get to a file: curl_ftpfile  */
   unsigned char ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
   unsigned char ftp_ccc;   /* FTP CCC options: curl_ftpccc */
@@ -1782,7 +1782,7 @@ struct UserDefined {
 
   curl_sshkeycallback ssh_keyfunc; /* key matching callback */
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
-#ifndef CURL_DISABLE_NETRC
+#ifdef FEAT_NETRC
   unsigned char use_netrc;        /* enum CURL_NETRC_OPTION values  */
 #endif
   curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
@@ -1799,12 +1799,12 @@ struct UserDefined {
   curl_prot_t redir_protocols;
   unsigned int mime_options;      /* Mime option flags. */
 
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
   void *rtp_out;     /* write RTP to this if non-NULL */
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
 #endif
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer
                                         starts */
   curl_chunk_end_callback chunk_end; /* called after part transferring
@@ -1832,7 +1832,7 @@ struct UserDefined {
   void *resolver_start_client; /* pointer to pass to resolver start callback */
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
   multidone_func fmultidone;
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
@@ -1840,7 +1840,7 @@ struct UserDefined {
   curl_trailer_callback trailer_callback; /* trailing data callback */
   char keep_post;     /* keep POSTs as POSTs after a 30x request; each
                          bit represents a request, from 301 to 303 */
-#ifndef CURL_DISABLE_SMTP
+#ifdef FEAT_SMTP
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
   BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
                                 recipients */
@@ -1848,7 +1848,7 @@ struct UserDefined {
   unsigned char connect_only; /* make connection/request, then let
                                  application use the socket */
   BIT(is_fread_set); /* has read callback been set to non-NULL? */
-#ifndef CURL_DISABLE_TFTP
+#ifdef FEAT_TFTP
   BIT(tftp_no_options); /* do not send TFTP options requests */
 #endif
   BIT(sep_headers);     /* handle host and proxy headers separately */
@@ -1864,7 +1864,7 @@ struct UserDefined {
   BIT(prefer_ascii);     /* ASCII rather than binary */
   BIT(remote_append);    /* append, not overwrite, on upload */
   BIT(list_only);        /* list directory */
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   BIT(ftp_use_port);     /* use the FTP PORT command */
   BIT(ftp_use_epsv);     /* if EPSV is to be attempted or not */
   BIT(ftp_use_eprt);     /* if EPRT is to be attempted or not */
@@ -1916,7 +1916,7 @@ struct UserDefined {
                            header */
   BIT(abstract_unix_socket);
   BIT(disallow_username_in_url); /* disallow username in url */
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   BIT(doh); /* DNS-over-HTTPS enabled */
   BIT(doh_verifypeer);     /* DoH certificate peer verification */
   BIT(doh_verifyhost);     /* DoH certificate hostname verification */
@@ -1987,22 +1987,22 @@ struct Curl_easy {
 #endif
   struct SingleRequest req;    /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
-#ifndef CURL_DISABLE_COOKIES
+#ifdef FEAT_COOKIES
   struct CookieInfo *cookies;  /* the cookies, read from files and servers.
                                   NOTE that the 'cookie' field in the
                                   UserDefined struct defines if the "engine"
                                   is to be used or not. */
 #endif
-#ifndef CURL_DISABLE_HSTS
+#ifdef FEAT_HSTS
   struct hsts *hsts;
 #endif
-#ifndef CURL_DISABLE_ALTSVC
+#ifdef FEAT_ALTSVC
   struct altsvcinfo *asi;      /* the alt-svc cache */
 #endif
   struct Progress progress;    /* for all the progress meter data */
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   struct WildcardData wildcard; /* wildcard download state info */
 #endif
   struct PureInfo info;        /* stats, reports and info data */

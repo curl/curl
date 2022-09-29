@@ -175,7 +175,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
   const unsigned char *type2 = Curl_bufref_ptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef FEAT_VERBOSE_STRINGS
   (void) data;
 #endif
 
@@ -281,7 +281,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   result = Curl_nss_force_init(data);
   if(result)
     return result;
-#elif defined(CURL_DISABLE_VERBOSE_STRINGS)
+#elif !defined(FEAT_VERBOSE_STRINGS)
   (void)data;
 #endif
 

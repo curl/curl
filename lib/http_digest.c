@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if defined(FEAT_HTTP) && defined(FEAT_CRYPTO_AUTH)
 
 #include "urldata.h"
 #include "strcase.h"
@@ -93,14 +93,14 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
   struct auth *authp;
 
   if(proxy) {
-#ifdef CURL_DISABLE_PROXY
-    return CURLE_NOT_BUILT_IN;
-#else
+#ifdef FEAT_PROXY
     digest = &data->state.proxydigest;
     allocuserpwd = &data->state.aptr.proxyuserpwd;
     userp = data->state.aptr.proxyuser;
     passwdp = data->state.aptr.proxypasswd;
     authp = &data->state.authproxy;
+#else
+    return CURLE_NOT_BUILT_IN;
 #endif
   }
   else {

@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_MIME
+#ifdef FEAT_MIME
 
 /* used by FormAdd for temporary storage */
 struct FormInfo {

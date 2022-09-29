@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#ifdef CURL_DISABLE_PROXY
+#ifndef FEAT_PROXY
 #define Curl_SOCKS4(a,b,c,d,e) CURLE_NOT_BUILT_IN
 #define Curl_SOCKS5(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
 #define Curl_SOCKS_getsock(x,y,z) 0
@@ -77,6 +77,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                       struct Curl_easy *data);
 #endif
 
-#endif /* CURL_DISABLE_PROXY */
+#endif /* FEAT_PROXY */
 
 #endif  /* HEADER_CURL_SOCKS_H */

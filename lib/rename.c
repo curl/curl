@@ -26,8 +26,7 @@
 
 #include "curl_setup.h"
 
-#if (!defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES)) || \
-  !defined(CURL_DISABLE_ALTSVC)
+#if defined(FEAT_HTTP) && (defined(FEAT_COOKIES) || defined(FEAT_ALTSVC))
 
 #include "curl_multibyte.h"
 #include "timeval.h"

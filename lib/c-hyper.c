@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HYPER)
+#if defined(FEAT_HTTP) && defined(USE_HYPER)
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -1076,7 +1076,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       goto error;
   }
 
-#ifndef CURL_DISABLE_ALTSVC
+#ifdef FEAT_ALTSVC
   if(conn->bits.altused && !Curl_checkheaders(data, STRCONST("Alt-Used"))) {
     char *altused = aprintf("Alt-Used: %s:%d\r\n",
                             conn->conn_to_host.name, conn->conn_to_port);
@@ -1091,7 +1091,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 #endif
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy &&
      !Curl_checkheaders(data, STRCONST("Proxy-Connection")) &&
      !Curl_checkProxyheaders(data, conn, STRCONST("Proxy-Connection"))) {
@@ -1226,4 +1226,4 @@ void Curl_hyper_done(struct Curl_easy *data)
   }
 }
 
-#endif /* !defined(CURL_DISABLE_HTTP) && defined(USE_HYPER) */
+#endif /* defined(FEAT_HTTP) && defined(USE_HYPER) */

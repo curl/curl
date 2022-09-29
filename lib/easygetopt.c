@@ -26,7 +26,7 @@
 #include "strcase.h"
 #include "easyoptions.h"
 
-#ifndef CURL_DISABLE_GETOPTIONS
+#ifdef FEAT_GETOPTIONS
 
 /* Lookups easy options at runtime */
 static struct curl_easyoption *lookup(const char *name, CURLoption id)

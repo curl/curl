@@ -37,7 +37,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_IMAP
+#ifdef FEAT_IMAP
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -397,7 +397,7 @@ static CURLcode imap_get_message(struct Curl_easy *data, struct bufref *out)
 static void state(struct Curl_easy *data, imapstate newstate)
 {
   struct imap_conn *imapc = &data->conn->proto.imapc;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[]={
     "STOP",
@@ -2128,4 +2128,4 @@ static CURLcode imap_parse_custom_request(struct Curl_easy *data)
   return result;
 }
 
-#endif /* CURL_DISABLE_IMAP */
+#endif /* FEAT_IMAP */

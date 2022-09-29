@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_TFTP
+#ifdef FEAT_TFTP
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -396,7 +396,7 @@ static CURLcode tftp_connect_for_tx(struct tftp_state_data *state,
                                     tftp_event_t event)
 {
   CURLcode result;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   struct Curl_easy *data = state->data;
 
   infof(data, "%s", "Connected for transmit");
@@ -412,7 +412,7 @@ static CURLcode tftp_connect_for_rx(struct tftp_state_data *state,
                                     tftp_event_t event)
 {
   CURLcode result;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   struct Curl_easy *data = state->data;
 
   infof(data, "%s", "Connected for receive");

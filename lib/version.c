@@ -289,52 +289,52 @@ char *curl_version(void)
  */
 
 static const char * const protocols[] = {
-#ifndef CURL_DISABLE_DICT
+#ifdef FEAT_DICT
   "dict",
 #endif
-#ifndef CURL_DISABLE_FILE
+#ifdef FEAT_FILE
   "file",
 #endif
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   "ftp",
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)
+#ifdef USE_SSL
   "ftps",
 #endif
-#ifndef CURL_DISABLE_GOPHER
-  "gopher",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_GOPHER)
+#ifdef FEAT_GOPHER
+  "gopher",
+#ifdef USE_SSL
   "gophers",
 #endif
-#ifndef CURL_DISABLE_HTTP
-  "http",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+#ifdef FEAT_HTTP
+  "http",
+#ifdef USE_SSL
   "https",
 #endif
-#ifndef CURL_DISABLE_IMAP
-  "imap",
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_IMAP)
+#ifdef FEAT_IMAP
+  "imap",
+#ifdef USE_SSL
   "imaps",
 #endif
-#ifndef CURL_DISABLE_LDAP
+#endif
+#ifdef FEAT_LDAP
   "ldap",
-#if !defined(CURL_DISABLE_LDAPS) && \
-    ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
-     (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
+#if defined(FEAT_LDAPS) &&                          \
+  ((defined(USE_OPENLDAP) && defined(USE_SSL)) ||               \
+   (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
   "ldaps",
 #endif
 #endif
-#ifndef CURL_DISABLE_MQTT
+#ifdef FEAT_MQTT
   "mqtt",
 #endif
-#ifndef CURL_DISABLE_POP3
+#ifdef FEAT_POP3
   "pop3",
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
+#ifdef USE_SSL
   "pop3s",
+#endif
 #endif
 #ifdef USE_LIBRTMP
   "rtmp",
@@ -344,7 +344,7 @@ static const char * const protocols[] = {
   "rtmpte",
   "rtmpts",
 #endif
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
   "rtsp",
 #endif
 #if defined(USE_SSH) && !defined(USE_WOLFSSH)
@@ -353,30 +353,30 @@ static const char * const protocols[] = {
 #ifdef USE_SSH
   "sftp",
 #endif
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
+#if defined(FEAT_SMB) && defined(USE_CURL_NTLM_CORE) && \
    (SIZEOF_CURL_OFF_T > 4)
   "smb",
 #  ifdef USE_SSL
   "smbs",
 #  endif
 #endif
-#ifndef CURL_DISABLE_SMTP
+#ifdef FEAT_SMTP
   "smtp",
-#endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_SMTP)
+#ifdef USE_SSL
   "smtps",
 #endif
-#ifndef CURL_DISABLE_TELNET
+#endif
+#ifdef FEAT_TELNET
   "telnet",
 #endif
-#ifndef CURL_DISABLE_TFTP
+#ifdef FEAT_TFTP
   "tftp",
 #endif
-#ifdef USE_WEBSOCKETS
+#ifdef FEAT_WS
   "ws",
-#endif
-#if defined(USE_SSL) && defined(USE_WEBSOCKETS)
+#ifdef USE_SSL
   "wss",
+#endif
 #endif
 
   NULL
@@ -397,7 +397,7 @@ static curl_version_info_data version_info = {
 #ifdef USE_NTLM
   | CURL_VERSION_NTLM
 #endif
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
+#if defined(FEAT_HTTP) && defined(USE_NTLM) && \
   defined(NTLM_WB_ENABLED)
   | CURL_VERSION_NTLM_WB
 #endif
@@ -456,10 +456,10 @@ static curl_version_info_data version_info = {
 #if defined(HAVE_ZSTD)
   | CURL_VERSION_ZSTD
 #endif
-#ifndef CURL_DISABLE_ALTSVC
+#ifdef FEAT_ALTSVC
   | CURL_VERSION_ALTSVC
 #endif
-#ifndef CURL_DISABLE_HSTS
+#ifdef FEAT_HSTS
   | CURL_VERSION_HSTS
 #endif
 #if defined(USE_GSASL)
@@ -521,7 +521,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #ifdef USE_SSL
   Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
   version_info.ssl_version = ssl_buffer;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(Curl_ssl->supports & SSLSUPP_HTTPS_PROXY)
     version_info.features |= CURL_VERSION_HTTPS_PROXY;
   else

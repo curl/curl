@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_RTSP) && !defined(USE_HYPER)
+#if defined(FEAT_RTSP) && !defined(USE_HYPER)
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -839,4 +839,4 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_RTSP or using Hyper */
+#endif /* FEAT_RTSP and !Hyper */

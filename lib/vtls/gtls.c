@@ -144,7 +144,7 @@ static void gtls_cleanup(void)
   }
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
 static void showtime(struct Curl_easy *data,
                      const char *text,
                      time_t stamp)
@@ -637,7 +637,7 @@ gtls_connect_step1(struct Curl_easy *data,
 
 #ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
        && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
        ) {
@@ -716,7 +716,7 @@ gtls_connect_step1(struct Curl_easy *data,
     }
   }
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   if(conn->proxy_ssl[sockindex].use) {
     struct ssl_backend_data *proxy_backend;
     proxy_backend = conn->proxy_ssl[sockindex].backend;
@@ -851,7 +851,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   int rc;
   gnutls_datum_t proto;
   CURLcode result = CURLE_OK;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   unsigned int algo;
   unsigned int bits;
   gnutls_protocol_t version = gnutls_protocol_get_version(session);
@@ -1227,7 +1227,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
 
   */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FEAT_VERBOSE_STRINGS
   /* public key algorithm's parameters */
   algo = gnutls_x509_crt_get_pk_algorithm(x509_cert, &bits);
   infof(data, "  certificate public key: %s",
@@ -1427,7 +1427,7 @@ static bool gtls_data_pending(const struct connectdata *conn,
      0 != gnutls_record_check_pending(backend->session))
     res = TRUE;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   connssl = &conn->proxy_ssl[connindex];
   backend = connssl->backend;
   DEBUGASSERT(backend);
@@ -1495,7 +1495,7 @@ static void gtls_close(struct Curl_easy *data, struct connectdata *conn,
 {
   (void) data;
   close_one(&conn->ssl[sockindex]);
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   close_one(&conn->proxy_ssl[sockindex]);
 #endif
 }
@@ -1513,7 +1513,7 @@ static int gtls_shutdown(struct Curl_easy *data, struct connectdata *conn,
 
   DEBUGASSERT(backend);
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   /* This has only been tested on the proftpd server, and the mod_tls code
      sends a close notify alert without waiting for a close notify alert in
      response. Thus we wait for a close notify alert from the server, but

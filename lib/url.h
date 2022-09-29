@@ -58,15 +58,13 @@ void Curl_free_idnconverted_hostname(struct hostname *host);
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
                                              specified */
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define Curl_verboseconnect(x,y)  Curl_nop_stmt
-#else
+#ifdef FEAT_VERBOSE_STRINGS
 void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
+#else
+#define Curl_verboseconnect(x,y)  Curl_nop_stmt
 #endif
 
-#ifdef CURL_DISABLE_PROXY
-#define CONNECT_PROXY_SSL() FALSE
-#else
+#ifdef FEAT_PROXY
 
 #define CONNECT_PROXY_SSL()\
   (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
@@ -79,6 +77,8 @@ void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
 #define CONNECT_SECONDARYSOCKET_PROXY_SSL()\
   (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
   !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
-#endif /* !CURL_DISABLE_PROXY */
+#else
+#define CONNECT_PROXY_SSL() FALSE
+#endif /* !FEAT_PROXY */
 
 #endif /* HEADER_CURL_URL_H */

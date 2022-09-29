@@ -50,7 +50,7 @@
 
 #define CONTENT_ENCODING_DEFAULT  "identity"
 
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
 
 #define DSIZ CURL_MAX_WRITE_SIZE /* buffer size for decompressed data */
 
@@ -1128,4 +1128,4 @@ char *Curl_all_content_encodings(void)
   return strdup(CONTENT_ENCODING_DEFAULT);  /* Satisfy caller. */
 }
 
-#endif /* CURL_DISABLE_HTTP */
+#endif /* !FEAT_HTTP */

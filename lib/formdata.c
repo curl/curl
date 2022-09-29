@@ -27,7 +27,7 @@
 #include <curl/curl.h>
 
 #include "formdata.h"
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)
+#if defined(FEAT_HTTP) && defined(FEAT_MIME)
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>

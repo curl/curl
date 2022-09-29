@@ -29,7 +29,7 @@
 void Curl_infof(struct Curl_easy *, const char *fmt, ...);
 void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef FEAT_VERBOSE_STRINGS
 
 #if defined(HAVE_VARIADIC_MACROS_C99)
 #define infof(...)  Curl_nop_stmt
@@ -39,11 +39,11 @@ void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 #error "missing VARIADIC macro define, fix and rebuild!"
 #endif
 
-#else /* CURL_DISABLE_VERBOSE_STRINGS */
+#else /* !FEAT__VERBOSE_STRINGS */
 
 #define infof Curl_infof
 
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* FEAT_VERBOSE_STRINGS */
 
 #define failf Curl_failf
 

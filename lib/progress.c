@@ -34,7 +34,7 @@
 /* check rate limits within this many recent milliseconds, at minimum. */
 #define MIN_RATE_LIMIT_PERIOD 3000
 
-#ifndef CURL_DISABLE_PROGRESS_METER
+#ifdef FEAT_PROGRESS_METER
 /* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
    byte) */
 static void time2str(char *r, curl_off_t seconds)
@@ -459,7 +459,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
   return timetoshow;
 }
 
-#ifndef CURL_DISABLE_PROGRESS_METER
+#ifdef FEAT_PROGRESS_METER
 static void progress_meter(struct Curl_easy *data)
 {
   char max5[6][10];

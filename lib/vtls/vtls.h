@@ -155,7 +155,7 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
 /* set of helper macros for the backends to access the correct fields. For the
    proxy or for the remote host - to properly support HTTPS proxy */
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
 #define SSL_IS_PROXY()                                                  \
   (CURLPROXY_HTTPS == conn->http_proxy.proxytype &&                     \
    ssl_connection_complete !=                                           \

@@ -26,12 +26,9 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP_AUTH) || defined(USE_SSH) || \
-  !defined(CURL_DISABLE_LDAP) || \
-  !defined(CURL_DISABLE_SMTP) || \
-  !defined(CURL_DISABLE_POP3) || \
-  !defined(CURL_DISABLE_IMAP) || \
-  !defined(CURL_DISABLE_DOH) || defined(USE_SSL)
+#if defined(FEAT_HTTP_AUTH) || defined(USE_SSH) || defined(FEAT_LDAP) || \
+  defined(FEAT_SMTP) || defined(FEAT_POP3) || defined(FEAT_IMAP) ||     \
+  defined(FEAT_DOH) || defined(USE_SSL)
 
 #include "urldata.h" /* for the Curl_easy definition */
 #include "warnless.h"

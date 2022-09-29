@@ -35,7 +35,7 @@ struct FILEPROTO {
   int fd;     /* open file descriptor to read from! */
 };
 
-#ifndef CURL_DISABLE_FILE
+#ifdef FEAT_FILE
 extern const struct Curl_handler Curl_handler_file;
 #endif
 

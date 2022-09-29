@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#ifndef CURL_DISABLE_DICT
+#ifdef FEAT_DICT
 extern const struct Curl_handler Curl_handler_dict;
 #endif
 

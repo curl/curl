@@ -25,7 +25,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP)
+#if defined(FEAT_LDAP) && defined(USE_OPENLDAP)
 
 /*
  * Notice that USE_OPENLDAP is only a source code selection switch. When
@@ -206,7 +206,7 @@ static void state(struct Curl_easy *data, ldapstate newstate)
 {
   struct ldapconninfo *ldapc = data->conn->proto.ldapc;
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(FEAT_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -1208,4 +1208,4 @@ static Sockbuf_IO ldapsb_tls =
 };
 #endif /* USE_SSL */
 
-#endif /* !CURL_DISABLE_LDAP && USE_OPENLDAP */
+#endif /* FEAT_LDAP && USE_OPENLDAP */

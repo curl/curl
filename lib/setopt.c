@@ -212,7 +212,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST],
                             va_arg(param, char *));
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection for proxy */
     result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_PROXY],
@@ -228,7 +228,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else
       return CURLE_NOT_BUILT_IN;
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_TLS13_CIPHERS:
     if(Curl_ssl_tls13_ciphersuites()) {
       /* set preferred list of TLS 1.3 cipher suites for proxy */
@@ -295,7 +295,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Do not include the body part in the output data stream.
      */
     data->set.opt_no_body = (0 != va_arg(param, long)) ? TRUE : FALSE;
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
     if(data->set.opt_no_body)
       /* in HTTP lingo, no body means using the HEAD request... */
       data->set.method = HTTPREQ_HEAD;
@@ -353,7 +353,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
-#ifndef CURL_DISABLE_TFTP
+#ifdef FEAT_TFTP
   case CURLOPT_TFTP_NO_OPTIONS:
     /*
      * Option that prevents libcurl from sending TFTP option requests to the
@@ -371,7 +371,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.tftp_blksize = arg;
     break;
 #endif
-#ifndef CURL_DISABLE_NETRC
+#ifdef FEAT_NETRC
   case CURLOPT_NETRC:
     /*
      * Parse the $HOME/.netrc file
@@ -425,7 +425,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_SSLVERSION:
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_SSLVERSION:
 #endif
     /*
@@ -436,7 +436,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     {
       long version, version_max;
       struct ssl_primary_config *primary = &data->set.ssl.primary;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
       if(option != CURLOPT_SSLVERSION)
         primary = &data->set.proxy_ssl.primary;
 #endif
@@ -463,7 +463,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
     /* MQTT "borrows" some of the HTTP options */
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
+#if defined(FEAT_HTTP) || defined(FEAT_MQTT)
   case CURLOPT_COPYPOSTFIELDS:
     /*
      * A string with POST data. Makes curl HTTP POST. Even if it is NULL.
@@ -559,7 +559,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.postfieldsize = bigsize;
     break;
 #endif
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
   case CURLOPT_AUTOREFERER:
     /*
      * Switch on automatic referer that gets set if curl follows locations.
@@ -654,7 +654,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.upload = FALSE;
     break;
 
-#ifndef CURL_DISABLE_MIME
+#ifdef FEAT_MIME
   case CURLOPT_HTTPPOST:
     /*
      * Set to make us do HTTP POST
@@ -700,7 +700,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     break;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXYHEADER:
     /*
      * Set a list with proxy headers to use (or replace internals with)
@@ -730,7 +730,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.http200aliases = va_arg(param, struct curl_slist *);
     break;
 
-#if !defined(CURL_DISABLE_COOKIES)
+#ifdef FEAT_COOKIES
   case CURLOPT_COOKIE:
     /*
      * Cookie string to send to the remote server in the request.
@@ -874,7 +874,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     }
 
     break;
-#endif /* !CURL_DISABLE_COOKIES */
+#endif /* FEAT_COOKIES */
 
   case CURLOPT_HTTPGET:
     /*
@@ -935,11 +935,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.http09_allowed = arg ? TRUE : FALSE;
 #endif
     break;
-#endif   /* CURL_DISABLE_HTTP */
+#endif   /* FEAT_HTTP */
 
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) ||       \
-    !defined(CURL_DISABLE_IMAP)
-# if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MIME)
+#if defined(FEAT_HTTP) || defined(FEAT_SMTP) || defined(FEAT_IMAP)
+# if defined(FEAT_HTTP) || defined(FEAT_MIME)
   case CURLOPT_HTTPHEADER:
     /*
      * Set a list with HTTP headers to use (or replace internals with)
@@ -948,7 +947,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 # endif
 
-# ifndef CURL_DISABLE_MIME
+#ifdef FEAT_MIME
   case CURLOPT_MIMEPOST:
     /*
      * Set to make us do MIME POST
@@ -1032,7 +1031,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
        and this just changes the actual request keyword */
     break;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_HTTPPROXYTUNNEL:
     /*
      * Tunnel operations through the proxy instead of normal proxy use
@@ -1161,7 +1160,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(data->set.socks5auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
       result = CURLE_NOT_BUILT_IN;
     break;
-#endif   /* CURL_DISABLE_PROXY */
+#endif   /* FEAT_PROXY */
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CURLOPT_SOCKS5_GSSAPI_NEC:
@@ -1171,7 +1170,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.socks5_gssapi_nec = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 #endif
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
   case CURLOPT_PROXY_SERVICE_NAME:
     /*
@@ -1226,7 +1225,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.remote_append = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   case CURLOPT_FTP_FILEMETHOD:
     /*
      * How do access files over FTP.
@@ -1445,7 +1444,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.connecttimeout = (unsigned int)uarg;
     break;
 
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   case CURLOPT_ACCEPTTIMEOUT_MS:
     /*
      * The maximum time for curl to wait for FTP server connect
@@ -1562,7 +1561,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.progress_client = va_arg(param, void *);
     break;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXYUSERPWD:
     /*
      * user:password needed to use the proxy
@@ -1710,7 +1709,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setblobopt(&data->set.blobs[BLOB_CERT],
                              va_arg(param, struct curl_blob *));
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_SSLCERT:
     /*
      * String that holds file name of the SSL certificate to use for proxy
@@ -1733,7 +1732,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_CERT_TYPE],
                             va_arg(param, char *));
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use for proxy
@@ -1756,7 +1755,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setblobopt(&data->set.blobs[BLOB_KEY],
                              va_arg(param, struct curl_blob *));
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_SSLKEY:
     /*
      * String that holds file name of the SSL key to use for proxy
@@ -1779,7 +1778,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_KEY_TYPE],
                             va_arg(param, char *));
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL key to use for proxy
@@ -1795,7 +1794,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_KEY_PASSWD],
                             va_arg(param, char *));
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_KEYPASSWD:
     /*
      * String that holds the SSL private key password for proxy.
@@ -1830,7 +1829,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     data->set.crlf = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_HAPROXYPROTOCOL:
     /*
      * Set to send the HAProxy Proxy Protocol header
@@ -1886,7 +1885,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->set.ssl.primary.verifypeer;
     }
     break;
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   case CURLOPT_DOH_SSL_VERIFYPEER:
     /*
      * Enable peer SSL verifying for DoH.
@@ -1895,7 +1894,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       TRUE : FALSE;
     break;
 #endif
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_SSL_VERIFYPEER:
     /*
      * Enable peer SSL verifying for proxy.
@@ -1927,7 +1926,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->set.ssl.primary.verifyhost;
     }
     break;
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   case CURLOPT_DOH_SSL_VERIFYHOST:
     /*
      * Enable verification of the host name in the peer certificate for DoH
@@ -1938,7 +1937,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.doh_verifyhost = (bool)((arg & 3) ? TRUE : FALSE);
     break;
 #endif
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_SSL_VERIFYHOST:
     /*
      * Enable verification of the host name in the peer certificate for proxy
@@ -1973,7 +1972,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->set.ssl.primary.verifystatus;
     }
     break;
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   case CURLOPT_DOH_SSL_VERIFYSTATUS:
     /*
      * Enable certificate status verifying for DoH.
@@ -2041,7 +2040,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
       result = CURLE_NOT_BUILT_IN;
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_PINNEDPUBLICKEY:
     /*
      * Set pinned public key for SSL connection.
@@ -2077,7 +2076,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_NOT_BUILT_IN;
 
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_CAINFO:
     /*
      * Set CA info SSL connection for proxy. Specify file name of the
@@ -2114,7 +2113,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
       result = CURLE_NOT_BUILT_IN;
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_CAPATH:
     /*
      * Set CA path info for SSL connection proxy. Specify directory name of the
@@ -2138,7 +2137,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_SSL_CRLFILE],
                             va_arg(param, char *));
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_CRLFILE:
     /*
      * Set CRL file info for SSL connection for proxy. Specify file name of the
@@ -2163,7 +2162,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setblobopt(&data->set.blobs[BLOB_SSL_ISSUERCERT],
                              va_arg(param, struct curl_blob *));
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_ISSUERCERT:
     /*
      * Set Issuer certificate file
@@ -2180,7 +2179,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                              va_arg(param, struct curl_blob *));
     break;
 #endif
-#ifndef CURL_DISABLE_TELNET
+#ifdef FEAT_TELNET
   case CURLOPT_TELNETOPTIONS:
     /*
      * Set a linked list of telnet options
@@ -2246,7 +2245,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->dns.hostcachetype = HCACHE_NONE;
       }
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+#if defined(FEAT_HTTP) && defined(FEAT_COOKIES)
       if(data->share->cookies == data->cookies)
         data->cookies = NULL;
 #endif
@@ -2279,14 +2278,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->dns.hostcache = &data->share->hostcache;
         data->dns.hostcachetype = HCACHE_SHARED;
       }
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+#if defined(FEAT_HTTP) && defined(FEAT_COOKIES)
       if(data->share->cookies) {
         /* use shared cookie list, first free own one if any */
         Curl_cookie_cleanup(data->cookies);
         /* enable cookies since we now use a share that uses cookies! */
         data->cookies = data->share->cookies;
       }
-#endif   /* CURL_DISABLE_HTTP */
+#endif   /* FEAT_HTTP && FEAT_COOKIES */
       if(data->share->sslsession) {
         data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;
         data->state.session = data->share->sslsession;
@@ -2344,7 +2343,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
        which sets its own CURLOPT_SSL_OPTIONS based on these settings. */
     break;
 
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_SSL_OPTIONS:
     arg = va_arg(param, long);
     data->set.proxy_ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
@@ -2471,7 +2470,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_SSL_SESSIONID_CACHE:
     data->set.ssl.primary.sessionid = (0 != va_arg(param, long)) ?
       TRUE : FALSE;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
     data->set.proxy_ssl.primary.sessionid = data->set.ssl.primary.sessionid;
 #endif
     break;
@@ -2571,7 +2570,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.http_ce_skip = (0 == va_arg(param, long)) ? TRUE : FALSE;
     break;
 
-#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
+#if defined(FEAT_FTP) || defined(USE_SSH)
   case CURLOPT_NEW_FILE_PERMS:
     /*
      * Uses these permissions instead of 0644
@@ -2649,7 +2648,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_DEFAULT_PROTOCOL],
                             va_arg(param, char *));
     break;
-#ifndef CURL_DISABLE_SMTP
+#ifdef FEAT_SMTP
   case CURLOPT_MAIL_FROM:
     /* Set the SMTP mail originator */
     result = Curl_setstropt(&data->set.str[STRING_MAIL_FROM],
@@ -2682,7 +2681,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* Enable/disable SASL initial response */
     data->set.sasl_ir = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
-#ifndef CURL_DISABLE_RTSP
+#ifdef FEAT_RTSP
   case CURLOPT_RTSP_REQUEST:
   {
     /*
@@ -2792,7 +2791,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.fwrite_rtp = va_arg(param, curl_write_callback);
     break;
 #endif
-#ifndef CURL_DISABLE_FTP
+#ifdef FEAT_FTP
   case CURLOPT_WILDCARDMATCH:
     data->set.wildcard_enabled = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
@@ -2820,7 +2819,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
        !data->set.ssl.primary.authtype)
       data->set.ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_TLSAUTH_USERNAME:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_PROXY],
                             va_arg(param, char *));
@@ -2837,7 +2836,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
        !data->set.ssl.primary.authtype)
       data->set.ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default */
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_TLSAUTH_PASSWORD:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY],
                             va_arg(param, char *));
@@ -2854,7 +2853,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else
       data->set.ssl.primary.authtype = CURL_TLSAUTH_NONE;
     break;
-#ifndef CURL_DISABLE_PROXY
+#ifdef FEAT_PROXY
   case CURLOPT_PROXY_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
     if(!argptr ||
@@ -2983,7 +2982,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       uarg = UINT_MAX;
     data->set.happy_eyeballs_timeout = (unsigned int)uarg;
     break;
-#ifndef CURL_DISABLE_SHUFFLE_DNS
+#ifdef FEAT_SHUFFLE_DNS
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
     data->set.dns_shuffle_addresses = (0 != va_arg(param, long)) ? TRUE:FALSE;
     break;
@@ -2992,7 +2991,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.disallow_username_in_url =
       (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
-#ifndef CURL_DISABLE_DOH
+#ifdef FEAT_DOH
   case CURLOPT_DOH_URL:
     result = Curl_setstropt(&data->set.str[STRING_DOH],
                             va_arg(param, char *));
@@ -3018,16 +3017,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.maxlifetime_conn = arg;
     break;
   case CURLOPT_TRAILERFUNCTION:
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
     data->set.trailer_callback = va_arg(param, curl_trailer_callback);
 #endif
     break;
   case CURLOPT_TRAILERDATA:
-#ifndef CURL_DISABLE_HTTP
+#ifdef FEAT_HTTP
     data->set.trailer_data = va_arg(param, void *);
 #endif
     break;
-#ifndef CURL_DISABLE_HSTS
+#ifdef FEAT_HSTS
   case CURLOPT_HSTSREADFUNCTION:
     data->set.hsts_read = va_arg(param, curl_hstsread_callback);
     break;
@@ -3066,7 +3065,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       Curl_hsts_cleanup(&data->hsts);
     break;
 #endif
-#ifndef CURL_DISABLE_ALTSVC
+#ifdef FEAT_ALTSVC
   case CURLOPT_ALTSVC:
     if(!data->asi) {
       data->asi = Curl_altsvc_init();

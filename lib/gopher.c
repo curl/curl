@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_GOPHER
+#ifdef FEAT_GOPHER
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -236,4 +236,4 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
   return CURLE_OK;
 }
-#endif /*CURL_DISABLE_GOPHER*/
+#endif /* FEAT_GOPHER */

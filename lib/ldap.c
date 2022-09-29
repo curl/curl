@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_LDAP) && !defined(USE_OPENLDAP)
+#if defined(FEAT_LDAP) && !defined(USE_OPENLDAP)
 
 /*
  * Notice that USE_OPENLDAP is only a source code selection switch. When
@@ -223,7 +223,7 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
   }
   else
 #endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#ifdef FEAT_CRYPTO_AUTH
   if(authflags & CURLAUTH_DIGEST) {
     method = LDAP_AUTH_DIGEST;
   }
@@ -1102,4 +1102,4 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp)
   free(ludp);
 }
 #endif  /* !HAVE_LDAP_URL_PARSE */
-#endif  /* !CURL_DISABLE_LDAP && !USE_OPENLDAP */
+#endif  /* FEAT_LDAP && !USE_OPENLDAP */

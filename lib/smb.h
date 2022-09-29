@@ -245,13 +245,11 @@ struct smb_tree_disconnect {
 
 #endif /* BUILDING_CURL_SMB_C */
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-    (SIZEOF_CURL_OFF_T > 4)
+#if defined(FEAT_SMB) && defined(USE_CURL_NTLM_CORE) && (SIZEOF_CURL_OFF_T > 4)
 
 extern const struct Curl_handler Curl_handler_smb;
 extern const struct Curl_handler Curl_handler_smbs;
 
-#endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
-          SIZEOF_CURL_OFF_T > 4 */
+#endif /* FEAT_SMB && USE_CURL_NTLM_CORE && SIZEOF_CURL_OFF_T > 4 */
 
 #endif /* HEADER_CURL_SMB_H */
