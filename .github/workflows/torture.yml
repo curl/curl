@@ -57,7 +57,7 @@ jobs:
     - run: make V=1 -C tests
       name: 'make tests'
 
-    - run: make V=1 test-ci
+    - run: make V=1 test-torture
       name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
