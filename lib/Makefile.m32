@@ -326,9 +326,6 @@ ifdef SSL
       OPENSSL_LIBS = -lcrypto -lssl
     endif
   endif
-  ifndef DYN
-    OPENSSL_LIBS += -lgdi32
-  endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL
   DLL_LIBS += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)

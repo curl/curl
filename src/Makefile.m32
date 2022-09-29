@@ -338,9 +338,6 @@ ifdef SSL
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
     endif
   endif
-  ifndef DYN
-    OPENSSL_LIBS += -lgdi32
-  endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
