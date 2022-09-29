@@ -69,8 +69,9 @@ ifndef LIBIDN2_PATH
 LIBIDN2_PATH = ../../libidn2
 endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
+# https://www.novell.com/developer/ndk/ldap_libraries_for_c.html
 ifndef LDAP_SDK
-LDAP_SDK = C:/novell/ndk/cldapsdk/win32
+LDAP_SDK = ../../openldapsdk
 endif
 # Edit the path below to point to the base of your nghttp2 package.
 ifndef NGHTTP2_PATH
