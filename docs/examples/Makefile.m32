@@ -68,12 +68,6 @@ endif
 ifndef LIBIDN2_PATH
 LIBIDN2_PATH = ../../../libidn2
 endif
-# Edit the path below to point to the base of your MS IDN package.
-# Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
-# https://www.microsoft.com/en-us/download/details.aspx?id=734
-ifndef WINIDN_PATH
-WINIDN_PATH = ../../../Microsoft IDN Mitigation APIs
-endif
 # Edit the path below to point to the base of your Novell LDAP NDK.
 ifndef LDAP_SDK
 LDAP_SDK = C:/novell/ndk/cldapsdk/win32
@@ -343,7 +337,7 @@ ifdef IDN2
 else
 ifdef WINIDN
   CFLAGS += -DUSE_WIN32_IDN
-  curl_LDADD += -L"$(WINIDN_PATH)" -lnormaliz
+  curl_LDADD += -lnormaliz
 endif
 endif
 ifdef SSPI
