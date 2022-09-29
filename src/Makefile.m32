@@ -25,7 +25,7 @@
 ###########################################################################
 #
 # Makefile for building curl examples with MinGW and optionally openssl, libssh2
-# librtmp, zlib, brotli, zstd, gsasl, libidn2, nghttp2, ngttp3, ngtcp2
+# librtmp, zlib, brotli, zstd, gsasl, libidn2, nghttp2, ngttp3, ngtcp2, c-ares
 #
 # Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
@@ -85,13 +85,12 @@ endif
 ifndef NGTCP2_PATH
 NGTCP2_PATH = ../../ngtcp2
 endif
-
-PROOT = ..
-
 # Edit the path below to point to the base of your c-ares package.
 ifndef LIBCARES_PATH
-LIBCARES_PATH = $(PROOT)/ares
+LIBCARES_PATH = ../../c-ares
 endif
+
+PROOT = ..
 
 ifeq ($(CURL_CC),)
 CURL_CC := $(CROSSPREFIX)gcc
