@@ -387,7 +387,7 @@ ifdef USE_LDAP_OPENLDAP
 endif
 ifndef USE_LDAP_NOVELL
 ifndef USE_LDAP_OPENLDAP
-curl_LDADD += -lwldap32
+  curl_LDADD += -lwldap32
 endif
 endif
 curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
