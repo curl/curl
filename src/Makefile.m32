@@ -25,7 +25,7 @@
 ###########################################################################
 #
 # Makefile for building curl.exe with MinGW and optionally
-# OpenSSL, libssh2, librtmp, zlib, brotli, zstd
+# openssl, libssh2, librtmp, zlib, brotli, zstd
 #
 # Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
@@ -36,23 +36,23 @@
 #
 ###########################################################################
 
-# Edit the path below to point to the base of your Zlib sources.
+# Edit the path below to point to the base of your zlib sources.
 ifndef ZLIB_PATH
 ZLIB_PATH = ../../zlib
 endif
-# Edit the path below to point to the base of your Zstandard sources.
+# Edit the path below to point to the base of your zstandard sources.
 ifndef ZSTD_PATH
 ZSTD_PATH = ../../zstd
 endif
-# Edit the path below to point to the base of your Brotli sources.
+# Edit the path below to point to the base of your brotli sources.
 ifndef BROTLI_PATH
 BROTLI_PATH = ../../brotli
 endif
-# Edit the path below to point to the base of your OpenSSL package.
+# Edit the path below to point to the base of your openssl package.
 ifndef OPENSSL_PATH
 OPENSSL_PATH = ../../openssl
 endif
-# Edit the path below to point to the base of your LibSSH2 package.
+# Edit the path below to point to the base of your libssh2 package.
 ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../libssh2
 endif
