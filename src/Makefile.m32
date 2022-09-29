@@ -60,9 +60,9 @@ endif
 ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp
 endif
-# Edit the path below to point to the base of your libgsasl package.
+# Edit the path below to point to the base of your gsasl package.
 ifndef LIBGSASL_PATH
-LIBGSASL_PATH = ../../libgsasl
+LIBGSASL_PATH = ../../gsasl
 endif
 # Edit the path below to point to the base of your libidn2 package.
 ifndef LIBIDN2_PATH
