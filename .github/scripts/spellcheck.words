@@ -71,6 +71,7 @@ buildbot
 buildconf
 Caddy
 calloc
+cancelling
 CAPA
 CCC
 CDN
@@ -755,6 +756,7 @@ Tomtom
 toolchain
 toolchains
 toolset
+toplevel
 TPF
 TrackMemory
 Tru
