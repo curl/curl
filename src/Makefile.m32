@@ -226,7 +226,7 @@ ifneq ($(SSH2)$(RTMP),)
   endif
 endif
 
-INCLUDES = -I. -I../include -I../lib
+INCLUDES = -I. -I$(PROOT)/include -I$(PROOT)/lib
 ifdef SSL
   ifdef SCHANNEL
     CFLAGS += -DCURL_WITH_MULTI_SSL

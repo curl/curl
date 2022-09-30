@@ -229,7 +229,7 @@ ifneq ($(SSH2)$(RTMP),)
   endif
 endif
 
-INCLUDES = -I. -I../include
+INCLUDES = -I. -I$(PROOT)/include
 CFLAGS += -DBUILDING_LIBCURL
 ifdef SSL
   ifdef SCHANNEL
@@ -296,13 +296,16 @@ ifdef SSL
     $(error Invalid path to OpenSSL package: $(OPENSSL_PATH))
   endif
   ifndef OPENSSL_LIBPATH
+    OPENSSL_LIBS = -lssl -lcrypto
     ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
-      OPENSSL_LIBS = -leay32 -lssl32 -lgdi32
+      OPENSSL_LIBS = -lssl32 -leay32
+      ifndef DYN
+        OPENSSL_LIBS += -lgdi32
+      endif
     endif
     ifeq "$(wildcard $(OPENSSL_PATH)/lib)" "$(OPENSSL_PATH)/lib"
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
-      OPENSSL_LIBS = -lcrypto -lssl
     endif
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"

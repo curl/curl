@@ -152,6 +152,9 @@ endif
 ifneq ($(findstring -ares,$(CFG)),)
 ARES = 1
 endif
+ifneq ($(findstring -sync,$(CFG)),)
+SYNC = 1
+endif
 ifneq ($(findstring -rtmp,$(CFG)),)
 RTMP = 1
 ZLIB = 1
@@ -222,12 +225,16 @@ else
   CFLAGS += -DCURL_STATICLIB
   LDFLAGS += -static
 endif
-ifdef ARES
-  ifndef DYN
-    curl_DEPENDENCIES += $(LIBCARES_PATH)/libcares.a
+ifdef SYNC
+  CFLAGS += -DUSE_SYNC_DNS
+else
+  ifdef ARES
+    ifndef DYN
+      curl_DEPENDENCIES += $(LIBCARES_PATH)/libcares.a
+    endif
+    CFLAGS += -DUSE_ARES
+    curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
   endif
-  CFLAGS += -DUSE_ARES
-  curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
 endif
 ifdef RTMP
   CFLAGS += -DUSE_LIBRTMP
