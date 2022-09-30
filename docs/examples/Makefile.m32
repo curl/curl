@@ -273,9 +273,7 @@ ifdef SSL
     OPENSSL_LIBS = -lssl -lcrypto
     ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
-      ifdef DYN
-        OPENSSL_LIBS = -lssl32 -leay32
-      endif
+      OPENSSL_LIBS = -lssl32 -leay32
       ifndef DYN
         OPENSSL_LIBS += -lgdi32
       endif
