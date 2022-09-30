@@ -271,6 +271,7 @@ endif
 ifdef SSL
   ifndef OPENSSL_INCLUDE
     ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
+      # OpenSSL 1.0.2 and earlier
       OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
     endif
     ifeq "$(wildcard $(OPENSSL_PATH)/include)" "$(OPENSSL_PATH)/include"
@@ -283,6 +284,7 @@ ifdef SSL
   ifndef OPENSSL_LIBPATH
     OPENSSL_LIBS = -lssl -lcrypto
     ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
+      # OpenSSL 1.0.2 and earlier
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
       OPENSSL_LIBS = -lssl32 -leay32
       ifndef DYN

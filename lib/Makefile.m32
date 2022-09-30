@@ -285,6 +285,7 @@ endif
 ifdef SSL
   ifndef OPENSSL_INCLUDE
     ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
+      # OpenSSL 1.0.2 and earlier
       OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
     endif
     ifeq "$(wildcard $(OPENSSL_PATH)/include)" "$(OPENSSL_PATH)/include"
@@ -297,6 +298,7 @@ ifdef SSL
   ifndef OPENSSL_LIBPATH
     OPENSSL_LIBS = -lssl -lcrypto
     ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
+      # OpenSSL 1.0.2 and earlier
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
       OPENSSL_LIBS = -lssl32 -leay32
       ifndef DYN
@@ -312,6 +314,7 @@ ifdef SSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
   ifdef SRP
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
+      # OpenSSL 1.0.1 and later
       CFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
     endif
   endif
