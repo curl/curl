@@ -247,7 +247,6 @@ else
     INCLUDES += -I"$(LIBCARES_PATH)"
     CFLAGS += -DUSE_ARES -DCARES_STATICLIB
     DLL_LIBS += -L"$(LIBCARES_PATH)" -lcares
-    libcurl_dll_DEPENDENCIES = $(LIBCARES_PATH)/libcares.a
   endif
 endif
 ifdef RTMP
@@ -416,7 +415,7 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 
 # remove the last line above to keep debug info
 
-$(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENCIES)
+$(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
 	@$(call DEL, $@)
 	$(CC) $(LDFLAGS) -shared -o $@ \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY) \

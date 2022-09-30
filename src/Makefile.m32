@@ -250,9 +250,6 @@ ifdef SYNC
   CFLAGS += -DUSE_SYNC_DNS
 else
   ifdef ARES
-    ifndef DYN
-      curl_DEPENDENCIES += $(LIBCARES_PATH)/libcares.a
-    endif
     CFLAGS += -DUSE_ARES -DCARES_STATICLIB
     curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
   endif
