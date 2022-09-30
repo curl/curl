@@ -96,7 +96,7 @@ CFLAGS = -O3 $(CURL_CFLAG_EXTRAS) -W -Wall
 LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
 AR = $(CURL_AR)
 RC = $(CURL_RC)
-RCFLAGS = --include-dir=$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST $(CURL_RCFLAG_EXTRAS)
+RCFLAGS = -I$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST $(CURL_RCFLAG_EXTRAS)
 STRIP   = $(CURL_STRIP) -g
 
 # We may need these someday
@@ -116,11 +116,11 @@ ifneq ($(ARCH),custom)
 ifeq ($(ARCH),w64)
 CFLAGS  += -m64
 LDFLAGS += -m64
-RCFLAGS += -F pe-x86-64
+RCFLAGS += --target=pe-x86-64
 else
 CFLAGS  += -m32
 LDFLAGS += -m32
-RCFLAGS += -F pe-i386
+RCFLAGS += --target=pe-i386
 endif
 endif
 
