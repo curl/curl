@@ -383,7 +383,7 @@ RESOURCE = curl.res
 all: $(TARGETS)
 
 curl.exe: $(RESOURCE) $(curl_OBJECTS) $(curl_DEPENDENCIES)
-	$(call DEL, $@)
+	@$(call DEL, $@)
 	$(CC) $(LDFLAGS) -o $@ $< $(curl_OBJECTS) $(curl_LDADD)
 
 %.o: %.c
