@@ -267,6 +267,7 @@ LIB_HFILES =         \
   easyif.h           \
   easyoptions.h      \
   escape.h           \
+  feat.h             \
   file.h             \
   fileinfo.h         \
   fopen.h            \
