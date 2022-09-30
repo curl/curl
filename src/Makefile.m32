@@ -367,7 +367,7 @@ endif
 endif
 curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 
-# Makefile.inc provides the CSOURCES define
+# Makefile.inc provides the CURL_CFILES and CURLX_CFILES defines
 include Makefile.inc
 
 curl_PROGRAMS = curl.exe
