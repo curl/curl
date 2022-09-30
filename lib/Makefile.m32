@@ -355,7 +355,8 @@ ifdef IDN2
   DLL_LIBS += -L"$(LIBIDN2_PATH)/lib" -lidn2
 else
 ifdef WINIDN
-  CFLAGS += -DUSE_WIN32_IDN -DWANT_IDN_PROTOTYPES
+  CFLAGS += -DUSE_WIN32_IDN
+  CFLAGS += -DWANT_IDN_PROTOTYPES
   DLL_LIBS += -lnormaliz
 endif
 endif
