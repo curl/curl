@@ -133,46 +133,73 @@ windows_task:
     %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
 
 macos_task:
-  name: macOS arm64 normal
+  name: macOS arm64
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
+
+  matrix:
+    - name: macOS arm64 normal
+      env:
+        install_packages: nghttp2
+        configure: --without-ssl
+    - name: macOS arm64 debug
+      env:
+        install_packages: nghttp2
+        configure: --without-ssl --enable-debug
+    - name: macOS arm64 libssh2
+      env:
+        install_packages: nghttp2 libssh2
+        configure: --without-ssl --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2
+    - name: macOS arm64 libssh-c-ares
+      env:
+        install_packages: nghttp2 openssl libssh
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-libssh --enable-ares
+    - name: macOS arm64 libssh
+      env:
+        install_packages: nghttp2 openssl libssh
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-libssh
+    - name: macOS arm64 c-ares
+      env:
+        install_packages: nghttp2      
+        configure: --without-ssl --enable-debug --enable-ares
+    - name: macOS arm64 HTTP only
+      env:
+        install_packages: nghttp2      
+        configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+    - name: macOS arm64 SecureTransport http2
+      env:
+        install_packages: nghttp2
+        configure: --with-secure-transport
+    - name: macOS arm64 OpenSSL http2
+      env:
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
+    - name: macOS arm64 LibreSSL http2
+      env:
+        install_packages: nghttp2 libressl
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl
+    - name: macOS arm64 torture
+      env:
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
+    - name: macOS arm64 torture-ftp
+      env:
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
 
   env:
     CIRRUS_CLONE_DEPTH: 10
     MAKE_FLAGS: -j 4
-    CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+    CFLAGS: "-Wno-vla -mmacosx-version-min=10.8"
 
   pkginstall_script:
-    - brew update
-    - echo libtool autoconf automake pkg-config | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+    - echo libtool autoconf automake pkg-config ${install_packages} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
     - brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
+    - sudo -H python3 -m pip install --upgrade pip
+    - sudo -H python3 -m pip install impacket
   configure_script:
     - autoreconf -fi
-    - ./configure --enable-warnings --enable-werror --without-ssl --enable-websockets
-  compile_script:
-    - make V=1 && make V=1 examples && cd tests && make V=1
-  test_script:
-    - sudo make V=1 test-ci
-  install_script:
-    - sudo make V=1 install
-
-macos_task:
-  name: macOS arm64 debug
-  macos_instance:
-    image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
-
-  env:
-    CIRRUS_CLONE_DEPTH: 10
-    MAKE_FLAGS: -j 4
-    CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
-
-  pkginstall_script:
-    - brew update
-    - echo libtool autoconf automake pkg-config nghttp2 | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-    - brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
-  configure_script:
-    - autoreconf -fi
-    - ./configure --enable-warnings --enable-werror --enable-debug --without-ssl --enable-websockets
+    - ./configure --enable-warnings --enable-werror --enable-websockets ${configure}
   compile_script:
     - make V=1 && make V=1 examples && cd tests && make V=1
   test_script:
