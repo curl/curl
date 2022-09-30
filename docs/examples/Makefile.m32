@@ -370,13 +370,15 @@ include Makefile.inc
 check_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
 check_PROGRAMS += synctime.exe
 
+RESOURCE = $(PROOT)/src/curl.res
+
 .PRECIOUS: %.o
 
 
 all: $(check_PROGRAMS)
 
-%.exe: %.o $(curl_DEPENDENCIES)
-	$(CC) $(LDFLAGS) -o $@ $< $(curl_LDADD)
+%.exe: %.o $(RESOURCE) $(curl_DEPENDENCIES)
+	$(CC) $(LDFLAGS) -o $@ $< $(RESOURCE) $(curl_LDADD)
 
 %.o: %.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
@@ -385,7 +387,7 @@ all: $(check_PROGRAMS)
 	$(RC) $(RCFLAGS) -i $< -o $@
 
 clean:
-	@$(call DEL, $(check_PROGRAMS:.exe=.o))
+	@$(call DEL, $(check_PROGRAMS:.exe=.o) $(RESOURCE))
 
 distclean vclean: clean
 	@$(call DEL, $(check_PROGRAMS))
