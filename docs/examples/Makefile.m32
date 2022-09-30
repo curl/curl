@@ -368,7 +368,7 @@ curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 include Makefile.inc
 
 check_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
-check_PROGRAMS += ftpuploadresume.exe synctime.exe
+check_PROGRAMS += synctime.exe
 
 .PRECIOUS: %.o
 
