@@ -364,18 +364,18 @@ endif
 endif
 curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 
-# Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
+# Makefile.inc provides the check_PROGRAMS define
 include Makefile.inc
 
-check_PROGRAMS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
-check_PROGRAMS += synctime.exe
+TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
+TARGETS += synctime.exe
 
 RESOURCE = $(PROOT)/src/curl.res
 
 .PRECIOUS: %.o
 
 
-all: $(check_PROGRAMS)
+all: $(TARGETS)
 
 %.exe: %.o $(RESOURCE) $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) -o $@ $< $(RESOURCE) $(curl_LDADD)
@@ -387,7 +387,7 @@ all: $(check_PROGRAMS)
 	$(RC) $(RCFLAGS) -i $< -o $@
 
 clean:
-	@$(call DEL, $(check_PROGRAMS:.exe=.o) $(RESOURCE))
+	$(call DEL, $(TARGETS:.exe=.o) $(RESOURCE))
 
 distclean vclean: clean
-	@$(call DEL, $(check_PROGRAMS))
+	@$(call DEL, $(TARGETS))
