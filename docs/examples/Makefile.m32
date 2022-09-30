@@ -121,7 +121,6 @@ DEL     = rm -f $1
 RMDIR   = rm -fr $1
 MKDIR   = mkdir -p $1
 COPY    = -cp -afv $1 $2
-#COPYR  = -cp -afr $1/* $2
 COPYR   = -rsync -aC $1/* $2
 TOUCH   = touch $1
 CAT     = cat
