@@ -28,8 +28,6 @@
 #define CURL_NO_OLDIES
 #endif
 
-#include "feat.h"
-
 /* define mingw version macros, eg __MINGW{32,64}_{MINOR,MAJOR}_VERSION */
 #ifdef __MINGW32__
 #include <_mingw.h>
@@ -115,6 +113,8 @@
 #endif
 
 #endif /* HAVE_CONFIG_H */
+
+#include "feat.h"
 
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
