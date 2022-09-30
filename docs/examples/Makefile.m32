@@ -387,7 +387,7 @@ all: $(TARGETS)
 	$(RC) $(RCFLAGS) -i $< -o $@
 
 clean:
-	$(call DEL, $(TARGETS:.exe=.o) $(RESOURCE))
+	@$(call DEL, $(TARGETS:.exe=.o) $(RESOURCE))
 
 distclean vclean: clean
 	@$(call DEL, $(TARGETS))
