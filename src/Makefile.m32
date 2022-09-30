@@ -94,10 +94,6 @@ LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
 RC = $(CURL_RC)
 RCFLAGS = -I$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST $(CURL_RCFLAG_EXTRAS)
 
-# We may need these someday
-# PERL = perl
-# NROFF = nroff
-
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
 ifeq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),x86_64)
@@ -388,11 +384,6 @@ all: $(curl_PROGRAMS)
 curl.exe: $(RESOURCE) $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(call DEL, $@)
 	$(CC) $(LDFLAGS) -o $@ $< $(curl_OBJECTS) $(curl_LDADD)
-
-# We don't have nroff normally under win32
-# tool_hugehelp.c: $(PROOT)/docs/MANUAL $(PROOT)/docs/curl.1 mkhelp.pl
-#	@$(call DEL, tool_hugehelp.c)
-# 	$(NROFF) -man $(PROOT)/docs/curl.1 | $(PERL) mkhelp.pl $(PROOT)/docs/MANUAL > tool_hugehelp.c
 
 %.o: %.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
