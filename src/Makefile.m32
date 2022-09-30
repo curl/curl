@@ -394,10 +394,6 @@ curl.exe: $(RESOURCE) $(curl_OBJECTS) $(curl_DEPENDENCIES)
 #	@$(call DEL, tool_hugehelp.c)
 # 	$(NROFF) -man $(PROOT)/docs/curl.1 | $(PERL) mkhelp.pl $(PROOT)/docs/MANUAL > tool_hugehelp.c
 
-tool_hugehelp.c:
-	@echo Creating $@
-	@$(call COPY, $@.cvs, $@)
-
 %.o: %.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
