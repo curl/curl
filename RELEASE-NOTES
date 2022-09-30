@@ -4,7 +4,7 @@ curl and libcurl 7.86.0
  Command line options:         248
  curl_easy_setopt() options:   300
  Public functions in libcurl:  91
- Contributors:                 2708
+ Contributors:                 2711
 
 This release includes the following changes:
 
@@ -13,15 +13,18 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o altsvc: reject bad port numbers [86]
  o altsvc: use 'h3' for h3 [46]
  o autotools: allow --enable-symbol-hiding with windows [65]
  o autotools: reduce brute-force when detecting recv/send arg list [66]
  o bearssl: make it proper C89 compliant
  o CI/GHA: cancel outdated CI runs on new PR changes [20]
+ o cirrus-ci: add macOS build with m1 [81]
  o cli tool: do not use disabled protocols
  o cmake: define BUILDING_LIBCURL in lib/CMakeLists, not config.h [5]
  o cmake: fix original MinGW builds [177]
  o configure: correct the wording when checking grep -E [13]
+ o configure: deprecate builds with small curl_off_t [89]
  o configure: fail if '--without-ssl' + explicit parameter for an ssl lib [164]
  o connect: fix the wrong error message on connect failures [55]
  o content_encoding: use writer struct subclasses for different encodings [8]
@@ -37,33 +40,43 @@ This release includes the following bugfixes:
  o curl_setup: include curl.h after platform setup headers [37]
  o curl_setup: include only system.h instead of curl.h [34]
  o curl_strequal.3: fix argument typo [60]
+ o CURLOPT_ACCEPT_ENCODING.3: remove "four" as they are five [85]
  o CURLOPT_DNS_INTERFACE.3: mention it works for almost all protocols [15]
  o CURLOPT_PROXY_SSLCERT_BLOB.3: this is for HTTPS proxies [9]
  o CURLOPT_WILDCARDMATCH.3: Fix backslash escaping under single quotes [172]
+ o CURLSHOPT_UNLOCKFUNC.3: the callback has no 'access' argument [84]
  o DEPRECATE.md: Support for systems without 64 bit data types [19]
  o docs/libcurl/symbols-in-versions: add several missing symbols
  o docs: 100+ spellfixes
  o docs: correct missing uppercase in Markdown files [38]
+ o docs: document more server names for test files
  o docs: remove mentions of deprecated '--without-openssl' parameter [170]
  o docs: tag curl options better in man pages
  o docs: tell about disabled protocols in CURLOPT_*PROTOCOLS_STR.
  o easy: fix the #include order [53]
+ o easy: fix the altsvc init for curl_easy_duphandle [77]
  o examples/chkspeed: improve portability [48]
  o formdata: fix warning: 'CURLformoption' is promoted to 'int' [24]
  o ftp: ignore a 550 response to MDTM [1]
+ o functypes: provide the recv and send arg and return types [87]
  o getparameter: return PARAM_MANUAL_REQUESTED for -M even when disabled [17]
+ o GHA: build tests in a separate step from the running of them [78]
  o GHA: run proselint on markdown files [22]
  o github: initial CODEOWNERS setup for CI configuration [52]
  o header: define public API functions as extern c [26]
  o headers: reset the requests counter at transfer start [25]
  o hostip: lazily wait to figure out if IPv6 works until needed [36]
+ o http, vauth: always provide Curl_allow_auth_to_host() functionality [90]
  o http2: make nghttp2 less picky about field whitespace [27]
+ o HTTP3.md: update Caddy example [76]
  o httpput-postfields.c: shorten string for C89 compliance [57]
+ o ldap: delete stray CURL_HAS_MOZILLA_LDAP reference [79]
  o lib1560: extended to verify detect/reject of unknown schemes
  o lib517: fix C89 constant signedness [73]
  o lib: add missing limits.h includes [35]
  o lib: add required Win32 setup definitions in setup-win32.h [4]
  o lib: prepare the incoming of additional protocols [71]
+ o lib: sanitize conditional exclusion around MIME [82]
  o lib: the number four in a sequence is the "fourth" [28]
  o manpage-syntax.pl: all libcurl option symbols should be \fI-tagged [75]
  o manpages: Fix spelling of "allows to" -> "allows one to" [171]
@@ -71,6 +84,8 @@ This release includes the following bugfixes:
  o misc: use the term "null-terminate" consistently [41]
  o mprintf: use snprintf if available [74]
  o msh3: change the static_assert to make the code C89
+ o ngtcp2: fix C89 compliance nit
+ o openssl: make certinfo available for QUIC [91]
  o README.md: add GHA status badges for Linux and macOS builds [40]
  o RELEASE-PROCEDURE.md: mention patch releases [21]
  o resolve: make forced IPv4 resolve only use A queries [61]
@@ -102,6 +117,7 @@ This release includes the following bugfixes:
  o url: rename function due to name-clash in Watt-32 [62]
  o urlapi: detect scheme better when not guessing [56]
  o urlapi: leaner with fewer allocs [2]
+ o urlapi: reject more bad characters from the host name field [88]
  o winbuild/MakefileBuild.vc: handle spaces in libssh(2) include paths [18]
  o winbuild: Use NMake batch-rules for compilation [47]
  o windows: add .rc support to autotools builds [33]
@@ -117,15 +133,16 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   a1346054 on github, ajak in #curl, Andrew Lambert, Benjamin Loison,
-  Dan Fandrich, Daniel Stenberg, Dmitry Karpov, Edoardo Lolletti,
+  Dan Fandrich, Daniel Stenberg, Dmitry Karpov, Edoardo Lolletti, Eloy Degen,
   Emanuele Torre, Gisle Vanem, Hayden Roche, James Fuller, John Bampton,
   justchen1369 on github, Keitagit-kun on github, Marcel Raad, Marc Hörsken,
-  Mark Itzcovitz, Max Dymond, Michael Drake, Michael Heimpold,
-  n0name321 on github, Orgad Shaneh, Patrick Monnerat, Philip Heiduck,
-  ProceduralMan on github, Randall S. Becker, Ray Satiro, RobBotic1 on github,
-  Samuel Henrique, Sergey Bronnikov, ssdbest on github, Tobias Schaefer,
-  Viktor Szakats, Yuriy Chernyshov, zhanghu on xiaomi
-  (36 contributors)
+  Mark Itzcovitz, Matt Holt, Max Dymond, Michael Drake, Michael Heimpold,
+  n0name321 on github, Orgad Shaneh, Patrick Monnerat, Philip H,
+  Philip Heiduck, ProceduralMan on github, Randall S. Becker, Ray Satiro,
+  RobBotic1 on github, Robby Simpson, Samuel Henrique, Sergey Bronnikov,
+  ssdbest on github, Thiago Suchorski, Tobias Schaefer, Viktor Szakats,
+  Yuriy Chernyshov, zhanghu on xiaomi
+  (41 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -204,6 +221,20 @@ References to bug reports and discussions on issues:
  [73] = https://curl.se/bug/?i=9572
  [74] = https://curl.se/bug/?i=9569
  [75] = https://curl.se/bug/?i=9574
+ [76] = https://curl.se/bug/?i=9623
+ [77] = https://curl.se/bug/?i=9624
+ [78] = https://curl.se/bug/?i=9619
+ [79] = https://curl.se/bug/?i=9625
+ [81] = https://curl.se/bug/?i=9565
+ [82] = https://curl.se/bug/?i=9610
+ [84] = https://curl.se/bug/?i=9612
+ [85] = https://curl.se/bug/?i=9614
+ [86] = https://curl.se/bug/?i=9607
+ [87] = https://curl.se/bug/?i=9592
+ [88] = https://curl.se/bug/?i=9608
+ [89] = https://curl.se/bug/?i=9605
+ [90] = https://curl.se/bug/?i=9600
+ [91] = https://curl.se/bug/?i=9584
  [164] = https://curl.se/bug/?i=9414
  [169] = https://curl.se/bug/?i=9417
  [170] = https://curl.se/bug/?i=9415
