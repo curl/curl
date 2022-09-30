@@ -298,7 +298,7 @@ ifdef SSL
   ifndef OPENSSL_LIBPATH
     ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
-      OPENSSL_LIBS = -leay32 -lssl32
+      OPENSSL_LIBS = -leay32 -lssl32 -lgdi32
     endif
     ifeq "$(wildcard $(OPENSSL_PATH)/lib)" "$(OPENSSL_PATH)/lib"
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib

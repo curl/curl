@@ -304,6 +304,9 @@ ifdef SSL
       ifdef DYN
         OPENSSL_LIBS = -lssl32 -leay32
       endif
+      ifndef DYN
+        OPENSSL_LIBS += -lgdi32
+      endif
     endif
     ifeq "$(wildcard $(OPENSSL_PATH)/lib)" "$(OPENSSL_PATH)/lib"
       OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
