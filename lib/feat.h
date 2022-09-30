@@ -69,9 +69,9 @@
 #endif
 #ifndef CURL_DISABLE_LDAP
 #define FEAT_LDAP /* protocol */
-#endif
 #ifndef CURL_DISABLE_LDAPS
 #define FEAT_LDAPS /* protocol */
+#endif
 #endif
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 #define FEAT_LIBCURL_OPTION
