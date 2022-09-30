@@ -217,7 +217,7 @@ ifneq ($(SSH2)$(RTMP),)
   endif
 endif
 
-INCLUDES = -I. -I$(PROOT)/include -I$(PROOT)/lib
+INCLUDES = -I. -I$(PROOT)/include
 ifdef UNICODE
   CFLAGS += -DUNICODE -D_UNICODE
   LDFLAGS += -municode
