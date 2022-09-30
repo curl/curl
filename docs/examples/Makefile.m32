@@ -35,6 +35,8 @@
 #
 ###########################################################################
 
+PROOT = ../..
+
 ifndef ZLIB_PATH
 ZLIB_PATH = ../../../zlib
 endif
@@ -75,8 +77,6 @@ endif
 ifndef LIBCARES_PATH
 LIBCARES_PATH = ../../../c-ares
 endif
-
-PROOT = ../..
 
 ifeq ($(CURL_CC),)
 CURL_CC := $(CROSSPREFIX)gcc
