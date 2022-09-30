@@ -206,6 +206,9 @@ endif
 ifneq ($(findstring -ngtcp2,$(CFG)),)
 NGTCP2 = 1
 endif
+ifneq ($(findstring -unicode,$(CFG)),)
+UNICODE = 1
+endif
 
 # SSH2 and RTMP require an SSL library; assume OpenSSL if none specified
 ifneq ($(SSH2)$(RTMP),)
@@ -215,6 +218,10 @@ ifneq ($(SSH2)$(RTMP),)
 endif
 
 INCLUDES = -I. -I$(PROOT) -I$(PROOT)/include -I$(PROOT)/lib
+ifdef UNICODE
+  CFLAGS += -DUNICODE -D_UNICODE
+  LDFLAGS += -municode
+endif
 
 ifdef DYN
   curl_DEPENDENCIES = $(PROOT)/lib/libcurldll.a $(PROOT)/lib/libcurl.dll
@@ -229,7 +236,7 @@ ifdef SYNC
   CFLAGS += -DUSE_SYNC_DNS
 else
   ifdef ARES
-    CFLAGS += -DUSE_ARES
+    CFLAGS += -DUSE_ARES -DCARES_STATICLIB
     curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
   endif
 endif
