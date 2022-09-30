@@ -406,9 +406,6 @@ tool_hugehelp.c:
 	$(RC) $(RCFLAGS) -i $< -o $@
 
 clean:
-ifeq "$(wildcard tool_hugehelp.c.cvs)" "tool_hugehelp.c.cvs"
-	@$(call DEL, tool_hugehelp.c)
-endif
 	@$(call DEL, $(curl_OBJECTS) $(curlx_OBJECTS) $(RESOURCE))
 
 distclean vclean: clean
