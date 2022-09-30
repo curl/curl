@@ -367,13 +367,12 @@ endif
 endif
 curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 
-# Makefile.inc provides the CSOURCES and HHEADERS defines
+# Makefile.inc provides the CSOURCES define
 include Makefile.inc
 
 curl_PROGRAMS = curl.exe
 curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_CFILES)))
-curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_CFILES))))
-curl_OBJECTS += $(curlx_OBJECTS)
+curl_OBJECTS += $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_CFILES))))
 vpath %.c $(PROOT)/lib
 
 RESOURCE = curl.res
@@ -392,7 +391,7 @@ curl.exe: $(RESOURCE) $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(RC) $(RCFLAGS) -i $< -o $@
 
 clean:
-	@$(call DEL, $(curl_OBJECTS) $(curlx_OBJECTS) $(RESOURCE))
+	@$(call DEL, $(curl_OBJECTS) $(RESOURCE))
 
 distclean vclean: clean
 	@$(call DEL, $(curl_PROGRAMS))
