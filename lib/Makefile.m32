@@ -246,38 +246,38 @@ else
   ifdef ARES
     INCLUDES += -I"$(LIBCARES_PATH)"
     CFLAGS += -DUSE_ARES -DCARES_STATICLIB
-    DLL_LIBS += -L"$(LIBCARES_PATH)" -lcares
+    curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
   endif
 endif
 ifdef RTMP
   INCLUDES += -I"$(LIBRTMP_PATH)"
   CFLAGS += -DUSE_LIBRTMP
-  DLL_LIBS += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
+  curl_LDADD += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
 endif
 ifdef NGHTTP2
   INCLUDES += -I"$(NGHTTP2_PATH)/include"
   CFLAGS += -DUSE_NGHTTP2
-  DLL_LIBS += -L"$(NGHTTP2_PATH)/lib" -lnghttp2
+  curl_LDADD += -L"$(NGHTTP2_PATH)/lib" -lnghttp2
 endif
 ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
-  DLL_LIBS += -L"$(LIBSSH2_PATH)/win32" -lssh2
+  curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
 endif
 ifdef NGHTTP3
   INCLUDES += -I"$(NGHTTP3_PATH)/include"
   CFLAGS += -DUSE_NGHTTP3
-  DLL_LIBS += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
+  curl_LDADD += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
   ifdef NGTCP2
     INCLUDES += -I"$(NGTCP2_PATH)/include"
     CFLAGS += -DUSE_NGTCP2
-    DLL_LIBS += -L"$(NGTCP2_PATH)/lib"
+    curl_LDADD += -L"$(NGTCP2_PATH)/lib"
     ifdef NGTCP2_LIBS
-      DLL_LIBS += $(NGTCP2_LIBS)
+      curl_LDADD += $(NGTCP2_LIBS)
     else
-      DLL_LIBS += -lngtcp2
+      curl_LDADD += -lngtcp2
       ifdef SSL
-        DLL_LIBS += -lngtcp2_crypto_openssl
+        curl_LDADD += -lngtcp2_crypto_openssl
       endif
     endif
   endif
@@ -309,7 +309,7 @@ ifdef SSL
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL
-  DLL_LIBS += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
+  curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
   ifdef SRP
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
       CFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
@@ -322,42 +322,42 @@ endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
-  DLL_LIBS += -L"$(ZLIB_PATH)" -lz
+  curl_LDADD += -L"$(ZLIB_PATH)" -lz
 endif
 ifdef ZSTD
   INCLUDES += -I"$(ZSTD_PATH)/include"
   CFLAGS += -DHAVE_ZSTD
-  DLL_LIBS += -L"$(ZSTD_PATH)/lib"
+  curl_LDADD += -L"$(ZSTD_PATH)/lib"
   ifdef ZSTD_LIBS
-    DLL_LIBS += $(ZSTD_LIBS)
+    curl_LDADD += $(ZSTD_LIBS)
   else
-    DLL_LIBS += -lzstd
+    curl_LDADD += -lzstd
   endif
 endif
 ifdef BROTLI
   INCLUDES += -I"$(BROTLI_PATH)/include"
   CFLAGS += -DHAVE_BROTLI
-  DLL_LIBS += -L"$(BROTLI_PATH)/lib"
+  curl_LDADD += -L"$(BROTLI_PATH)/lib"
   ifdef BROTLI_LIBS
-    DLL_LIBS += $(BROTLI_LIBS)
+    curl_LDADD += $(BROTLI_LIBS)
   else
-    DLL_LIBS += -lbrotlidec
+    curl_LDADD += -lbrotlidec
   endif
 endif
 ifdef GSASL
   INCLUDES += -I"$(LIBGSASL_PATH)/include"
   CFLAGS += -DUSE_GSASL
-  DLL_LIBS += -L"$(LIBGSASL_PATH)/lib" -lgsasl
+  curl_LDADD += -L"$(LIBGSASL_PATH)/lib" -lgsasl
 endif
 ifdef IDN2
   INCLUDES += -I"$(LIBIDN2_PATH)/include"
   CFLAGS += -DUSE_LIBIDN2
-  DLL_LIBS += -L"$(LIBIDN2_PATH)/lib" -lidn2
+  curl_LDADD += -L"$(LIBIDN2_PATH)/lib" -lidn2
 else
 ifdef WINIDN
   CFLAGS += -DUSE_WIN32_IDN
   CFLAGS += -DWANT_IDN_PROTOTYPES
-  DLL_LIBS += -lnormaliz
+  curl_LDADD += -lnormaliz
 endif
 endif
 ifdef SSPI
@@ -375,19 +375,19 @@ endif
 ifdef USE_LDAP_NOVELL
   INCLUDES += -I"$(LDAP_SDK)/inc"
   CFLAGS += -DCURL_HAS_NOVELL_LDAPSDK
-  DLL_LIBS += -L"$(LDAP_SDK)/lib/mscvc" -lldapsdk -lldapssl -lldapx
+  curl_LDADD += -L"$(LDAP_SDK)/lib/mscvc" -lldapsdk -lldapssl -lldapx
 endif
 ifdef USE_LDAP_OPENLDAP
   INCLUDES += -I"$(LDAP_SDK)/include"
   CFLAGS += -DCURL_HAS_OPENLDAP_LDAPSDK
-  DLL_LIBS += -L"$(LDAP_SDK)/lib" -lldap -llber
+  curl_LDADD += -L"$(LDAP_SDK)/lib" -lldap -llber
 endif
 ifndef USE_LDAP_NOVELL
 ifndef USE_LDAP_OPENLDAP
-  DLL_LIBS += -lwldap32
+  curl_LDADD += -lwldap32
 endif
 endif
-DLL_LIBS += -lws2_32 -lcrypt32 -lbcrypt
+curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
@@ -420,7 +420,7 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
 	@$(call DEL, $@)
 	$(CC) $(LDFLAGS) -shared -o $@ \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY) \
-	  $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
+	  $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS) $(curl_LDADD)
 
 %.o: %.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
