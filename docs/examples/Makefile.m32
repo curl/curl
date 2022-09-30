@@ -92,7 +92,7 @@ CC = $(CURL_CC)
 CFLAGS = -O3 $(CURL_CFLAG_EXTRAS) -W -Wall
 LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
 RC = $(CURL_RC)
-RCFLAGS = -I$(PROOT)/include -O coff $(CURL_RCFLAG_EXTRAS)
+RCFLAGS = -I$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST $(CURL_RCFLAG_EXTRAS)
 
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
