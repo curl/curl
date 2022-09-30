@@ -420,7 +420,7 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
 	@$(call DEL, $@)
 	$(CC) $(LDFLAGS) -shared -o $@ \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY) \
-	  $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS) $(curl_LDADD)
+	  $(libcurl_a_OBJECTS) $(RESOURCE) $(curl_LDADD)
 
 %.o: %.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
