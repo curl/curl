@@ -289,7 +289,9 @@ ifdef SSL
   CFLAGS += -DUSE_OPENSSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
   ifdef SRP
-    CFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
+    ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
+      CFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
+    endif
   endif
 endif
 ifdef SCHANNEL
