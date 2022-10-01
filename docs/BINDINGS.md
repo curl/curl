@@ -100,7 +100,7 @@ Bailiff and Bálint Szilakszi,
 
 [Rexx](https://rexxcurl.sourceforge.net/) Written Mark Hessling
 
-[Ring](https://ring-lang.sourceforge.net/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
+[Ring](https://ring-lang.sourceforge.io/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
 
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
