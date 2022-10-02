@@ -330,7 +330,10 @@ endif
 ifdef LDAPS
   CFLAGS += -DHAVE_LDAP_SSL
 endif
-curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt -lwldap32
+ifeq ($(findstring -lldap,$(LDFLAGS)),)
+  curl_LDADD += -lwldap32
+endif
+curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 
 # Makefile.inc provides the CURL_CFILES and CURLX_CFILES defines
 include Makefile.inc
