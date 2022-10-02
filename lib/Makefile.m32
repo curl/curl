@@ -61,10 +61,6 @@ endif
 ifndef LIBIDN2_PATH
 LIBIDN2_PATH = $(PROOT)/../libidn2
 endif
-# https://www.novell.com/developer/ndk/ldap_libraries_for_c.html
-ifndef LDAP_SDK
-LDAP_SDK = $(PROOT)/../openldapsdk
-endif
 ifndef NGHTTP2_PATH
 NGHTTP2_PATH = $(PROOT)/../nghttp2
 endif
@@ -283,37 +279,18 @@ ifdef NGHTTP3
 endif
 ifdef SSL
   ifndef OPENSSL_INCLUDE
-    ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
-      # OpenSSL 1.0.2 and earlier
-      OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
-    endif
-    ifeq "$(wildcard $(OPENSSL_PATH)/include)" "$(OPENSSL_PATH)/include"
-      OPENSSL_INCLUDE = $(OPENSSL_PATH)/include
-    endif
-  endif
-  ifneq "$(wildcard $(OPENSSL_INCLUDE)/openssl/opensslv.h)" "$(OPENSSL_INCLUDE)/openssl/opensslv.h"
-    $(error Invalid path to OpenSSL package: $(OPENSSL_PATH))
+    OPENSSL_INCLUDE = $(OPENSSL_PATH)/include
   endif
   ifndef OPENSSL_LIBPATH
     OPENSSL_LIBS = -lssl -lcrypto
-    ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
-      # OpenSSL 1.0.2 and earlier
-      OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
-      OPENSSL_LIBS = -lssl32 -leay32
-      ifndef DYN
-        OPENSSL_LIBS += -lgdi32
-      endif
-    endif
-    ifeq "$(wildcard $(OPENSSL_PATH)/lib)" "$(OPENSSL_PATH)/lib"
-      OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
-    endif
+    OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
   ifdef SRP
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
-      # OpenSSL 1.0.1 and later
+      # OpenSSL 1.0.1 and later, except BoringSSL
       CFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
     endif
   endif
@@ -374,20 +351,8 @@ endif
 ifdef LDAPS
   CFLAGS += -DHAVE_LDAP_SSL
 endif
-ifdef USE_LDAP_NOVELL
-  INCLUDES += -I"$(LDAP_SDK)/inc"
-  CFLAGS += -DCURL_HAS_NOVELL_LDAPSDK
-  curl_LDADD += -L"$(LDAP_SDK)/lib/mscvc" -lldapsdk -lldapssl -lldapx
-endif
-ifdef USE_LDAP_OPENLDAP
-  INCLUDES += -I"$(LDAP_SDK)/include"
-  CFLAGS += -DCURL_HAS_OPENLDAP_LDAPSDK
-  curl_LDADD += -L"$(LDAP_SDK)/lib" -lldap -llber
-endif
-ifndef USE_LDAP_NOVELL
-ifndef USE_LDAP_OPENLDAP
+ifeq ($(findstring -lldap,$(LDFLAGS)),)
   curl_LDADD += -lwldap32
-endif
 endif
 curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 
