@@ -129,9 +129,6 @@ endif
 ########################################################
 ## Nothing more to do below this line!
 
-ifneq ($(findstring -dyn,$(CFG)),)
-DYN = 1
-endif
 ifneq ($(findstring -ares,$(CFG)),)
 ARES = 1
 endif
