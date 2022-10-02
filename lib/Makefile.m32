@@ -24,7 +24,7 @@
 
 ###########################################################################
 #
-# Makefile for building libcurl.a with MinGW and optional features.
+# Makefile for building libcurl with MinGW and optional features.
 #
 # Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
@@ -131,6 +131,9 @@ endif
 ########################################################
 ## Nothing more to do below this line!
 
+ifneq ($(findstring -dyn,$(CFG)),)
+DYN := 1
+endif
 ifneq ($(findstring -ares,$(CFG)),)
 ARES := 1
 endif
@@ -204,15 +207,16 @@ endif
 
 CPPFLAGS += -I. -I$(PROOT)/include
 CPPFLAGS += -DBUILDING_LIBCURL
+
 ifdef SSL
   ifdef SCHANNEL
     CPPFLAGS += -DCURL_WITH_MULTI_SSL
   endif
 endif
+
 ifdef UNICODE
   CPPFLAGS += -DUNICODE -D_UNICODE
 endif
-
 ifdef SYNC
   CPPFLAGS += -DUSE_SYNC_DNS
 else
