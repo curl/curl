@@ -217,28 +217,33 @@ else
   ifdef ARES
     INCLUDES += -I"$(LIBCARES_PATH)"
     CPPFLAGS += -DUSE_ARES -DCARES_STATICLIB
-    curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
+    curl_LDADD += -L"$(LIBCARES_PATH)"
+    curl_LDADD += -lcares
   endif
 endif
 ifdef RTMP
   INCLUDES += -I"$(LIBRTMP_PATH)"
   CPPFLAGS += -DUSE_LIBRTMP
-  curl_LDADD += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
+  curl_LDADD += -L"$(LIBRTMP_PATH)/librtmp"
+  curl_LDADD += -lrtmp -lwinmm
 endif
 ifdef NGHTTP2
   INCLUDES += -I"$(NGHTTP2_PATH)/include"
   CPPFLAGS += -DUSE_NGHTTP2
-  curl_LDADD += -L"$(NGHTTP2_PATH)/lib" -lnghttp2
+  curl_LDADD += -L"$(NGHTTP2_PATH)/lib"
+  curl_LDADD += -lnghttp2
 endif
 ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CPPFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
-  curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
+  curl_LDADD += -L"$(LIBSSH2_PATH)/win32"
+  curl_LDADD += -lssh2
 endif
 ifdef NGHTTP3
   INCLUDES += -I"$(NGHTTP3_PATH)/include"
   CPPFLAGS += -DUSE_NGHTTP3
-  curl_LDADD += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
+  curl_LDADD += -L"$(NGHTTP3_PATH)/lib"
+  curl_LDADD += -lnghttp3
   ifdef NGTCP2
     INCLUDES += -I"$(NGTCP2_PATH)/include"
     CPPFLAGS += -DUSE_NGTCP2
@@ -263,7 +268,8 @@ ifdef SSL
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CPPFLAGS += -DUSE_OPENSSL
-  curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
+  curl_LDADD += -L"$(OPENSSL_LIBPATH)"
+  curl_LDADD += $(OPENSSL_LIBS)
   ifdef SRP
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
       # OpenSSL 1.0.1 and later, except BoringSSL
@@ -277,7 +283,8 @@ endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
-  curl_LDADD += -L"$(ZLIB_PATH)" -lz
+  curl_LDADD += -L"$(ZLIB_PATH)"
+  curl_LDADD += -lz
 endif
 ifdef ZSTD
   INCLUDES += -I"$(ZSTD_PATH)/include"
@@ -302,12 +309,14 @@ endif
 ifdef GSASL
   INCLUDES += -I"$(LIBGSASL_PATH)/include"
   CPPFLAGS += -DUSE_GSASL
-  curl_LDADD += -L"$(LIBGSASL_PATH)/lib" -lgsasl
+  curl_LDADD += -L"$(LIBGSASL_PATH)/lib"
+  curl_LDADD += -lgsasl
 endif
 ifdef IDN2
   INCLUDES += -I"$(LIBIDN2_PATH)/include"
   CPPFLAGS += -DUSE_LIBIDN2
-  curl_LDADD += -L"$(LIBIDN2_PATH)/lib" -lidn2
+  curl_LDADD += -L"$(LIBIDN2_PATH)/lib"
+  curl_LDADD += -lidn2
 else
 ifdef WINIDN
   CPPFLAGS += -DUSE_WIN32_IDN
