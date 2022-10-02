@@ -217,7 +217,7 @@ ifdef SYNC
   CPPFLAGS += -DUSE_SYNC_DNS
 else
   ifdef ARES
-    CPPFLAGS += -DUSE_ARES -DCARES_STATICLIB
+    CPPFLAGS += -DUSE_ARES
     CPPFLAGS += -I"$(LIBCARES_PATH)/include"
     LDFLAGS += -L"$(LIBCARES_PATH)/lib"
     LIBS += -lcares
