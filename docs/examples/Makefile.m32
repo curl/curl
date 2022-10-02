@@ -218,36 +218,29 @@ else
   LDFLAGS += -static
 endif
 ifdef SYNC
-  CPPFLAGS += -DUSE_SYNC_DNS
 else
   ifdef ARES
-    CPPFLAGS += -DUSE_ARES
     LDFLAGS += -L"$(LIBCARES_PATH)/lib"
     LIBS += -lcares
   endif
 endif
 ifdef RTMP
-  CPPFLAGS += -DUSE_LIBRTMP
   LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
   LIBS += -lrtmp -lwinmm
 endif
 ifdef NGHTTP2
-  CPPFLAGS += -DUSE_NGHTTP2
   LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
   LIBS += -lnghttp2
 endif
 ifdef SSH2
-  CPPFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   LIBS += -lssh2
 endif
 ifdef NGHTTP3
-  CPPFLAGS += -DUSE_NGHTTP3
   LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
   LIBS += -lnghttp3
   ifdef NGTCP2
-    CPPFLAGS += -DUSE_NGTCP2
     LDFLAGS += -L"$(NGTCP2_PATH)/lib"
     ifdef NGTCP2_LIBS
       LIBS += $(NGTCP2_LIBS)
@@ -260,30 +253,18 @@ ifdef NGHTTP3
   endif
 endif
 ifdef SSL
-  ifndef OPENSSL_INCLUDE
-    OPENSSL_INCLUDE := $(OPENSSL_PATH)/include
-  endif
   ifndef OPENSSL_LIBPATH
     OPENSSL_LIBPATH := $(OPENSSL_PATH)/lib
     OPENSSL_LIBS := -lssl -lcrypto
   endif
-  CPPFLAGS += -DUSE_OPENSSL
-  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
   LDFLAGS += -L"$(OPENSSL_LIBPATH)"
   LIBS += $(OPENSSL_LIBS)
 endif
-ifdef SCHANNEL
-  CPPFLAGS += -DUSE_SCHANNEL
-endif
 ifdef ZLIB
-  CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
-  CPPFLAGS += -I"$(ZLIB_PATH)"
   LDFLAGS += -L"$(ZLIB_PATH)"
   LIBS += -lz
 endif
 ifdef ZSTD
-  CPPFLAGS += -DHAVE_ZSTD
-  CPPFLAGS += -I"$(ZSTD_PATH)/include"
   LDFLAGS += -L"$(ZSTD_PATH)/lib"
   ifdef ZSTD_LIBS
     LIBS += $(ZSTD_LIBS)
@@ -292,8 +273,6 @@ ifdef ZSTD
   endif
 endif
 ifdef BROTLI
-  CPPFLAGS += -DHAVE_BROTLI
-  CPPFLAGS += -I"$(BROTLI_PATH)/include"
   LDFLAGS += -L"$(BROTLI_PATH)/lib"
   ifdef BROTLI_LIBS
     LIBS += $(BROTLI_LIBS)
@@ -302,28 +281,16 @@ ifdef BROTLI
   endif
 endif
 ifdef GSASL
-  CPPFLAGS += -DUSE_GSASL
   LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
   LIBS += -lgsasl
 endif
 ifdef IDN2
-  CPPFLAGS += -DUSE_LIBIDN2
   LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   LIBS += -lidn2
 else
 ifdef WINIDN
-  CPPFLAGS += -DUSE_WIN32_IDN
   LIBS += -lnormaliz
 endif
-endif
-ifdef SSPI
-  CPPFLAGS += -DUSE_WINDOWS_SSPI
-endif
-ifdef IPV6
-  CPPFLAGS += -DENABLE_IPV6
-endif
-ifdef LDAPS
-  CPPFLAGS += -DHAVE_LDAP_SSL
 endif
 ifeq ($(findstring -lldap,$(LDFLAGS)),)
   LIBS += -lwldap32
