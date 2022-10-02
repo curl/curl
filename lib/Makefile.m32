@@ -91,7 +91,7 @@ STRIP := $(CROSSPREFIX)strip
 endif
 
 CFLAGS  := -O3 $(CFLAGS) $(CURL_CFLAG_EXTRAS) -W -Wall
-LDFLAGS := $(LDFLAGS) $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL)
+LDFLAGS := $(LDFLAGS) $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL) $(DLL_LIBS)
 RCFLAGS := -I$(PROOT)/include -O coff $(RCFLAGS) $(CURL_RCFLAG_EXTRAS)
 
 # Set environment var ARCH to your architecture to override autodetection.
