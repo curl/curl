@@ -147,7 +147,7 @@ endif
 ifneq ($(findstring -ipv6,$(CFG)),)
 IPV6 := 1
 endif
-ifneq ($(findstring -schannel,$(CFG))$(findstring -winssl,$(CFG)),)
+ifneq ($(findstring -schannel,$(CFG)),)
 SCHANNEL := 1
 SSPI := 1
 endif
