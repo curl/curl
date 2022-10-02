@@ -167,7 +167,7 @@ endif
 
 # SSH2 and RTMP require an SSL library; assume OpenSSL if none specified
 ifneq ($(SSH2)$(RTMP),)
-  ifeq ($(SSL)$(SCHANNEL),)
+  ifeq ($(SCHANNEL),)
     SSL := 1
   endif
 endif
