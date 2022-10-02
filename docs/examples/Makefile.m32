@@ -94,16 +94,20 @@ endif
 ifneq ($(findstring -sync,$(CFG)),)
 SYNC := 1
 endif
-ifneq ($(findstring -rtmp,$(CFG)),)
-RTMP := 1
-ZLIB := 1
+ifneq ($(findstring -ssl,$(CFG)),)
+SSL := 1
+endif
+ifneq ($(findstring -schannel,$(CFG)),)
+SCHANNEL := 1
+SSPI := 1
 endif
 ifneq ($(findstring -ssh2,$(CFG)),)
 SSH2 := 1
 ZLIB := 1
 endif
-ifneq ($(findstring -ssl,$(CFG)),)
-SSL := 1
+ifneq ($(findstring -rtmp,$(CFG)),)
+RTMP := 1
+ZLIB := 1
 endif
 ifneq ($(findstring -srp,$(CFG)),)
 SRP := 1
@@ -134,10 +138,6 @@ LDAPS := 1
 endif
 ifneq ($(findstring -ipv6,$(CFG)),)
 IPV6 := 1
-endif
-ifneq ($(findstring -schannel,$(CFG)),)
-SCHANNEL := 1
-SSPI := 1
 endif
 ifneq ($(findstring -nghttp2,$(CFG)),)
 NGHTTP2 := 1
