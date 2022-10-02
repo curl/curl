@@ -241,7 +241,6 @@ ifdef NGHTTP3
   LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
   LIBS += -lnghttp3
   ifdef NGTCP2
-    CPPFLAGS += -DUSE_NGTCP2
     LDFLAGS += -L"$(NGTCP2_PATH)/lib"
     ifdef NGTCP2_LIBS
       LIBS += $(NGTCP2_LIBS)
