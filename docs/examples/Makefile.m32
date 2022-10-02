@@ -95,7 +95,6 @@ endif
 endif
 
 ########################################################
-## Nothing more to do below this line!
 
 ifneq ($(findstring -dyn,$(CFG)),)
 DYN := 1
