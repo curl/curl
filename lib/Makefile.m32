@@ -96,7 +96,7 @@ RCFLAGS := -I$(PROOT)/include -O coff $(RCFLAGS) $(CURL_RCFLAG_EXTRAS)
 
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
-ifeq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),x86_64)
+ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
 ARCH = w64
 else
 ARCH = w32
@@ -116,7 +116,7 @@ endif
 endif
 
 # Platform-dependent helper tool macros
-ifeq ($(findstring /sh,$(SHELL)),/sh)
+ifneq ($(findstring /sh,$(SHELL)),)
 DEL     = rm -f $1
 else
 ifeq "$(OS)" "Windows_NT"
