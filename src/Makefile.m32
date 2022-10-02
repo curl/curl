@@ -199,14 +199,14 @@ ifdef RTMP
   LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
   LIBS += -lrtmp -lwinmm
 endif
-ifdef NGHTTP2
-  LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
-  LIBS += -lnghttp2
-endif
 ifdef SSH2
   LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   LIBS += -lssh2
+endif
+ifdef NGHTTP2
+  LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
+  LIBS += -lnghttp2
 endif
 ifdef NGHTTP3
   LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
