@@ -109,28 +109,12 @@ endif
 # Platform-dependent helper tool macros
 ifeq ($(findstring /sh,$(SHELL)),/sh)
 DEL     = rm -f $1
-RMDIR   = rm -fr $1
-MKDIR   = mkdir -p $1
-COPY    = -cp -afv $1 $2
-COPYR   = -rsync -aC $1/* $2
-TOUCH   = touch $1
-CAT     = cat
-ECHONL  = echo ""
-DL      = '
 else
 ifeq "$(OS)" "Windows_NT"
 DEL     = -del 2>NUL /q /f $(subst /,\,$1)
-RMDIR   = -rd 2>NUL /q /s $(subst /,\,$1)
 else
 DEL     = -del 2>NUL $(subst /,\,$1)
-RMDIR   = -deltree 2>NUL /y $(subst /,\,$1)
 endif
-MKDIR   = -md 2>NUL $(subst /,\,$1)
-COPY    = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
-COPYR   = -xcopy 2>NUL /q /y /e $(subst /,\,$1) $(subst /,\,$2)
-TOUCH   = copy 2>&1>NUL /b $(subst /,\,$1) +,,
-CAT     = type
-ECHONL  = $(ComSpec) /c echo.
 endif
 
 ########################################################
