@@ -85,17 +85,6 @@ RCFLAGS += --target=pe-i386
 endif
 endif
 
-# Platform-dependent helper tool macros
-ifneq ($(findstring /sh,$(SHELL)),)
-DEL = rm -f $1
-else
-ifeq "$(OS)" "Windows_NT"
-DEL = -del 2>NUL /q /f $(subst /,\,$1)
-else
-DEL = -del 2>NUL $(subst /,\,$1)
-endif
-endif
-
 ########################################################
 
 ifneq ($(findstring -dyn,$(CFG)),)
@@ -314,6 +303,17 @@ ifeq ($(findstring -lldap,$(LIBS)),)
   LIBS += -lwldap32
 endif
 LIBS += -lws2_32 -lcrypt32 -lbcrypt
+
+# Platform-dependent helper tool macros
+ifneq ($(findstring /sh,$(SHELL)),)
+DEL = rm -f $1
+else
+ifeq "$(OS)" "Windows_NT"
+DEL = -del 2>NUL /q /f $(subst /,\,$1)
+else
+DEL = -del 2>NUL $(subst /,\,$1)
+endif
+endif
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
