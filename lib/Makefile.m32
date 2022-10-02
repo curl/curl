@@ -86,9 +86,6 @@ endif
 ifeq ($(RC),)
 RC := $(CROSSPREFIX)windres
 endif
-ifeq ($(STRIP),)
-STRIP := $(CROSSPREFIX)strip
-endif
 
 CFLAGS  := -O3 $(CFLAGS) $(CURL_CFLAG_EXTRAS) -W -Wall
 LDFLAGS := $(LDFLAGS) $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL) $(DLL_LIBS)
@@ -364,7 +361,6 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	@$(call DEL, $@)
 	$(AR) cru $@ $(libcurl_a_OBJECTS)
 	$(RANLIB) $@
-	$(STRIP) -g $@
 
 # remove the last line above to keep debug info
 
