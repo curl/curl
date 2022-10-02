@@ -90,6 +90,7 @@ windows_task:
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2 mingw-w64-i686-python-pip mingw-w64-i686-python-wheel mingw-w64-i686-python-pyopenssl && python3 -m pip install --prefer-binary impacket
         configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
         tests: "~571"
+        make_cmd: make V=1
     - name: Windows 32-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
@@ -97,7 +98,7 @@ windows_task:
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2 mingw-w64-i686-python-pip mingw-w64-i686-python-wheel mingw-w64-i686-python-pyopenssl && python3 -m pip install --prefer-binary impacket
         configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static  --enable-websockets
         tests: "~571"
-        curl_LDFLAGS: -all-static
+        make_cmd: make LDFLAGS=-all-static V=1
         PKG_CONFIG: pkg-config --static
     - name: Windows 64-bit shared/release Schannel/SSPI/WinIDN/libssh2
       env:
@@ -106,6 +107,7 @@ windows_task:
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2 mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-wheel mingw-w64-x86_64-python-pyopenssl && python3 -m pip install --prefer-binary impacket
         configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2  --enable-websockets
         tests: "~571"
+        make_cmd: make V=1
     - name: Windows 64-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
@@ -113,7 +115,7 @@ windows_task:
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2 mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-wheel mingw-w64-x86_64-python-pyopenssl && python3 -m pip install --prefer-binary impacket
         configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static --enable-websockets
         tests: "~571"
-        curl_LDFLAGS: -all-static
+        make_cmd: make LDFLAGS=-all-static V=1
         PKG_CONFIG: pkg-config --static
 
   env:
@@ -126,11 +128,11 @@ windows_task:
   configure_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure %configure%"
   compile_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"
+    %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% && %make_cmd% examples && cd tests && %make_cmd%"
   install_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
+    %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
   test_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
+    %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
 
 macos_task:
   name: macOS arm64 normal
