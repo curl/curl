@@ -57,6 +57,12 @@ CFLAGS  := -O3 $(CFLAGS) $(CURL_CFLAG_EXTRAS) -W -Wall
 LDFLAGS := $(LDFLAGS) $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
 RCFLAGS := -I$(PROOT)/include -O coff $(RCFLAGS) $(CURL_RCFLAG_EXTRAS)
 
+CPPFLAGS += -I. -I$(PROOT)/include
+CPPFLAGS += -I$(PROOT)/lib
+LDFLAGS += -L$(PROOT)/lib
+LIBS += -lcurl
+RCFLAGS += -DCURL_EMBED_MANIFEST
+
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
 ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
@@ -153,12 +159,6 @@ ifneq ($(SSH2)$(RTMP),)
     SSL := 1
   endif
 endif
-
-CPPFLAGS += -I. -I$(PROOT)/include
-CPPFLAGS += -I$(PROOT)/lib
-LDFLAGS += -L$(PROOT)/lib
-LIBS += -lcurl
-RCFLAGS += -DCURL_EMBED_MANIFEST
 
 ifdef DYN
   curl_DEPENDENCIES := $(PROOT)/lib/libcurl.dll.a $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll
