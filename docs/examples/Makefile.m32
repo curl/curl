@@ -191,7 +191,7 @@ ifneq ($(SSH2)$(RTMP),)
   endif
 endif
 
-INCLUDES := -I. -I$(PROOT)/include
+CPPFLAGS += -I. -I$(PROOT)/include
 ifdef UNICODE
   CPPFLAGS += -DUNICODE -D_UNICODE
   LDFLAGS += -municode
@@ -257,7 +257,7 @@ ifdef SSL
     OPENSSL_LIBS := -lssl -lcrypto
     OPENSSL_LIBPATH := $(OPENSSL_PATH)/lib
   endif
-  INCLUDES += -I"$(OPENSSL_INCLUDE)"
+  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
   CPPFLAGS += -DUSE_OPENSSL
   LDFLAGS += -L"$(OPENSSL_LIBPATH)"
   LIBS += $(OPENSSL_LIBS)
@@ -266,13 +266,13 @@ ifdef SCHANNEL
   CPPFLAGS += -DUSE_SCHANNEL
 endif
 ifdef ZLIB
-  INCLUDES += -I"$(ZLIB_PATH)"
+  CPPFLAGS += -I"$(ZLIB_PATH)"
   CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   LDFLAGS += -L"$(ZLIB_PATH)"
   LIBS += -lz
 endif
 ifdef ZSTD
-  INCLUDES += -I"$(ZSTD_PATH)/include"
+  CPPFLAGS += -I"$(ZSTD_PATH)/include"
   CPPFLAGS += -DHAVE_ZSTD
   LDFLAGS += -L"$(ZSTD_PATH)/lib"
   ifdef ZSTD_LIBS
@@ -282,7 +282,7 @@ ifdef ZSTD
   endif
 endif
 ifdef BROTLI
-  INCLUDES += -I"$(BROTLI_PATH)/include"
+  CPPFLAGS += -I"$(BROTLI_PATH)/include"
   CPPFLAGS += -DHAVE_BROTLI
   LDFLAGS += -L"$(BROTLI_PATH)/lib"
   ifdef BROTLI_LIBS
@@ -337,7 +337,7 @@ all: $(TARGETS)
 	$(CC) $(LDFLAGS) -o $@ $< $(RESOURCE) $(LIBS)
 
 %.o: %.c
-	$(CC) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) -c $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 %.res: %.rc
 	$(RC) $(RCFLAGS) -i $< -o $@
