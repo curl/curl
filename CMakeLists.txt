@@ -39,6 +39,27 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
+
+# Note: By default this CMake build script detects the version of some
+# dependencies using `check_symbol_exists`.  Those checks do not work
+# in the case that both CURL and its dependency are included as
+# sub-projects in a larger build using `FetchContent`.  To support
+# that case, additional variables may be defined by the parent
+# project, ideally in the "extra" find package redirect file:
+# https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
+#
+# The following variables are available:
+#   HAVE_RAND_EGD: `RAND_egd` present in OpenSSL
+#   HAVE_BORINGSSL: OpenSSL is BoringSSL
+#   HAVE_PK11_CREATEMANAGEDGENERICOBJECTL: `PK11_CreateManagedGenericObject` present in NSS
+#   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL
+#   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in QUICHE
+#   HAVE_ZSTD_CREATEDSTREAM: `ZSTD_createDStream` present in Zstd
+#
+# For each of the above variables, if the variable is DEFINED (either
+# to ON or OFF), the symbol detection will be skipped.  If the
+# variable is NOT DEFINED, the symbol detection will be performed.
+
 cmake_minimum_required(VERSION 3.2...3.16 FATAL_ERROR)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
@@ -440,8 +461,12 @@ if(CURL_USE_OPENSSL)
   endif()
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
-  check_symbol_exists(RAND_egd "${CURL_INCLUDES}" HAVE_RAND_EGD)
-  check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
+  if(NOT DEFINED HAVE_RAND_EGD)
+    check_symbol_exists(RAND_egd "${CURL_INCLUDES}" HAVE_RAND_EGD)
+  endif()
+  if(NOT DEFINED HAVE_BORINGSSL)
+    check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
+  endif()
 
   add_definitions(-DOPENSSL_SUPPRESS_DEPRECATED)
 endif()
@@ -476,11 +501,13 @@ if(CURL_USE_NSS)
   list(APPEND CURL_LIBS ${NSS_LIBRARIES})
   set(SSL_ENABLED ON)
   set(USE_NSS ON)
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES ${NSS_INCLUDE_DIRS})
-  set(CMAKE_REQUIRED_LIBRARIES ${NSS_LIBRARIES})
-  check_symbol_exists(PK11_CreateManagedGenericObject "pk11pub.h" HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
-  cmake_pop_check_state()
+  if(NOT DEFINED HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES ${NSS_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${NSS_LIBRARIES})
+    check_symbol_exists(PK11_CreateManagedGenericObject "pk11pub.h" HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
+    cmake_pop_check_state()
+  endif()
 endif()
 
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
@@ -492,14 +519,16 @@ endif()
 
 function(CheckQuicSupportInOpenSSL)
   # Be sure that the OpenSSL library actually supports QUIC.
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
-  set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
-  check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+  if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
+    set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
+    check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+    cmake_pop_check_state()
+  endif()
   if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
     message(FATAL_ERROR "QUIC support is missing in OpenSSL/BoringSSL. Try setting -DOPENSSL_ROOT_DIR")
   endif()
-  cmake_pop_check_state()
 endfunction()
 
 option(USE_NGTCP2 "Use ngtcp2 and nghttp3 libraries for HTTP/3 support" OFF)
@@ -537,11 +566,13 @@ if(USE_QUICHE)
   set(USE_QUICHE ON)
   include_directories(${QUICHE_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${QUICHE_LIBRARIES})
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES   "${QUICHE_INCLUDE_DIRS}")
-  set(CMAKE_REQUIRED_LIBRARIES  "${QUICHE_LIBRARIES}")
-  check_symbol_exists(quiche_conn_set_qlog_fd "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
-  cmake_pop_check_state()
+  if(NOT DEFINED HAVE_QUICHE_CONN_SET_QLOG_FD)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES   "${QUICHE_INCLUDE_DIRS}")
+    set(CMAKE_REQUIRED_LIBRARIES  "${QUICHE_LIBRARIES}")
+    check_symbol_exists(quiche_conn_set_qlog_fd "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
+    cmake_pop_check_state()
+  endif()
 endif()
 
 option(USE_MSH3 "Use msquic library for HTTP/3 support" OFF)
@@ -712,11 +743,13 @@ option(CURL_ZSTD "Set to ON to enable building curl with zstd support." OFF)
 set(HAVE_ZSTD OFF)
 if(CURL_ZSTD)
   find_package(Zstd REQUIRED)
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES ${Zstd_INCLUDE_DIRS})
-  set(CMAKE_REQUIRED_LIBRARIES ${Zstd_LIBRARIES})
-  check_symbol_exists(ZSTD_createDStream "zstd.h" HAVE_ZSTD_CREATEDSTREAM)
-  cmake_pop_check_state()
+  if (NOT DEFINED HAVE_ZSTD_CREATEDSTREAM)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES ${Zstd_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${Zstd_LIBRARIES})
+    check_symbol_exists(ZSTD_createDStream "zstd.h" HAVE_ZSTD_CREATEDSTREAM)
+    cmake_pop_check_state()
+  endif()
   if(Zstd_FOUND AND HAVE_ZSTD_CREATEDSTREAM)
     set(HAVE_ZSTD ON)
     list(APPEND CURL_LIBS ${Zstd_LIBRARIES})
@@ -805,14 +838,15 @@ if(CURL_USE_GSSAPI)
         set(_LINKER_FLAGS_STR "${_LINKER_FLAGS_STR} -L\"${_dir}\"")
       endforeach()
 
-      set(CMAKE_REQUIRED_FLAGS "${_COMPILER_FLAGS_STR} ${_LINKER_FLAGS_STR}")
-      set(CMAKE_REQUIRED_LIBRARIES ${GSS_LIBRARIES})
-      check_symbol_exists("GSS_C_NT_HOSTBASED_SERVICE" ${_INCLUDE_LIST} HAVE_GSS_C_NT_HOSTBASED_SERVICE)
+      if(NOT DEFINED HAVE_GSS_C_NT_HOSTBASED_SERVICE)
+        set(CMAKE_REQUIRED_FLAGS "${_COMPILER_FLAGS_STR} ${_LINKER_FLAGS_STR}")
+        set(CMAKE_REQUIRED_LIBRARIES ${GSS_LIBRARIES})
+        check_symbol_exists("GSS_C_NT_HOSTBASED_SERVICE" ${_INCLUDE_LIST} HAVE_GSS_C_NT_HOSTBASED_SERVICE)
+        unset(CMAKE_REQUIRED_LIBRARIES)
+      endif()
       if(NOT HAVE_GSS_C_NT_HOSTBASED_SERVICE)
         set(HAVE_OLD_GSSMIT ON)
       endif()
-      unset(CMAKE_REQUIRED_LIBRARIES)
-
     endif()
 
     include_directories(${GSS_INCLUDE_DIR})
@@ -1607,13 +1641,13 @@ if(MSVC_VERSION EQUAL 1600)
   endif()
 endif()
 
-if(NOT TARGET uninstall)
+if(NOT TARGET curl_uninstall)
   configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
       ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
       IMMEDIATE @ONLY)
 
-  add_custom_target(uninstall
+  add_custom_target(curl_uninstall
       COMMAND ${CMAKE_COMMAND} -P
       ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
 endif()
