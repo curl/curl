@@ -222,7 +222,7 @@ ifdef SYNC
 else
   ifdef ARES
     CPPFLAGS += -DUSE_ARES -DCARES_STATICLIB
-    LDFLAGS += -L"$(LIBCARES_PATH)"
+    LDFLAGS += -L"$(LIBCARES_PATH)/lib"
     LIBS += -lcares
   endif
 endif
