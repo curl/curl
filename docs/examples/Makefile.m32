@@ -113,12 +113,12 @@ endif
 
 # Platform-dependent helper tool macros
 ifneq ($(findstring /sh,$(SHELL)),)
-DEL     := rm -f $1
+DEL     = rm -f $1
 else
 ifeq "$(OS)" "Windows_NT"
-DEL     := -del 2>NUL /q /f $(subst /,\,$1)
+DEL     = -del 2>NUL /q /f $(subst /,\,$1)
 else
-DEL     := -del 2>NUL $(subst /,\,$1)
+DEL     = -del 2>NUL $(subst /,\,$1)
 endif
 endif
 
