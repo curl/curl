@@ -194,11 +194,11 @@ endif
 INCLUDES := -I. -I$(PROOT)/include -I$(PROOT)/lib
 ifdef SSL
   ifdef SCHANNEL
-    CFLAGS += -DCURL_WITH_MULTI_SSL
+    CPPFLAGS += -DCURL_WITH_MULTI_SSL
   endif
 endif
 ifdef UNICODE
-  CFLAGS += -DUNICODE -D_UNICODE
+  CPPFLAGS += -DUNICODE -D_UNICODE
   LDFLAGS += -municode
 endif
 
@@ -208,34 +208,34 @@ ifdef DYN
 else
   curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
   curl_LDADD += -L$(PROOT)/lib -lcurl
-  CFLAGS += -DCURL_STATICLIB
+  CPPFLAGS += -DCURL_STATICLIB
   LDFLAGS += -static
 endif
 ifdef SYNC
-  CFLAGS += -DUSE_SYNC_DNS
+  CPPFLAGS += -DUSE_SYNC_DNS
 else
   ifdef ARES
-    CFLAGS += -DUSE_ARES -DCARES_STATICLIB
+    CPPFLAGS += -DUSE_ARES -DCARES_STATICLIB
     curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
   endif
 endif
 ifdef RTMP
-  CFLAGS += -DUSE_LIBRTMP
+  CPPFLAGS += -DUSE_LIBRTMP
   curl_LDADD += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
 endif
 ifdef NGHTTP2
-  CFLAGS += -DUSE_NGHTTP2
+  CPPFLAGS += -DUSE_NGHTTP2
   curl_LDADD += -L"$(NGHTTP2_PATH)/lib" -lnghttp2
 endif
 ifdef SSH2
-  CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
+  CPPFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
 endif
 ifdef NGHTTP3
-  CFLAGS += -DUSE_NGHTTP3
+  CPPFLAGS += -DUSE_NGHTTP3
   curl_LDADD += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
   ifdef NGTCP2
-    CFLAGS += -DUSE_NGTCP2
+    CPPFLAGS += -DUSE_NGTCP2
     curl_LDADD += -L"$(NGTCP2_PATH)/lib"
     ifdef NGTCP2_LIBS
       curl_LDADD += $(NGTCP2_LIBS)
@@ -256,20 +256,20 @@ ifdef SSL
     OPENSSL_LIBPATH := $(OPENSSL_PATH)/lib
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
-  CFLAGS += -DUSE_OPENSSL
+  CPPFLAGS += -DUSE_OPENSSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
 endif
 ifdef SCHANNEL
-  CFLAGS += -DUSE_SCHANNEL
+  CPPFLAGS += -DUSE_SCHANNEL
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
-  CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
+  CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   curl_LDADD += -L"$(ZLIB_PATH)" -lz
 endif
 ifdef ZSTD
   INCLUDES += -I"$(ZSTD_PATH)/include"
-  CFLAGS += -DHAVE_ZSTD
+  CPPFLAGS += -DHAVE_ZSTD
   curl_LDADD += -L"$(ZSTD_PATH)/lib"
   ifdef ZSTD_LIBS
     curl_LDADD += $(ZSTD_LIBS)
@@ -279,7 +279,7 @@ ifdef ZSTD
 endif
 ifdef BROTLI
   INCLUDES += -I"$(BROTLI_PATH)/include"
-  CFLAGS += -DHAVE_BROTLI
+  CPPFLAGS += -DHAVE_BROTLI
   curl_LDADD += -L"$(BROTLI_PATH)/lib"
   ifdef BROTLI_LIBS
     curl_LDADD += $(BROTLI_LIBS)
@@ -288,26 +288,26 @@ ifdef BROTLI
   endif
 endif
 ifdef GSASL
-  CFLAGS += -DUSE_GSASL
+  CPPFLAGS += -DUSE_GSASL
   curl_LDADD += -L"$(LIBGSASL_PATH)/lib" -lgsasl
 endif
 ifdef IDN2
-  CFLAGS += -DUSE_LIBIDN2
+  CPPFLAGS += -DUSE_LIBIDN2
   curl_LDADD += -L"$(LIBIDN2_PATH)/lib" -lidn2
 else
 ifdef WINIDN
-  CFLAGS += -DUSE_WIN32_IDN
+  CPPFLAGS += -DUSE_WIN32_IDN
   curl_LDADD += -lnormaliz
 endif
 endif
 ifdef SSPI
-  CFLAGS += -DUSE_WINDOWS_SSPI
+  CPPFLAGS += -DUSE_WINDOWS_SSPI
 endif
 ifdef IPV6
-  CFLAGS += -DENABLE_IPV6
+  CPPFLAGS += -DENABLE_IPV6
 endif
 ifdef LDAPS
-  CFLAGS += -DHAVE_LDAP_SSL
+  CPPFLAGS += -DHAVE_LDAP_SSL
 endif
 ifeq ($(findstring -lldap,$(LDFLAGS)),)
   curl_LDADD += -lwldap32
