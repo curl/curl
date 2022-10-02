@@ -218,42 +218,42 @@ else
     INCLUDES += -I"$(LIBCARES_PATH)"
     CPPFLAGS += -DUSE_ARES -DCARES_STATICLIB
     LDFLAGS += -L"$(LIBCARES_PATH)"
-    curl_LDADD += -lcares
+    LIBS += -lcares
   endif
 endif
 ifdef RTMP
   INCLUDES += -I"$(LIBRTMP_PATH)"
   CPPFLAGS += -DUSE_LIBRTMP
   LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
-  curl_LDADD += -lrtmp -lwinmm
+  LIBS += -lrtmp -lwinmm
 endif
 ifdef NGHTTP2
   INCLUDES += -I"$(NGHTTP2_PATH)/include"
   CPPFLAGS += -DUSE_NGHTTP2
   LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
-  curl_LDADD += -lnghttp2
+  LIBS += -lnghttp2
 endif
 ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CPPFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
-  curl_LDADD += -lssh2
+  LIBS += -lssh2
 endif
 ifdef NGHTTP3
   INCLUDES += -I"$(NGHTTP3_PATH)/include"
   CPPFLAGS += -DUSE_NGHTTP3
   LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
-  curl_LDADD += -lnghttp3
+  LIBS += -lnghttp3
   ifdef NGTCP2
     INCLUDES += -I"$(NGTCP2_PATH)/include"
     CPPFLAGS += -DUSE_NGTCP2
     LDFLAGS += -L"$(NGTCP2_PATH)/lib"
     ifdef NGTCP2_LIBS
-      curl_LDADD += $(NGTCP2_LIBS)
+      LIBS += $(NGTCP2_LIBS)
     else
-      curl_LDADD += -lngtcp2
+      LIBS += -lngtcp2
       ifdef SSL
-        curl_LDADD += -lngtcp2_crypto_openssl
+        LIBS += -lngtcp2_crypto_openssl
       endif
     endif
   endif
@@ -269,7 +269,7 @@ ifdef SSL
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CPPFLAGS += -DUSE_OPENSSL
   LDFLAGS += -L"$(OPENSSL_LIBPATH)"
-  curl_LDADD += $(OPENSSL_LIBS)
+  LIBS += $(OPENSSL_LIBS)
   ifdef SRP
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
       # OpenSSL 1.0.1 and later, except BoringSSL
@@ -284,16 +284,16 @@ ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   LDFLAGS += -L"$(ZLIB_PATH)"
-  curl_LDADD += -lz
+  LIBS += -lz
 endif
 ifdef ZSTD
   INCLUDES += -I"$(ZSTD_PATH)/include"
   CPPFLAGS += -DHAVE_ZSTD
   LDFLAGS += -L"$(ZSTD_PATH)/lib"
   ifdef ZSTD_LIBS
-    curl_LDADD += $(ZSTD_LIBS)
+    LIBS += $(ZSTD_LIBS)
   else
-    curl_LDADD += -lzstd
+    LIBS += -lzstd
   endif
 endif
 ifdef BROTLI
@@ -301,27 +301,27 @@ ifdef BROTLI
   CPPFLAGS += -DHAVE_BROTLI
   LDFLAGS += -L"$(BROTLI_PATH)/lib"
   ifdef BROTLI_LIBS
-    curl_LDADD += $(BROTLI_LIBS)
+    LIBS += $(BROTLI_LIBS)
   else
-    curl_LDADD += -lbrotlidec
+    LIBS += -lbrotlidec
   endif
 endif
 ifdef GSASL
   INCLUDES += -I"$(LIBGSASL_PATH)/include"
   CPPFLAGS += -DUSE_GSASL
   LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
-  curl_LDADD += -lgsasl
+  LIBS += -lgsasl
 endif
 ifdef IDN2
   INCLUDES += -I"$(LIBIDN2_PATH)/include"
   CPPFLAGS += -DUSE_LIBIDN2
   LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
-  curl_LDADD += -lidn2
+  LIBS += -lidn2
 else
 ifdef WINIDN
   CPPFLAGS += -DUSE_WIN32_IDN
   CPPFLAGS += -DWANT_IDN_PROTOTYPES
-  curl_LDADD += -lnormaliz
+  LIBS += -lnormaliz
 endif
 endif
 ifdef SSPI
@@ -337,9 +337,9 @@ ifdef LDAPS
   CPPFLAGS += -DHAVE_LDAP_SSL
 endif
 ifeq ($(findstring -lldap,$(LDFLAGS)),)
-  curl_LDADD += -lwldap32
+  LIBS += -lwldap32
 endif
-curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
+LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
@@ -370,7 +370,7 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 
 $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
 	@$(call DEL, $@)
-	$(CC) $(LDFLAGS) -shared -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(LIBS) $(curl_LDADD) \
+	$(CC) $(LDFLAGS) -shared -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(LIBS) \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
 
 %.o: %.c
