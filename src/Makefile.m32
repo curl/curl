@@ -293,7 +293,7 @@ ifdef WINIDN
   LIBS += -lnormaliz
 endif
 endif
-ifeq ($(findstring -lldap,$(LDFLAGS)),)
+ifeq ($(findstring -lldap,$(LDFLAGS) $(LIBS)),)
   LIBS += -lwldap32
 endif
 LIBS += -lws2_32 -lcrypt32 -lbcrypt
