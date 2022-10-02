@@ -343,7 +343,7 @@ endif
 ifdef LDAPS
   CPPFLAGS += -DHAVE_LDAP_SSL
 endif
-ifeq ($(findstring -lldap,$(LDFLAGS) $(LIBS)),)
+ifeq ($(findstring -lldap,$(LIBS)),)
   LIBS += -lwldap32
 endif
 LIBS += -lws2_32 -lcrypt32 -lbcrypt
