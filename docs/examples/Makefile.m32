@@ -259,11 +259,11 @@ ifdef SSL
     OPENSSL_INCLUDE := $(OPENSSL_PATH)/include
   endif
   ifndef OPENSSL_LIBPATH
-    OPENSSL_LIBS := -lssl -lcrypto
     OPENSSL_LIBPATH := $(OPENSSL_PATH)/lib
+    OPENSSL_LIBS := -lssl -lcrypto
   endif
-  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
   CPPFLAGS += -DUSE_OPENSSL
+  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
   LDFLAGS += -L"$(OPENSSL_LIBPATH)"
   LIBS += $(OPENSSL_LIBS)
 endif
@@ -271,14 +271,14 @@ ifdef SCHANNEL
   CPPFLAGS += -DUSE_SCHANNEL
 endif
 ifdef ZLIB
-  CPPFLAGS += -I"$(ZLIB_PATH)"
   CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
+  CPPFLAGS += -I"$(ZLIB_PATH)"
   LDFLAGS += -L"$(ZLIB_PATH)"
   LIBS += -lz
 endif
 ifdef ZSTD
-  CPPFLAGS += -I"$(ZSTD_PATH)/include"
   CPPFLAGS += -DHAVE_ZSTD
+  CPPFLAGS += -I"$(ZSTD_PATH)/include"
   LDFLAGS += -L"$(ZSTD_PATH)/lib"
   ifdef ZSTD_LIBS
     LIBS += $(ZSTD_LIBS)
@@ -287,8 +287,8 @@ ifdef ZSTD
   endif
 endif
 ifdef BROTLI
-  CPPFLAGS += -I"$(BROTLI_PATH)/include"
   CPPFLAGS += -DHAVE_BROTLI
+  CPPFLAGS += -I"$(BROTLI_PATH)/include"
   LDFLAGS += -L"$(BROTLI_PATH)/lib"
   ifdef BROTLI_LIBS
     LIBS += $(BROTLI_LIBS)
