@@ -238,6 +238,7 @@ endif
 ifdef SSH2
   CPPFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   CPPFLAGS += -I"$(LIBSSH2_PATH)/include"
+  LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   LIBS += -lssh2
 endif
