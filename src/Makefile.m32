@@ -81,9 +81,9 @@ ifeq ($(RC),)
 RC := $(CROSSPREFIX)windres
 endif
 
-CFLAGS  = -O3 $(CURL_CFLAG_EXTRAS) -W -Wall
-LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
-RCFLAGS = -I$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST $(CURL_RCFLAG_EXTRAS)
+CFLAGS  := -O3 $(CFLAGS) $(CURL_CFLAG_EXTRAS) -W -Wall
+LDFLAGS := $(LDFLAGS) $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
+RCFLAGS := -I$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST $(RCFLAGS) $(CURL_RCFLAG_EXTRAS)
 
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
@@ -329,10 +329,10 @@ all: $(TARGETS)
 
 curl.exe: $(curl_OBJECTS) $(RESOURCE) $(curl_DEPENDENCIES)
 	@$(call DEL, $@)
-	$(CC) $(LDFLAGS) -o $@ $(curl_OBJECTS) $(RESOURCE) $(curl_LDADD)
+	$(CC) $(LDFLAGS) -o $@ $(curl_OBJECTS) $(RESOURCE) $(LIBS) $(curl_LDADD)
 
 %.o: %.c
-	$(CC) $(INCLUDES) $(CFLAGS) -c $<
+	$(CC) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) -c $<
 
 %.res: %.rc
 	$(RC) $(RCFLAGS) -i $< -o $@

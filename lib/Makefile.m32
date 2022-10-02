@@ -90,9 +90,9 @@ ifeq ($(STRIP),)
 STRIP := $(CROSSPREFIX)strip
 endif
 
-CFLAGS  = -O3 $(CURL_CFLAG_EXTRAS) -W -Wall
-LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL)
-RCFLAGS = -I$(PROOT)/include -O coff $(CURL_RCFLAG_EXTRAS)
+CFLAGS  := -O3 $(CFLAGS) $(CURL_CFLAG_EXTRAS) -W -Wall
+LDFLAGS := $(LDFLAGS) $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL)
+RCFLAGS := -I$(PROOT)/include -O coff $(RCFLAGS) $(CURL_RCFLAG_EXTRAS)
 
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
@@ -361,11 +361,11 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 
 $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
 	@$(call DEL, $@)
-	$(CC) $(LDFLAGS) -shared -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(curl_LDADD) \
+	$(CC) $(LDFLAGS) -shared -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(LIBS) $(curl_LDADD) \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
 
 %.o: %.c
-	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
+	$(CC) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 %.res: %.rc
 	$(RC) $(RCFLAGS) -i $< -o $@
