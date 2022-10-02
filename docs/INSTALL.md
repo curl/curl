@@ -182,15 +182,17 @@ currently it is possible to build with native Win32 OpenLDAP, or with the
 *Novell CLDAP* SDK. If you want to use these you need to set these vars:
 
 ```cmd
-set CURL_CFLAG_EXTRAS=-Ic:/openldap/include -DCURL_HAS_OPENLDAP_LDAPSDK
-set CURL_LDFLAG_EXTRAS=-Lc:/openldap/lib -lldap -llber
+set CPPFLAGS=-Ic:/openldap/include -DCURL_HAS_OPENLDAP_LDAPSDK
+set LDFLAGS=-Lc:/openldap/lib
+set LIBS=-lldap -llber
 ```
 
 or for using the Novell SDK:
 
 ```cmd
-set CURL_CFLAG_EXTRAS=-Ic:/openldapsdk/inc -DCURL_HAS_NOVELL_LDAPSDK
-set CURL_LDFLAG_EXTRAS=-Lc:/openldapsdk/lib/mscvc -lldapsdk -lldapssl -lldapx
+set CPPFLAGS=-Ic:/openldapsdk/inc -DCURL_HAS_NOVELL_LDAPSDK
+set LDFLAGS=-Lc:/openldapsdk/lib/mscvc
+set LIBS=-lldapsdk -lldapssl -lldapx
 ```
 
 If you want to enable LDAPS support then set LDAPS=1.
