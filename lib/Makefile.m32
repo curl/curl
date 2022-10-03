@@ -62,6 +62,7 @@ RCFLAGS := -I$(PROOT)/include -O coff $(RCFLAGS)
 CPPFLAGS += -I. -I$(PROOT)/include
 CPPFLAGS += -DBUILDING_LIBCURL
 
+ifneq ($(ARCH),custom)
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
 ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
@@ -70,8 +71,6 @@ else
 ARCH := w32
 endif
 endif
-
-ifneq ($(ARCH),custom)
 ifeq ($(ARCH),w64)
 CFLAGS  += -m64
 LDFLAGS += -m64
