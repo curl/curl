@@ -22,18 +22,13 @@
 #
 #***************************************************************************
 
-###########################################################################
-#
 # Makefile for building curl with MinGW and optional features.
 #
 # Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 #
-# Hint: you can also set environment vars to control the build, e.g.:
-# set ZLIB_PATH=C:/zlib
-# set ZLIB=1
-#
-###########################################################################
+# Set component root directories via envvar <feature>_PATH. CPPFLAGS, LDFLAGS,
+# LIBS, CFLAGS, RCFLAGS (and more) are also available for customization.
 
 PROOT := ..
 
