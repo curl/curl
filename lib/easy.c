@@ -1235,7 +1235,7 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
  * This is the private internal version of curl_easy_send()
  */
 CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
-                       size_t buflen, size_t *n)
+                       size_t buflen, ssize_t *n)
 {
   curl_socket_t sfd;
   CURLcode result;
@@ -1279,7 +1279,7 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
-  return Curl_senddata(data, buffer, buflen, n);
+  return Curl_senddata(data, buffer, buflen, (ssize_t *)n);
 }
 
 /*

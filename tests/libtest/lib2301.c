@@ -110,7 +110,7 @@ static size_t writecb(char *b, size_t size, size_t nitems, void *p)
   if(buffer[0] == 0x89) {
     CURLcode result;
     fprintf(stderr, "send back a simple PONG\n");
-    result = curl_ws_send(easy, pong, 2, &sent, 0);
+    result = curl_ws_send(easy, pong, 2, &sent, 0, 0);
     if(result)
       nitems = 0;
   }

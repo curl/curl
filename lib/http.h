@@ -202,17 +202,6 @@ struct h3out; /* see ngtcp2 */
 #endif /* _WIN32 */
 #endif /* USE_MSH3 */
 
-struct websockets {
-  bool contfragment; /* set TRUE if the previous fragment sent was not final */
-  unsigned char mask[4]; /* 32 bit mask for this connection */
-  struct Curl_easy *data; /* used for write callback handling */
-  struct dynbuf buf;
-  size_t usedbuf; /* number of leading bytes in 'buf' the most recent complete
-                     websocket frame uses */
-  struct curl_ws_metadata handout; /* the struct storage used for
-                                      curl_ws_meta() returns */
-};
-
 /****************************************************************************
  * HTTP unique setup
  ***************************************************************************/
@@ -240,7 +229,7 @@ struct HTTP {
   } sending;
 
 #ifdef USE_WEBSOCKETS
-  struct websockets ws;
+  struct websocket ws;
 #endif
 
 #ifndef CURL_DISABLE_HTTP
