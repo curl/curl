@@ -211,6 +211,9 @@ ifdef SSL
 endif
 ifdef SCHANNEL
   CPPFLAGS += -DUSE_SCHANNEL
+  ifdef SSL
+    CPPFLAGS += -DCURL_WITH_MULTI_SSL
+  endif
 endif
 ifdef ZLIB
   ZLIB_PATH ?= $(PROOT)/../zlib
@@ -271,12 +274,6 @@ ifeq ($(findstring -lldap,$(LIBS)),)
   LIBS += -lwldap32
 endif
 LIBS += -lws2_32 -lcrypt32 -lbcrypt
-
-ifdef SSL
-  ifdef SCHANNEL
-    CPPFLAGS += -DCURL_WITH_MULTI_SSL
-  endif
-endif
 
 ### Sources and targets
 
