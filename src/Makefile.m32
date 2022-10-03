@@ -35,8 +35,6 @@
 #
 ###########################################################################
 
-PROOT := ..
-
 ifneq ($(findstring -dyn,$(CFG)),)
 DYN := 1
 endif
@@ -111,6 +109,8 @@ ifneq ($(SSH2)$(RTMP),)
 endif
 
 ### Toolchain init
+
+PROOT := ..
 
 CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
