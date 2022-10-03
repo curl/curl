@@ -257,7 +257,7 @@ endif
 all: $(TARGETS)
 
 $(TARGETS): $(curl_OBJECTS) $(RESOURCE) $(curl_DEPENDENCIES)
-	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_EXE) -o $@ $(curl_OBJECTS) $(RESOURCE) $(LIBS)
+	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $(curl_OBJECTS) $(RESOURCE) $(LIBS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
