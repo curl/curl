@@ -53,12 +53,10 @@ LIBCARES_PATH ?= $(PROOT)/../c-ares
 CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
 
-LDFLAGS  += $(CURL_LDFLAGS_EXE)
-RCFLAGS  += -I$(PROOT)/include
-
 CPPFLAGS += -I. -I$(PROOT)/include
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     += -lcurl
+RCFLAGS  += -I$(PROOT)/include
 RCFLAGS  += -DCURL_EMBED_MANIFEST
 
 ifneq ($(ARCH),custom)
