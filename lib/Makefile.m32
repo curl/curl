@@ -159,12 +159,6 @@ ifneq ($(SSH2)$(RTMP),)
   endif
 endif
 
-ifdef SSL
-  ifdef SCHANNEL
-    CPPFLAGS += -DCURL_WITH_MULTI_SSL
-  endif
-endif
-
 ifdef UNICODE
   CPPFLAGS += -DUNICODE -D_UNICODE
 endif
@@ -298,6 +292,12 @@ ifeq ($(findstring -lldap,$(LIBS)),)
   LIBS += -lwldap32
 endif
 LIBS += -lws2_32 -lcrypt32 -lbcrypt
+
+ifdef SSL
+  ifdef SCHANNEL
+    CPPFLAGS += -DCURL_WITH_MULTI_SSL
+  endif
+endif
 
 # Platform-dependent helper tool macros
 ifneq ($(findstring /sh,$(SHELL)),)
