@@ -54,7 +54,7 @@ CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
 
 CFLAGS  := -O3 $(CFLAGS) -W -Wall
-LDFLAGS := $(LDFLAGS) $(CURL_LDFLAGS_EXE)
+LDFLAGS += $(CURL_LDFLAGS_EXE)
 RCFLAGS := -I$(PROOT)/include -O coff $(RCFLAGS)
 
 CPPFLAGS += -I. -I$(PROOT)/include
