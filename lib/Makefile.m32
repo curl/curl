@@ -57,7 +57,7 @@ RANLIB ?= $(CROSSPREFIX)ranlib
 
 CFLAGS  += -W -Wall
 LDFLAGS += $(CURL_LDFLAGS_DLL)
-RCFLAGS := -I$(PROOT)/include -O coff $(RCFLAGS)
+RCFLAGS += -I$(PROOT)/include
 
 CPPFLAGS += -I. -I$(PROOT)/include
 CPPFLAGS += -DBUILDING_LIBCURL
@@ -339,7 +339,7 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 %.res: %.rc
-	$(RC) $(RCFLAGS) -i $< -o $@
+	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
 	@$(call DEL, $(libcurl_a_OBJECTS) $(RESOURCE))

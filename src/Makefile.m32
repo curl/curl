@@ -55,7 +55,7 @@ RC ?= $(CROSSPREFIX)windres
 
 CFLAGS  += -W -Wall
 LDFLAGS += $(CURL_LDFLAGS_EXE)
-RCFLAGS := -I$(PROOT)/include -O coff $(RCFLAGS)
+RCFLAGS += -I$(PROOT)/include
 
 CPPFLAGS += -I. -I$(PROOT)/include
 CPPFLAGS += -I$(PROOT)/lib
@@ -283,7 +283,7 @@ $(TARGETS): $(curl_OBJECTS) $(RESOURCE) $(curl_DEPENDENCIES)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 %.res: %.rc
-	$(RC) $(RCFLAGS) -i $< -o $@
+	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
 	@$(call DEL, $(curl_OBJECTS) $(RESOURCE))
