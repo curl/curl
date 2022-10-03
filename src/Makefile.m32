@@ -35,74 +35,6 @@
 #
 ###########################################################################
 
-ifneq ($(findstring -dyn,$(CFG)),)
-DYN := 1
-endif
-ifneq ($(findstring -ares,$(CFG)),)
-ARES := 1
-endif
-ifneq ($(findstring -sync,$(CFG)),)
-SYNC := 1
-endif
-ifneq ($(findstring -ssl,$(CFG)),)
-SSL := 1
-endif
-ifneq ($(findstring -schannel,$(CFG)),)
-SCHANNEL := 1
-SSPI := 1
-endif
-ifneq ($(findstring -ssh2,$(CFG)),)
-SSH2 := 1
-endif
-ifneq ($(findstring -rtmp,$(CFG)),)
-RTMP := 1
-ZLIB := 1
-endif
-ifneq ($(findstring -srp,$(CFG)),)
-SRP := 1
-endif
-ifneq ($(findstring -zlib,$(CFG)),)
-ZLIB := 1
-endif
-ifneq ($(findstring -zstd,$(CFG)),)
-ZSTD := 1
-endif
-ifneq ($(findstring -brotli,$(CFG)),)
-BROTLI := 1
-endif
-ifneq ($(findstring -gsasl,$(CFG)),)
-GSASL := 1
-endif
-ifneq ($(findstring -idn2,$(CFG)),)
-IDN2 := 1
-endif
-ifneq ($(findstring -winidn,$(CFG)),)
-WINIDN := 1
-endif
-ifneq ($(findstring -sspi,$(CFG)),)
-SSPI := 1
-endif
-ifneq ($(findstring -ldaps,$(CFG)),)
-LDAPS := 1
-endif
-ifneq ($(findstring -ipv6,$(CFG)),)
-IPV6 := 1
-endif
-ifneq ($(findstring -nghttp2,$(CFG)),)
-NGHTTP2 := 1
-endif
-ifneq ($(findstring -nghttp3,$(CFG)),)
-NGHTTP3 := 1
-endif
-ifneq ($(findstring -ngtcp2,$(CFG)),)
-NGTCP2 := 1
-endif
-ifneq ($(findstring -unicode,$(CFG)),)
-UNICODE := 1
-endif
-
-### Toolchain init
-
 PROOT := ..
 
 CPPFLAGS += -I. -I$(PROOT)/include -I$(PROOT)/lib
@@ -132,7 +64,7 @@ endif
 
 ### Optional features
 
-ifdef DYN
+ifneq ($(findstring -dyn,$(CFG)),)
   curl_DEPENDENCIES := $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll
   curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
 else
@@ -140,36 +72,37 @@ else
   CPPFLAGS += -DCURL_STATICLIB
   LDFLAGS += -static
 endif
-ifdef UNICODE
+ifneq ($(findstring -unicode,$(CFG)),)
   CPPFLAGS += -DUNICODE -D_UNICODE
   LDFLAGS += -municode
 endif
-ifdef SYNC
+ifneq ($(findstring -sync,$(CFG)),)
 else
-  ifdef ARES
+  ifneq ($(findstring -ares,$(CFG)),)
     LIBCARES_PATH ?= $(PROOT)/../c-ares
     LDFLAGS += -L"$(LIBCARES_PATH)/lib"
     LIBS += -lcares
   endif
 endif
-ifdef RTMP
+ifneq ($(findstring -rtmp,$(CFG)),)
   LIBRTMP_PATH ?= $(PROOT)/../librtmp
   LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
   LIBS += -lrtmp -lwinmm
+  ZLIB := 1
 endif
-ifdef SSH2
+ifneq ($(findstring -ssh2,$(CFG)),)
   LIBSSH2_PATH ?= $(PROOT)/../libssh2
   LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   LIBS += -lssh2
 endif
-ifdef NGHTTP2
+ifneq ($(findstring -nghttp2,$(CFG)),)
   NGHTTP2_PATH ?= $(PROOT)/../nghttp2
   LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
   LIBS += -lnghttp2
 endif
-ifdef NGHTTP3
-  ifdef NGTCP2
+ifneq ($(findstring -nghttp3,$(CFG)),)
+  ifneq ($(findstring -ngtcp2,$(CFG)),)
     NGHTTP3_PATH ?= $(PROOT)/../nghttp3
     LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
     LIBS += -lnghttp3
@@ -179,43 +112,43 @@ ifdef NGHTTP3
     LIBS += $(NGTCP2_LIBS)
   endif
 endif
-ifdef SSL
+ifneq ($(findstring -ssl,$(CFG)),)
   OPENSSL_PATH ?= $(PROOT)/../openssl
   OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
   LDFLAGS += -L"$(OPENSSL_LIBPATH)"
   OPENSSL_LIBS ?= -lssl -lcrypto
   LIBS += $(OPENSSL_LIBS)
 endif
-ifdef ZLIB
+ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
   ZLIB_PATH ?= $(PROOT)/../zlib
   CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   CPPFLAGS += -I"$(ZLIB_PATH)"
   LDFLAGS += -L"$(ZLIB_PATH)"
   LIBS += -lz
 endif
-ifdef ZSTD
+ifneq ($(findstring -zstd,$(CFG)),)
   ZSTD_PATH ?= $(PROOT)/../zstd
   LDFLAGS += -L"$(ZSTD_PATH)/lib"
   ZSTD_LIBS ?= -lzstd
   LIBS += $(ZSTD_LIBS)
 endif
-ifdef BROTLI
+ifneq ($(findstring -brotli,$(CFG)),)
   BROTLI_PATH ?= $(PROOT)/../brotli
   LDFLAGS += -L"$(BROTLI_PATH)/lib"
   BROTLI_LIBS ?= -lbrotlidec -lbrotlicommon
   LIBS += $(BROTLI_LIBS)
 endif
-ifdef GSASL
+ifneq ($(findstring -gsasl,$(CFG)),)
   LIBGSASL_PATH ?= $(PROOT)/../gsasl
   LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
   LIBS += -lgsasl
 endif
-ifdef IDN2
+ifneq ($(findstring -idn2,$(CFG)),)
   LIBIDN2_PATH ?= $(PROOT)/../libidn2
   LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   LIBS += -lidn2
 else
-ifdef WINIDN
+ifneq ($(findstring -winidn,$(CFG)),)
   LIBS += -lnormaliz
 endif
 endif

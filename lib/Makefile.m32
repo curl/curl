@@ -35,74 +35,6 @@
 #
 ###########################################################################
 
-ifneq ($(findstring -dyn,$(CFG)),)
-DYN := 1
-endif
-ifneq ($(findstring -ares,$(CFG)),)
-ARES := 1
-endif
-ifneq ($(findstring -sync,$(CFG)),)
-SYNC := 1
-endif
-ifneq ($(findstring -ssl,$(CFG)),)
-SSL := 1
-endif
-ifneq ($(findstring -schannel,$(CFG)),)
-SCHANNEL := 1
-SSPI := 1
-endif
-ifneq ($(findstring -ssh2,$(CFG)),)
-SSH2 := 1
-endif
-ifneq ($(findstring -rtmp,$(CFG)),)
-RTMP := 1
-ZLIB := 1
-endif
-ifneq ($(findstring -srp,$(CFG)),)
-SRP := 1
-endif
-ifneq ($(findstring -zlib,$(CFG)),)
-ZLIB := 1
-endif
-ifneq ($(findstring -zstd,$(CFG)),)
-ZSTD := 1
-endif
-ifneq ($(findstring -brotli,$(CFG)),)
-BROTLI := 1
-endif
-ifneq ($(findstring -gsasl,$(CFG)),)
-GSASL := 1
-endif
-ifneq ($(findstring -idn2,$(CFG)),)
-IDN2 := 1
-endif
-ifneq ($(findstring -winidn,$(CFG)),)
-WINIDN := 1
-endif
-ifneq ($(findstring -sspi,$(CFG)),)
-SSPI := 1
-endif
-ifneq ($(findstring -ldaps,$(CFG)),)
-LDAPS := 1
-endif
-ifneq ($(findstring -ipv6,$(CFG)),)
-IPV6 := 1
-endif
-ifneq ($(findstring -nghttp2,$(CFG)),)
-NGHTTP2 := 1
-endif
-ifneq ($(findstring -nghttp3,$(CFG)),)
-NGHTTP3 := 1
-endif
-ifneq ($(findstring -ngtcp2,$(CFG)),)
-NGTCP2 := 1
-endif
-ifneq ($(findstring -unicode,$(CFG)),)
-UNICODE := 1
-endif
-
-### Toolchain init
-
 PROOT := ..
 
 CPPFLAGS += -I. -I$(PROOT)/include -DBUILDING_LIBCURL
@@ -130,13 +62,13 @@ endif
 
 ### Optional features
 
-ifdef UNICODE
+ifneq ($(findstring -unicode,$(CFG)),)
   CPPFLAGS += -DUNICODE -D_UNICODE
 endif
-ifdef SYNC
+ifneq ($(findstring -sync,$(CFG)),)
   CPPFLAGS += -DUSE_SYNC_DNS
 else
-  ifdef ARES
+  ifneq ($(findstring -ares,$(CFG)),)
     LIBCARES_PATH ?= $(PROOT)/../c-ares
     CPPFLAGS += -DUSE_ARES
     CPPFLAGS += -I"$(LIBCARES_PATH)/include"
@@ -144,14 +76,15 @@ else
     LIBS += -lcares
   endif
 endif
-ifdef RTMP
+ifneq ($(findstring -rtmp,$(CFG)),)
   LIBRTMP_PATH ?= $(PROOT)/../librtmp
   CPPFLAGS += -DUSE_LIBRTMP
   CPPFLAGS += -I"$(LIBRTMP_PATH)"
   LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
   LIBS += -lrtmp -lwinmm
+  ZLIB := 1
 endif
-ifdef SSH2
+ifneq ($(findstring -ssh2,$(CFG)),)
   LIBSSH2_PATH ?= $(PROOT)/../libssh2
   CPPFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   CPPFLAGS += -I"$(LIBSSH2_PATH)/include"
@@ -159,15 +92,15 @@ ifdef SSH2
   LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   LIBS += -lssh2
 endif
-ifdef NGHTTP2
+ifneq ($(findstring -nghttp2,$(CFG)),)
   NGHTTP2_PATH ?= $(PROOT)/../nghttp2
   CPPFLAGS += -DUSE_NGHTTP2
   CPPFLAGS += -I"$(NGHTTP2_PATH)/include"
   LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
   LIBS += -lnghttp2
 endif
-ifdef NGHTTP3
-  ifdef NGTCP2
+ifneq ($(findstring -nghttp3,$(CFG)),)
+  ifneq ($(findstring -ngtcp2,$(CFG)),)
     NGHTTP3_PATH ?= $(PROOT)/../nghttp3
     CPPFLAGS += -DUSE_NGHTTP3
     CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
@@ -181,7 +114,7 @@ ifdef NGHTTP3
     LIBS += $(NGTCP2_LIBS)
   endif
 endif
-ifdef SSL
+ifneq ($(findstring -ssl,$(CFG)),)
   OPENSSL_PATH ?= $(PROOT)/../openssl
   CPPFLAGS += -DUSE_OPENSSL
   CPPFLAGS += -DCURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
@@ -191,27 +124,28 @@ ifdef SSL
   LDFLAGS += -L"$(OPENSSL_LIBPATH)"
   OPENSSL_LIBS ?= -lssl -lcrypto
   LIBS += $(OPENSSL_LIBS)
-  ifdef SRP
+  ifneq ($(findstring -srp,$(CFG)),)
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
       # OpenSSL 1.0.1 and later, except BoringSSL
       CPPFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
     endif
   endif
+  SSL := 1
 endif
-ifdef SCHANNEL
+ifneq ($(findstring -schannel,$(CFG)),)
   CPPFLAGS += -DUSE_SCHANNEL
   ifdef SSL
     CPPFLAGS += -DCURL_WITH_MULTI_SSL
   endif
 endif
-ifdef ZLIB
+ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
   ZLIB_PATH ?= $(PROOT)/../zlib
   CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   CPPFLAGS += -I"$(ZLIB_PATH)"
   LDFLAGS += -L"$(ZLIB_PATH)"
   LIBS += -lz
 endif
-ifdef ZSTD
+ifneq ($(findstring -zstd,$(CFG)),)
   ZSTD_PATH ?= $(PROOT)/../zstd
   CPPFLAGS += -DHAVE_ZSTD
   CPPFLAGS += -I"$(ZSTD_PATH)/include"
@@ -219,7 +153,7 @@ ifdef ZSTD
   ZSTD_LIBS ?= -lzstd
   LIBS += $(ZSTD_LIBS)
 endif
-ifdef BROTLI
+ifneq ($(findstring -brotli,$(CFG)),)
   BROTLI_PATH ?= $(PROOT)/../brotli
   CPPFLAGS += -DHAVE_BROTLI
   CPPFLAGS += -I"$(BROTLI_PATH)/include"
@@ -227,33 +161,33 @@ ifdef BROTLI
   BROTLI_LIBS ?= -lbrotlidec -lbrotlicommon
   LIBS += $(BROTLI_LIBS)
 endif
-ifdef GSASL
+ifneq ($(findstring -gsasl,$(CFG)),)
   LIBGSASL_PATH ?= $(PROOT)/../gsasl
   CPPFLAGS += -DUSE_GSASL
   CPPFLAGS += -I"$(LIBGSASL_PATH)/include"
   LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
   LIBS += -lgsasl
 endif
-ifdef IDN2
+ifneq ($(findstring -idn2,$(CFG)),)
   LIBIDN2_PATH ?= $(PROOT)/../libidn2
   CPPFLAGS += -DUSE_LIBIDN2
   CPPFLAGS += -I"$(LIBIDN2_PATH)/include"
   LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   LIBS += -lidn2
 else
-ifdef WINIDN
+ifneq ($(findstring -winidn,$(CFG)),)
   CPPFLAGS += -DUSE_WIN32_IDN
   CPPFLAGS += -DWANT_IDN_PROTOTYPES
   LIBS += -lnormaliz
 endif
 endif
-ifdef SSPI
+ifneq ($(findstring -sspi,$(CFG)),)
   CPPFLAGS += -DUSE_WINDOWS_SSPI
 endif
-ifdef IPV6
+ifneq ($(findstring -ipv6,$(CFG)),)
   CPPFLAGS += -DENABLE_IPV6
 endif
-ifdef LDAPS
+ifneq ($(findstring -ldaps,$(CFG)),)
   CPPFLAGS += -DHAVE_LDAP_SSL
 endif
 ifeq ($(findstring -lldap,$(LIBS)),)
