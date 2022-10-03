@@ -250,9 +250,6 @@ endif
 ifdef SSPI
   CPPFLAGS += -DUSE_WINDOWS_SSPI
 endif
-ifdef SPNEGO
-  CPPFLAGS += -DHAVE_SPNEGO
-endif
 ifdef IPV6
   CPPFLAGS += -DENABLE_IPV6
 endif
