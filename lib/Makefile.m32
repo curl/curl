@@ -251,7 +251,7 @@ ifdef BROTLI
   ifdef BROTLI_LIBS
     LIBS += $(BROTLI_LIBS)
   else
-    LIBS += -lbrotlidec
+    LIBS += -lbrotlidec -lbrotlicommon
   endif
 endif
 ifdef GSASL
