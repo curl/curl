@@ -53,7 +53,6 @@ LIBCARES_PATH ?= $(PROOT)/../c-ares
 CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
 AR ?= $(CROSSPREFIX)ar
-RANLIB ?= $(CROSSPREFIX)ranlib
 
 LDFLAGS += $(CURL_LDFLAGS_DLL)
 RCFLAGS += -I$(PROOT)/include
@@ -324,8 +323,7 @@ all: $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
 
 $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	@$(call DEL, $@)
-	$(AR) cru $@ $(libcurl_a_OBJECTS)
-	$(RANLIB) $@
+	$(AR) rcs $@ $(libcurl_a_OBJECTS)
 
 # remove the last line above to keep debug info
 
