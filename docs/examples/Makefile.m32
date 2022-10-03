@@ -67,6 +67,7 @@ else
   CPPFLAGS += -DCURL_STATICLIB
   LDFLAGS += -static
 endif
+
 ifneq ($(findstring -unicode,$(CFG)),)
   CPPFLAGS += -DUNICODE -D_UNICODE
   LDFLAGS += -municode
