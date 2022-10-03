@@ -1111,7 +1111,7 @@ CURLWARNING                     7.66.0
 CURLWS_BINARY                   7.86.0
 CURLWS_CLOSE                    7.86.0
 CURLWS_CONT                     7.86.0
-CURLWS_NOCOMPRESS               7.86.0
+CURLWS_OFFSET                   7.86.0
 CURLWS_PING                     7.86.0
 CURLWS_PONG                     7.86.0
 CURLWS_RAW_MODE                 7.86.0

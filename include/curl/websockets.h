@@ -28,12 +28,20 @@
 extern "C" {
 #endif
 
-/* generic in/out flag bits */
+struct curl_ws_frame {
+  int age;              /* zero */
+  int flags;            /* See the CURLWS_* defines */
+  curl_off_t offset;    /* the offset of this data into the frame */
+  curl_off_t bytesleft; /* number of pending bytes left of the payload */
+};
+
+/* flag bits */
 #define CURLWS_TEXT       (1<<0)
 #define CURLWS_BINARY     (1<<1)
 #define CURLWS_CONT       (1<<2)
 #define CURLWS_CLOSE      (1<<3)
 #define CURLWS_PING       (1<<4)
+#define CURLWS_OFFSET     (1<<5)
 
 /*
  * NAME curl_ws_recv()
@@ -44,10 +52,10 @@ extern "C" {
  * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
  */
 CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
-                                  size_t *recv, unsigned int *recvflags);
+                                  size_t *recv,
+                                  struct curl_ws_frame **metap);
 
 /* sendflags for curl_ws_send() */
-#define CURLWS_NOCOMPRESS (1<<5)
 #define CURLWS_PONG       (1<<6)
 
 /*
@@ -60,17 +68,13 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
  */
 CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
                                   size_t buflen, size_t *sent,
+                                  curl_off_t framesize,
                                   unsigned int sendflags);
 
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
 #define CURLWS_RAW_MODE (1<<0)
 
-struct curl_ws_metadata {
-  int age;       /* zero */
-  int recvflags; /* See the CURLWS_* defines */
-};
-
-CURL_EXTERN struct curl_ws_metadata *curl_ws_meta(CURL *curl);
+CURL_EXTERN struct curl_ws_frame *curl_ws_meta(CURL *curl);
 
 #ifdef  __cplusplus
 }
