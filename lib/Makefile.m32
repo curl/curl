@@ -50,6 +50,8 @@ NGHTTP3_PATH  ?= $(PROOT)/../nghttp3
 NGTCP2_PATH   ?= $(PROOT)/../ngtcp2
 LIBCARES_PATH ?= $(PROOT)/../c-ares
 
+### Init toolchain
+
 CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
 AR ?= $(CROSSPREFIX)ar
@@ -151,6 +153,8 @@ ifneq ($(SSH2)$(RTMP),)
     SSL := 1
   endif
 endif
+
+### Optional features
 
 ifdef UNICODE
   CPPFLAGS += -DUNICODE -D_UNICODE
@@ -289,7 +293,9 @@ ifdef SSL
   endif
 endif
 
-# Makefile.inc provides the CSOURCES and HHEADERS defines
+### Sources and targets
+
+# Provides CSOURCES and HHEADERS
 include Makefile.inc
 
 libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
@@ -301,6 +307,7 @@ libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 
 RESOURCE := libcurl.res
 
+### Rules
 
 ifneq ($(findstring /sh,$(SHELL)),)
 DEL = rm -f $1

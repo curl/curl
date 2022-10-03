@@ -50,6 +50,8 @@ NGHTTP3_PATH  ?= $(PROOT)/../nghttp3
 NGTCP2_PATH   ?= $(PROOT)/../ngtcp2
 LIBCARES_PATH ?= $(PROOT)/../c-ares
 
+### Init toolchain
+
 CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
 
@@ -153,6 +155,8 @@ ifneq ($(SSH2)$(RTMP),)
   endif
 endif
 
+### Optional features
+
 ifdef DYN
   curl_DEPENDENCIES := $(PROOT)/lib/libcurl.dll.a $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll
 else
@@ -241,7 +245,9 @@ ifeq ($(findstring -lldap,$(LIBS)),)
 endif
 LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
-# Makefile.inc provides the check_PROGRAMS define
+### Sources and targets
+
+# Provides check_PROGRAMS
 include Makefile.inc
 
 TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
@@ -251,6 +257,7 @@ RESOURCE := $(PROOT)/src/curl.res
 
 .PRECIOUS: %.o
 
+### Rules
 
 ifneq ($(findstring /sh,$(SHELL)),)
 DEL = rm -f $1
