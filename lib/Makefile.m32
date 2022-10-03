@@ -112,10 +112,6 @@ endif
 
 PROOT := ..
 
-CC ?= $(CROSSPREFIX)gcc
-RC ?= $(CROSSPREFIX)windres
-AR ?= $(CROSSPREFIX)ar
-
 CPPFLAGS += -I. -I$(PROOT)/include -DBUILDING_LIBCURL
 RCFLAGS  += -I$(PROOT)/include
 
@@ -290,6 +286,10 @@ libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 RESOURCE := libcurl.res
 
 ### Rules
+
+CC ?= $(CROSSPREFIX)gcc
+RC ?= $(CROSSPREFIX)windres
+AR ?= $(CROSSPREFIX)ar
 
 ifneq ($(findstring /sh,$(SHELL)),)
   DEL = rm -f $1

@@ -112,9 +112,6 @@ endif
 
 PROOT := ../..
 
-CC ?= $(CROSSPREFIX)gcc
-RC ?= $(CROSSPREFIX)windres
-
 CPPFLAGS += -I. -I$(PROOT)/include
 RCFLAGS  += -I$(PROOT)/include -DCURL_EMBED_MANIFEST
 LDFLAGS  += -L$(PROOT)/lib
@@ -245,6 +242,9 @@ RESOURCE := $(PROOT)/src/curl.res
 .PRECIOUS: %.o
 
 ### Rules
+
+CC ?= $(CROSSPREFIX)gcc
+RC ?= $(CROSSPREFIX)windres
 
 ifneq ($(findstring /sh,$(SHELL)),)
   DEL = rm -f $1
