@@ -123,7 +123,7 @@ ifneq ($(SSH2)$(RTMP),)
   endif
 endif
 
-### Init toolchain
+### Toolchain init
 
 CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
