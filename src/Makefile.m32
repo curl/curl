@@ -156,7 +156,8 @@ endif
 ### Optional features
 
 ifdef DYN
-  curl_DEPENDENCIES := $(PROOT)/lib/libcurl.dll.a $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll
+  curl_DEPENDENCIES := $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll
+  curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
 else
   curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
   CPPFLAGS += -DCURL_STATICLIB
