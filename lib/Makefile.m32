@@ -55,7 +55,7 @@ RC ?= $(CROSSPREFIX)windres
 AR ?= $(CROSSPREFIX)ar
 RANLIB ?= $(CROSSPREFIX)ranlib
 
-CFLAGS  := -O3 $(CFLAGS) -W -Wall
+CFLAGS  += -W -Wall
 LDFLAGS += $(CURL_LDFLAGS_DLL)
 RCFLAGS := -I$(PROOT)/include -O coff $(RCFLAGS)
 
