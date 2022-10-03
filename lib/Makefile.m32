@@ -185,11 +185,11 @@ ifdef NGHTTP2
   LIBS += -lnghttp2
 endif
 ifdef NGHTTP3
-  CPPFLAGS += -DUSE_NGHTTP3
-  CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
-  LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
-  LIBS += -lnghttp3
   ifdef NGTCP2
+    CPPFLAGS += -DUSE_NGHTTP3
+    CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
+    LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
+    LIBS += -lnghttp3
     CPPFLAGS += -DUSE_NGTCP2
     CPPFLAGS += -I"$(NGTCP2_PATH)/include"
     LDFLAGS += -L"$(NGTCP2_PATH)/lib"
