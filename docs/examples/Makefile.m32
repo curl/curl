@@ -37,19 +37,6 @@
 
 PROOT := ../..
 
-ZLIB_PATH     ?= $(PROOT)/../zlib
-ZSTD_PATH     ?= $(PROOT)/../zstd
-BROTLI_PATH   ?= $(PROOT)/../brotli
-OPENSSL_PATH  ?= $(PROOT)/../openssl
-LIBSSH2_PATH  ?= $(PROOT)/../libssh2
-LIBRTMP_PATH  ?= $(PROOT)/../librtmp
-LIBGSASL_PATH ?= $(PROOT)/../gsasl
-LIBIDN2_PATH  ?= $(PROOT)/../libidn2
-NGHTTP2_PATH  ?= $(PROOT)/../nghttp2
-NGHTTP3_PATH  ?= $(PROOT)/../nghttp3
-NGTCP2_PATH   ?= $(PROOT)/../ngtcp2
-LIBCARES_PATH ?= $(PROOT)/../c-ares
-
 ifneq ($(findstring -dyn,$(CFG)),)
 DYN := 1
 endif
@@ -170,57 +157,69 @@ endif
 ifdef SYNC
 else
   ifdef ARES
+    LIBCARES_PATH ?= $(PROOT)/../c-ares
     LDFLAGS += -L"$(LIBCARES_PATH)/lib"
     LIBS += -lcares
   endif
 endif
 ifdef RTMP
+  LIBRTMP_PATH ?= $(PROOT)/../librtmp
   LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
   LIBS += -lrtmp -lwinmm
 endif
 ifdef SSH2
+  LIBSSH2_PATH ?= $(PROOT)/../libssh2
   LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   LIBS += -lssh2
 endif
 ifdef NGHTTP2
+  NGHTTP2_PATH ?= $(PROOT)/../nghttp2
   LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
   LIBS += -lnghttp2
 endif
 ifdef NGHTTP3
   ifdef NGTCP2
+    NGHTTP3_PATH ?= $(PROOT)/../nghttp3
     LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
     LIBS += -lnghttp3
+    NGTCP2_PATH ?= $(PROOT)/../ngtcp2
     LDFLAGS += -L"$(NGTCP2_PATH)/lib"
     NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
     LIBS += $(NGTCP2_LIBS)
   endif
 endif
 ifdef SSL
+  OPENSSL_PATH ?= $(PROOT)/../openssl
   OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
   LDFLAGS += -L"$(OPENSSL_LIBPATH)"
   OPENSSL_LIBS ?= -lssl -lcrypto
   LIBS += $(OPENSSL_LIBS)
 endif
 ifdef ZLIB
+  ZLIB_PATH ?= $(PROOT)/../zlib
   LDFLAGS += -L"$(ZLIB_PATH)"
   LIBS += -lz
 endif
 ifdef ZSTD
+  ZSTD_PATH ?= $(PROOT)/../zstd
   LDFLAGS += -L"$(ZSTD_PATH)/lib"
   ZSTD_LIBS ?= -lzstd
   LIBS += $(ZSTD_LIBS)
 endif
 ifdef BROTLI
+  BROTLI_PATH ?= $(PROOT)/../brotli
   LDFLAGS += -L"$(BROTLI_PATH)/lib"
   BROTLI_LIBS ?= -lbrotlidec -lbrotlicommon
   LIBS += $(BROTLI_LIBS)
 endif
 ifdef GSASL
+  LIBGSASL_PATH ?= $(PROOT)/../gsasl
   LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
   LIBS += -lgsasl
 endif
 ifdef IDN2
+  LIBIDN2_PATH ?= $(PROOT)/../libidn2
   LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   LIBS += -lidn2
 else
