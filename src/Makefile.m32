@@ -275,7 +275,6 @@ RESOURCE := curl.res
 all: $(TARGETS)
 
 $(TARGETS): $(curl_OBJECTS) $(RESOURCE) $(curl_DEPENDENCIES)
-	@$(call DEL, $@)
 	$(CC) $(LDFLAGS) -o $@ $(curl_OBJECTS) $(RESOURCE) $(LIBS)
 
 %.o: %.c
