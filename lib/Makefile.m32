@@ -63,23 +63,23 @@ CPPFLAGS += -I. -I$(PROOT)/include
 CPPFLAGS += -DBUILDING_LIBCURL
 
 ifneq ($(ARCH),custom)
-# Set environment var ARCH to your architecture to override autodetection.
-ifndef ARCH
-ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
-ARCH := w64
-else
-ARCH := w32
-endif
-endif
-ifeq ($(ARCH),w64)
-CFLAGS  += -m64
-LDFLAGS += -m64
-RCFLAGS += --target=pe-x86-64
-else
-CFLAGS  += -m32
-LDFLAGS += -m32
-RCFLAGS += --target=pe-i386
-endif
+  # Set environment var ARCH to your architecture to override autodetection.
+  ifndef ARCH
+    ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
+      ARCH := w64
+    else
+      ARCH := w32
+    endif
+  endif
+  ifeq ($(ARCH),w64)
+    CFLAGS  += -m64
+    LDFLAGS += -m64
+    RCFLAGS += --target=pe-x86-64
+  else
+    CFLAGS  += -m32
+    LDFLAGS += -m32
+    RCFLAGS += --target=pe-i386
+  endif
 endif
 
 ########################################################
