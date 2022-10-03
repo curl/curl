@@ -27,8 +27,8 @@
 # Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 #
-# Set component root directories via envvar <feature>_PATH. CPPFLAGS, LDFLAGS,
-# LIBS, CFLAGS, RCFLAGS (and more) are also available for customization.
+# Set component roots via envvar <feature>_PATH. CPPFLAGS, LDFLAGS, LIBS,
+# CFLAGS, RCFLAGS (and more) are also available for customization.
 
 PROOT := ..
 
