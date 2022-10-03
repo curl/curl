@@ -319,8 +319,6 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	@$(call DEL, $@)
 	$(AR) rcs $@ $(libcurl_a_OBJECTS)
 
-# remove the last line above to keep debug info
-
 $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
 	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_DLL) -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(LIBS) \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
