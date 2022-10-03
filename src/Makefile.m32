@@ -192,10 +192,7 @@ ifdef NGHTTP3
     ifdef NGTCP2_LIBS
       LIBS += $(NGTCP2_LIBS)
     else
-      LIBS += -lngtcp2
-      ifdef SSL
-        LIBS += -lngtcp2_crypto_openssl
-      endif
+      LIBS += -lngtcp2 -lngtcp2_crypto_openssl
     endif
   endif
 endif
