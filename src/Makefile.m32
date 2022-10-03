@@ -53,14 +53,14 @@ LIBCARES_PATH ?= $(PROOT)/../c-ares
 CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
 
-LDFLAGS += $(CURL_LDFLAGS_EXE)
-RCFLAGS += -I$(PROOT)/include
+LDFLAGS  += $(CURL_LDFLAGS_EXE)
+RCFLAGS  += -I$(PROOT)/include
 
 CPPFLAGS += -I. -I$(PROOT)/include
 CPPFLAGS += -I$(PROOT)/lib
-LDFLAGS += -L$(PROOT)/lib
-LIBS += -lcurl
-RCFLAGS += -DCURL_EMBED_MANIFEST
+LDFLAGS  += -L$(PROOT)/lib
+LIBS     += -lcurl
+RCFLAGS  += -DCURL_EMBED_MANIFEST
 
 ifneq ($(ARCH),custom)
   # Set environment var ARCH to your architecture to override autodetection.
