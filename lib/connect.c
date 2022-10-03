@@ -1222,7 +1222,11 @@ static CURLcode singleipconnect(struct Curl_easy *data,
     Curl_closesocket(data, conn, sockfd);
     return CURLE_OK;
   }
-  infof(data, "  Trying %s:%d...", ipaddress, port);
+  infof(data, "  Trying %s%s%s:%d...",
+        (addr.family == AF_INET6 ? "[" : ""),
+        ipaddress,
+        (addr.family == AF_INET6 ? "]" : ""),
+        port);
 
 #ifdef ENABLE_IPV6
   is_tcp = (addr.family == AF_INET || addr.family == AF_INET6) &&
