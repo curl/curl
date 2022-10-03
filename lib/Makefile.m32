@@ -195,24 +195,17 @@ ifdef NGHTTP3
     CPPFLAGS += -DUSE_NGTCP2
     CPPFLAGS += -I"$(NGTCP2_PATH)/include"
     LDFLAGS += -L"$(NGTCP2_PATH)/lib"
-    ifdef NGTCP2_LIBS
-      LIBS += $(NGTCP2_LIBS)
-    else
-      LIBS += -lngtcp2 -lngtcp2_crypto_openssl
-    endif
+    NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
+    LIBS += $(NGTCP2_LIBS)
   endif
 endif
 ifdef SSL
-  ifndef OPENSSL_INCLUDE
-    OPENSSL_INCLUDE := $(OPENSSL_PATH)/include
-  endif
-  ifndef OPENSSL_LIBPATH
-    OPENSSL_LIBPATH := $(OPENSSL_PATH)/lib
-    OPENSSL_LIBS := -lssl -lcrypto
-  endif
   CPPFLAGS += -DUSE_OPENSSL -DCURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+  OPENSSL_INCLUDE ?= $(OPENSSL_PATH)/include
   CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
+  OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
   LDFLAGS += -L"$(OPENSSL_LIBPATH)"
+  OPENSSL_LIBS ?= -lssl -lcrypto
   LIBS += $(OPENSSL_LIBS)
   ifdef SRP
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
@@ -234,21 +227,15 @@ ifdef ZSTD
   CPPFLAGS += -DHAVE_ZSTD
   CPPFLAGS += -I"$(ZSTD_PATH)/include"
   LDFLAGS += -L"$(ZSTD_PATH)/lib"
-  ifdef ZSTD_LIBS
-    LIBS += $(ZSTD_LIBS)
-  else
-    LIBS += -lzstd
-  endif
+  ZSTD_LIBS ?= -lzstd
+  LIBS += $(ZSTD_LIBS)
 endif
 ifdef BROTLI
   CPPFLAGS += -DHAVE_BROTLI
   CPPFLAGS += -I"$(BROTLI_PATH)/include"
   LDFLAGS += -L"$(BROTLI_PATH)/lib"
-  ifdef BROTLI_LIBS
-    LIBS += $(BROTLI_LIBS)
-  else
-    LIBS += -lbrotlidec -lbrotlicommon
-  endif
+  BROTLI_LIBS ?= -lbrotlidec -lbrotlicommon
+  LIBS += $(BROTLI_LIBS)
 endif
 ifdef GSASL
   CPPFLAGS += -DUSE_GSASL
