@@ -258,9 +258,9 @@ RESOURCE := $(PROOT)/src/curl.res
 ### Rules
 
 ifneq ($(findstring /sh,$(SHELL)),)
-DEL = rm -f $1
+  DEL = rm -f $1
 else
-DEL = -del 2>NUL /q /f $(subst /,\,$1)
+  DEL = -del 2>NUL /q /f $(subst /,\,$1)
 endif
 
 all: $(TARGETS)
