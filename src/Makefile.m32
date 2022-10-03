@@ -55,7 +55,6 @@ RC ?= $(CROSSPREFIX)windres
 
 CPPFLAGS += -I. -I$(PROOT)/include -I$(PROOT)/lib
 RCFLAGS  += -I$(PROOT)/include -DCURL_EMBED_MANIFEST
-LDFLAGS  += $(CURL_LDFLAGS_EXE)
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     += -lcurl
 
@@ -272,7 +271,7 @@ RESOURCE := curl.res
 all: $(TARGETS)
 
 $(TARGETS): $(curl_OBJECTS) $(RESOURCE) $(curl_DEPENDENCIES)
-	$(CC) $(LDFLAGS) -o $@ $(curl_OBJECTS) $(RESOURCE) $(LIBS)
+	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_EXE) -o $@ $(curl_OBJECTS) $(RESOURCE) $(LIBS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<

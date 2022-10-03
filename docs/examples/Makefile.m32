@@ -55,7 +55,6 @@ RC ?= $(CROSSPREFIX)windres
 
 CPPFLAGS += -I. -I$(PROOT)/include
 RCFLAGS  += -I$(PROOT)/include -DCURL_EMBED_MANIFEST
-LDFLAGS  += $(CURL_LDFLAGS_EXE)
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     += -lcurl
 

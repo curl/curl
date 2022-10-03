@@ -56,7 +56,6 @@ AR ?= $(CROSSPREFIX)ar
 
 CPPFLAGS += -I. -I$(PROOT)/include -DBUILDING_LIBCURL
 RCFLAGS  += -I$(PROOT)/include
-LDFLAGS  += $(CURL_LDFLAGS_DLL)
 
 ifneq ($(ARCH),custom)
   # Set environment var ARCH to your architecture to override autodetection.
@@ -326,7 +325,7 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 # remove the last line above to keep debug info
 
 $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
-	$(CC) $(LDFLAGS) -shared -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(LIBS) \
+	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_DLL) -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(LIBS) \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
 
 %.o: %.c
