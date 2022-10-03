@@ -104,7 +104,6 @@ SSPI := 1
 endif
 ifneq ($(findstring -ssh2,$(CFG)),)
 SSH2 := 1
-ZLIB := 1
 endif
 ifneq ($(findstring -rtmp,$(CFG)),)
 RTMP := 1
