@@ -22,341 +22,170 @@
 #
 #***************************************************************************
 
-###########################################################################
-#
-# Makefile for building curl.exe with MinGW and optional features.
+# Makefile for building curl with MinGW and optional features.
 #
 # Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 #
-# Hint: you can also set environment vars to control the build, e.g.:
-# set ZLIB_PATH=C:/zlib
-# set ZLIB=1
-#
-###########################################################################
+# Set component roots via envvar <feature>_PATH. CPPFLAGS, LDFLAGS, LIBS,
+# CFLAGS, RCFLAGS (and more) are also available for customization.
 
-PROOT = ..
+PROOT := ..
 
-ifndef ZLIB_PATH
-ZLIB_PATH = $(PROOT)/../zlib
-endif
-ifndef ZSTD_PATH
-ZSTD_PATH = $(PROOT)/../zstd
-endif
-ifndef BROTLI_PATH
-BROTLI_PATH = $(PROOT)/../brotli
-endif
-ifndef OPENSSL_PATH
-OPENSSL_PATH = $(PROOT)/../openssl
-endif
-ifndef LIBSSH2_PATH
-LIBSSH2_PATH = $(PROOT)/../libssh2
-endif
-ifndef LIBRTMP_PATH
-LIBRTMP_PATH = $(PROOT)/../librtmp
-endif
-ifndef LIBGSASL_PATH
-LIBGSASL_PATH = $(PROOT)/../gsasl
-endif
-ifndef LIBIDN2_PATH
-LIBIDN2_PATH = $(PROOT)/../libidn2
-endif
-ifndef NGHTTP2_PATH
-NGHTTP2_PATH = $(PROOT)/../nghttp2
-endif
-ifndef NGHTTP3_PATH
-NGHTTP3_PATH = $(PROOT)/../nghttp3
-endif
-ifndef NGTCP2_PATH
-NGTCP2_PATH = $(PROOT)/../ngtcp2
-endif
-ifndef LIBCARES_PATH
-LIBCARES_PATH = $(PROOT)/../c-ares
-endif
-
-ifeq ($(CURL_CC),)
-CURL_CC := $(CROSSPREFIX)gcc
-endif
-ifeq ($(CURL_AR),)
-CURL_AR := $(CROSSPREFIX)ar
-endif
-ifeq ($(CURL_RC),)
-CURL_RC := $(CROSSPREFIX)windres
-endif
-
-CC = $(CURL_CC)
-CFLAGS = -O3 $(CURL_CFLAG_EXTRAS) -W -Wall
-LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE)
-RC = $(CURL_RC)
-RCFLAGS = -I$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST $(CURL_RCFLAG_EXTRAS)
-
-# Set environment var ARCH to your architecture to override autodetection.
-ifndef ARCH
-ifeq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),x86_64)
-ARCH = w64
-else
-ARCH = w32
-endif
-endif
+CPPFLAGS += -I. -I$(PROOT)/include -I$(PROOT)/lib
+RCFLAGS  += -I$(PROOT)/include -DCURL_EMBED_MANIFEST
+LDFLAGS  += -L$(PROOT)/lib
+LIBS     += -lcurl
 
 ifneq ($(ARCH),custom)
-ifeq ($(ARCH),w64)
-CFLAGS  += -m64
-LDFLAGS += -m64
-RCFLAGS += --target=pe-x86-64
-else
-CFLAGS  += -m32
-LDFLAGS += -m32
-RCFLAGS += --target=pe-i386
-endif
-endif
-
-# Platform-dependent helper tool macros
-ifeq ($(findstring /sh,$(SHELL)),/sh)
-DEL     = rm -f $1
-RMDIR   = rm -fr $1
-MKDIR   = mkdir -p $1
-COPY    = -cp -afv $1 $2
-COPYR   = -rsync -aC $1/* $2
-TOUCH   = touch $1
-CAT     = cat
-ECHONL  = echo ""
-DL = '
-else
-ifeq "$(OS)" "Windows_NT"
-DEL     = -del 2>NUL /q /f $(subst /,\,$1)
-RMDIR   = -rd 2>NUL /q /s $(subst /,\,$1)
-else
-DEL     = -del 2>NUL $(subst /,\,$1)
-RMDIR   = -deltree 2>NUL /y $(subst /,\,$1)
-endif
-MKDIR   = -md 2>NUL $(subst /,\,$1)
-COPY    = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
-COPYR   = -xcopy 2>NUL /q /y /e $(subst /,\,$1) $(subst /,\,$2)
-TOUCH   = copy 2>&1>NUL /b $(subst /,\,$1) +,,
-CAT     = type
-ECHONL  = $(ComSpec) /c echo.
-endif
-
-########################################################
-## Nothing more to do below this line!
-
-ifneq ($(findstring -dyn,$(CFG)),)
-DYN = 1
-endif
-ifneq ($(findstring -ares,$(CFG)),)
-ARES = 1
-endif
-ifneq ($(findstring -sync,$(CFG)),)
-SYNC = 1
-endif
-ifneq ($(findstring -rtmp,$(CFG)),)
-RTMP = 1
-ZLIB = 1
-endif
-ifneq ($(findstring -ssh2,$(CFG)),)
-SSH2 = 1
-ZLIB = 1
-endif
-ifneq ($(findstring -ssl,$(CFG)),)
-SSL = 1
-endif
-ifneq ($(findstring -zlib,$(CFG)),)
-ZLIB = 1
-endif
-ifneq ($(findstring -zstd,$(CFG)),)
-ZSTD = 1
-endif
-ifneq ($(findstring -brotli,$(CFG)),)
-BROTLI = 1
-endif
-ifneq ($(findstring -gsasl,$(CFG)),)
-GSASL = 1
-endif
-ifneq ($(findstring -idn2,$(CFG)),)
-IDN2 = 1
-endif
-ifneq ($(findstring -winidn,$(CFG)),)
-WINIDN = 1
-endif
-ifneq ($(findstring -sspi,$(CFG)),)
-SSPI = 1
-endif
-ifneq ($(findstring -ldaps,$(CFG)),)
-LDAPS = 1
-endif
-ifneq ($(findstring -ipv6,$(CFG)),)
-IPV6 = 1
-endif
-ifneq ($(findstring -schannel,$(CFG))$(findstring -winssl,$(CFG)),)
-SCHANNEL = 1
-SSPI = 1
-endif
-ifneq ($(findstring -nghttp2,$(CFG)),)
-NGHTTP2 = 1
-endif
-ifneq ($(findstring -nghttp3,$(CFG)),)
-NGHTTP3 = 1
-endif
-ifneq ($(findstring -ngtcp2,$(CFG)),)
-NGTCP2 = 1
-endif
-ifneq ($(findstring -unicode,$(CFG)),)
-UNICODE = 1
-endif
-
-# SSH2 and RTMP require an SSL library; assume OpenSSL if none specified
-ifneq ($(SSH2)$(RTMP),)
-  ifeq ($(SSL)$(SCHANNEL),)
-    SSL = 1
-  endif
-endif
-
-INCLUDES = -I. -I$(PROOT)/include -I$(PROOT)/lib
-ifdef SSL
-  ifdef SCHANNEL
-    CFLAGS += -DCURL_WITH_MULTI_SSL
-  endif
-endif
-ifdef UNICODE
-  CFLAGS += -DUNICODE -D_UNICODE
-  LDFLAGS += -municode
-endif
-
-ifdef DYN
-  curl_DEPENDENCIES = $(PROOT)/lib/libcurldll.a $(PROOT)/lib/libcurl.dll
-  curl_LDADD = -L$(PROOT)/lib -lcurldll
-else
-  curl_DEPENDENCIES = $(PROOT)/lib/libcurl.a
-  curl_LDADD = -L$(PROOT)/lib -lcurl
-  CFLAGS += -DCURL_STATICLIB
-  LDFLAGS += -static
-endif
-ifdef SYNC
-  CFLAGS += -DUSE_SYNC_DNS
-else
-  ifdef ARES
-    CFLAGS += -DUSE_ARES -DCARES_STATICLIB
-    curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
-  endif
-endif
-ifdef RTMP
-  CFLAGS += -DUSE_LIBRTMP
-  curl_LDADD += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
-endif
-ifdef NGHTTP2
-  CFLAGS += -DUSE_NGHTTP2
-  curl_LDADD += -L"$(NGHTTP2_PATH)/lib" -lnghttp2
-endif
-ifdef SSH2
-  CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
-  curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
-endif
-ifdef NGHTTP3
-  CFLAGS += -DUSE_NGHTTP3
-  curl_LDADD += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
-  ifdef NGTCP2
-    CFLAGS += -DUSE_NGTCP2
-    curl_LDADD += -L"$(NGTCP2_PATH)/lib"
-    ifdef NGTCP2_LIBS
-      curl_LDADD += $(NGTCP2_LIBS)
+  # Set environment var ARCH to your architecture to override autodetection.
+  ifndef ARCH
+    ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
+      ARCH := w64
     else
-      curl_LDADD += -lngtcp2
-      ifdef SSL
-        curl_LDADD += -lngtcp2_crypto_openssl
-      endif
+      ARCH := w32
     endif
   endif
-endif
-ifdef SSL
-  ifndef OPENSSL_INCLUDE
-    OPENSSL_INCLUDE = $(OPENSSL_PATH)/include
-  endif
-  ifndef OPENSSL_LIBPATH
-    OPENSSL_LIBS = -lssl -lcrypto
-    OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
-  endif
-  INCLUDES += -I"$(OPENSSL_INCLUDE)"
-  CFLAGS += -DUSE_OPENSSL
-  curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
-endif
-ifdef SCHANNEL
-  CFLAGS += -DUSE_SCHANNEL
-endif
-ifdef ZLIB
-  INCLUDES += -I"$(ZLIB_PATH)"
-  CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
-  curl_LDADD += -L"$(ZLIB_PATH)" -lz
-endif
-ifdef ZSTD
-  INCLUDES += -I"$(ZSTD_PATH)/include"
-  CFLAGS += -DHAVE_ZSTD
-  curl_LDADD += -L"$(ZSTD_PATH)/lib"
-  ifdef ZSTD_LIBS
-    curl_LDADD += $(ZSTD_LIBS)
+  ifeq ($(ARCH),w64)
+    CFLAGS  += -m64
+    LDFLAGS += -m64
+    RCFLAGS += --target=pe-x86-64
   else
-    curl_LDADD += -lzstd
+    CFLAGS  += -m32
+    LDFLAGS += -m32
+    RCFLAGS += --target=pe-i386
   endif
 endif
-ifdef BROTLI
-  INCLUDES += -I"$(BROTLI_PATH)/include"
-  CFLAGS += -DHAVE_BROTLI
-  curl_LDADD += -L"$(BROTLI_PATH)/lib"
-  ifdef BROTLI_LIBS
-    curl_LDADD += $(BROTLI_LIBS)
-  else
-    curl_LDADD += -lbrotlidec
-  endif
-endif
-ifdef GSASL
-  CFLAGS += -DUSE_GSASL
-  curl_LDADD += -L"$(LIBGSASL_PATH)/lib" -lgsasl
-endif
-ifdef IDN2
-  CFLAGS += -DUSE_LIBIDN2
-  curl_LDADD += -L"$(LIBIDN2_PATH)/lib" -lidn2
-else
-ifdef WINIDN
-  CFLAGS += -DUSE_WIN32_IDN
-  curl_LDADD += -lnormaliz
-endif
-endif
-ifdef SSPI
-  CFLAGS += -DUSE_WINDOWS_SSPI
-endif
-ifdef IPV6
-  CFLAGS += -DENABLE_IPV6
-endif
-ifdef LDAPS
-  CFLAGS += -DHAVE_LDAP_SSL
-endif
-ifeq ($(findstring -lldap,$(LDFLAGS)),)
-  curl_LDADD += -lwldap32
-endif
-curl_LDADD += -lws2_32 -lcrypt32 -lbcrypt
 
-# Makefile.inc provides the CURL_CFILES and CURLX_CFILES defines
+### Optional features
+
+ifneq ($(findstring -dyn,$(CFG)),)
+  curl_DEPENDENCIES := $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll
+  curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
+else
+  curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
+  CPPFLAGS += -DCURL_STATICLIB
+  LDFLAGS += -static
+endif
+
+ifneq ($(findstring -unicode,$(CFG)),)
+  CPPFLAGS += -DUNICODE -D_UNICODE
+  LDFLAGS += -municode
+endif
+ifneq ($(findstring -sync,$(CFG)),)
+else
+  ifneq ($(findstring -ares,$(CFG)),)
+    LIBCARES_PATH ?= $(PROOT)/../c-ares
+    LDFLAGS += -L"$(LIBCARES_PATH)/lib"
+    LIBS += -lcares
+  endif
+endif
+ifneq ($(findstring -rtmp,$(CFG)),)
+  LIBRTMP_PATH ?= $(PROOT)/../librtmp
+  LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
+  LIBS += -lrtmp -lwinmm
+  ZLIB := 1
+endif
+ifneq ($(findstring -ssh2,$(CFG)),)
+  LIBSSH2_PATH ?= $(PROOT)/../libssh2
+  LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
+  LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
+  LIBS += -lssh2
+endif
+ifneq ($(findstring -nghttp2,$(CFG)),)
+  NGHTTP2_PATH ?= $(PROOT)/../nghttp2
+  LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
+  LIBS += -lnghttp2
+endif
+ifneq ($(findstring -nghttp3,$(CFG)),)
+  ifneq ($(findstring -ngtcp2,$(CFG)),)
+    NGHTTP3_PATH ?= $(PROOT)/../nghttp3
+    LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
+    LIBS += -lnghttp3
+    NGTCP2_PATH ?= $(PROOT)/../ngtcp2
+    LDFLAGS += -L"$(NGTCP2_PATH)/lib"
+    NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
+    LIBS += $(NGTCP2_LIBS)
+  endif
+endif
+ifneq ($(findstring -ssl,$(CFG)),)
+  OPENSSL_PATH ?= $(PROOT)/../openssl
+  OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
+  LDFLAGS += -L"$(OPENSSL_LIBPATH)"
+  OPENSSL_LIBS ?= -lssl -lcrypto
+  LIBS += $(OPENSSL_LIBS)
+endif
+ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
+  ZLIB_PATH ?= $(PROOT)/../zlib
+  CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
+  CPPFLAGS += -I"$(ZLIB_PATH)"
+  LDFLAGS += -L"$(ZLIB_PATH)"
+  LIBS += -lz
+endif
+ifneq ($(findstring -zstd,$(CFG)),)
+  ZSTD_PATH ?= $(PROOT)/../zstd
+  LDFLAGS += -L"$(ZSTD_PATH)/lib"
+  ZSTD_LIBS ?= -lzstd
+  LIBS += $(ZSTD_LIBS)
+endif
+ifneq ($(findstring -brotli,$(CFG)),)
+  BROTLI_PATH ?= $(PROOT)/../brotli
+  LDFLAGS += -L"$(BROTLI_PATH)/lib"
+  BROTLI_LIBS ?= -lbrotlidec -lbrotlicommon
+  LIBS += $(BROTLI_LIBS)
+endif
+ifneq ($(findstring -gsasl,$(CFG)),)
+  LIBGSASL_PATH ?= $(PROOT)/../gsasl
+  LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
+  LIBS += -lgsasl
+endif
+ifneq ($(findstring -idn2,$(CFG)),)
+  LIBIDN2_PATH ?= $(PROOT)/../libidn2
+  LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
+  LIBS += -lidn2
+else
+ifneq ($(findstring -winidn,$(CFG)),)
+  LIBS += -lnormaliz
+endif
+endif
+ifeq ($(findstring -lldap,$(LIBS)),)
+  LIBS += -lwldap32
+endif
+LIBS += -lws2_32 -lcrypt32 -lbcrypt
+
+### Sources and targets
+
+# Provides CURL_CFILES and CURLX_CFILES
 include Makefile.inc
 
-TARGETS = curl.exe
+TARGETS := curl.exe
 curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_CFILES)))
 curl_OBJECTS += $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_CFILES))))
 vpath %.c $(PROOT)/lib
 
-RESOURCE = curl.res
+RESOURCE := curl.res
 
+### Rules
+
+CC ?= $(CROSSPREFIX)gcc
+RC ?= $(CROSSPREFIX)windres
+
+ifneq ($(findstring /sh,$(SHELL)),)
+DEL = rm -f $1
+else
+DEL = -del 2>NUL /q /f $(subst /,\,$1)
+endif
 
 all: $(TARGETS)
 
-curl.exe: $(curl_OBJECTS) $(RESOURCE) $(curl_DEPENDENCIES)
-	@$(call DEL, $@)
-	$(CC) $(LDFLAGS) -o $@ $(curl_OBJECTS) $(RESOURCE) $(curl_LDADD)
+$(TARGETS): $(curl_OBJECTS) $(RESOURCE) $(curl_DEPENDENCIES)
+	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $(curl_OBJECTS) $(RESOURCE) $(LIBS)
 
 %.o: %.c
-	$(CC) $(INCLUDES) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 %.res: %.rc
-	$(RC) $(RCFLAGS) -i $< -o $@
+	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
 	@$(call DEL, $(curl_OBJECTS) $(RESOURCE))
