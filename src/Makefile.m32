@@ -53,10 +53,16 @@ SSPI := 1
 endif
 ifneq ($(findstring -ssh2,$(CFG)),)
 SSH2 := 1
+ifndef SCHANNEL
+  SSL := 1
+endif
 endif
 ifneq ($(findstring -rtmp,$(CFG)),)
 RTMP := 1
 ZLIB := 1
+ifndef SCHANNEL
+  SSL := 1
+endif
 endif
 ifneq ($(findstring -srp,$(CFG)),)
 SRP := 1
@@ -99,13 +105,6 @@ NGTCP2 := 1
 endif
 ifneq ($(findstring -unicode,$(CFG)),)
 UNICODE := 1
-endif
-
-# SSH2 and RTMP require an SSL library; assume OpenSSL if none specified
-ifneq ($(SSH2)$(RTMP),)
-  ifndef SCHANNEL
-    SSL := 1
-  endif
 endif
 
 ### Toolchain init
