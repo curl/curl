@@ -53,7 +53,6 @@ LIBCARES_PATH ?= $(PROOT)/../c-ares
 CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
 
-CFLAGS  += -W -Wall
 LDFLAGS += $(CURL_LDFLAGS_EXE)
 RCFLAGS += -I$(PROOT)/include
 
