@@ -156,9 +156,7 @@ LIBS += -lws2_32 -lcrypt32 -lbcrypt
 # Provides check_PROGRAMS
 include Makefile.inc
 
-TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
-TARGETS += synctime.exe
-
+TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS) synctime.c))
 RESOURCE := $(PROOT)/src/curl.res
 
 .PRECIOUS: %.o
@@ -186,7 +184,7 @@ all: $(TARGETS)
 	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
-	@$(call DEL, $(TARGETS:.exe=.o) $(RESOURCE))
+	@$(call DEL, $(TARGETS:.exe=.o))
 
 distclean vclean: clean
 	@$(call DEL, $(TARGETS))
