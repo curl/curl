@@ -167,7 +167,7 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(data->state.aptr.host) {
       size_t pos;
 
-      if (strlen(data->state.aptr.host) > FULL_HOST_LEN) {
+      if(strlen(data->state.aptr.host) > FULL_HOST_LEN) {
         ret = CURLE_URL_MALFORMAT;
         goto fail;
       }
@@ -177,7 +177,7 @@ static CURLcode make_headers(struct Curl_easy *data,
       full_host[pos] = 0;
     }
     else {
-      if (strlen(hostname) > FULL_HOST_LEN) {
+      if(strlen(hostname) > FULL_HOST_LEN) {
         ret = CURLE_URL_MALFORMAT;
         goto fail;
       }

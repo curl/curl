@@ -50,7 +50,7 @@ lib%TESTNUMBER
 </tool>
 
 <command>
-http://127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
+http://exam.ple.com:9000/%TESTNUMBER/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -63,8 +63,8 @@ http://127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
 </strip>
 <protocol>
 GET /%TESTNUMBER/testapi/test HTTP/1.1
-Host: 127.0.0.1:9000
-Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/0/127/xxx4_request, SignedHeaders=content-type;host;tesmixcase;test0;test1;test2;test_space;x-xxx-date, Signature=4bde3a4b84dcf26b643b60cdde5dea5a265b0a466d3cdb5e4c4cae96cf10b89f
+Host: exam.ple.com:9000
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;tesmixcase;test0;test1;test2;test_space;x-xxx-date, Signature=819251feec8de52dfaa992320241f23d27cefa979c93e039ae7df03ac486ed16
 X-Xxx-Date: 19700101T000000Z
 test2: 1234
 test_space: t	s  m	   end    
