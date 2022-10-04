@@ -71,7 +71,6 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 $(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
 	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
-
 endif
 
 CPPFLAGS += -I. -I$(PROOT)/include

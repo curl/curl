@@ -45,7 +45,6 @@ include Makefile.inc
 
 TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS) synctime.c))
 RESOURCE := $(PROOT)/src/curl.res
-
 TOCLEAN := $(TARGETS:.exe=.o)
 
 ### Local rules
