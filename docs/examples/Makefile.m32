@@ -38,7 +38,6 @@ else
   LDFLAGS += -static
 endif
 
-# For externalsocket.c
 LIBS += -lws2_32
 
 ### Sources and targets
