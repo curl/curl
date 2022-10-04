@@ -199,12 +199,12 @@ libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
 libcurl_dll_a_LIBRARY := libcurl.dll.a
 libcurl_a_LIBRARY := libcurl.a
 
+TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
+
 libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
 libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
 libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES))))
-
-TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
 
 ### Rules
 

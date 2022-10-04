@@ -159,6 +159,7 @@ LIBS += -lws2_32 -lcrypt32 -lbcrypt
 include Makefile.inc
 
 TARGETS := curl.exe
+
 curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_CFILES)))
 curl_OBJECTS += $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_CFILES))))
 curl_OBJECTS += $(patsubst %.rc,%.res,$(strip $(CURL_RCFILES)))
