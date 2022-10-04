@@ -100,9 +100,10 @@ endif
 
 # Most CPPFLAGS are only necessary when building libcurl via 'lib'. We include
 # them always for simplicity and for being in sync with other build systems.
+# See comment below about the exception.
 
-# TODO: LDFLAGS and LIBS below are not required when building 'src' or
-#       'docs/examples' in DYN mode.
+# LDFLAGS and LIBS below are not required when building 'src' and
+# 'docs/examples' in DYN mode.
 
 ifneq ($(findstring -unicode,$(CFG)),)
   CPPFLAGS += -DUNICODE -D_UNICODE
