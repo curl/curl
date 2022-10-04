@@ -56,7 +56,6 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
                                   struct curl_ws_frame **metap);
 
 /* sendflags for curl_ws_send() */
-#define CURLWS_NOCOMPRESS (1<<5)
 #define CURLWS_PONG       (1<<6)
 
 /*

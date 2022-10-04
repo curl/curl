@@ -24,7 +24,7 @@
 .\"
 .TH curl_ws_send 3 "12 Jun 2022" "libcurl 7.85.0" "libcurl Manual"
 .SH NAME
-curl_ws_send - receive WebSocket data
+curl_ws_send - send WebSocket data
 .SH SYNOPSIS
 .nf
 #include <curl/easy.h>
@@ -36,19 +36,19 @@ CURLcode curl_ws_send(CURL *curl, const void *buffer, size_t buflen,
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
 
-Send the specific message fragment over the established WebSocket
+Send the specific message fragment over an established WebSocket
 connection. The \fIbuffer\fP holds the data to send and it is \fIbuflen\fP
-number of bytes in that memory area.
+number of payload bytes in that memory area.
 
-\fIsent\fP is returned as the number of bytes actually sent.
+\fIsent\fP is returned as the number of payload bytes actually sent.
 
-To send a frame as multiple calls with partial content per invoke, set the
-\fICURLWS_OFFSET\fP bit and the \fIframesize\fP argument as the total expected
-size for the first part, then set the \fICURLWS_OFFSET\fP with a zero
-\fItotalsize\fP for the following parts.
+To send a (huge) fragment using multiple calls with partial content per
+invoke, set the \fICURLWS_OFFSET\fP bit and the \fIframesize\fP argument as
+the total expected size for the first part, then set the \fICURLWS_OFFSET\fP
+with a zero \fItotalsize\fP for the following parts.
 
-If not sending a partial frame or if this is raw mode, \fIframsize\fP should
-be set to zero.
+If not sending a partial fragment or if this is raw mode, \fIframsize\fP
+should be set to zero.
 
 If \fBCURLWS_RAW_MODE\fP is enabled in \fICURLOPT_WS_OPTIONS(3)\fP, the
 \fBflags\fP argument should be set to 0.
@@ -60,8 +60,6 @@ but libcurl itself will not make any verification of the content or
 precautions that you actually send valid UTF-8 content.
 .IP CURLWS_BINARY
 This is binary data.
-.IP CURLWS_NOCOMPRESS
-No-op if there’s no compression anyway.
 .IP CURLWS_CONT
 This is not the final fragment of the message, which implies that there will
 be another fragment coming as part of the same message where this bit is not
