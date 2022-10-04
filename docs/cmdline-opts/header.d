@@ -16,7 +16,7 @@ Extra header to include in information sent. When used within an HTTP request,
 it is added to the regular request headers.
 
 For an IMAP or SMTP MIME uploaded mail built with --form options, it is
-prepended to the resulting MIME document, effectively incuding it at the mail
+prepended to the resulting MIME document, effectively including it at the mail
 global level. It does not affect raw uploaded mails (Added in 7.56.0).
 
 You may specify any number of extra headers. Note that if you should add a

@@ -781,7 +781,7 @@ static CURLUcode decode_host(struct dynbuf *host)
  * The function handles a query part ('?' + stuff) appended but it expects
  * that fragments ('#' + stuff) have already been cut off.
  *
- * Note that this funciton *writes* a byte into the source buffer during its
+ * Note that this function *writes* a byte into the source buffer during its
  * operation.
  *
  * RETURNS
