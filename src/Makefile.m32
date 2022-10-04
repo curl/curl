@@ -163,7 +163,7 @@ curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_CFILES)))
 curl_OBJECTS += $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_CFILES))))
 vpath %.c $(PROOT)/lib
 
-RESOURCE := curl.res
+RESOURCE := $(patsubst %.rc,%.res,$(strip $(CURL_RCFILES)))
 
 ### Rules
 

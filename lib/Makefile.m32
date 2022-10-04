@@ -202,7 +202,7 @@ libcurl_a_LIBRARY := libcurl.a
 libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
 libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 
-RESOURCE := libcurl.res
+RESOURCE := $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES))))
 
 ### Rules
 
