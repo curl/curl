@@ -192,7 +192,7 @@ LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
 ### Sources and targets
 
-# Provides CSOURCES and HHEADERS
+# Provides CSOURCES, HHEADERS, LIB_RCFILES
 include Makefile.inc
 
 libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll

@@ -155,7 +155,7 @@ LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
 ### Sources and targets
 
-# Provides CURL_CFILES and CURLX_CFILES
+# Provides CURL_CFILES, CURLX_CFILES, CURL_RCFILES
 include Makefile.inc
 
 TARGETS := curl.exe
