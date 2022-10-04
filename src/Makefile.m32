@@ -54,11 +54,18 @@ curl_OBJECTS += $(patsubst %.rc,%.res,$(strip $(CURL_RCFILES)))
 vpath %.c $(PROOT)/lib
 
 TOCLEAN := $(curl_OBJECTS)
+ifneq ($(wildcard tool_hugehelp.c.cvs),)
+TOCLEAN += tool_hugehelp.c
+endif
 
 ### Local rules
 
 $(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $(curl_OBJECTS) $(LIBS)
+
+tool_hugehelp.c:
+	@echo Creating $@
+	@$(call COPY, $@.cvs, $@)
 
 ### Global script
 
