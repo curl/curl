@@ -22,7 +22,7 @@
 #
 #***************************************************************************
 
-# Before use, make sure to build curl via Makefile.m32.
+# Build libcurl via lib/Makefile.m32 first.
 
 PROOT := ../..
 
@@ -47,13 +47,12 @@ LIBS += -lws2_32
 include Makefile.inc
 
 TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS) synctime))
-RESOURCE := $(PROOT)/src/curl.res
 TOCLEAN := $(TARGETS:.exe=.o)
 
 ### Local rules
 
-%.exe: %.o $(RESOURCE) $(curl_DEPENDENCIES)
-	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $< $(RESOURCE) $(LIBS)
+%.exe: %.o $(curl_DEPENDENCIES)
+	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $< $(LIBS)
 
 ### Global script
 
