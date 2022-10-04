@@ -96,12 +96,12 @@ static void trim_headers(struct curl_slist *head)
     store = value;
 
     /* skip leading whitespace */
-    while(*value && ISSPACE(*value))
+    while(*value && ISBLANK(*value))
       value++;
 
     while(*value) {
       int space = 0;
-      while(*value && ISSPACE(*value)) {
+      while(*value && ISBLANK(*value)) {
         value++;
         space++;
       }
@@ -210,7 +210,7 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(!value)
       goto fail;
     ++value;
-    while(ISSPACE(*value))
+    while(ISBLANK(*value))
       ++value;
     strncpy(timestamp, value, TIMESTAMP_SIZE - 1);
     timestamp[TIMESTAMP_SIZE - 1] = 0;
