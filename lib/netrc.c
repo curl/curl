@@ -33,6 +33,7 @@
 #include "netrc.h"
 #include "strtok.h"
 #include "strcase.h"
+#include "curl_get_line.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -82,7 +83,7 @@ static int parsenetrc(const char *host,
     char netrcbuffer[4096];
     int  netrcbuffsize = (int)sizeof(netrcbuffer);
 
-    while(!done && fgets(netrcbuffer, netrcbuffsize, file)) {
+    while(!done && Curl_get_line(netrcbuffer, netrcbuffsize, file)) {
       char *tok;
       char *tok_end;
       bool quoted;
@@ -241,7 +242,7 @@ static int parsenetrc(const char *host,
         } /* switch (state) */
         tok = ++tok_end;
       }
-    } /* while fgets() */
+    } /* while Curl_get_line() */
 
     out:
     if(!retcode) {

@@ -25,7 +25,7 @@
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
-  !defined(CURL_DISABLE_HSTS)
+  !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
 
 #include "curl_get_line.h"
 #include "curl_memory.h"
@@ -33,8 +33,8 @@
 #include "memdebug.h"
 
 /*
- * get_line() makes sure to only return complete whole lines that fit in 'len'
- * bytes and end with a newline.
+ * Curl_get_line() makes sure to only return complete whole lines that fit in
+ * 'len' bytes and end with a newline.
  */
 char *Curl_get_line(char *buf, int len, FILE *input)
 {
