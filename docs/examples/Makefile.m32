@@ -35,6 +35,7 @@ ifneq ($(findstring -static,$(CFG)),)
   LDFLAGS += -static
 else
   curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
+  DYN := 1
 endif
 
 ### Sources and targets

@@ -101,6 +101,9 @@ endif
 # Most CPPFLAGS are only necessary when building libcurl via 'lib'. We include
 # them always for simplicity and for being in sync with other build systems.
 
+# TODO: LDFLAGS and LIBS below are not required when building 'src' or
+#       'docs/examples' in DYN mode.
+
 ifneq ($(findstring -unicode,$(CFG)),)
   CPPFLAGS += -DUNICODE -D_UNICODE
   CURL_LDFLAGS_BIN += -municode
@@ -231,10 +234,12 @@ endif
 ifneq ($(findstring -ldaps,$(CFG)),)
   CPPFLAGS += -DHAVE_LDAP_SSL
 endif
-ifeq ($(findstring -lldap,$(LIBS)),)
-  LIBS += -lwldap32
+ifndef DYN
+  ifeq ($(findstring -lldap,$(LIBS)),)
+    LIBS += -lwldap32
+  endif
+  LIBS += -lws2_32 -lcrypt32 -lbcrypt
 endif
-LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
 ### Global rules
 
