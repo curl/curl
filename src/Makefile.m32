@@ -26,11 +26,8 @@
 
 PROOT := ..
 
-# Provides CURL_CFILES, CURLX_CFILES, CURL_RCFILES
-include Makefile.inc
-
-CPPFLAGS += -I$(PROOT)/lib
 RCFLAGS  += -DCURL_EMBED_MANIFEST
+CPPFLAGS += -I$(PROOT)/lib
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     += -lcurl
 
@@ -44,6 +41,9 @@ else
 endif
 
 ### Sources and targets
+
+# Provides CURL_CFILES, CURLX_CFILES, CURL_RCFILES
+include Makefile.inc
 
 TARGETS := curl.exe
 
