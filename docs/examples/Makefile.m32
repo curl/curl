@@ -29,12 +29,12 @@ PROOT := ../..
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     += -lcurl
 
-ifneq ($(findstring -dyn,$(CFG)),)
-  curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
-else
+ifneq ($(findstring -static,$(CFG)),)
   curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
   CPPFLAGS += -DCURL_STATICLIB
   LDFLAGS += -static
+else
+  curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
 endif
 
 ### Sources and targets
