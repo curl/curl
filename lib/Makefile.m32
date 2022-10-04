@@ -201,8 +201,8 @@ libcurl_a_LIBRARY := libcurl.a
 
 libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
 libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
-
-RESOURCE := $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES))))
+libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
+libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES))))
 
 ### Rules
 
@@ -222,8 +222,8 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	@$(call DEL, $@)
 	$(AR) rcs $@ $(libcurl_a_OBJECTS)
 
-$(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
-	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_a_OBJECTS) $(RESOURCE) $(LIBS) \
+$(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
+	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
 
 %.o: %.c
@@ -233,7 +233,7 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
 	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
-	@$(call DEL, $(libcurl_a_OBJECTS) $(RESOURCE))
+	@$(call DEL, $(libcurl_dll_OBJECTS))
 
 distclean vclean: clean
 	@$(call DEL, $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY))
