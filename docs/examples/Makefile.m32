@@ -22,7 +22,7 @@
 #
 #***************************************************************************
 
-# See usage in lib/Makefile.m32
+# Before use, make sure to build curl via Makefile.m32.
 
 PROOT := ../..
 
