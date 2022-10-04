@@ -130,6 +130,7 @@ static void trim_headers(struct curl_slist *head)
 /* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' */
 #define DATE_FULL_HDR_LEN (DATE_HDR_KEY_LEN + TIMESTAMP_SIZE + 1)
 
+/* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
 static CURLcode make_headers(struct Curl_easy *data,
                              const char *hostname,
                              char *timestamp,
