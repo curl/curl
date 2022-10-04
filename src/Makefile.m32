@@ -193,4 +193,4 @@ clean:
 	@$(call DEL, $(TOCLEAN))
 
 distclean vclean: clean
-	@$(call DEL, $(TARGETS))
+	@$(call DEL, $(TARGETS) $(TOVCLEAN))

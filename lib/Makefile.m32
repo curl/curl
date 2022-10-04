@@ -207,6 +207,7 @@ libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
 libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES))))
 
 TOCLEAN := $(libcurl_dll_OBJECTS)
+TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
 
 ### Rules
 
@@ -240,4 +241,4 @@ clean:
 	@$(call DEL, $(TOCLEAN))
 
 distclean vclean: clean
-	@$(call DEL, $(TARGETS) $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY))
+	@$(call DEL, $(TARGETS) $(TOVCLEAN))
