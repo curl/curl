@@ -56,6 +56,26 @@ jobs:
           install_steps: mbedtls
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
 
+        - name: msh3
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_steps: quictls msh3
+          configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
+
+        - name: openssl3
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_steps: gcc-11 openssl3
+          configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+
+        - name: openssl3-O3
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_steps: gcc-11 openssl3
+          configure: CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+
+        - name: openssl3-clang
+          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev clang
+          install_steps: openssl3
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+
         - name: event-based
           install_packages: libpsl-dev libbrotli-dev libzstd-dev libssh-dev
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
@@ -91,6 +111,16 @@ jobs:
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
 
+    - if: ${{ contains(matrix.build.install_steps, 'gcc-11') }}
+      run: |
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
+        sudo apt-get update
+        sudo apt-get install gcc-11
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
+        sudo update-alternatives --set gcc /usr/bin/gcc-11
+        gcc --version
+      name: 'install gcc-11'
+
     - if: ${{ contains(matrix.build.install_steps, 'bearssl') }}
       run: |
         curl -LO https://bearssl.org/bearssl-0.6.tar.gz
@@ -117,6 +147,31 @@ jobs:
         cd mbedtls
         make DESTDIR=$HOME/mbed install
       name: 'install mbedtls'
+
+    - if: ${{ contains(matrix.build.install_steps, 'openssl3') }}
+      run: |
+        git clone --depth=1 https://github.com/openssl/openssl
+        cd openssl
+        ./config enable-tls1_3 --prefix=$HOME/openssl3
+        make install_sw
+      name: 'install openssl'
+
+    - if: ${{ contains(matrix.build.install_steps, 'quictls') }}
+      run: |
+        git clone --depth=1 -b OpenSSL_1_1_1j+quic https://github.com/quictls/openssl
+        cd openssl
+        ./config enable-tls1_3 --prefix=$HOME/quictls
+        make install_sw
+      name: 'install quictls'
+
+    - if: ${{ contains(matrix.build.install_steps, 'msh3') }}
+      run: |
+        git clone --depth=1 --recursive https://github.com/nibanks/msh3
+        cd msh3 && mkdir build && cd build
+        cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3 ..
+        cmake --build .
+        cmake --install .
+      name: 'install msh3'
 
     - if: ${{ contains(matrix.build.install_steps, 'rust') }}
       run: |
