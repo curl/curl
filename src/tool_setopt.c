@@ -252,12 +252,17 @@ static char *c_escape(const char *str, curl_off_t len)
       strcpy(e, "\\?");
       e += 2;
     }
-    else if(!ISPRINT(c)) {
+    else if(ISPRINT(c))
+      *e++ = c;
+    else if(len > 1 && ISXDIGIT(s[1])) {
+      /* Octal escape to avoid >2 digit hex. */
+      msnprintf(e, 5, "\\%03o", (unsigned)c);
+      e += 4;
+    }
+    else {
       msnprintf(e, 5, "\\x%02x", (unsigned)c);
       e += 4;
     }
-    else
-      *e++ = c;
   }
   while(cutoff--)
     *e++ = '.';
