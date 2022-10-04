@@ -60,11 +60,11 @@ This field specify the age of this struct. It is always zero for now.
 This is a bitmask with individual bits set that describes the WebSocket
 data. See the list below.
 .IP offset
-When this frame is a continuation of fragment data aleady delivered, this is
+When this frame is a continuation of fragment data already delivered, this is
 the offset into the final fragment where this piece belongs.
 .IP bytesleft
 If this is not a complete fragment, the \fIbytesleft\fP field informs about
-how many additonal bytes are expected to arrive before this fragment is
+how many additional bytes are expected to arrive before this fragment is
 complete.
 .SH FLAGS
 .IP CURLWS_TEXT
