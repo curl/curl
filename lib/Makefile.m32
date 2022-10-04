@@ -35,16 +35,44 @@
 # This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
 # Skip lib-specific parts when called through them.
 ifndef PROOT
-local := 1
 PROOT := ..
+
+CPPFLAGS += -DBUILDING_LIBCURL
+
+### Sources and targets
+
+# Provides CSOURCES, HHEADERS, LIB_RCFILES
+include Makefile.inc
+
+libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
+libcurl_dll_a_LIBRARY := libcurl.dll.a
+libcurl_a_LIBRARY := libcurl.a
+
+TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
+
+libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
+libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
+libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
+libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES)))
+vpath %.c vauth vquic vssh vtls
+
+TOCLEAN := $(libcurl_dll_OBJECTS)
+TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
+
+### Local rules
+
+$(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
+	@$(call DEL, $@)
+	$(AR) rcs $@ $(libcurl_a_OBJECTS)
+
+$(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
+	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
+	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
+
 endif
 
 CPPFLAGS += -I. -I$(PROOT)/include
 RCFLAGS  += -I$(PROOT)/include
-
-ifdef local
-CPPFLAGS += -DBUILDING_LIBCURL
-endif
 
 ifneq ($(ARCH),custom)
   # Set environment var ARCH to your architecture to override autodetection.
@@ -68,8 +96,8 @@ endif
 
 ### Optional features
 
-# Most CPPFLAGS are only necessary in 'local' mode. We include them always for
-# simplicity and for being in sync with other build systems.
+# Most CPPFLAGS are only necessary when building libcurl via 'lib'. We include
+# them always for simplicity and for being in sync with other build systems.
 
 ifneq ($(findstring -unicode,$(CFG)),)
   CPPFLAGS += -DUNICODE -D_UNICODE
@@ -205,40 +233,6 @@ ifeq ($(findstring -lldap,$(LIBS)),)
   LIBS += -lwldap32
 endif
 LIBS += -lws2_32 -lcrypt32 -lbcrypt
-
-ifdef local
-
-### Sources and targets
-
-# Provides CSOURCES, HHEADERS, LIB_RCFILES
-include Makefile.inc
-
-libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
-libcurl_dll_a_LIBRARY := libcurl.dll.a
-libcurl_a_LIBRARY := libcurl.a
-
-TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
-
-libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
-libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
-libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
-libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES)))
-vpath %.c vauth vquic vssh vtls
-
-TOCLEAN := $(libcurl_dll_OBJECTS)
-TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
-
-### Local rules (libcurl)
-
-$(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
-	@$(call DEL, $@)
-	$(AR) rcs $@ $(libcurl_a_OBJECTS)
-
-$(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
-	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
-	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
-
-endif
 
 ### Global rules
 
