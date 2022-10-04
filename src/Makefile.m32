@@ -165,6 +165,8 @@ curl_OBJECTS += $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_CFILES))))
 curl_OBJECTS += $(patsubst %.rc,%.res,$(strip $(CURL_RCFILES)))
 vpath %.c $(PROOT)/lib
 
+TOCLEAN := $(curl_OBJECTS)
+
 ### Rules
 
 CC ?= $(CROSSPREFIX)gcc
@@ -188,7 +190,7 @@ $(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
-	@$(call DEL, $(curl_OBJECTS))
+	@$(call DEL, $(TOCLEAN))
 
 distclean vclean: clean
 	@$(call DEL, $(TARGETS))

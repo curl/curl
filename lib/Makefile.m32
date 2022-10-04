@@ -206,6 +206,8 @@ libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
 libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES))))
 
+TOCLEAN := $(libcurl_dll_OBJECTS)
+
 ### Rules
 
 CC ?= $(CROSSPREFIX)gcc
@@ -235,7 +237,7 @@ $(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
 	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
-	@$(call DEL, $(libcurl_dll_OBJECTS))
+	@$(call DEL, $(TOCLEAN))
 
 distclean vclean: clean
 	@$(call DEL, $(TARGETS) $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY))

@@ -159,6 +159,8 @@ include Makefile.inc
 TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS) synctime.c))
 RESOURCE := $(PROOT)/src/curl.res
 
+TOCLEAN := $(TARGETS:.exe=.o)
+
 ### Rules
 
 CC ?= $(CROSSPREFIX)gcc
@@ -182,7 +184,7 @@ all: $(TARGETS)
 	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
-	@$(call DEL, $(TARGETS:.exe=.o))
+	@$(call DEL, $(TOCLEAN))
 
 distclean vclean: clean
 	@$(call DEL, $(TARGETS))
