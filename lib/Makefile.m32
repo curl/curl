@@ -169,7 +169,7 @@ ifneq ($(findstring -ssl,$(CFG)),)
   OPENSSL_LIBS ?= -lssl -lcrypto
   LIBS += $(OPENSSL_LIBS)
   ifneq ($(findstring -srp,$(CFG)),)
-    ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
+    ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h),)
       # OpenSSL 1.0.1 and later, except BoringSSL
       CPPFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
     endif
@@ -249,9 +249,11 @@ RC ?= $(CROSSPREFIX)windres
 AR ?= $(CROSSPREFIX)ar
 
 ifneq ($(findstring /sh,$(SHELL)),)
-DEL = rm -f $1
+DEL  = rm -f $1
+COPY = -cp -afv $1 $2
 else
-DEL = -del 2>NUL /q /f $(subst /,\,$1)
+DEL  = -del 2>NUL /q /f $(subst /,\,$1)
+COPY = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
 endif
 
 all: $(TARGETS)
