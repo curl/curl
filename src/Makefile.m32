@@ -32,32 +32,13 @@
 
 PROOT := ..
 
-CPPFLAGS += -I. -I$(PROOT)/include -I$(PROOT)/lib
-RCFLAGS  += -I$(PROOT)/include -DCURL_EMBED_MANIFEST
+# Provides CURL_CFILES, CURLX_CFILES, CURL_RCFILES
+include Makefile.inc
+
+CPPFLAGS += -I$(PROOT)/lib
+RCFLAGS  += -DCURL_EMBED_MANIFEST
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     += -lcurl
-
-ifneq ($(ARCH),custom)
-  # Set environment var ARCH to your architecture to override autodetection.
-  ifndef ARCH
-    ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
-      ARCH := w64
-    else
-      ARCH := w32
-    endif
-  endif
-  ifeq ($(ARCH),w64)
-    CFLAGS  += -m64
-    LDFLAGS += -m64
-    RCFLAGS += --target=pe-x86-64
-  else
-    CFLAGS  += -m32
-    LDFLAGS += -m32
-    RCFLAGS += --target=pe-i386
-  endif
-endif
-
-### Optional features
 
 ifneq ($(findstring -dyn,$(CFG)),)
   curl_DEPENDENCIES := $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll
@@ -68,95 +49,7 @@ else
   LDFLAGS += -static
 endif
 
-ifneq ($(findstring -unicode,$(CFG)),)
-  CPPFLAGS += -DUNICODE -D_UNICODE
-  LDFLAGS += -municode
-endif
-ifneq ($(findstring -sync,$(CFG)),)
-else
-  ifneq ($(findstring -ares,$(CFG)),)
-    LIBCARES_PATH ?= $(PROOT)/../c-ares
-    LDFLAGS += -L"$(LIBCARES_PATH)/lib"
-    LIBS += -lcares
-  endif
-endif
-ifneq ($(findstring -rtmp,$(CFG)),)
-  LIBRTMP_PATH ?= $(PROOT)/../librtmp
-  LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
-  LIBS += -lrtmp -lwinmm
-  ZLIB := 1
-endif
-ifneq ($(findstring -ssh2,$(CFG)),)
-  LIBSSH2_PATH ?= $(PROOT)/../libssh2
-  LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
-  LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
-  LIBS += -lssh2
-endif
-ifneq ($(findstring -nghttp2,$(CFG)),)
-  NGHTTP2_PATH ?= $(PROOT)/../nghttp2
-  LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
-  LIBS += -lnghttp2
-endif
-ifneq ($(findstring -nghttp3,$(CFG)),)
-  ifneq ($(findstring -ngtcp2,$(CFG)),)
-    NGHTTP3_PATH ?= $(PROOT)/../nghttp3
-    LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
-    LIBS += -lnghttp3
-    NGTCP2_PATH ?= $(PROOT)/../ngtcp2
-    LDFLAGS += -L"$(NGTCP2_PATH)/lib"
-    NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
-    LIBS += $(NGTCP2_LIBS)
-  endif
-endif
-ifneq ($(findstring -ssl,$(CFG)),)
-  OPENSSL_PATH ?= $(PROOT)/../openssl
-  OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
-  LDFLAGS += -L"$(OPENSSL_LIBPATH)"
-  OPENSSL_LIBS ?= -lssl -lcrypto
-  LIBS += $(OPENSSL_LIBS)
-endif
-ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
-  ZLIB_PATH ?= $(PROOT)/../zlib
-  CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
-  CPPFLAGS += -I"$(ZLIB_PATH)"
-  LDFLAGS += -L"$(ZLIB_PATH)"
-  LIBS += -lz
-endif
-ifneq ($(findstring -zstd,$(CFG)),)
-  ZSTD_PATH ?= $(PROOT)/../zstd
-  LDFLAGS += -L"$(ZSTD_PATH)/lib"
-  ZSTD_LIBS ?= -lzstd
-  LIBS += $(ZSTD_LIBS)
-endif
-ifneq ($(findstring -brotli,$(CFG)),)
-  BROTLI_PATH ?= $(PROOT)/../brotli
-  LDFLAGS += -L"$(BROTLI_PATH)/lib"
-  BROTLI_LIBS ?= -lbrotlidec -lbrotlicommon
-  LIBS += $(BROTLI_LIBS)
-endif
-ifneq ($(findstring -gsasl,$(CFG)),)
-  LIBGSASL_PATH ?= $(PROOT)/../gsasl
-  LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
-  LIBS += -lgsasl
-endif
-ifneq ($(findstring -idn2,$(CFG)),)
-  LIBIDN2_PATH ?= $(PROOT)/../libidn2
-  LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
-  LIBS += -lidn2
-else
-ifneq ($(findstring -winidn,$(CFG)),)
-  LIBS += -lnormaliz
-endif
-endif
-ifeq ($(findstring -lldap,$(LIBS)),)
-  LIBS += -lwldap32
-endif
-LIBS += -lws2_32 -lcrypt32 -lbcrypt
-
 ### Sources and targets
-
-# Provides CURL_CFILES, CURLX_CFILES, CURL_RCFILES
-include Makefile.inc
 
 TARGETS := curl.exe
 
@@ -167,30 +60,11 @@ vpath %.c $(PROOT)/lib
 
 TOCLEAN := $(curl_OBJECTS)
 
-### Rules
-
-CC ?= $(CROSSPREFIX)gcc
-RC ?= $(CROSSPREFIX)windres
-
-ifneq ($(findstring /sh,$(SHELL)),)
-DEL = rm -f $1
-else
-DEL = -del 2>NUL /q /f $(subst /,\,$1)
-endif
-
-all: $(TARGETS)
+### Local rules
 
 $(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $(curl_OBJECTS) $(LIBS)
 
-%.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+### Global script
 
-%.res: %.rc
-	$(RC) -O coff $(RCFLAGS) -i $< -o $@
-
-clean:
-	@$(call DEL, $(TOCLEAN))
-
-distclean vclean: clean
-	@$(call DEL, $(TARGETS) $(TOVCLEAN))
+include $(PROOT)/lib/Makefile.m32

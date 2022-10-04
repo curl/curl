@@ -30,10 +30,17 @@
 # Set component roots via envvar <feature>_PATH. CPPFLAGS, LDFLAGS, LIBS,
 # CFLAGS, RCFLAGS (and more) are also available for customization.
 
+ifndef PROOT
+local := 1
 PROOT := ..
+endif
 
-CPPFLAGS += -I. -I$(PROOT)/include -DBUILDING_LIBCURL
+CPPFLAGS += -I. -I$(PROOT)/include
 RCFLAGS  += -I$(PROOT)/include
+
+ifdef local
+CPPFLAGS += -DBUILDING_LIBCURL
+endif
 
 ifneq ($(ARCH),custom)
   # Set environment var ARCH to your architecture to override autodetection.
@@ -59,6 +66,7 @@ endif
 
 ifneq ($(findstring -unicode,$(CFG)),)
   CPPFLAGS += -DUNICODE -D_UNICODE
+  CURL_LDFLAGS_BIN += -municode
 endif
 ifneq ($(findstring -sync,$(CFG)),)
   CPPFLAGS += -DUSE_SYNC_DNS
@@ -135,6 +143,7 @@ ifneq ($(findstring -schannel,$(CFG)),)
 endif
 ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
   ZLIB_PATH ?= $(PROOT)/../zlib
+  # These CPPFLAGS are the only ones necessary when compiling the curl tool.
   CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   CPPFLAGS += -I"$(ZLIB_PATH)"
   LDFLAGS += -L"$(ZLIB_PATH)"
@@ -192,6 +201,7 @@ LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
 ### Sources and targets
 
+ifdef local
 # Provides CSOURCES, HHEADERS, LIB_RCFILES
 include Makefile.inc
 
@@ -209,8 +219,9 @@ vpath %.c vauth vquic vssh vtls
 
 TOCLEAN := $(libcurl_dll_OBJECTS)
 TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
+endif
 
-### Rules
+### Global rules
 
 CC ?= $(CROSSPREFIX)gcc
 RC ?= $(CROSSPREFIX)windres
@@ -224,6 +235,9 @@ endif
 
 all: $(TARGETS)
 
+ifdef local
+### Local rules
+
 $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	@$(call DEL, $@)
 	$(AR) rcs $@ $(libcurl_a_OBJECTS)
@@ -231,6 +245,7 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 $(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
 	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
+endif
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
