@@ -38,12 +38,15 @@ else
   LDFLAGS += -static
 endif
 
+# For externalsocket.c
+LIBS += -lws2_32
+
 ### Sources and targets
 
 # Provides check_PROGRAMS
 include Makefile.inc
 
-TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS) synctime.c))
+TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS) synctime))
 RESOURCE := $(PROOT)/src/curl.res
 TOCLEAN := $(TARGETS:.exe=.o)
 
