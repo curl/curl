@@ -33,7 +33,6 @@
 PROOT := ../..
 
 CPPFLAGS += -I. -I$(PROOT)/include
-RCFLAGS  += -I$(PROOT)/include -DCURL_EMBED_MANIFEST
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     += -lcurl
 
