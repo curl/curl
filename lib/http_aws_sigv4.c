@@ -166,13 +166,20 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(data->state.aptr.host) {
       size_t pos;
 
-      strncpy(full_host, data->state.aptr.host, FULL_HOST_LEN);
-      full_host[FULL_HOST_LEN - 1] = 0;
+      if (strlen(data->state.aptr.host) > FULL_HOST_LEN) {
+        ret = CURLE_URL_MALFORMAT;
+        goto fail;
+      }
+      strcpy(full_host, data->state.aptr.host);
       /* remove /r/n as the separator for canonical request must be '\n' */
       pos = strcspn(full_host, "\n\r");
       full_host[pos] = 0;
     }
     else {
+      if (strlen(hostname) > FULL_HOST_LEN) {
+        ret = CURLE_URL_MALFORMAT;
+        goto fail;
+      }
       msnprintf(full_host, FULL_HOST_LEN, "host:%s", hostname);
     }
 
