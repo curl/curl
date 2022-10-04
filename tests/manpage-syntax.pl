@@ -167,7 +167,7 @@ sub scanmanpage {
             my ($pre, $format) = ($1, $2);
             if($pre !~ /\\\z/) {
                 # only if there wasn't another backslash before the \f
-                print STDERR "$file:$line suspicios \\f format!\n";
+                print STDERR "$file:$line suspicious \\f format!\n";
                 $errors++;
             }
         }
