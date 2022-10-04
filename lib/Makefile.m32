@@ -22,14 +22,18 @@
 #
 #***************************************************************************
 
-# Makefile for building libcurl with MinGW and optional features.
+# Makefile for building curl parts with MinGW and optional features.
 #
 # Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 #
-# Set component roots via envvar <feature>_PATH. CPPFLAGS, LDFLAGS, LIBS,
-# CFLAGS, RCFLAGS (and more) are also available for customization.
+# Set component roots via envvar <feature>_PATH. Also available for
+# customization: CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS, ARCH,
+# CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX, and more for individual
+# components.
 
+# This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
+# Skip lib-specific parts when called through them.
 ifndef PROOT
 local := 1
 PROOT := ..
@@ -63,6 +67,9 @@ ifneq ($(ARCH),custom)
 endif
 
 ### Optional features
+
+# Most CPPFLAGS are only necessary in 'local' mode. We include them always for
+# simplicity and for being in sync with other build systems.
 
 ifneq ($(findstring -unicode,$(CFG)),)
   CPPFLAGS += -DUNICODE -D_UNICODE
@@ -143,7 +150,7 @@ ifneq ($(findstring -schannel,$(CFG)),)
 endif
 ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
   ZLIB_PATH ?= $(PROOT)/../zlib
-  # These CPPFLAGS are the only ones necessary when compiling the curl tool.
+  # These CPPFLAGS are also required when compiling the curl tool via 'src'.
   CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   CPPFLAGS += -I"$(ZLIB_PATH)"
   LDFLAGS += -L"$(ZLIB_PATH)"
@@ -199,9 +206,10 @@ ifeq ($(findstring -lldap,$(LIBS)),)
 endif
 LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
+ifdef local
+
 ### Sources and targets
 
-ifdef local
 # Provides CSOURCES, HHEADERS, LIB_RCFILES
 include Makefile.inc
 
@@ -219,6 +227,17 @@ vpath %.c vauth vquic vssh vtls
 
 TOCLEAN := $(libcurl_dll_OBJECTS)
 TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
+
+### Local rules (libcurl)
+
+$(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
+	@$(call DEL, $@)
+	$(AR) rcs $@ $(libcurl_a_OBJECTS)
+
+$(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
+	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
+	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
+
 endif
 
 ### Global rules
@@ -234,18 +253,6 @@ DEL = -del 2>NUL /q /f $(subst /,\,$1)
 endif
 
 all: $(TARGETS)
-
-ifdef local
-### Local rules
-
-$(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
-	@$(call DEL, $@)
-	$(AR) rcs $@ $(libcurl_a_OBJECTS)
-
-$(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
-	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
-	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
-endif
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
