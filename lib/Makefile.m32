@@ -199,7 +199,7 @@ libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
 libcurl_dll_a_LIBRARY := libcurl.dll.a
 libcurl_a_LIBRARY := libcurl.a
 
-libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(strip $(CSOURCES)))
+libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
 libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 
 RESOURCE := libcurl.res
@@ -227,7 +227,7 @@ $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE)
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 %.res: %.rc
 	$(RC) -O coff $(RCFLAGS) -i $< -o $@
