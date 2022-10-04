@@ -30,7 +30,6 @@ LDFLAGS  += -L$(PROOT)/lib
 LIBS     += -lcurl
 
 ifneq ($(findstring -dyn,$(CFG)),)
-  curl_DEPENDENCIES := $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll
   curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
 else
   curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
