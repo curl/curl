@@ -204,6 +204,8 @@ libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
 libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES))))
 
+TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
+
 ### Rules
 
 CC ?= $(CROSSPREFIX)gcc
@@ -216,7 +218,7 @@ else
 DEL = -del 2>NUL /q /f $(subst /,\,$1)
 endif
 
-all: $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
+all: $(TARGETS)
 
 $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	@$(call DEL, $@)
@@ -236,4 +238,4 @@ clean:
 	@$(call DEL, $(libcurl_dll_OBJECTS))
 
 distclean vclean: clean
-	@$(call DEL, $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY))
+	@$(call DEL, $(TARGETS) $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY))
