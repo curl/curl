@@ -98,17 +98,18 @@ endif
 
 ### Optional features
 
-# Most CPPFLAGS are only necessary when building libcurl via 'lib'. We include
-# them always for simplicity and for being in sync with other build systems.
-# See comment below about the exception.
-
-# LDFLAGS and LIBS below are not required when building 'src' and
-# 'docs/examples' in DYN mode.
-
 ifneq ($(findstring -unicode,$(CFG)),)
   CPPFLAGS += -DUNICODE -D_UNICODE
   CURL_LDFLAGS_BIN += -municode
 endif
+
+# CPPFLAGS below are only necessary when building libcurl via 'lib'. We
+# include them always for simplicity and for being in sync with other
+# build systems. See comment below about the exception.
+
+# LDFLAGS and LIBS below are not required when building 'src' and
+# 'docs/examples' in DYN mode.
+
 ifneq ($(findstring -sync,$(CFG)),)
   CPPFLAGS += -DUSE_SYNC_DNS
 else
