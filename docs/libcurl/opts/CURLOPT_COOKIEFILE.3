@@ -40,10 +40,9 @@ headers (Set-Cookie style) dumped to a file.
 It also enables the cookie engine, making libcurl parse and send cookies on
 subsequent requests with this handle.
 
-Given an empty or non-existing file or by passing the empty string ("") to
-this option, you can enable the cookie engine without reading any initial
-cookies. If you tell libcurl the file name is "-" (just a single minus sign),
-libcurl will instead read from stdin.
+By passing the empty string ("") to this option, you enable the cookie engine
+without reading any initial cookies. If you tell libcurl the file name is "-"
+(just a single minus sign), libcurl will instead read from stdin.
 
 This option only \fBreads\fP cookies. To make libcurl write cookies to file,
 see \fICURLOPT_COOKIEJAR(3)\fP.
