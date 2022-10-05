@@ -132,7 +132,7 @@ ifneq ($(findstring -rtmp,$(CFG)),)
 endif
 ifneq ($(findstring -ssh2,$(CFG)),)
   LIBSSH2_PATH ?= $(PROOT)/../libssh2
-  CPPFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
+  CPPFLAGS += -DUSE_LIBSSH2
   CPPFLAGS += -I"$(LIBSSH2_PATH)/include"
   _LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"

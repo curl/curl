@@ -241,7 +241,7 @@ make_module()
         fi
 
         if [ "${WITH_LIBSSH2}" != "0" ]
-        then    DEFINES="${DEFINES} USE_LIBSSH2 HAVE_LIBSSH2_H"
+        then    DEFINES="${DEFINES} USE_LIBSSH2"
         fi
 
         if [ "${DEFINES}" ]
