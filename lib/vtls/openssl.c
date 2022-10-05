@@ -4619,7 +4619,8 @@ const struct Curl_ssl Curl_ssl_openssl = {
   NULL,                     /* sha256sum */
 #endif
   ossl_associate_connection, /* associate_connection */
-  ossl_disassociate_connection /* disassociate_connection */
+  ossl_disassociate_connection, /* disassociate_connection */
+  NULL                      /* free_multi_ssl_backend_data */
 };
 
 #endif /* USE_OPENSSL */
