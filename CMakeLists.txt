@@ -678,11 +678,9 @@ if(WIN32)
 endif()
 
 set(HAVE_LIBZ OFF)
-set(HAVE_ZLIB_H OFF)
 set(USE_ZLIB OFF)
 optional_dependency(ZLIB)
 if(ZLIB_FOUND)
-  set(HAVE_ZLIB_H ON)
   set(HAVE_LIBZ ON)
   set(USE_ZLIB ON)
 
@@ -1234,18 +1232,6 @@ curl_internal_test(HAVE_BUILTIN_AVAILABLE)
 
 if(NOT HAVE_IN_ADDR_T)
   set(in_addr_t "unsigned long")
-endif()
-
-# Fix libz / zlib.h
-
-if(NOT CURL_SPECIAL_LIBZ)
-  if(NOT HAVE_LIBZ)
-    set(HAVE_ZLIB_H 0)
-  endif()
-
-  if(NOT HAVE_ZLIB_H)
-    set(HAVE_LIBZ 0)
-  endif()
 endif()
 
 # Check for nonblocking

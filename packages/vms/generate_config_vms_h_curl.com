@@ -447,7 +447,6 @@ $!
 $if .not. nozlib
 $then
 $   write cvh "#define HAVE_LIBZ 1"
-$   write cvh "#define HAVE_ZLIB_H 1"
 $endif
 $!
 $!

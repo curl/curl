@@ -604,9 +604,6 @@
 /* Define if you have the <process.h> header file. */
 #cmakedefine HAVE_PROCESS_H 1
 
-/* if you have the zlib.h header file */
-#cmakedefine HAVE_ZLIB_H 1
-
 /* Define to 1 if you need the lber.h header file even with ldap.h */
 #cmakedefine NEED_LBER_H 1
 

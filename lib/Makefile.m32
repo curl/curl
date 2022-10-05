@@ -187,7 +187,7 @@ endif
 ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
   ZLIB_PATH ?= $(PROOT)/../zlib
   # These CPPFLAGS are also required when compiling the curl tool via 'src'.
-  CPPFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
+  CPPFLAGS += -DHAVE_LIBZ
   CPPFLAGS += -I"$(ZLIB_PATH)"
   _LDFLAGS += -L"$(ZLIB_PATH)"
   _LIBS += -lz

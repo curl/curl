@@ -237,7 +237,7 @@ make_module()
         DEFINES="${3} BUILDING_LIBCURL"
 
         if [ "${WITH_ZLIB}" != "0" ]
-        then    DEFINES="${DEFINES} HAVE_LIBZ HAVE_ZLIB_H"
+        then    DEFINES="${DEFINES} HAVE_LIBZ"
         fi
 
         if [ "${WITH_LIBSSH2}" != "0" ]
