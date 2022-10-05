@@ -177,6 +177,28 @@ bool Curl_safecmp(char *a, char *b)
   return !a && !b;
 }
 
+/*
+ * Curl_timestrcmp() returns 0 if the two strings are identical. The time this
+ * function spends is a function of the shortest string, not of the contents.
+ */
+int Curl_timestrcmp(const char *a, const char *b)
+{
+  int match = 0;
+  int i = 0;
+
+  if(a && b) {
+    while(1) {
+      match |= a[i]^b[i];
+      if(!a[i] || !b[i])
+        break;
+      i++;
+    }
+  }
+  else
+    return a || b;
+  return match;
+}
+
 /* --- public functions --- */
 
 int curl_strequal(const char *first, const char *second)
