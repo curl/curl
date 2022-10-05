@@ -784,7 +784,6 @@ if(NOT HAVE_LIBSSH2 AND CURL_USE_LIBSSH)
     # Use imported target for include and library paths.
     list(APPEND CURL_LIBS ssh)
     set(USE_LIBSSH ON)
-    set(HAVE_LIBSSH_LIBSSH_H 1)
   endif()
 endif()
 

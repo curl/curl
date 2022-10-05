@@ -29,7 +29,7 @@
 #if defined(HAVE_LIBSSH2_H)
 #include <libssh2.h>
 #include <libssh2_sftp.h>
-#elif defined(HAVE_LIBSSH_LIBSSH_H)
+#elif defined(USE_LIBSSH)
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 #elif defined(USE_WOLFSSH)
