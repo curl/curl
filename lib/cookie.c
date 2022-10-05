@@ -538,7 +538,7 @@ Curl_cookie_add(struct Curl_easy *data,
     do {
       /* we have a <what>=<this> pair or a stand-alone word here */
       name[0] = what[0] = 0; /* init the buffers */
-      if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^;\r\n=] =%"
+      if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^;\t\r\n=] =%"
                      MAX_NAME_TXT "[^;\r\n]",
                      name, what)) {
         /*
@@ -591,6 +591,13 @@ Curl_cookie_add(struct Curl_easy *data,
         whatptr = what;
         while(*whatptr && ISBLANK(*whatptr))
           whatptr++;
+
+        /* Reject cookies with a TAB inside the content */
+        if(strchr(whatptr, '\t')) {
+          freecookie(co);
+          infof(data, "cookie contains TAB, dropping");
+          return NULL;
+        }
 
         /*
          * Check if we have a reserved prefix set before anything else, as we
