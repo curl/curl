@@ -60,8 +60,7 @@ HTTP, SMTP, IMAP.
 
  curl_easy_perform(handle); /* post away! */
 
- /* free the post data again */
- curl_mime_free(multipart);
+ curl_mime_free(multipart); /* free the post data */
 .fi
 .SH AVAILABILITY
 Added in 7.56.0
