@@ -46,7 +46,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
   long filetime = -1;
-  double filesize = 0.0;
+  curl_off_t filesize = 0;
   const char *filename = strrchr(ftpurl, '/') + 1;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -72,10 +72,11 @@ int main(void)
         time_t file_time = (time_t)filetime;
         printf("filetime %s: %s", filename, ctime(&file_time));
       }
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
+      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                               &filesize);
-      if((CURLE_OK == res) && (filesize>0.0))
-        printf("filesize %s: %0.0f bytes\n", filename, filesize);
+      if((CURLE_OK == res) && (filesize>0))
+        printf("filesize %s: %" CURL_FORMAT_CURL_OFF_T " bytes\n",
+               filename, filesize);
     }
     else {
       /* we failed */
