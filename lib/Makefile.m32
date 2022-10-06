@@ -107,7 +107,7 @@ endif
 # comments below about exceptions). Always include them anyway to match
 # behavior of other build systems.
 
-# Linker options to exclude for shared mode executables:
+# Linker options to exclude for shared mode executables.
 _LDFLAGS :=
 _LIBS :=
 
@@ -152,6 +152,7 @@ ifneq ($(findstring -nghttp3,$(CFG)),)
     CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
     _LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
     _LIBS += -lnghttp3
+
     NGTCP2_PATH ?= $(PROOT)/../ngtcp2
     CPPFLAGS += -DUSE_NGTCP2
     CPPFLAGS += -I"$(NGTCP2_PATH)/include"
@@ -165,14 +166,15 @@ ifneq ($(findstring -ssl,$(CFG)),)
   CPPFLAGS += -DUSE_OPENSSL
   CPPFLAGS += -DCURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
   OPENSSL_INCLUDE ?= $(OPENSSL_PATH)/include
-  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
   OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
+  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
   _LDFLAGS += -L"$(OPENSSL_LIBPATH)"
   OPENSSL_LIBS ?= -lssl -lcrypto
   _LIBS += $(OPENSSL_LIBS)
+
   ifneq ($(findstring -srp,$(CFG)),)
     ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h),)
-      # OpenSSL 1.0.1 and later, except BoringSSL
+      # OpenSSL 1.0.1 and later.
       CPPFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
     endif
   endif

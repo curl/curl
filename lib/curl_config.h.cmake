@@ -786,3 +786,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* to make the compiler know the prototypes of Windows IDN APIs */
 #cmakedefine WANT_IDN_PROTOTYPES 1
+
+/* Define to 1 to enable websocket support. */
+#cmakedefine USE_WEBSOCKETS 1
