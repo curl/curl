@@ -212,10 +212,8 @@ void Curl_connect_done(struct Curl_easy *data)
     Curl_dyn_free(&s->rcvbuf);
     Curl_dyn_free(&s->req);
 
-    /* restore the protocol pointer, if not already done */
-    if(s->prot_save)
-      data->req.p.http = s->prot_save;
-    s->prot_save = NULL;
+    /* restore the protocol pointer */
+    data->req.p.http = s->prot_save;
     data->info.httpcode = 0; /* clear it as it might've been used for the
                                 proxy */
     data->req.ignorebody = FALSE;
