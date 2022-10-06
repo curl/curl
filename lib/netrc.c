@@ -198,7 +198,7 @@ static int parsenetrc(const char *host,
           /* we are now parsing sub-keywords concerning "our" host */
           if(state_login) {
             if(specific_login) {
-              state_our_login = strcasecompare(login, tok);
+              state_our_login = !strcmp(login, tok);
             }
             else if(!login || strcmp(login, tok)) {
               if(login_alloc) {
