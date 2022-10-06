@@ -75,7 +75,7 @@ TEST_E = -a -e
 TEST_NF = -a -p !flaky
 
 # special CI target derived from nonflaky with CI-specific flags
-TEST_CI = $(TEST_NF) -r -rm
+TEST_CI = $(TEST_NF) -rm
 endif
 
 # make sure that PERL is pointing to an executable
