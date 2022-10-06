@@ -54,7 +54,7 @@ Set-Cookie: cookie5=%hex[%05-junk]hex%
 Set-Cookie: cookie6=%hex[%06-junk]hex%
 Set-Cookie: cookie7=%hex[%07-junk]hex%
 Set-Cookie: cookie8=%hex[%08-junk]hex%
-Set-Cookie: cookie9=%hex[junk-%09-]hex%
+Set-Cookie: cookie9=%hex[junk--%09]hex%
 Set-Cookie: cookie11=%hex[%0b-junk]hex%
 Set-Cookie: cookie12=%hex[%0c-junk]hex%
 Set-Cookie: cookie14=%hex[%0e-junk]hex%
@@ -90,7 +90,7 @@ GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Cookie: name with space=is weird but; trailingspace=removed; cookie=perhaps; cookie=yes; foobar=name; blexp=yesyes; cookie9=junk-	-
+Cookie: name with space=is weird but; trailingspace=removed; cookie=perhaps; cookie=yes; foobar=name; blexp=yesyes; cookie9=junk--
 
 </protocol>
 </verify>
