@@ -343,20 +343,8 @@
 /* Define to 1 if you have the `socket' library (-lsocket). */
 #cmakedefine HAVE_LIBSOCKET 1
 
-/* Define to 1 if you have the `psl' library (-lpsl). */
-#cmakedefine HAVE_LIBPSL 1
-
-/* Define to 1 if you have the <libpsl.h> header file. */
-#cmakedefine HAVE_LIBPSL_H 1
-
 /* Define to 1 if you have the `ssh2' library (-lssh2). */
 #cmakedefine HAVE_LIBSSH2 1
-
-/* Define to 1 if you have the <libssh2.h> header file. */
-#cmakedefine HAVE_LIBSSH2_H 1
-
-/* Define to 1 if you have the <libssh/libssh.h> header file. */
-#cmakedefine HAVE_LIBSSH_LIBSSH_H 1
 
 /* if zlib is available */
 #cmakedefine HAVE_LIBZ 1
@@ -603,9 +591,6 @@
 
 /* Define if you have the <process.h> header file. */
 #cmakedefine HAVE_PROCESS_H 1
-
-/* if you have the zlib.h header file */
-#cmakedefine HAVE_ZLIB_H 1
 
 /* Define to 1 if you need the lber.h header file even with ldap.h */
 #cmakedefine NEED_LBER_H 1

@@ -56,7 +56,6 @@ if(NOT UNIX)
     set(HAVE_TIME_H 1)
     set(HAVE_UNISTD_H 0)
     set(HAVE_UTIME_H 0)
-    set(HAVE_ZLIB_H 0)
 
     set(HAVE_SOCKET 1)
     set(HAVE_SELECT 1)
