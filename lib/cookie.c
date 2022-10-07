@@ -970,6 +970,35 @@ Curl_cookie_add(struct Curl_easy *data,
         if(!co->value)
           badcookie = TRUE;
         break;
+      case 7: { /* extensions */
+        char *p = ptr;
+        do {
+          if(strncasecompare("enc", p, 3)) {
+            /* the name/value have TABs encoded as '=' */
+            char *list[3];
+            char *enc;
+            int i;
+            list[0] = co->name;
+            list[1] = co->value;
+            list[2] = NULL;
+
+            for(i = 0; list[i] ; i++) {
+              enc = list[i];
+              while((enc = strchr(enc, '='))) {
+                *enc = '\t';
+                enc++;
+              }
+            }
+
+            p += 3;
+          }
+          else if(*p == ',')
+            p++;
+          else /* unknown specifier, bail out */
+            break;
+        } while(*p);
+        break;
+      }
       }
     }
     if(6 == fields) {
@@ -981,7 +1010,7 @@ Curl_cookie_add(struct Curl_easy *data,
         fields++;
     }
 
-    if(!badcookie && (7 != fields))
+    if(fields < 7)
       /* we did not find the sufficient number of fields */
       badcookie = TRUE;
 
@@ -1616,28 +1645,60 @@ void Curl_cookie_cleanup(struct CookieInfo *c)
  */
 static char *get_netscape_format(const struct Cookie *co)
 {
-  return aprintf(
-    "%s"     /* httponly preamble */
-    "%s%s\t" /* domain */
-    "%s\t"   /* tailmatch */
-    "%s\t"   /* path */
-    "%s\t"   /* secure */
-    "%" CURL_FORMAT_CURL_OFF_T "\t"   /* expires */
-    "%s\t"   /* name */
-    "%s",    /* value */
-    co->httponly?"#HttpOnly_":"",
-    /*
-     * Make sure all domains are prefixed with a dot if they allow
-     * tailmatching. This is Mozilla-style.
-     */
-    (co->tailmatch && co->domain && co->domain[0] != '.')? ".":"",
-    co->domain?co->domain:"unknown",
-    co->tailmatch?"TRUE":"FALSE",
-    co->path?co->path:"/",
-    co->secure?"TRUE":"FALSE",
-    co->expires,
-    co->name,
-    co->value?co->value:"");
+  struct dynbuf str;
+  Curl_dyn_init(&str, MAX_COOKIE_LINE);
+
+  if(Curl_dyn_addf(&str,
+                   "%s"     /* httponly preamble */
+                   "%s%s\t" /* domain */
+                   "%s\t"   /* tailmatch */
+                   "%s\t"   /* path */
+                   "%s\t"   /* secure */
+                   "%" CURL_FORMAT_CURL_OFF_T,   /* expires */
+
+                   co->httponly?"#HttpOnly_":"",
+                   /*
+                    * Make sure domains are prefixed with a dot if they allow
+                    * tailmatching.
+                    */
+                   (co->tailmatch && co->domain && co->domain[0] != '.')?
+                   ".":"",
+                   co->domain?co->domain:"unknown",
+                   co->tailmatch?"TRUE":"FALSE",
+                   co->path?co->path:"/",
+                   co->secure?"TRUE":"FALSE",
+                   co->expires))
+    return NULL;
+  else {
+    char *list[3];
+    char *enc;
+    int i;
+    bool encoded = FALSE;
+    list[0] = co->name;
+    list[1] = co->value;
+    list[2] = NULL;
+    for(i = 0; list[i] ; i++) {
+      enc = list[i];
+      if(Curl_dyn_addn(&str, "\t", 1))
+        return NULL;
+      while(*enc) {
+        char out = *enc;
+        if(out == '\t') {
+          out = '=';
+          encoded = TRUE;
+        }
+        if(Curl_dyn_addn(&str, &out, 1))
+          return NULL;
+        enc++;
+      }
+    }
+    if(encoded) {
+      /* tag the line as encoded */
+      if(Curl_dyn_addn(&str, "\tenc", 4))
+        return NULL;
+    }
+  }
+  return Curl_dyn_ptr(&str);
 }
 
 /*

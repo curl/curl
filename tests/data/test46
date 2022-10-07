@@ -55,6 +55,7 @@ www.loser.com	FALSE	/	FALSE	2139150993	UID	99
 domain..tld	FALSE	/	FALSE	2139150993	mooo	indeed
 #HttpOnly_domain..tld	FALSE	/want	FALSE	2139150993	mooo2	indeed2
 domain..tld	FALSE	/want	FALSE	0	empty	
+encoded.com	FALSE	/	FALSE	0	hello=there	foo=bar	enc
 </file>
 </client>
 
@@ -78,6 +79,7 @@ domain..tld	FALSE	/	FALSE	0	justaname
 domain..tld	FALSE	/	FALSE	0	ASPSESSIONIDQGGQQSJJ	GKNBDIFAAOFDPDAIEAKDIBKE
 domain..tld	FALSE	/	FALSE	0	ckySession	temporary
 domain..tld	FALSE	/	FALSE	2118138987	ckyPersistent	permanent
+encoded.com	FALSE	/	FALSE	0	hello=there	foo=bar	enc
 domain..tld	FALSE	/want	FALSE	0	empty	
 #HttpOnly_domain..tld	FALSE	/want	FALSE	2139150993	mooo2	indeed2
 domain..tld	FALSE	/	FALSE	2139150993	mooo	indeed
