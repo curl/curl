@@ -334,6 +334,7 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
   else if(nitems) {
     unsigned char *frame = NULL;
     size_t flen = 0;
+    size_t wrote = 0;
     CURLcode result;
     unsigned char *endp;
     curl_off_t oleft;
@@ -383,7 +384,10 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
     }
     else {
       /* deliver the decoded frame to the user callback */
-      if(data->set.fwrite_func((char *)frame, 1, flen, writebody_ptr) != flen)
+      Curl_set_in_callback(data, true);
+      wrote = data->set.fwrite_func((char *)frame, 1, flen, writebody_ptr);
+      Curl_set_in_callback(data, false);
+      if(wrote != flen)
         return 0;
     }
     if(oleft)
@@ -681,12 +685,13 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
   out = data->state.ulbuf;
   if(buflen)
     /* for PING and PONG etc there might not be a payload */
-    ws_xor(data, buffer, (unsigned char *)out + headlen, buflen - headlen);
-  if(Curl_is_in_callback(data))
+    ws_xor(data, buffer, (unsigned char *)out + headlen, buflen);
+
+  if(data->set.connect_only)
+    result = Curl_senddata(data, out, buflen + headlen, &written);
+  else
     result = Curl_write(data, data->conn->writesockfd, out,
                         buflen + headlen, &written);
-  else
-    result = Curl_senddata(data, out, buflen + headlen, &written);
 
   infof(data, "WS: wanted to send %zu bytes, sent %zu bytes",
         headlen + buflen, written);
