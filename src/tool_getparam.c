@@ -556,6 +556,106 @@ static void cleanarg(argv_item_t str)
 #define cleanarg(x)
 #endif
 
+/* --data-urlencode */
+static ParameterError data_urlencode(struct GlobalConfig *global,
+                                     char *nextarg,
+                                     char **postp,
+                                     size_t *lenp)
+{
+  /* [name]=[content], we encode the content part only
+   * [name]@[file name]
+   *
+   * Case 2: we first load the file using that name and then encode
+   * the content.
+   */
+  ParameterError err;
+  const char *p = strchr(nextarg, '=');
+  size_t nlen;
+  char is_file;
+  char *postdata = NULL;
+  size_t size = 0;
+  if(!p)
+    /* there was no '=' letter, check for a '@' instead */
+    p = strchr(nextarg, '@');
+  if(p) {
+    nlen = p - nextarg; /* length of the name part */
+    is_file = *p++; /* pass the separator */
+  }
+  else {
+    /* neither @ nor =, so no name and it isn't a file */
+    nlen = is_file = 0;
+    p = nextarg;
+  }
+  if('@' == is_file) {
+    FILE *file;
+    /* a '@' letter, it means that a file name or - (stdin) follows */
+    if(!strcmp("-", p)) {
+      file = stdin;
+      set_binmode(stdin);
+    }
+    else {
+      file = fopen(p, "rb");
+      if(!file)
+        warnf(global,
+              "Couldn't read data from file \"%s\", this makes "
+              "an empty POST.\n", nextarg);
+    }
+
+    err = file2memory(&postdata, &size, file);
+
+    if(file && (file != stdin))
+      fclose(file);
+    if(err)
+      return err;
+  }
+  else {
+    GetStr(&postdata, p);
+    if(postdata)
+      size = strlen(postdata);
+  }
+
+  if(!postdata) {
+    /* no data from the file, point to a zero byte string to make this
+       get sent as a POST anyway */
+    postdata = strdup("");
+    if(!postdata)
+      return PARAM_NO_MEM;
+    size = 0;
+  }
+  else {
+    char *enc = curl_easy_escape(NULL, postdata, (int)size);
+    Curl_safefree(postdata); /* no matter if it worked or not */
+    if(enc) {
+      /* replace (in-place) '%20' by '+' according to RFC1866 */
+      size_t enclen = replace_url_encoded_space_by_plus(enc);
+      /* now make a string with the name from above and append the
+         encoded string */
+      size_t outlen = nlen + enclen + 2;
+      char *n = malloc(outlen);
+      if(!n) {
+        curl_free(enc);
+        return PARAM_NO_MEM;
+      }
+      if(nlen > 0) { /* only append '=' if we have a name */
+        msnprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
+        size = outlen-1;
+      }
+      else {
+        strcpy(n, enc);
+        size = outlen-2; /* since no '=' was inserted */
+      }
+      curl_free(enc);
+      postdata = n;
+    }
+    else
+      return PARAM_NO_MEM;
+  }
+  *postp = postdata;
+  *lenp = size;
+  return PARAM_OK;
+}
+
+
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
                             bool *usedarg,    /* set to TRUE if the arg
@@ -1469,90 +1569,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       bool raw_mode = (subletter == 'r');
 
       if(subletter == 'e') { /* --data-urlencode */
-        /* [name]=[content], we encode the content part only
-         * [name]@[file name]
-         *
-         * Case 2: we first load the file using that name and then encode
-         * the content.
-         */
-        const char *p = strchr(nextarg, '=');
-        size_t nlen;
-        char is_file;
-        if(!p)
-          /* there was no '=' letter, check for a '@' instead */
-          p = strchr(nextarg, '@');
-        if(p) {
-          nlen = p - nextarg; /* length of the name part */
-          is_file = *p++; /* pass the separator */
-        }
-        else {
-          /* neither @ nor =, so no name and it isn't a file */
-          nlen = is_file = 0;
-          p = nextarg;
-        }
-        if('@' == is_file) {
-          /* a '@' letter, it means that a file name or - (stdin) follows */
-          if(!strcmp("-", p)) {
-            file = stdin;
-            set_binmode(stdin);
-          }
-          else {
-            file = fopen(p, "rb");
-            if(!file)
-              warnf(global,
-                    "Couldn't read data from file \"%s\", this makes "
-                    "an empty POST.\n", nextarg);
-          }
-
-          err = file2memory(&postdata, &size, file);
-
-          if(file && (file != stdin))
-            fclose(file);
-          if(err)
-            return err;
-        }
-        else {
-          GetStr(&postdata, p);
-          if(postdata)
-            size = strlen(postdata);
-        }
-
-        if(!postdata) {
-          /* no data from the file, point to a zero byte string to make this
-             get sent as a POST anyway */
-          postdata = strdup("");
-          if(!postdata)
-            return PARAM_NO_MEM;
-          size = 0;
-        }
-        else {
-          char *enc = curl_easy_escape(NULL, postdata, (int)size);
-          Curl_safefree(postdata); /* no matter if it worked or not */
-          if(enc) {
-            /* replace (in-place) '%20' by '+' according to RFC1866 */
-            size_t enclen = replace_url_encoded_space_by_plus(enc);
-            /* now make a string with the name from above and append the
-               encoded string */
-            size_t outlen = nlen + enclen + 2;
-            char *n = malloc(outlen);
-            if(!n) {
-              curl_free(enc);
-              return PARAM_NO_MEM;
-            }
-            if(nlen > 0) { /* only append '=' if we have a name */
-              msnprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
-              size = outlen-1;
-            }
-            else {
-              strcpy(n, enc);
-              size = outlen-2; /* since no '=' was inserted */
-            }
-            curl_free(enc);
-            postdata = n;
-          }
-          else
-            return PARAM_NO_MEM;
-        }
+        err = data_urlencode(global, nextarg, &postdata, &size);
+        if(err)
+          return err;
       }
       else if('@' == *nextarg && !raw_mode) {
         /* the data begins with a '@' letter, it means that a file name
