@@ -957,21 +957,11 @@ socks_proxy_info_matches(const struct proxy_info *data,
   /* the user information is case-sensitive
      or at least it is not defined as case-insensitive
      see https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.1 */
-  if(!data->user != !needle->user)
-    return FALSE;
+
   /* curl_strequal does a case insensitive comparison,
      so do not use it here! */
-  if(data->user &&
-     needle->user &&
-     Curl_timestrcmp(data->user, needle->user) != 0)
-    return FALSE;
-  if(!data->passwd != !needle->passwd)
-    return FALSE;
-  /* curl_strequal does a case insensitive comparison,
-     so do not use it here! */
-  if(data->passwd &&
-     needle->passwd &&
-     Curl_timestrcmp(data->passwd, needle->passwd) != 0)
+  if(Curl_timestrcmp(data->user, needle->user) ||
+     Curl_timestrcmp(data->passwd, needle->passwd))
     return FALSE;
   return TRUE;
 }
@@ -1375,8 +1365,8 @@ ConnectionExists(struct Curl_easy *data,
            so verify that we're using the same name and password as well */
         if(Curl_timestrcmp(needle->user, check->user) ||
            Curl_timestrcmp(needle->passwd, check->passwd) ||
-           !Curl_safecmp(needle->sasl_authzid, check->sasl_authzid) ||
-           !Curl_safecmp(needle->oauth_bearer, check->oauth_bearer)) {
+           Curl_timestrcmp(needle->sasl_authzid, check->sasl_authzid) ||
+           Curl_timestrcmp(needle->oauth_bearer, check->oauth_bearer)) {
           /* one of them was different */
           continue;
         }
