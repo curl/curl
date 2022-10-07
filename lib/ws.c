@@ -375,7 +375,7 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
       /* auto-respond to PINGs, only works for single-frame payloads atm */
       size_t bytes;
       infof(data, "WS: auto-respond to PING with a PONG");
-      DEBUGASSERT(frame && flen);
+      DEBUGASSERT(frame);
       /* send back the exact same content as a PONG */
       result = curl_ws_send(data, frame, flen, &bytes, 0, CURLWS_PONG);
       if(result)
