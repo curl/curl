@@ -195,7 +195,7 @@ int Curl_timestrcmp(const char *a, const char *b)
     }
   }
   else
-    return !a && !b;
+    return a || b;
   return match;
 }
 
