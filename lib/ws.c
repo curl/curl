@@ -332,9 +332,8 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
   if(data->set.ws_raw_mode)
     return data->set.fwrite_func(buffer, size, nitems, writebody_ptr);
   else if(nitems) {
-    unsigned char *frame;
-    size_t flen;
-    unsigned int recvflags;
+    unsigned char *frame = NULL;
+    size_t flen = 0;
     CURLcode result;
     unsigned char *endp;
     curl_off_t oleft;
@@ -343,6 +342,7 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
 
     oleft = ws->ws.frame.bytesleft;
     if(!oleft) {
+      unsigned int recvflags;
       result = ws_decode(data, (unsigned char *)buffer, nitems,
                          &frame, &flen, &oleft, &endp, &recvflags);
       if(result == CURLE_AGAIN)
@@ -360,12 +360,22 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
       ws->ws.frame.bytesleft = oleft;
     }
     else {
+      if(nitems > (size_t)ws->ws.frame.bytesleft) {
+        nitems = ws->ws.frame.bytesleft;
+        endp = (unsigned char *)&buffer[nitems];
+      }
+      else
+        endp = NULL;
+      ws->ws.frame.offset += nitems;
       ws->ws.frame.bytesleft -= nitems;
+      frame = (unsigned char *)buffer;
+      flen = nitems;
     }
-    /* auto-respond to PINGs */
-    if((recvflags & CURLWS_PING) && !oleft) {
+    if((ws->ws.frame.flags & CURLWS_PING) && !oleft) {
+      /* auto-respond to PINGs, only works for single-frame payloads atm */
       size_t bytes;
       infof(data, "WS: auto-respond to PING with a PONG");
+      DEBUGASSERT(frame);
       /* send back the exact same content as a PONG */
       result = curl_ws_send(data, frame, flen, &bytes, 0, CURLWS_PONG);
       if(result)
@@ -442,6 +452,7 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       }
       else {
         olen = oleft;
+        out = (unsigned char *)wsp->stillb;
         recvflags = wsp->frame.flags;
         if((curl_off_t)buflen < oleft)
           /* there is still data left after this */
@@ -573,7 +584,7 @@ static size_t ws_packethead(struct Curl_easy *data,
     out[3] = len & 0xff;
     outi = 10;
   }
-  if(len > 126) {
+  else if(len > 126) {
     out[1] = 126 | WSBIT_MASK;
     out[2] = (len >> 8) & 0xff;
     out[3] = len & 0xff;
