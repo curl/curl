@@ -1264,7 +1264,7 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
   if(!result && !n1)
     return CURLE_AGAIN;
 
-  *n = (size_t)n1;
+  *n = n1;
 
   return result;
 }
@@ -1276,10 +1276,14 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
 CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
                         size_t buflen, size_t *n)
 {
+  ssize_t written;
+  CURLcode result;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
-  return Curl_senddata(data, buffer, buflen, (ssize_t *)n);
+  result = Curl_senddata(data, buffer, buflen, &written);
+  *n = (size_t)written;
+  return result;
 }
 
 /*
