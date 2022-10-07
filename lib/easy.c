@@ -1276,7 +1276,7 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
 CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
                         size_t buflen, size_t *n)
 {
-  ssize_t written;
+  ssize_t written = 0;
   CURLcode result;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
