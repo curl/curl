@@ -135,9 +135,19 @@ windows_task:
     %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
 
 macos_task:
-  name: macOS arm64 normal
+  name: macOS arm64
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
+
+  matrix:
+    - name: macOS arm64 normal
+      env:
+        install_packages: nghttp2
+        configure: --without-ssl
+    - name: macOS arm64 debug
+      env:
+        install_packages: nghttp2
+        configure: --without-ssl --enable-debug
 
   env:
     CIRRUS_CLONE_DEPTH: 10
@@ -145,36 +155,13 @@ macos_task:
     CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
 
   pkginstall_script:
-    - brew update
-    - echo libtool autoconf automake pkg-config | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+    - echo libtool autoconf automake pkg-config ${install_packages} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
     - brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
+    - sudo -H python3 -m pip install --upgrade pip
+    - sudo -H python3 -m pip install impacket
   configure_script:
     - autoreconf -fi
-    - ./configure --enable-warnings --enable-werror --without-ssl --enable-websockets
-  compile_script:
-    - make V=1 && make V=1 examples && cd tests && make V=1
-  test_script:
-    - sudo make V=1 test-ci
-  install_script:
-    - sudo make V=1 install
-
-macos_task:
-  name: macOS arm64 debug
-  macos_instance:
-    image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
-
-  env:
-    CIRRUS_CLONE_DEPTH: 10
-    MAKE_FLAGS: -j 4
-    CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
-
-  pkginstall_script:
-    - brew update
-    - echo libtool autoconf automake pkg-config nghttp2 | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-    - brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
-  configure_script:
-    - autoreconf -fi
-    - ./configure --enable-warnings --enable-werror --enable-debug --without-ssl --enable-websockets
+    - ./configure --enable-warnings --enable-werror --enable-websockets ${configure}
   compile_script:
     - make V=1 && make V=1 examples && cd tests && make V=1
   test_script:
