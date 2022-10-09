@@ -156,6 +156,17 @@ ifneq ($(findstring -ssl,$(CFG)),)
     endif
   endif
   SSLLIBS += 1
+else
+ifneq ($(findstring -wolfssl,$(CFG)),)
+  WOLFSSL_PATH ?= $(PROOT)/../zlib
+  CPPFLAGS += -DUSE_WOLFSSL
+  CPPFLAGS += -DSIZEOF_LONG_LONG=8
+  CPPFLAGS += -I"$(WOLFSSL_PATH)/include"
+  _LDFLAGS += -L"$(WOLFSSL_PATH)/lib"
+  _LIBS += -lwolfssl
+  OPENSSL := wolfssl
+  SSLLIBS += 1
+endif
 endif
 ifneq ($(findstring -mbedtls,$(CFG)),)
   MBEDTLS_PATH ?= $(PROOT)/../zlib
@@ -186,6 +197,14 @@ ifneq ($(findstring -libssh,$(CFG)),)
   CPPFLAGS += -I"$(LIBSSH_PATH)/include"
   _LDFLAGS += -L"$(LIBSSH_PATH)/lib"
   _LIBS += -lssh
+else
+ifeq ($(OPENSSL)$(findstring -wolfssh,$(CFG)),wolfssl-wolfssh)
+  WOLFSSH_PATH ?= $(PROOT)/../wolfssh
+  CPPFLAGS += -DUSE_WOLFSSH
+  CPPFLAGS += -I"$(WOLFSSH_PATH)/include"
+  _LDFLAGS += -L"$(WOLFSSH_PATH)/lib"
+  _LIBS += -lwolfssh
+endif
 endif
 endif
 
