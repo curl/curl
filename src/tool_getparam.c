@@ -637,7 +637,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
         return PARAM_NO_MEM;
       }
       if(nlen > 0) { /* only append '=' if we have a name */
-        msnprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
+        msnprintf(n, outlen, "%.*s=%s", (int)nlen, nextarg, enc);
         size = outlen-1;
       }
       else {
