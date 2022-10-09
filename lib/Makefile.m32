@@ -28,9 +28,9 @@
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 #
 # Set component roots via envvar <feature>_PATH. Also available for
-# customization: CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS, ARCH[=custom],
-# CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX, and more for individual
-# components.
+# customization: CC, RC, AR, CROSSPREFIX, CPPFLAGS, LDFLAGS, LIBS, CFLAGS,
+# RCFLAGS, ARCH[=custom], CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
+# and more for individual components (see below).
 
 # This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
 # Skip lib-specific parts when called through them.
