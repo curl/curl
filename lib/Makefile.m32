@@ -144,6 +144,7 @@ ifneq ($(findstring -ssl,$(CFG)),)
   ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/aead.h),)
     OPENSSL := boringssl
   else
+    # including libressl
     OPENSSL := openssl
   endif
 
