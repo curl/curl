@@ -220,8 +220,8 @@ ifneq ($(OPENSSL),)
   CPPFLAGS += -DUSE_NGTCP2
   CPPFLAGS += -I"$(NGTCP2_PATH)/include"
   _LDFLAGS += -L"$(NGTCP2_PATH)/lib"
-  NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_$(OPENSSL)
-  _LIBS += $(NGTCP2_LIBS)
+  NGTCP2_LIBS ?= -lngtcp2_crypto_$(OPENSSL)
+  _LIBS += -lngtcp2 $(NGTCP2_LIBS)
 endif
 endif
 
