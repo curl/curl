@@ -132,6 +132,30 @@ ifneq ($(findstring -rtmp,$(CFG)),)
   ZLIB := 1
 endif
 
+ifneq ($(findstring -ssl,$(CFG)),)
+  OPENSSL_PATH ?= $(PROOT)/../openssl
+  CPPFLAGS += -DUSE_OPENSSL
+  CPPFLAGS += -DCURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+  OPENSSL_INCLUDE ?= $(OPENSSL_PATH)/include
+  OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
+  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
+  _LDFLAGS += -L"$(OPENSSL_LIBPATH)"
+  OPENSSL_LIBS ?= -lssl -lcrypto
+  _LIBS += $(OPENSSL_LIBS)
+
+  ifneq ($(findstring -srp,$(CFG)),)
+    ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h),)
+      # OpenSSL 1.0.1 and later.
+      CPPFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
+    endif
+  endif
+  SSLLIBS += 1
+endif
+ifneq ($(findstring -schannel,$(CFG)),)
+  CPPFLAGS += -DUSE_SCHANNEL
+  SSLLIBS += 1
+endif
+
 ifneq ($(findstring -ssh2,$(CFG)),)
   LIBSSH2_PATH ?= $(PROOT)/../libssh2
   CPPFLAGS += -DUSE_LIBSSH2
@@ -164,30 +188,6 @@ ifneq ($(findstring -ngtcp2,$(CFG)),)
   NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
   _LIBS += $(NGTCP2_LIBS)
 endif
-endif
-
-ifneq ($(findstring -ssl,$(CFG)),)
-  OPENSSL_PATH ?= $(PROOT)/../openssl
-  CPPFLAGS += -DUSE_OPENSSL
-  CPPFLAGS += -DCURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
-  OPENSSL_INCLUDE ?= $(OPENSSL_PATH)/include
-  OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
-  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
-  _LDFLAGS += -L"$(OPENSSL_LIBPATH)"
-  OPENSSL_LIBS ?= -lssl -lcrypto
-  _LIBS += $(OPENSSL_LIBS)
-
-  ifneq ($(findstring -srp,$(CFG)),)
-    ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h),)
-      # OpenSSL 1.0.1 and later.
-      CPPFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
-    endif
-  endif
-  SSLLIBS += 1
-endif
-ifneq ($(findstring -schannel,$(CFG)),)
-  CPPFLAGS += -DUSE_SCHANNEL
-  SSLLIBS += 1
 endif
 
 ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
