@@ -208,8 +208,7 @@ ifneq ($(findstring -nghttp2,$(CFG)),)
   _LIBS += -lnghttp2
 endif
 
-ifneq ($(findstring -nghttp3,$(CFG)),)
-ifneq ($(findstring -ngtcp2,$(CFG)),)
+ifeq ($(findstring -nghttp3,$(CFG))$(findstring -ngtcp2,$(CFG)),-nghttp3-ngtcp2)
 ifneq ($(OPENSSL),)
   NGHTTP3_PATH ?= $(PROOT)/../nghttp3
   CPPFLAGS += -DUSE_NGHTTP3
@@ -223,7 +222,6 @@ ifneq ($(OPENSSL),)
   _LDFLAGS += -L"$(NGTCP2_PATH)/lib"
   NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_$(OPENSSL)
   _LIBS += $(NGTCP2_LIBS)
-endif
 endif
 endif
 
