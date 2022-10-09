@@ -177,6 +177,16 @@ ifneq ($(findstring -ssh2,$(CFG)),)
   _LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   _LIBS += -lssh2
+else
+ifneq ($(findstring -libssh,$(CFG)),)
+  # You really should avoid libssh on Windows in production, due to its
+  # by-default-world-writable configuration vulnerability (as of 0.10.4)
+  LIBSSH_PATH ?= $(PROOT)/../libssh
+  CPPFLAGS += -DUSE_LIBSSH
+  CPPFLAGS += -I"$(LIBSSH_PATH)/include"
+  _LDFLAGS += -L"$(LIBSSH_PATH)/lib"
+  _LIBS += -lssh
+endif
 endif
 
 ifneq ($(findstring -nghttp2,$(CFG)),)
