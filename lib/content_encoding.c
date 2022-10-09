@@ -28,7 +28,7 @@
 #include <curl/curl.h>
 #include <stddef.h>
 
-#ifdef HAVE_ZLIB_H
+#ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
 

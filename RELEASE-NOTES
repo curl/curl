@@ -26,6 +26,7 @@ This release includes the following bugfixes:
  o configure: correct the wording when checking grep -E [13]
  o configure: deprecate builds with small curl_off_t [89]
  o configure: fail if '--without-ssl' + explicit parameter for an ssl lib [164]
+ o connect: change verbose IPv6 address:port to [address]:port [83]
  o connect: fix the wrong error message on connect failures [55]
  o content_encoding: use writer struct subclasses for different encodings [8]
  o ctype: remove all use of <ctype.h>, use our own versions [12]
@@ -40,7 +41,9 @@ This release includes the following bugfixes:
  o curl_setup: include curl.h after platform setup headers [37]
  o curl_setup: include only system.h instead of curl.h [34]
  o curl_strequal.3: fix argument typo [60]
+ o curl_url_set.3: document CURLU_APPENDQUERY proper [96]
  o CURLOPT_ACCEPT_ENCODING.3: remove "four" as they are five [85]
+ o CURLOPT_COOKIELIST.3: fix formatting mistake [80]
  o CURLOPT_DNS_INTERFACE.3: mention it works for almost all protocols [15]
  o CURLOPT_PROXY_SSLCERT_BLOB.3: this is for HTTPS proxies [9]
  o CURLOPT_WILDCARDMATCH.3: Fix backslash escaping under single quotes [172]
@@ -53,6 +56,7 @@ This release includes the following bugfixes:
  o docs: remove mentions of deprecated '--without-openssl' parameter [170]
  o docs: tag curl options better in man pages
  o docs: tell about disabled protocols in CURLOPT_*PROTOCOLS_STR.
+ o docs: update sourceforge project links [95]
  o easy: fix the #include order [53]
  o easy: fix the altsvc init for curl_easy_duphandle [77]
  o examples/chkspeed: improve portability [48]
@@ -78,6 +82,7 @@ This release includes the following bugfixes:
  o lib: prepare the incoming of additional protocols [71]
  o lib: sanitize conditional exclusion around MIME [82]
  o lib: the number four in a sequence is the "fourth" [28]
+ o Makefile.m32: major rework [92]
  o manpage-syntax.pl: all libcurl option symbols should be \fI-tagged [75]
  o manpages: Fix spelling of "allows to" -> "allows one to" [171]
  o misc: ISSPACE() => ISBLANK() [11]
@@ -133,16 +138,16 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   a1346054 on github, ajak in #curl, Andrew Lambert, Benjamin Loison,
-  Dan Fandrich, Daniel Stenberg, Dmitry Karpov, Edoardo Lolletti, Eloy Degen,
-  Emanuele Torre, Gisle Vanem, Hayden Roche, James Fuller, John Bampton,
-  justchen1369 on github, Keitagit-kun on github, Marcel Raad, Marc Hörsken,
-  Mark Itzcovitz, Matt Holt, Max Dymond, Michael Drake, Michael Heimpold,
-  n0name321 on github, Orgad Shaneh, Patrick Monnerat, Philip H,
-  Philip Heiduck, ProceduralMan on github, Randall S. Becker, Ray Satiro,
-  RobBotic1 on github, Robby Simpson, Samuel Henrique, Sergey Bronnikov,
-  ssdbest on github, Thiago Suchorski, Tobias Schaefer, Viktor Szakats,
-  Yuriy Chernyshov, zhanghu on xiaomi
-  (41 contributors)
+  Dan Fandrich, Daniel Stenberg, David Hu, Dmitry Karpov, Edoardo Lolletti,
+  Eloy Degen, Emanuele Torre, Gisle Vanem, Hayden Roche, James Fuller,
+  John Bampton, justchen1369 on github, Keitagit-kun on github, Marcel Raad,
+  Marc Hörsken, Mark Itzcovitz, Matt Holt, Max Dymond, Michael Drake,
+  Michael Heimpold, n0name321 on github, Orgad Shaneh, Patrick Monnerat,
+  Philip H, Philip Heiduck, ProceduralMan on github, Randall S. Becker,
+  Ray Satiro, RobBotic1 on github, Robby Simpson, Samuel Henrique,
+  Sergey Bronnikov, ssdbest on github, Thiago Suchorski, Tobias Schaefer,
+  Viktor Szakats, Yuriy Chernyshov, zhanghu on xiaomi
+  (42 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -225,8 +230,10 @@ References to bug reports and discussions on issues:
  [77] = https://curl.se/bug/?i=9624
  [78] = https://curl.se/bug/?i=9619
  [79] = https://curl.se/bug/?i=9625
+ [80] = https://curl.se/bug/?i=9639
  [81] = https://curl.se/bug/?i=9565
  [82] = https://curl.se/bug/?i=9610
+ [83] = https://curl.se/mail/archive-2022-02/0041.html
  [84] = https://curl.se/bug/?i=9612
  [85] = https://curl.se/bug/?i=9614
  [86] = https://curl.se/bug/?i=9607
@@ -235,6 +242,9 @@ References to bug reports and discussions on issues:
  [89] = https://curl.se/bug/?i=9605
  [90] = https://curl.se/bug/?i=9600
  [91] = https://curl.se/bug/?i=9584
+ [92] = https://curl.se/bug/?i=9632
+ [95] = https://curl.se/bug/?i=9630
+ [96] = https://curl.se/bug/?i=9628
  [164] = https://curl.se/bug/?i=9414
  [169] = https://curl.se/bug/?i=9417
  [170] = https://curl.se/bug/?i=9415

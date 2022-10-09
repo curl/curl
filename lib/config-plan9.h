@@ -141,8 +141,6 @@
 #define HAVE_UTIME 1
 #define HAVE_UTIME_H 1
 
-#define HAVE_ZLIB_H 1
-
 #define HAVE_POSIX_STRERROR_R 1
 #define HAVE_STRERROR_R 1
 

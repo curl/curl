@@ -1310,7 +1310,6 @@ else
   then
     dnl both header and lib were found!
     AC_SUBST(HAVE_LIBZ)
-    AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
     AC_DEFINE(HAVE_LIBZ, 1, [if zlib is available])
 
     ZLIB_LIBS="-lz"
@@ -2132,7 +2131,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
   dnl check for function added in libssh2 version 1.0
   AC_CHECK_LIB(ssh2, libssh2_session_block_directions)
 
-  AC_CHECK_HEADERS(libssh2.h,
+  AC_CHECK_HEADER(libssh2.h,
     curl_ssh_msg="enabled (libSSH2)"
     LIBSSH2_ENABLED=1
     AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use])
@@ -2205,7 +2204,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
 
   AC_CHECK_LIB(ssh, ssh_new)
 
-  AC_CHECK_HEADERS(libssh/libssh.h,
+  AC_CHECK_HEADER(libssh/libssh.h,
     curl_ssh_msg="enabled (libSSH)"
     LIBSSH_ENABLED=1
     AC_DEFINE(USE_LIBSSH, 1, [if libSSH is in use])
@@ -2718,7 +2717,7 @@ dnl **********************************************************************
 dnl Check for ngtcp2 (QUIC)
 dnl **********************************************************************
 
-OPT_TCP2="yes"
+OPT_TCP2="no"
 
 if test "x$disable_http" = "xyes"; then
   # without HTTP, ngtcp2 is no use

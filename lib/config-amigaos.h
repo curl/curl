@@ -65,7 +65,6 @@
 #define HAVE_UTIME 1
 #define HAVE_UTIME_H 1
 #define HAVE_WRITABLE_ARGV 1
-#define HAVE_ZLIB_H 1
 #define HAVE_SYS_IOCTL_H 1
 
 #define NEED_MALLOC_H 1

@@ -22,442 +22,257 @@
 #
 #***************************************************************************
 
-###########################################################################
+# Makefile for building curl parts with MinGW and optional features.
 #
-## Makefile for building libcurl.a with MinGW (GCC-3.2 or later or LLVM/Clang)
-## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4),
-## brotli (1.0.1), zstd (1.4.5)
-##
-## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
-## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
-##
-## Hint: you can also set environment vars to control the build, e.g.:
-## set ZLIB_PATH=c:/zlib-1.2.8
-## set ZLIB=1
+# Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
+# Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 #
-###########################################################################
+# Set component roots via envvar <feature>_PATH. Also available for
+# customization: CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS, ARCH[=custom],
+# CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX, and more for individual
+# components.
 
-# Edit the path below to point to the base of your Zlib sources.
-ifndef ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.2.8
-endif
-# Edit the path below to point to the base of your Zstandard sources.
-ifndef ZSTD_PATH
-ZSTD_PATH = ../../zstd-1.4.5
-endif
-# Edit the path below to point to the base of your Brotli sources.
-ifndef BROTLI_PATH
-BROTLI_PATH = ../../brotli-1.0.1
-endif
-# Edit the path below to point to the base of your OpenSSL package.
-ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-1.0.2a
-endif
-# Edit the path below to point to the base of your LibSSH2 package.
-ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.5.0
-endif
-# Edit the path below to point to the base of your librtmp package.
-ifndef LIBRTMP_PATH
-LIBRTMP_PATH = ../../librtmp-2.4
-endif
-# Edit the path below to point to the base of your libgsasl package.
-ifndef LIBGSASL_PATH
-LIBGSASL_PATH = ../../libgsasl-1.10.0
-endif
-# Edit the path below to point to the base of your libidn2 package.
-ifndef LIBIDN2_PATH
-LIBIDN2_PATH = ../../libidn2-2.0.3
-endif
-# Edit the path below to point to the base of your MS IDN package.
-# Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
-# https://www.microsoft.com/en-us/download/details.aspx?id=734
-ifndef WINIDN_PATH
-WINIDN_PATH = ../../Microsoft IDN Mitigation APIs
-endif
-# Edit the path below to point to the base of your Novell LDAP NDK.
-ifndef LDAP_SDK
-LDAP_SDK = c:/novell/ndk/cldapsdk/win32
-endif
-# Edit the path below to point to the base of your nghttp2 package.
-ifndef NGHTTP2_PATH
-NGHTTP2_PATH = ../../nghttp2-1.0.0
-endif
-# Edit the path below to point to the base of your nghttp3 package.
-ifndef NGHTTP3_PATH
-NGHTTP3_PATH = ../../nghttp3-1.0.0
-endif
-# Edit the path below to point to the base of your ngtcp2 package.
-ifndef NGTCP2_PATH
-NGTCP2_PATH = ../../ngtcp2-1.0.0
-endif
+# This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
+# Skip lib-specific parts when called through them.
+ifndef PROOT
+PROOT := ..
 
-PROOT = ..
+CPPFLAGS += -DBUILDING_LIBCURL
 
-# Edit the path below to point to the base of your c-ares package.
-ifndef LIBCARES_PATH
-LIBCARES_PATH = $(PROOT)/ares
-endif
+### Sources and targets
 
-ifeq ($(CURL_CC),)
-CURL_CC := $(CROSSPREFIX)gcc
-endif
-ifeq ($(CURL_AR),)
-CURL_AR := $(CROSSPREFIX)ar
-endif
-ifeq ($(CURL_RANLIB),)
-CURL_RANLIB := $(CROSSPREFIX)ranlib
-endif
-ifeq ($(CURL_RC),)
-CURL_RC := $(CROSSPREFIX)windres
-endif
-ifeq ($(CURL_STRIP),)
-CURL_STRIP := $(CROSSPREFIX)strip
-endif
-
-CC = $(CURL_CC)
-CFLAGS = -O3 $(CURL_CFLAG_EXTRAS) -W -Wall
-LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL)
-AR = $(CURL_AR)
-RANLIB = $(CURL_RANLIB)
-RC = $(CURL_RC)
-RCFLAGS = --include-dir=$(PROOT)/include -O coff $(CURL_RCFLAG_EXTRAS)
-STRIP   = $(CURL_STRIP) -g
-
-# Set environment var ARCH to your architecture to override autodetection.
-ifndef ARCH
-ifeq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),x86_64)
-ARCH = w64
-else
-ARCH = w32
-endif
-endif
-
-ifneq ($(ARCH),custom)
-ifeq ($(ARCH),w64)
-CFLAGS  += -m64
-LDFLAGS += -m64
-RCFLAGS += -F pe-x86-64
-else
-CFLAGS  += -m32
-LDFLAGS += -m32
-RCFLAGS += -F pe-i386
-endif
-endif
-
-# Platform-dependent helper tool macros
-ifeq ($(findstring /sh,$(SHELL)),/sh)
-DEL     = rm -f $1
-RMDIR   = rm -fr $1
-MKDIR   = mkdir -p $1
-COPY    = -cp -afv $1 $2
-#COPYR  = -cp -afr $1/* $2
-COPYR   = -rsync -aC $1/* $2
-TOUCH   = touch $1
-CAT     = cat
-ECHONL  = echo ""
-DL = '
-else
-ifeq "$(OS)" "Windows_NT"
-DEL     = -del 2>NUL /q /f $(subst /,\,$1)
-RMDIR   = -rd 2>NUL /q /s $(subst /,\,$1)
-else
-DEL     = -del 2>NUL $(subst /,\,$1)
-RMDIR   = -deltree 2>NUL /y $(subst /,\,$1)
-endif
-MKDIR   = -md 2>NUL $(subst /,\,$1)
-COPY    = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
-COPYR   = -xcopy 2>NUL /q /y /e $(subst /,\,$1) $(subst /,\,$2)
-TOUCH   = copy 2>&1>NUL /b $(subst /,\,$1) +,,
-CAT     = type
-ECHONL  = $(ComSpec) /c echo.
-endif
-
-########################################################
-## Nothing more to do below this line!
-
-ifneq ($(findstring -dyn,$(CFG)),)
-DYN = 1
-endif
-ifneq ($(findstring -ares,$(CFG)),)
-ARES = 1
-endif
-ifneq ($(findstring -sync,$(CFG)),)
-SYNC = 1
-endif
-ifneq ($(findstring -rtmp,$(CFG)),)
-RTMP = 1
-ZLIB = 1
-endif
-ifneq ($(findstring -ssh2,$(CFG)),)
-SSH2 = 1
-ZLIB = 1
-endif
-ifneq ($(findstring -ssl,$(CFG)),)
-SSL = 1
-endif
-ifneq ($(findstring -srp,$(CFG)),)
-SRP = 1
-endif
-ifneq ($(findstring -zlib,$(CFG)),)
-ZLIB = 1
-endif
-ifneq ($(findstring -zstd,$(CFG)),)
-ZSTD = 1
-endif
-ifneq ($(findstring -brotli,$(CFG)),)
-BROTLI = 1
-endif
-ifneq ($(findstring -gsasl,$(CFG)),)
-GSASL = 1
-endif
-ifneq ($(findstring -idn2,$(CFG)),)
-IDN2 = 1
-endif
-ifneq ($(findstring -winidn,$(CFG)),)
-WINIDN = 1
-endif
-ifneq ($(findstring -sspi,$(CFG)),)
-SSPI = 1
-endif
-ifneq ($(findstring -ldaps,$(CFG)),)
-LDAPS = 1
-endif
-ifneq ($(findstring -ipv6,$(CFG)),)
-IPV6 = 1
-endif
-ifneq ($(findstring -schannel,$(CFG))$(findstring -winssl,$(CFG)),)
-SCHANNEL = 1
-SSPI = 1
-endif
-ifneq ($(findstring -nghttp2,$(CFG)),)
-NGHTTP2 = 1
-endif
-ifneq ($(findstring -nghttp3,$(CFG)),)
-NGHTTP3 = 1
-endif
-ifneq ($(findstring -ngtcp2,$(CFG)),)
-NGTCP2 = 1
-endif
-ifneq ($(findstring -unicode,$(CFG)),)
-UNICODE = 1
-endif
-
-# SSH2 and RTMP require an SSL library; assume OpenSSL if none specified
-ifneq ($(SSH2)$(RTMP),)
-  ifeq ($(SSL)$(SCHANNEL),)
-    SSL = 1
-  endif
-endif
-
-INCLUDES = -I. -I../include
-CFLAGS += -DBUILDING_LIBCURL
-ifdef SSL
-  ifdef SCHANNEL
-    CFLAGS += -DCURL_WITH_MULTI_SSL
-  endif
-endif
-ifdef UNICODE
-  CFLAGS += -DUNICODE -D_UNICODE
-endif
-
-ifdef SYNC
-  CFLAGS += -DUSE_SYNC_DNS
-else
-  ifdef ARES
-    INCLUDES += -I"$(LIBCARES_PATH)"
-    CFLAGS += -DUSE_ARES -DCARES_STATICLIB
-    DLL_LIBS += -L"$(LIBCARES_PATH)" -lcares
-    libcurl_dll_DEPENDENCIES = $(LIBCARES_PATH)/libcares.a
-  endif
-endif
-ifdef RTMP
-  INCLUDES += -I"$(LIBRTMP_PATH)"
-  CFLAGS += -DUSE_LIBRTMP
-  DLL_LIBS += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
-endif
-ifdef NGHTTP2
-  INCLUDES += -I"$(NGHTTP2_PATH)/include"
-  CFLAGS += -DUSE_NGHTTP2
-  DLL_LIBS += -L"$(NGHTTP2_PATH)/lib" -lnghttp2
-endif
-ifdef SSH2
-  INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
-  CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
-  DLL_LIBS += -L"$(LIBSSH2_PATH)/win32" -lssh2
-  ifdef SCHANNEL
-    ifndef DYN
-      DLL_LIBS += -lcrypt32
-    endif
-  endif
-endif
-ifdef NGHTTP3
-  INCLUDES += -I"$(NGHTTP3_PATH)/include"
-  CFLAGS += -DUSE_NGHTTP3
-  DLL_LIBS += -L"$(NGHTTP3_PATH)/lib" -lnghttp3
-  ifdef NGTCP2
-    INCLUDES += -I"$(NGTCP2_PATH)/include"
-    CFLAGS += -DUSE_NGTCP2
-    DLL_LIBS += -L"$(NGTCP2_PATH)/lib"
-    ifdef NGTCP2_LIBS
-      DLL_LIBS += $(NGTCP2_LIBS)
-    else
-      DLL_LIBS += -lngtcp2
-      ifdef SSL
-        DLL_LIBS += -lngtcp2_crypto_openssl
-      endif
-    endif
-  endif
-endif
-ifdef SSL
-  ifndef OPENSSL_INCLUDE
-    ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
-      OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
-    endif
-    ifeq "$(wildcard $(OPENSSL_PATH)/include)" "$(OPENSSL_PATH)/include"
-      OPENSSL_INCLUDE = $(OPENSSL_PATH)/include
-    endif
-  endif
-  ifneq "$(wildcard $(OPENSSL_INCLUDE)/openssl/opensslv.h)" "$(OPENSSL_INCLUDE)/openssl/opensslv.h"
-    $(error Invalid path to OpenSSL package: $(OPENSSL_PATH))
-  endif
-  ifndef OPENSSL_LIBPATH
-    ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
-      OPENSSL_LIBPATH = $(OPENSSL_PATH)/out
-      OPENSSL_LIBS = -leay32 -lssl32
-    endif
-    ifeq "$(wildcard $(OPENSSL_PATH)/lib)" "$(OPENSSL_PATH)/lib"
-      OPENSSL_LIBPATH = $(OPENSSL_PATH)/lib
-      OPENSSL_LIBS = -lcrypto -lssl
-    endif
-  endif
-  ifndef DYN
-    OPENSSL_LIBS += -lgdi32 -lcrypt32
-  endif
-  INCLUDES += -I"$(OPENSSL_INCLUDE)"
-  CFLAGS += -DUSE_OPENSSL
-  DLL_LIBS += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
-  ifdef SRP
-    ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
-      CFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
-    endif
-  endif
-endif
-ifdef SCHANNEL
-  CFLAGS += -DUSE_SCHANNEL
-  DLL_LIBS += -lcrypt32
-endif
-ifdef ZLIB
-  INCLUDES += -I"$(ZLIB_PATH)"
-  CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
-  DLL_LIBS += -L"$(ZLIB_PATH)" -lz
-endif
-ifdef ZSTD
-  INCLUDES += -I"$(ZSTD_PATH)/include"
-  CFLAGS += -DHAVE_ZSTD
-  DLL_LIBS += -L"$(ZSTD_PATH)/lib"
-  ifdef ZSTD_LIBS
-    DLL_LIBS += $(ZSTD_LIBS)
-  else
-    DLL_LIBS += -lzstd
-  endif
-endif
-ifdef BROTLI
-  INCLUDES += -I"$(BROTLI_PATH)/include"
-  CFLAGS += -DHAVE_BROTLI
-  DLL_LIBS += -L"$(BROTLI_PATH)/lib"
-  ifdef BROTLI_LIBS
-    DLL_LIBS += $(BROTLI_LIBS)
-  else
-    DLL_LIBS += -lbrotlidec
-  endif
-endif
-ifdef GSASL
-  INCLUDES += -I"$(LIBGSASL_PATH)/include"
-  CFLAGS += -DUSE_GSASL
-  DLL_LIBS += -L"$(LIBGSASL_PATH)/lib" -lgsasl
-endif
-ifdef IDN2
-  INCLUDES += -I"$(LIBIDN2_PATH)/include"
-  CFLAGS += -DUSE_LIBIDN2
-  DLL_LIBS += -L"$(LIBIDN2_PATH)/lib" -lidn2
-else
-ifdef WINIDN
-  CFLAGS += -DUSE_WIN32_IDN
-  CFLAGS += -DWANT_IDN_PROTOTYPES
-  DLL_LIBS += -L"$(WINIDN_PATH)" -lnormaliz
-endif
-endif
-ifdef SSPI
-  CFLAGS += -DUSE_WINDOWS_SSPI
-endif
-ifdef SPNEGO
-  CFLAGS += -DHAVE_SPNEGO
-endif
-ifdef IPV6
-  CFLAGS += -DENABLE_IPV6
-endif
-ifdef LDAPS
-  CFLAGS += -DHAVE_LDAP_SSL
-endif
-ifdef USE_LDAP_NOVELL
-  INCLUDES += -I"$(LDAP_SDK)/inc"
-  CFLAGS += -DCURL_HAS_NOVELL_LDAPSDK
-  DLL_LIBS += -L"$(LDAP_SDK)/lib/mscvc" -lldapsdk -lldapssl -lldapx
-endif
-ifdef USE_LDAP_OPENLDAP
-  INCLUDES += -I"$(LDAP_SDK)/include"
-  CFLAGS += -DCURL_HAS_OPENLDAP_LDAPSDK
-  DLL_LIBS += -L"$(LDAP_SDK)/lib" -lldap -llber
-endif
-ifndef USE_LDAP_NOVELL
-ifndef USE_LDAP_OPENLDAP
-  DLL_LIBS += -lwldap32
-endif
-endif
-DLL_LIBS += -lws2_32 -lbcrypt
-
-# Makefile.inc provides the CSOURCES and HHEADERS defines
+# Provides CSOURCES, HHEADERS, LIB_RCFILES
 include Makefile.inc
 
-ifeq ($(CURL_DLL_A_SUFFIX),)
-CURL_DLL_A_SUFFIX := dll
-endif
+libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
+libcurl_dll_a_LIBRARY := libcurl.dll.a
+libcurl_a_LIBRARY := libcurl.a
 
-libcurl_dll_LIBRARY = libcurl$(CURL_DLL_SUFFIX).dll
-libcurl_dll_a_LIBRARY = libcurl$(CURL_DLL_A_SUFFIX).a
-libcurl_a_LIBRARY = libcurl.a
+TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
 
-libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(strip $(CSOURCES)))
+libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
 libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
+libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
+libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES)))
+vpath %.c vauth vquic vssh vtls
 
-RESOURCE = libcurl.res
+TOCLEAN := $(libcurl_dll_OBJECTS)
+TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
 
+### Local rules
 
-all: $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
+# Keep this at the top to act as the default target.
+all: $(TARGETS)
 
 $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	@$(call DEL, $@)
-	$(AR) cru $@ $(libcurl_a_OBJECTS)
-	$(RANLIB) $@
-	$(STRIP) $@
+	$(AR) rcs $@ $(libcurl_a_OBJECTS)
 
-# remove the last line above to keep debug info
+$(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
+	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
+	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
+endif
 
-$(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENCIES)
-	@$(call DEL, $@)
-	$(CC) $(LDFLAGS) -shared -o $@ \
-	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY) \
-	  $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
+CPPFLAGS += -I. -I$(PROOT)/include
+RCFLAGS  += -I$(PROOT)/include
+
+ifneq ($(ARCH),custom)
+  # Set environment var ARCH to your architecture to override autodetection.
+  ifndef ARCH
+    ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
+      ARCH := w64
+    else
+      ARCH := w32
+    endif
+  endif
+  ifeq ($(ARCH),w64)
+    CFLAGS  += -m64
+    LDFLAGS += -m64
+    RCFLAGS += --target=pe-x86-64
+  else
+    CFLAGS  += -m32
+    LDFLAGS += -m32
+    RCFLAGS += --target=pe-i386
+  endif
+endif
+
+### Optional features
+
+ifneq ($(findstring -unicode,$(CFG)),)
+  CPPFLAGS += -DUNICODE -D_UNICODE
+  CURL_LDFLAGS_BIN += -municode
+endif
+
+# CPPFLAGS below are only necessary when building libcurl via 'lib' (see
+# comments below about exceptions). Always include them anyway to match
+# behavior of other build systems.
+
+# Linker options to exclude for shared mode executables.
+_LDFLAGS :=
+_LIBS :=
+
+ifneq ($(findstring -sync,$(CFG)),)
+  CPPFLAGS += -DUSE_SYNC_DNS
+else
+  ifneq ($(findstring -ares,$(CFG)),)
+    LIBCARES_PATH ?= $(PROOT)/../c-ares
+    CPPFLAGS += -DUSE_ARES
+    CPPFLAGS += -I"$(LIBCARES_PATH)/include"
+    _LDFLAGS += -L"$(LIBCARES_PATH)/lib"
+    _LIBS += -lcares
+  endif
+endif
+ifneq ($(findstring -rtmp,$(CFG)),)
+  LIBRTMP_PATH ?= $(PROOT)/../librtmp
+  CPPFLAGS += -DUSE_LIBRTMP
+  CPPFLAGS += -I"$(LIBRTMP_PATH)"
+  _LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
+  _LIBS += -lrtmp -lwinmm
+  ZLIB := 1
+endif
+ifneq ($(findstring -ssh2,$(CFG)),)
+  LIBSSH2_PATH ?= $(PROOT)/../libssh2
+  CPPFLAGS += -DUSE_LIBSSH2
+  CPPFLAGS += -I"$(LIBSSH2_PATH)/include"
+  _LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
+  _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
+  _LIBS += -lssh2
+endif
+ifneq ($(findstring -nghttp2,$(CFG)),)
+  NGHTTP2_PATH ?= $(PROOT)/../nghttp2
+  CPPFLAGS += -DUSE_NGHTTP2
+  CPPFLAGS += -I"$(NGHTTP2_PATH)/include"
+  _LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
+  _LIBS += -lnghttp2
+endif
+ifneq ($(findstring -nghttp3,$(CFG)),)
+  ifneq ($(findstring -ngtcp2,$(CFG)),)
+    NGHTTP3_PATH ?= $(PROOT)/../nghttp3
+    CPPFLAGS += -DUSE_NGHTTP3
+    CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
+    _LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
+    _LIBS += -lnghttp3
+
+    NGTCP2_PATH ?= $(PROOT)/../ngtcp2
+    CPPFLAGS += -DUSE_NGTCP2
+    CPPFLAGS += -I"$(NGTCP2_PATH)/include"
+    _LDFLAGS += -L"$(NGTCP2_PATH)/lib"
+    NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
+    _LIBS += $(NGTCP2_LIBS)
+  endif
+endif
+ifneq ($(findstring -ssl,$(CFG)),)
+  OPENSSL_PATH ?= $(PROOT)/../openssl
+  CPPFLAGS += -DUSE_OPENSSL
+  CPPFLAGS += -DCURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+  OPENSSL_INCLUDE ?= $(OPENSSL_PATH)/include
+  OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
+  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
+  _LDFLAGS += -L"$(OPENSSL_LIBPATH)"
+  OPENSSL_LIBS ?= -lssl -lcrypto
+  _LIBS += $(OPENSSL_LIBS)
+
+  ifneq ($(findstring -srp,$(CFG)),)
+    ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h),)
+      # OpenSSL 1.0.1 and later.
+      CPPFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
+    endif
+  endif
+  SSL := 1
+endif
+ifneq ($(findstring -schannel,$(CFG)),)
+  CPPFLAGS += -DUSE_SCHANNEL
+  ifdef SSL
+    CPPFLAGS += -DCURL_WITH_MULTI_SSL
+  endif
+endif
+ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
+  ZLIB_PATH ?= $(PROOT)/../zlib
+  # These CPPFLAGS are also required when compiling the curl tool via 'src'.
+  CPPFLAGS += -DHAVE_LIBZ
+  CPPFLAGS += -I"$(ZLIB_PATH)"
+  _LDFLAGS += -L"$(ZLIB_PATH)"
+  _LIBS += -lz
+endif
+ifneq ($(findstring -zstd,$(CFG)),)
+  ZSTD_PATH ?= $(PROOT)/../zstd
+  CPPFLAGS += -DHAVE_ZSTD
+  CPPFLAGS += -I"$(ZSTD_PATH)/include"
+  _LDFLAGS += -L"$(ZSTD_PATH)/lib"
+  ZSTD_LIBS ?= -lzstd
+  _LIBS += $(ZSTD_LIBS)
+endif
+ifneq ($(findstring -brotli,$(CFG)),)
+  BROTLI_PATH ?= $(PROOT)/../brotli
+  CPPFLAGS += -DHAVE_BROTLI
+  CPPFLAGS += -I"$(BROTLI_PATH)/include"
+  _LDFLAGS += -L"$(BROTLI_PATH)/lib"
+  BROTLI_LIBS ?= -lbrotlidec -lbrotlicommon
+  _LIBS += $(BROTLI_LIBS)
+endif
+ifneq ($(findstring -gsasl,$(CFG)),)
+  LIBGSASL_PATH ?= $(PROOT)/../gsasl
+  CPPFLAGS += -DUSE_GSASL
+  CPPFLAGS += -I"$(LIBGSASL_PATH)/include"
+  _LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
+  _LIBS += -lgsasl
+endif
+ifneq ($(findstring -idn2,$(CFG)),)
+  LIBIDN2_PATH ?= $(PROOT)/../libidn2
+  CPPFLAGS += -DUSE_LIBIDN2
+  CPPFLAGS += -I"$(LIBIDN2_PATH)/include"
+  _LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
+  _LIBS += -lidn2
+else
+ifneq ($(findstring -winidn,$(CFG)),)
+  CPPFLAGS += -DUSE_WIN32_IDN
+  CPPFLAGS += -DWANT_IDN_PROTOTYPES
+  _LIBS += -lnormaliz
+endif
+endif
+ifneq ($(findstring -sspi,$(CFG)),)
+  CPPFLAGS += -DUSE_WINDOWS_SSPI
+endif
+ifneq ($(findstring -ipv6,$(CFG)),)
+  CPPFLAGS += -DENABLE_IPV6
+endif
+ifneq ($(findstring -ldaps,$(CFG)),)
+  CPPFLAGS += -DHAVE_LDAP_SSL
+endif
+ifeq ($(findstring -lldap,$(LIBS)),)
+  _LIBS += -lwldap32
+endif
+_LIBS += -lws2_32 -lcrypt32 -lbcrypt
+
+ifndef DYN
+  LDFLAGS += $(_LDFLAGS)
+  LIBS += $(_LIBS)
+endif
+
+### Global rules
+
+CC ?= $(CROSSPREFIX)gcc
+RC ?= $(CROSSPREFIX)windres
+AR ?= $(CROSSPREFIX)ar
+
+ifneq ($(findstring /sh,$(SHELL)),)
+DEL  = rm -f $1
+COPY = -cp -afv $1 $2
+else
+DEL  = -del 2>NUL /q /f $(subst /,\,$1)
+COPY = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
+endif
+
+all: $(TARGETS)
 
 %.o: %.c
-	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 %.res: %.rc
-	$(RC) $(RCFLAGS) -i $< -o $@
+	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
-	@$(call DEL, $(libcurl_a_OBJECTS) $(RESOURCE))
+	@$(call DEL, $(TOCLEAN))
 
 distclean vclean: clean
-	@$(call DEL, $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY) $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY))
+	@$(call DEL, $(TARGETS) $(TOVCLEAN))

@@ -160,7 +160,7 @@ ifeq ($(USE_OPENSSL),1)
 endif
 
 ifeq ($(USE_ZLIB),1)
-  CFLAGS += -DUSE_ZLIB -I$(ZLIB_ROOT)
+  CFLAGS += -DHAVE_LIBZ -I$(ZLIB_ROOT)
 endif
 
 ifeq ($(USE_IPV6),1)

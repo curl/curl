@@ -89,19 +89,22 @@ automatically when this URL is read from the handle.
 The query part will also get spaces converted to pluses when asked to URL
 encode on set with the \fICURLU_URLENCODE\fP bit.
 
-If used together with the \fICURLU_APPENDQUERY\fP bit, the provided part will
-be appended on the end of the existing query - and if the previous part did not
-end with an ampersand (&), an ampersand will be inserted before the new
-appended part.
-
-When \fICURLU_APPENDQUERY\fP is used together with \fICURLU_URLENCODE\fP, the
-first '=' symbol will not be URL encoded.
+If used together with the \fICURLU_APPENDQUERY\fP bit, the provided part is
+appended on the end of the existing query.
 
 The question mark in the URL is not part of the actual query contents.
 .IP CURLUPART_FRAGMENT
 The hash sign in the URL is not part of the actual fragment contents.
 .SH FLAGS
 The flags argument is zero, one or more bits set in a bitmask.
+.IP CURLU_APPENDQUERY
+Can be used when setting the \fICURLUPART_QUERY\fP component. The provided new
+part will then instead be appended at the end of the existing query - and if
+the previous part did not end with an ampersand (&), an ampersand gets
+inserted before the new appended part.
+
+When \fICURLU_APPENDQUERY\fP is used together with \fICURLU_URLENCODE\fP, the
+first '=' symbol will not be URL encoded.
 .IP CURLU_NON_SUPPORT_SCHEME
 If set, allows \fIcurl_url_set(3)\fP to set a non-supported scheme.
 .IP CURLU_URLENCODE

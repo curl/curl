@@ -198,9 +198,9 @@ static int parsenetrc(const char *host,
           /* we are now parsing sub-keywords concerning "our" host */
           if(state_login) {
             if(specific_login) {
-              state_our_login = strcasecompare(login, tok);
+              state_our_login = !Curl_timestrcmp(login, tok);
             }
-            else if(!login || strcmp(login, tok)) {
+            else if(!login || Curl_timestrcmp(login, tok)) {
               if(login_alloc) {
                 free(login);
                 login_alloc = FALSE;
@@ -216,7 +216,7 @@ static int parsenetrc(const char *host,
           }
           else if(state_password) {
             if((state_our_login || !specific_login)
-                && (!password || strcmp(password, tok))) {
+               && (!password || Curl_timestrcmp(password, tok))) {
               if(password_alloc) {
                 free(password);
                 password_alloc = FALSE;

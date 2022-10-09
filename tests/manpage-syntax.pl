@@ -163,6 +163,14 @@ sub scanmanpage {
                 $errors++;
             }
         }
+        if($_ =~ /(.*)\\f([^BIP])/) {
+            my ($pre, $format) = ($1, $2);
+            if($pre !~ /\\\z/) {
+                # only if there wasn't another backslash before the \f
+                print STDERR "$file:$line suspicious \\f format!\n";
+                $errors++;
+            }
+        }
         if($optpage && $SH && ($SH !~ /^(SYNOPSIS|EXAMPLE|NAME|SEE ALSO)/i) &&
            ($_ =~ /(.*)(CURL(OPT_|MOPT_|INFO_)[A-Z0-9_]*)/)) {
             # an option with its own man page, check that it is tagged

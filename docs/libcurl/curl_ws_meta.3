@@ -29,19 +29,21 @@ curl_ws_meta - meta data WebSocket information
 .nf
 #include <curl/easy.h>
 
-struct curl_ws_metadata {
-  int age;       /* zero */
-  int recvflags; /* See the CURLWS_* defines */
+struct curl_ws_frame {
+  int age;              /* zero */
+  int flags;            /* See the CURLWS_* defines */
+  curl_off_t offset;    /* the offset of this data into the frame */
+  curl_off_t bytesleft; /* number of pending bytes left of the payload */
 };
 
-struct curl_ws_metadata *curl_ws_meta(CURL *curl);
+struct curl_ws_frame *curl_ws_meta(CURL *curl);
 .fi
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
 
 When the write callback (\fICURLOPT_WRITEFUNCTION(3)\fP) is invoked on
 received WebSocket traffic, \fIcurl_ws_meta(3)\fP can be called from within
-the callback to provide additional information about the data.
+the callback to provide additional information about the current frame.
 
 This function only works from within the callback, and only when receiving
 WebSocket data.
@@ -54,9 +56,30 @@ to the callback by libcurl itself, applications that want to use
 .SH "struct fields"
 .IP age
 This field specify the age of this struct. It is always zero for now.
-.IP recvflags
-This is a bitmask with the exact same meaning as the \fBrecvflags\fP
-documented for \fIcurl_ws_recv(3)\fP.
+.IP flags
+This is a bitmask with individual bits set that describes the WebSocket
+data. See the list below.
+.IP offset
+When this frame is a continuation of fragment data already delivered, this is
+the offset into the final fragment where this piece belongs.
+.IP bytesleft
+If this is not a complete fragment, the \fIbytesleft\fP field informs about
+how many additional bytes are expected to arrive before this fragment is
+complete.
+.SH FLAGS
+.IP CURLWS_TEXT
+The buffer contains text data. Note that this makes a difference to WebSocket
+but libcurl itself will not make any verification of the content or
+precautions that you actually receive valid UTF-8 content.
+.IP CURLWS_BINARY
+This is binary data.
+.IP CURLWS_CONT
+This is not the final fragment of the message, it implies that there will be
+another fragment coming as part of the same message.
+.IP CURLWS_CLOSE
+This transfer is now closed.
+.IP CURLWS_PING
+This as an incoming ping message, that expects a pong response.
 .SH EXAMPLE
 .nf
 
@@ -70,9 +93,9 @@ static size_t writecb(unsigned char *buffer,
                       size_t size, size_t nitems, void *p)
 {
   struct customdata *c = (struct customdata *)p;
-  struct curl_ws_metadata *m = curl_ws_meta(c->easy);
+  struct curl_ws_frame *m = curl_ws_meta(c->easy);
 
-  /* m->recvflags tells us about the traffic */
+  /* m->flags tells us about the traffic */
 }
 
 {
@@ -86,10 +109,10 @@ static size_t writecb(unsigned char *buffer,
 .SH AVAILABILITY
 Added in 7.86.0.
 .SH RETURN VALUE
-This function returns a pointer to a metadata struct with information that is
-valid for this specific callback invocation. If it cannot return this
-information, or if the function is called in the wrong context, it returns
-NULL.
+This function returns a pointer to a \fIcurl_ws_frame\fP struct with
+information that is valid for this specific callback invocation. If it cannot
+return this information, or if the function is called in the wrong context, it
+returns NULL.
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3), "
 .BR curl_easy_getinfo "(3), "

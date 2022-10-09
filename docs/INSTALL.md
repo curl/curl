@@ -172,9 +172,9 @@ adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 
 ```cmd
-set ZLIB_PATH=c:\zlib-1.2.8
-set OPENSSL_PATH=c:\openssl-1.0.2c
-set LIBSSH2_PATH=c:\libssh2-1.6.0
+set ZLIB_PATH=c:\zlib-1.2.12
+set OPENSSL_PATH=c:\openssl-3.0.5
+set LIBSSH2_PATH=c:\libssh2-1.10.0
 ```
 
 It is also possible to build with other LDAP installations than MS LDAP;
@@ -182,14 +182,17 @@ currently it is possible to build with native Win32 OpenLDAP, or with the
 *Novell CLDAP* SDK. If you want to use these you need to set these vars:
 
 ```cmd
-set LDAP_SDK=c:\openldap
-set USE_LDAP_OPENLDAP=1
+set CPPFLAGS=-Ic:/openldap/include -DCURL_HAS_OPENLDAP_LDAPSDK
+set LDFLAGS=-Lc:/openldap/lib
+set LIBS=-lldap -llber
 ```
 
 or for using the Novell SDK:
 
 ```cmd
-set USE_LDAP_NOVELL=1
+set CPPFLAGS=-Ic:/openldapsdk/inc -DCURL_HAS_NOVELL_LDAPSDK
+set LDFLAGS=-Lc:/openldapsdk/lib/mscvc
+set LIBS=-lldapsdk -lldapssl -lldapx
 ```
 
 If you want to enable LDAPS support then set LDAPS=1.

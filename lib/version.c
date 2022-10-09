@@ -53,7 +53,7 @@
 #include <librtmp/rtmp.h>
 #endif
 
-#ifdef HAVE_ZLIB_H
+#ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
 

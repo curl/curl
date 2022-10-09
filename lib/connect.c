@@ -762,18 +762,10 @@ void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
   char local_ip[MAX_IPADR_LEN] = "";
   int local_port = -1;
 
-  if(conn->transport == TRNSPRT_TCP) {
-    if(!conn->bits.reuse && !conn->bits.tcp_fastopen)
-      Curl_conninfo_remote(data, conn, sockfd);
-    Curl_conninfo_local(data, sockfd, local_ip, &local_port);
-  } /* end of TCP-only section */
-#ifdef ENABLE_QUIC
-  else if(conn->transport == TRNSPRT_QUIC) {
-    if(!conn->bits.reuse)
-      Curl_conninfo_remote(data, conn, sockfd);
-    Curl_conninfo_local(data, sockfd, local_ip, &local_port);
-  }
-#endif
+  if(!conn->bits.reuse &&
+     (conn->transport != TRNSPRT_TCP || !conn->bits.tcp_fastopen))
+    Curl_conninfo_remote(data, conn, sockfd);
+  Curl_conninfo_local(data, sockfd, local_ip, &local_port);
 
   /* persist connection info in session handle */
   Curl_persistconninfo(data, conn, local_ip, local_port);
@@ -1222,7 +1214,11 @@ static CURLcode singleipconnect(struct Curl_easy *data,
     Curl_closesocket(data, conn, sockfd);
     return CURLE_OK;
   }
-  infof(data, "  Trying %s:%d...", ipaddress, port);
+  infof(data, "  Trying %s%s%s:%d...",
+        (addr.family == AF_INET6 ? "[" : ""),
+        ipaddress,
+        (addr.family == AF_INET6 ? "]" : ""),
+        port);
 
 #ifdef ENABLE_IPV6
   is_tcp = (addr.family == AF_INET || addr.family == AF_INET6) &&

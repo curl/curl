@@ -97,7 +97,7 @@ static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
   CURL *easy = p;
   size_t i;
   size_t incoming = nitems;
-  struct curl_ws_metadata *meta;
+  struct curl_ws_frame *meta;
   (void)size;
   for(i = 0; i < nitems; i++)
     printf("%02x ", (unsigned char)buffer[i]);
@@ -105,7 +105,7 @@ static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
 
   meta = curl_ws_meta(easy);
   if(meta)
-    printf("RECFLAGS: %x\n", meta->recvflags);
+    printf("RECFLAGS: %x\n", meta->flags);
   else
     fprintf(stderr, "RECFLAGS: NULL\n");
 

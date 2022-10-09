@@ -30,28 +30,22 @@ curl_ws_recv - receive WebSocket data
 #include <curl/easy.h>
 
 CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
-                      size_t *recv, unsigned int *flags);
+                      size_t *recv, struct curl_ws_frame **meta);
 .fi
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
 
 Retrieves as much as possible of a received WebSocket data fragment into the
-\fBbuffer\fP, but not more than \fBbuflen\fP bytes. The provide
-\fIflags\fP argument gets bits set to help characterize the fragment.
-.SH FLAGS
-.IP CURLWS_TEXT
-The buffer contains text data. Note that this makes a difference to WebSocket
-but libcurl itself will not make any verification of the content or
-precautions that you actually receive valid UTF-8 content.
-.IP CURLWS_BINARY
-This is binary data.
-.IP CURLWS_CONT
-This is not the final fragment of the message, it implies that there will be
-another fragment coming as part of the same message.
-.IP CURLWS_CLOSE
-This transfer is now closed.
-.IP CURLWS_PING
-This as an incoming ping message, that expects a pong response.
+\fBbuffer\fP, but not more than \fBbuflen\fP bytes. \fIrecv\fP is set to the
+number of bytes actually stored.
+
+If there is more fragment data to deliver than what fits in the provided
+\fIbuffer\fP, libcurl returns a full buffer and the application needs to call
+this function again to continue draining the buffer.
+
+The \fImeta\fP pointer gets set to point to a \fIstruct curl_ws_frame\fP that
+contains information about the received data. See the \fIcurl_ws_meta(3)\fP
+for details on that struct.
 .SH EXAMPLE
 .nf
 

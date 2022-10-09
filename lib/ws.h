@@ -36,6 +36,25 @@
 /* this is the largest single fragment size we support */
 #define MAX_WS_SIZE 65535
 
+/* part of 'struct HTTP', when used in the 'struct SingleRequest' in the
+   Curl_easy struct */
+struct websocket {
+  bool contfragment; /* set TRUE if the previous fragment sent was not final */
+  unsigned char mask[4]; /* 32 bit mask for this connection */
+  struct Curl_easy *data; /* used for write callback handling */
+  struct dynbuf buf;
+  size_t usedbuf; /* number of leading bytes in 'buf' the most recent complete
+                     websocket frame uses */
+  struct curl_ws_frame frame; /* the struct used for frame state */
+  curl_off_t oleft; /* outstanding number of payload bytes left from the
+                       server */
+  curl_off_t stillbuffer; /* number of bytes left in the buffer to deliver in
+                             the next curl_ws_recv() call */
+  char *stillb; /* the stillbuffer pending bytes are here */
+  curl_off_t sleft; /* outstanding number of payload bytes left to send */
+  unsigned int xori; /* xor index */
+};
+
 CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req);
 CURLcode Curl_ws_accept(struct Curl_easy *data);
 
