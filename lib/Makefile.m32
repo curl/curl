@@ -143,6 +143,12 @@ ifneq ($(findstring -ssl,$(CFG)),)
   OPENSSL_LIBS ?= -lssl -lcrypto
   _LIBS += $(OPENSSL_LIBS)
 
+  ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/aead.h),)
+    SSLNAME := boringssl
+  else
+    SSLNAME := openssl
+  endif
+
   ifneq ($(findstring -srp,$(CFG)),)
     ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h),)
       # OpenSSL 1.0.1 and later.
@@ -175,6 +181,7 @@ endif
 
 ifneq ($(findstring -nghttp3,$(CFG)),)
 ifneq ($(findstring -ngtcp2,$(CFG)),)
+ifneq ($(SSLNAME),)
   NGHTTP3_PATH ?= $(PROOT)/../nghttp3
   CPPFLAGS += -DUSE_NGHTTP3
   CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
@@ -185,8 +192,9 @@ ifneq ($(findstring -ngtcp2,$(CFG)),)
   CPPFLAGS += -DUSE_NGTCP2
   CPPFLAGS += -I"$(NGTCP2_PATH)/include"
   _LDFLAGS += -L"$(NGTCP2_PATH)/lib"
-  NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
+  NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_$(SSLNAME)
   _LIBS += $(NGTCP2_LIBS)
+endif
 endif
 endif
 
