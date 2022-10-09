@@ -122,6 +122,7 @@ ifneq ($(findstring -ares,$(CFG)),)
   _LIBS += -lcares
 endif
 endif
+
 ifneq ($(findstring -rtmp,$(CFG)),)
   LIBRTMP_PATH ?= $(PROOT)/../librtmp
   CPPFLAGS += -DUSE_LIBRTMP
@@ -130,6 +131,7 @@ ifneq ($(findstring -rtmp,$(CFG)),)
   _LIBS += -lrtmp -lwinmm
   ZLIB := 1
 endif
+
 ifneq ($(findstring -ssh2,$(CFG)),)
   LIBSSH2_PATH ?= $(PROOT)/../libssh2
   CPPFLAGS += -DUSE_LIBSSH2
@@ -138,6 +140,7 @@ ifneq ($(findstring -ssh2,$(CFG)),)
   _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   _LIBS += -lssh2
 endif
+
 ifneq ($(findstring -nghttp2,$(CFG)),)
   NGHTTP2_PATH ?= $(PROOT)/../nghttp2
   CPPFLAGS += -DUSE_NGHTTP2
@@ -145,6 +148,7 @@ ifneq ($(findstring -nghttp2,$(CFG)),)
   _LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
   _LIBS += -lnghttp2
 endif
+
 ifneq ($(findstring -nghttp3,$(CFG)),)
 ifneq ($(findstring -ngtcp2,$(CFG)),)
   NGHTTP3_PATH ?= $(PROOT)/../nghttp3
@@ -161,6 +165,7 @@ ifneq ($(findstring -ngtcp2,$(CFG)),)
   _LIBS += $(NGTCP2_LIBS)
 endif
 endif
+
 ifneq ($(findstring -ssl,$(CFG)),)
   OPENSSL_PATH ?= $(PROOT)/../openssl
   CPPFLAGS += -DUSE_OPENSSL
@@ -184,6 +189,7 @@ ifneq ($(findstring -schannel,$(CFG)),)
   CPPFLAGS += -DUSE_SCHANNEL
   SSLLIBS += 1
 endif
+
 ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
   ZLIB_PATH ?= $(PROOT)/../zlib
   # These CPPFLAGS are also required when compiling the curl tool via 'src'.
@@ -215,6 +221,7 @@ ifneq ($(findstring -gsasl,$(CFG)),)
   _LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
   _LIBS += -lgsasl
 endif
+
 ifneq ($(findstring -idn2,$(CFG)),)
   LIBIDN2_PATH ?= $(PROOT)/../libidn2
   CPPFLAGS += -DUSE_LIBIDN2
@@ -228,6 +235,7 @@ ifneq ($(findstring -winidn,$(CFG)),)
   _LIBS += -lnormaliz
 endif
 endif
+
 ifneq ($(findstring -sspi,$(CFG)),)
   CPPFLAGS += -DUSE_WINDOWS_SSPI
 endif
@@ -237,6 +245,7 @@ endif
 ifneq ($(findstring -ldaps,$(CFG)),)
   CPPFLAGS += -DHAVE_LDAP_SSL
 endif
+
 ifeq ($(findstring -lldap,$(LIBS)),)
   _LIBS += -lwldap32
 endif
