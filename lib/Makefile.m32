@@ -113,14 +113,12 @@ _LIBS :=
 
 ifneq ($(findstring -sync,$(CFG)),)
   CPPFLAGS += -DUSE_SYNC_DNS
-else
-ifneq ($(findstring -ares,$(CFG)),)
+else ifneq ($(findstring -ares,$(CFG)),)
   LIBCARES_PATH ?= $(PROOT)/../c-ares
   CPPFLAGS += -DUSE_ARES
   CPPFLAGS += -I"$(LIBCARES_PATH)/include"
   _LDFLAGS += -L"$(LIBCARES_PATH)/lib"
   _LIBS += -lcares
-endif
 endif
 
 ifneq ($(findstring -rtmp,$(CFG)),)
@@ -156,8 +154,7 @@ ifneq ($(findstring -ssl,$(CFG)),)
     endif
   endif
   SSLLIBS += 1
-else
-ifneq ($(findstring -wolfssl,$(CFG)),)
+else ifneq ($(findstring -wolfssl,$(CFG)),)
   WOLFSSL_PATH ?= $(PROOT)/../zlib
   CPPFLAGS += -DUSE_WOLFSSL
   CPPFLAGS += -DSIZEOF_LONG_LONG=8
@@ -166,7 +163,6 @@ ifneq ($(findstring -wolfssl,$(CFG)),)
   _LIBS += -lwolfssl
   OPENSSL := wolfssl
   SSLLIBS += 1
-endif
 endif
 ifneq ($(findstring -mbedtls,$(CFG)),)
   MBEDTLS_PATH ?= $(PROOT)/../zlib
@@ -188,8 +184,7 @@ ifneq ($(findstring -ssh2,$(CFG)),)
   _LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   _LIBS += -lssh2
-else
-ifneq ($(findstring -libssh,$(CFG)),)
+else ifneq ($(findstring -libssh,$(CFG)),)
   # You really should avoid libssh on Windows in production, due to its
   # by-default-world-writable configuration vulnerability (as of 0.10.4)
   LIBSSH_PATH ?= $(PROOT)/../libssh
@@ -197,15 +192,12 @@ ifneq ($(findstring -libssh,$(CFG)),)
   CPPFLAGS += -I"$(LIBSSH_PATH)/include"
   _LDFLAGS += -L"$(LIBSSH_PATH)/lib"
   _LIBS += -lssh
-else
-ifeq ($(OPENSSL)$(findstring -wolfssh,$(CFG)),wolfssl-wolfssh)
+else ifeq ($(OPENSSL)$(findstring -wolfssh,$(CFG)),wolfssl-wolfssh)
   WOLFSSH_PATH ?= $(PROOT)/../wolfssh
   CPPFLAGS += -DUSE_WOLFSSH
   CPPFLAGS += -I"$(WOLFSSH_PATH)/include"
   _LDFLAGS += -L"$(WOLFSSH_PATH)/lib"
   _LIBS += -lwolfssh
-endif
-endif
 endif
 
 ifneq ($(findstring -nghttp2,$(CFG)),)
@@ -273,12 +265,10 @@ ifneq ($(findstring -idn2,$(CFG)),)
   CPPFLAGS += -I"$(LIBIDN2_PATH)/include"
   _LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   _LIBS += -lidn2
-else
-ifneq ($(findstring -winidn,$(CFG)),)
+else ifneq ($(findstring -winidn,$(CFG)),)
   CPPFLAGS += -DUSE_WIN32_IDN
   CPPFLAGS += -DWANT_IDN_PROTOTYPES
   _LIBS += -lnormaliz
-endif
 endif
 
 ifneq ($(findstring -sspi,$(CFG)),)
