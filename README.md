@@ -4,7 +4,7 @@ Copyright (C) 1998 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-# ![curl logo](https://curl.se/logo/curl-logo.svg)
+# [![curl logo](https://curl.se/logo/curl-logo.svg)](https://curl.se/)
 
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/63/badge)](https://bestpractices.coreinfrastructure.org/projects/63)
 [![Coverity passed](https://scan.coverity.com/projects/curl/badge.svg)](https://scan.coverity.com/projects/curl)
