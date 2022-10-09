@@ -396,7 +396,6 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
     ws_decode_clear(data);
     if(endp) {
       /* there's more websocket data to deal with in the buffer */
-      buffer = NULL; /* don't pass in the data again */
       goto decode;
     }
   }
