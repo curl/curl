@@ -148,11 +148,51 @@ macos_task:
       env:
         install_packages: nghttp2
         configure: --without-ssl --enable-debug
+    - name: macOS arm64 libssh2
+      env:
+        install_packages: nghttp2 libssh2
+        configure: --without-ssl --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2
+    - name: macOS arm64 libssh-c-ares
+      env:
+        install_packages: nghttp2 openssl libssh
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-libssh --enable-ares
+    - name: macOS arm64 libssh
+      env:
+        install_packages: nghttp2 openssl libssh
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-libssh
+    - name: macOS arm64 c-ares
+      env:
+        install_packages: nghttp2      
+        configure: --without-ssl --enable-debug --enable-ares
+    - name: macOS arm64 HTTP only
+      env:
+        install_packages: nghttp2      
+        configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+    - name: macOS arm64 SecureTransport http2
+      env:
+        install_packages: nghttp2
+        configure: --with-secure-transport
+    - name: macOS arm64 OpenSSL http2
+      env:
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
+    - name: macOS arm64 LibreSSL http2
+      env:
+        install_packages: nghttp2 libressl
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl
+    - name: macOS arm64 torture
+      env:
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
+    - name: macOS arm64 torture-ftp
+      env:
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
 
   env:
     CIRRUS_CLONE_DEPTH: 10
     MAKE_FLAGS: -j 4
-    CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+    CFLAGS: "-Wno-vla -mmacosx-version-min=10.8"
 
   pkginstall_script:
     - echo libtool autoconf automake pkg-config ${install_packages} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
