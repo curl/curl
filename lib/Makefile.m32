@@ -114,13 +114,13 @@ _LIBS :=
 ifneq ($(findstring -sync,$(CFG)),)
   CPPFLAGS += -DUSE_SYNC_DNS
 else
-  ifneq ($(findstring -ares,$(CFG)),)
-    LIBCARES_PATH ?= $(PROOT)/../c-ares
-    CPPFLAGS += -DUSE_ARES
-    CPPFLAGS += -I"$(LIBCARES_PATH)/include"
-    _LDFLAGS += -L"$(LIBCARES_PATH)/lib"
-    _LIBS += -lcares
-  endif
+ifneq ($(findstring -ares,$(CFG)),)
+  LIBCARES_PATH ?= $(PROOT)/../c-ares
+  CPPFLAGS += -DUSE_ARES
+  CPPFLAGS += -I"$(LIBCARES_PATH)/include"
+  _LDFLAGS += -L"$(LIBCARES_PATH)/lib"
+  _LIBS += -lcares
+endif
 endif
 ifneq ($(findstring -rtmp,$(CFG)),)
   LIBRTMP_PATH ?= $(PROOT)/../librtmp
@@ -146,20 +146,20 @@ ifneq ($(findstring -nghttp2,$(CFG)),)
   _LIBS += -lnghttp2
 endif
 ifneq ($(findstring -nghttp3,$(CFG)),)
-  ifneq ($(findstring -ngtcp2,$(CFG)),)
-    NGHTTP3_PATH ?= $(PROOT)/../nghttp3
-    CPPFLAGS += -DUSE_NGHTTP3
-    CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
-    _LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
-    _LIBS += -lnghttp3
+ifneq ($(findstring -ngtcp2,$(CFG)),)
+  NGHTTP3_PATH ?= $(PROOT)/../nghttp3
+  CPPFLAGS += -DUSE_NGHTTP3
+  CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
+  _LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
+  _LIBS += -lnghttp3
 
-    NGTCP2_PATH ?= $(PROOT)/../ngtcp2
-    CPPFLAGS += -DUSE_NGTCP2
-    CPPFLAGS += -I"$(NGTCP2_PATH)/include"
-    _LDFLAGS += -L"$(NGTCP2_PATH)/lib"
-    NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
-    _LIBS += $(NGTCP2_LIBS)
-  endif
+  NGTCP2_PATH ?= $(PROOT)/../ngtcp2
+  CPPFLAGS += -DUSE_NGTCP2
+  CPPFLAGS += -I"$(NGTCP2_PATH)/include"
+  _LDFLAGS += -L"$(NGTCP2_PATH)/lib"
+  NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
+  _LIBS += $(NGTCP2_LIBS)
+endif
 endif
 ifneq ($(findstring -ssl,$(CFG)),)
   OPENSSL_PATH ?= $(PROOT)/../openssl
