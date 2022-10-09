@@ -264,6 +264,14 @@ ifneq ($(findstring -idn2,$(CFG)),)
   CPPFLAGS += -I"$(LIBIDN2_PATH)/include"
   _LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   _LIBS += -lidn2
+
+ifneq ($(findstring -psl,$(CFG)),)
+  LIBPSL_PATH ?= $(PROOT)/../libpsl
+  CPPFLAGS += -DUSE_LIBPSL
+  CPPFLAGS += -I"$(LIBPSL_PATH)/include"
+  _LDFLAGS += -L"$(LIBPSL_PATH)/lib"
+  _LIBS += -lpsl
+endif
 else ifneq ($(findstring -winidn,$(CFG)),)
   CPPFLAGS += -DUSE_WIN32_IDN
   CPPFLAGS += -DWANT_IDN_PROTOTYPES
