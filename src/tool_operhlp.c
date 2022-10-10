@@ -149,61 +149,65 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
 CURLcode get_url_file_name(char **filename, const char *url)
 {
   const char *pc, *pc2;
+  CURLU *uh = curl_url();
+  char *path = NULL;
+
+  if(!uh)
+    return CURLE_OUT_OF_MEMORY;
 
   *filename = NULL;
 
-  /* Find and get the remote file name */
-  pc = strstr(url, "://");
-  if(pc)
-    pc += 3;
-  else
-    pc = url;
+  if(!curl_url_set(uh, CURLUPART_URL, url, CURLU_GUESS_SCHEME) &&
+     !curl_url_get(uh, CURLUPART_PATH, &path, 0)) {
+    curl_url_cleanup(uh);
 
-  pc2 = strrchr(pc, '\\');
-  pc = strrchr(pc, '/');
-  if(pc2 && (!pc || pc < pc2))
-    pc = pc2;
+    pc = strrchr(path, '/');
+    pc2 = strrchr(pc ? pc + 1 : path, '\\');
+    if(pc2)
+      pc = pc2;
 
-  if(pc)
-    /* duplicate the string beyond the slash */
-    pc++;
-  else
-    /* no slash => empty string */
-    pc = "";
+    if(pc)
+      /* duplicate the string beyond the slash */
+      pc++;
+    else
+      /* no slash => empty string */
+      pc = "";
 
-  *filename = strdup(pc);
-  if(!*filename)
-    return CURLE_OUT_OF_MEMORY;
+    *filename = strdup(pc);
+    curl_free(path);
+    if(!*filename)
+      return CURLE_OUT_OF_MEMORY;
 
 #if defined(MSDOS) || defined(WIN32)
-  {
-    char *sanitized;
-    SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
-    Curl_safefree(*filename);
-    if(sc)
-      return CURLE_URL_MALFORMAT;
-    *filename = sanitized;
-  }
+    {
+      char *sanitized;
+      SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
+      Curl_safefree(*filename);
+      if(sc)
+        return CURLE_URL_MALFORMAT;
+      *filename = sanitized;
+    }
 #endif /* MSDOS || WIN32 */
 
-  /* in case we built debug enabled, we allow an environment variable
-   * named CURL_TESTDIR to prefix the given file name to put it into a
-   * specific directory
-   */
+    /* in case we built debug enabled, we allow an environment variable
+     * named CURL_TESTDIR to prefix the given file name to put it into a
+     * specific directory
+     */
 #ifdef DEBUGBUILD
-  {
-    char *tdir = curlx_getenv("CURL_TESTDIR");
-    if(tdir) {
-      char buffer[512]; /* suitably large */
-      msnprintf(buffer, sizeof(buffer), "%s/%s", tdir, *filename);
-      Curl_safefree(*filename);
-      *filename = strdup(buffer); /* clone the buffer */
-      curl_free(tdir);
-      if(!*filename)
-        return CURLE_OUT_OF_MEMORY;
+    {
+      char *tdir = curlx_getenv("CURL_TESTDIR");
+      if(tdir) {
+        char *alt = aprintf("%s/%s", tdir, *filename);
+        Curl_safefree(*filename);
+        *filename = alt;
+        curl_free(tdir);
+        if(!*filename)
+          return CURLE_OUT_OF_MEMORY;
+      }
     }
-  }
 #endif
-
-  return CURLE_OK;
+    return CURLE_OK;
+  }
+  curl_url_cleanup(uh);
+  return CURLE_URL_MALFORMAT;
 }
