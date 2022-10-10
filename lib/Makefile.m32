@@ -130,6 +130,29 @@ ifneq ($(findstring -rtmp,$(CFG)),)
   ZLIB := 1
 endif
 
+ifneq ($(findstring -ssh2,$(CFG)),)
+  LIBSSH2_PATH ?= $(PROOT)/../libssh2
+  CPPFLAGS += -DUSE_LIBSSH2
+  CPPFLAGS += -I"$(LIBSSH2_PATH)/include"
+  _LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
+  _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
+  _LIBS += -lssh2
+else ifneq ($(findstring -libssh,$(CFG)),)
+  # Avoid using libssh on Windows in production, due to its
+  # by-default-world-writable configuration vulnerability (as of 0.10.4)
+  LIBSSH_PATH ?= $(PROOT)/../libssh
+  CPPFLAGS += -DUSE_LIBSSH
+  CPPFLAGS += -I"$(LIBSSH_PATH)/include"
+  _LDFLAGS += -L"$(LIBSSH_PATH)/lib"
+  _LIBS += -lssh
+else ifneq ($(findstring -wolfssh,$(CFG)),)
+  WOLFSSH_PATH ?= $(PROOT)/../wolfssh
+  CPPFLAGS += -DUSE_WOLFSSH
+  CPPFLAGS += -I"$(WOLFSSH_PATH)/include"
+  _LDFLAGS += -L"$(WOLFSSH_PATH)/lib"
+  _LIBS += -lwolfssh
+endif
+
 ifneq ($(findstring -ssl,$(CFG)),)
   OPENSSL_PATH ?= $(PROOT)/../openssl
   CPPFLAGS += -DUSE_OPENSSL
@@ -176,30 +199,6 @@ endif
 ifneq ($(findstring -schannel,$(CFG)),)
   CPPFLAGS += -DUSE_SCHANNEL
   SSLLIBS += 1
-endif
-
-ifneq ($(findstring -ssh2,$(CFG)),)
-  LIBSSH2_PATH ?= $(PROOT)/../libssh2
-  CPPFLAGS += -DUSE_LIBSSH2
-  CPPFLAGS += -I"$(LIBSSH2_PATH)/include"
-  _LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
-  _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
-  _LIBS += -lssh2
-else ifneq ($(findstring -libssh,$(CFG)),)
-  # Avoid using libssh on Windows in production, due to its
-  # by-default-world-writable configuration vulnerability (as of 0.10.4)
-  LIBSSH_PATH ?= $(PROOT)/../libssh
-  CPPFLAGS += -DUSE_LIBSSH
-  CPPFLAGS += -I"$(LIBSSH_PATH)/include"
-  _LDFLAGS += -L"$(LIBSSH_PATH)/lib"
-  # Workaround when used with libressl 'duplicate symbol: explicit_bzero'
-  _LIBS := -lssh $(_LIBS)
-else ifeq ($(OPENSSL)$(findstring -wolfssh,$(CFG)),wolfssl-wolfssh)
-  WOLFSSH_PATH ?= $(PROOT)/../wolfssh
-  CPPFLAGS += -DUSE_WOLFSSH
-  CPPFLAGS += -I"$(WOLFSSH_PATH)/include"
-  _LDFLAGS += -L"$(WOLFSSH_PATH)/lib"
-  _LIBS += -lwolfssh
 endif
 
 ifneq ($(findstring -nghttp2,$(CFG)),)
