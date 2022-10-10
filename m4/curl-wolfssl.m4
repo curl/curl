@@ -154,7 +154,8 @@ if test "x$OPT_WOLFSSL" != xno; then
           AC_MSG_NOTICE([Added $wolfssllibpath to CURL_LIBRARY_PATH])
         fi
       fi
-
+    else
+        AC_MSG_ERROR([--with-wolfssl but wolfSSL was not found or doesn't work])
     fi
 
   fi dnl wolfSSL not disabled
