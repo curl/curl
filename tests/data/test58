@@ -36,7 +36,7 @@ a few bytes
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT /we/want/%TESTNUMBERte%5B%5Dst.txt HTTP/1.1
+PUT /we/want/%TESTNUMBERte%5b%5dst.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
