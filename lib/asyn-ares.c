@@ -786,6 +786,10 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
       hints.ai_family = pf;
       hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP)?
         SOCK_STREAM : SOCK_DGRAM;
+      /* Since the service is a numerical one, set the hint flags
+       * accordingly to save a call to getservbyname in inside C-Ares
+       */
+      hints.ai_flags = ARES_AI_NUMERICSERV;
       msnprintf(service, sizeof(service), "%d", port);
       res->num_pending = 1;
       ares_getaddrinfo((ares_channel)data->state.async.resolver, hostname,
