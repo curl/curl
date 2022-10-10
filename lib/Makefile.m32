@@ -192,7 +192,8 @@ else ifneq ($(findstring -libssh,$(CFG)),)
   CPPFLAGS += -DUSE_LIBSSH
   CPPFLAGS += -I"$(LIBSSH_PATH)/include"
   _LDFLAGS += -L"$(LIBSSH_PATH)/lib"
-  _LIBS += -lssh
+  # Workaround when used with libressl 'duplicate symbol: explicit_bzero'
+  _LIBS := -lssh $(_LIBS)
 else ifeq ($(OPENSSL)$(findstring -wolfssh,$(CFG)),wolfssl-wolfssh)
   WOLFSSH_PATH ?= $(PROOT)/../wolfssh
   CPPFLAGS += -DUSE_WOLFSSH
