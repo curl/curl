@@ -1191,43 +1191,22 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         }
 
         if(httpgetfields) {
-          char *urlbuffer;
-          /* Find out whether the url contains a file name */
-          const char *pc = strstr(per->this_url, "://");
-          char sep = '?';
-          if(pc)
-            pc += 3;
-          else
-            pc = per->this_url;
-
-          pc = strrchr(pc, '/'); /* check for a slash */
-
-          if(pc) {
-            /* there is a slash present in the URL */
-
-            if(strchr(pc, '?'))
-              /* Ouch, there's already a question mark in the URL string, we
-                 then append the data with an ampersand separator instead! */
-              sep = '&';
+          CURLU *uh = curl_url();
+          if(uh) {
+            char *updated;
+            if(curl_url_set(uh, CURLUPART_URL, per->this_url,
+                            CURLU_GUESS_SCHEME) ||
+               curl_url_set(uh, CURLUPART_QUERY, httpgetfields,
+                            CURLU_APPENDQUERY) ||
+               curl_url_get(uh, CURLUPART_URL, &updated, CURLU_GUESS_SCHEME)) {
+              curl_url_cleanup(uh);
+              result = CURLE_OUT_OF_MEMORY;
+              break;
+            }
+            Curl_safefree(per->this_url); /* free previous URL */
+            per->this_url = updated; /* use our new URL instead! */
+            curl_url_cleanup(uh);
           }
-          /*
-           * Then append ? followed by the get fields to the url.
-           */
-          if(pc)
-            urlbuffer = aprintf("%s%c%s", per->this_url, sep, httpgetfields);
-          else
-            /* Append  / before the ? to create a well-formed url
-               if the url contains a hostname only
-            */
-            urlbuffer = aprintf("%s/?%s", per->this_url, httpgetfields);
-
-          if(!urlbuffer) {
-            result = CURLE_OUT_OF_MEMORY;
-            break;
-          }
-
-          Curl_safefree(per->this_url); /* free previous URL */
-          per->this_url = urlbuffer; /* use our new URL instead! */
         }
 
         if(!global->errors)
