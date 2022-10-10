@@ -1064,6 +1064,7 @@ if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   check_symbol_exists(snprintf       "${CURL_INCLUDES}" HAVE_SNPRINTF)
 endif()
 check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
+check_symbol_exists(inet_ntop      "${CURL_INCLUDES}" HAVE_INET_NTOP)
 check_symbol_exists(inet_pton      "${CURL_INCLUDES}" HAVE_INET_PTON)
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
