@@ -294,9 +294,9 @@ ifeq ($(findstring -lldap,$(LIBS)),)
 endif
 _LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
-# Each SSL lib appends '1'. If '11' can be found, it means we have
-# multiple SSL libs, telling us to enable MultiSSL.
-ifneq ($(findstring 11,$(SSLLIBS)),)
+# Each additional SSL lib appends ' 1'. Finding '1 1' means we have multiple
+# SSL libs.
+ifneq ($(findstring 1 1,$(SSLLIBS)),)
   CPPFLAGS += -DCURL_WITH_MULTI_SSL
 endif
 
