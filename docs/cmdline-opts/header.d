@@ -5,7 +5,7 @@ Short: H
 Arg: <header/@file>
 Help: Pass custom header(s) to server
 Protocols: HTTP IMAP SMTP
-Category: http
+Category: http imap smtp
 See-also: user-agent referer
 Example: -H "X-First-Name: Joe" $URL
 Example: -H "User-Agent: yes-please/2000" $URL
