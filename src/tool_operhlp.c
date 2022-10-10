@@ -150,7 +150,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
     curl_url_cleanup(uh);
 
     pc = strrchr(path, '/');
-    pc2 = strrchr(pc?pc+1:path, '\\');
+    pc2 = strrchr(pc ? pc + 1 : path, '\\');
     if(pc2)
       pc = pc2;
 
