@@ -65,9 +65,6 @@
 /* Define if you have the <stdlib.h> header file.  */
 #define HAVE_STDLIB_H 1
 
-/* Define if you have the <process.h> header file.  */
-/* #define HAVE_PROCESS_H 1 */
-
 /* Define if you have the <sys/param.h> header file.  */
 /* #define HAVE_SYS_PARAM_H 1 */
 

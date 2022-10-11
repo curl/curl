@@ -48,10 +48,6 @@
 #include <signal.h>
 #endif
 
-#ifdef HAVE_PROCESS_H
-#include <process.h>
-#endif
-
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
