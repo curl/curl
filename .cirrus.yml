@@ -184,12 +184,12 @@ macos_task:
       env:
         install_packages: nghttp2 openssl
         configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
-        tflags: -n -t --shallow=25 !FTP
+        TFLAGS: -n -t --shallow=25 !FTP
     - name: macOS arm64 torture-ftp
       env:
         install_packages: nghttp2 openssl
         configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
-        tflags: -n -t --shallow=20 FTP
+        TFLAGS: -n -t --shallow=20 FTP
 
   env:
     CIRRUS_CLONE_DEPTH: 10
@@ -207,6 +207,6 @@ macos_task:
   compile_script:
     - make V=1 && make V=1 examples && cd tests && make V=1
   test_script:
-    - sudo make V=1 test-ci ${tflags}
+    - sudo make V=1 test-ci
   install_script:
     - sudo make V=1 install
