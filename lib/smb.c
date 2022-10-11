@@ -32,8 +32,6 @@
 
 #ifdef WIN32
 #define getpid GetCurrentProcessId
-#elif defined(HAVE_PROCESS_H)
-#include <process.h>
 #endif
 
 #include "smb.h"
