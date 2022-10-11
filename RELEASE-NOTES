@@ -4,7 +4,7 @@ curl and libcurl 7.86.0
  Command line options:         248
  curl_easy_setopt() options:   300
  Public functions in libcurl:  91
- Contributors:                 2711
+ Contributors:                 2719
 
 This release includes the following changes:
 
@@ -15,24 +15,34 @@ This release includes the following bugfixes:
 
  o altsvc: reject bad port numbers [86]
  o altsvc: use 'h3' for h3 [46]
+ o asyn-ares: set hint flags when calling ares_getaddrinfo [93]
  o autotools: allow --enable-symbol-hiding with windows [65]
  o autotools: reduce brute-force when detecting recv/send arg list [66]
  o bearssl: make it proper C89 compliant
  o CI/GHA: cancel outdated CI runs on new PR changes [20]
+ o CI/GHA: merge msh3 and openssl3 builds into linux workflow [110]
  o cirrus-ci: add macOS build with m1 [81]
+ o cirrus: use make LDFLAGS=-all-static instead of curl_LDFLAGS [129]
  o cli tool: do not use disabled protocols
+ o cmake: add the check of HAVE_SOCKETPAIR [98]
  o cmake: define BUILDING_LIBCURL in lib/CMakeLists, not config.h [5]
+ o cmake: fix enabling websocket support [116]
  o cmake: fix original MinGW builds [177]
  o configure: correct the wording when checking grep -E [13]
  o configure: deprecate builds with small curl_off_t [89]
  o configure: fail if '--without-ssl' + explicit parameter for an ssl lib [164]
+ o configure: the ngtcp2 option should default to 'no' [125]
  o connect: change verbose IPv6 address:port to [address]:port [83]
+ o connect: fix Curl_updateconninfo for TRNSPRT_UNIX [108]
  o connect: fix the wrong error message on connect failures [55]
  o content_encoding: use writer struct subclasses for different encodings [8]
  o ctype: remove all use of <ctype.h>, use our own versions [12]
  o curl-compilers.m4: for gcc + want warnings, set gnu89 standard [72]
  o curl-compilers.m4: use -O2 as default optimize for clang [6]
+ o curl-wolfssl.m4: error out if wolfSSL is not usable [102]
  o curl.h: fix mention of wrong error code in comment
+ o curl/add_file_name_to_url: use the libcurl URL parser [99]
+ o curl/get_url_file_name: use libcurl URL parser [97]
  o curl: warn for --ssl use, considered insecure [49]
  o curl_ctype: convert to macros-only [10]
  o curl_easy_pause.3: unpausing is as fast as possible [14]
@@ -43,12 +53,15 @@ This release includes the following bugfixes:
  o curl_strequal.3: fix argument typo [60]
  o curl_url_set.3: document CURLU_APPENDQUERY proper [96]
  o CURLOPT_ACCEPT_ENCODING.3: remove "four" as they are five [85]
+ o CURLOPT_COOKIEFILE: insist on "" for enable-without-file [119]
  o CURLOPT_COOKIELIST.3: fix formatting mistake [80]
  o CURLOPT_DNS_INTERFACE.3: mention it works for almost all protocols [15]
+ o CURLOPT_MIMEPOST.3: add an (inline) example [126]
  o CURLOPT_PROXY_SSLCERT_BLOB.3: this is for HTTPS proxies [9]
  o CURLOPT_WILDCARDMATCH.3: Fix backslash escaping under single quotes [172]
  o CURLSHOPT_UNLOCKFUNC.3: the callback has no 'access' argument [84]
  o DEPRECATE.md: Support for systems without 64 bit data types [19]
+ o docs/examples: avoid deprecated options in examples where possible [115]
  o docs/libcurl/symbols-in-versions: add several missing symbols
  o docs: 100+ spellfixes
  o docs: correct missing uppercase in Markdown files [38]
@@ -82,6 +95,9 @@ This release includes the following bugfixes:
  o lib: prepare the incoming of additional protocols [71]
  o lib: sanitize conditional exclusion around MIME [82]
  o lib: the number four in a sequence is the "fourth" [28]
+ o Makefile.m32: deduplicate build rules [131]
+ o Makefile.m32: exclude libs & libpaths for shared mode exes [127]
+ o Makefile.m32: fix regression with tool_hugehelp [130]
  o Makefile.m32: major rework [92]
  o manpage-syntax.pl: all libcurl option symbols should be \fI-tagged [75]
  o manpages: Fix spelling of "allows to" -> "allows one to" [171]
@@ -89,16 +105,20 @@ This release includes the following bugfixes:
  o misc: use the term "null-terminate" consistently [41]
  o mprintf: use snprintf if available [74]
  o msh3: change the static_assert to make the code C89
+ o netrc: compare user name case sensitively [118]
  o ngtcp2: fix C89 compliance nit
  o openssl: make certinfo available for QUIC [91]
  o README.md: add GHA status badges for Linux and macOS builds [40]
  o RELEASE-PROCEDURE.md: mention patch releases [21]
  o resolve: make forced IPv4 resolve only use A queries [61]
+ o runtests: fix uninitialized value on ignored tests [128]
  o schannel: ban server ALPN change during recv renegotiation [63]
  o scripts: use `grep -E` instead of `egrep` [30]
  o setopt: use the handler table for protocol name to number conversions [45]
  o setopt: when POST is set, reset the 'upload' field [51]
  o setup-win32: no longer define UNICODE/_UNICODE implicitly [3]
+ o single_transfer: use the libcurl URL parser when appending query parts [100]
+ o strcase: add and use Curl_timestrcmp [106]
  o strerror: improve two URL API error messages
  o symbol-scan.pl: also check for LIBCURL* symbols [43]
  o symbol-scan.pl: scan and verify .3 man pages [42]
@@ -107,11 +127,16 @@ This release includes the following bugfixes:
  o test1119: scan all public headers [44]
  o test972: verify the output without using external tool [32]
  o tests/certs/scripts: insert standard curl source headers [169]
+ o tests/Makefile: remove run time stats from ci-test [120]
  o tests: fix tag syntax errors in test files
  o tests: skip mime/form tests when mime is not built-in [54]
+ o tidy-up: delete parallel/unused feature flags [117]
  o TODO: Provide the error body from a CONNECT response [67]
+ o tool: avoid generating ambiguous escaped characters in --libcurl [124]
  o tool: remove dead code [70]
+ o tool: reorganize function c_escape around a dynbuf [121]
  o tool_hugehelp: make hugehelp a blank macro when disabled [7]
+ o tool_main: exit at once if out of file descriptors [113]
  o tool_operate: avoid a few #ifdefs for disabled-libcurl builds [29]
  o tool_operate: prevent over-queuing in parallel mode [176]
  o tool_operate: reduce errorbuffer allocs [173]
@@ -123,12 +148,14 @@ This release includes the following bugfixes:
  o urlapi: detect scheme better when not guessing [56]
  o urlapi: leaner with fewer allocs [2]
  o urlapi: reject more bad characters from the host name field [88]
+ o websockets: remodeled API to support 63 bit frame sizes [114]
  o winbuild/MakefileBuild.vc: handle spaces in libssh(2) include paths [18]
  o winbuild: Use NMake batch-rules for compilation [47]
  o windows: add .rc support to autotools builds [33]
  o windows: adjust name of two internal public functions [58]
  o windows: autotools .rc warnings fixup [68]
  o wolfSSL: fix session management bug. [31]
+ o ws: minor fixes for web sockets without the CONNECT_ONLY flag [104]
 
 This release includes the following known bugs:
 
@@ -138,16 +165,18 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   a1346054 on github, ajak in #curl, Andrew Lambert, Benjamin Loison,
-  Dan Fandrich, Daniel Stenberg, David Hu, Dmitry Karpov, Edoardo Lolletti,
-  Eloy Degen, Emanuele Torre, Gisle Vanem, Hayden Roche, James Fuller,
-  John Bampton, justchen1369 on github, Keitagit-kun on github, Marcel Raad,
-  Marc Hörsken, Mark Itzcovitz, Matt Holt, Max Dymond, Michael Drake,
-  Michael Heimpold, n0name321 on github, Orgad Shaneh, Patrick Monnerat,
-  Philip H, Philip Heiduck, ProceduralMan on github, Randall S. Becker,
-  Ray Satiro, RobBotic1 on github, Robby Simpson, Samuel Henrique,
-  Sergey Bronnikov, ssdbest on github, Thiago Suchorski, Tobias Schaefer,
-  Viktor Szakats, Yuriy Chernyshov, zhanghu on xiaomi
-  (42 contributors)
+  bsergean on github, Dan Fandrich, Daniel Hallberg, Daniel Stenberg, David Hu,
+  Dmitry Karpov, Edoardo Lolletti, Eloy Degen, Emanuele Torre, Gisle Vanem,
+  Hayden Roche, James Fuller, John Bampton, justchen1369 on github,
+  Keitagit-kun on github, Marcel Raad, Marc Hörsken, Mark Itzcovitz,
+  Martin Ågren, Matt Holt, Max Dymond, Michael Drake, Michael Heimpold,
+  n0name321 on github, Orgad Shaneh, Patrick Monnerat, Paul Seligman,
+  Petr Štetiar, Philip H, Philip H., Philip Heiduck, ProceduralMan on github,
+  Randall S. Becker, Ray Satiro, RobBotic1 on github, Robby Simpson,
+  Samuel Henrique, Sergey Bronnikov, ssdbest on github, Thiago Suchorski,
+  Tobias Schaefer, Trail of Bits, Vasiliy Ulyanov, Viktor Szakats, Xiang Xiao,
+  Yuriy Chernyshov, zhanghu on xiaomi
+  (51 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -243,8 +272,35 @@ References to bug reports and discussions on issues:
  [90] = https://curl.se/bug/?i=9600
  [91] = https://curl.se/bug/?i=9584
  [92] = https://curl.se/bug/?i=9632
+ [93] = https://curl.se/bug/?i=9694
  [95] = https://curl.se/bug/?i=9630
  [96] = https://curl.se/bug/?i=9628
+ [97] = https://curl.se/bug/?i=9684
+ [98] = https://curl.se/bug/?i=9686
+ [99] = https://curl.se/bug/?i=9683
+ [100] = https://curl.se/bug/?i=9681
+ [102] = https://curl.se/bug/?i=9682
+ [104] = https://curl.se/bug/?i=9665
+ [106] = https://curl.se/bug/?i=9658
+ [108] = https://curl.se/bug/?i=9664
+ [110] = https://curl.se/bug/?i=9646
+ [113] = https://curl.se/bug/?i=9663
+ [114] = https://curl.se/bug/?i=9636
+ [115] = https://curl.se/bug/?i=9661
+ [116] = https://curl.se/bug/?i=9660
+ [117] = https://curl.se/bug/?i=9652
+ [118] = https://curl.se/bug/?i=9657
+ [119] = https://curl.se/bug/?i=9654
+ [120] = https://curl.se/bug/?i=9656
+ [121] = https://curl.se/bug/?i=9653
+ [124] = https://curl.se/bug/?i=9643
+ [125] = https://curl.se/mail/lib-2022-10/0007.html
+ [126] = https://curl.se/bug/?i=9637
+ [127] = https://curl.se/bug/?i=9651
+ [128] = https://curl.se/bug/?i=9648
+ [129] = https://curl.se/bug/?i=9633
+ [130] = https://curl.se/bug/?i=9645
+ [131] = https://curl.se/bug/?i=9642
  [164] = https://curl.se/bug/?i=9414
  [169] = https://curl.se/bug/?i=9417
  [170] = https://curl.se/bug/?i=9415
