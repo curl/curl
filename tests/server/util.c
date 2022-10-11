@@ -521,7 +521,11 @@ static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
 #ifdef WIN32
+#ifdef _WIN32_WCE
 static DWORD thread_main_id = 0;
+#else
+static unsigned int thread_main_id = 0;
+#endif
 static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
 #endif
@@ -624,7 +628,12 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
 }
 /* Window message queue loop for hidden main window, details see above.
  */
+#ifdef _WIN32_WCE
 static DWORD WINAPI main_window_loop(LPVOID lpParameter)
+#else
+#include <process.h>
+static unsigned int WINAPI main_window_loop(void *lpParameter)
+#endif
 {
   WNDCLASS wc;
   BOOL ret;
@@ -705,6 +714,14 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
 void install_signal_handlers(bool keep_sigalrm)
 {
 #ifdef WIN32
+#ifdef _WIN32_WCE
+  typedef HANDLE curl_win_thread_handle_t;
+#elif defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+  typedef unsigned long curl_win_thread_handle_t;
+#else
+  typedef uintptr_t curl_win_thread_handle_t;
+#endif
+  curl_win_thread_handle_t thread;
   /* setup windows exit event before any signal can trigger */
   exit_event = CreateEvent(NULL, TRUE, FALSE, NULL);
   if(!exit_event)
@@ -753,10 +770,14 @@ void install_signal_handlers(bool keep_sigalrm)
 #ifdef WIN32
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
-  thread_main_window = CreateThread(NULL, 0,
-                                    &main_window_loop,
-                                    (LPVOID)GetModuleHandle(NULL),
-                                    0, &thread_main_id);
+#ifdef _WIN32_WCE
+  thread = CreateThread(NULL, 0, &main_window_loop,
+                        (LPVOID)GetModuleHandle(NULL), 0, &thread_main_id);
+#else
+  thread = _beginthreadex(NULL, 0, &main_window_loop,
+                          (void *)GetModuleHandle(NULL), 0, &thread_main_id);
+#endif
+  thread_main_window = (HANDLE)thread;
   if(!thread_main_window || !thread_main_id)
     logmsg("cannot start main window loop");
 #endif
