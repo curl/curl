@@ -1293,6 +1293,8 @@ if(WIN32)
 
   if(NOT HAVE_MINGW_ORIGINAL)
     list(APPEND CURL_LIBS "bcrypt")
+  else()
+    set(HAVE_FTRUNCATE OFF)
   endif()
 endif()
 
