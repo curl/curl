@@ -116,7 +116,7 @@ static const char *find_host_sep(const char *url)
 }
 
 /*
- * Decide in an encoding-independent manner whether a character in an
+ * Decide in an encoding-independent manner whether a character in a
  * URL must be escaped. The same criterion must be used in strlen_url()
  * and strcpy_url().
  */

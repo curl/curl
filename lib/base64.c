@@ -47,7 +47,7 @@
 static const char base64[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-/* The Base 64 encoding with an URL and filename safe alphabet, RFC 4648
+/* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
    section 5 */
 static const char base64url[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
