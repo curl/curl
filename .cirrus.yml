@@ -207,6 +207,6 @@ macos_task:
   compile_script:
     - make V=1 && make V=1 examples && cd tests && make V=1
   test_script:
-    - sudo make V=1 test-ci
+    - sudo -E make V=1 test-ci
   install_script:
     - sudo make V=1 install
