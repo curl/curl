@@ -30,7 +30,7 @@
 
 #define BUILDING_CURL_SMB_C
 
-#if defined(WIN32)
+#ifdef WIN32
 #define getpid GetCurrentProcessId
 #elif defined(HAVE_PROCESS_H)
 #include <process.h>
