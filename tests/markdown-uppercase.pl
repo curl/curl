@@ -29,17 +29,32 @@ my @m = `git ls-files -- $root`;
 
 my $errors;
 
+my %accepted=('curl' => 1,
+              'libcurl' => 1);
+
 sub checkfile {
     my ($f) = @_;
     chomp $f;
     if($f !~ /\.md\z/) {
         return;
     }
-    print "scan $f\n";
     open(F, "<$f");
     my $l = 1;
+    my $prevl;
     while(<F>) {
         my $line = $_;
+        chomp $line;
+        if(($prevl =~ /\.\z/) && ($line =~ /^( *)([a-z]+)/)) {
+            my ($prefix, $word) = ($1, $2);
+            if(!$accepted{$word}) {
+                my $c = length($prefix);
+                print STDERR "$f:$l:$c:error: lowercase $word after period\n";
+                print STDERR "$line\n";
+                print STDERR ' ' x $c;
+                print STDERR "^\n";
+                $errors++;
+            }
+        }
         if($line =~ /^(.*)\. +([a-z]+)/) {
             my ($prefix, $word) = ($1, $2);
 
@@ -48,19 +63,18 @@ sub checkfile {
                ($prefix =~ /e.g\z/) ||
                ($prefix =~ /i.e\z/) ||
                ($prefix =~ /etc\z/) ||
-               ($word eq "curl") ||
-               ($word eq "libcurl")
-                ) {
+               $accepted{$word}) {
             }
             else {
                 my $c = length($prefix) + 2;
-                print STDERR "$f:$l:$c:error: lowercase after period\n";
-                print STDERR $line;
+                print STDERR "$f:$l:$c:error: lowercase $word after period\n";
+                print STDERR "$line\n";
                 print STDERR ' ' x $c;
                 print STDERR "^\n";
                 $errors++;
             }
         }
+        $prevl = $line;
         $l++;
     }
     close(F);
