@@ -299,8 +299,7 @@ want the matching `MAILINDEX` numbers returned then you could search via URL:
 
     imap://user:password@mail.example.com/INBOX?TEXT%20%22foo%20bar%22
 
-.. but if you wanted matching `UID` numbers you would have to use a custom
-request:
+If you want matching `UID` numbers you have to use a custom request:
 
     imap://user:password@mail.example.com/INBOX -X "UID SEARCH TEXT \"foo bar\""
 

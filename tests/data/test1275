@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+symbols-in-versions
+documentation
+--manual
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+<name>
+Verify capital letters after period in markdown files
+</name>
+
+<command type="perl">
+%SRCDIR/markdown-uppercase.pl %SRCDIR/..
+</command>
+</client>
+
+<verify>
+<stderr>
+ok
+</stderr>
+</verify>
+
+</testcase>
