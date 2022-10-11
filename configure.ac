@@ -3905,17 +3905,23 @@ AS_HELP_STRING([--disable-unix-sockets],[Disable Unix domain sockets]),
        ]
 )
 if test "x$want_unix_sockets" != "xno"; then
-  AC_CHECK_MEMBER([struct sockaddr_un.sun_path], [
+  if test "x$curl_cv_native_windows" = "xyes"; then
+    USE_UNIX_SOCKETS=1
     AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
-    AC_SUBST(USE_UNIX_SOCKETS, [1])
     curl_unix_sockets_msg="enabled"
-  ], [
-    if test "x$want_unix_sockets" = "xyes"; then
-      AC_MSG_ERROR([--enable-unix-sockets is not available on this platform!])
-    fi
-  ], [
-    #include <sys/un.h>
-  ])
+  else
+    AC_CHECK_MEMBER([struct sockaddr_un.sun_path], [
+      AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
+      AC_SUBST(USE_UNIX_SOCKETS, [1])
+      curl_unix_sockets_msg="enabled"
+    ], [
+      if test "x$want_unix_sockets" = "xyes"; then
+        AC_MSG_ERROR([--enable-unix-sockets is not available on this platform!])
+      fi
+    ], [
+      #include <sys/un.h>
+    ])
+  fi
 fi
 
 dnl ************************************************************
