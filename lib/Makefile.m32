@@ -28,8 +28,8 @@
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 #
 # Set component roots via envvar <feature>_PATH. Also available for
-# customization: CC, RC, AR, CROSSPREFIX, CPPFLAGS, LDFLAGS, LIBS, CFLAGS,
-# RCFLAGS, ARCH[=custom], CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
+# customization: CC, RC, AR, CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS,
+# ARCH[=custom], CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
 # and more for individual components (see below).
 
 # This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
@@ -77,7 +77,7 @@ CPPFLAGS += -I. -I$(PROOT)/include
 RCFLAGS  += -I$(PROOT)/include
 
 ifneq ($(ARCH),custom)
-  # Set environment var ARCH to your architecture to override autodetection.
+  # Set environment var ARCH to your architecture to override auto-detection.
   ifndef ARCH
     ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
       ARCH := w64
@@ -302,9 +302,7 @@ endif
 
 ### Global rules
 
-CC ?= $(CROSSPREFIX)gcc
-RC ?= $(CROSSPREFIX)windres
-AR ?= $(CROSSPREFIX)ar
+RC ?= windres
 
 ifneq ($(findstring /sh,$(SHELL)),)
 DEL  = rm -f $1
