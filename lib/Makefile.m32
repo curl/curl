@@ -28,9 +28,9 @@
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 #
 # Set component roots via envvar <feature>_PATH. Also available for
-# customization: CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS, ARCH[=custom],
-# CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX, and more for individual
-# components.
+# customization: CC, RC, AR, CROSSPREFIX, CPPFLAGS, LDFLAGS, LIBS, CFLAGS,
+# RCFLAGS, ARCH[=custom], CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
+# and more for individual components (see below).
 
 # This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
 # Skip lib-specific parts when called through them.
@@ -113,15 +113,14 @@ _LIBS :=
 
 ifneq ($(findstring -sync,$(CFG)),)
   CPPFLAGS += -DUSE_SYNC_DNS
-else
-  ifneq ($(findstring -ares,$(CFG)),)
-    LIBCARES_PATH ?= $(PROOT)/../c-ares
-    CPPFLAGS += -DUSE_ARES
-    CPPFLAGS += -I"$(LIBCARES_PATH)/include"
-    _LDFLAGS += -L"$(LIBCARES_PATH)/lib"
-    _LIBS += -lcares
-  endif
+else ifneq ($(findstring -ares,$(CFG)),)
+  LIBCARES_PATH ?= $(PROOT)/../c-ares
+  CPPFLAGS += -DUSE_ARES
+  CPPFLAGS += -I"$(LIBCARES_PATH)/include"
+  _LDFLAGS += -L"$(LIBCARES_PATH)/lib"
+  _LIBS += -lcares
 endif
+
 ifneq ($(findstring -rtmp,$(CFG)),)
   LIBRTMP_PATH ?= $(PROOT)/../librtmp
   CPPFLAGS += -DUSE_LIBRTMP
@@ -130,6 +129,7 @@ ifneq ($(findstring -rtmp,$(CFG)),)
   _LIBS += -lrtmp -lwinmm
   ZLIB := 1
 endif
+
 ifneq ($(findstring -ssh2,$(CFG)),)
   LIBSSH2_PATH ?= $(PROOT)/../libssh2
   CPPFLAGS += -DUSE_LIBSSH2
@@ -137,30 +137,20 @@ ifneq ($(findstring -ssh2,$(CFG)),)
   _LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
   _LIBS += -lssh2
+else ifneq ($(findstring -libssh,$(CFG)),)
+  LIBSSH_PATH ?= $(PROOT)/../libssh
+  CPPFLAGS += -DUSE_LIBSSH
+  CPPFLAGS += -I"$(LIBSSH_PATH)/include"
+  _LDFLAGS += -L"$(LIBSSH_PATH)/lib"
+  _LIBS += -lssh
+else ifneq ($(findstring -wolfssh,$(CFG)),)
+  WOLFSSH_PATH ?= $(PROOT)/../wolfssh
+  CPPFLAGS += -DUSE_WOLFSSH
+  CPPFLAGS += -I"$(WOLFSSH_PATH)/include"
+  _LDFLAGS += -L"$(WOLFSSH_PATH)/lib"
+  _LIBS += -lwolfssh
 endif
-ifneq ($(findstring -nghttp2,$(CFG)),)
-  NGHTTP2_PATH ?= $(PROOT)/../nghttp2
-  CPPFLAGS += -DUSE_NGHTTP2
-  CPPFLAGS += -I"$(NGHTTP2_PATH)/include"
-  _LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
-  _LIBS += -lnghttp2
-endif
-ifneq ($(findstring -nghttp3,$(CFG)),)
-  ifneq ($(findstring -ngtcp2,$(CFG)),)
-    NGHTTP3_PATH ?= $(PROOT)/../nghttp3
-    CPPFLAGS += -DUSE_NGHTTP3
-    CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
-    _LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
-    _LIBS += -lnghttp3
 
-    NGTCP2_PATH ?= $(PROOT)/../ngtcp2
-    CPPFLAGS += -DUSE_NGTCP2
-    CPPFLAGS += -I"$(NGTCP2_PATH)/include"
-    _LDFLAGS += -L"$(NGTCP2_PATH)/lib"
-    NGTCP2_LIBS ?= -lngtcp2 -lngtcp2_crypto_openssl
-    _LIBS += $(NGTCP2_LIBS)
-  endif
-endif
 ifneq ($(findstring -ssl,$(CFG)),)
   OPENSSL_PATH ?= $(PROOT)/../openssl
   CPPFLAGS += -DUSE_OPENSSL
@@ -172,20 +162,68 @@ ifneq ($(findstring -ssl,$(CFG)),)
   OPENSSL_LIBS ?= -lssl -lcrypto
   _LIBS += $(OPENSSL_LIBS)
 
+  ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/aead.h),)
+    OPENSSL := boringssl
+  else
+    # including libressl
+    OPENSSL := openssl
+  endif
+
   ifneq ($(findstring -srp,$(CFG)),)
     ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h),)
       # OpenSSL 1.0.1 and later.
       CPPFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
     endif
   endif
-  SSL := 1
+  SSLLIBS += 1
+else ifneq ($(findstring -wolfssl,$(CFG)),)
+  WOLFSSL_PATH ?= $(PROOT)/../zlib
+  CPPFLAGS += -DUSE_WOLFSSL
+  CPPFLAGS += -DSIZEOF_LONG_LONG=8
+  CPPFLAGS += -I"$(WOLFSSL_PATH)/include"
+  _LDFLAGS += -L"$(WOLFSSL_PATH)/lib"
+  _LIBS += -lwolfssl
+  OPENSSL := wolfssl
+  SSLLIBS += 1
+endif
+ifneq ($(findstring -mbedtls,$(CFG)),)
+  MBEDTLS_PATH ?= $(PROOT)/../zlib
+  CPPFLAGS += -DUSE_MBEDTLS
+  CPPFLAGS += -I"$(MBEDTLS_PATH)/include"
+  _LDFLAGS += -L"$(MBEDTLS_PATH)/lib"
+  _LIBS += -lmbedtls -lmbedx509 -lmbedcrypto
+  SSLLIBS += 1
 endif
 ifneq ($(findstring -schannel,$(CFG)),)
   CPPFLAGS += -DUSE_SCHANNEL
-  ifdef SSL
-    CPPFLAGS += -DCURL_WITH_MULTI_SSL
-  endif
+  SSLLIBS += 1
 endif
+
+ifneq ($(findstring -nghttp2,$(CFG)),)
+  NGHTTP2_PATH ?= $(PROOT)/../nghttp2
+  CPPFLAGS += -DUSE_NGHTTP2
+  CPPFLAGS += -I"$(NGHTTP2_PATH)/include"
+  _LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
+  _LIBS += -lnghttp2
+endif
+
+ifeq ($(findstring -nghttp3,$(CFG))$(findstring -ngtcp2,$(CFG)),-nghttp3-ngtcp2)
+  NGHTTP3_PATH ?= $(PROOT)/../nghttp3
+  CPPFLAGS += -DUSE_NGHTTP3
+  CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
+  _LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
+  _LIBS += -lnghttp3
+
+  NGTCP2_PATH ?= $(PROOT)/../ngtcp2
+  CPPFLAGS += -DUSE_NGTCP2
+  CPPFLAGS += -I"$(NGTCP2_PATH)/include"
+  _LDFLAGS += -L"$(NGTCP2_PATH)/lib"
+  ifneq ($(OPENSSL),)
+    NGTCP2_LIBS ?= -lngtcp2_crypto_$(OPENSSL)
+  endif
+  _LIBS += -lngtcp2 $(NGTCP2_LIBS)
+endif
+
 ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
   ZLIB_PATH ?= $(PROOT)/../zlib
   # These CPPFLAGS are also required when compiling the curl tool via 'src'.
@@ -217,19 +255,27 @@ ifneq ($(findstring -gsasl,$(CFG)),)
   _LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
   _LIBS += -lgsasl
 endif
+
 ifneq ($(findstring -idn2,$(CFG)),)
   LIBIDN2_PATH ?= $(PROOT)/../libidn2
   CPPFLAGS += -DUSE_LIBIDN2
   CPPFLAGS += -I"$(LIBIDN2_PATH)/include"
   _LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   _LIBS += -lidn2
-else
-ifneq ($(findstring -winidn,$(CFG)),)
+
+ifneq ($(findstring -psl,$(CFG)),)
+  LIBPSL_PATH ?= $(PROOT)/../libpsl
+  CPPFLAGS += -DUSE_LIBPSL
+  CPPFLAGS += -I"$(LIBPSL_PATH)/include"
+  _LDFLAGS += -L"$(LIBPSL_PATH)/lib"
+  _LIBS += -lpsl
+endif
+else ifneq ($(findstring -winidn,$(CFG)),)
   CPPFLAGS += -DUSE_WIN32_IDN
   CPPFLAGS += -DWANT_IDN_PROTOTYPES
   _LIBS += -lnormaliz
 endif
-endif
+
 ifneq ($(findstring -sspi,$(CFG)),)
   CPPFLAGS += -DUSE_WINDOWS_SSPI
 endif
@@ -239,10 +285,15 @@ endif
 ifneq ($(findstring -ldaps,$(CFG)),)
   CPPFLAGS += -DHAVE_LDAP_SSL
 endif
+
 ifeq ($(findstring -lldap,$(LIBS)),)
   _LIBS += -lwldap32
 endif
 _LIBS += -lws2_32 -lcrypt32 -lbcrypt
+
+ifneq ($(findstring 11,$(subst $() ,,$(SSLLIBS))),)
+  CPPFLAGS += -DCURL_WITH_MULTI_SSL
+endif
 
 ifndef DYN
   LDFLAGS += $(_LDFLAGS)
