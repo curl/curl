@@ -42,6 +42,7 @@ struct curl_easyoption Curl_easyopts[] = {
   {"CAINFO", CURLOPT_CAINFO, CURLOT_STRING, 0},
   {"CAINFO_BLOB", CURLOPT_CAINFO_BLOB, CURLOT_BLOB, 0},
   {"CAPATH", CURLOPT_CAPATH, CURLOT_STRING, 0},
+  {"CA_CACHE_TIMEOUT", CURLOPT_CA_CACHE_TIMEOUT, CURLOT_LONG, 0},
   {"CERTINFO", CURLOPT_CERTINFO, CURLOT_LONG, 0},
   {"CHUNK_BGN_FUNCTION", CURLOPT_CHUNK_BGN_FUNCTION, CURLOT_FUNCTION, 0},
   {"CHUNK_DATA", CURLOPT_CHUNK_DATA, CURLOT_CBPTR, 0},
@@ -368,6 +369,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return ((CURLOPT_LASTENTRY%10000) != (320 + 1));
+  return ((CURLOPT_LASTENTRY%10000) != (321 + 1));
 }
 #endif

@@ -2157,6 +2157,9 @@ typedef enum {
   /* websockets options */
   CURLOPT(CURLOPT_WS_OPTIONS, CURLOPTTYPE_LONG, 320),
 
+  /* CA cache timeout */
+  CURLOPT(CURLOPT_CA_CACHE_TIMEOUT, CURLOPTTYPE_LONG, 321),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

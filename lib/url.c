@@ -539,6 +539,8 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   /* Set the default size of the SSL session ID cache */
   set->general_ssl.max_ssl_sessions = 5;
+  /* Timeout every 24 hours by default */
+  set->general_ssl.ca_cache_timeout = 24 * 60 * 60;
 
   set->proxyport = 0;
   set->proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
