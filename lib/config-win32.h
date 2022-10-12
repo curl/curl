@@ -511,11 +511,6 @@ Vista
 /* Define if struct sockaddr_in6 has the sin6_scope_id member. */
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 
-#if defined(HAVE_WINSOCK2_H) && defined(_WIN32_WINNT) && \
-    (_WIN32_WINNT >= 0x0600)
-#define HAVE_STRUCT_POLLFD 1
-#endif
-
 /* ---------------------------------------------------------------- */
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
