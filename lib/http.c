@@ -3715,7 +3715,14 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
 #ifndef CURL_DISABLE_HSTS
   /* If enabled, the header is incoming and this is over HTTPS */
   else if(data->hsts && checkprefix("Strict-Transport-Security:", headp) &&
-          (conn->handler->flags & PROTOPT_SSL)) {
+          ((conn->handler->flags & PROTOPT_SSL) ||
+#ifdef CURLDEBUG
+           /* allow debug builds to circumvent the HTTPS restriction */
+           getenv("CURL_HSTS_HTTP")
+#else
+           0
+#endif
+            )) {
     CURLcode check =
       Curl_hsts_parse(data->hsts, data->state.up.hostname,
                       headp + strlen("Strict-Transport-Security:"));
