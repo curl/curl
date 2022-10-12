@@ -2192,17 +2192,15 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
       sleeping = TRUE;
       continue;
     }
+    per->added = TRUE;
 
     result = pre_transfer(global, per);
     if(result)
       return result;
 
-    errorbuf = per->errorbuffer;
-    if(!errorbuf) {
-      errorbuf = malloc(CURL_ERROR_SIZE);
-      if(!errorbuf)
-        return CURLE_OUT_OF_MEMORY;
-    }
+    errorbuf = malloc(CURL_ERROR_SIZE);
+    if(!errorbuf)
+      return CURLE_OUT_OF_MEMORY;
 
     /* parallel connect means that we don't set PIPEWAIT since pipewait
        will make libcurl prefer multiplexing */
@@ -2212,19 +2210,21 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFODATA, per);
     (void)curl_easy_setopt(per->curl, CURLOPT_NOPROGRESS, 0L);
-    (void)curl_easy_setopt(per->curl, CURLOPT_ERRORBUFFER, errorbuf);
 
     mcode = curl_multi_add_handle(multi, per->curl);
     if(mcode) {
-      free(errorbuf);
-      return CURLE_OUT_OF_MEMORY;
+      DEBUGASSERT(mcode == CURLM_OUT_OF_MEMORY);
+      result = CURLE_OUT_OF_MEMORY;
     }
 
-    result = create_transfer(global, share, &getadded);
+    if(!result)
+      result = create_transfer(global, share, &getadded);
     if(result) {
       free(errorbuf);
       return result;
     }
+    errorbuf[0] = 0;
+    (void)curl_easy_setopt(per->curl, CURLOPT_ERRORBUFFER, errorbuf);
     per->errorbuffer = errorbuf;
     per->added = TRUE;
     all_added++;
