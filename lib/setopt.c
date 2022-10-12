@@ -204,6 +204,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
     data->set.dns_cache_timeout = (int)arg;
     break;
+  case CURLOPT_CA_CACHE_TIMEOUT:
+    arg = va_arg(param, long);
+    if(arg < -1)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    else if(arg > INT_MAX)
+      arg = INT_MAX;
+
+    data->set.general_ssl.ca_cache_timeout = (int)arg;
+    break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
     /* deprecated */
     break;

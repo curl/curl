@@ -122,6 +122,7 @@ man_MANS =                                      \
   CURLOPT_CAINFO.3                              \
   CURLOPT_CAINFO_BLOB.3                         \
   CURLOPT_CAPATH.3                              \
+  CURLOPT_CA_CACHE_TIMEOUT.3                    \
   CURLOPT_CERTINFO.3                            \
   CURLOPT_CHUNK_BGN_FUNCTION.3                  \
   CURLOPT_CHUNK_DATA.3                          \

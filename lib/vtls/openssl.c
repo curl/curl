@@ -3164,12 +3164,18 @@ static CURLcode populate_x509_store(struct Curl_easy *data,
 }
 
 #if defined(HAVE_SSL_X509_STORE_SHARE)
-#define X509_STORE_EXPIRY_MS (24 * 60 * 60 * 1000) /* 24 hours */
-static bool cached_x509_store_expired(const struct multi_ssl_backend_data *mb)
+static bool cached_x509_store_expired(const struct Curl_easy *data,
+                                      const struct multi_ssl_backend_data *mb)
 {
+  const struct ssl_general_config *cfg = &data->set.general_ssl;
   struct curltime now = Curl_now();
+  timediff_t elapsed_ms = Curl_timediff(now, mb->time);
+  timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
-  return Curl_timediff(now, mb->time) >= X509_STORE_EXPIRY_MS;
+  if(timeout_ms < 0)
+    return false;
+
+  return elapsed_ms >= timeout_ms;
 }
 
 static bool cached_x509_store_different(
@@ -3191,7 +3197,7 @@ static X509_STORE *get_cached_x509_store(const struct Curl_easy *data,
   if(multi &&
      multi->ssl_backend_data &&
      multi->ssl_backend_data->store &&
-     !cached_x509_store_expired(multi->ssl_backend_data) &&
+     !cached_x509_store_expired(data, multi->ssl_backend_data) &&
      !cached_x509_store_different(multi->ssl_backend_data, conn)) {
     store = multi->ssl_backend_data->store;
   }
@@ -3244,17 +3250,20 @@ static CURLcode set_up_x509_store(struct Curl_easy *data,
                                   struct ssl_backend_data *backend)
 {
   CURLcode result = CURLE_OK;
-  X509_STORE *cached_store = get_cached_x509_store(data, conn);
+  X509_STORE *cached_store;
+  bool cache_criteria_met;
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
      or no source is provided and we are falling back to openssl's built-in
      default. */
-  bool cache_criteria_met = SSL_CONN_CONFIG(verifypeer) &&
-                            !SSL_CONN_CONFIG(CApath) &&
-                            !SSL_CONN_CONFIG(ca_info_blob) &&
-                            !SSL_SET_OPTION(primary.CRLfile) &&
-                            !SSL_SET_OPTION(native_ca_store);
+  cache_criteria_met = (data->set.general_ssl.ca_cache_timeout != 0) &&
+                       SSL_CONN_CONFIG(verifypeer) &&
+                       !SSL_CONN_CONFIG(CApath) &&
+                       !SSL_CONN_CONFIG(ca_info_blob) &&
+                       !SSL_SET_OPTION(primary.CRLfile) &&
+                       !SSL_SET_OPTION(native_ca_store);
 
+  cached_store = get_cached_x509_store(data, conn);
   if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {
     SSL_CTX_set_cert_store(backend->ctx, cached_store);
   }
