@@ -124,8 +124,9 @@ static void trim_headers(struct curl_slist *head)
 
 #define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Date"))
 
+#define MAX_HOST_LEN 255
 /* FQDN + host: */
-#define FULL_HOST_LEN (255 + sizeof("host:"))
+#define FULL_HOST_LEN (MAX_HOST_LEN + sizeof("host:"))
 
 /* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' */
 #define DATE_FULL_HDR_LEN (DATE_HDR_KEY_LEN + TIMESTAMP_SIZE + 1)
@@ -162,7 +163,7 @@ static CURLcode make_headers(struct Curl_easy *data,
     head = NULL;
   }
   else {
-    char full_host[FULL_HOST_LEN];
+    char full_host[FULL_HOST_LEN + 1];
 
     if(data->state.aptr.host) {
       size_t pos;
@@ -177,7 +178,7 @@ static CURLcode make_headers(struct Curl_easy *data,
       full_host[pos] = 0;
     }
     else {
-      if(strlen(hostname) > FULL_HOST_LEN) {
+      if(strlen(hostname) > MAX_HOST_LEN) {
         ret = CURLE_URL_MALFORMAT;
         goto fail;
       }
