@@ -90,13 +90,17 @@ int _CRT_glob = 0;
  * open before starting to run.  Otherwise, the first three network
  * sockets opened by curl could be used for input sources, downloaded data
  * or error logs as they will effectively be stdin, stdout and/or stderr.
+ *
+ * fcntl's F_GETFD instruction returns -1 if the file descriptor is closed,
+ * otherwise it returns "the file descriptor flags (which typically can only
+ * be FD_CLOEXEC, which is not set here).
  */
 static int main_checkfds(void)
 {
   int fd[2];
-  while(fcntl(STDIN_FILENO, F_GETFD) ||
-        fcntl(STDOUT_FILENO, F_GETFD) ||
-        fcntl(STDERR_FILENO, F_GETFD))
+  while((fcntl(STDIN_FILENO, F_GETFD) == -1) ||
+        (fcntl(STDOUT_FILENO, F_GETFD) == -1) ||
+        (fcntl(STDERR_FILENO, F_GETFD) == -1))
     if(pipe(fd))
       return 1;
   return 0;
