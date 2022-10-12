@@ -2996,12 +2996,13 @@ static CURLcode override_login(struct Curl_easy *data,
   char **userp = &conn->user;
   char **passwdp = &conn->passwd;
   char **optionsp = &conn->options;
+  bool netrc_user_changed = FALSE;
+  bool netrc_passwd_changed = FALSE;
 
 #ifndef CURL_DISABLE_NETRC
   if(data->set.use_netrc == CURL_NETRC_REQUIRED && data->state.aptr.user) {
     Curl_safefree(*userp);
     Curl_safefree(*passwdp);
-    Curl_safefree(data->state.aptr.user); /* disable user+password */
   }
 #endif
 
@@ -3015,14 +3016,12 @@ static CURLcode override_login(struct Curl_easy *data,
 #ifndef CURL_DISABLE_NETRC
   conn->bits.netrc = FALSE;
   if(data->set.use_netrc && !data->set.str[STRING_USERNAME]) {
-    bool netrc_user_changed = FALSE;
-    bool netrc_passwd_changed = FALSE;
     int ret;
     bool url_provided = FALSE;
 
-    if(data->state.up.user) {
-      /* there was a user name in the URL */
-      userp = &data->state.up.user;
+    if(data->state.aptr.user) {
+      /* there was a user name in the URL. Use the URL decoded version */
+      userp = &data->state.aptr.user;
       url_provided = TRUE;
     }
 
@@ -3061,9 +3060,13 @@ static CURLcode override_login(struct Curl_easy *data,
 
   /* for updated strings, we update them in the URL */
   if(*userp) {
-    CURLcode result = Curl_setstropt(&data->state.aptr.user, *userp);
-    if(result)
-      return result;
+    CURLcode result;
+    if(data->state.aptr.user != *userp) {
+      /* nothing to do then */
+      result = Curl_setstropt(&data->state.aptr.user, *userp);
+      if(result)
+        return result;
+    }
   }
   if(data->state.aptr.user) {
     uc = curl_url_set(data->state.uh, CURLUPART_USER, data->state.aptr.user,
