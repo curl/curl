@@ -742,7 +742,6 @@ static CURLcode multi_done(struct Curl_easy *data,
   }
 
   Curl_safefree(data->state.buffer);
-  Curl_safefree(data->state.aptr.user);
   return result;
 }
 

@@ -2089,7 +2089,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       return Curl_uc_to_curlcode(uc);
   }
 
-  if(!data->state.aptr.user) {
+  if(!data->set.str[STRING_USERNAME]) {
     /* we don't use the URL API's URL decoder option here since it rejects
        control codes and we want to allow them for some schemes in the user
        and password fields */
@@ -2997,13 +2997,6 @@ static CURLcode override_login(struct Curl_easy *data,
   char **passwdp = &conn->passwd;
   char **optionsp = &conn->options;
 
-#ifndef CURL_DISABLE_NETRC
-  if(data->set.use_netrc == CURL_NETRC_REQUIRED && data->state.aptr.user) {
-    Curl_safefree(*userp);
-    Curl_safefree(*passwdp);
-  }
-#endif
-
   if(data->set.str[STRING_OPTIONS]) {
     free(*optionsp);
     *optionsp = strdup(data->set.str[STRING_OPTIONS]);
@@ -3012,6 +3005,10 @@ static CURLcode override_login(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_NETRC
+  if(data->set.use_netrc == CURL_NETRC_REQUIRED) {
+    Curl_safefree(*userp);
+    Curl_safefree(*passwdp);
+  }
   conn->bits.netrc = FALSE;
   if(data->set.use_netrc && !data->set.str[STRING_USERNAME]) {
     int ret;
