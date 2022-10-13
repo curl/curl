@@ -1665,7 +1665,12 @@ add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, void *raw_arg)
   if(valid_cert_encoding(ccert_context)) {
     const char *beg = (const char *) ccert_context->pbCertEncoded;
     const char *end = beg + ccert_context->cbCertEncoded;
-    int insert_index = (args->certs_count - 1) - args->idx;
+    int insert_index = args->idx;
+    /* Windows prior to 11 22H2 returned certificates in reverse order. */
+    if(curlx_verify_windows_version(10, 0, 22621, PLATFORM_WINNT,
+                                    VERSION_LESS_THAN)) {
+      insert_index += args->certs_count - 1;
+    }
     args->result = Curl_extract_certinfo(args->data, insert_index,
                                          beg, end);
     args->idx++;
