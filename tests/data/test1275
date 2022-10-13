@@ -2,6 +2,7 @@
 <info>
 <keywords>
 documentation
+markdown
 </keywords>
 </info>
 
@@ -20,11 +21,5 @@ Verify capital letters after period in markdown files
 %SRCDIR/markdown-uppercase.pl %SRCDIR/..
 </command>
 </client>
-
-<verify>
-<stderr>
-ok
-</stderr>
-</verify>
 
 </testcase>
