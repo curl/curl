@@ -66,7 +66,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
  lib1945 lib1946 lib1947 lib1948 lib1955 \
  lib2301 lib2302 \
- lib3010 lib3025 lib3026 lib3027
+ lib3010 lib3025 lib3026 lib3027 lib3028
 
 chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
  ../../lib/dynbuf.c ../../lib/strdup.c
@@ -782,3 +782,7 @@ lib3026_CPPFLAGS = $(AM_CPPFLAGS)
 lib3027_SOURCES = lib3027.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib3027_LDADD = $(TESTUTIL_LIBS)
 lib3027_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib3028_SOURCES = lib3028.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib3028_LDADD = $(TESTUTIL_LIBS)
+lib3028_CPPFLAGS = $(AM_CPPFLAGS)
