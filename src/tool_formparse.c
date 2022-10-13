@@ -705,7 +705,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
  *
  ***************************************************************************/
 
-#define SET_TOOL_MIME_PTR(m, field, retcode)                            \
+#define SET_TOOL_MIME_PTR(m, field)                                     \
   do {                                                                  \
     if(field) {                                                         \
       (m)->field = strdup(field);                                       \
@@ -767,7 +767,7 @@ int formparse(struct OperationConfig *config,
       *mimecurrent = part;
       part->headers = headers;
       headers = NULL;
-      SET_TOOL_MIME_PTR(part, type, 5);
+      SET_TOOL_MIME_PTR(part, type);
     }
     else if(!name && !strcmp(contp, ")") && !literal_value) {
       /* Ending a multipart. */
@@ -826,9 +826,9 @@ int formparse(struct OperationConfig *config,
           part->size = -1;
           res = CURLE_OK;
         }
-        SET_TOOL_MIME_PTR(part, filename, 11);
-        SET_TOOL_MIME_PTR(part, type, 12);
-        SET_TOOL_MIME_PTR(part, encoder, 13);
+        SET_TOOL_MIME_PTR(part, filename);
+        SET_TOOL_MIME_PTR(part, type);
+        SET_TOOL_MIME_PTR(part, encoder);
 
         /* *contp could be '\0', so we just check with the delimiter */
       } while(sep); /* loop if there's another file name */
@@ -881,9 +881,9 @@ int formparse(struct OperationConfig *config,
         headers = NULL;
       }
 
-      SET_TOOL_MIME_PTR(part, filename, 19);
-      SET_TOOL_MIME_PTR(part, type, 20);
-      SET_TOOL_MIME_PTR(part, encoder, 21);
+      SET_TOOL_MIME_PTR(part, filename);
+      SET_TOOL_MIME_PTR(part, type);
+      SET_TOOL_MIME_PTR(part, encoder);
 
       if(sep) {
         *contp = (char) sep;
@@ -893,7 +893,7 @@ int formparse(struct OperationConfig *config,
     }
 
     /* Set part name. */
-    SET_TOOL_MIME_PTR(part, name, 22);
+    SET_TOOL_MIME_PTR(part, name);
   }
   else {
     warnf(config->global, "Illegally formatted input field!\n");
