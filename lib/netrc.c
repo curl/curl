@@ -58,8 +58,6 @@ enum host_lookup_state {
 static int parsenetrc(const char *host,
                       char **loginp,
                       char **passwordp,
-                      bool *login_changed,
-                      bool *password_changed,
                       char *netrcfile)
 {
   FILE *file;
@@ -248,19 +246,15 @@ static int parsenetrc(const char *host,
     out:
     if(!retcode) {
       /* success */
-      *login_changed = FALSE;
-      *password_changed = FALSE;
       if(login_alloc) {
         if(*loginp)
           free(*loginp);
         *loginp = login;
-        *login_changed = TRUE;
       }
       if(password_alloc) {
         if(*passwordp)
           free(*passwordp);
         *passwordp = password;
-        *password_changed = TRUE;
       }
     }
     else {
@@ -281,11 +275,7 @@ static int parsenetrc(const char *host,
  * *loginp and *passwordp MUST be allocated if they aren't NULL when passed
  * in.
  */
-int Curl_parsenetrc(const char *host,
-                    char **loginp,
-                    char **passwordp,
-                    bool *login_changed,
-                    bool *password_changed,
+int Curl_parsenetrc(const char *host, char **loginp, char **passwordp,
                     char *netrcfile)
 {
   int retcode = 1;
@@ -334,8 +324,7 @@ int Curl_parsenetrc(const char *host,
       free(homea);
       return -1;
     }
-    retcode = parsenetrc(host, loginp, passwordp, login_changed,
-                         password_changed, filealloc);
+    retcode = parsenetrc(host, loginp, passwordp, filealloc);
     free(filealloc);
 #ifdef WIN32
     if(retcode == NETRC_FILE_MISSING) {
@@ -345,16 +334,14 @@ int Curl_parsenetrc(const char *host,
         free(homea);
         return -1;
       }
-      retcode = parsenetrc(host, loginp, passwordp, login_changed,
-                           password_changed, filealloc);
+      retcode = parsenetrc(host, loginp, passwordp, filealloc);
       free(filealloc);
     }
 #endif
     free(homea);
   }
   else
-    retcode = parsenetrc(host, loginp, passwordp, login_changed,
-                         password_changed, netrcfile);
+    retcode = parsenetrc(host, loginp, passwordp, netrcfile);
   return retcode;
 }
 
