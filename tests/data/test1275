@@ -21,10 +21,4 @@ Verify capital letters after period in markdown files
 </command>
 </client>
 
-<verify>
-<stderr>
-ok
-</stderr>
-</verify>
-
 </testcase>

@@ -88,4 +88,4 @@ for my $f (@m) {
 if($errors) {
     exit 1;
 }
-print STDERR "ok\n";
+print "ok\n";
