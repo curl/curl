@@ -2996,8 +2996,6 @@ static CURLcode override_login(struct Curl_easy *data,
   char **userp = &conn->user;
   char **passwdp = &conn->passwd;
   char **optionsp = &conn->options;
-  bool netrc_user_changed = FALSE;
-  bool netrc_passwd_changed = FALSE;
 
 #ifndef CURL_DISABLE_NETRC
   if(data->set.use_netrc == CURL_NETRC_REQUIRED && data->state.aptr.user) {
@@ -3027,7 +3025,6 @@ static CURLcode override_login(struct Curl_easy *data,
 
     ret = Curl_parsenetrc(conn->host.name,
                           userp, passwdp,
-                          &netrc_user_changed, &netrc_passwd_changed,
                           data->set.str[STRING_NETRC_FILE]);
     if(ret > 0) {
       infof(data, "Couldn't find host %s in the %s file; using defaults",
