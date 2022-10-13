@@ -576,11 +576,9 @@ Vista
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
-#if defined(USE_WIN32_LARGE_FILES)
-#  if defined(__MINGW64_VERSION_MAJOR)
-#    ifndef _FILE_OFFSET_BITS
-#    define _FILE_OFFSET_BITS 64
-#    endif
+#if defined(USE_WIN32_LARGE_FILES) && defined(__MINGW64_VERSION_MAJOR)
+#  ifndef _FILE_OFFSET_BITS
+#  define _FILE_OFFSET_BITS 64
 #  endif
 #endif
 
