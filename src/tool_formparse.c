@@ -38,9 +38,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/* Macros to free const pointers. */
-#define CONST_SAFEFREE(x)       Curl_safefree(*((void **) &(x)))
-
 /* tool_mime functions. */
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,
                                        toolmimekind kind)
@@ -64,7 +61,7 @@ static struct tool_mime *tool_mime_new_parts(struct tool_mime *parent)
 }
 
 static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
-                                            const char *data)
+                                            char *data)
 {
   struct tool_mime *m = NULL;
 
@@ -72,7 +69,7 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
   if(data) {
     m = tool_mime_new(parent, TOOLMIME_DATA);
     if(!m)
-      free((char *)data);
+      free(data);
     else
       m->data = data;
   }
@@ -80,7 +77,7 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
 }
 
 static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
-                                                const char *filename,
+                                                char *filename,
                                                 bool isremotefile,
                                                 CURLcode *errcode)
 {
@@ -94,7 +91,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     if(filename) {
       m = tool_mime_new(parent, TOOLMIME_FILE);
       if(!m)
-        free((char *)filename);
+        free(filename);
       else {
         m->data = filename;
         if(!isremotefile)
@@ -167,11 +164,11 @@ void tool_mime_free(struct tool_mime *mime)
       tool_mime_free(mime->subparts);
     if(mime->prev)
       tool_mime_free(mime->prev);
-    CONST_SAFEFREE(mime->name);
-    CONST_SAFEFREE(mime->filename);
-    CONST_SAFEFREE(mime->type);
-    CONST_SAFEFREE(mime->encoder);
-    CONST_SAFEFREE(mime->data);
+    Curl_safefree(mime->name);
+    Curl_safefree(mime->filename);
+    Curl_safefree(mime->type);
+    Curl_safefree(mime->encoder);
+    Curl_safefree(mime->data);
     curl_slist_free_all(mime->headers);
     free(mime);
   }
@@ -824,7 +821,7 @@ int formparse(struct OperationConfig *config,
                   "error while reading standard input\n");
             goto fail;
           }
-          CONST_SAFEFREE(part->data);
+          Curl_safefree(part->data);
           part->data = NULL;
           part->size = -1;
           res = CURLE_OK;
@@ -861,7 +858,7 @@ int formparse(struct OperationConfig *config,
                   "error while reading standard input\n");
             goto fail;
           }
-          CONST_SAFEFREE(part->data);
+          Curl_safefree(part->data);
           part->data = NULL;
           part->size = -1;
           res = CURLE_OK;
