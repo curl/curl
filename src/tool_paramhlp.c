@@ -218,7 +218,7 @@ ParameterError str2unummax(long *val, const char *str, long max)
  * data.
  */
 
-static ParameterError str2double(double *val, const char *str, long max)
+static ParameterError str2double(double *val, const char *str, double max)
 {
   if(str) {
     char *endptr;
@@ -251,7 +251,7 @@ static ParameterError str2double(double *val, const char *str, long max)
  * data.
  */
 
-ParameterError str2udouble(double *valp, const char *str, long max)
+ParameterError str2udouble(double *valp, const char *str, double max)
 {
   double value;
   ParameterError result = str2double(&value, str, max);
