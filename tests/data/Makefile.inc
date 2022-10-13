@@ -73,7 +73,7 @@ test430 test431 test432 test433 test434 test435 test436 \
 \
 test440 test441 test442 test443 test444 \
 \
-test490 test491 test492 test493 test494 \
+test490 test491 test492 test493 test494 test495 \
 \
 test500 test501 test502 test503 test504 test505 test506 test507 test508 \
 test509 test510 test511 test512 test513 test514 test515 test516 test517 \
