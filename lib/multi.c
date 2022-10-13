@@ -2919,6 +2919,16 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
         entry->writers++;
     }
     else if(!sincebefore) {
+#ifdef USE_WINSOCK
+      /* refresh socketype */
+      DWORD st = 0;
+      int sl = sizeof(st);
+      if(getsockopt(s, SOL_SOCKET, SO_TYPE, (char *)&st, &sl) != SOCKET_ERROR)
+        entry->socketype = st;
+      else
+        entry->socketype = 0;
+#endif
+
       /* a new user */
       entry->users++;
       if(action & CURL_POLL_IN)
