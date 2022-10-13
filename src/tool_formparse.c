@@ -77,7 +77,7 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
 }
 
 static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
-                                                char *filename,
+                                                const char *filename,
                                                 bool isremotefile,
                                                 CURLcode *errcode)
 {
@@ -87,13 +87,13 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
   *errcode = CURLE_OUT_OF_MEMORY;
   if(strcmp(filename, "-")) {
     /* This is a normal file. */
-    filename = strdup(filename);
-    if(filename) {
+    char *filedup = strdup(filename);
+    if(filedup) {
       m = tool_mime_new(parent, TOOLMIME_FILE);
       if(!m)
-        free(filename);
+        free(filedup);
       else {
-        m->data = filename;
+        m->data = filedup;
         if(!isremotefile)
           m->kind = TOOLMIME_FILEDATA;
        *errcode = CURLE_OK;
