@@ -184,28 +184,6 @@ if (sizeof (bool *) )
 #include <float.h>
 int main() { return 0; }
 #endif
-#ifdef HAVE_GETADDRINFO
-#include <netdb.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
-int main(void) {
-    struct addrinfo hints, *ai;
-    int error;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-#ifndef getaddrinfo
-    (void)getaddrinfo;
-#endif
-    error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);
-    if (error) {
-        return 1;
-    }
-    return 0;
-}
-#endif
 #ifdef HAVE_FILE_OFFSET_BITS
 #ifdef _FILE_OFFSET_BITS
 #undef _FILE_OFFSET_BITS
