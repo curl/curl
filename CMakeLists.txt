@@ -1295,6 +1295,7 @@ if(WIN32)
     list(APPEND CURL_LIBS "bcrypt")
   else()
     set(HAVE_FTRUNCATE OFF)
+    set(HAVE_GETADDRINFO_THREADSAFE OFF)
   endif()
 endif()
 
