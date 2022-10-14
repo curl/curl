@@ -41,37 +41,46 @@ sub checkfile {
     open(F, "<$f");
     my $l = 1;
     my $prevl;
+    my $ignore = 0;
     while(<F>) {
         my $line = $_;
         chomp $line;
-        if(($prevl =~ /\.\z/) && ($line =~ /^( *)([a-z]+)/)) {
-            my ($prefix, $word) = ($1, $2);
-            if(!$accepted{$word}) {
-                my $c = length($prefix);
-                print STDERR "$f:$l:$c:error: lowercase $word after period\n";
-                print STDERR "$line\n";
-                print STDERR ' ' x $c;
-                print STDERR "^\n";
-                $errors++;
-            }
+        if($line =~ /^(\`\`\`|\~\~\~)/) {
+            # start or stop ignore-mode
+            $ignore ^= 1;
         }
-        if($line =~ /^(.*)\. +([a-z]+)/) {
-            my ($prefix, $word) = ($1, $2);
-
-            if(($prefix =~ /\.\.\z/) ||
-               ($prefix =~ /[0-9]\z/) ||
-               ($prefix =~ /e.g\z/) ||
-               ($prefix =~ /i.e\z/) ||
-               ($prefix =~ /etc\z/) ||
-               $accepted{$word}) {
+        if(!$ignore) {
+            if(($prevl =~ /\.\z/) && ($line =~ /^( *)([a-z]+)/)) {
+                my ($prefix, $word) = ($1, $2);
+                if(!$accepted{$word}) {
+                    my $c = length($prefix);
+                    print STDERR
+                        "$f:$l:$c:error: lowercase $word after period\n";
+                    print STDERR "$line\n";
+                    print STDERR ' ' x $c;
+                    print STDERR "^\n";
+                    $errors++;
+                }
             }
-            else {
-                my $c = length($prefix) + 2;
-                print STDERR "$f:$l:$c:error: lowercase $word after period\n";
-                print STDERR "$line\n";
-                print STDERR ' ' x $c;
-                print STDERR "^\n";
-                $errors++;
+            elsif($line =~ /^(.*)\. +([a-z]+)/) {
+                my ($prefix, $word) = ($1, $2);
+
+                if(($prefix =~ /\.\.\z/) ||
+                   ($prefix =~ /[0-9]\z/) ||
+                   ($prefix =~ /e.g\z/) ||
+                   ($prefix =~ /i.e\z/) ||
+                   ($prefix =~ /etc\z/) ||
+                   $accepted{$word}) {
+                }
+                else {
+                    my $c = length($prefix) + 2;
+                    print STDERR
+                        "$f:$l:$c:error: lowercase $word after period\n";
+                    print STDERR "$line\n";
+                    print STDERR ' ' x $c;
+                    print STDERR "^\n";
+                    $errors++;
+                }
             }
         }
         $prevl = $line;
