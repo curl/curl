@@ -1139,6 +1139,10 @@ foreach(CURL_TEST
   curl_internal_test(${CURL_TEST})
 endforeach()
 
+if(NOT HAVE_GETADDRINFO)
+  set(HAVE_GETADDRINFO_THREADSAFE OFF)
+endif()
+
 if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
   set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
@@ -1295,7 +1299,6 @@ if(WIN32)
     list(APPEND CURL_LIBS "bcrypt")
   else()
     set(HAVE_FTRUNCATE OFF)
-    set(HAVE_GETADDRINFO_THREADSAFE OFF)
   endif()
 endif()
 
