@@ -17,6 +17,9 @@ Silly-header: yeeeees
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>

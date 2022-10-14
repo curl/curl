@@ -417,7 +417,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   /* -1 means it not set by user, use the default value */
   multi->maxconnects = -1;
   multi->max_concurrent_streams = 100;
-  multi->ipv6_works = Curl_ipv6works(NULL);
 
 #ifdef USE_WINSOCK
   multi->wsa_event = WSACreateEvent();
@@ -753,7 +752,7 @@ static int close_connect_only(struct Curl_easy *data,
   if(data->state.lastconnect_id != conn->connection_id)
     return 0;
 
-  if(!conn->bits.connect_only)
+  if(!conn->connect_only)
     return 1;
 
   connclose(conn, "Removing connect-only easy handle");
@@ -2144,7 +2143,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
       }
 
-      if(data->set.connect_only) {
+      if(data->set.connect_only == 1) {
         /* keep connection open for application to use the socket */
         connkeep(data->conn, "CONNECT_ONLY");
         multistate(data, MSTATE_DONE);

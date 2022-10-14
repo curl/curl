@@ -39,7 +39,7 @@ of the characters. It returns a non-zero (TRUE) integer if the strings are
 identical.
 .sp
 The \fBcurl_strnequal()\fP function is similar, except it only compares the
-first \fIlenght\fP characters of \fIstr1\fP.
+first \fIlength\fP characters of \fIstr1\fP.
 .sp
 These functions are provided by libcurl to enable applications to compare
 strings in a truly portable manner. There are no standard portable case
@@ -52,9 +52,7 @@ if(curl_strnequal(name, input, 5))
   printf("Name and input matches in the 5 first bytes\\n");
 .fi
 .SH AVAILABILITY
-These functions will be removed from the public libcurl API in a near
-future. They will instead be made "available" by source code access only, and
-then as curlx_strequal() and curlx_strenqual().
+Always
 .SH RETURN VALUE
 Non-zero if the strings are identical. Zero if they are not.
 .SH "SEE ALSO"

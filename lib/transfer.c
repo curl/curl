@@ -1439,6 +1439,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(result)
     return result;
 
+  data->state.requests = 0;
   data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
@@ -1636,7 +1637,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   if((type != FOLLOW_RETRY) &&
      (data->req.httpcode != 401) && (data->req.httpcode != 407) &&
-     Curl_is_absolute_url(newurl, NULL, 0))
+     Curl_is_absolute_url(newurl, NULL, 0, FALSE))
     /* If this is not redirect due to a 401 or 407 response and an absolute
        URL: don't allow a custom port number */
     disallowport = TRUE;
@@ -1648,8 +1649,11 @@ CURLcode Curl_follow(struct Curl_easy *data,
                     CURLU_ALLOW_SPACE |
                     (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
   if(uc) {
-    if(type != FOLLOW_FAKE)
+    if(type != FOLLOW_FAKE) {
+      failf(data, "The redirect target URL could not be parsed: %s",
+            curl_url_strerror(uc));
       return Curl_uc_to_curlcode(uc);
+    }
 
     /* the URL could not be parsed for some reason, but since this is FAKE
        mode, just duplicate the field as-is */
@@ -1696,7 +1700,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
           return Curl_uc_to_curlcode(uc);
         }
 
-        p = Curl_builtin_scheme(scheme);
+        p = Curl_builtin_scheme(scheme, CURL_ZERO_TERMINATED);
         if(p && (p->protocol != data->info.conn_protocol)) {
           infof(data, "Clear auth, redirects scheme from %s to %s",
                 data->info.conn_scheme, scheme);

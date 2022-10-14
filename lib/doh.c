@@ -396,7 +396,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     goto error;
   dohp->pending++;
 
-  if(Curl_ipv6works(data)) {
+  if((conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
     /* create IPv6 DoH request */
     result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V6],
                       DNS_TYPE_AAAA, hostname, data->set.str[STRING_DOH],
@@ -792,7 +792,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
 #endif
   CURLcode result = CURLE_OK;
   int i;
-  size_t hostlen = strlen(hostname) + 1; /* include zero terminator */
+  size_t hostlen = strlen(hostname) + 1; /* include null-terminator */
 
   if(!de)
     /* no input == no output! */

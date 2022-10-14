@@ -27,10 +27,22 @@
 
 /* global variable declarations, for libcurl run-time info */
 
+
 extern curl_version_info_data *curlinfo;
-extern long built_in_protos;
+extern const char * const *built_in_protos;
+extern size_t proto_count;
+
+extern const char *proto_file;
+extern const char *proto_ftp;
+extern const char *proto_ftps;
+extern const char *proto_http;
+extern const char *proto_https;
+extern const char *proto_rtsp;
+extern const char *proto_scp;
+extern const char *proto_sftp;
+extern const char *proto_tftp;
 
 CURLcode get_libcurl_info(void);
-long scheme2protocol(const char *scheme);
+const char *proto_token(const char *proto);
 
 #endif /* HEADER_CURL_TOOL_LIBINFO_H */

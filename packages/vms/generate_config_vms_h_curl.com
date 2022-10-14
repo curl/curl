@@ -426,12 +426,10 @@ $! Allow explicit experimentation.
 $if libssh2
 $then
 $   write cvh "#define HAVE_LIBSSH2_EXIT 1"
-$   write cvh "#define HAVE_LIBSSH2_H 1"
 $   write cvh "#define HAVE_LIBSSH2_INIT 1"
 $   write cvh "#define HAVE_LIBSSH2_SCP_SEND64 1"
 $   write cvh "#define HAVE_LIBSSH2_SESSION_HANDSHAKE 1"
 $   write cvh "#define HAVE_LIBSSH2_VERSION 1
-$   write cvh "#define HAVE_LIBSSH2 1
 $!
 $   write cvh "#ifndef USE_LIBSSH2"
 $   write cvh "#define USE_LIBSSH2 1"
@@ -447,7 +445,6 @@ $!
 $if .not. nozlib
 $then
 $   write cvh "#define HAVE_LIBZ 1"
-$   write cvh "#define HAVE_ZLIB_H 1"
 $endif
 $!
 $!

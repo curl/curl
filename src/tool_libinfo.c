@@ -35,85 +35,90 @@
 
 /* global variable definitions, for libcurl run-time info */
 
-curl_version_info_data *curlinfo = NULL;
-long built_in_protos = 0;
+static const char *no_protos = NULL;
 
-static struct proto_name_pattern {
-  const char *proto_name;
-  long        proto_pattern;
+curl_version_info_data *curlinfo = NULL;
+const char * const *built_in_protos = &no_protos;
+
+size_t proto_count = 0;
+
+const char *proto_file = NULL;
+const char *proto_ftp = NULL;
+const char *proto_ftps = NULL;
+const char *proto_http = NULL;
+const char *proto_https = NULL;
+const char *proto_rtsp = NULL;
+const char *proto_scp = NULL;
+const char *proto_sftp = NULL;
+const char *proto_tftp = NULL;
+
+static struct proto_name_tokenp {
+  const char   *proto_name;
+  const char  **proto_tokenp;
 } const possibly_built_in[] = {
-  { "dict",   CURLPROTO_DICT   },
-  { "file",   CURLPROTO_FILE   },
-  { "ftp",    CURLPROTO_FTP    },
-  { "ftps",   CURLPROTO_FTPS   },
-  { "gopher", CURLPROTO_GOPHER },
-  { "gophers",CURLPROTO_GOPHERS},
-  { "http",   CURLPROTO_HTTP   },
-  { "https",  CURLPROTO_HTTPS  },
-  { "imap",   CURLPROTO_IMAP   },
-  { "imaps",  CURLPROTO_IMAPS  },
-  { "ldap",   CURLPROTO_LDAP   },
-  { "ldaps",  CURLPROTO_LDAPS  },
-  { "mqtt",   CURLPROTO_MQTT   },
-  { "pop3",   CURLPROTO_POP3   },
-  { "pop3s",  CURLPROTO_POP3S  },
-  { "rtmp",   CURLPROTO_RTMP   },
-  { "rtmps",  CURLPROTO_RTMPS  },
-  { "rtsp",   CURLPROTO_RTSP   },
-  { "scp",    CURLPROTO_SCP    },
-  { "sftp",   CURLPROTO_SFTP   },
-  { "smb",    CURLPROTO_SMB    },
-  { "smbs",   CURLPROTO_SMBS   },
-  { "smtp",   CURLPROTO_SMTP   },
-  { "smtps",  CURLPROTO_SMTPS  },
-  { "telnet", CURLPROTO_TELNET },
-  { "tftp",   CURLPROTO_TFTP   },
-  {  NULL,    0                }
+  { "file",     &proto_file  },
+  { "ftp",      &proto_ftp   },
+  { "ftps",     &proto_ftps  },
+  { "http",     &proto_http  },
+  { "https",    &proto_https },
+  { "rtsp",     &proto_rtsp  },
+  { "scp",      &proto_scp   },
+  { "sftp",     &proto_sftp  },
+  { "tftp",     &proto_tftp  },
+  {  NULL,      NULL         }
 };
 
 /*
  * libcurl_info_init: retrieves run-time information about libcurl,
  * setting a global pointer 'curlinfo' to libcurl's run-time info
- * struct, and a global bit pattern 'built_in_protos' composed of
- * CURLPROTO_* bits indicating which protocols are actually built
- * into library being used.
+ * struct, count protocols and flag those we are interested in.
  */
 
 CURLcode get_libcurl_info(void)
 {
-  const char *const *proto;
+  CURLcode result = CURLE_OK;
 
   /* Pointer to libcurl's run-time version information */
   curlinfo = curl_version_info(CURLVERSION_NOW);
   if(!curlinfo)
     return CURLE_FAILED_INIT;
 
-  /* Build CURLPROTO_* bit pattern with libcurl's built-in protocols */
-  built_in_protos = 0;
   if(curlinfo->protocols) {
-    for(proto = curlinfo->protocols; *proto; proto++) {
-      struct proto_name_pattern const *p;
-      for(p = possibly_built_in; p->proto_name; p++) {
-        if(curl_strequal(*proto, p->proto_name)) {
-          built_in_protos |= p->proto_pattern;
+    const char *const *builtin;
+    const struct proto_name_tokenp *p;
+
+    built_in_protos = curlinfo->protocols;
+
+    for(builtin = built_in_protos; !result && *builtin; builtin++) {
+      /* Identify protocols we are interested in. */
+      for(p = possibly_built_in; p->proto_name; p++)
+        if(curl_strequal(p->proto_name, *builtin)) {
+          *p->proto_tokenp = *builtin;
           break;
         }
-      }
     }
+    proto_count = builtin - built_in_protos;
   }
 
   return CURLE_OK;
 }
 
-/*
- * scheme2protocol() returns the protocol bit for the specified URL scheme
+/* Tokenize a protocol name.
+ * Return the address of the protocol name listed by the library, or NULL if
+ * not found.
+ * Although this may seem useless, this always returns the same address for
+ * a given protocol and thus allows comparing pointers rather than strings.
+ * In addition, the returned pointer is not deallocated until the program ends.
  */
-long scheme2protocol(const char *scheme)
+
+const char *proto_token(const char *proto)
 {
-  struct proto_name_pattern const *p;
-  for(p = possibly_built_in; p->proto_name; p++) {
-    if(curl_strequal(scheme, p->proto_name))
-      return p->proto_pattern;
-  }
-  return 0;
+  const char * const *builtin;
+
+  if(!proto)
+    return NULL;
+  for(builtin = built_in_protos; *builtin; builtin++)
+    if(curl_strequal(*builtin, proto))
+      break;
+  return *builtin;
 }

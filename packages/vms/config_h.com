@@ -1661,55 +1661,6 @@ $		goto cfgh_in_loop1
 $	    endif
 $	endif
 $!
-$!
-$!	Process SELECT directives
-$!-------------------------------------
-$	if key2a .eqs. "SELECT"
-$	then
-$	    if key2 .eqs. "SELECT_QUAL_ARG5"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' const"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "SELECT_TYPE_ARG1"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' int"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "SELECT_TYPE_ARG2"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' void *"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "SELECT_TYPE_ARG234"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' fd_set *"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "SELECT_TYPE_ARG5"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' struct timeval *"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	    if key2 .eqs. "SELECT_TYPE_RETV"
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' int"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
-$	endif
-$!
 $!	Process SEND directives
 $!-------------------------------------
 $	if key2a .eqs. "SEND"

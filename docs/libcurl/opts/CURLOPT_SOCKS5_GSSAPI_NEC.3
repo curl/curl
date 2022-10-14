@@ -24,7 +24,7 @@
 .\"
 .TH CURLOPT_SOCKS5_GSSAPI_NEC 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SOCKS5_GSSAPI_NEC \- socks proxy gssapi negotiation protection
+CURLOPT_SOCKS5_GSSAPI_NEC \- SOCKS proxy GSSAPI negotiation protection
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -32,7 +32,7 @@ CURLOPT_SOCKS5_GSSAPI_NEC \- socks proxy gssapi negotiation protection
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SOCKS5_GSSAPI_NEC, long nec);
 .fi
 .SH DESCRIPTION
-Pass a long set to 1 to enable or 0 to disable. As part of the gssapi
+Pass a long set to 1 to enable or 0 to disable. As part of the GSSAPI
 negotiation a protection mode is negotiated. The RFC1961 says in section
 4.3/4.4 it should be protected, but the NEC reference implementation does not.
 If enabled, this option allows the unprotected exchange of the protection mode

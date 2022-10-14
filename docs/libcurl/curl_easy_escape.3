@@ -35,7 +35,7 @@ char *curl_easy_escape(CURL *curl, const char *string, int length);
 This function converts the given input \fIstring\fP to a URL encoded string
 and returns that as a new allocated string. All input characters that are not
 a-z, A-Z, 0-9, '-', '.', '_' or '~' are converted to their "URL escaped"
-version (%NN where NN is a two-digit hexadecimal number).
+version (\fB%NN\fP where \fBNN\fP is a two-digit hexadecimal number).
 
 If \fIlength\fP is set to 0 (zero), \fIcurl_easy_escape(3)\fP uses strlen() on
 the input \fIstring\fP to find out the size. This function does not accept

@@ -26,10 +26,10 @@
 
 #include "curl_setup.h"
 
-#if defined(HAVE_LIBSSH2_H)
+#if defined(USE_LIBSSH2)
 #include <libssh2.h>
 #include <libssh2_sftp.h>
-#elif defined(HAVE_LIBSSH_LIBSSH_H)
+#elif defined(USE_LIBSSH)
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 #elif defined(USE_WOLFSSH)

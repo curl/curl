@@ -46,7 +46,7 @@ The application does not have to keep \fIcontent\fP around after a successful
 call.
 
 Setting a part to a NULL pointer will effectively remove that part's contents
-from the CURLU handle.
+from the \fICURLU\fP handle.
 
 By default, this API only accepts URLs using schemes for protocols that are
 supported built-in. To make libcurl parse URLs generically even for schemes it
@@ -87,21 +87,24 @@ If a path is set in the URL without a leading slash, a slash will be inserted
 automatically when this URL is read from the handle.
 .IP CURLUPART_QUERY
 The query part will also get spaces converted to pluses when asked to URL
-encode on set with the CURLU_URLENCODE bit.
+encode on set with the \fICURLU_URLENCODE\fP bit.
 
-If used together with the \fICURLU_APPENDQUERY\fP bit, the provided part will
-be appended on the end of the existing query - and if the previous part did not
-end with an ampersand (&), an ampersand will be inserted before the new
-appended part.
-
-When \fICURLU_APPENDQUERY\fP is used together with \fICURLU_URLENCODE\fP, the
-first '=' symbol will not be URL encoded.
+If used together with the \fICURLU_APPENDQUERY\fP bit, the provided part is
+appended on the end of the existing query.
 
 The question mark in the URL is not part of the actual query contents.
 .IP CURLUPART_FRAGMENT
 The hash sign in the URL is not part of the actual fragment contents.
 .SH FLAGS
 The flags argument is zero, one or more bits set in a bitmask.
+.IP CURLU_APPENDQUERY
+Can be used when setting the \fICURLUPART_QUERY\fP component. The provided new
+part will then instead be appended at the end of the existing query - and if
+the previous part did not end with an ampersand (&), an ampersand gets
+inserted before the new appended part.
+
+When \fICURLU_APPENDQUERY\fP is used together with \fICURLU_URLENCODE\fP, the
+first '=' symbol will not be URL encoded.
 .IP CURLU_NON_SUPPORT_SCHEME
 If set, allows \fIcurl_url_set(3)\fP to set a non-supported scheme.
 .IP CURLU_URLENCODE
@@ -159,8 +162,8 @@ individual parts. (Added in 7.78.0)
 .SH AVAILABILITY
 Added in 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
 .SH RETURN VALUE
-Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
-fine. See the \fIlibcurl-errors(3)\fP man page for the full list with
+Returns a \fICURLUcode\fP error value, which is CURLUE_OK (0) if everything
+went fine. See the \fIlibcurl-errors(3)\fP man page for the full list with
 descriptions.
 
 A URL string passed on to \fIcurl_url_set(3)\fP for the \fBCURLUPART_URL\fP

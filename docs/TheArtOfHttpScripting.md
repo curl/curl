@@ -66,7 +66,7 @@
 ## See the Response
 
  By default curl sends the response to stdout. You need to redirect it
- somewhere to avoid that, most often that is done with ` -o` or `-O`.
+ somewhere to avoid that, most often that is done with `-o` or `-O`.
 
 # URL
 
@@ -74,7 +74,7 @@
 
  The Uniform Resource Locator format is how you specify the address of a
  particular resource on the Internet. You know these, you have seen URLs like
- https://curl.se or https://yourbank.com a million times. RFC 3986 is the
+ https://curl.se or https://example.com a million times. RFC 3986 is the
  canonical spec. And yeah, the formal name is not URL, it is URI.
 
 ## Host
@@ -169,7 +169,7 @@
  any. No limits. You will then get requests repeated over and over for all the
  given URLs.
 
- Example, send two GETs:
+ Example, send two GET requests:
 
     curl http://url1.example.com http://url2.example.com
 
@@ -435,7 +435,7 @@
  applications use this information to decide how to display pages. Silly web
  programmers try to make different pages for users of different browsers to
  make them look the best possible for their particular browsers. They usually
- also do different kinds of JavaScript, VBScript etc.
+ also do different kinds of JavaScript etc.
 
  At times, you will see that getting a page with curl will not return the same
  page that you see when getting the page with your browser. Then you know it
@@ -554,9 +554,8 @@
  SSL. SSL encrypts all the data that is sent and received over the network and
  thus makes it harder for attackers to spy on sensitive information.
 
- SSL (or TLS as the latest version of the standard is called) offers a
- truckload of advanced features to allow all those encryptions and key
- infrastructure mechanisms encrypted HTTP requires.
+ SSL (or TLS as the current version of the standard is called) offers a set of
+ advanced features to do secure transfers over HTTP.
 
  Curl supports encrypted fetches when built to use a TLS library and it can be
  built to use one out of a fairly large set of libraries - `curl -V` will show
@@ -584,7 +583,7 @@
  verified.
 
  More about server certificate verification and ca cert bundles can be read in
- the [SSLCERTS document](https://curl.se/docs/sslcerts.html).
+ the [`SSLCERTS` document](https://curl.se/docs/sslcerts.html).
 
  At times you may end up with your own CA cert store and then you can tell
  curl to use that to verify the server's certificate:
@@ -598,14 +597,15 @@
  Doing fancy stuff, you may need to add or change elements of a single curl
  request.
 
- For example, you can change the POST request to a PROPFIND and send the data
- as `Content-Type: text/xml` (instead of the default Content-Type) like this:
+ For example, you can change the POST method to `PROPFIND` and send the data
+ as `Content-Type: text/xml` (instead of the default `Content-Type`) like
+ this:
 
     curl --data "<xml>" --header "Content-Type: text/xml" \
       --request PROPFIND example.com
 
  You can delete a default header by providing one without content. Like you
- can ruin the request by chopping off the Host: header:
+ can ruin the request by chopping off the `Host:` header:
 
     curl --header "Host:" http://www.example.com
 

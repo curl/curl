@@ -30,6 +30,7 @@ int test(char *URL)
 {
   CURL *curl;
   CURLcode res = TEST_ERR_MAJOR_BAD;
+  struct curl_slist *connect_to = NULL;
   struct curl_slist *list = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -50,6 +51,10 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_USERPWD, "keyId:SecretKey");
   test_setopt(curl, CURLOPT_HEADER, 0L);
   test_setopt(curl, CURLOPT_URL, URL);
+  if(libtest_arg2) {
+    connect_to = curl_slist_append(connect_to, libtest_arg2);
+  }
+  test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
   list = curl_slist_append(list, "Content-Type: application/json");
   test_setopt(curl, CURLOPT_HTTPHEADER, list);
   test_setopt(curl, CURLOPT_POSTFIELDS, "postData");
@@ -58,6 +63,7 @@ int test(char *URL)
 
 test_cleanup:
 
+  curl_slist_free_all(connect_to);
   curl_slist_free_all(list);
   curl_easy_cleanup(curl);
   curl_global_cleanup();

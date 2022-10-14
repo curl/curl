@@ -381,9 +381,6 @@ static void MSH3_CALL msh3_shutdown(MSH3_REQUEST *Request, void *IfContext)
   (void)stream;
 }
 
-static_assert(sizeof(MSH3_HEADER) == sizeof(struct h2h3pseudo),
-              "Sizes must match for cast below to work");
-
 static ssize_t msh3_stream_send(struct Curl_easy *data,
                                 int sockindex,
                                 const void *mem,
@@ -396,6 +393,9 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
   struct h2h3req *hreq;
 
   (void)sockindex;
+  /* Sizes must match for cast below to work" */
+  DEBUGASSERT(sizeof(MSH3_HEADER) == sizeof(struct h2h3pseudo));
+
   H3BUGF(infof(data, "msh3_stream_send %zu", len));
 
   if(!stream->req) {

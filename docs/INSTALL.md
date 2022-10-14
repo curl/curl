@@ -17,7 +17,9 @@ You can download and install curl and libcurl using the [vcpkg](https://github.c
     ./vcpkg integrate install
     vcpkg install curl[tool]
 
-The curl port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+The curl port in vcpkg is kept up to date by Microsoft team members and
+community contributors. If the version is out of date, please [create an issue
+or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 
 ## Building from git
 
@@ -120,8 +122,8 @@ These options are provided to select the TLS backend to use.
  - NSS: `--with-nss`
  - OpenSSL: `--with-openssl` (also for BoringSSL and libressl)
  - rustls: `--with-rustls`
- - schannel: `--with-schannel`
- - secure transport: `--with-secure-transport`
+ - Schannel: `--with-schannel`
+ - Secure Transport: `--with-secure-transport`
  - wolfSSL: `--with-wolfssl`
 
 # Windows
@@ -140,14 +142,14 @@ These options are provided to select the TLS backend to use.
  - [Run-Time Library Compiler Options](https://docs.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
  - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://docs.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
 
-If your app is misbehaving in some strange way, or it is suffering from
-memory corruption, before asking for further help, please try first to
-rebuild every single library your app uses as well as your app using the
-debug multithreaded dynamic C runtime.
+If your app is misbehaving in some strange way, or it is suffering from memory
+corruption, before asking for further help, please try first to rebuild every
+single library your app uses as well as your app using the debug
+multi-threaded dynamic C runtime.
 
  If you get linkage errors read section 5.7 of the FAQ document.
 
-## MingW32
+## MinGW32
 
 Make sure that MinGW32's bin directory is in the search path, for example:
 
@@ -170,24 +172,27 @@ adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 
 ```cmd
-set ZLIB_PATH=c:\zlib-1.2.8
-set OPENSSL_PATH=c:\openssl-1.0.2c
-set LIBSSH2_PATH=c:\libssh2-1.6.0
+set ZLIB_PATH=c:\zlib-1.2.12
+set OPENSSL_PATH=c:\openssl-3.0.5
+set LIBSSH2_PATH=c:\libssh2-1.10.0
 ```
 
-It is also possible to build with other LDAP SDKs than MS LDAP; currently
-it is possible to build with native Win32 OpenLDAP, or with the Novell CLDAP
-SDK. If you want to use these you need to set these vars:
+It is also possible to build with other LDAP installations than MS LDAP;
+currently it is possible to build with native Win32 OpenLDAP, or with the
+*Novell CLDAP* SDK. If you want to use these you need to set these vars:
 
 ```cmd
-set LDAP_SDK=c:\openldap
-set USE_LDAP_OPENLDAP=1
+set CPPFLAGS=-Ic:/openldap/include -DCURL_HAS_OPENLDAP_LDAPSDK
+set LDFLAGS=-Lc:/openldap/lib
+set LIBS=-lldap -llber
 ```
 
 or for using the Novell SDK:
 
 ```cmd
-set USE_LDAP_NOVELL=1
+set CPPFLAGS=-Ic:/openldapsdk/inc -DCURL_HAS_NOVELL_LDAPSDK
+set LDFLAGS=-Lc:/openldapsdk/lib/mscvc
+set LIBS=-lldapsdk -lldapssl -lldapx
 ```
 
 If you want to enable LDAPS support then set LDAPS=1.
@@ -207,7 +212,7 @@ environment, therefore, you cannot use the various disable-protocol options of
 the configure utility on this platform.
 
 You can use specific defines to disable specific protocols and features. See
-[CURL-DISABLE.md](CURL-DISABLE.md) for the full list.
+[CURL-DISABLE](CURL-DISABLE.md) for the full list.
 
 If you want to set any of these defines you have the following options:
 
@@ -241,13 +246,11 @@ lwIP header file `<lwip/opt.h>` (or another lwIP header that includes this)
 before including any libcurl header. Your program does not need the
 `USE_LWIPSOCK` preprocessor definition which is for libcurl internals only.
 
-Compilation has been verified with [lwIP
-1.4.0](https://download.savannah.gnu.org/releases/lwip/lwip-1.4.0.zip) and
-[contrib-1.4.0](https://download.savannah.gnu.org/releases/lwip/contrib-1.4.0.zip).
+Compilation has been verified with lwIP 1.4.0.
 
 This BSD-style lwIP TCP/IP stack support must be considered experimental given
 that it has been verified that lwIP 1.4.0 still needs some polish, and libcurl
-might yet need some additional adjustment, caveat emptor.
+might yet need some additional adjustment.
 
 ## Important static libcurl usage note
 
@@ -325,7 +328,7 @@ In all above, the built libraries and executables can be found in the
 
 # Android
 
-When building curl for Android it's recommended to use a Linux environment
+When building curl for Android it's recommended to use a Linux/macOS environment
 since using curl's `configure` script is the easiest way to build curl
 for Android. Before you can build curl for Android, you need to install the
 Android NDK first. This can be done using the SDK Manager that is part of
@@ -335,16 +338,16 @@ launching `configure`. On macOS, those variables could look like this to compile
 for `aarch64` and API level 29:
 
 ```bash
-export NDK=~/Library/Android/sdk/ndk/20.1.5948944
-export HOST_TAG=darwin-x86_64
-export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
-export AR=$TOOLCHAIN/bin/aarch64-linux-android-ar
-export AS=$TOOLCHAIN/bin/aarch64-linux-android-as
-export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
-export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
-export LD=$TOOLCHAIN/bin/aarch64-linux-android-ld
-export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
-export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
+export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
+export HOST_TAG=darwin-x86_64 # Same tag for Apple Silicon. Other OS values here: https://developer.android.com/ndk/guides/other_build_systems#overview
+export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
+export AR=$TOOLCHAIN/bin/llvm-ar
+export AS=$TOOLCHAIN/bin/llvm-as
+export CC=$TOOLCHAIN/bin/aarch64-linux-android21-clang
+export CXX=$TOOLCHAIN/bin/aarch64-linux-android21-clang++
+export LD=$TOOLCHAIN/bin/ld
+export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
+export STRIP=$TOOLCHAIN/bin/llvm-strip
 ```
 
 When building on Linux or targeting other API levels or architectures, you need
@@ -360,11 +363,10 @@ OpenSSL, follow the OpenSSL build instructions and then install `libssl.a` and
 `$TOOLCHAIN/sysroot/usr/include`. Now you can build curl for Android using
 OpenSSL like this:
 
-    ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
-
-Note, however, that you must target at least Android M (API level 23) or `configure`
-will not be able to detect OpenSSL since `stderr` (and the like) were not defined
-before Android M.
+```bash
+LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you'll need to the SSL/TLS layer's transtive dependencies if you're linking statically.
+./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
+```
 
 # IBM i
 
@@ -382,12 +384,12 @@ For IBM i (formerly OS/400), you can use curl in two different ways:
 There are some additional limitations and quirks with curl on this platform;
 they affect both environments.
 
-## Multithreading notes
+## Multi-threading notes
 
 By default, jobs in IBM i will not start with threading enabled. (Exceptions
 include interactive PASE sessions started by `QP2TERM` or SSH.) If you use
-curl in an environment without threading when options like async DNS were
-enabled, you will get messages like:
+curl in an environment without threading when options like asynchronous DNS
+were enabled, you will get messages like:
 
 ```
 getaddrinfo() thread failed to start
@@ -407,9 +409,9 @@ Download and unpack the curl package.
 
 Set environment variables to point to the cross-compile toolchain and call
 configure with any options you need. Be sure and specify the `--host` and
-`--build` parameters at configuration time. The following script is an
-example of cross-compiling for the IBM 405GP PowerPC processor using the
-toolchain from MonteVista for Hardhat Linux.
+`--build` parameters at configuration time. The following script is an example
+of cross-compiling for the IBM 405GP PowerPC processor using the toolchain on
+Linux.
 
 ```bash
 #! /bin/sh
@@ -461,7 +463,7 @@ know your application is not going to need. Besides specifying the
 use, here are some other flags that can reduce the size of the library by
 disabling support for some feature:
 
- - `--disable-alt-svc` (HTTP Alt-Srv)
+ - `--disable-alt-svc` (HTTP Alt-Svc)
  - `--disable-ares` (the C-ARES DNS library)
  - `--disable-cookies` (HTTP cookies)
  - `--disable-crypto-auth` (cryptographic authentication)
@@ -478,8 +480,8 @@ disabling support for some feature:
  - `--disable-ntlm-wb` (NTLM WinBind)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
- - `--disable-pthreads` (multithreading)
- - `--disable-socketpair` (socketpair for async name resolving)
+ - `--disable-pthreads` (multi-threading)
+ - `--disable-socketpair` (socketpair for asynchronous name resolving)
  - `--disable-threaded-resolver`  (threaded name resolver)
  - `--disable-tls-srp` (Secure Remote Password authentication for TLS)
  - `--disable-unix-sockets` (UNIX sockets)
@@ -525,8 +527,8 @@ line. Following is a list of appropriate key words for those configure options
 that are not automatically detected:
 
  - `--disable-cookies`          !cookies
- - `--disable-dateparse`        !RETRY-AFTER !CURLOPT_TIMECONDITION !CURLINFO_FILETIME !If-Modified-Since !getdate !-z
- - `--disable-libcurl-option`   !--libcurl
+ - `--disable-dateparse`        !RETRY-AFTER !`CURLOPT_TIMECONDITION` !`CURLINFO_FILETIME` !`If-Modified-Since` !`curl_getdate` !`-z`
+ - `--disable-libcurl-option`   !`--libcurl`
  - `--disable-verbose`          !verbose\ logs
 
 # PORTS

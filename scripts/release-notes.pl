@@ -123,6 +123,7 @@ for my $l (@gitlog) {
     elsif(($l =~ /^    (.*)/) && !$first) {
         # first line
         $short = $1;
+        $short =~ s/ ?\[(ci skip|skip ci)\]//g;
         $first = 1;
         push @line, $short;
     }

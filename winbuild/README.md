@@ -21,8 +21,8 @@ SPDX-License-Identifier: curl
 
 ## Prerequisites
 
- If you wish to support zlib, openssl, c-ares, ssh2, you will have to download
- them separately and copy them to the deps directory as shown below:
+ If you wish to support zlib, OpenSSL, c-ares, ssh2, you will have to download
+ them separately and copy them to the `deps` directory as shown below:
 
     somedirectory\
      |_curl-src
@@ -33,8 +33,8 @@ SPDX-License-Identifier: curl
        |_ include
        |_ bin
 
- It is also possible to create the deps directory in some other random places
- and tell the Makefile its location using the WITH_DEVEL option.
+ It is also possible to create the `deps` directory in some other random places
+ and tell the `Makefile` its location using the `WITH_DEVEL` option.
 
 ## Building straight from git
 
@@ -59,7 +59,7 @@ Open a Visual Studio Command prompt:
 
  Using the **'VS [version] [platform] [type] Command Prompt'** menu entry:
  where [version] is the Visual Studio version, [platform] is e.g. x64 and
- [type] Native of Cross platform build.  This type of command prompt may not
+ [type] Native of Cross platform build. This type of command prompt may not
  exist in all Visual Studio versions.
 
  See also: [Set the Path and Environment Variables for Command-Line Builds](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line)
@@ -81,9 +81,7 @@ where `<options>` is one or many of:
 
  - `VC=<num>`                    - VC version. 6 or later.
  - `WITH_DEVEL=<path>`           - Paths for the development files (SSL, zlib, etc.)
-                                   Defaults to sibbling directory deps: ../deps
-                                   Libraries can be fetched at https://windows.php.net/downloads/php-sdk/deps/
-                                   Uncompress them into the deps folder.
+                                   Defaults to sibling directory: `../deps`
  - `WITH_SSL=<dll/static>`       - Enable OpenSSL support, DLL or static
  - `WITH_NGHTTP2=<dll/static>`   - Enable HTTP/2 support, DLL or static
  - `WITH_MSH3=<dll/static>`      - Enable (experimental) HTTP/3 support, DLL or static
@@ -115,20 +113,20 @@ where `<options>` is one or many of:
  - `SSL_PATH=<path>`             - Custom path for OpenSSL
  - `ZLIB_PATH=<path>`            - Custom path for zlib
 
-## Static linking of Microsoft's C RunTime (CRT):
+## Static linking of Microsoft's C runtime (CRT):
 
  If you are using mode=static nmake will create and link to the static build
  of libcurl but *not* the static CRT. If you must you can force nmake to link
- in the static CRT by passing RTLIBCFG=static. Typically you shouldn't use
- that option, and nmake will default to the DLL CRT. RTLIBCFG is rarely used
- and therefore rarely tested. When passing RTLIBCFG for a configuration that
+ in the static CRT by passing `RTLIBCFG=static`. Typically you shouldn't use
+ that option, and nmake will default to the DLL CRT. `RTLIBCFG` is rarely used
+ and therefore rarely tested. When passing `RTLIBCFG` for a configuration that
  was already built but not with that option, or if the option was specified
  differently, you must destroy the build directory containing the
  configuration so that nmake can build it from scratch.
 
  This option is not recommended unless you have enough development experience
- to know how to match the runtime library for linking (that is, the CRT).
- If RTLIBCFG=static then release builds use /MT and debug builds use /MTd.
+ to know how to match the runtime library for linking (that is, the CRT). If
+ `RTLIBCFG=static` then release builds use `/MT` and debug builds use `/MTd`.
 
 ## Building your own application with libcurl (Visual Studio example)
 
@@ -140,17 +138,17 @@ where `<options>` is one or many of:
  For example let's say you've built curl.exe and libcurl.dll from the Visual
  Studio 2010 x64 Win64 Command Prompt:
 
- nmake /f Makefile.vc mode=dll VC=10
+    nmake /f Makefile.vc mode=dll VC=10
 
  The output directory will have a name similar to
- ..\builds\libcurl-vc10-x64-release-dll-ipv6-sspi-schannel.
+ `..\builds\libcurl-vc10-x64-release-dll-ipv6-sspi-schannel`.
 
  The output directory contains subdirectories bin, lib and include. Those are
  the directories to set in your Visual Studio project. You can either copy the
  output directory to your project or leave it in place. Following the example,
  let's assume you leave it in place and your curl top source directory is
- C:\curl-7.82.0. You would set these options for configurations using the x64
- platform:
+ `C:\curl-7.82.0`. You would set these options for configurations using the
+ x64 platform:
 
 ~~~
  - Configuration Properties > Debugging > Environment
@@ -169,26 +167,27 @@ where `<options>` is one or many of:
  For configurations using the x86 platform (aka Win32 platform) you would
  need to make a separate x86 build of libcurl.
 
- If you build libcurl static (mode=static) or debug (DEBUG=yes) then the
+ If you build libcurl static (`mode=static`) or debug (`DEBUG=yes`) then the
  library name will vary and separate builds may be necessary for separate
- configurations of your project within the same platform. This is discussed
- in the next section.
+ configurations of your project within the same platform. This is discussed in
+ the next section.
 
 ## Building your own application with a static libcurl
 
  When building an application that uses the static libcurl library on Windows,
- you must define CURL_STATICLIB. Otherwise the linker will look for dynamic
+ you must define `CURL_STATICLIB`. Otherwise the linker will look for dynamic
  import symbols.
 
- The static library name has an '_a' suffix in the basename and the debug
- library name has a '_debug' suffix in the basename. For example,
- libcurl_a_debug.lib is a static debug build of libcurl.
+ The static library name has an `_a` suffix in the basename and the debug
+ library name has a `_debug` suffix in the basename. For example,
+ `libcurl_a_debug.lib` is a static debug build of libcurl.
 
  You may need a separate build of libcurl for each VC configuration combination
- (eg: Debug|Win32, Debug|x64, Release|Win32, Release|x64).
+ (for example: Debug|Win32, Debug|x64, Release|Win32, Release|x64).
 
  You must specify any additional dependencies needed by your build of static
- libcurl (eg: advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib).
+ libcurl (for example:
+ `advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib`).
 
 ## Legacy Windows and SSL
 

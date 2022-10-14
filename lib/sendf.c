@@ -48,6 +48,7 @@
 #include "strdup.h"
 #include "http2.h"
 #include "headers.h"
+#include "ws.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -534,6 +535,7 @@ static CURLcode chop_write(struct Curl_easy *data,
   curl_write_callback writebody = NULL;
   char *ptr = optr;
   size_t len = olen;
+  void *writebody_ptr = data->set.out;
 
   if(!len)
     return CURLE_OK;
@@ -544,8 +546,18 @@ static CURLcode chop_write(struct Curl_easy *data,
     return pausewrite(data, type, ptr, len);
 
   /* Determine the callback(s) to use. */
-  if(type & CLIENTWRITE_BODY)
+  if(type & CLIENTWRITE_BODY) {
+#ifdef USE_WEBSOCKETS
+    if(conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) {
+      struct HTTP *ws = data->req.p.http;
+      writebody = Curl_ws_writecb;
+      ws->ws.data = data;
+      writebody_ptr = ws;
+    }
+    else
+#endif
     writebody = data->set.fwrite_func;
+  }
   if((type & CLIENTWRITE_HEADER) &&
      (data->set.fwrite_header || data->set.writeheader)) {
     /*
@@ -563,7 +575,7 @@ static CURLcode chop_write(struct Curl_easy *data,
     if(writebody) {
       size_t wrote;
       Curl_set_in_callback(data, true);
-      wrote = writebody(ptr, 1, chunklen, data->set.out);
+      wrote = writebody(ptr, 1, chunklen, writebody_ptr);
       Curl_set_in_callback(data, false);
 
       if(CURL_WRITEFUNC_PAUSE == wrote) {
@@ -723,9 +735,10 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
     static const char s_infotype[CURLINFO_END][3] = {
       "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
     if(data->set.fdebug) {
+      bool inCallback = Curl_is_in_callback(data);
       Curl_set_in_callback(data, true);
       (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
-      Curl_set_in_callback(data, false);
+      Curl_set_in_callback(data, inCallback);
     }
     else {
       switch(type) {

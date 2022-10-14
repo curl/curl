@@ -46,14 +46,12 @@ set ("") to ask for an Accept-Encoding: header to be used that contains all
 built-in supported encodings.
 
 Alternatively, you can specify exactly the encoding or list of encodings you
-want in the response. Four encodings are supported: \fIidentity\fP, meaning
-non-compressed, \fIdeflate\fP which requests the server to compress its
-response using the zlib algorithm, \fIgzip\fP which requests the gzip
+want in the response. The following encodings are supported: \fIidentity\fP,
+meaning non-compressed, \fIdeflate\fP which requests the server to compress
+its response using the zlib algorithm, \fIgzip\fP which requests the gzip
 algorithm, (since curl 7.57.0) \fIbr\fP which is brotli and (since curl
-7.72.0) \fIzstd\fP which is zstd.  Provide them in the string as a
-comma-separated list of accepted encodings, like:
-
-  "br, gzip, deflate".
+7.72.0) \fIzstd\fP which is zstd. Provide them in the string as a
+comma-separated list of accepted encodings, like: \fB"br, gzip, deflate"\fP.
 
 Set \fICURLOPT_ACCEPT_ENCODING(3)\fP to NULL to explicitly disable it, which
 makes libcurl not send an Accept-Encoding: header and not decompress received

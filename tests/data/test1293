@@ -29,6 +29,9 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>

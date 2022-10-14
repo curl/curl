@@ -227,10 +227,6 @@ foot();
 
 sub foot {
   print <<FOOT
-#else /* !USE_MANUAL */
-/* built-in manual is disabled, blank function */
-#include "tool_hugehelp.h"
-void hugehelp(void) {}
 #endif /* USE_MANUAL */
 FOOT
   ;

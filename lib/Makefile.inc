@@ -216,7 +216,8 @@ LIB_CFILES =         \
   version.c          \
   version_win32.c    \
   warnless.c         \
-  wildcard.c
+  wildcard.c         \
+  ws.c
 
 LIB_HFILES =         \
   altsvc.h           \
@@ -270,6 +271,7 @@ LIB_HFILES =         \
   fileinfo.h         \
   fopen.h            \
   formdata.h         \
+  functypes.h        \
   ftp.h              \
   ftplistparser.h    \
   getinfo.h          \
@@ -338,7 +340,8 @@ LIB_HFILES =         \
   urldata.h          \
   version_win32.h    \
   warnless.h         \
-  wildcard.h
+  wildcard.h         \
+  ws.h
 
 LIB_RCFILES = libcurl.rc
 

@@ -157,12 +157,12 @@ git commit that is easy to merge and they are easy to track and not that easy
 to lose in the flood of many emails, like they sometimes do on the mailing
 lists.
 
-Every pull request submitted will automatically be
-tested in several different ways. [See CI.md for more
+Every pull request submitted will automatically be tested in several different
+ways. [See the CI document for more
 information](https://github.com/curl/curl/blob/master/tests/CI.md).
 
 Sometimes the tests fail due to a dependency service temporarily being offline
-or otherwise unavailable, eg. package downloads. In this case you can just
+or otherwise unavailable, e.g. package downloads. In this case you can just
 try to update your pull requests to rerun the tests later as described below.
 
 You can update your pull requests by pushing new commits or force-pushing
@@ -245,7 +245,7 @@ can make patches out of your changes that are suitable for mailing:
 
     git format-patch remotes/origin/master
 
-This creates files in your local directory named NNNN-[name].patch for each
+This creates files in your local directory named `NNNN-[name].patch` for each
 commit.
 
 Now send those patches off to the curl-library list. You can of course opt to
@@ -267,17 +267,7 @@ can use diff recursively:
     diff -ur curl-original-dir curl-modified-sources-dir > my-fixes.diff
 
 The GNU diff and GNU patch tools exist for virtually all platforms, including
-all kinds of Unixes and Windows:
-
-For unix-like operating systems:
-
- - [https://savannah.gnu.org/projects/patch/](https://savannah.gnu.org/projects/patch/)
- - [https://www.gnu.org/software/diffutils/](https://www.gnu.org/software/diffutils/)
-
-For Windows:
-
- - [https://gnuwin32.sourceforge.io/packages/patch.htm](https://gnuwin32.sourceforge.io/packages/patch.htm)
- - [https://gnuwin32.sourceforge.io/packages/diffutils.htm](https://gnuwin32.sourceforge.io/packages/diffutils.htm)
+all kinds of Unixes and Windows.
 
 ### Useful resources
  - [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
@@ -291,8 +281,8 @@ still fine.
 This means that all files need to have their license and copyright information
 clearly stated. Ideally by having the standard curl source code header, with
 an accurate copyright year range and the SPDX-License-Identifier included. If
-the header does not work, you can use a smaller header or as a last resort add
-the information for a specific file to the `.reuse/dep5` file.
+the header does not work, you can use a smaller header or add the information
+for a specific file to the `.reuse/dep5` file.
 
 We update copyright year ranges to end on the year of the most recent change
 of the individual file.

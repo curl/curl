@@ -41,8 +41,8 @@ data. If the curl handles are used simultaneously in multiple threads, you
 \fIcurl_share_setopt(3)\fP for details.
 
 If you add a share that is set to share cookies, your easy handle will use
-that cookie cache and get the cookie engine enabled. If you unshare an object
-that was using cookies (or change to another object that does not share
+that cookie cache and get the cookie engine enabled. If you stop sharing an
+object that was using cookies (or change to another object that does not share
 cookies), the easy handle will get its cookie engine disabled.
 
 Data that the share object is not set to share will be dealt with the usual

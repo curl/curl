@@ -45,9 +45,9 @@ order of the items is immaterial. A date string may contain many flavors of
 items:
 .TP 0.8i
 .B calendar date items
-Can be specified several ways. Month names can only be three-letter english
-abbreviations, numbers can be zero-prefixed and the year may use 2 or 4 digits.
-Examples: 06 Nov 1994, 06-Nov-94 and Nov-94 6.
+Can be specified several ways. Month names can only be three-letter English
+abbreviations, numbers can be zero-prefixed and the year may use 2 or 4
+digits.  Examples: 06 Nov 1994, 06-Nov-94 and Nov-94 6.
 .TP
 .B time of the day items
 This string specifies the time on a given day. You must specify it with 6
@@ -61,7 +61,7 @@ UTC. Supported formats include: -1200, MST, +0100.
 .TP
 .B day of the week items
 Specifies a day of the week. Days of the week may be spelled out in full
-(using english): `Sunday', `Monday', etc or they may be abbreviated to their
+(using English): `Sunday', `Monday', etc or they may be abbreviated to their
 first three letters. This is usually not info that adds anything.
 .TP
 .B pure numbers
@@ -97,8 +97,8 @@ calendar date.
 .SH STANDARDS
 This parser handles date formats specified in RFC 822 (including the update in
 RFC 1123) using time zone name or time zone delta and RFC 850 (obsoleted by
-RFC 1036) and ANSI C's asctime() format. These formats are the only ones RFC
-7231 says HTTP applications may use.
+RFC 1036) and ANSI C's \fIasctime()\fP format. These formats are the only ones
+RFC 7231 says HTTP applications may use.
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE

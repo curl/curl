@@ -279,7 +279,7 @@ Curl_he2ai(const struct hostent *he, int port)
 
   for(i = 0; (curr = he->h_addr_list[i]) != NULL; i++) {
     size_t ss_size;
-    size_t namelen = strlen(he->h_name) + 1; /* include zero termination */
+    size_t namelen = strlen(he->h_name) + 1; /* include null-terminatior */
 #ifdef ENABLE_IPV6
     if(he->h_addrtype == AF_INET6)
       ss_size = sizeof(struct sockaddr_in6);

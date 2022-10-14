@@ -259,7 +259,7 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
 
   /* put the data at the end of the previous data, not the newline */
   memcpy(&newhs->value[olen], value, vlen);
-  newhs->value[olen + vlen] = 0; /* zero terminate at newline */
+  newhs->value[olen + vlen] = 0; /* null-terminate at newline */
 
   /* insert this node into the list of headers */
   Curl_llist_insert_next(&data->state.httphdrs, data->state.httphdrs.tail,

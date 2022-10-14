@@ -1277,6 +1277,27 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
   }
 }
 
+static int client_new(struct connectdata *conn,
+                      nghttp2_session_callbacks *callbacks)
+{
+#if NGHTTP2_VERSION_NUM < 0x013200
+  /* before 1.50.0 */
+  return nghttp2_session_client_new(&conn->proto.httpc.h2, callbacks, conn);
+#else
+  nghttp2_option *o;
+  int rc = nghttp2_option_new(&o);
+  if(rc)
+    return rc;
+  /* turn off RFC 9113 leading and trailing white spaces validation against
+     HTTP field value. */
+  nghttp2_option_set_no_rfc9113_leading_and_trailing_ws_validation(o, 1);
+  rc = nghttp2_session_client_new2(&conn->proto.httpc.h2, callbacks, conn,
+                                   o);
+  nghttp2_option_del(o);
+  return rc;
+#endif
+}
+
 /*
  * Initialize nghttp2 for a Curl connection
  */
@@ -1317,7 +1338,7 @@ static CURLcode http2_init(struct Curl_easy *data, struct connectdata *conn)
     nghttp2_session_callbacks_set_error_callback(callbacks, error_callback);
 
     /* The nghttp2 session is not yet setup, do it */
-    rc = nghttp2_session_client_new(&conn->proto.httpc.h2, callbacks, conn);
+    rc = client_new(conn, callbacks);
 
     nghttp2_session_callbacks_del(callbacks);
 
@@ -1371,7 +1392,7 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
                          NGHTTP2_CLEARTEXT_PROTO_VERSION_ID, base64);
   free(base64);
 
-  k->upgr101 = UPGR101_REQUESTED;
+  k->upgr101 = UPGR101_H2;
 
   return result;
 }

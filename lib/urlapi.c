@@ -116,7 +116,7 @@ static const char *find_host_sep(const char *url)
 }
 
 /*
- * Decide in an encoding-independent manner whether a character in an
+ * Decide in an encoding-independent manner whether a character in a
  * URL must be escaped. The same criterion must be used in strlen_url()
  * and strcpy_url().
  */
@@ -184,8 +184,12 @@ static CURLUcode strcpy_url(struct dynbuf *o, const char *url, bool relative)
  * Returns the length of the scheme if the given URL is absolute (as opposed
  * to relative). Stores the scheme in the buffer if TRUE and 'buf' is
  * non-NULL. The buflen must be larger than MAX_SCHEME_LEN if buf is set.
+ *
+ * If 'guess_scheme' is TRUE, it means the URL might be provided without
+ * scheme.
  */
-size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
+size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
+                            bool guess_scheme)
 {
   int i;
   DEBUGASSERT(!buf || (buflen > MAX_SCHEME_LEN));
@@ -193,7 +197,7 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
   if(buf)
     buf[0] = 0; /* always leave a defined value in buf */
 #ifdef WIN32
-  if(STARTS_WITH_DRIVE_PREFIX(url))
+  if(guess_scheme && STARTS_WITH_DRIVE_PREFIX(url))
     return 0;
 #endif
   for(i = 0; i < MAX_SCHEME_LEN; ++i) {
@@ -207,7 +211,11 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
       break;
     }
   }
-  if(i && (url[i] == ':') && (url[i + 1] == '/')) {
+  if(i && (url[i] == ':') && ((url[i + 1] == '/') || !guess_scheme)) {
+    /* If this does not guess scheme, the scheme always ends with the colon so
+       that this also detects data: URLs etc. In guessing mode, data: could
+       be the host name "data" with a specified port number. */
+
     /* the length of the scheme is the name part only */
     size_t len = i;
     if(buf) {
@@ -423,7 +431,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   /* if this is a known scheme, get some details */
   if(u->scheme)
-    h = Curl_builtin_scheme(u->scheme);
+    h = Curl_builtin_scheme(u->scheme, CURL_ZERO_TERMINATED);
 
   /* We could use the login information in the URL so extract it. Only parse
      options if the handler says we should. Note that 'h' might be NULL! */
@@ -629,7 +637,7 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
   }
   else {
     /* letters from the second string are not ok */
-    len = strcspn(hostname, " \r\n\t/:#?!@");
+    len = strcspn(hostname, " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,");
     if(hlen != len)
       /* hostname with bad content */
       return CURLUE_BAD_HOSTNAME;
@@ -772,9 +780,6 @@ static CURLUcode decode_host(struct dynbuf *host)
  *
  * The function handles a query part ('?' + stuff) appended but it expects
  * that fragments ('#' + stuff) have already been cut off.
- *
- * Note that this funciton *writes* a byte into the source buffer during its
- * operation.
  *
  * RETURNS
  *
@@ -934,7 +939,9 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     goto fail;
   }
 
-  schemelen = Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf));
+  schemelen = Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf),
+                                   flags & (CURLU_GUESS_SCHEME|
+                                            CURLU_DEFAULT_SCHEME));
 
   /* handle the file: scheme */
   if(schemelen && !strcmp(schemebuf, "file")) {
@@ -1059,19 +1066,19 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
         p++;
         i++;
       }
-      if((i < 1) || (i>3)) {
-        /* less than one or more than three slashes */
-        result = CURLUE_BAD_SLASHES;
-        goto fail;
-      }
 
       schemep = schemebuf;
-      if(!Curl_builtin_scheme(schemep) &&
+      if(!Curl_builtin_scheme(schemep, CURL_ZERO_TERMINATED) &&
          !(flags & CURLU_NON_SUPPORT_SCHEME)) {
         result = CURLUE_UNSUPPORTED_SCHEME;
         goto fail;
       }
 
+      if((i < 1) || (i>3)) {
+        /* less than one or more than three slashes */
+        result = CURLUE_BAD_SLASHES;
+        goto fail;
+      }
       if(junkscan(schemep, flags)) {
         result = CURLUE_BAD_SCHEME;
         goto fail;
@@ -1402,7 +1409,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       /* there's no stored port number, but asked to deliver
          a default one for the scheme */
       const struct Curl_handler *h =
-        Curl_builtin_scheme(u->scheme);
+        Curl_builtin_scheme(u->scheme, CURL_ZERO_TERMINATED);
       if(h) {
         msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         ptr = portbuf;
@@ -1412,7 +1419,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       /* there is a stored port number, but ask to inhibit if
          it matches the default one for the scheme */
       const struct Curl_handler *h =
-        Curl_builtin_scheme(u->scheme);
+        Curl_builtin_scheme(u->scheme, CURL_ZERO_TERMINATED);
       if(h && (h->defport == u->portnum) &&
          (flags & CURLU_NO_DEFAULT_PORT))
         ptr = NULL;
@@ -1458,7 +1465,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       else
         return CURLUE_NO_SCHEME;
 
-      h = Curl_builtin_scheme(scheme);
+      h = Curl_builtin_scheme(scheme, CURL_ZERO_TERMINATED);
       if(!port && (flags & CURLU_DEFAULT_PORT)) {
         /* there's no stored port number, but asked to deliver
            a default one for the scheme */
@@ -1664,7 +1671,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       return CURLUE_BAD_SCHEME;
     if(!(flags & CURLU_NON_SUPPORT_SCHEME) &&
        /* verify that it is a fine scheme */
-       !Curl_builtin_scheme(part))
+       !Curl_builtin_scheme(part, CURL_ZERO_TERMINATED))
       return CURLUE_UNSUPPORTED_SCHEME;
     storep = &u->scheme;
     urlencode = FALSE; /* never */
@@ -1730,7 +1737,9 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     /* if the new thing is absolute or the old one is not
      * (we could not get an absolute url in 'oldurl'),
      * then replace the existing with the new. */
-    if(Curl_is_absolute_url(part, NULL, 0)
+    if(Curl_is_absolute_url(part, NULL, 0,
+                            flags & (CURLU_GUESS_SCHEME|
+                                     CURLU_DEFAULT_SCHEME))
        || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
       return parseurl_and_replace(part, u, flags);
     }

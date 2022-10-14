@@ -82,11 +82,12 @@
 #include "altsvc.h"
 #include "hsts.h"
 
+#include "easy_lock.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-#include "easy_lock.h"
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
@@ -943,7 +944,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
       goto fail;
   }
 
-#ifdef USE_ALTSVC
+#ifndef CURL_DISABLE_ALTSVC
   if(data->asi) {
     outcurl->asi = Curl_altsvc_init();
     if(!outcurl->asi)
@@ -1170,8 +1171,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 }
 
 
-static CURLcode easy_connection(struct Curl_easy *data,
-                                curl_socket_t *sfd,
+static CURLcode easy_connection(struct Curl_easy *data, curl_socket_t *sfd,
                                 struct connectdata **connp)
 {
   if(!data)
@@ -1230,20 +1230,18 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
 }
 
 /*
- * Sends data over the connected socket. Use after successful
- * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
+ * Sends data over the connected socket.
+ *
+ * This is the private internal version of curl_easy_send()
  */
-CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
-                        size_t buflen, size_t *n)
+CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
+                       size_t buflen, ssize_t *n)
 {
   curl_socket_t sfd;
   CURLcode result;
   ssize_t n1;
   struct connectdata *c = NULL;
   SIGPIPE_VARIABLE(pipe_st);
-
-  if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
 
   result = easy_connection(data, &sfd, &c);
   if(result)
@@ -1266,8 +1264,25 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
   if(!result && !n1)
     return CURLE_AGAIN;
 
-  *n = (size_t)n1;
+  *n = n1;
 
+  return result;
+}
+
+/*
+ * Sends data over the connected socket. Use after successful
+ * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
+ */
+CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
+                        size_t buflen, size_t *n)
+{
+  ssize_t written = 0;
+  CURLcode result;
+  if(Curl_is_in_callback(data))
+    return CURLE_RECURSIVE_API_CALL;
+
+  result = Curl_senddata(data, buffer, buflen, &written);
+  *n = (size_t)written;
   return result;
 }
 

@@ -35,8 +35,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REDIRECT_TIME,
 .SH DESCRIPTION
 Pass a pointer to a double to receive the total time, in seconds, it took for
 all redirection steps include name lookup, connect, pretransfer and transfer
-before final transaction was started. CURLINFO_REDIRECT_TIME contains the
-complete execution time for multiple redirections.
+before final transaction was started. \fICURLINFO_REDIRECT_TIME(3)\fP contains
+the complete execution time for multiple redirections.
 
 See also the TIMES overview in the \fIcurl_easy_getinfo(3)\fP man page.
 .SH PROTOCOLS

@@ -26,6 +26,8 @@
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 
+#include <curl/curl.h>
+
 #define HMAC_MD5_LENGTH 16
 
 typedef CURLcode (* HMAC_hinit_func)(void *context);

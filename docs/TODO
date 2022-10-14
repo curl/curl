@@ -70,6 +70,7 @@
  4.7 STAT for LIST without data connection
 
  5. HTTP
+ 5.1 Provide the error body from a CONNNECT response
  5.2 Set custom client ip when using haproxy protocol
  5.3 Rearrange request header order
  5.4 Allow SAN names in HTTP/2 server push
@@ -120,6 +121,7 @@
  13.9 TLS record padding
  13.10 Support Authority Information Access certificate extension (AIA)
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
+ 13.12 Reduce CA certificate bundle reparsing
  13.13 Make sure we forbid TLS 1.3 post-handshake authentication
  13.14 Support the clienthello extension
 
@@ -564,6 +566,15 @@
 
 5. HTTP
 
+5.1 Provide the error body from a CONNNECT response
+
+ When curl receives a body response from a CONNECT request to a proxy, it will
+ always just read and ignore it. It would make some users happy if curl
+ instead optionally would be able to make that responsible available. Via a new
+ callback? Through some other means?
+
+ See https://github.com/curl/curl/issues/9513
+
 5.2 Set custom client ip when using haproxy protocol
 
  This would allow testing servers with different client ip addresses (without
@@ -843,6 +854,15 @@
 
  Adding this feature would make curls pinning 100% compatible to HPKP and
  allow more flexible pinning.
+
+13.12 Reduce CA certificate bundle reparsing
+
+ When using the OpenSSL backend, curl will load and reparse the CA bundle at
+ the creation of the "SSL context" when it sets up a connection to do a TLS
+ handshake. A more effective way would be to somehow cache the CA bundle to
+ avoid it having to be repeatedly reloaded and reparsed.
+
+ See https://github.com/curl/curl/issues/9379
 
 13.13 Make sure we forbid TLS 1.3 post-handshake authentication
 

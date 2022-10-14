@@ -21,6 +21,7 @@ blablabla
 # Client-side
 <client>
 <features>
+Mime
 SSL
 </features>
 <server>

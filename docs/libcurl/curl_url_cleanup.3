@@ -23,7 +23,7 @@
 .\" **************************************************************************
 .TH curl_url_cleanup 3 "6 Aug 2018" "libcurl" "libcurl Manual"
 .SH NAME
-curl_url_cleanup - free a CURLU handle
+curl_url_cleanup - free the URL handle
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -31,7 +31,7 @@ curl_url_cleanup - free a CURLU handle
 void curl_url_cleanup(CURLU *handle);
 .fi
 .SH DESCRIPTION
-Frees all the resources associated with the given CURLU handle!
+Frees all the resources associated with the given \fICURLU\fP handle!
 .SH EXAMPLE
 .nf
   CURLU *url = curl_url();

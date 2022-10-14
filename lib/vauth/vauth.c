@@ -27,6 +27,8 @@
 #include <curl/curl.h>
 
 #include "vauth.h"
+#include "urldata.h"
+#include "strcase.h"
 #include "curl_multibyte.h"
 #include "curl_printf.h"
 
@@ -143,4 +145,19 @@ bool Curl_auth_user_contains_domain(const char *user)
 #endif
 
   return valid;
+}
+
+/*
+ * Curl_auth_ollowed_to_host() tells if authentication, cookies or other
+ * "sensitive data" can (still) be sent to this host.
+ */
+bool Curl_auth_allowed_to_host(struct Curl_easy *data)
+{
+  struct connectdata *conn = data->conn;
+  return (!data->state.this_is_a_follow ||
+          data->set.allow_auth_to_other_hosts ||
+          (data->state.first_host &&
+           strcasecompare(data->state.first_host, conn->host.name) &&
+           (data->state.first_remote_port == conn->remote_port) &&
+           (data->state.first_remote_protocol == conn->handler->protocol)));
 }

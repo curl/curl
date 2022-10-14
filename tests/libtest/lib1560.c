@@ -138,6 +138,49 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"https://exam{}[]ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam{ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam}ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam]ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam\\ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam$ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam'ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam\"ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam^ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam`ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam*ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam<ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam>ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam=ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://exam;ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://example,net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://example.net/}",
+   "https | [11] | [12] | [13] | example.net | [15] | /} | [16] | [17]",
+   0, 0, CURLUE_OK},
+
+  /* blank user is blank */
+  {"https://:password@example.net",
+   "https |  | password | [13] | example.net | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK},
+  /* blank user + blank password */
+  {"https://:@example.net",
+   "https |  |  | [13] | example.net | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK},
+  /* user-only (no password) */
+  {"https://user@example.net",
+   "https | user | [12] | [13] | example.net | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK},
+#ifdef USE_WEBSOCKETS
+  {"ws://example.com/color/?green",
+   "ws | [11] | [12] | [13] | example.com | [15] | /color/ | green |"
+   " [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
+  {"wss://example.com/color/?green",
+   "wss | [11] | [12] | [13] | example.com | [15] | /color/ | green |"
+   " [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK },
+#endif
+
   {"https://user:password@example.net/get?this=and#but frag then", "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_FRAGMENT},
   {"https://user:password@example.net/get?this=and what", "",
@@ -237,7 +280,7 @@ static const struct testcase get_parts_list[] ={
    CURLU_DEFAULT_SCHEME, 0, CURLUE_NO_HOST},
   {"boing:80",
    "https | [11] | [12] | [13] | boing | 80 | / | [16] | [17]",
-   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+   CURLU_DEFAULT_SCHEME|CURLU_GUESS_SCHEME, 0, CURLUE_OK},
   {"http://[fd00:a41::50]:8080",
    "http | [11] | [12] | [13] | [fd00:a41::50] | 8080 | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
@@ -382,6 +425,15 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  /* unsupported schemes with no guessing enabled */
+  {"data:text/html;charset=utf-8;base64,PCFET0NUWVBFIEhUTUw+PG1ldGEgY",
+   "", 0, 0, CURLUE_UNSUPPORTED_SCHEME},
+  {"d:anything-really", "", 0, 0, CURLUE_UNSUPPORTED_SCHEME},
+  {"about:config", "", 0, 0, CURLUE_UNSUPPORTED_SCHEME},
+  {"example://foo", "", 0, 0, CURLUE_UNSUPPORTED_SCHEME},
+  {"mailto:infobot@example.com?body=send%20current-issue", "", 0, 0,
+   CURLUE_UNSUPPORTED_SCHEME},
+  {"about:80", "https://about:80/", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   /* percent encoded host names */
   {"http://example.com%40127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://example.com%21127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
@@ -508,7 +560,7 @@ static const struct urltestcase get_url_list[] = {
    "",
    CURLU_DISALLOW_USER, 0, CURLUE_USER_NOT_ALLOWED},
   {"http:/@example.com:123",
-   "http://example.com:123/",
+   "http://@example.com:123/",
    0, 0, CURLUE_OK},
   {"http:/:password@example.com",
    "http://:password@example.com/",
@@ -1233,7 +1285,7 @@ static int get_nothing(void)
       fprintf(stderr, "unexpected return code line %u\n", __LINE__);
 
     rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
-    if(rc != CURLUE_OK)
+    if(rc != CURLUE_NO_ZONEID)
       fprintf(stderr, "unexpected return code %u on line %u\n", (int)rc,
               __LINE__);
 

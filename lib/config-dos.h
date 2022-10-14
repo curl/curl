@@ -105,9 +105,7 @@
 /* CURLDEBUG definition enables memory tracking */
 /* #define CURLDEBUG */
 
-/* USE_ZLIB on cmd-line */
-#ifdef USE_ZLIB
-  #define HAVE_ZLIB_H            1
+#ifdef USE_ZLIB  /* Deprecated. Use HAVE_LIBZ instead. */
   #define HAVE_LIBZ              1
 #endif
 

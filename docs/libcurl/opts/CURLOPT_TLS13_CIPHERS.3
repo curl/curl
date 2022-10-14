@@ -41,8 +41,9 @@ you will find more details about cipher lists on this URL:
  https://curl.se/docs/ssl-ciphers.html
 
 This option is currently used only when curl is built to use OpenSSL 1.1.1 or
-later or SChannel. If you are using a different SSL backend you can try
-setting TLS 1.3 cipher suites by using the CURLOPT_SSL_CIPHER_LIST option.
+later or Schannel. If you are using a different SSL backend you can try
+setting TLS 1.3 cipher suites by using the \fICURLOPT_SSL_CIPHER_LIST(3)\fP
+option.
 
 The application does not have to keep the string around after setting this
 option.
@@ -64,7 +65,7 @@ if(curl) {
 .SH AVAILABILITY
 Added in 7.61.0 for OpenSSL. Available when built with OpenSSL >= 1.1.1.
 
-Added in 7.85.0 for SChannel.
+Added in 7.85.0 for Schannel.
 .SH RETURN VALUE
 Returns CURLE_OK if supported, CURLE_NOT_BUILT_IN otherwise.
 .SH "SEE ALSO"

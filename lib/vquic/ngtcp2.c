@@ -1703,6 +1703,11 @@ static CURLcode ng_has_connected(struct Curl_easy *data,
   }
   else
     infof(data, "Skipped certificate verification");
+#ifdef USE_OPENSSL
+  if(data->set.ssl.certinfo)
+    /* asked to gather certificate info */
+    (void)Curl_ossl_certchain(data, conn->quic->ssl);
+#endif
   return result;
 }
 
@@ -1828,7 +1833,7 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
                            size_t pktlen, size_t gsolen)
 {
 #ifdef HAVE_SENDMSG
-  struct iovec msg_iov = {(void *)pkt, pktlen};
+  struct iovec msg_iov;
   struct msghdr msg = {0};
   uint8_t msg_ctrl[32];
   ssize_t sent;
@@ -1837,6 +1842,8 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
 #endif
 
   *psent = 0;
+  msg_iov.iov_base = (uint8_t *)pkt;
+  msg_iov.iov_len = pktlen;
   msg.msg_iov = &msg_iov;
   msg.msg_iovlen = 1;
 

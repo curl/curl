@@ -53,15 +53,11 @@ my $root=$ARGV[0] || ".";
 # need an include directory when building out-of-tree
 my $i = ($ARGV[1]) ? "-I$ARGV[1] " : '';
 
-my $h = "$root/include/curl/curl.h";
-my $mh = "$root/include/curl/multi.h";
-my $ua = "$root/include/curl/urlapi.h";
-my $hd = "$root/include/curl/header.h";
-
 my $verbose=0;
 my $summary=0;
 my $misses=0;
 
+my @manrefs;
 my @syms;
 my %doc;
 my %rem;
@@ -78,7 +74,6 @@ sub scanenum {
             chomp;
             s/[,\s].*//;
             push @syms, $_;
-            print STDERR "$_\n";
         }
     }
     close H_IN || die "Error preprocessing $file";
@@ -88,22 +83,65 @@ sub scanheader {
     my ($f)=@_;
     open H, "<$f";
     while(<H>) {
-        if (/^#define (CURL[A-Za-z0-9_]*)/) {
+        if (/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
             push @syms, $1;
         }
     }
     close H;
 }
 
-scanenum($h);
-scanheader($h);
-scanheader($mh);
-scanheader($ua);
-scanheader($hd);
+sub scanallheaders {
+    my $d = "$root/include/curl";
+    opendir(my $dh, $d) ||
+        die "Can't opendir: $!";
+    my @headers = grep { /.h\z/ } readdir($dh);
+    closedir $dh;
+    foreach my $h (@headers) {
+        scanenum("$d/$h");
+        scanheader("$d/$h");
+    }
+}
+
+sub checkmanpage {
+    my ($m) = @_;
+
+    open(M, "<$m");
+    my $line = 1;
+    while(<M>) {
+        # strip off formatting
+        $_ =~ s/\\f[BPRI]//;
+        # detect global-looking 'CURL[BLABLA]_*' symbols
+        while(s/\W(CURL(AUTH|E|H|MOPT|OPT|SHOPT|UE|M|SSH|SSLBACKEND|HEADER|FORM|FTP|PIPE|MIMEOPT|GSSAPI|ALTSVC|PROTO|PROXY|UPART|USESSL|_READFUNC|_WRITEFUNC|_CSELECT|_FORMADD|_IPRESOLVE|_REDIR|_RTSPREQ|_TIMECOND|_VERSION)_[a-zA-Z0-9_]+)//) {
+            my $s = $1;
+            # skip two "special" ones
+            if($s !~ /^(CURLE_OBSOLETE|CURLOPT_TEMPLATE)/) {
+                push @manrefs, "$1:$m:$line";
+            }
+        }
+        $line++;
+    }
+    close(M);
+}
+
+sub scanman3dir {
+    my ($d) = @_;
+    opendir(my $dh, $d) ||
+        die "Can't opendir: $!";
+    my @mans = grep { /.3\z/ } readdir($dh);
+    closedir $dh;
+    for my $m (@mans) {
+        checkmanpage("$d/$m");
+    }
+}
+
+
+scanallheaders();
+scanman3dir("$root/docs/libcurl");
+scanman3dir("$root/docs/libcurl/opts");
 
 open S, "<$root/docs/libcurl/symbols-in-versions";
 while(<S>) {
-    if(/(^CURL[^ \n]*) *(.*)/) {
+    if(/(^[^ \n]+) +(.*)/) {
         my ($sym, $rest)=($1, $2);
         if($doc{$sym}) {
             print "Detected duplicate symbol: $sym\n";
@@ -173,6 +211,17 @@ for my $e (sort keys %doc) {
 
         print "$e\n";
         $misses++;
+    }
+}
+
+my %warned;
+for my $r (@manrefs) {
+    if($r =~ /^([^:]+):(.*)/) {
+        my ($sym, $file)=($1, $2);
+        if(!$doc{$sym} && !$warned{$sym, $file}) {
+            print "$file: $sym is not a public symbol\n";
+            $warned{$sym, $file} = 1;
+        }
     }
 }
 

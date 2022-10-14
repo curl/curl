@@ -7,7 +7,7 @@ and
 users can control which ciphers to consider when negotiating TLS connections.
 
 TLS 1.3 ciphers are supported since curl 7.61 for OpenSSL 1.1.1+, and since
-curl 7.85 for SChannel with options
+curl 7.85 for Schannel with options
 [`CURLOPT_TLS13_CIPHERS`](https://curl.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
 and
 [`--tls13-ciphers`](https://curl.se/docs/manpage.html#--tls13-ciphers)
@@ -51,7 +51,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `ADH-RC4-MD5`
 `ADH-DES-CBC3-SHA`
 
-### AES ciphersuites from RFC3268, extending TLS v1.0
+### AES cipher suites from RFC3268, extending TLS v1.0
 
 `AES128-SHA`
 `AES256-SHA`
@@ -66,7 +66,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `ADH-AES128-SHA`
 `ADH-AES256-SHA`
 
-### SEED ciphersuites from RFC4162, extending TLS v1.0
+### SEED cipher suites from RFC4162, extending TLS v1.0
 
 `SEED-SHA`
 `DH-DSS-SEED-SHA`
@@ -75,7 +75,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `DHE-RSA-SEED-SHA`
 `ADH-SEED-SHA`
 
-### GOST ciphersuites, extending TLS v1.0
+### GOST cipher suites, extending TLS v1.0
 
 `GOST94-GOST89-GOST89`
 `GOST2001-GOST89-GOST89`
@@ -148,7 +148,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `ECDHE-ECDSA-AES128-CCM8`
 `ECDHE-ECDSA-AES256-CCM8`
 
-### Camellia HMAC-Based ciphersuites from RFC6367, extending TLS v1.2
+### Camellia HMAC-Based cipher suites from RFC6367, extending TLS v1.2
 
 `ECDHE-ECDSA-CAMELLIA128-SHA256`
 `ECDHE-ECDSA-CAMELLIA256-SHA384`
@@ -177,7 +177,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `des`
 `desede3`
 
-###  SSL3/TLS cipher suites
+### SSL3/TLS cipher suites
 
 `rsa_rc4_128_md5`
 `rsa_rc4_128_sha`
@@ -458,7 +458,7 @@ maps them to the following case-insensitive names.
 ## Schannel
 
 Schannel allows the enabling and disabling of encryption algorithms, but not
-specific ciphersuites. They are
+specific cipher suites. They are
 [defined](https://docs.microsoft.com/windows/desktop/SecCrypto/alg-id) by
 Microsoft.
 
@@ -517,7 +517,7 @@ and the request will fail.
 `CALG_ECDH_EPHEM`,
 
 As of curl 7.77.0, you can also pass `SCH_USE_STRONG_CRYPTO` as a cipher name
-to [constrain the set of available ciphers as specified in the schannel
+to [constrain the set of available ciphers as specified in the Schannel
 documentation](https://docs.microsoft.com/en-us/windows/win32/secauthn/tls-cipher-suites-in-windows-server-2022).
 Note that the supported ciphers in this case follow the OS version, so if you
 are running an outdated OS you might still be supporting weak ciphers.

@@ -6,7 +6,6 @@ SSL is TLS
 
 SSL is the old name. It is called TLS these days.
 
-
 Native SSL
 ----------
 
@@ -21,15 +20,16 @@ It is about trust
 -----------------
 
 This system is about trust. In your local CA certificate store you have certs
-from *trusted* Certificate Authorities that you then can use to verify that the
-server certificates you see are valid. they are signed by one of the CAs you
-trust.
+from *trusted* Certificate Authorities that you then can use to verify that
+the server certificates you see are valid. They are signed by one of the
+certificate authorities you trust.
 
-Which CAs do you trust? You can decide to trust the same set of companies your
-operating system trusts, or the set one of the known browsers trust. That is
-basically trust via someone else you trust. You should just be aware that
-modern operating systems and browsers are setup to trust *hundreds* of
-companies and in recent years several such CAs have been found untrustworthy.
+Which certificate authorities do you trust? You can decide to trust the same
+set of companies your operating system trusts, or the set one of the known
+browsers trust. That is basically trust via someone else you trust. You should
+just be aware that modern operating systems and browsers are setup to trust
+*hundreds* of companies and in recent years several certificate authorities
+have been found untrustworthy.
 
 Certificate Verification
 ------------------------
@@ -39,8 +39,8 @@ by using a CA certificate store that the SSL library can use to make sure the
 peer's server certificate is valid.
 
 If you communicate with HTTPS, FTPS or other TLS-using servers using
-certificates that are signed by CAs present in the store, you can be sure
-that the remote server really is the one it claims to be.
+certificates in the CA store, you can be sure that the remote server really is
+the one it claims to be.
 
 If the remote server uses a self-signed certificate, if you do not install a CA
 cert store, if the server uses a certificate signed by a CA that is not
@@ -51,30 +51,31 @@ server, do one of the following:
  1. Tell libcurl to *not* verify the peer. With libcurl you disable this with
     `curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);`
 
-    With the curl command line tool, you disable this with -k/--insecure.
+    With the curl command line tool, you disable this with `-k`/`--insecure`.
 
  2. Get a CA certificate that can verify the remote server and use the proper
     option to point out this CA cert for verification when connecting. For
     libcurl hackers: `curl_easy_setopt(curl, CURLOPT_CAINFO, cacert);`
 
-    With the curl command line tool: --cacert [file]
+    With the curl command line tool: `--cacert [file]`
 
  3. Add the CA cert for your server to the existing default CA certificate
     store. The default CA certificate store can be changed at compile time with
     the following configure options:
 
-    --with-ca-bundle=FILE: use the specified file as the CA certificate store.
-    CA certificates need to be concatenated in PEM format into this file.
+    `--with-ca-bundle=FILE`: use the specified file as the CA certificate
+    store. CA certificates need to be concatenated in PEM format into this
+    file.
 
-    --with-ca-path=PATH: use the specified path as CA certificate store. CA
+    `--with-ca-path=PATH`: use the specified path as CA certificate store. CA
     certificates need to be stored as individual PEM files in this directory.
     You may need to run c_rehash after adding files there.
 
-    If neither of the two options is specified, configure will try to auto-detect
-    a setting. It's also possible to explicitly not hardcode any default store
-    but rely on the built in default the crypto library may provide instead.
-    You can achieve that by passing both --without-ca-bundle and
-    --without-ca-path to the configure script.
+    If neither of the two options is specified, configure will try to
+    auto-detect a setting. It's also possible to explicitly not set any
+    default store but rely on the built in default the crypto library may
+    provide instead. You can achieve that by passing both
+    `--without-ca-bundle` and `--without-ca-path` to the configure script.
 
     If you use Internet Explorer, this is one way to get extract the CA cert
     for a particular server:
@@ -83,22 +84,21 @@ server, do one of the following:
      - Find out where the CA certificate is kept (Certificate>
        Authority Information Access>URL)
      - Get a copy of the crt file using curl
-     - Convert it from crt to PEM using the openssl tool:
-       openssl x509 -inform DES -in yourdownloaded.crt \
-       -out outcert.pem -text
-     - Add the 'outcert.pem' to the CA certificate store or use it stand-alone
+     - Convert it from crt to PEM using the OpenSSL tool:
+       `openssl x509 -inform DES -in yourdownloaded.crt -out outcert.pem -text`
+     - Add the `outcert.pem` to the CA certificate store or use it stand-alone
        as described below.
 
-    If you use the 'openssl' tool, this is one way to get extract the CA cert
+    If you use the `openssl` tool, this is one way to get extract the CA cert
     for a particular server:
 
      - `openssl s_client -showcerts -servername server -connect server:443 > cacert.pem`
      - type "quit", followed by the "ENTER" key
      - The certificate will have "BEGIN CERTIFICATE" and "END CERTIFICATE"
        markers.
-     - If you want to see the data in the certificate, you can do: "openssl
-       x509 -inform PEM -in certfile -text -out certdata" where certfile is
-       the cert you extracted from logfile. Look in certdata.
+     - If you want to see the data in the certificate, you can do: `openssl
+       x509 -inform PEM -in certfile -text -out certdata` where `certfile` is
+       the cert you extracted from logfile. Look in `certdata`.
      - If you want to trust the certificate, you can add it to your CA
        certificate store or use it stand-alone as described. Just remember that
        the security is no better than the way you obtained the certificate.
@@ -132,18 +132,20 @@ Certificate Verification with NSS
 
 If libcurl was built with NSS support, then depending on the OS distribution,
 it is probably required to take some additional steps to use the system-wide
-CA cert db. RedHat ships with an additional module, libnsspem.so, which
+CA cert db. Red Hat ships with an additional module, libnsspem.so, which
 enables NSS to read the OpenSSL PEM CA bundle. On openSUSE you can install
-p11-kit-nss-trust which makes NSS use the system wide CA certificate store. NSS
-also has a new [database format](https://wiki.mozilla.org/NSS_Shared_DB).
+p11-kit-nss-trust which makes NSS use the system wide CA certificate
+store. NSS also has a new [database
+format](https://wiki.mozilla.org/NSS_Shared_DB).
 
-Starting with version 7.19.7, libcurl automatically adds the 'sql:' prefix to
-the certdb directory (either the hardcoded default /etc/pki/nssdb or the
-directory configured with SSL_DIR environment variable). To check which certdb
-format your distribution provides, examine the default certdb location:
-/etc/pki/nssdb; the new certdb format can be identified by the filenames
-cert9.db, key4.db, pkcs11.txt; filenames of older versions are cert8.db,
-key3.db, secmod.db.
+Starting with version 7.19.7, libcurl automatically adds the `sql:` prefix to
+the certificate database directory (either the set default `/etc/pki/nssdb` or
+the directory configured with the `SSL_DIR` environment variable). To check
+which certificate database format your distribution provides, examine the
+default certificate database location: `/etc/pki/nssdb`; the new certificate
+database format can be identified by the filenames `cert9.db`, `key4.db`,
+`pkcs11.txt`; filenames of older versions are `cert8.db`, `key3.db`,
+`secmod.db`.
 
 Certificate Verification with Schannel and Secure Transport
 -----------------------------------------------------------

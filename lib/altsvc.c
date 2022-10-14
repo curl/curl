@@ -52,15 +52,7 @@
 #define MAX_ALTSVC_ALPNLENSTR "10"
 #define MAX_ALTSVC_ALPNLEN 10
 
-#if defined(USE_QUICHE) && !defined(UNITTESTS)
-#define H3VERSION "h3-29"
-#elif defined(USE_NGTCP2) && !defined(UNITTESTS)
-#define H3VERSION "h3-29"
-#elif defined(USE_MSH3) && !defined(UNITTESTS)
-#define H3VERSION "h3-29"
-#else
 #define H3VERSION "h3"
-#endif
 
 static enum alpnid alpn2alpnid(char *name)
 {
@@ -470,6 +462,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   struct altsvc *as;
   unsigned short dstport = srcport; /* the same by default */
   CURLcode result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
+  size_t entries = 0;
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
 #endif
@@ -480,11 +473,10 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
 
   DEBUGASSERT(asi);
 
-  /* Flush all cached alternatives for this source origin, if any */
-  altsvc_flush(asi, srcalpnid, srchost, srcport);
-
   /* "clear" is a magic keyword */
   if(strcasecompare(alpnbuf, "clear")) {
+    /* Flush cached alternatives for this source origin */
+    altsvc_flush(asi, srcalpnid, srchost, srcport);
     return CURLE_OK;
   }
 
@@ -502,6 +494,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         bool quoted = FALSE;
         time_t maxage = 24 * 3600; /* default is 24 hours */
         bool persist = FALSE;
+        bool valid = TRUE;
         p++;
         if(*p != ':') {
           /* host name starts here */
@@ -511,7 +504,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           len = p - hostp;
           if(!len || (len >= MAX_ALTSVC_HOSTLEN)) {
             infof(data, "Excessive alt-svc host name, ignoring.");
-            dstalpnid = ALPN_none;
+            valid = FALSE;
           }
           else {
             memcpy(namebuf, hostp, len);
@@ -528,10 +521,11 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           unsigned long port = strtoul(++p, &end_ptr, 10);
           if(port > USHRT_MAX || end_ptr == p || *end_ptr != '\"') {
             infof(data, "Unknown alt-svc port number, ignoring.");
-            dstalpnid = ALPN_none;
+            valid = FALSE;
           }
+          else
+            dstport = curlx_ultous(port);
           p = end_ptr;
-          dstport = curlx_ultous(port);
         }
         if(*p++ != '\"')
           break;
@@ -583,7 +577,12 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
               persist = TRUE;
           }
         }
-        if(dstalpnid) {
+        if(dstalpnid && valid) {
+          if(!entries++)
+            /* Flush cached alternatives for this source origin, if any - when
+               this is the first entry of the line. */
+            altsvc_flush(asi, srcalpnid, srchost, srcport);
+
           as = altsvc_createid(srchost, dsthost,
                                srcalpnid, dstalpnid,
                                srcport, dstport);
@@ -596,10 +595,6 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             infof(data, "Added alt-svc: %s:%d over %s", dsthost, dstport,
                   Curl_alpnid2str(dstalpnid));
           }
-        }
-        else {
-          infof(data, "Unknown alt-svc protocol \"%s\", skipping.",
-                alpnbuf);
         }
       }
       else

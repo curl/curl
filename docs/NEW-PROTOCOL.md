@@ -1,6 +1,6 @@
 # Adding a new protocol?
 
-Every once in a while someone comes up with the idea of adding support for yet
+Every once in a while, someone comes up with the idea of adding support for yet
 another protocol to curl. After all, curl already supports 25 something
 protocols and it is the Internet transfer machine for the world.
 
@@ -98,7 +98,7 @@ will try to debug something five years from now can figure out functionality a
 little easier!
 
 The protocol specification itself should be freely available without requiring
-any NDA or similar.
+a non-disclosure agreement or similar.
 
 ## Do not compare
 

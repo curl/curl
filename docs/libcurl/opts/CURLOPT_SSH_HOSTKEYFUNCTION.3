@@ -24,7 +24,7 @@
 .\"
 .TH CURLOPT_SSH_HOSTKEYFUNCTION 3 "4 Nov 2021" "libcurl 7.84.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SSH_HOSTKEYFUNCTION \- callback to check hostkey
+CURLOPT_SSH_HOSTKEYFUNCTION \- callback to check host key
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -41,20 +41,20 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_HOSTKEYFUNCTION,
 Pass a pointer to your callback function, which should match the prototype
 shown above. It overrides \fICURLOPT_SSH_KNOWNHOSTS(3)\fP.
 
-This callback gets called when the verification of the SSH hostkey is needed.
+This callback gets called when the verification of the SSH host key is needed.
 
 \fBkey\fP is \fBkeylen\fP bytes long and is the key to check. \fBkeytype\fP
-says what type it is, from the \fBCURLKHTYPE_*\fP series in the curl_khtype
-enum.
+says what type it is, from the \fBCURLKHTYPE_*\fP series in the
+\fBcurl_khtype\fP enum.
 
 \fBclientp\fP is a custom pointer set with \fICURLOPT_SSH_HOSTKEYDATA(3)\fP.
 
 The callback MUST return one of the following return codes to tell libcurl how
 to act:
 .IP CURLKHMATCH_OK
-The hostkey is accepted, the connection should continue.
+The host key is accepted, the connection should continue.
 .IP CURLKHMATCH_MISMATCH
-the hostkey is rejected, the connection is canceled.
+the host key is rejected, the connection is canceled.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -63,8 +63,8 @@ SCP and SFTP
 .nf
 int hostkeycb(void *clientp,    /* passed with CURLOPT_SSH_HOSTKEYDATA */
               int keytype,      /* CURLKHTYPE */
-              const char * key, /*hostkey to check*/
-              size_t keylen);   /*length of the key*/
+              const char * key, /* host key to check */
+              size_t keylen);   /* length of the key */
 {
   /* 'clientp' points to the callback_data struct */
   /* investigate the situation and return the correct value */

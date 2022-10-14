@@ -37,7 +37,7 @@ CURLHcode curl_easy_header(CURL *easy,
 .SH DESCRIPTION
 \fIcurl_easy_header(3)\fP returns a pointer to a "curl_header" struct in
 \fBhout\fP with data for the HTTP response header \fIname\fP. The case
-insensitive nul-terminated header name should be specified without colon.
+insensitive null-terminated header name should be specified without colon.
 
 \fIindex\fP 0 means asking for the first instance of the header. If the
 returned header struct has \fBamount\fP set larger than 1, it means there are
@@ -94,7 +94,7 @@ but it might have a different case.
 
 The data \fBvalue\fP field points to, comes exactly as delivered over the
 network but with leading and trailing whitespace and newlines stripped
-off. The `value` data is nul-terminated. For legacy HTTP/1 "folded headers",
+off. The `value` data is null-terminated. For legacy HTTP/1 "folded headers",
 this API provides the full single value in an unfolded manner with a single
 whitespace between the lines.
 
@@ -122,7 +122,7 @@ setup a transfer "through" an HTTP(S) proxy.
 .IP CURLH_1XX
 The header arrived in an HTTP 1xx response. A 1xx response is an "intermediate"
 response that might happen before the "real" response.
-.IP CURLH_PSUEDO
+.IP CURLH_PSEUDO
 The header is an HTTP/2 or HTTP/3 pseudo header
 .SH EXAMPLE
 .nf

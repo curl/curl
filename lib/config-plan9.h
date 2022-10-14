@@ -63,10 +63,6 @@
 #define RECV_TYPE_RETV int
 
 #define HAVE_SELECT 1
-#define SELECT_TYPE_ARG1 int
-#define SELECT_TYPE_ARG234 fd_set *
-#define SELECT_TYPE_ARG5 struct timeval *
-#define SELECT_TYPE_RETV int
 
 #define HAVE_SEND 1
 #define SEND_TYPE_ARG1 int
@@ -144,8 +140,6 @@
 #define HAVE_UNISTD_H 1
 #define HAVE_UTIME 1
 #define HAVE_UTIME_H 1
-
-#define HAVE_ZLIB_H 1
 
 #define HAVE_POSIX_STRERROR_R 1
 #define HAVE_STRERROR_R 1

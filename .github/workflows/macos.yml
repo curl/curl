@@ -5,8 +5,6 @@
 name: macOS
 
 on:
-  # Trigger the workflow on push or pull requests, but only for the
-  # master branch
   push:
     branches:
     - master
@@ -14,6 +12,10 @@ on:
   pull_request:
     branches:
     - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   autotools:
@@ -96,7 +98,7 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}  --enable-websockets
       name: 'configure'
       env:
         # -Wvla is caused by brotli
@@ -108,8 +110,11 @@ jobs:
     - run: make V=1 examples
       name: 'make examples'
 
+    - run: make V=1 -C tests
+      name: 'make tests'
+
     - run: make V=1 test-ci
-      name: 'test'
+      name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }} ~1452"
 

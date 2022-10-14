@@ -146,8 +146,8 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      Curl_safecmp(data->issuercert, needle->issuercert) &&
      Curl_safecmp(data->clientcert, needle->clientcert) &&
 #ifdef USE_TLS_SRP
-     Curl_safecmp(data->username, needle->username) &&
-     Curl_safecmp(data->password, needle->password) &&
+     !Curl_timestrcmp(data->username, needle->username) &&
+     !Curl_timestrcmp(data->password, needle->password) &&
      (data->authtype == needle->authtype) &&
 #endif
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list) &&

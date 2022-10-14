@@ -28,7 +28,6 @@
 struct contenc_writer {
   const struct content_encoding *handler;  /* Encoding handler. */
   struct contenc_writer *downstream;  /* Downstream writer. */
-  void *params;  /* Encoding-specific storage (variable length). */
 };
 
 /* Content encoding writer. */
@@ -42,7 +41,7 @@ struct content_encoding {
                              const char *buf, size_t nbytes);
   void (*close_writer)(struct Curl_easy *data,
                        struct contenc_writer *writer);
-  size_t paramsize;
+  size_t writersize;
 };
 
 

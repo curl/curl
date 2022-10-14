@@ -16,9 +16,9 @@ when, for example, one of the files is generated.
 
 `-h` shows the help output, that also lists all recognized warnings
 
-## What does checksrc warn for?
+## What does `checksrc` warn for?
 
-checksrc does not check and verify the code against the entire style guide.
+`checksrc` does not check and verify the code against the entire style guide.
 The script is an effort to detect the most common mistakes and syntax mistakes
 that contributors make before they get accustomed to our code style. Heck,
 many of us regulars do the mistakes too and this script helps us keep the code
@@ -27,7 +27,7 @@ in shape.
     checksrc.pl -h
 
 Lists how to use the script and it lists all existing warnings it has and
-problems it detects. At the time of this writing, the existing checksrc
+problems it detects. At the time of this writing, the existing `checksrc`
 warnings are:
 
 - `ASSIGNWITHINCONDITION`: Assignment within a conditional expression. The
@@ -41,7 +41,7 @@ warnings are:
    more appropriate `char *name` style. The asterisk should sit right next to
    the name without a space in between.
 
-- `BADCOMMAND`: There's a bad `!checksrc!` instruction in the code. See the
+- `BADCOMMAND`: There's a bad `checksrc` instruction in the code. See the
    **Ignore certain warnings** section below for details.
 
 - `BANNEDFUNC`: A banned function was used. The functions sprintf, vsprintf,
@@ -56,7 +56,7 @@ warnings are:
 
 - `COMMANOSPACE`: a comma without following space
 
-- `COPYRIGHT`: the file is missing a copyright statement!
+- `COPYRIGHT`: the file is missing a copyright statement
 
 - `CPPCOMMENTS`: `//` comment detected, that is not C89 compliant
 
@@ -113,14 +113,14 @@ warnings are:
 
 - `SPACESEMICOLON`: there was a space before semicolon, ` ;`.
 
-- `TABS`: TAB characters are not allowed!
+- `TABS`: TAB characters are not allowed
 
 - `TRAILINGSPACE`: Trailing whitespace on the line
 
 - `TYPEDEFSTRUCT`: we frown upon (most) typedefed structs
 
-- `UNUSEDIGNORE`: a checksrc inlined warning ignore was asked for but not used,
-   that is an ignore that should be removed or changed to get used.
+- `UNUSEDIGNORE`: a `checksrc` inlined warning ignore was asked for but not
+   used, that is an ignore that should be removed or changed to get used.
 
 ### Extended warnings
 
@@ -139,17 +139,16 @@ Currently these are the extended warnings which can be enabled:
 
 ## Ignore certain warnings
 
-Due to the nature of the source code and the flaws of the checksrc tool, there
-is sometimes a need to ignore specific warnings. checksrc allows a few
+Due to the nature of the source code and the flaws of the `checksrc` tool,
+there is sometimes a need to ignore specific warnings. `checksrc` allows a few
 different ways to do this.
 
 ### Inline ignore
 
 You can control what to ignore within a specific source file by providing
-instructions to checksrc in the source code itself. You need a magic marker
-that is `!checksrc!` followed by the instruction. The instruction can ask to
-ignore a specific warning N number of times or you ignore all of them until
-you mark the end of the ignored section.
+instructions to `checksrc` in the source code itself. See examples below. The
+instruction can ask to ignore a specific warning a specific number of times or
+you ignore all of them until you mark the end of the ignored section.
 
 Inline ignores are only done for that single specific source code file.
 

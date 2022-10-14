@@ -50,8 +50,8 @@ specific backend at first use. If no selection is done by the program using
 libcurl, this variable's selection will be used. Setting a name that is not a
 built-in alternative will make libcurl stay with the default.
 
-SSL backend names (case-insensitive): bearssl, gnutls, gskit, mbedtls,
-nss, openssl, rustls, schannel, secure-transport, wolfssl
+SSL backend names (case-insensitive): BearSSL, GnuTLS, gskit, mbedTLS,
+nss, OpenSSL, rustls, Schannel, Secure-Transport, wolfSSL
 .IP HOME
 When the netrc feature is used (\fICURLOPT_NETRC(3)\fP), this variable is
 checked as the primary way to find the "current" home directory in which
@@ -61,13 +61,14 @@ When the netrc feature is used (\fICURLOPT_NETRC(3)\fP), this variable is
 checked as the secondary way to find the "current" home directory (on Windows
 only) in which the .netrc file is likely to exist.
 .IP LOGNAME
-User name to use when invoking the ntlm-wb tool, if NTLMUSER was not set.
+User name to use when invoking the \fIntlm-wb\fP tool, if \fINTLMUSER\fP was
+not set.
 .IP NO_PROXY
 This has the same functionality as the \fICURLOPT_NOPROXY(3)\fP option: it
 gives libcurl a comma-separated list of host name patterns for which libcurl
 should not use a proxy.
 .IP NTLMUSER
-User name to use when invoking the ntlm-wb tool.
+User name to use when invoking the \fIntlm-wb\fP tool.
 .IP SSLKEYLOGFILE
 When set and libcurl runs with a SSL backend that supports this feature,
 libcurl will save SSL secrets into the given file name. Using those SSL
@@ -77,8 +78,8 @@ analyze/view the traffic.
 When libcurl runs with the NSS backends for TLS features, this variable is
 used to find the directory for NSS PKI database instead of the built-in.
 .IP USER
-User name to use when invoking the ntlm-wb tool, if NTLMUSER and LOGNAME
-were not set.
+User name to use when invoking the \fIntlm-wb\fP tool, if \fINTLMUSER\fP and
+\fILOGNAME\fP were not set.
 .SH "Debug Variables"
 There's a set of variables only recognized and used if libcurl was built
 "debug enabled", which should never be true for a library used in production.
@@ -93,6 +94,7 @@ random outputs can be tested for what they generate.
 .IP "CURL_TRACE"
 Debug-only variable. Used for debugging the lib/ldap implementation.
 .IP "CURL_NTLM_WB_FILE"
-Debug-only variable. Used to set to a debug-version of the ntlm-wb executable.
+Debug-only variable. Used to set to a debug-version of the \fIntlm-wb\fP
+executable.
 .IP "CURL_OPENLDAP_TRACE"
-Debug-only variable. Used for debugging the lib/openldap.c implementation.
+Debug-only variable. Used for debugging the OpenLDAP implementation.

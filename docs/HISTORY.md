@@ -24,7 +24,7 @@ new maintainer of the project.
 HttpGet 0.3 was released in January 1997 and now it accepted HTTP URLs on the
 command line.
 
-HttpGet 1.0 was released on April 8th 1997 with brand new HTTP proxy support.
+HttpGet 1.0 was released on April 8 1997 with brand new HTTP proxy support.
 
 We soon found and fixed support for getting currencies over GOPHER. Once FTP
 download support was added, the name of the project was changed and urlget 2.0
@@ -130,7 +130,7 @@ August: The curl website gets 8000 visits weekly. Curl Corporation contacted
 Daniel to discuss "the name issue". After Daniel's reply, they have never
 since got back in touch again.
 
-September: libcurl 7.9 introduces cookie jar and curl_formadd(). During the
+September: libcurl 7.9 introduces cookie jar and `curl_formadd()`. During the
 forthcoming 7.9.x releases, we introduced the multi interface slowly and
 without many whistles.
 
@@ -179,16 +179,16 @@ January: curl 7.11.0 introduced large file support.
 June: curl 7.12.0 introduced IDN support. 10 official web mirrors.
 
 This release bumped the major SONAME to 3 due to the removal of the
-curl_formparse() function
+`curl_formparse()` function
 
 August: Curl and libcurl 7.12.1
 
     Public curl release number:                82
-    Releases counted from the very beginning: 109
+    Releases counted from the beginning:      109
     Available command line options:            96
     Available curl_easy_setopt() options:     120
     Number of public functions in libcurl:     36
-    Amount of public website mirrors:         12
+    Amount of public website mirrors:          12
     Number of known libcurl bindings:          26
 
 2005
@@ -288,7 +288,7 @@ April: added the cyassl backend (later renamed to WolfSSL)
  July: Added support for Schannel (native Windows TLS backend) and Darwin SSL
  (Native Mac OS X and iOS TLS backend).
 
- Supports metalink
+ Supports Metalink
 
  October: SSH-agent support.
 

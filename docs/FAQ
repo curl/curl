@@ -136,7 +136,8 @@ FAQ
 
     A client-side URL transfer library, supporting DICT, FILE, FTP, FTPS,
     GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S,
-    RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP.
+    RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS
+    and WSS.
 
     libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
     Kerberos, SPNEGO, HTTP form based upload, proxies, cookies, user+password
@@ -1208,7 +1209,7 @@ FAQ
 
        Target:          static lib.   import lib for libcurl*.dll.
        -----------------------------------------------------------
-       MingW:           libcurl.a     libcurldll.a
+       MinGW:           libcurl.a     libcurldll.a
        MSVC (release):  libcurl.lib   libcurl_imp.lib
        MSVC (debug):    libcurld.lib  libcurld_imp.lib
        Borland:         libcurl.lib   libcurl_imp.lib

@@ -31,7 +31,7 @@ specific man pages for each function mentioned in here. See
 \fIlibcurl-url(3)\fP and \fIlibcurl-tutorial(3)\fP for in-depth understanding
 on how to program with libcurl.
 
-There are many bindings available that bring libcurl access to your favourite
+There are many bindings available that bring libcurl access to your favorite
 language. Look elsewhere for documentation on those.
 
 libcurl has a global constant environment that you must set up and maintain
@@ -205,8 +205,8 @@ author of this libcurl-using module, you can make the constructor call
 \fIcurl_global_init(3)\fP and the destructor call \fIcurl_global_cleanup(3)\fP
 and satisfy libcurl's requirements without your user having to think about it.
 (Caveat: If you are initializing libcurl from a Windows DLL you should not
-initialize it from DllMain or a static initializer because Windows holds the
-loader lock during that time and it could cause a deadlock.)
+initialize it from \fIDllMain\fP or a static initializer because Windows holds
+the loader lock during that time and it could cause a deadlock.)
 
 \fIcurl_global_init(3)\fP has an argument that tells what particular parts of
 the global constant environment to set up. In order to successfully use any

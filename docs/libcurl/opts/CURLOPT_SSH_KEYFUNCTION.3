@@ -34,9 +34,8 @@ enum curl_khstat {
   CURLKHSTAT_FINE,
   CURLKHSTAT_REJECT, /* reject the connection, return an error */
   CURLKHSTAT_DEFER,  /* do not accept it, but we cannot answer right
-                        now so this causes a CURLE_DEFER error but
-                        otherwise the connection will be left intact
-                        etc */
+                        now. Causes a CURLE_PEER_FAILED_VERIFICATION error but
+                        the connection will be left intact */
   CURLKHSTAT_FINE_REPLACE
 };
 

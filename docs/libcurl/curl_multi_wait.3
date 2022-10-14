@@ -42,8 +42,9 @@ Alternatively, if the multi handle has a pending internal timeout that has a
 shorter expiry time than \fItimeout_ms\fP, that shorter time will be used
 instead to make sure timeout accuracy is reasonably kept.
 
-The calling application may pass additional curl_waitfd structures which are
-similar to \fIpoll(2)\fP's pollfd structure to be waited on in the same call.
+The calling application may pass additional \fIcurl_waitfd\fP structures which
+are similar to \fIpoll(2)\fP's \fIpollfd\fP structure to be waited on in the
+same call.
 
 On completion, if \fInumfds\fP is non-NULL, it will be populated with the
 total number of file descriptors on which interesting events occurred. This
@@ -66,14 +67,14 @@ struct curl_waitfd {
 };
 .fi
 .IP CURL_WAIT_POLLIN
-Bit flag to curl_waitfd.events indicating the socket should poll on read
+Bit flag to \fIcurl_waitfd.events\fP indicating the socket should poll on read
 events such as new data received.
 .IP CURL_WAIT_POLLPRI
-Bit flag to curl_waitfd.events indicating the socket should poll on high
+Bit flag to \fIcurl_waitfd.events\fP indicating the socket should poll on high
 priority read events such as out of band data.
 .IP CURL_WAIT_POLLOUT
-Bit flag to curl_waitfd.events indicating the socket should poll on write
-events such as the socket being clear to write without blocking.
+Bit flag to \fIcurl_waitfd.events\fP indicating the socket should poll on
+write events such as the socket being clear to write without blocking.
 .SH EXAMPLE
 .nf
 CURL *easy_handle;

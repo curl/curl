@@ -20,7 +20,7 @@ C++: [curlpp](https://github.com/jpbarrette/curlpp/) Written by Jean-Philippe Ba
 [curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
 Requests](https://github.com/libcpr/cpr) by Huu Nguyen
 
-[Ch](https://chcurl.sourceforge.io/) Written by Stephen Nestinger and Jonathan Rogado
+[Ch](https://chcurl.sourceforge.net/) Written by Stephen Nestinger and Jonathan Rogado
 
 Cocoa: [BBHTTP](https://github.com/biasedbit/BBHTTP) written by Bruno de Carvalho
 [curlhandle](https://github.com/karelia/curlhandle) Written by Dan Wood
@@ -31,7 +31,7 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 [Delphi](https://github.com/Mercury13/curl4delphi) Written by Mikhail Merkuryev
 
-[Dylan](https://dylanlibs.sourceforge.io/) Written by Chris Double
+[Dylan](https://dylanlibs.sourceforge.net/) Written by Chris Double
 
 [Eiffel](https://iron.eiffel.com/repository/20.11/package/ABEF6975-37AC-45FD-9C67-52D10BA0669B) Written by Eiffel Software
 
@@ -41,7 +41,7 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 [Ferite](https://web.archive.org/web/20150102192018/ferite.org/) Written by Paul Querna
 
-[Gambas](https://gambas.sourceforge.io/)
+[Gambas](https://gambas.sourceforge.net/)
 
 [glib/GTK+](https://web.archive.org/web/20100526203452/atterer.net/glibcurl) Written by Richard Atterer
 
@@ -94,11 +94,11 @@ Bailiff and Bálint Szilakszi,
 
 [Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
 
-[Q](https://q-lang.sourceforge.io/) The libcurl module is part of the default install
+[Q](https://q-lang.sourceforge.net/) The libcurl module is part of the default install
 
 [R](https://cran.r-project.org/package=curl)
 
-[Rexx](https://rexxcurl.sourceforge.io/) Written Mark Hessling
+[Rexx](https://rexxcurl.sourceforge.net/) Written Mark Hessling
 
 [Ring](https://ring-lang.sourceforge.io/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
 
@@ -127,7 +127,7 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 
 [Visual Foxpro](https://web.archive.org/web/20130730181523/www.ctl32.com.ar/libcurl.asp) by Carlos Alloatti
 
-[wxWidgets](https://wxcode.sourceforge.io/components/wxcurl/) Written by Casey O'Donnell
+[wxWidgets](https://wxcode.sourceforge.net/components/wxcurl/) Written by Casey O'Donnell
 
 [XBLite](https://web.archive.org/web/20060426150418/perso.wanadoo.fr/xblite/libraries.html) Written by David Szafranski
 

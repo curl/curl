@@ -33,7 +33,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_FILETIME, long *timep);
 .fi
 .SH DESCRIPTION
 Pass a pointer to a long to receive the remote time of the retrieved document
-(in number of seconds since 1 jan 1970 in the GMT/UTC time zone). If you get
+in number of seconds since January 1 1970 in the GMT/UTC time zone. If you get
 -1, it can be because of many reasons (it might be unknown, the server might
 hide it or the server does not support the command that tells document time
 etc) and the time of the document is unknown.

@@ -27,6 +27,9 @@
 /*
  * Prototypes for library-wide functions provided by easy.c
  */
+CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
+                       size_t buflen, ssize_t *n);
+
 #ifdef CURLDEBUG
 CURL_EXTERN CURLcode curl_easy_perform_ev(struct Curl_easy *easy);
 #endif

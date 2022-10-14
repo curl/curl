@@ -23,7 +23,7 @@
 .\" **************************************************************************
 .TH curl_mime_subparts 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
 .SH NAME
-curl_mime_subparts - set subparts of a multipart mime part
+curl_mime_subparts - set sub-parts of a multipart mime part
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -36,7 +36,7 @@ structure.
 
 \fIpart\fP is a handle to the multipart part.
 
-\fIsubparts\fP is a mime structure handle holding the subparts. After
+\fIsubparts\fP is a mime structure handle holding the sub-parts. After
 \fIcurl_mime_subparts\fP succeeds, the mime structure handle belongs to the
 multipart part and must not be freed explicitly. It may however be updated by
 subsequent calls to mime API functions.

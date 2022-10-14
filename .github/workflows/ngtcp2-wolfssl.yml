@@ -5,8 +5,6 @@
 name: ngtcp2
 
 on:
-  # Trigger the workflow on push or pull requests, but only for the
-  # master branch
   push:
     branches:
     - master
@@ -14,6 +12,11 @@ on:
   pull_request:
     branches:
     - master
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: ngtcp2-wolfssl-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   autotools:
@@ -41,7 +44,7 @@ jobs:
         cd wolfssl
         ./autogen.sh
         ./configure ${{ matrix.build.wolfssl-configure }} --prefix=$HOME/all
-        make && make install
+        make install
       name: 'install wolfssl'
 
     - run: |
@@ -49,7 +52,7 @@ jobs:
         cd nghttp3
         autoreconf -fi
         ./configure --prefix=$HOME/all --enable-lib-only
-        make && make install
+        make install
       name: 'install nghttp3'
 
     - run: |
@@ -57,7 +60,7 @@ jobs:
         cd ngtcp2
         autoreconf -fi
         ./configure PKG_CONFIG_PATH=$HOME/all/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/all/lib" --prefix=$HOME/all --enable-lib-only --with-wolfssl=$HOME/all
-        make && make install
+        make install
       name: 'install ngtcp2'
 
     - uses: actions/checkout@v3
@@ -74,7 +77,10 @@ jobs:
     - run: make V=1 examples
       name: 'make examples'
 
+    - run: make V=1 -C tests
+      name: 'make tests'
+
     - run: make V=1 test-ci
-      name: 'test'
+      name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"

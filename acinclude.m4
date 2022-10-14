@@ -804,12 +804,6 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
 dnl CURL_CHECK_FUNC_RECV
 dnl -------------------------------------------------
 dnl Test if the socket recv() function is available,
-dnl and check its return type and the types of its
-dnl arguments. If the function succeeds HAVE_RECV
-dnl will be defined, defining the types of the arguments
-dnl in RECV_TYPE_ARG1, RECV_TYPE_ARG2, RECV_TYPE_ARG3
-dnl and RECV_TYPE_ARG4, defining the type of the function
-dnl return value in RECV_TYPE_RETV.
 
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
@@ -849,81 +843,9 @@ $curl_includes_bsdsocket
   ])
   #
   if test "$curl_cv_recv" = "yes"; then
-    AC_CACHE_CHECK([types of args and return type for recv],
-      [curl_cv_func_recv_args], [
-      curl_cv_func_recv_args="unknown"
-      for recv_retv in 'int' 'ssize_t'; do
-        for recv_arg1 in 'int' 'ssize_t' 'SOCKET'; do
-          for recv_arg2 in 'char *' 'void *'; do
-            for recv_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
-              for recv_arg4 in 'int' 'unsigned int'; do
-                if test "$curl_cv_func_recv_args" = "unknown"; then
-                  AC_COMPILE_IFELSE([
-                    AC_LANG_PROGRAM([[
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-#define RECVCALLCONV PASCAL
-#else
-$curl_includes_bsdsocket
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#define RECVCALLCONV
-#endif
-#ifndef HAVE_PROTO_BSDSOCKET_H
-                      extern $recv_retv RECVCALLCONV
-                      recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
-#endif
-                    ]],[[
-                      $recv_arg1 s=0;
-                      $recv_arg2 buf=0;
-                      $recv_arg3 len=0;
-                      $recv_arg4 flags=0;
-                      $recv_retv res = recv(s, buf, len, flags);
-                    ]])
-                  ],[
-                    curl_cv_func_recv_args="$recv_arg1,$recv_arg2,$recv_arg3,$recv_arg4,$recv_retv"
-                  ])
-                fi
-              done
-            done
-          done
-        done
-      done
-    ]) # AC-CACHE-CHECK
-    if test "$curl_cv_func_recv_args" = "unknown"; then
-      AC_MSG_ERROR([Cannot find proper types to use for recv args])
-    else
-      recv_prev_IFS=$IFS; IFS=','
-      set dummy `echo "$curl_cv_func_recv_args" | sed 's/\*/\*/g'`
-      IFS=$recv_prev_IFS
-      shift
-      #
-      AC_DEFINE_UNQUOTED(RECV_TYPE_ARG1, $[1],
-        [Define to the type of arg 1 for recv.])
-      AC_DEFINE_UNQUOTED(RECV_TYPE_ARG2, $[2],
-        [Define to the type of arg 2 for recv.])
-      AC_DEFINE_UNQUOTED(RECV_TYPE_ARG3, $[3],
-        [Define to the type of arg 3 for recv.])
-      AC_DEFINE_UNQUOTED(RECV_TYPE_ARG4, $[4],
-        [Define to the type of arg 4 for recv.])
-      AC_DEFINE_UNQUOTED(RECV_TYPE_RETV, $[5],
-        [Define to the function return type for recv.])
-      #
       AC_DEFINE_UNQUOTED(HAVE_RECV, 1,
         [Define to 1 if you have the recv function.])
       curl_cv_func_recv="yes"
-    fi
   else
     AC_MSG_ERROR([Unable to link function recv])
   fi
@@ -933,13 +855,6 @@ $curl_includes_bsdsocket
 dnl CURL_CHECK_FUNC_SEND
 dnl -------------------------------------------------
 dnl Test if the socket send() function is available,
-dnl and check its return type and the types of its
-dnl arguments. If the function succeeds HAVE_SEND
-dnl will be defined, defining the types of the arguments
-dnl in SEND_TYPE_ARG1, SEND_TYPE_ARG2, SEND_TYPE_ARG3
-dnl and SEND_TYPE_ARG4, defining the type of the function
-dnl return value in SEND_TYPE_RETV, and also defining the
-dnl type qualifier of second argument in SEND_QUAL_ARG2.
 
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
@@ -979,114 +894,9 @@ $curl_includes_bsdsocket
   ])
   #
   if test "$curl_cv_send" = "yes"; then
-    AC_CACHE_CHECK([types of args and return type for send],
-      [curl_cv_func_send_args], [
-      curl_cv_func_send_args="unknown"
-      for send_retv in 'int' 'ssize_t'; do
-        for send_arg1 in 'int' 'ssize_t' 'SOCKET'; do
-          for send_arg2 in 'char *' 'void *' 'const char *' 'const void *'; do
-            for send_arg3 in 'size_t' 'int' 'socklen_t' 'unsigned int'; do
-              for send_arg4 in 'int' 'unsigned int'; do
-                if test "$curl_cv_func_send_args" = "unknown"; then
-                  AC_COMPILE_IFELSE([
-                    AC_LANG_PROGRAM([[
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-#define SENDCALLCONV PASCAL
-#else
-$curl_includes_bsdsocket
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#define SENDCALLCONV
-#endif
-#ifndef HAVE_PROTO_BSDSOCKET_H
-                      extern $send_retv SENDCALLCONV
-                      send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
-#endif
-                    ]],[[
-                      $send_arg1 s=0;
-                      $send_arg3 len=0;
-                      $send_arg4 flags=0;
-                      $send_retv res = send(s, 0, len, flags);
-                    ]])
-                  ],[
-                    curl_cv_func_send_args="$send_arg1,$send_arg2,$send_arg3,$send_arg4,$send_retv"
-                  ])
-                fi
-              done
-            done
-          done
-        done
-      done
-    ]) # AC-CACHE-CHECK
-    if test "$curl_cv_func_send_args" = "unknown"; then
-      AC_MSG_ERROR([Cannot find proper types to use for send args])
-    else
-      send_prev_IFS=$IFS; IFS=','
-      set dummy `echo "$curl_cv_func_send_args" | sed 's/\*/\*/g'`
-      IFS=$send_prev_IFS
-      shift
-      #
-      send_qual_type_arg2=$[2]
-      #
-      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG1, $[1],
-        [Define to the type of arg 1 for send.])
-      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG3, $[3],
-        [Define to the type of arg 3 for send.])
-      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG4, $[4],
-        [Define to the type of arg 4 for send.])
-      AC_DEFINE_UNQUOTED(SEND_TYPE_RETV, $[5],
-        [Define to the function return type for send.])
-      #
-      prev_sh_opts=$-
-      #
-      case $prev_sh_opts in
-        *f*)
-          ;;
-        *)
-          set -f
-          ;;
-      esac
-      #
-      case "$send_qual_type_arg2" in
-        const*)
-          send_qual_arg2=const
-          send_type_arg2=`echo $send_qual_type_arg2 | sed 's/^const //'`
-        ;;
-        *)
-          send_qual_arg2=
-          send_type_arg2=$send_qual_type_arg2
-        ;;
-      esac
-      #
-      AC_DEFINE_UNQUOTED(SEND_QUAL_ARG2, $send_qual_arg2,
-        [Define to the type qualifier of arg 2 for send.])
-      AC_DEFINE_UNQUOTED(SEND_TYPE_ARG2, $send_type_arg2,
-        [Define to the type of arg 2 for send.])
-      #
-      case $prev_sh_opts in
-        *f*)
-          ;;
-        *)
-          set +f
-          ;;
-      esac
-      #
-      AC_DEFINE_UNQUOTED(HAVE_SEND, 1,
-        [Define to 1 if you have the send function.])
-      curl_cv_func_send="yes"
-    fi
+    AC_DEFINE_UNQUOTED(HAVE_SEND, 1,
+      [Define to 1 if you have the send function.])
+    curl_cv_func_send="yes"
   else
     AC_MSG_ERROR([Unable to link function send])
   fi
@@ -1518,15 +1328,7 @@ AC_DEFUN([CURL_CONFIGURE_PULL_SYS_POLL], [
 
 dnl CURL_CHECK_FUNC_SELECT
 dnl -------------------------------------------------
-dnl Test if the socket select() function is available,
-dnl and check its return type and the types of its
-dnl arguments. If the function succeeds HAVE_SELECT
-dnl will be defined, defining the types of the
-dnl arguments in SELECT_TYPE_ARG1, SELECT_TYPE_ARG234
-dnl and SELECT_TYPE_ARG5, defining the type of the
-dnl function return value in SELECT_TYPE_RETV, and
-dnl also defining the type qualifier of fifth argument
-dnl in SELECT_QUAL_ARG5.
+dnl Test if the socket select() function is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
   AC_REQUIRE([CURL_CHECK_STRUCT_TIMEVAL])dnl
@@ -1576,132 +1378,9 @@ $curl_includes_bsdsocket
   ])
   #
   if test "$curl_cv_select" = "yes"; then
-    AC_CACHE_CHECK([types of args and return type for select],
-      [curl_cv_func_select_args], [
-      curl_cv_func_select_args="unknown"
-      for sel_retv in 'int' 'ssize_t'; do
-        for sel_arg1 in 'int' 'ssize_t' 'size_t' 'unsigned long int' 'unsigned int'; do
-          for sel_arg234 in 'fd_set *' 'int *' 'void *'; do
-            for sel_arg5 in 'struct timeval *' 'const struct timeval *'; do
-              if test "$curl_cv_func_select_args" = "unknown"; then
-                AC_COMPILE_IFELSE([
-                  AC_LANG_PROGRAM([[
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-#define SELECTCALLCONV PASCAL
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
-#ifndef HAVE_WINDOWS_H
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#elif defined(HAVE_UNISTD_H)
-#include <unistd.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-$curl_includes_bsdsocket
-#define SELECTCALLCONV
-#endif
-#ifndef HAVE_STRUCT_TIMEVAL
-                    struct timeval {
-                      long tv_sec;
-                      long tv_usec;
-                    };
-#endif
-#ifndef HAVE_PROTO_BSDSOCKET_H
-                    extern $sel_retv SELECTCALLCONV
-				select($sel_arg1,
-					$sel_arg234,
-					$sel_arg234,
-					$sel_arg234,
-					$sel_arg5);
-#endif
-                  ]],[[
-                    $sel_arg1   nfds=0;
-                    $sel_arg234 rfds=0;
-                    $sel_arg234 wfds=0;
-                    $sel_arg234 efds=0;
-                    $sel_retv res = select(nfds, rfds, wfds, efds, 0);
-                  ]])
-                ],[
-                  curl_cv_func_select_args="$sel_arg1,$sel_arg234,$sel_arg5,$sel_retv"
-                ])
-              fi
-            done
-          done
-        done
-      done
-    ]) # AC-CACHE-CHECK
-    if test "$curl_cv_func_select_args" = "unknown"; then
-      AC_MSG_WARN([Cannot find proper types to use for select args])
-      AC_MSG_WARN([HAVE_SELECT will not be defined])
-    else
-      select_prev_IFS=$IFS; IFS=','
-      set dummy `echo "$curl_cv_func_select_args" | sed 's/\*/\*/g'`
-      IFS=$select_prev_IFS
-      shift
-      #
-      sel_qual_type_arg5=$[3]
-      #
-      AC_DEFINE_UNQUOTED(SELECT_TYPE_ARG1, $[1],
-        [Define to the type of arg 1 for select.])
-      AC_DEFINE_UNQUOTED(SELECT_TYPE_ARG234, $[2],
-        [Define to the type of args 2, 3 and 4 for select.])
-      AC_DEFINE_UNQUOTED(SELECT_TYPE_RETV, $[4],
-        [Define to the function return type for select.])
-      #
-      prev_sh_opts=$-
-      #
-      case $prev_sh_opts in
-        *f*)
-          ;;
-        *)
-          set -f
-          ;;
-      esac
-      #
-      case "$sel_qual_type_arg5" in
-        const*)
-          sel_qual_arg5=const
-          sel_type_arg5=`echo $sel_qual_type_arg5 | sed 's/^const //'`
-        ;;
-        *)
-          sel_qual_arg5=
-          sel_type_arg5=$sel_qual_type_arg5
-        ;;
-      esac
-      #
-      AC_DEFINE_UNQUOTED(SELECT_QUAL_ARG5, $sel_qual_arg5,
-        [Define to the type qualifier of arg 5 for select.])
-      AC_DEFINE_UNQUOTED(SELECT_TYPE_ARG5, $sel_type_arg5,
-        [Define to the type of arg 5 for select.])
-      #
-      case $prev_sh_opts in
-        *f*)
-          ;;
-        *)
-          set +f
-          ;;
-      esac
-      #
-      AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
-        [Define to 1 if you have the select function.])
-      curl_cv_func_select="yes"
-    fi
+    AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
+      [Define to 1 if you have the select function.])
+    curl_cv_func_select="yes"
   fi
 ])
 

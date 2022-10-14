@@ -956,7 +956,7 @@ static int dprintf_formatf(
         else
           *fptr++ = 'f';
 
-        *fptr = 0; /* and a final zero termination */
+        *fptr = 0; /* and a final null-termination */
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -964,7 +964,11 @@ static int dprintf_formatf(
 #endif
         /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
            output characters */
+#ifdef HAVE_SNPRINTF
+        (snprintf)(work, sizeof(work), formatbuf, p->data.dnum);
+#else
         (sprintf)(work, formatbuf, p->data.dnum);
+#endif
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

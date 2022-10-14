@@ -79,6 +79,8 @@
 1941
 1942
 1943
+2301
+2302
 %endif
 2043
 # Tests that are disabled here for rustls are SUPPOSED to work

@@ -24,6 +24,8 @@
  *
  ***************************************************************************/
 
+#include <curl/curl.h>
+
 #ifndef BUILDING_LIBCURL
 /* this renames the functions so that the tool code can use the same code
    without getting symbol collisions */
@@ -44,7 +46,7 @@
 
 struct dynbuf {
   char *bufr;    /* point to a null-terminated allocated buffer */
-  size_t leng;   /* number of bytes *EXCLUDING* the zero terminator */
+  size_t leng;   /* number of bytes *EXCLUDING* the null-terminator */
   size_t allc;   /* size of the current allocation */
   size_t toobig; /* size limit for the buffer */
 #ifdef DEBUGBUILD

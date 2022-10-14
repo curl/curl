@@ -34,8 +34,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SERVICE_NAME,
 .fi
 .SH DESCRIPTION
 Pass a char * as parameter to a string holding the \fIname\fP of the
-service. The default service name is "HTTP" for HTTP based proxies and "rcmd"
-for SOCKS5. This option allows you to change it.
+service. The default service name is \fB"HTTP"\fP for HTTP based proxies and
+\fB"rcmd"\fP for SOCKS5. This option allows you to change it.
 
 The application does not have to keep the string around after setting this
 option.
