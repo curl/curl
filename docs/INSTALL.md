@@ -328,7 +328,7 @@ In all above, the built libraries and executables can be found in the
 
 # Android
 
-When building curl for Android it's recommended to use a Linux environment
+When building curl for Android it's recommended to use a Linux/macOS environment
 since using curl's `configure` script is the easiest way to build curl
 for Android. Before you can build curl for Android, you need to install the
 Android NDK first. This can be done using the SDK Manager that is part of
@@ -338,16 +338,16 @@ launching `configure`. On macOS, those variables could look like this to compile
 for `aarch64` and API level 29:
 
 ```bash
-export NDK=~/Library/Android/sdk/ndk/20.1.5948944
-export HOST_TAG=darwin-x86_64
-export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
-export AR=$TOOLCHAIN/bin/aarch64-linux-android-ar
-export AS=$TOOLCHAIN/bin/aarch64-linux-android-as
-export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
-export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
-export LD=$TOOLCHAIN/bin/aarch64-linux-android-ld
-export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
-export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
+export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
+export HOST_TAG=darwin-x86_64 # Same tag for Apple Silicon. Other OS values here: https://developer.android.com/ndk/guides/other_build_systems#overview
+export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
+export AR=$TOOLCHAIN/bin/llvm-ar
+export AS=$TOOLCHAIN/bin/llvm-as
+export CC=$TOOLCHAIN/bin/aarch64-linux-android21-clang
+export CXX=$TOOLCHAIN/bin/aarch64-linux-android21-clang++
+export LD=$TOOLCHAIN/bin/ld
+export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
+export STRIP=$TOOLCHAIN/bin/llvm-strip
 ```
 
 When building on Linux or targeting other API levels or architectures, you need
@@ -363,11 +363,10 @@ OpenSSL, follow the OpenSSL build instructions and then install `libssl.a` and
 `$TOOLCHAIN/sysroot/usr/include`. Now you can build curl for Android using
 OpenSSL like this:
 
-    ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
-
-Note, however, that you must target at least Android M (API level 23) or `configure`
-will not be able to detect OpenSSL since `stderr` (and the like) were not defined
-before Android M.
+```bash
+LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you'll need to the SSL/TLS layer's transtive dependencies if you're linking statically.
+./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
+```
 
 # IBM i
 
