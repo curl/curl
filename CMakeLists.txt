@@ -1039,11 +1039,7 @@ check_symbol_exists(gmtime_r      "${CURL_INCLUDES}" HAVE_GMTIME_R)
 
 check_symbol_exists(gethostbyname_r "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME_R)
 
-check_symbol_exists(signal        "${CURL_INCLUDES}" HAVE_SIGNAL_FUNC)
-check_symbol_exists(SIGALRM       "${CURL_INCLUDES}" HAVE_SIGNAL_MACRO)
-if(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
-  set(HAVE_SIGNAL 1)
-endif()
+check_symbol_exists(signal         "${CURL_INCLUDES}" HAVE_SIGNAL)
 check_symbol_exists(strtoll        "${CURL_INCLUDES}" HAVE_STRTOLL)
 check_symbol_exists(_strtoi64      "${CURL_INCLUDES}" HAVE__STRTOI64)
 check_symbol_exists(strerror_r     "${CURL_INCLUDES}" HAVE_STRERROR_R)
