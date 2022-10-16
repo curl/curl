@@ -963,10 +963,9 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
       rc = sftp_init(sshc->sftp_session);
       if(rc != SSH_OK) {
-        rc = sftp_get_error(sshc->sftp_session);
         failf(data, "Failure initializing sftp session: %s",
               ssh_get_error(sshc->ssh_session));
-        MOVE_TO_ERROR_STATE(sftp_error_to_CURLE(rc));
+        MOVE_TO_ERROR_STATE(sftp_error_to_CURLE(SSH_FX_FAILURE));
         break;
       }
       state(data, SSH_SFTP_REALPATH);
