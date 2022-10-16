@@ -140,7 +140,7 @@ static CURLcode make_headers(struct Curl_easy *data,
                              struct dynbuf *signed_headers)
 {
   char date_hdr_key[DATE_HDR_KEY_LEN];
-  char date_full_hdr[DATE_FULL_HDR_LEN + 1];
+  char date_full_hdr[DATE_FULL_HDR_LEN];
   struct curl_slist *head = NULL;
   struct curl_slist *tmp_head = NULL;
   CURLcode ret = CURLE_OUT_OF_MEMORY;
