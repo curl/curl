@@ -380,126 +380,92 @@ static CURLcode file_upload(struct Curl_easy *data)
   return result;
 }
 
-/*
- * file_do() is the protocol-specific function for the do-phase, separated
- * from the connect-phase above. Other protocols merely setup the transfer in
- * the do-phase, to have it done in the main transfer loop but since some
- * platforms we support don't allow select()ing etc on file handles (as
- * opposed to sockets) we instead perform the whole do-operation in this
- * function.
- */
-static CURLcode file_do(struct Curl_easy *data, bool *done)
+/* Fetch a file, which is in this case anything but a directory */
+static CURLcode fetch_file(struct Curl_easy *data, struct_stat *statbuf)
 {
-  /* This implementation ignores the host name in conformance with
-     RFC 1738. Only local files (reachable via the standard file system)
-     are supported. This means that files on remotely mounted directories
-     (via NFS, Samba, NT sharing) can be accessed through a file:// URL
-  */
+  struct FILEPROTO *file = data->req.p.file;
+  int fd = file->fd;
   CURLcode result = CURLE_OK;
-  struct_stat statbuf; /* struct_stat instead of struct stat just to allow the
-                          Windows version to have a different struct without
-                          having to redefine the simple word 'stat' */
-  curl_off_t expected_size = -1;
+  curl_off_t expected_size = -1, bytecount = 0;
   bool size_known;
-  bool fstated = FALSE;
-  char *buf = data->state.buffer;
-  curl_off_t bytecount = 0;
-  int fd;
-  struct FILEPROTO *file;
 
-  *done = TRUE; /* unconditionally */
+  if(statbuf) {
+    expected_size = statbuf->st_size;
+    data->info.filetime = statbuf->st_mtime;
 
-  Curl_pgrsStartNow(data);
-
-  if(data->set.upload)
-    return file_upload(data);
-
-  file = data->req.p.file;
-
-  /* get the fd from the connection phase */
-  fd = file->fd;
-
-  /* VMS: This only works reliable for STREAMLF files */
-  if(-1 != fstat(fd, &statbuf)) {
-    if(!S_ISDIR(statbuf.st_mode))
-      expected_size = statbuf.st_size;
-    /* and store the modification time */
-    data->info.filetime = statbuf.st_mtime;
-    fstated = TRUE;
-  }
-
-  if(fstated && !data->state.range && data->set.timecondition) {
-    if(!Curl_meets_timecondition(data, data->info.filetime)) {
-      *done = TRUE;
+    if(!data->state.range && data->set.timecondition &&
+       !Curl_meets_timecondition(data, data->info.filetime))
       return CURLE_OK;
-    }
-  }
 
-  if(fstated) {
-    time_t filetime;
-    struct tm buffer;
-    const struct tm *tm = &buffer;
-    char header[80];
-    int headerlen;
-    char accept_ranges[24]= { "Accept-ranges: bytes\r\n" };
-    if(expected_size >= 0) {
+    /* TODO: Consider moving this into one or several separate functions */
+    {
+      struct tm buffer;
+      const struct tm *tm = &buffer;
+      char header[80];
+      int headerlen;
+
+      DEBUGASSERT(expected_size >= 0);
+
+      /* Content-Length */
       headerlen = msnprintf(header, sizeof(header),
-                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
-                expected_size);
+                            "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+                            expected_size);
       result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
       if(result)
         return result;
 
-      result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                 accept_ranges, strlen(accept_ranges));
-      if(result != CURLE_OK)
+      /* Accept-Ranges */
+      strcpy(header, "Accept-ranges: bytes\r\n");
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, header,
+                                 strlen(header));
+      if(result)
+        return result;
+
+      /* Last-Modified */
+      /* Convert the filetime (epoch) to a string */
+      result = Curl_gmtime((time_t)statbuf->st_mtime, &buffer);
+      if(result)
+        return result;
+
+      headerlen = msnprintf(header, sizeof(header),
+                    "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n%s",
+                    Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+                    tm->tm_mday,
+                    Curl_month[tm->tm_mon],
+                    tm->tm_year + 1900,
+                    tm->tm_hour,
+                    tm->tm_min,
+                    tm->tm_sec,
+                    data->set.opt_no_body ? "": "\r\n");
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+      if(result)
         return result;
     }
 
-    filetime = (time_t)statbuf.st_mtime;
-    result = Curl_gmtime(filetime, &buffer);
-    if(result)
-      return result;
-
-    /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-    headerlen = msnprintf(header, sizeof(header),
-              "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n%s",
-              Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
-              tm->tm_mday,
-              Curl_month[tm->tm_mon],
-              tm->tm_year + 1900,
-              tm->tm_hour,
-              tm->tm_min,
-              tm->tm_sec,
-              data->set.opt_no_body ? "": "\r\n");
-    result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
-    if(result)
-      return result;
-    /* set the file size to make it available post transfer */
+    /* Set the file size to make it available post transfer */
     Curl_pgrsSetDownloadSize(data, expected_size);
     if(data->set.opt_no_body)
       return result;
   }
 
-  /* Check whether file range has been specified */
+  /* Check whether a file range has been specified */
   result = Curl_range(data);
   if(result)
     return result;
 
-  /* Adjust the start offset in case we want to get the N last bytes
-   * of the stream if the filesize could be determined */
+  /* Adjust the start offset in case we want to get the N last bytes of the
+     stream if the filesize could be determined */
   if(data->state.resume_from < 0) {
-    if(!fstated) {
+    if(!statbuf) {
       failf(data, "Can't get the size of file.");
       return CURLE_READ_ERROR;
     }
-    data->state.resume_from += (curl_off_t)statbuf.st_size;
+    data->state.resume_from += (curl_off_t)statbuf->st_size;
   }
-
-  if(data->state.resume_from > 0) {
-    /* We check explicitly if we have a start offset, because
-     * expected_size may be -1 if we don't know how large the file is,
-     * in which case we should not adjust it. */
+  else if(data->state.resume_from > 0) {
+    /* We check explicitly if we have a start offset, because expected_size
+       may be -1 if we don't know how large the file is, in which case we
+       should not adjust it. */
     if(data->state.resume_from <= expected_size)
       expected_size -= data->state.resume_from;
     else {
@@ -508,55 +474,48 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  /* A high water mark has been specified so we obey... */
+  /* A high water mark has been specified so we obey ... */
   if(data->req.maxdownload > 0)
     expected_size = data->req.maxdownload;
 
-  if(!fstated || (expected_size <= 0))
-    size_known = FALSE;
-  else
-    size_known = TRUE;
+  size_known = (!statbuf || expected_size <= 0) ? FALSE : TRUE;
 
-  /* The following is a shortcut implementation of file reading
-     this is both more efficient than the former call to download() and
-     it avoids problems with select() and recv() on file descriptors
-     in Winsock */
+  /* The following is a shortcut implementation of file reading this is both
+     more efficient than the former call to download() and it avoid problems
+     with select() and recv() on file descriptors in Winsock. */
   if(size_known)
     Curl_pgrsSetDownloadSize(data, expected_size);
 
-  if(data->state.resume_from) {
-    if(data->state.resume_from !=
-       lseek(fd, data->state.resume_from, SEEK_SET))
-      return CURLE_BAD_DOWNLOAD_RESUME;
-  }
+  if(data->state.resume_from &&
+     data->state.resume_from != lseek(fd, data->state.resume_from, SEEK_SET))
+    return CURLE_BAD_DOWNLOAD_RESUME;
 
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
   while(!result) {
     ssize_t nread;
-    /* Don't fill a whole buffer if we want less than all data */
     size_t bytestoread;
 
-    if(size_known) {
+    if(size_known)
       bytestoread = (expected_size < data->set.buffer_size) ?
         curlx_sotouz(expected_size) : (size_t)data->set.buffer_size;
-    }
     else
-      bytestoread = data->set.buffer_size-1;
+      bytestoread = data->set.buffer_size - 1;
 
-    nread = read(fd, buf, bytestoread);
+    nread = read(fd, data->state.buffer, bytestoread);
 
     if(nread > 0)
-      buf[nread] = 0;
+      data->state.buffer[nread] = 0;
 
-    if(nread <= 0 || (size_known && (expected_size == 0)))
+    if(nread <= 0 || (size_known && expected_size == 0))
       break;
 
     bytecount += nread;
     if(size_known)
       expected_size -= nread;
 
-    result = Curl_client_write(data, CLIENTWRITE_BODY, buf, nread);
+    result = Curl_client_write(data, CLIENTWRITE_BODY, data->state.buffer,
+                               nread);
     if(result)
       return result;
 
@@ -571,6 +530,42 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     result = CURLE_ABORTED_BY_CALLBACK;
 
   return result;
+}
+
+/*
+ * file_do() is the protocol-specific function for the do-phase, separated
+ * from the connect-phase above. Other protocols merely setup the transfer in
+ * the do-phase, to have it done in the main transfer loop but since some
+ * platforms we support don't allow select()ing etc on file handles (as
+ * opposed to sockets) we instead perform the whole do-operation in this
+ * function.
+ */
+static CURLcode file_do(struct Curl_easy *data, bool *done)
+{
+  *done = TRUE; /* unconditionally */
+  Curl_pgrsStartNow(data);
+
+  /* Choose the mode of operation. */
+  if(data->set.upload)
+    return file_upload(data);
+  else {
+    /* Download a file */
+    struct_stat statbuf; /* struct_stat instead of struct stat just to allow
+                            Windows version to have a different struct without
+                            having to redefine the simple word "stat" */
+    struct FILEPROTO *file = data->req.p.file;
+
+    if(fstat(file->fd, &statbuf) == -1) {
+      /* fstat(2) failed, meaning we cannot do much more but assume it is an
+         ordinary file on the file system */
+      return fetch_file(data, NULL);
+    }
+
+    if(S_ISDIR(statbuf.st_mode))
+      return CURLE_OK;
+    else
+      return fetch_file(data, &statbuf);
+  }
 }
 
 #endif
