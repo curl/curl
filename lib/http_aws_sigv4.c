@@ -122,11 +122,12 @@ static void trim_headers(struct curl_slist *head)
 #define MAX_SIGV4_LEN 64
 #define MAX_SIGV4_LEN_TXT "64"
 
-#define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Date"))
+/* strlen("X--Date") == 7 */
+#define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + 7)
 
 #define MAX_HOST_LEN 255
-/* FQDN + host: */
-#define FULL_HOST_LEN (MAX_HOST_LEN + sizeof("host:"))
+/* FQDN + strlen(host:) */
+#define FULL_HOST_LEN (MAX_HOST_LEN + 5)
 
 /* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' */
 #define DATE_FULL_HDR_LEN (DATE_HDR_KEY_LEN + TIMESTAMP_SIZE + 1)
@@ -140,8 +141,8 @@ static CURLcode make_headers(struct Curl_easy *data,
                              struct dynbuf *canonical_headers,
                              struct dynbuf *signed_headers)
 {
-  char date_hdr_key[DATE_HDR_KEY_LEN];
-  char date_full_hdr[DATE_FULL_HDR_LEN];
+  char date_hdr_key[DATE_HDR_KEY_LEN + 1];
+  char date_full_hdr[DATE_FULL_HDR_LEN + 1];
   struct curl_slist *head = NULL;
   struct curl_slist *tmp_head = NULL;
   CURLcode ret = CURLE_OUT_OF_MEMORY;
@@ -152,11 +153,11 @@ static CURLcode make_headers(struct Curl_easy *data,
   Curl_strntolower(provider1, provider1, strlen(provider1));
   provider1[0] = Curl_raw_toupper(provider1[0]);
 
-  msnprintf(date_hdr_key, DATE_HDR_KEY_LEN, "X-%s-Date", provider1);
+  msnprintf(date_hdr_key, sizeof(date_hdr_key), "X-%s-Date", provider1);
 
   /* provider1 lowercase */
   Curl_strntolower(provider1, provider1, 1); /* first byte only */
-  msnprintf(date_full_hdr, DATE_FULL_HDR_LEN,
+  msnprintf(date_full_hdr, sizeof(date_full_hdr),
             "x-%s-date:%s", provider1, timestamp);
 
   if(Curl_checkheaders(data, STRCONST("Host"))) {
@@ -182,7 +183,7 @@ static CURLcode make_headers(struct Curl_easy *data,
         ret = CURLE_URL_MALFORMAT;
         goto fail;
       }
-      msnprintf(full_host, FULL_HOST_LEN, "host:%s", hostname);
+      msnprintf(full_host, sizeof(full_host), "host:%s", hostname);
     }
 
     head = curl_slist_append(NULL, full_host);
