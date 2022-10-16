@@ -122,12 +122,10 @@ static void trim_headers(struct curl_slist *head)
 #define MAX_SIGV4_LEN 64
 #define MAX_SIGV4_LEN_TXT "64"
 
-/* strlen("X--Date") == 7 */
-#define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + 7)
+#define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Date"))
 
 #define MAX_HOST_LEN 255
-/* FQDN + strlen(host:) */
-#define FULL_HOST_LEN (MAX_HOST_LEN + 5)
+#define FULL_HOST_LEN (MAX_HOST_LEN + sizeof("host:") - 1)
 
 /* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' */
 #define DATE_FULL_HDR_LEN (DATE_HDR_KEY_LEN + TIMESTAMP_SIZE + 1)
@@ -141,7 +139,7 @@ static CURLcode make_headers(struct Curl_easy *data,
                              struct dynbuf *canonical_headers,
                              struct dynbuf *signed_headers)
 {
-  char date_hdr_key[DATE_HDR_KEY_LEN + 1];
+  char date_hdr_key[DATE_HDR_KEY_LEN];
   char date_full_hdr[DATE_FULL_HDR_LEN + 1];
   struct curl_slist *head = NULL;
   struct curl_slist *tmp_head = NULL;
