@@ -24,4 +24,5 @@ runtests.pdf
 testcurl.html
 testcurl.pdf
 *.port
+static/
 config

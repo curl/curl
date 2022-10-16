@@ -3324,6 +3324,7 @@ AC_CHECK_HEADERS(
         termios.h \
         termio.h \
         fcntl.h \
+        dirent.h \
         io.h \
         pwd.h \
         utime.h \
@@ -3554,6 +3555,7 @@ AC_CHECK_FUNCS([fnmatch \
   gettimeofday \
   if_nametoindex \
   mach_absolute_time \
+  opendir \
   pipe \
   sched_yield \
   sendmsg \

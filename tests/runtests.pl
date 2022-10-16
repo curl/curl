@@ -184,6 +184,7 @@ my $ACURL=$VCURL;  # what curl binary to use to talk to APIs (relevant for CI)
                    # ACURL is handy to set to the system one for reliability
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
 my $LOGDIR="log";
+my $STATICDIR="static";
 my $TESTDIR="$srcdir/data";
 my $LIBDIR="./libtest";
 my $UNITDIR="./unit";
@@ -6088,6 +6089,31 @@ $SOCKSUNIXPATH    = $pwd."/socks$$.sock"; # HTTP server Unix domain socket path,
 
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
+
+#######################################################################
+# clear and create the static directory directory:
+#
+
+cleardir($STATICDIR);
+mkdir($STATICDIR, 0777);
+mkdir($STATICDIR . '/subdir', 0777);
+
+{
+  my $fh;
+  open $fh, '>>', "$STATICDIR/dummy" or die "cannot create static directory: $!";
+  close $fh;
+  open $fh, '>>', "$STATICDIR/dummy2" or die "cannot create static directory: $!";
+  close $fh;
+}
+utime(time(), 890384400, $STATICDIR);           # 1998-03-20 (curl day)
+utime(time(), 890384400, "$STATICDIR/subdir");
+utime(time(), 890384400, "$STATICDIR/dummy");
+utime(time(), 1007024400, "$STATICDIR/dummy2"); # 2001-11-29 (RIP George Harrison)
+
+chmod 0755, "$STATICDIR/subdir";
+chmod 0644, "$STATICDIR/dummy";
+chmod 0644, "$STATICDIR/dummy2";
+
 
 #######################################################################
 # initialize some variables

@@ -50,6 +50,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
 #include "strtoofft.h"
 #include "urldata.h"
 #include <curl/curl.h>
@@ -80,6 +84,9 @@
 #else
 #  define open_readonly(p,f) open((p),(f))
 #endif
+
+#define MODE_LEN 11
+#define MTIME_LEN 64
 
 /*
  * Forward declarations.
@@ -391,6 +398,174 @@ static CURLcode file_upload(struct Curl_easy *data)
   return result;
 }
 
+#ifdef HAVE_OPENDIR
+
+/* Convert a permission bitmask to a string (e.g. 0777 = -rwxrwxrwx) */
+static void fmt_mode(char *str, mode_t mode)
+{
+  memset(str, '\0', MODE_LEN);
+
+  if(S_ISDIR(mode))
+    str[0] = 'd';
+  else if(S_ISREG(mode))
+    str[0] = '-';
+#ifdef __unix__
+  else if(S_ISBLK(mode))
+    str[0] = 'b';
+  else if(S_ISCHR(mode))
+    str[0] = 'c';
+  else if(S_ISFIFO(mode))
+    str[0] = 'p';
+  else if(S_ISLNK(mode))
+    str[0] = 'l';
+  else if(S_ISSOCK(mode))
+    str[0] = 's';
+#endif
+  else
+    str[0] = '?';
+
+#ifdef __unix__
+  str[1] = mode & S_IRUSR ? 'r' : '-';
+  str[2] = mode & S_IWUSR ? 'w' : '-';
+  str[3] = mode & S_IXUSR ? 'x' : '-';
+  str[4] = mode & S_IRGRP ? 'r' : '-';
+  str[5] = mode & S_IWGRP ? 'w' : '-';
+  str[6] = mode & S_IXGRP ? 'x' : '-';
+  str[7] = mode & S_IROTH ? 'r' : '-';
+  str[8] = mode & S_IWOTH ? 'w' : '-';
+  str[9] = mode & S_IXOTH ? 'x' : '-';
+#else
+  memset(str + 1, '-', 9);
+#endif
+}
+
+static CURLcode fmt_mtime(char *str, time_t mtime)
+{
+  struct tm tm;
+  CURLcode result;
+
+  result = Curl_gmtime(mtime, &tm);
+  if(result)
+    return result;
+
+  strftime(str, MTIME_LEN, "%Y-%m-%dT%H:%M:%SZ", &tm);
+
+  return CURLE_OK;
+}
+
+static int sort_dir(const void *s1, const void *s2)
+{
+  return strcmp(*(const char **)s1, *(const char **)s2);
+}
+
+/* Fetch a directory listing (like FTP) */
+static CURLcode fetch_directory(struct Curl_easy *data, struct_stat *statbuf)
+{
+  struct FILEPROTO *file = data->req.p.file;
+  DIR *dir;
+  char **files;
+  size_t nfiles = 0, i;
+  CURLcode result;
+
+  DEBUGASSERT(statbuf);
+
+  /* Write headers */
+  {
+    char header[80];
+    int headerlen;
+    struct tm tm;
+
+    result = Curl_gmtime((time_t)statbuf->st_mtime, &tm);
+    if(result)
+      return result;
+
+    headerlen = msnprintf(header, sizeof(header),
+                  "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n\r\n",
+                  Curl_wkday[tm.tm_wday?tm.tm_wday-1:6],
+                  tm.tm_mday,
+                  Curl_month[tm.tm_mon],
+                  tm.tm_year + 1900,
+                  tm.tm_hour,
+                  tm.tm_min,
+                  tm.tm_sec);
+    result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+    if(result)
+      return result;
+  }
+
+  dir = opendir(file->path);
+  if(!dir)
+    return CURLE_FILE_COULDNT_READ_FILE;
+
+  /* Create the files array, which contains all files sorted */
+  {
+    struct dirent *dp;
+
+    /* Count all files. */
+    for(dp = readdir(dir); dp != NULL; dp = readdir(dir)) {
+      if(dp->d_name[0] == '.')
+        continue; /* skip dot files */
+      ++nfiles;
+    }
+    rewinddir(dir);
+
+    files = malloc(sizeof(char *) * nfiles);
+    if(!files) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto end;
+    }
+
+    i = 0;
+    for(dp = readdir(dir); dp != NULL; dp = readdir(dir)) {
+      if(dp->d_name[0] == '.')
+        continue; /* skip dot files */
+      files[i++] = dp->d_name;
+    }
+
+    qsort(files, nfiles, sizeof(char *), sort_dir);
+  }
+
+  /* Iterate over each and every entry in the directory */
+  {
+    struct_stat st;
+    char *path, *line;
+    char mode[MODE_LEN], mtime[MTIME_LEN];
+
+    for(i = 0; i < nfiles; ++i) {
+      /* stat(2) each file */
+      path = aprintf("%s/%s", file->path, files[i]);
+      if(!path) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto end;
+      }
+      memset(&st, 0, sizeof(st));
+      stat(path, &st); /* ignore errors */
+      free(path);
+
+      /* Generate the output */
+      fmt_mode(mode, st.st_mode);
+      fmt_mtime(mtime, (time_t)st.st_mtime);
+
+      line = aprintf("%s\t%zu\t%s\t%s\n", mode, st.st_size, mtime, files[i]);
+      if(!line) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto end;
+      }
+      result = Curl_client_write(data, CLIENTWRITE_BODY, line, strlen(line));
+      free(line);
+      if(result)
+        goto end;
+    }
+  }
+
+end:
+  free(files);
+  closedir(dir);
+  return result;
+}
+
+#endif
+
 /* Fetch a file, which is in this case anything but a directory */
 static CURLcode fetch_file(struct Curl_easy *data, struct_stat *statbuf)
 {
@@ -572,9 +747,13 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       return fetch_file(data, NULL);
     }
 
-    if(S_ISDIR(statbuf.st_mode))
-      return CURLE_OK;
+    DEBUGASSERT(strlen(file->path) > 0);
+
+#ifdef HAVE_OPENDIR
+    if(S_ISDIR(statbuf.st_mode) && file->path[strlen(file->path) - 1] == '/')
+      return fetch_directory(data, &statbuf);
     else
+#endif
       return fetch_file(data, &statbuf);
   }
 }

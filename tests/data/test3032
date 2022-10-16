@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+FILE
+</keywords>
+</info>
+
+<client>
+<server>
+none
+</server>
+<features>
+file
+!win32
+</features>
+<name>
+List a directory as a file through a file:// transfer
+</name>
+<command>
+-I file://%FILE_PWD/static
+</command>
+</client>
+
+<verify>
+<stripfile>
+s/^Content-Length:.*\n//
+</stripfile>
+<stdout>
+Accept-ranges: bytes
+Last-Modified: Fri, 20 Mar 1998 09:00:00 GMT
+</stdout>
+</verify>
+</testcase>
