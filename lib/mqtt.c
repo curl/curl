@@ -389,10 +389,18 @@ static CURLcode mqtt_get_topic(struct Curl_easy *data,
                                char **topic, size_t *topiclen)
 {
   char *path = data->state.up.path;
-  if(strlen(path) > 1)
-    return Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_NADA);
-  failf(data, "No MQTT topic found. Forgot to URL encode it?");
-  return CURLE_URL_MALFORMAT;
+  CURLcode result = CURLE_URL_MALFORMAT;
+  if(strlen(path) > 1) {
+    result = Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_NADA);
+    if(!result && (*topiclen > 0xffff)) {
+      failf(data, "Too long MQTT topic");
+      result = CURLE_URL_MALFORMAT;
+    }
+  }
+  else
+    failf(data, "No MQTT topic found. Forgot to URL encode it?");
+
+  return result;
 }
 
 static CURLcode mqtt_subscribe(struct Curl_easy *data)
