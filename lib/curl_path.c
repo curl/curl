@@ -122,7 +122,8 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
   bool relativePath = false;
   static const char WHITESPACE[] = " \t\r\n";
 
-  if(!*cp) {
+  DEBUGASSERT(homedir);
+  if(!*cp || !homedir) {
     *cpp = NULL;
     *path = NULL;
     return CURLE_QUOTE_ERROR;
