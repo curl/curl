@@ -47,7 +47,7 @@ typedef PVOID SRWLOCK, *PSRWLOCK;
 #define curl_simple_lock_lock(m) AcquireSRWLockExclusive(m)
 #define curl_simple_lock_unlock(m) ReleaseSRWLockExclusive(m)
 
-#elif defined (HAVE_ATOMIC)
+#elif defined(HAVE_ATOMIC) && defined(HAVE_STDATOMIC_H)
 #include <stdatomic.h>
 #if defined(HAVE_SCHED_YIELD)
 #include <sched.h>
