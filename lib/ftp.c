@@ -516,7 +516,7 @@ static CURLcode AllowServerConnect(struct Curl_easy *data, bool *connected)
   }
   else {
     /* Add timeout to multi handle and break out of the loop */
-    Curl_expire(data, data->set.accepttimeout > 0 ?
+    Curl_expire(data, data->set.accepttimeout ?
                 data->set.accepttimeout: DEFAULT_ACCEPT_TIMEOUT,
                 EXPIRE_FTP_ACCEPT);
   }
