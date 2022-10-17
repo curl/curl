@@ -26,6 +26,12 @@
 
 PROOT := ../..
 
+### Common
+
+include $(PROOT)/lib/Makefile.m32
+
+### Local
+
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     += -lcurl
 
@@ -48,11 +54,9 @@ include Makefile.inc
 TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS) synctime))
 TOCLEAN := $(TARGETS:.exe=.o)
 
-### Local rules
+### Rules
 
 %.exe: %.o $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $< $(LIBS)
 
-### Global script
-
-include $(PROOT)/lib/Makefile.m32
+all: $(TARGETS)

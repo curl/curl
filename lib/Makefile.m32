@@ -33,45 +33,13 @@
 # and more for individual components (see below).
 
 # This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
-# Skip lib-specific parts when called through them.
+
 ifndef PROOT
-PROOT := ..
-
-CPPFLAGS += -DBUILDING_LIBCURL
-
-### Sources and targets
-
-# Provides CSOURCES, HHEADERS, LIB_RCFILES
-include Makefile.inc
-
-libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
-libcurl_dll_a_LIBRARY := libcurl.dll.a
-libcurl_a_LIBRARY := libcurl.a
-
-TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
-
-libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
-libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
-libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
-libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES)))
-vpath %.c vauth vquic vssh vtls
-
-TOCLEAN := $(libcurl_dll_OBJECTS)
-TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
-
-### Local rules
-
-# Keep this at the top to act as the default target.
-all: $(TARGETS)
-
-$(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
-	@$(call DEL, $@)
-	$(AR) rcs $@ $(libcurl_a_OBJECTS)
-
-$(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
-	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
-	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
+  PROOT := ..
+  LOCAL := 1
 endif
+
+### Common
 
 CPPFLAGS += -I. -I$(PROOT)/include
 RCFLAGS  += -I$(PROOT)/include
@@ -303,7 +271,7 @@ ifndef DYN
   LIBS += $(_LIBS)
 endif
 
-### Global rules
+### Common rules
 
 ifneq ($(findstring /sh,$(SHELL)),)
 DEL  = rm -f $1
@@ -326,3 +294,45 @@ clean:
 
 distclean vclean: clean
 	@$(call DEL, $(TARGETS) $(TOVCLEAN))
+
+### Local
+
+ifdef LOCAL
+
+CPPFLAGS += -DBUILDING_LIBCURL
+
+### Sources and targets
+
+# Provides CSOURCES, HHEADERS, LIB_RCFILES
+include Makefile.inc
+
+libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
+libcurl_dll_a_LIBRARY := libcurl.dll.a
+libcurl_a_LIBRARY := libcurl.a
+
+TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
+
+libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
+libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
+libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
+libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES)))
+vpath %.c vauth vquic vssh vtls
+
+TOCLEAN := $(libcurl_dll_OBJECTS)
+TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
+
+### Rules
+
+# Keep this at the top to act as the default target.
+all: $(TARGETS)
+
+$(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
+	@$(call DEL, $@)
+	$(AR) rcs $@ $(libcurl_a_OBJECTS)
+
+$(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
+	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
+	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
+
+all: $(TARGETS)
+endif

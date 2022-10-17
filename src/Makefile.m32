@@ -26,6 +26,12 @@
 
 PROOT := ..
 
+### Common
+
+include $(PROOT)/lib/Makefile.m32
+
+### Local
+
 RCFLAGS  += -DCURL_EMBED_MANIFEST
 CPPFLAGS += -I$(PROOT)/lib
 LDFLAGS  += -L$(PROOT)/lib
@@ -58,7 +64,7 @@ ifneq ($(wildcard tool_hugehelp.c.cvs),)
 TOCLEAN += tool_hugehelp.c
 endif
 
-### Local rules
+### Rules
 
 $(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $(curl_OBJECTS) $(LIBS)
@@ -67,6 +73,4 @@ tool_hugehelp.c:
 	@echo Creating $@
 	@$(call COPY, $@.cvs, $@)
 
-### Global script
-
-include $(PROOT)/lib/Makefile.m32
+all: $(TARGETS)
