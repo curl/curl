@@ -350,7 +350,7 @@ static void AmigaSetComment(struct per_transfer *per,
 /* When doing serial transfers, we use a single fixed error area */
 static char global_errorbuffer[CURL_ERROR_SIZE];
 
-static void single_transfer_cleanup(struct OperationConfig *config)
+void single_transfer_cleanup(struct OperationConfig *config)
 {
   if(config) {
     struct State *state = &config->state;
@@ -449,8 +449,6 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         fprintf(global->errors, "curl: (%d) Failed writing body\n", result);
     }
   }
-  if(result)
-    single_transfer_cleanup(config);
 
   /* if retry-max-time is non-zero, make sure we haven't exceeded the
      time */
