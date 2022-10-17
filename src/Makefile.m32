@@ -76,9 +76,28 @@ endif
 
 ### Rules
 
+PERL  ?= perl
+NROFF ?= groff
+
+# FIXME: mkhelp.pl to prepend `#include "tool_setup.h"` to its output
+CPPFLAGS += -DUSE_MANUAL
+
+ifneq ($(shell $(WHICH) $(NROFF)),)
+$(PROOT)/docs/curl.1: $(wildcard $(PROOT)/docs/cmdline-opts/*.d)
+	cd $(PROOT)/docs/cmdline-opts && \
+	$(PERL) gen.pl mainpage $(notdir $^) > ../curl.1
+
+ifdef ZLIB
+_MKHELPOPT += -c
+endif
+tool_hugehelp.c: $(PROOT)/docs/curl.1 mkhelp.pl
+	$(NROFF) -man -Tascii $(MANOPT) $< | \
+	$(PERL) mkhelp.pl $(_MKHELPOPT) $< > $@
+else
 tool_hugehelp.c:
 	@echo Creating $@
 	@$(call COPY, $@.cvs, $@)
+endif
 
 $(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $(curl_OBJECTS) $(LIBS)
