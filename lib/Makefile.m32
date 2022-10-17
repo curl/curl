@@ -60,6 +60,8 @@ else
   TRIPLET ?= $(shell $(CC) -dumpmachine)
 endif
 
+BIN_EXT := .exe
+
 ifneq ($(findstring -w,$(TRIPLET)),)
   WIN32 := 1
 else ifneq ($(findstring msdos,$(TRIPLET)),)

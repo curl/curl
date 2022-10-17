@@ -64,12 +64,12 @@ ifdef WIN32
 check_PROGRAMS += synctime
 endif
 
-TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
+TARGETS := $(patsubst %,%$(BIN_EXT),$(strip $(check_PROGRAMS)))
 TOCLEAN := $(TARGETS)
 
 ### Rules
 
-%.exe: %.c $(curl_DEPENDENCIES)
+%$(BIN_EXT): %.c $(curl_DEPENDENCIES)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(CURL_LDFLAGS_BIN) $< -o $@ $(LIBS)
 
 all: $(TARGETS)

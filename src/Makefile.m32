@@ -59,7 +59,7 @@ endif
 # Provides CURL_CFILES, CURLX_CFILES, CURL_RCFILES
 include Makefile.inc
 
-TARGETS := curl.exe
+TARGETS := curl$(BIN_EXT)
 
 CURL_CFILES += $(notdir $(CURLX_CFILES))
 
