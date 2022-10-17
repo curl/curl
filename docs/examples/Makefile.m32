@@ -35,23 +35,36 @@ include $(PROOT)/lib/Makefile.m32
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     := -lcurl $(LIBS)
 
-ifeq ($(findstring -static,$(CFG)),)
-  curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
-  DYN := 1
-else
-  curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
-  CPPFLAGS += -DCURL_STATICLIB
-  LDFLAGS += -static
+ifdef WIN32
+  ifeq ($(findstring -static,$(CFG)),)
+    DYN := 1
+  endif
 endif
 
-LIBS += -lws2_32
+ifdef DYN
+  curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
+else
+  curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
+  ifdef WIN32
+    CPPFLAGS += -DCURL_STATICLIB
+    LDFLAGS += -static
+  endif
+endif
+
+ifdef WIN32
+  LIBS += -lws2_32
+endif
 
 ### Sources and targets
 
 # Provides check_PROGRAMS
 include Makefile.inc
 
-TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS) synctime))
+ifdef WIN32
+check_PROGRAMS += synctime
+endif
+
+TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
 TOCLEAN := $(TARGETS:.exe=.o)
 
 ### Rules

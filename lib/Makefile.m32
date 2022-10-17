@@ -69,9 +69,11 @@ RCFLAGS  += -I$(PROOT)/include
 
 ### Optional features
 
-ifneq ($(findstring -unicode,$(CFG)),)
-  CPPFLAGS += -DUNICODE -D_UNICODE
-  CURL_LDFLAGS_BIN += -municode
+ifdef WIN32
+  ifneq ($(findstring -unicode,$(CFG)),)
+    CPPFLAGS += -DUNICODE -D_UNICODE
+    CURL_LDFLAGS_BIN += -municode
+  endif
 endif
 
 # CPPFLAGS below are only necessary when building libcurl via 'lib' (see
@@ -81,6 +83,13 @@ endif
 # Linker options to exclude for shared mode executables.
 _LDFLAGS :=
 _LIBS :=
+
+ifneq ($(findstring -watt,$(CFG))$(WATT_ROOT),)
+  WATT_ROOT ?= $(PROOT)/../watt
+  CPPFLAGS += -I"$(WATT_ROOT)/inc"
+  _LDFLAGS += -L"$(WATT_ROOT)/lib"
+  _LIBS += -lwatt
+endif
 
 ifneq ($(findstring -sync,$(CFG)),)
   CPPFLAGS += -DUSE_SYNC_DNS
@@ -106,7 +115,9 @@ ifneq ($(findstring -ssh2,$(CFG)),)
   CPPFLAGS += -DUSE_LIBSSH2
   CPPFLAGS += -I"$(LIBSSH2_PATH)/include"
   _LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
-  _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
+  ifdef WIN32
+    _LDFLAGS += -L"$(LIBSSH2_PATH)/win32"
+  endif
   _LIBS += -lssh2
 else ifneq ($(findstring -libssh,$(CFG)),)
   LIBSSH_PATH ?= $(PROOT)/../libssh
@@ -247,7 +258,9 @@ else ifneq ($(findstring -winidn,$(CFG)),)
 endif
 
 ifneq ($(findstring -sspi,$(CFG)),)
-  CPPFLAGS += -DUSE_WINDOWS_SSPI
+  ifdef WIN32
+    CPPFLAGS += -DUSE_WINDOWS_SSPI
+  endif
 endif
 ifneq ($(findstring -ipv6,$(CFG)),)
   CPPFLAGS += -DENABLE_IPV6
@@ -256,10 +269,12 @@ ifneq ($(findstring -ldaps,$(CFG)),)
   CPPFLAGS += -DHAVE_LDAP_SSL
 endif
 
-ifeq ($(findstring -lldap,$(LIBS)),)
-  _LIBS += -lwldap32
+ifdef WIN32
+  ifeq ($(findstring -lldap,$(LIBS)),)
+    _LIBS += -lwldap32
+  endif
+  _LIBS += -lws2_32 -lcrypt32 -lbcrypt
 endif
-_LIBS += -lws2_32 -lcrypt32 -lbcrypt
 
 ifneq ($(findstring 11,$(subst $() ,,$(SSLLIBS))),)
   CPPFLAGS += -DCURL_WITH_MULTI_SSL
@@ -308,15 +323,19 @@ include Makefile.inc
 vpath %.c vauth vquic vssh vtls
 
 libcurl_a_LIBRARY := libcurl.a
+ifdef WIN32
 libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
 libcurl_dll_a_LIBRARY := libcurl.dll.a
+endif
 
 TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
 
 libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
 libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
+ifdef WIN32
 libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
 libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES)))
+endif
 
 TOCLEAN := $(libcurl_dll_OBJECTS)
 TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
