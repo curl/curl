@@ -287,24 +287,34 @@ endif
 
 ### Common rules
 
+OBJ_DIR := $(TRIPLET)
+
 ifneq ($(findstring /sh,$(SHELL)),)
-DEL  = rm -f $1
-COPY = -cp -afv $1 $2
+DEL   = rm -f $1
+COPY  = -cp -afv $1 $2
+MKDIR = mkdir -p $1
+RMDIR = rm -fr $1
 else
-DEL  = -del 2>NUL /q /f $(subst /,\,$1)
-COPY = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
+DEL   = -del 2>NUL /q /f $(subst /,\,$1)
+COPY  = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
+MKDIR = -md 2>NUL $(subst /,\,$1)
+RMDIR = -rd 2>NUL /q /s $(subst /,\,$1)
 endif
 
 all: $(TARGETS)
 
-%.o: %.c
-	$(CC) -W -Wall $(CFLAGS) $(CPPFLAGS) -c $<
+$(OBJ_DIR):
+	-$(MKDIR) $(OBJ_DIR)
 
-%.res: %.rc
+$(OBJ_DIR)/%.o: %.c
+	$(CC) -W -Wall $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/%.res: %.rc
 	$(RC) -O coff $(RCFLAGS) -i $< -o $@
 
 clean:
 	@$(call DEL, $(TOCLEAN))
+	@$(RMDIR) $(OBJ_DIR)
 
 distclean vclean: clean
 	@$(call DEL, $(TARGETS) $(TOVCLEAN))
@@ -330,11 +340,11 @@ endif
 
 TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
 
-libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CSOURCES))))
+libcurl_a_OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(strip $(CSOURCES))))
 libcurl_a_DEPENDENCIES := $(strip $(CSOURCES) $(HHEADERS))
 ifdef WIN32
 libcurl_dll_OBJECTS := $(libcurl_a_OBJECTS)
-libcurl_dll_OBJECTS += $(patsubst %.rc,%.res,$(strip $(LIB_RCFILES)))
+libcurl_dll_OBJECTS += $(patsubst %.rc,$(OBJ_DIR)/%.res,$(strip $(LIB_RCFILES)))
 endif
 
 TOCLEAN := $(libcurl_dll_OBJECTS)
@@ -350,5 +360,5 @@ $(libcurl_dll_LIBRARY): $(libcurl_dll_OBJECTS)
 	$(CC) $(LDFLAGS) -shared $(CURL_LDFLAGS_LIB) -o $@ $(libcurl_dll_OBJECTS) $(LIBS) \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY)
 
-all: $(TARGETS)
+all: $(OBJ_DIR) $(TARGETS)
 endif

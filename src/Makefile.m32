@@ -63,9 +63,9 @@ TARGETS := curl.exe
 
 CURL_CFILES += $(notdir $(CURLX_CFILES))
 
-curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_CFILES)))
+curl_OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CURL_CFILES)))
 ifdef WIN32
-curl_OBJECTS += $(patsubst %.rc,%.res,$(strip $(CURL_RCFILES)))
+curl_OBJECTS += $(patsubst %.rc,$(OBJ_DIR)/%.res,$(strip $(CURL_RCFILES)))
 endif
 vpath %.c $(PROOT)/lib
 
@@ -83,4 +83,4 @@ tool_hugehelp.c:
 	@echo Creating $@
 	@$(call COPY, $@.cvs, $@)
 
-all: $(TARGETS)
+all: $(OBJ_DIR) $(TARGETS)
