@@ -760,6 +760,7 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* version_negotiation */
   cb_recv_rx_key,
   NULL, /* recv_tx_key */
+  NULL, /* early_data_rejected */
 };
 
 /*
@@ -1835,9 +1836,9 @@ static CURLcode do_sendmsg(size_t *psent, struct Curl_easy *data, int sockfd,
 #ifdef HAVE_SENDMSG
   struct iovec msg_iov;
   struct msghdr msg = {0};
-  uint8_t msg_ctrl[32];
   ssize_t sent;
 #if defined(__linux__) && defined(UDP_SEGMENT)
+  uint8_t msg_ctrl[32];
   struct cmsghdr *cm;
 #endif
 
@@ -1988,9 +1989,9 @@ static CURLcode ng_flush_egress(struct Curl_easy *data,
   ngtcp2_ssize outlen;
   uint8_t *outpos = qs->pktbuf;
   size_t max_udp_payload_size =
-      ngtcp2_conn_get_max_udp_payload_size(qs->qconn);
+      ngtcp2_conn_get_max_tx_udp_payload_size(qs->qconn);
   size_t path_max_udp_payload_size =
-      ngtcp2_conn_get_path_max_udp_payload_size(qs->qconn);
+      ngtcp2_conn_get_path_max_tx_udp_payload_size(qs->qconn);
   size_t max_pktcnt =
       CURLMIN(MAX_PKT_BURST, qs->pktbuflen / max_udp_payload_size);
   size_t pktcnt = 0;
