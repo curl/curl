@@ -323,9 +323,6 @@ TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
 
 ### Rules
 
-# Keep this at the top to act as the default target.
-all: $(TARGETS)
-
 $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	@$(call DEL, $@)
 	$(AR) rcs $@ $(libcurl_a_OBJECTS)

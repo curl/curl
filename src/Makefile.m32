@@ -35,7 +35,7 @@ include $(PROOT)/lib/Makefile.m32
 RCFLAGS  += -DCURL_EMBED_MANIFEST
 CPPFLAGS += -I$(PROOT)/lib
 LDFLAGS  += -L$(PROOT)/lib
-LIBS     += -lcurl
+LIBS     := -lcurl $(LIBS)
 
 ifneq ($(findstring -dyn,$(CFG)),)
   curl_DEPENDENCIES := $(PROOT)/lib/libcurl$(CURL_DLL_SUFFIX).dll

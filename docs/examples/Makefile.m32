@@ -33,7 +33,7 @@ include $(PROOT)/lib/Makefile.m32
 ### Local
 
 LDFLAGS  += -L$(PROOT)/lib
-LIBS     += -lcurl
+LIBS     := -lcurl $(LIBS)
 
 ifeq ($(findstring -static,$(CFG)),)
   curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
