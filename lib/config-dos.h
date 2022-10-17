@@ -106,10 +106,6 @@
 /* CURLDEBUG definition enables memory tracking */
 /* #define CURLDEBUG */
 
-#ifdef USE_ZLIB  /* Deprecated. Use HAVE_LIBZ instead. */
-  #define HAVE_LIBZ              1
-#endif
-
 /* to disable LDAP */
 #define CURL_DISABLE_LDAP        1
 
