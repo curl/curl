@@ -318,6 +318,11 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
             flags |= FLAGS_PREC;
             precision = strtol(fmt, &fmt, 10);
           }
+          if((flags & (FLAGS_PREC | FLAGS_PRECPARAM)) ==
+             (FLAGS_PREC | FLAGS_PRECPARAM))
+            /* it is not permitted to use both kinds of precision for the same
+               argument */
+            return 1;
           break;
         case 'h':
           flags |= FLAGS_SHORT;
