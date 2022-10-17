@@ -57,6 +57,6 @@ TOCLEAN := $(TARGETS:.exe=.o)
 ### Rules
 
 %.exe: %.o $(curl_DEPENDENCIES)
-	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $< $(LIBS)
+	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) $< -o $@ $(LIBS)
 
 all: $(TARGETS)

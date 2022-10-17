@@ -54,8 +54,9 @@ include Makefile.inc
 
 TARGETS := curl.exe
 
+CURL_CFILES += $(notdir $(CURLX_CFILES))
+
 curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_CFILES)))
-curl_OBJECTS += $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_CFILES))))
 curl_OBJECTS += $(patsubst %.rc,%.res,$(strip $(CURL_RCFILES)))
 vpath %.c $(PROOT)/lib
 
