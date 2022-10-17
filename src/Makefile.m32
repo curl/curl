@@ -76,11 +76,11 @@ endif
 
 ### Rules
 
-$(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
-	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $(curl_OBJECTS) $(LIBS)
-
 tool_hugehelp.c:
 	@echo Creating $@
 	@$(call COPY, $@.cvs, $@)
+
+$(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
+	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $(curl_OBJECTS) $(LIBS)
 
 all: $(OBJ_DIR) $(TARGETS)
