@@ -65,11 +65,11 @@ check_PROGRAMS += synctime
 endif
 
 TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS)))
-TOCLEAN := $(TARGETS:.exe=.o)
+TOCLEAN := $(TARGETS)
 
 ### Rules
 
-%.exe: %.o $(curl_DEPENDENCIES)
-	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) $< -o $@ $(LIBS)
+%.exe: %.c $(curl_DEPENDENCIES)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(CURL_LDFLAGS_BIN) $< -o $@ $(LIBS)
 
 all: $(TARGETS)
