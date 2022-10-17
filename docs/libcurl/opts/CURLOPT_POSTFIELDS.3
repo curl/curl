@@ -69,7 +69,7 @@ be larger than 1MB or if the expected size is unknown. You can disable this
 header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 
 To make \fBmultipart/formdata\fP posts, check out the
-\fICURLOPT_HTTPPOST(3)\fP option combined with \fIcurl_mime_init(3)\fP.
+\fICURLOPT_MIMEPOST(3)\fP option combined with \fIcurl_mime_init(3)\fP.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -97,3 +97,4 @@ Always
 Returns CURLE_OK
 .SH "SEE ALSO"
 .BR CURLOPT_POSTFIELDSIZE "(3), " CURLOPT_READFUNCTION "(3), "
+.BR CURLOPT_MIMEPOST "(3), " CURLOPT_UPLOAD "(3), "
