@@ -62,6 +62,8 @@ endif
 
 ifneq ($(findstring -w,$(TRIPLET)),)
   WIN32 := 1
+else ifneq ($(findstring msdos,$(TRIPLET)),)
+  MSDOS := 1
 endif
 
 CPPFLAGS += -I. -I$(PROOT)/include
