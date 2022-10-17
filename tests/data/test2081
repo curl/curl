@@ -54,7 +54,7 @@ Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpwYXNz
 User-Agent: curl/%VERSION
 Accept: */*
-Referer: http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
+Referer: http://%HOSTIP:%HTTPPORT/
 
 </protocol>
 <stdout>
@@ -67,7 +67,7 @@ HTTP/1.1 200 This is another weirdo text message swsclose
 Connection: close
 
 Thanks for following.
-http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/
 </stdout>
 </verify>
 </testcase>

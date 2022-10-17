@@ -1646,6 +1646,10 @@ enum dupblob {
   BLOB_LAST
 };
 
+#define REFERER_NONE   0 /* no automatic referer */
+#define REFERER_ORIGIN 1 /* only send the scheme, host + port */
+#define REFERER_FULL   2 /* also include path and query */
+
 /* callback that gets called when this easy handle is completed within a multi
    handle.  Only used for internally created transfers, like for example
    DoH. */
@@ -1847,6 +1851,7 @@ struct UserDefined {
 #endif
   unsigned char connect_only; /* make connection/request, then let
                                  application use the socket */
+  unsigned char auto_referer; /* set HTTP referer when following location */
   BIT(is_fread_set); /* has read callback been set to non-NULL? */
 #ifndef CURL_DISABLE_TFTP
   BIT(tftp_no_options); /* do not send TFTP options requests */
@@ -1881,8 +1886,6 @@ struct UserDefined {
   BIT(allow_auth_to_other_hosts);
   BIT(include_header); /* include received protocol headers in data output */
   BIT(http_set_referer); /* is a custom referer used */
-  BIT(http_auto_referer); /* set "correct" referer when following
-                             location: */
   BIT(opt_no_body);    /* as set with CURLOPT_NOBODY */
   BIT(upload);         /* upload request */
   BIT(verbose);        /* output verbosity */

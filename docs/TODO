@@ -77,6 +77,7 @@
  5.5 auth= in URLs
  5.6 alt-svc should fallback if alt-svc does not work
  5.7 Require HTTP version X or higher
+ 5.8 Referrer-Policy
 
  6. TELNET
  6.1 ditch stdin
@@ -630,6 +631,13 @@
  consider adding a way to require a minimum version.
 
  See https://github.com/curl/curl/issues/7980
+
+5.8 Referrer-Policy
+
+ The response header Referrer-Policy tells the client what details to include
+ when creating referer headers when redirects are followed on this site.
+
+ See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
 
 6. TELNET
 

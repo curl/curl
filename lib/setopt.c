@@ -562,9 +562,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifndef CURL_DISABLE_HTTP
   case CURLOPT_AUTOREFERER:
     /*
-     * Switch on automatic referer that gets set if curl follows locations.
+     * Automatic referer when curl follows HTTP redirects.
      */
-    data->set.http_auto_referer = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    arg = va_arg(param, long);
+    if((arg < REFERER_NONE) || (arg > REFERER_FULL))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.auto_referer = (unsigned char)arg;
     break;
 
   case CURLOPT_ACCEPT_ENCODING:

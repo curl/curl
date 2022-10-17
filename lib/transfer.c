@@ -1596,7 +1596,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
       data->state.followlocation++; /* count location-followers */
 
-      if(data->set.http_auto_referer) {
+      if(data->set.auto_referer) {
         CURLU *u;
         char *referer = NULL;
 
@@ -1622,7 +1622,13 @@ CURLcode Curl_follow(struct Curl_easy *data,
         if(!uc)
           uc = curl_url_set(u, CURLUPART_PASSWORD, NULL, 0);
         if(!uc)
-          uc = curl_url_get(u, CURLUPART_URL, &referer, 0);
+          uc = curl_url_set(u, CURLUPART_PATH, NULL, 0);
+        if(data->set.auto_referer != REFERER_FULL) {
+          if(!uc)
+            uc = curl_url_set(u, CURLUPART_QUERY, NULL, 0);
+          if(!uc)
+            uc = curl_url_get(u, CURLUPART_URL, &referer, 0);
+        }
 
         curl_url_cleanup(u);
 

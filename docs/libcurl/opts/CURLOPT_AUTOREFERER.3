@@ -32,9 +32,15 @@ CURLOPT_AUTOREFERER \- automatically update the referer header
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AUTOREFERER, long autorefer);
 .fi
 .SH DESCRIPTION
-Pass a parameter set to 1 to enable this. When enabled, libcurl will
-automatically set the Referer: header field in HTTP requests to the full URL
-where it follows a Location: redirect.
+Pass a long parameter set to 1 to enable automatic referer headers. When
+enabled, libcurl will automatically set the Referer: header field in HTTP
+requests to the full URL where it follows a Location: redirect.
+
+Starting in curl 7.87.0: setting the value to 1 will make libcurl use
+\fIorigin-only mode\fP, where it only sets the "origin" in the header. That
+means scheme, host name and port number. Set the value to 2 to make libcurl
+also inclued the path and query parts in the \fBReferer:\fP header. Before
+7.87.0, libcurl would also act as if 2 was set.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS

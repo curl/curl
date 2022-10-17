@@ -70,11 +70,11 @@ GET /want/data/%TESTNUMBER0002.txt?coolsite=yes HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Referer: http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
+Referer: http://%HOSTIP:%HTTPPORT/
 
 </protocol>
 <stderr nonewline="yes">
-|http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER|
+|http://%HOSTIP:%HTTPPORT/|
 </stderr>
 </verify>
 </testcase>
