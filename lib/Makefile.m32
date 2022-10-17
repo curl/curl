@@ -63,6 +63,10 @@ else
   TRIPLET ?= $(shell $(CC) -dumpmachine)
 endif
 
+ifneq ($(findstring -w,$(TRIPLET)),)
+  WIN32 := 1
+endif
+
 ### Optional features
 
 ifneq ($(findstring -unicode,$(CFG)),)
