@@ -65,8 +65,10 @@ BIN_EXT := .exe
 ifneq ($(findstring -w,$(TRIPLET)),)
   WIN32 := 1
 else ifneq ($(findstring msdos,$(TRIPLET)),)
+  # Cross-tools: https://github.com/andrewwutw/build-djgpp
   MSDOS := 1
 else ifneq ($(findstring amigaos,$(TRIPLET)),)
+  # Cross-tools: https://github.com/bebbo/amiga-gcc
   AMIGA := 1
 endif
 
