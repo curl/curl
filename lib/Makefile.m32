@@ -29,7 +29,7 @@
 #
 # Set component roots via envvar <feature>_PATH. Also available for
 # customization: CC, RC, AR, CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS,
-# ARCH[=custom], CROSSPREFIX, CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
+# TRIPLET, CROSSPREFIX, CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
 # and more for individual components (see below).
 
 # This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
@@ -48,24 +48,19 @@ CC := $(CROSSPREFIX)$(CC)
 AR := $(CROSSPREFIX)$(AR)
 RC ?= $(CROSSPREFIX)windres
 
-ifneq ($(ARCH),custom)
-  # Set environment var ARCH to your architecture to override auto-detection.
-  ifndef ARCH
-    ifneq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),)
-      ARCH := w64
-    else
-      ARCH := w32
-    endif
-  endif
-  ifeq ($(ARCH),w64)
-    CFLAGS  += -m64
-    LDFLAGS += -m64
-    RCFLAGS += --target=pe-x86-64
-  else
-    CFLAGS  += -m32
-    LDFLAGS += -m32
-    RCFLAGS += --target=pe-i386
-  endif
+# For compatibility
+ifeq ($(ARCH),w64)
+  TRIPLET := x86_64-w64-mingw32
+  CFLAGS  += -m64
+  LDFLAGS += -m64
+  RCFLAGS += --target=pe-x86-64
+else ifdef ARCH
+  TRIPLET := i686-w64-mingw32
+  CFLAGS  += -m32
+  LDFLAGS += -m32
+  RCFLAGS += --target=pe-i386
+else
+  TRIPLET ?= $(shell $(CC) -dumpmachine)
 endif
 
 ### Optional features
