@@ -350,6 +350,26 @@ static void AmigaSetComment(struct per_transfer *per,
 /* When doing serial transfers, we use a single fixed error area */
 static char global_errorbuffer[CURL_ERROR_SIZE];
 
+void single_transfer_cleanup(struct OperationConfig *config)
+{
+  if(config) {
+    struct State *state = &config->state;
+    if(state->urls) {
+      /* Free list of remaining URLs */
+      glob_cleanup(state->urls);
+      state->urls = NULL;
+    }
+    Curl_safefree(state->outfiles);
+    Curl_safefree(state->httpgetfields);
+    Curl_safefree(state->uploadfile);
+    if(state->inglob) {
+      /* Free list of globbed upload files */
+      glob_cleanup(state->inglob);
+      state->inglob = NULL;
+    }
+  }
+}
+
 /*
  * Call this after a transfer has completed.
  */
@@ -664,26 +684,6 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     free(per->errorbuffer);
 
   return result;
-}
-
-static void single_transfer_cleanup(struct OperationConfig *config)
-{
-  if(config) {
-    struct State *state = &config->state;
-    if(state->urls) {
-      /* Free list of remaining URLs */
-      glob_cleanup(state->urls);
-      state->urls = NULL;
-    }
-    Curl_safefree(state->outfiles);
-    Curl_safefree(state->httpgetfields);
-    Curl_safefree(state->uploadfile);
-    if(state->inglob) {
-      /* Free list of globbed upload files */
-      glob_cleanup(state->inglob);
-      state->inglob = NULL;
-    }
-  }
 }
 
 /*
