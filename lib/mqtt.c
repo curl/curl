@@ -186,7 +186,7 @@ static int add_passwd(const char *passwd, const size_t plen,
   return 0;
 }
 
-/* add user to the CONN packet */
+/* add user to the CONNECT packet */
 static int add_user(const char *username, const size_t ulen,
                     unsigned char *pkt, const size_t start, int remain_pos)
 {
@@ -204,7 +204,7 @@ static int add_user(const char *username, const size_t ulen,
   return 0;
 }
 
-/* add client ID to the CONN packet */
+/* add client ID to the CONNECT packet */
 static int add_client_id(const char *client_id, const size_t client_id_len,
                          char *pkt, const size_t start)
 {
@@ -216,7 +216,7 @@ static int add_client_id(const char *client_id, const size_t client_id_len,
   return 0;
 }
 
-/* Set initial values of CONN packet */
+/* Set initial values of CONNECT packet */
 static int init_connpack(char *packet, char *remain, int remain_pos)
 {
   /* Fixed header starts */
@@ -293,7 +293,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
     return CURLE_OUT_OF_MEMORY;
   memset(packet, 0, packetlen);
 
-  /* set initial values for CONN pack */
+  /* set initial values for the CONNECT packet */
   pos = init_connpack(packet, remain, remain_pos);
 
   result = Curl_rand_hex(data, (unsigned char *)&client_id[clen],
@@ -698,7 +698,7 @@ static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
 
   result = mqtt_connect(data);
   if(result) {
-    failf(data, "Error %d sending MQTT CONN request", result);
+    failf(data, "Error %d sending MQTT CONNECT request", result);
     return result;
   }
   mqstate(data, MQTT_FIRST, MQTT_CONNACK);
