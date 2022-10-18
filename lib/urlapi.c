@@ -116,27 +116,24 @@ static const char *find_host_sep(const char *url)
 }
 
 /*
- * Decide in an encoding-independent manner whether a character in a
- * URL must be escaped. The same criterion must be used in strlen_url()
- * and strcpy_url().
+ * Decide in an encoding-independent manner whether a character in a URL must
+ * be escaped. This is used in urlencode_str().
  */
-static bool urlchar_needs_escaping(int c)
-{
-  return !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c));
-}
+#define urlchar_needs_escaping(c)               \
+  !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c))
 
-/* strcpy_url() creates a url in an output dynbuf and URL-encodes the spaces
- * in the source URL accordingly.
+/* urlencode_str() writes data into an output dynbuf and URL-encodes the
+ * spaces in the source URL accordingly.
  *
  * URL encoding should be skipped for host names, otherwise IDN resolution
  * will fail.
- *
  */
-static CURLUcode strcpy_url(struct dynbuf *o, const char *url,
-                            size_t len, bool relative)
+static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
+                               size_t len, bool relative,
+                               bool query)
 {
   /* we must add this with whitespace-replacing */
-  bool left = TRUE;
+  bool left = !query;
   const unsigned char *iptr;
   const unsigned char *host_sep = (const unsigned char *) url;
 
@@ -361,7 +358,7 @@ static char *concat_url(char *base, const char *relurl)
   }
 
   /* then append the new piece on the right side */
-  strcpy_url(&newest, useurl, strlen(useurl), !host_changed);
+  urlencode_str(&newest, useurl, strlen(useurl), !host_changed, FALSE);
 
   return Curl_dyn_ptr(&newest);
 }
@@ -1153,12 +1150,25 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     size_t qlen = strlen(query) - fraglen; /* includes '?' */
     pathlen = strlen(path) - qlen - fraglen;
     if(qlen > 1) {
-      u->query = Curl_memdup(query + 1, qlen);
-      if(!u->query) {
-        result = CURLUE_OUT_OF_MEMORY;
-        goto fail;
+      if(qlen && (flags & CURLU_URLENCODE)) {
+        struct dynbuf enc;
+        Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+        /* skip the leading question mark */
+        if(urlencode_str(&enc, query + 1, qlen - 1, TRUE, TRUE)) {
+          result = CURLUE_OUT_OF_MEMORY;
+          goto fail;
+        }
+        qlen = Curl_dyn_len(&enc);
+        query = u->query = Curl_dyn_ptr(&enc);
       }
-      u->query[qlen - 1] = 0;
+      else {
+        u->query = Curl_memdup(query + 1, qlen);
+        if(!u->query) {
+          result = CURLUE_OUT_OF_MEMORY;
+          goto fail;
+        }
+        u->query[qlen - 1] = 0;
+      }
 
       if(junkscan(u->query, flags)) {
         result = CURLUE_BAD_QUERY;
@@ -1180,7 +1190,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   if(pathlen && (flags & CURLU_URLENCODE)) {
     struct dynbuf enc;
     Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    if(strcpy_url(&enc, path, pathlen, TRUE)) { /* consider it relative */
+    if(urlencode_str(&enc, path, pathlen, TRUE, FALSE)) {
       result = CURLUE_OUT_OF_MEMORY;
       goto fail;
     }
@@ -1594,7 +1604,8 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     if(urlencode) {
       struct dynbuf enc;
       Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-      if(strcpy_url(&enc, *part, partlen, TRUE)) /* consider it relative */
+      if(urlencode_str(&enc, *part, partlen, TRUE,
+                       what == CURLUPART_QUERY))
         return CURLUE_OUT_OF_MEMORY;
       free(*part);
       *part = Curl_dyn_ptr(&enc);
