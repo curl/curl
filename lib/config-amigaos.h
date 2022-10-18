@@ -36,7 +36,6 @@
 #define HAVE_INTTYPES_H 1
 #define HAVE_IOCTLSOCKET_CAMEL 1
 #define HAVE_IOCTLSOCKET_CAMEL_FIONBIO 1
-#define HAVE_LIBZ 1
 #define HAVE_LONGLONG 1
 #define HAVE_NETDB_H 1
 #define HAVE_NETINET_IN_H 1
@@ -73,7 +72,6 @@
 #define SIZEOF_SIZE_T 4
 
 #define USE_MANUAL 1
-#define USE_OPENSSL 1
 #define CURL_DISABLE_LDAP 1
 
 #define OS "AmigaOS"
