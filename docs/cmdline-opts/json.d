@@ -12,6 +12,7 @@ Example: --json '{ "drink":' --json ' "coffe" }' $URL
 Example: --json @prepared $URL
 Example: --json @- $URL < json.txt
 Added: 7.82.0
+Multi: append
 ---
 Sends the specified JSON data in a POST request to the HTTP server. --json
 works as a shortcut for passing on these three options:

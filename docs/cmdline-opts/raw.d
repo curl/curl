@@ -7,6 +7,7 @@ Protocols: HTTP
 Category: http
 Example: --raw $URL
 See-also: tr-encoding
+Multi: boolean
 ---
 When used, it disables all internal HTTP decoding of content or transfer
 encodings and instead makes them passed on unaltered, raw.

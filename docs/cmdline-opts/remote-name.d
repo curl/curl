@@ -7,6 +7,7 @@ Category: important output
 Example: -O https://example.com/filename
 Added: 4.0
 See-also: remote-name-all output-dir remote-header-name
+Multi: append
 ---
 Write output to a local file named like the remote file we get. (Only the file
 part of the remote file is used, the path is cut off.)

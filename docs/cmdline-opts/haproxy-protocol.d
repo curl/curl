@@ -7,6 +7,7 @@ Added: 7.60.0
 Category: http proxy
 Example: --haproxy-protocol $URL
 See-also: proxy
+Multi: boolean
 ---
 Send a HAProxy PROXY protocol v1 header at the beginning of the
 connection. This is used by some load balancers and reverse proxies to

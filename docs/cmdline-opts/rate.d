@@ -9,6 +9,7 @@ Example: --rate 3/h $URL
 Example: --rate 14/m $URL
 Added: 7.84.0
 See-also: limit-rate retry-delay
+Multi: single
 ---
 Specify the maximum transfer frequency you allow curl to use - in number of
 transfer starts per time unit (sometimes called request rate). Without this
@@ -31,5 +32,3 @@ more than 1000 per second, it will instead run unrestricted.
 
 When retrying transfers, enabled with --retry, the separate retry delay logic
 is used and not this setting.
-
-If this option is used several times, the last one will be used.

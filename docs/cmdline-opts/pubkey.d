@@ -8,11 +8,10 @@ Category: sftp scp auth
 Example: --pubkey file.pub sftp://example.com/
 Added: 7.16.2
 See-also: pass
+Multi: single
 ---
 Public key file name. Allows you to provide your public key in this separate
 file.
-
-If this option is used several times, the last one will be used.
 
 (As of 7.39.0, curl attempts to automatically extract the public key from the
 private key file, so passing this option is generally not required. Note that

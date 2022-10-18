@@ -6,6 +6,7 @@ Added: 7.14.0
 Category: verbose
 Example: --trace-time --trace-ascii output $URL
 See-also: trace verbose
+Multi: boolean
 ---
 Prepends a time stamp to each trace or verbose line that curl displays.
 

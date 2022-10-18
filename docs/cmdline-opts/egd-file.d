@@ -8,6 +8,7 @@ See-also: random-file
 Category: tls
 Example: --egd-file /random/here $URL
 Added: 7.7
+Multi: single
 ---
 Deprecated option. This option is ignored by curl since 7.84.0. Prior to that
 it only had an effect on curl if built to use old versions of OpenSSL.

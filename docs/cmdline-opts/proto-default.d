@@ -7,6 +7,7 @@ Added: 7.45.0
 Category: connection curl
 Example: --proto-default https ftp.example.com
 See-also: proto proto-redir
+Multi: single
 ---
 Tells curl to use *protocol* for any URL missing a scheme name.
 

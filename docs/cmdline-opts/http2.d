@@ -11,6 +11,7 @@ Help: Use HTTP 2
 See-also: http1.1 http3
 Category: http
 Example: --http2 $URL
+Multi: mutex
 ---
 Tells curl to use HTTP version 2.
 

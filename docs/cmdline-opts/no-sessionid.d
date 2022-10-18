@@ -7,6 +7,7 @@ Added: 7.16.0
 Category: tls
 Example: --no-sessionid $URL
 See-also: insecure
+Multi: boolean
 ---
 Disable curl's use of SSL session-ID caching. By default all transfers are
 done using the cache. Note that while nothing should ever get hurt by

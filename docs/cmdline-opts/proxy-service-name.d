@@ -7,5 +7,6 @@ Added: 7.43.0
 Category: proxy tls
 Example: --proxy-service-name "shrubbery" -x proxy $URL
 See-also: service-name proxy
+Multi: single
 ---
 This option allows you to change the service name for proxy negotiation.

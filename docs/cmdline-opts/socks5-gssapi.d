@@ -6,6 +6,7 @@ Added: 7.55.0
 Category: proxy auth
 Example: --socks5-gssapi --socks5 hostname:4096 $URL
 See-also: socks5
+Multi: boolean
 ---
 Tells curl to use GSS-API authentication when connecting to a SOCKS5 proxy.
 The GSS-API authentication is enabled by default (if curl is compiled with

@@ -6,6 +6,7 @@ Added: 7.25.0
 Category: tls
 Example: --ssl-allow-beast $URL
 See-also: proxy-ssl-allow-beast insecure
+Multi: boolean
 ---
 This option tells curl to not work around a security flaw in the SSL3 and
 TLS1.0 protocols known as BEAST.  If this option is not used, the SSL layer

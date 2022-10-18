@@ -11,6 +11,7 @@ Example: "http://{one,two}.example.com" -o "file_#1.txt"
 Example: "http://{site,host}.host[1-5].com" -o "#1_#2"
 Example: -o file $URL -o file2 https://example.net
 Added: 4.0
+Multi: append
 ---
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
 multiple documents, you should quote the URL and you can use '#' followed by a

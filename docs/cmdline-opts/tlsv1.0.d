@@ -7,6 +7,7 @@ Added: 7.34.0
 Category: tls
 Example: --tlsv1.0 $URL
 See-also: tlsv1.3
+Multi: mutex
 ---
 Forces curl to use TLS version 1.0 or later when connecting to a remote TLS server.
 

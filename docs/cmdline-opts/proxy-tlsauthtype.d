@@ -7,5 +7,6 @@ Added: 7.52.0
 Category: proxy tls auth
 Example: --proxy-tlsauthtype SRP -x https://proxy $URL
 See-also: proxy proxy-tlsuser
+Multi: single
 ---
 Same as --tlsauthtype but used in HTTPS proxy context.

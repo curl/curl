@@ -6,6 +6,7 @@ See-also: fail
 Category: curl
 Example: --remove-on-error -o output $URL
 Added: 7.83.0
+Multi: boolean
 ---
 When curl returns an error when told to save output in a local file, this
 option removes that saved file before exiting. This prevents curl from

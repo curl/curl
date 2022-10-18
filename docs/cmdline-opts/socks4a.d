@@ -7,6 +7,7 @@ Added: 7.18.0
 Category: proxy
 Example: --socks4a hostname:4096 $URL
 See-also: socks4 socks5 socks5-hostname
+Multi: single
 ---
 Use the specified SOCKS4a proxy. If the port number is not specified, it is
 assumed at port 1080. This asks the proxy to resolve the host name.
@@ -23,5 +24,3 @@ using a socks4a:// protocol prefix. (Added in 7.21.7)
 Since 7.52.0, --preproxy can be used to specify a SOCKS proxy at the same time
 --proxy is used with an HTTP/HTTPS proxy. In such a case curl first connects to
 the SOCKS proxy and then connects (through SOCKS) to the HTTP or HTTPS proxy.
-
-If this option is used several times, the last one will be used.

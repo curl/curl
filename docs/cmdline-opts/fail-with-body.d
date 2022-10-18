@@ -8,6 +8,7 @@ Added: 7.76.0
 See-also: fail
 Mutexed: fail
 Example: --fail-with-body $URL
+Multi: boolean
 ---
 Return an error on server errors where the HTTP response code is 400 or
 greater). In normal cases when an HTTP server fails to deliver a document, it

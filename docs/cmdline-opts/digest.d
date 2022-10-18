@@ -8,9 +8,8 @@ See-also: user proxy-digest anyauth
 Category: proxy auth http
 Example: -u name:password --digest $URL
 Added: 7.10.6
+Multi: boolean
 ---
 Enables HTTP Digest authentication. This is an authentication scheme that
 prevents the password from being sent over the wire in clear text. Use this in
 combination with the normal --user option to set user name and password.
-
-If this option is used several times, only the first one is used.
