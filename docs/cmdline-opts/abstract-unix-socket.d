@@ -8,6 +8,7 @@ Protocols: HTTP
 Category: connection
 See-also: unix-socket
 Example: --abstract-unix-socket socketpath $URL
+Multi: single
 ---
 Connect through an abstract Unix domain socket, instead of using the network.
 Note: netstat shows the path of an abstract socket prefixed with '@', however

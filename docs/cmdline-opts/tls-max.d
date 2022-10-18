@@ -11,6 +11,7 @@ Help: Set maximum allowed TLS version
 Category: tls
 Example: --tls-max 1.2 $URL
 Example: --tls-max 1.3 --tlsv1.2 $URL
+Multi: single
 ---
 VERSION defines maximum supported TLS version. The minimum acceptable version
 is set by tlsv1.0, tlsv1.1, tlsv1.2 or tlsv1.3.

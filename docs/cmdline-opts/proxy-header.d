@@ -10,6 +10,7 @@ Example: --proxy-header "X-First-Name: Joe" -x http://proxy $URL
 Example: --proxy-header "User-Agent: surprise" -x http://proxy $URL
 Example: --proxy-header "Host:" -x http://proxy $URL
 See-also: proxy
+Multi: append
 ---
 Extra header to include in the request when sending HTTP to a proxy. You may
 specify any number of extra headers. This is the equivalent option to --header

@@ -7,6 +7,7 @@ Added: 7.20.0
 Category: tls
 Example: --ssl pop3://example.com/
 See-also: ssl-reqd insecure ciphers
+Multi: boolean
 ---
 Warning: this is considered an insecure option. Consider using --ssl-reqd
 instead to be sure curl upgrades to a secure connection.

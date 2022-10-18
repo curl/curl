@@ -7,6 +7,7 @@ Added: 7.19.4
 Category: proxy
 Example: --noproxy "www.example" $URL
 See-also: proxy
+Multi: single
 ---
 Comma-separated list of hosts for which not to use a proxy, if one is
 specified. The only wildcard is a single * character, which matches all hosts,

@@ -10,6 +10,7 @@ Example: -b cookiefile $URL
 Example: -b cookiefile -c cookiefile $URL
 See-also: cookie-jar junk-session-cookies
 Added: 4.9
+Multi: append
 ---
 Pass the data to the HTTP server in the Cookie header. It is supposedly the
 data previously received from the server in a "Set-Cookie:" line. The data
@@ -35,8 +36,6 @@ If you use the Set-Cookie file format and do not specify a domain then the
 cookie is not sent since the domain will never match. To address this, set a
 domain in Set-Cookie line (doing that will include sub-domains) or preferably:
 use the Netscape format.
-
-This option can be used multiple times.
 
 Users often want to both read cookies from a file and write updated cookies
 back to a file, so using both --cookie and --cookie-jar in the same command

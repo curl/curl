@@ -6,6 +6,7 @@ Category: curl output
 Added: 7.83.0
 See-also: output remote-name
 Example: --no-clobber --output local/dir/file $URL
+Multi: boolean
 ---
 When used in conjunction with the --output, --remote-header-name,
 --remote-name, or --remote-name-all options, curl avoids overwriting files

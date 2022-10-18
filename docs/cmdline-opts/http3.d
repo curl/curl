@@ -10,9 +10,9 @@ Help: Use HTTP v3
 See-also: http1.1 http2
 Category: http
 Example: --http3 $URL
+Multi: mutex
+Experimental: yes
 ---
-**WARNING**: this option is experimental. Do not use in production.
-
 Tells curl to use HTTP version 3 directly to the host and port number used in
 the URL. A normal HTTP/3 transaction will be done to a host and then get
 redirected via Alt-Svc, but this option allows a user to circumvent that when

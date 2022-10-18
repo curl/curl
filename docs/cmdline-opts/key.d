@@ -8,6 +8,7 @@ Category: tls ssh
 Example: --cert certificate --key here $URL
 Added: 7.9.3
 See-also: key-type cert
+Multi: single
 ---
 Private key file name. Allows you to provide your private key in this separate
 file. For SSH, if not specified, curl tries the following candidates in order:
@@ -24,5 +25,3 @@ If curl is built against Secure Transport or Schannel then this option is
 ignored for TLS protocols (HTTPS, etc). Those backends expect the private key
 to be already present in the keychain or PKCS#12 file containing the
 certificate.
-
-If this option is used several times, the last one will be used.

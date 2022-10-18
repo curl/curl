@@ -7,5 +7,6 @@ Added: 7.52.0
 Category: proxy tls
 Example: --proxy-cert file -x https://proxy $URL
 See-also: proxy-cert-type
+Multi: single
 ---
 Same as --cert but used in HTTPS proxy context.

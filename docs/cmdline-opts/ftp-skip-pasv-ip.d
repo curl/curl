@@ -7,6 +7,7 @@ Added: 7.14.2
 See-also: ftp-pasv
 Category: ftp
 Example: --ftp-skip-pasv-ip ftp://example.com/
+Multi: boolean
 ---
 Tell curl to not use the IP address the server suggests in its response
 to curl's PASV command when curl connects the data connection. Instead curl

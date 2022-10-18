@@ -10,6 +10,7 @@ Requires: TLS
 Help: Disable the NPN TLS extension
 Category: tls http
 Example: --no-npn $URL
+Multi: boolean
 ---
 In curl 7.86.0 and later, curl never uses NPN.
 

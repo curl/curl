@@ -7,5 +7,6 @@ Help: Client certificate type for HTTPS proxy
 Category: proxy tls
 Example: --proxy-cert-type PEM --proxy-cert file -x https://proxy $URL
 See-also: proxy-cert
+Multi: single
 ---
 Same as --cert-type but used in HTTPS proxy context.

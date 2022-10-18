@@ -10,6 +10,7 @@ Example: -c store-here.txt $URL
 Example: -c store-here.txt -b read-these $URL
 Added: 7.9
 See-also: cookie
+Multi: single
 ---
 Specify to which file you want curl to write all cookies after a completed
 operation. Curl writes all cookies from its in-memory cookie storage to the
@@ -26,6 +27,3 @@ If the cookie jar cannot be created or written to, the whole curl operation
 will not fail or even report an error clearly. Using --verbose will get a
 warning displayed, but that is the only visible feedback you get about this
 possibly lethal situation.
-
-If this option is used several times, the last specified file name will be
-used.

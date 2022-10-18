@@ -11,6 +11,7 @@ Example: --data-urlencode name=val $URL
 Example: --data-urlencode =encodethis $URL
 Example: --data-urlencode name@file $URL
 Example: --data-urlencode @fileonly $URL
+Multi: append
 ---
 This posts data, similar to the other --data options with the exception
 that this performs URL-encoding.

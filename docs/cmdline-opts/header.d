@@ -11,6 +11,7 @@ Example: -H "X-First-Name: Joe" $URL
 Example: -H "User-Agent: yes-please/2000" $URL
 Example: -H "Host:" $URL
 Added: 5.0
+Multi: append
 ---
 Extra header to include in information sent. When used within an HTTP request,
 it is added to the regular request headers.
@@ -53,5 +54,3 @@ with a request body, will make curl send the data using chunked encoding.
 lead to the header being sent to other hosts than the original host, so
 sensitive headers should be used with caution combined with following
 redirects.
-
-This option can be used multiple times to add/replace/remove multiple headers.

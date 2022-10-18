@@ -8,5 +8,6 @@ Protocols: HTTP
 Category: connection
 See-also: abstract-unix-socket
 Example: --unix-socket socket-path $URL
+Multi: single
 ---
 Connect through this Unix domain socket, instead of using the network.

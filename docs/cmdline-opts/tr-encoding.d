@@ -7,6 +7,7 @@ Protocols: HTTP
 Category: http
 Example: --tr-encoding $URL
 See-also: compressed
+Multi: boolean
 ---
 Request a compressed Transfer-Encoding response using one of the algorithms
 curl supports, and uncompress the data while receiving it.

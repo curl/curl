@@ -8,6 +8,7 @@ Category: verbose
 Example: -w '%{http_code}\\n' $URL
 Added: 6.5
 See-also: verbose head
+Multi: single
 ---
 Make curl display information on stdout after a completed transfer. The format
 is a string that may contain plain text mixed with any number of
@@ -206,4 +207,3 @@ The URL that was fetched last. This is most meaningful if you have told curl
 to follow location: headers.
 .RE
 .IP
-If this option is used several times, the last one will be used.

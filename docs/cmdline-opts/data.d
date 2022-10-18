@@ -12,6 +12,7 @@ Example: -d "name=curl" $URL
 Example: -d "name=curl" -d "tool=cmdline" $URL
 Example: -d @filename $URL
 Added: 4.0
+Multi: append
 ---
 Sends the specified data in a POST request to the HTTP server, in the same way
 that a browser does when a user has filled in an HTML form and presses the
