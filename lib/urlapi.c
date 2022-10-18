@@ -119,8 +119,10 @@ static const char *find_host_sep(const char *url)
  * Decide in an encoding-independent manner whether a character in a URL must
  * be escaped. This is used in urlencode_str().
  */
-#define urlchar_needs_escaping(c)               \
-  !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c))
+static bool urlchar_needs_escaping(int c)
+{
+  return !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c));
+}
 
 /* urlencode_str() writes data into an output dynbuf and URL-encodes the
  * spaces in the source URL accordingly.
