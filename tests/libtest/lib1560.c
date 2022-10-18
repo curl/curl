@@ -138,6 +138,12 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"https://user@example.net?he l lo",
+   "https | user | [12] | [13] | example.net | [15] | / | he+l+lo | [17]",
+   CURLU_ALLOW_SPACE, CURLU_URLENCODE, CURLUE_OK},
+  {"https://user@example.net?he l lo",
+   "https | user | [12] | [13] | example.net | [15] | / | he l lo | [17]",
+   CURLU_ALLOW_SPACE, 0, CURLUE_OK},
   {"https://exam{}[]ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://exam{ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://exam}ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
@@ -849,6 +855,18 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 }
 
 static const struct redircase set_url_list[] = {
+  {"http://example.com/please/../gimme/%TESTNUMBER?foobar#hello",
+   "http://example.net/there/it/is/../../tes t case=/%TESTNUMBER0002? yes no",
+   "http://example.net/there/tes%20t%20case=/%TESTNUMBER0002?+yes+no",
+   0, CURLU_URLENCODE|CURLU_ALLOW_SPACE, CURLUE_OK},
+  {"http://local.test?redirect=http://local.test:80?-321",
+   "http://local.test:80?-123",
+   "http://local.test:80/?-123",
+   0, CURLU_URLENCODE|CURLU_ALLOW_SPACE, CURLUE_OK},
+  {"http://local.test?redirect=http://local.test:80?-321",
+   "http://local.test:80?-123",
+   "http://local.test:80/?-123",
+   0, 0, CURLUE_OK},
   {"http://example.org/static/favicon/wikipedia.ico",
    "//fake.example.com/licenses/by-sa/3.0/",
    "http://fake.example.com/licenses/by-sa/3.0/",
