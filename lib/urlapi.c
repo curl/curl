@@ -116,26 +116,26 @@ static const char *find_host_sep(const char *url)
 }
 
 /*
- * Decide in an encoding-independent manner whether a character in a
- * URL must be escaped. The same criterion must be used in strlen_url()
- * and strcpy_url().
+ * Decide in an encoding-independent manner whether a character in a URL must
+ * be escaped. This is used in urlencode_str().
  */
 static bool urlchar_needs_escaping(int c)
 {
   return !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c));
 }
 
-/* strcpy_url() creates a url in an output dynbuf and URL-encodes the spaces
- * in the source URL accordingly.
+/* urlencode_str() writes data into an output dynbuf and URL-encodes the
+ * spaces in the source URL accordingly.
  *
  * URL encoding should be skipped for host names, otherwise IDN resolution
  * will fail.
- *
  */
-static CURLUcode strcpy_url(struct dynbuf *o, const char *url, bool relative)
+static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
+                               size_t len, bool relative,
+                               bool query)
 {
   /* we must add this with whitespace-replacing */
-  bool left = TRUE;
+  bool left = !query;
   const unsigned char *iptr;
   const unsigned char *host_sep = (const unsigned char *) url;
 
@@ -143,8 +143,7 @@ static CURLUcode strcpy_url(struct dynbuf *o, const char *url, bool relative)
     host_sep = (const unsigned char *) find_host_sep(url);
 
   for(iptr = (unsigned char *)url;    /* read from here */
-      *iptr;         /* until zero byte */
-      iptr++) {
+      len; iptr++, len--) {
 
     if(iptr < host_sep) {
       if(Curl_dyn_addn(o, iptr, 1))
@@ -361,7 +360,7 @@ static char *concat_url(char *base, const char *relurl)
   }
 
   /* then append the new piece on the right side */
-  strcpy_url(&newest, useurl, !host_changed);
+  urlencode_str(&newest, useurl, strlen(useurl), !host_changed, FALSE);
 
   return Curl_dyn_ptr(&newest);
 }
@@ -1130,16 +1129,6 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     }
   }
 
-  if(*path && (flags & CURLU_URLENCODE)) {
-    struct dynbuf enc;
-    Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    if(strcpy_url(&enc, path, TRUE)) { /* consider it relative */
-      result = CURLUE_OUT_OF_MEMORY;
-      goto fail;
-    }
-    path = u->path = Curl_dyn_ptr(&enc);
-  }
-
   fragment = strchr(path, '#');
   if(fragment) {
     fraglen = strlen(fragment);
@@ -1163,12 +1152,25 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     size_t qlen = strlen(query) - fraglen; /* includes '?' */
     pathlen = strlen(path) - qlen - fraglen;
     if(qlen > 1) {
-      u->query = Curl_memdup(query + 1, qlen);
-      if(!u->query) {
-        result = CURLUE_OUT_OF_MEMORY;
-        goto fail;
+      if(qlen && (flags & CURLU_URLENCODE)) {
+        struct dynbuf enc;
+        Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+        /* skip the leading question mark */
+        if(urlencode_str(&enc, query + 1, qlen - 1, TRUE, TRUE)) {
+          result = CURLUE_OUT_OF_MEMORY;
+          goto fail;
+        }
+        qlen = Curl_dyn_len(&enc);
+        query = u->query = Curl_dyn_ptr(&enc);
       }
-      u->query[qlen - 1] = 0;
+      else {
+        u->query = Curl_memdup(query + 1, qlen);
+        if(!u->query) {
+          result = CURLUE_OUT_OF_MEMORY;
+          goto fail;
+        }
+        u->query[qlen - 1] = 0;
+      }
 
       if(junkscan(u->query, flags)) {
         result = CURLUE_BAD_QUERY;
@@ -1186,6 +1188,17 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   }
   else
     pathlen = strlen(path) - fraglen;
+
+  if(pathlen && (flags & CURLU_URLENCODE)) {
+    struct dynbuf enc;
+    Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+    if(urlencode_str(&enc, path, pathlen, TRUE, FALSE)) {
+      result = CURLUE_OUT_OF_MEMORY;
+      goto fail;
+    }
+    pathlen = Curl_dyn_len(&enc);
+    path = u->path = Curl_dyn_ptr(&enc);
+  }
 
   if(!pathlen) {
     /* there is no path left, unset */
@@ -1563,13 +1576,15 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     break;
   }
   if(ptr) {
-    *part = strdup(ptr);
+    size_t partlen = strlen(ptr);
+    size_t i = 0;
+    *part = Curl_memdup(ptr, partlen + 1);
     if(!*part)
       return CURLUE_OUT_OF_MEMORY;
     if(plusdecode) {
       /* convert + to space */
-      char *plus;
-      for(plus = *part; *plus; ++plus) {
+      char *plus = *part;
+      for(i = 0; i < partlen; ++plus, i++) {
         if(*plus == '+')
           *plus = ' ';
       }
@@ -1586,11 +1601,13 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
         return CURLUE_URLDECODE;
       }
       *part = decoded;
+      partlen = dlen;
     }
     if(urlencode) {
       struct dynbuf enc;
       Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-      if(strcpy_url(&enc, *part, TRUE)) /* consider it relative */
+      if(urlencode_str(&enc, *part, partlen, TRUE,
+                       what == CURLUPART_QUERY))
         return CURLUE_OUT_OF_MEMORY;
       free(*part);
       *part = Curl_dyn_ptr(&enc);
