@@ -1935,8 +1935,7 @@ schannel_connect_common(struct Curl_easy *data, struct connectdata *conn,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    if(!connssl->backend->recv_renegotiating)
-    {
+    if(!connssl->backend->recv_renegotiating) {
       /* On renegotiation, we don't want to reset the existing recv/send
        * function pointers. They will have been set after the initial TLS
        * handshake was completed. If they were subsequently modified, as
