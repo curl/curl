@@ -303,8 +303,10 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     bool found = false;
     struct Curl_addrinfo *addr = dns->addr;
 
+#ifdef PF_INET6
     if(data->conn->ip_version == CURL_IPRESOLVE_V6)
       pf = PF_INET6;
+#endif
 
     while(addr) {
       if(addr->ai_family == pf) {
