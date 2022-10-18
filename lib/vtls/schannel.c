@@ -1935,8 +1935,15 @@ schannel_connect_common(struct Curl_easy *data, struct connectdata *conn,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = schannel_recv;
-    conn->send[sockindex] = schannel_send;
+    if(!connssl->backend->recv_renegotiating) {
+      /* On renegotiation, we don't want to reset the existing recv/send
+       * function pointers. They will have been set after the initial TLS
+       * handshake was completed. If they were subsequently modified, as
+       * is the case with HTTP/2, we don't want to override that change.
+       */
+      conn->recv[sockindex] = schannel_recv;
+      conn->send[sockindex] = schannel_send;
+    }
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
     /* When SSPI is used in combination with Schannel
