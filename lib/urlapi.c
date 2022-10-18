@@ -132,7 +132,8 @@ static bool urlchar_needs_escaping(int c)
  * will fail.
  *
  */
-static CURLUcode strcpy_url(struct dynbuf *o, const char *url, bool relative)
+static CURLUcode strcpy_url(struct dynbuf *o, const char *url,
+                            size_t len, bool relative)
 {
   /* we must add this with whitespace-replacing */
   bool left = TRUE;
@@ -143,8 +144,7 @@ static CURLUcode strcpy_url(struct dynbuf *o, const char *url, bool relative)
     host_sep = (const unsigned char *) find_host_sep(url);
 
   for(iptr = (unsigned char *)url;    /* read from here */
-      *iptr;         /* until zero byte */
-      iptr++) {
+      len; iptr++, len--) {
 
     if(iptr < host_sep) {
       if(Curl_dyn_addn(o, iptr, 1))
@@ -361,7 +361,7 @@ static char *concat_url(char *base, const char *relurl)
   }
 
   /* then append the new piece on the right side */
-  strcpy_url(&newest, useurl, !host_changed);
+  strcpy_url(&newest, useurl, strlen(useurl), !host_changed);
 
   return Curl_dyn_ptr(&newest);
 }
@@ -1130,16 +1130,6 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     }
   }
 
-  if(*path && (flags & CURLU_URLENCODE)) {
-    struct dynbuf enc;
-    Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    if(strcpy_url(&enc, path, TRUE)) { /* consider it relative */
-      result = CURLUE_OUT_OF_MEMORY;
-      goto fail;
-    }
-    path = u->path = Curl_dyn_ptr(&enc);
-  }
-
   fragment = strchr(path, '#');
   if(fragment) {
     fraglen = strlen(fragment);
@@ -1186,6 +1176,17 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   }
   else
     pathlen = strlen(path) - fraglen;
+
+  if(pathlen && (flags & CURLU_URLENCODE)) {
+    struct dynbuf enc;
+    Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+    if(strcpy_url(&enc, path, pathlen, TRUE)) { /* consider it relative */
+      result = CURLUE_OUT_OF_MEMORY;
+      goto fail;
+    }
+    pathlen = Curl_dyn_len(&enc);
+    path = u->path = Curl_dyn_ptr(&enc);
+  }
 
   if(!pathlen) {
     /* there is no path left, unset */
@@ -1563,13 +1564,15 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     break;
   }
   if(ptr) {
-    *part = strdup(ptr);
+    size_t partlen = strlen(ptr);
+    size_t i = 0;
+    *part = Curl_memdup(ptr, partlen + 1);
     if(!*part)
       return CURLUE_OUT_OF_MEMORY;
     if(plusdecode) {
       /* convert + to space */
-      char *plus;
-      for(plus = *part; *plus; ++plus) {
+      char *plus = *part;
+      for(i = 0; i < partlen; ++plus, i++) {
         if(*plus == '+')
           *plus = ' ';
       }
@@ -1586,11 +1589,12 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
         return CURLUE_URLDECODE;
       }
       *part = decoded;
+      partlen = dlen;
     }
     if(urlencode) {
       struct dynbuf enc;
       Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-      if(strcpy_url(&enc, *part, TRUE)) /* consider it relative */
+      if(strcpy_url(&enc, *part, partlen, TRUE)) /* consider it relative */
         return CURLUE_OUT_OF_MEMORY;
       free(*part);
       *part = Curl_dyn_ptr(&enc);

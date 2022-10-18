@@ -849,6 +849,14 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 }
 
 static const struct redircase set_url_list[] = {
+  {"http://local.test?redirect=http://local.test:80?-321",
+   "http://local.test:80?-123",
+   "http://local.test:80/?-123",
+   0, CURLU_URLENCODE|CURLU_ALLOW_SPACE, CURLUE_OK},
+  {"http://local.test?redirect=http://local.test:80?-321",
+   "http://local.test:80?-123",
+   "http://local.test:80/?-123",
+   0, 0, CURLUE_OK},
   {"http://example.org/static/favicon/wikipedia.ico",
    "//fake.example.com/licenses/by-sa/3.0/",
    "http://fake.example.com/licenses/by-sa/3.0/",
