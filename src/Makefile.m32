@@ -70,14 +70,14 @@ endif
 vpath %.c $(PROOT)/lib
 
 TOCLEAN := $(curl_OBJECTS)
-ifneq ($(wildcard tool_hugehelp.c.cvs),)
-TOCLEAN += tool_hugehelp.c
-endif
 
 ### Rules
 
+ifneq ($(wildcard tool_hugehelp.c.cvs),)
 PERL  ?= perl
 NROFF ?= groff
+
+TOCLEAN += tool_hugehelp.c
 
 ifneq ($(shell $(WHICH) $(NROFF)),)
 $(PROOT)/docs/curl.1: $(wildcard $(PROOT)/docs/cmdline-opts/*.d)
@@ -97,6 +97,7 @@ else
 tool_hugehelp.c:
 	@echo Creating $@
 	@$(call COPY, $@.cvs, $@)
+endif
 endif
 
 $(TARGETS): $(curl_OBJECTS) $(curl_DEPENDENCIES)
