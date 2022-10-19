@@ -47,7 +47,7 @@ UNITTEST_START
 UNITTEST_STOP
 #else
 
-bool stripcredentials(char **url);
+char *stripcredentials(const char *url);
 
 struct checkthis {
   const char *input;
@@ -67,25 +67,22 @@ static const struct checkthis tests[] = {
 
 UNITTEST_START
 {
-  bool cleanup;
-  char *url;
   int i;
   int rc = 0;
 
   for(i = 0; tests[i].input; i++) {
-    url = (char *)tests[i].input;
-    cleanup = stripcredentials(&url);
+    const char *url = tests[i].input;
+    char *stripped = stripcredentials(url);
     printf("Test %u got input \"%s\", output: \"%s\"\n",
-           i, tests[i].input, url);
+           i, tests[i].input, stripped);
 
-    if(strcmp(tests[i].output, url)) {
+    if(stripped && strcmp(tests[i].output, stripped)) {
       fprintf(stderr, "Test %u got input \"%s\", expected output \"%s\"\n"
               " Actual output: \"%s\"\n", i, tests[i].input, tests[i].output,
-              url);
+              stripped);
       rc++;
     }
-    if(cleanup)
-      curl_free(url);
+    curl_free(stripped);
   }
   return rc;
 }
