@@ -97,10 +97,16 @@ endif
 _LDFLAGS :=
 _LIBS :=
 
-ifneq ($(findstring -watt,$(CFG))$(WATT_ROOT),)
-  WATT_ROOT ?= $(PROOT)/../watt
-  CPPFLAGS += -I"$(WATT_ROOT)/inc"
-  _LDFLAGS += -L"$(WATT_ROOT)/lib"
+# For compatibility
+ifdef WATT_ROOT
+  CFG += -watt
+  WATT_PATH := $(WATT_ROOT)
+endif
+
+ifneq ($(findstring -watt,$(CFG)),)
+  WATT_PATH ?= $(PROOT)/../watt
+  CPPFLAGS += -I"$(WATT_PATH)/inc"
+  _LDFLAGS += -L"$(WATT_PATH)/lib"
   _LIBS += -lwatt
 endif
 
