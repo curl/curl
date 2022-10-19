@@ -1197,7 +1197,7 @@ static CURLcode singleipconnect(struct Curl_easy *data,
 #ifdef TCP_FASTOPEN_CONNECT
   int optval = 1;
 #endif
-  const char * ipmsg;
+  const char *ipmsg;
   char buffer[STRERROR_LEN];
   curl_socket_t *sockp = &conn->tempsock[tempindex];
   *sockp = CURL_SOCKET_BAD;
