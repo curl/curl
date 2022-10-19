@@ -36,6 +36,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib
 
+disabled_CPPFLAGS = $(AM_CPPFLAGS) \
+              -I$(top_srcdir)/src
+
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 

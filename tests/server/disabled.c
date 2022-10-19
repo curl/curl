@@ -33,6 +33,7 @@
 
 #include "curl_setup.h"
 #include "multihandle.h" /* for ENABLE_WAKEUP */
+#include "tool_xattr.h" /* for USE_XATTR */
 #include <stdio.h>
 
 static const char *disabled[]={
@@ -74,6 +75,9 @@ static const char *disabled[]={
 #endif
 #ifdef CURL_DISABLE_HEADERS_API
   "headers-api",
+#endif
+#ifndef USE_XATTR
+  "xattr",
 #endif
   NULL
 };

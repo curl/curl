@@ -22,17 +22,6 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-
-#ifdef HAVE_FSETXATTR
-#  include <sys/xattr.h> /* header from libc, not from libattr */
-#  define USE_XATTR
-#elif (defined(__FreeBSD_version) && (__FreeBSD_version > 500000)) || \
-      defined(__MidnightBSD_version)
-#  include <sys/types.h>
-#  include <sys/extattr.h>
-#  define USE_XATTR
-#endif
-
 #include "tool_xattr.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -143,14 +132,5 @@ int fwrite_xattr(CURL *curl, const char *url, int fd)
     curl_free(nurl);
   }
   return err;
-}
-#else
-int fwrite_xattr(CURL *curl, const char *url, int fd)
-{
-  (void)curl;
-  (void)url;
-  (void)fd;
-
-  return 0;
 }
 #endif

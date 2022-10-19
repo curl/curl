@@ -447,6 +447,7 @@ Features testable here are:
 - `win32`
 - `wolfssh`
 - `wolfssl`
+- `xattr`
 
 as well as each protocol that curl supports. A protocol only needs to be
 specified if it is different from the server (useful when the server is

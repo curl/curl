@@ -2958,7 +2958,7 @@ sub setupfeatures {
     $feature{"verbose-strings"} = 1;
     $feature{"wakeup"} = 1;
     $feature{"headers-api"} = 1;
-
+    $feature{"xattr"} = 1;
 }
 
 #######################################################################
