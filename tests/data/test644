@@ -1,0 +1,85 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+xattr
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 301 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: fake/data
+Funny-head: yesyes
+Location: data/%TESTNUMBER0002.txt?coolsite=yes
+
+-foo-
+</data>
+<data2 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/real
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data2>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+debug
+xattr
+</features>
+# simulate the xattr operations
+<setenv>
+CURL_FAKE_XATTR=1
+</setenv>
+<name>
+--xattr with redirect
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --xattr -L -o log/out%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /data/%TESTNUMBER0002.txt?coolsite=yes HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout mode="text">
+user.mime_type => text/html
+user.xdg.origin.url => http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</stdout>
+</verify>
+</testcase>
