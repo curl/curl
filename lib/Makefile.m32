@@ -25,7 +25,7 @@
 # Makefile for building curl parts with MinGW and optional features.
 #
 # Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
-# Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
+# Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-libssh2-ipv6
 #
 # Set component roots via envvar <feature>_PATH. Also available for
 # customization: CC, RC, AR, CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS,
