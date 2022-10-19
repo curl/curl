@@ -25,6 +25,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-int fwrite_xattr(CURL *curl, int fd);
+int fwrite_xattr(CURL *curl, const char *url, int fd);
 
 #endif /* HEADER_CURL_TOOL_XATTR_H */
