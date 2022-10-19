@@ -1215,7 +1215,6 @@ static CURLcode singleipconnect(struct Curl_easy *data,
     Curl_closesocket(data, conn, sockfd);
     return CURLE_OK;
   }
-
 #ifdef ENABLE_IPV6
   if(addr.family == AF_INET6)
     ipmsg = "  Trying [%s]:%d...";
