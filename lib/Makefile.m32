@@ -77,7 +77,6 @@ RCFLAGS  += -I$(PROOT)/include
 
 ifdef AMIGA
   BIN_EXT :=
-  CFLAGS += -msoft-float
 endif
 
 ### Optional features
