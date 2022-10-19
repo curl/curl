@@ -2465,6 +2465,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
 
     if((instate != FTP_LIST) &&
        !data->state.prefer_ascii &&
+       !data->set.ignorecl &&
        (ftp->downloadsize < 1)) {
       /*
        * It seems directory listings either don't show the size or very
