@@ -84,7 +84,7 @@ $(PROOT)/docs/curl.1: $(wildcard $(PROOT)/docs/cmdline-opts/*.d)
 	cd $(PROOT)/docs/cmdline-opts && \
 	$(PERL) gen.pl mainpage $(notdir $^) > ../curl.1
 
-# FIXME: mkhelp.pl to prepend `#include "tool_setup.h"` to its output
+# Necessary for the generated tools_hugehelp.c
 CPPFLAGS += -DUSE_MANUAL
 
 ifdef ZLIB
