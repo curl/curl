@@ -28,7 +28,7 @@
 # Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-libssh2-ipv6
 #
 # Set component roots via envvar <feature>_PATH. Also available for
-# customization: CC, RC, AR, CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS,
+# customization: CC, AR, RC, CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS,
 # TRIPLET, CROSSPREFIX, CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
 # and more for individual components (see below).
 
