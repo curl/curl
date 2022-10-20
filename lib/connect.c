@@ -1197,6 +1197,7 @@ static CURLcode singleipconnect(struct Curl_easy *data,
 #ifdef TCP_FASTOPEN_CONNECT
   int optval = 1;
 #endif
+  const char *ipmsg;
   char buffer[STRERROR_LEN];
   curl_socket_t *sockp = &conn->tempsock[tempindex];
   *sockp = CURL_SOCKET_BAD;
@@ -1214,11 +1215,13 @@ static CURLcode singleipconnect(struct Curl_easy *data,
     Curl_closesocket(data, conn, sockfd);
     return CURLE_OK;
   }
-  infof(data, "  Trying %s%s%s:%d...",
-        (addr.family == AF_INET6 ? "[" : ""),
-        ipaddress,
-        (addr.family == AF_INET6 ? "]" : ""),
-        port);
+#ifdef ENABLE_IPV6
+  if(addr.family == AF_INET6)
+    ipmsg = "  Trying [%s]:%d...";
+  else
+#endif
+    ipmsg = "  Trying %s:%d...";
+  infof(data, ipmsg, ipaddress, port);
 
 #ifdef ENABLE_IPV6
   is_tcp = (addr.family == AF_INET || addr.family == AF_INET6) &&
