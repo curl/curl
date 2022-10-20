@@ -93,6 +93,8 @@ UNITTEST_START
     { "BAr", "foo,,,,,              bar, ::1/64", TRUE},
     { "www.example.com", "foo, .example.com", TRUE},
     { "www.example.com", "www2.example.com, .example.net", FALSE},
+    { "example.com", ".example.com, .example.net", TRUE},
+    { "nonexample.com", ".example.com, .example.net", FALSE},
     { NULL, NULL, FALSE}
   };
   for(i = 0; list4[i].a; i++) {
