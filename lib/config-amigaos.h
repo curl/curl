@@ -71,6 +71,10 @@
 #define SIZEOF_INT 4
 #define SIZEOF_SIZE_T 4
 
+#ifndef SIZEOF_CURL_OFF_T
+#define SIZEOF_CURL_OFF_T 8
+#endif
+
 #define USE_MANUAL 1
 #define CURL_DISABLE_LDAP 1
 
