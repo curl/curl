@@ -1160,8 +1160,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
           result = CURLUE_OUT_OF_MEMORY;
           goto fail;
         }
-        qlen = Curl_dyn_len(&enc);
-        query = u->query = Curl_dyn_ptr(&enc);
+        u->query = Curl_dyn_ptr(&enc);
       }
       else {
         u->query = Curl_memdup(query + 1, qlen);
