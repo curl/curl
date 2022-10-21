@@ -45,7 +45,8 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
     /* strange input */
     return FALSE;
 
-  Curl_inet_pton(AF_INET, ipv4, &address);
+  if(1 != Curl_inet_pton(AF_INET, ipv4, &address))
+    return FALSE;
   if(1 != Curl_inet_pton(AF_INET, network, &check))
     return FALSE;
 
@@ -79,7 +80,8 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
 
   bytes = bits/8;
   rest = bits & 0x07;
-  Curl_inet_pton(AF_INET6, ipv6, address);
+  if(1 != Curl_inet_pton(AF_INET6, ipv6, address))
+    return FALSE;
   if(1 != Curl_inet_pton(AF_INET6, network, check))
     return FALSE;
   if((bytes > 16) || ((bytes == 16) && rest))
