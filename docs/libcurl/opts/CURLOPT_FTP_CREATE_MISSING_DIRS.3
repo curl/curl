@@ -66,7 +66,7 @@ CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/non-existing/new.txt");
   curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                         CURLFTP_CREATE_DIR_RETRY);
+                   (long)CURLFTP_CREATE_DIR_RETRY);
 
   ret = curl_easy_perform(curl);
 

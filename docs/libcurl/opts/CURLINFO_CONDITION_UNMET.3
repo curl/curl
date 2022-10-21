@@ -52,7 +52,8 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_TIMEVALUE, 1577833200L);
 
   /* If-Modified-Since the above time stamp */
-  curl_easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+  curl_easy_setopt(curl, CURLOPT_TIMECONDITION,
+                   (long)CURL_TIMECOND_IFMODSINCE);
 
   /* Perform the request */
   res = curl_easy_perform(curl);
