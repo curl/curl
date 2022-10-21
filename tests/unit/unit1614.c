@@ -49,6 +49,7 @@ struct noproxy {
 };
 
 UNITTEST_START
+#ifdef DEBUGBUILD
 {
   int i;
   int err = 0;
@@ -126,4 +127,7 @@ UNITTEST_START
   }
   return err;
 }
+#else
+return 0;
+#endif
 UNITTEST_STOP
