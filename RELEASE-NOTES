@@ -4,7 +4,7 @@ curl and libcurl 7.86.0
  Command line options:         248
  curl_easy_setopt() options:   300
  Public functions in libcurl:  91
- Contributors:                 2730
+ Contributors:                 2731
 
 This release includes the following changes:
 
@@ -15,6 +15,9 @@ This release includes the following bugfixes:
 
  o altsvc: reject bad port numbers [86]
  o altsvc: use 'h3' for h3 [46]
+ o amiga: do not hardcode openssl/zlib into the os config [158]
+ o amiga: set SIZEOF_CURL_OFF_T=8 by default [150]
+ o amigaos: add missing curl header [159]
  o asyn-ares: set hint flags when calling ares_getaddrinfo [93]
  o autotools: allow --enable-symbol-hiding with windows [65]
  o autotools: allow unix sockets on Windows [144]
@@ -36,11 +39,13 @@ This release includes the following bugfixes:
  o cmake: set HAVE_GETADDRINFO_THREADSAFE on Windows [147]
  o cmake: set HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID on Windows [146]
  o cmake: sync HAVE_SIGNAL detection with autotools [148]
+ o cmdline/docs: add a required 'multi' keyword for each option [160]
  o configure: correct the wording when checking grep -E [13]
  o configure: deprecate builds with small curl_off_t [89]
  o configure: fail if '--without-ssl' + explicit parameter for an ssl lib [164]
  o configure: the ngtcp2 option should default to 'no' [125]
  o connect: change verbose IPv6 address:port to [address]:port [83]
+ o connect: fix builds without AF_INET6 [152]
  o connect: fix Curl_updateconninfo for TRNSPRT_UNIX [108]
  o connect: fix the wrong error message on connect failures [55]
  o content_encoding: use writer struct subclasses for different encodings [8]
@@ -62,11 +67,14 @@ This release includes the following bugfixes:
  o curl_setup: include only system.h instead of curl.h [34]
  o curl_strequal.3: fix argument typo [60]
  o curl_url_set.3: document CURLU_APPENDQUERY proper [96]
+ o CURLMOPT_PIPELINING.3: dedup manpage xref [111]
  o CURLOPT_ACCEPT_ENCODING.3: remove "four" as they are five [85]
+ o CURLOPT_AUTOREFERER.3: highlight the privacy leak risk [161]
  o CURLOPT_COOKIEFILE: insist on "" for enable-without-file [119]
  o CURLOPT_COOKIELIST.3: fix formatting mistake [80]
  o CURLOPT_DNS_INTERFACE.3: mention it works for almost all protocols [15]
  o CURLOPT_MIMEPOST.3: add an (inline) example [126]
+ o CURLOPT_POSTFIELDS.3: refer to CURLOPT_MIMEPOST [167]
  o CURLOPT_PROXY_SSLCERT_BLOB.3: this is for HTTPS proxies [9]
  o CURLOPT_WILDCARDMATCH.3: Fix backslash escaping under single quotes [172]
  o CURLSHOPT_UNLOCKFUNC.3: the callback has no 'access' argument [84]
@@ -87,6 +95,7 @@ This release includes the following bugfixes:
  o examples/chkspeed: improve portability [48]
  o formdata: fix warning: 'CURLformoption' is promoted to 'int' [24]
  o ftp: ignore a 550 response to MDTM [1]
+ o ftp: remove redundant if [163]
  o functypes: provide the recv and send arg and return types [87]
  o getparameter: return PARAM_MANUAL_REQUESTED for -M even when disabled [17]
  o GHA: build tests in a separate step from the running of them [78]
@@ -94,6 +103,7 @@ This release includes the following bugfixes:
  o github: initial CODEOWNERS setup for CI configuration [52]
  o header: define public API functions as extern c [26]
  o headers: reset the requests counter at transfer start [25]
+ o hostip: guard PF_INET6 use [157]
  o hostip: lazily wait to figure out if IPv6 works until needed [36]
  o http, vauth: always provide Curl_allow_auth_to_host() functionality [90]
  o http2: make nghttp2 less picky about field whitespace [27]
@@ -120,8 +130,10 @@ This release includes the following bugfixes:
  o manpages: Fix spelling of "allows to" -> "allows one to" [171]
  o misc: ISSPACE() => ISBLANK() [11]
  o misc: use the term "null-terminate" consistently [41]
+ o mprintf: reject two kinds of precision for the same argument [162]
  o mprintf: use snprintf if available [74]
  o mqtt: return error for too long topic [133]
+ o mqtt: spell out CONNECT in comments [166]
  o msh3: change the static_assert to make the code C89
  o netrc: compare user name case sensitively [118]
  o netrc: use the URL-decoded user [103]
@@ -133,6 +145,7 @@ This release includes the following bugfixes:
  o resolve: make forced IPv4 resolve only use A queries [61]
  o runtests: fix uninitialized value on ignored tests [128]
  o schannel: ban server ALPN change during recv renegotiation [63]
+ o schannel: don't reset recv/send function pointers on renegotiation [156]
  o schannel: when importing PFX, disable key persistence [141]
  o scripts: use `grep -E` instead of `egrep` [30]
  o setopt: use the handler table for protocol name to number conversions [45]
@@ -151,17 +164,19 @@ This release includes the following bugfixes:
  o test972: verify the output without using external tool [32]
  o tests/certs/scripts: insert standard curl source headers [169]
  o tests/Makefile: remove run time stats from ci-test [120]
+ o tests: avoid CreateThread if _beginthreadex is available [155]
  o tests: fix tag syntax errors in test files
  o tests: skip mime/form tests when mime is not built-in [54]
  o tidy-up: delete parallel/unused feature flags [117]
  o tidy-up: delete unused HAVE_STRUCT_POLLFD [134]
- o TODO: Provide the error body from a CONNECT response [67]
+ o TODO: provide the error body from a CONNECT response [67]
  o tool: avoid generating ambiguous escaped characters in --libcurl [124]
  o tool: remove dead code [70]
  o tool: reorganize function c_escape around a dynbuf [121]
  o tool_hugehelp: make hugehelp a blank macro when disabled [7]
  o tool_main: exit at once if out of file descriptors [113]
  o tool_operate: avoid a few #ifdefs for disabled-libcurl builds [29]
+ o tool_operate: more transfer cleanup after parallel transfer fail [165]
  o tool_operate: prevent over-queuing in parallel mode [176]
  o tool_operate: reduce errorbuffer allocs [173]
  o tool_paramhelp: asserts verify maximum sizes for string loading [112]
@@ -173,11 +188,12 @@ This release includes the following bugfixes:
  o url: allow non-HTTPS HSTS-matching for debug builds [105]
  o url: rename function due to name-clash in Watt-32 [62]
  o urlapi: detect scheme better when not guessing [56]
+ o urlapi: fix parsing URL without slash with CURLU_URLENCODE [154]
  o urlapi: leaner with fewer allocs [2]
  o urlapi: reject more bad characters from the host name field [88]
  o websockets: remodeled API to support 63 bit frame sizes [114]
  o winbuild/MakefileBuild.vc: handle spaces in libssh(2) include paths [18]
- o winbuild: Use NMake batch-rules for compilation [47]
+ o winbuild: use NMake batch-rules for compilation [47]
  o windows: add .rc support to autotools builds [33]
  o windows: adjust name of two internal public functions [58]
  o windows: autotools .rc warnings fixup [68]
@@ -192,22 +208,23 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   12932 on github, a1346054 on github, Aftab Alam, ajak in #curl,
-  Andrew Lambert, Benjamin Loison, bsergean on github, Christopher Sauer,
-  Dan Fandrich, Daniel Hallberg, Daniel Stenberg, David Hu, David McLaughlin,
-  Dmitry Karpov, Dominik Klemba, Dustin Howett, Edoardo Lolletti, Eloy Degen,
-  Emanuele Torre, Emilio López, Gisle Vanem, Hayden Roche, Hiroki Kurosawa,
-  James Fuller, John Bampton, Jonas Haag, jurisuk on github,
-  justchen1369 on github, Keitagit-kun on github, Kelly Kaoudis, Marcel Raad,
-  Marc Hörsken, Mark Itzcovitz, Martin Ågren, Matthias Gatto, Matt Holt,
-  Max Dymond, Michael Drake, Michael Heimpold, n0name321 on github,
-  Orgad Shaneh, Patrick Monnerat, Paul Seligman, Petr Štetiar, Philip H,
+  Andrew Lambert, Benjamin Loison, Brad Harder, bsergean on github,
+  Christopher Sauer, Dan Fandrich, Daniel Hallberg, Daniel Stenberg, David Hu,
+  David McLaughlin, Dmitry Karpov, Dominik Klemba, Dustin Howett,
+  Edoardo Lolletti, Eloy Degen, Emanuele Torre, Emilio López, Gisle Vanem,
+  Hayden Roche, Hiroki Kurosawa, James Fuller, Joel Depooter, John Bampton,
+  Jonas Haag, jurisuk on github, justchen1369 on github,
+  Keitagit-kun on github, Kelly Kaoudis, Marcel Raad, Marc Hörsken,
+  Mark Itzcovitz, Martin Ågren, Matthias Gatto, Matt Holt, Max Dymond,
+  Michael Drake, Michael Heimpold, n0name321 on github, Orgad Shaneh,
+  Patrick Monnerat, Paul Seligman, Peter Goodman, Petr Štetiar, Philip H,
   Philip H., Philip Heiduck, ProceduralMan on github, Randall S. Becker,
   Ray Satiro, Rickard Hallerbäck, RobBotic1 on github, Robby Simpson,
   Samuel Henrique, Sergey Bronnikov, ShadowZzj on github, Shaun Mirani,
   ssdbest on github, Thiago Suchorski, Tobias Schaefer, Trail of Bits,
   Vasiliy Ulyanov, Viktor Szakats, Xiang Xiao, Yuriy Chernyshov,
   zhanghu on xiaomi
-  (66 contributors)
+  (69 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -321,6 +338,7 @@ References to bug reports and discussions on issues:
  [108] = https://curl.se/bug/?i=9664
  [109] = https://curl.se/bug/?i=9712
  [110] = https://curl.se/bug/?i=9646
+ [111] = https://curl.se/bug/?i=9776
  [112] = https://curl.se/bug/?i=9719
  [113] = https://curl.se/bug/?i=9663
  [114] = https://curl.se/bug/?i=9636
@@ -358,8 +376,23 @@ References to bug reports and discussions on issues:
  [147] = https://curl.se/bug/?i=9727
  [148] = https://curl.se/bug/?i=9725
  [149] = https://curl.se/bug/?i=9731
+ [150] = https://curl.se/bug/?i=9771
  [151] = https://curl.se/bug/?i=9732
+ [152] = https://curl.se/bug/?i=9770
+ [154] = https://curl.se/bug/?i=9763
+ [155] = https://curl.se/bug/?i=9705
+ [156] = https://curl.se/bug/?i=9451
+ [157] = https://curl.se/bug/?i=9760
+ [158] = https://curl.se/bug/?i=9762
+ [159] = https://curl.se/bug/?i=9761
+ [160] = https://curl.se/bug/?i=9759
+ [161] = https://curl.se/bug/?i=9757
+ [162] = https://curl.se/bug/?i=9754
+ [163] = https://curl.se/bug/?i=9753
  [164] = https://curl.se/bug/?i=9414
+ [165] = https://curl.se/bug/?i=9749
+ [166] = https://curl.se/bug/?i=9751
+ [167] = https://curl.se/bug/?i=9752
  [169] = https://curl.se/bug/?i=9417
  [170] = https://curl.se/bug/?i=9415
  [171] = https://curl.se/bug/?i=9419
