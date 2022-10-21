@@ -13,6 +13,7 @@ none
 </server>
 <features>
 unittest
+proxy
 </features>
  <name>
 cidr comparisons
