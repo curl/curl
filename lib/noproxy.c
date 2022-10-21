@@ -70,6 +70,7 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
                                const char *network,
                                unsigned int bits)
 {
+#ifdef ENABLE_IPV6
   int bytes;
   int rest;
   unsigned char address[16];
@@ -92,6 +93,9 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
     return FALSE;
 
   return TRUE;
+#else
+  return FALSE;
+#endif
 }
 
 enum nametype {
