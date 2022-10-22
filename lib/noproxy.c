@@ -94,6 +94,9 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
 
   return TRUE;
 #else
+  (void)ipv6;
+  (void)network;
+  (void)bits;
   return FALSE;
 #endif
 }
@@ -213,4 +216,3 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
 }
 
 #endif /* CURL_DISABLE_PROXY */
-
