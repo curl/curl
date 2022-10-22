@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "ws.h"
 
 typedef enum {
   HTTPREQ_GET,
@@ -49,6 +50,15 @@ extern const struct Curl_handler Curl_handler_http;
 #ifdef USE_SSL
 extern const struct Curl_handler Curl_handler_https;
 #endif
+
+#ifdef USE_WEBSOCKETS
+extern const struct Curl_handler Curl_handler_ws;
+
+#ifdef USE_SSL
+extern const struct Curl_handler Curl_handler_wss;
+#endif
+#endif /* websockets */
+
 
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
@@ -218,6 +228,10 @@ struct HTTP {
     HTTPSEND_BODY     /* sending body */
   } sending;
 
+#ifdef USE_WEBSOCKETS
+  struct websocket ws;
+#endif
+
 #ifndef CURL_DISABLE_HTTP
   struct dynbuf send_buffer; /* used if the request couldn't be sent in one
                                 chunk, points to an allocated send_buffer
@@ -366,11 +380,5 @@ Curl_http_output_auth(struct Curl_easy *data,
                       const char *path,
                       bool proxytunnel); /* TRUE if this is the request setting
                                             up the proxy tunnel */
-
-/*
- * Curl_allow_auth_to_host() tells if authentication, cookies or other
- * "sensitive data" can (still) be sent to this host.
- */
-bool Curl_allow_auth_to_host(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_HTTP_H */

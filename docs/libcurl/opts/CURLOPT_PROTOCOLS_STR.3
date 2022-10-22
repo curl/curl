@@ -45,8 +45,8 @@ set, it returns error.
 These are the available protocols:
 
 DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS,
-POP3, POP3S, RTMP, RTMPE, RTMPS, RTMPT, RTMPTE, RTMPTS, RTSP, SCP, SFTP, SMB,
-SMBS, SMTP, SMTPS, TELNET, TFTP
+MQTT, POP3, POP3S, RTMP, RTMPE, RTMPS, RTMPT, RTMPTE, RTMPTS, RTSP, SCP, SFTP,
+SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS, WSS
 
 You can set "ALL" as a short-cut to enable all protocols. Note that by setting
 all, you may enable protocols that were not supported the day you write this
@@ -76,7 +76,9 @@ if(curl) {
 .SH AVAILABILITY
 Added in 7.85.0
 .SH RETURN VALUE
-Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+Returns CURLE_UNKNOWN_OPTION if the option is not implemented,
+CURLE_UNSUPPORTED_PROTOCOL if a listed protocol is not supported or disabled,
+CURLE_BAD_FUNCTION_ARGUMENT if no protocol is listed else CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_REDIR_PROTOCOLS_STR "(3), " CURLOPT_URL "(3), "
 .BR curl_version_info "(3), " CURLINFO_SCHEME "(3), "

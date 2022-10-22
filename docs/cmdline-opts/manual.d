@@ -7,5 +7,6 @@ Category: curl
 Example: --manual
 Added: 5.2
 See-also: verbose libcurl trace
+Multi: boolean
 ---
 Manual. Display the huge help text.

@@ -45,6 +45,7 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "strcase.h"
+#include "curl_ctype.h"
 #include "hostcheck.h"
 #include "vtls/vtls.h"
 #include "sendf.h"
@@ -716,7 +717,7 @@ static ssize_t encodeDN(char *buf, size_t buflen, struct Curl_asn1Element *dn)
       /* Encode delimiter.
          If attribute has a short uppercase name, delimiter is ", ". */
       if(l) {
-        for(p3 = str; isupper(*p3); p3++)
+        for(p3 = str; ISUPPER(*p3); p3++)
           ;
         for(p3 = (*p3 || p3 - str > 2)? "/": ", "; *p3; p3++) {
           if(l < buflen)

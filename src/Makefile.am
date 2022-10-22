@@ -55,6 +55,10 @@ include Makefile.inc
 
 # CURL_FILES comes from Makefile.inc
 curl_SOURCES = $(CURL_FILES)
+if OS_WINDOWS
+curl_SOURCES += $(CURL_RCFILES)
+$(CURL_RCFILES): tool_version.h
+endif
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
@@ -75,7 +79,7 @@ libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) \
                           -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
-libcurltool_la_SOURCES = $(curl_SOURCES)
+libcurltool_la_SOURCES = $(CURL_FILES)
 endif
 
 CLEANFILES = tool_hugehelp.c
@@ -127,9 +131,7 @@ endif
 else # USE_MANUAL
 # built-in manual has been disabled, make a blank file
 $(HUGE):
-	$(HUGECMD)(echo "/* built-in manual is disabled, blank function */" > $(HUGE); \
-	echo '#include "tool_hugehelp.h"' >> $(HUGE); \
-	echo "void hugehelp(void) {}" >>$(HUGE) )
+	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
 
 # ignore tool_hugehelp.c since it is generated source code and it plays
@@ -153,3 +155,9 @@ tidy:
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && ./gen.pl listhelp *.d) > tool_listhelp.c
+
+if OS_WINDOWS
+# Warning is "normal": libtool:   error: ignoring unknown tag RC
+.rc.o:
+	$(LIBTOOL) --tag=RC --mode=compile $(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
+endif

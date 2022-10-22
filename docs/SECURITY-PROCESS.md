@@ -19,13 +19,13 @@ No information should be made public about a vulnerability until it is
 formally announced at the end of this process. That means, for example, that a
 bug tracker entry must NOT be created to track the issue since that will make
 the issue public and it should not be discussed on any of the project's public
-mailing lists. Also messages associated with any commits should not make any
+mailing lists. Messages associated with any commits should not make any
 reference to the security nature of the commit if done prior to the public
 announcement.
 
 - The person discovering the issue, the reporter, reports the vulnerability on
-  [https://hackerone.com/curl](https://hackerone.com/curl). Issues filed there
-  reach a handful of selected and trusted people.
+  [HackerOne](https://hackerone.com/curl). Issues filed there reach a handful
+  of selected and trusted people.
 
 - Messages that do not relate to the reporting or managing of an undisclosed
   security vulnerability in curl or libcurl are ignored and no further action
@@ -112,9 +112,9 @@ somewhat over time and a list somewhere will only risk getting outdated.
 
 2. Name the advisory file after the allocated CVE id.
 
-3. Add a line on the top of the array in `curl-www/docs/vuln.pm'.
+3. Add a line on the top of the array in `curl-www/docs/vuln.pm`.
 
-4. Put the new advisory markdown file in the curl-www/docs/ directory. Add it
+4. Put the new advisory markdown file in the `curl-www/docs/` directory. Add it
    to the git repository.
 
 5. Run `make` in your local web checkout and verify that things look fine.
@@ -122,7 +122,7 @@ somewhat over time and a list somewhere will only risk getting outdated.
 6. On security advisory release day, push the changes on the curl-www
    repository's remote master branch.
 
-## Hackerone
+## HackerOne
 
 Request the issue to be disclosed. If there are sensitive details present in
 the report and discussion, those should be redacted from the disclosure. The
@@ -158,7 +158,7 @@ stall and never end, so applications that cannot deal with never-ending
 transfers already need to have counter-measures established.
 
 If the problem avoids the regular counter-measures when it causes a never-
-ending transfer, it might very well be a security problem.
+ending transfer, it might be a security problem.
 
 ## Not practically possible
 
@@ -208,7 +208,7 @@ security vulnerabilities.
 
  - not all systems allow the arguments to be blanked in the first place
  - since curl blanks the argument itself they will be readable for a short
-   moment in time no matter what
+   moment no matter what
  - virtually every argument can contain sensitive data, depending on use
  - blanking all arguments would make it impractical for users to differentiate
    curl command lines in process listings

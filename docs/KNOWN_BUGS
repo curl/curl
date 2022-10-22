@@ -119,7 +119,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.9 DoH does not inherit all transfer options
  11.10 Blocking socket operations in non-blocking API
  11.11 A shared connection cache is not thread-safe
- 11.12 'no_proxy' string-matches IPv6 numerical addresses
  11.14 Multi perform hangs waiting for threaded resolver
  11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
  11.16 libcurl uses renames instead of locking for atomic operations
@@ -931,13 +930,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/4915 and lib1541.c
 
-11.12 'no_proxy' string-matches IPv6 numerical addresses
-
- This has the downside that "::1" for example does not match "::0:1" even
- though they are in fact the same address.
-
- See https://github.com/curl/curl/issues/5745
-
 11.14 Multi perform hangs waiting for threaded resolver
 
  If a threaded resolver takes a long time to complete, libcurl can be blocked
@@ -969,10 +961,10 @@ problems may have been fixed or changed somewhat since this was written.
 
 12.1 OpenLDAP hangs after returning results
 
- By configuration defaults, openldap automatically chase referrals on
+ By configuration defaults, OpenLDAP automatically chase referrals on
  secondary socket descriptors. The OpenLDAP backend is asynchronous and thus
  should monitor all socket descriptors involved. Currently, these secondary
- descriptors are not monitored, causing openldap library to never receive
+ descriptors are not monitored, causing OpenLDAP library to never receive
  data from them.
 
  As a temporary workaround, disable referrals chasing by configuration.

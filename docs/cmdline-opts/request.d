@@ -9,6 +9,7 @@ Example: -X "DELETE" $URL
 Example: -X NLST ftp://example.com/
 Added: 6.0
 See-also: request-target
+Multi: single
 ---
 (HTTP) Specifies a custom request method to use when communicating with the
 HTTP server. The specified request method will be used instead of the method
@@ -42,5 +43,3 @@ Specifies a custom IMAP command to use instead of LIST. (Added in 7.30.0)
 
 (SMTP)
 Specifies a custom SMTP command to use instead of HELP or VRFY. (Added in 7.34.0)
-
-If this option is used several times, the last one will be used.

@@ -47,7 +47,7 @@ lib%TESTNUMBER
 </tool>
 
 <command>
-http://xxx:yyy@%HOSTIP:%HTTPPORT/%TESTNUMBER/testapi/test
+http://xxx:yyy@127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -60,8 +60,8 @@ http://xxx:yyy@%HOSTIP:%HTTPPORT/%TESTNUMBER/testapi/test
 </strip>
 <protocol>
 GET /%TESTNUMBER/testapi/test HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/0/127/xxx4_request, SignedHeaders=content-type;host;x-xxx-date, Signature=d2c2dff48c59ec49dc31ef94f18c5dc1ac3eae2a70d51633a4342dadc0683664
+Host: 127.0.0.1:9000
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/0/127/xxx4_request, SignedHeaders=content-type;host;x-xxx-date, Signature=3d8e00a02e437211a596143dcd590fcc805b731365c68f7f48951ea6eda39c4f
 X-Xxx-Date: 19700101T000000Z
 
 </protocol>

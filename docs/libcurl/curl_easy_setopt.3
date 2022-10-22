@@ -83,9 +83,11 @@ Callback for reading data. See \fICURLOPT_READFUNCTION(3)\fP
 .IP CURLOPT_READDATA
 Data pointer to pass to the read callback. See \fICURLOPT_READDATA(3)\fP
 .IP CURLOPT_IOCTLFUNCTION
-Callback for I/O operations. See \fICURLOPT_IOCTLFUNCTION(3)\fP
+\fBDeprecated option\fP Callback for I/O operations.
+See \fICURLOPT_IOCTLFUNCTION(3)\fP
 .IP CURLOPT_IOCTLDATA
-Data pointer to pass to the I/O callback. See \fICURLOPT_IOCTLDATA(3)\fP
+\fBDeprecated option\fP Data pointer to pass to the I/O callback.
+See \fICURLOPT_IOCTLDATA(3)\fP
 .IP CURLOPT_SEEKFUNCTION
 Callback for seek operations. See \fICURLOPT_SEEKFUNCTION(3)\fP
 .IP CURLOPT_SEEKDATA
@@ -103,7 +105,8 @@ Callback for closing socket. See \fICURLOPT_CLOSESOCKETFUNCTION(3)\fP
 .IP CURLOPT_CLOSESOCKETDATA
 Data pointer to pass to the close socket callback. See \fICURLOPT_CLOSESOCKETDATA(3)\fP
 .IP CURLOPT_PROGRESSFUNCTION
-OBSOLETE callback for progress meter. See \fICURLOPT_PROGRESSFUNCTION(3)\fP
+\fBOBSOLETE\fP callback for progress meter.
+See \fICURLOPT_PROGRESSFUNCTION(3)\fP
 .IP CURLOPT_PROGRESSDATA
 Data pointer to pass to the progress meter callback. See \fICURLOPT_PROGRESSDATA(3)\fP
 .IP CURLOPT_XFERINFOFUNCTION
@@ -194,7 +197,8 @@ Connect to a specific host and port. See \fICURLOPT_CONNECT_TO(3)\fP
 .IP CURLOPT_SOCKS5_AUTH
 Socks5 authentication methods. See \fICURLOPT_SOCKS5_AUTH(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_SERVICE
-Socks5 GSSAPI service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
+\fBDeprecated option\fP Socks5 GSSAPI service name.
+See \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_NEC
 Socks5 GSSAPI NEC mode. See \fICURLOPT_SOCKS5_GSSAPI_NEC(3)\fP
 .IP CURLOPT_PROXY_SERVICE_NAME
@@ -212,7 +216,8 @@ Bind connection locally to port range. See \fICURLOPT_LOCALPORTRANGE(3)\fP
 .IP CURLOPT_DNS_CACHE_TIMEOUT
 Timeout for DNS cache. See \fICURLOPT_DNS_CACHE_TIMEOUT(3)\fP
 .IP CURLOPT_DNS_USE_GLOBAL_CACHE
-OBSOLETE Enable global DNS cache. See \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP
+\fBOBSOLETE\fP Enable global DNS cache.
+See \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP
 .IP CURLOPT_DOH_URL
 Use this DoH server for name resolves. See \fICURLOPT_DOH_URL(3)\fP
 .IP CURLOPT_BUFFERSIZE
@@ -220,7 +225,7 @@ Ask for alternate buffer size. See \fICURLOPT_BUFFERSIZE(3)\fP
 .IP CURLOPT_PORT
 Port number to connect to. See \fICURLOPT_PORT(3)\fP
 .IP CURLOPT_TCP_FASTOPEN
-Enable TFO, TCP Fast Open. See \fICURLOPT_TCP_FASTOPEN(3)\fP
+Enable TCP Fast Open. See \fICURLOPT_TCP_FASTOPEN(3)\fP
 .IP CURLOPT_TCP_NODELAY
 Disable the Nagle algorithm. See \fICURLOPT_TCP_NODELAY(3)\fP
 .IP CURLOPT_ADDRESS_SCOPE
@@ -294,7 +299,7 @@ Maximum number of redirects to follow. See \fICURLOPT_MAXREDIRS(3)\fP
 .IP CURLOPT_POSTREDIR
 How to act on redirects after POST. See \fICURLOPT_POSTREDIR(3)\fP
 .IP CURLOPT_PUT
-Issue an HTTP PUT request. See \fICURLOPT_PUT(3)\fP
+\fBDeprecated option\fP Issue an HTTP PUT request. See \fICURLOPT_PUT(3)\fP
 .IP CURLOPT_POST
 Issue an HTTP POST request. See \fICURLOPT_POST(3)\fP
 .IP CURLOPT_POSTFIELDS
@@ -306,7 +311,8 @@ The POST data is this big. See \fICURLOPT_POSTFIELDSIZE_LARGE(3)\fP
 .IP CURLOPT_COPYPOSTFIELDS
 Send a POST with this data - and copy it. See \fICURLOPT_COPYPOSTFIELDS(3)\fP
 .IP CURLOPT_HTTPPOST
-Multipart formpost HTTP POST. See \fICURLOPT_HTTPPOST(3)\fP
+\fBDeprecated option\fP Multipart formpost HTTP POST.
+See \fICURLOPT_HTTPPOST(3)\fP
 .IP CURLOPT_REFERER
 Referer: header. See \fICURLOPT_REFERER(3)\fP
 .IP CURLOPT_USERAGENT
@@ -402,7 +408,7 @@ Commands to run just before transfer. See \fICURLOPT_PREQUOTE(3)\fP
 .IP CURLOPT_APPEND
 Append to remote file. See \fICURLOPT_APPEND(3)\fP
 .IP CURLOPT_FTP_USE_EPRT
-Use EPTR. See \fICURLOPT_FTP_USE_EPRT(3)\fP
+Use EPRT. See \fICURLOPT_FTP_USE_EPRT(3)\fP
 .IP CURLOPT_FTP_USE_EPSV
 Use EPSV. See \fICURLOPT_FTP_USE_EPSV(3)\fP
 .IP CURLOPT_FTP_USE_PRET
@@ -452,7 +458,7 @@ Resume a transfer. See \fICURLOPT_RESUME_FROM(3)\fP
 .IP CURLOPT_RESUME_FROM_LARGE
 Resume a transfer. See \fICURLOPT_RESUME_FROM_LARGE(3)\fP
 .IP CURLOPT_CURLU
-Set URL to work on with CURLU *. See \fICURLOPT_CURLU(3)\fP
+Set URL to work on with a URL handle. See \fICURLOPT_CURLU(3)\fP
 .IP CURLOPT_CUSTOMREQUEST
 Custom request/method. See \fICURLOPT_CUSTOMREQUEST(3)\fP
 .IP CURLOPT_FILETIME
@@ -569,7 +575,7 @@ Set key exchange curves. See \fICURLOPT_SSL_EC_CURVES(3)\fP
 .IP CURLOPT_SSL_ENABLE_ALPN
 Enable use of ALPN. See \fICURLOPT_SSL_ENABLE_ALPN(3)\fP
 .IP CURLOPT_SSL_ENABLE_NPN
-Enable use of NPN. See \fICURLOPT_SSL_ENABLE_NPN(3)\fP
+\fBOBSOLETE\fP Enable use of NPN. See \fICURLOPT_SSL_ENABLE_NPN(3)\fP
 .IP CURLOPT_SSLENGINE
 Use identifier with SSL engine. See \fICURLOPT_SSLENGINE(3)\fP
 .IP CURLOPT_SSLENGINE_DEFAULT
@@ -631,9 +637,10 @@ Set pinned SSL public key . See \fICURLOPT_PINNEDPUBLICKEY(3)\fP
 Set the proxy's pinned SSL public key. See
 \fICURLOPT_PROXY_PINNEDPUBLICKEY(3)\fP
 .IP CURLOPT_RANDOM_FILE
-Provide source for entropy random data. See \fICURLOPT_RANDOM_FILE(3)\fP
+\fBOBSOLETE\fP Provide source for entropy random data.
+See \fICURLOPT_RANDOM_FILE(3)\fP
 .IP CURLOPT_EGDSOCKET
-Identify EGD socket for entropy. See \fICURLOPT_EGDSOCKET(3)\fP
+\fBOBSOLETE\fP Identify EGD socket for entropy. See \fICURLOPT_EGDSOCKET(3)\fP
 .IP CURLOPT_SSL_CIPHER_LIST
 Ciphers to use. See \fICURLOPT_SSL_CIPHER_LIST(3)\fP
 .IP CURLOPT_PROXY_SSL_CIPHER_LIST
@@ -675,6 +682,9 @@ Custom pointer to pass to ssh key callback. See \fICURLOPT_SSH_KEYDATA(3)\fP
 Callback for checking host key handling. See \fICURLOPT_SSH_HOSTKEYFUNCTION(3)\fP
 .IP CURLOPT_SSH_HOSTKEYDATA
 Custom pointer to pass to ssh host key callback. See \fICURLOPT_SSH_HOSTKEYDATA(3)\fP
+.SH WEBSOCKET
+.IP CURLOPT_WS_OPTIONS
+Set WebSocket options. See \fICURLOPT_WS_OPTIONS(3)\fP
 .SH OTHER OPTIONS
 .IP CURLOPT_PRIVATE
 Private pointer to store. See \fICURLOPT_PRIVATE(3)\fP

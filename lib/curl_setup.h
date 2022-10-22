@@ -158,8 +158,6 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
-#include <curl/curl.h>
-
 /*
  * Disable other protocols when http is the only one desired.
  */
@@ -219,7 +217,7 @@
 
 /* ================================================================ */
 /* No system header file shall be included in this file before this */
-/* point. The only allowed ones are those included from curl/system.h */
+/* point.                                                           */
 /* ================================================================ */
 
 /*
@@ -245,6 +243,8 @@
 #ifdef HAVE_WINDOWS_H
 #  include "setup-win32.h"
 #endif
+
+#include <curl/system.h>
 
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
@@ -322,8 +322,10 @@
 #include <assert.h>
 #endif
 
-#ifdef __TANDEM /* for nsr-tandem-nsk systems */
-#include <floss.h>
+#ifdef __TANDEM /* for ns*-tandem-nsk systems */
+# if ! defined __LP64
+#  include <floss.h> /* FLOSS is only used for 32-bit builds. */
+# endif
 #endif
 
 #ifndef STDC_HEADERS /* no standard C headers! */
@@ -740,12 +742,12 @@
 #define SHUT_RDWR 0x02
 #endif
 
-/* Define S_ISREG if not defined by system headers, f.e. MSVC */
+/* Define S_ISREG if not defined by system headers, e.g. MSVC */
 #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 
-/* Define S_ISDIR if not defined by system headers, f.e. MSVC */
+/* Define S_ISDIR if not defined by system headers, e.g. MSVC */
 #if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif

@@ -16,6 +16,7 @@ none
 <features>
 unittest
 http
+Mime
 </features>
  <name>
 formpost unit tests

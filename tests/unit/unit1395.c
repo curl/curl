@@ -23,7 +23,8 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "dotdot.h"
+/* copied from urlapi.c */
+extern char *dedotdotify(const char *input, size_t clen);
 
 #include "memdebug.h"
 
@@ -77,7 +78,7 @@ UNITTEST_START
   };
 
   for(i = 0; i < sizeof(pairs)/sizeof(pairs[0]); i++) {
-    char *out = Curl_dedotdotify(pairs[i].input);
+    char *out = dedotdotify(pairs[i].input, strlen(pairs[i].input));
     abort_unless(out != NULL, "returned NULL!");
 
     if(strcmp(out, pairs[i].output)) {

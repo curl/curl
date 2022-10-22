@@ -6,6 +6,7 @@ Added: 7.71.0
 Category: curl
 Example: --retry 5 --retry-all-errors $URL
 See-also: retry
+Multi: boolean
 ---
 Retry on any error. This option is used together with --retry.
 

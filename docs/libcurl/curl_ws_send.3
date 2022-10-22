@@ -1,0 +1,90 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.\"
+.TH curl_ws_send 3 "12 Jun 2022" "libcurl 7.85.0" "libcurl Manual"
+.SH NAME
+curl_ws_send - send WebSocket data
+.SH SYNOPSIS
+.nf
+#include <curl/easy.h>
+
+CURLcode curl_ws_send(CURL *curl, const void *buffer, size_t buflen,
+                      size_t *sent, curl_off_t fragsize,
+                      unsigned int flags);
+.fi
+.SH DESCRIPTION
+This function call is EXPERIMENTAL.
+
+Send the specific message fragment over an established WebSocket
+connection. The \fIbuffer\fP holds the data to send and it is \fIbuflen\fP
+number of payload bytes in that memory area.
+
+\fIsent\fP is returned as the number of payload bytes actually sent.
+
+To send a (huge) fragment using multiple calls with partial content per
+invoke, set the \fICURLWS_OFFSET\fP bit and the \fIfragsize\fP argument as the
+total expected size for the first part, then set the \fICURLWS_OFFSET\fP with
+a zero \fIfragsize\fP for the following parts.
+
+If not sending a partial fragment or if this is raw mode, \fIfragsize\fP
+should be set to zero.
+
+If \fBCURLWS_RAW_MODE\fP is enabled in \fICURLOPT_WS_OPTIONS(3)\fP, the
+\fBflags\fP argument should be set to 0.
+
+.SH FLAGS
+.IP CURLWS_TEXT
+The buffer contains text data. Note that this makes a difference to WebSocket
+but libcurl itself will not make any verification of the content or
+precautions that you actually send valid UTF-8 content.
+.IP CURLWS_BINARY
+This is binary data.
+.IP CURLWS_CONT
+This is not the final fragment of the message, which implies that there will
+be another fragment coming as part of the same message where this bit is not
+set.
+.IP CURLWS_CLOSE
+Close this transfer.
+.IP CURLWS_PING
+This as a ping.
+.IP CURLWS_PONG
+This as a pong.
+.IP CURLWS_OFFSET
+The provided data is only a partial fragment and there will be more in a
+following call to \fIcurl_ws_send()\fP. When sending only a piece of the
+fragment like this, the \fIfragsize\fP must be provided with the total
+expected fragment size in the first call and it needs to be zero in subsequent
+calls.
+.SH EXAMPLE
+.nf
+
+.fi
+.SH AVAILABILITY
+Added in 7.86.0.
+.SH RETURN VALUE
+
+.SH "SEE ALSO"
+.BR curl_easy_setopt "(3), " curl_easy_perform "(3), "
+.BR curl_easy_getinfo "(3), "
+.BR curl_ws_recv "(3) "

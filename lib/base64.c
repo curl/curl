@@ -47,7 +47,7 @@
 static const char base64[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-/* The Base 64 encoding with an URL and filename safe alphabet, RFC 4648
+/* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
    section 5 */
 static const char base64url[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
@@ -138,7 +138,7 @@ CURLcode Curl_base64_decode(const char *src,
   /* Calculate the size of the decoded string */
   rawlen = (numQuantums * 3) - padding;
 
-  /* Allocate our buffer including room for a zero terminator */
+  /* Allocate our buffer including room for a null-terminator */
   newstr = malloc(rawlen + 1);
   if(!newstr)
     return CURLE_OUT_OF_MEMORY;

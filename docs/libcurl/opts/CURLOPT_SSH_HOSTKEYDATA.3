@@ -24,7 +24,7 @@
 .\"
 .TH CURLOPT_SSH_KEYDATA 3 "4 Nov 2021" "libcurl 7.84.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SSH_HOSTKEYDATA \- pointer to pass to the SSH hostkey callback
+CURLOPT_SSH_HOSTKEYDATA \- pointer to pass to the SSH host key callback
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -42,8 +42,8 @@ SCP and SFTP
 .nf
 int hostkeycb(void *clientp,    /* passed with CURLOPT_SSH_HOSTKEYDATA */
               int keytype,      /* CURLKHTYPE */
-              const char * key, /*hostkey to check*/
-              size_t keylen);   /*length of the key*/
+              const char * key, /* host key to check */
+              size_t keylen);   /* length of the key */
 {
   /* 'clientp' points to the callback_data struct */
   /* investigate the situation and return the correct value */

@@ -36,9 +36,9 @@ with \fIcurl_mime_addpart(3)\fP and other mime-handling functions. This must
 be called when the data has been used, which typically means after
 \fIcurl_easy_perform(3)\fP has been called.
 
-The handle to free is the one you passed to
-the \fICURLOPT_MIMEPOST(3)\fP option: attached subparts mime structures must
-not be explicitly freed as they are by the top structure freeing.
+The handle to free is the one you passed to the \fICURLOPT_MIMEPOST(3)\fP
+option: attached sub part mime structures must not be explicitly freed as they
+are by the top structure freeing.
 
 \fBmime\fP is the handle as returned from a previous call to
 \fIcurl_mime_init(3)\fP and may be NULL.

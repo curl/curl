@@ -76,9 +76,9 @@ struct cafile_parser {
 #define CAFILE_SOURCE_PATH 1
 #define CAFILE_SOURCE_BLOB 2
 struct cafile_source {
-  const int type;
-  const char * const data;
-  const size_t len;
+  int type;
+  const char *data;
+  size_t len;
 };
 
 static void append_dn(void *ctx, const void *buf, size_t len)
@@ -618,11 +618,11 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
   }
 
   if(ca_info_blob) {
-    struct cafile_source source = {
-      CAFILE_SOURCE_BLOB,
-      ca_info_blob->data,
-      ca_info_blob->len,
-    };
+    struct cafile_source source;
+    source.type = CAFILE_SOURCE_BLOB;
+    source.data = ca_info_blob->data;
+    source.len = ca_info_blob->len;
+
     ret = load_cafile(&source, &backend->anchors, &backend->anchors_len);
     if(ret != CURLE_OK) {
       if(verifypeer) {
@@ -635,11 +635,11 @@ static CURLcode bearssl_connect_step1(struct Curl_easy *data,
   }
 
   if(ssl_cafile) {
-    struct cafile_source source = {
-      CAFILE_SOURCE_PATH,
-      ssl_cafile,
-      0,
-    };
+    struct cafile_source source;
+    source.type = CAFILE_SOURCE_PATH;
+    source.data = ssl_cafile;
+    source.len = 0;
+
     ret = load_cafile(&source, &backend->anchors, &backend->anchors_len);
     if(ret != CURLE_OK) {
       if(verifypeer) {
@@ -875,14 +875,14 @@ static CURLcode bearssl_connect_step3(struct Curl_easy *data,
 
 #ifdef USE_HTTP2
       if(!strcmp(protocol, ALPN_H2))
-        conn->negnpn = CURL_HTTP_VERSION_2;
+        conn->alpn = CURL_HTTP_VERSION_2;
       else
 #endif
       if(!strcmp(protocol, ALPN_HTTP_1_1))
-        conn->negnpn = CURL_HTTP_VERSION_1_1;
+        conn->alpn = CURL_HTTP_VERSION_1_1;
       else
         infof(data, "ALPN, unrecognized protocol %s", protocol);
-      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else

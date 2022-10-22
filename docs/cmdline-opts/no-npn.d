@@ -10,7 +10,10 @@ Requires: TLS
 Help: Disable the NPN TLS extension
 Category: tls http
 Example: --no-npn $URL
+Multi: boolean
 ---
+In curl 7.86.0 and later, curl never uses NPN.
+
 Disable the NPN TLS extension. NPN is enabled by default if libcurl was built
 with an SSL library that supports NPN. NPN is used by a libcurl that supports
 HTTP/2 to negotiate HTTP/2 support with the server during https sessions.

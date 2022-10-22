@@ -7,6 +7,7 @@ Added: 7.21.4
 Category: tls auth
 Example: --tlsauthtype SRP $URL
 See-also: tlsuser
+Multi: single
 ---
 Set TLS authentication type. Currently, the only supported option is "SRP",
 for TLS-SRP (RFC 5054). If --tlsuser and --tlspassword are specified but

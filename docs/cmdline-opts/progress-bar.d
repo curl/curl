@@ -7,6 +7,7 @@ Category: verbose
 Example: -# -O $URL
 Added: 5.10
 See-also: styled-output
+Multi: boolean
 ---
 Make curl display transfer progress as a simple progress bar instead of the
 standard, more informational, meter.

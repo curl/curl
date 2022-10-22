@@ -59,20 +59,20 @@ The callback function must return \fICURL_PREREQFUNC_OK\fP on success, or
 
 This function is passed the following arguments:
 .IP conn_primary_ip
-A nul-terminated pointer to a C string containing the primary IP of the remote
-server established with this connection. For FTP, this is the IP for the
-control connection. IPv6 addresses are represented without surrounding
+A null-terminated pointer to a C string containing the primary IP of the
+remote server established with this connection. For FTP, this is the IP for
+the control connection. IPv6 addresses are represented without surrounding
 brackets.
 .IP conn_local_ip
-A nul-terminated pointer to a C string containing the originating IP for this
+A null-terminated pointer to a C string containing the originating IP for this
 connection. IPv6 addresses are represented without surrounding brackets.
 .IP conn_primary_port
 The primary port number on the remote server established with this connection.
 For FTP, this is the port for the control connection. This can be a TCP or a
-UDP port number dependending on the protocol.
+UDP port number depending on the protocol.
 .IP conn_local_port
 The originating port number for this connection. This can be a TCP or a UDP
-port number dependending on the protocol.
+port number depending on the protocol.
 .IP clientp
 The pointer you set with \fICURLOPT_PREREQDATA(3)\fP.
 .SH DEFAULT

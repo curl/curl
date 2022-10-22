@@ -90,30 +90,32 @@ windows_task:
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2 mingw-w64-i686-python-pip mingw-w64-i686-python-wheel mingw-w64-i686-python-pyopenssl && python3 -m pip install --prefer-binary impacket
         configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
         tests: "~571"
+        make_cmd: make V=1
     - name: Windows 32-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2 mingw-w64-i686-python-pip mingw-w64-i686-python-wheel mingw-w64-i686-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static
+        configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static  --enable-websockets
         tests: "~571"
-        curl_LDFLAGS: -all-static
+        make_cmd: make LDFLAGS=-all-static V=1
         PKG_CONFIG: pkg-config --static
     - name: Windows 64-bit shared/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2 mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-wheel mingw-w64-x86_64-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
+        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2  --enable-websockets
         tests: "~571"
+        make_cmd: make V=1
     - name: Windows 64-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2 mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-wheel mingw-w64-x86_64-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static
+        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static --enable-websockets
         tests: "~571"
-        curl_LDFLAGS: -all-static
+        make_cmd: make LDFLAGS=-all-static V=1
         PKG_CONFIG: pkg-config --static
 
   env:
@@ -126,8 +128,96 @@ windows_task:
   configure_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure %configure%"
   compile_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"
+    %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% && %make_cmd% examples && cd tests && %make_cmd%"
   install_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
+    %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
   test_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
+    %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
+
+macos_task:
+  name: macOS arm64
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
+
+  matrix:
+    - name: macOS arm64 normal
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2
+        configure: --without-ssl
+    - name: macOS arm64 debug
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2
+        configure: --without-ssl --enable-debug
+    - name: macOS arm64 libssh2
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2 libssh2
+        configure: --without-ssl --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2
+    - name: macOS arm64 libssh-c-ares
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2 openssl libssh
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-libssh --enable-ares
+    - name: macOS arm64 libssh
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2 openssl libssh
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-libssh
+    - name: macOS arm64 c-ares
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2
+        configure: --without-ssl --enable-debug --enable-ares
+    - name: macOS arm64 HTTP only
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.15"
+        install_packages: nghttp2
+        configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+    - name: macOS arm64 SecureTransport http2
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.8"
+        install_packages: nghttp2
+        configure: --with-secure-transport
+    - name: macOS arm64 OpenSSL http2
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
+    - name: macOS arm64 LibreSSL http2
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2 libressl
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl
+    - name: macOS arm64 torture
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
+        TFLAGS: -n -t --shallow=25 !FTP
+    - name: macOS arm64 torture-ftp
+      env:
+        CFLAGS: "-Wno-vla -mmacosx-version-min=10.9"
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
+        TFLAGS: -n -t --shallow=20 FTP
+
+  env:
+    CIRRUS_CLONE_DEPTH: 10
+    MAKE_FLAGS: -j 4
+
+  pkginstall_script:
+    - echo libtool autoconf automake pkg-config ${install_packages} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+    - brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
+    - sudo -H python3 -m pip install --upgrade pip
+    - sudo -H python3 -m pip install impacket
+  configure_script:
+    - autoreconf -fi
+    - ./configure --enable-warnings --enable-werror --enable-websockets ${configure}
+  compile_script:
+    - make V=1 && make V=1 examples && cd tests && make V=1
+  test_script:
+    - sudo -E make V=1 test-ci
+  install_script:
+    - sudo make V=1 install

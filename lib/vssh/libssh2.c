@@ -2506,7 +2506,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           from_t = curlx_strtoofft(data->state.range, &ptr, 0, &from);
           if(from_t == CURL_OFFT_FLOW)
             return CURLE_RANGE_ERROR;
-          while(*ptr && (ISSPACE(*ptr) || (*ptr == '-')))
+          while(*ptr && (ISBLANK(*ptr) || (*ptr == '-')))
             ptr++;
           to_t = curlx_strtoofft(ptr, &ptr2, 0, &to);
           if(to_t == CURL_OFFT_FLOW)

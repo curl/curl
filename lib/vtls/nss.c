@@ -336,7 +336,7 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc *model,
     char name[MAX_CIPHER_LENGTH + 1];
     size_t len;
     bool found = FALSE;
-    while((*cipher) && (ISSPACE(*cipher)))
+    while((*cipher) && (ISBLANK(*cipher)))
       ++cipher;
 
     end = strpbrk(cipher, ":, ");
@@ -850,7 +850,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
   unsigned int buflen;
   SSLNextProtoState state;
 
-  if(!conn->bits.tls_enable_npn && !conn->bits.tls_enable_alpn) {
+  if(!conn->bits.tls_enable_alpn) {
     return;
   }
 
@@ -871,21 +871,21 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
       infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, buflen, buf);
       break;
 #endif
-    case SSL_NEXT_PROTO_NEGOTIATED:
-      infof(data, "NPN, server accepted to use %.*s", buflen, buf);
+    default:
+      /* ignore SSL_NEXT_PROTO_NEGOTIATED */
       break;
     }
 
 #ifdef USE_HTTP2
     if(buflen == ALPN_H2_LENGTH &&
        !memcmp(ALPN_H2, buf, ALPN_H2_LENGTH)) {
-      conn->negnpn = CURL_HTTP_VERSION_2;
+      conn->alpn = CURL_HTTP_VERSION_2;
     }
     else
 #endif
     if(buflen == ALPN_HTTP_1_1_LENGTH &&
        !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
-      conn->negnpn = CURL_HTTP_VERSION_1_1;
+      conn->alpn = CURL_HTTP_VERSION_1_1;
     }
 
     /* This callback might get called when PR_Recv() is used within
@@ -893,7 +893,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
      * be any "bundle" associated with the connection anymore.
      */
     if(conn->bundle)
-      Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+      Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
                           BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 }
@@ -936,8 +936,8 @@ static SECStatus CanFalseStartCallback(PRFileDesc *sock, void *client_data,
   if(cipherInfo.symCipher != ssl_calg_aes_gcm)
     goto end;
 
-  /* Enforce ALPN or NPN to do False Start, as an indicator of server
-   * compatibility. */
+  /* Enforce ALPN to do False Start, as an indicator of server
+     compatibility. */
   rv = SSL_HandshakeNegotiatedExtension(sock, ssl_app_layer_protocol_xtn,
                                         &negotiatedExtension);
   if(rv != SECSuccess || !negotiatedExtension) {
@@ -2136,12 +2136,6 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
   }
 #endif
 
-#ifdef SSL_ENABLE_NPN
-  if(SSL_OptionSet(backend->handle, SSL_ENABLE_NPN, conn->bits.tls_enable_npn
-                   ? PR_TRUE : PR_FALSE) != SECSuccess)
-    goto error;
-#endif
-
 #ifdef SSL_ENABLE_ALPN
   if(SSL_OptionSet(backend->handle, SSL_ENABLE_ALPN, conn->bits.tls_enable_alpn
                    ? PR_TRUE : PR_FALSE) != SECSuccess)
@@ -2160,15 +2154,15 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
   }
 #endif
 
-#if defined(SSL_ENABLE_NPN) || defined(SSL_ENABLE_ALPN)
-  if(conn->bits.tls_enable_npn || conn->bits.tls_enable_alpn) {
+#if defined(SSL_ENABLE_ALPN)
+  if(conn->bits.tls_enable_alpn) {
     int cur = 0;
     unsigned char protocols[128];
 
 #ifdef USE_HTTP2
     if(data->state.httpwant >= CURL_HTTP_VERSION_2
 #ifndef CURL_DISABLE_PROXY
-      && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
+       && (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)
 #endif
       ) {
       protocols[cur++] = ALPN_H2_LENGTH;

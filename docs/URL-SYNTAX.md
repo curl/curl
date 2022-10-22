@@ -259,7 +259,7 @@ A folder list on the user's inbox:
 
     imap://user:password@mail.example.com/INBOX
 
-Select the user's inbox and fetch message with uid = 1:
+Select the user's inbox and fetch message with `uid = 1`:
 
     imap://user:password@mail.example.com/INBOX/;UID=1
 
@@ -289,26 +289,26 @@ subject line:
 
     imap://user:password@mail.example.com/INBOX?SUBJECT%20shadows
 
-Searching via the query part of the URL `?` is a search request for the results
-to be returned as message sequence numbers (MAILINDEX). It is possible to make
-a search request for results to be returned as unique ID numbers (UID) by using
-a custom curl request via `-X`. UID numbers are unique per session (and
-multiple sessions when UIDVALIDITY is the same). For example, if you are
-searching for `"foo bar"` in header+body (TEXT) and you want the matching
-MAILINDEX numbers returned then you could search via URL:
+Searching via the query part of the URL `?` is a search request for the
+results to be returned as message sequence numbers (`MAILINDEX`). It is
+possible to make a search request for results to be returned as unique ID
+numbers (`UID`) by using a custom curl request via `-X`. `UID` numbers are
+unique per session (and multiple sessions when `UIDVALIDITY` is the same). For
+example, if you are searching for `"foo bar"` in header+body (`TEXT`) and you
+want the matching `MAILINDEX` numbers returned then you could search via URL:
 
     imap://user:password@mail.example.com/INBOX?TEXT%20%22foo%20bar%22
 
-.. but if you wanted matching UID numbers you would have to use a custom request:
+If you want matching `UID` numbers you have to use a custom request:
 
     imap://user:password@mail.example.com/INBOX -X "UID SEARCH TEXT \"foo bar\""
 
 For more information about IMAP commands please see RFC 9051. For more
 information about the individual components of an IMAP URL please see RFC 5092.
 
-* Note old curl versions would FETCH by message sequence number when UID was
-specified in the URL. That was a bug fixed in 7.62.0, which added MAILINDEX to
-FETCH by mail sequence number.
+* Note old curl versions would `FETCH` by message sequence number when `UID`
+was specified in the URL. That was a bug fixed in 7.62.0, which added
+`MAILINDEX` to `FETCH` by mail sequence number.
 
 ## LDAP
 
@@ -317,15 +317,15 @@ Name, Attributes, Scope, Filter and Extension for a LDAP search. Each field is
 separated by a question mark and when that field is not required an empty
 string with the question mark separator should be included.
 
-Search for the DN as `My Organization`:
+Search for the `DN` as `My Organization`:
 
     ldap://ldap.example.com/o=My%20Organization
 
-the same search but will only return postalAddress attributes:
+the same search but will only return `postalAddress` attributes:
 
     ldap://ldap.example.com/o=My%20Organization?postalAddress
 
-Search for an empty DN and request information about the
+Search for an empty `DN` and request information about the
 `rootDomainNamingContext` attribute for an Active Directory server:
 
     ldap://ldap.example.com/?rootDomainNamingContext

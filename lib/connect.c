@@ -625,7 +625,8 @@ void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
   else
     data->info.conn_local_ip[0] = 0;
   data->info.conn_scheme = conn->handler->scheme;
-  data->info.conn_protocol = conn->handler->protocol;
+  /* conn_protocol can only provide "old" protocols */
+  data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
   data->info.conn_primary_port = conn->port;
   data->info.conn_remote_port = conn->remote_port;
   data->info.conn_local_port = local_port;
@@ -761,18 +762,10 @@ void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
   char local_ip[MAX_IPADR_LEN] = "";
   int local_port = -1;
 
-  if(conn->transport == TRNSPRT_TCP) {
-    if(!conn->bits.reuse && !conn->bits.tcp_fastopen)
-      Curl_conninfo_remote(data, conn, sockfd);
-    Curl_conninfo_local(data, sockfd, local_ip, &local_port);
-  } /* end of TCP-only section */
-#ifdef ENABLE_QUIC
-  else if(conn->transport == TRNSPRT_QUIC) {
-    if(!conn->bits.reuse)
-      Curl_conninfo_remote(data, conn, sockfd);
-    Curl_conninfo_local(data, sockfd, local_ip, &local_port);
-  }
-#endif
+  if(!conn->bits.reuse &&
+     (conn->transport != TRNSPRT_TCP || !conn->bits.tcp_fastopen))
+    Curl_conninfo_remote(data, conn, sockfd);
+  Curl_conninfo_local(data, sockfd, local_ip, &local_port);
 
   /* persist connection info in session handle */
   Curl_persistconninfo(data, conn, local_ip, local_port);
@@ -1046,7 +1039,6 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
      (conn->tempsock[1] == CURL_SOCKET_BAD)) {
     /* no more addresses to try */
     const char *hostname;
-    char buffer[STRERROR_LEN];
     CURLcode failreason = result;
 
     /* if the first address family runs out of addresses to try before the
@@ -1073,11 +1065,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
           "%" CURL_FORMAT_TIMEDIFF_T " ms: %s",
           hostname, conn->port,
           Curl_timediff(now, data->progress.t_startsingle),
-#ifdef ENABLE_QUIC
-          (conn->transport == TRNSPRT_QUIC) ?
-          curl_easy_strerror(result) :
-#endif
-          Curl_strerror(error, buffer, sizeof(buffer)));
+          curl_easy_strerror(result));
 
     Curl_quic_disconnect(data, conn, 0);
     Curl_quic_disconnect(data, conn, 1);
@@ -1209,6 +1197,7 @@ static CURLcode singleipconnect(struct Curl_easy *data,
 #ifdef TCP_FASTOPEN_CONNECT
   int optval = 1;
 #endif
+  const char *ipmsg;
   char buffer[STRERROR_LEN];
   curl_socket_t *sockp = &conn->tempsock[tempindex];
   *sockp = CURL_SOCKET_BAD;
@@ -1226,7 +1215,13 @@ static CURLcode singleipconnect(struct Curl_easy *data,
     Curl_closesocket(data, conn, sockfd);
     return CURLE_OK;
   }
-  infof(data, "  Trying %s:%d...", ipaddress, port);
+#ifdef ENABLE_IPV6
+  if(addr.family == AF_INET6)
+    ipmsg = "  Trying [%s]:%d...";
+  else
+#endif
+    ipmsg = "  Trying %s:%d...";
+  infof(data, ipmsg, ipaddress, port);
 
 #ifdef ENABLE_IPV6
   is_tcp = (addr.family == AF_INET || addr.family == AF_INET6) &&

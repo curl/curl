@@ -7,6 +7,7 @@ Added: 7.69.0
 Category: smtp
 Example: --mail-rcpt-allowfails --mail-rcpt dest@example.com smtp://example.com
 See-also: mail-rcpt
+Multi: boolean
 ---
 When sending data to multiple recipients, by default curl will abort SMTP
 conversation if at least one of the recipients causes RCPT TO command to

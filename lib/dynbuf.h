@@ -24,6 +24,8 @@
  *
  ***************************************************************************/
 
+#include <curl/curl.h>
+
 #ifndef BUILDING_LIBCURL
 /* this renames the functions so that the tool code can use the same code
    without getting symbol collisions */
@@ -38,12 +40,13 @@
 #define Curl_dyn_len(a) curlx_dyn_len(a)
 #define Curl_dyn_reset(a) curlx_dyn_reset(a)
 #define Curl_dyn_tail(a,b) curlx_dyn_tail(a,b)
+#define Curl_dyn_setlen(a,b) curlx_dyn_setlen(a,b)
 #define curlx_dynbuf dynbuf /* for the struct name */
 #endif
 
 struct dynbuf {
   char *bufr;    /* point to a null-terminated allocated buffer */
-  size_t leng;   /* number of bytes *EXCLUDING* the zero terminator */
+  size_t leng;   /* number of bytes *EXCLUDING* the null-terminator */
   size_t allc;   /* size of the current allocation */
   size_t toobig; /* size limit for the buffer */
 #ifdef DEBUGBUILD
@@ -63,6 +66,7 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   WARN_UNUSED_RESULT;
 void Curl_dyn_reset(struct dynbuf *s);
 CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail);
+CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t set);
 char *Curl_dyn_ptr(const struct dynbuf *s);
 unsigned char *Curl_dyn_uptr(const struct dynbuf *s);
 size_t Curl_dyn_len(const struct dynbuf *s);

@@ -7,6 +7,7 @@ Added: 7.34.0
 Category: tls
 Example: --tlsv1.2 $URL
 See-also: tlsv1.3 tls-max
+Multi: mutex
 ---
 Forces curl to use TLS version 1.2 or later when connecting to a remote TLS server.
 

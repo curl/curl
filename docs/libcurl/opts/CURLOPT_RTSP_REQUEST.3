@@ -61,10 +61,11 @@ extract and use the session ID in the response to this request. The session ID
 is not needed for this method.
 .IP CURL_RTSPREQ_PLAY
 Send a Play command to the server. Use the \fICURLOPT_RANGE(3)\fP option to
-modify the playback time (e.g. 'npt=10-15').
+modify the playback time (e.g. \fInpt=10-15\fP).
 .IP CURL_RTSPREQ_PAUSE
 Send a Pause command to the server. Use the \fICURLOPT_RANGE(3)\fP option with
-a single value to indicate when the stream should be halted. (e.g. npt='25')
+a single value to indicate when the stream should be
+halted. (e.g. \fInpt=25\fP)
 .IP CURL_RTSPREQ_TEARDOWN
 This command terminates an RTSP session. Simply closing a connection does not
 terminate the RTSP session since it is valid to control an RTSP session over

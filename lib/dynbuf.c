@@ -128,7 +128,6 @@ void Curl_dyn_reset(struct dynbuf *s)
   s->leng = 0;
 }
 
-#ifdef USE_NGTCP2
 /*
  * Specify the size of the tail to keep (number of bytes from the end of the
  * buffer). The rest will be dropped.
@@ -153,7 +152,6 @@ CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
   return CURLE_OK;
 
 }
-#endif
 
 /*
  * Appends a buffer with length.
@@ -254,4 +252,19 @@ size_t Curl_dyn_len(const struct dynbuf *s)
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
   return s->leng;
+}
+
+/*
+ * Set a new (smaller) length.
+ */
+CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t set)
+{
+  DEBUGASSERT(s);
+  DEBUGASSERT(s->init == DYNINIT);
+  DEBUGASSERT(!s->leng || s->bufr);
+  if(set > s->leng)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  s->leng = set;
+  s->bufr[s->leng] = 0;
+  return CURLE_OK;
 }

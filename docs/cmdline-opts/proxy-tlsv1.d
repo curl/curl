@@ -6,5 +6,6 @@ Added: 7.52.0
 Category: proxy tls auth
 Example: --proxy-tlsv1 -x https://proxy $URL
 See-also: proxy
+Multi: mutex
 ---
 Same as --tlsv1 but used in HTTPS proxy context.

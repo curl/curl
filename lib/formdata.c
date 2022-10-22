@@ -251,8 +251,10 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       }
     }
     else {
-      /* This is not array-state, get next option */
-      option = va_arg(params, CURLformoption);
+      /* This is not array-state, get next option. This gets an 'int' with
+         va_arg() because CURLformoption might be a smaller type than int and
+         might cause compiler warnings and wrong behavior. */
+      option = (CURLformoption)va_arg(params, int);
       if(CURLFORM_END == option)
         break;
     }

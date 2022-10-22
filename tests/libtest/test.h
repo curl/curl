@@ -485,4 +485,12 @@ extern int unitfail;
 #define global_init(A) \
   chk_global_init((A), (__FILE__), (__LINE__))
 
+#define NO_SUPPORT_BUILT_IN                     \
+  int test(char *URL)                           \
+  {                                             \
+    (void)URL;                                  \
+    fprintf(stderr, "Missing support\n");       \
+    return 1;                                   \
+  }
+
 /* ---------------------------------------------------------------- */

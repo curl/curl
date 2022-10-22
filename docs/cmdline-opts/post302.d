@@ -7,6 +7,7 @@ See-also: post301 post303 location
 Added: 7.19.1
 Category: http post
 Example: --post302 --location -d "data" $URL
+Multi: boolean
 ---
 Tells curl to respect RFC 7231/6.4.3 and not convert POST requests into GET
 requests when following a 302 redirection. The non-RFC behavior is ubiquitous

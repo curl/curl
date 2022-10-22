@@ -134,8 +134,9 @@ struct curl_mimepart {
 
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
 
-#if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)) ||     \
-  !defined(CURL_DISABLE_SMTP) || !defined(CURL_DISABLE_IMAP)
+#if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
+                                    !defined(CURL_DISABLE_SMTP) ||      \
+                                    !defined(CURL_DISABLE_IMAP))
 
 /* Prototypes. */
 void Curl_mime_initpart(struct curl_mimepart *part, struct Curl_easy *easy);

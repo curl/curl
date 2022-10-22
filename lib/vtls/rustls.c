@@ -415,20 +415,20 @@ cr_set_negotiated_alpn(struct Curl_easy *data, struct connectdata *conn,
 #ifdef USE_HTTP2
   if(len == ALPN_H2_LENGTH && 0 == memcmp(ALPN_H2, protocol, len)) {
     infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, ALPN_H2);
-    conn->negnpn = CURL_HTTP_VERSION_2;
+    conn->alpn = CURL_HTTP_VERSION_2;
   }
   else
 #endif
   if(len == ALPN_HTTP_1_1_LENGTH &&
       0 == memcmp(ALPN_HTTP_1_1, protocol, len)) {
     infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, ALPN_HTTP_1_1);
-    conn->negnpn = CURL_HTTP_VERSION_1_1;
+    conn->alpn = CURL_HTTP_VERSION_1_1;
   }
   else {
     infof(data, "ALPN, negotiated an unrecognized protocol");
   }
 
-  Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+  Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
                       BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
 }
 

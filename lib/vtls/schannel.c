@@ -108,16 +108,11 @@
 #define BCRYPT_SHA384_ALGORITHM L"SHA384"
 #endif
 
-/* Workaround broken compilers like MingW.
+/* Workaround broken compilers like MinGW.
    Return the number of elements in a statically sized array.
 */
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)   \
-  && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
-#define HAS_CLIENT_CERT_PATH
 #endif
 
 #ifdef HAS_CLIENT_CERT_PATH
@@ -184,6 +179,10 @@
    see https://osdn.net/projects/mingw/ticket/38391 */
 #if !defined(ALG_CLASS_DHASH) && defined(ALG_CLASS_HASH)
 #define ALG_CLASS_DHASH ALG_CLASS_HASH
+#endif
+
+#ifndef PKCS12_NO_PERSIST_KEY
+#define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
 static Curl_recv schannel_recv;
@@ -486,6 +485,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 
 #ifdef HAS_CLIENT_CERT_PATH
   PCCERT_CONTEXT client_certs[1] = { NULL };
+  HCERTSTORE client_cert_store = NULL;
 #endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
@@ -676,7 +676,13 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         else
           pszPassword[0] = 0;
 
-        cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
+        if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
+                                        VERSION_GREATER_THAN_EQUAL))
+          cert_store = PFXImportCertStore(&datablob, pszPassword,
+                                          PKCS12_NO_PERSIST_KEY);
+        else
+          cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
+
         free(pszPassword);
       }
       if(!blob)
@@ -748,7 +754,7 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
         return CURLE_SSL_CERTPROBLEM;
       }
     }
-    CertCloseStore(cert_store, 0);
+    client_cert_store = cert_store;
   }
 #else
   if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
@@ -766,11 +772,20 @@ schannel_acquire_credential_handle(struct Curl_easy *data,
 #ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0])
       CertFreeCertificateContext(client_certs[0]);
+    if(client_cert_store)
+      CertCloseStore(client_cert_store, 0);
 #endif
 
     return CURLE_OUT_OF_MEMORY;
   }
   backend->cred->refcount = 1;
+
+#ifdef HAS_CLIENT_CERT_PATH
+  /* Since we did not persist the key, we need to extend the store's
+   * lifetime until the end of the connection
+   */
+  backend->cred->client_cert_store = client_cert_store;
+#endif
 
   /* Windows 10, 1809 (a.k.a. Windows 10 build 17763) */
   if(curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
@@ -1314,6 +1329,7 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   backend->recv_unrecoverable_err = CURLE_OK;
   backend->recv_sspi_close_notify = false;
   backend->recv_connection_closed = false;
+  backend->recv_renegotiating = false;
   backend->encdata_is_incomplete = false;
 
   /* continue to second handshake step */
@@ -1713,6 +1729,7 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
 
     if(alpn_result.ProtoNegoStatus ==
        SecApplicationProtocolNegotiationStatus_Success) {
+      unsigned char alpn = 0;
 
       infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR,
             alpn_result.ProtocolIdSize, alpn_result.ProtocolId);
@@ -1720,20 +1737,33 @@ schannel_connect_step3(struct Curl_easy *data, struct connectdata *conn,
 #ifdef USE_HTTP2
       if(alpn_result.ProtocolIdSize == ALPN_H2_LENGTH &&
          !memcmp(ALPN_H2, alpn_result.ProtocolId, ALPN_H2_LENGTH)) {
-        conn->negnpn = CURL_HTTP_VERSION_2;
+        alpn = CURL_HTTP_VERSION_2;
       }
       else
 #endif
         if(alpn_result.ProtocolIdSize == ALPN_HTTP_1_1_LENGTH &&
            !memcmp(ALPN_HTTP_1_1, alpn_result.ProtocolId,
                    ALPN_HTTP_1_1_LENGTH)) {
-          conn->negnpn = CURL_HTTP_VERSION_1_1;
+          alpn = CURL_HTTP_VERSION_1_1;
         }
+      if(backend->recv_renegotiating) {
+        if(alpn != conn->alpn) {
+          failf(data, "schannel: server selected an ALPN protocol too late");
+          return CURLE_SSL_CONNECT_ERROR;
+        }
+      }
+      else
+        conn->alpn = alpn;
     }
-    else
-      infof(data, VTLS_INFOF_NO_ALPN);
-    Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
-                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+    else {
+      if(!backend->recv_renegotiating)
+        infof(data, VTLS_INFOF_NO_ALPN);
+    }
+
+    if(!backend->recv_renegotiating) {
+      Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
+                          BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+    }
   }
 #endif
 
@@ -1905,8 +1935,15 @@ schannel_connect_common(struct Curl_easy *data, struct connectdata *conn,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = schannel_recv;
-    conn->send[sockindex] = schannel_send;
+    if(!connssl->backend->recv_renegotiating) {
+      /* On renegotiation, we don't want to reset the existing recv/send
+       * function pointers. They will have been set after the initial TLS
+       * handshake was completed. If they were subsequently modified, as
+       * is the case with HTTP/2, we don't want to override that change.
+       */
+      conn->recv[sockindex] = schannel_recv;
+      conn->send[sockindex] = schannel_send;
+    }
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
     /* When SSPI is used in combination with Schannel
@@ -2293,7 +2330,9 @@ schannel_recv(struct Curl_easy *data, int sockindex,
         infof(data, "schannel: renegotiating SSL/TLS connection");
         connssl->state = ssl_connection_negotiating;
         connssl->connecting_state = ssl_connect_2_writing;
+        backend->recv_renegotiating = true;
         *err = schannel_connect_common(data, conn, sockindex, FALSE, &done);
+        backend->recv_renegotiating = false;
         if(*err) {
           infof(data, "schannel: renegotiation failed");
           goto cleanup;
@@ -2447,6 +2486,12 @@ static void schannel_session_free(void *ptr)
     if(cred->refcount == 0) {
       s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
       curlx_unicodefree(cred->sni_hostname);
+#ifdef HAS_CLIENT_CERT_PATH
+      if(cred->client_cert_store) {
+        CertCloseStore(cred->client_cert_store, 0);
+        cred->client_cert_store = NULL;
+      }
+#endif
       Curl_safefree(cred);
     }
   }

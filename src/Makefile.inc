@@ -36,7 +36,6 @@ CURLX_CFILES = \
   ../lib/timediff.c \
   ../lib/nonblock.c \
   ../lib/warnless.c \
-  ../lib/curl_ctype.c \
   ../lib/curl_multibyte.c \
   ../lib/version_win32.c \
   ../lib/dynbuf.c

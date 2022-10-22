@@ -54,6 +54,12 @@ struct gsasldata;
 #define GSS_ERROR(status) ((status) & 0x80000000)
 #endif
 
+/*
+ * Curl_auth_allowed_to_host() tells if authentication, cookies or other
+ * "sensitive data" can (still) be sent to this host.
+ */
+bool Curl_auth_allowed_to_host(struct Curl_easy *data);
+
 /* This is used to build a SPN string */
 #if !defined(USE_WINDOWS_SSPI)
 char *Curl_auth_build_spn(const char *service, const char *host,

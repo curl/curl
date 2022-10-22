@@ -6,6 +6,7 @@ Added: 7.77.0
 See-also: proxy-ssl-auto-client-cert
 Category: tls
 Example: --ssl-auto-client-cert $URL
+Multi: boolean
 ---
 Tell libcurl to automatically locate and use a client certificate for
 authentication, when requested by the server. This option is only supported

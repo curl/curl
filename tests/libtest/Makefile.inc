@@ -64,11 +64,12 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
          lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
          lib1915 lib1916 lib1917 lib1918 lib1919 \
  lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
- lib1945 lib1946 \
- lib3010 lib3025 lib3026
+ lib1945 lib1946 lib1947 lib1948 lib1955 \
+ lib2301 lib2302 \
+ lib3010 lib3025 lib3026 lib3027
 
 chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
- ../../lib/curl_ctype.c  ../../lib/dynbuf.c ../../lib/strdup.c
+ ../../lib/dynbuf.c ../../lib/strdup.c
 chkdecimalpoint_LDADD =
 chkdecimalpoint_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB \
  -DCURLX_NO_MEMORY_CALLBACKS -DBUILDING_LIBCURL
@@ -748,6 +749,24 @@ lib1946_SOURCES = lib1940.c $(SUPPORTFILES)
 lib1946_LDADD = $(TESTUTIL_LIBS)
 lib1946_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1946
 
+lib1947_SOURCES = lib1947.c $(SUPPORTFILES)
+lib1947_LDADD = $(TESTUTIL_LIBS)
+lib1947_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1948_SOURCES = lib1948.c $(SUPPORTFILES)
+lib1948_LDADD = $(TESTUTIL_LIBS)
+lib1948_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1955_SOURCES = lib1955.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1955_LDADD = $(TESTUTIL_LIBS)
+lib1955_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib2301_SOURCES = lib2301.c $(SUPPORTFILES)
+lib2301_LDADD = $(TESTUTIL_LIBS)
+
+lib2302_SOURCES = lib2302.c $(SUPPORTFILES)
+lib2302_LDADD = $(TESTUTIL_LIBS)
+
 lib3010_SOURCES = lib3010.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib3010_LDADD = $(TESTUTIL_LIBS)
 lib3010_CPPFLAGS = $(AM_CPPFLAGS)
@@ -759,3 +778,7 @@ lib3025_CPPFLAGS = $(AM_CPPFLAGS)
 lib3026_SOURCES = lib3026.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib3026_LDADD = $(TESTUTIL_LIBS)
 lib3026_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib3027_SOURCES = lib3027.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib3027_LDADD = $(TESTUTIL_LIBS)
+lib3027_CPPFLAGS = $(AM_CPPFLAGS)

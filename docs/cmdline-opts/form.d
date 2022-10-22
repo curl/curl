@@ -10,6 +10,7 @@ Category: http upload
 Example: --form "name=curl" --form "file=@loadthis" $URL
 Added: 5.0
 See-also: data form-string form-escape
+Multi: append
 ---
 For HTTP protocol family, this lets curl emulate a filled-in form in which a
 user has pressed the submit button. This causes curl to POST data using the
@@ -132,5 +133,3 @@ base64 attached file:
       -F '=@localfile;encoder=base64' ... smtp://example.com
 
 See further examples and details in the MANUAL.
-
-This option can be used multiple times.

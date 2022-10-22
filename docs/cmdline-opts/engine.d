@@ -8,6 +8,7 @@ Category: tls
 Example: --engine flavor $URL
 Added: 7.9.3
 See-also: ciphers curves
+Multi: single
 ---
 Select the OpenSSL crypto engine to use for cipher operations. Use --engine
 list to print a list of build-time supported engines. Note that not all (and

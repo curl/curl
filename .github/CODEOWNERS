@@ -1,0 +1,13 @@
+# Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+# Code owners for CI configuration
+## GitHub Actions
+.github/workflows/ @cmeister2 @mback2k
+## AppVeyor
+appveyor.yml @MarcelRaad @mback2k
+tests/appveyor.pm @mback2k
+## Azure Pipelines
+.azure-pipelines.yml @cmeister2 @mback2k
+tests/azure.pm @mback2k

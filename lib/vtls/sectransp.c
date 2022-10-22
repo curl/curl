@@ -2847,18 +2847,18 @@ sectransp_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 #ifdef USE_HTTP2
         if(chosenProtocol &&
            !CFStringCompare(chosenProtocol, CFSTR(ALPN_H2), 0)) {
-          conn->negnpn = CURL_HTTP_VERSION_2;
+          conn->alpn = CURL_HTTP_VERSION_2;
         }
         else
 #endif
         if(chosenProtocol &&
            !CFStringCompare(chosenProtocol, CFSTR(ALPN_HTTP_1_1), 0)) {
-          conn->negnpn = CURL_HTTP_VERSION_1_1;
+          conn->alpn = CURL_HTTP_VERSION_1_1;
         }
         else
           infof(data, VTLS_INFOF_NO_ALPN);
 
-        Curl_multiuse_state(data, conn->negnpn == CURL_HTTP_VERSION_2 ?
+        Curl_multiuse_state(data, conn->alpn == CURL_HTTP_VERSION_2 ?
                             BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
 
         /* chosenProtocol is a reference to the string within alpnArr

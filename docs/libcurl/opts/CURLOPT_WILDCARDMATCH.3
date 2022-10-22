@@ -34,8 +34,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_WILDCARDMATCH, long onoff);
 .SH DESCRIPTION
 Set \fIonoff\fP to 1 if you want to transfer multiple files according to a
 file name pattern. The pattern can be specified as part of the
-\fICURLOPT_URL(3)\fP option, using an fnmatch-like pattern (Shell Pattern
-Matching) in the last part of URL (file name).
+\fICURLOPT_URL(3)\fP option, using an \fBfnmatch\fP-like pattern (Shell
+Pattern Matching) in the last part of URL (file name).
 
 By default, libcurl uses its internal wildcard matching implementation. You
 can provide your own matching function by the
@@ -44,14 +44,18 @@ can provide your own matching function by the
 A brief introduction of its syntax follows:
 .RS
 .IP "* - ASTERISK"
-\&ftp://example.com/some/path/\fB*.txt\fP (for all txt's from the root
-directory). Only two asterisks are allowed within the same pattern string.
+.nf
+  ftp://example.com/some/path/*.txt
+.fi
+for all txt's from the root directory. Only two asterisks are allowed within
+the same pattern string.
 .RE
 .RS
 .IP "? - QUESTION MARK"
 Question mark matches any (exactly one) character.
-
-\&ftp://example.com/some/path/\fBphoto?.jpeg\fP
+.nf
+  ftp://example.com/some/path/photo?.jpg
+.fi
 .RE
 .RS
 .IP "[ - BRACKET EXPRESSION"
@@ -65,7 +69,7 @@ right bracket and matches exactly one character. Some examples follow:
 
 \fB[^abc]\fP or \fB[!abc]\fP - negation
 
-\fB[[:\fP\fIname\fP\fB:]]\fP class expression. Supported classes are
+\fB[[:name:]]\fP class expression. Supported classes are
 \fBalnum\fP,\fBlower\fP, \fBspace\fP, \fBalpha\fP, \fBdigit\fP, \fBprint\fP,
 \fBupper\fP, \fBblank\fP, \fBgraph\fP, \fBxdigit\fP.
 
@@ -75,8 +79,9 @@ characters have no special purpose.
 \fB[\\[\\]\\\\]\fP - escape syntax. Matches '[', ']' or '\e'.
 
 Using the rules above, a file name pattern can be constructed:
-
-\&ftp://example.com/some/path/\fB[a-z[:upper:]\\\\].jpeg\fP
+.nf
+  ftp://example.com/some/path/[a-z[:upper:]\\\\].jpg
+.fi
 .SH PROTOCOLS
 This feature is only supported for FTP download.
 .SH EXAMPLE

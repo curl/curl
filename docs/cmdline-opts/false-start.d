@@ -7,6 +7,7 @@ Added: 7.42.0
 Category: tls
 Example: --false-start $URL
 See-also: tcp-fastopen
+Multi: boolean
 ---
 Tells curl to use false start during the TLS handshake. False start is a mode
 where a TLS client will start sending application data before verifying the

@@ -58,7 +58,7 @@ transfers in parallel. Each single transfer is built up around an easy
 handle. You create all the easy handles you need, and setup the appropriate
 options for each easy handle using \fIcurl_easy_setopt(3)\fP.
 
-There are two flavours of the multi interface, the select() oriented one and
+There are two flavors of the multi interface, the select() oriented one and
 the event based one we call multi_socket. You will benefit from reading
 through the description of both versions to fully understand how they work and
 differentiate. We start out with the select() oriented version.
@@ -89,7 +89,7 @@ Your application extracts info from libcurl about when it would like to get
 invoked to transfer data or do other work. The most convenient way is to use
 \fIcurl_multi_poll(3)\fP that will help you wait until the application should
 call libcurl again. The older API to accomplish the same thing is
-\fIcurl_multi_fdset(3)\fP that extracts fd_sets from libcurl to use in
+\fIcurl_multi_fdset(3)\fP that extracts \fIfd_sets\fP from libcurl to use in
 select() or poll() calls in order to get to know when the transfers in the
 multi stack might need attention. Both these APIs allow for your program to
 wait for input on your own private file descriptors at the same time.
@@ -160,10 +160,11 @@ better scale upward and beyond thousands of simultaneous transfers without
 losing performance.
 
 When you have added your initial set of handles, you call
-\fIcurl_multi_socket_action(3)\fP with CURL_SOCKET_TIMEOUT set in the sockfd
-argument, and you will get callbacks call that sets you up and you then continue
-to call \fIcurl_multi_socket_action(3)\fP accordingly when you get activity on
-the sockets you have been asked to wait on, or if the timeout timer expires.
+\fIcurl_multi_socket_action(3)\fP with CURL_SOCKET_TIMEOUT set in the
+\fIsockfd\fP argument, and you will get callbacks call that sets you up and
+you then continue to call \fIcurl_multi_socket_action(3)\fP accordingly when
+you get activity on the sockets you have been asked to wait on, or if the
+timeout timer expires.
 
 You can poll \fIcurl_multi_info_read(3)\fP to see if any transfer has
 completed, as it then has a message saying so.

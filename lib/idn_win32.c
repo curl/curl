@@ -67,10 +67,10 @@ WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
 
 #define IDN_MAX_LENGTH 255
 
-bool curl_win32_idn_to_ascii(const char *in, char **out);
-bool curl_win32_ascii_to_idn(const char *in, char **out);
+bool Curl_win32_idn_to_ascii(const char *in, char **out);
+bool Curl_win32_ascii_to_idn(const char *in, char **out);
 
-bool curl_win32_idn_to_ascii(const char *in, char **out)
+bool Curl_win32_idn_to_ascii(const char *in, char **out)
 {
   bool success = FALSE;
 
@@ -93,7 +93,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out)
   return success;
 }
 
-bool curl_win32_ascii_to_idn(const char *in, char **out)
+bool Curl_win32_ascii_to_idn(const char *in, char **out)
 {
   bool success = FALSE;
 

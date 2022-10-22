@@ -23,7 +23,7 @@
 .\" **************************************************************************
 .TH curl_formadd 3 "24 June 2002" "libcurl 7.9.8" "libcurl Manual"
 .SH NAME
-curl_formadd - add a section to a multipart/formdata HTTP POST
+curl_formadd - add a section to a multipart form POST
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -32,15 +32,14 @@ CURLFORMcode curl_formadd(struct curl_httppost **firstitem,
                           struct curl_httppost **lastitem, ...);
 .fi
 .SH DESCRIPTION
-This function is deprecated. Do not use. See \fIcurl_mime_init(3)\fP instead.
+\fBThis function is deprecated.\fP Use \fIcurl_mime_init(3)\fP instead.
 
-curl_formadd() is used to append sections when building a multipart/formdata
-HTTP POST (sometimes referred to as RFC2388-style posts). Append one section
-at a time until you have added all the sections you want included and then you
-pass the \fIfirstitem\fP pointer as parameter to \fICURLOPT_HTTPPOST(3)\fP.
-\fIlastitem\fP is set after each \fIcurl_formadd(3)\fP call and on repeated
-invokes it should be left as set to allow repeated invokes to find the end of
-the list faster.
+curl_formadd() is used to append sections when building a multipart form
+post. Append one section at a time until you have added all the sections you
+want included and then you pass the \fIfirstitem\fP pointer as parameter to
+\fICURLOPT_HTTPPOST(3)\fP.  \fIlastitem\fP is set after each
+\fIcurl_formadd(3)\fP call and on repeated invokes it should be left as set to
+allow repeated invokes to find the end of the list faster.
 
 After the \fIlastitem\fP pointer follow the real arguments.
 
@@ -52,7 +51,7 @@ the function itself. You must call \fIcurl_formfree(3)\fP on the
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 
-First, there are some basics you need to understand about multipart/formdata
+First, there are some basics you need to understand about multipart form
 posts. Each part consists of at least a NAME and a CONTENTS part. If the part
 is made for file upload, there are also a stored CONTENT-TYPE and a FILENAME.
 Below, we will discuss what options you use to set these properties in the
@@ -65,14 +64,15 @@ parts.
 .IP CURLFORM_COPYNAME
 followed by a string which provides the \fIname\fP of this part. libcurl
 copies the string so your application does not need to keep it around after
-this function call. If the name is not NUL-terminated, you must set its length
-with \fBCURLFORM_NAMELENGTH\fP. The \fIname\fP is not allowed to contain
-zero-valued bytes. The copied data will be freed by \fIcurl_formfree(3)\fP.
+this function call. If the name is not null-terminated, you must set its
+length with \fBCURLFORM_NAMELENGTH\fP. The \fIname\fP is not allowed to
+contain zero-valued bytes. The copied data will be freed by
+\fIcurl_formfree(3)\fP.
 .IP CURLFORM_PTRNAME
 followed by a string which provides the \fIname\fP of this part. libcurl
 will use the pointer and refer to the data in your application, so you
 must make sure it remains until curl no longer needs it. If the name
-is not NUL-terminated, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
+is not null-terminated, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
 The \fIname\fP is not allowed to contain zero-valued bytes.
 .IP CURLFORM_COPYCONTENTS
 followed by a pointer to the contents of this part, the actual data
@@ -82,11 +82,11 @@ terminated, or if you would like it to contain zero bytes, you must
 set the length of the name with \fBCURLFORM_CONTENTSLENGTH\fP. The copied
 data will be freed by \fIcurl_formfree(3)\fP.
 .IP CURLFORM_PTRCONTENTS
-followed by a pointer to the contents of this part, the actual data
-to send away. libcurl will use the pointer and refer to the data in your
-application, so you must make sure it remains until curl no longer needs it.
-If the data is not NUL-terminated, or if you would like it to contain zero bytes,
-you must set its length  with \fBCURLFORM_CONTENTSLENGTH\fP.
+followed by a pointer to the contents of this part, the actual data to send
+away. libcurl will use the pointer and refer to the data in your application,
+so you must make sure it remains until curl no longer needs it.  If the data
+is not null-terminated, or if you would like it to contain zero bytes, you
+must set its length with \fBCURLFORM_CONTENTSLENGTH\fP.
 .IP CURLFORM_CONTENTLEN
 followed by a curl_off_t value giving the length of the contents. Note that
 for \fICURLFORM_STREAM\fP contents, this option is mandatory.
@@ -157,10 +157,10 @@ chunked encoded. (Option added in libcurl 7.18.2)
 .IP CURLFORM_ARRAY
 Another possibility to send options to curl_formadd() is the
 \fBCURLFORM_ARRAY\fP option, that passes a struct curl_forms array pointer as
-its value. Each curl_forms structure element has a CURLformoption and a char
-pointer. The final element in the array must be a CURLFORM_END. All available
-options can be used in an array, except the CURLFORM_ARRAY option itself. The
-last argument in such an array must always be \fBCURLFORM_END\fP.
+its value. Each curl_forms structure element has a \fICURLformoption\fP and a
+char pointer. The final element in the array must be a CURLFORM_END. All
+available options can be used in an array, except the CURLFORM_ARRAY option
+itself. The last argument in such an array must always be \fBCURLFORM_END\fP.
 .IP CURLFORM_CONTENTHEADER
 specifies extra headers for the form POST section. This takes a curl_slist
 prepared in the usual way using \fBcurl_slist_append\fP and appends the list
@@ -168,9 +168,10 @@ of headers to those libcurl automatically generates. The list must exist while
 the POST occurs, if you free it before the post completes you may experience
 problems.
 
-When you have passed the HttpPost pointer to \fIcurl_easy_setopt(3)\fP (using
-the \fICURLOPT_HTTPPOST(3)\fP option), you must not free the list until after
-you have called \fIcurl_easy_cleanup(3)\fP for the curl handle.
+When you have passed the \fIstruct curl_httppost\fP pointer to
+\fIcurl_easy_setopt(3)\fP (using the \fICURLOPT_HTTPPOST(3)\fP option), you
+must not free the list until after you have called \fIcurl_easy_cleanup(3)\fP
+for the curl handle.
 
 See example below.
 .SH EXAMPLE
@@ -259,7 +260,7 @@ actually sent: the effective data size can then not be automatically
 determined, resulting in a chunked encoding transfer. Backslashes and
 double quotes in field and file names are now escaped before transmission.
 .SH RETURN VALUE
-0 means everything was ok, non-zero means an error occurred corresponding
+0 means everything was OK, non-zero means an error occurred corresponding
 to a CURL_FORMADD_* constant defined in
 .I <curl/curl.h>
 .SH "SEE ALSO"

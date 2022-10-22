@@ -50,10 +50,10 @@ Set the \fIuserp\fP argument with the \fICURLOPT_HSTSREADDATA(3)\fP option or
 it will be NULL.
 
 When this callback is invoked, the \fIsts\fP pointer points to a populated
-struct: Copy the host name to 'name' (no longer than 'namelen' bytes). Make it
-null-terminated. Set 'includeSubDomains' to TRUE or FALSE. Set 'expire' to a
-date stamp or a zero length string for *forever* (wrong date stamp format
-might cause the name to not get accepted)
+struct: Copy the host name to \fIname\fP (no longer than \fInamelen\fP
+bytes). Make it null-terminated. Set \fIincludeSubDomains\fP to TRUE or
+FALSE. Set \fIexpire\fP to a date stamp or a zero length string for *forever*
+(wrong date stamp format might cause the name to not get accepted)
 
 The callback should return \fICURLSTS_OK\fP if it returns a name and is
 prepared to be called again (for another host) or \fICURLSTS_DONE\fP if it has

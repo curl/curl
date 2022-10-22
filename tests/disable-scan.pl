@@ -95,7 +95,7 @@ sub scan_docs {
     my $line = 0;
     while(<F>) {
         $line++;
-        if(/^## (CURL_DISABLE_[A-Z_]+)/g) {
+        if(/^## `(CURL_DISABLE_[A-Z_]+)/g) {
             my ($sym)=($1);
             $docs{$sym} = $line;
         }

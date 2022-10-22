@@ -33,10 +33,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TFTP_NO_OPTIONS, long onoff);
 .fi
 .SH DESCRIPTION
 Set \fIonoff\fP to 1L to exclude all TFTP options defined in RFC2347, RFC2348
-and RFC2349 from read and write requests (RRQs/WRQs).
+and RFC2349 from read and write requests.
 
-This option improves interop with some legacy servers that do not acknowledge
-or properly implement TFTP options. When this option is used
+This option improves interoperability with legacy servers that do not
+acknowledge or properly implement TFTP options. When this option is used
 \fICURLOPT_TFTP_BLKSIZE(3)\fP is ignored.
 .SH DEFAULT
 0

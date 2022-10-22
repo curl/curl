@@ -1,10 +1,10 @@
+<testcase>
 # perl:
 #
 #for(1 .. 200) {
 #
 #}
 #
-<testcase>
 <info>
 <keywords>
 HTTP

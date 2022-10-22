@@ -8,6 +8,7 @@ Added: 7.80.0
 Category: sftp scp
 Example: --hostpubsha256 NDVkMTQxMGQ1ODdmMjQ3MjczYjAyOTY5MmRkMjVmNDQ= sftp://example.com/
 See-also: hostpubmd5
+Multi: single
 ---
 Pass a string containing a Base64-encoded SHA256 hash of the remote
 host's public key. Curl will refuse the connection with the host

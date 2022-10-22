@@ -33,7 +33,7 @@ typedef enum {
   CURLOT_VALUES,  /*      (a defined set or bitmask) */
   CURLOT_OFF_T,   /* curl_off_t (a range of values) */
   CURLOT_OBJECT,  /* pointer (void *) */
-  CURLOT_STRING,  /*         (char * to zero terminated buffer) */
+  CURLOT_STRING,  /*         (char * to null-terminated buffer) */
   CURLOT_SLIST,   /*         (struct curl_slist *) */
   CURLOT_CBPTR,   /*         (void * passed as-is to a callback) */
   CURLOT_BLOB,    /* blob (struct curl_blob *) */

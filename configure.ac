@@ -85,21 +85,22 @@ if test -z "$GREP"; then
 fi
 AC_SUBST([GREP])
 
-dnl EGREP is mandatory for configure process and libtool.
+dnl 'grep -E' is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
 if test -z "$EGREP"; then
   dnl allow it to be overridden
+  AC_MSG_CHECKING([that grep -E works])
   if echo a | ($GREP -E '(a|b)') >/dev/null 2>&1; then
-    AC_MSG_CHECKING([for egrep])
     EGREP="$GREP -E"
-    AC_MSG_RESULT([$EGREP])
+    AC_MSG_RESULT([yes])
   else
+    AC_MSG_RESULT([no])
     AC_PATH_PROG([EGREP], [egrep], [not_found],
       [$PATH:/usr/bin:/usr/local/bin])
   fi
 fi
 if test -z "$EGREP" || test "$EGREP" = "not_found"; then
-  AC_MSG_ERROR([egrep not found in PATH. Cannot continue without egrep.])
+  AC_MSG_ERROR([grep -E is not working and egrep is not found in PATH. Cannot continue.])
 fi
 AC_SUBST([EGREP])
 
@@ -170,6 +171,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
  curl_altsvc_msg="enabled (--disable-alt-svc)"
 curl_headers_msg="enabled (--disable-headers-api)"
    curl_hsts_msg="enabled (--disable-hsts)"
+     curl_ws_msg="no      (--enable-websockets)"
     ssl_backends=
      curl_h1_msg="enabled (internal)"
      curl_h2_msg="no      (--with-nghttp2, --with-hyper)"
@@ -346,6 +348,8 @@ dnl check for how to do large files
 AC_SYS_LARGEFILE
 
 XC_LIBTOOL
+
+LT_LANG([Windows Resource])
 
 #
 # Automake conditionals based on libtool related checks
@@ -566,6 +570,7 @@ CURL_DARWIN_CFLAGS
 CURL_DARWIN_SYSTEMCONFIGURATION
 CURL_SUPPORTS_BUILTIN_AVAILABLE
 
+AM_CONDITIONAL([OS_WINDOWS], [test "$curl_cv_native_windows" = "yes"])
 
 dnl ************************************************************
 dnl switch off particular protocols
@@ -1305,7 +1310,6 @@ else
   then
     dnl both header and lib were found!
     AC_SUBST(HAVE_LIBZ)
-    AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
     AC_DEFINE(HAVE_LIBZ, 1, [if zlib is available])
 
     ZLIB_LIBS="-lz"
@@ -1957,7 +1961,7 @@ if test "x$curl_cv_native_windows" = "xyes" &&
   LIBS="-lbcrypt $LIBS"
 fi
 
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED$SSL_DISABLED"
+case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED"
 in
 x)
   AC_MSG_ERROR([TLS not detected, you will not be able to use HTTPS, FTPS, NTLM and more.
@@ -1971,6 +1975,11 @@ x1)
   ;;
 xD)
   # explicitly built without TLS
+  ;;
+xD*)
+  AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an ssl library
+(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl, --with-rustls).
+Since these are conflicting parameters, verify which is the desired one and drop the other.])
   ;;
 *)
   # more than one SSL backend is enabled
@@ -2122,7 +2131,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
   dnl check for function added in libssh2 version 1.0
   AC_CHECK_LIB(ssh2, libssh2_session_block_directions)
 
-  AC_CHECK_HEADERS(libssh2.h,
+  AC_CHECK_HEADER(libssh2.h,
     curl_ssh_msg="enabled (libSSH2)"
     LIBSSH2_ENABLED=1
     AC_DEFINE(USE_LIBSSH2, 1, [if libSSH2 is in use])
@@ -2195,7 +2204,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
 
   AC_CHECK_LIB(ssh, ssh_new)
 
-  AC_CHECK_HEADERS(libssh/libssh.h,
+  AC_CHECK_HEADER(libssh/libssh.h,
     curl_ssh_msg="enabled (libSSH)"
     LIBSSH_ENABLED=1
     AC_DEFINE(USE_LIBSSH, 1, [if libSSH is in use])
@@ -2708,7 +2717,7 @@ dnl **********************************************************************
 dnl Check for ngtcp2 (QUIC)
 dnl **********************************************************************
 
-OPT_TCP2="yes"
+OPT_TCP2="no"
 
 if test "x$disable_http" = "xyes"; then
   # without HTTP, ngtcp2 is no use
@@ -3378,6 +3387,18 @@ AC_CHECK_TYPE(long long,
 )
 
 
+if test ${ac_cv_sizeof_curl_off_t} -lt 8; then
+  AC_ARG_WITH(n64-deprecated,dnl
+AS_HELP_STRING([--with-n64-deprecated],[confirm you realize support for systems without 64 bit data types is going away]),
+  if test X"$withval" != Xno; then
+    OPT_N64_AWARE=$withval
+  fi
+)
+  if test -z "$OPT_N64_AWARE"; then
+    AC_MSG_ERROR([support for systems without 64 bit curl_off_t is deprecated, use --with-n64-deprecated until then])
+  fi
+fi
+
 # check for ssize_t
 AC_CHECK_TYPE(ssize_t, ,
    AC_DEFINE(ssize_t, int, [the signed version of size_t]))
@@ -3525,6 +3546,7 @@ AC_CHECK_FUNCS([fnmatch \
   setlocale \
   setmode \
   setrlimit \
+  snprintf \
   utime \
   utimes
 ],[
@@ -3883,17 +3905,23 @@ AS_HELP_STRING([--disable-unix-sockets],[Disable Unix domain sockets]),
        ]
 )
 if test "x$want_unix_sockets" != "xno"; then
-  AC_CHECK_MEMBER([struct sockaddr_un.sun_path], [
+  if test "x$curl_cv_native_windows" = "xyes"; then
+    USE_UNIX_SOCKETS=1
     AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
-    AC_SUBST(USE_UNIX_SOCKETS, [1])
     curl_unix_sockets_msg="enabled"
-  ], [
-    if test "x$want_unix_sockets" = "xyes"; then
-      AC_MSG_ERROR([--enable-unix-sockets is not available on this platform!])
-    fi
-  ], [
-    #include <sys/un.h>
-  ])
+  else
+    AC_CHECK_MEMBER([struct sockaddr_un.sun_path], [
+      AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
+      AC_SUBST(USE_UNIX_SOCKETS, [1])
+      curl_unix_sockets_msg="enabled"
+    ], [
+      if test "x$want_unix_sockets" = "xyes"; then
+        AC_MSG_ERROR([--enable-unix-sockets is not available on this platform!])
+      fi
+    ], [
+      #include <sys/un.h>
+    ])
+  fi
 fi
 
 dnl ************************************************************
@@ -4174,6 +4202,38 @@ if test "x$want_ech" != "xno"; then
     AC_MSG_ERROR([--enable-ech ignored: No ECH support found])
   fi
 fi
+
+dnl *************************************************************
+dnl WebSockets
+dnl
+AC_MSG_CHECKING([whether to support WebSockets])
+AC_ARG_ENABLE(websockets,
+AS_HELP_STRING([--enable-websockets],[Enable WebSockets support])
+AS_HELP_STRING([--disable-websockets],[Disable WebSockets support]),
+[ case "$enableval" in
+  no)
+     AC_MSG_RESULT(no)
+     ;;
+  *)
+     if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
+         AC_MSG_RESULT(yes)
+         curl_ws_msg="enabled"
+         AC_DEFINE_UNQUOTED(USE_WEBSOCKETS, [1], [enable websockets support])
+         SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WS"
+         if test "x$SSL_ENABLED" = "x1"; then
+           SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WSS"
+         fi
+         experimental="$experimental Websockets"
+     else
+         dnl websockets requires >32 bit curl_off_t
+         AC_MSG_RESULT(no)
+         AC_MSG_WARN([Websockets disabled due to lack of >32 bit curl_off_t])
+     fi
+     ;;
+  esac ],
+     AC_MSG_RESULT(no)
+)
+
 
 dnl ************************************************************
 dnl hiding of library internal symbols
@@ -4554,6 +4614,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
   ECH:              ${curl_ech_msg}
+  WebSockets:       ${curl_ws_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])

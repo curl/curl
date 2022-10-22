@@ -40,10 +40,9 @@ headers (Set-Cookie style) dumped to a file.
 It also enables the cookie engine, making libcurl parse and send cookies on
 subsequent requests with this handle.
 
-Given an empty or non-existing file or by passing the empty string ("") to
-this option, you can enable the cookie engine without reading any initial
-cookies. If you tell libcurl the file name is "-" (just a single minus sign),
-libcurl will instead read from stdin.
+By passing the empty string ("") to this option, you enable the cookie engine
+without reading any initial cookies. If you tell libcurl the file name is "-"
+(just a single minus sign), libcurl will instead read from stdin.
 
 This option only \fBreads\fP cookies. To make libcurl write cookies to file,
 see \fICURLOPT_COOKIEJAR(3)\fP.
@@ -61,6 +60,11 @@ option.
 
 Setting this option to NULL will (since 7.77.0) explicitly disable the cookie
 engine and clear the list of files to read cookies from.
+.SH SECURITY
+This document previously mentioned how specifying a non-existing file can also
+enable the cookie engine. While true, we strongly advice against using that
+method as it is too hard to be sure what files will stay that way in the long
+run.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -80,9 +84,8 @@ if(curl) {
 }
 .fi
 .SH "Cookie file format"
-The cookie file format and general cookie concepts in curl are described in
-the HTTP-COOKIES.md file, also hosted online here:
-https://curl.se/docs/http-cookies.html
+The cookie file format and general cookie concepts in curl are described
+online here: https://curl.se/docs/http-cookies.html
 .SH AVAILABILITY
 As long as HTTP is supported
 .SH RETURN VALUE

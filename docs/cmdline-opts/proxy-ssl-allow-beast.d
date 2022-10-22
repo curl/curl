@@ -6,5 +6,6 @@ Added: 7.52.0
 Category: proxy tls
 Example: --proxy-ssl-allow-beast -x https://proxy $URL
 See-also: ssl-allow-beast proxy
+Multi: boolean
 ---
 Same as --ssl-allow-beast but used in HTTPS proxy context.

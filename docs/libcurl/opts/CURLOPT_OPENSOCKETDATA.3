@@ -33,7 +33,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_OPENSOCKETDATA, void *pointer);
 .fi
 .SH DESCRIPTION
 Pass a \fIpointer\fP that will be untouched by libcurl and passed as the first
-argument in the opensocket callback set with \fICURLOPT_OPENSOCKETFUNCTION(3)\fP.
+argument in the open socket callback set with
+\fICURLOPT_OPENSOCKETFUNCTION(3)\fP.
 .SH DEFAULT
 The default value of this parameter is NULL.
 .SH PROTOCOLS

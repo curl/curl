@@ -54,6 +54,7 @@
 #include "multiif.h"
 #include "progress.h"
 #include "content_encoding.h"
+#include "ws.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -470,6 +471,24 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     result = empty_header(data);
     if(result)
       break;
+
+    k->deductheadercount =
+      (100 <= http_status && 199 >= http_status)?k->headerbytecount:0;
+#ifdef USE_WEBSOCKETS
+    if(k->upgr101 == UPGR101_WS) {
+      if(http_status == 101) {
+        /* verify the response */
+        result = Curl_ws_accept(data);
+        if(result)
+          return result;
+      }
+      else {
+        failf(data, "Expected 101, got %u", k->httpcode);
+        result = CURLE_HTTP_RETURNED_ERROR;
+        break;
+      }
+    }
+#endif
 
     /* Curl_http_auth_act() checks what authentication methods that are
      * available and decides which one (if any) to use. It will set 'newurl'
@@ -918,7 +937,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
-  if(conn->negnpn == CURL_HTTP_VERSION_2) {
+  if(conn->alpn == CURL_HTTP_VERSION_2) {
     hyper_clientconn_options_http2(options, 1);
     h2 = TRUE;
   }
@@ -1122,6 +1141,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   result = cookies(data, conn, headers);
   if(result)
     goto error;
+
+  if(!result && conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
+    result = Curl_ws_request(data, headers);
 
   result = Curl_add_timecondition(data, headers);
   if(result)

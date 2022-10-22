@@ -2958,7 +2958,7 @@ sub setupfeatures {
     $feature{"verbose-strings"} = 1;
     $feature{"wakeup"} = 1;
     $feature{"headers-api"} = 1;
-
+    $feature{"xattr"} = 1;
 }
 
 #######################################################################
@@ -6286,7 +6286,7 @@ if($total) {
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
                    $ok/$total*100);
 
-    if($ok != $total) {
+    if($failed && ($ok != $total)) {
         logmsg "\nTESTFAIL: These test cases failed: $failed\n\n";
     }
 }

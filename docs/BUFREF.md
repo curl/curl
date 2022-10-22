@@ -12,13 +12,13 @@ The `struct bufref` is used to hold data referencing a buffer. The members of
 that structure **MUST NOT** be accessed or modified without using the dedicated
 bufref API.
 
-## init
+## `init`
 
 ```c
 void Curl_bufref_init(struct bufref *br);
 ```
 
-Initialises a `bufref` structure. This function **MUST** be called before any
+Initializes a `bufref` structure. This function **MUST** be called before any
 other operation is performed on the structure.
 
 Upon completion, the referenced buffer is `NULL` and length is zero.
@@ -26,16 +26,16 @@ Upon completion, the referenced buffer is `NULL` and length is zero.
 This function may also be called to bypass referenced buffer destruction while
 invalidating the current reference.
 
-## free
+## `free`
 
 ```c
 void Curl_bufref_free(struct bufref *br);
 ```
 
 Destroys the previously referenced buffer using its destructor and
-reinitialises the structure for a possible subsequent reuse.
+reinitializes the structure for a possible subsequent reuse.
 
-## set
+## `set`
 
 ```c
 void Curl_bufref_set(struct bufref *br, const void *buffer, size_t length,
@@ -47,9 +47,9 @@ the structure, associated with its `destructor` function. The latter can be
 specified as `NULL`: this will be the case when the referenced buffer is
 static.
 
-if `buffer` is NULL, `length`must be zero.
+if `buffer` is NULL, `length` must be zero.
 
-## memdup
+## `memdup`
 
 ```c
 CURLcode Curl_bufref_memdup(struct bufref *br, const void *data, size_t length);
@@ -59,12 +59,12 @@ Releases the previously referenced buffer, then duplicates the `length`-byte
 `data` into a buffer allocated via `malloc()` and references the latter
 associated with destructor `curl_free()`.
 
-An additional trailing byte is allocated and set to zero as a possible
-string zero-terminator; it is not counted in the stored length.
+An additional trailing byte is allocated and set to zero as a possible string
+null-terminator; it is not counted in the stored length.
 
 Returns `CURLE_OK` if successful, else `CURLE_OUT_OF_MEMORY`.
 
-## ptr
+## `ptr`
 
 ```c
 const unsigned char *Curl_bufref_ptr(const struct bufref *br);
@@ -72,7 +72,7 @@ const unsigned char *Curl_bufref_ptr(const struct bufref *br);
 
 Returns a `const unsigned char *` to the referenced buffer.
 
-## len
+## `len`
 
 ```c
 size_t Curl_bufref_len(const struct bufref *br);

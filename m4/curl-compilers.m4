@@ -107,7 +107,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
     flags_dbg_yes="-g"
     flags_opt_all="-O -O0 -O1 -O2 -Os -O3 -O4"
-    flags_opt_yes="-Os"
+    flags_opt_yes="-O2"
     flags_opt_off="-O0"
   else
     AC_MSG_RESULT([no])
@@ -860,6 +860,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
       GNU_C)
         #
         if test "$want_warnings" = "yes"; then
+          tmp_CFLAGS="$tmp_CFLAGS -std=gnu89"
           #
           dnl Do not enable -pedantic when cross-compiling with a gcc older
           dnl than 3.0, to avoid warnings from third party system headers.

@@ -53,7 +53,7 @@
 #include <librtmp/rtmp.h>
 #endif
 
-#ifdef HAVE_ZLIB_H
+#ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
 
@@ -338,6 +338,11 @@ static const char * const protocols[] = {
 #endif
 #ifdef USE_LIBRTMP
   "rtmp",
+  "rtmpe",
+  "rtmps",
+  "rtmpt",
+  "rtmpte",
+  "rtmpts",
 #endif
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
@@ -366,6 +371,12 @@ static const char * const protocols[] = {
 #endif
 #ifndef CURL_DISABLE_TFTP
   "tftp",
+#endif
+#ifdef USE_WEBSOCKETS
+  "ws",
+#endif
+#if defined(USE_SSL) && defined(USE_WEBSOCKETS)
+  "wss",
 #endif
 
   NULL

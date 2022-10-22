@@ -24,7 +24,7 @@
 .\"
 .TH CURLOPT_PROXY_SSLKEY 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PROXY_SSLKEY \- private keyfile for HTTPS proxy client cert
+CURLOPT_PROXY_SSLKEY \- private key file for HTTPS proxy client cert
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -38,8 +38,8 @@ default format is "PEM" and can be changed with
 \fICURLOPT_PROXY_SSLKEYTYPE(3)\fP.
 
 (Windows, iOS and Mac OS X) This option is ignored by Secure Transport and
-Schannel SSL backends because they expect the private key to be already present
-in the keychain or PKCS#12 file containing the certificate.
+Schannel SSL backends because they expect the private key to be already
+present in the key chain or PKCS#12 file containing the certificate.
 
 The application does not have to keep the string around after setting this
 option.

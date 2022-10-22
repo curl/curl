@@ -7,6 +7,7 @@ Added: 7.18.0
 Category: connection
 Example: --keepalive-time 20 $URL
 See-also: no-keepalive max-time
+Multi: single
 ---
 This option sets the time a connection needs to remain idle before sending
 keepalive probes and the time between individual keepalive probes. It is
@@ -17,5 +18,4 @@ connections. The number of missed keepalive probes before declaring the
 connection down is OS dependent and is commonly 9 or 10. This option has no
 effect if --no-keepalive is used.
 
-If this option is used several times, the last one will be used. If
-unspecified, the option defaults to 60 seconds.
+If unspecified, the option defaults to 60 seconds.

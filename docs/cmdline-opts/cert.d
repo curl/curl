@@ -9,6 +9,7 @@ See-also: cert-type key key-type
 Category: tls
 Example: --cert certfile --key keyfile $URL
 Added: 5.0
+Multi: single
 ---
 Tells curl to use the specified client certificate file when getting a file
 with HTTPS, FTPS or another SSL-based protocol. The certificate must be in
@@ -55,5 +56,3 @@ usually a SHA-1 hex string which you can see in certificate details. Following
 store locations are supported: CurrentUser, LocalMachine, CurrentService,
 Services, CurrentUserGroupPolicy, LocalMachineGroupPolicy,
 LocalMachineEnterprise.
-
-If this option is used several times, the last one will be used.
