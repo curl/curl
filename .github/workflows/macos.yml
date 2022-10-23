@@ -129,8 +129,8 @@ jobs:
         - CC: clang
           CXX: clang++
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
-        - CC: gcc-9
-          CXX: g++-9
+        - CC: gcc-11
+          CXX: g++-11
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         build:
         - name: OpenSSL
