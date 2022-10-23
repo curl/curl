@@ -72,8 +72,8 @@ cygwin-ssl:
 	make
 
 amiga:
-	make -C lib -f makefile.amiga
-	make -C src -f makefile.amiga
+	$(MAKE) -C lib -f makefile.amiga
+	$(MAKE) -C src -f makefile.amiga
 
 unix: all
 
