@@ -2432,7 +2432,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     proxytype == CURLPROXY_SOCKS4;
 
   proxyinfo = sockstype ? &conn->socks_proxy : &conn->http_proxy;
-  proxyinfo->proxytype = proxytype;
+  proxyinfo->proxytype = (unsigned char)proxytype;
 
   /* Is there a username and password given in this proxy url? */
   uc = curl_url_get(uhp, CURLUPART_USER, &proxyuser, CURLU_URLDECODE);
