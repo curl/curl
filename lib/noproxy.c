@@ -30,6 +30,10 @@
 #include "strcase.h"
 #include "noproxy.h"
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 /*
  * Curl_cidr4_match() returns TRUE if the given IPv4 address is within the
  * specified CIDR address range.
