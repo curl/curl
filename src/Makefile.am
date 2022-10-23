@@ -87,7 +87,7 @@ CLEANFILES = tool_hugehelp.c
 # embedded text.
 NROFF=env LC_ALL=C @NROFF@ @MANOPT@ # figured out by the configure script
 
-EXTRA_DIST = mkhelp.pl makefile.dj                                     \
+EXTRA_DIST = mkhelp.pl \
  Makefile.m32 makefile.amiga curl.rc Makefile.inc CMakeLists.txt
 
 # Use absolute directory to disable VPATH
