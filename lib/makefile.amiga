@@ -25,6 +25,7 @@
 # libcurl Makefile for AmigaOS ...
 #
 
+# Download: https://aminet.net/comm/tcp/AmiTCP-SDK-4.3.lha
 # change the follow to where you have the AmiTCP SDK v4.3 includes:
 
 ATCPSDKI= /GG/netinclude
