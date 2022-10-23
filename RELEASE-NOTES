@@ -204,6 +204,13 @@ This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (https://curl.se/docs/knownbugs.html)
 
+Planned upcoming removals include:
+
+ o Support for systems without 64 bit data types
+ o NSS
+
+ See https://curl.se/dev/deprecate.html for details
+
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
