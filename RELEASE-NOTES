@@ -4,7 +4,7 @@ curl and libcurl 7.86.0
  Command line options:         248
  curl_easy_setopt() options:   300
  Public functions in libcurl:  91
- Contributors:                 2731
+ Contributors:                 2733
 
 This release includes the following changes:
 
@@ -34,8 +34,8 @@ This release includes the following bugfixes:
  o cmake: define BUILDING_LIBCURL in lib/CMakeLists, not config.h [5]
  o cmake: delete duplicate HAVE_GETADDRINFO test [149]
  o cmake: enable more detection on Windows [143]
- o cmake: fix enabling websocket support [116]
  o cmake: fix original MinGW builds [177]
+ o cmake: improve usability of CMake build as a sub-project [186]
  o cmake: set HAVE_GETADDRINFO_THREADSAFE on Windows [147]
  o cmake: set HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID on Windows [146]
  o cmake: sync HAVE_SIGNAL detection with autotools [148]
@@ -86,12 +86,14 @@ This release includes the following bugfixes:
  o docs: correct missing uppercase in Markdown files [38]
  o docs: document more server names for test files
  o docs: fix deprecation versions inconsistencies [123]
+ o docs: make sure libcurl opts examples pass in long arguments [182]
  o docs: remove mentions of deprecated '--without-openssl' parameter [170]
  o docs: tag curl options better in man pages
  o docs: tell about disabled protocols in CURLOPT_*PROTOCOLS_STR.
  o docs: update sourceforge project links [95]
  o easy: fix the #include order [53]
  o easy: fix the altsvc init for curl_easy_duphandle [77]
+ o easy_lock: check for HAVE_STDATOMIC_H as well [187]
  o examples/chkspeed: improve portability [48]
  o formdata: fix warning: 'CURLformoption' is promoted to 'int' [24]
  o ftp: ignore a 550 response to MDTM [1]
@@ -109,6 +111,7 @@ This release includes the following bugfixes:
  o http2: make nghttp2 less picky about field whitespace [27]
  o HTTP3.md: update Caddy example [76]
  o http: try parsing Retry-After: as a number first [122]
+ o http_proxy: restore the protocol pointer on error [104]
  o httpput-postfields.c: shorten string for C89 compliance [57]
  o ldap: delete stray CURL_HAS_MOZILLA_LDAP reference [79]
  o lib1560: extended to verify detect/reject of unknown schemes
@@ -125,6 +128,7 @@ This release includes the following bugfixes:
  o Makefile.m32: exclude libs & libpaths for shared mode exes [127]
  o Makefile.m32: fix regression with tool_hugehelp [130]
  o Makefile.m32: major rework [92]
+ o Makefile.m32: reintroduce CROSSPREFIX and -W -Wall [179]
  o Makefile.m32: support more options [142]
  o manpage-syntax.pl: all libcurl option symbols should be \fI-tagged [75]
  o manpages: Fix spelling of "allows to" -> "allows one to" [171]
@@ -136,9 +140,11 @@ This release includes the following bugfixes:
  o mqtt: spell out CONNECT in comments [166]
  o msh3: change the static_assert to make the code C89
  o netrc: compare user name case sensitively [118]
+ o netrc: replace fgets with Curl_get_line [174]
  o netrc: use the URL-decoded user [103]
  o ngtcp2: fix build errors due to changes in ngtcp2 library [107]
  o ngtcp2: fix C89 compliance nit
+ o noproxy: support proxies specified using cidr notation [184]
  o openssl: make certinfo available for QUIC [91]
  o README.md: add GHA status badges for Linux and macOS builds [40]
  o RELEASE-PROCEDURE.md: mention patch releases [21]
@@ -183,22 +189,22 @@ This release includes the following bugfixes:
  o tool_paramhelp: make the max argument a 'double' [136]
  o tool_progress: remove 'Qd' from the parallel progress bar [175]
  o tool_setopt: use better English in --libcurl source comments [39]
+ o tool_xattr: save the original URL, not the final redirected one [181]
  o unit test 1655: make it C89-compliant [59]
  o url: a zero-length userinfo part in the URL is still a (blank) user [64]
  o url: allow non-HTTPS HSTS-matching for debug builds [105]
  o url: rename function due to name-clash in Watt-32 [62]
+ o url: use IDN decoded names for HSTS checks [140]
  o urlapi: detect scheme better when not guessing [56]
  o urlapi: fix parsing URL without slash with CURLU_URLENCODE [154]
  o urlapi: leaner with fewer allocs [2]
  o urlapi: reject more bad characters from the host name field [88]
- o websockets: remodeled API to support 63 bit frame sizes [114]
  o winbuild/MakefileBuild.vc: handle spaces in libssh(2) include paths [18]
  o winbuild: use NMake batch-rules for compilation [47]
  o windows: add .rc support to autotools builds [33]
  o windows: adjust name of two internal public functions [58]
  o windows: autotools .rc warnings fixup [68]
  o wolfSSL: fix session management bug. [31]
- o ws: minor fixes for web sockets without the CONNECT_ONLY flag [104]
 
 This release includes the following known bugs:
 
@@ -206,8 +212,8 @@ This release includes the following known bugs:
 
 Planned upcoming removals include:
 
- o Support for systems without 64 bit data types
  o NSS
+ o Support for systems without 64 bit data types
 
  See https://curl.se/dev/deprecate.html for details
 
@@ -216,13 +222,14 @@ advice from friends like these:
 
   12932 on github, a1346054 on github, Aftab Alam, ajak in #curl,
   Andrew Lambert, Benjamin Loison, Brad Harder, bsergean on github,
-  Christopher Sauer, Dan Fandrich, Daniel Hallberg, Daniel Stenberg, David Hu,
-  David McLaughlin, Dmitry Karpov, Dominik Klemba, Dustin Howett,
-  Edoardo Lolletti, Eloy Degen, Emanuele Torre, Emilio López, Gisle Vanem,
-  Hayden Roche, Hiroki Kurosawa, James Fuller, Joel Depooter, John Bampton,
-  Jonas Haag, jurisuk on github, justchen1369 on github,
-  Keitagit-kun on github, Kelly Kaoudis, Marcel Raad, Marc Hörsken,
-  Mark Itzcovitz, Martin Ågren, Matthias Gatto, Matt Holt, Max Dymond,
+  Christopher Sauer, Dan Fandrich, Daniel Gustafsson, Daniel Hallberg,
+  Daniel Stenberg, David Hu, David McLaughlin, Dmitry Karpov, Dominik Klemba,
+  Don J Olmstead, Dustin Howett, Edoardo Lolletti, Eloy Degen, Emanuele Torre,
+  Emilio López, Gisle Vanem, Hayden Roche, Hiroki Kurosawa, James Fuller,
+  Jeremy Maitin-Shepard, Joel Depooter, John Bampton, Jonas Haag,
+  jurisuk on github, justchen1369 on github, Keitagit-kun on github,
+  Kelly Kaoudis, Marcel Raad, Marc Hörsken, Mark Itzcovitz, Martin Ågren,
+  Martin Strunz, Mathieu Carbonneaux, Matthias Gatto, Matt Holt, Max Dymond,
   Michael Drake, Michael Heimpold, n0name321 on github, Orgad Shaneh,
   Patrick Monnerat, Paul Seligman, Peter Goodman, Petr Štetiar, Philip H,
   Philip H., Philip Heiduck, ProceduralMan on github, Randall S. Becker,
@@ -231,7 +238,7 @@ advice from friends like these:
   ssdbest on github, Thiago Suchorski, Tobias Schaefer, Trail of Bits,
   Vasiliy Ulyanov, Viktor Szakats, Xiang Xiao, Yuriy Chernyshov,
   zhanghu on xiaomi
-  (69 contributors)
+  (74 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -338,7 +345,7 @@ References to bug reports and discussions on issues:
  [101] = https://curl.se/bug/?i=9729
  [102] = https://curl.se/bug/?i=9682
  [103] = https://curl.se/bug/?i=9709
- [104] = https://curl.se/bug/?i=9665
+ [104] = https://curl.se/bug/?i=9790
  [105] = https://curl.se/bug/?i=9728
  [106] = https://curl.se/bug/?i=9658
  [107] = https://curl.se/bug/?i=9747
@@ -348,9 +355,7 @@ References to bug reports and discussions on issues:
  [111] = https://curl.se/bug/?i=9776
  [112] = https://curl.se/bug/?i=9719
  [113] = https://curl.se/bug/?i=9663
- [114] = https://curl.se/bug/?i=9636
  [115] = https://curl.se/bug/?i=9661
- [116] = https://curl.se/bug/?i=9660
  [117] = https://curl.se/bug/?i=9652
  [118] = https://curl.se/bug/?i=9657
  [119] = https://curl.se/bug/?i=9654
@@ -374,6 +379,7 @@ References to bug reports and discussions on issues:
  [137] = https://curl.se/bug/?i=9698
  [138] = https://curl.se/bug/?i=9701
  [139] = https://curl.se/bug/?i=7966
+ [140] = https://curl.se/bug/?i=9791
  [141] = https://curl.se/bug/?i=9300
  [142] = https://curl.se/bug/?i=9680
  [143] = https://curl.se/bug/?i=9687
@@ -405,6 +411,13 @@ References to bug reports and discussions on issues:
  [171] = https://curl.se/bug/?i=9419
  [172] = https://curl.se/bug/?i=9418
  [173] = https://curl.se/bug/?i=9394
+ [174] = https://curl.se/bug/?i=9789
  [175] = https://curl.se/bug/?i=9389
  [176] = https://curl.se/bug/?i=8933
  [177] = https://curl.se/bug/?i=9214
+ [179] = https://curl.se/bug/?i=9784
+ [181] = https://curl.se/bug/?i=9766
+ [182] = https://curl.se/bug/?i=9779
+ [184] = https://curl.se/bug/?i=9773
+ [186] = https://curl.se/bug/?i=9638
+ [187] = https://curl.se/bug/?i=9755
