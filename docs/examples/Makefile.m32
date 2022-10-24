@@ -26,6 +26,10 @@
 
 PROOT := ../..
 
+ifeq ($(findstring -static,$(CFG)),)
+  DYN := 1
+endif
+
 ### Common
 
 include $(PROOT)/lib/Makefile.m32
@@ -35,12 +39,6 @@ include $(PROOT)/lib/Makefile.m32
 CPPFLAGS += -DCURL_NO_OLDIES
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     := -lcurl $(LIBS)
-
-ifdef WIN32
-  ifeq ($(findstring -static,$(CFG)),)
-    DYN := 1
-  endif
-endif
 
 ifdef DYN
   curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
