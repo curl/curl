@@ -41,6 +41,9 @@ endif
 
 ### Common
 
+ifeq ($(CC),cc)
+  CC := gcc
+endif
 CC := $(CROSSPREFIX)$(CC)
 AR := $(CROSSPREFIX)$(AR)
 RC ?= $(CROSSPREFIX)windres
