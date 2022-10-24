@@ -32,8 +32,6 @@
 #include "http_aws_sigv4.h"
 #include "curl_sha256.h"
 #include "transfer.h"
-
-#include "strcase.h"
 #include "parsedate.h"
 #include "sendf.h"
 

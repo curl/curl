@@ -122,7 +122,6 @@
 #include <sys/sysctl.h>
 #endif /* CURL_BUILD_MAC */
 
-#include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
 #include "connect.h"

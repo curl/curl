@@ -62,7 +62,6 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "inet_pton.h"
-#include "util.h"
 #include "server_sockaddr.h"
 #include "warnless.h"
 

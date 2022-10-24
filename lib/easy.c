@@ -71,7 +71,6 @@
 #include "mime.h"
 #include "amigaos.h"
 #include "warnless.h"
-#include "multiif.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"
 #include "setopt.h"

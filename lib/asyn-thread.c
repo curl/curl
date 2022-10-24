@@ -75,7 +75,6 @@
 #include "inet_ntop.h"
 #include "curl_threads.h"
 #include "connect.h"
-#include "socketpair.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
