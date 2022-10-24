@@ -26,6 +26,7 @@
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 
+#include <string.h>
 #include <curl/curl.h>
 
 #include "curl_md5.h"
@@ -56,11 +57,31 @@
 #endif
 
 #if defined(USE_GNUTLS)
-
 #include <nettle/md5.h>
+#elif defined(USE_OPENSSL_MD5)
+#include <openssl/md5.h>
+#elif defined(USE_WOLFSSL_MD5)
+#include <wolfssl/openssl/md5.h>
+#elif defined(USE_MBEDTLS)
+#include <mbedtls/md5.h>
+#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
+       defined(__MAC_OS_X_VERSION_MIN_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MIN_ALLOWED < 101500)) || \
+      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
+#define AN_APPLE_OS
+#include <CommonCrypto/CommonDigest.h>
+#elif defined(USE_WIN32_CRYPTO)
+#include <wincrypt.h>
+#endif
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
+
+#if defined(USE_GNUTLS)
 
 typedef struct md5_ctx my_md5_ctx;
 
@@ -83,17 +104,6 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
 }
 
 #elif defined(USE_OPENSSL_MD5) || defined(USE_WOLFSSL_MD5)
-
-/* When OpenSSL or wolfSSL is available, we use their MD5 functions. */
-#if defined(USE_OPENSSL_MD5)
-#include <openssl/md5.h>
-#elif defined(USE_WOLFSSL_MD5)
-#include <wolfssl/openssl/md5.h>
-#endif
-
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 typedef MD5_CTX my_md5_ctx;
 
@@ -118,13 +128,6 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
 }
 
 #elif defined(USE_MBEDTLS)
-
-#include <mbedtls/md5.h>
-
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 typedef mbedtls_md5_context my_md5_ctx;
 
@@ -162,12 +165,7 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
 #endif
 }
 
-#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
-       defined(__MAC_OS_X_VERSION_MIN_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MIN_ALLOWED < 101500)) || \
-      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
+#elif defined(AN_APPLE_OS)
 
 /* For Apple operating systems: CommonCrypto has the functions we need.
    These functions are available on Tiger and later, as well as iOS 2.0
@@ -175,11 +173,7 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
 
    Declaring the functions as static like this seems to be a bit more
    reliable than defining COMMON_DIGEST_FOR_OPENSSL on older cats. */
-#  include <CommonCrypto/CommonDigest.h>
 #  define my_md5_ctx CC_MD5_CTX
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 static CURLcode my_md5_init(my_md5_ctx *ctx)
 {
@@ -202,11 +196,6 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
 }
 
 #elif defined(USE_WIN32_CRYPTO)
-
-#include <wincrypt.h>
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 struct md5_ctx {
   HCRYPTPROV hCryptProv;
@@ -287,12 +276,6 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
  * optimizations are not included to reduce source code size and avoid
  * compile-time configuration.
  */
-
-#include <string.h>
-
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 /* Any 32-bit or wider unsigned integer data type will do */
 typedef unsigned int MD5_u32plus;

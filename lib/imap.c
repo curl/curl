@@ -79,7 +79,6 @@
 #include "select.h"
 #include "multiif.h"
 #include "url.h"
-#include "strcase.h"
 #include "bufref.h"
 #include "curl_sasl.h"
 #include "warnless.h"

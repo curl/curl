@@ -39,7 +39,6 @@
 #include "parsedate.h"
 #include "fopen.h"
 #include "rename.h"
-#include "strtoofft.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

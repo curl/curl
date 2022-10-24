@@ -83,7 +83,6 @@
 #include "select.h"
 #include "warnless.h"
 #include "curl_path.h"
-#include "strcase.h"
 
 #include <curl_base64.h> /* for base64 encoding/decoding */
 #include <curl_sha256.h>
