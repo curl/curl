@@ -710,7 +710,4 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
 
 #else /* CURL_DISABLE_LIBCURL_OPTION */
 
-#include "tool_cfgable.h"
-#include "tool_setopt.h"
-
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
