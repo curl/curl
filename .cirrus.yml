@@ -155,7 +155,6 @@ macos_task:
         CFLAGS: -Wno-vla -mmacosx-version-min=10.9
         install_packages: nghttp2 libssh2
         configure: --without-ssl --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2
-        TFLAGS: -n !SFTP !SCP
     - name: macOS arm64 libssh-c-ares
       env:
         CFLAGS: -Wno-vla -mmacosx-version-min=10.9
