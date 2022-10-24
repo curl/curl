@@ -49,7 +49,7 @@ struct noproxy {
 };
 
 UNITTEST_START
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_PROXY)
 {
   int i;
   int err = 0;
