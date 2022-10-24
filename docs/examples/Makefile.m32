@@ -32,6 +32,7 @@ include $(PROOT)/lib/Makefile.m32
 
 ### Local
 
+CPPFLAGS += -DCURL_NO_OLDIES
 LDFLAGS  += -L$(PROOT)/lib
 LIBS     := -lcurl $(LIBS)
 
