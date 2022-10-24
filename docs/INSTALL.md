@@ -182,7 +182,7 @@ make targets available to build libcurl with more features, use:
    and SSPI support.
 
 If you have any problems linking libraries or finding header files, be sure
-to verify that the provided `Makefile.m32` files use the proper paths, and
+to verify that the provided `Makefile.mk` files use the proper paths, and
 adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 

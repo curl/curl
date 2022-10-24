@@ -24,15 +24,15 @@
 
 # Makefile to build curl parts with GCC-like toolchains and optional features.
 #
-# Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
-# Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-libssh2-ipv6
+# Usage:   [mingw32-]make -f Makefile.mk CFG=-feat1[-feat2][-feat3][...]
+# Example: [mingw32-]make -f Makefile.mk CFG=-zlib-ssl-libssh2-ipv6
 #
 # Set component roots via envvar <feature>_PATH. Also available for
 # customization: CC, AR, RC, CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS,
 # TRIPLET, CROSSPREFIX, CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
 # and more for individual components (see below).
 
-# This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
+# This script is reused by 'src' and 'docs/examples' Makefile.mk scripts.
 
 ifndef PROOT
   PROOT := ..

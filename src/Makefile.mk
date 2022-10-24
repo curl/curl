@@ -22,13 +22,13 @@
 #
 #***************************************************************************
 
-# See usage in lib/Makefile.m32
+# See usage in lib/Makefile.mk
 
 PROOT := ..
 
 ### Common
 
-include $(PROOT)/lib/Makefile.m32
+include $(PROOT)/lib/Makefile.mk
 
 ### Local
 

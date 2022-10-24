@@ -22,7 +22,7 @@
 #
 #***************************************************************************
 
-# Build libcurl via lib/Makefile.m32 first.
+# Build libcurl via lib/Makefile.mk first.
 
 PROOT := ../..
 
@@ -32,7 +32,7 @@ endif
 
 ### Common
 
-include $(PROOT)/lib/Makefile.m32
+include $(PROOT)/lib/Makefile.mk
 
 ### Local
 
