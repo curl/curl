@@ -31,9 +31,10 @@ jobs:
             jq -c '.build.jobs[] | {target_url: ($target_url + "/job/" + .jobId),
                                     context: (.name | sub("^(Environment: )?"; "AppVeyor / ")),
                                     state: (.status | sub("queued"; "pending")
+                                                    | sub("starting"; "pending")
                                                     | sub("running"; "pending")
                                                     | sub("failed"; "failure")
                                                     | sub("cancelled"; "error")),
                                     description: .status}' \
-                --arg target_url ${APPVEYOR_TARGET_URL} | parallel --pipe -j 1 -N 1 \
+                --arg target_url ${APPVEYOR_TARGET_URL} | tee /dev/stderr | parallel --pipe -j 1 -N 1 \
               gh api --silent --input - repos/${APPVEYOR_REPOSITORY}/statuses/${APPVEYOR_COMMIT_SHA}
