@@ -380,6 +380,7 @@ sub scanfile {
 
     my $incomment=0;
     my @copyright=();
+    my %includes;
     checksrc_clear(); # for file based ignores
     accept_violations();
 
@@ -470,6 +471,15 @@ sub scanfile {
         if($l =~ /^(([^"\*]*)[^:"]|)\/\//) {
             checkwarn("CPPCOMMENTS",
                       $line, length($1), $file, $l, "\/\/ comment");
+        }
+
+        if($l =~ /^(\#\s*include\s+)([\">].*[>}"])/) {
+            my ($pre, $path) = ($1, $2);
+            if($includes{$path}) {
+                checkwarn("INCLUDEDUP",
+                          $line, length($1), $file, $l, "duplicated include");
+            }
+            $includes{$path} = $l;
         }
 
         # detect and strip preprocessor directives
