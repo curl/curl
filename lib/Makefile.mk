@@ -86,6 +86,13 @@ ifdef AMIGA
   BIN_EXT :=
 endif
 
+### Deprecated settings. For compatibility.
+
+ifdef WATT_ROOT
+  CFG += -watt
+  WATT_PATH := $(WATT_ROOT)
+endif
+
 ### Optional features
 
 ifneq ($(findstring -debug,$(CFG)),)
@@ -115,12 +122,6 @@ endif
 # Linker options to exclude for shared mode executables.
 _LDFLAGS :=
 _LIBS :=
-
-# For compatibility
-ifdef WATT_ROOT
-  CFG += -watt
-  WATT_PATH := $(WATT_ROOT)
-endif
 
 ifneq ($(findstring -watt,$(CFG)),)
   WATT_PATH ?= $(PROOT)/../watt
