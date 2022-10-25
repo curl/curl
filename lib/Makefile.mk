@@ -88,6 +88,15 @@ endif
 
 ### Optional features
 
+ifneq ($(findstring -debug,$(CFG)),)
+  CPPFLAGS += -DDEBUGBUILD
+  LDFLAGS += -g
+else
+  CPPFLAGS += -DNDEBUG
+endif
+ifneq ($(findstring -trackmem,$(CFG)),)
+  CPPFLAGS += -DCURLDEBUG
+endif
 ifneq ($(findstring -map,$(CFG)),)
   MAP := 1
 endif
