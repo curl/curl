@@ -78,6 +78,10 @@ endif
 CPPFLAGS += -I. -I$(PROOT)/include
 RCFLAGS  += -I$(PROOT)/include
 
+ifneq ($(TRIPLET),)
+CPPFLAGS += -DOS="$(TRIPLET)"
+endif
+
 ifndef WIN32
   DYN :=
 endif
