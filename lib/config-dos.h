@@ -29,12 +29,14 @@
 /*       lib/config-dos.h - Hand crafted config file for DOS        */
 /* ================================================================ */
 
+#ifndef OS
 #if defined(DJGPP)
   #define OS  "MSDOS/djgpp"
 #elif defined(__HIGHC__)
   #define OS  "MSDOS/HighC"
 #else
   #define OS  "MSDOS/?"
+#endif
 #endif
 
 #define PACKAGE  "curl"
