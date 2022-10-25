@@ -90,7 +90,7 @@ endif
 
 ifdef WATT_ROOT
   CFG += -watt
-  WATT_PATH := $(WATT_ROOT)
+  WATT_PATH := $(realpath $(WATT_ROOT))
 endif
 
 ### Optional features
