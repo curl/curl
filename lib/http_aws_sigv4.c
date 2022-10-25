@@ -266,6 +266,40 @@ fail:
   return ret;
 }
 
+#define CONTENT_SHA256_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Content-Sha256"))
+
+/* try to parse a payload hash from the content-sha256 header */
+static char *parse_content_sha_hdr(struct Curl_easy *data,
+                                   const char *provider1,
+                                   size_t *value_len)
+{
+  char key[CONTENT_SHA256_KEY_LEN];
+  size_t key_len;
+  char *value;
+  size_t len;
+
+  key_len = msnprintf(key, sizeof(key), "x-%s-content-sha256", provider1);
+
+  value = Curl_checkheaders(data, key, key_len);
+  if(!value)
+    return NULL;
+
+  value = strchr(value, ':');
+  if(!value)
+    return NULL;
+  ++value;
+
+  while(*value && ISBLANK(*value))
+    ++value;
+
+  len = strlen(value);
+  while(len > 0 && ISBLANK(value[len-1]))
+    --len;
+
+  *value_len = len;
+  return value;
+}
+
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 {
   CURLcode ret = CURLE_OUT_OF_MEMORY;
@@ -284,6 +318,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   struct dynbuf canonical_headers;
   struct dynbuf signed_headers;
   char *date_header = NULL;
+  char *payload_hash = NULL;
+  size_t payload_hash_len = 0;
   const char *post_data = data->set.postfields;
   size_t post_data_len = 0;
   unsigned char sha_hash[32];
@@ -401,17 +437,23 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
 
-  if(post_data) {
-    if(data->set.postfieldsize < 0)
-      post_data_len = strlen(post_data);
-    else
-      post_data_len = (size_t)data->set.postfieldsize;
-  }
-  if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
-                   post_data_len))
-    goto fail;
+  payload_hash = parse_content_sha_hdr(data, provider1, &payload_hash_len);
 
-  sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
+  if(!payload_hash) {
+    if(post_data) {
+      if(data->set.postfieldsize < 0)
+        post_data_len = strlen(post_data);
+      else
+        post_data_len = (size_t)data->set.postfieldsize;
+    }
+    if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+                     post_data_len))
+      goto fail;
+
+    sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
+    payload_hash = sha_hex;
+    payload_hash_len = strlen(sha_hex);
+  }
 
   {
     Curl_HttpReq httpreq;
@@ -425,13 +467,13 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                     "%s\n" /* CanonicalQueryString */
                     "%s\n" /* CanonicalHeaders */
                     "%s\n" /* SignedHeaders */
-                    "%s",  /* HashedRequestPayload in hex */
+                    "%.*s",  /* HashedRequestPayload in hex */
                     method,
                     data->state.up.path,
                     data->state.up.query ? data->state.up.query : "",
                     Curl_dyn_ptr(&canonical_headers),
                     Curl_dyn_ptr(&signed_headers),
-                    sha_hex);
+                    (int)payload_hash_len, payload_hash);
     if(!canonical_request)
       goto fail;
   }
