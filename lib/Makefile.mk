@@ -92,6 +92,35 @@ ifdef WATT_ROOT
   CFG += -watt
   WATT_PATH := $(realpath $(WATT_ROOT))
 endif
+ifneq ($(findstring 1,$(USE_OPENSSL)$(USE_SSL)),)
+  CFG += -ssl
+  OPENSSL_PATH := $(OPENSSL_ROOT)
+endif
+ifeq ($(USE_ZLIB),1)
+  CFG += -zlib
+  ZLIB_PATH := $(ZLIB_ROOT)
+endif
+ifeq ($(USE_IPV6),1)
+  CFG += -ipv6
+endif
+ifeq ($(USE_IDNA),1)
+  CFG += -idn2
+  LIBIDN2_PATH := $(LIBIDN_ROOT)
+  LIBS += -liconv
+endif
+ifeq ($(USE_ARES),1)
+  CFG += -ares
+  LIBCARES_PATH := $(ARES_ROOT)
+endif
+ifeq ($(USE_DEBUG),1)
+  CFG += -debug
+endif
+ifeq ($(USE_CURLDEBUG),1)
+  CFG += -trackmem
+endif
+ifeq ($(MAKE_MAP_FILE),1)
+  CFG += -map
+endif
 
 ### Optional features
 
