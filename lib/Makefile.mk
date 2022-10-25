@@ -88,6 +88,10 @@ endif
 
 ### Optional features
 
+ifneq ($(findstring -map,$(CFG)),)
+  MAP := 1
+endif
+
 ifdef WIN32
   ifneq ($(findstring -unicode,$(CFG)),)
     CPPFLAGS += -DUNICODE -D_UNICODE
@@ -364,6 +368,10 @@ libcurl_a_LIBRARY := libcurl.a
 ifdef WIN32
 libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
 libcurl_dll_a_LIBRARY := libcurl.dll.a
+ifdef MAP
+libcurl_map_LIBRARY := libcurl$(CURL_DLL_SUFFIX).map
+CURL_LDFLAGS_LIB += -Wl,-Map,$(libcurl_map_LIBRARY)
+endif
 endif
 
 TARGETS := $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
@@ -376,7 +384,7 @@ libcurl_dll_OBJECTS += $(patsubst %.rc,$(OBJ_DIR)/%.res,$(strip $(LIB_RCFILES)))
 endif
 
 TOCLEAN := $(libcurl_dll_OBJECTS)
-TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY)
+TOVCLEAN := $(libcurl_dll_LIBRARY:.dll=.def) $(libcurl_dll_a_LIBRARY) $(libcurl_map_LIBRARY)
 
 ### Rules
 
