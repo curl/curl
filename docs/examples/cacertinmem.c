@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * CA cert in memory with OpenSSL to get a HTTPS page.
+ * CA cert in memory with OpenSSL to get an HTTPS page.
  * </DESC>
  */
 

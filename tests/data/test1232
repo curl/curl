@@ -1,6 +1,6 @@
 <testcase>
 <info>
-# This test is a copy of test 1231, modified to use a HTTP proxy.
+# This test is a copy of test 1231, modified to use an HTTP proxy.
 <keywords>
 HTTP
 HTTP GET

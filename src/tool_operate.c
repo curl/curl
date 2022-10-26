@@ -730,7 +730,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
   if(config->postfields) {
     if(config->use_httpget) {
       if(!httpgetfields) {
-        /* Use the postfields data for a http get */
+        /* Use the postfields data for an HTTP get */
         httpgetfields = state->httpgetfields = strdup(config->postfields);
         Curl_safefree(config->postfields);
         if(!httpgetfields) {

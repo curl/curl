@@ -10,7 +10,7 @@ Experimental support in curl means:
    "carved in stone".
 2. You must enable the feature when invoking configure as otherwise curl will
    not be built with the feature present.
-3. We strongly advice against using this feature in production.
+3. We strongly advise against using this feature in production.
 4. **We reserve the right to change behavior** of the feature without sticking
    to our API/ABI rules as we do for regular features, as long as it is marked
    experimental.

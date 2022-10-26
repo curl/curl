@@ -24,7 +24,7 @@
 
 # The results of each of these jobs can be found at 
 # https://curl.zuul.vexxhost.dev/builds. As of November 2021 they are not being
-# propagated to the Github "checks" UI, you need to check for them manually.
+# propagated to the GitHub "checks" UI, you need to check for them manually.
 
 ---
 - job:

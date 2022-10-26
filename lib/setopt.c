@@ -598,7 +598,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_FOLLOWLOCATION:
     /*
-     * Follow Location: header hints on a HTTP-server.
+     * Follow Location: header hints on an HTTP-server.
      */
     data->set.http_follow_location = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
@@ -914,7 +914,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_EXPECT_100_TIMEOUT_MS:
     /*
-     * Time to wait for a response to a HTTP request containing an
+     * Time to wait for a response to an HTTP request containing an
      * Expect: 100-continue header before sending the data anyway.
      */
     arg = va_arg(param, long);

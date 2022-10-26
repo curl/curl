@@ -148,7 +148,7 @@ changes.
 
 ### About pull requests
 
-With github it is easy to send a [pull
+With GitHub it is easy to send a [pull
 request](https://github.com/curl/curl/pulls) to the curl project to have
 changes merged.
 

@@ -134,7 +134,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   struct bufref ntlmmsg;
 
   /* point to the address of the pointer that holds the string to send to the
-     server, which is for a plain host or for a HTTP proxy */
+     server, which is for a plain host or for an HTTP proxy */
   char **allocuserpwd;
 
   /* point to the username, password, service and host */

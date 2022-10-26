@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Make a HTTP POST with data from memory and receive response in memory.
+ * Make an HTTP POST with data from memory and receive response in memory.
  * </DESC>
  */
 #include <stdio.h>

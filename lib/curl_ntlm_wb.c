@@ -385,7 +385,7 @@ CURLcode Curl_output_ntlm_wb(struct Curl_easy *data, struct connectdata *conn,
                              bool proxy)
 {
   /* point to the address of the pointer that holds the string to send to the
-     server, which is for a plain host or for a HTTP proxy */
+     server, which is for a plain host or for an HTTP proxy */
   char **allocuserpwd;
   /* point to the name and password for this */
   const char *userp;

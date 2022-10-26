@@ -515,7 +515,7 @@ Curl_cookie_add(struct Curl_easy *data,
     return NULL; /* bail out if we're this low on memory */
 
   if(httpheader) {
-    /* This line was read off a HTTP-header */
+    /* This line was read off an HTTP-header */
     char name[MAX_NAME];
     char what[MAX_NAME];
     const char *ptr;
@@ -864,7 +864,7 @@ Curl_cookie_add(struct Curl_easy *data,
   }
   else {
     /*
-     * This line is NOT a HTTP header style line, we do offer support for
+     * This line is NOT an HTTP header style line, we do offer support for
      * reading the odd netscape cookies-file format here
      */
     char *ptr;

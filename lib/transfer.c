@@ -1511,7 +1511,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
   /*
    * Set user-agent. Used for HTTP, but since we can attempt to tunnel
-   * basically anything through a http proxy we can't limit this based on
+   * basically anything through an HTTP proxy we can't limit this based on
    * protocol.
    */
   if(data->set.str[STRING_USERAGENT]) {
@@ -1743,7 +1743,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
    * differently based on exactly what return code there was.
    *
    * News from 7.10.6: we can also get here on a 401 or 407, in case we act on
-   * a HTTP (proxy-) authentication scheme other than Basic.
+   * an HTTP (proxy-) authentication scheme other than Basic.
    */
   switch(data->info.httpcode) {
     /* 401 - Act on a WWW-Authenticate, we keep on moving and do the

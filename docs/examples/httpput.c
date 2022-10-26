@@ -31,7 +31,7 @@
 #include <curl/curl.h>
 
 /*
- * This example shows a HTTP PUT operation. PUTs a file given as a command
+ * This example shows an HTTP PUT operation. PUTs a file given as a command
  * line argument to the URL also given on the command line.
  *
  * This example also uses its own read callback.

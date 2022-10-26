@@ -36,7 +36,7 @@
 
 /*
  * Curl_pseudo_headers() creates the array with pseudo headers to be
- * used in a HTTP/2 or HTTP/3 request.
+ * used in an HTTP/2 or HTTP/3 request.
  */
 
 #if defined(USE_NGHTTP2) || defined(ENABLE_QUIC)

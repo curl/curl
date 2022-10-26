@@ -1043,7 +1043,7 @@ void Curl_connect_free(struct Curl_easy *data)
 }
 
 /*
- * Curl_proxyCONNECT() requires that we're connected to a HTTP proxy. This
+ * Curl_proxyCONNECT() requires that we're connected to an HTTP proxy. This
  * function will issue the necessary commands to get a seamless tunnel through
  * this proxy. After that, the socket can be used just as a normal socket.
  */

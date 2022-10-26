@@ -43,7 +43,7 @@ static const char olivertwist[]=
    509 byte limit. */
 
 /*
- * This example shows a HTTP PUT operation that sends a fixed buffer with
+ * This example shows an HTTP PUT operation that sends a fixed buffer with
  * CURLOPT_POSTFIELDS to the URL given as an argument.
  */
 

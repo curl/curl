@@ -914,7 +914,7 @@ static int IsMultiplexingPossible(const struct Curl_easy *handle,
 {
   int avail = 0;
 
-  /* If a HTTP protocol and multiplexing is enabled */
+  /* If an HTTP protocol and multiplexing is enabled */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
      (!conn->bits.protoconnstart || !conn->bits.close)) {
 
@@ -1197,7 +1197,7 @@ ConnectionExists(struct Curl_easy *data,
       size_t multiplexed = 0;
 
       /*
-       * Note that if we use a HTTP proxy in normal mode (no tunneling), we
+       * Note that if we use an HTTP proxy in normal mode (no tunneling), we
        * check connections to that proxy and not to the actual remote server.
        */
       check = curr->ptr;
@@ -1381,9 +1381,9 @@ ConnectionExists(struct Curl_easy *data,
          || !needle->bits.httpproxy || needle->bits.tunnel_proxy
 #endif
         ) {
-        /* The requested connection does not use a HTTP proxy or it uses SSL or
-           it is a non-SSL protocol tunneled or it is a non-SSL protocol which
-           is allowed to be upgraded via TLS */
+        /* The requested connection does not use an HTTP proxy or it uses SSL
+           or it is a non-SSL protocol tunneled or it is a non-SSL protocol
+           which is allowed to be upgraded via TLS */
 
         if((strcasecompare(needle->handler->scheme, check->handler->scheme) ||
             (get_protocol_family(check->handler) ==
@@ -2704,7 +2704,7 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
 
     if(conn->http_proxy.host.rawalloc) {
 #ifdef CURL_DISABLE_HTTP
-      /* asking for a HTTP proxy is a bit funny when HTTP is disabled... */
+      /* asking for an HTTP proxy is a bit funny when HTTP is disabled... */
       result = CURLE_UNSUPPORTED_PROTOCOL;
       goto out;
 #else
@@ -2721,7 +2721,7 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
 #endif
     }
     else {
-      conn->bits.httpproxy = FALSE; /* not a HTTP proxy */
+      conn->bits.httpproxy = FALSE; /* not an HTTP proxy */
       conn->bits.tunnel_proxy = FALSE; /* no tunneling if not HTTP */
     }
 
@@ -3907,7 +3907,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
   /* reuse_fresh is TRUE if we are told to use a new connection by force, but
      we only acknowledge this option if this is not a re-used connection
-     already (which happens due to follow-location or during a HTTP
+     already (which happens due to follow-location or during an HTTP
      authentication phase). CONNECT_ONLY transfers also refuse reuse. */
   if((data->set.reuse_fresh && !data->state.this_is_a_follow) ||
      data->set.connect_only)

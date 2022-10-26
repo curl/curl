@@ -23,7 +23,7 @@ with a `testcase` tag, which encompasses the remainder of the file.
 # Preprocessing
 
 When a test is to be executed, the source file is first preprocessed and
-variables are substituted by the their respective contents and the output
+variables are substituted by their respective contents and the output
 version of the test file is stored as `log/testNUM`. That version is what will
 be read and used by the test servers.
 
@@ -70,7 +70,7 @@ string may contain `%HH` hexadecimal codes:
 
     %repeat[<number> x <string>]%
 
-For example, to insert the word hello a 100 times:
+For example, to insert the word hello 100 times:
 
     %repeat[100 x hello]%
 
@@ -114,7 +114,7 @@ Available substitute variables include:
 - `%CLIENT6IP` - IPv6 address of the client running curl
 - `%CLIENTIP` - IPv4 address of the client running curl
 - `%CURL` - Path to the curl executable
-- `%FILE_PWD` - Current directory, on windows prefixed with a slash
+- `%FILE_PWD` - Current directory, on Windows prefixed with a slash
 - `%FTP6PORT` - IPv6 port number of the FTP server
 - `%FTPPORT` - Port number of the FTP server
 - `%FTPSPORT` - Port number of the FTPS server
@@ -203,7 +203,7 @@ arrived safely. Set `nocheck="yes"` to prevent the test script from verifying
 the arrival of this data.
 
 If the data contains `swsclose` anywhere within the start and end tag, and
-this is a HTTP test, then the connection will be closed by the server after
+this is an HTTP test, then the connection will be closed by the server after
 this response is sent. If not, the connection will be kept persistent.
 
 If the data contains `swsbounce` anywhere within the start and end tag, the
@@ -237,10 +237,10 @@ Send back this contents instead of the <data> one. The `NUM` is set by:
  - The test number in the request line is >10000 and this is the remainder
    of [test case number]%10000.
  - The request was HTTP and included digest details, which adds 1000 to `NUM`
- - If a HTTP request is NTLM type-1, it adds 1001 to `NUM`
- - If a HTTP request is NTLM type-3, it adds 1002 to `NUM`
- - If a HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
- - If a HTTP request is Negotiate, `NUM` gets incremented by one for each
+ - If an HTTP request is NTLM type-1, it adds 1001 to `NUM`
+ - If an HTTP request is NTLM type-3, it adds 1002 to `NUM`
+ - If an HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
+ - If an HTTP request is Negotiate, `NUM` gets incremented by one for each
    request with Negotiate authorization header on the same test case.
 
 Dynamically changing `NUM` in this way allows the test harness to be used to
@@ -570,7 +570,7 @@ comparisons are made.
 
 ### `<proxy [nonewline="yes"]>`
 
-The protocol dump curl should transmit to a HTTP proxy (when the http-proxy
+The protocol dump curl should transmit to an HTTP proxy (when the http-proxy
 server is used), if `nonewline` is set, we will cut off the trailing newline
 of this given data before comparing with the one actually sent by the client
 The `<strip>` and `<strippart>` rules are applied before comparisons are made.

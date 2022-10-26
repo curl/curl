@@ -66,7 +66,7 @@
 
   Schannel in Windows XP is not able to connect to servers that no longer
   support the legacy handshakes and algorithms used by those versions, so we
-  advice against building curl to use Schannel on really old Windows versions.
+  advise against building curl to use Schannel on really old Windows versions.
 
   Reference: [Prohibiting RC4 Cipher
   Suites](https://datatracker.ietf.org/doc/html/draft-popov-tls-prohibiting-rc4-01)

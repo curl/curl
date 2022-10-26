@@ -40,7 +40,7 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     /* First set the URL that is about to receive our POST. This URL can
-       just as well be a https:// URL if that is what should receive the
+       just as well be an https:// URL if that is what should receive the
        data. */
     curl_easy_setopt(curl, CURLOPT_URL, "http://postit.example.com/moo.cgi");
     /* Now specify the POST data */

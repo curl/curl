@@ -481,7 +481,7 @@ struct ConnectBits {
 #ifndef CURL_DISABLE_PROXY
   bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
                                   is complete */
-  BIT(httpproxy);  /* if set, this transfer is done through a http proxy */
+  BIT(httpproxy);  /* if set, this transfer is done through an HTTP proxy */
   BIT(socksproxy); /* if set, this transfer is done through a socks proxy */
   BIT(proxy_user_passwd); /* user+password for the proxy? */
   BIT(tunnel_proxy);  /* if CONNECT is used to "tunnel" through the proxy.
@@ -920,8 +920,8 @@ struct connectdata {
   struct Curl_llist_element bundle_node; /* conncache */
 
   /* chunk is for HTTP chunked encoding, but is in the general connectdata
-     struct only because we can do just about any protocol through a HTTP proxy
-     and a HTTP proxy may in fact respond using chunked encoding */
+     struct only because we can do just about any protocol through an HTTP
+     proxy and an HTTP proxy may in fact respond using chunked encoding */
   struct Curl_chunker chunk;
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
@@ -1860,7 +1860,7 @@ struct UserDefined {
    this session. They are STATIC, set by libcurl users or at least initially
    and they don't change during operations. */
   BIT(get_filetime);     /* get the time and get of the remote file */
-  BIT(tunnel_thru_httpproxy); /* use CONNECT through a HTTP proxy */
+  BIT(tunnel_thru_httpproxy); /* use CONNECT through an HTTP proxy */
   BIT(prefer_ascii);     /* ASCII rather than binary */
   BIT(remote_append);    /* append, not overwrite, on upload */
   BIT(list_only);        /* list directory */
