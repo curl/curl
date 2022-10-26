@@ -45,7 +45,7 @@ struct h2h3req {
 
 /*
  * Curl_pseudo_headers() creates the array with pseudo headers to be
- * used in a HTTP/2 or HTTP/3 request. Returns an allocated struct.
+ * used in an HTTP/2 or HTTP/3 request. Returns an allocated struct.
  * Free it with Curl_pseudo_free().
  */
 CURLcode Curl_pseudo_headers(struct Curl_easy *data,

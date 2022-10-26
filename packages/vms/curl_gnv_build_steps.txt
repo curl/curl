@@ -251,7 +251,7 @@ branding the PCSI kit based on who is making the kit.
       step of backing up the source files will probably hang or fail.
 
       You need to copy the source files to VMS mounted disks and create
-      logical names SRC_ROOT1 and VMS_ROOT1 to work around this to to
+      logical names SRC_ROOT1 and VMS_ROOT1 to work around this to
       reference local disks.  Make sure src_root1:[000000] and
       vms_root1:[000000] exist and can be written to.
 

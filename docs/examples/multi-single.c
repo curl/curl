@@ -37,7 +37,7 @@
 #include <curl/curl.h>
 
 /*
- * Simply download a HTTP file.
+ * Simply download an HTTP file.
  */
 int main(void)
 {

@@ -101,7 +101,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     /*
-      If you use POST to a HTTP 1.1 server, you can send data without knowing
+      If you use POST to an HTTP 1.1 server, you can send data without knowing
       the size before starting the POST if you use chunked encoding. You
       enable this by adding a header like "Transfer-Encoding: chunked" with
       CURLOPT_HTTPHEADER. With HTTP 1.0 or without chunked transfer, you must
