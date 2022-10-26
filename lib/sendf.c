@@ -145,9 +145,9 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
          psnd->recv_size > psnd->recv_processed;
 }
 
-static CURLcode pre_receive_plain(struct Curl_easy *data,
-                                  struct connectdata *conn, int num)
+static CURLcode pre_receive_plain(struct Curl_easy *data, int num)
 {
+  struct connectdata *conn = data->conn;
   const curl_socket_t sockfd = conn->sock[num];
   struct postponed_data * const psnd = &(conn->postponed[num]);
   size_t bytestorecv = psnd->allocated_size - psnd->recv_size;
@@ -182,16 +182,21 @@ static CURLcode pre_receive_plain(struct Curl_easy *data,
       DEBUGASSERT(psnd->bindsock == sockfd);
       recvedbytes = sread(sockfd, psnd->buffer + psnd->recv_size,
                           bytestorecv);
-      if(recvedbytes > 0)
+      if(recvedbytes > 0) {
         psnd->recv_size += recvedbytes;
+
+        DEBUGF(infof(data, "prior to sending data, saved %lu bytes from recv "
+                     "buffer to postponed buffer", recvedbytes));
+      }
     }
   }
   return CURLE_OK;
 }
 
-static ssize_t get_pre_recved(struct connectdata *conn, int num, char *buf,
+static ssize_t get_pre_recved(struct Curl_easy *data, int num, char *buf,
                               size_t len)
 {
+  struct connectdata *conn = data->conn;
   struct postponed_data * const psnd = &(conn->postponed[num]);
   size_t copysize;
   if(!psnd->buffer)
@@ -222,6 +227,10 @@ static ssize_t get_pre_recved(struct connectdata *conn, int num, char *buf,
     psnd->bindsock = CURL_SOCKET_BAD;
 #endif /* DEBUGBUILD */
   }
+
+  DEBUGF(infof(data, "retrieved %lu bytes from postponed recv buffer",
+               copysize));
+
   return (ssize_t)copysize;
 }
 #else  /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
@@ -232,8 +241,8 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
   (void)sockindex;
   return false;
 }
-#define pre_receive_plain(d,c,n) CURLE_OK
-#define get_pre_recved(c,n,b,l) 0
+#define pre_receive_plain(d,n) CURLE_OK
+#define get_pre_recved(d,n,b,l) 0
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
 /* Curl_infof() is for info message along the way */
@@ -353,7 +362,7 @@ ssize_t Curl_send_plain(struct Curl_easy *data, int num,
      To avoid lossage of received data, recv() must be
      performed before every send() if any incoming data is
      available. */
-  if(pre_receive_plain(data, conn, num)) {
+  if(pre_receive_plain(data, num)) {
     *code = CURLE_OUT_OF_MEMORY;
     return -1;
   }
@@ -433,7 +442,7 @@ ssize_t Curl_recv_plain(struct Curl_easy *data, int num, char *buf,
   sockfd = conn->sock[num];
   /* Check and return data that already received and storied in internal
      intermediate buffer */
-  nread = get_pre_recved(conn, num, buf, len);
+  nread = get_pre_recved(data, num, buf, len);
   if(nread > 0) {
     *code = CURLE_OK;
     return nread;
