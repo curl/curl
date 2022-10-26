@@ -245,7 +245,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
 }
 
 /*
- * Hyper does not consider the status line, the first line in a HTTP/1
+ * Hyper does not consider the status line, the first line in an HTTP/1
  * response, to be a header. The libcurl API does. This function sends the
  * status line in the header callback. */
 static CURLcode status_line(struct Curl_easy *data,
@@ -740,7 +740,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
 }
 
 /*
- * bodysend() sets up headers in the outgoing request for a HTTP transfer that
+ * bodysend() sets up headers in the outgoing request for an HTTP transfer that
  * sends a body
  */
 
@@ -845,7 +845,7 @@ static void http1xx_cb(void *arg, struct hyper_response *resp)
 }
 
 /*
- * Curl_http() gets called from the generic multi_do() function when a HTTP
+ * Curl_http() gets called from the generic multi_do() function when an HTTP
  * request is to be performed. This creates and sends a properly constructed
  * HTTP request.
  */

@@ -1286,7 +1286,7 @@ typedef enum {
   /* size of the POST input data, if strlen() is not good to use */
   CURLOPT(CURLOPT_POSTFIELDSIZE, CURLOPTTYPE_LONG, 60),
 
-  /* tunnel non-http operations through a HTTP proxy */
+  /* tunnel non-http operations through an HTTP proxy */
   CURLOPT(CURLOPT_HTTPPROXYTUNNEL, CURLOPTTYPE_LONG, 61),
 
   /* Set the interface string to use as outgoing network interface */
@@ -1864,7 +1864,7 @@ typedef enum {
   /* Enable/disable TLS ALPN extension (http2 over ssl might fail without) */
   CURLOPT(CURLOPT_SSL_ENABLE_ALPN, CURLOPTTYPE_LONG, 226),
 
-  /* Time to wait for a response to a HTTP request containing an
+  /* Time to wait for a response to an HTTP request containing an
    * Expect: 100-continue header before sending the data anyway. */
   CURLOPT(CURLOPT_EXPECT_100_TIMEOUT_MS, CURLOPTTYPE_LONG, 227),
 

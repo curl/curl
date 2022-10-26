@@ -649,7 +649,7 @@ which of them to use. Default address can also be used:
     curl -P - ftp.download.com
 
 Download with `PORT` but use the IP address of our `le0` interface (this does
-not work on windows):
+not work on Windows):
 
     curl -P le0 ftp.download.com
 
@@ -829,7 +829,7 @@ The usage of the `-x`/`--proxy` flag overrides the environment variables.
 Unix introduced the `.netrc` concept a long time ago. It is a way for a user
 to specify name and password for commonly visited FTP sites in a file so that
 you do not have to type them in each time you visit those sites. You realize
-this is a big security risk if someone else gets hold of your passwords, so
+this is a big security risk if someone else gets hold of your passwords,
 therefore most Unix programs will not read this file unless it is only readable
 by yourself (curl does not care though).
 

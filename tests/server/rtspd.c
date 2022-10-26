@@ -450,10 +450,10 @@ static int ProcessRequest(struct httprequest *req)
 
   /* **** Persistence ****
    *
-   * If the request is a HTTP/1.0 one, we close the connection unconditionally
+   * If the request is an HTTP/1.0 one, we close the connection unconditionally
    * when we're done.
    *
-   * If the request is a HTTP/1.1 one, we MUST check for a "Connection:"
+   * If the request is an HTTP/1.1 one, we MUST check for a "Connection:"
    * header that might say "close". If it does, we close a connection when
    * this request is processed. Otherwise, we keep the connection alive for X
    * seconds.

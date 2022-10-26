@@ -490,7 +490,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 /*
  * Curl_auth_decode_digest_http_message()
  *
- * This is used to decode a HTTP DIGEST challenge message into the separate
+ * This is used to decode an HTTP DIGEST challenge message into the separate
  * attributes.
  *
  * Parameters:
@@ -650,7 +650,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 /*
  * auth_create_digest_http_message()
  *
- * This is used to generate a HTTP DIGEST response message ready for sending
+ * This is used to generate an HTTP DIGEST response message ready for sending
  * to the recipient.
  *
  * Parameters:
@@ -926,7 +926,7 @@ static CURLcode auth_create_digest_http_message(
 /*
  * Curl_auth_create_digest_http_message()
  *
- * This is used to generate a HTTP DIGEST response message ready for sending
+ * This is used to generate an HTTP DIGEST response message ready for sending
  * to the recipient.
  *
  * Parameters:
