@@ -1200,18 +1200,18 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
     /* The first four bytes will be an unsigned int indicating number
        of bytes of data in the rest of the buffer. */
-    extension_len = (unsigned int *)(&alpn_buffer[cur]);
+    extension_len = (unsigned int *)(void *)(&alpn_buffer[cur]);
     cur += sizeof(unsigned int);
 
     /* The next four bytes are an indicator that this buffer will contain
        ALPN data, as opposed to NPN, for example. */
-    *(unsigned int *)&alpn_buffer[cur] =
+    *(unsigned int *)(void *)&alpn_buffer[cur] =
       SecApplicationProtocolNegotiationExt_ALPN;
     cur += sizeof(unsigned int);
 
     /* The next two bytes will be an unsigned short indicating the number
        of bytes used to list the preferred protocols. */
-    list_len = (unsigned short*)(&alpn_buffer[cur]);
+    list_len = (unsigned short*)(void *)(&alpn_buffer[cur]);
     cur += sizeof(unsigned short);
 
     list_start_index = cur;
