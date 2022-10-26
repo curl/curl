@@ -276,7 +276,6 @@ ifneq ($(findstring -psl,$(CFG)),)
 endif
 else ifneq ($(findstring -winidn,$(CFG)),)
   CPPFLAGS += -DUSE_WIN32_IDN
-  CPPFLAGS += -DWANT_IDN_PROTOTYPES
   _LIBS += -lnormaliz
 endif
 
