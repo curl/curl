@@ -151,6 +151,8 @@ static CURLcode pre_receive_plain(struct Curl_easy *data,
   const curl_socket_t sockfd = conn->sock[num];
   struct postponed_data * const psnd = &(conn->postponed[num]);
   size_t bytestorecv = psnd->allocated_size - psnd->recv_size;
+  ssize_t recvedbytes;
+
   /* WinSock will destroy unread received data if send() is
      failed.
      To avoid lossage of received data, recv() must be
@@ -176,16 +178,12 @@ static CURLcode pre_receive_plain(struct Curl_easy *data,
 #endif /* DEBUGBUILD */
         bytestorecv = psnd->allocated_size;
       }
-      if(psnd->buffer) {
-        ssize_t recvedbytes;
-        DEBUGASSERT(psnd->bindsock == sockfd);
-        recvedbytes = sread(sockfd, psnd->buffer + psnd->recv_size,
-                            bytestorecv);
-        if(recvedbytes > 0)
-          psnd->recv_size += recvedbytes;
-      }
-      else
-        psnd->allocated_size = 0;
+
+      DEBUGASSERT(psnd->bindsock == sockfd);
+      recvedbytes = sread(sockfd, psnd->buffer + psnd->recv_size,
+                          bytestorecv);
+      if(recvedbytes > 0)
+        psnd->recv_size += recvedbytes;
     }
   }
   return CURLE_OK;
