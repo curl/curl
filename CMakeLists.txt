@@ -704,7 +704,6 @@ if(WIN32)
   option(USE_WIN32_IDN "Use WinIDN for IDN support" OFF)
   if(USE_WIN32_IDN)
     list(APPEND CURL_LIBS "normaliz")
-    set(WANT_IDN_PROTOTYPES ON)
   endif()
 endif()
 

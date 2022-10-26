@@ -2479,7 +2479,6 @@ if test "$want_winidn" = "yes"; then
   #
   if test "$tst_links_winidn" = "yes"; then
     AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
-    AC_DEFINE(WANT_IDN_PROTOTYPES, 1, [Define to 1 to provide own prototypes.])
     AC_SUBST([IDN_ENABLED], [1])
     curl_idn_msg="enabled (Windows-native)"
   else
