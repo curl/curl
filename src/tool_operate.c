@@ -328,6 +328,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
     }
     per->input.fd = per->infd;
   }
+  per->start = tvnow();
   return result;
 }
 
@@ -1243,6 +1244,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         /* for uploads */
         input->config = config;
+        input->per = per;
         /* Note that if CURLOPT_READFUNCTION is fread (the default), then
          * lib/telnet.c will Curl_poll() on the input file descriptor
          * rather than calling the READFUNCTION at regular intervals.
@@ -1344,7 +1346,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           per->errorbuffer = global_errorbuffer;
           my_setopt(curl, CURLOPT_ERRORBUFFER, global_errorbuffer);
         }
-        my_setopt(curl, CURLOPT_TIMEOUT_MS, (long)(config->timeout * 1000));
+        my_setopt(curl, CURLOPT_TIMEOUT_MS, config->timeout_ms);
 
         switch(config->httpreq) {
         case HTTPREQ_SIMPLEPOST:
@@ -1832,8 +1834,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt_slist(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
 
         /* new in libcurl 7.7: */
-        my_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS,
-                  (long)(config->connecttimeout * 1000));
+        my_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, config->connecttimeout_ms);
 
         if(config->doh_url)
           my_setopt_str(curl, CURLOPT_DOH_URL, config->doh_url);
@@ -2079,9 +2080,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL, config->proto_default);
 
         /* new in 7.47.0 */
-        if(config->expect100timeout > 0)
+        if(config->expect100timeout_ms > 0)
           my_setopt_str(curl, CURLOPT_EXPECT_100_TIMEOUT_MS,
-                        (long)(config->expect100timeout*1000));
+                        config->expect100timeout_ms);
 
         /* new in 7.48.0 */
         if(config->tftp_no_options && proto_tftp)
@@ -2386,7 +2387,6 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     bool retry;
     long delay_ms;
     bool bailout = FALSE;
-    struct timeval start;
     result = pre_transfer(global, per);
     if(result)
       break;
@@ -2397,7 +2397,6 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
         break;
     }
 
-    start = tvnow();
 #ifdef CURLDEBUG
     if(global->test_event_based)
       result = curl_easy_perform_ev(per->curl);
@@ -2429,7 +2428,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     if(per && global->ms_per_transfer) {
       /* how long time did the most recent transfer take in number of
          milliseconds */
-      long milli = tvdiff(tvnow(), start);
+      long milli = tvdiff(tvnow(), per->start);
       if(milli < global->ms_per_transfer) {
         notef(global, "Transfer took %ld ms, waits %ldms as set by --rate\n",
               milli, global->ms_per_transfer - milli);
