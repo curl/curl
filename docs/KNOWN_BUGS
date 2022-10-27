@@ -19,7 +19,6 @@ problems may have been fixed or changed somewhat since this was written.
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
  2. TLS
- 2.1 CURLINFO_SSL_VERIFYRESULT has limited support
  2.2 DER in keychain
  2.3 Unable to use PKCS12 certificate with Secure Transport
  2.4 Secure Transport will not import PKCS#12 client certificates without a password
@@ -214,11 +213,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 
 2. TLS
-
-2.1 CURLINFO_SSL_VERIFYRESULT has limited support
-
- CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL, NSS and
- GnuTLS backends, so relying on this information in a generic app is flaky.
 
 2.2 DER in keychain
 
