@@ -7,8 +7,8 @@ SPDX-License-Identifier: curl
 Fuzz tests
 ==========
 
-The fuzzing tests for curl have been moved to a separate repository:
+The fuzzing tests for curl have been moved to [a separate
+repository](https://github.com/curl/curl-fuzzer).
 
-https://github.com/curl/curl-fuzzer
-
-More information on how to get started with curl fuzz testing can be found there.
+More information on how to get started with curl fuzz testing can be found
+there.
