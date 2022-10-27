@@ -155,7 +155,6 @@ optiontable:
 	perl optiontable.pl < $(top_srcdir)/include/curl/curl.h > easyoptions.c
 
 if OS_WINDOWS
-# Warning is "normal": libtool:   error: ignoring unknown tag RC
 .rc.lo:
 	$(LIBTOOL) --tag=RC --mode=compile $(RC) -I$(top_srcdir)/include $(RCFLAGS) -i $< -o $@
 endif

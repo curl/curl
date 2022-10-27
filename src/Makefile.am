@@ -157,7 +157,6 @@ listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && ./gen.pl listhelp *.d) > tool_listhelp.c
 
 if OS_WINDOWS
-# Warning is "normal": libtool:   error: ignoring unknown tag RC
 .rc.o:
-	$(LIBTOOL) --tag=RC --mode=compile $(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
+	$(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
 endif
