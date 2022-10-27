@@ -34,6 +34,10 @@
 #include <netinet/in.h>
 #endif
 
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 /*
  * Curl_cidr4_match() returns TRUE if the given IPv4 address is within the
  * specified CIDR address range.
