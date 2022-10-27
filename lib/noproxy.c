@@ -188,18 +188,22 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
           /* FALLTHROUGH */
         case TYPE_IPV6: {
           const char *check = token;
-          char *slash = strchr(check, '/');
+          char *slash;
           unsigned int bits = 0;
           char checkip[128];
+          if(tokenlen >= sizeof(checkip))
+            /* this cannot match */
+            break;
+          /* copy the check name to a temp buffer */
+          memcpy(checkip, check, tokenlen);
+          checkip[tokenlen] = 0;
+          check = checkip;
+
+          slash = strchr(check, '/');
           /* if the slash is part of this token, use it */
-          if(slash && (slash < &check[tokenlen])) {
+          if(slash) {
             bits = atoi(slash + 1);
-            /* copy the check name to a temp buffer */
-            if(tokenlen >= sizeof(checkip))
-              break;
-            memcpy(checkip, check, tokenlen);
-            checkip[ slash - check ] = 0;
-            check = checkip;
+            *slash = 0; /* null terminate there */
           }
           if(type == TYPE_IPV6)
             match = Curl_cidr6_match(name, check, bits);

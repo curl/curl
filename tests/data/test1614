@@ -16,7 +16,7 @@ unittest
 proxy
 </features>
  <name>
-cidr comparisons
+noproxy and cidr comparisons
  </name>
 </client>
 <errorcode>

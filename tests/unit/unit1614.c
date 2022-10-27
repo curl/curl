@@ -77,6 +77,14 @@ UNITTEST_START
     { NULL, NULL, 0, FALSE} /* end marker */
   };
   struct noproxy list[]= {
+    { "127.0.0.1", "127.0.0.1,localhost", TRUE},
+    { "127.0.0.1", "127.0.0.1,localhost,", TRUE},
+    { "127.0.0.1", "127.0.0.1/8,localhost,", TRUE},
+    { "127.0.0.1", "127.0.0.1/28,localhost,", TRUE},
+    { "127.0.0.1", "127.0.0.1/31,localhost,", TRUE},
+    { "127.0.0.1", "localhost,127.0.0.1", TRUE},
+    { "localhost", "localhost,127.0.0.1", TRUE},
+    { "localhost", "127.0.0.1,localhost", TRUE},
     { "foobar", "barfoo", FALSE},
     { "foobar", "foobar", TRUE},
     { "192.168.0.1", "foobar", FALSE},
