@@ -104,7 +104,6 @@ problems may have been fixed or changed somewhat since this was written.
  11. Internals
  11.1 Curl leaks .onion hostnames in DNS
  11.2 error buffer not set if connection to multiple addresses fails
- 11.3 Disconnects do not do verbose
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.7 signal-based resolver timeouts
@@ -795,24 +794,6 @@ problems may have been fixed or changed somewhat since this was written.
  only. But you only have IPv4 connectivity. libcurl will correctly fail with
  CURLE_COULDNT_CONNECT. But the error buffer set by CURLOPT_ERRORBUFFER
  remains empty. Issue: https://github.com/curl/curl/issues/544
-
-11.3 Disconnects do not do verbose
-
- Due to how libcurl keeps connections alive in the "connection pool" after use
- to potentially transcend the life-time of the initial easy handle that was
- used to drive the transfer over that connection, it uses a *separate* and
- internal easy handle when it shuts down the connection. That separate
- connection might not have the same settings as the original easy handle, and
- in particular it is often note-worthy that it does not have the same VERBOSE
- and debug callbacks setup so that an application will not get the protocol
- data for the disconnect phase of a transfer the same way it got all the other
- data.
-
- This is because the original easy handle might have already been freed at that
- point and the application might not at all be prepared that the callback
- would get called again long after the handle was freed.
-
- See for example https://github.com/curl/curl/issues/6995
 
 11.4 HTTP test server 'connection-monitor' problems
 
