@@ -37,6 +37,7 @@ struct per_transfer {
   long retry_numretries;
   long retry_sleep_default;
   long retry_sleep;
+  struct timeval start; /* start of this transfer */
   struct timeval retrystart;
   char *this_url;
   unsigned int urlnum; /* the index of the given URL */
