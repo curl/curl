@@ -255,9 +255,9 @@ set_thread_string(localkey_t key, const char *s)
 
 
 int
-Curl_getnameinfo_a(const struct sockaddr *sa, curl_socklen_t salen,
-                   char *nodename, curl_socklen_t nodenamelen,
-                   char *servname, curl_socklen_t servnamelen,
+Curl_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
+                   char *nodename, socklen_t nodenamelen,
+                   char *servname, socklen_t servnamelen,
                    int flags)
 {
   char *enodename = NULL;
