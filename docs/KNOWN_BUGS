@@ -19,7 +19,6 @@ problems may have been fixed or changed somewhat since this was written.
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
  2. TLS
- 2.2 DER in keychain
  2.3 Unable to use PKCS12 certificate with Secure Transport
  2.4 Secure Transport will not import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
@@ -213,11 +212,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 
 2. TLS
-
-2.2 DER in keychain
-
- Curl does not recognize certificates in DER format in keychain, but it works
- with PEM.  https://curl.se/bug/view.cgi?id=1065
 
 2.3 Unable to use PKCS12 certificate with Secure Transport
 
