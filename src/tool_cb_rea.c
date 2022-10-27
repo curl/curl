@@ -23,7 +23,9 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#endif
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
