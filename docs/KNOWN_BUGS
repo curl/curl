@@ -51,7 +51,6 @@ problems may have been fixed or changed somewhat since this was written.
  5.4 Build with statically built dependency
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
  5.6 make distclean loops forever
- 5.7 Visual Studio project gaps
  5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
  5.10 curl hangs on SMB upload over stdin
@@ -450,20 +449,6 @@ problems may have been fixed or changed somewhat since this was written.
  never-ending loop.
 
  See https://github.com/curl/curl/issues/7716
-
-5.7 Visual Studio project gaps
-
- The Visual Studio projects lack some features that the autoconf and nmake
- builds offer, such as the following:
-
-  - support for zlib and nghttp2
-  - use of static runtime libraries
-  - add the test suite components
-
- In addition to this the following could be implemented:
-
-  - support for other development IDEs
-  - add PATH environment variables for third-party DLLs
 
 5.8 configure finding libs in wrong directory
 
