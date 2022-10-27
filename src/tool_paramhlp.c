@@ -240,8 +240,9 @@ static ParameterError str2double(double *val, const char *str, double max)
 }
 
 /*
- * Parse the string and write the double in the given address. Return PARAM_OK
- * on success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
+ * Parse the string as seconds with decimals, and write the number of
+ * milliseconds that corresponds in the given address. Return PARAM_OK on
+ * success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
  *
  * The 'max' argument is the maximum value allowed, as the numbers are often
  * multiplied when later used.
@@ -251,16 +252,16 @@ static ParameterError str2double(double *val, const char *str, double max)
  * data.
  */
 
-ParameterError str2udouble(double *valp, const char *str, double max)
+ParameterError secs2ms(long *valp, const char *str)
 {
   double value;
-  ParameterError result = str2double(&value, str, max);
+  ParameterError result = str2double(&value, str, (double)LONG_MAX/1000);
   if(result != PARAM_OK)
     return result;
   if(value < 0)
     return PARAM_NEGATIVE_NUMERIC;
 
-  *valp = value;
+  *valp = (long)(value*1000);
   return PARAM_OK;
 }
 

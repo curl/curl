@@ -70,8 +70,8 @@ struct OperationConfig {
   char *postfields;
   curl_off_t postfieldsize;
   char *referer;
-  double timeout;
-  double connecttimeout;
+  long timeout_ms;
+  long connecttimeout_ms;
   long maxredirs;
   curl_off_t max_filesize;
   char *output_dir;
@@ -272,7 +272,7 @@ struct OperationConfig {
   bool abstract_unix_socket;      /* path to an abstract Unix domain socket */
   bool falsestart;
   bool path_as_is;
-  double expect100timeout;
+  long expect100timeout_ms;
   bool suppress_connect_headers;  /* suppress proxy CONNECT response headers
                                      from user callbacks */
   bool synthetic_error;           /* if TRUE, this is tool-internal error */

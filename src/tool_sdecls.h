@@ -84,6 +84,7 @@ struct OutStruct {
 struct InStruct {
   int fd;
   struct OperationConfig *config;
+  struct per_transfer *per;
 };
 
 

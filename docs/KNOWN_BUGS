@@ -95,7 +95,6 @@ problems may have been fixed or changed somewhat since this was written.
  7.12 FTPS directory listing hangs on Windows with Schannel
 
  8. TELNET
- 8.1 TELNET and time limitations do not work
  8.2 Microsoft telnet server
 
  9. SFTP and SCP
@@ -780,11 +779,6 @@ problems may have been fixed or changed somewhat since this was written.
  https://github.com/curl/curl/issues/9161
 
 8. TELNET
-
-8.1 TELNET and time limitations do not work
-
- When using telnet, the time limitation options do not work.
- https://curl.se/bug/view.cgi?id=846
 
 8.2 Microsoft telnet server
 
