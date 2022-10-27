@@ -21,4 +21,4 @@ See: https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-svcb-https-02
  See Daniel's post on [Support of Encrypted
  SNI](https://curl.se/mail/lib-2019-03/0000.html) on the mailing list.
 
- Initial work exists in https://github.com/curl/curl/pull/4011
+ Initial work exists in [PR 4011](https://github.com/curl/curl/pull/4011)
