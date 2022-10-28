@@ -55,7 +55,7 @@ the three ones above are all 'no'.
 
 ## If an early release is deemed necessary
 
-Unless done for security or similarly very important reasons, an early release
+Unless done for security or similarly important reasons, an early release
 should never be done within two weeks of the previous version was shipped.
 
 This, to enable us to collect and bundle more fixes into the same release to
