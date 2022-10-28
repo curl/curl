@@ -135,15 +135,13 @@ static struct FormInfo *AddFormInfo(char *value,
 {
   struct FormInfo *form_info;
   form_info = calloc(1, sizeof(struct FormInfo));
-  if(form_info) {
-    if(value)
-      form_info->value = value;
-    if(contenttype)
-      form_info->contenttype = contenttype;
-    form_info->flags = HTTPPOST_FILENAME;
-  }
-  else
+  if(!form_info)
     return NULL;
+  if(value)
+    form_info->value = value;
+  if(contenttype)
+    form_info->contenttype = contenttype;
+  form_info->flags = HTTPPOST_FILENAME;
 
   if(parent_form_info) {
     /* now, point our 'more' to the original 'more' */
@@ -890,7 +888,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
                                   post->bufferlength? post->bufferlength: -1);
         else if(post->flags & HTTPPOST_CALLBACK) {
           /* the contents should be read with the callback and the size is set
-             with the contentslength */
+             with the content's length */
           if(!clen)
             clen = -1;
           result = curl_mime_data_cb(part, clen,

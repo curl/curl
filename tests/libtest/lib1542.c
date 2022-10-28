@@ -76,13 +76,11 @@ int test(char *URL)
   easy_setopt(easy, CURLOPT_MAXLIFETIME_CONN, 1L);
 
   res = curl_easy_perform(easy);
-  if(res)
-    goto test_cleanup;
 
 test_cleanup:
 
   curl_easy_cleanup(easy);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }

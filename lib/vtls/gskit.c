@@ -302,8 +302,8 @@ static CURLcode set_ciphers(struct Curl_easy *data,
   const char *cipherlist = SSL_CONN_CONFIG(cipher_list);
   const char *clp;
   const struct gskit_cipher *ctp;
-  int i;
-  int l;
+  unsigned int i;
+  size_t l;
   bool unsupported;
   CURLcode result;
   struct {
@@ -324,11 +324,11 @@ static CURLcode set_ciphers(struct Curl_easy *data,
      GSKit tokens are always shorter than their cipher names, allocated buffers
      will always be large enough to accommodate the result. */
   l = strlen(cipherlist) + 1;
-  memset((char *) ciphers, 0, sizeof(ciphers));
+  memset(ciphers, 0, sizeof(ciphers));
   for(i = 0; i < CURL_GSKPROTO_LAST; i++) {
     ciphers[i].buf = malloc(l);
     if(!ciphers[i].buf) {
-      while(i--)
+      for(; i; i--)
         free(ciphers[i].buf);
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1202,7 +1202,7 @@ static int gskit_shutdown(struct Curl_easy *data,
   int what;
   int rc;
   char buf[120];
-  int loop = 10; /* don't get stuck */
+  unsigned int loop; /* don't get stuck */
 
   DEBUGASSERT(BACKEND);
 
@@ -1219,18 +1219,18 @@ static int gskit_shutdown(struct Curl_easy *data,
   what = SOCKET_READABLE(conn->sock[sockindex],
                          SSL_SHUTDOWN_TIMEOUT);
 
-  while(loop--) {
+  for(loop = 10; loop; loop--) {
     ssize_t nread;
+
+    if(!what) {                                /* timeout */
+      failf(data, "SSL shutdown timeout");
+      break;
+    }
 
     if(what < 0) {
       /* anything that gets here is fatally bad */
       failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
       rc = -1;
-      break;
-    }
-
-    if(!what) {                                /* timeout */
-      failf(data, "SSL shutdown timeout");
       break;
     }
 
@@ -1240,14 +1240,15 @@ static int gskit_shutdown(struct Curl_easy *data,
 
     nread = read(conn->sock[sockindex], buf, sizeof(buf));
 
+    if(!nread)
+      break;
+
     if(nread < 0) {
       char buffer[STRERROR_LEN];
       failf(data, "read: %s", Curl_strerror(errno, buffer, sizeof(buffer)));
       rc = -1;
-    }
-
-    if(nread <= 0)
       break;
+    }
 
     what = SOCKET_READABLE(conn->sock[sockindex], 0);
   }

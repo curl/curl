@@ -262,17 +262,21 @@ static CURLcode smtp_get_message(struct Curl_easy *data, struct bufref *out)
   if(len > 4) {
     /* Find the start of the message */
     len -= 4;
-    for(message += 4; *message == ' ' || *message == '\t'; message++, len--)
-      ;
+    for(message += 4; *message == ' ' || *message == '\t'; message++)
+      len--;
 
     /* Find the end of the message */
-    while(len--)
+    while(len) {
+      --len;
       if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-         message[len] != '\t')
+          message[len] != '\t') {
+        ++len;
         break;
+      }
+    }
 
     /* Terminate the message */
-    message[++len] = '\0';
+    message[len] = '\0';
     Curl_bufref_set(out, message, len, NULL);
   }
   else

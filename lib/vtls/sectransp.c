@@ -3208,7 +3208,7 @@ static int sectransp_shutdown(struct Curl_easy *data,
   int what;
   int rc;
   char buf[120];
-  int loop = 10; /* avoid getting stuck */
+  unsigned int loop; /* avoid getting stuck */
 
   DEBUGASSERT(backend);
 
@@ -3226,7 +3226,7 @@ static int sectransp_shutdown(struct Curl_easy *data,
 
   what = SOCKET_READABLE(conn->sock[sockindex], SSL_SHUTDOWN_TIMEOUT);
 
-  while(loop--) {
+  for(loop = 10; loop; loop--) {
     if(what < 0) {
       /* anything that gets here is fatally bad */
       failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

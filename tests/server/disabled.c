@@ -84,7 +84,7 @@ static const char *disabled[]={
 
 int main(void)
 {
-  int i;
+  size_t i;
   for(i = 0; disabled[i]; i++)
     printf("%s\n", disabled[i]);
 

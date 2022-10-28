@@ -71,11 +71,11 @@
 bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
                                const char **endptr)
 {
-  int c;
+  unsigned int c;
   bool starts_with_quote = FALSE;
   bool escape = FALSE;
 
-  for(c = DIGEST_MAX_VALUE_LENGTH - 1; (*str && (*str != '=') && c--);)
+  for(c = DIGEST_MAX_VALUE_LENGTH - 1; (*str && (*str != '=') && c); c--)
     *value++ = *str++;
   *value = 0;
 
@@ -89,7 +89,8 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
     starts_with_quote = TRUE;
   }
 
-  for(c = DIGEST_MAX_CONTENT_LENGTH - 1; *str && c--; str++) {
+  for(c = DIGEST_MAX_CONTENT_LENGTH - 1; *str && c; str++) {
+    c--;
     if(!escape) {
       switch(*str) {
       case '\\':
@@ -186,7 +187,7 @@ static char *auth_digest_string_quoted(const char *source)
       }
       *d++ = *s++;
     }
-    *d = 0;
+    *d = '\0';
   }
 
   return dest;

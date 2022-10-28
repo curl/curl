@@ -268,7 +268,7 @@ Curl_he2ai(const struct hostent *he, int port)
   struct sockaddr_in6 *addr6;
 #endif
   CURLcode result = CURLE_OK;
-  int i;
+  size_t i;
   char *curr;
 
   if(!he)
@@ -422,8 +422,8 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
   h = &buf->hostentry;
   h->h_name = hoststr;
   h->h_aliases = NULL;
-  h->h_addrtype = (short)af;
-  h->h_length = (short)addrsize;
+  h->h_addrtype = af;
+  h->h_length = (int)addrsize;
   h->h_addr_list = &buf->h_addr_list[0];
   h->h_addr_list[0] = addrentry;
   h->h_addr_list[1] = NULL; /* terminate list of entries */

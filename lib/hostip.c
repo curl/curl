@@ -180,7 +180,7 @@ create_hostcache_id(const char *name, int port, char *ptr, size_t buflen)
   if(len > (buflen - 7))
     len = buflen - 7;
   /* store and lower case the name */
-  while(len--)
+  for(; len; len--)
     *ptr++ = Curl_raw_tolower(*name++);
   msnprintf(ptr, 7, ":%u", port);
 }

@@ -367,7 +367,7 @@ static int readit(struct testcase *test, struct tftphdr **dpp,
 static void read_ahead(struct testcase *test,
                        int convert /* if true, convert to ascii */)
 {
-  int i;
+  unsigned int i;
   char *p;
   int c;
   struct bf *b;

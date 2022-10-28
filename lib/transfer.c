@@ -522,7 +522,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   ssize_t nread; /* number of bytes read */
   size_t excess = 0; /* excess bytes read */
   bool readmore = FALSE; /* used by RTP to signal for more data */
-  int maxloops = 100;
+  unsigned int maxloops = 101;
   char *buf = data->state.buffer;
   DEBUGASSERT(buf);
 
@@ -857,9 +857,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       break;
     }
 
-  } while(data_pending(data) && maxloops--);
+  } while(--maxloops && data_pending(data));
 
-  if(maxloops <= 0) {
+  if(maxloops == 0) {
     /* we mark it as read-again-please */
     conn->cselect_bits = CURL_CSELECT_IN;
     *comeback = TRUE;
@@ -946,7 +946,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
        k->upload_present < curl_upload_refill_watermark(data) &&
        !k->upload_chunky &&/*(variable sized chunked header; append not safe)*/
        !k->upload_done &&  /*!(k->upload_done once k->upload_present sent)*/
-       !(k->writebytecount + k->upload_present - k->pendingheader ==
+       (k->writebytecount + k->upload_present - k->pendingheader !=
          data->state.infilesize)) {
       offset = k->upload_present;
     }

@@ -352,7 +352,7 @@ static void lograw(unsigned char *buffer, ssize_t len)
   unsigned char *ptr = buffer;
   char *optr = data;
   ssize_t width = 0;
-  int left = sizeof(data);
+  size_t left = sizeof(data);
 
   for(i = 0; i<len; i++) {
     switch(ptr[i]) {

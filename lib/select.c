@@ -187,7 +187,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
                       timediff_t timeout_ms) /* milliseconds to wait */
 {
   struct pollfd pfd[3];
-  int num;
+  unsigned int num;
   int r;
 
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&

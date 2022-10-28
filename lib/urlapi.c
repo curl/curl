@@ -115,15 +115,6 @@ static const char *find_host_sep(const char *url)
   return sep < query ? sep : query;
 }
 
-/*
- * Decide in an encoding-independent manner whether a character in a URL must
- * be escaped. This is used in urlencode_str().
- */
-static bool urlchar_needs_escaping(int c)
-{
-  return !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c));
-}
-
 /* urlencode_str() writes data into an output dynbuf and URL-encodes the
  * spaces in the source URL accordingly.
  *
@@ -136,14 +127,14 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
 {
   /* we must add this with whitespace-replacing */
   bool left = !query;
-  const unsigned char *iptr;
-  const unsigned char *host_sep = (const unsigned char *) url;
+  const char *iptr;
+  const char *host_sep = url;
 
   if(!relative)
-    host_sep = (const unsigned char *) find_host_sep(url);
+    host_sep = (const char *) find_host_sep(url);
 
-  for(iptr = (unsigned char *)url;    /* read from here */
-      len; iptr++, len--) {
+  for(iptr = url; /* read from here */
+       len; iptr++, len--) {
 
     if(iptr < host_sep) {
       if(Curl_dyn_addn(o, iptr, 1))
@@ -166,7 +157,9 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
     if(*iptr == '?')
       left = FALSE;
 
-    if(urlchar_needs_escaping(*iptr)) {
+    /* Decide in an encoding-independent manner whether a character
+       in a URL must be escaped. */
+    if(!(ISCNTRL(*iptr) || ISSPACE(*iptr) || ISGRAPH(*iptr))) {
       if(Curl_dyn_addf(o, "%%%02x", *iptr))
         return CURLUE_OUT_OF_MEMORY;
     }
@@ -190,7 +183,7 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
 size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
                             bool guess_scheme)
 {
-  int i;
+  size_t i;
   DEBUGASSERT(!buf || (buflen > MAX_SCHEME_LEN));
   (void)buflen; /* only used in debug-builds */
   if(buf)
@@ -219,7 +212,8 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
     size_t len = i;
     if(buf) {
       buf[i] = 0;
-      while(i--) {
+      while(i) {
+        --i;
         buf[i] = Curl_raw_tolower(url[i]);
       }
     }
@@ -257,7 +251,7 @@ static char *concat_url(char *base, const char *relurl)
     protsep += 2; /* pass the slashes */
 
   if('/' != relurl[0]) {
-    int level = 0;
+    unsigned int level = 0;
 
     /* First we need to find out if there's a ?-letter in the URL,
        and cut it and the right-side of that off */
@@ -297,7 +291,7 @@ static char *concat_url(char *base, const char *relurl)
     }
 
     if(protsep) {
-      while(level--) {
+      for(; level; level--) {
         /* cut off one more level from the right of the original URL */
         pathsep = strrchr(protsep, '/');
         if(pathsep)
@@ -1059,7 +1053,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     size_t len;
 
     if(schemelen) {
-      int i = 0;
+      unsigned int i = 0;
       p = &url[schemelen + 1];
       while(p && (*p == '/') && (i < 4)) {
         p++;
