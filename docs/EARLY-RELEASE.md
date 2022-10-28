@@ -52,11 +52,13 @@ the three ones above are all 'no'.
  - How long is it left until the already scheduled next release?
  - Can affected users safely rather revert to a former release until the next
    scheduled release?
+ - Is it a performance regression with no functionality side-effects? If so it
+   has to be substantial.
 
 ## If an early release is deemed necessary
 
 Unless done for security or similarly important reasons, an early release
-should never be done within two weeks of the previous version was shipped.
+should never be done within two weeks of the release of the previous version.
 
 This, to enable us to collect and bundle more fixes into the same release to
 make the release more worthwhile for everyone and to allow more time for fixes
