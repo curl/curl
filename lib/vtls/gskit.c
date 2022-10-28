@@ -324,7 +324,7 @@ static CURLcode set_ciphers(struct Curl_easy *data,
      GSKit tokens are always shorter than their cipher names, allocated buffers
      will always be large enough to accommodate the result. */
   l = strlen(cipherlist) + 1;
-  memset((char *) ciphers, 0, sizeof(ciphers));
+  memset(ciphers, 0, sizeof(ciphers));
   for(i = 0; i < CURL_GSKPROTO_LAST; i++) {
     ciphers[i].buf = malloc(l);
     if(!ciphers[i].buf) {

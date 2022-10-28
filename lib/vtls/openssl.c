@@ -1827,7 +1827,7 @@ static int ossl_shutdown(struct Curl_easy *data,
   char buf[256]; /* We will use this for the OpenSSL error buffer, so it has
                     to be at least 256 bytes long. */
   unsigned long sslerror;
-  ssize_t nread;
+  int nread;
   int buffsize;
   int err;
   bool done = FALSE;
@@ -1856,8 +1856,8 @@ static int ossl_shutdown(struct Curl_easy *data,
 
         /* Something to read, let's do it and hope that it is the close
            notify alert from the server */
-        nread = (ssize_t)SSL_read(backend->handle, buf, buffsize);
-        err = SSL_get_error(backend->handle, (int)nread);
+        nread = SSL_read(backend->handle, buf, buffsize);
+        err = SSL_get_error(backend->handle, nread);
 
         switch(err) {
         case SSL_ERROR_NONE: /* this is not an error */

@@ -1636,7 +1636,7 @@ static size_t slist_size(struct curl_slist *s,
 static curl_off_t multipart_size(curl_mime *mime)
 {
   curl_off_t size;
-  size_t boundarysize;
+  curl_off_t boundarysize;
   curl_mimepart *part;
 
   if(!mime)

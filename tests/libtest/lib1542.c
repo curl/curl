@@ -84,5 +84,5 @@ test_cleanup:
   curl_easy_cleanup(easy);
   curl_global_cleanup();
 
-  return (int)res;
+  return res;
 }
