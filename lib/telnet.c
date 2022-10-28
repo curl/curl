@@ -1200,7 +1200,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
 
     j = 0;
     for(i = 0; i < nread; i++) {
-      outbuf[j++] = buffer[i];
+      outbuf[j++] = (unsigned char)buffer[i];
       if((unsigned char)buffer[i] == CURL_IAC)
         outbuf[j++] = CURL_IAC;
     }

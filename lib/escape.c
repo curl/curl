@@ -202,7 +202,7 @@ char *curl_easy_unescape(struct Curl_easy *data, const char *string,
   char *str = NULL;
   (void)data;
   if(length >= 0) {
-    size_t inputlen = length;
+    size_t inputlen = (size_t)length;
     size_t outputlen;
     CURLcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
                                   REJECT_NADA);

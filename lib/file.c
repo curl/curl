@@ -329,7 +329,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
   while(!result) {
     size_t nread;
-    size_t nwrite;
+    ssize_t nwrite;
     size_t readcount;
     result = Curl_fillreadbuffer(data, data->set.buffer_size, &readcount);
     if(result)
@@ -358,7 +358,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
     /* write the data to the target */
     nwrite = write(fd, buf2, nread);
-    if(nwrite != nread) {
+    if((size_t)nwrite != nread) {
       result = CURLE_SEND_ERROR;
       break;
     }
