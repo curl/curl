@@ -1,7 +1,7 @@
 # How to determine if an early patch release is warranted
 
 In the curl project we do releases every 8 weeks. Unless we break the cycle
-and to an early patch release.
+and do an early patch release.
 
 We do frequent releases partly to always have the next release "not too far
 away".
