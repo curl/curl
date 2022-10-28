@@ -153,9 +153,14 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
     }
     else {
       unsigned int address;
+      namelen = strlen(name);
       if(1 == Curl_inet_pton(AF_INET, name, &address))
         type = TYPE_IPV4;
-      namelen = strlen(name);
+      else {
+        /* ignore trailing dots in the host name */
+        if(name[namelen - 1] == '.')
+          namelen--;
+      }
     }
 
     while(*p) {
@@ -177,12 +182,23 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       if(tokenlen) {
         switch(type) {
         case TYPE_HOST:
-          if(*token == '.') {
-            ++token;
-            --tokenlen;
-            /* tailmatch */
-            match = (tokenlen <= namelen) &&
-              strncasecompare(token, name + (namelen - tokenlen), namelen);
+          /* ignore trailing dots in the token to check */
+          if(token[tokenlen - 1] == '.')
+            tokenlen--;
+
+          if(tokenlen && (*token == '.')) {
+            /* A: example.com matches '.example.com'
+               B: www.example.com matches '.example.com'
+               C: nonexample.com DOES NOT match '.example.com'
+            */
+            if((tokenlen - 1) == namelen)
+              /* case A, exact match without leading dot */
+              match = strncasecompare(token + 1, name, namelen);
+            else if(tokenlen < namelen)
+              /* case B, tailmatch with leading dot */
+              match = strncasecompare(token, name + (namelen - tokenlen),
+                                      tokenlen);
+            /* case C passes through, not a match */
           }
           else
             match = (tokenlen == namelen) &&
