@@ -566,7 +566,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     /* write the number of authentication methods */
     socksreq[1] = (unsigned char) (idx - 2);
 
-    result = Curl_write_plain(data, sockfd, (char *)socksreq, idx, &written);
+    result = Curl_write_plain(data, sockfd, socksreq, idx, &written);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Unable to send initial SOCKS5 request.");
       return CURLPX_SEND_CONNECT;
@@ -712,7 +712,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
   }
     /* FALLTHROUGH */
   case CONNECT_AUTH_SEND:
-    result = Curl_write_plain(data, sockfd, (char *)sx->outp,
+    result = Curl_write_plain(data, sockfd, sx->outp,
                               sx->outstanding, &written);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Failed to send SOCKS5 sub-negotiation request.");

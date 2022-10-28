@@ -135,15 +135,13 @@ static struct FormInfo *AddFormInfo(char *value,
 {
   struct FormInfo *form_info;
   form_info = calloc(1, sizeof(struct FormInfo));
-  if(form_info) {
-    if(value)
-      form_info->value = value;
-    if(contenttype)
-      form_info->contenttype = contenttype;
-    form_info->flags = HTTPPOST_FILENAME;
-  }
-  else
+  if(!form_info)
     return NULL;
+  if(value)
+    form_info->value = value;
+  if(contenttype)
+    form_info->contenttype = contenttype;
+  form_info->flags = HTTPPOST_FILENAME;
 
   if(parent_form_info) {
     /* now, point our 'more' to the original 'more' */

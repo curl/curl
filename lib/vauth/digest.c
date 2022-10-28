@@ -186,7 +186,7 @@ static char *auth_digest_string_quoted(const char *source)
       }
       *d++ = *s++;
     }
-    *d = 0;
+    *d = '\0';
   }
 
   return dest;

@@ -398,18 +398,23 @@ static CURLcode bindlocal(struct Curl_easy *data,
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
         char *scope_ptr = strchr(myhost, '%');
         if(scope_ptr)
-          *(scope_ptr++) = 0;
+          *(scope_ptr++) = '\0';
 #endif
         if(Curl_inet_pton(AF_INET6, myhost, &si6->sin6_addr) > 0) {
           si6->sin6_family = AF_INET6;
           si6->sin6_port = htons(port);
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
-          if(scope_ptr)
+          if(scope_ptr) {
             /* The "myhost" string either comes from Curl_if2ip or from
                Curl_printable_address. The latter returns only numeric scope
                IDs and the former returns none at all.  So the scope ID, if
                present, is known to be numeric */
-            si6->sin6_scope_id = atoi(scope_ptr);
+            unsigned long scope_id = strtoul(scope_ptr, NULL, 10);
+            if(scope_id > UINT_MAX)
+              return CURLE_UNSUPPORTED_PROTOCOL;
+
+            si6->sin6_scope_id = (unsigned int)scope_id;
+          }
 #endif
         }
         sizeof_sa = sizeof(struct sockaddr_in6);
@@ -866,7 +871,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
   int error = 0;
   struct curltime now;
   int rc = 0;
-  unsigned int i;
+  int i;
 
   DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
 
@@ -1207,7 +1212,7 @@ static CURLcode singleipconnect(struct Curl_easy *data,
     return result;
 
   /* store remote address and port used in this connection attempt */
-  if(!Curl_addr2string((struct sockaddr*)&addr.sa_addr, addr.addrlen,
+  if(!Curl_addr2string(&addr.sa_addr, addr.addrlen,
                        ipaddress, &port)) {
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
@@ -1262,7 +1267,7 @@ static CURLcode singleipconnect(struct Curl_easy *data,
 #endif
     ) {
     result = bindlocal(data, sockfd, addr.family,
-                       Curl_ipv6_scope((struct sockaddr*)&addr.sa_addr));
+                       Curl_ipv6_scope(&addr.sa_addr));
     if(result) {
       Curl_closesocket(data, conn, sockfd); /* close socket and bail out */
       if(result == CURLE_UNSUPPORTED_PROTOCOL) {
