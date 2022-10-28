@@ -77,6 +77,12 @@ UNITTEST_START
     { NULL, NULL, 0, FALSE} /* end marker */
   };
   struct noproxy list[]= {
+    { "www.example.com", "localhost,.example.com,.example.de", TRUE},
+    { "www.example.com.", "localhost,.example.com,.example.de", TRUE},
+    { "example.com", "localhost,.example.com,.example.de", TRUE},
+    { "example.com.", "localhost,.example.com,.example.de", TRUE},
+    { "www.example.com", "localhost,.example.com.,.example.de", TRUE},
+    { "www.example.com", "localhost,www.example.com.,.example.de", TRUE},
     { "127.0.0.1", "127.0.0.1,localhost", TRUE},
     { "127.0.0.1", "127.0.0.1,localhost,", TRUE},
     { "127.0.0.1", "127.0.0.1/8,localhost,", TRUE},
