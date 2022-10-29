@@ -49,6 +49,7 @@ Invalid category provided, here is a list of all categories:
  proxy       All options related to proxies
  scp         SCP protocol options
  sftp        SFTP protocol options
+ sieve       SIEVE protocol options
  smtp        SMTP protocol options
  ssh         SSH protocol options
  telnet      TELNET protocol options

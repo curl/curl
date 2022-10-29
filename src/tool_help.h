@@ -61,14 +61,15 @@ struct helptxt {
 #define CURLHELP_PROXY 1u << 15u
 #define CURLHELP_SCP 1u << 16u
 #define CURLHELP_SFTP 1u << 17u
-#define CURLHELP_SMTP 1u << 18u
-#define CURLHELP_SSH 1u << 19u
-#define CURLHELP_TELNET 1u << 20u
-#define CURLHELP_TFTP 1u << 21u
-#define CURLHELP_TLS 1u << 22u
-#define CURLHELP_UPLOAD 1u << 23u
-#define CURLHELP_VERBOSE 1u << 24u
-#define CURLHELP_ECH 1u << 25u
+#define CURLHELP_SIEVE 1u << 18u
+#define CURLHELP_SMTP 1u << 19u
+#define CURLHELP_SSH 1u << 20u
+#define CURLHELP_TELNET 1u << 21u
+#define CURLHELP_TFTP 1u << 22u
+#define CURLHELP_TLS 1u << 23u
+#define CURLHELP_UPLOAD 1u << 24u
+#define CURLHELP_VERBOSE 1u << 25u
+#define CURLHELP_ECH 1u << 26u
 
 extern const struct helptxt helptext[];
 
