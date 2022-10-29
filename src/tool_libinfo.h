@@ -43,6 +43,7 @@ extern const char *proto_https;
 extern const char *proto_rtsp;
 extern const char *proto_scp;
 extern const char *proto_sftp;
+extern const char *proto_sieve;
 extern const char *proto_tftp;
 extern const char *proto_ipfs;
 extern const char *proto_ipns;
