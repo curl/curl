@@ -311,7 +311,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     break;
   case RTSPREQ_RECEIVE:
     p_request = "";
-    /* Treat interleaved RTP as body*/
+    /* Treat interleaved RTP as body */
     data->set.opt_no_body = FALSE;
     break;
   case RTSPREQ_LAST:
@@ -650,7 +650,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
       rtp_length = RTP_PKT_LENGTH(rtp);
 
       if(rtp_dataleft < rtp_length + 4) {
-        /* Need more - incomplete payload*/
+        /* Need more - incomplete payload */
         *readmore = TRUE;
         break;
       }

@@ -1164,7 +1164,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     port++;
   }
 
-  /* maybe all ports were in use already*/
+  /* maybe all ports were in use already */
   if(port > port_max) {
     failf(data, "bind() failed, we ran out of ports");
     Curl_closesocket(data, conn, portsock);

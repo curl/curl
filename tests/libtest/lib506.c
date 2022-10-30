@@ -349,7 +349,7 @@ int test(char *URL)
   printf("-----------------\n");
   curl_slist_free_all(cookies);
 
-  /* try to free share, expect to fail because share is in use*/
+  /* try to free share, expect to fail because share is in use */
   printf("try SHARE_CLEANUP...\n");
   scode = curl_share_cleanup(share);
   if(scode == CURLSHE_OK) {
