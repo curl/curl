@@ -1290,7 +1290,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         /* This specifies the noproxy list */
         GetStr(&config->noproxy, nextarg);
         break;
-       case '7': /* --socks5-gssapi-nec*/
+       case '7': /* --socks5-gssapi-nec */
         config->socks5_gssapi_nec = toggle;
         break;
       case '8': /* --proxy1.0 */
@@ -1436,7 +1436,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->httpversion = CURL_HTTP_VERSION_2_0;
         break;
       case '3': /* --http2-prior-knowledge */
-        /* HTTP version 2.0 over clean TCP*/
+        /* HTTP version 2.0 over clean TCP */
         config->httpversion = CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE;
         break;
       case '4': /* --http3 */

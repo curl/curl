@@ -113,7 +113,7 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
   *wrote = 0; /* nothing's written yet */
 
   /* the original data is written to the client, but we go on with the
-     chunk read process, to properly calculate the content length*/
+     chunk read process, to properly calculate the content length */
   if(data->set.http_te_skip && !k->ignorebody) {
     result = Curl_client_write(data, CLIENTWRITE_BODY, datap, datalen);
     if(result) {

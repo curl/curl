@@ -129,7 +129,7 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
 }
 
 /* for debugging: */
-/*#define SINGLETEST 9*/
+/* #define SINGLETEST 9 */
 
 int test(char *URL)
 {

@@ -609,9 +609,9 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
       /* remove old host+key that doesn't match */
       if(host)
         libssh2_knownhost_del(sshc->kh, host);
-        /*FALLTHROUGH*/
+        /* FALLTHROUGH */
     case CURLKHSTAT_FINE:
-        /*FALLTHROUGH*/
+        /* FALLTHROUGH */
     case CURLKHSTAT_FINE_ADD_TO_FILE:
       /* proceed */
       if(keycheck != LIBSSH2_KNOWNHOST_CHECK_MATCH) {
@@ -784,7 +784,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
       size_t keylen = 0;
       int sshkeytype = 0;
       int rc = 0;
-      /* we handle the process to the callback*/
+      /* we handle the process to the callback */
       const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
                                                       &keylen, &sshkeytype);
       if(remotekey) {

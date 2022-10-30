@@ -34,7 +34,7 @@
   ((__GNUC__ == 2) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 7)))
 #  define PACKED_STRUCT __attribute__((__packed__))
 #else
-#  define PACKED_STRUCT /*NOTHING*/
+#  define PACKED_STRUCT /* NOTHING */
 #endif
 
 /* Using a packed struct as binary in a program is begging for problems, but

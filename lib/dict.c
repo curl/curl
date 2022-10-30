@@ -319,4 +319,4 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
   return CURLE_OK;
 }
-#endif /*CURL_DISABLE_DICT*/
+#endif /* CURL_DISABLE_DICT */

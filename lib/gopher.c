@@ -236,4 +236,4 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
   return CURLE_OK;
 }
-#endif /*CURL_DISABLE_GOPHER*/
+#endif /* CURL_DISABLE_GOPHER */

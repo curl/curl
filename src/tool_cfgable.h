@@ -254,11 +254,8 @@ struct OperationConfig {
   bool xattr;               /* store metadata in extended attributes */
   long gssapi_delegation;
   bool ssl_allow_beast;     /* allow this SSL vulnerability */
-  bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy*/
-
+  bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy */
   bool ssl_no_revoke;       /* disable SSL certificate revocation checks */
-  /*bool proxy_ssl_no_revoke; */
-
   bool ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
                                   revocation list errors */
 

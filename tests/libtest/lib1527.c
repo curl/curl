@@ -49,7 +49,7 @@ int test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
-  /* http header list*/
+  /* http header list */
   struct curl_slist *hhl = NULL, *tmp = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {

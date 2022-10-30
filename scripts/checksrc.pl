@@ -91,6 +91,9 @@ my %warnings = (
     'EMPTYLINEBRACE'   => 'Empty line before the open brace',
     'EQUALSNULL'       => 'if/while comparison with == NULL',
     'NOTEQUALSZERO',   => 'if/while comparison with != 0',
+    'INCLUDEDUP',      => 'same file is included again',
+    'COMMENTNOSPACESTART' => 'no space following /*',
+    'COMMENTNOSPACEEND' => 'no space before */',
     );
 
 sub readskiplist {
@@ -424,6 +427,18 @@ sub scanfile {
                       $line, length($1), $file, $l, "Trailing whitespace");
         }
 
+        # no space after comment start
+        if($l =~ /^(.*)\/\*\w/) {
+            checkwarn("COMMENTNOSPACESTART",
+                      $line, length($1) + 2, $file, $l,
+                      "Missing space after comment start");
+        }
+        # no space at comment end
+        if($l =~ /^(.*)\w\*\//) {
+            checkwarn("COMMENTNOSPACEEND",
+                      $line, length($1) + 1, $file, $l,
+                      "Missing space end comment end");
+        }
         # ------------------------------------------------------------
         # Above this marker, the checks were done on lines *including*
         # comments

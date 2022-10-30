@@ -2141,7 +2141,7 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
 {
   const char *ptr;
   if(!data->state.this_is_a_follow) {
-    /* Free to avoid leaking memory on multiple requests*/
+    /* Free to avoid leaking memory on multiple requests */
     free(data->state.first_host);
 
     data->state.first_host = strdup(conn->host.name);
@@ -3117,7 +3117,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
         /* continue with HTTP/1.1 when explicitly requested */
         break;
       default:
-        /* Check if user wants to use HTTP/2 with clear TCP*/
+        /* Check if user wants to use HTTP/2 with clear TCP */
 #ifdef USE_NGHTTP2
         if(data->state.httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
 #ifndef CURL_DISABLE_PROXY

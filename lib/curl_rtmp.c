@@ -85,7 +85,7 @@ const struct Curl_handler Curl_handler_rtmp = {
   PORT_RTMP,                            /* defport */
   CURLPROTO_RTMP,                       /* protocol */
   CURLPROTO_RTMP,                       /* family */
-  PROTOPT_NONE                          /* flags*/
+  PROTOPT_NONE                          /* flags */
 };
 
 const struct Curl_handler Curl_handler_rtmpt = {
@@ -108,7 +108,7 @@ const struct Curl_handler Curl_handler_rtmpt = {
   PORT_RTMPT,                           /* defport */
   CURLPROTO_RTMPT,                      /* protocol */
   CURLPROTO_RTMPT,                      /* family */
-  PROTOPT_NONE                          /* flags*/
+  PROTOPT_NONE                          /* flags */
 };
 
 const struct Curl_handler Curl_handler_rtmpe = {
@@ -131,7 +131,7 @@ const struct Curl_handler Curl_handler_rtmpe = {
   PORT_RTMP,                            /* defport */
   CURLPROTO_RTMPE,                      /* protocol */
   CURLPROTO_RTMPE,                      /* family */
-  PROTOPT_NONE                          /* flags*/
+  PROTOPT_NONE                          /* flags */
 };
 
 const struct Curl_handler Curl_handler_rtmpte = {
@@ -154,7 +154,7 @@ const struct Curl_handler Curl_handler_rtmpte = {
   PORT_RTMPT,                           /* defport */
   CURLPROTO_RTMPTE,                     /* protocol */
   CURLPROTO_RTMPTE,                     /* family */
-  PROTOPT_NONE                          /* flags*/
+  PROTOPT_NONE                          /* flags */
 };
 
 const struct Curl_handler Curl_handler_rtmps = {
@@ -177,7 +177,7 @@ const struct Curl_handler Curl_handler_rtmps = {
   PORT_RTMPS,                           /* defport */
   CURLPROTO_RTMPS,                      /* protocol */
   CURLPROTO_RTMP,                       /* family */
-  PROTOPT_NONE                          /* flags*/
+  PROTOPT_NONE                          /* flags */
 };
 
 const struct Curl_handler Curl_handler_rtmpts = {
@@ -200,7 +200,7 @@ const struct Curl_handler Curl_handler_rtmpts = {
   PORT_RTMPS,                           /* defport */
   CURLPROTO_RTMPTS,                     /* protocol */
   CURLPROTO_RTMPT,                      /* family */
-  PROTOPT_NONE                          /* flags*/
+  PROTOPT_NONE                          /* flags */
 };
 
 static CURLcode rtmp_setup_connection(struct Curl_easy *data,

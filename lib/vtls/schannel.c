@@ -262,7 +262,7 @@ set_ssl_version_min_max(DWORD *enabled_protocols, struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/*longest is 26, buffer is slightly bigger*/
+/* longest is 26, buffer is slightly bigger */
 #define LONGEST_ALG_ID 32
 #define CIPHEROPTION(X)                         \
   if(strcmp(#X, tmp) == 0)                      \
@@ -289,7 +289,7 @@ get_alg_id_by_name(char *name)
   CIPHEROPTION(CALG_MAC);
   CIPHEROPTION(CALG_RSA_SIGN);
   CIPHEROPTION(CALG_DSS_SIGN);
-/*ifdefs for the options that are defined conditionally in wincrypt.h*/
+/* ifdefs for the options that are defined conditionally in wincrypt.h */
 #ifdef CALG_NO_SIGN
   CIPHEROPTION(CALG_NO_SIGN);
 #endif

@@ -93,10 +93,10 @@ UNITTEST_START
 
   fail_unless(Curl_llist_count(&llist) == 1,
               "List size should be 1 after adding a new element");
-  /*test that the list head data holds my unusedData */
+  /* test that the list head data holds my unusedData */
   fail_unless(llist.head->ptr == &unusedData_case1,
               "head ptr should be first entry");
-  /*same goes for the list tail */
+  /* same goes for the list tail */
   fail_unless(llist.tail == llist.head,
               "tail and head should be the same");
 
