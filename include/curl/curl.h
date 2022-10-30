@@ -368,7 +368,7 @@ typedef int (*curl_seek_callback)(void *instream,
 #define CURL_READFUNC_PAUSE 0x10000001
 
 /* Return code for when the trailing headers' callback has terminated
-   without any errors*/
+   without any errors */
 #define CURL_TRAILERFUNC_OK 0
 /* Return code for when was an error in the trailing header's list and we
   want to abort the request */
@@ -450,7 +450,7 @@ typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
 #define CURL_DID_MEMORY_FUNC_TYPEDEFS
 #endif
 
-/* the kind of data that is passed to information_callback*/
+/* the kind of data that is passed to information_callback */
 typedef enum {
   CURLINFO_TEXT = 0,
   CURLINFO_HEADER_IN,    /* 1 */
@@ -698,7 +698,7 @@ typedef enum {
 #define CURLOPT_WRITEINFO CURLOPT_OBSOLETE40
 #define CURLOPT_CLOSEPOLICY CURLOPT_OBSOLETE72
 
-#endif /*!CURL_NO_OLDIES*/
+#endif /* !CURL_NO_OLDIES */
 
 /*
  * Proxy error codes. Returned in CURLINFO_PROXY_ERROR if CURLE_PROXY was
@@ -843,7 +843,7 @@ enum curl_khstat {
   CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now.
                         Causes a CURLE_PEER_FAILED_VERIFICATION error but the
                         connection will be left intact etc */
-  CURLKHSTAT_FINE_REPLACE, /* accept and replace the wrong key*/
+  CURLKHSTAT_FINE_REPLACE, /* accept and replace the wrong key */
   CURLKHSTAT_LAST    /* not for use, only a marker for last-in-list */
 };
 
@@ -864,13 +864,13 @@ typedef int
                                           /* CURLOPT_SSH_KEYDATA */
 
 typedef int
-  (*curl_sshhostkeycallback) (void *clientp,/* custom pointer passed*/
+  (*curl_sshhostkeycallback) (void *clientp,/* custom pointer passed */
                                             /* with CURLOPT_SSH_HOSTKEYDATA */
                           int keytype, /* CURLKHTYPE */
-                          const char *key, /*hostkey to check*/
-                          size_t keylen); /*length of the key*/
-                          /*return CURLE_OK to accept*/
-                          /*or something else to refuse*/
+                          const char *key, /* hostkey to check */
+                          size_t keylen); /* length of the key */
+                          /* return CURLE_OK to accept */
+                          /* or something else to refuse */
 
 
 /* parameter for the CURLOPT_USE_SSL option */
@@ -932,7 +932,7 @@ typedef enum {
 #define CURLFTPSSL_ALL CURLUSESSL_ALL
 #define CURLFTPSSL_LAST CURLUSESSL_LAST
 #define curl_ftpssl curl_usessl
-#endif /*!CURL_NO_OLDIES*/
+#endif /* !CURL_NO_OLDIES */
 
 /* parameter for the CURLOPT_FTP_SSL_CCC option */
 typedef enum {

@@ -679,7 +679,7 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
       return HYPER_POLL_ERROR;
     }
     /* increasing the writebytecount here is a little premature but we
-       don't know exactly when the body is sent*/
+       don't know exactly when the body is sent */
     data->req.writebytecount += (size_t)data->req.p.http->postsize;
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     data->req.upload_done = TRUE;
@@ -732,7 +732,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
       return HYPER_POLL_ERROR;
     }
     /* increasing the writebytecount here is a little premature but we
-       don't know exactly when the body is sent*/
+       don't know exactly when the body is sent */
     data->req.writebytecount += fillcount;
     Curl_pgrsSetUploadCounter(data, fillcount);
   }

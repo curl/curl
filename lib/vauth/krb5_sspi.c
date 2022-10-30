@@ -471,4 +471,4 @@ void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
   krb5->token_max = 0;
 }
 
-#endif /* USE_WINDOWS_SSPI && USE_KERBEROS5*/
+#endif /* USE_WINDOWS_SSPI && USE_KERBEROS5 */

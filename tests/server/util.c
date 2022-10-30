@@ -67,7 +67,7 @@
     ((__W32API_MAJOR_VERSION == 3) && (__W32API_MINOR_VERSION < 6))
 const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
 #endif /* w32api < 3.6 */
-#endif /* ENABLE_IPV6 && __MINGW32__*/
+#endif /* ENABLE_IPV6 && __MINGW32__ */
 
 static struct timeval tvnow(void);
 

@@ -264,7 +264,7 @@ struct ssl_connect_data {
 
 struct ssl_primary_config {
   long version;          /* what version the client wants to use */
-  long version_max;      /* max supported version the client wants to use*/
+  long version_max;      /* max supported version the client wants to use */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
   char *issuercert;      /* optional issuer certificate filename */
@@ -301,7 +301,7 @@ struct ssl_config_data {
   char *key_passwd; /* plain text private key password */
   BIT(certinfo);     /* gather lots of certificate info */
   BIT(falsestart);
-  BIT(enable_beast); /* allow this flaw for interoperability's sake*/
+  BIT(enable_beast); /* allow this flaw for interoperability's sake */
   BIT(no_revoke);    /* disable SSL certificate revocation checks */
   BIT(no_partialchain); /* don't accept partial certificate chains */
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation

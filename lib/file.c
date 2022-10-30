@@ -340,7 +340,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
     nread = readcount;
 
-    /*skip bytes before resume point*/
+    /* skip bytes before resume point */
     if(data->state.resume_from) {
       if((curl_off_t)nread <= data->state.resume_from) {
         data->state.resume_from -= nread;
