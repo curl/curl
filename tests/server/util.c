@@ -378,9 +378,9 @@ static char raw_toupper(char in)
 
 int strncasecompare(const char *first, const char *second, size_t max)
 {
-  while(*first && *second && max) {
+  while(max && *first && *second) {
     if(raw_toupper(*first) != raw_toupper(*second)) {
-      break;
+      return 0;
     }
     max--;
     first++;
