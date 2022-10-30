@@ -78,8 +78,7 @@ static size_t convert_lineends(struct Curl_easy *data,
     if(*startPtr == '\n') {
       /* This block of incoming data starts with the
          previous block's LF so get rid of it */
-      memmove(startPtr, startPtr + 1, size-1);
-      size--;
+      memmove(startPtr, startPtr + 1, --size);
       /* and it wasn't a bare CR but a CRLF conversion instead */
       data->state.crlf_conversions++;
     }

@@ -648,9 +648,9 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   unsigned long authmask = ~0ul;
 
   if(!data->set.str[STRING_BEARER])
-    authmask &= (unsigned long)~CURLAUTH_BEARER;
+    authmask = (unsigned long)~CURLAUTH_BEARER;
 
-  if(100 <= data->req.httpcode && 199 >= data->req.httpcode)
+  if(100 <= data->req.httpcode && data->req.httpcode <= 199)
     /* this is a transient response code, ignore */
     return CURLE_OK;
 
@@ -3751,7 +3751,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
     result = Curl_altsvc_parse(data, data->asi,
                                headp + strlen("Alt-Svc:"),
                                id, conn->host.name,
-                               curlx_uitous(conn->remote_port));
+                               curlx_uitous((unsigned int)conn->remote_port));
     if(result)
       return result;
   }

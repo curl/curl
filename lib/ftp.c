@@ -1174,7 +1174,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* get the name again after the bind() so that we can extract the
      port number it uses now */
   sslen = sizeof(ss);
-  if(getsockname(portsock, (struct sockaddr *)sa, &sslen)) {
+  if(getsockname(portsock, sa, &sslen)) {
     failf(data, "getsockname() failed: %s",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     Curl_closesocket(data, conn, portsock);
@@ -1950,7 +1950,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
      */
     const char * const host_name = conn->bits.socksproxy ?
       conn->socks_proxy.host.name : conn->http_proxy.host.name;
-    rc = Curl_resolv(data, host_name, (int)conn->port, FALSE, &addr);
+    rc = Curl_resolv(data, host_name, conn->port, FALSE, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING, ignores the return code but 'addr' will be NULL in
          case of failure */
@@ -4167,7 +4167,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
         /* get path before last slash, except for / */
         size_t dirlen = slashPos - rawPath;
         if(dirlen == 0)
-            dirlen++;
+            dirlen = 1;
 
         ftpc->dirs = calloc(1, sizeof(ftpc->dirs[0]));
         if(!ftpc->dirs) {
@@ -4194,14 +4194,15 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
       /* current position: begin of next path component */
       const char *curPos = rawPath;
 
-      int dirAlloc = 0; /* number of entries allocated for the 'dirs' array */
+       /* number of entries allocated for the 'dirs' array */
+      ssize_t dirAlloc = 0;
       const char *str = rawPath;
       for(; *str != 0; ++str)
         if (*str == '/')
           ++dirAlloc;
 
       if(dirAlloc > 0) {
-        ftpc->dirs = calloc(dirAlloc, sizeof(ftpc->dirs[0]));
+        ftpc->dirs = calloc((size_t)dirAlloc, sizeof(ftpc->dirs[0]));
         if(!ftpc->dirs) {
           free(rawPath);
           return CURLE_OUT_OF_MEMORY;

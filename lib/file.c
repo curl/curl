@@ -548,8 +548,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
     if(nread > 0)
       buf[nread] = 0;
-
-    if(nread <= 0 || (size_known && (expected_size == 0)))
+    else if(size_known && (expected_size == 0))
       break;
 
     bytecount += nread;

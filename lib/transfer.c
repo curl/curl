@@ -946,7 +946,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
        k->upload_present < curl_upload_refill_watermark(data) &&
        !k->upload_chunky &&/*(variable sized chunked header; append not safe)*/
        !k->upload_done &&  /*!(k->upload_done once k->upload_present sent)*/
-       !(k->writebytecount + k->upload_present - k->pendingheader ==
+       (k->writebytecount + k->upload_present - k->pendingheader !=
          data->state.infilesize)) {
       offset = k->upload_present;
     }

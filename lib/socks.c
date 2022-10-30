@@ -513,7 +513,7 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
   struct connectdata *conn = data->conn;
   unsigned char *socksreq = (unsigned char *)data->state.buffer;
   char dest[256] = "unknown";  /* printable hostname:port */
-  int idx;
+  ssize_t idx;
   ssize_t actualread;
   ssize_t written;
   CURLcode result;
@@ -566,7 +566,8 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
     /* write the number of authentication methods */
     socksreq[1] = (unsigned char) (idx - 2);
 
-    result = Curl_write_plain(data, sockfd, (char *)socksreq, idx, &written);
+    result = Curl_write_plain(data, sockfd, (char *)socksreq,
+                              (size_t)idx, &written);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Unable to send initial SOCKS5 request.");
       return CURLPX_SEND_CONNECT;

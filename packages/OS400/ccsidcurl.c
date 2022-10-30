@@ -394,10 +394,10 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
 {
   curl_version_info_data *p;
   char *cp;
-  int n;
-  int nproto;
+  size_t n;
+  size_t nproto;
   curl_version_info_data *id;
-  int i;
+  size_t i;
   const char **cpp;
   static const size_t charfields[] = {
     offsetof(curl_version_info_data, version),
@@ -472,7 +472,7 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
   memcpy((char *) id, (char *) p, sizeof(*p));
 
   if(id->protocols) {
-    int i = nproto * sizeof(id->protocols[0]);
+    i = nproto * sizeof(id->protocols[0]);
 
     id->protocols = (const char * const *) cp;
     memcpy(cp, (char *) p->protocols, i);
@@ -487,7 +487,7 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
 
   for(i = 0; i < sizeof(charfields) / sizeof(charfields[0]); i++) {
     cpp = (const char **) ((char *) p + charfields[i]);
-    if (*cpp && convert_version_info_string(cpp, &cp, &n, ccsid))
+    if(*cpp && convert_version_info_string(cpp, &cp, &n, ccsid))
       return (curl_version_info_data *) NULL;
   }
 
@@ -498,7 +498,7 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
 const char *
 curl_easy_strerror_ccsid(CURLcode error, unsigned int ccsid)
 {
-  int i;
+  size_t i;
   const char *s;
   char *buf;
 
@@ -523,7 +523,7 @@ curl_easy_strerror_ccsid(CURLcode error, unsigned int ccsid)
 const char *
 curl_share_strerror_ccsid(CURLSHcode error, unsigned int ccsid)
 {
-  int i;
+  size_t i;
   const char *s;
   char *buf;
 
@@ -548,7 +548,7 @@ curl_share_strerror_ccsid(CURLSHcode error, unsigned int ccsid)
 const char *
 curl_multi_strerror_ccsid(CURLMcode error, unsigned int ccsid)
 {
-  int i;
+  size_t i;
   const char *s;
   char *buf;
 

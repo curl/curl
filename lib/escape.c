@@ -96,8 +96,9 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   if(!length)
     return strdup("");
 
-  while(length--) {
-    unsigned char in = *string; /* we need to treat the characters unsigned */
+  for(; length; length--) {
+    /* we need to treat the characters unsigned */
+    unsigned char in = (unsigned char)*string;
 
     if(Curl_isunreserved(in)) {
       /* append this */
@@ -150,7 +151,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     return CURLE_OUT_OF_MEMORY;
 
   while(--alloc > 0) {
-    unsigned char in = *string;
+    unsigned char in = (unsigned char) *string;
     if(('%' == in) && (alloc > 2) &&
        ISXDIGIT(string[1]) && ISXDIGIT(string[2])) {
       /* this is two hexadecimal digits following a '%' */
@@ -177,7 +178,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     ns[strindex++] = in;
     string++;
   }
-  ns[strindex] = 0; /* terminate it */
+  ns[strindex] = '\0'; /* terminate it */
 
   if(olen)
     /* store output size */
@@ -202,7 +203,7 @@ char *curl_easy_unescape(struct Curl_easy *data, const char *string,
   char *str = NULL;
   (void)data;
   if(length >= 0) {
-    size_t inputlen = length;
+    size_t inputlen = (size_t) length;
     size_t outputlen;
     CURLcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
                                   REJECT_NADA);

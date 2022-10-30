@@ -360,7 +360,7 @@ static void smb_format_message(struct Curl_easy *data, struct smb_header *h,
   struct connectdata *conn = data->conn;
   struct smb_conn *smbc = &conn->proto.smbc;
   struct smb_request *req = data->req.p.smb;
-  unsigned int pid;
+  pid_t pid;
 
   memset(h, 0, sizeof(*h));
   h->nbt_length = htons((unsigned short) (sizeof(*h) - sizeof(unsigned int) +

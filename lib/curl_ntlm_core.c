@@ -134,16 +134,17 @@
 /*
 * Turns a 56-bit key into being 64-bit wide.
 */
-static void extend_key_56_to_64(const unsigned char *key_56, char *key)
+static void extend_key_56_to_64(const unsigned char *key_56,
+                                unsigned char *key)
 {
   key[0] = key_56[0];
-  key[1] = (unsigned char)(((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1));
-  key[2] = (unsigned char)(((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2));
-  key[3] = (unsigned char)(((key_56[2] << 5) & 0xFF) | (key_56[3] >> 3));
-  key[4] = (unsigned char)(((key_56[3] << 4) & 0xFF) | (key_56[4] >> 4));
-  key[5] = (unsigned char)(((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5));
-  key[6] = (unsigned char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
-  key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
+  key[1] = (unsigned char)((key_56[0] << 7) | (key_56[1] >> 1));
+  key[2] = (unsigned char)((key_56[1] << 6) | (key_56[2] >> 2));
+  key[3] = (unsigned char)((key_56[2] << 5) | (key_56[3] >> 3));
+  key[4] = (unsigned char)((key_56[3] << 4) | (key_56[4] >> 4));
+  key[5] = (unsigned char)((key_56[4] << 3) | (key_56[5] >> 5));
+  key[6] = (unsigned char)((key_56[5] << 2)| (key_56[6] >> 6));
+  key[7] = (unsigned char)((key_56[6] << 1));
 }
 
 #if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
@@ -157,7 +158,7 @@ static void setup_des_key(const unsigned char *key_56,
   DES_cblock key;
 
   /* Expand the 56-bit key to 64-bits */
-  extend_key_56_to_64(key_56, (char *) &key);
+  extend_key_56_to_64(key_56, (unsigned char *)&key);
 
   /* Set the key parity to odd */
   DES_set_odd_parity(&key);
@@ -171,13 +172,13 @@ static void setup_des_key(const unsigned char *key_56,
 static void setup_des_key(const unsigned char *key_56,
                           struct des_ctx *des)
 {
-  char key[8];
+  unsigned char key[8];
 
   /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
+  Curl_des_set_odd_parity(key, sizeof(key));
 
   /* Set the key */
   des_set_key(des, (const uint8_t *) key);
@@ -194,7 +195,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
 {
   const CK_MECHANISM_TYPE mech = CKM_DES_ECB; /* DES cipher in ECB mode */
-  char key[8];                                /* expanded 64 bit key */
+  unsigned char key[8];                       /* expanded 64 bit key */
   SECItem key_item;
   PK11SymKey *symkey = NULL;
   SECItem *param = NULL;
@@ -214,7 +215,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
 
   /* Import the key */
-  key_item.data = (unsigned char *)key;
+  key_item.data = key;
   key_item.len = sizeof(key);
   symkey = PK11_ImportSymKey(slot, mech, PK11_OriginUnwrap, CKA_ENCRYPT,
                              &key_item, NULL);
@@ -253,17 +254,17 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
 {
   mbedtls_des_context ctx;
-  char key[8];
+  unsigned char key[8];
 
   /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
-  mbedtls_des_key_set_parity((unsigned char *) key);
+  mbedtls_des_key_set_parity(key);
 
   /* Perform the encryption */
   mbedtls_des_init(&ctx);
-  mbedtls_des_setkey_enc(&ctx, (unsigned char *) key);
+  mbedtls_des_setkey_enc(&ctx, key);
   return mbedtls_des_crypt_ecb(&ctx, in, out) == 0;
 }
 
@@ -272,7 +273,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
 {
-  char key[8];
+  unsigned char key[8];
   size_t out_len;
   CCCryptorStatus err;
 
@@ -280,7 +281,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
+  Curl_des_set_odd_parity(key, sizeof(key));
 
   /* Perform the encryption */
   err = CCCrypt(kCCEncrypt, kCCAlgorithmDES, kCCOptionECBMode, key,
@@ -295,7 +296,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
 {
-  char key[8];
+  unsigned char key[8];
   _CIPHER_Control_T ctl;
 
   /* Setup the cipher control structure */
@@ -303,7 +304,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   ctl.Data_Len = sizeof(key);
 
   /* Expand the 56-bit key to 64-bits */
-  extend_key_56_to_64(key_56, ctl.Crypto_Key);
+  extend_key_56_to_64(key_56, (unsigned char *) ctl.Crypto_Key);
 
   /* Set the key parity to odd */
   Curl_des_set_odd_parity((unsigned char *) ctl.Crypto_Key, ctl.Data_Len);
@@ -324,7 +325,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   struct {
     BLOBHEADER hdr;
     unsigned int len;
-    char key[8];
+    unsigned char key[8];
   } blob;
   DWORD len = 8;
 
@@ -344,7 +345,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   extend_key_56_to_64(key_56, blob.key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) blob.key, sizeof(blob.key));
+  Curl_des_set_odd_parity(blob.key, sizeof(blob.key));
 
   /* Import the key */
   if(!CryptImportKey(hprov, (BYTE *) &blob, sizeof(blob), 0, 0, &hkey)) {

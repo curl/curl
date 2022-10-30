@@ -441,12 +441,12 @@ static DOHcode skipqname(const unsigned char *doh, size_t dohlen,
   return DOH_OK;
 }
 
-static unsigned short get16bit(const unsigned char *doh, int index)
+static unsigned short get16bit(const unsigned char *doh, unsigned int index)
 {
   return (unsigned short)((doh[index] << 8) | doh[index + 1]);
 }
 
-static unsigned int get32bit(const unsigned char *doh, int index)
+static unsigned int get32bit(const unsigned char *doh, unsigned int index)
 {
    /* make clang and gcc optimize this to bswap by incrementing
       the pointer first. */
@@ -455,10 +455,12 @@ static unsigned int get32bit(const unsigned char *doh, int index)
    /* avoid undefined behavior by casting to unsigned before shifting
       24 bits, possibly into the sign bit. codegen is same, but
       ub sanitizer won't be upset */
-  return ( (unsigned)doh[0] << 24) | (doh[1] << 16) |(doh[2] << 8) | doh[3];
+  return ((unsigned int)doh[0] << 24) | (doh[1] << 16) |(doh[2] << 8) | doh[3];
 }
 
-static DOHcode store_a(const unsigned char *doh, int index, struct dohentry *d)
+static DOHcode store_a(const unsigned char *doh,
+                       unsigned int index,
+                       struct dohentry *d)
 {
   /* silently ignore addresses over the limit */
   if(d->numaddr < DOH_MAX_ADDR) {
@@ -471,7 +473,7 @@ static DOHcode store_a(const unsigned char *doh, int index, struct dohentry *d)
 }
 
 static DOHcode store_aaaa(const unsigned char *doh,
-                          int index,
+                          unsigned int index,
                           struct dohentry *d)
 {
   /* silently ignore addresses over the limit */
@@ -502,13 +504,13 @@ static DOHcode store_cname(const unsigned char *doh,
       return DOH_DNS_OUT_OF_RANGE;
     length = doh[index];
     if((length & 0xc0) == 0xc0) {
-      int newpos;
+      unsigned int newpos;
       /* name pointer, get the new offset (14 bits) */
       if((index + 1) >= dohlen)
         return DOH_DNS_OUT_OF_RANGE;
 
       /* move to the new index */
-      newpos = (length & 0x3f) << 8 | doh[index + 1];
+      newpos = (unsigned int) ((length & 0x3f) << 8 | doh[index + 1]);
       index = newpos;
       continue;
     }

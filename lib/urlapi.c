@@ -190,7 +190,7 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
 size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
                             bool guess_scheme)
 {
-  int i;
+  size_t i;
   DEBUGASSERT(!buf || (buflen > MAX_SCHEME_LEN));
   (void)buflen; /* only used in debug-builds */
   if(buf)
@@ -219,7 +219,8 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
     size_t len = i;
     if(buf) {
       buf[i] = 0;
-      while(i--) {
+      while(i) {
+        --i;
         buf[i] = Curl_raw_tolower(url[i]);
       }
     }

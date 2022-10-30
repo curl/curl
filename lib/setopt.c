@@ -2205,7 +2205,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else if(arg < READBUFFER_MIN)
       arg = READBUFFER_MIN;
 
-    data->set.buffer_size = (int)arg;
+    data->set.buffer_size = (unsigned int)arg;
     break;
 
   case CURLOPT_UPLOAD_BUFFERSIZE:
