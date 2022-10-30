@@ -33,6 +33,7 @@ CURLX_SRCS = \
  ../../lib/timediff.c \
  ../../lib/dynbuf.c \
  ../../lib/strdup.c \
+ ../../lib/strcase.c \
  ../../lib/curl_multibyte.c
 
 CURLX_HDRS = \

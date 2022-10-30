@@ -367,31 +367,6 @@ void clear_advisor_read_lock(const char *filename)
 }
 
 
-/* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because
-   its behavior is altered by the current locale. */
-static char raw_toupper(char in)
-{
-  if(in >= 'a' && in <= 'z')
-    return (char)('A' + in - 'a');
-  return in;
-}
-
-int strncasecompare(const char *first, const char *second, size_t max)
-{
-  while(*first && *second && max) {
-    if(raw_toupper(*first) != raw_toupper(*second)) {
-      break;
-    }
-    max--;
-    first++;
-    second++;
-  }
-  if(0 == max)
-    return 1; /* they are equal this far */
-
-  return raw_toupper(*first) == raw_toupper(*second);
-}
-
 #if defined(WIN32) && !defined(MSDOS)
 
 static struct timeval tvnow(void)
