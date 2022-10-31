@@ -29,7 +29,7 @@ UNITFILES = curlcheck.h \
  ../libtest/first.c
 
 # These are all unit test programs
-UNITPROGS = unit1300 unit1301 unit1302 unit1303 unit1304 unit1305 unit1307 \
+UNITPROGS = unit1300          unit1302 unit1303 unit1304 unit1305 unit1307 \
  unit1308 unit1309 unit1323 \
  unit1330 unit1394 unit1395 unit1396 unit1397 unit1398 \
  unit1399 \
@@ -41,9 +41,6 @@ UNITPROGS = unit1300 unit1301 unit1302 unit1303 unit1304 unit1305 unit1307 \
 
 unit1300_SOURCES = unit1300.c $(UNITFILES)
 unit1300_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1301_SOURCES = unit1301.c $(UNITFILES)
-unit1301_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1302_SOURCES = unit1302.c $(UNITFILES)
 unit1302_CPPFLAGS = $(AM_CPPFLAGS)
