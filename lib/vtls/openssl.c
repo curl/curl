@@ -4364,7 +4364,7 @@ static size_t ossl_version(char *buffer, size_t size)
   int count;
   const char *ver = OpenSSL_version(OPENSSL_VERSION);
   const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
-  if(Curl_strncasecompare(ver, expected, sizeof(expected) - 1)) {
+  if(strncasecompare(ver, expected, sizeof(expected) - 1)) {
     ver += sizeof(expected) - 1;
   }
   count = msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);

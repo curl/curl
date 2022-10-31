@@ -35,12 +35,8 @@
  * Result is 1 if text matches and 0 if not.
  */
 
-#define strcasecompare(a,b) Curl_strcasecompare(a,b)
-#define strncasecompare(a,b,c) Curl_strncasecompare(a,b,c)
-
-int Curl_strcasecompare(const char *first, const char *second);
-int Curl_safe_strcasecompare(const char *first, const char *second);
-int Curl_strncasecompare(const char *first, const char *second, size_t max);
+#define strcasecompare(a,b) curl_strequal(a,b)
+#define strncasecompare(a,b,c) curl_strnequal(a,b,c)
 
 char Curl_raw_toupper(char in);
 char Curl_raw_tolower(char in);
