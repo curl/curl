@@ -540,7 +540,7 @@ HEAD
         my $long = $f;
         my $short = $optlong{$long};
         my @categories = split ' ', $catlong{$long};
-        my $bitmask;
+        my $bitmask = ' ';
         my $opt;
 
         if(defined($short) && $long) {
@@ -556,6 +556,7 @@ HEAD
                 $bitmask .= ' | ';
             }
         }
+        $bitmask =~ s/(?=.{76}).{1,76}\|/$&\n  /g;
         my $arg = $arglong{$long};
         if($arg) {
             $opt .= " $arg";
@@ -563,7 +564,7 @@ HEAD
         my $desc = $helplong{$f};
         $desc =~ s/\"/\\\"/g; # escape double quotes
 
-        my $line = sprintf "  {\"%s\",\n   \"%s\",\n   %s},\n", $opt, $desc, $bitmask;
+        my $line = sprintf "  {\"%s\",\n   \"%s\",\n  %s},\n", $opt, $desc, $bitmask;
 
         if(length($opt) > 78) {
             print STDERR "WARN: the --$long name is too long\n";
