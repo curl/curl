@@ -66,11 +66,6 @@
 /* Define if you have the <netinet/in.h> header file. */
 /* #define HAVE_NETINET_IN_H 1 */
 
-/* Define if you have the <process.h> header file. */
-#ifndef __SALFORDC__
-#define HAVE_PROCESS_H 1
-#endif
-
 /* Define if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
 

@@ -56,7 +56,6 @@
 #define HAVE_NETINET_IN_H      1
 #define HAVE_NETINET_TCP_H     1
 #define HAVE_NET_IF_H          1
-#define HAVE_PROCESS_H         1
 #define HAVE_RECV              1
 #define HAVE_SELECT            1
 #define HAVE_SEND              1
