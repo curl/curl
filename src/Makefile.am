@@ -55,7 +55,7 @@ include Makefile.inc
 
 # CURL_FILES comes from Makefile.inc
 curl_SOURCES = $(CURL_FILES)
-if OS_WINDOWS
+if HAVE_WINDRES
 curl_SOURCES += $(CURL_RCFILES)
 $(CURL_RCFILES): tool_version.h
 endif
@@ -156,7 +156,7 @@ tidy:
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && ./gen.pl listhelp *.d) > tool_listhelp.c
 
-if OS_WINDOWS
+if HAVE_WINDRES
 .rc.o:
 	$(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
 endif
