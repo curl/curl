@@ -222,12 +222,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
           slash = strchr(check, '/');
           /* if the slash is part of this token, use it */
           if(slash) {
-            unsigned long longbits = strtoul(slash + 1, NULL, 10);
-            if(longbits > UINT_MAX)
-              /* this cannot match */
-              break;
-
-            bits = (unsigned int)longbits;
+            bits = atoi(slash + 1);
             *slash = 0; /* null terminate there */
           }
           if(type == TYPE_IPV6)
