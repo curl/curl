@@ -4167,7 +4167,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
         /* get path before last slash, except for / */
         size_t dirlen = slashPos - rawPath;
         if(dirlen == 0)
-            dirlen = 1;
+          dirlen = 1;
 
         ftpc->dirs = calloc(1, sizeof(ftpc->dirs[0]));
         if(!ftpc->dirs) {
