@@ -53,7 +53,11 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/%TESTNUMBER">
+%if win32
+<file name="log/%TESTNUMBER_junk">
+%else
+<file name="log/%TESTNUMBER?junk">
+%endif
 12345
 </file>
 

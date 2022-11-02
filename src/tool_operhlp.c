@@ -161,6 +161,9 @@ CURLcode get_url_file_name(char **filename, const char *url)
 
   if(!curl_url_set(uh, CURLUPART_URL, url, CURLU_GUESS_SCHEME) &&
      !curl_url_get(uh, CURLUPART_PATH, &path, 0)) {
+    char *query = NULL;
+    curl_url_get(uh, CURLUPART_QUERY, &query, 0);
+
     curl_url_cleanup(uh);
 
     pc = strrchr(path, '/');
@@ -175,7 +178,12 @@ CURLcode get_url_file_name(char **filename, const char *url)
       /* no slash => empty string */
       pc = "";
 
-    *filename = strdup(pc);
+    if(query) {
+      *filename = aprintf("%s?%s", pc, query);
+      curl_free(query);
+    }
+    else
+      *filename = strdup(pc);
     curl_free(path);
     if(!*filename)
       return CURLE_OUT_OF_MEMORY;
