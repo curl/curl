@@ -3112,7 +3112,9 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #include "urlapi.h"
 #include "options.h"
 #include "header.h"
+#ifdef USE_WEBSOCKETS
 #include "websockets.h"
+#endif /* USE_WEBSOCKETS */
 
 /* the typechecker doesn't work in C++ (yet) */
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && \

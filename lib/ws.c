@@ -721,37 +721,4 @@ CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
   return NULL;
 }
 
-#else
-
-CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
-                                  size_t *nread,
-                                  struct curl_ws_frame **metap)
-{
-  (void)curl;
-  (void)buffer;
-  (void)buflen;
-  (void)nread;
-  (void)metap;
-  return CURLE_OK;
-}
-
-CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
-                                  size_t buflen, size_t *sent,
-                                  curl_off_t framesize,
-                                  unsigned int sendflags)
-{
-  (void)curl;
-  (void)buffer;
-  (void)buflen;
-  (void)sent;
-  (void)framesize;
-  (void)sendflags;
-  return CURLE_OK;
-}
-
-CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
-{
-  (void)data;
-  return NULL;
-}
 #endif /* USE_WEBSOCKETS */

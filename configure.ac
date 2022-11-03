@@ -4238,6 +4238,7 @@ AS_HELP_STRING([--disable-websockets],[Disable WebSockets support]),
   esac ],
      AC_MSG_RESULT(no)
 )
+AM_CONDITIONAL(USE_WEBSOCKETS, test x$curl_ws_msg = xenabled)
 
 
 dnl ************************************************************
