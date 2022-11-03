@@ -732,7 +732,7 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
   (void)buflen;
   (void)nread;
   (void)metap;
-  return CURLE_OK;
+  return CURLE_NOT_BUILT_IN;
 }
 
 CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
@@ -746,7 +746,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
   (void)sent;
   (void)framesize;
   (void)sendflags;
-  return CURLE_OK;
+  return CURLE_NOT_BUILT_IN;
 }
 
 CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
