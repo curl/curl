@@ -265,6 +265,7 @@ DPAGES = \
   unix-socket.d \
   upload-file.d \
   url.d \
+  url-query.d \
   use-ascii.d \
   user-agent.d \
   user.d \

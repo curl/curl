@@ -251,6 +251,7 @@
 --unix-socket                        7.40.0
 --upload-file (-T)                   4.0
 --url                                7.5
+--url-query                          7.87.0
 --use-ascii (-B)                     5.0
 --user (-u)                          4.0
 --user-agent (-A)                    4.5.1
