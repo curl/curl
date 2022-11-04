@@ -628,7 +628,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   Curl_none_false_start,           /* false_start */
   NULL,                            /* sha256sum */
   NULL,                            /* associate_connection */
-  NULL                             /* disassociate_connection */
+  NULL,                            /* disassociate_connection */
   cr_recv,                         /* recv decrypted data */
   cr_send,                         /* send data to encrypt */
 };

@@ -305,11 +305,13 @@ CURLcode Curl_cfilter_setup(struct Curl_easy *data, int index,
     }
 
     if(conn->bits.httpproxy) {
+#ifdef USE_SSL
       if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
         result = Curl_cfilter_ssl_proxy_add(data, conn, index);
         if(result)
           goto out;
       }
+#endif /* USE_SSL */
 
       if(conn->bits.tunnel_proxy) {
         result = Curl_cfilter_http_proxy_add(data, conn, index);
@@ -319,6 +321,7 @@ CURLcode Curl_cfilter_setup(struct Curl_easy *data, int index,
     }
 #endif /* !CURL_DISABLE_PROXY */
 
+#ifdef USE_SSL
     if(ssl_mode == CURL_CF_SSL_ENABLE
       || (ssl_mode != CURL_CF_SSL_DISABLE
            && conn->handler->flags & PROTOPT_SSL)) {
@@ -326,6 +329,7 @@ CURLcode Curl_cfilter_setup(struct Curl_easy *data, int index,
       if(result)
         goto out;
     }
+#endif /* USE_SSL */
   }
   DEBUGASSERT(data->conn->cfilter[index]);
   cf = data->conn->cfilter[index];

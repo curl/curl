@@ -2324,7 +2324,6 @@ CURLcode scp_perform(struct Curl_easy *data,
                      bool *connected, bool *dophase_done)
 {
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
 
   DEBUGF(infof(data, "DO phase starts"));
 
@@ -2505,7 +2504,6 @@ CURLcode sftp_perform(struct Curl_easy *data,
                       bool *dophase_done)
 {
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
 
   DEBUGF(infof(data, "DO phase starts"));
 
