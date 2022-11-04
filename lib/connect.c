@@ -1689,7 +1689,7 @@ static CURLcode socket_cf_connect(struct Curl_cfilter *cf,
   struct connectdata *conn = data->conn;
   int sockindex = cf->sockindex;
   struct socket_cf_ctx *ctx = cf->ctx;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   (void)blocking;
   DEBUGASSERT(ctx);
@@ -1723,7 +1723,6 @@ static CURLcode socket_cf_connect(struct Curl_cfilter *cf,
       break;
     case SCFST_DONE:
       *done = TRUE;
-      result = CURLE_OK;
       DEBUGF(infof(data, "socket_cf_connect(handle=%p, index=%d) -> "
                    "already connected-> %d, done=%d",
                    data, sockindex, result, *done));
