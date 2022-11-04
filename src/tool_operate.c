@@ -1189,14 +1189,14 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           global->isatty = orig_isatty;
         }
 
-        if(httpgetfields) {
+        if(httpgetfields || config->query) {
+          char *q = httpgetfields ? httpgetfields : config->query;
           CURLU *uh = curl_url();
           if(uh) {
             char *updated;
             if(curl_url_set(uh, CURLUPART_URL, per->this_url,
                             CURLU_GUESS_SCHEME) ||
-               curl_url_set(uh, CURLUPART_QUERY, httpgetfields,
-                            CURLU_APPENDQUERY) ||
+               curl_url_set(uh, CURLUPART_QUERY, q, CURLU_APPENDQUERY) ||
                curl_url_get(uh, CURLUPART_URL, &updated, CURLU_GUESS_SCHEME)) {
               curl_url_cleanup(uh);
               result = CURLE_OUT_OF_MEMORY;

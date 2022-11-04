@@ -58,6 +58,7 @@ static void free_config_fields(struct OperationConfig *config)
   curl_slist_free_all(config->cookiefiles);
 
   Curl_safefree(config->postfields);
+  Curl_safefree(config->query);
   Curl_safefree(config->referer);
 
   Curl_safefree(config->headerfile);
