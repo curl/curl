@@ -2319,8 +2319,6 @@ static CURLcode nss_connect_common(struct Curl_easy *data,
     *done = TRUE;
 
   connssl->state = ssl_connection_complete;
-  conn->recv[sockindex] = nss_recv;
-  conn->send[sockindex] = nss_send;
 
   /* ssl_connect_done is never used outside, go back to the initial state */
   connssl->connecting_state = ssl_connect_1;
@@ -2530,7 +2528,9 @@ const struct Curl_ssl Curl_ssl_nss = {
   nss_false_start,              /* false_start */
   nss_sha256sum,                /* sha256sum */
   NULL,                         /* associate_connection */
-  NULL                          /* disassociate_connection */
+  NULL,                         /* disassociate_connection */
+  nss_recv,                     /* recv decrypted data */
+  nss_send,                     /* send data to encrypt */
 };
 
 #endif /* USE_NSS */

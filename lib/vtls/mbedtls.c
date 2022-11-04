@@ -675,9 +675,6 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 
   DEBUGASSERT(backend);
 
-  conn->recv[sockindex] = mbed_recv;
-  conn->send[sockindex] = mbed_send;
-
   ret = mbedtls_ssl_handshake(&backend->ssl);
 
   if(ret == MBEDTLS_ERR_SSL_WANT_READ) {
@@ -1147,8 +1144,6 @@ mbed_connect_common(struct Curl_easy *data,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = mbed_recv;
-    conn->send[sockindex] = mbed_send;
     *done = TRUE;
   }
   else
@@ -1267,7 +1262,9 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   Curl_none_false_start,            /* false_start */
   mbedtls_sha256sum,                /* sha256sum */
   NULL,                             /* associate_connection */
-  NULL                              /* disassociate_connection */
+  NULL,                             /* disassociate_connection */
+  mbedtls_recv,                     /* recv decrypted data */
+  mbedtls_send,                     /* send data to encrypt */
 };
 
 #endif /* USE_MBEDTLS */

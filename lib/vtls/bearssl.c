@@ -1069,8 +1069,6 @@ static CURLcode bearssl_connect_common(struct Curl_easy *data,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = bearssl_recv;
-    conn->send[sockindex] = bearssl_send;
     *done = TRUE;
   }
   else
@@ -1208,7 +1206,9 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   Curl_none_false_start,           /* false_start */
   bearssl_sha256sum,               /* sha256sum */
   NULL,                            /* associate_connection */
-  NULL                             /* disassociate_connection */
+  NULL,                            /* disassociate_connection */
+  bearssl_recv,                    /* recv decrypted data */
+  bearssl_send,                    /* send data to encrypt */
 };
 
 #endif /* USE_BEARSSL */

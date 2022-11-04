@@ -105,6 +105,7 @@ LIB_CFILES =         \
   base64.c           \
   bufref.c           \
   c-hyper.c          \
+  cfilters.c         \
   conncache.c        \
   connect.c          \
   content_encoding.c \
@@ -227,6 +228,7 @@ LIB_HFILES =         \
   asyn.h             \
   bufref.h           \
   c-hyper.h          \
+  cfilters.h         \
   conncache.h        \
   connect.h          \
   content_encoding.h \

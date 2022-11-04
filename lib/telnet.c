@@ -1491,6 +1491,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   }
 
   while(keepon) {
+    DEBUGF(infof(data, "telnet_do(handle=%p), poll %d fds", data, poll_cnt));
     switch(Curl_poll(pfd, poll_cnt, interval_ms)) {
     case -1:                    /* error, stop reading */
       keepon = FALSE;
@@ -1509,6 +1510,13 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         /* returned not-zero, this an error */
         if(result) {
           keepon = FALSE;
+          /* FIXME: in test 1452, macOS sees a ECONNRESET sometimes?
+           * Is this the telnet test server not shutting down the socket
+           * in a clean way? */
+          if(data->state.os_errno == ECONNRESET) {
+            DEBUGF(infof(data, "telnet_do(handle=%p), unexpected ECONNRESET"
+                         " on recv", data));
+          }
           break;
         }
         /* returned zero but actually received 0 or less here,

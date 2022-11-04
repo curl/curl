@@ -29,6 +29,7 @@
 #include "urldata.h"
 #include "transfer.h"
 #include "url.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "progress.h"
 #include "easyif.h"
@@ -160,7 +161,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     NULL,              /* TUNNELING */
     NULL,              /* PROTOCONNECT */
     NULL,              /* PROTOCONNECTING */
-    Curl_connect_free, /* DO */
+    NULL,              /* DO */
     NULL,              /* DOING */
     NULL,              /* DOING_MORE */
     before_perform,    /* DID */
@@ -709,6 +710,11 @@ static CURLcode multi_done(struct Curl_easy *data,
 #endif
      ) || conn->bits.close
        || (premature && !(conn->handler->flags & PROTOPT_STREAM))) {
+    DEBUGF(infof(data, "multi_done, not re-using connection=%ld, forbid=%d"
+                 ", close=%d, premature=%d, stream=%d",
+                 conn->connection_id,
+                 data->set.reuse_forbid, conn->bits.close, premature,
+                 (conn->handler->flags & PROTOPT_STREAM)));
     connclose(conn, "disconnecting");
     Curl_conncache_remove_conn(data, conn, FALSE);
     CONNCACHE_UNLOCK(data);
@@ -948,9 +954,8 @@ void Curl_detach_connection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   if(conn) {
-    Curl_connect_done(data); /* if mid-CONNECT, shut it down */
+    Curl_cfilter_detach_data(conn, data);
     Curl_llist_remove(&conn->easyq, &data->conn_queue, NULL);
-    Curl_ssl_detach_conn(data, conn);
   }
   data->conn = NULL;
 }
@@ -968,53 +973,9 @@ void Curl_attach_connection(struct Curl_easy *data,
   data->conn = conn;
   Curl_llist_insert_next(&conn->easyq, conn->easyq.tail, data,
                          &data->conn_queue);
+  Curl_cfilter_attach_data(conn, data);
   if(conn->handler->attach)
     conn->handler->attach(data, conn);
-  Curl_ssl_associate_conn(data, conn);
-}
-
-static int waitconnect_getsock(struct connectdata *conn,
-                               curl_socket_t *sock)
-{
-  int i;
-  int s = 0;
-  int rc = 0;
-
-#ifdef USE_SSL
-#ifndef CURL_DISABLE_PROXY
-  if(CONNECT_FIRSTSOCKET_PROXY_SSL())
-    return Curl_ssl->getsock(conn, sock);
-#endif
-#endif
-
-  if(SOCKS_STATE(conn->cnnct.state))
-    return Curl_SOCKS_getsock(conn, sock, FIRSTSOCKET);
-
-  for(i = 0; i<2; i++) {
-    if(conn->tempsock[i] != CURL_SOCKET_BAD) {
-      sock[s] = conn->tempsock[i];
-      rc |= GETSOCK_WRITESOCK(s);
-#ifdef ENABLE_QUIC
-      if(conn->transport == TRNSPRT_QUIC)
-        /* when connecting QUIC, we want to read the socket too */
-        rc |= GETSOCK_READSOCK(s);
-#endif
-      s++;
-    }
-  }
-
-  return rc;
-}
-
-static int waitproxyconnect_getsock(struct connectdata *conn,
-                                    curl_socket_t *sock)
-{
-  sock[0] = conn->sock[FIRSTSOCKET];
-
-  if(conn->connect_state)
-    return Curl_connect_getsock(conn);
-
-  return GETSOCK_WRITESOCK(0);
 }
 
 static int domore_getsock(struct Curl_easy *data,
@@ -1076,10 +1037,8 @@ static int multi_getsock(struct Curl_easy *data,
     return doing_getsock(data, conn, socks);
 
   case MSTATE_TUNNELING:
-    return waitproxyconnect_getsock(conn, socks);
-
   case MSTATE_CONNECTING:
-    return waitconnect_getsock(conn, socks);
+    return Curl_cfilter_get_select_socks(data, FIRSTSOCKET, socks);
 
   case MSTATE_DOING_MORE:
     return domore_getsock(data, conn, socks);
@@ -1737,7 +1696,8 @@ static CURLcode protocol_connect(struct Curl_easy *data,
 
   *protocol_done = FALSE;
 
-  if(conn->bits.tcpconnect[FIRSTSOCKET] && conn->bits.protoconnstart) {
+  if(Curl_cfilter_is_connected(data, FIRSTSOCKET)
+     && conn->bits.protoconnstart) {
     /* We already are connected, get back. This may happen when the connect
        worked fine in the first call, like when we connect to a local server
        or proxy. Note that we don't know if the protocol is actually done.
@@ -1751,21 +1711,6 @@ static CURLcode protocol_connect(struct Curl_easy *data,
   }
 
   if(!conn->bits.protoconnstart) {
-#ifndef CURL_DISABLE_PROXY
-    result = Curl_proxy_connect(data, FIRSTSOCKET);
-    if(result)
-      return result;
-
-    if(CONNECT_FIRSTSOCKET_PROXY_SSL())
-      /* wait for HTTPS proxy SSL initialization to complete */
-      return CURLE_OK;
-
-    if(conn->bits.tunnel_proxy && conn->bits.httpproxy &&
-       Curl_connect_ongoing(conn))
-      /* when using an HTTP tunnel proxy, await complete tunnel establishment
-         before proceeding further. Return CURLE_OK so we'll be called again */
-      return CURLE_OK;
-#endif
     if(conn->handler->connect_it) {
       /* is there a protocol-specific connect() procedure? */
 
@@ -1901,7 +1846,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(data->set.connecttimeout)
         Curl_expire(data, data->set.connecttimeout, EXPIRE_CONNECTTIMEOUT);
 
-      result = Curl_connect(data, &async, &protocol_connected);
+      result = Curl_connect(data, &async, &connected);
       if(CURLE_NO_CONNECTION_AVAILABLE == result) {
         /* There was no connection available. We will go to the pending
            state and wait for an available connection. */
@@ -1929,15 +1874,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
              WAITDO or DO! */
           rc = CURLM_CALL_MULTI_PERFORM;
 
-          if(protocol_connected)
-            multistate(data, MSTATE_DO);
+          if(connected)
+            multistate(data, MSTATE_PROTOCONNECT);
           else {
-#ifndef CURL_DISABLE_HTTP
-            if(Curl_connect_ongoing(data->conn))
-              multistate(data, MSTATE_TUNNELING);
-            else
-#endif
-              multistate(data, MSTATE_CONNECTING);
+            multistate(data, MSTATE_CONNECTING);
           }
         }
       }
@@ -1989,7 +1929,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(dns) {
         /* Perform the next step in the connection phase, and then move on
            to the WAITCONNECT state */
-        result = Curl_once_resolved(data, &protocol_connected);
+        result = Curl_once_resolved(data, &connected);
 
         if(result)
           /* if Curl_once_resolved() returns failure, the connection struct
@@ -1998,15 +1938,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         else {
           /* call again please so that we get the next socket setup */
           rc = CURLM_CALL_MULTI_PERFORM;
-          if(protocol_connected)
-            multistate(data, MSTATE_DO);
+          if(connected)
+            multistate(data, MSTATE_PROTOCONNECT);
           else {
-#ifndef CURL_DISABLE_HTTP
-            if(Curl_connect_ongoing(data->conn))
-              multistate(data, MSTATE_TUNNELING);
-            else
-#endif
-              multistate(data, MSTATE_CONNECTING);
+            multistate(data, MSTATE_CONNECTING);
           }
         }
       }
@@ -2035,16 +1970,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else
 #endif
         if(!result) {
-          if(
-#ifndef CURL_DISABLE_PROXY
-            (data->conn->http_proxy.proxytype != CURLPROXY_HTTPS ||
-             data->conn->bits.proxy_ssl_connected[FIRSTSOCKET]) &&
-#endif
-            Curl_connect_complete(data->conn)) {
-            rc = CURLM_CALL_MULTI_PERFORM;
-            /* initiate protocol connect phase */
-            multistate(data, MSTATE_PROTOCONNECT);
-          }
+          rc = CURLM_CALL_MULTI_PERFORM;
+          /* initiate protocol connect phase */
+          multistate(data, MSTATE_PROTOCONNECT);
         }
       else
         stream_error = TRUE;
@@ -2054,27 +1982,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case MSTATE_CONNECTING:
       /* awaiting a completion of an asynch TCP connect */
       DEBUGASSERT(data->conn);
-      result = Curl_is_connected(data, data->conn, FIRSTSOCKET, &connected);
+      result = Curl_cfilter_connect(data, FIRSTSOCKET, FALSE, &connected);
       if(connected && !result) {
-#ifndef CURL_DISABLE_HTTP
-        if(
-#ifndef CURL_DISABLE_PROXY
-          (data->conn->http_proxy.proxytype == CURLPROXY_HTTPS &&
-           !data->conn->bits.proxy_ssl_connected[FIRSTSOCKET]) ||
-#endif
-          Curl_connect_ongoing(data->conn)) {
-          multistate(data, MSTATE_TUNNELING);
-          break;
-        }
-#endif
         rc = CURLM_CALL_MULTI_PERFORM;
-#ifndef CURL_DISABLE_PROXY
-        multistate(data,
-                   data->conn->bits.tunnel_proxy?
-                   MSTATE_TUNNELING : MSTATE_PROTOCONNECT);
-#else
         multistate(data, MSTATE_PROTOCONNECT);
-#endif
       }
       else if(result) {
         /* failure detected */
@@ -2086,6 +1997,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case MSTATE_PROTOCONNECT:
+      if(data->conn->bits.reuse) {
+        /* FIXME: ftp seems to hang when protoconnect on reused connection
+         * since we handle PROTOCONNECT in general inside the filers, it
+         * seems wrong to restart this on a reused connection. */
+        multistate(data, MSTATE_DO);
+        rc = CURLM_CALL_MULTI_PERFORM;
+        break;
+      }
       result = protocol_connect(data, &protocol_connected);
       if(!result && !protocol_connected)
         /* switch to waiting state */

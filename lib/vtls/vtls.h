@@ -102,6 +102,12 @@ struct Curl_ssl {
                                struct connectdata *conn,
                                int sockindex);
   void (*disassociate_connection)(struct Curl_easy *data, int sockindex);
+
+  ssize_t (*recv_plain)(struct Curl_easy *data, int sockindex, char *buf,
+                        size_t len, CURLcode *code);
+  ssize_t (*send_plain)(struct Curl_easy *data, int sockindex,
+                        const void *mem, size_t len, CURLcode *code);
+
 };
 
 #ifdef USE_SSL
@@ -205,13 +211,6 @@ curl_sslbackend Curl_ssl_backend(void);
 #ifdef USE_SSL
 int Curl_ssl_init(void);
 void Curl_ssl_cleanup(void);
-CURLcode Curl_ssl_connect(struct Curl_easy *data, struct connectdata *conn,
-                          int sockindex);
-CURLcode Curl_ssl_connect_nonblocking(struct Curl_easy *data,
-                                      struct connectdata *conn,
-                                      bool isproxy,
-                                      int sockindex,
-                                      bool *done);
 /* tell the SSL stuff to close down all open information regarding
    connections (and thus session ID caching etc) */
 void Curl_ssl_close_all(struct Curl_easy *data);
@@ -227,8 +226,6 @@ struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data);
 /* init the SSL session ID cache */
 CURLcode Curl_ssl_initsessions(struct Curl_easy *, size_t);
 void Curl_ssl_version(char *buffer, size_t size);
-bool Curl_ssl_data_pending(const struct connectdata *conn,
-                           int connindex);
 int Curl_ssl_check_cxn(struct connectdata *conn);
 
 /* Certificate information list handling. */
@@ -313,25 +310,31 @@ void Curl_ssl_detach_conn(struct Curl_easy *data,
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
+CURLcode Curl_cfilter_ssl_add(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              int sockindex);
+
+#ifndef CURL_DISABLE_PROXY
+CURLcode Curl_cfilter_ssl_proxy_add(struct Curl_easy *data,
+                                    struct connectdata *conn,
+                                    int sockindex);
+#endif /* !CURL_DISABLE_PROXY */
+
+
 #else /* if not USE_SSL */
 
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1
 #define Curl_ssl_cleanup() Curl_nop_stmt
-#define Curl_ssl_connect(x,y,z) CURLE_NOT_BUILT_IN
 #define Curl_ssl_close_all(x) Curl_nop_stmt
 #define Curl_ssl_close(x,y,z) Curl_nop_stmt
 #define Curl_ssl_shutdown(x,y,z) CURLE_NOT_BUILT_IN
 #define Curl_ssl_set_engine(x,y) CURLE_NOT_BUILT_IN
 #define Curl_ssl_set_engine_default(x) CURLE_NOT_BUILT_IN
 #define Curl_ssl_engines_list(x) NULL
-#define Curl_ssl_send(a,b,c,d,e) -1
-#define Curl_ssl_recv(a,b,c,d,e) -1
 #define Curl_ssl_initsessions(x,y) CURLE_OK
-#define Curl_ssl_data_pending(x,y) 0
 #define Curl_ssl_check_cxn(x) 0
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
-#define Curl_ssl_connect_nonblocking(x,y,z,w,a) CURLE_NOT_BUILT_IN
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE

@@ -606,9 +606,6 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 
   ERR_clear_error();
 
-  conn->recv[sockindex] = wolfssl_recv;
-  conn->send[sockindex] = wolfssl_send;
-
   /* Enable RFC2818 checks */
   if(SSL_CONN_CONFIG(verifyhost)) {
     char *snihost = Curl_ssl_snihost(data, SSL_HOST_NAME(), NULL);
@@ -1135,8 +1132,6 @@ wolfssl_connect_common(struct Curl_easy *data,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = wolfssl_recv;
-    conn->send[sockindex] = wolfssl_send;
     *done = TRUE;
   }
   else
@@ -1241,7 +1236,9 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   Curl_none_false_start,           /* false_start */
   wolfssl_sha256sum,               /* sha256sum */
   NULL,                            /* associate_connection */
-  NULL                             /* disassociate_connection */
+  NULL,                            /* disassociate_connection */
+  wolfssl_recv,                    /* recv decrypted data */
+  wolfssl_send,                    /* send data to encrypt */
 };
 
 #endif

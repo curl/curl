@@ -718,11 +718,14 @@ CURLcode Curl_read(struct Curl_easy *data,   /* transfer */
 
   nread = conn->recv[num](data, num, buffertofill, bytesfromsocket, &result);
   if(nread < 0)
-    return result;
+    goto out;
 
   *n += nread;
-
-  return CURLE_OK;
+  result = CURLE_OK;
+out:
+  /* DEBUGF(infof(data, "Curl_read(handle=%p) -> %d, nread=%ld",
+        data, result, nread)); */
+  return result;
 }
 
 /* return 0 on success */

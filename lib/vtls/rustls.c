@@ -473,8 +473,6 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
 
       cr_set_negotiated_alpn(data, conn, rconn);
 
-      conn->recv[sockindex] = cr_recv;
-      conn->send[sockindex] = cr_send;
       *done = TRUE;
       return CURLE_OK;
     }
@@ -631,6 +629,8 @@ const struct Curl_ssl Curl_ssl_rustls = {
   NULL,                            /* sha256sum */
   NULL,                            /* associate_connection */
   NULL                             /* disassociate_connection */
+  cr_recv,                         /* recv decrypted data */
+  cr_send,                         /* send data to encrypt */
 };
 
 #endif /* USE_RUSTLS */
