@@ -239,7 +239,7 @@ CURLcode Curl_cfilter_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   (void)data;
-  DEBUGASSERT(conn);
+  (void)conn;
   DEBUGASSERT(cft);
   cf = calloc(sizeof(*cf), 1);
   if(!cf)
@@ -257,6 +257,7 @@ out:
 void Curl_cfilter_add(struct Curl_easy *data, struct connectdata *conn,
                       int index, struct Curl_cfilter *cf)
 {
+  (void)data;
   DEBUGF(infof(data, "Curl_cfilter_add(conn=%ld, index=%d, filter=%s)",
                conn->connection_id, index, cf->cft->name));
 
@@ -329,6 +330,8 @@ CURLcode Curl_cfilter_setup(struct Curl_easy *data, int index,
       if(result)
         goto out;
     }
+#else
+    (void)ssl_mode;
 #endif /* USE_SSL */
   }
   DEBUGASSERT(data->conn->cfilter[index]);
