@@ -1056,7 +1056,6 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
 {
   CURLcode result;
   bool next_done = FALSE;
-  int sockindex = cf->sockindex;
   struct tunnel_state *ts = cf->ctx;
 
   result = cf->next->cft->connect(cf->next, data, blocking, &next_done);
@@ -1091,7 +1090,7 @@ out:
   *done = (result == CURLE_OK) && tunnel_is_established(cf->ctx);
   cf->connected = *done;
   DEBUGF(infof(data, "http_proxy_cf_connect(handle=%p, i=%d, block=%d) "
-         "-> %d, done=%d", data, sockindex, blocking, result, *done));
+         "-> %d, done=%d", data, cf->sockindex, blocking, result, *done));
   return result;
 }
 
