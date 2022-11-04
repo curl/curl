@@ -70,6 +70,7 @@ struct OperationConfig {
   char *postfields;
   curl_off_t postfieldsize;
   char *referer;
+  char *query;
   long timeout_ms;
   long connecttimeout_ms;
   long maxredirs;

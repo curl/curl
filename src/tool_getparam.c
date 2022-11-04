@@ -41,6 +41,7 @@
 #include "tool_paramhlp.h"
 #include "tool_parsecfg.h"
 #include "tool_main.h"
+#include "dynbuf.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -233,6 +234,7 @@ static const struct LongShort aliases[]= {
   {"db", "data-binary",              ARG_STRING},
   {"de", "data-urlencode",           ARG_STRING},
   {"df", "json",                     ARG_STRING},
+  {"dg", "url-query",                ARG_STRING},
   {"D",  "dump-header",              ARG_FILENAME},
   {"e",  "referer",                  ARG_STRING},
   {"E",  "cert",                     ARG_FILENAME},
@@ -1567,7 +1569,39 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       size_t size = 0;
       bool raw_mode = (subletter == 'r');
 
-      if(subletter == 'e') { /* --data-urlencode */
+      if(subletter == 'g') { /* --url-query */
+#define MAX_QUERY_LEN 100000 /* larger is not likely to ever work */
+        char *query;
+        struct curlx_dynbuf dyn;
+        curlx_dyn_init(&dyn, MAX_QUERY_LEN);
+
+        if(*nextarg == '+') {
+          /* use without encoding */
+          query = strdup(&nextarg[1]);
+          if(!query)
+            return PARAM_NO_MEM;
+        }
+        else {
+          err = data_urlencode(global, nextarg, &query, &size);
+          if(err)
+            return err;
+        }
+
+        if(config->query) {
+          CURLcode result =
+            curlx_dyn_addf(&dyn, "%s&%s", config->query, query);
+          free(query);
+          if(result)
+            return PARAM_NO_MEM;
+          free(config->query);
+          config->query = curlx_dyn_ptr(&dyn);
+        }
+        else
+          config->query = query;
+
+        break; /* this is not a POST argument at all */
+      }
+      else if(subletter == 'e') { /* --data-urlencode */
         err = data_urlencode(global, nextarg, &postdata, &size);
         if(err)
           return err;
