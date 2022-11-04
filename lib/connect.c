@@ -1647,7 +1647,7 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
 typedef enum {
   SCFST_INIT,
   SCFST_WAITING,
-  SCFST_DONE,
+  SCFST_DONE
 } cf_connect_state;
 
 struct socket_cf_ctx {

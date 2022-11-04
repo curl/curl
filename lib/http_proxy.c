@@ -55,7 +55,7 @@ typedef enum {
     TUNNEL_RECEIVE,  /* CONNECT answer is being received */
     TUNNEL_RESPONSE, /* CONNECT response received completely */
     TUNNEL_ESTABLISHED,
-    TUNNEL_FAILED,
+    TUNNEL_FAILED
 } tunnel_state;
 
 /* struct for HTTP CONNECT tunneling */
