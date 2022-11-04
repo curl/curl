@@ -62,7 +62,7 @@ static void cf_debug(struct Curl_easy *data, const char *fname,
     if(offset) {
       chain[offset++] = '.';
     }
-    strncpy(chain + offset, cf->cft->name, len);
+    strcpy(chain + offset, cf->cft->name);
     offset += len;
   }
   chain[offset] = 0;

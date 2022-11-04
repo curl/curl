@@ -759,13 +759,6 @@ static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
   /* possible left-overs from the async name resolvers */
   Curl_resolver_cancel(data);
 
-  /* close the SSL stuff before we close any sockets since they will/may
-     write to the sockets */
-  Curl_ssl_close(data, conn, FIRSTSOCKET);
-#ifndef CURL_DISABLE_FTP
-  Curl_ssl_close(data, conn, SECONDARYSOCKET);
-#endif
-
   Curl_cfilter_close(data, conn, SECONDARYSOCKET);
   Curl_cfilter_close(data, conn, FIRSTSOCKET);
 }

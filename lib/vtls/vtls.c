@@ -694,14 +694,6 @@ int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks)
   return GETSOCK_BLANK;
 }
 
-void Curl_ssl_close(struct Curl_easy *data, struct connectdata *conn,
-                    int sockindex)
-{
-  DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
-  Curl_ssl->close_one(data, conn, sockindex);
-  conn->ssl[sockindex].state = ssl_connection_none;
-}
-
 CURLcode Curl_ssl_shutdown(struct Curl_easy *data, struct connectdata *conn,
                            int sockindex)
 {
@@ -1516,12 +1508,19 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
 #ifdef USE_SSL
 
-static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   if(cf->connected) {
-    Curl_ssl_close(data, data->conn, cf->sockindex);
+    DEBUGASSERT(data->conn);
+    Curl_ssl->close_one(data, data->conn, cf->sockindex);
+    data->conn->ssl[cf->sockindex].state = ssl_connection_none;
     cf->connected = FALSE;
   }
+}
+
+static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  cf_close(cf, data);
 }
 
 static CURLcode ssl_cf_setup(struct Curl_cfilter *cf,
@@ -1541,10 +1540,7 @@ static CURLcode ssl_cf_setup(struct Curl_cfilter *cf,
 static void ssl_cf_close(struct Curl_cfilter *cf,
                          struct Curl_easy *data)
 {
-  if(cf->connected) {
-    Curl_ssl_close(data, data->conn, cf->sockindex);
-    cf->connected = FALSE;
-  }
+  cf_close(cf, data);
   cf->next->cft->close(cf->next, data);
 }
 

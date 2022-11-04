@@ -214,8 +214,6 @@ void Curl_ssl_cleanup(void);
 /* tell the SSL stuff to close down all open information regarding
    connections (and thus session ID caching etc) */
 void Curl_ssl_close_all(struct Curl_easy *data);
-void Curl_ssl_close(struct Curl_easy *data, struct connectdata *conn,
-                    int sockindex);
 CURLcode Curl_ssl_shutdown(struct Curl_easy *data, struct connectdata *conn,
                            int sockindex);
 CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine);
@@ -327,7 +325,6 @@ CURLcode Curl_cfilter_ssl_proxy_add(struct Curl_easy *data,
 #define Curl_ssl_init() 1
 #define Curl_ssl_cleanup() Curl_nop_stmt
 #define Curl_ssl_close_all(x) Curl_nop_stmt
-#define Curl_ssl_close(x,y,z) Curl_nop_stmt
 #define Curl_ssl_shutdown(x,y,z) CURLE_NOT_BUILT_IN
 #define Curl_ssl_set_engine(x,y) CURLE_NOT_BUILT_IN
 #define Curl_ssl_set_engine_default(x) CURLE_NOT_BUILT_IN

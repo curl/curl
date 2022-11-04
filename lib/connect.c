@@ -1809,6 +1809,9 @@ static void socket_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct socket_cf_ctx *state = cf->ctx;
 
   (void)data;
+  if(cf->connected) {
+    socket_cf_close(cf, data);
+  }
   /* release any resources held in state */
   Curl_safefree(state);
 }
