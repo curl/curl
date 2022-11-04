@@ -39,6 +39,7 @@
 #include "strcase.h"
 #include "select.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "llist.h"
 #include "multiif.h"
 #include "curl_printf.h"

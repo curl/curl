@@ -54,6 +54,7 @@
 #include "cfilters.h"
 
 #include "vtls.h" /* generic SSL protos etc */
+#include "vtls_int.h"
 #include "slist.h"
 #include "sendf.h"
 #include "strcase.h"
@@ -1126,17 +1127,10 @@ bool Curl_ssl_cert_status_request(void)
 /*
  * Check whether the SSL backend supports false start.
  */
-bool Curl_ssl_false_start(void)
+bool Curl_ssl_false_start(struct Curl_easy *data)
 {
+  (void)data;
   return Curl_ssl->false_start();
-}
-
-/*
- * Check whether the SSL backend supports setting TLS 1.3 cipher suites
- */
-bool Curl_ssl_tls13_ciphersuites(void)
-{
-  return Curl_ssl->supports & SSLSUPP_TLS13_CIPHERSUITES;
 }
 
 /*
@@ -1702,5 +1696,69 @@ CURLcode Curl_cfilter_ssl_proxy_add(struct Curl_easy *data,
 }
 
 #endif /* !CURL_DISABLE_PROXY */
+
+size_t Curl_ssl_get_backend_data_size(struct Curl_easy *data)
+{
+  (void)data;
+  return Curl_ssl->sizeof_ssl_backend_data;
+}
+
+bool Curl_ssl_supports(struct Curl_easy *data, int option)
+{
+  (void)data;
+  return (Curl_ssl->supports & option)? TRUE : FALSE;
+}
+
+void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
+                             CURLINFO info, int n)
+{
+  struct connectdata *conn = data->conn;
+
+#if 0
+  struct Curl_cfilter *cf = conn? conn->cfilters[sockindex] : NULL;
+
+  for(; cf; cf = cf->next) {
+    if(cf->cft == cft_ssl || cf->cft == cft_ssl_proxy) {
+      if(n > 0) {
+        --n;
+        continue;
+      }
+      /* TODO: use cf->ctx instance once we have that */
+      return Curl_ssl->get_internals(&data->conn->ssl[0], info);
+    }
+  }
+#else
+  if(conn) {
+    size_t i;
+    (void)n;
+    (void)sockindex;
+    for(i = 0; i < (sizeof(conn->ssl) / sizeof(conn->ssl[0])); ++i) {
+      if(conn->ssl[i].use) {
+        return Curl_ssl->get_internals(&conn->ssl[i], info);
+      }
+    }
+  }
+#endif
+  return NULL;
+}
+
+bool Curl_ssl_use(struct connectdata *conn, int sockindex)
+{
+  return conn->ssl[sockindex].use;
+}
+
+bool Curl_cfilter_ssl_added(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            int sockindex)
+{
+  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
+
+  (void)data;
+  for(; cf; cf = cf->next) {
+    if(cf->cft == &cft_ssl)
+      return TRUE;
+  }
+  return FALSE;
+}
 
 #endif /* USE_SSL */

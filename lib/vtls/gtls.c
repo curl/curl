@@ -45,6 +45,7 @@
 #include "inet_pton.h"
 #include "gtls.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "vauth/vauth.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */

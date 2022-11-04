@@ -32,6 +32,7 @@
 #include "sendf.h"
 #include "inet_pton.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"

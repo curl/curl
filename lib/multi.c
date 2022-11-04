@@ -1998,7 +1998,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case MSTATE_PROTOCONNECT:
       if(data->conn->bits.reuse) {
-        /* FIXME: ftp seems to hang when protoconnect on reused connection
+        /* ftp seems to hang when protoconnect on reused connection
          * since we handle PROTOCONNECT in general inside the filers, it
          * seems wrong to restart this on a reused connection. */
         multistate(data, MSTATE_DO);

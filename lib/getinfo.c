@@ -533,13 +533,7 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
 
 #ifdef USE_SSL
       if(conn && tsi->backend != CURLSSLBACKEND_NONE) {
-        unsigned int i;
-        for(i = 0; i < (sizeof(conn->ssl) / sizeof(conn->ssl[0])); ++i) {
-          if(conn->ssl[i].use) {
-            tsi->internals = Curl_ssl->get_internals(&conn->ssl[i], info);
-            break;
-          }
-        }
+        tsi->internals = Curl_ssl_get_internals(data, FIRSTSOCKET, info, 0);
       }
 #endif
     }

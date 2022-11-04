@@ -1681,7 +1681,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
      Note that these backend pointers can be swapped by vtls (eg ssl backend
      data becomes proxy backend data). */
   {
-    size_t onesize = Curl_ssl->sizeof_ssl_backend_data;
+    size_t onesize = Curl_ssl_get_backend_data_size(data);
     size_t totalsize = onesize;
     char *ssl;
 
@@ -2429,7 +2429,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   }
 
 #ifdef USE_SSL
-  if(!(Curl_ssl->supports & SSLSUPP_HTTPS_PROXY))
+  if(!Curl_ssl_supports(data, SSLSUPP_HTTPS_PROXY))
 #endif
     if(proxytype == CURLPROXY_HTTPS) {
       failf(data, "Unsupported proxy \'%s\', libcurl is built without the "

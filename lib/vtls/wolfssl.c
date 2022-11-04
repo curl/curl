@@ -55,6 +55,7 @@
 #include "sendf.h"
 #include "inet_pton.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "keylog.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */

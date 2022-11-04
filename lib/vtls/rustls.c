@@ -35,6 +35,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "select.h"
 #include "strerror.h"
 #include "multiif.h"

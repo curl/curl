@@ -104,7 +104,7 @@ struct Curl_cftype {
 struct Curl_cfilter {
   const struct Curl_cftype *cft;        /* the type providing implementation */
   struct Curl_cfilter *next;            /* next filter in chain */
-  int sockindex;                        /* FIXME: like to get rid off this */
+  int sockindex;                        /* TODO: like to get rid off this */
   BIT(connected);                       /* != 0 iff this filter is connected */
   void *ctx;                            /* filter type specific settings */
 };

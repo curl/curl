@@ -481,6 +481,12 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   struct imap_conn *imapc = &conn->proto.imapc;
   CURLcode result;
 
+  if(!Curl_cfilter_ssl_added(data, conn, FIRSTSOCKET)) {
+    result = Curl_cfilter_ssl_add(data, conn, FIRSTSOCKET);
+    if(result)
+      goto out;
+  }
+
   result = Curl_cfilter_connect(data, FIRSTSOCKET, FALSE, &imapc->ssldone);
   if(!result) {
     if(imapc->state != IMAP_UPGRADETLS)
@@ -491,7 +497,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
       result = imap_perform_capability(data, conn);
     }
   }
-
+out:
   return result;
 }
 
@@ -951,7 +957,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
       line += wordlen;
     }
   }
-  else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
+  else if(data->set.use_ssl && !Curl_ssl_use(conn, FIRSTSOCKET)) {
     /* PREAUTH is not compatible with STARTTLS. */
     if(imapcode == IMAP_RESP_OK && imapc->tls_supported && !imapc->preauth) {
       /* Switch to TLS connection now */

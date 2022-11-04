@@ -127,6 +127,7 @@
 #include "connect.h"
 #include "select.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "sectransp.h"
 #include "curl_printf.h"
 #include "strdup.h"

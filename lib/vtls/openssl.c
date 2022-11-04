@@ -55,6 +55,7 @@
 #include "slist.h"
 #include "select.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "vauth/vauth.h"
 #include "keylog.h"
 #include "strcase.h"

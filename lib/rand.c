@@ -31,6 +31,7 @@
 #include <curl/curl.h>
 #include "vtls/vtls.h"
 #include "sendf.h"
+#include "timeval.h"
 #include "rand.h"
 
 /* The last 3 #include files should be in this order */

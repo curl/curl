@@ -772,8 +772,7 @@ void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
 }
 
 /*
- * post_connect() is called after a successful connect to the peer, which
- * *could* be a SOCKS proxy
+ * post_connect() is called after a successful connect to the peer
  */
 static void post_connect(struct Curl_easy *data,
                        struct connectdata *conn,
@@ -781,10 +780,6 @@ static void post_connect(struct Curl_easy *data,
                        bool *connected)
 {
   *connected = TRUE;
-  /* FIXME: This does not seem a good idea. It doubly counts connect time
-   */
-  if(0 && sockindex == FIRSTSOCKET)
-    Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
   Curl_updateconninfo(data, conn, conn->sock[sockindex]);
   Curl_verboseconnect(data, conn);
   data->info.numconnects++; /* to track the number of connections made */
@@ -1447,7 +1442,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
 bool Curl_connalive(struct connectdata *conn)
 {
   /* First determine if ssl */
-  if(conn->ssl[FIRSTSOCKET].use) {
+  if(Curl_ssl_use(conn, FIRSTSOCKET)) {
     /* use the SSL context */
     if(!Curl_ssl_check_cxn(conn))
       return false;   /* FIN received */
@@ -1709,7 +1704,7 @@ static CURLcode socket_cf_connect(struct Curl_cfilter *cf,
       result = is_connected(data, conn, sockindex, done);
       if(!result && *done) {
         Curl_pgrsTime(data, TIMER_CONNECT);    /* we're connected already */
-        if(conn->ssl[sockindex].use ||
+        if(Curl_ssl_use(conn, FIRSTSOCKET) ||
            (conn->handler->protocol & PROTO_FAMILY_SSH))
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
         Curl_updateconninfo(data, conn, conn->sock[sockindex]);

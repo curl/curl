@@ -74,6 +74,7 @@ LIB_VTLS_HFILES =           \
   vtls/schannel.h           \
   vtls/sectransp.h          \
   vtls/vtls.h               \
+  vtls/vtls_int.h           \
   vtls/wolfssl.h            \
   vtls/x509asn1.h
 

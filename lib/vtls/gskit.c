@@ -73,6 +73,7 @@
 #include "sendf.h"
 #include "gskit.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "strcase.h"

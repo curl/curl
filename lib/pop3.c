@@ -376,6 +376,12 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result;
 
+  if(!Curl_cfilter_ssl_added(data, conn, FIRSTSOCKET)) {
+    result = Curl_cfilter_ssl_add(data, conn, FIRSTSOCKET);
+    if(result)
+      goto out;
+  }
+
   result = Curl_cfilter_connect(data, FIRSTSOCKET, FALSE, &pop3c->ssldone);
 
   if(!result) {
@@ -387,7 +393,7 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
       result = pop3_perform_capa(data, conn);
     }
   }
-
+out:
   return result;
 }
 
@@ -768,7 +774,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
     if(pop3code != '+')
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
-    if(!data->set.use_ssl || conn->ssl[FIRSTSOCKET].use)
+    if(!data->set.use_ssl || Curl_ssl_use(conn, FIRSTSOCKET))
       result = pop3_perform_authentication(data, conn);
     else if(pop3code == '+' && pop3c->tls_supported)
       /* Switch to TLS connection now */
