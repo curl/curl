@@ -46,7 +46,7 @@ CURL_EXTERN char *curl_maprintf(const char *format, ...);
 CURL_EXTERN char *curl_mvaprintf(const char *format, va_list args);
 
 #ifdef  __cplusplus
-}
+} /* end of extern "C" */
 #endif
 
 #endif /* CURLINC_MPRINTF_H */
