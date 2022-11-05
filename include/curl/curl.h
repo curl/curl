@@ -3105,7 +3105,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
 
 #ifdef  __cplusplus
-}
+} /* end of extern "C" */
 #endif
 
 /* unfortunately, the easy.h and multi.h include files need options and info
@@ -3132,6 +3132,6 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
 #define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
 #endif /* __STDC__ >= 1 */
-#endif /* gcc >= 4.3 && !__cplusplus */
+#endif /* gcc >= 4.3 && !__cplusplus && !CURL_DISABLE_TYPECHECK */
 
 #endif /* CURLINC_CURL_H */

@@ -301,7 +301,7 @@ extern "C" {
 
 
 #ifdef __cplusplus
-}
+} /* end of extern "C" */
 #endif
 
 

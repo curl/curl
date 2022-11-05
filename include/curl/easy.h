@@ -119,7 +119,7 @@ CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
 CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
 
 #ifdef  __cplusplus
-}
+} /* end of extern "C" */
 #endif
 
 #endif
