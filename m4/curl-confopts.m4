@@ -618,6 +618,9 @@ AC_DEFUN([CURL_CHECK_NTLM_WB], [
     test "x$SSL_ENABLED" = "x"; then
     want_ntlm_wb_file=""
     want_ntlm_wb="no"
+  elif test "x$ac_cv_func_fork" != "xyes"; then
+    dnl ntlm_wb requires fork
+    want_ntlm_wb="no"
   fi
   AC_MSG_RESULT([$want_ntlm_wb])
   if test "$want_ntlm_wb" = "yes"; then
