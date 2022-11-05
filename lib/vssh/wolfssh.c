@@ -31,6 +31,7 @@
 #include <wolfssh/ssh.h>
 #include <wolfssh/wolfsftp.h>
 #include "urldata.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "sendf.h"
 #include "progress.h"
@@ -951,7 +952,7 @@ CURLcode wsftp_perform(struct Curl_easy *data,
   /* run the state-machine */
   result = wssh_multi_statemach(data, dophase_done);
 
-  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
+  *connected = Curl_cfilter_is_connected(data, FIRSTSOCKET);
 
   if(*dophase_done) {
     DEBUGF(infof(data, "DO phase is complete"));

@@ -55,6 +55,7 @@
 #include "slist.h"
 #include "select.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "vauth/vauth.h"
 #include "keylog.h"
 #include "strcase.h"
@@ -4125,8 +4126,6 @@ static CURLcode ossl_connect_common(struct Curl_easy *data,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = ossl_recv;
-    conn->send[sockindex] = ossl_send;
     *done = TRUE;
   }
   else
@@ -4611,7 +4610,9 @@ const struct Curl_ssl Curl_ssl_openssl = {
   NULL,                     /* sha256sum */
 #endif
   ossl_associate_connection, /* associate_connection */
-  ossl_disassociate_connection /* disassociate_connection */
+  ossl_disassociate_connection, /* disassociate_connection */
+  ossl_recv,                /* recv decrypted data */
+  ossl_send,                /* send data to encrypt */
 };
 
 #endif /* USE_OPENSSL */

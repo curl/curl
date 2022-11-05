@@ -73,6 +73,7 @@
 #include "sendf.h"
 #include "gskit.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "strcase.h"
@@ -1146,8 +1147,6 @@ static CURLcode gskit_connect_common(struct Curl_easy *data,
   else if(connssl->connecting_state == ssl_connect_done) {
     connssl->state = ssl_connection_complete;
     connssl->connecting_state = ssl_connect_1;
-    conn->recv[sockindex] = gskit_recv;
-    conn->send[sockindex] = gskit_send;
     *done = TRUE;
   }
 
@@ -1323,7 +1322,9 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_none_false_start,          /* false_start */
   NULL,                           /* sha256sum */
   NULL,                           /* associate_connection */
-  NULL                            /* disassociate_connection */
+  NULL,                           /* disassociate_connection */
+  gskit_recv,                     /* recv decrypted data */
+  gskit_send,                     /* send data to encrypt */
 };
 
 #endif /* USE_GSKIT */

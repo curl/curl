@@ -220,7 +220,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif
   case CURLOPT_TLS13_CIPHERS:
-    if(Curl_ssl_tls13_ciphersuites()) {
+    if(Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES)) {
       /* set preferred list of TLS 1.3 cipher suites */
       result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST],
                               va_arg(param, char *));
@@ -230,7 +230,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLS13_CIPHERS:
-    if(Curl_ssl_tls13_ciphersuites()) {
+    if(Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES)) {
       /* set preferred list of TLS 1.3 cipher suites for proxy */
       result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST_PROXY],
                               va_arg(param, char *));
@@ -1992,7 +1992,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set a SSL_CTX callback
      */
 #ifdef USE_SSL
-    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
+    if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
       data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
     else
 #endif
@@ -2003,7 +2003,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set a SSL_CTX callback parameter pointer
      */
 #ifdef USE_SSL
-    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
+    if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
       data->set.ssl.fsslctxp = va_arg(param, void *);
     else
 #endif
@@ -2013,7 +2013,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Enable TLS false start.
      */
-    if(!Curl_ssl_false_start()) {
+    if(!Curl_ssl_false_start(data)) {
       result = CURLE_NOT_BUILT_IN;
       break;
     }
@@ -2022,7 +2022,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_CERTINFO:
 #ifdef USE_SSL
-    if(Curl_ssl->supports & SSLSUPP_CERTINFO)
+    if(Curl_ssl_supports(data, SSLSUPP_CERTINFO))
       data->set.ssl.certinfo = (0 != va_arg(param, long)) ? TRUE : FALSE;
     else
 #endif
@@ -2034,7 +2034,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Specify file name of the public key in DER format.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->supports & SSLSUPP_PINNEDPUBKEY)
+    if(Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
       result = Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY],
                               va_arg(param, char *));
     else
@@ -2048,7 +2048,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Specify file name of the public key in DER format.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->supports & SSLSUPP_PINNEDPUBKEY)
+    if(Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
       result = Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
                               va_arg(param, char *));
     else
@@ -2069,7 +2069,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Specify entire PEM of the CA certificate
      */
 #ifdef USE_SSL
-    if(Curl_ssl->supports & SSLSUPP_CAINFO_BLOB)
+    if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
       result = Curl_setblobopt(&data->set.blobs[BLOB_CAINFO],
                                va_arg(param, struct curl_blob *));
     else
@@ -2092,7 +2092,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Specify entire PEM of the CA certificate
      */
 #ifdef USE_SSL
-    if(Curl_ssl->supports & SSLSUPP_CAINFO_BLOB)
+    if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
       result = Curl_setblobopt(&data->set.blobs[BLOB_CAINFO_PROXY],
                                va_arg(param, struct curl_blob *));
     else
@@ -2106,7 +2106,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->supports & SSLSUPP_CA_PATH)
+    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH))
       /* This does not work on windows. */
       result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH],
                               va_arg(param, char *));
@@ -2121,7 +2121,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * CA certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->supports & SSLSUPP_CA_PATH)
+    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH))
       /* This does not work on windows. */
       result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY],
                               va_arg(param, char *));

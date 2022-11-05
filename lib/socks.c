@@ -36,16 +36,22 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "select.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "timeval.h"
 #include "socks.h"
 #include "multiif.h" /* for getsock macros */
 #include "inet_pton.h"
+#include "url.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+
+#define SOCKS_STATE(x) (((x) >= CONNECT_SOCKS_INIT) &&  \
+                        ((x) < CONNECT_DONE))
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
 /*
@@ -188,12 +194,12 @@ int Curl_SOCKS_getsock(struct connectdata *conn, curl_socket_t *sock,
 *   Set protocol4a=true for  "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
 *   Nonsupport "Identification Protocol (RFC1413)"
 */
-CURLproxycode Curl_SOCKS4(const char *proxy_user,
-                          const char *hostname,
-                          int remote_port,
-                          int sockindex,
-                          struct Curl_easy *data,
-                          bool *done)
+static CURLproxycode do_SOCKS4(const char *proxy_user,
+                               const char *hostname,
+                               int remote_port,
+                               int sockindex,
+                               struct Curl_easy *data,
+                               bool *done)
 {
   struct connectdata *conn = data->conn;
   const bool protocol4a =
@@ -486,13 +492,13 @@ CURLproxycode Curl_SOCKS4(const char *proxy_user,
  * This function logs in to a SOCKS5 proxy and sends the specifics to the final
  * destination server.
  */
-CURLproxycode Curl_SOCKS5(const char *proxy_user,
-                          const char *proxy_password,
-                          const char *hostname,
-                          int remote_port,
-                          int sockindex,
-                          struct Curl_easy *data,
-                          bool *done)
+static CURLproxycode do_SOCKS5(const char *proxy_user,
+                               const char *proxy_password,
+                               const char *hostname,
+                               int remote_port,
+                               int sockindex,
+                               struct Curl_easy *data,
+                               bool *done)
 {
   /*
     According to the RFC1928, section "6.  Replies". This is what a SOCK5
@@ -1053,6 +1059,136 @@ CURLproxycode Curl_SOCKS5(const char *proxy_user,
 
   *done = TRUE;
   return CURLPX_OK; /* Proxy was successful! */
+}
+
+static int socks_cf_get_select_socks(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     curl_socket_t *socks)
+{
+  int fds;
+
+  fds = cf->next->cft->get_select_socks(cf->next, data, socks);
+  if(!cf->connected && !fds) {
+    /* If we are not connected and no filter "below" is waiting on
+     * something, we are in the TLS handshake and either
+     * want to send or wait for a reply. */
+    return Curl_SOCKS_getsock(data->conn, socks, cf->sockindex);
+  }
+  return fds;
+}
+
+static CURLcode connect_SOCKS(struct Curl_easy *data, int sockindex,
+                              bool *done)
+{
+  CURLcode result = CURLE_OK;
+  CURLproxycode pxresult = CURLPX_OK;
+  struct connectdata *conn = data->conn;
+  if(conn->bits.socksproxy) {
+    /* for the secondary socket (FTP), use the "connect to host"
+     * but ignore the "connect to port" (use the secondary port)
+     */
+    const char * const host =
+      conn->bits.httpproxy ?
+      conn->http_proxy.host.name :
+      conn->bits.conn_to_host ?
+      conn->conn_to_host.name :
+      sockindex == SECONDARYSOCKET ?
+      conn->secondaryhostname : conn->host.name;
+    const int port =
+      conn->bits.httpproxy ? (int)conn->http_proxy.port :
+      sockindex == SECONDARYSOCKET ? conn->secondary_port :
+      conn->bits.conn_to_port ? conn->conn_to_port :
+      conn->remote_port;
+    switch(conn->socks_proxy.proxytype) {
+    case CURLPROXY_SOCKS5:
+    case CURLPROXY_SOCKS5_HOSTNAME:
+      pxresult = do_SOCKS5(conn->socks_proxy.user, conn->socks_proxy.passwd,
+                           host, port, sockindex, data, done);
+      break;
+
+    case CURLPROXY_SOCKS4:
+    case CURLPROXY_SOCKS4A:
+      pxresult = do_SOCKS4(conn->socks_proxy.user, host, port, sockindex,
+                           data, done);
+      break;
+
+    default:
+      failf(data, "unknown proxytype option given");
+      result = CURLE_COULDNT_CONNECT;
+    } /* switch proxytype */
+    if(pxresult) {
+      result = CURLE_PROXY;
+      data->info.pxcode = pxresult;
+    }
+  }
+  else
+    *done = TRUE; /* no SOCKS proxy, so consider us connected */
+
+  return result;
+}
+
+/* After a TCP connection to the proxy has been verified, this function does
+   the next magic steps. If 'done' isn't set TRUE, it is not done yet and
+   must be called again.
+
+   Note: this function's sub-functions call failf()
+
+*/
+static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data,
+                                       bool blocking, bool *done)
+{
+  CURLcode result;
+  bool next_done = FALSE;
+  struct connectdata *conn = data->conn;
+  int sockindex = cf->sockindex;
+
+  result = cf->next->cft->connect(cf->next, data, blocking, &next_done);
+  if(result || !next_done)
+    return result;
+
+  if(cf->connected) {
+    *done = TRUE;
+    return result;
+  }
+
+  result = connect_SOCKS(data, sockindex, done);
+  if(!result && *done) {
+    cf->connected = TRUE;
+    Curl_updateconninfo(data, conn, conn->sock[cf->sockindex]);
+    /* TODO: this is also done by the socket cfilter, only one should */
+    Curl_verboseconnect(data, conn);
+  }
+
+  return result;
+}
+
+static const struct Curl_cftype cft_socks_proxy = {
+  "SOCKS-PROXYY",
+  Curl_cf_def_destroy,
+  Curl_cf_def_attach_data,
+  Curl_cf_def_detach_data,
+  Curl_cf_def_setup,
+  Curl_cf_def_close,
+  socks_proxy_cf_connect,
+  socks_cf_get_select_socks,
+  Curl_cf_def_data_pending,
+  Curl_cf_def_send,
+  Curl_cf_def_recv,
+};
+
+CURLcode Curl_cfilter_socks_proxy_add(struct Curl_easy *data,
+                                      struct connectdata *conn,
+                                      int sockindex)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  result = Curl_cfilter_create(&cf, data, conn, sockindex,
+                               &cft_socks_proxy, NULL);
+  if(!result)
+    Curl_cfilter_add(data, conn, sockindex, cf);
+  return result;
 }
 
 #endif /* CURL_DISABLE_PROXY */

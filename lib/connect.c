@@ -64,6 +64,7 @@
 #include "sendf.h"
 #include "if2ip.h"
 #include "strerror.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "select.h"
 #include "url.h" /* for Curl_safefree() */
@@ -79,7 +80,6 @@
 #include "share.h"
 #include "version_win32.h"
 #include "quic.h"
-#include "socks.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -771,95 +771,27 @@ void Curl_updateconninfo(struct Curl_easy *data, struct connectdata *conn,
   Curl_persistconninfo(data, conn, local_ip, local_port);
 }
 
-/* After a TCP connection to the proxy has been verified, this function does
-   the next magic steps. If 'done' isn't set TRUE, it is not done yet and
-   must be called again.
-
-   Note: this function's sub-functions call failf()
-
-*/
-static CURLcode connect_SOCKS(struct Curl_easy *data, int sockindex,
-                              bool *done)
-{
-  CURLcode result = CURLE_OK;
-#ifndef CURL_DISABLE_PROXY
-  CURLproxycode pxresult = CURLPX_OK;
-  struct connectdata *conn = data->conn;
-  if(conn->bits.socksproxy) {
-    /* for the secondary socket (FTP), use the "connect to host"
-     * but ignore the "connect to port" (use the secondary port)
-     */
-    const char * const host =
-      conn->bits.httpproxy ?
-      conn->http_proxy.host.name :
-      conn->bits.conn_to_host ?
-      conn->conn_to_host.name :
-      sockindex == SECONDARYSOCKET ?
-      conn->secondaryhostname : conn->host.name;
-    const int port =
-      conn->bits.httpproxy ? (int)conn->http_proxy.port :
-      sockindex == SECONDARYSOCKET ? conn->secondary_port :
-      conn->bits.conn_to_port ? conn->conn_to_port :
-      conn->remote_port;
-    switch(conn->socks_proxy.proxytype) {
-    case CURLPROXY_SOCKS5:
-    case CURLPROXY_SOCKS5_HOSTNAME:
-      pxresult = Curl_SOCKS5(conn->socks_proxy.user, conn->socks_proxy.passwd,
-                             host, port, sockindex, data, done);
-      break;
-
-    case CURLPROXY_SOCKS4:
-    case CURLPROXY_SOCKS4A:
-      pxresult = Curl_SOCKS4(conn->socks_proxy.user, host, port, sockindex,
-                             data, done);
-      break;
-
-    default:
-      failf(data, "unknown proxytype option given");
-      result = CURLE_COULDNT_CONNECT;
-    } /* switch proxytype */
-    if(pxresult) {
-      result = CURLE_PROXY;
-      data->info.pxcode = pxresult;
-    }
-  }
-  else
-#else
-    (void)data;
-    (void)sockindex;
-#endif /* CURL_DISABLE_PROXY */
-    *done = TRUE; /* no SOCKS proxy, so consider us connected */
-
-  return result;
-}
-
 /*
- * post_SOCKS() is called after a successful connect to the peer, which
- * *could* be a SOCKS proxy
+ * post_connect() is called after a successful connect to the peer
  */
-static void post_SOCKS(struct Curl_easy *data,
+static void post_connect(struct Curl_easy *data,
                        struct connectdata *conn,
                        int sockindex,
                        bool *connected)
 {
-  conn->bits.tcpconnect[sockindex] = TRUE;
-
   *connected = TRUE;
-  if(sockindex == FIRSTSOCKET)
-    Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
   Curl_updateconninfo(data, conn, conn->sock[sockindex]);
   Curl_verboseconnect(data, conn);
   data->info.numconnects++; /* to track the number of connections made */
 }
 
 /*
- * Curl_is_connected() checks if the socket has connected.
+ * is_connected() checks if the socket has connected.
  */
-
-CURLcode Curl_is_connected(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           int sockindex,
-                           bool *connected)
+static CURLcode is_connected(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             int sockindex,
+                             bool *connected)
 {
   CURLcode result = CURLE_OK;
   timediff_t allow;
@@ -872,22 +804,14 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
 
   *connected = FALSE; /* a very negative world view is best */
 
-  if(conn->bits.tcpconnect[sockindex]) {
-    /* we are connected already! */
-    *connected = TRUE;
-    return CURLE_OK;
-  }
-
   now = Curl_now();
 
-  if(SOCKS_STATE(conn->cnnct.state)) {
-    /* still doing SOCKS */
-    result = connect_SOCKS(data, sockindex, connected);
-    if(!result && *connected)
-      post_SOCKS(data, conn, sockindex, connected);
-    return result;
-  }
-
+  /* Check if any of the conn->tempsock we use for establishing connections
+   * succeeded and, if so, close any ongoing other ones.
+   * Transfer the successful conn->tempsock to conn->sock[sockindex]
+   * and set conn->tempsock to CURL_SOCKET_BAD.
+   * If transport is QUIC, we need to shutdown the ongoing 'other'
+   * connect attempts in a QUIC appropriate way. */
   for(i = 0; i<2; i++) {
     const int other = i ^ 1;
     if(conn->tempsock[i] == CURL_SOCKET_BAD)
@@ -901,7 +825,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
         conn->sock[sockindex] = conn->tempsock[i];
         conn->ip_addr = conn->tempaddr[i];
         conn->tempsock[i] = CURL_SOCKET_BAD;
-        post_SOCKS(data, conn, sockindex, connected);
+        post_connect(data, conn, sockindex, connected);
         connkeep(conn, "HTTP/3 default");
         if(conn->tempsock[other] != CURL_SOCKET_BAD)
           Curl_quic_disconnect(data, conn, other);
@@ -963,13 +887,7 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
           conn->tempsock[other] = CURL_SOCKET_BAD;
         }
 
-        /* see if we need to kick off any SOCKS proxy magic once we
-           connected */
-        result = connect_SOCKS(data, sockindex, connected);
-        if(result || !*connected)
-          return result;
-
-        post_SOCKS(data, conn, sockindex, connected);
+        post_connect(data, conn, sockindex, connected);
 
         return CURLE_OK;
       }
@@ -1524,7 +1442,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
 bool Curl_connalive(struct connectdata *conn)
 {
   /* First determine if ssl */
-  if(conn->ssl[FIRSTSOCKET].use) {
+  if(Curl_ssl_use(conn, FIRSTSOCKET)) {
     /* use the SSL context */
     if(!Curl_ssl_check_cxn(conn))
       return false;   /* FIN received */
@@ -1715,15 +1633,299 @@ void Curl_conncontrol(struct connectdata *conn,
 }
 
 /* Data received can be cached at various levels, so check them all here. */
-bool Curl_conn_data_pending(struct connectdata *conn, int sockindex)
+bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
+{
+  return Curl_recv_has_postponed_data(data->conn, sockindex)
+         ||Curl_cfilter_data_pending(data, sockindex);
+}
+
+typedef enum {
+  SCFST_INIT,
+  SCFST_WAITING,
+  SCFST_DONE
+} cf_connect_state;
+
+struct socket_cf_ctx {
+  const struct Curl_dns_entry *remotehost;
+  cf_connect_state state;
+};
+
+static int socket_cf_get_select_socks(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      curl_socket_t *socks)
+{
+  struct connectdata *conn = data->conn;
+  int i, s, rc = GETSOCK_BLANK;
+
+  if(cf->connected) {
+    return rc;
+  }
+
+  for(i = s = 0; i<2; i++) {
+    if(conn->tempsock[i] != CURL_SOCKET_BAD) {
+      socks[s] = conn->tempsock[i];
+      rc |= GETSOCK_WRITESOCK(s);
+#ifdef ENABLE_QUIC
+      if(conn->transport == TRNSPRT_QUIC)
+        /* when connecting QUIC, we want to read the socket too */
+        rc |= GETSOCK_READSOCK(s);
+#endif
+      s++;
+    }
+  }
+
+  return rc;
+}
+
+static CURLcode socket_cf_connect(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  bool blocking, bool *done)
+{
+  struct connectdata *conn = data->conn;
+  int sockindex = cf->sockindex;
+  struct socket_cf_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  (void)blocking;
+  DEBUGASSERT(ctx);
+  switch(ctx->state) {
+    case SCFST_INIT:
+      DEBUGASSERT(CURL_SOCKET_BAD == conn->sock[sockindex]);
+      DEBUGASSERT(!cf->connected);
+      result = Curl_connecthost(data, conn, ctx->remotehost);
+      *done = FALSE;
+      if(!result)
+        ctx->state = SCFST_WAITING;
+      DEBUGF(infof(data, "socket_cf_connect(handle=%p, index=%d) -> "
+                   "connecthost() -> %d, done=%d",
+                   data, sockindex, result, *done));
+      break;
+    case SCFST_WAITING:
+      result = is_connected(data, conn, sockindex, done);
+      if(!result && *done) {
+        Curl_pgrsTime(data, TIMER_CONNECT);    /* we're connected already */
+        if(Curl_ssl_use(conn, FIRSTSOCKET) ||
+           (conn->handler->protocol & PROTO_FAMILY_SSH))
+          Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
+        Curl_updateconninfo(data, conn, conn->sock[sockindex]);
+        Curl_verboseconnect(data, conn);
+        ctx->state = SCFST_DONE;
+        cf->connected = TRUE;
+      }
+      DEBUGF(infof(data, "socket_cf_connect(handle=%p, index=%d) -> "
+                   "is_connected() -> %d, done=%d",
+                   data, sockindex, result, *done));
+      break;
+    case SCFST_DONE:
+      *done = TRUE;
+      DEBUGF(infof(data, "socket_cf_connect(handle=%p, index=%d) -> "
+                   "already connected-> %d, done=%d",
+                   data, sockindex, result, *done));
+      break;
+  }
+  return result;
+}
+
+static CURLcode socket_cf_setup(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                const struct Curl_dns_entry *remotehost)
+{
+  struct socket_cf_ctx *ctx = cf->ctx;
+  bool done;
+
+  DEBUGASSERT(ctx);
+  if(ctx->remotehost != remotehost) {
+    if(ctx->remotehost) {
+      /* switching dns entry? TODO: reset? */
+    }
+    ctx->remotehost = remotehost;
+  }
+  /* we start connecting right on setup */
+  DEBUGF(infof(data, "socket_cf_setup(handle=%p, remotehost=%s)",
+               data, data->conn->hostname_resolve));
+  return socket_cf_connect(cf, data, FALSE, &done);
+}
+
+static void socket_cf_close(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
+{
+  struct connectdata *conn = data->conn;
+  int sockindex = cf->sockindex;
+  struct socket_cf_ctx *ctx = cf->ctx;
+
+ DEBUGASSERT(ctx);
+   /* close possibly still open sockets */
+  if(CURL_SOCKET_BAD != conn->sock[sockindex]) {
+    Curl_closesocket(data, conn, conn->sock[sockindex]);
+    conn->sock[sockindex] = CURL_SOCKET_BAD;
+  }
+  if(CURL_SOCKET_BAD != conn->tempsock[sockindex]) {
+    Curl_closesocket(data, conn, conn->tempsock[sockindex]);
+    conn->tempsock[sockindex] = CURL_SOCKET_BAD;
+  }
+  cf->connected = FALSE;
+  ctx->state = SCFST_INIT;
+}
+
+static bool socket_cf_data_pending(struct Curl_cfilter *cf,
+                                   const struct Curl_easy *data)
 {
   int readable;
-  DEBUGASSERT(conn);
+  (void)data;
+  DEBUGASSERT(cf);
+  DEBUGASSERT(data->conn);
 
-  if(Curl_ssl_data_pending(conn, sockindex) ||
-     Curl_recv_has_postponed_data(conn, sockindex))
-    return true;
-
-  readable = SOCKET_READABLE(conn->sock[sockindex], 0);
+  readable = SOCKET_READABLE(data->conn->sock[cf->sockindex], 0);
   return (readable > 0 && (readable & CURL_CSELECT_IN));
+}
+
+static ssize_t socket_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              const void *buf, size_t len, CURLcode *err)
+{
+  ssize_t nwritten;
+  nwritten = Curl_send_plain(data, cf->sockindex, buf, len, err);
+  /* DEBUGF(infof(data, "socket_cf_send(handle=%p, index=%d, len=%ld)"
+               "-> %ld, code=%d", data, cf->sockindex, len, nwritten, *err));*/
+  return nwritten;
+}
+
+static ssize_t socket_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              char *buf, size_t len, CURLcode *err)
+{
+  ssize_t nread;
+  nread = Curl_recv_plain(data, cf->sockindex, buf, len, err);
+  /* DEBUGF(infof(data, "socket_cf_recv(handle=%p, index=%d) -> %ld",
+               data, cf->sockindex, nread));*/
+  return nread;
+}
+
+static void socket_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  struct socket_cf_ctx *state = cf->ctx;
+
+  (void)data;
+  if(cf->connected) {
+    socket_cf_close(cf, data);
+  }
+  /* release any resources held in state */
+  Curl_safefree(state);
+}
+
+static const struct Curl_cftype cft_socket = {
+  "SOCKET",
+  socket_cf_destroy,
+  Curl_cf_def_attach_data,
+  Curl_cf_def_detach_data,
+  socket_cf_setup,
+  socket_cf_close,
+  socket_cf_connect,
+  socket_cf_get_select_socks,
+  socket_cf_data_pending,
+  socket_cf_send,
+  socket_cf_recv,
+};
+
+CURLcode Curl_cfilter_socket_set(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 int sockindex)
+{
+  CURLcode result;
+  struct Curl_cfilter *cf = NULL;
+  struct socket_cf_ctx *scf_ctx = NULL;
+
+  /* Need to be first */
+  DEBUGASSERT(!conn->cfilter[sockindex]);
+  scf_ctx = calloc(sizeof(*scf_ctx), 1);
+  if(!scf_ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  result = Curl_cfilter_create(&cf, data, conn, sockindex,
+                               &cft_socket, scf_ctx);
+  if(result)
+    goto out;
+  Curl_cfilter_add(data, conn, sockindex, cf);
+
+out:
+  if(result) {
+    Curl_safefree(cf);
+    Curl_safefree(scf_ctx);
+  }
+  return result;
+}
+
+static CURLcode socket_accept_cf_connect(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         bool blocking, bool *done)
+{
+  /* we start accepted, if we ever close, we cannot go on */
+  (void)data;
+  (void)blocking;
+  if(cf->connected) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+  return CURLE_FAILED_INIT;
+}
+
+static CURLcode socket_accept_cf_setup(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data,
+                                       const struct Curl_dns_entry *remotehost)
+{
+  /* we start accepted, if we ever close, we cannot go on */
+  (void)data;
+  (void)remotehost;
+  if(cf->connected) {
+    return CURLE_OK;
+  }
+  return CURLE_FAILED_INIT;
+}
+
+static const struct Curl_cftype cft_socket_accept = {
+  "SOCKET-ACCEPT",
+  socket_cf_destroy,
+  Curl_cf_def_attach_data,
+  Curl_cf_def_detach_data,
+  socket_accept_cf_setup,
+  socket_cf_close,
+  socket_accept_cf_connect,
+  Curl_cf_def_get_select_socks,
+  socket_cf_data_pending,
+  socket_cf_send,
+  socket_cf_recv,
+};
+
+CURLcode Curl_cfilter_socket_accepted_set(struct Curl_easy *data,
+                                 int sockindex, curl_socket_t *s)
+{
+  CURLcode result;
+  struct Curl_cfilter *cf = NULL;
+  struct socket_cf_ctx *scf_ctx = NULL;
+  struct connectdata *conn = data->conn;
+
+  DEBUGASSERT(!conn->cfilter[sockindex]);
+  scf_ctx = calloc(sizeof(*scf_ctx), 1);
+  if(!scf_ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  result = Curl_cfilter_create(&cf, data, conn, sockindex,
+                               &cft_socket_accept, scf_ctx);
+  if(result)
+    goto out;
+  Curl_cfilter_add(data, conn, sockindex, cf);
+
+   /* close any existing socket and replace */
+  Curl_closesocket(data, conn, conn->sock[sockindex]);
+  conn->sock[sockindex] = *s;
+  conn->bits.sock_accepted = TRUE;
+  cf->connected = TRUE;
+  scf_ctx->state = SCFST_DONE;
+
+out:
+  if(result) {
+    Curl_safefree(cf);
+    Curl_safefree(scf_ctx);
+  }
+  return result;
 }
