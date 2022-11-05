@@ -3102,7 +3102,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
 
 #ifdef  __cplusplus
-}
+} /* end of extern "C" */
 #endif
 
 /* unfortunately, the easy.h and multi.h include files need options and info
