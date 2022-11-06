@@ -86,6 +86,7 @@ UNITTEST_START
     { "example.com", "localhost,example.com,.example.de", TRUE},
     { "example.com.", "localhost,example.com,.example.de", TRUE},
     { "nexample.com", "localhost,example.com,.example.de", FALSE},
+    { "www.example.com", "localhost,example.com,.example.de", TRUE},
     { "127.0.0.1", "127.0.0.1,localhost", TRUE},
     { "127.0.0.1", "127.0.0.1,localhost,", TRUE},
     { "127.0.0.1", "127.0.0.1/8,localhost,", TRUE},
