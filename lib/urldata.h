@@ -1829,7 +1829,7 @@ struct UserDefined {
   BIT(quick_exit);       /* set 1L when it is okay to leak things (like
                             threads), as we're about to exit() anyway and
                             don't want lengthy cleanups to delay termination,
-                            e.g. after a DNS timeout*/
+                            e.g. after a DNS timeout */
   BIT(get_filetime);     /* get the time and get of the remote file */
   BIT(tunnel_thru_httpproxy); /* use CONNECT through an HTTP proxy */
   BIT(prefer_ascii);     /* ASCII rather than binary */
