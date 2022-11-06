@@ -40,10 +40,6 @@ list is matched as either a domain which contains the hostname, or the
 hostname itself. For example, "ample.com" would match ample.com, ample.com:80,
 and www.ample.com, but not www.example.com or ample.com.org.
 
-If the name in the \fInoproxy\fP list has a leading period, it is a domain
-match against the provided host name. This way ".example.com" will switch off
-proxy use for both "www.example.com" as well as for "foo.example.com".
-
 Setting the \fInoproxy\fP string to "" (an empty string) will explicitly
 enable the proxy for all host names, even if there is an environment variable
 set for it.
