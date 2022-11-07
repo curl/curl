@@ -2299,7 +2299,8 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
           curl_easy_getinfo(easy, CURLINFO_PRIVATE, (void *)&ended);
           curl_multi_remove_handle(multi, easy);
 
-          if(ended->abort && tres == CURLE_ABORTED_BY_CALLBACK) {
+          if(ended->abort && (tres == CURLE_ABORTED_BY_CALLBACK) &&
+             ended->errorbuffer) {
             msnprintf(ended->errorbuffer, CURL_ERROR_SIZE,
                       "Transfer aborted due to critical error "
                       "in another transfer");
