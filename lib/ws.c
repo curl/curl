@@ -297,29 +297,28 @@ static CURLcode ws_decode(struct Curl_easy *data,
       p[9];
   }
 
-  total = dataindex + payloadsize;
-  if(total > plen) {
-    /* deliver a partial frame */
-    *oleft = total - dataindex;
-    payloadsize = total - dataindex;
-  }
-  else {
-    *oleft = 0;
-    if(plen > total)
-      /* there is another fragment after */
-      *more = TRUE;
-  }
-
   /* point to the payload */
-  *out = &p[dataindex];
+   *out = &p[dataindex];
+   total = dataindex + payloadsize;
+   if(total > plen) {
+     /* buffer contains partial frame */
+     wsp->usedbuf = plen;      /* when written, whole buffer is used */
+     *olen = plen - dataindex; /* bytes to write out */
+     *oleft = total - plen;    /* bytes yet to come (for this frame) */
+     payloadsize = total - dataindex;
+   }
+   else {
+     /* we have the complete frame (`total` bytes) in buffer */
+     wsp->usedbuf = total;   /* when written, total frame has been used */
+     *olen = payloadsize;    /* bytes to write out */
+     *oleft = 0;             /* bytes yet to come (for this frame) */
+     if(plen > total)
+       /* there is another fragment after */
+       *more = TRUE;
+   }
 
-  /* return the payload length */
-  *olen = payloadsize;
-
-  /* number of bytes "used" from the buffer */
-  wsp->usedbuf = dataindex + payloadsize;
-  infof(data, "WS: received %zu bytes payload (%zu left)",
-        payloadsize, *oleft);
+   infof(data, "WS: received %zu bytes payload (%zu left, buflen was %zu)",
+         payloadsize, *oleft, plen);
   return CURLE_OK;
 }
 
