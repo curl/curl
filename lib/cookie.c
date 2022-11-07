@@ -605,9 +605,9 @@ Curl_cookie_add(struct Curl_easy *data,
          * only test for names where that can possibly be true.
          */
         if(nlen > 3 && name[0] == '_' && name[1] == '_') {
-          if(!strncmp("__Secure-", name, 9))
+          if(strncasecompare("__Secure-", name, 9))
             co->prefix |= COOKIE_PREFIX__SECURE;
-          else if(!strncmp("__Host-", name, 7))
+          else if(strncasecompare("__Host-", name, 7))
             co->prefix |= COOKIE_PREFIX__HOST;
         }
 

@@ -19,7 +19,7 @@ Server: test-server/fake
 Set-Cookie: super=secret; domain=example.com; path=/%TESTNUMBER; secure;
 Set-Cookie: supersuper=secret; domain=example.com; path=/%TESTNUMBER/login/; secure;
 Set-Cookie: __Secure-SID=12345; Domain=example.com
-Set-Cookie: __Secure-SID=12346; Secure; Domain=example.com
+Set-Cookie: __SecURE-SID=12346; Secure; Domain=example.com
 Set-Cookie: supersupersuper=secret; __Secure-SID=12346; Secure; Domain=example.com
 Set-Cookie: __Host-SID=22345
 Set-Cookie: __Host-SID=22346; Secure
@@ -43,7 +43,7 @@ Set-Cookie: supersuper=plain; domain=example.com; path=/%TESTNUMBER/login/en;
 Set-Cookie: supersuper=plain; domain=example.com; path=/%TESTNUMBER/login;
 Set-Cookie: secureoverhttp=yes; domain=example.com; path=/%TESTNUMBER; secure;
 Set-Cookie: __Secure-SID=22345; Domain=example.com
-Set-Cookie: __Secure-SID=22346; Secure; Domain=example.com
+Set-Cookie: __SecuRE-SID=22346; Secure; Domain=example.com
 Set-Cookie: __Host-SID=32345
 Set-Cookie: __Host-SID=32346; Secure
 Set-Cookie: __Host-SID=32347; Domain=example.com
@@ -97,7 +97,7 @@ Accept: */*
 #HttpOnly_.example.com	TRUE	/15	FALSE	0	super	plain
 www.example.com	FALSE	/	TRUE	0	__Host-SID	12346
 .example.com	TRUE	/	TRUE	0	supersupersuper	secret
-.example.com	TRUE	/	TRUE	0	__Secure-SID	12346
+.example.com	TRUE	/	TRUE	0	__SecURE-SID	12346
 .example.com	TRUE	/%TESTNUMBER/login/	TRUE	0	supersuper	secret
 .example.com	TRUE	/1561	TRUE	0	super	secret
 </file>
