@@ -415,8 +415,10 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       break;
     }
     else if(h->endtask == task) {
-      /* end of transfer */
+      /* end of transfer, forget the task handled, we might get a
+       * new one with the same address in the future. */
       *done = TRUE;
+      h->endtask = NULL;
       infof(data, "hyperstream is done");
       if(!k->bodywrites) {
         /* hyper doesn't always call the body write callback */
