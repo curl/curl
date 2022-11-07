@@ -125,7 +125,8 @@ int my_trace(CURL *handle, curl_infotype type,
 
   switch (type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "== Info: %s", data);
+    fputs("== Info: ", stderr);
+    fwrite(data, size, 1, stderr);
   default: /* in case a new one is introduced to shock us */
     return 0;
 
