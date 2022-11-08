@@ -333,7 +333,7 @@
 
 /* Define to the size of `off_t', as computed by sizeof. */
 #if defined(__MINGW32__)
-#  define SIZEOF_OFF_T 8
+#define SIZEOF_OFF_T 8
 #endif
 
 /* ---------------------------------------------------------------- */
