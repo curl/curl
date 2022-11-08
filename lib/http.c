@@ -696,6 +696,15 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     data->req.newurl = strdup(data->state.url); /* clone URL */
     if(!data->req.newurl)
       return CURLE_OUT_OF_MEMORY;
+#ifndef CURL_DISABLE_RTSP
+    /*
+     * Authentication is treated as a redirect in Curl_follow(), so if this is
+     * done using RTSP we make it allow these "redirects" to RTSP (only). A
+     * safe assumption as no other redirects should happen from RTSP.
+     */
+    if(conn->handler->protocol & CURLPROTO_RTSP)
+      data->set.redir_protocols = CURLPROTO_RTSP;
+#endif
   }
   else if((data->req.httpcode < 300) &&
           (!data->state.authhost.done) &&
