@@ -67,7 +67,6 @@ problems may have been fixed or changed somewhat since this was written.
  6.5 NTLM does not support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
- 6.8 RTSP authentication breaks without redirect support
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
@@ -563,15 +562,6 @@ problems may have been fixed or changed somewhat since this was written.
 6.7 Do not clear digest for single realm
 
  https://github.com/curl/curl/issues/3267
-
-6.8 RTSP authentication breaks without redirect support
-
- RTSP authentication broke in 7.66.0. A work-around is to enable RTSP in
- CURLOPT_REDIR_PROTOCOLS. Authentication should however not be considered an
- actual redirect so a "proper" fix needs to be different and not require users
- to allow redirects to RTSP to work.
-
- See https://github.com/curl/curl/pull/4750
 
 6.9 SHA-256 digest not supported in Windows SSPI builds
 

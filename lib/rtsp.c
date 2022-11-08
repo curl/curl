@@ -267,6 +267,19 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   rtsp->CSeq_sent = data->state.rtsp_next_client_CSeq;
   rtsp->CSeq_recv = 0;
 
+  /* Setup the first_* fields to allow auth details get sent
+     to this origin */
+
+  /* Free to avoid leaking memory on multiple requests */
+  free(data->state.first_host);
+
+  data->state.first_host = strdup(conn->host.name);
+  if(!data->state.first_host)
+    return CURLE_OUT_OF_MEMORY;
+
+  data->state.first_remote_port = conn->remote_port;
+  data->state.first_remote_protocol = conn->handler->protocol;
+
   /* Setup the 'p_request' pointer to the proper p_request string
    * Since all RTSP requests are included here, there is no need to
    * support custom requests like HTTP.
