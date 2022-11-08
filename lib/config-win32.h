@@ -332,8 +332,8 @@
 #define SIZEOF_CURL_OFF_T 8
 
 /* Define to the size of `off_t', as computed by sizeof. */
-#ifndef SIZEOF_OFF_T
-#define SIZEOF_OFF_T 8
+#if defined(__MINGW32__)
+#  define SIZEOF_OFF_T 8
 #endif
 
 /* ---------------------------------------------------------------- */
