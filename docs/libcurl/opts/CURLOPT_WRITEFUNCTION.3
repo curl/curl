@@ -63,6 +63,8 @@ that amount differs from the amount passed to your callback function, it will
 signal an error condition to the library. This will cause the transfer to get
 aborted and the libcurl function used will return \fICURLE_WRITE_ERROR\fP.
 
+You can also abort the transfer by returning CURL_WRITEFUNC_ERROR. (7.87.0)
+
 If your callback function returns CURL_WRITEFUNC_PAUSE it will cause this
 transfer to become paused.  See \fIcurl_easy_pause(3)\fP for further details.
 

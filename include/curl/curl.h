@@ -256,6 +256,10 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
    will signal libcurl to pause receiving on the current transfer. */
 #define CURL_WRITEFUNC_PAUSE 0x10000001
 
+/* This is a magic return code for the write callback that, when returned,
+   will signal an error from the callback. */
+#define CURL_WRITEFUNC_ERROR 0xFFFFFFFF
+
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
                                       size_t nitems,
