@@ -1463,7 +1463,7 @@ struct UrlState {
 #endif
 #ifndef CURL_DISABLE_PROXY
   /* to keep track whether we already sent PROXY header or not */
-  BIT(is_proxy_hdr_sent);
+  BIT(is_haproxy_hdr_sent);
 #endif
 #ifdef USE_HYPER
   bool hconnect;  /* set if a CONNECT request */

@@ -1572,14 +1572,14 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
 
-  if(data->set.haproxyprotocol && !data->state.is_proxy_hdr_sent) {
+  if(data->set.haproxyprotocol && !data->state.is_haproxy_hdr_sent) {
     /* add HAProxy PROXY protocol header */
     result = add_haproxy_protocol_header(data);
     if(result)
       return result;
 
     /* do not send the header again after successful try */
-    data->state.is_proxy_hdr_sent = TRUE;
+    data->state.is_haproxy_hdr_sent = TRUE;
   }
 #endif
 
