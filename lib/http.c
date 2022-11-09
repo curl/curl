@@ -1577,6 +1577,9 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
     result = add_haproxy_protocol_header(data);
     if(result)
       return result;
+
+    /* do not send the header again after successful try */
+    data->set.haproxyprotocol = FALSE;
   }
 #endif
 
