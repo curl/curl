@@ -50,24 +50,23 @@ proxy
 <verify>
 <strippart>
 s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %PROXYPORT/proxy-line/
-s/\r/\\r/
 </strippart>
 
 <proxy>
-CONNECT %HOSTIP:%HTTPPORT HTTP/1.1\r
-Host: %HOSTIP:%HTTPPORT\r
-User-Agent: curl/%VERSION\r
-Proxy-Connection: Keep-Alive\r
-\r
+CONNECT %HOSTIP:%HTTPPORT HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
 </proxy>
 
 <protocol>
-proxy-line\r
-GET /page HTTP/1.1\r
-Host: %HOSTIP:%HTTPPORT\r
-User-Agent: curl/%VERSION\r
-Accept: */*\r
-\r
+proxy-line
+GET /page HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
 </protocol>
 
 </verify>
