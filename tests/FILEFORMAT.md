@@ -307,6 +307,7 @@ about to issue.
    appear at once when a file is transferred
 - `RETRNOSIZE` - Make sure the RETR response doesn't contain the size of the
   file
+- `RETRSIZE [size]` - Force RETR response to contain the specified size
 - `NOSAVE` - Don't actually save what is received
 - `SLOWDOWN` - Send FTP responses with 0.01 sec delay between each byte
 - `PASVBADIP` - makes PASV send back an illegal IP in its 227 response
