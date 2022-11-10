@@ -141,6 +141,7 @@ my $ctrldelay;     # set if server should throttle ctrl stream
 my $datadelay;     # set if server should throttle data stream
 my $retrweirdo;    # set if ftp server should use RETRWEIRDO
 my $retrnosize;    # set if ftp server should use RETRNOSIZE
+my $retrsize;      # set if ftp server should use RETRSIZE
 my $pasvbadip;     # set if ftp server should use PASVBADIP
 my $nosave;        # set if ftp server should not save uploaded data
 my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
@@ -2343,6 +2344,9 @@ sub RETR_ftp {
             if($retrnosize) {
                 $sz = "size?";
             }
+            elsif($retrsize > 0) {
+                $sz = "($retrsize bytes)";
+            }
 
             sendcontrol "150 Binary data connection for $testno () $sz.\r\n";
 
@@ -2795,6 +2799,7 @@ sub customize {
     $datadelay = 0;     # default is no throttling of the data stream
     $retrweirdo = 0;    # default is no use of RETRWEIRDO
     $retrnosize = 0;    # default is no use of RETRNOSIZE
+    $retrsize = 0;      # default is no use of RETRSIZE
     $pasvbadip = 0;     # default is no use of PASVBADIP
     $nosave = 0;        # default is to actually save uploaded data to file
     $nodataconn = 0;    # default is to establish or accept data channel
@@ -2861,6 +2866,10 @@ sub customize {
         elsif($_ =~ /RETRNOSIZE/) {
             logmsg "FTPD: instructed to use RETRNOSIZE\n";
             $retrnosize=1;
+        }
+        elsif($_ =~ /RETRSIZE (\d+)/) {
+            $retrsize= $1;
+            logmsg "FTPD: instructed to use RETRSIZE = $1\n";
         }
         elsif($_ =~ /PASVBADIP/) {
             logmsg "FTPD: instructed to use PASVBADIP\n";
