@@ -210,7 +210,7 @@ set LDFLAGS=-Lc:/openldapsdk/lib/mscvc
 set LIBS=-lldapsdk -lldapssl -lldapx
 ```
 
-If you want to enable LDAPS support then set LDAPS=1.
+If you want to enable LDAPS support then append `-ldaps` to the make target.
 
 ## Cygwin
 
