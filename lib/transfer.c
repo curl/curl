@@ -64,6 +64,7 @@
 
 #include "content_encoding.h"
 #include "hostip.h"
+#include "cfilters.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "speedcheck.h"
@@ -454,7 +455,7 @@ static int data_pending(const struct Curl_easy *data)
 #endif
 
   if(conn->handler->protocol&PROTO_FAMILY_FTP)
-    return Curl_ssl_data_pending(conn, SECONDARYSOCKET);
+    return Curl_cfilter_data_pending(data, conn, SECONDARYSOCKET);
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
@@ -469,7 +470,7 @@ static int data_pending(const struct Curl_easy *data)
        a workaround, we return nonzero here to call http2_recv. */
     ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion >= 20) ||
 #endif
-    Curl_ssl_data_pending(conn, FIRSTSOCKET);
+    Curl_cfilter_data_pending(data, conn, FIRSTSOCKET);
 }
 
 /*
@@ -569,11 +570,13 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       result = Curl_read(data, conn->sockfd, buf, bytestoread, &nread);
 
       /* read would've blocked */
-      if(CURLE_AGAIN == result)
+      if(CURLE_AGAIN == result) {
+        result = CURLE_OK;
         break; /* get out of loop */
+      }
 
       if(result>0)
-        return result;
+        goto out;
     }
     else {
       /* read nothing but since we wanted nothing we consider this an OK
@@ -619,7 +622,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     if(conn->handler->readwrite) {
       result = conn->handler->readwrite(data, conn, &nread, &readmore);
       if(result)
-        return result;
+        goto out;
       if(readmore)
         break;
     }
@@ -632,13 +635,13 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       bool stop_reading = FALSE;
       result = Curl_http_readwrite_headers(data, conn, &nread, &stop_reading);
       if(result)
-        return result;
+        goto out;
 
       if(conn->handler->readwrite &&
          (k->maxdownload <= 0 && nread > 0)) {
         result = conn->handler->readwrite(data, conn, &nread, &readmore);
         if(result)
-          return result;
+          goto out;
         if(readmore)
           break;
       }
@@ -669,7 +672,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         /* data arrives although we want none, bail out */
         streamclose(conn, "ignoring body");
         *done = TRUE;
-        return CURLE_WEIRD_SERVER_REPLY;
+        result = CURLE_WEIRD_SERVER_REPLY;
+        goto out;
       }
 
 #ifndef CURL_DISABLE_HTTP
@@ -680,7 +684,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
           /* HTTP-only checks */
           result = Curl_http_firstwrite(data, conn, done);
           if(result || *done)
-            return result;
+            goto out;
         }
       } /* this is the first time we write a body part */
 #endif /* CURL_DISABLE_HTTP */
@@ -717,10 +721,12 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         if(CHUNKE_OK < res) {
           if(CHUNKE_PASSTHRU_ERROR == res) {
             failf(data, "Failed reading the chunked-encoded stream");
-            return extra;
+            result = extra;
+            goto out;
           }
           failf(data, "%s in chunked-encoding", Curl_chunked_strerror(res));
-          return CURLE_RECV_ERROR;
+          result = CURLE_RECV_ERROR;
+          goto out;
         }
         if(CHUNKE_STOP == res) {
           /* we're done reading chunks! */
@@ -796,7 +802,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                                        (size_t)k->maxdownload);
 
           if(result)
-            return result;
+            goto out;
         }
         if(k->badheader < HEADER_ALLBAD) {
           /* This switch handles various content encodings. If there's an
@@ -821,7 +827,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         k->badheader = HEADER_NORMAL; /* taken care of now */
 
         if(result)
-          return result;
+          goto out;
       }
 
     } /* if(!header and data to read) */
@@ -839,7 +845,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
       result = conn->handler->readwrite(data, conn, &nread, &readmore);
       if(result)
-        return result;
+        goto out;
 
       if(readmore)
         k->keepon |= KEEP_RECV; /* we're not done reading */
@@ -874,7 +880,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     k->keepon &= ~KEEP_SEND; /* no writing anymore either */
   }
 
-  return CURLE_OK;
+out:
+  DEBUGF(infof(data, "readwrite_data(handle=%p) -> %d", data, result));
+  return result;
 }
 
 CURLcode Curl_done_sending(struct Curl_easy *data,
@@ -1201,14 +1209,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   if(select_res == CURL_CSELECT_ERR) {
     failf(data, "select/poll returned error");
-    return CURLE_SEND_ERROR;
+    result = CURLE_SEND_ERROR;
+    goto out;
   }
 
 #ifdef USE_HYPER
   if(conn->datastream) {
     result = conn->datastream(data, conn, &didwhat, done, select_res);
     if(result || *done)
-      return result;
+      goto out;
   }
   else {
 #endif
@@ -1218,7 +1227,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if((k->keepon & KEEP_RECV) && (select_res & CURL_CSELECT_IN)) {
     result = readwrite_data(data, conn, k, &didwhat, done, comeback);
     if(result || *done)
-      return result;
+      goto out;
   }
 
   /* If we still have writing to do, we check if we have a writable socket. */
@@ -1227,7 +1236,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
     result = readwrite_upload(data, conn, &didwhat);
     if(result)
-      return result;
+      goto out;
   }
 #ifdef USE_HYPER
   }
@@ -1264,7 +1273,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(conn->transport == TRNSPRT_QUIC) {
       result = Curl_quic_idle(data);
       if(result)
-        return result;
+        goto out;
     }
 #endif
   }
@@ -1274,7 +1283,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     result = Curl_speedcheck(data, k->now);
   if(result)
-    return result;
+    goto out;
 
   if(k->keepon) {
     if(0 > Curl_timeleft(data, &k->now, FALSE)) {
@@ -1291,7 +1300,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               Curl_timediff(k->now, data->progress.t_startsingle),
               k->bytecount);
       }
-      return CURLE_OPERATION_TIMEDOUT;
+      result = CURLE_OPERATION_TIMEDOUT;
+      goto out;
     }
   }
   else {
@@ -1312,7 +1322,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
        !k->newurl) {
       failf(data, "transfer closed with %" CURL_FORMAT_CURL_OFF_T
             " bytes remaining to read", k->size - k->bytecount);
-      return CURLE_PARTIAL_FILE;
+      result = CURLE_PARTIAL_FILE;
+      goto out;
     }
     if(!(data->set.opt_no_body) && k->chunk &&
        (conn->chunk.state != CHUNK_STOP)) {
@@ -1326,17 +1337,22 @@ CURLcode Curl_readwrite(struct connectdata *conn,
        *
        */
       failf(data, "transfer closed with outstanding read data remaining");
-      return CURLE_PARTIAL_FILE;
+      result = CURLE_PARTIAL_FILE;
+      goto out;
     }
-    if(Curl_pgrsUpdate(data))
-      return CURLE_ABORTED_BY_CALLBACK;
+    if(Curl_pgrsUpdate(data)) {
+      result = CURLE_ABORTED_BY_CALLBACK;
+      goto out;
+    }
   }
 
   /* Now update the "done" boolean we return */
   *done = (0 == (k->keepon&(KEEP_RECV|KEEP_SEND|
                             KEEP_RECV_PAUSE|KEEP_SEND_PAUSE))) ? TRUE : FALSE;
-
-  return CURLE_OK;
+  result = CURLE_OK;
+out:
+  DEBUGF(infof(data, "Curl_readwrite(handle=%p) -> %d", data, result));
+  return result;
 }
 
 /*

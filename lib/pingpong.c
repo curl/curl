@@ -28,6 +28,7 @@
 #include "curl_setup.h"
 
 #include "urldata.h"
+#include "cfilters.h"
 #include "sendf.h"
 #include "select.h"
 #include "progress.h"
@@ -102,12 +103,12 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   else
     interval_ms = 0; /* immediate */
 
-  if(Curl_ssl_data_pending(conn, FIRSTSOCKET))
+  if(Curl_cfilter_data_pending(data, conn, FIRSTSOCKET))
     rc = 1;
   else if(Curl_pp_moredata(pp))
     /* We are receiving and there is data in the cache so just read it */
     rc = 1;
-  else if(!pp->sendleft && Curl_ssl_data_pending(conn, FIRSTSOCKET))
+  else if(!pp->sendleft && Curl_cfilter_data_pending(data, conn, FIRSTSOCKET))
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
   else

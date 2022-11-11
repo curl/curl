@@ -522,7 +522,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
   version_info.ssl_version = ssl_buffer;
 #ifndef CURL_DISABLE_PROXY
-  if(Curl_ssl->supports & SSLSUPP_HTTPS_PROXY)
+  if(Curl_ssl_supports(NULL, SSLSUPP_HTTPS_PROXY))
     version_info.features |= CURL_VERSION_HTTPS_PROXY;
   else
     version_info.features &= ~CURL_VERSION_HTTPS_PROXY;

@@ -127,6 +127,7 @@
 #include "connect.h"
 #include "select.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "sectransp.h"
 #include "curl_printf.h"
 #include "strdup.h"
@@ -3134,8 +3135,6 @@ sectransp_connect_common(struct Curl_easy *data,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = sectransp_recv;
-    conn->send[sockindex] = sectransp_send;
     *done = TRUE;
   }
   else
@@ -3530,7 +3529,9 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   sectransp_sha256sum,                /* sha256sum */
   NULL,                               /* associate_connection */
   NULL,                               /* disassociate_connection */
-  NULL                                /* free_multi_ssl_backend_data */
+  NULL,                               /* free_multi_ssl_backend_data */
+  sectransp_recv,                     /* recv decrypted data */
+  sectransp_send,                     /* send data to encrypt */
 };
 
 #ifdef __clang__

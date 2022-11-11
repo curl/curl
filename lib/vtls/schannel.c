@@ -41,6 +41,7 @@
 
 #include "schannel.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "strcase.h"
 #include "sendf.h"
 #include "connect.h" /* for the connect timeout */
@@ -1935,15 +1936,6 @@ schannel_connect_common(struct Curl_easy *data, struct connectdata *conn,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    if(!connssl->backend->recv_renegotiating) {
-      /* On renegotiation, we don't want to reset the existing recv/send
-       * function pointers. They will have been set after the initial TLS
-       * handshake was completed. If they were subsequently modified, as
-       * is the case with HTTP/2, we don't want to override that change.
-       */
-      conn->recv[sockindex] = schannel_recv;
-      conn->send[sockindex] = schannel_send;
-    }
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
     /* When SSPI is used in combination with Schannel
@@ -2810,7 +2802,9 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_sha256sum,                /* sha256sum */
   NULL,                              /* associate_connection */
   NULL,                              /* disassociate_connection */
-  NULL                               /* free_multi_ssl_backend_data */
+  NULL,                              /* free_multi_ssl_backend_data */
+  schannel_recv,                     /* recv decrypted data */
+  schannel_send,                     /* send data to encrypt */
 };
 
 #endif /* USE_SCHANNEL */

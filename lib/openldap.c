@@ -47,6 +47,7 @@
 #include "transfer.h"
 #include "curl_ldap.h"
 #include "curl_base64.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "curl_sasl.h"
 #include "strcase.h"
@@ -500,8 +501,7 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
   struct ldapconninfo *li = conn->proto.ldapc;
   bool ssldone = 0;
 
-  result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                        FIRSTSOCKET, &ssldone);
+  result = Curl_cfilter_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   if(!result) {
     state(data, newstate);
 
@@ -1153,7 +1153,7 @@ ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
   (void)arg;
   if(opt == LBER_SB_OPT_DATA_READY) {
     struct Curl_easy *data = sbiod->sbiod_pvt;
-    return Curl_ssl_data_pending(data->conn, FIRSTSOCKET);
+    return Curl_cfilter_data_pending(data->conn, FIRSTSOCKET);
   }
   return 0;
 }

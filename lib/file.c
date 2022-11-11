@@ -150,9 +150,19 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   char *actual_path;
 #endif
   size_t real_path_len;
+  CURLcode result;
 
-  CURLcode result = Curl_urldecode(data->state.up.path, 0, &real_path,
-                                   &real_path_len, REJECT_ZERO);
+  if(file->path) {
+    /* already connected.
+     * the handler->connect_it() is normally only called once, but
+     * FILE does a special check on setting up the connection which
+     * calls this explicitly. */
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  result = Curl_urldecode(data->state.up.path, 0, &real_path,
+                          &real_path_len, REJECT_ZERO);
   if(result)
     return result;
 
@@ -226,6 +236,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   file->path = real_path;
   #endif
 #endif
+  Curl_safefree(file->freepath);
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
