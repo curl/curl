@@ -1,20 +1,23 @@
 curl and libcurl 7.87.0
 
  Public curl releases:         212
- Command line options:         248
+ Command line options:         249
  curl_easy_setopt() options:   301
  Public functions in libcurl:  91
- Contributors:                 2740
+ Contributors:                 2745
 
 This release includes the following changes:
 
+ o curl: add --url-query [52]
  o openssl: reduce CA certificate bundle reparsing by caching [11]
 
 This release includes the following bugfixes:
 
  o cmake: really enable warnings with clang [25]
+ o config-win32: fix SIZEOF_OFF_T for MSVC and old MinGW [41]
  o configure: require fork for NTLM-WB [36]
  o cookie: compare cookie prefixes case insensitively [14]
+ o curl-rustls.m4: on macOS, rustls also needs the Security framework [44]
  o curl: timeout in the read callback [15]
  o curl_path: do not add '/' if homedir ends with one [4]
  o CURLMOPT_SOCKETFUNCTION.3: clarify CURL_POLL_REMOVE [1]
@@ -24,24 +27,37 @@ This release includes the following bugfixes:
  o docs: explain the noproxy CIDR notation support [17]
  o docs: remove performance note in CURLOPT_SSL_VERIFYPEER [13]
  o gen.pl: do not generate CURLHELP bitmask lines > 79 characters [10]
+ o headers: add endif comments [51]
+ o http: do not send PROXY more than once [46]
+ o http: set 'this_is_a_follow' in the Location: logic [40]
  o hyper: fix handling of hyper_task's when reusing the same address [33]
+ o KNOWN_BUGS: remove eight entries [50]
+ o lib: add CURL_WRITEFUNC_ERROR to signal write callback error [47]
+ o lib: connection filters (cfilter) addition to curl: [43]
  o lib: fix some type mismatches and remove unneeded typecasts [12]
+ o lib: remove bad set.opt_no_body assignments [42]
  o lib: sync guard for Curl_getaddrinfo_ex() definition and use [6]
  o libcurl-errors.3: remove duplicate word [3]
+ o maketgz: set the right version in lib/libcurl.plist [53]
  o misc: remove duplicated include files [28]
  o misc: typo and grammar fixes [23]
  o noproxy: also match with adjacent comma [19]
  o noproxy: tailmatch like in 7.85.0 and earlier [35]
  o os400: use platform socklen_t in Curl_getnameinfo_a [18]
  o README.md: remove badges and xmas-tree garnish [9]
+ o rtsp: fix RTSP auth [49]
  o scripts/checksrc.pl: detect duplicated include files [29]
  o sendf: remove unnecessary if condition [26]
  o spellcheck.words: remove 'github' as an accepted word [22]
  o strcase: use curl_str(n)equal for case insensitive matches [8]
  o system.h: support 64-bit curl_off_t for NonStop 32-bit [21]
  o tests/sshserver.pl: re-enable ssh-rsa while using openssh 8.8+
+ o tool_getparam: make --no-get work as the opposite of --get [39]
+ o tool_operate: provide better errmsg for -G with bad URL [16]
  o tool_operate: when aborting, make sure there is a non-NULL error buffer [20]
+ o vtls: fix build without proxy support [38]
  o WEBSOCKET.md: fix broken link [30]
+ o Websocket: fixes for partial frames and buffer updates. [7]
  o websockets: fix handling of partial frames [32]
  o windows: fail early with a missing windres in autotools [5]
  o windows: fix linking .rc to shared curl with autotools [24]
@@ -62,14 +78,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Averay, AtariDreams on github, Ayesh Karunaratne, Christoph Reiter,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Eric Vigeant,
-  Felipe Gasper, Henning Schild, Joel Depooter, Jon Rumsey, Luca Niccoli,
+  Adam Averay, Alex Xu, AtariDreams on github, Ayesh Karunaratne,
+  Christopher Sauer, Christoph Reiter, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Emanuele Torre, Emil Österlund, Eric Vigeant, Erik Janssen,
+  Fata Nugraha, Felipe Gasper, Henning Schild, Hirotaka Tagawa, Joel Depooter,
+  Jon Rumsey, jvreelanda on github, Lorenzo Miniero, Luca Niccoli,
   Marc Hörsken, Michael Drake, Oskar Sigvardsson, Patrick Monnerat,
-  Patrick Schlangen, Randall S. Becker, Ray Satiro, Stefan Eissing,
-  Stuart Henderson, Thomas Glanzmann, Trail of Bits, Viktor Szakats,
-  Zespre Schmidt
-  (26 contributors)
+  Patrick Schlangen, Peter Piekarski, Randall S. Becker, Ray Satiro,
+  Stefan Eissing, Stuart Henderson, Thomas Glanzmann, Trail of Bits,
+  Viktor Szakats, Zespre Schmidt
+  (36 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -79,6 +97,7 @@ References to bug reports and discussions on issues:
  [4] = https://curl.se/bug/?i=9844
  [5] = https://curl.se/bug/?i=9781
  [6] = https://curl.se/bug/?i=9734
+ [7] = https://curl.se/bug/?i=9890
  [8] = https://curl.se/bug/?i=9837
  [9] = https://curl.se/bug/?i=9833
  [10] = https://curl.se/bug/?i=9834
@@ -87,6 +106,7 @@ References to bug reports and discussions on issues:
  [13] = https://curl.se/bug/?i=9832
  [14] = https://curl.se/bug/?i=9863
  [15] = https://sourceforge.net/p/curl/bugs/846/
+ [16] = https://curl.se/bug/?i=9889
  [17] = https://curl.se/bug/?i=9818
  [18] = https://curl.se/bug/?i=9811
  [19] = https://curl.se/bug/?i=9813
@@ -108,3 +128,17 @@ References to bug reports and discussions on issues:
  [35] = https://curl.se/bug/?i=9842
  [36] = https://curl.se/bug/?i=9847
  [37] = https://curl.se/bug/?i=9820
+ [38] = https://curl.se/bug/?i=9895
+ [39] = https://curl.se/bug/?i=9891
+ [40] = https://curl.se/bug/?i=9885
+ [41] = https://curl.se/bug/?i=9712
+ [42] = https://curl.se/bug/?i=9888
+ [43] = https://curl.se/bug/?i=9855
+ [44] = https://curl.se/bug/?i=9883
+ [46] = https://curl.se/bug/?i=9442
+ [47] = https://curl.se/bug/?i=9874
+ [49] = https://curl.se/bug/?i=4750
+ [50] = https://curl.se/bug/?i=9871
+ [51] = https://curl.se/bug/?i=9853
+ [52] = https://curl.se/bug/?i=9691
+ [53] = https://curl.se/bug/?i=9866
