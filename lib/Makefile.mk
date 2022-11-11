@@ -86,6 +86,10 @@ ifndef WIN32
   DYN :=
 endif
 
+ifdef MSDOS
+  CFG += -watt
+endif
+
 ifdef AMIGA
   BIN_EXT :=
 endif
@@ -93,7 +97,6 @@ endif
 ### Deprecated settings. For compatibility.
 
 ifdef WATT_ROOT
-  CFG += -watt
   WATT_PATH := $(realpath $(WATT_ROOT))
 endif
 
