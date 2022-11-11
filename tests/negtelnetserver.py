@@ -66,9 +66,9 @@ def telnetserver(options):
 
     # Need to set the allow_reuse on the class, not on the instance.
     socketserver.TCPServer.allow_reuse_address = True
-    server = socketserver.TCPServer(local_bind, NegotiatingTelnetHandler)
-    server.serve_forever()
-
+    with socketserver.TCPServer(local_bind, NegotiatingTelnetHandler) as server:
+        server.serve_forever()
+    # leaving `with` calls server.close() automatically
     return ScriptRC.SUCCESS
 
 
