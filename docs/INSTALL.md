@@ -223,7 +223,7 @@ Run `make`
 ## MS-DOS
 
 Requires djgpp in the search path and pointing to Gisle Vanem's Watt-32 stack
-via `WATT_ROOT=c:/watt`.
+via `WATT_PATH=c:/watt`.
 
 Run 'make -f Makefile.dist djgpp' in the root curl dir.
 
