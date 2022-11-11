@@ -328,15 +328,6 @@ CURLcode Curl_cfilter_setup(struct Curl_easy *data,
 #else
     (void)ssl_mode;
 #endif /* USE_SSL */
-
-#ifndef CURL_DISABLE_PROXY
-    if(data->set.haproxyprotocol) {
-      result = Curl_cfilter_haproxy_add(data, conn, sockindex);
-      if(result)
-        goto out;
-    }
-#endif /* !CURL_DISABLE_PROXY */
-
   }
   DEBUGASSERT(conn->cfilter[sockindex]);
   cf = data->conn->cfilter[sockindex];

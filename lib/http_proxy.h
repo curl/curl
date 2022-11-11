@@ -38,12 +38,4 @@ CURLcode Curl_cfilter_http_proxy_add(struct Curl_easy *data,
 
 #endif
 
-#if !defined(CURL_DISABLE_PROXY)
-
-CURLcode Curl_cfilter_haproxy_add(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int sockindex);
-
-#endif
-
 #endif /* HEADER_CURL_HTTP_PROXY_H */
