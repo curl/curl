@@ -27,10 +27,14 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include <curl/curl.h>
 #include "vtls/vtls.h"
 #include "sendf.h"
+#include "timeval.h"
 #include "rand.h"
 
 /* The last 3 #include files should be in this order */

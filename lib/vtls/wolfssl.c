@@ -55,6 +55,7 @@
 #include "sendf.h"
 #include "inet_pton.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "keylog.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -606,9 +607,6 @@ wolfssl_connect_step2(struct Curl_easy *data, struct connectdata *conn,
 
   ERR_clear_error();
 
-  conn->recv[sockindex] = wolfssl_recv;
-  conn->send[sockindex] = wolfssl_send;
-
   /* Enable RFC2818 checks */
   if(SSL_CONN_CONFIG(verifyhost)) {
     char *snihost = Curl_ssl_snihost(data, SSL_HOST_NAME(), NULL);
@@ -1135,8 +1133,6 @@ wolfssl_connect_common(struct Curl_easy *data,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = wolfssl_recv;
-    conn->send[sockindex] = wolfssl_send;
     *done = TRUE;
   }
   else
@@ -1242,7 +1238,9 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wolfssl_sha256sum,               /* sha256sum */
   NULL,                            /* associate_connection */
   NULL,                            /* disassociate_connection */
-  NULL                             /* free_multi_ssl_backend_data */
+  NULL,                            /* free_multi_ssl_backend_data */
+  wolfssl_recv,                    /* recv decrypted data */
+  wolfssl_send,                    /* send data to encrypt */
 };
 
 #endif

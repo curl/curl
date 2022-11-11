@@ -80,6 +80,7 @@
 #include "http_proxy.h"
 #include "warnless.h"
 #include "http2.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "strdup.h"
 #include "altsvc.h"
@@ -105,14 +106,6 @@ static bool http_should_fail(struct Curl_easy *data);
 static CURLcode add_haproxy_protocol_header(struct Curl_easy *data);
 #endif
 
-#ifdef USE_SSL
-static CURLcode https_connecting(struct Curl_easy *data, bool *done);
-static int https_getsock(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         curl_socket_t *socks);
-#else
-#define https_connecting(x,y) CURLE_COULDNT_CONNECT
-#endif
 static CURLcode http_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn);
 #ifdef USE_WEBSOCKETS
@@ -184,9 +177,9 @@ const struct Curl_handler Curl_handler_https = {
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
   Curl_http_connect,                    /* connect_it */
-  https_connecting,                     /* connecting */
+  NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
-  https_getsock,                        /* proto_getsock */
+  NULL,                                 /* proto_getsock */
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
@@ -209,9 +202,9 @@ const struct Curl_handler Curl_handler_wss = {
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
   Curl_http_connect,                    /* connect_it */
-  https_connecting,                     /* connecting */
+  NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
-  https_getsock,                        /* proto_getsock */
+  NULL,                                 /* proto_getsock */
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
@@ -1555,23 +1548,11 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
      function to make the re-use checks properly be able to check this bit. */
   connkeep(conn, "HTTP default");
 
-#ifndef CURL_DISABLE_PROXY
-  /* the CONNECT procedure might not have been completed */
-  result = Curl_proxy_connect(data, FIRSTSOCKET);
-  if(result)
+  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET, FALSE, done);
+  if(result || !*done)
     return result;
 
-  if(conn->bits.proxy_connect_closed)
-    /* this is not an error, just part of the connection negotiation */
-    return CURLE_OK;
-
-  if(CONNECT_FIRSTSOCKET_PROXY_SSL())
-    return CURLE_OK; /* wait for HTTPS proxy SSL initialization to complete */
-
-  if(Curl_connect_ongoing(conn))
-    /* nothing else to do except wait right now - we're not done here. */
-    return CURLE_OK;
-
+#ifndef CURL_DISABLE_PROXY
   if(data->set.haproxyprotocol && !data->state.is_haproxy_hdr_sent) {
     /* add HAProxy PROXY protocol header */
     result = add_haproxy_protocol_header(data);
@@ -1582,15 +1563,6 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
     data->state.is_haproxy_hdr_sent = TRUE;
   }
 #endif
-
-  if(conn->given->flags & PROTOPT_SSL) {
-    /* perform SSL initialization */
-    result = https_connecting(data, done);
-    if(result)
-      return result;
-  }
-  else
-    *done = TRUE;
 
   return CURLE_OK;
 }
@@ -1643,39 +1615,6 @@ static CURLcode add_haproxy_protocol_header(struct Curl_easy *data)
   return result;
 }
 #endif
-
-#ifdef USE_SSL
-static CURLcode https_connecting(struct Curl_easy *data, bool *done)
-{
-  CURLcode result;
-  struct connectdata *conn = data->conn;
-  DEBUGASSERT((data) && (data->conn->handler->flags & PROTOPT_SSL));
-
-#ifdef ENABLE_QUIC
-  if(conn->transport == TRNSPRT_QUIC) {
-    *done = TRUE;
-    return CURLE_OK;
-  }
-#endif
-
-  /* perform SSL initialization for this socket */
-  result = Curl_ssl_connect_nonblocking(data, conn, FALSE, FIRSTSOCKET, done);
-  if(result)
-    connclose(conn, "Failed HTTPS connection");
-
-  return result;
-}
-
-static int https_getsock(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         curl_socket_t *socks)
-{
-  (void)data;
-  if(conn->handler->flags & PROTOPT_SSL)
-    return Curl_ssl->getsock(conn, socks);
-  return GETSOCK_BLANK;
-}
-#endif /* USE_SSL */
 
 /*
  * Curl_http_done() gets called after a single HTTP request has been

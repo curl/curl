@@ -64,21 +64,4 @@ void Curl_free_idnconverted_hostname(struct hostname *host);
 void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
 #endif
 
-#ifdef CURL_DISABLE_PROXY
-#define CONNECT_PROXY_SSL() FALSE
-#else
-
-#define CONNECT_PROXY_SSL()\
-  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
-  !conn->bits.proxy_ssl_connected[sockindex])
-
-#define CONNECT_FIRSTSOCKET_PROXY_SSL()\
-  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
-  !conn->bits.proxy_ssl_connected[FIRSTSOCKET])
-
-#define CONNECT_SECONDARYSOCKET_PROXY_SSL()\
-  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
-  !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
-#endif /* !CURL_DISABLE_PROXY */
-
 #endif /* HEADER_CURL_URL_H */

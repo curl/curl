@@ -38,6 +38,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "multiif.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "progress.h"
 #include "transfer.h"
@@ -666,8 +667,8 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
 #ifdef USE_SSL
     if((conn->handler->flags & PROTOPT_SSL)) {
       bool ssl_done = FALSE;
-      result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                            FIRSTSOCKET, &ssl_done);
+      result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
+                                    FALSE, &ssl_done);
       if(result && result != CURLE_AGAIN)
         return result;
       if(!ssl_done)

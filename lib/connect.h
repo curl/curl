@@ -29,11 +29,6 @@
 #include "sockaddr.h"
 #include "timeval.h"
 
-CURLcode Curl_is_connected(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           int sockindex,
-                           bool *connected);
-
 CURLcode Curl_connecthost(struct Curl_easy *data,
                           struct connectdata *conn,
                           const struct Curl_dns_entry *host);
@@ -153,6 +148,14 @@ void Curl_conncontrol(struct connectdata *conn,
 #define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP)
 #endif
 
-bool Curl_conn_data_pending(struct connectdata *conn, int sockindex);
+bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex);
+
+CURLcode Curl_cfilter_socket_set(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 int sockindex);
+
+CURLcode Curl_cfilter_socket_accepted_set(struct Curl_easy *data,
+                                          struct connectdata *conn,
+                                          int sockindex, curl_socket_t *s);
 
 #endif /* HEADER_CURL_CONNECT_H */
