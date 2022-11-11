@@ -1509,7 +1509,9 @@ static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
    * sockindex (if in use). Gladly, it is safe to call more than once. */
   Curl_ssl->close_one(data, cf->conn, cf->sockindex);
   cf->conn->ssl[cf->sockindex].state = ssl_connection_none;
+#ifndef CURL_DISABLE_PROXY
   cf->conn->bits.proxy_ssl_connected[cf->sockindex] = FALSE;
+#endif
   cf->connected = FALSE;
 }
 
@@ -1568,6 +1570,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   return result;
 }
 
+#ifndef CURL_DISABLE_PROXY
 static CURLcode ssl_proxy_cf_connect(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
                                      bool blocking, bool *done)
@@ -1585,6 +1588,7 @@ static CURLcode ssl_proxy_cf_connect(struct Curl_cfilter *cf,
   }
   return result;
 }
+#endif
 
 static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
                                 const struct Curl_easy *data)
@@ -1663,6 +1667,7 @@ static const struct Curl_cftype cft_ssl = {
   ssl_cf_recv,
 };
 
+#ifndef CURL_DISABLE_PROXY
 static const struct Curl_cftype cft_ssl_proxy = {
   "SSL-PROXY",
   ssl_cf_destroy,
@@ -1676,6 +1681,7 @@ static const struct Curl_cftype cft_ssl_proxy = {
   ssl_cf_send,
   ssl_cf_recv,
 };
+#endif
 
 CURLcode Curl_cfilter_ssl_add(struct Curl_easy *data,
                               struct connectdata *conn,
