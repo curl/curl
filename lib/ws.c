@@ -411,9 +411,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
   while(!done) {
     size_t write_len;
     unsigned int recvflags;
-    char *inbuf;
 
-    if(!wsp->stillbuffer) {
+    if(!wsp->stillblen) {
       /* try to get more data */
       size_t n;
       result = curl_easy_recv(data, data->state.buffer,
@@ -424,16 +423,16 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
         /* still have nothing */
         goto out;
       wsp->stillb = data->state.buffer;
-      wsp->stillbuffer = n;
+      wsp->stillblen = n;
     }
 
     infof(data, "WS: got %u websocket bytes to decode",
-          (int)wsp->stillbuffer);
+          (int)wsp->stillblen);
     if(!wsp->frame.bytesleft) {
       size_t headlen;
       curl_off_t oleft;
       /* detect new frame */
-      result = ws_decode(data, (unsigned char *)wsp->stillb, wsp->stillbuffer,
+      result = ws_decode(data, (unsigned char *)wsp->stillb, wsp->stillblen,
                          &headlen, &write_len, &oleft, &recvflags);
       if(result == CURLE_AGAIN)
         /* a packet fragment only */
@@ -441,7 +440,7 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       else if(result)
         return result;
       wsp->stillb += headlen;
-      wsp->stillbuffer -= headlen;
+      wsp->stillblen -= headlen;
       wsp->frame.offset = 0;
       wsp->frame.bytesleft = oleft;
       wsp->frame.flags = recvflags;
@@ -449,15 +448,15 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
     else {
       /* existing frame, remaining payload handling */
       write_len = wsp->frame.bytesleft;
-      if(write_len > wsp->stillbuffer)
-        write_len = wsp->stillbuffer;
+      if(write_len > wsp->stillblen)
+        write_len = wsp->stillblen;
     }
 
     /* auto-respond to PINGs */
     if((wsp->frame.flags & CURLWS_PING) && !wsp->frame.bytesleft) {
       infof(data, "WS: auto-respond to PING with a PONG");
       /* send back the exact same content as a PONG */
-      result = curl_ws_send(data, inbuf, write_len,
+      result = curl_ws_send(data, wsp->stillb, write_len,
                             &write_len, 0, CURLWS_PONG);
       if(result)
         return result;
@@ -466,7 +465,7 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       if(write_len > buflen)
         write_len = buflen;
       /* copy the payload to the user buffer */
-      memcpy(buffer, inbuf, write_len);
+      memcpy(buffer, wsp->stillb, write_len);
       *nread = write_len;
       done = TRUE;
     }
@@ -476,9 +475,9 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       DEBUGASSERT(wsp->frame.bytesleft >= (curl_off_t)write_len);
       if(wsp->frame.bytesleft)
         wsp->frame.bytesleft -= write_len;
-      DEBUGASSERT(write_len <= wsp->stillbuffer);
-      wsp->stillbuffer -= write_len;
-      if(wsp->stillbuffer)
+      DEBUGASSERT(write_len <= wsp->stillblen);
+      wsp->stillblen -= write_len;
+      if(wsp->stillblen)
         wsp->stillb += write_len;
       else
         wsp->stillb = NULL;
