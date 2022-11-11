@@ -948,7 +948,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
          content so send it as such. Note that there may even be additional
          "headers" after the body */
 
-      if(!data->set.opt_no_body) {
+      if(!data->req.no_body) {
         result = Curl_pop3_write(data, pp->cache, pp->cache_size);
         if(result)
           return result;
@@ -1197,7 +1197,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
 
   DEBUGF(infof(data, "DO phase starts"));
 
-  if(data->set.opt_no_body) {
+  if(data->req.no_body) {
     /* Requested no body means no transfer */
     pop3->transfer = PPTRANSFER_INFO;
   }
