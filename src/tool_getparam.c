@@ -1999,7 +1999,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->request_target, nextarg);
       }
       else
-        config->use_httpget = TRUE;
+        config->use_httpget = toggle;
       break;
 
     case 'h': /* h for help */
