@@ -4115,6 +4115,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
   Curl_free_request_state(data);
   memset(&data->req, 0, sizeof(struct SingleRequest));
   data->req.size = data->req.maxdownload = -1;
+  data->req.no_body = data->set.opt_no_body;
 
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);
@@ -4176,7 +4177,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   data->state.done = FALSE; /* *_done() is not called yet */
   data->state.expect100header = FALSE;
 
-  if(data->set.opt_no_body)
+  if(data->req.no_body)
     /* in HTTP lingo, no body means using the HEAD request... */
     data->state.httpreq = HTTPREQ_HEAD;
 

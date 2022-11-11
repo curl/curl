@@ -1050,7 +1050,7 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data, int smtpcode,
   }
   else {
     /* Temporarily add the LF character back and send as body to the client */
-    if(!data->set.opt_no_body) {
+    if(!data->req.no_body) {
       line[len] = '\n';
       result = Curl_client_write(data, CLIENTWRITE_BODY, line, len + 1);
       line[len] = '\0';
@@ -1490,7 +1490,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
 
   DEBUGF(infof(data, "DO phase starts"));
 
-  if(data->set.opt_no_body) {
+  if(data->req.no_body) {
     /* Requested no body means no transfer */
     smtp->transfer = PPTRANSFER_INFO;
   }
