@@ -283,7 +283,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * Since all RTSP requests are included here, there is no need to
    * support custom requests like HTTP.
    **/
-  data->set.opt_no_body = TRUE; /* most requests don't contain a body */
+  data->req.no_body = TRUE; /* most requests don't contain a body */
   switch(rtspreq) {
   default:
     failf(data, "Got invalid RTSP request");
@@ -293,7 +293,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     break;
   case RTSPREQ_DESCRIBE:
     p_request = "DESCRIBE";
-    data->set.opt_no_body = FALSE;
+    data->req.no_body = FALSE;
     break;
   case RTSPREQ_ANNOUNCE:
     p_request = "ANNOUNCE";
@@ -313,7 +313,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   case RTSPREQ_GET_PARAMETER:
     /* GET_PARAMETER's no_body status is determined later */
     p_request = "GET_PARAMETER";
-    data->set.opt_no_body = FALSE;
+    data->req.no_body = FALSE;
     break;
   case RTSPREQ_SET_PARAMETER:
     p_request = "SET_PARAMETER";
@@ -324,7 +324,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   case RTSPREQ_RECEIVE:
     p_request = "";
     /* Treat interleaved RTP as body */
-    data->set.opt_no_body = FALSE;
+    data->req.no_body = FALSE;
     break;
   case RTSPREQ_LAST:
     failf(data, "Got invalid RTSP request: RTSPREQ_LAST");
@@ -573,7 +573,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     else if(rtspreq == RTSPREQ_GET_PARAMETER) {
       /* Check for an empty GET_PARAMETER (heartbeat) request */
       data->state.httpreq = HTTPREQ_HEAD;
-      data->set.opt_no_body = TRUE;
+      data->req.no_body = TRUE;
     }
   }
 

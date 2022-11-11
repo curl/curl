@@ -668,7 +668,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
        is non-headers. */
     if(!k->header && (nread > 0 || is_empty_data)) {
 
-      if(data->set.opt_no_body) {
+      if(data->req.no_body) {
         /* data arrives although we want none, bail out */
         streamclose(conn, "ignoring body");
         *done = TRUE;
@@ -1310,7 +1310,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
      * returning.
      */
 
-    if(!(data->set.opt_no_body) && (k->size != -1) &&
+    if(!(data->req.no_body) && (k->size != -1) &&
        (k->bytecount != k->size) &&
 #ifdef CURL_DO_LINEEND_CONV
        /* Most FTP servers don't adjust their file SIZE response for CRLFs,
@@ -1325,7 +1325,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       result = CURLE_PARTIAL_FILE;
       goto out;
     }
-    if(!(data->set.opt_no_body) && k->chunk &&
+    if(!(data->req.no_body) && k->chunk &&
        (conn->chunk.state != CHUNK_STOP)) {
       /*
        * In chunked mode, return an error if the connection is closed prior to
@@ -1839,7 +1839,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
       data->state.httpreq = HTTPREQ_GET;
       data->set.upload = false;
       infof(data, "Switch to %s",
-            data->set.opt_no_body?"HEAD":"GET");
+            data->req.no_body?"HEAD":"GET");
     }
     break;
   case 304: /* Not Modified */
@@ -1881,7 +1881,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 
   if((data->req.bytecount + data->req.headerbytecount == 0) &&
      conn->bits.reuse &&
-     (!data->set.opt_no_body || (conn->handler->protocol & PROTO_FAMILY_HTTP))
+     (!data->req.no_body || (conn->handler->protocol & PROTO_FAMILY_HTTP))
 #ifndef CURL_DISABLE_RTSP
      && (data->set.rtspreq != RTSPREQ_RECEIVE)
 #endif
@@ -1995,7 +1995,7 @@ Curl_setup_transfer(
       Curl_pgrsSetDownloadSize(data, size);
   }
   /* we want header and/or body, if neither then don't do this! */
-  if(k->getheader || !data->set.opt_no_body) {
+  if(k->getheader || !data->req.no_body) {
 
     if(sockindex != -1)
       k->keepon |= KEEP_RECV;
@@ -2031,6 +2031,6 @@ Curl_setup_transfer(
         k->keepon |= KEEP_SEND;
       }
     } /* if(writesockindex != -1) */
-  } /* if(k->getheader || !data->set.opt_no_body) */
+  } /* if(k->getheader || !data->req.no_body) */
 
 }

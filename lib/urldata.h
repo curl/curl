@@ -723,6 +723,7 @@ struct SingleRequest {
   BIT(forbidchunk);  /* used only to explicitly forbid chunk-upload for
                         specific upload buffers. See readmoredata() in http.c
                         for details. */
+  BIT(no_body);      /* the response has no body */
 };
 
 /*

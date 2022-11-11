@@ -482,13 +482,13 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
               tm->tm_hour,
               tm->tm_min,
               tm->tm_sec,
-              data->set.opt_no_body ? "": "\r\n");
+              data->req.no_body ? "": "\r\n");
     result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
     if(result)
       return result;
     /* set the file size to make it available post transfer */
     Curl_pgrsSetDownloadSize(data, expected_size);
-    if(data->set.opt_no_body)
+    if(data->req.no_body)
       return result;
   }
 
