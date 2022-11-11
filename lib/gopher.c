@@ -30,6 +30,7 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "progress.h"
 #include "gopher.h"
@@ -117,7 +118,9 @@ static CURLcode gopher_connect(struct Curl_easy *data, bool *done)
 static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
-  CURLcode result = Curl_ssl_connect(data, conn, FIRSTSOCKET);
+  CURLcode result;
+
+  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET, TRUE, done);
   if(result)
     connclose(conn, "Failed TLS connection");
   *done = TRUE;

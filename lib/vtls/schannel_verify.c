@@ -42,6 +42,7 @@
 #ifdef HAS_MANUAL_VERIFY_API
 
 #include "vtls.h"
+#include "vtls_int.h"
 #include "sendf.h"
 #include "strerror.h"
 #include "curl_multibyte.h"
