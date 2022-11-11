@@ -48,9 +48,9 @@ struct websocket {
   struct curl_ws_frame frame; /* the struct used for frame state */
   curl_off_t oleft; /* outstanding number of payload bytes left from the
                        server */
-  curl_off_t stillbuffer; /* number of bytes left in the buffer to deliver in
-                             the next curl_ws_recv() call */
-  char *stillb; /* the stillbuffer pending bytes are here */
+  size_t stillblen; /* number of bytes left in the buffer to deliver in
+                         the next curl_ws_recv() call */
+  char *stillb; /* the stillblen pending bytes are here */
   curl_off_t sleft; /* outstanding number of payload bytes left to send */
   unsigned int xori; /* xor index */
 };
