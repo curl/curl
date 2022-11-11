@@ -689,15 +689,6 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     data->req.newurl = strdup(data->state.url); /* clone URL */
     if(!data->req.newurl)
       return CURLE_OUT_OF_MEMORY;
-#ifndef CURL_DISABLE_RTSP
-    /*
-     * Authentication is treated as a redirect in Curl_follow(), so if this is
-     * done using RTSP we make it allow these "redirects" to RTSP (only). A
-     * safe assumption as no other redirects should happen from RTSP.
-     */
-    if(conn->handler->protocol & CURLPROTO_RTSP)
-      data->set.redir_protocols = CURLPROTO_RTSP;
-#endif
   }
   else if((data->req.httpcode < 300) &&
           (!data->state.authhost.done) &&
@@ -2876,8 +2867,8 @@ CURLcode Curl_http_resume(struct Curl_easy *data,
       data->state.resume_from = 0;
     }
 
-    if(data->state.resume_from && !data->state.this_is_a_follow) {
-      /* do we still game? */
+    if(data->state.resume_from && !data->state.followlocation) {
+      /* only act on the first request */
 
       /* Now, let's read off the proper amount of bytes from the
          input. */
@@ -3659,6 +3650,9 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
         result = http_perhapsrewind(data, conn);
         if(result)
           return result;
+
+        /* mark the next request as a followed location: */
+        data->state.this_is_a_follow = TRUE;
       }
     }
   }
