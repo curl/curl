@@ -122,13 +122,6 @@ endif
 _LDFLAGS :=
 _LIBS :=
 
-ifneq ($(findstring -watt,$(CFG))$(MSDOS),)
-  WATT_PATH ?= $(PROOT)/../watt
-  CPPFLAGS += -I"$(WATT_PATH)/inc"
-  _LDFLAGS += -L"$(WATT_PATH)/lib"
-  _LIBS += -lwatt
-endif
-
 ifneq ($(findstring -sync,$(CFG)),)
   CPPFLAGS += -DUSE_SYNC_DNS
 else ifneq ($(findstring -ares,$(CFG)),)
@@ -306,6 +299,13 @@ ifneq ($(findstring -ipv6,$(CFG)),)
 endif
 ifneq ($(findstring -ldaps,$(CFG)),)
   CPPFLAGS += -DHAVE_LDAP_SSL
+endif
+
+ifneq ($(findstring -watt,$(CFG))$(MSDOS),)
+  WATT_PATH ?= $(PROOT)/../watt
+  CPPFLAGS += -I"$(WATT_PATH)/inc"
+  _LDFLAGS += -L"$(WATT_PATH)/lib"
+  _LIBS += -lwatt
 endif
 
 ifdef WIN32
