@@ -86,10 +86,6 @@ ifndef WIN32
   DYN :=
 endif
 
-ifdef MSDOS
-  CFG += -watt
-endif
-
 ifdef AMIGA
   BIN_EXT :=
 endif
@@ -130,7 +126,7 @@ endif
 _LDFLAGS :=
 _LIBS :=
 
-ifneq ($(findstring -watt,$(CFG)),)
+ifneq ($(findstring -watt,$(CFG))$(MSDOS),)
   WATT_PATH ?= $(PROOT)/../watt
   CPPFLAGS += -I"$(WATT_PATH)/inc"
   _LDFLAGS += -L"$(WATT_PATH)/lib"
