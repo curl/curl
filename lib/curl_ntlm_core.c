@@ -658,7 +658,8 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
             LONGQUARTET(tw.dwLowDateTime), LONGQUARTET(tw.dwHighDateTime));
 
   memcpy(ptr + 32, challenge_client, 8);
-  memcpy(ptr + 44, ntlm->target_info, ntlm->target_info_len);
+  if(ntlm->target_info_len)
+    memcpy(ptr + 44, ntlm->target_info, ntlm->target_info_len);
 
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
