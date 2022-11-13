@@ -104,9 +104,10 @@ sub printdesc {
         }
         # skip lines starting with space (examples)
         if($d =~ /^[^ ]/ && $d =~ /--/) {
-            for my $k (keys %optlong) {
+            # scan for options in longest-names first order
+            for my $k (sort {length($b) <=> length($a)} keys %optlong) {
                 my $l = manpageify($k);
-                $d =~ s/--\Q$k\E([^a-z0-9_-])([^a-zA-Z0-9_])/$l$1$2/;
+                $d =~ s/\-\-$k/$l/g;
             }
         }
         # quote "bare" minuses in the output
