@@ -7,6 +7,7 @@ Category: curl
 Example: --netrc $URL
 Added: 4.6
 See-also: netrc-file config user
+Mutexed: netrc-file netrc-optional
 Multi: boolean
 ---
 Makes curl scan the *.netrc* (*_netrc* on Windows) file in the user's home
