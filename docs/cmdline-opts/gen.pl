@@ -106,8 +106,13 @@ sub printdesc {
         if($d =~ /^[^ ]/ && $d =~ /--/) {
             # scan for options in longest-names first order
             for my $k (sort {length($b) <=> length($a)} keys %optlong) {
+                # --tlsv1 is complicated since --tlsv1.2 etc are also
+                # acceptable options!
+                if(($k eq "tlsv1") && ($d =~ /--tlsv1\.[1-9]\\f/)) {
+                    next;
+                }
                 my $l = manpageify($k);
-                $d =~ s/\-\-$k/$l/g;
+                $d =~ s/\-\-$k([^a-z0-9-])/$l$1/g;
             }
         }
         # quote "bare" minuses in the output
