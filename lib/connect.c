@@ -1472,8 +1472,9 @@ bool Curl_connalive(struct connectdata *conn)
 int Curl_closesocket(struct Curl_easy *data, struct connectdata *conn,
                      curl_socket_t sock)
 {
-  DEBUGF(infof(data, "Curl_closesocket(conn #%ld, sock=%d), fclosesocket=%d",
-         conn->connection_id, (int)sock, conn->fclosesocket));
+  DEBUGF(infof(data, "Curl_closesocket(conn #%ld, sock=%d), fclosesocket=%p",
+               conn ? conn->connection_id : -1,
+               (int)sock, conn ? conn->fclosesocket : NULL));
   if(conn && conn->fclosesocket) {
     if((sock == conn->sock[SECONDARYSOCKET]) && conn->bits.sock_accepted)
       /* if this socket matches the second socket, and that was created with
