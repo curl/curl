@@ -3907,7 +3907,7 @@ static CURLcode create_conn(struct Curl_easy *data,
      we only acknowledge this option if this is not a re-used connection
      already (which happens due to follow-location or during an HTTP
      authentication phase). CONNECT_ONLY transfers also refuse reuse. */
-  if((data->set.reuse_fresh && !data->state.this_is_a_follow) ||
+  if((data->set.reuse_fresh && !data->state.followlocation) ||
      data->set.connect_only)
     reuse = FALSE;
   else
