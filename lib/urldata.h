@@ -1427,10 +1427,6 @@ struct UrlState {
   trailers_state trailers_state; /* whether we are sending trailers
                                     and what stage are we at */
 #endif
-#ifndef CURL_DISABLE_PROXY
-  /* to keep track whether we already sent PROXY header or not */
-  BIT(is_haproxy_hdr_sent);
-#endif
 #ifdef USE_HYPER
   bool hconnect;  /* set if a CONNECT request */
   CURLcode hresult; /* used to pass return codes back from hyper callbacks */

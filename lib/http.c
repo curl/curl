@@ -102,10 +102,6 @@ static int http_getsock_do(struct Curl_easy *data,
                            curl_socket_t *socks);
 static bool http_should_fail(struct Curl_easy *data);
 
-#ifndef CURL_DISABLE_PROXY
-static CURLcode add_haproxy_protocol_header(struct Curl_easy *data);
-#endif
-
 static CURLcode http_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn);
 #ifdef USE_WEBSOCKETS
@@ -1532,30 +1528,13 @@ Curl_compareheader(const char *headerline, /* line to check */
  */
 CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 {
-  CURLcode result;
   struct connectdata *conn = data->conn;
 
   /* We default to persistent connections. We set this already in this connect
      function to make the re-use checks properly be able to check this bit. */
   connkeep(conn, "HTTP default");
 
-  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET, FALSE, done);
-  if(result || !*done)
-    return result;
-
-#ifndef CURL_DISABLE_PROXY
-  if(data->set.haproxyprotocol && !data->state.is_haproxy_hdr_sent) {
-    /* add HAProxy PROXY protocol header */
-    result = add_haproxy_protocol_header(data);
-    if(result)
-      return result;
-
-    /* do not send the header again after successful try */
-    data->state.is_haproxy_hdr_sent = TRUE;
-  }
-#endif
-
-  return CURLE_OK;
+  return Curl_cfilter_connect(data, conn, FIRSTSOCKET, FALSE, done);
 }
 
 /* this returns the socket to wait for in the DO and DOING state for the multi
@@ -1570,42 +1549,6 @@ static int http_getsock_do(struct Curl_easy *data,
   socks[0] = conn->sock[FIRSTSOCKET];
   return GETSOCK_WRITESOCK(0);
 }
-
-#ifndef CURL_DISABLE_PROXY
-static CURLcode add_haproxy_protocol_header(struct Curl_easy *data)
-{
-  struct dynbuf req;
-  CURLcode result;
-  const char *tcp_version;
-  DEBUGASSERT(data->conn);
-  Curl_dyn_init(&req, DYN_HAXPROXY);
-
-#ifdef USE_UNIX_SOCKETS
-  if(data->conn->unix_domain_socket)
-    /* the buffer is large enough to hold this! */
-    result = Curl_dyn_addn(&req, STRCONST("PROXY UNKNOWN\r\n"));
-  else {
-#endif
-  /* Emit the correct prefix for IPv6 */
-  tcp_version = data->conn->bits.ipv6 ? "TCP6" : "TCP4";
-
-  result = Curl_dyn_addf(&req, "PROXY %s %s %s %i %i\r\n",
-                         tcp_version,
-                         data->info.conn_local_ip,
-                         data->info.conn_primary_ip,
-                         data->info.conn_local_port,
-                         data->info.conn_primary_port);
-
-#ifdef USE_UNIX_SOCKETS
-  }
-#endif
-
-  if(!result)
-    result = Curl_buffer_send(&req, data, &data->info.request_size,
-                              0, FIRSTSOCKET);
-  return result;
-}
-#endif
 
 /*
  * Curl_http_done() gets called after a single HTTP request has been
