@@ -50,7 +50,9 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   counter[idx] += (int)(size * nmemb);
 
   /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
-  code = curl_easy_getinfo(easy[idx], CURLINFO_LASTSOCKET, &longdata);
+  CURL_IGNORE_DEPRECATION(
+    code = curl_easy_getinfo(easy[idx], CURLINFO_LASTSOCKET, &longdata);
+  )
   if(CURLE_OK != code) {
     fprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
             "with code %d (%s)\n",
