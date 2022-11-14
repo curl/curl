@@ -405,7 +405,7 @@ void Curl_cfilter_attach_data(struct connectdata *conn,
     cf = conn->cfilter[i];
     if(cf) {
       DEBUGF(infof(data, "Curl_cfilter_attach(handle=%p, connection=%ld, "
-                   "index=%d)", data, conn->connection_id, i));
+                   "index=%zu)", data, conn->connection_id, i));
       while(cf) {
         cf->cft->attach_data(cf, data);
         cf = cf->next;
@@ -424,7 +424,7 @@ void Curl_cfilter_detach_data(struct connectdata *conn,
     cf = conn->cfilter[i];
     if(cf) {
       DEBUGF(infof(data, "Curl_cfilter_detach(handle=%p, connection=%ld, "
-                   "index=%d)", data, conn->connection_id, i));
+                   "index=%zu)", data, conn->connection_id, i));
       while(cf) {
         cf->cft->detach_data(cf, data);
         cf = cf->next;
