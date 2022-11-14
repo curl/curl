@@ -318,16 +318,16 @@ typedef int (*curl_multi_timer_callback)(CURLM *multi,    /* multi handle */
                                          void *userp);    /* private callback
                                                              pointer */
 
-CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
-                                        int *running_handles);
+CURL_EXTERN CURLMcode CURL_DEPRECATED(7.19.5, "Use curl_multi_socket_action()")
+curl_multi_socket(CURLM *multi_handle, curl_socket_t s, int *running_handles);
 
 CURL_EXTERN CURLMcode curl_multi_socket_action(CURLM *multi_handle,
                                                curl_socket_t s,
                                                int ev_bitmask,
                                                int *running_handles);
 
-CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle,
-                                            int *running_handles);
+CURL_EXTERN CURLMcode CURL_DEPRECATED(7.19.5, "Use curl_multi_socket_action()")
+curl_multi_socket_all(CURLM *multi_handle, int *running_handles);
 
 #ifndef CURL_ALLOW_OLD_MULTI_SOCKET
 /* This macro below was added in 7.16.3 to push users who recompile to use

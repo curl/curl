@@ -74,7 +74,8 @@ sub scanenums {
     my ($file)=@_;
     my $skipit = 0;
 
-    open H_IN, "-|", "$Cpreprocessor $i$file" || die "Cannot preprocess $file";
+    open H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file" ||
+        die "Cannot preprocess $file";
     while ( <H_IN> ) {
         my ($line, $linenum) = ($_, $.);
         if( /^#(line|) (\d+) \"(.*)\"/) {
@@ -102,6 +103,7 @@ sub scanenums {
             if(($_ !~ /\}(;|)/) &&
                ($_ ne "typedef") &&
                ($_ ne "enum") &&
+               ($_ ne "=") &&
                ($_ !~ /^[ \t]*$/)) {
                 if($verbose) {
                     print "Source: $Cpreprocessor $i$file\n";

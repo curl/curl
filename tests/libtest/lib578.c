@@ -78,10 +78,10 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDS, data);
 
   /* we want to use our own progress function */
-  test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
-
-  /* pointer to pass to our read function */
+  CURL_IGNORE_DEPRECATION(
+    test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  )
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

@@ -1,0 +1,24 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+ <name>
+Verify deprecation statuses and versions
+ </name>
+
+<command type="perl">
+%SRCDIR/check-deprecated.pl %SRCDIR/..
+</command>
+</client>
+
+</testcase>
