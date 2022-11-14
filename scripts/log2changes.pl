@@ -43,6 +43,9 @@ sub printmsg {
         print $p.substr($msg, 0, 77, "")."\n";
         $p="  ";
     }
+    if($msg eq "") {
+        $p = "";
+    }
     print "$p$msg\n";
 }
 
