@@ -1188,4 +1188,91 @@ CURLcode Curl_cfilter_http_proxy_add(struct Curl_easy *data,
   return result;
 }
 
+#endif /* !CURL_DISABLE_PROXY && !defined(CURL_DISABLE_HTTP) */
+
+#if !defined(CURL_DISABLE_PROXY)
+
+static CURLcode send_haproxy_header(struct Curl_cfilter*cf,
+                                    struct Curl_easy *data)
+{
+  struct dynbuf req;
+  CURLcode result;
+  const char *tcp_version;
+  Curl_dyn_init(&req, DYN_HAXPROXY);
+
+#ifdef USE_UNIX_SOCKETS
+  if(cf->conn->unix_domain_socket)
+    /* the buffer is large enough to hold this! */
+    result = Curl_dyn_addn(&req, STRCONST("PROXY UNKNOWN\r\n"));
+  else {
+#endif
+  /* Emit the correct prefix for IPv6 */
+  tcp_version = cf->conn->bits.ipv6 ? "TCP6" : "TCP4";
+
+  result = Curl_dyn_addf(&req, "PROXY %s %s %s %i %i\r\n",
+                         tcp_version,
+                         data->info.conn_local_ip,
+                         data->info.conn_primary_ip,
+                         data->info.conn_local_port,
+                         data->info.conn_primary_port);
+
+#ifdef USE_UNIX_SOCKETS
+  }
+#endif
+
+  if(!result)
+    result = Curl_buffer_send(&req, data, &data->info.request_size,
+                              0, FIRSTSOCKET);
+  return result;
+}
+
+static CURLcode haproxy_cf_connect(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   bool blocking, bool *done)
+{
+  CURLcode result;
+
+  if(cf->connected) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  if(result || !*done)
+    return result;
+
+  result = send_haproxy_header(cf, data);
+  *done = (!result);
+  cf->connected = *done;
+  return result;
+}
+
+static const struct Curl_cftype cft_haproxy = {
+  "HAPROXY",
+  Curl_cf_def_destroy,
+  Curl_cf_def_attach_data,
+  Curl_cf_def_detach_data,
+  Curl_cf_def_setup,
+  Curl_cf_def_close,
+  haproxy_cf_connect,
+  Curl_cf_def_get_select_socks,
+  Curl_cf_def_data_pending,
+  Curl_cf_def_send,
+  Curl_cf_def_recv,
+};
+
+CURLcode Curl_cfilter_haproxy_add(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  int sockindex)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  result = Curl_cfilter_create(&cf, data, conn, sockindex,
+                               &cft_haproxy, NULL);
+  if(!result)
+    Curl_cfilter_add(data, conn, sockindex, cf);
+  return result;
+}
+
 #endif /* !CURL_DISABLE_PROXY */
