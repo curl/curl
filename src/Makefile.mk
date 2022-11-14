@@ -66,11 +66,11 @@ CURL_CFILES += $(notdir $(CURLX_CFILES))
 curl_OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CURL_CFILES)))
 ifdef WIN32
 curl_OBJECTS += $(patsubst %.rc,$(OBJ_DIR)/%.res,$(strip $(CURL_RCFILES)))
+endif
 ifdef MAP
 CURL_MAP := curl.map
 CURL_LDFLAGS_BIN += -Wl,-Map,$(CURL_MAP)
 TOVCLEAN := $(CURL_MAP)
-endif
 endif
 vpath %.c $(PROOT)/lib
 
