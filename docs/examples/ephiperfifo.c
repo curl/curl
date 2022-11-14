@@ -166,7 +166,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
     memset(&its, 0, sizeof(struct itimerspec));
   }
 
-  timerfd_settime(g->tfd, /*flags=*/0, &its, NULL);
+  timerfd_settime(g->tfd, /* flags= */0, &its, NULL);
   return 0;
 }
 
@@ -197,7 +197,7 @@ static void check_multi_info(GlobalInfo *g)
   }
 }
 
-/* Called by libevent when we get action on a multi socket filedescriptor*/
+/* Called by libevent when we get action on a multi socket filedescriptor */
 static void event_cb(GlobalInfo *g, int fd, int revents)
 {
   CURLMcode rc;

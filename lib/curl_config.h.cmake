@@ -595,9 +595,6 @@
 /* Define to 1 if you have the ws2tcpip.h header file. */
 #cmakedefine HAVE_WS2TCPIP_H 1
 
-/* Define if you have the <process.h> header file. */
-#cmakedefine HAVE_PROCESS_H 1
-
 /* Define to 1 if you need the lber.h header file even with ldap.h */
 #cmakedefine NEED_LBER_H 1
 
@@ -789,9 +786,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* to enable Windows IDN */
 #cmakedefine USE_WIN32_IDN 1
-
-/* to make the compiler know the prototypes of Windows IDN APIs */
-#cmakedefine WANT_IDN_PROTOTYPES 1
 
 /* Define to 1 to enable websocket support. */
 #cmakedefine USE_WEBSOCKETS 1

@@ -59,7 +59,7 @@
  *
  * AddHttpPost()
  *
- * Adds a HttpPost structure to the list, if parent_post is given becomes
+ * Adds an HttpPost structure to the list, if parent_post is given becomes
  * a subpost of parent_post instead of a direct list element.
  *
  * Returns newly allocated HttpPost on success and NULL if malloc failed.
@@ -135,15 +135,13 @@ static struct FormInfo *AddFormInfo(char *value,
 {
   struct FormInfo *form_info;
   form_info = calloc(1, sizeof(struct FormInfo));
-  if(form_info) {
-    if(value)
-      form_info->value = value;
-    if(contenttype)
-      form_info->contenttype = contenttype;
-    form_info->flags = HTTPPOST_FILENAME;
-  }
-  else
+  if(!form_info)
     return NULL;
+  if(value)
+    form_info->value = value;
+  if(contenttype)
+    form_info->contenttype = contenttype;
+  form_info->flags = HTTPPOST_FILENAME;
 
   if(parent_form_info) {
     /* now, point our 'more' to the original 'more' */
@@ -199,7 +197,7 @@ static struct FormInfo *AddFormInfo(char *value,
  * CURL_FORMADD_MEMORY         if the allocation of a FormInfo struct failed
  * CURL_FORMADD_UNKNOWN_OPTION if an unknown option was used
  * CURL_FORMADD_INCOMPLETE     if the some FormInfo is not complete (or error)
- * CURL_FORMADD_MEMORY         if a HttpPost struct cannot be allocated
+ * CURL_FORMADD_MEMORY         if an HttpPost struct cannot be allocated
  * CURL_FORMADD_MEMORY         if some allocation for string copying failed.
  * CURL_FORMADD_ILLEGAL_ARRAY  if an illegal option is used in an array
  *

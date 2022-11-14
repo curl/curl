@@ -300,12 +300,11 @@ static char *sanitize_cookie_path(const char *cookie_path)
   /* some stupid site sends path attribute with '"'. */
   len = strlen(new_path);
   if(new_path[0] == '\"') {
-    memmove((void *)new_path, (const void *)(new_path + 1), len);
+    memmove(new_path, new_path + 1, len);
     len--;
   }
   if(len && (new_path[len - 1] == '\"')) {
-    new_path[len - 1] = 0x0;
-    len--;
+    new_path[--len] = 0x0;
   }
 
   /* RFC6265 5.2.4 The Path Attribute */
@@ -458,11 +457,10 @@ static int invalid_octets(const char *p)
     "\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14"
     "\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x7f"
   };
-  size_t vlen, len;
+  size_t len;
   /* scan for all the octets that are *not* in cookie-octet */
   len = strcspn(p, badoctets);
-  vlen = strlen(p);
-  return (len != vlen);
+  return (p[len] != '\0');
 }
 
 /*
@@ -516,7 +514,7 @@ Curl_cookie_add(struct Curl_easy *data,
     return NULL; /* bail out if we're this low on memory */
 
   if(httpheader) {
-    /* This line was read off a HTTP-header */
+    /* This line was read off an HTTP-header */
     char name[MAX_NAME];
     char what[MAX_NAME];
     const char *ptr;
@@ -606,9 +604,9 @@ Curl_cookie_add(struct Curl_easy *data,
          * only test for names where that can possibly be true.
          */
         if(nlen > 3 && name[0] == '_' && name[1] == '_') {
-          if(!strncmp("__Secure-", name, 9))
+          if(strncasecompare("__Secure-", name, 9))
             co->prefix |= COOKIE_PREFIX__SECURE;
-          else if(!strncmp("__Host-", name, 7))
+          else if(strncasecompare("__Host-", name, 7))
             co->prefix |= COOKIE_PREFIX__HOST;
         }
 
@@ -865,7 +863,7 @@ Curl_cookie_add(struct Curl_easy *data,
   }
   else {
     /*
-     * This line is NOT a HTTP header style line, we do offer support for
+     * This line is NOT an HTTP header style line, we do offer support for
      * reading the odd netscape cookies-file format here
      */
     char *ptr;

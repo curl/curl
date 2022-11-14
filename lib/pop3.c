@@ -76,6 +76,7 @@
 #include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
@@ -373,9 +374,16 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
 {
   /* Start the SSL connection */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result =
-    Curl_ssl_connect_nonblocking(data, conn, FALSE, FIRSTSOCKET,
-                                 &pop3c->ssldone);
+  CURLcode result;
+
+  if(!Curl_cfilter_ssl_added(data, conn, FIRSTSOCKET)) {
+    result = Curl_cfilter_ssl_add(data, conn, FIRSTSOCKET);
+    if(result)
+      goto out;
+  }
+
+  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
+                                FALSE, &pop3c->ssldone);
 
   if(!result) {
     if(pop3c->state != POP3_UPGRADETLS)
@@ -386,7 +394,7 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
       result = pop3_perform_capa(data, conn);
     }
   }
-
+out:
   return result;
 }
 
@@ -767,7 +775,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
     if(pop3code != '+')
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
-    if(!data->set.use_ssl || conn->ssl[FIRSTSOCKET].use)
+    if(!data->set.use_ssl || Curl_ssl_use(conn, FIRSTSOCKET))
       result = pop3_perform_authentication(data, conn);
     else if(pop3code == '+' && pop3c->tls_supported)
       /* Switch to TLS connection now */
@@ -948,7 +956,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
          content so send it as such. Note that there may even be additional
          "headers" after the body */
 
-      if(!data->set.opt_no_body) {
+      if(!data->req.no_body) {
         result = Curl_pop3_write(data, pp->cache, pp->cache_size);
         if(result)
           return result;
@@ -1054,8 +1062,8 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone) {
-    result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                          FIRSTSOCKET, &pop3c->ssldone);
+    result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
+                                  FALSE, &pop3c->ssldone);
     if(result || !pop3c->ssldone)
       return result;
   }
@@ -1192,12 +1200,11 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
 {
   /* This is POP3 and no proxy */
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
   struct POP3 *pop3 = data->req.p.pop3;
 
   DEBUGF(infof(data, "DO phase starts"));
 
-  if(data->set.opt_no_body) {
+  if(data->req.no_body) {
     /* Requested no body means no transfer */
     pop3->transfer = PPTRANSFER_INFO;
   }
@@ -1211,7 +1218,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
 
   /* Run the state-machine */
   result = pop3_multi_statemach(data, dophase_done);
-  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
+  *connected = Curl_cfilter_is_connected(data, data->conn, FIRSTSOCKET);
 
   if(*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));

@@ -436,7 +436,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
   (CURLINFO_OFF_T < (info))
 
 
-/* typecheck helpers -- check whether given expression has requested type*/
+/* typecheck helpers -- check whether given expression has requested type */
 
 /* For pointers, you can use the curlcheck_ptr/curlcheck_arr macros,
  * otherwise define a new macro. Search for __builtin_types_compatible_p

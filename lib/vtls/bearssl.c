@@ -32,12 +32,16 @@
 #include "sendf.h"
 #include "inet_pton.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
 #include "curl_printf.h"
-#include "curl_memory.h"
 #include "strcase.h"
+
+/* The last #include files should be: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 struct x509_context {
   const br_x509_class *vtable;
@@ -1069,8 +1073,6 @@ static CURLcode bearssl_connect_common(struct Curl_easy *data,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = bearssl_recv;
-    conn->send[sockindex] = bearssl_send;
     *done = TRUE;
   }
   else
@@ -1156,12 +1158,15 @@ static void bearssl_close(struct Curl_easy *data,
   DEBUGASSERT(backend);
 
   if(backend->active) {
+    backend->active = FALSE;
     br_ssl_engine_close(&backend->ctx.eng);
     (void)bearssl_run_until(data, conn, sockindex, BR_SSL_CLOSED);
   }
-  for(i = 0; i < backend->anchors_len; ++i)
-    free(backend->anchors[i].dn.data);
-  free(backend->anchors);
+  if(backend->anchors) {
+    for(i = 0; i < backend->anchors_len; ++i)
+      free(backend->anchors[i].dn.data);
+    Curl_safefree(backend->anchors);
+  }
 }
 
 static void bearssl_session_free(void *ptr)
@@ -1208,7 +1213,10 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   Curl_none_false_start,           /* false_start */
   bearssl_sha256sum,               /* sha256sum */
   NULL,                            /* associate_connection */
-  NULL                             /* disassociate_connection */
+  NULL,                            /* disassociate_connection */
+  NULL,                            /* free_multi_ssl_backend_data */
+  bearssl_recv,                    /* recv decrypted data */
+  bearssl_send,                    /* send data to encrypt */
 };
 
 #endif /* USE_BEARSSL */

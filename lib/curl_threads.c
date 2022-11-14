@@ -31,9 +31,7 @@
 #    include <pthread.h>
 #  endif
 #elif defined(USE_THREADS_WIN32)
-#  ifdef HAVE_PROCESS_H
-#    include <process.h>
-#  endif
+#  include <process.h>
 #endif
 
 #include "curl_threads.h"

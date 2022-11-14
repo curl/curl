@@ -187,6 +187,7 @@ CURL_WAIT_POLLIN                7.28.0
 CURL_WAIT_POLLOUT               7.28.0
 CURL_WAIT_POLLPRI               7.28.0
 CURL_WIN32                      7.69.0
+CURL_WRITEFUNC_ERROR            7.87.0
 CURL_WRITEFUNC_PAUSE            7.18.0
 CURL_ZERO_TERMINATED            7.56.0
 CURLALTSVC_H1                   7.64.1
@@ -565,6 +566,7 @@ CURLOPT_BUFFERSIZE              7.10
 CURLOPT_CAINFO                  7.4.2
 CURLOPT_CAINFO_BLOB             7.77.0
 CURLOPT_CAPATH                  7.9.8
+CURLOPT_CA_CACHE_TIMEOUT        7.87.0
 CURLOPT_CERTINFO                7.19.1
 CURLOPT_CHUNK_BGN_FUNCTION      7.21.0
 CURLOPT_CHUNK_DATA              7.21.0
@@ -1097,6 +1099,7 @@ CURLUSESSL_CONTROL              7.17.0
 CURLUSESSL_NONE                 7.17.0
 CURLUSESSL_TRY                  7.17.0
 CURLVERSION_EIGHTH              7.72.0
+CURLVERSION_ELEVENTH            7.87.0
 CURLVERSION_FIFTH               7.57.0
 CURLVERSION_FIRST               7.10
 CURLVERSION_FOURTH              7.16.1

@@ -255,9 +255,9 @@ set_thread_string(localkey_t key, const char *s)
 
 
 int
-Curl_getnameinfo_a(const struct sockaddr *sa, curl_socklen_t salen,
-                   char *nodename, curl_socklen_t nodenamelen,
-                   char *servname, curl_socklen_t servnamelen,
+Curl_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
+                   char *nodename, socklen_t nodenamelen,
+                   char *servname, socklen_t servnamelen,
                    int flags)
 {
   char *enodename = NULL;
@@ -745,7 +745,7 @@ OM_uint32
 Curl_gss_import_name_a(OM_uint32 *minor_status, gss_buffer_t in_name,
                        gss_OID in_name_type, gss_name_t *out_name)
 {
-  int rc;
+  OM_uint32 rc;
   unsigned int i;
   gss_buffer_desc in;
 
@@ -859,7 +859,7 @@ Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_buffer_t output_token)
 {
-  int rc;
+  OM_uint32 rc;
 
   rc = gss_delete_sec_context(minor_status, context_handle, output_token);
 
@@ -886,7 +886,7 @@ Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
 void *
 Curl_ldap_init_a(char *host, int port)
 {
-  unsigned int i;
+  size_t i;
   char *ehost;
   void *result;
 

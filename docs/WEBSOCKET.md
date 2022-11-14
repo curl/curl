@@ -17,7 +17,7 @@ WebSocket with libcurl can be done two ways.
    of it).
 
 2. Set `CURLOPT_CONNECT_ONLY` to 2L (new for WebSocket), which makes libcurl
-   do a HTTP GET + `Upgrade:` request plus response in the
+   do an HTTP GET + `Upgrade:` request plus response in the
    `curl_easy_perform()` call before it returns and then you can use
    `curl_ws_recv()` and `curl_ws_send()` to receive and send WebSocket frames
    from and to the server.
@@ -94,7 +94,7 @@ Ideas:
 
 ## Why not libWebSocket
 
-[libWebSocket](https://libWebSocket.org/) is said to be a solid, fast and
+[libWebSocket](https://libWebSockets.org/) is said to be a solid, fast and
 efficient WebSocket library with a vast amount of users. My plan was
 originally to build upon it to skip having to implement the low level parts of
 WebSocket myself.

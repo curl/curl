@@ -245,7 +245,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
 }
 
 /*
- * Hyper does not consider the status line, the first line in a HTTP/1
+ * Hyper does not consider the status line, the first line in an HTTP/1
  * response, to be a header. The libcurl API does. This function sends the
  * status line in the header callback. */
 static CURLcode status_line(struct Curl_easy *data,
@@ -415,8 +415,10 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       break;
     }
     else if(h->endtask == task) {
-      /* end of transfer */
+      /* end of transfer, forget the task handled, we might get a
+       * new one with the same address in the future. */
       *done = TRUE;
+      h->endtask = NULL;
       infof(data, "hyperstream is done");
       if(!k->bodywrites) {
         /* hyper doesn't always call the body write callback */
@@ -679,7 +681,7 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
       return HYPER_POLL_ERROR;
     }
     /* increasing the writebytecount here is a little premature but we
-       don't know exactly when the body is sent*/
+       don't know exactly when the body is sent */
     data->req.writebytecount += (size_t)data->req.p.http->postsize;
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     data->req.upload_done = TRUE;
@@ -732,7 +734,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
       return HYPER_POLL_ERROR;
     }
     /* increasing the writebytecount here is a little premature but we
-       don't know exactly when the body is sent*/
+       don't know exactly when the body is sent */
     data->req.writebytecount += fillcount;
     Curl_pgrsSetUploadCounter(data, fillcount);
   }
@@ -740,7 +742,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
 }
 
 /*
- * bodysend() sets up headers in the outgoing request for a HTTP transfer that
+ * bodysend() sets up headers in the outgoing request for an HTTP transfer that
  * sends a body
  */
 
@@ -845,7 +847,7 @@ static void http1xx_cb(void *arg, struct hyper_response *resp)
 }
 
 /*
- * Curl_http() gets called from the generic multi_do() function when a HTTP
+ * Curl_http() gets called from the generic multi_do() function when an HTTP
  * request is to be performed. This creates and sends a properly constructed
  * HTTP request.
  */

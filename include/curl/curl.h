@@ -256,6 +256,10 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
    will signal libcurl to pause receiving on the current transfer. */
 #define CURL_WRITEFUNC_PAUSE 0x10000001
 
+/* This is a magic return code for the write callback that, when returned,
+   will signal an error from the callback. */
+#define CURL_WRITEFUNC_ERROR 0xFFFFFFFF
+
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
                                       size_t nitems,
@@ -368,7 +372,7 @@ typedef int (*curl_seek_callback)(void *instream,
 #define CURL_READFUNC_PAUSE 0x10000001
 
 /* Return code for when the trailing headers' callback has terminated
-   without any errors*/
+   without any errors */
 #define CURL_TRAILERFUNC_OK 0
 /* Return code for when was an error in the trailing header's list and we
   want to abort the request */
@@ -450,7 +454,7 @@ typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
 #define CURL_DID_MEMORY_FUNC_TYPEDEFS
 #endif
 
-/* the kind of data that is passed to information_callback*/
+/* the kind of data that is passed to information_callback */
 typedef enum {
   CURLINFO_TEXT = 0,
   CURLINFO_HEADER_IN,    /* 1 */
@@ -698,7 +702,7 @@ typedef enum {
 #define CURLOPT_WRITEINFO CURLOPT_OBSOLETE40
 #define CURLOPT_CLOSEPOLICY CURLOPT_OBSOLETE72
 
-#endif /*!CURL_NO_OLDIES*/
+#endif /* !CURL_NO_OLDIES */
 
 /*
  * Proxy error codes. Returned in CURLINFO_PROXY_ERROR if CURLE_PROXY was
@@ -843,7 +847,7 @@ enum curl_khstat {
   CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now.
                         Causes a CURLE_PEER_FAILED_VERIFICATION error but the
                         connection will be left intact etc */
-  CURLKHSTAT_FINE_REPLACE, /* accept and replace the wrong key*/
+  CURLKHSTAT_FINE_REPLACE, /* accept and replace the wrong key */
   CURLKHSTAT_LAST    /* not for use, only a marker for last-in-list */
 };
 
@@ -864,13 +868,13 @@ typedef int
                                           /* CURLOPT_SSH_KEYDATA */
 
 typedef int
-  (*curl_sshhostkeycallback) (void *clientp,/* custom pointer passed*/
+  (*curl_sshhostkeycallback) (void *clientp,/* custom pointer passed */
                                             /* with CURLOPT_SSH_HOSTKEYDATA */
                           int keytype, /* CURLKHTYPE */
-                          const char *key, /*hostkey to check*/
-                          size_t keylen); /*length of the key*/
-                          /*return CURLE_OK to accept*/
-                          /*or something else to refuse*/
+                          const char *key, /* hostkey to check */
+                          size_t keylen); /* length of the key */
+                          /* return CURLE_OK to accept */
+                          /* or something else to refuse */
 
 
 /* parameter for the CURLOPT_USE_SSL option */
@@ -932,7 +936,7 @@ typedef enum {
 #define CURLFTPSSL_ALL CURLUSESSL_ALL
 #define CURLFTPSSL_LAST CURLUSESSL_LAST
 #define curl_ftpssl curl_usessl
-#endif /*!CURL_NO_OLDIES*/
+#endif /* !CURL_NO_OLDIES */
 
 /* parameter for the CURLOPT_FTP_SSL_CCC option */
 typedef enum {
@@ -1286,7 +1290,7 @@ typedef enum {
   /* size of the POST input data, if strlen() is not good to use */
   CURLOPT(CURLOPT_POSTFIELDSIZE, CURLOPTTYPE_LONG, 60),
 
-  /* tunnel non-http operations through a HTTP proxy */
+  /* tunnel non-http operations through an HTTP proxy */
   CURLOPT(CURLOPT_HTTPPROXYTUNNEL, CURLOPTTYPE_LONG, 61),
 
   /* Set the interface string to use as outgoing network interface */
@@ -1864,7 +1868,7 @@ typedef enum {
   /* Enable/disable TLS ALPN extension (http2 over ssl might fail without) */
   CURLOPT(CURLOPT_SSL_ENABLE_ALPN, CURLOPTTYPE_LONG, 226),
 
-  /* Time to wait for a response to a HTTP request containing an
+  /* Time to wait for a response to an HTTP request containing an
    * Expect: 100-continue header before sending the data anyway. */
   CURLOPT(CURLOPT_EXPECT_100_TIMEOUT_MS, CURLOPTTYPE_LONG, 227),
 
@@ -2156,6 +2160,9 @@ typedef enum {
 
   /* websockets options */
   CURLOPT(CURLOPT_WS_OPTIONS, CURLOPTTYPE_LONG, 320),
+
+  /* CA cache timeout */
+  CURLOPT(CURLOPT_CA_CACHE_TIMEOUT, CURLOPTTYPE_LONG, 321),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
@@ -2945,6 +2952,7 @@ typedef enum {
   CURLVERSION_EIGHTH,
   CURLVERSION_NINTH,
   CURLVERSION_TENTH,
+  CURLVERSION_ELEVENTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2953,7 +2961,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_TENTH
+#define CURLVERSION_NOW CURLVERSION_ELEVENTH
 
 struct curl_version_info_data {
   CURLversion age;          /* age of the returned struct */
@@ -3009,6 +3017,10 @@ struct curl_version_info_data {
 
   /* These fields were added in CURLVERSION_TENTH */
   const char *gsasl_version; /* human readable string. */
+
+  /* These fields were added in CURLVERSION_ELEVENTH */
+  /* feature_names is terminated by an entry with a NULL feature name */
+  const char * const *feature_names;
 };
 typedef struct curl_version_info_data curl_version_info_data;
 
@@ -3102,7 +3114,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
 
 #ifdef  __cplusplus
-}
+} /* end of extern "C" */
 #endif
 
 /* unfortunately, the easy.h and multi.h include files need options and info
@@ -3129,6 +3141,6 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
 #define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
 #endif /* __STDC__ >= 1 */
-#endif /* gcc >= 4.3 && !__cplusplus */
+#endif /* gcc >= 4.3 && !__cplusplus && !CURL_DISABLE_TYPECHECK */
 
 #endif /* CURLINC_CURL_H */

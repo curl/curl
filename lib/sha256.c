@@ -57,6 +57,36 @@
 #endif
 #endif /* USE_MBEDTLS */
 
+#if defined(USE_OPENSSL_SHA256)
+
+/* When OpenSSL or wolfSSL is available is available we use their
+ * SHA256-functions.
+ */
+#if defined(USE_OPENSSL)
+#include <openssl/evp.h>
+#elif defined(USE_WOLFSSL)
+#include <wolfssl/openssl/evp.h>
+#endif
+
+#elif defined(USE_GNUTLS)
+#include <nettle/sha.h>
+#elif defined(USE_MBEDTLS)
+#include <mbedtls/sha256.h>
+#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
+      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
+#include <CommonCrypto/CommonDigest.h>
+#define AN_APPLE_OS
+#elif defined(USE_WIN32_CRYPTO)
+#include <wincrypt.h>
+#endif
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
+
 /* Please keep the SSL backend-specific #if branches in this order:
  *
  * 1. USE_OPENSSL
@@ -70,20 +100,6 @@
  */
 
 #if defined(USE_OPENSSL_SHA256)
-
-/* When OpenSSL or wolfSSL is available is available we use their
- * SHA256-functions.
- */
-#if defined(USE_OPENSSL)
-#include <openssl/evp.h>
-#elif defined(USE_WOLFSSL)
-#include <wolfssl/openssl/evp.h>
-#endif
-
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 struct sha256_ctx {
   EVP_MD_CTX *openssl_ctx;
@@ -115,13 +131,6 @@ static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
 
 #elif defined(USE_GNUTLS)
 
-#include <nettle/sha.h>
-
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
-
 typedef struct sha256_ctx my_sha256_ctx;
 
 static CURLcode my_sha256_init(my_sha256_ctx *ctx)
@@ -143,13 +152,6 @@ static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
 }
 
 #elif defined(USE_MBEDTLS)
-
-#include <mbedtls/sha256.h>
-
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 typedef mbedtls_sha256_context my_sha256_ctx;
 
@@ -183,18 +185,7 @@ static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
 #endif
 }
 
-#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
-      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
-
-#include <CommonCrypto/CommonDigest.h>
-
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
-
+#elif defined(AN_APPLE_OS)
 typedef CC_SHA256_CTX my_sha256_ctx;
 
 static CURLcode my_sha256_init(my_sha256_ctx *ctx)
@@ -216,8 +207,6 @@ static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
 }
 
 #elif defined(USE_WIN32_CRYPTO)
-
-#include <wincrypt.h>
 
 struct sha256_ctx {
   HCRYPTPROV hCryptProv;

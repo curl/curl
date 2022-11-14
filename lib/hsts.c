@@ -39,7 +39,6 @@
 #include "parsedate.h"
 #include "fopen.h"
 #include "rename.h"
-#include "strtoofft.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -158,7 +157,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
   do {
     while(*p && ISBLANK(*p))
       p++;
-    if(Curl_strncasecompare("max-age=", p, 8)) {
+    if(strncasecompare("max-age=", p, 8)) {
       bool quoted = FALSE;
       CURLofft offt;
       char *endp;
@@ -187,7 +186,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       }
       gotma = TRUE;
     }
-    else if(Curl_strncasecompare("includesubdomains", p, 17)) {
+    else if(strncasecompare("includesubdomains", p, 17)) {
       if(gotinc)
         return CURLE_BAD_FUNCTION_ARGUMENT;
       subdomains = TRUE;
@@ -278,11 +277,11 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
         if(ntail < hlen) {
           size_t offs = hlen - ntail;
           if((hostname[offs-1] == '.') &&
-             Curl_strncasecompare(&hostname[offs], sts->host, ntail))
+             strncasecompare(&hostname[offs], sts->host, ntail))
             return sts;
         }
       }
-      if(Curl_strcasecompare(hostname, sts->host))
+      if(strcasecompare(hostname, sts->host))
         return sts;
     }
   }

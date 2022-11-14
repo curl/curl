@@ -54,9 +54,9 @@ below.
 Here are the different CI environments that are currently in use, and how they
 are configured:
 
-### Github Actions
+### GitHub Actions
 
-Github Actions runs the following tests:
+GitHub Actions runs the following tests:
 
 - Mac OS tests with a variety of different compilation options
 - Fuzz tests ([see tests/fuzz/README for
@@ -101,7 +101,7 @@ BoringSSL, etc).
 - Curl compiled with different C compilers.
 
 As of November 2021, the tests run (sometimes) but do not run consistently and
-do not report results to the Github checks runner - you need to manually check
+do not report results to the GitHub checks runner - you need to manually check
 for failures. See [#7522](https://github.com/curl/curl/issues/7522) for more
 information.
 

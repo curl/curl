@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP CONNECT
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+
+</connect>
+
+<data nocheck="yes">
+HTTP/1.1 404 Not Found
+Server: nginx/1.23.2
+Date: Wed, 09 Nov 2022 09:44:58 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 4
+Connection: keep-alive
+X-Content-Type-Options: nosniff
+
+haha
+</data>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+<name>
+HTTP GET when PROXY Protocol enabled behind a proxy
+</name>
+<command>
+--haproxy-protocol http://%HOSTIP:%HTTPPORT/page --proxytunnel -x %HOSTIP:%PROXYPORT
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %PROXYPORT/proxy-line/
+</strippart>
+
+<proxy>
+CONNECT %HOSTIP:%HTTPPORT HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</proxy>
+
+<protocol>
+proxy-line
+GET /page HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+</verify>
+</testcase>

@@ -571,7 +571,7 @@ void rec_do(struct Curl_easy *data, int option)
         sendsuboption(data, option);
     }
     else if(tn->subnegotiation[option] == CURL_YES) {
-      /* send information to achieve this option*/
+      /* send information to achieve this option */
       tn->us[option] = CURL_YES;
       send_negotiation(data, CURL_WILL, option);
       sendsuboption(data, option);
@@ -1200,7 +1200,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
 
     j = 0;
     for(i = 0; i < nread; i++) {
-      outbuf[j++] = buffer[i];
+      outbuf[j++] = (unsigned char)buffer[i];
       if((unsigned char)buffer[i] == CURL_IAC)
         outbuf[j++] = CURL_IAC;
     }
@@ -1491,6 +1491,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   }
 
   while(keepon) {
+    DEBUGF(infof(data, "telnet_do(handle=%p), poll %d fds", data, poll_cnt));
     switch(Curl_poll(pfd, poll_cnt, interval_ms)) {
     case -1:                    /* error, stop reading */
       keepon = FALSE;
@@ -1509,6 +1510,14 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         /* returned not-zero, this an error */
         if(result) {
           keepon = FALSE;
+          /* TODO: in test 1452, macOS sees a ECONNRESET sometimes?
+           * Is this the telnet test server not shutting down the socket
+           * in a clean way? Seems to be timing related, happens more
+           * on slow debug build */
+          if(data->state.os_errno == ECONNRESET) {
+            DEBUGF(infof(data, "telnet_do(handle=%p), unexpected ECONNRESET"
+                         " on recv", data));
+          }
           break;
         }
         /* returned zero but actually received 0 or less here,

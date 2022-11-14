@@ -92,6 +92,7 @@ chmod
 chown
 ChromeOS
 CI's
+CIDR
 CIFS
 CLA
 CLAs
@@ -246,7 +247,6 @@ getpwuid
 ggcov
 Ghedini
 Gisle
-github
 Glesys
 globbing
 gmail

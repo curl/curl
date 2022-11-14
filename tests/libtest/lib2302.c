@@ -114,7 +114,6 @@ static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
     CURLcode result = CURLE_OK;
     fprintf(stderr, "send back a TEXT\n");
     (void)easy;
-    /*result = curl_ws_send(easy, pong, 2, &sent, 0);*/
     if(result)
       nitems = 0;
   }

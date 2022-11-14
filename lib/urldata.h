@@ -264,7 +264,7 @@ struct ssl_connect_data {
 
 struct ssl_primary_config {
   long version;          /* what version the client wants to use */
-  long version_max;      /* max supported version the client wants to use*/
+  long version_max;      /* max supported version the client wants to use */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
   char *issuercert;      /* optional issuer certificate filename */
@@ -301,7 +301,7 @@ struct ssl_config_data {
   char *key_passwd; /* plain text private key password */
   BIT(certinfo);     /* gather lots of certificate info */
   BIT(falsestart);
-  BIT(enable_beast); /* allow this flaw for interoperability's sake*/
+  BIT(enable_beast); /* allow this flaw for interoperability's sake */
   BIT(no_revoke);    /* disable SSL certificate revocation checks */
   BIT(no_partialchain); /* don't accept partial certificate chains */
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
@@ -313,6 +313,7 @@ struct ssl_config_data {
 
 struct ssl_general_config {
   size_t max_ssl_sessions; /* SSL session id cache size */
+  int ca_cache_timeout;  /* Certificate store cache timeout (seconds) */
 };
 
 /* information stored about one single SSL session */
@@ -476,12 +477,10 @@ struct negotiatedata {
  * Boolean values that concerns this connection.
  */
 struct ConnectBits {
-  bool tcpconnect[2]; /* the TCP layer (or similar) is connected, this is set
-                         the first time on the first connect function call */
 #ifndef CURL_DISABLE_PROXY
   bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
                                   is complete */
-  BIT(httpproxy);  /* if set, this transfer is done through a http proxy */
+  BIT(httpproxy);  /* if set, this transfer is done through an HTTP proxy */
   BIT(socksproxy); /* if set, this transfer is done through a socks proxy */
   BIT(proxy_user_passwd); /* user+password for the proxy? */
   BIT(tunnel_proxy);  /* if CONNECT is used to "tunnel" through the proxy.
@@ -724,6 +723,7 @@ struct SingleRequest {
   BIT(forbidchunk);  /* used only to explicitly forbid chunk-upload for
                         specific upload buffers. See readmoredata() in http.c
                         for details. */
+  BIT(no_body);      /* the response has no body */
 };
 
 /*
@@ -873,38 +873,6 @@ struct proxy_info {
 };
 
 struct ldapconninfo;
-struct http_connect_state;
-
-/* for the (SOCKS) connect state machine */
-enum connect_t {
-  CONNECT_INIT,
-  CONNECT_SOCKS_INIT, /* 1 */
-  CONNECT_SOCKS_SEND, /* 2 waiting to send more first data */
-  CONNECT_SOCKS_READ_INIT, /* 3 set up read */
-  CONNECT_SOCKS_READ, /* 4 read server response */
-  CONNECT_GSSAPI_INIT, /* 5 */
-  CONNECT_AUTH_INIT, /* 6 setup outgoing auth buffer */
-  CONNECT_AUTH_SEND, /* 7 send auth */
-  CONNECT_AUTH_READ, /* 8 read auth response */
-  CONNECT_REQ_INIT,  /* 9 init SOCKS "request" */
-  CONNECT_RESOLVING, /* 10 */
-  CONNECT_RESOLVED,  /* 11 */
-  CONNECT_RESOLVE_REMOTE, /* 12 */
-  CONNECT_REQ_SEND,  /* 13 */
-  CONNECT_REQ_SENDING, /* 14 */
-  CONNECT_REQ_READ,  /* 15 */
-  CONNECT_REQ_READ_MORE, /* 16 */
-  CONNECT_DONE /* 17 connected fine to the remote or the SOCKS proxy */
-};
-
-#define SOCKS_STATE(x) (((x) >= CONNECT_SOCKS_INIT) &&  \
-                        ((x) < CONNECT_DONE))
-
-struct connstate {
-  enum connect_t state;
-  ssize_t outstanding;  /* send this many bytes more */
-  unsigned char *outp; /* send from this pointer */
-};
 
 #define TRNSPRT_TCP 3
 #define TRNSPRT_UDP 4
@@ -916,12 +884,11 @@ struct connstate {
  * unique for an entire connection.
  */
 struct connectdata {
-  struct connstate cnnct;
   struct Curl_llist_element bundle_node; /* conncache */
 
   /* chunk is for HTTP chunked encoding, but is in the general connectdata
-     struct only because we can do just about any protocol through a HTTP proxy
-     and a HTTP proxy may in fact respond using chunked encoding */
+     struct only because we can do just about any protocol through an HTTP
+     proxy and an HTTP proxy may in fact respond using chunked encoding */
   struct Curl_chunker chunk;
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
@@ -985,6 +952,7 @@ struct connectdata {
   int tempfamily[2]; /* family used for the temp sockets */
   Curl_recv *recv[2];
   Curl_send *send[2];
+  struct Curl_cfilter *cfilter[2]; /* connection filters */
 
 #ifdef USE_RECV_BEFORE_SEND_WORKAROUND
   struct postponed_data postponed[2]; /* two buffers for two sockets */
@@ -1112,7 +1080,6 @@ struct connectdata {
 #endif
   } proto;
 
-  struct http_connect_state *connect_state; /* for HTTP CONNECT */
   struct connectbundle *bundle; /* The bundle we are member of */
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
@@ -1460,6 +1427,10 @@ struct UrlState {
   trailers_state trailers_state; /* whether we are sending trailers
                                     and what stage are we at */
 #endif
+#ifndef CURL_DISABLE_PROXY
+  /* to keep track whether we already sent PROXY header or not */
+  BIT(is_haproxy_hdr_sent);
+#endif
 #ifdef USE_HYPER
   bool hconnect;  /* set if a CONNECT request */
   CURLcode hresult; /* used to pass return codes back from hyper callbacks */
@@ -1531,7 +1502,7 @@ struct UrlState {
  * Character pointer fields point to dynamic storage, unless otherwise stated.
  */
 
-struct Curl_multi;    /* declared and used only in multi.c */
+struct Curl_multi;    /* declared in multihandle.c */
 
 /*
  * This enumeration MUST not use conditional directives (#ifdefs), new
@@ -1860,7 +1831,7 @@ struct UserDefined {
    this session. They are STATIC, set by libcurl users or at least initially
    and they don't change during operations. */
   BIT(get_filetime);     /* get the time and get of the remote file */
-  BIT(tunnel_thru_httpproxy); /* use CONNECT through a HTTP proxy */
+  BIT(tunnel_thru_httpproxy); /* use CONNECT through an HTTP proxy */
   BIT(prefer_ascii);     /* ASCII rather than binary */
   BIT(remote_append);    /* append, not overwrite, on upload */
   BIT(list_only);        /* list directory */

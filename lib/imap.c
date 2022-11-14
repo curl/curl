@@ -75,11 +75,11 @@
 #include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
 #include "url.h"
-#include "strcase.h"
 #include "bufref.h"
 #include "curl_sasl.h"
 #include "warnless.h"
@@ -479,9 +479,16 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
 {
   /* Start the SSL connection */
   struct imap_conn *imapc = &conn->proto.imapc;
-  CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                                 FIRSTSOCKET, &imapc->ssldone);
+  CURLcode result;
 
+  if(!Curl_cfilter_ssl_added(data, conn, FIRSTSOCKET)) {
+    result = Curl_cfilter_ssl_add(data, conn, FIRSTSOCKET);
+    if(result)
+      goto out;
+  }
+
+  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
+                                FALSE, &imapc->ssldone);
   if(!result) {
     if(imapc->state != IMAP_UPGRADETLS)
       state(data, IMAP_UPGRADETLS);
@@ -491,7 +498,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
       result = imap_perform_capability(data, conn);
     }
   }
-
+out:
   return result;
 }
 
@@ -951,7 +958,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
       line += wordlen;
     }
   }
-  else if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
+  else if(data->set.use_ssl && !Curl_ssl_use(conn, FIRSTSOCKET)) {
     /* PREAUTH is not compatible with STARTTLS. */
     if(imapcode == IMAP_RESP_OK && imapc->tls_supported && !imapc->preauth) {
       /* Switch to TLS connection now */
@@ -1385,8 +1392,8 @@ static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done)
   struct imap_conn *imapc = &conn->proto.imapc;
 
   if((conn->handler->flags & PROTOPT_SSL) && !imapc->ssldone) {
-    result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                          FIRSTSOCKET, &imapc->ssldone);
+    result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
+                                  FALSE, &imapc->ssldone);
     if(result || !imapc->ssldone)
       return result;
   }
@@ -1561,7 +1568,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
 
   DEBUGF(infof(data, "DO phase starts"));
 
-  if(data->set.opt_no_body) {
+  if(data->req.no_body) {
     /* Requested no body means no transfer */
     imap->transfer = PPTRANSFER_INFO;
   }
@@ -1603,7 +1610,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   /* Run the state-machine */
   result = imap_multi_statemach(data, dophase_done);
 
-  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
+  *connected = Curl_cfilter_is_connected(data, conn, FIRSTSOCKET);
 
   if(*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));

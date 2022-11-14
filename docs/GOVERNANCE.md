@@ -158,7 +158,7 @@ When you are merging patches/pull requests...
 - squash patch sets into a few logical commits even if the PR did not, if
   necessary
 - avoid the "merge" button on GitHub, do it "manually" instead to get full
-  control and full audit trail (github leaves out you as "Committer:")
+  control and full audit trail (GitHub leaves out you as "Committer:")
 - remember to credit the reporter and the helpers.
 
 ## Who are maintainers?

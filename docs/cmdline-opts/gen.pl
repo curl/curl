@@ -104,9 +104,15 @@ sub printdesc {
         }
         # skip lines starting with space (examples)
         if($d =~ /^[^ ]/ && $d =~ /--/) {
-            for my $k (keys %optlong) {
+            # scan for options in longest-names first order
+            for my $k (sort {length($b) <=> length($a)} keys %optlong) {
+                # --tlsv1 is complicated since --tlsv1.2 etc are also
+                # acceptable options!
+                if(($k eq "tlsv1") && ($d =~ /--tlsv1\.[0-9]\\f/)) {
+                    next;
+                }
                 my $l = manpageify($k);
-                $d =~ s/--\Q$k\E([^a-z0-9_-])([^a-zA-Z0-9_])/$l$1$2/;
+                $d =~ s/\-\-$k([^a-z0-9-])/$l$1/g;
             }
         }
         # quote "bare" minuses in the output
@@ -345,12 +351,13 @@ sub single {
     printdesc(@desc);
     undef @desc;
 
+    my @extra;
     if($multi eq "single") {
-        print "\nIf --$long is provided several times, the last set ".
+        push @extra, "\nIf --$long is provided several times, the last set ".
             "value will be used.\n";
     }
     elsif($multi eq "append") {
-        print "\n--$long can be used several times in a command line\n";
+        push @extra, "\n--$long can be used several times in a command line\n";
     }
     elsif($multi eq "boolean") {
         my $rev = "no-$long";
@@ -360,12 +367,16 @@ sub single {
             $rev = $long;
             $rev =~ s/^no-//;
         }
-        print "\nProviding --$long multiple times has no extra effect.\n".
+        push @extra,
+            "\nProviding --$long multiple times has no extra effect.\n".
             "Disable it again with --$rev.\n";
     }
     elsif($multi eq "mutex") {
-        print "\nProviding --$long multiple times has no extra effect.\n";
+        push @extra,
+            "\nProviding --$long multiple times has no extra effect.\n";
     }
+
+    printdesc(@extra);
 
     my @foot;
     if($seealso) {
@@ -540,7 +551,7 @@ HEAD
         my $long = $f;
         my $short = $optlong{$long};
         my @categories = split ' ', $catlong{$long};
-        my $bitmask;
+        my $bitmask = ' ';
         my $opt;
 
         if(defined($short) && $long) {
@@ -556,6 +567,7 @@ HEAD
                 $bitmask .= ' | ';
             }
         }
+        $bitmask =~ s/(?=.{76}).{1,76}\|/$&\n  /g;
         my $arg = $arglong{$long};
         if($arg) {
             $opt .= " $arg";
@@ -563,7 +575,7 @@ HEAD
         my $desc = $helplong{$f};
         $desc =~ s/\"/\\\"/g; # escape double quotes
 
-        my $line = sprintf "  {\"%s\",\n   \"%s\",\n   %s},\n", $opt, $desc, $bitmask;
+        my $line = sprintf "  {\"%s\",\n   \"%s\",\n  %s},\n", $opt, $desc, $bitmask;
 
         if(length($opt) > 78) {
             print STDERR "WARN: the --$long name is too long\n";

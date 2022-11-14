@@ -35,6 +35,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "select.h"
 #include "strerror.h"
 #include "multiif.h"
@@ -473,8 +474,6 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
 
       cr_set_negotiated_alpn(data, conn, rconn);
 
-      conn->recv[sockindex] = cr_recv;
-      conn->send[sockindex] = cr_send;
       *done = TRUE;
       return CURLE_OK;
     }
@@ -630,7 +629,10 @@ const struct Curl_ssl Curl_ssl_rustls = {
   Curl_none_false_start,           /* false_start */
   NULL,                            /* sha256sum */
   NULL,                            /* associate_connection */
-  NULL                             /* disassociate_connection */
+  NULL,                            /* disassociate_connection */
+  NULL,                            /* free_multi_ssl_backend_data */
+  cr_recv,                         /* recv decrypted data */
+  cr_send,                         /* send data to encrypt */
 };
 
 #endif /* USE_RUSTLS */

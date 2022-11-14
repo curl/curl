@@ -29,7 +29,7 @@
 #
 # Set component roots via envvar <feature>_PATH. Also available for
 # customization: CC, RC, AR, CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS,
-# ARCH[=custom], CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
+# ARCH[=custom], CROSSPREFIX, CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
 # and more for individual components (see below).
 
 # This script is reused by 'src' and 'docs/examples' Makefile.m32 scripts.
@@ -75,6 +75,10 @@ endif
 
 CPPFLAGS += -I. -I$(PROOT)/include
 RCFLAGS  += -I$(PROOT)/include
+
+CC := $(CROSSPREFIX)$(CC)
+AR := $(CROSSPREFIX)$(AR)
+RC ?= $(CROSSPREFIX)windres
 
 ifneq ($(ARCH),custom)
   # Set environment var ARCH to your architecture to override auto-detection.
@@ -272,7 +276,6 @@ ifneq ($(findstring -psl,$(CFG)),)
 endif
 else ifneq ($(findstring -winidn,$(CFG)),)
   CPPFLAGS += -DUSE_WIN32_IDN
-  CPPFLAGS += -DWANT_IDN_PROTOTYPES
   _LIBS += -lnormaliz
 endif
 
@@ -302,8 +305,6 @@ endif
 
 ### Global rules
 
-RC ?= windres
-
 ifneq ($(findstring /sh,$(SHELL)),)
 DEL  = rm -f $1
 COPY = -cp -afv $1 $2
@@ -315,7 +316,7 @@ endif
 all: $(TARGETS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+	$(CC) -W -Wall $(CFLAGS) $(CPPFLAGS) -c $<
 
 %.res: %.rc
 	$(RC) -O coff $(RCFLAGS) -i $< -o $@

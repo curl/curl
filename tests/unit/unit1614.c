@@ -49,7 +49,7 @@ struct noproxy {
 };
 
 UNITTEST_START
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_PROXY)
 {
   int i;
   int err = 0;
@@ -77,6 +77,30 @@ UNITTEST_START
     { NULL, NULL, 0, FALSE} /* end marker */
   };
   struct noproxy list[]= {
+    { "www.example.com", "localhost,.example.com,.example.de", TRUE},
+    { "www.example.com.", "localhost,.example.com,.example.de", TRUE},
+    { "example.com", "localhost,.example.com,.example.de", TRUE},
+    { "example.com.", "localhost,.example.com,.example.de", TRUE},
+    { "www.example.com", "localhost,.example.com.,.example.de", TRUE},
+    { "www.example.com", "localhost,www.example.com.,.example.de", TRUE},
+    { "example.com", "localhost,example.com,.example.de", TRUE},
+    { "example.com.", "localhost,example.com,.example.de", TRUE},
+    { "nexample.com", "localhost,example.com,.example.de", FALSE},
+    { "www.example.com", "localhost,example.com,.example.de", TRUE},
+    { "127.0.0.1", "127.0.0.1,localhost", TRUE},
+    { "127.0.0.1", "127.0.0.1,localhost,", TRUE},
+    { "127.0.0.1", "127.0.0.1/8,localhost,", TRUE},
+    { "127.0.0.1", "127.0.0.1/28,localhost,", TRUE},
+    { "127.0.0.1", "127.0.0.1/31,localhost,", TRUE},
+    { "127.0.0.1", "localhost,127.0.0.1", TRUE},
+    { "127.0.0.1", "localhost,127.0.0.1.127.0.0.1.127.0.0.1.127.0.0.1."
+      "127.0.0.1.127.0.0.1.127.0.0.1.127.0.0.1.127.0.0.1.127.0.0.1.127."
+      "0.0.1.127.0.0.1.127.0.0." /* 128 bytes "address" */, FALSE},
+    { "127.0.0.1", "localhost,127.0.0.1.127.0.0.1.127.0.0.1.127.0.0.1."
+      "127.0.0.1.127.0.0.1.127.0.0.1.127.0.0.1.127.0.0.1.127.0.0.1.127."
+      "0.0.1.127.0.0.1.127.0.0" /* 127 bytes "address" */, FALSE},
+    { "localhost", "localhost,127.0.0.1", TRUE},
+    { "localhost", "127.0.0.1,localhost", TRUE},
     { "foobar", "barfoo", FALSE},
     { "foobar", "foobar", TRUE},
     { "192.168.0.1", "foobar", FALSE},

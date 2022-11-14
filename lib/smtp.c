@@ -79,6 +79,7 @@
 #include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
@@ -400,10 +401,16 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
   /* Start the SSL connection */
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                                 FIRSTSOCKET,
-                                                 &smtpc->ssldone);
+  CURLcode result;
 
+  if(!Curl_cfilter_ssl_added(data, conn, FIRSTSOCKET)) {
+    result = Curl_cfilter_ssl_add(data, conn, FIRSTSOCKET);
+    if(result)
+      goto out;
+  }
+
+  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
+                                FALSE, &smtpc->ssldone);
   if(!result) {
     if(smtpc->state != SMTP_UPGRADETLS)
       state(data, SMTP_UPGRADETLS);
@@ -413,7 +420,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
       result = smtp_perform_ehlo(data);
     }
   }
-
+out:
   return result;
 }
 
@@ -888,7 +895,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
   (void)instate; /* no use for this yet */
 
   if(smtpcode/100 != 2 && smtpcode != 1) {
-    if(data->set.use_ssl <= CURLUSESSL_TRY || conn->ssl[FIRSTSOCKET].use)
+    if(data->set.use_ssl <= CURLUSESSL_TRY || Curl_ssl_use(conn, FIRSTSOCKET))
       result = smtp_perform_helo(data, conn);
     else {
       failf(data, "Remote access denied: %d", smtpcode);
@@ -953,7 +960,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
     }
 
     if(smtpcode != 1) {
-      if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
+      if(data->set.use_ssl && !Curl_ssl_use(conn, FIRSTSOCKET)) {
         /* We don't have a SSL/TLS connection yet, but SSL is requested */
         if(smtpc->tls_supported)
           /* Switch to TLS connection now */
@@ -1043,7 +1050,7 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data, int smtpcode,
   }
   else {
     /* Temporarily add the LF character back and send as body to the client */
-    if(!data->set.opt_no_body) {
+    if(!data->req.no_body) {
       line[len] = '\n';
       result = Curl_client_write(data, CLIENTWRITE_BODY, line, len + 1);
       line[len] = '\0';
@@ -1285,8 +1292,8 @@ static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   if((conn->handler->flags & PROTOPT_SSL) && !smtpc->ssldone) {
-    result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                          FIRSTSOCKET, &smtpc->ssldone);
+    result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
+                                  FALSE, &smtpc->ssldone);
     if(result || !smtpc->ssldone)
       return result;
   }
@@ -1479,12 +1486,11 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
 {
   /* This is SMTP and no proxy */
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
   struct SMTP *smtp = data->req.p.smtp;
 
   DEBUGF(infof(data, "DO phase starts"));
 
-  if(data->set.opt_no_body) {
+  if(data->req.no_body) {
     /* Requested no body means no transfer */
     smtp->transfer = PPTRANSFER_INFO;
   }
@@ -1519,7 +1525,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
   /* Run the state-machine */
   result = smtp_multi_statemach(data, dophase_done);
 
-  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
+  *connected = Curl_cfilter_is_connected(data, data->conn, FIRSTSOCKET);
 
   if(*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));

@@ -55,10 +55,12 @@ EXTRA_DIST =                                    \
  CODE_OF_CONDUCT.md                             \
  CODE_REVIEW.md                                 \
  CODE_STYLE.md                                  \
+ CONNECTION-FILTERS.md                          \
  CONTRIBUTE.md                                  \
  CURL-DISABLE.md                                \
  DEPRECATE.md                                   \
  DYNBUF.md                                      \
+ EARLY-RELEASE.md                               \
  EXPERIMENTAL.md                                \
  FAQ                                            \
  FEATURES.md                                    \

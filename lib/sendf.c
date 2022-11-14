@@ -38,6 +38,7 @@
 
 #include "urldata.h"
 #include "sendf.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "vtls/vtls.h"
 #include "vssh/ssh.h"
@@ -151,13 +152,15 @@ static CURLcode pre_receive_plain(struct Curl_easy *data,
   const curl_socket_t sockfd = conn->sock[num];
   struct postponed_data * const psnd = &(conn->postponed[num]);
   size_t bytestorecv = psnd->allocated_size - psnd->recv_size;
+  ssize_t recvedbytes;
+
   /* WinSock will destroy unread received data if send() is
      failed.
      To avoid lossage of received data, recv() must be
      performed before every send() if any incoming data is
      available. However, skip this, if buffer is already full. */
   if((conn->handler->protocol&PROTO_FAMILY_HTTP) != 0 &&
-     conn->recv[num] == Curl_recv_plain &&
+     conn->recv[num] == Curl_cfilter_recv &&
      (!psnd->buffer || bytestorecv)) {
     const int readymask = Curl_socket_check(sockfd, CURL_SOCKET_BAD,
                                             CURL_SOCKET_BAD, 0);
@@ -176,16 +179,12 @@ static CURLcode pre_receive_plain(struct Curl_easy *data,
 #endif /* DEBUGBUILD */
         bytestorecv = psnd->allocated_size;
       }
-      if(psnd->buffer) {
-        ssize_t recvedbytes;
-        DEBUGASSERT(psnd->bindsock == sockfd);
-        recvedbytes = sread(sockfd, psnd->buffer + psnd->recv_size,
-                            bytestorecv);
-        if(recvedbytes > 0)
-          psnd->recv_size += recvedbytes;
-      }
-      else
-        psnd->allocated_size = 0;
+
+      DEBUGASSERT(psnd->bindsock == sockfd);
+      recvedbytes = sread(sockfd, psnd->buffer + psnd->recv_size,
+                          bytestorecv);
+      if(recvedbytes > 0)
+        psnd->recv_size += recvedbytes;
     }
   }
   return CURLE_OK;
@@ -720,11 +719,14 @@ CURLcode Curl_read(struct Curl_easy *data,   /* transfer */
 
   nread = conn->recv[num](data, num, buffertofill, bytesfromsocket, &result);
   if(nread < 0)
-    return result;
+    goto out;
 
   *n += nread;
-
-  return CURLE_OK;
+  result = CURLE_OK;
+out:
+  /* DEBUGF(infof(data, "Curl_read(handle=%p) -> %d, nread=%ld",
+        data, result, nread)); */
+  return result;
 }
 
 /* return 0 on success */

@@ -45,6 +45,7 @@
 #include "inet_pton.h"
 #include "gtls.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "vauth/vauth.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -1383,8 +1384,6 @@ gtls_connect_common(struct Curl_easy *data,
     rc = Curl_gtls_verifyserver(data, conn, session, sockindex);
     if(rc)
       return rc;
-    conn->recv[sockindex] = gtls_recv;
-    conn->send[sockindex] = gtls_send;
   }
 
   *done = ssl_connect_1 == connssl->connecting_state;
@@ -1699,7 +1698,10 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_none_false_start,         /* false_start */
   gtls_sha256sum,                /* sha256sum */
   NULL,                          /* associate_connection */
-  NULL                           /* disassociate_connection */
+  NULL,                          /* disassociate_connection */
+  NULL,                          /* free_multi_ssl_backend_data */
+  gtls_recv,                     /* recv decrypted data */
+  gtls_send,                     /* send data to encrypt */
 };
 
 #endif /* USE_GNUTLS */

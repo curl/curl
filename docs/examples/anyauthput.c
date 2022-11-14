@@ -44,7 +44,7 @@
 #endif
 
 /*
- * This example shows a HTTP PUT operation with authentication using "any"
+ * This example shows an HTTP PUT operation with authentication using "any"
  * type. It PUTs a file given as a command line argument to the URL also given
  * on the command line.
  *

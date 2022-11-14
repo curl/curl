@@ -41,6 +41,7 @@
 
 #include "schannel.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "strcase.h"
 #include "sendf.h"
 #include "connect.h" /* for the connect timeout */
@@ -262,7 +263,7 @@ set_ssl_version_min_max(DWORD *enabled_protocols, struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/*longest is 26, buffer is slightly bigger*/
+/* longest is 26, buffer is slightly bigger */
 #define LONGEST_ALG_ID 32
 #define CIPHEROPTION(X)                         \
   if(strcmp(#X, tmp) == 0)                      \
@@ -289,7 +290,7 @@ get_alg_id_by_name(char *name)
   CIPHEROPTION(CALG_MAC);
   CIPHEROPTION(CALG_RSA_SIGN);
   CIPHEROPTION(CALG_DSS_SIGN);
-/*ifdefs for the options that are defined conditionally in wincrypt.h*/
+/* ifdefs for the options that are defined conditionally in wincrypt.h */
 #ifdef CALG_NO_SIGN
   CIPHEROPTION(CALG_NO_SIGN);
 #endif
@@ -1200,18 +1201,18 @@ schannel_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 
     /* The first four bytes will be an unsigned int indicating number
        of bytes of data in the rest of the buffer. */
-    extension_len = (unsigned int *)(&alpn_buffer[cur]);
+    extension_len = (unsigned int *)(void *)(&alpn_buffer[cur]);
     cur += sizeof(unsigned int);
 
     /* The next four bytes are an indicator that this buffer will contain
        ALPN data, as opposed to NPN, for example. */
-    *(unsigned int *)&alpn_buffer[cur] =
+    *(unsigned int *)(void *)&alpn_buffer[cur] =
       SecApplicationProtocolNegotiationExt_ALPN;
     cur += sizeof(unsigned int);
 
     /* The next two bytes will be an unsigned short indicating the number
        of bytes used to list the preferred protocols. */
-    list_len = (unsigned short*)(&alpn_buffer[cur]);
+    list_len = (unsigned short*)(void *)(&alpn_buffer[cur]);
     cur += sizeof(unsigned short);
 
     list_start_index = cur;
@@ -1935,15 +1936,6 @@ schannel_connect_common(struct Curl_easy *data, struct connectdata *conn,
 
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    if(!connssl->backend->recv_renegotiating) {
-      /* On renegotiation, we don't want to reset the existing recv/send
-       * function pointers. They will have been set after the initial TLS
-       * handshake was completed. If they were subsequently modified, as
-       * is the case with HTTP/2, we don't want to override that change.
-       */
-      conn->recv[sockindex] = schannel_recv;
-      conn->send[sockindex] = schannel_send;
-    }
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
     /* When SSPI is used in combination with Schannel
@@ -2809,7 +2801,10 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_none_false_start,             /* false_start */
   schannel_sha256sum,                /* sha256sum */
   NULL,                              /* associate_connection */
-  NULL                               /* disassociate_connection */
+  NULL,                              /* disassociate_connection */
+  NULL,                              /* free_multi_ssl_backend_data */
+  schannel_recv,                     /* recv decrypted data */
+  schannel_send,                     /* send data to encrypt */
 };
 
 #endif /* USE_SCHANNEL */

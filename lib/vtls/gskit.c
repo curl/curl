@@ -73,6 +73,7 @@
 #include "sendf.h"
 #include "gskit.h"
 #include "vtls.h"
+#include "vtls_int.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "strcase.h"
@@ -324,7 +325,7 @@ static CURLcode set_ciphers(struct Curl_easy *data,
      GSKit tokens are always shorter than their cipher names, allocated buffers
      will always be large enough to accommodate the result. */
   l = strlen(cipherlist) + 1;
-  memset((char *) ciphers, 0, sizeof(ciphers));
+  memset(ciphers, 0, sizeof(ciphers));
   for(i = 0; i < CURL_GSKPROTO_LAST; i++) {
     ciphers[i].buf = malloc(l);
     if(!ciphers[i].buf) {
@@ -1146,8 +1147,6 @@ static CURLcode gskit_connect_common(struct Curl_easy *data,
   else if(connssl->connecting_state == ssl_connect_done) {
     connssl->state = ssl_connection_complete;
     connssl->connecting_state = ssl_connect_1;
-    conn->recv[sockindex] = gskit_recv;
-    conn->send[sockindex] = gskit_send;
     *done = TRUE;
   }
 
@@ -1323,7 +1322,10 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_none_false_start,          /* false_start */
   NULL,                           /* sha256sum */
   NULL,                           /* associate_connection */
-  NULL                            /* disassociate_connection */
+  NULL,                           /* disassociate_connection */
+  NULL,                           /* free_multi_ssl_backend_data */
+  gskit_recv,                     /* recv decrypted data */
+  gskit_send,                     /* send data to encrypt */
 };
 
 #endif /* USE_GSKIT */

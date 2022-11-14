@@ -894,7 +894,7 @@ static int ng_getsock(struct Curl_easy *data, struct connectdata *conn,
 
   socks[0] = conn->sock[FIRSTSOCKET];
 
-  /* in a HTTP/2 connection we can basically always get a frame so we should
+  /* in an HTTP/2 connection we can basically always get a frame so we should
      always be ready for one */
   bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 
@@ -1170,7 +1170,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
     }
   }
   else {
-    /* store as a HTTP1-style header */
+    /* store as an HTTP1-style header */
     result = write_data(stream, h3name.base, h3name.len);
     if(result) {
       return -1;

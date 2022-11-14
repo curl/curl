@@ -150,9 +150,19 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   char *actual_path;
 #endif
   size_t real_path_len;
+  CURLcode result;
 
-  CURLcode result = Curl_urldecode(data->state.up.path, 0, &real_path,
-                                   &real_path_len, REJECT_ZERO);
+  if(file->path) {
+    /* already connected.
+     * the handler->connect_it() is normally only called once, but
+     * FILE does a special check on setting up the connection which
+     * calls this explicitly. */
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  result = Curl_urldecode(data->state.up.path, 0, &real_path,
+                          &real_path_len, REJECT_ZERO);
   if(result)
     return result;
 
@@ -226,6 +236,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   file->path = real_path;
   #endif
 #endif
+  Curl_safefree(file->freepath);
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
@@ -329,7 +340,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
   while(!result) {
     size_t nread;
-    size_t nwrite;
+    ssize_t nwrite;
     size_t readcount;
     result = Curl_fillreadbuffer(data, data->set.buffer_size, &readcount);
     if(result)
@@ -340,7 +351,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
     nread = readcount;
 
-    /*skip bytes before resume point*/
+    /* skip bytes before resume point */
     if(data->state.resume_from) {
       if((curl_off_t)nread <= data->state.resume_from) {
         data->state.resume_from -= nread;
@@ -358,7 +369,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
     /* write the data to the target */
     nwrite = write(fd, buf2, nread);
-    if(nwrite != nread) {
+    if((size_t)nwrite != nread) {
       result = CURLE_SEND_ERROR;
       break;
     }
@@ -471,13 +482,13 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
               tm->tm_hour,
               tm->tm_min,
               tm->tm_sec,
-              data->set.opt_no_body ? "": "\r\n");
+              data->req.no_body ? "": "\r\n");
     result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
     if(result)
       return result;
     /* set the file size to make it available post transfer */
     Curl_pgrsSetDownloadSize(data, expected_size);
-    if(data->set.opt_no_body)
+    if(data->req.no_body)
       return result;
   }
 

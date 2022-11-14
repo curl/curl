@@ -61,15 +61,6 @@ man-in-the-middle the communication without you knowing it. Disabling
 verification makes the communication insecure. Just having encryption on a
 transfer is not enough as you cannot be sure that you are communicating with
 the correct end-point.
-
-NOTE: even when this option is disabled, depending on the used TLS backend,
-curl may still load the certificate file specified in
-\fICURLOPT_CAINFO(3)\fP. curl default settings in some distributions might use
-quite a large file as a default setting for \fICURLOPT_CAINFO(3)\fP, so
-loading the file can be quite expensive, especially when dealing with many
-connections. Thus, in some situations, you might want to disable verification
-fully to save resources by setting \fICURLOPT_CAINFO(3)\fP to NULL - but
-please also consider the warning above!
 .SH DEFAULT
 By default, curl assumes a value of 1.
 .SH PROTOCOLS

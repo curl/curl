@@ -46,6 +46,10 @@ Applications should use this information to judge if things are possible to do
 or not, instead of using compile-time checks, as dynamic/DLL libraries can be
 changed independent of applications.
 
+This function can alter the returned static data as long as
+\fIcurl_global_init\fP has not been called. It is therefore not thread-safe
+before libcurl initialization occurs.
+
 The curl_version_info_data struct looks like this
 
 .nf
@@ -106,6 +110,9 @@ typedef struct {
   /* when 'age' is CURLVERSION_TENTH or higher (>= 7.77.0), the members
      below exist */
   const char *gsasl_version; /* human readable string. */
+  /* when 'age' is CURLVERSION_ELEVENTH or higher (>= 7.87.0), the members
+     below exist */
+  const char *const *feature_names; /* Feature names. */
 } curl_version_info_data;
 .fi
 
@@ -124,98 +131,167 @@ returned as 0x070908.
 was built for. As discovered by a configure script or set by the build
 environment.
 
-\fIfeatures\fP can have none, one or more bits set, and the currently defined
-bits are:
+\fIfeatures\fP is a bit mask representing available features. It can
+have none, one or more bits set.
+The use of this field is deprecated: use \fIfeature_names\fP instead.
+The feature names description below lists the associated bits.
+
+\fIfeature_names\fP is a pointer to an array of string pointers, containing the
+names of the features that libcurl supports. The array is terminated by a NULL
+entry. Currently defined names are:
 .RS
-.IP CURL_VERSION_ALTSVC
+.IP """alt-svc"""
+\fIfeatures\fP mask bit: CURL_VERSION_ALTSVC
+.br
 HTTP Alt-Svc parsing and the associated options (Added in 7.64.1)
-.IP CURL_VERSION_ASYNCHDNS
+.IP """AsynchDNS"""
+\fIfeatures\fP mask bit: CURL_VERSION_ASYNCHDNS
+.br
 libcurl was built with support for asynchronous name lookups, which allows
 more exact timeouts (even on Windows) and less blocking when using the multi
 interface. (added in 7.10.7)
-.IP CURL_VERSION_BROTLI
+.IP """brotli"""
+\fIfeatures\fP mask bit: CURL_VERSION_BROTLI
+.br
 supports HTTP Brotli content encoding using libbrotlidec (Added in 7.57.0)
-.IP CURL_VERSION_ZSTD
-supports HTTP zstd content encoding using zstd library (Added in 7.72.0)
-.IP CURL_VERSION_CONV
-libcurl was built with support for character conversions, as provided by the
-CURLOPT_CONV_* callbacks. (Added in 7.15.4)
-.IP CURL_VERSION_CURLDEBUG
-libcurl was built with memory tracking debug capabilities. This is mainly of
-interest for libcurl hackers. (added in 7.19.6)
-.IP CURL_VERSION_DEBUG
+.IP """Debug"""
+\fIfeatures\fP mask bit: CURL_VERSION_DEBUG
+.br
 libcurl was built with debug capabilities (added in 7.10.6)
-.IP CURL_VERSION_GSASL
+.IP """gsasl"""
+\fIfeatures\fP mask bit: CURL_VERSION_GSASL
+.br
 libcurl was built with libgsasl and thus with some extra SCRAM-SHA
 authentication methods. (added in 7.76.0)
-.IP CURL_VERSION_GSSAPI
+.IP """GSS-API"""
+\fIfeatures\fP mask bit: CURL_VERSION_GSSAPI
+.br
 libcurl was built with support for GSS-API. This makes libcurl use provided
 functions for Kerberos and SPNEGO authentication. It also allows libcurl
 to use the current user credentials without the app having to pass them on.
 (Added in 7.38.0)
-.IP CURL_VERSION_GSSNEGOTIATE
-supports HTTP GSS-Negotiate (added in 7.10.6)
-.IP CURL_VERSION_HSTS
+.IP """HSTS"""
+\fIfeatures\fP mask bit: CURL_VERSION_HSTS
+.br
 libcurl was built with support for HSTS (HTTP Strict Transport Security)
 (Added in 7.74.0)
-.IP CURL_VERSION_HTTPS_PROXY
-libcurl was built with support for HTTPS-proxy.
-(Added in 7.52.0)
-.IP CURL_VERSION_HTTP2
+.IP """HTTP2"""
+\fIfeatures\fP mask bit: CURL_VERSION_HTTP2
+.br
 libcurl was built with support for HTTP2.
 (Added in 7.33.0)
-.IP CURL_VERSION_HTTP3
+.IP """HTTP3"""
+\fIfeatures\fP mask bit: CURL_VERSION_HTTP3
+.br
 HTTP/3 and QUIC support are built-in (Added in 7.66.0)
-.IP CURL_VERSION_IDN
+.IP """HTTPS-proxy"""
+\fIfeatures\fP mask bit: CURL_VERSION_HTTPS_PROXY
+.br
+libcurl was built with support for HTTPS-proxy.
+(Added in 7.52.0)
+.IP """IDN"""
+\fIfeatures\fP mask bit: CURL_VERSION_IDN
+.br
 libcurl was built with support for IDNA, domain names with international
 letters. (Added in 7.12.0)
-.IP CURL_VERSION_IPV6
+.IP """IPv6"""
+\fIfeatures\fP mask bit: CURL_VERSION_IPV6
+.br
 supports IPv6
-.IP CURL_VERSION_KERBEROS4
-supports Kerberos V4 (when using FTP). Legacy bit. Deprecated since 7.33.0.
-.IP CURL_VERSION_KERBEROS5
+.IP """Kerberos"""
+\fIfeatures\fP mask bit: CURL_VERSION_KERBEROS5
+.br
 supports Kerberos V5 authentication for FTP, IMAP, LDAP, POP3, SMTP and
 SOCKSv5 proxy. (Added in 7.40.0)
-.IP CURL_VERSION_LARGEFILE
+.IP """Largefile"""
+\fIfeatures\fP mask bit: CURL_VERSION_LARGEFILE
+.br
 libcurl was built with support for large files. (Added in 7.11.1)
-.IP CURL_VERSION_UNICODE
-libcurl was built with Unicode support on Windows. This makes non-ASCII
-characters work in filenames and options passed to libcurl. (Added in 7.72.0)
-.IP CURL_VERSION_LIBZ
+.IP """libz"""
+\fIfeatures\fP mask bit: CURL_VERSION_LIBZ
+.br
 supports HTTP deflate using libz (Added in 7.10)
-.IP CURL_VERSION_MULTI_SSL
+.IP """MultiSSL"""
+\fIfeatures\fP mask bit: CURL_VERSION_MULTI_SSL
+.br
 libcurl was built with multiple SSL backends. For details, see
 \fIcurl_global_sslset(3)\fP.
 (Added in 7.56.0)
-.IP CURL_VERSION_NTLM
+.IP """NTLM"""
+\fIfeatures\fP mask bit: CURL_VERSION_NTLM
+.br
 supports HTTP NTLM (added in 7.10.6)
-.IP CURL_VERSION_NTLM_WB
+.IP """NTLM_WB"""
+\fIfeatures\fP mask bit: CURL_VERSION_NTLM_WB
+.br
 libcurl was built with support for NTLM delegation to a winbind helper.
 (Added in 7.22.0)
-.IP CURL_VERSION_PSL
+.IP """PSL"""
+\fIfeatures\fP mask bit: CURL_VERSION_PSL
+.br
 libcurl was built with support for Mozilla's Public Suffix List. This makes
 libcurl ignore cookies with a domain that is on the list.
 (Added in 7.47.0)
-.IP CURL_VERSION_SPNEGO
+.IP """SPNEGO"""
+\fIfeatures\fP mask bit: CURL_VERSION_SPNEGO
+.br
 libcurl was built with support for SPNEGO authentication (Simple and Protected
 GSS-API Negotiation Mechanism, defined in RFC 2478.) (added in 7.10.8)
-.IP CURL_VERSION_SSL
+.IP """SSL"""
+\fIfeatures\fP mask bit: CURL_VERSION_SSL
+.br
 supports SSL (HTTPS/FTPS) (Added in 7.10)
-.IP CURL_VERSION_SSPI
+.IP """SSPI"""
+\fIfeatures\fP mask bit: CURL_VERSION_SSPI
+.br
 libcurl was built with support for SSPI. This is only available on Windows and
 makes libcurl use Windows-provided functions for Kerberos, NTLM, SPNEGO and
 Digest authentication. It also allows libcurl to use the current user
 credentials without the app having to pass them on. (Added in 7.13.2)
-.IP CURL_VERSION_THREADSAFE
+.IP """threadsafe"""
+\fIfeatures\fP mask bit: CURL_VERSION_THREADSAFE
+.br
 libcurl was built with thread-safety support (Atomic or SRWLOCK) to protect
 curl initialization. (Added in 7.84.0) See \fIlibcurl-thread(3)\fP
-.IP CURL_VERSION_TLSAUTH_SRP
+.IP """TLS-SRP"""
+\fIfeatures\fP mask bit: CURL_VERSION_TLSAUTH_SRP
+.br
 libcurl was built with support for TLS-SRP (in one or more of the built-in TLS
 backends). (Added in 7.21.4)
-.IP CURL_VERSION_UNIX_SOCKETS
+.IP """TrackMemory"""
+\fIfeatures\fP mask bit: CURL_VERSION_CURLDEBUG
+.br
+libcurl was built with memory tracking debug capabilities. This is mainly of
+interest for libcurl hackers. (added in 7.19.6)
+.IP """Unicode"""
+\fIfeatures\fP mask bit: CURL_VERSION_UNICODE
+.br
+libcurl was built with Unicode support on Windows. This makes non-ASCII
+characters work in filenames and options passed to libcurl. (Added in 7.72.0)
+.IP """UnixSockets"""
+\fIfeatures\fP mask bit: CURL_VERSION_UNIX_SOCKETS
+.br
 libcurl was built with support for Unix domain sockets.
 (Added in 7.40.0)
+.IP """zstd"""
+\fIfeatures\fP mask bit: CURL_VERSION_ZSTD
+.br
+supports HTTP zstd content encoding using zstd library (Added in 7.72.0)
+.IP none
+\fIfeatures\fP mask bit: CURL_VERSION_CONV
+.br
+libcurl was built with support for character conversions, as provided by the
+CURLOPT_CONV_* callbacks. Always 0 since 7.82.0. (Added in 7.15.4)
+.IP none
+\fIfeatures\fP mask bit: CURL_VERSION_GSSNEGOTIATE
+.br
+supports HTTP GSS-Negotiate (added in 7.10.6, deprecated in 7.38.0)
+.IP none
+\fIfeatures\fP mask bit: CURL_VERSION_KERBEROS4
+.br
+supports Kerberos V4 (when using FTP). Legacy bit. Deprecated since 7.33.0.
 .RE
+
 \fIssl_version\fP is an ASCII string for the TLS library name + version
 used. If libcurl has no SSL support, this is NULL. For example "Schannel",
 \&"Secure Transport" or "OpenSSL/1.1.0g".

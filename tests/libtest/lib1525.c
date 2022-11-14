@@ -50,7 +50,7 @@ int test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
-  /* http and proxy header list*/
+  /* http and proxy header list */
   struct curl_slist *hhl = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {

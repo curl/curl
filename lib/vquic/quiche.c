@@ -80,7 +80,7 @@ static int quiche_getsock(struct Curl_easy *data,
 
   socks[0] = conn->sock[FIRSTSOCKET];
 
-  /* in a HTTP/2 connection we can basically always get a frame so we should
+  /* in an HTTP/2 connection we can basically always get a frame so we should
      always be ready for one */
   bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 

@@ -81,7 +81,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
   bool have_chlg;
 
   /* Point to the address of the pointer that holds the string to send to the
-     server, which is for a plain host or for a HTTP proxy */
+     server, which is for a plain host or for an HTTP proxy */
   char **allocuserpwd;
 
   /* Point to the name and password for this */

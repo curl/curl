@@ -131,7 +131,7 @@ Build nghttp3
      % make
      % make install
 
-Build ngtcp2 (once https://github.com/ngtcp2/ngtcp2/pull/505 is merged)
+Build ngtcp2
 
      % cd ..
      % git clone https://github.com/ngtcp2/ngtcp2

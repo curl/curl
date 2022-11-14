@@ -40,10 +40,6 @@ list is matched as either a domain which contains the hostname, or the
 hostname itself. For example, "ample.com" would match ample.com, ample.com:80,
 and www.ample.com, but not www.example.com or ample.com.org.
 
-If the name in the \fInoproxy\fP list has a leading period, it is a domain
-match against the provided host name. This way ".example.com" will switch off
-proxy use for both "www.example.com" as well as for "foo.example.com".
-
 Setting the \fInoproxy\fP string to "" (an empty string) will explicitly
 enable the proxy for all host names, even if there is an environment variable
 set for it.
@@ -52,6 +48,11 @@ Enter IPv6 numerical addresses in the list of host names without enclosing
 brackets:
 
  "example.com,::1,localhost"
+
+Since 7.86.0, IP addresses specified to this option can be provided using CIDR
+notation: an appended slash and number specifies the number of "network bits"
+out of the address to use in the comparison. For example "192.168.0.0/16"
+would match all addresses starting with "192.168".
 
 The application does not have to keep the string around after setting this
 option.

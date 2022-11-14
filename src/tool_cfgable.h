@@ -70,8 +70,9 @@ struct OperationConfig {
   char *postfields;
   curl_off_t postfieldsize;
   char *referer;
-  double timeout;
-  double connecttimeout;
+  char *query;
+  long timeout_ms;
+  long connecttimeout_ms;
   long maxredirs;
   curl_off_t max_filesize;
   char *output_dir;
@@ -254,11 +255,8 @@ struct OperationConfig {
   bool xattr;               /* store metadata in extended attributes */
   long gssapi_delegation;
   bool ssl_allow_beast;     /* allow this SSL vulnerability */
-  bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy*/
-
+  bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy */
   bool ssl_no_revoke;       /* disable SSL certificate revocation checks */
-  /*bool proxy_ssl_no_revoke; */
-
   bool ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
                                   revocation list errors */
 
@@ -272,7 +270,7 @@ struct OperationConfig {
   bool abstract_unix_socket;      /* path to an abstract Unix domain socket */
   bool falsestart;
   bool path_as_is;
-  double expect100timeout;
+  long expect100timeout_ms;
   bool suppress_connect_headers;  /* suppress proxy CONNECT response headers
                                      from user callbacks */
   bool synthetic_error;           /* if TRUE, this is tool-internal error */

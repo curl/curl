@@ -71,10 +71,14 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
       /* It is referenced to the home directory, so strip the
          leading '/' */
       memcpy(real_path, homedir, homelen);
-      real_path[homelen] = '/';
-      real_path[homelen + 1] = '\0';
+      /* Only add a trailing '/' if homedir does not end with one */
+      if(homelen == 0 || real_path[homelen - 1] != '/') {
+        real_path[homelen] = '/';
+        homelen++;
+        real_path[homelen] = '\0';
+      }
       if(working_path_len > 3) {
-        memcpy(real_path + homelen + 1, working_path + 3,
+        memcpy(real_path + homelen, working_path + 3,
                1 + working_path_len -3);
       }
     }
@@ -148,15 +152,12 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
         break;
       }
       if(cp[i] == '\0') {  /* End of string */
-        /*error("Unterminated quote");*/
         goto fail;
       }
       if(cp[i] == '\\') {  /* Escaped characters */
         i++;
         if(cp[i] != '\'' && cp[i] != '\"' &&
             cp[i] != '\\') {
-          /*error("Bad escaped character '\\%c'",
-              cp[i]);*/
           goto fail;
         }
       }
@@ -164,7 +165,6 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
     }
 
     if(j == 0) {
-      /*error("Empty quotes");*/
       goto fail;
     }
     *cpp = cp + i + strspn(cp + i, WHITESPACE);

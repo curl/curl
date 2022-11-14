@@ -44,14 +44,8 @@
 #include <inet.h>
 #endif
 
-#if defined(USE_THREADS_POSIX)
-#  ifdef HAVE_PTHREAD_H
-#    include <pthread.h>
-#  endif
-#elif defined(USE_THREADS_WIN32)
-#  ifdef HAVE_PROCESS_H
-#    include <process.h>
-#  endif
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#  include <pthread.h>
 #endif
 
 #if (defined(NETWARE) && defined(__NOVELL_LIBC__))
@@ -75,7 +69,6 @@
 #include "inet_ntop.h"
 #include "curl_threads.h"
 #include "connect.h"
-#include "socketpair.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"

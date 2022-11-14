@@ -1,6 +1,6 @@
 # Rustls
 
-[Rustls is a TLS backend written in Rust.](https://docs.rs/rustls/). Curl can
+[Rustls is a TLS backend written in Rust](https://docs.rs/rustls/). Curl can
 be built to use it as an alternative to OpenSSL or other TLS backends. We use
 the [rustls-ffi C bindings](https://github.com/rustls/rustls-ffi/). This
 version of curl depends on version v0.8.2 of rustls-ffi.

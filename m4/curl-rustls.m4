@@ -38,6 +38,14 @@ if test "x$OPT_RUSTLS" != xno; then
       OPT_RUSTLS=""
     fi
 
+    case $host_os in
+      darwin*)
+        LDFLAGS="$LDFLAGS -framework Security"
+        ;;
+      *)
+        ;;
+    esac
+
     if test -z "$OPT_RUSTLS" ; then
       dnl check for lib first without setting any new path
 

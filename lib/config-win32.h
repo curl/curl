@@ -66,11 +66,6 @@
 /* Define if you have the <netinet/in.h> header file. */
 /* #define HAVE_NETINET_IN_H 1 */
 
-/* Define if you have the <process.h> header file. */
-#ifndef __SALFORDC__
-#define HAVE_PROCESS_H 1
-#endif
-
 /* Define if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
 
@@ -336,11 +331,6 @@
 /* Define to the size of `curl_off_t', as computed by sizeof. */
 #define SIZEOF_CURL_OFF_T 8
 
-/* Define to the size of `off_t', as computed by sizeof. */
-#ifndef SIZEOF_OFF_T
-#define SIZEOF_OFF_T 8
-#endif
-
 /* ---------------------------------------------------------------- */
 /*               BSD-style lwIP TCP/IP stack SPECIFIC               */
 /* ---------------------------------------------------------------- */
@@ -580,6 +570,14 @@ Vista
 #  ifndef _FILE_OFFSET_BITS
 #  define _FILE_OFFSET_BITS 64
 #  endif
+#endif
+
+/* Define to the size of `off_t', as computed by sizeof. */
+#if defined(__MINGW64_VERSION_MAJOR) && \
+  defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS == 64)
+#  define SIZEOF_OFF_T 8
+#else
+#  define SIZEOF_OFF_T 4
 #endif
 
 /* ---------------------------------------------------------------- */
