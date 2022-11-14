@@ -44,7 +44,9 @@ int test(char *URL)
     goto test_cleanup;
   }
 
-  res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+  CURL_IGNORE_DEPRECATION(
+    res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+  )
   if(res) {
     fprintf(stderr, "curl_easy_getinfo() returned %d (%s)\n",
             res, curl_easy_strerror(res));
