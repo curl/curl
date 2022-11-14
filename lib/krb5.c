@@ -454,14 +454,14 @@ static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
 /* Read |len| from the socket |fd| and store it in |to|. Return a CURLcode
    saying whether an error occurred or CURLE_OK if |len| was read. */
 static CURLcode
-socket_read(curl_socket_t fd, void *to, size_t len)
+socket_read(struct Curl_easy *data, curl_socket_t fd, void *to, size_t len)
 {
   char *to_p = to;
   CURLcode result;
   ssize_t nread = 0;
 
   while(len > 0) {
-    result = Curl_read_plain(fd, to_p, len, &nread);
+    result = Curl_read_plain(data, fd, to_p, len, &nread);
     if(!result) {
       len -= nread;
       to_p += nread;
@@ -502,15 +502,15 @@ socket_write(struct Curl_easy *data, curl_socket_t fd, const void *to,
   return CURLE_OK;
 }
 
-static CURLcode read_data(struct connectdata *conn,
-                          curl_socket_t fd,
+static CURLcode read_data(struct Curl_easy *data, curl_socket_t fd,
                           struct krb5buffer *buf)
 {
+  struct connectdata *conn = data->conn;
   int len;
   CURLcode result;
   int nread;
 
-  result = socket_read(fd, &len, sizeof(len));
+  result = socket_read(data, fd, &len, sizeof(len));
   if(result)
     return result;
 
@@ -525,7 +525,7 @@ static CURLcode read_data(struct connectdata *conn,
   if(!len || !buf->data)
     return CURLE_OUT_OF_MEMORY;
 
-  result = socket_read(fd, buf->data, len);
+  result = socket_read(data, fd, buf->data, len);
   if(result)
     return result;
   nread = conn->mech->decode(conn->app_data, buf->data, len,
@@ -560,7 +560,7 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
 
   /* Handle clear text response. */
   if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR)
-    return sread(fd, buffer, len);
+    return Curl_recv_plain(data, sockindex, buffer, len, err);
 
   if(conn->in_buffer.eof_flag) {
     conn->in_buffer.eof_flag = 0;
@@ -573,7 +573,7 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   buffer += bytes_read;
 
   while(len > 0) {
-    if(read_data(conn, fd, &conn->in_buffer))
+    if(read_data(data, fd, &conn->in_buffer))
       return -1;
     if(conn->in_buffer.size == 0) {
       if(bytes_read > 0)
