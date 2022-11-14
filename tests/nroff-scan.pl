@@ -64,6 +64,10 @@ sub file {
         my $l = $_;
         while($l =~ s/\\f(.)([^ ]*)\\f(.)//) {
             my ($pre, $str, $post)=($1, $2, $3);
+            if($str =~ /^\\f[ib]/i) {
+                print "error: $f:$line: double-highlight\n";
+                $errors++;
+            }
             if($post ne "P") {
                 print "error: $f:$line: missing \\fP after $str\n";
                 $errors++;
