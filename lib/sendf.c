@@ -338,6 +338,7 @@ CURLcode Curl_write(struct Curl_easy *data,
   }
 }
 
+/* Curl_send_plain sends raw data without a size restriction on 'len'. */
 ssize_t Curl_send_plain(struct Curl_easy *data, int num,
                         const void *mem, size_t len, CURLcode *code)
 {
@@ -386,7 +387,6 @@ ssize_t Curl_send_plain(struct Curl_easy *data, int num,
 #endif
       ) {
       /* this is just a case of EWOULDBLOCK */
-      bytes_written = 0;
       *code = CURLE_AGAIN;
     }
     else {
@@ -403,7 +403,12 @@ ssize_t Curl_send_plain(struct Curl_easy *data, int num,
 /*
  * Curl_write_plain() is an internal write function that sends data to the
  * server using plain sockets only. Otherwise meant to have the exact same
- * proto as Curl_write()
+ * proto as Curl_write().
+ *
+ * This function wraps Curl_send_plain(). The only difference besides the
+ * prototype is '*written' (bytes written) is set to 0 on error.
+ * 'sockfd' must be one of the connection's two main sockets and the value of
+ * 'len' must not be changed.
  */
 CURLcode Curl_write_plain(struct Curl_easy *data,
                           curl_socket_t sockfd,
@@ -415,13 +420,22 @@ CURLcode Curl_write_plain(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   int num;
   DEBUGASSERT(conn);
+  DEBUGASSERT(sockfd == conn->sock[FIRSTSOCKET] ||
+              sockfd == conn->sock[SECONDARYSOCKET]);
+  if(sockfd != conn->sock[FIRSTSOCKET] &&
+     sockfd != conn->sock[SECONDARYSOCKET])
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
   *written = Curl_send_plain(data, num, mem, len, &result);
+  if(*written == -1)
+    *written = 0;
 
   return result;
 }
 
+/* Curl_recv_plain receives raw data without a size restriction on 'len'. */
 ssize_t Curl_recv_plain(struct Curl_easy *data, int num, char *buf,
                         size_t len, CURLcode *code)
 {
@@ -663,30 +677,39 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   return chop_write(data, type, ptr, len);
 }
 
-CURLcode Curl_read_plain(curl_socket_t sockfd,
-                         char *buf,
-                         size_t bytesfromsocket,
-                         ssize_t *n)
+/*
+ * Curl_read_plain() is an internal read function that reads data from the
+ * server using plain sockets only. Otherwise meant to have the exact same
+ * proto as Curl_read().
+ *
+ * This function wraps Curl_recv_plain(). The only difference besides the
+ * prototype is '*n' (bytes read) is set to 0 on error.
+ * 'sockfd' must be one of the connection's two main sockets and the value of
+ * 'sizerequested' must not be changed.
+ */
+CURLcode Curl_read_plain(struct Curl_easy *data,   /* transfer */
+                         curl_socket_t sockfd,     /* read from this socket */
+                         char *buf,                /* store read data here */
+                         size_t sizerequested,     /* max amount to read */
+                         ssize_t *n)               /* amount bytes read */
 {
-  ssize_t nread = sread(sockfd, buf, bytesfromsocket);
+  CURLcode result;
+  struct connectdata *conn = data->conn;
+  int num;
+  DEBUGASSERT(conn);
+  DEBUGASSERT(sockfd == conn->sock[FIRSTSOCKET] ||
+              sockfd == conn->sock[SECONDARYSOCKET]);
+  if(sockfd != conn->sock[FIRSTSOCKET] &&
+     sockfd != conn->sock[SECONDARYSOCKET])
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if(-1 == nread) {
-    const int err = SOCKERRNO;
-    const bool return_error =
-#ifdef USE_WINSOCK
-      WSAEWOULDBLOCK == err
-#else
-      EWOULDBLOCK == err || EAGAIN == err || EINTR == err
-#endif
-      ;
-    *n = 0; /* no data returned */
-    if(return_error)
-      return CURLE_AGAIN;
-    return CURLE_RECV_ERROR;
-  }
+  num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  *n = nread;
-  return CURLE_OK;
+  *n = Curl_recv_plain(data, num, buf, sizerequested, &result);
+  if(*n == -1)
+    *n = 0;
+
+  return result;
 }
 
 /*
