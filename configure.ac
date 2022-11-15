@@ -4127,6 +4127,32 @@ AS_HELP_STRING([--disable-mime],[Disable mime API support]),
 )
 
 dnl ************************************************************
+dnl disable form API support
+dnl
+AC_MSG_CHECKING([whether to support the form API])
+AC_ARG_ENABLE(form-api,
+AS_HELP_STRING([--enable-form-api],[Enable form API support])
+AS_HELP_STRING([--disable-form-api],[Disable form API support]),
+[ case "$enableval" in
+  no)  AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_FORM_API, 1, [disable form API])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       test "$enable_mime" = no &&
+         AC_MSG_ERROR(MIME support needs to be enabled in order to enable form API support)
+       ;;
+  esac ],
+[
+  if test "$enable_mime" = no; then
+    enable_form_api=no
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_FORM_API, 1, [disable form API])
+  else
+    AC_MSG_RESULT(yes)
+  fi ]
+)
+
+dnl ************************************************************
 dnl disable date parsing
 dnl
 AC_MSG_CHECKING([whether to support date parsing])

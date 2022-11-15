@@ -666,7 +666,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       data->set.method = HTTPREQ_GET;
     break;
 
-#ifndef CURL_DISABLE_MIME
+#ifndef CURL_DISABLE_FORM_API
   case CURLOPT_HTTPPOST:
     /*
      * Set to make us do HTTP POST

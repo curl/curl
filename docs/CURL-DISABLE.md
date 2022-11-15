@@ -24,6 +24,10 @@ Disable DNS-over-HTTPS
 
 Disable the FILE protocol
 
+## `CURL_DISABLE_FORM_API`
+
+Disable the form API
+
 ## `CURL_DISABLE_FTP`
 
 Disable the FTP (and FTPS) protocol

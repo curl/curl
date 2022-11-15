@@ -783,6 +783,7 @@ sub checksystemfeatures {
     $feature{"DoH"} = 1;
     $feature{"HTTP-auth"} = 1;
     $feature{"Mime"} = 1;
+    $feature{"form-api"} = 1;
     $feature{"netrc"} = 1;
     $feature{"parsedate"} = 1;
     $feature{"proxy"} = 1;

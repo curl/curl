@@ -50,6 +50,9 @@
 /* disables FILE */
 #cmakedefine CURL_DISABLE_FILE 1
 
+/* disables form api */
+#cmakedefine CURL_DISABLE_FORM_API 1
+
 /* disables FTP */
 #cmakedefine CURL_DISABLE_FTP 1
 
