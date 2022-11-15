@@ -2372,6 +2372,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
   case HTTPREQ_POST_MIME:
     http->sendit = &data->set.mimepost;
     break;
+#ifndef CURL_DISABLE_FORM_API
   case HTTPREQ_POST_FORM:
     /* Convert the form structure into a mime structure. */
     Curl_mime_cleanpart(&http->form);
@@ -2381,6 +2382,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
       return result;
     http->sendit = &http->form;
     break;
+#endif
   default:
     http->sendit = NULL;
   }

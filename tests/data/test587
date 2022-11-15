@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
+FORM
 flaky
 </keywords>
 </info>
@@ -17,7 +18,7 @@ flaky
 # Client-side
 <client>
 <features>
-Mime
+form-api
 </features>
 <server>
 http
