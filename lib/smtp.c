@@ -703,7 +703,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
 
     /* Add external headers and mime version. */
     curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(&data->set.mimepost, NULL,
+    result = Curl_mime_prepare_headers(data, &data->set.mimepost, NULL,
                                        NULL, MIMESTRATEGY_MAIL);
 
     if(!result)

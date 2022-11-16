@@ -99,7 +99,6 @@ struct mime_state {
 
 /* A mime multipart. */
 struct curl_mime {
-  struct Curl_easy *easy;          /* The associated easy handle. */
   curl_mimepart *parent;           /* Parent part. */
   curl_mimepart *firstpart;        /* First part. */
   curl_mimepart *lastpart;         /* Last part. */
@@ -109,7 +108,6 @@ struct curl_mime {
 
 /* A mime part. */
 struct curl_mimepart {
-  struct Curl_easy *easy;          /* The associated easy handle. */
   curl_mime *parent;               /* Parent mime structure. */
   curl_mimepart *nextpart;         /* Forward linked list. */
   enum mimekind kind;              /* The part kind. */
@@ -139,14 +137,16 @@ CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
                                     !defined(CURL_DISABLE_IMAP))
 
 /* Prototypes. */
-void Curl_mime_initpart(struct curl_mimepart *part, struct Curl_easy *easy);
+void Curl_mime_initpart(struct curl_mimepart *part);
 void Curl_mime_cleanpart(struct curl_mimepart *part);
-CURLcode Curl_mime_duppart(struct curl_mimepart *dst,
+CURLcode Curl_mime_duppart(struct Curl_easy *data,
+                           struct curl_mimepart *dst,
                            const curl_mimepart *src);
 CURLcode Curl_mime_set_subparts(struct curl_mimepart *part,
                                 struct curl_mime *subparts,
                                 int take_ownership);
-CURLcode Curl_mime_prepare_headers(struct curl_mimepart *part,
+CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
+                                   struct curl_mimepart *part,
                                    const char *contenttype,
                                    const char *disposition,
                                    enum mimestrategy strategy);
@@ -159,11 +159,11 @@ void Curl_mime_unpause(struct curl_mimepart *part);
 
 #else
 /* if disabled */
-#define Curl_mime_initpart(x,y)
+#define Curl_mime_initpart(x)
 #define Curl_mime_cleanpart(x)
-#define Curl_mime_duppart(x,y) CURLE_OK /* Nothing to duplicate. Succeed */
+#define Curl_mime_duppart(x,y,z) CURLE_OK /* Nothing to duplicate. Succeed */
 #define Curl_mime_set_subparts(a,b,c) CURLE_NOT_BUILT_IN
-#define Curl_mime_prepare_headers(a,b,c,d) CURLE_NOT_BUILT_IN
+#define Curl_mime_prepare_headers(a,b,c,d,e) CURLE_NOT_BUILT_IN
 #define Curl_mime_size(x) (curl_off_t) -1
 #define Curl_mime_read NULL
 #define Curl_mime_rewind(x) ((void)x, CURLE_NOT_BUILT_IN)

@@ -265,7 +265,7 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_mime_initpart(&http->form, data);
+  Curl_mime_initpart(&http->form);
   data->req.p.http = http;
 
   if(data->state.httpwant == CURL_HTTP_VERSION_3) {
@@ -2301,7 +2301,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
       cthdr = "multipart/form-data";
 
     curl_mime_headers(http->sendit, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(http->sendit, cthdr,
+    result = Curl_mime_prepare_headers(data, http->sendit, cthdr,
                                        NULL, MIMESTRATEGY_FORM);
     curl_mime_headers(http->sendit, NULL, 0);
     if(!result)
