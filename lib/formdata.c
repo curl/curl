@@ -715,10 +715,10 @@ int curl_formget(struct curl_httppost *form, void *arg,
   CURLcode result;
   curl_mimepart toppart;
 
-  Curl_mime_initpart(&toppart, NULL); /* default form is empty */
+  Curl_mime_initpart(&toppart); /* default form is empty */
   result = Curl_getformdata(NULL, &toppart, form, NULL);
   if(!result)
-    result = Curl_mime_prepare_headers(&toppart, "multipart/form-data",
+    result = Curl_mime_prepare_headers(NULL, &toppart, "multipart/form-data",
                                        NULL, MIMESTRATEGY_FORM);
 
   while(!result) {
