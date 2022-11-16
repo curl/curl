@@ -131,7 +131,7 @@ double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
 }
 
 #ifdef WIN32
-HMODULE win32_load_system_library(TCHAR *filename)
+HMODULE win32_load_system_library(const TCHAR *filename)
 {
   size_t filenamelen = _tcslen(filename);
   size_t systemdirlen = GetSystemDirectory(NULL, 0);

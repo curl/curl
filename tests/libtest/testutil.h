@@ -43,7 +43,7 @@ long tutil_tvdiff(struct timeval t1, struct timeval t2);
 double tutil_tvdiff_secs(struct timeval t1, struct timeval t2);
 
 #ifdef WIN32
-HMODULE win32_load_system_library(TCHAR *filename);
+HMODULE win32_load_system_library(const TCHAR *filename);
 #endif
 
 #endif  /* HEADER_CURL_LIBTEST_TESTUTIL_H */
