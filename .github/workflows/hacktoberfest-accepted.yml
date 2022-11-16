@@ -14,16 +14,17 @@ concurrency:
   # this should not run in parallel, so just run one at a time
   group: ${{ github.workflow }}
 
-permissions:
-  # requires issues AND pull-requests write permissions to edit labels on PRs!
-  issues: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   # add hacktoberfest-accepted label to PRs opened starting from September 30th
   # till November 1st which are closed via commit reference from master branch.
   merged:
     runs-on: ubuntu-latest
+    permissions:
+      # requires issues AND pull-requests write permissions to edit labels on PRs!
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
         with:

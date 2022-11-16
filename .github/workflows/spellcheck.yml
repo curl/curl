@@ -21,10 +21,11 @@ on:
     - '**.1'
     - '.github/**'
 
+permissions: {}
+
 jobs:
   check:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
 

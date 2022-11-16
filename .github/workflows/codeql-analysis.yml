@@ -18,12 +18,13 @@ on:
 concurrency:
   group: ${{ github.workflow }}
 
-permissions:
-  security-events: write
+permissions: {}
 
 jobs:
   codeql:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
