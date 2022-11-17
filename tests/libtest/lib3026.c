@@ -62,10 +62,8 @@ int test(char *URL)
      libcurl calls LoadLibrary/FreeLibrary it only increases/decreases the
      library's refcount rather than actually loading/unloading the library,
      which would affect the test runtime. */
-#ifdef WIN32
   (void)win32_load_system_library(TEXT("secur32.dll"));
   (void)win32_load_system_library(TEXT("iphlpapi.dll"));
-#endif
 
   for(i = 0; i < tid_count; i++) {
     HANDLE th;
