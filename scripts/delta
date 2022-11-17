@@ -59,8 +59,20 @@ $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 $contribs = $acontribs - $bcontribs;
 
 # number of setops:
-$asetopts=`grep '^  CURLOPT(' include/curl/curl.h  | grep -cv OBSOLETE`;
-$bsetopts=`git show $start:include/curl/curl.h | grep '^  CURLOPT(' | grep -cv OBSOLETE`;
+sub setopts {
+    my ($f)=@_;
+    open(H, "$f");
+    my $opts;
+    while(<H>) {
+        if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/))  {
+            $opts++;
+        }
+    }
+    close(H);
+    return $opts;
+}
+$asetopts = setopts("<include/curl/curl.h");
+$bsetopts = setopts("git show $start:include/curl/curl.h|");
 $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
