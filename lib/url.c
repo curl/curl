@@ -2060,18 +2060,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     if(result)
       return result;
   }
-#ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy) {
-    result = Curl_idnconvert_hostname(data, &conn->http_proxy.host);
-    if(result)
-      return result;
-  }
-  if(conn->bits.socksproxy) {
-    result = Curl_idnconvert_hostname(data, &conn->socks_proxy.host);
-    if(result)
-      return result;
-  }
-#endif
 
 #ifndef CURL_DISABLE_HSTS
   /* HSTS upgrade */
@@ -3731,6 +3719,21 @@ static CURLcode create_conn(struct Curl_easy *data,
   if(result)
     goto out;
 
+  /*************************************************************
+   * IDN-convert the proxy hostnames
+   *************************************************************/
+#ifndef CURL_DISABLE_PROXY
+  if(conn->bits.httpproxy) {
+    result = Curl_idnconvert_hostname(data, &conn->http_proxy.host);
+    if(result)
+      return result;
+  }
+  if(conn->bits.socksproxy) {
+    result = Curl_idnconvert_hostname(data, &conn->socks_proxy.host);
+    if(result)
+      return result;
+  }
+#endif
 
   /*************************************************************
    * Check whether the host and the "connect to host" are equal.
