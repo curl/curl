@@ -44,12 +44,12 @@ CURLcode Curl_range(struct Curl_easy *data)
   if(data->state.use_range && data->state.range) {
     CURLofft from_t;
     CURLofft to_t;
-    from_t = curlx_strtoofft(data->state.range, &ptr, 0, &from);
+    from_t = curlx_strtoofft(data->state.range, &ptr, 10, &from);
     if(from_t == CURL_OFFT_FLOW)
       return CURLE_RANGE_ERROR;
     while(*ptr && (ISBLANK(*ptr) || (*ptr == '-')))
       ptr++;
-    to_t = curlx_strtoofft(ptr, &ptr2, 0, &to);
+    to_t = curlx_strtoofft(ptr, &ptr2, 10, &to);
     if(to_t == CURL_OFFT_FLOW)
       return CURLE_RANGE_ERROR;
     if((to_t == CURL_OFFT_INVAL) && !from_t) {

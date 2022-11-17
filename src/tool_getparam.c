@@ -502,7 +502,7 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   char *unit;
   curl_off_t value;
 
-  if(curlx_strtoofft(arg, &unit, 0, &value)) {
+  if(curlx_strtoofft(arg, &unit, 10, &value)) {
     warnf(global, "invalid number specified for %s\n", which);
     return PARAM_BAD_USE;
   }

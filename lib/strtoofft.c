@@ -221,6 +221,7 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   curl_off_t number;
   errno = 0;
   *num = 0; /* clear by default */
+  DEBUGASSERT(base); /* starting now, avoid base zero */
 
   while(*str && ISBLANK(*str))
     str++;
