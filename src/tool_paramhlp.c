@@ -473,7 +473,7 @@ ParameterError str2offset(curl_off_t *val, const char *str)
 
 #if(SIZEOF_CURL_OFF_T > SIZEOF_LONG)
   {
-    CURLofft offt = curlx_strtoofft(str, &endptr, 0, val);
+    CURLofft offt = curlx_strtoofft(str, &endptr, 10, val);
     if(CURL_OFFT_FLOW == offt)
       return PARAM_NUMBER_TOO_LARGE;
     else if(CURL_OFFT_INVAL == offt)
