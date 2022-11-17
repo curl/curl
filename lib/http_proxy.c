@@ -672,7 +672,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
   return result;
 }
 
-#else
+#else /* USE_HYPER */
 /* The Hyper version of CONNECT */
 static CURLcode start_CONNECT(struct Curl_easy *data,
                               struct connectdata *conn,
@@ -951,7 +951,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
   return result;
 }
 
-#endif
+#endif /* USE_HYPER */
 
 static CURLcode CONNECT(struct Curl_cfilter *cf,
                         struct Curl_easy *data,
@@ -1188,9 +1188,6 @@ CURLcode Curl_cfilter_http_proxy_add(struct Curl_easy *data,
   return result;
 }
 
-#endif /* !CURL_DISABLE_PROXY && !defined(CURL_DISABLE_HTTP) */
-
-#if !defined(CURL_DISABLE_PROXY)
 
 static CURLcode send_haproxy_header(struct Curl_cfilter*cf,
                                     struct Curl_easy *data)
@@ -1205,7 +1202,7 @@ static CURLcode send_haproxy_header(struct Curl_cfilter*cf,
     /* the buffer is large enough to hold this! */
     result = Curl_dyn_addn(&req, STRCONST("PROXY UNKNOWN\r\n"));
   else {
-#endif
+#endif /* USE_UNIX_SOCKETS */
   /* Emit the correct prefix for IPv6 */
   tcp_version = cf->conn->bits.ipv6 ? "TCP6" : "TCP4";
 
@@ -1218,7 +1215,7 @@ static CURLcode send_haproxy_header(struct Curl_cfilter*cf,
 
 #ifdef USE_UNIX_SOCKETS
   }
-#endif
+#endif /* USE_UNIX_SOCKETS */
 
   if(!result)
     result = Curl_buffer_send(&req, data, &data->info.request_size,
@@ -1275,4 +1272,4 @@ CURLcode Curl_cfilter_haproxy_add(struct Curl_easy *data,
   return result;
 }
 
-#endif /* !CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_PROXY &6 ! CURL_DISABLE_HTTP */
