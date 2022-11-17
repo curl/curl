@@ -14,6 +14,7 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
+Set-Cookie: testn1=yes; path=/we/want/; domain=.host.foo.com; Max-Age=-1;
 Set-Cookie: test=yes; path=/we/want/; domain=.host.foo.com; Max-Age=0;
 Content-Length: 4
 

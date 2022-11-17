@@ -779,10 +779,16 @@ Curl_cookie_add(struct Curl_easy *data,
       offt = curlx_strtoofft((*co->maxage == '\"')?
                              &co->maxage[1]:&co->maxage[0], NULL, 10,
                              &co->expires);
-      if(offt == CURL_OFFT_FLOW)
+      switch(offt) {
+      case CURL_OFFT_FLOW:
         /* overflow, used max value */
         co->expires = CURL_OFF_T_MAX;
-      else if(!offt) {
+        break;
+      case CURL_OFFT_INVAL:
+        /* negative or otherwise bad, expire */
+        co->expires = 1;
+        break;
+      case CURL_OFFT_OK:
         if(!co->expires)
           /* already expired */
           co->expires = 1;
@@ -791,6 +797,7 @@ Curl_cookie_add(struct Curl_easy *data,
           co->expires = CURL_OFF_T_MAX;
         else
           co->expires += now;
+        break;
       }
     }
     else if(co->expirestr) {
