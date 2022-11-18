@@ -68,6 +68,10 @@ When setting \fICURLOPT_POST(3)\fP to 1, libcurl will automatically set
 If you issue a POST request and then want to make a HEAD or GET using the same
 re-used handle, you must explicitly set the new request type using
 \fICURLOPT_NOBODY(3)\fP or \fICURLOPT_HTTPGET(3)\fP or similar.
+
+When setting \fICURLOPT_POST(3)\fP to 0, libcurl resets the request type to
+the default to disable the POST. Typically that would mean it's reset to GET.
+Instead you should set a new request type explicitly as described above.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS
