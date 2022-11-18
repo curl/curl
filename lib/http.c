@@ -224,7 +224,7 @@ static CURLcode h3_setup_conn(struct Curl_easy *data,
 #ifdef ENABLE_QUIC
   /* We want HTTP/3 directly, setup the filter chain ourself,
    * overriding the default behaviour. */
-  DEBUGASSERT(conn->transport = TRNSPRT_QUIC);
+  DEBUGASSERT(conn->transport == TRNSPRT_QUIC);
 
   if(!(conn->handler->flags & PROTOPT_SSL)) {
     failf(data, "HTTP/3 requested for non-HTTPS URL");
