@@ -387,7 +387,6 @@ ssize_t Curl_send_plain(struct Curl_easy *data, int num,
 #endif
       ) {
       /* this is just a case of EWOULDBLOCK */
-      bytes_written = 0;
       *code = CURLE_AGAIN;
     }
     else {
@@ -406,9 +405,10 @@ ssize_t Curl_send_plain(struct Curl_easy *data, int num,
  * server using plain sockets only. Otherwise meant to have the exact same
  * proto as Curl_write().
  *
- * This function wraps Curl_send_plain(). The only difference should be the
- * prototype. 'sockfd' must be one of the connection's two main sockets and
- * the value of 'len' must not be changed.
+ * This function wraps Curl_send_plain(). The only difference besides the
+ * prototype is '*written' (bytes written) is set to 0 on error.
+ * 'sockfd' must be one of the connection's two main sockets and the value of
+ * 'len' must not be changed.
  */
 CURLcode Curl_write_plain(struct Curl_easy *data,
                           curl_socket_t sockfd,
@@ -429,6 +429,8 @@ CURLcode Curl_write_plain(struct Curl_easy *data,
   num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
   *written = Curl_send_plain(data, num, mem, len, &result);
+  if(*written == -1)
+    *written = 0;
 
   return result;
 }
@@ -680,9 +682,10 @@ CURLcode Curl_client_write(struct Curl_easy *data,
  * server using plain sockets only. Otherwise meant to have the exact same
  * proto as Curl_read().
  *
- * This function wraps Curl_recv_plain(). The only difference should be the
- * prototype. 'sockfd' must be one of the connection's two main sockets and
- * the value of 'sizerequested' must not be changed.
+ * This function wraps Curl_recv_plain(). The only difference besides the
+ * prototype is '*n' (bytes read) is set to 0 on error.
+ * 'sockfd' must be one of the connection's two main sockets and the value of
+ * 'sizerequested' must not be changed.
  */
 CURLcode Curl_read_plain(struct Curl_easy *data,   /* transfer */
                          curl_socket_t sockfd,     /* read from this socket */
@@ -703,6 +706,8 @@ CURLcode Curl_read_plain(struct Curl_easy *data,   /* transfer */
   num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
   *n = Curl_recv_plain(data, num, buf, sizerequested, &result);
+  if(*n == -1)
+    *n = 0;
 
   return result;
 }
