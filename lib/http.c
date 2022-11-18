@@ -246,6 +246,7 @@ static CURLcode h3_setup_conn(struct Curl_easy *data,
   return Curl_cfilter_socket_set(data, conn, FIRSTSOCKET);
 
 #else /* ENABLE_QUIC */
+  (void)conn;
   DEBUGF(infof(data, "QUIC is not supported in this build"));
   return CURLE_NOT_BUILT_IN;
 #endif /* !ENABLE_QUIC */
