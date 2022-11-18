@@ -1057,7 +1057,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     if((arg < 0) || (arg > 65535))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.proxyport = arg;
+    data->set.proxyport = (unsigned short)arg;
     break;
 
   case CURLOPT_PROXYAUTH:
