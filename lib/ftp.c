@@ -2747,6 +2747,13 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if((ftpcode == 234) || (ftpcode == 334)) {
         /* this was BLOCKING, keep it so for now */
         bool done;
+        if(!Curl_cfilter_ssl_added(data, conn, FIRSTSOCKET)) {
+          result = Curl_cfilter_ssl_add(data, conn, FIRSTSOCKET);
+          if(result) {
+            /* we failed and bail out */
+            return CURLE_USE_SSL_FAILED;
+          }
+        }
         result = Curl_cfilter_connect(data, conn, FIRSTSOCKET, TRUE, &done);
         if(!result) {
           conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
@@ -3557,7 +3564,8 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
   if(conn->cfilter[SECONDARYSOCKET]) {
     result = Curl_cfilter_connect(data, conn, SECONDARYSOCKET,
                                   FALSE, &connected);
-    if(result || !connected) {
+    if(result ||
+      (!connected && conn->sock[SECONDARYSOCKET] == CURL_SOCKET_BAD)) {
       if(result && (ftpc->count1 == 0)) {
         *completep = -1; /* go back to DOING please */
         /* this is a EPSV connect failing, try PASV instead */
