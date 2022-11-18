@@ -74,8 +74,8 @@ Without pkg-config installed, use this:
 
     ./configure --with-openssl=/opt/OpenSSL
 
-If you insist on forcing a build without SSL support, even though you may
-have OpenSSL installed in your system, you can run configure like this:
+If you insist on forcing a build without SSL support, you can run configure
+like this:
 
     ./configure --without-ssl
 
@@ -92,17 +92,32 @@ provide this option to gcc to set a hard-coded path to the runtime linker:
 
     LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-openssl
 
-## More Options
+## Static builds
 
 To force a static library compile, disable the shared library creation by
 running configure like:
 
     ./configure --disable-shared
 
-To tell the configure script to skip searching for thread-safe functions, add
-an option like:
+The configure script is primarily done to work with shared/dynamic third party
+dependencies. When linking with shared libraries, the dependency "chain" is
+handled automatically by the library loader - on all modern systems.
 
-    ./configure --disable-thread
+If you instead link with a static library, you need to provide all the
+dependency libraries already at the link command line.
+
+Figuring out all the dependency libraries for a given library is hard, as it
+might involve figuring out the dependencies of the dependencies and they vary
+between platforms and change between versions.
+
+When using static dependencies, the build scripts will mostly assume that you,
+the user, will provide all the necessary additional dependency libraries as
+additional arguments in the build. With configure, by setting LIBS/LDFLAGS on
+the command line.
+
+Building statically is not for the faint of heart.
+
+## Debug
 
 If you are a curl developer and use gcc, you might want to enable more debug
 options with the `--enable-debug` option.
