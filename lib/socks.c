@@ -112,7 +112,7 @@ int Curl_blockread_all(struct Curl_easy *data,   /* transfer */
       result = ~CURLE_OK;
       break;
     }
-    result = Curl_read_plain(data, sockfd, buf, buffersize, &nread);
+    result = Curl_read_plain(sockfd, buf, buffersize, &nread);
     if(CURLE_AGAIN == result)
       continue;
     if(result)
@@ -396,7 +396,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     /* FALLTHROUGH */
   case CONNECT_SOCKS_READ:
     /* Receive response */
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
+    result = Curl_read_plain(sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "SOCKS4: Failed receiving connect request ack: %s",
@@ -599,7 +599,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sx->outp = socksreq; /* store it here */
     /* FALLTHROUGH */
   case CONNECT_SOCKS_READ:
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
+    result = Curl_read_plain(sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Unable to receive initial SOCKS5 response.");
@@ -729,7 +729,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sxstate(sx, data, CONNECT_AUTH_READ);
     /* FALLTHROUGH */
   case CONNECT_AUTH_READ:
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
+    result = Curl_read_plain(sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Unable to receive SOCKS5 sub-negotiation response.");
@@ -931,7 +931,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sxstate(sx, data, CONNECT_REQ_READ);
     /* FALLTHROUGH */
   case CONNECT_REQ_READ:
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
+    result = Curl_read_plain(sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Failed to receive SOCKS5 connect request ack.");
@@ -1030,7 +1030,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
 #endif
     /* FALLTHROUGH */
   case CONNECT_REQ_READ_MORE:
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
+    result = Curl_read_plain(sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Failed to receive SOCKS5 connect request ack.");
