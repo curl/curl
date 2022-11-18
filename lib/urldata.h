@@ -865,7 +865,7 @@ struct postponed_data {
 
 struct proxy_info {
   struct hostname host;
-  long port;
+  int port;
   unsigned char proxytype; /* curl_proxytype: what kind of proxy that is in
                               use */
   char *user;    /* proxy user name string, allocated */
@@ -1622,12 +1622,12 @@ struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
   void *debugdata;   /* the data that will be passed to fdebug */
   char *errorbuffer; /* (Static) store failure messages in here */
-  long proxyport; /* If non-zero, use this port number by default. If the
-                     proxy string features a ":[port]" that one will override
-                     this. */
   void *out;         /* CURLOPT_WRITEDATA */
   void *in_set;      /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
+  unsigned short proxyport; /* If non-zero, use this port number by
+                               default. If the proxy string features a
+                               ":[port]" that one will override this. */
   unsigned short use_port; /* which port to use (when not using default) */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
