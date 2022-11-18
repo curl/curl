@@ -1413,7 +1413,7 @@ schannel_connect_step2(struct Curl_easy *data, struct connectdata *conn,
   for(;;) {
     if(doread) {
       /* read encrypted handshake data from socket */
-      result = Curl_read_plain(data, conn->sock[sockindex],
+      result = Curl_read_plain(conn->sock[sockindex],
                                (char *) (backend->encdata_buffer +
                                          backend->encdata_offset),
                                backend->encdata_length -
@@ -2190,7 +2190,7 @@ schannel_recv(struct Curl_easy *data, int sockindex,
                  backend->encdata_offset, backend->encdata_length));
 
     /* read encrypted data from socket */
-    *err = Curl_read_plain(data, conn->sock[sockindex],
+    *err = Curl_read_plain(conn->sock[sockindex],
                            (char *)(backend->encdata_buffer +
                                     backend->encdata_offset),
                            size, &nread);
