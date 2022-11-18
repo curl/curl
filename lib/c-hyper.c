@@ -163,6 +163,10 @@ static int hyper_each_header(void *userdata,
     writetype = CLIENTWRITE_HEADER;
     if(data->set.include_header)
       writetype |= CLIENTWRITE_BODY;
+    if(data->state.hconnect)
+      writetype |= CLIENTWRITE_CONNECT;
+    if(data->req.httpcode/100 == 1)
+      writetype |= CLIENTWRITE_1XX;
     result = Curl_client_write(data, writetype, headp, len);
     if(result) {
       data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
