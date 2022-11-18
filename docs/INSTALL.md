@@ -112,8 +112,8 @@ between platforms and change between versions.
 
 When using static dependencies, the build scripts will mostly assume that you,
 the user, will provide all the necessary additional dependency libraries as
-additional arguments in the build. With configure, by setting LIBS/LDFLAGS on
-the command line.
+additional arguments in the build. With configure, by setting `LIBS` or
+`LDFLAGS` on the command line.
 
 Building statically is not for the faint of heart.
 
