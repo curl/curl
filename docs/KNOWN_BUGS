@@ -48,7 +48,6 @@ problems may have been fixed or changed somewhat since this was written.
  5.1 OS400 port requires deprecated IBM library
  5.2 curl-config --libs contains private details
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
- 5.4 Build with statically built dependency
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
  5.6 make distclean loops forever
  5.8 configure finding libs in wrong directory
@@ -404,28 +403,6 @@ problems may have been fixed or changed somewhat since this was written.
 5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
 
  See https://github.com/curl/curl/issues/2905
-
-5.4 Build with statically built dependency
-
- The build scripts in curl (autotools, cmake and others) are primarily done to
- work with shared/dynamic third party dependencies. When linking with shared
- libraries, the dependency "chain" is handled automatically by the library
- loader - on all modern systems.
-
- If you instead link with a static library, we need to provide all the
- dependency libraries already at the link command line.
-
- Figuring out all the dependency libraries for a given library is hard, as it
- might also involve figuring out the dependencies of the dependencies and they
- may vary between platforms and even change between versions.
-
- When using static dependencies, the build scripts will mostly assume that
- you, the user, will provide all the necessary additional dependency libraries
- as additional arguments in the build. With configure, by setting LIBS/LDFLAGS
- on the command line.
-
- We welcome help to improve curl's ability to link with static libraries, but
- it is likely a task that we can never fully support.
 
 5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
 
