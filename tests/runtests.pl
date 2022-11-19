@@ -347,6 +347,7 @@ my $short;
 my $automakestyle;
 my $verbose;
 my $debugprotocol;
+my $no_debuginfod;
 my $anyway;
 my $gdbthis;      # run test case with gdb debugger
 my $gdbxwin;      # use windowed gdb when using gdb
@@ -435,7 +436,6 @@ foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no', 'all')) {
 
 delete $ENV{'SSL_CERT_DIR'} if($ENV{'SSL_CERT_DIR'});
 delete $ENV{'SSL_CERT_PATH'} if($ENV{'SSL_CERT_PATH'});
-delete $ENV{'DEBUGINFOD_URLS'} if($ENV{'DEBUGINFOD_URLS'});
 delete $ENV{'CURL_CA_BUNDLE'} if($ENV{'CURL_CA_BUNDLE'});
 
 #######################################################################
@@ -5661,6 +5661,10 @@ while(@ARGV) {
         # no valgrind
         undef $valgrind;
     }
+    elsif($ARGV[0] eq "--no-debuginfod") {
+        # disable the valgrind debuginfod functionality
+        $no_debuginfod = 1;
+    }
     elsif ($ARGV[0] eq "-R") {
         # execute in scrambled order
         $scrambleorder=1;
@@ -5840,6 +5844,8 @@ EOHELP
     }
     shift @ARGV;
 }
+
+delete $ENV{'DEBUGINFOD_URLS'} if($ENV{'DEBUGINFOD_URLS'} && $no_debuginfod);
 
 if(!$randseed) {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =

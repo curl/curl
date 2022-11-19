@@ -95,6 +95,9 @@ using curl's regression test suite.
 Lists all test case names.
 .IP "-n"
 Disable the check for and use of valgrind.
+.IP "--no-debuginfod"
+Delete the DEBUGINFOD_URLS variable if that is defined. Makes valgrind, gdb
+etc not able to use this functionality.
 .IP "-o <variablename=value>"
 Overwrite the specified internal \fBvariable\fP with \fBvalue\fP.
 Useful to change variables that didn't get a dedicated flag to change them.
