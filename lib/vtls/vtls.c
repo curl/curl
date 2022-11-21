@@ -1655,6 +1655,7 @@ static void ssl_cf_def_detach_data(struct Curl_cfilter *cf,
 
 static const struct Curl_cftype cft_ssl = {
   "SSL",
+  CF_TYPE_SSL,
   ssl_cf_destroy,
   ssl_cf_def_attach_data,
   ssl_cf_def_detach_data,
@@ -1670,6 +1671,7 @@ static const struct Curl_cftype cft_ssl = {
 #ifndef CURL_DISABLE_PROXY
 static const struct Curl_cftype cft_ssl_proxy = {
   "SSL-PROXY",
+  CF_TYPE_SSL,
   ssl_cf_destroy,
   ssl_cf_def_attach_data,
   ssl_cf_def_detach_data,

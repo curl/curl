@@ -3560,12 +3560,16 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
    * complete */
   struct FTP *ftp = NULL;
 
-  /* if the second connection isn't done yet, wait for it */
+  /* if the second connection isn't done yet, wait for it to have
+   * connected to the remote host. When using proxy tunneling, this
+   * means the tunnel needs to have been establish. However, we
+   * can not expect the remote host to talk to us in any way yet.
+   * So, when using ftps: the SSL handshake will not start until we
+   * tell the remote server that we are there. */
   if(conn->cfilter[SECONDARYSOCKET]) {
     result = Curl_cfilter_connect(data, conn, SECONDARYSOCKET,
                                   FALSE, &connected);
-    if(result ||
-      (!connected && conn->sock[SECONDARYSOCKET] == CURL_SOCKET_BAD)) {
+    if(result || !Curl_conn_is_ip_connected(data, SECONDARYSOCKET)) {
       if(result && (ftpc->count1 == 0)) {
         *completep = -1; /* go back to DOING please */
         /* this is a EPSV connect failing, try PASV instead */
