@@ -109,7 +109,6 @@ int main(void)
   CURLM *cm;
   CURLMsg *msg;
   unsigned int transfers = 0;
-  int msgs_left = -1;
   int still_alive = 1;
 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -118,10 +117,14 @@ int main(void)
   /* Limit the amount of simultaneous connections curl should allow: */
   curl_multi_setopt(cm, CURLMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
 
-  for(transfers = 0; transfers < MAX_PARALLEL; transfers++)
+  for(transfers = 0; transfers < MAX_PARALLEL && transfers < NUM_URLS;
+      transfers++)
     add_transfer(cm, transfers);
 
   do {
+    int msgs_left;
+    int added_more = FALSE;
+
     curl_multi_perform(cm, &still_alive);
 
     while((msg = curl_multi_info_read(cm, &msgs_left))) {
@@ -137,13 +140,18 @@ int main(void)
       else {
         fprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
       }
-      if(transfers < NUM_URLS)
+      if(transfers < NUM_URLS) {
         add_transfer(cm, transfers++);
+        added_more = TRUE;
+      }
     }
     if(still_alive)
       curl_multi_wait(cm, NULL, 0, 1000, NULL);
 
-  } while(still_alive || (transfers < NUM_URLS));
+    if(added_more)
+      still_alive = TRUE;
+
+  } while(still_alive);
 
   curl_multi_cleanup(cm);
   curl_global_cleanup();
