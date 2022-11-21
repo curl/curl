@@ -34,6 +34,14 @@
 #endif
 #include <curl/curl.h>
 
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
 static const char *urls[] = {
   "https://www.microsoft.com",
   "https://opensource.org",
