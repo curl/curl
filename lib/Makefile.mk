@@ -243,7 +243,8 @@ ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
   CPPFLAGS += -DHAVE_LIBZ
   CPPFLAGS += -I"$(ZLIB_PATH)/include"
   _LDFLAGS += -L"$(ZLIB_PATH)/lib"
-  _LIBS += -lz
+  ZLIB_LIBS ?= -lz
+  _LIBS += $(ZLIB_LIBS)
   ZLIB := 1
 endif
 ifneq ($(findstring -zstd,$(CFG)),)
