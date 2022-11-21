@@ -1162,6 +1162,7 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
 
 static const struct Curl_cftype cft_http_proxy = {
   "HTTP-PROXY",
+  CF_TYPE_IP_CONNECT,
   http_proxy_cf_destroy,
   Curl_cf_def_attach_data,
   http_proxy_cf_detach_data,
@@ -1246,6 +1247,7 @@ static CURLcode haproxy_cf_connect(struct Curl_cfilter *cf,
 
 static const struct Curl_cftype cft_haproxy = {
   "HAPROXY",
+  0,
   Curl_cf_def_destroy,
   Curl_cf_def_attach_data,
   Curl_cf_def_detach_data,

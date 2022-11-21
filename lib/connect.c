@@ -1822,6 +1822,7 @@ static void socket_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static const struct Curl_cftype cft_socket = {
   "SOCKET",
+  CF_TYPE_IP_CONNECT,
   socket_cf_destroy,
   Curl_cf_def_attach_data,
   Curl_cf_def_detach_data,
@@ -1892,6 +1893,7 @@ static CURLcode socket_accept_cf_setup(struct Curl_cfilter *cf,
 
 static const struct Curl_cftype cft_socket_accept = {
   "SOCKET-ACCEPT",
+  CF_TYPE_IP_CONNECT,
   socket_cf_destroy,
   Curl_cf_def_attach_data,
   Curl_cf_def_detach_data,
