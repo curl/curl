@@ -83,9 +83,13 @@ typedef void     Curl_cf_detach_data(struct Curl_cfilter *cf,
  */
 void Curl_cfilter_detach(struct connectdata *conn, struct Curl_easy *data);
 
+#define CF_TYPE_IP_CONNECT  (1 << 0)
+#define CF_TYPE_SSL         (1 << 1)
+
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
   const char *name;                      /* name of the filter type */
+  long flags;                            /* flags of filter type */
   Curl_cf_destroy *destroy;              /* destroy resources held */
   Curl_cf_attach_data *attach_data;      /* data is being handled here */
   Curl_cf_detach_data *detach_data;      /* data is no longer handled here */
@@ -164,6 +168,12 @@ CURLcode Curl_cfilter_connect(struct Curl_easy *data,
                               bool blocking, bool *done);
 bool Curl_cfilter_is_connected(struct Curl_easy *data,
                                struct connectdata *conn, int sockindex);
+/**
+ * Determine if we have reached the remote host on IP level, e.g.
+ * have a TCP connection. This turns TRUE before a possible SSL
+ * handshake has been started/done.
+ */
+bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex);
 
 void Curl_cfilter_close(struct Curl_easy *data,
                         struct connectdata *conn, int index);

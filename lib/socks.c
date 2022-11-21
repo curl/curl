@@ -1214,6 +1214,7 @@ static void socks_proxy_cf_detach_data(struct Curl_cfilter *cf,
 
 static const struct Curl_cftype cft_socks_proxy = {
   "SOCKS-PROXYY",
+  CF_TYPE_IP_CONNECT,
   socks_proxy_cf_destroy,
   Curl_cf_def_attach_data,
   socks_proxy_cf_detach_data,

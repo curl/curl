@@ -374,6 +374,21 @@ bool Curl_cfilter_is_connected(struct Curl_easy *data,
   return cf && cf->connected;
 }
 
+bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
+{
+  struct Curl_cfilter *cf;
+
+  cf = data->conn->cfilter[sockindex];
+  while(cf) {
+    if(cf->connected)
+      return TRUE;
+    if(cf->cft->flags & CF_TYPE_IP_CONNECT)
+      return FALSE;
+    cf = cf->next;
+  }
+  return FALSE;
+}
+
 bool Curl_cfilter_data_pending(const struct Curl_easy *data,
                                struct connectdata *conn, int sockindex)
 {
