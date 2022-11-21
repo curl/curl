@@ -4,11 +4,12 @@ curl and libcurl 7.87.0
  Command line options:         249
  curl_easy_setopt() options:   301
  Public functions in libcurl:  91
- Contributors:                 2751
+ Contributors:                 2755
 
 This release includes the following changes:
 
  o curl: add --url-query [52]
+ o CURLOPT_QUICK_EXIT: don't wait for DNS thread on exit [75]
  o openssl: reduce CA certificate bundle reparsing by caching [11]
  o version: add a feature names array to curl_version_info_data [67]
 
@@ -27,20 +28,27 @@ This release includes the following bugfixes:
  o curl_path: do not add '/' if homedir ends with one [4]
  o CURLMOPT_SOCKETFUNCTION.3: clarify CURL_POLL_REMOVE [1]
  o CURLOPT_DEBUGFUNCTION.3: do not assume nul-termination in example [31]
+ o CURLOPT_POST.3: Explain setting to 0 changes request type [61]
  o docs/EARLY-RELEASE.md: how to determine an early release [37]
+ o docs/INSTALL.md: expand on static builds [62]
+ o docs/WEBSOCKET.md: explain the URL use [71]
  o docs: add missing parameters for --retry flag [2]
  o docs: explain the noproxy CIDR notation support [17]
  o docs: remove performance note in CURLOPT_SSL_VERIFYPEER [13]
  o gen.pl: do not generate CURLHELP bitmask lines > 79 characters [10]
  o headers: add endif comments [51]
+ o HTTP-COOKIES.md: mention that http://localhost is a secure context [76]
+ o HTTP-COOKIES.md: update the 6265bis link to draft-11 [70]
  o http: do not send PROXY more than once [46]
  o http: set 'this_is_a_follow' in the Location: logic [40]
+ o hyper: classify headers as CONNECT and 1XX [56]
  o hyper: fix handling of hyper_task's when reusing the same address [33]
  o KNOWN_BUGS: remove eight entries [50]
  o lib: add CURL_WRITEFUNC_ERROR to signal write callback error [47]
  o lib: connection filters (cfilter) addition to curl: [43]
  o lib: feature deprecation warnings in gcc >= 4.3 [58]
  o lib: fix some type mismatches and remove unneeded typecasts [12]
+ o lib: parse numbers with fixed known base 10 [77]
  o lib: remove bad set.opt_no_body assignments [42]
  o lib: sync guard for Curl_getaddrinfo_ex() definition and use [6]
  o libcurl-errors.3: remove duplicate word [3]
@@ -60,14 +68,18 @@ This release includes the following bugfixes:
  o README.md: remove badges and xmas-tree garnish [9]
  o rtsp: fix RTSP auth [49]
  o scripts/checksrc.pl: detect duplicated include files [29]
+ o sendf: change Curl_read_plain to wrap Curl_recv_plain [48]
  o sendf: remove unnecessary if condition [26]
  o spellcheck.words: remove 'github' as an accepted word [22]
  o strcase: use curl_str(n)equal for case insensitive matches [8]
  o system.h: support 64-bit curl_off_t for NonStop 32-bit [21]
+ o test3026: reduce runtime in legacy mingw builds [73]
  o tests/sshserver.pl: re-enable ssh-rsa while using openssh 8.8+
  o tool_getparam: make --no-get work as the opposite of --get [39]
  o tool_operate: provide better errmsg for -G with bad URL [16]
  o tool_operate: when aborting, make sure there is a non-NULL error buffer [20]
+ o url: move back the IDN conversion of proxy names [74]
+ o urldata: change port num storage to int and unsigned short [66]
  o vtls: fix build without proxy support [38]
  o WEBSOCKET.md: fix broken link [30]
  o Websocket: fixes for partial frames and buffer updates. [7]
@@ -91,18 +103,19 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Averay, Alex Xu, Andrei Rybak, AtariDreams on github, Ayesh Karunaratne,
-  Christopher Sauer, Christoph Reiter, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Emanuele Torre, Emil Österlund, Eric Vigeant, Erik Janssen,
+  Adam Averay, Alexandre Ferrieux, Alex Xu, Andrei Rybak, Andy Stamp,
+  Anthony Hu, AtariDreams on github, Ayesh Karunaratne, Christopher Sauer,
+  Christoph Reiter, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Egor Pugin, Emanuele Torre, Emil Österlund, Eric Vigeant, Erik Janssen,
   Fata Nugraha, Felipe Gasper, godmar on github, Henning Schild,
   Hirotaka Tagawa, Joel Depooter, John Sherrill, Jon Rumsey,
-  jvreelanda on github, Lorenzo Miniero, Luca Niccoli, Marc Hörsken,
-  Michael Drake, Nathan Moinvaziri, Oskar Sigvardsson, Patrick Monnerat,
-  Patrick Schlangen, Peter Piekarski, Philip Chan, Randall S. Becker,
-  Ray Satiro, Stefan Eissing, Stephan Guilloux, Stuart Henderson,
-  Thomas Glanzmann, Trail of Bits, Viktor Szakats, xianghongai on github,
-  Zespre Schmidt
-  (43 contributors)
+  jvreelanda on github, Karthikdasari0423 on github, Lorenzo Miniero,
+  Luca Niccoli, Marc Hörsken, Michael Drake,  MonkeybreadSoftware on github,
+  Nathan Moinvaziri, Oskar Sigvardsson, Patrick Monnerat, Patrick Schlangen,
+  Peter Piekarski, Philip Chan, Randall S. Becker, Ray Satiro, Sean McArthur,
+  Stefan Eissing, Stephan Guilloux, Stuart Henderson, Thomas Glanzmann,
+  Trail of Bits, Viktor Szakats, xianghongai on github, Zespre Schmidt
+  (50 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -153,6 +166,7 @@ References to bug reports and discussions on issues:
  [45] = https://curl.se/bug/?i=9930
  [46] = https://curl.se/bug/?i=9442
  [47] = https://curl.se/bug/?i=9874
+ [48] = https://curl.se/bug/?i=9431
  [49] = https://curl.se/bug/?i=4750
  [50] = https://curl.se/bug/?i=9871
  [51] = https://curl.se/bug/?i=9853
@@ -160,11 +174,22 @@ References to bug reports and discussions on issues:
  [53] = https://curl.se/bug/?i=9866
  [54] = https://curl.se/bug/?i=9921
  [55] = https://curl.se/bug/?i=9903
+ [56] = https://curl.se/bug/?i=9947
  [57] = https://curl.se/bug/?i=9893
  [58] = https://curl.se/bug/?i=9667
  [59] = https://curl.se/bug/?i=9896
+ [61] = https://curl.se/bug/?i=9849
+ [62] = https://curl.se/bug/?i=9944
  [63] = https://curl.se/bug/?i=9899
  [64] = https://curl.se/bug/?i=9899
+ [66] = https://curl.se/bug/?i=9946
  [67] = https://curl.se/bug/?i=9583
  [68] = https://curl.se/bug/?i=9894
  [69] = https://curl.se/bug/?i=9898
+ [70] = https://curl.se/bug/?i=9940
+ [71] = https://curl.se/bug/?i=9936
+ [73] = https://curl.se/bug/?i=9412
+ [74] = https://curl.se/bug/?i=9937
+ [75] = https://curl.se/bug/?i=2975
+ [76] = https://curl.se/bug/?i=9938
+ [77] = https://curl.se/bug/?i=9933
