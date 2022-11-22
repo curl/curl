@@ -204,9 +204,6 @@ static void tunnel_go_state(struct Curl_cfilter *cf,
 
   case TUNNEL_ESTABLISHED:
     infof(data, "CONNECT phase completed");
-    if(cf->conn)
-      /* make sure this isn't set for the document request  */
-      cf->conn->bits.rewindaftersend = FALSE;
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     /* FALLTHROUGH */
