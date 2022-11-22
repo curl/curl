@@ -445,7 +445,7 @@ CURLcode Curl_readrewind(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static int data_pending(const struct Curl_easy *data)
+static int data_pending(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
 
@@ -455,7 +455,7 @@ static int data_pending(const struct Curl_easy *data)
 #endif
 
   if(conn->handler->protocol&PROTO_FAMILY_FTP)
-    return Curl_cfilter_data_pending(data, conn, SECONDARYSOCKET);
+    return Curl_conn_data_pending(data, SECONDARYSOCKET);
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
@@ -470,7 +470,7 @@ static int data_pending(const struct Curl_easy *data)
        a workaround, we return nonzero here to call http2_recv. */
     ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion >= 20) ||
 #endif
-    Curl_cfilter_data_pending(data, conn, FIRSTSOCKET);
+    Curl_conn_data_pending(data, FIRSTSOCKET);
 }
 
 /*

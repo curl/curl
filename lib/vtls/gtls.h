@@ -29,11 +29,12 @@
 #ifdef USE_GNUTLS
 
 #include "urldata.h"
+#include "cfilters.h"
 #include <gnutls/gnutls.h>
 CURLcode
-Curl_gtls_verifyserver(struct Curl_easy *data, struct connectdata *conn,
-                       gnutls_session_t session,
-                       int sockindex);
+Curl_gtls_verifyserver(struct Curl_cfilter *cf,
+                       struct Curl_easy *data,
+                       gnutls_session_t session);
 extern const struct Curl_ssl Curl_ssl_gnutls;
 
 #endif /* USE_GNUTLS */

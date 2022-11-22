@@ -141,7 +141,7 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
  * Instead, if it is readable, run Curl_connalive() to peek at the socket
  * and distinguish between closed and data.
  */
-static bool rtsp_connisdead(struct connectdata *check)
+static bool rtsp_connisdead(struct Curl_easy *data, struct connectdata *check)
 {
   int sval;
   bool ret_val = TRUE;
@@ -157,7 +157,7 @@ static bool rtsp_connisdead(struct connectdata *check)
   }
   else if(sval & CURL_CSELECT_IN) {
     /* readable with no error. could still be closed */
-    ret_val = !Curl_connalive(check);
+    ret_val = !Curl_connalive(data, check);
   }
 
   return ret_val;
@@ -174,7 +174,7 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
   (void)data;
 
   if(checks_to_perform & CONNCHECK_ISDEAD) {
-    if(rtsp_connisdead(conn))
+    if(rtsp_connisdead(data, conn))
       ret_val |= CONNRESULT_DEAD;
   }
 

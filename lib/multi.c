@@ -954,7 +954,7 @@ void Curl_detach_connection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   if(conn) {
-    Curl_cfilter_detach_data(conn, data);
+    Curl_conn_detach_data(conn, data);
     Curl_llist_remove(&conn->easyq, &data->conn_queue, NULL);
   }
   data->conn = NULL;
@@ -973,7 +973,7 @@ void Curl_attach_connection(struct Curl_easy *data,
   data->conn = conn;
   Curl_llist_insert_next(&conn->easyq, conn->easyq.tail, data,
                          &data->conn_queue);
-  Curl_cfilter_attach_data(conn, data);
+  Curl_conn_attach_data(conn, data);
   if(conn->handler->attach)
     conn->handler->attach(data, conn);
 }
@@ -1038,7 +1038,7 @@ static int multi_getsock(struct Curl_easy *data,
 
   case MSTATE_TUNNELING:
   case MSTATE_CONNECTING:
-    return Curl_cfilter_get_select_socks(data, conn, FIRSTSOCKET, socks);
+    return Curl_conn_get_select_socks(data, FIRSTSOCKET, socks);
 
   case MSTATE_DOING_MORE:
     return domore_getsock(data, conn, socks);
@@ -1696,7 +1696,7 @@ static CURLcode protocol_connect(struct Curl_easy *data,
 
   *protocol_done = FALSE;
 
-  if(Curl_cfilter_is_connected(data, conn, FIRSTSOCKET)
+  if(Curl_conn_is_connected(conn, FIRSTSOCKET)
      && conn->bits.protoconnstart) {
     /* We already are connected, get back. This may happen when the connect
        worked fine in the first call, like when we connect to a local server
@@ -1982,8 +1982,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case MSTATE_CONNECTING:
       /* awaiting a completion of an asynch TCP connect */
       DEBUGASSERT(data->conn);
-      result = Curl_cfilter_connect(data, data->conn, FIRSTSOCKET,
-                                    FALSE, &connected);
+      result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &connected);
       if(connected && !result) {
         rc = CURLM_CALL_MULTI_PERFORM;
         multistate(data, MSTATE_PROTOCONNECT);

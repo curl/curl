@@ -243,7 +243,7 @@ static CURLcode h3_setup_conn(struct Curl_easy *data,
 
   DEBUGF(infof(data, "HTTP/3 direct conn setup(conn #%ld, index=%d)",
          conn->connection_id, FIRSTSOCKET));
-  return Curl_cfilter_socket_set(data, conn, FIRSTSOCKET);
+  return Curl_conn_socket_set(data, FIRSTSOCKET);
 
 #else /* ENABLE_QUIC */
   (void)conn;
@@ -1566,7 +1566,7 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
      function to make the re-use checks properly be able to check this bit. */
   connkeep(conn, "HTTP default");
 
-  return Curl_cfilter_connect(data, conn, FIRSTSOCKET, FALSE, done);
+  return Curl_conn_connect(data, FIRSTSOCKET, FALSE, done);
 }
 
 /* this returns the socket to wait for in the DO and DOING state for the multi

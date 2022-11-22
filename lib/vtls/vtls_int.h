@@ -24,11 +24,25 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "cfilters.h"
 #include "urldata.h"
+
+#ifdef USE_SSL
+
+/* Information in each SSL cfilter context: cf->ctx */
+struct ssl_connect_data {
+  ssl_connection_state state;
+  ssl_connect_state connecting_state;
+  const char *hostname;
+  const char *dispname;
+  int port;
+  struct ssl_backend_data *backend;
+};
+
 
 /* Definitions for SSL Implementations */
 
- struct Curl_ssl {
+struct Curl_ssl {
   /*
    * This *must* be the first entry to allow returning the list of available
    * backends in curl_global_sslset().
@@ -41,21 +55,21 @@
   void (*cleanup)(void);
 
   size_t (*version)(char *buffer, size_t size);
-  int (*check_cxn)(struct connectdata *cxn);
-  int (*shut_down)(struct Curl_easy *data, struct connectdata *conn,
-                   int sockindex);
-  bool (*data_pending)(const struct connectdata *conn,
-                       int connindex);
+  int (*check_cxn)(struct Curl_cfilter *cf, struct Curl_easy *data);
+  int (*shut_down)(struct Curl_cfilter *cf,
+                   struct Curl_easy *data);
+  bool (*data_pending)(struct Curl_cfilter *cf,
+                       const struct Curl_easy *data);
 
   /* return 0 if a find random is filled in */
   CURLcode (*random)(struct Curl_easy *data, unsigned char *entropy,
                      size_t length);
   bool (*cert_status_request)(void);
 
-  CURLcode (*connect_blocking)(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex);
-  CURLcode (*connect_nonblocking)(struct Curl_easy *data,
-                                  struct connectdata *conn, int sockindex,
+  CURLcode (*connect_blocking)(struct Curl_cfilter *cf,
+                               struct Curl_easy *data);
+  CURLcode (*connect_nonblocking)(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
                                   bool *done);
 
   /* If the SSL backend wants to read or write on this connection during a
@@ -63,11 +77,11 @@
      a bitmap indicating read or write with GETSOCK_WRITESOCK(0) or
      GETSOCK_READSOCK(0). Otherwise return GETSOCK_BLANK.
      Mandatory. */
-  int (*getsock)(struct connectdata *conn, curl_socket_t *socks);
+  int (*get_select_socks)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          curl_socket_t *socks);
 
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
-  void (*close_one)(struct Curl_easy *data, struct connectdata *conn,
-                    int sockindex);
+  void (*close)(struct Curl_cfilter *cf, struct Curl_easy *data);
   void (*close_all)(struct Curl_easy *data);
   void (*session_free)(void *ptr);
 
@@ -79,16 +93,14 @@
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
 
-  bool (*associate_connection)(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               int sockindex);
-  void (*disassociate_connection)(struct Curl_easy *data, int sockindex);
+  bool (*attach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
+  void (*detach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
 
   void (*free_multi_ssl_backend_data)(struct multi_ssl_backend_data *mbackend);
 
-  ssize_t (*recv_plain)(struct Curl_easy *data, int sockindex, char *buf,
-                        size_t len, CURLcode *code);
-  ssize_t (*send_plain)(struct Curl_easy *data, int sockindex,
+  ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                        char *buf, size_t len, CURLcode *code);
+  ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         const void *mem, size_t len, CURLcode *code);
 
 };
@@ -98,20 +110,64 @@ extern const struct Curl_ssl *Curl_ssl;
 
 int Curl_none_init(void);
 void Curl_none_cleanup(void);
-int Curl_none_shutdown(struct Curl_easy *data, struct connectdata *conn,
-                       int sockindex);
-int Curl_none_check_cxn(struct connectdata *conn);
+int Curl_none_shutdown(struct Curl_cfilter *cf, struct Curl_easy *data);
+int Curl_none_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data);
 CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
                           size_t length);
 void Curl_none_close_all(struct Curl_easy *data);
 void Curl_none_session_free(void *ptr);
-bool Curl_none_data_pending(const struct connectdata *conn, int connindex);
+bool Curl_none_data_pending(struct Curl_cfilter *cf,
+                            const struct Curl_easy *data);
 bool Curl_none_cert_status_request(void);
 CURLcode Curl_none_set_engine(struct Curl_easy *data, const char *engine);
 CURLcode Curl_none_set_engine_default(struct Curl_easy *data);
 struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
 bool Curl_none_false_start(void);
-int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks);
+int Curl_ssl_get_select_socks(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              curl_socket_t *socks);
+
+/**
+ * Get the ssl_config_data in `data` that is relevant for cfilter `cf`.
+ */
+struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
+                                               struct Curl_easy *data);
+
+/**
+ * Get the primary config relevant for the filter from its connection.
+ */
+struct ssl_primary_config *
+  Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf);
+
+/**
+ * Get the first SSL filter in the chain starting with `cf`, or NULL.
+ */
+struct Curl_cfilter *Curl_ssl_cf_get_ssl(struct Curl_cfilter *cf);
+
+/**
+ * Get the SSL filter below the given one or NULL if there is none.
+ */
+bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
+
+/* extract a session ID
+ * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
+ * Caller must make sure that the ownership of returned sessionid object
+ * is properly taken (e.g. its refcount is incremented
+ * under sessionid mutex).
+ */
+bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           void **ssl_sessionid,
+                           size_t *idsize); /* set 0 if unknown */
+/* add a new session ID
+ * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
+ * Caller must ensure that it has properly shared ownership of this sessionid
+ * object with cache (e.g. incrementing refcount on success)
+ */
+CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               void *ssl_sessionid,
+                               size_t idsize,
+                               bool *added);
 
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
@@ -123,5 +179,7 @@ int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks);
 #include "mbedtls.h"        /* mbedTLS versions */
 #include "bearssl.h"        /* BearSSL versions */
 #include "rustls.h"         /* rustls versions */
+
+#endif /* USE_SSL */
 
 #endif /* HEADER_CURL_VTLS_INT_H */
