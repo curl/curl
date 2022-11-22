@@ -160,7 +160,7 @@ static CURLcode pre_receive_plain(struct Curl_easy *data,
      performed before every send() if any incoming data is
      available. However, skip this, if buffer is already full. */
   if((conn->handler->protocol&PROTO_FAMILY_HTTP) != 0 &&
-     conn->recv[num] == Curl_cfilter_recv &&
+     conn->recv[num] == Curl_conn_recv &&
      (!psnd->buffer || bytestorecv)) {
     const int readymask = Curl_socket_check(sockfd, CURL_SOCKET_BAD,
                                             CURL_SOCKET_BAD, 0);

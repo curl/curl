@@ -501,7 +501,7 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
   struct ldapconninfo *li = conn->proto.ldapc;
   bool ssldone = 0;
 
-  result = Curl_cfilter_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   if(!result) {
     state(data, newstate);
 
@@ -1153,7 +1153,7 @@ ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
   (void)arg;
   if(opt == LBER_SB_OPT_DATA_READY) {
     struct Curl_easy *data = sbiod->sbiod_pvt;
-    return Curl_cfilter_data_pending(data->conn, FIRSTSOCKET);
+    return Curl_conn_data_pending(data, FIRSTSOCKET);
   }
   return 0;
 }

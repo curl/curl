@@ -348,9 +348,6 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 
   Curl_persistconninfo(data, conn, NULL, -1);
 
-  /* for connection reuse purposes: */
-  conn->ssl[FIRSTSOCKET].state = ssl_connection_complete;
-
   {
     unsigned char alpn_protocols[] = QUICHE_H3_APPLICATION_PROTOCOL;
     unsigned alpn_len, offset = 0;

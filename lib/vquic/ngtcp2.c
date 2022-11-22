@@ -49,6 +49,7 @@
 #include "ngtcp2.h"
 #include "multiif.h"
 #include "strcase.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "strerror.h"
 #include "dynbuf.h"
@@ -300,17 +301,19 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 static CURLcode quic_set_client_cert(struct Curl_easy *data,
                                      struct quicsocket *qs)
 {
-  struct connectdata *conn = data->conn;
   SSL_CTX *ssl_ctx = qs->sslctx;
-  char *const ssl_cert = SSL_SET_OPTION(primary.clientcert);
-  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
-  const char *const ssl_cert_type = SSL_SET_OPTION(cert_type);
+  const struct ssl_config_data *ssl_config;
 
-  if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
+  ssl_config = Curl_ssl_get_config(data, FIRSTSOCKET);
+  DEBUGASSERT(ssl_config);
+
+  if(ssl_config->primary.clientcert || ssl_config->primary.cert_blob
+     || ssl_config->cert_type) {
     return Curl_ossl_set_client_cert(
-        data, ssl_ctx, ssl_cert, ssl_cert_blob, ssl_cert_type,
-        SSL_SET_OPTION(key), SSL_SET_OPTION(key_blob),
-        SSL_SET_OPTION(key_type), SSL_SET_OPTION(key_passwd));
+        data, ssl_ctx, ssl_config->primary.clientcert,
+        ssl_config->primary.cert_blob, ssl_config->cert_type,
+        ssl_config->key, ssl_config->key_blob,
+        ssl_config->key_type, ssl_config->key_passwd);
   }
 
   return CURLE_OK;
@@ -1693,9 +1696,15 @@ static CURLcode ng_has_connected(struct Curl_easy *data,
       return result;
     infof(data, "Verified certificate just fine");
 #elif defined(USE_GNUTLS)
-    result = Curl_gtls_verifyserver(data, conn, conn->quic->ssl, FIRSTSOCKET);
+    result = Curl_gtls_verifyserver(conn->cfilter[FIRSTSOCKET],
+                                    data, conn->quic->ssl);
 #elif defined(USE_WOLFSSL)
-    char *snihost = Curl_ssl_snihost(data, SSL_HOST_NAME(), NULL);
+    const char *hostname, *disp_hostname;
+    int port;
+    char *snihost;
+
+    Curl_conn_get_host(data, FIRSTSOCKET, &hostname, &disp_hostname, &port);
+    snihost = Curl_ssl_snihost(data, hostname, NULL);
     if(!snihost ||
        (wolfSSL_check_domain_name(conn->quic->ssl, snihost) == SSL_FAILURE))
       return CURLE_PEER_FAILED_VERIFICATION;
