@@ -78,7 +78,9 @@
 #define USE_MANUAL 1
 #define CURL_DISABLE_LDAP 1
 
+#ifndef OS
 #define OS "AmigaOS"
+#endif
 
 #define PACKAGE "curl"
 #define PACKAGE_BUGREPORT "a suitable mailing list: https://curl.se/mail/"

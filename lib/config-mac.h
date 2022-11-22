@@ -30,7 +30,9 @@
 /*  On Mac OS X you must run configure to generate curl_config.h file  */
 /* =================================================================== */
 
+#ifndef OS
 #define OS "mac"
+#endif
 
 /* Define if you want the built-in manual */
 #define USE_MANUAL              1

@@ -182,7 +182,7 @@ make targets available to build libcurl with more features, use:
    and SSPI support.
 
 If you have any problems linking libraries or finding header files, be sure
-to verify that the provided `Makefile.m32` files use the proper paths, and
+to verify that the provided `Makefile.mk` files use the proper paths, and
 adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 
@@ -210,7 +210,7 @@ set LDFLAGS=-Lc:/openldapsdk/lib/mscvc
 set LIBS=-lldapsdk -lldapssl -lldapx
 ```
 
-If you want to enable LDAPS support then set LDAPS=1.
+If you want to enable LDAPS support then append `-ldaps` to the make target.
 
 ## Cygwin
 
@@ -219,6 +219,30 @@ curl source tree root with `sh configure`. Make sure you have the `sh`
 executable in `/bin/` or you will see the configure fail toward the end.
 
 Run `make`
+
+## MS-DOS
+
+Requires DJGPP in the search path and pointing to the Watt-32 stack via
+`WATT_PATH=c:/djgpp/net/watt`.
+
+Run `make -f Makefile.dist djgpp` in the root curl dir.
+
+For build configuration options, please see the MinGW32 section.
+
+Notes:
+
+ - DJGPP 2.04 beta has a `sscanf()` bug so the URL parsing is not done
+   properly. Use DJGPP 2.03 until they fix it.
+
+ - Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
+   things go wrong because things like FS-extensions and `errno` values have
+   been changed between releases.
+
+## AmigaOS
+
+Run `make -f Makefile.dist amiga` in the root curl dir.
+
+For build configuration options, please see the MinGW32 section.
 
 ## Disabling Specific Protocols in Windows builds
 

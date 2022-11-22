@@ -35,7 +35,9 @@
 #undef VERSION
 
 /* Define cpu-machine-OS */
+#ifndef OS
 #define OS "ARM-RISC OS"
+#endif
 
 /* Define if you want the built-in manual */
 #define USE_MANUAL

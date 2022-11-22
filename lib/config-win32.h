@@ -635,7 +635,7 @@ Vista
 /* ---------------------------------------------------------------- */
 
 /* Define cpu-machine-OS */
-#if !defined(OS)
+#ifndef OS
 #if defined(_M_IX86) || defined(__i386__) /* x86 (MSVC or gcc) */
 #define OS "i386-pc-win32"
 #elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (MSVC >=2005 or gcc) */
