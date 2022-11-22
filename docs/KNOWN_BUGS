@@ -73,7 +73,6 @@ problems may have been fixed or changed somewhat since this was written.
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
- 7.1 FTP without or slow 220 response
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
  7.5 ASCII FTP
@@ -570,15 +569,6 @@ problems may have been fixed or changed somewhat since this was written.
  https://github.com/curl/curl/issues/8264
 
 7. FTP
-
-7.1 FTP without or slow 220 response
-
- If a connection is made to an FTP server but the server then just never sends
- the 220 response or otherwise is dead slow, libcurl will not acknowledge the
- connection timeout during that phase but only the "real" timeout - which may
- surprise users as it is probably considered to be the connect phase to most
- people. Brought up (and is being misunderstood) in:
- https://curl.se/bug/view.cgi?id=856
 
 7.3 FTP with NOBODY and FAILONERROR
 
