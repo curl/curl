@@ -44,7 +44,7 @@ certificate bundle is assumed to be stored, as established at build time.
 
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
 (libnsspem.so) needs to be available for this option to work properly.
-Starting with curl-7.55.0, if both \fICURLOPT_CAINFO(3)\fP and
+Starting with curl 7.55.0, if both \fICURLOPT_CAINFO(3)\fP and
 \fICURLOPT_CAPATH(3)\fP are unset, NSS-linked libcurl tries to load
 libnssckbi.so, which contains a more comprehensive set of trust information
 than supported by nss-pem, because libnssckbi.so also includes information
@@ -88,4 +88,4 @@ CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
 .BR CURLOPT_CAINFO_BLOB "(3), " CURLOPT_CAPATH "(3), "
 .BR CURLOPT_SSL_VERIFYPEER "(3), " CURLOPT_SSL_VERIFYHOST "(3), "
-.BR CURLINFO_CAINFO "(3), "
+.BR CURLINFO_CAINFO "(3), " CURLOPT_CA_CACHE_TIMEOUT "(3), "
