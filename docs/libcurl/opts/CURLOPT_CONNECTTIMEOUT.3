@@ -43,6 +43,9 @@ In unix-like systems, this might cause signals to be used unless
 
 If both \fICURLOPT_CONNECTTIMEOUT(3)\fP and \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
 are set, the value set last will be used.
+
+The "connection phase" is considered complete when the requested TCP, TLS or
+QUIC handshakes are done.
 .SH DEFAULT
 300
 .SH PROTOCOLS
