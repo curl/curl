@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to send emails
+ * Send email with IMAP
  * </DESC>
  */
 

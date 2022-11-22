@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to search for new emails
+ * Search for new IMAP emails
  * </DESC>
  */
 
