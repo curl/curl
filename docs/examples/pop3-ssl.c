@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example using SSL
+ * Get POP3 email using implicit SSL
  * </DESC>
  */
 

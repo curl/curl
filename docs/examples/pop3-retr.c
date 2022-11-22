@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example showing how to retrieve emails
+ * Retrieve POP3 email
  * </DESC>
  */
 

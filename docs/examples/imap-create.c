@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to create a new folder
+ * Create a new IMAP folder
  * </DESC>
  */
 
