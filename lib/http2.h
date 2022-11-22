@@ -73,7 +73,7 @@ bool Curl_h2_http_1_1_error(struct Curl_easy *data);
 #define Curl_http2_init_state(x)
 #define Curl_http2_init_userset(x)
 #define Curl_http2_done(x,y)
-#define Curl_http2_done_sending(x,y)
+#define Curl_http2_done_sending(x,y) (void)y
 #define Curl_http2_add_child(x, y, z)
 #define Curl_http2_remove_child(x, y)
 #define Curl_http2_cleanup_dependencies(x)
