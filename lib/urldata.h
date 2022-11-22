@@ -113,6 +113,24 @@ typedef unsigned int curl_prot_t;
    input easier and better. */
 #define CURL_MAX_INPUT_LENGTH 8000000
 
+/* Macros intended for DEBUGF logging, use like:
+ * DEBUGF(infof(data, CFMSG(cf, "this filter %s rocks"), "very much"));
+ * and it will output:
+ * [CONN-1-0][CF-SSL] this filter very much rocks
+ * on connection #1 with sockindex 0 for filter of type "SSL". */
+#define DMSG(d,msg)  \
+  "[CONN-%ld] "msg, (d)->conn->connection_id
+#define DMSGI(d,i,msg)  \
+  "[CONN-%ld-%d] "msg, (d)->conn->connection_id, (i)
+#define CMSG(c,msg)  \
+  "[CONN-%ld] "msg, (conn)->connection_id
+#define CMSGI(c,i,msg)  \
+  "[CONN-%ld-%d] "msg, (conn)->connection_id, (i)
+#define CFMSG(cf,msg)  \
+  "[CONN-%ld-%d][CF-%s] "msg, (cf)->conn->connection_id, \
+  (cf)->sockindex, (cf)->cft->name
+
+
 #include "cookie.h"
 #include "psl.h"
 #include "formdata.h"
@@ -248,19 +266,6 @@ typedef enum {
 
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
-
-/* struct for data related to each SSL connection */
-struct ssl_connect_data {
-  ssl_connection_state state;
-  ssl_connect_state connecting_state;
-#if defined(USE_SSL)
-  struct ssl_backend_data *backend;
-#endif
-  /* Use ssl encrypted communications TRUE/FALSE. The library is not
-     necessarily using ssl at the moment but at least asked to or means to use
-     it. See 'state' for the exact current state of the connection. */
-  BIT(use);
-};
 
 struct ssl_primary_config {
   long version;          /* what version the client wants to use */
@@ -478,8 +483,6 @@ struct negotiatedata {
  */
 struct ConnectBits {
 #ifndef CURL_DISABLE_PROXY
-  bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
-                                  is complete */
   BIT(httpproxy);  /* if set, this transfer is done through an HTTP proxy */
   BIT(socksproxy); /* if set, this transfer is done through a socks proxy */
   BIT(proxy_user_passwd); /* user+password for the proxy? */
@@ -957,13 +960,6 @@ struct connectdata {
 #ifdef USE_RECV_BEFORE_SEND_WORKAROUND
   struct postponed_data postponed[2]; /* two buffers for two sockets */
 #endif /* USE_RECV_BEFORE_SEND_WORKAROUND */
-  struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
-#ifndef CURL_DISABLE_PROXY
-  struct ssl_connect_data proxy_ssl[2]; /* this is for proxy ssl-stuff */
-#endif
-#ifdef USE_SSL
-  void *ssl_extra; /* separately allocated backend-specific data */
-#endif
   struct ssl_primary_config ssl_config;
 #ifndef CURL_DISABLE_PROXY
   struct ssl_primary_config proxy_ssl_config;

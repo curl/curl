@@ -1211,33 +1211,48 @@ static void socks_proxy_cf_detach_data(struct Curl_cfilter *cf,
   socks_proxy_cf_free(cf);
 }
 
+static void socks_cf_get_host(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              const char **phost,
+                              const char **pdisplay_host,
+                              int *pport)
+{
+  (void)data;
+  if(!cf->connected) {
+    *phost = cf->conn->socks_proxy.host.name;
+    *pdisplay_host = cf->conn->http_proxy.host.dispname;
+    *pport = (int)cf->conn->socks_proxy.port;
+  }
+  else {
+    cf->next->cft->get_host(cf->next, data, phost, pdisplay_host, pport);
+  }
+}
 
 static const struct Curl_cftype cft_socks_proxy = {
   "SOCKS-PROXYY",
   CF_TYPE_IP_CONNECT,
   socks_proxy_cf_destroy,
-  Curl_cf_def_attach_data,
-  socks_proxy_cf_detach_data,
   Curl_cf_def_setup,
-  socks_proxy_cf_close,
   socks_proxy_cf_connect,
+  socks_proxy_cf_close,
+  socks_cf_get_host,
   socks_cf_get_select_socks,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
+  Curl_cf_def_attach_data,
+  socks_proxy_cf_detach_data,
 };
 
-CURLcode Curl_cfilter_socks_proxy_add(struct Curl_easy *data,
-                                      struct connectdata *conn,
-                                      int sockindex)
+CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
+                                   int sockindex)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  result = Curl_cfilter_create(&cf, data, conn, sockindex,
-                               &cft_socks_proxy, NULL);
+  result = Curl_cf_create(&cf, &cft_socks_proxy, NULL);
   if(!result)
-    Curl_cfilter_add(data, conn, sockindex, cf);
+    Curl_conn_cf_add(data, sockindex, cf);
   return result;
 }
 

@@ -481,14 +481,13 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   struct imap_conn *imapc = &conn->proto.imapc;
   CURLcode result;
 
-  if(!Curl_cfilter_ssl_added(data, conn, FIRSTSOCKET)) {
-    result = Curl_cfilter_ssl_add(data, conn, FIRSTSOCKET);
+  if(!Curl_ssl_conn_is_ssl(data, FIRSTSOCKET)) {
+    result = Curl_ssl_cfilter_add(data, FIRSTSOCKET);
     if(result)
       goto out;
   }
 
-  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
-                                FALSE, &imapc->ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &imapc->ssldone);
   if(!result) {
     if(imapc->state != IMAP_UPGRADETLS)
       state(data, IMAP_UPGRADETLS);
@@ -1392,8 +1391,7 @@ static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done)
   struct imap_conn *imapc = &conn->proto.imapc;
 
   if((conn->handler->flags & PROTOPT_SSL) && !imapc->ssldone) {
-    result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
-                                  FALSE, &imapc->ssldone);
+    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &imapc->ssldone);
     if(result || !imapc->ssldone)
       return result;
   }
@@ -1610,7 +1608,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   /* Run the state-machine */
   result = imap_multi_statemach(data, dophase_done);
 
-  *connected = Curl_cfilter_is_connected(data, conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(conn, FIRSTSOCKET);
 
   if(*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));

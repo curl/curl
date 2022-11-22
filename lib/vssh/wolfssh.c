@@ -951,7 +951,7 @@ CURLcode wsftp_perform(struct Curl_easy *data,
   /* run the state-machine */
   result = wssh_multi_statemach(data, dophase_done);
 
-  *connected = Curl_cfilter_is_connected(data, data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
   if(*dophase_done) {
     DEBUGF(infof(data, "DO phase is complete"));
