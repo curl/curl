@@ -77,7 +77,6 @@ problems may have been fixed or changed somewhat since this was written.
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
  7.5 ASCII FTP
- 7.7 FTP and empty path parts in the URL
  7.8 Premature transfer end but healthy control channel
  7.9 Passive transfer tries only one IP address
  7.10 FTPS needs session reuse
@@ -607,15 +606,6 @@ problems may have been fixed or changed somewhat since this was written.
     form to his own internal form.
 
  Since 7.15.4 at least line endings are converted.
-
-7.7 FTP and empty path parts in the URL
-
- libcurl ignores empty path parts in FTP URLs, whereas RFC1738 states that
- such parts should be sent to the server as 'CWD ' (without an argument). The
- only exception to this rule, is that we knowingly break this if the empty
- part is first in the path, as then we use the double slashes to indicate that
- the user wants to reach the root dir (this exception SHALL remain even when
- this bug is fixed).
 
 7.8 Premature transfer end but healthy control channel
 
