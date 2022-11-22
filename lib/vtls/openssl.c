@@ -1613,6 +1613,7 @@ static void ossl_cleanup(void)
     !defined(LIBRESSL_VERSION_NUMBER)
   /* OpenSSL 1.1 deprecates all these cleanup functions and
      turns them into no-ops in OpenSSL 1.0 compatibility mode */
+  OPENSSL_cleanup();
 #else
   /* Free ciphers and digests lists */
   EVP_cleanup();
