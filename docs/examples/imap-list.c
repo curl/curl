@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example to list the folders within a mailbox
+ * List the folders within an IMAP mailbox
  * </DESC>
  */
 

@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example showing how to retrieve emails from a shared mailbox
+ * Retrieve emails from a shared POP3 mailbox
  * </DESC>
  */
 

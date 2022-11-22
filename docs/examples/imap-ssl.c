@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example using SSL
+ * IMAP with implicit SSL
  * </DESC>
  */
 

@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to copy an email from one folder to another
+ * Copy an email from one IMAP folder to another
  * </DESC>
  */
 

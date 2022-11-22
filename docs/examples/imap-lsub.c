@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example to list the subscribed folders
+ * List the subscribed IMAP folders
  * </DESC>
  */
 

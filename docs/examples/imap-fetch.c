@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to retreieve emails
+ * Retreieve IMAP emails
  * </DESC>
  */
 

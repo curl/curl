@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example showing how to perform a noop
+ * Perform a POP3 noop
  * </DESC>
  */
 

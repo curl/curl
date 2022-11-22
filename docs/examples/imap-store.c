@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to modify the properties of an email
+ * Modify the properties of an email over IMAP
  * </DESC>
  */
 

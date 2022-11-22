@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example showing how to verify an email address
+ * Verify an SMTP email address
  * </DESC>
  */
 

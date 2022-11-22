@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example showing how to expand an email mailing list
+ * Expand an SMTP email mailing list
  * </DESC>
  */
 

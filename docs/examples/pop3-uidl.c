@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example to list the contents of a mailbox by unique ID
+ * List the contents of a POP3 mailbox by unique ID
  * </DESC>
  */
 

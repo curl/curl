@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to obtain information about a folder
+ * Obtain information about an IMAP folder
  * </DESC>
  */
 

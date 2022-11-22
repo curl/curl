@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * A multi-threaded example that uses pthreads to fetch several files at once
+ * A multi-threaded program using pthreads to fetch several files at once
  * </DESC>
  */
 

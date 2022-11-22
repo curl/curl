@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example using SSL
+ * Send SMTP email using implicit SSL
  * </DESC>
  */
 

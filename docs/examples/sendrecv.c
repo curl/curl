@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * An example of curl_easy_send() and curl_easy_recv() usage.
+ * Demonstrate curl_easy_send() and curl_easy_recv() usage.
  * </DESC>
  */
 

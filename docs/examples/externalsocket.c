@@ -22,8 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * An example demonstrating how an application can pass in a custom
- * socket to libcurl to use. This example also handles the connect itself.
+ * Pass in a custom socket for libcurl to use.
  * </DESC>
  */
 #include <stdio.h>

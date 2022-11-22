@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to perform a noop
+ * Perform an IMAP noop
  * </DESC>
  */
 

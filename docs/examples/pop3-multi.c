@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example using the multi interface
+ * Get POP3 email using the multi interface
  * </DESC>
  */
 

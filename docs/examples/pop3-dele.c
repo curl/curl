@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example showing how to delete emails
+ * Delete POP3 emails
  * </DESC>
  */
 
