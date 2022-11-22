@@ -22,37 +22,53 @@
 #
 #***************************************************************************
 
-# Build libcurl via lib/Makefile.m32 first.
+# Build libcurl via lib/Makefile.mk first.
 
 PROOT := ../..
 
-LDFLAGS  += -L$(PROOT)/lib
-LIBS     += -lcurl
-
 ifeq ($(findstring -static,$(CFG)),)
-  curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
   DYN := 1
-else
-  curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
-  CPPFLAGS += -DCURL_STATICLIB
-  LDFLAGS += -static
 endif
 
-LIBS += -lws2_32
+### Common
+
+include $(PROOT)/lib/Makefile.mk
+
+### Local
+
+CPPFLAGS += -DCURL_NO_OLDIES
+LDFLAGS  += -L$(PROOT)/lib
+LIBS     := -lcurl $(LIBS)
+
+ifdef DYN
+  curl_DEPENDENCIES += $(PROOT)/lib/libcurl.dll.a
+else
+  curl_DEPENDENCIES := $(PROOT)/lib/libcurl.a
+  ifdef WIN32
+    CPPFLAGS += -DCURL_STATICLIB
+    LDFLAGS += -static
+  endif
+endif
+
+ifdef WIN32
+  LIBS += -lws2_32
+endif
 
 ### Sources and targets
 
 # Provides check_PROGRAMS
 include Makefile.inc
 
-TARGETS := $(patsubst %,%.exe,$(strip $(check_PROGRAMS) synctime))
-TOCLEAN := $(TARGETS:.exe=.o)
+ifdef WIN32
+check_PROGRAMS += synctime
+endif
 
-### Local rules
+TARGETS := $(patsubst %,%$(BIN_EXT),$(strip $(check_PROGRAMS)))
+TOCLEAN := $(TARGETS)
 
-%.exe: %.o $(curl_DEPENDENCIES)
-	$(CC) $(LDFLAGS) $(CURL_LDFLAGS_BIN) -o $@ $< $(LIBS)
+### Rules
 
-### Global script
+%$(BIN_EXT): %.c $(curl_DEPENDENCIES)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(CURL_LDFLAGS_BIN) $< -o $@ $(LIBS)
 
-include $(PROOT)/lib/Makefile.m32
+all: $(TARGETS)

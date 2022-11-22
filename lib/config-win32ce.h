@@ -302,8 +302,9 @@
 /* ---------------------------------------------------------------- */
 
 /* Define cpu-machine-OS */
-#undef OS
+#ifndef OS
 #define OS "i386-pc-win32ce"
+#endif
 
 /* Name of package */
 #define PACKAGE "curl"
