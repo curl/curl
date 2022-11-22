@@ -74,7 +74,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  7. FTP
  7.1 FTP without or slow 220 response
- 7.2 FTP with CONNECT and slow server
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
  7.5 ASCII FTP
@@ -583,14 +582,6 @@ problems may have been fixed or changed somewhat since this was written.
  surprise users as it is probably considered to be the connect phase to most
  people. Brought up (and is being misunderstood) in:
  https://curl.se/bug/view.cgi?id=856
-
-7.2 FTP with CONNECT and slow server
-
- When doing FTP over a socks proxy or CONNECT through HTTP proxy and the multi
- interface is used, libcurl will fail if the (passive) TCP connection for the
- data transfer is not more or less instant as the code does not properly wait
- for the connect to be confirmed. See test case 564 for a first shot at a test
- case.
 
 7.3 FTP with NOBODY and FAILONERROR
 
