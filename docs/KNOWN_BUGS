@@ -77,7 +77,6 @@ problems may have been fixed or changed somewhat since this was written.
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
  7.5 ASCII FTP
- 7.8 Premature transfer end but healthy control channel
  7.9 Passive transfer tries only one IP address
  7.10 FTPS needs session reuse
  7.11 FTPS upload data loss with TLS 1.3
@@ -606,18 +605,6 @@ problems may have been fixed or changed somewhat since this was written.
     form to his own internal form.
 
  Since 7.15.4 at least line endings are converted.
-
-7.8 Premature transfer end but healthy control channel
-
- When 'multi_done' is called before the transfer has been completed the normal
- way, it is considered a "premature" transfer end. In this situation, libcurl
- closes the connection assuming it does not know the state of the connection so
- it cannot be reused for subsequent requests.
-
- With FTP however, this is not necessarily true but there are a bunch of
- situations (listed in the ftp_done code) where it *could* keep the connection
- alive even in this situation - but the current code does not. Fixing this would
- allow libcurl to reuse FTP connections better.
 
 7.9 Passive transfer tries only one IP address
 
