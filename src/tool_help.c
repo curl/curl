@@ -26,7 +26,6 @@
 /* use our own printf() functions */
 #include "curlx.h"
 
-#include "tool_panykey.h"
 #include "tool_help.h"
 #include "tool_libinfo.h"
 #include "tool_util.h"
