@@ -53,10 +53,6 @@ Files: mlc_config.json
 Copyright: 2022 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-Files: packages/DOS/README
-Copyright: 2003 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
-License: curl
-
 Files: packages/OS400/README.OS400
 Copyright: 2007 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
