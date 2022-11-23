@@ -37,7 +37,8 @@ UNITPROGS = unit1300          unit1302 unit1303 unit1304 unit1305 unit1307 \
  unit1608 unit1609 unit1610 unit1611 unit1612 unit1614 \
  unit1620 unit1621 \
  unit1650 unit1651 unit1652 unit1653 unit1654 unit1655 \
- unit1660 unit1661
+ unit1660 unit1661 \
+ unit3200
 
 unit1300_SOURCES = unit1300.c $(UNITFILES)
 unit1300_CPPFLAGS = $(AM_CPPFLAGS)
@@ -162,3 +163,6 @@ unit1660_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1661_SOURCES = unit1661.c $(UNITFILES)
 unit1661_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit3200_SOURCES = unit3200.c $(UNITFILES)
+unit3200_CPPFLAGS = $(AM_CPPFLAGS)
