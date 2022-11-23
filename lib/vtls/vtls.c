@@ -387,10 +387,6 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
   *ssl_sessionid = NULL;
   if(!ssl_config)
     return TRUE;
-#ifdef CURL_DISABLE_PROXY
-  if(isProxy)
-    return TRUE;
-#endif
 
   DEBUGASSERT(ssl_config->primary.sessionid);
 
@@ -1442,13 +1438,16 @@ static void reinit_hostname(struct Curl_cfilter *cf)
 {
   struct ssl_connect_data *connssl = cf->ctx;
 
+#ifndef CURL_DISABLE_PROXY
   if(Curl_ssl_cf_is_proxy(cf)) {
     /* TODO: there is not definition for a proxy setup on a secondary conn */
     connssl->hostname = cf->conn->http_proxy.host.name;
     connssl->dispname = cf->conn->http_proxy.host.dispname;
     connssl->port = (int)cf->conn->http_proxy.port;
   }
-  else {
+  else
+#endif
+  {
     /* TODO: secondaryhostname is set to the IP address we connect to
      * in the FTP handler, it is assumed that host verification uses the
      * hostname from FIRSTSOCKET */
@@ -1778,7 +1777,12 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf)
 struct ssl_config_data *
 Curl_ssl_cf_get_config(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
+#ifdef CURL_DISABLE_PROXY
+  (void)cf;
+  return &data->set.ssl;
+#else
   return Curl_ssl_cf_is_proxy(cf)? &data->set.proxy_ssl : &data->set.ssl;
+#endif
 }
 
 struct ssl_config_data *
@@ -1795,8 +1799,12 @@ Curl_ssl_get_config(struct Curl_easy *data, int sockindex)
 struct ssl_primary_config *
 Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf)
 {
+#ifdef CURL_DISABLE_PROXY
+  return &cf->conn->ssl_config;
+#else
   return Curl_ssl_cf_is_proxy(cf)?
     &cf->conn->proxy_ssl_config : &cf->conn->ssl_config;
+#endif
 }
 
 struct ssl_primary_config *
