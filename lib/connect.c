@@ -48,13 +48,6 @@
 #include <arpa/inet.h>
 #endif
 
-#if (defined(HAVE_IOCTL_FIONBIO) && defined(NETWARE))
-#include <sys/filio.h>
-#endif
-#ifdef NETWARE
-#undef in_addr_t
-#define in_addr_t unsigned long
-#endif
 #ifdef __VMS
 #include <in.h>
 #include <inet.h>

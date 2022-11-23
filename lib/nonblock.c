@@ -31,9 +31,6 @@
 #include <fcntl.h>
 #endif
 
-#if (defined(HAVE_IOCTL_FIONBIO) && defined(NETWARE))
-#include <sys/filio.h>
-#endif
 #ifdef __VMS
 #include <in.h>
 #include <inet.h>

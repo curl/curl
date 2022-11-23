@@ -64,9 +64,6 @@
 /* Indicates that the LAN Manager session key should be used for signing and
    sealing authenticated communications. */
 
-#define NTLMFLAG_NEGOTIATE_NETWARE               (1<<8)
-/* unknown purpose */
-
 #define NTLMFLAG_NEGOTIATE_NTLM_KEY              (1<<9)
 /* Indicates that NTLM authentication is being used. */
 
