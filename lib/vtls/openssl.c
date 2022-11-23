@@ -3317,9 +3317,11 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   void *ssl_sessionid = NULL;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+#ifndef CURL_DISABLE_PROXY
   struct Curl_cfilter *cf_ssl_next = Curl_ssl_cf_get_ssl(cf->next);
   struct ssl_connect_data *connssl_next = cf_ssl_next?
-                                            cf_ssl_next->ctx : NULL;
+    cf_ssl_next->ctx : NULL;
+#endif
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   bool sni;
