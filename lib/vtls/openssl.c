@@ -2037,6 +2037,11 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   const char * const dispname = SSL_HOST_DISPNAME();
   size_t hostlen = strlen(hostname);
 
+#ifndef ENABLE_IPV6
+  /* Silence compiler warnings for unused params */
+  (void) conn;
+#endif
+
 #ifdef ENABLE_IPV6
   if(conn->bits.ipv6_ip &&
      Curl_inet_pton(AF_INET6, hostname, &addr)) {
