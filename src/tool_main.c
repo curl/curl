@@ -50,7 +50,6 @@
 #include "tool_doswin.h"
 #include "tool_msgs.h"
 #include "tool_operate.h"
-#include "tool_panykey.h"
 #include "tool_vms.h"
 #include "tool_main.h"
 #include "tool_libinfo.h"
@@ -290,11 +289,6 @@ int main(int argc, char *argv[])
 #ifdef WIN32
   /* Flush buffers of all streams opened in write or update mode */
   fflush(NULL);
-#endif
-
-#ifdef __NOVELL_LIBC__
-  if(!getenv("_IN_NETWARE_BASH_"))
-    tool_pressanykey();
 #endif
 
 #ifdef __VMS

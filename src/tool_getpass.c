@@ -50,14 +50,6 @@
 #  include <conio.h>
 #endif
 
-#ifdef NETWARE
-#  ifdef __NOVELL_LIBC__
-#    include <screen.h>
-#  else
-#    include <nwconio.h>
-#  endif
-#endif
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -131,45 +123,6 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 }
 #define DONE
 #endif /* WIN32 */
-
-#ifdef NETWARE
-/* NetWare implementation */
-#ifdef __NOVELL_LIBC__
-char *getpass_r(const char *prompt, char *buffer, size_t buflen)
-{
-  return getpassword(prompt, buffer, buflen);
-}
-#else
-char *getpass_r(const char *prompt, char *buffer, size_t buflen)
-{
-  size_t i = 0;
-
-  printf("%s", prompt);
-  do {
-    buffer[i++] = getch();
-    if(buffer[i-1] == '\b') {
-      /* remove this letter and if this is not the first key,
-         remove the previous one as well */
-      if(i > 1) {
-        printf("\b \b");
-        i = i - 2;
-      }
-      else {
-        RingTheBell();
-        i = i - 1;
-      }
-    }
-    else if(buffer[i-1] != 13)
-      putchar('*');
-
-  } while((buffer[i-1] != 13) && (i < buflen));
-  buffer[i-1] = '\0';
-  printf("\r\n");
-  return buffer;
-}
-#endif /* __NOVELL_LIBC__ */
-#define DONE
-#endif /* NETWARE */
 
 #ifndef DONE /* not previously provided */
 

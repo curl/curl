@@ -37,12 +37,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#ifdef NETWARE
-#  ifndef __NOVELL_LIBC__
-#    define mkdir mkdir_510
-#  endif
-#endif
-
 #if defined(WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
 #  define mkdir(x,y) (mkdir)((x))
 #  ifndef F_OK
