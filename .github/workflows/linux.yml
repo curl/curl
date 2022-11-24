@@ -101,8 +101,8 @@ jobs:
           configure: CC=icc --enable-debug --with-openssl
 
         - name: NSS
-          install_packages: clang-9 libnss3-dev libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
-          configure: CC=clang-9 CPPFLAGS="-isystem /usr/include/nss" --with-nss --enable-debug --with-nss-deprecated
+          install_packages: clang libnss3-dev libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
+          configure: CC=clang CPPFLAGS="-isystem /usr/include/nss" --with-nss --enable-debug --with-nss-deprecated
 
     steps:
     - run: |
