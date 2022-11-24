@@ -2639,8 +2639,9 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
   char *first_arg = argc > 1 ? curlx_convert_tchar_to_UTF8(argv[1]) : NULL;
 
 #ifdef HAVE_SETLOCALE
-  /* Override locales for uniform and consistent behavior */
-  setlocale(LC_ALL, "C");
+  /* Override locale for number parsing (only) */
+  setlocale(LC_ALL, "");
+  setlocale(LC_NUMERIC, "C");
 #endif
 
   /* Parse .curlrc if necessary */
