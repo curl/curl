@@ -120,7 +120,7 @@ static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   CURLcode result;
 
-  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET, TRUE, done);
+  result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
   if(result)
     connclose(conn, "Failed TLS connection");
   *done = TRUE;

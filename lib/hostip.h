@@ -34,11 +34,6 @@
 #include <setjmp.h>
 #endif
 
-#ifdef NETWARE
-#undef in_addr_t
-#define in_addr_t unsigned long
-#endif
-
 /* Allocate enough memory to hold the full name information structs and
  * everything. OSF1 is known to require at least 8872 bytes. The buffer
  * required for storing all possible aliases and IP numbers is according to

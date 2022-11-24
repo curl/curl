@@ -32,10 +32,12 @@
 /* Default proxy timeout in milliseconds */
 #define PROXY_TIMEOUT (3600*1000)
 
-CURLcode Curl_cfilter_http_proxy_add(struct Curl_easy *data,
-                                     struct connectdata *conn,
-                                     int sockindex);
+CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
+                                  int sockindex);
 
-#endif
+CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
+                               int sockindex);
+
+#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */

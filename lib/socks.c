@@ -112,7 +112,7 @@ int Curl_blockread_all(struct Curl_easy *data,   /* transfer */
       result = ~CURLE_OK;
       break;
     }
-    result = Curl_read_plain(sockfd, buf, buffersize, &nread);
+    result = Curl_read_plain(data, sockfd, buf, buffersize, &nread);
     if(CURLE_AGAIN == result)
       continue;
     if(result)
@@ -396,7 +396,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     /* FALLTHROUGH */
   case CONNECT_SOCKS_READ:
     /* Receive response */
-    result = Curl_read_plain(sockfd, (char *)sx->outp,
+    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "SOCKS4: Failed receiving connect request ack: %s",
@@ -599,7 +599,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sx->outp = socksreq; /* store it here */
     /* FALLTHROUGH */
   case CONNECT_SOCKS_READ:
-    result = Curl_read_plain(sockfd, (char *)sx->outp,
+    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Unable to receive initial SOCKS5 response.");
@@ -729,7 +729,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sxstate(sx, data, CONNECT_AUTH_READ);
     /* FALLTHROUGH */
   case CONNECT_AUTH_READ:
-    result = Curl_read_plain(sockfd, (char *)sx->outp,
+    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Unable to receive SOCKS5 sub-negotiation response.");
@@ -931,7 +931,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sxstate(sx, data, CONNECT_REQ_READ);
     /* FALLTHROUGH */
   case CONNECT_REQ_READ:
-    result = Curl_read_plain(sockfd, (char *)sx->outp,
+    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Failed to receive SOCKS5 connect request ack.");
@@ -1030,7 +1030,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
 #endif
     /* FALLTHROUGH */
   case CONNECT_REQ_READ_MORE:
-    result = Curl_read_plain(sockfd, (char *)sx->outp,
+    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
                              sx->outstanding, &actualread);
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "Failed to receive SOCKS5 connect request ack.");
@@ -1211,32 +1211,48 @@ static void socks_proxy_cf_detach_data(struct Curl_cfilter *cf,
   socks_proxy_cf_free(cf);
 }
 
+static void socks_cf_get_host(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              const char **phost,
+                              const char **pdisplay_host,
+                              int *pport)
+{
+  (void)data;
+  if(!cf->connected) {
+    *phost = cf->conn->socks_proxy.host.name;
+    *pdisplay_host = cf->conn->http_proxy.host.dispname;
+    *pport = (int)cf->conn->socks_proxy.port;
+  }
+  else {
+    cf->next->cft->get_host(cf->next, data, phost, pdisplay_host, pport);
+  }
+}
 
 static const struct Curl_cftype cft_socks_proxy = {
   "SOCKS-PROXYY",
+  CF_TYPE_IP_CONNECT,
   socks_proxy_cf_destroy,
-  Curl_cf_def_attach_data,
-  socks_proxy_cf_detach_data,
   Curl_cf_def_setup,
-  socks_proxy_cf_close,
   socks_proxy_cf_connect,
+  socks_proxy_cf_close,
+  socks_cf_get_host,
   socks_cf_get_select_socks,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
+  Curl_cf_def_attach_data,
+  socks_proxy_cf_detach_data,
 };
 
-CURLcode Curl_cfilter_socks_proxy_add(struct Curl_easy *data,
-                                      struct connectdata *conn,
-                                      int sockindex)
+CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
+                                   int sockindex)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  result = Curl_cfilter_create(&cf, data, conn, sockindex,
-                               &cft_socks_proxy, NULL);
+  result = Curl_cf_create(&cf, &cft_socks_proxy, NULL);
   if(!result)
-    Curl_cfilter_add(data, conn, sockindex, cf);
+    Curl_conn_cf_add(data, sockindex, cf);
   return result;
 }
 

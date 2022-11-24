@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example showing how to delete a folder
+ * Delete an IMAP folder
  * </DESC>
  */
 

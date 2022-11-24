@@ -1057,7 +1057,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     if((arg < 0) || (arg > 65535))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.proxyport = arg;
+    data->set.proxyport = (unsigned short)arg;
     break;
 
   case CURLOPT_PROXYAUTH:
@@ -3116,6 +3116,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   }
 #endif
+  case CURLOPT_QUICK_EXIT:
+    data->set.quick_exit = (0 != va_arg(param, long)) ? 1L:0L;
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

@@ -101,7 +101,7 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
-  test_setopt(curl, CURLOPT_PUT, 1L);
+  test_setopt(curl, CURLOPT_UPLOAD, 1L);
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
   test_setopt(curl, CURLOPT_TRAILERFUNCTION, trailers_callback);
   test_setopt(curl, CURLOPT_TRAILERDATA, NULL);

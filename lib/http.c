@@ -102,10 +102,6 @@ static int http_getsock_do(struct Curl_easy *data,
                            curl_socket_t *socks);
 static bool http_should_fail(struct Curl_easy *data);
 
-#ifndef CURL_DISABLE_PROXY
-static CURLcode add_haproxy_protocol_header(struct Curl_easy *data);
-#endif
-
 static CURLcode http_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn);
 #ifdef USE_WEBSOCKETS
@@ -222,6 +218,41 @@ const struct Curl_handler Curl_handler_wss = {
 
 #endif
 
+static CURLcode h3_setup_conn(struct Curl_easy *data,
+                                struct connectdata *conn)
+{
+#ifdef ENABLE_QUIC
+  /* We want HTTP/3 directly, setup the filter chain ourself,
+   * overriding the default behaviour. */
+  DEBUGASSERT(conn->transport == TRNSPRT_QUIC);
+
+  if(!(conn->handler->flags & PROTOPT_SSL)) {
+    failf(data, "HTTP/3 requested for non-HTTPS URL");
+    return CURLE_URL_MALFORMAT;
+  }
+#ifndef CURL_DISABLE_PROXY
+  if(conn->bits.socksproxy) {
+    failf(data, "HTTP/3 is not supported over a SOCKS proxy");
+    return CURLE_URL_MALFORMAT;
+  }
+  if(conn->bits.httpproxy && conn->bits.tunnel_proxy) {
+    failf(data, "HTTP/3 is not supported over a HTTP proxy");
+    return CURLE_URL_MALFORMAT;
+  }
+#endif
+
+  DEBUGF(infof(data, "HTTP/3 direct conn setup(conn #%ld, index=%d)",
+         conn->connection_id, FIRSTSOCKET));
+  return Curl_conn_socket_set(data, FIRSTSOCKET);
+
+#else /* ENABLE_QUIC */
+  (void)conn;
+  (void)data;
+  DEBUGF(infof(data, "QUIC is not supported in this build"));
+  return CURLE_NOT_BUILT_IN;
+#endif /* !ENABLE_QUIC */
+}
+
 static CURLcode http_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn)
 {
@@ -238,14 +269,11 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   data->req.p.http = http;
 
   if(data->state.httpwant == CURL_HTTP_VERSION_3) {
-    if(conn->handler->flags & PROTOPT_SSL)
-      /* Only go HTTP/3 directly on HTTPS URLs. It needs a UDP socket and does
-         the QUIC dance. */
-      conn->transport = TRNSPRT_QUIC;
-    else {
-      failf(data, "HTTP/3 requested for non-HTTPS URL");
-      return CURLE_URL_MALFORMAT;
-    }
+    conn->transport = TRNSPRT_QUIC;
+  }
+
+  if(conn->transport == TRNSPRT_QUIC) {
+    return h3_setup_conn(data, conn);
   }
   else {
     if(!CONN_INUSE(conn))
@@ -1532,30 +1560,13 @@ Curl_compareheader(const char *headerline, /* line to check */
  */
 CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 {
-  CURLcode result;
   struct connectdata *conn = data->conn;
 
   /* We default to persistent connections. We set this already in this connect
      function to make the re-use checks properly be able to check this bit. */
   connkeep(conn, "HTTP default");
 
-  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET, FALSE, done);
-  if(result || !*done)
-    return result;
-
-#ifndef CURL_DISABLE_PROXY
-  if(data->set.haproxyprotocol && !data->state.is_haproxy_hdr_sent) {
-    /* add HAProxy PROXY protocol header */
-    result = add_haproxy_protocol_header(data);
-    if(result)
-      return result;
-
-    /* do not send the header again after successful try */
-    data->state.is_haproxy_hdr_sent = TRUE;
-  }
-#endif
-
-  return CURLE_OK;
+  return Curl_conn_connect(data, FIRSTSOCKET, FALSE, done);
 }
 
 /* this returns the socket to wait for in the DO and DOING state for the multi
@@ -1570,42 +1581,6 @@ static int http_getsock_do(struct Curl_easy *data,
   socks[0] = conn->sock[FIRSTSOCKET];
   return GETSOCK_WRITESOCK(0);
 }
-
-#ifndef CURL_DISABLE_PROXY
-static CURLcode add_haproxy_protocol_header(struct Curl_easy *data)
-{
-  struct dynbuf req;
-  CURLcode result;
-  const char *tcp_version;
-  DEBUGASSERT(data->conn);
-  Curl_dyn_init(&req, DYN_HAXPROXY);
-
-#ifdef USE_UNIX_SOCKETS
-  if(data->conn->unix_domain_socket)
-    /* the buffer is large enough to hold this! */
-    result = Curl_dyn_addn(&req, STRCONST("PROXY UNKNOWN\r\n"));
-  else {
-#endif
-  /* Emit the correct prefix for IPv6 */
-  tcp_version = data->conn->bits.ipv6 ? "TCP6" : "TCP4";
-
-  result = Curl_dyn_addf(&req, "PROXY %s %s %s %i %i\r\n",
-                         tcp_version,
-                         data->info.conn_local_ip,
-                         data->info.conn_primary_ip,
-                         data->info.conn_local_port,
-                         data->info.conn_primary_port);
-
-#ifdef USE_UNIX_SOCKETS
-  }
-#endif
-
-  if(!result)
-    result = Curl_buffer_send(&req, data, &data->info.request_size,
-                              0, FIRSTSOCKET);
-  return result;
-}
-#endif
 
 /*
  * Curl_http_done() gets called after a single HTTP request has been

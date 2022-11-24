@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * IMAP example using the multi interface
+ * Get IMAP email with the multi interface
  * </DESC>
  */
 

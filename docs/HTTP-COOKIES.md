@@ -25,9 +25,14 @@
   [drafted](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-cookie-alone-01)
   to deprecate modification of 'secure' cookies from non-secure origins. Both
   of these drafts have been incorporated into a proposal to
-  [replace](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-02)
+  [replace](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-11)
   RFC6265. Cookie prefixes and secure cookie modification protection has been
   implemented by curl.
+
+  curl considers `http://localhost` to be a *secure context*, meaning that it
+  will allow and use cookies marked with the `secure` keyword even when done
+  over plain HTTP for this host. curl does this to match how popular browsers
+  work with secure cookies.
 
 ## Cookies saved to disk
 

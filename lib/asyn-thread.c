@@ -48,11 +48,6 @@
 #  include <pthread.h>
 #endif
 
-#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
-#undef in_addr_t
-#define in_addr_t unsigned long
-#endif
-
 #ifdef HAVE_GETADDRINFO
 #  define RESOLVER_ENOMEM  EAI_MEMORY
 #else
@@ -534,7 +529,8 @@ void Curl_resolver_kill(struct Curl_easy *data)
   /* If we're still resolving, we must wait for the threads to fully clean up,
      unfortunately.  Otherwise, we can simply cancel to clean up any resolver
      data. */
-  if(td && td->thread_hnd != curl_thread_t_null)
+  if(td && td->thread_hnd != curl_thread_t_null
+     && (data->set.quick_exit != 1L))
     (void)thread_wait_resolv(data, NULL, FALSE);
   else
     Curl_resolver_cancel(data);

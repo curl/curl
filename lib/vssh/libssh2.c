@@ -54,11 +54,6 @@
 #include <inet.h>
 #endif
 
-#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
-#undef in_addr_t
-#define in_addr_t unsigned long
-#endif
-
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
@@ -2503,12 +2498,12 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           CURLofft to_t;
           CURLofft from_t;
 
-          from_t = curlx_strtoofft(data->state.range, &ptr, 0, &from);
+          from_t = curlx_strtoofft(data->state.range, &ptr, 10, &from);
           if(from_t == CURL_OFFT_FLOW)
             return CURLE_RANGE_ERROR;
           while(*ptr && (ISBLANK(*ptr) || (*ptr == '-')))
             ptr++;
-          to_t = curlx_strtoofft(ptr, &ptr2, 0, &to);
+          to_t = curlx_strtoofft(ptr, &ptr2, 10, &to);
           if(to_t == CURL_OFFT_FLOW)
             return CURLE_RANGE_ERROR;
           if((to_t == CURL_OFFT_INVAL) /* no "to" value given */
@@ -3386,7 +3381,7 @@ CURLcode scp_perform(struct Curl_easy *data,
   /* run the state-machine */
   result = ssh_multi_statemach(data, dophase_done);
 
-  *connected = Curl_cfilter_is_connected(data, data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
   if(*dophase_done) {
     DEBUGF(infof(data, "DO phase is complete"));
@@ -3575,7 +3570,7 @@ CURLcode sftp_perform(struct Curl_easy *data,
   /* run the state-machine */
   result = ssh_multi_statemach(data, dophase_done);
 
-  *connected = Curl_cfilter_is_connected(data, data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
   if(*dophase_done) {
     DEBUGF(infof(data, "DO phase is complete"));

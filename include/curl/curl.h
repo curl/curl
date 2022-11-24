@@ -33,6 +33,23 @@
 #define CURL_STRICTER
 #endif
 
+/* Compile-time deprecation macros. */
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && \
+    ((__GNUC__ > 5) || (__GNUC__ == 5 && __GNUC_MINOR__ >= 3)) && \
+    !defined(__INTEL_COMPILER) && \
+    !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
+#define CURL_DEPRECATED(version, message) \
+    __attribute__((deprecated("since " # version ". " message)))
+#define CURL_IGNORE_DEPRECATION(statements) \
+      _Pragma("GCC diagnostic push") \
+      _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") \
+      statements \
+      _Pragma("GCC diagnostic pop")
+#else
+#define CURL_DEPRECATED(version, message)
+#define CURL_IGNORE_DEPRECATION(statements)     statements
+#endif
+
 #include "curlver.h"         /* libcurl version defines   */
 #include "system.h"          /* determine things run-time */
 
@@ -145,11 +162,11 @@ typedef enum {
   CURLSSLBACKEND_NSS = 3,
   CURLSSLBACKEND_OBSOLETE4 = 4,  /* Was QSOSSL. */
   CURLSSLBACKEND_GSKIT = 5,
-  CURLSSLBACKEND_POLARSSL = 6,
+  CURLSSLBACKEND_POLARSSL               CURL_DEPRECATED(7.69.0, "") = 6,
   CURLSSLBACKEND_WOLFSSL = 7,
   CURLSSLBACKEND_SCHANNEL = 8,
   CURLSSLBACKEND_SECURETRANSPORT = 9,
-  CURLSSLBACKEND_AXTLS = 10, /* never used since 7.63.0 */
+  CURLSSLBACKEND_AXTLS                  CURL_DEPRECATED(7.61.0, "") = 10,
   CURLSSLBACKEND_MBEDTLS = 11,
   CURLSSLBACKEND_MESALINK = 12,
   CURLSSLBACKEND_BEARSSL = 13,
@@ -1062,6 +1079,7 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 
 
 #define CURLOPT(na,t,nu) na = t + nu
+#define CURLOPTDEPRECATED(na,t,nu,v,m) na CURL_DEPRECATED(v,m) = t + nu
 
 /* CURLOPT aliases that make no run-time difference */
 
@@ -1175,7 +1193,8 @@ typedef enum {
   CURLOPT(CURLOPT_HTTPHEADER, CURLOPTTYPE_SLISTPOINT, 23),
 
   /* This points to a linked list of post entries, struct curl_httppost */
-  CURLOPT(CURLOPT_HTTPPOST, CURLOPTTYPE_OBJECTPOINT, 24),
+  CURLOPTDEPRECATED(CURLOPT_HTTPPOST, CURLOPTTYPE_OBJECTPOINT, 24,
+                    7.56.0, "Use CURLOPT_MIMEPOST"),
 
   /* name of the file keeping your private SSL-certificate */
   CURLOPT(CURLOPT_SSLCERT, CURLOPTTYPE_STRINGPOINT, 25),
@@ -1265,7 +1284,8 @@ typedef enum {
   CURLOPT(CURLOPT_TRANSFERTEXT, CURLOPTTYPE_LONG, 53),
 
   /* HTTP PUT */
-  CURLOPT(CURLOPT_PUT, CURLOPTTYPE_LONG, 54),
+  CURLOPTDEPRECATED(CURLOPT_PUT, CURLOPTTYPE_LONG, 54,
+                    7.12.1, "Use CURLOPT_UPLOAD"),
 
   /* 55 = OBSOLETE */
 
@@ -1273,7 +1293,8 @@ typedef enum {
    * Function that will be called instead of the internal progress display
    * function. This function should be defined as the curl_progress_callback
    * prototype defines. */
-  CURLOPT(CURLOPT_PROGRESSFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 56),
+  CURLOPTDEPRECATED(CURLOPT_PROGRESSFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 56,
+                    7.32.0, "Use CURLOPT_XFERINFOFUNCTION"),
 
   /* Data passed to the CURLOPT_PROGRESSFUNCTION and CURLOPT_XFERINFOFUNCTION
      callbacks */
@@ -1341,10 +1362,12 @@ typedef enum {
 
   /* Set to a file name that contains random data for libcurl to use to
      seed the random engine when doing SSL connects. */
-  CURLOPT(CURLOPT_RANDOM_FILE, CURLOPTTYPE_STRINGPOINT, 76),
+  CURLOPTDEPRECATED(CURLOPT_RANDOM_FILE, CURLOPTTYPE_STRINGPOINT, 76,
+                    7.84.0, "Serves no purpose anymore"),
 
   /* Set to the Entropy Gathering Daemon socket pathname */
-  CURLOPT(CURLOPT_EGDSOCKET, CURLOPTTYPE_STRINGPOINT, 77),
+  CURLOPTDEPRECATED(CURLOPT_EGDSOCKET, CURLOPTTYPE_STRINGPOINT, 77,
+                    7.84.0, "Serves no purpose anymore"),
 
   /* Time-out connect operations after this amount of seconds, if connects are
      OK within this time, then fine... This only aborts the connect phase. */
@@ -1399,7 +1422,8 @@ typedef enum {
 
   /* Non-zero value means to use the global dns cache */
   /* DEPRECATED, do not use! */
-  CURLOPT(CURLOPT_DNS_USE_GLOBAL_CACHE, CURLOPTTYPE_LONG, 91),
+  CURLOPTDEPRECATED(CURLOPT_DNS_USE_GLOBAL_CACHE, CURLOPTTYPE_LONG, 91,
+                    7.11.1, "Use CURLOPT_SHARE"),
 
   /* DNS cache timeout */
   CURLOPT(CURLOPT_DNS_CACHE_TIMEOUT, CURLOPTTYPE_LONG, 92),
@@ -1554,8 +1578,10 @@ typedef enum {
   */
   CURLOPT(CURLOPT_FTPSSLAUTH, CURLOPTTYPE_VALUES, 129),
 
-  CURLOPT(CURLOPT_IOCTLFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 130),
-  CURLOPT(CURLOPT_IOCTLDATA, CURLOPTTYPE_CBPOINT, 131),
+  CURLOPTDEPRECATED(CURLOPT_IOCTLFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 130,
+                    7.18.0, "Use CURLOPT_SEEKFUNCTION"),
+  CURLOPTDEPRECATED(CURLOPT_IOCTLDATA, CURLOPTTYPE_CBPOINT, 131,
+                    7.18.0, "Use CURLOPT_SEEKDATA"),
 
   /* 132 OBSOLETE. Gone in 7.16.0 */
   /* 133 OBSOLETE. Gone in 7.16.0 */
@@ -1594,16 +1620,22 @@ typedef enum {
 
   /* Function that will be called to convert from the
      network encoding (instead of using the iconv calls in libcurl) */
-  CURLOPT(CURLOPT_CONV_FROM_NETWORK_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 142),
+  CURLOPTDEPRECATED(CURLOPT_CONV_FROM_NETWORK_FUNCTION,
+                    CURLOPTTYPE_FUNCTIONPOINT, 142,
+                    7.82.0, "Serves no purpose anymore"),
 
   /* Function that will be called to convert to the
      network encoding (instead of using the iconv calls in libcurl) */
-  CURLOPT(CURLOPT_CONV_TO_NETWORK_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 143),
+  CURLOPTDEPRECATED(CURLOPT_CONV_TO_NETWORK_FUNCTION,
+                    CURLOPTTYPE_FUNCTIONPOINT, 143,
+                    7.82.0, "Serves no purpose anymore"),
 
   /* Function that will be called to convert from UTF8
      (instead of using the iconv calls in libcurl)
      Note that this is used only for SSL certificate processing */
-  CURLOPT(CURLOPT_CONV_FROM_UTF8_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 144),
+  CURLOPTDEPRECATED(CURLOPT_CONV_FROM_UTF8_FUNCTION,
+                    CURLOPTTYPE_FUNCTIONPOINT, 144,
+                    7.82.0, "Serves no purpose anymore"),
 
   /* if the connection proceeds too quickly then need to slow it down */
   /* limit-rate: maximum number of bytes per second to send or receive */
@@ -1704,7 +1736,9 @@ typedef enum {
 
   /* Socks Service */
   /* DEPRECATED, do not use! */
-  CURLOPT(CURLOPT_SOCKS5_GSSAPI_SERVICE, CURLOPTTYPE_STRINGPOINT, 179),
+  CURLOPTDEPRECATED(CURLOPT_SOCKS5_GSSAPI_SERVICE,
+                    CURLOPTTYPE_STRINGPOINT, 179,
+                    7.49.0, "Use CURLOPT_PROXY_SERVICE_NAME"),
 
   /* Socks Service */
   CURLOPT(CURLOPT_SOCKS5_GSSAPI_NEC, CURLOPTTYPE_LONG, 180),
@@ -1713,12 +1747,14 @@ typedef enum {
      transfer, which thus helps the app which takes URLs from users or other
      external inputs and want to restrict what protocol(s) to deal
      with. Defaults to CURLPROTO_ALL. */
-  CURLOPT(CURLOPT_PROTOCOLS, CURLOPTTYPE_LONG, 181),
+  CURLOPTDEPRECATED(CURLOPT_PROTOCOLS, CURLOPTTYPE_LONG, 181,
+                    7.85.0, "Use CURLOPT_PROTOCOLS_STR"),
 
   /* set the bitmask for the protocols that libcurl is allowed to follow to,
      as a subset of the CURLOPT_PROTOCOLS ones. That means the protocol needs
      to be set in both bitmasks to be allowed to get redirected to. */
-  CURLOPT(CURLOPT_REDIR_PROTOCOLS, CURLOPTTYPE_LONG, 182),
+  CURLOPTDEPRECATED(CURLOPT_REDIR_PROTOCOLS, CURLOPTTYPE_LONG, 182,
+                    7.85.0, "Use CURLOPT_REDIR_PROTOCOLS_STR"),
 
   /* set the SSH knownhost file name to use */
   CURLOPT(CURLOPT_SSH_KNOWNHOSTS, CURLOPTTYPE_STRINGPOINT, 183),
@@ -1863,7 +1899,8 @@ typedef enum {
   CURLOPT(CURLOPT_LOGIN_OPTIONS, CURLOPTTYPE_STRINGPOINT, 224),
 
   /* Enable/disable TLS NPN extension (http2 over ssl might fail without) */
-  CURLOPT(CURLOPT_SSL_ENABLE_NPN, CURLOPTTYPE_LONG, 225),
+  CURLOPTDEPRECATED(CURLOPT_SSL_ENABLE_NPN, CURLOPTTYPE_LONG, 225,
+                    7.86.0, "Has no function"),
 
   /* Enable/disable TLS ALPN extension (http2 over ssl might fail without) */
   CURLOPT(CURLOPT_SSL_ENABLE_ALPN, CURLOPTTYPE_LONG, 226),
@@ -2164,6 +2201,9 @@ typedef enum {
   /* CA cache timeout */
   CURLOPT(CURLOPT_CA_CACHE_TIMEOUT, CURLOPTTYPE_LONG, 321),
 
+  /* Can leak things, gonna exit() soon */
+  CURLOPT(CURLOPT_QUICK_EXIT, CURLOPTTYPE_LONG, 322),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2451,30 +2491,32 @@ CURL_EXTERN CURLcode curl_mime_headers(curl_mimepart *part,
                                        int take_ownership);
 
 typedef enum {
-  CURLFORM_NOTHING,        /********* the first one is unused ************/
-  CURLFORM_COPYNAME,
-  CURLFORM_PTRNAME,
-  CURLFORM_NAMELENGTH,
-  CURLFORM_COPYCONTENTS,
-  CURLFORM_PTRCONTENTS,
-  CURLFORM_CONTENTSLENGTH,
-  CURLFORM_FILECONTENT,
-  CURLFORM_ARRAY,
+  /********* the first one is unused ************/
+  CURLFORM_NOTHING         CURL_DEPRECATED(7.56.0, ""),
+  CURLFORM_COPYNAME        CURL_DEPRECATED(7.56.0, "Use curl_mime_name()"),
+  CURLFORM_PTRNAME         CURL_DEPRECATED(7.56.0, "Use curl_mime_name()"),
+  CURLFORM_NAMELENGTH      CURL_DEPRECATED(7.56.0, ""),
+  CURLFORM_COPYCONTENTS    CURL_DEPRECATED(7.56.0, "Use curl_mime_data()"),
+  CURLFORM_PTRCONTENTS     CURL_DEPRECATED(7.56.0, "Use curl_mime_data()"),
+  CURLFORM_CONTENTSLENGTH  CURL_DEPRECATED(7.56.0, "Use curl_mime_data()"),
+  CURLFORM_FILECONTENT     CURL_DEPRECATED(7.56.0, "Use curl_mime_data_cb()"),
+  CURLFORM_ARRAY           CURL_DEPRECATED(7.56.0, ""),
   CURLFORM_OBSOLETE,
-  CURLFORM_FILE,
+  CURLFORM_FILE            CURL_DEPRECATED(7.56.0, "Use curl_mime_filedata()"),
 
-  CURLFORM_BUFFER,
-  CURLFORM_BUFFERPTR,
-  CURLFORM_BUFFERLENGTH,
+  CURLFORM_BUFFER          CURL_DEPRECATED(7.56.0, "Use curl_mime_filename()"),
+  CURLFORM_BUFFERPTR       CURL_DEPRECATED(7.56.0, "Use curl_mime_data()"),
+  CURLFORM_BUFFERLENGTH    CURL_DEPRECATED(7.56.0, "Use curl_mime_data()"),
 
-  CURLFORM_CONTENTTYPE,
-  CURLFORM_CONTENTHEADER,
-  CURLFORM_FILENAME,
+  CURLFORM_CONTENTTYPE     CURL_DEPRECATED(7.56.0, "Use curl_mime_type()"),
+  CURLFORM_CONTENTHEADER   CURL_DEPRECATED(7.56.0, "Use curl_mime_headers()"),
+  CURLFORM_FILENAME        CURL_DEPRECATED(7.56.0, "Use curl_mime_filename()"),
   CURLFORM_END,
   CURLFORM_OBSOLETE2,
 
-  CURLFORM_STREAM,
-  CURLFORM_CONTENTLEN, /* added in 7.46.0, provide a curl_off_t length */
+  CURLFORM_STREAM          CURL_DEPRECATED(7.56.0, "Use curl_mime_data_cb()"),
+  CURLFORM_CONTENTLEN  /* added in 7.46.0, provide a curl_off_t length */
+                           CURL_DEPRECATED(7.56.0, "Use curl_mime_data()"),
 
   CURLFORM_LASTENTRY /* the last unused */
 } CURLformoption;
@@ -2502,15 +2544,16 @@ struct curl_forms {
  *
  ***************************************************************************/
 typedef enum {
-  CURL_FORMADD_OK, /* first, no error */
+  CURL_FORMADD_OK             CURL_DEPRECATED(7.56.0, ""), /* 1st, no error */
 
-  CURL_FORMADD_MEMORY,
-  CURL_FORMADD_OPTION_TWICE,
-  CURL_FORMADD_NULL,
-  CURL_FORMADD_UNKNOWN_OPTION,
-  CURL_FORMADD_INCOMPLETE,
-  CURL_FORMADD_ILLEGAL_ARRAY,
-  CURL_FORMADD_DISABLED, /* libcurl was built with this disabled */
+  CURL_FORMADD_MEMORY         CURL_DEPRECATED(7.56.0, ""),
+  CURL_FORMADD_OPTION_TWICE   CURL_DEPRECATED(7.56.0, ""),
+  CURL_FORMADD_NULL           CURL_DEPRECATED(7.56.0, ""),
+  CURL_FORMADD_UNKNOWN_OPTION CURL_DEPRECATED(7.56.0, ""),
+  CURL_FORMADD_INCOMPLETE     CURL_DEPRECATED(7.56.0, ""),
+  CURL_FORMADD_ILLEGAL_ARRAY  CURL_DEPRECATED(7.56.0, ""),
+  /* libcurl was built with form api disabled */
+  CURL_FORMADD_DISABLED       CURL_DEPRECATED(7.56.0, ""),
 
   CURL_FORMADD_LAST /* last */
 } CURLFORMcode;
@@ -2524,9 +2567,10 @@ typedef enum {
  * adds one part that together construct a full post. Then use
  * CURLOPT_HTTPPOST to send it off to libcurl.
  */
-CURL_EXTERN CURLFORMcode curl_formadd(struct curl_httppost **httppost,
-                                      struct curl_httppost **last_post,
-                                      ...);
+CURL_EXTERN CURLFORMcode CURL_DEPRECATED(7.56.0, "Use curl_mime_init()")
+curl_formadd(struct curl_httppost **httppost,
+             struct curl_httppost **last_post,
+             ...);
 
 /*
  * callback function for curl_formget()
@@ -2549,8 +2593,9 @@ typedef size_t (*curl_formget_callback)(void *arg, const char *buf,
  * the curl_formget_callback function.
  * Returns 0 on success.
  */
-CURL_EXTERN int curl_formget(struct curl_httppost *form, void *arg,
-                             curl_formget_callback append);
+CURL_EXTERN int CURL_DEPRECATED(7.56.0, "")
+curl_formget(struct curl_httppost *form, void *arg,
+             curl_formget_callback append);
 /*
  * NAME curl_formfree()
  *
@@ -2558,7 +2603,8 @@ CURL_EXTERN int curl_formget(struct curl_httppost *form, void *arg,
  *
  * Free a multipart formpost previously built with curl_formadd().
  */
-CURL_EXTERN void curl_formfree(struct curl_httppost *form);
+CURL_EXTERN void CURL_DEPRECATED(7.56.0, "Use curl_mime_free()")
+curl_formfree(struct curl_httppost *form);
 
 /*
  * NAME curl_getenv()
@@ -2785,22 +2831,35 @@ typedef enum {
   CURLINFO_NAMELOOKUP_TIME  = CURLINFO_DOUBLE + 4,
   CURLINFO_CONNECT_TIME     = CURLINFO_DOUBLE + 5,
   CURLINFO_PRETRANSFER_TIME = CURLINFO_DOUBLE + 6,
-  CURLINFO_SIZE_UPLOAD      = CURLINFO_DOUBLE + 7,
+  CURLINFO_SIZE_UPLOAD CURL_DEPRECATED(7.55.0, "Use CURLINFO_SIZE_UPLOAD_T")
+                            = CURLINFO_DOUBLE + 7,
   CURLINFO_SIZE_UPLOAD_T    = CURLINFO_OFF_T  + 7,
-  CURLINFO_SIZE_DOWNLOAD    = CURLINFO_DOUBLE + 8,
+  CURLINFO_SIZE_DOWNLOAD
+                       CURL_DEPRECATED(7.55.0, "Use CURLINFO_SIZE_DOWNLOAD_T")
+                            = CURLINFO_DOUBLE + 8,
   CURLINFO_SIZE_DOWNLOAD_T  = CURLINFO_OFF_T  + 8,
-  CURLINFO_SPEED_DOWNLOAD   = CURLINFO_DOUBLE + 9,
+  CURLINFO_SPEED_DOWNLOAD
+                       CURL_DEPRECATED(7.55.0, "Use CURLINFO_SPEED_DOWNLOAD_T")
+                            = CURLINFO_DOUBLE + 9,
   CURLINFO_SPEED_DOWNLOAD_T = CURLINFO_OFF_T  + 9,
-  CURLINFO_SPEED_UPLOAD     = CURLINFO_DOUBLE + 10,
+  CURLINFO_SPEED_UPLOAD
+                       CURL_DEPRECATED(7.55.0, "Use CURLINFO_SPEED_UPLOAD_T")
+                            = CURLINFO_DOUBLE + 10,
   CURLINFO_SPEED_UPLOAD_T   = CURLINFO_OFF_T  + 10,
   CURLINFO_HEADER_SIZE      = CURLINFO_LONG   + 11,
   CURLINFO_REQUEST_SIZE     = CURLINFO_LONG   + 12,
   CURLINFO_SSL_VERIFYRESULT = CURLINFO_LONG   + 13,
   CURLINFO_FILETIME         = CURLINFO_LONG   + 14,
   CURLINFO_FILETIME_T       = CURLINFO_OFF_T  + 14,
-  CURLINFO_CONTENT_LENGTH_DOWNLOAD   = CURLINFO_DOUBLE + 15,
+  CURLINFO_CONTENT_LENGTH_DOWNLOAD
+                       CURL_DEPRECATED(7.55.0,
+                                      "Use CURLINFO_CONTENT_LENGTH_DOWNLOAD_T")
+                            = CURLINFO_DOUBLE + 15,
   CURLINFO_CONTENT_LENGTH_DOWNLOAD_T = CURLINFO_OFF_T  + 15,
-  CURLINFO_CONTENT_LENGTH_UPLOAD     = CURLINFO_DOUBLE + 16,
+  CURLINFO_CONTENT_LENGTH_UPLOAD
+                       CURL_DEPRECATED(7.55.0,
+                                       "Use CURLINFO_CONTENT_LENGTH_UPLOAD_T")
+                            = CURLINFO_DOUBLE + 16,
   CURLINFO_CONTENT_LENGTH_UPLOAD_T   = CURLINFO_OFF_T  + 16,
   CURLINFO_STARTTRANSFER_TIME = CURLINFO_DOUBLE + 17,
   CURLINFO_CONTENT_TYPE     = CURLINFO_STRING + 18,
@@ -2814,7 +2873,8 @@ typedef enum {
   CURLINFO_NUM_CONNECTS     = CURLINFO_LONG   + 26,
   CURLINFO_SSL_ENGINES      = CURLINFO_SLIST  + 27,
   CURLINFO_COOKIELIST       = CURLINFO_SLIST  + 28,
-  CURLINFO_LASTSOCKET       = CURLINFO_LONG   + 29,
+  CURLINFO_LASTSOCKET  CURL_DEPRECATED(7.45.0, "Use CURLINFO_ACTIVESOCKET")
+                            = CURLINFO_LONG   + 29,
   CURLINFO_FTP_ENTRY_PATH   = CURLINFO_STRING + 30,
   CURLINFO_REDIRECT_URL     = CURLINFO_STRING + 31,
   CURLINFO_PRIMARY_IP       = CURLINFO_STRING + 32,
@@ -2828,12 +2888,14 @@ typedef enum {
   CURLINFO_PRIMARY_PORT     = CURLINFO_LONG   + 40,
   CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41,
   CURLINFO_LOCAL_PORT       = CURLINFO_LONG   + 42,
-  CURLINFO_TLS_SESSION      = CURLINFO_PTR    + 43,
+  CURLINFO_TLS_SESSION CURL_DEPRECATED(7.48.0, "Use CURLINFO_TLS_SSL_PTR")
+                            = CURLINFO_PTR    + 43,
   CURLINFO_ACTIVESOCKET     = CURLINFO_SOCKET + 44,
   CURLINFO_TLS_SSL_PTR      = CURLINFO_PTR    + 45,
   CURLINFO_HTTP_VERSION     = CURLINFO_LONG   + 46,
   CURLINFO_PROXY_SSL_VERIFYRESULT = CURLINFO_LONG + 47,
-  CURLINFO_PROTOCOL         = CURLINFO_LONG   + 48,
+  CURLINFO_PROTOCOL    CURL_DEPRECATED(7.85.0, "Use CURLINFO_SCHEME")
+                            = CURLINFO_LONG   + 48,
   CURLINFO_SCHEME           = CURLINFO_STRING + 49,
   CURLINFO_TOTAL_TIME_T     = CURLINFO_OFF_T + 50,
   CURLINFO_NAMELOOKUP_TIME_T = CURLINFO_OFF_T + 51,

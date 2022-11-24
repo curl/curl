@@ -191,7 +191,7 @@ static bool http2_connisdead(struct Curl_easy *data, struct connectdata *conn)
   }
   else if(sval & CURL_CSELECT_IN) {
     /* readable with no error. could still be closed */
-    dead = !Curl_connalive(conn);
+    dead = !Curl_connalive(data, conn);
     if(!dead) {
       /* This happens before we've sent off a request and the connection is
          not in use by any other transfer, there shouldn't be any data here,

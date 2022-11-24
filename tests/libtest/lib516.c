@@ -44,7 +44,9 @@ int test(char *URL)
 
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HTTPPOST, NULL);
+  CURL_IGNORE_DEPRECATION(
+    test_setopt(curl, CURLOPT_HTTPPOST, NULL);
+  )
   test_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
   test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 

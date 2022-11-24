@@ -58,11 +58,6 @@
 #include <inet.h>
 #endif
 
-#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
-#undef in_addr_t
-#define in_addr_t unsigned long
-#endif
-
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
@@ -376,14 +371,13 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result;
 
-  if(!Curl_cfilter_ssl_added(data, conn, FIRSTSOCKET)) {
-    result = Curl_cfilter_ssl_add(data, conn, FIRSTSOCKET);
+  if(!Curl_ssl_conn_is_ssl(data, FIRSTSOCKET)) {
+    result = Curl_ssl_cfilter_add(data, FIRSTSOCKET);
     if(result)
       goto out;
   }
 
-  result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
-                                FALSE, &pop3c->ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &pop3c->ssldone);
 
   if(!result) {
     if(pop3c->state != POP3_UPGRADETLS)
@@ -1062,8 +1056,7 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone) {
-    result = Curl_cfilter_connect(data, conn, FIRSTSOCKET,
-                                  FALSE, &pop3c->ssldone);
+    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &pop3c->ssldone);
     if(result || !pop3c->ssldone)
       return result;
   }
@@ -1218,7 +1211,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
 
   /* Run the state-machine */
   result = pop3_multi_statemach(data, dophase_done);
-  *connected = Curl_cfilter_is_connected(data, data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
   if(*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));

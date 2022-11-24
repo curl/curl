@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example using the multi interface
+ * Send SMTP email with the multi interface
  * </DESC>
  */
 

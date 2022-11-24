@@ -1,0 +1,59 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_QUICK_EXIT 3 "30 Sep 2022" "libcurl 7.87.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_QUICK_EXIT \- allow to exit quickly
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_QUICK_EXIT,
+                          long value);
+.SH DESCRIPTION
+Pass a long as a parameter, 1L meaning that when recovering from a timeout,
+libcurl should skip lengthy cleanups that are intended to avoid all kinds of
+leaks (threads etc.), as the caller program is about to call exit() anyway.
+This allows for a swift termination after a DNS timeout for example, by
+canceling and/or forgetting about a resolver thread, at the expense of a
+possible (though short-lived) leak of associated resources.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
+  ret = curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.87.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_RESOLVE "(3), "

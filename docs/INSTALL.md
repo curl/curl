@@ -74,8 +74,8 @@ Without pkg-config installed, use this:
 
     ./configure --with-openssl=/opt/OpenSSL
 
-If you insist on forcing a build without SSL support, even though you may
-have OpenSSL installed in your system, you can run configure like this:
+If you insist on forcing a build without SSL support, you can run configure
+like this:
 
     ./configure --without-ssl
 
@@ -92,17 +92,32 @@ provide this option to gcc to set a hard-coded path to the runtime linker:
 
     LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-openssl
 
-## More Options
+## Static builds
 
 To force a static library compile, disable the shared library creation by
 running configure like:
 
     ./configure --disable-shared
 
-To tell the configure script to skip searching for thread-safe functions, add
-an option like:
+The configure script is primarily done to work with shared/dynamic third party
+dependencies. When linking with shared libraries, the dependency "chain" is
+handled automatically by the library loader - on all modern systems.
 
-    ./configure --disable-thread
+If you instead link with a static library, you need to provide all the
+dependency libraries already at the link command line.
+
+Figuring out all the dependency libraries for a given library is hard, as it
+might involve figuring out the dependencies of the dependencies and they vary
+between platforms and change between versions.
+
+When using static dependencies, the build scripts will mostly assume that you,
+the user, will provide all the necessary additional dependency libraries as
+additional arguments in the build. With configure, by setting `LIBS` or
+`LDFLAGS` on the command line.
+
+Building statically is not for the faint of heart.
+
+## Debug
 
 If you are a curl developer and use gcc, you might want to enable more debug
 options with the `--enable-debug` option.
@@ -167,7 +182,7 @@ make targets available to build libcurl with more features, use:
    and SSPI support.
 
 If you have any problems linking libraries or finding header files, be sure
-to verify that the provided `Makefile.m32` files use the proper paths, and
+to verify that the provided `Makefile.mk` files use the proper paths, and
 adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 
@@ -195,7 +210,7 @@ set LDFLAGS=-Lc:/openldapsdk/lib/mscvc
 set LIBS=-lldapsdk -lldapssl -lldapx
 ```
 
-If you want to enable LDAPS support then set LDAPS=1.
+If you want to enable LDAPS support then append `-ldaps` to the make target.
 
 ## Cygwin
 
@@ -204,6 +219,30 @@ curl source tree root with `sh configure`. Make sure you have the `sh`
 executable in `/bin/` or you will see the configure fail toward the end.
 
 Run `make`
+
+## MS-DOS
+
+Requires DJGPP in the search path and pointing to the Watt-32 stack via
+`WATT_PATH=c:/djgpp/net/watt`.
+
+Run `make -f Makefile.dist djgpp` in the root curl dir.
+
+For build configuration options, please see the MinGW32 section.
+
+Notes:
+
+ - DJGPP 2.04 beta has a `sscanf()` bug so the URL parsing is not done
+   properly. Use DJGPP 2.03 until they fix it.
+
+ - Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
+   things go wrong because things like FS-extensions and `errno` values have
+   been changed between releases.
+
+## AmigaOS
+
+Run `make -f Makefile.dist amiga` in the root curl dir.
+
+For build configuration options, please see the MinGW32 section.
 
 ## Disabling Specific Protocols in Windows builds
 

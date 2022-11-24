@@ -160,6 +160,7 @@ dir
 distro
 distro's
 distros
+DJGPP
 dlist
 DLL
 dll
@@ -226,6 +227,7 @@ FreeDOS
 FreeRTOS
 freshmeat
 Frexx
+FS
 fseek
 FTPing
 fuzzer
@@ -755,6 +757,7 @@ Tomtom
 toolchain
 toolchains
 toolset
+toplevel
 TPF
 TrackMemory
 Tru

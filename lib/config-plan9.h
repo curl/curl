@@ -32,7 +32,9 @@
 #define CURL_DISABLE_LDAP 1
 
 #define NEED_REENTRANT 1
+#ifndef OS
 #define OS "plan9"
+#endif
 #define PACKAGE "curl"
 #define PACKAGE_NAME "curl"
 #define PACKAGE_BUGREPORT "a suitable mailing list: https://curl.se/mail/"

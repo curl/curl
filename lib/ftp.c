@@ -43,11 +43,6 @@
 #include <inet.h>
 #endif
 
-#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
-#undef in_addr_t
-#define in_addr_t unsigned long
-#endif
-
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
@@ -219,8 +214,8 @@ const struct Curl_handler Curl_handler_ftps = {
 static void close_secondarysocket(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
-  Curl_cfilter_close(data, conn, SECONDARYSOCKET);
-  Curl_cfilter_destroy(data, conn, SECONDARYSOCKET);
+  Curl_conn_close(data, SECONDARYSOCKET);
+  Curl_conn_cf_discard_all(data, conn, SECONDARYSOCKET);
 }
 
 /*
@@ -291,7 +286,7 @@ static CURLcode AcceptServerConnect(struct Curl_easy *data)
 
   (void)curlx_nonblock(s, TRUE); /* enable non-blocking */
   /* Replace any filter on SECONDARY with one listeing on this socket */
-  result = Curl_cfilter_socket_accepted_set(data, conn, SECONDARYSOCKET, &s);
+  result = Curl_conn_socket_accepted_set(data, SECONDARYSOCKET, &s);
   if(result)
     return result;
 
@@ -440,8 +435,7 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
   bool connected;
 
   DEBUGF(infof(data, "ftp InitiateTransfer()"));
-  result = Curl_cfilter_connect(data, conn, SECONDARYSOCKET,
-                                TRUE, &connected);
+  result = Curl_conn_connect(data, SECONDARYSOCKET, TRUE, &connected);
   if(result || !connected)
     return result;
 
@@ -820,8 +814,8 @@ static int ftp_domore_getsock(struct Curl_easy *data,
 
   DEBUGF(infof(data, "ftp_domore_getsock()"));
   if(conn->cfilter[SECONDARYSOCKET]
-     && !Curl_cfilter_is_connected(data, conn, SECONDARYSOCKET))
-    return Curl_cfilter_get_select_socks(data, conn, SECONDARYSOCKET, socks);
+     && !Curl_conn_is_connected(conn, SECONDARYSOCKET))
+    return Curl_conn_get_select_socks(data, SECONDARYSOCKET, socks);
 
   if(FTP_STOP == ftpc->state) {
     int bits = GETSOCK_READSOCK(0);
@@ -1273,8 +1267,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   ftpc->count1 = fcmd;
 
   /* Replace any filter on SECONDARY with one listeing on this socket */
-  result = Curl_cfilter_socket_accepted_set(data, conn, SECONDARYSOCKET,
-                                            &portsock);
+  result = Curl_conn_socket_accepted_set(data, SECONDARYSOCKET, &portsock);
   if(result)
     goto out;
   portsock = CURL_SOCKET_BAD; /* now held in filter */
@@ -1789,8 +1782,8 @@ static CURLcode ftp_epsv_disable(struct Curl_easy *data,
   infof(data, "Failed EPSV attempt. Disabling EPSV");
   /* disable it for next transfer */
   conn->bits.ftp_use_epsv = FALSE;
-  Curl_cfilter_close(data, conn, SECONDARYSOCKET);
-  Curl_cfilter_destroy(data, conn, SECONDARYSOCKET);
+  Curl_conn_close(data, SECONDARYSOCKET);
+  Curl_conn_cf_discard_all(data, conn, SECONDARYSOCKET);
   data->state.errorbuf = FALSE; /* allow error message to get
                                          rewritten */
   result = Curl_pp_sendf(data, &conn->proto.ftpc.pp, "%s", "PASV");
@@ -1980,9 +1973,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     }
   }
 
-  result = Curl_cfilter_setup(data, conn, SECONDARYSOCKET, addr,
-                              conn->bits.ftp_use_data_ssl?
-                              CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
+  result = Curl_conn_setup(data, SECONDARYSOCKET, addr,
+                           conn->bits.ftp_use_data_ssl?
+                           CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
   if(result) {
     Curl_resolv_unlock(data, addr); /* we're done using this address */
@@ -2299,7 +2292,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
     else
       fdigit = start;
     /* ignores parsing errors, which will make the size remain unknown */
-    (void)curlx_strtoofft(fdigit, NULL, 0, &filesize);
+    (void)curlx_strtoofft(fdigit, NULL, 10, &filesize);
 
   }
   else if(ftpcode == 550) { /* "No such file or directory" */
@@ -2484,7 +2477,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
         if(bytes) {
           ++bytes;
           /* get the number! */
-          (void)curlx_strtoofft(bytes, NULL, 0, &size);
+          (void)curlx_strtoofft(bytes, NULL, 10, &size);
         }
       }
     }
@@ -2747,7 +2740,14 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if((ftpcode == 234) || (ftpcode == 334)) {
         /* this was BLOCKING, keep it so for now */
         bool done;
-        result = Curl_cfilter_connect(data, conn, FIRSTSOCKET, TRUE, &done);
+        if(!Curl_ssl_conn_is_ssl(data, FIRSTSOCKET)) {
+          result = Curl_ssl_cfilter_add(data, FIRSTSOCKET);
+          if(result) {
+            /* we failed and bail out */
+            return CURLE_USE_SSL_FAILED;
+          }
+        }
+        result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, &done);
         if(!result) {
           conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
           conn->bits.ftp_use_control_ssl = TRUE; /* SSL on control */
@@ -2813,7 +2813,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
     case FTP_CCC:
       if(ftpcode < 500) {
         /* First shut down the SSL layer (note: this call will block) */
-        result = Curl_ssl_shutdown(data, conn, FIRSTSOCKET);
+        result = Curl_ssl_cfilter_remove(data, FIRSTSOCKET);
 
         if(result)
           failf(data, "Failed to clear the command channel (CCC)");
@@ -3157,7 +3157,7 @@ static CURLcode ftp_connect(struct Curl_easy *data,
 
   if(conn->handler->flags & PROTOPT_SSL) {
     /* BLOCKING */
-    result = Curl_cfilter_connect(data, conn, FIRSTSOCKET, TRUE, done);
+    result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
     if(result)
       return result;
     conn->bits.ftp_use_control_ssl = TRUE;
@@ -3553,11 +3553,15 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
    * complete */
   struct FTP *ftp = NULL;
 
-  /* if the second connection isn't done yet, wait for it */
+  /* if the second connection isn't done yet, wait for it to have
+   * connected to the remote host. When using proxy tunneling, this
+   * means the tunnel needs to have been establish. However, we
+   * can not expect the remote host to talk to us in any way yet.
+   * So, when using ftps: the SSL handshake will not start until we
+   * tell the remote server that we are there. */
   if(conn->cfilter[SECONDARYSOCKET]) {
-    result = Curl_cfilter_connect(data, conn, SECONDARYSOCKET,
-                                  FALSE, &connected);
-    if(result || !connected) {
+    result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &connected);
+    if(result || !Curl_conn_is_ip_connected(data, SECONDARYSOCKET)) {
       if(result && (ftpc->count1 == 0)) {
         *completep = -1; /* go back to DOING please */
         /* this is a EPSV connect failing, try PASV instead */
@@ -3715,7 +3719,7 @@ CURLcode ftp_perform(struct Curl_easy *data,
   /* run the state-machine */
   result = ftp_multi_statemach(data, dophase_done);
 
-  *connected = Curl_cfilter_is_connected(data, data->conn, SECONDARYSOCKET);
+  *connected = Curl_conn_is_connected(data->conn, SECONDARYSOCKET);
 
   infof(data, "ftp_perform ends with SECONDARY: %d", *connected);
 

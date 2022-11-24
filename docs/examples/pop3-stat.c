@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example showing how to obtain message statistics
+ * Obtain POP3 message statistics
  * </DESC>
  */
 

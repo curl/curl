@@ -655,6 +655,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 #endif
     ;
   Curl_http2_init_userset(set);
+  set->quick_exit = 0L;
   return result;
 }
 
@@ -752,17 +753,16 @@ static void conn_reset_all_postponed_data(struct connectdata *conn)
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
 
-static void conn_shutdown(struct Curl_easy *data, struct connectdata *conn)
+static void conn_shutdown(struct Curl_easy *data)
 {
-  DEBUGASSERT(conn);
   DEBUGASSERT(data);
-  infof(data, "Closing connection %ld", conn->connection_id);
+  infof(data, "Closing connection %ld", data->conn->connection_id);
 
   /* possible left-overs from the async name resolvers */
   Curl_resolver_cancel(data);
 
-  Curl_cfilter_close(data, conn, SECONDARYSOCKET);
-  Curl_cfilter_close(data, conn, FIRSTSOCKET);
+  Curl_conn_close(data, SECONDARYSOCKET);
+  Curl_conn_close(data, FIRSTSOCKET);
 }
 
 static void conn_free(struct Curl_easy *data, struct connectdata *conn)
@@ -772,7 +772,7 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
   DEBUGASSERT(conn);
 
   for(i = 0; i < ARRAYSIZE(conn->cfilter); ++i) {
-    Curl_cfilter_destroy(data, conn, (int)i);
+    Curl_conn_cf_discard_all(data, conn, (int)i);
   }
 
   Curl_free_idnconverted_hostname(&conn->host);
@@ -808,9 +808,6 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->unix_domain_socket);
 #endif
 
-#ifdef USE_SSL
-  Curl_safefree(conn->ssl_extra);
-#endif
   free(conn); /* free all the connection oriented data */
 }
 
@@ -877,7 +874,7 @@ void Curl_disconnect(struct Curl_easy *data,
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(data, conn, dead_connection);
 
-  conn_shutdown(data, conn);
+  conn_shutdown(data);
 
   /* detach it again */
   Curl_detach_connection(data);
@@ -1240,7 +1237,7 @@ ConnectionExists(struct Curl_easy *data,
           }
         }
 
-        if(check->sock[FIRSTSOCKET] == CURL_SOCKET_BAD) {
+        if(!Curl_conn_is_connected(check, FIRSTSOCKET)) {
           foundPendingCandidate = TRUE;
           /* Don't pick a connection that hasn't connected yet */
           infof(data, "Connection #%ld isn't open enough, can't reuse",
@@ -1306,14 +1303,10 @@ ConnectionExists(struct Curl_easy *data,
             if(!Curl_ssl_config_matches(&needle->proxy_ssl_config,
                                         &check->proxy_ssl_config))
               continue;
-            if(check->proxy_ssl[FIRSTSOCKET].state != ssl_connection_complete)
-              continue;
           }
 
           if(!Curl_ssl_config_matches(&needle->ssl_config,
                                       &check->ssl_config))
-            continue;
-          if(check->ssl[FIRSTSOCKET].state != ssl_connection_complete)
             continue;
         }
       }
@@ -1404,14 +1397,6 @@ ConnectionExists(struct Curl_easy *data,
                                         &check->ssl_config)) {
               DEBUGF(infof(data,
                            "Connection #%ld has different SSL parameters, "
-                           "can't reuse",
-                           check->connection_id));
-              continue;
-            }
-            if(check->ssl[FIRSTSOCKET].state != ssl_connection_complete) {
-              foundPendingCandidate = TRUE;
-              DEBUGF(infof(data,
-                           "Connection #%ld has not started SSL connect, "
                            "can't reuse",
                            check->connection_id));
               continue;
@@ -1679,45 +1664,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   if(!conn)
     return NULL;
 
-#ifdef USE_SSL
-  /* The SSL backend-specific data (ssl_backend_data) objects are allocated as
-     a separate array to ensure suitable alignment.
-     Note that these backend pointers can be swapped by vtls (eg ssl backend
-     data becomes proxy backend data). */
-  {
-    size_t onesize = Curl_ssl_get_backend_data_size(data);
-    size_t totalsize = onesize;
-    char *ssl;
-
-#ifndef CURL_DISABLE_FTP
-    totalsize *= 2;
-#endif
-#ifndef CURL_DISABLE_PROXY
-    totalsize *= 2;
-#endif
-
-    ssl = calloc(1, totalsize);
-    if(!ssl) {
-      free(conn);
-      return NULL;
-    }
-    conn->ssl_extra = ssl;
-    conn->ssl[FIRSTSOCKET].backend = (void *)ssl;
-#ifndef CURL_DISABLE_FTP
-    ssl += onesize;
-    conn->ssl[SECONDARYSOCKET].backend = (void *)ssl;
-#endif
-#ifndef CURL_DISABLE_PROXY
-    ssl += onesize;
-    conn->proxy_ssl[FIRSTSOCKET].backend = (void *)ssl;
-#ifndef CURL_DISABLE_FTP
-    ssl += onesize;
-    conn->proxy_ssl[SECONDARYSOCKET].backend = (void *)ssl;
-#endif
-#endif
-  }
-#endif
-
   conn->handler = &Curl_handler_dummy;  /* Be sure we have a handler defined
                                            already from start to avoid NULL
                                            situations and checks */
@@ -1825,9 +1771,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   Curl_llist_destroy(&conn->easyq, NULL);
   free(conn->localdev);
-#ifdef USE_SSL
-  free(conn->ssl_extra);
-#endif
   free(conn);
   return NULL;
 }
@@ -2059,18 +2002,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     if(result)
       return result;
   }
-#ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy) {
-    result = Curl_idnconvert_hostname(data, &conn->http_proxy.host);
-    if(result)
-      return result;
-  }
-  if(conn->bits.socksproxy) {
-    result = Curl_idnconvert_hostname(data, &conn->socks_proxy.host);
-    if(result)
-      return result;
-  }
-#endif
 
 #ifndef CURL_DISABLE_HSTS
   /* HSTS upgrade */
@@ -3730,6 +3661,21 @@ static CURLcode create_conn(struct Curl_easy *data,
   if(result)
     goto out;
 
+  /*************************************************************
+   * IDN-convert the proxy hostnames
+   *************************************************************/
+#ifndef CURL_DISABLE_PROXY
+  if(conn->bits.httpproxy) {
+    result = Curl_idnconvert_hostname(data, &conn->http_proxy.host);
+    if(result)
+      return result;
+  }
+  if(conn->bits.socksproxy) {
+    result = Curl_idnconvert_hostname(data, &conn->socks_proxy.host);
+    if(result)
+      return result;
+  }
+#endif
 
   /*************************************************************
    * Check whether the host and the "connect to host" are equal.
@@ -3806,10 +3752,10 @@ static CURLcode create_conn(struct Curl_easy *data,
 #endif
 
   /* Setup filter for network connections */
-  conn->recv[FIRSTSOCKET] = Curl_cfilter_recv;
-  conn->send[FIRSTSOCKET] = Curl_cfilter_send;
-  conn->recv[SECONDARYSOCKET] = Curl_cfilter_recv;
-  conn->send[SECONDARYSOCKET] = Curl_cfilter_send;
+  conn->recv[FIRSTSOCKET] = Curl_conn_recv;
+  conn->send[FIRSTSOCKET] = Curl_conn_send;
+  conn->recv[SECONDARYSOCKET] = Curl_conn_recv;
+  conn->send[SECONDARYSOCKET] = Curl_conn_send;
   conn->bits.tcp_fastopen = data->set.tcp_fastopen;
 
   /* Get a cloned copy of the SSL config situation stored in the
@@ -4095,8 +4041,8 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
      is later set again for the progress meter purpose */
   conn->now = Curl_now();
   if(!conn->bits.reuse)
-    result = Curl_cfilter_setup(data, conn, FIRSTSOCKET, conn->dns_entry,
-                                CURL_CF_SSL_DEFAULT);
+    result = Curl_conn_setup(data, FIRSTSOCKET, conn->dns_entry,
+                             CURL_CF_SSL_DEFAULT);
   /* not sure we need this flag to be passed around any more */
   *protocol_done = FALSE;
   return result;

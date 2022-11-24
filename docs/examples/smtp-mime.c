@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example showing how to send mime emails
+ * Send SMTP mime emails
  * </DESC>
  */
 

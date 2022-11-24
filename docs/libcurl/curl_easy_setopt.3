@@ -126,11 +126,14 @@ Callback for SSL context logic. See \fICURLOPT_SSL_CTX_FUNCTION(3)\fP
 .IP CURLOPT_SSL_CTX_DATA
 Data pointer to pass to the SSL context callback. See \fICURLOPT_SSL_CTX_DATA(3)\fP
 .IP CURLOPT_CONV_TO_NETWORK_FUNCTION
-Callback for code base conversion. See \fICURLOPT_CONV_TO_NETWORK_FUNCTION(3)\fP
+\fBOBSOLETE\fP Callback for code base conversion.
+See \fICURLOPT_CONV_TO_NETWORK_FUNCTION(3)\fP
 .IP CURLOPT_CONV_FROM_NETWORK_FUNCTION
-Callback for code base conversion. See \fICURLOPT_CONV_FROM_NETWORK_FUNCTION(3)\fP
+\fBOBSOLETE\fP Callback for code base conversion.
+See \fICURLOPT_CONV_FROM_NETWORK_FUNCTION(3)\fP
 .IP CURLOPT_CONV_FROM_UTF8_FUNCTION
-Callback for code base conversion. See \fICURLOPT_CONV_FROM_UTF8_FUNCTION(3)\fP
+\fBOBSOLETE\fP Callback for code base conversion.
+See \fICURLOPT_CONV_FROM_UTF8_FUNCTION(3)\fP
 .IP CURLOPT_INTERLEAVEFUNCTION
 Callback for RTSP interleaved data. See \fICURLOPT_INTERLEAVEFUNCTION(3)\fP
 .IP CURLOPT_INTERLEAVEDATA
@@ -696,6 +699,8 @@ Share object to use. See \fICURLOPT_SHARE(3)\fP
 Mode for creating new remote files. See \fICURLOPT_NEW_FILE_PERMS(3)\fP
 .IP CURLOPT_NEW_DIRECTORY_PERMS
 Mode for creating new remote directories. See \fICURLOPT_NEW_DIRECTORY_PERMS(3)\fP
+.IP CURLOPT_QUICK_EXIT
+To be set by toplevel tools like "curl" to skip lengthy cleanups when they are about to call exit() anyway. See \fICURLOPT_QUICK_EXIT(3)\fP
 .SH TELNET OPTIONS
 .IP CURLOPT_TELNETOPTIONS
 TELNET options. See \fICURLOPT_TELNETOPTIONS(3)\fP

@@ -242,6 +242,7 @@ struct curl_easyoption Curl_easyopts[] = {
    CURLOT_STRING, 0},
   {"PROXY_TRANSFER_MODE", CURLOPT_PROXY_TRANSFER_MODE, CURLOT_LONG, 0},
   {"PUT", CURLOPT_PUT, CURLOT_LONG, 0},
+  {"QUICK_EXIT", CURLOPT_QUICK_EXIT, CURLOT_LONG, 0},
   {"QUOTE", CURLOPT_QUOTE, CURLOT_SLIST, 0},
   {"RANDOM_FILE", CURLOPT_RANDOM_FILE, CURLOT_STRING, 0},
   {"RANGE", CURLOPT_RANGE, CURLOT_STRING, 0},
@@ -369,6 +370,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return ((CURLOPT_LASTENTRY%10000) != (321 + 1));
+  return ((CURLOPT_LASTENTRY%10000) != (322 + 1));
 }
 #endif

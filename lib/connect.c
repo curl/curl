@@ -48,13 +48,6 @@
 #include <arpa/inet.h>
 #endif
 
-#if (defined(HAVE_IOCTL_FIONBIO) && defined(NETWARE))
-#include <sys/filio.h>
-#endif
-#ifdef NETWARE
-#undef in_addr_t
-#define in_addr_t unsigned long
-#endif
 #ifdef __VMS
 #include <in.h>
 #include <inet.h>
@@ -1440,12 +1433,13 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
 /*
  * Check if a connection seems to be alive.
  */
-bool Curl_connalive(struct connectdata *conn)
+bool Curl_connalive(struct Curl_easy *data, struct connectdata *conn)
 {
+  (void)data;
   /* First determine if ssl */
   if(Curl_ssl_use(conn, FIRSTSOCKET)) {
     /* use the SSL context */
-    if(!Curl_ssl_check_cxn(conn))
+    if(!Curl_ssl_check_cxn(data, conn))
       return false;   /* FIN received */
   }
 /* Minix 3.1 doesn't support any flags on recv; just assume socket is OK */
@@ -1472,9 +1466,6 @@ bool Curl_connalive(struct connectdata *conn)
 int Curl_closesocket(struct Curl_easy *data, struct connectdata *conn,
                      curl_socket_t sock)
 {
-  DEBUGF(infof(data, "Curl_closesocket(conn #%ld, sock=%d), fclosesocket=%p",
-               conn ? conn->connection_id : -1,
-               (int)sock, conn ? conn->fclosesocket : NULL));
   if(conn && conn->fclosesocket) {
     if((sock == conn->sock[SECONDARYSOCKET]) && conn->bits.sock_accepted)
       /* if this socket matches the second socket, and that was created with
@@ -1636,13 +1627,6 @@ void Curl_conncontrol(struct connectdata *conn,
   }
 }
 
-/* Data received can be cached at various levels, so check them all here. */
-bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
-{
-  return Curl_recv_has_postponed_data(data->conn, sockindex)
-         ||Curl_cfilter_data_pending(data, data->conn, sockindex);
-}
-
 typedef enum {
   SCFST_INIT,
   SCFST_WAITING,
@@ -1706,9 +1690,8 @@ static CURLcode socket_cf_connect(struct Curl_cfilter *cf,
       result = Curl_connecthost(data, conn, ctx->remotehost);
       if(!result)
         ctx->state = SCFST_WAITING;
-      DEBUGF(infof(data, "socket_cf_connect(handle=%p, index=%d) -> "
-                   "connecthost() -> %d, done=%d",
-                   data, sockindex, result, *done));
+      DEBUGF(infof(data, CFMSG(cf, "connect(INIT) -> %d, done=%d"),
+             result, *done));
       break;
     case SCFST_WAITING:
       result = is_connected(data, conn, sockindex, done);
@@ -1721,15 +1704,13 @@ static CURLcode socket_cf_connect(struct Curl_cfilter *cf,
         ctx->state = SCFST_DONE;
         cf->connected = TRUE;
       }
-      DEBUGF(infof(data, "socket_cf_connect(handle=%p, index=%d) -> "
-                   "is_connected() -> %d, done=%d",
-                   data, sockindex, result, *done));
+      DEBUGF(infof(data, CFMSG(cf, "connect(WAIT) -> %d, done=%d"),
+             result, *done));
       break;
     case SCFST_DONE:
       *done = TRUE;
-      DEBUGF(infof(data, "socket_cf_connect(handle=%p, index=%d) -> "
-                   "already connected-> %d, done=%d",
-                   data, sockindex, result, *done));
+      DEBUGF(infof(data, CFMSG(cf, "connect(DONE) -> %d, done=%d"),
+             result, *done));
       break;
   }
   return result;
@@ -1750,8 +1731,8 @@ static CURLcode socket_cf_setup(struct Curl_cfilter *cf,
     ctx->remotehost = remotehost;
   }
   /* we start connecting right on setup */
-  DEBUGF(infof(data, "socket_cf_setup(handle=%p, remotehost=%s)",
-               data, cf->conn->hostname_resolve));
+  DEBUGF(infof(data, CFMSG(cf, "setup(remotehost=%s)"),
+         cf->conn->hostname_resolve));
   return socket_cf_connect(cf, data, FALSE, &done);
 }
 
@@ -1775,6 +1756,18 @@ static void socket_cf_close(struct Curl_cfilter *cf,
   ctx->state = SCFST_INIT;
 }
 
+static void socket_cf_get_host(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               const char **phost,
+                               const char **pdisplay_host,
+                               int *pport)
+{
+  (void)data;
+  *phost = cf->conn->host.name;
+  *pdisplay_host = cf->conn->host.dispname;
+  *pport = cf->conn->port;
+}
+
 static bool socket_cf_data_pending(struct Curl_cfilter *cf,
                                    const struct Curl_easy *data)
 {
@@ -1791,8 +1784,8 @@ static ssize_t socket_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   ssize_t nwritten;
   nwritten = Curl_send_plain(data, cf->sockindex, buf, len, err);
-  /* DEBUGF(infof(data, "socket_cf_send(handle=%p, index=%d, len=%ld)"
-               "-> %ld, code=%d", data, cf->sockindex, len, nwritten, *err));*/
+  DEBUGF(infof(data, CFMSG(cf, "send(len=%ld) -> %ld, err=%d"),
+         len, nwritten, *err));
   return nwritten;
 }
 
@@ -1801,8 +1794,7 @@ static ssize_t socket_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   ssize_t nread;
   nread = Curl_recv_plain(data, cf->sockindex, buf, len, err);
-  /* DEBUGF(infof(data, "socket_cf_recv(handle=%p, index=%d) -> %ld",
-               data, cf->sockindex, nread));*/
+  DEBUGF(infof(data, CFMSG(cf, "recv() -> %ld"), nread));
   return nread;
 }
 
@@ -1811,8 +1803,7 @@ static void socket_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct socket_cf_ctx *state = cf->ctx;
 
   (void)data;
-  DEBUGF(infof(data, "socket_cf_destroy(conn #%ld, index=%d",
-         cf->conn->connection_id, cf->sockindex));
+  DEBUGF(infof(data, CFMSG(cf, "destroy()")));
   if(cf->connected) {
     socket_cf_close(cf, data);
   }
@@ -1822,38 +1813,38 @@ static void socket_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static const struct Curl_cftype cft_socket = {
   "SOCKET",
+  CF_TYPE_IP_CONNECT,
   socket_cf_destroy,
-  Curl_cf_def_attach_data,
-  Curl_cf_def_detach_data,
   socket_cf_setup,
-  socket_cf_close,
   socket_cf_connect,
+  socket_cf_close,
+  socket_cf_get_host,
   socket_cf_get_select_socks,
   socket_cf_data_pending,
   socket_cf_send,
   socket_cf_recv,
+  Curl_cf_def_attach_data,
+  Curl_cf_def_detach_data,
 };
 
-CURLcode Curl_cfilter_socket_set(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 int sockindex)
+CURLcode Curl_conn_socket_set(struct Curl_easy *data,
+                              int sockindex)
 {
   CURLcode result;
   struct Curl_cfilter *cf = NULL;
   struct socket_cf_ctx *scf_ctx = NULL;
 
   /* Need to be first */
-  DEBUGASSERT(!conn->cfilter[sockindex]);
+  DEBUGASSERT(!data->conn->cfilter[sockindex]);
   scf_ctx = calloc(sizeof(*scf_ctx), 1);
   if(!scf_ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  result = Curl_cfilter_create(&cf, data, conn, sockindex,
-                               &cft_socket, scf_ctx);
+  result = Curl_cf_create(&cf, &cft_socket, scf_ctx);
   if(result)
     goto out;
-  Curl_cfilter_add(data, conn, sockindex, cf);
+  Curl_conn_cf_add(data, sockindex, cf);
 
 out:
   if(result) {
@@ -1892,22 +1883,24 @@ static CURLcode socket_accept_cf_setup(struct Curl_cfilter *cf,
 
 static const struct Curl_cftype cft_socket_accept = {
   "SOCKET-ACCEPT",
+  CF_TYPE_IP_CONNECT,
   socket_cf_destroy,
-  Curl_cf_def_attach_data,
-  Curl_cf_def_detach_data,
   socket_accept_cf_setup,
-  socket_cf_close,
   socket_accept_cf_connect,
+  socket_cf_close,
+  socket_cf_get_host,              /* TODO: not accurate */
   Curl_cf_def_get_select_socks,
   socket_cf_data_pending,
   socket_cf_send,
   socket_cf_recv,
+  Curl_cf_def_attach_data,
+  Curl_cf_def_detach_data,
 };
 
-CURLcode Curl_cfilter_socket_accepted_set(struct Curl_easy *data,
-                                          struct connectdata *conn,
-                                          int sockindex, curl_socket_t *s)
+CURLcode Curl_conn_socket_accepted_set(struct Curl_easy *data,
+                                       int sockindex, curl_socket_t *s)
 {
+  struct connectdata *conn = data->conn;
   CURLcode result;
   struct Curl_cfilter *cf = NULL;
   struct socket_cf_ctx *scf_ctx = NULL;
@@ -1920,17 +1913,16 @@ CURLcode Curl_cfilter_socket_accepted_set(struct Curl_easy *data,
   }
   else {
     /* replace any existing */
-    Curl_cfilter_destroy(data, conn, sockindex);
+    Curl_conn_cf_discard_all(data, conn, sockindex);
     scf_ctx = calloc(sizeof(*scf_ctx), 1);
     if(!scf_ctx) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
-    result = Curl_cfilter_create(&cf, data, conn, sockindex,
-                                 &cft_socket_accept, scf_ctx);
+    result = Curl_cf_create(&cf, &cft_socket_accept, scf_ctx);
     if(result)
       goto out;
-    Curl_cfilter_add(data, conn, sockindex, cf);
+    Curl_conn_cf_add(data, sockindex, cf);
   }
 
    /* close any existing socket and replace */
