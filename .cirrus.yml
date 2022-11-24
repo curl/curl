@@ -42,15 +42,14 @@ freebsd_task:
 
   pkginstall_script:
     - pkg update -f
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel unzip
+    - curl -L https://github.com/heimdal/heimdal/archive/refs/heads/master.zip -o heimdal.zip && unzip heimdal.zip && cd heimdal && sh autogen.sh && ./configure && make install
     - pkg delete -y curl
     - python -m ensurepip --default-pip
     - python -m pip install --upgrade pip
     - pip install --use-pep517 "cryptography<3.2"
     - pip install --use-pep517 "pyOpenSSL<20.0"
     - pip install --use-pep517 "impacket"
-    - git clone --depth=1 https://github.com/heimdal/heimdal.git
-    - cd heimdal && sh autogen.sh && ./configure && make install
   configure_script:
     - autoreconf -fi
     # Building with the address sanitizer is causing unexplainable test issues due to timeouts
