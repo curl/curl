@@ -46,9 +46,9 @@ freebsd_task:
     - pkg delete -y curl
     - python -m ensurepip --default-pip
     - python -m pip install --upgrade pip
-    - pip install "cryptography<3.2"
-    - pip install "pyOpenSSL<20.0"
-    - pip install "impacket"
+    - pip install --use-pep517 "cryptography<3.2"
+    - pip install --use-pep517 "pyOpenSSL<20.0"
+    - pip install --use-pep517 "impacket"
   configure_script:
     - autoreconf -fi
     # Building with the address sanitizer is causing unexplainable test issues due to timeouts
