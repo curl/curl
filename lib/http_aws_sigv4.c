@@ -410,6 +410,24 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     }
   }
 
+  payload_hash = parse_content_sha_hdr(data, provider1, &payload_hash_len);
+
+  if(!payload_hash) {
+    if(post_data) {
+      if(data->set.postfieldsize < 0)
+        post_data_len = strlen(post_data);
+      else
+        post_data_len = (size_t)data->set.postfieldsize;
+    }
+    if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+                     post_data_len))
+      goto fail;
+
+    sha256_to_hex(sha_hex, sha_hash);
+    payload_hash = sha_hex;
+    payload_hash_len = strlen(sha_hex);
+  }
+
 #ifdef DEBUGBUILD
   {
     char *force_timestamp = getenv("CURL_FORCETIME");
@@ -438,24 +456,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
-
-  payload_hash = parse_content_sha_hdr(data, provider1, &payload_hash_len);
-
-  if(!payload_hash) {
-    if(post_data) {
-      if(data->set.postfieldsize < 0)
-        post_data_len = strlen(post_data);
-      else
-        post_data_len = (size_t)data->set.postfieldsize;
-    }
-    if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
-                     post_data_len))
-      goto fail;
-
-    sha256_to_hex(sha_hex, sha_hash);
-    payload_hash = sha_hex;
-    payload_hash_len = strlen(sha_hex);
-  }
 
   {
     Curl_HttpReq httpreq;
