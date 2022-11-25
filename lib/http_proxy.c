@@ -172,8 +172,6 @@ static void tunnel_go_state(struct Curl_cfilter *cf,
 {
   if(ts->tunnel_state == new_state)
     return;
-  DEBUGF(infof(data, CFMSG(cf, "tunnel %p go_state %d -> %d"),
-         ts, ts->tunnel_state, new_state));
   /* leaving this one */
   switch(ts->tunnel_state) {
   case TUNNEL_CONNECT:
@@ -488,7 +486,6 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
 #define SELECT_OK      0
 #define SELECT_ERROR   1
 
-  DEBUGF(infof(data, "CONNECT: recv response, keepon=%d", ts->keepon));
   error = SELECT_OK;
   *done = FALSE;
 
@@ -642,7 +639,6 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
         }
       }
       else {
-        DEBUGF(infof(data, "CONNECT: no end of response headers"));
         ts->keepon = KEEPON_DONE;
       }
 
@@ -1085,8 +1081,6 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
     cf->ctx = ts;
   }
 
-  DEBUGF(infof(data, CFMSG(cf, "connect(%s:%d, state=%d)"),
-         ts->hostname, ts->remote_port, ts->tunnel_state));
   result = CONNECT(cf, data, ts);
   if(result)
     goto out;
@@ -1098,8 +1092,6 @@ out:
     cf->connected = TRUE;
     tunnel_free(cf, data);
   }
-  DEBUGF(infof(data, CFMSG(cf, "connect(block=%d) -> %d, done=%d"),
-         blocking, result, *done));
   return result;
 }
 
