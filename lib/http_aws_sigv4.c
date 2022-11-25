@@ -335,6 +335,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char provider1[MAX_SIGV4_LEN + 1]="";
   char region[MAX_SIGV4_LEN + 1]="";
   char service[MAX_SIGV4_LEN + 1]="";
+  bool sign_as_s3 = false;
   const char *hostname = conn->host.name;
   time_t clock;
   struct tm tm;
@@ -430,6 +431,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       region[len] = '\0';
     }
   }
+
+  /* AWS S3 requires a x-amz-content-sha256 header, and supports special
+   * values like UNSIGNED-PAYLOAD */
+  sign_as_s3 = (strcasecompare(provider0, "aws") &&
+                strcasecompare(service, "s3"));
 
   payload_hash = parse_content_sha_hdr(data, provider1, &payload_hash_len);
 
