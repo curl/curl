@@ -1463,7 +1463,10 @@ _add_if("TLS-SRP"       USE_TLS_SRP)
 _add_if("HTTP2"         USE_NGHTTP2)
 _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-_add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
+# TODO wolfSSL only support this from v5.0.0 onwards
+_add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS
+                        OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
+                        USE_MBEDTLS OR USE_SECTRANSP))
 _add_if("unicode"       ENABLE_UNICODE)
 _add_if("threadsafe"    HAVE_ATOMIC OR (WIN32 AND
                         HAVE_WIN32_WINNT GREATER_EQUAL 0x600))

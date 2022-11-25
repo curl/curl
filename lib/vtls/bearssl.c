@@ -764,11 +764,11 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_backend_data *backend = connssl->backend;
-  curl_socket_t sockfd = cf->conn->sock[cf->sockindex];
   unsigned state;
   unsigned char *buf;
   size_t len;
   ssize_t ret;
+  CURLcode result;
   int err;
 
   DEBUGASSERT(backend);
@@ -807,31 +807,21 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
       return CURLE_OK;
     if(state & BR_SSL_SENDREC) {
       buf = br_ssl_engine_sendrec_buf(&backend->ctx.eng, &len);
-      ret = swrite(sockfd, buf, len);
-      if(ret == -1) {
-        if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
-          if(connssl->state != ssl_connection_complete)
-            connssl->connecting_state = ssl_connect_2_writing;
-          return CURLE_AGAIN;
-        }
-        return CURLE_WRITE_ERROR;
+      ret = Curl_conn_cf_send(cf->next, data, (char *)buf, len, &result);
+      if(ret <= 0) {
+        return result;
       }
       br_ssl_engine_sendrec_ack(&backend->ctx.eng, ret);
     }
     else if(state & BR_SSL_RECVREC) {
       buf = br_ssl_engine_recvrec_buf(&backend->ctx.eng, &len);
-      ret = sread(sockfd, buf, len);
+      ret = Curl_conn_cf_recv(cf->next, data, (char *)buf, len, &result);
       if(ret == 0) {
         failf(data, "SSL: EOF without close notify");
         return CURLE_READ_ERROR;
       }
-      if(ret == -1) {
-        if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
-          if(connssl->state != ssl_connection_complete)
-            connssl->connecting_state = ssl_connect_2_reading;
-          return CURLE_AGAIN;
-        }
-        return CURLE_READ_ERROR;
+      if(ret <= 0) {
+        return result;
       }
       br_ssl_engine_recvrec_ack(&backend->ctx.eng, ret);
     }
@@ -1183,7 +1173,7 @@ static CURLcode bearssl_sha256sum(const unsigned char *input,
 
 const struct Curl_ssl Curl_ssl_bearssl = {
   { CURLSSLBACKEND_BEARSSL, "bearssl" }, /* info */
-  SSLSUPP_CAINFO_BLOB | SSLSUPP_SSL_CTX,
+  SSLSUPP_CAINFO_BLOB | SSLSUPP_SSL_CTX | SSLSUPP_HTTPS_PROXY,
   sizeof(struct ssl_backend_data),
 
   Curl_none_init,                  /* init */

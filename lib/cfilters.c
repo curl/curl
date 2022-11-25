@@ -134,7 +134,6 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
   struct Curl_cfilter *cfn, *cf = conn->cfilter[index];
 
   if(cf) {
-    DEBUGF(infof(data, CMSGI(conn, index, "Curl_conn_cf_discard_all()")));
     conn->cfilter[index] = NULL;
     while(cf) {
       cfn = cf->next;
@@ -153,7 +152,6 @@ void Curl_conn_close(struct Curl_easy *data, int index)
   /* it is valid to call that without filters being present */
   cf = data->conn->cfilter[index];
   if(cf) {
-    DEBUGF(infof(data, DMSGI(data, index, "close()")));
     cf->cft->close(cf, data);
   }
 }
@@ -259,6 +257,18 @@ void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
   cf->cft->destroy(cf, data);
   free(cf);
+}
+
+ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          const void *buf, size_t len, CURLcode *err)
+{
+  return cf->cft->do_send(cf, data, buf, len, err);
+}
+
+ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          char *buf, size_t len, CURLcode *err)
+{
+  return cf->cft->do_recv(cf, data, buf, len, err);
 }
 
 CURLcode Curl_conn_setup(struct Curl_easy *data,
@@ -384,6 +394,21 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
+bool Curl_conn_is_ssl(struct Curl_easy *data, int sockindex)
+{
+  struct Curl_cfilter *cf = data->conn? data->conn->cfilter[sockindex] : NULL;
+
+  (void)data;
+  for(; cf; cf = cf->next) {
+    if(cf->cft->flags & CF_TYPE_SSL)
+      return TRUE;
+    if(cf->cft->flags & CF_TYPE_IP_CONNECT)
+      return FALSE;
+  }
+  return FALSE;
+}
+
+
 bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -427,7 +452,6 @@ void Curl_conn_attach_data(struct connectdata *conn,
   for(i = 0; i < ARRAYSIZE(conn->cfilter); ++i) {
     cf = conn->cfilter[i];
     if(cf) {
-      DEBUGF(infof(data, DMSGI(data, i, "attach_data()")));
       while(cf) {
         cf->cft->attach_data(cf, data);
         cf = cf->next;
@@ -445,7 +469,6 @@ void Curl_conn_detach_data(struct connectdata *conn,
   for(i = 0; i < ARRAYSIZE(conn->cfilter); ++i) {
     cf = conn->cfilter[i];
     if(cf) {
-      DEBUGF(infof(data, DMSGI(data, i, "detach_data()")));
       while(cf) {
         cf->cft->detach_data(cf, data);
         cf = cf->next;

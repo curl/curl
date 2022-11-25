@@ -2742,7 +2742,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if((ftpcode == 234) || (ftpcode == 334)) {
         /* this was BLOCKING, keep it so for now */
         bool done;
-        if(!Curl_ssl_conn_is_ssl(data, FIRSTSOCKET)) {
+        if(!Curl_conn_is_ssl(data, FIRSTSOCKET)) {
           result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
           if(result) {
             /* we failed and bail out */

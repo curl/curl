@@ -81,26 +81,47 @@ cr_connect(struct Curl_cfilter *cf UNUSED_PARAM,
   return CURLE_SSL_CONNECT_ERROR;
 }
 
+struct io_ctx {
+  struct Curl_cfilter *cf;
+  struct Curl_easy *data;
+};
+
 static int
 read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
 {
-  ssize_t n = sread(*(int *)userdata, buf, len);
-  if(n < 0) {
-    return SOCKERRNO;
+  struct io_ctx *io_ctx = userdata;
+  CURLcode result;
+  int ret = 0;
+  ssize_t nread = Curl_conn_cf_recv(io_ctx->cf->next, io_ctx->data,
+                                    (char *)buf, len, &result);
+  if(nread < 0) {
+    nread = 0;
+    if(CURLE_AGAIN == result)
+      ret = EAGAIN;
+    else
+      ret = EINVAL;
   }
-  *out_n = n;
-  return 0;
+  *out_n = (int)nread;
+  return ret;
 }
 
 static int
 write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
 {
-  ssize_t n = swrite(*(int *)userdata, buf, len);
-  if(n < 0) {
-    return SOCKERRNO;
+  struct io_ctx *io_ctx = userdata;
+  CURLcode result;
+  int ret = 0;
+  ssize_t nwritten = Curl_conn_cf_send(io_ctx->cf->next, io_ctx->data,
+                                       (const char *)buf, len, &result);
+  if(nwritten < 0) {
+    nwritten = 0;
+    if(CURLE_AGAIN == result)
+      ret = EAGAIN;
+    else
+      ret = EINVAL;
   }
-  *out_n = n;
-  return 0;
+  *out_n = (int)nwritten;
+  return ret;
 }
 
 /*
@@ -122,6 +143,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct ssl_connect_data *const connssl = cf->ctx;
   struct ssl_backend_data *const backend = connssl->backend;
   struct rustls_connection *rconn = NULL;
+  struct io_ctx io_ctx;
 
   size_t n = 0;
   size_t tls_bytes_read = 0;
@@ -133,10 +155,13 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  io_error = rustls_connection_read_tls(rconn, read_cb,
-    &cf->conn->sock[cf->sockindex], &tls_bytes_read);
+  io_ctx.cf = cf;
+  io_ctx.data = data;
+
+  io_error = rustls_connection_read_tls(rconn, read_cb, &io_ctx,
+                                        &tls_bytes_read);
   if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-    infof(data, "sread: EAGAIN or EWOULDBLOCK");
+    infof(data, CFMSG(cf, "cr_recv: EAGAIN or EWOULDBLOCK"));
   }
   else if(io_error) {
     char buffer[STRERROR_LEN];
@@ -146,7 +171,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     return -1;
   }
 
-  infof(data, "cr_recv read %ld bytes from the network", tls_bytes_read);
+  infof(data, CFMSG(cf, "cr_recv: read %ld TLS bytes"), tls_bytes_read);
 
   rresult = rustls_connection_process_new_packets(rconn);
   if(rresult != RUSTLS_RESULT_OK) {
@@ -164,7 +189,8 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       plainlen - plain_bytes_copied,
       &n);
     if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
-      infof(data, "cr_recv got PLAINTEXT_EMPTY. will try again later.");
+      infof(data, CFMSG(cf, "cr_recv: got PLAINTEXT_EMPTY. "
+            "will try again later."));
       backend->data_pending = FALSE;
       break;
     }
@@ -181,7 +207,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       break;
     }
     else {
-      infof(data, "cr_recv copied out %ld bytes of plaintext", n);
+      infof(data, CFMSG(cf, "cr_recv: got %ld plain bytes"), n);
       plain_bytes_copied += n;
     }
   }
@@ -222,6 +248,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct ssl_connect_data *const connssl = cf->ctx;
   struct ssl_backend_data *const backend = connssl->backend;
   struct rustls_connection *rconn = NULL;
+  struct io_ctx io_ctx;
   size_t plainwritten = 0;
   size_t tlswritten = 0;
   size_t tlswritten_total = 0;
@@ -231,7 +258,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  infof(data, "cr_send %ld bytes of plaintext", plainlen);
+  infof(data, CFMSG(cf, "cr_send: %ld plain bytes"), plainlen);
 
   if(plainlen > 0) {
     rresult = rustls_connection_write(rconn, plainbuf, plainlen,
@@ -248,11 +275,15 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
 
+  io_ctx.cf = cf;
+  io_ctx.data = data;
+
   while(rustls_connection_wants_write(rconn)) {
-    io_error = rustls_connection_write_tls(rconn, write_cb,
-      &cf->conn->sock[cf->sockindex], &tlswritten);
+    io_error = rustls_connection_write_tls(rconn, write_cb, &io_ctx,
+                                           &tlswritten);
     if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-      infof(data, "swrite: EAGAIN after %ld bytes", tlswritten_total);
+      infof(data, CFMSG(cf, "cr_send: EAGAIN after %ld bytes"),
+            tlswritten_total);
       *err = CURLE_AGAIN;
       return -1;
     }
@@ -268,7 +299,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
-    infof(data, "cr_send wrote %ld bytes to network", tlswritten);
+    infof(data, CFMSG(cf, "cr_send: wrote %ld TLS bytes"), tlswritten);
     tlswritten_total += tlswritten;
   }
 
@@ -606,7 +637,8 @@ static size_t cr_version(char *buffer, size_t size)
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_CAINFO_BLOB |            /* supports */
-  SSLSUPP_TLS13_CIPHERSUITES,
+  SSLSUPP_TLS13_CIPHERSUITES |
+  SSLSUPP_HTTPS_PROXY,
   sizeof(struct ssl_backend_data),
 
   Curl_none_init,                  /* init */

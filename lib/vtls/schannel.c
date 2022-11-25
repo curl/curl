@@ -1313,8 +1313,9 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                "sending %lu bytes.", outbuf.cbBuffer));
 
   /* send initial handshake data which is now stored in output buffer */
-  result = Curl_write_plain(data, cf->conn->sock[cf->sockindex],
-                            outbuf.pvBuffer, outbuf.cbBuffer, &written);
+  written = Curl_conn_cf_send(cf->next, data,
+                              outbuf.pvBuffer, outbuf.cbBuffer,
+                              &result);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
   if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
     failf(data, "schannel: failed to send initial handshake data: "
@@ -1411,12 +1412,12 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   for(;;) {
     if(doread) {
       /* read encrypted handshake data from socket */
-      result = Curl_read_plain(data, cf->conn->sock[cf->sockindex],
+      nread = Curl_conn_cf_recv(cf->next, data,
                                (char *) (backend->encdata_buffer +
                                          backend->encdata_offset),
                                backend->encdata_length -
                                backend->encdata_offset,
-                               &nread);
+                               &result);
       if(result == CURLE_AGAIN) {
         if(connssl->connecting_state != ssl_connect_2_writing)
           connssl->connecting_state = ssl_connect_2_reading;
@@ -1500,9 +1501,9 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                        "sending %lu bytes.", outbuf[i].cbBuffer));
 
           /* send handshake token to server */
-          result = Curl_write_plain(data, cf->conn->sock[cf->sockindex],
-                                    outbuf[i].pvBuffer, outbuf[i].cbBuffer,
-                                    &written);
+          written = Curl_conn_cf_send(cf->next, data,
+                                      outbuf[i].pvBuffer, outbuf[i].cbBuffer,
+                                      &result);
           if((result != CURLE_OK) ||
              (outbuf[i].cbBuffer != (size_t) written)) {
             failf(data, "schannel: failed to send next handshake data: "
@@ -1964,7 +1965,6 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t written = -1;
   size_t data_len = 0;
   unsigned char *ptr = NULL;
-  struct connectdata *conn = cf->conn;
   struct ssl_connect_data *connssl = cf->ctx;
   SecBuffer outbuf[4];
   SecBufferDesc outbuf_desc;
@@ -2073,8 +2073,9 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       /* socket is writable */
 
-      result = Curl_write_plain(data, conn->sock[cf->sockindex],
-                                ptr + written, len - written, &this_write);
+       this_write = Curl_conn_cf_send(cf->next, data,
+                                      ptr + written, len - written,
+                                      &result);
       if(result == CURLE_AGAIN)
         continue;
       else if(result != CURLE_OK) {
@@ -2185,19 +2186,19 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                  backend->encdata_offset, backend->encdata_length));
 
     /* read encrypted data from socket */
-    *err = Curl_read_plain(data, cf->conn->sock[cf->sockindex],
-                           (char *)(backend->encdata_buffer +
+    nread = Curl_conn_cf_recv(cf->next, data,
+                              (char *)(backend->encdata_buffer +
                                     backend->encdata_offset),
-                           size, &nread);
+                              size, err);
     if(*err) {
       nread = -1;
       if(*err == CURLE_AGAIN)
         DEBUGF(infof(data,
-                     "schannel: Curl_read_plain returned CURLE_AGAIN"));
+                     "schannel: recv returned CURLE_AGAIN"));
       else if(*err == CURLE_RECV_ERROR)
-        infof(data, "schannel: Curl_read_plain returned CURLE_RECV_ERROR");
+        infof(data, "schannel: recv returned CURLE_RECV_ERROR");
       else
-        infof(data, "schannel: Curl_read_plain returned error %d", *err);
+        infof(data, "schannel: recv returned error %d", *err);
     }
     else if(nread == 0) {
       backend->recv_connection_closed = true;
@@ -2546,11 +2547,9 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */
-      ssize_t written;
-      result = Curl_write_plain(data, cf->conn->sock[cf->sockindex],
-                                outbuf.pvBuffer, outbuf.cbBuffer,
-                                &written);
-
+      ssize_t written = Curl_conn_cf_send(cf->next, data,
+                                          outbuf.pvBuffer, outbuf.cbBuffer,
+                                          &result);
       s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
       if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
         infof(data, "schannel: failed to send close msg: %s"
@@ -2767,7 +2766,8 @@ const struct Curl_ssl Curl_ssl_schannel = {
   SSLSUPP_CAINFO_BLOB |
 #endif
   SSLSUPP_PINNEDPUBKEY |
-  SSLSUPP_TLS13_CIPHERSUITES,
+  SSLSUPP_TLS13_CIPHERSUITES |
+  SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ssl_backend_data),
 

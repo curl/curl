@@ -143,6 +143,15 @@ if test "x$OPT_WOLFSSL" != xno; then
         ]
         )
 
+      dnl if this symbol is present, we can make use of BIO filter chains
+      AC_CHECK_FUNC(wolfSSL_BIO_set_shutdown,
+        [
+            AC_DEFINE(HAVE_WOLFSSL_FULL_BIO, 1,
+                      [if you have wolfSSL_BIO_set_shutdown])
+            WOLFSSL_FULL_BIO=1
+        ]
+        )
+
       if test -n "$wolfssllibpath"; then
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
