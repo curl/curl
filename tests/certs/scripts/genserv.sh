@@ -30,6 +30,9 @@ fi
 
 USAGE="echo Usage is genserv.sh <prefix> <caprefix>"
 
+# exit on first fail
+set -e
+
 HOME=`pwd`
 cd $HOME
 
@@ -132,5 +135,9 @@ $OPENSSL x509 -in $PREFIX-sv.crt -outform der -out $PREFIX-sv.der
 touch $PREFIX-sv.dhp
 cat $PREFIX-sv.prm $PREFIX-sv.key  $PREFIX-sv.crt $PREFIX-sv.dhp >$PREFIX-sv.pem
 chmod o-r $PREFIX-sv.prm
+
+$OPENSSL x509 -in $PREFIX-sv.pem -pubkey -noout | \
+$OPENSSL pkey -pubin -outform der | $OPENSSL dgst -sha256 -binary | \
+$OPENSSL enc -base64 >$PREFIX-sv.pubkey-pinned
 
 echo "$PREFIX-sv.pem done"

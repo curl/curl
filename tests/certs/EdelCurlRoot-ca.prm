@@ -15,3 +15,16 @@ commonName_value              = Northern Nowhere Trust Anchor
 basicConstraints = critical,CA:true
 keyUsage        = critical,keyCertSign,cRLSign
 subjectKeyIdentifier = hash
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+crlDistributionPoints   = @crl_info
+
+[ crl_ext ]
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+
+[ issuer_info ]
+caIssuers;URI.0         = http://test.curl.se/ca/EdelCurlRoot.cer
+
+[ crl_info ]
+URI.0                   = http://test.curl.se/ca/EdelCurlRoot.crl
