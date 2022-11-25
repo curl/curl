@@ -58,6 +58,9 @@ fi
 GETSERIAL="\$t = time ;\$d =  \$t . substr(\$t+$$ ,-4,4)-1;print \$d"
 SERIAL=`/usr/bin/env perl -e "$GETSERIAL"`
 
+# exit on first fail
+set -e
+
 echo SERIAL=$SERIAL PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE
 
 echo "openssl genrsa -out $PREFIX-ca.key $KEYSIZE -passout XXX"
