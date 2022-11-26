@@ -1722,6 +1722,7 @@ static CURLcode socket_cf_setup(struct Curl_cfilter *cf,
 {
   struct socket_cf_ctx *ctx = cf->ctx;
 
+  (void)data;
   DEBUGASSERT(ctx);
   if(ctx->remotehost != remotehost) {
     if(ctx->remotehost) {
