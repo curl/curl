@@ -219,7 +219,7 @@ const struct Curl_handler Curl_handler_wss = {
 #endif
 
 static CURLcode h3_setup_conn(struct Curl_easy *data,
-                                struct connectdata *conn)
+                              struct connectdata *conn)
 {
 #ifdef ENABLE_QUIC
   /* We want HTTP/3 directly, setup the filter chain ourself,
@@ -243,7 +243,7 @@ static CURLcode h3_setup_conn(struct Curl_easy *data,
 
   DEBUGF(infof(data, "HTTP/3 direct conn setup(conn #%ld, index=%d)",
          conn->connection_id, FIRSTSOCKET));
-  return Curl_conn_socket_set(data, FIRSTSOCKET);
+  return Curl_conn_socket_set(data, conn, FIRSTSOCKET);
 
 #else /* ENABLE_QUIC */
   (void)conn;

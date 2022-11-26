@@ -226,20 +226,22 @@ out:
   return result;
 }
 
-void Curl_conn_cf_add(struct Curl_easy *data, int index,
+void Curl_conn_cf_add(struct Curl_easy *data,
+                      struct connectdata *conn,
+                      int index,
                       struct Curl_cfilter *cf)
 {
   (void)data;
-  DEBUGF(infof(data, DMSGI(data, index, "cf_add(filter=%s)"),
+  DEBUGF(infof(data, CMSGI(conn, index, "cf_add(filter=%s)"),
                cf->cft->name));
 
-  DEBUGASSERT(data->conn);
+  DEBUGASSERT(conn);
   DEBUGASSERT(!cf->conn);
   DEBUGASSERT(!cf->next);
-  cf->next = data->conn->cfilter[index];
-  cf->conn = data->conn;
+  cf->next = conn->cfilter[index];
+  cf->conn = conn;
   cf->sockindex = index;
-  data->conn->cfilter[index] = cf;
+  conn->cfilter[index] = cf;
 }
 
 void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -260,11 +262,11 @@ void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 CURLcode Curl_conn_setup(struct Curl_easy *data,
+                         struct connectdata *conn,
                          int sockindex,
                          const struct Curl_dns_entry *remotehost,
                          int ssl_mode)
 {
-  struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf;
   CURLcode result;
 
@@ -281,13 +283,13 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
    */
   if(!conn->cfilter[sockindex]) {
     DEBUGF(infof(data, DMSGI(data, sockindex, "setup, init filter chain")));
-    result = Curl_conn_socket_set(data, sockindex);
+    result = Curl_conn_socket_set(data, conn, sockindex);
     if(result)
       goto out;
 
 #ifndef CURL_DISABLE_PROXY
     if(conn->bits.socksproxy) {
-      result = Curl_conn_socks_proxy_add(data, sockindex);
+      result = Curl_conn_socks_proxy_add(data, conn, sockindex);
       if(result)
         goto out;
     }
@@ -295,7 +297,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
     if(conn->bits.httpproxy) {
 #ifdef USE_SSL
       if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
-        result = Curl_ssl_cfilter_proxy_add(data, sockindex);
+        result = Curl_ssl_cfilter_proxy_add(data, conn, sockindex);
         if(result)
           goto out;
       }
@@ -303,7 +305,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
 #if !defined(CURL_DISABLE_HTTP)
       if(conn->bits.tunnel_proxy) {
-        result = Curl_conn_http_proxy_add(data, sockindex);
+        result = Curl_conn_http_proxy_add(data, conn, sockindex);
         if(result)
           goto out;
       }
@@ -315,7 +317,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
     if(ssl_mode == CURL_CF_SSL_ENABLE
       || (ssl_mode != CURL_CF_SSL_DISABLE
            && conn->handler->flags & PROTOPT_SSL)) {
-      result = Curl_ssl_cfilter_add(data, sockindex);
+      result = Curl_ssl_cfilter_add(data, conn, sockindex);
       if(result)
         goto out;
     }
@@ -325,7 +327,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
     if(data->set.haproxyprotocol) {
-      result = Curl_conn_haproxy_add(data, sockindex);
+      result = Curl_conn_haproxy_add(data, conn, sockindex);
       if(result)
         goto out;
     }

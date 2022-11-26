@@ -1462,6 +1462,7 @@ static void reinit_hostname(struct Curl_cfilter *cf)
       connssl->port = (int)cf->conn->remote_port;
     }
   }
+  DEBUGASSERT(connssl->hostname);
 }
 
 static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -1504,17 +1505,20 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   }
 
   (void)connssl;
+  DEBUGASSERT(data->conn);
+  DEBUGASSERT(data->conn == cf->conn);
   DEBUGASSERT(connssl);
-  /* TODO: right now we do not fully control when hostname is set, but
-   * copy it over again on each connect call. Esp. secondary chains seems
-   * to set it after the filters have been added */
-  reinit_hostname(cf);
+  DEBUGASSERT(cf->conn->host.name);
 
   result = cf->next->cft->connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
+  /* TODO: right now we do not fully control when hostname is set,
+   * assign it on each connect call. */
+  reinit_hostname(cf);
   *done = FALSE;
+
   if(blocking) {
     result = ssl_connect(cf, data);
     *done = (result == CURLE_OK);
@@ -1628,6 +1632,7 @@ static const struct Curl_cftype cft_ssl_proxy = {
 };
 
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
+                              struct connectdata *conn,
                               int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -1645,9 +1650,8 @@ CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
   if(result)
     goto out;
 
-  Curl_conn_cf_add(data, sockindex, cf);
+  Curl_conn_cf_add(data, conn, sockindex, cf);
 
-  reinit_hostname(cf);
   result = CURLE_OK;
 
 out:
@@ -1658,6 +1662,7 @@ out:
 
 #ifndef CURL_DISABLE_PROXY
 CURLcode Curl_ssl_cfilter_proxy_add(struct Curl_easy *data,
+                                    struct connectdata *conn,
                                     int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -1674,9 +1679,8 @@ CURLcode Curl_ssl_cfilter_proxy_add(struct Curl_easy *data,
   if(result)
     goto out;
 
-  Curl_conn_cf_add(data, sockindex, cf);
+  Curl_conn_cf_add(data, conn, sockindex, cf);
 
-  reinit_hostname(cf);
   result = CURLE_OK;
 
 out:
@@ -1793,7 +1797,7 @@ Curl_ssl_get_config(struct Curl_easy *data, int sockindex)
   (void)data;
   DEBUGASSERT(data->conn);
   cf = get_ssl_cf_engaged(data->conn, sockindex);
-  return cf? Curl_ssl_cf_get_config(cf, data) : NULL;
+  return cf? Curl_ssl_cf_get_config(cf, data) : &data->set.ssl;
 }
 
 struct ssl_primary_config *
