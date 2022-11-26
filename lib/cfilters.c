@@ -232,12 +232,12 @@ void Curl_conn_cf_add(struct Curl_easy *data,
                       struct Curl_cfilter *cf)
 {
   (void)data;
-  DEBUGF(infof(data, CMSGI(conn, index, "cf_add(filter=%s)"),
-               cf->cft->name));
-
   DEBUGASSERT(conn);
   DEBUGASSERT(!cf->conn);
   DEBUGASSERT(!cf->next);
+
+  DEBUGF(infof(data, CMSGI(conn, index, "cf_add(filter=%s)"),
+               cf->cft->name));
   cf->next = conn->cfilter[index];
   cf->conn = conn;
   cf->sockindex = index;
