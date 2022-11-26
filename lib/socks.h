@@ -52,6 +52,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 #endif
 
 CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
+                                   struct connectdata *conn,
                                    int sockindex);
 
 #endif /* CURL_DISABLE_PROXY */

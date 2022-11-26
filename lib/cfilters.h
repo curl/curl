@@ -180,6 +180,7 @@ CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
  * the start of the chain (top).
  */
 void Curl_conn_cf_add(struct Curl_easy *data,
+                      struct connectdata *conn,
                       int sockindex,
                       struct Curl_cfilter *cf);
 
@@ -208,6 +209,7 @@ void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data);
  * suitable filter chain.
  */
 CURLcode Curl_conn_setup(struct Curl_easy *data,
+                         struct connectdata *conn,
                          int sockindex,
                          const struct Curl_dns_entry *remotehost,
                          int ssl_mode);

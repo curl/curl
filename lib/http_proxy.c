@@ -1191,6 +1191,7 @@ static const struct Curl_cftype cft_http_proxy = {
 };
 
 CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
+                                  struct connectdata *conn,
                                   int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -1198,7 +1199,7 @@ CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
 
   result = Curl_cf_create(&cf, &cft_http_proxy, NULL);
   if(!result)
-    Curl_conn_cf_add(data, sockindex, cf);
+    Curl_conn_cf_add(data, conn, sockindex, cf);
   return result;
 }
 
@@ -1275,6 +1276,7 @@ static const struct Curl_cftype cft_haproxy = {
 };
 
 CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
+                               struct connectdata *conn,
                                int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -1282,7 +1284,7 @@ CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
 
   result = Curl_cf_create(&cf, &cft_haproxy, NULL);
   if(!result)
-    Curl_conn_cf_add(data, sockindex, cf);
+    Curl_conn_cf_add(data, conn, sockindex, cf);
   return result;
 }
 

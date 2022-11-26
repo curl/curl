@@ -477,7 +477,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   CURLcode result;
 
   if(!Curl_ssl_conn_is_ssl(data, FIRSTSOCKET)) {
-    result = Curl_ssl_cfilter_add(data, FIRSTSOCKET);
+    result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
     if(result)
       goto out;
   }

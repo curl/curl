@@ -153,6 +153,7 @@ void Curl_free_multi_ssl_backend_data(struct multi_ssl_backend_data *mbackend);
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
+                              struct connectdata *conn,
                               int sockindex);
 
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
@@ -160,6 +161,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
 CURLcode Curl_ssl_cfilter_proxy_add(struct Curl_easy *data,
+                                    struct connectdata *conn,
                                     int sockindex);
 #endif /* !CURL_DISABLE_PROXY */
 
@@ -239,8 +241,8 @@ bool Curl_ssl_use(struct connectdata *conn, int sockindex);
 #define Curl_ssl_get_backend_data_size(a) 0
 #define Curl_ssl_use(a,b) FALSE
 #define Curl_ssl_conn_is_ssl(a,b) FALSE
-#define Curl_ssl_cfilter_add(a,b) CURLE_NOT_BUILT_IN
-#define Curl_ssl_cfilter_proxy_add(a,b) CURLE_NOT_BUILT_IN
+#define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
+#define Curl_ssl_cfilter_proxy_add(a,b,c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_get_config(a,b) NULL
 #define Curl_ssl_cfilter_remove(a,b) CURLE_OK
 #endif
