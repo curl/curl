@@ -60,8 +60,8 @@ vc-x64:
 	nmake /f Makefile.vc MACHINE=x64
 
 djgpp:
-	$(MAKE) -C lib -f Makefile.mk CROSSPREFIX=i586-pc-msdosdjgpp-
-	$(MAKE) -C src -f Makefile.mk CROSSPREFIX=i586-pc-msdosdjgpp-
+	$(MAKE) -C lib -f makefile.dj
+	$(MAKE) -C src -f makefile.dj
 
 cygwin:
 	./configure
