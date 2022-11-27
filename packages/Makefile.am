@@ -24,6 +24,8 @@
 SUBDIRS = vms
 
 EXTRA_DIST = README \
+  DOS/README \
+  DOS/common.dj \
   OS400/README.OS400 \
   OS400/ccsidcurl.c \
   OS400/ccsidcurl.h \
