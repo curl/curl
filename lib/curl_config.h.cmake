@@ -171,9 +171,6 @@
 /* Define to 1 if you have the `closesocket' function. */
 #cmakedefine HAVE_CLOSESOCKET 1
 
-/* Define to 1 if you have the <errno.h> header file. */
-#cmakedefine HAVE_ERRNO_H 1
-
 /* Define to 1 if you have the fcntl function. */
 #cmakedefine HAVE_FCNTL 1
 
