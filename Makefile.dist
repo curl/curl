@@ -72,8 +72,8 @@ cygwin-ssl:
 	make
 
 amiga:
-	$(MAKE) -C lib -f Makefile.mk CROSSPREFIX=m68k-amigaos-
-	$(MAKE) -C src -f Makefile.mk CROSSPREFIX=m68k-amigaos-
+	$(MAKE) -C lib -f makefile.amiga
+	$(MAKE) -C src -f makefile.amiga
 
 unix: all
 
