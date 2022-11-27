@@ -3303,7 +3303,7 @@ AC_CHECK_HEADERS(
         arpa/inet.h \
         net/if.h \
         netinet/in.h \
-	netinet/in6.h \
+        netinet/in6.h \
         sys/un.h \
         linux/tcp.h \
         netinet/tcp.h \
@@ -3325,7 +3325,6 @@ AC_CHECK_HEADERS(
         sys/resource.h \
         libgen.h \
         locale.h \
-        errno.h \
         stdbool.h \
         arpa/tftp.h \
         sys/filio.h \

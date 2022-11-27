@@ -81,9 +81,6 @@
 /* Define if you have the `closesocket' function. */
 #undef HAVE_CLOSESOCKET
 
-/* Define if you have the <errno.h> header file. */
-#define HAVE_ERRNO_H
-
 /* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H
 

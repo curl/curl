@@ -38,9 +38,6 @@
 /* Define if you have the <assert.h> header file. */
 #define HAVE_ASSERT_H 1
 
-/* Define if you have the <errno.h> header file. */
-#define HAVE_ERRNO_H 1
-
 /* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
@@ -342,7 +339,6 @@
 #  undef USE_WINSOCK
 #  undef HAVE_WINSOCK2_H
 #  undef HAVE_WS2TCPIP_H
-#  undef HAVE_ERRNO_H
 #  undef HAVE_GETHOSTNAME
 #  undef LWIP_POSIX_SOCKETS_IO_NAMES
 #  undef RECV_TYPE_ARG1
