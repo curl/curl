@@ -225,7 +225,7 @@ Run `make`
 Requires DJGPP in the search path and pointing to the Watt-32 stack via
 `WATT_PATH=c:/djgpp/net/watt`.
 
-Run `make -f Makefile.dist djgpp` in the root curl dir.
+Run 'make -f Makefile.dist djgpp' in the root curl dir.
 
 For build configuration options, please see the MinGW32 section.
 
@@ -240,7 +240,7 @@ Notes:
 
 ## AmigaOS
 
-Run `make -f Makefile.dist amiga` in the root curl dir.
+Run 'make -f Makefile.dist amiga' in the root curl dir.
 
 For build configuration options, please see the MinGW32 section.
 
