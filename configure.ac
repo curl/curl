@@ -3297,13 +3297,12 @@ AC_CHECK_HEADERS(
         sys/socket.h \
         sys/ioctl.h \
         sys/uio.h \
-        assert.h \
         unistd.h \
         stdlib.h \
         arpa/inet.h \
         net/if.h \
         netinet/in.h \
-	netinet/in6.h \
+        netinet/in6.h \
         sys/un.h \
         linux/tcp.h \
         netinet/tcp.h \
