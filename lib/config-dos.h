@@ -44,7 +44,6 @@
 #define USE_MANUAL 1
 
 #define HAVE_ARPA_INET_H       1
-#define HAVE_ERRNO_H           1
 #define HAVE_FCNTL_H           1
 #define HAVE_FREEADDRINFO      1
 #define HAVE_GETADDRINFO       1

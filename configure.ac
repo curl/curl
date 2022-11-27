@@ -3334,7 +3334,6 @@ AC_CHECK_HEADERS(
         sys/resource.h \
         libgen.h \
         locale.h \
-        errno.h \
         stdbool.h \
         arpa/tftp.h \
         sys/filio.h \
