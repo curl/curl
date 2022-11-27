@@ -222,21 +222,19 @@ Run `make`
 
 ## MS-DOS
 
-Requires DJGPP in the search path and pointing to the Watt-32 stack via
-`WATT_PATH=c:/djgpp/net/watt`.
+Requires djgpp in the search path and pointing to Gisle Vanem's Watt-32 stack
+via `WATT_PATH=c:/djgpp/net/watt`.
 
 Run 'make -f Makefile.dist djgpp' in the root curl dir.
 
 For build configuration options, please see the MinGW32 section.
 
-Notes:
+Note 1: djgpp 2.04 beta has a sscanf() bug so the URL parsing isn't
+        done properly. Use djgpp 2.03 until they fix it.
 
- - DJGPP 2.04 beta has a `sscanf()` bug so the URL parsing is not done
-   properly. Use DJGPP 2.03 until they fix it.
-
- - Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
-   things go wrong because things like FS-extensions and `errno` values have
-   been changed between releases.
+Note 2: Compile Watt-32 (and OpenSSL) with the same version of djgpp.
+        Otherwise things go wrong because things like FS-extensions and
+        errnos have been changed between releases.
 
 ## AmigaOS
 

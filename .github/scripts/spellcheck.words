@@ -160,8 +160,6 @@ dir
 distro
 distro's
 distros
-DJGPP
-djgpp
 dlist
 DLL
 dll
@@ -228,7 +226,6 @@ FreeDOS
 FreeRTOS
 freshmeat
 Frexx
-FS
 fseek
 FTPing
 fuzzer
