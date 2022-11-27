@@ -322,9 +322,7 @@
 #endif
 
 #include <stdio.h>
-#ifdef HAVE_ASSERT_H
 #include <assert.h>
-#endif
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
 # if ! defined __LP64
