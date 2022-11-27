@@ -41,8 +41,6 @@
 
 #define PACKAGE  "curl"
 
-#define USE_MANUAL 1
-
 #define HAVE_ARPA_INET_H       1
 #define HAVE_ASSERT_H          1
 #define HAVE_ERRNO_H           1
