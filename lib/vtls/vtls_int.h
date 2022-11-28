@@ -38,7 +38,7 @@ struct ssl_connect_data {
   int port;                         /* remote port at origin */
   struct ssl_backend_data *backend; /* vtls backend specific props */
   struct Curl_easy *call_data;      /* data handle used in current call,
-                                     * same as paramter passed, but available
+                                     * same as parameter passed, but available
                                      * here for backend internal callbacks
                                      * that need it. NULLed after at the
                                      * end of each vtls filter invcocation. */
