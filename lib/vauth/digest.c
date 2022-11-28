@@ -58,7 +58,7 @@
 #define ALGO_SHA512_256 4
 #define ALGO_SHA512_256SESS (ALGO_SHA512_256 | SESSION_ALGO)
 
-#if !defined(USE_WINDOWS_SSPI) || defined(USE_OPENSSL)
+#if !defined(USE_WINDOWS_SSPI)
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
 #define DIGEST_QOP_VALUE_AUTH_CONF        (1 << 2)
@@ -66,7 +66,7 @@
 #define DIGEST_QOP_VALUE_STRING_AUTH      "auth"
 #define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
 #define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
-#endif /* !USE_WINDOWS_SSPI || USE_OPENSSL */
+#endif
 
 bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
                                const char **endptr)
@@ -141,8 +141,8 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
   return TRUE;
 }
 
-#if !defined(USE_WINDOWS_SSPI) || defined(USE_OPENSSL)
-/* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ascii string*/
+#if !defined(USE_WINDOWS_SSPI)
+/* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ascii string */
 static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
                                      unsigned char *dest) /* 33 bytes */
 {
@@ -151,7 +151,7 @@ static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
     msnprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
 }
 
-/* Convert sha256 chunk to RFC7616 -suitable ascii string*/
+/* Convert sha256 chunk to RFC7616 -suitable ascii string */
 static void auth_digest_sha256_to_ascii(unsigned char *source, /* 32 bytes */
                                      unsigned char *dest) /* 65 bytes */
 {
@@ -186,7 +186,7 @@ static char *auth_digest_string_quoted(const char *source)
       }
       *d++ = *s++;
     }
-    *d = 0;
+    *d = '\0';
   }
 
   return dest;
@@ -490,7 +490,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 /*
  * Curl_auth_decode_digest_http_message()
  *
- * This is used to decode a HTTP DIGEST challenge message into the separate
+ * This is used to decode an HTTP DIGEST challenge message into the separate
  * attributes.
  *
  * Parameters:
@@ -650,7 +650,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 /*
  * auth_create_digest_http_message()
  *
- * This is used to generate a HTTP DIGEST response message ready for sending
+ * This is used to generate an HTTP DIGEST response message ready for sending
  * to the recipient.
  *
  * Parameters:
@@ -926,7 +926,7 @@ static CURLcode auth_create_digest_http_message(
 /*
  * Curl_auth_create_digest_http_message()
  *
- * This is used to generate a HTTP DIGEST response message ready for sending
+ * This is used to generate an HTTP DIGEST response message ready for sending
  * to the recipient.
  *
  * Parameters:
@@ -989,6 +989,6 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
   digest->stale = FALSE; /* default means normal, not stale */
   digest->userhash = FALSE;
 }
-#endif  /* !USE_WINDOWS_SSPI  || USE_OPENSSL */
+#endif  /* !USE_WINDOWS_SSPI */
 
 #endif  /* CURL_DISABLE_CRYPTO_AUTH */
