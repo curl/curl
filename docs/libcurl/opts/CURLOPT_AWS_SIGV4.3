@@ -101,5 +101,9 @@ calculation.  For POST requests, this is a checksum of the provided
 \fICURLOPT_POSTFIELDS(3)\fP.  Otherwise, it's the checksum of an empty buffer.
 For requests like PUT, you can provide your own checksum in a HTTP header named
 \fBx-provider2-content-sha256\fP.
+.PP
+For \fBaws:s3\fP, a \fBx-amz-content-sha256\fP header is added to every request
+if not already present. For s3 requests with unknown payload, this header takes
+the special value "UNSIGNED-PAYLOAD".
 .SH "SEE ALSO"
 .BR CURLOPT_HEADEROPT "(3), " CURLOPT_HTTPHEADER "(3), "
