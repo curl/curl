@@ -53,15 +53,9 @@ if [ "$T" = "debug" ]; then
   fi
 fi
 
-if [ "$T" = "debug-bearssl" ]; then
-  ./configure --enable-debug --enable-werror $C
-  make
-  make "TFLAGS=-n !313" test-nonflaky
-fi
-
 if [ "$T" = "novalgrind" ]; then
   ./configure --enable-werror $C
-  make
+  make V=1
   make examples
   make TFLAGS=-n test-nonflaky
 fi
