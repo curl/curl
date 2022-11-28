@@ -32,10 +32,9 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl           \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl      \
  CMakeLists.txt mem-include-scan.pl valgrind.supp extern-scan.pl              \
  manpage-scan.pl nroff-scan.pl http2-server.pl dictserver.py                  \
- negtelnetserver.py smbserver.py util.py                                      \
- disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl               \
- azure.pm appveyor.pm version-scan.pl options-scan.pl markdown-uppercase.pl   \
- check-deprecated.pl
+ negtelnetserver.py smbserver.py util.py disable-scan.pl manpage-syntax.pl    \
+ error-codes.pl badsymbols.pl azure.pm appveyor.pm version-scan.pl            \
+ options-scan.pl markdown-uppercase.pl check-deprecated.pl option-check.pl
 
 DISTCLEANFILES = configurehelp.pm
 
