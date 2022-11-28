@@ -37,35 +37,67 @@ HEAD
 
 my $lastnum=0;
 
+sub add {
+    my($opt, $type, $num)=@_;
+    my $name;
+    # remove all spaces from the type
+    $type =~ s/ //g;
+    my $ext = $type;
+
+    if($opt =~ /OBSOLETE/) {
+        # skip obsolete options
+        next;
+    }
+
+    if($opt =~ /^CURLOPT_(.*)/) {
+        $name=$1;
+    }
+    $ext =~ s/CURLOPTTYPE_//;
+    $ext =~ s/CBPOINT/CBPTR/;
+    $ext =~ s/POINT\z//;
+    $type = "CURLOT_$ext";
+
+    $opt{$name} = $opt;
+    $type{$name} = $type;
+    push @names, $name;
+    if($num < $lastnum) {
+        print STDERR "ERROR: $opt has bad number: $num < $lastnum\n";
+        exit 2;
+    }
+    else {
+        $lastnum = $num;
+    }
+}
+
+
+my $fl;
 while(<STDIN>) {
-    if(/^ *CURLOPT\(([^,]*), ([^,]*), (\d+)\)/) {
-        my($opt, $type, $num)=($1,$2,$3);
-        my $name;
-        my $ext = $type;
+    my $l = $_;
+    if($fl) {
+        # continued deprecation
+        if($l =~ /(.*)\),/) {
+            $fl .= $1;
 
-        if($opt =~ /OBSOLETE/) {
-            # skip obsolete options
-            next;
-        }
-
-        if($opt =~ /^CURLOPT_(.*)/) {
-            $name=$1;
-        }
-        $ext =~ s/CURLOPTTYPE_//;
-        $ext =~ s/CBPOINT/CBPTR/;
-        $ext =~ s/POINT\z//;
-        $type = "CURLOT_$ext";
-
-        $opt{$name} = $opt;
-        $type{$name} = $type;
-        push @names, $name;
-        if($num < $lastnum) {
-            print STDERR "ERROR: $opt has bad number\n";
-            exit 2;
+            # the end
+            my @p=split(/, */, $fl);
+            add($p[0], $p[1], $p[2]);
+            undef $fl;
         }
         else {
-            $lastnum = $num;
+            # another line to append
+            chomp $l;
+            $fl .= $l;
         }
+    }
+
+    if(/^ *CURLOPTDEPRECATED\((.*)/) {
+        $fl = $1;
+        chomp $fl;
+    }
+
+    if(/^ *CURLOPT\(([^,]*), ([^,]*), (\d+)\)/) {
+        my($opt, $type, $num)=($1,$2,$3);
+        add($opt, $type, $num);
     }
 
     # alias for an older option
