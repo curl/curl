@@ -61,6 +61,11 @@ struct gsasldata;
 bool Curl_auth_allowed_to_host(struct Curl_easy *data);
 
 /* This is used to build a SPN string */
+#if defined(USE_OPENSSL)
+char* Curl_auth_build_spn_openssl(const char* service, const char* host,
+    const char* realm);
+#endif
+
 #if !defined(USE_WINDOWS_SSPI)
 char *Curl_auth_build_spn(const char *service, const char *host,
                           const char *realm);
@@ -104,11 +109,11 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const char *service,
                                              struct bufref *out);
 
-/* This is used to decode an HTTP DIGEST challenge message */
+/* This is used to decode a HTTP DIGEST challenge message */
 CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest);
 
-/* This is used to generate an HTTP DIGEST response message */
+/* This is used to generate a HTTP DIGEST response message */
 CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,

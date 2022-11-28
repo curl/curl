@@ -27,7 +27,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_OPENSSL)
 
 #include <curl/curl.h>
 
@@ -307,7 +307,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
 /*
  * Curl_auth_decode_digest_http_message()
  *
- * This is used to decode an HTTP DIGEST challenge message into the separate
+ * This is used to decode a HTTP DIGEST challenge message into the separate
  * attributes.
  *
  * Parameters:
@@ -371,7 +371,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 /*
  * Curl_auth_create_digest_http_message()
  *
- * This is used to generate an HTTP DIGEST response message ready for sending
+ * This is used to generate a HTTP DIGEST response message ready for sending
  * to the recipient.
  *
  * Parameters:
