@@ -340,7 +340,7 @@ struct Curl_ssl_session {
 
 /* Struct used for Digest challenge-response authentication */
 struct digestdata {
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_WINDOWS_SSPI) && defined(USE_SCHANNEL)
   BYTE *input_token;
   size_t input_token_len;
   CtxtHandle *http_context;
