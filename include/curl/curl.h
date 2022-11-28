@@ -34,10 +34,9 @@
 #endif
 
 /* Compile-time deprecation macros. */
-#if defined(__GNUC__) && defined(__GNUC_MINOR__) && \
-    ((__GNUC__ > 5) || (__GNUC__ == 5 && __GNUC_MINOR__ >= 3)) && \
-    !defined(__INTEL_COMPILER) && \
-    !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
+#if defined(__GNUC__) && (__GNUC__ >= 6) &&                             \
+  !defined(__INTEL_COMPILER) &&                                         \
+  !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
 #define CURL_DEPRECATED(version, message) \
     __attribute__((deprecated("since " # version ". " message)))
 #define CURL_IGNORE_DEPRECATION(statements) \
