@@ -354,7 +354,7 @@ endif
 all: $(TARGETS)
 
 $(OBJ_DIR):
-	-$(MKDIR) $(OBJ_DIR)
+	-$(call MKDIR, $(OBJ_DIR))
 
 $(OBJ_DIR)/%.o: %.c
 	$(CC) -W -Wall $(CFLAGS) $(CPPFLAGS) -c $< -o $@
