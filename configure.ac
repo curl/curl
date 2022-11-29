@@ -301,6 +301,16 @@ AS_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the inst
   fi
 )
 
+TEST_NGHTTPX=nghttpx
+AC_ARG_WITH(test-nghttpx,dnl
+AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
+  TEST_NGHTTPX=$withval
+  if test X"$OPT_TEST_NGHTTPX" = "Xno" ; then
+      TEST_NGHTTPX=""
+  fi
+)
+AC_SUBST(TEST_NGHTTPX)
+
 dnl If no TLS choice has been made, check if it was explicitly disabled or
 dnl error out to force the user to decide.
 if test -z "$TLSCHOICE"; then
@@ -4568,6 +4578,7 @@ AC_CONFIG_FILES([Makefile \
            lib/libcurl.vers \
            lib/libcurl.plist \
            tests/Makefile \
+           tests/config \
            tests/certs/Makefile \
            tests/certs/scripts/Makefile \
            tests/data/Makefile \

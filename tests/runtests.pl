@@ -159,6 +159,7 @@ my $HTTPTLSPORT=$noport; # HTTP TLS (non-stunnel) server port
 my $HTTPTLS6PORT=$noport; # HTTP TLS (non-stunnel) IPv6 server port
 my $HTTPPROXYPORT=$noport; # HTTP proxy port, when using CONNECT
 my $HTTP2PORT=$noport;   # HTTP/2 server port
+my $HTTP3PORT=$noport;   # HTTP/3 server port
 my $DICTPORT=$noport;    # DICT server port
 my $SMBPORT=$noport;     # SMB server port
 my $SMBSPORT=$noport;    # SMBS server port
@@ -262,6 +263,7 @@ my $has_charconv;   # set if libcurl is built with CharConv support
 my $has_tls_srp;    # set if libcurl is built with TLS-SRP support
 my $has_http2;      # set if libcurl is built with HTTP2 support
 my $has_h2c;        # set if libcurl is built with h2c support
+my $has_http3;      # set if libcurl is built with HTTP3 support
 my $has_httpsproxy; # set if libcurl is built with HTTPS-proxy support
 my $has_crypto;     # set if libcurl is built with cryptographic support
 my $has_cares;      # set if built with c-ares
@@ -315,7 +317,7 @@ my %ignored_keywords;   # key words of tests to ignore results
 my %enabled_keywords;   # key words of tests to run
 my %disabled;           # disabled test cases
 my %ignored;            # ignored results of test cases
-
+my $crlf_http = 0;      # always convert HTTP heaaders to cr+lf
 my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
 my $sshdverstr;  # for socks server, ssh daemon version string
@@ -438,12 +440,36 @@ delete $ENV{'SSL_CERT_DIR'} if($ENV{'SSL_CERT_DIR'});
 delete $ENV{'SSL_CERT_PATH'} if($ENV{'SSL_CERT_PATH'});
 delete $ENV{'CURL_CA_BUNDLE'} if($ENV{'CURL_CA_BUNDLE'});
 
+# provide defaults from our config file for ENV vars not explicitly
+# set by the caller
+if (open(my $fd, "< config")) {
+    while(my $line = <$fd>) {
+        next if ($line =~ /^#/);
+        chomp $line;
+        my ($name, $val) = split(/\s*:\s*/, $line, 2);
+        $ENV{$name} = $val if(!$ENV{$name});
+    }
+    close($fd);
+}
+
+# Check if we have nghttpx available and if it talks http/3
+my $nghttpx_h3 = 0;
+if (!$ENV{"NGHTTPX"}) {
+    $ENV{"NGHTTPX"} = checktestcmd("nghttpx");
+}
+if ($ENV{"NGHTTPX"}) {
+    my $nghttpx_version=join(' ', runclientoutput("$ENV{'NGHTTPX'} -v"));
+    $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
+    logmsg "nghttpx_h3=$nghttpx_h3, output=$nghttpx_version\n";
+}
+
+
 #######################################################################
 # Load serverpidfile and serverportfile hashes with file names for all
 # possible servers.
 #
 sub init_serverpidfile_hash {
-  for my $proto (('ftp', 'gopher', 'http', 'imap', 'pop3', 'smtp', 'http/2')) {
+  for my $proto (('ftp', 'gopher', 'http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
     for my $ssl (('', 's')) {
       for my $ipvnum ((4, 6)) {
         for my $idnum ((1, 2, 3)) {
@@ -468,7 +494,7 @@ sub init_serverpidfile_hash {
       }
     }
   }
-  for my $proto (('http', 'imap', 'pop3', 'smtp', 'http/2')) {
+  for my $proto (('http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
     for my $ssl (('', 's')) {
       my $serv = servername_id("$proto$ssl", "unix", 1);
       my $pidf = server_pidfilename("$proto$ssl", "unix", 1);
@@ -840,10 +866,11 @@ sub stopserver {
         push @killservers, "socks${2}";
     }
     if($server eq "http") {
-        # since the http2 server is a proxy that needs to know about the
+        # since the http2+3 server is a proxy that needs to know about the
         # dynamic http port it too needs to get restarted when the http server
         # is killed
         push @killservers, "http/2";
+        push @killservers, "http/3";
     }
     push @killservers, $server;
     #
@@ -1528,6 +1555,7 @@ sub runhttp2server {
 
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
+    $flags .= "--nghttpx \"$ENV{'NGHTTPX'}\" ";
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--connect $HOSTIP:$HTTPPORT ";
     $flags .= $verbose_flag if($debugprotocol);
@@ -1559,6 +1587,76 @@ sub runhttp2server {
     logmsg "RUN: failed to start the $srvrname server\n" if(!$http2pid);
 
     return ($http2pid, $pid2, $port);
+}
+
+#######################################################################
+# start the http3 server
+#
+sub runhttp3server {
+    my ($verbose, $cert) = @_;
+    my $server;
+    my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
+    my $proto="http/3";
+    my $ipvnum = 4;
+    my $idnum = 0;
+    my $exe = "$perl $srcdir/http3-server.pl";
+    my $verbose_flag = "--verbose ";
+
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
+
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0, 0, 0);
+    }
+
+    my $pid = processexists($pidfile);
+    if($pid > 0) {
+        stopserver($server, "$pid");
+    }
+    unlink($pidfile) if(-f $pidfile);
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
+
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--nghttpx \"$ENV{'NGHTTPX'}\" ";
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--connect $HOSTIP:$HTTPPORT ";
+    $flags .= "--cert \"$cert\" " if($cert);
+    $flags .= $verbose_flag if($debugprotocol);
+
+    my ($http3pid, $pid3);
+    my $port = 24113;
+    for(1 .. 10) {
+        $port += int(rand(900));
+        my $aflags = "--port $port $flags";
+
+        my $cmd = "$exe $aflags";
+        ($http3pid, $pid3) = startnew($cmd, $pidfile, 15, 0);
+
+        if($http3pid <= 0 || !pidexists($http3pid)) {
+            # it is NOT alive
+            stopserver($server, "$pid3");
+            $doesntrun{$pidfile} = 1;
+            $http3pid = $pid3 = 0;
+            next;
+        }
+        $doesntrun{$pidfile} = 0;
+
+        if($verbose) {
+            logmsg "RUN: $srvrname server PID $http3pid port $port\n";
+        }
+        last;
+    }
+
+    logmsg "RUN: failed to start the $srvrname server\n" if(!$http3pid);
+
+    return ($http3pid, $pid3, $port);
 }
 
 #######################################################################
@@ -2899,6 +2997,7 @@ sub setupfeatures {
     $feature{"h2c"} = $has_h2c;
     $feature{"HSTS"} = $has_hsts;
     $feature{"http/2"} = $has_http2;
+    $feature{"http/3"} = $has_http3;
     $feature{"https-proxy"} = $has_httpsproxy;
     $feature{"hyper"} = $has_hyper;
     $feature{"idn"} = $has_idn;
@@ -2959,6 +3058,8 @@ sub setupfeatures {
     $feature{"wakeup"} = 1;
     $feature{"headers-api"} = 1;
     $feature{"xattr"} = 1;
+    $feature{"nghttpx"} = !!$ENV{'NGHTTPX'};
+    $feature{"nghttpx-h3"} = !!$nghttpx_h3;
 }
 
 #######################################################################
@@ -3213,6 +3314,12 @@ sub checksystem {
 
                 push @protocols, 'http/2';
             }
+            if($feat =~ /HTTP3/) {
+                # http3 enabled
+                $has_http3=1;
+
+                push @protocols, 'http/3';
+            }
             if($feat =~ /HTTPS-proxy/) {
                 $has_httpsproxy=1;
 
@@ -3400,6 +3507,7 @@ sub subVariables {
     $$thing =~ s/${prefix}HTTPSPORT/$HTTPSPORT/g;
     $$thing =~ s/${prefix}HTTPSPROXYPORT/$HTTPSPROXYPORT/g;
     $$thing =~ s/${prefix}HTTP2PORT/$HTTP2PORT/g;
+    $$thing =~ s/${prefix}HTTP3PORT/$HTTP3PORT/g;
     $$thing =~ s/${prefix}HTTPPORT/$HTTPPORT/g;
     $$thing =~ s/${prefix}PROXYPORT/$HTTPPROXYPORT/g;
     $$thing =~ s/${prefix}MQTTPORT/$MQTTPORT/g;
@@ -3510,7 +3618,8 @@ sub subNewlines {
     # as well, all test comparisons will survive without knowing about this
     # little quirk.
 
-    if(($$thing =~ /^HTTP\/(1.1|1.0|2) [1-5][^\x0d]*\z/) ||
+    if(($$thing =~ /^HTTP\/(1.1|1.0|2|3) [1-5][^\x0d]*\z/) ||
+       ($$thing =~ /^(GET|POST|PUT|DELETE) \S+ HTTP\/\d+(\.\d+)?/) ||
        (($$thing =~ /^[a-z0-9_-]+: [^\x0d]*\z/i) &&
         # skip curl error messages
         ($$thing !~ /^curl: \(\d+\) /))) {
@@ -3587,6 +3696,8 @@ sub prepro {
     my (@entiretest) = @_;
     my $show = 1;
     my @out;
+    my $crlf_header = ($crlf_http || ($has_hyper && ($keywords{"HTTP"}
+                                                     || $keywords{"HTTPS"})));
     for my $s (@entiretest) {
         my $f = $s;
         if($s =~ /^ *%if (.*)/) {
@@ -3612,8 +3723,7 @@ sub prepro {
         if($show) {
             subVariables(\$s, $testnum, "%");
             subBase64(\$s);
-            subNewlines(\$s) if($has_hyper && ($keywords{"HTTP"} ||
-                                               $keywords{"HTTPS"}));
+            subNewlines(\$s) if($crlf_header);
             push @out, $s;
         }
     }
@@ -3805,6 +3915,12 @@ sub singletest {
 
     if(!$why) {
         $why = serverfortest($testnum);
+    }
+
+    $crlf_http = 0;
+    my %hash = testcaseattr();
+    if($hash{'http-crlf'}) {
+        $crlf_http = 1;
     }
 
     # Save a preprocessed version of the entire test file. This allows more
@@ -4956,6 +5072,17 @@ sub startservers {
                 logmsg sprintf("* pid gopher-ipv6 => %d %d\n", $pid,
                                $pid2) if($verbose);
                 $run{'gopher-ipv6'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "http/3") {
+            if(!$run{'http/3'}) {
+                ($pid, $pid2, $HTTP3PORT) = runhttp3server($verbose);
+                if($pid <= 0) {
+                    return "failed starting HTTP/3 server";
+                }
+                logmsg sprintf ("* pid http/3 => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'http/3'}="$pid $pid2";
             }
         }
         elsif($what eq "http/2") {

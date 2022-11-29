@@ -41,6 +41,21 @@ sub decode_hex {
     return $s;
 }
 
+sub testcaseattr {
+    my %hash;
+    for(@xml) {
+        if(($_ =~ /^ *\<testcase ([^>]*)/)) {
+            my $attr=$1;
+            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|([^\> ]*))//) {
+                my ($var, $cont)=($1, $2);
+                $cont =~ s/^\"(.*)\"$/$1/;
+                $hash{$var}=$cont;
+            }
+        }
+    }
+    return %hash;
+}
+
 sub getpartattr {
     # if $part is undefined (ie only one argument) then
     # return the attributes of the section
