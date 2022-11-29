@@ -1451,7 +1451,7 @@ static void reinit_hostname(struct Curl_cfilter *cf)
     /* TODO: there is not definition for a proxy setup on a secondary conn */
     connssl->hostname = cf->conn->http_proxy.host.name;
     connssl->dispname = cf->conn->http_proxy.host.dispname;
-    connssl->port = (int)cf->conn->http_proxy.port;
+    connssl->port = cf->conn->http_proxy.port;
   }
   else
 #endif
@@ -1462,12 +1462,12 @@ static void reinit_hostname(struct Curl_cfilter *cf)
     if(cf->sockindex == SECONDARYSOCKET && 0) {
       connssl->hostname = cf->conn->secondaryhostname;
       connssl->dispname = connssl->hostname;
-      connssl->port = (int)cf->conn->secondary_port;
+      connssl->port = cf->conn->secondary_port;
     }
     else {
       connssl->hostname = cf->conn->host.name;
       connssl->dispname = cf->conn->host.dispname;
-      connssl->port = (int)cf->conn->remote_port;
+      connssl->port = cf->conn->remote_port;
     }
   }
   DEBUGASSERT(connssl->hostname);

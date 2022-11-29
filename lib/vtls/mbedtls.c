@@ -541,7 +541,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-  infof(data, "mbedTLS: Connecting to %s:%ld", hostname, connssl->port);
+  infof(data, "mbedTLS: Connecting to %s:%d", hostname, connssl->port);
 
   mbedtls_ssl_config_init(&backend->config);
   ret = mbedtls_ssl_config_defaults(&backend->config,
