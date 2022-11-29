@@ -115,7 +115,6 @@ problems may have been fixed or changed somewhat since this was written.
  12.4 LDAPS with NSS is slow
 
  13. TCP/IP
- 13.1 --interface for ipv6 binds to unusable IP address
  13.2 Trying local ports fails on Windows
 
  14. DICT
@@ -828,14 +827,6 @@ problems may have been fixed or changed somewhat since this was written.
  See https://github.com/curl/curl/issues/5874
 
 13. TCP/IP
-
-13.1 --interface for ipv6 binds to unusable IP address
-
- Since IPv6 provides a lot of addresses with different scope, binding to an
- IPv6 address needs to take the proper care so that it does not bind to a
- locally scoped address as that is bound to fail.
-
- https://github.com/curl/curl/issues/686
 
 13.2 Trying local ports fails on Windows
 
