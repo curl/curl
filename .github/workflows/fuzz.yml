@@ -21,11 +21,32 @@ jobs:
   fuzzing:
     runs-on: ubuntu-latest
     steps:
+    # These two checkout steps check out:
+    # 
+    # - `curl` at the current ref
+    # - `curl_fuzzer` at HEAD of the default branch
+    #
+    # under the `fuzz` directory.
+    - name: Checkout curl
+      uses: actions/checkout@v3
+      with:
+        path: fuzz/curl
+    - name: Checkout curl fuzzer
+      uses: actions/checkout@v3
+      with:
+        repository: curl/curl-fuzzer
+        path: fuzz/curl_fuzzer
+    
+    # Now that the two codebases are checked out under `fuzz`,
+    # use the CIFuzz steps to test them. To do this we pass
+    # `project-src-path`, which overrides the codebases that
+    # get checked out in the google/ossfuzz curl Dockerfile.
     - name: Build Fuzzers
       uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
       with:
         oss-fuzz-project-name: 'curl'
         dry-run: false
+        project-src-path: fuzz
 
     - name: Run Fuzzers
       uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
