@@ -3989,7 +3989,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 
         if(sockerr && detail == SSL_ERROR_SYSCALL)
           Curl_strerror(sockerr, extramsg, sizeof(extramsg));
-        failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%ld ",
+        failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%d ",
               extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
               connssl->hostname, connssl->port);
         return result;
