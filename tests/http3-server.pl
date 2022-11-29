@@ -23,14 +23,18 @@
 #
 #***************************************************************************
 
-# This script invokes nghttpx properly to have it serve HTTP/2 for us.
+# This script invokes nghttpx properly to have it serve HTTP/3 for us.
 # nghttpx runs as a proxy in front of our "actual" HTTP/1 server.
 
+use Cwd;
+use Cwd 'abs_path';
+
 my $pidfile = "log/nghttpx.pid";
-my $logfile = "log/http2.log";
+my $logfile = "log/http3.log";
 my $nghttpx = "nghttpx";
 my $listenport = 9015;
 my $connect = "127.0.0.1,8990";
+my $cert = "Server-localhost-sv";
 my $conf = "nghttpx.conf";
 
 #***************************************************************************
@@ -65,6 +69,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--cert') {
+        if($ARGV[1]) {
+            $cert = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--logfile') {
         if($ARGV[1]) {
             $logfile = $ARGV[1];
@@ -78,16 +88,24 @@ while(@ARGV) {
         }
     }
     else {
-        print STDERR "\nWarning: http2-server.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: http3-server.pl unknown parameter: $ARGV[0]\n";
     }
     shift @ARGV;
 }
 
-my $cmdline="$nghttpx --backend=$connect ".
-    "--frontend=\"*,$listenport;no-tls\" ".
+my $path   = getcwd();
+my $srcdir = $path;
+$certfile = "$srcdir/certs/$cert.pem";
+$keyfile = "$srcdir/certs/$cert.key";
+$certfile = abs_path($certfile);
+$keyfile = abs_path($keyfile);
+
+my $cmdline="$nghttpx --http2-proxy --backend=$connect ".
+    "--frontend=\"*,$listenport;quic\" ".
     "--log-level=INFO ".
     "--pid-file=$pidfile ".
+    "--errorlog-file=$logfile ".
     "--conf=$conf ".
-    "--errorlog-file=$logfile";
+    "$keyfile $certfile";
 print "RUN: $cmdline\n" if($verbose);
 system("$cmdline 2>/dev/null");

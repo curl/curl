@@ -15,7 +15,7 @@ on:
 
 concurrency:
   # Hardcoded workflow filename as workflow name above is just Linux again
-  group: ngtcp2-gnutls-${{ github.event.pull_request.number || github.sha }}
+  group: ngtcp2-openssl-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -27,22 +27,15 @@ jobs:
       fail-fast: false
       matrix:
         build:
-        - name: gnutls
+        - name: quictls
           install: >-
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
-            nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin
-            libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools
-            texinfo texlive texlive-extra-utils autopoint libev-dev
           configure: >-
             PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib"
             --with-ngtcp2=$HOME/all --enable-warnings --enable-werror --enable-debug
             --with-test-nghttpx="$HOME/all/bin/nghttpx"
           ngtcp2-configure: >-
             --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
-          gnutls-configure: >-
-            PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib -L$HOME/all/lib"
-            --with-included-libtasn1 --with-included-unistring
-            --disable-guile --disable-doc --disable-tests --disable-tools
 
     steps:
     - run: |
@@ -59,22 +52,6 @@ jobs:
       name: 'install quictls'
 
     - run: |
-        git clone --depth=1 https://gitlab.com/gnutls/nettle.git
-        cd nettle
-        ./.bootstrap
-        ./configure LDFLAGS="-Wl,-rpath,$HOME/all/lib" ${{ matrix.build.nettle-configure }} --prefix=$HOME/all --libdir=$HOME/all/lib --disable-documentation
-        make install
-      name: 'install nettle'
-
-    - run: |
-        git clone --depth=1 -b 3.7.7 https://github.com/gnutls/gnutls.git
-        cd gnutls
-        ./bootstrap
-        ./configure ${{ matrix.build.gnutls-configure }} --prefix=$HOME/all
-        make install
-      name: 'install gnutls'
-
-    - run: |
         git clone --depth=1 https://github.com/ngtcp2/nghttp3
         cd nghttp3
         autoreconf -fi
@@ -86,7 +63,7 @@ jobs:
         git clone --depth=1 https://github.com/ngtcp2/ngtcp2
         cd ngtcp2
         autoreconf -fi
-        ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl --with-gnutls
+        ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl
         make install
       name: 'install ngtcp2'
 
@@ -103,7 +80,7 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --with-gnutls=$HOME/all ${{ matrix.build.configure }}
+    - run: ./configure --with-openssl=$HOME/all ${{ matrix.build.configure }}
       name: 'configure'
 
     - run: make V=1
