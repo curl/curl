@@ -591,8 +591,8 @@ and runs on, that is not listed, please let us know!
     Wii system software, Windows, Windows CE, Xbox System, Xenix, Zephyr,
     z/OS, z/TPF, z/VM, z/VSE
 
-## 25 CPU Architectures
+## 26 CPU Architectures
 
-    Alpha, ARC, ARM, AVR32, Elbrus, ETRAX, HP-PA, Itanium, LoongArch, m68k,
-    m88k, MicroBlaze, MIPS, Nios, OpenRISC, POWER, PowerPC, RISC-V, s390, SH4,
-    SPARC, Tilera, VAX, x86, Xtensa
+    Alpha, ARC, ARM, AVR32, CompactRISC, Elbrus, ETRAX, HP-PA, Itanium,
+    LoongArch, m68k, m88k, MicroBlaze, MIPS, Nios, OpenRISC, POWER, PowerPC,
+    RISC-V, s390, SH4, SPARC, Tilera, VAX, x86, Xtensa
