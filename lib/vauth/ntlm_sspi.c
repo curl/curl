@@ -153,7 +153,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   if(!ntlm->context)
     return CURLE_OUT_OF_MEMORY;
 
-  ntlm->spn = Curl_auth_build_spn(service, host, NULL);
+  ntlm->spn = Curl_auth_build_spn_WIN(service, host, NULL);
   if(!ntlm->spn)
     return CURLE_OUT_OF_MEMORY;
 

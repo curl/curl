@@ -27,7 +27,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_OPENSSL)
+#if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_CRYPTO_AUTH) && defined(USE_SCHANNEL)
 
 #include <curl/curl.h>
 
@@ -137,7 +137,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Generate our SPN */
-  spn = Curl_auth_build_spn(service, data->conn->host.name, NULL);
+  spn = Curl_auth_build_spn_WIN(service, data->conn->host.name, NULL);
   if(!spn) {
     free(output_token);
     return CURLE_OUT_OF_MEMORY;

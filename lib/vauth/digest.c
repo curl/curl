@@ -58,7 +58,7 @@
 #define ALGO_SHA512_256 4
 #define ALGO_SHA512_256SESS (ALGO_SHA512_256 | SESSION_ALGO)
 
-#if !defined(USE_WINDOWS_SSPI) || defined(USE_OPENSSL)
+#if !defined(USE_WINDOWS_SSPI) || !defined(USE_SCHANNEL)
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
 #define DIGEST_QOP_VALUE_AUTH_CONF        (1 << 2)
@@ -66,7 +66,7 @@
 #define DIGEST_QOP_VALUE_STRING_AUTH      "auth"
 #define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
 #define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
-#endif /* !USE_WINDOWS_SSPI || USE_OPENSSL */
+#endif /* !USE_WINDOWS_SSPI || !USE_SCHANNEL */
 
 bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
                                const char **endptr)
@@ -141,7 +141,7 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
   return TRUE;
 }
 
-#if !defined(USE_WINDOWS_SSPI) || defined(USE_OPENSSL)
+#if !defined(USE_WINDOWS_SSPI) || !defined(USE_SCHANNEL)
 /* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ascii string */
 static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
                                      unsigned char *dest) /* 33 bytes */
@@ -420,7 +420,11 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     msnprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Generate our SPN */
+#if !defined(USE_SCHANNEL)
   spn = Curl_auth_build_spn(service, realm, NULL);
+#else
+  spn = Curl_auth_build_spn_WIN(service, realm, NULL);
+#endif
   if(!spn)
     return CURLE_OUT_OF_MEMORY;
 
@@ -989,6 +993,6 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
   digest->stale = FALSE; /* default means normal, not stale */
   digest->userhash = FALSE;
 }
-#endif  /* !USE_WINDOWS_SSPI  || USE_OPENSSL */
+#endif  /* !USE_WINDOWS_SSPI  || !USE_SCHANNEL */
 
 #endif  /* CURL_DISABLE_CRYPTO_AUTH */

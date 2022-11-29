@@ -121,7 +121,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(!nego->spn) {
     /* Generate our SPN */
-    nego->spn = Curl_auth_build_spn(service, host, NULL);
+    nego->spn = Curl_auth_build_spn_WIN(service, host, NULL);
     if(!nego->spn)
       return CURLE_OUT_OF_MEMORY;
   }
