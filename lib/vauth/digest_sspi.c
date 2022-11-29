@@ -27,7 +27,9 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_CRYPTO_AUTH) && defined(USE_SCHANNEL)
+#if defined(USE_WINDOWS_SSPI) \
+    && !defined(CURL_DISABLE_CRYPTO_AUTH)\
+     && defined(USE_SCHANNEL)
 
 #include <curl/curl.h>
 

@@ -62,12 +62,12 @@ bool Curl_auth_allowed_to_host(struct Curl_easy *data);
 
 /* This is used to build a SPN string */
 #if !defined(USE_SCHANNEL)
-char* Curl_auth_build_spn(const char* service, const char* host,
-    const char* realm);
+char* Curl_auth_build_spn(const char *service, const char *host,
+    const char *realm);
 #endif
 
 #if defined(USE_WINDOWS_SSPI) || defined(USE_SCHANNEL)
-TCHAR* Curl_auth_build_spn_WIN(const char* service, const char* host,
+TCHAR* Curl_auth_build_spn_WIN(const char *service, const char *host,
                            const char *realm);
 #endif
 
