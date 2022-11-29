@@ -993,6 +993,6 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
   digest->stale = FALSE; /* default means normal, not stale */
   digest->userhash = FALSE;
 }
-#endif  /* !USE_WINDOWS_SSPI  || !USE_SCHANNEL */
+#endif  /* !USE_WINDOWS_SSPI || !USE_SCHANNEL */
 
 #endif  /* CURL_DISABLE_CRYPTO_AUTH */

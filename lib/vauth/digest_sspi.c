@@ -667,4 +667,4 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
   Curl_safefree(digest->passwd);
 }
 
-#endif /* USE_WINDOWS_SSPI && !CURL_DISABLE_CRYPTO_AUTH */
+#endif /* USE_WINDOWS_SSPI && !CURL_DISABLE_CRYPTO_AUTH && USE_SCHANNEL */
