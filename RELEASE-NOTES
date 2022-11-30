@@ -4,7 +4,7 @@ curl and libcurl 7.87.0
  Command line options:         249
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2758
+ Contributors:                 2760
 
 This release includes the following changes:
 
@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o aws_sigv4: consult x-%s-content-sha256 for payload hash [102]
  o cmake: check for cross-compile, not for toolchain [54]
  o cmake: really enable warnings with clang [25]
  o cmdline-opts/gen.pl: fix the linkifier [64]
@@ -23,6 +24,7 @@ This release includes the following bugfixes:
  o configure: require fork for NTLM-WB [36]
  o cookie: compare cookie prefixes case insensitively [14]
  o cookie: expire cookies at once when max-age is negative [45]
+ o curl-openssl.m4: do not add $prefix/include/openssl to CPPFLAGS [90]
  o curl-rustls.m4: on macOS, rustls also needs the Security framework [44]
  o curl: override the numeric locale and set "C" by force [60]
  o curl: timeout in the read callback [15]
@@ -40,7 +42,9 @@ This release includes the following bugfixes:
  o docs: remove performance note in CURLOPT_SSL_VERIFYPEER [13]
  o examples/10-at-a-time: fix possible skipped final transfers [85]
  o examples: update descriptions [83]
+ o ftp: support growing files with CURLOPT_IGNORE_CONTENT_LENGTH [96]
  o gen.pl: do not generate CURLHELP bitmask lines > 79 characters [10]
+ o GHA: NSS use clang instead of clang-9 [103]
  o headers: add endif comments [51]
  o HTTP-COOKIES.md: mention that http://localhost is a secure context [76]
  o HTTP-COOKIES.md: update the 6265bis link to draft-11 [70]
@@ -48,6 +52,7 @@ This release includes the following bugfixes:
  o http: set 'this_is_a_follow' in the Location: logic [40]
  o hyper: classify headers as CONNECT and 1XX [56]
  o hyper: fix handling of hyper_task's when reusing the same address [33]
+ o INSTALL: update operating systems and CPU archs [91]
  o KNOWN_BUGS: remove eight entries [50]
  o lib: add CURL_WRITEFUNC_ERROR to signal write callback error [47]
  o lib: connection filters (cfilter) addition to curl: [43]
@@ -61,6 +66,7 @@ This release includes the following bugfixes:
  o log2changes.pl: wrap long lines at 80 columns [59]
  o Makefile.mk: portable Makefile.m32 [86]
  o maketgz: set the right version in lib/libcurl.plist [53]
+ o mime: relax easy/mime structures binding [94]
  o misc: remove duplicated include files [28]
  o misc: typo and grammar fixes [23]
  o negtelnetserver.py: have it call its close() method [68]
@@ -71,10 +77,12 @@ This release includes the following bugfixes:
  o nroff-scan.pl: detect double highlights
  o ntlm: improve comment for encrypt_des [55]
  o ntlm: silence ubsan warning about copying from null target_info pointer. [69]
+ o openssl/mbedtls: use %d for outputing port with failf (int) [72]
  o os400: use platform socklen_t in Curl_getnameinfo_a [18]
  o proxy: refactor haproxy protocol handling as connection filter [57]
  o README.md: remove badges and xmas-tree garnish [9]
  o rtsp: fix RTSP auth [49]
+ o runtests: --no-debuginfod now disables DEBUGINFOD_URLS [100]
  o scripts/checksrc.pl: detect duplicated include files [29]
  o sendf: change Curl_read_plain to wrap Curl_recv_plain [48]
  o sendf: remove unnecessary if condition [26]
@@ -83,6 +91,8 @@ This release includes the following bugfixes:
  o system.h: support 64-bit curl_off_t for NonStop 32-bit [21]
  o test3026: reduce runtime in legacy mingw builds [73]
  o tests/sshserver.pl: re-enable ssh-rsa while using openssh 8.8+
+ o tests: add authorityInfoAccess to generated certs [99]
+ o tls: backends use connection filters for IO, enabling HTTPS-proxy [92]
  o tool_getparam: make --no-get work as the opposite of --get [39]
  o tool_operate: provide better errmsg for -G with bad URL [16]
  o tool_operate: when aborting, make sure there is a non-NULL error buffer [20]
@@ -114,19 +124,20 @@ advice from friends like these:
 
   Adam Averay, Alexandre Ferrieux, Alex Xu, Ali Utku Selen, Andrei Rybak,
   Andy Stamp, Anthony Hu, AtariDreams on github, Ayesh Karunaratne,
-  Christopher Sauer, Christoph Reiter, Dan Fandrich, Daniel Faust,
-  Daniel Gustafsson, Daniel Stenberg, Egor Pugin, Emanuele Torre,
+  Casey Bodley, Christopher Sauer, Christoph Reiter, Dan Fandrich,
+  Daniel Faust, Daniel Gustafsson, Daniel Stenberg, Egor Pugin, Emanuele Torre,
   Emil Österlund, Eric Vigeant, Erik Janssen, Fata Nugraha, Felipe Gasper,
-  godmar on github, Henning Schild, Hirotaka Tagawa, Joel Depooter,
-  John Sherrill, Jon Rumsey, jvreelanda on github, Karthikdasari0423 on github,
-  Lorenzo Miniero, Luca Niccoli, Marc Hörsken, Michael Drake,
+  Gisle Vanem, godmar on github, Henning Schild, Hirotaka Tagawa,
+  Ikko Ashimine, Joel Depooter, John Sherrill, Jon Rumsey,
+  jvreelanda on github, Karthikdasari0423 on github, Lorenzo Miniero,
+  Luca Niccoli, Marc Hörsken, Mark Gaiser, Michael Drake, Michael Kaufmann,
   Mikhail Kuznetsov,  MonkeybreadSoftware on github,
   MonkeybreadSoftware on github, Nathan Moinvaziri, Oskar Sigvardsson,
   Patrick Monnerat, Patrick Schlangen, Peter Piekarski, Philip Chan,
-  Randall S. Becker, Ray Satiro, Ryan Schmidt, Sean McArthur, Stefan Eissing,
-  Stephan Guilloux, Stuart Henderson, Thomas Glanzmann, Trail of Bits,
-  Viktor Szakats, xianghongai on github, Zespre Schmidt
-  (55 contributors)
+  Philip Heiduck, Randall S. Becker, Ray Satiro, Ryan Schmidt, Sean McArthur,
+  Stefan Eissing, Stephan Guilloux, Stuart Henderson, Thomas Glanzmann,
+  Trail of Bits, Viktor Szakats, xianghongai on github, Zespre Schmidt
+  (61 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -201,6 +212,7 @@ References to bug reports and discussions on issues:
  [69] = https://curl.se/bug/?i=9898
  [70] = https://curl.se/bug/?i=9940
  [71] = https://curl.se/bug/?i=9936
+ [72] = https://curl.se/bug/?i=10001
  [73] = https://curl.se/bug/?i=9412
  [74] = https://curl.se/bug/?i=9937
  [75] = https://curl.se/bug/?i=2975
@@ -213,3 +225,12 @@ References to bug reports and discussions on issues:
  [84] = https://curl.se/bug/?i=9919
  [85] = https://curl.se/bug/?i=9953
  [86] = https://curl.se/bug/?i=9764
+ [90] = https://curl.se/bug/?i=9989
+ [91] = https://curl.se/bug/?i=9994
+ [92] = https://curl.se/bug/?i=9962
+ [94] = https://curl.se/bug/?i=9927
+ [96] = https://curl.se/bug/?i=9772
+ [99] = https://curl.se/bug/?i=9980
+ [100] = https://curl.se/bug/?i=9950
+ [102] = https://curl.se/bug/?i=9804
+ [103] = https://curl.se/bug/?i=9978
