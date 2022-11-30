@@ -912,6 +912,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
     size -= (len + 2);
     *buf++ = ':';
     *buf++ = ' ';
+    *buf = '\0';
   }
 
 #ifdef OPENSSL_IS_BORINGSSL
@@ -920,7 +921,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
   ERR_error_string_n(error, buf, size);
 #endif
 
-  if(size > 1 && !*buf) {
+  if(!*buf) {
     strncpy(buf, (error ? "Unknown error" : "No error"), size);
     buf[size - 1] = '\0';
   }
