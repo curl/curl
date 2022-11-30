@@ -895,12 +895,25 @@ static const char *SSL_ERROR_to_str(int err)
   }
 }
 
+static size_t ossl_version(char *buffer, size_t size);
+
 /* Return error string for last OpenSSL error
  */
 static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 {
-  if(size)
+  size_t len;
+  DEBUGASSERT(size);
+  *buf = '\0';
+
+  len = ossl_version(buf, size);
+  DEBUGASSERT(len < (size - 2));
+  if(len < (size - 2)) {
+    buf += len;
+    size -= (len + 2);
+    *buf++ = ':';
+    *buf++ = ' ';
     *buf = '\0';
+  }
 
 #ifdef OPENSSL_IS_BORINGSSL
   ERR_error_string_n((uint32_t)error, buf, size);
@@ -908,7 +921,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
   ERR_error_string_n(error, buf, size);
 #endif
 
-  if(size > 1 && !*buf) {
+  if(!*buf) {
     strncpy(buf, (error ? "Unknown error" : "No error"), size);
     buf[size - 1] = '\0';
   }
@@ -4491,8 +4504,6 @@ static bool ossl_data_pending(struct Curl_cfilter *cf,
     return TRUE;
   return FALSE;
 }
-
-static size_t ossl_version(char *buffer, size_t size);
 
 static ssize_t ossl_send(struct Curl_cfilter *cf,
                          struct Curl_easy *data,
