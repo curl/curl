@@ -25,16 +25,50 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#include <curl/curl.h>
 
 #ifdef USE_GNUTLS
 
-#include "urldata.h"
-#include "cfilters.h"
 #include <gnutls/gnutls.h>
+
+#ifdef HAVE_GNUTLS_SRP
+/* the function exists */
+#ifdef USE_TLS_SRP
+/* the functionality is not disabled */
+#define USE_GNUTLS_SRP
+#endif
+#endif
+
+struct Curl_easy;
+struct Curl_cfilter;
+struct ssl_primary_config;
+struct ssl_config_data;
+
+struct gtls_instance {
+  gnutls_session_t session;
+  gnutls_certificate_credentials_t cred;
+#ifdef USE_GNUTLS_SRP
+  gnutls_srp_client_credentials_t srp_client_cred;
+#endif
+};
+
 CURLcode
-Curl_gtls_verifyserver(struct Curl_cfilter *cf,
-                       struct Curl_easy *data,
-                       gnutls_session_t session);
+gtls_client_init(struct Curl_easy *data,
+                 struct ssl_primary_config *config,
+                 struct ssl_config_data *ssl_config,
+                 const char *hostname,
+                 struct gtls_instance *gtls,
+                 long *pverifyresult);
+
+CURLcode
+Curl_gtls_verifyserver(struct Curl_easy *data,
+                       gnutls_session_t session,
+                       struct ssl_primary_config *config,
+                       struct ssl_config_data *ssl_config,
+                       const char *hostname,
+                       const char *dispname,
+                       const char *pinned_key);
+
 extern const struct Curl_ssl Curl_ssl_gnutls;
 
 #endif /* USE_GNUTLS */
