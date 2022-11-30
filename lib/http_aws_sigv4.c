@@ -116,7 +116,7 @@ static void trim_headers(struct curl_slist *head)
   }
 }
 
-/* maximum lenth for the aws sivg4 parts */
+/* maximum length for the aws sivg4 parts */
 #define MAX_SIGV4_LEN 64
 #define MAX_SIGV4_LEN_TXT "64"
 
@@ -342,7 +342,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     return CURLE_OK;
   }
 
-  /* we init thoses buffers here, so goto fail will free initialized dynbuf */
+  /* we init those buffers here, so goto fail will free initialized dynbuf */
   Curl_dyn_init(&canonical_headers, CURL_MAX_HTTP_HEADER);
   Curl_dyn_init(&signed_headers, CURL_MAX_HTTP_HEADER);
 
@@ -500,7 +500,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   /*
    * Google allows using RSA key instead of HMAC, so this code might change
-   * in the future. For now we ony support HMAC.
+   * in the future. For now we only support HMAC.
    */
   str_to_sign = curl_maprintf("%s4-HMAC-SHA256\n" /* Algorithm */
                               "%s\n" /* RequestDateTime */
