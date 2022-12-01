@@ -317,7 +317,6 @@ my %ignored_keywords;   # key words of tests to ignore results
 my %enabled_keywords;   # key words of tests to run
 my %disabled;           # disabled test cases
 my %ignored;            # ignored results of test cases
-my $crlf_http = 0;      # always convert HTTP heaaders to cr+lf
 my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
 my $sshdverstr;  # for socks server, ssh daemon version string
@@ -3609,7 +3608,13 @@ sub subBase64 {
 
 my $prevupdate;
 sub subNewlines {
-    my ($thing) = @_;
+    my ($force, $thing) = @_;
+
+    if($force) {
+        # enforce CRLF newline
+        $$thing =~ s/\x0d*\x0a/\x0d\x0a/;
+        return;
+    }
 
     # When curl is built with Hyper, it gets all response headers delivered as
     # name/value pairs and curl "invents" the newlines when it saves the
@@ -3624,7 +3629,7 @@ sub subNewlines {
         # skip curl error messages
         ($$thing !~ /^curl: \(\d+\) /))) {
         # enforce CRLF newline
-        $$thing =~ s/\x0a/\x0d\x0a/;
+        $$thing =~ s/\x0d*\x0a/\x0d\x0a/;
         $prevupdate = 1;
     }
     else {
@@ -3696,8 +3701,7 @@ sub prepro {
     my (@entiretest) = @_;
     my $show = 1;
     my @out;
-    my $crlf_header = ($crlf_http || ($has_hyper && ($keywords{"HTTP"}
-                                                     || $keywords{"HTTPS"})));
+    my $data_crlf;
     for my $s (@entiretest) {
         my $f = $s;
         if($s =~ /^ *%if (.*)/) {
@@ -3721,9 +3725,19 @@ sub prepro {
             next;
         }
         if($show) {
+            # The processor does CRLF replacements in the <data*> sections if
+            # necessary since those parts might be read by separate servers.
+            if($s =~ /^ *<data(.*)\>/) {
+                if($1 =~ /crlf="yes"/ || $has_hyper) {
+                    $data_crlf = 1;
+                }
+            }
+            elsif(($s =~ /^ *<\/data/) && $data_crlf) {
+                $data_crlf = 0;
+            }
             subVariables(\$s, $testnum, "%");
             subBase64(\$s);
-            subNewlines(\$s) if($crlf_header);
+            subNewlines(0, \$s) if($data_crlf);
             push @out, $s;
         }
     }
@@ -3917,12 +3931,6 @@ sub singletest {
         $why = serverfortest($testnum);
     }
 
-    $crlf_http = 0;
-    my %hash = testcaseattr();
-    if($hash{'http-crlf'}) {
-        $crlf_http = 1;
-    }
-
     # Save a preprocessed version of the entire test file. This allows more
     # "basic" test case readers to enjoy variable replacements.
     my @entiretest = fulltest();
@@ -4045,6 +4053,11 @@ sub singletest {
                     # of the datacheck
                     chomp($replycheckpart[$#replycheckpart]);
                 }
+                if($replycheckpartattr{'crlf'} ||
+                   ($has_hyper && ($keywords{"HTTP"}
+                                   || $keywords{"HTTPS"}))) {
+                    map subNewlines(0, \$_), @replycheckpart;
+                }
                 push(@reply, @replycheckpart);
             }
         }
@@ -4065,6 +4078,11 @@ sub singletest {
             # text mode when running on windows: fix line endings
             map s/\r\n/\n/g, @reply;
             map s/\n/\r\n/g, @reply;
+        }
+        if($replyattr{'crlf'} ||
+           ($has_hyper && ($keywords{"HTTP"}
+                           || $keywords{"HTTPS"}))) {
+            map subNewlines(0, \$_), @reply;
         }
     }
 
@@ -4522,6 +4540,12 @@ sub singletest {
             chomp($validstdout[$#validstdout]);
         }
 
+        if($hash{'crlf'} ||
+           ($has_hyper && ($keywords{"HTTP"}
+                           || $keywords{"HTTPS"}))) {
+            map subNewlines(0, \$_), @validstdout;
+        }
+
         $res = compare($testnum, $testname, "stdout", \@actual, \@validstdout);
         if($res) {
             return $errorreturncode;
@@ -4620,6 +4644,10 @@ sub singletest {
             for(@out) {
                 eval $strip;
             }
+        }
+
+        if($hash{'crlf'}) {
+            map subNewlines(1, \$_), @protstrip;
         }
 
         if((!$out[0] || ($out[0] eq "")) && $protstrip[0]) {
@@ -4752,6 +4780,11 @@ sub singletest {
                 # text mode when running on windows: fix line endings
                 map s/\r\n/\n/g, @outfile;
                 map s/\n/\r\n/g, @outfile;
+            }
+            if($hash{'crlf'} ||
+               ($has_hyper && ($keywords{"HTTP"}
+                               || $keywords{"HTTPS"}))) {
+                map subNewlines(0, \$_), @outfile;
             }
 
             my $strip;

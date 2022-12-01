@@ -1,4 +1,4 @@
-<testcase http-crlf="yes">
+<testcase>
 <info>
 <keywords>
 HTTP
@@ -10,7 +10,7 @@ HTTP/3
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data nocheck="yes" crlf="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -51,7 +51,7 @@ HTTP/3 GET:
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
-<protocol>
+<protocol crlf="yes">
 GET https://localhost:%HTTP3PORT/%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTP3PORT
 User-Agent: curl/%VERSION
