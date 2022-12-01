@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# The results of each of these jobs can be found at 
+# The results of each of these jobs can be found at
 # https://curl.zuul.vexxhost.dev/builds. As of November 2021 they are not being
 # propagated to the GitHub "checks" UI, you need to check for them manually.
 
@@ -187,21 +187,6 @@
         PKG_CONFIG_PATH: "{{ ansible_user_dir }}/ngbuild/lib/pkgconfig"
 
 - job:
-    name: curl-fuzzer
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - clang
-        - clang-9
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-      curl_env:
-        CC: clang-9
-        CXX: clang++-9
-        T: fuzzer
-
-- job:
     name: curl-debug-clang-with-openssl-dl-ubsan
     parent: curl-base
     vars:
@@ -239,6 +224,5 @@
       - curl-debug-clang-with-gnutls
       - curl-cmake-boringssl-quiche
       - curl-cmake-ngtcp2
-      - curl-fuzzer
       - curl-debug-clang-with-openssl-dl-ubsan
 ...

@@ -91,15 +91,3 @@ if [ "$T" = "cmake" ]; then
   cmake --build build
   env TFLAGS="!1139 $TFLAGS" cmake --build build --target test-nonflaky
 fi
-
-if [ "$T" = "fuzzer" ]; then
-  # Download the fuzzer to a temporary folder
-  ./tests/fuzz/download_fuzzer.sh /tmp/curl_fuzzer
-
-  export CURLSRC=$PWD
-
-  # Run the mainline fuzzer test
-  pushd /tmp/curl_fuzzer
-  ./mainline.sh ${CURLSRC}
-  popd
-fi
