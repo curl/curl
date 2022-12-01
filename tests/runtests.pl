@@ -3701,6 +3701,7 @@ sub prepro {
     my (@entiretest) = @_;
     my $show = 1;
     my @out;
+    my $data_crlf;
     for my $s (@entiretest) {
         my $f = $s;
         if($s =~ /^ *%if (.*)/) {
@@ -3724,8 +3725,19 @@ sub prepro {
             next;
         }
         if($show) {
+            # The processor does CRLF replacements in the <data*> sections if
+            # necessary since those parts might be read by separate servers.
+            if($s =~ /^ *<data(.*)\>/) {
+                if($1 =~ /crlf="yes"/ || $has_hyper) {
+                    $data_crlf = 1;
+                }
+            }
+            elsif(($s =~ /^ *<\/data/) && $data_crlf) {
+                $data_crlf = 0;
+            }
             subVariables(\$s, $testnum, "%");
             subBase64(\$s);
+            subNewlines(0, \$s) if($data_crlf);
             push @out, $s;
         }
     }
