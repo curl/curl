@@ -283,6 +283,7 @@ struct ssl_backend_data {
   SSL_CTX* ctx;
   SSL*     handle;
   X509*    server_cert;
+  CURLcode io_result;       /* result of last BIO cfilter operation */
 #ifndef HAVE_KEYLOG_CALLBACK
   /* Set to true once a valid keylog entry has been created to avoid dupes. */
   bool     keylog_done;
@@ -710,6 +711,7 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
   /* DEBUGF(infof(data, CFMSG(cf, "bio_cf_out_write(len=%d) -> %d, err=%d"),
          blen, (int)nwritten, result)); */
   BIO_clear_retry_flags(bio);
+  connssl->backend->io_result = result;
   if(nwritten < 0) {
     if(CURLE_AGAIN == result) {
       BIO_set_retry_write(bio);
@@ -739,6 +741,7 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
   /* DEBUGF(infof(data, CFMSG(cf, "bio_cf_in_read(len=%d) -> %d, err=%d"),
          blen, (int)nread, result)); */
   BIO_clear_retry_flags(bio);
+  connssl->backend->io_result = result;
   if(nread < 0) {
     if(CURLE_AGAIN == result) {
       BIO_set_retry_read(bio);
@@ -3935,6 +3938,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       return CURLE_OK;
     }
 #endif
+    else if(backend->io_result == CURLE_AGAIN) {
+      return CURLE_OK;
+    }
     else {
       /* untreated error */
       unsigned long errdetail;
@@ -4545,6 +4551,12 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
     case SSL_ERROR_SYSCALL:
       {
         int sockerr = SOCKERRNO;
+
+        if(backend->io_result == CURLE_AGAIN) {
+          *curlcode = CURLE_AGAIN;
+          rc = -1;
+          goto out;
+        }
         sslerror = ERR_get_error();
         if(sslerror)
           ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
@@ -4645,6 +4657,11 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
       /* openssl/ssl.h for SSL_ERROR_SYSCALL says "look at error stack/return
          value/errno" */
       /* https://www.openssl.org/docs/crypto/ERR_get_error.html */
+      if(backend->io_result == CURLE_AGAIN) {
+        *curlcode = CURLE_AGAIN;
+        nread = -1;
+        goto out;
+      }
       sslerror = ERR_get_error();
       if((nread < 0) || sslerror) {
         /* If the return code was negative or there actually is an error in the
