@@ -91,7 +91,12 @@ TCHAR *Curl_auth_build_spn_WIN(const char *service, const char *host,
      formulate the SPN instead. */
 
   /* Generate our UTF8 based SPN */
-  utf8_spn = aprintf("%s/%s", service, host);
+  if (host && realm)
+    utf8_spn = aprintf("%s/%s@%s", service, host, realm);
+  else if (host)
+    utf8_spn = aprintf("%s/%s", service, host);
+  else if (realm)
+    utf8_spn = aprintf("%s@%s", service, realm);
   if(!utf8_spn)
     return NULL;
 
