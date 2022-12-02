@@ -27,10 +27,7 @@
 # Usage:   [mingw32-]make -f Makefile.mk CFG=-feat1[-feat2][-feat3][...]
 # Example: [mingw32-]make -f Makefile.mk CFG=-zlib-ssl-libssh2-ipv6
 #
-# Set component roots via envvar <feature>_PATH. Also available for
-# customization: CC, AR, RC, CPPFLAGS, LDFLAGS, LIBS, CFLAGS, RCFLAGS,
-# TRIPLET, CROSSPREFIX, CURL_LDFLAGS_BIN, CURL_LDFLAGS_LIB, CURL_DLL_SUFFIX,
-# and more for individual components (see below).
+# Look for ' ?=' to find all accepted customization variables.
 
 # This script is reused by 'src' and 'docs/examples' Makefile.mk scripts.
 
@@ -41,6 +38,16 @@ endif
 
 ### Common
 
+CFLAGS ?=
+CPPFLAGS ?=
+RCFLAGS ?=
+LDFLAGS ?=
+CURL_LDFLAGS_BIN ?=
+CURL_LDFLAGS_LIB ?=
+LIBS ?=
+
+CROSSPREFIX ?=
+
 ifeq ($(CC),cc)
   CC := gcc
 endif
@@ -49,6 +56,7 @@ AR := $(CROSSPREFIX)$(AR)
 RC ?= $(CROSSPREFIX)windres
 
 # For compatibility
+ARCH ?=
 ifeq ($(ARCH),w64)
   TRIPLET := x86_64-w64-mingw32
   CFLAGS  += -m64
@@ -334,19 +342,19 @@ DEL   = rm -f $1
 COPY  = -cp -afv $1 $2
 MKDIR = mkdir -p $1
 RMDIR = rm -fr $1
-WHICH = command -v
+WHICH = $(SHELL) -c "command -v $1"
 else
 DEL   = -del 2>NUL /q /f $(subst /,\,$1)
 COPY  = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
 MKDIR = -md 2>NUL $(subst /,\,$1)
 RMDIR = -rd 2>NUL /q /s $(subst /,\,$1)
-WHICH = where
+WHICH = where $1
 endif
 
 all: $(TARGETS)
 
 $(OBJ_DIR):
-	-$(MKDIR) $(OBJ_DIR)
+	-$(call MKDIR, $(OBJ_DIR))
 
 $(OBJ_DIR)/%.o: %.c
 	$(CC) -W -Wall $(CFLAGS) $(CPPFLAGS) -c $< -o $@
@@ -376,6 +384,7 @@ vpath %.c vauth vquic vssh vtls
 
 libcurl_a_LIBRARY := libcurl.a
 ifdef WIN32
+CURL_DLL_SUFFIX ?=
 libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
 libcurl_dll_a_LIBRARY := libcurl.dll.a
 ifdef MAP

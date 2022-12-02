@@ -84,7 +84,7 @@ NROFF ?= groff
 
 TOCLEAN += tool_hugehelp.c
 
-ifneq ($(shell $(WHICH) $(NROFF)),)
+ifneq ($(shell $(call WHICH, $(NROFF))),)
 $(PROOT)/docs/curl.1: $(wildcard $(PROOT)/docs/cmdline-opts/*.d)
 	cd $(PROOT)/docs/cmdline-opts && \
 	$(PERL) gen.pl mainpage $(notdir $^) > ../curl.1
