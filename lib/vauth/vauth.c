@@ -54,7 +54,6 @@
  * Returns a pointer to the newly allocated SPN.
  */
 
-#if !defined(USE_SCHANNEL)
 char *Curl_auth_build_spn(const char *service, const char *host,
                           const char *realm)
 {
@@ -71,9 +70,6 @@ char *Curl_auth_build_spn(const char *service, const char *host,
   /* Return our newly allocated SPN */
   return spn;
 }
-#endif/* !USE_SCHANNEL */
-
-#if defined(USE_WINDOWS_SSPI) || defined(USE_SCHANNEL)
 TCHAR *Curl_auth_build_spn_WIN(const char *service, const char *host,
                            const char *realm)
 {
@@ -91,12 +87,7 @@ TCHAR *Curl_auth_build_spn_WIN(const char *service, const char *host,
      formulate the SPN instead. */
 
   /* Generate our UTF8 based SPN */
-  if (host && realm)
-    utf8_spn = aprintf("%s/%s@%s", service, host, realm);
-  else if (host)
-    utf8_spn = aprintf("%s/%s", service, host);
-  else if (realm)
-    utf8_spn = aprintf("%s@%s", service, realm);
+  utf8_spn = Curl_auth_build_spn(service, host, realm);
   if(!utf8_spn)
     return NULL;
 
@@ -111,7 +102,6 @@ TCHAR *Curl_auth_build_spn_WIN(const char *service, const char *host,
   curlx_unicodefree(tchar_spn);
   return dupe_tchar_spn;
 }
-#endif /* USE_WINDOWS_SSPI || USE_SCHANNEL */
 
 /*
  * Curl_auth_user_contains_domain()
