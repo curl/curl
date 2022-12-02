@@ -91,9 +91,7 @@ TCHAR *Curl_auth_build_spn_WIN(const char *service, const char *host,
      formulate the SPN instead. */
 
   /* Generate our UTF8 based SPN */
-  if (host)
-      utf8_spn = aprintf("%s/%s", service, host);
-
+  utf8_spn = aprintf("%s/%s", service, host);
   if(!utf8_spn)
     return NULL;
 
