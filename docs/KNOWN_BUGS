@@ -73,14 +73,9 @@ problems may have been fixed or changed somewhat since this was written.
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
- 7.1 FTP without or slow 220 response
- 7.2 FTP with CONNECT and slow server
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
  7.5 ASCII FTP
- 7.6 FTP with NULs in URL parts
- 7.7 FTP and empty path parts in the URL
- 7.8 Premature transfer end but healthy control channel
  7.9 Passive transfer tries only one IP address
  7.10 FTPS needs session reuse
  7.11 FTPS upload data loss with TLS 1.3
@@ -109,7 +104,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.9 DoH does not inherit all transfer options
  11.10 Blocking socket operations in non-blocking API
  11.11 A shared connection cache is not thread-safe
- 11.14 Multi perform hangs waiting for threaded resolver
  11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
  11.16 libcurl uses renames instead of locking for atomic operations
 
@@ -120,7 +114,6 @@ problems may have been fixed or changed somewhat since this was written.
  12.4 LDAPS with NSS is slow
 
  13. TCP/IP
- 13.1 --interface for ipv6 binds to unusable IP address
  13.2 Trying local ports fails on Windows
 
  14. DICT
@@ -575,23 +568,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 7. FTP
 
-7.1 FTP without or slow 220 response
-
- If a connection is made to an FTP server but the server then just never sends
- the 220 response or otherwise is dead slow, libcurl will not acknowledge the
- connection timeout during that phase but only the "real" timeout - which may
- surprise users as it is probably considered to be the connect phase to most
- people. Brought up (and is being misunderstood) in:
- https://curl.se/bug/view.cgi?id=856
-
-7.2 FTP with CONNECT and slow server
-
- When doing FTP over a socks proxy or CONNECT through HTTP proxy and the multi
- interface is used, libcurl will fail if the (passive) TCP connection for the
- data transfer is not more or less instant as the code does not properly wait
- for the connect to be confirmed. See test case 564 for a first shot at a test
- case.
-
 7.3 FTP with NOBODY and FAILONERROR
 
  It seems sensible to be able to use CURLOPT_NOBODY and CURLOPT_FAILONERROR
@@ -617,39 +593,6 @@ problems may have been fixed or changed somewhat since this was written.
     form to his own internal form.
 
  Since 7.15.4 at least line endings are converted.
-
-7.6 FTP with NULs in URL parts
-
- FTP URLs passed to curl may contain NUL (0x00) in the RFC 1738 <user>,
- <password>, and <fpath> components, encoded as "%00". The problem is that
- curl_unescape does not detect this, but instead returns a shortened C string.
- From a strict FTP protocol standpoint, NUL is a valid character within RFC
- 959 <string>, so the way to handle this correctly in curl would be to use a
- data structure other than a plain C string, one that can handle embedded NUL
- characters. From a practical standpoint, most FTP servers would not
- meaningfully support NUL characters within RFC 959 <string>, anyway (e.g.,
- Unix pathnames may not contain NUL).
-
-7.7 FTP and empty path parts in the URL
-
- libcurl ignores empty path parts in FTP URLs, whereas RFC1738 states that
- such parts should be sent to the server as 'CWD ' (without an argument). The
- only exception to this rule, is that we knowingly break this if the empty
- part is first in the path, as then we use the double slashes to indicate that
- the user wants to reach the root dir (this exception SHALL remain even when
- this bug is fixed).
-
-7.8 Premature transfer end but healthy control channel
-
- When 'multi_done' is called before the transfer has been completed the normal
- way, it is considered a "premature" transfer end. In this situation, libcurl
- closes the connection assuming it does not know the state of the connection so
- it cannot be reused for subsequent requests.
-
- With FTP however, this is not necessarily true but there are a bunch of
- situations (listed in the ftp_done code) where it *could* keep the connection
- alive even in this situation - but the current code does not. Fixing this would
- allow libcurl to reuse FTP connections better.
 
 7.9 Passive transfer tries only one IP address
 
@@ -819,15 +762,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/4915 and lib1541.c
 
-11.14 Multi perform hangs waiting for threaded resolver
-
- If a threaded resolver takes a long time to complete, libcurl can be blocked
- waiting for it for a longer time than expected - and longer than the set
- timeouts.
-
- See https://github.com/curl/curl/issues/2975 and
- https://github.com/curl/curl/issues/4852
-
 11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
 
  When libcurl creates sockets with socketpair(), those are not "exposed" in
@@ -883,14 +817,6 @@ problems may have been fixed or changed somewhat since this was written.
  See https://github.com/curl/curl/issues/5874
 
 13. TCP/IP
-
-13.1 --interface for ipv6 binds to unusable IP address
-
- Since IPv6 provides a lot of addresses with different scope, binding to an
- IPv6 address needs to take the proper care so that it does not bind to a
- locally scoped address as that is bound to fail.
-
- https://github.com/curl/curl/issues/686
 
 13.2 Trying local ports fails on Windows
 

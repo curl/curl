@@ -85,9 +85,16 @@
 #endif
 #endif
 
+#if defined(HAVE_WOLFSSL_FULL_BIO) && HAVE_WOLFSSL_FULL_BIO
+#define USE_BIO_CHAIN
+#else
+#undef USE_BIO_CHAIN
+#endif
+
 struct ssl_backend_data {
   SSL_CTX* ctx;
   SSL*     handle;
+  CURLcode io_result;
 };
 
 #ifdef OPENSSL_EXTRA
@@ -239,6 +246,139 @@ static const struct group_name_map gnm[] = {
 };
 #endif
 
+#ifdef USE_BIO_CHAIN
+
+static int bio_cf_create(WOLFSSL_BIO *bio)
+{
+  wolfSSL_BIO_set_shutdown(bio, 1);
+  wolfSSL_BIO_set_init(bio, 1);
+  wolfSSL_BIO_set_data(bio, NULL);
+  return 1;
+}
+
+static int bio_cf_destroy(WOLFSSL_BIO *bio)
+{
+  if(!bio)
+    return 0;
+  return 1;
+}
+
+static long bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
+{
+  struct Curl_cfilter *cf = BIO_get_data(bio);
+  long ret = 1;
+
+  (void)cf;
+  (void)ptr;
+  switch(cmd) {
+  case BIO_CTRL_GET_CLOSE:
+    ret = (long)wolfSSL_BIO_get_shutdown(bio);
+    break;
+  case BIO_CTRL_SET_CLOSE:
+    wolfSSL_BIO_set_shutdown(bio, (int)num);
+    break;
+  case BIO_CTRL_FLUSH:
+    /* we do no delayed writes, but if we ever would, this
+     * needs to trigger it. */
+    ret = 1;
+    break;
+  case BIO_CTRL_DUP:
+    ret = 1;
+    break;
+#ifdef BIO_CTRL_EOF
+  case BIO_CTRL_EOF:
+    /* EOF has been reached on input? */
+    return (!cf->next || !cf->next->connected);
+#endif
+  default:
+    ret = 0;
+    break;
+  }
+  return ret;
+}
+
+static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
+{
+  struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct Curl_easy *data = connssl->call_data;
+  ssize_t nwritten;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(data);
+  nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
+  wolfSSL_BIO_clear_retry_flags(bio);
+  /* wolfSSL is limited in error handling and SSL_read() will
+   * return WANT_READ, even though retry was not indicated by
+   * the installed BIO. */
+  connssl->backend->io_result = result;
+  if(nwritten < 0) {
+    if(CURLE_AGAIN == result) {
+      BIO_set_retry_read(bio);
+      nwritten = 0;
+    }
+    else {
+      nwritten = -1;
+    }
+  }
+  return (int)nwritten;
+}
+
+static int bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
+{
+  struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct Curl_easy *data = connssl->call_data;
+  ssize_t nread;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(data);
+  /* OpenSSL catches this case, so should we. */
+  if(!buf)
+    return 0;
+
+  nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
+  wolfSSL_BIO_clear_retry_flags(bio);
+  /* wolfSSL is limited in error handling and SSL_read() will
+   * return WANT_READ, even though retry was not indicated by
+   * the installed BIO. */
+  connssl->backend->io_result = result;
+  if(nread < 0) {
+    if(CURLE_AGAIN == result) {
+      BIO_set_retry_read(bio);
+      nread = 0;
+    }
+    else {
+      nread = -1;
+    }
+  }
+  return (int)nread;
+}
+
+static WOLFSSL_BIO_METHOD *bio_cf_method = NULL;
+
+static void bio_cf_init_methods(void)
+{
+    bio_cf_method = wolfSSL_BIO_meth_new(BIO_TYPE_MEM, "wolfSSL CF BIO");
+    wolfSSL_BIO_meth_set_write(bio_cf_method, &bio_cf_out_write);
+    wolfSSL_BIO_meth_set_read(bio_cf_method, &bio_cf_in_read);
+    wolfSSL_BIO_meth_set_ctrl(bio_cf_method, &bio_cf_ctrl);
+    wolfSSL_BIO_meth_set_create(bio_cf_method, &bio_cf_create);
+    wolfSSL_BIO_meth_set_destroy(bio_cf_method, &bio_cf_destroy);
+}
+
+static void bio_cf_free_methods(void)
+{
+    wolfSSL_BIO_meth_free(bio_cf_method);
+}
+
+#else /* USE_BIO_CHAIN */
+
+#define bio_cf_init_methods() Curl_nop_stmt
+#define bio_cf_free_methods() Curl_nop_stmt
+
+#endif /* !USE_BIO_CHAIN */
+
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
  * layer and do all necessary magic.
@@ -252,7 +392,6 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SSL_METHOD* req_method = NULL;
-  curl_socket_t sockfd = cf->conn->sock[cf->sockindex];
 #ifdef HAVE_LIBOQS
   word16 oqsAlg = 0;
   size_t idx = 0;
@@ -578,11 +717,24 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_ssl_sessionid_unlock(data);
   }
 
+#ifdef USE_BIO_CHAIN
+  {
+    WOLFSSL_BIO *bio;
+
+    bio = BIO_new(bio_cf_method);
+    if(!bio)
+      return CURLE_OUT_OF_MEMORY;
+
+    wolfSSL_BIO_set_data(bio, cf);
+    wolfSSL_set_bio(backend->handle, bio, bio);
+  }
+#else /* USE_BIO_CHAIN */
   /* pass the raw socket into the SSL layer */
-  if(!SSL_set_fd(backend->handle, (int)sockfd)) {
+  if(!SSL_set_fd(backend->handle, (int)cf->conn->sock[cf->sockindex])) {
     failf(data, "SSL: SSL_set_fd failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
+#endif /* !USE_BIO_CHAIN */
 
   connssl->connecting_state = ssl_connect_2;
   return CURLE_OK;
@@ -642,7 +794,10 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     char error_buffer[WOLFSSL_MAX_ERROR_SZ];
     int  detail = SSL_get_error(backend->handle, ret);
 
-    if(SSL_ERROR_WANT_READ == detail) {
+    if(backend->io_result != CURLE_OK && backend->io_result != CURLE_AGAIN) {
+      return backend->io_result;
+    }
+    else if(SSL_ERROR_WANT_READ == detail) {
       connssl->connecting_state = ssl_connect_2_reading;
       return CURLE_OK;
     }
@@ -870,6 +1025,10 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
   if(rc <= 0) {
     int err = SSL_get_error(backend->handle, rc);
 
+    if(backend->io_result != CURLE_OK && backend->io_result != CURLE_AGAIN) {
+      *curlcode = backend->io_result;
+      return -1;
+    }
     switch(err) {
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
@@ -932,6 +1091,10 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
   if(nread <= 0) {
     int err = SSL_get_error(backend->handle, nread);
 
+    if(backend->io_result != CURLE_OK && backend->io_result != CURLE_AGAIN) {
+      *curlcode = backend->io_result;
+      return -1;
+    }
     switch(err) {
     case SSL_ERROR_ZERO_RETURN: /* no more data */
       break;
@@ -972,15 +1135,20 @@ static size_t wolfssl_version(char *buffer, size_t size)
 
 static int wolfssl_init(void)
 {
+  int ret;
+
 #ifdef OPENSSL_EXTRA
   Curl_tls_keylog_open();
 #endif
-  return (wolfSSL_Init() == SSL_SUCCESS);
+  ret = (wolfSSL_Init() == SSL_SUCCESS);
+  bio_cf_init_methods();
+  return ret;
 }
 
 
 static void wolfssl_cleanup(void)
 {
+  bio_cf_free_methods();
   wolfSSL_Cleanup();
 #ifdef OPENSSL_EXTRA
   Curl_tls_keylog_close();
@@ -1200,6 +1368,9 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 
 #ifdef KEEP_PEER_CERT
   SSLSUPP_PINNEDPUBKEY |
+#endif
+#ifdef USE_BIO_CHAIN
+  SSLSUPP_HTTPS_PROXY |
 #endif
   SSLSUPP_SSL_CTX,
 

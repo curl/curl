@@ -33,9 +33,11 @@
 #define PROXY_TIMEOUT (3600*1000)
 
 CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
+                                  struct connectdata *conn,
                                   int sockindex);
 
 CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
+                               struct connectdata *conn,
                                int sockindex);
 
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */

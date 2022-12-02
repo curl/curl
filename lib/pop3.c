@@ -371,8 +371,8 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result;
 
-  if(!Curl_ssl_conn_is_ssl(data, FIRSTSOCKET)) {
-    result = Curl_ssl_cfilter_add(data, FIRSTSOCKET);
+  if(!Curl_conn_is_ssl(data, FIRSTSOCKET)) {
+    result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
     if(result)
       goto out;
   }

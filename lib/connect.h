@@ -149,9 +149,12 @@ void Curl_conncontrol(struct connectdata *conn,
 #endif
 
 CURLcode Curl_conn_socket_set(struct Curl_easy *data,
+                              struct connectdata *conn,
                               int sockindex);
 
 CURLcode Curl_conn_socket_accepted_set(struct Curl_easy *data,
-                                       int sockindex, curl_socket_t *s);
+                                       struct connectdata *conn,
+                                       int sockindex,
+                                       curl_socket_t *s);
 
 #endif /* HEADER_CURL_CONNECT_H */

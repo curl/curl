@@ -516,10 +516,6 @@ struct ConnectBits {
                          that we are creating a request with an auth header,
                          but it is not the final request in the auth
                          negotiation. */
-  BIT(rewindaftersend);/* TRUE when the sending couldn't be stopped even
-                          though it will be discarded. When the whole send
-                          operation is done, we must call the data rewind
-                          callback. */
 #ifndef CURL_DISABLE_FTP
   BIT(ftp_use_epsv);  /* As set with CURLOPT_FTP_USE_EPSV, but if we find out
                          EPSV doesn't work we disable it for the forthcoming
@@ -1483,6 +1479,9 @@ struct UrlState {
   BIT(url_alloc);   /* URL string is malloc()'ed */
   BIT(referer_alloc); /* referer string is malloc()ed */
   BIT(wildcard_resolve); /* Set to true if any resolve change is a wildcard */
+  BIT(rewindbeforesend);/* TRUE when the sending couldn't be stopped even
+                           though it will be discarded. We must call the data
+                           rewind callback before trying to send again. */
 };
 
 /*
