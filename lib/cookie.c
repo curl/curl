@@ -1264,7 +1264,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     fp = NULL;
   }
   else {
-    fp = fopen(file, FOPEN_READTEXT);
+    fp = fopen(file, "rb");
     if(!fp)
       infof(data, "WARNING: failed to open cookie file \"%s\"", file);
   }
