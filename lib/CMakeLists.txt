@@ -98,9 +98,14 @@ endif()
 
 target_link_libraries(${LIB_NAME} PRIVATE ${CURL_LIBS})
 
+transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
+include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
+
 set_target_properties(${LIB_NAME} PROPERTIES
   COMPILE_DEFINITIONS BUILDING_LIBCURL
   OUTPUT_NAME ${LIBCURL_OUTPUT_NAME}
+  VERSION ${CMAKEVERSION}
+  SOVERSION ${CMAKESONAME}
   )
 
 if(HIDES_CURL_PRIVATE_SYMBOLS)
