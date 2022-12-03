@@ -37,8 +37,7 @@
 #include "warnless.h"
 #include "curl_base64.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -172,20 +171,16 @@ static CURLcode base64_encode(const char *table64,
                               const char *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
-  unsigned char ibuf[3];
-  unsigned char obuf[4];
-  int i;
-  int inputparts;
   char *output;
   char *base64data;
-  const char *indata = inputbuff;
+  const unsigned char *in = (unsigned char *)inputbuff;
   const char *padstr = &table64[64];    /* Point to padding string. */
 
   *outptr = NULL;
   *outlen = 0;
 
   if(!insize)
-    insize = strlen(indata);
+    insize = strlen(inputbuff);
 
 #if SIZEOF_SIZE_T == 4
   if(insize > UINT_MAX/4)
@@ -196,51 +191,31 @@ static CURLcode base64_encode(const char *table64,
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 
-  while(insize > 0) {
-    for(i = inputparts = 0; i < 3; i++) {
-      if(insize > 0) {
-        inputparts++;
-        ibuf[i] = (unsigned char) *indata;
-        indata++;
-        insize--;
+  while(insize >= 3) {
+    *output++ = table64[ in[0] >> 2 ];
+    *output++ = table64[ ((in[0] & 0x03) << 4) | (in[1] >> 4) ];
+    *output++ = table64[ ((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6) ];
+    *output++ = table64[ in[2] & 0x3F ];
+    insize -= 3;
+    in += 3;
+  }
+  if(insize) {
+    /* this is only one or two bytes now */
+    *output++ = table64[ in[0] >> 2 ];
+    if(insize == 1) {
+      *output++ = table64[ ((in[0] & 0x03) << 4) ];
+      if(*padstr) {
+        *output++ = *padstr;
+        *output++ = *padstr;
       }
-      else
-        ibuf[i] = 0;
     }
-
-    obuf[0] = (unsigned char)  ((ibuf[0] & 0xFC) >> 2);
-    obuf[1] = (unsigned char) (((ibuf[0] & 0x03) << 4) | \
-                               ((ibuf[1] & 0xF0) >> 4));
-    obuf[2] = (unsigned char) (((ibuf[1] & 0x0F) << 2) | \
-                               ((ibuf[2] & 0xC0) >> 6));
-    obuf[3] = (unsigned char)   (ibuf[2] & 0x3F);
-
-    switch(inputparts) {
-    case 1: /* only one byte read */
-      i = msnprintf(output, 5, "%c%c%s%s",
-                    table64[obuf[0]],
-                    table64[obuf[1]],
-                    padstr,
-                    padstr);
-      break;
-
-    case 2: /* two bytes read */
-      i = msnprintf(output, 5, "%c%c%c%s",
-                    table64[obuf[0]],
-                    table64[obuf[1]],
-                    table64[obuf[2]],
-                    padstr);
-      break;
-
-    default:
-      i = msnprintf(output, 5, "%c%c%c%c",
-                    table64[obuf[0]],
-                    table64[obuf[1]],
-                    table64[obuf[2]],
-                    table64[obuf[3]]);
-      break;
+    else {
+      /* insize == 2 */
+      *output++ = table64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4) ];
+      *output++ = table64[ ((in[1] & 0x0F) << 2) ];
+      if(*padstr)
+        *output++ = *padstr;
     }
-    output += i;
   }
 
   /* Zero terminate */
