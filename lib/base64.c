@@ -192,7 +192,7 @@ static CURLcode base64_encode(const char *table64,
     return CURLE_OUT_OF_MEMORY;
 #endif
 
-  base64data = output = malloc(insize * 4 / 3 + 4);
+  base64data = output = malloc((insize + 2) / 3 * 4 + 1);
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 
