@@ -58,7 +58,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-include "Makefile.soname"
+include Makefile.soname
 
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
