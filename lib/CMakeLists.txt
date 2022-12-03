@@ -98,10 +98,36 @@ endif()
 
 target_link_libraries(${LIB_NAME} PRIVATE ${CURL_LIBS})
 
+transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
+include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
+
 set_target_properties(${LIB_NAME} PROPERTIES
   COMPILE_DEFINITIONS BUILDING_LIBCURL
   OUTPUT_NAME ${LIBCURL_OUTPUT_NAME}
   )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
+  CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+  CMAKE_SYSTEM_NAME STREQUAL "GNU/kFreeBSD" OR
+
+  # FreeBSD comes with the a.out and elf flavours
+  # but a.out was supported up to version 3.x and
+  # elf from 3.x. I cannot imagine someone runnig
+  # CMake on those ancient systems
+  CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
+
+  CMAKE_SYSTEM_NAME STREQUAL "Haiku")
+
+  math(EXPR CMAKESONAME "${VERSIONCHANGE} - ${VERSIONDEL}")
+  set(CMAKEVERSION "${CMAKESONAME}.${VERSIONDEL}.${VERSIONADD}")
+
+  set_target_properties(${LIB_NAME} PROPERTIES
+    VERSION ${CMAKEVERSION}
+    SOVERSION ${CMAKESONAME}
+  )
+
+endif()
+
 
 if(HIDES_CURL_PRIVATE_SYMBOLS)
   set_property(TARGET ${LIB_NAME} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")

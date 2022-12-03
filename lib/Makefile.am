@@ -28,7 +28,8 @@ CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 EXTRA_DIST = Makefile.mk config-win32.h config-win32ce.h config-plan9.h    \
  config-riscos.h config-mac.h curl_config.h.in config-dos.h                \
  libcurl.plist libcurl.rc config-amigaos.h config-win32ce.h                \
- config-os400.h setup-os400.h $(CMAKE_DIST) setup-win32.h .checksrc
+ config-os400.h setup-os400.h $(CMAKE_DIST) setup-win32.h .checksrc \
+ Makefile.soname
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -57,19 +58,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-VERSIONINFO=-version-info 12:0:8
-# This flag accepts an argument of the form current[:revision[:age]]. So,
-# passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
-# 1.
-#
-# Here's the simplified rule guide on how to change -version-info:
-# (current version is C:R:A)
-#
-# 1. if there are only source changes, use C:R+1:A
-# 2. if interfaces were added use C+1:0:A+1
-# 3. if interfaces were removed, then use C+1:0:0
-#
-# For the full guide on libcurl ABI rules, see docs/libcurl/ABI
+include Makefile.soname
 
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
