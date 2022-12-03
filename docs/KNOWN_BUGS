@@ -106,7 +106,6 @@ problems may have been fixed or changed somewhat since this was written.
  13.2 Trying local ports fails on Windows
 
  15. CMake
- 15.1 use correct SONAME
  15.2 support build with GnuTLS
  15.3 unusable tool_hugehelp.c with MinGW
  15.4 build docs/curl.1
@@ -710,13 +709,6 @@ problems may have been fixed or changed somewhat since this was written.
  https://github.com/curl/curl/issues/8112
 
 15. CMake
-
-15.1 use correct SONAME
-
- The autotools build sets the SONAME properly according to VERSIONINFO in
- lib/Makefile.am and so should cmake to make comparable build.
-
- See https://github.com/curl/curl/pull/5935
 
 15.2 support build with GnuTLS
 
