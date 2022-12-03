@@ -196,9 +196,9 @@ static CURLcode base64_encode(const char *table64,
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 
-  while(insize > 0) {
+  while(insize) {
     for(i = inputparts = 0; i < 3; i++) {
-      if(insize > 0) {
+      if(insize) {
         inputparts++;
         ibuf[i] = (unsigned char) *indata;
         indata++;
@@ -208,39 +208,34 @@ static CURLcode base64_encode(const char *table64,
         ibuf[i] = 0;
     }
 
-    obuf[0] = (unsigned char)  ((ibuf[0] & 0xFC) >> 2);
-    obuf[1] = (unsigned char) (((ibuf[0] & 0x03) << 4) | \
-                               ((ibuf[1] & 0xF0) >> 4));
-    obuf[2] = (unsigned char) (((ibuf[1] & 0x0F) << 2) | \
-                               ((ibuf[2] & 0xC0) >> 6));
-    obuf[3] = (unsigned char)   (ibuf[2] & 0x3F);
+    obuf[0] = ibuf[0] >> 2;
+    obuf[1] = (((ibuf[0] & 0x03) << 4) | ((ibuf[1] & 0xF0) >> 4));
+
+    *output++ = table64[obuf[0]];
+    *output++ = table64[obuf[1]];
 
     switch(inputparts) {
     case 1: /* only one byte read */
-      i = msnprintf(output, 5, "%c%c%s%s",
-                    table64[obuf[0]],
-                    table64[obuf[1]],
-                    padstr,
-                    padstr);
+      if(*padstr) {
+        *output++ = *padstr;
+        *output++ = *padstr;
+      }
       break;
 
     case 2: /* two bytes read */
-      i = msnprintf(output, 5, "%c%c%c%s",
-                    table64[obuf[0]],
-                    table64[obuf[1]],
-                    table64[obuf[2]],
-                    padstr);
+      obuf[2] = (((ibuf[1] & 0x0F) << 2) | ((ibuf[2] & 0xC0) >> 6));
+      *output++ = table64[obuf[2]];
+      if(*padstr)
+        *output++ = *padstr;
       break;
 
     default:
-      i = msnprintf(output, 5, "%c%c%c%c",
-                    table64[obuf[0]],
-                    table64[obuf[1]],
-                    table64[obuf[2]],
-                    table64[obuf[3]]);
+      obuf[2] = (((ibuf[1] & 0x0F) << 2) | ((ibuf[2] & 0xC0) >> 6));
+      obuf[3] = ibuf[2] & 0x3F;
+      *output++ = table64[obuf[2]];
+      *output++ = table64[obuf[3]];
       break;
     }
-    output += i;
   }
 
   /* Zero terminate */
