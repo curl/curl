@@ -21,31 +21,42 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-SUBDIRS = vms
 
-EXTRA_DIST = README \
-  DOS/README.md \
-  DOS/common-openssl.dj \
-  DOS/common-mbedtls.dj \
-  OS400/README.OS400 \
-  OS400/ccsidcurl.c \
-  OS400/ccsidcurl.h \
-  OS400/chkstrings.c \
-  OS400/curl.inc.in \
-  OS400/initscript.sh \
-  OS400/make-include.sh \
-  OS400/make-lib.sh \
-  OS400/make-src.sh \
-  OS400/make-tests.sh \
-  OS400/makefile.sh \
-  OS400/os400sys.c \
-  OS400/os400sys.h \
-  Android/Android.mk
+TOPDIR = ../..
 
-CHECKSRC = $(CS_$(V))
-CS_0 = @echo "  RUN     " $@;
-CS_1 =
-CS_ = $(CS_0)
 
-checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(srcdir)/OS400/*.[ch])
+ifeq ($(USE_MBEDTLS),1)
+	include $(TOPDIR)/packages/DOS/common-mbedtls.dj
+else
+	include $(TOPDIR)/packages/DOS/common-openssl.dj
+endif
+
+CFLAGS += -DFALSE=0 -DTRUE=1
+
+LIBS = $(TOPDIR)/lib/libcurl.a
+
+ifeq ($(USE_SSL),1)
+  LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
+endif
+
+ifeq ($(USE_IDNA),1)
+  LIBS += $(LIBIDN_ROOT)/lib/dj_obj/libidn.a -liconv
+endif
+
+LIBS += $(WATT32_ROOT)/lib/libwatt.a $(ZLIB_ROOT)/libz.a
+
+include Makefile.inc
+
+PROGRAMS = $(patsubst %,%.exe,$(check_PROGRAMS))
+
+all: $(PROGRAMS)
+	@echo Welcome to libcurl example program
+
+%.exe: %.c
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+	@echo
+
+clean vclean realclean:
+	- rm -f $(PROGRAMS) depend.dj
+
+-include depend.dj
