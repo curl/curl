@@ -177,14 +177,14 @@ static CURLcode base64_encode(const char *table64,
   int inputparts;
   char *output;
   char *base64data;
-  const char *indata = inputbuff;
+  const unsigned char *in = (unsigned char *)inputbuff;
   const char *padstr = &table64[64];    /* Point to padding string. */
 
   *outptr = NULL;
   *outlen = 0;
 
   if(!insize)
-    insize = strlen(indata);
+    insize = strlen(inputbuff);
 
 #if SIZEOF_SIZE_T == 4
   if(insize > UINT_MAX/4)
@@ -195,12 +195,21 @@ static CURLcode base64_encode(const char *table64,
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 
-  while(insize) {
-    for(i = inputparts = 0; i < 3; i++) {
+  while(insize >= 3) {
+    *output++ = table64[ in[0] >> 2 ];
+    *output++ = table64[ ((in[0] & 0x03) << 4) | (in[1] >> 4) ];
+    *output++ = table64[ ((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6) ];
+    *output++ = table64[ in[2] & 0x3F ];
+    insize -= 3;
+    in += 3;
+  }
+  if(insize) {
+    /* this is only one or two bytes now */
+    for(i = inputparts = 0; i < 2; i++) {
       if(insize) {
         inputparts++;
-        ibuf[i] = (unsigned char) *indata;
-        indata++;
+        ibuf[i] = *in;
+        in++;
         insize--;
       }
       else
@@ -210,24 +219,16 @@ static CURLcode base64_encode(const char *table64,
     *output++ = table64[ ibuf[0] >> 2 ];
     *output++ = table64[ ((ibuf[0] & 0x03) << 4) | ((ibuf[1] & 0xF0) >> 4) ];
 
-    switch(inputparts) {
-    case 1: /* only one byte read */
+    if(inputparts == 1) {
       if(*padstr) {
         *output++ = *padstr;
         *output++ = *padstr;
       }
-      break;
-
-    case 2: /* two bytes read */
+    }
+    else {
       *output++ = table64[ ((ibuf[1] & 0x0F) << 2) | ((ibuf[2] & 0xC0) >> 6) ];
       if(*padstr)
         *output++ = *padstr;
-      break;
-
-    default:
-      *output++ = table64[ ((ibuf[1] & 0x0F) << 2) | ((ibuf[2] & 0xC0) >> 6) ];
-      *output++ = table64[ ibuf[2] & 0x3F ];
-      break;
     }
   }
 
