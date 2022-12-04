@@ -205,7 +205,7 @@ static CURLcode base64_encode(const char *table64,
   }
   if(insize) {
     /* this is only one or two bytes now */
-    for(i = inputparts = 0; i < 2; i++) {
+    for(i = inputparts = 0; i < 3; i++) {
       if(insize) {
         inputparts++;
         ibuf[i] = *in;
