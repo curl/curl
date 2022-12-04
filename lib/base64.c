@@ -172,9 +172,6 @@ static CURLcode base64_encode(const char *table64,
                               const char *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
-  unsigned char ibuf[3];
-  int i;
-  int inputparts;
   char *output;
   char *base64data;
   const unsigned char *in = (unsigned char *)inputbuff;
@@ -205,28 +202,18 @@ static CURLcode base64_encode(const char *table64,
   }
   if(insize) {
     /* this is only one or two bytes now */
-    for(i = inputparts = 0; i < 3; i++) {
-      if(insize) {
-        inputparts++;
-        ibuf[i] = *in;
-        in++;
-        insize--;
-      }
-      else
-        ibuf[i] = 0;
-    }
-
-    *output++ = table64[ ibuf[0] >> 2 ];
-    *output++ = table64[ ((ibuf[0] & 0x03) << 4) | ((ibuf[1] & 0xF0) >> 4) ];
-
-    if(inputparts == 1) {
+    *output++ = table64[ in[0] >> 2 ];
+    if(insize == 1) {
+      *output++ = table64[ ((in[0] & 0x03) << 4) ];
       if(*padstr) {
         *output++ = *padstr;
         *output++ = *padstr;
       }
     }
     else {
-      *output++ = table64[ ((ibuf[1] & 0x0F) << 2) | ((ibuf[2] & 0xC0) >> 6) ];
+      /* insize == 2 */
+      *output++ = table64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4) ];
+      *output++ = table64[ ((in[1] & 0x0F) << 2) ];
       if(*padstr)
         *output++ = *padstr;
     }
