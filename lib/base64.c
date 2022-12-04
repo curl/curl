@@ -173,7 +173,6 @@ static CURLcode base64_encode(const char *table64,
                               char **outptr, size_t *outlen)
 {
   unsigned char ibuf[3];
-  unsigned char o;
   int i;
   int inputparts;
   char *output;
@@ -208,10 +207,8 @@ static CURLcode base64_encode(const char *table64,
         ibuf[i] = 0;
     }
 
-    o = ibuf[0] >> 2;
-    *output++ = table64[o];
-    o = (((ibuf[0] & 0x03) << 4) | ((ibuf[1] & 0xF0) >> 4));
-    *output++ = table64[o];
+    *output++ = table64[ ibuf[0] >> 2 ];
+    *output++ = table64[ ((ibuf[0] & 0x03) << 4) | ((ibuf[1] & 0xF0) >> 4) ];
 
     switch(inputparts) {
     case 1: /* only one byte read */
@@ -222,17 +219,14 @@ static CURLcode base64_encode(const char *table64,
       break;
 
     case 2: /* two bytes read */
-      o = (((ibuf[1] & 0x0F) << 2) | ((ibuf[2] & 0xC0) >> 6));
-      *output++ = table64[o];
+      *output++ = table64[ ((ibuf[1] & 0x0F) << 2) | ((ibuf[2] & 0xC0) >> 6) ];
       if(*padstr)
         *output++ = *padstr;
       break;
 
     default:
-      o = (((ibuf[1] & 0x0F) << 2) | ((ibuf[2] & 0xC0) >> 6));
-      *output++ = table64[o];
-      o = ibuf[2] & 0x3F;
-      *output++ = table64[o];
+      *output++ = table64[ ((ibuf[1] & 0x0F) << 2) | ((ibuf[2] & 0xC0) >> 6) ];
+      *output++ = table64[ ibuf[2] & 0x3F ];
       break;
     }
   }
