@@ -791,10 +791,14 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
         Curl_set_in_callback(data, false);
         if(rc!= CURLKHMATCH_OK) {
           state(data, SSH_SESSION_FREE);
+          sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
+          return sshc->actualcode;
         }
       }
       else {
         state(data, SSH_SESSION_FREE);
+        sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
+        return sshc->actualcode;
       }
       return CURLE_OK;
     }
