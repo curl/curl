@@ -52,6 +52,7 @@
 #define HAVE_UTIME_H            1
 #define HAVE_SYS_TIME_H         1
 #define HAVE_SYS_UTIME_H        1
+#define HAVE_SYS_IOCTL_H        1
 
 #define TIME_WITH_SYS_TIME      1
 
