@@ -713,13 +713,8 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
   BIO_clear_retry_flags(bio);
   connssl->backend->io_result = result;
   if(nwritten < 0) {
-    if(CURLE_AGAIN == result) {
+    if(CURLE_AGAIN == result)
       BIO_set_retry_write(bio);
-      nwritten = 0;
-    }
-    else {
-      nwritten = -1;
-    }
   }
   return (int)nwritten;
 }
@@ -743,13 +738,8 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
   BIO_clear_retry_flags(bio);
   connssl->backend->io_result = result;
   if(nread < 0) {
-    if(CURLE_AGAIN == result) {
+    if(CURLE_AGAIN == result)
       BIO_set_retry_read(bio);
-      nread = 0;
-    }
-    else {
-      nread = -1;
-    }
   }
   return (int)nread;
 }
