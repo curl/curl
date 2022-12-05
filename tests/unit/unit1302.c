@@ -169,6 +169,15 @@ fail_unless(rc == CURLE_BAD_CONTENT_ENCODING,
 fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 
+/* This is also illegal input as it contains a padding character mid input */
+size = 1; /* not zero */
+decoded = &anychar; /* not NULL */
+rc = Curl_base64_decode("aWlpa=Q=", &decoded, &size);
+fail_unless(rc == CURLE_BAD_CONTENT_ENCODING,
+            "return code should be CURLE_BAD_CONTENT_ENCODING");
+fail_unless(size == 0, "size should be 0");
+fail_if(decoded, "returned pointer should be NULL");
+
 /* This is garbage input as it contains an illegal base64 character */
 size = 1; /* not zero */
 decoded = &anychar; /* not NULL */
@@ -177,5 +186,6 @@ fail_unless(rc == CURLE_BAD_CONTENT_ENCODING,
             "return code should be CURLE_BAD_CONTENT_ENCODING");
 fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
+
 
 UNITTEST_STOP
