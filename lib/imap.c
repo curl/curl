@@ -1925,6 +1925,7 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *ptr = conn->options;
+  bool prefer_login = false;
 
   while(!result && ptr && *ptr) {
     const char *key = ptr;
@@ -1938,26 +1939,39 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
     while(*ptr && *ptr != ';')
       ptr++;
 
-    if(strncasecompare(key, "AUTH=", 5))
+    if(strncasecompare(key, "AUTH=+LOGIN", 11)) {
+      /* User prefers plaintext LOGIN over any SASL, including SASL LOGIN */
+      prefer_login = true;
+      imapc->sasl.prefmech = SASL_AUTH_NONE;
+    }
+    else if(strncasecompare(key, "AUTH=", 5)) {
+      prefer_login = false;
       result = Curl_sasl_parse_url_auth_option(&imapc->sasl,
                                                value, ptr - value);
-    else
+    }
+    else {
+      prefer_login = false;
       result = CURLE_URL_MALFORMAT;
+    }
 
     if(*ptr == ';')
       ptr++;
   }
 
-  switch(imapc->sasl.prefmech) {
-  case SASL_AUTH_NONE:
-    imapc->preftype = IMAP_TYPE_NONE;
-    break;
-  case SASL_AUTH_DEFAULT:
-    imapc->preftype = IMAP_TYPE_ANY;
-    break;
-  default:
-    imapc->preftype = IMAP_TYPE_SASL;
-    break;
+  if(prefer_login)
+    imapc->preftype = IMAP_TYPE_CLEARTEXT;
+  else {
+    switch(imapc->sasl.prefmech) {
+    case SASL_AUTH_NONE:
+      imapc->preftype = IMAP_TYPE_NONE;
+      break;
+    case SASL_AUTH_DEFAULT:
+      imapc->preftype = IMAP_TYPE_ANY;
+      break;
+    default:
+      imapc->preftype = IMAP_TYPE_SASL;
+      break;
+    }
   }
 
   return result;
