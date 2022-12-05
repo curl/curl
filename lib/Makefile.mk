@@ -324,7 +324,7 @@ ifdef WIN32
   _LIBS += -lws2_32 -lcrypt32 -lbcrypt
 endif
 
-ifneq ($(findstring 11,$(subst $() ,,$(SSLLIBS))),)
+ifneq ($(findstring 11,$(subst $(subst ,, ),,$(SSLLIBS))),)
   CPPFLAGS += -DCURL_WITH_MULTI_SSL
 endif
 
