@@ -70,7 +70,7 @@
  4.7 STAT for LIST without data connection
 
  5. HTTP
- 5.1 Provide the error body from a CONNNECT response
+ 5.1 Provide the error body from a CONNECT response
  5.2 Set custom client ip when using haproxy protocol
  5.3 Rearrange request header order
  5.4 Allow SAN names in HTTP/2 server push
@@ -566,7 +566,7 @@
 
 5. HTTP
 
-5.1 Provide the error body from a CONNNECT response
+5.1 Provide the error body from a CONNECT response
 
  When curl receives a body response from a CONNECT request to a proxy, it will
  always just read and ignore it. It would make some users happy if curl

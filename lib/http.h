@@ -317,7 +317,7 @@ struct http_conn {
   uint8_t binsettings[H2_BINSETTINGS_LEN];
   size_t  binlen; /* length of the binsettings data */
 
-  /* We associate the connnectdata struct with the connection, but we need to
+  /* We associate the connectdata struct with the connection, but we need to
      make sure we can identify the current "driving" transfer. This is a
      work-around for the lack of nghttp2_session_set_user_data() in older
      nghttp2 versions that we want to support. (Added in 1.31.0) */
