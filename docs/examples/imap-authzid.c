@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * Retreieve emails from a shared IMAP mailbox
+ * Retrieve emails from a shared IMAP mailbox
  * </DESC>
  */
 
