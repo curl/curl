@@ -31,7 +31,7 @@ char ldap_url_parse(void) {return 0;}
 /* These are to pass the test that does not use headers */
 /* Because configure does an #undef which keeps us from using #define */
 /* char CRYPTO_add_lock(void) {return 0;} */
-char SSL_connnect(void) {return 0;}
+char SSL_connect(void) {return 0;}
 char ENGINE_init(void) {return 0;}
 char RAND_status(void) {return 0;}
 /* char RAND_screen(void) {return 0;} In headers, but not present */
