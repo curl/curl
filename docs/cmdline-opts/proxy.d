@@ -45,3 +45,6 @@ or pass in a colon with %3a.
 The proxy host can be specified the same way as the proxy environment
 variables, including the protocol prefix (http://) and the embedded user +
 password.
+
+When a proxy is used, the active FTP mode as set with --ftp-port, cannot be
+used.

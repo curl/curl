@@ -80,6 +80,9 @@ localhost for the host part. e.g. socks5h://localhost/path/to/socket.sock
 
 The application does not have to keep the string around after setting this
 option.
+
+When a proxy is used, the active FTP mode as set with \fICUROPT_FTPPORT(3)\fP,
+cannot be used.
 .SH "Environment variables"
 libcurl respects the proxy environment variables named \fBhttp_proxy\fP,
 \fBftp_proxy\fP, \fBsftp_proxy\fP etc. If set, libcurl will use the specified
