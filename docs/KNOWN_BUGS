@@ -12,25 +12,18 @@ check the changelog of the current development status, as one or more of these
 problems may have been fixed or changed somewhat since this was written.
 
  1. HTTP
- 1.3 STARTTRANSFER time is wrong for HTTP POSTs
- 1.4 multipart formposts file name encoding
  1.5 Expect-100 meets 417
- 1.8 DoH is not used for all name resolves when enabled
- 1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
  2. TLS
  2.3 Unable to use PKCS12 certificate with Secure Transport
  2.4 Secure Transport will not import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
- 2.6 CURL_GLOBAL_SSL
  2.7 Client cert (MTLS) issues with Schannel
  2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
  2.9 TLS session cache does not work with TFO
- 2.10 Store TLS context per transfer instead of per connection
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
- 2.14 Secure Transport disabling hostname validation also disables SNI
  2.15 Renegotiate from server may cause hang for OpenSSL backend
 
  3. Email protocols
@@ -81,9 +74,6 @@ problems may have been fixed or changed somewhat since this was written.
  7.11 FTPS upload data loss with TLS 1.3
  7.12 FTPS directory listing hangs on Windows with Schannel
 
- 8. TELNET
- 8.2 Microsoft telnet server
-
  9. SFTP and SCP
  9.1 SFTP does not do CURLOPT_POSTQUOTE correct
  9.2 wolfssh: publickey auth does not work
@@ -92,7 +82,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  10. SOCKS
  10.3 FTPS over SOCKS
- 10.4 active FTP over a SOCKS
 
  11. Internals
  11.1 Curl leaks .onion hostnames in DNS
@@ -115,9 +104,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  13. TCP/IP
  13.2 Trying local ports fails on Windows
-
- 14. DICT
- 14.1 DICT responses show the underlying protocol
 
  15. CMake
  15.1 use correct SONAME
@@ -153,51 +139,12 @@ problems may have been fixed or changed somewhat since this was written.
 
 1. HTTP
 
-1.3 STARTTRANSFER time is wrong for HTTP POSTs
-
- Wrong STARTTRANSFER timer accounting for POST requests Timer works fine with
- GET requests, but while using POST the time for CURLINFO_STARTTRANSFER_TIME
- is wrong. While using POST CURLINFO_STARTTRANSFER_TIME minus
- CURLINFO_PRETRANSFER_TIME is near to zero every time.
-
- https://github.com/curl/curl/issues/218
- https://curl.se/bug/view.cgi?id=1213
-
-1.4 multipart formposts file name encoding
-
- When creating multipart formposts. The file name part can be encoded with
- something beyond ascii but currently libcurl will only pass in the verbatim
- string the app provides. There are several browsers that already do this
- encoding. The key seems to be the updated draft to RFC2231:
- https://datatracker.ietf.org/doc/html/draft-reschke-rfc2231-in-http-02
-
 1.5 Expect-100 meets 417
 
  If an upload using Expect: 100-continue receives an HTTP 417 response, it
  ought to be automatically resent without the Expect:. A workaround is for
  the client application to redo the transfer after disabling Expect:.
  https://curl.se/mail/archive-2008-02/0043.html
-
-1.8 DoH is not used for all name resolves when enabled
-
- Even if DoH is specified to be used, there are some name resolves that are
- done without it. This should be fixed. When the internal function
- `Curl_resolver_wait_resolv()` is called, it does not use DoH to complete the
- resolve as it otherwise should.
-
- See https://github.com/curl/curl/pull/3857 and
- https://github.com/curl/curl/pull/3850
-
-1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
-
- When using libcurl to POST form data using a FILE* with the CURLFORM_STREAM
- option of curl_formadd(). I notice that if the connection drops at just the
- right time, the POST is reattempted without the data from the file. It seems
- like the file stream position is not getting reset to the beginning of the
- file. I found the CURLOPT_SEEKFUNCTION option and set that with a function
- that performs an fseek() on the FILE*. However, setting that did not seem to
- fix the issue or even get called. See https://github.com/curl/curl/issues/768
-
 
 2. TLS
 
@@ -219,34 +166,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/1411
 
-2.6 CURL_GLOBAL_SSL
-
- Since libcurl 7.57.0, the flag CURL_GLOBAL_SSL is a no-op. The change was
- merged in https://github.com/curl/curl/commit/d661b0afb571a
-
- It was removed since it was
-
- A) never clear for applications on how to deal with init in the light of
-    different SSL backends (the option was added back in the days when life
-    was simpler)
-
- B) multissl introduced dynamic switching between SSL backends which
-    emphasized (A) even more
-
- C) libcurl uses some TLS backend functionality even for non-TLS functions (to
-    get "good" random) so applications trying to avoid the init for
-    performance reasons would do wrong anyway
-
- D) not documented carefully so all this mostly just happened to work
-    for some users
-
- However, in spite of the problems with the feature, there were some users who
- apparently depended on this feature and who now claim libcurl is broken for
- them. The fix for this situation is not obvious as a downright revert of the
- patch is totally ruled out due to those reasons above.
-
- https://github.com/curl/curl/issues/2276
-
 2.7 Client cert (MTLS) issues with Schannel
 
  See https://github.com/curl/curl/issues/3145
@@ -260,16 +179,6 @@ problems may have been fixed or changed somewhat since this was written.
 2.9 TLS session cache does not work with TFO
 
  See https://github.com/curl/curl/issues/4301
-
-2.10 Store TLS context per transfer instead of per connection
-
- The GnuTLS `backend->cred` and the OpenSSL `backend->ctx` data and their
- proxy versions (and possibly other TLS backends), could be better moved to be
- stored in the Curl_easy handle instead of in per connection so that a single
- transfer that makes multiple connections can reuse the context and reduce
- memory consumption.
-
- https://github.com/curl/curl/issues/5102
 
 2.11 Schannel TLS 1.2 handshake bug in old Windows versions
 
@@ -288,20 +197,6 @@ problems may have been fixed or changed somewhat since this was written.
 2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
 
  https://github.com/curl/curl/issues/8741
-
-2.14 Secure Transport disabling hostname validation also disables SNI
-
- SNI is the hostname that is sent by the TLS library to the server as part of
- the TLS handshake. Secure Transport does not send SNI when hostname validation
- is disabled. Servers that host multiple websites may not know which
- certificate to serve without SNI or which backend server to connect to. The
- server may serve the certificate of a default server or abort.
-
- If a server aborts a handshake then curl shows error "SSL peer handshake
- failed, the server most likely requires a client certificate to connect".
- In this case the error may also have been caused by lack of SNI.
-
- https://github.com/curl/curl/issues/6347
 
 2.15 Renegotiate from server may cause hang for OpenSSL backend
 
@@ -634,14 +529,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/9161
 
-8. TELNET
-
-8.2 Microsoft telnet server
-
- There seems to be a problem when connecting to the Microsoft telnet server.
- https://curl.se/bug/view.cgi?id=649
-
-
 9. SFTP and SCP
 
 9.1 SFTP does not do CURLOPT_POSTQUOTE correct
@@ -682,10 +569,6 @@ problems may have been fixed or changed somewhat since this was written.
 10.3 FTPS over SOCKS
 
  libcurl does not support FTPS over a SOCKS proxy.
-
-10.4 active FTP over a SOCKS
-
- libcurl does not support active FTP over a SOCKS proxy
 
 
 11. Internals
@@ -825,15 +708,6 @@ problems may have been fixed or changed somewhat since this was written.
  then subsequently fail anyway if that was actually in use.
 
  https://github.com/curl/curl/issues/8112
-
-14. DICT
-
-14.1 DICT responses show the underlying protocol
-
- When getting a DICT response, the protocol parts of DICT are not stripped off
- from the output.
-
- https://github.com/curl/curl/issues/1809
 
 15. CMake
 
