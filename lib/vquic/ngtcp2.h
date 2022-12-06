@@ -36,13 +36,13 @@
 #include <nghttp3/nghttp3.h>
 #ifdef USE_OPENSSL
 #include <openssl/ssl.h>
-#elif defined(USE_GNUTLS)
-#include <gnutls/gnutls.h>
 #elif defined(USE_WOLFSSL)
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/quic.h>
 #endif
+
+struct gtls_instance;
 
 struct blocked_pkt {
   const uint8_t *pkt;
@@ -64,8 +64,7 @@ struct quicsocket {
   SSL_CTX *sslctx;
   SSL *ssl;
 #elif defined(USE_GNUTLS)
-  gnutls_certificate_credentials_t cred;
-  gnutls_session_t ssl;
+  struct gtls_instance *gtls;
 #elif defined(USE_WOLFSSL)
   WOLFSSL_CTX *sslctx;
   WOLFSSL *ssl;

@@ -31,6 +31,7 @@ my $logfile = "log/http2.log";
 my $nghttpx = "nghttpx";
 my $listenport = 9015;
 my $connect = "127.0.0.1,8990";
+my $conf = "nghttpx.conf";
 
 #***************************************************************************
 # Process command line options
@@ -70,6 +71,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--conf') {
+        if($ARGV[1]) {
+            $conf = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     else {
         print STDERR "\nWarning: http2-server.pl unknown parameter: $ARGV[0]\n";
     }
@@ -80,6 +87,7 @@ my $cmdline="$nghttpx --backend=$connect ".
     "--frontend=\"*,$listenport;no-tls\" ".
     "--log-level=INFO ".
     "--pid-file=$pidfile ".
+    "--conf=$conf ".
     "--errorlog-file=$logfile";
 print "RUN: $cmdline\n" if($verbose);
 system("$cmdline 2>/dev/null");

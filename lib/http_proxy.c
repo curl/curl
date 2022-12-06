@@ -172,8 +172,6 @@ static void tunnel_go_state(struct Curl_cfilter *cf,
 {
   if(ts->tunnel_state == new_state)
     return;
-  DEBUGF(infof(data, CFMSG(cf, "tunnel %p go_state %d -> %d"),
-         ts, ts->tunnel_state, new_state));
   /* leaving this one */
   switch(ts->tunnel_state) {
   case TUNNEL_CONNECT:
@@ -204,9 +202,6 @@ static void tunnel_go_state(struct Curl_cfilter *cf,
 
   case TUNNEL_ESTABLISHED:
     infof(data, "CONNECT phase completed");
-    if(cf->conn)
-      /* make sure this isn't set for the document request  */
-      cf->conn->bits.rewindaftersend = FALSE;
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     /* FALLTHROUGH */
@@ -491,7 +486,6 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
 #define SELECT_OK      0
 #define SELECT_ERROR   1
 
-  DEBUGF(infof(data, "CONNECT: recv response, keepon=%d", ts->keepon));
   error = SELECT_OK;
   *done = FALSE;
 
@@ -645,7 +639,6 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
         }
       }
       else {
-        DEBUGF(infof(data, "CONNECT: no end of response headers"));
         ts->keepon = KEEPON_DONE;
       }
 
@@ -1088,8 +1081,6 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
     cf->ctx = ts;
   }
 
-  DEBUGF(infof(data, CFMSG(cf, "connect(%s:%d, state=%d)"),
-         ts->hostname, ts->remote_port, ts->tunnel_state));
   result = CONNECT(cf, data, ts);
   if(result)
     goto out;
@@ -1101,8 +1092,6 @@ out:
     cf->connected = TRUE;
     tunnel_free(cf, data);
   }
-  DEBUGF(infof(data, CFMSG(cf, "connect(block=%d) -> %d, done=%d"),
-         blocking, result, *done));
   return result;
 }
 
@@ -1194,6 +1183,7 @@ static const struct Curl_cftype cft_http_proxy = {
 };
 
 CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
+                                  struct connectdata *conn,
                                   int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -1201,7 +1191,7 @@ CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
 
   result = Curl_cf_create(&cf, &cft_http_proxy, NULL);
   if(!result)
-    Curl_conn_cf_add(data, sockindex, cf);
+    Curl_conn_cf_add(data, conn, sockindex, cf);
   return result;
 }
 
@@ -1278,6 +1268,7 @@ static const struct Curl_cftype cft_haproxy = {
 };
 
 CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
+                               struct connectdata *conn,
                                int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -1285,7 +1276,7 @@ CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
 
   result = Curl_cf_create(&cf, &cft_haproxy, NULL);
   if(!result)
-    Curl_conn_cf_add(data, sockindex, cf);
+    Curl_conn_cf_add(data, conn, sockindex, cf);
   return result;
 }
 

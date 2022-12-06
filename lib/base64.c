@@ -37,8 +37,7 @@
 #include "warnless.h"
 #include "curl_base64.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -52,39 +51,12 @@ static const char base64[]=
 static const char base64url[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-static size_t decodeQuantum(unsigned char *dest, const char *src)
-{
-  size_t padding = 0;
-  const char *s;
-  unsigned long i, x = 0;
-
-  for(i = 0, s = src; i < 4; i++, s++) {
-    if(*s == '=') {
-      x <<= 6;
-      padding++;
-    }
-    else {
-      const char *p = strchr(base64, *s);
-      if(p)
-        x = (x << 6) + curlx_uztoul(p - base64);
-      else
-        return 0;
-    }
-  }
-
-  if(padding < 1)
-    dest[2] = curlx_ultouc(x & 0xFFUL);
-
-  x >>= 8;
-  if(padding < 2)
-    dest[1] = curlx_ultouc(x & 0xFFUL);
-
-  x >>= 8;
-  dest[0] = curlx_ultouc(x & 0xFFUL);
-
-  return 3 - padding;
-}
-
+static const unsigned char decodetable[] =
+{ 62, 255, 255, 255, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 255, 255, 255,
+  255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+  17, 18, 19, 20, 21, 22, 23, 24, 25, 255, 255, 255, 255, 255, 255, 26, 27, 28,
+  29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+  48, 49, 50, 51 };
 /*
  * Curl_base64_decode()
  *
@@ -106,10 +78,11 @@ CURLcode Curl_base64_decode(const char *src,
   size_t padding = 0;
   size_t i;
   size_t numQuantums;
+  size_t fullQuantums;
   size_t rawlen = 0;
-  const char *padptr;
   unsigned char *pos;
   unsigned char *newstr;
+  unsigned char lookup[256];
 
   *outptr = NULL;
   *outlen = 0;
@@ -119,21 +92,18 @@ CURLcode Curl_base64_decode(const char *src,
   if(!srclen || srclen % 4)
     return CURLE_BAD_CONTENT_ENCODING;
 
-  /* Find the position of any = padding characters */
-  padptr = strchr(src, '=');
-  if(padptr) {
+  /* srclen is at least 4 here */
+  while(src[srclen - 1 - padding] == '=') {
+    /* count padding characters */
     padding++;
     /* A maximum of two = padding characters is allowed */
-    if(padptr[1] == '=')
-      padding++;
-
-    /* Check the = padding characters weren't part way through the input */
-    if(padptr + padding != src + srclen)
+    if(padding > 2)
       return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Calculate the number of quantums */
   numQuantums = srclen / 4;
+  fullQuantums = numQuantums - (padding ? 1 : 0);
 
   /* Calculate the size of the decoded string */
   rawlen = (numQuantums * 3) - padding;
@@ -145,17 +115,59 @@ CURLcode Curl_base64_decode(const char *src,
 
   pos = newstr;
 
-  /* Decode the quantums */
-  for(i = 0; i < numQuantums; i++) {
-    size_t result = decodeQuantum(pos, src);
-    if(!result) {
-      free(newstr);
+  memset(lookup, 0xff, sizeof(lookup));
+  memcpy(&lookup['+'], decodetable, sizeof(decodetable));
+  /* replaces
+  {
+    unsigned char c;
+    const unsigned char *p = (const unsigned char *)base64;
+    for(c = 0; *p; c++, p++)
+      lookup[*p] = c;
+  }
+  */
 
-      return CURLE_BAD_CONTENT_ENCODING;
+  /* Decode the complete quantums first */
+  for(i = 0; i < fullQuantums; i++) {
+    unsigned char val;
+    unsigned int x = 0;
+    int j;
+
+    for(j = 0; j < 4; j++) {
+      val = lookup[(unsigned char)*src++];
+      if(val == 0xff) /* bad symbol */
+        goto bad;
+      x = (x << 6) | val;
     }
-
-    pos += result;
-    src += 4;
+    pos[2] = x & 0xff;
+    pos[1] = (x >> 8) & 0xff;
+    pos[0] = (x >> 16) & 0xff;
+    pos += 3;
+  }
+  if(padding) {
+    /* this means either 8 or 16 bits output */
+    unsigned char val;
+    unsigned int x = 0;
+    int j;
+    size_t padc = 0;
+    for(j = 0; j < 4; j++) {
+      if(*src == '=') {
+        x <<= 6;
+        src++;
+        if(++padc > padding)
+          /* this is a badly placed '=' symbol! */
+          goto bad;
+      }
+      else {
+        val = lookup[(unsigned char)*src++];
+        if(val == 0xff) /* bad symbol */
+          goto bad;
+        x = (x << 6) | val;
+      }
+    }
+    if(padding == 1)
+      pos[1] = (x >> 8) & 0xff;
+    pos[0] = (x >> 16) & 0xff;
+    pos += 3 - padding;
   }
 
   /* Zero terminate */
@@ -166,81 +178,60 @@ CURLcode Curl_base64_decode(const char *src,
   *outlen = rawlen;
 
   return CURLE_OK;
+  bad:
+  free(newstr);
+  return CURLE_BAD_CONTENT_ENCODING;
 }
 
 static CURLcode base64_encode(const char *table64,
                               const char *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
-  unsigned char ibuf[3];
-  unsigned char obuf[4];
-  int i;
-  int inputparts;
   char *output;
   char *base64data;
-  const char *indata = inputbuff;
+  const unsigned char *in = (unsigned char *)inputbuff;
   const char *padstr = &table64[64];    /* Point to padding string. */
 
   *outptr = NULL;
   *outlen = 0;
 
   if(!insize)
-    insize = strlen(indata);
+    insize = strlen(inputbuff);
 
 #if SIZEOF_SIZE_T == 4
   if(insize > UINT_MAX/4)
     return CURLE_OUT_OF_MEMORY;
 #endif
 
-  base64data = output = malloc(insize * 4 / 3 + 4);
+  base64data = output = malloc((insize + 2) / 3 * 4 + 1);
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 
-  while(insize > 0) {
-    for(i = inputparts = 0; i < 3; i++) {
-      if(insize > 0) {
-        inputparts++;
-        ibuf[i] = (unsigned char) *indata;
-        indata++;
-        insize--;
+  while(insize >= 3) {
+    *output++ = table64[ in[0] >> 2 ];
+    *output++ = table64[ ((in[0] & 0x03) << 4) | (in[1] >> 4) ];
+    *output++ = table64[ ((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6) ];
+    *output++ = table64[ in[2] & 0x3F ];
+    insize -= 3;
+    in += 3;
+  }
+  if(insize) {
+    /* this is only one or two bytes now */
+    *output++ = table64[ in[0] >> 2 ];
+    if(insize == 1) {
+      *output++ = table64[ ((in[0] & 0x03) << 4) ];
+      if(*padstr) {
+        *output++ = *padstr;
+        *output++ = *padstr;
       }
-      else
-        ibuf[i] = 0;
     }
-
-    obuf[0] = (unsigned char)  ((ibuf[0] & 0xFC) >> 2);
-    obuf[1] = (unsigned char) (((ibuf[0] & 0x03) << 4) | \
-                               ((ibuf[1] & 0xF0) >> 4));
-    obuf[2] = (unsigned char) (((ibuf[1] & 0x0F) << 2) | \
-                               ((ibuf[2] & 0xC0) >> 6));
-    obuf[3] = (unsigned char)   (ibuf[2] & 0x3F);
-
-    switch(inputparts) {
-    case 1: /* only one byte read */
-      i = msnprintf(output, 5, "%c%c%s%s",
-                    table64[obuf[0]],
-                    table64[obuf[1]],
-                    padstr,
-                    padstr);
-      break;
-
-    case 2: /* two bytes read */
-      i = msnprintf(output, 5, "%c%c%c%s",
-                    table64[obuf[0]],
-                    table64[obuf[1]],
-                    table64[obuf[2]],
-                    padstr);
-      break;
-
-    default:
-      i = msnprintf(output, 5, "%c%c%c%c",
-                    table64[obuf[0]],
-                    table64[obuf[1]],
-                    table64[obuf[2]],
-                    table64[obuf[3]]);
-      break;
+    else {
+      /* insize == 2 */
+      *output++ = table64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4) ];
+      *output++ = table64[ ((in[1] & 0x0F) << 2) ];
+      if(*padstr)
+        *output++ = *padstr;
     }
-    output += i;
   }
 
   /* Zero terminate */

@@ -156,6 +156,46 @@ static void mbed_debug(void *context, int level, const char *f_name,
 #else
 #endif
 
+static int bio_cf_write(void *bio, const unsigned char *buf, size_t blen)
+{
+  struct Curl_cfilter *cf = bio;
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct Curl_easy *data = connssl->call_data;
+  ssize_t nwritten;
+  CURLcode result;
+
+  DEBUGASSERT(data);
+  nwritten = Curl_conn_cf_send(cf->next, data, (char *)buf, blen, &result);
+  /* DEBUGF(infof(data, CFMSG(cf, "bio_cf_out_write(len=%d) -> %d, err=%d"),
+         blen, (int)nwritten, result)); */
+  if(nwritten < 0 && CURLE_AGAIN == result) {
+    nwritten = MBEDTLS_ERR_SSL_WANT_WRITE;
+  }
+  return (int)nwritten;
+}
+
+static int bio_cf_read(void *bio, unsigned char *buf, size_t blen)
+{
+  struct Curl_cfilter *cf = bio;
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct Curl_easy *data = connssl->call_data;
+  ssize_t nread;
+  CURLcode result;
+
+  DEBUGASSERT(data);
+  /* OpenSSL catches this case, so should we. */
+  if(!buf)
+    return 0;
+
+  nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &result);
+  /* DEBUGF(infof(data, CFMSG(cf, "bio_cf_in_read(len=%d) -> %d, err=%d"),
+         blen, (int)nread, result)); */
+  if(nread < 0 && CURLE_AGAIN == result) {
+    nread = MBEDTLS_ERR_SSL_WANT_READ;
+  }
+  return (int)nread;
+}
+
 /*
  *  profile
  */
@@ -501,7 +541,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-  infof(data, "mbedTLS: Connecting to %s:%ld", hostname, connssl->port);
+  infof(data, "mbedTLS: Connecting to %s:%d", hostname, connssl->port);
 
   mbedtls_ssl_config_init(&backend->config);
   ret = mbedtls_ssl_config_defaults(&backend->config,
@@ -551,9 +591,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
-  mbedtls_ssl_set_bio(&backend->ssl, &cf->conn->sock[cf->sockindex],
-                      mbedtls_net_send,
-                      mbedtls_net_recv,
+  mbedtls_ssl_set_bio(&backend->ssl, cf, bio_cf_write, bio_cf_read,
                       NULL /*  rev_timeout() */);
 
   mbedtls_ssl_conf_ciphersuites(&backend->config,
@@ -902,7 +940,6 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   (void)data;
   DEBUGASSERT(backend);
-
   ret = mbedtls_ssl_write(&backend->ssl, (unsigned char *)mem, len);
 
   if(ret < 0) {
@@ -924,8 +961,8 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_backend_data *backend = connssl->backend;
   char buf[32];
-  (void) data;
 
+  (void)data;
   DEBUGASSERT(backend);
 
   /* Maybe the server has already sent a close notify alert.
@@ -1229,7 +1266,8 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
   SSLSUPP_PINNEDPUBKEY |
-  SSLSUPP_SSL_CTX,
+  SSLSUPP_SSL_CTX |
+  SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ssl_backend_data),
 

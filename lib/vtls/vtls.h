@@ -153,6 +153,7 @@ void Curl_free_multi_ssl_backend_data(struct multi_ssl_backend_data *mbackend);
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
+                              struct connectdata *conn,
                               int sockindex);
 
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
@@ -160,16 +161,9 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
 CURLcode Curl_ssl_cfilter_proxy_add(struct Curl_easy *data,
+                                    struct connectdata *conn,
                                     int sockindex);
 #endif /* !CURL_DISABLE_PROXY */
-
-/**
- * Return TRUE iff the filter chain `sockindex` at connection `conn`
- * is using/prepared for SSL encryption. This tests the presence of the
- * necessary filters and not their connectedness.
- */
-bool Curl_ssl_conn_is_ssl(struct Curl_easy *data,
-                          int sockindex);
 
 /**
  * Get the SSL configuration that is used on the connection.
@@ -214,8 +208,6 @@ bool Curl_ssl_supports(struct Curl_easy *data, int ssl_option);
 void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
                              CURLINFO info, int n);
 
-size_t Curl_ssl_get_backend_data_size(struct Curl_easy *data);
-
 bool Curl_ssl_use(struct connectdata *conn, int sockindex);
 
 #else /* if not USE_SSL */
@@ -236,11 +228,9 @@ bool Curl_ssl_use(struct connectdata *conn, int sockindex);
 #define Curl_ssl_false_start(a) FALSE
 #define Curl_ssl_get_internals(a,b,c,d) NULL
 #define Curl_ssl_supports(a,b) FALSE
-#define Curl_ssl_get_backend_data_size(a) 0
 #define Curl_ssl_use(a,b) FALSE
-#define Curl_ssl_conn_is_ssl(a,b) FALSE
-#define Curl_ssl_cfilter_add(a,b) CURLE_NOT_BUILT_IN
-#define Curl_ssl_cfilter_proxy_add(a,b) CURLE_NOT_BUILT_IN
+#define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
+#define Curl_ssl_cfilter_proxy_add(a,b,c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_get_config(a,b) NULL
 #define Curl_ssl_cfilter_remove(a,b) CURLE_OK
 #endif

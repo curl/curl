@@ -53,7 +53,7 @@ Calling \fICURLOPT_HTTPAUTH(3)\fP with CURLAUTH_AWS_SIGV4 is the same
 as calling this with \fB"aws:amz"\fP in parameter.
 .PP
 Example with "Test:Try", when curl will do the algorithm, it will generate
-\fB"TEST-HMAC-SHA256"\đP for "Algorithm", \fB"x-try-date"\fP and
+\fB"TEST-HMAC-SHA256"\fP for "Algorithm", \fB"x-try-date"\fP and
 \fB"X-Try-Date"\fP for "date", \fB"test4_request"\fP for "request type",
 \fB"SignedHeaders=content-type;host;x-try-date"\fP for "signed headers"
 .PP
@@ -95,5 +95,11 @@ Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 This option overrides the other auth types you might have set in
 \fICURLOPT_HTTPAUTH(3)\fP which should be highlighted as this makes this auth
 method special.  This method cannot be combined with other auth types.
+.PP
+A sha256 checksum of the request payload is used as input to the signature
+calculation.  For POST requests, this is a checksum of the provided
+\fICURLOPT_POSTFIELDS(3)\fP.  Otherwise, it's the checksum of an empty buffer.
+For requests like PUT, you can provide your own checksum in a HTTP header named
+\fBx-provider2-content-sha256\fP.
 .SH "SEE ALSO"
 .BR CURLOPT_HEADEROPT "(3), " CURLOPT_HTTPHEADER "(3), "

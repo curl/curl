@@ -18,6 +18,8 @@ concurrency:
   group: ngtcp2-wolfssl-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   autotools:
     name: ${{ matrix.build.name }}
@@ -28,9 +30,17 @@ jobs:
       matrix:
         build:
         - name: wolfssl
-          install:
-          configure: LDFLAGS="-Wl,-rpath,$HOME/all/lib" --with-wolfssl=$HOME/all --enable-debug
-          wolfssl-configure: --enable-quic --enable-session-ticket --enable-earlydata --enable-psk --enable-harden --enable-altcertchains
+          install: >-
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
+          configure: >-
+            PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib"
+            --with-ngtcp2=$HOME/all --enable-warnings --enable-werror --enable-debug
+            --with-test-nghttpx="$HOME/all/bin/nghttpx"
+          ngtcp2-configure: >-
+            --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
+          wolfssl-configure: >-
+            --enable-quic --enable-session-ticket --enable-earlydata --enable-psk
+            --enable-harden --enable-altcertchains
 
     steps:
     - run: |
@@ -48,27 +58,42 @@ jobs:
       name: 'install wolfssl'
 
     - run: |
-        git clone https://github.com/ngtcp2/nghttp3
+        git clone --depth=1 -b openssl-3.0.7+quic https://github.com/quictls/openssl
+        cd openssl
+        ./config --prefix=$HOME/all --libdir=$HOME/all/lib
+        make install_sw
+      name: 'install quictls'
+
+    - run: |
+        git clone --depth=1 https://github.com/ngtcp2/nghttp3
         cd nghttp3
         autoreconf -fi
-        ./configure --prefix=$HOME/all --enable-lib-only
+        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
         make install
       name: 'install nghttp3'
 
     - run: |
-        git clone https://github.com/ngtcp2/ngtcp2
+        git clone --depth=1 https://github.com/ngtcp2/ngtcp2
         cd ngtcp2
         autoreconf -fi
-        ./configure PKG_CONFIG_PATH=$HOME/all/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/all/lib" --prefix=$HOME/all --enable-lib-only --with-wolfssl=$HOME/all
+        ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl  --with-wolfssl
         make install
       name: 'install ngtcp2'
+
+    - run: |
+        git clone --depth=1 https://github.com/nghttp2/nghttp2
+        cd nghttp2
+        autoreconf -fi
+        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-http3
+        make install
+      name: 'install nghttp2'
 
     - uses: actions/checkout@v3
 
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+    - run: ./configure --with-wolfssl=$HOME/all ${{ matrix.build.configure }}
       name: 'configure'
 
     - run: make V=1

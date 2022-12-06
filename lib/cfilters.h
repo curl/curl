@@ -33,20 +33,20 @@ struct connectdata;
 /* Callback to destroy resources held by this filter instance.
  * Implementations MUST NOT chain calls to cf->next.
  */
-typedef void     Curl_cf_destroy_this(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data);
+typedef void     Curl_cft_destroy_this(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data);
 
 /* Setup the connection for `data`, using destination `remotehost`.
  */
-typedef CURLcode Curl_cf_setup(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
-                               const struct Curl_dns_entry *remotehost);
-typedef void     Curl_cf_close(struct Curl_cfilter *cf,
-                               struct Curl_easy *data);
+typedef CURLcode Curl_cft_setup(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                const struct Curl_dns_entry *remotehost);
+typedef void     Curl_cft_close(struct Curl_cfilter *cf,
+                                struct Curl_easy *data);
 
-typedef CURLcode Curl_cf_connect(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 bool blocking, bool *done);
+typedef CURLcode Curl_cft_connect(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  bool blocking, bool *done);
 
 /* Return the hostname and port the connection goes to.
  * This may change with the connection state of filters when tunneling
@@ -59,40 +59,40 @@ typedef CURLcode Curl_cf_connect(struct Curl_cfilter *cf,
  *               this is owned by the connection.
  * @param pport  on return, contains the port number
  */
-typedef void     Curl_cf_get_host(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 const char **phost,
-                                 const char **pdisplay_host,
-                                 int *pport);
+typedef void     Curl_cft_get_host(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  const char **phost,
+                                  const char **pdisplay_host,
+                                  int *pport);
 
 /* Filters may return sockets and fdset flags they are waiting for.
  * The passes array has room for up to MAX_SOCKSPEREASYHANDLE sockets.
  * @return read/write fdset for index in socks
  *         or GETSOCK_BLANK when nothing to wait on
  */
-typedef int      Curl_cf_get_select_socks(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data,
-                                          curl_socket_t *socks);
+typedef int      Curl_cft_get_select_socks(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           curl_socket_t *socks);
 
-typedef bool     Curl_cf_data_pending(struct Curl_cfilter *cf,
-                                      const struct Curl_easy *data);
+typedef bool     Curl_cft_data_pending(struct Curl_cfilter *cf,
+                                       const struct Curl_easy *data);
 
-typedef ssize_t  Curl_cf_send(struct Curl_cfilter *cf,
-                              struct Curl_easy *data, /* transfer */
-                              const void *buf,        /* data to write */
-                              size_t len,             /* max amount to write */
-                              CURLcode *err);         /* error to return */
+typedef ssize_t  Curl_cft_send(struct Curl_cfilter *cf,
+                               struct Curl_easy *data, /* transfer */
+                               const void *buf,        /* data to write */
+                               size_t len,             /* amount to write */
+                               CURLcode *err);         /* error to return */
 
-typedef ssize_t  Curl_cf_recv(struct Curl_cfilter *cf,
-                              struct Curl_easy *data, /* transfer */
-                              char *buf,              /* store data here */
-                              size_t len,             /* max amount to read */
-                              CURLcode *err);         /* error to return */
+typedef ssize_t  Curl_cft_recv(struct Curl_cfilter *cf,
+                               struct Curl_easy *data, /* transfer */
+                               char *buf,              /* store data here */
+                               size_t len,             /* amount to read */
+                               CURLcode *err);         /* error to return */
 
-typedef void     Curl_cf_attach_data(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data);
-typedef void     Curl_cf_detach_data(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data);
+typedef void     Curl_cft_attach_data(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data);
+typedef void     Curl_cft_detach_data(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data);
 
 /**
  * The easy handle `data` is being detached (no longer served)
@@ -108,19 +108,19 @@ void Curl_conn_detach(struct connectdata *conn, struct Curl_easy *data);
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
-  const char *name;                      /* name of the filter type */
-  long flags;                            /* flags of filter type */
-  Curl_cf_destroy_this *destroy;         /* destroy resources of this cf */
-  Curl_cf_setup *setup;                  /* setup for a connection */
-  Curl_cf_connect *connect;              /* establish connection */
-  Curl_cf_close *close;                  /* close conn */
-  Curl_cf_get_host *get_host;            /* host filter talks to */
-  Curl_cf_get_select_socks *get_select_socks;/* sockets to select on */
-  Curl_cf_data_pending *has_data_pending;/* conn has data pending */
-  Curl_cf_send *do_send;                 /* send data */
-  Curl_cf_recv *do_recv;                 /* receive data */
-  Curl_cf_attach_data *attach_data;      /* data is being handled here */
-  Curl_cf_detach_data *detach_data;      /* data is no longer handled here */
+  const char *name;                       /* name of the filter type */
+  long flags;                             /* flags of filter type */
+  Curl_cft_destroy_this *destroy;         /* destroy resources of this cf */
+  Curl_cft_setup *setup;                  /* setup for a connection */
+  Curl_cft_connect *connect;              /* establish connection */
+  Curl_cft_close *close;                  /* close conn */
+  Curl_cft_get_host *get_host;            /* host filter talks to */
+  Curl_cft_get_select_socks *get_select_socks;/* sockets to select on */
+  Curl_cft_data_pending *has_data_pending;/* conn has data pending */
+  Curl_cft_send *do_send;                 /* send data */
+  Curl_cft_recv *do_recv;                 /* receive data */
+  Curl_cft_attach_data *attach_data;      /* data is being handled here */
+  Curl_cft_detach_data *detach_data;      /* data is no longer handled here */
 };
 
 /* A connection filter instance, e.g. registered at a connection */
@@ -180,6 +180,7 @@ CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
  * the start of the chain (top).
  */
 void Curl_conn_cf_add(struct Curl_easy *data,
+                      struct connectdata *conn,
                       int sockindex,
                       struct Curl_cfilter *cf);
 
@@ -197,6 +198,12 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
  */
 void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data);
 
+
+ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          const void *buf, size_t len, CURLcode *err);
+ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          char *buf, size_t len, CURLcode *err);
+
 #define CURL_CF_SSL_DEFAULT  -1
 #define CURL_CF_SSL_DISABLE  0
 #define CURL_CF_SSL_ENABLE   1
@@ -208,6 +215,7 @@ void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data);
  * suitable filter chain.
  */
 CURLcode Curl_conn_setup(struct Curl_easy *data,
+                         struct connectdata *conn,
                          int sockindex,
                          const struct Curl_dns_entry *remotehost,
                          int ssl_mode);
@@ -234,6 +242,13 @@ bool Curl_conn_is_connected(struct connectdata *conn, int sockindex);
  * handshake has been started/done.
  */
 bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex);
+
+/**
+ * Determine if the connection is using SSL to the remote host
+ * (or will be once connected). This will return FALSE, if SSL
+ * is only used in proxying and not for the tunnel itself.
+ */
+bool Curl_conn_is_ssl(struct Curl_easy *data, int sockindex);
 
 /**
  * Close the filter chain at `sockindex` for connection `data->conn`.

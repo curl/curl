@@ -11,13 +11,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.sha }}-${{ github.event.target_url }}
   cancel-in-progress: true
 
-permissions:
-  statuses: write
+permissions: {}
 
 jobs:
   split:
     runs-on: ubuntu-latest
     if: ${{ github.event.sender.login == 'appveyor[bot]' }}
+    permissions:
+      statuses: write
     steps:
       - name: Create individual AppVeyor build statuses
         if: ${{ github.event.sha && github.event.target_url }}
