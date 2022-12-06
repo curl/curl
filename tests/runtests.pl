@@ -459,7 +459,7 @@ if (!$ENV{"NGHTTPX"}) {
 if ($ENV{"NGHTTPX"}) {
     my $nghttpx_version=join(' ', runclientoutput("$ENV{'NGHTTPX'} -v"));
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
-    logmsg "nghttpx_h3=$nghttpx_h3, output=$nghttpx_version\n";
+    chomp $nghttpx_h3;
 }
 
 
@@ -663,7 +663,7 @@ sub runclient {
 #
 sub runclientoutput {
     my ($cmd)=@_;
-    return `$cmd`;
+    return `$cmd 2>/dev/null`;
 
 # This is one way to test curl on a remote machine
 #    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
@@ -3458,8 +3458,9 @@ sub checksystem {
     logmsg sprintf("%s", $http_unix?"HTTP-unix ":"");
     logmsg sprintf("%s\n", $ftp_ipv6?"FTP-IPv6 ":"");
 
-    logmsg sprintf("* Env: %s%s", $valgrind?"Valgrind ":"",
-                   $run_event_based?"event-based ":"");
+    logmsg sprintf("* Env: %s%s%s", $valgrind?"Valgrind ":"",
+                   $run_event_based?"event-based ":"",
+                   $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
 
