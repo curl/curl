@@ -769,7 +769,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
     if(pop3code != '+')
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
-    if(!data->set.use_ssl || Curl_ssl_use(conn, FIRSTSOCKET))
+    if(!data->set.use_ssl || Curl_conn_is_ssl(data, FIRSTSOCKET))
       result = pop3_perform_authentication(data, conn);
     else if(pop3code == '+' && pop3c->tls_supported)
       /* Switch to TLS connection now */

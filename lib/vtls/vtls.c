@@ -1725,11 +1725,6 @@ void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
   return result;
 }
 
-bool Curl_ssl_use(struct connectdata *conn, int sockindex)
-{
-  return Curl_ssl_cf_get_ssl(conn->cfilter[sockindex]) != NULL;
-}
-
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
                                  int sockindex)
 {
@@ -1818,11 +1813,9 @@ Curl_ssl_get_primary_config(struct Curl_easy *data,
 
 struct Curl_cfilter *Curl_ssl_cf_get_ssl(struct Curl_cfilter *cf)
 {
-  struct Curl_cfilter *cfn;
-
-  for(cfn = cf->next; cfn; cfn = cfn->next) {
-    if(cfn->cft == &cft_ssl || cfn->cft == &cft_ssl_proxy)
-      return cfn;
+  for(; cf; cf = cf->next) {
+    if(cf->cft == &cft_ssl || cf->cft == &cft_ssl_proxy)
+      return cf;
   }
   return NULL;
 }
