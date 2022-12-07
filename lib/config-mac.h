@@ -34,6 +34,11 @@
 #define OS "mac"
 #endif
 
+#include <ConditionalMacros.h>
+#if TYPE_LONGLONG
+#define HAVE_LONGLONG           1
+#endif
+
 /* Define if you want the built-in manual */
 #define USE_MANUAL              1
 
