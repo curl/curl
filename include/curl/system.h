@@ -170,7 +170,7 @@
 #  define CURL_FORMAT_CURL_OFF_TU    "llu"
 #  define CURL_SUFFIX_CURL_OFF_T     LL
 #  define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
 #elif defined(__TANDEM)
 # if ! defined(__LP64)
