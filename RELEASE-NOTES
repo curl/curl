@@ -2,9 +2,9 @@ curl and libcurl 7.87.0
 
  Public curl releases:         212
  Command line options:         249
- curl_easy_setopt() options:   301
+ curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2755
+ Contributors:                 2766
 
 This release includes the following changes:
 
@@ -15,7 +15,11 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o aws_sigv4: consult x-%s-content-sha256 for payload hash [102]
+ o aws_sigv4: fix typos in aws_sigv4.c [101]
+ o ci: Remove zuul fuzzing job as it's superseded by CIFuzz
  o cmake: check for cross-compile, not for toolchain [54]
+ o CMake: fix build with `CURL_USE_GSSAPI` [78]
  o cmake: really enable warnings with clang [25]
  o cmdline-opts/gen.pl: fix the linkifier [64]
  o cmdline-opts/page-footer: remove long option nroff formatting
@@ -23,8 +27,14 @@ This release includes the following bugfixes:
  o configure: require fork for NTLM-WB [36]
  o cookie: compare cookie prefixes case insensitively [14]
  o cookie: expire cookies at once when max-age is negative [45]
+ o cookie: open cookie jar as a binary file [89]
+ o curl-openssl.m4: do not add $prefix/include/openssl to CPPFLAGS [90]
  o curl-rustls.m4: on macOS, rustls also needs the Security framework [44]
+ o curl.h: include <sys/select.h> on SerenityOS [104]
+ o curl: override the numeric locale and set "C" by force [60]
  o curl: timeout in the read callback [15]
+ o curl_endian: remove Curl_write64_le from header [81]
+ o curl_get_line: allow last line without newline char [88]
  o curl_path: do not add '/' if homedir ends with one [4]
  o CURLMOPT_SOCKETFUNCTION.3: clarify CURL_POLL_REMOVE [1]
  o CURLOPT_DEBUGFUNCTION.3: do not assume nul-termination in example [31]
@@ -33,9 +43,16 @@ This release includes the following bugfixes:
  o docs/INSTALL.md: expand on static builds [62]
  o docs/WEBSOCKET.md: explain the URL use [71]
  o docs: add missing parameters for --retry flag [2]
+ o docs: add more "SEE ALSO" links to CA related pages [82]
  o docs: explain the noproxy CIDR notation support [17]
  o docs: remove performance note in CURLOPT_SSL_VERIFYPEER [13]
+ o examples/10-at-a-time: fix possible skipped final transfers [85]
+ o examples: update descriptions [83]
+ o ftp: support growing files with CURLOPT_IGNORE_CONTENT_LENGTH [96]
  o gen.pl: do not generate CURLHELP bitmask lines > 79 characters [10]
+ o GHA: clarify workflows permissions, set least possible privilege [79]
+ o GHA: NSS use clang instead of clang-9 [103]
+ o gnutls: use common gnutls init and verify code for ngtcp2 [98]
  o headers: add endif comments [51]
  o HTTP-COOKIES.md: mention that http://localhost is a secure context [76]
  o HTTP-COOKIES.md: update the 6265bis link to draft-11 [70]
@@ -43,6 +60,7 @@ This release includes the following bugfixes:
  o http: set 'this_is_a_follow' in the Location: logic [40]
  o hyper: classify headers as CONNECT and 1XX [56]
  o hyper: fix handling of hyper_task's when reusing the same address [33]
+ o INSTALL: update operating systems and CPU archs [91]
  o KNOWN_BUGS: remove eight entries [50]
  o lib: add CURL_WRITEFUNC_ERROR to signal write callback error [47]
  o lib: connection filters (cfilter) addition to curl: [43]
@@ -50,23 +68,32 @@ This release includes the following bugfixes:
  o lib: fix some type mismatches and remove unneeded typecasts [12]
  o lib: parse numbers with fixed known base 10 [77]
  o lib: remove bad set.opt_no_body assignments [42]
+ o lib: rewind BEFORE request instead of AFTER previous [65]
  o lib: sync guard for Curl_getaddrinfo_ex() definition and use [6]
  o libcurl-errors.3: remove duplicate word [3]
  o log2changes.pl: wrap long lines at 80 columns [59]
+ o Makefile.mk: address minor issues [87]
+ o Makefile.mk: portable Makefile.m32 [86]
  o maketgz: set the right version in lib/libcurl.plist [53]
+ o mime: relax easy/mime structures binding [94]
  o misc: remove duplicated include files [28]
  o misc: typo and grammar fixes [23]
  o negtelnetserver.py: have it call its close() method [68]
  o netrc.d: provide mutext info [63]
+ o netware: remove leftover traces [80]
  o noproxy: also match with adjacent comma [19]
  o noproxy: tailmatch like in 7.85.0 and earlier [35]
  o nroff-scan.pl: detect double highlights
  o ntlm: improve comment for encrypt_des [55]
  o ntlm: silence ubsan warning about copying from null target_info pointer. [69]
+ o openssl/mbedtls: use %d for outputing port with failf (int) [72]
+ o openssl: prefix errors with '[lib]/[version]: ' [105]
  o os400: use platform socklen_t in Curl_getnameinfo_a [18]
  o proxy: refactor haproxy protocol handling as connection filter [57]
  o README.md: remove badges and xmas-tree garnish [9]
  o rtsp: fix RTSP auth [49]
+ o runtests: --no-debuginfod now disables DEBUGINFOD_URLS [100]
+ o runtests: do CRLF replacements per section only [97]
  o scripts/checksrc.pl: detect duplicated include files [29]
  o sendf: change Curl_read_plain to wrap Curl_recv_plain [48]
  o sendf: remove unnecessary if condition [26]
@@ -75,12 +102,16 @@ This release includes the following bugfixes:
  o system.h: support 64-bit curl_off_t for NonStop 32-bit [21]
  o test3026: reduce runtime in legacy mingw builds [73]
  o tests/sshserver.pl: re-enable ssh-rsa while using openssh 8.8+
+ o tests: add authorityInfoAccess to generated certs [99]
+ o tests: add HTTP/3 test case, custom location for proper nghttpx [106]
+ o tls: backends use connection filters for IO, enabling HTTPS-proxy [92]
  o tool_getparam: make --no-get work as the opposite of --get [39]
  o tool_operate: provide better errmsg for -G with bad URL [16]
  o tool_operate: when aborting, make sure there is a non-NULL error buffer [20]
  o url: move back the IDN conversion of proxy names [74]
  o urldata: change port num storage to int and unsigned short [66]
  o vtls: fix build without proxy support [38]
+ o vtls: localization of state data in filters [84]
  o WEBSOCKET.md: fix broken link [30]
  o Websocket: fixes for partial frames and buffer updates. [7]
  o websockets: fix handling of partial frames [32]
@@ -103,19 +134,24 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Averay, Alexandre Ferrieux, Alex Xu, Andrei Rybak, Andy Stamp,
-  Anthony Hu, AtariDreams on github, Ayesh Karunaratne, Christopher Sauer,
-  Christoph Reiter, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Egor Pugin, Emanuele Torre, Emil Österlund, Eric Vigeant, Erik Janssen,
-  Fata Nugraha, Felipe Gasper, godmar on github, Henning Schild,
-  Hirotaka Tagawa, Joel Depooter, John Sherrill, Jon Rumsey,
-  jvreelanda on github, Karthikdasari0423 on github, Lorenzo Miniero,
-  Luca Niccoli, Marc Hörsken, Michael Drake,  MonkeybreadSoftware on github,
-  Nathan Moinvaziri, Oskar Sigvardsson, Patrick Monnerat, Patrick Schlangen,
-  Peter Piekarski, Philip Chan, Randall S. Becker, Ray Satiro, Sean McArthur,
-  Stefan Eissing, Stephan Guilloux, Stuart Henderson, Thomas Glanzmann,
-  Trail of Bits, Viktor Szakats, xianghongai on github, Zespre Schmidt
-  (50 contributors)
+  Adam Averay, Alexandre Ferrieux, Alex Xu, Ali Utku Selen, Andrei Rybak,
+  Andy Stamp, Anthony Hu, AtariDreams on github, Ayesh Karunaratne,
+  Baitinq on github, Casey Bodley, Christopher Sauer, Christoph Reiter,
+  Dan Fandrich, Daniel Faust, Daniel Gustafsson, Daniel Stenberg,
+  Diogo Teles Sant'Anna, Egor Pugin, Emanuele Torre, Emil Österlund,
+  Eric Vigeant, Erik Janssen, Fata Nugraha, Felipe Gasper, Gisle Vanem,
+  godmar on github, Henning Schild, Hirotaka Tagawa, Ikko Ashimine,
+  Jakub Zakrzewski, Joel Depooter, John Sherrill, Jon Rumsey,
+  jvreelanda on github, Karthikdasari0423 on github, Kenneth Myhra,
+  Lorenzo Miniero, Luca Niccoli, Marc Hörsken, Mark Gaiser, Max Dymond,
+  Michael Drake, Michael Kaufmann, Mikhail Kuznetsov,
+  MonkeybreadSoftware on github, Nathan Moinvaziri, Oskar Sigvardsson,
+  Patrick Monnerat, Patrick Schlangen, Peter Piekarski, Philip Chan,
+  Philip Heiduck, Philip Sanetra, Randall S. Becker, Ray Satiro, Rob de Wit,
+  Robin Marx, Ryan Schmidt, Sean McArthur, Stefan Eissing, Stephan Guilloux,
+  Stuart Henderson, Thomas Glanzmann, Trail of Bits, Viktor Szakats,
+  xianghongai on github, Zespre Schmidt
+  (68 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -178,18 +214,48 @@ References to bug reports and discussions on issues:
  [57] = https://curl.se/bug/?i=9893
  [58] = https://curl.se/bug/?i=9667
  [59] = https://curl.se/bug/?i=9896
+ [60] = https://curl.se/bug/?i=9969
  [61] = https://curl.se/bug/?i=9849
  [62] = https://curl.se/bug/?i=9944
  [63] = https://curl.se/bug/?i=9899
  [64] = https://curl.se/bug/?i=9899
+ [65] = https://curl.se/bug/?i=9735
  [66] = https://curl.se/bug/?i=9946
  [67] = https://curl.se/bug/?i=9583
  [68] = https://curl.se/bug/?i=9894
  [69] = https://curl.se/bug/?i=9898
  [70] = https://curl.se/bug/?i=9940
  [71] = https://curl.se/bug/?i=9936
+ [72] = https://curl.se/bug/?i=10001
  [73] = https://curl.se/bug/?i=9412
  [74] = https://curl.se/bug/?i=9937
  [75] = https://curl.se/bug/?i=2975
  [76] = https://curl.se/bug/?i=9938
  [77] = https://curl.se/bug/?i=9933
+ [78] = https://curl.se/bug/?i=9017
+ [79] = https://curl.se/bug/?i=9928
+ [80] = https://curl.se/bug/?i=9966
+ [81] = https://curl.se/bug/?i=9968
+ [82] = https://curl.se/bug/?i=9959
+ [83] = https://curl.se/bug/?i=9960
+ [84] = https://curl.se/bug/?i=9919
+ [85] = https://curl.se/bug/?i=9953
+ [86] = https://curl.se/bug/?i=9764
+ [87] = https://curl.se/bug/?i=10000
+ [88] = https://curl.se/bug/?i=9973
+ [89] = https://curl.se/bug/?i=10017
+ [90] = https://curl.se/bug/?i=9989
+ [91] = https://curl.se/bug/?i=9994
+ [92] = https://curl.se/bug/?i=9962
+ [94] = https://curl.se/bug/?i=9927
+ [96] = https://curl.se/bug/?i=9772
+ [97] = https://curl.se/bug/?i=10009
+ [98] = https://curl.se/bug/?i=10007
+ [99] = https://curl.se/bug/?i=9980
+ [100] = https://curl.se/bug/?i=9950
+ [101] = https://curl.se/bug/?i=10008
+ [102] = https://curl.se/bug/?i=9804
+ [103] = https://curl.se/bug/?i=9978
+ [104] = https://curl.se/bug/?i=10006
+ [105] = https://curl.se/bug/?i=10004
+ [106] = https://curl.se/bug/?i=9031

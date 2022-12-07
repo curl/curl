@@ -17,26 +17,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
-  fuzzing:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Build Fuzzers
-      uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
-      with:
-        oss-fuzz-project-name: 'curl'
-        dry-run: false
-
-    - name: Run Fuzzers
-      uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
-      with:
-        oss-fuzz-project-name: 'curl'
-        fuzz-seconds: 2400
-        dry-run: false
-
-    - name: Upload Crash
-      uses: actions/upload-artifact@v3
-      if: failure()
-      with:
-        name: artifacts
-        path: ./out/artifacts
+  Fuzzing:
+    uses: curl/curl-fuzzer/.github/workflows/ci.yml@master

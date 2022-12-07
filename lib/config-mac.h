@@ -40,7 +40,6 @@
 #define HAVE_ERRNO_H            1
 #define HAVE_NETINET_IN_H       1
 #define HAVE_SYS_SOCKET_H       1
-#define HAVE_SYS_SELECT_H       1
 #define HAVE_NETDB_H            1
 #define HAVE_ARPA_INET_H        1
 #define HAVE_UNISTD_H           1
@@ -91,7 +90,7 @@
 #define SEND_TYPE_ARG1 int
 #define SEND_QUAL_ARG2 const
 #define SEND_TYPE_ARG2 void *
-#define SEND_TYPE_ARG3 size_T
+#define SEND_TYPE_ARG3 size_t
 #define SEND_TYPE_ARG4 int
 #define SEND_TYPE_RETV ssize_t
 

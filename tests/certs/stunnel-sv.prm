@@ -1,0 +1,38 @@
+extensions = x509v3
+[ x509v3 ]
+subjectAltName = DNS:localhost
+keyUsage	= keyEncipherment,digitalSignature,keyAgreement
+extendedKeyUsage = serverAuth
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+basicConstraints = CA:false
+authorityInfoAccess     = @issuer_info
+crlDistributionPoints   = @crl_info
+
+[ crl_ext ]
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+
+[ issuer_info ]
+caIssuers;URI.0         = http://test.curl.se/ca/EdelCurlRoot.cer
+
+[ crl_info ]
+URI.0                   = http://test.curl.se/ca/EdelCurlRoot.crl
+
+[ req ]
+default_bits                    = 12048
+distinguished_name              = req_DN
+default_md			= sha256
+string_mask			= utf8only
+[ req_DN ]
+countryName                     = "Country Name is Northern Nowhere"
+countryName_value            = NN
+organizationName              = "Organization Name"
+organizationName_value     = Edel Curl Arctic Illudium Research Cloud
+commonName                      = "Common Name"
+commonName_value              = localhost
+
+[something]
+# The key
+# the certificate
+# some dhparam

@@ -196,7 +196,7 @@ When using curl built with Hyper, the keywords must include HTTP or HTTPS for
 'hyper mode' to kick in and make line ending checks work for tests.
 ## `<reply>`
 
-### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"] [nonewline="yes"]>`
+### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes"]>`
 
 data to be sent to the client on its request and later verified that it
 arrived safely. Set `nocheck="yes"` to prevent the test script from verifying
@@ -225,12 +225,16 @@ and used as "raw" data.
 `nonewline=yes` means that the last byte (the trailing newline character)
 should be cut off from the data before sending or comparing it.
 
+`crlf=yes` forces *header* newlines to become CRLF even if not written so in
+the source file. Note that this makes runtests.pl parse and "guess" what is a
+header and what is not in order to apply the CRLF line endings appropriately.
+
 For FTP file listings, the `<data>` section will be used *only* if you make
 sure that there has been a CWD done first to a directory named `test-[NUM]`
 where `NUM` is the test case number. Otherwise the ftp server can't know from
 which test file to load the list content.
 
-### `<dataNUM>`
+### `<dataNUM [crlf="yes"]>`
 
 Send back this contents instead of the <data> one. The `NUM` is set by:
 
@@ -257,7 +261,7 @@ a connect prefix.
 ### `<socks>`
 Address type and address details as logged by the SOCKS proxy.
 
-### `<datacheck [mode="text"] [nonewline="yes"]>`
+### `<datacheck [mode="text"] [nonewline="yes"] [crlf="yes"]>`
 if the data is sent but this is what should be checked afterwards. If
 `nonewline=yes` is set, runtests will cut off the trailing newline from the
 data before comparing with the one actually received by the client.
@@ -265,7 +269,7 @@ data before comparing with the one actually received by the client.
 Use the `mode="text"` attribute if the output is in text mode on platforms
 that have a text/binary difference.
 
-### `<datacheckNUM [nonewline="yes"] [mode="text"]>`
+### `<datacheckNUM [nonewline="yes"] [mode="text"] [crlf="yes"]>`
 The contents of numbered `datacheck` sections are appended to the non-numbered
 one.
 
@@ -307,6 +311,7 @@ about to issue.
    appear at once when a file is transferred
 - `RETRNOSIZE` - Make sure the RETR response doesn't contain the size of the
   file
+- `RETRSIZE [size]` - Force RETR response to contain the specified size
 - `NOSAVE` - Don't actually save what is received
 - `SLOWDOWN` - Send FTP responses with 0.01 sec delay between each byte
 - `PASVBADIP` - makes PASV send back an illegal IP in its 227 response
@@ -561,12 +566,15 @@ changing protocol data such as port numbers or user-agent strings.
 One perl op per line that operates on the protocol dump. This is pretty
 advanced. Example: `s/^EPRT .*/EPRT stripped/`.
 
-### `<protocol [nonewline="yes"]>`
+### `<protocol [nonewline="yes"] crlf="yes">`
 
 the protocol dump curl should transmit, if `nonewline` is set, we will cut off
 the trailing newline of this given data before comparing with the one actually
 sent by the client The `<strip>` and `<strippart>` rules are applied before
 comparisons are made.
+
+`crlf=yes` forces the newlines to become CRLF even if not written so in the
+test.
 
 ### `<proxy [nonewline="yes"]>`
 
@@ -584,7 +592,7 @@ have a text/binary difference.
 If `nonewline` is set, we will cut off the trailing newline of this given data
 before comparing with the one actually received by the client
 
-### `<stdout [mode="text"] [nonewline="yes"]>`
+### `<stdout [mode="text"] [nonewline="yes"] [crlf="yes"]>`
 This verifies that this data was passed to stdout.
 
 Use the mode="text" attribute if the output is in text mode on platforms that
@@ -592,6 +600,9 @@ have a text/binary difference.
 
 If `nonewline` is set, we will cut off the trailing newline of this given data
 before comparing with the one actually received by the client
+
+`crlf=yes` forces the newlines to become CRLF even if not written so in the
+test.
 
 ### `<file name="log/filename" [mode="text"]>`
 The file's contents must be identical to this after the test is complete. Use

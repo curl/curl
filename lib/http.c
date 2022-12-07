@@ -219,7 +219,7 @@ const struct Curl_handler Curl_handler_wss = {
 #endif
 
 static CURLcode h3_setup_conn(struct Curl_easy *data,
-                                struct connectdata *conn)
+                              struct connectdata *conn)
 {
 #ifdef ENABLE_QUIC
   /* We want HTTP/3 directly, setup the filter chain ourself,
@@ -243,7 +243,7 @@ static CURLcode h3_setup_conn(struct Curl_easy *data,
 
   DEBUGF(infof(data, "HTTP/3 direct conn setup(conn #%ld, index=%d)",
          conn->connection_id, FIRSTSOCKET));
-  return Curl_conn_socket_set(data, FIRSTSOCKET);
+  return Curl_conn_socket_set(data, conn, FIRSTSOCKET);
 
 #else /* ENABLE_QUIC */
   (void)conn;
@@ -265,7 +265,7 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_mime_initpart(&http->form, data);
+  Curl_mime_initpart(&http->form);
   data->req.p.http = http;
 
   if(data->state.httpwant == CURL_HTTP_VERSION_3) {
@@ -576,7 +576,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     }
   }
 
-  conn->bits.rewindaftersend = FALSE; /* default */
+  data->state.rewindbeforesend = FALSE; /* default */
 
   if((expectsend == -1) || (expectsend > bytessent)) {
 #if defined(USE_NTLM)
@@ -593,8 +593,8 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
         /* rewind data when completely done sending! */
         if(!conn->bits.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
-          conn->bits.rewindaftersend = TRUE;
-          infof(data, "Rewind stream after send");
+          data->state.rewindbeforesend = TRUE;
+          infof(data, "Rewind stream before next send");
         }
 
         return CURLE_OK;
@@ -621,8 +621,8 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
         /* rewind data when completely done sending! */
         if(!conn->bits.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
-          conn->bits.rewindaftersend = TRUE;
-          infof(data, "Rewind stream after send");
+          data->state.rewindbeforesend = TRUE;
+          infof(data, "Rewind stream before next send");
         }
 
         return CURLE_OK;
@@ -646,9 +646,11 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
        closure so we can safely do the rewind right now */
   }
 
-  if(bytessent)
-    /* we rewind now at once since if we already sent something */
-    return Curl_readrewind(data);
+  if(bytessent) {
+    /* mark for rewind since if we already sent something */
+    data->state.rewindbeforesend = TRUE;
+    infof(data, "Please rewind output before next send");
+  }
 
   return CURLE_OK;
 }
@@ -705,7 +707,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   if(pickhost || pickproxy) {
     if((data->state.httpreq != HTTPREQ_GET) &&
        (data->state.httpreq != HTTPREQ_HEAD) &&
-       !conn->bits.rewindaftersend) {
+       !data->state.rewindbeforesend) {
       result = http_perhapsrewind(data, conn);
       if(result)
         return result;
@@ -2301,7 +2303,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
       cthdr = "multipart/form-data";
 
     curl_mime_headers(http->sendit, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(http->sendit, cthdr,
+    result = Curl_mime_prepare_headers(data, http->sendit, cthdr,
                                        NULL, MIMESTRATEGY_FORM);
     curl_mime_headers(http->sendit, NULL, 0);
     if(!result)
@@ -4096,7 +4098,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
       if(k->httpcode >= 300) {
         if((!conn->bits.authneg) && !conn->bits.close &&
-           !conn->bits.rewindaftersend) {
+           !data->state.rewindbeforesend) {
           /*
            * General treatment of errors when about to send data. Including :
            * "417 Expectation Failed", while waiting for 100-continue.
@@ -4106,7 +4108,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            * something else should've considered the big picture and we
            * avoid this check.
            *
-           * rewindaftersend indicates that something has told libcurl to
+           * rewindbeforesend indicates that something has told libcurl to
            * continue sending even if it gets discarded
            */
 
@@ -4155,9 +4157,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           }
         }
 
-        if(conn->bits.rewindaftersend) {
-          /* We rewind after a complete send, so thus we continue
-             sending now */
+        if(data->state.rewindbeforesend &&
+           (conn->writesockfd != CURL_SOCKET_BAD)) {
+          /* We rewind before next send, continue sending now */
           infof(data, "Keep sending data to get tossed away");
           k->keepon |= KEEP_SEND;
         }

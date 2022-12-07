@@ -34,10 +34,9 @@
 #endif
 
 /* Compile-time deprecation macros. */
-#if defined(__GNUC__) && defined(__GNUC_MINOR__) && \
-    ((__GNUC__ > 5) || (__GNUC__ == 5 && __GNUC_MINOR__ >= 3)) && \
-    !defined(__INTEL_COMPILER) && \
-    !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
+#if defined(__GNUC__) && (__GNUC__ >= 6) &&                             \
+  !defined(__INTEL_COMPILER) &&                                         \
+  !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
 #define CURL_DEPRECATED(version, message) \
     __attribute__((deprecated("since " # version ". " message)))
 #define CURL_IGNORE_DEPRECATION(statements) \
@@ -93,7 +92,7 @@
     defined(__CYGWIN__) || defined(AMIGA) || defined(__NuttX__) || \
    (defined(__FreeBSD_version) && (__FreeBSD_version < 800000)) || \
    (defined(__MidnightBSD_version) && (__MidnightBSD_version < 100000)) || \
-    defined(__sun__)
+    defined(__sun__) || defined(__serenity__)
 #include <sys/select.h>
 #endif
 
@@ -2773,8 +2772,8 @@ CURL_EXTERN CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
  * Appends a string to a linked list. If no list exists, it will be created
  * first. Returns the new list, after appending.
  */
-CURL_EXTERN struct curl_slist *curl_slist_append(struct curl_slist *,
-                                                 const char *);
+CURL_EXTERN struct curl_slist *curl_slist_append(struct curl_slist *list,
+                                                 const char *data);
 
 /*
  * NAME curl_slist_free_all()
@@ -2783,7 +2782,7 @@ CURL_EXTERN struct curl_slist *curl_slist_append(struct curl_slist *,
  *
  * free a previously built curl_slist.
  */
-CURL_EXTERN void curl_slist_free_all(struct curl_slist *);
+CURL_EXTERN void curl_slist_free_all(struct curl_slist *list);
 
 /*
  * NAME curl_getdate()
@@ -2996,8 +2995,9 @@ typedef enum {
 } CURLSHoption;
 
 CURL_EXTERN CURLSH *curl_share_init(void);
-CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *, CURLSHoption option, ...);
-CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *);
+CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option,
+                                         ...);
+CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *share);
 
 /****************************************************************************
  * Structures for querying information about the curl library at runtime.

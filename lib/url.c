@@ -560,7 +560,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   /* make libcurl quiet by default: */
   set->hide_progress = TRUE;  /* CURLOPT_NOPROGRESS changes these */
 
-  Curl_mime_initpart(&set->mimepost, data);
+  Curl_mime_initpart(&set->mimepost);
 
   /*
    * libcurl 7.10 introduced SSL verification *by default*! This needs to be
@@ -4041,7 +4041,7 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
      is later set again for the progress meter purpose */
   conn->now = Curl_now();
   if(!conn->bits.reuse)
-    result = Curl_conn_setup(data, FIRSTSOCKET, conn->dns_entry,
+    result = Curl_conn_setup(data, conn, FIRSTSOCKET, conn->dns_entry,
                              CURL_CF_SSL_DEFAULT);
   /* not sure we need this flag to be passed around any more */
   *protocol_done = FALSE;

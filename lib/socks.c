@@ -1245,6 +1245,7 @@ static const struct Curl_cftype cft_socks_proxy = {
 };
 
 CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
+                                   struct connectdata *conn,
                                    int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -1252,7 +1253,7 @@ CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
 
   result = Curl_cf_create(&cf, &cft_socks_proxy, NULL);
   if(!result)
-    Curl_conn_cf_add(data, sockindex, cf);
+    Curl_conn_cf_add(data, conn, sockindex, cf);
   return result;
 }
 

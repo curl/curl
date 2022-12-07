@@ -16,7 +16,7 @@ SPDX-License-Identifier: curl
   - diff (when a test fails, a diff is shown)
   - stunnel (for HTTPS and FTPS tests)
   - OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)
-  - nghttpx (for HTTP/2 tests)
+  - nghttpx (for HTTP/2 and HTTP/3 tests)
   - nroff (for --manual tests)
   - An available `en_US.UTF-8` locale
 
@@ -69,6 +69,11 @@ SPDX-License-Identifier: curl
 
   The HTTP server supports listening on a Unix domain socket, the default
   location is 'http.sock'.
+  
+  For HTTP/2 and HTTP/3 testing an installed `nghttpx` is used. HTTP/3
+  tests check if nghttpx supports the protocol. To override the nghttpx
+  used, set the environment variable `NGHTTPX`. The default can also be
+  changed by specifying `--with-test-nghttpx=<path>` as argument to `configure`.
 
 ### Run
 

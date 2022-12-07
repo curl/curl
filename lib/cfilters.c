@@ -134,7 +134,6 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
   struct Curl_cfilter *cfn, *cf = conn->cfilter[index];
 
   if(cf) {
-    DEBUGF(infof(data, CMSGI(conn, index, "Curl_conn_cf_discard_all()")));
     conn->cfilter[index] = NULL;
     while(cf) {
       cfn = cf->next;
@@ -153,7 +152,6 @@ void Curl_conn_close(struct Curl_easy *data, int index)
   /* it is valid to call that without filters being present */
   cf = data->conn->cfilter[index];
   if(cf) {
-    DEBUGF(infof(data, DMSGI(data, index, "close()")));
     cf->cft->close(cf, data);
   }
 }
@@ -226,20 +224,22 @@ out:
   return result;
 }
 
-void Curl_conn_cf_add(struct Curl_easy *data, int index,
+void Curl_conn_cf_add(struct Curl_easy *data,
+                      struct connectdata *conn,
+                      int index,
                       struct Curl_cfilter *cf)
 {
   (void)data;
-  DEBUGF(infof(data, DMSGI(data, index, "cf_add(filter=%s)"),
-               cf->cft->name));
-
-  DEBUGASSERT(data->conn);
+  DEBUGASSERT(conn);
   DEBUGASSERT(!cf->conn);
   DEBUGASSERT(!cf->next);
-  cf->next = data->conn->cfilter[index];
-  cf->conn = data->conn;
+
+  DEBUGF(infof(data, CMSGI(conn, index, "cf_add(filter=%s)"),
+               cf->cft->name));
+  cf->next = conn->cfilter[index];
+  cf->conn = conn;
   cf->sockindex = index;
-  data->conn->cfilter[index] = cf;
+  conn->cfilter[index] = cf;
 }
 
 void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -259,12 +259,24 @@ void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data)
   free(cf);
 }
 
+ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          const void *buf, size_t len, CURLcode *err)
+{
+  return cf->cft->do_send(cf, data, buf, len, err);
+}
+
+ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          char *buf, size_t len, CURLcode *err)
+{
+  return cf->cft->do_recv(cf, data, buf, len, err);
+}
+
 CURLcode Curl_conn_setup(struct Curl_easy *data,
+                         struct connectdata *conn,
                          int sockindex,
                          const struct Curl_dns_entry *remotehost,
                          int ssl_mode)
 {
-  struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf;
   CURLcode result;
 
@@ -281,13 +293,13 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
    */
   if(!conn->cfilter[sockindex]) {
     DEBUGF(infof(data, DMSGI(data, sockindex, "setup, init filter chain")));
-    result = Curl_conn_socket_set(data, sockindex);
+    result = Curl_conn_socket_set(data, conn, sockindex);
     if(result)
       goto out;
 
 #ifndef CURL_DISABLE_PROXY
     if(conn->bits.socksproxy) {
-      result = Curl_conn_socks_proxy_add(data, sockindex);
+      result = Curl_conn_socks_proxy_add(data, conn, sockindex);
       if(result)
         goto out;
     }
@@ -295,7 +307,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
     if(conn->bits.httpproxy) {
 #ifdef USE_SSL
       if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
-        result = Curl_ssl_cfilter_proxy_add(data, sockindex);
+        result = Curl_ssl_cfilter_proxy_add(data, conn, sockindex);
         if(result)
           goto out;
       }
@@ -303,7 +315,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
 #if !defined(CURL_DISABLE_HTTP)
       if(conn->bits.tunnel_proxy) {
-        result = Curl_conn_http_proxy_add(data, sockindex);
+        result = Curl_conn_http_proxy_add(data, conn, sockindex);
         if(result)
           goto out;
       }
@@ -315,7 +327,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
     if(ssl_mode == CURL_CF_SSL_ENABLE
       || (ssl_mode != CURL_CF_SSL_DISABLE
            && conn->handler->flags & PROTOPT_SSL)) {
-      result = Curl_ssl_cfilter_add(data, sockindex);
+      result = Curl_ssl_cfilter_add(data, conn, sockindex);
       if(result)
         goto out;
     }
@@ -325,7 +337,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
     if(data->set.haproxyprotocol) {
-      result = Curl_conn_haproxy_add(data, sockindex);
+      result = Curl_conn_haproxy_add(data, conn, sockindex);
       if(result)
         goto out;
     }
@@ -382,6 +394,21 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
+bool Curl_conn_is_ssl(struct Curl_easy *data, int sockindex)
+{
+  struct Curl_cfilter *cf = data->conn? data->conn->cfilter[sockindex] : NULL;
+
+  (void)data;
+  for(; cf; cf = cf->next) {
+    if(cf->cft->flags & CF_TYPE_SSL)
+      return TRUE;
+    if(cf->cft->flags & CF_TYPE_IP_CONNECT)
+      return FALSE;
+  }
+  return FALSE;
+}
+
+
 bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -425,7 +452,6 @@ void Curl_conn_attach_data(struct connectdata *conn,
   for(i = 0; i < ARRAYSIZE(conn->cfilter); ++i) {
     cf = conn->cfilter[i];
     if(cf) {
-      DEBUGF(infof(data, DMSGI(data, i, "attach_data()")));
       while(cf) {
         cf->cft->attach_data(cf, data);
         cf = cf->next;
@@ -443,7 +469,6 @@ void Curl_conn_detach_data(struct connectdata *conn,
   for(i = 0; i < ARRAYSIZE(conn->cfilter); ++i) {
     cf = conn->cfilter[i];
     if(cf) {
-      DEBUGF(infof(data, DMSGI(data, i, "detach_data()")));
       while(cf) {
         cf->cft->detach_data(cf, data);
         cf = cf->next;

@@ -286,7 +286,7 @@ static CURLcode AcceptServerConnect(struct Curl_easy *data)
 
   (void)curlx_nonblock(s, TRUE); /* enable non-blocking */
   /* Replace any filter on SECONDARY with one listeing on this socket */
-  result = Curl_conn_socket_accepted_set(data, SECONDARYSOCKET, &s);
+  result = Curl_conn_socket_accepted_set(data, conn, SECONDARYSOCKET, &s);
   if(result)
     return result;
 
@@ -1267,7 +1267,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   ftpc->count1 = fcmd;
 
   /* Replace any filter on SECONDARY with one listeing on this socket */
-  result = Curl_conn_socket_accepted_set(data, SECONDARYSOCKET, &portsock);
+  result = Curl_conn_socket_accepted_set(data, conn, SECONDARYSOCKET,
+                                         &portsock);
   if(result)
     goto out;
   portsock = CURL_SOCKET_BAD; /* now held in filter */
@@ -1973,7 +1974,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     }
   }
 
-  result = Curl_conn_setup(data, SECONDARYSOCKET, addr,
+  result = Curl_conn_setup(data, conn, SECONDARYSOCKET, addr,
                            conn->bits.ftp_use_data_ssl?
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
@@ -2447,6 +2448,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
 
     if((instate != FTP_LIST) &&
        !data->state.prefer_ascii &&
+       !data->set.ignorecl &&
        (ftp->downloadsize < 1)) {
       /*
        * It seems directory listings either don't show the size or very
@@ -2740,8 +2742,8 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if((ftpcode == 234) || (ftpcode == 334)) {
         /* this was BLOCKING, keep it so for now */
         bool done;
-        if(!Curl_ssl_conn_is_ssl(data, FIRSTSOCKET)) {
-          result = Curl_ssl_cfilter_add(data, FIRSTSOCKET);
+        if(!Curl_conn_is_ssl(data, FIRSTSOCKET)) {
+          result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
           if(result) {
             /* we failed and bail out */
             return CURLE_USE_SSL_FAILED;
