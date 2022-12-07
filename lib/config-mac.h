@@ -83,6 +83,11 @@
 
 #define SIZEOF_INT              4
 #define SIZEOF_SIZE_T           4
+#ifdef HAVE_LONGLONG
+#define SIZEOF_CURL_OFF_T       8
+#else
+#define SIZEOF_CURL_OFF_T       4
+#endif
 
 #define HAVE_RECV 1
 #define RECV_TYPE_ARG1 int
