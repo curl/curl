@@ -165,11 +165,20 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
 #elif defined(macintosh)
-#  define CURL_TYPEOF_CURL_OFF_T     long long
-#  define CURL_FORMAT_CURL_OFF_T     "lld"
-#  define CURL_FORMAT_CURL_OFF_TU    "llu"
-#  define CURL_SUFFIX_CURL_OFF_T     LL
-#  define CURL_SUFFIX_CURL_OFF_TU    ULL
+#  include <ConditionalMacros.h>
+#  if TYPE_LONGLONG
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#  else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
 #  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
 #elif defined(__TANDEM)
