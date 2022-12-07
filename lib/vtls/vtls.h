@@ -208,8 +208,6 @@ bool Curl_ssl_supports(struct Curl_easy *data, int ssl_option);
 void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
                              CURLINFO info, int n);
 
-bool Curl_ssl_use(struct connectdata *conn, int sockindex);
-
 #else /* if not USE_SSL */
 
 /* When SSL support is not present, just define away these function calls */
@@ -228,7 +226,6 @@ bool Curl_ssl_use(struct connectdata *conn, int sockindex);
 #define Curl_ssl_false_start(a) FALSE
 #define Curl_ssl_get_internals(a,b,c,d) NULL
 #define Curl_ssl_supports(a,b) FALSE
-#define Curl_ssl_use(a,b) FALSE
 #define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_proxy_add(a,b,c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_get_config(a,b) NULL

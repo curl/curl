@@ -1437,7 +1437,7 @@ bool Curl_connalive(struct Curl_easy *data, struct connectdata *conn)
 {
   (void)data;
   /* First determine if ssl */
-  if(Curl_ssl_use(conn, FIRSTSOCKET)) {
+  if(Curl_conn_is_ssl(data, FIRSTSOCKET)) {
     /* use the SSL context */
     if(!Curl_ssl_check_cxn(data, conn))
       return false;   /* FIN received */
@@ -1695,7 +1695,7 @@ static CURLcode socket_cf_connect(struct Curl_cfilter *cf,
       result = is_connected(data, conn, sockindex, done);
       if(!result && *done) {
         Curl_pgrsTime(data, TIMER_CONNECT);    /* we're connected already */
-        if(Curl_ssl_use(conn, FIRSTSOCKET) ||
+        if(Curl_conn_is_ssl(data, FIRSTSOCKET) ||
            (conn->handler->protocol & PROTO_FAMILY_SSH))
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
         post_connect(data, conn, sockindex);
