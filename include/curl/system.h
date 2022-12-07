@@ -164,7 +164,7 @@
 #  endif
 #  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
-#elif defined(__MWERKS__)
+#elif defined(macintosh)
 #  define CURL_TYPEOF_CURL_OFF_T     long long
 #  define CURL_FORMAT_CURL_OFF_T     "lld"
 #  define CURL_FORMAT_CURL_OFF_TU    "llu"
