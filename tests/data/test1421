@@ -12,7 +12,7 @@ HTTP proxy
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Uknown-header: blrub
+Unknown-header: blrub
 Content-Length: 6
 
 -foo-
@@ -45,12 +45,12 @@ proxy
 <verify>
 <stdout>
 HTTP/1.1 200 OK
-Uknown-header: blrub
+Unknown-header: blrub
 Content-Length: 6
 
 -foo-
 HTTP/1.1 200 OK
-Uknown-header: blrub
+Unknown-header: blrub
 Content-Length: 6
 
 -foo-
