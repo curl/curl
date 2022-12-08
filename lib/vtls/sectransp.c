@@ -1199,6 +1199,7 @@ static CFTypeRef ExtractIdentityFromArray(CFArrayRef pArray)
                                               kSecImportItemIdentity);
     }
   }
+  return NULL;
 }
 #endif /* CURL_BUILD_MAC_10_7 */
 
