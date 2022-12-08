@@ -61,17 +61,18 @@ static struct tool_mime *tool_mime_new_parts(struct tool_mime *parent)
 }
 
 static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
-                                            char *data)
+                                            char *mime_data)
 {
+  char *mime_data_copy;
   struct tool_mime *m = NULL;
 
-  data = strdup(data);
-  if(data) {
+  mime_data_copy = strdup(mime_data);
+  if(mime_data_copy) {
     m = tool_mime_new(parent, TOOLMIME_DATA);
     if(!m)
-      free(data);
+      free(mime_data_copy);
     else
-      m->data = data;
+      m->data = mime_data_copy;
   }
   return m;
 }
