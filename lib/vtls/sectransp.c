@@ -140,6 +140,10 @@
 #define ioErr -36
 #define paramErr -50
 
+#if CURL_BUILD_MAC_10_7
+#define tempKeychain "CURL_RESERVED_TEMPORARY_KEYCHAIN"
+#endif
+
 struct ssl_backend_data {
   SSLContextRef ssl_ctx;
   bool ssl_direction; /* true if writing, false if reading */
@@ -1153,6 +1157,51 @@ static OSStatus CopyIdentityWithLabel(char *label,
   return status;
 }
 
+#if CURL_BUILD_MAC_10_7
+static SecKeychainRef GetTemporaryKeychain()
+{
+  SecKeychainRef keychain = NULL;
+  OSStatus status = SecKeychainCreate(tempKeychain,
+                                      0,
+                                      "",
+                                      false,
+                                      NULL,
+                                      &keychain);
+  if(status == errSecDuplicateKeychain)
+    status = SecKeychainOpen(tempKeychain, &keychain);
+
+  if(status == errSecSuccess && keychain)
+    return keychain;
+  return NULL;
+}
+
+static void DeleteTemporaryKeychain()
+{
+  SecKeychainRef keychain = GetTemporaryKeychain();
+  if(keychain) {
+    SecKeychainDelete(keychain);
+    CFRelease(keychain);
+  }
+}
+
+static CFTypeRef ExtractIdentityFromArray(CFArrayRef pArray)
+{
+  CFIndex i, count;
+  count = CFArrayGetCount(pArray);
+
+  for(i = 0; i < count; i++) {
+    CFTypeRef item = (CFTypeRef) CFArrayGetValueAtIndex(pArray, i);
+    CFTypeID  itemID = CFGetTypeID(item);
+
+    if(itemID == CFDictionaryGetTypeID()) {
+      return (CFTypeRef) CFDictionaryGetValue(
+                                              (CFDictionaryRef) item,
+                                              kSecImportItemIdentity);
+    }
+  }
+}
+#endif /* CURL_BUILD_MAC_10_7 */
+
 static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
                                            const struct curl_blob *blob,
                                            const char *cPassword,
@@ -1257,6 +1306,50 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
 #endif
       }
     }
+
+#if CURL_BUILD_MAC_10_7
+    if(status == errSecItemNotFound) {
+      /* Try importing into temporary Keychain */
+      SecKeychainRef curlKeychain = GetTemporaryKeychain();
+      if(curlKeychain) {
+        const void *cKeys[] = {
+          kSecImportExportKeychain,
+          kSecImportExportPassphrase
+        };
+        const void *cValues[] = {
+          curlKeychain,
+          password
+        };
+        CFDictionaryRef options =
+        CFDictionaryCreate(NULL, cKeys, cValues,
+                           password ? 2L : 1L,
+                           NULL, NULL);
+        CFArrayRef tempItems = NULL;
+        if(options) {
+          status = SecPKCS12Import(pkcs_data, options, &tempItems);
+          CFRelease(options);
+        }
+        if(status == errSecSuccess &&
+           tempItems &&
+           CFArrayGetCount(tempItems)) {
+          CFTypeRef identity = ExtractIdentityFromArray(tempItems);
+          if(identity) {
+            CFRetain(identity);
+            *out_cert_and_key = (SecIdentityRef) identity;
+          }
+          else
+            status = errSecItemNotFound;
+        }
+        else
+          status = errSecItemNotFound;
+        if(tempItems)
+          CFRelease(tempItems);
+      }
+      if(curlKeychain)
+        CFRelease(curlKeychain);
+    }
+#endif /* CURL_BUILD_MAC_10_7 */
+
 
     if(items)
       CFRelease(items);
@@ -2503,6 +2596,9 @@ static CURLcode sectransp_connect_step2(struct Curl_cfilter *cf,
   err = SSLHandshake(backend->ssl_ctx);
 
   if(err != noErr) {
+#if CURL_BUILD_MAC_10_7
+    DeleteTemporaryKeychain();
+#endif
     switch(err) {
       case errSSLWouldBlock:  /* they're not done with us yet */
         connssl->connecting_state = backend->ssl_direction ?
@@ -2959,6 +3055,9 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
 static CURLcode sectransp_connect_step3(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
+#if CURL_BUILD_MAC_10_7
+  DeleteTemporaryKeychain();
+#endif
   struct ssl_connect_data *connssl = cf->ctx;
 
   /* There is no step 3!
