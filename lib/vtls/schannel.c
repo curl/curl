@@ -810,9 +810,9 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
     SCH_CREDENTIALS credentials = { 0 };
     TLS_PARAMETERS tls_parameters = { 0 };
-    CRYPTO_SETTINGS crypto_settings[4] = { 0 };
-    UNICODE_STRING blocked_ccm_modes[1] = { 0 };
-    UNICODE_STRING blocked_gcm_modes[1] = { 0 };
+    CRYPTO_SETTINGS crypto_settings[4] = { { 0 } };
+    UNICODE_STRING blocked_ccm_modes[1] = { { 0 } };
+    UNICODE_STRING blocked_gcm_modes[1] = { { 0 } };
 
     int crypto_settings_idx = 0;
 
@@ -1634,9 +1634,15 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 #ifdef HAS_MANUAL_VERIFY_API
   if(conn_config->verifypeer && backend->use_manual_cred_validation) {
+    /* Certificate verification also verifies the hostname if verifyhost */
     return Curl_verify_certificate(cf, data);
   }
 #endif
+
+  /* Verify the hostname manually when certificate verification is disabled,
+     because in that case Schannel won't verify it. */
+  if(!conn_config->verifypeer && conn_config->verifyhost)
+    return Curl_verify_host(cf, data);
 
   return CURLE_OK;
 }

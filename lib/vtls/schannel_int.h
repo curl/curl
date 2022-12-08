@@ -43,6 +43,58 @@
 #define HAS_CLIENT_CERT_PATH
 #endif
 
+#ifndef CRYPT_DECODE_NOCOPY_FLAG
+#define CRYPT_DECODE_NOCOPY_FLAG 0x1
+#endif
+
+#ifndef CRYPT_DECODE_ALLOC_FLAG
+#define CRYPT_DECODE_ALLOC_FLAG 0x8000
+#endif
+
+#ifndef CERT_ALT_NAME_DNS_NAME
+#define CERT_ALT_NAME_DNS_NAME 3
+#endif
+
+#ifndef CERT_ALT_NAME_IP_ADDRESS
+#define CERT_ALT_NAME_IP_ADDRESS 8
+#endif
+
+
+#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+/* Original mingw is missing CERT structs or they're disabled.
+   Refer to w32api-5.0.2-mingw32-dev\include\wincrypt.h. */
+
+/* !checksrc! disable TYPEDEFSTRUCT 4 */
+typedef struct _CERT_OTHER_NAME {
+  LPSTR pszObjId;
+  CRYPT_OBJID_BLOB Value;
+} CERT_OTHER_NAME, *PCERT_OTHER_NAME;
+
+typedef struct _CERT_ALT_NAME_ENTRY {
+  DWORD dwAltNameChoice;
+  union {
+    PCERT_OTHER_NAME pOtherName;
+    LPWSTR pwszRfc822Name;
+    LPWSTR pwszDNSName;
+    CERT_NAME_BLOB DirectoryName;
+    LPWSTR pwszURL;
+    CRYPT_DATA_BLOB IPAddress;
+    LPSTR pszRegisteredID;
+  };
+} CERT_ALT_NAME_ENTRY, *PCERT_ALT_NAME_ENTRY;
+
+typedef struct _CERT_ALT_NAME_INFO {
+  DWORD cAltEntry;
+  PCERT_ALT_NAME_ENTRY rgAltEntry;
+} CERT_ALT_NAME_INFO, *PCERT_ALT_NAME_INFO;
+
+typedef struct _CRYPT_DECODE_PARA {
+  DWORD cbSize;
+  PFN_CRYPT_ALLOC pfnAlloc;
+  PFN_CRYPT_FREE pfnFree;
+} CRYPT_DECODE_PARA, *PCRYPT_DECODE_PARA;
+#endif
+
 #ifndef SCH_CREDENTIALS_VERSION
 
 #define SCH_CREDENTIALS_VERSION  0x00000005

@@ -76,6 +76,9 @@
 
 extern const struct Curl_ssl Curl_ssl_schannel;
 
+CURLcode Curl_verify_host(struct Curl_cfilter *cf,
+                          struct Curl_easy *data);
+
 CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                  struct Curl_easy *data);
 

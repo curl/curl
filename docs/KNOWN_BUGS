@@ -21,7 +21,6 @@ problems may have been fixed or changed somewhat since this was written.
  2.4 Secure Transport will not import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
- 2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
@@ -162,12 +161,6 @@ problems may have been fixed or changed somewhat since this was written.
 2.7 Client cert (MTLS) issues with Schannel
 
  See https://github.com/curl/curl/issues/3145
-
-2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
-
- This seems to be a limitation in the underlying Schannel API.
-
- https://github.com/curl/curl/issues/3284
 
 2.11 Schannel TLS 1.2 handshake bug in old Windows versions
 
