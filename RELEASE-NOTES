@@ -4,7 +4,7 @@ curl and libcurl 7.87.0
  Command line options:         249
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2766
+ Contributors:                 2768
 
 This release includes the following changes:
 
@@ -17,12 +17,22 @@ This release includes the following bugfixes:
 
  o aws_sigv4: consult x-%s-content-sha256 for payload hash [102]
  o aws_sigv4: fix typos in aws_sigv4.c [101]
+ o base64: better alloc size [124]
+ o base64: encode without using snprintf [123]
+ o base64: faster base64 decoding [120]
+ o build: assume assert.h is always available [111]
+ o build: assume errno.h is always available [110]
+ o CI: Change FreeBSD image from 12.3 to 12.4 [108]
+ o CI: LGTM.com will be shut down in December 2022 [112]
  o ci: Remove zuul fuzzing job as it's superseded by CIFuzz
  o cmake: check for cross-compile, not for toolchain [54]
  o CMake: fix build with `CURL_USE_GSSAPI` [78]
  o cmake: really enable warnings with clang [25]
  o cmdline-opts/gen.pl: fix the linkifier [64]
  o cmdline-opts/page-footer: remove long option nroff formatting
+ o config-mac: define HAVE_SYS_IOCTL_H [107]
+ o config-mac: fix typo: size_T -> size_t [125]
+ o config-mac: remove HAVE_SYS_SELECT_H [116]
  o config-win32: fix SIZEOF_OFF_T for MSVC and old MinGW [41]
  o configure: require fork for NTLM-WB [36]
  o cookie: compare cookie prefixes case insensitively [14]
@@ -31,6 +41,7 @@ This release includes the following bugfixes:
  o curl-openssl.m4: do not add $prefix/include/openssl to CPPFLAGS [90]
  o curl-rustls.m4: on macOS, rustls also needs the Security framework [44]
  o curl.h: include <sys/select.h> on SerenityOS [104]
+ o curl.h: name all public function parameters [118]
  o curl: override the numeric locale and set "C" by force [60]
  o curl: timeout in the read callback [15]
  o curl_endian: remove Curl_write64_le from header [81]
@@ -40,6 +51,7 @@ This release includes the following bugfixes:
  o CURLOPT_DEBUGFUNCTION.3: do not assume nul-termination in example [31]
  o CURLOPT_POST.3: Explain setting to 0 changes request type [61]
  o docs/EARLY-RELEASE.md: how to determine an early release [37]
+ o docs/examples: spell correction ('Retrieve') [119]
  o docs/INSTALL.md: expand on static builds [62]
  o docs/WEBSOCKET.md: explain the URL use [71]
  o docs: add missing parameters for --retry flag [2]
@@ -71,11 +83,14 @@ This release includes the following bugfixes:
  o lib: rewind BEFORE request instead of AFTER previous [65]
  o lib: sync guard for Curl_getaddrinfo_ex() definition and use [6]
  o libcurl-errors.3: remove duplicate word [3]
+ o libssh2: return error when ssh_hostkeyfunc returns error [121]
  o log2changes.pl: wrap long lines at 80 columns [59]
  o Makefile.mk: address minor issues [87]
+ o Makefile.mk: improve a GNU Make hack [122]
  o Makefile.mk: portable Makefile.m32 [86]
  o maketgz: set the right version in lib/libcurl.plist [53]
  o mime: relax easy/mime structures binding [94]
+ o misc: Fix incorrect spelling [113]
  o misc: remove duplicated include files [28]
  o misc: typo and grammar fixes [23]
  o negtelnetserver.py: have it call its close() method [68]
@@ -97,9 +112,11 @@ This release includes the following bugfixes:
  o scripts/checksrc.pl: detect duplicated include files [29]
  o sendf: change Curl_read_plain to wrap Curl_recv_plain [48]
  o sendf: remove unnecessary if condition [26]
+ o setup: do not require __MRC__ defined for Mac OS 9 builds [117]
  o spellcheck.words: remove 'github' as an accepted word [22]
  o strcase: use curl_str(n)equal for case insensitive matches [8]
  o system.h: support 64-bit curl_off_t for NonStop 32-bit [21]
+ o test1421: fix typo [109]
  o test3026: reduce runtime in legacy mingw builds [73]
  o tests/sshserver.pl: re-enable ssh-rsa while using openssh 8.8+
  o tests: add authorityInfoAccess to generated certs [99]
@@ -135,23 +152,23 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adam Averay, Alexandre Ferrieux, Alex Xu, Ali Utku Selen, Andrei Rybak,
-  Andy Stamp, Anthony Hu, AtariDreams on github, Ayesh Karunaratne,
+  Andy Alt, Andy Stamp, Anthony Hu, AtariDreams on github, Ayesh Karunaratne,
   Baitinq on github, Casey Bodley, Christopher Sauer, Christoph Reiter,
   Dan Fandrich, Daniel Faust, Daniel Gustafsson, Daniel Stenberg,
-  Diogo Teles Sant'Anna, Egor Pugin, Emanuele Torre, Emil Österlund,
-  Eric Vigeant, Erik Janssen, Fata Nugraha, Felipe Gasper, Gisle Vanem,
-  godmar on github, Henning Schild, Hirotaka Tagawa, Ikko Ashimine,
-  Jakub Zakrzewski, Joel Depooter, John Sherrill, Jon Rumsey,
+  David Benjamin, Diogo Teles Sant'Anna, Egor Pugin, Emanuele Torre,
+  Emil Österlund, Eric Vigeant, Erik Janssen, Fata Nugraha, Felipe Gasper,
+  Gisle Vanem, godmar on github, Henning Schild, Hirotaka Tagawa,
+  Ikko Ashimine, Jakub Zakrzewski, Joel Depooter, John Sherrill, Jon Rumsey,
   jvreelanda on github, Karthikdasari0423 on github, Kenneth Myhra,
-  Lorenzo Miniero, Luca Niccoli, Marc Hörsken, Mark Gaiser, Max Dymond,
-  Michael Drake, Michael Kaufmann, Mikhail Kuznetsov,
-  MonkeybreadSoftware on github, Nathan Moinvaziri, Oskar Sigvardsson,
-  Patrick Monnerat, Patrick Schlangen, Peter Piekarski, Philip Chan,
-  Philip Heiduck, Philip Sanetra, Randall S. Becker, Ray Satiro, Rob de Wit,
-  Robin Marx, Ryan Schmidt, Sean McArthur, Stefan Eissing, Stephan Guilloux,
-  Stuart Henderson, Thomas Glanzmann, Trail of Bits, Viktor Szakats,
-  xianghongai on github, Zespre Schmidt
-  (68 contributors)
+  Lorenzo Miniero, Luca Niccoli, Marcel Raad, Marc Hörsken, Mark Gaiser,
+  Max Dymond, Michael Drake, Michael Kaufmann, Michael Musset,
+  Mikhail Kuznetsov, MonkeybreadSoftware on github, Nathan Moinvaziri,
+  Oskar Sigvardsson, Patrick Monnerat, Patrick Schlangen, Peter Piekarski,
+  Philip Chan, Philip Heiduck, Philip Sanetra, Randall S. Becker, Ray Satiro,
+  Rob de Wit, Robin Marx, Ryan Schmidt, Sean McArthur, Stefan Eissing,
+  Stephan Guilloux, Stuart Henderson, Thomas Glanzmann, Trail of Bits,
+  Viktor Szakats, xianghongai on github, xtonik on github, Zespre Schmidt
+  (73 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -259,3 +276,20 @@ References to bug reports and discussions on issues:
  [104] = https://curl.se/bug/?i=10006
  [105] = https://curl.se/bug/?i=10004
  [106] = https://curl.se/bug/?i=9031
+ [107] = https://curl.se/bug/?i=10042
+ [108] = https://curl.se/bug/?i=10051
+ [109] = https://curl.se/bug/?i=10055
+ [110] = https://curl.se/bug/?i=9986
+ [111] = https://curl.se/bug/?i=9985
+ [112] = https://curl.se/bug/?i=10052
+ [113] = https://curl.se/bug/?i=10045
+ [116] = https://curl.se/bug/?i=10039
+ [117] = https://curl.se/bug/?i=10037
+ [118] = https://curl.se/bug/?i=10036
+ [119] = https://curl.se/bug/?i=10040
+ [120] = https://curl.se/bug/?i=10032
+ [121] = https://curl.se/bug/?i=10034
+ [122] = https://curl.se/bug/?i=10031
+ [123] = https://curl.se/bug/?i=10026
+ [124] = https://curl.se/bug/?i=10024
+ [125] = https://curl.se/bug/?i=10029
