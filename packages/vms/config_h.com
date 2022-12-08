@@ -1539,13 +1539,6 @@ $		    write tf "#endif"
 $		endif
 $		goto cfgh_in_loop1
 $	    endif
-$	    if key2b .eqs. "SHORT"
-$	    then
-$		write tf "#ifndef SIZEOF_SHORT"
-$		write tf "#define SIZEOF_SHORT 2"
-$		write tf "#endif"
-$		goto cfgh_in_loop1
-$	    endif
 $	    write tf "/* ", xline, " */"
 $	    goto cfgh_in_loop1
 $	endif
