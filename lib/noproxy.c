@@ -121,6 +121,13 @@ enum nametype {
 ****************************************************************/
 bool Curl_check_noproxy(const char *name, const char *no_proxy)
 {
+  /*
+   * If we don't have a hostname at all, like for example with a FILE
+   * transfer, we have nothing to interrogate the noproxy list with.
+   */
+  if(!name || name[0] == '\0')
+    return FALSE;
+
   /* no_proxy=domain1.dom,host.domain2.dom
    *   (a comma-separated list of hosts which should
    *   not be proxied, or an asterisk to override
