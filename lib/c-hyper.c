@@ -174,8 +174,8 @@ static int hyper_each_header(void *userdata,
     }
   }
 
-  data->info.header_size += (long)len;
-  data->req.headerbytecount += (long)len;
+  data->info.header_size += (curl_off_t)len;
+  data->req.headerbytecount += (curl_off_t)len;
   return HYPER_ITER_CONTINUE;
 }
 
@@ -264,23 +264,25 @@ static CURLcode status_line(struct Curl_easy *data,
   int writetype;
   vstr = http_version == HYPER_HTTP_VERSION_1_1 ? "1.1" :
     (http_version == HYPER_HTTP_VERSION_2 ? "2" : "1.0");
-  conn->httpversion =
-    http_version == HYPER_HTTP_VERSION_1_1 ? 11 :
-    (http_version == HYPER_HTTP_VERSION_2 ? 20 : 10);
-  if(http_version == HYPER_HTTP_VERSION_1_0)
-    data->state.httpwant = CURL_HTTP_VERSION_1_0;
-
-  if(data->state.hconnect)
-    /* CONNECT */
-    data->info.httpproxycode = http_status;
 
   /* We need to set 'httpcodeq' for functions that check the response code in
      a single place. */
   data->req.httpcode = http_status;
 
-  result = Curl_http_statusline(data, conn);
-  if(result)
-    return result;
+  if(data->state.hconnect)
+    /* CONNECT */
+    data->info.httpproxycode = http_status;
+  else {
+    conn->httpversion =
+      http_version == HYPER_HTTP_VERSION_1_1 ? 11 :
+      (http_version == HYPER_HTTP_VERSION_2 ? 20 : 10);
+    if(http_version == HYPER_HTTP_VERSION_1_0)
+      data->state.httpwant = CURL_HTTP_VERSION_1_0;
+
+    result = Curl_http_statusline(data, conn);
+    if(result)
+      return result;
+  }
 
   Curl_dyn_reset(&data->state.headerb);
 
@@ -303,9 +305,8 @@ static CURLcode status_line(struct Curl_easy *data,
     if(result)
       return result;
   }
-  data->info.header_size += (long)len;
-  data->req.headerbytecount += (long)len;
-  data->req.httpcode = http_status;
+  data->info.header_size += (curl_off_t)len;
+  data->req.headerbytecount += (curl_off_t)len;
   return CURLE_OK;
 }
 
