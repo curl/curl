@@ -82,6 +82,7 @@
 #define HAVE_IOCTL_FIONBIO      1
 
 #define SIZEOF_INT              4
+#define SIZEOF_LONG             4
 #define SIZEOF_SIZE_T           4
 #ifdef HAVE_LONGLONG
 #define SIZEOF_CURL_OFF_T       8
