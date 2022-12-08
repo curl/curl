@@ -2015,7 +2015,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
 
         /* curl 7.69.x */
-        my_setopt(curl, CURLOPT_MAIL_RCPT_ALLLOWFAILS,
+        my_setopt(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS,
           config->mail_rcpt_allowfails ? 1L : 0L);
 
         /* curl 7.20.x */
