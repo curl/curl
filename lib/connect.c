@@ -1694,6 +1694,7 @@ static CURLcode socket_cf_connect(struct Curl_cfilter *cf,
     case SCFST_WAITING:
       result = is_connected(data, conn, sockindex, done);
       if(!result && *done) {
+        /* TODO: there's got to be a better way to do this */
         Curl_pgrsTime(data, TIMER_CONNECT);    /* we're connected already */
         if(Curl_conn_is_ssl(data, FIRSTSOCKET) ||
            (conn->handler->protocol & PROTO_FAMILY_SSH))
