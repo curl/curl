@@ -3056,10 +3056,10 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
 static CURLcode sectransp_connect_step3(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
 #if CURL_BUILD_MAC_10_7
   DeleteTemporaryKeychain();
 #endif
-  struct ssl_connect_data *connssl = cf->ctx;
 
   /* There is no step 3!
    * Well, okay, let's collect server certificates, and if verbose mode is on,
