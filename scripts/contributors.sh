@@ -45,6 +45,11 @@ if [ -z "$CURLWWW" ] ; then
     CURLWWW=../curl-www
 fi
 
+# We also include curl-fuzzer if possible. Override by setting CURLFUZZER
+if [ -z "$CURLFUZZER" ] ; then
+    CURLFUZZER=../curl-fuzzer
+fi
+
 # filter out Author:, Commit: and *by: lines
 # cut off the email parts
 # split list of names at comma
@@ -61,6 +66,19 @@ fi
   if [ -d "$CURLWWW" ]
   then
    git -C "$CURLWWW" log --pretty=full --use-mailmap $start..HEAD
+  fi
+  if [ -d "$CURLFUZZER" ]
+  then
+   # If $start is a tag, we want to use the tag timestamp if available.
+   STARTTS=$(git for-each-ref --format="%(refname:short)|%(taggerdate:unix)" refs/tags/* | grep ^"$start|" | cut -f 2 -d '|')
+   if [ -n "$STARTTS" ]
+   then
+       git -C "$CURLFUZZER" log --pretty=full --use-mailmap --since "$STARTTS"
+   else
+       # No tag timestamp. We'll use the commit timestamp instead
+       STARTTS=$(git log  --pretty="format:%ci" -n 1 $start)
+       git -C "$CURLFUZZER" log --pretty=full --use-mailmap --since "$STARTTS"
+   fi
   fi
  ) | \
 grep -Eai '(^Author|^Commit|by):' | \
