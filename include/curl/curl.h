@@ -1140,7 +1140,7 @@ typedef enum {
   /* Time-out the read operation after this amount of seconds */
   CURLOPT(CURLOPT_TIMEOUT, CURLOPTTYPE_LONG, 13),
 
-  /* If the CURLOPT_INFILE is used, this can be used to inform libcurl about
+  /* If CURLOPT_READDATA is used, this can be used to inform libcurl about
    * how large the file being sent really is. That allows better error
    * checking and better verifies that the upload was successful. -1 means
    * unknown size.
