@@ -24,62 +24,64 @@ jobs:
     name: ${{ matrix.build.name }}
     runs-on: 'ubuntu-latest'
     timeout-minutes: 90
+    env:
+      PKGS_COMMON: libpsl-dev libbrotli-dev libzstd-dev
     strategy:
       fail-fast: false
       matrix:
         build:
         - name: bearssl
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev
           install_steps: bearssl
           configure: LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
 
         - name: bearssl-clang
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev clang
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev clang
           install_steps: bearssl
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
 
         - name: libressl
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev
           install_steps: libressl
           configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
 
         - name: libressl-clang
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev clang
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev clang
           install_steps: libressl
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
 
         - name: mbedtls
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev
+          install_packages: ${{ env.PKGS_COMMON }} libnghttp2-dev
           install_steps: mbedtls
           configure: LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
 
         - name: mbedtls-clang
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev clang
+          install_packages: ${{ env.PKGS_COMMON }} libnghttp2-dev clang
           install_steps: mbedtls
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
 
         - name: msh3
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev
           install_steps: quictls msh3
           configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
 
         - name: openssl3
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev
           install_steps: gcc-11 openssl3
           configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
         - name: openssl3-O3
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev
           install_steps: gcc-11 openssl3
           configure: CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
         - name: openssl3-clang
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev clang
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev clang
           install_steps: openssl3
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
         - name: event-based
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev libssh-dev
+          install_packages: ${{ env.PKGS_COMMON }} libssh-dev
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
           tflags: -n -e '!TLS-SRP'
 
@@ -88,22 +90,22 @@ jobs:
           configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
 
         - name: rustls
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev
+          install_packages: ${{ env.PKGS_COMMON }}
           install_steps: rust rustls
           configure: --with-rustls=$HOME/rustls --enable-debug
 
         - name: Intel compiler - without SSL
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev
           install_steps: intel
           configure: CC=icc --enable-debug --without-ssl
 
         - name: Intel compiler - OpenSSL
-          install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libssl-dev
+          install_packages: ${{ env.PKGS_COMMON }} zlib1g-dev libssl-dev
           install_steps: intel
           configure: CC=icc --enable-debug --with-openssl
 
         - name: NSS
-          install_packages: clang libnss3-dev libpsl-dev libbrotli-dev libzstd-dev libnghttp2-dev nss-plugin-pem
+          install_packages: clang libnss3-dev ${{ env.PKGS_COMMON }} libnghttp2-dev nss-plugin-pem
           configure: CC=clang CPPFLAGS="-isystem /usr/include/nss" --with-nss --enable-debug --with-nss-deprecated
 
     steps:
