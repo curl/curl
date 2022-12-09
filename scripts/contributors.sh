@@ -60,7 +60,7 @@ fi
   git log --pretty=full --use-mailmap $start..HEAD
   if [ -d "$CURLWWW" ]
   then
-   git -C ../curl-www log --pretty=full --use-mailmap $start..HEAD
+   git -C "$CURLWWW" log --pretty=full --use-mailmap $start..HEAD
   fi
  ) | \
 grep -Eai '(^Author|^Commit|by):' | \
