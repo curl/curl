@@ -699,6 +699,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
 {
   size_t fillcount;
   struct Curl_easy *data = (struct Curl_easy *)userdata;
+  struct connectdata *conn = (struct connectdata *)data->conn;
   CURLcode result;
   (void)ctx;
 
@@ -713,7 +714,15 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     return HYPER_POLL_PENDING;
   }
 
-  result = Curl_fillreadbuffer(data, data->set.upload_buffer_size, &fillcount);
+  if(data->req.upload_chunky && conn->bits.authneg) {
+    fillcount = 0;
+    data->req.upload_chunky = FALSE;
+    result = CURLE_OK;
+  }
+  else {
+    result = Curl_fillreadbuffer(data, data->set.upload_buffer_size,
+                                 &fillcount);
+  }
   if(result) {
     data->state.hresult = result;
     return HYPER_POLL_ERROR;
@@ -1166,7 +1175,12 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"\r\n", 2);
 
-  data->req.upload_chunky = FALSE;
+  if(data->req.upload_chunky && conn->bits.authneg) {
+    data->req.upload_chunky = TRUE;
+  }
+  else {
+    data->req.upload_chunky = FALSE;
+  }
   sendtask = hyper_clientconn_send(client, req);
   if(!sendtask) {
     failf(data, "hyper_clientconn_send");
