@@ -420,8 +420,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       if(result)
         return result;
       if(!n)
-        /* still have nothing */
-        goto out;
+        /* connection closed */
+        return CURLE_GOT_NOTHING;
       wsp->stillb = data->state.buffer;
       wsp->stillblen = n;
     }
@@ -483,7 +483,6 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
         wsp->stillb = NULL;
     }
   }
-out:
   *metap = &wsp->frame;
   return CURLE_OK;
 }
@@ -632,9 +631,14 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
       return CURLE_OK;
     /* raw mode sends exactly what was requested, and this is from within
        the write callback */
-    if(Curl_is_in_callback(data))
+    if(Curl_is_in_callback(data)) {
+      if(!data->conn) {
+        failf(data, "No associated connection");
+        return CURLE_SEND_ERROR;
+      }
       result = Curl_write(data, data->conn->writesockfd, buffer, buflen,
                           &written);
+    }
     else
       result = Curl_senddata(data, buffer, buflen, &written);
 
