@@ -420,8 +420,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       if(result)
         return result;
       if(!n)
-        /* still have nothing */
-        goto out;
+        /* connection closed */
+        return CURLE_GOT_NOTHING;
       wsp->stillb = data->state.buffer;
       wsp->stillblen = n;
     }
@@ -483,7 +483,6 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
         wsp->stillb = NULL;
     }
   }
-out:
   *metap = &wsp->frame;
   return CURLE_OK;
 }
