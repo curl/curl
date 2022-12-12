@@ -16,3 +16,6 @@ received, the use of this option will create an empty file.
 
 When used in FTP, the FTP server response lines are considered being "headers"
 and thus are saved there.
+
+Having multiple transfers in one set of operations (i.e. the URLs in one
+--next clause), will append them to the same file, seperated by a blank line.
