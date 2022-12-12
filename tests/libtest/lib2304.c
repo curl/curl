@@ -86,7 +86,7 @@ static void websocket(CURL *curl)
     if(ping(curl, "foobar"))
       return;
     fprintf(stderr, "Receive pong\n");
-    if(recv_pong(curl, "foobar") == CURLE_GOT_NOTHING) {
+    if(recv_pong(curl, "foobar")) {
       printf("Connection closed\n");
       return;
     }
