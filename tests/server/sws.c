@@ -881,12 +881,12 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     req->offset = 0;
 
     /* read websocket traffic */
-    do {
+    if(req->open)
+      do {
 
       got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
       if(got > 0)
         req->offset += got;
-      logmsg("Got: %d", (int)got);
 
       if((got == -1) && ((EAGAIN == errno) || (EWOULDBLOCK == errno))) {
         int rc;
@@ -894,6 +894,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
         fd_set output;
         struct timeval timeout = {1, 0}; /* 1000 ms */
 
+        logmsg("Got EAGAIN from sread");
         FD_ZERO(&input);
         FD_ZERO(&output);
         got = 0;
@@ -1916,6 +1917,9 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
   if(req->open) {
     logmsg("=> persistent connection request ended, awaits new request\n");
     return 1;
+  }
+  else {
+    logmsg("=> NOT a persistent connection, close close CLOSE\n");
   }
 
   return -1;
