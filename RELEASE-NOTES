@@ -4,12 +4,13 @@ curl and libcurl 7.87.0
  Command line options:         249
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2768
+ Contributors:                 2769
 
 This release includes the following changes:
 
  o curl: add --url-query [52]
  o CURLOPT_QUICK_EXIT: don't wait for DNS thread on exit [75]
+ o lib: add CURL_WRITEFUNC_ERROR to signal write callback error [47]
  o openssl: reduce CA certificate bundle reparsing by caching [11]
  o version: add a feature names array to curl_version_info_data [67]
 
@@ -22,6 +23,8 @@ This release includes the following bugfixes:
  o base64: faster base64 decoding [120]
  o build: assume assert.h is always available [111]
  o build: assume errno.h is always available [110]
+ o c-hyper: CONNECT respones are not server responses [137]
+ o c-hyper: fix multi-request mechanism [115]
  o CI: Change FreeBSD image from 12.3 to 12.4 [108]
  o CI: LGTM.com will be shut down in December 2022 [112]
  o ci: Remove zuul fuzzing job as it's superseded by CIFuzz
@@ -35,6 +38,7 @@ This release includes the following bugfixes:
  o config-mac: remove HAVE_SYS_SELECT_H [116]
  o config-win32: fix SIZEOF_OFF_T for MSVC and old MinGW [41]
  o configure: require fork for NTLM-WB [36]
+ o contributors.sh: actually use $CURLWWW instead of just setting it. [129]
  o cookie: compare cookie prefixes case insensitively [14]
  o cookie: expire cookies at once when max-age is negative [45]
  o cookie: open cookie jar as a binary file [89]
@@ -42,14 +46,17 @@ This release includes the following bugfixes:
  o curl-rustls.m4: on macOS, rustls also needs the Security framework [44]
  o curl.h: include <sys/select.h> on SerenityOS [104]
  o curl.h: name all public function parameters [118]
+ o curl.h: reword comment to not use deprecated option [132]
  o curl: override the numeric locale and set "C" by force [60]
  o curl: timeout in the read callback [15]
  o curl_endian: remove Curl_write64_le from header [81]
  o curl_get_line: allow last line without newline char [88]
  o curl_path: do not add '/' if homedir ends with one [4]
  o CURLMOPT_SOCKETFUNCTION.3: clarify CURL_POLL_REMOVE [1]
+ o CURLOPT_COOKIEFILE.3: advice => advise [131]
  o CURLOPT_DEBUGFUNCTION.3: do not assume nul-termination in example [31]
  o CURLOPT_POST.3: Explain setting to 0 changes request type [61]
+ o docs/curl_ws_send: Fixed typo in websocket docs [114]
  o docs/EARLY-RELEASE.md: how to determine an early release [37]
  o docs/examples: spell correction ('Retrieve') [119]
  o docs/INSTALL.md: expand on static builds [62]
@@ -74,7 +81,6 @@ This release includes the following bugfixes:
  o hyper: fix handling of hyper_task's when reusing the same address [33]
  o INSTALL: update operating systems and CPU archs [91]
  o KNOWN_BUGS: remove eight entries [50]
- o lib: add CURL_WRITEFUNC_ERROR to signal write callback error [47]
  o lib: connection filters (cfilter) addition to curl: [43]
  o lib: feature deprecation warnings in gcc >= 4.3 [58]
  o lib: fix some type mismatches and remove unneeded typecasts [12]
@@ -97,6 +103,7 @@ This release includes the following bugfixes:
  o netrc.d: provide mutext info [63]
  o netware: remove leftover traces [80]
  o noproxy: also match with adjacent comma [19]
+ o noproxy: guard against empty hostnames in noproxy check [136]
  o noproxy: tailmatch like in 7.85.0 and earlier [35]
  o nroff-scan.pl: detect double highlights
  o ntlm: improve comment for encrypt_des [55]
@@ -104,6 +111,7 @@ This release includes the following bugfixes:
  o openssl/mbedtls: use %d for outputing port with failf (int) [72]
  o openssl: prefix errors with '[lib]/[version]: ' [105]
  o os400: use platform socklen_t in Curl_getnameinfo_a [18]
+ o page-header: grammar improvement (display transfer rate) [126]
  o proxy: refactor haproxy protocol handling as connection filter [57]
  o README.md: remove badges and xmas-tree garnish [9]
  o rtsp: fix RTSP auth [49]
@@ -115,6 +123,8 @@ This release includes the following bugfixes:
  o setup: do not require __MRC__ defined for Mac OS 9 builds [117]
  o spellcheck.words: remove 'github' as an accepted word [22]
  o strcase: use curl_str(n)equal for case insensitive matches [8]
+ o styled-output.d: this option does not work on Windows [93]
+ o system.h: fix socklen_t, curl_off_t, long long for Classic Mac OS [133]
  o system.h: support 64-bit curl_off_t for NonStop 32-bit [21]
  o test1421: fix typo [109]
  o test3026: reduce runtime in legacy mingw builds [73]
@@ -122,11 +132,15 @@ This release includes the following bugfixes:
  o tests: add authorityInfoAccess to generated certs [99]
  o tests: add HTTP/3 test case, custom location for proper nghttpx [106]
  o tls: backends use connection filters for IO, enabling HTTPS-proxy [92]
+ o tool: determine the correct fopen option for -D [95]
+ o tool_cfgable: make socks5_gssapi_nec a boolean [128]
+ o tool_formparse: avoid clobbering on function params [135]
  o tool_getparam: make --no-get work as the opposite of --get [39]
  o tool_operate: provide better errmsg for -G with bad URL [16]
  o tool_operate: when aborting, make sure there is a non-NULL error buffer [20]
  o url: move back the IDN conversion of proxy names [74]
  o urldata: change port num storage to int and unsigned short [66]
+ o vms: remove SIZEOF_SHORT [134]
  o vtls: fix build without proxy support [38]
  o vtls: localization of state data in filters [84]
  o WEBSOCKET.md: fix broken link [30]
@@ -153,10 +167,11 @@ advice from friends like these:
 
   Adam Averay, Alexandre Ferrieux, Alex Xu, Ali Utku Selen, Andrei Rybak,
   Andy Alt, Andy Stamp, Anthony Hu, AtariDreams on github, Ayesh Karunaratne,
-  Baitinq on github, Casey Bodley, Christopher Sauer, Christoph Reiter,
-  Dan Fandrich, Daniel Faust, Daniel Gustafsson, Daniel Stenberg,
-  David Benjamin, Diogo Teles Sant'Anna, Egor Pugin, Emanuele Torre,
-  Emil Österlund, Eric Vigeant, Erik Janssen, Fata Nugraha, Felipe Gasper,
+  Baitinq on github, Boris Verkhovskiy, Casey Bodley, Christian Schmitz,
+  Christopher Sauer, Christoph Reiter, Dan Fandrich, Daniel Faust,
+  Daniel Gustafsson, Daniel Stenberg, David Benjamin, Diogo Teles Sant'Anna,
+  Egor Pugin, Emanuele Torre, Emil Engler, Emil Österlund, Eric Vigeant,
+  Erik Janssen, Fata Nugraha, Felipe Gasper, Frank Gevaerts, Geeknik Labs,
   Gisle Vanem, godmar on github, Henning Schild, Hirotaka Tagawa,
   Ikko Ashimine, Jakub Zakrzewski, Joel Depooter, John Sherrill, Jon Rumsey,
   jvreelanda on github, Karthikdasari0423 on github, Kenneth Myhra,
@@ -164,11 +179,12 @@ advice from friends like these:
   Max Dymond, Michael Drake, Michael Kaufmann, Michael Musset,
   Mikhail Kuznetsov, MonkeybreadSoftware on github, Nathan Moinvaziri,
   Oskar Sigvardsson, Patrick Monnerat, Patrick Schlangen, Peter Piekarski,
-  Philip Chan, Philip Heiduck, Philip Sanetra, Randall S. Becker, Ray Satiro,
-  Rob de Wit, Robin Marx, Ryan Schmidt, Sean McArthur, Stefan Eissing,
-  Stephan Guilloux, Stuart Henderson, Thomas Glanzmann, Trail of Bits,
-  Viktor Szakats, xianghongai on github, xtonik on github, Zespre Schmidt
-  (73 contributors)
+  Philip Chan, Philip Heiduck, Philip Sanetra, Prithvi MK, Randall S. Becker,
+  Ray Satiro, Rob de Wit, Robin Marx, Ryan Schmidt, Sean McArthur,
+  Stefan Eissing, Stephan Guilloux, Stuart Henderson, Thomas Glanzmann,
+  Trail of Bits, u20221022 on github, Viktor Szakats, xianghongai on github,
+  xtonik on github, Zespre Schmidt
+  (80 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -264,7 +280,9 @@ References to bug reports and discussions on issues:
  [90] = https://curl.se/bug/?i=9989
  [91] = https://curl.se/bug/?i=9994
  [92] = https://curl.se/bug/?i=9962
+ [93] = https://curl.se/bug/?i=10082
  [94] = https://curl.se/bug/?i=9927
+ [95] = https://curl.se/bug/?i=10074
  [96] = https://curl.se/bug/?i=9772
  [97] = https://curl.se/bug/?i=10009
  [98] = https://curl.se/bug/?i=10007
@@ -283,6 +301,8 @@ References to bug reports and discussions on issues:
  [111] = https://curl.se/bug/?i=9985
  [112] = https://curl.se/bug/?i=10052
  [113] = https://curl.se/bug/?i=10045
+ [114] = https://curl.se/bug/?i=10081
+ [115] = https://curl.se/bug/?i=8896
  [116] = https://curl.se/bug/?i=10039
  [117] = https://curl.se/bug/?i=10037
  [118] = https://curl.se/bug/?i=10036
@@ -293,3 +313,13 @@ References to bug reports and discussions on issues:
  [123] = https://curl.se/bug/?i=10026
  [124] = https://curl.se/bug/?i=10024
  [125] = https://curl.se/bug/?i=10029
+ [126] = https://curl.se/bug/?i=10068
+ [128] = https://curl.se/bug/?i=10078
+ [129] = https://curl.se/bug/?i=10064
+ [131] = https://curl.se/bug/?i=10063
+ [132] = https://curl.se/bug/?i=10062
+ [133] = https://curl.se/bug/?i=10049
+ [134] = https://curl.se/bug/?i=10061
+ [135] = https://curl.se/bug/?i=10046
+ [136] = https://curl.se/bug/?i=10057
+ [137] = https://curl.se/bug/?i=8853
