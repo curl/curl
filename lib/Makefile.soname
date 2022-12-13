@@ -22,8 +22,12 @@
 #
 ###########################################################################
 
+VERSIONCHANGE=12
+VERSIONADD=0
+VERSIONDEL=8
+
 # libtool version:
-VERSIONINFO=-version-info 12:0:8
+VERSIONINFO=-version-info $(VERSIONCHANGE):$(VERSIONADD):$(VERSIONDEL)
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
 # 1.
@@ -36,7 +40,3 @@ VERSIONINFO=-version-info 12:0:8
 # 3. if interfaces were removed, then use C+1:0:0
 #
 # For the full guide on libcurl ABI rules, see docs/libcurl/ABI
-
-# cmake version:
-CMAKEVERSION=4.8.0
-CMAKESONAME=4
