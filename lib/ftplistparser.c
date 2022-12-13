@@ -334,7 +334,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
   struct ftp_parselist_data *parser = ftpwc->parser;
   struct fileinfo *infop;
   struct curl_fileinfo *finfo;
-  unsigned long i = 0;
+  size_t i = 0;
   CURLcode result;
   size_t retsize = bufflen;
 
