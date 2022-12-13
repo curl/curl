@@ -182,7 +182,7 @@ static const char *getASN1Element(struct Curl_asn1Element *elem,
                                   const char *beg, const char *end)
 {
   unsigned char b;
-  unsigned long len;
+  size_t len;
   struct Curl_asn1Element lelem;
 
   /* Get a single ASN.1 element into `elem', parse ASN.1 string at `beg'
@@ -307,7 +307,7 @@ static const char *bit2str(const char *beg, const char *end)
  */
 static const char *int2str(const char *beg, const char *end)
 {
-  unsigned long val = 0;
+  unsigned int val = 0;
   size_t n = end - beg;
 
   if(!n)
@@ -323,7 +323,7 @@ static const char *int2str(const char *beg, const char *end)
   do
     val = (val << 8) | *(const unsigned char *) beg++;
   while(beg < end);
-  return curl_maprintf("%s%lx", val >= 10? "0x": "", val);
+  return curl_maprintf("%s%x", val >= 10? "0x": "", val);
 }
 
 /*
@@ -953,8 +953,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
      * ECC public key is all the data, a value of type BIT STRING mapped to
      * OCTET STRING and should not be parsed as an ASN.1 value.
      */
-    const unsigned long len =
-      (unsigned long)((pubkey->end - pubkey->beg - 2) * 4);
+    const size_t len = ((pubkey->end - pubkey->beg - 2) * 4);
     if(!certnum)
       infof(data, "   ECC Public Key (%lu bits)", len);
     if(data->set.ssl.certinfo) {
@@ -972,7 +971,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
 
   if(strcasecompare(algo, "rsaEncryption")) {
     const char *q;
-    unsigned long len;
+    size_t len;
 
     p = getASN1Element(&elem, pk.beg, pk.end);
     if(!p)
@@ -981,7 +980,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     /* Compute key length. */
     for(q = elem.beg; !*q && q < elem.end; q++)
       ;
-    len = (unsigned long)((elem.end - q) * 8);
+    len = ((elem.end - q) * 8);
     if(len) {
       unsigned int i;
       for(i = *(unsigned char *) q; !(i & 0x80); i <<= 1)
@@ -1073,7 +1072,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   size_t cl1;
   char *cp2;
   CURLcode result = CURLE_OK;
-  unsigned long version;
+  unsigned int version;
   size_t i;
   size_t j;
 
@@ -1360,8 +1359,8 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
           break;
 
         case 7: /* IP address. */
-          matched = (size_t) (name.end - name.beg) == addrlen &&
-                    !memcmp(&addr, name.beg, addrlen);
+          matched = (name.end - name.beg) == addrlen &&
+            !memcmp(&addr, name.beg, addrlen);
           break;
         }
       }
