@@ -526,10 +526,11 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ? TRUE : FALSE;
   const size_t hostname_len = strlen(sx->hostname);
   ssize_t len = 0;
-  const unsigned long auth = data->set.socks5auth;
+  const unsigned char auth = data->set.socks5auth;
   bool allow_gssapi = FALSE;
   struct Curl_dns_entry *dns = NULL;
 
+  DEBUGASSERT(auth & (CURLAUTH_BASIC | CURLAUTH_GSSAPI));
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
     if(conn->bits.httpproxy)

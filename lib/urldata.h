@@ -1627,7 +1627,7 @@ struct UserDefined {
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
 #ifndef CURL_DISABLE_PROXY
-  unsigned long socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
+  unsigned char socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */
