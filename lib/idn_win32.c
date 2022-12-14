@@ -29,7 +29,7 @@
 #include "curl_setup.h"
 
 #ifdef USE_WIN32_IDN
-
+#include "idn_win32.h"
 #include "curl_multibyte.h"
 #include "curl_memory.h"
 #include "warnless.h"
@@ -52,9 +52,6 @@ WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
 
 #define IDN_MAX_LENGTH 255
 
-bool Curl_win32_idn_to_ascii(const char *in, char **out);
-bool Curl_win32_ascii_to_idn(const char *in, char **out);
-
 bool Curl_win32_idn_to_ascii(const char *in, char **out)
 {
   bool success = FALSE;
@@ -66,31 +63,6 @@ bool Curl_win32_idn_to_ascii(const char *in, char **out)
     curlx_unicodefree(in_w);
     if(chars) {
       char *mstr = curlx_convert_wchar_to_UTF8(punycode);
-      if(mstr) {
-        *out = strdup(mstr);
-        curlx_unicodefree(mstr);
-        if(*out)
-          success = TRUE;
-      }
-    }
-  }
-
-  return success;
-}
-
-bool Curl_win32_ascii_to_idn(const char *in, char **out)
-{
-  bool success = FALSE;
-
-  wchar_t *in_w = curlx_convert_UTF8_to_wchar(in);
-  if(in_w) {
-    size_t in_len = wcslen(in_w) + 1;
-    wchar_t unicode[IDN_MAX_LENGTH];
-    int chars = IdnToUnicode(0, in_w, curlx_uztosi(in_len),
-                             unicode, IDN_MAX_LENGTH);
-    curlx_unicodefree(in_w);
-    if(chars) {
-      char *mstr = curlx_convert_wchar_to_UTF8(unicode);
       if(mstr) {
         *out = strdup(mstr);
         curlx_unicodefree(mstr);

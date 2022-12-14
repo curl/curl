@@ -71,10 +71,8 @@
 #define IDN2_LOOKUP(name, host, flags) \
   idn2_lookup_ul((const char *)name, (char **)host, flags)
 #endif
-
 #elif defined(USE_WIN32_IDN)
-/* prototype for Curl_win32_idn_to_ascii() */
-bool Curl_win32_idn_to_ascii(const char *in, char **out);
+#include "idn.h"
 #endif  /* USE_LIBIDN2 */
 
 #include "doh.h"
