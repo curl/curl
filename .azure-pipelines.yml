@@ -158,23 +158,23 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - script: sudo apt-get update && sudo apt-get install -y clang-tools-10 clang-9 libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
+    - script: sudo apt-get update && sudo apt-get install -y clang-tools clang libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
       displayName: 'apt install'
       retryCountOnTaskFailure: 3
 
     - script: autoreconf -fi
       displayName: 'autoreconf'
 
-    - script: scan-build-10 ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
+    - script: scan-build ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
       displayName: 'configure'
       env:
-        CC: "clang-9"
-        CCX: "clang++-9"
+        CC: "clang"
+        CCX: "clang++"
 
-    - script: scan-build-10 --status-bugs make
+    - script: scan-build --status-bugs make
       displayName: 'make'
 
-    - script: scan-build-10 --status-bugs make examples
+    - script: scan-build --status-bugs make examples
       displayName: 'make examples'
 
 ##########################################
