@@ -517,15 +517,21 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           dsthost = srchost;
         }
         if(*p == ':') {
-          /* a port number */
-          unsigned long port = strtoul(++p, &end_ptr, 10);
-          if(port > USHRT_MAX || end_ptr == p || *end_ptr != '\"') {
+          unsigned long port = 0;
+          p++;
+          if(ISDIGIT(*p))
+            /* a port number */
+            port = strtoul(p, &end_ptr, 10);
+          else
+            end_ptr = (char *)p; /* not left uninitialized */
+          if(!port || port > USHRT_MAX || end_ptr == p || *end_ptr != '\"') {
             infof(data, "Unknown alt-svc port number, ignoring.");
             valid = FALSE;
           }
-          else
+          else {
             dstport = curlx_ultous(port);
-          p = end_ptr;
+            p = end_ptr;
+          }
         }
         if(*p++ != '\"')
           break;
