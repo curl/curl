@@ -160,6 +160,10 @@ static const struct testcase get_parts_list[] ={
   {"https://exam=ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://exam;ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://example,net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://example&net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://example+net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://example(net", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://example)net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://example.net/}",
    "https | [11] | [12] | [13] | example.net | [15] | /} | [16] | [17]",
    0, 0, CURLUE_OK},
@@ -466,8 +470,8 @@ static const struct urltestcase get_url_list[] = {
   {"https://0xff.0xff.0377.255", "https://255.255.255.255/", 0, 0, CURLUE_OK},
   {"https://1.0xffffff", "https://1.255.255.255/", 0, 0, CURLUE_OK},
   /* IPv4 numerical overflows or syntax errors will not normalize */
-  {"https://+127.0.0.1", "https://+127.0.0.1/", 0, 0, CURLUE_OK},
-  {"https://+127.0.0.1", "https://%2B127.0.0.1/", 0, CURLU_URLENCODE,
+  {"https://a127.0.0.1", "https://a127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://\xff.127.0.0.1", "https://%FF.127.0.0.1/", 0, CURLU_URLENCODE,
    CURLUE_OK},
   {"https://127.-0.0.1", "https://127.-0.0.1/", 0, 0, CURLUE_OK},
   {"https://127.0. 1", "https://127.0.0.1/", 0, 0, CURLUE_BAD_HOSTNAME},
@@ -632,9 +636,9 @@ static int checkurl(const char *url, const char *out)
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static const struct setcase set_parts_list[] = {
   {"https://example.com/",
-   "host=++,", /* '++' there's no automatic URL decode when settin this
+   "host=0xff,", /* '++' there's no automatic URL decode when settin this
                   part */
-   "https://++/",
+   "https://0xff/",
    0, /* get */
    0, /* set */
    CURLUE_OK, CURLUE_OK},
