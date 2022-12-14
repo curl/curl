@@ -519,10 +519,11 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         if(*p == ':') {
           unsigned long port = 0;
           p++;
-          if(ISDIGIT(*p)) {
+          if(ISDIGIT(*p))
             /* a port number */
             port = strtoul(p, &end_ptr, 10);
-          }
+          else
+            end_ptr = (char *)p; /* not left uninitialized */
           if(!port || port > USHRT_MAX || end_ptr == p || *end_ptr != '\"') {
             infof(data, "Unknown alt-svc port number, ignoring.");
             valid = FALSE;
