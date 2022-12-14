@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_IDN_WIN32_H
-#define HEADER_CURL_IDN_WIN32_H
+#ifndef HEADER_CURL_IDN_H
+#define HEADER_CURL_IDN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -25,8 +25,14 @@
  ***************************************************************************/
 
 #ifdef USE_WIN32_IDN
-
 bool Curl_win32_idn_to_ascii(const char *in, char **out);
-
 #endif /* USE_WIN32_IDN */
-#endif /* HEADER_CURL_IDN_WIN32_H */
+bool Curl_is_ASCII_name(const char *hostname);
+CURLcode Curl_idnconvert_hostname(struct hostname *host);
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
+#define USE_IDN
+void Curl_free_idnconverted_hostname(struct hostname *host);
+#else
+#define Curl_free_idnconverted_hostname(x)
+#endif
+#endif /* HEADER_CURL_IDN_H */

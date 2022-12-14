@@ -162,7 +162,7 @@ LIB_CFILES =         \
   http_ntlm.c        \
   http_proxy.c       \
   http_aws_sigv4.c   \
-  idn_win32.c        \
+  idn.c              \
   if2ip.c            \
   imap.c             \
   inet_ntop.c        \
@@ -293,6 +293,7 @@ LIB_HFILES =         \
   http_ntlm.h        \
   http_proxy.h       \
   http_aws_sigv4.h   \
+  idn.h              \
   if2ip.h            \
   imap.h             \
   inet_ntop.h        \

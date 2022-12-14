@@ -61,24 +61,9 @@
 
 #include <limits.h>
 
-#ifdef USE_LIBIDN2
-#include <idn2.h>
-
-#if defined(WIN32) && defined(UNICODE)
-#define IDN2_LOOKUP(name, host, flags) \
-  idn2_lookup_u8((const uint8_t *)name, (uint8_t **)host, flags)
-#else
-#define IDN2_LOOKUP(name, host, flags) \
-  idn2_lookup_ul((const char *)name, (char **)host, flags)
-#endif
-#elif defined(USE_WIN32_IDN)
-#include "idn.h"
-#endif  /* USE_LIBIDN2 */
-
 #include "doh.h"
 #include "urldata.h"
 #include "netrc.h"
-
 #include "formdata.h"
 #include "mime.h"
 #include "vtls/vtls.h"
@@ -106,6 +91,7 @@
 #include "hsts.h"
 #include "noproxy.h"
 #include "cfilters.h"
+#include "idn.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -1549,111 +1535,6 @@ void Curl_verboseconnect(struct Curl_easy *data,
 #endif
 
 /*
- * Helpers for IDNA conversions.
- */
-bool Curl_is_ASCII_name(const char *hostname)
-{
-  /* get an UNSIGNED local version of the pointer */
-  const unsigned char *ch = (const unsigned char *)hostname;
-
-  if(!hostname) /* bad input, consider it ASCII! */
-    return TRUE;
-
-  while(*ch) {
-    if(*ch++ & 0x80)
-      return FALSE;
-  }
-  return TRUE;
-}
-
-/*
- * Perform any necessary IDN conversion of hostname
- */
-CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,
-                                  struct hostname *host)
-{
-#ifndef USE_LIBIDN2
-  (void)data;
-  (void)data;
-#elif defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void)data;
-#endif
-
-  /* set the name we use to display the host name */
-  host->dispname = host->name;
-
-  /* Check name for non-ASCII and convert hostname to ACE form if we can */
-  if(!Curl_is_ASCII_name(host->name)) {
-#ifdef USE_LIBIDN2
-    if(idn2_check_version(IDN2_VERSION)) {
-      char *ace_hostname = NULL;
-#if IDN2_VERSION_NUMBER >= 0x00140000
-      /* IDN2_NFC_INPUT: Normalize input string using normalization form C.
-         IDN2_NONTRANSITIONAL: Perform Unicode TR46 non-transitional
-         processing. */
-      int flags = IDN2_NFC_INPUT | IDN2_NONTRANSITIONAL;
-#else
-      int flags = IDN2_NFC_INPUT;
-#endif
-      int rc = IDN2_LOOKUP(host->name, &ace_hostname, flags);
-      if(rc != IDN2_OK)
-        /* fallback to TR46 Transitional mode for better IDNA2003
-           compatibility */
-        rc = IDN2_LOOKUP(host->name, &ace_hostname,
-                         IDN2_TRANSITIONAL);
-      if(rc == IDN2_OK) {
-        host->encalloc = (char *)ace_hostname;
-        /* change the name pointer to point to the encoded hostname */
-        host->name = host->encalloc;
-      }
-      else {
-        failf(data, "Failed to convert %s to ACE; %s", host->name,
-              idn2_strerror(rc));
-        return CURLE_URL_MALFORMAT;
-      }
-    }
-#elif defined(USE_WIN32_IDN)
-    char *ace_hostname = NULL;
-
-    if(Curl_win32_idn_to_ascii(host->name, &ace_hostname)) {
-      host->encalloc = ace_hostname;
-      /* change the name pointer to point to the encoded hostname */
-      host->name = host->encalloc;
-    }
-    else {
-      char buffer[STRERROR_LEN];
-      failf(data, "Failed to convert %s to ACE; %s", host->name,
-            Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
-      return CURLE_URL_MALFORMAT;
-    }
-#else
-    infof(data, "IDN support not present, can't parse Unicode domains");
-#endif
-  }
-  return CURLE_OK;
-}
-
-/*
- * Frees data allocated by idnconvert_hostname()
- */
-void Curl_free_idnconverted_hostname(struct hostname *host)
-{
-#if defined(USE_LIBIDN2)
-  if(host->encalloc) {
-    idn2_free(host->encalloc); /* must be freed with idn2_free() since this was
-                                 allocated by libidn */
-    host->encalloc = NULL;
-  }
-#elif defined(USE_WIN32_IDN)
-  free(host->encalloc); /* must be freed with free() since this was
-                           allocated by Curl_win32_idn_to_ascii */
-  host->encalloc = NULL;
-#else
-  (void)host;
-#endif
-}
-
-/*
  * Allocate and initialize a new connectdata object.
  */
 static struct connectdata *allocate_conn(struct Curl_easy *data)
@@ -1992,11 +1873,11 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   /*************************************************************
    * IDN-convert the hostnames
    *************************************************************/
-  result = Curl_idnconvert_hostname(data, &conn->host);
+  result = Curl_idnconvert_hostname(&conn->host);
   if(result)
     return result;
   if(conn->bits.conn_to_host) {
-    result = Curl_idnconvert_hostname(data, &conn->conn_to_host);
+    result = Curl_idnconvert_hostname(&conn->conn_to_host);
     if(result)
       return result;
   }
@@ -3664,12 +3545,12 @@ static CURLcode create_conn(struct Curl_easy *data,
    *************************************************************/
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.httpproxy) {
-    result = Curl_idnconvert_hostname(data, &conn->http_proxy.host);
+    result = Curl_idnconvert_hostname(&conn->http_proxy.host);
     if(result)
       return result;
   }
   if(conn->bits.socksproxy) {
-    result = Curl_idnconvert_hostname(data, &conn->socks_proxy.host);
+    result = Curl_idnconvert_hostname(&conn->socks_proxy.host);
     if(result)
       return result;
   }
