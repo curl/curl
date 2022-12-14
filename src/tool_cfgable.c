@@ -133,13 +133,12 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->engine);
   Curl_safefree(config->etag_save_file);
   Curl_safefree(config->etag_compare_file);
+  Curl_safefree(config->ssl_ec_curves);
   Curl_safefree(config->request_target);
   Curl_safefree(config->customrequest);
   Curl_safefree(config->krblevel);
-
   Curl_safefree(config->oauth_bearer);
   Curl_safefree(config->sasl_authzid);
-
   Curl_safefree(config->unix_socket_path);
   Curl_safefree(config->writeout);
   Curl_safefree(config->proto_default);
