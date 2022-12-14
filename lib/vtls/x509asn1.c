@@ -1349,14 +1349,15 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
           break;
         switch(name.tag) {
         case 2: /* DNS name. */
+          matched = 0;
           len = utf8asn1str(&dnsname, CURL_ASN1_IA5_STRING,
                             name.beg, name.end);
-          if(len > 0 && (size_t)len == strlen(dnsname))
-            matched = Curl_cert_hostcheck(dnsname, (size_t)len,
-                                          connssl->hostname, hostlen);
-          else
-            matched = 0;
-          free(dnsname);
+          if(len > 0) {
+            if(size_t)len == strlen(dnsname)
+              matched = Curl_cert_hostcheck(dnsname, (size_t)len,
+                                            connssl->hostname, hostlen);
+            free(dnsname);
+          }
           break;
 
         case 7: /* IP address. */
@@ -1406,10 +1407,8 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
     failf(data, "SSL: unable to obtain common name from peer certificate");
   else {
     len = utf8asn1str(&dnsname, elem.tag, elem.beg, elem.end);
-    if(len < 0) {
-      free(dnsname);
+    if(len < 0)
       return CURLE_OUT_OF_MEMORY;
-    }
     if(strlen(dnsname) != (size_t) len)         /* Nul byte in string ? */
       failf(data, "SSL: illegal cert name field");
     else if(Curl_cert_hostcheck((const char *) dnsname,
