@@ -138,6 +138,25 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  /* https://ℂᵤⓇℒ。𝐒🄴 */
+  {"https://"
+   "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4",
+   "https | [11] | [12] | [13] | ℂᵤⓇℒ。𝐒🄴 | [15] |"
+   " / | [16] | [17]",
+   0, 0, CURLUE_OK},
+  {"https://"
+   "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4",
+   "https | [11] | [12] | [13] | "
+   "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4 "
+   "| [15] | / | [16] | [17]",
+   0, CURLU_URLENCODE, CURLUE_OK},
+  {"https://"
+   "\xe2\x84\x82\xe1\xb5\xa4\xe2\x93\x87\xe2\x84\x92"
+   "\xe3\x80\x82\xf0\x9d\x90\x92\xf0\x9f\x84\xb4",
+   "https | [11] | [12] | [13] | "
+   "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4 "
+   "| [15] | / | [16] | [17]",
+   0, CURLU_URLENCODE, CURLUE_OK},
   {"https://user@example.net?he l lo",
    "https | user | [12] | [13] | example.net | [15] | / | he+l+lo | [17]",
    CURLU_ALLOW_SPACE, CURLU_URLENCODE, CURLUE_OK},
