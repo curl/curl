@@ -546,7 +546,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
 
     if(auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
       infof(data,
-            "warning: unsupported value passed to CURLOPT_SOCKS5_AUTH: %lu",
+            "warning: unsupported value passed to CURLOPT_SOCKS5_AUTH: %u",
             auth);
     if(!(auth & CURLAUTH_BASIC))
       /* disable username/password auth */
