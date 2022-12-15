@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o altsvc: fix rejection of negative port numbers [144]
  o aws_sigv4: consult x-%s-content-sha256 for payload hash [102]
  o aws_sigv4: fix typos in aws_sigv4.c [101]
  o base64: better alloc size [124]
@@ -31,6 +32,7 @@ This release includes the following bugfixes:
  o cmake: check for cross-compile, not for toolchain [54]
  o CMake: fix build with `CURL_USE_GSSAPI` [78]
  o cmake: really enable warnings with clang [25]
+ o cmake: set the soname on the shared library [140]
  o cmdline-opts/gen.pl: fix the linkifier [64]
  o cmdline-opts/page-footer: remove long option nroff formatting
  o config-mac: define HAVE_SYS_IOCTL_H [107]
@@ -38,7 +40,7 @@ This release includes the following bugfixes:
  o config-mac: remove HAVE_SYS_SELECT_H [116]
  o config-win32: fix SIZEOF_OFF_T for MSVC and old MinGW [41]
  o configure: require fork for NTLM-WB [36]
- o contributors.sh: actually use $CURLWWW instead of just setting it. [129]
+ o contributors.sh: actually use $CURLWWW instead of just setting it [129]
  o cookie: compare cookie prefixes case insensitively [14]
  o cookie: expire cookies at once when max-age is negative [45]
  o cookie: open cookie jar as a binary file [89]
@@ -52,6 +54,9 @@ This release includes the following bugfixes:
  o curl_endian: remove Curl_write64_le from header [81]
  o curl_get_line: allow last line without newline char [88]
  o curl_path: do not add '/' if homedir ends with one [4]
+ o curl_url_get.3: remove spurious backtick [127]
+ o curl_url_set.3: document CURLU_DISALLOW_USER [139]
+ o curl_url_set.3: fix typo [148]
  o CURLMOPT_SOCKETFUNCTION.3: clarify CURL_POLL_REMOVE [1]
  o CURLOPT_COOKIEFILE.3: advice => advise [131]
  o CURLOPT_DEBUGFUNCTION.3: do not assume nul-termination in example [31]
@@ -64,6 +69,7 @@ This release includes the following bugfixes:
  o docs: add missing parameters for --retry flag [2]
  o docs: add more "SEE ALSO" links to CA related pages [82]
  o docs: explain the noproxy CIDR notation support [17]
+ o docs: extend the dump-header documentation [150]
  o docs: remove performance note in CURLOPT_SSL_VERIFYPEER [13]
  o examples/10-at-a-time: fix possible skipped final transfers [85]
  o examples: update descriptions [83]
@@ -88,6 +94,7 @@ This release includes the following bugfixes:
  o lib: remove bad set.opt_no_body assignments [42]
  o lib: rewind BEFORE request instead of AFTER previous [65]
  o lib: sync guard for Curl_getaddrinfo_ex() definition and use [6]
+ o lib: use size_t or int etc instead of longs [145]
  o libcurl-errors.3: remove duplicate word [3]
  o libssh2: return error when ssh_hostkeyfunc returns error [121]
  o log2changes.pl: wrap long lines at 80 columns [59]
@@ -107,7 +114,7 @@ This release includes the following bugfixes:
  o noproxy: tailmatch like in 7.85.0 and earlier [35]
  o nroff-scan.pl: detect double highlights
  o ntlm: improve comment for encrypt_des [55]
- o ntlm: silence ubsan warning about copying from null target_info pointer. [69]
+ o ntlm: silence ubsan warning about copying from null target_info pointer [69]
  o openssl/mbedtls: use %d for outputing port with failf (int) [72]
  o openssl: prefix errors with '[lib]/[version]: ' [105]
  o os400: use platform socklen_t in Curl_getnameinfo_a [18]
@@ -122,6 +129,7 @@ This release includes the following bugfixes:
  o sendf: remove unnecessary if condition [26]
  o setup: do not require __MRC__ defined for Mac OS 9 builds [117]
  o spellcheck.words: remove 'github' as an accepted word [22]
+ o ssl-reqd.d: clarify that this is for upgrading connections only [138]
  o strcase: use curl_str(n)equal for case insensitive matches [8]
  o styled-output.d: this option does not work on Windows [93]
  o system.h: fix socklen_t, curl_off_t, long long for Classic Mac OS [133]
@@ -133,23 +141,28 @@ This release includes the following bugfixes:
  o tests: add HTTP/3 test case, custom location for proper nghttpx [106]
  o tls: backends use connection filters for IO, enabling HTTPS-proxy [92]
  o tool: determine the correct fopen option for -D [95]
+ o tool_cfgable: free the ssl_ec_curves on exit [142]
  o tool_cfgable: make socks5_gssapi_nec a boolean [128]
  o tool_formparse: avoid clobbering on function params [135]
  o tool_getparam: make --no-get work as the opposite of --get [39]
  o tool_operate: provide better errmsg for -G with bad URL [16]
  o tool_operate: when aborting, make sure there is a non-NULL error buffer [20]
+ o tool_paramhlp: free the proto strings on exit [141]
  o url: move back the IDN conversion of proxy names [74]
+ o urlapi: reject more bad letters from the host name: &+() [143]
  o urldata: change port num storage to int and unsigned short [66]
  o vms: remove SIZEOF_SHORT [134]
  o vtls: fix build without proxy support [38]
  o vtls: localization of state data in filters [84]
  o WEBSOCKET.md: fix broken link [30]
- o Websocket: fixes for partial frames and buffer updates. [7]
+ o Websocket: fixes for partial frames and buffer updates [7]
  o websockets: fix handling of partial frames [32]
  o windows: fail early with a missing windres in autotools [5]
  o windows: fix linking .rc to shared curl with autotools [24]
  o winidn: drop WANT_IDN_PROTOTYPES [27]
+ o ws: if no connection is around, return error [149]
  o ws: return CURLE_NOT_BUILT_IN when websockets not built in [34]
+ o x509asn1: avoid freeing unallocated pointers [147]
 
 This release includes the following known bugs:
 
@@ -314,6 +327,7 @@ References to bug reports and discussions on issues:
  [124] = https://curl.se/bug/?i=10024
  [125] = https://curl.se/bug/?i=10029
  [126] = https://curl.se/bug/?i=10068
+ [127] = https://curl.se/bug/?i=10101
  [128] = https://curl.se/bug/?i=10078
  [129] = https://curl.se/bug/?i=10064
  [131] = https://curl.se/bug/?i=10063
@@ -323,3 +337,15 @@ References to bug reports and discussions on issues:
  [135] = https://curl.se/bug/?i=10046
  [136] = https://curl.se/bug/?i=10057
  [137] = https://curl.se/bug/?i=8853
+ [138] = https://curl.se/bug/?i=10093
+ [139] = https://curl.se/bug/?i=10099
+ [140] = https://curl.se/bug/?i=10023
+ [141] = https://curl.se/bug/?i=10098
+ [142] = https://curl.se/bug/?i=10097
+ [143] = https://curl.se/bug/?i=10096
+ [144] = https://curl.se/bug/?i=10095
+ [145] = https://curl.se/bug/?i=10088
+ [147] = https://curl.se/bug/?i=10087
+ [148] = https://curl.se/bug/?i=10089
+ [149] = https://curl.se/bug/?i=10084
+ [150] = https://curl.se/bug/?i=10085
