@@ -147,6 +147,10 @@ When space is used and allowed in a URL, it will be stored as-is unless
 space before stored. This affects how the URL will be constructed when
 \fIcurl_url_get(3)\fP is subsequently used to extract the full URL or
 individual parts. (Added in 7.78.0)
+.IP CURLU_DISALLOW_USER
+If set, the URL parser will not accept embedded credentials for the
+\fBCURLUPART_URL\fP, and will instead return \fBCURLUE_USER_NOT_ALLOWED\fP for
+such URLs.
 .SH EXAMPLE
 .nf
   CURLUcode rc;
