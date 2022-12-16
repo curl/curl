@@ -690,7 +690,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     socksreq[len++] = (unsigned char) proxy_user_len;
     if(sx->proxy_user && proxy_user_len) {
       /* the length must fit in a single byte */
-      if(proxy_user_len >= 255) {
+      if(proxy_user_len > 255) {
         failf(data, "Excessive user name length for proxy auth");
         return CURLPX_LONG_USER;
       }
