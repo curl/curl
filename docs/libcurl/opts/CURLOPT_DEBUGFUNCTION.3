@@ -69,7 +69,10 @@ The data is header (or header-like) data received from the peer.
 .IP CURLINFO_HEADER_OUT
 The data is header (or header-like) data sent to the peer.
 .IP CURLINFO_DATA_IN
-The data is protocol data received from the peer.
+The data is the unprocessed protocol data received from the peer. Even if the
+data is encoded or compressed, it will not be provided decoded nor
+decompressed to this callback. If you need the data in decoded and
+decompressed form, use \fICURLOPT_WRITEFUNCTION(3)\fP.
 .IP CURLINFO_DATA_OUT
 The data is protocol data sent to the peer.
 .IP CURLINFO_SSL_DATA_OUT
