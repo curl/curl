@@ -25,13 +25,17 @@
 
 # This script invokes nghttpx properly to have it serve HTTP/2 for us.
 # nghttpx runs as a proxy in front of our "actual" HTTP/1 server.
+use Cwd;
+use Cwd 'abs_path';
 
 my $pidfile = "log/nghttpx.pid";
 my $logfile = "log/http2.log";
 my $nghttpx = "nghttpx";
 my $listenport = 9015;
+my $listenport2 = 9016;
 my $connect = "127.0.0.1,8990";
 my $conf = "nghttpx.conf";
+my $cert = "Server-localhost-sv";
 
 #***************************************************************************
 # Process command line options
@@ -55,6 +59,12 @@ while(@ARGV) {
     elsif($ARGV[0] eq '--port') {
         if($ARGV[1]) {
             $listenport = $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--port2') {
+        if($ARGV[1]) {
+            $listenport2 = $ARGV[1];
             shift @ARGV;
         }
     }
@@ -83,11 +93,20 @@ while(@ARGV) {
     shift @ARGV;
 }
 
+my $path   = getcwd();
+my $srcdir = $path;
+$certfile = "$srcdir/certs/$cert.pem";
+$keyfile = "$srcdir/certs/$cert.key";
+$certfile = abs_path($certfile);
+$keyfile = abs_path($keyfile);
+
 my $cmdline="$nghttpx --backend=$connect ".
     "--frontend=\"*,$listenport;no-tls\" ".
+    "--frontend=\"*,$listenport2\" ".
     "--log-level=INFO ".
     "--pid-file=$pidfile ".
     "--conf=$conf ".
-    "--errorlog-file=$logfile";
+    "--errorlog-file=$logfile ".
+    "$keyfile $certfile";
 print "RUN: $cmdline\n" if($verbose);
 system("$cmdline 2>/dev/null");
