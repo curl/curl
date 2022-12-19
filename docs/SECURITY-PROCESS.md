@@ -134,6 +134,44 @@ has been published.
 See [BUG-BOUNTY](https://curl.se/docs/bugbounty.html) for details on the
 bug bounty program.
 
+# Severity levels
+
+The curl project's security team rates security problems using four severity
+levels depending how serious we consider the problem to be. We use **Low**,
+**Medium**, **High** and **Critical**. We refrain from using numerical scoring
+of vulnerabilities.
+
+When deciding severity level on a particular issue, we take all the factors
+into account: attack vector, attack complexity, required privileges, necessary
+build configuration, protocols involved, platform specifics and also what
+effects a possible exploit or trigger of the issue can lead do, including
+confidentiality, ingegrity or availability problems.
+
+## Low
+
+This is a security problem that is truly hard or unlikely to exploit or
+trigger. Due to timing, platform requirements or the fact that options or
+protocols involved are rare etc.
+
+## Medium
+
+This is a security problem that is less hard than **Low** to exploit or
+trigger. Less strict timing, wider platforms availabilities or involving more
+widely used options or protocols. A problem that usually needs something else
+to also happen to become serious.
+
+## High
+
+Ths issue in itself a serious problem with real world impact. Flaws that can
+easily compromise the confidentiality, integrity or availability of resources.
+Exploiting or triggering this problem is not hard.
+
+## Critical
+
+Easily exploitable by a remote unauthenticated attacker and lead to system
+compromise (arbitrary code execution) without requiring user interaction, with
+a common configuration on a popular platform.
+
 # Not security issues
 
 This is an incomplete list of issues that are not considered vulnerabilities.
