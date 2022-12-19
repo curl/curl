@@ -865,7 +865,7 @@ sub stopserver {
         # given a ssh server, also kill socks piggybacking one
         push @killservers, "socks${2}";
     }
-    if($server eq "http") {
+    if($server eq "http" or $server eq "https") {
         # since the http2+3 server is a proxy that needs to know about the
         # dynamic http port it too needs to get restarted when the http server
         # is killed
@@ -1581,7 +1581,9 @@ sub runhttp2server {
         $doesntrun{$pidfile} = 0;
 
         if($verbose) {
-            logmsg "RUN: $srvrname server PID $http2pid port $port\n";
+            logmsg "RUN: $srvrname server PID $http2pid ".
+                   "http-port $port https-port $port2 ".
+                   "backend $HOSTIP:$HTTPPORT\n";
         }
         last;
     }
