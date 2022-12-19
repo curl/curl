@@ -11,7 +11,7 @@ HTTPS
 #
 # Server-side
 <reply>
-<data nocheck="yes" crlf="yes">
+<data nocheck="yes">
 HTTP/1.1 201 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
@@ -47,7 +47,7 @@ HTTP/2 GET
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout crlf="yes">
+<stdout>
 HTTP/2 201 
 date: Tue, 09 Nov 2010 14:49:00 GMT
 content-length: 0
