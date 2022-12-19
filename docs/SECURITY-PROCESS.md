@@ -145,7 +145,7 @@ When deciding severity level on a particular issue, we take all the factors
 into account: attack vector, attack complexity, required privileges, necessary
 build configuration, protocols involved, platform specifics and also what
 effects a possible exploit or trigger of the issue can lead do, including
-confidentiality, ingegrity or availability problems.
+confidentiality, integrity or availability problems.
 
 ## Low
 
@@ -156,13 +156,13 @@ protocols involved are rare etc.
 ## Medium
 
 This is a security problem that is less hard than **Low** to exploit or
-trigger. Less strict timing, wider platforms availabilities or involving more
+trigger. Less strict timing, wider platforms availability or involving more
 widely used options or protocols. A problem that usually needs something else
 to also happen to become serious.
 
 ## High
 
-Ths issue in itself a serious problem with real world impact. Flaws that can
+This issue in itself a serious problem with real world impact. Flaws that can
 easily compromise the confidentiality, integrity or availability of resources.
 Exploiting or triggering this problem is not hard.
 
