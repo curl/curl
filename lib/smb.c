@@ -58,8 +58,6 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done);
 static CURLcode smb_connection_state(struct Curl_easy *data, bool *done);
 static CURLcode smb_do(struct Curl_easy *data, bool *done);
 static CURLcode smb_request_state(struct Curl_easy *data, bool *done);
-static CURLcode smb_done(struct Curl_easy *data, CURLcode status,
-                         bool premature);
 static CURLcode smb_disconnect(struct Curl_easy *data,
                                struct connectdata *conn, bool dead);
 static int smb_getsock(struct Curl_easy *data, struct connectdata *conn,
@@ -74,7 +72,7 @@ const struct Curl_handler Curl_handler_smb = {
   "SMB",                                /* scheme */
   smb_setup_connection,                 /* setup_connection */
   smb_do,                               /* do_it */
-  smb_done,                             /* done */
+  ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */
   smb_connect,                          /* connect_it */
   smb_connection_state,                 /* connecting */
@@ -101,7 +99,7 @@ const struct Curl_handler Curl_handler_smbs = {
   "SMBS",                               /* scheme */
   smb_setup_connection,                 /* setup_connection */
   smb_do,                               /* do_it */
-  smb_done,                             /* done */
+  ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */
   smb_connect,                          /* connect_it */
   smb_connection_state,                 /* connecting */
@@ -934,14 +932,6 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
   request_state(data, next_state);
 
   return CURLE_OK;
-}
-
-static CURLcode smb_done(struct Curl_easy *data, CURLcode status,
-                         bool premature)
-{
-  (void) premature;
-  Curl_safefree(data->req.p.smb);
-  return status;
 }
 
 static CURLcode smb_disconnect(struct Curl_easy *data,
