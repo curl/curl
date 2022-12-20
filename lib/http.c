@@ -2714,7 +2714,7 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
         conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
         strcasecompare("localhost", host) ||
         !strcmp(host, "127.0.0.1") ||
-        !strcmp(host, "[::1]") ? TRUE : FALSE;
+        !strcmp(host, "::1") ? TRUE : FALSE;
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       co = Curl_cookie_getlist(data, data->cookies, host, data->state.up.path,
                                secure_context);
@@ -3553,7 +3553,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
       conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
       strcasecompare("localhost", host) ||
       !strcmp(host, "127.0.0.1") ||
-      !strcmp(host, "[::1]") ? TRUE : FALSE;
+      !strcmp(host, "::1") ? TRUE : FALSE;
 
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
                     CURL_LOCK_ACCESS_SINGLE);
