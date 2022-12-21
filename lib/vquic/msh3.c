@@ -406,7 +406,8 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
     }
     H3BUGF(infof(data, "starting request with %zu headers", hreq->entries));
     stream->req = MsH3RequestOpen(qs->conn, &msh3_request_if, stream,
-                                 (MSH3_HEADER*)hreq->header, hreq->entries);
+                                 (MSH3_HEADER*)hreq->header, hreq->entries,
+                                 MSH3_REQUEST_FLAG_FIN);
     Curl_pseudo_free(hreq);
     if(!stream->req) {
       failf(data, "request open failed");
