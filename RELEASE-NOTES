@@ -4,7 +4,7 @@ curl and libcurl 7.87.0
  Command line options:         249
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2769
+ Contributors:                 2771
 
 This release includes the following changes:
 
@@ -60,6 +60,7 @@ This release includes the following bugfixes:
  o CURLMOPT_SOCKETFUNCTION.3: clarify CURL_POLL_REMOVE [1]
  o CURLOPT_COOKIEFILE.3: advice => advise [131]
  o CURLOPT_DEBUGFUNCTION.3: do not assume nul-termination in example [31]
+ o CURLOPT_DEBUGFUNCTION.3: emphasize that incoming data is "raw" [130]
  o CURLOPT_POST.3: Explain setting to 0 changes request type [61]
  o docs/curl_ws_send: Fixed typo in websocket docs [114]
  o docs/EARLY-RELEASE.md: how to determine an early release [37]
@@ -82,11 +83,15 @@ This release includes the following bugfixes:
  o HTTP-COOKIES.md: mention that http://localhost is a secure context [76]
  o HTTP-COOKIES.md: update the 6265bis link to draft-11 [70]
  o http: do not send PROXY more than once [46]
+ o http: fix the ::1 comparison for IPv6 localhost for cookies [155]
  o http: set 'this_is_a_follow' in the Location: logic [40]
+ o http: use the IDN decoded name in HSTS checks [154]
  o hyper: classify headers as CONNECT and 1XX [56]
  o hyper: fix handling of hyper_task's when reusing the same address [33]
+ o idn: remove Curl_win32_ascii_to_idn [153]
  o INSTALL: update operating systems and CPU archs [91]
  o KNOWN_BUGS: remove eight entries [50]
+ o lib1560: add some basic IDN host name tests [151]
  o lib: connection filters (cfilter) addition to curl: [43]
  o lib: feature deprecation warnings in gcc >= 4.3 [58]
  o lib: fix some type mismatches and remove unneeded typecasts [12]
@@ -97,6 +102,7 @@ This release includes the following bugfixes:
  o lib: use size_t or int etc instead of longs [145]
  o libcurl-errors.3: remove duplicate word [3]
  o libssh2: return error when ssh_hostkeyfunc returns error [121]
+ o limit-rate.d: see also --rate
  o log2changes.pl: wrap long lines at 80 columns [59]
  o Makefile.mk: address minor issues [87]
  o Makefile.mk: improve a GNU Make hack [122]
@@ -128,6 +134,8 @@ This release includes the following bugfixes:
  o sendf: change Curl_read_plain to wrap Curl_recv_plain [48]
  o sendf: remove unnecessary if condition [26]
  o setup: do not require __MRC__ defined for Mac OS 9 builds [117]
+ o smb/telnet: do not free the protocol struct in *_done() [152]
+ o socks: fix username max size is 255 (0xFF) [146]
  o spellcheck.words: remove 'github' as an accepted word [22]
  o ssl-reqd.d: clarify that this is for upgrading connections only [138]
  o strcase: use curl_str(n)equal for case insensitive matches [8]
@@ -180,24 +188,25 @@ advice from friends like these:
 
   Adam Averay, Alexandre Ferrieux, Alex Xu, Ali Utku Selen, Andrei Rybak,
   Andy Alt, Andy Stamp, Anthony Hu, AtariDreams on github, Ayesh Karunaratne,
-  Baitinq on github, Boris Verkhovskiy, Casey Bodley, Christian Schmitz,
-  Christopher Sauer, Christoph Reiter, Dan Fandrich, Daniel Faust,
-  Daniel Gustafsson, Daniel Stenberg, David Benjamin, Diogo Teles Sant'Anna,
-  Egor Pugin, Emanuele Torre, Emil Engler, Emil Österlund, Eric Vigeant,
-  Erik Janssen, Fata Nugraha, Felipe Gasper, Frank Gevaerts, Geeknik Labs,
-  Gisle Vanem, godmar on github, Henning Schild, Hirotaka Tagawa,
-  Ikko Ashimine, Jakub Zakrzewski, Joel Depooter, John Sherrill, Jon Rumsey,
-  jvreelanda on github, Karthikdasari0423 on github, Kenneth Myhra,
-  Lorenzo Miniero, Luca Niccoli, Marcel Raad, Marc Hörsken, Mark Gaiser,
-  Max Dymond, Michael Drake, Michael Kaufmann, Michael Musset,
-  Mikhail Kuznetsov, MonkeybreadSoftware on github, Nathan Moinvaziri,
-  Oskar Sigvardsson, Patrick Monnerat, Patrick Schlangen, Peter Piekarski,
-  Philip Chan, Philip Heiduck, Philip Sanetra, Prithvi MK, Randall S. Becker,
-  Ray Satiro, Rob de Wit, Robin Marx, Ryan Schmidt, Sean McArthur,
-  Stefan Eissing, Stephan Guilloux, Stuart Henderson, Thomas Glanzmann,
-  Trail of Bits, u20221022 on github, Viktor Szakats, xianghongai on github,
+  Baitinq on github, Boris Verkhovskiy, BratSinot on github, Casey Bodley,
+  Christian Schmitz, Christopher Sauer, Christoph Reiter, Dan Fandrich,
+  Daniel Faust, Daniel Gustafsson, Daniel Stenberg, David Benjamin,
+  Diogo Teles Sant'Anna, Egor Pugin, Emanuele Torre, Emil Engler,
+  Emil Österlund, Eric Vigeant, Erik Janssen, Fata Nugraha, Felipe Gasper,
+  Frank Gevaerts, Geeknik Labs, Gisle Vanem, godmar on github, Henning Schild,
+  Hiroki Kurosawa, Hirotaka Tagawa, Ikko Ashimine, Jakub Zakrzewski,
+  Joel Depooter, John Sherrill, Jon Rumsey, jvreelanda on github,
+  Karthikdasari0423 on github, Kenneth Myhra, Lorenzo Miniero, Luca Niccoli,
+  Marcel Raad, Marc Hörsken, Mark Gaiser, Max Dymond, Michael Drake,
+  Michael Kaufmann, Michael Musset, Mikhail Kuznetsov,
+  MonkeybreadSoftware on github, Nathan Moinvaziri, Oskar Sigvardsson,
+  Patrick Monnerat, Patrick Schlangen, Peter Piekarski, Philip Chan,
+  Philip Heiduck, Philip Sanetra, Prithvi MK, Randall S. Becker, Ray Satiro,
+  Rob de Wit, Robin Marx, Ryan Schmidt, Sean McArthur, Stefan Eissing,
+  Stephan Guilloux, Stuart Henderson, Thomas Glanzmann, Trail of Bits,
+  u20221022 on github, Viktor Szakats, xianghongai on github, Xì Gà,
   xtonik on github, Zespre Schmidt
-  (80 contributors)
+  (83 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -330,6 +339,7 @@ References to bug reports and discussions on issues:
  [127] = https://curl.se/bug/?i=10101
  [128] = https://curl.se/bug/?i=10078
  [129] = https://curl.se/bug/?i=10064
+ [130] = https://curl.se/bug/?i=10106
  [131] = https://curl.se/bug/?i=10063
  [132] = https://curl.se/bug/?i=10062
  [133] = https://curl.se/bug/?i=10049
@@ -345,7 +355,13 @@ References to bug reports and discussions on issues:
  [143] = https://curl.se/bug/?i=10096
  [144] = https://curl.se/bug/?i=10095
  [145] = https://curl.se/bug/?i=10088
+ [146] = https://curl.se/bug/?i=10105
  [147] = https://curl.se/bug/?i=10087
  [148] = https://curl.se/bug/?i=10089
  [149] = https://curl.se/bug/?i=10084
  [150] = https://curl.se/bug/?i=10085
+ [151] = https://curl.se/bug/?i=10094
+ [152] = https://curl.se/bug/?i=10112
+ [153] = https://curl.se/bug/?i=10094
+ [154] = https://curl.se/bug/?i=10111
+ [155] = https://curl.se/bug/?i=10120
