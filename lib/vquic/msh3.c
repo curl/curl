@@ -68,6 +68,8 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
 static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
                                     bool Aborted, uint64_t AbortError);
 static void MSH3_CALL msh3_shutdown(MSH3_REQUEST *Request, void *IfContext);
+static void MSH3_CALL msh3_send_complete(MSH3_REQUEST *Request,
+                                         void *IfContext, void *SendContext);
 
 static const struct Curl_handler msh3_curl_handler_http3 = {
   "HTTPS",                              /* scheme */
@@ -96,7 +98,8 @@ static const MSH3_REQUEST_IF msh3_request_if = {
   msh3_header_received,
   msh3_data_received,
   msh3_complete,
-  msh3_shutdown
+  msh3_shutdown,
+  msh3_send_complete
 };
 
 void Curl_quic_ver(char *p, size_t len)
@@ -381,6 +384,15 @@ static void MSH3_CALL msh3_shutdown(MSH3_REQUEST *Request, void *IfContext)
   (void)stream;
 }
 
+static void MSH3_CALL msh3_send_complete(MSH3_REQUEST *Request,
+                                         void *IfContext, void *SendContext)
+{
+  struct HTTP *stream = IfContext;
+  (void)Request;
+  (void)stream;
+  (void)SendContext;
+}
+
 static ssize_t msh3_stream_send(struct Curl_easy *data,
                                 int sockindex,
                                 const void *mem,
@@ -406,7 +418,8 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
     }
     H3BUGF(infof(data, "starting request with %zu headers", hreq->entries));
     stream->req = MsH3RequestOpen(qs->conn, &msh3_request_if, stream,
-                                 (MSH3_HEADER*)hreq->header, hreq->entries);
+                                 (MSH3_HEADER*)hreq->header, hreq->entries,
+                                 MSH3_REQUEST_FLAG_FIN);
     Curl_pseudo_free(hreq);
     if(!stream->req) {
       failf(data, "request open failed");
