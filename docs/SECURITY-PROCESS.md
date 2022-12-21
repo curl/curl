@@ -151,26 +151,32 @@ confidentiality, integrity or availability problems.
 
 This is a security problem that is truly hard or unlikely to exploit or
 trigger. Due to timing, platform requirements or the fact that options or
-protocols involved are rare etc.
+protocols involved are rare etc. [Past
+example](https://curl.se/docs/CVE-2022-43552.html)
 
 ## Medium
 
 This is a security problem that is less hard than **Low** to exploit or
 trigger. Less strict timing, wider platforms availability or involving more
 widely used options or protocols. A problem that usually needs something else
-to also happen to become serious.
+to also happen to become serious. [Past
+example](https://curl.se/docs/CVE-2022-32206.html)
 
 ## High
 
 This issue in itself a serious problem with real world impact. Flaws that can
 easily compromise the confidentiality, integrity or availability of resources.
-Exploiting or triggering this problem is not hard.
+Exploiting or triggering this problem is not hard. [Past
+example](https://curl.se/docs/CVE-2019-3822.html)
 
 ## Critical
 
 Easily exploitable by a remote unauthenticated attacker and lead to system
 compromise (arbitrary code execution) without requiring user interaction, with
-a common configuration on a popular platform.
+a common configuration on a popular platform. This issue has few restrictions
+and requirements and can be exploited easily using most curl configs.
+
+No past curl vulnerability has had this severity level.
 
 # Not security issues
 
