@@ -61,6 +61,11 @@ man-in-the-middle the communication without you knowing it. Disabling
 verification makes the communication insecure. Just having encryption on a
 transfer is not enough as you cannot be sure that you are communicating with
 the correct end-point.
+
+When libcurl uses secure protocols it trusts responses and allows for example
+HSTS and Alt-Svc information to be stored and used subsequently. Disabling
+certificate verification can make libcurl trust and use such information from
+malicious servers.
 .SH DEFAULT
 By default, curl assumes a value of 1.
 .SH PROTOCOLS
