@@ -67,6 +67,17 @@ The default value for this option is 2.
 This option controls checking the server's certificate's claimed identity.
 The server could be lying.  To control lying, see
 \fICURLOPT_SSL_VERIFYPEER(3)\fP.
+
+WARNING: disabling verification of the certificate allows bad guys to
+man-in-the-middle the communication without you knowing it. Disabling
+verification makes the communication insecure. Just having encryption on a
+transfer is not enough as you cannot be sure that you are communicating with
+the correct end-point.
+
+When libcurl uses secure protocols it trusts responses and allows for example
+HSTS and Alt-Svc information to be stored and used subsequently. Disabling
+certificate verification can make libcurl trust and use such information from
+malicious servers.
 .SH LIMITATIONS
 Secure Transport: If \fIverify\fP value is 0, then SNI is also disabled. SNI is
 a TLS extension that sends the hostname to the server. The server may use that
