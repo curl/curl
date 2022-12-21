@@ -68,8 +68,8 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
 static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
                                     bool Aborted, uint64_t AbortError);
 static void MSH3_CALL msh3_shutdown(MSH3_REQUEST *Request, void *IfContext);
-static void MSH3_CALL msh3_send_complete(MSH3_REQUEST* Request, void* IfContext,
-                                         void* SendContext);
+static void MSH3_CALL msh3_send_complete(MSH3_REQUEST *Request,
+                                         void *IfContext, void *SendContext);
 
 static const struct Curl_handler msh3_curl_handler_http3 = {
   "HTTPS",                              /* scheme */
@@ -384,8 +384,8 @@ static void MSH3_CALL msh3_shutdown(MSH3_REQUEST *Request, void *IfContext)
   (void)stream;
 }
 
-static void MSH3_CALL msh3_send_complete(MSH3_REQUEST* Request, void* IfContext,
-                                         void* SendContext)
+static void MSH3_CALL msh3_send_complete(MSH3_REQUEST *Request,
+                                         void *IfContext, void *SendContext)
 {
   struct HTTP *stream = IfContext;
   (void)Request;
