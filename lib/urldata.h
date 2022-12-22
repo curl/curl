@@ -1732,11 +1732,13 @@ struct UserDefined {
   unsigned char ftp_ccc;   /* FTP CCC options: curl_ftpccc */
   unsigned int accepttimeout;   /* in milliseconds, 0 means no timeout */
 #endif
-  /* Desppie the name ftp_create_missing_dirs is for FTP(S) and SFTP
+#if !defined(CURL_DISABLE_FTP) || !defined(USE_SSH)
+  /* Despite the name, ftp_create_missing_dirs is for FTP(S) and SFTP
      1 - create directories that don't exist
      2 - the same but also allow MKD to fail once
   */
   unsigned char ftp_create_missing_dirs;
+#endif
 #ifdef USE_LIBSSH2
   curl_sshhostkeycallback ssh_hostkeyfunc; /* hostkey check callback */
   void *ssh_hostkeyfunc_userp;         /* custom pointer to callback */
