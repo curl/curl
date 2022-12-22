@@ -1880,10 +1880,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * GSS-API credential delegation bitmask
      */
-    arg = va_arg(param, long);
-    if(arg < CURLGSSAPI_DELEGATION_NONE)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.gssapi_delegation = arg;
+    uarg = va_arg(param, unsigned long);
+    data->set.gssapi_delegation = (unsigned char)uarg&
+      (CURLGSSAPI_DELEGATION_POLICY_FLAG|CURLGSSAPI_DELEGATION_FLAG);
     break;
   case CURLOPT_SSL_VERIFYPEER:
     /*

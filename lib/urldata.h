@@ -1774,8 +1774,9 @@ struct UserDefined {
                                     to pattern (e.g. if WILDCARDMATCH is on) */
   void *fnmatch_data;
 #endif
-  long gssapi_delegation; /* GSS-API credential delegation, see the
-                             documentation of CURLOPT_GSSAPI_DELEGATION */
+ /* GSS-API credential delegation, see the documentation of
+    CURLOPT_GSSAPI_DELEGATION */
+  unsigned char gssapi_delegation;
 
   int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
@@ -1797,8 +1798,10 @@ struct UserDefined {
   struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
+#ifndef CURL_DISABLE_HTTP
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
+#endif
   char keep_post;     /* keep POSTs as POSTs after a 30x request; each
                          bit represents a request, from 301 to 303 */
 #ifndef CURL_DISABLE_SMTP
