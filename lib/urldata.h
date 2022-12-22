@@ -1747,6 +1747,7 @@ struct UserDefined {
   curl_sshkeycallback ssh_keyfunc; /* key matching callback */
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
   int ssh_auth_types;    /* allowed SSH auth types */
+  unsigned int new_directory_perms; /* when creating remote dirs */
 #endif
 #ifndef CURL_DISABLE_NETRC
   unsigned char use_netrc;        /* enum CURL_NETRC_OPTION values  */
@@ -1754,7 +1755,6 @@ struct UserDefined {
   curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                             IMAP or POP3 or others! */
   unsigned int new_file_perms;      /* when creating remote files */
-  unsigned int new_directory_perms; /* when creating remote dirs */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
   struct curl_blob *blobs[BLOB_LAST];
 #ifdef ENABLE_IPV6

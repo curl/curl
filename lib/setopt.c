@@ -2591,7 +2591,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.new_file_perms = (unsigned int)arg;
     break;
-
+#endif
+#ifdef USE_SSH
   case CURLOPT_NEW_DIRECTORY_PERMS:
     /*
      * Uses these permissions instead of 0755
