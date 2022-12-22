@@ -282,7 +282,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
   DEBUGASSERT(data);
   /* If no filter is set, we have the "default" setup of connection filters.
-   * The filter chain from botton to top will be:
+   * The filter chain from bottom to top will be:
    * - SOCKET       socket filter for outgoing connection to remotehost
    * if http_proxy tunneling is engaged:
    *    - SSL                 if proxytype is CURLPROXY_HTTPS
@@ -491,7 +491,7 @@ void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
   else {
     /* Some filter ask during shutdown for this, mainly for debugging
      * purposes. We hand out the defaults, however this is not always
-     * accurate, as the connction might be tunneled, etc. But all that
+     * accurate, as the connection might be tunneled, etc. But all that
      * state is already gone here. */
     *phost = data->conn->host.name;
     *pdisplay_host = data->conn->host.dispname;

@@ -285,7 +285,7 @@ static CURLcode AcceptServerConnect(struct Curl_easy *data)
   conn->bits.do_more = FALSE;
 
   (void)curlx_nonblock(s, TRUE); /* enable non-blocking */
-  /* Replace any filter on SECONDARY with one listeing on this socket */
+  /* Replace any filter on SECONDARY with one listening on this socket */
   result = Curl_conn_socket_accepted_set(data, conn, SECONDARYSOCKET, &s);
   if(result)
     return result;
@@ -1266,7 +1266,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* store which command was sent */
   ftpc->count1 = fcmd;
 
-  /* Replace any filter on SECONDARY with one listeing on this socket */
+  /* Replace any filter on SECONDARY with one listening on this socket */
   result = Curl_conn_socket_accepted_set(data, conn, SECONDARYSOCKET,
                                          &portsock);
   if(result)
