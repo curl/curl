@@ -972,8 +972,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
             /*
              * this checks if the previous transfer had the same
-             * OperationConfig, which would mean, that the an output file has
-             * already been created and data can be appened to it, instead
+             * OperationConfig, which would mean, that an output file has
+             * already been created and data can be appended to it, instead
              * of overwriting it.
              * TODO: Consider placing the file handle inside the
              * OperationConfig, so that it does not need to be opened/closed

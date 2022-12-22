@@ -112,7 +112,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
 
   # FreeBSD comes with the a.out and elf flavours
   # but a.out was supported up to version 3.x and
-  # elf from 3.x. I cannot imagine someone runnig
+  # elf from 3.x. I cannot imagine someone running
   # CMake on those ancient systems
   CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
 
