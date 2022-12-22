@@ -1694,11 +1694,6 @@ struct UserDefined {
   struct curl_slist *quote;     /* after connection is established */
   struct curl_slist *postquote; /* after the transfer */
   struct curl_slist *prequote; /* before the transfer, after type */
-  struct curl_slist *source_quote;  /* 3rd party quote */
-  struct curl_slist *source_prequote;  /* in 3rd party transfer mode - before
-                                          the transfer on source host */
-  struct curl_slist *source_postquote; /* in 3rd party transfer mode - after
-                                          the transfer on source host */
 #ifndef CURL_DISABLE_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
 #endif
