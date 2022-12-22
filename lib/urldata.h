@@ -1403,10 +1403,6 @@ struct UrlState {
                             is this */
   char *url;        /* work URL, copied from UserDefined */
   char *referer;    /* referer string */
-#ifndef CURL_DISABLE_COOKIES
-  struct curl_slist *cookielist; /* list of cookie files set by
-                                    curl_easy_setopt(COOKIEFILE) calls */
-#endif
   struct curl_slist *resolve; /* set to point to the set.resolve list when
                                  this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP
@@ -1661,6 +1657,10 @@ struct UserDefined {
   void *prereq_userp; /* pre-initial request user data */
 
   void *seek_client;    /* pointer to pass to the seek callback */
+#ifndef CURL_DISABLE_COOKIES
+  struct curl_slist *cookielist; /* list of cookie files set by
+                                    curl_easy_setopt(COOKIEFILE) calls */
+#endif
 #ifndef CURL_DISABLE_HSTS
   curl_hstsread_callback hsts_read;
   void *hsts_read_userp;

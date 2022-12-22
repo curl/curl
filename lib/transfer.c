@@ -1391,8 +1391,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
 #ifndef CURL_DISABLE_COOKIES
   /* If there is a list of cookie files to read, do it now! */
-  if(data->state.cookielist)
-    Curl_cookie_loadfiles(data);
+  Curl_cookie_loadfiles(data);
 #endif
   /* If there is a list of host pairs to deal with */
   if(data->state.resolve)
