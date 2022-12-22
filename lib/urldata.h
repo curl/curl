@@ -1757,8 +1757,9 @@ struct UserDefined {
 #endif
   curl_prot_t allowed_protocols;
   curl_prot_t redir_protocols;
+#ifndef CURL_DISABLE_MIME
   unsigned int mime_options;      /* Mime option flags. */
-
+#endif
 #ifndef CURL_DISABLE_RTSP
   void *rtp_out;     /* write RTP to this if non-NULL */
   /* Common RTSP header options */
