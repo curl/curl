@@ -86,11 +86,7 @@
 #include "memdebug.h"
 
 
-#if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
-
-#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
-
-#elif defined(USE_GNUTLS)
+#if defined(USE_GNUTLS)
 
 typedef struct md4_ctx MD4_CTX;
 
@@ -108,6 +104,10 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   md4_digest(ctx, MD4_DIGEST_SIZE, result);
 }
+
+#elif defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
+
+#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 
 #elif defined(AN_APPLE_OS)
 typedef CC_MD4_CTX MD4_CTX;
