@@ -1309,7 +1309,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.krb = (data->set.str[STRING_KRB_LEVEL]) ? TRUE : FALSE;
     break;
 #endif
-#if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_SFTP)
+#if !defined(CURL_DISABLE_FTP) || !defined(USE_SSH)
   case CURLOPT_FTP_CREATE_MISSING_DIRS:
     /*
      * An FTP/SFTP option that modifies an upload to create missing
