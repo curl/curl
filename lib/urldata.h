@@ -1086,7 +1086,7 @@ struct connectdata {
      that subsequent bound-requested connections aren't accidentally re-using
      wrong connections. */
   char *localdev;
-  int localportrange;
+  unsigned short localportrange;
   int cselect_bits; /* bitmask of socket events */
   int waitfor;      /* current READ/WRITE bits to wait for */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
@@ -1628,8 +1628,9 @@ struct UserDefined {
                                of strlen(), and then the data *may* be binary
                                (contain zero bytes) */
   unsigned short localport; /* local port number to bind to */
-  int localportrange; /* number of additional port numbers to test in case the
-                         'localport' one can't be bind()ed */
+  unsigned short localportrange; /* number of additional port numbers to test
+                                    in case the 'localport' one can't be
+                                    bind()ed */
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
