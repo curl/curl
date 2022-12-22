@@ -1034,8 +1034,10 @@ struct connectdata {
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
 
+#ifndef CURL_DISABLE_HTTP
   /* for chunked-encoded trailer */
   struct dynbuf trailer;
+#endif
 
   union {
 #ifndef CURL_DISABLE_FTP
@@ -1086,7 +1088,7 @@ struct connectdata {
      that subsequent bound-requested connections aren't accidentally re-using
      wrong connections. */
   char *localdev;
-  int localportrange;
+  unsigned short localportrange;
   int cselect_bits; /* bitmask of socket events */
   int waitfor;      /* current READ/WRITE bits to wait for */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
@@ -1616,15 +1618,9 @@ struct UserDefined {
   void *out;         /* CURLOPT_WRITEDATA */
   void *in_set;      /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
-  unsigned short proxyport; /* If non-zero, use this port number by
-                               default. If the proxy string features a
-                               ":[port]" that one will override this. */
   unsigned short use_port; /* which port to use (when not using default) */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
-#ifndef CURL_DISABLE_PROXY
-  unsigned char socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
-#endif
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */
 
@@ -1634,8 +1630,9 @@ struct UserDefined {
                                of strlen(), and then the data *may* be binary
                                (contain zero bytes) */
   unsigned short localport; /* local port number to bind to */
-  int localportrange; /* number of additional port numbers to test in case the
-                         'localport' one can't be bind()ed */
+  unsigned short localportrange; /* number of additional port numbers to test
+                                    in case the 'localport' one can't be
+                                    bind()ed */
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
@@ -1688,17 +1685,8 @@ struct UserDefined {
                                 download */
   curl_off_t set_resume_from;  /* continue [ftp] transfer from here */
   struct curl_slist *headers; /* linked list of extra headers */
-  struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
   struct curl_httppost *httppost;  /* linked list of old POST data */
   curl_mimepart mimepost;  /* MIME/POST data. */
-  struct curl_slist *quote;     /* after connection is established */
-  struct curl_slist *postquote; /* after the transfer */
-  struct curl_slist *prequote; /* before the transfer, after type */
-  struct curl_slist *source_quote;  /* 3rd party quote */
-  struct curl_slist *source_prequote;  /* in 3rd party transfer mode - before
-                                          the transfer on source host */
-  struct curl_slist *source_postquote; /* in 3rd party transfer mode - after
-                                          the transfer on source host */
 #ifndef CURL_DISABLE_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
 #endif
@@ -1708,13 +1696,18 @@ struct UserDefined {
                                     the hostname and port to connect to */
   time_t timevalue;       /* what time to compare with */
   unsigned char timecondition; /* kind of time comparison: curl_TimeCond */
-  unsigned char proxytype; /* what kind of proxy: curl_proxytype */
   unsigned char method;   /* what kind of HTTP request: Curl_HttpReq */
   unsigned char httpwant; /* when non-zero, a specific HTTP version requested
                              to be used in the library's request(s) */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
 #ifndef CURL_DISABLE_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
+  struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
+  unsigned short proxyport; /* If non-zero, use this port number by
+                               default. If the proxy string features a
+                               ":[port]" that one will override this. */
+  unsigned char proxytype; /* what kind of proxy: curl_proxytype */
+  unsigned char socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   int dns_cache_timeout; /* DNS cache timeout (seconds) */
@@ -1734,7 +1727,10 @@ struct UserDefined {
   unsigned char ftp_ccc;   /* FTP CCC options: curl_ftpccc */
   unsigned int accepttimeout;   /* in milliseconds, 0 means no timeout */
 #endif
-#if !defined(CURL_DISABLE_FTP) || !defined(USE_SSH)
+#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
+  struct curl_slist *quote;     /* after connection is established */
+  struct curl_slist *postquote; /* after the transfer */
+  struct curl_slist *prequote; /* before the transfer, after type */
   /* Despite the name, ftp_create_missing_dirs is for FTP(S) and SFTP
      1 - create directories that don't exist
      2 - the same but also allow MKD to fail once
@@ -1764,8 +1760,9 @@ struct UserDefined {
 #endif
   curl_prot_t allowed_protocols;
   curl_prot_t redir_protocols;
+#ifndef CURL_DISABLE_MIME
   unsigned int mime_options;      /* Mime option flags. */
-
+#endif
 #ifndef CURL_DISABLE_RTSP
   void *rtp_out;     /* write RTP to this if non-NULL */
   /* Common RTSP header options */
@@ -1780,8 +1777,9 @@ struct UserDefined {
                                     to pattern (e.g. if WILDCARDMATCH is on) */
   void *fnmatch_data;
 #endif
-  long gssapi_delegation; /* GSS-API credential delegation, see the
-                             documentation of CURLOPT_GSSAPI_DELEGATION */
+ /* GSS-API credential delegation, see the documentation of
+    CURLOPT_GSSAPI_DELEGATION */
+  unsigned char gssapi_delegation;
 
   int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
@@ -1803,8 +1801,10 @@ struct UserDefined {
   struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
+#ifndef CURL_DISABLE_HTTP
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
+#endif
   char keep_post;     /* keep POSTs as POSTs after a 30x request; each
                          bit represents a request, from 301 to 303 */
 #ifndef CURL_DISABLE_SMTP
