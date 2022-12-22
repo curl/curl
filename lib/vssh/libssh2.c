@@ -839,7 +839,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
     = "ecdsa-sha2-nistp256";
 #endif
   static const char * const hostkey_method_ssh_rsa
-    = "ssh-rsa";
+    = "rsa-sha2-256,rsa-sha2-512,ssh-rsa";
   static const char * const hostkey_method_ssh_dss
     = "ssh-dss";
 
