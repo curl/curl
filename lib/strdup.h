@@ -26,7 +26,7 @@
 #include "curl_setup.h"
 
 #ifndef HAVE_STRDUP
-extern char *curlx_strdup(const char *str);
+char *Curl_strdup(const char *str);
 #endif
 #ifdef WIN32
 wchar_t* Curl_wcsdup(const wchar_t* src);

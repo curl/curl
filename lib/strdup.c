@@ -37,7 +37,7 @@
 #include "memdebug.h"
 
 #ifndef HAVE_STRDUP
-char *curlx_strdup(const char *str)
+char *Curl_strdup(const char *str)
 {
   size_t len;
   char *newstr;
