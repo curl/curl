@@ -1034,8 +1034,10 @@ struct connectdata {
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
 
+#ifndef CURL_DISABLE_HTTP
   /* for chunked-encoded trailer */
   struct dynbuf trailer;
+#endif
 
   union {
 #ifndef CURL_DISABLE_FTP
