@@ -1684,9 +1684,6 @@ struct UserDefined {
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_httppost *httppost;  /* linked list of old POST data */
   curl_mimepart mimepost;  /* MIME/POST data. */
-  struct curl_slist *quote;     /* after connection is established */
-  struct curl_slist *postquote; /* after the transfer */
-  struct curl_slist *prequote; /* before the transfer, after type */
 #ifndef CURL_DISABLE_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
 #endif
@@ -1727,7 +1724,10 @@ struct UserDefined {
   unsigned char ftp_ccc;   /* FTP CCC options: curl_ftpccc */
   unsigned int accepttimeout;   /* in milliseconds, 0 means no timeout */
 #endif
-#if !defined(CURL_DISABLE_FTP) || !defined(USE_SSH)
+#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
+  struct curl_slist *quote;     /* after connection is established */
+  struct curl_slist *postquote; /* after the transfer */
+  struct curl_slist *prequote; /* before the transfer, after type */
   /* Despite the name, ftp_create_missing_dirs is for FTP(S) and SFTP
      1 - create directories that don't exist
      2 - the same but also allow MKD to fail once

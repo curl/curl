@@ -1309,7 +1309,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.krb = (data->set.str[STRING_KRB_LEVEL]) ? TRUE : FALSE;
     break;
 #endif
-#if !defined(CURL_DISABLE_FTP) || !defined(USE_SSH)
+#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   case CURLOPT_FTP_CREATE_MISSING_DIRS:
     /*
      * An FTP/SFTP option that modifies an upload to create missing
@@ -1322,6 +1322,25 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       result = CURLE_BAD_FUNCTION_ARGUMENT;
     else
       data->set.ftp_create_missing_dirs = (unsigned char)arg;
+    break;
+
+  case CURLOPT_POSTQUOTE:
+    /*
+     * List of RAW FTP commands to use after a transfer
+     */
+    data->set.postquote = va_arg(param, struct curl_slist *);
+    break;
+  case CURLOPT_PREQUOTE:
+    /*
+     * List of RAW FTP commands to use prior to RETR (Wesley Laxton)
+     */
+    data->set.prequote = va_arg(param, struct curl_slist *);
+    break;
+  case CURLOPT_QUOTE:
+    /*
+     * List of RAW FTP commands to use before a transfer
+     */
+    data->set.quote = va_arg(param, struct curl_slist *);
     break;
 #endif
   case CURLOPT_READDATA:
@@ -1508,24 +1527,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     break;
 
-  case CURLOPT_POSTQUOTE:
-    /*
-     * List of RAW FTP commands to use after a transfer
-     */
-    data->set.postquote = va_arg(param, struct curl_slist *);
-    break;
-  case CURLOPT_PREQUOTE:
-    /*
-     * List of RAW FTP commands to use prior to RETR (Wesley Laxton)
-     */
-    data->set.prequote = va_arg(param, struct curl_slist *);
-    break;
-  case CURLOPT_QUOTE:
-    /*
-     * List of RAW FTP commands to use before a transfer
-     */
-    data->set.quote = va_arg(param, struct curl_slist *);
-    break;
   case CURLOPT_RESOLVE:
     /*
      * List of HOST:PORT:[addresses] strings to populate the DNS cache with
