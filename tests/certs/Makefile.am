@@ -30,7 +30,10 @@ CERTCONFIGS = \
   EdelCurlRoot-ca.cnf \
   Server-localhost-sv.prm \
   Server-localhost.nn-sv.prm \
-  Server-localhost0h-sv.prm
+  Server-localhost0h-sv.prm \
+  Server-localhost-firstSAN-sv.prm \
+  Server-localhost-lastSAN-sv.prm \
+  stunnel-sv.prm
 
 GENERATEDCERTS = \
   EdelCurlRoot-ca.cacert \
