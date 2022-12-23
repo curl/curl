@@ -63,8 +63,8 @@ set -e
 
 echo SERIAL=$SERIAL PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE
 
-echo "openssl genrsa -out $PREFIX-ca.key $KEYSIZE -passout XXX"
-openssl genrsa -out $PREFIX-ca.key $KEYSIZE -passout pass:secret
+echo "openssl genrsa -out $PREFIX-ca.key -passout XXX $KEYSIZE"
+openssl genrsa -out $PREFIX-ca.key -passout pass:secret $KEYSIZE
 
 echo "openssl req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr"
 $OPENSSL req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr -passin pass:secret
