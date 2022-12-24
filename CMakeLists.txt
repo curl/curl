@@ -1007,7 +1007,6 @@ check_include_file_concat("utime.h"          HAVE_UTIME_H)
 
 check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
 check_include_file_concat("stdint.h"        HAVE_STDINT_H)
-check_include_file_concat("stdio.h"         HAVE_STDIO_H)
 check_include_file_concat("sys/utsname.h"   HAVE_SYS_UTSNAME_H)
 
 check_type_size(size_t  SIZEOF_SIZE_T)
@@ -1093,7 +1092,7 @@ check_symbol_exists(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   # earlier MSVC compilers had faulty snprintf implementations
-  check_symbol_exists(snprintf       "${CURL_INCLUDES}" HAVE_SNPRINTF)
+  check_symbol_exists(snprintf       "stdio.h" HAVE_SNPRINTF)
 endif()
 check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
 check_symbol_exists(inet_ntop      "${CURL_INCLUDES}" HAVE_INET_NTOP)
