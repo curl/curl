@@ -839,6 +839,8 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
     = "ecdsa-sha2-nistp256";
 #endif
   static const char * const hostkey_method_ssh_rsa
+    = "ssh-rsa";
+  static const char * const hostkey_method_ssh_rsa_all
     = "rsa-sha2-256,rsa-sha2-512,ssh-rsa";
   static const char * const hostkey_method_ssh_dss
     = "ssh-dss";
@@ -914,7 +916,19 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
         break;
 #endif
       case LIBSSH2_KNOWNHOST_KEY_SSHRSA:
-        hostkey_method = hostkey_method_ssh_rsa;
+#ifdef HAVE_LIBSSH2_VERSION
+        if (libssh2_version(0x010900)) {
+          /* since 1.9.0 libssh2_session_method_pref() works as expected */
+          hostkey_method = hostkey_method_ssh_rsa_all;
+        } else
+#endif
+        {
+          /* old libssh2 which cannot correctly remove unsupported
+           * methods due to bug in src/kex.c or does not support the 
+           * new methods anyways.
+           */
+          hostkey_method = hostkey_method_ssh_rsa;
+        }
         break;
       case LIBSSH2_KNOWNHOST_KEY_SSHDSS:
         hostkey_method = hostkey_method_ssh_dss;
