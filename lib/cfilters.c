@@ -437,6 +437,10 @@ int Curl_conn_get_select_socks(struct Curl_easy *data, int sockindex,
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   cf = data->conn->cfilter[sockindex];
+
+  /* if the next one is not yet connected, that's the one we want */
+  while(cf && cf->next && !cf->next->connected)
+    cf = cf->next;
   if(cf) {
     return cf->cft->get_select_socks(cf, data, socks);
   }
