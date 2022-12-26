@@ -60,7 +60,7 @@
 # to ON or OFF), the symbol detection will be skipped.  If the
 # variable is NOT DEFINED, the symbol detection will be performed.
 
-cmake_minimum_required(VERSION 3.2...3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
