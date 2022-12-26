@@ -2,7 +2,7 @@
 
 The canonical libcurl internals documentation is now in the [everything
 curl](https://everything.curl.dev/internals) book. This file lists supported
-versions of libs, tools and operating systems.
+versions of libs and build tools.
 
 ## Portability
 
@@ -33,18 +33,6 @@ versions of libs, tools and operating systems.
  - nghttp2      1.12.0
  - WinSock      2.2 (on Windows 95+ and Windows CE .NET 4.1+)
 
-## Operating Systems
-
- On systems where configure runs, we aim at working on them all - if they have
- a suitable C compiler. On systems that do not run configure, we strive to
- keep curl running correctly on:
-
- - Windows      98
- - AS/400       V5R3M0
- - Symbian      9.1
- - Windows CE   ?
- - TPF          ?
-
 ## Build tools
 
  When writing code (mostly for generating stuff included in release tarballs)
@@ -52,12 +40,13 @@ versions of libs, tools and operating systems.
  these versions:
 
  - GNU Libtool  1.4.2
- - GNU Autoconf 2.57
+ - GNU Autoconf 2.59
  - GNU Automake 1.7
  - GNU M4       1.4
  - perl         5.004
  - roffit       0.5
- - groff        ? (any version that supports `groff -Tps -man [in] [out]`)
+ - nroff        any version that supports `-man [in] [out]`
+ - cmake        3.7
 
 Library Symbols
 ===============
