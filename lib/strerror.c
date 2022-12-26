@@ -550,6 +550,9 @@ curl_url_strerror(CURLUcode error)
   case CURLUE_BAD_USER:
     return "Bad user";
 
+  case CURLUE_LACKS_IDN:
+    return "libcurl lacks IDN support";
+
   case CURLUE_LAST:
     break;
   }

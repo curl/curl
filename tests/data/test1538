@@ -185,7 +185,8 @@ u26: Bad query
 u27: Bad scheme
 u28: Unsupported number of slashes following scheme
 u29: Bad user
-u30: CURLUcode unknown
+u30: libcurl lacks IDN support
+u31: CURLUcode unknown
 </stdout>
 </verify>
 
