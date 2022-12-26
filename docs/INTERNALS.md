@@ -2,7 +2,7 @@
 
 The canonical libcurl internals documentation is now in the [everything
 curl](https://everything.curl.dev/internals) book. This file lists supported
-versions of libs, tools and operating systems.
+versions of libs and build tools.
 
 ## Portability
 
