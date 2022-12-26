@@ -4290,7 +4290,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           }
           if(conn->httpversion < 20) {
             conn->bundle->multiuse = BUNDLE_NO_MULTIUSE;
-            infof(data, "Mark bundle as not supporting multiuse");
           }
         }
         else if(!nc) {
