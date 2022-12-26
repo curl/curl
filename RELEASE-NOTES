@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         249
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2771
+ Contributors:                 2777
 
 This release includes the following changes:
 
@@ -12,7 +12,25 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o cmake: fix the snprintf detection [5]
+ o docs: mention indirect effects of --insecure [19]
+ o http: remove the trace message "Mark bundle... multiuse" [6]
+ o libssh2: try sha2 algos for hostkey methods [2]
+ o md4: fix build with GnuTLS + OpenSSL v1 [12]
+ o misc: fix grammar and spelling [14]
+ o msh3: update to v0.5 Release [17]
+ o runtests: also tear down http2/http3 servers when https server is stopped [8]
+ o SECURITY-PROCESS.md: document severity levels [20]
+ o strdup: name it Curl_strdup [16]
+ o tests: add 3 new HTTP/2 test cases, plus https: support for nghttpx [9]
+ o tests: avoid use of sha1 in certificates [4]
  o tool_operate: fix `CURLOPT_SOCKS5_GSSAPI_NEC` type [1]
+ o typecheck: accept expressions for option/info parameters [3]
+ o urldata: make 'ftp_create_missing_dirs' depend on FTP || SFTP [13]
+ o urldata: make set.http200aliases conditional on HTTP being present [11]
+ o urldata: move the cookefilelist to the 'set' struct [15]
+ o urldata: remove unused struct fields, made more conditional [10]
+ o workflows/linux.yml: merge 3 common packages [18]
 
 This release includes the following known bugs:
 
@@ -28,9 +46,30 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Marcel Raad, Martin Waleczek
-  (3 contributors)
+  Andy Alt, Daniel Stenberg, Esdras de Morais da Silva, Hannah Schierling,
+  Harry Sintonen, John Bampton, Marcel Raad, Martin Waleczek, Nick Banks,
+  norbertmm on github, Patrick Monnerat, Paul Howarth, Radu Hociung,
+  Stefan Eissing, Thomas Klausner, Yurii Rashkovskii
+  (16 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=10124
+ [2] = https://curl.se/bug/?i=10143
+ [3] = https://curl.se/bug/?i=10148
+ [4] = https://curl.se/bug/?i=10135
+ [5] = https://curl.se/bug/?i=10155
+ [6] = https://curl.se/bug/?i=10159
+ [8] = https://curl.se/bug/?i=10114
+ [9] = https://curl.se/bug/?i=10114
+ [10] = https://curl.se/bug/?i=10147
+ [11] = https://curl.se/bug/?i=10140
+ [12] = https://curl.se/bug/?i=10110
+ [13] = https://curl.se/bug/?i=10139
+ [14] = https://curl.se/bug/?i=10137
+ [15] = https://curl.se/bug/?i=10133
+ [16] = https://curl.se/bug/?i=10132
+ [17] = https://curl.se/bug/?i=10125
+ [18] = https://curl.se/bug/?i=10071
+ [19] = https://curl.se/bug/?i=10126
+ [20] = https://curl.se/bug/?i=10118
