@@ -31,6 +31,9 @@
  */
 
 #include "test.h"
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
+#define USE_IDN
+#endif
 
 #include "testutil.h"
 #include "warnless.h"
@@ -138,6 +141,15 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+#ifdef USE_IDN
+  {"https://räksmörgås.se",
+   "https | [11] | [12] | [13] | xn--rksmrgs-5wao1o.se | "
+   "[15] | / | [16] | [17]", 0, CURLU_PUNYCODE, CURLUE_OK},
+#else
+  {"https://räksmörgås.se",
+   "https | [11] | [12] | [13] | [30] | [15] | / | [16] | [17]",
+   0, CURLU_PUNYCODE, CURLUE_OK},
+#endif
   /* https://ℂᵤⓇℒ。𝐒🄴 */
   {"https://"
    "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4",
@@ -454,6 +466,10 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+#ifdef USE_IDN
+  {"https://räksmörgås.se/path?q#frag",
+   "https://xn--rksmrgs-5wao1o.se/path?q#frag", 0, CURLU_PUNYCODE, CURLUE_OK},
+#endif
   /* unsupported schemes with no guessing enabled */
   {"data:text/html;charset=utf-8;base64,PCFET0NUWVBFIEhUTUw+PG1ldGEgY",
    "", 0, 0, CURLUE_UNSUPPORTED_SCHEME},

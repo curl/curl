@@ -116,7 +116,7 @@ bool Curl_is_ASCII_name(const char *hostname)
  * Curl_idn_decode() returns an allocated IDN decoded string if it was
  * possible. NULL on error.
  */
-static char *Curl_idn_decode(const char *input)
+static char *idn_decode(const char *input)
 {
   char *decoded = NULL;
 #ifdef USE_LIBIDN2
@@ -144,24 +144,29 @@ static char *Curl_idn_decode(const char *input)
   return decoded;
 }
 
+char *Curl_idn_decode(const char *input)
+{
+  char *d = idn_decode(input);
+#ifdef USE_LIBIDN2
+  if(d) {
+    char *c = strdup(d);
+    idn2_free(d);
+    d = c;
+  }
+#endif
+  return d;
+}
+
 /*
  * Frees data allocated by idnconvert_hostname()
  */
 void Curl_free_idnconverted_hostname(struct hostname *host)
 {
-#if defined(USE_LIBIDN2)
   if(host->encalloc) {
-    idn2_free(host->encalloc); /* must be freed with idn2_free() since this was
-                                  allocated by libidn */
+    /* must be freed with idn2_free() if allocated by libidn */
+    Curl_idn_free(host->encalloc);
     host->encalloc = NULL;
   }
-#elif defined(USE_WIN32_IDN)
-  free(host->encalloc); /* must be freed with free() since this was
-                           allocated by Curl_win32_idn_to_ascii */
-  host->encalloc = NULL;
-#else
-  (void)host;
-#endif
 }
 
 #endif /* USE_IDN */
@@ -177,7 +182,7 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host)
 #ifdef USE_IDN
   /* Check name for non-ASCII and convert hostname if we can */
   if(!Curl_is_ASCII_name(host->name)) {
-    char *decoded = Curl_idn_decode(host->name);
+    char *decoded = idn_decode(host->name);
     if(decoded) {
       /* successful */
       host->encalloc = decoded;
@@ -190,4 +195,3 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host)
 #endif
   return CURLE_OK;
 }
-

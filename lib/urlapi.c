@@ -33,6 +33,7 @@
 #include "inet_pton.h"
 #include "inet_ntop.h"
 #include "strdup.h"
+#include "idn.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1379,6 +1380,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
   char portbuf[7];
   bool urldecode = (flags & CURLU_URLDECODE)?1:0;
   bool urlencode = (flags & CURLU_URLENCODE)?1:0;
+  bool punycode = FALSE;
   bool plusdecode = FALSE;
   (void)flags;
   if(!u)
@@ -1408,6 +1410,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
   case CURLUPART_HOST:
     ptr = u->host;
     ifmissing = CURLUE_NO_HOST;
+    punycode = (flags & CURLU_PUNYCODE)?1:0;
     break;
   case CURLUPART_ZONEID:
     ptr = u->zoneid;
@@ -1460,6 +1463,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     char *options = u->options;
     char *port = u->port;
     char *allochost = NULL;
+    punycode = (flags & CURLU_PUNYCODE)?1:0;
     if(u->scheme && strcasecompare("file", u->scheme)) {
       url = aprintf("file://%s%s%s",
                     u->path,
@@ -1513,6 +1517,17 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
         allochost = curl_easy_escape(NULL, u->host, 0);
         if(!allochost)
           return CURLUE_OUT_OF_MEMORY;
+      }
+      else if(punycode) {
+        if(!Curl_is_ASCII_name(u->host)) {
+#ifndef USE_IDN
+          return CURLUE_LACKS_IDN;
+#else
+          allochost = Curl_idn_decode(u->host);
+          if(!allochost)
+            return CURLUE_OUT_OF_MEMORY;
+#endif
+        }
       }
       else {
         /* only encode '%' in output host name */
@@ -1610,6 +1625,19 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
         return CURLUE_OUT_OF_MEMORY;
       free(*part);
       *part = Curl_dyn_ptr(&enc);
+    }
+    else if(punycode) {
+      if(!Curl_is_ASCII_name(u->host)) {
+#ifndef USE_IDN
+        return CURLUE_LACKS_IDN;
+#else
+        char *allochost = Curl_idn_decode(*part);
+        if(!allochost)
+          return CURLUE_OUT_OF_MEMORY;
+        free(*part);
+        *part = allochost;
+#endif
+      }
     }
 
     return CURLUE_OK;

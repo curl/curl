@@ -1055,6 +1055,7 @@ CURLU_NO_AUTHORITY              7.67.0
 CURLU_NO_DEFAULT_PORT           7.62.0
 CURLU_NON_SUPPORT_SCHEME        7.62.0
 CURLU_PATH_AS_IS                7.62.0
+CURLU_PUNYCODE                  7.88.0
 CURLU_URLDECODE                 7.62.0
 CURLU_URLENCODE                 7.62.0
 CURLUE_BAD_FILE_URL             7.81.0
@@ -1071,6 +1072,7 @@ CURLUE_BAD_QUERY                7.81.0
 CURLUE_BAD_SCHEME               7.81.0
 CURLUE_BAD_SLASHES              7.81.0
 CURLUE_BAD_USER                 7.81.0
+CURLUE_LACKS_IDN                7.88.0
 CURLUE_MALFORMED_INPUT          7.62.0
 CURLUE_NO_FRAGMENT              7.62.0
 CURLUE_NO_HOST                  7.62.0
