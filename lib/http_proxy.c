@@ -1195,6 +1195,9 @@ CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
   return result;
 }
 
+#endif /* !CURL_DISABLE_PROXY &6 ! CURL_DISABLE_HTTP */
+
+#if !defined(CURL_DISABLE_PROXY)
 
 static CURLcode send_haproxy_header(struct Curl_cfilter*cf,
                                     struct Curl_easy *data)
@@ -1280,4 +1283,4 @@ CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
   return result;
 }
 
-#endif /* !CURL_DISABLE_PROXY &6 ! CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_PROXY */
