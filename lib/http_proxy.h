@@ -27,19 +27,21 @@
 #include "curl_setup.h"
 #include "urldata.h"
 
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_PROXY)
 
+#if !defined(CURL_DISABLE_HTTP)
 /* Default proxy timeout in milliseconds */
 #define PROXY_TIMEOUT (3600*1000)
 
 CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   int sockindex);
+#endif /* !CURL_DISABLE_HTTP */
 
 CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
                                struct connectdata *conn,
                                int sockindex);
 
-#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_PROXY */
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */

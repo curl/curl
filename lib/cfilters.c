@@ -319,7 +319,14 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
         if(result)
           goto out;
       }
+    }
 #endif /* !CURL_DISABLE_HTTP */
+
+    /* HAProxy protocol comes *before* SSL, see #10165 */
+    if(data->set.haproxyprotocol) {
+      result = Curl_conn_haproxy_add(data, conn, sockindex);
+      if(result)
+        goto out;
     }
 #endif /* !CURL_DISABLE_PROXY */
 
@@ -334,14 +341,6 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 #else
     (void)ssl_mode;
 #endif /* USE_SSL */
-
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
-    if(data->set.haproxyprotocol) {
-      result = Curl_conn_haproxy_add(data, conn, sockindex);
-      if(result)
-        goto out;
-    }
-#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
   }
   DEBUGASSERT(conn->cfilter[sockindex]);
