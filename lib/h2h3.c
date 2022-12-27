@@ -118,6 +118,7 @@ static header_instruction inspect_header(const char *name, size_t namelen,
 CURLcode Curl_pseudo_headers(struct Curl_easy *data,
                              const char *mem, /* the request */
                              const size_t len /* size of request */,
+                             size_t* hdrlen /* opt size of headers read */,
                              struct h2h3req **hp)
 {
   struct connectdata *conn = data->conn;
@@ -289,6 +290,12 @@ CURLcode Curl_pseudo_headers(struct Curl_easy *data,
             "headers exceeds %d bytes and that could cause the "
             "stream to be rejected.", MAX_ACC);
     }
+  }
+
+  if(hdrlen) {
+    /* Skip trailing CRLF */
+    end += 4;
+    *hdrlen = end - mem;
   }
 
   hreq->entries = nheader;
