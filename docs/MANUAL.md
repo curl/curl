@@ -177,6 +177,16 @@ to a remote FTP server using a Blue Coat FTP proxy with the options:
 See the manual for your FTP proxy to determine the form it expects to set up
 transfers, and curl's `-v` option to see exactly what curl is sending.
 
+## Piping
+
+Get a key file and add it with `apt-key` (when on a system that uses `apt` for
+package management):
+
+    curl -L https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+
+The '|' pipes the output to STDIN. `-` tells `apt-key` that the key file
+should be read from STDIN.
+
 ## Ranges
 
 HTTP 1.1 introduced byte-ranges. Using this, a client can request to get only
