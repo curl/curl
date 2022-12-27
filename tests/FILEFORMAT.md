@@ -423,6 +423,7 @@ Features testable here are:
 - `oldlibssh` (versions before 0.9.4)
 - `libz`
 - `manual`
+- `mbedtls`
 - `Mime`
 - `netrc`
 - `NSS`
