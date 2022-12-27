@@ -8,14 +8,20 @@ curl and libcurl 7.87.1
 
 This release includes the following changes:
 
- o
+ o share: add sharing of HSTS cache among handles [7]
+ o tool_operate: share HSTS between handles
+ o urlapi: add CURLU_PUNYCODE [25]
 
 This release includes the following bugfixes:
 
+ o cfilters:Curl_conn_get_select_socks: use the first non-connected filter [24]
+ o cmake: bump requirement to 3.7 [23]
  o cmake: fix the snprintf detection [5]
  o docs: mention indirect effects of --insecure [19]
+ o hsts: handle adding the same host name again
  o http: remove the trace message "Mark bundle... multiuse" [6]
  o libssh2: try sha2 algos for hostkey methods [2]
+ o Makefile.mk: fix wolfssl and mbedtls default paths [21]
  o md4: fix build with GnuTLS + OpenSSL v1 [12]
  o misc: fix grammar and spelling [14]
  o msh3: update to v0.5 Release [17]
@@ -48,9 +54,10 @@ advice from friends like these:
 
   Andy Alt, Daniel Stenberg, Esdras de Morais da Silva, Hannah Schierling,
   Harry Sintonen, John Bampton, Marcel Raad, Martin Waleczek, Nick Banks,
-  norbertmm on github, Patrick Monnerat, Paul Howarth, Radu Hociung,
-  Stefan Eissing, Thomas Klausner, Yurii Rashkovskii
-  (16 contributors)
+  nick-telia on github, norbertmm on github, Patrick Monnerat, Paul Howarth,
+  Radu Hociung, Ryan Schmidt, Stefan Eissing, Thomas Klausner, Viktor Szakats,
+  Yurii Rashkovskii
+  (19 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -60,6 +67,7 @@ References to bug reports and discussions on issues:
  [4] = https://curl.se/bug/?i=10135
  [5] = https://curl.se/bug/?i=10155
  [6] = https://curl.se/bug/?i=10159
+ [7] = https://curl.se/bug/?i=10138
  [8] = https://curl.se/bug/?i=10114
  [9] = https://curl.se/bug/?i=10114
  [10] = https://curl.se/bug/?i=10147
@@ -73,3 +81,7 @@ References to bug reports and discussions on issues:
  [18] = https://curl.se/bug/?i=10071
  [19] = https://curl.se/bug/?i=10126
  [20] = https://curl.se/bug/?i=10118
+ [21] = https://curl.se/bug/?i=10164
+ [23] = https://curl.se/bug/?i=10128
+ [24] = https://curl.se/bug/?i=10157
+ [25] = https://curl.se/bug/?i=10109
