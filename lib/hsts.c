@@ -426,14 +426,23 @@ static CURLcode hsts_add(struct hsts *h, char *line)
   if(2 == rc) {
     time_t expires = strcmp(date, UNLIMITED) ? Curl_getdate_capped(date) :
       TIME_T_MAX;
-    CURLcode result;
+    CURLcode result = CURLE_OK;
     char *p = host;
     bool subdomain = FALSE;
+    struct stsentry *e;
     if(p[0] == '.') {
       p++;
       subdomain = TRUE;
     }
-    result = hsts_create(h, p, subdomain, expires);
+    /* only add it if not already present */
+    e = Curl_hsts(h, p, subdomain);
+    if(!e)
+      result = hsts_create(h, p, subdomain, expires);
+    else {
+      /* the same host name, use the largest expire time */
+      if(expires > e->expires)
+        e->expires = expires;
+    }
     if(result)
       return result;
   }
