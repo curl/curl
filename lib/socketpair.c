@@ -119,7 +119,7 @@ int Curl_socketpair(int domain, int type, int protocol,
     swrite(socks[0], &now, sizeof(now));
     /* verify that we read the correct data */
     if((sizeof(now) != sread(socks[1], &check, sizeof(check)) ||
-        (now != check)))
+        memcmp(&now, &check, sizeof(check))))
       goto error;
   }
 
