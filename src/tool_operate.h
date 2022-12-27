@@ -33,6 +33,7 @@ struct per_transfer {
   struct per_transfer *next;
   struct per_transfer *prev;
   struct OperationConfig *config; /* for this transfer */
+  struct curl_certinfo *certinfo;
   CURL *curl;
   long retry_numretries;
   long retry_sleep_default;

@@ -1553,6 +1553,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->ssl_ec_curves)
           my_setopt_str(curl, CURLOPT_SSL_EC_CURVES, config->ssl_ec_curves);
 
+        if(config->writeout)
+          my_setopt_str(curl, CURLOPT_CERTINFO, 1L);
+
         if(feature_ssl) {
           /* Check if config->cert is a PKCS#11 URI and set the
            * config->cert_type if necessary */

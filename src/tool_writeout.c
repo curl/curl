@@ -28,6 +28,7 @@
 #include "tool_cfgable.h"
 #include "tool_writeout.h"
 #include "tool_writeout_json.h"
+#include "dynbuf.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -72,6 +73,7 @@ static const struct httpmap http_version[] = {
    Variable names should be in alphabetical order.
    */
 static const struct writeoutvar variables[] = {
+  {"certs", VAR_CERT, CURLINFO_NONE, writeString},
   {"content_type", VAR_CONTENT_TYPE, CURLINFO_CONTENT_TYPE, writeString},
   {"errormsg", VAR_ERRORMSG, CURLINFO_NONE, writeString},
   {"exitcode", VAR_EXITCODE, CURLINFO_NONE, writeLong},
@@ -85,6 +87,7 @@ static const struct writeoutvar variables[] = {
   {"local_ip", VAR_LOCAL_IP, CURLINFO_LOCAL_IP, writeString},
   {"local_port", VAR_LOCAL_PORT, CURLINFO_LOCAL_PORT, writeLong},
   {"method", VAR_EFFECTIVE_METHOD, CURLINFO_EFFECTIVE_METHOD, writeString},
+  {"num_certs", VAR_NUM_CERTS, CURLINFO_NONE, writeLong},
   {"num_connects", VAR_NUM_CONNECTS, CURLINFO_NUM_CONNECTS, writeLong},
   {"num_headers", VAR_NUM_HEADERS, CURLINFO_NONE, writeLong},
   {"num_redirects", VAR_REDIRECT_COUNT, CURLINFO_REDIRECT_COUNT, writeLong},
@@ -168,6 +171,8 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
 {
   bool valid = false;
   const char *strinfo = NULL;
+  struct dynbuf buf;
+  curlx_dyn_init(&buf, 256*1024);
 
   DEBUGASSERT(wovar->writefunc == writeString);
 
@@ -193,6 +198,51 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
   }
   else {
     switch(wovar->id) {
+    case VAR_CERT:
+      if(per->certinfo) {
+        int i;
+        bool error = FALSE;
+        for(i = 0; (i < per->certinfo->num_of_certs) && !error; i++) {
+          struct curl_slist *slist;
+
+          for(slist = per->certinfo->certinfo[i]; slist; slist = slist->next) {
+            size_t len;
+            if(curl_strnequal(slist->data, "cert:", 5)) {
+              if(curlx_dyn_add(&buf, &slist->data[5])) {
+                error = TRUE;
+                break;
+              }
+            }
+            else {
+              if(curlx_dyn_add(&buf, slist->data)) {
+                error = TRUE;
+                break;
+              }
+            }
+            len = curlx_dyn_len(&buf);
+            if(len) {
+              char *ptr = curlx_dyn_ptr(&buf);
+              if(ptr[len -1] != '\n') {
+                /* add a newline to make things look better */
+                if(curlx_dyn_addn(&buf, "\n", 1)) {
+                  error = TRUE;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if(!error) {
+          strinfo = curlx_dyn_ptr(&buf);
+          if(!strinfo)
+            /* maybe not a TLS protocol */
+            strinfo = "";
+          valid = true;
+        }
+      }
+      else
+        strinfo = ""; /* no cert info */
+      break;
     case VAR_ERRORMSG:
       if(per_result) {
         strinfo = (per->errorbuffer && per->errorbuffer[0]) ?
@@ -232,6 +282,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
       fprintf(stream, "\"%s\":null", wovar->name);
   }
 
+  curlx_dyn_free(&buf);
   return 1; /* return 1 if anything was written */
 }
 
@@ -250,6 +301,10 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
   }
   else {
     switch(wovar->id) {
+    case VAR_NUM_CERTS:
+      longinfo = per->certinfo ? per->certinfo->num_of_certs : 0;
+      valid = true;
+      break;
     case VAR_NUM_HEADERS:
       longinfo = per->num_headers;
       valid = true;
@@ -327,6 +382,11 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
   FILE *stream = stdout;
   const char *ptr = writeinfo;
   bool done = FALSE;
+  struct curl_certinfo *certinfo;
+  CURLcode res = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO, &certinfo);
+
+  if(!res && certinfo)
+    per->certinfo = certinfo;
 
   while(ptr && *ptr && !done) {
     if('%' == *ptr && ptr[1]) {
