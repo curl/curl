@@ -25,6 +25,14 @@ notice. It needs to be enabled at build-time.
 Further development and tweaking of the HTTP/3 support in curl will happen in
 the master branch using pull-requests, just like ordinary changes.
 
+To fix before we remove the experimental label:
+
+ - working multiplexing and GTFO handling
+ - fallback or another flexible way to go (back to) h1/h2 if h3 fails
+ - enough test cases to verify basic HTTP/3 functionality
+ - no "important" bugs left on HTTP/3
+ - it's fine to "leave" individual backends as experimental if necessary
+
 # ngtcp2 version
 
 ## Build with OpenSSL
