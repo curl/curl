@@ -1,0 +1,83 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+%{certs}
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 7
+
+nomnom
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+SSL
+!wolfssl
+!bearssl
+!mbedtls
+!rustls
+</features>
+<server>
+http
+https
+</server>
+<name>
+%{certs}
+</name>
+<command option="no-include">
+--insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER -w '%{certs}'
+</command>
+</client>
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stripfile>
+s/^(.*):(.*)[\r\n]*//
+</stripfile>
+<stdout>
+nomnom
+-----BEGIN CERTIFICATE-----
+MIIERDCCAyygAwIBAgIGDzR1UZ/TMA0GCSqGSIb3DQEBCwUAMGgxCzAJBgNVBAYT
+Ak5OMTEwLwYDVQQKDChFZGVsIEN1cmwgQXJjdGljIElsbHVkaXVtIFJlc2VhcmNo
+IENsb3VkMSYwJAYDVQQDDB1Ob3J0aGVybiBOb3doZXJlIFRydXN0IEFuY2hvcjAe
+Fw0yMjEyMjMxMjIxMzlaFw0zMTAzMTExMjIxMzlaMFQxCzAJBgNVBAYTAk5OMTEw
+LwYDVQQKDChFZGVsIEN1cmwgQXJjdGljIElsbHVkaXVtIFJlc2VhcmNoIENsb3Vk
+MRIwEAYDVQQDDAlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+AoIBAQCrCrAD0Hb+Xs4V3mHV45FvfNa7yiaOeL4mNdGmWfHVPFU+CSzsoNSvDjxa
+orWweFGVYoCAcchOn1lZk0ASsqnOss0Xi58n8+PPI3gG0gYjX5sg7EJ3Zq2kXoK0
+TZRy6hNkcvzLgyzXoYv1LkzTwYiyyJgZX++Y/GKAs2fMHyP8XzjNgm4tltk1k/4p
+omllwN9Fqz+sFxgAgEq3ybq4Xym7xKwWl8xXNBDJNmVsPtiJRcilQoR8Xs0a6PE+
+VbMhD9A2E/LEL7lzQfqHqtxE1mSW5FpQ+Uqf4KLnafStWs86IOWnCeLP6BmhAK6o
+uyICNFyzz7UkTHa/renxuNOGun2TAgMBAAGjggEGMIIBAjAUBgNVHREEDTALggls
+b2NhbGhvc3QwCwYDVR0PBAQDAgOoMBMGA1UdJQQMMAoGCCsGAQUFBwMBMB0GA1Ud
+DgQWBBScl7A9s1Cx9tRx4uvLgOqTfJjMcjAfBgNVHSMEGDAWgBSHy7EzLsFnfnHj
+5StMTaSzbtJbqTAJBgNVHRMEAjAAMEMGCCsGAQUFBwEBBDcwNTAzBggrBgEFBQcw
+AoYnaHR0cDovL3Rlc3QuY3VybC5zZS9jYS9FZGVsQ3VybFJvb3QuY2VyMDgGA1Ud
+HwQxMC8wLaAroCmGJ2h0dHA6Ly90ZXN0LmN1cmwuc2UvY2EvRWRlbEN1cmxSb290
+LmNybDANBgkqhkiG9w0BAQsFAAOCAQEAC4rtaof6cRWIJViFG0oJv0MANZN4DXIU
+MFHik4Oh2hsvqTGut8dMcsJeMiTxlpNw1T+1hYATdTLPDvhdxKIphEMsdYEmEmqg
+y3tXwZJ4hQj6ZFDCe4MCTXkTvGFkTbhr1fGEaxJcaZCtQEfA7d3qimZ+h4UZqonT
+PAhyCKFNY2BbmxeeABKhAFLKeAGIGMftW8fk2eu9P6+SUz/+WFcN/PR7e6JP6blc
+taRSULRWWkSO2dDt3o9+rBxYdluoecmVq4Ud20wTgkqlQRsp9dOW34DRHgB9ujWU
+V4HhCCqBaxwwUDcBGg4mT2vtyVAXNyszP2j+xvAhjOeyeVXyQr0vsA==
+-----END CERTIFICATE-----
+</stdout>
+
+</verify>
+
+</testcase>
