@@ -1942,7 +1942,7 @@ static ssize_t http2_send(struct Curl_easy *data, int sockindex,
     return len;
   }
 
-  result = Curl_pseudo_headers(data, mem, len, &hreq);
+  result = Curl_pseudo_headers(data, mem, len, NULL, &hreq);
   if(result) {
     *err = result;
     return -1;

@@ -1526,7 +1526,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   stream->h3req = TRUE; /* senf off! */
   Curl_dyn_init(&stream->overflow, CURL_MAX_READ_SIZE);
 
-  result = Curl_pseudo_headers(data, mem, len, &hreq);
+  result = Curl_pseudo_headers(data, mem, len, NULL, &hreq);
   if(result)
     goto fail;
   nheader = hreq->entries;
