@@ -403,6 +403,8 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
   struct HTTP *stream = data->req.p.http;
   struct quicsocket *qs = conn->quic;
   struct h2h3req *hreq;
+  size_t hdrlen = 0;
+  size_t sentlen = 0;
 
   (void)sockindex;
   /* Sizes must match for cast below to work" */
@@ -411,15 +413,21 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
   H3BUGF(infof(data, "msh3_stream_send %zu", len));
 
   if(!stream->req) {
-    *curlcode = Curl_pseudo_headers(data, mem, len, &hreq);
+    /* The first send on the request contains the headers and possibly some
+       data. Parse out the headers and create the request, then if there is
+       any data left over go ahead and send it too. */
+    *curlcode = Curl_pseudo_headers(data, mem, len, &hdrlen, &hreq);
     if(*curlcode) {
       failf(data, "Curl_pseudo_headers failed");
       return -1;
     }
+
     H3BUGF(infof(data, "starting request with %zu headers", hreq->entries));
     stream->req = MsH3RequestOpen(qs->conn, &msh3_request_if, stream,
-                                 (MSH3_HEADER*)hreq->header, hreq->entries,
-                                 MSH3_REQUEST_FLAG_FIN);
+                                  (MSH3_HEADER*)hreq->header, hreq->entries,
+                                  hdrlen == len ? MSH3_REQUEST_FLAG_FIN :
+                                   MSH3_REQUEST_FLAG_NONE);
+
     Curl_pseudo_free(hreq);
     if(!stream->req) {
       failf(data, "request open failed");
@@ -431,8 +439,24 @@ static ssize_t msh3_stream_send(struct Curl_easy *data,
   }
   H3BUGF(infof(data, "send %zd body bytes on request %p", len,
                (void *)stream->req));
-  *curlcode = CURLE_SEND_ERROR;
-  return -1;
+  if(len > 0xFFFFFFFF) {
+    /* msh3 doesn't support size_t sends currently. */
+    *curlcode = CURLE_SEND_ERROR;
+    return -1;
+  }
+
+  /* TODO - Need an explicit signal to know when to FIN. */
+  if(!MsH3RequestSend(stream->req, MSH3_REQUEST_FLAG_FIN, mem, (uint32_t)len,
+                      stream)) {
+    *curlcode = CURLE_SEND_ERROR;
+    return -1;
+  }
+
+  /* TODO - msh3/msquic will hold onto this memory until the send complete
+     event. How do we make sure curl doesn't free it until then? */
+  sentlen += len;
+  *curlcode = CURLE_OK;
+  return sentlen;
 }
 
 static ssize_t msh3_stream_recv(struct Curl_easy *data,
