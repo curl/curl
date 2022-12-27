@@ -2262,9 +2262,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->cookies = NULL;
 #endif
 
+#ifndef CURL_DISABLE_HSTS
+      if(data->share->hsts == data->hsts)
+        data->hsts = NULL;
+#endif
+#ifdef USE_SSL
       if(data->share->sslsession == data->state.session)
         data->state.session = NULL;
-
+#endif
 #ifdef USE_LIBPSL
       if(data->psl == &data->share->psl)
         data->psl = data->multi? &data->multi->psl: NULL;
@@ -2298,10 +2303,19 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         data->cookies = data->share->cookies;
       }
 #endif   /* CURL_DISABLE_HTTP */
+#ifndef CURL_DISABLE_HSTS
+      if(data->share->hsts) {
+        /* first free the private one if any */
+        Curl_hsts_cleanup(&data->hsts);
+        data->hsts = data->share->hsts;
+      }
+#endif   /* CURL_DISABLE_HTTP */
+#ifdef USE_SSL
       if(data->share->sslsession) {
         data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;
         data->state.session = data->share->sslsession;
       }
+#endif
 #ifdef USE_LIBPSL
       if(data->share->specifier & (1 << CURL_LOCK_DATA_PSL))
         data->psl = &data->share->psl;
@@ -3053,19 +3067,39 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_HSTSWRITEDATA:
     data->set.hsts_write_userp = va_arg(param, void *);
     break;
-  case CURLOPT_HSTS:
+  case CURLOPT_HSTS: {
+    struct curl_slist *h;
     if(!data->hsts) {
       data->hsts = Curl_hsts_init();
       if(!data->hsts)
         return CURLE_OUT_OF_MEMORY;
     }
     argptr = va_arg(param, char *);
-    result = Curl_setstropt(&data->set.str[STRING_HSTS], argptr);
-    if(result)
-      return result;
-    if(argptr)
-      (void)Curl_hsts_loadfile(data, data->hsts, argptr);
+    if(argptr) {
+      result = Curl_setstropt(&data->set.str[STRING_HSTS], argptr);
+      if(result)
+        return result;
+      /* this needs to build a list of file names to read from, so that it can
+         read them later, as we might get a shared HSTS handle to load them
+         into */
+      h = curl_slist_append(data->set.hstslist, argptr);
+      if(!h) {
+        curl_slist_free_all(data->set.hstslist);
+        data->set.hstslist = NULL;
+        return CURLE_OUT_OF_MEMORY;
+      }
+      data->set.hstslist = h; /* store the list for later use */
+    }
+    else {
+      /* clear the list of HSTS files */
+      curl_slist_free_all(data->set.hstslist);
+      data->set.hstslist = NULL;
+      if(!data->share || !data->share->hsts)
+        /* throw away the HSTS cache unless shared */
+        Curl_hsts_cleanup(&data->hsts);
+    }
     break;
+  }
   case CURLOPT_HSTS_CTRL:
     arg = va_arg(param, long);
     if(arg & CURLHSTS_ENABLE) {

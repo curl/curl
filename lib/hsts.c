@@ -39,6 +39,7 @@
 #include "parsedate.h"
 #include "fopen.h"
 #include "rename.h"
+#include "share.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -549,6 +550,20 @@ CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
   if(h)
     return hsts_pull(data, h);
   return CURLE_OK;
+}
+
+void Curl_hsts_loadfiles(struct Curl_easy *data)
+{
+  struct curl_slist *l = data->set.hstslist;
+  if(l) {
+    Curl_share_lock(data, CURL_LOCK_DATA_HSTS, CURL_LOCK_ACCESS_SINGLE);
+
+    while(l) {
+      (void)Curl_hsts_loadfile(data, data->hsts, l->data);
+      l = l->next;
+    }
+    Curl_share_unlock(data, CURL_LOCK_DATA_HSTS);
+  }
 }
 
 #endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */
