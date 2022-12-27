@@ -437,7 +437,11 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
   Curl_altsvc_cleanup(&data->asi);
   Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
-  Curl_hsts_cleanup(&data->hsts);
+#ifndef CURL_DISABLE_HSTS
+  if(!data->share || !data->share->hsts)
+    Curl_hsts_cleanup(&data->hsts);
+  curl_slist_free_all(data->set.hstslist); /* clean up list */
+#endif
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif

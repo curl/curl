@@ -1659,6 +1659,8 @@ struct UserDefined {
                                     curl_easy_setopt(COOKIEFILE) calls */
 #endif
 #ifndef CURL_DISABLE_HSTS
+  struct curl_slist *hstslist; /* list of HSTS files set by
+                                  curl_easy_setopt(HSTS) calls */
   curl_hstsread_callback hsts_read;
   void *hsts_read_userp;
   curl_hstswrite_callback hsts_write;
