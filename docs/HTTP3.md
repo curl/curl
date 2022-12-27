@@ -27,7 +27,7 @@ the master branch using pull-requests, just like ordinary changes.
 
 To fix before we remove the experimental label:
 
- - working multiplexing and GFTO handling
+ - working multiplexing and GTFO handling
  - fallback or another flexible way to go (back to) h1/h2 if h3 fails
  - enough test cases to verify basic HTTP/3 functionality
  - no "important" bugs left on HTTP/3
