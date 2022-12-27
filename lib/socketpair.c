@@ -107,24 +107,21 @@ int Curl_socketpair(int domain, int type, int protocol,
   pfd[0].fd = listener;
   pfd[0].events = POLLIN;
   pfd[0].revents = 0;
-  (void)Curl_poll(pfd, 1, 10*1000); /* 10 seconds */
+  (void)Curl_poll(pfd, 1, 1000); /* one second */
   socks[1] = accept(listener, NULL, NULL);
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
+  else {
+    struct curltime check;
+    struct curltime now = Curl_now();
 
-  /* verify that nothing else connected */
-  addrlen = sizeof(a.inaddr);
-  if(getsockname(socks[0], &a.addr, &addrlen) == -1 ||
-     addrlen < (int)sizeof(a.inaddr))
-    goto error;
-  addrlen = sizeof(a2.inaddr);
-  if(getpeername(socks[1], &a2.addr, &addrlen) == -1 ||
-     addrlen < (int)sizeof(a2.inaddr))
-    goto error;
-  if(a.inaddr.sin_family != a2.inaddr.sin_family ||
-     a.inaddr.sin_addr.s_addr != a2.inaddr.sin_addr.s_addr ||
-     a.inaddr.sin_port != a2.inaddr.sin_port)
-    goto error;
+    /* write data to the socket */
+    swrite(socks[0], &now, sizeof(now));
+    /* verify that we read the correct data */
+    if((sizeof(now) != sread(socks[1], &check, sizeof(check)) ||
+        (now != check)))
+      goto error;
+  }
 
   sclose(listener);
   return 0;
