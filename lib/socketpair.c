@@ -65,7 +65,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   union {
     struct sockaddr_in inaddr;
     struct sockaddr addr;
-  } a, a2;
+  } a;
   curl_socket_t listener;
   curl_socklen_t addrlen = sizeof(a.inaddr);
   int reuse = 1;
