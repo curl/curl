@@ -4218,6 +4218,13 @@ if test "x$want_ech" != "xno"; then
 fi
 
 dnl *************************************************************
+dnl check whether OpenSSL (lookalikes) have SSL_set0_wbio
+dnl
+if test "x$OPENSSL_ENABLED" = "x1"; then
+  AC_CHECK_FUNCS([SSL_set0_wbio])
+fi
+
+dnl *************************************************************
 dnl WebSockets
 dnl
 AC_MSG_CHECKING([whether to support WebSockets])
