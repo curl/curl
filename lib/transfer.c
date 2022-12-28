@@ -776,8 +776,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       k->keepon &= ~KEEP_RECV;
     }
 
-    if(k->keepon & KEEP_RECV_PAUSE) {
-      /* this is a paused transfer */
+    if((k->keepon & KEEP_RECV_PAUSE) || !(k->keepon & KEEP_RECV)) {
+      /* this is a paused or stopped transfer */
       break;
     }
 
