@@ -1,4 +1,4 @@
-# Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2000 - 2023 Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
 
@@ -9,9 +9,13 @@ on:
     branches:
     - master
     - '*/ci'
+    paths-ignore:
+    - '**/*.md'
   pull_request:
     branches:
     - master
+    paths-ignore:
+    - '**/*.md'
 
 concurrency:
   # Hardcoded workflow filename as workflow name above is just Linux again
