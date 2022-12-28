@@ -9,9 +9,13 @@ on:
     branches:
     - master
     - '*/ci'
+    paths-ignore:
+    - '**/*.md'
   pull_request:
     branches:
     - master
+    paths-ignore:
+    - '**/*.md'
   schedule:
     - cron: '0 0 * * 4'
 
