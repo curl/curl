@@ -2577,7 +2577,7 @@ sub PASV_ftp {
         local $SIG{ALRM} = sub { die "alarm\n" };
 
         # assume swift operations unless explicitly slow
-        alarm ($datadelay?20:10);
+        alarm ($datadelay?20:2);
 
         # Wait for 'CNCT'
         my $input;
