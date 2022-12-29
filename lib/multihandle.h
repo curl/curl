@@ -162,13 +162,13 @@ struct Curl_multi {
 #define IPV6_DEAD    1
 #define IPV6_WORKS   2
   unsigned char ipv6_up;       /* IPV6_* defined */
-  bool multiplexing;           /* multiplexing wanted */
-  bool recheckstate;           /* see Curl_multi_connchanged */
-  bool in_callback;            /* true while executing a callback */
+  BIT(multiplexing);           /* multiplexing wanted */
+  BIT(recheckstate);           /* see Curl_multi_connchanged */
+  BIT(in_callback);            /* true while executing a callback */
 #ifdef USE_OPENSSL
-  bool ssl_seeded;
+  BIT(ssl_seeded);
 #endif
-  bool dead; /* a callback returned error, everything needs to crash and
+  BIT(dead); /* a callback returned error, everything needs to crash and
                 burn */
 };
 
