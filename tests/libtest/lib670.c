@@ -22,13 +22,13 @@
  *
  ***************************************************************************/
 
-#include <time.h>
-
 #if !defined(LIB670) && !defined(LIB671)
 #define CURL_DISABLE_DEPRECATION  /* Using and testing the form api */
 #endif
 
 #include "test.h"
+
+#include <time.h>
 
 #include "memdebug.h"
 
