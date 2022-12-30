@@ -36,11 +36,6 @@ struct connectdata;
 typedef void     Curl_cft_destroy_this(struct Curl_cfilter *cf,
                                        struct Curl_easy *data);
 
-/* Setup the connection for `data`, using destination `remotehost`.
- */
-typedef CURLcode Curl_cft_setup(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const struct Curl_dns_entry *remotehost);
 typedef void     Curl_cft_close(struct Curl_cfilter *cf,
                                 struct Curl_easy *data);
 
@@ -89,29 +84,77 @@ typedef ssize_t  Curl_cft_recv(struct Curl_cfilter *cf,
                                size_t len,             /* amount to read */
                                CURLcode *err);         /* error to return */
 
-typedef void     Curl_cft_attach_data(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data);
-typedef void     Curl_cft_detach_data(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data);
+typedef bool     Curl_cft_conn_is_alive(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data);
+
+typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data);
 
 /**
- * The easy handle `data` is being detached (no longer served)
- * by connection `conn`. All filters are informed to release any resources
- * related to `data`.
- * Note: there may be several `data` attached to a connection at the same
- * time.
+ * Events/controls for connection filters, their arguments and
+ * return code handling. Filter callbacks are invoked "top down".
+ * Return code handling:
+ * "first fail" meaning that the first filter returning != CURLE_OK, will
+ *              abort further event distribution and determine the result.
+ * "ignored" meaning return values are ignored and the event is distributed
+ *           to all filters in the chain. Overall result is always CURLE_OK.
  */
-void Curl_conn_detach(struct connectdata *conn, struct Curl_easy *data);
+/*      data event                          arg1       arg2     return */
+#define CF_CTRL_DATA_ATTACH           1  /* 0          NULL     ignored */
+#define CF_CTRL_DATA_DETACH           2  /* 0          NULL     ignored */
+#define CF_CTRL_DATA_SETUP            4  /* 0          NULL     first fail */
+#define CF_CTRL_DATA_IDLE             5  /* 0          NULL     first fail */
+#define CF_CTRL_DATA_PAUSE            6  /* on/off     NULL     first fail */
+#define CF_CTRL_DATA_DONE             7  /* premature  NULL     ignored */
+#define CF_CTRL_DATA_DONE_SEND        8  /* 0          NULL     ignored */
+/* update conn info at connection and data */
+#define CF_CTRL_CONN_INFO_UPDATE (256+0) /* 0          NULL     ignored */
 
+/**
+ * Handle event/control for the filter.
+ * Implementations MUST NOT chain calls to cf->next.
+ */
+typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                int event, int arg1, void *arg2);
+
+
+/**
+ * Queries to ask via a `Curl_cft_query *query` method on a cfilter chain.
+ * - MAX_CONCURRENT: the maximum number of parallel transfers the filter
+ *                   chain expects to handle at the same time.
+ *                   default: 1 if no filter overrides.
+ */
+/*      query                             res1       res2     */
+#define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
+
+/**
+ * Query the cfilter for properties. Filters ignorant of a query will
+ * pass it "down" the filter chain.
+ */
+typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                int query, int *pres1, void **pres2);
+
+/**
+ * Type flags for connection filters. A filter can have none, one or
+ * many of those. Use to evaluate state/capabilities of a filter chain.
+ *
+ * CF_TYPE_IP_CONNECT: provides an IP connection or sth equivalent, like
+ *                     a CONNECT tunnel, a UNIX domain socket, a QUIC
+ *                     connection, etc.
+ * CF_TYPE_SSL:        provide SSL/TLS
+ * CF_TYPE_MULTIPLEX:  provides multiplexing of easy handles
+ */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
+#define CF_TYPE_MULTIPLEX   (1 << 2)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
   const char *name;                       /* name of the filter type */
   long flags;                             /* flags of filter type */
   Curl_cft_destroy_this *destroy;         /* destroy resources of this cf */
-  Curl_cft_setup *setup;                  /* setup for a connection */
   Curl_cft_connect *connect;              /* establish connection */
   Curl_cft_close *close;                  /* close conn */
   Curl_cft_get_host *get_host;            /* host filter talks to */
@@ -119,8 +162,10 @@ struct Curl_cftype {
   Curl_cft_data_pending *has_data_pending;/* conn has data pending */
   Curl_cft_send *do_send;                 /* send data */
   Curl_cft_recv *do_recv;                 /* receive data */
-  Curl_cft_attach_data *attach_data;      /* data is being handled here */
-  Curl_cft_detach_data *detach_data;      /* data is no longer handled here */
+  Curl_cft_cntrl *cntrl;                  /* events/control */
+  Curl_cft_conn_is_alive *is_alive;       /* FALSE if conn is dead, Jim! */
+  Curl_cft_conn_keep_alive *keep_alive;   /* try to keep it alive */
+  Curl_cft_query *query;                  /* query filter chain */
 };
 
 /* A connection filter instance, e.g. registered at a connection */
@@ -129,7 +174,7 @@ struct Curl_cfilter {
   struct Curl_cfilter *next;     /* next filter in chain */
   void *ctx;                     /* filter type specific settings */
   struct connectdata *conn;      /* the connection this filter belongs to */
-  int sockindex;                 /* TODO: like to get rid off this */
+  int sockindex;                 /* the index the filter is installed at */
   BIT(connected);                /* != 0 iff this filter is connected */
 };
 
@@ -139,9 +184,6 @@ void Curl_cf_def_destroy_this(struct Curl_cfilter *cf,
 
 /* Default implementations for the type functions, implementing pass-through
  * the filter chain. */
-CURLcode Curl_cf_def_setup(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const struct Curl_dns_entry *remotehost);
 void     Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 CURLcode Curl_cf_def_connect(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
@@ -158,10 +200,16 @@ ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, CURLcode *err);
 ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                           char *buf, size_t len, CURLcode *err);
-void     Curl_cf_def_attach_data(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data);
-void     Curl_cf_def_detach_data(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data);
+CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                int event, int arg1, void *arg2);
+bool     Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data);
+CURLcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data);
+CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           int query, int *pres1, void **pres2);
 
 /**
  * Create a new filter instance, unattached to the filter chain.
@@ -176,7 +224,7 @@ CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
 
 /**
  * Add a filter instance to the `sockindex` filter chain at connection
- * `data->conn`. The filter must not already be attached. It is inserted at
+ * `conn`. The filter must not already be attached. It is inserted at
  * the start of the chain (top).
  */
 void Curl_conn_cf_add(struct Curl_easy *data,
@@ -185,11 +233,11 @@ void Curl_conn_cf_add(struct Curl_easy *data,
                       struct Curl_cfilter *cf);
 
 /**
- * Remove and destroy all filters at chain `sockindex` on connection `conn`.
+ * Insert a filter (chain) after `cf_at`.
+ * `cf_new` must not already be attached.
  */
-void Curl_conn_cf_discard_all(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              int sockindex);
+void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
+                               struct Curl_cfilter *cf_new);
 
 /**
  * Discard, e.g. remove and destroy a specific filter instance.
@@ -198,27 +246,41 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
  */
 void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data);
 
+/**
+ * Discard all cfilters starting with `*pcf` and clearing it afterwards.
+ */
+void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
+                                struct Curl_easy *data);
 
+/**
+ * Remove and destroy all filters at chain `sockindex` on connection `conn`.
+ */
+void Curl_conn_cf_discard_all(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              int sockindex);
+
+
+CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              bool blocking, bool *done);
+void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
+int Curl_conn_cf_get_select_socks(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  curl_socket_t *socks);
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, CURLcode *err);
 ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                           char *buf, size_t len, CURLcode *err);
+CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            bool ignore_result,
+                            int event, int arg1, void *arg2);
+
+
 
 #define CURL_CF_SSL_DEFAULT  -1
 #define CURL_CF_SSL_DISABLE  0
 #define CURL_CF_SSL_ENABLE   1
-
-/**
- * Setup the filter chain at `sockindex` in connection `conn`, invoking
- * the instance `setup(remotehost)` methods. If no filter chain is
- * installed yet, inspects the configuration in `data` to install a
- * suitable filter chain.
- */
-CURLcode Curl_conn_setup(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         int sockindex,
-                         const struct Curl_dns_entry *remotehost,
-                         int ssl_mode);
 
 /**
  * Bring the filter chain at `sockindex` for connection `data->conn` into
@@ -248,7 +310,12 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex);
  * (or will be once connected). This will return FALSE, if SSL
  * is only used in proxying and not for the tunnel itself.
  */
-bool Curl_conn_is_ssl(struct Curl_easy *data, int sockindex);
+bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex);
+
+/**
+ * Connection provides multiplexing of easy handles at `socketindex`.
+ */
+bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex);
 
 /**
  * Close the filter chain at `sockindex` for connection `data->conn`.
@@ -289,13 +356,12 @@ ssize_t Curl_conn_send(struct Curl_easy *data, int sockindex,
                        const void *buf, size_t len, CURLcode *code);
 
 /**
- * The easy handle `data` is being attached (served) by connection `conn`.
- * All filters are informed to adapt to handling `data`.
- * Note: there may be several `data` attached to a connection at the same
- * time.
+ * The easy handle `data` is being attached to `conn`. This does
+ * not mean that data will actually do a transfer. Attachment is
+ * also used for temporary actions on the connection.
  */
-void Curl_conn_attach_data(struct connectdata *conn,
-                           struct Curl_easy *data);
+void Curl_conn_ev_data_attach(struct connectdata *conn,
+                              struct Curl_easy *data);
 
 /**
  * The easy handle `data` is being detached (no longer served)
@@ -304,12 +370,66 @@ void Curl_conn_attach_data(struct connectdata *conn,
  * Note: there may be several `data` attached to a connection at the same
  * time.
  */
-void Curl_conn_detach_data(struct connectdata *conn,
-                           struct Curl_easy *data);
+void Curl_conn_ev_data_detach(struct connectdata *conn,
+                              struct Curl_easy *data);
+
+/**
+ * Notify connection filters that they need to setup data for
+ * a transfer.
+ */
+CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data);
+
+/**
+ * Notify connection filters that now would be a good time to
+ * perform any idle, e.g. time related, actions.
+ */
+CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data);
+
+/**
+ * Notify connection filters that the transfer represented by `data`
+ * is donw with sending data (e.g. has uploaded everything).
+ */
+void Curl_conn_ev_data_done_send(struct Curl_easy *data);
+
+/**
+ * Notify connection filters that the transfer represented by `data`
+ * is finished - eventually premature, e.g. before being complete.
+ */
+void Curl_conn_ev_data_done(struct Curl_easy *data, bool premature);
+
+/**
+ * Notify connection filters that the transfer of data is paused/unpaused.
+ */
+CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause);
+
+/**
+ * Inform connection filters to update their info in `conn`.
+ */
+void Curl_conn_ev_update_info(struct Curl_easy *data,
+                              struct connectdata *conn);
+
+/**
+ * Check if FIRSTSOCKET's cfilter chain deems connection alive.
+ */
+bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn);
+
+/**
+ * Try to upkeep the connection filters at sockindex.
+ */
+CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              int sockindex);
 
 void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
                         const char **phost, const char **pdisplay_host,
                         int *pport);
 
+/**
+ * Get the maximum number of parallel transfers the connection
+ * expects to be able to handle at `sockindex`.
+ */
+size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
+                                    struct connectdata *conn,
+                                    int sockindex);
 
 #endif /* HEADER_CURL_CFILTERS_H */

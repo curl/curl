@@ -2974,29 +2974,23 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.pipewait = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
   case CURLOPT_STREAM_WEIGHT:
-#ifndef USE_NGHTTP2
-    return CURLE_NOT_BUILT_IN;
-#else
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
     arg = va_arg(param, long);
     if((arg >= 1) && (arg <= 256))
-      data->set.stream_weight = (int)arg;
+      data->set.priority.weight = (int)arg;
     break;
+#else
+    return CURLE_NOT_BUILT_IN;
 #endif
   case CURLOPT_STREAM_DEPENDS:
   case CURLOPT_STREAM_DEPENDS_E:
   {
-#ifndef USE_NGHTTP2
-    return CURLE_NOT_BUILT_IN;
-#else
     struct Curl_easy *dep = va_arg(param, struct Curl_easy *);
     if(!dep || GOOD_EASY_HANDLE(dep)) {
-      if(data->set.stream_depends_on) {
-        Curl_http2_remove_child(data->set.stream_depends_on, data);
-      }
-      Curl_http2_add_child(dep, data, (option == CURLOPT_STREAM_DEPENDS_E));
+      return Curl_data_priority_add_child(dep, data,
+                                          option == CURLOPT_STREAM_DEPENDS_E);
     }
     break;
-#endif
   }
   case CURLOPT_CONNECT_TO:
     data->set.connect_to = va_arg(param, struct curl_slist *);

@@ -32,6 +32,9 @@
 #include "urldata.h"
 #include "dynbuf.h"
 #include "curl_printf.h"
+#include "msh3.h"
+#include "ngtcp2.h"
+#include "quiche.h"
 #include "vquic.h"
 
 #ifdef O_BINARY
@@ -39,6 +42,17 @@
 #else
 #define QLOGMODE O_WRONLY|O_CREAT
 #endif
+
+void Curl_quic_ver(char *p, size_t len)
+{
+#ifdef USE_NGTCP2
+  Curl_ngtcp2_ver(p, len);
+#elif defined(USE_QUICHE)
+  Curl_quiche_ver(p, len);
+#elif defined(USE_MSH3)
+  Curl_msh3_ver(p, len);
+#endif
+}
 
 /*
  * If the QLOGDIR environment variable is set, open and return a file
@@ -84,4 +98,41 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
 
   return CURLE_OK;
 }
+
+CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
+                             struct Curl_easy *data,
+                             struct connectdata *conn,
+                             const struct Curl_addrinfo *ai)
+{
+#ifdef USE_NGTCP2
+  return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
+#elif defined(USE_QUICHE)
+  return Curl_cf_quiche_create(pcf, data, conn, ai);
+#elif defined(USE_MSH3)
+  return Curl_cf_msh3_create(pcf, data, conn, ai);
+#else
+  *pcf = NULL;
+  (void)data;
+  (void)conn;
+  (void)ai;
+  return CURLE_NOT_BUILT_IN;
+#endif
+}
+
+bool Curl_conn_is_http3(const struct Curl_easy *data,
+                        const struct connectdata *conn,
+                        int sockindex)
+{
+#ifdef USE_NGTCP2
+  return Curl_conn_is_ngtcp2(data, conn, sockindex);
+#elif defined(USE_QUICHE)
+  return Curl_conn_is_quiche(data, conn, sockindex);
+#elif defined(USE_MSH3)
+  return Curl_conn_is_msh3(data, conn, sockindex);
+#else
+  return ((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+          (conn->httpversion == 30));
+#endif
+}
+
 #endif

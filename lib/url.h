@@ -59,4 +59,20 @@ const struct Curl_handler *Curl_builtin_scheme(const char *scheme,
 void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
 #endif
 
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+void Curl_data_priority_cleanup(struct Curl_easy *data);
+void Curl_data_priority_clear_state(struct Curl_easy *data);
+#else
+#define Curl_data_priority_cleanup(x)
+#define Curl_data_priority_clear_state(x)
+#endif /* !(defined(USE_HTTP2) || defined(USE_HTTP3)) */
+
+#ifdef USE_NGHTTP2
+CURLcode Curl_data_priority_add_child(struct Curl_easy *parent,
+                                      struct Curl_easy *child,
+                                      bool exclusive);
+#else
+#define Curl_data_priority_add_child(x, y, z) CURLE_NOT_BUILT_IN
+#endif
+
 #endif /* HEADER_CURL_URL_H */

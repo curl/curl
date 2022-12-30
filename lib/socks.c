@@ -1151,7 +1151,6 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   result = connect_SOCKS(cf, sx, data);
   if(!result && sx->state == CONNECT_DONE) {
     cf->connected = TRUE;
-    Curl_updateconninfo(data, conn, conn->sock[cf->sockindex]);
     Curl_verboseconnect(data, conn);
     socks_proxy_cf_free(cf);
   }
@@ -1205,13 +1204,6 @@ static void socks_proxy_cf_destroy(struct Curl_cfilter *cf,
   socks_proxy_cf_free(cf);
 }
 
-static void socks_proxy_cf_detach_data(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
-{
-  (void)data;
-  socks_proxy_cf_free(cf);
-}
-
 static void socks_cf_get_host(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               const char **phost,
@@ -1233,7 +1225,6 @@ static const struct Curl_cftype cft_socks_proxy = {
   "SOCKS-PROXYY",
   CF_TYPE_IP_CONNECT,
   socks_proxy_cf_destroy,
-  Curl_cf_def_setup,
   socks_proxy_cf_connect,
   socks_proxy_cf_close,
   socks_cf_get_host,
@@ -1241,8 +1232,10 @@ static const struct Curl_cftype cft_socks_proxy = {
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
-  Curl_cf_def_attach_data,
-  socks_proxy_cf_detach_data,
+  Curl_cf_def_cntrl,
+  Curl_cf_def_conn_is_alive,
+  Curl_cf_def_conn_keep_alive,
+  Curl_cf_def_query,
 };
 
 CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
@@ -1255,6 +1248,19 @@ CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
   result = Curl_cf_create(&cf, &cft_socks_proxy, NULL);
   if(!result)
     Curl_conn_cf_add(data, conn, sockindex, cf);
+  return result;
+}
+
+CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
+                                          struct Curl_easy *data)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  (void)data;
+  result = Curl_cf_create(&cf, &cft_socks_proxy, NULL);
+  if(!result)
+    Curl_conn_cf_insert_after(cf_at, cf);
   return result;
 }
 

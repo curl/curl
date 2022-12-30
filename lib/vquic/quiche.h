@@ -31,27 +31,19 @@
 #include <quiche.h>
 #include <openssl/ssl.h>
 
-struct quic_handshake {
-  char *buf;       /* pointer to the buffer */
-  size_t alloclen; /* size of allocation */
-  size_t len;      /* size of content in buffer */
-  size_t nread;    /* how many bytes have been read */
-};
+struct Curl_cfilter;
+struct Curl_easy;
 
-struct quicsocket {
-  quiche_config *cfg;
-  quiche_conn *conn;
-  quiche_h3_conn *h3c;
-  quiche_h3_config *h3config;
-  uint8_t scid[QUICHE_MAX_CONN_ID_LEN];
-  curl_socket_t sockfd;
-  uint32_t version;
-  SSL_CTX *sslctx;
-  SSL *ssl;
-  bool h3_recving; /* TRUE when in h3-body-reading state */
-  struct sockaddr_storage local_addr;
-  socklen_t local_addrlen;
-};
+void Curl_quiche_ver(char *p, size_t len);
+
+CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
+                               struct Curl_easy *data,
+                               struct connectdata *conn,
+                               const struct Curl_addrinfo *ai);
+
+bool Curl_conn_is_quiche(const struct Curl_easy *data,
+                         const struct connectdata *conn,
+                         int sockindex);
 
 #endif
 

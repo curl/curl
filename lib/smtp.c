@@ -399,7 +399,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   CURLcode result;
 
-  if(!Curl_conn_is_ssl(data, FIRSTSOCKET)) {
+  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
     if(result)
       goto out;
@@ -891,7 +891,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
 
   if(smtpcode/100 != 2 && smtpcode != 1) {
     if(data->set.use_ssl <= CURLUSESSL_TRY
-       || Curl_conn_is_ssl(data, FIRSTSOCKET))
+       || Curl_conn_is_ssl(conn, FIRSTSOCKET))
       result = smtp_perform_helo(data, conn);
     else {
       failf(data, "Remote access denied: %d", smtpcode);
@@ -956,7 +956,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
     }
 
     if(smtpcode != 1) {
-      if(data->set.use_ssl && !Curl_conn_is_ssl(data, FIRSTSOCKET)) {
+      if(data->set.use_ssl && !Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
         /* We don't have a SSL/TLS connection yet, but SSL is requested */
         if(smtpc->tls_supported)
           /* Switch to TLS connection now */

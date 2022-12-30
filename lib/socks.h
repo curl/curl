@@ -55,6 +55,9 @@ CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
                                    struct connectdata *conn,
                                    int sockindex);
 
+CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
+                                          struct Curl_easy *data);
+
 #endif /* CURL_DISABLE_PROXY */
 
 #endif  /* HEADER_CURL_SOCKS_H */

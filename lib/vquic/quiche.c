@@ -29,10 +29,11 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include "urldata.h"
+#include "cfilters.h"
+#include "cf-socket.h"
 #include "sendf.h"
 #include "strdup.h"
 #include "rand.h"
-#include "quic.h"
 #include "strcase.h"
 #include "multiif.h"
 #include "connect.h"
@@ -48,136 +49,26 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define DEBUG_HTTP3
-/* #define DEBUG_QUICHE */
-#ifdef DEBUG_HTTP3
-#define H3BUGF(x) x
+#define DEBUG_CF 0
+
+#if DEBUG_CF
+#define CF_DEBUGF(x) x
 #else
-#define H3BUGF(x) do { } while(0)
+#define CF_DEBUGF(x) do { } while(0)
 #endif
 
 #define QUIC_MAX_STREAMS (256*1024)
 #define QUIC_MAX_DATA (1*1024*1024)
 #define QUIC_IDLE_TIMEOUT (60 * 1000) /* milliseconds */
 
-static CURLcode process_ingress(struct Curl_easy *data,
-                                curl_socket_t sockfd,
-                                struct quicsocket *qs);
 
-static CURLcode flush_egress(struct Curl_easy *data, curl_socket_t sockfd,
-                             struct quicsocket *qs);
-
-static CURLcode http_request(struct Curl_easy *data, const void *mem,
-                             size_t len);
-static Curl_recv h3_stream_recv;
-static Curl_send h3_stream_send;
-
-static int quiche_getsock(struct Curl_easy *data,
-                          struct connectdata *conn, curl_socket_t *socks)
+/*
+ * Store quiche version info in this buffer.
+ */
+void Curl_quiche_ver(char *p, size_t len)
 {
-  struct SingleRequest *k = &data->req;
-  int bitmap = GETSOCK_BLANK;
-
-  socks[0] = conn->sock[FIRSTSOCKET];
-
-  /* in an HTTP/2 connection we can basically always get a frame so we should
-     always be ready for one */
-  bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
-
-  /* we're still uploading or the HTTP/2 layer wants to send data */
-  if((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND)
-    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
-
-  return bitmap;
+  (void)msnprintf(p, len, "quiche/%s", quiche_version());
 }
-
-static CURLcode qs_disconnect(struct Curl_easy *data,
-                              struct quicsocket *qs)
-{
-  DEBUGASSERT(qs);
-  if(qs->conn) {
-    (void)quiche_conn_close(qs->conn, TRUE, 0, NULL, 0);
-    /* flushing the egress is not a failsafe way to deliver all the
-       outstanding packets, but we also don't want to get stuck here... */
-    (void)flush_egress(data, qs->sockfd, qs);
-    quiche_conn_free(qs->conn);
-    qs->conn = NULL;
-  }
-  if(qs->h3config)
-    quiche_h3_config_free(qs->h3config);
-  if(qs->h3c)
-    quiche_h3_conn_free(qs->h3c);
-  if(qs->cfg) {
-    quiche_config_free(qs->cfg);
-    qs->cfg = NULL;
-  }
-  return CURLE_OK;
-}
-
-static CURLcode quiche_disconnect(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  bool dead_connection)
-{
-  struct quicsocket *qs = conn->quic;
-  (void)dead_connection;
-  return qs_disconnect(data, qs);
-}
-
-void Curl_quic_disconnect(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          int tempindex)
-{
-  if(conn->transport == TRNSPRT_QUIC)
-    qs_disconnect(data, &conn->hequic[tempindex]);
-}
-
-static unsigned int quiche_conncheck(struct Curl_easy *data,
-                                     struct connectdata *conn,
-                                     unsigned int checks_to_perform)
-{
-  (void)data;
-  (void)conn;
-  (void)checks_to_perform;
-  return CONNRESULT_NONE;
-}
-
-static CURLcode quiche_do(struct Curl_easy *data, bool *done)
-{
-  struct HTTP *stream = data->req.p.http;
-  stream->h3req = FALSE; /* not sent */
-  return Curl_http(data, done);
-}
-
-static const struct Curl_handler Curl_handler_http3 = {
-  "HTTPS",                              /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  quiche_do,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  quiche_getsock,                       /* proto_getsock */
-  quiche_getsock,                       /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  quiche_getsock,                       /* perform_getsock */
-  quiche_disconnect,                    /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  quiche_conncheck,                     /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  PORT_HTTP,                            /* defport */
-  CURLPROTO_HTTPS,                      /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_SSL | PROTOPT_STREAM          /* flags */
-};
-
-#ifdef DEBUG_QUICHE
-static void quiche_debug_log(const char *line, void *argp)
-{
-  (void)argp;
-  fprintf(stderr, "%s\n", line);
-}
-#endif
 
 static void keylog_callback(const SSL *ssl, const char *line)
 {
@@ -233,232 +124,262 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
   return ssl_ctx;
 }
 
-static int quic_init_ssl(struct quicsocket *qs, struct connectdata *conn)
+struct quic_handshake {
+  char *buf;       /* pointer to the buffer */
+  size_t alloclen; /* size of allocation */
+  size_t len;      /* size of content in buffer */
+  size_t nread;    /* how many bytes have been read */
+};
+
+struct h3_event_node {
+  struct h3_event_node *next;
+  uint64_t stream3_id;
+  quiche_h3_event *ev;
+};
+
+struct cf_quiche_ctx {
+  curl_socket_t sockfd;
+  struct sockaddr_storage local_addr;
+  socklen_t local_addrlen;
+  quiche_conn *qconn;
+  quiche_config *cfg;
+  quiche_h3_conn *h3c;
+  quiche_h3_config *h3config;
+  uint8_t scid[QUICHE_MAX_CONN_ID_LEN];
+  SSL_CTX *sslctx;
+  SSL *ssl;
+  struct h3_event_node *pending;
+  bool h3_recving; /* TRUE when in h3-body-reading state */
+  bool goaway;
+};
+
+
+#ifdef DEBUG_QUICHE
+static void quiche_debug_log(const char *line, void *argp)
 {
-  /* this will need some attention when HTTPS proxy over QUIC get fixed */
-  const char * const hostname = conn->host.name;
+  (void)argp;
+  fprintf(stderr, "%s\n", line);
+}
+#endif
 
-  DEBUGASSERT(!qs->ssl);
-  qs->ssl = SSL_new(qs->sslctx);
+static void h3_clear_pending(struct cf_quiche_ctx *ctx)
+{
+  if(ctx->pending) {
+    struct h3_event_node *node, *next;
+    for(node = ctx->pending; node; node = next) {
+      next = node->next;
+      quiche_h3_event_free(node->ev);
+      free(node);
+    }
+    ctx->pending = NULL;
+  }
+}
 
-  SSL_set_app_data(qs->ssl, qs);
+static bool h3_has_pending(struct Curl_cfilter *cf,
+                           struct Curl_easy *data)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  struct HTTP *stream = data->req.p.http;
+  struct h3_event_node *node;
 
-  /* set SNI */
-  SSL_set_tlsext_host_name(qs->ssl, hostname);
+  for(node = ctx->pending; node; node = node->next) {
+    if(node->stream3_id == stream->stream3_id) {
+      CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] has data pending"),
+                stream->stream3_id));
+      return TRUE;
+    }
+  }
+  CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] no data pending"),
+            stream->stream3_id));
+  return FALSE;
+}
+
+static CURLcode h3_add_event(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             uint64_t stream3_id, quiche_h3_event *ev)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  struct Curl_easy *mdata;
+  struct h3_event_node *node, **pnext = &ctx->pending;
+
+  DEBUGASSERT(data->multi);
+  for(mdata = data->multi->easyp; mdata; mdata = mdata->next) {
+    if(mdata->req.p.http && mdata->req.p.http->stream3_id == stream3_id) {
+      break;
+    }
+  }
+
+  if(!mdata) {
+    CF_DEBUGF(infof(data, CFMSG(cf, "event for unknown stream %u, discarded"),
+              stream3_id));
+    quiche_h3_event_free(ev);
+    return CURLE_OK;
+  }
+
+  node = calloc(sizeof(*node), 1);
+  if(!node)
+    return CURLE_OUT_OF_MEMORY;
+  node->stream3_id = stream3_id;
+  node->ev = ev;
+  /* append to process them in order of arrival */
+  while(*pnext) {
+    pnext = &((*pnext)->next);
+  }
+  *pnext = node;
+  if(!mdata->state.drain) {
+    /* tell the multi handle that this data needs processing */
+    mdata->state.drain = 1;
+    Curl_expire(mdata, 0, EXPIRE_RUN_NOW);
+  }
+  return CURLE_OK;
+}
+
+struct h3h1header {
+  char *dest;
+  size_t destlen; /* left to use */
+  size_t nlen; /* used */
+};
+
+static int cb_each_header(uint8_t *name, size_t name_len,
+                          uint8_t *value, size_t value_len,
+                          void *argp)
+{
+  struct h3h1header *headers = (struct h3h1header *)argp;
+  size_t olen = 0;
+
+  if((name_len == 7) && !strncmp(H2H3_PSEUDO_STATUS, (char *)name, 7)) {
+    msnprintf(headers->dest,
+              headers->destlen, "HTTP/3 %.*s \r\n",
+              (int) value_len, value);
+  }
+  else if(!headers->nlen) {
+    return CURLE_HTTP3;
+  }
+  else {
+    msnprintf(headers->dest,
+              headers->destlen, "%.*s: %.*s\r\n",
+              (int)name_len, name, (int) value_len, value);
+  }
+  olen = strlen(headers->dest);
+  headers->destlen -= olen;
+  headers->nlen += olen;
+  headers->dest += olen;
   return 0;
 }
 
-
-CURLcode Curl_quic_connect(struct Curl_easy *data,
-                           struct connectdata *conn, curl_socket_t sockfd,
-                           int sockindex,
-                           const struct sockaddr *addr, socklen_t addrlen)
+static ssize_t h3_process_event(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                char *buf, size_t len,
+                                uint64_t stream3_id,
+                                quiche_h3_event *ev,
+                                CURLcode *err)
 {
-  CURLcode result;
-  struct quicsocket *qs = &conn->hequic[sockindex];
-  char ipbuf[40];
-  int port;
-  int rv;
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  struct HTTP *stream = data->req.p.http;
+  ssize_t recvd = -1;
+  ssize_t rcode;
+  int rc;
+  struct h3h1header headers;
 
-#ifdef DEBUG_QUICHE
-  /* initialize debug log callback only once */
-  static int debug_log_init = 0;
-  if(!debug_log_init) {
-    quiche_enable_debug_logging(quiche_debug_log, NULL);
-    debug_log_init = 1;
-  }
-#endif
+  DEBUGASSERT(stream3_id == stream->stream3_id);
 
-  (void)addr;
-  (void)addrlen;
-
-  qs->sockfd = sockfd;
-  qs->cfg = quiche_config_new(QUICHE_PROTOCOL_VERSION);
-  if(!qs->cfg) {
-    failf(data, "can't create quiche config");
-    return CURLE_FAILED_INIT;
-  }
-
-  quiche_config_set_max_idle_timeout(qs->cfg, QUIC_IDLE_TIMEOUT);
-  quiche_config_set_initial_max_data(qs->cfg, QUIC_MAX_DATA);
-  quiche_config_set_initial_max_stream_data_bidi_local(qs->cfg, QUIC_MAX_DATA);
-  quiche_config_set_initial_max_stream_data_bidi_remote(qs->cfg,
-                                                        QUIC_MAX_DATA);
-  quiche_config_set_initial_max_stream_data_uni(qs->cfg, QUIC_MAX_DATA);
-  quiche_config_set_initial_max_streams_bidi(qs->cfg, QUIC_MAX_STREAMS);
-  quiche_config_set_initial_max_streams_uni(qs->cfg, QUIC_MAX_STREAMS);
-  quiche_config_set_application_protos(qs->cfg,
-                                       (uint8_t *)
-                                       QUICHE_H3_APPLICATION_PROTOCOL,
-                                       sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
-                                       - 1);
-
-  qs->sslctx = quic_ssl_ctx(data);
-  if(!qs->sslctx)
-    return CURLE_QUIC_CONNECT_ERROR;
-
-  if(quic_init_ssl(qs, conn))
-    return CURLE_QUIC_CONNECT_ERROR;
-
-  result = Curl_rand(data, qs->scid, sizeof(qs->scid));
-  if(result)
-    return result;
-
-  qs->local_addrlen = sizeof(qs->local_addr);
-  rv = getsockname(sockfd, (struct sockaddr *)&qs->local_addr,
-                   &qs->local_addrlen);
-  if(rv == -1)
-    return CURLE_QUIC_CONNECT_ERROR;
-
-  qs->conn = quiche_conn_new_with_tls((const uint8_t *) qs->scid,
-                                      sizeof(qs->scid), NULL, 0,
-                                      (struct sockaddr *)&qs->local_addr,
-                                      qs->local_addrlen, addr, addrlen,
-                                      qs->cfg, qs->ssl, false);
-  if(!qs->conn) {
-    failf(data, "can't create quiche connection");
-    return CURLE_OUT_OF_MEMORY;
-  }
-
-  /* Known to not work on Windows */
-#if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
-  {
-    int qfd;
-    (void)Curl_qlogdir(data, qs->scid, sizeof(qs->scid), &qfd);
-    if(qfd != -1)
-      quiche_conn_set_qlog_fd(qs->conn, qfd,
-                              "qlog title", "curl qlog");
-  }
-#endif
-
-  result = flush_egress(data, sockfd, qs);
-  if(result)
-    return result;
-
-  /* extract the used address as a string */
-  if(!Curl_addr2string((struct sockaddr*)addr, addrlen, ipbuf, &port)) {
-    char buffer[STRERROR_LEN];
-    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-          SOCKERRNO, Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
-
-  infof(data, "Connect socket %d over QUIC to %s:%ld",
-        sockfd, ipbuf, port);
-
-  Curl_persistconninfo(data, conn, NULL, -1);
-
-  {
-    unsigned char alpn_protocols[] = QUICHE_H3_APPLICATION_PROTOCOL;
-    unsigned alpn_len, offset = 0;
-
-    /* Replace each ALPN length prefix by a comma. */
-    while(offset < sizeof(alpn_protocols) - 1) {
-      alpn_len = alpn_protocols[offset];
-      alpn_protocols[offset] = ',';
-      offset += 1 + alpn_len;
+  switch(quiche_h3_event_type(ev)) {
+  case QUICHE_H3_EVENT_HEADERS:
+    headers.dest = buf;
+    headers.destlen = len;
+    headers.nlen = 0;
+    rc = quiche_h3_event_for_each_header(ev, cb_each_header, &headers);
+    if(rc) {
+      failf(data, "Error in HTTP/3 response header");
+      *err = CURLE_RECV_ERROR;
+      recvd = -1;
+      break;
     }
+    recvd = headers.nlen;
+    CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] HEADERS len=%d"),
+              stream3_id, (int)recvd));
+    break;
 
-    infof(data, "Sent QUIC client Initial, ALPN: %s",
-          alpn_protocols + 1);
-  }
-
-  return CURLE_OK;
-}
-
-static CURLcode quiche_has_connected(struct Curl_easy *data,
-                                     struct connectdata *conn,
-                                     int sockindex,
-                                     int tempindex)
-{
-  CURLcode result;
-  struct quicsocket *qs = conn->quic = &conn->hequic[tempindex];
-
-  conn->recv[sockindex] = h3_stream_recv;
-  conn->send[sockindex] = h3_stream_send;
-  conn->handler = &Curl_handler_http3;
-  conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-  conn->httpversion = 30;
-  conn->bundle->multiuse = BUNDLE_MULTIPLEX;
-
-  if(conn->ssl_config.verifyhost) {
-    X509 *server_cert;
-    server_cert = SSL_get_peer_certificate(qs->ssl);
-    if(!server_cert) {
-      return CURLE_PEER_FAILED_VERIFICATION;
+  case QUICHE_H3_EVENT_DATA:
+    CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] DATA"), stream3_id));
+    if(!stream->firstbody) {
+      /* add a header-body separator CRLF */
+      buf[0] = '\r';
+      buf[1] = '\n';
+      buf += 2;
+      len -= 2;
+      stream->firstbody = TRUE;
+      recvd = 2; /* two bytes already */
     }
-    result = Curl_ossl_verifyhost(data, conn, server_cert);
-    X509_free(server_cert);
-    if(result)
-      return result;
-    infof(data, "Verified certificate just fine");
-  }
-  else
-    infof(data, "Skipped certificate verification");
+    else
+      recvd = 0;
+    rcode = quiche_h3_recv_body(ctx->h3c, ctx->qconn, stream3_id,
+                               (unsigned char *)buf, len);
+    if(rcode <= 0) {
+      recvd = -1;
+      *err = CURLE_AGAIN;
+      break;
+    }
+    ctx->h3_recving = TRUE;
+    recvd += rcode;
+    break;
 
-  qs->h3config = quiche_h3_config_new();
-  if(!qs->h3config)
-    return CURLE_OUT_OF_MEMORY;
+  case QUICHE_H3_EVENT_RESET:
+    CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] RESET"), stream3_id));
+    streamclose(cf->conn, "Stream reset");
+    *err = CURLE_PARTIAL_FILE;
+    recvd = -1;
+    break;
 
-  /* Create a new HTTP/3 connection on the QUIC connection. */
-  qs->h3c = quiche_h3_conn_new_with_transport(qs->conn, qs->h3config);
-  if(!qs->h3c) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
-  if(conn->hequic[1-tempindex].cfg) {
-    qs = &conn->hequic[1-tempindex];
-    quiche_config_free(qs->cfg);
-    quiche_conn_free(qs->conn);
-    qs->cfg = NULL;
-    qs->conn = NULL;
-  }
-  if(data->set.ssl.certinfo)
-    /* asked to gather certificate info */
-    (void)Curl_ossl_certchain(data, qs->ssl);
+  case QUICHE_H3_EVENT_FINISHED:
+    CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] FINISHED"), stream3_id));
+    stream->closed = TRUE;
+    streamclose(cf->conn, "End of stream");
+    *err = CURLE_OK;
+    recvd = 0; /* end of stream */
+    break;
 
-  return CURLE_OK;
-  fail:
-  quiche_h3_config_free(qs->h3config);
-  quiche_h3_conn_free(qs->h3c);
-  return result;
+  case QUICHE_H3_EVENT_GOAWAY:
+    recvd = -1;
+    *err = CURLE_AGAIN;
+    ctx->goaway = TRUE;
+    break;
+
+  default:
+    CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] unhandled event %d"),
+              stream3_id, quiche_h3_event_type(ev)));
+    break;
+  }
+  return recvd;
 }
 
-/*
- * This function gets polled to check if this QUIC connection has connected.
- */
-CURLcode Curl_quic_is_connected(struct Curl_easy *data,
-                                struct connectdata *conn,
-                                int sockindex,
-                                bool *done)
+static ssize_t h3_process_pending(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  char *buf, size_t len,
+                                  CURLcode *err)
 {
-  CURLcode result;
-  struct quicsocket *qs = &conn->hequic[sockindex];
-  curl_socket_t sockfd = conn->tempsock[sockindex];
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  struct HTTP *stream = data->req.p.http;
+  struct h3_event_node *node = ctx->pending, **pnext = &ctx->pending;
+  ssize_t recvd = -1;
 
-  result = process_ingress(data, sockfd, qs);
-  if(result)
-    goto error;
-
-  result = flush_egress(data, sockfd, qs);
-  if(result)
-    goto error;
-
-  if(quiche_conn_is_established(qs->conn)) {
-    *done = TRUE;
-    result = quiche_has_connected(data, conn, 0, sockindex);
-    DEBUGF(infof(data, "quiche established connection"));
+  for(; node; pnext = &node->next, node = node->next) {
+    if(node->stream3_id == stream->stream3_id) {
+      recvd = h3_process_event(cf, data, buf, len,
+                               node->stream3_id, node->ev, err);
+      quiche_h3_event_free(node->ev);
+      *pnext = node->next;
+      free(node);
+      break;
+    }
   }
-
-  return result;
-  error:
-  qs_disconnect(data, qs);
-  return result;
+  return recvd;
 }
 
-static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
-                                struct quicsocket *qs)
+static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
 {
+  struct cf_quiche_ctx *ctx = cf->ctx;
   ssize_t recvd;
   uint8_t *buf = (uint8_t *)data->state.buffer;
   size_t bufsize = data->set.buffer_size;
@@ -469,12 +390,12 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
   DEBUGASSERT(qs->conn);
 
   /* in case the timeout expired */
-  quiche_conn_on_timeout(qs->conn);
+  quiche_conn_on_timeout(ctx->qconn);
 
   do {
     from_len = sizeof(from);
 
-    recvd = recvfrom(sockfd, buf, bufsize, 0,
+    recvd = recvfrom(ctx->sockfd, buf, bufsize, 0,
                      (struct sockaddr *)&from, &from_len);
 
     if((recvd < 0) && ((SOCKERRNO == EAGAIN) || (SOCKERRNO == EWOULDBLOCK)))
@@ -482,22 +403,22 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
 
     if(recvd < 0) {
       failf(data, "quiche: recvfrom() unexpectedly returned %zd "
-            "(errno: %d, socket %d)", recvd, SOCKERRNO, sockfd);
+            "(errno: %d, socket %d)", recvd, SOCKERRNO, ctx->sockfd);
       return CURLE_RECV_ERROR;
     }
 
     recv_info.from = (struct sockaddr *) &from;
     recv_info.from_len = from_len;
-    recv_info.to = (struct sockaddr *) &qs->local_addr;
-    recv_info.to_len = qs->local_addrlen;
+    recv_info.to = (struct sockaddr *) &ctx->local_addr;
+    recv_info.to_len = ctx->local_addrlen;
 
-    recvd = quiche_conn_recv(qs->conn, buf, recvd, &recv_info);
+    recvd = quiche_conn_recv(ctx->qconn, buf, recvd, &recv_info);
     if(recvd == QUICHE_ERR_DONE)
       break;
 
     if(recvd < 0) {
       if(QUICHE_ERR_TLS_FAIL == recvd) {
-        long verify_ok = SSL_get_verify_result(qs->ssl);
+        long verify_ok = SSL_get_verify_result(ctx->ssl);
         if(verify_ok != X509_V_OK) {
           failf(data, "SSL certificate problem: %s",
                 X509_verify_cert_error_string(verify_ok));
@@ -519,16 +440,17 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
  * flush_egress drains the buffers and sends off data.
  * Calls failf() on errors.
  */
-static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
-                             struct quicsocket *qs)
+static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
+                                struct Curl_easy *data)
 {
+  struct cf_quiche_ctx *ctx = cf->ctx;
   ssize_t sent;
   uint8_t out[1200];
   int64_t timeout_ns;
   quiche_send_info send_info;
 
   do {
-    sent = quiche_conn_send(qs->conn, out, sizeof(out), &send_info);
+    sent = quiche_conn_send(ctx->qconn, out, sizeof(out), &send_info);
     if(sent == QUICHE_ERR_DONE)
       break;
 
@@ -537,7 +459,7 @@ static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
       return CURLE_SEND_ERROR;
     }
 
-    sent = send(sockfd, out, sent, 0);
+    sent = send(ctx->sockfd, out, sent, 0);
     if(sent < 0) {
       failf(data, "send() returned %zd", sent);
       return CURLE_SEND_ERROR;
@@ -545,7 +467,7 @@ static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
   } while(1);
 
   /* time until the next timeout event, as nanoseconds. */
-  timeout_ns = quiche_conn_timeout_as_nanos(qs->conn);
+  timeout_ns = quiche_conn_timeout_as_nanos(ctx->qconn);
   if(timeout_ns)
     /* expire uses milliseconds */
     Curl_expire(data, (timeout_ns + 999999) / 1000000, EXPIRE_QUIC);
@@ -553,213 +475,107 @@ static CURLcode flush_egress(struct Curl_easy *data, int sockfd,
   return CURLE_OK;
 }
 
-struct h3h1header {
-  char *dest;
-  size_t destlen; /* left to use */
-  size_t nlen; /* used */
-};
-
-static int cb_each_header(uint8_t *name, size_t name_len,
-                          uint8_t *value, size_t value_len,
-                          void *argp)
+static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              char *buf, size_t len, CURLcode *err)
 {
-  struct h3h1header *headers = (struct h3h1header *)argp;
-  size_t olen = 0;
-
-  if((name_len == 7) && !strncmp(H2H3_PSEUDO_STATUS, (char *)name, 7)) {
-    msnprintf(headers->dest,
-              headers->destlen, "HTTP/3 %.*s\n",
-              (int) value_len, value);
-  }
-  else if(!headers->nlen) {
-    return CURLE_HTTP3;
-  }
-  else {
-    msnprintf(headers->dest,
-              headers->destlen, "%.*s: %.*s\n",
-              (int)name_len, name, (int) value_len, value);
-  }
-  olen = strlen(headers->dest);
-  headers->destlen -= olen;
-  headers->nlen += olen;
-  headers->dest += olen;
-  return 0;
-}
-
-static ssize_t h3_stream_recv(struct Curl_easy *data,
-                              int sockindex,
-                              char *buf,
-                              size_t buffersize,
-                              CURLcode *curlcode)
-{
+  struct cf_quiche_ctx *ctx = cf->ctx;
   ssize_t recvd = -1;
   ssize_t rcode;
-  struct connectdata *conn = data->conn;
-  struct quicsocket *qs = conn->quic;
-  curl_socket_t sockfd = conn->sock[sockindex];
   quiche_h3_event *ev;
   int rc;
   struct h3h1header headers;
   struct HTTP *stream = data->req.p.http;
   headers.dest = buf;
-  headers.destlen = buffersize;
+  headers.destlen = len;
   headers.nlen = 0;
 
-  if(process_ingress(data, sockfd, qs)) {
-    infof(data, "h3_stream_recv returns on ingress");
-    *curlcode = CURLE_RECV_ERROR;
-    return -1;
+  CF_DEBUGF(infof(data, CFMSG(cf, "recv[%u]"), stream->stream3_id));
+
+  *err = CURLE_AGAIN;
+  recvd = -1;
+
+  if(cf_process_ingress(cf, data)) {
+    CF_DEBUGF(infof(data, "h3_stream_recv returns on ingress"));
+    *err = CURLE_RECV_ERROR;
+    goto out;
   }
 
-  if(qs->h3_recving) {
+  if(ctx->h3_recving) {
     /* body receiving state */
-    rcode = quiche_h3_recv_body(qs->h3c, qs->conn, stream->stream3_id,
-                                (unsigned char *)buf, buffersize);
+    rcode = quiche_h3_recv_body(ctx->h3c, ctx->qconn, stream->stream3_id,
+                                (unsigned char *)buf, len);
     if(rcode <= 0) {
-      recvd = -1;
-      qs->h3_recving = FALSE;
+      ctx->h3_recving = FALSE;
       /* fall through into the while loop below */
     }
-    else
+    else {
+      *err = CURLE_OK;
       recvd = rcode;
+      goto out;
+    }
+  }
+
+  if(recvd < 0) {
+    recvd = h3_process_pending(cf, data, buf, len, err);
   }
 
   while(recvd < 0) {
-    int64_t s = quiche_h3_conn_poll(qs->h3c, qs->conn, &ev);
-    if(s < 0)
+    int64_t stream3_id = quiche_h3_conn_poll(ctx->h3c, ctx->qconn, &ev);
+    if(stream3_id < 0)
       /* nothing more to do */
       break;
 
-    if(s != stream->stream3_id) {
-      /* another transfer, ignore for now */
-      infof(data, "Got h3 for stream %u, expects %u",
-            s, stream->stream3_id);
-      continue;
+    if(stream3_id != stream->stream3_id) {
+      /* event for another transfer, preserver for later */
+      CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] queuing event"), stream3_id));
+      if(h3_add_event(cf, data, stream3_id, ev) != CURLE_OK) {
+        *err = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
     }
-
-    switch(quiche_h3_event_type(ev)) {
-    case QUICHE_H3_EVENT_HEADERS:
-      rc = quiche_h3_event_for_each_header(ev, cb_each_header, &headers);
-      if(rc) {
-        *curlcode = rc;
-        failf(data, "Error in HTTP/3 response header");
-        break;
-      }
-      recvd = headers.nlen;
-      break;
-    case QUICHE_H3_EVENT_DATA:
-      if(!stream->firstbody) {
-        /* add a header-body separator CRLF */
-        buf[0] = '\r';
-        buf[1] = '\n';
-        buf += 2;
-        buffersize -= 2;
-        stream->firstbody = TRUE;
-        recvd = 2; /* two bytes already */
-      }
-      else
-        recvd = 0;
-      rcode = quiche_h3_recv_body(qs->h3c, qs->conn, s, (unsigned char *)buf,
-                                  buffersize);
-      if(rcode <= 0) {
-        recvd = -1;
-        break;
-      }
-      qs->h3_recving = TRUE;
-      recvd += rcode;
-      break;
-
-    case QUICHE_H3_EVENT_RESET:
-      streamclose(conn, "Stream reset");
-      *curlcode = CURLE_PARTIAL_FILE;
-      return -1;
-
-    case QUICHE_H3_EVENT_FINISHED:
-      streamclose(conn, "End of stream");
-      recvd = 0; /* end of stream */
-      break;
-    default:
-      break;
+    else {
+      recvd = h3_process_event(cf, data, buf, len, stream3_id, ev, err);
+      quiche_h3_event_free(ev);
     }
-
-    quiche_h3_event_free(ev);
-  }
-  if(flush_egress(data, sockfd, qs)) {
-    *curlcode = CURLE_SEND_ERROR;
-    return -1;
   }
 
-  *curlcode = (-1 == recvd)? CURLE_AGAIN : CURLE_OK;
-  if(recvd >= 0)
+  if(cf_flush_egress(cf, data)) {
+    CF_DEBUGF(infof(data, CFMSG(cf, "recv(), flush egress failed")));
+    *err = CURLE_SEND_ERROR;
+    recvd = -1;
+    goto out;
+  }
+
+  if(recvd >= 0) {
     /* Get this called again to drain the event queue */
     Curl_expire(data, 0, EXPIRE_QUIC);
+  }
+  else if(stream->closed) {
+    *err = CURLE_OK;
+    recvd = -1;
+  }
 
+out:
   data->state.drain = (recvd >= 0) ? 1 : 0;
+  CF_DEBUGF(infof(data, CFMSG(cf, "recv[%u] -> %ld, err=%d"),
+           stream->stream3_id, (long)recvd, *err));
   return recvd;
-}
-
-static ssize_t h3_stream_send(struct Curl_easy *data,
-                              int sockindex,
-                              const void *mem,
-                              size_t len,
-                              CURLcode *curlcode)
-{
-  ssize_t sent;
-  struct connectdata *conn = data->conn;
-  struct quicsocket *qs = conn->quic;
-  curl_socket_t sockfd = conn->sock[sockindex];
-  struct HTTP *stream = data->req.p.http;
-
-  if(!stream->h3req) {
-    CURLcode result = http_request(data, mem, len);
-    if(result) {
-      *curlcode = CURLE_SEND_ERROR;
-      return -1;
-    }
-    sent = len;
-  }
-  else {
-    sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
-                               (uint8_t *)mem, len, FALSE);
-    if(sent == QUICHE_H3_ERR_DONE) {
-      sent = 0;
-    }
-    else if(sent < 0) {
-      *curlcode = CURLE_SEND_ERROR;
-      return -1;
-    }
-  }
-
-  if(flush_egress(data, sockfd, qs)) {
-    *curlcode = CURLE_SEND_ERROR;
-    return -1;
-  }
-
-  *curlcode = CURLE_OK;
-  return sent;
-}
-
-/*
- * Store quiche version info in this buffer.
- */
-void Curl_quic_ver(char *p, size_t len)
-{
-  (void)msnprintf(p, len, "quiche/%s", quiche_version());
 }
 
 /* Index where :authority header field will appear in request header
    field list. */
 #define AUTHORITY_DST_IDX 3
 
-static CURLcode http_request(struct Curl_easy *data, const void *mem,
-                             size_t len)
+static CURLcode cf_http_request(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                const void *mem,
+                                size_t len)
 {
-  struct connectdata *conn = data->conn;
+  struct cf_quiche_ctx *ctx = cf->ctx;
   struct HTTP *stream = data->req.p.http;
   size_t nheader;
   int64_t stream3_id;
   quiche_h3_header *nva = NULL;
-  struct quicsocket *qs = conn->quic;
   CURLcode result = CURLE_OK;
   struct h2h3req *hreq = NULL;
 
@@ -796,10 +612,10 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
       /* data sending without specifying the data amount up front */
       stream->upload_left = -1; /* unknown, but not zero */
 
-    stream3_id = quiche_h3_send_request(qs->h3c, qs->conn, nva, nheader,
+    stream3_id = quiche_h3_send_request(ctx->h3c, ctx->qconn, nva, nheader,
                                         stream->upload_left ? FALSE: TRUE);
     if((stream3_id >= 0) && data->set.postfields) {
-      ssize_t sent = quiche_h3_send_body(qs->h3c, qs->conn, stream3_id,
+      ssize_t sent = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream3_id,
                                          (uint8_t *)data->set.postfields,
                                          stream->upload_left, TRUE);
       if(sent <= 0) {
@@ -810,7 +626,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
     }
     break;
   default:
-    stream3_id = quiche_h3_send_request(qs->h3c, qs->conn, nva, nheader,
+    stream3_id = quiche_h3_send_request(ctx->h3c, ctx->qconn, nva, nheader,
                                         TRUE);
     break;
   }
@@ -818,14 +634,13 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
   Curl_safefree(nva);
 
   if(stream3_id < 0) {
-    H3BUGF(infof(data, "quiche_h3_send_request returned %d",
-                 stream3_id));
+    CF_DEBUGF(infof(data, CFMSG(cf, "quiche_h3_send_request returned %ld"),
+                    (long)stream3_id));
     result = CURLE_SEND_ERROR;
     goto fail;
   }
 
-  infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)",
-        stream3_id, (void *)data);
+  CF_DEBUGF(infof(data, CFMSG(cf, "Using HTTP/3 Stream ID: %u"), stream3_id));
   stream->stream3_id = stream3_id;
 
   Curl_pseudo_free(hreq);
@@ -837,56 +652,507 @@ fail:
   return result;
 }
 
-/*
- * Called from transfer.c:done_sending when we stop HTTP/3 uploading.
- */
-CURLcode Curl_quic_done_sending(struct Curl_easy *data)
+static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              const void *buf, size_t len, CURLcode *err)
 {
-  struct connectdata *conn = data->conn;
-  DEBUGASSERT(conn);
-  if(conn->handler == &Curl_handler_http3) {
-    /* only for HTTP/3 transfers */
-    ssize_t sent;
-    struct HTTP *stream = data->req.p.http;
-    struct quicsocket *qs = conn->quic;
-    stream->upload_done = TRUE;
-    sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
-                               NULL, 0, TRUE);
-    if(sent < 0)
-      return CURLE_SEND_ERROR;
+  struct cf_quiche_ctx *ctx = ctx;
+  struct HTTP *stream = data->req.p.http;
+  ssize_t sent;
+
+  if(!stream->h3req) {
+    CURLcode result = cf_http_request(cf, data, buf, len);
+    if(result) {
+      *err = CURLE_SEND_ERROR;
+      return -1;
+    }
+    sent = len;
+  }
+  else {
+    sent = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->stream3_id,
+                               (uint8_t *)buf, len, FALSE);
+    if(sent == QUICHE_H3_ERR_DONE) {
+      sent = 0;
+    }
+    else if(sent < 0) {
+      *err = CURLE_SEND_ERROR;
+      return -1;
+    }
   }
 
-  return CURLE_OK;
+  if(cf_flush_egress(cf, data)) {
+    *err = CURLE_SEND_ERROR;
+    return -1;
+  }
+
+  *err = CURLE_OK;
+  return sent;
 }
 
-/*
- * Called from http.c:Curl_http_done when a request completes.
- */
-void Curl_quic_done(struct Curl_easy *data, bool premature)
+static int cf_quiche_get_select_socks(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      curl_socket_t *socks)
 {
-  (void)data;
-  (void)premature;
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  struct SingleRequest *k = &data->req;
+  int rv = GETSOCK_BLANK;
+  struct HTTP *stream = data->req.p.http;
+
+  socks[0] = ctx->sockfd;
+
+  /* in an HTTP/3 connection we can basically always get a frame so we should
+     always be ready for one */
+  rv |= GETSOCK_READSOCK(0);
+
+  /* we're still uploading or the HTTP/3 layer wants to send data */
+  if((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND)
+    rv |= GETSOCK_WRITESOCK(0);
+
+  return rv;
 }
 
 /*
  * Called from transfer.c:data_pending to know if we should keep looping
  * to receive more data from the connection.
  */
-bool Curl_quic_data_pending(const struct Curl_easy *data)
+static bool cf_quiche_data_pending(struct Curl_cfilter *cf,
+                                   const struct Curl_easy *data)
 {
-  (void)data;
-  return FALSE;
+  struct cf_quiche_ctx *ctx = cf->ctx;
+
+  return h3_has_pending(cf, (struct Curl_easy *)data);
 }
 
-/*
- * Called from transfer.c:Curl_readwrite when neither HTTP level read
- * nor write is performed. It is a good place to handle timer expiry
- * for QUIC transport.
- */
-CURLcode Curl_quic_idle(struct Curl_easy *data)
+static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     int event, int arg1, void *arg2)
 {
-  (void)data;
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  (void)arg1;
+  (void)arg2;
+  switch(event) {
+  case CF_CTRL_DATA_DONE_SEND: {
+    struct HTTP *stream = data->req.p.http;
+    ssize_t sent;
+    stream->upload_done = TRUE;
+    sent = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->stream3_id,
+                               NULL, 0, TRUE);
+    if(sent < 0)
+      return CURLE_SEND_ERROR;
+    break;
+  }
+
+  default:
+    break;
+  }
+  return result;
+}
+
+static CURLcode cf_verify_peer(struct Curl_cfilter *cf,
+                               struct Curl_easy *data)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+  cf->conn->httpversion = 30;
+  cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+
+  if(cf->conn->ssl_config.verifyhost) {
+    X509 *server_cert;
+    server_cert = SSL_get_peer_certificate(ctx->ssl);
+    if(!server_cert) {
+      result = CURLE_PEER_FAILED_VERIFICATION;
+      goto out;
+    }
+    result = Curl_ossl_verifyhost(data, cf->conn, server_cert);
+    X509_free(server_cert);
+    if(result)
+      goto out;
+    CF_DEBUGF(infof(data, CFMSG(cf, "Verified certificate just fine")));
+  }
+  else
+    CF_DEBUGF(infof(data, CFMSG(cf, "Skipped certificate verification")));
+
+  ctx->h3config = quiche_h3_config_new();
+  if(!ctx->h3config) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  /* Create a new HTTP/3 connection on the QUIC connection. */
+  ctx->h3c = quiche_h3_conn_new_with_transport(ctx->qconn, ctx->h3config);
+  if(!ctx->h3c) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  if(data->set.ssl.certinfo)
+    /* asked to gather certificate info */
+    (void)Curl_ossl_certchain(data, ctx->ssl);
+
+out:
+  if(result) {
+    if(ctx->h3config) {
+      quiche_h3_config_free(ctx->h3config);
+      ctx->h3config = NULL;
+    }
+    if(ctx->h3c) {
+      quiche_h3_conn_free(ctx->h3c);
+      ctx->h3c = NULL;
+    }
+  }
+  return result;
+}
+
+static CURLcode cf_connect_start(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  int rc;
+  int rv;
+  CURLcode result;
+  const struct Curl_sockaddr_ex *sockaddr;
+  const char *r_ip;
+  int r_port;
+  int qfd;
+
+  result = Curl_cf_socket_peek(cf->next, &ctx->sockfd,
+                               &sockaddr, &r_ip, &r_port);
+  if(result)
+    return result;
+  DEBUGASSERT(ctx->sockfd != CURL_SOCKET_BAD);
+
+  infof(data, "Connect socket %d over QUIC to %s:%d",
+        ctx->sockfd, r_ip, r_port);
+
+  rc = connect(ctx->sockfd, &sockaddr->sa_addr, sockaddr->addrlen);
+  if(-1 == rc) {
+    return Curl_socket_connect_result(data, r_ip, SOCKERRNO);
+  }
+
+  /* QUIC sockets need to be nonblocking */
+  (void)curlx_nonblock(ctx->sockfd, TRUE);
+  switch(sockaddr->family) {
+#if defined(__linux__) && defined(IP_MTU_DISCOVER)
+  case AF_INET: {
+    int val = IP_PMTUDISC_DO;
+    (void)setsockopt(ctx->sockfd, IPPROTO_IP, IP_MTU_DISCOVER, &val,
+                     sizeof(val));
+    break;
+  }
+#endif
+#if defined(__linux__) && defined(IPV6_MTU_DISCOVER)
+  case AF_INET6: {
+    int val = IPV6_PMTUDISC_DO;
+    (void)setsockopt(ctx->sockfd, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
+                     sizeof(val));
+    break;
+  }
+#endif
+  }
+
+#ifdef DEBUG_QUICHE
+  /* initialize debug log callback only once */
+  static int debug_log_init = 0;
+  if(!debug_log_init) {
+    quiche_enable_debug_logging(quiche_debug_log, NULL);
+    debug_log_init = 1;
+  }
+#endif
+
+  ctx->cfg = quiche_config_new(QUICHE_PROTOCOL_VERSION);
+  if(!ctx->cfg) {
+    failf(data, "can't create quiche config");
+    return CURLE_FAILED_INIT;
+  }
+  quiche_config_set_max_idle_timeout(ctx->cfg, QUIC_IDLE_TIMEOUT);
+  quiche_config_set_initial_max_data(ctx->cfg, QUIC_MAX_DATA);
+  quiche_config_set_initial_max_stream_data_bidi_local(
+    ctx->cfg, QUIC_MAX_DATA);
+  quiche_config_set_initial_max_stream_data_bidi_remote(
+    ctx->cfg, QUIC_MAX_DATA);
+  quiche_config_set_initial_max_stream_data_uni(ctx->cfg, QUIC_MAX_DATA);
+  quiche_config_set_initial_max_streams_bidi(ctx->cfg, QUIC_MAX_STREAMS);
+  quiche_config_set_initial_max_streams_uni(ctx->cfg, QUIC_MAX_STREAMS);
+  quiche_config_set_application_protos(ctx->cfg,
+                                       (uint8_t *)
+                                       QUICHE_H3_APPLICATION_PROTOCOL,
+                                       sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
+                                       - 1);
+
+  DEBUGASSERT(!ctx->ssl);
+  DEBUGASSERT(!ctx->sslctx);
+  ctx->sslctx = quic_ssl_ctx(data);
+  if(!ctx->sslctx)
+    return CURLE_QUIC_CONNECT_ERROR;
+  ctx->ssl = SSL_new(ctx->sslctx);
+  if(!ctx->ssl)
+    return CURLE_QUIC_CONNECT_ERROR;
+
+  SSL_set_app_data(ctx->ssl, cf);
+  SSL_set_tlsext_host_name(ctx->ssl, cf->conn->host.name);
+
+  result = Curl_rand(data, ctx->scid, sizeof(ctx->scid));
+  if(result)
+    return result;
+
+  ctx->local_addrlen = sizeof(ctx->local_addr);
+  rv = getsockname(ctx->sockfd, (struct sockaddr *)&ctx->local_addr,
+                   &ctx->local_addrlen);
+  if(rv == -1)
+    return CURLE_QUIC_CONNECT_ERROR;
+
+  ctx->qconn = quiche_conn_new_with_tls((const uint8_t *)ctx->scid,
+                                      sizeof(ctx->scid), NULL, 0,
+                                      (struct sockaddr *)&ctx->local_addr,
+                                      ctx->local_addrlen,
+                                      &sockaddr->sa_addr, sockaddr->addrlen,
+                                      ctx->cfg, ctx->ssl, false);
+  if(!ctx->qconn) {
+    failf(data, "can't create quiche connection");
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  /* Known to not work on Windows */
+#if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
+  {
+    int qfd;
+    (void)Curl_qlogdir(data, ctx->scid, sizeof(ctx->scid), &qfd);
+    if(qfd != -1)
+      quiche_conn_set_qlog_fd(ctx->qconn, qfd,
+                              "qlog title", "curl qlog");
+  }
+#endif
+
+  result = cf_flush_egress(cf, data);
+  if(result)
+    return result;
+
+  {
+    unsigned char alpn_protocols[] = QUICHE_H3_APPLICATION_PROTOCOL;
+    unsigned alpn_len, offset = 0;
+
+    /* Replace each ALPN length prefix by a comma. */
+    while(offset < sizeof(alpn_protocols) - 1) {
+      alpn_len = alpn_protocols[offset];
+      alpn_protocols[offset] = ',';
+      offset += 1 + alpn_len;
+    }
+
+    CF_DEBUGF(infof(data, CFMSG(cf, "Sent QUIC client Initial, ALPN: %s"),
+              alpn_protocols + 1));
+  }
+
   return CURLE_OK;
+}
+
+static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  bool blocking, bool *done)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  if(cf->connected) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  /* Connect the UDP filter first */
+  if(!cf->next->connected) {
+    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    if(result || !*done)
+      return result;
+  }
+
+  if(!ctx->qconn) {
+    result = cf_connect_start(cf, data);
+    if(result)
+      goto out;
+  }
+
+  *done = FALSE;
+  result = cf_process_ingress(cf, data);
+  if(result)
+    goto out;
+
+  result = cf_flush_egress(cf, data);
+  if(result)
+    goto out;
+
+  if(quiche_conn_is_established(ctx->qconn)) {
+    result = cf_verify_peer(cf, data);
+    if(!result) {
+      DEBUGF(infof(data, "quiche established connection"));
+      cf->connected = TRUE;
+      cf->conn->alpn = CURL_HTTP_VERSION_3;
+      *done = TRUE;
+      connkeep(cf->conn, "HTTP/3 default");
+    }
+  }
+
+out:
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  if(result && result != CURLE_AGAIN) {
+    const struct Curl_sockaddr_ex *sockaddr;
+    const char *r_ip;
+    int r_port;
+
+    result = Curl_cf_socket_peek(cf->next, &ctx->sockfd,
+                                 &sockaddr, &r_ip, &r_port);
+    infof(data, "connect to %s port %u failed: %s",
+          r_ip, r_port, curl_easy_strerror(result));
+  }
+#endif
+  return result;
+}
+
+static void cf_quiche_ctx_clear(struct cf_quiche_ctx *ctx)
+{
+  if(ctx) {
+    if(ctx->pending)
+      h3_clear_pending(ctx);
+    if(ctx->qconn)
+      quiche_conn_free(ctx->qconn);
+    if(ctx->h3config)
+      quiche_h3_config_free(ctx->h3config);
+    if(ctx->h3c)
+      quiche_h3_conn_free(ctx->h3c);
+    if(ctx->cfg)
+      quiche_config_free(ctx->cfg);
+    memset(ctx, 0, sizeof(*ctx));
+  }
+}
+
+static void cf_quiche_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+
+  (void)data;
+  if(ctx) {
+    if(ctx->qconn) {
+      (void)quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
+      /* flushing the egress is not a failsafe way to deliver all the
+         outstanding packets, but we also don't want to get stuck here... */
+      (void)cf_flush_egress(cf, data);
+    }
+    cf_quiche_ctx_clear(ctx);
+  }
+}
+
+static void cf_quiche_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+
+  cf_quiche_ctx_clear(ctx);
+  free(ctx);
+  cf->ctx = NULL;
+}
+
+static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                int query, int *pres1, void **pres2)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+
+  switch(query) {
+  case CF_QUERY_MAX_CONCURRENT: {
+    uint64_t in_use = CONN_INUSE(cf->conn);
+    if(ctx->goaway) {
+      *pres1 = in_use;
+    }
+    else {
+      uint64_t bidi_left = quiche_conn_peer_streams_left_bidi(ctx->qconn);
+      if(bidi_left >= (INT_MAX - in_use))
+        *pres1 = INT_MAX;
+      else
+        *pres1 = (long)(bidi_left + in_use);
+    }
+    CF_DEBUGF(infof(data, CFMSG(cf, "query: MAX_CONCURRENT -> %ld"), *pres1));
+    return CURLE_OK;
+  }
+  default:
+    break;
+  }
+  return cf->next?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
+}
+
+
+static const struct Curl_cftype cft_quiche = {
+  "HTTP/3-QUICHE",
+  CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX,
+  cf_quiche_destroy,
+  cf_quiche_connect,
+  cf_quiche_close,
+  Curl_cf_def_get_host,
+  cf_quiche_get_select_socks,
+  cf_quiche_data_pending,
+  cf_quiche_send,
+  cf_quiche_recv,
+  cf_quiche_data_event,
+  Curl_cf_def_conn_is_alive,
+  Curl_cf_def_conn_keep_alive,
+  cf_quiche_query,
+};
+
+CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
+                               struct Curl_easy *data,
+                               struct connectdata *conn,
+                               const struct Curl_addrinfo *ai)
+{
+  struct cf_quiche_ctx *ctx = NULL;
+  struct Curl_cfilter *cf = NULL, *udp_cf;
+  CURLcode result;
+
+  (void)data;
+  (void)conn;
+  ctx = calloc(sizeof(*ctx), 1);
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  result = Curl_cf_create(&cf, &cft_quiche, ctx);
+  if(result)
+    goto out;
+
+  result = Curl_cf_udp_create(&udp_cf, data, conn, ai);
+  if(result)
+    goto out;
+
+  udp_cf->conn = cf->conn;
+  udp_cf->sockindex = cf->sockindex;
+  cf->next = udp_cf;
+
+out:
+  *pcf = (!result)? cf : NULL;
+  if(result) {
+    if(udp_cf)
+      Curl_conn_cf_discard(udp_cf, data);
+    Curl_safefree(cf);
+    Curl_safefree(ctx);
+  }
+
+  return result;
+}
+
+bool Curl_conn_is_quiche(const struct Curl_easy *data,
+                         const struct connectdata *conn,
+                         int sockindex)
+{
+  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
+
+  (void)data;
+  for(; cf; cf = cf->next) {
+    if(cf->cft == &cft_quiche)
+      return TRUE;
+    if(cf->cft->flags & CF_TYPE_IP_CONNECT)
+      return FALSE;
+  }
+  return FALSE;
 }
 
 #endif
