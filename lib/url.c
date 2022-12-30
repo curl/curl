@@ -563,9 +563,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 #endif
   set->ssl.primary.verifypeer = TRUE;
   set->ssl.primary.verifyhost = TRUE;
-#ifdef USE_TLS_SRP
-  set->ssl.primary.authtype = CURL_TLSAUTH_NONE;
-#endif
 #ifdef USE_SSH
   /* defaults to any auth type */
   set->ssh_auth_types = CURLSSH_AUTH_DEFAULT;
