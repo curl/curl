@@ -53,6 +53,7 @@ struct Curl_ssl_session;
 /* Curl_multi SSL backend-specific data; declared differently by each SSL
    backend */
 struct multi_ssl_backend_data;
+struct Curl_cfilter;
 
 CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
                                    const curl_ssl_backend ***avail);
@@ -95,7 +96,6 @@ struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data);
 /* init the SSL session ID cache */
 CURLcode Curl_ssl_initsessions(struct Curl_easy *, size_t);
 void Curl_ssl_version(char *buffer, size_t size);
-int Curl_ssl_check_cxn(struct Curl_easy *data, struct connectdata *conn);
 
 /* Certificate information list handling. */
 
@@ -156,6 +156,9 @@ CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
                               struct connectdata *conn,
                               int sockindex);
 
+CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
+                                  struct Curl_easy *data);
+
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
                                  int sockindex);
 
@@ -163,6 +166,8 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
 CURLcode Curl_ssl_cfilter_proxy_add(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex);
+CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
+                                        struct Curl_easy *data);
 #endif /* !CURL_DISABLE_PROXY */
 
 /**
@@ -218,7 +223,6 @@ void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
 #define Curl_ssl_set_engine_default(x) CURLE_NOT_BUILT_IN
 #define Curl_ssl_engines_list(x) NULL
 #define Curl_ssl_initsessions(x,y) CURLE_OK
-#define Curl_ssl_check_cxn(d,x) 0
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)

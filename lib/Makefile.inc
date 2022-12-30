@@ -88,7 +88,8 @@ LIB_VQUIC_HFILES = \
   vquic/msh3.h   \
   vquic/ngtcp2.h   \
   vquic/quiche.h   \
-  vquic/vquic.h
+  vquic/vquic.h    \
+  vquic/vquic_int.h
 
 LIB_VSSH_CFILES =  \
   vssh/libssh.c    \
@@ -106,6 +107,7 @@ LIB_CFILES =         \
   base64.c           \
   bufref.c           \
   c-hyper.c          \
+  cf-socket.c          \
   cfilters.c         \
   conncache.c        \
   connect.c          \
@@ -229,6 +231,7 @@ LIB_HFILES =         \
   asyn.h             \
   bufref.h           \
   c-hyper.h          \
+  cf-socket.h          \
   cfilters.h         \
   conncache.h        \
   connect.h          \
@@ -312,7 +315,6 @@ LIB_HFILES =         \
   pop3.h             \
   progress.h         \
   psl.h              \
-  quic.h             \
   rand.h             \
   rename.h           \
   rtsp.h             \
