@@ -2017,7 +2017,7 @@ static bool cf_ngtcp2_data_pending(struct Curl_cfilter *cf,
 
 static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
-                                     int event, long arg1, void *arg2)
+                                     int event, int arg1, void *arg2)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -2317,7 +2317,7 @@ out:
 
 static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                int query, long *pres1, void **pres2)
+                                int query, int *pres1, void **pres2)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
 
@@ -2327,7 +2327,8 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     DEBUGASSERT(pres1);
     rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
     if(rp)
-      *pres1 = rp->initial_max_streams_bidi;
+      *pres1 = (rp->initial_max_streams_bidi > INT_MAX)?
+                 INT_MAX : (int)rp->initial_max_streams_bidi;
     else  /* not arrived yet? */
       *pres1 = Curl_multi_max_concurrent_streams(data->multi);
     return CURLE_OK;

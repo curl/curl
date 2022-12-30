@@ -148,7 +148,7 @@ CURLcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
 
 CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
-                           int query, long *pres1, void **pres2)
+                           int query, int *pres1, void **pres2)
 {
   return cf->next?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
@@ -504,7 +504,7 @@ void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
 
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                int event, long arg1, void *arg2)
+                                int event, int arg1, void *arg2)
 {
   (void)cf;
   (void)data;
@@ -517,7 +517,7 @@ CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
 CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             bool ignore_result,
-                            int event, long arg1, void *arg2)
+                            int event, int arg1, void *arg2)
 {
   CURLcode result = CURLE_OK;
 
@@ -534,7 +534,7 @@ CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
 static CURLcode cf_cntrl_all(struct connectdata *conn,
                              struct Curl_easy *data,
                              bool ignore_result,
-                             int event, long arg1, void *arg2)
+                             int event, int arg1, void *arg2)
 {
   CURLcode result = CURLE_OK;
   size_t i;
@@ -621,7 +621,7 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                      int sockindex)
 {
   CURLcode result;
-  long n = 0;
+  int n = 0;
 
   struct Curl_cfilter *cf = conn->cfilter[sockindex];
   result = cf? cf->cft->query(cf, data, CF_QUERY_MAX_CONCURRENT,

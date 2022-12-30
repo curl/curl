@@ -1055,8 +1055,8 @@ typedef enum {
   CF_SETUP_CNNCT_EYEBALLS,
   CF_SETUP_CNNCT_SOCKS,
   CF_SETUP_CNNCT_HTTP_PROXY,
-  CF_SETUP_CNNCT_SSL,
   CF_SETUP_CNNCT_HAPROXY,
+  CF_SETUP_CNNCT_SSL,
   CF_SETUP_DONE
 } cf_setup_state;
 
@@ -1130,6 +1130,24 @@ connect_sub_chain:
   }
 #endif /* !CURL_DISABLE_PROXY */
 
+  if(ctx->state < CF_SETUP_CNNCT_HAPROXY) {
+#if !defined(CURL_DISABLE_PROXY)
+    if(data->set.haproxyprotocol) {
+      if(Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
+        failf(data, "haproxy protocol not support with SSL "
+              "encryption in place (QUIC?)");
+        return CURLE_UNSUPPORTED_PROTOCOL;
+      }
+      result = Curl_cf_haproxy_insert_after(cf, data);
+      if(result)
+        return result;
+    }
+#endif /* !CURL_DISABLE_PROXY */
+    ctx->state = CF_SETUP_CNNCT_HAPROXY;
+    if(!cf->next || !cf->next->connected)
+      goto connect_sub_chain;
+  }
+
   if(ctx->state < CF_SETUP_CNNCT_SSL) {
 #ifdef USE_SSL
     if((ctx->ssl_mode == CURL_CF_SSL_ENABLE
@@ -1142,19 +1160,6 @@ connect_sub_chain:
     }
 #endif /* USE_SSL */
     ctx->state = CF_SETUP_CNNCT_SSL;
-    if(!cf->next || !cf->next->connected)
-      goto connect_sub_chain;
-  }
-
-  if(ctx->state < CF_SETUP_CNNCT_HAPROXY) {
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
-    if(data->set.haproxyprotocol) {
-      result = Curl_cf_haproxy_insert_after(cf, data);
-      if(result)
-        return result;
-    }
-#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
-    ctx->state = CF_SETUP_CNNCT_HAPROXY;
     if(!cf->next || !cf->next->connected)
       goto connect_sub_chain;
   }

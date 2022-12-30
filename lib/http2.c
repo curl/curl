@@ -2152,7 +2152,7 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
 
 static CURLcode h2_cf_cntrl(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
-                            int event, long arg1, void *arg2)
+                            int event, int arg1, void *arg2)
 {
   CURLcode result = CURLE_OK;
 
@@ -2204,14 +2204,15 @@ static CURLcode h2_cf_keep_alive(struct Curl_cfilter *cf,
 
 static CURLcode h2_cf_query(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
-                            int query, long *pres1, void **pres2)
+                            int query, int *pres1, void **pres2)
 {
   struct h2_cf_ctx *ctx = cf->ctx;
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT:
     DEBUGASSERT(pres1);
-    *pres1 = ctx->max_concurrent_streams;
+    *pres1 = (ctx->max_concurrent_streams > INT_MAX)?
+               INT_MAX : (int)ctx->max_concurrent_streams;
     return CURLE_OK;
   default:
     break;

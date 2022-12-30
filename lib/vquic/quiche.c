@@ -146,7 +146,6 @@ struct cf_quiche_ctx {
   quiche_h3_conn *h3c;
   quiche_h3_config *h3config;
   uint8_t scid[QUICHE_MAX_CONN_ID_LEN];
-  uint32_t version;
   SSL_CTX *sslctx;
   SSL *ssl;
   struct h3_event_node *pending;
@@ -227,7 +226,11 @@ static CURLcode h3_add_event(struct Curl_cfilter *cf,
     pnext = &((*pnext)->next);
   }
   *pnext = node;
-  mdata->state.drain = 1;
+  if(!mdata->state.drain) {
+    /* tell the multi handle that this data needs processing */
+    mdata->state.drain = 1;
+    Curl_expire(mdata, 0, EXPIRE_RUN_NOW);
+  }
   return CURLE_OK;
 }
 
@@ -721,7 +724,7 @@ static bool cf_quiche_data_pending(struct Curl_cfilter *cf,
 
 static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
-                                     int event, long arg1, void *arg2)
+                                     int event, int arg1, void *arg2)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -1049,7 +1052,7 @@ static void cf_quiche_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                int query, long *pres1, void **pres2)
+                                int query, int *pres1, void **pres2)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
 
@@ -1061,8 +1064,8 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
     }
     else {
       uint64_t bidi_left = quiche_conn_peer_streams_left_bidi(ctx->qconn);
-      if(bidi_left >= (LONG_MAX - in_use))
-        *pres1 = LONG_MAX;
+      if(bidi_left >= (INT_MAX - in_use))
+        *pres1 = INT_MAX;
       else
         *pres1 = (long)(bidi_left + in_use);
     }

@@ -1577,7 +1577,7 @@ static int ssl_cf_get_select_socks(struct Curl_cfilter *cf,
 
 static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
-                             int event, long arg1, void *arg2)
+                             int event, int arg1, void *arg2)
 {
   (void)arg1;
   (void)arg2;

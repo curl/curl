@@ -1188,7 +1188,7 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                int event, long arg1, void *arg2)
+                                int event, int arg1, void *arg2)
 {
   (void)arg1;
   (void)arg2;

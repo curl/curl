@@ -286,10 +286,6 @@ struct HTTP {
 #endif /* USE_MSH3 */
 };
 
-struct http_conn {
-  int unused; /* prevent a compiler warning */
-};
-
 CURLcode Curl_http_size(struct Curl_easy *data);
 
 CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,

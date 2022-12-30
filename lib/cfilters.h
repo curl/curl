@@ -116,7 +116,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
  */
 typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                int event, long arg1, void *arg2);
+                                int event, int arg1, void *arg2);
 
 
 /**
@@ -134,7 +134,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  */
 typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                int query, long *pres1, void **pres2);
+                                int query, int *pres1, void **pres2);
 
 /**
  * Type flags for connection filters. A filter can have none, one or
@@ -202,14 +202,14 @@ ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                           char *buf, size_t len, CURLcode *err);
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                int event, long arg1, void *arg2);
+                                int event, int arg1, void *arg2);
 bool     Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
                                    struct Curl_easy *data);
 CURLcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
                                      struct Curl_easy *data);
 CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
-                           int query, long *pres1, void **pres2);
+                           int query, int *pres1, void **pres2);
 
 /**
  * Create a new filter instance, unattached to the filter chain.
@@ -274,7 +274,7 @@ ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             bool ignore_result,
-                            int event, long arg1, void *arg2);
+                            int event, int arg1, void *arg2);
 
 
 

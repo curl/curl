@@ -1024,9 +1024,6 @@ struct connectdata {
 #ifndef CURL_DISABLE_FTP
     struct ftp_conn ftpc;
 #endif
-#ifndef CURL_DISABLE_HTTP
-    struct http_conn httpc;
-#endif
 #ifdef USE_SSH
     struct ssh_conn sshc;
 #endif

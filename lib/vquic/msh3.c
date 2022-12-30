@@ -405,7 +405,7 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
 
 static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
-                                   int event, long arg1, void *arg2)
+                                   int event, int arg1, void *arg2)
 {
   struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
