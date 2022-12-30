@@ -1236,7 +1236,7 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
 typedef enum {
     HAPROXY_INIT,     /* init/default/no tunnel state */
     HAPROXY_SEND,     /* data_out being sent */
-    HAPROXY_DONE,     /* all work done */
+    HAPROXY_DONE      /* all work done */
 } haproxy_state;
 
 struct cf_haproxy_ctx {
