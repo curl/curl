@@ -704,23 +704,28 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     int cur = 0;
     gnutls_datum_t protocols[2];
 
-#ifdef USE_HTTP2
-    if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-       && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
-#endif
-       ) {
-      protocols[cur].data = (unsigned char *)ALPN_H2;
-      protocols[cur].size = ALPN_H2_LENGTH;
-      cur++;
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
+    if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
+      protocols[cur].data = (unsigned char *)ALPN_HTTP_1_0;
+      protocols[cur++].size = ALPN_HTTP_1_0_LENGTH;
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_0);
     }
+    else {
+#ifdef USE_HTTP2
+      if(data->state.httpwant >= CURL_HTTP_VERSION_2
+#ifndef CURL_DISABLE_PROXY
+         && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
+#endif
+        ) {
+        protocols[cur].data = (unsigned char *)ALPN_H2;
+        protocols[cur++].size = ALPN_H2_LENGTH;
+        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
+      }
 #endif
 
-    protocols[cur].data = (unsigned char *)ALPN_HTTP_1_1;
-    protocols[cur].size = ALPN_HTTP_1_1_LENGTH;
-    cur++;
-    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
+      protocols[cur].data = (unsigned char *)ALPN_HTTP_1_1;
+      protocols[cur++].size = ALPN_HTTP_1_1_LENGTH;
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
+    }
 
     if(gnutls_alpn_set_protocols(backend->gtls.session, protocols, cur, 0)) {
       failf(data, "failed setting ALPN");

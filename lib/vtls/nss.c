@@ -896,6 +896,10 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
        !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
       cf->conn->alpn = CURL_HTTP_VERSION_1_1;
     }
+    else if(buflen == ALPN_HTTP_1_0_LENGTH &&
+            !memcmp(ALPN_HTTP_1_0, buf, ALPN_HTTP_1_0_LENGTH)) {
+      cf->conn->alpn = CURL_HTTP_VERSION_1_0;
+    }
 
     /* This callback might get called when PR_Recv() is used within
      * close_one() during a connection shutdown. At that point there might not
@@ -2167,20 +2171,27 @@ static CURLcode nss_setup_connect(struct Curl_cfilter *cf,
     int cur = 0;
     unsigned char protocols[128];
 
-#ifdef USE_HTTP2
-    if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-       && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
-#endif
-      ) {
-      protocols[cur++] = ALPN_H2_LENGTH;
-      memcpy(&protocols[cur], ALPN_H2, ALPN_H2_LENGTH);
-      cur += ALPN_H2_LENGTH;
+    if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
+      protocols[cur++] = ALPN_HTTP_1_0_LENGTH;
+      memcpy(&protocols[cur], ALPN_HTTP_1_0, ALPN_HTTP_1_0_LENGTH);
+      cur += ALPN_HTTP_1_0_LENGTH;
     }
+    else {
+#ifdef USE_HTTP2
+      if(data->state.httpwant >= CURL_HTTP_VERSION_2
+#ifndef CURL_DISABLE_PROXY
+         && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
 #endif
-    protocols[cur++] = ALPN_HTTP_1_1_LENGTH;
-    memcpy(&protocols[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
-    cur += ALPN_HTTP_1_1_LENGTH;
+        ) {
+        protocols[cur++] = ALPN_H2_LENGTH;
+        memcpy(&protocols[cur], ALPN_H2, ALPN_H2_LENGTH);
+        cur += ALPN_H2_LENGTH;
+      }
+#endif
+      protocols[cur++] = ALPN_HTTP_1_1_LENGTH;
+      memcpy(&protocols[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
+      cur += ALPN_HTTP_1_1_LENGTH;
+    }
 
     if(SSL_SetNextProtoNego(backend->handle, protocols, cur) != SECSuccess)
       goto error;

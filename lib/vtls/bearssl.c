@@ -698,19 +698,25 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
      * protocols array in `struct ssl_backend_data`.
      */
 
-#ifdef USE_HTTP2
-    if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-      && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
-#endif
-      ) {
-      backend->protocols[cur++] = ALPN_H2;
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
+    if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
+      backend->protocols[cur++] = ALPN_HTTP_1_0;
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_0);
     }
+    else {
+#ifdef USE_HTTP2
+      if(data->state.httpwant >= CURL_HTTP_VERSION_2
+#ifndef CURL_DISABLE_PROXY
+         && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
+#endif
+        ) {
+        backend->protocols[cur++] = ALPN_H2;
+        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
+      }
 #endif
 
-    backend->protocols[cur++] = ALPN_HTTP_1_1;
-    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
+      backend->protocols[cur++] = ALPN_HTTP_1_1;
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
+    }
 
     br_ssl_engine_set_protocol_names(&backend->ctx.eng,
                                      backend->protocols, cur);
