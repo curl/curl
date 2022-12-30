@@ -2843,52 +2843,33 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_TLSAUTH_USERNAME:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME],
                             va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME] &&
-       !data->set.ssl.primary.authtype)
-      data->set.ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_USERNAME:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_PROXY],
                             va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
-       !data->set.proxy_ssl.primary.authtype)
-      data->set.proxy_ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default to
-                                                                  SRP */
     break;
 #endif
   case CURLOPT_TLSAUTH_PASSWORD:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD],
                             va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME] &&
-       !data->set.ssl.primary.authtype)
-      data->set.ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default */
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_PASSWORD:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY],
                             va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
-       !data->set.proxy_ssl.primary.authtype)
-      data->set.proxy_ssl.primary.authtype = CURL_TLSAUTH_SRP; /* default */
     break;
 #endif
   case CURLOPT_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
-    if(!argptr ||
-       strncasecompare(argptr, "SRP", strlen("SRP")))
-      data->set.ssl.primary.authtype = CURL_TLSAUTH_SRP;
-    else
-      data->set.ssl.primary.authtype = CURL_TLSAUTH_NONE;
+    if(argptr && !strncasecompare(argptr, "SRP", strlen("SRP")))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
-    if(!argptr ||
-       strncasecompare(argptr, "SRP", strlen("SRP")))
-      data->set.proxy_ssl.primary.authtype = CURL_TLSAUTH_SRP;
-    else
-      data->set.proxy_ssl.primary.authtype = CURL_TLSAUTH_NONE;
+    if(argptr || !strncasecompare(argptr, "SRP", strlen("SRP")))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 #endif
 #endif

@@ -283,7 +283,6 @@ struct ssl_primary_config {
 #ifdef USE_TLS_SRP
   char *username; /* TLS username (for, e.g., SRP) */
   char *password; /* TLS password (for, e.g., SRP) */
-  enum CURL_TLSAUTH authtype; /* TLS authentication type (default SRP) */
 #endif
   char *curves;          /* list of curves to use */
   unsigned char ssl_options;  /* the CURLOPT_SSL_OPTIONS bitmask */

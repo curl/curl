@@ -150,7 +150,6 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
 #ifdef USE_TLS_SRP
      !Curl_timestrcmp(data->username, needle->username) &&
      !Curl_timestrcmp(data->password, needle->password) &&
-     (data->authtype == needle->authtype) &&
 #endif
      strcasecompare(data->cipher_list, needle->cipher_list) &&
      strcasecompare(data->cipher_list13, needle->cipher_list13) &&
@@ -173,9 +172,6 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   dest->verifystatus = source->verifystatus;
   dest->sessionid = source->sessionid;
   dest->ssl_options = source->ssl_options;
-#ifdef USE_TLS_SRP
-  dest->authtype = source->authtype;
-#endif
 
   CLONE_BLOB(cert_blob);
   CLONE_BLOB(ca_info_blob);
