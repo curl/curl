@@ -1399,7 +1399,7 @@ static const struct Curl_cftype cft_haproxy = {
 static CURLcode cf_haproxy_create(struct Curl_cfilter **pcf,
                                   struct Curl_easy *data)
 {
-  struct Curl_cfilter *cf;
+  struct Curl_cfilter *cf = NULL;
   struct cf_haproxy_ctx *ctx;
   CURLcode result;
 
