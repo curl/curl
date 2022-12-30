@@ -62,6 +62,7 @@
 #include "cookie.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
+#include "vquic/vquic.h"
 #include "http_digest.h"
 #include "http_ntlm.h"
 #include "curl_ntlm_wb.h"
@@ -241,10 +242,7 @@ static CURLcode h3_setup_conn(struct Curl_easy *data,
   }
 #endif
 
-  DEBUGF(infof(data, "HTTP/3 direct conn setup(conn #%ld, index=%d)",
-         conn->connection_id, FIRSTSOCKET));
-  return Curl_conn_socket_set(data, conn, FIRSTSOCKET);
-
+  return CURLE_OK;
 #else /* ENABLE_QUIC */
   (void)conn;
   (void)data;
@@ -274,12 +272,6 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
 
   if(conn->transport == TRNSPRT_QUIC) {
     return h3_setup_conn(data, conn);
-  }
-  else {
-    if(!CONN_INUSE(conn))
-      /* if not already multi-using, setup connection details */
-      Curl_http2_setup_conn(conn);
-    Curl_http2_setup_req(data);
   }
   return CURLE_OK;
 }
@@ -1610,8 +1602,6 @@ CURLcode Curl_http_done(struct Curl_easy *data,
     return CURLE_OK;
 
   Curl_dyn_free(&http->send_buffer);
-  Curl_http2_done(data, premature);
-  Curl_quic_done(data, premature);
   Curl_mime_cleanpart(&http->form);
   Curl_dyn_reset(&data->state.headerb);
   Curl_hyper_done(data);
@@ -1664,17 +1654,10 @@ bool Curl_use_http_1_1plus(const struct Curl_easy *data,
 static const char *get_http_string(const struct Curl_easy *data,
                                    const struct connectdata *conn)
 {
-#ifdef ENABLE_QUIC
-  if((data->state.httpwant == CURL_HTTP_VERSION_3) ||
-     (conn->httpversion == 30))
+  if(Curl_conn_is_http3(data, conn, FIRSTSOCKET))
     return "3";
-#endif
-
-#ifdef USE_NGHTTP2
-  if(conn->proto.httpc.h2)
+  if(Curl_conn_is_http2(data, conn, FIRSTSOCKET))
     return "2";
-#endif
-
   if(Curl_use_http_1_1plus(data, conn))
     return "1.1";
 
@@ -2561,7 +2544,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 
       /* In HTTP2, we send request body in DATA frame regardless of
          its size. */
-      if(conn->httpversion != 20 &&
+      if(conn->httpversion < 20 &&
          !data->state.expect100header &&
          (http->postsize < MAX_INITIAL_POST_SIZE)) {
         /* if we don't use expect: 100  AND
@@ -3021,50 +3004,35 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
-  if(conn->transport != TRNSPRT_QUIC) {
-    if(conn->httpversion < 20) { /* unless the connection is re-used and
-                                    already http2 */
-      switch(conn->alpn) {
-      case CURL_HTTP_VERSION_2:
-        conn->httpversion = 20; /* we know we're on HTTP/2 now */
-
-        result = Curl_http2_switched(data, NULL, 0);
-        if(result)
-          return result;
-        break;
-      case CURL_HTTP_VERSION_1_1:
-        /* continue with HTTP/1.1 when explicitly requested */
-        break;
-      default:
-        /* Check if user wants to use HTTP/2 with clear TCP */
-#ifdef USE_NGHTTP2
-        if(data->state.httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
-#ifndef CURL_DISABLE_PROXY
-          if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
-            /* We don't support HTTP/2 proxies yet. Also it's debatable
-               whether or not this setting should apply to HTTP/2 proxies. */
-            infof(data, "Ignoring HTTP/2 prior knowledge due to proxy");
-            break;
-          }
-#endif
-          DEBUGF(infof(data, "HTTP/2 over clean TCP"));
-          conn->httpversion = 20;
-
-          result = Curl_http2_switched(data, NULL, 0);
-          if(result)
-            return result;
-        }
-#endif
-        break;
-      }
-    }
-    else {
-      /* prepare for an http2 request */
-      result = Curl_http2_setup(data, conn);
+  if(Curl_conn_is_http3(data, conn, FIRSTSOCKET)
+     || Curl_conn_is_http2(data, conn, FIRSTSOCKET)
+     || conn->httpversion == 20 /* like to get rid of this */) {
+    /* all fine, we are set */
+  }
+  else { /* undecided */
+    switch(conn->alpn) {
+    case CURL_HTTP_VERSION_2:
+      result = Curl_http2_switch(data, conn, FIRSTSOCKET, NULL, 0);
       if(result)
         return result;
+      break;
+
+    case CURL_HTTP_VERSION_1_1:
+      /* continue with HTTP/1.1 when explicitly requested */
+      break;
+
+    default:
+      /* Check if user wants to use HTTP/2 with clear TCP */
+      if(Curl_http2_may_switch(data, conn, FIRSTSOCKET)) {
+        DEBUGF(infof(data, "HTTP/2 over clean TCP"));
+        result = Curl_http2_switch(data, conn, FIRSTSOCKET, NULL, 0);
+        if(result)
+          return result;
+      }
+      break;
     }
   }
+
   http = data->req.p.http;
   DEBUGASSERT(http);
 
@@ -3224,7 +3192,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   if(!(conn->handler->flags&PROTOPT_SSL) &&
-     conn->httpversion != 20 &&
+     conn->httpversion < 20 &&
      (data->state.httpwant == CURL_HTTP_VERSION_2)) {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it isn't done
        over SSL */
@@ -3282,7 +3250,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     }
   }
 
-  if((conn->httpversion == 20) && data->req.upload_chunky)
+  if((conn->httpversion >= 20) && data->req.upload_chunky)
     /* upload_chunky was set above to set up the request in a chunky fashion,
        but is disabled here again to avoid that the chunked encoded version is
        actually used when sending the request body over h2 */
@@ -3669,7 +3637,8 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
 #endif
             )) {
     /* the ALPN of the current request */
-    enum alpnid id = (conn->httpversion == 20) ? ALPN_h2 : ALPN_h1;
+    enum alpnid id = (conn->httpversion == 30)? ALPN_h3 :
+                       (conn->httpversion == 20) ? ALPN_h2 : ALPN_h1;
     result = Curl_altsvc_parse(data, data->asi,
                                headp + strlen("Alt-Svc:"),
                                id, conn->host.name,
@@ -3963,7 +3932,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
             /* switch to http2 now. The bytes after response headers
                are also processed here, otherwise they are lost. */
-            result = Curl_http2_switched(data, k->str, *nread);
+            result = Curl_http2_switch(data, conn, FIRSTSOCKET,
+                                       k->str, *nread);
             if(result)
               return result;
             *nread = 0;
@@ -4191,11 +4161,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            stream.  In order to do this, we keep reading until we
            close the stream. */
         if(0 == k->maxdownload
-#if defined(USE_NGHTTP2)
-           && !((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-                conn->httpversion == 20)
-#endif
-           )
+           && !Curl_conn_is_http2(data, conn, FIRSTSOCKET)
+           && !Curl_conn_is_http3(data, conn, FIRSTSOCKET))
           *stop_reading = TRUE;
 
         if(*stop_reading) {

@@ -38,6 +38,7 @@
 #include "strcase.h"
 #include "select.h"
 #include "connect.h"
+#include "cfilters.h"
 #include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -134,36 +135,6 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
 
 
 /*
- * The server may send us RTP data at any point, and RTSPREQ_RECEIVE does not
- * want to block the application forever while receiving a stream. Therefore,
- * we cannot assume that an RTSP socket is dead just because it is readable.
- *
- * Instead, if it is readable, run Curl_connalive() to peek at the socket
- * and distinguish between closed and data.
- */
-static bool rtsp_connisdead(struct Curl_easy *data, struct connectdata *check)
-{
-  int sval;
-  bool ret_val = TRUE;
-
-  sval = SOCKET_READABLE(check->sock[FIRSTSOCKET], 0);
-  if(sval == 0) {
-    /* timeout */
-    ret_val = FALSE;
-  }
-  else if(sval & CURL_CSELECT_ERR) {
-    /* socket is in an error state */
-    ret_val = TRUE;
-  }
-  else if(sval & CURL_CSELECT_IN) {
-    /* readable with no error. could still be closed */
-    ret_val = !Curl_connalive(data, check);
-  }
-
-  return ret_val;
-}
-
-/*
  * Function to check on various aspects of a connection.
  */
 static unsigned int rtsp_conncheck(struct Curl_easy *data,
@@ -174,7 +145,7 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
   (void)data;
 
   if(checks_to_perform & CONNCHECK_ISDEAD) {
-    if(rtsp_connisdead(data, conn))
+    if(!Curl_conn_is_alive(data, conn))
       ret_val |= CONNRESULT_DEAD;
   }
 

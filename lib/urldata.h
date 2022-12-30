@@ -123,9 +123,9 @@ typedef unsigned int curl_prot_t;
 #define DMSGI(d,i,msg)  \
   "[CONN-%ld-%d] "msg, (d)->conn->connection_id, (i)
 #define CMSG(c,msg)  \
-  "[CONN-%ld] "msg, (conn)->connection_id
+  "[CONN-%ld] "msg, (c)->connection_id
 #define CMSGI(c,i,msg)  \
-  "[CONN-%ld-%d] "msg, (conn)->connection_id, (i)
+  "[CONN-%ld-%d] "msg, (c)->connection_id, (i)
 #define CFMSG(cf,msg)  \
   "[CONN-%ld-%d][CF-%s] "msg, (cf)->conn->connection_id, \
   (cf)->sockindex, (cf)->cft->name
@@ -187,7 +187,6 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #include "mqtt.h"
 #include "wildcard.h"
 #include "multihandle.h"
-#include "quic.h"
 #include "c-hyper.h"
 
 #ifdef HAVE_GSSAPI
@@ -830,7 +829,7 @@ struct Curl_handler {
 #define PROTOPT_CREDSPERREQUEST (1<<7) /* requires login credentials per
                                           request instead of per connection */
 #define PROTOPT_ALPN (1<<8) /* set ALPN for this */
-#define PROTOPT_STREAM (1<<9) /* a protocol with individual logical streams */
+/* (1<<9) was PROTOPT_STREAM, now free */
 #define PROTOPT_URLOPTIONS (1<<10) /* allow options part in the userinfo field
                                       of the URL */
 #define PROTOPT_PROXY_AS_HTTP (1<<11) /* allow this non-HTTP scheme over a
@@ -912,13 +911,7 @@ struct connectdata {
   /* 'ip_addr' is the particular IP we connected to. It points to a struct
      within the DNS cache, so this pointer is only valid as long as the DNS
      cache entry remains locked. It gets unlocked in multi_done() */
-  struct Curl_addrinfo *ip_addr;
-  struct Curl_addrinfo *tempaddr[2]; /* for happy eyeballs */
-
-#ifdef ENABLE_QUIC
-  struct quicsocket hequic[2]; /* two, for happy eyeballs! */
-  struct quicsocket *quic;
-#endif
+  const struct Curl_addrinfo *ip_addr;
 
   struct hostname host;
   char *hostname_resolve; /* host name to resolve to address, allocated */
@@ -947,8 +940,6 @@ struct connectdata {
   struct curltime lastused; /* when returned to the connection cache */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
-  curl_socket_t tempsock[2]; /* temporary sockets for happy eyeballs */
-  int tempfamily[2]; /* family used for the temp sockets */
   Curl_recv *recv[2];
   Curl_send *send[2];
   struct Curl_cfilter *cfilter[2]; /* connection filters */
@@ -961,16 +952,6 @@ struct connectdata {
   struct ssl_primary_config proxy_ssl_config;
 #endif
   struct ConnectBits bits;    /* various state-flags for this connection */
-
- /* connecttime: when connect() is called on the current IP address. Used to
-    be able to track when to move on to try next IP - but only when the multi
-    interface is used. */
-  struct curltime connecttime;
-
-  /* The field below gets set in Curl_connecthost */
-  /* how long time in milliseconds to spend on trying to connect to each IP
-     address, per family */
-  timediff_t timeoutms_per_addr[2];
 
   const struct Curl_handler *handler; /* Connection's protocol handler */
   const struct Curl_handler *given;   /* The protocol first given */
@@ -1094,7 +1075,7 @@ struct connectdata {
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
 #endif
-  /* The field below gets set in Curl_connecthost */
+  /* The field below gets set in connect.c:connecthost() */
   int num_addr; /* number of addresses to try to connect to */
   int port;        /* which port to use locally - to connect to */
   int remote_port; /* the remote port, not the proxy port! */
@@ -1240,9 +1221,28 @@ struct auth {
                    should be RFC compliant */
 };
 
-struct Curl_http2_dep {
-  struct Curl_http2_dep *next;
+#ifdef USE_NGHTTP2
+struct Curl_data_prio_node {
+  struct Curl_data_prio_node *next;
   struct Curl_easy *data;
+};
+#endif
+
+/**
+ * Priority information for an easy handle in relation to others
+ * on the same connection.
+ * TODO: we need to adapt it to the new priority scheme as defined in RFC 9218
+ */
+struct Curl_data_priority {
+#ifdef USE_NGHTTP2
+  /* tree like dependencies only implemented in nghttp2 */
+  struct Curl_easy *parent;
+  struct Curl_data_prio_node *children;
+#endif
+  int weight;
+#ifdef USE_NGHTTP2
+  BIT(exclusive);
+#endif
 };
 
 /*
@@ -1391,14 +1391,11 @@ struct UrlState {
   size_t drain; /* Increased when this stream has data to read, even if its
                    socket is not necessarily is readable. Decreased when
                    checked. */
+  struct Curl_data_priority priority; /* shallow coyp of data->set */
 #endif
 
   curl_read_callback fread_func; /* read callback/function */
   void *in;                      /* CURLOPT_READDATA */
-#ifdef USE_HTTP2
-  struct Curl_easy *stream_depends_on;
-  int stream_weight;
-#endif
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
   unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
@@ -1469,7 +1466,6 @@ struct UrlState {
   BIT(done); /* set to FALSE when Curl_init_do() is called and set to TRUE
                 when multi_done() is called, to prevent multi_done() to get
                 invoked twice when the multi interface is used. */
-  BIT(stream_depends_e); /* set or don't set the Exclusive bit */
   BIT(previouslypending); /* this transfer WAS in the multi->pending queue */
   BIT(cookie_engine);
   BIT(prefer_ascii);   /* ASCII rather than binary */
@@ -1789,10 +1785,8 @@ struct UserDefined {
   size_t maxconnects;    /* Max idle connections in the connection cache */
 
   long expect_100_timeout; /* in milliseconds */
-#ifdef USE_HTTP2
-  struct Curl_easy *stream_depends_on;
-  int stream_weight;
-  struct Curl_http2_dep *stream_dependents;
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+  struct Curl_data_priority priority;
 #endif
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
@@ -1884,7 +1878,6 @@ struct UserDefined {
   BIT(suppress_connect_headers); /* suppress proxy CONNECT response headers
                                     from user callbacks */
   BIT(dns_shuffle_addresses); /* whether to shuffle addresses before use */
-  BIT(stream_depends_e); /* set or don't set the Exclusive bit */
   BIT(haproxyprotocol); /* whether to send HAProxy PROXY protocol v1
                            header */
   BIT(abstract_unix_socket);
