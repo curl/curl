@@ -376,8 +376,9 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
       rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 2);
     }
+    else
 #endif
-    else {
+    {
       infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
       rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 1);
     }
