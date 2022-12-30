@@ -434,12 +434,10 @@ CURLcode gtls_client_init(struct Curl_easy *data,
   }
 
 #ifdef USE_GNUTLS_SRP
-  if((config->authtype == CURL_TLSAUTH_SRP) &&
-     Curl_auth_allowed_to_host(data)) {
+  if(config->username && Curl_auth_allowed_to_host(data)) {
     infof(data, "Using TLS-SRP username: %s", config->username);
 
-    rc = gnutls_srp_allocate_client_credentials(
-           &gtls->srp_client_cred);
+    rc = gnutls_srp_allocate_client_credentials(&gtls->srp_client_cred);
     if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_srp_allocate_client_cred() failed: %s",
             gnutls_strerror(rc));
@@ -581,7 +579,7 @@ CURLcode gtls_client_init(struct Curl_easy *data,
 #ifdef USE_GNUTLS_SRP
   /* Only add SRP to the cipher list if SRP is requested. Otherwise
    * GnuTLS will disable TLS 1.3 support. */
-  if(config->authtype == CURL_TLSAUTH_SRP) {
+  if(config->username) {
     size_t len = strlen(prioritylist);
 
     char *prioritysrp = malloc(len + sizeof(GNUTLS_SRP) + 1);
@@ -646,7 +644,7 @@ CURLcode gtls_client_init(struct Curl_easy *data,
 
 #ifdef USE_GNUTLS_SRP
   /* put the credentials to the current session */
-  if(config->authtype == CURL_TLSAUTH_SRP) {
+  if(config->username) {
     rc = gnutls_credentials_set(gtls->session, GNUTLS_CRD_SRP,
                                 gtls->srp_client_cred);
     if(rc != GNUTLS_E_SUCCESS) {
@@ -860,10 +858,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
        config->verifyhost ||
        config->issuercert) {
 #ifdef USE_GNUTLS_SRP
-      if(ssl_config->primary.authtype == CURL_TLSAUTH_SRP
-         && ssl_config->primary.username
-         && !config->verifypeer
-         && gnutls_cipher_get(session)) {
+      if(ssl_config->primary.username && !config->verifypeer &&
+         gnutls_cipher_get(session)) {
         /* no peer cert, but auth is ok if we have SRP user and cipher and no
            peer verify */
       }
@@ -1556,8 +1552,7 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
   gnutls_certificate_free_credentials(backend->gtls.cred);
 
 #ifdef USE_GNUTLS_SRP
-  if(ssl_config->primary.authtype == CURL_TLSAUTH_SRP
-     && ssl_config->primary.username != NULL)
+  if(ssl_config->primary.username)
     gnutls_srp_free_client_credentials(backend->gtls.srp_client_cred);
 #endif
 
