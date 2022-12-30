@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         249
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2777
+ Contributors:                 2781
 
 This release includes the following changes:
 
@@ -18,25 +18,35 @@ This release includes the following bugfixes:
  o cmake: bump requirement to 3.7 [23]
  o cmake: fix the snprintf detection [5]
  o docs: mention indirect effects of --insecure [19]
+ o ftpserver: lower the normal DATA connect timeout to speed up torture tests [27]
+ o haxproxy: send before TLS handhshake [34]
  o hsts: handle adding the same host name again
+ o HTTP3: mention what needs to be in place to remove EXPERIMENTAL label [31]
  o http: remove the trace message "Mark bundle... multiuse" [6]
  o libssh2: try sha2 algos for hostkey methods [2]
  o Makefile.mk: fix wolfssl and mbedtls default paths [21]
  o md4: fix build with GnuTLS + OpenSSL v1 [12]
  o misc: fix grammar and spelling [14]
+ o msh3: add support for request payload [28]
  o msh3: update to v0.5 Release [17]
+ o multihandle: turn bool struct fields into bits [26]
+ o openssl: remove attached easy handles from SSL instances [29]
  o runtests: also tear down http2/http3 servers when https server is stopped [8]
+ o runtests: make 'mbedtls' a testable feature
  o SECURITY-PROCESS.md: document severity levels [20]
+ o socketpair: allow localhost MITM sniffers [30]
  o strdup: name it Curl_strdup [16]
  o tests: add 3 new HTTP/2 test cases, plus https: support for nghttpx [9]
  o tests: avoid use of sha1 in certificates [4]
  o tool_operate: fix `CURLOPT_SOCKS5_GSSAPI_NEC` type [1]
+ o transfer: break the read loop when RECV is cleared [22]
  o typecheck: accept expressions for option/info parameters [3]
  o urldata: make 'ftp_create_missing_dirs' depend on FTP || SFTP [13]
  o urldata: make set.http200aliases conditional on HTTP being present [11]
  o urldata: move the cookefilelist to the 'set' struct [15]
  o urldata: remove unused struct fields, made more conditional [10]
  o workflows/linux.yml: merge 3 common packages [18]
+ o writeout: add %{certs} and %{num_certs} [33]
 
 This release includes the following known bugs:
 
@@ -53,11 +63,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andy Alt, Daniel Stenberg, Esdras de Morais da Silva, Hannah Schierling,
-  Harry Sintonen, John Bampton, Marcel Raad, Martin Waleczek, Nick Banks,
-  nick-telia on github, norbertmm on github, Patrick Monnerat, Paul Howarth,
-  Radu Hociung, Ryan Schmidt, Stefan Eissing, Thomas Klausner, Viktor Szakats,
+  Harry Sintonen, Hide Ishikawa, John Bampton, Marcel Raad, Martin Waleczek,
+  Nick Banks, nick-telia on github, norbertmm on github, Patrick Monnerat,
+  Paul Howarth, Radu Hociung, Ryan Schmidt, Sergio-IME on github,
+  SerusDev on github, Stefan Eissing, Thomas Klausner, Viktor Szakats,
   Yurii Rashkovskii
-  (19 contributors)
+  (22 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -82,6 +93,15 @@ References to bug reports and discussions on issues:
  [19] = https://curl.se/bug/?i=10126
  [20] = https://curl.se/bug/?i=10118
  [21] = https://curl.se/bug/?i=10164
+ [22] = https://curl.se/bug/?i=10172
  [23] = https://curl.se/bug/?i=10128
  [24] = https://curl.se/bug/?i=10157
  [25] = https://curl.se/bug/?i=10109
+ [26] = https://curl.se/bug/?i=10179
+ [27] = https://curl.se/bug/?i=10178
+ [28] = https://curl.se/bug/?i=10136
+ [29] = https://curl.se/bug/?i=10151
+ [30] = https://curl.se/bug/?i=10144
+ [31] = https://curl.se/bug/?i=10168
+ [33] = https://curl.se/bug/?i=10019
+ [34] = https://curl.se/bug/?i=10165
