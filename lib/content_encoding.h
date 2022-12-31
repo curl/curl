@@ -28,6 +28,7 @@
 struct contenc_writer {
   const struct content_encoding *handler;  /* Encoding handler. */
   struct contenc_writer *downstream;  /* Downstream writer. */
+  unsigned int order; /* Ordering within writer stack. */
 };
 
 /* Content encoding writer. */
@@ -46,7 +47,7 @@ struct content_encoding {
 
 
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
-                                     const char *enclist, int maybechunked);
+                                     const char *enclist, int is_transfer);
 CURLcode Curl_unencode_write(struct Curl_easy *data,
                              struct contenc_writer *writer,
                              const char *buf, size_t nbytes);
