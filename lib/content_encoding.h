@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2023, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 struct contenc_writer {
   const struct content_encoding *handler;  /* Encoding handler. */
   struct contenc_writer *downstream;  /* Downstream writer. */
+  unsigned int order; /* Ordering within writer stack. */
 };
 
 /* Content encoding writer. */
@@ -46,7 +47,7 @@ struct content_encoding {
 
 
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
-                                     const char *enclist, int maybechunked);
+                                     const char *enclist, int is_transfer);
 CURLcode Curl_unencode_write(struct Curl_easy *data,
                              struct contenc_writer *writer,
                              const char *buf, size_t nbytes);
