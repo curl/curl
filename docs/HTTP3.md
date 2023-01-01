@@ -39,7 +39,7 @@ To fix before we remove the experimental label:
 
 Build (patched) OpenSSL
 
-     % git clone --depth 1 -b openssl-3.0.0+quic https://github.com/quictls/openssl
+     % git clone --depth 1 -b openssl-3.0.7+quic https://github.com/quictls/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere1>
      % make
