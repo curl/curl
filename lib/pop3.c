@@ -370,6 +370,7 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
   /* Start the SSL connection */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result;
+  bool ssldone = FALSE;
 
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
@@ -377,9 +378,10 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
       goto out;
   }
 
-  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &pop3c->ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
 
   if(!result) {
+    pop3c->ssldone = ssldone;
     if(pop3c->state != POP3_UPGRADETLS)
       state(data, POP3_UPGRADETLS);
 
@@ -1056,7 +1058,9 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone) {
-    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &pop3c->ssldone);
+    bool ssldone = FALSE;
+    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+    pop3c->ssldone = ssldone;
     if(result || !pop3c->ssldone)
       return result;
   }

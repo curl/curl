@@ -72,19 +72,19 @@ struct IMAP {
    struct */
 struct imap_conn {
   struct pingpong pp;
-  imapstate state;            /* Always use imap.c:state() to change state! */
-  bool ssldone;               /* Is connect() over SSL done? */
-  bool preauth;               /* Is this connection PREAUTH? */
   struct SASL sasl;           /* SASL-related parameters */
-  unsigned int preftype;      /* Preferred authentication type */
-  unsigned int cmdid;         /* Last used command ID */
-  char resptag[5];            /* Response tag to wait for */
-  bool tls_supported;         /* StartTLS capability supported by server */
-  bool login_disabled;        /* LOGIN command disabled by server */
-  bool ir_supported;          /* Initial response supported by server */
+  struct dynbuf dyn;          /* for the IMAP commands */
   char *mailbox;              /* The last selected mailbox */
   char *mailbox_uidvalidity;  /* UIDVALIDITY parsed from select response */
-  struct dynbuf dyn;          /* for the IMAP commands */
+  imapstate state;            /* Always use imap.c:state() to change state! */
+  char resptag[5];            /* Response tag to wait for */
+  unsigned char preftype;     /* Preferred authentication type */
+  unsigned char cmdid;        /* Last used command ID */
+  BIT(ssldone);               /* Is connect() over SSL done? */
+  BIT(preauth);               /* Is this connection PREAUTH? */
+  BIT(tls_supported);         /* StartTLS capability supported by server */
+  BIT(login_disabled);        /* LOGIN command disabled by server */
+  BIT(ir_supported);          /* Initial response supported by server */
 };
 
 extern const struct Curl_handler Curl_handler_imap;
@@ -96,6 +96,6 @@ extern const struct Curl_handler Curl_handler_imaps;
 
 /* Authentication type values */
 #define IMAP_TYPE_NONE      0
-#define IMAP_TYPE_ANY       ~0U
+#define IMAP_TYPE_ANY       (IMAP_TYPE_CLEARTEXT|IMAP_TYPE_SASL)
 
 #endif /* HEADER_CURL_IMAP_H */
