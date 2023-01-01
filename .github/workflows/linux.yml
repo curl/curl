@@ -135,7 +135,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'libressl') }}
       run: |
-        git clone --depth=1 -b v3.5.3 https://github.com/libressl-portable/portable.git libressl-git
+        git clone --depth=1 -b v3.6.1 https://github.com/libressl-portable/portable.git libressl-git
         cd libressl-git
         ./autogen.sh
         ./configure --prefix=$HOME/libressl
@@ -144,7 +144,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
       run: |
-        git clone --depth=1 -b v3.1.0 https://github.com/ARMmbed/mbedtls
+        git clone --depth=1 -b v3.3.0 https://github.com/ARMmbed/mbedtls
         cd mbedtls
         make DESTDIR=$HOME/mbed install
       name: 'install mbedtls'
@@ -159,7 +159,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'quictls') }}
       run: |
-        git clone --depth=1 -b OpenSSL_1_1_1j+quic https://github.com/quictls/openssl
+        git clone --depth=1 -b OpenSSL_1_1_1s+quic https://github.com/quictls/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/quictls
         make install_sw
