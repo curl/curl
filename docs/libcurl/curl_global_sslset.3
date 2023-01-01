@@ -46,7 +46,8 @@ typedef enum {
   CURLSSLBACKEND_AXTLS = 10, /* deprecated */
   CURLSSLBACKEND_MBEDTLS = 11,
   CURLSSLBACKEND_MESALINK = 12, /* deprecated */
-  CURLSSLBACKEND_BEARSSL = 13
+  CURLSSLBACKEND_BEARSSL = 13,
+  CURLSSLBACKEND_RUSTLS = 14
 } curl_sslbackend;
 
 CURLsslset curl_global_sslset(curl_sslbackend id,
@@ -90,9 +91,10 @@ thread in the program (i.e. a thread sharing the same memory) is running.
 This does not just mean no other thread that is using libcurl.
 .SH OpenSSL
 The name "OpenSSL" is used for all versions of OpenSSL and its associated
-forks/flavors in this function. OpenSSL, BoringSSL, libressl and quictls are
-all supported by libcurl, but in the eyes of \fIcurl_global_sslset(3)\fP they
-are all just "OpenSSL". They all mostly provide the same API.
+forks/flavors in this function. OpenSSL, BoringSSL, libressl, quictls and
+AmiSSL are all supported by libcurl, but in the eyes of
+\fIcurl_global_sslset(3)\fP they are all just "OpenSSL". They all mostly
+provide the same API.
 
 \fIcurl_version_info(3)\fP can return more specific info about the exact
 OpenSSL flavor and version number is use.
