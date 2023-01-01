@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2023, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -942,7 +942,7 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     rc = connect(ctx->sock, &ctx->r_addr.sa_addr, ctx->r_addr.addrlen);
 #elif defined(MSG_FASTOPEN) /* old Linux */
-    if(conn->given->flags & PROTOPT_SSL)
+    if(cf->conn->given->flags & PROTOPT_SSL)
       rc = connect(ctx->sock, &ctx->r_addr.sa_addr, ctx->r_addr.addrlen);
     else
       rc = 0; /* Do nothing */
