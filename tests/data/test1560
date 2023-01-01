@@ -12,6 +12,9 @@ URLAPI
 <server>
 none
 </server>
+<setenv>
+LANG=en_US.UTF-8
+</setenv>
 <features>
 file
 https
