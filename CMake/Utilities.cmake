@@ -23,15 +23,15 @@
 ###########################################################################
 # File containing various utilities
 
-# Returns number of arguments that evaluate to true
+# Return number of arguments that evaluate to true
 function(curl_count_true _output_count_var)
-  set(lst_len 0)
-  foreach(option_var IN LISTS ARGN)
-    if(${option_var})
-      math(EXPR lst_len "${lst_len} + 1")
+  set(_list_len 0)
+  foreach(_option_var IN LISTS ARGN)
+    if(${_option_var})
+      math(EXPR _list_len "${_list_len} + 1")
     endif()
   endforeach()
-  set(${_output_count_var} ${lst_len} PARENT_SCOPE)
+  set(${_output_count_var} ${_list_len} PARENT_SCOPE)
 endfunction()
 
 # Dump all defined variables with their values
