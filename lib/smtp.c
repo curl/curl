@@ -398,6 +398,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   CURLcode result;
+  bool ssldone = FALSE;
 
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
@@ -405,8 +406,9 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
       goto out;
   }
 
-  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &smtpc->ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   if(!result) {
+    smtpc->ssldone = ssldone;
     if(smtpc->state != SMTP_UPGRADETLS)
       state(data, SMTP_UPGRADETLS);
 
@@ -1288,7 +1290,9 @@ static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   if((conn->handler->flags & PROTOPT_SSL) && !smtpc->ssldone) {
-    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &smtpc->ssldone);
+    bool ssldone = FALSE;
+    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+    smtpc->ssldone = ssldone;
     if(result || !smtpc->ssldone)
       return result;
   }

@@ -125,9 +125,9 @@ struct SASL {
   unsigned short authmechs;  /* Accepted authentication mechanisms */
   unsigned short prefmech;   /* Preferred authentication mechanism */
   unsigned short authused;   /* Auth mechanism used for the connection */
-  bool resetprefs;           /* For URL auth option parsing. */
-  bool mutual_auth;          /* Mutual authentication enabled (GSSAPI only) */
-  bool force_ir;             /* Protocol always supports initial response */
+  BIT(resetprefs);           /* For URL auth option parsing. */
+  BIT(mutual_auth);          /* Mutual authentication enabled (GSSAPI only) */
+  BIT(force_ir);             /* Protocol always supports initial response */
 };
 
 /* This is used to test whether the line starts with the given mechanism */

@@ -463,8 +463,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
          version_max >= CURL_SSLVERSION_MAX_LAST)
         return CURLE_BAD_FUNCTION_ARGUMENT;
 
-      primary->version = version;
-      primary->version_max = version_max;
+      primary->version = (unsigned char)version;
+      primary->version_max = (unsigned int)version_max;
     }
 #else
     result = CURLE_NOT_BUILT_IN;

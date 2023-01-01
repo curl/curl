@@ -475,6 +475,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   /* Start the SSL connection */
   struct imap_conn *imapc = &conn->proto.imapc;
   CURLcode result;
+  bool ssldone = FALSE;
 
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
@@ -482,8 +483,9 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
       goto out;
   }
 
-  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &imapc->ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   if(!result) {
+    imapc->ssldone = ssldone;
     if(imapc->state != IMAP_UPGRADETLS)
       state(data, IMAP_UPGRADETLS);
 
@@ -1386,8 +1388,10 @@ static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done)
   struct imap_conn *imapc = &conn->proto.imapc;
 
   if((conn->handler->flags & PROTOPT_SSL) && !imapc->ssldone) {
-    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &imapc->ssldone);
-    if(result || !imapc->ssldone)
+    bool ssldone = FALSE;
+    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+    imapc->ssldone = ssldone;
+    if(result || !ssldone)
       return result;
   }
 
@@ -1774,7 +1778,7 @@ static CURLcode imap_sendf(struct Curl_easy *data, const char *fmt, ...)
   /* Calculate the tag based on the connection ID and command ID */
   msnprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
             'A' + curlx_sltosi(data->conn->connection_id % 26),
-            (++imapc->cmdid)%1000);
+            ++imapc->cmdid);
 
   /* start with a blank buffer */
   Curl_dyn_reset(&imapc->dyn);
