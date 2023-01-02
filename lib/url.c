@@ -2096,8 +2096,8 @@ static char *detect_proxy(struct Curl_easy *data,
    * http_proxy=http://some.server.dom:port/
    * https_proxy=http://some.server.dom:port/
    * ftp_proxy=http://some.server.dom:port/
-   * no_proxy=domain1.dom,host.domain2.dom
-   *   (a comma-separated list of hosts which should
+   * no_proxy='domain1.dom,host.domain2.dom sub.domain3.com'
+   *   (a comma- or space-separated list of hosts which should
    *   not be proxied, or an asterisk to override
    *   all proxy variables)
    * all_proxy=http://some.server.dom:port/

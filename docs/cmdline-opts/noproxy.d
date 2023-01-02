@@ -9,7 +9,7 @@ Example: --noproxy "www.example" $URL
 See-also: proxy
 Multi: single
 ---
-Comma-separated list of hosts for which not to use a proxy, if one is
+Comma- or space-separated list of hosts for which not to use a proxy, if one is
 specified. The only wildcard is a single * character, which matches all hosts,
 and effectively disables the proxy. Each name in this list is matched as
 either a domain which contains the hostname, or the hostname itself. For

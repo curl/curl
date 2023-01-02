@@ -819,8 +819,8 @@ with
 
     ALL_PROXY
 
-A comma-separated list of host names that should not go through any proxy is
-set in (only an asterisk, `*` matches all hosts)
+A comma- or space-separated list of host names that should not go through any
+proxy is set in (only an asterisk, `*` matches all hosts)
 
     NO_PROXY
 

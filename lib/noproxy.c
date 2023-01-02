@@ -128,8 +128,8 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
   if(!name || name[0] == '\0')
     return FALSE;
 
-  /* no_proxy=domain1.dom,host.domain2.dom
-   *   (a comma-separated list of hosts which should
+  /* no_proxy='domain1.dom,host.domain2.dom sub.domain3.com'
+   *   (a comma- or space-separated list of hosts which should
    *   not be proxied, or an asterisk to override
    *   all proxy variables)
    */
@@ -244,7 +244,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
         if(match)
           return TRUE;
       } /* if(tokenlen) */
-      while(*p == ',')
+      while(ISBLANK(*p) || *p == ',')
         p++;
     } /* while(*p) */
   } /* NO_PROXY was specified and it wasn't just an asterisk */
