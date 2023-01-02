@@ -79,7 +79,7 @@
 #include "memdebug.h"
 
 
-#define DEBUG_CF 0
+#define DEBUG_CF 1
 
 #if DEBUG_CF
 #define CF_DEBUGF(x) x
@@ -203,9 +203,9 @@ tcpkeepalive(struct Curl_easy *data,
   }
 }
 
-static void assign_sockaddr_ex(struct Curl_sockaddr_ex *dest,
-                               const struct Curl_addrinfo *ai,
-                               int transport)
+void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
+                           const struct Curl_addrinfo *ai,
+                           int transport)
 {
   /*
    * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -296,7 +296,7 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
     /* if the caller doesn't want info back, use a local temp copy */
     addr = &dummy;
 
-  assign_sockaddr_ex(addr, ai, transport);
+  Curl_sock_assign_addr(addr, ai, transport);
   return socket_open(data, addr, sockfd);
 }
 
@@ -786,6 +786,8 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
         CF_DEBUGF(infof(data, CFMSG(cf, "cf_socket_close(%d) no longer at "
                   "conn->sock[%d], discarding"), (int)ctx->sock));
       }
+      if(cf->sockindex == FIRSTSOCKET)
+        cf->conn->remote_addr = NULL;
     }
     else {
       /* this is our local socket, we did never publish it */
@@ -797,8 +799,6 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     ctx->active = FALSE;
   }
 
-  if(cf->sockindex == FIRSTSOCKET)
-    cf->conn->remote_addr = NULL;
   cf->connected = FALSE;
 }
 
@@ -1297,7 +1297,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->transport = TRNSPRT_TCP;
-  assign_sockaddr_ex(&ctx->addr, ai, ctx->transport);
+  Curl_sock_assign_addr(&ctx->addr, ai, ctx->transport);
   ctx->sock = CURL_SOCKET_BAD;
 
   result = Curl_cf_create(&cf, &cft_tcp, ctx);
@@ -1376,7 +1376,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->transport = TRNSPRT_UDP;
-  assign_sockaddr_ex(&ctx->addr, ai, ctx->transport);
+  Curl_sock_assign_addr(&ctx->addr, ai, ctx->transport);
   ctx->sock = CURL_SOCKET_BAD;
 
   result = Curl_cf_create(&cf, &cft_udp, ctx);
@@ -1426,7 +1426,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->transport = TRNSPRT_UNIX;
-  assign_sockaddr_ex(&ctx->addr, ai, ctx->transport);
+  Curl_sock_assign_addr(&ctx->addr, ai, ctx->transport);
   ctx->sock = CURL_SOCKET_BAD;
 
   result = Curl_cf_create(&cf, &cft_unix, ctx);
