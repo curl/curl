@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2023, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -393,8 +393,10 @@ static bool http2_connisdead(struct Curl_cfilter *cf, struct Curl_easy *data)
     CURLcode result;
     ssize_t nread = -1;
 
+    Curl_attach_connection(data, cf->conn);
     nread = Curl_conn_cf_recv(cf->next, data,
                               ctx->inbuf, H2_BUFSIZE, &result);
+    dead = FALSE;
     if(nread != -1) {
       H2BUGF(infof(data,
                    "%d bytes stray data read before trying h2 connection",
@@ -408,6 +410,7 @@ static bool http2_connisdead(struct Curl_cfilter *cf, struct Curl_easy *data)
     else
       /* the read failed so let's say this is dead anyway */
       dead = TRUE;
+    Curl_detach_connection(data);
   }
 
   return dead;
