@@ -75,7 +75,8 @@ BEGIN {
 }
 
 use strict;
-use warnings;
+# Promote all warnings to fatal
+use warnings FATAL => 'all';
 use Cwd;
 use Digest::MD5 qw(md5);
 use MIME::Base64;
