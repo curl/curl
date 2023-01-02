@@ -1,13 +1,11 @@
 $! File: setup_gnv_curl_build.com
 $!
-$! $Id$
-$!
 $! Set up build environment for building Curl under GNV on VMS.
 $!
 $! GNV needs some files moved into the other directories to help with
 $! the configure script and the build.
 $!
-$! Copyright 2013 - 2022, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -22,8 +20,6 @@ $! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
 $! SPDX-License-Identifier: ISC
-$!
-$! 30-May-2009  J. Malmberg
 $!
 $!=======================================================================
 $!
