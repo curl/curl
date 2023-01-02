@@ -48,7 +48,7 @@ We remove support for building curl with the gskit TLS library in August 2023.
 - no regular curl contributors use this backend
 - no CI builds use or verify this backend
 - gskit, or the curl adaption for it, lacks many modern TLS features making it
-  an inferrior solution
+  an inferior solution
 - build breakages in this code takes weeks or more to get detected
 - fixing gskit code is mostly done "flying blind"
 
