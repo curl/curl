@@ -1707,7 +1707,6 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   }
 #else
   ssize_t sent;
-  (void)qs;
   (void)gsolen;
 
   *psent = 0;
