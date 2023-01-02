@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2023, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1152,11 +1152,11 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
   if(stream->bodystarted) {
     /* This is a trailer */
-    H2BUGF(infof(data_s, "h2 trailer: %.*s: %.*s", namelen, name, valuelen,
-                 value));
+    H2BUGF(infof(data_s, "h2 trailer: %.*s: %.*s", (int)namelen, name,
+                 (int)valuelen, value));
     result = Curl_dyn_addf(&stream->trailer_recvbuf,
-                           "%.*s: %.*s\r\n", namelen, name,
-                           valuelen, value);
+                           "%.*s: %.*s\r\n", (int)namelen, name,
+                           (int)valuelen, value);
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
 
@@ -1214,8 +1214,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(get_transfer(ctx) != data_s)
     Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
 
-  H2BUGF(infof(data_s, "h2 header: %.*s: %.*s", namelen, name, valuelen,
-               value));
+  H2BUGF(infof(data_s, "h2 header: %.*s: %.*s", (int)namelen, name,
+               (int)valuelen, value));
 
   return 0; /* 0 is successful */
 }
