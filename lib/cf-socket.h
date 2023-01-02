@@ -99,6 +99,14 @@ void Curl_sndbufset(curl_socket_t sockfd);
 #endif
 
 /**
+ * Assign the address `ai` to the Curl_sockaddr_ex `dest` and
+ * set the transport used.
+ */
+void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
+                           const struct Curl_addrinfo *ai,
+                           int transport);
+
+/**
  * Creates a cfilter that opens a TCP socket to the given address
  * when calling its `connect` implementation.
  * The filter will not touch any connection/data flags and can be
