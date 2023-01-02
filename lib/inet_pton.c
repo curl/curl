@@ -1,6 +1,6 @@
 /* This is from the BIND 4.9.4 release, modified to compile by itself */
 
-/* Copyright (c) 2003 - 2022 by Internet Software Consortium.
+/* Copyright (c) Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

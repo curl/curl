@@ -5,8 +5,8 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2020-2022, Daniel Stenberg, <daniel@haxx.se>, et al.
-# Copyright (C) 2020-2022, Marc Hoersken, <info@marc-hoersken.de>
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Marc Hoersken, <info@marc-hoersken.de>
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms

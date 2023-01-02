@@ -1,11 +1,9 @@
 $! File: PCSI_PRODUCT_GNV_CURL.COM
 $!
-$! $Id$
-$!
 $! This command file packages up the product CURL into a sequential
 $! format kit
 $!
-$! Copyright 2013 - 2022, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -20,8 +18,6 @@ $! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
 $! SPDX-License-Identifier: ISC
-$!
-$! 16-Jun-2009  J.Malmberg
 $!
 $!=========================================================================
 $!

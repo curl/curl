@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2011 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -53,47 +53,47 @@ my %warnings_extended = (
     );
 
 my %warnings = (
-    'LONGLINE'         => "Line longer than $max_column",
-    'TABS'             => 'TAB characters not allowed',
-    'TRAILINGSPACE'    => 'Trailing whitespace on the line',
+    'ASSIGNWITHINCONDITION' => 'assignment within conditional expression',
+    'ASTERISKNOSPACE'  => 'pointer declared without space before asterisk',
+    'ASTERISKSPACE'    => 'pointer declared with space after asterisk',
+    'BADCOMMAND'       => 'bad !checksrc! instruction',
+    'BANNEDFUNC'       => 'a banned function was used',
+    'BRACEELSE'        => '} else on the same line',
+    'BRACEPOS'         => 'wrong position for an open brace',
+    'BRACEWHILE'       => 'A single space between open brace and while',
+    'COMMANOSPACE'     => 'comma without following space',
+    'COMMENTNOSPACEEND' => 'no space before */',
+    'COMMENTNOSPACESTART' => 'no space following /*',
+    'COPYRIGHT'        => 'file missing a copyright statement',
     'CPPCOMMENTS'      => '// comment detected',
-    'SPACEBEFOREPAREN' => 'space before an open parenthesis',
+    'DOBRACE'          => 'A single space between do and open brace',
+    'EMPTYLINEBRACE'   => 'Empty line before the open brace',
+    'EQUALSNOSPACE'    => 'equals sign without following space',
+    'EQUALSNULL'       => 'if/while comparison with == NULL',
+    'EXCLAMATIONSPACE' => 'Whitespace after exclamation mark in expression',
+    'FOPENMODE'        => 'fopen needs a macro for the mode string',
+    'INCLUDEDUP',      => 'same file is included again',
+    'INDENTATION'      => 'wrong start column for code',
+    'LONGLINE'         => "Line longer than $max_column",
+    'MULTISPACE'       => 'multiple spaces used when not suitable',
+    'NOSPACEEQUALS'    => 'equals sign without preceding space',
+    'NOTEQUALSZERO',   => 'if/while comparison with != 0',
+    'ONELINECONDITION' => 'conditional block on the same line as the if()',
+    'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
+    'PARENBRACE'       => '){ without sufficient space',
+    'RETURNNOSPACE'    => 'return without space',
+    'SEMINOSPACE'      => 'semicolon without following space',
+    'SIZEOFNOPAREN'    => 'use of sizeof without parentheses',
+    'SNPRINTF'         => 'use of snprintf',
     'SPACEAFTERPAREN'  => 'space after open parenthesis',
     'SPACEBEFORECLOSE' => 'space before a close parenthesis',
     'SPACEBEFORECOMMA' => 'space before a comma',
-    'RETURNNOSPACE'    => 'return without space',
-    'COMMANOSPACE'     => 'comma without following space',
-    'BRACEELSE'        => '} else on the same line',
-    'PARENBRACE'       => '){ without sufficient space',
+    'SPACEBEFOREPAREN' => 'space before an open parenthesis',
     'SPACESEMICOLON'   => 'space before semicolon',
-    'BANNEDFUNC'       => 'a banned function was used',
-    'FOPENMODE'        => 'fopen needs a macro for the mode string',
-    'BRACEPOS'         => 'wrong position for an open brace',
-    'INDENTATION'      => 'wrong start column for code',
-    'COPYRIGHT'        => 'file missing a copyright statement',
-    'BADCOMMAND'       => 'bad !checksrc! instruction',
-    'UNUSEDIGNORE'     => 'a warning ignore was not used',
-    'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
-    'ASTERISKSPACE'    => 'pointer declared with space after asterisk',
-    'ASTERISKNOSPACE'  => 'pointer declared without space before asterisk',
-    'ASSIGNWITHINCONDITION' => 'assignment within conditional expression',
-    'EQUALSNOSPACE'    => 'equals sign without following space',
-    'NOSPACEEQUALS'    => 'equals sign without preceding space',
-    'SEMINOSPACE'      => 'semicolon without following space',
-    'MULTISPACE'       => 'multiple spaces used when not suitable',
-    'SIZEOFNOPAREN'    => 'use of sizeof without parentheses',
-    'SNPRINTF'         => 'use of snprintf',
-    'ONELINECONDITION' => 'conditional block on the same line as the if()',
+    'TABS'             => 'TAB characters not allowed',
+    'TRAILINGSPACE'    => 'Trailing whitespace on the line',
     'TYPEDEFSTRUCT'    => 'typedefed struct',
-    'DOBRACE'          => 'A single space between do and open brace',
-    'BRACEWHILE'       => 'A single space between open brace and while',
-    'EXCLAMATIONSPACE' => 'Whitespace after exclamation mark in expression',
-    'EMPTYLINEBRACE'   => 'Empty line before the open brace',
-    'EQUALSNULL'       => 'if/while comparison with == NULL',
-    'NOTEQUALSZERO',   => 'if/while comparison with != 0',
-    'INCLUDEDUP',      => 'same file is included again',
-    'COMMENTNOSPACESTART' => 'no space following /*',
-    'COMMENTNOSPACEEND' => 'no space before */',
+    'UNUSEDIGNORE'     => 'a warning ignore was not used',
     );
 
 sub readskiplist {
@@ -400,13 +400,24 @@ sub scanfile {
         }
 
         # check for a copyright statement and save the years
-        if($l =~ /\* +copyright .* \d\d\d\d/i) {
+        if($l =~ /\* +copyright .* (\d\d\d\d|)/i) {
+            my $count = 0;
             while($l =~ /([\d]{4})/g) {
                 push @copyright, {
                   year => $1,
                   line => $line,
                   col => index($l, $1),
                   code => $l
+                };
+                $count++;
+            }
+            if(!$count) {
+                # year-less
+                push @copyright, {
+                    year => -1,
+                    line => $line,
+                    col => index($l, $1),
+                    code => $l
                 };
             }
         }

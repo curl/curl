@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms

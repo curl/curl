@@ -1,7 +1,5 @@
 $! File: Build_GNV_curl_pcsi_text.com
 $!
-$! $Id$
-$!
 $! Build the *.pcsi$text file from the four components:
 $!    1. Generated =product header section
 $!    2. [--]readme. file from the Curl distribution, modified to fit
@@ -12,7 +10,7 @@ $!    4. Generated Producer section.
 $!
 $! Set the name of the release notes from the GNV_PCSI_FILENAME_BASE
 $!
-$! Copyright 2013 - 2022, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -27,8 +25,6 @@ $! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
 $! SPDX-License-Identifier: ISC
-$!
-$! 15-Jun-2009  J. Malmberg
 $!
 $!===========================================================================
 $!

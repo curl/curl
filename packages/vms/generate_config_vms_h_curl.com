@@ -1,7 +1,5 @@
 $! File: GENERATE_CONFIG_H_CURL.COM
 $!
-$! $Id$
-$!
 $! Curl like most open source products uses a variant of a config.h file.
 $! Depending on the curl version, this could be config.h or curl_config.h.
 $!
@@ -16,8 +14,7 @@ $! which is used to supplement that file.  Note that the config_vms.h file
 $! and the [.lib]config-vms.h file do two different tasks and that the
 $! filenames are slightly different.
 $!
-$!
-$! Copyright 2013 - 2022, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -32,8 +29,6 @@ $! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
 $! SPDX-License-Identifier: ISC
-$!
-$! 06-Jan-2013	J. Malmberg
 $!
 $!=========================================================================
 $!
