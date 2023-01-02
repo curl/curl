@@ -1,7 +1,5 @@
 /* File: report_openssl_version.c
  *
- * $Id$
- *
  * This file dynamically loads the openssl shared image to report the
  * version string.
  *
@@ -9,7 +7,7 @@
  *
  * Usage:  report_openssl_version <shared_image> [<dcl_symbol>]
  *
- * Copyright 2013 - 2022, John Malmberg
+ * Copyright (C) John Malmberg
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
