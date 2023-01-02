@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2023, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -605,7 +605,7 @@ void Curl_conn_ev_update_info(struct Curl_easy *data,
 bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn)
 {
   struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
-  return !cf->conn->bits.close && cf && cf->cft->is_alive(cf, data);
+  return cf && !cf->conn->bits.close && cf->cft->is_alive(cf, data);
 }
 
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
