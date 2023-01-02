@@ -75,7 +75,8 @@ BEGIN {
 }
 
 use strict;
-use warnings;
+# Promote all warnings to fatal
+use warnings FATAL => 'all';
 use Cwd;
 use Digest::MD5 qw(md5);
 use MIME::Base64;
@@ -123,9 +124,6 @@ require "valgrind.pm"; # valgrind report parser
 require "ftp.pm";
 require "azure.pm";
 require "appveyor.pm";
-
-# Promote all warnings to fatal
-$SIG{__WARN__} = sub { die @_; };
 
 my $HOSTIP="127.0.0.1";   # address on which the test server listens
 my $HOST6IP="[::1]";      # address on which the test server listens
