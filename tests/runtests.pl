@@ -1542,7 +1542,7 @@ sub runhttp2server {
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
-        return (0, 0, 0);
+        return (0, 0, 0, 0);
     }
 
     my $pid = processexists($pidfile);
