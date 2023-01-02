@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2023, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1128,6 +1128,16 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       goto error;
   }
 
+#ifdef HAVE_LIBZ
+  /* we only consider transfer-encoding magic if libz support is built-in */
+  result = Curl_transferencode(data);
+  if(result)
+    goto error;
+  result = Curl_hyper_header(data, headers, data->state.aptr.te);
+  if(result)
+    goto error;
+#endif
+
   if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
      data->set.str[STRING_ENCODING]) {
     Curl_safefree(data->state.aptr.accept_encoding);
@@ -1143,16 +1153,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   else
     Curl_safefree(data->state.aptr.accept_encoding);
-
-#ifdef HAVE_LIBZ
-  /* we only consider transfer-encoding magic if libz support is built-in */
-  result = Curl_transferencode(data);
-  if(result)
-    goto error;
-  result = Curl_hyper_header(data, headers, data->state.aptr.te);
-  if(result)
-    goto error;
-#endif
 
   result = cookies(data, conn, headers);
   if(result)
