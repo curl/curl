@@ -753,8 +753,6 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
   ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
 
   result = Curl_cf_create(&cf, &cft_msh3, ctx);
-  if(result)
-    goto out;
 
 out:
   *pcf = (!result)? cf : NULL;
