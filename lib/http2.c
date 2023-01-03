@@ -2247,7 +2247,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
                                   struct connectdata *conn,
                                   int sockindex)
 {
-  struct Curl_cfilter *cf;
+  struct Curl_cfilter *cf = NULL;
   struct h2_cf_ctx *ctx;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
