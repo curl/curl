@@ -108,6 +108,7 @@ set_target_properties(${LIB_NAME} PROPERTIES
 
 if(CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
   CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+  CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
   CMAKE_SYSTEM_NAME STREQUAL "GNU/kFreeBSD" OR
 
   # FreeBSD comes with the a.out and elf flavours
