@@ -37,7 +37,8 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
                                unsigned int bits);
 #endif
 
-bool Curl_check_noproxy(const char *name, const char *no_proxy);
+bool Curl_check_noproxy(const char *name, const char *no_proxy,
+                        bool *spacesep);
 
 #endif
 
