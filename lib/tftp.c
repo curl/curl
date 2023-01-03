@@ -48,6 +48,7 @@
 
 #include "urldata.h"
 #include <curl/curl.h>
+#include "cf-socket.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "tftp.h"
@@ -529,8 +530,8 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
        not have a size_t argument, like older unixes that want an 'int' */
     senddata = sendto(state->sockfd, (void *)state->spacket.data,
                       (SEND_TYPE_ARG3)sbytes, 0,
-                      data->conn->ip_addr->ai_addr,
-                      data->conn->ip_addr->ai_addrlen);
+                      &data->conn->remote_addr->sa_addr,
+                      data->conn->remote_addr->addrlen);
     if(senddata != (ssize_t)sbytes) {
       char buffer[STRERROR_LEN];
       failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
@@ -1014,7 +1015,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
   state->requested_blksize = blksize;
 
   ((struct sockaddr *)&state->local_addr)->sa_family =
-    (CURL_SA_FAMILY_T)(conn->ip_addr->ai_family);
+    (CURL_SA_FAMILY_T)(conn->remote_addr->family);
 
   tftp_set_timeouts(state);
 
@@ -1033,7 +1034,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
      * IPv4 and IPv6...
      */
     int rc = bind(state->sockfd, (struct sockaddr *)&state->local_addr,
-                  conn->ip_addr->ai_addrlen);
+                  conn->remote_addr->addrlen);
     if(rc) {
       char buffer[STRERROR_LEN];
       failf(data, "bind() failed; %s",

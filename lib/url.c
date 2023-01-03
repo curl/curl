@@ -3381,9 +3381,6 @@ static void reuse_conn(struct Curl_easy *data,
   existing->hostname_resolve = temp->hostname_resolve;
   temp->hostname_resolve = NULL;
 
-  /* persist existing connection info in data */
-  Curl_conn_ev_update_info(data, existing);
-
   conn_reset_all_postponed_data(temp); /* free buffers */
 
   /* re-use init */
