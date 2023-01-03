@@ -119,8 +119,10 @@ enum nametype {
 * Checks if the host is in the noproxy list. returns TRUE if it matches and
 * therefore the proxy should NOT be used.
 ****************************************************************/
-bool Curl_check_noproxy(const char *name, const char *no_proxy)
+bool Curl_check_noproxy(const char *name, const char *no_proxy,
+                        bool *spacesep)
 {
+  *spacesep = FALSE;
   /*
    * If we don't have a hostname at all, like for example with a FILE
    * transfer, we have nothing to interrogate the noproxy list with.
@@ -244,6 +246,15 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
         if(match)
           return TRUE;
       } /* if(tokenlen) */
+      /* pass blanks after pattern */
+      while(ISBLANK(*p))
+        p++;
+      /* if not a comma! */
+      if(*p && (*p != ',')) {
+        *spacesep = TRUE;
+        continue;
+      }
+      /* pass any number of commas */
       while(*p == ',')
         p++;
     } /* while(*p) */
