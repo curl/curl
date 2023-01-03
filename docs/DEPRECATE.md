@@ -52,7 +52,7 @@ We remove support for building curl with the gskit TLS library in August 2023.
 - build breakages in this code take weeks or more to get detected
 - fixing gskit code is mostly done "flying blind"
 
-## space-separated NOPROXY patterns
+## space-separated `NOPROXY` patterns
 
 When specifying patterns/domain names for curl that should *not* go through a
 proxy, the curl tool features the `--noproxy` command line option and the
