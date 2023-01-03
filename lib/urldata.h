@@ -907,10 +907,9 @@ struct connectdata {
      there is no name resolve done. */
   struct Curl_dns_entry *dns_entry;
 
-  /* 'ip_addr' is the particular IP we connected to. It points to a struct
-     within the DNS cache, so this pointer is only valid as long as the DNS
-     cache entry remains locked. It gets unlocked in multi_done() */
-  const struct Curl_addrinfo *ip_addr;
+  /* 'remote_addr' is the particular IP we connected to. it is owned, set
+   * and NULLed by the connected socket filter (if there is one). */
+  const struct Curl_sockaddr_ex *remote_addr;
 
   struct hostname host;
   char *hostname_resolve; /* host name to resolve to address, allocated */

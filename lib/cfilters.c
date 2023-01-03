@@ -369,10 +369,14 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 
   cf = data->conn->cfilter[sockindex];
   DEBUGASSERT(cf);
+  if(!cf)
+    return CURLE_FAILED_INIT;
+
   *done = cf->connected;
   if(!*done) {
-    result = cf->cft->connect (cf, data, blocking, done);
+    result = cf->cft->connect(cf, data, blocking, done);
     if(!result && *done) {
+      Curl_conn_ev_update_info(data, data->conn);
       data->conn->keepalive = Curl_now();
     }
   }

@@ -1010,9 +1010,9 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
     if(*addr != '\0') {
       /* attempt to get the address of the given interface name */
-      switch(Curl_if2ip(conn->ip_addr->ai_family,
+      switch(Curl_if2ip(conn->remote_addr->family,
 #ifdef ENABLE_IPV6
-                        Curl_ipv6_scope(conn->ip_addr->ai_addr),
+                        Curl_ipv6_scope(&conn->remote_addr->sa_addr),
                         conn->scope_id,
 #endif
                         addr, hbuf, sizeof(hbuf))) {
