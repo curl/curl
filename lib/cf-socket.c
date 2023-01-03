@@ -203,28 +203,10 @@ tcpkeepalive(struct Curl_easy *data,
   }
 }
 
-/*
- * Create a socket based on info from 'conn' and 'ai'.
- *
- * 'addr' should be a pointer to the correct struct to get data back, or NULL.
- * 'sockfd' must be a pointer to a socket descriptor.
- *
- * If the open socket callback is set, used that!
- *
- */
-CURLcode Curl_socket_open(struct Curl_easy *data,
-                            const struct Curl_addrinfo *ai,
-                            struct Curl_sockaddr_ex *addr,
-                            int transport,
-                            curl_socket_t *sockfd)
+static void assign_sockaddr_ex(struct Curl_sockaddr_ex *dest,
+                               const struct Curl_addrinfo *ai,
+                               int transport)
 {
-  struct connectdata *conn = data->conn;
-  struct Curl_sockaddr_ex dummy;
-
-  if(!addr)
-    /* if the caller doesn't want info back, use a local temp copy */
-    addr = &dummy;
-
   /*
    * The Curl_sockaddr_ex structure is basically libcurl's external API
    * curl_sockaddr structure with enough space available to directly hold
@@ -232,28 +214,34 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
    * will be used to pass / receive data to/from the fopensocket callback
    * if this has been set, before that, it is initialized from parameters.
    */
-
-  addr->family = ai->ai_family;
+  dest->family = ai->ai_family;
   switch(transport) {
   case TRNSPRT_TCP:
-    addr->socktype = SOCK_STREAM;
-    addr->protocol = IPPROTO_TCP;
+    dest->socktype = SOCK_STREAM;
+    dest->protocol = IPPROTO_TCP;
     break;
   case TRNSPRT_UNIX:
-    addr->socktype = SOCK_STREAM;
-    addr->protocol = IPPROTO_IP;
+    dest->socktype = SOCK_STREAM;
+    dest->protocol = IPPROTO_IP;
     break;
   default: /* UDP and QUIC */
-    addr->socktype = SOCK_DGRAM;
-    addr->protocol = IPPROTO_UDP;
+    dest->socktype = SOCK_DGRAM;
+    dest->protocol = IPPROTO_UDP;
     break;
   }
-  addr->addrlen = ai->ai_addrlen;
+  dest->addrlen = ai->ai_addrlen;
 
-  if(addr->addrlen > sizeof(struct Curl_sockaddr_storage))
-     addr->addrlen = sizeof(struct Curl_sockaddr_storage);
-  memcpy(&addr->sa_addr, ai->ai_addr, addr->addrlen);
+  if(dest->addrlen > sizeof(struct Curl_sockaddr_storage))
+     dest->addrlen = sizeof(struct Curl_sockaddr_storage);
+  memcpy(&dest->sa_addr, ai->ai_addr, dest->addrlen);
+}
 
+static CURLcode socket_open(struct Curl_easy *data,
+                            struct Curl_sockaddr_ex *addr,
+                            curl_socket_t *sockfd)
+{
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
   if(data->set.fopensocket) {
    /*
     * If the opensocket callback is set, all the destination address
@@ -278,15 +266,38 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
     /* no socket, no connection */
     return CURLE_COULDNT_CONNECT;
 
-  (void)conn;
 #if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  if(conn->scope_id && (addr->family == AF_INET6)) {
+  if(data->conn->scope_id && (addr->family == AF_INET6)) {
     struct sockaddr_in6 * const sa6 = (void *)&addr->sa_addr;
-    sa6->sin6_scope_id = conn->scope_id;
+    sa6->sin6_scope_id = data->conn->scope_id;
   }
 #endif
-
   return CURLE_OK;
+}
+
+/*
+ * Create a socket based on info from 'conn' and 'ai'.
+ *
+ * 'addr' should be a pointer to the correct struct to get data back, or NULL.
+ * 'sockfd' must be a pointer to a socket descriptor.
+ *
+ * If the open socket callback is set, used that!
+ *
+ */
+CURLcode Curl_socket_open(struct Curl_easy *data,
+                            const struct Curl_addrinfo *ai,
+                            struct Curl_sockaddr_ex *addr,
+                            int transport,
+                            curl_socket_t *sockfd)
+{
+  struct Curl_sockaddr_ex dummy;
+
+  if(!addr)
+    /* if the caller doesn't want info back, use a local temp copy */
+    addr = &dummy;
+
+  assign_sockaddr_ex(addr, ai, transport);
+  return socket_open(data, addr, sockfd);
 }
 
 static int socket_close(struct Curl_easy *data, struct connectdata *conn,
@@ -744,11 +755,12 @@ CURLcode Curl_socket_connect_result(struct Curl_easy *data,
 
 struct cf_socket_ctx {
   int transport;
-  const struct Curl_addrinfo *ai;
+  struct Curl_sockaddr_ex addr;      /* address to connect to */
   curl_socket_t sock;                /* current attempt socket */
-  struct Curl_sockaddr_ex r_addr;    /* remote address sock is trying */
   char r_ip[MAX_IPADR_LEN];          /* remote IP as string */
   int r_port;                        /* remote port number */
+  char l_ip[MAX_IPADR_LEN];          /* local IP as string */
+  int l_port;                        /* local port number */
   int error;                         /* errno of last failure or 0 */
   BIT(accepted);                     /* socket was accepted, not connected */
   BIT(active);
@@ -785,6 +797,8 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     ctx->active = FALSE;
   }
 
+  if(cf->sockindex == FIRSTSOCKET)
+    cf->conn->remote_addr = NULL;
   cf->connected = FALSE;
 }
 
@@ -795,6 +809,56 @@ static void cf_socket_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf_socket_close(cf, data);
   free(ctx);
   cf->ctx = NULL;
+}
+
+static CURLcode set_local_ip(struct Curl_cfilter *cf,
+                             struct Curl_easy *data)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+
+#ifdef HAVE_GETSOCKNAME
+  char buffer[STRERROR_LEN];
+  struct Curl_sockaddr_storage ssloc;
+  curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
+
+  memset(&ssloc, 0, sizeof(ssloc));
+  if(getsockname(ctx->sock, (struct sockaddr*) &ssloc, &slen)) {
+    int error = SOCKERRNO;
+    failf(data, "getsockname() failed with errno %d: %s",
+          error, Curl_strerror(error, buffer, sizeof(buffer)));
+    return CURLE_FAILED_INIT;
+  }
+  if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
+                       ctx->l_ip, &ctx->l_port)) {
+    failf(data, "ssloc inet_ntop() failed with errno %d: %s",
+          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+    return CURLE_FAILED_INIT;
+  }
+#else
+  (void)data;
+  ctx->l_ip[0] = 0;
+  ctx->l_port = -1;
+#endif
+  return CURLE_OK;
+}
+
+static CURLcode set_remote_ip(struct Curl_cfilter *cf,
+                              struct Curl_easy *data)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+
+  /* store remote address and port used in this connection attempt */
+  if(!Curl_addr2string(&ctx->addr.sa_addr, ctx->addr.addrlen,
+                       ctx->r_ip, &ctx->r_port)) {
+    char buffer[STRERROR_LEN];
+
+    ctx->error = errno;
+    /* malformed address or bug in inet_ntop, try next address */
+    failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
+          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+    return CURLE_FAILED_INIT;
+  }
+  return CURLE_OK;
 }
 
 static CURLcode cf_socket_open(struct Curl_cfilter *cf,
@@ -809,25 +873,16 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
   (void)data;
   ctx->sock = CURL_SOCKET_BAD;
-  result = Curl_socket_open(data, ctx->ai, &ctx->r_addr,
-                              ctx->transport, &ctx->sock);
+  result = socket_open(data, &ctx->addr, &ctx->sock);
   if(result)
     goto out;
 
-  /* store remote address and port used in this connection attempt */
-  if(!Curl_addr2string(&ctx->r_addr.sa_addr, ctx->r_addr.addrlen,
-                       ctx->r_ip, &ctx->r_port)) {
-    char buffer[STRERROR_LEN];
-
-    ctx->error = errno;
-    /* malformed address or bug in inet_ntop, try next address */
-    failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    result = CURLE_FAILED_INIT;
+  result = set_remote_ip(cf, data);
+  if(result)
     goto out;
-  }
+
 #ifdef ENABLE_IPV6
-  if(ctx->r_addr.family == AF_INET6)
+  if(ctx->addr.family == AF_INET6)
     ipmsg = "  Trying [%s]:%d...";
   else
 #endif
@@ -835,12 +890,12 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   infof(data, ipmsg, ctx->r_ip, ctx->r_port);
 
 #ifdef ENABLE_IPV6
-  is_tcp = (ctx->r_addr.family == AF_INET
-            || ctx->r_addr.family == AF_INET6) &&
-           ctx->r_addr.socktype == SOCK_STREAM;
+  is_tcp = (ctx->addr.family == AF_INET
+            || ctx->addr.family == AF_INET6) &&
+           ctx->addr.socktype == SOCK_STREAM;
 #else
-  is_tcp = (ctx->r_addr.family == AF_INET) &&
-           ctx->r_addr.socktype == SOCK_STREAM;
+  is_tcp = (ctx->addr.family == AF_INET) &&
+           ctx->addr.socktype == SOCK_STREAM;
 #endif
   if(is_tcp && data->set.tcp_nodelay)
     tcpnodelay(data, ctx->sock);
@@ -869,13 +924,13 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   }
 
   /* possibly bind the local end to an IP, interface or port */
-  if(ctx->r_addr.family == AF_INET
+  if(ctx->addr.family == AF_INET
 #ifdef ENABLE_IPV6
-     || ctx->r_addr.family == AF_INET6
+     || ctx->addr.family == AF_INET6
 #endif
     ) {
-    result = bindlocal(data, cf->conn, ctx->sock, ctx->r_addr.family,
-                       Curl_ipv6_scope(&ctx->r_addr.sa_addr));
+    result = bindlocal(data, cf->conn, ctx->sock, ctx->addr.family,
+                       Curl_ipv6_scope(&ctx->addr.sa_addr));
     if(result) {
       if(result == CURLE_UNSUPPORTED_PROTOCOL) {
         /* The address family is not supported on this interface.
@@ -897,6 +952,7 @@ out:
     }
   }
   else if(isconnected) {
+    set_local_ip(cf, data);
     cf->connected = TRUE;
   }
   return result;
@@ -922,34 +978,34 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
       endpoints.sae_srcif = 0;
       endpoints.sae_srcaddr = NULL;
       endpoints.sae_srcaddrlen = 0;
-      endpoints.sae_dstaddr = &ctx->r_addr.sa_addr;
-      endpoints.sae_dstaddrlen = ctx->r_addr.addrlen;
+      endpoints.sae_dstaddr = &ctx->addr.sa_addr;
+      endpoints.sae_dstaddrlen = ctx->addr.addrlen;
 
       rc = connectx(ctx->sock, &endpoints, SAE_ASSOCID_ANY,
                     CONNECT_RESUME_ON_READ_WRITE | CONNECT_DATA_IDEMPOTENT,
                     NULL, 0, NULL, NULL);
     }
     else {
-      rc = connect(ctx->sock, &ctx->r_addr.sa_addr, ctx->r_addr.addrlen);
+      rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
     }
 #  else
-    rc = connect(ctx->sock, &ctx->r_addr.sa_addr, ctx->r_addr.addrlen);
+    rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
 #  endif /* HAVE_BUILTIN_AVAILABLE */
 #elif defined(TCP_FASTOPEN_CONNECT) /* Linux >= 4.11 */
     if(setsockopt(ctx->sock, IPPROTO_TCP, TCP_FASTOPEN_CONNECT,
                   (void *)&optval, sizeof(optval)) < 0)
       infof(data, "Failed to enable TCP Fast Open on fd %d", ctx->sock);
 
-    rc = connect(ctx->sock, &ctx->r_addr.sa_addr, ctx->r_addr.addrlen);
+    rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
 #elif defined(MSG_FASTOPEN) /* old Linux */
     if(cf->conn->given->flags & PROTOPT_SSL)
-      rc = connect(ctx->sock, &ctx->r_addr.sa_addr, ctx->r_addr.addrlen);
+      rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
     else
       rc = 0; /* Do nothing */
 #endif
   }
   else {
-    rc = connect(ctx->sock, &ctx->r_addr.sa_addr, ctx->r_addr.addrlen);
+    rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
   }
   return rc;
 }
@@ -1005,6 +1061,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
   else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
     if(verifyconnect(ctx->sock, &ctx->error)) {
       /* we are connected with TCP, awesome! */
+      set_local_ip(cf, data);
       *done = TRUE;
       cf->connected = TRUE;
       return CURLE_OK;
@@ -1101,62 +1158,32 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   return nread;
 }
 
-/* retrieves the start/end point information of a socket of an established
-   connection */
-static void conninfo_local(struct Curl_easy *data, curl_socket_t sockfd,
-                           char *local_ip, int *local_port)
+static void conn_set_primary_ip(struct Curl_cfilter *cf,
+                                struct Curl_easy *data)
 {
-#ifdef HAVE_GETSOCKNAME
-  char buffer[STRERROR_LEN];
-  struct Curl_sockaddr_storage ssloc;
-  curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
-
-  memset(&ssloc, 0, sizeof(ssloc));
-  if(getsockname(sockfd, (struct sockaddr*) &ssloc, &slen)) {
-    int error = SOCKERRNO;
-    failf(data, "getsockname() failed with errno %d: %s",
-          error, Curl_strerror(error, buffer, sizeof(buffer)));
-    return;
-  }
-  if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
-                       local_ip, local_port)) {
-    failf(data, "ssloc inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    return;
-  }
-#else
-  (void)data;
-  (void)sockfd;
-  (void)local_ip;
-  (void)local_port;
-#endif
-}
-
-/* retrieves the start/end point information of a socket of an established
-   connection */
-static void conninfo_remote(struct Curl_easy *data,
-                            struct connectdata *conn, curl_socket_t sockfd)
-{
+  struct cf_socket_ctx *ctx = cf->ctx;
 #ifdef HAVE_GETPEERNAME
   char buffer[STRERROR_LEN];
   struct Curl_sockaddr_storage ssrem;
   curl_socklen_t plen;
   int port;
-  plen = sizeof(struct Curl_sockaddr_storage);
-  memset(&ssrem, 0, sizeof(ssrem));
-  if(getpeername(sockfd, (struct sockaddr*) &ssrem, &plen)) {
+
+  plen = sizeof(ssrem);
+  memset(&ssrem, 0, plen);
+  if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
     int error = SOCKERRNO;
     failf(data, "getpeername() failed with errno %d: %s",
           error, Curl_strerror(error, buffer, sizeof(buffer)));
     return;
   }
   if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
-                       conn->primary_ip, &port)) {
+                       cf->conn->primary_ip, &port)) {
     failf(data, "ssrem inet_ntop() failed with errno %d: %s",
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     return;
   }
 #else
+  cf->conn->primary_ip[0] = 0;
   (void)data;
   (void)conn;
   (void)sockfd;
@@ -1166,22 +1193,17 @@ static void conninfo_remote(struct Curl_easy *data,
 static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
-  char local_ip[MAX_IPADR_LEN] = "";
-  int local_port = -1;
 
   /* use this socket from now on */
-  DEBUGASSERT(ctx);
-  DEBUGASSERT(cf->conn);
   cf->conn->sock[cf->sockindex] = ctx->sock;
-
+  /* the first socket info gets set at conn and data */
   if(cf->sockindex == FIRSTSOCKET) {
-    cf->conn->ip_addr = ctx->ai;
+    cf->conn->remote_addr = &ctx->addr;
   #ifdef ENABLE_IPV6
-    cf->conn->bits.ipv6 = (ctx->ai->ai_family == AF_INET6)? TRUE : FALSE;
+    cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
   #endif
-    conninfo_remote(data, cf->conn, ctx->sock);
-    conninfo_local(data, ctx->sock, local_ip, &local_port);
-    Curl_persistconninfo(data, cf->conn, local_ip, local_port);
+    conn_set_primary_ip(cf, data);
+    Curl_persistconninfo(data, cf->conn, ctx->l_ip, ctx->l_port);
   }
   ctx->active = TRUE;
 }
@@ -1190,11 +1212,16 @@ static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int event, int arg1, void *arg2)
 {
+  struct cf_socket_ctx *ctx = cf->ctx;
+
   (void)arg1;
   (void)arg2;
   switch(event) {
   case CF_CTRL_CONN_INFO_UPDATE:
     cf_socket_active(cf, data);
+    break;
+  case CF_CTRL_DATA_SETUP:
+    Curl_persistconninfo(data, cf->conn, ctx->l_ip, ctx->l_port);
     break;
   }
   return CURLE_OK;
@@ -1270,7 +1297,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->transport = TRNSPRT_TCP;
-  ctx->ai = ai;
+  assign_sockaddr_ex(&ctx->addr, ai, ctx->transport);
   ctx->sock = CURL_SOCKET_BAD;
 
   result = Curl_cf_create(&cf, &cft_tcp, ctx);
@@ -1307,6 +1334,7 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
       }
     }
     else {
+      set_local_ip(cf, data);
       *done = TRUE;
       cf->connected = TRUE;
     }
@@ -1348,7 +1376,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->transport = TRNSPRT_UDP;
-  ctx->ai = ai;
+  assign_sockaddr_ex(&ctx->addr, ai, ctx->transport);
   ctx->sock = CURL_SOCKET_BAD;
 
   result = Curl_cf_create(&cf, &cft_udp, ctx);
@@ -1398,7 +1426,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->transport = TRNSPRT_UNIX;
-  ctx->ai = ai;
+  assign_sockaddr_ex(&ctx->addr, ai, ctx->transport);
   ctx->sock = CURL_SOCKET_BAD;
 
   result = Curl_cf_create(&cf, &cft_unix, ctx);
@@ -1470,6 +1498,8 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
   Curl_conn_cf_add(data, conn, sockindex, cf);
 
   conn->sock[sockindex] = ctx->sock;
+  set_remote_ip(cf, data);
+  set_local_ip(cf, data);
   ctx->active = TRUE;
   cf->connected = TRUE;
   CF_DEBUGF(infof(data, CFMSG(cf, "Curl_conn_tcp_listen_set(%d)"),
@@ -1499,6 +1529,8 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
   socket_close(data, conn, TRUE, ctx->sock);
   ctx->sock = *s;
   conn->sock[sockindex] = ctx->sock;
+  set_remote_ip(cf, data);
+  set_local_ip(cf, data);
   ctx->active = TRUE;
   ctx->accepted = TRUE;
   cf->connected = TRUE;
@@ -1524,7 +1556,7 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
     struct cf_socket_ctx *ctx = cf->ctx;
 
     *psock = ctx->sock;
-    *paddr = &ctx->r_addr;
+    *paddr = &ctx->addr;
     *premote_ip_str = ctx->r_ip;
     *premote_port = ctx->r_port;
     return CURLE_OK;

@@ -46,6 +46,7 @@
 #endif
 
 #include "urldata.h"
+#include "cf-socket.h"
 #include "curl_base64.h"
 #include "ftp.h"
 #include "curl_gssapi.h"
@@ -207,8 +208,8 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   gss_ctx_id_t *context = app_data;
   struct gss_channel_bindings_struct chan;
   size_t base64_sz = 0;
-  struct sockaddr_in **remote_addr =
-    (struct sockaddr_in **)&conn->ip_addr->ai_addr;
+  struct sockaddr_in *remote_addr =
+    (struct sockaddr_in *)&conn->remote_addr->sa_addr;
   char *stringp;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
@@ -220,7 +221,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   chan.initiator_address.value = &conn->local_addr.sin_addr.s_addr;
   chan.acceptor_addrtype = GSS_C_AF_INET;
   chan.acceptor_address.length = l - 4;
-  chan.acceptor_address.value = &(*remote_addr)->sin_addr.s_addr;
+  chan.acceptor_address.value = &remote_addr->sin_addr.s_addr;
   chan.application_data.length = 0;
   chan.application_data.value = NULL;
 
