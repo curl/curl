@@ -2318,7 +2318,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
       goto error;
     }
-    /* path will be "/", if no path was was found */
+    /* path will be "/", if no path was found */
     if(strcmp("/", path)) {
       is_unix_proxy = TRUE;
       free(host);
