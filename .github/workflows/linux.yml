@@ -233,3 +233,26 @@ jobs:
       name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
+
+  slackware-15_0:
+    # Containers must run in Linux based operating systems
+    runs-on: ubuntu-latest
+    # Docker Hub image that `container-job` executes in
+    container: andy5995/slackware-build-essential:15.0
+    steps:
+    - uses: actions/checkout@v3
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror --with-openssl
+      name: 'configure'
+
+    - run: make V=1 -j$(expr $(nproc) - 1)
+      name: 'make'
+
+    - run: make V=1 examples -j$(expr $(nproc) - 1)
+      name: 'make examples'
+
+    - run: make V=1 -C tests -j$(expr $(nproc) - 1)
+      name: 'make tests'
