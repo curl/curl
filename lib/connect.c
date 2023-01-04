@@ -356,7 +356,7 @@ struct eyeballer {
   int ai_family;                     /* matching address family only */
   cf_ip_connect_create *cf_create;   /* for creating cf */
   struct Curl_cfilter *cf;           /* current sub-cfilter connecting */
-  struct eyeballer *primary;         /* eyeballer this one is is backup for */
+  struct eyeballer *primary;         /* eyeballer this one is backup for */
   timediff_t delay_ms;               /* delay until start */
   timediff_t timeoutms;              /* timeout for all tries */
   expire_id timeout_id;              /* ID for Curl_expire() */
