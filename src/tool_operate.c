@@ -971,18 +971,19 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             FILE *newfile;
 
             /*
-             * this checks if the previous transfer had the same
-             * OperationConfig, which would mean, that an output file has
-             * already been created and data can be appended to it, instead
-             * of overwriting it.
+             * Since every transfer has its own file handle for dumping
+             * the headers, we need to open it in append mode, since transfers
+             * might finish in any order.
+             * The first transfer just clears the file.
              * TODO: Consider placing the file handle inside the
              * OperationConfig, so that it does not need to be opened/closed
              * for every transfer.
              */
-            if(per->prev && per->prev->config == config)
-              newfile = fopen(config->headerfile, "ab+");
-            else
+            if(!per->prev || per->prev->config != config) {
               newfile = fopen(config->headerfile, "wb+");
+              fclose(newfile);
+            }
+            newfile = fopen(config->headerfile, "ab+");
 
             if(!newfile) {
               warnf(global, "Failed to open %s\n", config->headerfile);
