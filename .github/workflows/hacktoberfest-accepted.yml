@@ -32,8 +32,8 @@ jobs:
 
       - name: Check whether repo participates in Hacktoberfest
         run: |
-          gh config set prompt disabled && echo "::set-output name=label::$(
-            gh repo view --json repositoryTopics --jq '.repositoryTopics[].name' | grep '^hacktoberfest$')"
+          gh config set prompt disabled && echo "label=$(
+            gh repo view --json repositoryTopics --jq '.repositoryTopics[].name' | grep '^hacktoberfest$')" >> $GITHUB_OUTPUT
         id: check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
