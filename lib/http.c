@@ -2342,7 +2342,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
   curl_off_t included_body = 0;
 #else
   /* from this point down, this function should not be used */
-#define Curl_buffer_send(a,b,c,d,e) CURLE_OK
+#define Curl_buffer_send(a,b,c,d,e,f) CURLE_OK
 #endif
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
