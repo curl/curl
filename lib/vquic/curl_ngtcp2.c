@@ -354,6 +354,19 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
 #endif
   }
+
+  /* give application a chance to interfere with SSL set up. */
+  if(data->set.ssl.fsslctx) {
+    CURLcode result;
+    Curl_set_in_callback(data, true);
+    result = (*data->set.ssl.fsslctx)(data, ssl_ctx,
+                                      data->set.ssl.fsslctxp);
+    Curl_set_in_callback(data, false);
+    if(result) {
+      failf(data, "error signaled by ssl ctx callback");
+      return NULL;
+    }
+  }
   return ssl_ctx;
 }
 
@@ -527,6 +540,18 @@ static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf,
     wolfSSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_NONE, NULL);
   }
 
+  /* give application a chance to interfere with SSL set up. */
+  if(data->set.ssl.fsslctx) {
+    CURLcode result;
+    Curl_set_in_callback(data, true);
+    result = (*data->set.ssl.fsslctx)(data, ssl_ctx,
+                                      data->set.ssl.fsslctxp);
+    Curl_set_in_callback(data, false);
+    if(result) {
+      failf(data, "error signaled by ssl ctx callback");
+      return NULL;
+    }
+  }
   return ssl_ctx;
 }
 
