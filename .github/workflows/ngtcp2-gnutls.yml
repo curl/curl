@@ -142,16 +142,16 @@ jobs:
     - run: ./configure --with-gnutls=$HOME/all ${{ matrix.build.configure }}
       name: 'configure'
 
-    - run: make V=1
+    - run: make V=1 -j$(nproc)
       name: 'make'
 
-    - run: make V=1 examples
+    - run: make V=1 -j$(nproc) examples
       name: 'make examples'
 
-    - run: make V=1 -C tests
+    - run: make V=1 -j$(nproc) -C tests
       name: 'make tests'
 
-    - run: make V=1 test-ci
+    - run: make V=1 -j$(nproc) test-ci
       name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"

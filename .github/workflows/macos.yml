@@ -41,6 +41,7 @@ permissions: {}
 
 env:
   DEVELOPER_DIR: /Applications/Xcode_14.0.1.app/Contents/Developer
+  MK_COMMON_OPTS: 'V=1 -j3' # 3 cores on macOS according to https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
 
 jobs:
   autotools:
@@ -129,16 +130,16 @@ jobs:
         # -Wvla is caused by brotli
         CFLAGS: "-Wno-vla -mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
 
-    - run: make V=1
+    - run: make $MK_COMMON_OPTS
       name: 'make'
 
-    - run: make V=1 examples
+    - run: make $MK_COMMON_OPTS examples
       name: 'make examples'
 
-    - run: make V=1 -C tests
+    - run: make $MK_COMMON_OPTS -C tests
       name: 'make tests'
 
-    - run: make V=1 test-ci
+    - run: make $MK_COMMON_OPTS test-ci
       name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }} ~1452"
