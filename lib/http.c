@@ -2598,11 +2598,10 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       else {
         /* A huge POST coming up, do data separate from the request */
         http->postdata = data->set.postfields;
-
         http->sending = HTTPSEND_BODY;
-
+        http->backup.data = data;
         data->state.fread_func = (curl_read_callback)readmoredata;
-        data->state.in = (void *)data;
+        data->state.in = (void *)http;
 
         /* set the upload size to the progress meter */
         Curl_pgrsSetUploadSize(data, http->postsize);
