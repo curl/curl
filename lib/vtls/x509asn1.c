@@ -48,6 +48,7 @@
 #include "curl_ctype.h"
 #include "hostcheck.h"
 #include "vtls/vtls.h"
+#include "vtls/vtls_int.h"
 #include "sendf.h"
 #include "inet_pton.h"
 #include "curl_base64.h"
@@ -1313,7 +1314,8 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
 
   /* Get the server IP address. */
 #ifdef ENABLE_IPV6
-  if(conn->bits.ipv6_ip && Curl_inet_pton(AF_INET6, connssl->hostname, &addr))
+  if(cf->conn->bits.ipv6_ip &&
+     Curl_inet_pton(AF_INET6, connssl->hostname, &addr))
     addrlen = sizeof(struct in6_addr);
   else
 #endif
@@ -1359,7 +1361,7 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
           break;
 
         case 7: /* IP address. */
-          matched = (name.end - name.beg) == addrlen &&
+          matched = (size_t)(name.end - name.beg) == addrlen &&
             !memcmp(&addr, name.beg, addrlen);
           break;
         }
