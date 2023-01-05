@@ -56,5 +56,14 @@ CURLcode Curl_ossl_set_client_cert(struct Curl_easy *data,
 
 CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl);
 
+/**
+ * Setup the OpenSSL X509_STORE in `ssl_ctx` for the cfilter `cf` and
+ * easy handle `data`. Will allow reuse of a shared cache if suitable
+ * and configured.
+ */
+CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   SSL_CTX *ssl_ctx);
+
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */
