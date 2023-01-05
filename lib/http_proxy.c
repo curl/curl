@@ -74,8 +74,7 @@ struct tunnel_state {
   int sockindex;
   const char *hostname;
   int remote_port;
-  struct HTTP http_proxy;
-  struct HTTP *prot_save;
+  struct HTTP CONNECT;
   struct dynbuf rcvbuf;
   struct dynbuf req;
   size_t nsend;
@@ -160,17 +159,6 @@ static CURLcode tunnel_init(struct tunnel_state **pts,
   Curl_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
   Curl_dyn_init(&ts->req, DYN_HTTP_REQUEST);
 
-  /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the
-   * member conn->proto.http; we want [protocol] through HTTP and we have
-   * to change the member temporarily for connecting to the HTTP
-   * proxy. After Curl_proxyCONNECT we have to set back the member to the
-   * original pointer
-   *
-   * This function might be called several times in the multi interface case
-   * if the proxy's CONNECT response is not instant.
-   */
-  ts->prot_save = data->req.p.http;
-  data->req.p.http = &ts->http_proxy;
   *pts =  ts;
   connkeep(conn, "HTTP proxy CONNECT");
   return tunnel_reinit(ts, conn, data);
@@ -227,7 +215,6 @@ static void tunnel_go_state(struct Curl_cfilter *cf,
     Curl_dyn_reset(&ts->rcvbuf);
     Curl_dyn_reset(&ts->req);
     /* restore the protocol pointer */
-    data->req.p.http = ts->prot_save;
     data->info.httpcode = 0; /* clear it as it might've been used for the
                                 proxy */
     /* If a proxy-authorization header was used for the proxy, then we should
@@ -355,7 +342,8 @@ static CURLcode start_CONNECT(struct Curl_easy *data,
     goto out;
 
   /* Send the connect request to the proxy */
-  result = Curl_buffer_send(&ts->req, data, &data->info.request_size, 0,
+  result = Curl_buffer_send(&ts->req, data, &ts->CONNECT,
+                            &data->info.request_size, 0,
                             ts->sockindex);
   ts->headerlines = 0;
 
@@ -373,7 +361,7 @@ static CURLcode send_CONNECT(struct Curl_easy *data,
                              bool *done)
 {
   struct SingleRequest *k = &data->req;
-  struct HTTP *http = data->req.p.http;
+  struct HTTP *http = &ts->CONNECT;
   CURLcode result = CURLE_OK;
 
   if(http->sending != HTTPSEND_REQUEST)
@@ -394,7 +382,7 @@ static CURLcode send_CONNECT(struct Curl_easy *data,
     result = Curl_write(data,
                         conn->writesockfd,  /* socket to send to */
                         k->upload_fromhere, /* buffer pointer */
-                        ts->nsend,           /* buffer size */
+                        ts->nsend,          /* buffer size */
                         &bytes_written);    /* actually sent */
     if(result)
       goto out;
@@ -1158,8 +1146,9 @@ static int http_proxy_cf_get_select_socks(struct Curl_cfilter *cf,
          wait for the socket to become readable to be able to get the
          response headers or if we're still sending the request, wait
          for write. */
-      if(ts->http_proxy.sending == HTTPSEND_REQUEST)
+      if(ts->CONNECT.sending == HTTPSEND_REQUEST) {
         return GETSOCK_WRITESOCK(0);
+      }
       return GETSOCK_READSOCK(0);
     }
     return GETSOCK_WRITESOCK(0);
