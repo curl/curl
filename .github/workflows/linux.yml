@@ -254,5 +254,5 @@ jobs:
     - run: make V=1 examples -j$(expr $(nproc) - 1)
       name: 'make examples'
 
-    - run: make V=1 distcheck -j$(expr $(nproc) - 1)
-      name: 'make distcheck'
+    - run: make V=1 -C tests -j$(expr $(nproc) - 1)
+      name: 'make tests'
