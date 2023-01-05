@@ -862,7 +862,7 @@ static OSStatus bio_cf_in_read(SSLConnectionRef connection,
     }
     nread = 0;
   }
-  else if(nread < *dataLength) {
+  else if((size_t)nread < *dataLength) {
     rtn = errSSLWouldBlock;
   }
   *dataLength = nread;
@@ -895,7 +895,7 @@ static OSStatus bio_cf_out_write(SSLConnectionRef connection,
     }
     nwritten = 0;
   }
-  else if(nwritten < *dataLength) {
+  else if((size_t)nwritten < *dataLength) {
     rtn = errSSLWouldBlock;
   }
   *dataLength = nwritten;
@@ -2270,7 +2270,7 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
   CFMutableArrayRef array = NULL;
   SecTrustRef trust = NULL;
   CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
-
+  (void)cf;
   /*
    * Certbuf now contains the contents of the certificate file, which can be
    * - a single DER certificate,
