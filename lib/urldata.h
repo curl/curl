@@ -1805,7 +1805,18 @@ struct UserDefined {
 #endif
   unsigned char connect_only; /* make connection/request, then let
                                  application use the socket */
-  BIT(is_fread_set); /* has read callback been set to non-NULL? */
+  /* has READFUNCTION been set to non-NULL by user? */
+  BIT(is_fread_set_from_user);
+  /* has WRITEFUNCTION been set to non-NULL by user? */
+  BIT(is_fwrite_func_from_user);
+  /* has HEADERFUNCTION been set to non-NULL by user? */
+  BIT(is_fwrite_header_from_user);
+  /* has READDATA been set by user? */
+  BIT(is_in_set_from_user);
+  /* has WRITEDATA been set by user? */
+  BIT(is_out_from_user);
+  /* has HEADERDATA been set by user? */
+  BIT(is_writeheader_from_user);
 #ifndef CURL_DISABLE_TFTP
   BIT(tftp_no_options); /* do not send TFTP options requests */
 #endif

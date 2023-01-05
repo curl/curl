@@ -511,7 +511,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   /* use fread as default function to read input */
   set->fread_func_set = (curl_read_callback)fread;
-  set->is_fread_set = 0;
 
   set->seek_func = ZERO_NULL;
   set->seek_client = ZERO_NULL;

@@ -45,6 +45,9 @@ static HMODULE s_hIpHlpApiDll = NULL;
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
 
+/* Pointer to the GetModuleHandleExA function */
+GETMODULEHANDLEEXA_FN Curl_GetModuleHandleExA = NULL;
+
 /* Curl_win32_init() performs win32 global initialization */
 CURLcode Curl_win32_init(long flags)
 {
@@ -92,6 +95,10 @@ CURLcode Curl_win32_init(long flags)
       return result;
   }
 #endif
+
+  Curl_GetModuleHandleExA =
+    CURLX_FUNCTION_CAST(GETMODULEHANDLEEXA_FN,
+      GetProcAddress(GetModuleHandleA("kernel32"), "GetModuleHandleExA"));
 
   s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {

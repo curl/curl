@@ -1319,7 +1319,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   /* If stdin_handle is a pipe, use PeekNamedPipe() method to check it,
      else use the old WaitForMultipleObjects() way */
   if(GetFileType(stdin_handle) == FILE_TYPE_PIPE ||
-     data->set.is_fread_set) {
+     data->set.is_fread_set_from_user) {
     /* Don't wait for stdin_handle, just wait for event_handle */
     obj_count = 1;
     /* Check stdin_handle per 100 milliseconds */
@@ -1340,7 +1340,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     case WAIT_TIMEOUT:
     {
       for(;;) {
-        if(data->set.is_fread_set) {
+        if(data->set.is_fread_set_from_user) {
           size_t n;
           /* read from user-supplied method */
           n = data->state.fread_func(buf, 1, buf_size, data->state.in);
@@ -1475,7 +1475,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   pfd[0].fd = sockfd;
   pfd[0].events = POLLIN;
 
-  if(data->set.is_fread_set) {
+  if(data->set.is_fread_set_from_user) {
     poll_cnt = 1;
     interval_ms = 100; /* poll user-supplied read function */
   }

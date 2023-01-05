@@ -1203,6 +1203,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Custom pointer to pass the header write callback function
      */
     data->set.writeheader = (void *)va_arg(param, void *);
+    data->set.is_writeheader_from_user = true;
     break;
   case CURLOPT_ERRORBUFFER:
     /*
@@ -1217,6 +1218,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * used as argument to the write callback.
      */
     data->set.out = va_arg(param, void *);
+    data->set.is_out_from_user = true;
     break;
 
   case CURLOPT_DIRLISTONLY:
@@ -1349,6 +1351,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * used as argument to the read callback.
      */
     data->set.in_set = va_arg(param, void *);
+    data->set.is_in_set_from_user = true;
     break;
   case CURLOPT_INFILESIZE:
     /*
@@ -1661,15 +1664,23 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set header write callback
      */
     data->set.fwrite_header = va_arg(param, curl_write_callback);
+    if(!data->set.fwrite_header)
+      data->set.is_fwrite_header_from_user = false;
+    else
+      data->set.is_fwrite_header_from_user = true;
     break;
   case CURLOPT_WRITEFUNCTION:
     /*
      * Set data write callback
      */
     data->set.fwrite_func = va_arg(param, curl_write_callback);
-    if(!data->set.fwrite_func)
+    if(!data->set.fwrite_func) {
+      data->set.is_fwrite_func_from_user = false;
       /* When set to NULL, reset to our internal default function */
       data->set.fwrite_func = (curl_write_callback)fwrite;
+    }
+    else
+      data->set.is_fwrite_func_from_user = true;
     break;
   case CURLOPT_READFUNCTION:
     /*
@@ -1677,12 +1688,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     data->set.fread_func_set = va_arg(param, curl_read_callback);
     if(!data->set.fread_func_set) {
-      data->set.is_fread_set = 0;
+      data->set.is_fread_set_from_user = false;
       /* When set to NULL, reset to our internal default function */
       data->set.fread_func_set = (curl_read_callback)fread;
     }
     else
-      data->set.is_fread_set = 1;
+      data->set.is_fread_set_from_user = true;
     break;
   case CURLOPT_SEEKFUNCTION:
     /*

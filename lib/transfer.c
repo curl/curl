@@ -84,6 +84,7 @@
 #include "hsts.h"
 #include "setopt.h"
 #include "headers.h"
+#include "system_win32.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1286,6 +1287,51 @@ void Curl_init_CONNECT(struct Curl_easy *data)
   data->state.in = data->set.in_set;
 }
 
+#if defined(WIN32)
+static CURLcode check_for_option_conflicts(struct Curl_easy *data)
+{
+  if(Curl_GetModuleHandleExA) {
+    HMODULE module;
+
+#pragma warning(push)
+#pragma warning(disable:4054) /* function pointer to data pointer */
+    bool dll = /* true if our code is running from a DLL */
+      Curl_GetModuleHandleExA(
+        (GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT),
+        ((LPCSTR)(void *)check_for_option_conflicts), &module) &&
+      module != GetModuleHandleA(NULL);
+#pragma warning(pop)
+
+    if(dll) {
+      if(data->set.is_in_set_from_user &&
+         !data->set.is_fread_set_from_user) {
+        failf(data, "Windows DLL users must set CURLOPT_READFUNCTION if "
+                    "CURLOPT_READDATA is set.");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+      if(data->set.is_out_from_user &&
+         !data->set.is_fwrite_func_from_user) {
+        failf(data, "Windows DLL users must set CURLOPT_WRITEFUNCTION if "
+                    "CURLOPT_WRITEDATA is set.");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+      if(data->set.is_writeheader_from_user &&
+         !data->set.is_fwrite_func_from_user &&
+         !data->set.is_fwrite_header_from_user) {
+        failf(data, "Windows DLL users must set CURLOPT_HEADERFUNCTION or "
+                    "CURLOPT_WRITEFUNCTION if CURLOPT_HEADERDATA is set.");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+    }
+  }
+
+  return CURLE_OK;
+}
+#else
+#define check_for_option_conflicts(x) CURLE_OK
+#endif
+
 /*
  * Curl_pretransfer() is called immediately before a transfer starts, and only
  * once for one transfer no matter if it has redirects or do multi-pass
@@ -1294,6 +1340,10 @@ void Curl_init_CONNECT(struct Curl_easy *data)
 CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result;
+
+  result = check_for_option_conflicts(data);
+  if(result)
+    return result;
 
   if(!data->state.url && !data->set.uh) {
     /* we can't do anything without URL */

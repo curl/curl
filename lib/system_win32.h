@@ -40,6 +40,21 @@ typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
 /* This is used instead of if_nametoindex if available on Windows */
 extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
 
+#ifndef GET_MODULE_HANDLE_EX_FLAG_PIN
+#define GET_MODULE_HANDLE_EX_FLAG_PIN                  0x00000001
+#endif
+#ifndef GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT
+#define GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT   0x00000002
+#endif
+#ifndef GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+#define GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS         0x00000004
+#endif
+
+typedef BOOL(WINAPI *GETMODULEHANDLEEXA_FN)(DWORD, LPCSTR, HMODULE *);
+
+/* This is used instead of GetModuleHandleExA if available on Windows */
+extern GETMODULEHANDLEEXA_FN Curl_GetModuleHandleExA;
+
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);
 
