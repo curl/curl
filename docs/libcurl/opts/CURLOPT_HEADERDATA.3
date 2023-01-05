@@ -40,6 +40,10 @@ If \fICURLOPT_WRITEFUNCTION(3)\fP or \fICURLOPT_HEADERFUNCTION(3)\fP is used,
 
 If neither of those options are set, \fIpointer\fP must be a valid FILE * and
 it will be used by a plain fwrite() to write headers to.
+
+If you are using libcurl as a win32 DLL, you \fBMUST\fP use a
+\fICURLOPT_WRITEFUNCTION(3)\fP or \fICURLOPT_HEADERFUNCTION(3)\fP if you set
+this option or you will experience crashes.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
