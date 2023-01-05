@@ -48,7 +48,6 @@
 #include "sendf.h"
 #include "strdup.h"
 #include "rand.h"
-#include "ngtcp2.h"
 #include "multiif.h"
 #include "strcase.h"
 #include "cfilters.h"
@@ -60,6 +59,7 @@
 #include "h2h3.h"
 #include "vtls/keylog.h"
 #include "vtls/vtls.h"
+#include "curl_ngtcp2.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
