@@ -1248,8 +1248,8 @@ static size_t readmoredata(char *buffer,
                            size_t nitems,
                            void *userp)
 {
-  struct Curl_easy *data = (struct Curl_easy *)userp;
-  struct HTTP *http = data->req.p.http;
+  struct HTTP *http = (struct HTTP *)userp;
+  struct Curl_easy *data = http->backup.data;
   size_t fullsize = size * nitems;
 
   if(!http->postsize)
@@ -1301,6 +1301,7 @@ static size_t readmoredata(char *buffer,
  */
 CURLcode Curl_buffer_send(struct dynbuf *in,
                           struct Curl_easy *data,
+                          struct HTTP *http,
                           /* add the number of sent bytes to this
                              counter */
                           curl_off_t *bytes_written,
@@ -1313,7 +1314,6 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   char *ptr;
   size_t size;
   struct connectdata *conn = data->conn;
-  struct HTTP *http = data->req.p.http;
   size_t sendsize;
   curl_socket_t sockfd;
   size_t headersize;
@@ -1448,10 +1448,11 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
         http->backup.fread_in = data->state.in;
         http->backup.postdata = http->postdata;
         http->backup.postsize = http->postsize;
+        http->backup.data = data;
 
         /* set the new pointers for the request-sending */
         data->state.fread_func = (curl_read_callback)readmoredata;
-        data->state.in = (void *)data;
+        data->state.in = (void *)http;
         http->postdata = ptr;
         http->postsize = (curl_off_t)size;
 
@@ -1460,7 +1461,6 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
 
         http->send_buffer = *in; /* copy the whole struct */
         http->sending = HTTPSEND_REQUEST;
-
         return CURLE_OK;
       }
       http->sending = HTTPSEND_BODY;
@@ -2342,7 +2342,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
   curl_off_t included_body = 0;
 #else
   /* from this point down, this function should not be used */
-#define Curl_buffer_send(a,b,c,d,e) CURLE_OK
+#define Curl_buffer_send(a,b,c,d,e,f) CURLE_OK
 #endif
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
@@ -2386,7 +2386,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     Curl_pgrsSetUploadSize(data, http->postsize);
 
     /* this sends the buffer and frees all the buffer resources */
-    result = Curl_buffer_send(r, data, &data->info.request_size, 0,
+    result = Curl_buffer_send(r, data, data->req.p.http,
+                              &data->info.request_size, 0,
                               FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending PUT request");
@@ -2407,7 +2408,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       if(result)
         return result;
 
-      result = Curl_buffer_send(r, data, &data->info.request_size, 0,
+      result = Curl_buffer_send(r, data, data->req.p.http,
+                                &data->info.request_size, 0,
                                 FIRSTSOCKET);
       if(result)
         failf(data, "Failed sending POST request");
@@ -2478,7 +2480,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     http->sending = HTTPSEND_BODY;
 
     /* this sends the buffer and frees all the buffer resources */
-    result = Curl_buffer_send(r, data, &data->info.request_size, 0,
+    result = Curl_buffer_send(r, data, data->req.p.http,
+                              &data->info.request_size, 0,
                               FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending POST request");
@@ -2595,11 +2598,10 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       else {
         /* A huge POST coming up, do data separate from the request */
         http->postdata = data->set.postfields;
-
         http->sending = HTTPSEND_BODY;
-
+        http->backup.data = data;
         data->state.fread_func = (curl_read_callback)readmoredata;
-        data->state.in = (void *)data;
+        data->state.in = (void *)http;
 
         /* set the upload size to the progress meter */
         Curl_pgrsSetUploadSize(data, http->postsize);
@@ -2638,7 +2640,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       }
     }
     /* issue the request */
-    result = Curl_buffer_send(r, data, &data->info.request_size, included_body,
+    result = Curl_buffer_send(r, data, data->req.p.http,
+                              &data->info.request_size, included_body,
                               FIRSTSOCKET);
 
     if(result)
@@ -2654,7 +2657,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       return result;
 
     /* issue the request */
-    result = Curl_buffer_send(r, data, &data->info.request_size, 0,
+    result = Curl_buffer_send(r, data, data->req.p.http,
+                              &data->info.request_size, 0,
                               FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending HTTP request");
