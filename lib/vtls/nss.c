@@ -2404,6 +2404,19 @@ static ssize_t nss_send(struct Curl_cfilter *cf,
   return rc; /* number of bytes */
 }
 
+static bool
+nss_data_pending(struct Curl_cfilter *cf, const struct Curl_easy *data)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  PRFileDesc *fd = connssl->backend->handle->lower;
+  char buf;
+
+  (void) data;
+
+  /* Returns true in case of error to force reading. */
+  return PR_Recv(fd, (void *) &buf, 1, PR_MSG_PEEK, PR_INTERVAL_NO_WAIT) != 0;
+}
+
 static ssize_t nss_recv(struct Curl_cfilter *cf,
                         struct Curl_easy *data,    /* transfer */
                         char *buf,             /* store read data here */
@@ -2554,7 +2567,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   nss_check_cxn,                /* check_cxn */
   /* NSS has no shutdown function provided and thus always fail */
   Curl_none_shutdown,           /* shutdown */
-  Curl_none_data_pending,       /* data_pending */
+  nss_data_pending,             /* data_pending */
   nss_random,                   /* random */
   nss_cert_status_request,      /* cert_status_request */
   nss_connect,                  /* connect */
