@@ -32,6 +32,11 @@ jobs:
       fail-fast: false
       matrix:
         build:
+        - name: quiche
+          install_packages: zlib1g-dev
+          install_steps: quiche
+          configure: LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release" --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src --enable-debug --with-quiche=/home/runner/work/curl/curl/quiche/target/release
+
         - name: bearssl
           install_packages: zlib1g-dev
           install_steps: bearssl
@@ -116,6 +121,8 @@ jobs:
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
 
+    - uses: actions/checkout@v3
+
     - if: ${{ contains(matrix.build.install_steps, 'gcc-11') }}
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
@@ -145,6 +152,27 @@ jobs:
         ./configure --prefix=$HOME/libressl
         make install
       name: 'install libressl'
+
+    - if: ${{ contains(matrix.build.install_steps, 'quiche') }}
+      run: |
+        git clone --depth=1 --recursive https://github.com/cloudflare/quiche.git
+        cd quiche
+        #### Work-around https://github.com/curl/curl/issues/7927 #######
+        #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
+        sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
+
+        # /home/runner/work/curl/curl/boringssl
+
+        cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
+        mkdir -v quiche/deps/boringssl/src/lib
+        ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
+
+        # include dir
+        # /home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src/include
+        # lib dir
+        # /home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src/lib
+
+      name: 'build quiche and boringssl'
 
     - if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
       run: |
@@ -211,8 +239,6 @@ jobs:
         source /opt/intel/oneapi/setvars.sh
         printenv >> $GITHUB_ENV
       name: 'install Intel compilers'
-
-    - uses: actions/checkout@v3
 
     - run: autoreconf -fi
       name: 'autoreconf'

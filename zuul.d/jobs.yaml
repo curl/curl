@@ -70,24 +70,6 @@
         LD_LIBRARY_PATH: "{{ ansible_user_dir }}/boringssl/lib:/usr/local/lib"
 
 - job:
-    name: curl-novalgrind-boringssl-with-openssl-quiche
-    parent: curl-base
-    vars:
-      curl_apt_packages:
-        - libpsl-dev
-        - libbrotli-dev
-        - libzstd-dev
-      curl_env:
-        CC: gcc-8
-        CXX: g++-8
-        T: novalgrind
-        QUICHE: "yes"
-        C: >-
-          --with-openssl={{ ansible_user_dir }}/quiche/quiche/deps/boringssl/src
-          --with-quiche={{ ansible_user_dir }}/quiche/target/release
-        LD_LIBRARY_PATH: "{{ ansible_user_dir }}/quiche/target/release:/usr/local/lib"
-
-- job:
     name: curl-novalgrind-ngtcp2-with-openssl
     parent: curl-base
     vars:
@@ -218,7 +200,6 @@
       jobs:
       - curl-normal-with-openssl-gssapi-libssh2-checksrc
       - curl-novalgrind-boringssl-with-openssl
-      - curl-novalgrind-boringssl-with-openssl-quiche
       - curl-novalgrind-ngtcp2-with-openssl
       - curl-debug-clang-disable-alt-svc-with-openssl
       - curl-debug-clang-with-gnutls
