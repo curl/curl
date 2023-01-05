@@ -1314,7 +1314,8 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
 
   /* Get the server IP address. */
 #ifdef ENABLE_IPV6
-  if(cf->conn->bits.ipv6_ip && Curl_inet_pton(AF_INET6, connssl->hostname, &addr))
+  if(cf->conn->bits.ipv6_ip &&
+     Curl_inet_pton(AF_INET6, connssl->hostname, &addr))
     addrlen = sizeof(struct in6_addr);
   else
 #endif
