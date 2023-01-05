@@ -32,9 +32,9 @@
 #include "urldata.h"
 #include "dynbuf.h"
 #include "curl_printf.h"
-#include "msh3.h"
-#include "ngtcp2.h"
-#include "quiche.h"
+#include "curl_msh3.h"
+#include "curl_ngtcp2.h"
+#include "curl_quiche.h"
 #include "vquic.h"
 
 #ifdef O_BINARY

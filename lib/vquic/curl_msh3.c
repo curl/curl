@@ -33,7 +33,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "h2h3.h"
-#include "msh3.h"
+#include "curl_msh3.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

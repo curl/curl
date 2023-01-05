@@ -39,6 +39,7 @@
 #include "connect.h"
 #include "strerror.h"
 #include "vquic.h"
+#include "curl_quiche.h"
 #include "transfer.h"
 #include "h2h3.h"
 #include "vtls/openssl.h"
@@ -133,7 +134,7 @@ struct quic_handshake {
 
 struct h3_event_node {
   struct h3_event_node *next;
-  uint64_t stream3_id;
+  int64_t stream3_id;
   quiche_h3_event *ev;
 };
 
@@ -175,28 +176,9 @@ static void h3_clear_pending(struct cf_quiche_ctx *ctx)
   }
 }
 
-static bool h3_has_pending(struct Curl_cfilter *cf,
-                           struct Curl_easy *data)
-{
-  struct cf_quiche_ctx *ctx = cf->ctx;
-  struct HTTP *stream = data->req.p.http;
-  struct h3_event_node *node;
-
-  for(node = ctx->pending; node; node = node->next) {
-    if(node->stream3_id == stream->stream3_id) {
-      CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] has data pending"),
-                stream->stream3_id));
-      return TRUE;
-    }
-  }
-  CF_DEBUGF(infof(data, CFMSG(cf, "h3[%u] no data pending"),
-            stream->stream3_id));
-  return FALSE;
-}
-
 static CURLcode h3_add_event(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
-                             uint64_t stream3_id, quiche_h3_event *ev)
+                             int64_t stream3_id, quiche_h3_event *ev)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct Curl_easy *mdata;
@@ -270,7 +252,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
 static ssize_t h3_process_event(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 char *buf, size_t len,
-                                uint64_t stream3_id,
+                                int64_t stream3_id,
                                 quiche_h3_event *ev,
                                 CURLcode *err)
 {
@@ -387,7 +369,7 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
   socklen_t from_len;
   quiche_recv_info recv_info;
 
-  DEBUGASSERT(qs->conn);
+  DEBUGASSERT(ctx->qconn);
 
   /* in case the timeout expired */
   quiche_conn_on_timeout(ctx->qconn);
@@ -482,7 +464,6 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t recvd = -1;
   ssize_t rcode;
   quiche_h3_event *ev;
-  int rc;
   struct h3h1header headers;
   struct HTTP *stream = data->req.p.http;
   headers.dest = buf;
@@ -614,6 +595,8 @@ static CURLcode cf_http_request(struct Curl_cfilter *cf,
 
     stream3_id = quiche_h3_send_request(ctx->h3c, ctx->qconn, nva, nheader,
                                         stream->upload_left ? FALSE: TRUE);
+    CF_DEBUGF(infof(data, CFMSG(cf, "send_request(with_body=%d) -> %zd"),
+                    !!stream->upload_left, stream3_id));
     if((stream3_id >= 0) && data->set.postfields) {
       ssize_t sent = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream3_id,
                                          (uint8_t *)data->set.postfields,
@@ -655,7 +638,7 @@ fail:
 static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                               const void *buf, size_t len, CURLcode *err)
 {
-  struct cf_quiche_ctx *ctx = ctx;
+  struct cf_quiche_ctx *ctx = cf->ctx;
   struct HTTP *stream = data->req.p.http;
   ssize_t sent;
 
@@ -673,7 +656,14 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(sent == QUICHE_H3_ERR_DONE) {
       sent = 0;
     }
+    else if(sent == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
+      DEBUGF(infof(data, CFMSG(cf, "send_body(len=%zu) -> exceeds size"),
+                   len));
+      *err = CURLE_SEND_ERROR;
+      return -1;
+    }
     else if(sent < 0) {
+      DEBUGF(infof(data, CFMSG(cf, "send_body(len=%zu) -> %zd"), len, sent));
       *err = CURLE_SEND_ERROR;
       return -1;
     }
@@ -695,7 +685,6 @@ static int cf_quiche_get_select_socks(struct Curl_cfilter *cf,
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct SingleRequest *k = &data->req;
   int rv = GETSOCK_BLANK;
-  struct HTTP *stream = data->req.p.http;
 
   socks[0] = ctx->sockfd;
 
@@ -718,8 +707,19 @@ static bool cf_quiche_data_pending(struct Curl_cfilter *cf,
                                    const struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
+  struct HTTP *stream = data->req.p.http;
+  struct h3_event_node *node;
 
-  return h3_has_pending(cf, (struct Curl_easy *)data);
+  for(node = ctx->pending; node; node = node->next) {
+    if(node->stream3_id == stream->stream3_id) {
+      CF_DEBUGF(infof((struct Curl_easy *)data,
+                CFMSG(cf, "h3[%u] has data pending"), stream->stream3_id));
+      return TRUE;
+    }
+  }
+  CF_DEBUGF(infof((struct Curl_easy *)data,
+            CFMSG(cf, "h3[%u] no data pending"), stream->stream3_id));
+  return FALSE;
 }
 
 static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
@@ -815,7 +815,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   const struct Curl_sockaddr_ex *sockaddr;
   const char *r_ip;
   int r_port;
-  int qfd;
 
   result = Curl_cf_socket_peek(cf->next, &ctx->sockfd,
                                &sockaddr, &r_ip, &r_port);
@@ -1045,6 +1044,7 @@ static void cf_quiche_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
 
+  (void)data;
   cf_quiche_ctx_clear(ctx);
   free(ctx);
   cf->ctx = NULL;
@@ -1058,17 +1058,11 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT: {
-    uint64_t in_use = CONN_INUSE(cf->conn);
-    if(ctx->goaway) {
-      *pres1 = in_use;
+    uint64_t max_streams = CONN_INUSE(cf->conn);
+    if(!ctx->goaway) {
+      max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
-    else {
-      uint64_t bidi_left = quiche_conn_peer_streams_left_bidi(ctx->qconn);
-      if(bidi_left >= (INT_MAX - in_use))
-        *pres1 = INT_MAX;
-      else
-        *pres1 = (long)(bidi_left + in_use);
-    }
+    *pres1 = (max_streams > INT_MAX)? INT_MAX : (int)max_streams;
     CF_DEBUGF(infof(data, CFMSG(cf, "query: MAX_CONCURRENT -> %ld"), *pres1));
     return CURLE_OK;
   }
