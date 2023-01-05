@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_QUICHE_H
-#define HEADER_CURL_VQUIC_QUICHE_H
+#ifndef HEADER_CURL_VQUIC_CURL_QUICHE_H
+#define HEADER_CURL_VQUIC_CURL_QUICHE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -47,4 +47,4 @@ bool Curl_conn_is_quiche(const struct Curl_easy *data,
 
 #endif
 
-#endif /* HEADER_CURL_VQUIC_QUICHE_H */
+#endif /* HEADER_CURL_VQUIC_CURL_QUICHE_H */
