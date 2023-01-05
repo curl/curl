@@ -74,8 +74,10 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const struct connectdata *conn,
                              const char *thisheader,
                              const size_t thislen);
+struct HTTP; /* see below */
 CURLcode Curl_buffer_send(struct dynbuf *in,
                           struct Curl_easy *data,
+                          struct HTTP *http,
                           curl_off_t *bytes_written,
                           curl_off_t included_body_bytes,
                           int socketindex);
@@ -198,6 +200,7 @@ struct HTTP {
     void *fread_in;           /* backup storage for fread_in pointer */
     const char *postdata;
     curl_off_t postsize;
+    struct Curl_easy *data;
   } backup;
 
   enum {

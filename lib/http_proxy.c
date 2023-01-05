@@ -74,7 +74,7 @@ struct tunnel_state {
   int sockindex;
   const char *hostname;
   int remote_port;
-  struct HTTP http_proxy;
+  struct HTTP CONNECT;
   struct dynbuf rcvbuf;
   struct dynbuf req;
   size_t nsend;
@@ -342,7 +342,8 @@ static CURLcode start_CONNECT(struct Curl_easy *data,
     goto out;
 
   /* Send the connect request to the proxy */
-  result = Curl_buffer_send(&ts->req, data, &data->info.request_size, 0,
+  result = Curl_buffer_send(&ts->req, data, &ts->CONNECT,
+                            &data->info.request_size, 0,
                             ts->sockindex);
   ts->headerlines = 0;
 
@@ -360,7 +361,7 @@ static CURLcode send_CONNECT(struct Curl_easy *data,
                              bool *done)
 {
   struct SingleRequest *k = &data->req;
-  struct HTTP *http = &ts->http_proxy;
+  struct HTTP *http = &ts->CONNECT;
   CURLcode result = CURLE_OK;
 
   if(http->sending != HTTPSEND_REQUEST)
@@ -381,7 +382,7 @@ static CURLcode send_CONNECT(struct Curl_easy *data,
     result = Curl_write(data,
                         conn->writesockfd,  /* socket to send to */
                         k->upload_fromhere, /* buffer pointer */
-                        ts->nsend,           /* buffer size */
+                        ts->nsend,          /* buffer size */
                         &bytes_written);    /* actually sent */
     if(result)
       goto out;
@@ -1145,8 +1146,9 @@ static int http_proxy_cf_get_select_socks(struct Curl_cfilter *cf,
          wait for the socket to become readable to be able to get the
          response headers or if we're still sending the request, wait
          for write. */
-      if(ts->http_proxy.sending == HTTPSEND_REQUEST)
+      if(ts->CONNECT.sending == HTTPSEND_REQUEST) {
         return GETSOCK_WRITESOCK(0);
+      }
       return GETSOCK_READSOCK(0);
     }
     return GETSOCK_WRITESOCK(0);
