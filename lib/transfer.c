@@ -1293,15 +1293,25 @@ static CURLcode check_for_option_conflicts(struct Curl_easy *data)
   if(Curl_GetModuleHandleExA) {
     HMODULE module;
 
+/* disable warning for function pointer to data pointer */
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#elif defined(_MSC_VER)
 #pragma warning(push)
-#pragma warning(disable:4054) /* function pointer to data pointer */
+#pragma warning(disable:4054)
+#endif
     bool dll = /* true if our code is running from a DLL */
       Curl_GetModuleHandleExA(
         (GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
          GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT),
         ((LPCSTR)(void *)check_for_option_conflicts), &module) &&
       module != GetModuleHandleA(NULL);
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
 #pragma warning(pop)
+#endif
 
     if(dll) {
       if(data->set.is_in_set_from_user &&
