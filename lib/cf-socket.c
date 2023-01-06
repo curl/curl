@@ -1555,10 +1555,14 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
   if(Curl_cf_is_socket(cf) && cf->ctx) {
     struct cf_socket_ctx *ctx = cf->ctx;
 
-    *psock = ctx->sock;
-    *paddr = &ctx->addr;
-    *premote_ip_str = ctx->r_ip;
-    *premote_port = ctx->r_port;
+    if(psock)
+      *psock = ctx->sock;
+    if(paddr)
+      *paddr = &ctx->addr;
+    if(premote_ip_str)
+      *premote_ip_str = ctx->r_ip;
+    if(premote_port)
+      *premote_port = ctx->r_port;
     return CURLE_OK;
   }
   return CURLE_FAILED_INIT;

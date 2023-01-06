@@ -352,6 +352,7 @@ void Curl_conncontrol(struct connectdata *conn,
  * provided method `cf_create` and running setup/connect on it.
  */
 struct eyeballer {
+  const char *name;
   const struct Curl_addrinfo *addr;  /* List of addresses to try, not owned */
   int ai_family;                     /* matching address family only */
   cf_ip_connect_create *cf_create;   /* for creating cf */
@@ -379,7 +380,7 @@ struct cf_he_ctx {
   cf_ip_connect_create *cf_create;
   const struct Curl_dns_entry *remotehost;
   cf_connect_state state;
-  struct eyeballer *baller[5];
+  struct eyeballer *baller[2];
   struct eyeballer *winner;
   struct curltime started;
 };
@@ -400,6 +401,8 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
   if(!baller)
     return CURLE_OUT_OF_MEMORY;
 
+  baller->name = ((ai_family == AF_INET)? "ipv4" : (
+                  (ai_family == AF_INET6)? "ipv6" : "ip"));
   baller->cf_create = cf_create;
   baller->addr = addr;
   baller->ai_family = ai_family;
@@ -458,8 +461,6 @@ static void baller_initiate(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-  CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer created %s"),
-                  baller->cf->cft->name));
   /* the new filter might have sub-filters */
   for(wcf = baller->cf; wcf; wcf = wcf->next) {
     wcf->conn = cf->conn;
@@ -472,7 +473,7 @@ static void baller_initiate(struct Curl_cfilter *cf,
 
 out:
   if(result) {
-    CF_DEBUGF(infof(data, "eyeballer failed"));
+    CF_DEBUGF(infof(data, "eyeballer[%s] failed", baller->name));
     baller_close(baller, data);
   }
   if(cf_prev)
@@ -546,8 +547,8 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
         baller->is_done = TRUE;
       }
       else if(Curl_timediff(*now, ctx->started) >= baller->timeoutms) {
-        infof(data, "After %" CURL_FORMAT_TIMEDIFF_T
-              "ms connect time, move on!", baller->timeoutms);
+        infof(data, "%s connect timeout after %" CURL_FORMAT_TIMEDIFF_T
+              "ms, move on!", baller->name, baller->timeoutms);
 #if defined(ETIMEDOUT)
         baller->error = ETIMEDOUT;
 #endif
@@ -592,13 +593,12 @@ evaluate:
       continue;
 
     if(!baller->has_started) {
-      CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%d] not started yet"), i));
       ++not_started;
       continue;
     }
     baller->result = baller_connect(cf, data, baller, &now, connected);
-    CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%d] connect -> %d, "
-              "connected=%d"), i, baller->result, *connected));
+    CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%s] connect -> %d, "
+              "connected=%d"), baller->name, baller->result, *connected));
 
     if(!baller->result) {
       if(*connected) {
@@ -619,11 +619,14 @@ evaluate:
       }
       allow = Curl_timeleft(data, &now, TRUE);
       baller->timeoutms = baller->addr->ai_next == NULL ? allow : allow / 2;
-      CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%d] starting"), i));
       baller_start_next(cf, data, baller);
-      if(!baller->is_done) {
+      if(baller->is_done) {
+        CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%s] done"), baller->name));
+      }
+      else {
         /* next attempt was started */
-        CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%d] started"), i));
+        CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%s] trying next"),
+                        baller->name));
         ++ongoing;
       }
     }
@@ -655,10 +658,14 @@ evaluate:
        * its start delay_ms have expired */
       if((baller->primary && baller->primary->is_done) ||
           Curl_timediff(now, ctx->started) >= baller->delay_ms) {
-        CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%d] starting"), i));
         baller_start(cf, data, baller);
-        if(!baller->is_done) {
-          CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%d] has started"), i));
+        if(baller->is_done) {
+          CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%s] done"),
+                          baller->name));
+        }
+        else {
+          CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%s] starting"),
+                          baller->name));
           ++ongoing;
           ++added;
         }
@@ -679,8 +686,9 @@ evaluate:
   result = CURLE_COULDNT_CONNECT;
   for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
     struct eyeballer *baller = ctx->baller[i];
-    CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%d] assess started=%d, "
-              "result=%d"), i, baller->has_started, baller->result));
+    CF_DEBUGF(infof(data, CFMSG(cf, "eyeballer[%s] assess started=%d, "
+              "result=%d"),
+              baller->name, baller->has_started, baller->result));
     if(baller && baller->has_started && baller->result) {
       result = baller->result;
       break;
@@ -887,6 +895,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
       if(!result && *done) {
         DEBUGASSERT(ctx->winner);
         DEBUGASSERT(ctx->winner->cf);
+        DEBUGASSERT(ctx->winner->cf->connected);
         /* we have a winner. Install and activate it.
          * close/free all others. */
         ctx->state = SCFST_DONE;
@@ -953,7 +962,7 @@ static void cf_he_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   CF_DEBUGF(infof(data, CFMSG(cf, "destroy")));
   if(ctx) {
-    cf_he_close(cf, data);
+    cf_he_ctx_clear(cf, data);
   }
   /* release any resources held in state */
   Curl_safefree(ctx);
@@ -1189,11 +1198,8 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
 
+  (void)data;
   CF_DEBUGF(infof(data, CFMSG(cf, "destroy")));
-  if(ctx) {
-    cf_setup_close(cf, data);
-  }
-  /* release any resources held in state */
   Curl_safefree(ctx);
 }
 
