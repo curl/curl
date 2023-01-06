@@ -1169,6 +1169,10 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct HTTP *stream = data->req.p.http;
 
+  DEBUGASSERT(cf->connected);
+  DEBUGASSERT(ctx);
+  DEBUGASSERT(ctx->qconn);
+  DEBUGASSERT(ctx->h3conn);
   *err = CURLE_OK;
 
   if(!stream->memlen) {
@@ -1442,6 +1446,10 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t sent = 0;
   struct HTTP *stream = data->req.p.http;
 
+  DEBUGASSERT(cf->connected);
+  DEBUGASSERT(ctx);
+  DEBUGASSERT(ctx->qconn);
+  DEBUGASSERT(ctx->h3conn);
   *err = CURLE_OK;
 
   if(stream->closed) {
@@ -1576,8 +1584,16 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
     if(recvd == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK)
         break;
-
-      failf(data, "ngtcp2: recvfrom() unexpectedly returned %zd", recvd);
+      if(SOCKERRNO == ECONNREFUSED) {
+        const char *r_ip;
+        int r_port;
+        Curl_cf_socket_peek(cf->next, NULL, NULL, &r_ip, &r_port);
+        failf(data, "ngtcp2: connection to %s port %u refused",
+              r_ip, r_port);
+        return CURLE_COULDNT_CONNECT;
+      }
+      failf(data, "ngtcp2: recvfrom() unexpectedly returned %zd (errno=%d)",
+                  recvd, SOCKERRNO);
       return CURLE_RECV_ERROR;
     }
 
@@ -2273,13 +2289,13 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
       return result;
   }
 
+  *done = FALSE;
   if(!ctx->qconn) {
     result = cf_connect_start(cf, data);
     if(result)
       goto out;
   }
 
-  *done = FALSE;
   result = cf_process_ingress(cf, data);
   if(result)
     goto out;
@@ -2301,12 +2317,10 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
 out:
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(result && result != CURLE_AGAIN) {
-    const struct Curl_sockaddr_ex *sockaddr;
     const char *r_ip;
     int r_port;
 
-    result = Curl_cf_socket_peek(cf->next, &ctx->sockfd,
-                                 &sockaddr, &r_ip, &r_port);
+    Curl_cf_socket_peek(cf->next, NULL, NULL, &r_ip, &r_port);
     infof(data, "connect to %s port %u failed: %s",
           r_ip, r_port, curl_easy_strerror(result));
   }
@@ -2364,7 +2378,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
                                const struct Curl_addrinfo *ai)
 {
   struct cf_ngtcp2_ctx *ctx = NULL;
-  struct Curl_cfilter *cf = NULL, *udp_cf;
+  struct Curl_cfilter *cf = NULL, *udp_cf = NULL;
   CURLcode result;
 
   (void)data;

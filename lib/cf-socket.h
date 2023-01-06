@@ -166,6 +166,10 @@ bool Curl_cf_is_socket(struct Curl_cfilter *cf);
 /**
  * Peek at the socket and remote ip/port the socket filter is using.
  * The filter owns all returned values.
+ * @param psock             pointer to hold socket descriptor or NULL
+ * @param paddr             pointer to hold addr reference or NULL
+ * @param premote_ip_str    pointer to hold remote addr as string or NULL
+ * @param premote_port      pointer to hold remote port number or NULL
  * Returns error if the filter is of invalid type.
  */
 CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
