@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Linux
+name: wolfssl
 
 on:
   push:

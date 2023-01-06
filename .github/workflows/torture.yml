@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Linux
+name: torture
 
 on:
   push:
