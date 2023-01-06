@@ -188,6 +188,7 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #include "wildcard.h"
 #include "multihandle.h"
 #include "c-hyper.h"
+#include "cf-socket.h"
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU

@@ -363,7 +363,8 @@ ssize_t Curl_send_plain(struct Curl_easy *data, int num,
 #if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(conn->bits.tcp_fastopen) {
     bytes_written = sendto(sockfd, mem, len, MSG_FASTOPEN,
-                           conn->remote_addr.addr, conn->remote_addr.addrlen);
+                           &conn->remote_addr->sa_addr,
+                           conn->remote_addr->addrlen);
     conn->bits.tcp_fastopen = FALSE;
   }
   else
