@@ -9,13 +9,19 @@ on:
     branches:
     - master
     - '*/ci'
-    paths-ignore:
-    - '**/*.md'
+    paths:
+    - '**'
+    - '!**/*.yml'
+    - '!**/*.md'
+    - '**/linux.yml'
   pull_request:
     branches:
     - master
-    paths-ignore:
-    - '**/*.md'
+    paths:
+    - '**'
+    - '!**/*.yml'
+    - '!**/*.md'
+    - '**/linux.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}

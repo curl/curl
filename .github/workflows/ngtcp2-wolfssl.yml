@@ -9,13 +9,19 @@ on:
     branches:
     - master
     - '*/ci'
-    paths-ignore:
-    - '**/*.md'
+    paths:
+    - '**'
+    - '!**/*.yml'
+    - '!**/*.md'
+    - '**/ngtcp2-wolfssl.yml'
   pull_request:
     branches:
     - master
-    paths-ignore:
-    - '**/*.md'
+    paths:
+    - '**'
+    - '!**/*.yml'
+    - '!**/*.md'
+    - '**/ngtcp2-wolfssl.yml'
 
 concurrency:
   # Hardcoded workflow filename as workflow name above is just Linux again
