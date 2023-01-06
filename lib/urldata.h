@@ -1805,6 +1805,10 @@ struct UserDefined {
 #endif
   unsigned char connect_only; /* make connection/request, then let
                                  application use the socket */
+  /* has SEEKFUNCTION been set to non-NULL by user? */
+  BIT(is_seek_func_from_user);
+  /* has IOCTLFUNCTION been set to non-NULL by user? */
+  BIT(is_ioctl_func_from_user);
   /* has READFUNCTION been set to non-NULL by user? */
   BIT(is_fread_set_from_user);
   /* has WRITEFUNCTION been set to non-NULL by user? */

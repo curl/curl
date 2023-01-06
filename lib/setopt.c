@@ -1700,6 +1700,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Seek callback. Might be NULL.
      */
     data->set.seek_func = va_arg(param, curl_seek_callback);
+    if(!data->set.seek_func)
+      data->set.is_seek_func_from_user = false;
+    else
+      data->set.is_seek_func_from_user = true;
     break;
   case CURLOPT_SEEKDATA:
     /*
@@ -1712,6 +1716,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * I/O control callback. Might be NULL.
      */
     data->set.ioctl_func = va_arg(param, curl_ioctl_callback);
+    if(!data->set.ioctl_func)
+      data->set.is_ioctl_func_from_user = false;
+    else
+      data->set.is_ioctl_func_from_user = true;
     break;
   case CURLOPT_IOCTLDATA:
     /*

@@ -1314,6 +1314,20 @@ static CURLcode check_for_option_conflicts(struct Curl_easy *data)
 #endif
 
     if(dll) {
+      if(data->set.is_ioctl_func_from_user &&
+         (!data->set.is_in_set_from_user ||
+          !data->set.is_fread_set_from_user)) {
+        failf(data, "Windows DLL users must set CURLOPT_READDATA and "
+                    "CURLOPT_READFUNCTION if CURLOPT_IOCTLFUNCTION is set.");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+      if(data->set.is_seek_func_from_user &&
+         (!data->set.is_in_set_from_user ||
+          !data->set.is_fread_set_from_user)) {
+        failf(data, "Windows DLL users must set CURLOPT_READDATA and "
+                    "CURLOPT_READFUNCTION if CURLOPT_SEEKFUNCTION is set.");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
       if(data->set.is_in_set_from_user &&
          !data->set.is_fread_set_from_user) {
         failf(data, "Windows DLL users must set CURLOPT_READFUNCTION if "
