@@ -965,13 +965,13 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
       return result;
   }
 
+  *done = FALSE;
   if(!ctx->qconn) {
     result = cf_connect_start(cf, data);
     if(result)
       goto out;
   }
 
-  *done = FALSE;
   result = cf_process_ingress(cf, data);
   if(result)
     goto out;
@@ -994,12 +994,10 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
 out:
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(result && result != CURLE_AGAIN) {
-    const struct Curl_sockaddr_ex *sockaddr;
     const char *r_ip;
     int r_port;
 
-    result = Curl_cf_socket_peek(cf->next, &ctx->sockfd,
-                                 &sockaddr, &r_ip, &r_port);
+    Curl_cf_socket_peek(cf->next, NULL, NULL, &r_ip, &r_port);
     infof(data, "connect to %s port %u failed: %s",
           r_ip, r_port, curl_easy_strerror(result));
   }
