@@ -2378,7 +2378,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
                                const struct Curl_addrinfo *ai)
 {
   struct cf_ngtcp2_ctx *ctx = NULL;
-  struct Curl_cfilter *cf = NULL, *udp_cf;
+  struct Curl_cfilter *cf = NULL, *udp_cf = NULL;
   CURLcode result;
 
   (void)data;
