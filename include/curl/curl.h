@@ -248,7 +248,7 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
 
 #ifndef CURL_MAX_READ_SIZE
   /* The maximum receive buffer size configurable via CURLOPT_BUFFERSIZE. */
-#define CURL_MAX_READ_SIZE 524288
+#define CURL_MAX_READ_SIZE (10*1024*1024)
 #endif
 
 #ifndef CURL_MAX_WRITE_SIZE
