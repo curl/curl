@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         249
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2787
+ Contributors:                 2789
 
 This release includes the following changes:
 
@@ -14,50 +14,65 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o cf-socket: keep sockaddr local in the socket filters [69]
  o cfilters:Curl_conn_get_select_socks: use the first non-connected filter [24]
  o cmake: bump requirement to 3.7 [23]
  o cmake: check for sendmsg [39]
  o cmake: fix the snprintf detection [5]
+ o cmake: set SOVERSION also for macOS [68]
  o copyright: update all copyright lines and remove year ranges [35]
  o curl.h: mark CURLSSLBACKEND_MESALINK as deprecated [52]
  o curl_global_sslset.3: clarify the openssl situation [53]
+ o CURLOPT_HEADERDATA.3: warn DLL users must set write function [45]
  o docs/DEPRECATE.md: deprecate gskit [36]
  o docs: add link to GitHub Discussions [49]
  o docs: mention indirect effects of --insecure [19]
  o examples: remove the curlgtk.c example [48]
  o ftpserver: lower the normal DATA connect timeout to speed up torture tests [27]
+ o GHA: add job on Slackware 15.0 [58]
  o haxproxy: send before TLS handhshake [34]
  o hsts: handle adding the same host name again
+ o http2: fix compiler warning due to uninitialized variable
  o http2: when using printf %.*s, the length arg must be 'int' [41]
  o HTTP3: mention what needs to be in place to remove EXPERIMENTAL label [31]
  o http: add additional condition for including stdint.h [54]
  o http: decode transfer encoding first [51]
  o http: remove the trace message "Mark bundle... multiuse" [6]
+ o http_proxy: do not assign data->req.p.http use local copy [59]
  o lib670: make test.h the first include [56]
  o lib: connect/h2/h3 refactor [57]
+ o lib: fix typos in comments which repeat a word [67]
  o libssh2: try sha2 algos for hostkey methods [2]
  o Linux CI: update some dependecies to latest tag [44]
  o Makefile.mk: fix wolfssl and mbedtls default paths [21]
  o md4: fix build with GnuTLS + OpenSSL v1 [12]
  o misc: fix grammar and spelling [14]
+ o misc: reduce struct and struct field sizes [65]
  o msh3: add support for request payload [28]
  o msh3: update to v0.5 Release [17]
  o multihandle: turn bool struct fields into bits [26]
  o ngtcp2: fix the build without 'sendmsg' [38]
+ o noproxy: support for space-separated names is deprecated [66]
+ o nss: implement data_pending method [43]
  o openssl: remove attached easy handles from SSL instances [29]
  o release-notes.pl: check fixes/closes lines better
  o Revert "x509asn1: avoid freeing unallocated pointers" [37]
  o runtest.pl: add expected fourth return value [40]
  o runtests: also tear down http2/http3 servers when https server is stopped [8]
  o runtests: consider warnings fatal and error on them [32]
+ o runtests: fix detection of TLS backends [50]
  o runtests: make 'mbedtls' a testable feature
+ o scripts: set file mode +x on all perl and shell scripts [63]
+ o sectransp: fix for incomplete read/writes [61]
  o SECURITY-PROCESS.md: document severity levels [20]
+ o setopt: move the SHA256 opt within #ifdef libssh2 [42]
  o socketpair: allow localhost MITM sniffers [30]
  o strdup: name it Curl_strdup [16]
  o test1560: use a UTF8-using locale when run [46]
  o tests: add 3 new HTTP/2 test cases, plus https: support for nghttpx [9]
  o tests: avoid use of sha1 in certificates [4]
  o tool_operate: fix `CURLOPT_SOCKS5_GSSAPI_NEC` type [1]
+ o tool_operate: fix headerfile writing [64]
  o transfer: break the read loop when RECV is cleared [22]
  o typecheck: accept expressions for option/info parameters [3]
  o urldata: cease storing TLS auth type [55]
@@ -68,6 +83,7 @@ This release includes the following bugfixes:
  o vtls: use ALPN HTTP/1.0 when HTTP/1.0 is used
  o workflows/linux.yml: merge 3 common packages [18]
  o writeout: add %{certs} and %{num_certs} [33]
+ o x509asn1: fix compile errors and warnings [47]
 
 This release includes the following known bugs:
 
@@ -84,14 +100,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andy Alt, Cameron Blomquist, Daniel Stenberg, Esdras de Morais da Silva,
-  Hannah Schierling, Harry Sintonen, Hide Ishikawa, Jakob Hirsch, John Bampton,
-  Josh Brobst, Marcel Raad, Martin Waleczek, Nick Banks, nick-telia on github,
+  Andrei Rybak, Andy Alt, Cameron Blomquist, Daniel Stenberg,
+  Esdras de Morais da Silva, Hannah Schierling, Harry Sintonen, Hide Ishikawa,
+  Jakob Hirsch, John Bampton, Jon Rumsey, Josh Brobst, Marcel Raad,
+  Martin Waleczek, Michael Osipov, Nick Banks, nick-telia on github,
   norbertmm on github, odek86 on github, Patrick Monnerat, Paul Howarth,
-  Philip Heiduck, Radu Hociung, Ryan Schmidt, Sergio-IME on github,
-  SerusDev on github, Stefan Eissing, Stephan Guilloux, Thomas Klausner,
-  Timmy Schierling, Viktor Szakats, William Tang, Yurii Rashkovskii
-  (30 contributors)
+  Philip Heiduck, Radek Brich, Radu Hociung, Ray Satiro, Ryan Schmidt,
+  Sébastien Helleu, Sergio-IME on github, SerusDev on github, Stefan Eissing,
+  Stephan Guilloux, Thomas Klausner, Timmy Schierling, Viktor Szakats,
+  William Tang, Yurii Rashkovskii
+  (36 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -136,10 +154,15 @@ References to bug reports and discussions on issues:
  [39] = https://curl.se/bug/?i=10211
  [40] = https://curl.se/bug/?i=10206
  [41] = https://curl.se/bug/?i=10203
+ [42] = https://curl.se/bug/?i=10255
+ [43] = https://curl.se/bug/?i=10225
  [44] = https://curl.se/bug/?i=10195
+ [45] = https://curl.se/bug/?i=10233
  [46] = https://curl.se/bug/?i=10193
+ [47] = https://curl.se/bug/?i=10238
  [48] = https://curl.se/bug/?i=10197
  [49] = https://curl.se/bug/?i=10171
+ [50] = https://curl.se/bug/?i=10236
  [51] = https://curl.se/bug/?i=10187
  [52] = https://curl.se/bug/?i=10189
  [53] = https://curl.se/bug/?i=10188
@@ -147,3 +170,13 @@ References to bug reports and discussions on issues:
  [55] = https://curl.se/bug/?i=10181
  [56] = https://curl.se/bug/?i=10182
  [57] = https://curl.se/bug/?i=10141
+ [58] = https://curl.se/bug/?i=10230
+ [59] = https://curl.se/bug/?i=10194
+ [61] = https://curl.se/bug/?i=10227
+ [63] = https://curl.se/bug/?i=10219
+ [64] = https://curl.se/bug/?i=10224
+ [65] = https://curl.se/bug/?i=10186
+ [66] = https://curl.se/bug/?i=10209
+ [67] = https://curl.se/bug/?i=10220
+ [68] = https://curl.se/bug/?i=10214
+ [69] = https://curl.se/bug/?i=10213
