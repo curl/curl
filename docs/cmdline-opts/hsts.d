@@ -14,6 +14,11 @@ This option enables HSTS for the transfer. If the file name points to an
 existing HSTS cache file, that will be used. After a completed transfer, the
 cache will be saved to the file name again if it has been modified.
 
+If curl is told to use HTTP:// for a transfer involving a host name that
+exists in the HSTS cache, it upgrades the transfer to use HTTPS. Each HSTS
+cache entry has an individual life time after which the upgrade is no longer
+performed.
+
 Specify a "" file name (zero length) to avoid loading/saving and make curl
 just handle HSTS in memory.
 
