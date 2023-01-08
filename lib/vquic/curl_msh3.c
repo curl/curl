@@ -113,11 +113,11 @@ struct cf_msh3_ctx {
   curl_socket_t sock[2]; /* fake socket pair until we get support in msh3 */
   char l_ip[MAX_IPADR_LEN];          /* local IP as string */
   int l_port;                        /* local port number */
-  /* Flags written by msh3/msquic thread*/
+  /* Flags written by msh3/msquic thread */
   bool handshake_complete;
   bool handshake_succeeded;
   bool connected;
-  /* Flags written by curl thread*/
+  /* Flags written by curl thread */
   BIT(verbose);
   BIT(active);
 };
