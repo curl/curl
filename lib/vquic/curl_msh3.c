@@ -791,7 +791,9 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
+  (void)data;
   (void)conn;
+  (void)ai; /* TODO: msh3 resolves itself? */
   ctx = calloc(sizeof(*ctx), 1);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -800,8 +802,6 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
   Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
   ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
   ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
-
-  ctx->ai = ai;
 
   result = Curl_cf_create(&cf, &cft_msh3, ctx);
 
