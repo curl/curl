@@ -278,6 +278,7 @@ struct HTTP {
   /* Receive Buffer (Headers and Data) */
   uint8_t* recv_buf;
   size_t recv_buf_alloc;
+  size_t recv_buf_max;
   /* Receive Headers */
   size_t recv_header_len;
   bool recv_header_complete;

@@ -189,7 +189,7 @@ Build curl:
 
 Build msh3:
 
-     % git clone -b v0.5.0 --depth 1 --recursive https://github.com/nibanks/msh3
+     % git clone -b v0.6.0 --depth 1 --recursive https://github.com/nibanks/msh3
      % cd msh3 && mkdir build && cd build
      % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
      % cmake --build .
