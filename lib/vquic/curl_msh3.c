@@ -553,7 +553,6 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
   (void)arg2;
   switch(event) {
   case CF_CTRL_DATA_SETUP:
-    H3BUGF(infof(data, "msh3: req: setup"));
     result = msh3_data_setup(cf, data);
     break;
 
