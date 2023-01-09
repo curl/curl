@@ -208,6 +208,7 @@ static const struct LongShort aliases[]= {
   {"02",  "http2",                   ARG_NONE},
   {"03",  "http2-prior-knowledge",   ARG_NONE},
   {"04",  "http3",                   ARG_NONE},
+  {"05",  "http3-only",              ARG_NONE},
   {"09",  "http0.9",                 ARG_BOOL},
   {"1",  "tlsv1",                    ARG_NONE},
   {"10",  "tlsv1.0",                 ARG_NONE},
@@ -657,6 +658,16 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
+static void sethttpver(struct GlobalConfig *global,
+                       struct OperationConfig *config,
+                       long httpversion)
+{
+  if(config->httpversion &&
+     (config->httpversion != httpversion))
+    warnf(global, "Overrides previous HTTP version option\n");
+
+  config->httpversion = httpversion;
+}
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
@@ -1418,25 +1429,31 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       switch(subletter) {
       case '\0':
         /* HTTP version 1.0 */
-        config->httpversion = CURL_HTTP_VERSION_1_0;
+        sethttpver(global, config, CURL_HTTP_VERSION_1_0);
         break;
       case '1':
         /* HTTP version 1.1 */
-        config->httpversion = CURL_HTTP_VERSION_1_1;
+        sethttpver(global, config, CURL_HTTP_VERSION_1_1);
         break;
       case '2':
         /* HTTP version 2.0 */
-        config->httpversion = CURL_HTTP_VERSION_2_0;
+        sethttpver(global, config, CURL_HTTP_VERSION_2_0);
         break;
       case '3': /* --http2-prior-knowledge */
         /* HTTP version 2.0 over clean TCP */
-        config->httpversion = CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE;
+        sethttpver(global, config, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
         break;
       case '4': /* --http3 */
-        /* HTTP version 3 go over QUIC - at once */
+        /* Try HTTP/3, allow fallback */
         if(!feature_http3)
           return PARAM_LIBCURL_DOESNT_SUPPORT;
-        config->httpversion = CURL_HTTP_VERSION_3;
+        sethttpver(global, config, CURL_HTTP_VERSION_3);
+        break;
+      case '5': /* --http3-only */
+        /* Try HTTP/3 without fallback */
+        if(!feature_http3)
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
+        sethttpver(global, config, CURL_HTTP_VERSION_3ONLY);
         break;
       case '9':
         /* Allow HTTP/0.9 responses! */

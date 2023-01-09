@@ -107,6 +107,7 @@ DPAGES = \
   http2-prior-knowledge.d \
   http2.d \
   http3.d \
+  http3-only.d \
   ignore-content-length.d \
   include.d \
   insecure.d \
