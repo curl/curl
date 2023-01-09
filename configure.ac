@@ -311,6 +311,61 @@ AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
 )
 AC_SUBST(TEST_NGHTTPX)
 
+dnl we'd like a httpd+apachectl as test server
+dnl
+AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
+                         [where to find httpd/apache2 for testing])],
+  [request_httpd=$withval], [request_httpd=check])
+if test x"$request_httpd" = "xcheck"; then
+  if test -x "/usr/sbin/apache2" -a -x "/usr/sbin/apache2ctl"; then
+    # common location on distros (debian/ubuntu)
+    HTTPD="/usr/sbin/apache2"
+    APACHECTL="/usr/sbin/apache2ctl"
+    AC_PATH_PROG([APXS], [apxs])
+    if test "x$APXS" != "x"; then
+      AC_MSG_NOTICE([apache2-dev not installed, httpd tests disabled])
+    fi
+  else
+    AC_PATH_PROG([HTTPD], [httpd])
+    if test "x$HTTPD" = "x"; then
+      AC_PATH_PROG([HTTPD], [apache2])
+    fi
+    AC_PATH_PROG([APACHECTL], [apachectl])
+    AC_PATH_PROG([APXS], [apxs])
+    if test "x$HTTPD" = "x" -o "x$APACHECTL" = "x"; then
+      AC_MSG_NOTICE([httpd/apache2 not in PATH, httpd tests disabled])
+    fi
+    if test "x$APXS" = "x"; then
+      AC_MSG_NOTICE([apxs not in PATH, httpd tests disabled])
+    fi
+  fi
+else
+  HTTPD="${request_httpd}/bin/httpd"
+  APACHECTL="${request_httpd}/bin/apachectl"
+  APXS="${request_httpd}/bin/apxs"
+  if test ! -x "${HTTPD}"; then
+    AC_MSG_NOTICE([httpd not found as ${HTTPD}, httpd tests disabled])
+  elif test ! -x "${APACHECTL}"; then
+    AC_MSG_NOTICE([apachectl not found as ${APACHECTL}, httpd tests disabled])
+  elif test ! -x "${APXS}"; then
+    AC_MSG_NOTICE([apxs not found as ${APXS}, httpd tests disabled])
+  else
+    AC_MSG_NOTICE([using HTTPD=$HTTPD for tests])
+  fi
+fi
+AC_SUBST(HTTPD)
+AC_SUBST(APACHECTL)
+AC_SUBST(APXS)
+
+dnl the nghttpx we might use in httpd testing
+if test "x$TEST_NGHTTPX" != "x"; then
+  HTTPD_NGHTTPX="$TEST_NGHTTPX"
+else
+  AC_PATH_PROG([HTTPD_NGHTTPX], [nghttpx])
+fi
+    AC_PATH_PROG([APXS], [apxs])
+AC_SUBST(HTTPD_NGHTTPX)
+
 dnl If no TLS choice has been made, check if it was explicitly disabled or
 dnl error out to force the user to decide.
 if test -z "$TLSCHOICE"; then
@@ -4590,6 +4645,7 @@ AC_CONFIG_FILES([Makefile \
            tests/server/Makefile \
            tests/libtest/Makefile \
            tests/unit/Makefile \
+           tests/tests-httpd/config.ini \
            packages/Makefile \
            packages/vms/Makefile \
            curl-config \

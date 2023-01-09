@@ -772,48 +772,60 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
   if(!stream_id) {
     /* stream ID zero is for connection-oriented stuff */
-    if(frame->hd.type == NGHTTP2_SETTINGS) {
+    DEBUGASSERT(data);
+    switch(frame->hd.type) {
+    case NGHTTP2_SETTINGS: {
       uint32_t max_conn = ctx->max_concurrent_streams;
-      H2BUGF(infof(data, "Got SETTINGS"));
+      H2BUGF(infof(data, CFMSG(cf, "recv frame SETTINGS")));
       ctx->max_concurrent_streams = nghttp2_session_get_remote_settings(
           session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
       ctx->enable_push = nghttp2_session_get_remote_settings(
           session, NGHTTP2_SETTINGS_ENABLE_PUSH);
-      H2BUGF(infof(data, "MAX_CONCURRENT_STREAMS == %d",
+      H2BUGF(infof(data, CFMSG(cf, "MAX_CONCURRENT_STREAMS == %d"),
                    ctx->max_concurrent_streams));
-      H2BUGF(infof(data, "ENABLE_PUSH == %s",
+      H2BUGF(infof(data, CFMSG(cf, "ENABLE_PUSH == %s"),
                    ctx->enable_push?"TRUE":"false"));
-      if(max_conn != ctx->max_concurrent_streams) {
+      if(data && max_conn != ctx->max_concurrent_streams) {
         /* only signal change if the value actually changed */
-        infof(data,
-              "Connection state changed (MAX_CONCURRENT_STREAMS == %u)!",
+        infof(data, CFMSG(cf, "MAX_CONCURRENT_STREAMS now %u"),
               ctx->max_concurrent_streams);
         multi_connchanged(data->multi);
       }
+      break;
+    }
+    case NGHTTP2_GOAWAY:
+      if(data) {
+        infof(data, "recveived GOAWAY, error=%d, last_stream=%u",
+                    frame->goaway.error_code, frame->goaway.last_stream_id);
+        multi_connchanged(data->multi);
+      }
+      break;
+    case NGHTTP2_WINDOW_UPDATE:
+      H2BUGF(infof(data, CFMSG(cf, "recv frame WINDOW_UPDATE")));
+      break;
+    default:
+      H2BUGF(infof(data, CFMSG(cf, "recv frame %x on 0"), frame->hd.type));
     }
     return 0;
   }
   data_s = nghttp2_session_get_stream_user_data(session, stream_id);
   if(!data_s) {
-    H2BUGF(infof(data,
-                 "No Curl_easy associated with stream: %u",
+    H2BUGF(infof(data, CFMSG(cf, "No Curl_easy associated with stream: %u"),
                  stream_id));
     return 0;
   }
 
   stream = data_s->req.p.http;
   if(!stream) {
-    H2BUGF(infof(data_s, "No proto pointer for stream: %u",
+    H2BUGF(infof(data_s, CFMSG(cf, "No proto pointer for stream: %u"),
                  stream_id));
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
 
-  H2BUGF(infof(data_s, "on_frame_recv() header %x stream %u",
-               frame->hd.type, stream_id));
-
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
     /* If body started on this stream, then receiving DATA is illegal. */
+    H2BUGF(infof(data_s, CFMSG(cf, "recv frame DATA stream %u"), stream_id));
     if(!stream->bodystarted) {
       rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
                                      stream_id, NGHTTP2_PROTOCOL_ERROR);
@@ -824,6 +836,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
     break;
   case NGHTTP2_HEADERS:
+    H2BUGF(infof(data_s, CFMSG(cf, "recv frame HEADERS stream %u"),
+                 stream_id));
     if(stream->bodystarted) {
       /* Only valid HEADERS after body started is trailer HEADERS.  We
          buffer them in on_header callback. */
@@ -857,7 +871,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->nread_header_recvbuf += ncopy;
 
     DEBUGASSERT(stream->mem);
-    H2BUGF(infof(data_s, "Store %zu bytes headers from stream %u at %p",
+    H2BUGF(infof(data_s, CFMSG(cf, "%zu header bytes, stream %u at %p"),
                  ncopy, stream_id, stream->mem));
 
     stream->len -= ncopy;
@@ -869,6 +883,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
     break;
   case NGHTTP2_PUSH_PROMISE:
+    H2BUGF(infof(data_s, CFMSG(cf, "recv frame PUSH_PROMISE stream %u"),
+                 stream_id));
     rv = push_promise(cf, data_s, &frame->push_promise);
     if(rv) { /* deny! */
       int h2;
@@ -879,13 +895,13 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       if(nghttp2_is_fatal(h2))
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       else if(rv == CURL_PUSH_ERROROUT) {
-        DEBUGF(infof(data_s, "Fail the parent stream (too)"));
+        DEBUGF(infof(data_s, CFMSG(cf, "Fail the parent stream (too)")));
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       }
     }
     break;
   default:
-    H2BUGF(infof(data_s, "Got frame type %x for stream %u",
+    H2BUGF(infof(data_s, CFMSG(cf, "recv frame %x for stream %u"),
                  frame->hd.type, stream_id));
     break;
   }
@@ -2210,12 +2226,19 @@ static CURLcode h2_cf_query(struct Curl_cfilter *cf,
                             int query, int *pres1, void **pres2)
 {
   struct h2_cf_ctx *ctx = cf->ctx;
+  size_t effective_max;
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT:
     DEBUGASSERT(pres1);
-    *pres1 = (ctx->max_concurrent_streams > INT_MAX)?
-               INT_MAX : (int)ctx->max_concurrent_streams;
+    if(nghttp2_session_check_request_allowed(ctx->h2) == 0) {
+      /* the limit is what we have in use right now */
+      effective_max = CONN_INUSE(cf->conn);
+    }
+    else {
+      effective_max = ctx->max_concurrent_streams;
+    }
+    *pres1 = (effective_max > INT_MAX)? INT_MAX : (int)effective_max;
     return CURLE_OK;
   default:
     break;
