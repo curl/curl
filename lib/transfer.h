@@ -29,8 +29,6 @@ char *Curl_checkheaders(const struct Curl_easy *data,
                         const char *thisheader,
                         const size_t thislen);
 
-void Curl_init_CONNECT(struct Curl_easy *data);
-
 CURLcode Curl_pretransfer(struct Curl_easy *data);
 CURLcode Curl_posttransfer(struct Curl_easy *data);
 

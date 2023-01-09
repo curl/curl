@@ -28,6 +28,7 @@
 
 typedef enum {
   VAR_NONE,       /* must be the first */
+  VAR_ADDED_TIME,
   VAR_APPCONNECT_TIME,
   VAR_CERT,
   VAR_CONNECT_TIME,

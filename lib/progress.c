@@ -181,6 +181,14 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
   case TIMER_NONE:
     /* mistake filter */
     break;
+#ifdef CURLDEBUG
+  case TIMER_ADDED: {
+    /* relative time from the creation of the multi handle */
+    struct Curl_multi *m = data->multi_easy ? data->multi_easy : data->multi;
+    data->progress.t_added = Curl_timediff_us(now, m->t_created);
+    break;
+  }
+#endif
   case TIMER_STARTOP:
     /* This is set at the start of a transfer */
     data->progress.t_startop = now;

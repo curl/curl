@@ -2909,6 +2909,7 @@ typedef enum {
   CURLINFO_REFERER          = CURLINFO_STRING + 60,
   CURLINFO_CAINFO           = CURLINFO_STRING + 61,
   CURLINFO_CAPATH           = CURLINFO_STRING + 62,
+  CURLINFO_ADDED_TIME_T     = CURLINFO_OFF_T + 63, /* debug only for now */
   CURLINFO_LASTONE          = 62
 } CURLINFO;
 

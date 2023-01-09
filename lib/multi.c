@@ -127,12 +127,29 @@ static const char * const statename[]={
 /* function pointer called once when switching TO a state */
 typedef void (*init_multistate_func)(struct Curl_easy *data);
 
-/* called in DID state, before PERFORMING state */
-static void before_perform(struct Curl_easy *data)
+/* called before DO state */
+static void before_DO(struct Curl_easy *data)
+{
+#ifdef CURLDEBUG
+  Curl_pgrsTime(data, TIMER_ADDED);
+#endif
+}
+
+/* called before DID state */
+static void before_DID(struct Curl_easy *data)
 {
   data->req.chunk = FALSE;
   Curl_pgrsTime(data, TIMER_PRETRANSFER);
 }
+
+/* before_CONNECT() gets called each time the handle switches to CONNECT
+   which means this gets called once for each subsequent redirect etc */
+static void before_CONNECT(struct Curl_easy *data)
+{
+  data->state.fread_func = data->set.fread_func_set;
+  data->state.in = data->set.in_set;
+}
+
 
 static void init_completed(struct Curl_easy *data)
 {
@@ -155,16 +172,16 @@ static void mstate(struct Curl_easy *data, CURLMstate state
   static const init_multistate_func finit[MSTATE_LAST] = {
     NULL,              /* INIT */
     NULL,              /* PENDING */
-    Curl_init_CONNECT, /* CONNECT */
+    before_CONNECT,    /* CONNECT */
     NULL,              /* RESOLVING */
     NULL,              /* CONNECTING */
     NULL,              /* TUNNELING */
     NULL,              /* PROTOCONNECT */
     NULL,              /* PROTOCONNECTING */
-    NULL,              /* DO */
+    before_DO,         /* DO */
     NULL,              /* DOING */
     NULL,              /* DOING_MORE */
-    before_perform,    /* DID */
+    before_DID,        /* DID */
     NULL,              /* PERFORMING */
     NULL,              /* RATELIMITING */
     NULL,              /* DONE */
@@ -573,6 +590,10 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
 
   /* increase the alive-counter */
   multi->num_alive++;
+
+#ifdef CURLDEBUG
+  multi->t_created = Curl_now();
+#endif
 
   CONNCACHE_LOCK(data);
   /* The closure handle only ever has default timeouts set. To improve the
@@ -2126,7 +2147,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       break;
 
-    case MSTATE_DO:
+     case MSTATE_DO:
       if(data->set.fprereq) {
         int prereq_rc;
 

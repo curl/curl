@@ -1164,6 +1164,9 @@ struct Progress {
   timediff_t t_pretransfer;
   timediff_t t_starttransfer;
   timediff_t t_redirect;
+#ifdef CURLDEBUG
+  timediff_t t_added;
+#endif
 
   struct curltime start;
   struct curltime t_startsingle;

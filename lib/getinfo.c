@@ -391,7 +391,12 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     *param_offt = (data->progress.flags & PGRS_UL_SIZE_KNOWN)?
       data->progress.size_ul:-1;
     break;
-   case CURLINFO_TOTAL_TIME_T:
+#ifdef CURLDEBUG
+  case CURLINFO_ADDED_TIME_T:
+    *param_offt = data->progress.t_added;
+    break;
+#endif
+  case CURLINFO_TOTAL_TIME_T:
     *param_offt = data->progress.timespent;
     break;
   case CURLINFO_NAMELOOKUP_TIME_T:

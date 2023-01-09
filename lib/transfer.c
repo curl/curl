@@ -1278,14 +1278,6 @@ int Curl_single_getsock(struct Curl_easy *data,
   return bitmap;
 }
 
-/* Curl_init_CONNECT() gets called each time the handle switches to CONNECT
-   which means this gets called once for each subsequent redirect etc */
-void Curl_init_CONNECT(struct Curl_easy *data)
-{
-  data->state.fread_func = data->set.fread_func_set;
-  data->state.in = data->set.in_set;
-}
-
 /*
  * Curl_pretransfer() is called immediately before a transfer starts, and only
  * once for one transfer no matter if it has redirects or do multi-pass

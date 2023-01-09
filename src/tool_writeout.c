@@ -111,6 +111,7 @@ static const struct writeoutvar variables[] = {
    writeLong},
   {"stderr", VAR_STDERR, CURLINFO_NONE, NULL},
   {"stdout", VAR_STDOUT, CURLINFO_NONE, NULL},
+  {"time_added", VAR_ADDED_TIME, CURLINFO_ADDED_TIME_T, writeTime},
   {"time_appconnect", VAR_APPCONNECT_TIME, CURLINFO_APPCONNECT_TIME_T,
    writeTime},
   {"time_connect", VAR_CONNECT_TIME, CURLINFO_CONNECT_TIME_T, writeTime},

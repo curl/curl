@@ -39,6 +39,9 @@ typedef enum {
   TIMER_POSTRANSFER,
   TIMER_STARTACCEPT,
   TIMER_REDIRECT,
+#ifdef CURLDEBUG
+  TIMER_ADDED,
+#endif
   TIMER_LAST /* must be last */
 } timerid;
 
