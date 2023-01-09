@@ -2259,8 +2259,13 @@ enum {
   CURL_HTTP_VERSION_2TLS, /* use version 2 for HTTPS, version 1.1 for HTTP */
   CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,  /* please use HTTP 2 without HTTP/1.1
                                            Upgrade */
-  CURL_HTTP_VERSION_3 = 30, /* Makes use of explicit HTTP/3 without fallback.
-                               Use CURLOPT_ALTSVC to enable HTTP/3 upgrade */
+  CURL_HTTP_VERSION_3 = 30, /* Use HTTP/3, fallback to HTTP/2 or HTTP/1 if
+                               needed. For HTTPS only. For HTTP, this option
+                               makes libcurl return error. */
+  CURL_HTTP_VERSION_3ONLY = 31, /* Use HTTP/3 without fallback. For HTTPS
+                                   only. For HTTP, this makes libcurl
+                                   return error. */
+
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
 };
 
