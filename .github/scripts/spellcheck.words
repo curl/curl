@@ -20,6 +20,8 @@ AmigaOS
 AmiSSL
 anyauth
 anycast
+apache
+Apache
 API
 APIs
 APOP
@@ -135,6 +137,7 @@ CURLE
 CURLH
 curlimages
 curlrc
+curltest
 customizable
 CVE
 CVSS
@@ -295,6 +298,8 @@ hsts
 HTC
 html
 http
+httpd
+HTTPD
 HTTPAUTH
 httpget
 HttpGet
@@ -577,6 +582,8 @@ ptr
 punycode
 py
 pycurl
+pytest
+Pytest
 QNX
 QoS
 Qubes
