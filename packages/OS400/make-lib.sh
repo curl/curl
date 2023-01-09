@@ -129,15 +129,26 @@ fi
 
 
 #       Gather the list of symbols to export.
+#       First use awk to pull all CURL_EXTERN function prototypes from
+#       the header files, pass through to sed to strip CURL_DEPRECATED(..)
+#       then back to awk to pull the string immediately to the left of a
+#       bracket stripping any spaces or *'s.
 
-EXPORTS=`grep '^CURL_EXTERN[[:space:]]'                                 \
+EXPORTS=`awk '/^CURL_EXTERN/,/;/'                                       \
               "${TOPDIR}"/include/curl/*.h                              \
               "${SCRIPTDIR}/ccsidcurl.h"                                |
-         sed -e 's/^.*CURL_EXTERN[[:space:]]\(.*\)(.*$/\1/'             \
-             -e 's/[[:space:]]*$//'                                     \
-             -e 's/^.*[[:space:]][[:space:]]*//'                        \
-             -e 's/^\*//'                                               \
-             -e 's/(\(.*\))/\1/'`
+         sed 's| CURL_DEPRECATED(.*)||g'                                |
+         awk '{br=index($0,"(");                                        \
+              if (br) {                                                 \
+                for(c=br-1; ;c--) {                                     \
+                  if (c==1) {                                           \
+                    print substr($0,c,br-1); break                      \
+                  } else if (match(substr($0, c, br-c), "[ *]") != 0) { \
+                    print substr($0, c+1, br-c-1); break                \
+                  }                                                     \
+                }                                                       \
+              }                                                         \
+        }'`
 
 #       Create the service program exportation file in DB2 member if needed.
 
