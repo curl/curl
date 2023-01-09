@@ -4,7 +4,7 @@ Long: http3
 Tags: Versions
 Protocols: HTTP
 Added: 7.66.0
-Mutexed: http1.1 http1.0 http2 http2-prior-knowledge
+Mutexed: http1.1 http1.0 http2 http2-prior-knowledge http3-only
 Requires: HTTP/3
 Help: Use HTTP v3
 See-also: http1.1 http2
@@ -13,10 +13,15 @@ Example: --http3 $URL
 Multi: mutex
 Experimental: yes
 ---
-Tells curl to use HTTP version 3 directly to the host and port number used in
-the URL. A normal HTTP/3 transaction will be done to a host and then get
-redirected via Alt-Svc, but this option allows a user to circumvent that when
-you know that the target speaks HTTP/3 on the given host and port.
+Tells curl to try HTTP/3 to the host in the URL, but fallback to earlier
+HTTP versions if the HTTP/3 connection establishement fails. HTTP/3 is only
+available for HTTPS and not for HTTP URLs.
 
-This option will make curl fail if a QUIC connection cannot be established, it
-cannot fall back to a lower HTTP version on its own.
+This option allows a user to avoid using the Alt-Svc method of upgrading to
+HTTP/3 when you know that the target speaks HTTP/3 on the given host and port.
+
+When asked to use HTTP/3, curl will issue a separate attempt to use older HTTP
+versions with a slight delay, so if the HTTP/3 transfer fails or is very slow,
+curl will still try to proceed with an older HTTP version.
+
+Use --http3-only for similar fuctionality *without* a fallback.
