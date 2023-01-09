@@ -283,20 +283,27 @@ static void keylog_callback(const WOLFSSL *ssl, const char *line)
 static int init_ngh3_conn(struct Curl_cfilter *cf);
 
 #ifdef USE_OPENSSL
-static SSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
+                             struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct connectdata *conn = cf->conn;
+  CURLcode result = CURLE_FAILED_INIT;
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
+
+  if(!ssl_ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
 #ifdef OPENSSL_IS_BORINGSSL
   if(ngtcp2_crypto_boringssl_configure_client_context(ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_boringssl_configure_client_context failed");
-    return NULL;
+    goto out;
   }
 #else
   if(ngtcp2_crypto_openssl_configure_client_context(ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_openssl_configure_client_context failed");
-    return NULL;
+    goto out;
   }
 #endif
 
@@ -305,19 +312,19 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifdef OPENSSL_IS_BORINGSSL
   if(SSL_CTX_set1_curves_list(ssl_ctx, QUIC_GROUPS) != 1) {
     failf(data, "SSL_CTX_set1_curves_list failed");
-    return NULL;
+    goto out;
   }
 #else
   if(SSL_CTX_set_ciphersuites(ssl_ctx, QUIC_CIPHERS) != 1) {
     char error_buffer[256];
     ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
     failf(data, "SSL_CTX_set_ciphersuites: %s", error_buffer);
-    return NULL;
+    goto out;
   }
 
   if(SSL_CTX_set1_groups_list(ssl_ctx, QUIC_GROUPS) != 1) {
     failf(data, "SSL_CTX_set1_groups_list failed");
-    return NULL;
+    goto out;
   }
 #endif
 
@@ -327,47 +334,35 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf, struct Curl_easy *data)
     SSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
   }
 
-  if(conn->ssl_config.verifypeer) {
-    const char * const ssl_cafile = conn->ssl_config.CAfile;
-    const char * const ssl_capath = conn->ssl_config.CApath;
+  result = Curl_ssl_setup_x509_store(cf, data, ssl_ctx);
+  if(result)
+    goto out;
 
-    if(ssl_cafile || ssl_capath) {
-      SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
-      /* tell OpenSSL where to find CA certificates that are used to verify
-         the server's certificate. */
-      if(!SSL_CTX_load_verify_locations(ssl_ctx, ssl_cafile, ssl_capath)) {
-        /* Fail if we insist on successfully verifying the server. */
-        failf(data, "error setting certificate verify locations:"
-              "  CAfile: %s CApath: %s",
-              ssl_cafile ? ssl_cafile : "none",
-              ssl_capath ? ssl_capath : "none");
-        return NULL;
-      }
-      infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
-      infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
-    }
-#ifdef CURL_CA_FALLBACK
-    else {
-      /* verifying the peer without any CA certificates won't work so
-         use openssl's built-in default as fallback */
-      SSL_CTX_set_default_verify_paths(ssl_ctx);
-    }
-#endif
-  }
+  /* OpenSSL always tries to verify the peer, this only says whether it should
+   * fail to connect if the verification fails, or if it should continue
+   * anyway. In the latter case the result of the verification is checked with
+   * SSL_get_verify_result() below. */
+  SSL_CTX_set_verify(ssl_ctx, conn->ssl_config.verifypeer ?
+                     SSL_VERIFY_PEER : SSL_VERIFY_NONE, NULL);
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    CURLcode result;
     Curl_set_in_callback(data, true);
     result = (*data->set.ssl.fsslctx)(data, ssl_ctx,
                                       data->set.ssl.fsslctxp);
     Curl_set_in_callback(data, false);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
-      return NULL;
+      goto out;
     }
   }
-  return ssl_ctx;
+  result = CURLE_OK;
+
+out:
+  *pssl_ctx = result? NULL : ssl_ctx;
+  if(result && ssl_ctx)
+    SSL_CTX_free(ssl_ctx);
+  return result;
 }
 
 static CURLcode quic_set_client_cert(struct Curl_cfilter *cf,
@@ -473,15 +468,21 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
 }
 #elif defined(USE_WOLFSSL)
 
-static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+static CURLcode quic_ssl_ctx(WOLFSSL_CTX **pssl_ctx,
+                             struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct connectdata *conn = cf->conn;
+  CURLcode result = CURLE_FAILED_INIT;
   WOLFSSL_CTX *ssl_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
+
+  if(!ssl_ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
   if(ngtcp2_crypto_wolfssl_configure_client_context(ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
-    return NULL;
+    goto out;
   }
 
   wolfSSL_CTX_set_default_verify_paths(ssl_ctx);
@@ -490,12 +491,12 @@ static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf,
     char error_buffer[256];
     ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
     failf(data, "SSL_CTX_set_ciphersuites: %s", error_buffer);
-    return NULL;
+    goto out;
   }
 
   if(wolfSSL_CTX_set1_groups_list(ssl_ctx, (char *)QUIC_GROUPS) != 1) {
     failf(data, "SSL_CTX_set1_groups_list failed");
-    return NULL;
+    goto out;
   }
 
   /* Open the file if a TLS or QUIC backend has not done this before. */
@@ -505,7 +506,7 @@ static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf,
     wolfSSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
 #else
     failf(data, "wolfSSL was built without keylog callback");
-    return NULL;
+    goto out;
 #endif
   }
 
@@ -513,8 +514,8 @@ static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf,
     const char * const ssl_cafile = conn->ssl_config.CAfile;
     const char * const ssl_capath = conn->ssl_config.CApath;
 
-    if(ssl_cafile || ssl_capath) {
-      wolfSSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
+    wolfSSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
+    if(conn->ssl_config.CAfile || conn->ssl_config.CApath) {
       /* tell wolfSSL where to find CA certificates that are used to verify
          the server's certificate. */
       if(!wolfSSL_CTX_load_verify_locations(ssl_ctx, ssl_cafile, ssl_capath)) {
@@ -523,7 +524,7 @@ static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf,
               "  CAfile: %s CApath: %s",
               ssl_cafile ? ssl_cafile : "none",
               ssl_capath ? ssl_capath : "none");
-        return NULL;
+        goto out;
       }
       infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
       infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
@@ -542,17 +543,22 @@ static WOLFSSL_CTX *quic_ssl_ctx(struct Curl_cfilter *cf,
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    CURLcode result;
     Curl_set_in_callback(data, true);
     result = (*data->set.ssl.fsslctx)(data, ssl_ctx,
                                       data->set.ssl.fsslctxp);
     Curl_set_in_callback(data, false);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
-      return NULL;
+      goto out;
     }
   }
-  return ssl_ctx;
+  result = CURLE_OK;
+
+out:
+  *pssl_ctx = result? NULL : ssl_ctx;
+  if(result && ssl_ctx)
+    SSL_CTX_free(ssl_ctx);
+  return result;
 }
 
 /** SSL callbacks ***/
@@ -2199,17 +2205,17 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
   ctx->version = NGTCP2_PROTO_VER_MAX;
 #ifdef USE_OPENSSL
-  ctx->sslctx = quic_ssl_ctx(cf, data);
-  if(!ctx->sslctx)
-    return CURLE_QUIC_CONNECT_ERROR;
+  result = quic_ssl_ctx(&ctx->sslctx, cf, data);
+  if(result)
+    return result;
 
   result = quic_set_client_cert(cf, data);
   if(result)
     return result;
 #elif defined(USE_WOLFSSL)
-  ctx->sslctx = quic_ssl_ctx(cf, data);
-  if(!ctx->sslctx)
-    return CURLE_QUIC_CONNECT_ERROR;
+  result = quic_ssl_ctx(&ctx->sslctx, cf, data);
+  if(result)
+    return result;
 #endif
 
   result = quic_init_ssl(cf, data);

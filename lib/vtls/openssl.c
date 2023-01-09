@@ -3398,9 +3398,9 @@ static void set_cached_x509_store(struct Curl_cfilter *cf,
   }
 }
 
-static CURLcode set_up_x509_store(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct ssl_backend_data *backend)
+CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   SSL_CTX *ssl_ctx)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -3420,10 +3420,10 @@ static CURLcode set_up_x509_store(struct Curl_cfilter *cf,
 
   cached_store = get_cached_x509_store(cf, data);
   if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {
-    SSL_CTX_set_cert_store(backend->ctx, cached_store);
+    SSL_CTX_set_cert_store(ssl_ctx, cached_store);
   }
   else {
-    X509_STORE *store = SSL_CTX_get_cert_store(backend->ctx);
+    X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
 
     result = populate_x509_store(cf, data, store);
     if(result == CURLE_OK && cache_criteria_met) {
@@ -3434,11 +3434,11 @@ static CURLcode set_up_x509_store(struct Curl_cfilter *cf,
   return result;
 }
 #else /* HAVE_SSL_X509_STORE_SHARE */
-static CURLcode set_up_x509_store(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct ssl_backend_data *backend)
+CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   SSL_CTX *ssl_ctx)
 {
-  X509_STORE *store = SSL_CTX_get_cert_store(backend->ctx);
+  X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
 
   return populate_x509_store(cf, data, store);
 }
@@ -3753,7 +3753,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   }
 #endif
 
-  result = set_up_x509_store(cf, data, backend);
+  result = Curl_ssl_setup_x509_store(cf, data, backend->ctx);
   if(result)
     return result;
 
