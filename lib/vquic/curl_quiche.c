@@ -464,11 +464,7 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t recvd = -1;
   ssize_t rcode;
   quiche_h3_event *ev;
-  struct h3h1header headers;
   struct HTTP *stream = data->req.p.http;
-  headers.dest = buf;
-  headers.destlen = len;
-  headers.nlen = 0;
 
   CF_DEBUGF(infof(data, CFMSG(cf, "recv[%u]"), stream->stream3_id));
 
