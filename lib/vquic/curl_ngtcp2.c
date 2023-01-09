@@ -67,14 +67,23 @@
 #include "memdebug.h"
 
 /* #define DEBUG_NGTCP2 */
-#ifdef CURLDEBUG
-#define DEBUG_HTTP3
-#endif
-#ifdef DEBUG_HTTP3
-#define H3BUGF(x) x
+#define DEBUG_CF 0
+
+#if DEBUG_CF
+#define CF_DEBUGF(x) x
+#define H3STRM(cf,sid,msg) \
+  "[CONN-%ld-%d][CF-%s][h3sid=%" PRIx64 "] "msg, (cf)->conn->connection_id, \
+  (cf)->sockindex, (cf)->cft->name, sid
+#define QSTRM(cf,sid,msg) \
+  "[CONN-%ld-%d][CF-%s][qsid=%" PRIx64 "] "msg, (cf)->conn->connection_id, \
+  (cf)->sockindex, (cf)->cft->name, sid
+
 #else
-#define H3BUGF(x) do { } while(0)
+#define H3STRM(cf,sid,msg)
+#define QSTRM(cf,sid,msg)
+#define CF_DEBUGF(x) do { } while(0)
 #endif
+
 
 #define H3_ALPN_H3_29 "\x5h3-29"
 #define H3_ALPN_H3 "\x2h3"
@@ -198,8 +207,11 @@ static ngtcp2_tstamp timestamp(void)
 #ifdef DEBUG_NGTCP2
 static void quic_printf(void *user_data, const char *fmt, ...)
 {
+  struct Curl_cfilter *cf = user_data;
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+
+  (void)ctx;  /* TODO: need an easy handle to infof() message */
   va_list ap;
-  (void)user_data; /* TODO, use this to do infof() instead long-term */
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   va_end(ap);
@@ -430,15 +442,15 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   gnutls_session_set_ptr(ctx->gtls->session, &ctx->conn_ref);
 
   if(ngtcp2_crypto_gnutls_configure_client_session(ctx->gtls->session) != 0) {
-    H3BUGF(fprintf(stderr,
-                   "ngtcp2_crypto_gnutls_configure_client_session failed\n"));
+    CF_DEBUGF(fprintf(stderr,
+              "ngtcp2_crypto_gnutls_configure_client_session failed\n"));
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
   rc = gnutls_priority_set_direct(ctx->gtls->session, QUIC_PRIORITY, NULL);
   if(rc < 0) {
-    H3BUGF(fprintf(stderr, "gnutls_priority_set_direct failed: %s\n",
-                   gnutls_strerror(rc)));
+    CF_DEBUGF(fprintf(stderr, "gnutls_priority_set_direct failed: %s\n",
+              gnutls_strerror(rc)));
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
@@ -637,9 +649,11 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct Curl_easy *data = stream_user_data;
   int rv;
+
+  (void)data;
   (void)tconn;
-  (void)stream_user_data;
   /* stream is closed... */
 
   if(!(flags & NGTCP2_STREAM_CLOSE_FLAG_APP_ERROR_CODE_SET)) {
@@ -648,6 +662,7 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
 
   rv = nghttp3_conn_close_stream(ctx->h3conn, stream_id,
                                  app_error_code);
+  CF_DEBUGF(infof(data, QSTRM(cf, stream_id, "close -> %d"), rv));
   if(rv) {
     ngtcp2_connection_close_error_set_application_error(
         &ctx->last_error, nghttp3_err_infer_quic_app_error_code(rv), NULL, 0);
@@ -663,13 +678,15 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct Curl_easy *data = stream_user_data;
   int rv;
   (void)tconn;
   (void)final_size;
   (void)app_error_code;
-  (void)stream_user_data;
+  (void)data;
 
   rv = nghttp3_conn_shutdown_stream_read(ctx->h3conn, stream_id);
+  CF_DEBUGF(infof(data, QSTRM(cf, stream_id, "reset -> %d"), rv));
   if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -850,14 +867,15 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
                               uint64_t app_error_code, void *user_data,
                               void *stream_user_data)
 {
+  struct Curl_cfilter *cf = user_data;
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.p.http;
   (void)conn;
   (void)stream_id;
   (void)app_error_code;
-  (void)user_data;
-  H3BUGF(infof(data, "cb_h3_stream_close CALLED"));
+  (void)cf;
 
+  CF_DEBUGF(infof(data, H3STRM(cf, stream_id, "close")));
   stream->closed = TRUE;
   stream->error3 = app_error_code;
   Curl_expire(data, 0, EXPIRE_QUIC);
@@ -897,12 +915,16 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
                            const uint8_t *buf, size_t buflen,
                            void *user_data, void *stream_user_data)
 {
+  struct Curl_cfilter *cf = user_data;
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
   (void)conn;
+  (void)cf;
 
   result = write_data(stream, buf, buflen);
+  CF_DEBUGF(infof(data, H3STRM(cf, stream_id, "recv_data(len=%zu) -> %d"),
+            buflen, result));
   if(result) {
     return -1;
   }
@@ -957,13 +979,14 @@ static int decode_status_code(const uint8_t *value, size_t len)
 static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
                              int fin, void *user_data, void *stream_user_data)
 {
+  struct Curl_cfilter *cf = user_data;
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
-  (void)user_data;
   (void)fin;
+  (void)cf;
 
   /* add a CRLF only if we've received some headers */
   if(stream->firstheader) {
@@ -973,6 +996,8 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
     }
   }
 
+  CF_DEBUGF(infof(data, H3STRM(cf, stream_id, "end_headers(status_code=%d"),
+            stream->status_code));
   if(stream->status_code / 100 != 1) {
     stream->bodystarted = TRUE;
   }
@@ -1054,12 +1079,14 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t stream_id,
                               void *stream_user_data) {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct Curl_easy *data = stream_user_data;
   int rv;
   (void)conn;
-  (void)stream_user_data;
+  (void)data;
 
   rv = ngtcp2_conn_shutdown_stream_write(ctx->qconn, stream_id,
                                          app_error_code);
+  CF_DEBUGF(infof(data, H3STRM(cf, stream_id, "reset -> %d"), rv));
   if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -1251,9 +1278,9 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
 
   if(!data->set.postfields) {
     stream->h3out->used -= datalen;
-    H3BUGF(infof(data,
-                 "cb_h3_acked_stream_data, %zd bytes, %zd left unacked",
-                 datalen, stream->h3out->used));
+    CF_DEBUGF(infof(data,
+              "cb_h3_acked_stream_data, %zd bytes, %zd left unacked",
+              datalen, stream->h3out->used));
     DEBUGASSERT(stream->h3out->used < H3_SEND_SIZE);
 
     if(stream->h3out->used == 0) {
@@ -1318,13 +1345,13 @@ static nghttp3_ssize cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
       if(!stream->upload_left)
         *pflags = NGHTTP3_DATA_FLAG_EOF;
     }
-    H3BUGF(infof(data, "cb_h3_readfunction %zd bytes%s (at %zd unacked)",
-                 nread, *pflags == NGHTTP3_DATA_FLAG_EOF?" EOF":"",
-                 out->used));
+    CF_DEBUGF(infof(data, "cb_h3_readfunction %zd bytes%s (at %zd unacked)",
+              nread, *pflags == NGHTTP3_DATA_FLAG_EOF?" EOF":"",
+              out->used));
   }
   if(stream->upload_done && !stream->upload_len &&
      (stream->upload_left <= 0)) {
-    H3BUGF(infof(data, "cb_h3_readfunction sets EOF"));
+    CF_DEBUGF(infof(data, "cb_h3_readfunction sets EOF"));
     *pflags = NGHTTP3_DATA_FLAG_EOF;
     return nread ? 1 : 0;
   }
@@ -1427,7 +1454,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
 
   Curl_safefree(nva);
 
-  infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)",
+  infof(data, "Using HTTP/3 Stream ID: %" PRIx64 " (easy handle %p)",
         stream3_id, (void *)data);
 
   Curl_pseudo_free(hreq);
@@ -1469,8 +1496,8 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     sent = len;
   }
   else {
-    H3BUGF(infof(data, "ngh3_stream_send() wants to send %zd bytes",
-                 len));
+    CF_DEBUGF(infof(data, "ngh3_stream_send() wants to send %zd bytes",
+              len));
     if(!stream->upload_len) {
       stream->upload_mem = buf;
       stream->upload_len = len;
