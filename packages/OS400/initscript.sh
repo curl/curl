@@ -234,7 +234,7 @@ make_module()
         CMD="${CMD} OPTIMIZE(${OPTIMIZE})"
         CMD="${CMD} DBGVIEW(${DEBUG})"
 
-        DEFINES="${3} BUILDING_LIBCURL"
+        DEFINES="${3} BUILDING_LIBCURL 'qadrt_use_inline'"
 
         if [ "${WITH_ZLIB}" != "0" ]
         then    DEFINES="${DEFINES} HAVE_LIBZ"
