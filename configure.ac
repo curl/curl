@@ -1054,7 +1054,7 @@ dnl gethostbyname without lib or in the nsl lib?
 AC_CHECK_FUNC(gethostbyname,
               [HAVE_GETHOSTBYNAME="1"
               ],
-              [ AC_CHECK_LIB(nsl, gethostbyname,
+              [ AC_SEARCH_LIBS([gethostbyname], [nsl],
                              [HAVE_GETHOSTBYNAME="1"
                              LIBS="-lnsl $LIBS"
                              ])
