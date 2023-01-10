@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         249
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2789
+ Contributors:                 2791
 
 This release includes the following changes:
 
@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o cmake: fix the snprintf detection [5]
  o cmake: set SOVERSION also for macOS [68]
  o copyright: update all copyright lines and remove year ranges [35]
+ o curl.h: allow up to 10M buffer size [76]
  o curl.h: mark CURLSSLBACKEND_MESALINK as deprecated [52]
  o curl_global_sslset.3: clarify the openssl situation [53]
  o CURLOPT_HEADERDATA.3: warn DLL users must set write function [45]
@@ -30,7 +31,10 @@ This release includes the following bugfixes:
  o examples: remove the curlgtk.c example [48]
  o ftpserver: lower the normal DATA connect timeout to speed up torture tests [27]
  o GHA: add job on Slackware 15.0 [58]
+ o GHA: move the quiche job here from zuul [75]
+ o GHA: use designated ngtcp2 and its dependencies versions [77]
  o haxproxy: send before TLS handhshake [34]
+ o hsts.d: explain hsts more [78]
  o hsts: handle adding the same host name again
  o http2: fix compiler warning due to uninitialized variable
  o http2: when using printf %.*s, the length arg must be 'int' [41]
@@ -50,11 +54,14 @@ This release includes the following bugfixes:
  o misc: reduce struct and struct field sizes [65]
  o msh3: add support for request payload [28]
  o msh3: update to v0.5 Release [17]
+ o msh3: update to v0.6 [60]
  o multihandle: turn bool struct fields into bits [26]
+ o ngtcp2: add CURLOPT_SSL_CTX_FUNCTION support for openssl+wolfssl [62]
  o ngtcp2: fix the build without 'sendmsg' [38]
  o noproxy: support for space-separated names is deprecated [66]
  o nss: implement data_pending method [43]
  o openssl: remove attached easy handles from SSL instances [29]
+ o os400: fixes to make-lib.sh and initscript.sh [71]
  o release-notes.pl: check fixes/closes lines better
  o Revert "x509asn1: avoid freeing unallocated pointers" [37]
  o runtest.pl: add expected fourth return value [40]
@@ -69,6 +76,7 @@ This release includes the following bugfixes:
  o socketpair: allow localhost MITM sniffers [30]
  o strdup: name it Curl_strdup [16]
  o test1560: use a UTF8-using locale when run [46]
+ o tests-httpd: basic infra to run curl against an apache httpd [72]
  o tests: add 3 new HTTP/2 test cases, plus https: support for nghttpx [9]
  o tests: avoid use of sha1 in certificates [4]
  o tool_operate: fix `CURLOPT_SOCKS5_GSSAPI_NEC` type [1]
@@ -100,16 +108,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrei Rybak, Andy Alt, Cameron Blomquist, Daniel Stenberg,
+  Andrei Rybak, Andy Alt, Cameron Blomquist, Daniel Stenberg, Divy Le Ray,
   Esdras de Morais da Silva, Hannah Schierling, Harry Sintonen, Hide Ishikawa,
   Jakob Hirsch, John Bampton, Jon Rumsey, Josh Brobst, Marcel Raad,
   Martin Waleczek, Michael Osipov, Nick Banks, nick-telia on github,
   norbertmm on github, odek86 on github, Patrick Monnerat, Paul Howarth,
   Philip Heiduck, Radek Brich, Radu Hociung, Ray Satiro, Ryan Schmidt,
   Sébastien Helleu, Sergio-IME on github, SerusDev on github, Stefan Eissing,
-  Stephan Guilloux, Thomas Klausner, Timmy Schierling, Viktor Szakats,
-  William Tang, Yurii Rashkovskii
-  (36 contributors)
+  Stephan Guilloux, Tatsuhiro Tsujikawa, Thomas Klausner, Timmy Schierling,
+  Viktor Szakats, violetlige on github, William Tang, Yurii Rashkovskii
+  (39 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -172,7 +180,9 @@ References to bug reports and discussions on issues:
  [57] = https://curl.se/bug/?i=10141
  [58] = https://curl.se/bug/?i=10230
  [59] = https://curl.se/bug/?i=10194
+ [60] = https://curl.se/bug/?i=10192
  [61] = https://curl.se/bug/?i=10227
+ [62] = https://curl.se/bug/?i=10222
  [63] = https://curl.se/bug/?i=10219
  [64] = https://curl.se/bug/?i=10224
  [65] = https://curl.se/bug/?i=10186
@@ -180,3 +190,9 @@ References to bug reports and discussions on issues:
  [67] = https://curl.se/bug/?i=10220
  [68] = https://curl.se/bug/?i=10214
  [69] = https://curl.se/bug/?i=10213
+ [71] = https://curl.se/bug/?i=10266
+ [72] = https://curl.se/bug/?i=10175
+ [75] = https://curl.se/bug/?i=10241
+ [76] = https://curl.se/bug/?i=10256
+ [77] = https://curl.se/bug/?i=10257
+ [78] = https://curl.se/bug/?i=10258
