@@ -28,9 +28,9 @@ freebsd_task:
   name: FreeBSD
 
   matrix:
-    - name: FreeBSD 13.1
+    - name: FreeBSD 13.2
       freebsd_instance:
-        image_family: freebsd-13-1
+        image_family: freebsd-13-2
     - name: FreeBSD 12.4
       freebsd_instance:
         image_family: freebsd-12-4
