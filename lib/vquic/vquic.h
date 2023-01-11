@@ -49,6 +49,8 @@ bool Curl_conn_is_http3(const struct Curl_easy *data,
                         const struct connectdata *conn,
                         int sockindex);
 
+extern struct Curl_cftype Curl_cft_http3;
+
 #else /* ENABLE_QUIC */
 
 #define Curl_conn_is_http3(a,b,c)  FALSE

@@ -97,9 +97,6 @@
 #include "memdebug.h"
 
 
-#define DEBUG_ME  0
-
-
 /* Uncomment the ALLOW_RENEG line to a real #define if you want to allow TLS
    renegotiations when built with BoringSSL. Renegotiating is non-compliant
    with HTTP/2 and "an extremely dangerous protocol feature". Beware.
@@ -710,10 +707,8 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
-#if DEBUG_ME
-  DEBUGF(infof(data, CFMSG(cf, "bio_cf_out_write(len=%d) -> %d, err=%d"),
-         blen, (int)nwritten, result));
-#endif
+  DEBUGF(LOG_CF(data, cf, "bio_cf_out_write(len=%d) -> %d, err=%d",
+                blen, (int)nwritten, result));
   BIO_clear_retry_flags(bio);
   connssl->backend->io_result = result;
   if(nwritten < 0) {
@@ -737,10 +732,8 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
-#if DEBUG_ME
-  DEBUGF(infof(data, CFMSG(cf, "bio_cf_in_read(len=%d) -> %d, err=%d"),
-         blen, (int)nread, result));
-#endif
+  DEBUGF(LOG_CF(data, cf, "bio_cf_in_read(len=%d) -> %d, err=%d",
+                blen, (int)nread, result));
   BIO_clear_retry_flags(bio);
   connssl->backend->io_result = result;
   if(nread < 0) {
@@ -2735,7 +2728,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     }
 
     txt_len = msnprintf(ssl_buf, sizeof(ssl_buf),
-                        CFMSG(cf, "%s (%s), %s, %s (%d):\n"),
+                        "%s (%s), %s, %s (%d):\n",
                         verstr, direction?"OUT":"IN",
                         tls_rt_name, msg_name, msg_type);
     if(0 <= txt_len && (unsigned)txt_len < sizeof(ssl_buf)) {

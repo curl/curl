@@ -178,4 +178,9 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
                              const char **premote_ip_str,
                              int *premote_port);
 
+extern struct Curl_cftype Curl_cft_tcp;
+extern struct Curl_cftype Curl_cft_udp;
+extern struct Curl_cftype Curl_cft_unix;
+extern struct Curl_cftype Curl_cft_tcp_accept;
+
 #endif /* HEADER_CURL_CF_SOCKET_H */

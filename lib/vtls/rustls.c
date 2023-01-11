@@ -161,7 +161,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   io_error = rustls_connection_read_tls(rconn, read_cb, &io_ctx,
                                         &tls_bytes_read);
   if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-    infof(data, CFMSG(cf, "cr_recv: EAGAIN or EWOULDBLOCK"));
+    DEBUGF(LOG_CF(data, cf, "cr_recv: EAGAIN or EWOULDBLOCK"));
   }
   else if(io_error) {
     char buffer[STRERROR_LEN];
@@ -171,7 +171,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     return -1;
   }
 
-  infof(data, CFMSG(cf, "cr_recv: read %ld TLS bytes"), tls_bytes_read);
+  DEBUGF(LOG_CF(data, cf, "cr_recv: read %ld TLS bytes", tls_bytes_read));
 
   rresult = rustls_connection_process_new_packets(rconn);
   if(rresult != RUSTLS_RESULT_OK) {
@@ -189,8 +189,8 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       plainlen - plain_bytes_copied,
       &n);
     if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
-      infof(data, CFMSG(cf, "cr_recv: got PLAINTEXT_EMPTY. "
-            "will try again later."));
+      DEBUGF(LOG_CF(data, cf, "cr_recv: got PLAINTEXT_EMPTY. "
+                    "will try again later."));
       backend->data_pending = FALSE;
       break;
     }
@@ -207,7 +207,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       break;
     }
     else {
-      infof(data, CFMSG(cf, "cr_recv: got %ld plain bytes"), n);
+      DEBUGF(LOG_CF(data, cf, "cr_recv: got %ld plain bytes", n));
       plain_bytes_copied += n;
     }
   }
@@ -258,7 +258,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  infof(data, CFMSG(cf, "cr_send: %ld plain bytes"), plainlen);
+  DEBUGF(LOG_CF(data, cf, "cr_send: %ld plain bytes", plainlen));
 
   if(plainlen > 0) {
     rresult = rustls_connection_write(rconn, plainbuf, plainlen,
@@ -282,8 +282,8 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     io_error = rustls_connection_write_tls(rconn, write_cb, &io_ctx,
                                            &tlswritten);
     if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-      infof(data, CFMSG(cf, "cr_send: EAGAIN after %ld bytes"),
-            tlswritten_total);
+      DEBUGF(LOG_CF(data, cf, "cr_send: EAGAIN after %zu bytes",
+                    tlswritten_total));
       *err = CURLE_AGAIN;
       return -1;
     }
@@ -299,7 +299,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
-    infof(data, CFMSG(cf, "cr_send: wrote %ld TLS bytes"), tlswritten);
+    DEBUGF(LOG_CF(data, cf, "cr_send: wrote %zu TLS bytes", tlswritten));
     tlswritten_total += tlswritten;
   }
 

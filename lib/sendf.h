@@ -26,26 +26,8 @@
 
 #include "curl_setup.h"
 
-void Curl_infof(struct Curl_easy *, const char *fmt, ...);
-void Curl_failf(struct Curl_easy *, const char *fmt, ...);
+#include "curl_log.h"
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-
-#if defined(HAVE_VARIADIC_MACROS_C99)
-#define infof(...)  Curl_nop_stmt
-#elif defined(HAVE_VARIADIC_MACROS_GCC)
-#define infof(x...)  Curl_nop_stmt
-#else
-#error "missing VARIADIC macro define, fix and rebuild!"
-#endif
-
-#else /* CURL_DISABLE_VERBOSE_STRINGS */
-
-#define infof Curl_infof
-
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
-
-#define failf Curl_failf
 
 #define CLIENTWRITE_BODY    (1<<0)
 #define CLIENTWRITE_HEADER  (1<<1)
@@ -88,10 +70,5 @@ CURLcode Curl_write_plain(struct Curl_easy *data,
                           curl_socket_t sockfd,
                           const void *mem, size_t len,
                           ssize_t *written);
-
-/* the function used to output verbose information */
-void Curl_debug(struct Curl_easy *data, curl_infotype type,
-                char *ptr, size_t size);
-
 
 #endif /* HEADER_CURL_SENDF_H */

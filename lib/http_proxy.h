@@ -40,6 +40,8 @@ CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
 CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
                                          struct Curl_easy *data);
 
+extern struct Curl_cftype Curl_cft_http_proxy;
+
 #endif /* !CURL_DISABLE_HTTP */
 
 CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
@@ -48,6 +50,9 @@ CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
 
 CURLcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
                                       struct Curl_easy *data);
+
+extern struct Curl_cftype Curl_cft_haproxy;
+
 #endif /* !CURL_DISABLE_PROXY */
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */
