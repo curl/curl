@@ -205,6 +205,7 @@ CURLcode Curl_log_init(void)
   return CURLE_OK;
 }
 
+#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
 void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
@@ -212,5 +213,6 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
   (void)cf;
   (void)fmt;
 }
+#endif
 
 #endif /* !DEBUGBUILD */
