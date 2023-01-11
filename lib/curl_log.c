@@ -39,6 +39,7 @@
 #include "http2.h"
 #include "http_proxy.h"
 #include "socks.h"
+#include "strtok.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
 
