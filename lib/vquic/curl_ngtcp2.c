@@ -432,15 +432,15 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   gnutls_session_set_ptr(ctx->gtls->session, &ctx->conn_ref);
 
   if(ngtcp2_crypto_gnutls_configure_client_session(ctx->gtls->session) != 0) {
-    LOG_CF_DEBUG(data, cf,
-                 "ngtcp2_crypto_gnutls_configure_client_session failed\n");
+    DEBUGF(LOG_CF(data, cf,
+                  "ngtcp2_crypto_gnutls_configure_client_session failed\n"));
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
   rc = gnutls_priority_set_direct(ctx->gtls->session, QUIC_PRIORITY, NULL);
   if(rc < 0) {
-    LOG_CF_DEBUG(data, cf, "gnutls_priority_set_direct failed: %s\n",
-                 gnutls_strerror(rc));
+    DEBUGF(LOG_CF(data, cf, "gnutls_priority_set_direct failed: %s\n",
+                  gnutls_strerror(rc)));
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
@@ -675,7 +675,7 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
 
   rv = nghttp3_conn_close_stream(ctx->h3conn, stream_id,
                                  app_error_code);
-  LOG_CF_DEBUG(data, cf, "[qsid=%" PRIx64 "] close -> %d", stream_id, rv);
+  DEBUGF(LOG_CF(data, cf, "[qsid=%" PRIx64 "] close -> %d", stream_id, rv));
   if(rv) {
     ngtcp2_connection_close_error_set_application_error(
         &ctx->last_error, nghttp3_err_infer_quic_app_error_code(rv), NULL, 0);
@@ -699,7 +699,7 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
   (void)data;
 
   rv = nghttp3_conn_shutdown_stream_read(ctx->h3conn, stream_id);
-  LOG_CF_DEBUG(data, cf, "[h3sid=%" PRIx64 "] reset -> %d", stream_id, rv);
+  DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRIx64 "] reset -> %d", stream_id, rv));
   if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -888,7 +888,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   (void)app_error_code;
   (void)cf;
 
-  LOG_CF_DEBUG(data, cf, "[h3sid=%" PRIx64 "] close", stream_id);
+  DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRIx64 "] close", stream_id));
   stream->closed = TRUE;
   stream->error3 = app_error_code;
   Curl_expire(data, 0, EXPIRE_QUIC);
@@ -936,8 +936,8 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
   (void)cf;
 
   result = write_data(stream, buf, buflen);
-  LOG_CF_DEBUG(data, cf, "[h3sid=%" PRIx64 "] recv_data(len=%zu) -> %d",
-               stream_id, buflen, result);
+  DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRIx64 "] recv_data(len=%zu) -> %d",
+                stream_id, buflen, result));
   if(result) {
     return -1;
   }
@@ -1009,8 +1009,8 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
     }
   }
 
-  LOG_CF_DEBUG(data, cf, "[h3sid=%" PRIx64 "] end_headers(status_code=%d",
-               stream_id, stream->status_code);
+  DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRIx64 "] end_headers(status_code=%d",
+                stream_id, stream->status_code));
   if(stream->status_code / 100 != 1) {
     stream->bodystarted = TRUE;
   }
@@ -1099,7 +1099,7 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t stream_id,
 
   rv = ngtcp2_conn_shutdown_stream_write(ctx->qconn, stream_id,
                                          app_error_code);
-  LOG_CF_DEBUG(data, cf, "[h3sid=%" PRIx64 "] reset -> %d", stream_id, rv);
+  DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRIx64 "] reset -> %d", stream_id, rv));
   if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -1293,8 +1293,8 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
   (void)cf;
   if(!data->set.postfields) {
     stream->h3out->used -= datalen;
-    LOG_CF_DEBUG(data, cf, "cb_h3_acked_stream_data, %"PRIu64" bytes, "
-                 "%zd left unacked", datalen, stream->h3out->used);
+    DEBUGF(LOG_CF(data, cf, "cb_h3_acked_stream_data, %"PRIu64" bytes, "
+                  "%zd left unacked", datalen, stream->h3out->used));
     DEBUGASSERT(stream->h3out->used < H3_SEND_SIZE);
 
     if(stream->h3out->used == 0) {
@@ -1361,13 +1361,13 @@ static nghttp3_ssize cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
       if(!stream->upload_left)
         *pflags = NGHTTP3_DATA_FLAG_EOF;
     }
-    LOG_CF_DEBUG(data, cf, "cb_h3_readfunction %zd bytes%s (at %zd unacked)",
-                 nread, *pflags == NGHTTP3_DATA_FLAG_EOF?" EOF":"",
-                 out->used);
+    DEBUGF(LOG_CF(data, cf, "cb_h3_readfunction %zd bytes%s (at %zd unacked)",
+                  nread, *pflags == NGHTTP3_DATA_FLAG_EOF?" EOF":"",
+                  out->used));
   }
   if(stream->upload_done && !stream->upload_len &&
      (stream->upload_left <= 0)) {
-    LOG_CF_DEBUG(data, cf, "cb_h3_readfunction sets EOF");
+    DEBUGF(LOG_CF(data, cf, "cb_h3_readfunction sets EOF"));
     *pflags = NGHTTP3_DATA_FLAG_EOF;
     return nread ? 1 : 0;
   }
@@ -1512,8 +1512,8 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     sent = len;
   }
   else {
-    LOG_CF_DEBUG(data, cf, "ngh3_stream_send() wants to send %zd bytes",
-                 len);
+    DEBUGF(LOG_CF(data, cf, "ngh3_stream_send() wants to send %zd bytes",
+                  len));
     if(!stream->upload_len) {
       stream->upload_mem = buf;
       stream->upload_len = len;

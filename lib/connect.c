@@ -466,7 +466,7 @@ static void baller_initiate(struct Curl_cfilter *cf,
 
 out:
   if(result) {
-    LOG_CF_DEBUG(data, cf, "%s failed", baller->name);
+    DEBUGF(LOG_CF(data, cf, "%s failed", baller->name));
     baller_close(baller, data);
   }
   if(cf_prev)
@@ -590,8 +590,8 @@ evaluate:
       continue;
     }
     baller->result = baller_connect(cf, data, baller, &now, connected);
-    LOG_CF_DEBUG(data, cf, "%s connect -> %d, connected=%d",
-                 baller->name, baller->result, *connected);
+    DEBUGF(LOG_CF(data, cf, "%s connect -> %d, connected=%d",
+                  baller->name, baller->result, *connected));
 
     if(!baller->result) {
       if(*connected) {
@@ -614,11 +614,11 @@ evaluate:
       baller->timeoutms = baller->addr->ai_next == NULL ? allow : allow / 2;
       baller_start_next(cf, data, baller);
       if(baller->is_done) {
-        LOG_CF_DEBUG(data, cf, "%s done", baller->name);
+        DEBUGF(LOG_CF(data, cf, "%s done", baller->name));
       }
       else {
         /* next attempt was started */
-        LOG_CF_DEBUG(data, cf, "%s trying next", baller->name);
+        DEBUGF(LOG_CF(data, cf, "%s trying next", baller->name));
         ++ongoing;
       }
     }
@@ -652,10 +652,10 @@ evaluate:
           Curl_timediff(now, ctx->started) >= baller->delay_ms) {
         baller_start(cf, data, baller);
         if(baller->is_done) {
-          LOG_CF_DEBUG(data, cf, "%s done", baller->name);
+          DEBUGF(LOG_CF(data, cf, "%s done", baller->name));
         }
         else {
-          LOG_CF_DEBUG(data, cf, "%s starting", baller->name);
+          DEBUGF(LOG_CF(data, cf, "%s starting", baller->name));
           ++ongoing;
           ++added;
         }
@@ -672,12 +672,12 @@ evaluate:
   }
 
   /* all ballers have failed to connect. */
-  LOG_CF_DEBUG(data, cf, "all eyeballers failed");
+  DEBUGF(LOG_CF(data, cf, "all eyeballers failed"));
   result = CURLE_COULDNT_CONNECT;
   for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
     struct eyeballer *baller = ctx->baller[i];
-    LOG_CF_DEBUG(data, cf, "%s assess started=%d, result=%d",
-                 baller->name, baller->has_started, baller->result);
+    DEBUGF(LOG_CF(data, cf, "%s assess started=%d, result=%d",
+                  baller->name, baller->has_started, baller->result));
     if(baller && baller->has_started && baller->result) {
       result = baller->result;
       break;
@@ -915,7 +915,7 @@ static void cf_he_close(struct Curl_cfilter *cf,
 {
   struct cf_he_ctx *ctx = cf->ctx;
 
-  LOG_CF_DEBUG(data, cf, "close");
+  DEBUGF(LOG_CF(data, cf, "close"));
   cf_he_ctx_clear(cf, data);
   cf->connected = FALSE;
   ctx->state = SCFST_INIT;
@@ -949,7 +949,7 @@ static void cf_he_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_he_ctx *ctx = cf->ctx;
 
-  LOG_CF_DEBUG(data, cf, "destroy");
+  DEBUGF(LOG_CF(data, cf, "destroy"));
   if(ctx) {
     cf_he_ctx_clear(cf, data);
   }
@@ -1036,7 +1036,7 @@ static CURLcode cf_he_insert_after(struct Curl_cfilter *cf_at,
   DEBUGASSERT(cf_at);
   cf_create = get_cf_create(transport);
   if(!cf_create) {
-    LOG_CF_DEBUG(data, cf_at, "unsupported transport type %d", transport);
+    DEBUGF(LOG_CF(data, cf_at, "unsupported transport type %d", transport));
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
   result = Curl_cf_happy_eyeballs_create(&cf, data, cf_at->conn,
@@ -1173,7 +1173,7 @@ static void cf_setup_close(struct Curl_cfilter *cf,
 {
   struct cf_setup_ctx *ctx = cf->ctx;
 
-  LOG_CF_DEBUG(data, cf, "close");
+  DEBUGF(LOG_CF(data, cf, "close"));
   cf->connected = FALSE;
   ctx->state = CF_SETUP_INIT;
 
@@ -1188,7 +1188,7 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct cf_setup_ctx *ctx = cf->ctx;
 
   (void)data;
-  LOG_CF_DEBUG(data, cf, "destroy");
+  DEBUGF(LOG_CF(data, cf, "destroy"));
   Curl_safefree(ctx);
 }
 

@@ -73,11 +73,11 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
 #if defined(HAVE_VARIADIC_MACROS_C99) && \
     defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 
-#define LOG_CF_DEBUG(data, cf, ...) \
+#define LOG_CF(data, cf, ...) \
   do { if(Curl_log_cf_is_debug(cf)) \
          Curl_log_cf_debug(data, cf, __VA_ARGS__); } while(0)
 #else
-#define LOG_CF_DEBUG Curl_log_cf_debug
+#define LOG_CF Curl_log_cf_debug
 #endif
 
 void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
@@ -96,22 +96,17 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
 
 #if defined(HAVE_VARIADIC_MACROS_C99) && \
     defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-#define LOG_CF_DEBUG(...)         Curl_nop_stmt
+#define LOG_CF(...)               Curl_nop_stmt
 #define Curl_log_cf_debug(...)    Curl_nop_stmt
 #elif defined(HAVE_VARIADIC_MACROS_GCC) && \
     defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-#define LOG_CF_DEBUG(x...)        Curl_nop_stmt
+#define LOG_CF(x...)              Curl_nop_stmt
 #define Curl_log_cf_debug(x...)   Curl_nop_stmt
 #else
-#define LOG_CF_DEBUG              Curl_log_cf_debug
-/* in the hope that any decent compiler shreds this to nothing */
-static void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
-                              const char *fmt, ...)
-{
-  (void)data;
-  (void)cf;
-  (void)fmt;
-}
+#define LOG_CF                    Curl_log_cf_debug
+/* without c99, we seem unable to completely define away this function. */
+void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
+                       const char *fmt, ...);
 #endif
 
 #define Curl_log_cf_is_debug(x)   ((void)(x), FALSE)

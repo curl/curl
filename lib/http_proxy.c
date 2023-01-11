@@ -174,35 +174,35 @@ static void tunnel_go_state(struct Curl_cfilter *cf,
   /* entering this one */
   switch(new_state) {
   case TUNNEL_INIT:
-    LOG_CF_DEBUG(data, cf, "new tunnel state 'init'");
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'init'"));
     tunnel_reinit(ts, cf->conn, data);
     break;
 
   case TUNNEL_CONNECT:
-    LOG_CF_DEBUG(data, cf, "new tunnel state 'connect'");
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'connect'"));
     ts->tunnel_state = TUNNEL_CONNECT;
     ts->keepon = KEEPON_CONNECT;
     Curl_dyn_reset(&ts->rcvbuf);
     break;
 
   case TUNNEL_RECEIVE:
-    LOG_CF_DEBUG(data, cf, "new tunnel state 'receive'");
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'receive'"));
     ts->tunnel_state = TUNNEL_RECEIVE;
     break;
 
   case TUNNEL_RESPONSE:
-    LOG_CF_DEBUG(data, cf, "new tunnel state 'response'");
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'response'"));
     ts->tunnel_state = TUNNEL_RESPONSE;
     break;
 
   case TUNNEL_ESTABLISHED:
-    LOG_CF_DEBUG(data, cf, "new tunnel state 'established'");
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'established'"));
     infof(data, "CONNECT phase completed");
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     /* FALLTHROUGH */
   case TUNNEL_FAILED:
-    LOG_CF_DEBUG(data, cf, "new tunnel state 'failed'");
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'failed'"));
     ts->tunnel_state = new_state;
     Curl_dyn_reset(&ts->rcvbuf);
     Curl_dyn_reset(&ts->req);
@@ -415,7 +415,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
     if(!auth)
       return CURLE_OUT_OF_MEMORY;
 
-    LOG_CF_DEBUG(data, cf, "CONNECT: fwd auth header '%s'", header);
+    DEBUGF(LOG_CF(data, cf, "CONNECT: fwd auth header '%s'", header));
     result = Curl_http_input_auth(data, proxy, auth);
 
     free(auth);
@@ -632,7 +632,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
           /* without content-length or chunked encoding, we
              can't keep the connection alive since the close is
              the end signal so we bail out at once instead */
-          LOG_CF_DEBUG(data, cf, "CONNECT: no content-length or chunked");
+          DEBUGF(LOG_CF(data, cf, "CONNECT: no content-length or chunked"));
           ts->keepon = KEEPON_DONE;
         }
       }
@@ -970,7 +970,7 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
     switch(ts->tunnel_state) {
     case TUNNEL_INIT:
       /* Prepare the CONNECT request and make a first attempt to send. */
-      LOG_CF_DEBUG(data, cf, "CONNECT start");
+      DEBUGF(LOG_CF(data, cf, "CONNECT start"));
       result = start_CONNECT(data, cf->conn, ts);
       if(result)
         goto out;
@@ -979,7 +979,7 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
 
     case TUNNEL_CONNECT:
       /* see that the request is completely sent */
-      LOG_CF_DEBUG(data, cf, "CONNECT send");
+      DEBUGF(LOG_CF(data, cf, "CONNECT send"));
       result = send_CONNECT(data, cf->conn, ts, &done);
       if(result || !done)
         goto out;
@@ -988,7 +988,7 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
 
     case TUNNEL_RECEIVE:
       /* read what is there */
-      LOG_CF_DEBUG(data, cf, "CONNECT receive");
+      DEBUGF(LOG_CF(data, cf, "CONNECT receive"));
       result = recv_CONNECT_resp(cf, data, ts, &done);
       if(Curl_pgrsUpdate(data)) {
         result = CURLE_ABORTED_BY_CALLBACK;
@@ -1002,7 +1002,7 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
       /* FALLTHROUGH */
 
     case TUNNEL_RESPONSE:
-      LOG_CF_DEBUG(data, cf, "CONNECT response");
+      DEBUGF(LOG_CF(data, cf, "CONNECT response"));
       if(data->req.newurl) {
         /* not the "final" response, we need to do a follow up request.
          * If the other side indicated a connection close, or if someone
@@ -1014,7 +1014,7 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
            * reset our tunnel state. To avoid recursion, we return
            * and expect to be called again.
            */
-          LOG_CF_DEBUG(data, cf, "CONNECT need to close+open");
+          DEBUGF(LOG_CF(data, cf, "CONNECT need to close+open"));
           infof(data, "Connect me again please");
           Curl_conn_cf_close(cf, data);
           connkeep(conn, "HTTP proxy CONNECT");
@@ -1069,12 +1069,12 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  LOG_CF_DEBUG(data, cf, "connect");
+  DEBUGF(LOG_CF(data, cf, "connect"));
   result = cf->next->cft->connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
-  LOG_CF_DEBUG(data, cf, "subchain is connected");
+  DEBUGF(LOG_CF(data, cf, "subchain is connected"));
   /* TODO: can we do blocking? */
   /* We want "seamless" operations through HTTP proxy tunnel */
 
@@ -1152,7 +1152,7 @@ static int http_proxy_cf_get_select_socks(struct Curl_cfilter *cf,
 static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
                                   struct Curl_easy *data)
 {
-  LOG_CF_DEBUG(data, cf, "destroy");
+  DEBUGF(LOG_CF(data, cf, "destroy"));
   tunnel_free(cf, data);
 }
 
@@ -1160,7 +1160,7 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
   DEBUGASSERT(cf->next);
-  LOG_CF_DEBUG(data, cf, "close");
+  DEBUGF(LOG_CF(data, cf, "close"));
   cf->connected = FALSE;
   cf->next->cft->close(cf->next, data);
   if(cf->ctx) {
@@ -1329,14 +1329,14 @@ static void cf_haproxy_destroy(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   (void)data;
-  LOG_CF_DEBUG(data, cf, "destroy");
+  DEBUGF(LOG_CF(data, cf, "destroy"));
   cf_haproxy_ctx_free(cf->ctx);
 }
 
 static void cf_haproxy_close(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
-  LOG_CF_DEBUG(data, cf, "close");
+  DEBUGF(LOG_CF(data, cf, "close"));
   cf->connected = FALSE;
   cf_haproxy_ctx_reset(cf->ctx);
   if(cf->next)

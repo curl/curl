@@ -185,8 +185,8 @@ static CURLcode h3_add_event(struct Curl_cfilter *cf,
   }
 
   if(!mdata) {
-    LOG_CF_DEBUG(data, cf, "event for unknown stream %"PRId64", discarded",
-                 stream3_id);
+    DEBUGF(LOG_CF(data, cf, "event for unknown stream %"PRId64", discarded",
+                  stream3_id));
     quiche_h3_event_free(ev);
     return CURLE_OK;
   }
@@ -271,12 +271,12 @@ static ssize_t h3_process_event(struct Curl_cfilter *cf,
       break;
     }
     recvd = headers.nlen;
-    LOG_CF_DEBUG(data, cf, "h3[%"PRId64"] HEADERS len=%d",
-                 stream3_id, (int)recvd);
+    DEBUGF(LOG_CF(data, cf, "h3[%"PRId64"] HEADERS len=%d",
+                  stream3_id, (int)recvd));
     break;
 
   case QUICHE_H3_EVENT_DATA:
-    LOG_CF_DEBUG(data, cf, "h3[%"PRId64"] DATA", stream3_id);
+    DEBUGF(LOG_CF(data, cf, "h3[%"PRId64"] DATA", stream3_id));
     if(!stream->firstbody) {
       /* add a header-body separator CRLF */
       buf[0] = '\r';
@@ -300,14 +300,14 @@ static ssize_t h3_process_event(struct Curl_cfilter *cf,
     break;
 
   case QUICHE_H3_EVENT_RESET:
-    LOG_CF_DEBUG(data, cf, "h3[%"PRId64"] RESET", stream3_id);
+    DEBUGF(LOG_CF(data, cf, "h3[%"PRId64"] RESET", stream3_id));
     streamclose(cf->conn, "Stream reset");
     *err = CURLE_PARTIAL_FILE;
     recvd = -1;
     break;
 
   case QUICHE_H3_EVENT_FINISHED:
-    LOG_CF_DEBUG(data, cf, "h3[%"PRId64"] FINISHED", stream3_id);
+    DEBUGF(LOG_CF(data, cf, "h3[%"PRId64"] FINISHED", stream3_id));
     stream->closed = TRUE;
     streamclose(cf->conn, "End of stream");
     *err = CURLE_OK;
@@ -321,8 +321,8 @@ static ssize_t h3_process_event(struct Curl_cfilter *cf,
     break;
 
   default:
-    LOG_CF_DEBUG(data, cf, "h3[%"PRId64"] unhandled event %d",
-                 stream3_id, quiche_h3_event_type(ev));
+    DEBUGF(LOG_CF(data, cf, "h3[%"PRId64"] unhandled event %d",
+                  stream3_id, quiche_h3_event_type(ev)));
     break;
   }
   return recvd;
@@ -459,13 +459,13 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   quiche_h3_event *ev;
   struct HTTP *stream = data->req.p.http;
 
-  LOG_CF_DEBUG(data, cf, "recv[%"PRId64"]", stream->stream3_id);
+  DEBUGF(LOG_CF(data, cf, "recv[%"PRId64"]", stream->stream3_id));
 
   *err = CURLE_AGAIN;
   recvd = -1;
 
   if(cf_process_ingress(cf, data)) {
-    LOG_CF_DEBUG(data, cf, "h3_stream_recv returns on ingress");
+    DEBUGF(LOG_CF(data, cf, "h3_stream_recv returns on ingress"));
     *err = CURLE_RECV_ERROR;
     goto out;
   }
@@ -497,7 +497,7 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     if(stream3_id != stream->stream3_id) {
       /* event for another transfer, preserver for later */
-      LOG_CF_DEBUG(data, cf, "h3[%"PRId64"] queuing event", stream3_id);
+      DEBUGF(LOG_CF(data, cf, "h3[%"PRId64"] queuing event", stream3_id));
       if(h3_add_event(cf, data, stream3_id, ev) != CURLE_OK) {
         *err = CURLE_OUT_OF_MEMORY;
         goto out;
@@ -510,7 +510,7 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(cf_flush_egress(cf, data)) {
-    LOG_CF_DEBUG(data, cf, "recv(), flush egress failed");
+    DEBUGF(LOG_CF(data, cf, "recv(), flush egress failed"));
     *err = CURLE_SEND_ERROR;
     recvd = -1;
     goto out;
@@ -527,8 +527,8 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   data->state.drain = (recvd >= 0) ? 1 : 0;
-  LOG_CF_DEBUG(data, cf, "recv[%"PRId64"] -> %ld, err=%d",
-               stream->stream3_id, (long)recvd, *err);
+  DEBUGF(LOG_CF(data, cf, "recv[%"PRId64"] -> %ld, err=%d",
+                stream->stream3_id, (long)recvd, *err));
   return recvd;
 }
 
@@ -584,8 +584,8 @@ static CURLcode cf_http_request(struct Curl_cfilter *cf,
 
     stream3_id = quiche_h3_send_request(ctx->h3c, ctx->qconn, nva, nheader,
                                         stream->upload_left ? FALSE: TRUE);
-    LOG_CF_DEBUG(data, cf, "send_request(with_body=%d) -> %"PRId64,
-                 !!stream->upload_left, stream3_id);
+    DEBUGF(LOG_CF(data, cf, "send_request(with_body=%d) -> %"PRId64,
+                  !!stream->upload_left, stream3_id));
     if((stream3_id >= 0) && data->set.postfields) {
       ssize_t sent = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream3_id,
                                          (uint8_t *)data->set.postfields,
@@ -606,13 +606,13 @@ static CURLcode cf_http_request(struct Curl_cfilter *cf,
   Curl_safefree(nva);
 
   if(stream3_id < 0) {
-    LOG_CF_DEBUG(data, cf, "quiche_h3_send_request returned %ld",
-                 (long)stream3_id);
+    DEBUGF(LOG_CF(data, cf, "quiche_h3_send_request returned %ld",
+                  (long)stream3_id));
     result = CURLE_SEND_ERROR;
     goto fail;
   }
 
-  LOG_CF_DEBUG(data, cf, "Using HTTP/3 Stream ID: %"PRId64, stream3_id);
+  DEBUGF(LOG_CF(data, cf, "Using HTTP/3 Stream ID: %"PRId64, stream3_id));
   stream->stream3_id = stream3_id;
 
   Curl_pseudo_free(hreq);
@@ -646,12 +646,12 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       sent = 0;
     }
     else if(sent == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
-      LOG_CF_DEBUG(data, cf, "send_body(len=%zu) -> exceeds size", len);
+      DEBUGF(LOG_CF(data, cf, "send_body(len=%zu) -> exceeds size", len));
       *err = CURLE_SEND_ERROR;
       return -1;
     }
     else if(sent < 0) {
-      LOG_CF_DEBUG(data, cf, "send_body(len=%zu) -> %zd", len, sent);
+      DEBUGF(LOG_CF(data, cf, "send_body(len=%zu) -> %zd", len, sent));
       *err = CURLE_SEND_ERROR;
       return -1;
     }
@@ -700,13 +700,13 @@ static bool cf_quiche_data_pending(struct Curl_cfilter *cf,
 
   for(node = ctx->pending; node; node = node->next) {
     if(node->stream3_id == stream->stream3_id) {
-      LOG_CF_DEBUG((struct Curl_easy *)data, cf,
-                    "h3[%"PRId64"] has data pending", stream->stream3_id);
+      DEBUGF(LOG_CF((struct Curl_easy *)data, cf,
+                     "h3[%"PRId64"] has data pending", stream->stream3_id));
       return TRUE;
     }
   }
-  LOG_CF_DEBUG((struct Curl_easy *)data, cf, "h3[%"PRId64"] no data pending",
-                stream->stream3_id);
+  DEBUGF(LOG_CF((struct Curl_easy *)data, cf, "h3[%"PRId64"] no data pending",
+                 stream->stream3_id));
   return FALSE;
 }
 
@@ -758,10 +758,10 @@ static CURLcode cf_verify_peer(struct Curl_cfilter *cf,
     X509_free(server_cert);
     if(result)
       goto out;
-    LOG_CF_DEBUG(data, cf, "Verified certificate just fine");
+    DEBUGF(LOG_CF(data, cf, "Verified certificate just fine"));
   }
   else
-    LOG_CF_DEBUG(data, cf, "Skipped certificate verification");
+    DEBUGF(LOG_CF(data, cf, "Skipped certificate verification"));
 
   ctx->h3config = quiche_h3_config_new();
   if(!ctx->h3config) {
@@ -927,8 +927,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
       offset += 1 + alpn_len;
     }
 
-    LOG_CF_DEBUG(data, cf, "Sent QUIC client Initial, ALPN: %s",
-                  alpn_protocols + 1);
+    DEBUGF(LOG_CF(data, cf, "Sent QUIC client Initial, ALPN: %s",
+                   alpn_protocols + 1));
   }
 
   return CURLE_OK;
@@ -1049,7 +1049,7 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
       max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
     *pres1 = (max_streams > INT_MAX)? INT_MAX : (int)max_streams;
-    LOG_CF_DEBUG(data, cf, "query: MAX_CONCURRENT -> %d", *pres1);
+    DEBUGF(LOG_CF(data, cf, "query: MAX_CONCURRENT -> %d", *pres1));
     return CURLE_OK;
   }
   default:

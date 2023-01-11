@@ -205,4 +205,12 @@ CURLcode Curl_log_init(void)
   return CURLE_OK;
 }
 
+void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
+                       const char *fmt, ...)
+{
+  (void)data;
+  (void)cf;
+  (void)fmt;
+}
+
 #endif /* !DEBUGBUILD */
