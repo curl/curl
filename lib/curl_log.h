@@ -83,10 +83,10 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
 void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
 #if defined(__GNUC__) && !defined(printf) && \
     defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-                        const char *fmt, ...)
-                        __attribute__((format(printf, 3, 4)));
+                       const char *fmt, ...)
+                       __attribute__((format(printf, 3, 4)));
 #else
-                        const char *fmt, ...);
+                       const char *fmt, ...);
 #endif
 
 #define Curl_log_cf_is_debug(cf) \
@@ -103,8 +103,15 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
 #define LOG_CF_DEBUG(x...)        Curl_nop_stmt
 #define Curl_log_cf_debug(x...)   Curl_nop_stmt
 #else
-#define LOG_CF_DEBUG              (void)
-#define Curl_log_cf_debug         (void)
+#define LOG_CF_DEBUG              Curl_log_cf_debug
+/* in the hope that any decent compiler shreds this to nothing */
+static void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
+                              const char *fmt, ...)
+{
+  (void)data;
+  (void)cf;
+  (void)fmt;
+}
 #endif
 
 #define Curl_log_cf_is_debug(x)   ((void)(x), FALSE)
