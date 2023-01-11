@@ -151,10 +151,21 @@ void tool_help(char *category)
   free(category);
 }
 
+static bool is_debug(void)
+{
+  const char *const *builtin;
+  for(builtin = feature_names; *builtin; ++builtin)
+    if(curl_strequal("debug", *builtin))
+      return TRUE;
+  return FALSE;
+}
 
 void tool_version_info(void)
 {
   const char *const *builtin;
+  if(is_debug())
+    fprintf(stderr, "WARNING: this libcurl is Debug-enabled, "
+            "do not use in production\n\n");
 
   printf(CURL_ID "%s\n", curl_version());
 #ifdef CURL_PATCHSTAMP
