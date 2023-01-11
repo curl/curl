@@ -73,6 +73,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+
 /* convenience macro to check if this handle is using a shared SSL session */
 #define SSLSESSION_SHARED(data) (data->share &&                        \
                                  (data->share->specifier &             \
@@ -1611,9 +1612,10 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data)
   return Curl_ssl->check_cxn(cf, data) != 0;
 }
 
-static const struct Curl_cftype cft_ssl = {
+struct Curl_cftype Curl_cft_ssl = {
   "SSL",
   CF_TYPE_SSL,
+  CURL_LOG_DEFAULT,
   ssl_cf_destroy,
   ssl_cf_connect,
   ssl_cf_close,
@@ -1628,9 +1630,10 @@ static const struct Curl_cftype cft_ssl = {
   Curl_cf_def_query,
 };
 
-static const struct Curl_cftype cft_ssl_proxy = {
+struct Curl_cftype Curl_cft_ssl_proxy = {
   "SSL-PROXY",
   CF_TYPE_SSL,
+  CURL_LOG_DEFAULT,
   ssl_cf_destroy,
   ssl_cf_connect,
   ssl_cf_close,
@@ -1659,7 +1662,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
     goto out;
   }
 
-  result = Curl_cf_create(&cf, &cft_ssl, ctx);
+  result = Curl_cf_create(&cf, &Curl_cft_ssl, ctx);
 
 out:
   if(result)
@@ -1707,7 +1710,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
     goto out;
   }
 
-  result = Curl_cf_create(&cf, &cft_ssl_proxy, ctx);
+  result = Curl_cf_create(&cf, &Curl_cft_ssl_proxy, ctx);
 
 out:
   if(result)
@@ -1775,7 +1778,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
 
   (void)data;
   for(; cf; cf = cf->next) {
-    if(cf->cft == &cft_ssl) {
+    if(cf->cft == &Curl_cft_ssl) {
       if(Curl_ssl->shut_down(cf, data))
         result = CURLE_SSL_SHUTDOWN_FAILED;
       Curl_conn_cf_discard(cf, data);
@@ -1791,7 +1794,7 @@ static struct Curl_cfilter *get_ssl_cf_engaged(struct connectdata *conn,
   struct Curl_cfilter *cf, *lowest_ssl_cf = NULL;
 
   for(cf = conn->cfilter[sockindex]; cf; cf = cf->next) {
-    if(cf->cft == &cft_ssl || cf->cft == &cft_ssl_proxy) {
+    if(cf->cft == &Curl_cft_ssl || cf->cft == &Curl_cft_ssl_proxy) {
       lowest_ssl_cf = cf;
       if(cf->connected || (cf->next && cf->next->connected)) {
         /* connected or about to start */
@@ -1804,7 +1807,7 @@ static struct Curl_cfilter *get_ssl_cf_engaged(struct connectdata *conn,
 
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf)
 {
-  return (cf->cft == &cft_ssl_proxy);
+  return (cf->cft == &Curl_cft_ssl_proxy);
 }
 
 struct ssl_config_data *
@@ -1856,7 +1859,7 @@ Curl_ssl_get_primary_config(struct Curl_easy *data,
 struct Curl_cfilter *Curl_ssl_cf_get_ssl(struct Curl_cfilter *cf)
 {
   for(; cf; cf = cf->next) {
-    if(cf->cft == &cft_ssl || cf->cft == &cft_ssl_proxy)
+    if(cf->cft == &Curl_cft_ssl || cf->cft == &Curl_cft_ssl_proxy)
       return cf;
   }
   return NULL;
