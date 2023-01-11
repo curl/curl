@@ -1861,6 +1861,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     multistate(data, MSTATE_COMPLETED);
   }
 
+#ifdef DEBUGBUILD
+  if(!multi->warned) {
+    infof(data, "!!! WARNING !!!");
+    infof(data, "This is a debug build of libcurl, "
+          "do not use in production.");
+    multi->warned = true;
+  }
+#endif
+
   do {
     /* A "stream" here is a logical stream if the protocol can handle that
        (HTTP/2), or the full connection for older protocols */
