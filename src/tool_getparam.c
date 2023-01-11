@@ -660,6 +660,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
+                            argv_item_t cleararg,
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
@@ -764,15 +765,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
-#ifdef HAVE_WRITABLE_ARGV
-        clearthis = nextarg;
-#endif
         singleopt = TRUE;   /* don't loop anymore after this */
       }
       else if(!nextarg)
         return PARAM_REQUIRES_PARAMETER;
-      else
+      else {
+#ifdef HAVE_WRITABLE_ARGV
+        clearthis = cleararg;
+#endif
         *usedarg = TRUE; /* mark it as used */
+      }
 
       if((aliases[hit].desc == ARG_FILENAME) &&
          (nextarg[0] == '-') && nextarg[1]) {
@@ -2494,7 +2496,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           }
         }
 
-        result = getparameter(orig_opt, nextarg, &passarg,
+        result = getparameter(orig_opt, nextarg, argv[i + 1], &passarg,
                               global, config);
 
         curlx_unicodefree(nextarg);
@@ -2533,7 +2535,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter("--url", orig_opt, &used, global, config);
+      result = getparameter("--url", orig_opt, argv[i], &used, global, config);
     }
 
     if(!result)
