@@ -166,8 +166,8 @@ static int bio_cf_write(void *bio, const unsigned char *buf, size_t blen)
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, (char *)buf, blen, &result);
-  /* DEBUGF(infof(data, CFMSG(cf, "bio_cf_out_write(len=%d) -> %d, err=%d"),
-         blen, (int)nwritten, result)); */
+  LOG_CF_DEBUG(data, cf, "bio_cf_out_write(len=%zu) -> %zd, err=%d",
+               blen, nwritten, result);
   if(nwritten < 0 && CURLE_AGAIN == result) {
     nwritten = MBEDTLS_ERR_SSL_WANT_WRITE;
   }
@@ -188,8 +188,8 @@ static int bio_cf_read(void *bio, unsigned char *buf, size_t blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &result);
-  /* DEBUGF(infof(data, CFMSG(cf, "bio_cf_in_read(len=%d) -> %d, err=%d"),
-         blen, (int)nread, result)); */
+  LOG_CF_DEBUG(data, cf, "bio_cf_in_read(len=%zu) -> %zd, err=%d",
+               blen, nread, result);
   if(nread < 0 && CURLE_AGAIN == result) {
     nread = MBEDTLS_ERR_SSL_WANT_READ;
   }

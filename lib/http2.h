@@ -58,6 +58,8 @@ CURLcode Curl_http2_switch(struct Curl_easy *data,
                            struct connectdata *conn, int sockindex,
                            const char *ptr, size_t nread);
 
+extern struct Curl_cftype Curl_cft_nghttp2;
+
 #else /* USE_NGHTTP2 */
 
 #define Curl_conn_is_http2(a,b,c) FALSE

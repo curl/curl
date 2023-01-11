@@ -215,6 +215,9 @@ bool Curl_ssl_supports(struct Curl_easy *data, int ssl_option);
 void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
                              CURLINFO info, int n);
 
+extern struct Curl_cftype Curl_cft_ssl;
+extern struct Curl_cftype Curl_cft_ssl_proxy;
+
 #else /* if not USE_SSL */
 
 /* When SSL support is not present, just define away these function calls */

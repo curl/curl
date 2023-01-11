@@ -153,7 +153,8 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
   const char *name;                       /* name of the filter type */
-  long flags;                             /* flags of filter type */
+  int flags;                              /* flags of filter type */
+  int log_level;                          /* log level for such filters */
   Curl_cft_destroy_this *destroy;         /* destroy resources of this cf */
   Curl_cft_connect *connect;              /* establish connection */
   Curl_cft_close *close;                  /* close conn */

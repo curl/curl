@@ -64,6 +64,7 @@
 
 #define HTTP2_HUGE_WINDOW_SIZE (32 * 1024 * 1024) /* 32 MB */
 
+
 #define DEBUG_HTTP2
 #ifdef DEBUG_HTTP2
 #define H2BUGF(x) x
@@ -776,19 +777,19 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     switch(frame->hd.type) {
     case NGHTTP2_SETTINGS: {
       uint32_t max_conn = ctx->max_concurrent_streams;
-      H2BUGF(infof(data, CFMSG(cf, "recv frame SETTINGS")));
+      LOG_CF_DEBUG(data, cf, "recv frame SETTINGS");
       ctx->max_concurrent_streams = nghttp2_session_get_remote_settings(
           session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
       ctx->enable_push = nghttp2_session_get_remote_settings(
           session, NGHTTP2_SETTINGS_ENABLE_PUSH);
-      H2BUGF(infof(data, CFMSG(cf, "MAX_CONCURRENT_STREAMS == %d"),
-                   ctx->max_concurrent_streams));
-      H2BUGF(infof(data, CFMSG(cf, "ENABLE_PUSH == %s"),
-                   ctx->enable_push?"TRUE":"false"));
+      LOG_CF_DEBUG(data, cf, "MAX_CONCURRENT_STREAMS == %d",
+                   ctx->max_concurrent_streams);
+      LOG_CF_DEBUG(data, cf, "ENABLE_PUSH == %s",
+                   ctx->enable_push ? "TRUE" : "false");
       if(data && max_conn != ctx->max_concurrent_streams) {
         /* only signal change if the value actually changed */
-        infof(data, CFMSG(cf, "MAX_CONCURRENT_STREAMS now %u"),
-              ctx->max_concurrent_streams);
+        LOG_CF_DEBUG(data, cf, "MAX_CONCURRENT_STREAMS now %u",
+                     ctx->max_concurrent_streams);
         multi_connchanged(data->multi);
       }
       break;
@@ -801,31 +802,30 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       }
       break;
     case NGHTTP2_WINDOW_UPDATE:
-      H2BUGF(infof(data, CFMSG(cf, "recv frame WINDOW_UPDATE")));
+      LOG_CF_DEBUG(data, cf, "recv frame WINDOW_UPDATE");
       break;
     default:
-      H2BUGF(infof(data, CFMSG(cf, "recv frame %x on 0"), frame->hd.type));
+      LOG_CF_DEBUG(data, cf, "recv frame %x on 0", frame->hd.type);
     }
     return 0;
   }
   data_s = nghttp2_session_get_stream_user_data(session, stream_id);
   if(!data_s) {
-    H2BUGF(infof(data, CFMSG(cf, "No Curl_easy associated with stream: %u"),
-                 stream_id));
+    LOG_CF_DEBUG(data, cf, "No Curl_easy associated with stream: %u",
+                 stream_id);
     return 0;
   }
 
   stream = data_s->req.p.http;
   if(!stream) {
-    H2BUGF(infof(data_s, CFMSG(cf, "No proto pointer for stream: %u"),
-                 stream_id));
+    LOG_CF_DEBUG(data_s, cf, "No proto pointer for stream: %u", stream_id);
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
 
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
     /* If body started on this stream, then receiving DATA is illegal. */
-    H2BUGF(infof(data_s, CFMSG(cf, "recv frame DATA stream %u"), stream_id));
+    LOG_CF_DEBUG(data_s, cf, "recv frame DATA stream %u", stream_id);
     if(!stream->bodystarted) {
       rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
                                      stream_id, NGHTTP2_PROTOCOL_ERROR);
@@ -836,8 +836,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
     break;
   case NGHTTP2_HEADERS:
-    H2BUGF(infof(data_s, CFMSG(cf, "recv frame HEADERS stream %u"),
-                 stream_id));
+    LOG_CF_DEBUG(data_s, cf, "recv frame HEADERS stream %u", stream_id);
     if(stream->bodystarted) {
       /* Only valid HEADERS after body started is trailer HEADERS.  We
          buffer them in on_header callback. */
@@ -871,8 +870,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->nread_header_recvbuf += ncopy;
 
     DEBUGASSERT(stream->mem);
-    H2BUGF(infof(data_s, CFMSG(cf, "%zu header bytes, stream %u at %p"),
-                 ncopy, stream_id, stream->mem));
+    LOG_CF_DEBUG(data_s, cf, "%zu header bytes, stream %u at %p",
+                 ncopy, stream_id, (void *)stream->mem);
 
     stream->len -= ncopy;
     stream->memlen += ncopy;
@@ -883,8 +882,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
     break;
   case NGHTTP2_PUSH_PROMISE:
-    H2BUGF(infof(data_s, CFMSG(cf, "recv frame PUSH_PROMISE stream %u"),
-                 stream_id));
+    LOG_CF_DEBUG(data_s, cf, "recv frame PUSH_PROMISE stream %u", stream_id);
     rv = push_promise(cf, data_s, &frame->push_promise);
     if(rv) { /* deny! */
       int h2;
@@ -895,14 +893,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       if(nghttp2_is_fatal(h2))
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       else if(rv == CURL_PUSH_ERROROUT) {
-        DEBUGF(infof(data_s, CFMSG(cf, "Fail the parent stream (too)")));
+        LOG_CF_DEBUG(data_s, cf, "Fail the parent stream (too)");
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       }
     }
     break;
   default:
-    H2BUGF(infof(data_s, CFMSG(cf, "recv frame %x for stream %u"),
-                 frame->hd.type, stream_id));
+    LOG_CF_DEBUG(data_s, cf, "recv frame %x for stream %u",
+                 frame->hd.type, stream_id);
     break;
   }
   return 0;
@@ -2248,9 +2246,10 @@ static CURLcode h2_cf_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
-static const struct Curl_cftype cft_nghttp2 = {
+struct Curl_cftype Curl_cft_nghttp2 = {
   "NGHTTP2",
   CF_TYPE_MULTIPLEX,
+  CURL_LOG_DEFAULT,
   h2_cf_destroy,
   h2_cf_connect,
   h2_cf_close,
@@ -2279,7 +2278,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
   if(!ctx)
     goto out;
 
-  result = Curl_cf_create(&cf, &cft_nghttp2, ctx);
+  result = Curl_cf_create(&cf, &Curl_cft_nghttp2, ctx);
   if(result)
     goto out;
 
@@ -2301,7 +2300,7 @@ bool Curl_conn_is_http2(const struct Curl_easy *data,
 
   (void)data;
   for(; cf; cf = cf->next) {
-    if(cf->cft == &cft_nghttp2)
+    if(cf->cft == &Curl_cft_nghttp2)
       return TRUE;
     if(cf->cft->flags & CF_TYPE_IP_CONNECT)
       return FALSE;
@@ -2343,7 +2342,7 @@ CURLcode Curl_http2_switch(struct Curl_easy *data,
   if(result)
     return result;
 
-  DEBUGASSERT(cf->cft == &cft_nghttp2);
+  DEBUGASSERT(cf->cft == &Curl_cft_nghttp2);
   ctx = cf->ctx;
 
   result = h2_cf_ctx_init(cf, data, (data->req.upgr101 == UPGR101_RECEIVED));

@@ -132,5 +132,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          const struct Curl_dns_entry *remotehost,
                          int ssl_mode);
 
+extern struct Curl_cftype Curl_cft_happy_eyeballs;
+extern struct Curl_cftype Curl_cft_setup;
 
 #endif /* HEADER_CURL_CONNECT_H */
