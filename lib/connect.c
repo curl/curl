@@ -677,7 +677,9 @@ evaluate:
   for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
     struct eyeballer *baller = ctx->baller[i];
     DEBUGF(LOG_CF(data, cf, "%s assess started=%d, result=%d",
-                  baller->name, baller->has_started, baller->result));
+                  baller?baller->name:NULL,
+                  baller?baller->has_started:0,
+                  baller?baller->result:0));
     if(baller && baller->has_started && baller->result) {
       result = baller->result;
       break;
