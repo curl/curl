@@ -87,6 +87,8 @@ jobs:
           configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl
           macosx-version-min: 10.15
     steps:
+    - run: brew uninstall azure-cli pipx python@3.10 python@3.11
+      name: 'uninstall Python'
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
@@ -149,6 +151,8 @@ jobs:
           install: nghttp2 openssl libssh2
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON
     steps:
+    - run: brew uninstall azure-cli pipx python@3.10 python@3.11
+      name: 'uninstall Python'
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
