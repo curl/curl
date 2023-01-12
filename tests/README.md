@@ -163,10 +163,11 @@ SPDX-License-Identifier: curl
 
   A curl build with `--enable-debug` offers more verbose output in the logs.
   This applies not only for test cases, but also when running it standalone
-  with `curl -v`. A curl built with debug is ***not suitable for production***, 
-  but it greatly helps to track down problems.
+  with `curl -v`. While a curl debug built is
+  ***not suitable for production***, it is often helpful in tracking down
+  problems.
   
-  Sometimes, one needs very detailed logging of operations, but does not want
+  Sometimes, one needs detailed logging of operations, but does not want
   to drown in output. The newly introduced *connection filters* allows one to
   dynamically increase log verbosity for a particular *filter type*. Example:
   
