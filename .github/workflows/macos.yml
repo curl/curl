@@ -152,7 +152,7 @@ jobs:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
-    - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
+    - run: brew update && brew tap mongodb/brew && brew bundle install --no-lock --file /tmp/Brewfile
       name: 'brew install'
 
     - run: python3 -m pip install impacket
