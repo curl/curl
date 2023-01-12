@@ -170,6 +170,9 @@ struct Curl_multi {
 #endif
   BIT(dead); /* a callback returned error, everything needs to crash and
                 burn */
+#ifdef DEBUGBUILD
+  BIT(warned);                 /* true after user warned of DEBUGBUILD */
+#endif
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */
