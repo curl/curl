@@ -152,7 +152,7 @@ jobs:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
-    - run: brew uninstall mongodb-community@5.0 && brew update && brew bundle install --no-lock --file /tmp/Brewfile
+    - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile --force
       name: 'brew install'
 
     - run: python3 -m pip install impacket
