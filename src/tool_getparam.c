@@ -689,10 +689,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   ParameterError err;
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
-#ifdef HAVE_WRITABLE_ARGV
-  argv_item_t clearthis = NULL;
-#endif
-
   static const char *redir_protos[] = {
     "http",
     "https",
@@ -700,6 +696,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     "ftps",
     NULL
   };
+#ifdef HAVE_WRITABLE_ARGV
+  argv_item_t clearthis = NULL;
+#else
+  (void)cleararg;
+#endif
 
   *usedarg = FALSE; /* default is that we don't use the arg */
 
