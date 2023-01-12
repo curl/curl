@@ -164,8 +164,8 @@ void tool_version_info(void)
 {
   const char *const *builtin;
   if(is_debug())
-    printf("WARNING: this libcurl is Debug-enabled, "
-           "do not use in production\n\n");
+    fprintf(stderr, "WARNING: this libcurl is Debug-enabled, "
+            "do not use in production\n\n");
 
   printf(CURL_ID "%s\n", curl_version());
 #ifdef CURL_PATCHSTAMP
