@@ -691,6 +691,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
                          by using --OPTION or --no-OPTION */
 #ifdef HAVE_WRITABLE_ARGV
   argv_item_t clearthis = NULL;
+#else
+  (void)cleararg;
 #endif
 
   static const char *redir_protos[] = {
