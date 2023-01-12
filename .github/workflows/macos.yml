@@ -140,19 +140,19 @@ jobs:
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         build:
         - name: OpenSSL
-          install: mongodb-community@5.0 nghttp2 openssl
+          install: nghttp2 openssl
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
         - name: LibreSSL
-          install: mongodb-community@5.0 nghttp2 libressl
+          install: nghttp2 libressl
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
         - name: libssh2
-          install: mongodb-community@5.0 nghttp2 openssl libssh2
+          install: nghttp2 openssl libssh2
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON
     steps:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
-    - run: brew update && brew tap mongodb/brew && brew bundle install --no-lock --file /tmp/Brewfile
+    - run: brew uninstall mongodb-community@5.0 && brew update && brew bundle install --no-lock --file /tmp/Brewfile
       name: 'brew install'
 
     - run: python3 -m pip install impacket
