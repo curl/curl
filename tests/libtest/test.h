@@ -42,6 +42,10 @@
 
 #include "curl_printf.h"
 
+#ifdef WIN32
+#define sleep(sec) Sleep ((sec)*1000)
+#endif
+
 #define test_setopt(A,B,C)                                      \
   if((res = curl_easy_setopt((A), (B), (C))) != CURLE_OK)       \
     goto test_cleanup
