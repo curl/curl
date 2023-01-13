@@ -37,10 +37,6 @@
 
 #define DNS_TIMEOUT 1
 
-#if defined(WIN32) || defined(_WIN32)
-#define sleep(sec) Sleep ((sec)*1000)
-#endif
-
 static int debug_callback(CURL *curl, curl_infotype info, char *msg,
                           size_t len, void *ptr)
 {
