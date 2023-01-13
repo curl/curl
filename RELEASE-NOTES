@@ -1,14 +1,16 @@
 curl and libcurl 7.87.1
 
  Public curl releases:         213
- Command line options:         249
+ Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2791
+ Contributors:                 2792
 
 This release includes the following changes:
 
+ o curl.h: add CURL_HTTP_VERSION_3ONLY [82]
  o share: add sharing of HSTS cache among handles [7]
+ o src: add --http3-only [81]
  o tool_operate: share HSTS between handles
  o urlapi: add CURLU_PUNYCODE [25]
 
@@ -20,14 +22,18 @@ This release includes the following bugfixes:
  o cmake: check for sendmsg [39]
  o cmake: fix the snprintf detection [5]
  o cmake: set SOVERSION also for macOS [68]
+ o connect: fix access of pointer before NULL check [83]
  o copyright: update all copyright lines and remove year ranges [35]
  o curl.h: allow up to 10M buffer size [76]
  o curl.h: mark CURLSSLBACKEND_MESALINK as deprecated [52]
+ o curl: output warning at --verbose output for debug-enabled version [80]
  o curl_global_sslset.3: clarify the openssl situation [53]
+ o curl_log: for failf/infof and debug logging implementations [87]
  o CURLOPT_HEADERDATA.3: warn DLL users must set write function [45]
  o docs/DEPRECATE.md: deprecate gskit [36]
  o docs: add link to GitHub Discussions [49]
  o docs: mention indirect effects of --insecure [19]
+ o easyoptions: Fix header printing in generation script [84]
  o examples: remove the curlgtk.c example [48]
  o ftpserver: lower the normal DATA connect timeout to speed up torture tests [27]
  o GHA: add job on Slackware 15.0 [58]
@@ -60,6 +66,7 @@ This release includes the following bugfixes:
  o ngtcp2: fix the build without 'sendmsg' [38]
  o noproxy: support for space-separated names is deprecated [66]
  o nss: implement data_pending method [43]
+ o openssl: make the BIO_METHOD a local variable in the connection filter [79]
  o openssl: remove attached easy handles from SSL instances [29]
  o os400: fixes to make-lib.sh and initscript.sh [71]
  o release-notes.pl: check fixes/closes lines better
@@ -79,6 +86,7 @@ This release includes the following bugfixes:
  o tests-httpd: basic infra to run curl against an apache httpd [72]
  o tests: add 3 new HTTP/2 test cases, plus https: support for nghttpx [9]
  o tests: avoid use of sha1 in certificates [4]
+ o tool_getparam: fix hiding of command line secrets [85]
  o tool_operate: fix `CURLOPT_SOCKS5_GSSAPI_NEC` type [1]
  o tool_operate: fix headerfile writing [64]
  o transfer: break the read loop when RECV is cleared [22]
@@ -91,6 +99,7 @@ This release includes the following bugfixes:
  o vtls: use ALPN HTTP/1.0 when HTTP/1.0 is used
  o workflows/linux.yml: merge 3 common packages [18]
  o writeout: add %{certs} and %{num_certs} [33]
+ o ws: fix autoping handling [70]
  o x509asn1: fix compile errors and warnings [47]
 
 This release includes the following known bugs:
@@ -108,16 +117,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrei Rybak, Andy Alt, Cameron Blomquist, Daniel Stenberg, Divy Le Ray,
-  Esdras de Morais da Silva, Hannah Schierling, Harry Sintonen, Hide Ishikawa,
-  Jakob Hirsch, John Bampton, Jon Rumsey, Josh Brobst, Marcel Raad,
-  Martin Waleczek, Michael Osipov, Nick Banks, nick-telia on github,
-  norbertmm on github, odek86 on github, Patrick Monnerat, Paul Howarth,
-  Philip Heiduck, Radek Brich, Radu Hociung, Ray Satiro, Ryan Schmidt,
-  Sébastien Helleu, Sergio-IME on github, SerusDev on github, Stefan Eissing,
-  Stephan Guilloux, Tatsuhiro Tsujikawa, Thomas Klausner, Timmy Schierling,
-  Viktor Szakats, violetlige on github, William Tang, Yurii Rashkovskii
-  (39 contributors)
+  Alexey Savchuk, Andrei Rybak, Andy Alt, Cameron Blomquist, Daniel Gustafsson,
+  Daniel Stenberg, Divy Le Ray, Esdras de Morais da Silva, Hannah Schierling,
+  Harry Sintonen, Hide Ishikawa, Jakob Hirsch, John Bampton, Jon Rumsey,
+  Josh Brobst, Marcel Raad, Martin Waleczek, Michael Osipov, Nick Banks,
+  nick-telia on github, norbertmm on github, odek86 on github,
+  Patrick Monnerat, Paul Howarth, Philip Heiduck, Radek Brich, Radu Hociung,
+  Ray Satiro, Ryan Schmidt, Sébastien Helleu, Sergio-IME on github,
+  SerusDev on github, Stefan Eissing, Stephan Guilloux, Tatsuhiro Tsujikawa,
+  Thomas Klausner, Timmy Schierling, Viktor Szakats, violetlige on github,
+  William Tang, Yurii Rashkovskii
+  (41 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -190,9 +200,18 @@ References to bug reports and discussions on issues:
  [67] = https://curl.se/bug/?i=10220
  [68] = https://curl.se/bug/?i=10214
  [69] = https://curl.se/bug/?i=10213
+ [70] = https://curl.se/bug/?i=10289
  [71] = https://curl.se/bug/?i=10266
  [72] = https://curl.se/bug/?i=10175
  [75] = https://curl.se/bug/?i=10241
  [76] = https://curl.se/bug/?i=10256
  [77] = https://curl.se/bug/?i=10257
  [78] = https://curl.se/bug/?i=10258
+ [79] = https://curl.se/bug/?i=10285
+ [80] = https://curl.se/bug/?i=10278
+ [81] = https://curl.se/bug/?i=10264
+ [82] = https://curl.se/bug/?i=10264
+ [83] = https://curl.se/bug/?i=10284
+ [84] = https://curl.se/bug/?i=10275
+ [85] = https://curl.se/bug/?i=10276
+ [87] = https://curl.se/bug/?i=10271
