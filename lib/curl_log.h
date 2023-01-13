@@ -81,8 +81,9 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
 #endif
 
 void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
-#if defined(__GNUC__) && !defined(printf) && \
-    defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#if defined(__GNUC__) && !defined(printf) &&                    \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
+  !defined(__MINGW32__)
                        const char *fmt, ...)
                        __attribute__((format(printf, 3, 4)));
 #else
