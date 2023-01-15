@@ -2698,6 +2698,9 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
    * For TLS 1.3, skip notification of the decrypted inner Content-Type.
    */
   if(ssl_ver
+#ifdef SSL3_RT_HEADER
+     && content_type != SSL3_RT_HEADER
+#endif
 #ifdef SSL3_RT_INNER_CONTENT_TYPE
      && content_type != SSL3_RT_INNER_CONTENT_TYPE
 #endif
