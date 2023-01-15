@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+HTTP proxy Digest auth
+</keywords>
+</info>
+
+# Server-side
+<reply>
+
+# this is returned first since we get no proxy-auth
+<connect>
+HTTP/1.1 407 Authorization Required to proxy me swsclose
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
+</connect>
+
+<datacheck>
+HTTP/1.1 407 Authorization Required to proxy me swsclose
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+proxy
+</features>
+ <name>
+HTTP proxy CONNECT (no auth) with proxy returning 407 and closing
+ </name>
+ <command>
+http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER0002 --proxy http://%HOSTIP:%HTTPPORT --proxytunnel
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+CONNECT test.remote.haxx.se.%TESTNUMBER:8990 HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</protocol>
+<errorcode>
+56
+</errorcode>
+</verify>
+</testcase>

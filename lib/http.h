@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,8 +20,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "curl_setup.h"
+
+#if defined(USE_MSH3) && !defined(_WIN32)
+#include <pthread.h>
+#endif
+
+#include "ws.h"
 
 typedef enum {
   HTTPREQ_GET,
@@ -34,8 +42,8 @@ typedef enum {
 
 #ifndef CURL_DISABLE_HTTP
 
-#ifdef USE_NGHTTP2
-#include <nghttp2/nghttp2.h>
+#if defined(_WIN32) && (defined(ENABLE_QUIC) || defined(USE_NGHTTP2))
+#include <stdint.h>
 #endif
 
 extern const struct Curl_handler Curl_handler_http;
@@ -44,25 +52,35 @@ extern const struct Curl_handler Curl_handler_http;
 extern const struct Curl_handler Curl_handler_https;
 #endif
 
+#ifdef USE_WEBSOCKETS
+extern const struct Curl_handler Curl_handler_ws;
+
+#ifdef USE_SSL
+extern const struct Curl_handler Curl_handler_wss;
+#endif
+#endif /* websockets */
+
+
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
-                        const char *content); /* content string to find */
+                        const size_t hlen,   /* len of the keyword in bytes */
+                        const char *content, /* content string to find */
+                        const size_t clen);   /* len of the content in bytes */
 
 char *Curl_copy_header_value(const char *header);
 
 char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const struct connectdata *conn,
-                             const char *thisheader);
-#ifndef USE_HYPER
+                             const char *thisheader,
+                             const size_t thislen);
+struct HTTP; /* see below */
 CURLcode Curl_buffer_send(struct dynbuf *in,
                           struct Curl_easy *data,
+                          struct HTTP *http,
                           curl_off_t *bytes_written,
                           curl_off_t included_body_bytes,
                           int socketindex);
-#else
-#define Curl_buffer_send(a,b,c,d,e) CURLE_OK
-#endif
 
 CURLcode Curl_add_timecondition(struct Curl_easy *data,
 #ifndef USE_HYPER
@@ -93,11 +111,14 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
                               struct connectdata *conn);
 CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
                           char *headp);
+CURLcode Curl_transferencode(struct Curl_easy *data);
 CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
                         Curl_HttpReq httpreq,
                         const char **teep);
 CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
                             struct dynbuf *r, Curl_HttpReq httpreq);
+bool Curl_use_http_1_1plus(const struct Curl_easy *data,
+                           const struct connectdata *conn);
 #ifndef CURL_DISABLE_COOKIES
 CURLcode Curl_http_cookies(struct Curl_easy *data,
                            struct connectdata *conn,
@@ -179,14 +200,18 @@ struct HTTP {
     void *fread_in;           /* backup storage for fread_in pointer */
     const char *postdata;
     curl_off_t postsize;
+    struct Curl_easy *data;
   } backup;
 
   enum {
     HTTPSEND_NADA,    /* init */
     HTTPSEND_REQUEST, /* sending a request */
-    HTTPSEND_BODY,    /* sending body */
-    HTTPSEND_LAST     /* never use this */
+    HTTPSEND_BODY     /* sending body */
   } sending;
+
+#ifdef USE_WEBSOCKETS
+  struct websocket ws;
+#endif
 
 #ifndef CURL_DISABLE_HTTP
   struct dynbuf send_buffer; /* used if the request couldn't be sent in one
@@ -197,13 +222,11 @@ struct HTTP {
   /*********** for HTTP/2 we store stream-local data here *************/
   int32_t stream_id; /* stream we are interested in */
 
-  bool bodystarted;
   /* We store non-final and final response headers here, per-stream */
   struct dynbuf header_recvbuf;
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
                                   upper layer */
   struct dynbuf trailer_recvbuf;
-  int status_code; /* HTTP status code */
   const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
   size_t pauselen; /* the number of bytes left in data */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
@@ -211,9 +234,11 @@ struct HTTP {
   char **push_headers;       /* allocated array */
   size_t push_headers_used;  /* number of entries filled in */
   size_t push_headers_alloc; /* number of entries allocated */
+  uint32_t error; /* HTTP/2 stream error code */
 #endif
 #if defined(USE_NGHTTP2) || defined(USE_NGHTTP3)
-  bool closed; /* TRUE on HTTP2 stream close */
+  bool bodystarted;
+  int status_code; /* HTTP status code */
   char *mem;     /* points to a buffer in memory to store received data */
   size_t len;    /* size of the buffer 'mem' points to */
   size_t memlen; /* size of data copied to mem */
@@ -223,69 +248,49 @@ struct HTTP {
   const uint8_t *upload_mem; /* points to a buffer to read from */
   size_t upload_len; /* size of the buffer 'upload_mem' points to */
   curl_off_t upload_left; /* number of bytes left to upload */
+  bool closed; /* TRUE on HTTP2 stream close */
 #endif
 
 #ifdef ENABLE_QUIC
+#ifndef USE_MSH3
   /*********** for HTTP/3 we store stream-local data here *************/
   int64_t stream3_id; /* stream we are interested in */
+  uint64_t error3; /* HTTP/3 stream error code */
   bool firstheader;  /* FALSE until headers arrive */
   bool firstbody;  /* FALSE until body arrives */
   bool h3req;    /* FALSE until request is issued */
+#endif /* !USE_MSH3 */
   bool upload_done;
-#endif
+#endif /* ENABLE_QUIC */
 #ifdef USE_NGHTTP3
   size_t unacked_window;
   struct h3out *h3out; /* per-stream buffers for upload */
   struct dynbuf overflow; /* excess data received during a single Curl_read */
-#endif
+#endif /* USE_NGHTTP3 */
+#ifdef USE_MSH3
+  struct MSH3_REQUEST *req;
+#ifdef _WIN32
+  CRITICAL_SECTION recv_lock;
+#else /* !_WIN32 */
+  pthread_mutex_t recv_lock;
+#endif /* _WIN32 */
+
+  /* Receive Buffer (Headers and Data) */
+  uint8_t* recv_buf;
+  size_t recv_buf_alloc;
+  size_t recv_buf_max;
+  /* Receive Headers */
+  size_t recv_header_len;
+  bool recv_header_complete;
+  /* Receive Data */
+  size_t recv_data_len;
+  bool recv_data_complete;
+  /* General Receive Error */
+  CURLcode recv_error;
+#endif /* USE_MSH3 */
 };
 
-#ifdef USE_NGHTTP2
-/* h2 settings for this connection */
-struct h2settings {
-  uint32_t max_concurrent_streams;
-  bool enable_push;
-};
-#endif
-
-struct http_conn {
-#ifdef USE_NGHTTP2
-#define H2_BINSETTINGS_LEN 80
-  uint8_t binsettings[H2_BINSETTINGS_LEN];
-  size_t  binlen; /* length of the binsettings data */
-
-  /* We associate the connnectdata struct with the connection, but we need to
-     make sure we can identify the current "driving" transfer. This is a
-     work-around for the lack of nghttp2_session_set_user_data() in older
-     nghttp2 versions that we want to support. (Added in 1.31.0) */
-  struct Curl_easy *trnsfr;
-
-  nghttp2_session *h2;
-  Curl_send *send_underlying; /* underlying send Curl_send callback */
-  Curl_recv *recv_underlying; /* underlying recv Curl_recv callback */
-  char *inbuf; /* buffer to receive data from underlying socket */
-  size_t inbuflen; /* number of bytes filled in inbuf */
-  size_t nread_inbuf; /* number of bytes read from in inbuf */
-  /* We need separate buffer for transmission and reception because we
-     may call nghttp2_session_send() after the
-     nghttp2_session_mem_recv() but mem buffer is still not full. In
-     this case, we wrongly sends the content of mem buffer if we share
-     them for both cases. */
-  int32_t pause_stream_id; /* stream ID which paused
-                              nghttp2_session_mem_recv */
-  size_t drain_total; /* sum of all stream's UrlState.drain */
-
-  /* this is a hash of all individual streams (Curl_easy structs) */
-  struct h2settings settings;
-
-  /* list of settings that will be sent */
-  nghttp2_settings_entry local_settings[3];
-  size_t local_settings_num;
-  uint32_t error_code; /* HTTP/2 error code */
-#else
-  int unused; /* prevent a compiler warning */
-#endif
-};
+CURLcode Curl_http_size(struct Curl_easy *data);
 
 CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                                      struct connectdata *conn,

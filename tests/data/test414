@@ -1,0 +1,84 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+cookies
+--resolve
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 301 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Set-Cookie: SESSIONID=originaltoken; secure
+Set-Cookie: second=originaltoken; secure; path=/a
+Location: http://attack.invalid:%HTTPPORT/a/b/%TESTNUMBER0002
+
+-foo-
+</data>
+
+<data2>
+HTTP/1.1 301 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Set-Cookie: SESSIONID=hacker; domain=attack.invalid;
+Set-Cookie: second=replacement; path=/a/b
+Location: https://attack.invalid:%HTTPSPORT/a/b/%TESTNUMBER0003
+
+-foo-
+</data2>
+
+<data3>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+
+-foo-
+</data3>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+https
+</server>
+<name>
+HTTPS sec-cookie, HTTP redirect, same name cookie, redirect back
+</name>
+<command>
+https://attack.invalid:%HTTPSPORT/a/b/%TESTNUMBER -k -c log/cookie%TESTNUMBER --resolve attack.invalid:%HTTPSPORT:%HOSTIP --resolve attack.invalid:%HTTPPORT:%HOSTIP -L
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /a/b/%TESTNUMBER HTTP/1.1
+Host: attack.invalid:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /a/b/%TESTNUMBER0002 HTTP/1.1
+Host: attack.invalid:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /a/b/%TESTNUMBER0003 HTTP/1.1
+Host: attack.invalid:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Cookie: SESSIONID=originaltoken; second=originaltoken
+
+</protocol>
+</verify>
+</testcase>

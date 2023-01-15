@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -34,8 +36,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_EFFECTIVE_METHOD,
 Pass in a pointer to a char pointer and get the last used effective HTTP
 method.
 
-In cases when you've asked libcurl to follow redirects, the method may very
-well not be the same method the first request would use.
+In cases when you have asked libcurl to follow redirects, the method may not be
+the same method the first request would use.
 
 The \fBmethodp\fP pointer will be NULL or pointing to private memory you MUST
 NOT free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the

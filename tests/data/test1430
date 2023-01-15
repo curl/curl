@@ -7,7 +7,7 @@ HTTP GET
 </info>
 
 <reply>
-<data>
+<data nocheck="yes">
 HTTP/1.1 -12 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -47,5 +47,10 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
+# 1 - CURLE_UNSUPPORTED_PROTOCOL
+# Due to invalid HTTP response code
+<errorcode>
+1
+</errorcode>
 </verify>
 </testcase>

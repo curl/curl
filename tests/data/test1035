@@ -23,6 +23,7 @@ none
 <features>
 idn
 http
+proxy
 </features>
 <setenv>
 LC_ALL=

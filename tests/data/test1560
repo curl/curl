@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-URL API
+URLAPI
 </keywords>
 </info>
 
@@ -12,6 +12,9 @@ URL API
 <server>
 none
 </server>
+<setenv>
+LANG=en_US.UTF-8
+</setenv>
 <features>
 file
 https

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,11 +18,13 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HTTPAUTH 3 "2 Aug 2014" "libcurl 7.38.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_HTTPAUTH \- set HTTP server authentication methods to try
+CURLOPT_HTTPAUTH \- HTTP server authentication methods to try
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -76,11 +78,11 @@ option to work, or build libcurl on Windows with SSPI support.
 .IP CURLAUTH_NTLM_WB
 NTLM delegating to winbind helper. Authentication is performed by a separate
 binary application that is executed when needed. The name of the application
-is specified at compile time but is typically /usr/bin/ntlm_auth
+is specified at compile time but is typically \fB/usr/bin/ntlm_auth\fP.
 
 Note that libcurl will fork when necessary to run the winbind application and
-kill it when complete, calling waitpid() to await its exit when done. On POSIX
-operating systems, killing the process will cause a SIGCHLD signal to be
+kill it when complete, calling \fBwaitpid()\fP to await its exit when done. On
+POSIX operating systems, killing the process will cause a SIGCHLD signal to be
 raised (regardless of whether \fICURLOPT_NOSIGNAL(3)\fP is set), which must be
 handled intelligently by the application. In particular, the application must
 not unconditionally call wait() in its SIGCHLD signal handler to avoid being
@@ -96,7 +98,7 @@ libcurl pick any it finds suitable. libcurl will automatically select the one
 it finds most secure.
 .IP CURLAUTH_ONLY
 This is a meta symbol. OR this value together with a single specific auth
-value to force libcurl to probe for un-restricted auth and if not, only that
+value to force libcurl to probe for unrestricted auth and if not, only that
 single auth algorithm is acceptable.
 .IP CURLAUTH_AWS_SIGV4
 provides AWS V4 signature authentication on HTTPS header
@@ -112,7 +114,7 @@ if(curl) {
   CURLcode ret;
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
   /* allow whatever auth the server speaks */
-  curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+  curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
   curl_easy_setopt(curl, CURLOPT_USERPWD, "james:bond");
   ret = curl_easy_perform(curl);
 }

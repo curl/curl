@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -69,11 +71,11 @@ struct Curl_hash_iterator {
   struct Curl_llist_element *current_element;
 };
 
-int Curl_hash_init(struct Curl_hash *h,
-                   int slots,
-                   hash_function hfunc,
-                   comp_function comparator,
-                   Curl_hash_dtor dtor);
+void Curl_hash_init(struct Curl_hash *h,
+                    int slots,
+                    hash_function hfunc,
+                    comp_function comparator,
+                    Curl_hash_dtor dtor);
 
 void *Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p);
 int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len);

@@ -47,7 +47,11 @@ Accept: */*
 Transfer-Encoding: chunked
 Expect: 100-continue
 
+%if hyper
+1E
+%else
 1e
+%endif
 just some tiny teeny contents
 
 0

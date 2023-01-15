@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,18 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_easy_duphandle 3 "19 Sep 2014" "libcurl" "libcurl Manual"
 .SH NAME
 curl_easy_duphandle - Clone a libcurl session handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.BI "CURL *curl_easy_duphandle(CURL *"handle ");"
-
+CURL *curl_easy_duphandle(CURL *handle);
+.fi
 .SH DESCRIPTION
 This function will return a new curl handle, a duplicate, using all the
 options previously set in the input curl \fIhandle\fP. Both handles can
@@ -45,6 +48,21 @@ NULL).
 
 In multi-threaded programs, this function must be called in a synchronous way,
 the input handle may not be in use when cloned.
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+CURL *nother;
+if(curl) {
+  CURLcode res;
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  nother = curl_easy_duphandle(curl);
+  res = curl_easy_perform(nother);
+  curl_easy_cleanup(nother);
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.9
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and no valid handle was
 returned.

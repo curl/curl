@@ -4,9 +4,11 @@ We are always in need of more help. If you are new to the project and are
 looking for ways to contribute and help out, this document aims to give a few
 good starting points.
 
-A good idea is to start by subscribing to the [curl-library mailing
-list](https://cool.haxx.se/mailman/listinfo/curl-library) to keep track of the
-current discussion topics.
+You may subscribe to the [curl-library mailing
+list](https://lists.haxx.se/listinfo/curl-library) to keep track of the
+current discussion topics; or if you are registered on GitHub, you can use the
+[Discussions section](https://github.com/curl/curl/discussions) on the main
+curl repository.
 
 ## Scratch your own itch
 
@@ -18,17 +20,17 @@ down and report the bug. Or make your first pull request with a fix for that.
 ## Smaller tasks
 
 Some projects mark small issues as "beginner friendly", "bite-sized" or
-similar. We don't do that in curl since such issues never linger around long
-enough. Simple issues get handled very fast.
+similar. We do not do that in curl since such issues never linger around long
+enough. Simple issues get handled fast.
 
-If you're looking for a smaller or simpler task in the project to help out
+If you are looking for a smaller or simpler task in the project to help out
 with as an entry-point into the project, perhaps because you are a newcomer or
 even maybe not a terribly experienced developer, here's our advice:
 
  - Read through this document to get a grasp on a general approach to use
  - Consider adding a test case for something not currently tested (correctly)
  - Consider updating or adding documentation
- - One way to get your feet wet gently in the project, is to participate in an
+ - One way to get started gently in the project, is to participate in an
    existing issue/PR and help out by reproducing the issue, review the code in
    the PR etc.
 
@@ -43,7 +45,7 @@ one that piques your interest.
 
 ## Work on known bugs
 
-Some bugs are known and haven't yet received attention and work enough to get
+Some bugs are known and have not yet received attention and work enough to get
 fixed. We collect such known existing flaws in the
 [KNOWN_BUGS](https://curl.se/docs/knownbugs.html) page. Many of them link
 to the original bug report with some additional details, but some may also
@@ -56,7 +58,7 @@ On the [autobuilds page](https://curl.se/dev/builds.html) we show a
 collection of test results from the automatic curl build and tests that are
 performed by volunteers. Fixing compiler warnings and errors shown there is
 something we value greatly. Also, if you own or run systems or architectures
-that aren't already tested in the autobuilds, we also appreciate more
+that are not already tested in the autobuilds, we also appreciate more
 volunteers running builds automatically to help us keep curl portable.
 
 ## TODO items
@@ -64,7 +66,7 @@ volunteers running builds automatically to help us keep curl portable.
 Ideas for features and functions that we have considered worthwhile to
 implement and provide are kept in the
 [TODO](https://curl.se/docs/todo.html) file. Some of the ideas are
-rough. Some are well thought out. Some probably aren't really suitable
+rough. Some are well thought out. Some probably are not really suitable
 anymore.
 
 Before you invest a lot of time on a TODO item, do bring it up for discussion
@@ -83,5 +85,5 @@ the specific implementation. Either way is fine.
 
 We offer [guidelines](https://curl.se/dev/contribute.html) that are
 suitable to be familiar with before you decide to contribute to curl. If
-you're used to open source development, you'll probably not find many
-surprises in there.
+you are used to open source development, you will probably not find many
+surprises there.

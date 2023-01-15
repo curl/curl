@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_setup.h"
 
@@ -29,12 +31,12 @@
 #include "tool_writeout_json.h"
 #include "tool_writeout.h"
 
-
-void jsonWriteString(FILE *stream, const char *in)
+void jsonWriteString(FILE *stream, const char *in, bool lowercase)
 {
   const char *i = in;
   const char *in_end = in + strlen(in);
 
+  fputc('\"', stream);
   for(; i < in_end; i++) {
     switch(*i) {
     case '\\':
@@ -63,11 +65,16 @@ void jsonWriteString(FILE *stream, const char *in)
         fprintf(stream, "u%04x", *i);
       }
       else {
-        fputc(*i, stream);
+        char out = *i;
+        if(lowercase && (out >= 'A' && out <= 'Z'))
+          /* do not use tolower() since that's locale specific */
+          out |= ('a' - 'A');
+        fputc(out, stream);
       }
       break;
     }
   }
+  fputc('\"', stream);
 }
 
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
@@ -85,7 +92,54 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
 
   /* The variables are sorted in alphabetical order but as a special case
      curl_version (which is not actually a --write-out variable) is last. */
-  fprintf(stream, "\"curl_version\":\"");
-  jsonWriteString(stream, curl_version());
-  fprintf(stream, "\"}");
+  fprintf(stream, "\"curl_version\":");
+  jsonWriteString(stream, curl_version(), FALSE);
+  fprintf(stream, "}");
+}
+
+#ifdef _MSC_VER
+/* warning C4706: assignment within conditional expression */
+#pragma warning(disable:4706)
+#endif
+
+void headerJSON(FILE *stream, struct per_transfer *per)
+{
+  struct curl_header *header;
+  struct curl_header *prev = NULL;
+
+  fputc('{', stream);
+  while((header = curl_easy_nextheader(per->curl, CURLH_HEADER, -1,
+                                       prev))) {
+    if(prev)
+      fputs(",\n", stream);
+    jsonWriteString(stream, header->name, TRUE);
+    fputc(':', stream);
+    prev = header;
+    if(header->amount > 1) {
+      if(!header->index) {
+        /* act on the 0-index entry and pull the others in, then output in a
+           JSON list */
+        size_t a = header->amount;
+        size_t i = 0;
+        char *name = header->name;
+        fputc('[', stream);
+        do {
+          jsonWriteString(stream, header->value, FALSE);
+          if(++i >= a)
+            break;
+          fputc(',', stream);
+          if(curl_easy_header(per->curl, name, i, CURLH_HEADER,
+                              -1, &header))
+            break;
+        } while(1);
+      }
+      fputc(']', stream);
+    }
+    else {
+      fputc('[', stream);
+      jsonWriteString(stream, header->value, FALSE);
+      fputc(']', stream);
+    }
+  }
+  fputs("\n}", stream);
 }

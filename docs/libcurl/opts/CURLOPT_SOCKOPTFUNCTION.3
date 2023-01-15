@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,11 +18,13 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SOCKOPTFUNCTION 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SOCKOPTFUNCTION \- set callback for setting socket options
+CURLOPT_SOCKOPTFUNCTION \- callback for setting socket options
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -54,7 +56,7 @@ exact purpose for this particular socket:
 
 \fICURLSOCKTYPE_IPCXN\fP for actively created connections or since 7.28.0
 \fICURLSOCKTYPE_ACCEPT\fP for FTP when the connection was setup with PORT/EPSV
-(in earlier versions these sockets weren't passed to this callback).
+(in earlier versions these sockets were not passed to this callback).
 
 Future versions of libcurl may support more purposes. libcurl passes the newly
 created socket descriptor to the callback in the \fIcurlfd\fP parameter so

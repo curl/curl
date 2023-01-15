@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,50 +18,87 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_NETRC 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_NETRC \- request that .netrc is used
+CURLOPT_NETRC \- enable use of .netrc
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NETRC, long level);
+.fi
 .SH DESCRIPTION
 This parameter controls the preference \fIlevel\fP of libcurl between using
 user names and passwords from your \fI~/.netrc\fP file, relative to user names
-and passwords in the URL supplied with \fICURLOPT_URL(3)\fP. On Windows,
-libcurl will use the file as \fI%HOME%/_netrc\fP, but you can also tell
-libcurl a different file name to use with \fICURLOPT_NETRC_FILE(3)\fP.
+and passwords in the URL supplied with \fICURLOPT_URL(3)\fP.
+
+On Windows, libcurl will use the file as \fI%HOME%/_netrc\fP. If \fI%HOME%\fP
+is not set on Windows, libcurl falls back to \fI%USERPROFILE%\fP.
+
+You can also tell libcurl a different file name to use with
+\fICURLOPT_NETRC_FILE(3)\fP.
 
 libcurl uses a user name (and supplied or prompted password) supplied with
 \fICURLOPT_USERPWD(3)\fP or \fICURLOPT_USERNAME(3)\fP in preference to any of
 the options controlled by this parameter.
 
 Only machine name, user name and password are taken into account (init macros
-and similar things aren't supported).
+and similar things are not supported).
 
 libcurl does not verify that the file has the correct properties set (as the
 standard Unix ftp client does). It should only be readable by user.
 
-\fIlevel\fP should be set to one of the values described below.
-
-.IP CURL_NETRC_OPTIONAL
-The use of the \fI~/.netrc\fP file is optional, and information in the URL is
-to be preferred.  The file will be scanned for the host and user name (to find
+\fIlevel\fP is a long that should be set to one of the values described below.
+.IP "CURL_NETRC_IGNORED (0)"
+The library will ignore the \fI.netrc\fP file. This is the default.
+.IP "CURL_NETRC_OPTIONAL (1)"
+The use of the \fI.netrc\fP file is optional, and information in the URL is to
+be preferred.  The file will be scanned for the host and user name (to find
 the password only) or for the host only, to find the first user name and
 password after that \fImachine\fP, which ever information is not specified.
+.IP "CURL_NETRC_REQUIRED (2)"
+The use of the \fI.netrc\fP file is required, and any credential information
+present in the URL is ignored.  The file will be scanned for the host and user
+name (to find the password only) or for the host only, to find the first user
+name and password after that \fImachine\fP, which ever information is not
+specified.
+.SH FILE FORMAT
+The \fB.netrc\fP file format is simple: you specify lines with a machine name
+and follow the login and password that are associated with that machine.
 
-Undefined values of the option will have this effect.
-.IP CURL_NETRC_IGNORED
-The library will ignore the \fI~/.netrc\fP file.
+Each field is provided as a sequence of letters that ends with a space or
+newline. Starting in 7.84.0, libcurl also supports quoted strings. They start
+and end with double quotes and support the escaped special letters \\\", \\n,
+\\r, and \\t. Quoted strings are the only way a space character can be used in
+a user name or password.
 
-This is the default.
-.IP CURL_NETRC_REQUIRED
-The use of the \fI~/.netrc\fP file is required, and information in the URL is
-to be ignored.  The file will be scanned for the host and user name (to find
-the password only) or for the host only, to find the first user name and
-password after that \fImachine\fP, which ever information is not specified.
+.IP "machine <name>"
+Provides credentials for a host called \fBname\fP. libcurl searches the .netrc
+file for a machine token that matches the host name specified in the URL. Once
+a match is made, the subsequent tokens are processed, stopping when the end of
+file is reached or another "machine" is encountered.
+.IP default
+This is the same as "machine" name except that default matches any name. There
+can be only one default token, and it must be after all machine tokens. To
+provide a default anonymous login for hosts that are not otherwise matched,
+add a line similar to this in the end:
+
+ default login anonymous password user@domain
+.IP "login <name>"
+The user name string for the remote machine.
+.IP "password <secret>"
+Supply a password. If this token is present, curl will supply the specified
+string if the remote server requires a password as part of the login process.
+Note that if this token is present in the .netrc file you really should make
+sure the file is not readable by anyone besides the user.
+.IP "macdef <name>"
+Define a macro. This feature is not supported by libcurl. In order for the
+rest of the .netrc to still work fine, libcurl will properly skip every
+definition done with "macdef" that it finds.
 .SH DEFAULT
 CURL_NETRC_IGNORED
 .SH PROTOCOLS

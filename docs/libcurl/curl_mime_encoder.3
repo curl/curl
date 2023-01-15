@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,18 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_mime_encoder 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
 .SH NAME
 curl_mime_encoder - set a mime part's encoder and content transfer encoding
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_encoder(curl_mimepart * " part ,
-.BI "const char * " encoding ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding);
+.fi
 .SH DESCRIPTION
 curl_mime_encoder() requests a mime part's content to be encoded before being
 transmitted.
@@ -37,11 +39,11 @@ transmitted.
 set to NULL to disable an encoder previously attached to the part. The encoding
 scheme storage may safely be reused after this function returns.
 
-Setting a part's encoder twice is valid: only the value set by the last call is
-retained.
+Setting a part's encoder multiple times is valid: only the value set by the
+last call is retained.
 
 Upon multipart rendering, the part's content is encoded according to the
-pertaining scheme and a corresponding \fIContent-Transfer-Encoding"\fP header
+pertaining scheme and a corresponding \fI"Content-Transfer-Encoding"\fP header
 is added to the part.
 
 Supported encoding schemes are:
@@ -65,15 +67,11 @@ not be used with other types of data.
 
 If the original data is already encoded in such a scheme, a custom
 \fIContent-Transfer-Encoding\fP header should be added with
-\FIcurl_mime_headers\fP() instead of setting a part encoder.
+\fIcurl_mime_headers\fP() instead of setting a part encoder.
 
 Encoding should not be applied to multiparts, thus the use of this
 function on a part with content set with \fIcurl_mime_subparts\fP() is
 strongly discouraged.
-.SH AVAILABILITY
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
-.SH RETURN VALUE
-CURLE_OK or a CURL error code upon failure.
 .SH EXAMPLE
 .nf
  curl_mime *mime;
@@ -91,6 +89,10 @@ CURLE_OK or a CURL error code upon failure.
  /* encode file data in base64 for transfer */
  curl_mime_encoder(part, "base64");
 .fi
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+CURLE_OK or a CURL error code upon failure.
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
 .BR curl_mime_headers "(3),"

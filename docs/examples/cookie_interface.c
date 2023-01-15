@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -69,7 +71,7 @@ main(void)
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(curl) {
-    char nline[256];
+    char nline[512];
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -93,9 +95,9 @@ main(void)
 #define snprintf _snprintf
 #endif
     /* Netscape format cookie */
-    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%lu\t%s\t%s",
+    snprintf(nline, sizeof(nline), "%s\t%s\t%s\t%s\t%.0f\t%s\t%s",
              ".example.com", "TRUE", "/", "FALSE",
-             (unsigned long)time(NULL) + 31337UL,
+             difftime(time(NULL) + 31337, (time_t)0),
              "PREF", "hello example, i like you very much!");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if(res != CURLE_OK) {
@@ -104,7 +106,7 @@ main(void)
       return 1;
     }
 
-    /* HTTP-header style cookie. If you use the Set-Cookie format and don't
+    /* HTTP-header style cookie. If you use the Set-Cookie format and do not
     specify a domain then the cookie is sent for any domain and will not be
     modified, likely not what you intended. Starting in 7.43.0 any-domain
     cookies will not be exported either. For more information refer to the

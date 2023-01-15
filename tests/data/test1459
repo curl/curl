@@ -17,6 +17,7 @@ mkdir -p %PWD/log/test%TESTNUMBER.dir/.ssh
 </precheck>
 <features>
 sftp
+!oldlibssh
 </features>
  <name>
 SFTP with corrupted known_hosts
@@ -35,6 +36,7 @@ CURL_HOME=%PWD/log/test%TESTNUMBER.dir
 
 # Verify data after the test has been "shot"
 <verify>
+# old libssh installs return the wrong thing
 <errorcode>
 60
 </errorcode>

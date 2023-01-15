@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--clobber
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.0 200 OK
+Connection: close
+Content-Type: text/plain
+Content-Length: 4
+
+foo
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<name>
+HTTP GET with explicit clobber
+</name>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<command option="no-output">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/exist%TESTNUMBER --clobber
+</command>
+<file name="log/exist%TESTNUMBER">
+to be overwritten
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<file name="log/exist%TESTNUMBER">
+HTTP/1.0 200 OK
+Connection: close
+Content-Type: text/plain
+Content-Length: 4
+
+foo
+</file>
+</verify>
+</testcase>

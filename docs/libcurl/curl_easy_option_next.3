@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .TH curl_easy_option_next 3 "27 Aug 2020" "libcurl 7.73.0" "libcurl Manual"
@@ -31,7 +33,7 @@ typedef enum {
   CURLOT_VALUES,  /*      (a defined set or bitmask) */
   CURLOT_OFF_T,   /* curl_off_t (a range of values) */
   CURLOT_OBJECT,  /* pointer (void *) */
-  CURLOT_STRING,  /*         (char * to zero terminated buffer) */
+  CURLOT_STRING,  /*         (char * to null-terminated buffer) */
   CURLOT_SLIST,   /*         (struct curl_slist *) */
   CURLOT_CBPTR,   /*         (void * passed as-is to a callback) */
   CURLOT_BLOB,    /* blob (struct curl_blob *) */
@@ -51,7 +53,7 @@ const struct curl_easyoption *
 curl_easy_option_next(const struct curl_easyoption *prev);
 .fi
 .SH DESCRIPTION
-This function returns a pointer to the first or the next curl_easyoption
+This function returns a pointer to the first or the next \fIcurl_easyoption\fP
 struct, providing an ability to iterate over all known options for
 \fIcurl_easy_setopt(3)\fP in this instance of libcurl.
 
@@ -64,11 +66,21 @@ information about what argument type they want.
 
 If the \fBCURLOT_FLAG_ALIAS\fP bit is set in the flags field, it means the
 name is provided for backwards compatibility as an alias.
+.SH EXAMPLE
+.nf
+/* iterate over all available options */
+const struct curl_easyoption *opt;
+opt = curl_easy_option_by_next(NULL);
+while(opt) {
+  printf("Name: %s\\n", opt->name);
+  opt = curl_easy_option_by_next(opt);
+}
+.fi
 .SH AVAILABILITY
 This function was added in libcurl 7.73.0
 .SH RETURN VALUE
-A pointer to the curl_easyoption struct for the next option or NULL if no more
-options.
+A pointer to the \fIcurl_easyoption\fP struct for the next option or NULL if
+no more options.
 .SH "SEE ALSO"
 .BR curl_easy_option_by_name "(3)," curl_easy_option_by_id "(3),"
 .BR curl_easy_setopt "(3),"

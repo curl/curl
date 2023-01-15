@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #ifdef TIME_WITH_SYS_TIME
@@ -56,7 +58,7 @@ return 0;
 # define PLATFORM_AIX_V3
 #endif
 /* */
-#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3) || defined(__BEOS__)
+#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3)
 #error "O_NONBLOCK does not work on this platform"
 #endif
 
@@ -71,21 +73,15 @@ main ()
 }
 #endif
 
-/* tests for gethostbyaddr_r or gethostbyname_r */
-#if defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT) || \
-    defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT) || \
-    defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT) || \
-    defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
+/* tests for gethostbyname_r */
+#if defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
     defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
 #   define _REENTRANT
     /* no idea whether _REENTRANT is always set, just invent a new flag */
 #   define TEST_GETHOSTBYFOO_REENTRANT
 #endif
-#if defined(HAVE_GETHOSTBYADDR_R_5) || \
-    defined(HAVE_GETHOSTBYADDR_R_7) || \
-    defined(HAVE_GETHOSTBYADDR_R_8) || \
-    defined(HAVE_GETHOSTBYNAME_R_3) || \
+#if defined(HAVE_GETHOSTBYNAME_R_3) || \
     defined(HAVE_GETHOSTBYNAME_R_5) || \
     defined(HAVE_GETHOSTBYNAME_R_6) || \
     defined(TEST_GETHOSTBYFOO_REENTRANT)
@@ -98,42 +94,16 @@ int main(void)
   int type = 0;
   struct hostent h;
   int rc = 0;
-#if defined(HAVE_GETHOSTBYADDR_R_5) || \
-    defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT) || \
-    \
-    defined(HAVE_GETHOSTBYNAME_R_3) || \
+#if defined(HAVE_GETHOSTBYNAME_R_3) || \
     defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
   struct hostent_data hdata;
-#elif defined(HAVE_GETHOSTBYADDR_R_7) || \
-      defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT) || \
-      defined(HAVE_GETHOSTBYADDR_R_8) || \
-      defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT) || \
-      \
-      defined(HAVE_GETHOSTBYNAME_R_5) || \
+#elif defined(HAVE_GETHOSTBYNAME_R_5) || \
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
       defined(HAVE_GETHOSTBYNAME_R_6) || \
       defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
   char buffer[8192];
   int h_errnop;
   struct hostent *hp;
-#endif
-
-#ifndef gethostbyaddr_r
-  (void)gethostbyaddr_r;
-#endif
-
-#if   defined(HAVE_GETHOSTBYADDR_R_5) || \
-      defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT)
-  rc = gethostbyaddr_r(address, length, type, &h, &hdata);
-  (void)rc;
-#elif defined(HAVE_GETHOSTBYADDR_R_7) || \
-      defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT)
-  hp = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &h_errnop);
-  (void)hp;
-#elif defined(HAVE_GETHOSTBYADDR_R_8) || \
-      defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT)
-  rc = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &hp, &h_errnop);
-  (void)rc;
 #endif
 
 #if   defined(HAVE_GETHOSTBYNAME_R_3) || \
@@ -214,77 +184,6 @@ if (sizeof (bool *) )
 #include <float.h>
 int main() { return 0; }
 #endif
-#ifdef RETSIGTYPE_TEST
-#include <sys/types.h>
-#include <signal.h>
-#ifdef signal
-# undef signal
-#endif
-#ifdef __cplusplus
-extern "C" void (*signal (int, void (*)(int)))(int);
-#else
-void (*signal ()) ();
-#endif
-
-int
-main ()
-{
-  return 0;
-}
-#endif
-#ifdef HAVE_INET_NTOA_R_DECL
-#include <arpa/inet.h>
-
-typedef void (*func_type)();
-
-int main()
-{
-#ifndef inet_ntoa_r
-  func_type func;
-  func = (func_type)inet_ntoa_r;
-  (void)func;
-#endif
-  return 0;
-}
-#endif
-#ifdef HAVE_INET_NTOA_R_DECL_REENTRANT
-#define _REENTRANT
-#include <arpa/inet.h>
-
-typedef void (*func_type)();
-
-int main()
-{
-#ifndef inet_ntoa_r
-  func_type func;
-  func = (func_type)&inet_ntoa_r;
-  (void)func;
-#endif
-  return 0;
-}
-#endif
-#ifdef HAVE_GETADDRINFO
-#include <netdb.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
-int main(void) {
-    struct addrinfo hints, *ai;
-    int error;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-#ifndef getaddrinfo
-    (void)getaddrinfo;
-#endif
-    error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);
-    if (error) {
-        return 1;
-    }
-    return 0;
-}
-#endif
 #ifdef HAVE_FILE_OFFSET_BITS
 #ifdef _FILE_OFFSET_BITS
 #undef _FILE_OFFSET_BITS
@@ -310,10 +209,6 @@ int main () { ; return 0; }
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
-#  else
-#    ifdef HAVE_WINSOCK_H
-#      include <winsock.h>
-#    endif
 #  endif
 #endif
 
@@ -339,10 +234,6 @@ main ()
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
-#  else
-#    ifdef HAVE_WINSOCK_H
-#      include <winsock.h>
-#    endif
 #  endif
 #endif
 
@@ -366,10 +257,6 @@ main ()
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
-#  else
-#    ifdef HAVE_WINSOCK_H
-#      include <winsock.h>
-#    endif
 #  endif
 #endif
 
@@ -379,7 +266,7 @@ main ()
 
 /* IoctlSocket source code */
         long flags = 0;
-        if(0 != ioctlsocket(0, FIONBIO, &flags))
+        if(0 != IoctlSocket(0, FIONBIO, &flags))
           return 1;
   ;
   return 0;
@@ -394,10 +281,6 @@ main ()
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
-#  else
-#    ifdef HAVE_WINSOCK_H
-#      include <winsock.h>
-#    endif
 #  endif
 #endif
 
@@ -484,10 +367,6 @@ main ()
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
-#  else
-#    ifdef HAVE_WINSOCK_H
-#      include <winsock.h>
-#    endif
 #  endif
 #endif
 /* includes start */
@@ -612,6 +491,42 @@ main() {
   int res2 = gcc_vmacro2(1, 2);
   (void)res3;
   (void)res2;
+  return 0;
+}
+#endif
+#ifdef HAVE_ATOMIC
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+#ifdef HAVE_STDATOMIC_H
+#  include <stdatomic.h>
+#endif
+/* includes end */
+
+int
+main() {
+  _Atomic int i = 1;
+  i = 0;  // Force an atomic-write operation.
+  return i;
+}
+#endif
+#ifdef HAVE_WIN32_WINNT
+/* includes start */
+#ifdef WIN32
+#  include "../lib/setup-win32.h"
+#endif
+/* includes end */
+
+#define enquote(x) #x
+#define expand(x) enquote(x)
+#pragma message("_WIN32_WINNT=" expand(_WIN32_WINNT))
+
+int
+main() {
   return 0;
 }
 #endif

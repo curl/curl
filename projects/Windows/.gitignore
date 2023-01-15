@@ -1,6 +1,9 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
 VC*/src/*curl.vcproj.dist
 VC*/lib/*curl.vcproj.dist
 VC*/src/*curl.vcxproj.dist
 VC*/lib/*curl.vcxproj.dist
-VC6/lib/libcurl.dsp.dist
-VC6/src/curl.dsp.dist
+

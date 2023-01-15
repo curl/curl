@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -127,7 +129,8 @@ static bool countcheck(const char *func, int line, const char *source)
   return FALSE; /* allow this */
 }
 
-void *curl_dbg_malloc(size_t wantedsize, int line, const char *source)
+ALLOC_FUNC void *curl_dbg_malloc(size_t wantedsize,
+                                 int line, const char *source)
 {
   struct memdebug *mem;
   size_t size;
@@ -153,8 +156,8 @@ void *curl_dbg_malloc(size_t wantedsize, int line, const char *source)
   return (mem ? mem->mem : NULL);
 }
 
-void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
-                      int line, const char *source)
+ALLOC_FUNC void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
+                                 int line, const char *source)
 {
   struct memdebug *mem;
   size_t size, user_size;
@@ -181,7 +184,8 @@ void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
   return (mem ? mem->mem : NULL);
 }
 
-char *curl_dbg_strdup(const char *str, int line, const char *source)
+ALLOC_FUNC char *curl_dbg_strdup(const char *str,
+                                 int line, const char *source)
 {
   char *mem;
   size_t len;
@@ -205,7 +209,8 @@ char *curl_dbg_strdup(const char *str, int line, const char *source)
 }
 
 #if defined(WIN32) && defined(UNICODE)
-wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source)
+ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
+                                    int line, const char *source)
 {
   wchar_t *mem;
   size_t wsiz, bsiz;
@@ -408,8 +413,8 @@ int curl_dbg_sclose(curl_socket_t sockfd, int line, const char *source)
   return res;
 }
 
-FILE *curl_dbg_fopen(const char *file, const char *mode,
-                    int line, const char *source)
+ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
+                                int line, const char *source)
 {
   FILE *res = fopen(file, mode);
 
@@ -420,8 +425,8 @@ FILE *curl_dbg_fopen(const char *file, const char *mode,
   return res;
 }
 
-FILE *curl_dbg_fdopen(int filedes, const char *mode,
-                      int line, const char *source)
+ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                                 int line, const char *source)
 {
   FILE *res = fdopen(filedes, mode);
   if(source)

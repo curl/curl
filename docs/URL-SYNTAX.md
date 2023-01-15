@@ -5,7 +5,8 @@
 The official "URL syntax" is primarily defined in these two different
 specifications:
 
- - [RFC 3986](https://tools.ietf.org/html/rfc3986) (although URL is called "URI" in there)
+ - [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986) (although URL is called
+   "URI" in there)
  - [The WHATWG URL Specification](https://url.spec.whatwg.org/)
 
 RFC 3986 is the earlier one, and curl has always tried to adhere to that one
@@ -19,7 +20,7 @@ changes over time.
 URL parsers as implemented in browsers, libraries and tools usually opt to
 support one of the mentioned specifications. Bugs, differences in
 interpretations and the moving nature of the WHATWG spec does however make it
-very unlikely that multiple parsers treat URLs the exact same way!
+unlikely that multiple parsers treat URLs the same way.
 
 ## Security
 
@@ -41,8 +42,8 @@ security concerns:
 
 1. If you have an application that runs as or in a server application, getting
    an unfiltered URL can trick your application to access a local resource
-   instead of a remote resource. Protecting yourself against localhost accesses is very
-   hard when accepting user provided URLs.
+   instead of a remote resource. Protecting yourself against localhost accesses
+   is hard when accepting user provided URLs.
 
 2. Such custom URLs can access other ports than you planned as port numbers
    are part of the regular URL format. The combination of a local host and a
@@ -62,10 +63,13 @@ inter-operate better with URLs that appear in the wild.
 
 ### spaces
 
-In particular `Location:` headers that indicate to the client where a resource
-has been redirected to, sometimes contain spaces. This is a violation of RFC
-3986 but is fine in the WHATWG spec. curl handles these by re-encoding them to
-`%20`.
+A URL provided to curl cannot contain spaces. They need to be provided URL
+encoded to be accepted in a URL by curl.
+
+An exception to this rule: `Location:` response headers that indicate to a
+client where a resource has been redirected to, sometimes contain spaces. This
+is a violation of RFC 3986 but is fine in the WHATWG spec. curl handles these
+by re-encoding them to `%20`.
 
 ### non-ASCII
 
@@ -149,7 +153,7 @@ since it often means passing around the password in plain text and is thus a
 security risk.
 
 URLs for IMAP, POP3 and SMTP also support *login options* as part of the
-userinfo field. They're provided as a semicolon after the password and then
+userinfo field. They are provided as a semicolon after the password and then
 the options.
 
 ## Hostname
@@ -168,15 +172,28 @@ brackets). For example:
 
     http://[2001:1890:1112:1::20]/
 
+### "localhost"
+
+Starting in curl 7.77.0, curl uses loopback IP addresses for the name
+`localhost`: `127.0.0.1` and `::1`. It does not resolve the name using the
+resolver functions.
+
+This is done to make sure the host accessed is truly the localhost - the local
+machine.
+
 ### IDNA
 
 If curl was built with International Domain Name (IDN) support, it can also
 handle host names using non-ASCII characters.
 
-curl supports IDN host names using the IDNA 2008 standard. This differs from
-browsers that follow the WHATWG URL spec, which dictates IDNA 2003 to be used.
-The two standards have a huge overlap but differ slightly, perhaps most
-famously in how they deal with the German "double s" (`ß`).
+When built with libidn2, curl uses the IDNA 2008 standard. This is equivalent
+to the WHATWG URL spec, but differs from certain browsers that use IDNA 2003
+Transitional Processing. The two standards have a huge overlap but differ
+slightly, perhaps most famously in how they deal with the German "double s"
+(`ß`).
+
+When winidn is used, curl uses IDNA 2003 Transitional Processing, like the rest
+of Windows.
 
 ## Port number
 
@@ -203,7 +220,7 @@ directory listing for the root / home directory will be returned.
 
 FTP servers typically put the user in its "home directory" after login, which
 then differs between users. To explicitly specify the root directory of an FTP
-server start the path with double slash `//` or `/%2f` (2F is the hexadecimal
+server, start the path with double slash `//` or `/%2f` (2F is the hexadecimal
 value of the ascii code for the slash).
 
 ## FILE
@@ -218,7 +235,7 @@ Anything else will make curl fail to parse the URL.
 
 ### Windows-specific FILE details
 
-curl accepts that the FILE URL's path starts with a "drive letter". That's a
+curl accepts that the FILE URL's path starts with a "drive letter". That is a
 single letter `a` to `z` followed by a colon or a pipe character (`|`).
 
 The Windows operating system itself will convert some file accesses to perform
@@ -242,7 +259,7 @@ A folder list on the user's inbox:
 
     imap://user:password@mail.example.com/INBOX
 
-Select the user's inbox and fetch message with uid = 1:
+Select the user's inbox and fetch message with `uid = 1`:
 
     imap://user:password@mail.example.com/INBOX/;UID=1
 
@@ -272,8 +289,26 @@ subject line:
 
     imap://user:password@mail.example.com/INBOX?SUBJECT%20shadows
 
-For more information about the individual components of an IMAP URL please see
-RFC 5092.
+Searching via the query part of the URL `?` is a search request for the
+results to be returned as message sequence numbers (`MAILINDEX`). It is
+possible to make a search request for results to be returned as unique ID
+numbers (`UID`) by using a custom curl request via `-X`. `UID` numbers are
+unique per session (and multiple sessions when `UIDVALIDITY` is the same). For
+example, if you are searching for `"foo bar"` in header+body (`TEXT`) and you
+want the matching `MAILINDEX` numbers returned then you could search via URL:
+
+    imap://user:password@mail.example.com/INBOX?TEXT%20%22foo%20bar%22
+
+If you want matching `UID` numbers you have to use a custom request:
+
+    imap://user:password@mail.example.com/INBOX -X "UID SEARCH TEXT \"foo bar\""
+
+For more information about IMAP commands please see RFC 9051. For more
+information about the individual components of an IMAP URL please see RFC 5092.
+
+* Note old curl versions would `FETCH` by message sequence number when `UID`
+was specified in the URL. That was a bug fixed in 7.62.0, which added
+`MAILINDEX` to `FETCH` by mail sequence number.
 
 ## LDAP
 
@@ -282,21 +317,21 @@ Name, Attributes, Scope, Filter and Extension for a LDAP search. Each field is
 separated by a question mark and when that field is not required an empty
 string with the question mark separator should be included.
 
-Search for the DN as `My Organisation`:
+Search for the `DN` as `My Organization`:
 
-    ldap://ldap.example.com/o=My%20Organisation
+    ldap://ldap.example.com/o=My%20Organization
 
-the same search but will only return postalAddress attributes:
+the same search but will only return `postalAddress` attributes:
 
-    ldap://ldap.example.com/o=My%20Organisation?postalAddress
+    ldap://ldap.example.com/o=My%20Organization?postalAddress
 
-Search for an empty DN and request information about the
+Search for an empty `DN` and request information about the
 `rootDomainNamingContext` attribute for an Active Directory server:
 
     ldap://ldap.example.com/?rootDomainNamingContext
 
 For more information about the individual components of a LDAP URL please
-see [RFC 4516](https://tools.ietf.org/html/rfc4516).
+see [RFC 4516](https://datatracker.ietf.org/doc/html/rfc4516).
 
 ## POP3
 

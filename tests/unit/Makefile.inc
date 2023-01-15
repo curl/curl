@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 
 # these files are used in every single unit test program
@@ -27,21 +29,19 @@ UNITFILES = curlcheck.h \
  ../libtest/first.c
 
 # These are all unit test programs
-UNITPROGS = unit1300 unit1301 unit1302 unit1303 unit1304 unit1305 unit1307 \
+UNITPROGS = unit1300          unit1302 unit1303 unit1304 unit1305 unit1307 \
  unit1308 unit1309 unit1323 \
  unit1330 unit1394 unit1395 unit1396 unit1397 unit1398 \
  unit1399 \
  unit1600 unit1601 unit1602 unit1603 unit1604 unit1605 unit1606 unit1607 \
- unit1608 unit1609 unit1610 unit1611 unit1612 \
+ unit1608 unit1609 unit1610 unit1611 unit1612 unit1614 \
  unit1620 unit1621 \
  unit1650 unit1651 unit1652 unit1653 unit1654 unit1655 \
- unit1660
+ unit1660 unit1661 \
+ unit3200
 
 unit1300_SOURCES = unit1300.c $(UNITFILES)
 unit1300_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1301_SOURCES = unit1301.c $(UNITFILES)
-unit1301_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1302_SOURCES = unit1302.c $(UNITFILES)
 unit1302_CPPFLAGS = $(AM_CPPFLAGS)
@@ -71,9 +71,9 @@ unit1330_SOURCES = unit1330.c $(UNITFILES)
 unit1330_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1394_SOURCES = unit1394.c $(UNITFILES)
-unit1394_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
-unit1394_LDADD = @LIBMETALINK_LIBS@ $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
-unit1394_LDFLAGS = @LIBMETALINK_LDFLAGS@ $(top_builddir)/src/libcurltool.la
+unit1394_CPPFLAGS = $(AM_CPPFLAGS)
+unit1394_LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
+unit1394_LDFLAGS = $(top_builddir)/src/libcurltool.la
 unit1394_LIBS =
 
 unit1395_SOURCES = unit1395.c $(UNITFILES)
@@ -104,7 +104,7 @@ unit1603_SOURCES = unit1603.c $(UNITFILES)
 unit1603_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1604_SOURCES = unit1604.c $(UNITFILES)
-unit1604_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
+unit1604_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1605_SOURCES = unit1605.c $(UNITFILES)
 unit1605_CPPFLAGS = $(AM_CPPFLAGS)
@@ -130,12 +130,15 @@ unit1611_CPPFLAGS = $(AM_CPPFLAGS)
 unit1612_SOURCES = unit1612.c $(UNITFILES)
 unit1612_CPPFLAGS = $(AM_CPPFLAGS)
 
+unit1614_SOURCES = unit1614.c $(UNITFILES)
+unit1614_CPPFLAGS = $(AM_CPPFLAGS)
+
 unit1620_SOURCES = unit1620.c $(UNITFILES)
 unit1620_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1621_SOURCES = unit1621.c $(UNITFILES)
 unit1621_CPPFLAGS = $(AM_CPPFLAGS)
-unit1621_LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la
+unit1621_LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la @NSS_LIBS@
 
 unit1650_SOURCES = unit1650.c $(UNITFILES)
 unit1650_CPPFLAGS = $(AM_CPPFLAGS)
@@ -157,3 +160,9 @@ unit1655_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1660_SOURCES = unit1660.c $(UNITFILES)
 unit1660_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1661_SOURCES = unit1661.c $(UNITFILES)
+unit1661_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit3200_SOURCES = unit3200.c $(UNITFILES)
+unit3200_CPPFLAGS = $(AM_CPPFLAGS)

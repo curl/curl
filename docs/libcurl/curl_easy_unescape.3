@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,17 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH curl_easy_unescape 3 "7 April 2006" "libcurl 7.15.4" "libcurl Manual"
 .SH NAME
 curl_easy_unescape - URL decodes the given string
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "char *curl_easy_unescape( CURL *" curl ", const char *" url
-.BI ", int "inlength ", int *" outlength " );"
-.ad
+.nf
+#include <curl/curl.h>
+
+char *curl_easy_unescape(CURL *curl, const char *url,
+                         int inlength, int *outlength);
+.fi
 .SH DESCRIPTION
 This function converts the given URL encoded input string to a "plain string"
 and returns that in an allocated memory area. All input characters that are
@@ -39,13 +42,31 @@ If the \fBlength\fP argument is set to 0 (zero), \fIcurl_easy_unescape(3)\fP
 will use strlen() on the input \fIurl\fP string to find out the size.
 
 If \fBoutlength\fP is non-NULL, the function will write the length of the
-returned string in the integer it points to. This allows an escaped string
-containing %00 to still get used properly after unescaping. Since this is a
-pointer to an \fIint\fP type, it can only return a value up to INT_MAX so no
-longer string can be unescaped if the string length is returned in this
-parameter.
+returned string in the integer it points to. This allows proper handling even
+for strings containing %00. Since this is a pointer to an \fIint\fP type, it
+can only return a value up to \fIINT_MAX\fP so no longer string can be
+returned in this parameter.
 
-You must \fIcurl_free(3)\fP the returned string when you're done with it.
+Since 7.82.0, the \fBcurl\fP parameter is ignored. Prior to that there was
+per-handle character conversion support for some very old operating systems
+such as TPF, but it was otherwise ignored.
+
+You must \fIcurl_free(3)\fP the returned string when you are done with it.
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  int decodelen;
+  char *decoded = curl_easy_unescape(curl, "%63%75%72%6c", 12, &decodelen);
+  if(decoded) {
+    /* do not assume printf() works on the decoded data! */
+    printf("Decoded: ");
+    /* ... */
+    curl_free(decoded);
+  }
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.15.4 and replaces the old \fIcurl_unescape(3)\fP function.
 .SH RETURN VALUE

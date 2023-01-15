@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "curlcheck.h"
@@ -46,19 +48,13 @@ static struct Curl_dns_entry *data_node;
 
 static CURLcode unit_setup(void)
 {
-  int rc;
   data = curl_easy_init();
   if(!data) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
 
-  rc = Curl_mk_dnscache(&hp);
-  if(rc) {
-    curl_easy_cleanup(data);
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
-  }
+  Curl_init_dnscache(&hp, 7);
   return CURLE_OK;
 }
 
@@ -79,7 +75,7 @@ static struct Curl_addrinfo *fake_ai(void)
 {
   static struct Curl_addrinfo *ai;
   static const char dummy[]="dummy";
-  size_t namelen = sizeof(dummy); /* including the zero terminator */
+  size_t namelen = sizeof(dummy); /* including the null-terminator */
 
   ai = calloc(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_in) +
               namelen);

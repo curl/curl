@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -69,12 +71,11 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROXY_ERROR, long *detail);
 .fi
 .SH DESCRIPTION
 Pass a pointer to a long to receive a detailed error code when the most recent
-transfer returned a CURLE_PROXY error.
+transfer returned a \fBCURLE_PROXY\fP error. That error code will match the
+\fBCURLproxycode\fP set.
 
-The return value will match the CURLproxycode set.
-
-The returned value will be zero (equal to CURLPX_OK) if no such response code
-was available.
+The error code will be zero (\fBCURLPX_OK\fP) if no response code was
+available.
 .SH PROTOCOLS
 All that can be done over SOCKS
 .SH EXAMPLE

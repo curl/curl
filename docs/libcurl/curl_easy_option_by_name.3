@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_easy_option_by_name 3 "27 Aug 2020" "libcurl 7.73.0" "libcurl Manual"
 .SH NAME
@@ -29,16 +31,24 @@ curl_easy_option_by_name - find an easy setopt option by name
 const struct curl_easyoption *curl_easy_option_by_name(const char *name);
 .fi
 .SH DESCRIPTION
-Given a \fBname\fP, this function returns a pointer to the curl_easyoption
-struct, holding information about the \fIcurl_easy_setopt(3)\fP option using
-that name. The name should be specified without the "CURLOPT_" prefix and the
-name comparison is made case insensitive.
+Given a \fBname\fP, this function returns a pointer to the
+\fIcurl_easyoption\fP struct, holding information about the
+\fIcurl_easy_setopt(3)\fP option using that name. The name should be specified
+without the "CURLOPT_" prefix and the name comparison is made case
+insensitive.
 
 If libcurl has no option with the given name, this function returns NULL.
+.SH EXAMPLE
+.nf
+const struct curl_easyoption *opt = curl_easy_option_by_name("URL");
+if(opt) {
+  printf("This option wants CURLoption %x\\n", (int)opt->id);
+}
+.fi
 .SH AVAILABILITY
 This function was added in libcurl 7.73.0
 .SH RETURN VALUE
-A pointer to the curl_easyoption struct for the option or NULL.
+A pointer to the \fIcurl_easyoption\fP struct for the option or NULL.
 .SH "SEE ALSO"
 .BR curl_easy_option_next "(3)," curl_easy_option_by_id "(3),"
 .BR curl_easy_setopt "(3),"

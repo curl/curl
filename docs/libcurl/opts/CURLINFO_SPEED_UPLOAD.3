@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLINFO_SPEED_UPLOAD 3 "28 Aug 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
 .SH NAME
 CURLINFO_SPEED_UPLOAD \- get upload speed
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SPEED_UPLOAD, double *speed);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a double to receive the average upload speed that curl
 measured for the complete upload. Measured in bytes/second.
@@ -47,13 +51,13 @@ if(curl) {
     double speed;
     res = curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed);
     if(!res) {
-      printf("Upload speed %.0f bytes/sec\\n", ul);
+      printf("Upload speed %.0f bytes/sec\\n", speed);
     }
   }
 }
 .fi
 .SH AVAILABILITY
-Added in
+Added in 7.4.1. Deprecated since 7.55.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

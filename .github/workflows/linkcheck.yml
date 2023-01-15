@@ -1,0 +1,36 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Markdown links
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths:
+    - '.github/workflows/linkcheck.yml'
+    - '**.md'
+  pull_request:
+    branches:
+    - master
+    paths:
+    - '.github/workflows/linkcheck.yml'
+    - '**.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  # Docs: https://github.com/marketplace/actions/markdown-link-check
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'

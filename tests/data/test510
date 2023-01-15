@@ -56,7 +56,11 @@ one
 two
 5
 three
+%if hyper
+1D
+%else
 1d
+%endif
 and a final longer crap: four
 0
 

@@ -1,9 +1,27 @@
 #!/bin/bash
-
-# (c) CopyRight 2000 - 2020, EdelWeb for EdelKey and OpenEvidence
-# Author: Peter Sylvester
-
-# "libre" for integration with curl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) EdelWeb for EdelKey and OpenEvidence
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
 
 OPENSSL=openssl
 if [ -f /usr/local/ssl/bin/openssl ] ; then
@@ -40,10 +58,13 @@ fi
 GETSERIAL="\$t = time ;\$d =  \$t . substr(\$t+$$ ,-4,4)-1;print \$d"
 SERIAL=`/usr/bin/env perl -e "$GETSERIAL"`
 
+# exit on first fail
+set -e
+
 echo SERIAL=$SERIAL PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE
 
-echo "openssl genrsa -out $PREFIX-ca.key $KEYSIZE -passout XXX"
-openssl genrsa -out $PREFIX-ca.key $KEYSIZE -passout pass:secret
+echo "openssl genrsa -out $PREFIX-ca.key -passout XXX $KEYSIZE"
+openssl genrsa -out $PREFIX-ca.key -passout pass:secret $KEYSIZE
 
 echo "openssl req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr"
 $OPENSSL req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr -passin pass:secret

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+
+	<key>CFBundleExecutable</key>
+	<string>curl</string>
+
+	<key>CFBundleIdentifier</key>
+	<string>se.curl.libcurl</string>
+
+	<key>CFBundleVersion</key>
+	<string>@CURL_PLIST_VERSION@</string>
+
+	<key>CFBundleName</key>
+	<string>libcurl</string>
+
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+
+	<key>CFBundleSignature</key>
+	<string>????</string>
+
+	<key>CFBundleShortVersionString</key>
+	<string>libcurl @CURL_PLIST_VERSION@</string>
+
+	<key>CFBundleGetInfoString</key>
+	<string>libcurl.plist @CURL_PLIST_VERSION@</string>
+</dict>
+</plist>

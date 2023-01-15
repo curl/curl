@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_mime_headers 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
 .SH NAME
 curl_mime_headers - set a mime part's custom headers
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_headers(curl_mimepart * " part ,
-.BI "struct curl_slist * " headers ", int " take_ownership ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_headers(curl_mimepart *part,
+                           struct curl_slist *headers, int take_ownership);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_headers(3)\fP sets a mime part's custom headers.
 
@@ -40,12 +43,8 @@ to remove a previously attached custom header list.
 replacement or mime structure deletion; in this case the list must not be
 freed explicitly.
 
-Setting a part's custom headers list twice is valid: only the value set by
-the last call is retained.
-.SH AVAILABILITY
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
-.SH RETURN VALUE
-CURLE_OK or a CURL error code upon failure.
+Setting a part's custom headers list multiple times is valid: only the value
+set by the last call is retained.
 .SH EXAMPLE
 .nf
  struct curl_slist *headers = NULL;
@@ -61,5 +60,9 @@ CURLE_OK or a CURL error code upon failure.
  /* set name */
  curl_mime_name(part, "numbers");
 .fi
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+CURLE_OK or a CURL error code upon failure.
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3)"

@@ -1,0 +1,65 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.\"
+.TH curl_ws_recv 3 "12 Jun 2022" "libcurl 7.85.0" "libcurl Manual"
+.SH NAME
+curl_ws_recv - receive WebSocket data
+.SH SYNOPSIS
+.nf
+#include <curl/easy.h>
+
+CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
+                      size_t *recv, struct curl_ws_frame **meta);
+.fi
+.SH DESCRIPTION
+This function call is EXPERIMENTAL.
+
+Retrieves as much as possible of a received WebSocket data fragment into the
+\fBbuffer\fP, but not more than \fBbuflen\fP bytes. \fIrecv\fP is set to the
+number of bytes actually stored.
+
+If there is more fragment data to deliver than what fits in the provided
+\fIbuffer\fP, libcurl returns a full buffer and the application needs to call
+this function again to continue draining the buffer.
+
+The \fImeta\fP pointer gets set to point to a \fIstruct curl_ws_frame\fP that
+contains information about the received data. See the \fIcurl_ws_meta(3)\fP
+for details on that struct.
+.SH EXAMPLE
+.nf
+  size_t rlen;
+  struct curl_ws_frame *meta;
+  char buffer[256];
+  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+.fi
+.SH AVAILABILITY
+Added in 7.86.0.
+.SH RETURN VALUE
+Returns \fBCURLE_OK\fP if everything is okay, and a non-zero number for
+errors. Returns \fBCURLE_GOT_NOTHING\fP if the associated connection is
+closed.
+.SH "SEE ALSO"
+.BR curl_easy_setopt "(3), " curl_easy_perform "(3), "
+.BR curl_easy_getinfo "(3), "
+.BR curl_ws_send "(3) "

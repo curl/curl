@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 
@@ -69,7 +71,7 @@ endif()
 if(NGTCP2_FIND_COMPONENTS)
   set(NGTCP2_CRYPTO_BACKEND "")
   foreach(component IN LISTS NGTCP2_FIND_COMPONENTS)
-    if(component MATCHES "^(OpenSSL|GnuTLS)")
+    if(component MATCHES "^(BoringSSL|OpenSSL|GnuTLS)")
       if(NGTCP2_CRYPTO_BACKEND)
         message(FATAL_ERROR "NGTCP2: Only one crypto library can be selected")
       endif()

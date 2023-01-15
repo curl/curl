@@ -1,0 +1,76 @@
+<testcase>
+<info>
+<keywords>
+curl_easy_header
+CONNECT
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server:       test with trailing space     
+Content-Type: text/html
+Content-Length: 0
+Set-Cookie: onecookie=data;
+Set-Cookie: secondcookie=2data;
+Set-Cookie: cookie3=data3;
+Location: /%TESTNUMBER0002
+
+</data>
+<connect>
+HTTP/1.1 200 Sure go ahead
+Server: from the connect
+Silly-thing: yes yes
+
+</connect>
+</reply>
+
+# Client-side
+<client>
+<features>
+proxy
+SSL
+headers-api
+</features>
+<server>
+http
+http-proxy
+</server>
+
+<name>
+curl_easy_header with CONNECT
+</name>
+<tool>
+lib1940
+</tool>
+
+<command>
+http://hello:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<proxy>
+CONNECT hello:%HTTPPORT HTTP/1.1
+Host: hello:%HTTPPORT
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<stdout>
+ Date == Thu, 09 Nov 2010 14:49:00 GMT
+ Server == test with trailing space
+ Content-Type == text/html
+ Content-Length == 0
+ Location == /%TESTNUMBER0002
+- Set-Cookie == onecookie=data; (0/3)
+- Set-Cookie == secondcookie=2data; (1/3)
+- Set-Cookie == cookie3=data3; (2/3)
+ Server == from the connect
+ Silly-thing == yes yes
+</stdout>
+</verify>
+</testcase>

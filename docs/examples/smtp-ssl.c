@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,10 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example using SSL
+ * Send SMTP email using implicit SSL
  * </DESC>
  */
 
@@ -37,45 +39,46 @@
  * Note that this example requires libcurl 7.20.0 or above.
  */
 
-#define FROM    "<sender@example.org>"
-#define TO      "<addressee@example.net>"
-#define CC      "<info@example.org>"
+#define FROM_MAIL     "<sender@example.com>"
+#define TO_MAIL       "<recipient@example.com>"
+#define CC_MAIL       "<info@example.com>"
 
-static const char *payload_text[] = {
-  "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
-  "To: " TO "\r\n",
-  "From: " FROM " (Example User)\r\n",
-  "Cc: " CC " (Another example User)\r\n",
+static const char *payload_text =
+  "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
+  "To: " TO_MAIL "\r\n"
+  "From: " FROM_MAIL "\r\n"
+  "Cc: " CC_MAIL "\r\n"
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
-  "rfcpedant.example.org>\r\n",
-  "Subject: SMTP SSL example message\r\n",
-  "\r\n", /* empty line to divide headers from body, see RFC5322 */
-  "The body of the message starts here.\r\n",
-  "\r\n",
-  "It could be a lot of lines, could be MIME encoded, whatever.\r\n",
-  "Check RFC5322.\r\n",
-  NULL
-};
+  "rfcpedant.example.org>\r\n"
+  "Subject: SMTP example message\r\n"
+  "\r\n" /* empty line to divide headers from body, see RFC5322 */
+  "The body of the message starts here.\r\n"
+  "\r\n"
+  "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
+  "Check RFC5322.\r\n";
 
 struct upload_status {
-  int lines_read;
+  size_t bytes_read;
 };
 
 static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
+  size_t room = size * nmemb;
 
   if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
     return 0;
   }
 
-  data = payload_text[upload_ctx->lines_read];
+  data = &payload_text[upload_ctx->bytes_read];
 
   if(data) {
     size_t len = strlen(data);
+    if(room < len)
+      len = room;
     memcpy(ptr, data, len);
-    upload_ctx->lines_read++;
+    upload_ctx->bytes_read += len;
 
     return len;
   }
@@ -88,9 +91,7 @@ int main(void)
   CURL *curl;
   CURLcode res = CURLE_OK;
   struct curl_slist *recipients = NULL;
-  struct upload_status upload_ctx;
-
-  upload_ctx.lines_read = 0;
+  struct upload_status upload_ctx = { 0 };
 
   curl = curl_easy_init();
   if(curl) {
@@ -102,7 +103,7 @@ int main(void)
      * than smtp:// to request a SSL based connection. */
     curl_easy_setopt(curl, CURLOPT_URL, "smtps://mainserver.example.net");
 
-    /* If you want to connect to a site who isn't using a certificate that is
+    /* If you want to connect to a site who is not using a certificate that is
      * signed by one of the certs in the CA bundle you have, you can skip the
      * verification of the server's certificate. This makes the connection
      * A LOT LESS SECURE.
@@ -114,7 +115,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
 
-    /* If the site you're connecting to uses a different host name that what
+    /* If the site you are connecting to uses a different host name that what
      * they have mentioned in their server certificate's commonName (or
      * subjectAltName) fields, libcurl will refuse to connect. You can skip
      * this check, but this will make the connection less secure. */
@@ -122,23 +123,23 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 #endif
 
-    /* Note that this option isn't strictly required, omitting it will result
+    /* Note that this option is not strictly required, omitting it will result
      * in libcurl sending the MAIL FROM command with empty sender data. All
      * autoresponses should have an empty reverse-path, and should be directed
      * to the address in the reverse-path which triggered them. Otherwise,
      * they could cause an endless loop. See RFC 5321 Section 4.5.5 for more
      * details.
      */
-    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
+    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM_MAIL);
 
     /* Add two recipients, in this particular case they correspond to the
      * To: and Cc: addressees in the header, but they could be any kind of
      * recipient. */
-    recipients = curl_slist_append(recipients, TO);
-    recipients = curl_slist_append(recipients, CC);
+    recipients = curl_slist_append(recipients, TO_MAIL);
+    recipients = curl_slist_append(recipients, CC_MAIL);
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
-    /* We're using a callback function to specify the payload (the headers and
+    /* We are using a callback function to specify the payload (the headers and
      * body of the message). You could just use the CURLOPT_READDATA option to
      * specify a FILE pointer to read from. */
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,22 +18,28 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /* <DESC>
  * HTTP Multipart formpost with file upload and two additional parts.
  * </DESC>
  */
-/* Example code that uploads a file name 'foo' to a remote script that accepts
+
+/*
+ * Example code that uploads a file name 'foo' to a remote script that accepts
  * "HTML form based" (as described in RFC1738) uploads using HTTP POST.
  *
- * The imaginary form we'll fill in looks like:
+ * Warning: this example uses the deprecated form api. See "postit2.c"
+ *          for a similar example using the mime api.
+ *
+ * The imaginary form we will fill in looks like:
  *
  * <form method="post" enctype="multipart/form-data" action="examplepost.cgi">
  * Enter file: <input type="file" name="sendfile" size="40">
  * Enter file name: <input type="text" name="filename" size="30">
  * <input type="submit" value="send" name="submit">
  * </form>
- *
  */
 
 #include <stdio.h>
@@ -57,14 +63,14 @@ int main(int argc, char *argv[])
   curl_formadd(&formpost,
                &lastptr,
                CURLFORM_COPYNAME, "sendfile",
-               CURLFORM_FILE, "postit2.c",
+               CURLFORM_FILE, "postit2-formadd.c",
                CURLFORM_END);
 
   /* Fill in the filename field */
   curl_formadd(&formpost,
                &lastptr,
                CURLFORM_COPYNAME, "filename",
-               CURLFORM_COPYCONTENTS, "postit2.c",
+               CURLFORM_COPYCONTENTS, "postit2-formadd.c",
                CURLFORM_END);
 
 

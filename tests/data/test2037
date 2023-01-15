@@ -26,6 +26,7 @@ MooMoo
 <features>
 SSL
 SSLpinning
+!Schannel
 </features>
 <server>
 https Server-localhost-sv.pem
@@ -45,7 +46,6 @@ perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0
 #
 # Verify data after the test has been "shot"
 <verify>
-</strip>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT

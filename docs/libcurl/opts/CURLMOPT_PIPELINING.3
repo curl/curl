@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLMOPT_PIPELINING 3 "17 Jun 2014" "libcurl 7.37.0" "curl_multi_setopt options"
 .SH NAME
 CURLMOPT_PIPELINING \- enable HTTP pipelining and multiplexing
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PIPELINING, long bitmask);
+.fi
 .SH DESCRIPTION
 Pass in the \fBbitmask\fP parameter to instruct libcurl to enable HTTP
 pipelining and/or HTTP/2 multiplexing for this multi handle.
@@ -84,6 +88,5 @@ Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
 .BR CURLMOPT_PIPELINING_SITE_BL "(3), "
 .BR CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE "(3), "
 .BR CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE "(3), "
-.BR CURLMOPT_MAX_HOST_CONNECTIONS "(3), "
 .BR CURLMOPT_MAXCONNECTS "(3), "
 .BR CURLMOPT_MAX_HOST_CONNECTIONS "(3), "

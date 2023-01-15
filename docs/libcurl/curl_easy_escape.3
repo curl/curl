@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,28 +18,34 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH curl_easy_escape 3 "7 April 2006" "libcurl 7.15.4" "libcurl Manual"
 .SH NAME
 curl_easy_escape - URL encodes the given string
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "char *curl_easy_escape( CURL *" curl ", const char *" string
-.BI ", int "length " );"
-.ad
+.nf
+#include <curl/curl.h>
+
+char *curl_easy_escape(CURL *curl, const char *string, int length);
+.fi
 .SH DESCRIPTION
 This function converts the given input \fIstring\fP to a URL encoded string
 and returns that as a new allocated string. All input characters that are not
 a-z, A-Z, 0-9, '-', '.', '_' or '~' are converted to their "URL escaped"
-version (%NN where NN is a two-digit hexadecimal number).
+version (\fB%NN\fP where \fBNN\fP is a two-digit hexadecimal number).
 
 If \fIlength\fP is set to 0 (zero), \fIcurl_easy_escape(3)\fP uses strlen() on
 the input \fIstring\fP to find out the size. This function does not accept
 input strings longer than \fBCURL_MAX_INPUT_LENGTH\fP (8 MB).
 
-You must \fIcurl_free(3)\fP the returned string when you're done with it.
+Since 7.82.0, the \fBcurl\fP parameter is ignored. Prior to that there was
+per-handle character conversion support for some very old operating systems
+such as TPF, but it was otherwise ignored.
+
+You must \fIcurl_free(3)\fP the returned string when you are done with it.
 .SH ENCODING
 libcurl is typically not aware of, nor does it care about, character
 encodings. \fIcurl_easy_escape(3)\fP encodes the data byte-by-byte into the
@@ -49,10 +55,6 @@ uses.
 
 The caller of \fIcurl_easy_escape(3)\fP must make sure that the data passed in
 to the function is encoded correctly.
-.SH AVAILABILITY
-Added in 7.15.4 and replaces the old \fIcurl_escape(3)\fP function.
-.SH RETURN VALUE
-A pointer to a null-terminated string or NULL if it failed.
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -62,7 +64,12 @@ if(curl) {
     printf("Encoded: %s\\n", output);
     curl_free(output);
   }
+  curl_easy_cleanup(curl);
 }
 .fi
+.SH AVAILABILITY
+Added in 7.15.4 and replaces the old \fIcurl_escape(3)\fP function.
+.SH RETURN VALUE
+A pointer to a null-terminated string or NULL if it failed.
 .SH "SEE ALSO"
 .BR curl_easy_unescape "(3), " curl_free "(3), " RFC 3986

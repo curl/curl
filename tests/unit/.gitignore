@@ -1,1 +1,5 @@
-/unit1[36][0-9][0-9]
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+/unit[0-9][0-9][0-9][0-9]

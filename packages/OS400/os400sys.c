@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  *
  ***************************************************************************/
@@ -38,7 +40,7 @@
 #include <qadrt.h>
 #include <errno.h>
 
-#ifdef HAVE_ZLIB_H
+#ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
 
@@ -253,9 +255,9 @@ set_thread_string(localkey_t key, const char *s)
 
 
 int
-Curl_getnameinfo_a(const struct sockaddr *sa, curl_socklen_t salen,
-                   char *nodename, curl_socklen_t nodenamelen,
-                   char *servname, curl_socklen_t servnamelen,
+Curl_getnameinfo_a(const struct sockaddr *sa, socklen_t salen,
+                   char *nodename, socklen_t nodenamelen,
+                   char *servname, socklen_t servnamelen,
                    int flags)
 {
   char *enodename = NULL;
@@ -743,7 +745,7 @@ OM_uint32
 Curl_gss_import_name_a(OM_uint32 *minor_status, gss_buffer_t in_name,
                        gss_OID in_name_type, gss_name_t *out_name)
 {
-  int rc;
+  OM_uint32 rc;
   unsigned int i;
   gss_buffer_desc in;
 
@@ -857,7 +859,7 @@ Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_buffer_t output_token)
 {
-  int rc;
+  OM_uint32 rc;
 
   rc = gss_delete_sec_context(minor_status, context_handle, output_token);
 
@@ -884,7 +886,7 @@ Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
 void *
 Curl_ldap_init_a(char *host, int port)
 {
-  unsigned int i;
+  size_t i;
   char *ehost;
   void *result;
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -38,11 +40,11 @@ int main(void)
 
   fd = fopen("debugit", "rb"); /* open file to upload */
   if(!fd)
-    return 1; /* can't continue */
+    return 1; /* cannot continue */
 
   /* to get the file size */
   if(fstat(fileno(fd), &file_info) != 0)
-    return 1; /* can't continue */
+    return 1; /* cannot continue */
 
   curl = curl_easy_init();
   if(curl) {
@@ -68,18 +70,16 @@ int main(void)
     if(res != CURLE_OK) {
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
               curl_easy_strerror(res));
-
     }
     else {
       /* now extract transfer info */
       curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &speed_upload);
       curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &total_time);
 
-      fprintf(stderr, "Speed: %" CURL_FORMAT_CURL_OFF_T " bytes/sec during %"
-              CURL_FORMAT_CURL_OFF_T ".%06ld seconds\n",
-              speed_upload,
-              (total_time / 1000000), (long)(total_time % 1000000));
-
+      fprintf(stderr, "Speed: %lu bytes/sec during %lu.%06lu seconds\n",
+              (unsigned long)speed_upload,
+              (unsigned long)(total_time / 1000000),
+              (unsigned long)(total_time % 1000000));
     }
     /* always cleanup */
     curl_easy_cleanup(curl);

@@ -32,6 +32,9 @@ hello
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -69,7 +72,11 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
+%if hyper
+C1
+%else
 c1
+%endif
 ------------------------------
 Content-Disposition: form-data; name="field1"
 

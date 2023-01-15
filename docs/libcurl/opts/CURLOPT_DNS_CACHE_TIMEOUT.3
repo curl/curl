@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,28 +18,32 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_DNS_CACHE_TIMEOUT 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_DNS_CACHE_TIMEOUT \- set life-time for DNS cache entries
+CURLOPT_DNS_CACHE_TIMEOUT \- life-time for DNS cache entries
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_CACHE_TIMEOUT, long age);
+.fi
 .SH DESCRIPTION
 Pass a long, this sets the timeout in seconds. Name resolves will be kept in
 memory and used for this number of seconds. Set to zero to completely disable
 caching, or set to -1 to make the cached entries remain forever. By default,
 libcurl caches this info for 60 seconds.
 
-The name resolve functions of various libc implementations don't re-read name
+The name resolve functions of various libc implementations do not re-read name
 server information unless explicitly told so (for example, by calling
 \fIres_init(3)\fP). This may cause libcurl to keep using the older server even
 if DHCP has updated the server info, and this may look like a DNS cache issue
 to the casual libcurl-app user.
 
-Note that DNS entries have a "TTL" property but libcurl doesn't use that. This
+Note that DNS entries have a "TTL" property but libcurl does not use that. This
 DNS cache timeout is entirely speculative that a name will resolve to the same
 address for a certain small amount of time into the future.
 .SH DEFAULT
@@ -52,7 +56,7 @@ CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
-  /* only reuse addresses for a very short time */
+  /* only reuse addresses for a short time */
   curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 2L);
 
   ret = curl_easy_perform(curl);

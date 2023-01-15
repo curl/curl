@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,28 +20,31 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /*
  * Prototypes for library-wide functions provided by multi.c
  */
 
-void Curl_updatesocket(struct Curl_easy *data);
+CURLcode Curl_updatesocket(struct Curl_easy *data);
 void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
-void Curl_update_timer(struct Curl_multi *multi);
-void Curl_attach_connnection(struct Curl_easy *data,
+CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
+void Curl_attach_connection(struct Curl_easy *data,
                              struct connectdata *conn);
-void Curl_detach_connnection(struct Curl_easy *data);
+void Curl_detach_connection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);
 CURLcode Curl_preconnect(struct Curl_easy *data);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
-   socket and connection hashes */
-struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
+   socket, connection and dns hashes */
+struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize,
+                                     int dnssize);
 
 /* the write bits start at bit 16 for the *getsock() bitmap */
 #define GETSOCK_WRITEBITSTART 16

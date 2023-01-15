@@ -38,8 +38,8 @@ Contents of that page you requested, sir.
 </data1000>
 
 <datacheck>
-APPLICATION: received a CURLIOCMD_RESTARTREAD request
-APPLICATION: ** REWINDING! **
+APPLICATION received a CURLIOCMD_RESTARTREAD request
+APPLICATION ** REWINDING! **
 Contents of that page you requested, sir.
 </datacheck>
 </reply>

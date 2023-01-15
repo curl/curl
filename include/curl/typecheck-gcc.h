@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -40,107 +42,111 @@
  */
 #define curl_easy_setopt(handle, option, value)                         \
   __extension__({                                                       \
-      __typeof__(option) _curl_opt = option;                            \
+      CURLoption _curl_opt = (option);                                  \
       if(__builtin_constant_p(_curl_opt)) {                             \
-        if(curlcheck_long_option(_curl_opt))                            \
-          if(!curlcheck_long(value))                                    \
-            _curl_easy_setopt_err_long();                               \
-        if(curlcheck_off_t_option(_curl_opt))                           \
-          if(!curlcheck_off_t(value))                                   \
-            _curl_easy_setopt_err_curl_off_t();                         \
-        if(curlcheck_string_option(_curl_opt))                          \
-          if(!curlcheck_string(value))                                  \
-            _curl_easy_setopt_err_string();                             \
-        if(curlcheck_write_cb_option(_curl_opt))                        \
-          if(!curlcheck_write_cb(value))                                \
-            _curl_easy_setopt_err_write_callback();                     \
-        if((_curl_opt) == CURLOPT_RESOLVER_START_FUNCTION)              \
-          if(!curlcheck_resolver_start_callback(value))                 \
-            _curl_easy_setopt_err_resolver_start_callback();            \
-        if((_curl_opt) == CURLOPT_READFUNCTION)                         \
-          if(!curlcheck_read_cb(value))                                 \
-            _curl_easy_setopt_err_read_cb();                            \
-        if((_curl_opt) == CURLOPT_IOCTLFUNCTION)                        \
-          if(!curlcheck_ioctl_cb(value))                                \
-            _curl_easy_setopt_err_ioctl_cb();                           \
-        if((_curl_opt) == CURLOPT_SOCKOPTFUNCTION)                      \
-          if(!curlcheck_sockopt_cb(value))                              \
-            _curl_easy_setopt_err_sockopt_cb();                         \
-        if((_curl_opt) == CURLOPT_OPENSOCKETFUNCTION)                   \
-          if(!curlcheck_opensocket_cb(value))                           \
-            _curl_easy_setopt_err_opensocket_cb();                      \
-        if((_curl_opt) == CURLOPT_PROGRESSFUNCTION)                     \
-          if(!curlcheck_progress_cb(value))                             \
-            _curl_easy_setopt_err_progress_cb();                        \
-        if((_curl_opt) == CURLOPT_DEBUGFUNCTION)                        \
-          if(!curlcheck_debug_cb(value))                                \
-            _curl_easy_setopt_err_debug_cb();                           \
-        if((_curl_opt) == CURLOPT_SSL_CTX_FUNCTION)                     \
-          if(!curlcheck_ssl_ctx_cb(value))                              \
-            _curl_easy_setopt_err_ssl_ctx_cb();                         \
-        if(curlcheck_conv_cb_option(_curl_opt))                         \
-          if(!curlcheck_conv_cb(value))                                 \
-            _curl_easy_setopt_err_conv_cb();                            \
-        if((_curl_opt) == CURLOPT_SEEKFUNCTION)                         \
-          if(!curlcheck_seek_cb(value))                                 \
-            _curl_easy_setopt_err_seek_cb();                            \
-        if(curlcheck_cb_data_option(_curl_opt))                         \
-          if(!curlcheck_cb_data(value))                                 \
-            _curl_easy_setopt_err_cb_data();                            \
-        if((_curl_opt) == CURLOPT_ERRORBUFFER)                          \
-          if(!curlcheck_error_buffer(value))                            \
-            _curl_easy_setopt_err_error_buffer();                       \
-        if((_curl_opt) == CURLOPT_STDERR)                               \
-          if(!curlcheck_FILE(value))                                    \
-            _curl_easy_setopt_err_FILE();                               \
-        if(curlcheck_postfields_option(_curl_opt))                      \
-          if(!curlcheck_postfields(value))                              \
-            _curl_easy_setopt_err_postfields();                         \
-        if((_curl_opt) == CURLOPT_HTTPPOST)                             \
-          if(!curlcheck_arr((value), struct curl_httppost))             \
-            _curl_easy_setopt_err_curl_httpost();                       \
-        if((_curl_opt) == CURLOPT_MIMEPOST)                             \
-          if(!curlcheck_ptr((value), curl_mime))                        \
-            _curl_easy_setopt_err_curl_mimepost();                      \
-        if(curlcheck_slist_option(_curl_opt))                           \
-          if(!curlcheck_arr((value), struct curl_slist))                \
-            _curl_easy_setopt_err_curl_slist();                         \
-        if((_curl_opt) == CURLOPT_SHARE)                                \
-          if(!curlcheck_ptr((value), CURLSH))                           \
-            _curl_easy_setopt_err_CURLSH();                             \
+        CURL_IGNORE_DEPRECATION(                                        \
+          if(curlcheck_long_option(_curl_opt))                          \
+            if(!curlcheck_long(value))                                  \
+              _curl_easy_setopt_err_long();                             \
+          if(curlcheck_off_t_option(_curl_opt))                         \
+            if(!curlcheck_off_t(value))                                 \
+              _curl_easy_setopt_err_curl_off_t();                       \
+          if(curlcheck_string_option(_curl_opt))                        \
+            if(!curlcheck_string(value))                                \
+              _curl_easy_setopt_err_string();                           \
+          if(curlcheck_write_cb_option(_curl_opt))                      \
+            if(!curlcheck_write_cb(value))                              \
+              _curl_easy_setopt_err_write_callback();                   \
+          if((_curl_opt) == CURLOPT_RESOLVER_START_FUNCTION)            \
+            if(!curlcheck_resolver_start_callback(value))               \
+              _curl_easy_setopt_err_resolver_start_callback();          \
+          if((_curl_opt) == CURLOPT_READFUNCTION)                       \
+            if(!curlcheck_read_cb(value))                               \
+              _curl_easy_setopt_err_read_cb();                          \
+          if((_curl_opt) == CURLOPT_IOCTLFUNCTION)                      \
+            if(!curlcheck_ioctl_cb(value))                              \
+              _curl_easy_setopt_err_ioctl_cb();                         \
+          if((_curl_opt) == CURLOPT_SOCKOPTFUNCTION)                    \
+            if(!curlcheck_sockopt_cb(value))                            \
+              _curl_easy_setopt_err_sockopt_cb();                       \
+          if((_curl_opt) == CURLOPT_OPENSOCKETFUNCTION)                 \
+            if(!curlcheck_opensocket_cb(value))                         \
+              _curl_easy_setopt_err_opensocket_cb();                    \
+          if((_curl_opt) == CURLOPT_PROGRESSFUNCTION)                   \
+            if(!curlcheck_progress_cb(value))                           \
+              _curl_easy_setopt_err_progress_cb();                      \
+          if((_curl_opt) == CURLOPT_DEBUGFUNCTION)                      \
+            if(!curlcheck_debug_cb(value))                              \
+              _curl_easy_setopt_err_debug_cb();                         \
+          if((_curl_opt) == CURLOPT_SSL_CTX_FUNCTION)                   \
+            if(!curlcheck_ssl_ctx_cb(value))                            \
+              _curl_easy_setopt_err_ssl_ctx_cb();                       \
+          if(curlcheck_conv_cb_option(_curl_opt))                       \
+            if(!curlcheck_conv_cb(value))                               \
+              _curl_easy_setopt_err_conv_cb();                          \
+          if((_curl_opt) == CURLOPT_SEEKFUNCTION)                       \
+            if(!curlcheck_seek_cb(value))                               \
+              _curl_easy_setopt_err_seek_cb();                          \
+          if(curlcheck_cb_data_option(_curl_opt))                       \
+            if(!curlcheck_cb_data(value))                               \
+              _curl_easy_setopt_err_cb_data();                          \
+          if((_curl_opt) == CURLOPT_ERRORBUFFER)                        \
+            if(!curlcheck_error_buffer(value))                          \
+              _curl_easy_setopt_err_error_buffer();                     \
+          if((_curl_opt) == CURLOPT_STDERR)                             \
+            if(!curlcheck_FILE(value))                                  \
+              _curl_easy_setopt_err_FILE();                             \
+          if(curlcheck_postfields_option(_curl_opt))                    \
+            if(!curlcheck_postfields(value))                            \
+              _curl_easy_setopt_err_postfields();                       \
+          if((_curl_opt) == CURLOPT_HTTPPOST)                           \
+            if(!curlcheck_arr((value), struct curl_httppost))           \
+              _curl_easy_setopt_err_curl_httpost();                     \
+          if((_curl_opt) == CURLOPT_MIMEPOST)                           \
+            if(!curlcheck_ptr((value), curl_mime))                      \
+              _curl_easy_setopt_err_curl_mimepost();                    \
+          if(curlcheck_slist_option(_curl_opt))                         \
+            if(!curlcheck_arr((value), struct curl_slist))              \
+              _curl_easy_setopt_err_curl_slist();                       \
+          if((_curl_opt) == CURLOPT_SHARE)                              \
+            if(!curlcheck_ptr((value), CURLSH))                         \
+              _curl_easy_setopt_err_CURLSH();                           \
+        )                                                               \
       }                                                                 \
       curl_easy_setopt(handle, _curl_opt, value);                       \
     })
 
 /* wraps curl_easy_getinfo() with typechecking */
 #define curl_easy_getinfo(handle, info, arg)                            \
-  __extension__({                                                      \
-      __typeof__(info) _curl_info = info;                               \
+  __extension__({                                                       \
+      CURLINFO _curl_info = (info);                                     \
       if(__builtin_constant_p(_curl_info)) {                            \
-        if(curlcheck_string_info(_curl_info))                           \
-          if(!curlcheck_arr((arg), char *))                             \
-            _curl_easy_getinfo_err_string();                            \
-        if(curlcheck_long_info(_curl_info))                             \
-          if(!curlcheck_arr((arg), long))                               \
-            _curl_easy_getinfo_err_long();                              \
-        if(curlcheck_double_info(_curl_info))                           \
-          if(!curlcheck_arr((arg), double))                             \
-            _curl_easy_getinfo_err_double();                            \
-        if(curlcheck_slist_info(_curl_info))                            \
-          if(!curlcheck_arr((arg), struct curl_slist *))                \
-            _curl_easy_getinfo_err_curl_slist();                        \
-        if(curlcheck_tlssessioninfo_info(_curl_info))                   \
-          if(!curlcheck_arr((arg), struct curl_tlssessioninfo *))       \
-            _curl_easy_getinfo_err_curl_tlssesssioninfo();              \
-        if(curlcheck_certinfo_info(_curl_info))                         \
-          if(!curlcheck_arr((arg), struct curl_certinfo *))             \
-            _curl_easy_getinfo_err_curl_certinfo();                     \
-        if(curlcheck_socket_info(_curl_info))                           \
-          if(!curlcheck_arr((arg), curl_socket_t))                      \
-            _curl_easy_getinfo_err_curl_socket();                       \
-        if(curlcheck_off_t_info(_curl_info))                            \
-          if(!curlcheck_arr((arg), curl_off_t))                         \
-            _curl_easy_getinfo_err_curl_off_t();                        \
+        CURL_IGNORE_DEPRECATION(                                        \
+          if(curlcheck_string_info(_curl_info))                         \
+            if(!curlcheck_arr((arg), char *))                           \
+              _curl_easy_getinfo_err_string();                          \
+          if(curlcheck_long_info(_curl_info))                           \
+            if(!curlcheck_arr((arg), long))                             \
+              _curl_easy_getinfo_err_long();                            \
+          if(curlcheck_double_info(_curl_info))                         \
+            if(!curlcheck_arr((arg), double))                           \
+              _curl_easy_getinfo_err_double();                          \
+          if(curlcheck_slist_info(_curl_info))                          \
+            if(!curlcheck_arr((arg), struct curl_slist *))              \
+              _curl_easy_getinfo_err_curl_slist();                      \
+          if(curlcheck_tlssessioninfo_info(_curl_info))                 \
+            if(!curlcheck_arr((arg), struct curl_tlssessioninfo *))     \
+              _curl_easy_getinfo_err_curl_tlssesssioninfo();            \
+          if(curlcheck_certinfo_info(_curl_info))                       \
+            if(!curlcheck_arr((arg), struct curl_certinfo *))           \
+              _curl_easy_getinfo_err_curl_certinfo();                   \
+          if(curlcheck_socket_info(_curl_info))                         \
+            if(!curlcheck_arr((arg), curl_socket_t))                    \
+              _curl_easy_getinfo_err_curl_socket();                     \
+          if(curlcheck_off_t_info(_curl_info))                          \
+            if(!curlcheck_arr((arg), curl_off_t))                       \
+              _curl_easy_getinfo_err_curl_off_t();                      \
+        )                                                               \
       }                                                                 \
       curl_easy_getinfo(handle, _curl_info, arg);                       \
     })
@@ -270,9 +276,9 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_DNS_SERVERS ||                                         \
    (option) == CURLOPT_DOH_URL ||                                             \
    (option) == CURLOPT_EGDSOCKET ||                                           \
-   (option) == CURLOPT_FTPPORT ||                                             \
    (option) == CURLOPT_FTP_ACCOUNT ||                                         \
    (option) == CURLOPT_FTP_ALTERNATIVE_TO_USER ||                             \
+   (option) == CURLOPT_FTPPORT ||                                             \
    (option) == CURLOPT_HSTS ||                                                \
    (option) == CURLOPT_INTERFACE ||                                           \
    (option) == CURLOPT_ISSUERCERT ||                                          \
@@ -286,10 +292,8 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_PASSWORD ||                                            \
    (option) == CURLOPT_PINNEDPUBLICKEY ||                                     \
    (option) == CURLOPT_PRE_PROXY ||                                           \
+   (option) == CURLOPT_PROTOCOLS_STR ||                                       \
    (option) == CURLOPT_PROXY ||                                               \
-   (option) == CURLOPT_PROXYPASSWORD ||                                       \
-   (option) == CURLOPT_PROXYUSERNAME ||                                       \
-   (option) == CURLOPT_PROXYUSERPWD ||                                        \
    (option) == CURLOPT_PROXY_CAINFO ||                                        \
    (option) == CURLOPT_PROXY_CAPATH ||                                        \
    (option) == CURLOPT_PROXY_CRLFILE ||                                       \
@@ -297,17 +301,21 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_PROXY_KEYPASSWD ||                                     \
    (option) == CURLOPT_PROXY_PINNEDPUBLICKEY ||                               \
    (option) == CURLOPT_PROXY_SERVICE_NAME ||                                  \
+   (option) == CURLOPT_PROXY_SSL_CIPHER_LIST ||                               \
    (option) == CURLOPT_PROXY_SSLCERT ||                                       \
    (option) == CURLOPT_PROXY_SSLCERTTYPE ||                                   \
    (option) == CURLOPT_PROXY_SSLKEY ||                                        \
    (option) == CURLOPT_PROXY_SSLKEYTYPE ||                                    \
-   (option) == CURLOPT_PROXY_SSL_CIPHER_LIST ||                               \
    (option) == CURLOPT_PROXY_TLS13_CIPHERS ||                                 \
    (option) == CURLOPT_PROXY_TLSAUTH_PASSWORD ||                              \
    (option) == CURLOPT_PROXY_TLSAUTH_TYPE ||                                  \
    (option) == CURLOPT_PROXY_TLSAUTH_USERNAME ||                              \
+   (option) == CURLOPT_PROXYPASSWORD ||                                       \
+   (option) == CURLOPT_PROXYUSERNAME ||                                       \
+   (option) == CURLOPT_PROXYUSERPWD ||                                        \
    (option) == CURLOPT_RANDOM_FILE ||                                         \
    (option) == CURLOPT_RANGE ||                                               \
+   (option) == CURLOPT_REDIR_PROTOCOLS_STR ||                                 \
    (option) == CURLOPT_REFERER ||                                             \
    (option) == CURLOPT_REQUEST_TARGET ||                                      \
    (option) == CURLOPT_RTSP_SESSION_ID ||                                     \
@@ -317,6 +325,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SERVICE_NAME ||                                        \
    (option) == CURLOPT_SOCKS5_GSSAPI_SERVICE ||                               \
    (option) == CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 ||                             \
+   (option) == CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256 ||                          \
    (option) == CURLOPT_SSH_KNOWNHOSTS ||                                      \
    (option) == CURLOPT_SSH_PRIVATE_KEYFILE ||                                 \
    (option) == CURLOPT_SSH_PUBLIC_KEYFILE ||                                  \
@@ -363,6 +372,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_INTERLEAVEDATA ||                                      \
    (option) == CURLOPT_IOCTLDATA ||                                           \
    (option) == CURLOPT_OPENSOCKETDATA ||                                      \
+   (option) == CURLOPT_PREREQDATA ||                                          \
    (option) == CURLOPT_PROGRESSDATA ||                                        \
    (option) == CURLOPT_READDATA ||                                            \
    (option) == CURLOPT_SEEKDATA ||                                            \
@@ -372,6 +382,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_WRITEDATA ||                                           \
    (option) == CURLOPT_RESOLVER_START_DATA ||                                 \
    (option) == CURLOPT_TRAILERDATA ||                                         \
+   (option) == CURLOPT_SSH_HOSTKEYDATA ||                                     \
    0)
 
 /* evaluates to true if option takes a POST data argument (void* or char*) */
@@ -429,7 +440,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
   (CURLINFO_OFF_T < (info))
 
 
-/* typecheck helpers -- check whether given expression has requested type*/
+/* typecheck helpers -- check whether given expression has requested type */
 
 /* For pointers, you can use the curlcheck_ptr/curlcheck_arr macros,
  * otherwise define a new macro. Search for __builtin_types_compatible_p
@@ -667,11 +678,11 @@ typedef CURLcode (*_curl_ssl_ctx_callback4)(CURL *, const void *,
 /* hack: if we included OpenSSL's ssl.h, we know about SSL_CTX
  * this will of course break if we're included before OpenSSL headers...
  */
-typedef CURLcode (*_curl_ssl_ctx_callback5)(CURL *, SSL_CTX, void *);
-typedef CURLcode (*_curl_ssl_ctx_callback6)(CURL *, SSL_CTX, const void *);
-typedef CURLcode (*_curl_ssl_ctx_callback7)(CURL *, const SSL_CTX, void *);
-typedef CURLcode (*_curl_ssl_ctx_callback8)(CURL *, const SSL_CTX,
-                                           const void *);
+typedef CURLcode (*_curl_ssl_ctx_callback5)(CURL *, SSL_CTX *, void *);
+typedef CURLcode (*_curl_ssl_ctx_callback6)(CURL *, SSL_CTX *, const void *);
+typedef CURLcode (*_curl_ssl_ctx_callback7)(CURL *, const SSL_CTX *, void *);
+typedef CURLcode (*_curl_ssl_ctx_callback8)(CURL *, const SSL_CTX *,
+                                            const void *);
 #else
 typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback5;
 typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback6;

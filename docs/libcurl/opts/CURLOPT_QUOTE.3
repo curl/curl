@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_QUOTE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_QUOTE \- (S)FTP commands to run before transfer
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_QUOTE, struct curl_slist *cmds);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_QUOTE,
+                          struct curl_slist *cmds);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a linked list of FTP or SFTP commands to pass to the server
 prior to your request. This will be done before any other commands are issued
@@ -66,8 +71,8 @@ The chown command sets the owner of the file named by the file operand to the
 user ID specified by the user operand. The user operand is a decimal
 integer user ID.
 .IP "ln source_file target_file"
-The ln and symlink commands create a symbolic link at the target_file location
-pointing to the source_file location.
+The \fBln\fP and \fBsymlink\fP commands create a symbolic link at the
+target_file location pointing to the source_file location.
 .IP "mkdir directory_name"
 The mkdir command creates the directory named by the directory_name operand.
 .IP "mtime date file"
@@ -75,7 +80,8 @@ The mtime command sets the last modification time of the file named by the
 file operand. The <date expression> can be all sorts of date strings, see the
 \fIcurl_getdate(3)\fP man page for date expression details. (Added in 7.73.0)
 .IP "pwd"
-The pwd command returns the absolute pathname of the current working directory.
+The \fBpwd\fP command returns the absolute path of the current working
+directory.
 .IP "rename source target"
 The rename command renames the file or directory named by the source
 operand to the destination path named by the target operand.

@@ -1,6 +1,8 @@
 <testcase>
 <info>
 <keywords>
+HTTP
+HTTP proxy
 HSTS
 url_effective
 </keywords>
@@ -9,7 +11,7 @@ url_effective
 <reply>
 
 # we use this as response to a CONNECT
-<data nocheck="yes">
+<connect nocheck="yes">
 HTTP/1.1 403 not OK at all
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -18,7 +20,7 @@ Connection: close
 Funny-head: yesyes
 
 -foo-
-</data>
+</connect>
 </reply>
 
 <client>
@@ -27,10 +29,12 @@ http
 </server>
 <features>
 HSTS
+proxy
+https
 </features>
 
 <file name="log/input%TESTNUMBER">
-.hsts.example "20311001 04:47:41"
+.hsts.example "99991001 04:47:41"
 </file>
 
 <name>
@@ -51,6 +55,13 @@ Proxy-Connection: Keep-Alive
 
 </protocol>
 <stdout>
+HTTP/1.1 403 not OK at all
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Funny-head: yesyes
+
 https://this.hsts.example/%TESTNUMBER
 </stdout>
 # Proxy CONNECT aborted

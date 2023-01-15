@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+CURLINFO_FILETIME
 </keywords>
 </info>
 

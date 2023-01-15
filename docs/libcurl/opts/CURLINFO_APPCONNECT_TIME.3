@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,21 +18,26 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLINFO_APPCONNECT_TIME 3 "28 Aug 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
 .SH NAME
 CURLINFO_APPCONNECT_TIME \- get the time until the SSL/SSH handshake is completed
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_APPCONNECT_TIME, double *timep);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_APPCONNECT_TIME,
+                           double *timep);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a double to receive the time, in seconds, it took from the
 start until the SSL/SSH connect/handshake to the remote host was completed.
-This time is most often very near to the \fICURLINFO_PRETRANSFER_TIME(3)\fP
-time, except for cases such as HTTP pipelining where the pretransfer time can
-be delayed due to waits in line for the pipeline and more.
+This time is most often close to the \fICURLINFO_PRETRANSFER_TIME(3)\fP time,
+except for cases such as HTTP pipelining where the pretransfer time can be
+delayed due to waits in line for the pipeline and more.
 
 When a redirect is followed, the time from each request is added together.
 

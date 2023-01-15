@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+FTP
+EPSV
+netrc
+macdef
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+blipp
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+skip 'macdef' when parsing netrc
+ </name>
+ <command>
+--netrc --netrc-file log/netrc%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
+</command>
+<file name="log/netrc%TESTNUMBER" >
+
+macdef testmacro
+	bin
+	cd default
+	cd login
+	put login.bin
+	cd ..
+	cd password
+	put password.bin
+	quit
+
+machine %HOSTIP login user1 password passwd1
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER user1
+PASS passwd1
+PWD
+EPSV
+TYPE I
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
+QUIT
+</protocol>
+</verify>
+</testcase>

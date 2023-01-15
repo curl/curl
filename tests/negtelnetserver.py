@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 #  Project                     ___| | | |  _ \| |
@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2017 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 """ A telnet server which negotiates"""
 
@@ -64,9 +66,9 @@ def telnetserver(options):
 
     # Need to set the allow_reuse on the class, not on the instance.
     socketserver.TCPServer.allow_reuse_address = True
-    server = socketserver.TCPServer(local_bind, NegotiatingTelnetHandler)
-    server.serve_forever()
-
+    with socketserver.TCPServer(local_bind, NegotiatingTelnetHandler) as server:
+        server.serve_forever()
+    # leaving `with` calls server.close() automatically
     return ScriptRC.SUCCESS
 
 
@@ -363,6 +365,9 @@ if __name__ == '__main__':
     except Exception as e:
         log.exception(e)
         rc = ScriptRC.EXCEPTION
+
+    if options.pidfile and os.path.isfile(options.pidfile):
+        os.unlink(options.pidfile)
 
     log.info("Returning %d", rc)
     sys.exit(rc)

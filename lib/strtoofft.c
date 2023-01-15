@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -85,7 +87,7 @@ static curl_off_t strtooff(const char *nptr, char **endptr, int base)
 
   /* Skip leading whitespace. */
   end = (char *)nptr;
-  while(ISSPACE(end[0])) {
+  while(ISBLANK(end[0])) {
     end++;
   }
 
@@ -219,10 +221,11 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   curl_off_t number;
   errno = 0;
   *num = 0; /* clear by default */
+  DEBUGASSERT(base); /* starting now, avoid base zero */
 
-  while(*str && ISSPACE(*str))
+  while(*str && ISBLANK(*str))
     str++;
-  if('-' == *str) {
+  if(('-' == *str) || (ISSPACE(*str))) {
     if(endp)
       *endp = (char *)str; /* didn't actually move */
     return CURL_OFFT_INVAL; /* nothing parsed */

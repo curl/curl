@@ -2,7 +2,7 @@
 #
 # zz40-xc-ovr.m4
 #
-# Copyright (c) 2013 - 2018 Daniel Stenberg <daniel@haxx.se>
+# Copyright (C) Daniel Stenberg <daniel@haxx.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,8 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# SPDX-License-Identifier: ISC
 #
 #---------------------------------------------------------------------------
 
@@ -358,7 +360,7 @@ dnl and stores the result in 'PATH_SEPARATOR', unless
 dnl the user has already set it with a non-empty value.
 dnl
 dnl This path separator is the symbol used to separate
-dnl or diferentiate paths inside the 'PATH' environment
+dnl or differentiate paths inside the 'PATH' environment
 dnl variable.
 dnl
 dnl Non-empty user provided 'PATH_SEPARATOR' always
@@ -592,7 +594,7 @@ dnl and stores the result in 'PATH_SEPARATOR', unless
 dnl the user has already set it with a non-empty value.
 dnl
 dnl This path separator is the symbol used to separate
-dnl or diferentiate paths inside the 'PATH' environment
+dnl or differentiate paths inside the 'PATH' environment
 dnl variable.
 dnl
 dnl Non-empty user provided 'PATH_SEPARATOR' always

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,22 +18,29 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PREQUOTE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_PREQUOTE \- commands to run before an FTP transfer
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PREQUOTE,
                           struct curl_slist *cmds);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a linked list of FTP commands to pass to the server after
 the transfer type is set. The linked list should be a fully valid list of
 struct curl_slist structs properly filled in as described for
 \fICURLOPT_QUOTE(3)\fP. Disable this operation again by setting a NULL to this
 option.
+
+These commands are not performed when a directory listing is performed, only
+for file transfers.
 
 While \fICURLOPT_QUOTE(3)\fP and \fICURLOPT_POSTQUOTE(3)\fP work for SFTP,
 this option does not.

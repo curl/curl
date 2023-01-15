@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,19 +18,27 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_STDERR 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_STDERR \- redirect stderr to another stream
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STDERR, FILE *stream);
+.fi
 .SH DESCRIPTION
 Pass a FILE * as parameter. Tell libcurl to use this \fIstream\fP instead of
 stderr when showing the progress meter and displaying \fICURLOPT_VERBOSE(3)\fP
 data.
+
+If you are using libcurl as a win32 DLL, this option will cause an exception
+and crash in the library since it cannot access a FILE * passed on from the
+application. A work-around is to instead use \fICURLOPT_DEBUGFUNCTION(3)\fP.
 .SH DEFAULT
 stderr
 .SH PROTOCOLS
@@ -52,3 +60,4 @@ Always
 Returns CURLE_OK
 .SH "SEE ALSO"
 .BR CURLOPT_VERBOSE "(3), " CURLOPT_NOPROGRESS "(3), "
+.BR CURLOPT_DEBUGFUNCTION "(3) "

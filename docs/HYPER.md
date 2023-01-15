@@ -9,28 +9,31 @@ Hyper support in curl is considered **EXPERIMENTAL** until further notice. It
 needs to be explicitly enabled at build-time.
 
 Further development and tweaking of the Hyper backend support in curl will
-happen in in the master branch using pull-requests, just like ordinary
+happen in the master branch using pull-requests, just like ordinary
 changes.
 
 ## Hyper version
 
-The C API for Hyper is brand new and under development. This description
-assumes that you get and build that C API off [the branch in Hyper's git
-repository](https://github.com/hyperium/hyper/tree/hyper-capi).
+The C API for Hyper is brand new and is still under development.
 
 ## build curl with hyper
 
-Build hyper and enable the C API:
+Since March 3 2022, hyper needs the nightly rustc to build, which you may need
+to install first with:
+
+     % rustup toolchain install nightly
+
+Then build hyper and enable its C API like this:
 
      % git clone https://github.com/hyperium/hyper
      % cd hyper
-     % RUSTFLAGS="--cfg hyper_unstable_ffi" cargo build --features client,http1,http2,ffi
+     % RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib
 
 Build curl to use hyper's C API:
 
      % git clone https://github.com/curl/curl
      % cd curl
-     % ./buildconf
+     % autoreconf -fi
      % ./configure --with-hyper=<hyper dir>
      % make
 
@@ -46,6 +49,17 @@ The API in Hyper delivers received HTTP headers as (cleaned up) name=value
 pairs, making it impossible for curl to know the exact byte representation
 over the wire with Hyper.
 
+## Limitations
+
+The hyper backend does not support
+
+- `CURLOPT_IGNORE_CONTENT_LENGTH`
+- `--raw` and disabling `CURLOPT_HTTP_TRANSFER_DECODING`
+- RTSP
+- hyper is much stricter about what HTTP header contents it allows
+- HTTP/0.9
+- HTTP/2 upgrade using HTTP:// URLs. Aka 'h2c'
+
 ## Remaining issues
 
 This backend is still not feature complete with the native backend. Areas that
@@ -54,11 +68,6 @@ still need attention and verification include:
 - multiplexed HTTP/2
 - h2 Upgrade:
 - pausing transfers
-- co-exist with a HTTP/3 build
 - receiving HTTP/1 trailers
 - sending HTTP/1 trailers
-- accept-encoding
-- transfer encoding
-- alt-svc
-- hsts
-- DoH ([#6389](https://github.com/curl/curl/issues/6389))
+

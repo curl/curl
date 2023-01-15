@@ -19,7 +19,7 @@ alerts.
 ## How to provide feedback to author
 
 Be nice. Ask questions. Provide examples or suggestions of improvements.
-Assume best intentions. Remember language barriers.
+Assume the best intentions. Remember language barriers.
 
 All first-time contributors can become regulars. Let's help them go there.
 
@@ -36,17 +36,17 @@ Changing the API and the ABI may be fine in a change but it needs to be done
 deliberately and carefully. If not, a reviewer must help the author to realize
 the mistake.
 
-curl and libcurl are similarly very strict on not modifying existing
-behavior. API and ABI stability is not enough, the behavior should also remain
-intact as far as possible.
+curl and libcurl are similarly strict on not modifying existing behavior. API
+and ABI stability is not enough, the behavior should also remain intact as far
+as possible.
 
 ## Code style
 
 Most code style nits are detected by checksrc but not all. Only leave remarks
-on style deviation once checksrc doesn't find any more.
+on style deviation once checksrc does not find anymore.
 
 Minor nits from fresh submitters can also be handled by the maintainer when
-merging, in case it seems like the submitter isn't clear on what to do. We
+merging, in case it seems like the submitter is not clear on what to do. We
 want to make the process fun and exciting for new contributors.
 
 ## Encourage consistency
@@ -70,7 +70,7 @@ on final or release builds.
 Can the mallocs be avoided? Do not introduce mallocs in any hot paths. If
 there are (new) mallocs, can they be combined into fewer calls?
 
-Are all allocations handled in errorpaths to avoid leaks and crashes?
+Are all allocations handled in error paths to avoid leaks and crashes?
 
 ## Thread-safety
 
@@ -100,20 +100,20 @@ test individual functions.
 
 ## Documentation
 
-New features or changes to existing functionality **must** be accompanied with
+New features or changes to existing functionality **must** be accompanied by
 updated documentation. Submitting that in a separate follow-up pull request is
 not OK. A code review must also verify that the submitted documentation update
 matches the code submission.
 
-English isn't everyone's first language, be mindful of this and help the
+English is not everyone's first language, be mindful of this and help the
 submitter improve the text if it needs a rewrite to read better.
 
-## Code shouldn't be hard to understand
+## Code should not be hard to understand
 
 Source code should be written to maximize readability and be easy to
 understand.
 
-## Functions shouldn't be large
+## Functions should not be large
 
 A single function should never be large as that makes it hard to follow and
 understand all the exit points and state changes. Some existing functions in
@@ -151,12 +151,12 @@ Maybe use of `realloc()` should rather use the dynbuf functions?
 Do not allow new code that grows buffers without using dynbuf.
 
 Use of C functions that rely on a terminating zero must only be used on data
-that really do have a zero terminating zero.
+that really do have a null-terminating zero.
 
 ## Dangerous "data styles"
 
 Make extra precautions and verify that memory buffers that need a terminating
-zero always have exactly that. Buffers *without* a zero terminator must not be
+zero always have exactly that. Buffers *without* a null-terminator must not be
 used as input to string functions.
 
 # Commit messages
@@ -164,5 +164,5 @@ used as input to string functions.
 Tightly coupled with a code review is making sure that the commit message is
 good. It is the responsibility of the person who merges the code to make sure
 that the commit message follows our standard (detailed in the
-[CONTRIBUTE.md](CONTRIBUTE.md) document). This includes making sure the PR
+[CONTRIBUTE](CONTRIBUTE.md) document). This includes making sure the PR
 identifies related issues and giving credit to reporters and helpers.

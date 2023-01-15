@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,17 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_formfree 3 "6 April 2001" "libcurl 7.7.1" "libcurl Manual"
 .SH NAME
-curl_formfree - free a previously build multipart/formdata HTTP POST chain
+curl_formfree - free a previously build multipart form post chain
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "void curl_formfree(struct curl_httppost *" form);
-.ad
+.nf
+#include <curl/curl.h>
+
+void curl_formfree(struct curl_httppost *form);
+.fi
 .SH DESCRIPTION
-This function is deprecated. Do not use! See \fIcurl_mime_init(3)\fP instead!
+This function is deprecated. Do not use. See \fIcurl_mime_init(3)\fP instead!
 
 curl_formfree() is used to clean up data previously built/appended with
 \fIcurl_formadd(3)\fP. This must be called when the data has been used, which
@@ -43,6 +46,22 @@ the \fIcurl_formadd(3)\fP invoke(s).
 
 Passing in a NULL pointer in \fIform\fP will make this function return
 immediately with no action.
+.SH EXAMPLE
+.nf
+  /* Fill in a file upload field */
+  curl_formadd(&formpost,
+               &lastptr,
+               CURLFORM_COPYNAME, "file",
+               CURLFORM_FILE, "nice-image.jpg",
+               CURLFORM_END);
+
+  curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+
+  curl_easy_perform(curl);
+
+  /* then cleanup the formpost chain */
+  curl_formfree(formpost);
+.fi
 .SH AVAILABILITY
 Deprecated in 7.56.0.
 .SH RETURN VALUE

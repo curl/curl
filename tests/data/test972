@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 445
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+
+<server>
+http
+</server>
+<features>
+debug
+proxy
+</features>
+<setenv>
+CURL_TIME=13
+CURL_DEBUG_SIZE=4019
+CURL_VERSION=curl-unit-test-fake-version
+</setenv>
+<name>
+Verify JSON output
+</name>
+<command option="no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -s --write-out '%{json}\n' -o log/out972
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout mode="text">
+{"certs":"","content_type":"text/html","errormsg":null,"exitcode":0,"filename_effective":"log/out972","ftp_entry_path":null,"http_code":200,"http_connect":0,"http_version":"1.1","local_ip":"%HOSTIP","local_port":13,"method":"GET","num_certs":0,"num_connects":1,"num_headers":9,"num_redirects":0,"proxy_ssl_verify_result":0,"redirect_url":null,"referer":null,"remote_ip":"%HOSTIP","remote_port":%HTTPPORT,"response_code":200,"scheme":"HTTP","size_download":445,"size_header":4019,"size_request":4019,"size_upload":0,"speed_download":13,"speed_upload":13,"ssl_verify_result":0,"time_appconnect":0.000013,"time_connect":0.000013,"time_namelookup":0.000013,"time_pretransfer":0.000013,"time_redirect":0.000013,"time_starttransfer":0.000013,"time_total":0.000013,"url":"http://%HOSTIP:%HTTPPORT/%TESTNUMBER","url_effective":"http://%HOSTIP:%HTTPPORT/%TESTNUMBER","urlnum":0,"curl_version":"curl-unit-test-fake-version"}
+</stdout>
+</verify>
+</testcase>

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,11 +18,13 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_CHUNK_BGN_FUNCTION 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_CHUNK_BGN_FUNCTION \- callback before a transfer with FTP wildcardmatch
+CURLOPT_CHUNK_BGN_FUNCTION \- callback before a transfer with FTP wildcard match
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -66,14 +68,14 @@ shown above.
 This callback function gets called by libcurl before a part of the stream is
 going to be transferred (if the transfer supports chunks).
 
-The \fItransfer_info\fP pointer will point to a struct curl_fileinfo with
-details about the file that is about to get transferred.
+The \fItransfer_info\fP pointer will point to a \fBcurl_fileinfo\fP struct
+with details about the file that is about to get transferred.
 
 This callback makes sense only when using the \fICURLOPT_WILDCARDMATCH(3)\fP
 option for now.
 
 The target of transfer_info parameter is a "feature depended" structure. For
-the FTP wildcard download, the target is curl_fileinfo structure (see
+the FTP wildcard download, the target is \fBcurl_fileinfo\fP structure (see
 \fIcurl/curl.h\fP).  The parameter \fIptr\fP is a pointer given by
 \fICURLOPT_CHUNK_DATA(3)\fP. The parameter remains contains number of chunks
 remaining per the transfer. If the feature is not available, the parameter has

@@ -1,7 +1,5 @@
 /* File: report_openssl_version.c
  *
- * $Id$
- *
  * This file dynamically loads the openssl shared image to report the
  * version string.
  *
@@ -9,7 +7,7 @@
  *
  * Usage:  report_openssl_version <shared_image> [<dcl_symbol>]
  *
- * Copyright 2013, John Malmberg
+ * Copyright (C) John Malmberg
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +20,8 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * SPDX-License-Identifier: ISC
  *
  */
 
@@ -47,7 +47,7 @@ void * libptr;
 const char * (*ssl_version)(int t);
 const char * version;
 
-   if (argc < 1) {
+   if(argc < 1) {
        puts("report_openssl_version filename");
        exit(1);
    }
@@ -55,16 +55,16 @@ const char * version;
    libptr = dlopen(argv[1], 0);
 
    ssl_version = (const char * (*)(int))dlsym(libptr, "SSLeay_version");
-   if ((void *)ssl_version == NULL) {
+   if(ssl_version == NULL) {
       ssl_version = (const char * (*)(int))dlsym(libptr, "ssleay_version");
-      if ((void *)ssl_version == NULL) {
+      if(ssl_version == NULL) {
          ssl_version = (const char * (*)(int))dlsym(libptr, "SSLEAY_VERSION");
       }
    }
 
    dlclose(libptr);
 
-   if ((void *)ssl_version == NULL) {
+   if(ssl_version == NULL) {
       puts("Unable to lookup version of OpenSSL");
       exit(1);
    }
@@ -74,7 +74,7 @@ const char * version;
    puts(version);
 
    /* Was a symbol argument given? */
-   if (argc > 1) {
+   if(argc > 1) {
       int status;
       struct dsc$descriptor_s symbol_dsc;
       struct dsc$descriptor_s value_dsc;
@@ -91,7 +91,7 @@ const char * version;
       value_dsc.dsc$b_class = DSC$K_CLASS_S;
 
       status = LIB$SET_SYMBOL(&symbol_dsc, &value_dsc, &table_type);
-      if (!$VMS_STATUS_SUCCESS(status)) {
+      if(!$VMS_STATUS_SUCCESS(status)) {
          exit(status);
       }
    }

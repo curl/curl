@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 
 version: 7.50.0.{build}
@@ -25,7 +27,8 @@ version: 7.50.0.{build}
 environment:
     matrix:
       # generated CMake-based Visual Studio Release builds
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "CMake, VS2008, Release x86, Schannel"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 9 2008"
         PRJ_CFG: Release
@@ -36,10 +39,10 @@ environment:
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
-        COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+      - job_name: "CMake, VS2022, Release x64, OpenSSL, WebSockets"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Release
         OPENSSL: ON
@@ -49,10 +52,11 @@ environment:
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
-        COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+        WEBSOCKETS: ON
+      - job_name: "CMake, VS2022, Release arm64, Schannel, Static"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A ARM64"
         PRJ_CFG: Release
         OPENSSL: OFF
@@ -62,9 +66,9 @@ environment:
         TESTING: OFF
         SHARED: OFF
         DISABLED_TESTS: ""
-        COMPILER_PATH: ""
       # generated CMake-based Visual Studio Debug builds
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "CMake, VS2010, Debug x64, no SSL, Static"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 10 2010 Win64"
         PRJ_CFG: Debug
@@ -74,11 +78,12 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+        DISABLED_TESTS: "!1139 !1501 ~1056"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
+      - job_name: "CMake, VS2022, Debug x64, Schannel, Static, Unicode"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -87,11 +92,12 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~571 !1139 !1501 "
-        COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+        DISABLED_TESTS: "~571 !1139 !1501 ~1056"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
+      - job_name: "CMake, VS2022, Debug x64, no SSL, Static"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -100,11 +106,12 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~571 !1139 !1501"
-        COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+        DISABLED_TESTS: "~571 !1139 !1501 ~1056"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
+      - job_name: "CMake, VS2022, Debug x64, no SSL, Static, HTTP only"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 16 2019"
+        PRJ_GEN: "Visual Studio 17 2022"
         TARGET: "-A x64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -113,10 +120,11 @@ environment:
         HTTP_ONLY: ON
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: ""
+        DISABLED_TESTS: "!1139 !1501 ~1056"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
       # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "CMake, mingw-w64, Debug x64, Schannel, Static, Unicode"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
@@ -126,11 +134,12 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin"
+        DISABLED_TESTS: "!1139 !1501 ~1056"
+        ADD_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - job_name: "CMake, mingw-w64, Debug x64, Schannel, Static, Unicode"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
@@ -140,11 +149,12 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: "C:\\mingw-w64\\x86_64-7.2.0-posix-seh-rt_v5-rev1\\mingw64\\bin"
+        DISABLED_TESTS: "!1139 !1501 ~1056"
+        ADD_PATH: "C:\\mingw-w64\\x86_64-7.2.0-posix-seh-rt_v5-rev1\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "CMake, mingw-w64, Debug x86, Schannel, Static"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
@@ -154,11 +164,12 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin"
+        DISABLED_TESTS: "!1139 !1501 ~1056"
+        ADD_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "CMake, mingw, Debug x86, no SSL, Static"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
@@ -168,97 +179,121 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: "C:\\MinGW\\bin"
+        DISABLED_TESTS: "!1139 !1501 ~1056"
+        ADD_PATH: "C:\\MinGW\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
       # winbuild-based builds
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "winbuild, VS2015, Debug"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: winbuild_vs2015
         DEBUG: yes
         PATHPART: debug
         TESTING: OFF
         ENABLE_UNICODE: no
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "winbuild, VS2015, Release"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: winbuild_vs2015
         DEBUG: no
         PATHPART: release
         TESTING: OFF
         ENABLE_UNICODE: no
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - job_name: "winbuild, VS2017, Debug"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: winbuild_vs2017
         DEBUG: yes
         PATHPART: debug
         TESTING: OFF
         ENABLE_UNICODE: no
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - job_name: "winbuild, VS2017, Release"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: winbuild_vs2017
         DEBUG: no
         PATHPART: release
         TESTING: OFF
         ENABLE_UNICODE: no
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "winbuild, VS2015, Debug, Unicode"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: winbuild_vs2015
         DEBUG: yes
         PATHPART: debug
         TESTING: OFF
         ENABLE_UNICODE: yes
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "winbuild, VS2015, Release, Unicode"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: winbuild_vs2015
         DEBUG: no
         PATHPART: release
         TESTING: OFF
         ENABLE_UNICODE: yes
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - job_name: "winbuild, VS2017, Debug, Unicode"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: winbuild_vs2017
         DEBUG: yes
         PATHPART: debug
         TESTING: OFF
         ENABLE_UNICODE: yes
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - job_name: "winbuild, VS2017, Release, Unicode"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: winbuild_vs2017
         DEBUG: no
         PATHPART: release
         TESTING: OFF
         ENABLE_UNICODE: yes
       # generated VisualStudioSolution-based builds
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - job_name: "VisualStudioSolution, VS2017, Debug"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: VisualStudioSolution
         PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
         TESTING: OFF
-        VC_VERSION: VC15
+        VC_VERSION: VC14.10
       # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - job_name: "autotools, msys2, Debug, no Proxy, no SSL"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 ~1056 !1233"
-        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy"
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
+        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --without-ssl --enable-websockets"
+      - job_name: "autotools, msys2, Debug, no SSL"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
-        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver"
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
+        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets"
+      - job_name: "autotools, msys2, Release, no SSL"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
-        CONFIG_ARGS: "--enable-warnings --enable-werror"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
+        CONFIG_ARGS: "--enable-warnings --enable-werror --without-ssl --enable-websockets"
+      # autotools-based Cygwin build
+      - job_name: "autotools, cygwin, Debug, no SSL"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
+        BUILD_SYSTEM: autotools
+        TESTING: ON
+        DISABLED_TESTS: "~1056"
+        ADD_PATH: "C:\\cygwin64\\bin"
+        CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --without-ssl --enable-websockets"
+        POSIX_PATH_PREFIX: "/cygdrive"
 
 install:
-    - set "PATH=C:\msys64\usr\bin;%PATH%"
-    - if not "%COMPILER_PATH%"=="" (
-        set "PATH=%COMPILER_PATH%;%PATH%" )
+    - if not "%ADD_PATH%"=="" (
+        set "PATH=%ADD_PATH%;%PATH%" )
 
 build_script:
     - if %BUILD_SYSTEM%==CMake (
         cmake .
         -G"%PRJ_GEN%"
         %TARGET%
-        -DCMAKE_USE_OPENSSL=%OPENSSL%
-        -DCMAKE_USE_SCHANNEL=%SCHANNEL%
+        -DCURL_USE_OPENSSL=%OPENSSL%
+        -DCURL_USE_SCHANNEL=%SCHANNEL%
         -DHTTP_ONLY=%HTTP_ONLY%
         -DBUILD_SHARED_LIBS=%SHARED%
         -DBUILD_TESTING=%TESTING%
+        -DENABLE_WEBSOCKETS=%WEBSOCKETS%
         -DCURL_WERROR=ON
         -DENABLE_DEBUG=ON
         -DENABLE_UNICODE=%ENABLE_UNICODE%
@@ -285,11 +320,11 @@ build_script:
         call buildconf.bat &&
         cd winbuild &&
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" &&
-        nmake /f Makefile.vc mode=dll VC=15 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
-        ..\builds\libcurl-vc15-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
+        nmake /f Makefile.vc mode=dll VC=14.10 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
+        ..\builds\libcurl-vc14.10-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==autotools (
-        bash.exe -e -l -c "cd /c/projects/curl && ./buildconf && ./configure %CONFIG_ARGS% && make && make examples && cd tests && make"
+        bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && autoreconf -fi && ./configure %CONFIG_ARGS% && make V=1 && make V=1 examples && cd tests && make V=1"
       )))))
     - if %TESTING%==ON (
         if %BUILD_SYSTEM%==CMake (
@@ -297,13 +332,21 @@ build_script:
       ))
 
 test_script:
+    - if exist C:/msys64/usr/bin/curl.exe (
+        set ACURL=-ac %POSIX_PATH_PREFIX%/c/msys64/usr/bin/curl.exe )
+    - if exist C:/Windows/System32/curl.exe (
+        set ACURL=-ac %POSIX_PATH_PREFIX%/c/Windows/System32/curl.exe )
     - if %TESTING%==ON (
         if %BUILD_SYSTEM%==CMake (
-          set TFLAGS=%DISABLED_TESTS% &&
-          cmake --build . --config %PRJ_CFG% --target test-nonflaky
+          set TFLAGS=%ACURL% %DISABLED_TESTS% &&
+          cmake --build . --config %PRJ_CFG% --target test-ci
         ) else (
-          echo APPVEYOR_API_URL=%APPVEYOR_API_URL% &&
-          bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p !flaky %DISABLED_TESTS%" ))
+        if %BUILD_SYSTEM%==autotools (
+          bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl && make V=1 TFLAGS='%ACURL% %DISABLED_TESTS%' test-ci"
+        ) else (
+          bash.exe -e -l -c "cd %POSIX_PATH_PREFIX%/c/projects/curl/tests && ./runtests.pl -a -p !flaky -r -rm %ACURL% %DISABLED_TESTS%"
+        ))
+      )
 
 # select branches to avoid testing feature branches twice (as branch and as pull request)
 branches:

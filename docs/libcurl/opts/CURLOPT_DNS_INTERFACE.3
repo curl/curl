@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,19 +18,23 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_DNS_INTERFACE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_DNS_INTERFACE \- set interface to speak DNS over
+CURLOPT_DNS_INTERFACE \- interface to speak DNS over
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_INTERFACE, char *ifname);
+.fi
 .SH DESCRIPTION
 Pass a char * as parameter. Set the name of the network interface that the DNS
 resolver should bind to. This must be an interface name (not an address). Set
-this option to NULL to use the default setting (don't bind to a specific
+this option to NULL to use the default setting (do not bind to a specific
 interface).
 
 The application does not have to keep the string around after setting this
@@ -38,6 +42,7 @@ option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
+All protocols except file:// - protocols that resolve host names.
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();

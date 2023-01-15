@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_FTPSSLAUTH 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_FTPSSLAUTH \- set order in which to attempt TLS vs SSL when using FTP
+CURLOPT_FTPSSLAUTH \- order in which to attempt TLS vs SSL
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTPSSLAUTH, long order);
+.fi
 .SH DESCRIPTION
 Pass a long using one of the values from below, to alter how libcurl issues
 \&"AUTH TLS" or "AUTH SSL" when FTP over SSL is activated. This is only
@@ -50,7 +54,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
   curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
   /* funny server, ask for SSL before TLS */
-  curl_easy_setopt(curl, CURLOPT_FTPSSLAUTH, CURLFTPAUTH_SSL);
+  curl_easy_setopt(curl, CURLOPT_FTPSSLAUTH, (long)CURLFTPAUTH_SSL);
   ret = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }

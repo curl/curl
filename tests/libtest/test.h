@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,9 +18,9 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
-
-/* !checksrc! disable ASSIGNWITHINCONDITION 14 */
 
 /* Now include the curl_setup.h file from libcurl's private libdir (the source
    version, but that might include "curl_config.h" from the build dir so we
@@ -38,10 +38,6 @@
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
-
-#ifdef TPF
-#  include "select.h"
 #endif
 
 #include "curl_printf.h"
@@ -488,5 +484,13 @@ extern int unitfail;
 
 #define global_init(A) \
   chk_global_init((A), (__FILE__), (__LINE__))
+
+#define NO_SUPPORT_BUILT_IN                     \
+  int test(char *URL)                           \
+  {                                             \
+    (void)URL;                                  \
+    fprintf(stderr, "Missing support\n");       \
+    return 1;                                   \
+  }
 
 /* ---------------------------------------------------------------- */

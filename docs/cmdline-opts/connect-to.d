@@ -1,9 +1,13 @@
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: connect-to
 Arg: <HOST1:PORT1:HOST2:PORT2>
 Help: Connect to host
 Added: 7.49.0
 See-also: resolve header
 Category: connection
+Example: --connect-to example.com:443:example.net:8443 $URL
+Multi: append
 ---
 
 For a request to the given HOST1:PORT1 pair, connect to HOST2:PORT2 instead.
@@ -18,5 +22,3 @@ request's original host/port".
 A "host" specified to this option is compared as a string, so it needs to
 match the name used in request URL. It can be either numerical such as
 "127.0.0.1" or the full host name such as "example.org".
-
-This option can be used many times to add many connect rules.

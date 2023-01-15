@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_filetime.h"
 #include "tool_cfgable.h"
@@ -28,11 +30,6 @@
 #  include <utime.h>
 #elif defined(HAVE_SYS_UTIME_H)
 #  include <sys/utime.h>
-#endif
-
-#if defined(__GNUC__) && defined(__MINGW32__)
-/* GCC 10 on mingw has issues with this, disable */
-#pragma GCC diagnostic ignored "-Wformat"
 #endif
 
 curl_off_t getfiletime(const char *filename, struct GlobalConfig *global)

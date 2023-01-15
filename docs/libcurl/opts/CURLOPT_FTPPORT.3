@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_FTPPORT 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_FTPPORT \- make FTP transfer active
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTPPORT, char *spec);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. It specifies that the
 FTP transfer will be made actively and the given string will be used to get
@@ -36,14 +40,14 @@ The PORT instruction tells the remote server to connect to our specified IP
 address. The string may be a plain IP address, a host name, a network
 interface name (under Unix) or just a '-' symbol to let the library use your
 system's default IP address. Default FTP operations are passive, and thus
-won't use PORT.
+will not use PORT.
 
 The address can be followed by a ':' to specify a port, optionally followed by
-a '-' to specify a port range.  If the port specified is 0, the operating
-system will pick a free port.  If a range is provided and all ports in the
+a '-' to specify a port range. If the port specified is 0, the operating
+system will pick a free port. If a range is provided and all ports in the
 range are not available, libcurl will report CURLE_FTP_PORT_FAILED for the
-handle.  Invalid port/range settings are ignored.  IPv6 addresses followed by
-a port or portrange have to be in brackets.  IPv6 addresses without port/range
+handle. Invalid port/range settings are ignored. IPv6 addresses followed by a
+port or port range have to be in brackets. IPv6 addresses without port/range
 specifier can be in brackets.
 
 Examples with specified ports:
@@ -54,6 +58,11 @@ Examples with specified ports:
   curl.se:32123
   [::1]:1234-4567
 .fi
+
+We strongly advise against specifying the address with a name, as it causes
+libcurl to do a blocking name resolve call to retrieve the IP address. That
+name resolve operation will \fBnot\fP use DNS-over-HTTPS even if
+\fICURLOPT_DOH_URL(3)\fP is set.
 
 You disable PORT again and go back to using the passive version by setting
 this option to NULL.

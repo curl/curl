@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PROXY_SSL_CIPHER_LIST 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PROXY_SSL_CIPHER_LIST \- specify ciphers to use for proxy TLS
+CURLOPT_PROXY_SSL_CIPHER_LIST \- ciphers to use for HTTPS proxy
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_CIPHER_LIST, char *list);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_CIPHER_LIST,
+                          char *list);
+.fi
 .SH DESCRIPTION
 Pass a char *, pointing to a null-terminated string holding the list of
 ciphers to use for the connection to the HTTPS proxy. The list must be
@@ -34,22 +39,28 @@ syntactically correct, it consists of one or more cipher strings separated by
 colons. Commas or spaces are also acceptable separators but colons are
 normally used, \&!, \&- and \&+ can be used as operators.
 
-For OpenSSL and GnuTLS valid examples of cipher lists include 'RC4-SHA',
-\'SHA1+DES\', 'TLSv1' and 'DEFAULT'. The default list is normally set when you
-compile OpenSSL.
+For OpenSSL and GnuTLS valid examples of cipher lists include \fBRC4-SHA\fP,
+\fBSHA1+DES\fP, \fBTLSv1\fP and \fBDEFAULT\fP. The default list is normally
+set when you compile OpenSSL.
 
-You'll find more details about cipher lists on this URL:
-
- https://www.openssl.org/docs/apps/ciphers.html
-
-For NSS, valid examples of cipher lists include 'rsa_rc4_128_md5',
-\'rsa_aes_128_sha\', etc. With NSS you don't add/remove ciphers. If one uses
+For NSS, valid examples of cipher lists include \fBrsa_rc4_128_md5\fP,
+\fBrsa_aes_128_sha\fP, etc. With NSS you do not add/remove ciphers. If one uses
 this option then all known ciphers are disabled and only those passed in are
 enabled.
 
-You'll find more details about the NSS cipher lists on this URL:
+For WolfSSL, valid examples of cipher lists include \fBECDHE-RSA-RC4-SHA\fP,
+\fBAES256-SHA:AES256-SHA256\fP, etc.
 
- http://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives
+For BearSSL, valid examples of cipher lists include
+\fBECDHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256\fP, or when using IANA names
+\fBTLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\fP,
+etc.
+With BearSSL you do not add/remove ciphers. If one uses this option then all
+known ciphers are disabled and only those passed in are enabled.
+
+you will find more details about cipher lists on this URL:
+
+ https://curl.se/docs/ssl-ciphers.html
 
 The application does not have to keep the string around after setting this
 option.
@@ -69,7 +80,7 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.52.0
+Added in 7.52.0, in 7.83.0 for BearSSL
 
 If built TLS enabled.
 .SH RETURN VALUE

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,24 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_REDIR_PROTOCOLS 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_REDIR_PROTOCOLS \- set protocols allowed to redirect to
+CURLOPT_REDIR_PROTOCOLS \- protocols allowed to redirect to
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REDIR_PROTOCOLS, long bitmask);
+.fi
 .SH DESCRIPTION
+This option is deprecated. We strongly recommend using
+\fICURLOPT_REDIR_PROTOCOLS_STR(3)\fP instead because this option cannot
+control all available protocols!
+
 Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
 limits what protocols libcurl may use in a transfer that it follows to in a
 redirect when \fICURLOPT_FOLLOWLOCATION(3)\fP is enabled. This allows you to
@@ -75,7 +83,7 @@ CURLPROTO_TELNET
 CURLPROTO_TFTP
 .fi
 .SH DEFAULT
-HTTP, HTTPS, FTP and FTPS (Since 7.65.2).
+HTTP, HTTPS, FTP and FTPS (Added in 7.65.2).
 
 Older versions defaulted to all protocols except FILE, SCP and since 7.40.0
 SMB and SMBS.
@@ -97,7 +105,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.19.4, before then it would follow all protocols.
+Added in 7.19.4, before then it would follow all protocols. Deprecated
+since 7.85.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

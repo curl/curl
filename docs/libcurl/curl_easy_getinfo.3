@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,22 +18,25 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH curl_easy_getinfo 3 "11 Feb 2009" "libcurl 7.19.4" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - extract information from a curl handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.B "CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );"
-
+CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );
+.fi
 .SH DESCRIPTION
-Request internal information from the curl session with this function.  The
+Request internal information from the curl session with this function. The
 third argument \fBMUST\fP be a pointer to a long, a pointer to a char *, a
 pointer to a struct curl_slist * or a pointer to a double (as this
-documentation describes further down).  The data pointed-to will be filled in
-accordingly and can be relied upon only if the function returns CURLE_OK.  Use
+documentation describes further down). The data pointed-to will be filled in
+accordingly and can be relied upon only if the function returns CURLE_OK. Use
 this function AFTER a performed transfer if you want to get transfer related
 data.
 
@@ -162,7 +165,7 @@ See \fICURLINFO_CONTENT_LENGTH_DOWNLOAD_T(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_UPLOAD
 (Deprecated) Upload size. See \fICURLINFO_CONTENT_LENGTH_UPLOAD(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_UPLOAD_T
-Upload size.  See \fICURLINFO_CONTENT_LENGTH_UPLOAD_T(3)\fP
+Upload size. See \fICURLINFO_CONTENT_LENGTH_UPLOAD_T(3)\fP
 .IP CURLINFO_CONTENT_TYPE
 Content type from the Content-Type header.
 See \fICURLINFO_CONTENT_TYPE(3)\fP
@@ -200,7 +203,7 @@ See \fICURLINFO_LOCAL_PORT(3)\fP
 List of all known cookies.
 See \fICURLINFO_COOKIELIST(3)\fP
 .IP CURLINFO_LASTSOCKET
-Last socket used.
+(Deprecated) Last socket used.
 See \fICURLINFO_LASTSOCKET(3)\fP
 .IP CURLINFO_ACTIVESOCKET
 The session's active socket.
@@ -208,6 +211,12 @@ See \fICURLINFO_ACTIVESOCKET(3)\fP
 .IP CURLINFO_FTP_ENTRY_PATH
 The entry path after logging in to an FTP server.
 See \fICURLINFO_FTP_ENTRY_PATH(3)\fP
+.IP CURLINFO_CAPATH
+Get the default value for \fICURLOPT_CAPATH(3)\fP.
+See \fICURLINFO_CAPATH(3)\fP
+.IP CURLINFO_CAINFO
+Get the default value for \fICURLOPT_CAINFO(3)\fP.
+See \fICURLINFO_CAINFO(3)\fP
 .IP CURLINFO_CERTINFO
 Certificate chain.
 See \fICURLINFO_CERTINFO(3)\fP
@@ -215,7 +224,7 @@ See \fICURLINFO_CERTINFO(3)\fP
 TLS session info that can be used for further processing.
 See \fICURLINFO_TLS_SSL_PTR(3)\fP
 .IP CURLINFO_TLS_SESSION
-TLS session info that can be used for further processing.  See
+TLS session info that can be used for further processing. See
 \fICURLINFO_TLS_SESSION(3)\fP. Deprecated option, use
 \fICURLINFO_TLS_SSL_PTR(3)\fP instead!
 .IP CURLINFO_CONDITION_UNMET
@@ -234,7 +243,7 @@ See \fICURLINFO_RTSP_SERVER_CSEQ(3)\fP
 RTSP CSeq last received.
 See \fICURLINFO_RTSP_CSEQ_RECV(3)\fP
 .IP CURLINFO_PROTOCOL
-The protocol used for the connection. (Added in 7.52.0)
+(Deprecated) The protocol used for the connection. (Added in 7.52.0)
 See \fICURLINFO_PROTOCOL(3)\fP
 .IP CURLINFO_SCHEME
 The scheme used for the connection. (Added in 7.52.0)
@@ -282,6 +291,28 @@ Total time of the previous request.
 The time it took for all redirection steps
 include name lookup, connect, pretransfer and transfer before final
 transaction was started. So, this is zero if no redirection took place.
+.SH EXAMPLE
+.nf
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
+    res = curl_easy_perform(curl);
+
+    if(CURLE_OK == res) {
+      char *ct;
+      /* ask for the content-type */
+      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
+
+      if((CURLE_OK == res) && ct)
+        printf("We received Content-Type: %s\\n", ct);
+    }
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
+.fi
+.SH AVAILABILITY
+Added in 7.4.1
 .SH RETURN VALUE
 If the operation was successful, CURLE_OK is returned. Otherwise an
 appropriate error code will be returned.

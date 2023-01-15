@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 
@@ -139,6 +141,7 @@ my $ctrldelay;     # set if server should throttle ctrl stream
 my $datadelay;     # set if server should throttle data stream
 my $retrweirdo;    # set if ftp server should use RETRWEIRDO
 my $retrnosize;    # set if ftp server should use RETRNOSIZE
+my $retrsize;      # set if ftp server should use RETRSIZE
 my $pasvbadip;     # set if ftp server should use PASVBADIP
 my $nosave;        # set if ftp server should not save uploaded data
 my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
@@ -146,6 +149,7 @@ my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
 my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
 my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
 my $storeresp;
+my $postfetch;
 my @capabilities;  # set if server supports capability commands
 my @auth_mechs;    # set if server supports authentication commands
 my %fulltextreply; #
@@ -643,6 +647,7 @@ sub protocolsetup {
             'STATUS'     => \&STATUS_imap,
             'STORE'      => \&STORE_imap,
             'UID'        => \&UID_imap,
+            'IDLE'       => \&IDLE_imap,
         );
         %displaytext = (
             'welcome' => join("",
@@ -1231,7 +1236,8 @@ sub FETCH_imap {
             sendcontrol $d;
         }
 
-        sendcontrol ")\r\n";
+        # Set the custom extra header content with POSTFETCH
+        sendcontrol "$postfetch)\r\n";
         sendcontrol "$cmdid OK FETCH completed\r\n";
     }
 
@@ -1584,6 +1590,13 @@ sub COPY_imap {
         sendcontrol "$cmdid OK COPY completed\r\n";
     }
 
+    return 0;
+}
+
+sub IDLE_imap {
+    logmsg "IDLE received\n";
+
+    sendcontrol "+ entering idle mode\r\n";
     return 0;
 }
 
@@ -2331,6 +2344,9 @@ sub RETR_ftp {
             if($retrnosize) {
                 $sz = "size?";
             }
+            elsif($retrsize > 0) {
+                $sz = "($retrsize bytes)";
+            }
 
             sendcontrol "150 Binary data connection for $testno () $sz.\r\n";
 
@@ -2561,7 +2577,7 @@ sub PASV_ftp {
         local $SIG{ALRM} = sub { die "alarm\n" };
 
         # assume swift operations unless explicitly slow
-        alarm ($datadelay?20:10);
+        alarm ($datadelay?20:2);
 
         # Wait for 'CNCT'
         my $input;
@@ -2783,6 +2799,7 @@ sub customize {
     $datadelay = 0;     # default is no throttling of the data stream
     $retrweirdo = 0;    # default is no use of RETRWEIRDO
     $retrnosize = 0;    # default is no use of RETRNOSIZE
+    $retrsize = 0;      # default is no use of RETRSIZE
     $pasvbadip = 0;     # default is no use of PASVBADIP
     $nosave = 0;        # default is to actually save uploaded data to file
     $nodataconn = 0;    # default is to establish or accept data channel
@@ -2790,6 +2807,7 @@ sub customize {
     $nodataconn421 = 0; # default is to not send 421 without data channel
     $nodataconn150 = 0; # default is to not send 150 without data channel
     $storeresp = "";    # send as ultimate STOR response
+    $postfetch = "";    # send as header after a FETCH response
     @capabilities = (); # default is to not support capability commands
     @auth_mechs = ();   # default is to not support authentication commands
     %fulltextreply = ();#
@@ -2832,6 +2850,10 @@ sub customize {
             $delayreply{$1}=$2;
             logmsg "FTPD: delay reply for $1 with $2 seconds\n";
         }
+        elsif($_ =~ /POSTFETCH (.*)/) {
+            logmsg "FTPD: read POSTFETCH header data\n";
+            $postfetch = $1;
+        }
         elsif($_ =~ /SLOWDOWN/) {
             $ctrldelay=1;
             $datadelay=1;
@@ -2844,6 +2866,10 @@ sub customize {
         elsif($_ =~ /RETRNOSIZE/) {
             logmsg "FTPD: instructed to use RETRNOSIZE\n";
             $retrnosize=1;
+        }
+        elsif($_ =~ /RETRSIZE (\d+)/) {
+            $retrsize= $1;
+            logmsg "FTPD: instructed to use RETRSIZE = $1\n";
         }
         elsif($_ =~ /PASVBADIP/) {
             logmsg "FTPD: instructed to use PASVBADIP\n";

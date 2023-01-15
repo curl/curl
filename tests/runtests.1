@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -72,6 +74,8 @@ The exclusion types are \fkeyword\fP, \ftest\fP, and \ftool\fP.
 Run the test event-based (if possible). This will make runtests invoke curl
 with --test-event option. This option only works if both curl and libcurl were
 built debug-enabled.
+.IP "-f"
+Force the test to run even if mentioned in DISABLED.
 .IP "-g"
 Run the given test(s) with gdb. This is best used on a single test case and
 curl built --disable-shared. This then fires up gdb with command line set to
@@ -84,20 +88,23 @@ Keep output and log files in log/ after a test run, even if no error was
 detected. Useful for debugging.
 .IP "-L <file>"
 Load and execute the specified file which should contain perl code.
-This option allows to change \fIruntests.pl\fP behaviour by overwriting
+This option allows one to change \fIruntests.pl\fP behaviour by overwriting
 functions and variables and is useful when testing external proxies
 using curl's regression test suite.
 .IP "-l"
 Lists all test case names.
 .IP "-n"
 Disable the check for and use of valgrind.
+.IP "--no-debuginfod"
+Delete the DEBUGINFOD_URLS variable if that is defined. Makes valgrind, gdb
+etc not able to use this functionality.
 .IP "-o <variablename=value>"
 Overwrite the specified internal \fBvariable\fP with \fBvalue\fP.
 Useful to change variables that didn't get a dedicated flag to change them.
 Check the source to see which variables are available.
 .IP "-P <proxy>"
 Use the specified HTTP proxy when executing tests, even if the tests
-themselves don't specify a proxy. This option allows to test external
+themselves don't specify a proxy. This option allows one to test external
 proxies using curl's regression test suite.
 .IP "-p"
 Prints out all files in "log/" to stdout when a test case fails. Very
@@ -145,6 +152,8 @@ to fail until all allocs have been tested. By setting \fInum\fP you can force
 the allocation with that number to be set to fail at once instead of looping
 through everyone, which is very handy when debugging and then often in
 combination with \fI-g\fP.
+.IP "-u"
+Error instead of warning on server unexpectedly alive.
 .IP "-v"
 Enable verbose output. Speaks more than default.
 .IP "-vc <curl>"

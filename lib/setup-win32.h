@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,25 +20,38 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /*
  * Include header files for windows builds before redefining anything.
  * Use this preprocessor block only to include or exclude windows.h,
- * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
+ * winsock2.h or ws2tcpip.h. Any other windows thing belongs
  * to any other further and independent block.  Under Cygwin things work
  * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
  * never be included when __CYGWIN__ is defined.  configure script takes
- * care of this, not defining HAVE_WINDOWS_H, HAVE_WINSOCK_H, HAVE_WINSOCK2_H,
+ * care of this, not defining HAVE_WINDOWS_H, HAVE_WINSOCK2_H,
  * neither HAVE_WS2TCPIP_H when __CYGWIN__ is defined.
  */
 
 #ifdef HAVE_WINDOWS_H
 #  if defined(UNICODE) && !defined(_UNICODE)
-#    define _UNICODE
+#    error "UNICODE is defined but _UNICODE is not defined"
 #  endif
 #  if defined(_UNICODE) && !defined(UNICODE)
-#    define UNICODE
+#    error "_UNICODE is defined but UNICODE is not defined"
+#  endif
+/*
+ * Don't include unneeded stuff in Windows headers to avoid compiler
+ * warnings and macro clashes.
+ * Make sure to define this macro before including any Windows headers.
+ */
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  ifndef NOGDI
+#    define NOGDI
 #  endif
 #  include <winerror.h>
 #  include <windows.h>
@@ -46,10 +59,6 @@
 #    include <winsock2.h>
 #    ifdef HAVE_WS2TCPIP_H
 #      include <ws2tcpip.h>
-#    endif
-#  else
-#    ifdef HAVE_WINSOCK_H
-#      include <winsock.h>
 #    endif
 #  endif
 #  include <tchar.h>
@@ -67,10 +76,6 @@
 
 #ifdef HAVE_WINSOCK2_H
 #  define USE_WINSOCK 2
-#else
-#  ifdef HAVE_WINSOCK_H
-#    error "WinSock version 1 is no longer supported, version 2 is required!"
-#  endif
 #endif
 
 /*

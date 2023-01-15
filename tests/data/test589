@@ -22,6 +22,9 @@ OK
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -31,7 +34,7 @@ lib%TESTNUMBER
 </tool>
 
  <name>
-make a HTTP MIME POST set to NULL
+make an HTTP MIME POST set to NULL
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

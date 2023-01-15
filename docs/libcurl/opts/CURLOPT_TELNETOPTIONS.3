@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,21 +18,25 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_TELNETOPTIONS 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_TELNETOPTIONS \- custom telnet options
+CURLOPT_TELNETOPTIONS \- set of telnet options
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TELNETOPTIONS,
                           struct curl_slist *cmds);
+.fi
 .SH DESCRIPTION
 Provide a pointer to a curl_slist with variables to pass to the telnet
 negotiations. The variables should be in the format <option=value>. libcurl
-supports the options 'TTYPE', 'XDISPLOC' and 'NEW_ENV'. See the TELNET
-standard for details.
+supports the options \fBTTYPE\fP, \fBXDISPLOC\fP and \fBNEW_ENV\fP. See the
+TELNET standard for details.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

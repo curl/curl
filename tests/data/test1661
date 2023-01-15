@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+bufref
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+bufref unit tests
+ </name>
+</client>
+</testcase>

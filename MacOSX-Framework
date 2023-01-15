@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 # This script performs all of the steps needed to build a
@@ -55,7 +57,7 @@ DEVELOPER_PATH=`xcode-select --print-path`
 if test -d "$DEVELOPER_PATH/Platforms/MacOSX.platform/Developer/SDKs"; then
  SDK_PATH="$DEVELOPER_PATH/Platforms/MacOSX.platform/Developer/SDKs"
 else
- SDK_PATH="$DEVELOPER_PATH/SDKs";
+ SDK_PATH="$DEVELOPER_PATH/SDKs"
 fi
 OLD_SDK=`ls  $SDK_PATH|head -1`
 NEW_SDK=`ls -r $SDK_PATH|head -1`
@@ -81,12 +83,12 @@ if test $PPC64_NEEDED -gt 0
 then
   SDK64=10.5
   ARCHES64='-arch x86_64 -arch ppc64'
-  SDK64=`ls  $SDK_PATH|grep 10.5|head -1`
+  SDK64=`ls  $SDK_PATH | grep "10\.5" | head -1`
 else
  ARCHES64='-arch x86_64'
  #We "know" that 10.4 and earlier do not support 64bit
- OLD_SDK64=`ls  $SDK_PATH|egrep -v "10.[0-4]"|head -1`
- NEW_SDK64=`ls -r $SDK_PATH|egrep -v "10.[0-4][^0-9]" | head -1`
+ OLD_SDK64=`ls  $SDK_PATH | grep -v "10\.[0-4]" | head -1`
+ NEW_SDK64=`ls -r $SDK_PATH | grep -v "10\.[0-4][^0-9]" | head -1`
  if test $USE_OLD -gt 0
   then
    SDK64=$OLD_SDK64
@@ -116,7 +118,7 @@ if test ! -z $SDK32; then
   mkdir -p libcurl.framework/${FRAMEWORK_VERSION}/Resources
   cp lib/.libs/libcurl.dylib libcurl.framework/${FRAMEWORK_VERSION}/libcurl
   install_name_tool -id @rpath/libcurl.framework/${FRAMEWORK_VERSION}/libcurl libcurl.framework/${FRAMEWORK_VERSION}/libcurl
-  /usr/bin/sed -e "s/7\.12\.3/$VERSION/" lib/libcurl.plist >libcurl.framework/${FRAMEWORK_VERSION}/Resources/Info.plist
+  cp lib/libcurl.plist libcurl.framework/${FRAMEWORK_VERSION}/Resources/Info.plist
   mkdir -p libcurl.framework/${FRAMEWORK_VERSION}/Headers/curl
   cp include/curl/*.h libcurl.framework/${FRAMEWORK_VERSION}/Headers/curl
   pushd libcurl.framework

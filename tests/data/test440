@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+HSTS
+trailing-dot
+</keywords>
+</info>
+
+<reply>
+
+# we use this as response to a CONNECT
+<connect nocheck="yes">
+HTTP/1.1 403 not OK at all
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Funny-head: yesyes
+
+-foo-
+</connect>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+HSTS
+proxy
+https
+</features>
+
+# no trailing dot in the file only in the URL
+<file name="log/input%TESTNUMBER">
+this.hsts.example "99991001 04:47:41"
+</file>
+
+<name>
+HSTS with trailing-dot host name in URL but none in hsts file
+</name>
+<command>
+-x http://%HOSTIP:%HTTPPORT http://this.hsts.example./%TESTNUMBER --hsts log/input%TESTNUMBER -w '%{url_effective}\n'
+</command>
+</client>
+
+<verify>
+# we let it CONNECT to the server to confirm HSTS but deny from there
+<protocol>
+CONNECT this.hsts.example.:443 HTTP/1.1
+Host: this.hsts.example.:443
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</protocol>
+<stdout>
+HTTP/1.1 403 not OK at all
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Funny-head: yesyes
+
+https://this.hsts.example./%TESTNUMBER
+</stdout>
+# Proxy CONNECT aborted
+<errorcode>
+56
+</errorcode>
+</verify>
+</testcase>

@@ -1,0 +1,72 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.TH CURLSHOPT_LOCKFUNC 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.SH NAME
+CURLSHOPT_LOCKFUNC - mutex lock callback
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+void lockcb(CURL *handle, curl_lock_data data, curl_lock_access access,
+            void *userptr);
+
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_LOCKFUNC, lockcb);
+.fi
+.SH DESCRIPTION
+Set a mutex lock callback for the share object, to allow it to get used by
+multiple threads concurrently. There's a corresponding
+\fICURLSHOPT_UNLOCKFUNC(3)\fP callback called when the mutex is again released.
+
+The \fIlockcb\fP argument must be a pointer to a function matching the
+prototype shown above. The arguments to the callback are:
+
+\fIhandle\fP is the currently active easy handle in use when the share object
+is intended to get used.
+
+The \fIdata\fP argument tells what kind of data libcurl wants to lock. Make
+sure that the callback uses a different lock for each kind of data.
+
+\fIaccess\fP defines what access type libcurl wants, shared or single.
+
+\fIuserptr\fP is the private pointer you set with \fICURLSHOPT_USERDATA\fP.
+This pointer is not used by libcurl itself.
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+  CURLSHcode sh;
+  share = curl_share_init();
+  sh = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, mutex_lock);
+  if(sh)
+    printf("Error: %s\\n", curl_share_strerror(sh));
+.fi
+.SH AVAILABILITY
+Added in 7.10
+.SH RETURN VALUE
+CURLSHE_OK (zero) means that the option was set properly, non-zero means an
+error occurred. See \fIlibcurl-errors(3)\fP for the full list with
+descriptions.
+.SH "SEE ALSO"
+.BR CURLSHOPT_UNLOCKFUNC "(3), "
+.BR curl_share_setopt "(3), " curl_share_cleanup "(3), " curl_share_init "(3)"

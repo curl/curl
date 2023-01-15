@@ -63,7 +63,11 @@ Accept: */*
 Transfer-Encoding: chunked
 Expect: 100-continue
 
+%if hyper
+7A
+%else
 7a
+%endif
 This is data we upload with PUT
 it comes from stdin so MUST be sent
 with chunked encoding

@@ -29,7 +29,6 @@ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER
 <verify>
 <protocol>
 A001 CAPABILITY
-A002 LOGOUT
 </protocol>
 </verify>
 </testcase>

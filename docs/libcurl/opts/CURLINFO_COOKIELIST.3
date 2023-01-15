@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,19 +18,23 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLINFO_COOKIELIST 3 "1 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
 .SH NAME
 CURLINFO_COOKIELIST \- get all known cookies
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_COOKIELIST,
                            struct curl_slist **cookies);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
-cookies curl knows (expired ones, too). Don't forget to call
+cookies curl knows (expired ones, too). do not forget to call
 \fIcurl_slist_free_all(3)\fP on the list after it has been used.  If there are
 no cookies (cookies for the handle have not been enabled or simply none have
 been received) 'struct curl_slist *' will be set to point to NULL.
@@ -61,7 +65,7 @@ if(curl) {
         printf("%s\\n", each->data);
         each = each->next;
       }
-      /* we must free these cookies when we're done */
+      /* we must free these cookies when we are done */
       curl_slist_free_all(cookies);
     }
   }

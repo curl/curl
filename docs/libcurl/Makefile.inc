@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2008 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 
 # Shared between Makefile.am and CMakeLists.txt
@@ -27,7 +29,9 @@ man_MANS = \
  curl_easy_duphandle.3 \
  curl_easy_escape.3 \
  curl_easy_getinfo.3 \
+ curl_easy_header.3 \
  curl_easy_init.3 \
+ curl_easy_nextheader.3 \
  curl_easy_option_by_id.3 \
  curl_easy_option_by_name.3 \
  curl_easy_option_next.3 \
@@ -95,8 +99,12 @@ man_MANS = \
  curl_url_dup.3 \
  curl_url_get.3 \
  curl_url_set.3 \
+ curl_url_strerror.3 \
  curl_version.3 \
  curl_version_info.3 \
+ curl_ws_meta.3 \
+ curl_ws_recv.3 \
+ curl_ws_send.3 \
  libcurl-easy.3 \
  libcurl-env.3 \
  libcurl-errors.3 \

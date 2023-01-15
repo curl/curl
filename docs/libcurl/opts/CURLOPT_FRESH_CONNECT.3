@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_FRESH_CONNECT 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_FRESH_CONNECT \- force a new connection to be used
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FRESH_CONNECT, long fresh);
+.fi
 .SH DESCRIPTION
 Pass a long. Set to 1 to make the next transfer use a new (fresh) connection
 by force instead of trying to re-use an existing one.  This option should be
@@ -34,7 +38,7 @@ used with caution and only if you understand what it does as it may seriously
 impact performance.
 
 Related functionality is \fICURLOPT_FORBID_REUSE(3)\fP which makes sure the
-connection is closed after use so that it won't be re-used.
+connection is closed after use so that it will not be re-used.
 
 Set \fIfresh\fP to 0 to have libcurl attempt re-using an existing connection
 (default behavior).

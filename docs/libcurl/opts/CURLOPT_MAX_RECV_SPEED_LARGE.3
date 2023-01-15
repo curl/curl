@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -40,7 +42,7 @@ the given threshold over a period time.
 If you set \fImaxspeed\fP to a value lower than \fICURLOPT_BUFFERSIZE(3)\fP,
 libcurl might download faster than the set limit initially.
 
-This option doesn't affect transfer speeds done with FILE:// URLs.
+This option does not affect transfer speeds done with FILE:// URLs.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS

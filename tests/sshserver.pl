@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 #***************************************************************************
 
 # Starts sshd for use in the SCP and SFTP curl test harness tests.
@@ -30,6 +32,8 @@ use Cwd;
 use Cwd 'abs_path';
 use Digest::MD5;
 use Digest::MD5 'md5_hex';
+use Digest::SHA;
+use Digest::SHA 'sha256_base64';
 use MIME::Base64;
 
 #***************************************************************************
@@ -52,6 +56,7 @@ use sshhelp qw(
     $hstprvkeyf
     $hstpubkeyf
     $hstpubmd5f
+    $hstpubsha256f
     $cliprvkeyf
     $clipubkeyf
     display_sshdconfig
@@ -362,10 +367,12 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
 if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
    (! -e $hstpubkeyf) || (! -s $hstpubkeyf) ||
    (! -e $hstpubmd5f) || (! -s $hstpubmd5f) ||
+   (! -e $hstpubsha256f) || (! -s $hstpubsha256f) ||
    (! -e $cliprvkeyf) || (! -s $cliprvkeyf) ||
    (! -e $clipubkeyf) || (! -s $clipubkeyf)) {
     # Make sure all files are gone so ssh-keygen doesn't complain
-    unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $cliprvkeyf, $clipubkeyf);
+    unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $hstpubsha256f,
+           $cliprvkeyf, $clipubkeyf);
     logmsg 'generating host keys...' if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f $hstprvkeyf -C 'curl test server' -N ''") {
         logmsg 'Could not generate host key';
@@ -379,7 +386,7 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     # Make sure that permissions are restricted so openssh doesn't complain
     system "chmod 600 $hstprvkeyf";
     system "chmod 600 $cliprvkeyf";
-    # Save md5 hash of public host key
+    # Save md5 and sha256 hashes of public host key
     open(RSAKEYFILE, "<$hstpubkeyf");
     my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
     close(RSAKEYFILE);
@@ -392,6 +399,13 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     close(PUBMD5FILE);
     if((! -e $hstpubmd5f) || (! -s $hstpubmd5f)) {
         logmsg 'Failed writing md5 hash of RSA host key';
+        exit 1;
+    }
+    open(PUBSHA256FILE, ">$hstpubsha256f");
+    print PUBSHA256FILE sha256_base64(decode_base64($rsahostkey[1]));
+    close(PUBSHA256FILE);
+    if((! -e $hstpubsha256f) || (! -s $hstpubsha256f)) {
+        logmsg 'Failed writing sha256 hash of RSA host key';
         exit 1;
     }
 }
@@ -428,9 +442,7 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 #  ssh daemon configuration file options we might use and version support
 #
 #  AFSTokenPassing                  : OpenSSH 1.2.1 and later [1]
-#  AcceptEnv                        : OpenSSH 3.9.0 and later
 #  AddressFamily                    : OpenSSH 4.0.0 and later
-#  AllowGroups                      : OpenSSH 1.2.1 and later
 #  AllowTcpForwarding               : OpenSSH 2.3.0 and later
 #  AllowUsers                       : OpenSSH 1.2.1 and later
 #  AuthorizedKeysFile               : OpenSSH 2.9.9 and later
@@ -441,7 +453,6 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 #  ClientAliveCountMax              : OpenSSH 2.9.0 and later
 #  ClientAliveInterval              : OpenSSH 2.9.0 and later
 #  Compression                      : OpenSSH 3.3.0 and later
-#  DenyGroups                       : OpenSSH 1.2.1 and later
 #  DenyUsers                        : OpenSSH 1.2.1 and later
 #  ForceCommand                     : OpenSSH 4.4.0 and later [3]
 #  GatewayPorts                     : OpenSSH 2.1.0 and later
@@ -534,14 +545,15 @@ if ($sshdid =~ /OpenSSH-Windows/) {
     push @cfgarr, "AllowUsers $username";
 }
 
-push @cfgarr, 'DenyGroups';
-push @cfgarr, 'AllowGroups';
-push @cfgarr, '#';
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
 push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
 push @cfgarr, "HostKey $hstprvkeyf_config";
 if ($sshdid !~ /OpenSSH-Windows/) {
     push @cfgarr, "PidFile $pidfile_config";
+}
+if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 880)) {
+    push @cfgarr, 'HostKeyAlgorithms +ssh-rsa';
+    push @cfgarr, 'PubkeyAcceptedKeyTypes +ssh-rsa';
 }
 push @cfgarr, '#';
 push @cfgarr, "Port $port";
@@ -684,9 +696,6 @@ push @cfgarr, '#';
 #***************************************************************************
 # Options that might be supported or not in sshd OpenSSH 2.9.9 and later
 #
-if(sshd_supports_opt('AcceptEnv','')) {
-    push @cfgarr, 'AcceptEnv';
-}
 if(sshd_supports_opt('AddressFamily','any')) {
     # Address family must be specified before ListenAddress
     splice @cfgarr, 14, 0, 'AddressFamily any';
@@ -873,7 +882,6 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 #  RemoteForward                     : OpenSSH 1.2.1 and later [3]
 #  RhostsRSAAuthentication           : OpenSSH 1.2.1 and later
 #  RSAAuthentication                 : OpenSSH 1.2.1 and later
-#  SendEnv                           : OpenSSH 3.9.0 and later
 #  ServerAliveCountMax               : OpenSSH 3.8.0 and later
 #  ServerAliveInterval               : OpenSSH 3.8.0 and later
 #  SmartcardDevice                   : OpenSSH 2.9.9 and later [1][3]
@@ -1028,10 +1036,6 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum >= 370)) ||
     push @cfgarr, 'RekeyLimit 1G';
 }
 
-if(($sshid =~ /OpenSSH/) && ($sshvernum >= 390)) {
-    push @cfgarr, 'SendEnv';
-}
-
 if((($sshid =~ /OpenSSH/) && ($sshvernum >= 380)) ||
    (($sshid =~ /SunSSH/) && ($sshvernum >= 120))) {
     push @cfgarr, 'ServerAliveCountMax 3';
@@ -1122,6 +1126,9 @@ if ($sshdid =~ /OpenSSH-Windows/) {
         close(OUT);
     }
 
+    # Flush output.
+    $| = 1;
+
     # Put an "exec" in front of the command so that the child process
     # keeps this child's process ID by being tied to the spawned shell.
     exec("exec $cmd") || die "Can't exec() $cmd: $!";
@@ -1152,7 +1159,7 @@ elsif($verbose && ($rc >> 8)) {
 #***************************************************************************
 # Clean up once the server has stopped
 #
-unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f,
+unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $hstpubsha256f,
        $cliprvkeyf, $clipubkeyf, $knownhosts,
        $sshdconfig, $sshconfig, $sftpconfig);
 

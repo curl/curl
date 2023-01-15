@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2012 - 2021, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@ rem * furnished to do so, under the terms of the COPYING file.
 rem *
 rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
+rem *
+rem * SPDX-License-Identifier: curl
 rem *
 rem ***************************************************************************
 
@@ -44,33 +46,18 @@ rem ***************************************************************************
     set OS_PLATFORM=x86
   )
   if defined PROGRAMFILES(x86) (
-    set "PF=%PROGRAMFILES(x86)%"
+    rem Visual Studio was x86-only prior to 14.3
+    if /i "%~1" == "vc14.3" (
+      set "PF=%PROGRAMFILES%"
+    ) else (
+      set "PF=%PROGRAMFILES(x86)%"
+    )
     set OS_PLATFORM=x64
   )
 
 :parseArgs
   if not "%~1" == "" (
-    if /i "%~1" == "vc6" (
-      set VC_VER=6.0
-      set VC_DESC=VC6
-      set "VC_PATH=Microsoft Visual Studio\VC98"
-    ) else if /i "%~1" == "vc7" (
-      set VC_VER=7.0
-      set VC_DESC=VC7
-      set "VC_PATH=Microsoft Visual Studio .NET\Vc7"
-    ) else if /i "%~1" == "vc7.1" (
-      set VC_VER=7.1
-      set VC_DESC=VC7.1
-      set "VC_PATH=Microsoft Visual Studio .NET 2003\Vc7"
-    ) else if /i "%~1" == "vc8" (
-      set VC_VER=8.0
-      set VC_DESC=VC8
-      set "VC_PATH=Microsoft Visual Studio 8\VC"
-    ) else if /i "%~1" == "vc9" (
-      set VC_VER=9.0
-      set VC_DESC=VC9
-      set "VC_PATH=Microsoft Visual Studio 9.0\VC"
-    ) else if /i "%~1" == "vc10" (
+    if /i "%~1" == "vc10" (
       set VC_VER=10.0
       set VC_DESC=VC10
       set "VC_PATH=Microsoft Visual Studio 10.0\VC"
@@ -88,7 +75,7 @@ rem ***************************************************************************
       set "VC_PATH=Microsoft Visual Studio 14.0\VC"
     ) else if /i "%~1" == "vc14.1" (
       set VC_VER=14.1
-      set VC_DESC=VC14.1
+      set VC_DESC=VC14.10
 
       rem Determine the VC14.1 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
@@ -101,7 +88,7 @@ rem ***************************************************************************
       )
     ) else if /i "%~1" == "vc14.2" (
       set VC_VER=14.2
-      set VC_DESC=VC14.2
+      set VC_DESC=VC14.20
 
       rem Determine the VC14.2 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
@@ -111,6 +98,19 @@ rem ***************************************************************************
         set "VC_PATH=Microsoft Visual Studio\2019\Professional\VC"
       ) else (
         set "VC_PATH=Microsoft Visual Studio\2019\Community\VC"
+      )
+    ) else if /i "%~1" == "vc14.3" (
+      set VC_VER=14.3
+      set VC_DESC=VC14.30
+
+      rem Determine the VC14.3 path based on the installed edition in descending
+      rem order (Enterprise, then Professional and finally Community)
+      if exist "%PF%\Microsoft Visual Studio\2022\Enterprise\VC" (
+        set "VC_PATH=Microsoft Visual Studio\2022\Enterprise\VC"
+      ) else if exist "%PF%\Microsoft Visual Studio\2022\Professional\VC" (
+        set "VC_PATH=Microsoft Visual Studio\2022\Professional\VC"
+      ) else (
+        set "VC_PATH=Microsoft Visual Studio\2022\Community\VC"
       )
     ) else if /i "%~1%" == "x86" (
       set BUILD_PLATFORM=x86
@@ -209,17 +209,13 @@ rem ***************************************************************************
   if "%BUILD_PLATFORM%" == "x86" (
     set VCVARS_PLATFORM=x86
   ) else if "%BUILD_PLATFORM%" == "x64" (
-    if "%VC_VER%" == "6.0" goto nox64
-    if "%VC_VER%" == "7.0" goto nox64
-    if "%VC_VER%" == "7.1" goto nox64
-    if "%VC_VER%" == "8.0" set VCVARS_PLATFORM=x86_amd64
-    if "%VC_VER%" == "9.0" set VCVARS_PLATFORM=%BUILD_PLATFORM%
     if "%VC_VER%" == "10.0" set VCVARS_PLATFORM=%BUILD_PLATFORM%
     if "%VC_VER%" == "11.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "12.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "14.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "14.1" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "14.2" set VCVARS_PLATFORM=amd64
+    if "%VC_VER%" == "14.3" set VCVARS_PLATFORM=amd64
   )
 
   if exist "%START_DIR%\ms\do_ms.bat" (
@@ -232,15 +228,11 @@ rem ***************************************************************************
   echo.
   set "SAVED_PATH=%CD%"
 
-  if "%VC_VER%" == "6.0" (
-    call "%ABS_VC_PATH%\bin\vcvars32"
-  ) else if "%VC_VER%" == "7.0" (
-    call "%ABS_VC_PATH%\bin\vcvars32"
-  ) else if "%VC_VER%" == "7.1" (
-    call "%ABS_VC_PATH%\bin\vcvars32"
-  ) else if "%VC_VER%" == "14.1" (
+  if "%VC_VER%" == "14.1" (
     call "%ABS_VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
   ) else if "%VC_VER%" == "14.2" (
+    call "%ABS_VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
+  ) else if "%VC_VER%" == "14.3" (
     call "%ABS_VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
   ) else (
     call "%ABS_VC_PATH%\vcvarsall" %VCVARS_PLATFORM%
@@ -656,17 +648,13 @@ rem
   echo.
   echo Compiler:
   echo.
-  echo vc6       - Use Visual Studio 6
-  echo vc7       - Use Visual Studio .NET
-  echo vc7.1     - Use Visual Studio .NET 2003
-  echo vc8       - Use Visual Studio 2005
-  echo vc9       - Use Visual Studio 2008
   echo vc10      - Use Visual Studio 2010
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
   echo vc14      - Use Visual Studio 2015
   echo vc14.1    - Use Visual Studio 2017
   echo vc14.2    - Use Visual Studio 2019
+  echo vc14.3    - Use Visual Studio 2022
   echo.
   echo Platform:
   echo.

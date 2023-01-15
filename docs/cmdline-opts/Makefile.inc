@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 # Shared between Makefile.am and CMakeLists.txt
@@ -75,6 +77,7 @@ DPAGES = \
   fail-with-body.d \
   fail.d \
   false-start.d \
+  form-escape.d \
   form-string.d \
   form.d \
   ftp-account.d \
@@ -96,6 +99,7 @@ DPAGES = \
   header.d \
   help.d \
   hostpubmd5.d \
+  hostpubsha256.d \
   hsts.d \
   http0.9.d \
   http1.0.d \
@@ -103,12 +107,14 @@ DPAGES = \
   http2-prior-knowledge.d \
   http2.d \
   http3.d \
+  http3-only.d \
   ignore-content-length.d \
   include.d \
   insecure.d \
   interface.d \
   ipv4.d \
   ipv6.d \
+  json.d \
   junk-session-cookies.d \
   keepalive-time.d \
   key-type.d \
@@ -137,6 +143,7 @@ DPAGES = \
   next.d \
   no-alpn.d \
   no-buffer.d \
+  no-clobber.d \
   no-keepalive.d \
   no-npn.d \
   no-progress-meter.d \
@@ -180,6 +187,7 @@ DPAGES = \
   proxy-pinnedpubkey.d \
   proxy-service-name.d \
   proxy-ssl-allow-beast.d \
+  proxy-ssl-auto-client-cert.d \
   proxy-tls13-ciphers.d \
   proxy-tlsauthtype.d \
   proxy-tlspassword.d \
@@ -193,12 +201,14 @@ DPAGES = \
   quote.d \
   random-file.d \
   range.d \
+  rate.d \
   raw.d \
   referer.d \
   remote-header-name.d \
   remote-name-all.d \
   remote-name.d \
   remote-time.d \
+  remove-on-error.d \
   request-target.d \
   request.d \
   resolve.d \
@@ -223,6 +233,7 @@ DPAGES = \
   speed-limit.d \
   speed-time.d \
   ssl-allow-beast.d \
+  ssl-auto-client-cert.d \
   ssl-no-revoke.d \
   ssl-reqd.d \
   ssl-revoke-best-effort.d \
@@ -255,6 +266,7 @@ DPAGES = \
   unix-socket.d \
   upload-file.d \
   url.d \
+  url-query.d \
   use-ascii.d \
   user-agent.d \
   user.d \

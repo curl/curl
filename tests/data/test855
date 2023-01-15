@@ -34,7 +34,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-56
+8
 </errorcode>
 <protocol>
 CAPA

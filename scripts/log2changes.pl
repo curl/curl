@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 
@@ -35,6 +37,18 @@ sub nicedate {
     return $date;
 }
 
+sub printmsg {
+    my ($p, $msg)=@_;
+    while(length($msg) > 77) {
+        print $p.substr($msg, 0, 77, "")."\n";
+        $p="  ";
+    }
+    if($msg eq "") {
+        $p = "";
+    }
+    print "$p$msg\n";
+}
+
 print
 '                                  _   _ ____  _
                               ___| | | |  _ \| |
@@ -45,7 +59,6 @@ print
                                   Changelog
 ';
 
-my $line;
 my $tag;
 while(<STDIN>) {
     my $l = $_;
@@ -59,44 +72,32 @@ while(<STDIN>) {
         }
     }
     elsif($l =~ /^Author: *(.*) +</) {
-        $a = $1;
-    }
-    elsif($l =~ /^Commit: *(.*) +</) {
         $c = $1;
     }
     elsif($l =~ /^CommitDate: (.*)/) {
         $date = nicedate($1);
     }
     elsif($l =~ /^(    )(.*)/) {
-        my $extra;
+        my $pref = "  ";
         if ($tag) {
             # Version entries have a special format
             print "\nVersion " . $tag." ($date)\n";
             $oldc = "";
             $tag = "";
         }
-        if($a ne $c) {
-            $extra=sprintf("\n- [%s brought this change]\n\n  ", $a);
-        }
-        else {
-            $extra="\n- ";
-        }
         if($co ne $oldco) {
             if($c ne $oldc) {
-                print "\n$c ($date)$extra";
+                print "\n$c ($date)\n\n";
             }
             else {
-                print "$extra";
+                print "\n";
             }
-            $line =0;
+            $pref = "- ";
         }
 
         $oldco = $co;
         $oldc = $c;
         $olddate = $date;
-        if($line++) {
-            print "  ";
-        }
-        print $2."\n";
+        printmsg($pref, $2);
     }
 }

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SSH_COMPRESSION 3 "05 Aug 2017" "libcurl 7.56.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SSH_COMPRESSION \- enables compression / decompression of SSH traffic
+CURLOPT_SSH_COMPRESSION \- enable SSH compression
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_COMPRESSION, long enable);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter set to 1L to enable or 0L to disable.
 

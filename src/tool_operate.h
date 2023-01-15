@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,6 +20,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_setup.h"
 #include "tool_cb_hdr.h"
@@ -31,15 +33,13 @@ struct per_transfer {
   struct per_transfer *next;
   struct per_transfer *prev;
   struct OperationConfig *config; /* for this transfer */
+  struct curl_certinfo *certinfo;
   CURL *curl;
   long retry_numretries;
   long retry_sleep_default;
   long retry_sleep;
+  struct timeval start; /* start of this transfer */
   struct timeval retrystart;
-  bool metalink; /* nonzero for metalink download. */
-  bool metalink_next_res;
-  struct metalinkfile *mlfile;
-  struct metalink_resource *mlres;
   char *this_url;
   unsigned int urlnum; /* the index of the given URL */
   char *outfile;
@@ -54,12 +54,14 @@ struct per_transfer {
   struct HdrCbData hdrcbdata;
   long num_headers;
   bool was_last_header_empty;
-  char errorbuffer[CURL_ERROR_SIZE];
 
   bool added; /* set TRUE when added to the multi handle */
   time_t startat; /* when doing parallel transfers, this is a retry transfer
                      that has been set to sleep until this time before it
                      should get started (again) */
+  bool abort; /* when doing parallel transfers and this is TRUE then a critical
+                 error (eg --fail-early) has occurred in another transfer and
+                 this transfer will be aborted in the progress callback */
 
   /* for parallel progress bar */
   curl_off_t dltotal;
@@ -70,12 +72,13 @@ struct per_transfer {
   bool ultotal_added;
 
   /* NULL or malloced */
-  char *separator_err;
-  char *separator;
   char *uploadfile;
+  char *errorbuffer; /* alloced and assigned while this is used for a
+                        transfer */
 };
 
 CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[]);
+void single_transfer_cleanup(struct OperationConfig *config);
 
 extern struct per_transfer *transfers; /* first node */
 

@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+conn-reuse
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 6
+
+-foo-
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+
+# This created a memory leak in 7.83.1 and earlier
+<name>
+set CURLOPT_XOAUTH2_BEARER and do connection reuse
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Bearer c4e448d652a961fda0ab64f882c8c161d5985f805d45d80c9ddca1
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Bearer c4e448d652a961fda0ab64f882c8c161d5985f805d45d80c9ddca1
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

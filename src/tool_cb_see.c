@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -100,6 +102,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 /* 64-bit lseek-like function unavailable */
 #    define _lseeki64(hnd,ofs,whence) _lseek(hnd,ofs,whence)
 #  else
+#    undef _lseeki64
 #    define _lseeki64(hnd,ofs,whence) _lseek64(hnd,ofs,whence)
 #  endif
 #endif

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -98,22 +100,6 @@
 #  define CURL_SUFFIX_CURL_OFF_TU    UL
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
-#elif defined(__WATCOMC__)
-#  if defined(__386__)
-#    define CURL_TYPEOF_CURL_OFF_T     __int64
-#    define CURL_FORMAT_CURL_OFF_T     "I64d"
-#    define CURL_FORMAT_CURL_OFF_TU    "I64u"
-#    define CURL_SUFFIX_CURL_OFF_T     i64
-#    define CURL_SUFFIX_CURL_OFF_TU    ui64
-#  else
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
-#  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
-
 #elif defined(__POCC__)
 #  if (__POCC__ < 280)
 #    define CURL_TYPEOF_CURL_OFF_T     long
@@ -137,7 +123,7 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
 #elif defined(__LCC__)
-#  if defined(__e2k__) /* MCST eLbrus C Compiler */
+#  if defined(__MCST__) /* MCST eLbrus Compiler Collection */
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"
@@ -178,13 +164,33 @@
 #  endif
 #  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
-#elif defined(__MWERKS__)
+#elif defined(macintosh)
+#  include <ConditionalMacros.h>
+#  if TYPE_LONGLONG
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#  else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
+#  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
+
+#elif defined(__TANDEM)
+# if ! defined(__LP64)
+   /* Required for 32-bit NonStop builds only. */
 #  define CURL_TYPEOF_CURL_OFF_T     long long
 #  define CURL_FORMAT_CURL_OFF_T     "lld"
 #  define CURL_FORMAT_CURL_OFF_TU    "llu"
 #  define CURL_SUFFIX_CURL_OFF_T     LL
 #  define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
+# endif
 
 #elif defined(_WIN32_WCE)
 #  define CURL_TYPEOF_CURL_OFF_T     __int64

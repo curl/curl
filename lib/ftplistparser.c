@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -203,9 +205,9 @@ CURLcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data)
 
 #define FTP_LP_MALFORMATED_PERM 0x01000000
 
-static int ftp_pl_get_permission(const char *str)
+static unsigned int ftp_pl_get_permission(const char *str)
 {
-  int permissions = 0;
+  unsigned int permissions = 0;
   /* USER */
   if(str[0] == 'r')
     permissions |= 1 << 8;
@@ -332,7 +334,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
   struct ftp_parselist_data *parser = ftpwc->parser;
   struct fileinfo *infop;
   struct curl_fileinfo *finfo;
-  unsigned long i = 0;
+  size_t i = 0;
   CURLcode result;
   size_t retsize = bufflen;
 
@@ -420,11 +422,11 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
               char *endptr = finfo->b_data + 6;
               /* here we can deal with directory size, pass the leading
                  whitespace and then the digits */
-              while(ISSPACE(*endptr))
+              while(ISBLANK(*endptr))
                 endptr++;
               while(ISDIGIT(*endptr))
                 endptr++;
-              if(*endptr != 0) {
+              if(*endptr) {
                 parser->error = CURLE_FTP_BAD_FILE_LIST;
                 goto fail;
               }
@@ -892,7 +894,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         parser->item_length++;
         switch(parser->state.NT.sub.time) {
         case PL_WINNT_TIME_PRESPACE:
-          if(!ISSPACE(c)) {
+          if(!ISBLANK(c)) {
             parser->state.NT.sub.time = PL_WINNT_TIME_TIME;
           }
           break;

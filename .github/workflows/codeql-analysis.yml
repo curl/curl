@@ -1,35 +1,49 @@
-name: CI
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: CodeQL
 
 on:
-  # Trigger the workflow on push or pull requests, but only for the
-  # master branch
   push:
     branches:
-      - master
-      - '*/ci'
+    - master
+    - '*/ci'
+    paths-ignore:
+    - '**/*.md'
   pull_request:
     branches:
-      - master
+    - master
+    paths-ignore:
+    - '**/*.md'
   schedule:
     - cron: '0 0 * * 4'
+
+concurrency:
+  group: ${{ github.workflow }}
+
+permissions: {}
 
 jobs:
   codeql:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: cpp
+        queries: security-extended
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
     - name: Autobuild
-      uses: github/codeql-action/autobuild@v1
+      uses: github/codeql-action/autobuild@v2
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
@@ -43,4 +57,4 @@ jobs:
     #   make release
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2

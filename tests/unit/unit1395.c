@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,10 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "dotdot.h"
+/* copied from urlapi.c */
+extern char *dedotdotify(const char *input, size_t clen);
 
 #include "memdebug.h"
 
@@ -75,7 +78,7 @@ UNITTEST_START
   };
 
   for(i = 0; i < sizeof(pairs)/sizeof(pairs[0]); i++) {
-    char *out = Curl_dedotdotify(pairs[i].input);
+    char *out = dedotdotify(pairs[i].input, strlen(pairs[i].input));
     abort_unless(out != NULL, "returned NULL!");
 
     if(strcmp(out, pairs[i].output)) {

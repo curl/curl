@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,20 +18,25 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE 3 "4 Nov 2014" "libcurl 7.39.0" "curl_multi_setopt options"
 .SH NAME
 CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE \- size threshold for pipelining penalty
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, long size);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE,
+                            long size);
+.fi
 .SH DESCRIPTION
 No function since pipelining was removed in 7.62.0.
 
-Pass a long with a \fBsize\fP in bytes. If a pipelined connection is currently
-processing a request with a Content-Length larger than this
+Pass a long with a \fBsize\fP in bytes. If a transfer in a pipeline is
+currently processing a request with a Content-Length larger than this
 \fICURLMOPT_CONTENT_LENGTH_PENALTY_SIZE(3)\fP, that pipeline will then not be
 considered for additional requests, even if it is shorter than
 \fICURLMOPT_MAX_PIPELINE_LENGTH(3)\fP.

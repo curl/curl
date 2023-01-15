@@ -54,7 +54,7 @@ Accept: */*
 </protocol>
 <stdout>
 -foo-
-Max: 100008
+Max = 100009
 </stdout>
 </verify>
 </testcase>

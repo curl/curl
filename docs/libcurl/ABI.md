@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 ABI - Application Binary Interface
 ==================================
 
@@ -11,20 +17,20 @@ ABI - Application Binary Interface
 
  A libcurl upgrade does not break the ABI or change established and documented
  behavior. Your application can remain using libcurl just as before, only with
- less bugs and possibly with added new features.
+ fewer bugs and possibly with added new features.
 
 ## Version Numbers
 
  In libcurl land, you cannot tell by the libcurl version number if that
  libcurl is binary compatible or not with another libcurl version. As a rule,
- we don't break the ABI so you can *always* upgrade to a later version without
+ we do not break the ABI so you can *always* upgrade to a later version without
  any loss or change in functionality.
 
-## Soname Bumps
+## SONAME Bumps
 
  Whenever there are changes done to the library that will cause an ABI
  breakage, that may require your application to get attention or possibly be
- changed to adhere to new things, we will bump the soname. Then the library
+ changed to adhere to new things, we will bump the SONAME. Then the library
  will get a different output name and thus can in fact be installed in
  parallel with an older installed lib (on most systems). Thus, old
  applications built against the previous ABI version will remain working and
@@ -33,22 +39,22 @@ ABI - Application Binary Interface
  During the first seven years of libcurl releases, there have only been four
  ABI breakages.
 
- We are determined to bump the SONAME as rarely as possible.  Ideally, we
- never do it again.
+ We are determined to bump the SONAME as rarely as possible. Ideally, we never
+ do it again.
 
 ## Downgrades
 
- Going to an older libcurl version from one you're currently using can be a
+ Going to an older libcurl version from one you are currently using can be a
  tricky thing. Mostly we add features and options to newer libcurls as that
- won't break ABI or hamper existing applications. This has the implication
+ will not break ABI or hamper existing applications. This has the implication
  that going backwards may get you in a situation where you pick a libcurl that
- doesn't support the options your application needs. Or possibly you even
+ does not support the options your application needs. Or possibly you even
  downgrade so far so you cross an ABI break border and thus a different
- soname, and then your application may need to adapt to the modified ABI.
+ SONAME, and then your application may need to adapt to the modified ABI.
 
 ## History
 
- The previous major library soname number bumps (breaking backwards
+ The previous major library SONAME number bumps (breaking backwards
  compatibility) happened the following times:
 
  0 - libcurl 7.1,   August 2000

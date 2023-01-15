@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* File: curl_crtl_init.c
@@ -37,7 +39,7 @@
  * On VMS versions that are too old to use the feature setting API, this
  * module falls back to using logical names.
  *
- * Copyright 2013, John Malmberg
+ * Copyright (C) John Malmberg
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -128,7 +130,7 @@ static int sys_trnlnm
 
     status = SYS$TRNLNM(&attr, &table_dsc, &name_dsc, 0, itlst);
 
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if($VMS_STATUS_SUCCESS(status)) {
 
          /* Null terminate and return the string */
         /*--------------------------------------*/
@@ -190,7 +192,7 @@ static void set_feature_default(const char *name, int value)
 
     index = decc$feature_get_index(name);
 
-    if (index > 0)
+    if(index > 0)
         decc$feature_set_value (index, 0, value);
 }
 #endif
@@ -203,7 +205,7 @@ static void set_features(void)
 
     status = sys_trnlnm("GNV$UNIX_SHELL",
                         unix_shell_name, sizeof unix_shell_name -1);
-    if (!$VMS_STATUS_SUCCESS(status)) {
+    if(!$VMS_STATUS_SUCCESS(status)) {
         use_unix_settings = 0;
     }
 
@@ -247,7 +249,7 @@ static void set_features(void)
     /* Fix mv aa.bb aa  */
     set_feature_default ("DECC$RENAME_NO_INHERIT", ENABLE);
 
-    if (use_unix_settings) {
+    if(use_unix_settings) {
 
         /* POSIX requires that open files be able to be removed */
         set_feature_default ("DECC$ALLOW_REMOVE_OPEN_FILES", ENABLE);

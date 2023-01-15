@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,22 +18,27 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PROXY_SSL_VERIFYPEER 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_PROXY_SSL_VERIFYPEER \- verify the proxy's SSL certificate
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_VERIFYPEER, long verify);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_VERIFYPEER,
+                          long verify);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter set to 1L to enable or 0L to disable.
 
 This option tells curl to verifies the authenticity of the HTTPS proxy's
-certificate. A value of 1 means curl verifies; 0 (zero) means it doesn't.
+certificate. A value of 1 means curl verifies; 0 (zero) means it does not.
 
-This is the proxy version of \fICURLOPT_SSL_VERIFYPEER(3)\fP that's used for
+This is the proxy version of \fICURLOPT_SSL_VERIFYPEER(3)\fP that is used for
 ordinary HTTPS servers.
 
 When negotiating a TLS or SSL connection, the server sends a certificate
@@ -52,7 +57,7 @@ the option is zero, the peer certificate verification succeeds regardless.
 Authenticating the certificate is not enough to be sure about the server. You
 typically also want to ensure that the server is the server you mean to be
 talking to.  Use \fICURLOPT_PROXY_SSL_VERIFYHOST(3)\fP for that. The check
-that the host name in the certificate is valid for the host name you're
+that the host name in the certificate is valid for the host name you are
 connecting to is done independently of the
 \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP option.
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "test.h"
@@ -37,7 +39,7 @@ int test(char *URL)
   curl_easy_setopt(curl, CURLOPT_CURLU, curlu);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  /* set a port number that makes this reqeuest fail */
+  /* set a port number that makes this request fail */
   curl_easy_setopt(curl, CURLOPT_PORT, 1L);
   curl_code = curl_easy_perform(curl);
   if(!curl_code)

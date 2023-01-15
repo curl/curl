@@ -43,10 +43,10 @@ POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 133
+Content-Length: 119
 Content-Type: application/x-www-form-urlencoded
 
-my%20name%20is%20moo%5B%5D&y e s=s_i_r&v_alue=content%20to%20_%3F%21%23%24%27%7C%3C%3E%0A&content%20to%20_%3F%21%23%24%27%7C%3C%3E%0A
+my+name+is+moo%5B%5D&y e s=s_i_r&v_alue=content+to+_%3F%21%23%24%27%7C%3C%3E%0A&content+to+_%3F%21%23%24%27%7C%3C%3E%0A
 </protocol>
 </verify>
 </testcase>

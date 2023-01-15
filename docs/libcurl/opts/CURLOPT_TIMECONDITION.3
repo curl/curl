@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_TIMECONDITION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_TIMECONDITION \- select condition for a time request
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMECONDITION, long cond);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter. This defines how the \fICURLOPT_TIMEVALUE(3)\fP time
 value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
@@ -51,7 +55,8 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_TIMEVALUE, 1577833200L);
 
   /* If-Modified-Since the above time stamp */
-  curl_easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+  curl_easy_setopt(curl, CURLOPT_TIMECONDITION,
+                   (long)CURL_TIMECOND_IFMODSINCE);
 
   /* Perform the request */
   curl_easy_perform(curl);

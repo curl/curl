@@ -13,7 +13,7 @@ inner sanctum.
 To build in environments that support configure, after having extracted
 everything from git, do this:
 
-./buildconf
+autoreconf -fi
 ./configure
 make
 
@@ -28,8 +28,8 @@ buildconf.bat
 
 REQUIREMENTS
 
- For buildconf (not buildconf.bat) to work, you need the following software
-installed:
+For autoreconf and configure (not buildconf.bat) to work, you need the
+following software installed:
 
  o autoconf 2.57  (or later)
  o automake 1.7   (or later)

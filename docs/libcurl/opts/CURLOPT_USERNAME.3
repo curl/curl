@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -39,7 +41,7 @@ authentication. You should not use this option together with the (older)
 
 When using Kerberos V5 authentication with a Windows based server, you should
 include the domain name in order for the server to successfully obtain a
-Kerberos Ticket. If you don't then the initial part of the authentication
+Kerberos Ticket. If you do not then the initial part of the authentication
 handshake may fail.
 
 When using NTLM, the user name can be specified simply as the user name

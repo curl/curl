@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 #  Project                     ___| | | |  _ \| |
@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2017 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -19,10 +19,12 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 """Server for testing SMB"""
 
-from __future__ import absolute_import, division, print_function
-# NOTE: the impacket configuration is not unicode_literals compatible!
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import argparse
 import logging
@@ -201,7 +203,8 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
             # Get this file's information
             resp_info, error_code = imp_smbserver.queryPathInformation(
-                "", full_path, level=imp_smb.SMB_QUERY_FILE_ALL_INFO)
+                os.path.dirname(full_path), os.path.basename(full_path),
+                level=imp_smb.SMB_QUERY_FILE_ALL_INFO)
 
             if error_code != STATUS_SUCCESS:
                 raise SmbException(error_code, "Failed to query path info")
@@ -390,6 +393,9 @@ if __name__ == '__main__':
     except Exception as e:
         log.exception(e)
         rc = ScriptRC.EXCEPTION
+
+    if options.pidfile and os.path.isfile(options.pidfile):
+        os.unlink(options.pidfile)
 
     log.info("[SMB] Returning %d", rc)
     sys.exit(rc)

@@ -1,0 +1,111 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP FORMPOST
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 10
+
+blablabla
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+Mime
+</features>
+<server>
+http
+</server>
+ <name>
+Multipart formposting with backslash-escaping of name= and filename=
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --form-escape -F name=daniel -F tool=curl --form-string "str1=@literal" --form-string "str2=<verbatim;type=xxx/yyy" -F "file=@log/test%TESTNUMBER.txt;type=moo/foobar;filename=fakerfile" -F file2=@log/test%TESTNUMBER.txt -F "file3=@\"log/test%TESTNUMBER.txt\";type=mo/foo;filename=\"f\\\\\\\\ak\\\\\\er,\\\\an\\d;.t\\\"xt\"" -F 'file4=@"log/test%TESTNUMBER.txt"; filename="A\\AA\"\"\\\"ZZZ"'
+</command>
+# We create this file before the command is invoked!
+<file name="log/test%TESTNUMBER.txt">
+foo bar
+This is a bar foo
+bar
+foo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^(Content-Type: multipart/form-data;|-------).*
+</strip>
+<protocol>
+POST /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 1186
+Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="name"
+
+daniel
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="tool"
+
+curl
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="str1"
+
+@literal
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="str2"
+
+<verbatim;type=xxx/yyy
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file"; filename="fakerfile"
+Content-Type: moo/foobar
+
+foo bar
+This is a bar foo
+bar
+foo
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER.txt"
+Content-Type: text/plain
+
+foo bar
+This is a bar foo
+bar
+foo
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file3"; filename="f\\\\ak\\\\er,\\an\\d;.t\"xt"
+Content-Type: mo/foo
+
+foo bar
+This is a bar foo
+bar
+foo
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file4"; filename="A\\AA\"\"\\\"ZZZ"
+Content-Type: text/plain
+
+foo bar
+This is a bar foo
+bar
+foo
+
+------------------------------24e78000bd32--
+</protocol>
+</verify>
+</testcase>

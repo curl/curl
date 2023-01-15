@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -41,11 +43,11 @@ struct tool_mime {
   struct tool_mime *parent;     /* Parent item. */
   struct tool_mime *prev;       /* Previous sibling (reverse order link). */
   /* Common fields. */
-  const char *data;             /* Actual data or data filename. */
-  const char *name;             /* Part name. */
-  const char *filename;         /* Part's filename. */
-  const char *type;             /* Part's mime type. */
-  const char *encoder;          /* Part's requested encoding. */
+  char *data;                   /* Actual data or data filename. */
+  char *name;                   /* Part name. */
+  char *filename;               /* Part's filename. */
+  char *type;                   /* Part's mime type. */
+  char *encoder;                /* Part's requested encoding. */
   struct curl_slist *headers;   /* User-defined headers. */
   /* TOOLMIME_PARTS fields. */
   struct tool_mime *subparts;   /* Part's subparts. */

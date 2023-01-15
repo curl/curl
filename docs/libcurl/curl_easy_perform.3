@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,23 +18,26 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_easy_perform 3 "5 Mar 2001" "libcurl 7.7" "libcurl Manual"
 .SH NAME
 curl_easy_perform - perform a blocking file transfer
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_easy_perform(CURL *" easy_handle ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_perform(CURL *easy_handle);
+.fi
 .SH DESCRIPTION
 Invoke this function after \fIcurl_easy_init(3)\fP and all the
-\fIcurl_easy_setopt(3)\fP calls are made, and will perform the transfer as
+\fIcurl_easy_setopt(3)\fP calls are made, and it performs the transfer as
 described in the options. It must be called with the same \fBeasy_handle\fP as
 input as the \fIcurl_easy_init(3)\fP call returned.
 
 \fIcurl_easy_perform(3)\fP performs the entire request in a blocking manner
-and returns when done, or if it failed. For non-blocking behavior, see
+and returns when done, or earlier if it fails. For non-blocking behavior, see
 \fIcurl_multi_perform(3)\fP.
 
 You can do any amount of calls to \fIcurl_easy_perform(3)\fP while using the
@@ -50,14 +53,14 @@ same \fBeasy_handle\fP. Let the function return first before invoking it
 another time. If you want parallel transfers, you must use several curl
 easy_handles.
 
+A network transfer moves data to a peer or from a peer. An application tells
+libcurl how to receive data by setting the \fICURLOPT_WRITEFUNCTION(3)\fP and
+\fICURLOPT_WRITEDATA(3)\fP options. To tell libcurl what data to send, there
+are a few more alternatives but two common ones are
+\fICURLOPT_READFUNCTION(3)\fP and \fICURLOPT_POSTFIELDS(3)\fP.
+
 While the \fBeasy_handle\fP is added to a multi handle, it cannot be used by
 \fIcurl_easy_perform(3)\fP.
-.SH RETURN VALUE
-CURLE_OK (0) means everything was ok, non-zero means an error occurred as
-.I <curl/curl.h>
-defines - see \fIlibcurl-errors(3)\fP. If the \fICURLOPT_ERRORBUFFER(3)\fP was
-set with \fIcurl_easy_setopt(3)\fP there will be a readable error message in
-the error buffer when non-zero is returned.
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -68,6 +71,14 @@ if(curl) {
   curl_easy_cleanup(curl);
 }
 .fi
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+CURLE_OK (0) means everything was OK, non-zero means an error occurred as
+.I <curl/curl.h>
+defines - see \fIlibcurl-errors(3)\fP. If the \fICURLOPT_ERRORBUFFER(3)\fP was
+set with \fIcurl_easy_setopt(3)\fP there will be a readable error message in
+the error buffer when non-zero is returned.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_setopt "(3), "
 .BR curl_multi_add_handle "(3), " curl_multi_perform "(3), "

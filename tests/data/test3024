@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+PEM certificate
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 7
+
+MooMoo
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+Schannel
+</features>
+<server>
+https Server-localhost-lastSAN-sv.pem
+</server>
+<name>
+HTTPS GET to localhost, last subject alt name matches, CN does not match (Schannel variant)
+</name>
+<setenv>
+# This test is pointless if we're not using the schannel backend
+CURL_SSL_BACKEND=schannel
+</setenv>
+<command>
+--cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
+</command>
+# Ensure that we're running on localhost because we're checking the host name
+<precheck>
+perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: localhost:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

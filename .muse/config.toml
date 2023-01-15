@@ -1,3 +1,0 @@
-ignore = [ "DEAD_STORE" ]
-build = "make"
-setup = ".muse/setup.sh"

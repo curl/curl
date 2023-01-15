@@ -1,7 +1,12 @@
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: fail-early
 Help: Fail on first transfer error, do not continue
 Added: 7.52.0
 Category: curl
+Example: --fail-early $URL https://two.example
+See-also: fail fail-with-body
+Multi: boolean
 ---
 Fail and exit on the first detected transfer error.
 

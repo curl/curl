@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,22 +18,26 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_NOBODY 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_NOBODY \- do the download request without getting the body
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOBODY, long opt);
+.fi
 .SH DESCRIPTION
 A long parameter set to 1 tells libcurl to not include the body-part in the
 output when doing what would otherwise be a download. For HTTP(S), this makes
 libcurl do a HEAD request. For most other protocols it means just not asking
 to transfer the body data.
 
-For HTTP operations when \fICURLOPT_NOBODY(3)\fP has been set, unsetting the
+For HTTP operations when \fICURLOPT_NOBODY(3)\fP has been set, disabling this
 option (with 0) will make it a GET again - only if the method is still set to
 be HEAD. The proper way to get back to a GET request is to set
 \fICURLOPT_HTTPGET(3)\fP and for other methods, use the POST or UPLOAD

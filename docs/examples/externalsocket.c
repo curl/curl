@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,10 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /* <DESC>
- * An example demonstrating how an application can pass in a custom
- * socket to libcurl to use. This example also handles the connect itself.
+ * Pass in a custom socket for libcurl to use.
  * </DESC>
  */
 #include <stdio.h>
@@ -97,8 +98,8 @@ int main(void)
 
 #ifdef WIN32
   WSADATA wsaData;
-  int initwsa = WSAStartup(MAKEWORD(2, 0), &wsaData);
-  if(initwsa != 0) {
+  int initwsa = WSAStartup(MAKEWORD(2, 2), &wsaData);
+  if(initwsa) {
     printf("WSAStartup failed: %d\n", initwsa);
     return 1;
   }

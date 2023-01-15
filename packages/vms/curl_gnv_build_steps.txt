@@ -1,6 +1,6 @@
 From File: curl_gnv_build_steps.txt
 
- Copyright 2009 - 2020, John Malmberg
+ Copyright (C) John Malmberg
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -13,6 +13,8 @@ From File: curl_gnv_build_steps.txt
  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
  OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+ SPDX-License-Identifier: ISC
 
 Currently building Curl using GNV takes longer than building Curl via DCL.
 The GNV procedure actually uses the same configure and makefiles that
@@ -249,7 +251,7 @@ branding the PCSI kit based on who is making the kit.
       step of backing up the source files will probably hang or fail.
 
       You need to copy the source files to VMS mounted disks and create
-      logical names SRC_ROOT1 and VMS_ROOT1 to work around this to to
+      logical names SRC_ROOT1 and VMS_ROOT1 to work around this to
       reference local disks.  Make sure src_root1:[000000] and
       vms_root1:[000000] exist and can be written to.
 

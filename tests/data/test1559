@@ -2,6 +2,7 @@
 <info>
 <keywords>
 CURLOPT_URL
+verbose logs
 </keywords>
 </info>
 
@@ -35,9 +36,9 @@ Set excessive URL lengths
 <stdout>
 CURLOPT_URL 10000000 bytes URL == 43
 CURLOPT_POSTFIELDS 10000000 bytes data == 0
-CURLUPART_URL 10000000 bytes URL == 3
-CURLUPART_SCHEME 10000000 bytes scheme == 3
-CURLUPART_USER 10000000 bytes user == 3
+CURLUPART_URL 10000000 bytes URL == 3 (Malformed input to a URL function)
+CURLUPART_SCHEME 10000000 bytes scheme == 27 (Bad scheme)
+CURLUPART_USER 10000000 bytes user == 3 (Malformed input to a URL function)
 </stdout>
 </verify>
 

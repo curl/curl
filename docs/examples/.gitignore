@@ -1,3 +1,7 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
 10-at-a-time
 altsvc
 anyauthput
@@ -16,6 +20,7 @@ ftpsget
 ftpupload
 ftpuploadfrommem
 ftpuploadresume
+getreferrer
 getinfo
 getinmemory
 getredirect
@@ -49,6 +54,7 @@ multi-app
 multi-debugcallback
 multi-double
 multi-formadd
+multi-legacy
 multi-poll
 multi-post
 multi-single

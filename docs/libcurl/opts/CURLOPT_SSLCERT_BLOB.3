@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,20 +18,26 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SSLCERT_BLOB 3 "24 Jun 2020" "libcurl 7.71.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_SSLCERT_BLOB \- SSL client certificate from memory blob
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERT_BLOB, struct curl_blob *stblob);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERT_BLOB,
+                          struct curl_blob *stblob);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a curl_blob structure, which contains (pointer and size) a
 client certificate. The format must be "P12" on Secure Transport or
-Schannel. The format must be "P12" or "PEM" on OpenSSL. The string "P12" or
-"PEM" must be specified with \fICURLOPT_SSLCERTTYPE(3)\fP.
+Schannel. The format must be "P12" or "PEM" on OpenSSL. The format must be
+"DER" or "PEM" on mbedTLS. The format must be specified with
+\fICURLOPT_SSLCERTTYPE(3)\fP.
 
 If the blob is initialized with the flags member of struct curl_blob set to
 CURL_BLOB_COPY, the application does not have to keep the buffer around after
@@ -60,8 +66,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in libcurl 7.71.0. This option is supported by the OpenSSL, Secure
-Transport and Schannel backends.
+Added in 7.71.0. This option is supported by the OpenSSL, Secure Transport,
+Schannel and mbedTLS (since 7.78.0) backends.
 .SH RETURN VALUE
 Returns CURLE_OK if TLS enabled, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

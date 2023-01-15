@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HAPROXYPROTOCOL 3 "5 Feb 2018" "libcurl 7.60.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_HAPROXYPROTOCOL \- send HAProxy PROXY protocol v1 header
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPROXYPROTOCOL,
                           long haproxy_protocol);
+.fi
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to send an HAProxy PROXY
 protocol v1 header at beginning of the connection. The default action is not to
@@ -55,3 +59,5 @@ if(curl) {
 Along with HTTP. Added in 7.60.0.
 .SH RETURN VALUE
 Returns CURLE_OK if HTTP is enabled, and CURLE_UNKNOWN_OPTION if not.
+.SH SEE ALSO
+.BR CURLOPT_PROXY "(3), "

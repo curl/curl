@@ -12,7 +12,7 @@ HTTP Digest auth
 <data>
 HTTP/1.1 401 authentication please swsbounce
 Server: Microsoft-IIS/6.0
-WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", algorithm="SHA-512-256", userhash=true
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", algorithm="SHA-256", userhash=true
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 0
 
@@ -29,7 +29,7 @@ ok
 <datacheck>
 HTTP/1.1 401 authentication please swsbounce
 Server: Microsoft-IIS/6.0
-WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", algorithm="SHA-512-256", userhash=true
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", algorithm="SHA-256", userhash=true
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 0
 
@@ -54,7 +54,7 @@ http
 crypto
 </features>
 <name>
-HTTP POST --digest with SHA-512-256, userhash=true and user-specified Content-Length header
+HTTP POST --digest with SHA-256, userhash=true and user-specified Content-Length header
 </name>
 # This test is to ensure 'Content-Length: 0' is sent while negotiating auth
 # even when there is a user-specified Content-Length header.
@@ -76,7 +76,7 @@ Content-Type: application/x-www-form-urlencoded
 
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="fddc3bc7b753b73ab0848fd83cb20cbbca971258eb8d20c941dd5e0b010d66be", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="ff13d977110a471f30de75e747976e4de78d7a3d2425cd23ff46e67f4bc9ead7", algorithm=SHA-512-256, userhash=true
+Authorization: Digest username="fddc3bc7b753b73ab0848fd83cb20cbbca971258eb8d20c941dd5e0b010d66be", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="9a29f1dab407e62daa7121185f9f12db6177415e03f35d9a881550095a83378d", algorithm=SHA-256, userhash=true
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 11

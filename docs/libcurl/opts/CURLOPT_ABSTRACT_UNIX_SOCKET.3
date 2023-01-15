@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,40 +18,46 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_ABSTRACT_UNIX_SOCKET 3 "08 Jan 2017" "libcurl 7.53.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_ABSTRACT_UNIX_SOCKET \- set an abstract Unix domain socket
+CURLOPT_ABSTRACT_UNIX_SOCKET \- abstract Unix domain socket
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ABSTRACT_UNIX_SOCKET, char *path);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ABSTRACT_UNIX_SOCKET,
+                          char *path);
+.fi
 .SH DESCRIPTION
-Enables the use of an abstract Unix domain socket instead of establishing a TCP
-connection to a host. The parameter should be a char * to a null-terminated string
-holding the path of the socket. The path will be set to \fIpath\fP prefixed by a
-NULL byte (this is the convention for abstract sockets, however it should be stressed
-that the path passed to this function should not contain a leading NULL).
+Enables the use of an abstract Unix domain socket instead of establishing a
+TCP connection to a host. The parameter should be a char * to a
+null-terminated string holding the path of the socket. The path will be set to
+\fIpath\fP prefixed by a NULL byte (this is the convention for abstract
+sockets, however it should be stressed that the path passed to this function
+should not contain a leading NULL).
 
-On non-supporting platforms, the abstract address will be interpreted as an empty
-string and fail gracefully, generating a run-time error.
+On non-supporting platforms, the abstract address will be interpreted as an
+empty string and fail gracefully, generating a runtime error.
 
-This option shares the same semantics as
-.BR CURLOPT_UNIX_SOCKET_PATH "(3)
-in which documentation more details can be found. Internally, these two options share
-the same storage and therefore only one of them can be set per handle.
-
+This option shares the same semantics as \fICURLOPT_UNIX_SOCKET_PATH(3)\fP in
+which documentation more details can be found. Internally, these two options
+share the same storage and therefore only one of them can be set per handle.
 .SH DEFAULT
 Default is NULL.
+.SH PROTOCOLS
+All
 .SH EXAMPLE
 .nf
-    curl_easy_setopt(curl_handle, CURLOPT_ABSTRACT_UNIX_SOCKET, "/tmp/foo.sock");
-    curl_easy_setopt(curl_handle, CURLOPT_URL, "http://localhost/");
+  curl_easy_setopt(curl_handle, CURLOPT_ABSTRACT_UNIX_SOCKET, "/tmp/foo.sock");
+  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://localhost/");
 .fi
 
 .SH AVAILABILITY
-Since 7.53.0.
+Added in 7.53.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

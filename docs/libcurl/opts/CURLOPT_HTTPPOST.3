@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,11 +18,13 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HTTPPOST 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_HTTPPOST \- specify the multipart formpost content
+CURLOPT_HTTPPOST \- multipart formpost content
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -30,10 +32,12 @@ CURLOPT_HTTPPOST \- specify the multipart formpost content
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPPOST,
                           struct curl_httppost *formpost);
 .SH DESCRIPTION
-Tells libcurl you want a multipart/formdata HTTP POST to be made and you
+\fBThis option is deprecated.\fP Use \fICURLOPT_MIMEPOST(3)\fP instead.
+
+Tells libcurl you want a \fBmultipart/formdata\fP HTTP POST to be made and you
 instruct what data to pass on to the server in the \fIformpost\fP argument.
-Pass a pointer to a linked list of curl_httppost structs as parameter.  The
-easiest way to create such a list, is to use \fIcurl_formadd(3)\fP as
+Pass a pointer to a linked list of \fIcurl_httppost\fP structs as parameter.
+The easiest way to create such a list, is to use \fIcurl_formadd(3)\fP as
 documented. The data in this list must remain intact as long as the curl
 transfer is alive and is using it.
 
@@ -42,9 +46,6 @@ You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP.
 
 When setting \fICURLOPT_HTTPPOST(3)\fP, it will automatically set
 \fICURLOPT_NOBODY(3)\fP to 0.
-
-This option is deprecated! Do not use it. Use \fICURLOPT_MIMEPOST(3)\fP
-instead after having prepared mime data.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

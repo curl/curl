@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -42,19 +44,8 @@
 #include <inet.h>
 #endif
 
-#if defined(USE_THREADS_POSIX)
-#  ifdef HAVE_PTHREAD_H
-#    include <pthread.h>
-#  endif
-#elif defined(USE_THREADS_WIN32)
-#  ifdef HAVE_PROCESS_H
-#    include <process.h>
-#  endif
-#endif
-
-#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
-#undef in_addr_t
-#define in_addr_t unsigned long
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#  include <pthread.h>
 #endif
 
 #ifdef HAVE_GETADDRINFO
@@ -68,13 +59,11 @@
 #include "hostip.h"
 #include "hash.h"
 #include "share.h"
-#include "strerror.h"
 #include "url.h"
 #include "multiif.h"
 #include "inet_ntop.h"
 #include "curl_threads.h"
 #include "connect.h"
-#include "socketpair.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -238,7 +227,7 @@ int init_thread_sync_data(struct thread_data *td,
 #endif
 
   tsd->mtx = malloc(sizeof(curl_mutex_t));
-  if(tsd->mtx == NULL)
+  if(!tsd->mtx)
     goto err_exit;
 
   Curl_mutex_init(tsd->mtx);
@@ -263,23 +252,28 @@ int init_thread_sync_data(struct thread_data *td,
   return 1;
 
  err_exit:
-  /* Memory allocation failed */
+#ifndef CURL_DISABLE_SOCKETPAIR
+  if(tsd->sock_pair[0] != CURL_SOCKET_BAD) {
+    sclose(tsd->sock_pair[0]);
+    tsd->sock_pair[0] = CURL_SOCKET_BAD;
+  }
+#endif
   destroy_thread_sync_data(tsd);
   return 0;
 }
 
-static int getaddrinfo_complete(struct Curl_easy *data)
+static CURLcode getaddrinfo_complete(struct Curl_easy *data)
 {
   struct thread_sync_data *tsd = conn_thread_sync_data(data);
-  int rc;
+  CURLcode result;
 
-  rc = Curl_addrinfo_callback(data, tsd->sock_error, tsd->res);
+  result = Curl_addrinfo_callback(data, tsd->sock_error, tsd->res);
   /* The tsd->res structure has been copied to async.dns and perhaps the DNS
      cache.  Set our copy to NULL so destroy_thread_sync_data doesn't free it.
   */
   tsd->res = NULL;
 
-  return rc;
+  return result;
 }
 
 
@@ -305,7 +299,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
 
   rc = Curl_getaddrinfo_ex(tsd->hostname, service, &tsd->hints, &tsd->res);
 
-  if(rc != 0) {
+  if(rc) {
     tsd->sock_error = SOCKERRNO?SOCKERRNO:rc;
     if(tsd->sock_error == 0)
       tsd->sock_error = RESOLVER_ENOMEM;
@@ -535,7 +529,8 @@ void Curl_resolver_kill(struct Curl_easy *data)
   /* If we're still resolving, we must wait for the threads to fully clean up,
      unfortunately.  Otherwise, we can simply cancel to clean up any resolver
      data. */
-  if(td && td->thread_hnd != curl_thread_t_null)
+  if(td && td->thread_hnd != curl_thread_t_null
+     && (data->set.quick_exit != 1L))
     (void)thread_wait_resolv(data, NULL, FALSE);
   else
     Curl_resolver_cancel(data);
@@ -701,24 +696,9 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   *waitp = 0; /* default to synchronous response */
 
 #ifdef CURLRES_IPV6
-  /*
-   * Check if a limited name resolve has been requested.
-   */
-  switch(data->set.ipver) {
-  case CURL_IPRESOLVE_V4:
-    pf = PF_INET;
-    break;
-  case CURL_IPRESOLVE_V6:
-    pf = PF_INET6;
-    break;
-  default:
+  if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
+    /* The stack seems to be IPv6-enabled */
     pf = PF_UNSPEC;
-    break;
-  }
-
-  if((pf != PF_INET) && !Curl_ipv6works(data))
-    /* The stack seems to be a non-IPv6 one */
-    pf = PF_INET;
 #endif /* CURLRES_IPV6 */
 
   memset(&hints, 0, sizeof(hints));

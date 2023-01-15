@@ -9,7 +9,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,6 +21,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 
@@ -62,6 +64,7 @@ numeric=`perl -e 'printf("%02x%02x%02x\n", '"$major, $minor, $patch);"`
 HEADER=include/curl/curlver.h
 CHEADER=src/tool_version.h
 PLIST=lib/libcurl.plist
+PLISTO=$PLIST
 
 if test -z "$only"; then
   ext=".dist"
@@ -93,8 +96,7 @@ sed -i.bak 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $
 rm -f "$CHEADER.bak"
 
 # Replace version number in plist file:
-sed -i.bak "s/7\.12\.3/$libversion/g" $PLIST
-rm -f "$PLIST.bak"
+sed "s/@CURL_PLIST_VERSION@/$curlversion/g" < $PLISTO.in >$PLIST
 
 if test -n "$only"; then
   # done!
@@ -147,7 +149,7 @@ fi
 #
 
 echo "update man pages"
-./scripts/updatemanpages.pl $version
+./scripts/updatemanpages.pl $version >/dev/null
 
 # make the generated file newer than the man page
 touch src/tool_hugehelp.c
@@ -169,6 +171,12 @@ git log --pretty=fuller --no-color --date=short --decorate=full -1000 | ./script
 echo "make dist"
 targz="curl-$version.tar.gz"
 make -sj dist VERSION=$version
+res=$?
+
+if test "$res" != 0; then
+    echo "make dist failed"
+    exit 2
+fi
 
 ############################################################################
 #

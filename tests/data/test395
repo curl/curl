@@ -49,5 +49,12 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
+
+# hyper cannot work with too-large content-length
+%if hyper
+<errorcode>
+1
+</errorcode>
+%endif
 </verify>
 </testcase>

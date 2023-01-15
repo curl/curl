@@ -1,0 +1,115 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: ngtcp2
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**/*.md'
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: ngtcp2-wolfssl-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: wolfssl
+          install: >-
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
+          configure: >-
+            PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib"
+            --with-ngtcp2=$HOME/all --enable-warnings --enable-werror --enable-debug
+            --with-test-nghttpx="$HOME/all/bin/nghttpx"
+          ngtcp2-configure: >-
+            --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
+          wolfssl-configure: >-
+            --enable-quic --enable-session-ticket --enable-earlydata --enable-psk
+            --enable-harden --enable-altcertchains
+
+    steps:
+    - run: |
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
+        sudo python3 -m pip install impacket
+      name: 'install prereqs and impacket'
+
+    - run: |
+        git clone https://github.com/wolfSSL/wolfssl.git
+        cd wolfssl
+        ./autogen.sh
+        ./configure ${{ matrix.build.wolfssl-configure }} --prefix=$HOME/all
+        make install
+      name: 'install wolfssl'
+
+    - run: |
+        git clone --depth=1 -b openssl-3.0.7+quic https://github.com/quictls/openssl
+        cd openssl
+        ./config --prefix=$HOME/all --libdir=$HOME/all/lib
+        make install_sw
+      name: 'install quictls'
+
+    - run: |
+        git clone --depth=1 -b v0.8.0 https://github.com/ngtcp2/nghttp3
+        cd nghttp3
+        autoreconf -fi
+        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
+        make install
+      name: 'install nghttp3'
+
+    - run: |
+        git clone --depth=1 -b v0.12.1 https://github.com/ngtcp2/ngtcp2
+        cd ngtcp2
+        autoreconf -fi
+        ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl  --with-wolfssl
+        make install
+      name: 'install ngtcp2'
+
+    - run: |
+        git clone --depth=1 -b v1.51.0 https://github.com/nghttp2/nghttp2
+        cd nghttp2
+        autoreconf -fi
+        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-http3
+        make install
+      name: 'install nghttp2'
+
+    - uses: actions/checkout@v3
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --with-wolfssl=$HOME/all ${{ matrix.build.configure }}
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
+
+    - run: make V=1 -C tests
+      name: 'make tests'
+
+    - run: make V=1 test-ci
+      name: 'run tests'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLMOPT_PIPELINING_SITE_BL 3 "4 Nov 2014" "libcurl 7.39.0" "curl_multi_setopt options"
 .SH NAME
 CURLMOPT_PIPELINING_SITE_BL \- pipelining host block list
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PIPELINING_SITE_BL, char **hosts);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PIPELINING_SITE_BL,
+                            char **hosts);
+.fi
 .SH DESCRIPTION
 No function since pipelining was removed in 7.62.0.
 

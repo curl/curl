@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_INTERFACE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_INTERFACE \- source interface for outgoing traffic
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INTERFACE, char *interface);
+.fi
 .SH DESCRIPTION
 Pass a char * as parameter. This sets the \fIinterface\fP name to use as
 outgoing network interface. The name can be an interface name, an IP address,
@@ -34,15 +38,20 @@ or a host name.
 
 If the parameter starts with "if!" then it is treated as only as interface
 name and no attempt will ever be named to do treat it as an IP address or to
-do name resolution on it.  If the parameter starts with \&"host!" it is
-treated as either an IP address or a hostname.  Hostnames are resolved
-synchronously.  Using the if! format is highly recommended when using the
-multi interfaces to avoid allowing the code to block.  If "if!" is specified
-but the parameter does not match an existing interface, CURLE_INTERFACE_FAILED
-is returned from the libcurl function used to perform the transfer.
+do name resolution on it. If the parameter starts with \&"host!" it is treated
+as either an IP address or a hostname.
+
+If "if!" is specified but the parameter does not match an existing interface,
+\fICURLE_INTERFACE_FAILED\fP is returned from the libcurl function used to
+perform the transfer.
 
 libcurl does not support using network interface names for this option on
 Windows.
+
+We strongly advise against specifying the interface with a hostname, as it
+causes libcurl to do a blocking name resolve call to retrieve the IP
+address. That name resolve operation will \fBnot\fP use DNS-over-HTTPS even if
+\fICURLOPT_DOH_URL(3)\fP is set.
 
 The application does not have to keep the string around after setting this
 option.

@@ -25,6 +25,7 @@ MooMoo
 <client>
 <features>
 SSL
+!Schannel
 </features>
 <server>
 https Server-localhost-firstSAN-sv.pem

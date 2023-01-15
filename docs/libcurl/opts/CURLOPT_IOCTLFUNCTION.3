@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -48,7 +50,7 @@ Pass a pointer to your callback function, which should match the prototype
 shown above.
 
 This callback function gets called by libcurl when something special
-I/O-related needs to be done that the library can't do by itself. For now,
+I/O-related needs to be done that the library cannot do by itself. For now,
 rewinding the read data stream is the only action it can request. The
 rewinding of the read data stream may be necessary when doing an HTTP PUT or
 POST with a multi-pass authentication method.
@@ -85,7 +87,7 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
 }
 .fi
 .SH AVAILABILITY
-Added in 7.12.3
+Added in 7.12.3. Deprecated since 7.18.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

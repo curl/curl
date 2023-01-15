@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,9 +18,11 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
-.TH libcurl-errors 3 "1 Jan 2010" "libcurl 7.20.0" "libcurl errors"
+.TH libcurl-errors 3 "23 Nov 2021" "libcurl 7.81.0" "libcurl errors"
 .SH NAME
 libcurl-errors \- error codes in libcurl
 .SH DESCRIPTION
@@ -39,13 +41,13 @@ CURLcode is one of the following:
 All fine. Proceed as usual.
 .IP "CURLE_UNSUPPORTED_PROTOCOL (1)"
 The URL you passed to libcurl used a protocol that this libcurl does not
-support. The support might be a compile-time option that you didn't use, it
+support. The support might be a compile-time option that you did not use, it
 can be a misspelled protocol string or just a protocol libcurl has no code
 for.
 .IP "CURLE_FAILED_INIT (2)"
-Very early initialization code failed. This is likely to be an internal error
-or problem, or a resource problem where something fundamental couldn't get
-done at init time.
+Early initialization code failed. This is likely to be an internal error or
+problem, or a resource problem where something fundamental could not get done
+at init time.
 .IP "CURLE_URL_MALFORMAT (3)"
 The URL was not properly formatted.
 .IP "CURLE_NOT_BUILT_IN (4)"
@@ -54,16 +56,16 @@ due to a build-time decision. This means that a feature or option was not
 enabled or explicitly disabled when libcurl was built and in order to get it
 to function you have to get a rebuilt libcurl.
 .IP "CURLE_COULDNT_RESOLVE_PROXY (5)"
-Couldn't resolve proxy. The given proxy host could not be resolved.
+Could not resolve proxy. The given proxy host could not be resolved.
 .IP "CURLE_COULDNT_RESOLVE_HOST (6)"
-Couldn't resolve host. The given remote host was not resolved.
+Could not resolve host. The given remote host was not resolved.
 .IP "CURLE_COULDNT_CONNECT (7)"
 Failed to connect() to host or proxy.
 .IP "CURLE_WEIRD_SERVER_REPLY (8)"
-The server sent data libcurl couldn't parse. This error code was known as as
+The server sent data libcurl could not parse. This error code was known as
 \fICURLE_FTP_WEIRD_SERVER_REPLY\fP before 7.51.0.
 .IP "CURLE_REMOTE_ACCESS_DENIED (9)"
-We were denied access to the resource given in the URL.  For FTP, this occurs
+We were denied access to the resource given in the URL. For FTP, this occurs
 while trying to change to the remote directory.
 .IP "CURLE_FTP_ACCEPT_FAILED (10)"
 While waiting for the server to connect back when an active FTP session is
@@ -90,10 +92,12 @@ Received an error when trying to set the transfer mode to binary or ASCII.
 .IP "CURLE_PARTIAL_FILE (18)"
 A file transfer was shorter or larger than expected. This happens when the
 server first reports an expected transfer size, and then delivers data that
-doesn't match the previously given size.
+does not match the previously given size.
 .IP "CURLE_FTP_COULDNT_RETR_FILE (19)"
 This was either a weird reply to a 'RETR' command or a zero byte transfer
 complete.
+.IP "Obsolete error (20)"
+Not used in modern versions.
 .IP "CURLE_QUOTE_ERROR (21)"
 When sending custom "QUOTE" commands to the remote server, one of the commands
 returned an error code that was 400 or higher (for FTP) or otherwise
@@ -104,6 +108,8 @@ server returns an error code that is >= 400.
 .IP "CURLE_WRITE_ERROR (23)"
 An error occurred when writing received data to a local file, or an error was
 returned to libcurl from a write callback.
+.IP "Obsolete error (24)"
+Not used in modern versions.
 .IP "CURLE_UPLOAD_FAILED (25)"
 Failed starting the upload. For FTP, the server typically denied the STOR
 command. The error buffer usually contains the server's explanation for this.
@@ -116,13 +122,17 @@ things are severely screwed up if this ever occurs.
 .IP "CURLE_OPERATION_TIMEDOUT (28)"
 Operation timeout. The specified time-out period was reached according to the
 conditions.
+.IP "Obsolete error (29)"
+Not used in modern versions.
 .IP "CURLE_FTP_PORT_FAILED (30)"
-The FTP PORT command returned error. This mostly happens when you haven't
+The FTP PORT command returned error. This mostly happens when you have not
 specified a good enough address for libcurl to use. See
 \fICURLOPT_FTPPORT(3)\fP.
 .IP "CURLE_FTP_COULDNT_USE_REST (31)"
 The FTP REST command returned error. This should never happen if the server is
 sane.
+.IP "Obsolete error (32)"
+Not used in modern versions.
 .IP "CURLE_RANGE_ERROR (33)"
 The server does not support or accept range requests.
 .IP "CURLE_HTTP_POST_ERROR (34)"
@@ -136,22 +146,28 @@ others.
 The download could not be resumed because the specified offset was out of the
 file boundary.
 .IP "CURLE_FILE_COULDNT_READ_FILE (37)"
-A file given with FILE:// couldn't be opened. Most likely because the file
-path doesn't identify an existing file. Did you check file permissions?
+A file given with FILE:// could not be opened. Most likely because the file
+path does not identify an existing file. Did you check file permissions?
 .IP "CURLE_LDAP_CANNOT_BIND (38)"
 LDAP cannot bind. LDAP bind operation failed.
 .IP "CURLE_LDAP_SEARCH_FAILED (39)"
 LDAP search failed.
+.IP "Obsolete error (40)"
+Not used in modern versions.
 .IP "CURLE_FUNCTION_NOT_FOUND (41)"
 Function not found. A required zlib function was not found.
 .IP "CURLE_ABORTED_BY_CALLBACK (42)"
 Aborted by callback. A callback returned "abort" to libcurl.
 .IP "CURLE_BAD_FUNCTION_ARGUMENT (43)"
 A function was called with a bad parameter.
+.IP "Obsolete error (44)"
+Not used in modern versions.
 .IP "CURLE_INTERFACE_FAILED (45)"
 Interface error. A specified outgoing interface could not be used. Set which
 interface to use for outgoing connections' source IP address with
 \fICURLOPT_INTERFACE(3)\fP.
+.IP "Obsolete error (46)"
+Not used in modern versions.
 .IP "CURLE_TOO_MANY_REDIRECTS (47)"
 Too many redirects. When following redirects, libcurl hit the maximum amount.
 Set your limit with \fICURLOPT_MAXREDIRS(3)\fP.
@@ -160,31 +176,36 @@ An option passed to libcurl is not recognized/known. Refer to the appropriate
 documentation. This is most likely a problem in the program that uses
 libcurl. The error buffer might contain more specific information about which
 exact option it concerns.
-.IP "CURLE_TELNET_OPTION_SYNTAX (49)"
-A telnet option string was Illegally formatted.
+.IP "CURLE_SETOPT_OPTION_SYNTAX (49)"
+An option passed in to a setopt was wrongly formatted. See error message for
+details about what option.
+.IP "Obsolete errors (50-51)"
+Not used in modern versions.
 .IP "CURLE_GOT_NOTHING (52)"
 Nothing was returned from the server, and under the circumstances, getting
 nothing is considered an error.
 .IP "CURLE_SSL_ENGINE_NOTFOUND (53)"
-The specified crypto engine wasn't found.
+The specified crypto engine was not found.
 .IP "CURLE_SSL_ENGINE_SETFAILED (54)"
-Failed setting the selected SSL crypto engine as default!
+Failed setting the selected SSL crypto engine as default.
 .IP "CURLE_SEND_ERROR (55)"
 Failed sending network data.
 .IP "CURLE_RECV_ERROR (56)"
 Failure with receiving network data.
+.IP "Obsolete error (57)"
+Not used in modern versions.
 .IP "CURLE_SSL_CERTPROBLEM (58)"
 problem with the local client certificate.
 .IP "CURLE_SSL_CIPHER (59)"
-Couldn't use specified cipher.
+Could not use specified cipher.
 .IP "CURLE_PEER_FAILED_VERIFICATION (60)"
-The remote server's SSL certificate or SSH md5 fingerprint was deemed not OK.
+The remote server's SSL certificate or SSH fingerprint was deemed not OK.
 This error code has been unified with CURLE_SSL_CACERT since 7.62.0. Its
 previous value was 51.
 .IP "CURLE_BAD_CONTENT_ENCODING (61)"
 Unrecognized transfer encoding.
-.IP "CURLE_LDAP_INVALID_URL (62)"
-Invalid LDAP URL.
+.IP "Obsolete error (62)"
+Not used in modern versions.
 .IP "CURLE_FILESIZE_EXCEEDED (63)"
 Maximum file size exceeded.
 .IP "CURLE_USE_SSL_FAILED (64)"
@@ -210,10 +231,8 @@ Unknown TFTP transfer ID.
 File already exists and will not be overwritten.
 .IP "CURLE_TFTP_NOSUCHUSER (74)"
 This error should never be returned by a properly functioning TFTP server.
-.IP "CURLE_CONV_FAILED (75)"
-Character conversion failed.
-.IP "CURLE_CONV_REQD (76)"
-Caller must register conversion callbacks.
+.IP "Obsolete error (75-76)"
+Not used in modern versions.
 .IP "CURLE_SSL_CACERT_BADFILE (77)"
 Problem with reading the SSL CA cert (path? access rights?)
 .IP "CURLE_REMOTE_FILE_NOT_FOUND (78)"
@@ -233,8 +252,8 @@ Issuer check failed (Added in 7.19.0)
 .IP "CURLE_FTP_PRET_FAILED (84)"
 The FTP server does not understand the PRET command at all or does not support
 the given argument. Be careful when using \fICURLOPT_CUSTOMREQUEST(3)\fP, a
-custom LIST command will be sent with PRET CMD before PASV as well. (Added in
-7.20.0)
+custom LIST command will be sent with the PRET command before PASV as
+well. (Added in 7.20.0)
 .IP "CURLE_RTSP_CSEQ_ERROR (85)"
 Mismatch of RTSP CSeq numbers.
 .IP "CURLE_RTSP_SESSION_ERROR (86)"
@@ -262,6 +281,13 @@ be one out of several problems, see the error buffer for details.
 .IP "CURLE_QUIC_CONNECT_ERROR (96)"
 QUIC connection error. This error may be caused by an SSL library error. QUIC
 is the protocol used for HTTP/3 transfers.
+.IP "CURLE_PROXY (97)"
+Proxy handshake error. \fICURLINFO_PROXY_ERROR(3)\fP provides extra details on
+the specific problem.
+.IP "CURLE_SSL_CLIENTCERT (98)"
+SSL Client Certificate required.
+.IP "CURLE_UNRECOVERABLE_POLL (99)"
+An internal call to poll() or select() returned error that is not recoverable.
 .IP "CURLE_OBSOLETE*"
 These error codes will never be returned. They were used in an old libcurl
 version and are currently unused.
@@ -275,14 +301,14 @@ between. Before version 7.20.0 (released on February 9 2010) this could be retur
 \fIcurl_multi_perform(3)\fP, but in later versions this return code is never
 used.
 .IP "CURLM_CALL_MULTI_SOCKET (-1)"
-An alias for CURLM_CALL_MULTI_PERFORM. Never returned by modern libcurl
+An alias for \fICURLM_CALL_MULTI_PERFORM\fP. Never returned by modern libcurl
 versions.
 .IP "CURLM_OK (0)"
 Things are fine.
 .IP "CURLM_BAD_HANDLE (1)"
-The passed-in handle is not a valid CURLM handle.
+The passed-in handle is not a valid \fICURLM\fP handle.
 .IP "CURLM_BAD_EASY_HANDLE (2)"
-An easy handle was not good/valid. It could mean that it isn't an easy handle
+An easy handle was not good/valid. It could mean that it is not an easy handle
 at all, or possibly that the handle already is in use by this or another multi
 handle.
 .IP "CURLM_OUT_OF_MEMORY (3)"
@@ -301,12 +327,16 @@ second time. (Added in 7.32.1)
 .IP "CURLM_RECURSIVE_API_CALL (8)"
 An API function was called from inside a callback.
 .IP "CURLM_WAKEUP_FAILURE (9)"
-Wakeup is unavailable or failed.
+Wake up is unavailable or failed.
 .IP "CURLM_BAD_FUNCTION_ARGUMENT (10)"
 A function was called with a bad parameter.
+.IP "CURLM_ABORTED_BY_CALLBACK (11)"
+A multi handle callback returned error.
+.IP "CURLM_UNRECOVERABLE_POLL (12)"
+An internal call to poll() or select() returned error that is not recoverable.
 .SH "CURLSHcode"
-The "share" interface will return a CURLSHcode to indicate when an error has
-occurred.  Also consider \fIcurl_share_strerror(3)\fP.
+The "share" interface will return a \fBCURLSHcode\fP to indicate when an error
+has occurred. Also consider \fIcurl_share_strerror(3)\fP.
 .IP "CURLSHE_OK (0)"
 All fine. Proceed as usual.
 .IP "CURLSHE_BAD_OPTION (1)"
@@ -319,19 +349,21 @@ An invalid share object was passed to the function.
 Not enough memory was available.
 (Added in 7.12.0)
 .IP "CURLSHE_NOT_BUILT_IN (5)"
-The requested sharing could not be done because the library you use don't have
+The requested sharing could not be done because the library you use do not have
 that particular feature enabled. (Added in 7.23.0)
 .SH "CURLUcode"
+The URL interface will return a \fICURLUcode\fP to indicate when an error has
+occurred. Also consider \fIcurl_url_strerror(3)\fP.
 .IP "CURLUE_BAD_HANDLE (1)"
-An argument that should be a CURLU pointer was passed in as a NULL.
+An invalid URL handle was passed as argument.
 .IP "CURLUE_BAD_PARTPOINTER (2)"
-A NULL pointer was passed to the 'part' argument of \fIcurl_url_get(3)\fP.
+An invalid 'part' argument was passed as argument.
 .IP "CURLUE_MALFORMED_INPUT (3)"
 A malformed input was passed to a URL API function.
 .IP "CURLUE_BAD_PORT_NUMBER (4)"
 The port number was not a decimal number between 0 and 65535.
 .IP "CURLUE_UNSUPPORTED_SCHEME (5)"
-This libcurl build doesn't support the given URL scheme.
+This libcurl build does not support the given URL scheme.
 .IP "CURLUE_URLDECODE (6)"
 URL decode error, most likely because of rubbish in the input.
 .IP "CURLUE_OUT_OF_MEMORY (7)"
@@ -356,7 +388,32 @@ There is no port part in the URL.
 There is no query part in the URL.
 .IP "CURLUE_NO_FRAGMENT (17)"
 There is no fragment part in the URL.
+.IP "CURLUE_NO_ZONEID (18)"
+There is no zone id set in the URL.
+.IP "CURLUE_BAD_FILE_URL (19)"
+The file:// URL is invalid.
+.IP "CURLUE_BAD_FRAGMENT (20)"
+The fragment part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_HOSTNAME (21)"
+The hostname contained bad or invalid characters.
+.IP "CURLUE_BAD_IPV6 (22)"
+The IPv6 address hostname contained bad or invalid characters.
+.IP "CURLUE_BAD_LOGIN (23)"
+The login part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_PASSWORD (24)"
+The password part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_PATH (25)"
+The path part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_QUERY (26)"
+The query part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_SCHEME (27)"
+The scheme part of the URL contained bad or invalid characters.
+.IP "CURLUE_BAD_SLASHES (28)"
+The URL contained an invalid number of slashes.
+.IP "CURLUE_BAD_USER (29)"
+The user part of the URL contained bad or invalid characters.
 .SH "SEE ALSO"
 .BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
-.BR curl_share_strerror "(3), " CURLOPT_ERRORBUFFER "(3), "
-.BR CURLOPT_VERBOSE "(3), " CURLOPT_DEBUGFUNCTION "(3) "
+.BR curl_share_strerror "(3), " curl_url_strerror "(3), "
+.BR CURLOPT_ERRORBUFFER "(3), " CURLOPT_VERBOSE "(3), "
+.BR CURLOPT_DEBUGFUNCTION "(3)"

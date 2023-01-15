@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 #
@@ -58,6 +60,8 @@ for TEXT in "${TOPDIR}/COPYING" "${SCRIPTDIR}/README.OS400"             \
 do      MEMBER="`basename \"${TEXT}\" .OS400`"
         MEMBER="`basename \"${MEMBER}\" .md`"
         MEMBER="${LIBIFSNAME}/DOCS.FILE/`db2_name \"${MEMBER}\"`.MBR"
+
+        [ -e "${TEXT}" ] || continue
 
         if action_needed "${MEMBER}" "${TEXT}"
         then    CMD="CPY OBJ('${TEXT}') TOOBJ('${MEMBER}') TOCCSID(${TGTCCSID})"

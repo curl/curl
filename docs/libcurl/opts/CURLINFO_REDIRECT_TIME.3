@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,20 +18,25 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLINFO_REDIRECT_TIME 3 "28 Aug 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
 .SH NAME
 CURLINFO_REDIRECT_TIME \- get the time for all redirection steps
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REDIRECT_TIME, double *timep);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REDIRECT_TIME,
+                           double *timep);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a double to receive the total time, in seconds, it took for
 all redirection steps include name lookup, connect, pretransfer and transfer
-before final transaction was started. CURLINFO_REDIRECT_TIME contains the
-complete execution time for multiple redirections.
+before final transaction was started. \fICURLINFO_REDIRECT_TIME(3)\fP contains
+the complete execution time for multiple redirections.
 
 See also the TIMES overview in the \fIcurl_easy_getinfo(3)\fP man page.
 .SH PROTOCOLS

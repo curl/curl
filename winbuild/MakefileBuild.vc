@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 #***************************************************************************
 
@@ -157,9 +159,33 @@ NGHTTP2_CFLAGS   = /DUSE_NGHTTP2 /I"$(NGHTTP2_INC_DIR)"
 NGHTTP2_LIBS     = nghttp2.lib
 !ELSEIF "$(WITH_NGHTTP2)"=="static"
 NGHTTP2_CFLAGS   = /DUSE_NGHTTP2 /DNGHTTP2_STATICLIB /I"$(NGHTTP2_INC_DIR)"
+!IF EXISTS("$(NGHTTP2_LIB_DIR)\nghttp2_static.lib")
 NGHTTP2_LIBS     = nghttp2_static.lib
+!ELSE
+NGHTTP2_LIBS     = nghttp2.lib
+!ENDIF
 !ENDIF
 
+!IFDEF MSH3_PATH
+MSH3_INC_DIR     = $(MSH3_PATH)\include
+MSH3_LIB_DIR     = $(MSH3_PATH)\lib
+MSH3_LFLAGS      = $(MSH3_LFLAGS) "/LIBPATH:$(MSH3_LIB_DIR)"
+!ELSE
+MSH3_INC_DIR     = $(DEVEL_INCLUDE)
+MSH3_LIB_DIR     = $(DEVEL_LIB)
+!ENDIF
+
+!IF "$(WITH_MSH3)"=="dll"
+MSH3_CFLAGS      = /DUSE_MSH3 /I"$(MSH3_INC_DIR)"
+MSH3_LIBS        = msh3.lib
+!ELSEIF "$(WITH_MSH3)"=="static"
+MSH3_CFLAGS      = /DUSE_MSH3 /DMSH3_STATICLIB /I"$(MSH3_INC_DIR)"
+!IF EXISTS("$(NGHTTP2_LIB_DIR)\msh3_static.lib")
+MSH3_LIBS        = msh3_static.lib
+!ELSE
+MSH3_LIBS        = msh3.lib
+!ENDIF
+!ENDIF
 
 !IFDEF MBEDTLS_PATH
 MBEDTLS_INC_DIR  = $(MBEDTLS_PATH)\include
@@ -249,7 +275,7 @@ ZLIB        = static
 !ENDIF
 
 !IFDEF USE_ZLIB
-ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ $(ADDITIONAL_ZLIB_CFLAGS) /I"$(ZLIB_INC_DIR)"
+ZLIB_CFLAGS = /DHAVE_LIBZ $(ADDITIONAL_ZLIB_CFLAGS) /I"$(ZLIB_INC_DIR)"
 !ENDIF
 
 
@@ -279,8 +305,29 @@ SSH2        = static
 !ENDIF
 
 !IFDEF USE_SSH2
-SSH2_CFLAGS = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
-SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(SSH2_INC_DIR)
+SSH2_CFLAGS = /DUSE_LIBSSH2
+SSH2_CFLAGS = $(SSH2_CFLAGS) /I"$(SSH2_INC_DIR)"
+!ENDIF
+
+
+!IFDEF SSH_PATH
+SSH_INC_DIR= $(SSH_PATH)\include
+SSH_LIB_DIR= $(SSH_PATH)\lib
+SSH_LFLAGS = $(SSH_LFLAGS) "/LIBPATH:$(SSH_LIB_DIR)"
+!ELSE
+SSH_LIB_DIR= $(DEVEL_LIB)
+SSH_INC_DIR= $(DEVEL_INCLUDE)
+!ENDIF
+
+!IF "$(WITH_SSH)"=="dll" || "$(WITH_SSH)"=="static"
+SSH_LIBS   = ssh.lib
+USE_SSH    = true
+SSH        = $(WITH_SSH)
+!ENDIF
+
+!IFDEF USE_SSH
+SSH_CFLAGS = /DUSE_LIBSSH
+SSH_CFLAGS = $(SSH_CFLAGS) /I"$(SSH_INC_DIR)"
 !ENDIF
 
 
@@ -291,7 +338,7 @@ USE_IDN   = true
 !ENDIF
 
 !IF "$(USE_IDN)"=="true"
-IDN_CFLAGS = $(IDN_CFLAGS) /DUSE_WIN32_IDN /DWANT_IDN_PROTOTYPES
+IDN_CFLAGS = $(IDN_CFLAGS) /DUSE_WIN32_IDN
 WIN_LIBS   = $(WIN_LIBS) Normaliz.lib
 !ENDIF
 
@@ -445,6 +492,11 @@ CFLAGS = $(CFLAGS) $(SSH2_CFLAGS)
 LFLAGS = $(LFLAGS) $(SSH2_LFLAGS) $(SSH2_LIBS)
 !ENDIF
 
+!IF "$(USE_SSH)"=="true"
+CFLAGS = $(CFLAGS) $(SSH_CFLAGS)
+LFLAGS = $(LFLAGS) $(SSH_LFLAGS) $(SSH_LIBS)
+!ENDIF
+
 !IF "$(USE_IDN)"=="true"
 CFLAGS = $(CFLAGS) $(IDN_CFLAGS)
 !ENDIF
@@ -460,6 +512,11 @@ CFLAGS = $(CFLAGS) $(SSPI_CFLAGS)
 !IF "$(USE_NGHTTP2)"=="true"
 CFLAGS = $(CFLAGS) $(NGHTTP2_CFLAGS)
 LFLAGS = $(LFLAGS) $(NGHTTP2_LFLAGS) $(NGHTTP2_LIBS)
+!ENDIF
+
+!IF "$(USE_MSH3)"=="true"
+CFLAGS = $(CFLAGS) $(MSH3_CFLAGS)
+LFLAGS = $(LFLAGS) $(MSH3_LFLAGS) $(MSH3_LIBS)
 !ENDIF
 
 !IF "$(GEN_PDB)"=="true"
@@ -515,8 +572,10 @@ package: $(TARGET)
 $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DIRDIST)
 	@echo Using SSL: $(USE_SSL)
 	@echo Using NGHTTP2: $(USE_NGHTTP2)
+	@echo Using MSH3: $(USE_MSH3)
 	@echo Using c-ares: $(USE_CARES)
 	@echo Using SSH2: $(USE_SSH2)
+	@echo Using SSH: $(USE_SSH)
 	@echo Using ZLIB: $(USE_ZLIB)
 	@echo Using IDN:  $(USE_IDN)
 	@echo Using IPv6: $(USE_IPV6)
@@ -562,20 +621,20 @@ $(CURL_DIROBJ):
 
 .SUFFIXES: .c .obj .res
 
-{$(LIBCURL_SRC_DIR)\}.c{$(LIB_DIROBJ)\}.obj:
-	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
+{$(LIBCURL_SRC_DIR)\}.c{$(LIB_DIROBJ)\}.obj::
+	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\\"  $<
 
-{$(LIBCURL_SRC_DIR)\vauth\}.c{$(LIB_DIROBJ)\vauth\}.obj:
-	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
+{$(LIBCURL_SRC_DIR)\vauth\}.c{$(LIB_DIROBJ)\vauth\}.obj::
+	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vauth\\"  $<
 
-{$(LIBCURL_SRC_DIR)\vtls\}.c{$(LIB_DIROBJ)\vtls\}.obj:
-	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
+{$(LIBCURL_SRC_DIR)\vtls\}.c{$(LIB_DIROBJ)\vtls\}.obj::
+	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vtls\\"  $<
 
-{$(LIBCURL_SRC_DIR)\vssh\}.c{$(LIB_DIROBJ)\vssh\}.obj:
-	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
+{$(LIBCURL_SRC_DIR)\vssh\}.c{$(LIB_DIROBJ)\vssh\}.obj::
+	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vssh\\"  $<
 
-{$(LIBCURL_SRC_DIR)\vquic\}.c{$(LIB_DIROBJ)\vquic\}.obj:
-	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
+{$(LIBCURL_SRC_DIR)\vquic\}.c{$(LIB_DIROBJ)\vquic\}.obj::
+	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vquic\\"  $<
 
 $(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
 	$(RC) $(RC_FLAGS)
@@ -603,7 +662,6 @@ CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\strtoofft.obj \
  $(CURL_DIROBJ)\warnless.obj \
- $(CURL_DIROBJ)\curl_ctype.obj \
  $(CURL_DIROBJ)\curl_multibyte.obj \
  $(CURL_DIROBJ)\version_win32.obj \
  $(CURL_DIROBJ)\dynbuf.obj
@@ -612,8 +670,8 @@ $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(MANIFESTTOOL)
 
-{$(CURL_SRC_DIR)\}.c{$(CURL_DIROBJ)\}.obj:
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@"  $<
+{$(CURL_SRC_DIR)\}.c{$(CURL_DIROBJ)\}.obj::
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$(CURL_DIROBJ)\\"  $<
 
 $(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
 	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c
@@ -623,8 +681,6 @@ $(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
 $(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
-$(CURL_DIROBJ)\curl_ctype.obj: ../lib/curl_ctype.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_ctype.c
 $(CURL_DIROBJ)\curl_multibyte.obj: ../lib/curl_multibyte.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_multibyte.c
 $(CURL_DIROBJ)\version_win32.obj: ../lib/version_win32.c

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_COOKIE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_COOKIE \- set contents of HTTP Cookie header
+CURLOPT_COOKIE \- HTTP Cookie header
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIE, char *cookie);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. It will be used to
 set a cookie in the HTTP request. The format of the string should be
@@ -42,7 +46,7 @@ similar, they will all get this cookie passed on.
 
 The cookies set by this option are separate from the internal cookie storage
 held by the cookie engine and will not be modified by it. If you enable the
-cookie engine and either you've imported a cookie of the same name (e.g. 'foo')
+cookie engine and either you have imported a cookie of the same name (e.g. 'foo')
 or the server has set one, it will have no effect on the cookies you set here.
 A request to the server will send both the 'foo' held by the cookie engine and
 the 'foo' held by this option. To set a cookie that is instead held by the

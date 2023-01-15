@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -102,14 +104,16 @@ int curlx_win32_open(const char *filename, int oflag, ...)
   va_end(param);
 
 #ifdef _UNICODE
-  if(filename_w)
+  if(filename_w) {
     result = _wopen(filename_w, oflag, pmode);
-  free(filename_w);
-  if(result != -1)
-    return result;
-#endif
-
+    curlx_unicodefree(filename_w);
+  }
+  else
+    errno = EINVAL;
+  return result;
+#else
   return (_open)(filename, oflag, pmode);
+#endif
 }
 
 FILE *curlx_win32_fopen(const char *filename, const char *mode)
@@ -120,19 +124,20 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   wchar_t *mode_w = curlx_convert_UTF8_to_wchar(mode);
   if(filename_w && mode_w)
     result = _wfopen(filename_w, mode_w);
-  free(filename_w);
-  free(mode_w);
-  if(result)
-    return result;
-#endif
-
+  else
+    errno = EINVAL;
+  curlx_unicodefree(filename_w);
+  curlx_unicodefree(mode_w);
+  return result;
+#else
   return (fopen)(filename, mode);
+#endif
 }
 
 int curlx_win32_stat(const char *path, struct_stat *buffer)
 {
-  int result = -1;
 #ifdef _UNICODE
+  int result = -1;
   wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
   if(path_w) {
 #if defined(USE_WIN32_SMALL_FILES)
@@ -140,32 +145,35 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
 #else
     result = _wstati64(path_w, buffer);
 #endif
-    free(path_w);
-    if(result != -1)
-      return result;
+    curlx_unicodefree(path_w);
   }
-#endif /* _UNICODE */
-
-#if defined(USE_WIN32_SMALL_FILES)
-  result = _stat(path, buffer);
-#else
-  result = _stati64(path, buffer);
-#endif
+  else
+    errno = EINVAL;
   return result;
+#else
+#if defined(USE_WIN32_SMALL_FILES)
+  return _stat(path, buffer);
+#else
+  return _stati64(path, buffer);
+#endif
+#endif
 }
 
 int curlx_win32_access(const char *path, int mode)
 {
 #if defined(_UNICODE)
+  int result = -1;
   wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
   if(path_w) {
-    int result = _waccess(path_w, mode);
-    free(path_w);
-    if(result != -1)
-      return result;
+    result = _waccess(path_w, mode);
+    curlx_unicodefree(path_w);
   }
-#endif /* _UNICODE */
+  else
+    errno = EINVAL;
+  return result;
+#else
   return _access(path, mode);
+#endif
 }
 
 #endif /* USE_WIN32_LARGE_FILES || USE_WIN32_SMALL_FILES */

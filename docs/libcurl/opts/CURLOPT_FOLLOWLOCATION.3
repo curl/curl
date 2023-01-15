@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_FOLLOWLOCATION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_FOLLOWLOCATION \- follow HTTP 3xx redirects
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FOLLOWLOCATION, long enable);
+.fi
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to follow any Location: header
 that the server sends as part of an HTTP header in a 3xx response. The
@@ -51,7 +55,7 @@ dictates which request method it will use in the subsequent request: For 301,
 will make libcurl send the same method again.
 
 For users who think the existing location following is too naive, too simple
-or just lacks features, it is very easy to instead implement your own redirect
+or just lacks features, it is easy to instead implement your own redirect
 follow logic with the use of \fIcurl_easy_getinfo(3)\fP's
 \fICURLINFO_REDIRECT_URL(3)\fP option instead of using
 \fICURLOPT_FOLLOWLOCATION(3)\fP.

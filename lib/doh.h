@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,27 +20,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "urldata.h"
 #include "curl_addrinfo.h"
 
 #ifndef CURL_DISABLE_DOH
-
-/*
- * Curl_doh() resolve a name using DoH (DNS-over-HTTPS). It resolves a name
- * and returns a 'Curl_addrinfo *' with the address information.
- */
-
-struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
-                               const char *hostname,
-                               int port,
-                               int *waitp);
-
-CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
-                              struct Curl_dns_entry **dns);
-
-int Curl_doh_getsock(struct connectdata *conn, curl_socket_t *socks);
 
 typedef enum {
   DOH_OK,
@@ -66,6 +53,38 @@ typedef enum {
   DNS_TYPE_AAAA = 28,
   DNS_TYPE_DNAME = 39           /* RFC6672 */
 } DNStype;
+
+/* one of these for each DoH request */
+struct dnsprobe {
+  CURL *easy;
+  DNStype dnstype;
+  unsigned char dohbuffer[512];
+  size_t dohlen;
+  struct dynbuf serverdoh;
+};
+
+struct dohdata {
+  struct curl_slist *headers;
+  struct dnsprobe probe[DOH_PROBE_SLOTS];
+  unsigned int pending; /* still outstanding requests */
+  int port;
+  const char *host;
+};
+
+/*
+ * Curl_doh() resolve a name using DoH (DNS-over-HTTPS). It resolves a name
+ * and returns a 'Curl_addrinfo *' with the address information.
+ */
+
+struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
+                               const char *hostname,
+                               int port,
+                               int *waitp);
+
+CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
+                              struct Curl_dns_entry **dns);
+
+int Curl_doh_getsock(struct connectdata *conn, curl_socket_t *socks);
 
 #define DOH_MAX_ADDR 24
 #define DOH_MAX_CNAME 4
@@ -101,7 +120,7 @@ void de_init(struct dohentry *d);
 void de_cleanup(struct dohentry *d);
 #endif
 
-#else /* if DOH is disabled */
+#else /* if DoH is disabled */
 #define Curl_doh(a,b,c,d) NULL
 #define Curl_doh_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #endif

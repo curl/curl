@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -36,9 +38,9 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SSL_PTR,
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SESSION,
                            struct curl_tlssessioninfo **session);
 .SH DESCRIPTION
-Pass a pointer to a 'struct curl_tlssessioninfo *'.  The pointer will be
-initialized to refer to a 'struct curl_tlssessioninfo *' that will contain an
-enum indicating the SSL library used for the handshake and a pointer to the
+Pass a pointer to a \fIstruct curl_tlssessioninfo *\fP.  The pointer will be
+initialized to refer to a \fIstruct curl_tlssessioninfo *\fP that will contain
+an enum indicating the SSL library used for the handshake and a pointer to the
 respective internal TLS session structure of this underlying SSL library.
 
 This option may be useful for example to extract certificate information in a
@@ -64,34 +66,32 @@ The \fIinternals\fP struct member will point to a TLS library specific pointer
 for the active ("in use") SSL connection, with the following underlying types:
 .RS
 .IP GnuTLS
-gnutls_session_t
+\fBgnutls_session_t\fP
 .IP gskit
-gsk_handle
+\fBgsk_handle\fP
 .IP NSS
-PRFileDesc *
+\fBPRFileDesc *\fP
 .IP OpenSSL
-CURLINFO_TLS_SESSION: SSL_CTX *
+\fICURLINFO_TLS_SESSION(3)\fP: \fBSSL_CTX *\fP
 
-CURLINFO_TLS_SSL_PTR: SSL *
+\fICURLINFO_TLS_SSL_PTR(3)\fP: \fBSSL *\fP
 .RE
 Since 7.48.0 the \fIinternals\fP member can point to these other SSL backends
 as well:
 .RS
 .IP mbedTLS
-mbedtls_ssl_context *
+\fBmbedTLS_ssl_context *\fP
 .IP "Secure Channel"
-CtxtHandle *
+\fBCtxtHandle *\fP
 .IP "Secure Transport"
-SSLContext *
+\fBSSLContext *\fP
 .IP "wolfSSL"
-SSL *
-.IP "MesaLink"
-SSL *
+\fBSSL *\fP
 .RE
 
 If the \fIinternals\fP pointer is NULL then either the SSL backend is not
 supported, an SSL session has not yet been established or the connection is no
-longer associated with the easy handle (eg curl_easy_perform has returned).
+longer associated with the easy handle (e.g. curl_easy_perform has returned).
 .SH LIMITATIONS
 This option has some limitations that could make it unsafe when it comes to
 the manual verification of certificates.
@@ -102,7 +102,7 @@ using FTP over SSL. That is because the FTP protocol has a control channel and
 a data channel and one or both may be over SSL. Currently there is no way to
 retrieve a second in-use SSL session associated with an easy handle.
 
-This option has not been thoroughly tested with plaintext protocols that can
+This option has not been thoroughly tested with clear text protocols that can
 be upgraded/downgraded to/from SSL: FTP, SMTP, POP3, IMAP when used with
 \fICURLOPT_USE_SSL(3)\fP. Though you will be able to retrieve the SSL pointer,
 it's possible that before you can do that data (including auth) may have
@@ -115,10 +115,10 @@ after renegotiation but before you are able to get the (possibly) changed SSL
 pointer, with the (possibly) changed certificate information.
 
 If you are using OpenSSL or wolfSSL then \fICURLOPT_SSL_CTX_FUNCTION(3)\fP can
-be used to set a certificate verification callback in the CTX. That is safer
-than using this option to poll for certificate changes and doesn't suffer from
-any of the problems above. There is currently no way in libcurl to set a
-verification callback for the other SSL backends.
+be used to set a certificate verification callback. That is safer than using
+this option to poll for certificate changes and does not suffer from any of
+the problems above. There is currently no way in libcurl to set a verification
+callback for the other SSL backends.
 
 How are you using this option? Are you affected by any of these limitations?
 Please let us know by making a comment at

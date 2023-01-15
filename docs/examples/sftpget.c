@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -34,8 +36,8 @@
 /*
  * This is an example showing how to get a single file from an SFTP server.
  * It delays the actual destination file creation until the first write
- * callback so that it won't create an empty file in case the remote file
- * doesn't exist or something else fails.
+ * callback so that it will not create an empty file in case the remote file
+ * does not exist or something else fails.
  */
 
 struct FtpFile {
@@ -51,7 +53,7 @@ static size_t my_fwrite(void *buffer, size_t size, size_t nmemb,
     /* open file for writing */
     out->stream = fopen(out->filename, "wb");
     if(!out->stream)
-      return -1; /* failure, can't open file to write */
+      return -1; /* failure, cannot open file to write */
   }
   return fwrite(buffer, size, nmemb, out->stream);
 }

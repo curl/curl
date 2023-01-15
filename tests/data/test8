@@ -46,6 +46,36 @@ Set-Cookie: trailingspace    = removed; path=/we/want;
 Set-Cookie: nocookie=yes; path=/WE;
 Set-Cookie: blexp=yesyes; domain=%HOSTIP; domain=%HOSTIP; expiry=totally bad;
 Set-Cookie: partialip=nono; domain=.0.0.1;
+Set-Cookie: cookie1=%hex[%01-junk]hex%
+Set-Cookie: cookie2=%hex[%02-junk]hex%
+Set-Cookie: cookie3=%hex[%03-junk]hex%
+Set-Cookie: cookie4=%hex[%04-junk]hex%
+Set-Cookie: cookie5=%hex[%05-junk]hex%
+Set-Cookie: cookie6=%hex[%06-junk]hex%
+Set-Cookie: cookie7=%hex[%07-junk]hex%
+Set-Cookie: cookie8=%hex[%08-junk]hex%
+Set-Cookie: cookie9=%hex[junk--%09]hex%
+Set-Cookie: cookie11=%hex[%0b-junk]hex%
+Set-Cookie: cookie12=%hex[%0c-junk]hex%
+Set-Cookie: cookie14=%hex[%0e-junk]hex%
+Set-Cookie: cookie15=%hex[%0f-junk]hex%
+Set-Cookie: cookie16=%hex[%10-junk]hex%
+Set-Cookie: cookie17=%hex[%11-junk]hex%
+Set-Cookie: cookie18=%hex[%12-junk]hex%
+Set-Cookie: cookie19=%hex[%13-junk]hex%
+Set-Cookie: cookie20=%hex[%14-junk]hex%
+Set-Cookie: cookie21=%hex[%15-junk]hex%
+Set-Cookie: cookie22=%hex[%16-junk]hex%
+Set-Cookie: cookie23=%hex[%17-junk]hex%
+Set-Cookie: cookie24=%hex[%18-junk]hex%
+Set-Cookie: cookie25=%hex[%19-junk]hex%
+Set-Cookie: cookie26=%hex[%1a-junk]hex%
+Set-Cookie: cookie27=%hex[%1b-junk]hex%
+Set-Cookie: cookie28=%hex[%1c-junk]hex%
+Set-Cookie: cookie29=%hex[%1d-junk]hex%
+Set-Cookie: cookie30=%hex[%1e-junk]hex%
+Set-Cookie: cookie31=%hex[%1f-junk]hex%
+Set-Cookie: cookie31=%hex[%7f-junk]hex%
 
 </file>
 <precheck>
@@ -60,7 +90,7 @@ GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Cookie: name with space=is weird but; trailingspace=removed; cookie=perhaps; cookie=yes; foobar=name; blexp=yesyes
+Cookie: name with space=is weird but; trailingspace=removed; cookie=perhaps; cookie=yes; foobar=name; blexp=yesyes; cookie9=junk--
 
 </protocol>
 </verify>

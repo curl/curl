@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HEADER 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_HEADER \- pass headers to the data stream
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADER, long onoff);
+.fi
 .SH DESCRIPTION
 Pass the long value \fIonoff\fP set to 1 to ask libcurl to include the headers
 in the write callback (\fICURLOPT_WRITEFUNCTION(3)\fP). This option is
@@ -62,6 +66,8 @@ if(curl) {
   curl_easy_perform(curl);
 }
 .fi
+.SH AVAILABILITY
+Provided in all libcurl versions.
 .SH RETURN VALUE
 Returns CURLE_OK.
 .SH "SEE ALSO"

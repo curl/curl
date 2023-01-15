@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_setup.h"
 
@@ -28,7 +30,7 @@
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
-#include "tool_homedir.h"
+#include "tool_findfile.h"
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
 #include "dynbuf.h"
@@ -45,9 +47,9 @@ static const char *unslashquote(const char *line, char *param);
 static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
 
 #ifdef WIN32
-static FILE *execpath(const char *filename)
+static FILE *execpath(const char *filename, char **pathp)
 {
-  char filebuffer[512];
+  static char filebuffer[512];
   /* Get the filename of our executable. GetModuleFileName is already declared
    * via inclusions done in setup header file.  We assume that we are using
    * the ASCII version here.
@@ -62,8 +64,11 @@ static FILE *execpath(const char *filename)
       /* If we have enough space, build the RC filename */
       remaining = sizeof(filebuffer) - strlen(filebuffer);
       if(strlen(filename) < remaining - 1) {
+        FILE *f;
         msnprintf(lastdirchar, remaining, "%s%s", DIR_CHAR, filename);
-        return fopen(filebuffer, FOPEN_READTEXT);
+        *pathp = filebuffer;
+        f = fopen(filebuffer, FOPEN_READTEXT);
+        return f;
       }
     }
   }
@@ -82,54 +87,31 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   struct OperationConfig *operation = global->last;
   char *pathalloc = NULL;
 
-  if(!filename || !*filename) {
-    /* NULL or no file name attempts to load .curlrc from the homedir! */
-
-    char *home = homedir(".curlrc");
-#ifndef WIN32
-    if(home) {
-      pathalloc = curl_maprintf("%s%s.curlrc", home, DIR_CHAR);
-      if(!pathalloc) {
-        free(home);
-        return 1; /* out of memory */
+  if(!filename) {
+    /* NULL means load .curlrc from homedir! */
+    char *curlrc = findfile(".curlrc", CURLRC_DOTSCORE);
+    if(curlrc) {
+      file = fopen(curlrc, FOPEN_READTEXT);
+      if(!file) {
+        free(curlrc);
+        return 1;
       }
-      filename = pathalloc;
+      filename = pathalloc = curlrc;
     }
-#else /* Windows */
-    if(home) {
-      int i = 0;
-      char prefix = '.';
-      do {
-        /* if it was allocated in a previous attempt */
-        curl_free(pathalloc);
-        /* check for .curlrc then _curlrc in the home dir */
-        pathalloc = curl_maprintf("%s%s%ccurlrc", home, DIR_CHAR, prefix);
-        if(!pathalloc) {
-          free(home);
-          return 1; /* out of memory */
-        }
-
-        /* Check if the file exists - if not, try _curlrc */
-        file = fopen(pathalloc, FOPEN_READTEXT);
-        if(file) {
-          filename = pathalloc;
-          break;
-        }
-        prefix = '_';
-      } while(++i < 2);
-    }
-    if(!filename) {
+#ifdef WIN32 /* Windows */
+    else {
+      char *fullp;
       /* check for .curlrc then _curlrc in the dir of the executable */
-      file = execpath(".curlrc");
+      file = execpath(".curlrc", &fullp);
       if(!file)
-        file = execpath("_curlrc");
+        file = execpath("_curlrc", &fullp);
+      if(file)
+        /* this is the filename we read from */
+        filename = fullp;
     }
 #endif
-
-    Curl_safefree(home); /* we've used it, now free it */
   }
-
-  if(!file && filename) { /* no need to fopen() again */
+  else {
     if(strcmp(filename, "-"))
       file = fopen(filename, FOPEN_READTEXT);
     else
@@ -145,6 +127,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     struct curlx_dynbuf buf;
     bool fileerror;
     curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
+    DEBUGASSERT(filename);
 
     while(my_get_line(file, &buf, &fileerror)) {
       int res;
@@ -240,7 +223,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #ifdef DEBUG_CONFIG
       fprintf(stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
-      res = getparameter(option, param, &usedarg, global, operation);
+      res = getparameter(option, param, NULL, &usedarg, global, operation);
       operation = global->last;
 
       if(!res && param && *param && !usedarg)
@@ -299,7 +282,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   else
     rc = 1; /* couldn't open the file */
 
-  curl_free(pathalloc);
+  free(pathalloc);
   return rc;
 }
 

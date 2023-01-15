@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 #***************************************************************************
 
@@ -51,6 +53,7 @@ use vars qw(
     $hstprvkeyf
     $hstpubkeyf
     $hstpubmd5f
+    $hstpubsha256f
     $cliprvkeyf
     $clipubkeyf
     @sftppath
@@ -84,6 +87,7 @@ use vars qw(
     $hstprvkeyf
     $hstpubkeyf
     $hstpubmd5f
+    $hstpubsha256f
     $cliprvkeyf
     $clipubkeyf
     display_sshdconfig
@@ -125,6 +129,7 @@ $knownhosts      = 'curl_client_knownhosts'; # ssh knownhosts file
 $hstprvkeyf      = 'curl_host_rsa_key';      # host private key file
 $hstpubkeyf      = 'curl_host_rsa_key.pub';  # host public key file
 $hstpubmd5f      = 'curl_host_rsa_key.pub_md5';  # md5 hash of host public key
+$hstpubsha256f   = 'curl_host_rsa_key.pub_sha256';  # sha256 hash of host public key
 $cliprvkeyf      = 'curl_client_key';        # client private key file
 $clipubkeyf      = 'curl_client_key.pub';    # client public key file
 

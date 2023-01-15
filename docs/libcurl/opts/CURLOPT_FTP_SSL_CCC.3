@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,23 +18,27 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_FTP_SSL_CCC 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_FTP_SSL_CCC \- switch off SSL again with FTP after auth
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_SSL_CCC,
                           long how);
+.fi
 .SH DESCRIPTION
 If enabled, this option makes libcurl use CCC (Clear Command Channel). It
 shuts down the SSL/TLS layer after authenticating. The rest of the control
 channel communication will be unencrypted. This allows NAT routers to follow
 the FTP transaction. Pass a long using one of the values below
 .IP CURLFTPSSL_CCC_NONE
-Don't attempt to use CCC.
+do not attempt to use CCC.
 .IP CURLFTPSSL_CCC_PASSIVE
 Do not initiate the shutdown, but wait for the server to do it. Do not send a
 reply.
@@ -51,7 +55,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
   curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_CONTROL);
   /* go back to clear-text FTP after authenticating */
-  curl_easy_setopt(curl, CURLOPT_FTP_SSL_CCC, CURLFTPSSL_CCC_ACTIVE);
+  curl_easy_setopt(curl, CURLOPT_FTP_SSL_CCC, (long)CURLFTPSSL_CCC_ACTIVE);
   ret = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }

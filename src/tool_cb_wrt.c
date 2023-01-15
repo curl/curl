@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -48,50 +50,95 @@
 #define OPENMODE S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
 #endif
 
-/* create a local file for writing, return TRUE on success */
+/* create/open a local file for writing, return TRUE on success */
 bool tool_create_output_file(struct OutStruct *outs,
                              struct OperationConfig *config)
 {
   struct GlobalConfig *global;
   FILE *file = NULL;
+  char *fname = outs->filename;
+  char *aname = NULL;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
   global = config->global;
-  if(!outs->filename || !*outs->filename) {
+  if(!fname || !*fname) {
     warnf(global, "Remote filename has no length!\n");
     return FALSE;
   }
 
-  if(outs->is_cd_filename) {
-    /* don't overwrite existing files */
+  if(config->output_dir && outs->is_cd_filename) {
+    aname = aprintf("%s/%s", config->output_dir, fname);
+    if(!aname) {
+      errorf(global, "out of memory\n");
+      return FALSE;
+    }
+    fname = aname;
+  }
+
+  if(config->file_clobber_mode == CLOBBER_ALWAYS ||
+     (config->file_clobber_mode == CLOBBER_DEFAULT &&
+      !outs->is_cd_filename)) {
+    /* open file for writing */
+    file = fopen(fname, "wb");
+  }
+  else {
     int fd;
-    char *name = outs->filename;
-    char *aname = NULL;
-    if(config->output_dir) {
-      aname = aprintf("%s/%s", config->output_dir, name);
-      if(!aname) {
-        errorf(global, "out of memory\n");
+    do {
+      fd = open(fname, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
+      /* Keep retrying in the hope that it isn't interrupted sometime */
+    } while(fd == -1 && errno == EINTR);
+    if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
+      int next_num = 1;
+      size_t len = strlen(fname);
+      size_t newlen = len + 13; /* nul + 1-11 digits + dot */
+      char *newname;
+      /* Guard against wraparound in new filename */
+      if(newlen < len) {
+        free(aname);
+        errorf(global, "overflow in filename generation\n");
         return FALSE;
       }
-      name = aname;
+      newname = malloc(newlen);
+      if(!newname) {
+        errorf(global, "out of memory\n");
+        free(aname);
+        return FALSE;
+      }
+      memcpy(newname, fname, len);
+      newname[len] = '.';
+      while(fd == -1 && /* haven't successfully opened a file */
+            (errno == EEXIST || errno == EISDIR) &&
+            /* because we keep having files that already exist */
+            next_num < 100 /* and we haven't reached the retry limit */ ) {
+        curlx_msnprintf(newname + len + 1, 12, "%d", next_num);
+        next_num++;
+        do {
+          fd = open(newname, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
+          /* Keep retrying in the hope that it isn't interrupted sometime */
+        } while(fd == -1 && errno == EINTR);
+      }
+      outs->filename = newname; /* remember the new one */
+      outs->alloc_filename = TRUE;
     }
-    fd = open(name, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
+    /* An else statement to not overwrite existing files and not retry with
+       new numbered names (which would cover
+       config->file_clobber_mode == CLOBBER_DEFAULT && outs->is_cd_filename)
+       is not needed because we would have failed earlier, in the while loop
+       and `fd` would now be -1 */
     if(fd != -1) {
       file = fdopen(fd, "wb");
       if(!file)
         close(fd);
     }
-    free(aname);
   }
-  else
-    /* open file for writing */
-    file = fopen(outs->filename, "wb");
 
   if(!file) {
-    warnf(global, "Failed to create the file %s: %s\n", outs->filename,
+    warnf(global, "Failed to open the file %s: %s\n", fname,
           strerror(errno));
+    free(aname);
     return FALSE;
   }
+  free(aname);
   outs->s_isreg = TRUE;
   outs->fopened = TRUE;
   outs->stream = file;
@@ -117,14 +164,6 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   intptr_t fhnd;
 #endif
 
-  /*
-   * Once that libcurl has called back tool_write_cb() the returned value
-   * is checked against the amount that was intended to be written, if
-   * it does not match then it fails with CURLE_WRITE_ERROR. So at this
-   * point returning a value different from sz*nmemb indicates failure.
-   */
-  const size_t failure = bytes ? 0 : 1;
-
 #ifdef DEBUGBUILD
   {
     char *tty = curlx_getenv("CURL_ISATTY");
@@ -138,13 +177,13 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {
       warnf(config->global, "Header data size exceeds single call write "
             "limit!\n");
-      return failure;
+      return CURL_WRITEFUNC_ERROR;
     }
   }
   else {
     if(bytes > (size_t)CURL_MAX_WRITE_SIZE) {
       warnf(config->global, "Data size exceeds single call write limit!\n");
-      return failure;
+      return CURL_WRITEFUNC_ERROR;
     }
   }
 
@@ -173,13 +212,13 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
     if(check_fails) {
       warnf(config->global, "Invalid output struct data for write callback\n");
-      return failure;
+      return CURL_WRITEFUNC_ERROR;
     }
   }
 #endif
 
   if(!outs->stream && !tool_create_output_file(outs, per->config))
-    return failure;
+    return CURL_WRITEFUNC_ERROR;
 
   if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {
     /* binary output to terminal? */
@@ -187,8 +226,8 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       warnf(config->global, "Binary output can mess up your terminal. "
             "Use \"--output -\" to tell curl to output it to your terminal "
             "anyway, or consider \"--output <FILE>\" to save to a file.\n");
-      config->synthetic_error = ERR_BINARY_TERMINAL;
-      return failure;
+      config->synthetic_error = TRUE;
+      return CURL_WRITEFUNC_ERROR;
     }
   }
 
@@ -204,13 +243,13 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len,  NULL, 0);
     wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
     if(!wc_buf)
-      return failure;
+      return CURL_WRITEFUNC_ERROR;
 
     /* calculate buffer size for multi-byte characters */
     wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len, wc_buf, wc_len);
     if(!wc_len) {
       free(wc_buf);
-      return failure;
+      return CURL_WRITEFUNC_ERROR;
     }
 
     if(!WriteConsoleW(
@@ -220,7 +259,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
         &wc_len,
         NULL)) {
       free(wc_buf);
-      return failure;
+      return CURL_WRITEFUNC_ERROR;
     }
     free(wc_buf);
     rc = bytes;
@@ -242,7 +281,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     /* output buffering disabled */
     int res = fflush(outs->stream);
     if(res)
-      return failure;
+      return CURL_WRITEFUNC_ERROR;
   }
 
   return rc;

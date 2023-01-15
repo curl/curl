@@ -22,34 +22,35 @@ Server: test-server/fake
 Content-Length: 4
 Content-Type: text/html
 Funny-head: yesyes
+Set-Cookie: blankdomain=sure; domain=; path=/
 %if !hyper
 Set-Cookie: foobar=name; domain=anything.com; path=/ ; secure
-Set-Cookie:ismatch=this  ; domain=127.0.0.1; path=/silly/
-Set-Cookie: overwrite=this  ; domain=127.0.0.1; path=/overwrite/
-Set-Cookie: overwrite=this2  ; domain=127.0.0.1; path=/overwrite
-Set-Cookie: sec1value=secure1  ; domain=127.0.0.1; path=/secure1/ ; secure
-Set-Cookie: sec2value=secure2  ; domain=127.0.0.1; path=/secure2/ ; secure=
-Set-Cookie: sec3value=secure3  ; domain=127.0.0.1; path=/secure3/ ; secure=
-Set-Cookie: sec4value=secure4  ; secure=; domain=127.0.0.1; path=/secure4/ ; 
-Set-Cookie: sec5value=secure5  ; secure; domain=127.0.0.1; path=/secure5/ ; 
-Set-Cookie: sec6value=secure6  ; secure ; domain=127.0.0.1; path=/secure6/ ; 
-Set-Cookie: sec7value=secure7  ; secure   ; domain=127.0.0.1; path=/secure7/ ; 
-Set-Cookie: sec8value=secure8  ; secure= ; domain=127.0.0.1; path=/secure8/ ; 
-Set-Cookie: secure=very1  ; secure=; domain=127.0.0.1; path=/secure9/; 
-Set-Cookie: httpo1=value1  ; domain=127.0.0.1; path=/p1/; httponly
-Set-Cookie: httpo2=value2  ; domain=127.0.0.1; path=/p2/; httponly=
-Set-Cookie: httpo3=value3  ; httponly; domain=127.0.0.1; path=/p3/;
-Set-Cookie: httpo4=value4  ; httponly=; domain=127.0.0.1; path=/p4/; 
-Set-Cookie: httponly=myvalue1  ; domain=127.0.0.1; path=/p4/; httponly
-Set-Cookie: httpandsec=myvalue2  ; domain=127.0.0.1; path=/p4/; httponly; secure
-Set-Cookie: httpandsec2=myvalue3; domain=127.0.0.1; path=/p4/; httponly=; secure
-Set-Cookie: httpandsec3=myvalue4  ; domain=127.0.0.1; path=/p4/; httponly; secure=
-Set-Cookie: httpandsec4=myvalue5  ; domain=127.0.0.1; path=/p4/; httponly=; secure=
-Set-Cookie: httpandsec5=myvalue6  ; domain=127.0.0.1; path=/p4/; secure; httponly=
-Set-Cookie: httpandsec6=myvalue7  ; domain=127.0.0.1; path=/p4/; secure=; httponly=
-Set-Cookie: httpandsec7=myvalue8  ; domain=127.0.0.1; path=/p4/; secure; httponly
-Set-Cookie: httpandsec8=myvalue9; domain=127.0.0.1; path=/p4/; secure=; httponly
-Set-Cookie: partmatch=present; domain=127.0.0.1 ; path=/;
+Set-Cookie:ismatch=this  ; domain=test31.curl; path=/silly/
+Set-Cookie: overwrite=this  ; domain=test31.curl; path=/overwrite/
+Set-Cookie: overwrite=this2  ; domain=test31.curl; path=/overwrite
+Set-Cookie: sec1value=secure1  ; domain=test31.curl; path=/secure1/ ; secure
+Set-Cookie: sec2value=secure2  ; domain=test31.curl; path=/secure2/ ; secure=
+Set-Cookie: sec3value=secure3  ; domain=test31.curl; path=/secure3/ ; secure=
+Set-Cookie: sec4value=secure4  ; secure=; domain=test31.curl; path=/secure4/ ; 
+Set-Cookie: sec5value=secure5  ; secure; domain=test31.curl; path=/secure5/ ; 
+Set-Cookie: sec6value=secure6  ; secure ; domain=test31.curl; path=/secure6/ ; 
+Set-Cookie: sec7value=secure7  ; secure   ; domain=test31.curl; path=/secure7/ ; 
+Set-Cookie: sec8value=secure8  ; secure= ; domain=test31.curl; path=/secure8/ ; 
+Set-Cookie: secure=very1  ; secure=; domain=test31.curl; path=/secure9/; 
+Set-Cookie: httpo1=value1  ; domain=test31.curl; path=/p1/; httponly
+Set-Cookie: httpo2=value2  ; domain=test31.curl; path=/p2/; httponly=
+Set-Cookie: httpo3=value3  ; httponly; domain=test31.curl; path=/p3/;
+Set-Cookie: httpo4=value4  ; httponly=; domain=test31.curl; path=/p4/; 
+Set-Cookie: httponly=myvalue1  ; domain=test31.curl; path=/p4/; httponly
+Set-Cookie: httpandsec=myvalue2  ; domain=test31.curl; path=/p4/; httponly; secure
+Set-Cookie: httpandsec2=myvalue3; domain=test31.curl; path=/p4/; httponly=; secure
+Set-Cookie: httpandsec3=myvalue4  ; domain=test31.curl; path=/p4/; httponly; secure=
+Set-Cookie: httpandsec4=myvalue5  ; domain=test31.curl; path=/p4/; httponly=; secure=
+Set-Cookie: httpandsec5=myvalue6  ; domain=test31.curl; path=/p4/; secure; httponly=
+Set-Cookie: httpandsec6=myvalue7  ; domain=test31.curl; path=/p4/; secure=; httponly=
+Set-Cookie: httpandsec7=myvalue8  ; domain=test31.curl; path=/p4/; secure; httponly
+Set-Cookie: httpandsec8=myvalue9; domain=test31.curl; path=/p4/; secure=; httponly
+Set-Cookie: partmatch=present; domain=test31.curl ; path=/;
 Set-Cookie:eat=this; domain=moo.foo.moo;
 Set-Cookie: eat=this-too; domain=.foo.moo;
 Set-Cookie: nodomainnovalue
@@ -58,7 +59,7 @@ Set-Cookie: novalue; domain=reallysilly
 Set-Cookie: test=yes; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
 Set-Cookie: test2=yes; domain=se; expires=Sat Feb 2 11:56:27 GMT 2030
 Set-Cookie: magic=yessir; path=/silly/; HttpOnly
-Set-Cookie: blexp=yesyes; domain=127.0.0.1; domain=127.0.0.1; expiry=totally bad;
+Set-Cookie: blexp=yesyes; domain=test31.curl; domain=test31.curl; expiry=totally bad;
 Set-Cookie: partialip=nono; domain=.0.0.1;
 Set-Cookie: withspaces=  yes  within and around    ;
 Set-Cookie: withspaces2 =before equals;
@@ -66,32 +67,32 @@ Set-Cookie: prespace=  yes before;
 Set-Cookie: securewithspace=after    ; secure =
 %else
 Set-Cookie: foobar=name; domain=anything.com; path=/ ; secure
-Set-Cookie: ismatch=this  ; domain=127.0.0.1; path=/silly/
-Set-Cookie: overwrite=this  ; domain=127.0.0.1; path=/overwrite/
-Set-Cookie: overwrite=this2  ; domain=127.0.0.1; path=/overwrite
-Set-Cookie: sec1value=secure1  ; domain=127.0.0.1; path=/secure1/ ; secure
-Set-Cookie: sec2value=secure2  ; domain=127.0.0.1; path=/secure2/ ; secure=
-Set-Cookie: sec3value=secure3  ; domain=127.0.0.1; path=/secure3/ ; secure=
-Set-Cookie: sec4value=secure4  ; secure=; domain=127.0.0.1; path=/secure4/ ;
-Set-Cookie: sec5value=secure5  ; secure; domain=127.0.0.1; path=/secure5/ ;
-Set-Cookie: sec6value=secure6  ; secure ; domain=127.0.0.1; path=/secure6/ ;
-Set-Cookie: sec7value=secure7  ; secure   ; domain=127.0.0.1; path=/secure7/ ;
-Set-Cookie: sec8value=secure8  ; secure= ; domain=127.0.0.1; path=/secure8/ ;
-Set-Cookie: secure=very1  ; secure=; domain=127.0.0.1; path=/secure9/;
-Set-Cookie: httpo1=value1  ; domain=127.0.0.1; path=/p1/; httponly
-Set-Cookie: httpo2=value2  ; domain=127.0.0.1; path=/p2/; httponly=
-Set-Cookie: httpo3=value3  ; httponly; domain=127.0.0.1; path=/p3/;
-Set-Cookie: httpo4=value4  ; httponly=; domain=127.0.0.1; path=/p4/;
-Set-Cookie: httponly=myvalue1  ; domain=127.0.0.1; path=/p4/; httponly
-Set-Cookie: httpandsec=myvalue2  ; domain=127.0.0.1; path=/p4/; httponly; secure
-Set-Cookie: httpandsec2=myvalue3; domain=127.0.0.1; path=/p4/; httponly=; secure
-Set-Cookie: httpandsec3=myvalue4  ; domain=127.0.0.1; path=/p4/; httponly; secure=
-Set-Cookie: httpandsec4=myvalue5  ; domain=127.0.0.1; path=/p4/; httponly=; secure=
-Set-Cookie: httpandsec5=myvalue6  ; domain=127.0.0.1; path=/p4/; secure; httponly=
-Set-Cookie: httpandsec6=myvalue7  ; domain=127.0.0.1; path=/p4/; secure=; httponly=
-Set-Cookie: httpandsec7=myvalue8  ; domain=127.0.0.1; path=/p4/; secure; httponly
-Set-Cookie: httpandsec8=myvalue9; domain=127.0.0.1; path=/p4/; secure=; httponly
-Set-Cookie: partmatch=present; domain=127.0.0.1 ; path=/;
+Set-Cookie: ismatch=this  ; domain=test31.curl; path=/silly/
+Set-Cookie: overwrite=this  ; domain=test31.curl; path=/overwrite/
+Set-Cookie: overwrite=this2  ; domain=test31.curl; path=/overwrite
+Set-Cookie: sec1value=secure1  ; domain=test31.curl; path=/secure1/ ; secure
+Set-Cookie: sec2value=secure2  ; domain=test31.curl; path=/secure2/ ; secure=
+Set-Cookie: sec3value=secure3  ; domain=test31.curl; path=/secure3/ ; secure=
+Set-Cookie: sec4value=secure4  ; secure=; domain=test31.curl; path=/secure4/ ;
+Set-Cookie: sec5value=secure5  ; secure; domain=test31.curl; path=/secure5/ ;
+Set-Cookie: sec6value=secure6  ; secure ; domain=test31.curl; path=/secure6/ ;
+Set-Cookie: sec7value=secure7  ; secure   ; domain=test31.curl; path=/secure7/ ;
+Set-Cookie: sec8value=secure8  ; secure= ; domain=test31.curl; path=/secure8/ ;
+Set-Cookie: secure=very1  ; secure=; domain=test31.curl; path=/secure9/;
+Set-Cookie: httpo1=value1  ; domain=test31.curl; path=/p1/; httponly
+Set-Cookie: httpo2=value2  ; domain=test31.curl; path=/p2/; httponly=
+Set-Cookie: httpo3=value3  ; httponly; domain=test31.curl; path=/p3/;
+Set-Cookie: httpo4=value4  ; httponly=; domain=test31.curl; path=/p4/;
+Set-Cookie: httponly=myvalue1  ; domain=test31.curl; path=/p4/; httponly
+Set-Cookie: httpandsec=myvalue2  ; domain=test31.curl; path=/p4/; httponly; secure
+Set-Cookie: httpandsec2=myvalue3; domain=test31.curl; path=/p4/; httponly=; secure
+Set-Cookie: httpandsec3=myvalue4  ; domain=test31.curl; path=/p4/; httponly; secure=
+Set-Cookie: httpandsec4=myvalue5  ; domain=test31.curl; path=/p4/; httponly=; secure=
+Set-Cookie: httpandsec5=myvalue6  ; domain=test31.curl; path=/p4/; secure; httponly=
+Set-Cookie: httpandsec6=myvalue7  ; domain=test31.curl; path=/p4/; secure=; httponly=
+Set-Cookie: httpandsec7=myvalue8  ; domain=test31.curl; path=/p4/; secure; httponly
+Set-Cookie: httpandsec8=myvalue9; domain=test31.curl; path=/p4/; secure=; httponly
+Set-Cookie: partmatch=present; domain=test31.curl ; path=/;
 Set-Cookie: eat=this; domain=moo.foo.moo;
 Set-Cookie: eat=this-too; domain=.foo.moo;
 Set-Cookie: nodomainnovalue
@@ -100,7 +101,7 @@ Set-Cookie: novalue; domain=reallysilly
 Set-Cookie: test=yes; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
 Set-Cookie: test2=yes; domain=se; expires=Sat Feb 2 11:56:27 GMT 2030
 Set-Cookie: magic=yessir; path=/silly/; HttpOnly
-Set-Cookie: blexp=yesyes; domain=127.0.0.1; domain=127.0.0.1; expiry=totally bad;
+Set-Cookie: blexp=yesyes; domain=test31.curl; domain=test31.curl; expiry=totally bad;
 Set-Cookie: partialip=nono; domain=.0.0.1;
 Set-Cookie: withspaces=  yes  within and around    ;
 Set-Cookie: withspaces2 =before equals;
@@ -127,7 +128,7 @@ HTTP with weirdly formatted cookies and cookiejar storage
 TZ=GMT
 </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b none -c log/jar%TESTNUMBER.txt
+http://test31.curl:%HTTPPORT/we/want/%TESTNUMBER -b none -c log/jar%TESTNUMBER.txt --resolve test31.curl:%HTTPPORT:127.0.0.1
 </command>
 <precheck>
 perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
@@ -138,7 +139,7 @@ perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0
 <verify>
 <protocol>
 GET /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
+Host: test31.curl:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
@@ -148,20 +149,21 @@ Accept: */*
 # https://curl.se/docs/http-cookies.html
 # This file was generated by libcurl! Edit at your own risk.
 
-127.0.0.1	FALSE	/we/want/	FALSE	0	prespace	yes before
-127.0.0.1	FALSE	/we/want/	FALSE	0	withspaces2	before equals
-127.0.0.1	FALSE	/we/want/	FALSE	0	withspaces	yes  within and around
-127.0.0.1	FALSE	/we/want/	FALSE	0	blexp	yesyes
-#HttpOnly_127.0.0.1	FALSE	/silly/	FALSE	0	magic	yessir
-127.0.0.1	FALSE	/we/want/	FALSE	2118138987	nodomain	value
-127.0.0.1	FALSE	/	FALSE	0	partmatch	present
-#HttpOnly_127.0.0.1	FALSE	/p4/	FALSE	0	httponly	myvalue1
-#HttpOnly_127.0.0.1	FALSE	/p4/	FALSE	0	httpo4	value4
-#HttpOnly_127.0.0.1	FALSE	/p3/	FALSE	0	httpo3	value3
-#HttpOnly_127.0.0.1	FALSE	/p2/	FALSE	0	httpo2	value2
-#HttpOnly_127.0.0.1	FALSE	/p1/	FALSE	0	httpo1	value1
-127.0.0.1	FALSE	/overwrite	FALSE	0	overwrite	this2
-127.0.0.1	FALSE	/silly/	FALSE	0	ismatch	this
+test31.curl	FALSE	/we/want/	FALSE	0	prespace	yes before
+test31.curl	FALSE	/we/want/	FALSE	0	withspaces2	before equals
+test31.curl	FALSE	/we/want/	FALSE	0	withspaces	yes  within and around
+.test31.curl	TRUE	/we/want/	FALSE	0	blexp	yesyes
+#HttpOnly_test31.curl	FALSE	/silly/	FALSE	0	magic	yessir
+test31.curl	FALSE	/we/want/	FALSE	2118138987	nodomain	value
+.test31.curl	TRUE	/	FALSE	0	partmatch	present
+#HttpOnly_.test31.curl	TRUE	/p4/	FALSE	0	httponly	myvalue1
+#HttpOnly_.test31.curl	TRUE	/p4/	FALSE	0	httpo4	value4
+#HttpOnly_.test31.curl	TRUE	/p3/	FALSE	0	httpo3	value3
+#HttpOnly_.test31.curl	TRUE	/p2/	FALSE	0	httpo2	value2
+#HttpOnly_.test31.curl	TRUE	/p1/	FALSE	0	httpo1	value1
+.test31.curl	TRUE	/overwrite	FALSE	0	overwrite	this2
+.test31.curl	TRUE	/silly/	FALSE	0	ismatch	this
+test31.curl	FALSE	/	FALSE	0	blankdomain	sure
 </file>
 </verify>
 </testcase>

@@ -15,12 +15,18 @@ none
 </server>
 
  <name>
-Basic man page syntax check
+Man page syntax checks
  </name>
 
 <command type="perl">
-%SRCDIR/manpage-syntax.pl %SRCDIR/../docs/*.1  %SRCDIR/../docs/libcurl/*.3 %SRCDIR/../docs/libcurl/opts/*.3
+%SRCDIR/manpage-syntax.pl %SRCDIR/../docs/libcurl/symbols-in-versions %SRCDIR/../docs/*.1  %SRCDIR/../docs/libcurl/*.3 %SRCDIR/../docs/libcurl/opts/*.3
 </command>
 </client>
+
+<verify>
+<stderr>
+ok
+</stderr>
+</verify>
 
 </testcase>

@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP PUT
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 01 Nov 2001 14:49:00 GMT
+Content-Type: text/html
+Content-Length: 6
+
+hello
+</data>
+<datacheck>
+HTTP/1.1 200 OK
+Date: Thu, 01 Nov 2001 14:49:00 GMT
+Content-Type: text/html
+Content-Length: 6
+
+hello
+HTTP/1.1 200 OK
+Date: Thu, 01 Nov 2001 14:49:00 GMT
+Content-Type: text/html
+Content-Length: 6
+
+hello
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+
+<name>
+CURLOPT_POST after CURLOPT_UPLOAD reusing handle
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+PUT /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 22
+Expect: 100-continue
+
+This is test PUT data
+POST /1948 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 22
+Content-Type: application/x-www-form-urlencoded
+
+This is test PUT data
+</protocol>
+</verify>
+</testcase>

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,20 +18,30 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_version 3 "5 March 2001" "libcurl 7.0" "libcurl Manual"
 .SH NAME
 curl_version - returns the libcurl version string
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "char *curl_version( );"
-.ad
+.nf
+#include <curl/curl.h>
+
+char *curl_version();
+.fi
 .SH DESCRIPTION
 Returns a human readable string with the version number of libcurl and some of
 its important components (like OpenSSL version).
 
 We recommend using \fIcurl_version_info(3)\fP instead!
+.SH EXAMPLE
+.nf
+printf("libcurl version %s\\n", curl_version());
+.fi
+
+.SH AVAILABILITY
+Always
 .SH RETURN VALUE
 A pointer to a null-terminated string. The string resides in a statically
 allocated buffer and must not be freed by the caller.

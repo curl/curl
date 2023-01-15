@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -75,7 +77,7 @@ store the info in a 'setup' file, which it will look for on each invoke. Use
 \fI--name\fP, \fI--email\fP, \fI--configure\fP and \fI--desc\fP instead.
 .IP "--target=[your os]"
 Specify your target environment. Recognized strings include 'vc', 'mingw32',
-\&'borland' and 'netware'.
+and \&'borland'.
 .SH "INITIAL SETUP"
 First you make a checkout from git (or you write a script that downloads daily
 snapshots automatically, find inspiration in

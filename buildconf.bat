@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+rem * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@ rem * furnished to do so, under the terms of the COPYING file.
 rem *
 rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
+rem *
+rem * SPDX-License-Identifier: curl
 rem *
 rem ***************************************************************************
 

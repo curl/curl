@@ -1,8 +1,13 @@
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: anyauth
 Help: Pick any authentication method
 Protocols: HTTP
 See-also: proxy-anyauth basic digest
 Category: http proxy auth
+Example: --anyauth --user me:pwd $URL
+Added: 7.10.6
+Multi: mutex
 ---
 Tells curl to figure out authentication method by itself, and use the most
 secure one the remote site claims to support. This is done by first doing a

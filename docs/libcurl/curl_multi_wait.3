@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .TH curl_multi_wait 3 "12 Jul 2012" "libcurl 7.28.0" "libcurl Manual"
@@ -34,14 +36,15 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
 .ad
 .SH DESCRIPTION
 \fIcurl_multi_wait(3)\fP polls all file descriptors used by the curl easy
-handles contained in the given multi handle set.  It will block until activity
+handles contained in the given multi handle set. It will block until activity
 is detected on at least one of the handles or \fItimeout_ms\fP has passed.
 Alternatively, if the multi handle has a pending internal timeout that has a
 shorter expiry time than \fItimeout_ms\fP, that shorter time will be used
 instead to make sure timeout accuracy is reasonably kept.
 
-The calling application may pass additional curl_waitfd structures which are
-similar to \fIpoll(2)\fP's pollfd structure to be waited on in the same call.
+The calling application may pass additional \fIcurl_waitfd\fP structures which
+are similar to \fIpoll(2)\fP's \fIpollfd\fP structure to be waited on in the
+same call.
 
 On completion, if \fInumfds\fP is non-NULL, it will be populated with the
 total number of file descriptors on which interesting events occurred. This
@@ -64,14 +67,14 @@ struct curl_waitfd {
 };
 .fi
 .IP CURL_WAIT_POLLIN
-Bit flag to curl_waitfd.events indicating the socket should poll on read
+Bit flag to \fIcurl_waitfd.events\fP indicating the socket should poll on read
 events such as new data received.
 .IP CURL_WAIT_POLLPRI
-Bit flag to curl_waitfd.events indicating the socket should poll on high
+Bit flag to \fIcurl_waitfd.events\fP indicating the socket should poll on high
 priority read events such as out of band data.
 .IP CURL_WAIT_POLLOUT
-Bit flag to curl_waitfd.events indicating the socket should poll on write
-events such as the socket being clear to write without blocking.
+Bit flag to \fIcurl_waitfd.events\fP indicating the socket should poll on
+write events such as the socket being clear to write without blocking.
 .SH EXAMPLE
 .nf
 CURL *easy_handle;
@@ -114,10 +117,10 @@ do {
 
 curl_multi_remove_handle(multi_handle, easy_handle);
 .fi
+.SH AVAILABILITY
+This function was added in libcurl 7.28.0.
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
-.SH AVAILABILITY
-This function was added in libcurl 7.28.0.
 .SH "SEE ALSO"
 .BR curl_multi_fdset "(3), " curl_multi_perform "(3)", curl_multi_poll "(3) ",

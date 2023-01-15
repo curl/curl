@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PINNEDPUBLICKEY 3 "27 Aug 2014" "libcurl 7.38.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PINNEDPUBLICKEY \- set pinned public key
+CURLOPT_PINNEDPUBLICKEY \- pinned public key
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PINNEDPUBLICKEY, char *pinnedpubkey);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PINNEDPUBLICKEY,
+                          char *pinnedpubkey);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. The string can be the
 file name of your pinned public key. The file format expected is "PEM" or "DER".
@@ -64,14 +69,14 @@ if(curl) {
 If you do not have the server's public key file you can extract it from the
 server's certificate.
 .nf
-# retrieve the server's certificate if you don't already have it
+# retrieve the server's certificate if you do not already have it
 #
 # be sure to examine the certificate to see if it is what you expected
 #
 # Windows-specific:
 # - Use NUL instead of /dev/null.
 # - OpenSSL may wait for input instead of disconnecting. Hit enter.
-# - If you don't have sed, then just copy the certificate into a file:
+# - If you do not have sed, then just copy the certificate into a file:
 #   Lines from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE-----.
 #
 openssl s_client -servername www.example.com -connect www.example.com:443 < /dev/null | sed -n "/-----BEGIN/,/-----END/p" > www.example.com.pem
@@ -101,21 +106,21 @@ PEM/DER support:
 
   7.43.0: NSS and wolfSSL
 
-  7.47.0: mbedtls
+  7.47.0: mbedTLS
 
-  7.54.1: SecureTransport on macOS 10.7+/iOS 10+
+  7.54.1: Secure Transport on macOS 10.7+/iOS 10+
 
-  7.58.1: SChannel
+  7.58.1: Schannel
 
 sha256 support:
 
   7.44.0: OpenSSL, GnuTLS, NSS and wolfSSL
 
-  7.47.0: mbedtls
+  7.47.0: mbedTLS
 
-  7.54.1: SecureTransport on macOS 10.7+/iOS 10+
+  7.54.1: Secure Transport on macOS 10.7+/iOS 10+
 
-  7.58.1: SChannel Windows XP SP3+
+  7.58.1: Schannel Windows XP SP3+
 
 Other SSL backends not supported.
 .SH RETURN VALUE

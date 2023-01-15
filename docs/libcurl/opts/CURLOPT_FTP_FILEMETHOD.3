@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -33,7 +35,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_FILEMETHOD,
 Pass a long telling libcurl which \fImethod\fP to use to reach a file on a
 FTP(S) server.
 
-This option exists because some server implementations aren't compliant to
+This option exists because some server implementations are not compliant to
 what the standards say should work.
 
 The argument should be one of the following alternatives:
@@ -58,7 +60,7 @@ CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/1/2/3/4/new.txt");
   curl_easy_setopt(curl, CURLOPT_FTP_FILEMETHOD,
-                         CURLFTPMETHOD_SINGLECWD);
+                   (long)CURLFTPMETHOD_SINGLECWD);
 
   ret = curl_easy_perform(curl);
 

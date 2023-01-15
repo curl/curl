@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
+
+#include "curl_setup.h"
 
 #include "pingpong.h"
 
@@ -38,7 +42,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data, ssize_t *nread,
 /****************************************************************************
  * FTP unique setup
  ***************************************************************************/
-typedef enum {
+enum {
   FTP_STOP,    /* do nothing state, stops the state machine */
   FTP_WAIT220, /* waiting for the initial 220 response immediately after
                   a connect */
@@ -76,7 +80,8 @@ typedef enum {
   FTP_STOR, /* generic state for STOR and APPE */
   FTP_QUIT,
   FTP_LAST  /* never used */
-} ftpstate;
+};
+typedef unsigned char ftpstate; /* use the enum values */
 
 struct ftp_parselist_data; /* defined later in ftplistparser.c */
 
@@ -118,37 +123,38 @@ struct ftp_conn {
   char *entrypath; /* the PWD reply when we logged on */
   char *file;    /* url-decoded file name (or path) */
   char **dirs;   /* realloc()ed array for path components */
-  int dirdepth;  /* number of entries used in the 'dirs' array */
-  bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
-                       file size and 226/250 status check. It should still
-                       read the line, just ignore the result. */
-  bool ctl_valid;   /* Tells Curl_ftp_quit() whether or not to do anything. If
-                       the connection has timed out or been closed, this
-                       should be FALSE when it gets to Curl_ftp_quit() */
-  bool cwddone;     /* if it has been determined that the proper CWD combo
-                       already has been done */
-  int cwdcount;     /* number of CWD commands issued */
-  bool cwdfail;     /* set TRUE if a CWD command fails, as then we must prevent
-                       caching the current directory */
-  bool wait_data_conn; /* this is set TRUE if data connection is waited */
-  /* newhost is the (allocated) IP addr or host name to connect the data
-     connection to */
-  unsigned short newport;
   char *newhost;
   char *prevpath;   /* url-decoded conn->path from the previous transfer */
   char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
                         and others (A/I or zero) */
-  int count1; /* general purpose counter for the state machine */
-  int count2; /* general purpose counter for the state machine */
-  int count3; /* general purpose counter for the state machine */
-  ftpstate state; /* always use ftp.c:state() to change state! */
-  ftpstate state_saved; /* transfer type saved to be reloaded after
-                           data connection is established */
   curl_off_t retr_size_saved; /* Size of retrieved file saved */
   char *server_os;     /* The target server operating system. */
   curl_off_t known_filesize; /* file size is different from -1, if wildcard
                                 LIST parsing was done and wc_statemach set
                                 it */
+  int dirdepth;  /* number of entries used in the 'dirs' array */
+  int cwdcount;     /* number of CWD commands issued */
+  int count1; /* general purpose counter for the state machine */
+  int count2; /* general purpose counter for the state machine */
+  int count3; /* general purpose counter for the state machine */
+  /* newhost is the (allocated) IP addr or host name to connect the data
+     connection to */
+  unsigned short newport;
+  ftpstate state; /* always use ftp.c:state() to change state! */
+  ftpstate state_saved; /* transfer type saved to be reloaded after data
+                           connection is established */
+  BIT(ftp_trying_alternative);
+  BIT(dont_check);  /* Set to TRUE to prevent the final (post-transfer)
+                       file size and 226/250 status check. It should still
+                       read the line, just ignore the result. */
+  BIT(ctl_valid);   /* Tells Curl_ftp_quit() whether or not to do anything. If
+                       the connection has timed out or been closed, this
+                       should be FALSE when it gets to Curl_ftp_quit() */
+  BIT(cwddone);     /* if it has been determined that the proper CWD combo
+                       already has been done */
+  BIT(cwdfail);     /* set TRUE if a CWD command fails, as then we must prevent
+                       caching the current directory */
+  BIT(wait_data_conn); /* this is set TRUE if data connection is waited */
 };
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */

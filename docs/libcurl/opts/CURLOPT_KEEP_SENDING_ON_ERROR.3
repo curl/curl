@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_KEEP_SENDING_ON_ERROR 3 "22 Sep 2016" "libcurl 7.51.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_KEEP_SENDING_ON_ERROR \- keep sending on early HTTP response >= 300
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_KEEP_SENDING_ON_ERROR,
                           long keep_sending);
+.fi
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to keep sending the request body
 if the HTTP code returned is equal to or larger than 300. The default action

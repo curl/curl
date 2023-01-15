@@ -1,0 +1,68 @@
+<testcase>
+<info>
+<keywords>
+curl_easy_header
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK
+Date: Thu, 01 Nov 2001 14:49:00 GMT
+Server:       test with trailing space     
+Content-Type: text/html
+Content-Length: 0
+Set-Cookie: onecookie=data;
+Set-Cookie: secondcookie=2data;
+Set-Cookie: cookie3=data3;
+Location: /%TESTNUMBER0002
+
+</data>
+<data2 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: the other one
+Content-Type: text/html
+Content-Length: 0
+Set-Cookie: 1cookie=data1;
+Set-Cookie: 2cookie=data2;
+
+</data2>
+</reply>
+
+# Client-side
+<client>
+<features>
+headers-api
+</features>
+<server>
+http
+</server>
+
+<name>
+curl_easy_header with redirect but get headers from first request
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+ Date == Thu, 01 Nov 2001 14:49:00 GMT
+ Server == test with trailing space
+ Content-Type == text/html
+ Content-Length == 0
+ Location == /19460002
+- Set-Cookie == onecookie=data; (0/3)
+- Set-Cookie == secondcookie=2data; (1/3)
+- Set-Cookie == cookie3=data3; (2/3)
+</stdout>
+</verify>
+</testcase>

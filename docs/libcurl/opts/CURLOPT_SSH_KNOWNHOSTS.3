@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,22 +18,26 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SSH_KNOWNHOSTS 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_SSH_KNOWNHOSTS \- file name holding the SSH known hosts
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_KNOWNHOSTS, char *fname);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string holding the file name of the
 known_host file to use.  The known_hosts file should use the OpenSSH file
 format as supported by libssh2. If this file is specified, libcurl will only
 accept connections with hosts that are known and present in that file, with a
 matching public key. Use \fICURLOPT_SSH_KEYFUNCTION(3)\fP to alter the default
-behavior on host and key (mis)matching.
+behavior on host and key matches and mismatches.
 
 The application does not have to keep the string around after setting this
 option.

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,23 +18,24 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_slist_free_all 3 "5 March 2001" "libcurl 7.0" "libcurl Manual"
 .SH NAME
 curl_slist_free_all - free an entire curl_slist list
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "void curl_slist_free_all(struct curl_slist *" list);
-.ad
+.nf
+#include <curl/curl.h>
+
+void curl_slist_free_all(struct curl_slist *list);
+.fi
 .SH DESCRIPTION
 curl_slist_free_all() removes all traces of a previously built curl_slist
 linked list.
 
 Passing in a NULL pointer in \fIlist\fP will make this function return
 immediately with no action.
-.SH RETURN VALUE
-Nothing.
 .SH EXAMPLE
 .nf
 CURL *handle;
@@ -51,5 +52,9 @@ curl_easy_perform(handle);
 
 curl_slist_free_all(slist); /* free the list again */
 .fi
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Nothing.
 .SH "SEE ALSO"
 .BR curl_slist_append "(3), "

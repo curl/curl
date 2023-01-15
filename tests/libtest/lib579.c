@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "test.h"
@@ -104,7 +106,7 @@ int test(char *URL)
   }
 
   slist = curl_slist_append(slist, "Transfer-Encoding: chunked");
-  if(slist == NULL) {
+  if(!slist) {
     fprintf(stderr, "curl_slist_append() failed\n");
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -116,11 +118,6 @@ int test(char *URL)
 
   /* Now specify we want to POST data */
   test_setopt(curl, CURLOPT_POST, 1L);
-
-#ifdef CURL_DOES_CONVERSIONS
-  /* Convert the POST data to ASCII */
-  test_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
-#endif
 
   /* we want to use our own read function */
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -142,7 +139,9 @@ int test(char *URL)
 
   /* we want to use our own progress function */
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  CURL_IGNORE_DEPRECATION(
+    test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  )
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -60,16 +62,16 @@ struct POP3 {
 struct pop3_conn {
   struct pingpong pp;
   pop3state state;        /* Always use pop3.c:state() to change state! */
-  bool ssldone;           /* Is connect() over SSL done? */
-  bool tls_supported;     /* StartTLS capability supported by server */
   size_t eob;             /* Number of bytes of the EOB (End Of Body) that
                              have been received so far */
   size_t strip;           /* Number of bytes from the start to ignore as
                              non-body */
   struct SASL sasl;       /* SASL-related storage */
-  unsigned int authtypes; /* Accepted authentication types */
-  unsigned int preftype;  /* Preferred authentication type */
   char *apoptimestamp;    /* APOP timestamp from the server greeting */
+  unsigned char authtypes; /* Accepted authentication types */
+  unsigned char preftype;  /* Preferred authentication type */
+  BIT(ssldone);           /* Is connect() over SSL done? */
+  BIT(tls_supported);     /* StartTLS capability supported by server */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;
@@ -82,7 +84,7 @@ extern const struct Curl_handler Curl_handler_pop3s;
 
 /* Authentication type values */
 #define POP3_TYPE_NONE      0
-#define POP3_TYPE_ANY       ~0U
+#define POP3_TYPE_ANY       (POP3_TYPE_CLEARTEXT|POP3_TYPE_APOP|POP3_TYPE_SASL)
 
 /* This is the 5-bytes End-Of-Body marker for POP3 */
 #define POP3_EOB "\x0d\x0a\x2e\x0d\x0a"

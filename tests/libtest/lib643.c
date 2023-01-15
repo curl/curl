@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,18 +18,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "test.h"
 
 #include "memdebug.h"
 
 static char data[]=
-#ifdef CURL_DOES_CONVERSIONS
-  /* ASCII representation with escape sequences for non-ASCII platforms */
-  "\x64\x75\x6d\x6d\x79\x0a";
-#else
   "dummy\n";
-#endif
 
 struct WriteThis {
   char *readptr;
@@ -178,15 +175,8 @@ static int once(char *URL, bool oldstyle)
   /* Fill in the filename field */
   res = curl_mime_name(part, "filename");
   if(!res)
-    res = curl_mime_data(part,
-#ifdef CURL_DOES_CONVERSIONS
-                         /* ASCII representation with escape
-                            sequences for non-ASCII platforms */
-                         "\x70\x6f\x73\x74\x69\x74\x32\x2e\x63",
-#else
-                          "postit2.c",
-#endif
-                          CURL_ZERO_TERMINATED);
+    res = curl_mime_data(part, "postit2.c",
+                         CURL_ZERO_TERMINATED);
 
   if(res)
     printf("curl_mime_xxx(3) = %s\n", curl_easy_strerror(res));
@@ -202,15 +192,8 @@ static int once(char *URL, bool oldstyle)
   }
   res = curl_mime_name(part, "submit");
   if(!res)
-    res = curl_mime_data(part,
-#ifdef CURL_DOES_CONVERSIONS
-                         /* ASCII representation with escape
-                            sequences for non-ASCII platforms */
-                         "\x73\x65\x6e\x64",
-#else
-                          "send",
-#endif
-                          CURL_ZERO_TERMINATED);
+    res = curl_mime_data(part, "send",
+                         CURL_ZERO_TERMINATED);
 
   if(res)
     printf("curl_mime_xxx(4) = %s\n", curl_easy_strerror(res));

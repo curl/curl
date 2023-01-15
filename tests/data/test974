@@ -1,0 +1,91 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+--location
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 redirect
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+Connection: close
+Content-Type: text/html
+Location: http://firsthost.com:9999/a/path/%TESTNUMBER0002
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Connection: close
+Content-Type: text/html
+
+hey
+</data2>
+
+<datacheck>
+HTTP/1.1 301 redirect
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+Connection: close
+Content-Type: text/html
+Location: http://firsthost.com:9999/a/path/%TESTNUMBER0002
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Connection: close
+Content-Type: text/html
+
+hey
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+proxy
+</features>
+<server>
+http
+</server>
+ <name>
+HTTP with auth redirected to HTTP on a diff port w/o auth
+ </name>
+ <command>
+-x http://%HOSTIP:%HTTPPORT http://firsthost.com -L -u joe:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET http://firsthost.com/ HTTP/1.1
+Host: firsthost.com
+Authorization: Basic am9lOnNlY3JldA==
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://firsthost.com:9999/a/path/%TESTNUMBER0002 HTTP/1.1
+Host: firsthost.com:9999
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

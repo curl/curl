@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,13 +20,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_setup.h"
 #include "tool_writeout.h"
 
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
                      struct per_transfer *per, CURLcode per_result);
-
-void jsonWriteString(FILE *stream, const char *in);
+void headerJSON(FILE *stream, struct per_transfer *per);
+void jsonWriteString(FILE *stream, const char *in, bool lowercase);
 
 #endif /* HEADER_CURL_TOOL_WRITEOUT_H */

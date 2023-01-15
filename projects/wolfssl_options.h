@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 /*
 By default wolfSSL has a very conservative configuration that can result in
@@ -26,14 +28,17 @@ To remedy this issue for libcurl I've generated this options file that
 build-wolfssl will copy to the wolfSSL include directories and will result in
 maximum compatibility.
 
-These are the configure options that were used to build wolfSSL v3.11.0 in
+These are the configure options that were used to build wolfSSL v5.1.1 in
 mingw and generate the options in this file:
 
 C_EXTRA_FLAGS="\
   -Wno-attributes \
   -Wno-unused-but-set-variable \
   -DFP_MAX_BITS=16384 \
+  -DHAVE_SECRET_CALLBACK \
   -DTFM_TIMING_RESISTANT \
+  -DUSE_WOLF_STRTOK \
+  -DWOLFSSL_DES_ECB \
   -DWOLFSSL_STATIC_DH \
   -DWOLFSSL_STATIC_RSA \
   " \
@@ -41,6 +46,7 @@ C_EXTRA_FLAGS="\
   --disable-jobserver \
   --enable-aesgcm \
   --enable-alpn \
+  --enable-altcertchains \
   --enable-certgen \
   --enable-des3 \
   --enable-dh \
@@ -53,8 +59,9 @@ C_EXTRA_FLAGS="\
   --enable-sessioncerts \
   --enable-sha512 \
   --enable-sni \
-  --enable-sslv3 \
+  --enable-tlsv10 \
   --enable-supportedcurves \
+  --enable-tls13 \
   --enable-testcert \
   > config.out 2>&1
 
@@ -73,11 +80,21 @@ https://www.yassl.com/forums/topic423-cacertorgs-ca-cert-verify-failed-but-withd
 buffer size.  You can do this using the define:
 FP_MAX_BITS and setting it to 8192."
 
+HAVE_SECRET_CALLBACK
+Build wolfSSL with wolfSSL_set_tls13_secret_cb which allows saving TLS 1.3
+secrets to SSLKEYLOGFILE.
+
 TFM_TIMING_RESISTANT
 https://wolfssl.com/wolfSSL/Docs-wolfssl-manual-2-building-wolfssl.html
 From section 2.4.5 Increasing Performance, USE_FAST_MATH:
 "Because the stack memory usage can be larger when using fastmath, we recommend
 defining TFM_TIMING_RESISTANT as well when using this option."
+
+USE_WOLF_STRTOK
+Build wolfSSL to always use its internal strtok instead of C runtime strtok.
+
+WOLFSSL_DES_ECB
+Build wolfSSL with wolfSSL_DES_ecb_encrypt which is needed by libcurl for NTLM.
 
 WOLFSSL_STATIC_DH:    Allow TLS_ECDH_ ciphers
 WOLFSSL_STATIC_RSA:   Allow TLS_RSA_ ciphers
@@ -88,7 +105,7 @@ Static key cipher suites are deprecated and disabled by default since v3.6.6.
 /* wolfssl options.h
  * generated from configure options
  *
- * Copyright (C) 2006-2015 wolfSSL Inc.
+ * Copyright (C) 2006-2022 wolfSSL Inc.
  *
  * This file is part of wolfSSL. (formerly known as CyaSSL)
  *
@@ -105,39 +122,23 @@ extern "C" {
 #undef  FP_MAX_BITS
 #define FP_MAX_BITS 16384
 
+#undef  HAVE_SECRET_CALLBACK
+#define HAVE_SECRET_CALLBACK
+
 #undef  TFM_TIMING_RESISTANT
 #define TFM_TIMING_RESISTANT
+
+#undef  USE_WOLF_STRTOK
+#define USE_WOLF_STRTOK
+
+#undef  WOLFSSL_DES_ECB
+#define WOLFSSL_DES_ECB
 
 #undef  WOLFSSL_STATIC_DH
 #define WOLFSSL_STATIC_DH
 
 #undef  WOLFSSL_STATIC_RSA
 #define WOLFSSL_STATIC_RSA
-
-#undef  OPENSSL_EXTRA
-#define OPENSSL_EXTRA
-
-/*
-The commented out defines below are the equivalent of --enable-tls13.
-Uncomment them to build wolfSSL with TLS 1.3 support as of v3.11.1-tls13-beta.
-This is for experimenting only, afaict TLS 1.3 support doesn't appear to be
-functioning correctly yet. https://github.com/wolfSSL/wolfssl/pull/943
-
-#undef  WC_RSA_PSS
-#define WC_RSA_PSS
-
-#undef  WOLFSSL_TLS13
-#define WOLFSSL_TLS13
-
-#undef  HAVE_TLS_EXTENSIONS
-#define HAVE_TLS_EXTENSIONS
-
-#undef  HAVE_FFDHE_2048
-#define HAVE_FFDHE_2048
-
-#undef  HAVE_HKDF
-#define HAVE_HKDF
-*/
 
 #undef  TFM_TIMING_RESISTANT
 #define TFM_TIMING_RESISTANT
@@ -148,8 +149,8 @@ functioning correctly yet. https://github.com/wolfSSL/wolfssl/pull/943
 #undef  WC_RSA_BLINDING
 #define WC_RSA_BLINDING
 
-#undef  HAVE_AESGCM
-#define HAVE_AESGCM
+#undef  WOLFSSL_USE_ALIGN
+#define WOLFSSL_USE_ALIGN
 
 #undef  WOLFSSL_RIPEMD
 #define WOLFSSL_RIPEMD
@@ -163,8 +164,8 @@ functioning correctly yet. https://github.com/wolfSSL/wolfssl/pull/943
 #undef  SESSION_CERTS
 #define SESSION_CERTS
 
-#undef  WOLFSSL_CERT_GEN
-#define WOLFSSL_CERT_GEN
+#undef  HAVE_HKDF
+#define HAVE_HKDF
 
 #undef  HAVE_ECC
 #define HAVE_ECC
@@ -175,11 +176,11 @@ functioning correctly yet. https://github.com/wolfSSL/wolfssl/pull/943
 #undef  ECC_SHAMIR
 #define ECC_SHAMIR
 
-#undef  WOLFSSL_ALLOW_SSLV3
-#define WOLFSSL_ALLOW_SSLV3
+#undef  WOLFSSL_ALLOW_TLSV10
+#define WOLFSSL_ALLOW_TLSV10
 
-#undef  NO_RC4
-#define NO_RC4
+#undef  WC_RSA_PSS
+#define WC_RSA_PSS
 
 #undef  NO_HC128
 #define NO_HC128
@@ -217,11 +218,32 @@ functioning correctly yet. https://github.com/wolfSSL/wolfssl/pull/943
 #undef  HAVE_SUPPORTED_CURVES
 #define HAVE_SUPPORTED_CURVES
 
+#undef  HAVE_FFDHE_2048
+#define HAVE_FFDHE_2048
+
+#undef  HAVE_SUPPORTED_CURVES
+#define HAVE_SUPPORTED_CURVES
+
+#undef  WOLFSSL_TLS13
+#define WOLFSSL_TLS13
+
+#undef  HAVE_TLS_EXTENSIONS
+#define HAVE_TLS_EXTENSIONS
+
 #undef  HAVE_EXTENDED_MASTER
 #define HAVE_EXTENDED_MASTER
 
+#undef  WOLFSSL_ALT_CERT_CHAINS
+#define WOLFSSL_ALT_CERT_CHAINS
+
 #undef  WOLFSSL_TEST_CERT
 #define WOLFSSL_TEST_CERT
+
+#undef  NO_RC4
+#define NO_RC4
+
+#undef  HAVE_ENCRYPT_THEN_MAC
+#define HAVE_ENCRYPT_THEN_MAC
 
 #undef  NO_PSK
 #define NO_PSK
@@ -229,15 +251,57 @@ functioning correctly yet. https://github.com/wolfSSL/wolfssl/pull/943
 #undef  NO_MD4
 #define NO_MD4
 
+#undef  WOLFSSL_ENCRYPTED_KEYS
+#define WOLFSSL_ENCRYPTED_KEYS
+
 #undef  USE_FAST_MATH
 #define USE_FAST_MATH
 
 #undef  WC_NO_ASYNC_THREADING
 #define WC_NO_ASYNC_THREADING
 
+#undef  HAVE_DH_DEFAULT_PARAMS
+#define HAVE_DH_DEFAULT_PARAMS
+
+#undef  WOLFSSL_CERT_GEN
+#define WOLFSSL_CERT_GEN
+
+#undef  OPENSSL_EXTRA
+#define OPENSSL_EXTRA
+
+#undef  WOLFSSL_ALWAYS_VERIFY_CB
+#define WOLFSSL_ALWAYS_VERIFY_CB
+
+#undef  WOLFSSL_VERIFY_CB_ALL_CERTS
+#define WOLFSSL_VERIFY_CB_ALL_CERTS
+
+#undef  WOLFSSL_EXTRA_ALERTS
+#define WOLFSSL_EXTRA_ALERTS
+
+#undef  HAVE_EXT_CACHE
+#define HAVE_EXT_CACHE
+
+#undef  WOLFSSL_FORCE_CACHE_ON_TICKET
+#define WOLFSSL_FORCE_CACHE_ON_TICKET
+
+#undef  WOLFSSL_AKID_NAME
+#define WOLFSSL_AKID_NAME
+
+#undef  HAVE_CTS
+#define HAVE_CTS
+
+#undef  GCM_TABLE_4BIT
+#define GCM_TABLE_4BIT
+
+#undef  HAVE_AESGCM
+#define HAVE_AESGCM
+
+#undef  HAVE_WC_INTROSPECTION
+#define HAVE_WC_INTROSPECTION
+
 
 #ifdef __cplusplus
-}
+} /* end of extern "C" */
 #endif
 
 

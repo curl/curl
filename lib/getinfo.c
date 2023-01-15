@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -164,6 +166,20 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_SCHEME:
     *param_charp = data->info.conn_scheme;
     break;
+  case CURLINFO_CAPATH:
+#ifdef CURL_CA_PATH
+    *param_charp = CURL_CA_PATH;
+#else
+    *param_charp = NULL;
+#endif
+    break;
+  case CURLINFO_CAINFO:
+#ifdef CURL_CA_BUNDLE
+    *param_charp = CURL_CA_BUNDLE;
+#else
+    *param_charp = NULL;
+#endif
+    break;
 
   default:
     return CURLE_UNKNOWN_OPTION;
@@ -285,6 +301,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
       /* return if the condition prevented the document to get transferred */
       *param_longp = data->info.timecond ? 1L : 0L;
     break;
+#ifndef CURL_DISABLE_RTSP
   case CURLINFO_RTSP_CLIENT_CSEQ:
     *param_longp = data->state.rtsp_next_client_CSeq;
     break;
@@ -294,6 +311,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_RTSP_CSEQ_RECV:
     *param_longp = data->state.rtsp_CSeq_recv;
     break;
+#endif
   case CURLINFO_HTTP_VERSION:
     switch(data->info.httpversion) {
     case 10:
@@ -515,13 +533,7 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
 
 #ifdef USE_SSL
       if(conn && tsi->backend != CURLSSLBACKEND_NONE) {
-        unsigned int i;
-        for(i = 0; i < (sizeof(conn->ssl) / sizeof(conn->ssl[0])); ++i) {
-          if(conn->ssl[i].use) {
-            tsi->internals = Curl_ssl->get_internals(&conn->ssl[i], info);
-            break;
-          }
-        }
+        tsi->internals = Curl_ssl_get_internals(data, FIRSTSOCKET, info, 0);
       }
 #endif
     }
@@ -560,7 +572,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   CURLcode result = CURLE_UNKNOWN_OPTION;
 
   if(!data)
-    return result;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, info);
 

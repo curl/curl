@@ -1,0 +1,69 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Linux
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**/*.md'
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: torture-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: torture
+          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+          configure: --with-openssl --enable-debug --enable-ares
+          tflags: -n -t --shallow=25 !FTP
+        - name: torture-ftp
+          install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+          configure: --with-openssl --enable-debug --enable-ares
+          tflags: -n -t --shallow=20 FTP
+
+    steps:
+    - run: |
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
+        sudo python3 -m pip install impacket
+      name: 'install prereqs and impacket'
+
+    - uses: actions/checkout@v3
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 -C tests
+      name: 'make tests'
+
+    - run: make V=1 test-torture
+      name: 'run tests'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"

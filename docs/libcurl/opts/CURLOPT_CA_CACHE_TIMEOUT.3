@@ -1,0 +1,78 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CA_CACHE_TIMEOUT 3 "21 Dec 2022" "libcurl 7.87.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_CA_CACHE_TIMEOUT \- life-time for cached certificate stores
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CA_CACHE_TIMEOUT, long age);
+.fi
+.SH DESCRIPTION
+Pass a long, this sets the timeout in seconds. This tells libcurl the maximum
+time any cached certificate store it has in memory may be kept and reused for
+new connections. Once the timeout has expired, a subsequent fetch requiring a
+certificate store will have to build a new one.
+
+Building a certificate store from a \fICURLOPT_CAINFO\fP file is a slow
+operation so curl may cache the generated certificate store internally to speed
+up future connections.
+
+Set to zero to completely disable caching, or set to -1 to retain the cached
+store remain forever. By default, libcurl caches this info for 24 hours.
+.SH DEFAULT
+86400 (24 hours)
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
+
+  /* only reuse certificate stores for a short time */
+  curl_easy_setopt(curl, CURLOPT_CA_CACHE_TIMEOUT, 60L);
+
+  ret = curl_easy_perform(curl);
+
+  /* in this second request, the cache will not be used if more than
+     sixty seconds have passed since the previous connection */
+  ret = curl_easy_perform(curl);
+
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+This option was added in curl 7.87.0.
+
+Currently the only SSL backend to implement this certificate store caching
+functionality is the OpenSSL (and forks) backend.
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_CAINFO "(3), "
+.BR CURLOPT_CAINFO_BLOB "(3), " CURLOPT_CAPATH "(3), "
+.BR CURLOPT_SSL_VERIFYPEER "(3), " CURLOPT_SSL_VERIFYHOST "(3), "

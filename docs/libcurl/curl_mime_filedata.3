@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_mime_filedata 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
 .SH NAME
 curl_mime_filedata - set a mime part's body data from a file contents
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_filedata(curl_mimepart * " part ,
-.BI " const char * " filename ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_filedata(curl_mimepart *part,
+                            const char *filename);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_filedata(3)\fP sets a mime part's body content from the named
 file's contents. This is an alternative to \fIcurl_mime_data(3)\fP for setting
@@ -36,7 +39,7 @@ data to a mime part.
 \fIpart\fP is the part's to assign contents to.
 
 \fIfilename\fP points to the null-terminated file's path name. The pointer can
-be NULL to detach the previous part contents settings.  Filename storage can
+be NULL to detach the previous part contents settings. Filename storage can
 be safely be reused after this call.
 
 As a side effect, the part's remote file name is set to the base name of the
@@ -51,15 +54,8 @@ If the file size cannot be determined before actually reading it (such as for
 a device or named pipe), the whole mime structure containing the part
 will be transferred as chunks by HTTP and rejected by IMAP.
 
-Setting a part's contents twice is valid: only the value set by the last call
-is retained.
-.SH AVAILABILITY
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
-.SH RETURN VALUE
-CURLE_OK or a CURL error code upon failure. CURLE_READ_ERROR is only an
-indication that the file is not yet readable: it can be safely ignored at
-this time, but the file must be made readable before the pertaining
-easy handle is performed.
+Setting a part's contents multiple times is valid: only the value set by the
+last call is retained.
 .SH EXAMPLE
 .nf
  curl_mime *mime;
@@ -77,6 +73,13 @@ easy handle is performed.
  /* set name */
  curl_mime_name(part, "data");
 .fi
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+CURLE_OK or a CURL error code upon failure. CURLE_READ_ERROR is only an
+indication that the file is not yet readable: it can be safely ignored at
+this time, but the file must be made readable before the pertaining
+easy handle is performed.
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
 .BR curl_mime_data "(3),"

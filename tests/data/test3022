@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+SCP
+server sha256 key check
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+test
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+# so far only the libssh2 backend supports SHA256
+<features>
+libssh2
+</features>
+<server>
+scp
+</server>
+ <name>
+SCP correct sha256 host key
+ </name>
+ <command>
+--hostpubsha256 %SSHSRVSHA256 --key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt
+</command>
+<setenv>
+# Needed for MSYS2 to not treat the argument as a POSIX path list
+# that has to be converted to Windows paths
+MSYS2_ARG_CONV_EXCL=*
+</setenv>
+<file name="log/file%TESTNUMBER.txt">
+test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

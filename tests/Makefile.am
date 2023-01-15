@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 
@@ -30,9 +32,9 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl           \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl      \
  CMakeLists.txt mem-include-scan.pl valgrind.supp extern-scan.pl              \
  manpage-scan.pl nroff-scan.pl http2-server.pl dictserver.py                  \
- negtelnetserver.py smbserver.py util.py                                      \
- disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl               \
- azure.pm appveyor.pm version-scan.pl options-scan.pl
+ negtelnetserver.py smbserver.py util.py disable-scan.pl manpage-syntax.pl    \
+ error-codes.pl badsymbols.pl azure.pm appveyor.pm version-scan.pl            \
+ options-scan.pl markdown-uppercase.pl check-deprecated.pl option-check.pl
 
 DISTCLEANFILES = configurehelp.pm
 
@@ -71,6 +73,9 @@ TEST_E = -a -e
 
 # !flaky means that it'll skip all tests using the flaky keyword
 TEST_NF = -a -p !flaky
+
+# special CI target derived from nonflaky with CI-specific flags
+TEST_CI = $(TEST_NF) -rm
 endif
 
 # make sure that PERL is pointing to an executable
@@ -85,6 +90,9 @@ quiet-test: perlcheck all
 
 am-test: perlcheck all
 	$(TEST) $(TEST_AM) $(TFLAGS)
+
+ci-test: perlcheck all
+	$(TEST) $(TEST_CI) $(TFLAGS)
 
 full-test: perlcheck all
 	$(TEST) $(TEST_F) $(TFLAGS)

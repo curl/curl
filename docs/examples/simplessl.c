@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -35,7 +37,7 @@
    3.1. set a #define USE_ENGINE
    3.2. set pEngine to the name of the crypto engine you use
    3.3. set pKeyName to the key identifier you want to use
-   4.   if you don't use a crypto engine:
+   4.   if you do not use a crypto engine:
    4.1. set pKeyName to the file name of your client key
    4.2. if the format of the key file is DER, set pKeyType to "DER"
 
@@ -86,14 +88,14 @@ int main(void)
         /* use crypto engine */
         if(curl_easy_setopt(curl, CURLOPT_SSLENGINE, pEngine) != CURLE_OK) {
           /* load the crypto engine */
-          fprintf(stderr, "can't set crypto engine\n");
+          fprintf(stderr, "cannot set crypto engine\n");
           break;
         }
         if(curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) != CURLE_OK) {
           /* set the crypto engine as default */
           /* only needed for the first time you load
              a engine in a curl object... */
-          fprintf(stderr, "can't set crypto engine as default\n");
+          fprintf(stderr, "cannot set crypto engine as default\n");
           break;
         }
       }
@@ -119,7 +121,7 @@ int main(void)
       /* set the file with the certs vaildating the server */
       curl_easy_setopt(curl, CURLOPT_CAINFO, pCACertFile);
 
-      /* disconnect if we can't validate server's cert */
+      /* disconnect if we cannot validate server's cert */
       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 
       /* Perform the request, res will get the return code */

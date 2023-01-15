@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,18 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_easy_reset 3 "31 July 2004" "libcurl 7.12.1" "libcurl Manual"
 .SH NAME
 curl_easy_reset - reset all options of a libcurl session handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.BI "void curl_easy_reset(CURL *"handle ");"
-
+void curl_easy_reset(CURL *handle);
+.fi
 .SH DESCRIPTION
 Re-initializes all options previously set on a specified CURL handle to the
 default values. This puts back the handle to the same state as it was in when
@@ -35,6 +38,14 @@ it was just created with \fIcurl_easy_init(3)\fP.
 It does not change the following information kept in the handle: live
 connections, the Session ID cache, the DNS cache, the cookies, the shares or
 the alt-svc cache.
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+
+/* ... the handle is used and options are set ... */
+
+curl_easy_reset(curl);
+.fi
 .SH AVAILABILITY
 This function was added in libcurl 7.12.1
 .SH RETURN VALUE

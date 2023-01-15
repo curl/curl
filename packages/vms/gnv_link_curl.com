@@ -1,10 +1,8 @@
 $! File: gnv_link_curl.com
 $!
-$! $Id$
-$!
 $! File to build images using gnv$libcurl.exe
 $!
-$! Copyright 2009 - 2020, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +16,8 @@ $! WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 $! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
-$! 10-Jun-2009  J. Malmberg
+$! SPDX-License-Identifier: ISC
+$!
 $!============================================================================
 $!
 $! Save this so we can get back.
@@ -408,9 +407,9 @@ $       link'ldebug'/exe=[.src]curl.exe/dsf=[.src]curl.dsf -
            [.src]curl-tool_getpass.o, [.src]curl-tool_help.o, -
            [.src]curl-tool_helpers.o, [.src]curl-tool_homedir.o, -
            [.src]curl-tool_hugehelp.o, [.src]curl-tool_libinfo.o, -
-           [.src]curl-tool_metalink.o, [.src]curl-tool_mfiles.o, -
+           [.src]curl-tool_mfiles.o, -
            [.src]curl-tool_msgs.o, [.src]curl-tool_operate.o, -
-           [.src]curl-tool_operhlp.o, [.src]curl-tool_panykey.o, -
+           [.src]curl-tool_operhlp.o, -
            [.src]curl-tool_paramhlp.o, [.src]curl-tool_parsecfg.o, -
            [.src]curl-tool_setopt.o, [.src]curl-tool_sleep.o, -
            [.src]curl-tool_urlglob.o, [.src]curl-tool_util.o, -

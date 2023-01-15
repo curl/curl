@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,22 +18,26 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_GSSAPI_DELEGATION 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_GSSAPI_DELEGATION \- set allowed GSS-API delegation
+CURLOPT_GSSAPI_DELEGATION \- allowed GSS-API delegation
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_GSSAPI_DELEGATION, long level);
+.fi
 .SH DESCRIPTION
 Set the long parameter \fIlevel\fP to \fBCURLGSSAPI_DELEGATION_FLAG\fP to
 allow unconditional GSSAPI credential delegation. The delegation is disabled
 by default since 7.21.7.  Set the parameter to
 \fBCURLGSSAPI_DELEGATION_POLICY_FLAG\fP to delegate only if the OK-AS-DELEGATE
 flag is set in the service ticket in case this feature is supported by the
-GSS-API implementation and the definition of GSS_C_DELEG_POLICY_FLAG was
+GSS-API implementation and the definition of \fIGSS_C_DELEG_POLICY_FLAG\fP was
 available at compile-time.
 .SH DEFAULT
 CURLGSSAPI_DELEGATION_NONE
@@ -47,7 +51,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
   /* delegate if okayed by policy */
   curl_easy_setopt(curl, CURLOPT_GSSAPI_DELEGATION,
-                         CURLGSSAPI_DELEGATION_POLICY_FLAG);
+                   (long)CURLGSSAPI_DELEGATION_POLICY_FLAG);
   ret = curl_easy_perform(curl);
 }
 .fi

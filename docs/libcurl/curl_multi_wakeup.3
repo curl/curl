@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,18 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_multi_wakeup 3 "17 Nov 2019" "libcurl 7.68.0" "libcurl Manual"
 .SH NAME
 curl_multi_wakeup - wakes up a sleeping curl_multi_poll call
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLMcode curl_multi_wakeup(CURLM *multi_handle);
-.ad
+.fi
 .SH DESCRIPTION
 This function can be called from any thread and it wakes up a
 sleeping \fIcurl_multi_poll(3)\fP call that is currently (or will be)
@@ -41,10 +44,6 @@ possible that multiple calls to this function will wake up the same waiting
 operation.
 
 This function has no effect on \fIcurl_multi_wait(3)\fP calls.
-.SH RETURN VALUE
-CURLMcode type, general libcurl multi interface error code.
-.SH AVAILABILITY
-Added in 7.68.0
 .SH EXAMPLE
 .nf
 CURL *easy_handle;
@@ -82,5 +81,9 @@ if(something makes us decide to stop thread 1) {
 }
 
 .fi
+.SH AVAILABILITY
+Added in 7.68.0
+.SH RETURN VALUE
+CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"
 .BR curl_multi_poll "(3), " curl_multi_wait "(3)"

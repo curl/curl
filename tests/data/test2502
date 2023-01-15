@@ -1,0 +1,104 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP/3
+multi
+verbose logs
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data1 crlf=yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: server.example.com
+Content-Length: 47
+
+file contents should appear once for each file
+</data1>
+<data2>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: server.example.com
+Content-Length: 47
+
+file contents should appear once for each file
+</data2>
+<data3>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: server.example.com
+Content-Length: 47
+
+file contents should appear once for each file
+</data3>
+<data4>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: server.example.com
+Content-Length: 47
+
+file contents should appear once for each file
+</data4>
+</reply>
+
+# Client-side
+<client>
+<features>
+http/3
+</features>
+<server>
+http
+http/3
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+ <name>
+HTTP GET multiple over HTTP/3
+ </name>
+ <command>
+https://%HOSTIP:%HTTP3PORT/path/%TESTNUMBER %HOSTIP %HTTP3PORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET https://localhost:%HTTP3PORT/path/%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Via: 3 nghttpx
+
+GET https://localhost:%HTTP3PORT/path/%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Via: 3 nghttpx
+
+GET https://localhost:%HTTP3PORT/path/%TESTNUMBER0003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Via: 3 nghttpx
+
+GET https://localhost:%HTTP3PORT/path/%TESTNUMBER0004 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Via: 3 nghttpx
+
+</protocol>
+<strip>
+^Host:.*
+</strip>
+<file name="log/stderr%TESTNUMBER" mode="text">
+* Connection #0 to host localhost left intact
+* Connection #0 to host localhost left intact
+* Connection #0 to host localhost left intact
+* Connection #0 to host localhost left intact
+</file>
+<stripfile>
+$_ = '' if (($_ !~ /left intact/) && ($_ !~ /Closing connection/))
+</stripfile>
+</verify>
+</testcase>

@@ -36,7 +36,7 @@ MQTT PUBLISH with CURLOPT_POST set (no payload)
 lib%TESTNUMBER
 </tool>
 <command option="binary-trace">
-"mqtt://%HOSTIP:%MQTTPORT/ "
+"mqtt://%HOSTIP:%MQTTPORT/%20"
 </command>
 </client>
 

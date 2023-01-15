@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,22 +18,26 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_USERPWD 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_USERPWD \- user name and password to use in authentication
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERPWD, char *userpwd);
+.fi
 .SH DESCRIPTION
 Pass a char * as parameter, pointing to a null-terminated login details string
 for the connection. The format of which is: [user name]:[password].
 
 When using Kerberos V5 authentication with a Windows based server, you should
 specify the user name part with the domain name in order for the server to
-successfully obtain a Kerberos Ticket. If you don't then the initial part of
+successfully obtain a Kerberos Ticket. If you do not then the initial part of
 the authentication handshake may fail.
 
 When using NTLM, the user name can be specified simply as the user name

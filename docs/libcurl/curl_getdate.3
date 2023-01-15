@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,29 +18,36 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_getdate 3 "12 Aug 2005" "libcurl 7.0" "libcurl Manual"
 .SH NAME
 curl_getdate - Convert a date string to number of seconds
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "time_t curl_getdate(char *" datestring ", time_t *"now " );"
-.ad
+.nf
+#include <curl/curl.h>
+
+time_t curl_getdate(char *datestring, time_t *now);
+.fi
 .SH DESCRIPTION
 \fIcurl_getdate(3)\fP returns the number of seconds since the Epoch, January
 1st 1970 00:00:00 in the UTC time zone, for the date and time that the
 \fIdatestring\fP parameter specifies. The \fInow\fP parameter is not used,
 pass a NULL there.
+
+This function works with valid dates and does not always detect and reject
+wrong dates, such as February 30.
+
 .SH PARSING DATES AND TIMES
 A "date" is a string containing several items separated by whitespace. The
-order of the items is immaterial.  A date string may contain many flavors of
+order of the items is immaterial. A date string may contain many flavors of
 items:
 .TP 0.8i
 .B calendar date items
-Can be specified several ways. Month names can only be three-letter english
-abbreviations, numbers can be zero-prefixed and the year may use 2 or 4 digits.
-Examples: 06 Nov 1994, 06-Nov-94 and Nov-94 6.
+Can be specified several ways. Month names can only be three-letter English
+abbreviations, numbers can be zero-prefixed and the year may use 2 or 4
+digits.  Examples: 06 Nov 1994, 06-Nov-94 and Nov-94 6.
 .TP
 .B time of the day items
 This string specifies the time on a given day. You must specify it with 6
@@ -54,44 +61,47 @@ UTC. Supported formats include: -1200, MST, +0100.
 .TP
 .B day of the week items
 Specifies a day of the week. Days of the week may be spelled out in full
-(using english): `Sunday', `Monday', etc or they may be abbreviated to their
+(using English): `Sunday', `Monday', etc or they may be abbreviated to their
 first three letters. This is usually not info that adds anything.
 .TP
 .B pure numbers
 If a decimal number of the form YYYYMMDD appears, then YYYY is read as the
 year, MM as the month number and DD as the day of the month, for the specified
 calendar date.
-.PP
-.SH EXAMPLES
+.SH EXAMPLE
 .nf
-Sun, 06 Nov 1994 08:49:37 GMT
-Sunday, 06-Nov-94 08:49:37 GMT
-Sun Nov  6 08:49:37 1994
-06 Nov 1994 08:49:37 GMT
-06-Nov-94 08:49:37 GMT
-Nov  6 08:49:37 1994
-06 Nov 1994 08:49:37
-06-Nov-94 08:49:37
-1994 Nov 6 08:49:37
-GMT 08:49:37 06-Nov-94 Sunday
-94 6 Nov 08:49:37
-1994 Nov 6
-06-Nov-94
-Sun Nov 6 94
-1994.Nov.6
-Sun/Nov/6/94/GMT
-Sun, 06 Nov 1994 08:49:37 CET
-06 Nov 1994 08:49:37 EST
-Sun, 12 Sep 2004 15:05:58 -0700
-Sat, 11 Sep 2004 21:32:11 +0200
-20040912 15:05:58 -0700
-20040911 +0200
+ time_t t;
+ t = curl_getdate("Sun, 06 Nov 1994 08:49:37 GMT", NULL);
+ t = curl_getdate("Sunday, 06-Nov-94 08:49:37 GMT", NULL);
+ t = curl_getdate("Sun Nov  6 08:49:37 1994", NULL);
+ t = curl_getdate("06 Nov 1994 08:49:37 GMT", NULL);
+ t = curl_getdate("06-Nov-94 08:49:37 GMT", NULL);
+ t = curl_getdate("Nov  6 08:49:37 1994", NULL);
+ t = curl_getdate("06 Nov 1994 08:49:37", NULL);
+ t = curl_getdate("06-Nov-94 08:49:37", NULL);
+ t = curl_getdate("1994 Nov 6 08:49:37", NULL);
+ t = curl_getdate("GMT 08:49:37 06-Nov-94 Sunday", NULL);
+ t = curl_getdate("94 6 Nov 08:49:37", NULL);
+ t = curl_getdate("1994 Nov 6", NULL);
+ t = curl_getdate("06-Nov-94", NULL);
+ t = curl_getdate("Sun Nov 6 94", NULL);
+ t = curl_getdate("1994.Nov.6", NULL);
+ t = curl_getdate("Sun/Nov/6/94/GMT", NULL);
+ t = curl_getdate("Sun, 06 Nov 1994 08:49:37 CET", NULL);
+ t = curl_getdate("06 Nov 1994 08:49:37 EST", NULL);
+ t = curl_getdate("Sun, 12 Sep 2004 15:05:58 -0700", NULL);
+ t = curl_getdate("Sat, 11 Sep 2004 21:32:11 +0200", NULL);
+ t = curl_getdate("20040912 15:05:58 -0700", NULL);
+ t = curl_getdate("20040911 +0200", NULL);
 .fi
 .SH STANDARDS
-This parser was written to handle date formats specified in RFC 822 (including
-the update in RFC 1123) using time zone name or time zone delta and RFC 850
-(obsoleted by RFC 1036) and ANSI C's asctime() format. These formats are the
-only ones RFC 7231 says HTTP applications may use.
+This parser handles date formats specified in RFC 822 (including the update in
+RFC 1123) using time zone name or time zone delta and RFC 850 (obsoleted by
+RFC 1036) and ANSI C's \fIasctime()\fP format.
+
+These formats are the only ones RFC 7231 says HTTP applications may use.
+.SH AVAILABILITY
+Always
 .SH RETURN VALUE
 This function returns -1 when it fails to parse the date string. Otherwise it
 returns the number of seconds as described.

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,32 +18,36 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SASL_AUTHZID 3 "11 Sep 2019" "libcurl 7.66.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SASL_AUTHZID \- authorisation identity (identity to act as)
+CURLOPT_SASL_AUTHZID \- authorization identity (identity to act as)
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SASL_AUTHZID, char *authzid);
+.fi
 .SH DESCRIPTION
 Pass a char * as parameter, which should be pointing to the null-terminated
-authorisation identity (authzid) for the transfer. Only applicable to the PLAIN
-SASL authentication mechanism where it is optional.
+authorization identity (\fIauthzid\fP) for the transfer. Only applicable to
+the PLAIN SASL authentication mechanism where it is optional.
 
-When not specified only the authentication identity (authcid) as specified by
-the username will be sent to the server, along with the password. The server
-will derive a authzid from the authcid when not provided, which it will then
-uses internally.
+When not specified only the authentication identity (\fIauthcid\fP) as
+specified by the username will be sent to the server, along with the
+password. The server will derive a \fIauthzid\fP from the \fIauthcid\fP when
+not provided, which it will then uses internally.
 
-When the authzid is specified, the use of which is server dependent, it can be
-used to access another user's inbox, that the user has been granted access to,
-or a shared mailbox for example.
+When the \fIauthzid\fP is specified, the use of which is server dependent, it
+can be used to access another user's inbox, that the user has been granted
+access to, or a shared mailbox for example.
 .SH DEFAULT
 blank
 .SH PROTOCOLS
-IMAP, POP3 and SMTP
+IMAP, LDAP, POP3 and SMTP
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -57,7 +61,7 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.66.0
+Added in 7.66.0. Support for OpenLDAP added in 7.82.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

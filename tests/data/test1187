@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+MULTIPART
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+Mime
+</features>
+<server>
+smtp
+</server>
+ <name>
+SMTP multipart with file name escaping
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F  "=This is the mail text" -F '=File content;filename="strange\file\"name"'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+EHLO %TESTNUMBER
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+Content-Type: multipart/mixed; boundary=----------------------------
+Mime-Version: 1.0
+
+------------------------------
+
+This is the mail text
+------------------------------
+Content-Disposition: attachment; filename="strange\\file\"name"
+
+File content
+--------------------------------
+.
+</upload>
+</verify>
+</testcase>

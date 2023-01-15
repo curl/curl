@@ -1,0 +1,81 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Linux
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**/*.md'
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: wolfssl-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: wolfssl (configured with --enable-all)
+          install:
+          configure: LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" --with-wolfssl=$HOME/wssl --enable-debug
+          wolfssl-configure: --enable-all
+        - name: wolfssl (configured with --enable-opensslextra)
+          install:
+          configure: LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" --with-wolfssl=$HOME/wssl --enable-debug
+          wolfssl-configure: --enable-opensslextra
+
+    steps:
+    - run: |
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
+        sudo python3 -m pip install impacket
+      name: 'install prereqs and impacket'
+
+    - run: |
+        curl -LO https://github.com/wolfSSL/wolfssl/archive/v5.5.4-stable.tar.gz
+        tar -xzf v5.5.4-stable.tar.gz
+        cd wolfssl-5.5.4-stable
+        ./autogen.sh
+        ./configure --enable-tls13 ${{ matrix.build.wolfssl-configure }} --enable-harden --prefix=$HOME/wssl
+        make install
+      name: 'install wolfssl'
+
+    - uses: actions/checkout@v3
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
+
+    - run: make V=1 -C tests
+      name: 'make tests'
+
+    - run: make V=1 test-ci
+      name: 'run tests'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"

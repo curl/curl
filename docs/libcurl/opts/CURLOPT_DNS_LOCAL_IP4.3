@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,19 +18,23 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_DNS_LOCAL_IP4 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_DNS_LOCAL_IP4 \- IPv4 address to bind DNS resolves to
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_LOCAL_IP4, char *address);
+.fi
 .SH DESCRIPTION
 Set the local IPv4 \fIaddress\fP that the resolver should bind to. The
 argument should be of type char * and contain a single numerical IPv4 address
-as a string.  Set this option to NULL to use the default setting (don't bind
+as a string.  Set this option to NULL to use the default setting (do not bind
 to a specific IP address).
 
 The application does not have to keep the string around after setting this

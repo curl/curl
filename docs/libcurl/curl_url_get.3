@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,14 +18,16 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_url_get 3 "6 Aug 2018" "libcurl" "libcurl Manual"
 .SH NAME
 curl_url_get - extract a part from a URL
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-
 .nf
+#include <curl/curl.h>
+
 CURLUcode curl_url_get(CURLU *url,
                        CURLUPart what,
                        char **part,
@@ -66,6 +68,25 @@ encoding.
 
 If there's any byte values lower than 32 in the decoded string, the get
 operation will return an error instead.
+.IP CURLU_URLENCODE
+If set, will make \fIcurl_url_get(3)\fP URL encode the host name part when a
+full URL is retrieved. If not set (default), libcurl returns the URL with the
+host name "raw" to support IDN names to appear as-is. IDN host names are
+typically using non-ASCII bytes that otherwise will be percent-encoded.
+
+Note that even when not asking for URL encoding, the '%' (byte 37) will be URL
+encoded to make sure the host name remains valid.
+.IP CURLU_PUNYCODE
+If set and \fICURLU_URLENCODE\fP is not set, and asked to retrieve the
+\fBCURLUPART_HOST\fP or \fBCURLUPART_URL\fP parts, libcurl returns the host
+name in its punycode version if it contains any non-ASCII octets (and is an
+IDN name).
+
+If libcurl is built without IDN capabilities, using this bit will make
+\fIcurl_url_get(3)\fP return \fICURLUE_LACKS_IDN\fP if the host name contains
+anything outside the ASCII range.
+
+(Added in curl 7.88.0)
 .SH PARTS
 .IP CURLUPART_URL
 When asked to return the full URL, \fIcurl_url_get(3)\fP will return a
@@ -76,7 +97,7 @@ Scheme cannot be URL decoded on get.
 .IP CURLUPART_PASSWORD
 .IP CURLUPART_OPTIONS
 .IP CURLUPART_HOST
-The host name. If it is an IPv6 numeric address, the zoneid will not be part
+The host name. If it is an IPv6 numeric address, the zone id will not be part
 of it but is provided separately in \fICURLUPART_ZONEID\fP. IPv6 numerical
 addresses are returned within brackets ([]).
 .IP CURLUPART_ZONEID
@@ -84,15 +105,19 @@ If the host name is a numeric IPv6 address, this field might also be set.
 .IP CURLUPART_PORT
 Port cannot be URL decoded on get.
 .IP CURLUPART_PATH
+\fIpart\fP will be '/' even if no path is supplied in the URL.
 .IP CURLUPART_QUERY
+The initial question mark that denotes the beginning of the query part is
+a delimiter only.
+It is not part of the query contents.
+
+
+A not-present query will lead \fIpart\fP to be set to NULL.
+A zero-length query will lead \fIpart\fP to be set to a zero-length string.
+
 The query part will also get pluses converted to space when asked to URL
 decode on get with the CURLU_URLDECODE bit.
 .IP CURLUPART_FRAGMENT
-.SH RETURN VALUE
-Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
-fine.
-
-If this function returns an error, no URL part is returned.
 .SH EXAMPLE
 .nf
   CURLUcode rc;
@@ -109,7 +134,13 @@ If this function returns an error, no URL part is returned.
   }
 .fi
 .SH AVAILABILITY
-Added in curl 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
+Added in 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
+.SH RETURN VALUE
+Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
+fine. See the \fIlibcurl-errors(3)\fP man page for the full list with
+descriptions.
+
+If this function returns an error, no URL part is returned.
 .SH "SEE ALSO"
 .BR curl_url_cleanup "(3), " curl_url "(3), " curl_url_set "(3), "
-.BR curl_url_dup "(3), " CURLOPT_CURLU "(3), "
+.BR curl_url_dup "(3), " curl_url_strerror "(3), " CURLOPT_CURLU "(3)"

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,11 +18,13 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_ALTSVC 3 "5 Feb 2019" "libcurl 7.64.1" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_ALTSVC \- set alt-svc cache file name
+CURLOPT_ALTSVC \- alt-svc cache file name
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -49,6 +51,35 @@ if(curl) {
   curl_easy_perform(curl);
 }
 .fi
+.SH "FILE FORMAT"
+A text based file with one line per alt-svc entry and each line consists of
+nine space-separated fields.
+
+An example line could look like
+
+ h2 www.example 8443 h3 second.example 443 "20190808 06:18:37" 1 0
+
+The fields of that line are:
+
+.IP h2
+ALPN id for the source origin
+.IP www.example
+Host name for the source origin
+.IP 8443
+Port number for the source origin
+.IP h3
+ALPN id for the destination host
+.IP second.example
+Host name for the destination host
+.IP 443
+Port number for the destination host
+.IP 2019*
+Expiration date and time of this entry within double quotes. The date format
+is "YYYYMMDD HH:MM:SS" and the time zone is GMT.
+.IP 1
+Boolean (1 or 0) if "persist" was set for this entry
+.IP 0
+Integer priority value (not currently used)
 .SH AVAILABILITY
 Added in 7.64.1
 .SH RETURN VALUE

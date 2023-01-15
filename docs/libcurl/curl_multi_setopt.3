@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,23 +18,27 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_multi_setopt 3 "4 Nov 2014" "libcurl 7.39.0" "libcurl Manual"
 .SH NAME
 curl_multi_setopt \- set options for a curl multi handle
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLMcode curl_multi_setopt(CURLM * multi_handle, CURLMoption option, param);
+CURLMcode curl_multi_setopt(CURLM *multi_handle, CURLMoption option, param);
+.fi
 .SH DESCRIPTION
 \fIcurl_multi_setopt(3)\fP is used to tell a libcurl multi handle how to
 behave. By using the appropriate options to \fIcurl_multi_setopt(3)\fP, you
-can change libcurl's behavior when using that multi handle.  All options are
+can change libcurl's behavior when using that multi handle. All options are
 set with the \fIoption\fP followed by the parameter \fIparam\fP. That
 parameter can be a \fBlong\fP, a \fBfunction pointer\fP, an \fBobject
 pointer\fP or a \fBcurl_off_t\fP type, depending on what the specific option
 expects. Read this manual carefully as bad input values may cause libcurl to
-behave badly!  You can only set one option in each function call.
+behave badly. You can only set one option in each function call.
 
 .SH OPTIONS
 .IP CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE
@@ -69,12 +73,17 @@ See \fICURLMOPT_TIMERFUNCTION(3)\fP
 See \fICURLMOPT_TIMERDATA(3)\fP
 .IP CURLMOPT_MAX_CONCURRENT_STREAMS
 See \fICURLMOPT_MAX_CONCURRENT_STREAMS(3)\fP
-.SH RETURNS
+.SH EXAMPLE
+.fi
+  /* Limit the amount of simultaneous connections curl should allow: */
+  curl_multi_setopt(handle, CURLMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
+.nf
+.SH AVAILABILITY
+Added in 7.15.4
+.SH RETURN VALUE
 The standard CURLMcode for multi interface error codes. Note that it returns a
 CURLM_UNKNOWN_OPTION if you try setting an option that this version of libcurl
-doesn't know of.
-.SH AVAILABILITY
-This function was added in libcurl 7.15.4.
+does not know of.
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
 .BR curl_multi_socket "(3), " curl_multi_info_read "(3)"

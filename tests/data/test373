@@ -1,0 +1,78 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+chunked transfer encoding
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Jul 2010 11:22:33 GMT
+Connection: close
+Content-Type: text/html
+Transfer-Encoding: chunked
+X-Control: swsclose
+
+100
+%repeat[255 x %00]%
+
+100
+%repeat[255 x %00]%
+
+100
+%repeat[255 x %00]%
+
+100
+%repeat[255 x %00]%
+
+0
+
+</data>
+
+<datacheck>
+HTTP/1.1 200 OK
+Date: Thu, 22 Jul 2010 11:22:33 GMT
+Connection: close
+Content-Type: text/html
+Transfer-Encoding: chunked
+X-Control: swsclose
+
+%repeat[255 x %00]%
+%repeat[255 x %00]%
+%repeat[255 x %00]%
+%repeat[255 x %00]%
+</datacheck>
+
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+Chunked transfer encoding - Multiple valid chunks with binary zeros.
+</name>
+<features>
+proxy
+</features>
+<command>
+http://%HOSTIP:%HTTPPORT/chunked-transfer-encoding/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /chunked-transfer-encoding/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

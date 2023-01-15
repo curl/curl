@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -38,7 +40,7 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     /* First set the URL that is about to receive our POST. This URL can
-       just as well be a https:// URL if that is what should receive the
+       just as well be an https:// URL if that is what should receive the
        data. */
     curl_easy_setopt(curl, CURLOPT_URL, "http://postit.example.com/moo.cgi");
     /* Now specify the POST data */

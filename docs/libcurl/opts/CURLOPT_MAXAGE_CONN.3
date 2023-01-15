@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,30 +18,33 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_MAXAGE_CONN 3 "18 Apr 2019" "libcurl 7.65.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_MAXAGE_CONN \- max idle time allowed for reusing a connection
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXAGE_CONN, long maxage);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXAGE_CONN, long age);
+.fi
 .SH DESCRIPTION
-Pass a long as parameter containing \fImaxage\fP - the maximum time in seconds
-that you allow an existing connection to have to be considered for reuse for
-this request.
+Pass a long as parameter containing \fIage\fP - the maximum time in seconds
+that you allow an existing connection to have been idle to be considered for
+reuse for this request.
 
 The "connection cache" that holds previously used connections. When a new
 request is to be done, it will consider any connection that matches for
-reuse. The \fICURLOPT_MAXAGE_CONN(3)\fP limit prevents libcurl from trying
-very old connections for reuse, since old connections have a high risk of not
+reuse. The \fICURLOPT_MAXAGE_CONN(3)\fP limit prevents libcurl from trying too
+old connections for reuse, since old connections have a high risk of not
 working and thus trying them is a performance loss and sometimes service loss
 due to the difficulties to figure out the situation. If a connection is found
-in the cache that is older than this set \fImaxage\fP, it will instead be
-closed.
+in the cache that is older than this set \fIage\fP, it will instead be closed.
 .SH DEFAULT
-Default maxage is 118 seconds.
+Default maximum age is set to 118 seconds.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
@@ -57,9 +60,9 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in libcurl 7.65.0
+Added in 7.65.0
 .SH RETURN VALUE
 Returns CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_TIMEOUT "(3), " CURLOPT_FORBID_REUSE "(3), "
-.BR CURLOPT_FRESH_CONNECT "(3), "
+.BR CURLOPT_FRESH_CONNECT "(3), " CURLOPT_MAXLIFETIME_CONN "(3), "

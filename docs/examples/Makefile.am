@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,12 +18,14 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = README.md Makefile.example Makefile.inc Makefile.m32 \
-  Makefile.netware makefile.dj $(COMPLICATED_EXAMPLES) .checksrc
+EXTRA_DIST = README.md Makefile.example Makefile.inc Makefile.mk \
+  $(COMPLICATED_EXAMPLES) .checksrc
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -32,7 +34,8 @@ EXTRA_DIST = README.md Makefile.example Makefile.inc Makefile.m32 \
 #
 # $(top_srcdir)/include is for libcurl's external include files
 
-AM_CPPFLAGS = -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include   \
+              -DCURL_DISABLE_DEPRECATION
 
 LIBDIR = $(top_builddir)/lib
 
@@ -67,4 +70,4 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir) $(srcdir)/*.c)
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(srcdir)/*.c)

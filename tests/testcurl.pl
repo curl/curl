@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 
@@ -151,7 +153,7 @@ if ($^O eq 'MSWin32' || $targetos) {
     # If no target defined on Win32 lets assume vc
     $targetos = 'vc';
   }
-  if ($targetos =~ /vc/ || $targetos =~ /borland/ || $targetos =~ /watcom/) {
+  if ($targetos =~ /vc/ || $targetos =~ /borland/) {
     $binext = '.exe';
     $libext = '.lib';
   }
@@ -161,21 +163,11 @@ if ($^O eq 'MSWin32' || $targetos) {
       $libext = '.a';
     }
   }
-  elsif ($targetos =~ /netware/) {
-    $configurebuild = 0;
-    $binext = '.nlm';
-    if ($^O eq 'MSWin32') {
-      $libext = '.lib';
-    }
-    else {
-      $libext = '.a';
-    }
-  }
 }
 
 if (($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
     ($targetos =~ /vc/ || $targetos =~ /mingw32/ ||
-     $targetos =~ /borland/ || $targetos =~ /watcom/)) {
+     $targetos =~ /borland/)) {
 
   # Set these things only when building ON Windows and for Win32 platform.
   # FOR Windows since we might be cross-compiling on another system. Non-
@@ -306,7 +298,7 @@ if (!$desc) {
 if (!$confopts) {
   if ($infixed < 4) {
     print "please enter your additional arguments to configure\n";
-    print "examples: --with-ssl --enable-debug --enable-ipv6 --with-krb4\n";
+    print "examples: --with-openssl --enable-debug --enable-ipv6\n";
     $confopts = <>;
     chomp $confopts;
   }
@@ -476,8 +468,8 @@ if ($git) {
     unlink "autom4te.cache";
 
     # generate the build files
-    logit "invoke buildconf";
-    open(F, "./buildconf 2>&1 |") or die;
+    logit "invoke autoreconf";
+    open(F, "autoreconf -fi 2>&1 |") or die;
     open(LOG, ">$buildlog") or die;
     while (<F>) {
       my $ll = $_;
@@ -546,8 +538,6 @@ if(!$make) {
 }
 # force to 'nmake' for VC builds
 $make = "nmake" if ($targetos =~ /vc/);
-# force to 'wmake' for Watcom builds
-$make = "wmake" if ($targetos =~ /watcom/);
 logit "going with $make as make";
 
 # change to build dir
@@ -564,18 +554,9 @@ if ($configurebuild) {
   }
 } else {
   logit "copying files to build dir ...";
-  if (($^O eq 'MSWin32') && ($targetos !~ /netware/)) {
+  if ($^O eq 'MSWin32') {
     system("xcopy /s /q \"$CURLDIR\" .");
     system("buildconf.bat");
-  }
-  elsif ($targetos =~ /netware/) {
-    system("cp -afr $CURLDIR/* .");
-    system("cp -af $CURLDIR/Makefile.dist Makefile");
-    system("$make -i -C lib -f Makefile.netware prebuild");
-    system("$make -i -C src -f Makefile.netware prebuild");
-    if (-d "$CURLDIR/ares") {
-      system("$make -i -C ares -f Makefile.netware prebuild");
-    }
   }
   elsif ($^O eq 'linux') {
     system("cp -afr $CURLDIR/* .");

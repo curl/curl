@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_TIMEVALUE_LARGE 3 "25 Jan 2018" "libcurl 7.59.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_TIMEVALUE_LARGE \- set time value for conditional
+CURLOPT_TIMEVALUE_LARGE \- time value for conditional
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE_LARGE, curl_off_t val);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE_LARGE,
+                          curl_off_t val);
+.fi
 .SH DESCRIPTION
 Pass a curl_off_t \fIval\fP as parameter. This should be the time counted as
 seconds since 1 Jan 1970, and the time will be used in a condition as

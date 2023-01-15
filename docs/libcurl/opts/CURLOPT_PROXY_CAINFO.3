@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PROXY_CAINFO 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_PROXY_CAINFO \- path to proxy Certificate Authority (CA) bundle
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAINFO, char *path);
+.fi
 .SH DESCRIPTION
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 
@@ -37,8 +41,8 @@ If \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is zero and you avoid verifying the
 server's certificate, \fICURLOPT_PROXY_CAINFO(3)\fP need not even indicate an
 accessible file.
 
-This option is by default set to the system path where libcurl's cacert bundle
-is assumed to be stored, as established at build time.
+This option is by default set to the system path where libcurl's CA
+certificate bundle is assumed to be stored, as established at build time.
 
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
 (libnsspem.so) needs to be available for this option to work properly.
@@ -51,6 +55,8 @@ preferred method of verifying the peer's certificate chain.
 
 The application does not have to keep the string around after setting this
 option.
+
+The default value for this can be figured out with \fICURLINFO_CAINFO(3)\fP.
 .SH DEFAULT
 Built-in system specific
 .SH PROTOCOLS
@@ -70,14 +76,15 @@ if(curl) {
 .SH AVAILABILITY
 Added in 7.52.0
 
-For TLS backends that don't support certificate files, the
+For TLS backends that do not support certificate files, the
 \fICURLOPT_PROXY_CAINFO(3)\fP option is ignored. Refer to
 https://curl.se/docs/ssl-compared.html
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
-.BR CURLOPT_PROXY_CAPATH "(3), "
+.BR CURLOPT_PROXY_CAINFO_BLOB "(3), " CURLOPT_PROXY_CAPATH "(3), "
 .BR CURLOPT_PROXY_SSL_VERIFYPEER "(3), " CURLOPT_PROXY_SSL_VERIFYHOST "(3), "
+.BR CURLOPT_CAINFO "(3), " CURLOPT_CAINFO_BLOB "(3), "
 .BR CURLOPT_CAPATH "(3), "
 .BR CURLOPT_SSL_VERIFYPEER "(3), " CURLOPT_SSL_VERIFYHOST "(3), "

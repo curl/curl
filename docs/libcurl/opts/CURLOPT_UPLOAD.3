@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_UPLOAD 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_UPLOAD \- enable data upload
+CURLOPT_UPLOAD \- data upload
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPLOAD, long upload);
+.fi
 .SH DESCRIPTION
 The long parameter \fIupload\fP set to 1 tells the library to prepare for and
 perform an upload. The \fICURLOPT_READDATA(3)\fP and
@@ -65,7 +69,7 @@ if(curl) {
   /* Set the size of the file to upload */
   curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
 
-  /* Now run off and do what you've been told! */
+  /* Now run off and do what you have been told! */
   curl_easy_perform(curl);
 }
 .fi

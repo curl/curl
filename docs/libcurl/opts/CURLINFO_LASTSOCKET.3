@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLINFO_LASTSOCKET 3 "12 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
 .SH NAME
 CURLINFO_LASTSOCKET \- get the last socket used
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_LASTSOCKET, long *socket);
+.fi
 .SH DESCRIPTION
 Deprecated since 7.45.0. Use \fICURLINFO_ACTIVESOCKET(3)\fP instead.
 
@@ -46,7 +50,7 @@ All
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  long sockfd; /* doesn't work on win64! */
+  long sockfd; /* does not work on win64! */
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* Do not do the transfer - only connect to host */

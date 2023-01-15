@@ -1,0 +1,108 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+Server: test tunnel 2000
+
+</connect>
+
+<data nocheck="yes">
+HTTP/1.1 302 OK
+Location: http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER0002
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+Connection: close
+
+contents
+</data>
+
+<data2 nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 7
+
+second
+</data2>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+ <name>
+HTTP 1.1 CONNECT with redirect and set -H user-agent
+ </name>
+ <command>
+-x %HOSTIP:%PROXYPORT -p http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -L -H "User-Agent: %TESTNUMBER-agent"
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<proxy>
+CONNECT %HOSTIP.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+CONNECT %HOSTIP.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<protocol>
+GET /we/want/that/page/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
+Accept: */*
+User-Agent: %TESTNUMBER-agent
+
+GET /we/want/that/page/%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
+Accept: */*
+User-Agent: %TESTNUMBER-agent
+
+</protocol>
+<stdout>
+HTTP/1.1 200 Mighty fine indeed
+Server: test tunnel 2000
+
+HTTP/1.1 302 OK
+Location: http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER0002
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+Connection: close
+
+HTTP/1.1 200 Mighty fine indeed
+Server: test tunnel 2000
+
+HTTP/1.1 200 OK
+Content-Length: 7
+
+second
+</stdout>
+</verify>
+</testcase>

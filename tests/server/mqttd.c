@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "server_setup.h"
@@ -60,7 +62,6 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "inet_pton.h"
-#include "util.h"
 #include "server_sockaddr.h"
 #include "warnless.h"
 
@@ -106,6 +107,7 @@ struct configurable {
                             this */
   bool publish_before_suback;
   bool short_publish;
+  bool excessive_remaining;
   unsigned char error_connack;
   int testnum;
 };
@@ -130,6 +132,7 @@ static void resetdefaults(void)
   config.version = CONFIG_VERSION;
   config.publish_before_suback = FALSE;
   config.short_publish = FALSE;
+  config.excessive_remaining = FALSE;
   config.error_connack = 0;
   config.testnum = 0;
 }
@@ -170,6 +173,10 @@ static void getconfig(void)
         else if(!strcmp(key, "Testnum")) {
           config.testnum = atoi(value);
           logmsg("testnum = %d", config.testnum);
+        }
+        else if(!strcmp(key, "excessive-remaining")) {
+          logmsg("excessive-remaining set");
+          config.excessive_remaining = TRUE;
         }
       }
     }
@@ -337,7 +344,8 @@ static int disconnect(FILE *dump, curl_socket_t fd)
 */
 
 /* return number of bytes used */
-static int encode_length(size_t packetlen, char *remlength) /* 4 bytes */
+static int encode_length(size_t packetlen,
+                         unsigned char *remlength) /* 4 bytes */
 {
   int bytes = 0;
   unsigned char encode;
@@ -393,10 +401,19 @@ static int publish(FILE *dump,
   ssize_t packetlen;
   ssize_t sendamount;
   ssize_t rc;
-  char rembuffer[4];
+  unsigned char rembuffer[4];
   int encodedlen;
 
-  encodedlen = encode_length(remaininglength, rembuffer);
+  if(config.excessive_remaining) {
+    /* manually set illegal remaining length */
+    rembuffer[0] = 0xff;
+    rembuffer[1] = 0xff;
+    rembuffer[2] = 0xff;
+    rembuffer[3] = 0x80; /* maximum allowed here by spec is 0x7f */
+    encodedlen = 4;
+  }
+  else
+    encodedlen = encode_length(remaininglength, rembuffer);
 
   /* one packet type byte (possibly two more for packetid) */
   packetlen = remaininglength + encodedlen + 1;
@@ -474,17 +491,20 @@ static int fixedheader(curl_socket_t fd,
 
 static curl_socket_t mqttit(curl_socket_t fd)
 {
-  unsigned char buffer[10*1024];
+  size_t buff_size = 10*1024;
+  unsigned char *buffer = NULL;
   ssize_t rc;
   unsigned char byte;
   unsigned short packet_id;
   size_t payload_len;
+  size_t client_id_length;
   unsigned int topic_len;
   size_t remaining_length = 0;
   size_t bytes = 0; /* remaining length field size in bytes */
   char client_id[MAX_CLIENT_ID_LENGTH];
   long testno;
   FILE *stream = NULL;
+
 
   static const char protocol[7] = {
     0x00, 0x04,       /* protocol length */
@@ -502,12 +522,36 @@ static curl_socket_t mqttit(curl_socket_t fd)
   if(testno)
     logmsg("Found test number %ld", testno);
 
+  buffer = malloc(buff_size);
+  if(!buffer) {
+    logmsg("Out of memory, unable to allocate buffer");
+    goto end;
+  }
+
   do {
+    unsigned char usr_flag = 0x80;
+    unsigned char passwd_flag = 0x40;
+    unsigned char conn_flags;
+    const size_t client_id_offset = 12;
+    size_t start_usr;
+    size_t start_passwd;
+
     /* get the fixed header */
     rc = fixedheader(fd, &byte, &remaining_length, &bytes);
     if(rc)
       break;
+
+    if(remaining_length >= buff_size) {
+      buff_size = remaining_length;
+      buffer = realloc(buffer, buff_size);
+      if(!buffer) {
+        logmsg("Failed realloc of size %lu", buff_size);
+        goto end;
+      }
+    }
+
     if(remaining_length) {
+      /* reading variable header and payload into buffer */
       rc = sread(fd, (char *)buffer, remaining_length);
       if(rc > 0) {
         logmsg("READ %d bytes", rc);
@@ -524,19 +568,40 @@ static curl_socket_t mqttit(curl_socket_t fd)
         goto end;
       }
       /* ignore the connect flag byte and two keepalive bytes */
-
       payload_len = (buffer[10] << 8) | buffer[11];
+      /* first part of the payload is the client ID */
+      client_id_length = payload_len;
+
+      /* checking if user and password flags were set */
+      conn_flags = buffer[7];
+
+      start_usr = client_id_offset + payload_len;
+      if(usr_flag == (unsigned char)(conn_flags & usr_flag)) {
+        logmsg("User flag is present in CONN flag");
+        payload_len += (buffer[start_usr] << 8) | buffer[start_usr + 1];
+        payload_len += 2; /* MSB and LSB for user length */
+      }
+
+      start_passwd = client_id_offset + payload_len;
+      if(passwd_flag == (char)(conn_flags & passwd_flag)) {
+        logmsg("Password flag is present in CONN flags");
+        payload_len += (buffer[start_passwd] << 8) | buffer[start_passwd + 1];
+        payload_len += 2; /* MSB and LSB for password length */
+      }
+
+      /* check the length of the payload */
       if((ssize_t)payload_len != (rc - 12)) {
         logmsg("Payload length mismatch, expected %x got %x",
                rc - 12, payload_len);
         goto end;
       }
-      else if((payload_len + 1) > MAX_CLIENT_ID_LENGTH) {
+      /* check the length of the client ID */
+      else if((client_id_length + 1) > MAX_CLIENT_ID_LENGTH) {
         logmsg("Too large client id");
         goto end;
       }
-      memcpy(client_id, &buffer[12], payload_len);
-      client_id[payload_len] = 0;
+      memcpy(client_id, &buffer[12], client_id_length);
+      client_id[client_id_length] = 0;
 
       logmsg("MQTT client connect accepted: %s", client_id);
 
@@ -634,6 +699,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
   } while(1);
 
   end:
+  if(buffer)
+    free(buffer);
   if(dump)
     fclose(dump);
   if(stream)
@@ -931,6 +998,7 @@ int main(int argc, char *argv[])
            " --version\n"
            " --logfile [file]\n"
            " --pidfile [file]\n"
+           " --portfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
            " --port [port]\n");
@@ -982,7 +1050,7 @@ int main(int argc, char *argv[])
     goto mqttd_cleanup;
   }
 
-  wroteportfile = write_portfile(portname, (int)port);
+  wroteportfile = write_portfile(portname, port);
   if(!wroteportfile) {
     goto mqttd_cleanup;
   }
@@ -1001,6 +1069,8 @@ mqttd_cleanup:
 
   if(wrotepidfile)
     unlink(pidname);
+  if(wroteportfile)
+    unlink(portname);
 
   restore_signal_handlers(FALSE);
 

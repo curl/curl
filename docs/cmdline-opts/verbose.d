@@ -1,9 +1,14 @@
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Short: v
 Long: verbose
 Mutexed: trace trace-ascii
 Help: Make the operation more talkative
 See-also: include
 Category: important verbose
+Example: --verbose $URL
+Added: 4.0
+Multi: boolean
 ---
 Makes curl verbose during the operation. Useful for debugging and seeing
 what's going on "under the hood". A line starting with '>' means "header data"
@@ -12,9 +17,12 @@ normal cases, and a line starting with '*' means additional info provided by
 curl.
 
 If you only want HTTP headers in the output, --include might be the option
-you're looking for.
+you are looking for.
 
-If you think this option still doesn't give you enough details, consider using
+If you think this option still does not give you enough details, consider using
 --trace or --trace-ascii instead.
+
+This option is global and does not need to be specified for each use of
+--next.
 
 Use --silent to make curl really quiet.

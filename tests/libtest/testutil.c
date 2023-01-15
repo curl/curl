@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "curl_setup.h"
@@ -67,7 +69,7 @@ struct timeval tutil_tvnow(void)
     (void)gettimeofday(&now, NULL);
 #else
   else {
-    now.tv_sec = (long)time(NULL);
+    now.tv_sec = time(NULL);
     now.tv_usec = 0;
   }
 #endif
@@ -96,7 +98,7 @@ struct timeval tutil_tvnow(void)
   ** time() returns the value of time in seconds since the Epoch.
   */
   struct timeval now;
-  now.tv_sec = (long)time(NULL);
+  now.tv_sec = time(NULL);
   now.tv_usec = 0;
   return now;
 }
@@ -115,7 +117,6 @@ long tutil_tvdiff(struct timeval newer, struct timeval older)
     (long)(newer.tv_usec-older.tv_usec)/1000;
 }
 
-
 /*
  * Same as tutil_tvdiff but with full usec resolution.
  *
@@ -128,3 +129,34 @@ double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
       (double)(newer.tv_usec-older.tv_usec)/1000000.0;
   return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
 }
+
+#ifdef WIN32
+HMODULE win32_load_system_library(const TCHAR *filename)
+{
+  size_t filenamelen = _tcslen(filename);
+  size_t systemdirlen = GetSystemDirectory(NULL, 0);
+  size_t written;
+  TCHAR *path;
+
+  if(!filenamelen || filenamelen > 32768 ||
+     !systemdirlen || systemdirlen > 32768)
+    return NULL;
+
+  /* systemdirlen includes null character */
+  path = malloc(sizeof(TCHAR) * (systemdirlen + 1 + filenamelen));
+  if(!path)
+    return NULL;
+
+  /* if written >= systemdirlen then nothing was written */
+  written = GetSystemDirectory(path, (unsigned int)systemdirlen);
+  if(!written || written >= systemdirlen)
+    return NULL;
+
+  if(path[written - 1] != _T('\\'))
+    path[written++] = _T('\\');
+
+  _tcscpy(path + written, filename);
+
+  return LoadLibrary(path);
+}
+#endif

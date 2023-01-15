@@ -16,7 +16,10 @@ Content-Length: 6
 Connection: close
 Content-Type: text/html
 Funny-head: yesyes
+Alt-Svc: h1="nowhere.foo:-1"
+Alt-Svc: h1="nowhere.foo:-18446744073709551614"
 Alt-Svc: h1="nowhere.foo:81", un-kno22!wn=":82"
+Alt-Svc: h1="nowhere.foo:70000"
 
 -foo-
 </data>

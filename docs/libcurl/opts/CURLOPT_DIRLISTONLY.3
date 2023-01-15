@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_DIRLISTONLY 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_DIRLISTONLY \- ask for names only in a directory listing
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DIRLISTONLY, long listonly);
+.fi
 .SH DESCRIPTION
 For FTP and SFTP based URLs a parameter set to 1 tells the library to list the
 names of files in a directory, rather than performing a full directory listing
@@ -42,7 +46,7 @@ that some FTP servers list only files in their response to NLST; they might not
 include subdirectories and symbolic links.
 
 Setting this option to 1 also implies a directory listing even if the URL
-doesn't end with a slash, which otherwise is necessary.
+does not end with a slash, which otherwise is necessary.
 
 Do NOT use this option if you also use \fICURLOPT_WILDCARDMATCH(3)\fP as it
 will effectively break that feature then.

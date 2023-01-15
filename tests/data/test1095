@@ -73,7 +73,7 @@ Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="test \"this\" realm!!", nonce="1053604145", uri="/%TESTNUMBER", response="a1c7931ece9e8617bae2715045e4f49f"
+Authorization: Digest username="testuser", realm="test \"this\" realm!!", nonce="1053604145", uri="/%TESTNUMBER", response="df3246f44d2bc8de0e9f8fc4d7cf6e95"
 User-Agent: curl/%VERSION
 Accept: */*
 

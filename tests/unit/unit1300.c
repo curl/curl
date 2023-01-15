@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "curlcheck.h"
@@ -91,10 +93,10 @@ UNITTEST_START
 
   fail_unless(Curl_llist_count(&llist) == 1,
               "List size should be 1 after adding a new element");
-  /*test that the list head data holds my unusedData */
+  /* test that the list head data holds my unusedData */
   fail_unless(llist.head->ptr == &unusedData_case1,
               "head ptr should be first entry");
-  /*same goes for the list tail */
+  /* same goes for the list tail */
   fail_unless(llist.tail == llist.head,
               "tail and head should be the same");
 

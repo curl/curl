@@ -48,7 +48,11 @@ Transfer-Encoding: chunked
 Trailer: my-super-awesome-trailer, my-other-awesome-trailer
 Expect: 100-continue
 
+%if hyper
+E
+%else
 e
+%endif
 Hello Cloud!
 
 0

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,19 +18,23 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HTTP09_ALLOWED 3 "17 Dec 2018" "libcurl 7.64.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_HTTP09 \- allow HTTP/0.9 response
+CURLOPT_HTTP09_ALLOWED \- allow HTTP/0.9 response
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP09_ALLOWED, long allowed);
+.fi
 .SH DESCRIPTION
 Pass the long argument \fIallowed\fP set to 1L to allow HTTP/0.9 responses.
 
-A HTTP/0.9 response is a server response entirely without headers and only a
+An HTTP/0.9 response is a server response entirely without headers and only a
 body. You can connect to lots of random TCP services and still get a response
 that curl might consider to be HTTP/0.9!
 .SH DEFAULT

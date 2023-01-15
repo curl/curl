@@ -81,7 +81,7 @@ e45: Failed binding local connection end
 e46: Unknown error
 e47: Number of redirects hit maximum amount
 e48: An unknown option was passed in to libcurl
-e49: Malformed telnet option
+e49: Malformed option provided in a setopt
 e50: Unknown error
 e51: Unknown error
 e52: Server returned nothing (no headers, no data)
@@ -94,7 +94,7 @@ e58: Problem with the local SSL certificate
 e59: Couldn't use specified SSL cipher
 e60: SSL peer certificate or SSH remote key was not OK
 e61: Unrecognized or bad HTTP Content or Transfer-Encoding
-e62: Invalid LDAP URL
+e62: Unknown error
 e63: Maximum file size exceeded
 e64: Requested SSL level failed
 e65: Send failed since rewinding of the data stream failed
@@ -107,8 +107,8 @@ e71: TFTP: Illegal operation
 e72: TFTP: Unknown transfer ID
 e73: Remote file already exists
 e74: TFTP: No such user
-e75: Conversion failed
-e76: Caller must register CURLOPT_CONV_ callback options
+e75: Unknown error
+e76: Unknown error
 e77: Problem with the SSL CA cert (path? access rights?)
 e78: Remote file not found
 e79: Error in the SSH layer
@@ -130,7 +130,9 @@ e94: An authentication function returned an error
 e95: HTTP/3 error
 e96: QUIC connection error
 e97: proxy handshake error
-e98: Unknown error
+e98: SSL Client Certificate required
+e99: Unrecoverable error in select/poll
+e100: Unknown error
 m-1: Please call curl_multi_perform() soon
 m0: No error
 m1: Invalid multi handle
@@ -143,7 +145,9 @@ m7: The easy handle is already added to a multi handle
 m8: API function called from within callback
 m9: Wakeup is unavailable or failed
 m10: A libcurl function was given a bad argument
-m11: Unknown error
+m11: Operation was aborted by an application callback
+m12: Unrecoverable error in select/poll
+m13: Unknown error
 s0: No error
 s1: Unknown share option
 s2: Share currently in use
@@ -151,6 +155,38 @@ s3: Invalid share handle
 s4: Out of memory
 s5: Feature not enabled in this library
 s6: CURLSHcode unknown
+u0: No error
+u1: An invalid CURLU pointer was passed as argument
+u2: An invalid 'part' argument was passed as argument
+u3: Malformed input to a URL function
+u4: Port number was not a decimal number between 0 and 65535
+u5: Unsupported URL scheme
+u6: URL decode error, most likely because of rubbish in the input
+u7: A memory function failed
+u8: Credentials was passed in the URL when prohibited
+u9: An unknown part ID was passed to a URL API function
+u10: No scheme part in the URL
+u11: No user part in the URL
+u12: No password part in the URL
+u13: No options part in the URL
+u14: No host part in the URL
+u15: No port part in the URL
+u16: No query part in the URL
+u17: No fragment part in the URL
+u18: No zoneid part in the URL
+u19: Bad file:// URL
+u20: Bad fragment
+u21: Bad hostname
+u22: Bad IPv6 address
+u23: Bad login part
+u24: Bad password
+u25: Bad path
+u26: Bad query
+u27: Bad scheme
+u28: Unsupported number of slashes following scheme
+u29: Bad user
+u30: libcurl lacks IDN support
+u31: CURLUcode unknown
 </stdout>
 </verify>
 

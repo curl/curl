@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+etag
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 4
+Content-Type: text/html
+
+hej
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+--etag-save with bad path then working transfer
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save log/nowhere/etag%TESTNUMBER --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER --include --output log/curl%TESTNUMBER.out
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

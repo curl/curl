@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
@@ -53,6 +55,10 @@ include Makefile.inc
 
 # CURL_FILES comes from Makefile.inc
 curl_SOURCES = $(CURL_FILES)
+if HAVE_WINDRES
+curl_SOURCES += $(CURL_RCFILES)
+$(CURL_RCFILES): tool_version.h
+endif
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
@@ -61,22 +67,19 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 LIBS = $(BLANK_AT_MAKETIME)
 
 if USE_EXPLICIT_LIB_DEPS
-curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @LIBCURL_LIBS@
+curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
 else
-curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @NSS_LIBS@ @SSL_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
+curl_LDADD = $(top_builddir)/lib/libcurl.la @NSS_LIBS@ @SSL_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
 endif
-
-curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
-curl_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
 
 # if unit tests are enabled, build a static library to link them with
 if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurltool.la
-libcurltool_la_CPPFLAGS = $(LIBMETALINK_CPPFLAGS) $(AM_CPPFLAGS) \
+libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) \
                           -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
-libcurltool_la_SOURCES = $(curl_SOURCES)
+libcurltool_la_SOURCES = $(CURL_FILES)
 endif
 
 CLEANFILES = tool_hugehelp.c
@@ -84,10 +87,8 @@ CLEANFILES = tool_hugehelp.c
 # embedded text.
 NROFF=env LC_ALL=C @NROFF@ @MANOPT@ # figured out by the configure script
 
-EXTRA_DIST = mkhelp.pl makefile.dj                                     \
- Makefile.m32 macos/curl.mcp.xml.sit.hqx macos/MACINSTALL.TXT          \
- macos/src/curl_GUSIConfig.cpp macos/src/macos_main.cpp makefile.amiga \
- curl.rc Makefile.netware Makefile.inc CMakeLists.txt
+EXTRA_DIST = mkhelp.pl \
+ Makefile.mk curl.rc Makefile.inc CMakeLists.txt
 
 # Use absolute directory to disable VPATH
 MANPAGE=$(abs_top_builddir)/docs/curl.1
@@ -130,15 +131,13 @@ endif
 else # USE_MANUAL
 # built-in manual has been disabled, make a blank file
 $(HUGE):
-	$(HUGECMD)(echo "/* built-in manual is disabled, blank function */" > $(HUGE); \
-	echo '#include "tool_hugehelp.h"' >> $(HUGE); \
-	echo "void hugehelp(void) {}" >>$(HUGE) )
+	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
 
 # ignore tool_hugehelp.c since it is generated source code and it plays
 # by slightly different rules!
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir)        \
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
 	-W$(srcdir)/tool_hugehelp.c $(srcdir)/*.[ch])
 
 if CURLDEBUG
@@ -153,3 +152,11 @@ TIDY:=clang-tidy
 
 tidy:
 	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
+
+listhelp:
+	(cd $(top_srcdir)/docs/cmdline-opts && ./gen.pl listhelp *.d) > tool_listhelp.c
+
+if HAVE_WINDRES
+.rc.o:
+	$(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
+endif

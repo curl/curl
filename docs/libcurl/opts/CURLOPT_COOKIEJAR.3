@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_COOKIEJAR 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_COOKIEJAR \- file name to store cookies to
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEJAR, char *filename);
+.fi
 .SH DESCRIPTION
 Pass a \fIfilename\fP as char *, null-terminated. This will make libcurl write
 all internally known cookies to the specified file when
@@ -35,10 +39,10 @@ created. Specify "-" as filename to instead have the cookies written to
 stdout. Using this option also enables cookies for this session, so if you for
 example follow a location it will make matching cookies get sent accordingly.
 
-Note that libcurl doesn't read any cookies from the cookie jar. If you want to
+Note that libcurl does not read any cookies from the cookie jar. If you want to
 read cookies from a file, use \fICURLOPT_COOKIEFILE(3)\fP.
 
-If the cookie jar file can't be created or written to (when the
+If the cookie jar file cannot be created or written to (when the
 \fIcurl_easy_cleanup(3)\fP is called), libcurl will not and cannot report an
 error for this. Using \fICURLOPT_VERBOSE(3)\fP or
 \fICURLOPT_DEBUGFUNCTION(3)\fP will get a warning to display, but that is the

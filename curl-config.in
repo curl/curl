@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2001 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -19,9 +19,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 
-prefix=@prefix@
+prefix="@prefix@"
 exec_prefix=@exec_prefix@
 includedir=@includedir@
 cppflag_curl_staticlib=@CPPFLAG_CURL_STATICLIB@
@@ -172,7 +174,7 @@ while test $# -gt 0; do
 
     --static-libs)
         if test "X@ENABLE_STATIC@" != "Xno" ; then
-          echo @libdir@/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@
+          echo "@libdir@/libcurl.@libext@" @LDFLAGS@ @LIBCURL_LIBS@
         else
           echo "curl was built with static libraries disabled" >&2
           exit 1

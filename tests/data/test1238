@@ -10,7 +10,7 @@ TFTP RRQ
 # Server-side
 <reply>
 <servercmd>
-writedelay: 2
+writedelay: 2000
 </servercmd>
 # ~1200 bytes (so that they don't fit in two 512 byte chunks)
 <data nocheck="yes">
@@ -45,12 +45,12 @@ tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER -Y1000 -y2
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <protocol>
-opcode: 1
-mode: octet
-tsize: 0
-blksize: 512
-timeout: 6
-filename: /%TESTNUMBER
+opcode = 1
+mode = octet
+tsize = 0
+blksize = 512
+timeout = 6
+filename = /%TESTNUMBER
 </protocol>
 # 28 = CURLE_OPERATION_TIMEDOUT
 <errorcode>

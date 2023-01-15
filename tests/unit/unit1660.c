@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "curlcheck.h"
@@ -36,7 +38,7 @@ unit_stop(void)
   curl_global_cleanup();
 }
 
-#if defined(CURL_DISABLE_HTTP) || !defined(USE_HSTS)
+#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
 UNITTEST_START
 {
   return 0; /* nothing to do when HTTP or HSTS are disabled */
@@ -101,7 +103,7 @@ static const struct testit headers[] = {
 
   /* make this live for 7 seconds */
   { "expire.example", NULL, "max-age=\"7\"\r\n", CURLE_OK },
-  { NULL, NULL, NULL, 0 }
+  { NULL, NULL, NULL, CURLE_OK }
 };
 
 static void showsts(struct stsentry *e, const char *chost)

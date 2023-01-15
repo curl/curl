@@ -25,7 +25,7 @@ MAIL ETIQUETTE
   2.5 HTML is not for mails
   2.6 Quoting
   2.7 Digest
-  2.8 Please Tell Us How You Solved The Problem!
+  2.8 Please Tell Us How You Solved The Problem
 
 ==============================================================================
 
@@ -39,13 +39,13 @@ MAIL ETIQUETTE
   Each mailing list is targeted to a specific set of users and subjects,
   please use the one or the ones that suit you the most.
 
-  Each mailing list has hundreds up to thousands of readers, meaning that
-  each mail sent will be received and read by a very large number of people.
-  People from various cultures, regions, religions and continents.
+  Each mailing list has hundreds up to thousands of readers, meaning that each
+  mail sent will be received and read by a large number of people. People
+  from various cultures, regions, religions and continents.
 
   1.2 Netiquette
 
-  Netiquette is a common term for how to behave on the internet. Of course, in
+  Netiquette is a common term for how to behave on the Internet. Of course, in
   each particular group and subculture there will be differences in what is
   acceptable and what is considered good manners.
 
@@ -80,7 +80,7 @@ MAIL ETIQUETTE
   1.5 Moderation of new posters
 
   Several of the curl mailing lists automatically make all posts from new
-  subscribers be moderated. This means that after you've subscribed and
+  subscribers be moderated. This means that after you have subscribed and
   sent your first mail to a list, that mail will not be let through to the
   list until a mailing list administrator has verified that it is OK and
   permits it to get posted.
@@ -105,18 +105,18 @@ MAIL ETIQUETTE
   messages"
 
   No matter what, we NEVER EVER respond to trolls or spammers on the list. If
-  you believe the list admin should do something in particular, contact him/her
+  you believe the list admin should do something in particular, contact them
   off-list. The subject will be taken care of as much as possible to prevent
   repeated offenses, but responding on the list to such messages never leads to
   anything good and only puts the light even more on the offender: which was
   the entire purpose of it getting sent to the list in the first place.
 
-  Don't feed the trolls!
+  Do not feed the trolls.
 
   1.7 How to unsubscribe
 
   You can unsubscribe the same way you subscribed in the first place. You go
-  to the page for the particular mailing list you're subscribed to and you enter
+  to the page for the particular mailing list you are subscribed to and you enter
   your email address and password and press the unsubscribe button.
 
   Also, the instructions to unsubscribe are included in the headers of every
@@ -129,27 +129,27 @@ MAIL ETIQUETTE
 
   1.8 I posted, now what?
 
-  If you aren't subscribed with the exact same email address that you used to
-  send the email, your post will just be silently discarded.
+  If you are not subscribed with the same email address that you used to send
+  the email, your post will just be silently discarded.
 
   If you posted for the first time to the mailing list, you first need to wait
-  for an administrator to allow your email to go through (moderated). This normally
-  happens very quickly but in case we're asleep, you may have to wait a few
-  hours.
+  for an administrator to allow your email to go through (moderated). This
+  normally happens quickly but in case we are asleep, you may have to wait a
+  few hours.
 
   Once your email goes through it is sent out to several hundred or even
-  thousands of recipients.  Your email may cover an area that not that many people
-  know about or are interested in. Or possibly the person who knows about it
-  is on vacation or under a very heavy work load right now. You may have to wait
-  for a response and you should not expect to get a response at all, but
-  hopefully you get an answer within a couple of days.
+  thousands of recipients. Your email may cover an area that not that many
+  people know about or are interested in. Or possibly the person who knows
+  about it is on vacation or under a heavy work load right now. You may have
+  to wait for a response and you should not expect to get a response at all.
+  Ideally, you get an answer within a couple of days.
 
   You do yourself and all of us a service when you include as many details as
   possible already in your first email. Mention your operating system and
-  environment. Tell us which curl version you're using and tell us what you
+  environment. Tell us which curl version you are using and tell us what you
   did, what happened and what you expected would happen. Preferably, show us
-  what you did with details enough to allow others to help point out the problem
-  or repeat the same steps in their locations.
+  what you did with details enough to allow others to help point out the
+  problem or repeat the steps in their locations.
 
   Failing to include details will only delay responses and make people respond
   and ask for more details and you will have to send a follow-up email that
@@ -194,8 +194,8 @@ MAIL ETIQUETTE
 
   Many mail programs and web archivers use information within mails to keep
   them together as "threads", as collections of posts that discuss a certain
-  subject. If you don't intend to reply on the same or similar subject, don't
-  just hit reply on an existing mail and change subject, create a new mail.
+  subject. If you do not intend to reply on the same or similar subject, do not
+  just hit reply on an existing mail and change the subject, create a new mail.
 
   2.2 Reply to the List
 
@@ -203,7 +203,7 @@ MAIL ETIQUETTE
   reply" or "reply to all", and not just reply to the author of the single
   mail you reply to.
 
-  We're actively discouraging replying back to the single person by setting
+  We are actively discouraging replying back to the single person by setting
   the Reply-To: field in outgoing mails back to the mailing list address,
   making it harder for people to mail the author directly, if only by mistake.
 
@@ -215,7 +215,7 @@ MAIL ETIQUETTE
 
   2.4 Do Not Top-Post
 
-  If you reply to a message, don't use top-posting. Top-posting is when you
+  If you reply to a message, do not use top-posting. Top-posting is when you
   write the new text at the top of a mail and you insert the previous quoted
   mail conversation below. It forces users to read the mail in a backwards
   order to properly understand it.
@@ -225,7 +225,7 @@ MAIL ETIQUETTE
       A: Because it messes up the order in which people normally read text.
       Q: Why is top-posting such a bad thing?
       A: Top-posting.
-      Q: What is the most annoying thing in e-mail?
+      Q: What is the most annoying thing in email?
 
   Apart from the screwed up read order (especially when mixed together in a
   thread when someone responds using the mandated bottom-posting style), it
@@ -233,13 +233,13 @@ MAIL ETIQUETTE
 
   When you reply to a mail. You let the mail client insert the previous mail
   quoted. Then you put the cursor on the first line of the mail and you move
-  down through the mail, deleting all parts of the quotes that don't add
+  down through the mail, deleting all parts of the quotes that do not add
   context for your comments. When you want to add a comment you do so, inline,
   right after the quotes that relate to your comment. Then you continue
   downwards again.
 
-  When most of the quotes have been removed and you've added your own words,
-  you're done!
+  When most of the quotes have been removed and you have added your own words,
+  you are done.
 
   2.5 HTML is not for mails
 
@@ -268,7 +268,7 @@ MAIL ETIQUETTE
   Change the subject name to something sensible and related to the subject,
   preferably even the actual subject of the single mail you wanted to reply to
 
-  2.8 Please Tell Us How You Solved The Problem!
+  2.8 Please Tell Us How You Solved The Problem
 
   Many people mail questions to the list, people spend some of their time and
   make an effort in providing good answers to these questions.
@@ -277,9 +277,9 @@ MAIL ETIQUETTE
   one of the hints was what solved your problems. The guys who write answers
   feel good to know that they provided a good answer and that you fixed the
   problem. Far too often, the person who asked the question is never heard from
-  again, and we never get to know if he/she is gone because the problem was
-  solved or perhaps because the problem was unsolvable!
+  again, and we never get to know if they are gone because the problem was
+  solved or perhaps because the problem was unsolvable.
 
   Getting the solution posted also helps other users that experience the same
   problem(s). They get to see (possibly in the web archives) that the
-  suggested fixes actually has helped at least one person.
+  suggested fixes actually have helped at least one person.

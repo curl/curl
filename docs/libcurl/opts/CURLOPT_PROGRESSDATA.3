@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PROGRESSDATA 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PROGRESSDATA \- custom pointer passed to the progress callback
+CURLOPT_PROGRESSDATA \- pointer passed to the progress callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROGRESSDATA, void *pointer);
+.fi
 .SH DESCRIPTION
 Pass a \fIpointer\fP that will be untouched by libcurl and passed as the first
 argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION(3)\fP.
@@ -35,7 +39,32 @@ The default value of this parameter is NULL.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-https://curl.se/libcurl/c/progressfunc.html
+.nf
+ struct progress {
+   char *private;
+   size_t size;
+ };
+
+ static size_t progress_callback(void *clientp,
+                                 double dltotal,
+                                 double dlnow,
+                                 double ultotal,
+                                 double ulnow)
+ {
+   struct memory *progress = (struct progress *)userp;
+
+   /* use the values */
+
+   return 0; /* all is good */
+ }
+
+ struct progress data;
+
+ /* pass struct to callback  */
+ curl_easy_setopt(curl_handle, CURLOPT_PROGRESSDATA, &data);
+
+ curl_easy_setopt(curl_handle, CURLOPT_PROGRESSFUNCTION, progress_callback);
+.fi
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE

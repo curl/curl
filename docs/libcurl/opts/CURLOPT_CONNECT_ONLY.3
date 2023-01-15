@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_CONNECT_ONLY 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_CONNECT_ONLY \- stop when connected to target server
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECT_ONLY, long only);
+.fi
 .SH DESCRIPTION
 Pass a long. If the parameter equals 1, it tells the library to perform all
 the required proxy authentication and connection setup, but no data transfer,
@@ -38,12 +42,22 @@ useful when used with the \fICURLINFO_ACTIVESOCKET(3)\fP option to
 the application can obtain the most recently used socket for special data
 transfers.
 
+Since 7.86.0, this option can be set to '2' and if HTTP or WebSocket are
+used, libcurl will do the request and read all response headers before handing
+over control to the application.
+
 Transfers marked connect only will not reuse any existing connections and
 connections marked connect only will not be allowed to get reused.
+
+If the connect only transfer is done using the multi interface, the particular
+easy handle must remain added to the multi handle for as long as the
+application wants to use it. Once it has been removed with
+\fIcurl_multi_remove_handle(3)\fP, \fIcurl_easy_send(3)\fP and
+\fIcurl_easy_recv(3)\fP do not function.
 .SH DEFAULT
 0
 .SH PROTOCOLS
-HTTP, SMTP, POP3 and IMAP
+HTTP, SMTP, POP3 and IMAP. For WS and WSS starting in 7.86.0.
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();

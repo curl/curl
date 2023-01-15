@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2009, Markus Moeller, <markus_moeller@compuserve.com>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Markus Moeller, <markus_moeller@compuserve.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -51,7 +53,7 @@ static int check_gss_err(struct Curl_easy *data,
   if(GSS_ERROR(major_status)) {
     OM_uint32 maj_stat, min_stat;
     OM_uint32 msg_ctx = 0;
-    gss_buffer_desc status_string;
+    gss_buffer_desc status_string = GSS_C_EMPTY_BUFFER;
     char buf[1024];
     size_t len;
 
@@ -195,7 +197,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       return CURLE_COULDNT_CONNECT;
     }
 
-    if(gss_send_token.length != 0) {
+    if(gss_send_token.length) {
       socksreq[0] = 1;    /* GSS-API subnegotiation version */
       socksreq[1] = 1;    /* authentication message type */
       us_length = htons((short)gss_send_token.length);
@@ -257,7 +259,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       return CURLE_COULDNT_CONNECT;
     }
 
-    if(socksreq[1] != 1) { /* status / messgae type */
+    if(socksreq[1] != 1) { /* status / message type */
       failf(data, "Invalid GSS-API authentication response type (%d %d).",
             socksreq[0], socksreq[1]);
       gss_release_name(&gss_status, &server);
@@ -328,7 +330,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   user[gss_send_token.length] = '\0';
   gss_release_name(&gss_status, &gss_client_name);
   gss_release_buffer(&gss_status, &gss_send_token);
-  infof(data, "SOCKS5 server authenticated user %s with GSS-API.\n",user);
+  infof(data, "SOCKS5 server authenticated user %s with GSS-API.",user);
   free(user);
   user = NULL;
 
@@ -344,7 +346,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   else if(gss_ret_flags & GSS_C_INTEG_FLAG)
     gss_enc = 1;
 
-  infof(data, "SOCKS5 server supports GSS-API %s data protection.\n",
+  infof(data, "SOCKS5 server supports GSS-API %s data protection.",
         (gss_enc == 0)?"no":((gss_enc==1)?"integrity":"confidentiality"));
   /* force for the moment to no data protection */
   gss_enc = 0;
@@ -452,7 +454,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     return CURLE_COULDNT_CONNECT;
   }
 
-  if(socksreq[1] != 2) { /* status / messgae type */
+  if(socksreq[1] != 2) { /* status / message type */
     failf(data, "Invalid GSS-API encryption response type (%d %d).",
           socksreq[0], socksreq[1]);
     gss_delete_sec_context(&gss_status, &gss_context, NULL);
@@ -518,7 +520,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   (void)curlx_nonblock(sock, TRUE);
 
-  infof(data, "SOCKS5 access with%s protection granted.\n",
+  infof(data, "SOCKS5 access with%s protection granted.",
         (socksreq[0] == 0)?"out GSS-API data":
         ((socksreq[0] == 1)?" GSS-API integrity":" GSS-API confidentiality"));
 

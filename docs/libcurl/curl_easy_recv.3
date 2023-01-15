@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,23 +18,25 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH curl_easy_recv 3 "29 April 2008" "libcurl 7.18.2" "libcurl Manual"
 .SH NAME
 curl_easy_recv - receives raw data on an "easy" connection
 .SH SYNOPSIS
-.B #include <curl/easy.h>
-.sp
-.BI "CURLcode curl_easy_recv( CURL *" curl ", void *" buffer ","
-.BI "size_t " buflen ", size_t *" n ");"
-.ad
+.nf
+#include <curl/easy.h>
+
+CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n);
+.fi
 .SH DESCRIPTION
 This function receives raw data from the established connection. You may use
 it together with \fIcurl_easy_send(3)\fP to implement custom protocols using
 libcurl. This functionality can be particularly useful if you use proxies
 and/or SSL encryption: libcurl will take care of proxy negotiation and
-connection set-up.
+connection setup.
 
 \fBbuffer\fP is a pointer to your buffer that will get the received
 data. \fBbuflen\fP is the maximum amount of data you can get in that
@@ -60,7 +62,22 @@ read which would include any cached data.
 Furthermore if you wait on the socket and it tells you there is data to read,
 \fIcurl_easy_recv(3)\fP may return \fBCURLE_AGAIN\fP if the only data that was
 read was for internal SSL processing, and no other data is available.
+.SH EXAMPLE
+.nf
+ curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+ /* Do not do the transfer - only connect to host */
+ curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
+ res = curl_easy_perform(curl);
 
+ if(res == CURLE_OK) {
+   /* Extract the socket from the curl handle -
+      we will need it for waiting. */
+   res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
+
+   /* read data */
+   res = curl_easy_recv(curl, buf, sizeof(buf), &nread);
+ }
+.fi
 .SH AVAILABILITY
 Added in 7.18.2.
 .SH RETURN VALUE
@@ -76,8 +93,6 @@ Reading exactly 0 bytes indicates a closed connection.
 
 If there's no socket available to use from the previous transfer, this function
 returns \fBCURLE_UNSUPPORTED_PROTOCOL\fP.
-.SH EXAMPLE
-See \fBsendrecv.c\fP in \fBdocs/examples\fP directory for usage example.
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3), " curl_easy_perform "(3), "
 .BR curl_easy_getinfo "(3), "

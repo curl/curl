@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,21 +18,25 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_TFTP_NO_OPTIONS 3 "23 Feb 2016" "libcurl 7.48.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_TFTP_NO_OPTIONS \- Do not send TFTP options requests.
+CURLOPT_TFTP_NO_OPTIONS \- send no TFTP options requests
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TFTP_NO_OPTIONS, long onoff);
+.fi
 .SH DESCRIPTION
 Set \fIonoff\fP to 1L to exclude all TFTP options defined in RFC2347, RFC2348
-and RFC2349 from read and write requests (RRQs/WRQs).
+and RFC2349 from read and write requests.
 
-This option improves interop with some legacy servers that do not acknowledge
-or properly implement TFTP options. When this option is used
+This option improves interoperability with legacy servers that do not
+acknowledge or properly implement TFTP options. When this option is used
 \fICURLOPT_TFTP_BLKSIZE(3)\fP is ignored.
 .SH DEFAULT
 0
@@ -69,3 +73,5 @@ if(curl) {
 Added in 7.48.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH SEE ALSO
+.BR CURLOPT_TFTP_BLKSIZE "(3), "

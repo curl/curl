@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,18 +18,22 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SSL_CTX_DATA 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SSL_CTX_DATA \- custom pointer passed to ssl_ctx callback
+CURLOPT_SSL_CTX_DATA \- pointer passed to SSL context callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_DATA, void *pointer);
+.fi
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the ssl context callback set by the option
-\fICURLOPT_SSL_CTX_FUNCTION(3)\fP, this is the pointer you'll get as third
+\fICURLOPT_SSL_CTX_FUNCTION(3)\fP, this is the pointer you will get as third
 parameter.
 .SH DEFAULT
 NULL
@@ -46,11 +50,11 @@ All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 {
   X509_STORE *store;
-  X509 *cert=NULL;
+  X509 *cert = NULL;
   BIO *bio;
-  char *mypem = (char *)parm;
+  char *mypem = parm;
   /* get a BIO */
-  bio=BIO_new_mem_buf(mypem, -1);
+  bio = BIO_new_mem_buf(mypem, -1);
   /* use it to read the PEM formatted certificate from memory into an
    * X509 structure that SSL can use
    */
@@ -59,10 +63,10 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
     printf("PEM_read_bio_X509 failed...\\n");
 
   /* get a pointer to the X509 certificate store (which may be empty) */
-  store=SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+  store = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
 
   /* add our certificate to this store */
-  if(X509_STORE_add_cert(store, cert)==0)
+  if(X509_STORE_add_cert(store, cert) == 0)
     printf("error adding certificate\\n");
 
   /* decrease reference counts */
@@ -88,20 +92,21 @@ int main(void)
     "omTxJBzcoTWcFbLUvFUufQb1nA5V9FrWk9p2rSVzTMVD\\n"
     "-----END CERTIFICATE-----\\n";
 
-  rv=curl_global_init(CURL_GLOBAL_ALL);
-  ch=curl_easy_init();
-  rv=curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
-  rv=curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
-  rv=curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
+  curl_global_init(CURL_GLOBAL_ALL);
+  ch = curl_easy_init();
+
+  curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
+  curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
+  curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
 
   /* Retrieve page using cacerts' certificate -> will succeed
    * load the certificate by installing a function doing the necessary
    * "modifications" to the SSL CONTEXT just before link init
    */
-  rv=curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
-  rv=curl_easy_setopt(ch, CURLOPT_SSL_CTX_DATA, mypem);
-  rv=curl_easy_perform(ch);
-  if(rv==CURLE_OK)
+  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
+  curl_easy_setopt(ch, CURLOPT_SSL_CTX_DATA, mypem);
+  rv = curl_easy_perform(ch);
+  if(!rv)
     printf("*** transfer succeeded ***\\n");
   else
     printf("*** transfer failed ***\\n");
@@ -112,8 +117,8 @@ int main(void)
 }
 .fi
 .SH AVAILABILITY
-Added in 7.11.0 for OpenSSL, in 7.42.0 for wolfSSL and in 7.54.0 for
-mbedTLS. Other SSL backends are not supported.
+Added in 7.11.0 for OpenSSL, in 7.42.0 for wolfSSL, in 7.54.0 for mbedTLS,
+in 7.83.0 in BearSSL. Other SSL backends are not supported.
 .SH RETURN VALUE
 CURLE_OK if supported; or an error such as:
 

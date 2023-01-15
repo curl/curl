@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,94 +18,41 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_share_setopt 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
 .SH NAME
 curl_share_setopt - Set options for a shared object
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
+.nf
+#include <curl/curl.h>
+
 CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
-.ad
+.fi
 .SH DESCRIPTION
 Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
 .SH OPTIONS
 .IP CURLSHOPT_LOCKFUNC
-The \fIparameter\fP must be a pointer to a function matching the following
-prototype:
-
-void lock_function(CURL *handle, curl_lock_data data, curl_lock_access access,
-void *userptr);
-
-The \fIdata\fP argument tells what kind of data libcurl wants to lock. Make
-sure that the callback uses a different lock for each kind of data.
-
-\fIaccess\fP defines what access type libcurl wants, shared or single.
-
-\fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDATA\fP.
+See \fICURLSHOPT_LOCKFUNC(3)\fP.
 .IP CURLSHOPT_UNLOCKFUNC
-The \fIparameter\fP must be a pointer to a function matching the following
-prototype:
-
-void unlock_function(CURL *handle, curl_lock_data data, void *userptr);
-
-\fIdata\fP defines what data libcurl wants to unlock, and you must make sure
-that only one lock is given at any time for each kind of data.
-
-\fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDATA\fP.
+See \fICURLSHOPT_UNLOCKFUNC(3)\fP.
 .IP CURLSHOPT_SHARE
-The \fIparameter\fP specifies a type of data that should be shared. This may
-be set to one of the values described below.
-.RS
-.IP CURL_LOCK_DATA_COOKIE
-Cookie data will be shared across the easy handles using this shared object.
-Note that this does not activate an easy handle's cookie handling. You can do
-that separately by using \fICURLOPT_COOKIEFILE(3)\fP for example.
-.IP CURL_LOCK_DATA_DNS
-Cached DNS hosts will be shared across the easy handles using this shared
-object. Note that when you use the multi interface, all easy handles added to
-the same multi handle will share DNS cache by default without using this
-option.
-.IP CURL_LOCK_DATA_SSL_SESSION
-SSL session IDs will be shared across the easy handles using this shared
-object. This will reduce the time spent in the SSL handshake when reconnecting
-to the same server. Note SSL session IDs are reused within the same easy handle
-by default. Note this symbol was added in 7.10.3 but was not implemented until
-7.23.0.
-.IP CURL_LOCK_DATA_CONNECT
-Put the connection cache in the share object and make all easy handles using
-this share object share the connection cache.
-
-Note that due to a known bug, it is not safe to share connections this way
-between multiple concurrent threads.
-
-Connections that are used for HTTP/1.1 Pipelining or HTTP/2 multiplexing only
-get additional transfers added to them if the existing connection is held by
-the same multi or easy handle. libcurl does not support doing HTTP/2 streams
-in different threads using a shared connection.
-
-Support for \fBCURL_LOCK_DATA_CONNECT\fP was added in 7.57.0, but the symbol
-existed before this.
-
-Note that when you use the multi interface, all easy handles added to the same
-multi handle will share connection cache by default without using this option.
-.IP CURL_LOCK_DATA_PSL
-The Public Suffix List stored in the share object is made available to all
-easy handle bound to the later. Since the Public Suffix List is periodically
-refreshed, this avoids updates in too many different contexts.
-
-\fBCURL_LOCK_DATA_PSL\fP exists since 7.61.0.
-
-Note that when you use the multi interface, all easy handles added to the same
-multi handle will share PSL cache by default without using this option.
-.RE
+See \fICURLSHOPT_SHARE(3)\fP.
 .IP CURLSHOPT_UNSHARE
-This option does the opposite of \fICURLSHOPT_SHARE\fP. It specifies that
-the specified \fIparameter\fP will no longer be shared. Valid values are
-the same as those for \fICURLSHOPT_SHARE\fP.
+See \fICURLSHOPT_UNSHARE(3)\fP.
 .IP CURLSHOPT_USERDATA
-The \fIparameter\fP allows you to specify a pointer to data that will be passed
-to the lock_function and unlock_function each time it is called.
+See \fICURLSHOPT_USERDATA(3)\fP.
+.SH EXAMPLE
+.nf
+  CURLSHcode sh;
+  share = curl_share_init();
+  sh = curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+  if(sh)
+    printf("Error: %s\\n", curl_share_strerror(sh));
+.fi
+.SH AVAILABILITY
+Added in 7.10
 .SH RETURN VALUE
 CURLSHE_OK (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP

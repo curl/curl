@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+curl_get_line
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+curl_get_line unit tests
+ </name>
+</client>
+</testcase>

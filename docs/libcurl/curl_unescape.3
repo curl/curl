@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,18 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_unescape 3 "22 March 2001" "libcurl 7.7" "libcurl Manual"
 .SH NAME
 curl_unescape - URL decodes the given string
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "char *curl_unescape( const char *" url ", int "length " );"
-.ad
+.nf
+#include <curl/curl.h>
+
+char *curl_unescape( const char *url, int length);
+.fi
 .SH DESCRIPTION
 Obsolete function. Use \fIcurl_easy_unescape(3)\fP instead!
 
@@ -35,14 +38,28 @@ string" and return that as a new allocated string. All input characters that
 are URL encoded (%XX where XX is a two-digit hexadecimal number) will be
 converted to their plain text versions.
 
-If the 'length' argument is set to 0, curl_unescape() will use strlen() on the
-input 'url' string to find out the size.
+If the 'length' argument is set to 0, \fIcurl_unescape(3)\fP will use strlen()
+on the input \fBurl\fP string to find out the size.
 
-You must \fIcurl_free(3)\fP the returned string when you're done with it.
+You must \fIcurl_free(3)\fP the returned string when you are done with it.
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  int decodelen;
+  char *decoded = curl_unescape("%63%75%72%6c", 12, &decodelen);
+  if(decoded) {
+    /* do not assume printf() works on the decoded data! */
+    printf("Decoded: ");
+    /* ... */
+    curl_free(decoded);
+  }
+}
+.fi
 .SH AVAILABILITY
 Since 7.15.4, \fIcurl_easy_unescape(3)\fP should be used. This function will
 be removed in a future release.
 .SH RETURN VALUE
 A pointer to a null-terminated string or NULL if it failed.
 .SH "SEE ALSO"
-.br curl_easy_escape "(3)," curl_easy_unescape "(3)," curl_free "(3)," RFC 2396
+.BR curl_easy_escape "(3)," curl_easy_unescape "(3)," curl_free "(3)," RFC 2396

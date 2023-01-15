@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,10 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "test.h"
 
 #include "testutil.h"
+#include "timediff.h"
 #include "warnless.h"
 #include "memdebug.h"
 
@@ -85,11 +88,11 @@ int test(char *URL)
 
     curl_multi_timeout(multi_handle, &curl_timeo);
     if(curl_timeo >= 0) {
-      timeout.tv_sec = curl_timeo / 1000;
-      if(timeout.tv_sec > 1)
+      curlx_mstotv(&timeout, curl_timeo);
+      if(timeout.tv_sec > 1) {
         timeout.tv_sec = 1;
-      else
-        timeout.tv_usec = (curl_timeo % 1000) * 1000;
+        timeout.tv_usec = 0;
+      }
     }
 
     /* get file descriptors from the transfers */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "curlcheck.h"
 
@@ -29,7 +31,7 @@ static struct Curl_easy *data;
 
 static CURLcode unit_setup(void)
 {
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   data = curl_easy_init();
@@ -99,10 +101,10 @@ UNITTEST_START
   {BASE + 12, 0,     10000, 0, FALSE, -2000, "-2000, overdue 2 seconds"},
 
   /* no connect timeout set, connecting */
-  {BASE + 4, 0,      10000, 0, FALSE, 6000, "6 seconds should be left"},
-  {BASE + 4, 990000, 10000, 0, FALSE, 5010, "5010 ms should be left"},
-  {BASE + 10, 0,     10000, 0, FALSE, -1,   "timeout is -1, expired"},
-  {BASE + 12, 0,     10000, 0, FALSE, -2000, "-2000, overdue 2 seconds"},
+  {BASE + 4, 0,      10000, 0, TRUE, 6000, "6 seconds should be left"},
+  {BASE + 4, 990000, 10000, 0, TRUE, 5010, "5010 ms should be left"},
+  {BASE + 10, 0,     10000, 0, TRUE, -1,   "timeout is -1, expired"},
+  {BASE + 12, 0,     10000, 0, TRUE, -2000, "-2000, overdue 2 seconds"},
 
   /* only connect timeout set, not connecting */
   {BASE + 4, 0,      0, 10000, FALSE, 0, "no timeout active"},

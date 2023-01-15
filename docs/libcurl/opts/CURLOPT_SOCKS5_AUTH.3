@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SOCKS5_AUTH 3 "27 April 2017" "libcurl 7.55.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SOCKS5_AUTH \- set allowed methods for SOCKS5 proxy authentication
+CURLOPT_SOCKS5_AUTH \- methods for SOCKS5 proxy authentication
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SOCKS5_AUTH, long bitmask);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter, which is set to a bitmask, to tell libcurl which
 authentication method(s) are allowed for SOCKS5 proxy authentication.  The only
@@ -48,7 +52,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://user:pass@myproxy.com");
 
   /* enable username/password authentication only */
-  curl_easy_setopt(curl, CURLOPT_SOCKS5_AUTH, CURLAUTH_BASIC);
+  curl_easy_setopt(curl, CURLOPT_SOCKS5_AUTH, (long)CURLAUTH_BASIC);
 
   /* Perform the request */
   curl_easy_perform(curl);

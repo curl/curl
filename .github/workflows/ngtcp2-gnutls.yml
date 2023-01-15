@@ -1,0 +1,127 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: ngtcp2
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**/*.md'
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: ngtcp2-gnutls-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: gnutls
+          install: >-
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
+            nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin
+            libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools
+            texinfo texlive texlive-extra-utils autopoint libev-dev
+          configure: >-
+            PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib"
+            --with-ngtcp2=$HOME/all --enable-warnings --enable-werror --enable-debug
+            --with-test-nghttpx="$HOME/all/bin/nghttpx"
+          ngtcp2-configure: >-
+            --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
+          gnutls-configure: >-
+            PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib -L$HOME/all/lib"
+            --with-included-libtasn1 --with-included-unistring
+            --disable-guile --disable-doc --disable-tests --disable-tools
+
+    steps:
+    - run: |
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
+        sudo python3 -m pip install impacket
+      name: 'install prereqs and impacket'
+
+    - run: |
+        git clone --depth=1 -b openssl-3.0.7+quic https://github.com/quictls/openssl
+        cd openssl
+        ./config --prefix=$HOME/all --libdir=$HOME/all/lib
+        make install_sw
+      name: 'install quictls'
+
+    - run: |
+        git clone --depth=1 https://gitlab.com/gnutls/nettle.git
+        cd nettle
+        ./.bootstrap
+        ./configure LDFLAGS="-Wl,-rpath,$HOME/all/lib" ${{ matrix.build.nettle-configure }} --prefix=$HOME/all --libdir=$HOME/all/lib --disable-documentation
+        make install
+      name: 'install nettle'
+
+    - run: |
+        git clone --depth=1 -b 3.7.8 https://github.com/gnutls/gnutls.git
+        cd gnutls
+        ./bootstrap
+        ./configure ${{ matrix.build.gnutls-configure }} --prefix=$HOME/all
+        make install
+      name: 'install gnutls'
+
+    - run: |
+        git clone --depth=1 -b v0.8.0 https://github.com/ngtcp2/nghttp3
+        cd nghttp3
+        autoreconf -fi
+        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
+        make install
+      name: 'install nghttp3'
+
+    - run: |
+        git clone --depth=1 -b v0.12.1 https://github.com/ngtcp2/ngtcp2
+        cd ngtcp2
+        autoreconf -fi
+        ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl --with-gnutls
+        make install
+      name: 'install ngtcp2'
+
+    - run: |
+        git clone --depth=1 -b v1.51.0 https://github.com/nghttp2/nghttp2
+        cd nghttp2
+        autoreconf -fi
+        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-http3
+        make install
+      name: 'install nghttp2'
+
+    - uses: actions/checkout@v3
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --with-gnutls=$HOME/all ${{ matrix.build.configure }}
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
+
+    - run: make V=1 -C tests
+      name: 'make tests'
+
+    - run: make V=1 test-ci
+      name: 'run tests'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"

@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Alt-Svc
+trailing-dot
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+alt-svc
+debug
+</features>
+<server>
+http
+</server>
+ <name>
+alt-svc using host name with trailing dot on host from file
+ </name>
+<setenv>
+# make debug-curl accept Alt-Svc over plain HTTP
+CURL_ALTSVC_HTTP="yeah"
+</setenv>
+ <command>
+--alt-svc "log/altsvc-%TESTNUMBER" "http://whohoo:12345/%TESTNUMBER"
+</command>
+<file name="log/altsvc-%TESTNUMBER">
+h1 whohoo. 12345 h1 %HOSTIP %HTTPPORT "20290222 22:19:28" 0 0
+</file>
+
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: whohoo:12345
+User-Agent: curl/%VERSION
+Accept: */*
+Alt-Used: %HOSTIP:%HTTPPORT
+
+</protocol>
+</verify>
+</testcase>

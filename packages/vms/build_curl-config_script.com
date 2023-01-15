@@ -2,7 +2,7 @@ $! build_curl-config_script.com
 $!
 $! This generates the curl-config. script from the curl-config.in file.
 $!
-$! Copyright 2014, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -16,8 +16,7 @@ $! WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 $! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
-$!
-$! 16-Dec-2014	J. Malmberg
+$! SPDX-License-Identifier: ISC
 $!
 $!===========================================================================
 $!

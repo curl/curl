@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,36 +18,58 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_mime_subparts 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
 .SH NAME
-curl_mime_subparts - set subparts of a multipart mime part
+curl_mime_subparts - set sub-parts of a multipart mime part
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_subparts(curl_mimepart * " part ,
-.BI "curl_mime * " subparts ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_subparts(curl_mimepart *part, curl_mime *subparts);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_subparts(3)\fP sets a multipart mime part's content from a mime
 structure.
 
 \fIpart\fP is a handle to the multipart part.
 
-\fIsubparts\fP is a mime structure handle holding the subparts. After
+\fIsubparts\fP is a mime structure handle holding the sub-parts. After
 \fIcurl_mime_subparts\fP succeeds, the mime structure handle belongs to the
 multipart part and must not be freed explicitly. It may however be updated by
 subsequent calls to mime API functions.
 
-Setting a part's contents twice is valid: only the value set by the last call
-is retained. It is possible to unassign previous part's contents by setting
-\fIsubparts\fP to NULL.
+Setting a part's contents multiple times is valid: only the value set by the
+last call is retained. It is possible to unassign previous part's contents by
+setting \fIsubparts\fP to NULL.
+.SH EXAMPLE
+.nf
+ /* The inline part is an alternative proposing the html and the text
+    versions of the email. */
+ alt = curl_mime_init(curl);
+
+ /* HTML message. */
+ part = curl_mime_addpart(alt);
+ curl_mime_data(part, inline_html, CURL_ZERO_TERMINATED);
+ curl_mime_type(part, "text/html");
+
+ /* Text message. */
+ part = curl_mime_addpart(alt);
+ curl_mime_data(part, inline_text, CURL_ZERO_TERMINATED);
+
+ /* Create the inline part. */
+ part = curl_mime_addpart(mime);
+ curl_mime_subparts(part, alt);
+ curl_mime_type(part, "multipart/alternative");
+ slist = curl_slist_append(NULL, "Content-Disposition: inline");
+ curl_mime_headers(part, slist, 1);
+.fi
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE
 CURLE_OK or a CURL error code upon failure.
-.SH EXAMPLE
-TODO
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
 .BR curl_mime_init "(3)"

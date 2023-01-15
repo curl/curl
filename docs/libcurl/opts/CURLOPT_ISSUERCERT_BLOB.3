@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_ISSUERCERT_BLOB 3 "24 Jun 2020" "libcurl 7.71.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_ISSUERCERT_BLOB \- issuer SSL certificate from memory blob
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ISSUERCERT_BLOB, struct curl_blob *stblob);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ISSUERCERT_BLOB,
+                          struct curl_blob *stblob);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a curl_blob structure, which contains information (pointer
 and size) about a memory block with binary data of a CA certificate in PEM
@@ -70,7 +75,7 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in libcurl 7.71.0. This option is supported by the OpenSSL backends.
+Added in 7.71.0. This option is supported by the OpenSSL backends.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

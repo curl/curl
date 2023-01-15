@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,12 +18,12 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 SUBDIRS = vms
 
 EXTRA_DIST = README \
-  DOS/README \
-  DOS/common.dj \
   OS400/README.OS400 \
   OS400/ccsidcurl.c \
   OS400/ccsidcurl.h \
@@ -37,9 +37,6 @@ EXTRA_DIST = README \
   OS400/makefile.sh \
   OS400/os400sys.c \
   OS400/os400sys.h \
-  TPF/curl.mak \
-  TPF/maketpf.env_curl \
-  TPF/maketpf.env_curllib \
   Android/Android.mk
 
 CHECKSRC = $(CS_$(V))
@@ -48,4 +45,4 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir) $(srcdir)/OS400/*.[ch])
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(srcdir)/OS400/*.[ch])

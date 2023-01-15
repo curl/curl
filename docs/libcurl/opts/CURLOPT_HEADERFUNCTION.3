@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,12 +18,15 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HEADERFUNCTION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_HEADERFUNCTION \- callback that receives header data
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 size_t header_callback(char *buffer,
@@ -31,25 +34,29 @@ size_t header_callback(char *buffer,
                        size_t nitems,
                        void *userdata);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADERFUNCTION, header_callback);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADERFUNCTION,
+                          header_callback);
+.fi
 .SH DESCRIPTION
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
 This function gets called by libcurl as soon as it has received header
 data. The header callback will be called once for each header and only
-complete header lines are passed on to the callback. Parsing headers is very
-easy using this. \fIbuffer\fP points to the delivered data, and the size of
-that data is \fInitems\fP; \fIsize\fP is always 1. Do not assume that the
-header line is null-terminated!
+complete header lines are passed on to the callback. Parsing headers is easy
+to do using this callback. \fIbuffer\fP points to the delivered data, and the
+size of that data is \fInitems\fP; \fIsize\fP is always 1. Do not assume that
+the header line is null-terminated!
 
 The pointer named \fIuserdata\fP is the one you set with the
 \fICURLOPT_HEADERDATA(3)\fP option.
 
-This callback function must return the number of bytes actually taken care of.
-If that amount differs from the amount passed in to your function, it'll signal
-an error to the library. This will cause the transfer to get aborted and the
-libcurl function in progress will return \fICURLE_WRITE_ERROR\fP.
+Your callback should return the number of bytes actually taken care of. If
+that amount differs from the amount passed to your callback function, it will
+signal an error condition to the library. This will cause the transfer to get
+aborted and the libcurl function used will return \fICURLE_WRITE_ERROR\fP.
+
+You can also abort the transfer by returning CURL_WRITEFUNC_ERROR. (7.87.0)
 
 A complete HTTP header that is passed to this function can be up to
 \fICURL_MAX_HTTP_HEADER\fP (100K) bytes and includes the final line terminator.
@@ -114,4 +121,5 @@ Always
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
+.BR curl_easy_header "(3), "
 .BR CURLOPT_HEADERDATA "(3), " CURLOPT_WRITEFUNCTION "(3), "

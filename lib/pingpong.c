@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  *   'pingpong' is for generic back-and-forth support functions used by FTP,
  *   IMAP, POP3, SMTP and whatever more that likes them.
  *
@@ -26,13 +28,13 @@
 #include "curl_setup.h"
 
 #include "urldata.h"
+#include "cfilters.h"
 #include "sendf.h"
 #include "select.h"
 #include "progress.h"
 #include "speedcheck.h"
 #include "pingpong.h"
 #include "multiif.h"
-#include "non-ascii.h"
 #include "vtls/vtls.h"
 
 /* The last 3 #include files should be in this order */
@@ -101,12 +103,12 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   else
     interval_ms = 0; /* immediate */
 
-  if(Curl_ssl_data_pending(conn, FIRSTSOCKET))
+  if(Curl_conn_data_pending(data, FIRSTSOCKET))
     rc = 1;
   else if(Curl_pp_moredata(pp))
     /* We are receiving and there is data in the cache so just read it */
     rc = 1;
-  else if(!pp->sendleft && Curl_ssl_data_pending(conn, FIRSTSOCKET))
+  else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
   else
@@ -198,11 +200,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   write_len = Curl_dyn_len(&pp->sendbuf);
   s = Curl_dyn_ptr(&pp->sendbuf);
   Curl_pp_init(data, pp);
-
-  result = Curl_convert_to_network(data, s, write_len);
-  /* Curl_convert_to_network calls failf if unsuccessful */
-  if(result)
-    return result;
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CMD;
@@ -299,7 +296,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
        */
       if((ptr + pp->cache_size) > (buf + data->set.buffer_size + 1)) {
         failf(data, "cached response data too big to handle");
-        return CURLE_RECV_ERROR;
+        return CURLE_WEIRD_SERVER_REPLY;
       }
       memcpy(ptr, pp->cache, pp->cache_size);
       gotbytes = (ssize_t)pp->cache_size;
@@ -324,11 +321,6 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       if(result == CURLE_AGAIN)
         return CURLE_OK; /* return */
 
-      if(!result && (gotbytes > 0))
-        /* convert from the network encoding */
-        result = Curl_convert_from_network(data, ptr, gotbytes);
-      /* Curl_convert_from_network calls failf if unsuccessful */
-
       if(result)
         /* Set outer result variable to this error. */
         keepon = FALSE;
@@ -339,7 +331,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     else if(gotbytes <= 0) {
       keepon = FALSE;
       result = CURLE_RECV_ERROR;
-      failf(data, "response reading failed");
+      failf(data, "response reading failed (errno: %d)", SOCKERRNO);
     }
     else {
       /* we got a whole chunk of data, which can be anything from one
@@ -402,17 +394,18 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
         clipamount = gotbytes - i;
         restart = TRUE;
         DEBUGF(infof(data, "Curl_pp_readresp_ %d bytes of trailing "
-                     "server response left\n",
+                     "server response left",
                      (int)clipamount));
       }
       else if(keepon) {
 
-        if((perline == gotbytes) && (gotbytes > data->set.buffer_size/2)) {
+        if((perline == gotbytes) &&
+           (gotbytes > (ssize_t)data->set.buffer_size/2)) {
           /* We got an excessive line without newlines and we need to deal
              with it. We keep the first bytes of the line then we throw
              away the rest. */
           infof(data, "Excessive server response line length received, "
-                "%zd bytes. Stripping\n", gotbytes);
+                "%zd bytes. Stripping", gotbytes);
           restart = TRUE;
 
           /* we keep 40 bytes since all our pingpong protocols are only

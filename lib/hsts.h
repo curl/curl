@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,10 +20,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HSTS)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
 #include <curl/curl.h>
 #include "llist.h"
 
@@ -35,7 +37,7 @@ struct stsentry {
   struct Curl_llist_element node;
   const char *host;
   bool includeSubDomains;
-  time_t expires; /* the timestamp of this entry's expiry */
+  curl_off_t expires; /* the timestamp of this entry's expiry */
 };
 
 /* The HSTS cache. Needs to be able to tailmatch host names. */
@@ -57,9 +59,11 @@ CURLcode Curl_hsts_loadfile(struct Curl_easy *data,
                             struct hsts *h, const char *file);
 CURLcode Curl_hsts_loadcb(struct Curl_easy *data,
                           struct hsts *h);
+void Curl_hsts_loadfiles(struct Curl_easy *data);
 #else
 #define Curl_hsts_cleanup(x)
-#define Curl_hsts_loadcb(x,y)
+#define Curl_hsts_loadcb(x,y) CURLE_OK
 #define Curl_hsts_save(x,y,z)
-#endif /* CURL_DISABLE_HTTP || USE_HSTS */
+#define Curl_hsts_loadfiles(x)
+#endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */
 #endif /* HEADER_CURL_HSTS_H */

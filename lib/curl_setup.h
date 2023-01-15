@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,10 +20,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #if defined(BUILDING_LIBCURL) && !defined(CURL_NO_OLDIES)
 #define CURL_NO_OLDIES
+#endif
+
+/* define mingw version macros, eg __MINGW{32,64}_{MINOR,MAJOR}_VERSION */
+#ifdef __MINGW32__
+#include <_mingw.h>
 #endif
 
 /*
@@ -85,7 +92,7 @@
 #  endif
 #endif
 
-#if defined(macintosh) && defined(__MRC__)
+#ifdef macintosh
 #  include "config-mac.h"
 #endif
 
@@ -101,16 +108,12 @@
 #  include "config-os400.h"
 #endif
 
-#ifdef TPF
-#  include "config-tpf.h"
-#endif
-
-#ifdef __VXWORKS__
-#  include "config-vxworks.h"
-#endif
-
 #ifdef __PLAN9__
 #  include "config-plan9.h"
+#endif
+
+#ifdef MSDOS
+#  include "config-dos.h"
 #endif
 
 #endif /* HAVE_CONFIG_H */
@@ -159,48 +162,52 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
-#include <curl/curl.h>
-
 /*
  * Disable other protocols when http is the only one desired.
  */
 
 #ifdef HTTP_ONLY
-#  ifndef CURL_DISABLE_TFTP
-#    define CURL_DISABLE_TFTP
-#  endif
-#  ifndef CURL_DISABLE_FTP
-#    define CURL_DISABLE_FTP
-#  endif
-#  ifndef CURL_DISABLE_LDAP
-#    define CURL_DISABLE_LDAP
-#  endif
-#  ifndef CURL_DISABLE_TELNET
-#    define CURL_DISABLE_TELNET
-#  endif
 #  ifndef CURL_DISABLE_DICT
 #    define CURL_DISABLE_DICT
 #  endif
 #  ifndef CURL_DISABLE_FILE
 #    define CURL_DISABLE_FILE
 #  endif
-#  ifndef CURL_DISABLE_RTSP
-#    define CURL_DISABLE_RTSP
-#  endif
-#  ifndef CURL_DISABLE_POP3
-#    define CURL_DISABLE_POP3
-#  endif
-#  ifndef CURL_DISABLE_IMAP
-#    define CURL_DISABLE_IMAP
-#  endif
-#  ifndef CURL_DISABLE_SMTP
-#    define CURL_DISABLE_SMTP
+#  ifndef CURL_DISABLE_FTP
+#    define CURL_DISABLE_FTP
 #  endif
 #  ifndef CURL_DISABLE_GOPHER
 #    define CURL_DISABLE_GOPHER
 #  endif
+#  ifndef CURL_DISABLE_IMAP
+#    define CURL_DISABLE_IMAP
+#  endif
+#  ifndef CURL_DISABLE_LDAP
+#    define CURL_DISABLE_LDAP
+#  endif
+#  ifndef CURL_DISABLE_LDAPS
+#    define CURL_DISABLE_LDAPS
+#  endif
+#  ifndef CURL_DISABLE_MQTT
+#    define CURL_DISABLE_MQTT
+#  endif
+#  ifndef CURL_DISABLE_POP3
+#    define CURL_DISABLE_POP3
+#  endif
+#  ifndef CURL_DISABLE_RTSP
+#    define CURL_DISABLE_RTSP
+#  endif
 #  ifndef CURL_DISABLE_SMB
 #    define CURL_DISABLE_SMB
+#  endif
+#  ifndef CURL_DISABLE_SMTP
+#    define CURL_DISABLE_SMTP
+#  endif
+#  ifndef CURL_DISABLE_TELNET
+#    define CURL_DISABLE_TELNET
+#  endif
+#  ifndef CURL_DISABLE_TFTP
+#    define CURL_DISABLE_TFTP
 #  endif
 #endif
 
@@ -214,7 +221,7 @@
 
 /* ================================================================ */
 /* No system header file shall be included in this file before this */
-/* point. The only allowed ones are those included from curl/system.h */
+/* point.                                                           */
 /* ================================================================ */
 
 /*
@@ -241,13 +248,19 @@
 #  include "setup-win32.h"
 #endif
 
+#include <curl/system.h>
+
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
  * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
 #if defined(__APPLE__) && !defined(USE_ARES)
+#include <TargetConditionals.h>
 #define USE_RESOLVE_ON_IPS 1
+#  if defined(TARGET_OS_OSX) && TARGET_OS_OSX
+#    define CURL_OSX_CALL_COPYPROXIES 1
+#  endif
 #endif
 
 #ifdef USE_LWIPSOCK
@@ -264,31 +277,42 @@
 #  include <extra/strdup.h>
 #endif
 
-#ifdef TPF
-#  include <strings.h>    /* for bzero, strcasecmp, and strncasecmp */
-#  include <string.h>     /* for strcpy and strlen */
-#  include <stdlib.h>     /* for rand and srand */
-#  include <sys/socket.h> /* for select and ioctl*/
-#  include <netdb.h>      /* for in_addr_t definition */
-#  include <tpf/sysapi.h> /* for tpf_process_signals */
-   /* change which select is used for libcurl */
-#  define select(a,b,c,d,e) tpf_select_libcurl(a,b,c,d,e)
-#endif
-
-#ifdef __VXWORKS__
-#  include <sockLib.h>    /* for generic BSD socket functions */
-#  include <ioLib.h>      /* for basic I/O interface functions */
-#endif
-
 #ifdef __AMIGA__
+#  ifdef __amigaos4__
+#    define __USE_INLINE__
+     /* use our own resolver which uses runtime feature detection */
+#    define CURLRES_AMIGA
+     /* getaddrinfo() currently crashes bsdsocket.library, so disable */
+#    undef HAVE_GETADDRINFO
+#    if !(defined(__NEWLIB__) || \
+          (defined(__CLIB2__) && defined(__THREAD_SAFE)))
+       /* disable threaded resolver with clib2 - requires newlib or clib-ts */
+#      undef USE_THREADS_POSIX
+#    endif
+#  endif
 #  include <exec/types.h>
 #  include <exec/execbase.h>
 #  include <proto/exec.h>
 #  include <proto/dos.h>
 #  include <unistd.h>
-#  ifdef HAVE_PROTO_BSDSOCKET_H
-#    include <proto/bsdsocket.h> /* ensure bsdsocket.library use */
-#    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#  if defined(HAVE_PROTO_BSDSOCKET_H) && \
+    (!defined(__amigaos4__) || defined(USE_AMISSL))
+     /* use bsdsocket.library directly, instead of libc networking functions */
+#    include <proto/bsdsocket.h>
+#    ifdef __amigaos4__
+       int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
+                             fd_set *errorfds, struct timeval *timeout);
+#      define select(a,b,c,d,e) Curl_amiga_select(a,b,c,d,e)
+#    else
+#      define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#    endif
+     /* must not use libc's fcntl() on bsdsocket.library sockfds! */
+#    undef HAVE_FCNTL
+#    undef HAVE_FCNTL_O_NONBLOCK
+#  else
+     /* use libc networking and hence close() and fnctl() */
+#    undef HAVE_CLOSESOCKET_CAMEL
+#    undef HAVE_IOCTLSOCKET_CAMEL
 #  endif
 /*
  * In clib2 arpa/inet.h warns that some prototypes may clash
@@ -298,12 +322,12 @@
 #endif
 
 #include <stdio.h>
-#ifdef HAVE_ASSERT_H
 #include <assert.h>
-#endif
 
-#ifdef __TANDEM /* for nsr-tandem-nsk systems */
-#include <floss.h>
+#ifdef __TANDEM /* for ns*-tandem-nsk systems */
+# if ! defined __LP64
+#  include <floss.h> /* FLOSS is only used for 32-bit builds. */
+# endif
 #endif
 
 #ifndef STDC_HEADERS /* no standard C headers! */
@@ -452,6 +476,15 @@
 #endif
 #endif
 
+#ifndef SSIZE_T_MAX
+/* some limits.h headers have this defined, some don't */
+#if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
+#define SSIZE_T_MAX 9223372036854775807
+#else
+#define SSIZE_T_MAX 2147483647
+#endif
+#endif
+
 /*
  * Arg 2 type for gethostname in case it hasn't been defined in config file.
  */
@@ -517,7 +550,6 @@
 #    undef HAVE_GETADDRINFO_THREADSAFE
 #    undef HAVE_FREEADDRINFO
 #    undef HAVE_GETADDRINFO
-#    undef HAVE_GETNAMEINFO
 #    undef ENABLE_IPV6
 #  endif
 #endif
@@ -562,7 +594,6 @@
 /* now undef the stock libc functions just to avoid them being used */
 #  undef HAVE_GETADDRINFO
 #  undef HAVE_FREEADDRINFO
-#  undef HAVE_GETHOSTBYNAME
 #elif defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 #  define CURLRES_ASYNCH
 #  define CURLRES_THREADED
@@ -601,14 +632,6 @@
 #  endif
 #endif
 
-#ifdef NETWARE
-int netware_init(void);
-#ifndef __NOVELL_LIBC__
-#include <sys/bsdskt.h>
-#include <sys/timeval.h>
-#endif
-#endif
-
 #if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && !defined(USE_WIN32_IDN)
 /* The lib and header are present */
 #define USE_LIBIDN2
@@ -623,7 +646,7 @@ int netware_init(void);
 #if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_NSS) || \
     defined(USE_MBEDTLS) || \
     defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
-    defined(USE_SECTRANSP) || defined(USE_GSKIT) || defined(USE_MESALINK) || \
+    defined(USE_SECTRANSP) || defined(USE_GSKIT) || \
     defined(USE_BEARSSL) || defined(USE_RUSTLS)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
@@ -641,24 +664,16 @@ int netware_init(void);
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-#if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                     \
-  defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
-  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
-  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
-
-#define USE_CURL_NTLM_CORE
-
-#  if defined(USE_MBEDTLS)
-/* Get definition of MBEDTLS_MD4_C */
-#  include <mbedtls/md4.h>
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(CURL_DISABLE_NTLM)
+#  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                       \
+      defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
+      defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
+      (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
+#    define USE_CURL_NTLM_CORE
 #  endif
-
-#endif
-
-#if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
-#define USE_NTLM
-#endif
+#  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
+#    define USE_NTLM
+#  endif
 #endif
 
 #ifdef CURL_WANTS_CA_BUNDLE_ENV
@@ -680,7 +695,7 @@ int netware_init(void);
 #  define UNUSED_PARAM __attribute__((__unused__))
 #  define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #else
-#  define UNUSED_PARAM /*NOTHING*/
+#  define UNUSED_PARAM /* NOTHING */
 #  define WARN_UNUSED_RESULT
 #endif
 
@@ -707,7 +722,6 @@ int netware_init(void);
 #if defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H)
 #  if defined(SOCKET) || \
      defined(USE_WINSOCK) || \
-     defined(HAVE_WINSOCK_H) || \
      defined(HAVE_WINSOCK2_H) || \
      defined(HAVE_WS2TCPIP_H)
 #    error "WinSock and lwIP TCP/IP stack definitions shall not coexist!"
@@ -715,21 +729,27 @@ int netware_init(void);
 #endif
 
 /*
- * Portable symbolic names for Winsock shutdown() mode flags.
+ * shutdown() flags for systems that don't define them
  */
 
-#ifdef USE_WINSOCK
-#  define SHUT_RD   0x00
-#  define SHUT_WR   0x01
-#  define SHUT_RDWR 0x02
+#ifndef SHUT_RD
+#define SHUT_RD 0x00
 #endif
 
-/* Define S_ISREG if not defined by system headers, f.e. MSVC */
+#ifndef SHUT_WR
+#define SHUT_WR 0x01
+#endif
+
+#ifndef SHUT_RDWR
+#define SHUT_RDWR 0x02
+#endif
+
+/* Define S_ISREG if not defined by system headers, e.g. MSVC */
 #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 
-/* Define S_ISDIR if not defined by system headers, f.e. MSVC */
+/* Define S_ISDIR if not defined by system headers, e.g. MSVC */
 #if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
@@ -772,15 +792,27 @@ endings either CRLF or LF so 't' is appropriate.
 #  endif
 #endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
 
-/* for systems that don't detect this in configure, use a sensible default */
+/* for systems that don't detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#define CURL_SA_FAMILY_T unsigned short
+#  if defined(HAVE_SA_FAMILY_T)
+#    define CURL_SA_FAMILY_T sa_family_t
+#  elif defined(HAVE_ADDRESS_FAMILY)
+#    define CURL_SA_FAMILY_T ADDRESS_FAMILY
+#  else
+/* use a sensible default */
+#    define CURL_SA_FAMILY_T unsigned short
+#  endif
 #endif
 
 /* Some convenience macros to get the larger/smaller value out of two given.
    We prefix with CURL to prevent name collisions. */
 #define CURLMAX(x,y) ((x)>(y)?(x):(y))
 #define CURLMIN(x,y) ((x)<(y)?(x):(y))
+
+/* A convenience macro to provide both the string literal and the length of
+   the string literal in one go, useful for functions that take "string,len"
+   as their argument */
+#define STRCONST(x) x,sizeof(x)-1
 
 /* Some versions of the Android SDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_DECL_GETPWUID_R_MISSING)
@@ -795,8 +827,30 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define UNITTEST static
 #endif
 
-#if defined(USE_NGTCP2) || defined(USE_QUICHE)
+#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+#define USE_HTTP2
+#endif
+
+#if defined(USE_NGTCP2) || defined(USE_QUICHE) || defined(USE_MSH3)
 #define ENABLE_QUIC
+#define USE_HTTP3
+#endif
+
+#if defined(USE_UNIX_SOCKETS) && defined(WIN32)
+#  if defined(__MINGW32__) && !defined(LUP_SECURE)
+     typedef u_short ADDRESS_FAMILY; /* Classic mingw, 11y+ old mingw-w64 */
+#  endif
+#  if !defined(UNIX_PATH_MAX)
+     /* Replicating logic present in afunix.h
+        (distributed with newer Windows 10 SDK versions only) */
+#    define UNIX_PATH_MAX 108
+     /* !checksrc! disable TYPEDEFSTRUCT 1 */
+     typedef struct sockaddr_un {
+       ADDRESS_FAMILY sun_family;
+       char sun_path[UNIX_PATH_MAX];
+     } SOCKADDR_UN, *PSOCKADDR_UN;
+#    define WIN32_SOCKADDR_UN
+#  endif
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */

@@ -1,6 +1,7 @@
 <testcase>
 <info>
 <keywords>
+HTTP
 protocol
 --write-out
 </keywords>

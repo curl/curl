@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_IOCTLDATA 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_IOCTLDATA \- custom pointer passed to I/O callback
+CURLOPT_IOCTLDATA \- pointer passed to I/O callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_IOCTLDATA, void *pointer);
+.fi
 .SH DESCRIPTION
 Pass the \fIpointer\fP that will be untouched by libcurl and passed as the 3rd
 argument in the ioctl callback set with \fICURLOPT_IOCTLFUNCTION(3)\fP.
@@ -53,7 +57,7 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
 }
 .fi
 .SH AVAILABILITY
-Added in 7.12.3
+Added in 7.12.3. Deprecated since 7.18.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

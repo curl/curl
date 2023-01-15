@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .TH libcurl-share 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl share interface"
@@ -45,7 +47,7 @@ You tell the shared object what data you want it to share by using
 \fIcurl_share_setopt(3)\fP.
 
 Since you can use this share from multiple threads, and libcurl has no
-internal thread synchronization, you must provide mutex callbacks if you're
+internal thread synchronization, you must provide mutex callbacks if you are
 using this multi-threaded. You set lock and unlock functions with
 \fIcurl_share_setopt(3)\fP too.
 
@@ -58,7 +60,7 @@ To make an easy handle stop using that particular share, you set
 \fICURLOPT_SHARE(3)\fP to NULL for that easy handle. To make a handle stop
 sharing a particular data, you can \fICURLSHOPT_UNSHARE\fP it.
 
-When you're done using the share, make sure that no easy handle is still using
+When you are done using the share, make sure that no easy handle is still using
 it, and call \fIcurl_share_cleanup(3)\fP on the handle.
 .SH "SEE ALSO"
 .BR curl_share_init "(3), " curl_share_setopt "(3), " curl_share_cleanup "(3)"

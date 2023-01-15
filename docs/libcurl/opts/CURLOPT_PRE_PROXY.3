@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PRE_PROXY 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PRE_PROXY \- set pre-proxy to use
+CURLOPT_PRE_PROXY \- pre-proxy host to use
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PRE_PROXY, char *preproxy);
+.fi
 .SH DESCRIPTION
 Set the \fIpreproxy\fP to use for the upcoming request. The parameter
 should be a char * to a null-terminated string holding the host name or dotted
@@ -59,13 +63,13 @@ Default is NULL, meaning no pre proxy is used.
 When you set a host name to use, do not assume that there's any particular
 single port number used widely for proxies. Specify it!
 .SH PROTOCOLS
-All except file://. Note that some protocols don't do very well over proxy.
+All except file://. Note that some protocols do not work well over proxy.
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/file.txt");
-  curl_easy_setopt(curl, CURLOPT_PREPROXY, "socks4://socks-proxy:1080");
+  curl_easy_setopt(curl, CURLOPT_PRE_PROXY, "socks4://socks-proxy:1080");
   curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
   curl_easy_perform(curl);
 }

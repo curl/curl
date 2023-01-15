@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,11 +18,13 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_INTERLEAVEFUNCTION 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_INTERLEAVEFUNCTION \- callback function for RTSP interleaved data
+CURLOPT_INTERLEAVEFUNCTION \- callback for RTSP interleaved data
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -57,6 +59,13 @@ process any pending RTP data before marking the request as finished.
 
 The \fICURLOPT_INTERLEAVEDATA(3)\fP is passed in the \fIuserdata\fP argument in
 the callback.
+
+Your callback should return the number of bytes actually taken care of. If
+that amount differs from the amount passed to your callback function, it will
+signal an error condition to the library. This will cause the transfer to get
+aborted and the libcurl function used will return \fICURLE_WRITE_ERROR\fP.
+
+You can also abort the transfer by returning CURL_WRITEFUNC_ERROR. (7.87.0)
 .SH DEFAULT
 NULL, the interleave data is then passed to the regular write function:
 \fICURLOPT_WRITEFUNCTION(3)\fP.

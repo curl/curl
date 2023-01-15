@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,25 +18,27 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_mime_data_cb 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
 .SH NAME
 curl_mime_data_cb - set a callback-based data source for a mime part's body
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
+.nf
+#include <curl/curl.h>
+
 size_t readfunc(char *buffer, size_t size, size_t nitems, void *arg);
-.br
+
 int seekfunc(void *arg, curl_off_t offset, int origin);
-.br
+
 void freefunc(void *arg);
-.sp
-.BI "CURLcode curl_mime_data_cb(curl_mimepart * " part ", curl_off_t " datasize ,
-.br
-.BI "        curl_read_callback " readfunc ", curl_seek_callback " seekfunc ,
-.br
-.BI "        curl_free_callback " freefunc ", void * " arg ");"
-.ad
+
+CURLcode curl_mime_data_cb(curl_mimepart *part, curl_off_t datasize,
+                           curl_read_callback readfunc,
+                           curl_seek_callback seekfunc,
+                           curl_free_callback freefunc, void *arg);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_data_cb(3)\fP sets the data source of a mime part's body content
 from a data read callback function.
@@ -61,7 +63,7 @@ freeing.
 The read callback function gets called by libcurl as soon as it needs to
 read data in order to send it to the peer - like if you ask it to upload or
 post data to the server. The data area pointed at by the pointer \fIbuffer\fP
-should be filled up with at most \fIsize\fP multiplied with \fInmemb\fP number
+should be filled up with at most \fIsize\fP multiplied with \fInitems\fP number
 of bytes by your function.
 
 Your read function must then return the actual number of bytes that it stored
@@ -69,9 +71,9 @@ in that memory area. Returning 0 will signal end-of-file to the library and
 cause it to stop the current transfer.
 
 If you stop the current transfer by returning 0 "pre-maturely" (i.e. before the
-server expected it, like when you've said you will upload N bytes and you
+server expected it, like when you have said you will upload N bytes and you
 upload less than N bytes), you may experience that the server "hangs" waiting
-for the rest of the data that won't come.
+for the rest of the data that will not come.
 
 The read callback may return \fICURL_READFUNC_ABORT\fP to stop the current
 operation immediately, resulting in a \fICURLE_ABORTED_BY_CALLBACK\fP error
@@ -96,11 +98,6 @@ duplicated: the \fIarg\fP pointer argument is also duplicated, resulting in
 the pointed item to be shared between the original and the copied handle.
 In particular, special attention should be given to the \fIfreefunc\fP
 procedure code since it will be called twice with the same argument.
-
-.SH AVAILABILITY
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
-.SH RETURN VALUE
-CURLE_OK or a CURL error code upon failure.
 .SH EXAMPLE
 Sending a huge data string will cause the same amount of memory to be
 allocated: to avoid overhead resources consumption, one might want to use a
@@ -160,6 +157,10 @@ int seek_callback(void *arg, curl_off_t offset, int origin)
  curl_mime_data_cb(part, hugectl.size, read_callback, seek_callback, NULL,
                    &hugectl);
 
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+CURLE_OK or a CURL error code upon failure.
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
 .BR curl_mime_data "(3),"

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -38,12 +40,16 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_SOCKETFUNCTION, socket_callb
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-When the \fIcurl_multi_socket_action(3)\fP function is called, it informs the
-application about updates in the socket (file descriptor) status by doing
-none, one, or multiple calls to the \fBsocket_callback\fP. The callback
-function gets status updates with changes since the previous time the callback
-was called. If the given callback pointer is set to NULL, no callback will be
-called.
+When the \fIcurl_multi_socket_action(3)\fP function is called, it uses this
+callback to inform the application about updates in the socket (file
+descriptor) status by doing none, one, or multiple calls to the
+\fBsocket_callback\fP. The callback function gets status updates with changes
+since the previous time the callback was called. If the given callback pointer
+is set to NULL, no callback will be called.
+
+libcurl then expects the application to monitor the sockets for the specific
+activities and tell libcurl again when something happens on one of them. Tell
+libcurl by calling \fIcurl_multi_socket_action(3)\fP.
 .SH "CALLBACK ARGUMENTS"
 \fIeasy\fP identifies the specific transfer for which this update is related.
 
@@ -52,6 +58,10 @@ called.
 what activity on this socket the application is supposed to
 monitor. Subsequent calls to this callback might update the \fBwhat\fP bits
 for a socket that is already monitored.
+
+The socket callback should return 0 on success, and -1 on error. If this
+callback returns error, \fBall\fP transfers currently in progress in this
+multi handle will be aborted and fail.
 
 \fBuserp\fP is set with \fICURLMOPT_SOCKETDATA(3)\fP.
 
@@ -67,7 +77,8 @@ Wait for outgoing data. For the socket to become writable.
 Wait for incoming and outgoing data. For the socket to become readable or
 writable.
 .IP CURL_POLL_REMOVE
-The specified socket/file descriptor is no longer used by libcurl.
+The specified socket/file descriptor is no longer used by libcurl for any
+active transfer. It might soon be added again.
 .SH DEFAULT
 NULL (no callback)
 .SH PROTOCOLS

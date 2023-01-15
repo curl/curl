@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 # Determine if curl-config --protocols/--features matches the
@@ -44,7 +46,7 @@ $curl_protocols =~ /\w+: (.*)$/;
 @curl = split / /,$1;
 
 # These features are not supported by curl-config
-@curl = grep(!/^(Debug|TrackMemory|Metalink|CharConv)$/i, @curl);
+@curl = grep(!/^(Debug|TrackMemory|CharConv)$/i, @curl);
 @curl = sort @curl;
 
 # Read the output of curl-config

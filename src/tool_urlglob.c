@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "tool_setup.h"
@@ -348,7 +350,7 @@ static bool peek_ipv6(const char *str, size_t *skip)
   memcpy(hostname, str, hlen);
   hostname[hlen] = 0;
 
-  /* ask to "guess scheme" as then it works without a https:// prefix */
+  /* ask to "guess scheme" as then it works without an https:// prefix */
   rc = curl_url_set(u, CURLUPART_URL, hostname, CURLU_GUESS_SCHEME);
 
   curl_url_cleanup(u);
@@ -472,7 +474,7 @@ CURLcode glob_url(struct URLGlob **glob, char *url, unsigned long *urlnum,
       if(glob_expand->pos) {
         msnprintf(text, sizeof(text), "%s in URL position %zu:\n%s\n%*s^",
                   glob_expand->error,
-                  glob_expand->pos, url, glob_expand->pos - 1, " ");
+                  glob_expand->pos, url, (int)glob_expand->pos - 1, " ");
         t = text;
       }
       else
@@ -685,6 +687,9 @@ CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
     if(curlx_dyn_addn(&dyn, appendthis, appendlen))
       return CURLE_OUT_OF_MEMORY;
   }
+
+  if(curlx_dyn_addn(&dyn, "", 0))
+    return CURLE_OUT_OF_MEMORY;
 
 #if defined(MSDOS) || defined(WIN32)
   {

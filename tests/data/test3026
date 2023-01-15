@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+curl_global_init
+thread-safe
+slow
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+# require the threaded resolver only because it means pthreads might
+# be used for it
+<features>
+threadsafe
+threaded-resolver
+</features>
+<server>
+none
+</server>
+<name>
+curl_global_init thread-safety
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+none
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HEADERDATA 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_HEADERDATA \- pointer to pass to header callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADERDATA, void *pointer);
+.fi
 .SH DESCRIPTION
 Pass a \fIpointer\fP to be used to write the header part of the received data
 to.
@@ -36,6 +40,10 @@ If \fICURLOPT_WRITEFUNCTION(3)\fP or \fICURLOPT_HEADERFUNCTION(3)\fP is used,
 
 If neither of those options are set, \fIpointer\fP must be a valid FILE * and
 it will be used by a plain fwrite() to write headers to.
+
+If you are using libcurl as a win32 DLL, you \fBMUST\fP use a
+\fICURLOPT_WRITEFUNCTION(3)\fP or \fICURLOPT_HEADERFUNCTION(3)\fP if you set
+this option or you will experience crashes.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

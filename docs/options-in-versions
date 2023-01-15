@@ -64,6 +64,7 @@
 --fail-with-body                     7.76.0
 --false-start                        7.42.0
 --form (-F)                          5.0
+--form-escape                        7.81.0
 --form-string                        7.13.2
 --ftp-account                        7.13.0
 --ftp-alternative-to-user            7.15.5
@@ -84,6 +85,7 @@
 --header (-H)                        5.0
 --help (-h)                          4.0
 --hostpubmd5                         7.17.1
+--hostpubsha256                      7.80.0
 --hsts                               7.74.0
 --http0.9                            7.64.0
 --http1.0 (-0)                       7.9.1
@@ -91,12 +93,14 @@
 --http2                              7.33.0
 --http2-prior-knowledge              7.49.0
 --http3                              7.66.0
+--http3-only                         7.88.0
 --ignore-content-length              7.14.1
 --include (-i)                       4.8
 --insecure (-k)                      7.10
 --interface                          7.3
 --ipv4 (-4)                          7.10.8
 --ipv6 (-6)                          7.10.8
+--json                               7.82.0
 --junk-session-cookies (-j)          7.9.7
 --keepalive-time                     7.18.0
 --key                                7.9.3
@@ -125,6 +129,7 @@
 --next (-:)                          7.36.0
 --no-alpn                            7.36.0
 --no-buffer (-N)                     6.5
+--no-clobber                         7.83.0
 --no-keepalive                       7.18.0
 --no-npn                             7.36.0
 --no-progress-meter                  7.67.0
@@ -169,6 +174,7 @@
 --proxy-pinnedpubkey                 7.59.0
 --proxy-service-name                 7.43.0
 --proxy-ssl-allow-beast              7.52.0
+--proxy-ssl-auto-client-cert         7.77.0
 --proxy-tls13-ciphers                7.61.0
 --proxy-tlsauthtype                  7.52.0
 --proxy-tlspassword                  7.52.0
@@ -181,12 +187,14 @@
 --quote (-Q)                         5.3
 --random-file                        7.7
 --range (-r)                         4.0
+--rate                               7.84.0
 --raw                                7.16.2
 --referer (-e)                       4.0
 --remote-header-name (-J)            7.20.0
 --remote-name (-O)                   4.0
 --remote-name-all                    7.19.0
 --remote-time (-R)                   7.9
+--remove-on-error                    7.83.0
 --request (-X)                       6.0
 --request-target                     7.55.0
 --resolve                            7.21.3
@@ -212,6 +220,7 @@
 --speed-time (-y)                    4.7
 --ssl                                7.20.0
 --ssl-allow-beast                    7.25.0
+--ssl-auto-client-cert               7.77.0
 --ssl-no-revoke                      7.44.0
 --ssl-reqd                           7.20.0
 --ssl-revoke-best-effort             7.70.0
@@ -243,6 +252,7 @@
 --unix-socket                        7.40.0
 --upload-file (-T)                   4.0
 --url                                7.5
+--url-query                          7.87.0
 --use-ascii (-B)                     5.0
 --user (-u)                          4.0
 --user-agent (-A)                    4.5.1

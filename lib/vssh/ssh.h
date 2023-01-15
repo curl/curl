@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,14 +20,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
 
-#if defined(HAVE_LIBSSH2_H)
+#if defined(USE_LIBSSH2)
 #include <libssh2.h>
 #include <libssh2_sftp.h>
-#elif defined(HAVE_LIBSSH_LIBSSH_H)
+#elif defined(USE_LIBSSH)
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 #elif defined(USE_WOLFSSH)
@@ -131,8 +133,8 @@ struct ssh_conn {
 
   /* common */
   const char *passphrase;     /* pass-phrase to use */
-  char *rsa_pub;              /* path name */
-  char *rsa;                  /* path name */
+  char *rsa_pub;              /* strdup'ed public key file */
+  char *rsa;                  /* strdup'ed private key file */
   bool authed;                /* the connection has been authenticated fine */
   bool acceptfail;            /* used by the SFTP_QUOTE (continue if
                                  quote command fails) */
@@ -209,11 +211,7 @@ struct ssh_conn {
 #endif /* USE_LIBSSH */
 };
 
-#if defined(USE_LIBSSH)
-
-#define CURL_LIBSSH_VERSION ssh_version(0)
-
-#elif defined(USE_LIBSSH2)
+#if defined(USE_LIBSSH2)
 
 /* Feature detection based on version numbers to better work with
    non-configure platforms */
@@ -262,10 +260,13 @@ extern const struct Curl_handler Curl_handler_sftp;
 /* generic SSH backend functions */
 CURLcode Curl_ssh_init(void);
 void Curl_ssh_cleanup(void);
-size_t Curl_ssh_version(char *buffer, size_t buflen);
+void Curl_ssh_version(char *buffer, size_t buflen);
+void Curl_ssh_attach(struct Curl_easy *data,
+                     struct connectdata *conn);
 #else
 /* for non-SSH builds */
 #define Curl_ssh_cleanup()
+#define Curl_ssh_attach(x,y)
 #endif
 
 #endif /* HEADER_CURL_SSH_H */

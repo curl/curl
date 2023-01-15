@@ -1,0 +1,210 @@
+<testcase>
+# perl:
+#
+# for(1 .. 151) {
+#    print join("\t",
+#               "attack.invalid", "TRUE", "/", "FALSE", "0",
+#               "name$_", "could-be-large-$_")."\n";
+# }
+#
+<info>
+<keywords>
+HTTP
+cookies
+--resolve
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Send capped huge number of matching cookies
+</name>
+<command>
+http://attack.invalid:%HTTPPORT/a/b/%TESTNUMBER -b log/cookie%TESTNUMBER --resolve attack.invalid:%HTTPPORT:%HOSTIP -L
+</command>
+<file name="log/cookie%TESTNUMBER" mode="text">
+attack.invalid	TRUE	/	FALSE	0	name1	could-be-large-1
+attack.invalid	TRUE	/	FALSE	0	name2	could-be-large-2
+attack.invalid	TRUE	/	FALSE	0	name3	could-be-large-3
+attack.invalid	TRUE	/	FALSE	0	name4	could-be-large-4
+attack.invalid	TRUE	/	FALSE	0	name5	could-be-large-5
+attack.invalid	TRUE	/	FALSE	0	name6	could-be-large-6
+attack.invalid	TRUE	/	FALSE	0	name7	could-be-large-7
+attack.invalid	TRUE	/	FALSE	0	name8	could-be-large-8
+attack.invalid	TRUE	/	FALSE	0	name9	could-be-large-9
+attack.invalid	TRUE	/	FALSE	0	name10	could-be-large-10
+attack.invalid	TRUE	/	FALSE	0	name11	could-be-large-11
+attack.invalid	TRUE	/	FALSE	0	name12	could-be-large-12
+attack.invalid	TRUE	/	FALSE	0	name13	could-be-large-13
+attack.invalid	TRUE	/	FALSE	0	name14	could-be-large-14
+attack.invalid	TRUE	/	FALSE	0	name15	could-be-large-15
+attack.invalid	TRUE	/	FALSE	0	name16	could-be-large-16
+attack.invalid	TRUE	/	FALSE	0	name17	could-be-large-17
+attack.invalid	TRUE	/	FALSE	0	name18	could-be-large-18
+attack.invalid	TRUE	/	FALSE	0	name19	could-be-large-19
+attack.invalid	TRUE	/	FALSE	0	name20	could-be-large-20
+attack.invalid	TRUE	/	FALSE	0	name21	could-be-large-21
+attack.invalid	TRUE	/	FALSE	0	name22	could-be-large-22
+attack.invalid	TRUE	/	FALSE	0	name23	could-be-large-23
+attack.invalid	TRUE	/	FALSE	0	name24	could-be-large-24
+attack.invalid	TRUE	/	FALSE	0	name25	could-be-large-25
+attack.invalid	TRUE	/	FALSE	0	name26	could-be-large-26
+attack.invalid	TRUE	/	FALSE	0	name27	could-be-large-27
+attack.invalid	TRUE	/	FALSE	0	name28	could-be-large-28
+attack.invalid	TRUE	/	FALSE	0	name29	could-be-large-29
+attack.invalid	TRUE	/	FALSE	0	name30	could-be-large-30
+attack.invalid	TRUE	/	FALSE	0	name31	could-be-large-31
+attack.invalid	TRUE	/	FALSE	0	name32	could-be-large-32
+attack.invalid	TRUE	/	FALSE	0	name33	could-be-large-33
+attack.invalid	TRUE	/	FALSE	0	name34	could-be-large-34
+attack.invalid	TRUE	/	FALSE	0	name35	could-be-large-35
+attack.invalid	TRUE	/	FALSE	0	name36	could-be-large-36
+attack.invalid	TRUE	/	FALSE	0	name37	could-be-large-37
+attack.invalid	TRUE	/	FALSE	0	name38	could-be-large-38
+attack.invalid	TRUE	/	FALSE	0	name39	could-be-large-39
+attack.invalid	TRUE	/	FALSE	0	name40	could-be-large-40
+attack.invalid	TRUE	/	FALSE	0	name41	could-be-large-41
+attack.invalid	TRUE	/	FALSE	0	name42	could-be-large-42
+attack.invalid	TRUE	/	FALSE	0	name43	could-be-large-43
+attack.invalid	TRUE	/	FALSE	0	name44	could-be-large-44
+attack.invalid	TRUE	/	FALSE	0	name45	could-be-large-45
+attack.invalid	TRUE	/	FALSE	0	name46	could-be-large-46
+attack.invalid	TRUE	/	FALSE	0	name47	could-be-large-47
+attack.invalid	TRUE	/	FALSE	0	name48	could-be-large-48
+attack.invalid	TRUE	/	FALSE	0	name49	could-be-large-49
+attack.invalid	TRUE	/	FALSE	0	name50	could-be-large-50
+attack.invalid	TRUE	/	FALSE	0	name51	could-be-large-51
+attack.invalid	TRUE	/	FALSE	0	name52	could-be-large-52
+attack.invalid	TRUE	/	FALSE	0	name53	could-be-large-53
+attack.invalid	TRUE	/	FALSE	0	name54	could-be-large-54
+attack.invalid	TRUE	/	FALSE	0	name55	could-be-large-55
+attack.invalid	TRUE	/	FALSE	0	name56	could-be-large-56
+attack.invalid	TRUE	/	FALSE	0	name57	could-be-large-57
+attack.invalid	TRUE	/	FALSE	0	name58	could-be-large-58
+attack.invalid	TRUE	/	FALSE	0	name59	could-be-large-59
+attack.invalid	TRUE	/	FALSE	0	name60	could-be-large-60
+attack.invalid	TRUE	/	FALSE	0	name61	could-be-large-61
+attack.invalid	TRUE	/	FALSE	0	name62	could-be-large-62
+attack.invalid	TRUE	/	FALSE	0	name63	could-be-large-63
+attack.invalid	TRUE	/	FALSE	0	name64	could-be-large-64
+attack.invalid	TRUE	/	FALSE	0	name65	could-be-large-65
+attack.invalid	TRUE	/	FALSE	0	name66	could-be-large-66
+attack.invalid	TRUE	/	FALSE	0	name67	could-be-large-67
+attack.invalid	TRUE	/	FALSE	0	name68	could-be-large-68
+attack.invalid	TRUE	/	FALSE	0	name69	could-be-large-69
+attack.invalid	TRUE	/	FALSE	0	name70	could-be-large-70
+attack.invalid	TRUE	/	FALSE	0	name71	could-be-large-71
+attack.invalid	TRUE	/	FALSE	0	name72	could-be-large-72
+attack.invalid	TRUE	/	FALSE	0	name73	could-be-large-73
+attack.invalid	TRUE	/	FALSE	0	name74	could-be-large-74
+attack.invalid	TRUE	/	FALSE	0	name75	could-be-large-75
+attack.invalid	TRUE	/	FALSE	0	name76	could-be-large-76
+attack.invalid	TRUE	/	FALSE	0	name77	could-be-large-77
+attack.invalid	TRUE	/	FALSE	0	name78	could-be-large-78
+attack.invalid	TRUE	/	FALSE	0	name79	could-be-large-79
+attack.invalid	TRUE	/	FALSE	0	name80	could-be-large-80
+attack.invalid	TRUE	/	FALSE	0	name81	could-be-large-81
+attack.invalid	TRUE	/	FALSE	0	name82	could-be-large-82
+attack.invalid	TRUE	/	FALSE	0	name83	could-be-large-83
+attack.invalid	TRUE	/	FALSE	0	name84	could-be-large-84
+attack.invalid	TRUE	/	FALSE	0	name85	could-be-large-85
+attack.invalid	TRUE	/	FALSE	0	name86	could-be-large-86
+attack.invalid	TRUE	/	FALSE	0	name87	could-be-large-87
+attack.invalid	TRUE	/	FALSE	0	name88	could-be-large-88
+attack.invalid	TRUE	/	FALSE	0	name89	could-be-large-89
+attack.invalid	TRUE	/	FALSE	0	name90	could-be-large-90
+attack.invalid	TRUE	/	FALSE	0	name91	could-be-large-91
+attack.invalid	TRUE	/	FALSE	0	name92	could-be-large-92
+attack.invalid	TRUE	/	FALSE	0	name93	could-be-large-93
+attack.invalid	TRUE	/	FALSE	0	name94	could-be-large-94
+attack.invalid	TRUE	/	FALSE	0	name95	could-be-large-95
+attack.invalid	TRUE	/	FALSE	0	name96	could-be-large-96
+attack.invalid	TRUE	/	FALSE	0	name97	could-be-large-97
+attack.invalid	TRUE	/	FALSE	0	name98	could-be-large-98
+attack.invalid	TRUE	/	FALSE	0	name99	could-be-large-99
+attack.invalid	TRUE	/	FALSE	0	name100	could-be-large-100
+attack.invalid	TRUE	/	FALSE	0	name101	could-be-large-101
+attack.invalid	TRUE	/	FALSE	0	name102	could-be-large-102
+attack.invalid	TRUE	/	FALSE	0	name103	could-be-large-103
+attack.invalid	TRUE	/	FALSE	0	name104	could-be-large-104
+attack.invalid	TRUE	/	FALSE	0	name105	could-be-large-105
+attack.invalid	TRUE	/	FALSE	0	name106	could-be-large-106
+attack.invalid	TRUE	/	FALSE	0	name107	could-be-large-107
+attack.invalid	TRUE	/	FALSE	0	name108	could-be-large-108
+attack.invalid	TRUE	/	FALSE	0	name109	could-be-large-109
+attack.invalid	TRUE	/	FALSE	0	name110	could-be-large-110
+attack.invalid	TRUE	/	FALSE	0	name111	could-be-large-111
+attack.invalid	TRUE	/	FALSE	0	name112	could-be-large-112
+attack.invalid	TRUE	/	FALSE	0	name113	could-be-large-113
+attack.invalid	TRUE	/	FALSE	0	name114	could-be-large-114
+attack.invalid	TRUE	/	FALSE	0	name115	could-be-large-115
+attack.invalid	TRUE	/	FALSE	0	name116	could-be-large-116
+attack.invalid	TRUE	/	FALSE	0	name117	could-be-large-117
+attack.invalid	TRUE	/	FALSE	0	name118	could-be-large-118
+attack.invalid	TRUE	/	FALSE	0	name119	could-be-large-119
+attack.invalid	TRUE	/	FALSE	0	name120	could-be-large-120
+attack.invalid	TRUE	/	FALSE	0	name121	could-be-large-121
+attack.invalid	TRUE	/	FALSE	0	name122	could-be-large-122
+attack.invalid	TRUE	/	FALSE	0	name123	could-be-large-123
+attack.invalid	TRUE	/	FALSE	0	name124	could-be-large-124
+attack.invalid	TRUE	/	FALSE	0	name125	could-be-large-125
+attack.invalid	TRUE	/	FALSE	0	name126	could-be-large-126
+attack.invalid	TRUE	/	FALSE	0	name127	could-be-large-127
+attack.invalid	TRUE	/	FALSE	0	name128	could-be-large-128
+attack.invalid	TRUE	/	FALSE	0	name129	could-be-large-129
+attack.invalid	TRUE	/	FALSE	0	name130	could-be-large-130
+attack.invalid	TRUE	/	FALSE	0	name131	could-be-large-131
+attack.invalid	TRUE	/	FALSE	0	name132	could-be-large-132
+attack.invalid	TRUE	/	FALSE	0	name133	could-be-large-133
+attack.invalid	TRUE	/	FALSE	0	name134	could-be-large-134
+attack.invalid	TRUE	/	FALSE	0	name135	could-be-large-135
+attack.invalid	TRUE	/	FALSE	0	name136	could-be-large-136
+attack.invalid	TRUE	/	FALSE	0	name137	could-be-large-137
+attack.invalid	TRUE	/	FALSE	0	name138	could-be-large-138
+attack.invalid	TRUE	/	FALSE	0	name139	could-be-large-139
+attack.invalid	TRUE	/	FALSE	0	name140	could-be-large-140
+attack.invalid	TRUE	/	FALSE	0	name141	could-be-large-141
+attack.invalid	TRUE	/	FALSE	0	name142	could-be-large-142
+attack.invalid	TRUE	/	FALSE	0	name143	could-be-large-143
+attack.invalid	TRUE	/	FALSE	0	name144	could-be-large-144
+attack.invalid	TRUE	/	FALSE	0	name145	could-be-large-145
+attack.invalid	TRUE	/	FALSE	0	name146	could-be-large-146
+attack.invalid	TRUE	/	FALSE	0	name147	could-be-large-147
+attack.invalid	TRUE	/	FALSE	0	name148	could-be-large-148
+attack.invalid	TRUE	/	FALSE	0	name149	could-be-large-149
+attack.invalid	TRUE	/	FALSE	0	name150	could-be-large-150
+attack.invalid	TRUE	/	FALSE	0	name151	could-be-large-151
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /a/b/%TESTNUMBER HTTP/1.1
+Host: attack.invalid:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Cookie: name150=could-be-large-150; name149=could-be-large-149; name148=could-be-large-148; name147=could-be-large-147; name146=could-be-large-146; name145=could-be-large-145; name144=could-be-large-144; name143=could-be-large-143; name142=could-be-large-142; name141=could-be-large-141; name140=could-be-large-140; name139=could-be-large-139; name138=could-be-large-138; name137=could-be-large-137; name136=could-be-large-136; name135=could-be-large-135; name134=could-be-large-134; name133=could-be-large-133; name132=could-be-large-132; name131=could-be-large-131; name130=could-be-large-130; name129=could-be-large-129; name128=could-be-large-128; name127=could-be-large-127; name126=could-be-large-126; name125=could-be-large-125; name124=could-be-large-124; name123=could-be-large-123; name122=could-be-large-122; name121=could-be-large-121; name120=could-be-large-120; name119=could-be-large-119; name118=could-be-large-118; name117=could-be-large-117; name116=could-be-large-116; name115=could-be-large-115; name114=could-be-large-114; name113=could-be-large-113; name112=could-be-large-112; name111=could-be-large-111; name110=could-be-large-110; name109=could-be-large-109; name108=could-be-large-108; name107=could-be-large-107; name106=could-be-large-106; name105=could-be-large-105; name104=could-be-large-104; name103=could-be-large-103; name102=could-be-large-102; name101=could-be-large-101; name100=could-be-large-100; name99=could-be-large-99; name98=could-be-large-98; name97=could-be-large-97; name96=could-be-large-96; name95=could-be-large-95; name94=could-be-large-94; name93=could-be-large-93; name92=could-be-large-92; name91=could-be-large-91; name90=could-be-large-90; name89=could-be-large-89; name88=could-be-large-88; name87=could-be-large-87; name86=could-be-large-86; name85=could-be-large-85; name84=could-be-large-84; name83=could-be-large-83; name82=could-be-large-82; name81=could-be-large-81; name80=could-be-large-80; name79=could-be-large-79; name78=could-be-large-78; name77=could-be-large-77; name76=could-be-large-76; name75=could-be-large-75; name74=could-be-large-74; name73=could-be-large-73; name72=could-be-large-72; name71=could-be-large-71; name70=could-be-large-70; name69=could-be-large-69; name68=could-be-large-68; name67=could-be-large-67; name66=could-be-large-66; name65=could-be-large-65; name64=could-be-large-64; name63=could-be-large-63; name62=could-be-large-62; name61=could-be-large-61; name60=could-be-large-60; name59=could-be-large-59; name58=could-be-large-58; name57=could-be-large-57; name56=could-be-large-56; name55=could-be-large-55; name54=could-be-large-54; name53=could-be-large-53; name52=could-be-large-52; name51=could-be-large-51; name50=could-be-large-50; name49=could-be-large-49; name48=could-be-large-48; name47=could-be-large-47; name46=could-be-large-46; name45=could-be-large-45; name44=could-be-large-44; name43=could-be-large-43; name42=could-be-large-42; name41=could-be-large-41; name40=could-be-large-40; name39=could-be-large-39; name38=could-be-large-38; name37=could-be-large-37; name36=could-be-large-36; name35=could-be-large-35; name34=could-be-large-34; name33=could-be-large-33; name32=could-be-large-32; name31=could-be-large-31; name30=could-be-large-30; name29=could-be-large-29; name28=could-be-large-28; name27=could-be-large-27; name26=could-be-large-26; name25=could-be-large-25; name24=could-be-large-24; name23=could-be-large-23; name22=could-be-large-22; name21=could-be-large-21; name20=could-be-large-20; name19=could-be-large-19; name18=could-be-large-18; name17=could-be-large-17; name16=could-be-large-16; name15=could-be-large-15; name14=could-be-large-14; name13=could-be-large-13; name12=could-be-large-12; name11=could-be-large-11; name10=could-be-large-10; name9=could-be-large-9; name8=could-be-large-8; name7=could-be-large-7; name6=could-be-large-6; name5=could-be-large-5; name4=could-be-large-4; name3=could-be-large-3; name2=could-be-large-2; name1=could-be-large-1
+
+</protocol>
+</verify>
+</testcase>

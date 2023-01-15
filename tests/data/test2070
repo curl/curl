@@ -24,8 +24,8 @@ MooMoo
 # Client-side
 <client>
 <features>
+SSL
 Schannel
-!MinGW
 </features>
 <server>
 https Server-localhost-sv.pem

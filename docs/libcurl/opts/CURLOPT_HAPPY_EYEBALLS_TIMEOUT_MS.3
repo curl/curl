@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS 3 "1 Feb 2018" "libcurl 7.59.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS \- head start for ipv6 for happy eyeballs
+CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS \- head start for IPv6 for happy eyeballs
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, long timeout);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
+                          long timeout);
+.fi
 .SH DESCRIPTION
 Happy eyeballs is an algorithm that attempts to connect to both IPv4 and IPv6
 addresses for dual-stack hosts, preferring IPv6 first for \fItimeout\fP
@@ -40,6 +45,8 @@ Eyeballs RFC 6555 says "It is RECOMMENDED that connection attempts be paced
 currently defaults to 200 ms. Firefox and Chrome currently default to 300 ms.
 .SH DEFAULT
 CURL_HET_DEFAULT (currently defined as 200L)
+.SH PROTOCOLS
+All except FILE
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -57,3 +64,6 @@ if(curl) {
 Added in 7.59.0
 .SH RETURN VALUE
 Returns CURLE_OK
+.SH SEE ALSO
+.BR CURLOPT_CONNECTTIMEOUT_MS "(3), "
+.BR CURLOPT_TIMEOUT "(3), " CURLOPT_LOW_SPEED_LIMIT "(3), "

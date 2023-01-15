@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -234,7 +236,9 @@ static void timer_cb(int fd, short kind, void *userp)
 static void remsock(SockInfo *f)
 {
   if(f) {
-    event_del(&f->ev);
+    if(event_initialized(&f->ev)) {
+      event_del(&f->ev);
+    }
     free(f);
   }
 }
@@ -252,7 +256,9 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
   f->sockfd = s;
   f->action = act;
   f->easy = e;
-  event_del(&f->ev);
+  if(event_initialized(&f->ev)) {
+    event_del(&f->ev);
+  }
   event_assign(&f->ev, g->evbase, f->sockfd, kind, event_cb, g);
   event_add(&f->ev, NULL);
 }
@@ -262,7 +268,7 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
 /* Initialize a new SockInfo structure */
 static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g)
 {
-  SockInfo *fdp = calloc(sizeof(SockInfo), 1);
+  SockInfo *fdp = calloc(1, sizeof(SockInfo));
 
   fdp->global = g;
   setsock(fdp, s, easy, action, g);
@@ -443,13 +449,13 @@ int main(int argc, char **argv)
   curl_multi_setopt(g.multi, CURLMOPT_TIMERFUNCTION, multi_timer_cb);
   curl_multi_setopt(g.multi, CURLMOPT_TIMERDATA, &g);
 
-  /* we don't call any curl_multi_socket*() function yet as we have no handles
+  /* we do not call any curl_multi_socket*() function yet as we have no handles
      added! */
 
   event_base_dispatch(g.evbase);
 
-  /* this, of course, won't get called since only way to stop this program is
-     via ctrl-C, but it is here to show how cleanup /would/ be done. */
+  /* this, of course, will not get called since only way to stop this program
+     is via ctrl-C, but it is here to show how cleanup /would/ be done. */
   clean_fifo(&g);
   event_del(&g.timer_event);
   event_base_free(g.evbase);

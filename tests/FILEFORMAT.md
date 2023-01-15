@@ -1,23 +1,29 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # curl test suite file format
 
-The curl test suite's file format is very simple and extensible, closely
-resembling XML. All data for a single test case resides in a single ASCII
-file. Labels mark the beginning and the end of all sections, and each label
-must be written in its own line.  Comments are either XML-style (enclosed with
-`<!--` and `-->`) or shell script style (beginning with `#`) and must appear
-on their own lines and not alongside actual test data.  Most test data files
-are syntactically valid XML, although a few files are not (lack of support for
+The curl test suite's file format is simple and extendable, closely resembling
+XML. All data for a single test case resides in a single ASCII file. Labels
+mark the beginning and the end of all sections, and each label must be written
+in its own line. Comments are either XML-style (enclosed with `<!--` and
+`-->`) or shell script style (beginning with `#`) and must appear on their own
+lines and not alongside actual test data. Most test data files are
+syntactically valid XML, although a few files are not (lack of support for
 character entities and the preservation of CR/LF characters at the end of
 lines are the biggest differences).
 
 Each test case source exists as a file matching the format
-`tests/data/testNUM`, where NUM is the unique test number, and must begin with
-a 'testcase' tag, which encompasses the remainder of the file.
+`tests/data/testNUM`, where `NUM` is the unique test number, and must begin
+with a `testcase` tag, which encompasses the remainder of the file.
 
 # Preprocessing
 
 When a test is to be executed, the source file is first preprocessed and
-variables are substituted by the their respective contents and the output
+variables are substituted by their respective contents and the output
 version of the test file is stored as `log/testNUM`. That version is what will
 be read and used by the test servers.
 
@@ -56,15 +62,15 @@ For example, to insert the binary octets 0, 1 and 255 into the test file:
 ## Repeat content
 
 In the preprocess stage, a special instruction can be used to have runtests.pl
-generate a repetetive sequence of bytes.
+generate a repetitive sequence of bytes.
 
 To insert a sequence of repeat bytes, use this syntax to make the `<string>`
-get repeated `<number>` of times. The number has to be 1 or large and the
+get repeated `<number>` of times. The number has to be 1 or larger and the
 string may contain `%HH` hexadecimal codes:
 
     %repeat[<number> x <string>]%
 
-For example, to insert the word hello a 100 times:
+For example, to insert the word hello 100 times:
 
     %repeat[100 x hello]%
 
@@ -73,13 +79,13 @@ For example, to insert the word hello a 100 times:
 Lines in the test file can be made to appear conditionally on a specific
 feature (see the "features" section below) being set or not set. If the
 specific feature is present, the following lines will be output, otherwise it
-outputs nothing, until a following else or endif clause. Like this:
+outputs nothing, until a following else or `endif` clause. Like this:
 
     %if brotli
     Accept-Encoding
     %endif
 
-It can also check for the inversed condition, so if the feature us *not* set by
+It can also check for the inverse condition, so if the feature is *not* set by
 the use of an exclamation mark:
 
     %if !brotli
@@ -108,13 +114,13 @@ Available substitute variables include:
 - `%CLIENT6IP` - IPv6 address of the client running curl
 - `%CLIENTIP` - IPv4 address of the client running curl
 - `%CURL` - Path to the curl executable
-- `%FILE_PWD` - Current directory, on windows prefixed with a slash
+- `%FILE_PWD` - Current directory, on Windows prefixed with a slash
 - `%FTP6PORT` - IPv6 port number of the FTP server
 - `%FTPPORT` - Port number of the FTP server
 - `%FTPSPORT` - Port number of the FTPS server
 - `%FTPTIME2` - Timeout in seconds that should be just sufficient to receive a
   response from the test FTP server
-- `%FTPTIME3` - Even longer than %FTPTIME2
+- `%FTPTIME3` - Even longer than `%FTPTIME2`
 - `%GOPHER6PORT` - IPv6 port number of the Gopher server
 - `%GOPHERPORT` - Port number of the Gopher server
 - `%GOPHERSPORT` - Port number of the Gophers server
@@ -128,6 +134,7 @@ Available substitute variables include:
 - `%HTTPTLS6PORT` - IPv6 port number of the HTTP TLS server
 - `%HTTPTLSPORT` - Port number of the HTTP TLS server
 - `%HTTPUNIXPATH` - Path to the Unix socket of the HTTP server
+- `%SOCKSUNIXPATH` - Absolute Path to the Unix socket of the SOCKS server
 - `%IMAP6PORT` - IPv6 port number of the IMAP server
 - `%IMAPPORT` - Port number of the IMAP server
 - `%MQTTPORT` - Port number of the MQTT server
@@ -148,6 +155,7 @@ Available substitute variables include:
 - `%SRCDIR` - Full path to the source dir
 - `%SSHPORT` - Port number of the SCP/SFTP server
 - `%SSHSRVMD5` - MD5 of SSH server's public key
+- `%SSHSRVSHA256` - SHA256 of SSH server's public key
 - `%SSH_PWD` - Current directory friendly for the SSH server
 - `%TESTNUMBER` - Number of the test case
 - `%TFTP6PORT` - IPv6 port number of the TFTP server
@@ -157,8 +165,9 @@ Available substitute variables include:
 
 # `<testcase>`
 
-Each test is always specified entirely within the testcase tag. Each test case
-is split up in four main sections: `info`, `reply`, `client` and `verify`.
+Each test is always specified entirely within the `testcase` tag. Each test
+case is split up in four main sections: `info`, `reply`, `client` and
+`verify`.
 
 - **info** provides information about the test case
 
@@ -177,22 +186,24 @@ that will be checked/used if specified.
 
 ### `<keywords>`
 A newline-separated list of keywords describing what this test case uses and
-tests. Try to use an already used keyword.  These keywords will be used for
-statistical/informational purposes and for choosing or skipping classes
-of tests.  "Keywords" must begin with an alphabetic character, "-", "["
-or "{" and may actually consist of multiple words separated by spaces
-which are treated together as a single identifier.
+tests. Try to use already used keywords. These keywords will be used for
+statistical/informational purposes and for choosing or skipping classes of
+tests. Keywords must begin with an alphabetic character, `-`, `[` or `{` and
+may actually consist of multiple words separated by spaces which are treated
+together as a single identifier.
 
+When using curl built with Hyper, the keywords must include HTTP or HTTPS for
+'hyper mode' to kick in and make line ending checks work for tests.
 ## `<reply>`
 
-### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"]>`
+### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes"]>`
 
 data to be sent to the client on its request and later verified that it
 arrived safely. Set `nocheck="yes"` to prevent the test script from verifying
 the arrival of this data.
 
 If the data contains `swsclose` anywhere within the start and end tag, and
-this is a HTTP test, then the connection will be closed by the server after
+this is an HTTP test, then the connection will be closed by the server after
 this response is sent. If not, the connection will be kept persistent.
 
 If the data contains `swsbounce` anywhere within the start and end tag, the
@@ -211,36 +222,46 @@ much sense for other sections than "data").
 `hex=yes` means that the data is a sequence of hex pairs. It will get decoded
 and used as "raw" data.
 
+`nonewline=yes` means that the last byte (the trailing newline character)
+should be cut off from the data before sending or comparing it.
+
+`crlf=yes` forces *header* newlines to become CRLF even if not written so in
+the source file. Note that this makes runtests.pl parse and "guess" what is a
+header and what is not in order to apply the CRLF line endings appropriately.
+
 For FTP file listings, the `<data>` section will be used *only* if you make
-sure that there has been a CWD done first to a directory named `test-[num]`
-where [num] is the test case number. Otherwise the ftp server can't know from
+sure that there has been a CWD done first to a directory named `test-[NUM]`
+where `NUM` is the test case number. Otherwise the ftp server can't know from
 which test file to load the list content.
 
-### `<dataNUM>`
+### `<dataNUM [crlf="yes"]>`
 
-Send back this contents instead of the <data> one. The num is set by:
+Send back this contents instead of the <data> one. The `NUM` is set by:
 
  - The test number in the request line is >10000 and this is the remainder
    of [test case number]%10000.
- - The request was HTTP and included digest details, which adds 1000 to NUM
- - If a HTTP request is NTLM type-1, it adds 1001 to num
- - If a HTTP request is NTLM type-3, it adds 1002 to num
- - If a HTTP request is Basic and num is already >=1000, it adds 1 to num
- - If a HTTP request is Negotiate, num gets incremented by one for each
+ - The request was HTTP and included digest details, which adds 1000 to `NUM`
+ - If an HTTP request is NTLM type-1, it adds 1001 to `NUM`
+ - If an HTTP request is NTLM type-3, it adds 1002 to `NUM`
+ - If an HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
+ - If an HTTP request is Negotiate, `NUM` gets incremented by one for each
    request with Negotiate authorization header on the same test case.
 
-Dynamically changing num in this way allows the test harness to be used to
+Dynamically changing `NUM` in this way allows the test harness to be used to
 test authentication negotiation where several different requests must be sent
 to complete a transfer. The response to each request is found in its own data
-section.  Validating the entire negotiation sequence can be done by specifying
-a datacheck section.
+section. Validating the entire negotiation sequence can be done by specifying
+a `datacheck` section.
 
 ### `<connect>`
 The connect section is used instead of the 'data' for all CONNECT
 requests. The remainder of the rules for the data section then apply but with
 a connect prefix.
 
-### `<datacheck [mode="text"] [nonewline="yes"]>`
+### `<socks>`
+Address type and address details as logged by the SOCKS proxy.
+
+### `<datacheck [mode="text"] [nonewline="yes"] [crlf="yes"]>`
 if the data is sent but this is what should be checked afterwards. If
 `nonewline=yes` is set, runtests will cut off the trailing newline from the
 data before comparing with the one actually received by the client.
@@ -248,15 +269,15 @@ data before comparing with the one actually received by the client.
 Use the `mode="text"` attribute if the output is in text mode on platforms
 that have a text/binary difference.
 
-### `<datacheckNUM [nonewline="yes"] [mode="text"]>`
-The contents of numbered datacheck sections are appended to the non-numbered
+### `<datacheckNUM [nonewline="yes"] [mode="text"] [crlf="yes"]>`
+The contents of numbered `datacheck` sections are appended to the non-numbered
 one.
 
 ### `<size>`
 number to return on a ftp SIZE command (set to -1 to make this command fail)
 
 ### `<mdtm>`
-what to send back if the client sends a (FTP) MDTM command, set to -1 to
+what to send back if the client sends a (FTP) `MDTM` command, set to -1 to
 have it return that the file doesn't exist
 
 ### `<postcmd>`
@@ -290,6 +311,7 @@ about to issue.
    appear at once when a file is transferred
 - `RETRNOSIZE` - Make sure the RETR response doesn't contain the size of the
   file
+- `RETRSIZE [size]` - Force RETR response to contain the specified size
 - `NOSAVE` - Don't actually save what is received
 - `SLOWDOWN` - Send FTP responses with 0.01 sec delay between each byte
 - `PASVBADIP` - makes PASV send back an illegal IP in its 227 response
@@ -306,7 +328,7 @@ about to issue.
   server will NOT wait for the full request body to get sent
 - `idle` - do nothing after receiving the request, just "sit idle"
 - `stream` - continuously send data to the client, never-ending
-- `writedelay: [secs]` delay this amount between reply packets
+- `writedelay: [msecs]` delay this amount between reply packets
 - `skip: [num]` - instructs the server to ignore reading this many bytes from
   a PUT or POST request
 - `rtp: part [num] channel [num] size [num]` - stream a fake RTP packet for
@@ -327,33 +349,43 @@ about to issue.
 ### `<server>`
 What server(s) this test case requires/uses. Available servers:
 
+- `dict`
 - `file`
-- `ftp-ipv6`
 - `ftp`
+- `ftp-ipv6`
 - `ftps`
 - `gopher`
+- `gopher-ipv6`
 - `gophers`
+- `http`
+- `http/2`
 - `http-ipv6`
 - `http-proxy`
-- `http-unix`
-- `http/2`
-- `http`
 - `https`
-- `httptls+srp-ipv6`
+- `https-proxy`
 - `httptls+srp`
+- `httptls+srp-ipv6`
+- `http-unix`
 - `imap`
 - `mqtt`
 - `none`
 - `pop3`
-- `rtsp-ipv6`
 - `rtsp`
+- `rtsp-ipv6`
 - `scp`
 - `sftp`
+- `smb`
 - `smtp`
 - `socks4`
 - `socks5`
+- `socks5unix`
+- `telnet`
+- `tftp`
 
-Give only one per line.  This subsection is mandatory.
+Give only one per line. This subsection is mandatory (use `none` if no servers
+are required). Servers that require a special server certificate can have the
+PEM certificate file name (found in the `certs` directory) appended to the
+server name separated by a space.
 
 ### `<features>`
 A list of features that MUST be present in the client/library for this test to
@@ -367,6 +399,7 @@ SKIPPED.
 Features testable here are:
 
 - `alt-svc`
+- `bearssl`
 - `c-ares`
 - `cookies`
 - `crypto`
@@ -375,6 +408,7 @@ Features testable here are:
 - `getrlimit`
 - `GnuTLS`
 - `GSS-API`
+- `h2c`
 - `HSTS`
 - `HTTP-auth`
 - `http/2`
@@ -384,9 +418,12 @@ Features testable here are:
 - `Kerberos`
 - `large_file`
 - `ld_preload`
+- `libssh2`
+- `libssh`
+- `oldlibssh` (versions before 0.9.4)
 - `libz`
 - `manual`
-- `Metalink`
+- `mbedtls`
 - `Mime`
 - `netrc`
 - `NSS`
@@ -395,7 +432,9 @@ Features testable here are:
 - `parsedate`
 - `proxy`
 - `PSL`
+- `rustls`
 - `Schannel`
+- `sectransp`
 - `shuffle-dns`
 - `socks`
 - `SPNEGO`
@@ -412,10 +451,13 @@ Features testable here are:
 - `verbose-strings`
 - `wakeup`
 - `win32`
+- `wolfssh`
+- `wolfssl`
+- `xattr`
 
-as well as each protocol that curl supports.  A protocol only needs to be
-specified if it is different from the server (useful when the server
-is `none`).
+as well as each protocol that curl supports. A protocol only needs to be
+specified if it is different from the server (useful when the server is
+`none`).
 
 ### `<killserver>`
 Using the same syntax as in `<server>` but when mentioned here these servers
@@ -436,8 +478,8 @@ to have failed.
 
 ### `<tool>`
 Name of tool to invoke instead of "curl". This tool must be built and exist
-either in the libtest/ directory (if the tool name starts with 'lib') or in
-the unit/ directory (if the tool name starts with 'unit').
+either in the `libtest/` directory (if the tool name starts with `lib`) or in
+the `unit/` directory (if the tool name starts with `unit`).
 
 ### `<name>`
 Brief test case description, shown when the test runs.
@@ -481,33 +523,33 @@ Set `option="no-include"` to prevent the test script to slap on the
 `--include` argument.
 
 Set `option="binary-trace"` to use `--trace` instead of `--trace-ascii` for
-tracing.  Suitable for binary-oriented protocols such as MQTT.
+tracing. Suitable for binary-oriented protocols such as MQTT.
 
 Set `timeout="secs"` to override default server logs advisor read lock
-timeout.  This timeout is used by the test harness, once that the command has
+timeout. This timeout is used by the test harness, once that the command has
 completed execution, to wait for the test server to write out server side log
 files and remove the lock that advised not to read them. The "secs" parameter
 is the not negative integer number of seconds for the timeout. This `timeout`
 attribute is documented for completeness sake, but is deep test harness stuff
-and only needed for very singular and specific test cases. Avoid using it.
+and only needed for singular and specific test cases. Avoid using it.
 
 Set `delay="secs"` to introduce a time delay once that the command has
 completed execution and before the `<postcheck>` section runs. The "secs"
 parameter is the not negative integer number of seconds for the delay. This
-'delay' attribute is intended for very specific test cases, and normally not
+'delay' attribute is intended for specific test cases, and normally not
 needed.
 
 ### `<file name="log/filename" [nonewline="yes"]>`
 This creates the named file with this content before the test case is run,
 which is useful if the test case needs a file to act on.
 
-If 'nonewline="yes"` is used, the created file will have the final newline
+If `nonewline="yes"` is used, the created file will have the final newline
 stripped off.
 
 ### `<stdin [nonewline="yes"]>`
 Pass this given data on stdin to the tool.
 
-If 'nonewline' is set, we will cut off the trailing newline of this given data
+If `nonewline` is set, we will cut off the trailing newline of this given data
 before comparing with the one actually received by the client
 
 ## `<verify>`
@@ -518,24 +560,27 @@ example.
 
 ### `<strip>`
 One regex per line that is removed from the protocol dumps before the
-comparison is made. This is very useful to remove dependencies on dynamically
+comparison is made. This is useful to remove dependencies on dynamically
 changing protocol data such as port numbers or user-agent strings.
 
 ### `<strippart>`
 One perl op per line that operates on the protocol dump. This is pretty
 advanced. Example: `s/^EPRT .*/EPRT stripped/`.
 
-### `<protocol [nonewline="yes"]>`
+### `<protocol [nonewline="yes"][crlf="yes"]>`
 
-the protocol dump curl should transmit, if 'nonewline' is set, we will cut off
+the protocol dump curl should transmit, if `nonewline` is set, we will cut off
 the trailing newline of this given data before comparing with the one actually
 sent by the client The `<strip>` and `<strippart>` rules are applied before
 comparisons are made.
 
-### `<proxy [nonewline="yes"]>`
+`crlf=yes` forces the newlines to become CRLF even if not written so in the
+test.
 
-The protocol dump curl should transmit to a HTTP proxy (when the http-proxy
-server is used), if 'nonewline' is set, we will cut off the trailing newline
+### `<proxy [nonewline="yes"][crlf="yes"]>`
+
+The protocol dump curl should transmit to an HTTP proxy (when the http-proxy
+server is used), if `nonewline` is set, we will cut off the trailing newline
 of this given data before comparing with the one actually sent by the client
 The `<strip>` and `<strippart>` rules are applied before comparisons are made.
 
@@ -545,20 +590,23 @@ This verifies that this data was passed to stderr.
 Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
 
-If 'nonewline' is set, we will cut off the trailing newline of this given data
+If `nonewline` is set, we will cut off the trailing newline of this given data
 before comparing with the one actually received by the client
 
-### `<stdout [mode="text"] [nonewline="yes"]>`
+### `<stdout [mode="text"] [nonewline="yes"] [crlf="yes"]>`
 This verifies that this data was passed to stdout.
 
 Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
 
-If 'nonewline' is set, we will cut off the trailing newline of this given data
+If `nonewline` is set, we will cut off the trailing newline of this given data
 before comparing with the one actually received by the client
 
+`crlf=yes` forces the newlines to become CRLF even if not written so in the
+test.
+
 ### `<file name="log/filename" [mode="text"]>`
-The file's contents must be identical to this after the test is complete.  Use
+The file's contents must be identical to this after the test is complete. Use
 the mode="text" attribute if the output is in text mode on platforms that have
 a text/binary difference.
 
@@ -577,7 +625,7 @@ compared with what is stored in the test file. This is pretty
 advanced. Example: "s/^EPRT .*/EPRT stripped/"
 
 ### `<stripfile1>`
-1 to 4 can be appended to 'stripfile' to strip the corresponding <fileN>
+1 to 4 can be appended to `stripfile` to strip the corresponding <fileN>
 content
 
 ### `<stripfile2>`

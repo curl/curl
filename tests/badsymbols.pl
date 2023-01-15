@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010-2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -19,10 +19,12 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 #
 # This script grew out of help from Przemyslaw Iskra and Balint Szilakszi
-# a late evening in the #curl IRC channel on freenode.
+# a late evening in the #curl IRC channel.
 #
 
 use strict;
@@ -72,7 +74,8 @@ sub scanenums {
     my ($file)=@_;
     my $skipit = 0;
 
-    open H_IN, "-|", "$Cpreprocessor $i$file" || die "Cannot preprocess $file";
+    open H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file" ||
+        die "Cannot preprocess $file";
     while ( <H_IN> ) {
         my ($line, $linenum) = ($_, $.);
         if( /^#(line|) (\d+) \"(.*)\"/) {
@@ -100,6 +103,7 @@ sub scanenums {
             if(($_ !~ /\}(;|)/) &&
                ($_ ne "typedef") &&
                ($_ ne "enum") &&
+               ($_ ne "=") &&
                ($_ !~ /^[ \t]*$/)) {
                 if($verbose) {
                     print "Source: $Cpreprocessor $i$file\n";

@@ -1,0 +1,63 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+SOCKS5
+SOCKS5h
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ipv6
+proxy
+</features>
+<server>
+http
+socks5
+</server>
+ <name>
+HTTP GET with IPv6 numerical via SOCKS5h
+ </name>
+ <command>
+http://[2200::33]:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT 
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: [2200::33]:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<socks>
+atyp 4 => 22 00 00 00 00 00 00 00 00 00 00 00 00 00 00 33
+</socks>
+</verify>
+</testcase>

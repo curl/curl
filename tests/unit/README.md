@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # Unit tests
 
 The goal is to add tests for *all* functions in libcurl. If functions are too
@@ -27,40 +33,41 @@ start up gdb and run the same case using that.
 ## Write Unit Tests
 
 We put tests that focus on an area or a specific function into a single C
-source file. The source file should be named 'unitNNNN.c' where NNNN is a
+source file. The source file should be named `unitNNNN.c` where `NNNN` is a
 previously unused number.
 
-Add your test to `tests/unit/Makefile.inc` (if it is a unit test).  Add your
+Add your test to `tests/unit/Makefile.inc` (if it is a unit test). Add your
 test data file name to `tests/data/Makefile.inc`
 
 You also need a separate file called `tests/data/testNNNN` (using the same
 number) that describes your test case. See the test1300 file for inspiration
 and the `tests/FILEFORMAT.md` documentation.
 
-For the actual C file, here's a very simple example:
+For the actual C file, here's a simple example:
 ~~~c
-#include "curlcheck.h"
 
-#include "a libcurl header.h" /* from the lib dir */
+    #include "curlcheck.h"
 
-static CURLcode unit_setup( void )
-{
-  /* whatever you want done first */
-  return CURLE_OK;
-}
+    #include "a libcurl header.h" /* from the lib dir */
 
-static void unit_stop( void )
-{
-  /* done before shutting down and exiting */
-}
+    static CURLcode unit_setup( void )
+    {
+      /* whatever you want done first */
+      return CURLE_OK;
+    }
 
-UNITTEST_START
+    static void unit_stop( void )
+    {
+      /* done before shutting down and exiting */
+    }
 
-  /* here you start doing things and checking that the results are good */
+    UNITTEST_START
 
-  fail_unless( size == 0 , "initial size should be zero" );
-  fail_if( head == NULL , "head should not be initiated to NULL" );
+      /* here you start doing things and checking that the results are good */
 
-  /* you end the test code like this: */
+      fail_unless( size == 0 , "initial size should be zero" );
+      fail_if( head == NULL , "head should not be initiated to NULL" );
 
-UNITTEST_STOP
+      /* you end the test code like this: */
+
+    UNITTEST_STOP

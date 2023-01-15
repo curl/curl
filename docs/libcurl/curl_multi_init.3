@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,20 +18,34 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_multi_init 3 "1 March 2002" "libcurl 7.9.5" "libcurl Manual"
 .SH NAME
 curl_multi_init - create a multi handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLM *curl_multi_init( );"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLM *curl_multi_init();
+.fi
 .SH DESCRIPTION
-This function returns a CURLM handle to be used as input to all the other
-multi-functions, sometimes referred to as a multi handle in some places in the
-documentation. This init call MUST have a corresponding call to
+This function returns a pointer to a \fICURLM\fP handle to be used as input to
+all the other multi-functions, sometimes referred to as a multi handle in some
+places in the documentation. This init call MUST have a corresponding call to
 \fIcurl_multi_cleanup(3)\fP when the operation is complete.
+.SH EXAMPLE
+.nf
+/* init a multi stack */
+multi_handle = curl_multi_init();
+
+/* add individual transfers */
+curl_multi_add_handle(multi_handle, http_handle);
+curl_multi_add_handle(multi_handle, http_handle2);
+.fi
+.SH AVAILABILITY
+Added in 7.9.6
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
 other curl functions.

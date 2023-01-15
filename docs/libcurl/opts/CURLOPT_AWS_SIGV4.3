@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -33,8 +35,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_AWS_SIGV4, char *param);
 Provides AWS V4 signature authentication on HTTP(S) header.
 .PP
 Pass a char * that is the collection of specific arguments are used for
-creating outgoing authentication headers.
-The format of the param option is:
+creating outgoing authentication headers.  The format of the \fIparam\fP
+option is:
 .IP provider1[:provider2[:region[:service]]]
 .IP provider1,\ provider2
 The providers arguments are used for generating some authentication parameters
@@ -48,19 +50,19 @@ It is extracted from the host name specified in the URL if omitted.
 .PP
 NOTE: This call set \fICURLOPT_HTTPAUTH(3)\fP to CURLAUTH_AWS_SIGV4.
 Calling \fICURLOPT_HTTPAUTH(3)\fP with CURLAUTH_AWS_SIGV4 is the same
-as calling this with "aws:amz" in parameter.
+as calling this with \fB"aws:amz"\fP in parameter.
 .PP
 Example with "Test:Try", when curl will do the algorithm, it will generate
-"TEST-HMAC-SHA256" for "Algorithm", "x-try-date" and "X-Try-Date" for "date",
-"test4_request" for "request type",
-"SignedHeaders=content-type;host;x-try-date" for "signed headers"
+\fB"TEST-HMAC-SHA256"\fP for "Algorithm", \fB"x-try-date"\fP and
+\fB"X-Try-Date"\fP for "date", \fB"test4_request"\fP for "request type",
+\fB"SignedHeaders=content-type;host;x-try-date"\fP for "signed headers"
 .PP
 If you use just "test", instead of "test:try",
 test will be use for every strings generated
 .SH DEFAULT
 By default, the value of this parameter is NULL.
 Calling \fICURLOPT_HTTPAUTH(3)\fP with CURLAUTH_AWS_SIGV4 is the same
-as calling this with "aws:amz" in parameter.
+as calling this with \fB"aws:amz"\fP in parameter.
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
@@ -90,8 +92,14 @@ Added in 7.75.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH NOTES
-This option overrides the other auth types you might have set in CURL_HTTPAUTH
-which should be highlighted as this makes this auth method special.
-This method can't be combined with other auth types.
+This option overrides the other auth types you might have set in
+\fICURLOPT_HTTPAUTH(3)\fP which should be highlighted as this makes this auth
+method special.  This method cannot be combined with other auth types.
+.PP
+A sha256 checksum of the request payload is used as input to the signature
+calculation.  For POST requests, this is a checksum of the provided
+\fICURLOPT_POSTFIELDS(3)\fP.  Otherwise, it's the checksum of an empty buffer.
+For requests like PUT, you can provide your own checksum in a HTTP header named
+\fBx-provider2-content-sha256\fP.
 .SH "SEE ALSO"
 .BR CURLOPT_HEADEROPT "(3), " CURLOPT_HTTPHEADER "(3), "

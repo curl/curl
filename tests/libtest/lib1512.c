@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2020, Linus Nielsen Feltzing <linus@haxx.se>
+ * Copyright (C) Linus Nielsen Feltzing <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -69,7 +71,9 @@ int test(char *URL)
     /* include headers */
     easy_setopt(curl[i], CURLOPT_HEADER, 1L);
 
-    easy_setopt(curl[i], CURLOPT_DNS_USE_GLOBAL_CACHE, 1L);
+    CURL_IGNORE_DEPRECATION(
+      easy_setopt(curl[i], CURLOPT_DNS_USE_GLOBAL_CACHE, 1L);
+    )
   }
 
   /* make the first one populate the GLOBAL cache */

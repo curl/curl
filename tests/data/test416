@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+FTP
+EPSV
+RETR
+Range
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+0123456789abcdef0123456789abcdef0123456789abcdef
+</data>
+<datacheck>
+0123456789abcdef0123456789abcdef0123456789abcdef
+</datacheck>
+<servercmd>
+RETRSIZE 7
+</servercmd>
+<size>
+8
+</size>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP growing file support
+ </name>
+ <command>
+--ignore-content-length ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+RETR %TESTNUMBER
+QUIT
+</protocol>
+</verify>
+</testcase>

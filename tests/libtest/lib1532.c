@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "test.h"
 
@@ -29,7 +31,7 @@ int test(char *URL)
 {
   CURL *curl;
   long httpcode;
-  int res = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -66,7 +68,7 @@ int test(char *URL)
             __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
-  if(httpcode != 0) {
+  if(httpcode) {
     fprintf(stderr, "%s:%d curl_easy_reset failed to zero the response code\n"
             "possible regression of github bug 1017\n", __FILE__, __LINE__);
     res = CURLE_HTTP_RETURNED_ERROR;
@@ -76,5 +78,5 @@ int test(char *URL)
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return (int)res;
 }

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SSLCERT 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SSLCERT \- set SSL client certificate
+CURLOPT_SSLCERT \- SSL client certificate
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERT, char *cert);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. The string should be
 the file name of your client certificate. The default format is "P12" on
@@ -38,17 +42,17 @@ you wish to authenticate with as it is named in the security database. If you
 want to use a file from the current directory, please precede it with "./"
 prefix, in order to avoid confusion with a nickname.
 
-(Schannel only) Client certificates can be specified by a path expression to
-a certificate store. (You can import PFX to a store first). You can use
-"<store location>\\<store name>\\<thumbprint>" to refer to a certificate
-in the system certificates store, for example,
-"CurrentUser\\MY\\934a7ac6f8a5d579285a74fa61e19f23ddfe8d7a". Thumbprint is
-usually a SHA-1 hex string which you can see in certificate details. Following
-store locations are supported: CurrentUser, LocalMachine, CurrentService,
-Services, CurrentUserGroupPolicy, LocalMachineGroupPolicy,
-LocalMachineEnterprise.
-Schannel also support P12 certificate file, with the string "P12" specified
-with \fICURLOPT_SSLCERTTYPE(3)\fP.
+(Schannel only) Client certificates can be specified by a path expression to a
+certificate store. (You can import \fIPFX\fP to a store first). You can use
+"<store location>\\<store name>\\<thumbprint>" to refer to a certificate in
+the system certificates store, for example,
+\fB"CurrentUser\\MY\\934a7ac6f8a5d579285a74fa"\fP. The thumbprint is usually a
+SHA-1 hex string which you can see in certificate details. Following store
+locations are supported: \fBCurrentUser\fP, \fBLocalMachine\fP,
+\fBCurrentService\fP, \fBServices\fP, \fBCurrentUserGroupPolicy\fP,
+\fBLocalMachineGroupPolicy\fP, \fBLocalMachineEnterprise\fP.  Schannel also
+support P12 certificate file, with the string "P12" specified with
+\fICURLOPT_SSLCERTTYPE(3)\fP.
 
 When using a client certificate, you most likely also need to provide a
 private key with \fICURLOPT_SSLKEY(3)\fP.

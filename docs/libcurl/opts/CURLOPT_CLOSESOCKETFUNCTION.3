@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,17 +18,22 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_CLOSESOCKETFUNCTION 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_CLOSESOCKETFUNCTION \- callback to socket close replacement function
+CURLOPT_CLOSESOCKETFUNCTION \- callback to socket close replacement
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 int closesocket_callback(void *clientp, curl_socket_t item);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CLOSESOCKETFUNCTION, closesocket_callback);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CLOSESOCKETFUNCTION,
+                          closesocket_callback);
+.fi
 .SH DESCRIPTION
 Pass a pointer to your callback function, which should match the prototype
 shown above.

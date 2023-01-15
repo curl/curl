@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -74,9 +76,9 @@ static int parsekeyword(unsigned char **pattern, unsigned char *charset)
   parsekey_state state = CURLFNM_PKW_INIT;
 #define KEYLEN 10
   char keyword[KEYLEN] = { 0 };
-  int found = FALSE;
   int i;
   unsigned char *p = *pattern;
+  bool found = FALSE;
   for(i = 0; !found; i++) {
     char c = *p++;
     if(i >= KEYLEN)
@@ -366,14 +368,13 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
  */
 int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
 {
-  int rc;
   (void)ptr; /* the argument is specified by the curl_fnmatch_callback
                 prototype, but not used by Curl_fnmatch() */
   if(!pattern || !string) {
     return CURL_FNMATCH_FAIL;
   }
-  rc = fnmatch(pattern, string, 0);
-  switch(rc) {
+
+  switch(fnmatch(pattern, string, 0)) {
   case 0:
     return CURL_FNMATCH_MATCH;
   case FNM_NOMATCH:

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -38,10 +40,14 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC_CTRL, long bitmask);
 Populate the long \fIbitmask\fP with the correct set of features to instruct
 libcurl how to handle Alt-Svc for the transfers using this handle.
 
-libcurl will only accept Alt-Svc headers over a secure transport, meaning
+libcurl only accepts Alt-Svc headers over a secure transport, meaning
 HTTPS. It will also only complete a request to an alternative origin if that
 origin is properly hosted over HTTPS. These requirements are there to make
 sure both the source and the destination are legitimate.
+
+Alternative services are only used when setting up new connections. If there
+exists an existing connection to the host in the connection pool, then that
+will be preferred.
 
 Setting any bit will enable the alt-svc engine.
 .IP "CURLALTSVC_READONLYFILE"
@@ -69,7 +75,7 @@ HTTPS
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, CURLALTSVC_H1);
+  curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, (long)CURLALTSVC_H1);
   curl_easy_setopt(curl, CURLOPT_ALTSVC, "altsvc-cache.txt");
   curl_easy_perform(curl);
 }

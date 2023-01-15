@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -77,6 +79,10 @@ typedef enum {
 /* value for MAXIMUM CONCURRENT STREAMS upper limit */
 #define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
 
+/* Curl_multi SSL backend-specific data; declared differently by each SSL
+   backend */
+struct multi_ssl_backend_data;
+
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
@@ -116,6 +122,10 @@ struct Curl_multi {
      times of all currently set timers */
   struct Curl_tree *timetree;
 
+#if defined(USE_SSL)
+  struct multi_ssl_backend_data *ssl_backend_data;
+#endif
+
   /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
      the pluralis form, there can be more than one easy handle waiting on the
      same actual socket) */
@@ -140,15 +150,29 @@ struct Curl_multi {
                                     previous callback */
   unsigned int max_concurrent_streams;
 
+#ifdef USE_WINSOCK
+  WSAEVENT wsa_event; /* winsock event used for waits */
+#else
 #ifdef ENABLE_WAKEUP
   curl_socket_t wakeup_pair[2]; /* socketpair() used for wakeup
                                    0 is used for read, 1 is used for write */
 #endif
-  /* multiplexing wanted */
-  bool multiplexing;
-  bool recheckstate; /* see Curl_multi_connchanged */
-  bool in_callback;            /* true while executing a callback */
-  bool ipv6_works;
+#endif
+#define IPV6_UNKNOWN 0
+#define IPV6_DEAD    1
+#define IPV6_WORKS   2
+  unsigned char ipv6_up;       /* IPV6_* defined */
+  BIT(multiplexing);           /* multiplexing wanted */
+  BIT(recheckstate);           /* see Curl_multi_connchanged */
+  BIT(in_callback);            /* true while executing a callback */
+#ifdef USE_OPENSSL
+  BIT(ssl_seeded);
+#endif
+  BIT(dead); /* a callback returned error, everything needs to crash and
+                burn */
+#ifdef DEBUGBUILD
+  BIT(warned);                 /* true after user warned of DEBUGBUILD */
+#endif
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

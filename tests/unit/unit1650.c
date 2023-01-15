@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "curlcheck.h"
@@ -59,7 +61,7 @@ struct dohrequest {
 };
 
 
-static struct dohrequest req[] = {
+static const struct dohrequest req[] = {
   {"test.host.name", DNS_TYPE_A, DNS_Q1, sizeof(DNS_Q1)-1, 0 },
   {"test.host.name", DNS_TYPE_AAAA, DNS_Q2, sizeof(DNS_Q2)-1, 0 },
   {"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
@@ -86,7 +88,7 @@ struct dohresp {
 
 static const char full49[] = DNS_FOO_EXAMPLE_COM;
 
-static struct dohresp resp[] = {
+static const struct dohresp resp[] = {
   {"\x00\x00", 2, DNS_TYPE_A, DOH_TOO_SMALL_BUFFER, NULL },
   {"\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01", 12,
    DNS_TYPE_A, DOH_DNS_BAD_ID, NULL },

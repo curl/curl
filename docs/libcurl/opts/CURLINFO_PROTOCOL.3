@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,24 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLINFO_PROTOCOL 3 "23 November 2016" "libcurl 7.52.0" "curl_easy_getinfo options"
 .SH NAME
 CURLINFO_PROTOCOL \- get the protocol used in the connection
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROTOCOL, long *p);
+.fi
 .SH DESCRIPTION
+This option is deprecated. We strongly recommend using
+\fICURLINFO_SCHEME(3)\fP instead, because this option cannot return all
+possible protocols!
+
 Pass a pointer to a long to receive the version used in the last http
 connection.  The returned value will be exactly one of the CURLPROTO_* values:
 
@@ -56,7 +64,7 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.52.0
+Added in 7.52.0. Deprecated since 7.85.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

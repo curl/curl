@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,21 +18,25 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PROXY_KEYPASSWD 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PROXY_KEYPASSWD \- set passphrase to proxy private key
+CURLOPT_PROXY_KEYPASSWD \- passphrase for the proxy private key
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_KEYPASSWD, char *pwd);
+.fi
 .SH DESCRIPTION
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 
 Pass a pointer to a null-terminated string as parameter. It will be used as
 the password required to use the \fICURLOPT_PROXY_SSLKEY(3)\fP private key.
-You never needed a pass phrase to load a certificate but you need one to load
+You never need a pass phrase to load a certificate but you need one to load
 your private key.
 
 The application does not have to keep the string around after setting this

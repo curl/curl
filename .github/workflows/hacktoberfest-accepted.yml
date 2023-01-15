@@ -1,0 +1,67 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Hacktoberfest
+
+on:
+  # this must not ever run on any other branch than master
+  push:
+    branches:
+    - master
+
+concurrency:
+  # this should not run in parallel, so just run one at a time
+  group: ${{ github.workflow }}
+
+permissions: {}
+
+jobs:
+  # add hacktoberfest-accepted label to PRs opened starting from September 30th
+  # till November 1st which are closed via commit reference from master branch.
+  merged:
+    runs-on: ubuntu-latest
+    permissions:
+      # requires issues AND pull-requests write permissions to edit labels on PRs!
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 100
+
+      - name: Check whether repo participates in Hacktoberfest
+        run: |
+          gh config set prompt disabled && echo "label=$(
+            gh repo view --json repositoryTopics --jq '.repositoryTopics[].name' | grep '^hacktoberfest$')" >> $GITHUB_OUTPUT
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Search relevant commit message lines starting with Closes/Merges
+        run: |
+          git log --format=email ${{ github.event.before }}..${{ github.event.after }} | \
+            grep -Ei "^Close[sd]? " | sort | uniq | tee log
+        if: steps.check.outputs.label == 'hacktoberfest'
+
+      - name: Search for Number-based PR references
+        run: |
+          grep -Eo "#([0-9]+)" log | cut -d# -f2 | sort | uniq | xargs -t -n1 -I{} \
+            gh pr view {} --json number,createdAt \
+              --jq '{number, opened: .createdAt} | [.number, .opened] | join(":")' | tee /dev/stderr | \
+            grep -Eo '^([0-9]+):[0-9]{4}-(09-30T|10-|11-01T)' | cut -d: -f1 | sort | uniq | xargs -t -n1 -I {} \
+              gh pr edit {} --add-label 'hacktoberfest-accepted'
+        if: steps.check.outputs.label == 'hacktoberfest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Search for URL-based PR references
+        run: |
+          grep -Eo "github.com/(.+)/(.+)/pull/([0-9]+)" log | sort | uniq | xargs -t -n1 -I{} \
+            gh pr view "https://{}" --json number,createdAt \
+              --jq '{number, opened: .createdAt} | [.number, .opened] | join(":")' | tee /dev/stderr | \
+            grep -Eo '^([0-9]+):[0-9]{4}-(09-30T|10-|11-01T)' | cut -d: -f1 | sort | uniq | xargs -t -n1 -I {} \
+              gh pr edit {} --add-label 'hacktoberfest-accepted'
+        if: steps.check.outputs.label == 'hacktoberfest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

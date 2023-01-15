@@ -1,0 +1,284 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Linux
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**/*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: quiche
+          install_packages: zlib1g-dev
+          install_steps: quiche
+          configure: LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release" --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src --enable-debug --with-quiche=/home/runner/work/curl/curl/quiche/target/release
+
+        - name: bearssl
+          install_packages: zlib1g-dev
+          install_steps: bearssl
+          configure: LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
+
+        - name: bearssl-clang
+          install_packages: zlib1g-dev clang
+          install_steps: bearssl
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
+
+        - name: libressl
+          install_packages: zlib1g-dev
+          install_steps: libressl
+          configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
+
+        - name: libressl-clang
+          install_packages: zlib1g-dev clang
+          install_steps: libressl
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
+
+        - name: mbedtls
+          install_packages: libnghttp2-dev
+          install_steps: mbedtls
+          configure: LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
+
+        - name: mbedtls-clang
+          install_packages: libnghttp2-dev clang
+          install_steps: mbedtls
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
+
+        - name: msh3
+          install_packages: zlib1g-dev
+          install_steps: quictls msh3
+          configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
+
+        - name: openssl3
+          install_packages: zlib1g-dev
+          install_steps: gcc-11 openssl3
+          configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+
+        - name: openssl3-O3
+          install_packages: zlib1g-dev
+          install_steps: gcc-11 openssl3
+          configure: CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+
+        - name: openssl3-clang
+          install_packages: zlib1g-dev clang
+          install_steps: openssl3
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+
+        - name: event-based
+          install_packages: libssh-dev
+          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
+          tflags: -n -e '!TLS-SRP'
+
+        - name: hyper
+          install_steps: rust hyper
+          configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
+
+        - name: rustls
+          install_steps: rust rustls
+          configure: --with-rustls=$HOME/rustls --enable-debug
+
+        - name: Intel compiler - without SSL
+          install_packages: zlib1g-dev
+          install_steps: intel
+          configure: CC=icc --enable-debug --without-ssl
+
+        - name: Intel compiler - OpenSSL
+          install_packages: zlib1g-dev libssl-dev
+          install_steps: intel
+          configure: CC=icc --enable-debug --with-openssl
+
+        - name: NSS
+          install_packages: clang libnss3-dev libnghttp2-dev nss-plugin-pem
+          configure: CC=clang CPPFLAGS="-isystem /usr/include/nss" --with-nss --enable-debug --with-nss-deprecated
+
+    steps:
+    - run: |
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 libpsl-dev libbrotli-dev libzstd-dev ${{ matrix.build.install_packages }}
+        sudo python3 -m pip install impacket
+      name: 'install prereqs and impacket'
+
+    - uses: actions/checkout@v3
+
+    - if: ${{ contains(matrix.build.install_steps, 'gcc-11') }}
+      run: |
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
+        sudo apt-get update
+        sudo apt-get install gcc-11
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
+        sudo update-alternatives --set gcc /usr/bin/gcc-11
+        gcc --version
+      name: 'install gcc-11'
+
+    - if: ${{ contains(matrix.build.install_steps, 'bearssl') }}
+      run: |
+        curl -LO https://bearssl.org/bearssl-0.6.tar.gz
+        tar -xzf bearssl-0.6.tar.gz
+        cd bearssl-0.6
+        make
+        mkdir -p $HOME/bear/lib $HOME/bear/include
+        cp inc/*.h $HOME/bear/include
+        cp build/libbearssl.* $HOME/bear/lib
+      name: 'install bearssl'
+
+    - if: ${{ contains(matrix.build.install_steps, 'libressl') }}
+      run: |
+        git clone --depth=1 -b v3.6.1 https://github.com/libressl-portable/portable.git libressl-git
+        cd libressl-git
+        ./autogen.sh
+        ./configure --prefix=$HOME/libressl
+        make install
+      name: 'install libressl'
+
+    - if: ${{ contains(matrix.build.install_steps, 'quiche') }}
+      run: |
+        git clone --depth=1 --recursive https://github.com/cloudflare/quiche.git
+        cd quiche
+        #### Work-around https://github.com/curl/curl/issues/7927 #######
+        #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
+        sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
+
+        # /home/runner/work/curl/curl/boringssl
+
+        cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
+        mkdir -v quiche/deps/boringssl/src/lib
+        ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
+
+        # include dir
+        # /home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src/include
+        # lib dir
+        # /home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src/lib
+
+      name: 'build quiche and boringssl'
+
+    - if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
+      run: |
+        git clone --depth=1 -b v3.3.0 https://github.com/ARMmbed/mbedtls
+        cd mbedtls
+        make DESTDIR=$HOME/mbed install
+      name: 'install mbedtls'
+
+    - if: ${{ contains(matrix.build.install_steps, 'openssl3') }}
+      run: |
+        git clone --depth=1 https://github.com/openssl/openssl
+        cd openssl
+        ./config enable-tls1_3 --prefix=$HOME/openssl3
+        make install_sw
+      name: 'install openssl'
+
+    - if: ${{ contains(matrix.build.install_steps, 'quictls') }}
+      run: |
+        git clone --depth=1 -b OpenSSL_1_1_1s+quic https://github.com/quictls/openssl
+        cd openssl
+        ./config enable-tls1_3 --prefix=$HOME/quictls
+        make install_sw
+      name: 'install quictls'
+
+    - if: ${{ contains(matrix.build.install_steps, 'msh3') }}
+      run: |
+        git clone -b v0.6.0 --depth=1 --recursive https://github.com/nibanks/msh3
+        cd msh3 && mkdir build && cd build
+        cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3 ..
+        cmake --build .
+        cmake --install .
+      name: 'install msh3'
+
+    - if: ${{ contains(matrix.build.install_steps, 'rust') }}
+      run: |
+        cd $HOME
+        curl https://sh.rustup.rs -sSf | sh -s -- -y
+        source $HOME/.cargo/env
+        rustup toolchain install nightly
+      name: 'install rust'
+
+    - if: ${{ contains(matrix.build.install_steps, 'rustls') }}
+      run: |
+        git clone --depth=1 -b v0.8.2 --recursive https://github.com/rustls/rustls-ffi.git
+        cd rustls-ffi
+        make DESTDIR=$HOME/rustls install
+      name: 'install rustls'
+
+    - if: ${{ contains(matrix.build.install_steps, 'hyper') }}
+      run: |
+        cd $HOME
+        git clone --depth=1 https://github.com/hyperium/hyper.git
+        cd $HOME/hyper
+        RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib
+        echo "LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib" >> $GITHUB_ENV
+      name: 'install hyper'
+
+    - if: ${{ contains(matrix.build.install_steps, 'intel') }}
+      run: |
+        cd /tmp
+        curl https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo apt-key add -
+        sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
+        sudo apt install --no-install-recommends intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+        source /opt/intel/oneapi/setvars.sh
+        printenv >> $GITHUB_ENV
+      name: 'install Intel compilers'
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
+
+    - run: make V=1 -C tests
+      name: 'make tests'
+
+    - run: make V=1 test-ci
+      name: 'run tests'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
+
+  slackware-15_0:
+    # Containers must run in Linux based operating systems
+    runs-on: ubuntu-latest
+    # Docker Hub image that `container-job` executes in
+    container: andy5995/slackware-build-essential:15.0
+    steps:
+    - uses: actions/checkout@v3
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror --with-openssl
+      name: 'configure'
+
+    - run: make V=1 -j$(expr $(nproc) - 1)
+      name: 'make'
+
+    - run: make V=1 examples -j$(expr $(nproc) - 1)
+      name: 'make examples'
+
+    - run: make V=1 -C tests -j$(expr $(nproc) - 1)
+      name: 'make tests'

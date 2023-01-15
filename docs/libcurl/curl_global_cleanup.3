@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,24 +18,31 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_global_cleanup 3 "17 Feb 2006" "libcurl 7.8" "libcurl Manual"
 .SH NAME
 curl_global_cleanup - global libcurl cleanup
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "void curl_global_cleanup(void);"
-.ad
+.nf
+#include <curl/curl.h>
+
+void curl_global_cleanup(void);
+.fi
 .SH DESCRIPTION
 This function releases resources acquired by \fIcurl_global_init(3)\fP.
 
 You should call \fIcurl_global_cleanup(3)\fP once for each call you make to
 \fIcurl_global_init(3)\fP, after you are done using libcurl.
 
-\fBThis function is not thread safe.\fP You must not call it when any other
+This function is thread-safe since libcurl 7.84.0 if
+\fIcurl_version_info(3)\fP has the CURL_VERSION_THREADSAFE feature bit set
+(most platforms).
+
+If this is not thread-safe, you must not call this function when any other
 thread in the program (i.e. a thread sharing the same memory) is running.
-This doesn't just mean no other thread that is using libcurl.  Because
+This does not just mean no other thread that is using libcurl. Because
 \fIcurl_global_cleanup(3)\fP calls functions of other libraries that are
 similarly thread unsafe, it could conflict with any other thread that uses
 these other libraries.
@@ -49,6 +56,18 @@ containing libcurl is dynamically unloaded while libcurl-created threads are
 still running then your program may crash or other corruption may occur. We
 recommend you do not run libcurl from any module that may be unloaded
 dynamically. This behavior may be addressed in the future.
+.SH EXAMPLE
+.nf
+ curl_global_init(CURL_GLOBAL_DEFAULT);
+
+ /* use libcurl, then before exiting... */
+
+ curl_global_cleanup();
+.fi
+.SH AVAILABILITY
+Added in 7.8
+.SH RETURN VALUE
+None
 .SH "SEE ALSO"
 .BR curl_global_init "(3), "
 .BR libcurl "(3), "

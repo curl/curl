@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "tool_setup.h"
 
@@ -26,7 +28,6 @@
 #include "curlx.h"
 
 #include "tool_cfgable.h"
-#include "tool_convert.h"
 #include "tool_msgs.h"
 #include "tool_cb_dbg.h"
 #include "tool_util.h"
@@ -162,29 +163,6 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
     return 0;
   }
 
-#ifdef CURL_DOES_CONVERSIONS
-  /* Special processing is needed for CURLINFO_HEADER_OUT blocks
-   * if they contain both headers and data (separated by CRLFCRLF).
-   * We dump the header text and then switch type to CURLINFO_DATA_OUT.
-   */
-  if((type == CURLINFO_HEADER_OUT) && (size > 4)) {
-    size_t i;
-    for(i = 0; i < size - 4; i++) {
-      if(memcmp(&data[i], "\r\n\r\n", 4) == 0) {
-        /* dump everything through the CRLFCRLF as a sent header */
-        text = "=> Send header";
-        dump(timebuf, text, output, (unsigned char *)data, i + 4,
-             config->tracetype, type);
-        data += i + 3;
-        size -= i + 4;
-        type = CURLINFO_DATA_OUT;
-        data += 1;
-        break;
-      }
-    }
-  }
-#endif /* CURL_DOES_CONVERSIONS */
-
   switch(type) {
   case CURLINFO_TEXT:
     fprintf(output, "%s== Info: %.*s", timebuf, (int)size, data);
@@ -253,21 +231,9 @@ static void dump(const char *timebuf, const char *text,
         i += (c + 2 - width);
         break;
       }
-#ifdef CURL_DOES_CONVERSIONS
-      /* repeat the 0D0A check above but use the host encoding for CRLF */
-      if((tracetype == TRACE_ASCII) &&
-         (i + c + 1 < size) && (ptr[i + c] == '\r') &&
-         (ptr[i + c + 1] == '\n')) {
-        i += (c + 2 - width);
-        break;
-      }
-      /* convert to host encoding and print this character */
-      fprintf(stream, "%c", convert_char(infotype, ptr[i + c]));
-#else
       (void)infotype;
-      fprintf(stream, "%c", ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80)) ?
+      fprintf(stream, "%c", ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x7F)) ?
               ptr[i + c] : UNPRINTABLE_CHAR);
-#endif /* CURL_DOES_CONVERSIONS */
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if((tracetype == TRACE_ASCII) &&
          (i + c + 2 < size) && (ptr[i + c + 1] == 0x0D) &&

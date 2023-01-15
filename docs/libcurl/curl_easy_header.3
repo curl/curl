@@ -1,0 +1,153 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.TH curl_easy_header 3 "13 March 2022" "libcurl 7.83.0" "libcurl Manual"
+.SH NAME
+curl_easy_header - get an HTTP header
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLHcode curl_easy_header(CURL *easy,
+                           const char *name,
+                           size_t index,
+                           unsigned int origin,
+                           int request,
+                           struct curl_header **hout);
+.SH DESCRIPTION
+\fIcurl_easy_header(3)\fP returns a pointer to a "curl_header" struct in
+\fBhout\fP with data for the HTTP response header \fIname\fP. The case
+insensitive null-terminated header name should be specified without colon.
+
+\fIindex\fP 0 means asking for the first instance of the header. If the
+returned header struct has \fBamount\fP set larger than 1, it means there are
+more instances of the same header name available to get. Asking for a too big
+index makes \fBCURLHE_BADINDEX\fP get returned.
+
+The \fIorigin\fP argument is for specifying which headers to receive, as a
+single HTTP transfer might provide headers from several different places and
+they may then have different importance to the user and headers using the same
+name might be used. The \fIorigin\fP is a bitmask for what header sources you
+want. See the descriptions below.
+
+The \fIrequest\fP argument tells libcurl from which request you want headers
+from. A single transfer might consist of a series of HTTP requests and this
+argument lets you specify which particular individual request you want the
+headers from. 0 being the first request and then the number increases for
+further redirects or when multi-state authentication is used. Passing in -1 is
+a shortcut to "the last" request in the series, independently of the actual
+amount of requests used.
+
+libcurl stores and provides the actually used "correct" headers. If for
+example two headers with the same name arrive and the latter overrides the
+former, then only the latter will be provided. If the first header survives
+the second, then only the first one will be provided. An application using
+this API does not have to bother about multiple headers used wrongly.
+
+The memory for the returned struct is associated with the easy handle and
+subsequent calls to \fIcurl_easy_header(3)\fP will clobber the struct used in
+the previous calls for the same easy handle. Applications need to copy the
+data if it wants to keep it around. The memory used for the struct gets freed
+with calling \fIcurl_easy_cleanup(3)\fP of the easy handle.
+
+The first line in an HTTP response is called the status line. It is not
+considered a header by this function. Headers are the "name: value" lines
+following the status.
+
+This function can be used before (all) headers have been received and is fine
+to call from within libcurl callbacks. It will always return the state of the
+headers at the time it is called.
+.SH "The header struct"
+.nf
+struct curl_header {
+   char *name;
+   char *value;
+   size_t amount;
+   size_t index;
+   unsigned int origin;
+   void *anchor;
+};
+.fi
+
+The data \fBname\fP field points to, will be the same as the requested name
+but it might have a different case.
+
+The data \fBvalue\fP field points to, comes exactly as delivered over the
+network but with leading and trailing whitespace and newlines stripped
+off. The `value` data is null-terminated. For legacy HTTP/1 "folded headers",
+this API provides the full single value in an unfolded manner with a single
+whitespace between the lines.
+
+\fBamount\fP is how many headers using this name that exist, within the origin
+and request scope asked for.
+
+\fBindex\fP is the zero based entry number of this particular header, which in
+case this header was used more than once in the requested scope can be larger
+than 0 but is always less than \fBamount\fP.
+
+The \fBorigin\fP field in the "curl_header" struct has one of the origin bits
+set, indicating where from the header originates. At the time of this writing,
+there are 5 bits with defined use. The undocumented 27 remaining bits are
+reserved for future use and must not be assumed to have any particular value.
+
+\fBanchor\fP is a private handle used by libcurl internals. Do not modify.
+.SH ORIGINS
+.IP CURLH_HEADER
+The header arrived as a header from the server.
+.IP CURLH_TRAILER
+The header arrived as a trailer. A header that arrives after the body.
+.IP CURLH_CONNECT
+The header arrived in a CONNECT response. A CONNECT request is being done to
+setup a transfer "through" an HTTP(S) proxy.
+.IP CURLH_1XX
+The header arrived in an HTTP 1xx response. A 1xx response is an "intermediate"
+response that might happen before the "real" response.
+.IP CURLH_PSEUDO
+The header is an HTTP/2 or HTTP/3 pseudo header
+.SH EXAMPLE
+.nf
+struct curl_header *type;
+CURLHcode h =
+  curl_easy_header(easy, "Content-Type", 0, CURLH_HEADER, -1, &type);
+.fi
+.SH AVAILABILITY
+Added in 7.83.0. Officially supported since 7.84.0.
+.SH RETURN VALUE
+This function returns a CURLHcode indicating success or error.
+.IP "CURLHE_BADINDEX (1)"
+There is no header with the requested index.
+.IP "CURLHE_MISSING (2)"
+No such header exists.
+.IP "CURLHE_NOHEADERS (3)"
+No headers at all have been recorded.
+.IP "CURLHE_NOREQUEST (4)"
+There was no such request number.
+.IP "CURLHE_OUT_OF_MEMORY (5)"
+Out of resources
+.IP "CURLHE_BAD_ARGUMENT (6)"
+One or more of the given arguments are bad.
+.IP "CURLHE_NOT_BUILT_IN (7)"
+HTTP or the header API has been disabled in the build.
+.SH "SEE ALSO"
+.BR curl_easy_nextheader "(3), " curl_easy_perform "(3), "
+.BR CURLOPT_HEADERFUNCTION "(3), " CURLINFO_CONTENT_TYPE "(3) "

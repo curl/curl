@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -37,10 +39,10 @@ regular HTTP-style header (Set-Cookie: ...) format. This will also enable the
 cookie engine. This adds that single cookie to the internal cookie store.
 
 Exercise caution if you are using this option and multiple transfers may occur.
-If you use the Set-Cookie format and don't specify a domain then the cookie is
+If you use the Set-Cookie format and do not specify a domain then the cookie is
 sent for any domain (even after redirects are followed) and cannot be modified
 by a server-set cookie. If a server sets a cookie of the same name (or maybe
-you've imported one) then both will be sent on a future transfer to that
+you have imported one) then both will be sent on a future transfer to that
 server, likely not what you intended. To address these issues set a domain in
 Set-Cookie (doing that will include sub-domains) or use the Netscape format as
 shown in EXAMPLE.
@@ -90,7 +92,7 @@ curl_easy_setopt(curl, CURLOPT_COOKIELIST, my_cookie);
 before a transfer is performed. Cookies in the list that have the same
 hostname, path and name as in my_cookie are skipped. That is because
 libcurl has already imported my_cookie and it's considered a "live"
-cookie. A live cookie won't be replaced by one read from a file.
+cookie. A live cookie will not be replaced by one read from a file.
 */
 curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookies.txt");  /* import */
 
@@ -105,17 +107,16 @@ curl_easy_perform(curl);  /* cookies imported from cookies.txt */
 curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
 .fi
 .SH "Cookie file format"
-The cookie file format and general cookie concepts in curl are described in
-the HTTP-COOKIES.md file, also hosted online here:
-https://curl.se/docs/http-cookies.html
+The cookie file format and general cookie concepts in curl are described
+online here: https://curl.se/docs/http-cookies.html
 .SH AVAILABILITY
-ALL was added in 7.14.1
+\fBALL\fP was added in 7.14.1
 
-SESS was added in 7.15.4
+\fBSESS\fP was added in 7.15.4
 
-FLUSH was added in 7.17.1
+\fBFLUSH\fP was added in 7.17.1
 
-RELOAD was added in 7.39.0
+\fBRELOAD\fP was added in 7.39.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

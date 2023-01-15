@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,6 +20,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #ifdef  __cplusplus
@@ -31,7 +33,7 @@ typedef enum {
   CURLOT_VALUES,  /*      (a defined set or bitmask) */
   CURLOT_OFF_T,   /* curl_off_t (a range of values) */
   CURLOT_OBJECT,  /* pointer (void *) */
-  CURLOT_STRING,  /*         (char * to zero terminated buffer) */
+  CURLOT_STRING,  /*         (char * to null-terminated buffer) */
   CURLOT_SLIST,   /*         (struct curl_slist *) */
   CURLOT_CBPTR,   /*         (void * passed as-is to a callback) */
   CURLOT_BLOB,    /* blob (struct curl_blob *) */
@@ -57,7 +59,7 @@ CURL_EXTERN const struct curl_easyoption *
 curl_easy_option_by_name(const char *name);
 
 CURL_EXTERN const struct curl_easyoption *
-curl_easy_option_by_id (CURLoption id);
+curl_easy_option_by_id(CURLoption id);
 
 CURL_EXTERN const struct curl_easyoption *
 curl_easy_option_next(const struct curl_easyoption *prev);

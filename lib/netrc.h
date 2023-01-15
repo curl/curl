@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,18 +20,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
 #ifndef CURL_DISABLE_NETRC
 
 /* returns -1 on failure, 0 if the host is found, 1 is the host isn't found */
-int Curl_parsenetrc(const char *host,
-                    char **loginp,
-                    char **passwordp,
-                    bool *login_changed,
-                    bool *password_changed,
-                    char *filename);
+int Curl_parsenetrc(const char *host, char **loginp,
+                    char **passwordp, char *filename);
   /* Assume: (*passwordp)[0]=0, host[0] != 0.
    * If (*loginp)[0] = 0, search for login and password within a machine
    * section in the netrc.

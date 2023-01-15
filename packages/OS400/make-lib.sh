@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 #
@@ -41,7 +43,7 @@ fi
 echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")' > os400.c
 echo '#pragma comment(user, __DATE__)' >> os400.c
 echo '#pragma comment(user, __TIME__)' >> os400.c
-echo '#pragma comment(copyright, "Copyright (C) 1998-2016 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
+echo '#pragma comment(copyright, "Copyright (C) Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
 make_module     OS400           os400.c
 LINK=                           # No need to rebuild service program yet.
 MODULES=
@@ -127,15 +129,26 @@ fi
 
 
 #       Gather the list of symbols to export.
+#       First use awk to pull all CURL_EXTERN function prototypes from
+#       the header files, pass through to sed to strip CURL_DEPRECATED(..)
+#       then back to awk to pull the string immediately to the left of a
+#       bracket stripping any spaces or *'s.
 
-EXPORTS=`grep '^CURL_EXTERN[[:space:]]'                                 \
+EXPORTS=`awk '/^CURL_EXTERN/,/;/'                                       \
               "${TOPDIR}"/include/curl/*.h                              \
               "${SCRIPTDIR}/ccsidcurl.h"                                |
-         sed -e 's/^.*CURL_EXTERN[[:space:]]\(.*\)(.*$/\1/'             \
-             -e 's/[[:space:]]*$//'                                     \
-             -e 's/^.*[[:space:]][[:space:]]*//'                        \
-             -e 's/^\*//'                                               \
-             -e 's/(\(.*\))/\1/'`
+         sed 's| CURL_DEPRECATED(.*)||g'                                |
+         awk '{br=index($0,"(");                                        \
+              if (br) {                                                 \
+                for(c=br-1; ;c--) {                                     \
+                  if (c==1) {                                           \
+                    print substr($0,c,br-1); break                      \
+                  } else if (match(substr($0, c, br-c), "[ *]") != 0) { \
+                    print substr($0, c+1, br-c-1); break                \
+                  }                                                     \
+                }                                                       \
+              }                                                         \
+        }'`
 
 #       Create the service program exportation file in DB2 member if needed.
 

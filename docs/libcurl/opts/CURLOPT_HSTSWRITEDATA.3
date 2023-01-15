@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,26 +18,25 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HSTSWRITEDATA 3 "14 Sep 2020" "libcurl 7.74.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_HSTSWRITEDATA \- pointer passed to the HSTS write callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSWRITEDATA, void *pointer);
-.SH EXPERIMENTAL
-Warning: this feature is early code and is marked as experimental. It can only
-be enabled by explicitly telling configure with \fB--enable-hsts\fP. You are
-advised to not ship this in production before the experimental label is
-removed.
+.fi
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the HSTS write function. If you use the
-\fICURLOPT_HSTSWRITEFUNCTION(3)\fP option, this is the pointer you'll get as
-input in the 4th argument to the callback.
+\fICURLOPT_HSTSWRITEFUNCTION(3)\fP option, this is the pointer you will get as
+input in the fourth argument to the callback.
 
-This option doesn't enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
+This option does not enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
 do that.
 .SH DEFAULT
 NULL

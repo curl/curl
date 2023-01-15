@@ -1,8 +1,14 @@
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: cacert
 Arg: <file>
 Help: CA certificate to verify peer against
 Protocols: TLS
 Category: tls
+See-also: capath insecure
+Example: --cacert CA-file.txt $URL
+Added: 7.5
+Multi: single
 ---
 Tells curl to use the specified certificate file to verify the peer. The file
 may contain multiple CA certificates. The certificate(s) must be in PEM
@@ -14,7 +20,7 @@ set, and uses the given path as a path to a CA cert bundle. This option
 overrides that variable.
 
 The windows version of curl will automatically look for a CA certs file named
-\'curl-ca-bundle.crt\', either in the same directory as curl.exe, or in the
+'curl-ca-bundle.crt', either in the same directory as curl.exe, or in the
 Current Working Directory, or in any folder along your PATH.
 
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
@@ -26,9 +32,7 @@ should not be set. If the option is not set, then curl will use the
 certificates in the system and user Keychain to verify the peer, which is the
 preferred method of verifying the peer's certificate chain.
 
-(Schannel only) This option is supported for Schannel in Windows 7 or later with
-libcurl 7.60 or later. This option is supported for backward compatibility
-with other SSL engines; instead it is recommended to use Windows' store of
-root certificates (the default for Schannel).
-
-If this option is used several times, the last one will be used.
+(Schannel only) This option is supported for Schannel in Windows 7 or later
+with libcurl 7.60 or later. This option is supported for backward
+compatibility with other SSL engines; instead it is recommended to use
+Windows' store of root certificates (the default for Schannel).

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -60,12 +62,10 @@
 
 /* ------------------------------------------------------------------ */
 
+#ifdef ENABLE_IPV6
 /* Return the scope of the given address. */
 unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 {
-#ifndef ENABLE_IPV6
-  (void) sa;
-#else
   if(sa->sa_family == AF_INET6) {
     const struct sockaddr_in6 * sa6 = (const struct sockaddr_in6 *)(void *) sa;
     const unsigned char *b = sa6->sin6_addr.s6_addr;
@@ -88,33 +88,31 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
       break;
     }
   }
-#endif
-
   return IPV6_SCOPE_GLOBAL;
 }
-
+#endif
 
 #if defined(HAVE_GETIFADDRS)
 
-if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          unsigned int local_scope_id, const char *interf,
+if2ip_result_t Curl_if2ip(int af,
+#ifdef ENABLE_IPV6
+                          unsigned int remote_scope,
+                          unsigned int local_scope_id,
+#endif
+                          const char *interf,
                           char *buf, int buf_size)
 {
   struct ifaddrs *iface, *head;
   if2ip_result_t res = IF2IP_NOT_FOUND;
 
-#ifndef ENABLE_IPV6
-  (void) remote_scope;
-#endif
-
-#if !defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID) || \
-    !defined(ENABLE_IPV6)
+#if defined(ENABLE_IPV6) && \
+    !defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   (void) local_scope_id;
 #endif
 
   if(getifaddrs(&head) >= 0) {
     for(iface = head; iface != NULL; iface = iface->ifa_next) {
-      if(iface->ifa_addr != NULL) {
+      if(iface->ifa_addr) {
         if(iface->ifa_addr->sa_family == af) {
           if(strcasecompare(iface->ifa_name, interf)) {
             void *addr;
@@ -181,8 +179,12 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 
 #elif defined(HAVE_IOCTL_SIOCGIFADDR)
 
-if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          unsigned int local_scope_id, const char *interf,
+if2ip_result_t Curl_if2ip(int af,
+#ifdef ENABLE_IPV6
+                          unsigned int remote_scope,
+                          unsigned int local_scope_id,
+#endif
+                          const char *interf,
                           char *buf, int buf_size)
 {
   struct ifreq req;
@@ -192,8 +194,10 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
   size_t len;
   const char *r;
 
+#ifdef ENABLE_IPV6
   (void)remote_scope;
   (void)local_scope_id;
+#endif
 
   if(!interf || (af != AF_INET))
     return IF2IP_NOT_FOUND;
@@ -230,13 +234,19 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 
 #else
 
-if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          unsigned int local_scope_id, const char *interf,
+if2ip_result_t Curl_if2ip(int af,
+#ifdef ENABLE_IPV6
+                          unsigned int remote_scope,
+                          unsigned int local_scope_id,
+#endif
+                          const char *interf,
                           char *buf, int buf_size)
 {
     (void) af;
+#ifdef ENABLE_IPV6
     (void) remote_scope;
     (void) local_scope_id;
+#endif
     (void) interf;
     (void) buf;
     (void) buf_size;

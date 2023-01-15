@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,18 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_mime_type 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
 .SH NAME
 curl_mime_type - set a mime part's content type
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "CURLcode curl_mime_type(curl_mimepart * " part ,
-.BI "const char * " mimetype ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype);
+.fi
 .SH DESCRIPTION
 \fIcurl_mime_type(3)\fP sets a mime part's content type.
 
@@ -37,8 +39,8 @@ curl_mime_type - set a mime part's content type
 set to NULL to remove a previously attached mime type.
 
 The mime type string is copied into the part, thus the associated storage may
-safely be released or reused after call. Setting a part's type twice is valid:
-only the value set by the last call is retained.
+safely be released or reused after call. Setting a part's type multiple times
+is valid: only the value set by the last call is retained.
 
 In the absence of a mime type and if needed by the protocol specifications,
 a default mime type is determined by the context:
@@ -53,10 +55,6 @@ extension, or application/octet-stream by default.
 - For a multipart part, multipart/mixed.
 .br
 - text/plain in other cases.
-.SH AVAILABILITY
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
-.SH RETURN VALUE
-CURLE_OK or a CURL error code upon failure.
 .SH EXAMPLE
 .nf
  curl_mime *mime;
@@ -77,6 +75,10 @@ CURLE_OK or a CURL error code upon failure.
  /* set name */
  curl_mime_name(part, "image");
 .fi
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+CURLE_OK or a CURL error code upon failure.
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
 .BR curl_mime_name "(3),"

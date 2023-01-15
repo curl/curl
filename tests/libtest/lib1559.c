@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "test.h"
 
@@ -28,7 +30,7 @@
 #define EXCESSIVE 10*1000*1000
 int test(char *URL)
 {
-  CURLcode res = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   char *longurl = malloc(EXCESSIVE);
   CURLU *u;
@@ -54,14 +56,14 @@ int test(char *URL)
   u = curl_url();
   if(u) {
     CURLUcode uc = curl_url_set(u, CURLUPART_URL, longurl, 0);
-    printf("CURLUPART_URL %d bytes URL == %d\n",
-           EXCESSIVE, (int)uc);
+    printf("CURLUPART_URL %d bytes URL == %d (%s)\n",
+           EXCESSIVE, (int)uc, curl_url_strerror(uc));
     uc = curl_url_set(u, CURLUPART_SCHEME, longurl, CURLU_NON_SUPPORT_SCHEME);
-    printf("CURLUPART_SCHEME %d bytes scheme == %d\n",
-           EXCESSIVE, (int)uc);
+    printf("CURLUPART_SCHEME %d bytes scheme == %d (%s)\n",
+           EXCESSIVE, (int)uc, curl_url_strerror(uc));
     uc = curl_url_set(u, CURLUPART_USER, longurl, 0);
-    printf("CURLUPART_USER %d bytes user == %d\n",
-           EXCESSIVE, (int)uc);
+    printf("CURLUPART_USER %d bytes user == %d (%s)\n",
+           EXCESSIVE, (int)uc, curl_url_strerror(uc));
     curl_url_cleanup(u);
   }
 

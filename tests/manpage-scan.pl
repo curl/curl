@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2016 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 #
@@ -31,7 +33,7 @@
 #
 # src/tool_getparam.c lists all options curl can parse
 # docs/curl.1 documents all command line options
-# src/tool_help.c outputs all options with curl -h
+# src/tool_listhelp.c outputs all options with curl -h
 # - make sure they're all in sync
 #
 # Output all deviances to stderr.
@@ -146,8 +148,9 @@ my %opts = (
     '--no-sessionid' => 1,
     '--no-keepalive' => 1,
     '--no-progress-meter' => 1,
+    '--no-clobber' => 1,
 
-    # pretend these options without -no exist in curl.1 and tool_help.c
+    # pretend these options without -no exist in curl.1 and tool_listhelp.c
     '--alpn' => 6,
     '--npn' => 6,
     '--eprt' => 6,
@@ -156,6 +159,7 @@ my %opts = (
     '-N, --buffer' => 6,
     '--sessionid' => 6,
     '--progress-meter' => 6,
+    '--clobber' => 6,
 
     # deprecated options do not need to be in tool_help.c nor curl.1
     '--krb4' => 6,
@@ -236,7 +240,7 @@ close(R);
 
 #########################################################################
 # parse the curl code that outputs the curl -h list
-open(R, "<$root/src/tool_help.c") ||
+open(R, "<$root/src/tool_listhelp.c") ||
     die "no input file";
 my @toolhelp; # store all parsed parameters
 while(<R>) {
@@ -286,10 +290,10 @@ foreach my $o (keys %opts) {
             $missing.= " curl.1";
         }
         if($where & 4) {
-            $exists .= " tool_help.c";
+            $exists .= " tool_listhelp.c";
         }
         else {
-            $missing .= " tool_help.c";
+            $missing .= " tool_listhelp.c";
         }
 
         print STDERR "$o is not in$missing (but in$exists)\n";

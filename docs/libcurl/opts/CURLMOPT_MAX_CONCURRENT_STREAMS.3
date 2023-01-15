@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,11 +18,13 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLMOPT_MAX_CONCURRENT_STREAMS 3 "06 Nov 2019" "libcurl 7.67.0" "curl_multi_setopt options"
 .SH NAME
-CURLMOPT_MAX_CONCURRENT_STREAMS \- set max concurrent streams for http2
+CURLMOPT_MAX_CONCURRENT_STREAMS \- max concurrent streams for http2
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -36,8 +38,7 @@ maximum number of concurrent streams for a connections that libcurl should
 support on connections done using HTTP/2.
 
 Valid values range from 1 to 2147483647 (2^31 - 1) and defaults to 100.  The
-value passed here would be honoured based on other system resources
-properties.
+value passed here would be honored based on other system resources properties.
 .SH DEFAULT
 100
 .SH PROTOCOLS

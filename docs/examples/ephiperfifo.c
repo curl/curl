@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -164,7 +166,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
     memset(&its, 0, sizeof(struct itimerspec));
   }
 
-  timerfd_settime(g->tfd, /*flags=*/0, &its, NULL);
+  timerfd_settime(g->tfd, /* flags= */0, &its, NULL);
   return 0;
 }
 
@@ -195,7 +197,7 @@ static void check_multi_info(GlobalInfo *g)
   }
 }
 
-/* Called by libevent when we get action on a multi socket filedescriptor*/
+/* Called by libevent when we get action on a multi socket filedescriptor */
 static void event_cb(GlobalInfo *g, int fd, int revents)
 {
   CURLMcode rc;
@@ -224,7 +226,7 @@ static void timer_cb(GlobalInfo* g, int revents)
 
   err = read(g->tfd, &count, sizeof(uint64_t));
   if(err == -1) {
-    /* Note that we may call the timer callback even if the timerfd isn't
+    /* Note that we may call the timer callback even if the timerfd is not
      * readable. It's possible that there are multiple events stored in the
      * epoll buffer (i.e. the timer may have fired multiple times). The
      * event count is cleared after the first call so future events in the
@@ -292,7 +294,7 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
 /* Initialize a new SockInfo structure */
 static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g)
 {
-  SockInfo *fdp = (SockInfo*)calloc(sizeof(SockInfo), 1);
+  SockInfo *fdp = (SockInfo*)calloc(1, sizeof(SockInfo));
 
   fdp->global = g;
   setsock(fdp, s, easy, action, g);
@@ -455,11 +457,9 @@ static void clean_fifo(GlobalInfo *g)
 
 int g_should_exit_ = 0;
 
-void SignalHandler(int signo)
+void sigint_handler(int signo)
 {
-  if(signo == SIGINT) {
-    g_should_exit_ = 1;
-  }
+  g_should_exit_ = 1;
 }
 
 int main(int argc, char **argv)
@@ -472,7 +472,7 @@ int main(int argc, char **argv)
   (void)argv;
 
   g_should_exit_ = 0;
-  signal(SIGINT, SignalHandler);
+  signal(SIGINT, sigint_handler);
 
   memset(&g, 0, sizeof(GlobalInfo));
   g.epfd = epoll_create1(EPOLL_CLOEXEC);
@@ -505,7 +505,7 @@ int main(int argc, char **argv)
   curl_multi_setopt(g.multi, CURLMOPT_TIMERFUNCTION, multi_timer_cb);
   curl_multi_setopt(g.multi, CURLMOPT_TIMERDATA, &g);
 
-  /* we don't call any curl_multi_socket*() function yet as we have no handles
+  /* we do not call any curl_multi_socket*() function yet as we have no handles
      added! */
 
   fprintf(MSG_OUT, "Entering wait loop\n");

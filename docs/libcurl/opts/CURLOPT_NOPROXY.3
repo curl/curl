@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,40 +18,41 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_NOPROXY 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_NOPROXY \- disable proxy use for specific hosts
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOPROXY, char *noproxy);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string. The string consists of a comma
 separated list of host names that do not require a proxy to get reached, even
 if one is specified.  The only wildcard available is a single * character,
 which matches all hosts, and effectively disables the proxy. Each name in this
 list is matched as either a domain which contains the hostname, or the
-hostname itself. For example, example.com would match example.com,
-example.com:80, and www.example.com, but not www.notanexample.com or
-example.com.othertld.
+hostname itself. For example, "ample.com" would match ample.com, ample.com:80,
+and www.ample.com, but not www.example.com or ample.com.org.
 
-If the name in the noproxy list has a leading period, it is a domain match
-against the provided host name. This way ".example.com" will switch off proxy
-use for both "www.example.com" as well as for "foo.example.com".
-
-Setting the noproxy string to "" (an empty string) will explicitly enable the
-proxy for all host names, even if there is an environment variable set for it.
+Setting the \fInoproxy\fP string to "" (an empty string) will explicitly
+enable the proxy for all host names, even if there is an environment variable
+set for it.
 
 Enter IPv6 numerical addresses in the list of host names without enclosing
 brackets:
 
  "example.com,::1,localhost"
 
-IPv6 numerical addresses are compared as strings, so they will only match if
-the representations are the same: "::1" is the same as "::0:1" but they don't
-match.
+Since 7.86.0, IP addresses specified to this option can be provided using CIDR
+notation: an appended slash and number specifies the number of "network bits"
+out of the address to use in the comparison. For example "192.168.0.0/16"
+would match all addresses starting with "192.168".
 
 The application does not have to keep the string around after setting this
 option.

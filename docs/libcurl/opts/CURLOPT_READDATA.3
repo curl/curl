@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,24 +18,28 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_READDATA 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_READDATA \- custom pointer passed to the read callback
+CURLOPT_READDATA \- pointer passed to the read callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_READDATA, void *pointer);
+.fi
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the file read function. If you use the
-\fICURLOPT_READFUNCTION(3)\fP option, this is the pointer you'll get as
-input in the 4th argument to the callback.
+\fICURLOPT_READFUNCTION(3)\fP option, this is the pointer you will get as
+input in the fourth argument to the callback.
 
-If you don't specify a read callback but instead rely on the default internal
+If you do not specify a read callback but instead rely on the default internal
 read function, this data must be a valid readable FILE * (cast to 'void *').
 
-If you're using libcurl as a win32 DLL, you \fBMUST\fP use a
+If you are using libcurl as a win32 DLL, you \fBMUST\fP use a
 \fICURLOPT_READFUNCTION(3)\fP if you set this option or you will experience
 crashes.
 .SH DEFAULT

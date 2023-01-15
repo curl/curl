@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH curl_easy_upkeep 3 "31 Oct 2018" "libcurl 7.62.0" "libcurl Manual"
 .SH NAME
 curl_easy_upkeep - Perform any connection upkeep checks.
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.BI "CURLcode curl_easy_upkeep(CURL *" handle ");"
+CURLcode curl_easy_upkeep(CURL *handle);
+.fi
 .SH DESCRIPTION
 
 Some protocols have "connection upkeep" mechanisms. These mechanisms usually
@@ -41,14 +45,6 @@ is called, an HTTP/2 PING frame is sent on the connection.
 This function must be explicitly called in order to perform the upkeep work.
 The connection upkeep interval is set with
 \fICURLOPT_UPKEEP_INTERVAL_MS(3)\fP.
-
-.SH AVAILABILITY
-Added in 7.62.0.
-.SH RETURN VALUE
-On success, returns \fBCURLE_OK\fP.
-
-On failure, returns the appropriate error code.
-
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -73,5 +69,13 @@ if(curl) {
   /* always cleanup */
   curl_easy_cleanup(curl);
 }
-
 .fi
+.SH AVAILABILITY
+Added in 7.62.0.
+.SH RETURN VALUE
+On success, returns \fBCURLE_OK\fP.
+
+On failure, returns the appropriate error code.
+.SH SEE ALSO
+.BR CURLOPT_TCP_KEEPALIVE "(3), "
+.BR CURLOPT_TCP_KEEPIDLE "(3), "

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -89,19 +91,20 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_DICT,                            /* defport */
   CURLPROTO_DICT,                       /* protocol */
   CURLPROTO_DICT,                       /* family */
   PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
-static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
+static char *unescape_word(const char *inputbuff)
 {
   char *newp = NULL;
   char *dictp;
   size_t len;
 
-  CURLcode result = Curl_urldecode(data, inputbuff, 0, &newp, &len,
+  CURLcode result = Curl_urldecode(inputbuff, 0, &newp, &len,
                                    REJECT_NADA);
   if(!newp || result)
     return NULL;
@@ -189,10 +192,6 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
   *done = TRUE; /* unconditionally */
 
-  if(conn->bits.user_passwd) {
-    /* AUTH is missing */
-  }
-
   if(strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
      strncasecompare(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
      strncasecompare(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
@@ -214,18 +213,18 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       }
     }
 
-    if((word == NULL) || (*word == (char)0)) {
-      infof(data, "lookup word is missing\n");
+    if(!word || (*word == (char)0)) {
+      infof(data, "lookup word is missing");
       word = (char *)"default";
     }
-    if((database == NULL) || (*database == (char)0)) {
+    if(!database || (*database == (char)0)) {
       database = (char *)"!";
     }
-    if((strategy == NULL) || (*strategy == (char)0)) {
+    if(!strategy || (*strategy == (char)0)) {
       strategy = (char *)".";
     }
 
-    eword = unescape_word(data, word);
+    eword = unescape_word(word);
     if(!eword)
       return CURLE_OUT_OF_MEMORY;
 
@@ -265,15 +264,15 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       }
     }
 
-    if((word == NULL) || (*word == (char)0)) {
-      infof(data, "lookup word is missing\n");
+    if(!word || (*word == (char)0)) {
+      infof(data, "lookup word is missing");
       word = (char *)"default";
     }
-    if((database == NULL) || (*database == (char)0)) {
+    if(!database || (*database == (char)0)) {
       database = (char *)"!";
     }
 
-    eword = unescape_word(data, word);
+    eword = unescape_word(word);
     if(!eword)
       return CURLE_OUT_OF_MEMORY;
 
@@ -320,4 +319,4 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
   return CURLE_OK;
 }
-#endif /*CURL_DISABLE_DICT*/
+#endif /* CURL_DISABLE_DICT */

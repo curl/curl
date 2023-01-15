@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_DISALLOW_USERNAME_IN_URL 3 "30 May 2018" "libcurl 7.61.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_DISALLOW_USERNAME_IN_URL \- disallow specifying username in the url
+CURLOPT_DISALLOW_USERNAME_IN_URL \- disallow specifying username in the URL
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DISALLOW_USERNAME_IN_URL, long disallow);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DISALLOW_USERNAME_IN_URL,
+                          long disallow);
+.fi
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to not allow URLs that include a
 username.
@@ -46,7 +51,7 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in libcurl 7.61.0
+Added in 7.61.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 

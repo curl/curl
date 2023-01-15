@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+MQTT
+MQTT PUBLISH
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+
+# error 5 - "Connection Refused, not authorized. Wrong data supplied"
+<servercmd>
+error-CONNACK 5
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+mqtt
+</features>
+<server>
+mqtt
+</server>
+<name>
+MQTT PUBLISH with invalid user and password
+</name>
+<command option="binary-trace">
+mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER -d something -u fakeuser:fakepasswd
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# These are hexadecimal protocol dumps from the client
+#
+# Strip out the random part of the client id from the CONNECT message
+# before comparison
+<strippart>
+s/^(.* 00044d51545404c2003c000c6375726c).*/$1/
+</strippart>
+<protocol>
+client CONNECT 2e 00044d51545404c2003c000c6375726c
+server CONNACK 2 20020005
+</protocol>
+
+
+# 8 is CURLE_WEIRD_SERVER_REPLY
+<errorcode>
+8
+</errorcode>
+</verify>
+</testcase>

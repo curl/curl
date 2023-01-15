@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--no-clobber
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.0 200 OK
+Connection: close
+Content-Type: text/plain
+Content-Length: 4
+
+foo
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<name>
+HTTP GET without clobber when 100 files already exist
+</name>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<command option="no-output">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/exist%TESTNUMBER --no-clobber
+</command>
+<file name="log/exist%TESTNUMBER">
+to stay the same
+</file>
+<precheck>
+perl -e 'for my $i ((1..100)) { my $filename = "log/exist%TESTNUMBER.$i"; open(FH, ">", $filename) or die $!; print FH "to stay the same" ; close(FH) }'
+# python3 -c 'for i in range(1, 101): open("log/exist%TESTNUMBER.{}".format(i), mode="w").write("to stay the same")'
+</precheck>
+<postcheck>
+perl -e 'for my $i ((1..100)) { my $filename = "log/exist%TESTNUMBER.$i"; open(FH, "<", $filename) or die $!; (<FH> eq "to stay the same" and <FH> eq "") or die "incorrect $filename" ; close(FH) }'
+# python3 -c 'for i in range(1, 101): assert open("log/exist%TESTNUMBER.{}".format(i), mode="r").read(17) == "to stay the same"'
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+23
+</errorcode>
+<file name="log/exist%TESTNUMBER">
+to stay the same
+</file>
+</verify>
+</testcase>

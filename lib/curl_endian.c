@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -80,45 +82,3 @@ unsigned short Curl_read16_be(const unsigned char *buf)
   return (unsigned short)(((unsigned short)buf[0] << 8) |
                           ((unsigned short)buf[1]));
 }
-
-#if (SIZEOF_CURL_OFF_T > 4)
-/*
- * write32_le()
- *
- * This function converts a 32-bit integer from the native endian format,
- * to little endian format ready for sending down the wire.
- *
- * Parameters:
- *
- * value    [in]     - The 32-bit integer value.
- * buffer   [in]     - A pointer to the output buffer.
- */
-static void write32_le(const int value, unsigned char *buffer)
-{
-  buffer[0] = (char)(value & 0x000000FF);
-  buffer[1] = (char)((value & 0x0000FF00) >> 8);
-  buffer[2] = (char)((value & 0x00FF0000) >> 16);
-  buffer[3] = (char)((value & 0xFF000000) >> 24);
-}
-
-/*
- * Curl_write64_le()
- *
- * This function converts a 64-bit integer from the native endian format,
- * to little endian format ready for sending down the wire.
- *
- * Parameters:
- *
- * value    [in]     - The 64-bit integer value.
- * buffer   [in]     - A pointer to the output buffer.
- */
-#if defined(HAVE_LONGLONG)
-void Curl_write64_le(const long long value, unsigned char *buffer)
-#else
-void Curl_write64_le(const __int64 value, unsigned char *buffer)
-#endif
-{
-  write32_le((int)value, buffer);
-  write32_le((int)(value >> 32), buffer + 4);
-}
-#endif /* SIZEOF_CURL_OFF_T > 4 */

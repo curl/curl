@@ -19,6 +19,9 @@ blablabla
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -50,11 +53,11 @@ POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 954
+Content-Length: 958
 Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
 
 ------------------------------24e78000bd32
-Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER\".txt"
+Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER%22.txt"
 Content-Type: mo/foo
 
 foo bar
@@ -63,7 +66,7 @@ bar
 foo
 
 ------------------------------24e78000bd32
-Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER\".txt"
+Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER%22.txt"
 Content-Type: text/plain
 
 foo bar
@@ -75,7 +78,7 @@ foo
 Content-Disposition: form-data; name="file3"
 Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b
 
-Content-Disposition: attachment; filename="test%TESTNUMBER\".txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER%22.txt"
 Content-Type: m/f
 
 foo bar
@@ -83,7 +86,7 @@ This is a bar foo
 bar
 foo
 
-Content-Disposition: attachment; filename="test%TESTNUMBER\".txt"
+Content-Disposition: attachment; filename="test%TESTNUMBER%22.txt"
 Content-Type: text/plain
 
 foo bar

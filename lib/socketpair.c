@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -48,6 +50,10 @@
 #endif /* !INADDR_LOOPBACK */
 #endif /* !WIN32 */
 
+#include "nonblock.h" /* for curlx_nonblock */
+#include "timeval.h"  /* needed before select.h */
+#include "select.h"   /* for Curl_poll */
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -63,8 +69,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   curl_socket_t listener;
   curl_socklen_t addrlen = sizeof(a.inaddr);
   int reuse = 1;
-  char data[2][12];
-  ssize_t dlen;
+  struct pollfd pfd[1];
   (void)domain;
   (void)type;
   (void)protocol;
@@ -85,7 +90,8 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   if(bind(listener, &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
-  if(getsockname(listener, &a.addr, &addrlen) == -1)
+  if(getsockname(listener, &a.addr, &addrlen) == -1 ||
+     addrlen < (int)sizeof(a.inaddr))
     goto error;
   if(listen(listener, 1) == -1)
     goto error;
@@ -94,19 +100,28 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   if(connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
+
+  /* use non-blocking accept to make sure we don't block forever */
+  if(curlx_nonblock(listener, TRUE) < 0)
+    goto error;
+  pfd[0].fd = listener;
+  pfd[0].events = POLLIN;
+  pfd[0].revents = 0;
+  (void)Curl_poll(pfd, 1, 1000); /* one second */
   socks[1] = accept(listener, NULL, NULL);
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
+  else {
+    struct curltime check;
+    struct curltime now = Curl_now();
 
-  /* verify that nothing else connected */
-  msnprintf(data[0], sizeof(data[0]), "%p", socks);
-  dlen = strlen(data[0]);
-  if(swrite(socks[0], data[0], dlen) != dlen)
-    goto error;
-  if(sread(socks[1], data[1], sizeof(data[1])) != dlen)
-    goto error;
-  if(memcmp(data[0], data[1], dlen))
-    goto error;
+    /* write data to the socket */
+    swrite(socks[0], &now, sizeof(now));
+    /* verify that we read the correct data */
+    if((sizeof(now) != sread(socks[1], &check, sizeof(check)) ||
+        memcmp(&now, &check, sizeof(check))))
+      goto error;
+  }
 
   sclose(listener);
   return 0;

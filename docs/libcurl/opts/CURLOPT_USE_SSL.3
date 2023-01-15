@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_USE_SSL 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_USE_SSL \- request using SSL / TLS for the transfer
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USE_SSL, long level);
+.fi
 .SH DESCRIPTION
 Pass a long using one of the values from below, to make libcurl use your
 desired \fIlevel\fP of SSL for the transfer.
@@ -36,9 +40,10 @@ using the STARTTLS command.
 
 This is for enabling SSL/TLS when you use FTP, SMTP, POP3, IMAP etc.
 .IP CURLUSESSL_NONE
-Don't attempt to use SSL.
+do not attempt to use SSL.
 .IP CURLUSESSL_TRY
-Try using SSL, proceed as normal otherwise.
+Try using SSL, proceed as normal otherwise. Note that server may close the
+connection if the negotiation does not succeed.
 .IP CURLUSESSL_CONTROL
 Require SSL for the control connection or fail with \fICURLE_USE_SSL_FAILED\fP.
 .IP CURLUSESSL_ALL
@@ -46,7 +51,7 @@ Require SSL for all communication or fail with \fICURLE_USE_SSL_FAILED\fP.
 .SH DEFAULT
 CURLUSESSL_NONE
 .SH PROTOCOLS
-FTP, SMTP, POP3, IMAP
+FTP, SMTP, POP3, IMAP, LDAP
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -54,7 +59,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/file.ext");
 
   /* require use of SSL for this, or fail */
-  curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+  curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 
   /* Perform the request */
   curl_easy_perform(curl);
@@ -63,6 +68,7 @@ if(curl) {
 .SH AVAILABILITY
 Added in 7.11.0. This option was known as CURLOPT_FTP_SSL up to 7.16.4, and
 the constants were known as CURLFTPSSL_*
+Handled by LDAP since 7.81.0. Fully supported by the OpenLDAP backend only.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

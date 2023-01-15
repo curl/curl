@@ -6,7 +6,7 @@
 # *                            | (__| |_| |  _ <| |___
 # *                             \___|\___/|_| \_\_____|
 # *
-# * Copyright (C) 2015 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 # *
 # * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # * KIND, either express or implied.
+# *
+# * SPDX-License-Identifier: curl
 # *
 # ***************************************************************************
 
@@ -35,7 +37,7 @@ print <<HEADER
 .\\" *                            | (__| |_| |  _ <| |___
 .\\" *                             \\___|\\___/|_| \\_\\_____|
 .\\" *
-.\\" * Copyright (C) 1998 - $year, Daniel Stenberg, <daniel\@haxx.se>, et al.
+.\\" * Copyright (C) Daniel Stenberg, <daniel\@haxx.se>, et al.
 .\\" *
 .\\" * This software is licensed as described in the file COPYING, which
 .\\" * you should have received as part of this distribution. The terms
@@ -47,6 +49,8 @@ print <<HEADER
 .\\" *
 .\\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\\" * KIND, either express or implied.
+.\\" *
+.\\" * SPDX-License-Identifier: curl
 .\\" *
 .\\" **************************************************************************
 .TH libcurl-symbols 3 "$date" "libcurl $version" "libcurl symbols"
@@ -69,7 +73,7 @@ HEADER
     ;
 
 while(<STDIN>) {
-    if($_ =~ /^(CURL[A-Z0-9_.]*) *(.*)/) {
+    if($_ =~ /^(CURL[A-Z0-9_.]*) *(.*)/i) {
         my ($symbol, $rest)=($1,$2);
         my ($intro, $dep, $rem);
         if($rest =~ s/^([0-9.]*) *//) {
@@ -86,7 +90,7 @@ while(<STDIN>) {
           print "Deprecated since $dep\n";
         }
         if($rem) {
-          print "Last used in $dep\n";
+          print "Last used in $rem\n";
         }
     }
 

@@ -1,0 +1,71 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_MAXLIFETIME_CONN 3 "10 Nov 2021" "libcurl 7.80.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_MAXLIFETIME_CONN \- max lifetime (since creation) allowed for reusing a connection
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXLIFETIME_CONN,
+                          long maxlifetime);
+.fi
+.SH DESCRIPTION
+Pass a long as parameter containing \fImaxlifetime\fP - the maximum time in
+seconds, since the creation of the connection, that you allow an existing
+connection to have to be considered for reuse for this request.
+
+libcurl features a connection cache that holds previously used connections.
+When a new request is to be done, it will consider any connection that matches
+for reuse. The \fICURLOPT_MAXLIFETIME_CONN(3)\fP limit prevents libcurl from
+trying too old connections for reuse. This can be used for client-side load
+balancing. If a connection is found in the cache that is older than this set
+\fImaxlifetime\fP, it will instead be closed once any in-progress transfers
+complete.
+
+If set to 0, this behavior is disabled: all connections are eligible for reuse.
+.SH DEFAULT
+Default \fImaxlifetime\fP is 0 seconds (i.e., disabled).
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  /* only allow each connection to be reused for 30 seconds */
+  curl_easy_setopt(curl, CURLOPT_MAXLIFETIME_CONN, 30L);
+
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.80.0
+.SH RETURN VALUE
+Returns CURLE_OK.
+.SH "SEE ALSO"
+.BR CURLOPT_TIMEOUT "(3), " CURLOPT_FORBID_REUSE "(3), "
+.BR CURLOPT_FRESH_CONNECT "(3), " CURLOPT_MAXAGE_CONN "(3), "

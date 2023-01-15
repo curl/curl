@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
+
 # libcurl examples
 
 This directory is for libcurl programming examples. They are meant to show
@@ -9,22 +15,23 @@ them for submission in future packages and on the website.
 
 ## Building
 
-The Makefile.example is an example makefile that could be used to build these
-examples. Just edit the file according to your system and requirements first.
+The `Makefile.example` is an example Makefile that could be used to build
+these examples. Just edit the file according to your system and requirements
+first.
 
 Most examples should build fine using a command line like this:
 
     `curl-config --cc --cflags --libs` -o example example.c
 
-Some compilers don't like having the arguments in this order but instead
+Some compilers do not like having the arguments in this order but instead
 want you do reorganize them like:
 
     `curl-config --cc` -o example example.c `curl-config --cflags --libs`
 
-**Please** do not use the `curl.se` site as a test target for your
-libcurl applications/experiments. Even if some of the examples use that site
-as a URL at some places, it doesn't mean that the URLs work or that we expect
-you to actually torture our website with your tests!  Thanks.
+**Please** do not use the `curl.se` site as a test target for your libcurl
+applications/experiments. Even if some of the examples use that site as a URL
+at some places, it does not mean that the URLs work or that we expect you to
+actually torture our website with your tests. Thanks.
 
 ## Examples
 

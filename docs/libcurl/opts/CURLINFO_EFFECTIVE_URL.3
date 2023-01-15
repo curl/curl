@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,20 +18,24 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLINFO_EFFECTIVE_URL 3 "28 Aug 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
 .SH NAME
 CURLINFO_EFFECTIVE_URL \- get the last used URL
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_EFFECTIVE_URL, char **urlp);
+.fi
 .SH DESCRIPTION
 Pass in a pointer to a char pointer and get the last used effective URL.
 
-In cases when you've asked libcurl to follow redirects, it may very well not
-be the same value you set with \fICURLOPT_URL(3)\fP.
+In cases when you have asked libcurl to follow redirects, it may not be the same
+value you set with \fICURLOPT_URL(3)\fP.
 
 The \fBurlp\fP pointer will be NULL or pointing to private memory you MUST NOT
 free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the

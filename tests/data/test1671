@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-w
+%header
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Set-Cookie: firstcookie=want1; path=/
+Funny-head: yesyes
+Set-Cookie: 2cookie=want2; path=/
+Content-Type: text/html
+Set-Cookie: cookie3=want3; path=/
+Content-Length: 6
+Connection: close
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+headers-api
+</features>
+<server>
+http
+</server>
+<name>
+-w header JSON output
+</name>
+<command option="no-output">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{header_json}\n' -o log/%TESTNUMBER.out
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout mode="text">
+{"date":["Tue, 09 Nov 2010 14:49:00 GMT"],
+"server":["test-server/fake"],
+"last-modified":["Tue, 13 Jun 2000 12:10:00 GMT"],
+"etag":["\"21025-dc7-39462498\""],
+"accept-ranges":["bytes"],
+"set-cookie":["firstcookie=want1; path=/","2cookie=want2; path=/","cookie3=want3; path=/"],
+"content-length":["6"],
+"connection":["close"]
+}
+</stdout>
+</verify>
+</testcase>

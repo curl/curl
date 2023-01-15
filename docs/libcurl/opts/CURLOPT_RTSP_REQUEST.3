@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_RTSP_REQUEST 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_RTSP_REQUEST \- specify RTSP request
+CURLOPT_RTSP_REQUEST \- RTSP request
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RTSP_REQUEST, long request);
+.fi
 .SH DESCRIPTION
 Tell libcurl what kind of RTSP request to make. Pass one of the following RTSP
 enum values as a long in the \fIrequest\fP argument. Unless noted otherwise,
@@ -57,10 +61,11 @@ extract and use the session ID in the response to this request. The session ID
 is not needed for this method.
 .IP CURL_RTSPREQ_PLAY
 Send a Play command to the server. Use the \fICURLOPT_RANGE(3)\fP option to
-modify the playback time (e.g. 'npt=10-15').
+modify the playback time (e.g. \fInpt=10-15\fP).
 .IP CURL_RTSPREQ_PAUSE
 Send a Pause command to the server. Use the \fICURLOPT_RANGE(3)\fP option with
-a single value to indicate when the stream should be halted. (e.g. npt='25')
+a single value to indicate when the stream should be
+halted. (e.g. \fInpt=25\fP)
 .IP CURL_RTSPREQ_TEARDOWN
 This command terminates an RTSP session. Simply closing a connection does not
 terminate the RTSP session since it is valid to control an RTSP session over

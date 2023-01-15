@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2009 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 set(TARGET_LABEL_PREFIX "Test server ")
@@ -34,6 +36,7 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
     ${CURL_SOURCE_DIR}/lib      # To be able to reach "curl_setup_once.h"
     ${CURL_BINARY_DIR}/lib      # To be able to reach "curl_config.h"
     ${CURL_BINARY_DIR}/include  # To be able to reach "curl/curl.h"
+    ${CURL_SOURCE_DIR}/src      # To be able to reach "tool_xattr.h"
     )
   if(USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})

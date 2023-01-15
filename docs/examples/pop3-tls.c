@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,10 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example using TLS
+ * POP3 using TLS
  * </DESC>
  */
 
@@ -49,14 +51,14 @@ int main(void)
     /* This will retrieve message 1 from the user's mailbox */
     curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com/1");
 
-    /* In this example, we'll start with a plain text connection, and upgrade
+    /* In this example, we will start with a plain text connection, and upgrade
      * to Transport Layer Security (TLS) using the STLS command. Be careful of
      * using CURLUSESSL_TRY here, because if TLS upgrade fails, the transfer
      * will continue anyway - see the security discussion in the libcurl
      * tutorial for more details. */
     curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 
-    /* If your server doesn't have a valid certificate, then you can disable
+    /* If your server does not have a valid certificate, then you can disable
      * part of the Transport Layer Security protection by setting the
      * CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST options to 0 (false).
      *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);

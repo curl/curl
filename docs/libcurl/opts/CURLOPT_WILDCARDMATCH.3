@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,20 +18,24 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_WILDCARDMATCH 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_WILDCARDMATCH \- enable directory wildcard transfers
+CURLOPT_WILDCARDMATCH \- directory wildcard transfers
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_WILDCARDMATCH, long onoff);
+.fi
 .SH DESCRIPTION
 Set \fIonoff\fP to 1 if you want to transfer multiple files according to a
 file name pattern. The pattern can be specified as part of the
-\fICURLOPT_URL(3)\fP option, using an fnmatch-like pattern (Shell Pattern
-Matching) in the last part of URL (file name).
+\fICURLOPT_URL(3)\fP option, using an \fBfnmatch\fP-like pattern (Shell
+Pattern Matching) in the last part of URL (file name).
 
 By default, libcurl uses its internal wildcard matching implementation. You
 can provide your own matching function by the
@@ -40,14 +44,18 @@ can provide your own matching function by the
 A brief introduction of its syntax follows:
 .RS
 .IP "* - ASTERISK"
-\&ftp://example.com/some/path/\fB*.txt\fP (for all txt's from the root
-directory). Only two asterisks are allowed within the same pattern string.
+.nf
+  ftp://example.com/some/path/*.txt
+.fi
+for all txt's from the root directory. Only two asterisks are allowed within
+the same pattern string.
 .RE
 .RS
 .IP "? - QUESTION MARK"
 Question mark matches any (exactly one) character.
-
-\&ftp://example.com/some/path/\fBphoto?.jpeg\fP
+.nf
+  ftp://example.com/some/path/photo?.jpg
+.fi
 .RE
 .RS
 .IP "[ - BRACKET EXPRESSION"
@@ -61,24 +69,37 @@ right bracket and matches exactly one character. Some examples follow:
 
 \fB[^abc]\fP or \fB[!abc]\fP - negation
 
-\fB[[:\fP\fIname\fP\fB:]]\fP class expression. Supported classes are
+\fB[[:name:]]\fP class expression. Supported classes are
 \fBalnum\fP,\fBlower\fP, \fBspace\fP, \fBalpha\fP, \fBdigit\fP, \fBprint\fP,
 \fBupper\fP, \fBblank\fP, \fBgraph\fP, \fBxdigit\fP.
 
 \fB[][-!^]\fP - special case \- matches only '\-', ']', '[', '!' or '^'. These
 characters have no special purpose.
 
-\fB[\\[\\]\\\\]\fP - escape syntax. Matches '[', ']' or '\\'.
+\fB[\\[\\]\\\\]\fP - escape syntax. Matches '[', ']' or '\e'.
 
 Using the rules above, a file name pattern can be constructed:
-
-\&ftp://example.com/some/path/\fB[a-z[:upper:]\\\\].jpeg\fP
-.RE
-.PP
+.nf
+  ftp://example.com/some/path/[a-z[:upper:]\\\\].jpg
+.fi
 .SH PROTOCOLS
 This feature is only supported for FTP download.
 .SH EXAMPLE
-See https://curl.se/libcurl/c/ftp-wildcard.html
+.nf
+/* initialization of easy handle */
+handle = curl_easy_init();
+
+/* turn on wildcard matching */
+curl_easy_setopt(handle, CURLOPT_WILDCARDMATCH, 1L);
+
+/* callback is called before download of concrete file started */
+curl_easy_setopt(handle, CURLOPT_CHUNK_BGN_FUNCTION, file_is_coming);
+
+/* callback is called after data from the file have been transferred */
+curl_easy_setopt(handle, CURLOPT_CHUNK_END_FUNCTION, file_is_downloaded);
+
+/* See more on https://curl.se/libcurl/c/ftp-wildcard.html */
+.fi
 .SH AVAILABILITY
 Added in 7.21.0
 .SH RETURN VALUE

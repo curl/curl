@@ -1,7 +1,13 @@
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: proxy1.0
 Arg: <host[:port]>
 Help: Use HTTP/1.0 proxy on given port
 Category: proxy
+Example: --proxy1.0 -x http://proxy $URL
+Added: 7.19.4
+See-also: proxy socks5 preproxy
+Multi: mutex
 ---
 Use the specified HTTP 1.0 proxy. If the port number is not specified, it is
 assumed at port 1080.

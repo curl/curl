@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_TCP_FASTOPEN 3 "16 Feb 2016" "libcurl 7.49.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_TCP_FASTOPEN \- enable TCP Fast Open
+CURLOPT_TCP_FASTOPEN \- TCP Fast Open
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_FASTOPEN, long enable);
+.fi
 .SH DESCRIPTION
 Pass a long as parameter set to 1L to enable or 0 to disable.
 
@@ -47,8 +51,10 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.49.0. This option is currently only supported on Linux and  OS X
-El Capitan.
+Added in 7.49.0. This option is currently only supported on Linux and macOS
+10.11 or later.
 .SH RETURN VALUE
 Returns CURLE_OK if fast open is supported by the operating system, otherwise
 returns CURLE_NOT_BUILT_IN.
+.SH SEE ALSO
+.BR CURLOPT_SSL_FALSESTART "(3), "

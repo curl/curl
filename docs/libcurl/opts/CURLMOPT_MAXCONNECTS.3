@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLMOPT_MAXCONNECTS 3 "17 Jun 2014" "libcurl 7.37.0" "curl_multi_setopt options"
 .SH NAME
-CURLMOPT_MAXCONNECTS \- set size of connection cache
+CURLMOPT_MAXCONNECTS \- size of connection cache
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAXCONNECTS, long max);
+.fi
 .SH DESCRIPTION
 Pass a long indicating the \fBmax\fP. The set number will be used as the
 maximum amount of simultaneously open connections that libcurl may keep in its

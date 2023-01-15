@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2015 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -38,7 +40,7 @@ using the share interface but you must provide your own locking and set
 .SH TLS
 If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
 then of course using the underlying SSL library multi-threaded and those libs
-might have their own requirements on this issue.  You may need to provide one
+might have their own requirements on this issue. You may need to provide one
 or two functions to allow it to function properly:
 .IP OpenSSL
 OpenSSL 1.1.0+ "can be safely used in multi-threaded applications provided that
@@ -84,15 +86,19 @@ threaded situation as there will be race where libcurl risks restoring the
 former signal handler while another thread should still ignore it.
 .IP "Name resolving"
 \fBgethostby* functions and other system calls.\fP These functions, provided
-by your operating system, must be thread safe. It is very important that
-libcurl can find and use thread safe versions of these and other system calls,
-as otherwise it can't function fully thread safe. Some operating systems are
+by your operating system, must be thread safe. It is important that libcurl
+can find and use thread safe versions of these and other system calls, as
+otherwise it cannot function fully thread safe. Some operating systems are
 known to have faulty thread implementations. We have previously received
 problem reports on *BSD (at least in the past, they may be working fine these
-days).  Some operating systems that are known to have solid and working thread
+days). Some operating systems that are known to have solid and working thread
 support are Linux, Solaris and Windows.
 .IP "curl_global_* functions"
-These functions are not thread safe. If you are using libcurl with multiple
+These functions are thread-safe since libcurl 7.84.0 if
+\fIcurl_version_info(3)\fP has the \fBCURL_VERSION_THREADSAFE\fP feature bit
+set (most platforms).
+
+If these functions are not thread-safe and you are using libcurl with multiple
 threads it is especially important that before use you call
 \fIcurl_global_init(3)\fP or \fIcurl_global_init_mem(3)\fP to explicitly
 initialize the library and its dependents, rather than rely on the "lazy"
@@ -105,3 +111,5 @@ replacements, must be thread safe. You can use \fIcurl_global_init_mem(3)\fP
 to set your own replacement memory functions.
 .IP "Non-safe functions"
 \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP is not thread-safe.
+
+\fIcurl_version_info(3)\fP is not thread-safe before libcurl initialization.

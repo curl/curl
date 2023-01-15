@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,20 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLINFO_SIZE_UPLOAD 3 "28 Aug 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
 .SH NAME
 CURLINFO_SIZE_UPLOAD \- get the number of uploaded bytes
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SIZE_UPLOAD, double *uploadp);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SIZE_UPLOAD,
+                           double *uploadp);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a double to receive the total amount of bytes that were
 uploaded.
@@ -54,7 +59,7 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.4.1
+Added in 7.4.1. Deprecated since 7.55.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

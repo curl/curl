@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,22 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HSTS 3 "5 Feb 2019" "libcurl 7.74.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_HSTS \- set HSTS cache file name
+CURLOPT_HSTS \- HSTS cache file name
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTS, char *filename);
 .fi
-.SH EXPERIMENTAL
-Warning: this feature is early code and is marked as experimental. It can only
-be enabled by explicitly telling configure with \fB--enable-hsts\fP. You are
-advised to not ship this in production before the experimental label is
-removed.
 .SH DESCRIPTION
 Make the \fIfilename\fP point to a file name to load an existing HSTS cache
 from, and to store the cache in when the easy handle is closed. Setting a file
@@ -53,8 +50,8 @@ physical line. Each line in the file has the following format:
 [host] [stamp]
 
 [host] is the domain name for the entry and the name is dot-prefixed if it is
-a includeSubDomain entry (if the entry is valid for all subdmains to the name
-as well or only for the exact name).
+an entry valid for all subdomains to the name as well or only for the exact
+name.
 
 [stamp] is the time (in UTC) when the entry expires and it uses the format
 \&"YYYYMMDD HH:MM:SS".

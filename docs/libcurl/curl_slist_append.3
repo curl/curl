@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_slist_append 3 "19 Jun 2003" "libcurl 7.10.4" "libcurl Manual"
 .SH NAME
 curl_slist_append - add a string to an slist
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "struct curl_slist *curl_slist_append(struct curl_slist *" list,
-.BI "const char * "string ");"
-.ad
+.nf
+#include <curl/curl.h>
+
+struct curl_slist *curl_slist_append(struct curl_slist *list,
+                                     const char *string);
+.fi
 .SH DESCRIPTION
 \fIcurl_slist_append(3)\fP appends a string to a linked list of strings. The
 existing \fBlist\fP should be passed as the first argument and the new list is
@@ -37,11 +40,6 @@ returns. \fIcurl_slist_append(3)\fP copies the string.
 
 The list should be freed again (after usage) with
 \fIcurl_slist_free_all(3)\fP.
-.SH RETURN VALUE
-A null pointer is returned if anything went wrong, otherwise the new list
-pointer is returned. To avoid overwriting an existing non-empty list on
-failure, the new list should be returned to a temporary variable which can
-be tested for NULL before updating the original list pointer.
 .SH EXAMPLE
 .nf
 CURL *handle;
@@ -68,5 +66,12 @@ curl_easy_perform(handle);
 
 curl_slist_free_all(slist); /* free the list again */
 .fi
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+A null pointer is returned if anything went wrong, otherwise the new list
+pointer is returned. To avoid overwriting an existing non-empty list on
+failure, the new list should be returned to a temporary variable which can
+be tested for NULL before updating the original list pointer.
 .SH "SEE ALSO"
 .BR curl_slist_free_all "(3), "

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .TH curl_multi_socket_action 3 "9 Jul 2006" "libcurl 7.16.0" "libcurl Manual"
 .SH NAME
@@ -26,7 +28,7 @@ curl_multi_socket_action \- reads/writes available data given an action
 .nf
 #include <curl/curl.h>
 
-CURLMcode curl_multi_socket_action(CURLM * multi_handle,
+CURLMcode curl_multi_socket_action(CURLM *multi_handle,
                                    curl_socket_t sockfd,
                                    int ev_bitmask,
                                    int *running_handles);
@@ -65,6 +67,11 @@ timeout action: call the \fIcurl_multi_socket_action(3)\fP function with the
 \fIcurl_multi_timeout(3)\fP function to poll the value at any given time, but
 for an event-based system using the callback is far better than relying on
 polling the timeout value.
+
+When this function returns error, the state of all transfers are uncertain and
+they cannot be continued. \fIcurl_multi_socket_action(3)\fP should not be
+called again on the same multi handle after an error has been returned, unless
+first removing all the handles and adding new ones.
 .SH "TYPICAL USAGE"
 1. Create a multi handle
 
@@ -88,8 +95,19 @@ callback has been told.
 8, When activity is detected, call curl_multi_socket_action() for the
 socket(s) that got action. If no activity is detected and the timeout expires,
 call \fIcurl_multi_socket_action(3)\fP with \fICURL_SOCKET_TIMEOUT\fP.
+.SH EXAMPLE
+.nf
+/* the event-library gets told when there activity on the socket 'fd',
+   which we translate to a call to curl_multi_socket_action() */
+int running;
+rc = curl_multi_socket_action(multi_handle, fd, EVENT,
+                              &running);
+.fi
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4, and is deemed stable since 7.16.0.
+.SH RETURN VALUE
+CURLMcode type, general libcurl multi interface error code. See
+\fIlibcurl-errors(3)\fP
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
 .BR curl_multi_fdset "(3), " curl_multi_info_read "(3), "

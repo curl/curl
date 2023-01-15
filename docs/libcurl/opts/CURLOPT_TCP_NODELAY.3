@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,24 +18,28 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_TCP_NODELAY 3 "30 Jun 2016" "libcurl 7.50.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_TCP_NODELAY \- set the TCP_NODELAY option
+CURLOPT_TCP_NODELAY \- the TCP_NODELAY option
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_NODELAY, long nodelay);
+.fi
 .SH DESCRIPTION
-Pass a long specifying whether the TCP_NODELAY option is to be set or cleared
-(1L = set, 0 = clear). The option is set by default. This will have no effect
-after the connection has been established.
+Pass a long specifying whether the \fITCP_NODELAY\fP option is to be set or
+cleared (1L = set, 0 = clear). The option is set by default. This will have no
+effect after the connection has been established.
 
 Setting this option to 1L will disable TCP's Nagle algorithm on this
 connection. The purpose of this algorithm is to try to minimize the number of
 small packets on the network (where "small packets" means TCP segments less
-than the Maximum Segment Size (MSS) for the network).
+than the Maximum Segment Size for the network).
 
 Maximizing the amount of data sent per TCP segment is good because it
 amortizes the overhead of the send. However, in some cases small segments may

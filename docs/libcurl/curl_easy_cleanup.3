@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH curl_easy_cleanup 3 "22 Aug 2007" "libcurl 7.17.0" "libcurl Manual"
 .SH NAME
 curl_easy_cleanup - End a libcurl easy handle
 .SH SYNOPSIS
-.B #include <curl/curl.h>
+.nf
+#include <curl/curl.h>
 
-.BI "void curl_easy_cleanup(CURL *" handle ");"
+void curl_easy_cleanup(CURL *handle);
+.fi
 .SH DESCRIPTION
 This function must be the last function to call for an easy session. It is the
 opposite of the \fIcurl_easy_init(3)\fP function and must be called with the
@@ -34,7 +38,7 @@ same \fIhandle\fP as input that a \fIcurl_easy_init(3)\fP call returned.
 
 This might close all connections this handle has used and possibly has kept
 open until now - unless it was attached to a multi handle while doing the
-transfers. Don't call this function if you intend to transfer more files,
+transfers. Do not call this function if you intend to transfer more files,
 re-using handles is a key to good performance with libcurl.
 
 Occasionally you may get your progress callback or header callback called from
@@ -47,14 +51,12 @@ Any use of the \fBhandle\fP after this function has been called and have
 returned, is illegal. \fIcurl_easy_cleanup(3)\fP kills the handle and all
 memory associated with it!
 
+To close an easy handle that has been used with the multi interface, make sure
+to call \fIcurl_multi_remove_handle(3)\fP first to remove it from the multi
+handle before it is closed.
+
 Passing in a NULL pointer in \fIhandle\fP will make this function return
 immediately with no action.
-.SH "OLD TIMES"
-For libcurl versions before 7.17,: after you've called this function, you can
-safely remove all the strings you've previously told libcurl to use, as it
-won't use them anymore now.
-.SH RETURN VALUE
-None
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -65,6 +67,10 @@ if(curl) {
   curl_easy_cleanup(curl);
 }
 .fi
+.SH AVAILABILITY
+Added in 7.1
+.SH RETURN VALUE
+None
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_duphandle "(3), "
 .BR curl_easy_reset "(3), "

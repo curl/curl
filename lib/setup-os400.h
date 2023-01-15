@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -47,11 +49,11 @@ extern int Curl_getaddrinfo_a(const char *nodename,
                               struct addrinfo **res);
 #define getaddrinfo             Curl_getaddrinfo_a
 
-
+/* Note socklen_t must be used as this is declared before curl_socklen_t */
 extern int Curl_getnameinfo_a(const struct sockaddr *sa,
-                              curl_socklen_t salen,
-                              char *nodename, curl_socklen_t nodenamelen,
-                              char *servname, curl_socklen_t servnamelen,
+                              socklen_t salen,
+                              char *nodename, socklen_t nodenamelen,
+                              char *servname, socklen_t servnamelen,
                               int flags);
 #define getnameinfo             Curl_getnameinfo_a
 

@@ -1,7 +1,5 @@
 ! File GNV$LIBCURL_SYMBOLS.OPT
 !
-! $Id$
-!
 ! This file must be manually maintained to allow upward compatibility
 ! The SYMBOL_VECTORs are set up so that applications can be compiled
 ! with either case sensitive symbol names or the default of uppercase.
@@ -41,7 +39,7 @@
 ! maintaining multiple versions as long as the routine can be called with
 ! the old number of parameters.
 !
-! Copyright 2009 - 2020, John Malmberg
+! Copyright (C) John Malmberg
 !
 ! Permission to use, copy, modify, and/or distribute this software for any
 ! purpose with or without fee is hereby granted, provided that the above
@@ -54,6 +52,8 @@
 ! WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 ! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+!
+! SPDX-License-Identifier: ISC
 !============================================================================
 GSMATCH=LEQUAL,1,719050
 CASE_SENSITIVE=YES

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_COOKIEFILE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_COOKIEFILE \- file name to read cookies from
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEFILE, char *filename);
+.fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. It should point to
 the file name of your file holding cookie data to read. The cookie data can be
@@ -36,27 +40,31 @@ headers (Set-Cookie style) dumped to a file.
 It also enables the cookie engine, making libcurl parse and send cookies on
 subsequent requests with this handle.
 
-Given an empty or non-existing file or by passing the empty string ("") to
-this option, you can enable the cookie engine without reading any initial
-cookies. If you tell libcurl the file name is "-" (just a single minus sign),
-libcurl will instead read from stdin.
+By passing the empty string ("") to this option, you enable the cookie engine
+without reading any initial cookies. If you tell libcurl the file name is "-"
+(just a single minus sign), libcurl will instead read from stdin.
 
 This option only \fBreads\fP cookies. To make libcurl write cookies to file,
 see \fICURLOPT_COOKIEJAR(3)\fP.
 
-Exercise caution if you are using this option and multiple transfers may occur.
-If you use the Set-Cookie format and don't specify a domain then the cookie is
-sent for any domain (even after redirects are followed) and cannot be modified
-by a server-set cookie. If a server sets a cookie of the same name then both
-will be sent on a future transfer to that server, likely not what you intended.
-To address these issues set a domain in Set-Cookie (doing that will include
-sub-domains) or use the Netscape format.
+If you use the Set-Cookie file format and do not specify a domain then the
+cookie is not sent since the domain will never match. To address this, set a
+domain in Set-Cookie line (doing that will include sub-domains) or preferably:
+use the Netscape format.
 
 If you use this option multiple times, you just add more files to read.
 Subsequent files will add more cookies.
 
 The application does not have to keep the string around after setting this
 option.
+
+Setting this option to NULL will (since 7.77.0) explicitly disable the cookie
+engine and clear the list of files to read cookies from.
+.SH SECURITY
+This document previously mentioned how specifying a non-existing file can also
+enable the cookie engine. While true, we strongly advise against using that
+method as it is too hard to be sure what files will stay that way in the long
+run.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -76,9 +84,8 @@ if(curl) {
 }
 .fi
 .SH "Cookie file format"
-The cookie file format and general cookie concepts in curl are described in
-the HTTP-COOKIES.md file, also hosted online here:
-https://curl.se/docs/http-cookies.html
+The cookie file format and general cookie concepts in curl are described
+online here: https://curl.se/docs/http-cookies.html
 .SH AVAILABILITY
 As long as HTTP is supported
 .SH RETURN VALUE

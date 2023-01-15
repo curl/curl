@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_RANGE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_RANGE \- set byte range to request
+CURLOPT_RANGE \- byte range to request
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RANGE, char *range);
+.fi
 .SH DESCRIPTION
 Pass a char * as parameter, which should contain the specified range you want
 to retrieve. It should be in the format "X-Y", where either X or Y may be left
@@ -41,15 +45,10 @@ for a request, you may end up getting the full response sent back.
 
 For RTSP, the formatting of a range should follow RFC2326 Section 12.29. For
 RTSP, byte ranges are \fBnot\fP permitted. Instead, ranges should be given in
-npt, utc, or smpte formats.
+\fBnpt\fP, \fButc\fP, or \fBsmpte\fP formats.
 
 For HTTP PUT uploads this option should not be used, since it may conflict with
-other options. If you need to upload arbitrary parts of a file (like for
-Amazon's web services) support is limited. We suggest set resume position using
-\fICURLOPT_RESUME_FROM(3)\fP, set end (resume+size) position using
-\fICURLOPT_INFILESIZE(3)\fP and seek to the resume position before initiating
-the transfer for each part. For more information refer to
-https://curl.se/mail/lib-2019-05/0012.html
+other options.
 
 Pass a NULL to this option to disable the use of ranges.
 

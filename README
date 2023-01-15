@@ -13,7 +13,7 @@ README
 
   libcurl is the library curl is using to do its job. It is readily
   available to be used by your software. Read the libcurl.3 man page to
-  learn how!
+  learn how.
 
   You find answers to the most frequent questions we get in the FAQ document.
 
@@ -36,15 +36,15 @@ WEBSITE
 
 GIT
 
-  To download the very latest source off the GIT server do this:
+  To download the latest source code off the GIT server, do this:
 
     git clone https://github.com/curl/curl.git
 
-  (you'll get a directory named curl created, filled with the source code)
+  (you will get a directory named curl created, filled with the source code)
 
 SECURITY PROBLEMS
 
-  Report suspected security problems via our HackerOne page and not in public!
+  Report suspected security problems via our HackerOne page and not in public.
 
     https://hackerone.com/curl
 

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,11 +18,13 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SUPPRESS_CONNECT_HEADERS 3 "13 February 2017" "libcurl 7.54.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SUPPRESS_CONNECT_HEADERS \- Suppress proxy CONNECT response headers from user callbacks
+CURLOPT_SUPPRESS_CONNECT_HEADERS \- suppress proxy CONNECT response headers from user callbacks
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>

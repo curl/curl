@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -48,7 +50,7 @@ should be returned if an error was encountered.
 \fBCURLOPT_CONV_FROM_UTF8_FUNCTION\fP converts to host encoding from UTF8
 encoding. It is required only for SSL processing.
 
-If you set a callback pointer to NULL, or don't set it at all, the built-in
+If you set a callback pointer to NULL, or do not set it at all, the built-in
 libcurl iconv functions will be used.  If HAVE_ICONV was not defined when
 libcurl was built, and no callback has been established, conversion will
 return the CURLE_CONV_REQD error code.
@@ -92,7 +94,10 @@ curl_easy_setopt(curl, CURLOPT_CONV_FROM_UTF8_FUNCTION,
                  my_conv_from_utf8_to_ebcdic);
 .fi
 .SH AVAILABILITY
-Available only if \fBCURL_DOES_CONVERSIONS\fP was defined when libcurl was built.
+Not available and deprecated since 7.82.0.
+
+Available only if \fBCURL_DOES_CONVERSIONS\fP was defined when libcurl was
+built.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

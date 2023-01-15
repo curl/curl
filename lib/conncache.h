@@ -7,8 +7,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2012 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /*
@@ -29,6 +31,7 @@
  * be shared.
  */
 
+#include <curl/curl.h>
 #include "timeval.h"
 
 struct connectdata;
@@ -87,8 +90,7 @@ void Curl_conncache_destroy(struct conncache *connc);
 /* return the correct bundle, to a host or a proxy */
 struct connectbundle *Curl_conncache_find_bundle(struct Curl_easy *data,
                                                  struct connectdata *conn,
-                                                 struct conncache *connc,
-                                                 const char **hostp);
+                                                 struct conncache *connc);
 /* returns number of connections currently held in the connection cache */
 size_t Curl_conncache_size(struct Curl_easy *data);
 

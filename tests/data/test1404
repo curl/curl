@@ -23,6 +23,9 @@ Connection: close
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -153,21 +156,21 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated
-     as source easily. You may select to either not use them or implement
+     as source easily. You may choose to either not use them or implement
      them yourself.
 
-  CURLOPT_WRITEDATA set to a objectpointer
-  CURLOPT_WRITEFUNCTION set to a functionpointer
-  CURLOPT_READDATA set to a objectpointer
-  CURLOPT_READFUNCTION set to a functionpointer
-  CURLOPT_SEEKDATA set to a objectpointer
-  CURLOPT_SEEKFUNCTION set to a functionpointer
-  CURLOPT_ERRORBUFFER set to a objectpointer
-  CURLOPT_STDERR set to a objectpointer
-  CURLOPT_DEBUGFUNCTION set to a functionpointer
-  CURLOPT_DEBUGDATA set to a objectpointer
-  CURLOPT_HEADERFUNCTION set to a functionpointer
-  CURLOPT_HEADERDATA set to a objectpointer
+  CURLOPT_WRITEDATA was set to an object pointer
+  CURLOPT_WRITEFUNCTION was set to a function pointer
+  CURLOPT_READDATA was set to an object pointer
+  CURLOPT_READFUNCTION was set to a function pointer
+  CURLOPT_SEEKDATA was set to an object pointer
+  CURLOPT_SEEKFUNCTION was set to a function pointer
+  CURLOPT_ERRORBUFFER was set to an object pointer
+  CURLOPT_STDERR was set to an object pointer
+  CURLOPT_DEBUGFUNCTION was set to a function pointer
+  CURLOPT_DEBUGDATA was set to an object pointer
+  CURLOPT_HEADERFUNCTION was set to a function pointer
+  CURLOPT_HEADERDATA was set to an object pointer
 
   */
 

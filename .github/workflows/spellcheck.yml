@@ -1,0 +1,51 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: spell
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - '**.md'
+    - '**.3'
+    - '**.1'
+    - '.github/**'
+  pull_request:
+    branches:
+    - master
+    paths:
+    - '**.md'
+    - '**.3'
+    - '**.1'
+    - '.github/**'
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: install pandoc
+      run: sudo apt-get install pandoc
+
+    - name: strip "uncheckable" sections from .3 pages
+      run: find docs -name "*.3" -size +40c | sed 's/\.3//' | xargs -t -n1 -I OO  ./.github/scripts/cleanspell.pl OO.3 OO.33
+
+    - name: convert .3 man pages to markdown
+      run: find docs -name "*.33" -size +40c | sed 's/\.33//' | xargs -t -n1 -I OO pandoc -f man -t markdown OO.33 -o OO.md
+
+    - name: convert .1 man pages to markdown
+      run: find docs -name "*.1" -size +40c | sed 's/\.1//' | xargs -t -n1 -I OO pandoc OO.1 -o OO.md
+
+    - name: setup the custom wordlist
+      run: grep -v '^#' .github/scripts/spellcheck.words >  wordlist.txt
+
+    - name: setup the spellcheck config
+      run: cp .github/scripts/spellcheck.yaml .
+
+    - name: Check Spelling
+      uses: UnicornGlobal/spellcheck-github-actions@master

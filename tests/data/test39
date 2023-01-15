@@ -19,6 +19,9 @@ blablabla
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -47,7 +50,7 @@ POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 1184
+Content-Length: 1180
 Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
 
 ------------------------------24e78000bd32
@@ -85,7 +88,7 @@ bar
 foo
 
 ------------------------------24e78000bd32
-Content-Disposition: form-data; name="file3"; filename="f\\\\ak\\\\er,\\an\\d;.t\"xt"
+Content-Disposition: form-data; name="file3"; filename="f\\ak\\er,\an\d;.t%22xt"
 Content-Type: mo/foo
 
 foo bar
@@ -94,7 +97,7 @@ bar
 foo
 
 ------------------------------24e78000bd32
-Content-Disposition: form-data; name="file4"; filename="A\\AA\"\"\\\"ZZZ"
+Content-Disposition: form-data; name="file4"; filename="A\AA%22%22\%22ZZZ"
 Content-Type: text/plain
 
 foo bar

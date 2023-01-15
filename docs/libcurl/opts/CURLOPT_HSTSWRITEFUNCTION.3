@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,23 +18,34 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_HSTSWRITEFUNCTION 3 "14 Sep 2020" "libcurl 7.74.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_HSTSWRITEFUNCTION \- write callback for HSTS hosts
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
+
+struct curl_hstsentry {
+  char *name;
+  size_t namelen;
+  unsigned int includeSubDomains:1;
+  char expire[18]; /* YYYYMMDD HH:MM:SS [null-terminated] */
+};
+
+struct curl_index {
+  size_t index; /* the provided entry's "index" or count */
+  size_t total; /* total number of entries to save */
+};
 
 CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *sts,
                       struct curl_index *count, void *userp);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
-.SH EXPERIMENTAL
-Warning: this feature is early code and is marked as experimental. It can only
-be enabled by explicitly telling configure with \fB--enable-hsts\fP. You are
-advised to not ship this in production before the experimental label is
-removed.
+.fi
 .SH DESCRIPTION
 Pass a pointer to your callback function, as the prototype shows above.
 
@@ -46,14 +57,17 @@ Set the \fIuserp\fP argument with the \fICURLOPT_HSTSWRITEDATA(3)\fP option or
 it will be NULL.
 
 When the callback is invoked, the \fIsts\fP pointer points to a populated
-struct: Read the host name to 'name' (it is 'namelen' bytes long and null
-terminated. The 'includeSubDomains' field is non-zero if the entry matches
-subdomains. The 'expire' string is a date stamp null-terminated string using
-the syntax YYYYMMDD HH:MM:SS.
+struct: Read the host name to 'name' (it is \fInamelen\fP bytes long and null
+terminated. The \fIincludeSubDomains\fP field is non-zero if the entry matches
+subdomains. The \fIexpire\fP string is a date stamp null-terminated string
+using the syntax YYYYMMDD HH:MM:SS.
 
 The callback should return \fICURLSTS_OK\fP if it succeeded and is prepared to
 be called again (for another host) or \fICURLSTS_DONE\fP if there's nothing
 more to do. It can also return \fICURLSTS_FAIL\fP to signal error.
+
+This option does not enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
+do that.
 .SH DEFAULT
 NULL - no callback.
 .SH PROTOCOLS

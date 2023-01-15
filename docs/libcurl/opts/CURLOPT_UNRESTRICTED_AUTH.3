@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -35,9 +37,19 @@ authentication (user+password) credentials when following locations, even when
 hostname changed. This option is meaningful only when setting
 \fICURLOPT_FOLLOWLOCATION(3)\fP.
 
-By default, libcurl will only send given credentials to the initial host name
-as given in the original URL, to avoid leaking username + password to other
-sites.
+Further, when this option is not used or set to \fB0L\fP, libcurl will not
+send custom set nor internally generated Authentication: headers on requests
+done to other hosts than the one used for the initial URL.
+
+By default, libcurl will only send credentials and Authentication headers to
+the initial host name as given in the original URL, to avoid leaking username
++ password to other sites.
+
+This option should be used with caution: when curl follows redirects it
+blindly fetches the next URL as instructed by the server. Setting
+\fICURLOPT_UNRESTRICTED_AUTH(3)\fP to 1L will therefore also make curl trust
+the server and send possibly sensitive credentials to a host the server points
+out.
 .SH DEFAULT
 0
 .SH PROTOCOLS

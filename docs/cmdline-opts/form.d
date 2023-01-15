@@ -1,3 +1,5 @@
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: form
 Short: F
 Arg: <name=content>
@@ -5,12 +7,16 @@ Help: Specify multipart MIME data
 Protocols: HTTP SMTP IMAP
 Mutexed: data head upload-file
 Category: http upload
+Example: --form "name=curl" --form "file=@loadthis" $URL
+Added: 5.0
+See-also: data form-string form-escape
+Multi: append
 ---
 For HTTP protocol family, this lets curl emulate a filled-in form in which a
 user has pressed the submit button. This causes curl to POST data using the
 Content-Type multipart/form-data according to RFC 2388.
 
-For SMTP and IMAP protocols, this is the mean to compose a multipart mail
+For SMTP and IMAP protocols, this is the means to compose a multipart mail
 message to transmit.
 
 This enables uploading of binary files etc. To force the 'content' part to be
@@ -23,13 +29,13 @@ file.
 Tell curl to read content from stdin instead of a file by using - as
 filename. This goes for both @ and < constructs. When stdin is used, the
 contents is buffered in memory first by curl to determine its size and allow a
-possible resend.  Defining a part's data from a named non-regular file (such
+possible resend. Defining a part's data from a named non-regular file (such
 as a named pipe or similar) is unfortunately not subject to buffering and will
 be effectively read at transmission time; since the full size is unknown
 before the transfer starts, such data is sent as chunks by HTTP and rejected
 by IMAP.
 
-Example: send an image to an HTTP server, where \&'profile' is the name of the
+Example: send an image to an HTTP server, where 'profile' is the name of the
 form-field to which the file portrait.jpg will be the input:
 
  curl -F profile=@portrait.jpg https://example.com/upload.cgi
@@ -59,11 +65,11 @@ filename=, like this:
 
 If filename/path contains ',' or ';', it must be quoted by double-quotes like:
 
- curl -F "file=@\\"localfile\\";filename=\\"nameinpost\\"" example.com
+ curl -F "file=@\\"local,file\\";filename=\\"name;in;post\\"" example.com
 
 or
 
- curl -F 'file=@"localfile";filename="nameinpost"' example.com
+ curl -F 'file=@"local,file";filename="name;in;post"' example.com
 
 Note that if a filename/path is quoted by double-quotes, any double-quote
 or backslash within the filename must be escaped by backslash.
@@ -89,15 +95,11 @@ carriage-returns and trailing spaces are stripped.
 Here is an example of a header file contents:
 
   # This file contain two headers.
-.br
   X-header-1: this is a header
 
   # The following header is folded.
-.br
   X-header-2: this is
-.br
    another header
-
 
 To support sending multipart mail messages, the syntax is extended as follows:
 .br
@@ -108,16 +110,13 @@ followed by a content type specification.
 .br
 - a multipart can be terminated with a '=)' argument.
 
-Example: the following command sends an SMTP mime e-mail consisting in an
+Example: the following command sends an SMTP mime email consisting in an
 inline part in two alternative formats: plain text and HTML. It attaches a
 text file:
 
  curl -F '=(;type=multipart/alternative' \\
-.br
-         -F '=plain text message' \\
-.br
-         -F '= <body>HTML message</body>;type=text/html' \\
-.br
+      -F '=plain text message' \\
+      -F '= <body>HTML message</body>;type=text/html' \\
       -F '=)' -F '=@textfile.txt' ...  smtp://example.com
 
 Data can be encoded for transfer using encoder=. Available encodings are
@@ -131,9 +130,6 @@ Example: send multipart mail with a quoted-printable text message and a
 base64 attached file:
 
  curl -F '=text message;encoder=quoted-printable' \\
-.br
       -F '=@localfile;encoder=base64' ... smtp://example.com
 
 See further examples and details in the MANUAL.
-
-This option can be used multiple times.

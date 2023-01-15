@@ -1,7 +1,5 @@
 $! File: Build_GNV_curl_release_notes.com
 $!
-$! $Id$
-$!
 $! Build the release note file from the four components:
 $!    1. The curl_release_note_start.txt
 $!    2. The hp_ssl_release_info.txt
@@ -11,7 +9,7 @@ $!
 $! Set the name of the release notes from the GNV_PCSI_FILENAME_BASE
 $! logical name.
 $!
-$! Copyright 2009 - 2020, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -25,7 +23,7 @@ $! WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 $! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
-$! 14-Jun-2009  J. Malmberg
+$! SPDX-License-Identifier: ISC
 $!
 $!===========================================================================
 $!

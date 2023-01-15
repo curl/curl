@@ -30,6 +30,7 @@ Alt-Svc: h2=":%HTTP2PORT", ma=315360000; persist=0
 <features>
 alt-svc
 debug
+h2c
 </features>
 <server>
 https

@@ -23,8 +23,10 @@ bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 cccccccccccccccccccccccccccccccc
 
 0
+%if !hyper
 chunky-trailer: header data
 another-header: yes
+%endif
 
 </data>
 <datacheck>
@@ -34,9 +36,14 @@ Transfer-Encoding: chunked
 Connection: mooo
 
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccc
+%if !hyper
 chunky-trailer: header data
 another-header: yes
+%endif
 </datacheck>
+<servercmd>
+writedelay: 10
+</servercmd>
 </reply>
 
 #
@@ -69,8 +76,10 @@ Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked
 Connection: mooo
 
+%if !hyper
 chunky-trailer: header data
 another-header: yes
+%endif
 </file>
 </verify>
 

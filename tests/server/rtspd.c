@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 #include "server_setup.h"
@@ -369,7 +371,7 @@ static int ProcessRequest(struct httprequest *req)
                   memcpy(rtp_scratch + 4 + i, RTP_DATA, RTP_DATA_SIZE);
                 }
 
-                if(req->rtp_buffer == NULL) {
+                if(!req->rtp_buffer) {
                   req->rtp_buffer = rtp_scratch;
                   req->rtp_buffersize = rtp_size + 4;
                 }
@@ -448,10 +450,10 @@ static int ProcessRequest(struct httprequest *req)
 
   /* **** Persistence ****
    *
-   * If the request is a HTTP/1.0 one, we close the connection unconditionally
+   * If the request is an HTTP/1.0 one, we close the connection unconditionally
    * when we're done.
    *
-   * If the request is a HTTP/1.1 one, we MUST check for a "Connection:"
+   * If the request is an HTTP/1.1 one, we MUST check for a "Connection:"
    * header that might say "close". If it does, we close a connection when
    * this request is processed. Otherwise, we keep the connection alive for X
    * seconds.
@@ -599,15 +601,15 @@ static void storerequest(char *reqbuf, size_t totalsize)
   size_t writeleft;
   FILE *dump;
 
-  if(reqbuf == NULL)
+  if(!reqbuf)
     return;
   if(totalsize == 0)
     return;
 
   do {
     dump = fopen(REQUEST_DUMP, "ab");
-  } while((dump == NULL) && ((error = errno) == EINTR));
-  if(dump == NULL) {
+  } while(!dump && ((error = errno) == EINTR));
+  if(!dump) {
     logmsg("Error opening file %s error: %d %s",
            REQUEST_DUMP, error, strerror(error));
     logmsg("Failed to write request input to " REQUEST_DUMP);
@@ -810,8 +812,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
-      msnprintf(msgbuf, sizeof(msgbuf), "RTSP_SERVER WE ROOLZ: %ld\r\n",
-                (long)getpid());
+      msnprintf(msgbuf, sizeof(msgbuf), "RTSP_SERVER WE ROOLZ: %"
+                CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
       msglen = strlen(msgbuf);
       msnprintf(weare, sizeof(weare),
                 "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
@@ -1045,15 +1047,15 @@ int main(int argc, char *argv[])
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
+  int wroteportfile = 0;
   int flag;
   unsigned short port = DEFAULT_PORT;
   const char *pidname = ".rtsp.pid";
-  const char *portfile = NULL;
+  const char *portname = NULL; /* none by default */
   struct httprequest req;
   int rc;
   int error;
   int arg = 1;
-  long pid;
 
   memset(&req, 0, sizeof(req));
 
@@ -1078,7 +1080,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--portfile", argv[arg])) {
       arg++;
       if(argc>arg)
-        portfile = argv[arg++];
+        portname = argv[arg++];
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
@@ -1135,8 +1137,6 @@ int main(int argc, char *argv[])
 #endif
 
   install_signal_handlers(false);
-
-  pid = (long)getpid();
 
 #ifdef ENABLE_IPV6
   if(!use_ipv6)
@@ -1251,9 +1251,9 @@ int main(int argc, char *argv[])
   if(!wrotepidfile)
     goto server_cleanup;
 
-  if(portfile) {
-    wrotepidfile = write_portfile(portfile, port);
-    if(!wrotepidfile)
+  if(portname) {
+    wroteportfile = write_portfile(portname, port);
+    if(!wroteportfile)
       goto server_cleanup;
   }
 
@@ -1367,6 +1367,8 @@ server_cleanup:
 
   if(wrotepidfile)
     unlink(pidname);
+  if(wroteportfile)
+    unlink(portname);
 
   if(serverlogslocked) {
     serverlogslocked = 0;
@@ -1377,7 +1379,7 @@ server_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s rtspd (port: %d pid: %ld) exits with signal (%d)",
-           ipv_inuse, (int)port, pid, exit_signal);
+           ipv_inuse, (int)port, (long)getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we

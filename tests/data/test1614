@@ -1,0 +1,25 @@
+<testcase>
+<info>
+<keywords>
+unittest
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+proxy
+</features>
+ <name>
+noproxy and cidr comparisons
+ </name>
+</client>
+<errorcode>
+0
+</errorcode>
+</testcase>

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,12 +18,15 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PROGRESSFUNCTION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PROGRESSFUNCTION \- callback to progress meter function
+CURLOPT_PROGRESSFUNCTION \- progress meter callback
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 int progress_callback(void *clientp,
@@ -32,16 +35,18 @@ int progress_callback(void *clientp,
                       double ultotal,
                       double ulnow);
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROGRESSFUNCTION, progress_callback);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROGRESSFUNCTION,
+                          progress_callback);
+.fi
 .SH DESCRIPTION
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-We encourage users to use the newer \fICURLOPT_XFERINFOFUNCTION(3)\fP instead,
-if you can.
+This option is deprecated and we encourage users to use the
+newer \fICURLOPT_XFERINFOFUNCTION(3)\fP instead, if you can.
 
 This function gets called by libcurl instead of its internal equivalent with a
-frequent interval. While data is being transferred it will be called very
+frequent interval. While data is being transferred it will be called
 frequently, and during slow periods like when nothing is being transferred it
 can slow down to about one call per second.
 
@@ -73,15 +78,41 @@ function that performs transfers.
 \fICURLOPT_NOPROGRESS(3)\fP must be set to 0 to make this function actually
 get called.
 .SH DEFAULT
-By default, libcurl has an internal progress meter. That's rarely wanted by
+By default, libcurl has an internal progress meter. That is rarely wanted by
 users.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-https://curl.se/libcurl/c/progressfunc.html
+.nf
+ struct progress {
+   char *private;
+   size_t size;
+ };
+
+ static size_t progress_callback(void *clientp,
+                                 double dltotal,
+                                 double dlnow,
+                                 double ultotal,
+                                 double ulnow)
+ {
+   struct progress *memory = (struct progress *)clientp;
+
+   /* use the values */
+
+   return 0; /* all is good */
+ }
+
+ struct progress data;
+
+ /* pass struct to callback  */
+ curl_easy_setopt(curl_handle, CURLOPT_PROGRESSDATA, &data);
+
+ curl_easy_setopt(curl_handle, CURLOPT_PROGRESSFUNCTION, progress_callback);
+.fi
 .SH AVAILABILITY
-Always
+Deprecated since 7.32.0.
 .SH RETURN VALUE
 Returns CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_VERBOSE "(3), " CURLOPT_NOPROGRESS "(3), "
+.BR CURLOPT_XFERINFOFUNCTION "(3)"

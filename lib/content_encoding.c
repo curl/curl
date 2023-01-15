@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -26,7 +28,7 @@
 #include <curl/curl.h>
 #include <stddef.h>
 
-#ifdef HAVE_ZLIB_H
+#ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
 
@@ -80,8 +82,9 @@ typedef enum {
   ZLIB_INIT_GZIP             /* initialized in transparent gzip mode */
 } zlibInitState;
 
-/* Writer parameters. */
-struct zlib_params {
+/* Deflate and gzip writer. */
+struct zlib_writer {
+  struct contenc_writer super;
   zlibInitState zlib_init;   /* zlib init state */
   uInt trailerlen;           /* Remaining trailer byte count. */
   z_stream z;                /* State structure for zlib. */
@@ -133,7 +136,7 @@ exit_zlib(struct Curl_easy *data,
 }
 
 static CURLcode process_trailer(struct Curl_easy *data,
-                                struct zlib_params *zp)
+                                struct zlib_writer *zp)
 {
   z_stream *z = &zp->z;
   CURLcode result = CURLE_OK;
@@ -160,7 +163,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
                                struct contenc_writer *writer,
                                zlibInitState started)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;         /* zlib state structure */
   uInt nread = z->avail_in;
   Bytef *orig_in = z->next_in;
@@ -178,7 +181,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
   /* Dynamically allocate a buffer for decompression because it's uncommonly
      large to hold on the stack */
   decomp = malloc(DSIZ);
-  if(decomp == NULL)
+  if(!decomp)
     return exit_zlib(data, z, &zp->zlib_init, CURLE_OUT_OF_MEMORY);
 
   /* because the buffer size is fixed, iteratively decompress and transfer to
@@ -240,7 +243,8 @@ static CURLcode inflate_stream(struct Curl_easy *data,
         }
         zp->zlib_init = ZLIB_UNINIT;    /* inflateEnd() already called. */
       }
-      /* FALLTHROUGH */
+      result = exit_zlib(data, z, &zp->zlib_init, process_zlib_error(data, z));
+      break;
     default:
       result = exit_zlib(data, z, &zp->zlib_init, process_zlib_error(data, z));
       break;
@@ -262,7 +266,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
 static CURLcode deflate_init_writer(struct Curl_easy *data,
                                     struct contenc_writer *writer)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
 
   if(!writer->downstream)
@@ -282,7 +286,7 @@ static CURLcode deflate_unencode_write(struct Curl_easy *data,
                                        struct contenc_writer *writer,
                                        const char *buf, size_t nbytes)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
 
   /* Set the compressed input when this function is called */
@@ -299,7 +303,7 @@ static CURLcode deflate_unencode_write(struct Curl_easy *data,
 static void deflate_close_writer(struct Curl_easy *data,
                                  struct contenc_writer *writer)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
 
   exit_zlib(data, z, &zp->zlib_init, CURLE_OK);
@@ -311,7 +315,7 @@ static const struct content_encoding deflate_encoding = {
   deflate_init_writer,
   deflate_unencode_write,
   deflate_close_writer,
-  sizeof(struct zlib_params)
+  sizeof(struct zlib_writer)
 };
 
 
@@ -319,7 +323,7 @@ static const struct content_encoding deflate_encoding = {
 static CURLcode gzip_init_writer(struct Curl_easy *data,
                                  struct contenc_writer *writer)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
 
   if(!writer->downstream)
@@ -436,7 +440,7 @@ static CURLcode gzip_unencode_write(struct Curl_easy *data,
                                     struct contenc_writer *writer,
                                     const char *buf, size_t nbytes)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
 
   if(zp->zlib_init == ZLIB_INIT_GZIP) {
@@ -487,7 +491,7 @@ static CURLcode gzip_unencode_write(struct Curl_easy *data,
        */
       z->avail_in = (uInt) nbytes;
       z->next_in = malloc(z->avail_in);
-      if(z->next_in == NULL) {
+      if(!z->next_in) {
         return exit_zlib(data, z, &zp->zlib_init, CURLE_OUT_OF_MEMORY);
       }
       memcpy(z->next_in, buf, z->avail_in);
@@ -509,7 +513,7 @@ static CURLcode gzip_unencode_write(struct Curl_easy *data,
     ssize_t hlen;
     z->avail_in += (uInt) nbytes;
     z->next_in = Curl_saferealloc(z->next_in, z->avail_in);
-    if(z->next_in == NULL) {
+    if(!z->next_in) {
       return exit_zlib(data, z, &zp->zlib_init, CURLE_OUT_OF_MEMORY);
     }
     /* Append the new block of data to the previous one */
@@ -563,7 +567,7 @@ static CURLcode gzip_unencode_write(struct Curl_easy *data,
 static void gzip_close_writer(struct Curl_easy *data,
                               struct contenc_writer *writer)
 {
-  struct zlib_params *zp = (struct zlib_params *) &writer->params;
+  struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
 
   exit_zlib(data, z, &zp->zlib_init, CURLE_OK);
@@ -575,15 +579,16 @@ static const struct content_encoding gzip_encoding = {
   gzip_init_writer,
   gzip_unencode_write,
   gzip_close_writer,
-  sizeof(struct zlib_params)
+  sizeof(struct zlib_writer)
 };
 
 #endif /* HAVE_LIBZ */
 
 
 #ifdef HAVE_BROTLI
-/* Writer parameters. */
-struct brotli_params {
+/* Brotli writer. */
+struct brotli_writer {
+  struct contenc_writer super;
   BrotliDecoderState *br;    /* State structure for brotli. */
 };
 
@@ -628,7 +633,7 @@ static CURLcode brotli_map_error(BrotliDecoderErrorCode be)
 static CURLcode brotli_init_writer(struct Curl_easy *data,
                                    struct contenc_writer *writer)
 {
-  struct brotli_params *bp = (struct brotli_params *) &writer->params;
+  struct brotli_writer *bp = (struct brotli_writer *) writer;
   (void) data;
 
   if(!writer->downstream)
@@ -642,7 +647,7 @@ static CURLcode brotli_unencode_write(struct Curl_easy *data,
                                       struct contenc_writer *writer,
                                       const char *buf, size_t nbytes)
 {
-  struct brotli_params *bp = (struct brotli_params *) &writer->params;
+  struct brotli_writer *bp = (struct brotli_writer *) writer;
   const uint8_t *src = (const uint8_t *) buf;
   char *decomp;
   uint8_t *dst;
@@ -689,7 +694,8 @@ static CURLcode brotli_unencode_write(struct Curl_easy *data,
 static void brotli_close_writer(struct Curl_easy *data,
                                 struct contenc_writer *writer)
 {
-  struct brotli_params *bp = (struct brotli_params *) &writer->params;
+  struct brotli_writer *bp = (struct brotli_writer *) writer;
+
   (void) data;
 
   if(bp->br) {
@@ -704,14 +710,15 @@ static const struct content_encoding brotli_encoding = {
   brotli_init_writer,
   brotli_unencode_write,
   brotli_close_writer,
-  sizeof(struct brotli_params)
+  sizeof(struct brotli_writer)
 };
 #endif
 
 
 #ifdef HAVE_ZSTD
-/* Writer parameters. */
-struct zstd_params {
+/* Zstd writer. */
+struct zstd_writer {
+  struct contenc_writer super;
   ZSTD_DStream *zds;    /* State structure for zstd. */
   void *decomp;
 };
@@ -719,7 +726,8 @@ struct zstd_params {
 static CURLcode zstd_init_writer(struct Curl_easy *data,
                                  struct contenc_writer *writer)
 {
-  struct zstd_params *zp = (struct zstd_params *)&writer->params;
+  struct zstd_writer *zp = (struct zstd_writer *) writer;
+
   (void)data;
 
   if(!writer->downstream)
@@ -735,7 +743,7 @@ static CURLcode zstd_unencode_write(struct Curl_easy *data,
                                     const char *buf, size_t nbytes)
 {
   CURLcode result = CURLE_OK;
-  struct zstd_params *zp = (struct zstd_params *)&writer->params;
+  struct zstd_writer *zp = (struct zstd_writer *) writer;
   ZSTD_inBuffer in;
   ZSTD_outBuffer out;
   size_t errorCode;
@@ -774,7 +782,8 @@ static CURLcode zstd_unencode_write(struct Curl_easy *data,
 static void zstd_close_writer(struct Curl_easy *data,
                               struct contenc_writer *writer)
 {
-  struct zstd_params *zp = (struct zstd_params *)&writer->params;
+  struct zstd_writer *zp = (struct zstd_writer *) writer;
+
   (void)data;
 
   if(zp->decomp) {
@@ -793,7 +802,7 @@ static const struct content_encoding zstd_encoding = {
   zstd_init_writer,
   zstd_unencode_write,
   zstd_close_writer,
-  sizeof(struct zstd_params)
+  sizeof(struct zstd_writer)
 };
 #endif
 
@@ -826,7 +835,7 @@ static const struct content_encoding identity_encoding = {
   identity_init_writer,
   identity_unencode_write,
   identity_close_writer,
-  0
+  sizeof(struct contenc_writer)
 };
 
 
@@ -918,7 +927,7 @@ static const struct content_encoding client_encoding = {
   client_init_writer,
   client_unencode_write,
   client_close_writer,
-  0
+  sizeof(struct contenc_writer)
 };
 
 
@@ -961,21 +970,25 @@ static const struct content_encoding error_encoding = {
   error_init_writer,
   error_unencode_write,
   error_close_writer,
-  0
+  sizeof(struct contenc_writer)
 };
 
 /* Create an unencoding writer stage using the given handler. */
 static struct contenc_writer *
 new_unencoding_writer(struct Curl_easy *data,
                       const struct content_encoding *handler,
-                      struct contenc_writer *downstream)
+                      struct contenc_writer *downstream,
+                      int order)
 {
-  size_t sz = offsetof(struct contenc_writer, params) + handler->paramsize;
-  struct contenc_writer *writer = (struct contenc_writer *)calloc(1, sz);
+  struct contenc_writer *writer;
+
+  DEBUGASSERT(handler->writersize >= sizeof(struct contenc_writer));
+  writer = (struct contenc_writer *) calloc(1, handler->writersize);
 
   if(writer) {
     writer->handler = handler;
     writer->downstream = downstream;
+    writer->order = order;
     if(handler->init_writer(data, writer)) {
       free(writer);
       writer = NULL;
@@ -985,7 +998,8 @@ new_unencoding_writer(struct Curl_easy *data,
   return writer;
 }
 
-/* Write data using an unencoding writer stack. */
+/* Write data using an unencoding writer stack. "nbytes" is not
+   allowed to be 0. */
 CURLcode Curl_unencode_write(struct Curl_easy *data,
                              struct contenc_writer *writer,
                              const char *buf, size_t nbytes)
@@ -1024,19 +1038,24 @@ static const struct content_encoding *find_encoding(const char *name,
   return NULL;
 }
 
+/* allow no more than 5 "chained" compression steps */
+#define MAX_ENCODE_STACK 5
+
 /* Set-up the unencoding stack from the Content-Encoding header value.
  * See RFC 7231 section 3.1.2.2. */
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
-                                     const char *enclist, int maybechunked)
+                                     const char *enclist, int is_transfer)
 {
   struct SingleRequest *k = &data->req;
+  int counter = 0;
+  unsigned int order = is_transfer? 2: 1;
 
   do {
     const char *name;
     size_t namelen;
 
     /* Parse a single encoding name. */
-    while(ISSPACE(*enclist) || *enclist == ',')
+    while(ISBLANK(*enclist) || *enclist == ',')
       enclist++;
 
     name = enclist;
@@ -1046,7 +1065,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
         namelen = enclist - name + 1;
 
     /* Special case: chunked encoding is handled at the reader level. */
-    if(maybechunked && namelen == 7 && strncasecompare(name, "chunked", 7)) {
+    if(is_transfer && namelen == 7 && strncasecompare(name, "chunked", 7)) {
       k->chunk = TRUE;             /* chunks coming our way. */
       Curl_httpchunk_init(data);   /* init our chunky engine. */
     }
@@ -1055,7 +1074,8 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       struct contenc_writer *writer;
 
       if(!k->writer_stack) {
-        k->writer_stack = new_unencoding_writer(data, &client_encoding, NULL);
+        k->writer_stack = new_unencoding_writer(data, &client_encoding,
+                                                NULL, 0);
 
         if(!k->writer_stack)
           return CURLE_OUT_OF_MEMORY;
@@ -1064,11 +1084,29 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       if(!encoding)
         encoding = &error_encoding;  /* Defer error at stack use. */
 
+      if(++counter >= MAX_ENCODE_STACK) {
+        failf(data, "Reject response due to %u content encodings",
+              counter);
+        return CURLE_BAD_CONTENT_ENCODING;
+      }
       /* Stack the unencoding stage. */
-      writer = new_unencoding_writer(data, encoding, k->writer_stack);
-      if(!writer)
-        return CURLE_OUT_OF_MEMORY;
-      k->writer_stack = writer;
+      if(order >= k->writer_stack->order) {
+        writer = new_unencoding_writer(data, encoding,
+                                       k->writer_stack, order);
+        if(!writer)
+          return CURLE_OUT_OF_MEMORY;
+        k->writer_stack = writer;
+      }
+      else {
+        struct contenc_writer *w = k->writer_stack;
+        while(w->downstream && order < w->downstream->order)
+          w = w->downstream;
+        writer = new_unencoding_writer(data, encoding,
+                                       w->downstream, order);
+        if(!writer)
+          return CURLE_OUT_OF_MEMORY;
+        w->downstream = writer;
+      }
     }
   } while(*enclist);
 
@@ -1078,11 +1116,11 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
 #else
 /* Stubs for builds without HTTP. */
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
-                                     const char *enclist, int maybechunked)
+                                     const char *enclist, int is_transfer)
 {
   (void) data;
   (void) enclist;
-  (void) maybechunked;
+  (void) is_transfer;
   return CURLE_NOT_BUILT_IN;
 }
 

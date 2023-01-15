@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_ERRORBUFFER 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_ERRORBUFFER \- set error buffer for error messages
+CURLOPT_ERRORBUFFER \- error buffer for error messages
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ERRORBUFFER, char *buf);
+.fi
 .SH DESCRIPTION
 Pass a char * to a buffer that libcurl \fBmay\fP store human readable error
 messages on failures or problems. This may be more helpful than just the
@@ -34,9 +38,9 @@ return code from \fIcurl_easy_perform(3)\fP and related functions. The buffer
 \fBmust be at least CURL_ERROR_SIZE bytes big\fP.
 
 You must keep the associated buffer available until libcurl no longer needs
-it. Failing to do so will cause very odd behavior or even crashes. libcurl
-will need it until you call \fIcurl_easy_cleanup(3)\fP or you set the same
-option again to use a different pointer.
+it. Failing to do so will cause odd behavior or even crashes. libcurl will
+need it until you call \fIcurl_easy_cleanup(3)\fP or you set the same option
+again to use a different pointer.
 
 Do not rely on the contents of the buffer unless an error code was returned.
 Since 7.60.0 libcurl will initialize the contents of the error buffer to an
@@ -89,4 +93,4 @@ Returns CURLE_OK
 .SH "SEE ALSO"
 .BR CURLOPT_DEBUGFUNCTION "(3), " CURLOPT_VERBOSE "(3), "
 .BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
-.BR curl_share_strerror "(3) "
+.BR curl_share_strerror "(3), " curl_url_strerror "(3)"

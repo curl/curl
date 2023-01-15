@@ -1,6 +1,6 @@
 /* This is from the BIND 4.9.4 release, modified to compile by itself */
 
-/* Copyright (c) 1996 - 2020 by Internet Software Consortium.
+/* Copyright (c) Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,6 +14,8 @@
  * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
+ *
+ * SPDX-License-Identifier: ISC
  */
 
 #include "curl_setup.h"
@@ -174,7 +176,7 @@ inet_pton6(const char *src, unsigned char *dst)
     pch = strchr((xdigits = xdigits_l), ch);
     if(!pch)
       pch = strchr((xdigits = xdigits_u), ch);
-    if(pch != NULL) {
+    if(pch) {
       val <<= 4;
       val |= (pch - xdigits);
       if(++saw_xdigit > 4)
@@ -211,7 +213,7 @@ inet_pton6(const char *src, unsigned char *dst)
     *tp++ = (unsigned char) ((val >> 8) & 0xff);
     *tp++ = (unsigned char) (val & 0xff);
   }
-  if(colonp != NULL) {
+  if(colonp) {
     /*
      * Since some memmove()'s erroneously fail to handle
      * overlapping regions, we'll do the shift by hand.

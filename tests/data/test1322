@@ -46,7 +46,7 @@ HTTP with --resolve and hostname with trailing dot
 <verify>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
-Host: example.com:%HTTPPORT
+Host: example.com.:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 

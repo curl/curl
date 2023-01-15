@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -43,7 +45,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
 
   char *ptr = realloc(mem->memory, mem->size + realsize + 1);
-  if(ptr == NULL) {
+  if(!ptr) {
     /* out of memory! */
     printf("not enough memory (realloc returned NULL)\n");
     return 0;
@@ -81,7 +83,7 @@ int main(void)
   /* we pass our 'chunk' struct to the callback function */
   curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
 
-  /* some servers don't like requests that are made without a user-agent
+  /* some servers do not like requests that are made without a user-agent
      field, so we provide one */
   curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
@@ -109,7 +111,7 @@ int main(void)
 
   free(chunk.memory);
 
-  /* we're done with libcurl, so clean it up */
+  /* we are done with libcurl, so clean it up */
   curl_global_cleanup();
 
   return 0;

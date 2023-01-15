@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,15 +18,19 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PIPEWAIT 3 "12 May 2015" "libcurl 7.43.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_PIPEWAIT \- wait for pipelining/multiplexing
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PIPEWAIT, long wait);
+.fi
 .SH DESCRIPTION
 Set \fIwait\fP to 1L to tell libcurl to prefer to wait for a connection to
 confirm or deny that it can do pipelining or multiplexing before continuing.
@@ -54,6 +58,15 @@ and support level.
 .SH PROTOCOLS
 HTTP(S)
 .SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
+
+  /* now add this easy handle to the multi handle */
+}
+.fi
 .SH AVAILABILITY
 Added in 7.43.0
 .SH RETURN VALUE

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "test.h"
 
@@ -28,7 +30,7 @@ struct dcheck {
   time_t output;
 };
 
-static struct dcheck dates[] = {
+static const struct dcheck dates[] = {
   {"Sun, 06 Nov 1994 08:49:37 GMT", 784111777 },
   {"Sunday, 06-Nov-94 08:49:37 GMT", 784111777 },
   {"Sun Nov  6 08:49:37 1994", 784111777 },
@@ -124,7 +126,7 @@ static struct dcheck dates[] = {
   {"Thu, 31-Dec-1969 23:59:58 GMT", -2 },
   {"Thu, 31-Dec-1969 23:59:59 GMT", 0 }, /* avoids -1 ! */
 #if SIZEOF_TIME_T > 4
-  {"Sun, 06 Nov 2044 08:49:37 GMT", 2362034977 },
+  {"Sun, 06 Nov 2044 08:49:37 GMT", (time_t) CURL_OFF_TU_C(2362034977) },
   {"Sun, 06 Nov 3144 08:49:37 GMT", 37074617377 },
 #ifndef HAVE_TIME_T_UNSIGNED
 #if 0

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .TH curl_multi_poll 3 "29 Jul 2019" "libcurl 7.66.0" "libcurl Manual"
@@ -34,14 +36,15 @@ CURLMcode curl_multi_poll(CURLM *multi_handle,
 .ad
 .SH DESCRIPTION
 \fIcurl_multi_poll(3)\fP polls all file descriptors used by the curl easy
-handles contained in the given multi handle set.  It will block until activity
+handles contained in the given multi handle set. It will block until activity
 is detected on at least one of the handles or \fItimeout_ms\fP has passed.
 Alternatively, if the multi handle has a pending internal timeout that has a
 shorter expiry time than \fItimeout_ms\fP, that shorter time will be used
 instead to make sure timeout accuracy is reasonably kept.
 
 The calling application may pass additional curl_waitfd structures which are
-similar to \fIpoll(2)\fP's pollfd structure to be waited on in the same call.
+similar to \fIpoll(2)\fP's \fIpollfd\fP structure to be waited on in the same
+call.
 
 On completion, if \fInumfds\fP is non-NULL, it will be populated with the
 total number of file descriptors on which interesting events occurred. This
@@ -107,11 +110,11 @@ do {
 
 curl_multi_remove_handle(multi_handle, easy_handle);
 .fi
+.SH AVAILABILITY
+Added in 7.66.0.
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
-.SH AVAILABILITY
-This function was added in libcurl 7.66.0.
 .SH "SEE ALSO"
 .BR curl_multi_fdset "(3), " curl_multi_perform "(3), "
 .BR curl_multi_wait "(3), " curl_multi_wakeup "(3)"

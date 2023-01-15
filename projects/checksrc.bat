@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2014 - 2020, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@ rem * furnished to do so, under the terms of the COPYING file.
 rem *
 rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
+rem *
+rem * SPDX-License-Identifier: curl
 rem *
 rem ***************************************************************************
 
@@ -113,67 +115,67 @@ rem ***************************************************************************
   if "%CHECK_SRC%" == "TRUE" (
     rem Check the src directory
     if exist %SRC_DIR%\src (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\src\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\src" -Wtool_hugehelp.c "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\src\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\src" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\src\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\src" -Wtool_hugehelp.c "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\src\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\src" "%%i"
     )
   )
 
   if "%CHECK_LIB%" == "TRUE" (
     rem Check the lib directory
     if exist %SRC_DIR%\lib (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib" "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib" -Wcurl_config.h.cmake -Wcurl_config.h.in -Wcurl_config.h "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib" -Wcurl_config.h.cmake -Wcurl_config.h.in -Wcurl_config.h "%%i"
     )
 
     rem Check the lib\vauth directory
     if exist %SRC_DIR%\lib\vauth (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vauth\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vauth" "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vauth\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vauth" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vauth\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib\vauth" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vauth\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib\vauth" "%%i"
     )
 
     rem Check the lib\vquic directory
     if exist %SRC_DIR%\lib\vquic (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vquic\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vquic" "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vquic\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vquic" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vquic\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib\vquic" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vquic\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib\vquic" "%%i"
     )
 
     rem Check the lib\vssh directory
     if exist %SRC_DIR%\lib\vssh (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vssh\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vssh" "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vssh\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vssh" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vssh\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib\vssh" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vssh\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib\vssh" "%%i"
     )
 
     rem Check the lib\vtls directory
     if exist %SRC_DIR%\lib\vtls (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vtls\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vtls" "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vtls\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vtls" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vtls\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib\vtls" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vtls\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\lib\vtls" "%%i"
     )
   )
 
   if "%CHECK_TESTS%" == "TRUE" (
     rem Check the tests\libtest directory
     if exist %SRC_DIR%\tests\libtest (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\libtest\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\tests\libtest" "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\libtest\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\tests\libtest" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\libtest\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\tests\libtest" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\libtest\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\tests\libtest" "%%i"
     )
 
     rem Check the tests\unit directory
     if exist %SRC_DIR%\tests\unit (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\unit\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\tests\unit" "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\unit\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\tests\unit" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\unit\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\tests\unit" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\unit\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\tests\unit" "%%i"
     )
 
     rem Check the tests\server directory
     if exist %SRC_DIR%\tests\server (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\server\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\tests\server" "%%i"
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\server\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\tests\server" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\server\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\tests\server" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\tests\server\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\tests\server" "%%i"
     )
   )
 
   if "%CHECK_EXAMPLES%" == "TRUE" (
     rem Check the docs\examples directory
     if exist %SRC_DIR%\docs\examples (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\docs\examples\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\docs\examples" -ASNPRINTF "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\docs\examples\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\docs\examples" -ASNPRINTF "%%i"
     )
   )
 

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 .\" *
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
 .\"
@@ -49,7 +51,7 @@ should be returned if an error was encountered.
 network encoding.  It is used when commands or ASCII data are sent over the
 network.
 
-If you set a callback pointer to NULL, or don't set it at all, the built-in
+If you set a callback pointer to NULL, or do not set it at all, the built-in
 libcurl iconv functions will be used.  If HAVE_ICONV was not defined when
 libcurl was built, and no callback has been established, conversion will
 return the CURLE_CONV_REQD error code.
@@ -93,7 +95,10 @@ curl_easy_setopt(curl, CURLOPT_CONV_TO_NETWORK_FUNCTION,
                  my_conv_from_ebcdic_to_ascii);
 .fi
 .SH AVAILABILITY
-Available only if \fBCURL_DOES_CONVERSIONS\fP was defined when libcurl was built.
+Not available and deprecated since 7.82.0.
+
+Available only if \fBCURL_DOES_CONVERSIONS\fP was defined when libcurl was
+built.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

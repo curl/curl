@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,10 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example showing how to expand an e-mail mailing list
+ * Expand an SMTP email mailing list
  * </DESC>
  */
 
@@ -29,7 +31,7 @@
 #include <string.h>
 #include <curl/curl.h>
 
-/* This is a simple example showing how to expand an e-mail mailing list.
+/* This is a simple example showing how to expand an email mailing list.
  *
  * Notes:
  *
@@ -66,10 +68,10 @@ int main(void)
     /* Free the list of recipients */
     curl_slist_free_all(recipients);
 
-    /* Curl won't send the QUIT command until you call cleanup, so you should
-     * be able to re-use this connection for additional requests. It may not be
-     * a good idea to keep the connection open for a very long time though
-     * (more than a few minutes may result in the server timing out the
+    /* curl will not send the QUIT command until you call cleanup, so you
+     * should be able to re-use this connection for additional requests. It
+     * may not be a good idea to keep the connection open for a very long time
+     * though (more than a few minutes may result in the server timing out the
      * connection) and you do want to clean up in the end.
      */
     curl_easy_cleanup(curl);

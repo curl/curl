@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,10 +18,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "x509asn1.h"
+#include "vtls/x509asn1.h"
 
 static CURLcode unit_setup(void)
 {
@@ -32,8 +34,8 @@ static void unit_stop(void)
 {
 
 }
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
-    defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
+#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) ||    \
+  defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
 
 /* cert captured from gdb when connecting to curl.se on October 26
    2018 */
@@ -348,27 +350,35 @@ UNITTEST_START
   CURLcode result;
   const char *beg = (const char *)&cert[0];
   const char *end = (const char *)&cert[sizeof(cert)];
-  struct Curl_easy *data = curl_easy_init();
+  struct Curl_easy *data;
   int i;
   int byte;
-  if(!data)
-    return 2;
 
-  result = Curl_extract_certinfo(data, 0, beg, end);
-
-  fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
-
-  /* a poor man's fuzzing of some initial data to make sure nothing bad
-     happens */
-  for(byte = 1 ; byte < 255; byte += 17) {
-    for(i = 0; i < 45; i++) {
-      char backup = cert[i];
-      cert[i] = (unsigned char) (byte & 0xff);
-      (void) Curl_extract_certinfo(data, 0, beg, end);
-      cert[i] = backup;
-    }
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
   }
-  curl_easy_cleanup(data);
+
+  data = curl_easy_init();
+  if(data) {
+    result = Curl_extract_certinfo(data, 0, beg, end);
+
+    fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
+
+    /* a poor man's fuzzing of some initial data to make sure nothing bad
+       happens */
+    for(byte = 1 ; byte < 255; byte += 17) {
+      for(i = 0; i < 45; i++) {
+        char backup = cert[i];
+        cert[i] = (unsigned char) (byte & 0xff);
+        (void) Curl_extract_certinfo(data, 0, beg, end);
+        cert[i] = backup;
+      }
+    }
+
+    curl_easy_cleanup(data);
+  }
+  curl_global_cleanup();
 }
 UNITTEST_STOP
 

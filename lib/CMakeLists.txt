@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,8 +18,12 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 set(LIB_NAME libcurl)
+set(LIBCURL_OUTPUT_NAME libcurl CACHE STRING "Basename of the curl library")
+add_definitions(-DBUILDING_LIBCURL)
 
 if(BUILD_SHARED_LIBS)
   set(CURL_STATICLIB NO)
@@ -39,7 +43,7 @@ list(APPEND HHEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h
   )
 
-if(WIN32)
+if(WIN32 AND NOT CURL_STATICLIB)
   list(APPEND CSOURCES libcurl.rc)
 endif()
 
@@ -92,13 +96,39 @@ if(NOT BUILD_SHARED_LIBS)
     set_target_properties(${LIB_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS CURL_STATICLIB)
 endif()
 
-target_link_libraries(${LIB_NAME} ${CURL_LIBS})
+target_link_libraries(${LIB_NAME} PRIVATE ${CURL_LIBS})
 
-if(WIN32)
-  add_definitions(-D_USRDLL)
+transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
+include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
+
+set_target_properties(${LIB_NAME} PROPERTIES
+  COMPILE_DEFINITIONS BUILDING_LIBCURL
+  OUTPUT_NAME ${LIBCURL_OUTPUT_NAME}
+  )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
+  CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+  CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
+  CMAKE_SYSTEM_NAME STREQUAL "GNU/kFreeBSD" OR
+
+  # FreeBSD comes with the a.out and elf flavours
+  # but a.out was supported up to version 3.x and
+  # elf from 3.x. I cannot imagine someone running
+  # CMake on those ancient systems
+  CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
+
+  CMAKE_SYSTEM_NAME STREQUAL "Haiku")
+
+  math(EXPR CMAKESONAME "${VERSIONCHANGE} - ${VERSIONDEL}")
+  set(CMAKEVERSION "${CMAKESONAME}.${VERSIONDEL}.${VERSIONADD}")
+
+  set_target_properties(${LIB_NAME} PROPERTIES
+    VERSION ${CMAKEVERSION}
+    SOVERSION ${CMAKESONAME}
+  )
+
 endif()
 
-set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS BUILDING_LIBCURL)
 
 if(HIDES_CURL_PRIVATE_SYMBOLS)
   set_property(TARGET ${LIB_NAME} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
@@ -129,14 +159,16 @@ target_include_directories(${LIB_NAME} INTERFACE
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
 
-install(TARGETS ${LIB_NAME}
-  EXPORT ${TARGETS_EXPORT_NAME}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+if(CURL_ENABLE_EXPORT_TARGET)
+  install(TARGETS ${LIB_NAME}
+    EXPORT ${TARGETS_EXPORT_NAME}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
 
-export(TARGETS ${LIB_NAME}
-       APPEND FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
-       NAMESPACE ${PROJECT_NAME}::
-)
+  export(TARGETS ${LIB_NAME}
+         FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
+         NAMESPACE ${PROJECT_NAME}::
+  )
+endif()

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* <DESC>
@@ -121,7 +123,7 @@ static void *pull_one_url(void *url)
 
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, url);
-  /* this example doesn't verify the server's certificate, which means we
+  /* this example does not verify the server's certificate, which means we
      might be downloading stuff from an impostor */
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -135,7 +137,7 @@ int main(int argc, char **argv)
 {
   pthread_t tid[NUMT];
   int i;
-  (void)argc; /* we don't use any arguments in this example */
+  (void)argc; /* we do not use any arguments in this example */
   (void)argv;
 
   /* Must initialize libcurl before any threads are started */

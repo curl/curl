@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 /* Escape and unescape URL encoding in strings. The functions return a new
@@ -32,8 +34,7 @@ enum urlreject {
   REJECT_ZERO
 };
 
-CURLcode Curl_urldecode(struct Curl_easy *data,
-                        const char *string, size_t length,
+CURLcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
                         enum urlreject ctrl);
 

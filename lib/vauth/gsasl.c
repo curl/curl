@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020 - 2021, Simon Josefsson, <simon@josefsson.org>, et al.
+ * Copyright (C) Simon Josefsson, <simon@josefsson.org>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  * RFC5802 SCRAM-SHA-1 authentication
  *
  ***************************************************************************/
@@ -28,14 +30,14 @@
 
 #include <curl/curl.h>
 
-#include "curl_base64.h"
 #include "vauth/vauth.h"
 #include "urldata.h"
 #include "sendf.h"
 
 #include <gsasl.h>
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -94,42 +96,24 @@ CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
 }
 
 CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
-                               const char *chlg64,
+                               const struct bufref *chlg,
                                struct gsasldata *gsasl,
-                               char **outptr, size_t *outlen)
+                               struct bufref *out)
 {
-  unsigned char *chlg = NULL;
-  size_t chlglen = 0;
-  CURLcode result = CURLE_OK;
   int res;
   char *response;
-
-  if(chlg64) {
-    result = Curl_base64_decode(chlg64, &chlg, &chlglen);
-    if(result)
-      return result;
-  }
+  size_t outlen;
 
   res = gsasl_step(gsasl->client,
-                   (const char *)chlg, chlglen, &response, outlen);
+                   (const char *) Curl_bufref_ptr(chlg), Curl_bufref_len(chlg),
+                   &response, &outlen);
   if(res != GSASL_OK && res != GSASL_NEEDS_MORE) {
-    if(chlg64)
-      free(chlg);
     failf(data, "GSASL step: %s\n", gsasl_strerror(res));
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  if(*outlen > 0) {
-    result = Curl_base64_encode(data, response, 0, outptr, outlen);
-    gsasl_free(response);
-  }
-  else {
-    *outptr = strdup("");
-    if(!*outptr)
-      result = CURLE_OUT_OF_MEMORY;
-  }
-
-  return result;
+  Curl_bufref_set(out, response, outlen, gsasl_free);
+  return CURLE_OK;
 }
 
 void Curl_auth_gsasl_cleanup(struct gsasldata *gsasl)

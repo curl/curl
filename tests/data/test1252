@@ -23,6 +23,9 @@ foo
 
 # Client-side
 <client>
+<features>
+proxy
+</features>
 <server>
 http
 </server>

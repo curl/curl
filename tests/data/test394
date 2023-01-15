@@ -44,7 +44,11 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
+%if hyper
+1
+%else
 8
+%endif
 </errorcode>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1

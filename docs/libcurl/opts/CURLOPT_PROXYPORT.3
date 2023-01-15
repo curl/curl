@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,21 +18,25 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PROXYPORT 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_PROXYPORT \- port number the proxy listens on
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYPORT, long port);
+.fi
 .SH DESCRIPTION
 Pass a long with this option to set the proxy port to connect to unless it is
 specified in the proxy string \fICURLOPT_PROXY(3)\fP or uses 443 for https
 proxies and 1080 for all others as default.
 
-While this accepts a 'long', the port number is 16 bit so it can't be larger
+While this accepts a 'long', the port number is 16 bit so it cannot be larger
 than 65535.
 .SH DEFAULT
 0, not specified which makes it use the default port

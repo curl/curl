@@ -1,14 +1,20 @@
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
 Long: remote-name
 Short: O
 Help: Write output to a file named as the remote file
 Category: important output
+Example: -O https://example.com/filename
+Added: 4.0
+See-also: remote-name-all output-dir remote-header-name
+Multi: append
 ---
 Write output to a local file named like the remote file we get. (Only the file
 part of the remote file is used, the path is cut off.)
 
 The file will be saved in the current working directory. If you want the file
 saved in a different directory, make sure you change the current working
-directory before invoking curl with this option.
+directory before invoking curl with this option or use --output-dir.
 
 The remote file name to use for saving is extracted from the given URL,
 nothing else, and if it already exists it will be overwritten. If you want the

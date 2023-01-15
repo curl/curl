@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,23 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_PORT 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PORT \- set remote port number to work with
+CURLOPT_PORT \- remote port number to connect to
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PORT, long number);
+.fi
 .SH DESCRIPTION
+We discourage using this option since its scope is not obvious and hard to
+predict. Set the preferred port number in the URL instead.
+
 This option sets \fInumber\fP to be the remote port number to connect to,
 instead of the one specified in the URL or the default port for the used
 protocol.
@@ -35,10 +42,12 @@ protocol.
 Usually, you just let the URL decide which port to use but this allows the
 application to override that.
 
-While this option accepts a 'long', a port number is usually a 16 bit number
-and therefore using a port number over 65535 will cause a run-time error.
+While this option accepts a 'long', a port number is an unsigned 16 bit number
+and therefore using a port number lower than zero or over 65535 will cause a
+\fBCURLE_BAD_FUNCTION_ARGUMENT\fP error.
 .SH DEFAULT
-By default this is 0 which makes it not used.
+By default this is 0 which makes it not used. This also makes port number zero
+impossible to set with this API.
 .SH PROTOCOLS
 Used for all protocols that speak to a port number.
 .SH EXAMPLE

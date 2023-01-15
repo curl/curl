@@ -19,6 +19,9 @@ Funny-head: yesyes swsclose
 Set-Cookie: foobar=name;
 Set-Cookie: mismatch=this; domain=127.0.0.1; path="/silly/";
 Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
+Set-Cookie: foo	bar=barfoo
+Set-Cookie: bar	foo=
+Set-Cookie: bar=foo	bar
 
 </data>
 </reply>

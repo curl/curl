@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 
@@ -37,7 +39,7 @@
 # 3. Run the cleanup script and let it sort the entries and remove unused
 # references from lines you removed in step (2):
 #
-# $ ./script/release-notes.pl cleanup
+# $ ./scripts/release-notes.pl cleanup
 #
 # 4. Reload RELEASE-NOTES and verify that things look okay. The cleanup
 # procedure can and should be re-run when lines are removed or rephrased.
@@ -82,6 +84,29 @@ sub getref {
     return $#refs + 1;
 }
 
+# '#num'
+# 'num'
+# 'https://github.com/curl/curl/issues/6939'
+# 'https://github.com/curl/curl-www/issues/69'
+# 'https://elsewhere.example.com/discussion'
+
+sub extract {
+    my ($ref)=@_;
+    if($ref =~ /^(\#|)(\d+)/) {
+        # return the plain number
+        return $2;
+    }
+    elsif($ref =~ /^https:\/\/github.com\/curl\/curl\/.*\/(\d+)/) {
+        # return the plain number
+        return $1;
+    }
+    elsif($ref =~ /:\/\//) {
+        # contains a '://', return the URL
+        return $ref;
+    }
+    # false alarm, not a valid line
+}
+
 my $short;
 my $first;
 for my $l (@gitlog) {
@@ -100,6 +125,7 @@ for my $l (@gitlog) {
     elsif(($l =~ /^    (.*)/) && !$first) {
         # first line
         $short = $1;
+        $short =~ s/ ?\[(ci skip|skip ci)\]//g;
         $first = 1;
         push @line, $short;
     }
@@ -107,14 +133,17 @@ for my $l (@gitlog) {
         # not the first
         my $line = $1;
 
-        if($line =~ /^Fixes(:|) .*[^0-9](\d+)/i) {
-            push @fixes, $2;
+        if($line =~ /^Fixes(:|) *(.*)/i) {
+            my $ref = extract($2);
+            push @fixes, $ref if($ref);
         }
-        elsif($line =~ /^Closes(:|) .*[^0-9](\d+)/i) {
-            push @closes, $2;
+        elsif($line =~ /^Clo(s|)es(:|) *(.*)/i) {
+            my $ref = extract($3);
+            push @closes, $ref if($ref);
         }
         elsif($line =~ /^Bug: (.*)/i) {
-            push @bug, $1;
+            my $ref = extract($1);
+            push @bug, $ref if($ref);
         }
     }
 }

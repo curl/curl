@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,19 +18,23 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_MAXCONNECTS 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_MAXCONNECTS \- maximum connection cache size
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXCONNECTS, long amount);
+.fi
 .SH DESCRIPTION
 Pass a long. The set \fIamount\fP will be the maximum number of simultaneously
 open persistent connections that libcurl may cache in the pool associated with
-this handle. The default is 5, and there isn't much point in changing this
+this handle. The default is 5, and there is not much point in changing this
 value unless you are perfectly aware of how this works and changes libcurl's
 behavior. This concerns connections using any of the protocols that support
 persistent connections.

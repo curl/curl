@@ -1,7 +1,12 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
 chkdecimalpoint
 chkhostname
-lib[123][0-9][0-9][0-9]
+lib[1234][0-9][0-9][0-9]
 lib[56][0-9][0-9]
 lib1521.c
 libauthretry
 libntlmconnect
+libprereq

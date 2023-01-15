@@ -14,11 +14,11 @@ eventually remove the "experimental" label from this functionality.
 
 As a DNS version of alt-svc and also a pre-requisite for ECH (see below).
 
-See: https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-02
+See: https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-svcb-https-02
 
 ## ECH (Encrypted Client Hello - formerly known as ESNI)
 
  See Daniel's post on [Support of Encrypted
  SNI](https://curl.se/mail/lib-2019-03/0000.html) on the mailing list.
 
- Initial work exists in https://github.com/curl/curl/pull/4011
+ Initial work exists in [PR 4011](https://github.com/curl/curl/pull/4011)

@@ -11,7 +11,7 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 302 OK swsclose
-Location: ../moo.html/?name=آغاز-سم-زدایی-از-بازار-پول&testcase=/%TESTNUMBER0002    
+Location: ../moo.html/?name=آغاز-سم-زدایی-از-بازار-پول&testcase=/%TESTNUMBER0002
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
@@ -26,7 +26,7 @@ body
 </data2>
 <datacheck>
 HTTP/1.1 302 OK swsclose
-Location: ../moo.html/?name=آغاز-سم-زدایی-از-بازار-پول&testcase=/%TESTNUMBER0002    
+Location: ../moo.html/?name=آغاز-سم-زدایی-از-بازار-پول&testcase=/%TESTNUMBER0002
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 

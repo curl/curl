@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -18,16 +18,22 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
 .\" **************************************************************************
 .\"
 .TH CURLOPT_SSL_ENABLE_NPN 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SSL_ENABLE_NPN \- enable NPN
+CURLOPT_SSL_ENABLE_NPN \- use NPN
 .SH SYNOPSIS
+.nf
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_ENABLE_NPN, long npn);
+.fi
 .SH DESCRIPTION
+Deprecated in 7.86.0. Setting this option has no function.
+
 Pass a long as parameter, 0 or 1 where 1 is for enable and 0 for disable. This
 option enables/disables NPN in the SSL handshake (if the SSL backend libcurl
 is built to use supports it), which can be used to negotiate http2.
@@ -46,7 +52,7 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.36.0
+Added in 7.36.0. Deprecated in 7.86.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

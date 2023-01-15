@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -28,6 +30,7 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "progress.h"
 #include "gopher.h"
@@ -74,6 +77,7 @@ const struct Curl_handler Curl_handler_gopher = {
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_GOPHER,                          /* defport */
   CURLPROTO_GOPHER,                     /* protocol */
   CURLPROTO_GOPHER,                     /* family */
@@ -97,6 +101,7 @@ const struct Curl_handler Curl_handler_gophers = {
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
+  ZERO_NULL,                            /* attach connection */
   PORT_GOPHER,                          /* defport */
   CURLPROTO_GOPHERS,                    /* protocol */
   CURLPROTO_GOPHER,                     /* family */
@@ -113,7 +118,9 @@ static CURLcode gopher_connect(struct Curl_easy *data, bool *done)
 static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
-  CURLcode result = Curl_ssl_connect(data, conn, FIRSTSOCKET);
+  CURLcode result;
+
+  result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
   if(result)
     connclose(conn, "Failed TLS connection");
   *done = TRUE;
@@ -163,7 +170,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     newp += 2;
 
     /* ... and finally unescape */
-    result = Curl_urldecode(data, newp, 0, &sel, &len, REJECT_ZERO);
+    result = Curl_urldecode(newp, 0, &sel, &len, REJECT_ZERO);
     free(gopherpath);
     if(result)
       return result;
@@ -232,4 +239,4 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
   return CURLE_OK;
 }
-#endif /*CURL_DISABLE_GOPHER*/
+#endif /* CURL_DISABLE_GOPHER */

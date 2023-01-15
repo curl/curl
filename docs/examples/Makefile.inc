@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
 #
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
 #
 ###########################################################################
 
@@ -31,7 +33,6 @@ check_PROGRAMS = \
   debug \
   externalsocket \
   fileupload \
-  fopen \
   ftp-wildcard \
   ftpget \
   ftpgetinfo \
@@ -44,6 +45,7 @@ check_PROGRAMS = \
   getinmemory \
   getredirect \
   getreferrer \
+  headerapi \
   http-post \
   http2-download \
   http2-pushinmemory \
@@ -74,7 +76,7 @@ check_PROGRAMS = \
   multi-debugcallback \
   multi-double \
   multi-formadd \
-  multi-poll \
+  multi-legacy \
   multi-post \
   multi-single \
   parseurl \
@@ -96,7 +98,6 @@ check_PROGRAMS = \
   postit2-formadd \
   progressfunc \
   resolve \
-  rtsp \
   sendrecv \
   sepheaders \
   sftpget \
@@ -122,8 +123,6 @@ check_PROGRAMS = \
 COMPLICATED_EXAMPLES = \
   cacertinmem.c \
   crawler.c \
-  curlgtk.c \
-  curlx.c \
   ephiperfifo.c \
   evhiperfifo.c \
   ghiper.c \
@@ -135,7 +134,6 @@ COMPLICATED_EXAMPLES = \
   multi-uv.c \
   multithread.c \
   opensslthreadlock.c \
-  sampleconv.c \
   sessioninfo.c \
   smooth-gtk-thread.c \
   synctime.c \
