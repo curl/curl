@@ -54,7 +54,7 @@ class TestStuttered:
         r.check_responses(count=1, exp_status=200)
 
     # download 50 files in 100 chunks a 100 bytes with 10ms delay between
-    # prepend 100 file requests to warm up connection procesing limits
+    # prepend 100 file requests to warm up connection processing limits
     # (Apache2 increases # of parallel processed requests after successes)
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_04_02_100_100_10(self, env: Env,
@@ -78,7 +78,7 @@ class TestStuttered:
             f'avg time of transfer: {t_avg} [{i_min}={t_min}, {i_max}={t_max}]'
 
     # download 50 files in 1000 chunks a 10 bytes with 1ms delay between
-    # prepend 100 file requests to warm up connection procesing limits
+    # prepend 100 file requests to warm up connection processing limits
     # (Apache2 increases # of parallel processed requests after successes)
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_04_03_1000_10_1(self, env: Env, httpd, nghttpx, repeat, proto):
@@ -101,7 +101,7 @@ class TestStuttered:
             f'avg time of transfer: {t_avg} [{i_min}={t_min}, {i_max}={t_max}]'
 
     # download 50 files in 10000 chunks a 1 byte with 10us delay between
-    # prepend 100 file requests to warm up connection procesing limits
+    # prepend 100 file requests to warm up connection processing limits
     # (Apache2 increases # of parallel processed requests after successes)
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_04_04_1000_10_1(self, env: Env, httpd, nghttpx, repeat, proto):
