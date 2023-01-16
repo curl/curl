@@ -354,34 +354,19 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   rconn = backend->conn;
 
   config_builder = rustls_client_config_builder_new();
-  if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
-    rustls_slice_bytes alpn[] = {
-      { (const uint8_t *)ALPN_HTTP_1_0, ALPN_HTTP_1_0_LENGTH }
-    };
-    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_0);
-    rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 1);
-  }
-  else {
-    rustls_slice_bytes alpn[2] = {
-      { (const uint8_t *)ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH },
-      { (const uint8_t *)ALPN_H2, ALPN_H2_LENGTH },
-    };
-#ifdef USE_HTTP2
-    if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-       && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
-#endif
-      ) {
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
-      rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 2);
+  if(connssl->alpn) {
+    struct alpn_proto_buf proto;
+    rustls_slice_bytes alpn[ALPN_ENTRIES_MAX];
+    size_t i;
+
+    for(i = 0; i < connssl->alpn->count; ++i) {
+      alpn[i].data = (const uint8_t *)connssl->alpn->entries[i];
+      alpn[i].len = strlen(connssl->alpn->entries[i]);
     }
-    else
-#endif
-    {
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
-      rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 1);
-    }
+    rustls_client_config_builder_set_alpn_protocols(config_builder, alpn,
+                                                    connssl->alpn->count);
+    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
@@ -457,29 +442,7 @@ cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t len = 0;
 
   rustls_connection_get_alpn_protocol(rconn, &protocol, &len);
-  if(!protocol) {
-    infof(data, VTLS_INFOF_NO_ALPN);
-    return;
-  }
-
-#ifdef USE_HTTP2
-  if(len == ALPN_H2_LENGTH && 0 == memcmp(ALPN_H2, protocol, len)) {
-    infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, ALPN_H2);
-    cf->conn->alpn = CURL_HTTP_VERSION_2;
-  }
-  else
-#endif
-  if(len == ALPN_HTTP_1_1_LENGTH &&
-      0 == memcmp(ALPN_HTTP_1_1, protocol, len)) {
-    infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, ALPN_HTTP_1_1);
-    cf->conn->alpn = CURL_HTTP_VERSION_1_1;
-  }
-  else {
-    infof(data, "ALPN, negotiated an unrecognized protocol");
-  }
-
-  Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                      BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+  Curl_alpn_set_negotiated(cf, data, protocol, len);
 }
 
 static CURLcode

@@ -24,15 +24,16 @@
 #
 ###########################################################################
 #
-import datetime
 import logging
 import os
 import signal
 import subprocess
 import time
 from typing import Optional
+from datetime import datetime, timedelta
 
 from .env import Env
+from .curl import CurlClient
 
 
 log = logging.getLogger(__name__)
@@ -43,10 +44,12 @@ class Nghttpx:
     def __init__(self, env: Env):
         self.env = env
         self._cmd = env.nghttpx
-        self._pid_file = os.path.join(env.gen_dir, 'nghttpx.pid')
-        self._conf_file = os.path.join(env.gen_dir, 'nghttpx.conf')
-        self._error_log = os.path.join(env.gen_dir, 'nghttpx.log')
-        self._stderr = os.path.join(env.gen_dir, 'nghttpx.stderr')
+        self._run_dir = os.path.join(env.gen_dir, 'nghttpx')
+        self._pid_file = os.path.join(self._run_dir, 'nghttpx.pid')
+        self._conf_file = os.path.join(self._run_dir, 'nghttpx.conf')
+        self._error_log = os.path.join(self._run_dir, 'nghttpx.log')
+        self._stderr = os.path.join(self._run_dir, 'nghttpx.stderr')
+        self._tmp_dir = os.path.join(self._run_dir, 'tmp')
         self._process = None
         self._process: Optional[subprocess.Popen] = None
 
@@ -63,7 +66,13 @@ class Nghttpx:
             return self._process.returncode is None
         return False
 
+    def start_if_needed(self):
+        if not self.is_running():
+            return self.start()
+        return True
+
     def start(self):
+        self._mkpath(self._tmp_dir)
         if self._process:
             self.stop()
         self._write_config()
@@ -82,20 +91,29 @@ class Nghttpx:
         ]
         ngerr = open(self._stderr, 'a')
         self._process = subprocess.Popen(args=args, stderr=ngerr)
-        return self._process.returncode is None
+        if self._process.returncode is not None:
+            return False
+        return self.wait_live(timeout=timedelta(seconds=5))
+
+    def stop_if_running(self):
+        if self.is_running():
+            return self.stop()
+        return True
 
     def stop(self):
+        self._mkpath(self._tmp_dir)
         if self._process:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
+            return self.wait_dead(timeout=timedelta(seconds=5))
         return True
 
     def restart(self):
         self.stop()
         return self.start()
 
-    def reload(self, timeout: datetime.timedelta):
+    def reload(self, timeout: timedelta):
         if self._process:
             running = self._process
             os.kill(running.pid, signal.SIGQUIT)
@@ -107,6 +125,32 @@ class Nghttpx:
                 return True
             except subprocess.TimeoutExpired:
                 log.error(f'SIGQUIT nghttpx({running.pid}), but did not shut down.')
+        return False
+
+    def wait_dead(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        try_until = datetime.now() + timeout
+        while datetime.now() < try_until:
+            check_url = f'https://{self.env.domain1}:{self.env.h3_port}/'
+            r = curl.http_get(url=check_url, extra_args=['--http3-only'])
+            if r.exit_code != 0:
+                return True
+            log.warning(f'waiting for nghttpx to stop responding: {r}')
+            time.sleep(.1)
+        log.debug(f"Server still responding after {timeout}")
+        return False
+
+    def wait_live(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        try_until = datetime.now() + timeout
+        while datetime.now() < try_until:
+            check_url = f'https://{self.env.domain1}:{self.env.h3_port}/'
+            r = curl.http_get(url=check_url, extra_args=['--http3-only'])
+            if r.exit_code == 0:
+                return True
+            log.warning(f'waiting for nghttpx to become responsive: {r}')
+            time.sleep(.1)
+        log.debug(f"Server still not responding after {timeout}")
         return False
 
     def _rmf(self, path):

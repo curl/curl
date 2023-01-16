@@ -1130,8 +1130,8 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(data->conn == cf->conn);
   nwritten = Curl_send_plain(data, cf->sockindex, buf, len, err);
-  DEBUGF(LOG_CF(data, cf, "send(len=%zu) -> %d, err=%d",
-                len, (int)nwritten, *err));
+  DEBUGF(LOG_CF(data, cf, "send(len=%zu) -> %zd, err=%d",
+                len, nwritten, *err));
   return nwritten;
 }
 
@@ -1142,8 +1142,8 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(data->conn == cf->conn);
   nread = Curl_recv_plain(data, cf->sockindex, buf, len, err);
-  DEBUGF(LOG_CF(data, cf, "recv(len=%zu) -> %d, err=%d", len, (int)nread,
-                *err));
+  DEBUGF(LOG_CF(data, cf, "recv(len=%zu) -> %zd, err=%d",
+                len, nread, *err));
   return nread;
 }
 

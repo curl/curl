@@ -39,6 +39,11 @@ log = logging.getLogger(__name__)
                     reason=f"missing: {Env.incomplete_reason()}")
 class TestErrors:
 
+    @pytest.fixture(autouse=True, scope='class')
+    def _class_scope(self, env, nghttpx):
+        if env.have_h3():
+            nghttpx.start_if_needed()
+
     # download 1 file, check that we get CURLE_PARTIAL_FILE
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_05_01_partial_1(self, env: Env, httpd, nghttpx, repeat,

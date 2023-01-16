@@ -42,6 +42,11 @@ log = logging.getLogger(__name__)
                     reason=f"missing: {Env.incomplete_reason()}")
 class TestGoAway:
 
+    @pytest.fixture(autouse=True, scope='class')
+    def _class_scope(self, env, nghttpx):
+        if env.have_h3():
+            nghttpx.start_if_needed()
+
     # download files sequentially with delay, reload server for GOAWAY
     def test_03_01_h2_goaway(self, env: Env, httpd, nghttpx, repeat):
         proto = 'h2'

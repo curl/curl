@@ -633,34 +633,18 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
 #ifdef HAVE_ALPN
-  if(cf->conn->bits.tls_enable_alpn) {
-    char protocols[128];
-    *protocols = '\0';
+  if(connssl->alpn) {
+    struct alpn_proto_buf proto;
+    CURLcode result;
 
-    /* wolfSSL's ALPN protocol name list format is a comma separated string of
-       protocols in descending order of preference, eg: "h2,http/1.1" */
-
-    if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
-      strcpy(protocols, ALPN_HTTP_1_0);
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_0);
-    }
-    else {
-#ifdef USE_HTTP2
-      if(data->state.httpwant >= CURL_HTTP_VERSION_2) {
-        strcpy(protocols + strlen(protocols), ALPN_H2 ",");
-        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
-      }
-#endif
-
-      strcpy(protocols + strlen(protocols), ALPN_HTTP_1_1);
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
-    }
-    if(wolfSSL_UseALPN(backend->handle, protocols,
-                       (unsigned)strlen(protocols),
+    result = Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    if(result ||
+       wolfSSL_UseALPN(backend->handle, (char *)proto.data, proto.len,
                        WOLFSSL_ALPN_CONTINUE_ON_MISMATCH) != SSL_SUCCESS) {
       failf(data, "SSL: failed setting ALPN protocols");
       return CURLE_SSL_CONNECT_ERROR;
     }
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 #endif /* HAVE_ALPN */
 
@@ -888,25 +872,11 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     rc = wolfSSL_ALPN_GetProtocol(backend->handle, &protocol, &protocol_len);
 
     if(rc == SSL_SUCCESS) {
-      infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, protocol_len, protocol);
-
-      if(protocol_len == ALPN_HTTP_1_1_LENGTH &&
-         !memcmp(protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH))
-        cf->conn->alpn = CURL_HTTP_VERSION_1_1;
-#ifdef USE_HTTP2
-      else if(data->state.httpwant >= CURL_HTTP_VERSION_2 &&
-              protocol_len == ALPN_H2_LENGTH &&
-              !memcmp(protocol, ALPN_H2, ALPN_H2_LENGTH))
-        cf->conn->alpn = CURL_HTTP_VERSION_2;
-#endif
-      else
-        infof(data, "ALPN, unrecognized protocol %.*s", protocol_len,
-              protocol);
-      Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                          BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+      Curl_alpn_set_negotiated(cf, data, (const unsigned char *)protocol,
+                               protocol_len);
     }
     else if(rc == SSL_ALPN_NOT_FOUND)
-      infof(data, VTLS_INFOF_NO_ALPN);
+      Curl_alpn_set_negotiated(cf, data, NULL, 0);
     else {
       failf(data, "ALPN, failure getting protocol, error %d", rc);
       return CURLE_SSL_CONNECT_ERROR;

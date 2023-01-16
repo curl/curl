@@ -1064,6 +1064,7 @@ struct cf_setup_ctx {
   cf_setup_state state;
   const struct Curl_dns_entry *remotehost;
   int ssl_mode;
+  int transport;
 };
 
 static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
@@ -1087,8 +1088,7 @@ connect_sub_chain:
   }
 
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
-    result = cf_he_insert_after(cf, data, ctx->remotehost,
-                                cf->conn->transport);
+    result = cf_he_insert_after(cf, data, ctx->remotehost, ctx->transport);
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_EYEBALLS;
@@ -1236,6 +1236,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
     ctx->state = CF_SETUP_INIT;
     ctx->remotehost = remotehost;
     ctx->ssl_mode = ssl_mode;
+    ctx->transport = conn->transport;
 
     result = Curl_cf_create(&cf, &Curl_cft_setup, ctx);
     if(result)

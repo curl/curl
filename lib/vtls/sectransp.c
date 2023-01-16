@@ -1797,38 +1797,28 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
 #if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
-  if(cf->conn->bits.tls_enable_alpn) {
+  if(connssl->alpn) {
     if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
+      struct alpn_proto_buf proto;
+      size_t i;
+      CFStringRef cstr;
       CFMutableArrayRef alpnArr = CFArrayCreateMutable(NULL, 0,
                                                        &kCFTypeArrayCallBacks);
-
-      if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
-        CFArrayAppendValue(alpnArr, CFSTR(ALPN_HTTP_1_0));
-        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_0);
+      for(i = 0; i < connssl->alpn->count; ++i) {
+        cstr = CFStringCreateWithCString(NULL, connssl->alpn->entries[i],
+                                         kCFStringEncodingUTF8);
+        if(!cstr)
+          return CURLE_OUT_OF_MEMORY;
+        CFArrayAppendValue(alpnArr, cstr);
+        CFRelease(cstr);
       }
-      else {
-#ifdef USE_HTTP2
-        if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-           && (!isproxy || !cf->conn->bits.tunnel_proxy)
-#endif
-          ) {
-          CFArrayAppendValue(alpnArr, CFSTR(ALPN_H2));
-          infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
-        }
-#endif
-
-        CFArrayAppendValue(alpnArr, CFSTR(ALPN_HTTP_1_1));
-        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
-      }
-      /* expects length prefixed preference ordered list of protocols in wire
-       * format
-       */
       err = SSLSetALPNProtocols(backend->ssl_ctx, alpnArr);
       if(err != noErr)
         infof(data, "WARNING: failed to set ALPN protocols; OSStatus %d",
               err);
       CFRelease(alpnArr);
+      Curl_alpn_to_proto_str(&proto, connssl->alpn);
+      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
     }
   }
 #endif

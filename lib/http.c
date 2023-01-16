@@ -219,38 +219,6 @@ const struct Curl_handler Curl_handler_wss = {
 
 #endif
 
-static CURLcode h3_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn)
-{
-#ifdef ENABLE_QUIC
-  /* We want HTTP/3 directly, setup the filter chain ourself,
-   * overriding the default behaviour. */
-  DEBUGASSERT(conn->transport == TRNSPRT_QUIC);
-
-  if(!(conn->handler->flags & PROTOPT_SSL)) {
-    failf(data, "HTTP/3 requested for non-HTTPS URL");
-    return CURLE_URL_MALFORMAT;
-  }
-#ifndef CURL_DISABLE_PROXY
-  if(conn->bits.socksproxy) {
-    failf(data, "HTTP/3 is not supported over a SOCKS proxy");
-    return CURLE_URL_MALFORMAT;
-  }
-  if(conn->bits.httpproxy && conn->bits.tunnel_proxy) {
-    failf(data, "HTTP/3 is not supported over a HTTP proxy");
-    return CURLE_URL_MALFORMAT;
-  }
-#endif
-
-  return CURLE_OK;
-#else /* ENABLE_QUIC */
-  (void)conn;
-  (void)data;
-  DEBUGF(infof(data, "QUIC is not supported in this build"));
-  return CURLE_NOT_BUILT_IN;
-#endif /* !ENABLE_QUIC */
-}
-
 static CURLcode http_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn)
 {
@@ -266,13 +234,16 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   Curl_mime_initpart(&http->form);
   data->req.p.http = http;
 
-  if(data->state.httpwant == CURL_HTTP_VERSION_3) {
+  if((data->state.httpwant == CURL_HTTP_VERSION_3)
+     || (data->state.httpwant == CURL_HTTP_VERSION_3ONLY)) {
+    CURLcode result = Curl_conn_may_http3(data, conn);
+    if(result)
+      return result;
+
+     /* TODO: HTTP lower version eyeballing */
     conn->transport = TRNSPRT_QUIC;
   }
 
-  if(conn->transport == TRNSPRT_QUIC) {
-    return h3_setup_conn(data, conn);
-  }
   return CURLE_OK;
 }
 
