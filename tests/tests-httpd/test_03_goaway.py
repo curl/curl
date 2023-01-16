@@ -67,7 +67,7 @@ class TestGoAway:
         r.check_responses(count=count, exp_status=200)
         assert len(r.stats) == count, f'{r.stats}'
         # reload will shut down the connection gracefully with GOAWAY
-        # we expect to see a second connetion opened afterwards
+        # we expect to see a second connection opened afterwards
         assert r.total_connects == 2
         for idx, s in enumerate(r.stats):
             if s['num_connects'] > 0:
@@ -102,7 +102,7 @@ class TestGoAway:
         r.check_responses(count=count, exp_status=200)
         assert len(r.stats) == count, f'{r.stats}'
         # reload will shut down the connection gracefully with GOAWAY
-        # we expect to see a second connetion opened afterwards
+        # we expect to see a second connection opened afterwards
         assert r.total_connects == 2
         for idx, s in enumerate(r.stats):
             if s['num_connects'] > 0:

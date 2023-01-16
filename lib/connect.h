@@ -89,7 +89,7 @@ void Curl_conncontrol(struct connectdata *conn,
 
 /**
  * Create a cfilter for making an "ip" connection to the
- * given address, using paramters from `conn`. The "ip" connection
+ * given address, using parameters from `conn`. The "ip" connection
  * can be a TCP socket, a UDP socket or even a QUIC connection.
  *
  * It MUST use only the supplied `ai` for its connection attempt.

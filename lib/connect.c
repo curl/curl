@@ -341,7 +341,7 @@ void Curl_conncontrol(struct connectdata *conn,
 }
 
 /**
- * job walking the matching addr infos, createing a sub-cfilter with the
+ * job walking the matching addr infos, creating a sub-cfilter with the
  * provided method `cf_create` and running setup/connect on it.
  */
 struct eyeballer {
