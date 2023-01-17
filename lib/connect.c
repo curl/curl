@@ -1012,10 +1012,11 @@ struct transport_provider {
   cf_ip_connect_create *cf_create;
 };
 
+static
 #ifndef DEBUGBUILD
 const
 #endif
-static struct transport_provider transport_providers[] = {
+struct transport_provider transport_providers[] = {
   { TRNSPRT_TCP, Curl_cf_tcp_create },
 #ifdef ENABLE_QUIC
   { TRNSPRT_QUIC, Curl_cf_quic_create },
