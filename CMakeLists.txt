@@ -358,24 +358,6 @@ if(WIN32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
 endif()
 
-# This check below for use of deprecated symbols is only temporary and is to
-# be removed again after a year's service. Remove after November 25, 2022.
-set(CURL_RECONFIG_REQUIRED 0)
-foreach(_LIB GSSAPI OPENLDAP LIBSSH LIBSSH2 BEARSSL MBEDTLS NSS OPENSSL
-        SCHANNEL SECTRANSP WOLFSSL)
-  if(CMAKE_USE_${_LIB})
-    set(CURL_RECONFIG_REQUIRED 1)
-    message(SEND_ERROR "The option CMAKE_USE_${_LIB} was renamed to CURL_USE_${_LIB}.")
-  endif()
-endforeach()
-if(CMAKE_USE_WINSSL)
-  set(CURL_RECONFIG_REQUIRED 1)
-  message(SEND_ERROR "The option CMAKE_USE_WINSSL was renamed to CURL_USE_SCHANNEL.")
-endif()
-if(CURL_RECONFIG_REQUIRED)
-  message(FATAL_ERROR "Reconfig required")
-endif()
-
 # check SSL libraries
 # TODO support GnuTLS
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
