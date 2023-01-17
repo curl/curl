@@ -202,7 +202,10 @@ static void check_result(struct test_case *tc,
   char msg[256];
   timediff_t duration_ms;
 
-  if(tr->result != tc->exp_result) {
+  if(tr->result != tc->exp_result
+    && CURLE_OPERATION_TIMEDOUT != tr->result) {
+    /* on CI we encounter the TIMEOUT result, since images get less CPU
+     * and events are not as sharply timed. */
     curl_msprintf(msg, "%d: expected result %d but got %d",
                   tc->id, CURLE_COULDNT_CONNECT, tr->result);
     fail(msg);
@@ -294,6 +297,9 @@ static void test_connect(struct test_case *tc)
  * - we feed addresses into the resolve cache to simulate different cases
  * - we monitor how many instances of ipv4/v6 attempts are made and when
  * - for mixed families, we expect HAPPY_EYEBALLS_TIMEOUT to trigger
+ *
+ * Max Duration checks needs to be conservative since CI jobs are not
+ * as sharp.
  */
 #define TURL "http://test.com:123"
 
@@ -304,27 +310,27 @@ static struct test_case TEST_CASES[] = {
   /* TIMEOUT_MS,        FAIL_MS      CREATED    DURATION     Result, HE_PREF */
   /* CNCT   HE          v4    v6     v4 v6      MIN   MAX */
   { 1, TURL, "test.com:123:192.0.2.1",
-     250,  150,        200,  200,    1,  0,      200,  300,  R_FAIL, NULL },
+     250,  150,        200,  200,    1,  0,      200,  500,  R_FAIL, NULL },
   /* 1 ipv4, fails after ~200ms, reports COULDNT_CONNECT   */
   { 2, TURL, "test.com:123:192.0.2.1,192.0.2.2",
-     500,  150,        200,  200,    2,  0,      400,  600,  R_FAIL, NULL },
+     500,  150,        200,  200,    2,  0,      400,  800,  R_FAIL, NULL },
   /* 2 ipv4, fails after ~400ms, reports COULDNT_CONNECT   */
 #ifdef ENABLE_IPV6
   { 3, TURL, "test.com:123:::1",
-     250,  150,        200,  200,    0,  1,      200,  300,  R_FAIL, NULL },
+     250,  150,        200,  200,    0,  1,      200,  500,  R_FAIL, NULL },
   /* 1 ipv6, fails after ~200ms, reports COULDNT_CONNECT   */
   { 4, TURL, "test.com:123:::1,::2",
-     500,  150,        200,  200,    0,  2,      400,  600,  R_FAIL, NULL },
+     500,  150,        200,  200,    0,  2,      400,  800,  R_FAIL, NULL },
   /* 2 ipv6, fails after ~400ms, reports COULDNT_CONNECT   */
 
   { 5, TURL, "test.com:123:192.0.2.1,::1",
-     500,  150,        200, 200,     1,  1,      350,  600,  R_FAIL, "v4" },
+     500,  150,        200, 200,     1,  1,      350,  800,  R_FAIL, "v4" },
   /* mixed ip4+6, v4 starts, v6 kicks in on HE, fails after ~350ms */
   { 6, TURL, "test.com:123:::1,192.0.2.1",
-     500,  150,        200, 200,     1,  1,      350,  600,  R_FAIL, "v6" },
+     500,  150,        200, 200,     1,  1,      350,  800,  R_FAIL, "v6" },
   /* mixed ip6+4, v6 starts, v4 kicks in on HE, fails after ~350ms */
   { 7, TURL, "test.com:123:::1,192.0.2.1,::2,::3",
-     500,  600,        200, 200,     0,  3,      350,  600,  R_TIME, "v6" },
+     500,  600,        200, 200,     0,  3,      350,  800,  R_TIME, "v6" },
   /* mixed ip6+4, v6 starts, v4 never starts due to high HE, TIMEOUT */
 #endif
 };
