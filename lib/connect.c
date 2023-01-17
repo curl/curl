@@ -352,7 +352,8 @@ struct eyeballer {
   struct Curl_cfilter *cf;           /* current sub-cfilter connecting */
   struct eyeballer *primary;         /* eyeballer this one is backup for */
   timediff_t delay_ms;               /* delay until start */
-  timediff_t timeoutms;              /* timeout for all tries */
+  struct curltime started;           /* start of current attempt */
+  timediff_t timeoutms;              /* timeout for current attempt */
   expire_id timeout_id;              /* ID for Curl_expire() */
   CURLcode result;
   int error;
@@ -460,7 +461,7 @@ static void baller_initiate(struct Curl_cfilter *cf,
     wcf->sockindex = cf->sockindex;
   }
 
-  if(cf->conn->num_addr > 1) {
+  if(baller->addr && baller->addr->ai_next) {
     Curl_expire(data, baller->timeoutms, baller->timeout_id);
   }
 
@@ -482,13 +483,17 @@ out:
  */
 static CURLcode baller_start(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
-                             struct eyeballer *baller)
+                             struct eyeballer *baller,
+                             timediff_t timeoutms)
 {
   baller->error = 0;
   baller->connected = FALSE;
   baller->has_started = TRUE;
 
   while(baller->addr) {
+    baller->started = Curl_now();
+    baller->timeoutms = (baller->addr->ai_next == NULL) ?
+                         timeoutms : timeoutms / 2;
     baller_initiate(cf, data, baller);
     if(!baller->result)
       break;
@@ -505,11 +510,12 @@ static CURLcode baller_start(struct Curl_cfilter *cf,
    more address exists or error */
 static CURLcode baller_start_next(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  struct eyeballer *baller)
+                                  struct eyeballer *baller,
+                                  timediff_t timeoutms)
 {
   if(cf->sockindex == FIRSTSOCKET) {
     baller_next_addr(baller);
-    baller_start(cf, data, baller);
+    baller_start(cf, data, baller, timeoutms);
   }
   else {
     baller->error = 0;
@@ -527,8 +533,7 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
                                struct curltime *now,
                                bool *connected)
 {
-  struct cf_he_ctx *ctx = cf->ctx;
-
+  (void)cf;
   *connected = baller->connected;
   if(!baller->result &&  !*connected) {
     /* evaluate again */
@@ -539,14 +544,13 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
         baller->connected = TRUE;
         baller->is_done = TRUE;
       }
-      else if(Curl_timediff(*now, ctx->started) >= baller->timeoutms) {
+      else if(Curl_timediff(*now, baller->started) >= baller->timeoutms) {
         infof(data, "%s connect timeout after %" CURL_FORMAT_TIMEDIFF_T
               "ms, move on!", baller->name, baller->timeoutms);
 #if defined(ETIMEDOUT)
         baller->error = ETIMEDOUT;
 #endif
         baller->result = CURLE_OPERATION_TIMEDOUT;
-        baller->is_done = TRUE;
       }
     }
   }
@@ -563,7 +567,6 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
   struct cf_he_ctx *ctx = cf->ctx;
   struct connectdata *conn = cf->conn;
   CURLcode result;
-  timediff_t allow;
   struct curltime now;
   size_t i;
   int ongoing, not_started;
@@ -610,9 +613,7 @@ evaluate:
         data->state.os_errno = baller->error;
         SET_SOCKERRNO(baller->error);
       }
-      allow = Curl_timeleft(data, &now, TRUE);
-      baller->timeoutms = baller->addr->ai_next == NULL ? allow : allow / 2;
-      baller_start_next(cf, data, baller);
+      baller_start_next(cf, data, baller, Curl_timeleft(data, &now, TRUE));
       if(baller->is_done) {
         DEBUGF(LOG_CF(data, cf, "%s done", baller->name));
       }
@@ -629,9 +630,9 @@ evaluate:
     return CURLE_OK;
   }
 
-  /* Nothing connected, have we timed out completely yet? */
-  allow = Curl_timeleft(data, &now, TRUE);
-  if(allow < 0) {
+  /* Nothing connected, check the time before we might
+   * start new ballers or return ok. */
+  if((ongoing || not_started) && Curl_timeleft(data, &now, TRUE) < 0) {
     failf(data, "Connection timeout after %ld ms",
           Curl_timediff(now, data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
@@ -650,7 +651,7 @@ evaluate:
        * its start delay_ms have expired */
       if((baller->primary && baller->primary->is_done) ||
           Curl_timediff(now, ctx->started) >= baller->delay_ms) {
-        baller_start(cf, data, baller);
+        baller_start(cf, data, baller, Curl_timeleft(data, &now, TRUE));
         if(baller->is_done) {
           DEBUGF(LOG_CF(data, cf, "%s done", baller->name));
         }
@@ -737,7 +738,6 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   }
 
   ctx->started = Curl_now();
-  conn->num_addr = Curl_num_addresses(remotehost->addr);
 
   /* remotehost->addr is the list of addresses from the resolver, each
    * with an address family. The list has at least one entry, possibly
@@ -1007,23 +1007,49 @@ out:
   return result;
 }
 
+struct transport_provider {
+  int transport;
+  cf_ip_connect_create *cf_create;
+};
+
+#ifndef DEBUGBUILD
+const
+#endif
+static struct transport_provider transport_providers[] = {
+  { TRNSPRT_TCP, Curl_cf_tcp_create },
+#ifdef ENABLE_QUIC
+  { TRNSPRT_QUIC, Curl_cf_quic_create },
+#endif
+  { TRNSPRT_UDP, Curl_cf_udp_create },
+  { TRNSPRT_UNIX, Curl_cf_unix_create },
+};
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
+
 static cf_ip_connect_create *get_cf_create(int transport)
 {
- switch(transport) {
-  case TRNSPRT_TCP:
-    return Curl_cf_tcp_create;
-  case TRNSPRT_UDP:
-    return Curl_cf_udp_create;
-  case TRNSPRT_UNIX:
-    return Curl_cf_unix_create;
-#ifdef ENABLE_QUIC
-  case TRNSPRT_QUIC:
-    return Curl_cf_quic_create;
-#endif
-  default:
-    return NULL;
+  size_t i;
+  for(i = 0; i < ARRAYSIZE(transport_providers); ++i) {
+    if(transport == transport_providers[i].transport)
+      return transport_providers[i].cf_create;
+  }
+  return NULL;
+}
+
+#ifdef DEBUGBUILD
+void Curl_debug_set_transport_provider(int transport,
+                                       cf_ip_connect_create *cf_create)
+{
+  size_t i;
+  for(i = 0; i < ARRAYSIZE(transport_providers); ++i) {
+    if(transport == transport_providers[i].transport)
+      transport_providers[i].cf_create = cf_create;
+      return;
   }
 }
+#endif /* DEBUGBUILD */
 
 static CURLcode cf_he_insert_after(struct Curl_cfilter *cf_at,
                                    struct Curl_easy *data,
