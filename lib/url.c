@@ -3369,6 +3369,20 @@ static void reuse_conn(struct Curl_easy *data,
   }
 #endif
 
+  /* Finding a connection for reuse in the cache matches, among other
+   * things on the "remote-relevant" hostname. This is not necessarily
+   * the authority of the URL, e.g. conn->host. For example:
+   * - we use a proxy (not tunneling). we want to send all requests
+   *   that use the same proxy on this connection.
+   * - we have a "connect-to" setting that may redirect the hostname of
+   *   a new request to the same remote endpoint of an existing conn.
+   *   We want to reuse an existing conn to the remote endpoint.
+   * Since connection reuse does not match on conn->host necessarily, we
+   * switch `existing` conn to `temp` conn's host settings.
+   * TODO: is this correct in the case of TLS connections that have
+   *       used the original hostname in SNI to negotiate? Do we send
+   *       requests for another host through the different SNI?
+   */
   Curl_free_idnconverted_hostname(&existing->host);
   Curl_free_idnconverted_hostname(&existing->conn_to_host);
   Curl_safefree(existing->host.rawalloc);

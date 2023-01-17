@@ -1413,47 +1413,71 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
 #ifdef USE_SSL
 
+static void free_hostname(struct ssl_connect_data *connssl)
+{
+  if(connssl->dispname != connssl->hostname)
+    free(connssl->dispname);
+  free(connssl->hostname);
+  connssl->hostname = connssl->dispname = NULL;
+}
+
 static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  /* TODO: close_one closes BOTH conn->ssl AND conn->proxy_ssl for this
-   * sockindex (if in use). Gladly, it is safe to call more than once. */
   if(connssl) {
     Curl_ssl->close(cf, data);
     connssl->state = ssl_connection_none;
+    free_hostname(connssl);
   }
   cf->connected = FALSE;
 }
 
-static void reinit_hostname(struct Curl_cfilter *cf)
+static CURLcode reinit_hostname(struct Curl_cfilter *cf)
 {
   struct ssl_connect_data *connssl = cf->ctx;
+  const char *ehostname, *edispname;
+  int eport;
 
+  /* We need the hostname for SNI negotiation. Once handshaked, this
+   * remains the SNI hostname for the TLS connection. But when the
+   * connection is reused, the settings in cf->conn might change.
+   * So we keep a copy of the hostname we use for SNI.
+   */
 #ifndef CURL_DISABLE_PROXY
   if(Curl_ssl_cf_is_proxy(cf)) {
-    /* TODO: there is not definition for a proxy setup on a secondary conn */
-    connssl->hostname = cf->conn->http_proxy.host.name;
-    connssl->dispname = cf->conn->http_proxy.host.dispname;
-    connssl->port = cf->conn->http_proxy.port;
+    ehostname = cf->conn->http_proxy.host.name;
+    edispname = cf->conn->http_proxy.host.dispname;
+    eport = cf->conn->http_proxy.port;
   }
   else
 #endif
   {
-    /* TODO: secondaryhostname is set to the IP address we connect to
-     * in the FTP handler, it is assumed that host verification uses the
-     * hostname from FIRSTSOCKET */
-    if(cf->sockindex == SECONDARYSOCKET && 0) {
-      connssl->hostname = cf->conn->secondaryhostname;
-      connssl->dispname = connssl->hostname;
-      connssl->port = cf->conn->secondary_port;
+    ehostname = cf->conn->host.name;
+    edispname = cf->conn->host.dispname;
+    eport = cf->conn->remote_port;
+  }
+
+  /* change if ehostname changed */
+  if(ehostname && (!connssl->hostname
+                   || strcmp(ehostname, connssl->hostname))) {
+    free_hostname(connssl);
+    connssl->hostname = strdup(ehostname);
+    if(!connssl->hostname) {
+      free_hostname(connssl);
+      return CURLE_OUT_OF_MEMORY;
     }
+    if(!edispname || !strcmp(ehostname, edispname))
+      connssl->dispname = connssl->hostname;
     else {
-      connssl->hostname = cf->conn->host.name;
-      connssl->dispname = cf->conn->host.dispname;
-      connssl->port = cf->conn->remote_port;
+      connssl->dispname = strdup(edispname);
+      if(!connssl->dispname) {
+        free_hostname(connssl);
+        return CURLE_OUT_OF_MEMORY;
+      }
     }
   }
-  DEBUGASSERT(connssl->hostname);
+  connssl->port = eport;
+  return CURLE_OK;
 }
 
 static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -1496,10 +1520,10 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   if(result || !*done)
     goto out;
 
-  /* TODO: right now we do not fully control when hostname is set,
-   * assign it on each connect call. */
-  reinit_hostname(cf);
   *done = FALSE;
+  result = reinit_hostname(cf);
+  if(result)
+    goto out;
 
   if(blocking) {
     result = ssl_connect(cf, data);

@@ -33,8 +33,8 @@
 struct ssl_connect_data {
   ssl_connection_state state;
   ssl_connect_state connecting_state;
-  const char *hostname;             /* hostnaem for verification */
-  const char *dispname;             /* display version of hostname */
+  char *hostname;                   /* hostname for verification */
+  char *dispname;                   /* display version of hostname */
   int port;                         /* remote port at origin */
   struct ssl_backend_data *backend; /* vtls backend specific props */
   struct Curl_easy *call_data;      /* data handle used in current call,
