@@ -1044,9 +1044,10 @@ void Curl_debug_set_transport_provider(int transport,
 {
   size_t i;
   for(i = 0; i < ARRAYSIZE(transport_providers); ++i) {
-    if(transport == transport_providers[i].transport)
+    if(transport == transport_providers[i].transport) {
       transport_providers[i].cf_create = cf_create;
       return;
+    }
   }
 }
 #endif /* DEBUGBUILD */
