@@ -165,6 +165,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
   }
 
+  if(Curl_log_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_log_init failed\n"));
+    goto fail;
+  }
+
   if(!Curl_ssl_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
     goto fail;

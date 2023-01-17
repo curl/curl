@@ -58,6 +58,8 @@ CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
 CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
                                           struct Curl_easy *data);
 
+extern struct Curl_cftype Curl_cft_socks_proxy;
+
 #endif /* CURL_DISABLE_PROXY */
 
 #endif  /* HEADER_CURL_SOCKS_H */

@@ -97,9 +97,6 @@
 #include "memdebug.h"
 
 
-#define DEBUG_ME  0
-
-
 /* Uncomment the ALLOW_RENEG line to a real #define if you want to allow TLS
    renegotiations when built with BoringSSL. Renegotiating is non-compliant
    with HTTP/2 and "an extremely dangerous protocol feature". Beware.
@@ -285,6 +282,7 @@ struct ssl_backend_data {
   SSL_CTX* ctx;
   SSL*     handle;
   X509*    server_cert;
+  BIO_METHOD *bio_method;
   CURLcode io_result;       /* result of last BIO cfilter operation */
 #ifndef HAVE_KEYLOG_CALLBACK
   /* Set to true once a valid keylog entry has been created to avoid dupes. */
@@ -710,10 +708,8 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
-#if DEBUG_ME
-  DEBUGF(infof(data, CFMSG(cf, "bio_cf_out_write(len=%d) -> %d, err=%d"),
-         blen, (int)nwritten, result));
-#endif
+  DEBUGF(LOG_CF(data, cf, "bio_cf_out_write(len=%d) -> %d, err=%d",
+                blen, (int)nwritten, result));
   BIO_clear_retry_flags(bio);
   connssl->backend->io_result = result;
   if(nwritten < 0) {
@@ -737,10 +733,8 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
-#if DEBUG_ME
-  DEBUGF(infof(data, CFMSG(cf, "bio_cf_in_read(len=%d) -> %d, err=%d"),
-         blen, (int)nread, result));
-#endif
+  DEBUGF(LOG_CF(data, cf, "bio_cf_in_read(len=%d) -> %d, err=%d",
+                blen, (int)nread, result));
   BIO_clear_retry_flags(bio);
   connssl->backend->io_result = result;
   if(nread < 0) {
@@ -750,45 +744,47 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
   return (int)nread;
 }
 
-static BIO_METHOD *bio_cf_method = NULL;
-
 #if USE_PRE_1_1_API
 
 static BIO_METHOD bio_cf_meth_1_0 = {
-    BIO_TYPE_MEM,
-    "OpenSSL CF BIO",
-    bio_cf_out_write,
-    bio_cf_in_read,
-    NULL,                    /* puts is never called */
-    NULL,                    /* gets is never called */
-    bio_cf_ctrl,
-    bio_cf_create,
-    bio_cf_destroy,
-    NULL
+  BIO_TYPE_MEM,
+  "OpenSSL CF BIO",
+  bio_cf_out_write,
+  bio_cf_in_read,
+  NULL,                    /* puts is never called */
+  NULL,                    /* gets is never called */
+  bio_cf_ctrl,
+  bio_cf_create,
+  bio_cf_destroy,
+  NULL
 };
 
-static void bio_cf_init_methods(void)
+static BIO_METHOD *bio_cf_method_create(void)
 {
-  bio_cf_method = &bio_cf_meth_1_0;
+  return &bio_cf_meth_1_0;
 }
 
-#define bio_cf_free_methods() Curl_nop_stmt
+#define bio_cf_method_free(m) Curl_nop_stmt
 
 #else
 
-static void bio_cf_init_methods(void)
+static BIO_METHOD *bio_cf_method_create(void)
 {
-    bio_cf_method = BIO_meth_new(BIO_TYPE_MEM, "OpenSSL CF BIO");
-    BIO_meth_set_write(bio_cf_method, &bio_cf_out_write);
-    BIO_meth_set_read(bio_cf_method, &bio_cf_in_read);
-    BIO_meth_set_ctrl(bio_cf_method, &bio_cf_ctrl);
-    BIO_meth_set_create(bio_cf_method, &bio_cf_create);
-    BIO_meth_set_destroy(bio_cf_method, &bio_cf_destroy);
+  BIO_METHOD *m = BIO_meth_new(BIO_TYPE_MEM, "OpenSSL CF BIO");
+  if(m) {
+    BIO_meth_set_write(m, &bio_cf_out_write);
+    BIO_meth_set_read(m, &bio_cf_in_read);
+    BIO_meth_set_ctrl(m, &bio_cf_ctrl);
+    BIO_meth_set_create(m, &bio_cf_create);
+    BIO_meth_set_destroy(m, &bio_cf_destroy);
+  }
+  return m;
 }
 
-static void bio_cf_free_methods(void)
+static void bio_cf_method_free(BIO_METHOD *m)
 {
-    BIO_meth_free(bio_cf_method);
+  if(m)
+    BIO_meth_free(m);
 }
 
 #endif
@@ -1751,7 +1747,6 @@ static int ossl_init(void)
   OpenSSL_add_all_algorithms();
 #endif
 
-  bio_cf_init_methods();
   Curl_tls_keylog_open();
 
   /* Initialize the extra data indexes */
@@ -1796,7 +1791,6 @@ static void ossl_cleanup(void)
 #endif
 
   Curl_tls_keylog_close();
-  bio_cf_free_methods();
 }
 
 /*
@@ -1967,6 +1961,10 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(backend->ctx) {
     SSL_CTX_free(backend->ctx);
     backend->ctx = NULL;
+  }
+  if(backend->bio_method) {
+    bio_cf_method_free(backend->bio_method);
+    backend->bio_method = NULL;
   }
 }
 
@@ -2735,7 +2733,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     }
 
     txt_len = msnprintf(ssl_buf, sizeof(ssl_buf),
-                        CFMSG(cf, "%s (%s), %s, %s (%d):\n"),
+                        "%s (%s), %s, %s (%d):\n",
                         verstr, direction?"OUT":"IN",
                         tls_rt_name, msg_name, msg_type);
     if(0 <= txt_len && (unsigned)txt_len < sizeof(ssl_buf)) {
@@ -3068,6 +3066,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
   const bool verifypeer = conn_config->verifypeer;
   bool imported_native_ca = false;
+  bool imported_ca_info_blob = false;
 
   if(!store)
     return CURLE_OUT_OF_MEMORY;
@@ -3227,33 +3226,49 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
       /* Only warn if no certificate verification is required. */
       infof(data, "error importing CA certificate blob, continuing anyway");
     }
+    else {
+      imported_ca_info_blob = true;
+      infof(data, "successfully imported CA certificate blob");
+    }
   }
 
-  if(verifypeer && !imported_native_ca && (ssl_cafile || ssl_capath)) {
+  if(verifypeer && (ssl_cafile || ssl_capath)) {
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
   /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
-    if(ssl_cafile &&
-       !X509_STORE_load_file(store, ssl_cafile)) {
-      /* Fail if we insist on successfully verifying the server. */
-      failf(data, "error setting certificate file: %s", ssl_cafile);
-      return CURLE_SSL_CACERT_BADFILE;
+    if(ssl_cafile && !X509_STORE_load_file(store, ssl_cafile)) {
+      if(!imported_native_ca && !imported_ca_info_blob) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error setting certificate file: %s", ssl_cafile);
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+      else
+        infof(data, "error setting certificate file, continuing anyway");
     }
-    if(ssl_capath &&
-       !X509_STORE_load_path(store, ssl_capath)) {
-      /* Fail if we insist on successfully verifying the server. */
-      failf(data, "error setting certificate path: %s", ssl_capath);
-      return CURLE_SSL_CACERT_BADFILE;
+    if(ssl_capath && !X509_STORE_load_path(store, ssl_capath)) {
+      if(!imported_native_ca && !imported_ca_info_blob) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error setting certificate path: %s", ssl_capath);
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+      else
+        infof(data, "error setting certificate path, continuing anyway");
     }
 #else
     /* tell OpenSSL where to find CA certificates that are used to verify the
        server's certificate. */
     if(!X509_STORE_load_locations(store, ssl_cafile, ssl_capath)) {
-      /* Fail if we insist on successfully verifying the server. */
-      failf(data, "error setting certificate verify locations:"
-            "  CAfile: %s CApath: %s",
-            ssl_cafile ? ssl_cafile : "none",
-            ssl_capath ? ssl_capath : "none");
-      return CURLE_SSL_CACERT_BADFILE;
+      if(!imported_native_ca && !imported_ca_info_blob) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error setting certificate verify locations:"
+              "  CAfile: %s CApath: %s",
+              ssl_cafile ? ssl_cafile : "none",
+              ssl_capath ? ssl_capath : "none");
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+      else {
+        infof(data, "error setting certificate verify locations,"
+              " continuing anyway");
+      }
     }
 #endif
     infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
@@ -3261,8 +3276,8 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   }
 
 #ifdef CURL_CA_FALLBACK
-  if(verifypeer &&
-     !ca_info_blob && !ssl_cafile && !ssl_capath && !imported_native_ca) {
+  if(verifypeer && !ssl_cafile && !ssl_capath &&
+     !imported_native_ca && !imported_ca_info_blob) {
     /* verifying the peer without any CA certificates won't
        work so use openssl's built-in default as fallback */
     X509_STORE_set_default_paths(store);
@@ -3398,9 +3413,9 @@ static void set_cached_x509_store(struct Curl_cfilter *cf,
   }
 }
 
-static CURLcode set_up_x509_store(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct ssl_backend_data *backend)
+CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   SSL_CTX *ssl_ctx)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -3420,10 +3435,10 @@ static CURLcode set_up_x509_store(struct Curl_cfilter *cf,
 
   cached_store = get_cached_x509_store(cf, data);
   if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {
-    SSL_CTX_set_cert_store(backend->ctx, cached_store);
+    SSL_CTX_set_cert_store(ssl_ctx, cached_store);
   }
   else {
-    X509_STORE *store = SSL_CTX_get_cert_store(backend->ctx);
+    X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
 
     result = populate_x509_store(cf, data, store);
     if(result == CURLE_OK && cache_criteria_met) {
@@ -3434,11 +3449,11 @@ static CURLcode set_up_x509_store(struct Curl_cfilter *cf,
   return result;
 }
 #else /* HAVE_SSL_X509_STORE_SHARE */
-static CURLcode set_up_x509_store(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct ssl_backend_data *backend)
+CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   SSL_CTX *ssl_ctx)
 {
-  X509_STORE *store = SSL_CTX_get_cert_store(backend->ctx);
+  X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
 
   return populate_x509_store(cf, data, store);
 }
@@ -3753,7 +3768,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   }
 #endif
 
-  result = set_up_x509_store(cf, data, backend);
+  result = Curl_ssl_setup_x509_store(cf, data, backend->ctx);
   if(result)
     return result;
 
@@ -3854,7 +3869,10 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
     Curl_ssl_sessionid_unlock(data);
   }
 
-  bio = BIO_new(bio_cf_method);
+  backend->bio_method = bio_cf_method_create();
+  if(!backend->bio_method)
+    return CURLE_OUT_OF_MEMORY;
+  bio = BIO_new(backend->bio_method);
   if(!bio)
     return CURLE_OUT_OF_MEMORY;
 

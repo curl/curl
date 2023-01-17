@@ -79,14 +79,6 @@
 #include "memdebug.h"
 
 
-#define DEBUG_CF 1
-
-#if DEBUG_CF
-#define CF_DEBUGF(x) x
-#else
-#define CF_DEBUGF(x) do { } while(0)
-#endif
-
 static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
 {
 #if defined(TCP_NODELAY)
@@ -305,7 +297,6 @@ static int socket_close(struct Curl_easy *data, struct connectdata *conn,
 {
   if(use_callback && conn && conn->fclosesocket) {
     int rc;
-    CF_DEBUGF(infof(data, "socket_close(%d) via callback", (int)sock));
     Curl_multi_closed(data, sock);
     Curl_set_in_callback(data, true);
     rc = conn->fclosesocket(conn->closesocket_client, sock);
@@ -313,7 +304,6 @@ static int socket_close(struct Curl_easy *data, struct connectdata *conn,
     return rc;
   }
 
-  CF_DEBUGF(infof(data, "socket_close(%d)", (int)sock));
   if(conn)
     /* tell the multi-socket code about this */
     Curl_multi_closed(data, sock);
@@ -777,22 +767,20 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
        * closed it) and we just forget about it.
        */
       if(ctx->sock == cf->conn->sock[cf->sockindex]) {
-        CF_DEBUGF(infof(data, CFMSG(cf, "cf_socket_close(%d) active"),
-                 (int)ctx->sock));
+        DEBUGF(LOG_CF(data, cf, "cf_socket_close(%d) active", (int)ctx->sock));
         socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
         cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
       }
       else {
-        CF_DEBUGF(infof(data, CFMSG(cf, "cf_socket_close(%d) no longer at "
-                  "conn->sock[%d], discarding"), (int)ctx->sock));
+        DEBUGF(LOG_CF(data, cf, "cf_socket_close(%d) no longer at "
+                      "conn->sock[], discarding", (int)ctx->sock));
       }
       if(cf->sockindex == FIRSTSOCKET)
         cf->conn->remote_addr = NULL;
     }
     else {
       /* this is our local socket, we did never publish it */
-      CF_DEBUGF(infof(data, CFMSG(cf, "cf_socket_close(%d) local"),
-               (int)ctx->sock));
+      DEBUGF(LOG_CF(data, cf, "cf_socket_close(%d) local", (int)ctx->sock));
       sclose(ctx->sock);
     }
     ctx->sock = CURL_SOCKET_BAD;
@@ -807,6 +795,7 @@ static void cf_socket_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct cf_socket_ctx *ctx = cf->ctx;
 
   cf_socket_close(cf, data);
+  DEBUGF(LOG_CF(data, cf, "destroy"));
   free(ctx);
   cf->ctx = NULL;
 }
@@ -1018,7 +1007,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
   CURLcode result = CURLE_COULDNT_CONNECT;
   int rc = 0;
 
-  CF_DEBUGF(infof(data, CFMSG(cf, "connect")));
+  DEBUGF(LOG_CF(data, cf, "connect"));
   (void)data;
   if(cf->connected) {
     *done = TRUE;
@@ -1036,7 +1025,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     if(result)
       goto out;
 
-    CF_DEBUGF(infof(data, CFMSG(cf, "connect opened(%d)"), (int)ctx->sock));
+    DEBUGF(LOG_CF(data, cf, "connect opened(%d)", (int)ctx->sock));
     /* Connect TCP socket */
     rc = do_connect(cf, data);
     if(-1 == rc) {
@@ -1141,8 +1130,8 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(data->conn == cf->conn);
   nwritten = Curl_send_plain(data, cf->sockindex, buf, len, err);
-  CF_DEBUGF(infof(data, CFMSG(cf, "send(len=%zu) -> %d, err=%d"),
-            len, (int)nwritten, *err));
+  DEBUGF(LOG_CF(data, cf, "send(len=%zu) -> %d, err=%d",
+                len, (int)nwritten, *err));
   return nwritten;
 }
 
@@ -1153,8 +1142,8 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(data->conn == cf->conn);
   nread = Curl_recv_plain(data, cf->sockindex, buf, len, err);
-  CF_DEBUGF(infof(data, CFMSG(cf, "recv(len=%zu) -> %d, err=%d"),
-            len, (int)nread, *err));
+  DEBUGF(LOG_CF(data, cf, "recv(len=%zu) -> %d, err=%d", len, (int)nread,
+                *err));
   return nread;
 }
 
@@ -1263,9 +1252,10 @@ static bool cf_socket_conn_is_alive(struct Curl_cfilter *cf,
   return TRUE;
 }
 
-static const struct Curl_cftype cft_tcp = {
+struct Curl_cftype Curl_cft_tcp = {
   "TCP",
   CF_TYPE_IP_CONNECT,
+  CURL_LOG_DEFAULT,
   cf_socket_destroy,
   cf_tcp_connect,
   cf_socket_close,
@@ -1300,7 +1290,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
   Curl_sock_assign_addr(&ctx->addr, ai, ctx->transport);
   ctx->sock = CURL_SOCKET_BAD;
 
-  result = Curl_cf_create(&cf, &cft_tcp, ctx);
+  result = Curl_cf_create(&cf, &Curl_cft_tcp, ctx);
 
 out:
   *pcf = (!result)? cf : NULL;
@@ -1342,9 +1332,10 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
   return result;
 }
 
-static const struct Curl_cftype cft_udp = {
+struct Curl_cftype Curl_cft_udp = {
   "UDP",
   CF_TYPE_IP_CONNECT,
+  CURL_LOG_DEFAULT,
   cf_socket_destroy,
   cf_udp_connect,
   cf_socket_close,
@@ -1379,7 +1370,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
   Curl_sock_assign_addr(&ctx->addr, ai, ctx->transport);
   ctx->sock = CURL_SOCKET_BAD;
 
-  result = Curl_cf_create(&cf, &cft_udp, ctx);
+  result = Curl_cf_create(&cf, &Curl_cft_udp, ctx);
 
 out:
   *pcf = (!result)? cf : NULL;
@@ -1392,9 +1383,10 @@ out:
 }
 
 /* this is the TCP filter which can also handle this case */
-static const struct Curl_cftype cft_unix = {
+struct Curl_cftype Curl_cft_unix = {
   "UNIX",
   CF_TYPE_IP_CONNECT,
+  CURL_LOG_DEFAULT,
   cf_socket_destroy,
   cf_tcp_connect,
   cf_socket_close,
@@ -1429,7 +1421,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
   Curl_sock_assign_addr(&ctx->addr, ai, ctx->transport);
   ctx->sock = CURL_SOCKET_BAD;
 
-  result = Curl_cf_create(&cf, &cft_unix, ctx);
+  result = Curl_cf_create(&cf, &Curl_cft_unix, ctx);
 
 out:
   *pcf = (!result)? cf : NULL;
@@ -1455,9 +1447,10 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
   return CURLE_FAILED_INIT;
 }
 
-static const struct Curl_cftype cft_tcp_accept = {
+struct Curl_cftype Curl_cft_tcp_accept = {
   "TCP-ACCEPT",
   CF_TYPE_IP_CONNECT,
+  CURL_LOG_DEFAULT,
   cf_socket_destroy,
   cf_tcp_accept_connect,
   cf_socket_close,
@@ -1492,7 +1485,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
   ctx->transport = conn->transport;
   ctx->sock = *s;
   ctx->accepted = FALSE;
-  result = Curl_cf_create(&cf, &cft_tcp_accept, ctx);
+  result = Curl_cf_create(&cf, &Curl_cft_tcp_accept, ctx);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -1502,8 +1495,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
   set_local_ip(cf, data);
   ctx->active = TRUE;
   cf->connected = TRUE;
-  CF_DEBUGF(infof(data, CFMSG(cf, "Curl_conn_tcp_listen_set(%d)"),
-            (int)ctx->sock));
+  DEBUGF(LOG_CF(data, cf, "Curl_conn_tcp_listen_set(%d)", (int)ctx->sock));
 
 out:
   if(result) {
@@ -1521,7 +1513,7 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
   struct cf_socket_ctx *ctx = NULL;
 
   cf = conn->cfilter[sockindex];
-  if(!cf || cf->cft != &cft_tcp_accept)
+  if(!cf || cf->cft != &Curl_cft_tcp_accept)
     return CURLE_FAILED_INIT;
 
   ctx = cf->ctx;
@@ -1534,16 +1526,17 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
   ctx->active = TRUE;
   ctx->accepted = TRUE;
   cf->connected = TRUE;
-  CF_DEBUGF(infof(data, CFMSG(cf, "Curl_conn_tcp_accepted_set(%d)"),
-            (int)ctx->sock));
+  DEBUGF(LOG_CF(data, cf, "Curl_conn_tcp_accepted_set(%d)", (int)ctx->sock));
 
   return CURLE_OK;
 }
 
 bool Curl_cf_is_socket(struct Curl_cfilter *cf)
 {
-  return cf && (cf->cft == &cft_tcp || cf->cft == &cft_udp ||
-                cf->cft == &cft_unix || cf->cft == &cft_tcp_accept);
+  return cf && (cf->cft == &Curl_cft_tcp ||
+                cf->cft == &Curl_cft_udp ||
+                cf->cft == &Curl_cft_unix ||
+                cf->cft == &Curl_cft_tcp_accept);
 }
 
 CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,

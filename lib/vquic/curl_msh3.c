@@ -30,12 +30,14 @@
 #include "timeval.h"
 #include "multiif.h"
 #include "sendf.h"
+#include "curl_log.h"
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
 #include "h2h3.h"
 #include "curl_msh3.h"
 #include "socketpair.h"
+#include "vquic/vquic.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -44,13 +46,14 @@
 
 #define DEBUG_CF 1
 
-#if DEBUG_CF
+#if DEBUG_CF && defined(DEBUGBUILD)
 #define CF_DEBUGF(x) x
 #else
 #define CF_DEBUGF(x) do { } while(0)
 #endif
 
-#define MSH3_REQ_INIT_BUF_LEN 8192
+#define MSH3_REQ_INIT_BUF_LEN 16384
+#define MSH3_REQ_MAX_BUF_LEN 0x100000
 
 #ifdef _WIN32
 #define msh3_lock CRITICAL_SECTION
@@ -74,17 +77,25 @@
 #endif /* _WIN32 */
 
 
+static void MSH3_CALL msh3_conn_connected(MSH3_CONNECTION *Connection,
+                                          void *IfContext);
+static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
+                                          void *IfContext);
+static void MSH3_CALL msh3_conn_new_request(MSH3_CONNECTION *Connection,
+                                          void *IfContext,
+                                          MSH3_REQUEST *Request);
 static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
                                            void *IfContext,
                                            const MSH3_HEADER *Header);
-static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
-                                        void *IfContext, uint32_t Length,
+static bool MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
+                                        void *IfContext, uint32_t *Length,
                                         const uint8_t *Data);
 static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
                                     bool Aborted, uint64_t AbortError);
-static void MSH3_CALL msh3_shutdown(MSH3_REQUEST *Request, void *IfContext);
-static void MSH3_CALL msh3_send_complete(MSH3_REQUEST *Request,
-                                         void *IfContext, void *SendContext);
+static void MSH3_CALL msh3_shutdown_complete(MSH3_REQUEST *Request,
+                                             void *IfContext);
+static void MSH3_CALL msh3_data_sent(MSH3_REQUEST *Request,
+                                     void *IfContext, void *SendContext);
 
 
 void Curl_msh3_ver(char *p, size_t len)
@@ -104,15 +115,59 @@ struct cf_msh3_ctx {
   curl_socket_t sock[2]; /* fake socket pair until we get support in msh3 */
   char l_ip[MAX_IPADR_LEN];          /* local IP as string */
   int l_port;                        /* local port number */
+  /* Flags written by msh3/msquic thread */
+  bool handshake_complete;
+  bool handshake_succeeded;
+  bool connected;
+  /* Flags written by curl thread */
+  BIT(verbose);
   BIT(active);
 };
+
+static const MSH3_CONNECTION_IF msh3_conn_if = {
+  msh3_conn_connected,
+  msh3_conn_shutdown_complete,
+  msh3_conn_new_request
+};
+
+static void MSH3_CALL msh3_conn_connected(MSH3_CONNECTION *Connection,
+                                          void *IfContext)
+{
+  struct cf_msh3_ctx *ctx = IfContext;
+  (void)Connection;
+  if(ctx->verbose)
+    CF_DEBUGF(fprintf(stderr, "* [MSH3] evt: connected\n"));
+  ctx->handshake_succeeded = true;
+  ctx->connected = true;
+  ctx->handshake_complete = true;
+}
+
+static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
+                                          void *IfContext)
+{
+  struct cf_msh3_ctx *ctx = IfContext;
+  (void)Connection;
+  if(ctx->verbose)
+    CF_DEBUGF(fprintf(stderr, "* [MSH3] evt: shutdown complete\n"));
+  ctx->connected = false;
+  ctx->handshake_complete = true;
+}
+
+static void MSH3_CALL msh3_conn_new_request(MSH3_CONNECTION *Connection,
+                                          void *IfContext,
+                                          MSH3_REQUEST *Request)
+{
+  (void)Connection;
+  (void)IfContext;
+  (void)Request;
+}
 
 static const MSH3_REQUEST_IF msh3_request_if = {
   msh3_header_received,
   msh3_data_received,
   msh3_complete,
-  msh3_shutdown,
-  msh3_send_complete
+  msh3_shutdown_complete,
+  msh3_data_sent
 };
 
 static CURLcode msh3_data_setup(struct Curl_cfilter *cf,
@@ -123,7 +178,7 @@ static CURLcode msh3_data_setup(struct Curl_cfilter *cf,
 
   DEBUGASSERT(stream);
   if(!stream->recv_buf) {
-    CF_DEBUGF(infof(data, CFMSG(cf, "msh3_data_setup")));
+    DEBUGF(LOG_CF(data, cf, "req: setup"));
     stream->recv_buf = malloc(MSH3_REQ_INIT_BUF_LEN);
     if(!stream->recv_buf) {
       return CURLE_OUT_OF_MEMORY;
@@ -131,6 +186,7 @@ static CURLcode msh3_data_setup(struct Curl_cfilter *cf,
     stream->req = ZERO_NULL;
     msh3_lock_initialize(&stream->recv_lock);
     stream->recv_buf_alloc = MSH3_REQ_INIT_BUF_LEN;
+    stream->recv_buf_max = MSH3_REQ_MAX_BUF_LEN;
     stream->recv_header_len = 0;
     stream->recv_header_complete = false;
     stream->recv_data_len = 0;
@@ -220,8 +276,8 @@ release_lock:
   msh3_lock_release(&stream->recv_lock);
 }
 
-static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
-                                         void *IfContext, uint32_t Length,
+static bool MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
+                                         void *IfContext, uint32_t *Length,
                                          const uint8_t *Data)
 {
   struct Curl_easy *data = IfContext;
@@ -229,13 +285,19 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
   size_t cur_recv_len = stream->recv_header_len + stream->recv_data_len;
 
   (void)Request;
-  CF_DEBUGF(fprintf(stderr, "* msh3_data_received %u. %zu buffered, "
-            "%zu allocated\n",
-            Length, cur_recv_len, stream->recv_buf_alloc));
+  if(data && data->set.verbose)
+    CF_DEBUGF(fprintf(stderr, "* [MSH3] req: evt: received %u. %zu buffered, "
+              "%zu allocated\n",
+              *Length, cur_recv_len, stream->recv_buf_alloc));
+  /* TODO - Update this code to limit data bufferring by `stream->recv_buf_max`
+     and return `false` when we reach that limit. Then, when curl drains some
+     of the buffer, making room, call MsH3RequestSetReceiveEnabled to enable
+     receive callbacks again. */
   msh3_lock_acquire(&stream->recv_lock);
 
   if(!stream->recv_header_complete) {
-    CF_DEBUGF(fprintf(stderr, "* Headers complete!\n"));
+    if(data && data->set.verbose)
+      CF_DEBUGF(fprintf(stderr, "* [MSH3] req: Headers complete!\n"));
     if(!msh3request_ensure_room(stream, 2)) {
       stream->recv_error = CURLE_OUT_OF_MEMORY;
       goto release_lock;
@@ -245,16 +307,17 @@ static void MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
     stream->recv_header_complete = true;
     cur_recv_len += 2;
   }
-  if(!msh3request_ensure_room(stream, Length)) {
+  if(!msh3request_ensure_room(stream, *Length)) {
     stream->recv_error = CURLE_OUT_OF_MEMORY;
     goto release_lock;
   }
-  memcpy(stream->recv_buf + cur_recv_len, Data, Length);
-  stream->recv_data_len += (size_t)Length;
+  memcpy(stream->recv_buf + cur_recv_len, Data, *Length);
+  stream->recv_data_len += (size_t)*Length;
   data->state.drain = 1;
 
 release_lock:
   msh3_lock_release(&stream->recv_lock);
+  return true;
 }
 
 static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
@@ -265,8 +328,9 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
 
   (void)Request;
   (void)AbortError;
-  CF_DEBUGF(fprintf(stderr, "* msh3_complete, aborted=%s\n",
-            Aborted ? "true" : "false"));
+  if(data && data->set.verbose)
+    CF_DEBUGF(fprintf(stderr, "* [MSH3] req: evt: complete, aborted=%s\n",
+              Aborted ? "true" : "false"));
   msh3_lock_acquire(&stream->recv_lock);
   if(Aborted) {
     stream->recv_error = CURLE_HTTP3; /* TODO - how do we pass AbortError? */
@@ -276,7 +340,8 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
   msh3_lock_release(&stream->recv_lock);
 }
 
-static void MSH3_CALL msh3_shutdown(MSH3_REQUEST *Request, void *IfContext)
+static void MSH3_CALL msh3_shutdown_complete(MSH3_REQUEST *Request,
+                                             void *IfContext)
 {
   struct Curl_easy *data = IfContext;
   struct HTTP *stream = data->req.p.http;
@@ -284,8 +349,8 @@ static void MSH3_CALL msh3_shutdown(MSH3_REQUEST *Request, void *IfContext)
   (void)stream;
 }
 
-static void MSH3_CALL msh3_send_complete(MSH3_REQUEST *Request,
-                                         void *IfContext, void *SendContext)
+static void MSH3_CALL msh3_data_sent(MSH3_REQUEST *Request,
+                                     void *IfContext, void *SendContext)
 {
   struct Curl_easy *data = IfContext;
   struct HTTP *stream = data->req.p.http;
@@ -301,7 +366,7 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t outsize = 0;
 
   (void)cf;
-  CF_DEBUGF(infof(data, CFMSG(cf, "recv(len=%zu)"), len));
+  DEBUGF(LOG_CF(data, cf, "req: recv with %zu byte buffer", len));
 
   if(stream->recv_error) {
     failf(data, "request aborted");
@@ -324,8 +389,7 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
               stream->recv_header_len + stream->recv_data_len - outsize);
     }
     stream->recv_header_len -= outsize;
-    CF_DEBUGF(infof(data, CFMSG(cf, "returned %zu bytes of headers"),
-              outsize));
+    DEBUGF(LOG_CF(data, cf, "req: returned %zu bytes of header", outsize));
   }
   else if(stream->recv_data_len) {
     outsize = len;
@@ -338,16 +402,16 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
               stream->recv_data_len - outsize);
     }
     stream->recv_data_len -= outsize;
-    CF_DEBUGF(infof(data, CFMSG(cf, "returned %zu bytes of data"), outsize));
+    DEBUGF(LOG_CF(data, cf, "req: returned %zu bytes of data", outsize));
     if(stream->recv_data_len == 0 && stream->recv_data_complete)
       data->state.drain = 1;
   }
   else if(stream->recv_data_complete) {
-    CF_DEBUGF(infof(data, CFMSG(cf, "receive complete")));
+    DEBUGF(LOG_CF(data, cf, "req: receive complete"));
     data->state.drain = 0;
   }
   else {
-    CF_DEBUGF(infof(data, CFMSG(cf, "nothing here, call again")));
+    DEBUGF(LOG_CF(data, cf, "req: nothing here, call again"));
     *err = CURLE_AGAIN;
     outsize = -1;
   }
@@ -368,6 +432,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   /* Sizes must match for cast below to work" */
   DEBUGASSERT(sizeof(MSH3_HEADER) == sizeof(struct h2h3pseudo));
+  DEBUGF(LOG_CF(data, cf, "req: send %zu bytes", len));
 
   if(!stream->req) {
     /* The first send on the request contains the headers and possibly some
@@ -386,8 +451,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       return -1;
     }
 
-    CF_DEBUGF(infof(data, CFMSG(cf, "opening request(%zu headers, len=%zu)"),
-              hreq->entries, len - hdrlen));
+    DEBUGF(LOG_CF(data, cf, "req: send %zu headers", hreq->entries));
     stream->req = MsH3RequestOpen(ctx->qconn, &msh3_request_if, data,
                                   (MSH3_HEADER*)hreq->header, hreq->entries,
                                   hdrlen == len ? MSH3_REQUEST_FLAG_FIN :
@@ -402,7 +466,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     return len;
   }
 
-  CF_DEBUGF(infof(data, CFMSG(cf, "send body(len=%zu)"), len));
+  DEBUGF(LOG_CF(data, cf, "req: send %zd body bytes", len));
   if(len > 0xFFFFFFFF) {
     /* msh3 doesn't support size_t sends currently. */
     *err = CURLE_SEND_ERROR;
@@ -442,8 +506,8 @@ static int cf_msh3_get_select_socks(struct Curl_cfilter *cf,
       data->state.drain = 1;
     }
   }
-  CF_DEBUGF(infof(data, CFMSG(cf, "get_select_socks %u -> %d"),
-            (uint32_t)data->state.drain, bitmap));
+  DEBUGF(LOG_CF(data, cf, "select_sock %u -> %d",
+                (uint32_t)data->state.drain, bitmap));
 
   return bitmap;
 }
@@ -454,7 +518,8 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
   struct HTTP *stream = data->req.p.http;
 
   (void)cf;
-  CF_DEBUGF(infof((struct Curl_easy *)data, CFMSG(cf, "data_pending")));
+  DEBUGF(LOG_CF((struct Curl_easy *)data, cf, "data pending = %hhu",
+                (bool)(stream->recv_header_len || stream->recv_data_len)));
   return stream->recv_header_len || stream->recv_data_len;
 }
 
@@ -490,7 +555,7 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
     break;
 
   case CF_CTRL_DATA_DONE:
-    CF_DEBUGF(infof(data, CFMSG(cf, "Curl_quic_done")));
+    DEBUGF(LOG_CF(data, cf, "req: done"));
     if(stream) {
       if(stream->recv_buf) {
         Curl_safefree(stream->recv_buf);
@@ -504,11 +569,12 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
     break;
 
   case CF_CTRL_DATA_DONE_SEND:
-    CF_DEBUGF(infof(data, CFMSG(cf, "Curl_quic_done_sending")));
+    DEBUGF(LOG_CF(data, cf, "req: send done"));
     stream->upload_done = TRUE;
     break;
 
   case CF_CTRL_CONN_INFO_UPDATE:
+    DEBUGF(LOG_CF(data, cf, "req: update"));
     cf_msh3_active(cf, data);
     break;
 
@@ -523,22 +589,26 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   bool verify = !!cf->conn->ssl_config.verifypeer;
+  MSH3_ADDR addr = {0};
+  memcpy(&addr, &ctx->addr.sa_addr, ctx->addr.addrlen);
+  MSH3_SET_PORT(&addr, (uint16_t)cf->conn->remote_port);
+  ctx->verbose = (data && data->set.verbose);
 
   if(verify && (cf->conn->ssl_config.CAfile || cf->conn->ssl_config.CApath)) {
-    /* TODO: find out if there is a way to provide trust anchors to MSH3 */
+    /* TODO: need a way to provide trust anchors to MSH3 */
 #ifdef DEBUGBUILD
     /* we need this for our test cases to run */
-    CF_DEBUGF(infof(data, CFMSG(cf, "non-standard CA not supported"
-              "switching off verifypeer in DEBUG mode")));
+    DEBUGF(LOG_CF(data, cf, "non-standard CA not supported, "
+                  "switching off verifypeer in DEBUG mode"));
     verify = 0;
 #else
-    failf(data, "non-standard CA not supported via MsH3");
-    return CURLE_FAILED_INIT;
+    DEBUGF(LOG_CF(data, cf, "non-standard CA not supported, "
+                  "attempting with built-in verification"));
 #endif
   }
 
-  CF_DEBUGF(infof(data, CFMSG(cf, "connecting to %s:%d (verify=%d)"),
-            cf->conn->host.name, (int)cf->conn->remote_port, verify));
+  DEBUGF(LOG_CF(data, cf, "connecting to %s:%d (verify=%d)",
+                cf->conn->host.name, (int)cf->conn->remote_port, verify));
 
   ctx->api = MsH3ApiOpen();
   if(!ctx->api) {
@@ -547,8 +617,10 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   }
 
   ctx->qconn = MsH3ConnectionOpen(ctx->api,
+                                  &msh3_conn_if,
+                                  ctx,
                                   cf->conn->host.name,
-                                  (uint16_t)cf->conn->remote_port,
+                                  &addr,
                                   !verify);
   if(!ctx->qconn) {
     failf(data, "can't create msh3 connection");
@@ -567,7 +639,6 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
                                 bool blocking, bool *done)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  MSH3_CONNECTION_STATE state;
   CURLcode result = CURLE_OK;
 
   (void)blocking;
@@ -591,41 +662,33 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
       goto out;
   }
 
-  state = MsH3ConnectionGetState(ctx->qconn, FALSE);
-  if(state == MSH3_CONN_DISCONNECTED) {
-    failf(data, "failed to connect, MsH3 reports `DISCONNECTED`");
-    result = CURLE_COULDNT_CONNECT;
-    goto out;
-  }
-  if(state == MSH3_CONN_HANDSHAKE_FAILED) {
-    failf(data, "failed to connect, handshake failed");
-    result = CURLE_COULDNT_CONNECT;
-    goto out;
-  }
-
-  if(state == MSH3_CONN_CONNECTED) {
-    DEBUGF(infof(data, "msh3 established connection"));
-    cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-    cf->conn->httpversion = 30;
-    cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
-
-    cf->connected = TRUE;
-    cf->conn->alpn = CURL_HTTP_VERSION_3;
-    *done = TRUE;
-    connkeep(cf->conn, "HTTP/3 default");
+  if(ctx->handshake_complete) {
+    if(ctx->handshake_succeeded) {
+      cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+      cf->conn->httpversion = 30;
+      cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+      cf->connected = TRUE;
+      cf->conn->alpn = CURL_HTTP_VERSION_3;
+      *done = TRUE;
+      connkeep(cf->conn, "HTTP/3 default");
+    }
+    else {
+      failf(data, "failed to connect, handshake failed");
+      result = CURLE_COULDNT_CONNECT;
+    }
   }
 
 out:
   return result;
 }
 
-static void cf_msh3_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cf_msh3_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
 
   (void)data;
-  CF_DEBUGF(infof(data, CFMSG(cf, "clearing ctx")));
   if(ctx) {
+    DEBUGF(LOG_CF(data, cf, "destroying"));
     if(ctx->qconn)
       MsH3ConnectionClose(ctx->qconn);
     if(ctx->api)
@@ -637,13 +700,13 @@ static void cf_msh3_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
        * closed it) and we just forget about it.
        */
       if(ctx->sock[SP_LOCAL] == cf->conn->sock[cf->sockindex]) {
-        CF_DEBUGF(infof(data, CFMSG(cf, "cf_msh3_close(%d) active"),
-                 (int)ctx->sock[SP_LOCAL]));
+        DEBUGF(LOG_CF(data, cf, "cf_msh3_close(%d) active",
+                      (int)ctx->sock[SP_LOCAL]));
         cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
       }
       else {
-        CF_DEBUGF(infof(data, CFMSG(cf, "cf_socket_close(%d) no longer at "
-                  "conn->sock[%d], discarding"), (int)ctx->sock[SP_LOCAL]));
+        DEBUGF(LOG_CF(data, cf, "cf_socket_close(%d) no longer at "
+                      "conn->sock[], discarding", (int)ctx->sock[SP_LOCAL]));
         ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
       }
       if(cf->sockindex == FIRSTSOCKET)
@@ -661,23 +724,10 @@ static void cf_msh3_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static void cf_msh3_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_msh3_ctx *ctx = cf->ctx;
-
-  (void)data;
-  if(ctx) {
-    cf_msh3_ctx_clear(cf, data);
-  }
-}
-
 static void cf_msh3_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct cf_msh3_ctx *ctx = cf->ctx;
-
-  (void)data;
-  cf_msh3_ctx_clear(cf, data);
-  free(ctx);
+  cf_msh3_close(cf, data);
+  free(cf->ctx);
   cf->ctx = NULL;
 }
 
@@ -708,15 +758,14 @@ static bool cf_msh3_conn_is_alive(struct Curl_cfilter *cf,
   struct cf_msh3_ctx *ctx = cf->ctx;
 
   (void)data;
-  if(!ctx || ctx->sock[SP_LOCAL] == CURL_SOCKET_BAD || !ctx->qconn)
-    return FALSE;
-
-  return MSH3_CONN_CONNECTED == MsH3ConnectionGetState(ctx->qconn, FALSE);
+  return ctx && ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD && ctx->qconn &&
+         ctx->connected;
 }
 
-static const struct Curl_cftype cft_msh3 = {
-  "HTTP/3-MSH3",
+struct Curl_cftype Curl_cft_http3 = {
+  "HTTP/3",
   CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX,
+  0,
   cf_msh3_destroy,
   cf_msh3_connect,
   cf_msh3_close,
@@ -752,7 +801,7 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
   ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
   ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
 
-  result = Curl_cf_create(&cf, &cft_msh3, ctx);
+  result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
 
 out:
   *pcf = (!result)? cf : NULL;
@@ -772,7 +821,7 @@ bool Curl_conn_is_msh3(const struct Curl_easy *data,
 
   (void)data;
   for(; cf; cf = cf->next) {
-    if(cf->cft == &cft_msh3)
+    if(cf->cft == &Curl_cft_http3)
       return TRUE;
     if(cf->cft->flags & CF_TYPE_IP_CONNECT)
       return FALSE;

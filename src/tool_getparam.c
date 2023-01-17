@@ -208,6 +208,7 @@ static const struct LongShort aliases[]= {
   {"02",  "http2",                   ARG_NONE},
   {"03",  "http2-prior-knowledge",   ARG_NONE},
   {"04",  "http3",                   ARG_NONE},
+  {"05",  "http3-only",              ARG_NONE},
   {"09",  "http0.9",                 ARG_BOOL},
   {"1",  "tlsv1",                    ARG_NONE},
   {"10",  "tlsv1.0",                 ARG_NONE},
@@ -657,9 +658,20 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
+static void sethttpver(struct GlobalConfig *global,
+                       struct OperationConfig *config,
+                       long httpversion)
+{
+  if(config->httpversion &&
+     (config->httpversion != httpversion))
+    warnf(global, "Overrides previous HTTP version option\n");
+
+  config->httpversion = httpversion;
+}
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
+                            argv_item_t cleararg,
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
@@ -677,10 +689,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   ParameterError err;
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
-#ifdef HAVE_WRITABLE_ARGV
-  argv_item_t clearthis = NULL;
-#endif
-
   static const char *redir_protos[] = {
     "http",
     "https",
@@ -688,6 +696,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     "ftps",
     NULL
   };
+#ifdef HAVE_WRITABLE_ARGV
+  argv_item_t clearthis = NULL;
+#else
+  (void)cleararg;
+#endif
 
   *usedarg = FALSE; /* default is that we don't use the arg */
 
@@ -764,15 +777,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
-#ifdef HAVE_WRITABLE_ARGV
-        clearthis = nextarg;
-#endif
         singleopt = TRUE;   /* don't loop anymore after this */
       }
       else if(!nextarg)
         return PARAM_REQUIRES_PARAMETER;
-      else
+      else {
+#ifdef HAVE_WRITABLE_ARGV
+        clearthis = cleararg;
+#endif
         *usedarg = TRUE; /* mark it as used */
+      }
 
       if((aliases[hit].desc == ARG_FILENAME) &&
          (nextarg[0] == '-') && nextarg[1]) {
@@ -1416,25 +1430,31 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       switch(subletter) {
       case '\0':
         /* HTTP version 1.0 */
-        config->httpversion = CURL_HTTP_VERSION_1_0;
+        sethttpver(global, config, CURL_HTTP_VERSION_1_0);
         break;
       case '1':
         /* HTTP version 1.1 */
-        config->httpversion = CURL_HTTP_VERSION_1_1;
+        sethttpver(global, config, CURL_HTTP_VERSION_1_1);
         break;
       case '2':
         /* HTTP version 2.0 */
-        config->httpversion = CURL_HTTP_VERSION_2_0;
+        sethttpver(global, config, CURL_HTTP_VERSION_2_0);
         break;
       case '3': /* --http2-prior-knowledge */
         /* HTTP version 2.0 over clean TCP */
-        config->httpversion = CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE;
+        sethttpver(global, config, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
         break;
       case '4': /* --http3 */
-        /* HTTP version 3 go over QUIC - at once */
+        /* Try HTTP/3, allow fallback */
         if(!feature_http3)
           return PARAM_LIBCURL_DOESNT_SUPPORT;
-        config->httpversion = CURL_HTTP_VERSION_3;
+        sethttpver(global, config, CURL_HTTP_VERSION_3);
+        break;
+      case '5': /* --http3-only */
+        /* Try HTTP/3 without fallback */
+        if(!feature_http3)
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
+        sethttpver(global, config, CURL_HTTP_VERSION_3ONLY);
         break;
       case '9':
         /* Allow HTTP/0.9 responses! */
@@ -2494,7 +2514,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           }
         }
 
-        result = getparameter(orig_opt, nextarg, &passarg,
+        result = getparameter(orig_opt, nextarg, argv[i + 1], &passarg,
                               global, config);
 
         curlx_unicodefree(nextarg);
@@ -2533,7 +2553,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter("--url", orig_opt, &used, global, config);
+      result = getparameter("--url", orig_opt, argv[i], &used, global, config);
     }
 
     if(!result)
