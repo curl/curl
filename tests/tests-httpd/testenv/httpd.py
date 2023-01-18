@@ -92,11 +92,17 @@ class Httpd:
         return os.path.exists(self._cmd)
 
     def _run(self, args, intext=''):
-        os.environ['APACHE_RUN_DIR'] = self._run_dir
-        os.environ['APACHE_LOCK_DIR'] = self._lock_dir
+        env = {}
+        for key, val in os.environ.items():
+            env[key] = val
+        env['APACHE_RUN_DIR'] = self._run_dir
+        env['APACHE_RUN_USER'] = os.environ['USER']
+        env['APACHE_LOCK_DIR'] = self._lock_dir
+        env['APACHE_CONFDIR'] = self._apache_dir
         p = subprocess.run(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                            cwd=self.env.gen_dir,
-                           input=intext.encode() if intext else None)
+                           input=intext.encode() if intext else None,
+                           env=env)
         start = datetime.now()
         return ExecResult(args=args, exit_code=p.returncode,
                           stdout=p.stdout.decode().splitlines(),
@@ -121,6 +127,7 @@ class Httpd:
         r = self._apachectl('start')
         if r.exit_code != 0:
             log.error(f'failed to start httpd: {r}')
+            return False
         return self.wait_live(timeout=timedelta(seconds=5))
 
     def stop(self):
