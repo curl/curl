@@ -19,7 +19,7 @@ on:
 
 concurrency:
   # Hardcoded workflow filename as workflow name above is just Linux again
-  group: ngtcp2-openssl-${{ github.event.pull_request.number || github.sha }}
+  group: pytest-openssl-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
