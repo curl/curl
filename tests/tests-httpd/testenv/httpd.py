@@ -60,6 +60,8 @@ class Httpd:
         self.env = env
         self._cmd = env.apachectl
         self._apache_dir = os.path.join(env.gen_dir, 'apache')
+        self._run_dir = os.path.join(self._apache_dir, 'run')
+        self._lock_dir = os.path.join(self._apache_dir, 'locks')
         self._docs_dir = os.path.join(self._apache_dir, 'docs')
         self._conf_dir = os.path.join(self._apache_dir, 'conf')
         self._conf_file = os.path.join(self._conf_dir, 'test.conf')
@@ -90,6 +92,8 @@ class Httpd:
         return os.path.exists(self._cmd)
 
     def _run(self, args, intext=''):
+        os.environ['APACHE_RUN_DIR'] = self._run_dir
+        os.environ['APACHE_LOCK_DIR'] = self._lock_dir
         p = subprocess.run(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                            cwd=self.env.gen_dir,
                            input=intext.encode() if intext else None)
