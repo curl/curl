@@ -1,0 +1,106 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Linux
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**/*.md'
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: awslc-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  autoconf:
+    name: awslc (autoconf)
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 30
+
+    steps:
+    - run: |
+        sudo apt-get update --yes
+        sudo apt-get install --yes libtool autoconf automake pkg-config stunnel4
+        # ensure we don't pick up openssl in this build
+        sudo apt remove --yes libssl-dev
+        sudo python3 -m pip install impacket
+      name: 'install prereqs and impacket'
+
+    - run: |
+        curl -LO https://github.com/awslabs/aws-lc/archive/refs/tags/v1.3.0.tar.gz
+        tar xzf v1.3.0.tar.gz
+        mkdir aws-lc-1.3.0-build
+        cd aws-lc-1.3.0-build
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-1.3.0
+        cmake --build . --parallel
+        cmake --install .
+      name: 'install awslc'
+
+    - uses: actions/checkout@v3
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure --enable-warnings --enable-werror --with-openssl=$HOME/awslc
+      name: 'configure'
+
+    - run: make -j 2 V=1
+      name: 'make'
+
+    - run: make -j 2 V=1 examples
+      name: 'make examples'
+
+    - run: make -j 2 V=1 -C tests
+      name: 'make tests'
+
+    - run: make V=1 test-ci
+      name: 'run tests'
+
+  cmake:
+    name: awslc (cmake)
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 15
+
+    steps:
+    - run: |
+        sudo apt-get update
+        sudo apt-get install cmake stunnel4
+        # ensure we don't pick up openssl in this build
+        sudo apt remove --yes libssl-dev
+        sudo python3 -m pip install impacket
+      name: 'install prereqs and impacket'
+
+    - run: |
+        curl -LO https://github.com/awslabs/aws-lc/archive/refs/tags/v1.3.0.tar.gz
+        tar xzf v1.3.0.tar.gz
+        mkdir aws-lc-1.3.0-build
+        cd aws-lc-1.3.0-build
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-1.3.0
+        cmake --build . --parallel
+        cmake --install .
+      name: 'install awslc'
+
+    - uses: actions/checkout@v3
+
+    # CMAKE_COMPILE_WARNING_AS_ERROR is available in cmake 3.24 or later
+    - run: cmake -Bbuild -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON .
+      name: 'cmake generate'
+
+    - run: cmake --build build --parallel
+      name: 'cmake build'
+
+    - run: cmake --install build --prefix $HOME/curl --strip
+      name: 'cmake install'

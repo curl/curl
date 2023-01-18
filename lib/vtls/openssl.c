@@ -207,8 +207,10 @@
 #if ((OPENSSL_VERSION_NUMBER >= 0x10101000L) && \
      !defined(LIBRESSL_VERSION_NUMBER) &&       \
      !defined(OPENSSL_IS_BORINGSSL))
-#define HAVE_SSL_CTX_SET_CIPHERSUITES
-#define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
+  #define HAVE_SSL_CTX_SET_CIPHERSUITES
+  #if !defined(OPENSSL_IS_AWSLC)
+    #define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
+  #endif
 #endif
 
 /*
@@ -227,6 +229,8 @@
 #define OSSL_PACKAGE "LibreSSL"
 #elif defined(OPENSSL_IS_BORINGSSL)
 #define OSSL_PACKAGE "BoringSSL"
+#elif defined(OPENSSL_IS_AWSLC)
+#define OSSL_PACKAGE "AWS-LC"
 #else
 #define OSSL_PACKAGE "OpenSSL"
 #endif
@@ -257,7 +261,8 @@
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
     !(defined(LIBRESSL_VERSION_NUMBER) && \
       LIBRESSL_VERSION_NUMBER < 0x2070100fL) && \
-    !defined(OPENSSL_IS_BORINGSSL)
+    !defined(OPENSSL_IS_BORINGSSL) && \
+    !defined(OPENSSL_IS_AWSLC)
 #define HAVE_OPENSSL_VERSION
 #endif
 
@@ -393,7 +398,7 @@ static void X509V3_ext(struct Curl_easy *data,
   }
 }
 
-#ifdef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 typedef size_t numcert_t;
 #else
 typedef int numcert_t;
@@ -926,7 +931,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
     *buf = '\0';
   }
 
-#ifdef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
   ERR_error_string_n((uint32_t)error, buf, size);
 #else
   ERR_error_string_n(error, buf, size);
@@ -2147,7 +2152,7 @@ ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   altnames = X509_get_ext_d2i(server_cert, NID_subject_alt_name, NULL, NULL);
 
   if(altnames) {
-#ifdef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
     size_t numalts;
     size_t i;
 #else
@@ -2716,7 +2721,9 @@ set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
   long curl_ssl_version_max;
 
   /* convert curl min SSL version option to OpenSSL constant */
-#if defined(OPENSSL_IS_BORINGSSL) || defined(LIBRESSL_VERSION_NUMBER)
+#if (defined(OPENSSL_IS_BORINGSSL)  || \
+     defined(OPENSSL_IS_AWSLC)      || \
+     defined(LIBRESSL_VERSION_NUMBER))
   uint16_t ossl_ssl_version_min = 0;
   uint16_t ossl_ssl_version_max = 0;
 #else
@@ -2793,7 +2800,7 @@ set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
 }
 #endif
 
-#ifdef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 typedef uint32_t ctx_option_t;
 #elif OPENSSL_VERSION_NUMBER >= 0x30000000L
 typedef uint64_t ctx_option_t;
@@ -3726,7 +3733,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
     SSL_set_tlsext_status_type(backend->handle, TLSEXT_STATUSTYPE_ocsp);
 #endif
 
-#if defined(OPENSSL_IS_BORINGSSL) && defined(ALLOW_RENEG)
+#if (defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)) && \
+    defined(ALLOW_RENEG)
   SSL_set_renegotiate_mode(backend->handle, ssl_renegotiate_freely);
 #endif
 
@@ -3887,9 +3895,11 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       }
 #if (OPENSSL_VERSION_NUMBER >= 0x10101000L &&   \
      !defined(LIBRESSL_VERSION_NUMBER) &&       \
-     !defined(OPENSSL_IS_BORINGSSL))
+     !defined(OPENSSL_IS_BORINGSSL) &&          \
+     !defined(OPENSSL_IS_AWSLC))
+
       /* SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED is only available on
-         OpenSSL version above v1.1.1, not LibreSSL nor BoringSSL */
+         OpenSSL version above v1.1.1, not LibreSSL, BoringSSL, or AWS-LC */
       else if((lib == ERR_LIB_SSL) &&
               (reason == SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)) {
         /* If client certificate is required, communicate the
@@ -4629,6 +4639,10 @@ static size_t ossl_version(char *buffer, size_t size)
 #else
   return msnprintf(buffer, size, OSSL_PACKAGE);
 #endif
+#elif defined(OPENSSL_IS_AWSLC)
+  return msnprintf(buffer, size, "%s/%s",
+                   OSSL_PACKAGE,
+                   AWSLC_VERSION_NUMBER_STRING);
 #elif defined(HAVE_OPENSSL_VERSION) && defined(OPENSSL_VERSION_STRING)
   return msnprintf(buffer, size, "%s/%s",
                    OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
