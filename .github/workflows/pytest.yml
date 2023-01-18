@@ -45,6 +45,7 @@ jobs:
     - run: |
         sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
+        sudo apt-get install apache2 apache2-dev
         sudo python3 -m pip install impacket pytest cryptography
       name: 'install prereqs and impacket, pytest, crypto'
 
