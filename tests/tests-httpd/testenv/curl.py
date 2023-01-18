@@ -273,7 +273,7 @@ class CurlClient:
             self._curl, "-s", "--path-as-is", "-D", self._headerfile,
         ]
         if self.env.verbose > 2:
-            args.extend(['--trace', self._tracefile])
+            args.extend(['--trace', self._tracefile, '--trace-time'])
 
         for url in urls:
             u = urlparse(urls[0])
