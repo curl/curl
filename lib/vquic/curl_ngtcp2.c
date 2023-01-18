@@ -1472,6 +1472,8 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
 
   infof(data, "Using HTTP/3 Stream ID: %" PRIx64 " (easy handle %p)",
         stream3_id, (void *)data);
+  DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRIx64 "] opened for %s",
+                stream3_id, data->state.url));
 
   Curl_pseudo_free(hreq);
   return CURLE_OK;
