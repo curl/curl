@@ -335,9 +335,18 @@ static struct test_case TEST_CASES[] = {
 #endif
 };
 
+/* copied from hostip.c to switch using SIGALARM for timeouts.
+ * SIGALARM has only seconds resolution, so our tests will not work
+ * here. */
+#if defined(CURLRES_SYNCH) && \
+    defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP)
+#define USE_ALARM_TIMEOUT
+#endif
+
+
 UNITTEST_START
 
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && !defined(USE_ALARM_TIMEOUT)
   size_t i;
 
   for(i = 0; i < sizeof(TEST_CASES)/sizeof(TEST_CASES[0]); ++i) {
