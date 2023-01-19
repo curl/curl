@@ -37,11 +37,11 @@
 #define NTLM_NEEDS_NSS_INIT
 #endif
 
-#ifdef USE_WOLFSSL
+#if defined(USE_OPENSSL)
+#  include <openssl/ssl.h>
+#elif defined(USE_WOLFSSL)
 #  include <wolfssl/options.h>
 #  include <wolfssl/openssl/ssl.h>
-#elif defined(USE_OPENSSL)
-#  include <openssl/ssl.h>
 #endif
 
 /* Helpers to generate function byte arguments in little endian order */
