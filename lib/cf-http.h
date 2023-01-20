@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_CF_HTTP_H
+#define HEADER_CURL_CF_HTTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,37 +23,34 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* <DESC>
- * Very simple HTTP/3 GET
- * </DESC>
- */
-#include <stdio.h>
-#include <curl/curl.h>
+#include "curl_setup.h"
 
-int main(void)
-{
-  CURL *curl;
-  CURLcode res;
+#ifndef CURL_DISABLE_HTTP
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+struct Curl_cfilter;
+struct Curl_easy;
+struct connectdata;
+struct Curl_cftype;
+struct Curl_dns_entry;
 
-    /* Forcing HTTP/3 will make the connection fail if the server is not
-       accessible over QUIC + HTTP/3 on the given host and port.
-       Consider using CURLOPT_ALTSVC instead! */
-    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
-                     (long)CURL_HTTP_VERSION_3ONLY);
+extern struct Curl_cftype Curl_cft_http_connect;
 
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
-    /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+CURLcode Curl_cf_http_connect_add(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  int sockindex,
+                                  const struct Curl_dns_entry *remotehost);
 
-    /* always cleanup */
-    curl_easy_cleanup(curl);
-  }
-  return 0;
-}
+CURLcode
+Curl_cf_http_connect_insert_after(struct Curl_cfilter *cf_at,
+                                  struct Curl_easy *data,
+                                  const struct Curl_dns_entry *remotehost);
+
+
+CURLcode Curl_cf_https_setup(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             int sockindex,
+                             const struct Curl_dns_entry *remotehost);
+
+
+#endif /* !CURL_DISABLE_HTTP */
+#endif /* HEADER_CURL_CF_HTTP_H */

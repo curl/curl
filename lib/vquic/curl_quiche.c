@@ -804,8 +804,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   const char *r_ip;
   int r_port;
 
-  result = Curl_cf_socket_peek(cf->next, &ctx->sockfd,
-                               &sockaddr, &r_ip, &r_port);
+  result = Curl_cf_socket_peek(cf->next, data, &ctx->sockfd,
+                               &sockaddr, &r_ip, &r_port, NULL, NULL);
   if(result)
     return result;
   DEBUGASSERT(ctx->sockfd != CURL_SOCKET_BAD);
@@ -985,7 +985,8 @@ out:
     const char *r_ip;
     int r_port;
 
-    Curl_cf_socket_peek(cf->next, NULL, NULL, &r_ip, &r_port);
+    Curl_cf_socket_peek(cf->next, data, NULL, NULL,
+                        &r_ip, &r_port, NULL, NULL);
     infof(data, "connect to %s port %u failed: %s",
           r_ip, r_port, curl_easy_strerror(result));
   }

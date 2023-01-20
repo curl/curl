@@ -36,6 +36,7 @@ struct ssl_connect_data {
   char *hostname;                   /* hostname for verification */
   char *dispname;                   /* display version of hostname */
   int port;                         /* remote port at origin */
+  const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   struct ssl_backend_data *backend; /* vtls backend specific props */
   struct Curl_easy *call_data;      /* data handle used in current call,
                                      * same as parameter passed, but available

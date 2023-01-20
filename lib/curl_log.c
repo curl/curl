@@ -38,6 +38,7 @@
 #include "connect.h"
 #include "http2.h"
 #include "http_proxy.h"
+#include "cf-http.h"
 #include "socks.h"
 #include "strtok.h"
 #include "vtls/vtls.h"
@@ -166,6 +167,9 @@ static struct Curl_cftype *cf_types[] = {
 #endif /* !CURL_DISABLE_PROXY */
 #ifdef ENABLE_QUIC
   &Curl_cft_http3,
+#endif
+#ifndef CURL_DISABLE_HTTP
+  &Curl_cft_http_connect,
 #endif
   NULL,
 };

@@ -24,18 +24,24 @@
 
 #include "curl_setup.h"
 
-#ifdef ENABLE_QUIC
-
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #include "urldata.h"
 #include "dynbuf.h"
-#include "curl_printf.h"
+#include "curl_log.h"
 #include "curl_msh3.h"
 #include "curl_ngtcp2.h"
 #include "curl_quiche.h"
 #include "vquic.h"
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
+
+
+#ifdef ENABLE_QUIC
 
 #ifdef O_BINARY
 #define QLOGMODE O_WRONLY|O_CREAT|O_BINARY
@@ -135,4 +141,36 @@ bool Curl_conn_is_http3(const struct Curl_easy *data,
 #endif
 }
 
+CURLcode Curl_conn_may_http3(struct Curl_easy *data,
+                             const struct connectdata *conn)
+{
+  if(!(conn->handler->flags & PROTOPT_SSL)) {
+    failf(data, "HTTP/3 requested for non-HTTPS URL");
+    return CURLE_URL_MALFORMAT;
+  }
+#ifndef CURL_DISABLE_PROXY
+  if(conn->bits.socksproxy) {
+    failf(data, "HTTP/3 is not supported over a SOCKS proxy");
+    return CURLE_URL_MALFORMAT;
+  }
+  if(conn->bits.httpproxy && conn->bits.tunnel_proxy) {
+    failf(data, "HTTP/3 is not supported over a HTTP proxy");
+    return CURLE_URL_MALFORMAT;
+  }
 #endif
+
+  return CURLE_OK;
+}
+
+#else /* ENABLE_QUIC */
+
+CURLcode Curl_conn_may_http3(struct Curl_easy *data,
+                             const struct connectdata *conn)
+{
+  (void)conn;
+  (void)data;
+  DEBUGF(infof(data, "QUIC is not supported in this build"));
+  return CURLE_NOT_BUILT_IN;
+}
+
+#endif /* !ENABLE_QUIC */

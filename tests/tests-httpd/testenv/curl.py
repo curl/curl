@@ -155,7 +155,8 @@ class ExecResult:
     def add_assets(self, assets: List):
         self._assets.extend(assets)
 
-    def check_responses(self, count: int, exp_status: Optional[int] = None):
+    def check_responses(self, count: int, exp_status: Optional[int] = None,
+                        exp_exitcode: Optional[int] = None):
         if len(self.responses) != count:
             seen_queries = []
             for idx, resp in enumerate(self.responses):
@@ -174,6 +175,10 @@ class ExecResult:
             for idx, x in enumerate(self.responses):
                 assert x['status'] == exp_status, \
                     f'response #{idx} unexpectedstatus: {x["status"]}'
+        if exp_exitcode is not None:
+            for idx, x in enumerate(self.responses):
+                if 'exitcode' in x:
+                    assert x['exitcode'] == 0, f'response #{idx} exitcode: {x["exitcode"]}'
         if self.with_stats:
             assert len(self.stats) == count, f'{self}'
 
@@ -273,7 +278,7 @@ class CurlClient:
             self._curl, "-s", "--path-as-is", "-D", self._headerfile,
         ]
         if self.env.verbose > 2:
-            args.extend(['--trace', self._tracefile])
+            args.extend(['--trace', self._tracefile, '--trace-time'])
 
         for url in urls:
             u = urlparse(urls[0])

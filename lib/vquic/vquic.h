@@ -53,8 +53,11 @@ extern struct Curl_cftype Curl_cft_http3;
 
 #else /* ENABLE_QUIC */
 
-#define Curl_conn_is_http3(a,b,c)  FALSE
+#define Curl_conn_is_http3(a,b,c)   FALSE
 
 #endif /* !ENABLE_QUIC */
+
+CURLcode Curl_conn_may_http3(struct Curl_easy *data,
+                             const struct connectdata *conn);
 
 #endif /* HEADER_CURL_VQUIC_QUIC_H */

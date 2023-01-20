@@ -33,7 +33,7 @@ apachectl = @APACHECTL@
 [test]
 http_port = 5001
 https_port = 5002
-h3_port = 5003
+h3_port = 5002
 
 [nghttpx]
 nghttpx = @HTTPD_NGHTTPX@

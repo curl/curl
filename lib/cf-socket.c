@@ -863,6 +863,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   (void)data;
   ctx->sock = CURL_SOCKET_BAD;
   result = socket_open(data, &ctx->addr, &ctx->sock);
+  DEBUGF(LOG_CF(data, cf, "socket_open() -> %d, fd=%d", result, ctx->sock));
   if(result)
     goto out;
 
@@ -944,10 +945,12 @@ out:
     set_local_ip(cf, data);
     cf->connected = TRUE;
   }
+  DEBUGF(LOG_CF(data, cf, "cf_socket_open() -> %d, fd=%d", result, ctx->sock));
   return result;
 }
 
-static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
+static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
+                      bool is_tcp_fastopen)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
 #ifdef TCP_FASTOPEN_CONNECT
@@ -956,7 +959,7 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
   int rc = -1;
 
   (void)data;
-  if(cf->conn->bits.tcp_fastopen) {
+  if(is_tcp_fastopen) {
 #if defined(CONNECT_DATA_IDEMPOTENT) /* Darwin */
 #  if defined(HAVE_BUILTIN_AVAILABLE)
     /* while connectx function is available since macOS 10.11 / iOS 9,
@@ -1027,7 +1030,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 
     DEBUGF(LOG_CF(data, cf, "connect opened(%d)", (int)ctx->sock));
     /* Connect TCP socket */
-    rc = do_connect(cf, data);
+    rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
     if(-1 == rc) {
       result = Curl_socket_connect_result(data, ctx->r_ip, SOCKERRNO);
       goto out;
@@ -1130,8 +1133,8 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(data->conn == cf->conn);
   nwritten = Curl_send_plain(data, cf->sockindex, buf, len, err);
-  DEBUGF(LOG_CF(data, cf, "send(len=%zu) -> %d, err=%d",
-                len, (int)nwritten, *err));
+  DEBUGF(LOG_CF(data, cf, "send(len=%zu) -> %zd, err=%d",
+                len, nwritten, *err));
   return nwritten;
 }
 
@@ -1142,8 +1145,8 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(data->conn == cf->conn);
   nread = Curl_recv_plain(data, cf->sockindex, buf, len, err);
-  DEBUGF(LOG_CF(data, cf, "recv(len=%zu) -> %d, err=%d", len, (int)nread,
-                *err));
+  DEBUGF(LOG_CF(data, cf, "recv(len=%zu) -> %zd, err=%d",
+                len, nread, *err));
   return nread;
 }
 
@@ -1192,6 +1195,7 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
   #endif
     conn_set_primary_ip(cf, data);
+    set_local_ip(cf, data);
     Curl_persistconninfo(data, cf->conn, ctx->l_ip, ctx->l_port);
   }
   ctx->active = TRUE;
@@ -1318,6 +1322,7 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
   if(ctx->sock == CURL_SOCKET_BAD) {
     result = cf_socket_open(cf, data);
     if(result) {
+      DEBUGF(LOG_CF(data, cf, "cf_udp_connect() failed -> %d", result));
       if(ctx->sock != CURL_SOCKET_BAD) {
         socket_close(data, cf->conn, TRUE, ctx->sock);
         ctx->sock = CURL_SOCKET_BAD;
@@ -1540,10 +1545,11 @@ bool Curl_cf_is_socket(struct Curl_cfilter *cf)
 }
 
 CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
                              curl_socket_t *psock,
                              const struct Curl_sockaddr_ex **paddr,
-                             const char **premote_ip_str,
-                             int *premote_port)
+                             const char **pr_ip_str, int *pr_port,
+                             const char **pl_ip_str, int *pl_port)
 {
   if(Curl_cf_is_socket(cf) && cf->ctx) {
     struct cf_socket_ctx *ctx = cf->ctx;
@@ -1552,10 +1558,17 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
       *psock = ctx->sock;
     if(paddr)
       *paddr = &ctx->addr;
-    if(premote_ip_str)
-      *premote_ip_str = ctx->r_ip;
-    if(premote_port)
-      *premote_port = ctx->r_port;
+    if(pr_ip_str)
+      *pr_ip_str = ctx->r_ip;
+    if(pr_port)
+      *pr_port = ctx->r_port;
+    if(pl_port ||pl_ip_str) {
+      set_local_ip(cf, data);
+      if(pl_ip_str)
+        *pl_ip_str = ctx->l_ip;
+      if(pl_port)
+        *pl_port = ctx->l_port;
+    }
     return CURLE_OK;
   }
   return CURLE_FAILED_INIT;

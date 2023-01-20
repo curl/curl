@@ -42,6 +42,11 @@ log = logging.getLogger(__name__)
                     reason=f"missing: {Env.incomplete_reason()}")
 class TestGoAway:
 
+    @pytest.fixture(autouse=True, scope='class')
+    def _class_scope(self, env, nghttpx):
+        if env.have_h3():
+            nghttpx.start_if_needed()
+
     # download files sequentially with delay, reload server for GOAWAY
     def test_03_01_h2_goaway(self, env: Env, httpd, nghttpx, repeat):
         proto = 'h2'
@@ -77,7 +82,6 @@ class TestGoAway:
 
     # download files sequentially with delay, reload server for GOAWAY
     @pytest.mark.skipif(condition=not Env.have_h3_server(), reason="no h3 server")
-    @pytest.mark.skipif(condition=True, reason="2nd and 3rd request sometimes fail")
     def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx, repeat):
         proto = 'h3'
         count = 3
@@ -95,11 +99,11 @@ class TestGoAway:
         # each request will take a second, reload the server in the middle
         # of the first one.
         time.sleep(1.5)
-        assert nghttpx.reload(timeout=timedelta(seconds=5))
+        assert nghttpx.reload(timeout=timedelta(seconds=2))
         t.join()
         r: ExecResult = self.r
         assert r.exit_code == 0, f'{r}'
-        r.check_responses(count=count, exp_status=200)
+        r.check_responses(count=count, exp_status=200, exp_exitcode=0)
         assert len(r.stats) == count, f'{r.stats}'
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards

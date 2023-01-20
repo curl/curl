@@ -59,6 +59,7 @@
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
+#include "cf-http.h"
 #include "cf-socket.h"
 #include "select.h"
 #include "url.h" /* for Curl_safefree() */
@@ -1064,6 +1065,7 @@ struct cf_setup_ctx {
   cf_setup_state state;
   const struct Curl_dns_entry *remotehost;
   int ssl_mode;
+  int transport;
 };
 
 static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
@@ -1087,8 +1089,7 @@ connect_sub_chain:
   }
 
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
-    result = cf_he_insert_after(cf, data, ctx->remotehost,
-                                cf->conn->transport);
+    result = cf_he_insert_after(cf, data, ctx->remotehost, ctx->transport);
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_EYEBALLS;
@@ -1213,6 +1214,75 @@ struct Curl_cftype Curl_cft_setup = {
   Curl_cf_def_query,
 };
 
+static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
+                                struct Curl_easy *data,
+                                const struct Curl_dns_entry *remotehost,
+                                int transport,
+                                int ssl_mode)
+{
+  struct Curl_cfilter *cf;
+  struct cf_setup_ctx *ctx;
+  CURLcode result = CURLE_OK;
+
+  (void)data;
+  ctx = calloc(sizeof(*ctx), 1);
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  ctx->state = CF_SETUP_INIT;
+  ctx->remotehost = remotehost;
+  ctx->ssl_mode = ssl_mode;
+  ctx->transport = transport;
+
+  result = Curl_cf_create(&cf, &Curl_cft_setup, ctx);
+  if(result)
+    goto out;
+  ctx = NULL;
+
+out:
+  *pcf = result? NULL : cf;
+  free(ctx);
+  return result;
+}
+
+CURLcode Curl_cf_setup_add(struct Curl_easy *data,
+                           struct connectdata *conn,
+                           int sockindex,
+                           const struct Curl_dns_entry *remotehost,
+                           int transport,
+                           int ssl_mode)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(data);
+  result = cf_setup_create(&cf, data, remotehost, transport, ssl_mode);
+  if(result)
+    goto out;
+  Curl_conn_cf_add(data, conn, sockindex, cf);
+out:
+  return result;
+}
+
+CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
+                                    struct Curl_easy *data,
+                                    const struct Curl_dns_entry *remotehost,
+                                    int transport,
+                                    int ssl_mode)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  DEBUGASSERT(data);
+  result = cf_setup_create(&cf, data, remotehost, transport, ssl_mode);
+  if(result)
+    goto out;
+  Curl_conn_cf_insert_after(cf_at, cf);
+out:
+  return result;
+}
+
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
@@ -1220,34 +1290,31 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          int ssl_mode)
 {
   CURLcode result = CURLE_OK;
-  struct cf_setup_ctx *ctx = NULL;
 
   DEBUGASSERT(data);
-  /* If no filter is set, we add the "default" setup connection filter.
-   */
-  if(!conn->cfilter[sockindex]) {
-    struct Curl_cfilter *cf;
+  DEBUGASSERT(conn->handler);
 
-    ctx = calloc(sizeof(*ctx), 1);
-    if(!ctx) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
-    ctx->state = CF_SETUP_INIT;
-    ctx->remotehost = remotehost;
-    ctx->ssl_mode = ssl_mode;
+#ifndef CURL_DISABLE_HTTP
+  if(!conn->cfilter[sockindex] &&
+     conn->handler->protocol == CURLPROTO_HTTPS &&
+     (ssl_mode == CURL_CF_SSL_ENABLE || ssl_mode != CURL_CF_SSL_DISABLE)) {
 
-    result = Curl_cf_create(&cf, &Curl_cft_setup, ctx);
+    result = Curl_cf_https_setup(data, conn, sockindex, remotehost);
     if(result)
       goto out;
-    ctx = NULL;
-    Curl_conn_cf_add(data, conn, sockindex, cf);
+  }
+#endif
+
+  /* Still no cfilter set, apply default. */
+  if(!conn->cfilter[sockindex]) {
+    result = Curl_cf_setup_add(data, conn, sockindex, remotehost,
+                               conn->transport, ssl_mode);
+    if(result)
+      goto out;
   }
 
   DEBUGASSERT(conn->cfilter[sockindex]);
-
 out:
-  free(ctx);
   return result;
 }
 
