@@ -227,16 +227,14 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
 #elif defined(__OS400__)
-#  if defined(__ILEC400__)
-#    define CURL_TYPEOF_CURL_OFF_T     long long
-#    define CURL_FORMAT_CURL_OFF_T     "lld"
-#    define CURL_FORMAT_CURL_OFF_TU    "llu"
-#    define CURL_SUFFIX_CURL_OFF_T     LL
-#    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#    define CURL_PULL_SYS_TYPES_H      1
-#    define CURL_PULL_SYS_SOCKET_H     1
-#  endif
+#  define CURL_TYPEOF_CURL_OFF_T     long long
+#  define CURL_FORMAT_CURL_OFF_T     "lld"
+#  define CURL_FORMAT_CURL_OFF_TU    "llu"
+#  define CURL_SUFFIX_CURL_OFF_T     LL
+#  define CURL_SUFFIX_CURL_OFF_TU    ULL
+#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#  define CURL_PULL_SYS_TYPES_H      1
+#  define CURL_PULL_SYS_SOCKET_H     1
 
 #elif defined(__MVS__)
 #  if defined(__IBMC__) || defined(__IBMCPP__)
