@@ -44,7 +44,7 @@ typedef enum {
   CF_HC_INIT,
   CF_HC_CONNECT,
   CF_HC_SUCCESS,
-  CF_HC_FAILURE,
+  CF_HC_FAILURE
 } cf_hc_state;
 
 struct cf_hc_baller {
