@@ -1220,7 +1220,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
                                 int transport,
                                 int ssl_mode)
 {
-  struct Curl_cfilter *cf;
+  struct Curl_cfilter *cf = NULL;
   struct cf_setup_ctx *ctx;
   CURLcode result = CURLE_OK;
 

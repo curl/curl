@@ -317,7 +317,7 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              const struct Curl_dns_entry *remotehost)
 {
-  struct Curl_cfilter *cf;
+  struct Curl_cfilter *cf = NULL;
   struct cf_hc_ctx *ctx;
   CURLcode result = CURLE_OK;
 
