@@ -176,6 +176,7 @@ CURL_VERSION_KERBEROS5          7.40.0
 CURL_VERSION_LARGEFILE          7.11.1
 CURL_VERSION_LIBZ               7.10
 CURL_VERSION_MULTI_SSL          7.56.0
+CURL_VERSION_NGTCP2             7.88.0
 CURL_VERSION_NTLM               7.10.6
 CURL_VERSION_NTLM_WB            7.22.0
 CURL_VERSION_PSL                7.47.0
@@ -1118,6 +1119,7 @@ CURLVERSION_SEVENTH             7.70.0
 CURLVERSION_SIXTH               7.66.0
 CURLVERSION_TENTH               7.77.0
 CURLVERSION_THIRD               7.12.0
+CURLVERSION_TWELFTH             7.88.0
 CURLWARNING                     7.66.0
 CURLWS_BINARY                   7.86.0
 CURLWS_CLOSE                    7.86.0

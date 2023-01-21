@@ -113,6 +113,9 @@ typedef struct {
   /* when 'age' is CURLVERSION_ELEVENTH or higher (>= 7.87.0), the members
      below exist */
   const char *const *feature_names; /* Feature names. */
+  /* when 'age' is CURLVERSION_TWELFTH or higher (>= 7.88.0), the members
+     below exist */
+  const char *ngtcp2_version; /* human readable string. */
 } curl_version_info_data;
 .fi
 
@@ -217,6 +220,10 @@ supports HTTP deflate using libz (Added in 7.10)
 libcurl was built with multiple SSL backends. For details, see
 \fIcurl_global_sslset(3)\fP.
 (Added in 7.56.0)
+.IP """NGTCP2"""
+\fIfeatures\fP mask bit: CURL_VERSION_NGTCP2
+.br
+supports NGTCP2 (added in 7.88.0)
 .IP """NTLM"""
 \fIfeatures\fP mask bit: CURL_VERSION_NTLM
 .br

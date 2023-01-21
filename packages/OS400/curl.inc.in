@@ -2279,6 +2279,8 @@
      d                                 *                                        const char *
      d  gsasl_version...
      d                                 *                                        const char *
+     d  ngtcp2_version...
+     d                                 *                                        const char *
       *
      d curl_certinfo   ds                  based(######ptr######)
      d                                     qualified

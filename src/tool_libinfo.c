@@ -104,6 +104,7 @@ static struct feature_name_presentp {
   {"Largefile",      NULL,                CURL_VERSION_LARGEFILE},
   {"libz",           &feature_libz,       CURL_VERSION_LIBZ},
   {"MultiSSL",       NULL,                CURL_VERSION_MULTI_SSL},
+  {"NGTCP2",         NULL,                CURL_VERSION_NGTCP2},
   {"NTLM",           &feature_ntlm,       CURL_VERSION_NTLM},
   {"NTLM_WB",        &feature_ntlm_wb,    CURL_VERSION_NTLM_WB},
   {"PSL",            NULL,                CURL_VERSION_PSL},

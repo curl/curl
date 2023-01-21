@@ -3021,6 +3021,7 @@ typedef enum {
   CURLVERSION_NINTH,
   CURLVERSION_TENTH,
   CURLVERSION_ELEVENTH,
+  CURLVERSION_TWELFTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -3089,6 +3090,9 @@ struct curl_version_info_data {
   /* These fields were added in CURLVERSION_ELEVENTH */
   /* feature_names is terminated by an entry with a NULL feature name */
   const char * const *feature_names;
+
+  /* These fields were added in CURLVERSION_TWELFTH */
+  const char *ngtcp2_version; /* human readable string. */
 };
 typedef struct curl_version_info_data curl_version_info_data;
 
@@ -3128,6 +3132,7 @@ typedef struct curl_version_info_data curl_version_info_data;
 #define CURL_VERSION_HSTS         (1<<28) /* HSTS is supported */
 #define CURL_VERSION_GSASL        (1<<29) /* libgsasl is supported */
 #define CURL_VERSION_THREADSAFE   (1<<30) /* libcurl API is thread-safe */
+#define CURL_VERSION_NGTCP2       (1<<31) /* libngtcp2 is supported */
 
  /*
  * NAME curl_version_info()

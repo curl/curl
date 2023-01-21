@@ -73,6 +73,10 @@
 #include <gsasl.h>
 #endif
 
+#ifdef USE_NGTCP2
+#include <ngtcp2.h>
+#endif
+
 #ifdef USE_OPENLDAP
 #include <ldap.h>
 #endif
@@ -155,6 +159,9 @@ char *curl_version(void)
 #endif
 #ifdef USE_GSASL
   char gsasl_buf[30];
+#endif
+#ifdef USE_NGTCP2
+  char ngtcp2_buf[30];
 #endif
 #ifdef USE_OPENLDAP
   char ldap_buf[30];
@@ -243,6 +250,11 @@ char *curl_version(void)
   msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
             gsasl_check_version(NULL));
   src[i++] = gsasl_buf;
+#endif
+#ifdef USE_NGTCP2
+  const ngtcp2_info *ngtcp2_version_info = ngtcp2_version(0);
+  msnprintf(ngtcp2_buf, sizeof(ngtcp2_buf), "libngtcp2/%s", ngtcp2_version_info->version_str);
+  src[i++] = ngtcp2_buf;
 #endif
 #ifdef USE_OPENLDAP
   {
@@ -475,6 +487,9 @@ static const struct feat features_table[] = {
 #ifdef CURL_WITH_MULTI_SSL
   FEATURE("MultiSSL",    NULL,                CURL_VERSION_MULTI_SSL),
 #endif
+#ifdef USE_NGTCP2
+  FEATURE("NGTCP2",      NULL,                CURL_VERSION_NGTCP2),
+#endif
 #ifdef USE_NTLM
   FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
 #endif
@@ -553,7 +568,8 @@ static curl_version_info_data version_info = {
   NULL, /* zstd version */
   NULL, /* Hyper version */
   NULL, /* gsasl version */
-  feature_names
+  feature_names,
+  NULL, /* ngtcp2 version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -647,6 +663,15 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #ifdef USE_GSASL
   {
     version_info.gsasl_version = gsasl_check_version(NULL);
+  }
+#endif
+
+#ifdef USE_NGTCP2
+  {
+    static char ngtcp2_buffer[30];
+    const ngtcp2_info *ngtcp2_version_info = ngtcp2_version(0);
+    msnprintf(ngtcp2_buffer, sizeof(ngtcp2_buffer), "%s", ngtcp2_version_info->version_str);
+    version_info.ngtcp2_version = ngtcp2_buffer;
   }
 #endif
 

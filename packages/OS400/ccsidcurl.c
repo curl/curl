@@ -414,7 +414,8 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
     offsetof(curl_version_info_data, capath),
     offsetof(curl_version_info_data, zstd_version),
     offsetof(curl_version_info_data, hyper_version),
-    offsetof(curl_version_info_data, gsasl_version)
+    offsetof(curl_version_info_data, gsasl_version),
+    offsetof(curl_version_info_data, ngtcp2_version)
   };
 
   /* The assertion below is possible, because although the second operand
