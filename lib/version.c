@@ -487,9 +487,6 @@ static const struct feat features_table[] = {
 #ifdef CURL_WITH_MULTI_SSL
   FEATURE("MultiSSL",    NULL,                CURL_VERSION_MULTI_SSL),
 #endif
-#ifdef USE_NGTCP2
-  FEATURE("NGTCP2",      NULL,                CURL_VERSION_NGTCP2),
-#endif
 #ifdef USE_NTLM
   FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
 #endif
