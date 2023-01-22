@@ -104,7 +104,7 @@ where `<options>` is one or many of:
  - `GEN_PDB=<yes/no>`            - Generate External Program Database
                                    (debug symbols for release build)
  - `DEBUG=<yes/no>`              - Debug builds
- - `MACHINE=<x86/x64>`           - Target architecture (default is x86)
+ - `MACHINE=<x86/x64/arm64>`     - Target architecture (default is x86)
  - `CARES_PATH=<path>`           - Custom path for c-ares
  - `MBEDTLS_PATH=<path>`         - Custom path for mbedTLS
  - `NGHTTP2_PATH=<path>`         - Custom path for nghttp2
