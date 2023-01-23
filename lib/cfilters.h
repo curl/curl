@@ -433,4 +433,50 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex);
 
+
+/**
+ * Types and macros used to keep the current easy handle in filter calls,
+ * allowing for nested invocations. See #10336.
+ *
+ * `cf_call_data` is intended to be a member of the cfilter's `ctx` type.
+ * A filter defines the macro `CF_CTX_CALL_DATA` to give access to that.
+ *
+ * With all values 0, the default, this indicates that there is no cfilter
+ * call with `data` ongoing.
+ * Macro `CF_DATA_SAVE` preserves the current `cf_call_data` in a local
+ * variable and sets the `data` given, incrementing the `depth` counter.
+ *
+ * Macro `CF_DATA_RESTORE` restores the old values from the local variable,
+ * while checking that `depth` values are as expected (debug build), catching
+ * cases where a "lower" RESTORE was not called.
+ *
+ * Finally, macro `CF_DATA_CURRENT` gives the easy handle of the current
+ * invocation.
+ */
+struct cf_call_data {
+  struct Curl_easy *data;
+  int depth;
+};
+
+/**
+ * define to access the `struct cf_call_data for a cfilter. Normally
+ * a member in the cfilter's `ctx`.
+ *
+ * #define CF_CTX_CALL_DATA(cf)   -> struct cf_call_data instance
+*/
+
+#define CF_DATA_SAVE(cf, data) \
+  struct cf_call_data cf_cd_save = CF_CTX_CALL_DATA(cf); \
+  DEBUGASSERT(cf_cd_save.data == NULL || cf_cd_save.depth > 0); \
+  CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)data; \
+  CF_CTX_CALL_DATA(cf).depth++
+
+#define CF_DATA_RESTORE(cf) \
+  DEBUGASSERT(CF_CTX_CALL_DATA(cf).depth == cf_cd_save.depth + 1); \
+  DEBUGASSERT(cf_cd_save.data == NULL || cf_cd_save.depth > 0); \
+  CF_CTX_CALL_DATA(cf) = cf_cd_save
+
+#define CF_DATA_CURRENT(cf) \
+  ((cf)? (CF_CTX_CALL_DATA(cf).data) : NULL)
+
 #endif /* HEADER_CURL_CFILTERS_H */

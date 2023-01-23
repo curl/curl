@@ -300,7 +300,7 @@ static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   CURLcode result = CURLE_OK;
 
@@ -316,7 +316,7 @@ static int bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   CURLcode result = CURLE_OK;
 

@@ -702,7 +702,7 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
 {
   struct Curl_cfilter *cf = BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   CURLcode result = CURLE_SEND_ERROR;
 
@@ -723,7 +723,7 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
 {
   struct Curl_cfilter *cf = BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   CURLcode result = CURLE_RECV_ERROR;
 
@@ -2650,7 +2650,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   connssl = cf->ctx;
   DEBUGASSERT(connssl);
   DEBUGASSERT(connssl->backend);
-  data = connssl->call_data;
+  data = CF_DATA_CURRENT(cf);
 
   if(!conn || !data || !data->set.fdebug
      || (direction != 0 && direction != 1))
@@ -2951,7 +2951,7 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     return 0;
   cf = (struct Curl_cfilter*) SSL_get_ex_data(ssl, cf_idx);
   connssl = cf? cf->ctx : NULL;
-  data = connssl? connssl->call_data : NULL;
+  data = connssl? CF_DATA_CURRENT(cf) : NULL;
   /* The sockindex has been stored as a pointer to an array element */
   if(!cf || !data)
     return 0;
