@@ -2639,7 +2639,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   const char *verstr = "???";
   struct connectdata *conn = userp;
   int cf_idx = ossl_get_ssl_cf_index();
-  struct ssl_connect_data *connssl;
   struct Curl_easy *data = NULL;
   struct Curl_cfilter *cf;
   char unknown[32];
@@ -2647,9 +2646,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   DEBUGASSERT(cf_idx >= 0);
   cf = (struct Curl_cfilter*) SSL_get_ex_data(ssl, cf_idx);
   DEBUGASSERT(cf);
-  connssl = cf->ctx;
-  DEBUGASSERT(connssl);
-  DEBUGASSERT(connssl->backend);
   data = CF_DATA_CURRENT(cf);
 
   if(!conn || !data || !data->set.fdebug

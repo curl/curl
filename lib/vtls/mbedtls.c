@@ -159,7 +159,6 @@ static void mbed_debug(void *context, int level, const char *f_name,
 static int bio_cf_write(void *bio, const unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
-  struct ssl_connect_data *connssl = cf->ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   CURLcode result;
@@ -177,7 +176,6 @@ static int bio_cf_write(void *bio, const unsigned char *buf, size_t blen)
 static int bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
-  struct ssl_connect_data *connssl = cf->ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   CURLcode result;
