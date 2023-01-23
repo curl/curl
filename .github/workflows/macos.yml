@@ -152,6 +152,10 @@ jobs:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
+      if:  matrix.compiler == 'gcc-11'
+    - run: brew update && brew install gcc@11
+      name: 'brew install gcc-11'
+
     - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
       name: 'brew install'
 
