@@ -2979,33 +2979,25 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
-  if(Curl_conn_is_http3(data, conn, FIRSTSOCKET)
-     || Curl_conn_is_http2(data, conn, FIRSTSOCKET)
-     || conn->httpversion == 20 /* like to get rid of this */) {
-    /* all fine, we are set */
-  }
-  else { /* undecided */
-    switch(conn->alpn) {
-    case CURL_HTTP_VERSION_2:
-      result = Curl_http2_switch(data, conn, FIRSTSOCKET, NULL, 0);
+  switch(conn->alpn) {
+  case CURL_HTTP_VERSION_3:
+    DEBUGASSERT(Curl_conn_is_http3(data, conn, FIRSTSOCKET));
+    break;
+  case CURL_HTTP_VERSION_2:
+    DEBUGASSERT(Curl_conn_is_http2(data, conn, FIRSTSOCKET));
+    break;
+  case CURL_HTTP_VERSION_1_1:
+    /* continue with HTTP/1.1 when explicitly requested */
+    break;
+  default:
+    /* Check if user wants to use HTTP/2 with clear TCP */
+    if(Curl_http2_may_switch(data, conn, FIRSTSOCKET)) {
+      DEBUGF(infof(data, "HTTP/2 over clean TCP"));
+      result = Curl_http2_switch(data, conn, FIRSTSOCKET);
       if(result)
         return result;
-      break;
-
-    case CURL_HTTP_VERSION_1_1:
-      /* continue with HTTP/1.1 when explicitly requested */
-      break;
-
-    default:
-      /* Check if user wants to use HTTP/2 with clear TCP */
-      if(Curl_http2_may_switch(data, conn, FIRSTSOCKET)) {
-        DEBUGF(infof(data, "HTTP/2 over clean TCP"));
-        result = Curl_http2_switch(data, conn, FIRSTSOCKET, NULL, 0);
-        if(result)
-          return result;
-      }
-      break;
     }
+    break;
   }
 
   http = data->req.p.http;
@@ -3907,8 +3899,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
             /* switch to http2 now. The bytes after response headers
                are also processed here, otherwise they are lost. */
-            result = Curl_http2_switch(data, conn, FIRSTSOCKET,
-                                       k->str, *nread);
+            result = Curl_http2_upgrade(data, conn, FIRSTSOCKET,
+                                        k->str, *nread);
             if(result)
               return result;
             *nread = 0;

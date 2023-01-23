@@ -2319,12 +2319,33 @@ out:
   return result;
 }
 
-bool Curl_conn_is_http2(const struct Curl_easy *data,
-                        const struct connectdata *conn,
-                        int sockindex)
+static CURLcode http2_cfilter_insert_after(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data)
 {
-  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
+  struct Curl_cfilter *cf_h2 = NULL;
+  struct cf_h2_ctx *ctx;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
 
+  (void)data;
+  ctx = calloc(sizeof(*ctx), 1);
+  if(!ctx)
+    goto out;
+
+  result = Curl_cf_create(&cf_h2, &Curl_cft_nghttp2, ctx);
+  if(result)
+    goto out;
+
+  Curl_conn_cf_insert_after(cf, cf_h2);
+  result = CURLE_OK;
+
+out:
+  if(result)
+    cf_h2_ctx_free(ctx);
+  return result;
+}
+
+bool Curl_cf_is_http2(struct Curl_cfilter *cf, const struct Curl_easy *data)
+{
   (void)data;
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_nghttp2)
@@ -2333,6 +2354,13 @@ bool Curl_conn_is_http2(const struct Curl_easy *data,
       return FALSE;
   }
   return FALSE;
+}
+
+bool Curl_conn_is_http2(const struct Curl_easy *data,
+                        const struct connectdata *conn,
+                        int sockindex)
+{
+  return conn? Curl_cf_is_http2(conn->cfilter[sockindex], data) : FALSE;
 }
 
 bool Curl_http2_may_switch(struct Curl_easy *data,
@@ -2355,11 +2383,9 @@ bool Curl_http2_may_switch(struct Curl_easy *data,
 }
 
 CURLcode Curl_http2_switch(struct Curl_easy *data,
-                           struct connectdata *conn, int sockindex,
-                           const char *mem, size_t nread)
+                           struct connectdata *conn, int sockindex)
 {
   struct Curl_cfilter *cf;
-  struct cf_h2_ctx *ctx;
   CURLcode result;
 
   DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
@@ -2369,10 +2395,70 @@ CURLcode Curl_http2_switch(struct Curl_easy *data,
   if(result)
     return result;
 
+  result = cf_h2_ctx_init(cf, data, FALSE);
+  if(result)
+    return result;
+
+  conn->httpversion = 20; /* we know we're on HTTP/2 now */
+  conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+  conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+  multi_connchanged(data->multi);
+
+  if(cf->next) {
+    bool done;
+    return Curl_conn_cf_connect(cf, data, FALSE, &done);
+  }
+  return CURLE_OK;
+}
+
+CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  struct Curl_cfilter *cf_h2;
+  CURLcode result;
+
+  DEBUGASSERT(!Curl_cf_is_http2(cf, data));
+
+  result = http2_cfilter_insert_after(cf, data);
+  if(result)
+    return result;
+
+  cf_h2 = cf->next;
+  result = cf_h2_ctx_init(cf_h2, data, FALSE);
+  if(result)
+    return result;
+
+  cf->conn->httpversion = 20; /* we know we're on HTTP/2 now */
+  cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+  cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+  multi_connchanged(data->multi);
+
+  if(cf_h2->next) {
+    bool done;
+    return Curl_conn_cf_connect(cf_h2, data, FALSE, &done);
+  }
+  return CURLE_OK;
+}
+
+CURLcode Curl_http2_upgrade(struct Curl_easy *data,
+                            struct connectdata *conn, int sockindex,
+                            const char *mem, size_t nread)
+{
+  struct Curl_cfilter *cf;
+  struct cf_h2_ctx *ctx;
+  CURLcode result;
+
+  DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
+  DEBUGF(infof(data, DMSGI(data, sockindex, "upgrading to HTTP/2")));
+  DEBUGASSERT(data->req.upgr101 == UPGR101_RECEIVED);
+
+  result = http2_cfilter_add(&cf, data, conn, sockindex);
+  if(result)
+    return result;
+
   DEBUGASSERT(cf->cft == &Curl_cft_nghttp2);
   ctx = cf->ctx;
 
-  result = cf_h2_ctx_init(cf, data, (data->req.upgr101 == UPGR101_RECEIVED));
+  result = cf_h2_ctx_init(cf, data, TRUE);
   if(result)
     return result;
 

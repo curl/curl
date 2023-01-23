@@ -160,7 +160,8 @@ struct cf_ngtcp2_ctx {
   nghttp3_conn *h3conn;
   nghttp3_settings h3settings;
   int qlogfd;
-  struct curltime connect_at;
+  struct curltime connect_started; /* time the current attempt started */
+  struct curltime reconnect_at;    /* time the next attempt should start */
 };
 
 static void cf_ngtcp2_ctx_set_data(struct Curl_cfilter *cf,
@@ -1667,7 +1668,7 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
       ;
     if(recvd == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
-        DEBUGF(LOG_CF(data, cf, "cf_process_ingress, recvfrom -> EAGAIN"));
+        DEBUGF(LOG_CF(data, cf, "ingress, recvfrom -> EAGAIN"));
         goto out;
       }
       if(SOCKERRNO == ECONNREFUSED) {
@@ -1689,9 +1690,10 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
     ngtcp2_addr_init(&path.remote, (struct sockaddr *)&remote_addr,
                      remote_addrlen);
 
+    DEBUGF(LOG_CF(data, cf, "ingress, recvd %zd bytes", recvd));
     rv = ngtcp2_conn_read_pkt(ctx->qconn, &path, &pi, buf, recvd, ts);
     if(rv) {
-      DEBUGF(LOG_CF(data, cf, "cf_process_ingress, read_pkt -> %s",
+      DEBUGF(LOG_CF(data, cf, "ingress, read_pkt -> %s",
                     ngtcp2_strerror(rv)));
       if(!ctx->last_error.error_code) {
         if(rv == NGTCP2_ERR_CRYPTO) {
@@ -1848,6 +1850,7 @@ static CURLcode send_packet(struct Curl_cfilter *cf,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
 
+  DEBUGF(LOG_CF(data, cf, "egress, send %zu bytes", pktlen));
   if(ctx->no_gso && pktlen > gsolen) {
     return send_packet_no_gso(cf, data, pkt, pktlen, gsolen, psent);
   }
@@ -2375,7 +2378,7 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
-  struct curltime now = Curl_now();
+  struct curltime now;
 
   if(cf->connected) {
     *done = TRUE;
@@ -2390,9 +2393,11 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
+  now = Curl_now();
   cf_ngtcp2_ctx_set_data(cf, data);
 
-  if(ctx->connect_at.tv_sec && Curl_timediff(now, ctx->connect_at) < 0) {
+  if(ctx->reconnect_at.tv_sec && Curl_timediff(now, ctx->reconnect_at) < 0) {
+    /* Not time yet to attempt the next connect */
     goto out;
   }
 
@@ -2400,6 +2405,10 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
     result = cf_connect_start(cf, data);
     if(result)
       goto out;
+    ctx->connect_started = now;
+    result = cf_flush_egress(cf, data);
+    /* we do not expect to be able to recv anything yet */
+    goto out;
   }
 
   result = cf_process_ingress(cf, data);
@@ -2411,8 +2420,11 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
     goto out;
 
   if(ngtcp2_conn_get_handshake_completed(ctx->qconn)) {
+    DEBUGF(LOG_CF(data, cf, "handshake complete after %dms",
+           (int)Curl_timediff(now, ctx->connect_started)));
     result = qng_verify_peer(cf, data);
     if(!result) {
+      DEBUGF(LOG_CF(data, cf, "peer verified"));
       cf->connected = TRUE;
       cf->conn->alpn = CURL_HTTP_VERSION_3;
       *done = TRUE;
@@ -2440,8 +2452,8 @@ out:
     cf_ngtcp2_ctx_clear(ctx);
     Curl_conn_cf_connect(cf->next, data, FALSE, done);
     *done = FALSE;
-    ctx->connect_at = now;
-    ctx->connect_at.tv_usec += reconn_delay_ms * 1000;
+    ctx->reconnect_at = now;
+    ctx->reconnect_at.tv_usec += reconn_delay_ms * 1000;
     Curl_expire(data, reconn_delay_ms, EXPIRE_QUIC);
     result = CURLE_OK;
   }

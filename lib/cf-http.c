@@ -33,12 +33,19 @@
 #include "connect.h"
 #include "multiif.h"
 #include "cf-http.h"
+#include "http2.h"
 #include "vquic/vquic.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+/* The default connection attempt delay in milliseconds for ALPN eyeballs. */
+/* TODO: arbitrary after some experimentation */
+#define CURL_ALPN_HET_DEFAULT 100L
+
+
 
 typedef enum {
   CF_HC_INIT,
@@ -51,6 +58,7 @@ struct cf_hc_baller {
   struct Curl_cfilter *cf;
   CURLcode result;
   timediff_t delay_ms;
+  bool enabled;
 };
 
 static void cf_hc_baller_reset(struct cf_hc_baller *b,
@@ -66,7 +74,7 @@ static void cf_hc_baller_reset(struct cf_hc_baller *b,
 
 static bool cf_hc_baller_is_active(struct cf_hc_baller *b)
 {
-  return b->cf && !b->result;
+  return b->enabled && b->cf && !b->result;
 }
 
 static bool cf_hc_baller_has_started(struct cf_hc_baller *b)
@@ -127,8 +135,53 @@ static void cf_hc_reset(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf_hc_baller_reset(&ctx->h21_baller, data);
     ctx->state = CF_HC_INIT;
     ctx->result = CURLE_OK;
-    ctx->h21_baller.delay_ms = 100; /* arbitrary */
+    ctx->h21_baller.delay_ms = CURL_ALPN_HET_DEFAULT;
   }
+}
+
+static CURLcode baller_connected(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct cf_hc_baller *winner)
+{
+  struct cf_hc_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(winner->cf);
+  cf->next = winner->cf;
+  winner->cf = NULL;
+
+  if(winner != &ctx->h3_baller)
+    cf_hc_baller_reset(&ctx->h3_baller, data);
+  if(winner != &ctx->h21_baller)
+    cf_hc_baller_reset(&ctx->h21_baller, data);
+
+  switch(cf->conn->alpn) {
+  case CURL_HTTP_VERSION_3:
+    infof(data, "using HTTP/3");
+    break;
+  case CURL_HTTP_VERSION_2:
+#ifdef USE_NGHTTP2
+    /* Using nghttp2, we add the filter "below" us, so when the conn
+     * closes, we tear it down for a fresh reconnect */
+    result = Curl_http2_switch_at(cf, data);
+    if(result) {
+      ctx->state = CF_HC_FAILURE;
+      ctx->result = result;
+      return result;
+    }
+#endif
+    infof(data, "using HTTP/2");
+    break;
+  case CURL_HTTP_VERSION_1_1:
+    infof(data, "using HTTP/1.1");
+    break;
+  default:
+    infof(data, "using HTTP/1.x");
+    break;
+  }
+  ctx->state = CF_HC_SUCCESS;
+  cf->connected = TRUE;
+  return result;
 }
 
 static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
@@ -154,7 +207,13 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     DEBUGASSERT(!cf->next);
     DEBUGF(LOG_CF(data, cf, "connect, init"));
     ctx->started = now;
-    cf_hc_baller_init(&ctx->h3_baller, cf, data, TRNSPRT_QUIC);
+    if(ctx->h3_baller.enabled) {
+      cf_hc_baller_init(&ctx->h3_baller, cf, data, TRNSPRT_QUIC);
+      if(ctx->h21_baller.enabled)
+        Curl_expire(data, ctx->h21_baller.delay_ms, EXPIRE_ALPN_EYEBALLS);
+    }
+    else if(ctx->h21_baller.enabled)
+      cf_hc_baller_init(&ctx->h21_baller, cf, data, TRNSPRT_TCP);
     ctx->state = CF_HC_CONNECT;
     /* FALLTHROUGH */
 
@@ -164,19 +223,15 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       result = cf_hc_baller_connect(&ctx->h3_baller, cf, data, done);
       if(!result && *done) {
         DEBUGF(LOG_CF(data, cf, "connect, h3 connected"));
-        cf_hc_baller_reset(&ctx->h21_baller, data);
-        ctx->state = CF_HC_SUCCESS;
-        cf->next = ctx->h3_baller.cf;
-        ctx->h3_baller.cf = NULL;
-        cf->connected = TRUE;
+        result = baller_connected(cf, data, &ctx->h3_baller);
         goto out;
       }
     }
 
     if(!cf_hc_baller_has_started(&ctx->h21_baller) &&
-       (ctx->h3_baller.result
+       (!ctx->h3_baller.enabled || ctx->h3_baller.result
         || Curl_timediff(now, ctx->started) >= ctx->h21_baller.delay_ms)) {
-       /* h3 failed or delay expired, start h21 attempt */
+       /* h3 disabled, failed or delay expired, start h21 attempt */
        DEBUGF(LOG_CF(data, cf, "connect, start h21"));
        cf_hc_baller_init(&ctx->h21_baller, cf, data, TRNSPRT_TCP);
     }
@@ -186,19 +241,17 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       result = cf_hc_baller_connect(&ctx->h21_baller, cf, data, done);
       if(!result && *done) {
         DEBUGF(LOG_CF(data, cf, "connect, h21 connected"));
-        cf_hc_baller_reset(&ctx->h3_baller, data);
-        ctx->state = CF_HC_SUCCESS;
-        cf->next = ctx->h21_baller.cf;
-        ctx->h21_baller.cf = NULL;
-        cf->connected = TRUE;
+        result = baller_connected(cf, data, &ctx->h21_baller);
         goto out;
       }
     }
 
-    if(ctx->h3_baller.result && ctx->h21_baller.result) {
-      /* both failed. we give up */
+    if((!ctx->h3_baller.enabled || ctx->h3_baller.result) &&
+       (!ctx->h21_baller.enabled || ctx->h21_baller.result)) {
+      /* both failed or disabled. we give up */
       DEBUGF(LOG_CF(data, cf, "connect, all failed"));
-      result = ctx->result = ctx->h3_baller.result;
+      result = ctx->result = ctx->h3_baller.enabled?
+                              ctx->h3_baller.result : ctx->h21_baller.result;
       ctx->state = CF_HC_FAILURE;
       goto out;
     }
@@ -296,7 +349,7 @@ static void cf_hc_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 struct Curl_cftype Curl_cft_http_connect = {
-  "HTTP-CONNECT",
+  "HTTPS-CONNECT",
   0,
   CURL_LOG_DEFAULT,
   cf_hc_destroy,
@@ -315,7 +368,8 @@ struct Curl_cftype Curl_cft_http_connect = {
 
 static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
-                             const struct Curl_dns_entry *remotehost)
+                             const struct Curl_dns_entry *remotehost,
+                             bool try_h3, bool try_h21)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_hc_ctx *ctx;
@@ -328,6 +382,8 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->remotehost = remotehost;
+  ctx->h3_baller.enabled = try_h3;
+  ctx->h21_baller.enabled = try_h21;
 
   result = Curl_cf_create(&cf, &Curl_cft_http_connect, ctx);
   if(result)
@@ -344,13 +400,14 @@ out:
 CURLcode Curl_cf_http_connect_add(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   int sockindex,
-                                  const struct Curl_dns_entry *remotehost)
+                                  const struct Curl_dns_entry *remotehost,
+                                  bool try_h3, bool try_h21)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  result = cf_hc_create(&cf, data, remotehost);
+  result = cf_hc_create(&cf, data, remotehost, try_h3, try_h21);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -361,13 +418,14 @@ out:
 CURLcode
 Curl_cf_http_connect_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
-                                  const struct Curl_dns_entry *remotehost)
+                                  const struct Curl_dns_entry *remotehost,
+                                  bool try_h3, bool try_h21)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
 
   DEBUGASSERT(data);
-  result = cf_hc_create(&cf, data, remotehost);
+  result = cf_hc_create(&cf, data, remotehost, try_h3, try_h21);
   if(result)
     goto out;
   Curl_conn_cf_insert_after(cf_at, cf);
@@ -398,26 +456,13 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
   }
   else if(data->state.httpwant >= CURL_HTTP_VERSION_3) {
     /* We assume that silently not even trying H3 is ok here */
+    /* TODO: should we fail instead? */
     try_h3 = (Curl_conn_may_http3(data, conn) == CURLE_OK);
     try_h21 = TRUE;
   }
 
-  if(!try_h3) {
-    /* The default setup filter knows how to handle TRNSPRT_TCP
-     * for HTTP/2 and/or HTTP/1.x */
-    conn->transport = TRNSPRT_TCP;
-    goto out;
-  }
-  else if(!try_h21) {
-    /* The default setup filter knows how to handle TRNSPRT_QUIC
-     * for pure HTTP/3 */
-    conn->transport = TRNSPRT_QUIC;
-    goto out;
-  }
-
-  /* ALPN eyeball scenario. Install the HTTP-SETUP filter */
-  result = Curl_cf_http_connect_add(data, conn, sockindex, remotehost);
-
+  result = Curl_cf_http_connect_add(data, conn, sockindex, remotehost,
+                                    try_h3, try_h21);
 out:
   return result;
 }
