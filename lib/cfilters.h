@@ -465,16 +465,16 @@ struct cf_call_data {
  * #define CF_CTX_CALL_DATA(cf)   -> struct cf_call_data instance
 */
 
-#define CF_DATA_SAVE(cf, data) \
-  struct cf_call_data cf_cd_save = CF_CTX_CALL_DATA(cf); \
-  DEBUGASSERT(cf_cd_save.data == NULL || cf_cd_save.depth > 0); \
+#define CF_DATA_SAVE(save, cf, data) \
+  (save) = CF_CTX_CALL_DATA(cf); \
+  DEBUGASSERT((save).data == NULL || (save).depth > 0); \
   CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)data; \
   CF_CTX_CALL_DATA(cf).depth++
 
-#define CF_DATA_RESTORE(cf) \
-  DEBUGASSERT(CF_CTX_CALL_DATA(cf).depth == cf_cd_save.depth + 1); \
-  DEBUGASSERT(cf_cd_save.data == NULL || cf_cd_save.depth > 0); \
-  CF_CTX_CALL_DATA(cf) = cf_cd_save
+#define CF_DATA_RESTORE(cf, save) \
+  DEBUGASSERT(CF_CTX_CALL_DATA(cf).depth == (save).depth + 1); \
+  DEBUGASSERT((save).data == NULL || (save).depth > 0); \
+  CF_CTX_CALL_DATA(cf) = (save)
 
 #define CF_DATA_CURRENT(cf) \
   ((cf)? (CF_CTX_CALL_DATA(cf).data) : NULL)
