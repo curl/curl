@@ -150,6 +150,7 @@
 --post303                            7.26.0
 --preproxy                           7.52.0
 --progress-bar (-#)                  5.10
+--progress-percent
 --proto                              7.20.2
 --proto-default                      7.45.0
 --proto-redir                        7.20.2

@@ -627,7 +627,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   } /* if retry_numretries */
   noretry:
 
-  if((global->progressmode == CURL_PROGRESS_BAR) &&
+  if((global->progressmode == CURL_PROGRESS_BAR || global->progressmode == CURL_PROGRESS_PERCENT) &&
      per->progressbar.calls)
     /* if the custom progress bar has been displayed, we output a
        newline here */
@@ -1842,6 +1842,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* we want the alternative style, then we have to implement it
              ourselves! */
           my_setopt(curl, CURLOPT_XFERINFOFUNCTION, tool_progress_cb);
+          my_setopt(curl, CURLOPT_XFERINFODATA, per);
+        }
+        else if((global->progressmode == CURL_PROGRESS_PERCENT) &&
+           !global->noprogress && !global->mute) {
+          progresspercentinit(&per->progresspercent, config);
+          my_setopt(curl, CURLOPT_XFERINFOFUNCTION, tool_progress_pct);
           my_setopt(curl, CURLOPT_XFERINFODATA, per);
         }
         else if(per->uploadfile && !strcmp(per->uploadfile, ".")) {

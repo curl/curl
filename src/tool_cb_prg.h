@@ -25,8 +25,9 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#define CURL_PROGRESS_STATS 0 /* default progress display */
-#define CURL_PROGRESS_BAR   1
+#define CURL_PROGRESS_STATS   0 /* default progress display */
+#define CURL_PROGRESS_BAR     1
+#define CURL_PROGRESS_PERCENT 2
 
 struct ProgressData {
   int         calls;
@@ -43,11 +44,25 @@ struct ProgressData {
 void progressbarinit(struct ProgressData *bar,
                      struct OperationConfig *config);
 
+struct ProgressPercent {
+  curl_off_t     prev;
+  struct timeval prevtime;
+  FILE           *out;
+  uint           tick;
+};
+
+void progresspercentinit(struct ProgressPercent *perc,
+                         struct OperationConfig *config);
+
 /*
 ** callback for CURLOPT_PROGRESSFUNCTION
 */
 
 int tool_progress_cb(void *clientp,
+                     curl_off_t dltotal, curl_off_t dlnow,
+                     curl_off_t ultotal, curl_off_t ulnow);
+
+int tool_progress_pct(void *clientp,
                      curl_off_t dltotal, curl_off_t dlnow,
                      curl_off_t ultotal, curl_off_t ulnow);
 

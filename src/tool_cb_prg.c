@@ -278,3 +278,56 @@ void progressbarinit(struct ProgressData *bar,
   bar->tick = 150;
   bar->barmove = 1;
 }
+
+int tool_progress_pct(void *clientp,
+                     curl_off_t dltotal, curl_off_t dlnow,
+                     curl_off_t ultotal, curl_off_t ulnow)
+{
+  float percent;
+  curl_off_t total, current;
+
+  struct timeval now = tvnow();
+  struct per_transfer *per = clientp;
+  struct ProgressPercent *perc = &per->progresspercent;
+  struct OperationConfig *config = per->config;
+
+  /* Calculate the total and current progress */
+  total = dltotal + ultotal;
+  current = dlnow + ulnow;
+  if(current > total)
+    total = current;
+
+  /* After the first call avoid updating too quickly
+   * or when there is no progress */
+  if(perc->prev == current || tvdiff(now, perc->prevtime) < perc->tick)
+    return 0;
+
+
+  /* Calculate the percent */
+  if(current > 0 && total > 0)
+    percent = (float)current / (float)total * 100;
+
+  /* Print the result */
+  fprintf(perc->out, "\r%.0f", percent);
+  fflush(perc->out);
+
+  /* Update global value */
+  perc->prev = current;
+  perc->prevtime = now;
+
+  if(config->readbusy) {
+    config->readbusy = FALSE;
+    curl_easy_pause(per->curl, CURLPAUSE_CONT);
+  }
+
+  return 0;
+}
+
+void progresspercentinit(struct ProgressPercent *perc,
+                         struct OperationConfig *config)
+{
+  memset(perc, 0, sizeof(struct ProgressPercent));
+
+  perc->out = config->global->errors;
+  perc->tick = 250;
+}

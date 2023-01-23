@@ -346,6 +346,7 @@ static const struct LongShort aliases[]= {
   {"Zc", "parallel-immediate",       ARG_BOOL},
   {"#",  "progress-bar",             ARG_BOOL},
   {"#m", "progress-meter",           ARG_BOOL},
+  {"#p", "progress-percent",         ARG_BOOL},
   {":",  "next",                     ARG_NONE},
 };
 
@@ -1403,6 +1404,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       switch(subletter) {
       case 'm': /* --progress-meter */
         global->noprogress = !toggle;
+        break;
+      case 'p': /* --progress-percent */
+        global->progressmode = CURL_PROGRESS_PERCENT;
         break;
       default:  /* --progress-bar */
         global->progressmode =

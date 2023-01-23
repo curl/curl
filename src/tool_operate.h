@@ -47,6 +47,7 @@ struct per_transfer {
   int infd;
   bool noprogress;
   struct ProgressData progressbar;
+  struct ProgressPercent progresspercent;
   struct OutStruct outs;
   struct OutStruct heads;
   struct OutStruct etag_save;
