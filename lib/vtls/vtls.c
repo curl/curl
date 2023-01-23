@@ -315,13 +315,6 @@ static void cf_ctx_free(struct ssl_connect_data *ctx)
   }
 }
 
-static void cf_ctx_set_data(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
-{
-  if(cf->ctx)
-    ((struct ssl_connect_data *)cf->ctx)->call_data = data;
-}
-
 static CURLcode ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1482,8 +1475,11 @@ static CURLcode reinit_hostname(struct Curl_cfilter *cf)
 
 static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  cf_ctx_set_data(cf, data);
+  struct cf_call_data save;
+
+  CF_DATA_SAVE(save, cf, data);
   cf_close(cf, data);
+  CF_DATA_RESTORE(cf, save);
   cf_ctx_free(cf->ctx);
   cf->ctx = NULL;
 }
@@ -1491,10 +1487,12 @@ static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 static void ssl_cf_close(struct Curl_cfilter *cf,
                          struct Curl_easy *data)
 {
-  cf_ctx_set_data(cf, data);
+  struct cf_call_data save;
+
+  CF_DATA_SAVE(save, cf, data);
   cf_close(cf, data);
   cf->next->cft->close(cf->next, data);
-  cf_ctx_set_data(cf, NULL);
+  CF_DATA_RESTORE(cf, save);
 }
 
 static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
@@ -1502,6 +1500,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
                                bool blocking, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
+  struct cf_call_data save;
   CURLcode result;
 
   if(cf->connected) {
@@ -1509,7 +1508,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  cf_ctx_set_data(cf, data);
+  CF_DATA_SAVE(save, cf, data);
   (void)connssl;
   DEBUGASSERT(data->conn);
   DEBUGASSERT(data->conn == cf->conn);
@@ -1540,21 +1539,22 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     DEBUGASSERT(connssl->state == ssl_connection_complete);
   }
 out:
-  cf_ctx_set_data(cf, NULL);
+  CF_DATA_RESTORE(cf, save);
   return result;
 }
 
 static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
                                 const struct Curl_easy *data)
 {
+  struct cf_call_data save;
   bool result;
 
-  cf_ctx_set_data(cf, (struct Curl_easy *)data);
+  CF_DATA_SAVE(save, cf, data);
   if(cf->ctx && Curl_ssl->data_pending(cf, data))
     result = TRUE;
   else
     result = cf->next->cft->has_data_pending(cf->next, data);
-  cf_ctx_set_data(cf, NULL);
+  CF_DATA_RESTORE(cf, save);
   return result;
 }
 
@@ -1562,12 +1562,13 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
                            struct Curl_easy *data, const void *buf, size_t len,
                            CURLcode *err)
 {
+  struct cf_call_data save;
   ssize_t nwritten;
 
+  CF_DATA_SAVE(save, cf, data);
   *err = CURLE_OK;
-  cf_ctx_set_data(cf, data);
   nwritten = Curl_ssl->send_plain(cf, data, buf, len, err);
-  cf_ctx_set_data(cf, NULL);
+  CF_DATA_RESTORE(cf, save);
   return nwritten;
 }
 
@@ -1575,12 +1576,13 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
                            struct Curl_easy *data, char *buf, size_t len,
                            CURLcode *err)
 {
+  struct cf_call_data save;
   ssize_t nread;
 
+  CF_DATA_SAVE(save, cf, data);
   *err = CURLE_OK;
-  cf_ctx_set_data(cf, data);
   nread = Curl_ssl->recv_plain(cf, data, buf, len, err);
-  cf_ctx_set_data(cf, NULL);
+  CF_DATA_RESTORE(cf, save);
   return nread;
 }
 
@@ -1588,11 +1590,12 @@ static int ssl_cf_get_select_socks(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    curl_socket_t *socks)
 {
+  struct cf_call_data save;
   int result;
 
-  cf_ctx_set_data(cf, data);
+  CF_DATA_SAVE(save, cf, data);
   result = Curl_ssl->get_select_socks(cf, data, socks);
-  cf_ctx_set_data(cf, NULL);
+  CF_DATA_RESTORE(cf, save);
   return result;
 }
 
@@ -1600,21 +1603,23 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              int event, int arg1, void *arg2)
 {
+  struct cf_call_data save;
+
   (void)arg1;
   (void)arg2;
   switch(event) {
   case CF_CTRL_DATA_ATTACH:
     if(Curl_ssl->attach_data) {
-      cf_ctx_set_data(cf, data);
+      CF_DATA_SAVE(save, cf, data);
       Curl_ssl->attach_data(cf, data);
-      cf_ctx_set_data(cf, NULL);
+      CF_DATA_RESTORE(cf, save);
     }
     break;
   case CF_CTRL_DATA_DETACH:
     if(Curl_ssl->detach_data) {
-      cf_ctx_set_data(cf, data);
+      CF_DATA_SAVE(save, cf, data);
       Curl_ssl->detach_data(cf, data);
-      cf_ctx_set_data(cf, NULL);
+      CF_DATA_RESTORE(cf, save);
     }
     break;
   default:
@@ -1625,6 +1630,8 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
 
 static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
+  struct cf_call_data save;
+  bool result;
   /*
    * This function tries to determine connection status.
    *
@@ -1633,7 +1640,10 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data)
    *     0 means the connection has been closed
    *    -1 means the connection status is unknown
    */
-  return Curl_ssl->check_cxn(cf, data) != 0;
+  CF_DATA_SAVE(save, cf, data);
+  result = Curl_ssl->check_cxn(cf, data) != 0;
+  CF_DATA_RESTORE(cf, save);
+  return result;
 }
 
 struct Curl_cftype Curl_cft_ssl = {
@@ -1786,9 +1796,10 @@ void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
     /* get first filter in chain, if any is present */
     cf = Curl_ssl_cf_get_ssl(data->conn->cfilter[sockindex]);
     if(cf) {
-      cf_ctx_set_data(cf, data);
+      struct cf_call_data save;
+      CF_DATA_SAVE(save, cf, data);
       result = Curl_ssl->get_internals(cf->ctx, info);
-      cf_ctx_set_data(cf, NULL);
+      CF_DATA_RESTORE(cf, save);
     }
   }
   return result;
