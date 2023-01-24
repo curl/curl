@@ -455,7 +455,9 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
  */
 struct cf_call_data {
   struct Curl_easy *data;
+#ifdef DEBUGBUILD
   int depth;
+#endif
 };
 
 /**
@@ -465,16 +467,35 @@ struct cf_call_data {
  * #define CF_CTX_CALL_DATA(cf)   -> struct cf_call_data instance
 */
 
+#ifdef DEBUGBUILD
+
 #define CF_DATA_SAVE(save, cf, data) \
-  (save) = CF_CTX_CALL_DATA(cf); \
-  DEBUGASSERT((save).data == NULL || (save).depth > 0); \
-  CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)data; \
-  CF_CTX_CALL_DATA(cf).depth++
+  do { (save) = CF_CTX_CALL_DATA(cf); \
+    DEBUGASSERT((save).data == NULL || (save).depth > 0); \
+    CF_CTX_CALL_DATA(cf).depth++;  \
+    CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)data; \
+  } while(0)
 
 #define CF_DATA_RESTORE(cf, save) \
-  DEBUGASSERT(CF_CTX_CALL_DATA(cf).depth == (save).depth + 1); \
-  DEBUGASSERT((save).data == NULL || (save).depth > 0); \
-  CF_CTX_CALL_DATA(cf) = (save)
+  do { \
+    DEBUGASSERT(CF_CTX_CALL_DATA(cf).depth == (save).depth + 1); \
+    DEBUGASSERT((save).data == NULL || (save).depth > 0); \
+    CF_CTX_CALL_DATA(cf) = (save); \
+  } while(0)
+
+#else /* DEBUGBUILD */
+
+#define CF_DATA_SAVE(save, cf, data) \
+  do { (save) = CF_CTX_CALL_DATA(cf); \
+    CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)data; \
+  } while(0)
+
+#define CF_DATA_RESTORE(cf, save) \
+  do { \
+    CF_CTX_CALL_DATA(cf) = (save); \
+  } while(0)
+
+#endif /* !DEBUGBUILD */
 
 #define CF_DATA_CURRENT(cf) \
   ((cf)? (CF_CTX_CALL_DATA(cf).data) : NULL)
