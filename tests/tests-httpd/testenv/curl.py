@@ -157,18 +157,6 @@ class ExecResult:
 
     def check_responses(self, count: int, exp_status: Optional[int] = None,
                         exp_exitcode: Optional[int] = None):
-        if len(self.responses) != count:
-            seen_queries = []
-            for idx, resp in enumerate(self.responses):
-                assert resp['status'] == 200, f'response #{idx} status: {resp["status"]}'
-                if 'rquery' not in resp['header']:
-                    log.error(f'response #{idx} missing "rquery": {resp["header"]}')
-                seen_queries.append(int(resp['header']['rquery']))
-            for i in range(0, count-1):
-                if i not in seen_queries:
-                    log.error(f'response for query {i} missing')
-            if self.with_stats and len(self.stats) == count:
-                log.error(f'got all {count} stats, though')
         assert len(self.responses) == count, \
             f'response count: expected {count}, got {len(self.responses)}'
         if exp_status is not None:

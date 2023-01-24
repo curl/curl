@@ -124,9 +124,16 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  * - MAX_CONCURRENT: the maximum number of parallel transfers the filter
  *                   chain expects to handle at the same time.
  *                   default: 1 if no filter overrides.
+ * - CONNECT_REPLY_MS: milliseconds until the first indication of a server
+ *                   response was received on a connect. For TCP, this
+ *                   reflects the time until the socket connected. On UDP
+ *                   this gives the time the first bytes from the server
+ *                   were received.
+ *                   -1 if not determined yet.
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
+#define CF_QUERY_CONNECT_REPLY_MS   2  /* number     -        */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will

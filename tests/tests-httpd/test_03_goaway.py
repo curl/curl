@@ -24,12 +24,10 @@
 #
 ###########################################################################
 #
-import json
 import logging
 import time
 from datetime import timedelta
 from threading import Thread
-from typing import Optional
 import pytest
 
 from testenv import Env, CurlClient, ExecResult
@@ -82,6 +80,8 @@ class TestGoAway:
 
     # download files sequentially with delay, reload server for GOAWAY
     @pytest.mark.skipif(condition=not Env.have_h3_server(), reason="no h3 server")
+    @pytest.mark.skip('not working, shutting down nghttpx puts new connections'
+                      'immediately in DRAIN state.')
     def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx, repeat):
         proto = 'h3'
         count = 3

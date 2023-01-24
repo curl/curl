@@ -41,11 +41,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* The default connection attempt delay in milliseconds for ALPN eyeballs. */
-/* TODO: arbitrary after some experimentation */
-#define CURL_ALPN_HET_DEFAULT 100L
-
-
 
 typedef enum {
   CF_HC_INIT,
@@ -57,7 +52,8 @@ typedef enum {
 struct cf_hc_baller {
   struct Curl_cfilter *cf;
   CURLcode result;
-  timediff_t delay_ms;
+  struct curltime started;
+  int reply_ms;
   bool enabled;
 };
 
@@ -70,6 +66,7 @@ static void cf_hc_baller_reset(struct cf_hc_baller *b,
     b->cf = NULL;
   }
   b->result = CURLE_OK;
+  b->reply_ms = -1;
 }
 
 static bool cf_hc_baller_is_active(struct cf_hc_baller *b)
@@ -80,6 +77,15 @@ static bool cf_hc_baller_is_active(struct cf_hc_baller *b)
 static bool cf_hc_baller_has_started(struct cf_hc_baller *b)
 {
   return !!b->cf;
+}
+
+static int cf_hc_baller_reply_ms(struct cf_hc_baller *b,
+                                 struct Curl_easy *data)
+{
+  if(b->reply_ms < 0)
+    b->cf->cft->query(b->cf, data, CF_QUERY_CONNECT_REPLY_MS,
+                      &b->reply_ms, NULL);
+  return b->reply_ms;
 }
 
 static bool cf_hc_baller_data_pending(struct cf_hc_baller *b,
@@ -95,6 +101,8 @@ struct cf_hc_ctx {
   CURLcode result;          /* overall result */
   struct cf_hc_baller h3_baller;
   struct cf_hc_baller h21_baller;
+  int soft_eyeballs_timeout_ms;
+  int hard_eyeballs_timeout_ms;
 };
 
 static void cf_hc_baller_init(struct cf_hc_baller *b,
@@ -106,6 +114,7 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
   struct Curl_cfilter *save = cf->next;
 
   cf->next = NULL;
+  b->started = Curl_now();
   b->result = Curl_cf_setup_insert_after(cf, data, ctx->remotehost,
                                          transport, CURL_CF_SSL_ENABLE);
   b->cf = cf->next;
@@ -135,7 +144,8 @@ static void cf_hc_reset(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf_hc_baller_reset(&ctx->h21_baller, data);
     ctx->state = CF_HC_INIT;
     ctx->result = CURLE_OK;
-    ctx->h21_baller.delay_ms = CURL_ALPN_HET_DEFAULT;
+    ctx->hard_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout;
+    ctx->soft_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout / 2;
   }
 }
 
@@ -147,13 +157,16 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(winner->cf);
-  cf->next = winner->cf;
-  winner->cf = NULL;
-
   if(winner != &ctx->h3_baller)
     cf_hc_baller_reset(&ctx->h3_baller, data);
   if(winner != &ctx->h21_baller)
     cf_hc_baller_reset(&ctx->h21_baller, data);
+
+  DEBUGF(LOG_CF(data, cf, "connect+handshake: %dms, 1st data: %dms",
+                (int)Curl_timediff(Curl_now(), winner->started),
+                cf_hc_baller_reply_ms(winner, data)));
+  cf->next = winner->cf;
+  winner->cf = NULL;
 
   switch(cf->conn->alpn) {
   case CURL_HTTP_VERSION_3:
@@ -184,6 +197,41 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   return result;
 }
 
+
+static bool time_to_start_h21(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              struct curltime now)
+{
+  struct cf_hc_ctx *ctx = cf->ctx;
+  timediff_t elapsed_ms;
+
+  if(!ctx->h21_baller.enabled || cf_hc_baller_has_started(&ctx->h21_baller))
+    return FALSE;
+
+  if(!ctx->h3_baller.enabled || !cf_hc_baller_is_active(&ctx->h3_baller))
+    return TRUE;
+
+  elapsed_ms = Curl_timediff(now, ctx->started);
+  if(elapsed_ms >= ctx->hard_eyeballs_timeout_ms) {
+    DEBUGF(LOG_CF(data, cf, "hard timeout of %dms reached, starting h21",
+                  ctx->hard_eyeballs_timeout_ms));
+    return TRUE;
+  }
+
+  if(elapsed_ms >= ctx->soft_eyeballs_timeout_ms) {
+    if(cf_hc_baller_reply_ms(&ctx->h3_baller, data) < 0) {
+      DEBUGF(LOG_CF(data, cf, "soft timeout of %dms reached, h3 has not "
+                    "seen any data, starting h21",
+                    ctx->soft_eyeballs_timeout_ms));
+      return TRUE;
+    }
+    /* set the effective hard timeout again */
+    Curl_expire(data, ctx->hard_eyeballs_timeout_ms - elapsed_ms,
+                EXPIRE_ALPN_EYEBALLS);
+  }
+  return FALSE;
+}
+
 static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool blocking, bool *done)
@@ -210,7 +258,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     if(ctx->h3_baller.enabled) {
       cf_hc_baller_init(&ctx->h3_baller, cf, data, TRNSPRT_QUIC);
       if(ctx->h21_baller.enabled)
-        Curl_expire(data, ctx->h21_baller.delay_ms, EXPIRE_ALPN_EYEBALLS);
+        Curl_expire(data, ctx->soft_eyeballs_timeout_ms, EXPIRE_ALPN_EYEBALLS);
     }
     else if(ctx->h21_baller.enabled)
       cf_hc_baller_init(&ctx->h21_baller, cf, data, TRNSPRT_TCP);
@@ -219,7 +267,6 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
 
   case CF_HC_CONNECT:
     if(cf_hc_baller_is_active(&ctx->h3_baller)) {
-      DEBUGF(LOG_CF(data, cf, "connect, check h3"));
       result = cf_hc_baller_connect(&ctx->h3_baller, cf, data, done);
       if(!result && *done) {
         DEBUGF(LOG_CF(data, cf, "connect, h3 connected"));
@@ -228,19 +275,14 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       }
     }
 
-    if(!cf_hc_baller_has_started(&ctx->h21_baller) &&
-       (!ctx->h3_baller.enabled || ctx->h3_baller.result
-        || Curl_timediff(now, ctx->started) >= ctx->h21_baller.delay_ms)) {
-       /* h3 disabled, failed or delay expired, start h21 attempt */
-       DEBUGF(LOG_CF(data, cf, "connect, start h21"));
-       cf_hc_baller_init(&ctx->h21_baller, cf, data, TRNSPRT_TCP);
+    if(time_to_start_h21(cf, data, now)) {
+      cf_hc_baller_init(&ctx->h21_baller, cf, data, TRNSPRT_TCP);
     }
 
     if(cf_hc_baller_is_active(&ctx->h21_baller)) {
       DEBUGF(LOG_CF(data, cf, "connect, check h21"));
       result = cf_hc_baller_connect(&ctx->h21_baller, cf, data, done);
       if(!result && *done) {
-        DEBUGF(LOG_CF(data, cf, "connect, h21 connected"));
         result = baller_connected(cf, data, &ctx->h21_baller);
         goto out;
       }
@@ -273,6 +315,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
   }
 
 out:
+  DEBUGF(LOG_CF(data, cf, "connect -> %d, done=%d", result, *done));
   return result;
 }
 
@@ -289,7 +332,6 @@ static int cf_hc_get_select_socks(struct Curl_cfilter *cf,
   if(cf->connected)
     return cf->next->cft->get_select_socks(cf->next, data, socks);
 
-  DEBUGF(LOG_CF(data, cf, "get_select_socks"));
   ballers[0] = &ctx->h3_baller;
   ballers[1] = &ctx->h21_baller;
   for(i = s = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {

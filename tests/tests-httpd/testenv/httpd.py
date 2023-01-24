@@ -202,9 +202,6 @@ class Httpd:
                 f'Listen {self.env.http_port}',
                 f'Listen {self.env.https_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
-                # we want the quest string in a response header, so we
-                # can check responses more easily
-                f'Header set rquery "%{{QUERY_STRING}}s"',
             ]
             conf.extend([  # plain http host for domain1
                 f'<VirtualHost *:{self.env.http_port}>',

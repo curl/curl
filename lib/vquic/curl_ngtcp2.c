@@ -161,6 +161,8 @@ struct cf_ngtcp2_ctx {
   nghttp3_settings h3settings;
   int qlogfd;
   struct curltime connect_started; /* time the current attempt started */
+  struct curltime handshake_done;    /* time connect handshake finished */
+  int first_reply_ms;              /* ms since first data arrived */
   struct curltime reconnect_at;    /* time the next attempt should start */
 };
 
@@ -1713,6 +1715,10 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
         return CURLE_PEER_FAILED_VERIFICATION;
       return CURLE_RECV_ERROR;
     }
+    if(ctx->first_reply_ms < 0) {
+      timediff_t ms = Curl_timediff(Curl_now(), ctx->connect_started);
+      ctx->first_reply_ms = (ms < INT_MAX)? (int)ms : INT_MAX;
+    }
   }
 
 out:
@@ -2164,36 +2170,37 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
 
 static void cf_ngtcp2_ctx_clear(struct cf_ngtcp2_ctx *ctx)
 {
-  if(ctx) {
-    if(ctx->qlogfd != -1) {
-      close(ctx->qlogfd);
-      ctx->qlogfd = -1;
-    }
+  if(ctx->qlogfd != -1) {
+    close(ctx->qlogfd);
+    ctx->qlogfd = -1;
+  }
 #ifdef USE_OPENSSL
-    if(ctx->ssl)
-      SSL_free(ctx->ssl);
-    if(ctx->sslctx)
-      SSL_CTX_free(ctx->sslctx);
+  if(ctx->ssl)
+    SSL_free(ctx->ssl);
+  if(ctx->sslctx)
+    SSL_CTX_free(ctx->sslctx);
 #elif defined(USE_GNUTLS)
-    if(ctx->gtls) {
-      if(ctx->gtls->cred)
-        gnutls_certificate_free_credentials(ctx->gtls->cred);
-      if(ctx->gtls->session)
-        gnutls_deinit(ctx->gtls->session);
-      free(ctx->gtls);
-    }
+  if(ctx->gtls) {
+    if(ctx->gtls->cred)
+      gnutls_certificate_free_credentials(ctx->gtls->cred);
+    if(ctx->gtls->session)
+      gnutls_deinit(ctx->gtls->session);
+    free(ctx->gtls);
+  }
 #elif defined(USE_WOLFSSL)
-    if(ctx->ssl)
-      wolfSSL_free(ctx->ssl);
-    if(ctx->sslctx)
-      wolfSSL_CTX_free(ctx->sslctx);
+  if(ctx->ssl)
+    wolfSSL_free(ctx->ssl);
+  if(ctx->sslctx)
+    wolfSSL_CTX_free(ctx->sslctx);
 #endif
-    free(ctx->pktbuf);
+  free(ctx->pktbuf);
+  if(ctx->h3conn)
     nghttp3_conn_del(ctx->h3conn);
+  if(ctx->qconn)
     ngtcp2_conn_del(ctx->qconn);
 
-    memset(ctx, 0, sizeof(*ctx));
-  }
+  memset(ctx, 0, sizeof(*ctx));
+  ctx->first_reply_ms = -1;
 }
 
 static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -2230,8 +2237,10 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   cf_ngtcp2_ctx_set_data(cf, data);
   DEBUGF(LOG_CF(data, cf, "destroy"));
-  cf_ngtcp2_ctx_clear(ctx);
-  free(ctx);
+  if(ctx) {
+    cf_ngtcp2_ctx_clear(ctx);
+    free(ctx);
+  }
   cf->ctx = NULL;
 }
 
@@ -2398,6 +2407,7 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
 
   if(ctx->reconnect_at.tv_sec && Curl_timediff(now, ctx->reconnect_at) < 0) {
     /* Not time yet to attempt the next connect */
+    DEBUGF(LOG_CF(data, cf, "waiting for reconnect time"));
     goto out;
   }
 
@@ -2420,6 +2430,7 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
     goto out;
 
   if(ngtcp2_conn_get_handshake_completed(ctx->qconn)) {
+    ctx->handshake_done = now;
     DEBUGF(LOG_CF(data, cf, "handshake complete after %dms",
            (int)Curl_timediff(now, ctx->connect_started)));
     result = qng_verify_peer(cf, data);
@@ -2433,6 +2444,10 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   }
 
 out:
+#if 0
+  /* TODO: this attempt at making a new connection fails with a BAD_POLL
+   * error in the multi handling.
+   */
   if(result == CURLE_RECV_ERROR && ctx->qconn &&
      ngtcp2_conn_is_in_draining_period(ctx->qconn)) {
     /* When a QUIC server instance is shutting down, it may send us a
@@ -2457,6 +2472,8 @@ out:
     Curl_expire(data, reconn_delay_ms, EXPIRE_QUIC);
     result = CURLE_OK;
   }
+#endif
+
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(result) {
     const char *r_ip;
@@ -2464,7 +2481,7 @@ out:
 
     Curl_cf_socket_peek(cf->next, data, NULL, NULL,
                         &r_ip, &r_port, NULL, NULL);
-    infof(data, "connect to %s port %u failed: %s",
+    infof(data, "QUIC connect to %s port %u failed: %s",
           r_ip, r_port, curl_easy_strerror(result));
   }
 #endif
@@ -2494,6 +2511,12 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     cf_ngtcp2_ctx_set_data(cf, NULL);
     return CURLE_OK;
   }
+
+  case CF_QUERY_CONNECT_REPLY_MS:
+    *pres1 = ctx->first_reply_ms;
+    DEBUGF(LOG_CF(data, cf, "query connect reply: %dms", *pres1));
+    return CURLE_OK;
+
   default:
     break;
   }
@@ -2531,12 +2554,12 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
-  (void)conn;
   ctx = calloc(sizeof(*ctx), 1);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+  cf_ngtcp2_ctx_clear(ctx);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
@@ -2546,6 +2569,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
   if(result)
     goto out;
 
+  cf->conn = conn;
   udp_cf->conn = cf->conn;
   udp_cf->sockindex = cf->sockindex;
   cf->next = udp_cf;

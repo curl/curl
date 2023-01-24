@@ -948,6 +948,44 @@ static bool cf_he_data_pending(struct Curl_cfilter *cf,
   return FALSE;
 }
 
+static CURLcode cf_he_query(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            int query, int *pres1, void **pres2)
+{
+  struct cf_he_ctx *ctx = cf->ctx;
+
+  if(!cf->connected) {
+    switch(query) {
+    case CF_QUERY_CONNECT_REPLY_MS: {
+      int reply_ms = -1;
+      size_t i;
+
+      for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+        struct eyeballer *baller = ctx->baller[i];
+        int breply_ms;
+
+        if(baller && baller->cf &&
+           !baller->cf->cft->query(baller->cf, data, query,
+                                   &breply_ms, NULL)) {
+          if(breply_ms >= 0 && (reply_ms < 0 || breply_ms < reply_ms))
+            reply_ms = breply_ms;
+        }
+      }
+      *pres1 = reply_ms;
+      DEBUGF(LOG_CF(data, cf, "query connect reply: %dms", *pres1));
+      return CURLE_OK;
+    }
+
+    default:
+      break;
+    }
+  }
+
+  return cf->next?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
+}
+
 static void cf_he_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_he_ctx *ctx = cf->ctx;
@@ -975,7 +1013,7 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  cf_he_query,
 };
 
 CURLcode Curl_cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
