@@ -1,0 +1,604 @@
+# Copyright 2023 Daniel Fandrich, <dan@coneharvesters.com>, et al.
+#
+# SPDX-License-Identifier: curl
+#
+# Configure Reviewpad (https://reviewpad.com/) to add labels to pull requests
+# automatically based on the files changed.
+#
+# A common matching pattern here is to look for specific files or specific
+# directories, while also allowing files in tests/ or docs/ but verifying that
+# at least one file in the set is actually in other than tests/ or docs/ to
+# avoid mislabeling a pure test or pure documentation PR falsely.
+#
+# Normally, workflow evaluation stops when the first matching rule is found.
+# Since some labels might be legitimately added at the same time as other
+# labels, they must all have always-run: true so they all have a chance to be
+# evaluated.
+
+api-version: reviewpad.com/v3.x
+
+labels:
+  authentication:
+  build:
+  CI:
+  cmake:
+  cmdline tool:
+  connecting & proxies:
+  cookies:
+  cryptography:
+  DICT:
+  documentation:
+  FTP:
+  GOPHER:
+  HTTP:
+  HTTP/2:
+  HTTP/3:
+  Hyper:
+  IMAP:
+  LDAP:
+  libcurl API:
+  MIME:
+  MQTT:
+  name lookup:
+  POP3:
+  RTMP:
+  RTSP:
+  SCP/SFTP:
+  script:
+  SMB:
+  SMTP:
+  tests:
+  TFTP:
+  TLS:
+  URL:
+  WebSocket:
+  Windows:
+
+workflows:
+  - name: Add label authentication
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/mk-ca-bundle\.1$", $fn) ||
+            $matchString("^lib/.*gssapi", $fn) ||
+            $matchString("^lib/.*krb5", $fn) ||
+            $matchString("^lib/.*ntlm", $fn) ||
+            $matchString("^lib/curl_sasl", $fn) ||
+            $matchString("^lib/curl_aws", $fn) ||
+            $matchString("^lib/http_digest", $fn) ||
+            $matchString("^lib/http_negotiate", $fn) ||
+            $matchString("^lib/vauth/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("authentication")
+
+  - name: Add label build
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("\bCMakeLists\.txt$", $fn) ||
+            $matchString("\bMakefile\.am$", $fn) ||
+            $matchString("\bMakefile\.mk$", $fn) ||
+            $matchString("\.inc$", $fn) ||
+            $matchString("\.m4$", $fn) ||
+            $matchString("\.mk$", $fn) ||
+            $matchString("^CMake/", $fn) ||
+            $matchString("^configure\.ac$", $fn) ||
+            $matchString("^m4/", $fn) ||
+            $matchString("^packages/", $fn) ||
+            $matchString("^plan9/", $fn) ||
+            $matchString("^projects/", $fn) ||
+            $matchString("^winbuild/", $fn)
+          ))'
+    then:
+      - $addLabel("build")
+
+  - name: Add label CI
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^\.azure-pipelines\.yml$", $fn) ||
+            $matchString("^\.circleci/", $fn) ||
+            $matchString("^\.cirrus\.yml$", $fn) ||
+            $matchString("^\.github/", $fn) ||
+            $matchString("^appveyor\.yml$", $fn) ||
+            $matchString("^reviewpad\.yml$", $fn) ||
+            $matchString("^zuul\.d/", $fn)
+          ))'
+    then:
+      - $addLabel("CI")
+
+  - name: Add label cmake
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("\bCMakeLists\.txt$", $fn) ||
+            $matchString("^CMake/", $fn)
+          ))'
+    then:
+      - $addLabel("cmake")
+
+  - name: Add label cmdline tool
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^src/", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^src/", $fn)
+          ))'
+    then:
+      - $addLabel("cmdline tool")
+
+  - name: Add label connecting & proxies
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/http_proxy\.", $fn) ||
+            $matchString("^lib/noproxy\.", $fn) ||
+            $matchString("^lib/socks\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("connecting & proxies")
+
+  - name: Add label cookies
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/cookie\.", $fn) ||
+            $matchString("^lib/psl\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("cookies")
+
+  - name: Add label cryptography
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/CIPHERS\.md$", $fn) ||
+            $matchString("^lib/.*sha256", $fn) ||
+            $matchString("^lib/curl_hmac\.", $fn) ||
+            $matchString("^lib/curl_md.\.", $fn) ||
+            $matchString("^lib/md.\.", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("cryptography")
+
+  - name: Add label DICT
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/dict\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("DICT")
+
+  - name: Add label documentation
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String => (
+            $matchString("\.md$", $fn) ||
+            $matchString("\.txt$", $fn) ||
+            $matchString("\.1$", $fn) ||
+            $matchString("\.3$", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^RELEASE-NOTES", $fn)
+          ) && ! (
+            $matchString("\bCMakeLists\.txt$", $fn) ||
+            $matchString("^docs/examples/", $fn)
+          )))'
+    then:
+      - $addLabel("documentation")
+
+  - name: Add label FTP
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/curl_range\.", $fn) ||
+            $matchString("^lib/ftp", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("FTP")
+
+  - name: Add label GOPHER
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/gopher", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("GOPHER")
+
+  - name: Add label HTTP
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/HSTS\.md$", $fn) ||
+            $matchString("^docs/HTTP-COOKIES\.md$", $fn) ||
+            $matchString("^lib/h2h3\.", $fn) ||
+            $matchString("^lib/http", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("HTTP")
+
+  - name: Add label HTTP/2
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/HTTP2\.md$", $fn) ||
+            $matchString("^lib/http2", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("HTTP/2")
+
+  - name: Add label HTTP/3
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/HTTP3\.md$", $fn) ||
+            $matchString("^lib/vquic/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("HTTP/3")
+
+  - name: Add label Hyper
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/c-hyper\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("Hyper")
+
+  - name: Add label IMAP
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/imap", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("IMAP")
+
+  - name: Add label LDAP
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/.*ldap", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("LDAP")
+
+  - name: Add label libcurl API
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/libcurl/ABI\.md$", $fn) ||
+            $matchString("^include/curl/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("libcurl API")
+
+  - name: Add label MIME
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/libcurl/curl_mime_", $fn) ||
+            $matchString("^lib/mime", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("MIME")
+
+  - name: Add label MQTT
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/MQTT\.md$", $fn) ||
+            $matchString("^lib/mqtt", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("MQTT")
+
+  - name: Add label name lookup
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/asyn", $fn) ||
+            $matchString("^lib/curl_gethostname\.", $fn) ||
+            $matchString("^lib/doh", $fn) ||
+            $matchString("^lib/host", $fn) ||
+            $matchString("^lib/idn", $fn) ||
+            $matchString("^lib/socketpair", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("name lookup")
+
+  - name: Add label POP3
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/pop3\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("POP3")
+
+  - name: Add label RTMP
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/curl_rtmp\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("RTMP")
+
+  - name: Add label RTSP
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/rtsp\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("RTSP")
+
+  - name: Add label SCP/SFTP
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/vssh/", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("SCP/SFTP")
+
+  - name: Add label script
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^scripts/", $fn) ||
+            $matchString("\.pl$", $fn) ||
+            $matchString("\.sh$", $fn)
+          ))'
+    then:
+      - $addLabel("script")
+
+  - name: Add label SMB
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/smb\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("SMB")
+
+  - name: Add label SMTP
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/smtp\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("SMTP")
+
+  - name: Add label tests
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("tests")
+
+  - name: Add label TFTP
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^lib/tftp\.", $fn) ||
+            $matchString("^docs/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            $matchString("^lib/", $fn)
+          ))'
+    then:
+      - $addLabel("TFTP")
+
+  - name: Add label TLS
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/HYPER\.md$", $fn) ||
+            $matchString("^docs/SSL", $fn) ||
+            $matchString("^lib/vtls/", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("TLS")
+
+  - name: Add label URL
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/libcurl/curl_url", $fn) ||
+            $matchString("^lib/urlapi", $fn) ||
+            $matchString("^lib/url\.", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("URL")
+
+  - name: Add label WebSocket
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^docs/WEBSOCKET\.md$", $fn) ||
+            $matchString("^docs/libcurl/opts/CURLOPT_WS_OPTIONS\.3$", $fn) ||
+            $matchString("^docs/libcurl/curl_ws_", $fn) ||
+            $matchString("^lib/ws\.", $fn) ||
+            $matchString("^tests/data/", $fn)
+          )) &&
+          $any($filesPath(), ($fn: String =>
+            !$matchString("^tests/", $fn)
+          ))'
+    then:
+      - $addLabel("WebSocket")
+
+  - name: Add label Windows
+    always-run: true
+    if:
+      - rule: '
+          $all($filesPath(), ($fn: String =>
+            $matchString("^projects/Windows/", $fn) ||
+            $matchString("^lib/.*win32", $fn) ||
+            $matchString("^lib/curl_multibyte\.", $fn) ||
+            $matchString("^lib/rename\.", $fn) ||
+            $matchString("^winbuild/", $fn)
+          ))'
+    then:
+      - $addLabel("Windows")
