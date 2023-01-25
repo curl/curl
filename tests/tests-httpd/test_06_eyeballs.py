@@ -54,8 +54,8 @@ class TestEyeballs:
         urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = curl.http_download(urls=[urln], extra_args=['--http3-only'])
         assert r.exit_code == 0, f'{r}'
-        r.check_responses(count=1, exp_status=200)
-        assert r.responses[0]['protocol'] == 'HTTP/3'
+        r.check_stats(count=1, exp_status=200)
+        assert r.stats[0]['http_version'] == '3'
 
     # download using only HTTP/3 on missing server
     def test_06_02_h3_only(self, env: Env, httpd, nghttpx, repeat):
@@ -72,8 +72,8 @@ class TestEyeballs:
         urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = curl.http_download(urls=[urln], extra_args=['--http3'])
         assert r.exit_code == 0, f'{r}'
-        r.check_responses(count=1, exp_status=200)
-        assert r.responses[0]['protocol'] == 'HTTP/2'
+        r.check_stats(count=1, exp_status=200)
+        assert r.stats[0]['http_version'] == '2'
 
     # download using HTTP/3 on missing server with fallback on http/1.1
     def test_06_04_h3_fallback_h1(self, env: Env, httpd, nghttpx, repeat):
@@ -82,5 +82,5 @@ class TestEyeballs:
         urln = f'https://{env.authority_for(env.domain2, "h3")}/data.json'
         r = curl.http_download(urls=[urln], extra_args=['--http3'])
         assert r.exit_code == 0, f'{r}'
-        r.check_responses(count=1, exp_status=200)
-        assert r.responses[0]['protocol'] == 'HTTP/1.1'
+        r.check_stats(count=1, exp_status=200)
+        assert r.stats[0]['http_version'] == '1.1'

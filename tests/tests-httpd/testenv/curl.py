@@ -170,6 +170,21 @@ class ExecResult:
         if self.with_stats:
             assert len(self.stats) == count, f'{self}'
 
+    def check_stats(self, count: int, exp_status: Optional[int] = None,
+                        exp_exitcode: Optional[int] = None):
+        assert len(self.stats) == count, \
+            f'stats count: expected {count}, got {len(self.stats)}'
+        if exp_status is not None:
+            for idx, x in enumerate(self.stats):
+                assert 'http_code' in x, \
+                    f'status #{idx} reports no http_code'
+                assert x['http_code'] == exp_status, \
+                    f'status #{idx} unexpected http_code: {x["http_code"]}'
+        if exp_exitcode is not None:
+            for idx, x in enumerate(self.stats):
+                if 'exitcode' in x:
+                    assert x['exitcode'] == 0, f'status #{idx} exitcode: {x["exitcode"]}'
+
 
 class CurlClient:
 
@@ -212,6 +227,7 @@ class CurlClient:
     def http_download(self, urls: List[str],
                       alpn_proto: Optional[str] = None,
                       with_stats: bool = True,
+                      with_headers: bool = False,
                       extra_args: List[str] = None):
         if extra_args is None:
             extra_args = []
@@ -223,7 +239,8 @@ class CurlClient:
                 '-w', '%{json}\\n'
             ])
         return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
-                         with_stats=with_stats)
+                         with_stats=with_stats,
+                         with_headers=with_headers)
 
     def _run(self, args, intext='', with_stats: bool = False):
         self._rmf(self._stdoutfile)
@@ -245,12 +262,15 @@ class CurlClient:
 
     def _raw(self, urls, timeout=10, options=None, insecure=False,
              alpn_proto: Optional[str] = None,
-             force_resolve=True, with_stats=False):
+             force_resolve=True,
+             with_stats=False,
+             with_headers=True):
         args = self._complete_args(
             urls=urls, timeout=timeout, options=options, insecure=insecure,
-            alpn_proto=alpn_proto, force_resolve=force_resolve)
+            alpn_proto=alpn_proto, force_resolve=force_resolve,
+            with_headers=with_headers)
         r = self._run(args, with_stats=with_stats)
-        if r.exit_code == 0:
+        if r.exit_code == 0 and with_headers:
             self._parse_headerfile(self._headerfile, r=r)
             if r.json:
                 r.response["json"] = r.json
@@ -258,13 +278,14 @@ class CurlClient:
 
     def _complete_args(self, urls, timeout=None, options=None,
                        insecure=False, force_resolve=True,
-                       alpn_proto: Optional[str] = None):
+                       alpn_proto: Optional[str] = None,
+                       with_headers: bool = True):
         if not isinstance(urls, list):
             urls = [urls]
 
-        args = [
-            self._curl, "-s", "--path-as-is", "-D", self._headerfile,
-        ]
+        args = [self._curl, "-s", "--path-as-is"]
+        if with_headers:
+            args.extend(["-D", self._headerfile])
         if self.env.verbose > 2:
             args.extend(['--trace', self._tracefile, '--trace-time'])
 

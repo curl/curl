@@ -67,8 +67,7 @@ class TestGoAway:
         t.join()
         r: ExecResult = self.r
         assert r.exit_code == 0, f'{r}'
-        r.check_responses(count=count, exp_status=200)
-        assert len(r.stats) == count, f'{r.stats}'
+        r.check_stats(count=count, exp_status=200)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
         assert r.total_connects == 2
@@ -109,10 +108,6 @@ class TestGoAway:
                 log.debug(f'request {idx} connected')
         # this should take `count` seconds to retrieve
         assert r.duration >= timedelta(seconds=count)
-        assert len(r.stats) == count, f'{r.stats}'
-        # TODO: curl (the tool) handles --dump-header <file> in a strange
-        # way that may lead to the generated file being incomplete. All
-        # headers are written in tool_cb_hdr.c but do not appear.
-        # r.check_responses(count=count, exp_status=200, exp_exitcode=0)
+        r.check_stats(count=count, exp_status=200, exp_exitcode=0)
 
 

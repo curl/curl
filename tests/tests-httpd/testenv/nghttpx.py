@@ -74,7 +74,7 @@ class Nghttpx:
             return self.start()
         return True
 
-    def start(self):
+    def start(self, wait_live=True):
         self._mkpath(self._tmp_dir)
         if self._process:
             self.stop()
@@ -95,7 +95,7 @@ class Nghttpx:
         self._process = subprocess.Popen(args=args, stderr=ngerr)
         if self._process.returncode is not None:
             return False
-        return self.wait_live(timeout=timedelta(seconds=5))
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
 
     def stop_if_running(self):
         if self.is_running():
@@ -120,22 +120,25 @@ class Nghttpx:
             running = self._process
             self._process = None
             os.kill(running.pid, signal.SIGQUIT)
-            if not self.start():
+            end_wait = datetime.now() + timeout
+            if not self.start(wait_live=False):
                 self._process = running
                 return False
-            end_wait = datetime.now() + timeout
             while datetime.now() < end_wait:
                 try:
                     log.debug(f'waiting for nghttpx({running.pid}) to exit.')
-                    running.wait(1)
+                    running.wait(2)
                     log.debug(f'nghttpx({running.pid}) terminated -> {running.returncode}')
-                    return True
+                    break
                 except subprocess.TimeoutExpired:
                     log.warning(f'nghttpx({running.pid}), not shut down yet.')
                     os.kill(running.pid, signal.SIGQUIT)
-            log.error(f'nghttpx({running.pid}), terminate forcefully.')
-            running.terminate()
-            return True
+            if datetime.now() >= end_wait:
+                log.error(f'nghttpx({running.pid}), terminate forcefully.')
+                os.kill(running.pid, signal.SIGKILL)
+                running.terminate()
+                running.wait(1)
+            return self.wait_live(timeout=timedelta(seconds=5))
         return False
 
     def wait_dead(self, timeout: timedelta):
@@ -161,7 +164,7 @@ class Nghttpx:
                 return True
             log.warning(f'waiting for nghttpx to become responsive: {r}')
             time.sleep(.1)
-        log.debug(f"Server still not responding after {timeout}")
+        log.error(f"Server still not responding after {timeout}")
         return False
 
     def _rmf(self, path):

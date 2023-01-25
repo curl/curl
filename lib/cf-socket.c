@@ -1392,7 +1392,8 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
     return Curl_socket_connect_result(data, ctx->r_ip, SOCKERRNO);
   }
   set_local_ip(cf, data);
-  DEBUGF(LOG_CF(data, cf, "socket %d connected: [%s:%d] -> [%s:%d]",
+  DEBUGF(LOG_CF(data, cf, "%s socket %d connected: [%s:%d] -> [%s:%d]",
+         (ctx->transport == TRNSPRT_QUIC)? "QUIC" : "UDP",
          ctx->sock, ctx->l_ip, ctx->l_port, ctx->r_ip, ctx->r_port));
 
   (void)curlx_nonblock(ctx->sock, TRUE);

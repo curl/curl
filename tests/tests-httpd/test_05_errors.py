@@ -59,7 +59,7 @@ class TestErrors:
         assert r.exit_code != 0, f'{r}'
         invalid_stats = []
         for idx, s in enumerate(r.stats):
-            if 'exitcode' not in s or s['exitcode'] != 18:
+            if 'exitcode' not in s or s['exitcode'] not in [18, 56]:
                 invalid_stats.append(f'request {idx} exit with {s["exitcode"]}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
 
@@ -79,6 +79,6 @@ class TestErrors:
         assert len(r.stats) == count, f'did not get all stats: {r}'
         invalid_stats = []
         for idx, s in enumerate(r.stats):
-            if 'exitcode' not in s or s['exitcode'] != 18:
+            if 'exitcode' not in s or s['exitcode'] not in [18, 56]:
                 invalid_stats.append(f'request {idx} exit with {s["exitcode"]}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'

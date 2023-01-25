@@ -275,7 +275,6 @@ struct HTTP {
 #else /* !_WIN32 */
   pthread_mutex_t recv_lock;
 #endif /* _WIN32 */
-
   /* Receive Buffer (Headers and Data) */
   uint8_t* recv_buf;
   size_t recv_buf_alloc;
@@ -289,6 +288,10 @@ struct HTTP {
   /* General Receive Error */
   CURLcode recv_error;
 #endif /* USE_MSH3 */
+#ifdef USE_QUICHE
+  bool h3_got_header; /* TRUE when h3 stream has recvd some HEADER */
+  bool h3_recving_data; /* TRUE when h3 stream is reading DATA */
+#endif /* USE_QUICHE */
 };
 
 CURLcode Curl_http_size(struct Curl_easy *data);
