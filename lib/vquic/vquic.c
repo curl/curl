@@ -108,8 +108,10 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
 CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
-                             const struct Curl_addrinfo *ai)
+                             const struct Curl_addrinfo *ai,
+                             int transport)
 {
+  DEBUGASSERT(transport == TRNSPRT_QUIC);
 #ifdef USE_NGTCP2
   return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
 #elif defined(USE_QUICHE)

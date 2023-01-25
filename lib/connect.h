@@ -101,7 +101,8 @@ void Curl_conncontrol(struct connectdata *conn,
 typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       struct Curl_easy *data,
                                       struct connectdata *conn,
-                                      const struct Curl_addrinfo *ai);
+                                      const struct Curl_addrinfo *ai,
+                                      int transport);
 
 /**
  * Create a happy eyeball connection filter that uses the, once resolved,
@@ -118,7 +119,8 @@ Curl_cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
                               struct Curl_easy *data,
                               struct connectdata *conn,
                               cf_ip_connect_create *cf_create,
-                              const struct Curl_dns_entry *remotehost);
+                              const struct Curl_dns_entry *remotehost,
+                              int transport);
 
 CURLcode Curl_cf_setup_add(struct Curl_easy *data,
                            struct connectdata *conn,

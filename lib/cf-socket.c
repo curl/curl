@@ -1349,7 +1349,8 @@ struct Curl_cftype Curl_cft_tcp = {
 CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
-                            const struct Curl_addrinfo *ai)
+                            const struct Curl_addrinfo *ai,
+                            int transport)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1357,12 +1358,13 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
+  DEBUGASSERT(transport == TRNSPRT_TCP);
   ctx = calloc(sizeof(*ctx), 1);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  cf_socket_ctx_init(ctx, ai, TRNSPRT_TCP);
+  cf_socket_ctx_init(ctx, ai, transport);
 
   result = Curl_cf_create(&cf, &Curl_cft_tcp, ctx);
 
@@ -1374,6 +1376,45 @@ out:
   }
 
   return result;
+}
+
+static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
+                               struct Curl_easy *data)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+  int rc;
+
+  /* QUIC needs a connected socket, nonblocking */
+  DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
+
+  rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+  if(-1 == rc) {
+    return Curl_socket_connect_result(data, ctx->r_ip, SOCKERRNO);
+  }
+  set_local_ip(cf, data);
+  DEBUGF(LOG_CF(data, cf, "socket %d connected: [%s:%d] -> [%s:%d]",
+         ctx->sock, ctx->l_ip, ctx->l_port, ctx->r_ip, ctx->r_port));
+
+  (void)curlx_nonblock(ctx->sock, TRUE);
+  switch(ctx->addr.family) {
+#if defined(__linux__) && defined(IP_MTU_DISCOVER)
+  case AF_INET: {
+    int val = IP_PMTUDISC_DO;
+    (void)setsockopt(ctx->sock, IPPROTO_IP, IP_MTU_DISCOVER, &val,
+                     sizeof(val));
+    break;
+  }
+#endif
+#if defined(__linux__) && defined(IPV6_MTU_DISCOVER)
+  case AF_INET6: {
+    int val = IPV6_PMTUDISC_DO;
+    (void)setsockopt(ctx->sock, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
+                     sizeof(val));
+    break;
+  }
+#endif
+  }
+  return CURLE_OK;
 }
 
 static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
@@ -1392,20 +1433,29 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
   if(ctx->sock == CURL_SOCKET_BAD) {
     result = cf_socket_open(cf, data);
     if(result) {
-      DEBUGF(LOG_CF(data, cf, "cf_udp_connect() failed -> %d", result));
+      DEBUGF(LOG_CF(data, cf, "cf_udp_connect(), open failed -> %d", result));
       if(ctx->sock != CURL_SOCKET_BAD) {
         socket_close(data, cf->conn, TRUE, ctx->sock);
         ctx->sock = CURL_SOCKET_BAD;
       }
+      goto out;
     }
-    else {
-      set_local_ip(cf, data);
+
+    if(ctx->transport == TRNSPRT_QUIC) {
+      result = cf_udp_setup_quic(cf, data);
+      if(result)
+        goto out;
       DEBUGF(LOG_CF(data, cf, "cf_udp_connect(), opened socket=%d (%s:%d)",
                     ctx->sock, ctx->l_ip, ctx->l_port));
-      *done = TRUE;
-      cf->connected = TRUE;
     }
+    else {
+      DEBUGF(LOG_CF(data, cf, "cf_udp_connect(), opened socket=%d "
+                    "(unconnected)", ctx->sock));
+    }
+    *done = TRUE;
+    cf->connected = TRUE;
   }
+out:
   return result;
 }
 
@@ -1430,7 +1480,8 @@ struct Curl_cftype Curl_cft_udp = {
 CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
-                            const struct Curl_addrinfo *ai)
+                            const struct Curl_addrinfo *ai,
+                            int transport)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1438,12 +1489,13 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
+  DEBUGASSERT(transport == TRNSPRT_UDP || transport == TRNSPRT_QUIC);
   ctx = calloc(sizeof(*ctx), 1);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  cf_socket_ctx_init(ctx, ai, TRNSPRT_UDP);
+  cf_socket_ctx_init(ctx, ai, transport);
 
   result = Curl_cf_create(&cf, &Curl_cft_udp, ctx);
 
@@ -1479,7 +1531,8 @@ struct Curl_cftype Curl_cft_unix = {
 CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
-                             const struct Curl_addrinfo *ai)
+                             const struct Curl_addrinfo *ai,
+                             int transport)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1487,12 +1540,13 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
+  DEBUGASSERT(transport == TRNSPRT_UNIX);
   ctx = calloc(sizeof(*ctx), 1);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  cf_socket_ctx_init(ctx, ai, TRNSPRT_UNIX);
+  cf_socket_ctx_init(ctx, ai, transport);
 
   result = Curl_cf_create(&cf, &Curl_cft_unix, ctx);
 

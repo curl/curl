@@ -50,6 +50,7 @@ typedef enum {
 } cf_hc_state;
 
 struct cf_hc_baller {
+  const char *name;
   struct Curl_cfilter *cf;
   CURLcode result;
   struct curltime started;
@@ -108,11 +109,13 @@ struct cf_hc_ctx {
 static void cf_hc_baller_init(struct cf_hc_baller *b,
                               struct Curl_cfilter *cf,
                               struct Curl_easy *data,
+                              const char *name,
                               int transport)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   struct Curl_cfilter *save = cf->next;
 
+  b->name = name;
   cf->next = NULL;
   b->started = Curl_now();
   b->result = Curl_cf_setup_insert_after(cf, data, ctx->remotehost,
@@ -162,8 +165,8 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   if(winner != &ctx->h21_baller)
     cf_hc_baller_reset(&ctx->h21_baller, data);
 
-  DEBUGF(LOG_CF(data, cf, "connect+handshake: %dms, 1st data: %dms",
-                (int)Curl_timediff(Curl_now(), winner->started),
+  DEBUGF(LOG_CF(data, cf, "connect+handshake %s: %dms, 1st data: %dms",
+                winner->name, (int)Curl_timediff(Curl_now(), winner->started),
                 cf_hc_baller_reply_ms(winner, data)));
   cf->next = winner->cf;
   winner->cf = NULL;
@@ -256,12 +259,12 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     DEBUGF(LOG_CF(data, cf, "connect, init"));
     ctx->started = now;
     if(ctx->h3_baller.enabled) {
-      cf_hc_baller_init(&ctx->h3_baller, cf, data, TRNSPRT_QUIC);
+      cf_hc_baller_init(&ctx->h3_baller, cf, data, "h3", TRNSPRT_QUIC);
       if(ctx->h21_baller.enabled)
         Curl_expire(data, ctx->soft_eyeballs_timeout_ms, EXPIRE_ALPN_EYEBALLS);
     }
     else if(ctx->h21_baller.enabled)
-      cf_hc_baller_init(&ctx->h21_baller, cf, data, TRNSPRT_TCP);
+      cf_hc_baller_init(&ctx->h21_baller, cf, data, "h21", TRNSPRT_TCP);
     ctx->state = CF_HC_CONNECT;
     /* FALLTHROUGH */
 
@@ -269,14 +272,13 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     if(cf_hc_baller_is_active(&ctx->h3_baller)) {
       result = cf_hc_baller_connect(&ctx->h3_baller, cf, data, done);
       if(!result && *done) {
-        DEBUGF(LOG_CF(data, cf, "connect, h3 connected"));
         result = baller_connected(cf, data, &ctx->h3_baller);
         goto out;
       }
     }
 
     if(time_to_start_h21(cf, data, now)) {
-      cf_hc_baller_init(&ctx->h21_baller, cf, data, TRNSPRT_TCP);
+      cf_hc_baller_init(&ctx->h21_baller, cf, data, "h21", TRNSPRT_TCP);
     }
 
     if(cf_hc_baller_is_active(&ctx->h21_baller)) {
@@ -325,8 +327,8 @@ static int cf_hc_get_select_socks(struct Curl_cfilter *cf,
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   size_t i, j, s;
-  int wrc, rc = GETSOCK_BLANK;
-  curl_socket_t wsocks[MAX_SOCKSPEREASYHANDLE];
+  int brc, rc = GETSOCK_BLANK;
+  curl_socket_t bsocks[MAX_SOCKSPEREASYHANDLE];
   struct cf_hc_baller *ballers[2];
 
   if(cf->connected)
@@ -335,23 +337,25 @@ static int cf_hc_get_select_socks(struct Curl_cfilter *cf,
   ballers[0] = &ctx->h3_baller;
   ballers[1] = &ctx->h21_baller;
   for(i = s = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
-    struct cf_hc_baller *baller = ballers[i];
-    if(!cf_hc_baller_is_active(baller))
+    struct cf_hc_baller *b = ballers[i];
+    if(!cf_hc_baller_is_active(b))
       continue;
-    wrc = Curl_conn_cf_get_select_socks(baller->cf, data, wsocks);
-    if(!wrc)
+    brc = Curl_conn_cf_get_select_socks(b->cf, data, bsocks);
+    DEBUGF(LOG_CF(data, cf, "get_selected_socks(%s) -> %x", b->name, brc));
+    if(!brc)
       continue;
     for(j = 0; j < MAX_SOCKSPEREASYHANDLE && s < MAX_SOCKSPEREASYHANDLE; ++j) {
-      if((wrc & GETSOCK_WRITESOCK(j)) || (wrc & GETSOCK_READSOCK(j))) {
-        socks[s] = wsocks[j];
-        if(wrc & GETSOCK_WRITESOCK(j))
+      if((brc & GETSOCK_WRITESOCK(j)) || (brc & GETSOCK_READSOCK(j))) {
+        socks[s] = bsocks[j];
+        if(brc & GETSOCK_WRITESOCK(j))
           rc |= GETSOCK_WRITESOCK(s);
-        if(wrc & GETSOCK_READSOCK(j))
+        if(brc & GETSOCK_READSOCK(j))
           rc |= GETSOCK_READSOCK(s);
         s++;
       }
     }
   }
+  DEBUGF(LOG_CF(data, cf, "get_selected_socks -> %x", rc));
   return rc;
 }
 

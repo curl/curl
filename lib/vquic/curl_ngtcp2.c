@@ -2256,48 +2256,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   CURLcode result;
   ngtcp2_path path; /* TODO: this must be initialized properly */
   const struct Curl_sockaddr_ex *sockaddr;
-  const char *r_ip, *l_ip;
-  int r_port, l_port;
   int qfd;
-
-  result = Curl_cf_socket_peek(cf->next, data, &ctx->sockfd,
-                               &sockaddr, &r_ip, &r_port, NULL, NULL);
-  if(result)
-    return result;
-  DEBUGASSERT(ctx->sockfd != CURL_SOCKET_BAD);
-
-  infof(data, "Connect socket %d over QUIC to %s:%d",
-        ctx->sockfd, r_ip, r_port);
-
-  rc = connect(ctx->sockfd, &sockaddr->sa_addr, sockaddr->addrlen);
-  if(-1 == rc) {
-    return Curl_socket_connect_result(data, r_ip, SOCKERRNO);
-  }
-
-  Curl_cf_socket_peek(cf->next, data, NULL, NULL, NULL, NULL, &l_ip, &l_port);
-  DEBUGF(LOG_CF(data, cf, "socket %d connect: [%s:%d] -> [%s:%d]",
-         ctx->sockfd, l_ip, l_port, r_ip, r_port));
-
-  /* QUIC sockets need to be nonblocking */
-  (void)curlx_nonblock(ctx->sockfd, TRUE);
-  switch(sockaddr->family) {
-#if defined(__linux__) && defined(IP_MTU_DISCOVER)
-  case AF_INET: {
-    int val = IP_PMTUDISC_DO;
-    (void)setsockopt(ctx->sockfd, IPPROTO_IP, IP_MTU_DISCOVER, &val,
-                     sizeof(val));
-    break;
-  }
-#endif
-#if defined(__linux__) && defined(IPV6_MTU_DISCOVER)
-  case AF_INET6: {
-    int val = IPV6_PMTUDISC_DO;
-    (void)setsockopt(ctx->sockfd, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
-                     sizeof(val));
-    break;
-  }
-#endif
-  }
 
   ctx->version = NGTCP2_PROTO_VER_MAX;
 #ifdef USE_OPENSSL
@@ -2332,6 +2291,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   ctx->qlogfd = qfd; /* -1 if failure above */
   quic_settings(ctx, data);
 
+  Curl_cf_socket_peek(cf->next, data, &ctx->sockfd,
+                      &sockaddr, NULL, NULL, NULL, NULL);
   ctx->local_addrlen = sizeof(ctx->local_addr);
   rv = getsockname(ctx->sockfd, (struct sockaddr *)&ctx->local_addr,
                    &ctx->local_addrlen);
@@ -2444,10 +2405,6 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   }
 
 out:
-#if 0
-  /* TODO: this attempt at making a new connection fails with a BAD_POLL
-   * error in the multi handling.
-   */
   if(result == CURLE_RECV_ERROR && ctx->qconn &&
      ngtcp2_conn_is_in_draining_period(ctx->qconn)) {
     /* When a QUIC server instance is shutting down, it may send us a
@@ -2465,14 +2422,16 @@ out:
                   reconn_delay_ms));
     Curl_conn_cf_close(cf->next, data);
     cf_ngtcp2_ctx_clear(ctx);
-    Curl_conn_cf_connect(cf->next, data, FALSE, done);
-    *done = FALSE;
-    ctx->reconnect_at = now;
-    ctx->reconnect_at.tv_usec += reconn_delay_ms * 1000;
-    Curl_expire(data, reconn_delay_ms, EXPIRE_QUIC);
-    result = CURLE_OK;
+    result = Curl_conn_cf_connect(cf->next, data, FALSE, done);
+    if(!result && *done) {
+      result = cf_connect_start(cf, data);
+      *done = FALSE;
+      ctx->reconnect_at = now;
+      ctx->reconnect_at.tv_usec += reconn_delay_ms * 1000;
+      Curl_expire(data, reconn_delay_ms, EXPIRE_QUIC);
+      result = CURLE_OK;
+    }
   }
-#endif
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(result) {
@@ -2565,7 +2524,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
   if(result)
     goto out;
 
-  result = Curl_cf_udp_create(&udp_cf, data, conn, ai);
+  result = Curl_cf_udp_create(&udp_cf, data, conn, ai, TRNSPRT_QUIC);
   if(result)
     goto out;
 

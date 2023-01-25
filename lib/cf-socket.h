@@ -116,7 +116,8 @@ void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
 CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
-                            const struct Curl_addrinfo *ai);
+                            const struct Curl_addrinfo *ai,
+                            int transport);
 
 /**
  * Creates a cfilter that opens a UDP socket to the given address
@@ -128,7 +129,8 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
 CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
-                            const struct Curl_addrinfo *ai);
+                            const struct Curl_addrinfo *ai,
+                            int transport);
 
 /**
  * Creates a cfilter that opens a UNIX socket to the given address
@@ -140,7 +142,8 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
 CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
-                             const struct Curl_addrinfo *ai);
+                             const struct Curl_addrinfo *ai,
+                             int transport);
 
 /**
  * Creates a cfilter that keeps a listening socket.

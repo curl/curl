@@ -442,6 +442,7 @@ static void baller_initiate(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct eyeballer *baller)
 {
+  struct cf_he_ctx *ctx = cf->ctx;
   struct Curl_cfilter *cf_prev = baller->cf;
   struct Curl_cfilter *wcf;
   CURLcode result;
@@ -451,7 +452,8 @@ static void baller_initiate(struct Curl_cfilter *cf,
      socket gets a different file descriptor, which can prevent bugs when
      the curl_multi_socket_action interface is used with certain select()
      replacements such as kqueue. */
-  result = baller->cf_create(&baller->cf, data, cf->conn, baller->addr);
+  result = baller->cf_create(&baller->cf, data, cf->conn, baller->addr,
+                             ctx->transport);
   if(result)
     goto out;
 
@@ -1020,7 +1022,8 @@ CURLcode Curl_cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
                                        struct Curl_easy *data,
                                        struct connectdata *conn,
                                        cf_ip_connect_create *cf_create,
-                                       const struct Curl_dns_entry *remotehost)
+                                       const struct Curl_dns_entry *remotehost,
+                                       int transport)
 {
   struct cf_he_ctx *ctx = NULL;
   CURLcode result;
@@ -1033,6 +1036,7 @@ CURLcode Curl_cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+  ctx->transport = transport;
   ctx->cf_create = cf_create;
   ctx->remotehost = remotehost;
 
@@ -1081,7 +1085,8 @@ static CURLcode cf_he_insert_after(struct Curl_cfilter *cf_at,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
   result = Curl_cf_happy_eyeballs_create(&cf, data, cf_at->conn,
-                                         cf_create, remotehost);
+                                         cf_create, remotehost,
+                                         transport);
   if(result)
     return result;
 

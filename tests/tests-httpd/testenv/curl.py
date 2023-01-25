@@ -179,7 +179,7 @@ class CurlClient:
         'http/1.1': '--http1.1',
         'h2': '--http2',
         'h2c': '--http2',
-        'h3': '--http3',
+        'h3': '--http3-only',
     }
 
     def __init__(self, env: Env, run_dir: Optional[str] = None):
