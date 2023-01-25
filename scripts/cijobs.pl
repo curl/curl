@@ -237,7 +237,7 @@ sub appveyor {
             }
         }
         $job{'line'} = $line;
-        if($_ =~ /^      - APPVEYOR_BUILD_WORKER_IMAGE: \"(.*)\"/) {
+        if($_ =~ /^        APPVEYOR_BUILD_WORKER_IMAGE: \"(.*)\"/) {
             $job{'image'}= $1;
         }
         elsif($_ =~ /^        BUILD_SYSTEM: (.*)/) {
