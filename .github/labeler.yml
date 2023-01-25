@@ -26,9 +26,11 @@ authentication:
 build:
 - all: ['**/CMakeLists.txt']
 - all: ['**/Makefile.am']
+- all: ['**/Makefile.mk']
 - all: ['**/*.inc']
 - all: ['**/*.m4']
 - all: ['**/*.mk']
+- all: ['CMake/**']
 - all: ['configure.ac']
 - all: ['m4/**']
 - all: ['packages/**']
@@ -46,6 +48,7 @@ CI:
 
 cmake:
 - all: ['**/CMakeLists.txt']
+- all: ['CMake/**']
 
 cmdline tool:
 - all: ['src/**']
@@ -168,10 +171,9 @@ URL:
 
 WebSocket:
 - all: ['docs/WEBSOCKET.md*']
-- all: ['lib/ws.*']
-- all: ['docs/WebSockets.md']
 - all: ['docs/libcurl/opts/CURLOPT_WS_OPTIONS.3']
 - all: ['docs/libcurl/curl_ws_*']
+- all: ['lib/ws.*']
 
 Windows:
 - all: ['projects/Windows/**']
