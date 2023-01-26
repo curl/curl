@@ -30,9 +30,11 @@ build:
 - all: ['**/*.inc']
 - all: ['**/*.m4']
 - all: ['**/*.mk']
+- all: ['lib/libcurl*.in']
 - all: ['CMake/**']
 - all: ['configure.ac']
 - all: ['m4/**']
+- all: ['MacOSX-Framework']
 - all: ['packages/**']
 - all: ['plan9/**']
 - all: ['projects/**']
@@ -54,6 +56,8 @@ cmdline tool:
 - all: ['src/**']
 
 connecting & proxies:
+- all: ['lib/conncache.*']
+- all: ['lib/connect.*']
 - all: ['lib/http_proxy.*']
 - all: ['lib/noproxy.*']
 - all: ['lib/socks.*']
@@ -65,9 +69,11 @@ cookies:
 cryptography:
 - all: ['docs/CIPHERS.md']
 - all: ['lib/*sha256*']
+- all: ['lib/curl_des.*']
 - all: ['lib/curl_hmac.*']
 - all: ['lib/curl_md?.*']
 - all: ['lib/md?.*']
+- all: ['lib/rand.*']
 
 DICT:
 - all: ['lib/dict.*']
@@ -77,10 +83,15 @@ documentation:
 - all: ['**/*.txt', '!**/CMakeLists.txt']
 - all: ['**/*.1']
 - all: ['**/*.3']
+- all: ['CHANGES']
 - all: ['docs/**', '!docs/examples/**']
+- all: ['GIT-INFO']
+- all: ['LICENSES/**']
+- all: ['README']
 - all: ['RELEASE-NOTES']
 
 FTP:
+- all: ['lib/curl_fnmatch.*']
 - all: ['lib/curl_range.*']
 - all: ['lib/ftp*']
 
@@ -143,9 +154,10 @@ SCP/SFTP:
 - all: ['lib/vssh/**']
 
 script:
-- all: ['scripts/**']
 - all: ['**/*.pl']
 - all: ['**/*.sh']
+- all: ['curl-config.in']
+- all: ['scripts/**']
 
 SMB:
 - all: ['lib/smb.*']
@@ -176,8 +188,8 @@ WebSocket:
 - all: ['lib/ws.*']
 
 Windows:
-- all: ['projects/Windows/**']
 - all: ['lib/*win32*']
 - all: ['lib/curl_multibyte.*']
 - all: ['lib/rename.*']
+- all: ['projects/Windows/**']
 - all: ['winbuild/**']
