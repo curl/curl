@@ -395,7 +395,10 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
     return CURLE_OUT_OF_MEMORY;
 
   baller->name = ((ai_family == AF_INET)? "ipv4" : (
-                  (ai_family == AF_INET6)? "ipv6" : "ip"));
+#ifdef ENABLE_IPV6
+                  (ai_family == AF_INET6)? "ipv6" :
+#endif
+                  "ip"));
   baller->cf_create = cf_create;
   baller->addr = addr;
   baller->ai_family = ai_family;
