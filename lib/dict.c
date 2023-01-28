@@ -98,36 +98,25 @@ const struct Curl_handler Curl_handler_dict = {
   PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
-static char *unescape_word(const char *inputbuff)
+static char *unescape_word(const char *input)
 {
-  char *newp = NULL;
-  char *dictp;
-  size_t len;
-
-  CURLcode result = Curl_urldecode(inputbuff, 0, &newp, &len,
-                                   REJECT_NADA);
-  if(!newp || result)
-    return NULL;
-
-  dictp = malloc(len*2 + 1); /* add one for terminating zero */
+  size_t len = strlen(input);
+  char *dictp = malloc(len*2 + 1); /* add one for terminating zero */
   if(dictp) {
-    char *ptr;
+    const char *ptr;
     char ch;
     int olen = 0;
     /* According to RFC2229 section 2.2, these letters need to be escaped with
        \[letter] */
-    for(ptr = newp;
-        (ch = *ptr) != 0;
-        ptr++) {
+    for(ptr = input; (ch = *ptr); ptr++) {
       if((ch <= 32) || (ch == 127) ||
-          (ch == '\'') || (ch == '\"') || (ch == '\\')) {
+         (ch == '\'') || (ch == '\"') || (ch == '\\')) {
         dictp[olen++] = '\\';
       }
       dictp[olen++] = ch;
     }
     dictp[olen] = 0;
   }
-  free(newp);
   return dictp;
 }
 
@@ -178,19 +167,24 @@ static CURLcode sendf(curl_socket_t sockfd, struct Curl_easy *data,
 static CURLcode dict_do(struct Curl_easy *data, bool *done)
 {
   char *word;
-  char *eword;
+  char *eword = NULL;
   char *ppath;
   char *database = NULL;
   char *strategy = NULL;
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
-  char *path = data->state.up.path;
+  char *path;
 
   *done = TRUE; /* unconditionally */
+
+  /* url-decode path before further evaluation */
+  result = Curl_urldecode(data->state.up.path, 0, &path, NULL, REJECT_CTRL);
+  if(result)
+    return result;
 
   if(strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
      strncasecompare(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
@@ -225,8 +219,10 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
 
     eword = unescape_word(word);
-    if(!eword)
-      return CURLE_OUT_OF_MEMORY;
+    if(!eword) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto error;
+    }
 
     result = sendf(sockfd, data,
                    "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
@@ -239,11 +235,9 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
                    strategy,
                    eword);
 
-    free(eword);
-
     if(result) {
       failf(data, "Failed sending DICT request");
-      return result;
+      goto error;
     }
     Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1); /* no upload */
   }
@@ -273,8 +267,10 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
 
     eword = unescape_word(word);
-    if(!eword)
-      return CURLE_OUT_OF_MEMORY;
+    if(!eword) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto error;
+    }
 
     result = sendf(sockfd, data,
                    "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
@@ -285,11 +281,9 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
                    database,
                    eword);
 
-    free(eword);
-
     if(result) {
       failf(data, "Failed sending DICT request");
-      return result;
+      goto error;
     }
     Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
   }
@@ -310,13 +304,16 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
                      "QUIT\r\n", ppath);
       if(result) {
         failf(data, "Failed sending DICT request");
-        return result;
+        goto error;
       }
 
       Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
     }
   }
 
-  return CURLE_OK;
+  error:
+  free(eword);
+  free(path);
+  return result;
 }
 #endif /* CURL_DISABLE_DICT */
