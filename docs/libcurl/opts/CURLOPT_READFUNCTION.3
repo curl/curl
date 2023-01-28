@@ -40,7 +40,7 @@ This callback function gets called by libcurl as soon as it needs to read data
 in order to send it to the peer - like if you ask it to upload or post data to
 the server. The data area pointed at by the pointer \fIbuffer\fP should be
 filled up with at most \fIsize\fP multiplied with \fInitems\fP number of bytes
-by your function.
+by your function. \fIsize\fP is always 1.
 
 Set the \fIuserdata\fP argument with the \fICURLOPT_READDATA(3)\fP option.
 
