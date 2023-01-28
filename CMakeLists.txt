@@ -1155,6 +1155,46 @@ if(HAVE_FILE_OFFSET_BITS)
 endif()
 check_type_size("off_t"  SIZEOF_OFF_T)
 
+# For Windows, all compilers used by CMake should support large files
+if(WIN32)
+  set(USE_WIN32_LARGE_FILES ON)
+
+  # Use the manifest embedded in the Windows Resource
+  set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
+
+  # Check if crypto functions in wincrypt.h are actually available
+  if(HAVE_WINCRYPT_H)
+    check_symbol_exists(CryptAcquireContext "${CURL_INCLUDES}" USE_WINCRYPT)
+  endif()
+  if(USE_WINCRYPT)
+    set(USE_WIN32_CRYPTO ON)
+  endif()
+
+  # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
+  if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
+    list(APPEND CURL_LIBS "advapi32" "crypt32")
+  endif()
+
+  # Matching logic used for Curl_win32_random()
+  if(MINGW)
+    check_c_source_compiles("
+      #include <_mingw.h>
+      #if defined(__MINGW64_VERSION_MAJOR)
+      #error
+      #endif
+      int main(void) {
+        return 0;
+      }"
+      HAVE_MINGW_ORIGINAL)
+  endif()
+
+  if(NOT HAVE_MINGW_ORIGINAL)
+    list(APPEND CURL_LIBS "bcrypt")
+  else()
+    set(HAVE_FTRUNCATE OFF)
+  endif()
+endif()
+
 # include this header to get the type
 set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
@@ -1267,46 +1307,6 @@ set(CURL_PULL_INTTYPES_H ${HAVE_INTTYPES_H})
 include(CMake/OtherTests.cmake)
 
 add_definitions(-DHAVE_CONFIG_H)
-
-# For Windows, all compilers used by CMake should support large files
-if(WIN32)
-  set(USE_WIN32_LARGE_FILES ON)
-
-  # Use the manifest embedded in the Windows Resource
-  set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
-
-  # Check if crypto functions in wincrypt.h are actually available
-  if(HAVE_WINCRYPT_H)
-    check_symbol_exists(CryptAcquireContext "${CURL_INCLUDES}" USE_WINCRYPT)
-  endif()
-  if(USE_WINCRYPT)
-    set(USE_WIN32_CRYPTO ON)
-  endif()
-
-  # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
-  if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
-    list(APPEND CURL_LIBS "advapi32" "crypt32")
-  endif()
-
-  # Matching logic used for Curl_win32_random()
-  if(MINGW)
-    check_c_source_compiles("
-      #include <_mingw.h>
-      #if defined(__MINGW64_VERSION_MAJOR)
-      #error
-      #endif
-      int main(void) {
-        return 0;
-      }"
-      HAVE_MINGW_ORIGINAL)
-  endif()
-
-  if(NOT HAVE_MINGW_ORIGINAL)
-    list(APPEND CURL_LIBS "bcrypt")
-  else()
-    set(HAVE_FTRUNCATE OFF)
-  endif()
-endif()
 
 if(MSVC)
   # Disable default manifest added by CMake
