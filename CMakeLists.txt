@@ -1277,7 +1277,7 @@ if(WIN32)
 
   # Check if crypto functions in wincrypt.h are actually available
   if(HAVE_WINCRYPT_H)
-    check_symbol_exists(CryptAcquireContext "${CURL_INCLUDES}" USE_WINCRYPT)
+    check_symbol_exists(CryptAcquireContext "windows.h;wincrypt.h" USE_WINCRYPT)
   endif()
   if(USE_WINCRYPT)
     set(USE_WIN32_CRYPTO ON)
