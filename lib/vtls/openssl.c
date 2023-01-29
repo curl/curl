@@ -261,6 +261,12 @@
 #define HAVE_OPENSSL_VERSION
 #endif
 
+#ifdef OPENSSL_IS_BORINGSSL
+typedef uint32_t errcode_t;
+#else
+typedef unsigned long errcode_t;
+#endif
+
 /*
  * Whether the OpenSSL version has the API needed to support sharing an
  * X509_STORE between connections. The API is:
@@ -1225,7 +1231,7 @@ SSL_CTX_use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
 
   if(ret) {
     X509 *ca;
-    unsigned long err;
+    errcode_t err;
 
     if(!SSL_CTX_clear_chain_certs(ctx)) {
       ret = 0;
@@ -3942,7 +3948,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     }
     else {
       /* untreated error */
-      unsigned long errdetail;
+      errcode_t errdetail;
       char error_buffer[256]="";
       CURLcode result;
       long lerr;
@@ -4520,7 +4526,7 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
      'size_t' */
   int err;
   char error_buffer[256];
-  unsigned long sslerror;
+  errcode_t sslerror;
   int memlen;
   int rc;
   struct ssl_connect_data *connssl = cf->ctx;
