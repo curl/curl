@@ -3093,6 +3093,8 @@ struct curl_version_info_data {
 
   /* These fields were added in CURLVERSION_TWELFTH */
   const char *ngtcp2_version; /* human readable string. */
+
+  const char *nghttp3_version; /* human readable string. */
 };
 typedef struct curl_version_info_data curl_version_info_data;
 

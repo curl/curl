@@ -77,6 +77,10 @@
 #include <ngtcp2.h>
 #endif
 
+#ifdef USE_NGHTTP3
+#include <nghttp3.h>
+#endif
+
 #ifdef USE_OPENLDAP
 #include <ldap.h>
 #endif
@@ -162,6 +166,9 @@ char *curl_version(void)
 #endif
 #ifdef USE_NGTCP2
   char ngtcp2_buf[30];
+#endif
+#ifdef USE_NGHTTP3
+  char nghttp3_buf[30];
 #endif
 #ifdef USE_OPENLDAP
   char ldap_buf[30];
@@ -256,6 +263,12 @@ char *curl_version(void)
   msnprintf(ngtcp2_buf, sizeof(ngtcp2_buf), "libngtcp2/%s",
             ngtcp2_version_info->version_str);
   src[i++] = ngtcp2_buf;
+#endif
+#ifdef USE_NGHTTP3
+  const nghttp3_info *nghttp3_version_info = nghttp3_info(0);
+  msnprintf(nghttp3_buf, sizeof(nghttp3_buf), "libnghttp3/%s",
+            nghttp3_version_info->version_str);
+  src[i++] = nghttp3_buf;
 #endif
 #ifdef USE_OPENLDAP
   {
@@ -568,6 +581,7 @@ static curl_version_info_data version_info = {
   NULL, /* gsasl version */
   feature_names,
   NULL, /* ngtcp2 version */
+  NULL /* nghttp3 version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -671,6 +685,16 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
     msnprintf(ngtcp2_buffer, sizeof(ngtcp2_buffer), "%s",
               ngtcp2_version_info->version_str);
     version_info.ngtcp2_version = ngtcp2_buffer;
+  }
+#endif
+
+#ifdef USE_NGHTTP3
+  {
+    static char nghttp3_buffer[30];
+    const nghttp3_info *nghttp3_version_info = nghttp3_version(0);
+    msnprintf(nghttp3_buffer, sizeof(nghttp3_buffer), "%s",
+              nghttp3_version_info->version_str);
+    version_info.nghttp3_version = nghttp3_buffer;
   }
 #endif
 
