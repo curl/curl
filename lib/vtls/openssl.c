@@ -3052,7 +3052,7 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
   BIO_free(cbio);
 
   /* if we didn't end up importing anything, treat that as an error */
-  return (count > 0 ? CURLE_OK : CURLE_SSL_CACERT_BADFILE);
+  return (count > 0) ? CURLE_OK : CURLE_SSL_CACERT_BADFILE;
 }
 
 static CURLcode populate_x509_store(struct Curl_cfilter *cf,
@@ -3076,13 +3076,13 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   if(!store)
     return CURLE_OUT_OF_MEMORY;
 
+  if(verifypeer) {
 #if defined(USE_WIN32_CRYPTO)
   /* Import certificates from the Windows root certificate store if requested.
      https://stackoverflow.com/questions/9507184/
      https://github.com/d3x0r/SACK/blob/master/src/netlib/ssl_layer.c#L1037
      https://datatracker.ietf.org/doc/html/rfc5280 */
-  if((conn_config->verifypeer || conn_config->verifyhost) &&
-     (ssl_config->native_ca_store)) {
+  if(ssl_config->native_ca_store) {
     HCERTSTORE hStore = CertOpenSystemStore(0, TEXT("ROOT"));
 
     if(hStore) {
@@ -3217,77 +3217,72 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
       infof(data, "successfully imported Windows CA store");
     else
       infof(data, "error importing Windows CA store, continuing anyway");
-  }
-#endif
 
-  if(ca_info_blob) {
-    result = load_cacert_from_memory(store, ca_info_blob);
-    if(result) {
-      if(result == CURLE_OUT_OF_MEMORY ||
-         (verifypeer && !imported_native_ca)) {
+#endif
+    if(ca_info_blob) {
+      result = load_cacert_from_memory(store, ca_info_blob);
+      if(result) {
         failf(data, "error importing CA certificate blob");
         return result;
       }
-      /* Only warn if no certificate verification is required. */
-      infof(data, "error importing CA certificate blob, continuing anyway");
-    }
-    else {
-      imported_ca_info_blob = true;
-      infof(data, "successfully imported CA certificate blob");
-    }
-  }
-
-  if(verifypeer && (ssl_cafile || ssl_capath)) {
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-  /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
-    if(ssl_cafile && !X509_STORE_load_file(store, ssl_cafile)) {
-      if(!imported_native_ca && !imported_ca_info_blob) {
-        /* Fail if we insist on successfully verifying the server. */
-        failf(data, "error setting certificate file: %s", ssl_cafile);
-        return CURLE_SSL_CACERT_BADFILE;
-      }
-      else
-        infof(data, "error setting certificate file, continuing anyway");
-    }
-    if(ssl_capath && !X509_STORE_load_path(store, ssl_capath)) {
-      if(!imported_native_ca && !imported_ca_info_blob) {
-        /* Fail if we insist on successfully verifying the server. */
-        failf(data, "error setting certificate path: %s", ssl_capath);
-        return CURLE_SSL_CACERT_BADFILE;
-      }
-      else
-        infof(data, "error setting certificate path, continuing anyway");
-    }
-#else
-    /* tell OpenSSL where to find CA certificates that are used to verify the
-       server's certificate. */
-    if(!X509_STORE_load_locations(store, ssl_cafile, ssl_capath)) {
-      if(!imported_native_ca && !imported_ca_info_blob) {
-        /* Fail if we insist on successfully verifying the server. */
-        failf(data, "error setting certificate verify locations:"
-              "  CAfile: %s CApath: %s",
-              ssl_cafile ? ssl_cafile : "none",
-              ssl_capath ? ssl_capath : "none");
-        return CURLE_SSL_CACERT_BADFILE;
-      }
       else {
-        infof(data, "error setting certificate verify locations,"
-              " continuing anyway");
+        imported_ca_info_blob = true;
+        infof(data, "successfully imported CA certificate blob");
       }
     }
+
+    if(ssl_cafile || ssl_capath) {
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+      /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
+      if(ssl_cafile && !X509_STORE_load_file(store, ssl_cafile)) {
+        if(!imported_native_ca && !imported_ca_info_blob) {
+          /* Fail if we insist on successfully verifying the server. */
+          failf(data, "error setting certificate file: %s", ssl_cafile);
+          return CURLE_SSL_CACERT_BADFILE;
+        }
+        else
+          infof(data, "error setting certificate file, continuing anyway");
+      }
+      if(ssl_capath && !X509_STORE_load_path(store, ssl_capath)) {
+        if(!imported_native_ca && !imported_ca_info_blob) {
+          /* Fail if we insist on successfully verifying the server. */
+          failf(data, "error setting certificate path: %s", ssl_capath);
+          return CURLE_SSL_CACERT_BADFILE;
+        }
+        else
+          infof(data, "error setting certificate path, continuing anyway");
+      }
+#else
+      /* tell OpenSSL where to find CA certificates that are used to verify the
+         server's certificate. */
+      if(!X509_STORE_load_locations(store, ssl_cafile, ssl_capath)) {
+        if(!imported_native_ca && !imported_ca_info_blob) {
+          /* Fail if we insist on successfully verifying the server. */
+          failf(data, "error setting certificate verify locations:"
+                "  CAfile: %s CApath: %s",
+                ssl_cafile ? ssl_cafile : "none",
+                ssl_capath ? ssl_capath : "none");
+          return CURLE_SSL_CACERT_BADFILE;
+        }
+        else {
+          infof(data, "error setting certificate verify locations,"
+                " continuing anyway");
+        }
+      }
 #endif
-    infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
-    infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
-  }
+      infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
+      infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
+    }
 
 #ifdef CURL_CA_FALLBACK
-  if(verifypeer && !ssl_cafile && !ssl_capath &&
-     !imported_native_ca && !imported_ca_info_blob) {
-    /* verifying the peer without any CA certificates won't
-       work so use openssl's built-in default as fallback */
-    X509_STORE_set_default_paths(store);
-  }
+    if(!ssl_cafile && !ssl_capath &&
+       !imported_native_ca && !imported_ca_info_blob) {
+      /* verifying the peer without any CA certificates won't
+         work so use openssl's built-in default as fallback */
+      X509_STORE_set_default_paths(store);
+    }
 #endif
+  }
 
   if(ssl_crlfile) {
     /* tell OpenSSL where to find CRL file that is used to check certificate
