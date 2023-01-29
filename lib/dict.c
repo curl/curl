@@ -98,26 +98,27 @@ const struct Curl_handler Curl_handler_dict = {
   PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
+#define DYN_DICT_WORD 10000
 static char *unescape_word(const char *input)
 {
-  size_t len = strlen(input);
-  char *dictp = malloc(len*2 + 1); /* add one for terminating zero */
-  if(dictp) {
-    const char *ptr;
-    char ch;
-    int olen = 0;
-    /* According to RFC2229 section 2.2, these letters need to be escaped with
-       \[letter] */
-    for(ptr = input; (ch = *ptr); ptr++) {
-      if((ch <= 32) || (ch == 127) ||
-         (ch == '\'') || (ch == '\"') || (ch == '\\')) {
-        dictp[olen++] = '\\';
-      }
-      dictp[olen++] = ch;
-    }
-    dictp[olen] = 0;
+  struct dynbuf out;
+  const char *ptr;
+  CURLcode result = CURLE_OK;
+  Curl_dyn_init(&out, DYN_DICT_WORD);
+
+  /* According to RFC2229 section 2.2, these letters need to be escaped with
+     \[letter] */
+  for(ptr = input; *ptr; ptr++) {
+    char ch = *ptr;
+    if((ch <= 32) || (ch == 127) ||
+       (ch == '\'') || (ch == '\"') || (ch == '\\'))
+      result = Curl_dyn_addn(&out, "\\", 1);
+    if(!result)
+      result = Curl_dyn_addn(&out, ptr, 1);
+    if(result)
+      return NULL;
   }
-  return dictp;
+  return Curl_dyn_ptr(&out);
 }
 
 /* sendf() sends formatted data to the server */
