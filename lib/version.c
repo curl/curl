@@ -253,7 +253,8 @@ char *curl_version(void)
 #endif
 #ifdef USE_NGTCP2
   const ngtcp2_info *ngtcp2_version_info = ngtcp2_version(0);
-  msnprintf(ngtcp2_buf, sizeof(ngtcp2_buf), "libngtcp2/%s", ngtcp2_version_info->version_str);
+  msnprintf(ngtcp2_buf, sizeof(ngtcp2_buf), "libngtcp2/%s",
+            ngtcp2_version_info->version_str);
   src[i++] = ngtcp2_buf;
 #endif
 #ifdef USE_OPENLDAP
@@ -667,7 +668,8 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   {
     static char ngtcp2_buffer[30];
     const ngtcp2_info *ngtcp2_version_info = ngtcp2_version(0);
-    msnprintf(ngtcp2_buffer, sizeof(ngtcp2_buffer), "%s", ngtcp2_version_info->version_str);
+    msnprintf(ngtcp2_buffer, sizeof(ngtcp2_buffer), "%s",
+              ngtcp2_version_info->version_str);
     version_info.ngtcp2_version = ngtcp2_buffer;
   }
 #endif
