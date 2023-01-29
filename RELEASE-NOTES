@@ -16,24 +16,34 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o cf-socket: fix build when not HAVE_GETPEERNAME [89]
  o cf-socket: keep sockaddr local in the socket filters [69]
  o cfilters:Curl_conn_get_select_socks: use the first non-connected filter [24]
+ o CI: add a workflow to automatically label pull requests [102]
  o cmake: bump requirement to 3.7 [23]
  o cmake: check for sendmsg [39]
+ o cmake: delete redundant macro definition `SECURITY_WIN32` [91]
  o cmake: fix the snprintf detection [5]
+ o cmake: remove deprecated symbols check [96]
  o cmake: set SOVERSION also for macOS [68]
+ o cmake: use list APPEND syntax for CMAKE_REQUIRED_DEFINITIONS [94]
  o connect: fix access of pointer before NULL check [83]
+ o connect: fix build when not ENABLE_IPV6 [88]
+ o copyright.pl: cease doing year verifications [74]
  o copyright: update all copyright lines and remove year ranges [35]
  o curl.h: allow up to 10M buffer size [76]
  o curl.h: mark CURLSSLBACKEND_MESALINK as deprecated [52]
  o curl: output warning at --verbose output for debug-enabled version [80]
  o curl_global_sslset.3: clarify the openssl situation [53]
  o curl_log: for failf/infof and debug logging implementations [87]
+ o curl_version_info.3: fix typo [100]
  o CURLOPT_HEADERDATA.3: warn DLL users must set write function [45]
+ o CURLOPT_READFUNCTION.3: the callback 'size' arg is always 1 [73]
  o docs/DEPRECATE.md: deprecate gskit [36]
  o docs: add link to GitHub Discussions [49]
  o docs: mention indirect effects of --insecure [19]
- o easyoptions: Fix header printing in generation script [84]
+ o docs: POSTFIELDSIZE must be set to -1 with read function [97]
+ o easyoptions: fix header printing in generation script [84]
  o examples: remove the curlgtk.c example [48]
  o ftpserver: lower the normal DATA connect timeout to speed up torture tests [27]
  o GHA: add job on Slackware 15.0 [58]
@@ -51,6 +61,7 @@ This release includes the following bugfixes:
  o http_proxy: do not assign data->req.p.http use local copy [59]
  o lib670: make test.h the first include [56]
  o lib: connect/h2/h3 refactor [57]
+ o lib: fix typos [99]
  o lib: fix typos in comments which repeat a word [67]
  o libssh2: try sha2 algos for hostkey methods [2]
  o Linux CI: update some dependecies to latest tag [44]
@@ -66,6 +77,8 @@ This release includes the following bugfixes:
  o ngtcp2: fix the build without 'sendmsg' [38]
  o noproxy: support for space-separated names is deprecated [66]
  o nss: implement data_pending method [43]
+ o openssl: don't ignore CA paths when using Windows CA store (redux) [101]
+ o openssl: don't log raw record headers [93]
  o openssl: make the BIO_METHOD a local variable in the connection filter [79]
  o openssl: remove attached easy handles from SSL instances [29]
  o os400: fixes to make-lib.sh and initscript.sh [71]
@@ -76,12 +89,14 @@ This release includes the following bugfixes:
  o runtests: consider warnings fatal and error on them [32]
  o runtests: fix detection of TLS backends [50]
  o runtests: make 'mbedtls' a testable feature
+ o scripts: fix Appveyor job detection in cijobs.pl
  o scripts: set file mode +x on all perl and shell scripts [63]
  o sectransp: fix for incomplete read/writes [61]
  o SECURITY-PROCESS.md: document severity levels [20]
  o setopt: move the SHA256 opt within #ifdef libssh2 [42]
  o socketpair: allow localhost MITM sniffers [30]
  o strdup: name it Curl_strdup [16]
+ o system.h: assume OS400 is always built with ILEC compiler [95]
  o test1560: use a UTF8-using locale when run [46]
  o tests-httpd: basic infra to run curl against an apache httpd [72]
  o tests: add 3 new HTTP/2 test cases, plus https: support for nghttpx [9]
@@ -96,8 +111,12 @@ This release includes the following bugfixes:
  o urldata: make set.http200aliases conditional on HTTP being present [11]
  o urldata: move the cookefilelist to the 'set' struct [15]
  o urldata: remove unused struct fields, made more conditional [10]
+ o vtls: fix hostname handling in filters [98]
+ o vtls: manage current easy handle in nested cfilter calls [90]
  o vtls: use ALPN HTTP/1.0 when HTTP/1.0 is used
+ o winbuild: document that arm64 is supported [92]
  o workflows/linux.yml: merge 3 common packages [18]
+ o write-out.d: clarify Windows % symbol escaping [86]
  o writeout: add %{certs} and %{num_certs} [33]
  o ws: fix autoping handling [70]
  o x509asn1: fix compile errors and warnings [47]
@@ -117,17 +136,20 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexey Savchuk, Andrei Rybak, Andy Alt, Cameron Blomquist, Daniel Gustafsson,
-  Daniel Stenberg, Divy Le Ray, Esdras de Morais da Silva, Hannah Schierling,
-  Harry Sintonen, Hide Ishikawa, Jakob Hirsch, John Bampton, Jon Rumsey,
-  Josh Brobst, Marcel Raad, Martin Waleczek, Michael Osipov, Nick Banks,
-  nick-telia on github, norbertmm on github, odek86 on github,
-  Patrick Monnerat, Paul Howarth, Philip Heiduck, Radek Brich, Radu Hociung,
-  Ray Satiro, Ryan Schmidt, Sébastien Helleu, Sergio-IME on github,
-  SerusDev on github, Stefan Eissing, Stephan Guilloux, Tatsuhiro Tsujikawa,
+  Alexey Savchuk, Andrei Rybak, Andy Alt, Brian Green, Cameron Blomquist,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Divy Le Ray,
+  Esdras de Morais da Silva, Fujii Hironori, Hannah Schierling, Harry Sintonen,
+  Hide Ishikawa, Jakob Hirsch, John Bampton, John Sherrill, Jon Rumsey,
+  Josh Brobst, Marc Aldorasi, Marcel Raad, Martin Waleczek, Michael Osipov,
+  Muhammad Hussein Ammari, Nick Banks, nick-telia on github,
+  norbertmm on github, odek86 on github, Patrick Monnerat, Paul Howarth,
+  Peter Wu, Philip Heiduck, Radek Brich, Radu Hociung, RanBarLavie on github,
+  Ray Satiro, Ryan Schmidt, Sébastien Helleu, Sergey Bronnikov,
+  Sergio-IME on github, sergio-nsk on github, SerusDev on github,
+  Stefan Eissing, Stefan Talpalaru, Stephan Guilloux, Tatsuhiro Tsujikawa,
   Thomas Klausner, Timmy Schierling, Viktor Szakats, violetlige on github,
   William Tang, Yurii Rashkovskii
-  (41 contributors)
+  (52 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -203,6 +225,8 @@ References to bug reports and discussions on issues:
  [70] = https://curl.se/bug/?i=10289
  [71] = https://curl.se/bug/?i=10266
  [72] = https://curl.se/bug/?i=10175
+ [73] = https://curl.se/bug/?i=10328
+ [74] = https://curl.se/bug/?i=10345
  [75] = https://curl.se/bug/?i=10241
  [76] = https://curl.se/bug/?i=10256
  [77] = https://curl.se/bug/?i=10257
@@ -214,4 +238,20 @@ References to bug reports and discussions on issues:
  [83] = https://curl.se/bug/?i=10284
  [84] = https://curl.se/bug/?i=10275
  [85] = https://curl.se/bug/?i=10276
+ [86] = https://curl.se/bug/?i=10323
  [87] = https://curl.se/bug/?i=10271
+ [88] = https://curl.se/bug/?i=10344
+ [89] = https://curl.se/bug/?i=10343
+ [90] = https://curl.se/bug/?i=10336
+ [91] = https://curl.se/bug/?i=10341
+ [92] = https://curl.se/bug/?i=10332
+ [93] = https://curl.se/bug/?i=10299
+ [94] = https://curl.se/bug/?i=10272
+ [95] = https://curl.se/bug/?i=10305
+ [96] = https://curl.se/bug/?i=10314
+ [97] = https://curl.se/bug/?i=10313
+ [98] = https://curl.se/bug/?i=10273
+ [99] = https://curl.se/bug/?i=10307
+ [100] = https://curl.se/bug/?i=10306
+ [101] = https://curl.se/bug/?i=10244
+ [102] = https://curl.se/bug/?i=10326
