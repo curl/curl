@@ -1174,8 +1174,6 @@ static void conn_set_primary_ip(struct Curl_cfilter *cf,
 #else
   cf->conn->primary_ip[0] = 0;
   (void)data;
-  (void)conn;
-  (void)sockfd;
 #endif
 }
 

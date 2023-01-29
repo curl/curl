@@ -181,14 +181,14 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
         set(GSS_FLAVOUR "MIT")
       else()
         # prevent compiling the header - just check if we can include it
-        set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D__ROKEN_H__")
+        list(APPEND CMAKE_REQUIRED_DEFINITIONS -D__ROKEN_H__)
         check_include_file( "roken.h" _GSS_HAVE_ROKEN_H)
 
         check_include_file( "heimdal/roken.h" _GSS_HAVE_HEIMDAL_ROKEN_H)
         if(_GSS_HAVE_ROKEN_H OR _GSS_HAVE_HEIMDAL_ROKEN_H)
           set(GSS_FLAVOUR "Heimdal")
         endif()
-        set(CMAKE_REQUIRED_DEFINITIONS "")
+        list(REMOVE_ITEM CMAKE_REQUIRED_DEFINITIONS -D__ROKEN_H__)
       endif()
     else()
       # I'm not convinced if this is the right way but this is what autotools do at the moment

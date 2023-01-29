@@ -832,7 +832,7 @@ static OSStatus bio_cf_in_read(SSLConnectionRef connection,
   struct Curl_cfilter *cf = (struct Curl_cfilter *)connection;
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_backend_data *backend = connssl->backend;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   CURLcode result;
   OSStatus rtn = noErr;
@@ -868,7 +868,7 @@ static OSStatus bio_cf_out_write(SSLConnectionRef connection,
   struct Curl_cfilter *cf = (struct Curl_cfilter *)connection;
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_backend_data *backend = connssl->backend;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   CURLcode result;
   OSStatus rtn = noErr;

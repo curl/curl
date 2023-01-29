@@ -1,0 +1,195 @@
+# Copyright (C) Daniel Fandrich, <dan@coneharvesters.com>, et al.
+#
+# SPDX-License-Identifier: curl
+
+# The workflow configures the .github/workflows/label.yml action
+# to add labels to pull requests. This is not (yet?) a replacement for human
+# triaging, but is intended to add labels to the easy cases. If the matching
+# language becomes more powerful, more cases should be able to be handled.
+#
+# The biggest low-hanging problem is this:
+# It looks like there's no way of specifying that a label be added if *all* the
+# files match *any* one of a number of globs. This feature request is tracked
+# in https://github.com/actions/labeler/issues/423
+
+authentication:
+- all: ['docs/mk-ca-bundle.1']
+- all: ['lib/*gssapi*']
+- all: ['lib/*krb5*']
+- all: ['lib/*ntlm*']
+- all: ['lib/curl_sasl.*']
+- all: ['lib/http_aws*']
+- all: ['lib/http_digest.*']
+- all: ['lib/http_negotiate.*']
+- all: ['lib/vauth/**']
+
+build:
+- all: ['**/CMakeLists.txt']
+- all: ['**/Makefile.am']
+- all: ['**/Makefile.mk']
+- all: ['**/*.inc']
+- all: ['**/*.m4']
+- all: ['**/*.mk']
+- all: ['lib/libcurl*.in']
+- all: ['CMake/**']
+- all: ['configure.ac']
+- all: ['m4/**']
+- all: ['MacOSX-Framework']
+- all: ['packages/**']
+- all: ['plan9/**']
+- all: ['projects/**']
+- all: ['winbuild/**']
+
+CI:
+- all: ['.azure-pipelines.yml']
+- all: ['.circleci/**']
+- all: ['.cirrus.yml']
+- all: ['.github/**']
+- all: ['appveyor.yml']
+- all: ['zuul.d/**']
+
+cmake:
+- all: ['**/CMakeLists.txt']
+- all: ['CMake/**']
+
+cmdline tool:
+- all: ['src/**']
+
+connecting & proxies:
+- all: ['lib/conncache.*']
+- all: ['lib/connect.*']
+- all: ['lib/http_proxy.*']
+- all: ['lib/noproxy.*']
+- all: ['lib/socks.*']
+
+cookies:
+- all: ['lib/cookie.*']
+- all: ['lib/psl.*']
+
+cryptography:
+- all: ['docs/CIPHERS.md']
+- all: ['lib/*sha256*']
+- all: ['lib/curl_des.*']
+- all: ['lib/curl_hmac.*']
+- all: ['lib/curl_md?.*']
+- all: ['lib/md?.*']
+- all: ['lib/rand.*']
+
+DICT:
+- all: ['lib/dict.*']
+
+documentation:
+- all: ['**/*.md']
+- all: ['**/*.txt', '!**/CMakeLists.txt']
+- all: ['**/*.1']
+- all: ['**/*.3']
+- all: ['CHANGES']
+- all: ['docs/**', '!docs/examples/**']
+- all: ['GIT-INFO']
+- all: ['LICENSES/**']
+- all: ['README']
+- all: ['RELEASE-NOTES']
+
+FTP:
+- all: ['lib/curl_fnmatch.*']
+- all: ['lib/curl_range.*']
+- all: ['lib/ftp*']
+
+GOPHER:
+- all: ['lib/gopher*']
+
+HTTP:
+- all: ['docs/HSTS.md']
+- all: ['docs/HTTP-COOKIES.md']
+- all: ['lib/h2h3.*']
+- all: ['lib/http*']
+
+HTTP/2:
+- all: ['docs/HTTP2.md']
+- all: ['lib/http2*']
+
+HTTP/3:
+- all: ['docs/HTTP3.md']
+- all: ['lib/vquic/**']
+
+Hyper:
+- all: ['lib/c-hyper.*']
+
+IMAP:
+- all: ['lib/imap*']
+
+LDAP:
+- all: ['lib/*ldap*']
+
+libcurl API:
+- all: ['docs/libcurl/ABI.md']
+- all: ['include/curl/**']
+
+MIME:
+- all: ['docs/libcurl/curl_mime_*']
+- all: ['lib/mime*']
+
+MQTT:
+- all: ['docs/MQTT.md']
+- all: ['lib/mqtt*']
+
+name lookup:
+- all: ['lib/asyn*']
+- all: ['lib/curl_gethostname.*']
+- all: ['lib/doh*']
+- all: ['lib/host*']
+- all: ['lib/idn*']
+- all: ['lib/socketpair*']
+
+POP3:
+- all: ['lib/pop3.*']
+
+RTMP:
+- all: ['lib/curl_rtmp.*']
+
+RTSP:
+- all: ['lib/rtsp.*']
+
+SCP/SFTP:
+- all: ['lib/vssh/**']
+
+script:
+- all: ['**/*.pl']
+- all: ['**/*.sh']
+- all: ['curl-config.in']
+- all: ['scripts/**']
+
+SMB:
+- all: ['lib/smb.*']
+
+SMTP:
+- all: ['lib/smtp.*']
+
+tests:
+- all: ['tests/**']
+
+TFTP:
+- all: ['lib/tftp.*']
+
+TLS:
+- all: ['docs/HYPER.md']
+- all: ['docs/SSL*']
+- all: ['lib/vtls/**']
+
+URL:
+- all: ['docs/libcurl/curl_url*']
+- all: ['lib/urlapi*']
+- all: ['lib/url.*']
+
+WebSocket:
+- all: ['docs/WEBSOCKET.md*']
+- all: ['docs/libcurl/opts/CURLOPT_WS_OPTIONS.3']
+- all: ['docs/libcurl/curl_ws_*']
+- all: ['lib/ws.*']
+
+Windows:
+- all: ['lib/*win32*']
+- all: ['lib/curl_multibyte.*']
+- all: ['lib/rename.*']
+- all: ['projects/Windows/**']
+- all: ['winbuild/**']
