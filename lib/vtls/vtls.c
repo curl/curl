@@ -1550,7 +1550,7 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
   bool result;
 
   CF_DATA_SAVE(save, cf, data);
-  if(cf->ctx && Curl_ssl->data_pending(cf, data))
+  if(Curl_ssl->data_pending(cf, data))
     result = TRUE;
   else
     result = cf->next->cft->has_data_pending(cf->next, data);
