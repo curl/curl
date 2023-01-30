@@ -46,7 +46,6 @@ CI:
 - all: ['.cirrus.yml']
 - all: ['.github/**']
 - all: ['appveyor.yml']
-- all: ['zuul.d/**']
 
 cmake:
 - all: ['**/CMakeLists.txt']

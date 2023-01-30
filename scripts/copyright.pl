@@ -43,8 +43,6 @@ my %skiplist = (
     "LICENSES/curl.txt" => "<built-in>",
     "COPYING" => "<built-in>",
 
-    # an empty control file
-    "zuul.d/playbooks/.zuul.ignore" => "<built-in>",
     );
 
 sub scanfile {
