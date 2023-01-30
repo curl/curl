@@ -479,7 +479,6 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
 
       /* update buffer and frame info */
       wsp->frame.offset += datalen;
-      DEBUGASSERT(wsp->frame.bytesleft >= (curl_off_t)datalen);
       if(wsp->frame.bytesleft)
         wsp->frame.bytesleft -= datalen;
       DEBUGASSERT(datalen <= wsp->stillblen);
