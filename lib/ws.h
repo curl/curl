@@ -60,7 +60,9 @@ CURLcode Curl_ws_accept(struct Curl_easy *data);
 
 size_t Curl_ws_writecb(char *buffer, size_t size, size_t nitems, void *userp);
 void Curl_ws_done(struct Curl_easy *data);
-CURLcode Curl_ws_disconnect(struct Curl_easy *data);
+CURLcode Curl_ws_disconnect(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            bool dead_connection);
 
 #else
 #define Curl_ws_request(x,y) CURLE_OK

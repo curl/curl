@@ -710,9 +710,12 @@ void Curl_ws_done(struct Curl_easy *data)
   Curl_dyn_free(&wsp->buf);
 }
 
-CURLcode Curl_ws_disconnect(struct Curl_easy *data)
+CURLcode Curl_ws_disconnect(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            bool dead_connection)
 {
-  struct connectdata *conn = data->conn;
+  (void)data;
+  (void)dead_connection;
   /* make sure this is non-blocking to avoid getting stuck in shutdown */
   (void)curlx_nonblock(conn->sock[FIRSTSOCKET], TRUE);
   return CURLE_OK;
