@@ -64,8 +64,6 @@
 
 #define HTTP2_HUGE_WINDOW_SIZE (32 * 1024 * 1024) /* 32 MB */
 
-
-#define DEBUG_HTTP2
 #ifdef DEBUG_HTTP2
 #define H2BUGF(x) x
 #else
