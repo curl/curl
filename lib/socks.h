@@ -37,8 +37,8 @@
  *
  * This is STUPID BLOCKING behavior
  */
-int Curl_blockread_all(struct Curl_easy *data,
-                       curl_socket_t sockfd,
+int Curl_blockread_all(struct Curl_cfilter *cf,
+                       struct Curl_easy *data,
                        char *buf,
                        ssize_t buffersize,
                        ssize_t *n);
@@ -47,7 +47,7 @@ int Curl_blockread_all(struct Curl_easy *data,
 /*
  * This function handles the SOCKS5 GSS-API negotiation and initialization
  */
-CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
+CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                       struct Curl_easy *data);
 #endif
 

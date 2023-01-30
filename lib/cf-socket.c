@@ -742,11 +742,29 @@ CURLcode Curl_socket_connect_result(struct Curl_easy *data,
   }
 }
 
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+struct io_buffer {
+  char *bufr;
+  size_t allc;           /* size of the current allocation */
+  size_t head;           /* bufr index for next read */
+  size_t tail;           /* bufr index for next write */
+};
+
+static void io_buffer_reset(struct io_buffer *iob)
+{
+  if(iob->bufr)
+    free(iob->bufr);
+  memset(iob, 0, sizeof(*iob));
+}
+#endif /* USE_RECV_BEFORE_SEND_WORKAROUND */
 
 struct cf_socket_ctx {
   int transport;
   struct Curl_sockaddr_ex addr;      /* address to connect to */
   curl_socket_t sock;                /* current attempt socket */
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+  struct io_buffer recv_buffer;
+#endif
   char r_ip[MAX_IPADR_LEN];          /* remote IP as string */
   int r_port;                        /* remote port number */
   char l_ip[MAX_IPADR_LEN];          /* local IP as string */
@@ -783,6 +801,9 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
       DEBUGF(LOG_CF(data, cf, "cf_socket_close(%d) local", (int)ctx->sock));
       sclose(ctx->sock);
     }
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+    io_buffer_reset(&ctx->recv_buffer);
+#endif
     ctx->sock = CURL_SOCKET_BAD;
     ctx->active = FALSE;
   }
@@ -1112,11 +1133,87 @@ static int cf_socket_get_select_socks(struct Curl_cfilter *cf,
   return rc;
 }
 
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+
+static CURLcode pre_receive_plain(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+  struct io_buffer * const iob = &ctx->recv_buffer;
+
+  /* WinSock will destroy unread received data if send() is
+     failed.
+     To avoid lossage of received data, recv() must be
+     performed before every send() if any incoming data is
+     available. However, skip this, if buffer is already full. */
+  if((cf->conn->handler->protocol&PROTO_FAMILY_HTTP) != 0 &&
+     cf->conn->recv[cf->sockindex] == Curl_conn_recv &&
+     (!iob->bufr || (iob->allc > iob->tail))) {
+    const int readymask = Curl_socket_check(ctx->sock, CURL_SOCKET_BAD,
+                                            CURL_SOCKET_BAD, 0);
+    if(readymask != -1 && (readymask & CURL_CSELECT_IN) != 0) {
+      size_t bytestorecv = iob->allc - iob->tail;
+      ssize_t nread;
+      /* Have some incoming data */
+      if(!iob->bufr) {
+        /* Use buffer double default size for intermediate buffer */
+        iob->allc = 2 * data->set.buffer_size;
+        iob->bufr = malloc(iob->allc);
+        if(!iob->bufr)
+          return CURLE_OUT_OF_MEMORY;
+        iob->tail = 0;
+        iob->head = 0;
+        bytestorecv = iob->allc;
+      }
+
+      nread = sread(ctx->sock, iob->bufr + iob->tail, bytestorecv);
+      if(nread > 0)
+        iob->tail += (size_t)nread;
+    }
+  }
+  return CURLE_OK;
+}
+
+static ssize_t get_pre_recved(struct Curl_cfilter *cf, char *buf, size_t len)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+  struct io_buffer * const iob = &ctx->recv_buffer;
+  size_t copysize;
+  if(!iob->bufr)
+    return 0;
+
+  DEBUGASSERT(iob->allc > 0);
+  DEBUGASSERT(iob->tail <= iob->allc);
+  DEBUGASSERT(iob->head <= iob->tail);
+  /* Check and process data that already received and storied in internal
+     intermediate buffer */
+  if(iob->tail > iob->head) {
+    copysize = CURLMIN(len, iob->tail - iob->head);
+    memcpy(buf, iob->bufr + iob->head, copysize);
+    iob->head += copysize;
+  }
+  else
+    copysize = 0; /* buffer was allocated, but nothing was received */
+
+  /* Free intermediate buffer if it has no unprocessed data */
+  if(iob->head == iob->tail)
+    io_buffer_reset(iob);
+
+  return (ssize_t)copysize;
+}
+#endif  /* USE_RECV_BEFORE_SEND_WORKAROUND */
+
 static bool cf_socket_data_pending(struct Curl_cfilter *cf,
                                    const struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   int readable;
+
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+  if(ctx->recv_buffer.bufr && ctx->recv_buffer.allc &&
+     ctx->recv_buffer.tail > ctx->recv_buffer.head)
+     return TRUE;
+#endif
 
   (void)data;
   readable = SOCKET_READABLE(ctx->sock, 0);
@@ -1126,10 +1223,59 @@ static bool cf_socket_data_pending(struct Curl_cfilter *cf,
 static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                               const void *buf, size_t len, CURLcode *err)
 {
+  struct cf_socket_ctx *ctx = cf->ctx;
   ssize_t nwritten;
 
-  DEBUGASSERT(data->conn == cf->conn);
-  nwritten = Curl_send_plain(data, cf->sockindex, buf, len, err);
+  *err = CURLE_OK;
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+  /* WinSock will destroy unread received data if send() is
+     failed.
+     To avoid lossage of received data, recv() must be
+     performed before every send() if any incoming data is
+     available. */
+  if(pre_receive_plain(cf, data)) {
+    *err = CURLE_OUT_OF_MEMORY;
+    return -1;
+  }
+#endif
+
+#if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
+  if(cf->conn->bits.tcp_fastopen) {
+    bytes_written = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
+                           &cf->conn->remote_addr->sa_addr,
+                           cf->conn->remote_addr->addrlen);
+    cf->conn->bits.tcp_fastopen = FALSE;
+  }
+  else
+#endif
+    nwritten = swrite(ctx->sock, buf, len);
+
+  if(-1 == nwritten) {
+    int sockerr = SOCKERRNO;
+
+    if(
+#ifdef WSAEWOULDBLOCK
+      /* This is how Windows does it */
+      (WSAEWOULDBLOCK == sockerr)
+#else
+      /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
+         due to its inability to send off data without blocking. We therefore
+         treat both error codes the same here */
+      (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) || (EINTR == sockerr) ||
+      (EINPROGRESS == sockerr)
+#endif
+      ) {
+      /* this is just a case of EWOULDBLOCK */
+      *err = CURLE_AGAIN;
+    }
+    else {
+      char buffer[STRERROR_LEN];
+      failf(data, "Send failure: %s",
+            Curl_strerror(sockerr, buffer, sizeof(buffer)));
+      data->state.os_errno = sockerr;
+      *err = CURLE_SEND_ERROR;
+    }
+  }
   DEBUGF(LOG_CF(data, cf, "send(len=%zu) -> %d, err=%d",
                 len, (int)nwritten, *err));
   return nwritten;
@@ -1138,10 +1284,48 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                               char *buf, size_t len, CURLcode *err)
 {
+  struct cf_socket_ctx *ctx = cf->ctx;
   ssize_t nread;
 
-  DEBUGASSERT(data->conn == cf->conn);
-  nread = Curl_recv_plain(data, cf->sockindex, buf, len, err);
+  *err = CURLE_OK;
+
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+  /* Check and return data that already received and storied in internal
+     intermediate buffer */
+  nread = get_pre_recved(cf, buf, len);
+  if(nread > 0) {
+    *err = CURLE_OK;
+    return nread;
+  }
+#endif
+
+  nread = sread(ctx->sock, buf, len);
+
+  if(-1 == nread) {
+    int sockerr = SOCKERRNO;
+
+    if(
+#ifdef WSAEWOULDBLOCK
+      /* This is how Windows does it */
+      (WSAEWOULDBLOCK == sockerr)
+#else
+      /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
+         due to its inability to send off data without blocking. We therefore
+         treat both error codes the same here */
+      (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) || (EINTR == sockerr)
+#endif
+      ) {
+      /* this is just a case of EWOULDBLOCK */
+      *err = CURLE_AGAIN;
+    }
+    else {
+      char buffer[STRERROR_LEN];
+      failf(data, "Recv failure: %s",
+            Curl_strerror(sockerr, buffer, sizeof(buffer)));
+      data->state.os_errno = sockerr;
+      *err = CURLE_RECV_ERROR;
+    }
+  }
   DEBUGF(LOG_CF(data, cf, "recv(len=%zu) -> %d, err=%d", len, (int)nread,
                 *err));
   return nread;
