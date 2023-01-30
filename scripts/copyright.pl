@@ -43,9 +43,6 @@ my %skiplist = (
     "LICENSES/curl.txt" => "<built-in>",
     "COPYING" => "<built-in>",
 
-    # imported, leave be
-    'm4/ax_compile_check_sizeof.m4' => "<built-in>",
-
     # an empty control file
     "zuul.d/playbooks/.zuul.ignore" => "<built-in>",
     );
@@ -167,6 +164,7 @@ sub dep5 {
 
 dep5(".reuse/dep5");
 
+my $checkall = 0;
 my @all;
 my $verbose;
 if($ARGV[0] eq "-v") {
@@ -178,6 +176,7 @@ if($ARGV[0]) {
 }
 else {
     @all = `git ls-files`;
+    $checkall = 1;
 }
 
 for my $f (@all) {
@@ -190,6 +189,7 @@ for my $f (@all) {
         $pattern = $skip;
         $skiplisted++;
         $skipped = 1;
+        $skip{$f}++;
     }
 
     my $r = checkfile($f, $skipped, $pattern);
@@ -214,6 +214,14 @@ if($verbose) {
         if($superf{$s}) {
             printf ("%s was skipped superfluously %u times and legitimately %u times\n",
                     $s, $superf{$s}, $skips{$s});
+        }
+    }
+}
+
+if($checkall) {
+    for(keys %skiplist) {
+        if(!$skip{$_}) {
+            printf STDERR "$_ is marked for SKIP but is missing!\n";
         }
     }
 }
