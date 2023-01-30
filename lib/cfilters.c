@@ -323,6 +323,14 @@ int Curl_conn_cf_get_select_socks(struct Curl_cfilter *cf,
   return 0;
 }
 
+bool Curl_conn_cf_data_pending(struct Curl_cfilter *cf,
+                               const struct Curl_easy *data)
+{
+  if(cf)
+    return cf->cft->has_data_pending(cf, data);
+  return FALSE;
+}
+
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, CURLcode *err)
 {
@@ -426,8 +434,6 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
   (void)data;
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  if(Curl_recv_has_postponed_data(data->conn, sockindex))
-    return TRUE;
 
   cf = data->conn->cfilter[sockindex];
   while(cf && !cf->connected) {

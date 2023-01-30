@@ -268,6 +268,8 @@ void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 int Curl_conn_cf_get_select_socks(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   curl_socket_t *socks);
+bool Curl_conn_cf_data_pending(struct Curl_cfilter *cf,
+                               const struct Curl_easy *data);
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, CURLcode *err);
 ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
