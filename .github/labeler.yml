@@ -14,6 +14,14 @@
 
 authentication:
 - all: ['docs/mk-ca-bundle.1']
+- all: ['docs/libcurl/opts/CURLINFO_HTTPAUTH*']
+- all: ['docs/libcurl/opts/CURLINFO_PROXYAUTH*']
+- all: ['docs/libcurl/opts/CURLOPT_KRB*']
+- all: ['docs/libcurl/opts/CURLOPT_SASL*']
+- all: ['docs/libcurl/opts/CURLOPT_SERVICE_NAME*']
+- all: ['docs/libcurl/opts/CURLOPT_USERNAME*']
+- all: ['docs/libcurl/opts/CURLOPT_USERPWD*']
+- all: ['docs/libcurl/opts/CURLOPT_XOAUTH*']
 - all: ['lib/*gssapi*']
 - all: ['lib/*krb5*']
 - all: ['lib/*ntlm*']
@@ -22,6 +30,7 @@ authentication:
 - all: ['lib/http_digest.*']
 - all: ['lib/http_negotiate.*']
 - all: ['lib/vauth/**']
+- all: ['tests/server/fake_ntlm.c']
 
 build:
 - all: ['**/CMakeLists.txt']
@@ -46,27 +55,50 @@ CI:
 - all: ['.cirrus.yml']
 - all: ['.github/**']
 - all: ['appveyor.yml']
+- all: ['tests/azure.pm']
+- all: ['tests/appveyor.pm']
+- all: ['tests/CI.pm']
 
 cmake:
 - all: ['**/CMakeLists.txt']
 - all: ['CMake/**']
 
 cmdline tool:
+- all: ['docs/cmdline-opts/**']
 - all: ['src/**']
 
 connecting & proxies:
+- all: ['docs/libcurl/opts/CURLINFO_CONNECT*']
+- all: ['docs/libcurl/opts/CURLINFO_PROXY*']
+- all: ['docs/libcurl/opts/CURLOPT_ADDRESS*']
+- all: ['docs/libcurl/opts/CURLOPT_CONNECT*']
+- all: ['docs/libcurl/opts/CURLOPT_HAPROXY*']
+- all: ['docs/libcurl/opts/CURLOPT_OPENSOCKET*']
+- all: ['docs/libcurl/opts/CURLOPT_PRE_PROXY*']
+- all: ['docs/libcurl/opts/CURLOPT_PROXY*']
+- all: ['docs/libcurl/opts/CURLOPT_SOCKOPT*']
+- all: ['docs/libcurl/opts/CURLOPT_SOCKS*']
+- all: ['docs/libcurl/opts/CURLOPT_TCP*']
+- all: ['docs/libcurl/opts/CURLOPT_TIMEOUT*']
+- all: ['lib/cf-socket.*']
 - all: ['lib/conncache.*']
 - all: ['lib/connect.*']
 - all: ['lib/http_proxy.*']
+- all: ['lib/if2ip.*']
 - all: ['lib/noproxy.*']
 - all: ['lib/socks.*']
+- all: ['tests/server/socksd.c']
 
 cookies:
+- all: ['docs/HTTP-COOKIES.md']
+- all: ['docs/libcurl/opts/CURLINFO_COOKIE*']
+- all: ['docs/libcurl/opts/CURLOPT_COOKIE*']
 - all: ['lib/cookie.*']
 - all: ['lib/psl.*']
 
 cryptography:
 - all: ['docs/CIPHERS.md']
+- all: ['docs/libcurl/opts/CURLOPT_EGDSOCKET*']
 - all: ['lib/*sha256*']
 - all: ['lib/curl_des.*']
 - all: ['lib/curl_hmac.*']
@@ -76,6 +108,7 @@ cryptography:
 
 DICT:
 - all: ['lib/dict.*']
+- all: ['tests/dictserver.py']
 
 documentation:
 - all: ['**/*.md']
@@ -90,9 +123,13 @@ documentation:
 - all: ['RELEASE-NOTES']
 
 FTP:
+- all: ['docs/libcurl/opts/CURLINFO_FTP*']
+- all: ['docs/libcurl/opts/CURLOPT_FTP*']
+- all: ['docs/libcurl/opts/CURLOPT_WILDCARDMATCH*']
 - all: ['lib/curl_fnmatch.*']
 - all: ['lib/curl_range.*']
 - all: ['lib/ftp*']
+- all: ['tests/ftp*']
 
 GOPHER:
 - all: ['lib/gopher*']
@@ -100,16 +137,39 @@ GOPHER:
 HTTP:
 - all: ['docs/HSTS.md']
 - all: ['docs/HTTP-COOKIES.md']
+- all: ['docs/libcurl/opts/CURLINFO_COOKIE*']
+- all: ['docs/libcurl/opts/CURLOPT_COOKIE*']
+- all: ['docs/libcurl/opts/CURLINFO_HTTP_**']
+- all: ['docs/libcurl/opts/CURLINFO_REDIRECT*']
+- all: ['docs/libcurl/opts/CURLINFO_REFER*']
+- all: ['docs/libcurl/opts/CURLOPT_FOLLOWLOCATION*']
+- all: ['docs/libcurl/opts/CURLOPT_HSTS*']
+- all: ['docs/libcurl/opts/CURLOPT_HTTP*']
+- all: ['docs/libcurl/opts/CURLOPT_POST.*']
+- all: ['docs/libcurl/opts/CURLOPT_POSTFIELD*']
+- all: ['docs/libcurl/opts/CURLOPT_POSTREDIR*']
+- all: ['docs/libcurl/opts/CURLOPT_REDIR*']
+- all: ['docs/libcurl/opts/CURLOPT_REFER*']
+- all: ['docs/libcurl/opts/CURLOPT_TRAILER*']
+- all: ['docs/libcurl/opts/CURLOPT_TRANSFER_ENCODING*']
+- all: ['lib/cf-http*']
+- all: ['lib/cookie.*']
 - all: ['lib/h2h3.*']
 - all: ['lib/http*']
+- all: ['tests/http-server.pl']
+- all: ['tests/tests-httpd/*']
 
 HTTP/2:
 - all: ['docs/HTTP2.md']
+- all: ['docs/libcurl/opts/CURLOPT_STREAM*']
 - all: ['lib/http2*']
+- all: ['tests/http2-server.pl']
 
 HTTP/3:
 - all: ['docs/HTTP3.md']
 - all: ['lib/vquic/**']
+- all: ['tests/http3-server.pl']
+- all: ['tests/nghttpx.conf']
 
 Hyper:
 - all: ['lib/c-hyper.*']
@@ -126,19 +186,26 @@ libcurl API:
 
 MIME:
 - all: ['docs/libcurl/curl_mime_*']
+- all: ['docs/libcurl/opts/CURLOPT_MIME*']
 - all: ['lib/mime*']
 
 MQTT:
 - all: ['docs/MQTT.md']
 - all: ['lib/mqtt*']
+- all: ['tests/server/mqttd.c']
 
 name lookup:
+- all: ['docs/libcurl/opts/CURLINFO_NAMELOOKUP*']
+- all: ['docs/libcurl/opts/CURLOPT_DNS*']
+- all: ['docs/libcurl/opts/CURLOPT_DOH*']
+- all: ['docs/libcurl/opts/CURLOPT_RESOLVE*']
 - all: ['lib/asyn*']
 - all: ['lib/curl_gethostname.*']
 - all: ['lib/doh*']
 - all: ['lib/host*']
 - all: ['lib/idn*']
 - all: ['lib/socketpair*']
+- all: ['tests/server/resolve.c']
 
 POP3:
 - all: ['lib/pop3.*']
@@ -147,21 +214,33 @@ RTMP:
 - all: ['lib/curl_rtmp.*']
 
 RTSP:
+- all: ['docs/libcurl/opts/CURLINFO_RTSP*']
+- all: ['docs/libcurl/opts/CURLOPT_RTSP*']
 - all: ['lib/rtsp.*']
+- all: ['tests/rtspserver.pl']
+- all: ['tests/server/rtspd.c']
 
 SCP/SFTP:
+- all: ['docs/libcurl/opts/CURLOPT_SSH*']
 - all: ['lib/vssh/**']
+- all: ['tests/sshhelp.pm']
+- all: ['tests/sshserver.pl']
 
 script:
 - all: ['**/*.pl']
 - all: ['**/*.sh']
 - all: ['curl-config.in']
+- all: ['docs/curl-config.1']
+- all: ['docs/mk-ca-bundle.1']
+- all: ['docs/THANKS-filter']
 - all: ['scripts/**']
 
 SMB:
 - all: ['lib/smb.*']
+- all: ['tests/smbserver.py']
 
 SMTP:
+- all: ['docs/libcurl/opts/CURLOPT_MAIL*']
 - all: ['lib/smtp.*']
 
 tests:
@@ -169,20 +248,33 @@ tests:
 
 TFTP:
 - all: ['lib/tftp.*']
+- all: ['tests/tftpserver.pl']
+- all: ['tests/server/tftp*']
 
 TLS:
 - all: ['docs/HYPER.md']
 - all: ['docs/SSL*']
+- all: ['docs/libcurl/opts/CURLINFO_CA*']
+- all: ['docs/libcurl/opts/CURLINFO_CERT*']
+- all: ['docs/libcurl/opts/CURLINFO_SSL*']
+- all: ['docs/libcurl/opts/CURLINFO_TLS*']
+- all: ['docs/libcurl/opts/CURLOPT_CA*']
+- all: ['docs/libcurl/opts/CURLOPT_CERT*']
+- all: ['docs/libcurl/opts/CURLOPT_PINNEDPUBLICKEY*']
+- all: ['docs/libcurl/opts/CURLOPT_SSL*']
+- all: ['docs/libcurl/opts/CURLOPT_TLS*']
+- all: ['docs/libcurl/opts/CURLOPT_USE_SSL*']
 - all: ['lib/vtls/**']
 
 URL:
 - all: ['docs/libcurl/curl_url*']
+- all: ['docs/URL-SYNTAX.md']
 - all: ['lib/urlapi*']
 - all: ['lib/url.*']
 
 WebSocket:
 - all: ['docs/WEBSOCKET.md*']
-- all: ['docs/libcurl/opts/CURLOPT_WS_OPTIONS.3']
+- all: ['docs/libcurl/opts/CURLOPT_WS_*']
 - all: ['docs/libcurl/curl_ws_*']
 - all: ['lib/ws.*']
 
@@ -190,5 +282,5 @@ Windows:
 - all: ['lib/*win32*']
 - all: ['lib/curl_multibyte.*']
 - all: ['lib/rename.*']
-- all: ['projects/Windows/**']
+- all: ['projects/**']
 - all: ['winbuild/**']
