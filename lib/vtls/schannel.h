@@ -179,8 +179,8 @@ struct ssl_backend_data {
   size_t encdata_offset, decdata_offset;
   unsigned char *encdata_buffer, *decdata_buffer;
   /* encdata_is_incomplete: if encdata contains only a partial record that
-     can't be decrypted without another Curl_read_plain (that is, status is
-     SEC_E_INCOMPLETE_MESSAGE) then set this true. after Curl_read_plain writes
+     can't be decrypted without another recv() (that is, status is
+     SEC_E_INCOMPLETE_MESSAGE) then set this true. after an recv() adds
      more bytes into encdata then set this back to false. */
   bool encdata_is_incomplete;
   unsigned long req_flags, ret_flags;

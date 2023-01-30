@@ -1786,8 +1786,7 @@ static ssize_t h2_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(ctx->inbuflen == 0) {
       /* Receive data from the "lower" filters */
       nread = Curl_conn_cf_recv(cf->next, data, ctx->inbuf, H2_BUFSIZE, err);
-
-      if(nread == -1) {
+      if(nread < 0) {
         if(*err != CURLE_AGAIN)
           failf(data, "Failed receiving HTTP2 data");
         else if(stream->closed)
@@ -1796,8 +1795,7 @@ static ssize_t h2_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
         return -1;
       }
-
-      if(nread == 0) {
+      else if(nread == 0) {
         if(!stream->closed) {
           /* This will happen when the server or proxy server is SIGKILLed
              during data transfer. We should emit an error since our data
@@ -1814,21 +1812,22 @@ static ssize_t h2_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         return 0;
       }
 
-      H2BUGF(infof(data, "nread=%zd", nread));
-
+      H2BUGF(infof(data, "http2_recv: recvd %zd bytes", nread));
       ctx->inbuflen = nread;
-
       DEBUGASSERT(ctx->nread_inbuf == 0);
     }
     else {
       nread = ctx->inbuflen - ctx->nread_inbuf;
-      (void)nread;  /* silence warning, used in debug */
       H2BUGF(infof(data, "Use data left in connection buffer, nread=%zd",
                    nread));
     }
 
     if(h2_process_pending_input(cf, data, err))
       return -1;
+    if(Curl_conn_cf_data_pending(cf->next, data)) {
+      H2BUGF(infof(data, "conn has pending data, set drain"));
+      drain_this(cf, data);
+    }
   }
   if(stream->memlen) {
     ssize_t retlen = stream->memlen;
