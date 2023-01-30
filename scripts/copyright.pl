@@ -45,9 +45,6 @@ my %skiplist = (
 
     # imported, leave be
     'm4/ax_compile_check_sizeof.m4' => "<built-in>",
-
-    # an empty control file
-    "zuul.d/playbooks/.zuul.ignore" => "<built-in>",
     );
 
 sub scanfile {
