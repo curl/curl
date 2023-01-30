@@ -110,6 +110,10 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
 #endif
 
+static CURLcode http_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                bool dead_connection);
+
 /*
  * HTTP handler interface.
  */
@@ -151,7 +155,7 @@ const struct Curl_handler Curl_handler_ws = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
+  http_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
@@ -205,7 +209,7 @@ const struct Curl_handler Curl_handler_wss = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
+  http_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
@@ -277,6 +281,15 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
 }
 
 #ifdef USE_WEBSOCKETS
+static CURLcode http_disconnect(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                bool dead_connection)
+{
+  (void) conn;
+  (void) dead_connection;
+  return Curl_ws_disconnect(data);
+}
+
 static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {

@@ -710,6 +710,14 @@ void Curl_ws_done(struct Curl_easy *data)
   Curl_dyn_free(&wsp->buf);
 }
 
+CURLcode Curl_ws_disconnect(struct Curl_easy *data)
+{
+  struct connectdata *conn = data->conn;
+  /* make sure this is non-blocking to avoid getting stuck in shutdown */
+  (void)curlx_nonblock(conn->sock[FIRSTSOCKET], TRUE);
+  return CURLE_OK;
+}
+
 CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
 {
   /* we only return something for websocket, called from within the callback
