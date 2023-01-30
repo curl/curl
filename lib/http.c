@@ -108,11 +108,10 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
 #ifdef USE_WEBSOCKETS
 static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
-#endif
-
 static CURLcode http_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 bool dead_connection);
+#endif
 
 /*
  * HTTP handler interface.
