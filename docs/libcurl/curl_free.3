@@ -28,7 +28,7 @@ curl_free - reclaim memory that has been obtained through a libcurl call
 .nf
 #include <curl/curl.h>
 
-void curl_free(char *ptr);
+void curl_free(void *ptr);
 .fi
 .SH DESCRIPTION
 curl_free reclaims memory that has been obtained through a libcurl call. Use
