@@ -354,6 +354,7 @@ UNITTEST_START
   }
 #else
   (void)TEST_CASES;
+  (void)test_connect;
 #endif
 
 UNITTEST_STOP
