@@ -3089,9 +3089,8 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
       if(hStore) {
         PCCERT_CONTEXT pContext = NULL;
         /* The array of enhanced key usage OIDs will vary per certificate and
-           is declared outside of the loop so that rather than malloc/free is
-           deceach iteration we can grow it with realloc, when is
-           decnecessary. */
+           is declared outside of the loop so that rather than malloc/free each
+           iteration we can grow it with realloc, when necessary. */
         CERT_ENHKEY_USAGE *enhkey_usage = NULL;
         DWORD enhkey_usage_size = 0;
 
