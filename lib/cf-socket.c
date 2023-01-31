@@ -1241,9 +1241,9 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 #if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(cf->conn->bits.tcp_fastopen) {
-    bytes_written = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
-                           &cf->conn->remote_addr->sa_addr,
-                           cf->conn->remote_addr->addrlen);
+    nwritten = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
+                      &cf->conn->remote_addr->sa_addr,
+                      cf->conn->remote_addr->addrlen);
     cf->conn->bits.tcp_fastopen = FALSE;
   }
   else
