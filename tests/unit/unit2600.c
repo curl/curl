@@ -352,7 +352,9 @@ UNITTEST_START
   for(i = 0; i < sizeof(TEST_CASES)/sizeof(TEST_CASES[0]); ++i) {
     test_connect(&TEST_CASES[i]);
   }
-
+#else
+  (void)TEST_CASES;
+  (void)test_connect;
 #endif
 
 UNITTEST_STOP
