@@ -117,14 +117,11 @@ static const char *find_host_sep(const char *url)
 }
 
 /*
- * Decide in an encoding-independent manner whether a character in a URL must
- * be escaped. This is used in urlencode_str().
+ * Decide whether a character in a URL must be escaped.
  */
-static bool urlchar_needs_escaping(int c)
-{
-  return !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c));
-}
+#define urlchar_needs_escaping(c) (!(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c)))
 
+static const char hexdigits[] = "0123456789abcdef";
 /* urlencode_str() writes data into an output dynbuf and URL-encodes the
  * spaces in the source URL accordingly.
  *
@@ -168,7 +165,10 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
       left = FALSE;
 
     if(urlchar_needs_escaping(*iptr)) {
-      if(Curl_dyn_addf(o, "%%%02x", *iptr))
+      char out[3]={'%'};
+      out[1] = hexdigits[*iptr>>4];
+      out[2] = hexdigits[*iptr & 0xf];
+      if(Curl_dyn_addn(o, out, 3))
         return CURLUE_OUT_OF_MEMORY;
     }
     else {
@@ -1835,7 +1835,10 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
             return CURLUE_OUT_OF_MEMORY;
         }
         else {
-          result = Curl_dyn_addf(&enc, "%%%02x", *i);
+          char out[3]={'%'};
+          out[1] = hexdigits[*i>>4];
+          out[2] = hexdigits[*i & 0xf];
+          result = Curl_dyn_addn(&enc, out, 3);
           if(result)
             return CURLUE_OUT_OF_MEMORY;
         }
