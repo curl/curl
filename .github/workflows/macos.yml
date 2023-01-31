@@ -23,6 +23,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  DEVELOPER_DIR: /Applications/Xcode_14.0.1.app/Contents/Developer
+
 jobs:
   autotools:
     name: ${{ matrix.build.name }}
