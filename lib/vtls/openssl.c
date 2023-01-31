@@ -3217,7 +3217,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
       if(imported_native_ca)
         infof(data, "successfully imported Windows CA store");
       else
-        infof(data, "failed importing Windows CA store");
+        infof(data, "error importing Windows CA store, continuing anyway");
     }
 #endif
     if(ca_info_blob) {
