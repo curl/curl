@@ -97,7 +97,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
     return strdup("");
 
   while(length--) {
-    unsigned char in = *string; /* we need to treat the characters unsigned */
+    unsigned char in = *string++; /* treat the characters unsigned */
 
     if(Curl_isunreserved(in)) {
       /* append this */
@@ -106,10 +106,13 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
     }
     else {
       /* encode it */
-      if(Curl_dyn_addf(&d, "%%%02X", in))
+      const char hex[] = "0123456789ABCDEF";
+      char out[3]={'%'};
+      out[1] = hex[in>>4];
+      out[2] = hex[in & 0xf];
+      if(Curl_dyn_addn(&d, out, 3))
         return NULL;
     }
-    string++;
   }
 
   return Curl_dyn_ptr(&d);
