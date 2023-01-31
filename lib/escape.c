@@ -177,8 +177,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
 
     if(((ctrl == REJECT_CTRL) && (in < 0x20)) ||
        ((ctrl == REJECT_ZERO) && (in == 0))) {
-      free(ns);
-      *ostring = NULL;
+      Curl_safefree(*ostring);
       return CURLE_URL_MALFORMAT;
     }
 
