@@ -146,7 +146,7 @@ backends cannot be combined: if you build with an OpenSSL fork (or wolfSSL),
 you cannot add another OpenSSL fork (or wolfSSL) simply because they have
 conflicting identical symbol names.
 
-When you build with multipl TLS backends, you can select the active one at
+When you build with multiple TLS backends, you can select the active one at
 run-time when curl starts up.
 
 # Windows
