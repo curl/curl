@@ -135,11 +135,19 @@ These options are provided to select the TLS backend to use.
  - GnuTLS: `--with-gnutls`.
  - mbedTLS: `--with-mbedtls`
  - NSS: `--with-nss`
- - OpenSSL: `--with-openssl` (also for BoringSSL and libressl)
+ - OpenSSL: `--with-openssl` (also for BoringSSL, libressl and quictls)
  - rustls: `--with-rustls`
  - Schannel: `--with-schannel`
  - Secure Transport: `--with-secure-transport`
  - wolfSSL: `--with-wolfssl`
+
+You can build curl with *multiple* TLS backends at your choice, but some TLS
+backends cannot be combined: if you build with an OpenSSL fork (or wolfSSL),
+you cannot add another OpenSSL fork (or wolfSSL) simply because they have
+conflicting identical symbol names.
+
+When you build with multiple TLS backends, you can select the active one at
+run-time when curl starts up.
 
 # Windows
 
