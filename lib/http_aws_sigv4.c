@@ -302,6 +302,29 @@ static char *parse_content_sha_hdr(struct Curl_easy *data,
   return value;
 }
 
+static CURLcode calc_payload_hash(struct Curl_easy *data,
+                                  unsigned char *sha_hash, char *sha_hex)
+{
+  const char *post_data = data->set.postfields;
+  size_t post_data_len = 0;
+  CURLcode ret = CURLE_OUT_OF_MEMORY;
+
+  if(post_data) {
+    if(data->set.postfieldsize < 0)
+      post_data_len = strlen(post_data);
+    else
+      post_data_len = (size_t)data->set.postfieldsize;
+  }
+  ret = Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+                      post_data_len);
+  if(ret)
+    goto fail;
+
+  sha256_to_hex(sha_hex, sha_hash);
+fail:
+  return ret;
+}
+
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 {
   CURLcode ret = CURLE_OUT_OF_MEMORY;
@@ -322,8 +345,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *date_header = NULL;
   char *payload_hash = NULL;
   size_t payload_hash_len = 0;
-  const char *post_data = data->set.postfields;
-  size_t post_data_len = 0;
   unsigned char sha_hash[SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
   char *canonical_request = NULL;
@@ -413,17 +434,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   payload_hash = parse_content_sha_hdr(data, provider1, &payload_hash_len);
 
   if(!payload_hash) {
-    if(post_data) {
-      if(data->set.postfieldsize < 0)
-        post_data_len = strlen(post_data);
-      else
-        post_data_len = (size_t)data->set.postfieldsize;
-    }
-    if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
-                     post_data_len))
+    ret = calc_payload_hash(data, sha_hash, sha_hex);
+    if(ret)
       goto fail;
+    ret = CURLE_OUT_OF_MEMORY;
 
-    sha256_to_hex(sha_hex, sha_hash);
     payload_hash = sha_hex;
     payload_hash_len = strlen(sha_hex);
   }
