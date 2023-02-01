@@ -58,7 +58,7 @@ struct ssl_backend_data {
   unsigned char buf[BR_SSL_BUFSIZE_BIDI];
   br_x509_trust_anchor *anchors;
   size_t anchors_len;
-  const char *protocols[2];
+  const char *protocols[ALPN_ENTRIES_MAX];
   /* SSL client context is active */
   bool active;
   /* size of pending write, yet to be flushed */
@@ -691,35 +691,17 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     Curl_ssl_sessionid_unlock(data);
   }
 
-  if(cf->conn->bits.tls_enable_alpn) {
-    int cur = 0;
+  if(connssl->alpn) {
+    struct alpn_proto_buf proto;
+    size_t i;
 
-    /* NOTE: when adding more protocols here, increase the size of the
-     * protocols array in `struct ssl_backend_data`.
-     */
-
-    if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
-      backend->protocols[cur++] = ALPN_HTTP_1_0;
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_0);
+    for(i = 0; i < connssl->alpn->count; ++i) {
+      backend->protocols[i] = connssl->alpn->entries[i];
     }
-    else {
-#ifdef USE_HTTP2
-      if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-         && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
-#endif
-        ) {
-        backend->protocols[cur++] = ALPN_H2;
-        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
-      }
-#endif
-
-      backend->protocols[cur++] = ALPN_HTTP_1_1;
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
-    }
-
-    br_ssl_engine_set_protocol_names(&backend->ctx.eng,
-                                     backend->protocols, cur);
+    br_ssl_engine_set_protocol_names(&backend->ctx.eng, backend->protocols,
+                                     connssl->alpn->count);
+    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
   if((1 == Curl_inet_pton(AF_INET, hostname, &addr))
@@ -868,26 +850,11 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
 
   if(cf->conn->bits.tls_enable_alpn) {
-    const char *protocol;
+    const char *proto;
 
-    protocol = br_ssl_engine_get_selected_protocol(&backend->ctx.eng);
-    if(protocol) {
-      infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, protocol);
-
-#ifdef USE_HTTP2
-      if(!strcmp(protocol, ALPN_H2))
-        cf->conn->alpn = CURL_HTTP_VERSION_2;
-      else
-#endif
-      if(!strcmp(protocol, ALPN_HTTP_1_1))
-        cf->conn->alpn = CURL_HTTP_VERSION_1_1;
-      else
-        infof(data, "ALPN, unrecognized protocol %s", protocol);
-      Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                          BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
-    }
-    else
-      infof(data, VTLS_INFOF_NO_ALPN);
+    proto = br_ssl_engine_get_selected_protocol(&backend->ctx.eng);
+    Curl_alpn_set_negotiated(cf, data, (const unsigned char *)proto,
+                             proto? strlen(proto) : 0);
   }
 
   if(ssl_config->primary.sessionid) {
@@ -983,7 +950,7 @@ static CURLcode bearssl_connect_common(struct Curl_cfilter *cf,
 {
   CURLcode ret;
   struct ssl_connect_data *connssl = cf->ctx;
-  curl_socket_t sockfd = cf->conn->sock[cf->sockindex];
+  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   timediff_t timeout_ms;
   int what;
 

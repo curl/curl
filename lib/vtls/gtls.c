@@ -214,7 +214,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_backend_data *backend = connssl->backend;
   gnutls_session_t session;
-  curl_socket_t sockfd = cf->conn->sock[cf->sockindex];
+  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
 
   DEBUGASSERT(backend);
   session = backend->gtls.session;
@@ -698,37 +698,22 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(result)
     return result;
 
-  if(cf->conn->bits.tls_enable_alpn) {
-    int cur = 0;
-    gnutls_datum_t protocols[2];
+  if(connssl->alpn) {
+    struct alpn_proto_buf proto;
+    gnutls_datum_t alpn[ALPN_ENTRIES_MAX];
+    size_t i;
 
-    if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
-      protocols[cur].data = (unsigned char *)ALPN_HTTP_1_0;
-      protocols[cur++].size = ALPN_HTTP_1_0_LENGTH;
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_0);
+    for(i = 0; i < connssl->alpn->count; ++i) {
+      alpn[i].data = (unsigned char *)connssl->alpn->entries[i];
+      alpn[i].size = (unsigned)strlen(connssl->alpn->entries[i]);
     }
-    else {
-#ifdef USE_HTTP2
-      if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-         && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
-#endif
-        ) {
-        protocols[cur].data = (unsigned char *)ALPN_H2;
-        protocols[cur++].size = ALPN_H2_LENGTH;
-        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
-      }
-#endif
-
-      protocols[cur].data = (unsigned char *)ALPN_HTTP_1_1;
-      protocols[cur++].size = ALPN_HTTP_1_1_LENGTH;
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
-    }
-
-    if(gnutls_alpn_set_protocols(backend->gtls.session, protocols, cur, 0)) {
+    if(gnutls_alpn_set_protocols(backend->gtls.session, alpn,
+                                 (unsigned)connssl->alpn->count, 0)) {
       failf(data, "failed setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
+    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
   /* This might be a reconnect, so we check for a session ID in the cache
@@ -1272,28 +1257,10 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
     int rc;
 
     rc = gnutls_alpn_get_selected_protocol(session, &proto);
-    if(rc == 0) {
-      infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, proto.size,
-            proto.data);
-
-#ifdef USE_HTTP2
-      if(proto.size == ALPN_H2_LENGTH &&
-         !memcmp(ALPN_H2, proto.data,
-                 ALPN_H2_LENGTH)) {
-        cf->conn->alpn = CURL_HTTP_VERSION_2;
-      }
-      else
-#endif
-      if(proto.size == ALPN_HTTP_1_1_LENGTH &&
-         !memcmp(ALPN_HTTP_1_1, proto.data, ALPN_HTTP_1_1_LENGTH)) {
-        cf->conn->alpn = CURL_HTTP_VERSION_1_1;
-      }
-    }
+    if(rc == 0)
+      Curl_alpn_set_negotiated(cf, data, proto.data, proto.size);
     else
-      infof(data, VTLS_INFOF_NO_ALPN);
-
-    Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+      Curl_alpn_set_negotiated(cf, data, NULL, 0);
   }
 
   if(ssl_config->primary.sessionid) {
@@ -1517,7 +1484,7 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
     char buf[120];
 
     while(!done) {
-      int what = SOCKET_READABLE(cf->conn->sock[cf->sockindex],
+      int what = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data),
                                  SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {
         /* Something to read, let's do it and hope that it is the close

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -6,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2008 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,22 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-#
-[global]
 
-[httpd]
-apxs = @APXS@
-httpd = @HTTPD@
-apachectl = @APACHECTL@
-
-[test]
-http_port = 5001
-https_port = 5002
-h3_port = 5002
-
-[nghttpx]
-nghttpx = @HTTPD_NGHTTPX@
-
-[caddy]
-caddy = @CADDY@
-port = 5004
+clean-local:
+	rm -rf *.pyc __pycache__
+	rm -rf gen

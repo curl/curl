@@ -38,6 +38,11 @@ log = logging.getLogger(__name__)
                     reason=f"missing: {Env.incomplete_reason()}")
 class TestBasic:
 
+    @pytest.fixture(autouse=True, scope='class')
+    def _class_scope(self, env, nghttpx):
+        if env.have_h3():
+            nghttpx.start_if_needed()
+
     # simple http: GET
     def test_01_01_http_get(self, env: Env, httpd):
         curl = CurlClient(env=env)
