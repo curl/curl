@@ -336,16 +336,34 @@ fail:
   return ret;
 }
 
-static CURLcode calc_s3_payload_hash(struct Curl_easy *data, char *provider1,
-                                     unsigned char *sha_hash, char *sha_hex,
-                                     char *header)
+#define S3_UNSIGNED_PAYLOAD "UNSIGNED-PAYLOAD"
+
+static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
+                                     Curl_HttpReq httpreq, char *provider1,
+                                     unsigned char *sha_hash,
+                                     char *sha_hex, char *header)
 {
+  bool empty_method = (httpreq == HTTPREQ_GET || httpreq == HTTPREQ_HEAD);
+  /* The request method or filesize indicate no request payload */
+  bool empty_payload = (empty_method || data->set.filesize == 0);
+  /* The POST payload is in memory */
+  bool post_payload = (httpreq == HTTPREQ_POST && data->set.postfields);
   CURLcode ret = CURLE_OUT_OF_MEMORY;
 
-  ret = calc_payload_hash(data, sha_hash, sha_hex);
-  if(ret)
-    goto fail;
-  ret = CURLE_OUT_OF_MEMORY;
+  if(empty_payload || post_payload) {
+    /* Calculate a real hash when we know the request payload */
+    ret = calc_payload_hash(data, sha_hash, sha_hex);
+    if(ret)
+      goto fail;
+    ret = CURLE_OUT_OF_MEMORY;
+  }
+  else {
+    /* Fall back to s3's UNSIGNED-PAYLOAD */
+    size_t len = sizeof(S3_UNSIGNED_PAYLOAD) - 1;
+    DEBUGASSERT(len < SHA256_HEX_LENGTH); /* 16 < 65 */
+    memcpy(sha_hex, S3_UNSIGNED_PAYLOAD, len);
+    sha_hex[len] = 0;
+  }
 
   /* format the required content-sha256 header */
   msnprintf(header, CONTENT_SHA256_HDR_LEN,
@@ -477,7 +495,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   if(!payload_hash) {
     if(sign_as_s3)
-      ret = calc_s3_payload_hash(data, provider1, sha_hash,
+      ret = calc_s3_payload_hash(data, httpreq, provider1, sha_hash,
                                  sha_hex, content_sha256_hdr);
     else
       ret = calc_payload_hash(data, sha_hash, sha_hex);
