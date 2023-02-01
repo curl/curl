@@ -36,12 +36,13 @@
 /* Please keep the SSL backend-specific #if branches in this order:
 
    1. USE_OPENSSL
-   2. USE_GNUTLS
-   3. USE_NSS
-   4. USE_MBEDTLS
-   5. USE_SECTRANSP
-   6. USE_OS400CRYPTO
-   7. USE_WIN32_CRYPTO
+   2. USE_WOLFSSL
+   3. USE_GNUTLS
+   4. USE_NSS
+   5. USE_MBEDTLS
+   6. USE_SECTRANSP
+   7. USE_OS400CRYPTO
+   8. USE_WIN32_CRYPTO
 
    This ensures that:
    - the same SSL branch gets activated throughout this source
