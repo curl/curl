@@ -109,6 +109,9 @@ For all protocols
 
  /* we pass our 'chunk' struct to the callback function */
  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+ /* remember to free the buffer */
+ free(chunk.response)
 .fi
 .SH AVAILABILITY
 Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
