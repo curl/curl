@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2792
+ Contributors:                 2802
 
 This release includes the following changes:
 
@@ -20,6 +20,7 @@ This release includes the following bugfixes:
  o cf-socket: keep sockaddr local in the socket filters [69]
  o cfilters:Curl_conn_get_select_socks: use the first non-connected filter [24]
  o CI: add a workflow to automatically label pull requests [102]
+ o CI: add pytest github workflow to CI test/tests-httpd on a HTTP/3 setup [109]
  o cmake: bump requirement to 3.7 [23]
  o cmake: check for sendmsg [39]
  o cmake: delete redundant macro definition `SECURITY_WIN32` [91]
@@ -29,21 +30,27 @@ This release includes the following bugfixes:
  o cmake: use list APPEND syntax for CMAKE_REQUIRED_DEFINITIONS [94]
  o connect: fix access of pointer before NULL check [83]
  o connect: fix build when not ENABLE_IPV6 [88]
+ o connect: fix strategy testing for attempts, timeouts and happy-eyeball [110]
+ o cookies: fp is always not NULL [104]
  o copyright.pl: cease doing year verifications [74]
  o copyright: update all copyright lines and remove year ranges [35]
  o curl.h: allow up to 10M buffer size [76]
  o curl.h: mark CURLSSLBACKEND_MESALINK as deprecated [52]
  o curl: output warning at --verbose output for debug-enabled version [80]
+ o curl_free.3: fix return type of `curl_free` [113]
  o curl_global_sslset.3: clarify the openssl situation [53]
  o curl_log: for failf/infof and debug logging implementations [87]
  o curl_version_info.3: fix typo [100]
  o CURLOPT_HEADERDATA.3: warn DLL users must set write function [45]
  o CURLOPT_READFUNCTION.3: the callback 'size' arg is always 1 [73]
+ o dict: URL decode the entire path always [120]
  o docs/DEPRECATE.md: deprecate gskit [36]
  o docs: add link to GitHub Discussions [49]
  o docs: mention indirect effects of --insecure [19]
  o docs: POSTFIELDSIZE must be set to -1 with read function [97]
  o easyoptions: fix header printing in generation script [84]
+ o escape: hex decode with a lookup-table [107]
+ o escape: use table lookup when adding %-codes to output [105]
  o examples: remove the curlgtk.c example [48]
  o ftpserver: lower the normal DATA connect timeout to speed up torture tests [27]
  o GHA: add job on Slackware 15.0 [58]
@@ -59,6 +66,7 @@ This release includes the following bugfixes:
  o http: decode transfer encoding first [51]
  o http: remove the trace message "Mark bundle... multiuse" [6]
  o http_proxy: do not assign data->req.p.http use local copy [59]
+ o INSTALL: document how to use multiple TLS backends [103]
  o lib670: make test.h the first include [56]
  o lib: connect/h2/h3 refactor [57]
  o lib: fix typos [99]
@@ -77,9 +85,11 @@ This release includes the following bugfixes:
  o ngtcp2: fix the build without 'sendmsg' [38]
  o noproxy: support for space-separated names is deprecated [66]
  o nss: implement data_pending method [43]
+ o openssl: adapt to boringssl's error code type [118]
  o openssl: don't ignore CA paths when using Windows CA store (redux) [101]
  o openssl: don't log raw record headers [93]
  o openssl: make the BIO_METHOD a local variable in the connection filter [79]
+ o openssl: only use CA_BLOB if verifying peer [112]
  o openssl: remove attached easy handles from SSL instances [29]
  o os400: fixes to make-lib.sh and initscript.sh [71]
  o release-notes.pl: check fixes/closes lines better
@@ -104,6 +114,7 @@ This release includes the following bugfixes:
  o tool_getparam: fix hiding of command line secrets [85]
  o tool_operate: fix `CURLOPT_SOCKS5_GSSAPI_NEC` type [1]
  o tool_operate: fix headerfile writing [64]
+ o tool_operate: repair --rate [119]
  o transfer: break the read loop when RECV is cleared [22]
  o typecheck: accept expressions for option/info parameters [3]
  o urldata: cease storing TLS auth type [55]
@@ -119,7 +130,10 @@ This release includes the following bugfixes:
  o write-out.d: clarify Windows % symbol escaping [86]
  o writeout: add %{certs} and %{num_certs} [33]
  o ws: fix autoping handling [70]
+ o ws: remove bad assert [117]
+ o ws: unstick connect-only shutdown [116]
  o x509asn1: fix compile errors and warnings [47]
+ o zuul: stop using this CI service [114]
 
 This release includes the following known bugs:
 
@@ -137,19 +151,21 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alexey Savchuk, Andrei Rybak, Andy Alt, Brian Green, Cameron Blomquist,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Divy Le Ray,
-  Esdras de Morais da Silva, Fujii Hironori, Hannah Schierling, Harry Sintonen,
-  Hide Ishikawa, Jakob Hirsch, John Bampton, John Sherrill, Jon Rumsey,
-  Josh Brobst, Marc Aldorasi, Marcel Raad, Martin Waleczek, Michael Osipov,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, dekerser on github,
+  Divy Le Ray, Esdras de Morais da Silva, Fujii Hironori, Hannah Schierling,
+  Harry Sintonen, Hide Ishikawa, highmtworks on github, Jakob Hirsch,
+  John Bampton, John Sherrill, Jon Rumsey, Josh Brobst, Kvarec Lezki,
+  Marc Aldorasi, Marcel Raad, Mark Roszko, Martin Waleczek, Michael Osipov,
   Muhammad Hussein Ammari, Nick Banks, nick-telia on github,
-  norbertmm on github, odek86 on github, Patrick Monnerat, Paul Howarth,
-  Peter Wu, Philip Heiduck, Radek Brich, Radu Hociung, RanBarLavie on github,
-  Ray Satiro, Ryan Schmidt, Sébastien Helleu, Sergey Bronnikov,
-  Sergio-IME on github, sergio-nsk on github, SerusDev on github,
-  Stefan Eissing, Stefan Talpalaru, Stephan Guilloux, Tatsuhiro Tsujikawa,
-  Thomas Klausner, Timmy Schierling, Viktor Szakats, violetlige on github,
-  William Tang, Yurii Rashkovskii
-  (52 contributors)
+  norbertmm on github, odek86 on github, Patrick Monnerat, Paul Groke,
+  Paul Howarth, Peter Wu, Philip Heiduck, Radek Brich, Radu Hociung,
+  RanBarLavie on github, Ray Satiro, Ryan Schmidt, Sébastien Helleu,
+  Sergey Bronnikov, Sergio-IME on github, sergio-nsk on github,
+  SerusDev on github, Stanley Wucw, Stefan Eissing, Stefan Talpalaru,
+  Stephan Guilloux, Tatsuhiro Tsujikawa, Thomas1664 on github, Thomas Klausner,
+  Timmy Schierling, Viktor Szakats, violetlige on github, William Tang,
+  Yurii Rashkovskii
+  (59 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -255,3 +271,17 @@ References to bug reports and discussions on issues:
  [100] = https://curl.se/bug/?i=10306
  [101] = https://curl.se/bug/?i=10244
  [102] = https://curl.se/bug/?i=10326
+ [103] = https://curl.se/bug/?i=10321
+ [104] = https://curl.se/bug/?i=10383
+ [105] = https://curl.se/bug/?i=10377
+ [107] = https://curl.se/bug/?i=10376
+ [109] = https://curl.se/bug/?i=10317
+ [110] = https://curl.se/bug/?i=10312
+ [112] = https://curl.se/mail/lib-2023-01/0070.html
+ [113] = https://curl.se/bug/?i=10373
+ [114] = https://curl.se/bug/?i=10368
+ [116] = https://curl.se/bug/?i=10366
+ [117] = https://curl.se/bug/?i=10347
+ [118] = https://curl.se/bug/?i=10360
+ [119] = https://curl.se/bug/?i=10357
+ [120] = https://curl.se/bug/?i=10298
