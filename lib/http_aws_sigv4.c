@@ -137,6 +137,7 @@ static CURLcode make_headers(struct Curl_easy *data,
                              char *timestamp,
                              char *provider1,
                              char **date_header,
+                             char *content_sha256_header,
                              struct dynbuf *canonical_headers,
                              struct dynbuf *signed_headers)
 {
@@ -190,6 +191,13 @@ static CURLcode make_headers(struct Curl_easy *data,
       goto fail;
   }
 
+
+  if (*content_sha256_header) {
+    tmp_head = curl_slist_append(head, content_sha256_header);
+    if(!tmp_head)
+      goto fail;
+    head = tmp_head;
+  }
 
   for(l = data->set.headers; l; l = l->next) {
     tmp_head = curl_slist_append(head, l->data);
@@ -269,6 +277,9 @@ fail:
 }
 
 #define CONTENT_SHA256_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Content-Sha256"))
+/* add 2 for ": " between header name and value */
+#define CONTENT_SHA256_HDR_LEN (CONTENT_SHA256_KEY_LEN + 2 + \
+                                SHA256_HEX_LENGTH)
 
 /* try to parse a payload hash from the content-sha256 header */
 static char *parse_content_sha_hdr(struct Curl_easy *data,
@@ -325,6 +336,26 @@ fail:
   return ret;
 }
 
+static CURLcode calc_s3_payload_hash(struct Curl_easy *data, char *provider1,
+                                     unsigned char *sha_hash, char *sha_hex,
+                                     char *header)
+{
+  CURLcode ret = CURLE_OUT_OF_MEMORY;
+
+  ret = calc_payload_hash(data, sha_hash, sha_hex);
+  if(ret)
+    goto fail;
+  ret = CURLE_OUT_OF_MEMORY;
+
+  /* format the required content-sha256 header */
+  msnprintf(header, CONTENT_SHA256_HDR_LEN,
+            "x-%s-content-sha256: %s", provider1, sha_hex);
+
+  ret = CURLE_OK;
+fail:
+  return ret;
+}
+
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 {
   CURLcode ret = CURLE_OUT_OF_MEMORY;
@@ -350,6 +381,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   size_t payload_hash_len = 0;
   unsigned char sha_hash[SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
+  char content_sha256_hdr[CONTENT_SHA256_HDR_LEN + 2] = ""; /* add \r\n */
   char *canonical_request = NULL;
   char *request_type = NULL;
   char *credential_scope = NULL;
@@ -444,12 +476,17 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   payload_hash = parse_content_sha_hdr(data, provider1, &payload_hash_len);
 
   if(!payload_hash) {
-    ret = calc_payload_hash(data, sha_hash, sha_hex);
+    if(sign_as_s3)
+      ret = calc_s3_payload_hash(data, provider1, sha_hash,
+                                 sha_hex, content_sha256_hdr);
+    else
+      ret = calc_payload_hash(data, sha_hash, sha_hex);
     if(ret)
       goto fail;
     ret = CURLE_OUT_OF_MEMORY;
 
     payload_hash = sha_hex;
+    /* may be shorter than SHA256_HEX_LENGTH, like S3_UNSIGNED_PAYLOAD */
     payload_hash_len = strlen(sha_hex);
   }
 
@@ -474,10 +511,18 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   }
 
   ret = make_headers(data, hostname, timestamp, provider1,
-                     &date_header, &canonical_headers, &signed_headers);
+                     &date_header, content_sha256_hdr,
+                     &canonical_headers, &signed_headers);
   if(ret)
     goto fail;
   ret = CURLE_OUT_OF_MEMORY;
+
+  if(*content_sha256_hdr) {
+    /* make_headers() needed this without the \r\n for canonicalization */
+    size_t hdrlen = strlen(content_sha256_hdr);
+    DEBUGASSERT(hdrlen + 3 < sizeof(content_sha256_hdr));
+    memcpy(content_sha256_hdr + hdrlen, "\r\n", 3);
+  }
 
   memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
@@ -554,13 +599,15 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                                "Credential=%s/%s, "
                                "SignedHeaders=%s, "
                                "Signature=%s\r\n"
-                               "%s\r\n",
+                               "%s\r\n"
+                               "%s", /* optional sha256 header includes \r\n */
                                provider0,
                                user,
                                credential_scope,
                                Curl_dyn_ptr(&signed_headers),
                                sha_hex,
-                               date_header);
+                               date_header,
+                               content_sha256_hdr);
   if(!auth_headers) {
     goto fail;
   }
