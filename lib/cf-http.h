@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_QUIC_H
-#define HEADER_CURL_VQUIC_QUIC_H
+#ifndef HEADER_CURL_CF_HTTP_H
+#define HEADER_CURL_CF_HTTP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,42 +23,36 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#ifdef ENABLE_QUIC
+#if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)
+
 struct Curl_cfilter;
 struct Curl_easy;
 struct connectdata;
-struct Curl_addrinfo;
+struct Curl_cftype;
+struct Curl_dns_entry;
 
-void Curl_quic_ver(char *p, size_t len);
+extern struct Curl_cftype Curl_cft_http_connect;
 
-CURLcode Curl_qlogdir(struct Curl_easy *data,
-                      unsigned char *scid,
-                      size_t scidlen,
-                      int *qlogfdp);
+CURLcode Curl_cf_http_connect_add(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  int sockindex,
+                                  const struct Curl_dns_entry *remotehost,
+                                  bool try_h3, bool try_h21);
+
+CURLcode
+Curl_cf_http_connect_insert_after(struct Curl_cfilter *cf_at,
+                                  struct Curl_easy *data,
+                                  const struct Curl_dns_entry *remotehost,
+                                  bool try_h3, bool try_h21);
 
 
-CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
-                             struct Curl_easy *data,
+CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
-                             const struct Curl_addrinfo *ai,
-                             int transport);
+                             int sockindex,
+                             const struct Curl_dns_entry *remotehost);
 
-bool Curl_conn_is_http3(const struct Curl_easy *data,
-                        const struct connectdata *conn,
-                        int sockindex);
 
-extern struct Curl_cftype Curl_cft_http3;
-
-#else /* ENABLE_QUIC */
-
-#define Curl_conn_is_http3(a,b,c)   FALSE
-
-#endif /* !ENABLE_QUIC */
-
-CURLcode Curl_conn_may_http3(struct Curl_easy *data,
-                             const struct connectdata *conn);
-
-#endif /* HEADER_CURL_VQUIC_QUIC_H */
+#endif /* !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER) */
+#endif /* HEADER_CURL_CF_HTTP_H */

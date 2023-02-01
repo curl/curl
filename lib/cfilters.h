@@ -109,6 +109,8 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_DATA_DONE_SEND        8  /* 0          NULL     ignored */
 /* update conn info at connection and data */
 #define CF_CTRL_CONN_INFO_UPDATE (256+0) /* 0          NULL     ignored */
+/* report conn statistics (timers) for connection and data */
+#define CF_CTRL_CONN_REPORT_STATS (256+1) /* 0         NULL     ignored */
 
 /**
  * Handle event/control for the filter.
@@ -124,9 +126,18 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  * - MAX_CONCURRENT: the maximum number of parallel transfers the filter
  *                   chain expects to handle at the same time.
  *                   default: 1 if no filter overrides.
+ * - CONNECT_REPLY_MS: milliseconds until the first indication of a server
+ *                   response was received on a connect. For TCP, this
+ *                   reflects the time until the socket connected. On UDP
+ *                   this gives the time the first bytes from the server
+ *                   were received.
+ *                   -1 if not determined yet.
+ * - CF_QUERY_SOCKET: the socket used by the filter chain
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
+#define CF_QUERY_CONNECT_REPLY_MS   2  /* number     -        */
+#define CF_QUERY_SOCKET             3  /* -          curl_socket_t */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -134,7 +145,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  */
 typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                int query, int *pres1, void **pres2);
+                                int query, int *pres1, void *pres2);
 
 /**
  * Type flags for connection filters. A filter can have none, one or
@@ -210,7 +221,7 @@ CURLcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
                                      struct Curl_easy *data);
 CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
-                           int query, int *pres1, void **pres2);
+                           int query, int *pres1, void *pres2);
 
 /**
  * Create a new filter instance, unattached to the filter chain.
@@ -279,6 +290,12 @@ CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
                             bool ignore_result,
                             int event, int arg1, void *arg2);
 
+/**
+ * Get the socket used by the filter chain starting at `cf`.
+ * Returns CURL_SOCKET_BAD if not available.
+ */
+curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data);
 
 
 #define CURL_CF_SSL_DEFAULT  -1
@@ -332,6 +349,12 @@ void Curl_conn_close(struct Curl_easy *data, int sockindex);
  */
 bool Curl_conn_data_pending(struct Curl_easy *data,
                             int sockindex);
+
+/**
+ * Return the socket used on data's connection for the index.
+ * Returns CURL_SOCKET_BAD if not available.
+ */
+curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex);
 
 /**
  * Get any select fd flags and the socket filters at chain `sockindex`
@@ -410,6 +433,12 @@ CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause);
  */
 void Curl_conn_ev_update_info(struct Curl_easy *data,
                               struct connectdata *conn);
+
+/**
+ * Inform connection filters to report statistics.
+ */
+void Curl_conn_ev_report_stats(struct Curl_easy *data,
+                               struct connectdata *conn);
 
 /**
  * Check if FIRSTSOCKET's cfilter chain deems connection alive.
