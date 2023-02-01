@@ -1299,7 +1299,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
      */
     remove_expired(c);
 
-    if(fromfile && fp)
+    if(fromfile)
       fclose(fp);
   }
 
