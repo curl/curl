@@ -1233,6 +1233,7 @@ typedef enum {
   EXPIRE_TOOFAST,
   EXPIRE_QUIC,
   EXPIRE_FTP_ACCEPT,
+  EXPIRE_ALPN_EYEBALLS,
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 

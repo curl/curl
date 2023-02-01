@@ -26,6 +26,7 @@
 #
 from .env import Env
 from .certs import TestCA, Credentials
+from .caddy import Caddy
 from .httpd import Httpd
 from .curl import CurlClient, ExecResult
 from .nghttpx import Nghttpx

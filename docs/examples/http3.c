@@ -40,7 +40,8 @@ int main(void)
     /* Forcing HTTP/3 will make the connection fail if the server is not
        accessible over QUIC + HTTP/3 on the given host and port.
        Consider using CURLOPT_ALTSVC instead! */
-    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_3);
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                     (long)CURL_HTTP_VERSION_3ONLY);
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);

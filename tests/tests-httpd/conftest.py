@@ -70,7 +70,7 @@ def httpd(env) -> Httpd:
 
 
 @pytest.fixture(scope='package')
-def nghttpx(env) -> Optional[Nghttpx]:
+def nghttpx(env, httpd) -> Optional[Nghttpx]:
     if env.have_h3_server():
         nghttpx = Nghttpx(env=env)
         nghttpx.clear_logs()

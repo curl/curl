@@ -74,7 +74,7 @@ int test(char *URL)
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go http2 */
-    easy_setopt(curl[i], CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_3);
+    easy_setopt(curl[i], CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_3ONLY);
     easy_setopt(curl[i], CURLOPT_CONNECTTIMEOUT_MS, (long)5000);
     easy_setopt(curl[i], CURLOPT_CAINFO, "./certs/EdelCurlRoot-ca.cacert");
     /* wait for first connection establised to see if we can share it */

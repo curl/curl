@@ -646,19 +646,13 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifdef HAS_ALPN
-  if(cf->conn->bits.tls_enable_alpn) {
-    const char **p = &backend->protocols[0];
-    if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
-      *p++ = ALPN_HTTP_1_0;
+  if(connssl->alpn) {
+    struct alpn_proto_buf proto;
+    size_t i;
+
+    for(i = 0; i < connssl->alpn->count; ++i) {
+      backend->protocols[i] = connssl->alpn->entries[i];
     }
-    else {
-#ifdef USE_HTTP2
-      if(data->state.httpwant >= CURL_HTTP_VERSION_2)
-        *p++ = ALPN_H2;
-#endif
-      *p++ = ALPN_HTTP_1_1;
-    }
-    *p = NULL;
     /* this function doesn't clone the protocols array, which is why we need
        to keep it around */
     if(mbedtls_ssl_conf_alpn_protocols(&backend->config,
@@ -666,8 +660,8 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       failf(data, "Failed setting ALPN protocols");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    for(p = &backend->protocols[0]; *p; ++p)
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, *p);
+    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 #endif
 
@@ -847,28 +841,11 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifdef HAS_ALPN
-  if(cf->conn->bits.tls_enable_alpn) {
-    const char *next_protocol = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
+  if(connssl->alpn) {
+    const char *proto = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
 
-    if(next_protocol) {
-      infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, next_protocol);
-#ifdef USE_HTTP2
-      if(!strncmp(next_protocol, ALPN_H2, ALPN_H2_LENGTH) &&
-         !next_protocol[ALPN_H2_LENGTH]) {
-        cf->conn->alpn = CURL_HTTP_VERSION_2;
-      }
-      else
-#endif
-        if(!strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH) &&
-           !next_protocol[ALPN_HTTP_1_1_LENGTH]) {
-          cf->conn->alpn = CURL_HTTP_VERSION_1_1;
-        }
-    }
-    else {
-      infof(data, VTLS_INFOF_NO_ALPN);
-    }
-    Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+    Curl_alpn_set_negotiated(cf, data, (const unsigned char *)proto,
+                             proto? strlen(proto) : 0);
   }
 #endif
 
@@ -1084,7 +1061,7 @@ mbed_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   CURLcode retcode;
   struct ssl_connect_data *connssl = cf->ctx;
-  curl_socket_t sockfd = cf->conn->sock[cf->sockindex];
+  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   timediff_t timeout_ms;
   int what;
 

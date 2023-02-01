@@ -89,6 +89,7 @@ static struct test_result *current_tr;
 
 struct cf_test_ctx {
   int ai_family;
+  int transport;
   char id[16];
   struct curltime started;
   timediff_t fail_delay_ms;
@@ -147,7 +148,8 @@ static struct Curl_cftype cft_test = {
 static CURLcode cf_test_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai)
+                               const struct Curl_addrinfo *ai,
+                               int transport)
 {
   struct cf_test_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -162,6 +164,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->ai_family = ai->ai_family;
+  ctx->transport = transport;
   ctx->started = Curl_now();
 #ifdef ENABLE_IPV6
   if(ctx->ai_family == AF_INET6) {

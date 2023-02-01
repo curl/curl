@@ -59,6 +59,7 @@
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
+#include "cf-http.h"
 #include "cf-socket.h"
 #include "select.h"
 #include "url.h" /* for Curl_safefree() */
@@ -445,6 +446,7 @@ static void baller_initiate(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct eyeballer *baller)
 {
+  struct cf_he_ctx *ctx = cf->ctx;
   struct Curl_cfilter *cf_prev = baller->cf;
   struct Curl_cfilter *wcf;
   CURLcode result;
@@ -454,7 +456,8 @@ static void baller_initiate(struct Curl_cfilter *cf,
      socket gets a different file descriptor, which can prevent bugs when
      the curl_multi_socket_action interface is used with certain select()
      replacements such as kqueue. */
-  result = baller->cf_create(&baller->cf, data, cf->conn, baller->addr);
+  result = baller->cf_create(&baller->cf, data, cf->conn, baller->addr,
+                             ctx->transport);
   if(result)
     goto out;
 
@@ -877,7 +880,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
 
   switch(ctx->state) {
     case SCFST_INIT:
-      DEBUGASSERT(CURL_SOCKET_BAD == cf->conn->sock[cf->sockindex]);
+      DEBUGASSERT(CURL_SOCKET_BAD == Curl_conn_cf_get_socket(cf, data));
       DEBUGASSERT(!cf->connected);
       result = start_connect(cf, data, ctx->remotehost);
       if(result)
@@ -900,9 +903,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
         Curl_conn_cf_cntrl(cf->next, data, TRUE,
                            CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 
-        Curl_pgrsTime(data, TIMER_CONNECT);    /* we're connected already */
-        if(Curl_conn_is_ssl(cf->conn, FIRSTSOCKET) ||
-           (cf->conn->handler->protocol & PROTO_FAMILY_SSH))
+        if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
         Curl_verboseconnect(data, cf->conn);
         data->info.numconnects++; /* to track the # of connections made */
@@ -950,6 +951,44 @@ static bool cf_he_data_pending(struct Curl_cfilter *cf,
   return FALSE;
 }
 
+static CURLcode cf_he_query(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            int query, int *pres1, void *pres2)
+{
+  struct cf_he_ctx *ctx = cf->ctx;
+
+  if(!cf->connected) {
+    switch(query) {
+    case CF_QUERY_CONNECT_REPLY_MS: {
+      int reply_ms = -1;
+      size_t i;
+
+      for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+        struct eyeballer *baller = ctx->baller[i];
+        int breply_ms;
+
+        if(baller && baller->cf &&
+           !baller->cf->cft->query(baller->cf, data, query,
+                                   &breply_ms, NULL)) {
+          if(breply_ms >= 0 && (reply_ms < 0 || breply_ms < reply_ms))
+            reply_ms = breply_ms;
+        }
+      }
+      *pres1 = reply_ms;
+      DEBUGF(LOG_CF(data, cf, "query connect reply: %dms", *pres1));
+      return CURLE_OK;
+    }
+
+    default:
+      break;
+    }
+  }
+
+  return cf->next?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
+}
+
 static void cf_he_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_he_ctx *ctx = cf->ctx;
@@ -977,14 +1016,15 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  cf_he_query,
 };
 
 CURLcode Curl_cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
                                        struct Curl_easy *data,
                                        struct connectdata *conn,
                                        cf_ip_connect_create *cf_create,
-                                       const struct Curl_dns_entry *remotehost)
+                                       const struct Curl_dns_entry *remotehost,
+                                       int transport)
 {
   struct cf_he_ctx *ctx = NULL;
   CURLcode result;
@@ -997,6 +1037,7 @@ CURLcode Curl_cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+  ctx->transport = transport;
   ctx->cf_create = cf_create;
   ctx->remotehost = remotehost;
 
@@ -1073,7 +1114,8 @@ static CURLcode cf_he_insert_after(struct Curl_cfilter *cf_at,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
   result = Curl_cf_happy_eyeballs_create(&cf, data, cf_at->conn,
-                                         cf_create, remotehost);
+                                         cf_create, remotehost,
+                                         transport);
   if(result)
     return result;
 
@@ -1095,6 +1137,7 @@ struct cf_setup_ctx {
   cf_setup_state state;
   const struct Curl_dns_entry *remotehost;
   int ssl_mode;
+  int transport;
 };
 
 static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
@@ -1118,8 +1161,7 @@ connect_sub_chain:
   }
 
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
-    result = cf_he_insert_after(cf, data, ctx->remotehost,
-                                cf->conn->transport);
+    result = cf_he_insert_after(cf, data, ctx->remotehost, ctx->transport);
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_EYEBALLS;
@@ -1244,6 +1286,75 @@ struct Curl_cftype Curl_cft_setup = {
   Curl_cf_def_query,
 };
 
+static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
+                                struct Curl_easy *data,
+                                const struct Curl_dns_entry *remotehost,
+                                int transport,
+                                int ssl_mode)
+{
+  struct Curl_cfilter *cf = NULL;
+  struct cf_setup_ctx *ctx;
+  CURLcode result = CURLE_OK;
+
+  (void)data;
+  ctx = calloc(sizeof(*ctx), 1);
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  ctx->state = CF_SETUP_INIT;
+  ctx->remotehost = remotehost;
+  ctx->ssl_mode = ssl_mode;
+  ctx->transport = transport;
+
+  result = Curl_cf_create(&cf, &Curl_cft_setup, ctx);
+  if(result)
+    goto out;
+  ctx = NULL;
+
+out:
+  *pcf = result? NULL : cf;
+  free(ctx);
+  return result;
+}
+
+CURLcode Curl_cf_setup_add(struct Curl_easy *data,
+                           struct connectdata *conn,
+                           int sockindex,
+                           const struct Curl_dns_entry *remotehost,
+                           int transport,
+                           int ssl_mode)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(data);
+  result = cf_setup_create(&cf, data, remotehost, transport, ssl_mode);
+  if(result)
+    goto out;
+  Curl_conn_cf_add(data, conn, sockindex, cf);
+out:
+  return result;
+}
+
+CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
+                                    struct Curl_easy *data,
+                                    const struct Curl_dns_entry *remotehost,
+                                    int transport,
+                                    int ssl_mode)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  DEBUGASSERT(data);
+  result = cf_setup_create(&cf, data, remotehost, transport, ssl_mode);
+  if(result)
+    goto out;
+  Curl_conn_cf_insert_after(cf_at, cf);
+out:
+  return result;
+}
+
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
@@ -1251,34 +1362,31 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          int ssl_mode)
 {
   CURLcode result = CURLE_OK;
-  struct cf_setup_ctx *ctx = NULL;
 
   DEBUGASSERT(data);
-  /* If no filter is set, we add the "default" setup connection filter.
-   */
-  if(!conn->cfilter[sockindex]) {
-    struct Curl_cfilter *cf;
+  DEBUGASSERT(conn->handler);
 
-    ctx = calloc(sizeof(*ctx), 1);
-    if(!ctx) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
-    ctx->state = CF_SETUP_INIT;
-    ctx->remotehost = remotehost;
-    ctx->ssl_mode = ssl_mode;
+#if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)
+  if(!conn->cfilter[sockindex] &&
+     conn->handler->protocol == CURLPROTO_HTTPS &&
+     (ssl_mode == CURL_CF_SSL_ENABLE || ssl_mode != CURL_CF_SSL_DISABLE)) {
 
-    result = Curl_cf_create(&cf, &Curl_cft_setup, ctx);
+    result = Curl_cf_https_setup(data, conn, sockindex, remotehost);
     if(result)
       goto out;
-    ctx = NULL;
-    Curl_conn_cf_add(data, conn, sockindex, cf);
+  }
+#endif /* !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER) */
+
+  /* Still no cfilter set, apply default. */
+  if(!conn->cfilter[sockindex]) {
+    result = Curl_cf_setup_add(data, conn, sockindex, remotehost,
+                               conn->transport, ssl_mode);
+    if(result)
+      goto out;
   }
 
   DEBUGASSERT(conn->cfilter[sockindex]);
-
 out:
-  free(ctx);
   return result;
 }
 

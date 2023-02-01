@@ -37,7 +37,14 @@ log = logging.getLogger(__name__)
 
 @pytest.mark.skipif(condition=Env.setup_incomplete(),
                     reason=f"missing: {Env.incomplete_reason()}")
+@pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.55'),
+                    reason=f"httpd version too old for this: {Env.httpd_version()}")
 class TestErrors:
+
+    @pytest.fixture(autouse=True, scope='class')
+    def _class_scope(self, env, nghttpx):
+        if env.have_h3():
+            nghttpx.start_if_needed()
 
     # download 1 file, check that we get CURLE_PARTIAL_FILE
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -45,10 +52,6 @@ class TestErrors:
                               proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h2':  # TODO, fix error code in curl
-            pytest.skip("h2 reports exitcode 16(CURLE_HTTP2)")
-        if proto == 'h3':  # TODO, fix error code in curl
-            pytest.skip("h3 reports exitcode 95(CURLE_HTTP3)")
         count = 1
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
@@ -58,7 +61,7 @@ class TestErrors:
         assert r.exit_code != 0, f'{r}'
         invalid_stats = []
         for idx, s in enumerate(r.stats):
-            if 'exitcode' not in s or s['exitcode'] != 18:
+            if 'exitcode' not in s or s['exitcode'] not in [18, 56]:
                 invalid_stats.append(f'request {idx} exit with {s["exitcode"]}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
 
@@ -68,10 +71,6 @@ class TestErrors:
                               proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h2':  # TODO, fix error code in curl
-            pytest.skip("h2 reports exitcode 16(CURLE_HTTP2)")
-        if proto == 'h3':  # TODO, fix error code in curl
-            pytest.skip("h3 reports exitcode 95(CURLE_HTTP3) and takes a long time")
         count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
@@ -82,6 +81,6 @@ class TestErrors:
         assert len(r.stats) == count, f'did not get all stats: {r}'
         invalid_stats = []
         for idx, s in enumerate(r.stats):
-            if 'exitcode' not in s or s['exitcode'] != 18:
+            if 'exitcode' not in s or s['exitcode'] not in [18, 56]:
                 invalid_stats.append(f'request {idx} exit with {s["exitcode"]}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'

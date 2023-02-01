@@ -155,27 +155,35 @@ class ExecResult:
     def add_assets(self, assets: List):
         self._assets.extend(assets)
 
-    def check_responses(self, count: int, exp_status: Optional[int] = None):
-        if len(self.responses) != count:
-            seen_queries = []
-            for idx, resp in enumerate(self.responses):
-                assert resp['status'] == 200, f'response #{idx} status: {resp["status"]}'
-                if 'rquery' not in resp['header']:
-                    log.error(f'response #{idx} missing "rquery": {resp["header"]}')
-                seen_queries.append(int(resp['header']['rquery']))
-            for i in range(0, count-1):
-                if i not in seen_queries:
-                    log.error(f'response for query {i} missing')
-            if self.with_stats and len(self.stats) == count:
-                log.error(f'got all {count} stats, though')
+    def check_responses(self, count: int, exp_status: Optional[int] = None,
+                        exp_exitcode: Optional[int] = None):
         assert len(self.responses) == count, \
             f'response count: expected {count}, got {len(self.responses)}'
         if exp_status is not None:
             for idx, x in enumerate(self.responses):
                 assert x['status'] == exp_status, \
                     f'response #{idx} unexpectedstatus: {x["status"]}'
+        if exp_exitcode is not None:
+            for idx, x in enumerate(self.responses):
+                if 'exitcode' in x:
+                    assert x['exitcode'] == 0, f'response #{idx} exitcode: {x["exitcode"]}'
         if self.with_stats:
             assert len(self.stats) == count, f'{self}'
+
+    def check_stats(self, count: int, exp_status: Optional[int] = None,
+                        exp_exitcode: Optional[int] = None):
+        assert len(self.stats) == count, \
+            f'stats count: expected {count}, got {len(self.stats)}'
+        if exp_status is not None:
+            for idx, x in enumerate(self.stats):
+                assert 'http_code' in x, \
+                    f'status #{idx} reports no http_code'
+                assert x['http_code'] == exp_status, \
+                    f'status #{idx} unexpected http_code: {x["http_code"]}'
+        if exp_exitcode is not None:
+            for idx, x in enumerate(self.stats):
+                if 'exitcode' in x:
+                    assert x['exitcode'] == 0, f'status #{idx} exitcode: {x["exitcode"]}'
 
 
 class CurlClient:
@@ -186,7 +194,7 @@ class CurlClient:
         'http/1.1': '--http1.1',
         'h2': '--http2',
         'h2c': '--http2',
-        'h3': '--http3',
+        'h3': '--http3-only',
     }
 
     def __init__(self, env: Env, run_dir: Optional[str] = None):
@@ -219,6 +227,7 @@ class CurlClient:
     def http_download(self, urls: List[str],
                       alpn_proto: Optional[str] = None,
                       with_stats: bool = True,
+                      with_headers: bool = False,
                       extra_args: List[str] = None):
         if extra_args is None:
             extra_args = []
@@ -230,7 +239,41 @@ class CurlClient:
                 '-w', '%{json}\\n'
             ])
         return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
-                         with_stats=with_stats)
+                         with_stats=with_stats,
+                         with_headers=with_headers)
+
+    def http_upload(self, urls: List[str], data: str,
+                    alpn_proto: Optional[str] = None,
+                    with_stats: bool = True,
+                    with_headers: bool = False,
+                    extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        extra_args.extend([
+            '--data-binary', data, '-o', 'download_#1.data',
+        ])
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=with_headers)
+
+    def response_file(self, idx: int):
+        return os.path.join(self._run_dir, f'download_{idx}.data')
+
+    def run_direct(self, args, with_stats: bool = False):
+        my_args = [self._curl]
+        if with_stats:
+            my_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        my_args.extend([
+            '-o', 'download.data',
+        ])
+        my_args.extend(args)
+        return self._run(args=my_args, with_stats=with_stats)
 
     def _run(self, args, intext='', with_stats: bool = False):
         self._rmf(self._stdoutfile)
@@ -252,12 +295,15 @@ class CurlClient:
 
     def _raw(self, urls, timeout=10, options=None, insecure=False,
              alpn_proto: Optional[str] = None,
-             force_resolve=True, with_stats=False):
+             force_resolve=True,
+             with_stats=False,
+             with_headers=True):
         args = self._complete_args(
             urls=urls, timeout=timeout, options=options, insecure=insecure,
-            alpn_proto=alpn_proto, force_resolve=force_resolve)
+            alpn_proto=alpn_proto, force_resolve=force_resolve,
+            with_headers=with_headers)
         r = self._run(args, with_stats=with_stats)
-        if r.exit_code == 0:
+        if r.exit_code == 0 and with_headers:
             self._parse_headerfile(self._headerfile, r=r)
             if r.json:
                 r.response["json"] = r.json
@@ -265,13 +311,14 @@ class CurlClient:
 
     def _complete_args(self, urls, timeout=None, options=None,
                        insecure=False, force_resolve=True,
-                       alpn_proto: Optional[str] = None):
+                       alpn_proto: Optional[str] = None,
+                       with_headers: bool = True):
         if not isinstance(urls, list):
             urls = [urls]
 
-        args = [
-            self._curl, "-s", "--path-as-is", "-D", self._headerfile,
-        ]
+        args = [self._curl, "-s", "--path-as-is"]
+        if with_headers:
+            args.extend(["-D", self._headerfile])
         if self.env.verbose > 2:
             args.extend(['--trace', self._tracefile, '--trace-time'])
 

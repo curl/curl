@@ -311,6 +311,16 @@ AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
 )
 AC_SUBST(TEST_NGHTTPX)
 
+CADDY=caddy
+AC_ARG_WITH(test-caddy,dnl
+AS_HELP_STRING([--with-test-caddy=PATH],[where to find caddy for testing]),
+  CADDY=$withval
+  if test X"$OPT_CADDY" = "Xno" ; then
+      CADDY=""
+  fi
+)
+AC_SUBST(CADDY)
+
 dnl we'd like a httpd+apachectl as test server
 dnl
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
@@ -365,6 +375,14 @@ else
 fi
     AC_PATH_PROG([APXS], [apxs])
 AC_SUBST(HTTPD_NGHTTPX)
+
+dnl the Caddy server we might use in testing
+if test "x$TEST_CADDY" != "x"; then
+  CADDY="$TEST_CADDY"
+else
+  AC_PATH_PROG([CADDY], [caddy])
+fi
+AC_SUBST(CADDY)
 
 dnl If no TLS choice has been made, check if it was explicitly disabled or
 dnl error out to force the user to decide.
@@ -4646,6 +4664,7 @@ AC_CONFIG_FILES([Makefile \
            tests/libtest/Makefile \
            tests/unit/Makefile \
            tests/tests-httpd/config.ini \
+           tests/tests-httpd/Makefile \
            packages/Makefile \
            packages/vms/Makefile \
            curl-config \

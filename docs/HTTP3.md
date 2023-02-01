@@ -239,7 +239,11 @@ directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 
 # `--http3`
 
-Use HTTP/3 directly:
+Use only HTTP/3:
+
+    curl --http3-only https://nghttp2.org:4433/
+
+Use HTTP/3 with fallback to HTTP/2 or HTTP/1.1 (see "HTTPS eyeballing" below):
 
     curl --http3 https://nghttp2.org:4433/
 
@@ -248,6 +252,28 @@ Upgrade via Alt-Svc:
     curl --alt-svc altsvc.cache https://quic.aiortc.org/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
+
+### HTTPS eyeballing
+
+With option `--http3` curl will attempt earlier HTTP versions as well should the connect
+attempt via HTTP/3 not succeed "fast enough". This strategy is similar to IPv4/6 happy
+eyeballing where the alternate address family is used in parallel after a short delay.
+
+The IPv4/6 eyeballing has a default of 200ms and you may override that via `--happy-eyeballs-timeout-ms value`.
+Since HTTP/3 is still relatively new, we decided to use this timeout also for the HTTP eyeballing - with a slight twist.
+
+The `happy-eyeballs-timeout-ms` value is the **hard** timeout, meaning after that time expired, a TLS connection is opened in addition to negotiate HTTP/2 or HTTP/1.1. At half of that value - currently - is the **soft** timeout. The soft timeout fires, when there has been **no data at all** seen from the server on the HTTP/3 connection.
+
+So, without you specifying anything, the hard timeout is 200ms and the soft is 100ms:
+
+ * Ideally, the whole QUIC handshake happens and curl has a HTTP/3 connection in less than 100ms. 
+ * When QUIC is not supported (or UDP does not work for this network path), no reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
+ * In the worst case, UDP replies start before 100ms, but drag on. This will start the TLS+TCP connection after 200ms.
+ * When the QUIC handshake fails, the TLS+TCP connection is attempted right away. For example, when the QUIC server presents the wrong certificate.
+
+The whole transfer only fails, when **both** QUIC and TLS+TCP fail to handshake or time out.
+
+Note that all this happens in addition to IP version happy eyeballing. If the name resolution for the server gives more than one IP address, curl will try all those until one succeeds - just as with all other protocols. And if those IP addresses contain both IPv6 and IPv4, those attempts will happen, delayed, in parallel (the actual eyeballing).
 
 ## Known Bugs
 

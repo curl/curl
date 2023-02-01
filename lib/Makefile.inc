@@ -107,7 +107,8 @@ LIB_CFILES =         \
   base64.c           \
   bufref.c           \
   c-hyper.c          \
-  cf-socket.c          \
+  cf-http.c          \
+  cf-socket.c        \
   cfilters.c         \
   conncache.c        \
   connect.c          \
@@ -232,7 +233,8 @@ LIB_HFILES =         \
   asyn.h             \
   bufref.h           \
   c-hyper.h          \
-  cf-socket.h          \
+  cf-http.h          \
+  cf-socket.h        \
   cfilters.h         \
   conncache.h        \
   connect.h          \

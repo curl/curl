@@ -69,21 +69,23 @@ class Httpd:
         self._error_log = os.path.join(self._logs_dir, 'error_log')
         self._tmp_dir = os.path.join(self._apache_dir, 'tmp')
         self._mods_dir = None
-        if env.apxs is not None:
-            p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
-                               capture_output=True, text=True)
-            if p.returncode != 0:
-                raise Exception(f'{env.apxs} failed to query libexecdir: {p}')
-            self._mods_dir = p.stdout.strip()
-        else:
-            for md in self.COMMON_MODULES_DIRS:
-                if os.path.isdir(md):
-                    self._mods_dir = md
+        assert env.apxs
+        p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
+                           capture_output=True, text=True)
+        if p.returncode != 0:
+            raise Exception(f'{env.apxs} failed to query libexecdir: {p}')
+        self._mods_dir = p.stdout.strip()
         if self._mods_dir is None:
             raise Exception(f'apache modules dir cannot be found')
+        if not os.path.exists(self._mods_dir):
+            raise Exception(f'apache modules dir does not exist: {self._mods_dir}')
         self._process = None
         self._rmf(self._error_log)
         self._init_curltest()
+
+    @property
+    def docs_dir(self):
+        return self._docs_dir
 
     def clear_logs(self):
         self._rmf(self._error_log)
@@ -213,9 +215,6 @@ class Httpd:
                 f'Listen {self.env.http_port}',
                 f'Listen {self.env.https_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
-                # we want the quest string in a response header, so we
-                # can check responses more easily
-                f'Header set rquery "%{{QUERY_STRING}}s"',
             ]
             conf.extend([  # plain http host for domain1
                 f'<VirtualHost *:{self.env.http_port}>',

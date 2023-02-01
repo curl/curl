@@ -1169,7 +1169,7 @@ static int socks_cf_get_select_socks(struct Curl_cfilter *cf,
   if(!fds && cf->next->connected && !cf->connected && sx) {
     /* If we are not connected, the filter below is and has nothing
      * to wait on, we determine what to wait for. */
-    socks[0] = cf->conn->sock[cf->sockindex];
+    socks[0] = Curl_conn_cf_get_socket(cf, data);
     switch(sx->state) {
     case CONNECT_RESOLVING:
     case CONNECT_SOCKS_READ:
