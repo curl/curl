@@ -1200,9 +1200,10 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     path = u->path = Curl_dyn_ptr(&enc);
   }
 
-  if(!pathlen) {
-    /* there is no path left, unset */
+  if(pathlen <= 1) {
+    /* there is no path left or just the slash, unset */
     path = NULL;
+    pathlen = 0;
   }
   else {
     if(!u->path) {
