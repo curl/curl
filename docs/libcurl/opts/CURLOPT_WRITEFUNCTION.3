@@ -103,12 +103,16 @@ For all protocols
  }
 
  struct memory chunk = {0};
+ CURLcode res;
 
  /* send all data to this function  */
  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, cb);
 
  /* we pass our 'chunk' struct to the callback function */
  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+ /* send a request */
+ res = curl_easy_perform(curl_handle);
 
  /* remember to free the buffer */
  free(chunk.response)
