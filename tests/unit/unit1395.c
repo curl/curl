@@ -24,7 +24,7 @@
 #include "curlcheck.h"
 
 /* copied from urlapi.c */
-extern char *dedotdotify(const char *input, size_t clen);
+extern int dedotdotify(const char *input, size_t clen, char **out);
 
 #include "memdebug.h"
 
@@ -58,32 +58,40 @@ UNITTEST_START
     { "/1/./..", "/" },
     { "/1/./../2", "/2" },
     { "/hello/1/./../2", "/hello/2" },
-    { "test/this", "test/this" },
+    { "test/this", NULL },
     { "test/this/../now", "test/now" },
     { "/1../moo../foo", "/1../moo../foo"},
     { "/../../moo", "/moo"},
     { "/../../moo?andnot/../yay", "/moo?andnot/../yay"},
     { "/123?foo=/./&bar=/../", "/123?foo=/./&bar=/../"},
     { "/../moo/..?what", "/?what" },
-    { "/", "/" },
-    { "", "" },
+    { "/", NULL },
+    { "", NULL },
     { "/.../", "/.../" },
     { "./moo", "moo" },
     { "../moo", "moo" },
     { "/.", "/" },
     { "/..", "/" },
     { "/moo/..", "/" },
-    { "..", "" },
-    { ".", "" },
+    { "/..", "/" },
+    { "/.", "/" },
   };
 
   for(i = 0; i < sizeof(pairs)/sizeof(pairs[0]); i++) {
-    char *out = dedotdotify(pairs[i].input, strlen(pairs[i].input));
-    abort_unless(out != NULL, "returned NULL!");
+    char *out;
+    int err = dedotdotify(pairs[i].input, strlen(pairs[i].input), &out);
+    abort_unless(err == 0, "returned error");
+    abort_if(err && out, "returned error with output");
 
-    if(strcmp(out, pairs[i].output)) {
+    if(out && strcmp(out, pairs[i].output)) {
       fprintf(stderr, "Test %u: '%s' gave '%s' instead of '%s'\n",
               i, pairs[i].input, out, pairs[i].output);
+      fail("Test case output mismatched");
+      fails++;
+    }
+    else if(!out && pairs[i].output) {
+      fprintf(stderr, "Test %u: '%s' gave '%s' instead of NULL\n",
+              i, pairs[i].input, out);
       fail("Test case output mismatched");
       fails++;
     }

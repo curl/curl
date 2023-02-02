@@ -783,24 +783,27 @@ static CURLUcode decode_host(struct dynbuf *host)
  *
  * RETURNS
  *
- * an allocated dedotdotified output string
+ * Zero for success and 'out' set to an allocated dedotdotified string.
  */
-UNITTEST char *dedotdotify(const char *input, size_t clen);
-UNITTEST char *dedotdotify(const char *input, size_t clen)
+UNITTEST int dedotdotify(const char *input, size_t clen, char **outp);
+UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
 {
-  char *out = malloc(clen + 1);
   char *outptr;
   const char *orginput = input;
   char *queryp;
+  char *out;
+
+  *outp = NULL;
+  /* the path always starts with a slash, and a slash has not dot */
+  if((clen < 2) || !memchr(input, '.', clen))
+    return 0;
+
+  out = malloc(clen + 1);
   if(!out)
-    return NULL; /* out of memory */
+    return 1; /* out of memory */
 
   *out = 0; /* null-terminates, for inputs like "./" */
   outptr = out;
-
-  if(!*input)
-    /* zero length input string, return that */
-    return out;
 
   /*
    * To handle query-parts properly, we must find it and remove it during the
@@ -906,7 +909,8 @@ UNITTEST char *dedotdotify(const char *input, size_t clen)
     memcpy(outptr, &orginput[oindex], qlen + 1); /* include zero byte */
   }
 
-  return out;
+  *outp = out;
+  return 0; /* success */
 }
 
 static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
@@ -1226,13 +1230,16 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 
     if(!(flags & CURLU_PATH_AS_IS)) {
       /* remove ../ and ./ sequences according to RFC3986 */
-      char *newp = dedotdotify((char *)path, pathlen);
-      if(!newp) {
+      char *dedot;
+      int err = dedotdotify((char *)path, pathlen, &dedot);
+      if(err) {
         result = CURLUE_OUT_OF_MEMORY;
         goto fail;
       }
-      free(u->path);
-      u->path = newp;
+      if(dedot) {
+        free(u->path);
+        u->path = dedot;
+      }
     }
   }
 
