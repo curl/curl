@@ -225,7 +225,7 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
 
   while(*str && ISBLANK(*str))
     str++;
-  if(('-' == *str) || (ISSPACE(*str))) {
+  if(('-' == *str) || (ISSPACEBASE(*str))) {
     if(endp)
       *endp = (char *)str; /* didn't actually move */
     return CURL_OFFT_INVAL; /* nothing parsed */
