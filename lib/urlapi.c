@@ -794,7 +794,8 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
   char *out;
 
   *outp = NULL;
-  if(!clen || !memchr(input, '.', clen))
+  /* the path always starts with a slash, and a slash has not dot */
+  if((clen < 2) || !memchr(input, '.', clen))
     return 0;
 
   out = malloc(clen + 1);
