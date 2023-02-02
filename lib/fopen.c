@@ -106,7 +106,6 @@ fail:
 
   free(tempstore);
 
-  *tempname = NULL;
   return result;
 }
 
