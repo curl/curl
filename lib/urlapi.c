@@ -1203,7 +1203,6 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   if(pathlen <= 1) {
     /* there is no path left or just the slash, unset */
     path = NULL;
-    pathlen = 0;
   }
   else {
     if(!u->path) {
