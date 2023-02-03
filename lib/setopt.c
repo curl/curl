@@ -1490,7 +1490,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     uarg = va_arg(param, unsigned long);
 #if SIZEOF_LONG > 4
-    if(uarg >= UINT_MAX)
+    if(uarg > UINT_MAX)
       uarg = UINT_MAX;
 #endif
     data->set.accepttimeout = (unsigned int)uarg;
