@@ -2275,7 +2275,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       goto error;
     }
     /* path will be "/", if no path was found */
-    if(strcmp("/", path)) {
+    if(strcmp("/", path) != 0) {
       is_unix_proxy = TRUE;
       free(host);
       host = aprintf(UNIX_SOCKET_PREFIX"%s", path);
@@ -2744,7 +2744,7 @@ static CURLcode override_login(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
     }
     /* no user was set but a password, set a blank user */
-    if(userp && !*userp && *passwdp) {
+    if(!*userp && *passwdp) {
       *userp = strdup("");
       if(!*userp)
         return CURLE_OUT_OF_MEMORY;
