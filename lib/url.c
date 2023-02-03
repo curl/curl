@@ -2275,7 +2275,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       goto error;
     }
     /* path will be "/", if no path was found */
-    if(strcmp("/", path) != 0) {
+    if(strcmp("/", path)) {
       is_unix_proxy = TRUE;
       free(host);
       host = aprintf(UNIX_SOCKET_PREFIX"%s", path);
