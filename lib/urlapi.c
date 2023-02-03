@@ -1102,10 +1102,10 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     hostp = p; /* host name starts here */
 
     /* find the end of the host name + port number */
-    while(*p && !HOSTNAME_END(*p))
+    while(p && *p && !HOSTNAME_END(*p))
       p++;
 
-    len = p - hostp;
+    len = p ? p - hostp : 0;
     if(len) {
       if(Curl_dyn_addn(&host, hostp, len)) {
         result = CURLUE_OUT_OF_MEMORY;
@@ -1153,7 +1153,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     size_t qlen = strlen(query) - fraglen; /* includes '?' */
     pathlen = strlen(path) - qlen - fraglen;
     if(qlen > 1) {
-      if(qlen && (flags & CURLU_URLENCODE)) {
+      if(flags & CURLU_URLENCODE) {
         struct dynbuf enc;
         Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
         /* skip the leading question mark */
