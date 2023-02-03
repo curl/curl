@@ -60,6 +60,16 @@ int test(char *URL)
 
   struct WriteThis pooh;
 
+  if(!strcmp(URL, "check")) {
+#if (defined(WIN32) || defined(__CYGWIN__)) && \
+    !defined(USE_RECV_BEFORE_SEND_WORKAROUND)
+    printf("test requires recv-before-send workaround on Windows\n");
+    return 1; /* skip since test will fail on Windows without workaround */
+#else
+    return 0; /* sure, run this! */
+#endif
+  }
+
   pooh.readptr = data;
   pooh.sizeleft = strlen(data);
 
