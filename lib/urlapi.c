@@ -1102,10 +1102,10 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     hostp = p; /* host name starts here */
 
     /* find the end of the host name + port number */
-    while(p && *p && !HOSTNAME_END(*p))
+    while(*p && !HOSTNAME_END(*p))
       p++;
 
-    len = p ? p - hostp : 0;
+    len = p - hostp;
     if(len) {
       if(Curl_dyn_addn(&host, hostp, len)) {
         result = CURLUE_OUT_OF_MEMORY;
