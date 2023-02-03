@@ -1157,7 +1157,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     size_t qlen = strlen(query) - fraglen; /* includes '?' */
     pathlen = strlen(path) - qlen - fraglen;
     if(qlen > 1) {
-      if(qlen && (flags & CURLU_URLENCODE)) {
+      if(flags & CURLU_URLENCODE) {
         struct dynbuf enc;
         Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
         /* skip the leading question mark */
