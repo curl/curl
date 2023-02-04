@@ -27,6 +27,7 @@ jobs:
   autotools:
     name: ${{ matrix.build.name }}
     runs-on: 'ubuntu-latest'
+    container: ${{ matrix.build.container }}
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -114,8 +115,14 @@ jobs:
           install_packages: clang libnss3-dev libnghttp2-dev nss-plugin-pem
           configure: CC=clang CPPFLAGS="-isystem /usr/include/nss" --with-nss --enable-debug --with-nss-deprecated
 
+        - name: Slackware-openssl-gcc
+          configure: --with-openssl
+          # Docker Hub image that `container-job` executes in
+          container: 'andy5995/slackware-build-essential:15.0'
+
     steps:
-    - run: |
+    - if: ${{ matrix.build.container == null }}
+      run: |
         sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 libpsl-dev libbrotli-dev libzstd-dev ${{ matrix.build.install_packages }}
         sudo python3 -m pip install impacket
@@ -259,26 +266,3 @@ jobs:
       name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
-
-  slackware-15_0:
-    # Containers must run in Linux based operating systems
-    runs-on: ubuntu-latest
-    # Docker Hub image that `container-job` executes in
-    container: andy5995/slackware-build-essential:15.0
-    steps:
-    - uses: actions/checkout@v3
-
-    - run: autoreconf -fi
-      name: 'autoreconf'
-
-    - run: ./configure --enable-warnings --enable-werror --with-openssl
-      name: 'configure'
-
-    - run: make V=1 -j$(expr $(nproc) - 1)
-      name: 'make'
-
-    - run: make V=1 examples -j$(expr $(nproc) - 1)
-      name: 'make examples'
-
-    - run: make V=1 -C tests -j$(expr $(nproc) - 1)
-      name: 'make tests'
