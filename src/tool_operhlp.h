@@ -37,4 +37,6 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename);
 
 CURLcode get_url_file_name(char **filename, const char *url);
 
+CURLcode urlerr_cvt(CURLUcode ucode);
+
 #endif /* HEADER_CURL_TOOL_OPERHLP_H */

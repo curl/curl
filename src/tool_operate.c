@@ -1209,21 +1209,26 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           CURLU *uh = curl_url();
           if(uh) {
             char *updated;
-            if(curl_url_set(uh, CURLUPART_URL, per->this_url,
-                            CURLU_GUESS_SCHEME)) {
-              result = CURLE_FAILED_INIT;
+            CURLUcode uerr;
+            uerr = curl_url_set(uh, CURLUPART_URL, per->this_url,
+                            CURLU_GUESS_SCHEME);
+            if(uerr) {
+              result = urlerr_cvt(uerr);
               errorf(global, "(%d) Could not parse the URL, "
                      "failed to set query\n", result);
               config->synthetic_error = TRUE;
             }
-            else if(curl_url_set(uh, CURLUPART_QUERY, q, CURLU_APPENDQUERY) ||
-                    curl_url_get(uh, CURLUPART_URL, &updated,
-                                 CURLU_GUESS_SCHEME)) {
-              result = CURLE_OUT_OF_MEMORY;
-            }
             else {
-              Curl_safefree(per->this_url); /* free previous URL */
-              per->this_url = updated; /* use our new URL instead! */
+              uerr = curl_url_set(uh, CURLUPART_QUERY, q, CURLU_APPENDQUERY);
+              if(!uerr)
+                uerr = curl_url_get(uh, CURLUPART_URL, &updated,
+                                   CURLU_GUESS_SCHEME);
+              if(uerr)
+                result = urlerr_cvt(uerr);
+              else {
+                Curl_safefree(per->this_url); /* free previous URL */
+                per->this_url = updated; /* use our new URL instead! */
+              }
             }
             curl_url_cleanup(uh);
             if(result)
