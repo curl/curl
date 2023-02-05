@@ -57,10 +57,6 @@ Files: packages/OS400/README.OS400
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-Files: packages/README
-Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
-License: curl
-
 Files: packages/vms/build_vms.com
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl

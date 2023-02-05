@@ -23,7 +23,7 @@
 ###########################################################################
 SUBDIRS = vms
 
-EXTRA_DIST = README \
+EXTRA_DIST = README.md \
   OS400/README.OS400 \
   OS400/ccsidcurl.c \
   OS400/ccsidcurl.h \
