@@ -1814,7 +1814,10 @@ static int ossl_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifdef MSG_PEEK
   char buf;
   ssize_t nread;
-  nread = recv((RECV_TYPE_ARG1)Curl_conn_cf_get_socket(cf, data),
+  curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+  if(sock == CURL_SOCKET_BAD)
+    return 0; /* no socket, consider closed */
+  nread = recv((RECV_TYPE_ARG1)sock,
                (RECV_TYPE_ARG2)&buf, (RECV_TYPE_ARG3)1,
                (RECV_TYPE_ARG4)MSG_PEEK);
   if(nread == 0)
