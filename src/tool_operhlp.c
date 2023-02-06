@@ -209,14 +209,17 @@ CURLcode get_url_file_name(char **filename, const char *url)
         return CURLE_OUT_OF_MEMORY;
 
 #if defined(MSDOS) || defined(WIN32)
-    {
-      char *sanitized;
-      SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
-      Curl_safefree(*filename);
-      if(sc)
-        return CURLE_URL_MALFORMAT;
-      *filename = sanitized;
-    }
+      {
+        char *sanitized;
+        SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
+        Curl_safefree(*filename);
+        if(sc) {
+          if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+            return CURLE_OUT_OF_MEMORY;
+          return CURLE_URL_MALFORMAT;
+        }
+        *filename = sanitized;
+      }
 #endif /* MSDOS || WIN32 */
 
       /* in case we built debug enabled, we allow an environment variable
