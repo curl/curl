@@ -36,8 +36,7 @@ EXTRA_DIST = README.md \
   OS400/make-tests.sh \
   OS400/makefile.sh \
   OS400/os400sys.c \
-  OS400/os400sys.h \
-  Android/Android.mk
+  OS400/os400sys.h
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
