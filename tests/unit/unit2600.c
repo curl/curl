@@ -271,7 +271,8 @@ static void test_connect(struct test_case *tc)
   fail_unless(list, "error allocating resolve list entry");
   curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
   curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT_MS, tc->connect_timeout_ms);
-  curl_easy_setopt(easy, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, tc->he_timeout_ms);
+  curl_easy_setopt(easy, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
+                   (long)tc->he_timeout_ms);
 
   curl_easy_setopt(easy, CURLOPT_URL, tc->url);
   memset(&tr, 0, sizeof(tr));
