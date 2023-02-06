@@ -53,6 +53,8 @@ should be set to zero.
 If \fBCURLWS_RAW_MODE\fP is enabled in \fICURLOPT_WS_OPTIONS(3)\fP, the
 \fBflags\fP argument should be set to 0.
 
+To send a message consisting of multiple frames, set the \fICURLWS_CONT\fP bit
+in all frames except the final one.
 .SH FLAGS
 .IP CURLWS_TEXT
 The buffer contains text data. Note that this makes a difference to WebSocket
