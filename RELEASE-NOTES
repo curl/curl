@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2802
+ Contributors:                 2804
 
 This release includes the following changes:
 
@@ -28,9 +28,11 @@ This release includes the following bugfixes:
  o cmake: remove deprecated symbols check [96]
  o cmake: set SOVERSION also for macOS [68]
  o cmake: use list APPEND syntax for CMAKE_REQUIRED_DEFINITIONS [94]
+ o CODEOWNERS: remove the peeps mentioned as CI owners [128]
  o connect: fix access of pointer before NULL check [83]
  o connect: fix build when not ENABLE_IPV6 [88]
  o connect: fix strategy testing for attempts, timeouts and happy-eyeball [110]
+ o connections: introduce http/3 happy eyeballs [127]
  o cookies: fp is always not NULL [104]
  o copyright.pl: cease doing year verifications [74]
  o copyright: update all copyright lines and remove year ranges [35]
@@ -43,16 +45,21 @@ This release includes the following bugfixes:
  o curl_version_info.3: fix typo [100]
  o CURLOPT_HEADERDATA.3: warn DLL users must set write function [45]
  o CURLOPT_READFUNCTION.3: the callback 'size' arg is always 1 [73]
+ o CURLOPT_WRITEFUNCTION.3: fix memory leak in example [122]
  o dict: URL decode the entire path always [120]
  o docs/DEPRECATE.md: deprecate gskit [36]
  o docs: add link to GitHub Discussions [49]
  o docs: mention indirect effects of --insecure [19]
  o docs: POSTFIELDSIZE must be set to -1 with read function [97]
+ o doh: ifdef IPv6 code [123]
  o easyoptions: fix header printing in generation script [84]
  o escape: hex decode with a lookup-table [107]
  o escape: use table lookup when adding %-codes to output [105]
  o examples: remove the curlgtk.c example [48]
+ o fopen: remove unnecessary assignment [111]
  o ftpserver: lower the normal DATA connect timeout to speed up torture tests [27]
+ o GHA/macos.yml: bump to gcc-12 [106]
+ o GHA/macos: use Xcode_14.0.1 for cmake builds [132]
  o GHA: add job on Slackware 15.0 [58]
  o GHA: move the quiche job here from zuul [75]
  o GHA: use designated ngtcp2 and its dependencies versions [77]
@@ -64,7 +71,9 @@ This release includes the following bugfixes:
  o HTTP3: mention what needs to be in place to remove EXPERIMENTAL label [31]
  o http: add additional condition for including stdint.h [54]
  o http: decode transfer encoding first [51]
+ o http: fix "part of conditional expression is always false" [125]
  o http: remove the trace message "Mark bundle... multiuse" [6]
+ o http_aws_sigv4: remove typecasts from HMAC_SHA256 macro [121]
  o http_proxy: do not assign data->req.p.http use local copy [59]
  o INSTALL: document how to use multiple TLS backends [103]
  o lib670: make test.h the first include [56]
@@ -72,6 +81,7 @@ This release includes the following bugfixes:
  o lib: fix typos [99]
  o lib: fix typos in comments which repeat a word [67]
  o libssh2: try sha2 algos for hostkey methods [2]
+ o libtest: add a sleep macro for Windows [115]
  o Linux CI: update some dependecies to latest tag [44]
  o Makefile.mk: fix wolfssl and mbedtls default paths [21]
  o md4: fix build with GnuTLS + OpenSSL v1 [12]
@@ -92,6 +102,7 @@ This release includes the following bugfixes:
  o openssl: only use CA_BLOB if verifying peer [112]
  o openssl: remove attached easy handles from SSL instances [29]
  o os400: fixes to make-lib.sh and initscript.sh [71]
+ o packages: remove Android, update README [108]
  o release-notes.pl: check fixes/closes lines better
  o Revert "x509asn1: avoid freeing unallocated pointers" [37]
  o runtest.pl: add expected fourth return value [40]
@@ -111,12 +122,16 @@ This release includes the following bugfixes:
  o tests-httpd: basic infra to run curl against an apache httpd [72]
  o tests: add 3 new HTTP/2 test cases, plus https: support for nghttpx [9]
  o tests: avoid use of sha1 in certificates [4]
+ o tls: fixes for wolfssl + openssl combo builds [133]
  o tool_getparam: fix hiding of command line secrets [85]
  o tool_operate: fix `CURLOPT_SOCKS5_GSSAPI_NEC` type [1]
  o tool_operate: fix headerfile writing [64]
  o tool_operate: repair --rate [119]
  o transfer: break the read loop when RECV is cleared [22]
  o typecheck: accept expressions for option/info parameters [3]
+ o urlapi: avoid Curl_dyn_addf() for hex outputs [130]
+ o urlapi: skip path checks if path is just "/" [131]
+ o urlapi: skip the extra dedotdot alloc if no dot in path [126]
  o urldata: cease storing TLS auth type [55]
  o urldata: make 'ftp_create_missing_dirs' depend on FTP || SFTP [13]
  o urldata: make set.http200aliases conditional on HTTP being present [11]
@@ -127,6 +142,7 @@ This release includes the following bugfixes:
  o vtls: use ALPN HTTP/1.0 when HTTP/1.0 is used
  o winbuild: document that arm64 is supported [92]
  o workflows/linux.yml: merge 3 common packages [18]
+ o write-out.d: add 'since version' to %{header_json} documentation [129]
  o write-out.d: clarify Windows % symbol escaping [86]
  o writeout: add %{certs} and %{num_certs} [33]
  o ws: fix autoping handling [70]
@@ -152,20 +168,20 @@ advice from friends like these:
 
   Alexey Savchuk, Andrei Rybak, Andy Alt, Brian Green, Cameron Blomquist,
   Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, dekerser on github,
-  Divy Le Ray, Esdras de Morais da Silva, Fujii Hironori, Hannah Schierling,
-  Harry Sintonen, Hide Ishikawa, highmtworks on github, Jakob Hirsch,
-  John Bampton, John Sherrill, Jon Rumsey, Josh Brobst, Kvarec Lezki,
-  Marc Aldorasi, Marcel Raad, Mark Roszko, Martin Waleczek, Michael Osipov,
-  Muhammad Hussein Ammari, Nick Banks, nick-telia on github,
-  norbertmm on github, odek86 on github, Patrick Monnerat, Paul Groke,
-  Paul Howarth, Peter Wu, Philip Heiduck, Radek Brich, Radu Hociung,
-  RanBarLavie on github, Ray Satiro, Ryan Schmidt, Sébastien Helleu,
-  Sergey Bronnikov, Sergio-IME on github, sergio-nsk on github,
-  SerusDev on github, Stanley Wucw, Stefan Eissing, Stefan Talpalaru,
-  Stephan Guilloux, Tatsuhiro Tsujikawa, Thomas1664 on github, Thomas Klausner,
-  Timmy Schierling, Viktor Szakats, violetlige on github, William Tang,
-  Yurii Rashkovskii
-  (59 contributors)
+  Divy Le Ray, Esdras de Morais da Silva, Fujii Hironori, Gisle Vanem,
+  Hannah Schierling, Harry Sintonen, Hide Ishikawa, highmtworks on github,
+  Jakob Hirsch, John Bampton, John Porter, John Sherrill, Jon Rumsey,
+  Josh Brobst, Kvarec Lezki, Marc Aldorasi, Marcel Raad, Mark Roszko,
+  Martin D'Aloia, Martin Waleczek, Michael Osipov, Muhammad Hussein Ammari,
+  Nick Banks, nick-telia on github, norbertmm on github, odek86 on github,
+  Patrick Monnerat, Paul Groke, Paul Howarth, Peter Wu, Philip Heiduck,
+  Radek Brich, Radu Hociung, RanBarLavie on github, Ray Satiro, Ryan Schmidt,
+  Sébastien Helleu, Sergey Bronnikov, Sergio-IME on github,
+  sergio-nsk on github, SerusDev on github, Stanley Wucw, Stefan Eissing,
+  Stefan Talpalaru, Stephan Guilloux, Tatsuhiro Tsujikawa,
+  Thomas1664 on github, Thomas Klausner, Timmy Schierling, Viktor Szakats,
+  violetlige on github, William Tang, Yurii Rashkovskii
+  (62 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -274,14 +290,30 @@ References to bug reports and discussions on issues:
  [103] = https://curl.se/bug/?i=10321
  [104] = https://curl.se/bug/?i=10383
  [105] = https://curl.se/bug/?i=10377
+ [106] = https://curl.se/bug/?i=10415
  [107] = https://curl.se/bug/?i=10376
+ [108] = https://curl.se/bug/?i=10416
  [109] = https://curl.se/bug/?i=10317
  [110] = https://curl.se/bug/?i=10312
+ [111] = https://curl.se/bug/?i=10398
  [112] = https://curl.se/mail/lib-2023-01/0070.html
  [113] = https://curl.se/bug/?i=10373
  [114] = https://curl.se/bug/?i=10368
+ [115] = https://curl.se/bug/?i=10295
  [116] = https://curl.se/bug/?i=10366
  [117] = https://curl.se/bug/?i=10347
  [118] = https://curl.se/bug/?i=10360
  [119] = https://curl.se/bug/?i=10357
  [120] = https://curl.se/bug/?i=10298
+ [121] = https://curl.se/bug/?i=10400
+ [122] = https://curl.se/bug/?i=10390
+ [123] = https://curl.se/bug/?i=10397
+ [125] = https://curl.se/bug/?i=10399
+ [126] = https://curl.se/bug/?i=10403
+ [127] = https://curl.se/bug/?i=10349
+ [128] = https://curl.se/bug/?i=10386
+ [129] = https://curl.se/bug/?i=10395
+ [130] = https://curl.se/bug/?i=10384
+ [131] = https://curl.se/bug/?i=10385
+ [132] = https://curl.se/bug/?i=10356
+ [133] = https://curl.se/bug/?i=10322
