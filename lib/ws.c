@@ -561,17 +561,27 @@ static size_t ws_packethead(struct Curl_easy *data,
   }
 
   if(!(flags & CURLWS_CONT)) {
-    /* if not marked as continuing, assume this is the final fragment */
-    firstbyte |= WSBIT_FIN | opcode;
+    if(!ws->ws.contfragment)
+      /* not marked as continuing, this is the final fragment */
+      firstbyte |= WSBIT_FIN | opcode;
+    else
+      /* marked as continuing, this is the final fragment; set CONT
+         opcode and FIN bit */
+      firstbyte |= WSBIT_FIN | WSBIT_OPCODE_CONT;
+
     ws->ws.contfragment = FALSE;
+    infof(data, "WS: set FIN");
   }
   else if(ws->ws.contfragment) {
     /* the previous fragment was not a final one and this isn't either, keep a
        CONT opcode and no FIN bit */
     firstbyte |= WSBIT_OPCODE_CONT;
+    infof(data, "WS: keep CONT, no FIN");
   }
   else {
+    firstbyte = opcode;
     ws->ws.contfragment = TRUE;
+    infof(data, "WS: set CONT, no FIN");
   }
   out[0] = firstbyte;
   if(len > 65535) {
