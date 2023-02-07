@@ -1954,7 +1954,7 @@ CURLcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
   memset(buf, 0, sizeof(*buf));
   for(i = 0; spec && i < spec->count; ++i) {
     len = strlen(spec->entries[i]);
-    if(len > 255)
+    if(len >= ALPN_NAME_MAX)
       return CURLE_FAILED_INIT;
     blen = (unsigned  char)len;
     if(off + blen + 1 >= (int)sizeof(buf->data))
@@ -1976,7 +1976,7 @@ CURLcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
   memset(buf, 0, sizeof(*buf));
   for(i = 0; spec && i < spec->count; ++i) {
     len = strlen(spec->entries[i]);
-    if(len > 255)
+    if(len >= ALPN_NAME_MAX)
       return CURLE_FAILED_INIT;
     if(off + len + 2 >= (int)sizeof(buf->data))
       return CURLE_FAILED_INIT;
