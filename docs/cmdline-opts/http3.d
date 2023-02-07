@@ -14,7 +14,7 @@ Multi: mutex
 Experimental: yes
 ---
 Tells curl to try HTTP/3 to the host in the URL, but fallback to earlier
-HTTP versions if the HTTP/3 connection establishement fails. HTTP/3 is only
+HTTP versions if the HTTP/3 connection establishment fails. HTTP/3 is only
 available for HTTPS and not for HTTP URLs.
 
 This option allows a user to avoid using the Alt-Svc method of upgrading to
@@ -24,4 +24,4 @@ When asked to use HTTP/3, curl will issue a separate attempt to use older HTTP
 versions with a slight delay, so if the HTTP/3 transfer fails or is very slow,
 curl will still try to proceed with an older HTTP version.
 
-Use --http3-only for similar fuctionality *without* a fallback.
+Use --http3-only for similar functionality *without* a fallback.

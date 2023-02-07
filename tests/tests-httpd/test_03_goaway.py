@@ -52,7 +52,7 @@ class TestGoAway:
         self.r = None
         def long_run():
             curl = CurlClient(env=env)
-            #  send 10 chunks of 1024 bytest in a response body with 100ms delay inbetween
+            #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
                    f'/curltest/tweak?id=[0-{count - 1}]'\
                    '&chunks=10&chunk_size=1024&chunk_delay=100ms'
@@ -85,7 +85,7 @@ class TestGoAway:
         self.r = None
         def long_run():
             curl = CurlClient(env=env)
-            #  send 10 chunks of 1024 bytest in a response body with 100ms delay inbetween
+            #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
                    f'/curltest/tweak?id=[0-{count - 1}]'\
                    '&chunks=10&chunk_size=1024&chunk_delay=100ms'

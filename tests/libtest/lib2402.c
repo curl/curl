@@ -78,7 +78,7 @@ int test(char *URL)
     /* no peer verify */
     easy_setopt(curl[i], CURLOPT_SSL_VERIFYPEER, 0L);
     easy_setopt(curl[i], CURLOPT_SSL_VERIFYHOST, 0L);
-    /* wait for first connection establised to see if we can share it */
+    /* wait for first connection established to see if we can share it */
     easy_setopt(curl[i], CURLOPT_PIPEWAIT, 1L);
     /* go verbose */
     easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);

@@ -22,4 +22,4 @@ HTTP/3 when you know that the target speaks HTTP/3 on the given host and port.
 
 This option will make curl fail if a QUIC connection cannot be established, it
 will not attempt any other HTTP version on its own. Use --http3 for similar
-fuctionality *with* a fallback.
+functionality *with* a fallback.

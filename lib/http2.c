@@ -1793,7 +1793,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     while(stream->memlen == 0          /* have no data for this stream */
           && !ctx->pause_stream_id     /* we are not paused either */
-          && ctx->inbuflen == 0) {     /* and out inpput buffer is emtpy */
+          && ctx->inbuflen == 0) {     /* and out input buffer is empty */
       /* Receive data from the "lower" filters */
       nread = Curl_conn_cf_recv(cf->next, data, ctx->inbuf, H2_BUFSIZE, err);
       if(nread < 0) {
