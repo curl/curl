@@ -748,6 +748,18 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
     if(CURLE_AGAIN == result)
       BIO_set_retry_read(bio);
   }
+
+  /* Before returning server replies to the SSL instance, we need
+   * to have setup the x509 store or verification will fail. */
+  if(!connssl->backend->x509_store_setup) {
+    result = Curl_ssl_setup_x509_store(cf, data, connssl->backend->ctx);
+    if(result) {
+      connssl->backend->io_result = result;
+      return -1;
+    }
+    connssl->backend->x509_store_setup = TRUE;
+  }
+
   return (int)nread;
 }
 
