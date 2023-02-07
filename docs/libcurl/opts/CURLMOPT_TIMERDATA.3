@@ -35,7 +35,7 @@ A data \fBpointer\fP to pass to the timer callback set with the
 \fICURLMOPT_TIMERFUNCTION(3)\fP option.
 
 This pointer will not be touched by libcurl but will only be passed in to the
-timer callbacks's \fBuserp\fP argument.
+timer callbacks's \fBclientp\fP argument.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -53,9 +53,9 @@ static gboolean timeout_cb(gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
-static int timerfunc(CURLM *multi, long timeout_ms, void *userp)
+static int timerfunc(CURLM *multi, long timeout_ms, void *clientp)
 {
-  guint *id = userp;
+  guint *id = clientp;
 
   if(id)
     g_source_remove(*id);
