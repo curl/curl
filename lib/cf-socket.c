@@ -258,7 +258,7 @@ static CURLcode socket_open(struct Curl_easy *data,
        * we get sockfd == 0 and if called again, we get a valid one > 0.
        * If we close the 0, we sometimes get failures in multi poll, as
        * 0 seems also be the fd for the sockpair used for WAKEUP polling.
-       * Very strange. Maybe this code shouldbe ifdef'ed for macOS, but
+       * Very strange. Maybe this code should be ifdef'ed for macOS, but
        * on "real" OS, fd 0 is stdin and we never see that. So...
        */
       fake_sclose(*sockfd);

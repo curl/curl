@@ -227,7 +227,7 @@ CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
  * Create a new filter instance, unattached to the filter chain.
  * Use Curl_conn_cf_add() to add it to the chain.
  * @param pcf  on success holds the created instance
- * @parm cft   the filter type
+ * @param cft   the filter type
  * @param ctx  the type specific context to use
  */
 CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
