@@ -1208,7 +1208,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           char *q = httpgetfields ? httpgetfields : config->query;
           CURLU *uh = curl_url();
           if(uh) {
-            char *updated;
             CURLUcode uerr;
             uerr = curl_url_set(uh, CURLUPART_URL, per->this_url,
                             CURLU_GUESS_SCHEME);
@@ -1219,6 +1218,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               config->synthetic_error = TRUE;
             }
             else {
+              char *updated = NULL;
               uerr = curl_url_set(uh, CURLUPART_QUERY, q, CURLU_APPENDQUERY);
               if(!uerr)
                 uerr = curl_url_get(uh, CURLUPART_URL, &updated,
