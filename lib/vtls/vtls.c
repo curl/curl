@@ -2028,7 +2028,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       /* return CURLE_NOT_BUILT_IN; */
       goto out;
     }
-    infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, proto_len, proto);
+    infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, (int)proto_len, proto);
   }
   else {
     cf->conn->alpn = CURL_HTTP_VERSION_NONE;
