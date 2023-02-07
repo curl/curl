@@ -36,7 +36,7 @@ struct curl_hstsentry {
   char expire[18]; /* YYYYMMDD HH:MM:SS [null-terminated] */
 };
 
-CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *sts, void *userp);
+CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *sts, void *clientp);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSREADFUNCTION, hstsread);
 .fi
@@ -46,8 +46,8 @@ Pass a pointer to your callback function, as the prototype shows above.
 This callback function gets called by libcurl repeatedly when it populates the
 in-memory HSTS cache.
 
-Set the \fIuserp\fP argument with the \fICURLOPT_HSTSREADDATA(3)\fP option or
-it will be NULL.
+Set the \fIclientp\fP argument with the \fICURLOPT_HSTSREADDATA(3)\fP option
+or it will be NULL.
 
 When this callback is invoked, the \fIsts\fP pointer points to a populated
 struct: Copy the host name to \fIname\fP (no longer than \fInamelen\fP

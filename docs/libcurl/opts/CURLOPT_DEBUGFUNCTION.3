@@ -44,7 +44,7 @@ int debug_callback(CURL *handle,
                    curl_infotype type,
                    char *data,
                    size_t size,
-                   void *userptr);
+                   void *clientp);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DEBUGFUNCTION,
                           debug_callback);
@@ -59,7 +59,7 @@ return 0. The \fIdata\fP pointed to by the char * passed to this function WILL
 NOT be null-terminated, but will be exactly of the \fIsize\fP as told by the
 \fIsize\fP argument.
 
-The \fIuserptr\fP argument is the pointer set with \fICURLOPT_DEBUGDATA(3)\fP.
+The \fIclientp\fP argument is the pointer set with \fICURLOPT_DEBUGDATA(3)\fP.
 
 Available \fBcurl_infotype\fP values:
 .IP CURLINFO_TEXT
@@ -120,11 +120,11 @@ void dump(const char *text,
 static
 int my_trace(CURL *handle, curl_infotype type,
              char *data, size_t size,
-             void *userp)
+             void *clientp)
 {
   const char *text;
   (void)handle; /* prevent compiler warning */
-  (void)userp;
+  (void)clientp;
 
   switch (type) {
   case CURLINFO_TEXT:

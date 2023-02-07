@@ -31,7 +31,7 @@ CURLMOPT_TIMERFUNCTION \- callback to receive timeout values
 
 int timer_callback(CURLM *multi,    /* multi handle */
                    long timeout_ms, /* timeout in number of ms */
-                   void *userp);    /* private callback pointer */
+                   void *clientp);    /* private callback pointer */
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_TIMERFUNCTION, timer_callback);
 .SH DESCRIPTION
@@ -52,7 +52,7 @@ the timer. All other values are valid expire times in number of milliseconds.
 The \fBtimer_callback\fP will only be called when the timeout expire time is
 changed.
 
-The \fBuserp\fP pointer is set with \fICURLMOPT_TIMERDATA(3)\fP.
+The \fBclientp\fP pointer is set with \fICURLMOPT_TIMERDATA(3)\fP.
 
 The timer callback should return 0 on success, and -1 on error. If this
 callback returns error, \fBall\fP transfers currently in progress in this
@@ -82,9 +82,9 @@ static gboolean timeout_cb(gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
-static int timerfunc(CURLM *multi, long timeout_ms, void *userp)
+static int timerfunc(CURLM *multi, long timeout_ms, void *clientp)
 {
-  guint *id = userp;
+  guint *id = clientp;
 
   if(id)
     g_source_remove(*id);

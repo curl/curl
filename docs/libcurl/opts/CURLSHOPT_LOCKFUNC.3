@@ -29,7 +29,7 @@ CURLSHOPT_LOCKFUNC - mutex lock callback
 #include <curl/curl.h>
 
 void lockcb(CURL *handle, curl_lock_data data, curl_lock_access access,
-            void *userptr);
+            void *clientp);
 
 CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_LOCKFUNC, lockcb);
 .fi
@@ -49,7 +49,7 @@ sure that the callback uses a different lock for each kind of data.
 
 \fIaccess\fP defines what access type libcurl wants, shared or single.
 
-\fIuserptr\fP is the private pointer you set with \fICURLSHOPT_USERDATA\fP.
+\fIclientp\fP is the private pointer you set with \fICURLSHOPT_USERDATA\fP.
 This pointer is not used by libcurl itself.
 .SH PROTOCOLS
 All

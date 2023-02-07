@@ -41,9 +41,9 @@ If you do not set this, NULL is passed to the callback.
 HTTP, FTP, SFTP
 .SH EXAMPLE
 .nf
-static int seek_cb(void *userp, curl_off_t offset, int origin)
+static int seek_cb(void *clientp, curl_off_t offset, int origin)
 {
-  struct data *d = (struct data *)userp;
+  struct data *d = (struct data *)clientp;
   lseek(d->our_fd, offset, origin);
   return CURL_SEEKFUNC_OK;
 }

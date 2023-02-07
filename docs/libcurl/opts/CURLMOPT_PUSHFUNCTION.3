@@ -36,7 +36,7 @@ int curl_push_callback(CURL *parent,
                        CURL *easy,
                        size_t num_headers,
                        struct curl_pushheaders *headers,
-                       void *userp);
+                       void *clientp);
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PUSHFUNCTION,
                             curl_push_callback func);
@@ -63,7 +63,7 @@ functions described below. This only accesses and provides the PUSH_PROMISE
 headers, the normal response headers will be provided in the header callback
 as usual.
 
-\fIuserp\fP is the pointer set with \fICURLMOPT_PUSHDATA(3)\fP
+\fIclientp\fP is the pointer set with \fICURLMOPT_PUSHDATA(3)\fP
 
 If the callback returns CURL_PUSH_OK, the 'easy' handle will be added to the
 multi handle, the callback must not do that by itself.
@@ -104,10 +104,10 @@ int push_callback(CURL *parent,
                   CURL *easy,
                   size_t num_headers,
                   struct curl_pushheaders *headers,
-                  void *userp)
+                  void *clientp)
 {
   char *headp;
-  int *transfers = (int *)userp;
+  int *transfers = (int *)clientp;
   FILE *out;
   headp = curl_pushheader_byname(headers, ":path");
   if(headp && !strncmp(headp, "/push-", 6)) {

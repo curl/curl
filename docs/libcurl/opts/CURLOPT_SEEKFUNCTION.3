@@ -35,7 +35,7 @@ CURLOPT_SEEKFUNCTION \- user callback for seeking in input stream
 #define CURL_SEEKFUNC_CANTSEEK 2 /* tell libcurl seeking cannot be done, so
                                     libcurl might try other means instead */
 
-int seek_callback(void *userp, curl_off_t offset, int origin);
+int seek_callback(void *clientp, curl_off_t offset, int origin);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SEEKFUNCTION, seek_callback);
 .SH DESCRIPTION
@@ -53,7 +53,7 @@ connection. The function shall work like fseek(3) or lseek(3) and it gets
 SEEK_SET, SEEK_CUR or SEEK_END as argument for \fIorigin\fP, although libcurl
 currently only passes SEEK_SET.
 
-\fIuserp\fP is the pointer you set with \fICURLOPT_SEEKDATA(3)\fP.
+\fIclientp\fP is the pointer you set with \fICURLOPT_SEEKDATA(3)\fP.
 
 The callback function must return \fICURL_SEEKFUNC_OK\fP on success,
 \fICURL_SEEKFUNC_FAIL\fP to cause the upload operation to fail or
@@ -70,9 +70,9 @@ By default, this is NULL and unused.
 HTTP, FTP, SFTP
 .SH EXAMPLE
 .nf
-static int seek_cb(void *userp, curl_off_t offset, int origin)
+static int seek_cb(void *clientp, curl_off_t offset, int origin)
 {
-  struct data *d = (struct data *)userp;
+  struct data *d = (struct data *)clientp;
   lseek(our_fd, offset, origin);
   return CURL_SEEKFUNC_OK;
 }

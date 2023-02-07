@@ -46,10 +46,10 @@ int push_callback(CURL *parent,
                   CURL *easy,
                   size_t num_headers,
                   struct curl_pushheaders *headers,
-                  void *userp)
+                  void *clientp)
 {
   char *headp;
-  int *transfers = (int *)userp;
+  int *transfers = (int *)clientp;
   FILE *out;
   headp = curl_pushheader_byname(headers, ":path");
   if(headp && !strncmp(headp, "/push-", 6)) {

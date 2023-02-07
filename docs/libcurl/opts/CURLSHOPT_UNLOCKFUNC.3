@@ -28,7 +28,7 @@ CURLSHOPT_UNLOCKFUNC - mutex unlock callback
 .nf
 #include <curl/curl.h>
 
-void unlockcb(CURL *handle, curl_lock_data data, void *userptr);
+void unlockcb(CURL *handle, curl_lock_data data, void *clientp);
 
 CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_UNLOCKFUNC, unlockcb);
 .fi
@@ -45,7 +45,7 @@ is released.
 The \fIdata\fP argument tells what kind of data libcurl wants to unlock. Make
 sure that the callback uses a different lock for each kind of data.
 
-\fIuserptr\fP is the private pointer you set with \fICURLSHOPT_USERDATA\fP.
+\fIclientp\fP is the private pointer you set with \fICURLSHOPT_USERDATA\fP.
 This pointer is not used by libcurl itself.
 .SH PROTOCOLS
 All

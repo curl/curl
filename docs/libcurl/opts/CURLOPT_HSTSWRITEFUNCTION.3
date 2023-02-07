@@ -42,7 +42,7 @@ struct curl_index {
 };
 
 CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *sts,
-                      struct curl_index *count, void *userp);
+                      struct curl_index *count, void *clientp);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
 .fi
@@ -53,8 +53,8 @@ This callback function gets called by libcurl repeatedly to allow the
 application to store the in-memory HSTS cache when libcurl is about to discard
 it.
 
-Set the \fIuserp\fP argument with the \fICURLOPT_HSTSWRITEDATA(3)\fP option or
-it will be NULL.
+Set the \fIclientp\fP argument with the \fICURLOPT_HSTSWRITEDATA(3)\fP option
+or it will be NULL.
 
 When the callback is invoked, the \fIsts\fP pointer points to a populated
 struct: Read the host name to 'name' (it is \fInamelen\fP bytes long and null
