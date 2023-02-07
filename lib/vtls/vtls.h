@@ -76,7 +76,7 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 #define ALPN_H3 "h3"
 
 /* conservative sizes on the ALPN entries and count we are handling,
- * we can increase these if we ever feel the need or have to accomodate
+ * we can increase these if we ever feel the need or have to accommodate
  * ALPN strings from the "outside". */
 #define ALPN_NAME_MAX     10
 #define ALPN_ENTRIES_MAX  3
