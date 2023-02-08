@@ -538,11 +538,12 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
 static void drained_transfer(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
-  struct cf_h2_ctx *ctx = cf->ctx;
-
-  DEBUGASSERT(ctx->drain_total >= data->state.drain);
-  ctx->drain_total -= data->state.drain;
-  data->state.drain = 0;
+  if(data->state.drain) {
+    struct cf_h2_ctx *ctx = cf->ctx;
+    DEBUGASSERT(ctx->drain_total > 0);
+    ctx->drain_total--;
+    data->state.drain = 0;
+  }
 }
 
 /*
@@ -551,11 +552,12 @@ static void drained_transfer(struct Curl_cfilter *cf,
 static void drain_this(struct Curl_cfilter *cf,
                        struct Curl_easy *data)
 {
-  struct cf_h2_ctx *ctx = cf->ctx;
-
-  data->state.drain++;
-  ctx->drain_total++;
-  DEBUGASSERT(ctx->drain_total >= data->state.drain);
+  if(!data->state.drain) {
+    struct cf_h2_ctx *ctx = cf->ctx;
+    data->state.drain = 1;
+    ctx->drain_total++;
+    DEBUGASSERT(ctx->drain_total > 0);
+  }
 }
 
 static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
@@ -1520,8 +1522,6 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
     }
   }
 
-  DEBUGASSERT(data->state.drain == 0);
-
   /* Reset to FALSE to prevent infinite loop in readwrite_data function. */
   stream->closed = FALSE;
   if(stream->error == NGHTTP2_REFUSED_STREAM) {
@@ -1861,8 +1861,9 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       drain_this(cf, data);
       Curl_expire(data, 0, EXPIRE_RUN_NOW);
     }
-    else
+    else {
       drained_transfer(cf, data);
+    }
 
     nread = retlen;
     goto out;

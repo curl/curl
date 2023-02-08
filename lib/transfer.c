@@ -1076,12 +1076,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     fd_write = CURL_SOCKET_BAD;
 
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-  if(data->state.drain) {
+  if(data->state.drain &&
+     (Curl_conn_is_http2(data, conn, FIRSTSOCKET) ||
+      Curl_conn_is_http3(data, conn, FIRSTSOCKET))) {
     select_res |= CURL_CSELECT_IN;
     DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data"));
+    if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
+      select_res |= CURL_CSELECT_OUT;
   }
-#endif
 
   if(!select_res) /* Call for select()/poll() only, if read/write/error
                      status is not known. */
