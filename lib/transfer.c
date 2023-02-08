@@ -1080,6 +1080,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if(data->state.drain) {
     select_res |= CURL_CSELECT_IN;
     DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data"));
+    if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
+      select_res |= CURL_CSELECT_OUT;
   }
 #endif
 
