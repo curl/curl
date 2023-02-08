@@ -106,6 +106,8 @@ struct cf_h2_ctx {
   size_t inbuflen; /* number of bytes filled in inbuf */
   size_t nread_inbuf; /* number of bytes read from in inbuf */
 
+  struct dynbuf outbuf;
+
   /* We need separate buffer for transmission and reception because we
      may call nghttp2_session_send() after the
      nghttp2_session_mem_recv() but mem buffer is still not full. In
@@ -129,6 +131,7 @@ static void cf_h2_ctx_clear(struct cf_h2_ctx *ctx)
     nghttp2_session_del(ctx->h2);
   }
   free(ctx->inbuf);
+  Curl_dyn_free(&ctx->outbuf);
   memset(ctx, 0, sizeof(*ctx));
   ctx->call_data = save;
 }
@@ -243,6 +246,8 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
   ctx->inbuf = malloc(H2_BUFSIZE);
   if(!ctx->inbuf)
       goto out;
+  /* we want to aggregate small frames, SETTINGS, PRIO, UPDATES */
+  Curl_dyn_init(&ctx->outbuf, 4*1024);
 
   rc = nghttp2_session_callbacks_new(&cbs);
   if(rc) {
@@ -337,8 +342,8 @@ out:
   return result;
 }
 
-static int h2_session_send(struct Curl_cfilter *cf,
-                           struct Curl_easy *data);
+static CURLcode  h2_session_send(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data);
 static int h2_process_pending_input(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     CURLcode *err);
@@ -443,6 +448,32 @@ void Curl_http2_ver(char *p, size_t len)
   (void)msnprintf(p, len, "nghttp2/%s", h2->version_str);
 }
 
+static CURLcode flush_output(struct Curl_cfilter *cf,
+                             struct Curl_easy *data)
+{
+  struct cf_h2_ctx *ctx = cf->ctx;
+  size_t buflen = Curl_dyn_len(&ctx->outbuf);
+  ssize_t written;
+  CURLcode result;
+
+  if(!buflen)
+    return CURLE_OK;
+
+  DEBUGF(LOG_CF(data, cf, "h2 conn flush %zu bytes", buflen));
+  written = Curl_conn_cf_send(cf->next, data, Curl_dyn_ptr(&ctx->outbuf),
+                              buflen, &result);
+  if(written < 0) {
+    return result;
+  }
+  if((size_t)written < buflen) {
+    Curl_dyn_tail(&ctx->outbuf, buflen - (size_t)written);
+  }
+  else {
+    Curl_dyn_reset(&ctx->outbuf);
+  }
+  return CURLE_OK;
+}
+
 /*
  * The implementation of nghttp2_send_callback type. Here we write |data| with
  * size |length| to the network and return the number of bytes actually
@@ -453,14 +484,37 @@ static ssize_t send_callback(nghttp2_session *h2,
                              void *userp)
 {
   struct Curl_cfilter *cf = userp;
+  struct cf_h2_ctx *ctx = cf->ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t written;
   CURLcode result = CURLE_OK;
+  size_t buflen = Curl_dyn_len(&ctx->outbuf);
 
   (void)h2;
   (void)flags;
   DEBUGASSERT(data);
 
+  if(blen < 1024 && (buflen + blen + 1 < ctx->outbuf.toobig)) {
+    result = Curl_dyn_addn(&ctx->outbuf, buf, blen);
+    if(result) {
+      failf(data, "Failed to add data to output buffer");
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
+    return blen;
+  }
+  if(buflen) {
+    /* not adding, flush buffer */
+    result = flush_output(cf, data);
+    if(result) {
+      if(result == CURLE_AGAIN) {
+        return NGHTTP2_ERR_WOULDBLOCK;
+      }
+      failf(data, "Failed sending HTTP2 data");
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
+  }
+
+  DEBUGF(LOG_CF(data, cf, "h2 conn send %zu bytes", blen));
   written = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
   if(result == CURLE_AGAIN) {
     return NGHTTP2_ERR_WOULDBLOCK;
@@ -1401,31 +1455,32 @@ static int h2_process_pending_input(struct Curl_cfilter *cf,
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   ssize_t nread;
-  char *inbuf;
   ssize_t rv;
 
   nread = ctx->inbuflen - ctx->nread_inbuf;
-  inbuf = ctx->inbuf + ctx->nread_inbuf;
+  if(nread) {
+    char *inbuf = ctx->inbuf + ctx->nread_inbuf;
 
-  rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)inbuf, nread);
-  if(rv < 0) {
-    failf(data,
-          "h2_process_pending_input: nghttp2_session_mem_recv() returned "
-          "%zd:%s", rv, nghttp2_strerror((int)rv));
-    *err = CURLE_RECV_ERROR;
-    return -1;
-  }
+    rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)inbuf, nread);
+    if(rv < 0) {
+      failf(data,
+            "h2_process_pending_input: nghttp2_session_mem_recv() returned "
+            "%zd:%s", rv, nghttp2_strerror((int)rv));
+      *err = CURLE_RECV_ERROR;
+      return -1;
+    }
 
-  if(nread == rv) {
-    DEBUGF(LOG_CF(data, cf, "all data in connection buffer processed"));
-    ctx->inbuflen = 0;
-    ctx->nread_inbuf = 0;
-  }
-  else {
-    ctx->nread_inbuf += rv;
-    DEBUGF(LOG_CF(data, cf, "h2_process_pending_input: %zu bytes left "
-                  "in connection buffer",
-                 ctx->inbuflen - ctx->nread_inbuf));
+    if(nread == rv) {
+      DEBUGF(LOG_CF(data, cf, "all data in connection buffer processed"));
+      ctx->inbuflen = 0;
+      ctx->nread_inbuf = 0;
+    }
+    else {
+      ctx->nread_inbuf += rv;
+      DEBUGF(LOG_CF(data, cf, "h2_process_pending_input: %zu bytes left "
+                    "in connection buffer",
+                   ctx->inbuflen - ctx->nread_inbuf));
+    }
   }
 
   rv = h2_session_send(cf, data);
@@ -1616,17 +1671,18 @@ static void h2_pri_spec(struct Curl_easy *data,
  * dependency settings and if so it submits a PRIORITY frame with the updated
  * info.
  */
-static int h2_session_send(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode h2_session_send(struct Curl_cfilter *cf,
+                                struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct HTTP *stream = data->req.p.http;
+  int rv = 0;
 
   if((sweight_wanted(data) != sweight_in_effect(data)) ||
      (data->set.priority.exclusive != data->state.priority.exclusive) ||
      (data->set.priority.parent != data->state.priority.parent) ) {
     /* send new weight and/or dependency */
     nghttp2_priority_spec pri_spec;
-    int rv;
 
     h2_pri_spec(data, &pri_spec);
     DEBUGF(LOG_CF(data, cf, "[h2sid=%u] Queuing PRIORITY",
@@ -1635,10 +1691,17 @@ static int h2_session_send(struct Curl_cfilter *cf, struct Curl_easy *data)
     rv = nghttp2_submit_priority(ctx->h2, NGHTTP2_FLAG_NONE,
                                  stream->stream_id, &pri_spec);
     if(rv)
-      return rv;
+      goto out;
   }
 
-  return nghttp2_session_send(ctx->h2);
+  rv = nghttp2_session_send(ctx->h2);
+out:
+  if(nghttp2_is_fatal(rv)) {
+    DEBUGF(LOG_CF(data, cf, "nghttp2_session_send error (%s)%d",
+                  nghttp2_strerror(rv), rv));
+    return CURLE_SEND_ERROR;
+  }
+  return flush_output(cf, data);
 }
 
 static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -1929,9 +1992,9 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       len = -1;
       goto out;
     }
-    rv = h2_session_send(cf, data);
-    if(nghttp2_is_fatal(rv)) {
-      *err = CURLE_SEND_ERROR;
+    result = h2_session_send(cf, data);
+    if(result) {
+      *err = result;
       len = -1;
       goto out;
     }
@@ -2040,12 +2103,9 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         stream_id, (void *)data);
   stream->stream_id = stream_id;
 
-  rv = h2_session_send(cf, data);
-  if(rv) {
-    DEBUGF(LOG_CF(data, cf, "send: nghttp2_session_send error (%s)%d",
-                  nghttp2_strerror(rv), rv));
-
-    *err = CURLE_SEND_ERROR;
+  result = h2_session_send(cf, data);
+  if(result) {
+    *err = result;
     len = -1;
     goto out;
   }
@@ -2181,6 +2241,8 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
   if(ctx && ctx->h2) {
     struct HTTP *stream = data->req.p.http;
     uint32_t window = !pause * HTTP2_HUGE_WINDOW_SIZE;
+    CURLcode result;
+
     int rv = nghttp2_session_set_local_window_size(ctx->h2,
                                                    NGHTTP2_FLAG_NONE,
                                                    stream->stream_id,
@@ -2192,9 +2254,9 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
     }
 
     /* make sure the window update gets sent */
-    rv = h2_session_send(cf, data);
-    if(rv)
-      return CURLE_SEND_ERROR;
+    result = h2_session_send(cf, data);
+    if(result)
+      return result;
 
     DEBUGF(infof(data, "Set HTTP/2 window size to %u for stream %u",
                  window, stream->stream_id));

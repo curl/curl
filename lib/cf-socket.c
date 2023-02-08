@@ -920,7 +920,6 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx->sock == CURL_SOCKET_BAD);
   ctx->started_at = Curl_now();
   result = socket_open(data, &ctx->addr, &ctx->sock);
-  DEBUGF(LOG_CF(data, cf, "socket_open() -> %d, fd=%d", result, ctx->sock));
   if(result)
     goto out;
 
@@ -1068,7 +1067,6 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
   CURLcode result = CURLE_COULDNT_CONNECT;
   int rc = 0;
 
-  DEBUGF(LOG_CF(data, cf, "connect"));
   (void)data;
   if(cf->connected) {
     *done = TRUE;
@@ -1086,7 +1084,6 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     if(result)
       goto out;
 
-    DEBUGF(LOG_CF(data, cf, "connect opened(%d)", (int)ctx->sock));
     /* Connect TCP socket */
     rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
     if(-1 == rc) {
@@ -1106,6 +1103,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
   rc = SOCKET_WRITABLE(ctx->sock, 0);
 
   if(rc == 0) { /* no connection yet */
+    DEBUGF(LOG_CF(data, cf, "not connected yet"));
     return CURLE_OK;
   }
   else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
@@ -1115,6 +1113,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
       set_local_ip(cf, data);
       *done = TRUE;
       cf->connected = TRUE;
+      DEBUGF(LOG_CF(data, cf, "connected"));
       return CURLE_OK;
     }
   }
