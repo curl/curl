@@ -3909,7 +3909,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 #ifdef USE_WEBSOCKETS
           else if(k->upgr101 == UPGR101_WS) {
             /* verify the response */
-            result = Curl_ws_accept(data);
+            result = Curl_ws_accept(data, k->str, *nread);
             if(result)
               return result;
             k->header = FALSE; /* no more header to parse! */
