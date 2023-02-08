@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2804
+ Contributors:                 2806
 
 This release includes the following changes:
 
@@ -20,7 +20,7 @@ This release includes the following bugfixes:
  o cf-socket: keep sockaddr local in the socket filters [69]
  o cfilters:Curl_conn_get_select_socks: use the first non-connected filter [24]
  o CI: add a workflow to automatically label pull requests [102]
- o CI: add pytest github workflow to CI test/tests-httpd on a HTTP/3 setup [109]
+ o CI: add pytest GHA to CI test/tests-httpd on a HTTP/3 setup [109]
  o cmake: bump requirement to 3.7 [23]
  o cmake: check for sendmsg [39]
  o cmake: delete redundant macro definition `SECURITY_WIN32` [91]
@@ -43,6 +43,7 @@ This release includes the following bugfixes:
  o curl_global_sslset.3: clarify the openssl situation [53]
  o curl_log: for failf/infof and debug logging implementations [87]
  o curl_version_info.3: fix typo [100]
+ o curl_ws_send.3: clarify how to send multi-frame messages
  o CURLOPT_HEADERDATA.3: warn DLL users must set write function [45]
  o CURLOPT_READFUNCTION.3: the callback 'size' arg is always 1 [73]
  o CURLOPT_WRITEFUNCTION.3: fix memory leak in example [122]
@@ -57,7 +58,7 @@ This release includes the following bugfixes:
  o escape: use table lookup when adding %-codes to output [105]
  o examples: remove the curlgtk.c example [48]
  o fopen: remove unnecessary assignment [111]
- o ftpserver: lower the normal DATA connect timeout to speed up torture tests [27]
+ o ftpserver: lower the DATA connect timeout to speed up torture tests [27]
  o GHA/macos.yml: bump to gcc-12 [106]
  o GHA/macos: use Xcode_14.0.1 for cmake builds [132]
  o GHA: add job on Slackware 15.0 [58]
@@ -84,8 +85,10 @@ This release includes the following bugfixes:
  o libtest: add a sleep macro for Windows [115]
  o Linux CI: update some dependecies to latest tag [44]
  o Makefile.mk: fix wolfssl and mbedtls default paths [21]
+ o man pages: call the custom user pointer 'clientp' consistently [135]
  o md4: fix build with GnuTLS + OpenSSL v1 [12]
  o misc: fix grammar and spelling [14]
+ o misc: fix spelling [134]
  o misc: reduce struct and struct field sizes [65]
  o msh3: add support for request payload [28]
  o msh3: update to v0.5 Release [17]
@@ -115,6 +118,7 @@ This release includes the following bugfixes:
  o sectransp: fix for incomplete read/writes [61]
  o SECURITY-PROCESS.md: document severity levels [20]
  o setopt: move the SHA256 opt within #ifdef libssh2 [42]
+ o setopt: use >, not >=, when checking if uarg is larger than uint-max [140]
  o socketpair: allow localhost MITM sniffers [30]
  o strdup: name it Curl_strdup [16]
  o system.h: assume OS400 is always built with ILEC compiler [95]
@@ -125,11 +129,15 @@ This release includes the following bugfixes:
  o tls: fixes for wolfssl + openssl combo builds [133]
  o tool_getparam: fix hiding of command line secrets [85]
  o tool_operate: fix `CURLOPT_SOCKS5_GSSAPI_NEC` type [1]
+ o tool_operate: fix error codes during DOS filename sanitize [138]
+ o tool_operate: fix error codes on bad URL & OOM [139]
  o tool_operate: fix headerfile writing [64]
  o tool_operate: repair --rate [119]
  o transfer: break the read loop when RECV is cleared [22]
  o typecheck: accept expressions for option/info parameters [3]
+ o url: fix part of conditional expression is always true [147]
  o urlapi: avoid Curl_dyn_addf() for hex outputs [130]
+ o urlapi: fix part of conditional expression is always true: qlen [146]
  o urlapi: skip path checks if path is just "/" [131]
  o urlapi: skip the extra dedotdot alloc if no dot in path [126]
  o urldata: cease storing TLS auth type [55]
@@ -141,11 +149,13 @@ This release includes the following bugfixes:
  o vtls: manage current easy handle in nested cfilter calls [90]
  o vtls: use ALPN HTTP/1.0 when HTTP/1.0 is used
  o winbuild: document that arm64 is supported [92]
+ o wolfssl: remove deprecated post-quantum algorithms [124]
  o workflows/linux.yml: merge 3 common packages [18]
  o write-out.d: add 'since version' to %{header_json} documentation [129]
  o write-out.d: clarify Windows % symbol escaping [86]
  o writeout: add %{certs} and %{num_certs} [33]
  o ws: fix autoping handling [70]
+ o ws: fix multiframe send handling [143]
  o ws: remove bad assert [117]
  o ws: unstick connect-only shutdown [116]
  o x509asn1: fix compile errors and warnings [47]
@@ -166,22 +176,23 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexey Savchuk, Andrei Rybak, Andy Alt, Brian Green, Cameron Blomquist,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, dekerser on github,
-  Divy Le Ray, Esdras de Morais da Silva, Fujii Hironori, Gisle Vanem,
-  Hannah Schierling, Harry Sintonen, Hide Ishikawa, highmtworks on github,
-  Jakob Hirsch, John Bampton, John Porter, John Sherrill, Jon Rumsey,
-  Josh Brobst, Kvarec Lezki, Marc Aldorasi, Marcel Raad, Mark Roszko,
-  Martin D'Aloia, Martin Waleczek, Michael Osipov, Muhammad Hussein Ammari,
-  Nick Banks, nick-telia on github, norbertmm on github, odek86 on github,
-  Patrick Monnerat, Paul Groke, Paul Howarth, Peter Wu, Philip Heiduck,
-  Radek Brich, Radu Hociung, RanBarLavie on github, Ray Satiro, Ryan Schmidt,
+  Alexey Savchuk, Andrei Rybak, Andy Alt, Anthony Hu, Brian Green,
+  Cameron Blomquist, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  dekerser on github, Divy Le Ray, Esdras de Morais da Silva, Fujii Hironori,
+  Gerrit Renker, Gisle Vanem, Hannah Schierling, Harry Sintonen, Hide Ishikawa,
+  highmtworks on github, Jakob Hirsch, John Bampton, John Porter,
+  John Sherrill, Jon Rumsey, Josh Brobst, Kvarec Lezki, Marc Aldorasi,
+  Marcel Raad, Mark Roszko, Martin D'Aloia, Martin Waleczek, Michael Osipov,
+  Mike Duglas, Muhammad Hussein Ammari, Nick Banks, nick-telia on github,
+  norbertmm on github, odek86 on github, Patrick Monnerat, Paul Groke,
+  Paul Howarth, Peter Wu, Philip Heiduck, Pronyushkin Petr, Radek Brich,
+  Radu Hociung, RanBarLavie on github, Ray Satiro, Ryan Schmidt,
   Sébastien Helleu, Sergey Bronnikov, Sergio-IME on github,
   sergio-nsk on github, SerusDev on github, Stanley Wucw, Stefan Eissing,
   Stefan Talpalaru, Stephan Guilloux, Tatsuhiro Tsujikawa,
   Thomas1664 on github, Thomas Klausner, Timmy Schierling, Viktor Szakats,
   violetlige on github, William Tang, Yurii Rashkovskii
-  (62 contributors)
+  (66 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -308,6 +319,7 @@ References to bug reports and discussions on issues:
  [121] = https://curl.se/bug/?i=10400
  [122] = https://curl.se/bug/?i=10390
  [123] = https://curl.se/bug/?i=10397
+ [124] = https://curl.se/bug/?i=10440
  [125] = https://curl.se/bug/?i=10399
  [126] = https://curl.se/bug/?i=10403
  [127] = https://curl.se/bug/?i=10349
@@ -317,3 +329,11 @@ References to bug reports and discussions on issues:
  [131] = https://curl.se/bug/?i=10385
  [132] = https://curl.se/bug/?i=10356
  [133] = https://curl.se/bug/?i=10322
+ [134] = https://curl.se/bug/?i=10437
+ [135] = https://curl.se/bug/?i=10434
+ [138] = https://curl.se/bug/?i=10414
+ [139] = https://curl.se/bug/?i=10130
+ [140] = https://curl.se/bug/?i=10421
+ [143] = https://curl.se/bug/?i=10413
+ [146] = https://curl.se/bug/?i=10408
+ [147] = https://curl.se/bug/?i=10407
