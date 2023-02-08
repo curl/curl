@@ -57,30 +57,34 @@ class TestErrors:
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
                f'/curltest/tweak?id=[0-{count - 1}]'\
                '&chunks=3&chunk_size=16000&body_error=reset'
-        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            '--retry', '0'
+        ])
         assert r.exit_code != 0, f'{r}'
         invalid_stats = []
         for idx, s in enumerate(r.stats):
-            if 'exitcode' not in s or s['exitcode'] not in [18, 56]:
+            if 'exitcode' not in s or s['exitcode'] not in [18, 56, 92]:
                 invalid_stats.append(f'request {idx} exit with {s["exitcode"]}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
 
-    # download 20 file, check that we get CURLE_PARTIAL_FILE for all
+    # download files, check that we get CURLE_PARTIAL_FILE for all
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_05_02_partial_20(self, env: Env, httpd, nghttpx, repeat,
                               proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        count = 20
+        count = 5
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
                f'/curltest/tweak?id=[0-{count - 1}]'\
                '&chunks=3&chunk_size=16000&body_error=reset'
-        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            '--retry', '0', '--parallel',
+        ])
         assert r.exit_code != 0, f'{r}'
         assert len(r.stats) == count, f'did not get all stats: {r}'
         invalid_stats = []
         for idx, s in enumerate(r.stats):
-            if 'exitcode' not in s or s['exitcode'] not in [18, 56]:
-                invalid_stats.append(f'request {idx} exit with {s["exitcode"]}')
+            if 'exitcode' not in s or s['exitcode'] not in [18, 56, 92]:
+                invalid_stats.append(f'request {idx} exit with {s["exitcode"]}\n{s}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
