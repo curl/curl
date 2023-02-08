@@ -294,6 +294,7 @@ struct ssl_backend_data {
   /* Set to true once a valid keylog entry has been created to avoid dupes. */
   bool     keylog_done;
 #endif
+  bool x509_store_setup;            /* x509 store has been set up */
 };
 
 #if defined(HAVE_SSL_X509_STORE_SHARE)
@@ -747,6 +748,18 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
     if(CURLE_AGAIN == result)
       BIO_set_retry_read(bio);
   }
+
+  /* Before returning server replies to the SSL instance, we need
+   * to have setup the x509 store or verification will fail. */
+  if(!connssl->backend->x509_store_setup) {
+    result = Curl_ssl_setup_x509_store(cf, data, connssl->backend->ctx);
+    if(result) {
+      connssl->backend->io_result = result;
+      return -1;
+    }
+    connssl->backend->x509_store_setup = TRUE;
+  }
+
   return (int)nread;
 }
 
@@ -925,34 +938,6 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
   }
 
   return buf;
-}
-
-/* Return an extra data index for the associated Curl_cfilter instance.
- * This index can be used with SSL_get_ex_data() and SSL_set_ex_data().
- */
-static int ossl_get_ssl_cf_index(void)
-{
-  static int ssl_ex_data_cf_index = -1;
-  if(ssl_ex_data_cf_index < 0) {
-    ssl_ex_data_cf_index = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
-  }
-  return ssl_ex_data_cf_index;
-}
-
-static bool ossl_attach_cf(struct Curl_cfilter *cf)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
-  int cf_idx = ossl_get_ssl_cf_index();
-
-  DEBUGASSERT(backend);
-
-  /* If we don't have SSL context, do nothing. */
-  if(backend->handle && cf_idx >= 0) {
-    if(SSL_set_ex_data(backend->handle, cf_idx, cf))
-      return TRUE;
-  }
-  return FALSE;
 }
 
 static int passwd_callback(char *buf, int num, int encrypting,
@@ -1755,10 +1740,6 @@ static int ossl_init(void)
 
   Curl_tls_keylog_open();
 
-  /* Initialize the extra data indexes */
-  if(ossl_get_ssl_cf_index() < 0)
-    return 0;
-
   return 1;
 }
 
@@ -1970,6 +1951,7 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(backend->ctx) {
     SSL_CTX_free(backend->ctx);
     backend->ctx = NULL;
+    backend->x509_store_setup = FALSE;
   }
   if(backend->bio_method) {
     bio_cf_method_free(backend->bio_method);
@@ -2646,19 +2628,14 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
                        void *userp)
 {
   const char *verstr = "???";
-  struct connectdata *conn = userp;
-  int cf_idx = ossl_get_ssl_cf_index();
+  struct Curl_cfilter *cf = userp;
   struct Curl_easy *data = NULL;
-  struct Curl_cfilter *cf;
   char unknown[32];
 
-  DEBUGASSERT(cf_idx >= 0);
-  cf = (struct Curl_cfilter*) SSL_get_ex_data(ssl, cf_idx);
-  DEBUGASSERT(cf);
+  if(!cf)
+    return;
   data = CF_DATA_CURRENT(cf);
-
-  if(!conn || !data || !data->set.fdebug
-     || (direction != 0 && direction != 1))
+  if(!data || !data->set.fdebug || (direction && direction != 1))
     return;
 
  switch(ssl_ver) {
@@ -2951,13 +2928,10 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   struct Curl_easy *data;
   struct Curl_cfilter *cf;
   const struct ssl_config_data *config;
-  int cf_idx = ossl_get_ssl_cf_index();
   struct ssl_connect_data *connssl;
   bool isproxy;
 
-  if(cf_idx < 0)
-    return 0;
-  cf = (struct Curl_cfilter*) SSL_get_ex_data(ssl, cf_idx);
+  cf = (struct Curl_cfilter*) SSL_get_app_data(ssl);
   connssl = cf? cf->ctx : NULL;
   data = connssl? CF_DATA_CURRENT(cf) : NULL;
   /* The sockindex has been stored as a pointer to an array element */
@@ -3475,7 +3449,6 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   BIO *bio;
-  int cf_idx = ossl_get_ssl_cf_index();
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   bool sni;
@@ -3497,9 +3470,6 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
   DEBUGASSERT(backend);
-
-  if(cf_idx < 0)
-    return CURLE_FAILED_INIT;
 
   /* Make funny stuff to get random input */
   result = ossl_seed(data);
@@ -3558,7 +3528,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   if(data->set.fdebug && data->set.verbose) {
     /* the SSL trace callback is only used for verbose logging */
     SSL_CTX_set_msg_callback(backend->ctx, ossl_trace);
-    SSL_CTX_set_msg_callback_arg(backend->ctx, cf->conn);
+    SSL_CTX_set_msg_callback_arg(backend->ctx, cf);
   }
 #endif
 
@@ -3746,10 +3716,6 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   }
 #endif
 
-  result = Curl_ssl_setup_x509_store(cf, data, backend->ctx);
-  if(result)
-    return result;
-
   /* OpenSSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
    * anyway. In the latter case the result of the verification is checked with
@@ -3793,7 +3759,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  SSL_set_ex_data(backend->handle, cf_idx, cf);
+  SSL_set_app_data(backend->handle, cf);
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
     !defined(OPENSSL_NO_OCSP)
@@ -3822,13 +3788,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   }
 #endif
 
-  if(!ossl_attach_cf(cf)) {
-    /* Maybe the internal errors of SSL_get_ex_new_index or SSL_set_ex_data */
-    failf(data, "SSL: ossl_attach_cf failed: %s",
-          ossl_strerror(ERR_get_error(), error_buffer,
-                        sizeof(error_buffer)));
-    return CURLE_SSL_CONNECT_ERROR;
-  }
+  SSL_set_app_data(backend->handle, cf);
 
   if(ssl_config->primary.sessionid) {
     Curl_ssl_sessionid_lock(data);
@@ -3887,6 +3847,16 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   ERR_clear_error();
 
   err = SSL_connect(backend->handle);
+
+  if(!backend->x509_store_setup) {
+    /* After having send off the ClientHello, we prepare the x509
+     * store to verify the coming certificate from the server */
+    CURLcode result = Curl_ssl_setup_x509_store(cf, data, backend->ctx);
+    if(result)
+      return result;
+    backend->x509_store_setup = TRUE;
+  }
+
 #ifndef HAVE_KEYLOG_CALLBACK
   if(Curl_tls_keylog_enabled()) {
     /* If key logging is enabled, wait for the handshake to complete and then
@@ -4372,8 +4342,9 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
     }
 
     /* if ssl is expecting something, check if it's available. */
-    if(connssl->connecting_state == ssl_connect_2_reading ||
-       connssl->connecting_state == ssl_connect_2_writing) {
+    if(!nonblocking &&
+       (connssl->connecting_state == ssl_connect_2_reading ||
+        connssl->connecting_state == ssl_connect_2_writing)) {
 
       curl_socket_t writefd = ssl_connect_2_writing ==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
