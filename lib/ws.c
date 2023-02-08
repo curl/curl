@@ -296,7 +296,7 @@ static CURLcode ws_decode(struct Curl_easy *data,
     *oleft = 0;             /* bytes yet to come (for this frame) */
   }
 
-  infof(data, "WS: received %zu bytes payload (%zu left, buflen was %zu)",
+  infof(data, "WS: received %Ou bytes payload (%Ou left, buflen was %zu)",
         payloadsize, *oleft, inlen);
   return CURLE_OK;
 }
