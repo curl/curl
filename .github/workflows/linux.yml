@@ -36,7 +36,7 @@ jobs:
         - name: quiche
           install_packages: zlib1g-dev
           install_steps: quiche
-          configure: LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release" --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src --enable-debug --with-quiche=/home/runner/work/curl/curl/quiche/target/release
+          configure: CFLAGS="${CFLAGS} -fno-omit-frame-pointer -Wl,--allow-shlib-undefined -fsanitize=address,undefined" LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release" --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src --enable-debug --disable-optimize --with-quiche=/home/runner/work/curl/curl/quiche/target/release
 
         - name: bearssl
           install_packages: zlib1g-dev
