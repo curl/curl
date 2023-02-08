@@ -1015,6 +1015,9 @@ struct connectdata {
 #ifndef CURL_DISABLE_MQTT
     struct mqtt_conn mqtt;
 #endif
+#ifdef USE_WEBSOCKETS
+    struct ws_conn ws;
+#endif
   } proto;
 
   struct connectbundle *bundle; /* The bundle we are member of */

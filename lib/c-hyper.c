@@ -485,7 +485,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     if(k->upgr101 == UPGR101_WS) {
       if(http_status == 101) {
         /* verify the response */
-        result = Curl_ws_accept(data);
+        result = Curl_ws_accept(data, NULL, 0);
         if(result)
           return result;
       }
