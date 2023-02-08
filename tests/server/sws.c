@@ -872,7 +872,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
   if(req->upgrade_request) {
     /* upgraded connection, work it differently until end of connection */
-    logmsg("Upgraded connection, this is a no longer HTTP/1");
+    logmsg("Upgraded connection, this is no longer HTTP/1");
     send_doc(sock, req);
 
     /* dump the request received so far to the external file */
@@ -881,34 +881,39 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     req->offset = 0;
 
     /* read websocket traffic */
-    if(req->open)
+    if(req->open) {
+      logmsg("wait for websocket traffic");
       do {
+        got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
+        if(got > 0) {
+          req->offset += got;
+          logmsg("Got %zu bytes from client", got);
+        }
 
-      got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
-      if(got > 0)
-        req->offset += got;
+        if((got == -1) && ((EAGAIN == errno) || (EWOULDBLOCK == errno))) {
+          int rc;
+          fd_set input;
+          fd_set output;
+          struct timeval timeout = {1, 0}; /* 1000 ms */
 
-      if((got == -1) && ((EAGAIN == errno) || (EWOULDBLOCK == errno))) {
-        int rc;
-        fd_set input;
-        fd_set output;
-        struct timeval timeout = {1, 0}; /* 1000 ms */
-
-        logmsg("Got EAGAIN from sread");
-        FD_ZERO(&input);
-        FD_ZERO(&output);
-        got = 0;
-        FD_SET(sock, &input);
-        do {
-          logmsg("Wait until readable");
-          rc = select((int)sock + 1, &input, &output, NULL, &timeout);
-        } while(rc < 0 && errno == EINTR && !got_exit_signal);
-        logmsg("readable %d", rc);
-        if(rc)
-          got = 1;
-      }
-    } while(got > 0);
-
+          logmsg("Got EAGAIN from sread");
+          FD_ZERO(&input);
+          FD_ZERO(&output);
+          got = 0;
+          FD_SET(sock, &input);
+          do {
+            logmsg("Wait until readable");
+            rc = select((int)sock + 1, &input, &output, NULL, &timeout);
+          } while(rc < 0 && errno == EINTR && !got_exit_signal);
+          logmsg("readable %d", rc);
+          if(rc)
+            got = 1;
+        }
+      } while(got > 0);
+    }
+    else {
+      logmsg("NO wait for websocket traffic");
+    }
     if(req->offset) {
       logmsg("log the websocket traffic");
       /* dump the incoming websocket traffic to the external file */
