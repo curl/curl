@@ -115,12 +115,18 @@ CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req)
   return result;
 }
 
-CURLcode Curl_ws_accept(struct Curl_easy *data)
+/*
+ * 'nread' is number of bytes of websocket data already in the buffer at
+ * 'mem'.
+ */
+CURLcode Curl_ws_accept(struct Curl_easy *data,
+                        const char *mem, size_t nread)
 {
   struct SingleRequest *k = &data->req;
   struct HTTP *ws = data->req.p.http;
   struct connectdata *conn = data->conn;
   struct websocket *wsp = &data->req.p.http->ws;
+  struct ws_conn *wsc = &conn->proto.ws;
   CURLcode result;
 
   /* Verify the Sec-WebSocket-Accept response.
@@ -149,13 +155,21 @@ CURLcode Curl_ws_accept(struct Curl_easy *data)
 
   infof(data, "Received 101, switch to WebSocket; mask %02x%02x%02x%02x",
         ws->ws.mask[0], ws->ws.mask[1], ws->ws.mask[2], ws->ws.mask[3]);
+  Curl_dyn_init(&wsc->early, data->set.buffer_size);
+  if(nread) {
+    result = Curl_dyn_addn(&wsc->early, mem, nread);
+    if(result)
+      return result;
+    infof(data, "%zu bytes websocket payload", nread);
+    wsp->stillb = Curl_dyn_ptr(&wsc->early);
+    wsp->stillblen = Curl_dyn_len(&wsc->early);
+  }
   k->upgr101 = UPGR101_RECEIVED;
 
   if(data->set.connect_only)
     /* switch off non-blocking sockets */
     (void)curlx_nonblock(conn->sock[FIRSTSOCKET], FALSE);
 
-  wsp->oleft = 0;
   return result;
 }
 
@@ -246,6 +260,9 @@ static CURLcode ws_decode(struct Curl_easy *data,
     infof(data, "WS: received OPCODE PONG");
     *flags |= CURLWS_PONG;
     break;
+  default:
+    failf(data, "WS: unknown opcode: %x", opcode);
+    return CURLE_RECV_ERROR;
   }
 
   if(inbuf[1] & WSBIT_MASK) {
@@ -419,15 +436,16 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
                               data->set.buffer_size, &n);
       if(result)
         return result;
-      if(!n)
+      if(!n) {
         /* connection closed */
+        infof(data, "connection expectedly closed?");
         return CURLE_GOT_NOTHING;
+      }
       wsp->stillb = data->state.buffer;
       wsp->stillblen = n;
     }
 
-    infof(data, "WS: got %u websocket bytes to decode",
-          (int)wsp->stillblen);
+    infof(data, "WS: %u bytes left to decode", (int)wsp->stillblen);
     if(!wsp->frame.bytesleft) {
       size_t headlen;
       curl_off_t oleft;
@@ -439,6 +457,11 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
         break;
       else if(result)
         return result;
+      if(datalen > buflen) {
+        size_t diff = datalen - buflen;
+        datalen = buflen;
+        oleft += diff;
+      }
       wsp->stillb += headlen;
       wsp->stillblen -= headlen;
       wsp->frame.offset = 0;
@@ -450,7 +473,13 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       datalen = wsp->frame.bytesleft;
       if(datalen > wsp->stillblen)
         datalen = wsp->stillblen;
+      if(datalen > buflen)
+        datalen = buflen;
+
+      wsp->frame.offset += wsp->frame.len;
+      wsp->frame.bytesleft -= datalen;
     }
+    wsp->frame.len = datalen;
 
     /* auto-respond to PINGs */
     if((wsp->frame.flags & CURLWS_PING) && !wsp->frame.bytesleft) {
@@ -469,24 +498,17 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       wsp->stillblen -= nsent;
     }
     else if(datalen) {
-      /* there is payload for the user */
-      if(datalen > buflen)
-        datalen = buflen;
       /* copy the payload to the user buffer */
       memcpy(buffer, wsp->stillb, datalen);
       *nread = datalen;
       done = TRUE;
 
-      /* update buffer and frame info */
-      wsp->frame.offset += datalen;
-      if(wsp->frame.bytesleft)
-        wsp->frame.bytesleft -= datalen;
-      DEBUGASSERT(datalen <= wsp->stillblen);
       wsp->stillblen -= datalen;
       if(wsp->stillblen)
         wsp->stillb += datalen;
-      else
+      else {
         wsp->stillb = NULL;
+      }
     }
   }
   *metap = &wsp->frame;
@@ -724,8 +746,11 @@ CURLcode Curl_ws_disconnect(struct Curl_easy *data,
                             struct connectdata *conn,
                             bool dead_connection)
 {
+  struct ws_conn *wsc = &conn->proto.ws;
   (void)data;
   (void)dead_connection;
+  Curl_dyn_free(&wsc->early);
+
   /* make sure this is non-blocking to avoid getting stuck in shutdown */
   (void)curlx_nonblock(conn->sock[FIRSTSOCKET], TRUE);
   return CURLE_OK;
