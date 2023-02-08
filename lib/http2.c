@@ -1905,8 +1905,9 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(stream->memlen) {
     ssize_t retlen = stream->memlen;
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%u] recv: returns %zd",
-                  stream->stream_id, retlen));
+
+    /* TODO: all this buffer handling is very brittle */
+    stream->len += stream->memlen;
     stream->memlen = 0;
 
     if(ctx->pause_stream_id == stream->stream_id) {
@@ -1918,6 +1919,10 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       Curl_expire(data, 0, EXPIRE_RUN_NOW);
     }
     else if(stream->closed) {
+      if(stream->reset || stream->error) {
+        nread = http2_handle_stream_close(cf, data, stream, err);
+        goto out;
+      }
       /* this stream is closed, trigger a another read ASAP to detect that */
       DEBUGF(LOG_CF(data, cf, "[h2sid=%u] is closed now, run again",
                     stream->stream_id));
@@ -1928,11 +1933,15 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       drained_transfer(cf, data);
 
     nread = retlen;
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%u] cf_h2_recv -> %zd",
+                  stream->stream_id, nread));
     goto out;
   }
 
-  if(stream->closed)
-    return http2_handle_stream_close(cf, data, stream, err);
+  if(stream->closed) {
+    nread = http2_handle_stream_close(cf, data, stream, err);
+    goto out;
+  }
 
   if(!data->state.drain && Curl_conn_cf_data_pending(cf->next, data)) {
     DEBUGF(LOG_CF(data, cf, "[h2sid=%u] pending data, set drain",
