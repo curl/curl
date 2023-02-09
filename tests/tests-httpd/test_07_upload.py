@@ -181,3 +181,41 @@ class TestUpload:
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == indata
 
+    # PUT 100k
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_30_put_100k(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        fdata = os.path.join(env.gen_dir, 'data-100k')
+        count = 1
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
+                             extra_args=['--parallel'])
+        assert r.exit_code == 0, f'{r}'
+        r.check_stats(count=count, exp_status=200)
+        exp_data = [f'{os.path.getsize(fdata)}']
+        r.check_stats(count=count, exp_status=200)
+        for i in range(count):
+            respdata = open(curl.response_file(i)).readlines()
+            assert respdata == exp_data
+
+    # PUT 10m
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_31_put_10m(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        count = 1
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]&chunk_delay=10ms'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
+                             extra_args=['--parallel'])
+        assert r.exit_code == 0, f'{r}'
+        r.check_stats(count=count, exp_status=200)
+        exp_data = [f'{os.path.getsize(fdata)}']
+        r.check_stats(count=count, exp_status=200)
+        for i in range(count):
+            respdata = open(curl.response_file(i)).readlines()
+            assert respdata == exp_data
+
