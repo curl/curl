@@ -35,7 +35,7 @@ jobs:
         build:
         - name: torture
           install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
-          configure: --with-openssl --enable-debug --enable-ares
+          configure: --with-openssl --enable-debug --enable-ares --enable-websockets
           tflags: -n -t --shallow=25 !FTP
         - name: torture-ftp
           install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
