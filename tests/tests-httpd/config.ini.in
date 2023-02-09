@@ -40,4 +40,5 @@ nghttpx = @HTTPD_NGHTTPX@
 
 [caddy]
 caddy = @CADDY@
-port = 5004
+http_port = 5003
+https_port = 5004

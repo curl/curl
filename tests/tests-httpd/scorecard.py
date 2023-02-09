@@ -213,31 +213,33 @@ class ScoreCard:
         self.info(f'\n')
         return props
 
-    def downloads(self, proto: str) -> Dict[str, Any]:
+    def downloads(self, proto: str, test_httpd: bool = True,
+                  test_caddy: bool = True) -> Dict[str, Any]:
         scores = {}
-        if proto == 'h3':
-            port = self.env.h3_port
-            via = 'nghttpx'
-            descr = f'port {port}, proxying httpd'
-        else:
-            port = self.env.https_port
-            via = 'httpd'
-            descr = f'port {port}'
-        self.info('httpd downloads\n')
-        self._make_docs_file(docs_dir=self.httpd.docs_dir, fname='score1.data', fsize=1024*1024)
-        url1 = f'https://{self.env.domain1}:{port}/score1.data'
-        self._make_docs_file(docs_dir=self.httpd.docs_dir, fname='score10.data', fsize=10*1024*1024)
-        url10 = f'https://{self.env.domain1}:{port}/score10.data'
-        self._make_docs_file(docs_dir=self.httpd.docs_dir, fname='score100.data', fsize=100*1024*1024)
-        url100 = f'https://{self.env.domain1}:{port}/score100.data'
-        scores[via] = {
-            'description': descr,
-            '1MB-local': self.download_url(url=url1, proto=proto, count=50),
-            '10MB-local': self.download_url(url=url10, proto=proto, count=50),
-            '100MB-local': self.download_url(url=url100, proto=proto, count=50),
-        }
-        if self.caddy:
-            port = self.env.caddy_port
+        if test_httpd:
+            if proto == 'h3':
+                port = self.env.h3_port
+                via = 'nghttpx'
+                descr = f'port {port}, proxying httpd'
+            else:
+                port = self.env.https_port
+                via = 'httpd'
+                descr = f'port {port}'
+            self.info(f'{via} downloads\n')
+            self._make_docs_file(docs_dir=self.httpd.docs_dir, fname='score1.data', fsize=1024*1024)
+            url1 = f'https://{self.env.domain1}:{port}/score1.data'
+            self._make_docs_file(docs_dir=self.httpd.docs_dir, fname='score10.data', fsize=10*1024*1024)
+            url10 = f'https://{self.env.domain1}:{port}/score10.data'
+            self._make_docs_file(docs_dir=self.httpd.docs_dir, fname='score100.data', fsize=100*1024*1024)
+            url100 = f'https://{self.env.domain1}:{port}/score100.data'
+            scores[via] = {
+                'description': descr,
+                '1MB-local': self.download_url(url=url1, proto=proto, count=50),
+                '10MB-local': self.download_url(url=url10, proto=proto, count=50),
+                '100MB-local': self.download_url(url=url100, proto=proto, count=50),
+            }
+        if test_caddy and self.caddy:
+            port = self.caddy.port
             via = 'caddy'
             descr = f'port {port}'
             self.info('caddy downloads\n')
@@ -255,7 +257,11 @@ class ScoreCard:
             }
         return scores
 
-    def score_proto(self, proto: str, handshakes: bool = True, downloads: bool = True):
+    def score_proto(self, proto: str,
+                    handshakes: bool = True,
+                    downloads: bool = True,
+                    test_httpd: bool = True,
+                    test_caddy: bool = True):
         self.info(f"scoring {proto}\n")
         p = {}
         if proto == 'h3':
@@ -289,7 +295,9 @@ class ScoreCard:
         if handshakes:
             score['handshakes'] = self.handshakes(proto=proto)
         if downloads:
-            score['downloads'] = self.downloads(proto=proto)
+            score['downloads'] = self.downloads(proto=proto,
+                                                test_httpd=test_httpd,
+                                                test_caddy=test_caddy)
         self.info("\n")
         return score
 
@@ -335,6 +343,10 @@ class ScoreCard:
                             help="print text instead of json")
         parser.add_argument("-d", "--downloads", action='store_true', default=False,
                             help="evaluate downloads only")
+        parser.add_argument("--httpd", action='store_true', default=False,
+                            help="evaluate httpd server only")
+        parser.add_argument("--caddy", action='store_true', default=False,
+                            help="evaluate caddy server only")
         parser.add_argument("protocols", nargs='*', help="Name(s) of protocol to score")
         args = parser.parse_args()
 
@@ -348,8 +360,16 @@ class ScoreCard:
         protocols = args.protocols if len(args.protocols) else ['h2', 'h3']
         handshakes = True
         downloads = True
+        test_httpd = True
+        test_caddy = True
         if args.downloads:
             handshakes = False
+        if args.caddy:
+            test_caddy = True
+            test_httpd = False
+        if args.httpd:
+            test_caddy = False
+            test_httpd = True
 
         rv = 0
         self.env = Env()
@@ -372,7 +392,10 @@ class ScoreCard:
                 assert self.caddy.start()
 
             for p in protocols:
-                score = self.score_proto(proto=p, handshakes=handshakes, downloads=downloads)
+                score = self.score_proto(proto=p, handshakes=handshakes,
+                                         downloads=downloads,
+                                         test_caddy=test_caddy,
+                                         test_httpd=test_httpd)
                 if args.text:
                     self.print_score(score)
                 else:
