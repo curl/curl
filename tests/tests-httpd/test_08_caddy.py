@@ -34,7 +34,7 @@ from testenv import Env, CurlClient, Caddy
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=not Env.caddy, reason=f"missing caddy")
+@pytest.mark.skipif(condition=not Env.has_caddy(), reason=f"missing caddy")
 class TestCaddy:
 
     @pytest.fixture(autouse=True, scope='class')
