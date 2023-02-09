@@ -1976,6 +1976,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   CURLcode result;
   struct h2h3req *hreq;
   struct cf_call_data save;
+  ssize_t nwritten;
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGF(LOG_CF(data, cf, "send len=%zu", len));
@@ -1984,11 +1985,11 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(stream->close_handled) {
       infof(data, "stream %u closed", stream->stream_id);
       *err = CURLE_HTTP2_STREAM;
-      len = -1;
+      nwritten = -1;
       goto out;
     }
     else if(stream->closed) {
-      len = http2_handle_stream_close(cf, data, stream, err);
+      nwritten = http2_handle_stream_close(cf, data, stream, err);
       goto out;
     }
     /* If stream_id != -1, we have dispatched request HEADERS, and now
@@ -1998,26 +1999,33 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     rv = nghttp2_session_resume_data(ctx->h2, stream->stream_id);
     if(nghttp2_is_fatal(rv)) {
       *err = CURLE_SEND_ERROR;
-      len = -1;
+      nwritten = -1;
       goto out;
     }
     result = h2_session_send(cf, data);
     if(result) {
       *err = result;
-      len = -1;
+      nwritten = -1;
       goto out;
     }
-    len -= stream->upload_len;
 
-    /* Nullify here because we call nghttp2_session_send() and they
-       might refer to the old buffer. */
+    /* The callback for stream input updates `upload_len` with what it
+     * has provided to nghttp2. If it has *not* been called, `upload_len`
+     * is unchanged and we should report a block on send. */
+    if(stream->upload_len == len) {
+      *err = CURLE_AGAIN;
+      nwritten = -1;
+      goto out;
+    }
+
+    nwritten = len - stream->upload_len;
     stream->upload_mem = NULL;
     stream->upload_len = 0;
 
     if(should_close_session(ctx)) {
       DEBUGF(LOG_CF(data, cf, "send: nothing to do in this session"));
       *err = CURLE_HTTP2;
-      len = -1;
+      nwritten = -1;
       goto out;
     }
 
@@ -2045,10 +2053,13 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
 
+  /* TODO: this assumes that the `buf` and `len` we are called with
+   * is *all* HEADERs and no body. We have no way to determine here
+   * if that is indeed the case. */
   result = Curl_pseudo_headers(data, buf, len, NULL, &hreq);
   if(result) {
     *err = result;
-    len = -1;
+    nwritten = -1;
     goto out;
   }
   nheader = hreq->entries;
@@ -2057,7 +2068,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!nva) {
     Curl_pseudo_free(hreq);
     *err = CURLE_OUT_OF_MEMORY;
-    len = -1;
+    nwritten = -1;
     goto out;
   }
   else {
@@ -2104,25 +2115,28 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     DEBUGF(LOG_CF(data, cf, "send: nghttp2_submit_request error (%s)%u",
                   nghttp2_strerror(stream_id), stream_id));
     *err = CURLE_SEND_ERROR;
-    len = -1;
+    nwritten = -1;
     goto out;
   }
 
   infof(data, "Using Stream ID: %u (easy handle %p)",
         stream_id, (void *)data);
   stream->stream_id = stream_id;
+  /* See comment above. We assume that the whole buf was consumed by
+   * generating the request headers. */
+  nwritten = len;
 
   result = h2_session_send(cf, data);
   if(result) {
     *err = result;
-    len = -1;
+    nwritten = -1;
     goto out;
   }
 
   if(should_close_session(ctx)) {
     DEBUGF(LOG_CF(data, cf, "send: nothing to do in this session"));
     *err = CURLE_HTTP2;
-    len = -1;
+    nwritten = -1;
     goto out;
   }
 
@@ -2137,7 +2151,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   CF_DATA_RESTORE(cf, save);
-  return len;
+  return nwritten;
 }
 
 static int cf_h2_get_select_socks(struct Curl_cfilter *cf,
