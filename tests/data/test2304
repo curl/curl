@@ -61,8 +61,9 @@ Sec-WebSocket-Version: 13
 Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
 
 </protocol>
-<stdout mode="text">
-Connection closed
-</stdout>
+
+# This test used to check that "connection closed" was output, but
+# that is flaky since the outgoing PING just before might fail already
+# and then the test exists before the output gets to be written
 </verify>
 </testcase>
