@@ -147,7 +147,8 @@ class EnvConfig:
                     self.caddy = None
             except:
                 self.caddy = None
-        self.caddy_port = self.config['caddy']['port']
+        self.caddy_http_port = self.config['caddy']['http_port']
+        self.caddy_https_port = self.config['caddy']['https_port']
 
     @property
     def httpd_version(self):
@@ -306,8 +307,12 @@ class Env:
         return self.CONFIG.caddy
 
     @property
-    def caddy_port(self) -> str:
-        return self.CONFIG.caddy_port
+    def caddy_https_port(self) -> str:
+        return self.CONFIG.caddy_https_port
+
+    @property
+    def caddy_http_port(self) -> str:
+        return self.CONFIG.caddy_http_port
 
     @property
     def curl(self) -> str:

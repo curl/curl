@@ -319,6 +319,8 @@ class CurlClient:
         args = [self._curl, "-s", "--path-as-is"]
         if with_headers:
             args.extend(["-D", self._headerfile])
+        if self.env.verbose > 1:
+            args.extend(['--trace', self._tracefile])
         if self.env.verbose > 2:
             args.extend(['--trace', self._tracefile, '--trace-time'])
 
