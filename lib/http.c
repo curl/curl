@@ -233,6 +233,7 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
 
   Curl_mime_initpart(&http->form);
   data->req.p.http = http;
+  connkeep(conn, "HTTP default");
 
   if((data->state.httpwant == CURL_HTTP_VERSION_3)
      || (data->state.httpwant == CURL_HTTP_VERSION_3ONLY)) {

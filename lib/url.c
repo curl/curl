@@ -1170,14 +1170,14 @@ ConnectionExists(struct Curl_easy *data,
             continue;
           }
         }
+      }
 
-        if(!Curl_conn_is_connected(check, FIRSTSOCKET)) {
-          foundPendingCandidate = TRUE;
-          /* Don't pick a connection that hasn't connected yet */
-          infof(data, "Connection #%ld isn't open enough, can't reuse",
-                check->connection_id);
-          continue;
-        }
+      if(!Curl_conn_is_connected(check, FIRSTSOCKET)) {
+        foundPendingCandidate = TRUE;
+        /* Don't pick a connection that hasn't connected yet */
+        infof(data, "Connection #%ld isn't open enough, can't reuse",
+              check->connection_id);
+        continue;
       }
 
 #ifdef USE_UNIX_SOCKETS
