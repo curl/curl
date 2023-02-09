@@ -143,23 +143,39 @@ class TestDownload:
             # http2 parallel transfers will use one connection (common limit is 100)
             assert r.total_connects == 1
 
-    # download 500 files parallel (max of 200), only h2
-    @pytest.mark.skip(reason="TODO: we get 101 connections created. PIPEWAIT needs a fix")
+    # download files parallel, check connection reuse/multiplex
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_02_07_download_500_parallel(self, env: Env,
-                                         httpd, nghttpx, repeat, proto):
+    def test_02_07_download_reuse(self, env: Env,
+                                  httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        count=200
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-499]'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto,
-                               with_stats=False, extra_args=[
+                               with_stats=True, extra_args=[
             '--parallel', '--parallel-max', '200'
         ])
         assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=500, exp_status=200)
-        # http2 should now use 2 connections, at most 5
-        assert r.total_connects <= 5, "h2 should use fewer connections here"
+        r.check_stats(count=count, exp_status=200)
+        # should have used 2 connections only (test servers allow 100 req/conn)
+        assert r.total_connects == 2, "h2 should use fewer connections here"
+
+    # download files parallel with http/1.1, check connection not reused
+    @pytest.mark.parametrize("proto", ['http/1.1'])
+    def test_02_07b_download_reuse(self, env: Env,
+                                   httpd, nghttpx, repeat, proto):
+        count=20
+        curl = CurlClient(env=env)
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
+        r = curl.http_download(urls=[urln], alpn_proto=proto,
+                               with_stats=True, extra_args=[
+            '--parallel', '--parallel-max', '200'
+        ])
+        assert r.exit_code == 0, f'{r}'
+        r.check_stats(count=count, exp_status=200)
+        # http/1.1 should have used count connections
+        assert r.total_connects == count, "http/1.1 should use this many connections"
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_08_1MB_serial(self, env: Env,
