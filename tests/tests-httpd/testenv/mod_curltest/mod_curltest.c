@@ -35,6 +35,7 @@
 
 static void curltest_hooks(apr_pool_t *pool);
 static int curltest_echo_handler(request_rec *r);
+static int curltest_put_handler(request_rec *r);
 static int curltest_tweak_handler(request_rec *r);
 
 AP_DECLARE_MODULE(curltest) = {
@@ -81,6 +82,7 @@ static void curltest_hooks(apr_pool_t *pool)
 
   /* curl test handlers */
   ap_hook_handler(curltest_echo_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_put_handler, NULL, NULL, APR_HOOK_MIDDLE);
   ap_hook_handler(curltest_tweak_handler, NULL, NULL, APR_HOOK_MIDDLE);
 }
 
@@ -229,9 +231,9 @@ static int curltest_echo_handler(request_rec *r)
   rv = ap_pass_brigade(r->output_filters, bb);
 
 cleanup:
-  if(rv == APR_SUCCESS
-     || r->status != HTTP_OK
-     || c->aborted) {
+  if(rv == APR_SUCCESS ||
+     r->status != HTTP_OK ||
+     c->aborted) {
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "echo_handler: done");
     return OK;
   }
@@ -409,3 +411,104 @@ cleanup:
   }
   return AP_FILTER_ERROR;
 }
+
+static int curltest_put_handler(request_rec *r)
+{
+  conn_rec *c = r->connection;
+  apr_bucket_brigade *bb;
+  apr_bucket *b;
+  apr_status_t rv;
+  char buffer[16*1024];
+  const char *ct;
+  apr_off_t rbody_len = 0;
+  const char *request_id = "none";
+  apr_time_t chunk_delay = 0;
+  apr_array_header_t *args = NULL;
+  long l;
+  int i;
+
+  if(strcmp(r->handler, "curltest-put")) {
+    return DECLINED;
+  }
+  if(r->method_number != M_PUT) {
+    return DECLINED;
+  }
+
+  if(r->args) {
+    args = apr_cstr_split(r->args, "&", 1, r->pool);
+    for(i = 0; i < args->nelts; ++i) {
+      char *s, *val, *arg = APR_ARRAY_IDX(args, i, char*);
+      s = strchr(arg, '=');
+      if(s) {
+        *s = '\0';
+        val = s + 1;
+        if(!strcmp("id", arg)) {
+          /* just an id for repeated requests with curl's url globbing */
+          request_id = val;
+          continue;
+        }
+        else if(!strcmp("chunk_delay", arg)) {
+          rv = duration_parse(&chunk_delay, val, "s");
+          if(APR_SUCCESS == rv) {
+            continue;
+          }
+        }
+      }
+      ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
+                    "understood: '%s' in %s",
+                    arg, r->args);
+      ap_die(HTTP_BAD_REQUEST, r);
+      return OK;
+    }
+  }
+
+  ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "put_handler: processing");
+  r->status = 200;
+  r->clength = -1;
+  r->chunked = 1;
+  apr_table_unset(r->headers_out, "Content-Length");
+  /* Discourage content-encodings */
+  apr_table_unset(r->headers_out, "Content-Encoding");
+  apr_table_setn(r->subprocess_env, "no-brotli", "1");
+  apr_table_setn(r->subprocess_env, "no-gzip", "1");
+
+  ct = apr_table_get(r->headers_in, "content-type");
+  ap_set_content_type(r, ct? ct : "text/plain");
+
+  bb = apr_brigade_create(r->pool, c->bucket_alloc);
+  /* copy any request body into the response */
+  if((rv = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK))) goto cleanup;
+  if(ap_should_client_block(r)) {
+    while(0 < (l = ap_get_client_block(r, &buffer[0], sizeof(buffer)))) {
+      ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
+                    "put_handler: read %ld bytes from request body", l);
+      if(chunk_delay) {
+        apr_sleep(chunk_delay);
+      }
+      rbody_len += l;
+    }
+  }
+  /* we are done */
+  rv = apr_brigade_printf(bb, NULL, NULL, "%"APR_OFF_T_FMT, rbody_len);
+  if(APR_SUCCESS != rv) goto cleanup;
+  b = apr_bucket_eos_create(c->bucket_alloc);
+  APR_BRIGADE_INSERT_TAIL(bb, b);
+  ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "put_handler: request read");
+
+  rv = ap_pass_brigade(r->output_filters, bb);
+
+cleanup:
+  if(rv == APR_SUCCESS
+     || r->status != HTTP_OK
+     || c->aborted) {
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "put_handler: done");
+    return OK;
+  }
+  else {
+    /* no way to know what type of error occurred */
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "put_handler failed");
+    return AP_FILTER_ERROR;
+  }
+  return DECLINED;
+}
+
