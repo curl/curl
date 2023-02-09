@@ -31,7 +31,7 @@ import subprocess
 from datetime import timedelta, datetime
 from json import JSONEncoder
 import time
-from typing import List
+from typing import List, Union, Optional
 
 from .curl import CurlClient, ExecResult
 from .env import Env
@@ -69,6 +69,7 @@ class Httpd:
         self._error_log = os.path.join(self._logs_dir, 'error_log')
         self._tmp_dir = os.path.join(self._apache_dir, 'tmp')
         self._mods_dir = None
+        self._extra_configs = {}
         assert env.apxs
         p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
                            capture_output=True, text=True)
@@ -92,6 +93,12 @@ class Httpd:
 
     def exists(self):
         return os.path.exists(self._cmd)
+
+    def set_extra_config(self, domain: str, lines: Optional[Union[str, List[str]]]):
+        if lines is None:
+            self._extra_configs.pop(domain, None)
+        else:
+            self._extra_configs[domain] = lines
 
     def _run(self, args, intext=''):
         env = {}
@@ -143,6 +150,7 @@ class Httpd:
         return self.start()
 
     def reload(self):
+        self._write_config()
         r = self._apachectl("graceful")
         if r.exit_code != 0:
             log.error(f'failed to reload httpd: {r}')
@@ -236,6 +244,8 @@ class Httpd:
                 f'    DocumentRoot "{self._docs_dir}"',
             ])
             conf.extend(self._curltest_conf())
+            if domain1 in self._extra_configs:
+                conf.extend(self._extra_configs[domain1])
             conf.extend([
                 f'</VirtualHost>',
                 f'',
@@ -250,6 +260,8 @@ class Httpd:
                 f'    DocumentRoot "{self._docs_dir}/two"',
             ])
             conf.extend(self._curltest_conf())
+            if domain2 in self._extra_configs:
+                conf.extend(self._extra_configs[domain2])
             conf.extend([
                 f'</VirtualHost>',
                 f'',
@@ -263,12 +275,12 @@ class Httpd:
             ]))
 
     def _get_log_level(self):
-        #if self.env.verbose > 3:
-        #    return 'trace2'
-        #if self.env.verbose > 2:
-        #    return 'trace1'
-        #if self.env.verbose > 1:
-        #    return 'debug'
+        if self.env.verbose > 3:
+            return 'trace2'
+        if self.env.verbose > 2:
+            return 'trace1'
+        if self.env.verbose > 1:
+            return 'debug'
         return 'info'
 
     def _curltest_conf(self) -> List[str]:
