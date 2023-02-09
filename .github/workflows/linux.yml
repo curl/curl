@@ -198,7 +198,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'quictls') }}
       run: |
-        git clone --depth=1 -b OpenSSL_1_1_1s+quic https://github.com/quictls/openssl
+        git clone --depth=1 -b OpenSSL_1_1_1t+quic https://github.com/quictls/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/quictls
         make install_sw
