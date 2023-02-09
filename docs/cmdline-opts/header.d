@@ -10,6 +10,7 @@ See-also: user-agent referer
 Example: -H "X-First-Name: Joe" $URL
 Example: -H "User-Agent: yes-please/2000" $URL
 Example: -H "Host:" $URL
+Example: -H @headers.txt $URL
 Added: 5.0
 Multi: append
 ---
