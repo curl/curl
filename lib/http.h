@@ -264,7 +264,7 @@ struct HTTP {
   bool upload_done;
 #endif /* ENABLE_QUIC */
 #ifdef USE_NGHTTP3
-  size_t unacked_window;
+  size_t recv_buf_nonflow; /* buffered bytes, not counting for flow control */
   struct h3out *h3out; /* per-stream buffers for upload */
   struct dynbuf overflow; /* excess data received during a single Curl_read */
 #endif /* USE_NGHTTP3 */
@@ -291,6 +291,8 @@ struct HTTP {
 #ifdef USE_QUICHE
   bool h3_got_header; /* TRUE when h3 stream has recvd some HEADER */
   bool h3_recving_data; /* TRUE when h3 stream is reading DATA */
+  bool h3_body_pending; /* TRUE when h3 stream may have more body DATA */
+  struct h3_event_node *pending;
 #endif /* USE_QUICHE */
 };
 

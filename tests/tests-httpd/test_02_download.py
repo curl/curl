@@ -42,13 +42,22 @@ class TestDownload:
     def _class_scope(self, env, httpd, nghttpx):
         if env.have_h3():
             nghttpx.start_if_needed()
-        fpath = os.path.join(httpd.docs_dir, 'data-1mb.data')
+
+    def _make_docs_file(self, docs_dir: str, fname: str, fsize: int):
+        fpath = os.path.join(docs_dir, fname)
         data1k = 1024*'x'
+        flen = 0
         with open(fpath, 'w') as fd:
-            fsize = 0
-            while fsize < 1024*1024:
+            while flen < fsize:
                 fd.write(data1k)
-                fsize += len(data1k)
+                flen += len(data1k)
+        return flen
+
+    @pytest.fixture(autouse=True, scope='class')
+    def _class_scope(self, env, httpd):
+        self._make_docs_file(docs_dir=httpd.docs_dir, fname='data1.data', fsize=1024*1024)
+        self._make_docs_file(docs_dir=httpd.docs_dir, fname='data10.data', fsize=10*1024*1024)
+        self._make_docs_file(docs_dir=httpd.docs_dir, fname='data100.data', fsize=100*1024*1024)
 
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -163,8 +172,8 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_08_1MB_serial(self, env: Env,
                               httpd, nghttpx, repeat, proto):
-        count = 2
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data-1mb.data?[0-{count-1}]'
+        count = 20
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data1.data?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto)
         assert r.exit_code == 0
@@ -173,8 +182,30 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_09_1MB_parallel(self, env: Env,
                               httpd, nghttpx, repeat, proto):
-        count = 2
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data-1mb.data?[0-{count-1}]'
+        count = 20
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data1.data?[0-{count-1}]'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            '--parallel'
+        ])
+        assert r.exit_code == 0
+        r.check_stats(count=count, exp_status=200)
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_10_10MB_serial(self, env: Env,
+                              httpd, nghttpx, repeat, proto):
+        count = 20
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data10.data?[0-{count-1}]'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        assert r.exit_code == 0
+        r.check_stats(count=count, exp_status=200)
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_11_10MB_parallel(self, env: Env,
+                              httpd, nghttpx, repeat, proto):
+        count = 20
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data10.data?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'

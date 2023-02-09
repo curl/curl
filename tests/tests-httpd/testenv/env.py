@@ -136,8 +136,8 @@ class EnvConfig:
                 log.debug(f'nghttpx -v: {p.stdout}')
 
         self.caddy = self.config['caddy']['caddy']
-        if len(self.caddy) == 0:
-            self.caddy = 'caddy'
+        if len(self.caddy.strip()) == 0:
+            self.caddy = None
         if self.caddy is not None:
             try:
                 p = subprocess.run(args=[self.caddy, 'version'],
@@ -147,7 +147,8 @@ class EnvConfig:
                     self.caddy = None
             except:
                 self.caddy = None
-        self.caddy_port = self.config['caddy']['port']
+        self.caddy_http_port = self.config['caddy']['http_port']
+        self.caddy_https_port = self.config['caddy']['https_port']
 
     @property
     def httpd_version(self):
@@ -241,6 +242,10 @@ class Env:
     def httpd_is_at_least(minv) -> bool:
         return Env.CONFIG.httpd_is_at_least(minv)
 
+    @staticmethod
+    def has_caddy() -> bool:
+        return Env.CONFIG.caddy is not None
+
     def __init__(self, pytestconfig=None):
         self._verbose = pytestconfig.option.verbose \
             if pytestconfig is not None else 0
@@ -306,8 +311,12 @@ class Env:
         return self.CONFIG.caddy
 
     @property
-    def caddy_port(self) -> str:
-        return self.CONFIG.caddy_port
+    def caddy_https_port(self) -> str:
+        return self.CONFIG.caddy_https_port
+
+    @property
+    def caddy_http_port(self) -> str:
+        return self.CONFIG.caddy_http_port
 
     @property
     def curl(self) -> str:

@@ -55,6 +55,10 @@ class Caddy:
     def docs_dir(self):
         return self._docs_dir
 
+    @property
+    def port(self) -> str:
+        return self.env.caddy_https_port
+
     def clear_logs(self):
         self._rmf(self._error_log)
 
@@ -105,7 +109,7 @@ class Caddy:
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            check_url = f'https://{self.env.domain1}:{self.env.caddy_port}/'
+            check_url = f'https://{self.env.domain1}:{self.port}/'
             r = curl.http_get(url=check_url)
             if r.exit_code != 0:
                 return True
@@ -118,7 +122,7 @@ class Caddy:
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            check_url = f'https://{self.env.domain1}:{self.env.caddy_port}/'
+            check_url = f'https://{self.env.domain1}:{self.port}/'
             r = curl.http_get(url=check_url)
             if r.exit_code == 0:
                 return True
@@ -149,12 +153,13 @@ class Caddy:
         with open(self._conf_file, 'w') as fd:
             conf = [   # base server config
                 f'{{',
-                f'  https_port {self.env.caddy_port}',
-                f'  servers :{self.env.caddy_port} {{',
+                f'  http_port {self.env.caddy_http_port}',
+                f'  https_port {self.env.caddy_https_port}',
+                f'  servers :{self.env.caddy_https_port} {{',
                 f'    protocols h3 h2 h1',
                 f'  }}',
                 f'}}',
-                f'{domain1}:{self.env.caddy_port} {{',
+                f'{domain1}:{self.env.caddy_https_port} {{',
                 f'  file_server * {{',
                 f'    root {self._docs_dir}',
                 f'  }}',
