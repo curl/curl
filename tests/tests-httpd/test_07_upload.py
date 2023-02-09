@@ -144,6 +144,9 @@ class TestUpload:
             assert respdata == [data]
 
     # upload large data parallel, check that this is what was echoed
+    # we seem to encounter errors on earlier httpd versions
+    @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.55'),
+                        reason=f"httpd version too old for this: {Env.httpd_version()}")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_07_21_upload_parallel_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
