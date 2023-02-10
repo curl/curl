@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2806
+ Contributors:                 2808
 
 This release includes the following changes:
 
@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o cfilters:Curl_conn_get_select_socks: use the first non-connected filter [24]
  o CI: add a workflow to automatically label pull requests [102]
  o CI: add pytest GHA to CI test/tests-httpd on a HTTP/3 setup [109]
+ o CI: Retry failed downloads to reduce spurious failures
  o cmake: bump requirement to 3.7 [23]
  o cmake: check for sendmsg [39]
  o cmake: delete redundant macro definition `SECURITY_WIN32` [91]
@@ -38,10 +39,12 @@ This release includes the following bugfixes:
  o copyright: update all copyright lines and remove year ranges [35]
  o curl.h: allow up to 10M buffer size [76]
  o curl.h: mark CURLSSLBACKEND_MESALINK as deprecated [52]
+ o curl/websockets.h: extend the websocket frame struct
  o curl: output warning at --verbose output for debug-enabled version [80]
  o curl_free.3: fix return type of `curl_free` [113]
  o curl_global_sslset.3: clarify the openssl situation [53]
  o curl_log: for failf/infof and debug logging implementations [87]
+ o curl_setup: Disable by default recv-before-send in Windows [154]
  o curl_version_info.3: fix typo [100]
  o curl_ws_send.3: clarify how to send multi-frame messages
  o CURLOPT_HEADERDATA.3: warn DLL users must set write function [45]
@@ -62,12 +65,17 @@ This release includes the following bugfixes:
  o GHA/macos.yml: bump to gcc-12 [106]
  o GHA/macos: use Xcode_14.0.1 for cmake builds [132]
  o GHA: add job on Slackware 15.0 [58]
+ o GHA: enable websockets in the torture job [148]
  o GHA: move the quiche job here from zuul [75]
  o GHA: use designated ngtcp2 and its dependencies versions [77]
  o haxproxy: send before TLS handhshake [34]
+ o header.d: add a header file example [149]
  o hsts.d: explain hsts more [78]
  o hsts: handle adding the same host name again
+ o HTTP/[23]: continue upload when state.drain is set [150]
+ o http2: aggregate small SETTINGS/PRIO/WIN_UPDATE frames [155]
  o http2: fix compiler warning due to uninitialized variable
+ o http2: minor buffer and error path fixes [151]
  o http2: when using printf %.*s, the length arg must be 'int' [41]
  o HTTP3: mention what needs to be in place to remove EXPERIMENTAL label [31]
  o http: add additional condition for including stdint.h [54]
@@ -96,14 +104,17 @@ This release includes the following bugfixes:
  o multihandle: turn bool struct fields into bits [26]
  o ngtcp2: add CURLOPT_SSL_CTX_FUNCTION support for openssl+wolfssl [62]
  o ngtcp2: fix the build without 'sendmsg' [38]
+ o no-clobber.d: only use long form options in man page text [145]
  o noproxy: support for space-separated names is deprecated [66]
  o nss: implement data_pending method [43]
+ o openldap: fix missing sasl symbols at build in specific configs [152]
  o openssl: adapt to boringssl's error code type [118]
  o openssl: don't ignore CA paths when using Windows CA store (redux) [101]
  o openssl: don't log raw record headers [93]
  o openssl: make the BIO_METHOD a local variable in the connection filter [79]
  o openssl: only use CA_BLOB if verifying peer [112]
  o openssl: remove attached easy handles from SSL instances [29]
+ o openssl: store the CA after first send (ClientHello) [156]
  o os400: fixes to make-lib.sh and initscript.sh [71]
  o packages: remove Android, update README [108]
  o release-notes.pl: check fixes/closes lines better
@@ -123,6 +134,7 @@ This release includes the following bugfixes:
  o strdup: name it Curl_strdup [16]
  o system.h: assume OS400 is always built with ILEC compiler [95]
  o test1560: use a UTF8-using locale when run [46]
+ o test2304: remove stdout verification
  o tests-httpd: basic infra to run curl against an apache httpd [72]
  o tests: add 3 new HTTP/2 test cases, plus https: support for nghttpx [9]
  o tests: avoid use of sha1 in certificates [4]
@@ -145,6 +157,7 @@ This release includes the following bugfixes:
  o urldata: make set.http200aliases conditional on HTTP being present [11]
  o urldata: move the cookefilelist to the 'set' struct [15]
  o urldata: remove unused struct fields, made more conditional [10]
+ o vquic: stabilization and improvements [141]
  o vtls: fix hostname handling in filters [98]
  o vtls: manage current easy handle in nested cfilter calls [90]
  o vtls: use ALPN HTTP/1.0 when HTTP/1.0 is used
@@ -156,8 +169,10 @@ This release includes the following bugfixes:
  o writeout: add %{certs} and %{num_certs} [33]
  o ws: fix autoping handling [70]
  o ws: fix multiframe send handling [143]
+ o ws: fix recv of larger frames [144]
  o ws: remove bad assert [117]
  o ws: unstick connect-only shutdown [116]
+ o ws: use %Ou for outputting curl_off_t with info() [153]
  o x509asn1: fix compile errors and warnings [47]
  o zuul: stop using this CI service [114]
 
@@ -178,21 +193,22 @@ advice from friends like these:
 
   Alexey Savchuk, Andrei Rybak, Andy Alt, Anthony Hu, Brian Green,
   Cameron Blomquist, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  dekerser on github, Divy Le Ray, Esdras de Morais da Silva, Fujii Hironori,
-  Gerrit Renker, Gisle Vanem, Hannah Schierling, Harry Sintonen, Hide Ishikawa,
+  dekerser on github, Divy Le Ray, Esdras de Morais da Silva,
+  Federico Pellegrin, Fujii Hironori, Gerrit Renker, Gisle Vanem,
+  Gregory Panakkal, Hannah Schierling, Harry Sintonen, Hide Ishikawa,
   highmtworks on github, Jakob Hirsch, John Bampton, John Porter,
-  John Sherrill, Jon Rumsey, Josh Brobst, Kvarec Lezki, Marc Aldorasi,
-  Marcel Raad, Mark Roszko, Martin D'Aloia, Martin Waleczek, Michael Osipov,
-  Mike Duglas, Muhammad Hussein Ammari, Nick Banks, nick-telia on github,
-  norbertmm on github, odek86 on github, Patrick Monnerat, Paul Groke,
-  Paul Howarth, Peter Wu, Philip Heiduck, Pronyushkin Petr, Radek Brich,
-  Radu Hociung, RanBarLavie on github, Ray Satiro, Ryan Schmidt,
-  Sébastien Helleu, Sergey Bronnikov, Sergio-IME on github,
-  sergio-nsk on github, SerusDev on github, Stanley Wucw, Stefan Eissing,
-  Stefan Talpalaru, Stephan Guilloux, Tatsuhiro Tsujikawa,
+  John Sherrill, Jon Rumsey, Josh Brobst, Kvarec Lezki, Lucas Pardue,
+  Marc Aldorasi, Marcel Raad, Mark Roszko, Martin D'Aloia, Martin Waleczek,
+  Michael Osipov, Mike Duglas, Muhammad Hussein Ammari, Nick Banks,
+  nick-telia on github, norbertmm on github, odek86 on github,
+  Patrick Monnerat, Paul Groke, Paul Howarth, Peter Wu, Philip Heiduck,
+  Pronyushkin Petr, Radek Brich, Radu Hociung, RanBarLavie on github,
+  Ray Satiro, Ryan Schmidt, Sébastien Helleu, Sergey Bronnikov,
+  Sergio-IME on github, sergio-nsk on github, SerusDev on github, Stanley Wucw,
+  Stefan Eissing, Stefan Talpalaru, Stephan Guilloux, Tatsuhiro Tsujikawa,
   Thomas1664 on github, Thomas Klausner, Timmy Schierling, Viktor Szakats,
   violetlige on github, William Tang, Yurii Rashkovskii
-  (66 contributors)
+  (69 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -334,6 +350,18 @@ References to bug reports and discussions on issues:
  [138] = https://curl.se/bug/?i=10414
  [139] = https://curl.se/bug/?i=10130
  [140] = https://curl.se/bug/?i=10421
+ [141] = https://curl.se/bug/?i=10451
  [143] = https://curl.se/bug/?i=10413
+ [144] = https://curl.se/bug/?i=10438
+ [145] = https://curl.se/bug/?i=10461
  [146] = https://curl.se/bug/?i=10408
  [147] = https://curl.se/bug/?i=10407
+ [148] = https://curl.se/bug/?i=10448
+ [149] = https://curl.se/bug/?i=10455
+ [150] = https://curl.se/bug/?i=10433
+ [151] = https://curl.se/bug/?i=10444
+ [152] = https://curl.se/bug/?i=10445
+ [153] = https://curl.se/bug/?i=10439
+ [154] = https://curl.se/bug/?i=10409
+ [155] = https://curl.se/bug/?i=10432
+ [156] = https://curl.se/bug/?i=10432
