@@ -162,7 +162,7 @@ printf "Added files:                    %d (total %d)\n",
 printf "Deleted files:                  %d (delta: %d)\n", $deletes,
     $creates - $deletes;
 print "Diffstat:$diffstat" if(!$fileschanged);
-printf "Files changed:                  %d\n", $fileschanged;
+printf "Files changed:                  %d (%.2f%%)\n", $fileschanged, $fileschanged*100/$afiles;
 printf "Lines inserted:                 %d\n", $insertions;
 printf "Lines deleted:                  %d (delta: %d)\n", $deletions,
     $insertions - $deletions;
