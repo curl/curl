@@ -90,6 +90,7 @@ struct h3out {
 #define QUIC_MAX_STREAMS (256*1024)
 #define QUIC_MAX_DATA (1*1024*1024)
 #define QUIC_IDLE_TIMEOUT (60*NGTCP2_SECONDS)
+#define QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
 
 #ifdef USE_OPENSSL
 #define QUIC_CIPHERS                                                          \
@@ -231,7 +232,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
 
   (void)data;
   s->initial_ts = timestamp();
-  s->handshake_timeout = NGTCP2_DEFAULT_HANDSHAKE_TIMEOUT;
+  s->handshake_timeout = QUIC_HANDSHAKE_TIMEOUT;
   s->max_window = 100 * stream_win_size;
   s->max_stream_window = stream_win_size;
 
@@ -2087,15 +2088,6 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
     struct HTTP *stream = data->req.p.http;
     Curl_dyn_free(&stream->overflow);
     free(stream->h3out);
-#ifdef DEBUGBUILD
-  if(ctx->qconn) {
-    ngtcp2_conn_stat stat;
-    ngtcp2_conn_get_conn_stat(ctx->qconn, &stat);
-    DEBUGF(LOG_CF(data, cf, "ngtcp2 conn stat: cwnd=%" PRIu64 ", "
-                  "max_tx_payload=%zu",
-                  stat.cwnd, stat.max_tx_udp_payload_size));
-  }
-#endif
     break;
   }
   case CF_CTRL_DATA_DONE_SEND: {
