@@ -150,6 +150,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t plain_bytes_copied = 0;
   rustls_result rresult = 0;
   char errorbuf[255];
+  size_t errorlen;
   rustls_io_result io_error;
 
   DEBUGASSERT(backend);
@@ -175,8 +176,9 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   rresult = rustls_connection_process_new_packets(rconn);
   if(rresult != RUSTLS_RESULT_OK) {
-    rustls_error(rresult, errorbuf, sizeof(errorbuf), &n);
-    failf(data, "%.*s", n, errorbuf);
+    rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
+    failf(data, "rustls_connection_process_new_packets: %.*s",
+      errorlen, errorbuf);
     *err = map_error(rresult);
     return -1;
   }
@@ -194,9 +196,16 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       backend->data_pending = FALSE;
       break;
     }
+    else if(rresult == RUSTLS_RESULT_UNEXPECTED_EOF) {
+      failf(data, "rustls: peer closed TCP connection "
+        "without first closing TLS connection");
+      *err = CURLE_READ_ERROR;
+      return -1;
+    }
     else if(rresult != RUSTLS_RESULT_OK) {
       /* n always equals 0 in this case, don't need to check it */
-      failf(data, "error in rustls_connection_read: %d", rresult);
+      rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
+      failf(data, "rustls_connection_read: %.*s", errorlen, errorbuf);
       *err = CURLE_READ_ERROR;
       return -1;
     }
@@ -254,6 +263,8 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t tlswritten_total = 0;
   rustls_result rresult;
   rustls_io_result io_error;
+  char errorbuf[256];
+  size_t errorlen;
 
   DEBUGASSERT(backend);
   rconn = backend->conn;
@@ -264,12 +275,13 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     rresult = rustls_connection_write(rconn, plainbuf, plainlen,
                                       &plainwritten);
     if(rresult != RUSTLS_RESULT_OK) {
-      failf(data, "error in rustls_connection_write");
+      rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
+      failf(data, "rustls_connection_write: %.*s", errorlen, errorbuf);
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
     else if(plainwritten == 0) {
-      failf(data, "EOF in rustls_connection_write");
+      failf(data, "rustls_connection_write: EOF");
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
@@ -387,7 +399,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = rustls_root_cert_store_add_pem(roots, ca_info_blob->data,
                                             ca_info_blob->len, verifypeer);
     if(result != RUSTLS_RESULT_OK) {
-      failf(data, "failed to parse trusted certificates from blob");
+      failf(data, "rustls: failed to parse trusted certificates from blob");
       rustls_root_cert_store_free(roots);
       rustls_client_config_free(
         rustls_client_config_builder_build(config_builder));
@@ -397,7 +409,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = rustls_client_config_builder_use_roots(config_builder, roots);
     rustls_root_cert_store_free(roots);
     if(result != RUSTLS_RESULT_OK) {
-      failf(data, "failed to load trusted certificates");
+      failf(data, "rustls: failed to load trusted certificates");
       rustls_client_config_free(
         rustls_client_config_builder_build(config_builder));
       return CURLE_SSL_CACERT_BADFILE;
@@ -407,7 +419,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = rustls_client_config_builder_load_roots_from_file(
       config_builder, ssl_cafile);
     if(result != RUSTLS_RESULT_OK) {
-      failf(data, "failed to load trusted certificates");
+      failf(data, "rustls: failed to load trusted certificates");
       rustls_client_config_free(
         rustls_client_config_builder_build(config_builder));
       return CURLE_SSL_CACERT_BADFILE;
@@ -419,7 +431,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   {
     char *snihost = Curl_ssl_snihost(data, hostname, NULL);
     if(!snihost) {
-      failf(data, "Failed to set SNI");
+      failf(data, "rustls: failed to get SNI");
       return CURLE_SSL_CONNECT_ERROR;
     }
     result = rustls_client_connection_new(backend->config, snihost, &rconn);
@@ -597,7 +609,7 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     rustls_connection_send_close_notify(backend->conn);
     n = cr_send(cf, data, NULL, 0, &tmperr);
     if(n < 0) {
-      failf(data, "error sending close notify: %d", tmperr);
+      failf(data, "rustls: error sending close_notify: %d", tmperr);
     }
 
     rustls_connection_free(backend->conn);
