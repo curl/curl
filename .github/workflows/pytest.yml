@@ -38,6 +38,7 @@ jobs:
             PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib"
             --with-ngtcp2=$HOME/all --enable-warnings --enable-werror --enable-debug
             --with-test-nghttpx="$HOME/all/bin/nghttpx"
+            --with-test-caddy="/usr/bin/caddy"
           ngtcp2-configure: >-
             --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
 
@@ -46,6 +47,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
         sudo apt-get install apache2 apache2-dev
+        sudo caddy
         sudo python3 -m pip install impacket pytest cryptography
       name: 'install prereqs and impacket, pytest, crypto'
 
