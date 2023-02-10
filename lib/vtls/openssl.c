@@ -4352,7 +4352,7 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
-                               nonblocking?0:timeout_ms);
+                               timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
@@ -4360,11 +4360,6 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
         goto out;
       }
       if(0 == what) {
-        if(nonblocking) {
-          *done = FALSE;
-          result = CURLE_OK;
-          goto out;
-        }
         /* timeout */
         failf(data, "SSL connection timeout");
         result = CURLE_OPERATION_TIMEDOUT;
