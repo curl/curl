@@ -174,7 +174,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
 
       *val |= h->protocol;
     }
-  } while(str++);
+  } while(str && str++);
 
   if(!*val)
     /* no protocol listed */
