@@ -2039,7 +2039,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
 #ifdef DEBUG_HTTP2
-    if(!len) {
+    if(!nwritten) {
       infof(data, "http2_send: easy %p (stream %u) win %u/%u",
             data, stream->stream_id,
             nghttp2_session_get_remote_window_size(ctx->h2),
@@ -2048,12 +2048,14 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         );
 
     }
-    infof(data, "http2_send returns %zu for stream %u", len,
+    infof(data, "http2_send returns %zd for stream %u", nwritten,
           stream->stream_id);
 #endif
+    /* handled writing BODY for open stream. */
     goto out;
   }
-
+  /* Stream has not been opened yet. `buf` is expected to contain
+   * request headers. */
   /* TODO: this assumes that the `buf` and `len` we are called with
    * is *all* HEADERs and no body. We have no way to determine here
    * if that is indeed the case. */
@@ -2123,7 +2125,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   infof(data, "Using Stream ID: %u (easy handle %p)",
         stream_id, (void *)data);
   stream->stream_id = stream_id;
-  /* See comment above. We assume that the whole buf was consumed by
+  /* See TODO above. We assume that the whole buf was consumed by
    * generating the request headers. */
   nwritten = len;
 
