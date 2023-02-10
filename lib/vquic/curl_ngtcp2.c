@@ -231,7 +231,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
 
   (void)data;
   s->initial_ts = timestamp();
-  s->handshake_timeout = NGTCP2_ERR_HANDSHAKE_TIMEOUT;
+  s->handshake_timeout = 10;
   s->max_window = 100 * stream_win_size;
   s->max_stream_window = stream_win_size;
 
