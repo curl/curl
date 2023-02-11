@@ -1,0 +1,1927 @@
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_5a3b6 && [1/2] Building C object CMakeFiles\cmTC_5a3b6.dir\src.c.obj
+FAILED: CMakeFiles/cmTC_5a3b6.dir/src.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo -DCMAKE_HAVE_LIBC_PTHREAD  /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_5a3b6.dir\src.c.obj /FdCMakeFiles\cmTC_5a3b6.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\src.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\src.c(1): fatal error C1083: Cannot open include file: 'pthread.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <pthread.h>
+
+static void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_bba5d && [1/2] Building C object CMakeFiles\cmTC_bba5d.dir\CheckFunctionExists.c.obj
+[2/2] Linking C executable cmTC_bba5d.exe
+FAILED: cmTC_bba5d.exe 
+cmd.exe /C "cd . && "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_bba5d.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\mt.exe --manifests  -- C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_bba5d.dir\CheckFunctionExists.c.obj  /out:cmTC_bba5d.exe /implib:cmTC_bba5d.lib /pdb:cmTC_bba5d.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  pthreads.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+LINK Pass 1: command "C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_bba5d.dir\CheckFunctionExists.c.obj /out:cmTC_bba5d.exe /implib:cmTC_bba5d.lib /pdb:cmTC_bba5d.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\cmTC_bba5d.dir/intermediate.manifest CMakeFiles\cmTC_bba5d.dir/manifest.res" failed (exit code 1104) with the following output:
+LINK : fatal error LNK1104: cannot open file 'pthreads.lib'
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if the function pthread_create exists in the pthread failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_5c2ed && [1/2] Building C object CMakeFiles\cmTC_5c2ed.dir\CheckFunctionExists.c.obj
+[2/2] Linking C executable cmTC_5c2ed.exe
+FAILED: cmTC_5c2ed.exe 
+cmd.exe /C "cd . && "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_5c2ed.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\mt.exe --manifests  -- C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_5c2ed.dir\CheckFunctionExists.c.obj  /out:cmTC_5c2ed.exe /implib:cmTC_5c2ed.lib /pdb:cmTC_5c2ed.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  pthread.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+LINK Pass 1: command "C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_5c2ed.dir\CheckFunctionExists.c.obj /out:cmTC_5c2ed.exe /implib:cmTC_5c2ed.lib /pdb:cmTC_5c2ed.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\cmTC_5c2ed.dir/intermediate.manifest CMakeFiles\cmTC_5c2ed.dir/manifest.res" failed (exit code 1104) with the following output:
+LINK : fatal error LNK1104: cannot open file 'pthread.lib'
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if files ;winldap.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_089a8 && [1/2] Building C object CMakeFiles\cmTC_089a8.dir\HAVE_WINLDAP_H.c.obj
+FAILED: CMakeFiles/cmTC_089a8.dir/HAVE_WINLDAP_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_089a8.dir\HAVE_WINLDAP_H.c.obj /FdCMakeFiles\cmTC_089a8.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_WINLDAP_H.c
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winnt.h(169): fatal error C1189: #error:  "No Target Architecture"
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <winldap.h>
+
+
+int main(void){return 0;}
+
+Determining if files ;winber.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_88930 && [1/2] Building C object CMakeFiles\cmTC_88930.dir\HAVE_WINBER_H.c.obj
+FAILED: CMakeFiles/cmTC_88930.dir/HAVE_WINBER_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_88930.dir\HAVE_WINBER_H.c.obj /FdCMakeFiles\cmTC_88930.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_WINBER_H.c
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(67): error C2061: syntax error: identifier 'BerElement'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(67): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(67): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(67): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(67): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(76): error C2061: syntax error: identifier 'VOID'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(76): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(76): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(76): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(76): error C2146: syntax error: missing ';' before identifier 'fbuf'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(76): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(84): error C2061: syntax error: identifier 'VOID'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(84): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(84): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(84): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(84): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(91): error C2061: syntax error: identifier 'VOID'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(91): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(91): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(91): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(91): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(97): error C2061: syntax error: identifier 'BERVAL'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(97): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(97): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(97): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(97): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(108): error C2061: syntax error: identifier 'BerElement'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(108): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(108): error C2146: syntax error: missing ')' before identifier 'options'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(108): error C2061: syntax error: identifier 'options'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(108): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(124): error C2061: syntax error: identifier 'ULONG'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(124): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(124): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(124): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(124): error C2143: syntax error: missing ';' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(124): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(135): error C2061: syntax error: identifier 'ULONG'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(135): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(135): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(135): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(135): error C2143: syntax error: missing ';' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(135): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(146): error C2061: syntax error: identifier 'ULONG'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(146): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(146): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(146): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(146): error C2143: syntax error: missing ';' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(146): error C2146: syntax error: missing ';' before identifier 'CHAR'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(146): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(156): error C2061: syntax error: identifier 'ULONG'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(156): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(156): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(156): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(156): error C2143: syntax error: missing ';' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(156): error C2146: syntax error: missing ';' before identifier 'CHAR'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(156): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(165): error C2061: syntax error: identifier 'INT'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(165): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(165): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(165): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(165): error C2143: syntax error: missing ';' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(165): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(248): error C2061: syntax error: identifier 'INT'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(248): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(248): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(248): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(248): error C2146: syntax error: missing ';' before identifier 'PSTR'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(248): error C2061: syntax error: identifier 'fmt'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(248): error C2059: syntax error: ','
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(248): error C2059: syntax error: ')'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(340): error C2061: syntax error: identifier 'ULONG'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(340): error C2059: syntax error: ';'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(340): error C2143: syntax error: missing ')' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(340): error C2143: syntax error: missing '{' before '*'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(340): error C2146: syntax error: missing ';' before identifier 'PSTR'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(340): error C2061: syntax error: identifier 'fmt'
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(340): error C2059: syntax error: ','
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\um\winber.h(340): error C2059: syntax error: ')'
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <winber.h>
+
+
+int main(void){return 0;}
+
+Determining if files ;ldap_ssl.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_88a22 && [1/2] Building C object CMakeFiles\cmTC_88a22.dir\HAVE_LDAP_SSL_H.c.obj
+FAILED: CMakeFiles/cmTC_88a22.dir/HAVE_LDAP_SSL_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_88a22.dir\HAVE_LDAP_SSL_H.c.obj /FdCMakeFiles\cmTC_88a22.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_LDAP_SSL_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_LDAP_SSL_H.c(2): fatal error C1083: Cannot open include file: 'ldap_ssl.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <ldap_ssl.h>
+
+
+int main(void){return 0;}
+
+Determining if files ;ldapssl.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_e2158 && [1/2] Building C object CMakeFiles\cmTC_e2158.dir\HAVE_LDAPSSL_H.c.obj
+FAILED: CMakeFiles/cmTC_e2158.dir/HAVE_LDAPSSL_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_e2158.dir\HAVE_LDAPSSL_H.c.obj /FdCMakeFiles\cmTC_e2158.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_LDAPSSL_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_LDAPSSL_H.c(2): fatal error C1083: Cannot open include file: 'ldapssl.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <ldapssl.h>
+
+
+int main(void){return 0;}
+
+Determining if the function idn2_lookup_ul exists in the idn2;wldap32;winmm;ws2_32 failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_569e0 && [1/2] Building C object CMakeFiles\cmTC_569e0.dir\CheckFunctionExists.c.obj
+[2/2] Linking C executable cmTC_569e0.exe
+FAILED: cmTC_569e0.exe 
+cmd.exe /C "cd . && "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_569e0.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\mt.exe --manifests  -- C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_569e0.dir\CheckFunctionExists.c.obj  /out:cmTC_569e0.exe /implib:cmTC_569e0.lib /pdb:cmTC_569e0.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  idn2.lib  wldap32.lib  winmm.lib  ws2_32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+LINK Pass 1: command "C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_569e0.dir\CheckFunctionExists.c.obj /out:cmTC_569e0.exe /implib:cmTC_569e0.lib /pdb:cmTC_569e0.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console idn2.lib wldap32.lib winmm.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\cmTC_569e0.dir/intermediate.manifest CMakeFiles\cmTC_569e0.dir/manifest.res" failed (exit code 1104) with the following output:
+LINK : fatal error LNK1104: cannot open file 'idn2.lib'
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/filio.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_67fc0 && [1/2] Building C object CMakeFiles\cmTC_67fc0.dir\HAVE_SYS_FILIO_H.c.obj
+FAILED: CMakeFiles/cmTC_67fc0.dir/HAVE_SYS_FILIO_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_67fc0.dir\HAVE_SYS_FILIO_H.c.obj /FdCMakeFiles\cmTC_67fc0.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_FILIO_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_FILIO_H.c(7): fatal error C1083: Cannot open include file: 'sys/filio.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/filio.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/ioctl.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_f9807 && [1/2] Building C object CMakeFiles\cmTC_f9807.dir\HAVE_SYS_IOCTL_H.c.obj
+FAILED: CMakeFiles/cmTC_f9807.dir/HAVE_SYS_IOCTL_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_f9807.dir\HAVE_SYS_IOCTL_H.c.obj /FdCMakeFiles\cmTC_f9807.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_IOCTL_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_IOCTL_H.c(7): fatal error C1083: Cannot open include file: 'sys/ioctl.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/resource.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_f0e83 && [1/2] Building C object CMakeFiles\cmTC_f0e83.dir\HAVE_SYS_RESOURCE_H.c.obj
+FAILED: CMakeFiles/cmTC_f0e83.dir/HAVE_SYS_RESOURCE_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_f0e83.dir\HAVE_SYS_RESOURCE_H.c.obj /FdCMakeFiles\cmTC_f0e83.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_RESOURCE_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_RESOURCE_H.c(7): fatal error C1083: Cannot open include file: 'sys/resource.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/resource.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/uio.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_0f890 && [1/2] Building C object CMakeFiles\cmTC_0f890.dir\HAVE_SYS_UIO_H.c.obj
+FAILED: CMakeFiles/cmTC_0f890.dir/HAVE_SYS_UIO_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_0f890.dir\HAVE_SYS_UIO_H.c.obj /FdCMakeFiles\cmTC_0f890.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_UIO_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_UIO_H.c(9): fatal error C1083: Cannot open include file: 'sys/uio.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/un.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_2b26a && [1/2] Building C object CMakeFiles\cmTC_2b26a.dir\HAVE_SYS_UN_H.c.obj
+FAILED: CMakeFiles/cmTC_2b26a.dir/HAVE_SYS_UN_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_2b26a.dir\HAVE_SYS_UN_H.c.obj /FdCMakeFiles\cmTC_2b26a.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_UN_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_UN_H.c(9): fatal error C1083: Cannot open include file: 'sys/un.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/un.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;sys/xattr.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_e3b94 && [1/2] Building C object CMakeFiles\cmTC_e3b94.dir\HAVE_SYS_XATTR_H.c.obj
+FAILED: CMakeFiles/cmTC_e3b94.dir/HAVE_SYS_XATTR_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_e3b94.dir\HAVE_SYS_XATTR_H.c.obj /FdCMakeFiles\cmTC_e3b94.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_XATTR_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_XATTR_H.c(10): fatal error C1083: Cannot open include file: 'sys/xattr.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <sys/xattr.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;arpa/tftp.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_33d82 && [1/2] Building C object CMakeFiles\cmTC_33d82.dir\HAVE_ARPA_TFTP_H.c.obj
+FAILED: CMakeFiles/cmTC_33d82.dir/HAVE_ARPA_TFTP_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_33d82.dir\HAVE_ARPA_TFTP_H.c.obj /FdCMakeFiles\cmTC_33d82.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_ARPA_TFTP_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_ARPA_TFTP_H.c(10): fatal error C1083: Cannot open include file: 'arpa/tftp.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <arpa/tftp.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;idn2.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_2fa07 && [1/2] Building C object CMakeFiles\cmTC_2fa07.dir\HAVE_IDN2_H.c.obj
+FAILED: CMakeFiles/cmTC_2fa07.dir/HAVE_IDN2_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_2fa07.dir\HAVE_IDN2_H.c.obj /FdCMakeFiles\cmTC_2fa07.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_IDN2_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_IDN2_H.c(13): fatal error C1083: Cannot open include file: 'idn2.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <idn2.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;ifaddrs.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_7cedf && [1/2] Building C object CMakeFiles\cmTC_7cedf.dir\HAVE_IFADDRS_H.c.obj
+FAILED: CMakeFiles/cmTC_7cedf.dir/HAVE_IFADDRS_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_7cedf.dir\HAVE_IFADDRS_H.c.obj /FdCMakeFiles\cmTC_7cedf.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_IFADDRS_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_IFADDRS_H.c(13): fatal error C1083: Cannot open include file: 'ifaddrs.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;io.h;krb.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_903a8 && [1/2] Building C object CMakeFiles\cmTC_903a8.dir\HAVE_KRB_H.c.obj
+FAILED: CMakeFiles/cmTC_903a8.dir/HAVE_KRB_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_903a8.dir\HAVE_KRB_H.c.obj /FdCMakeFiles\cmTC_903a8.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_KRB_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_KRB_H.c(14): fatal error C1083: Cannot open include file: 'krb.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <krb.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;io.h;libgen.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_a460b && [1/2] Building C object CMakeFiles\cmTC_a460b.dir\HAVE_LIBGEN_H.c.obj
+FAILED: CMakeFiles/cmTC_a460b.dir/HAVE_LIBGEN_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_a460b.dir\HAVE_LIBGEN_H.c.obj /FdCMakeFiles\cmTC_a460b.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_LIBGEN_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_LIBGEN_H.c(14): fatal error C1083: Cannot open include file: 'libgen.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <libgen.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;io.h;locale.h;netinet/tcp.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_f563f && [1/2] Building C object CMakeFiles\cmTC_f563f.dir\HAVE_NETINET_TCP_H.c.obj
+FAILED: CMakeFiles/cmTC_f563f.dir/HAVE_NETINET_TCP_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_f563f.dir\HAVE_NETINET_TCP_H.c.obj /FdCMakeFiles\cmTC_f563f.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_NETINET_TCP_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_NETINET_TCP_H.c(15): fatal error C1083: Cannot open include file: 'netinet/tcp.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <netinet/tcp.h>
+
+
+int main(void){return 0;}
+
+Determining if the include file linux/tcp.h exists failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_8ace3 && [1/2] Building C object CMakeFiles\cmTC_8ace3.dir\CheckIncludeFile.c.obj
+FAILED: CMakeFiles/cmTC_8ace3.dir/CheckIncludeFile.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_8ace3.dir\CheckIncludeFile.c.obj /FdCMakeFiles\cmTC_8ace3.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckIncludeFile.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckIncludeFile.c(1): fatal error C1083: Cannot open include file: 'linux/tcp.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;io.h;locale.h;pem.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_cd93c && [1/2] Building C object CMakeFiles\cmTC_cd93c.dir\HAVE_PEM_H.c.obj
+FAILED: CMakeFiles/cmTC_cd93c.dir/HAVE_PEM_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_cd93c.dir\HAVE_PEM_H.c.obj /FdCMakeFiles\cmTC_cd93c.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_PEM_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_PEM_H.c(15): fatal error C1083: Cannot open include file: 'pem.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <pem.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;io.h;locale.h;poll.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_7a1b9 && [1/2] Building C object CMakeFiles\cmTC_7a1b9.dir\HAVE_POLL_H.c.obj
+FAILED: CMakeFiles/cmTC_7a1b9.dir/HAVE_POLL_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_7a1b9.dir\HAVE_POLL_H.c.obj /FdCMakeFiles\cmTC_7a1b9.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_POLL_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_POLL_H.c(15): fatal error C1083: Cannot open include file: 'poll.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <poll.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;io.h;locale.h;setjmp.h;signal.h;ssl.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_a2c44 && [1/2] Building C object CMakeFiles\cmTC_a2c44.dir\HAVE_SSL_H.c.obj
+FAILED: CMakeFiles/cmTC_a2c44.dir/HAVE_SSL_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_a2c44.dir\HAVE_SSL_H.c.obj /FdCMakeFiles\cmTC_a2c44.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SSL_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SSL_H.c(17): fatal error C1083: Cannot open include file: 'ssl.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <ssl.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;io.h;locale.h;setjmp.h;signal.h;stdbool.h;stdio.h;stdlib.h;string.h;stropts.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_f3877 && [1/2] Building C object CMakeFiles\cmTC_f3877.dir\HAVE_STROPTS_H.c.obj
+FAILED: CMakeFiles/cmTC_f3877.dir/HAVE_STROPTS_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_f3877.dir\HAVE_STROPTS_H.c.obj /FdCMakeFiles\cmTC_f3877.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_STROPTS_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_STROPTS_H.c(21): fatal error C1083: Cannot open include file: 'stropts.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stropts.h>
+
+
+int main(void){return 0;}
+
+Determining if files windows.h;ws2tcpip.h;winsock2.h;wincrypt.h;stdio.h;sys/stat.h;sys/types.h;sys/utime.h;assert.h;errno.h;fcntl.h;io.h;locale.h;setjmp.h;signal.h;stdbool.h;stdio.h;stdlib.h;string.h;time.h;process.h;stddef.h;malloc.h;memory.h;sys/utsname.h exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_c90ca && [1/2] Building C object CMakeFiles\cmTC_c90ca.dir\HAVE_SYS_UTSNAME_H.c.obj
+FAILED: CMakeFiles/cmTC_c90ca.dir/HAVE_SYS_UTSNAME_H.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_c90ca.dir\HAVE_SYS_UTSNAME_H.c.obj /FdCMakeFiles\cmTC_c90ca.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_UTSNAME_H.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckIncludeFiles\HAVE_SYS_UTSNAME_H.c(26): fatal error C1083: Cannot open include file: 'sys/utsname.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Source:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+#include <sys/utsname.h>
+
+
+int main(void){return 0;}
+
+Determining size of ssize_t failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_e56d4 && [1/2] Building C object CMakeFiles\cmTC_e56d4.dir\SIZEOF_SSIZE_T.c.obj
+FAILED: CMakeFiles/cmTC_e56d4.dir/SIZEOF_SSIZE_T.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_e56d4.dir\SIZEOF_SSIZE_T.c.obj /FdCMakeFiles\cmTC_e56d4.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckTypeSize\SIZEOF_SSIZE_T.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckTypeSize\SIZEOF_SSIZE_T.c(28): error C2065: 'ssize_t': undeclared identifier
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckTypeSize\SIZEOF_SSIZE_T.c(29): error C2065: 'ssize_t': undeclared identifier
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckTypeSize\SIZEOF_SSIZE_T.c(30): error C2065: 'ssize_t': undeclared identifier
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckTypeSize\SIZEOF_SSIZE_T.c(31): error C2065: 'ssize_t': undeclared identifier
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckTypeSize\SIZEOF_SSIZE_T.c(32): error C2065: 'ssize_t': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CheckTypeSize/SIZEOF_SSIZE_T.c:
+#include <sys/types.h>
+#include <stddef.h>
+
+
+#undef KEY
+#if defined(__i386)
+# define KEY '_','_','i','3','8','6'
+#elif defined(__x86_64)
+# define KEY '_','_','x','8','6','_','6','4'
+#elif defined(__PPC64__)
+# define KEY '_','_','P','P','C','6','4','_','_'
+#elif defined(__ppc64__)
+# define KEY '_','_','p','p','c','6','4','_','_'
+#elif defined(__PPC__)
+# define KEY '_','_','P','P','C','_','_'
+#elif defined(__ppc__)
+# define KEY '_','_','p','p','c','_','_'
+#elif defined(__aarch64__)
+# define KEY '_','_','a','a','r','c','h','6','4','_','_'
+#elif defined(__ARM_ARCH_7A__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','A','_','_'
+#elif defined(__ARM_ARCH_7S__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','S','_','_'
+#endif
+
+#define SIZE (sizeof(ssize_t))
+static char info_size[] =  {'I', 'N', 'F', 'O', ':', 's','i','z','e','[',
+  ('0' + ((SIZE / 10000)%10)),
+  ('0' + ((SIZE / 1000)%10)),
+  ('0' + ((SIZE / 100)%10)),
+  ('0' + ((SIZE / 10)%10)),
+  ('0' +  (SIZE    % 10)),
+  ']',
+#ifdef KEY
+  ' ','k','e','y','[', KEY, ']',
+#endif
+  '\0'};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_size[argc];
+  (void)argv;
+  return require;
+}
+
+
+Determining if the basename exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_910a7 && [1/2] Building C object CMakeFiles\cmTC_910a7.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_910a7.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_910a7.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_910a7.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'basename': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef basename
+  return ((int*)(&basename))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the strncmpi exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_b8d45 && [1/2] Building C object CMakeFiles\cmTC_b8d45.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_b8d45.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_b8d45.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_b8d45.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'strncmpi': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strncmpi
+  return ((int*)(&strncmpi))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the alarm exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_84017 && [1/2] Building C object CMakeFiles\cmTC_84017.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_84017.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_84017.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_84017.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'alarm': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef alarm
+  return ((int*)(&alarm))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the getppid exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_300af && [1/2] Building C object CMakeFiles\cmTC_300af.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_300af.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_300af.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_300af.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'getppid': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef getppid
+  return ((int*)(&getppid))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the utimes exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_948c4 && [1/2] Building C object CMakeFiles\cmTC_948c4.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_948c4.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_948c4.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_948c4.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'utimes': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef utimes
+  return ((int*)(&utimes))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the getpwuid_r exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_cb129 && [1/2] Building C object CMakeFiles\cmTC_cb129.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_cb129.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_cb129.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_cb129.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'getpwuid_r': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef getpwuid_r
+  return ((int*)(&getpwuid_r))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the usleep exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_5087f && [1/2] Building C object CMakeFiles\cmTC_5087f.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_5087f.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_5087f.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_5087f.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'usleep': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef usleep
+  return ((int*)(&usleep))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the strerror_r exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_187ea && [1/2] Building C object CMakeFiles\cmTC_187ea.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_187ea.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_187ea.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_187ea.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'strerror_r': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strerror_r
+  return ((int*)(&strerror_r))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the siginterrupt exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_ac79d && [1/2] Building C object CMakeFiles\cmTC_ac79d.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_ac79d.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_ac79d.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_ac79d.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'siginterrupt': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef siginterrupt
+  return ((int*)(&siginterrupt))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the pipe exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_f73b9 && [1/2] Building C object CMakeFiles\cmTC_f73b9.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_f73b9.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_f73b9.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_f73b9.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'pipe': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pipe
+  return ((int*)(&pipe))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the ftruncate exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_6549c && [1/2] Building C object CMakeFiles\cmTC_6549c.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_6549c.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_6549c.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_6549c.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'ftruncate': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef ftruncate
+  return ((int*)(&ftruncate))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the if_nametoindex exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_10529 && [1/2] Building C object CMakeFiles\cmTC_10529.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_10529.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_10529.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_10529.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'if_nametoindex': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef if_nametoindex
+  return ((int*)(&if_nametoindex))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the getrlimit exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_bf49e && [1/2] Building C object CMakeFiles\cmTC_bf49e.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_bf49e.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_bf49e.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_bf49e.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'getrlimit': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef getrlimit
+  return ((int*)(&getrlimit))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the setrlimit exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_b08dd && [1/2] Building C object CMakeFiles\cmTC_b08dd.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_b08dd.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_b08dd.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_b08dd.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'setrlimit': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef setrlimit
+  return ((int*)(&setrlimit))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the fcntl exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_18d37 && [1/2] Building C object CMakeFiles\cmTC_18d37.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_18d37.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_18d37.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_18d37.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'fcntl': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef fcntl
+  return ((int*)(&fcntl))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the ioctl exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_3ff0a && [1/2] Building C object CMakeFiles\cmTC_3ff0a.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_3ff0a.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_3ff0a.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_3ff0a.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'ioctl': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef ioctl
+  return ((int*)(&ioctl))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the function mach_absolute_time exists failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_2238d && [1/2] Building C object CMakeFiles\cmTC_2238d.dir\CheckFunctionExists.c.obj
+[2/2] Linking C executable cmTC_2238d.exe
+FAILED: cmTC_2238d.exe 
+cmd.exe /C "cd . && "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_2238d.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\mt.exe --manifests  -- C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_2238d.dir\CheckFunctionExists.c.obj  /out:cmTC_2238d.exe /implib:cmTC_2238d.lib /pdb:cmTC_2238d.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  ws2_32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+LINK Pass 1: command "C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_2238d.dir\CheckFunctionExists.c.obj /out:cmTC_2238d.exe /implib:cmTC_2238d.lib /pdb:cmTC_2238d.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\cmTC_2238d.dir/intermediate.manifest CMakeFiles\cmTC_2238d.dir/manifest.res" failed (exit code 1120) with the following output:
+CheckFunctionExists.c.obj : error LNK2019: unresolved external symbol mach_absolute_time referenced in function main
+cmTC_2238d.exe : fatal error LNK1120: 1 unresolved externals
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if the fsetxattr exist failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_1c0d8 && [1/2] Building C object CMakeFiles\cmTC_1c0d8.dir\CheckSymbolExists.c.obj
+FAILED: CMakeFiles/cmTC_1c0d8.dir/CheckSymbolExists.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_1c0d8.dir\CheckSymbolExists.c.obj /FdCMakeFiles\cmTC_1c0d8.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\CheckSymbolExists.c(31): error C2065: 'fsetxattr': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+File C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <windows.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <wincrypt.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utime.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <io.h>
+#include <locale.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <process.h>
+#include <stddef.h>
+#include <malloc.h>
+#include <memory.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef fsetxattr
+  return ((int*)(&fsetxattr))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining size of sa_family_t failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_2c30d && [1/2] Building C object CMakeFiles\cmTC_2c30d.dir\SIZEOF_SA_FAMILY_T.c.obj
+FAILED: CMakeFiles/cmTC_2c30d.dir/SIZEOF_SA_FAMILY_T.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_2c30d.dir\SIZEOF_SA_FAMILY_T.c.obj /FdCMakeFiles\cmTC_2c30d.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckTypeSize\SIZEOF_SA_FAMILY_T.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckTypeSize\SIZEOF_SA_FAMILY_T.c(3): fatal error C1083: Cannot open include file: 'sys/socket.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CheckTypeSize/SIZEOF_SA_FAMILY_T.c:
+#include <sys/types.h>
+#include <stddef.h>
+#include "sys/socket.h"
+
+
+#undef KEY
+#if defined(__i386)
+# define KEY '_','_','i','3','8','6'
+#elif defined(__x86_64)
+# define KEY '_','_','x','8','6','_','6','4'
+#elif defined(__PPC64__)
+# define KEY '_','_','P','P','C','6','4','_','_'
+#elif defined(__ppc64__)
+# define KEY '_','_','p','p','c','6','4','_','_'
+#elif defined(__PPC__)
+# define KEY '_','_','P','P','C','_','_'
+#elif defined(__ppc__)
+# define KEY '_','_','p','p','c','_','_'
+#elif defined(__aarch64__)
+# define KEY '_','_','a','a','r','c','h','6','4','_','_'
+#elif defined(__ARM_ARCH_7A__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','A','_','_'
+#elif defined(__ARM_ARCH_7S__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','S','_','_'
+#endif
+
+#define SIZE (sizeof(sa_family_t))
+static char info_size[] =  {'I', 'N', 'F', 'O', ':', 's','i','z','e','[',
+  ('0' + ((SIZE / 10000)%10)),
+  ('0' + ((SIZE / 1000)%10)),
+  ('0' + ((SIZE / 100)%10)),
+  ('0' + ((SIZE / 10)%10)),
+  ('0' +  (SIZE    % 10)),
+  ']',
+#ifdef KEY
+  ' ','k','e','y','[', KEY, ']',
+#endif
+  '\0'};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_size[argc];
+  (void)argv;
+  return require;
+}
+
+
+Determining size of ADDRESS_FAMILY failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_7ca88 && [1/2] Building C object CMakeFiles\cmTC_7ca88.dir\SIZEOF_ADDRESS_FAMILY.c.obj
+FAILED: CMakeFiles/cmTC_7ca88.dir/SIZEOF_ADDRESS_FAMILY.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_7ca88.dir\SIZEOF_ADDRESS_FAMILY.c.obj /FdCMakeFiles\cmTC_7ca88.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CheckTypeSize\SIZEOF_ADDRESS_FAMILY.c
+C:\Program Files (x86)\Windows Kits\10\include\10.0.22000.0\shared\ws2def.h(47): fatal error C1189: #error:  Do not include winsock.h and ws2def.h in the same module. Instead include only winsock2.h.
+ninja: build stopped: subcommand failed.
+
+
+C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CheckTypeSize/SIZEOF_ADDRESS_FAMILY.c:
+#include <sys/types.h>
+#include <stddef.h>
+#include "ws2def.h"
+
+
+#undef KEY
+#if defined(__i386)
+# define KEY '_','_','i','3','8','6'
+#elif defined(__x86_64)
+# define KEY '_','_','x','8','6','_','6','4'
+#elif defined(__PPC64__)
+# define KEY '_','_','P','P','C','6','4','_','_'
+#elif defined(__ppc64__)
+# define KEY '_','_','p','p','c','6','4','_','_'
+#elif defined(__PPC__)
+# define KEY '_','_','P','P','C','_','_'
+#elif defined(__ppc__)
+# define KEY '_','_','p','p','c','_','_'
+#elif defined(__aarch64__)
+# define KEY '_','_','a','a','r','c','h','6','4','_','_'
+#elif defined(__ARM_ARCH_7A__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','A','_','_'
+#elif defined(__ARM_ARCH_7S__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','S','_','_'
+#endif
+
+#define SIZE (sizeof(ADDRESS_FAMILY))
+static char info_size[] =  {'I', 'N', 'F', 'O', ':', 's','i','z','e','[',
+  ('0' + ((SIZE / 10000)%10)),
+  ('0' + ((SIZE / 1000)%10)),
+  ('0' + ((SIZE / 100)%10)),
+  ('0' + ((SIZE / 10)%10)),
+  ('0' +  (SIZE    % 10)),
+  ']',
+#ifdef KEY
+  ' ','k','e','y','[', KEY, ']',
+#endif
+  '\0'};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_size[argc];
+  (void)argv;
+  return require;
+}
+
+
+Performing Curl Test HAVE_FCNTL_O_NONBLOCK failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_a399d && [1/2] Building C object CMakeFiles\cmTC_a399d.dir\CurlTests.c.obj
+FAILED: CMakeFiles/cmTC_a399d.dir/CurlTests.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS -DHAVE_FCNTL_O_NONBLOCK  -DHAVE_WINDOWS_H -DHAVE_WS2TCPIP_H -DHAVE_WINSOCK2_H -DHAVE_WINCRYPT_H -DHAVE_STDIO_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UTIME_H -DHAVE_ASSERT_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IO_H -DHAVE_LOCALE_H -DHAVE_SETJMP_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_TIME_H -DHAVE_PROCESS_H -DHAVE_STDDEF_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_a399d.dir\CurlTests.c.obj /FdCMakeFiles\cmTC_a399d.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(46): fatal error C1083: Cannot open include file: 'unistd.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_IOCTLSOCKET_CAMEL failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_ffc00 && [1/2] Building C object CMakeFiles\cmTC_ffc00.dir\CurlTests.c.obj
+[2/2] Linking C executable cmTC_ffc00.exe
+FAILED: cmTC_ffc00.exe 
+cmd.exe /C "cd . && "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_ffc00.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\mt.exe --manifests  -- C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_ffc00.dir\CurlTests.c.obj  /out:cmTC_ffc00.exe /implib:cmTC_ffc00.lib /pdb:cmTC_ffc00.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  ws2_32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+LINK Pass 1: command "C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_ffc00.dir\CurlTests.c.obj /out:cmTC_ffc00.exe /implib:cmTC_ffc00.lib /pdb:cmTC_ffc00.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\cmTC_ffc00.dir/intermediate.manifest CMakeFiles\cmTC_ffc00.dir/manifest.res" failed (exit code 1120) with the following output:
+CurlTests.c.obj : error LNK2019: unresolved external symbol IoctlSocket referenced in function main
+cmTC_ffc00.exe : fatal error LNK1120: 1 unresolved externals
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_IOCTLSOCKET_CAMEL_FIONBIO failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_30cd8 && [1/2] Building C object CMakeFiles\cmTC_30cd8.dir\CurlTests.c.obj
+[2/2] Linking C executable cmTC_30cd8.exe
+FAILED: cmTC_30cd8.exe 
+cmd.exe /C "cd . && "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_30cd8.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\mt.exe --manifests  -- C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_30cd8.dir\CurlTests.c.obj  /out:cmTC_30cd8.exe /implib:cmTC_30cd8.lib /pdb:cmTC_30cd8.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  ws2_32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+LINK Pass 1: command "C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_30cd8.dir\CurlTests.c.obj /out:cmTC_30cd8.exe /implib:cmTC_30cd8.lib /pdb:cmTC_30cd8.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\cmTC_30cd8.dir/intermediate.manifest CMakeFiles\cmTC_30cd8.dir/manifest.res" failed (exit code 1120) with the following output:
+CurlTests.c.obj : error LNK2019: unresolved external symbol IoctlSocket referenced in function main
+cmTC_30cd8.exe : fatal error LNK1120: 1 unresolved externals
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_IOCTL_FIONBIO failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_f245a && [1/2] Building C object CMakeFiles\cmTC_f245a.dir\CurlTests.c.obj
+FAILED: CMakeFiles/cmTC_f245a.dir/CurlTests.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS -DHAVE_IOCTL_FIONBIO  -DHAVE_WINDOWS_H -DHAVE_WS2TCPIP_H -DHAVE_WINSOCK2_H -DHAVE_WINCRYPT_H -DHAVE_STDIO_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UTIME_H -DHAVE_ASSERT_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IO_H -DHAVE_LOCALE_H -DHAVE_SETJMP_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_TIME_H -DHAVE_PROCESS_H -DHAVE_STDDEF_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_f245a.dir\CurlTests.c.obj /FdCMakeFiles\cmTC_f245a.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(345): error C2065: 'FIONBIO': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_IOCTL_SIOCGIFADDR failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_6a884 && [1/2] Building C object CMakeFiles\cmTC_6a884.dir\CurlTests.c.obj
+FAILED: CMakeFiles/cmTC_6a884.dir/CurlTests.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS -DHAVE_IOCTL_SIOCGIFADDR  -DHAVE_WINDOWS_H -DHAVE_WS2TCPIP_H -DHAVE_WINSOCK2_H -DHAVE_WINCRYPT_H -DHAVE_STDIO_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UTIME_H -DHAVE_ASSERT_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IO_H -DHAVE_LOCALE_H -DHAVE_SETJMP_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_TIME_H -DHAVE_PROCESS_H -DHAVE_STDDEF_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_6a884.dir\CurlTests.c.obj /FdCMakeFiles\cmTC_6a884.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(370): fatal error C1083: Cannot open include file: 'net/if.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_SETSOCKOPT_SO_NONBLOCK failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_728d2 && [1/2] Building C object CMakeFiles\cmTC_728d2.dir\CurlTests.c.obj
+FAILED: CMakeFiles/cmTC_728d2.dir/CurlTests.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS -DHAVE_SETSOCKOPT_SO_NONBLOCK  -DHAVE_WINDOWS_H -DHAVE_WS2TCPIP_H -DHAVE_WINSOCK2_H -DHAVE_WINCRYPT_H -DHAVE_STDIO_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UTIME_H -DHAVE_ASSERT_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IO_H -DHAVE_LOCALE_H -DHAVE_SETJMP_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_TIME_H -DHAVE_PROCESS_H -DHAVE_STDDEF_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_728d2.dir\CurlTests.c.obj /FdCMakeFiles\cmTC_728d2.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(406): error C2065: 'SO_NONBLOCK': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_7d122 && [1/2] Building C object CMakeFiles\cmTC_7d122.dir\CurlTests.c.obj
+[2/2] Linking C executable cmTC_7d122.exe
+FAILED: cmTC_7d122.exe 
+cmd.exe /C "cd . && "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_7d122.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\mt.exe --manifests  -- C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_7d122.dir\CurlTests.c.obj  /out:cmTC_7d122.exe /implib:cmTC_7d122.lib /pdb:cmTC_7d122.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  ws2_32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+LINK Pass 1: command "C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_7d122.dir\CurlTests.c.obj /out:cmTC_7d122.exe /implib:cmTC_7d122.lib /pdb:cmTC_7d122.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\cmTC_7d122.dir/intermediate.manifest CMakeFiles\cmTC_7d122.dir/manifest.res" failed (exit code 1120) with the following output:
+MSVCRTD.lib(exe_main.obj) : error LNK2019: unresolved external symbol main referenced in function "int __cdecl invoke_main(void)" (?invoke_main@@YAHXZ)
+cmTC_7d122.exe : fatal error LNK1120: 1 unresolved externals
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_FILE_OFFSET_BITS failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_086b3 && [1/2] Building C object CMakeFiles\cmTC_086b3.dir\CurlTests.c.obj
+FAILED: CMakeFiles/cmTC_086b3.dir/CurlTests.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS -DHAVE_FILE_OFFSET_BITS  -DHAVE_WINDOWS_H -DHAVE_WS2TCPIP_H -DHAVE_WINSOCK2_H -DHAVE_WINCRYPT_H -DHAVE_STDIO_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UTIME_H -DHAVE_ASSERT_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IO_H -DHAVE_LOCALE_H -DHAVE_SETJMP_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_TIME_H -DHAVE_PROCESS_H -DHAVE_STDDEF_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_086b3.dir\CurlTests.c.obj /FdCMakeFiles\cmTC_086b3.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(220): warning C4293: '<<': shift count negative or too big, undefined behavior
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(221): warning C4293: '<<': shift count negative or too big, undefined behavior
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(222): error C2118: negative subscript
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_VARIADIC_MACROS_GCC failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_32246 && [1/2] Building C object CMakeFiles\cmTC_32246.dir\CurlTests.c.obj
+FAILED: CMakeFiles/cmTC_32246.dir/CurlTests.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS -DHAVE_VARIADIC_MACROS_GCC  -DHAVE_WINDOWS_H -DHAVE_WS2TCPIP_H -DHAVE_WINSOCK2_H -DHAVE_WINCRYPT_H -DHAVE_STDIO_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UTIME_H -DHAVE_ASSERT_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IO_H -DHAVE_LOCALE_H -DHAVE_SETJMP_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_TIME_H -DHAVE_PROCESS_H -DHAVE_STDDEF_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_32246.dir\CurlTests.c.obj /FdCMakeFiles\cmTC_32246.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(497): error C2010: '.': unexpected in macro parameter list
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(498): error C2010: '.': unexpected in macro parameter list
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_GLIBC_STRERROR_R failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_63d1a && [1/2] Building C object CMakeFiles\cmTC_63d1a.dir\CurlTests.c.obj
+FAILED: CMakeFiles/cmTC_63d1a.dir/CurlTests.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS -DHAVE_GLIBC_STRERROR_R  -DHAVE_WINDOWS_H -DHAVE_WS2TCPIP_H -DHAVE_WINSOCK2_H -DHAVE_WINCRYPT_H -DHAVE_STDIO_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UTIME_H -DHAVE_ASSERT_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IO_H -DHAVE_LOCALE_H -DHAVE_SETJMP_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_TIME_H -DHAVE_PROCESS_H -DHAVE_STDDEF_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_63d1a.dir\CurlTests.c.obj /FdCMakeFiles\cmTC_63d1a.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(422): error C2109: subscript requires array or pointer type
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(422): error C2198: 'check': too few arguments for call
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_POSIX_STRERROR_R failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_aca35 && [1/2] Building C object CMakeFiles\cmTC_aca35.dir\CurlTests.c.obj
+[2/2] Linking C executable cmTC_aca35.exe
+FAILED: cmTC_aca35.exe 
+cmd.exe /C "cd . && "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_aca35.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100220~1.0\x64\mt.exe --manifests  -- C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_aca35.dir\CurlTests.c.obj  /out:cmTC_aca35.exe /implib:cmTC_aca35.lib /pdb:cmTC_aca35.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  ws2_32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+LINK Pass 1: command "C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_aca35.dir\CurlTests.c.obj /out:cmTC_aca35.exe /implib:cmTC_aca35.lib /pdb:cmTC_aca35.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\cmTC_aca35.dir/intermediate.manifest CMakeFiles\cmTC_aca35.dir/manifest.res" failed (exit code 1120) with the following output:
+CurlTests.c.obj : error LNK2019: unresolved external symbol strerror_r referenced in function main
+cmTC_aca35.exe : fatal error LNK1120: 1 unresolved externals
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_CLOCK_GETTIME_MONOTONIC failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_b6a62 && [1/2] Building C object CMakeFiles\cmTC_b6a62.dir\CurlTests.c.obj
+FAILED: CMakeFiles/cmTC_b6a62.dir/CurlTests.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS -DHAVE_CLOCK_GETTIME_MONOTONIC  -DHAVE_WINDOWS_H -DHAVE_WS2TCPIP_H -DHAVE_WINSOCK2_H -DHAVE_WINCRYPT_H -DHAVE_STDIO_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UTIME_H -DHAVE_ASSERT_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IO_H -DHAVE_LOCALE_H -DHAVE_SETJMP_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_TIME_H -DHAVE_PROCESS_H -DHAVE_STDDEF_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_b6a62.dir\CurlTests.c.obj /FdCMakeFiles\cmTC_b6a62.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(462): error C2065: 'CLOCK_MONOTONIC': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+Performing Curl Test HAVE_BUILTIN_AVAILABLE failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_ece86 && [1/2] Building C object CMakeFiles\cmTC_ece86.dir\CurlTests.c.obj
+FAILED: CMakeFiles/cmTC_ece86.dir/CurlTests.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS -DHAVE_BUILTIN_AVAILABLE  -DHAVE_WINDOWS_H -DHAVE_WS2TCPIP_H -DHAVE_WINSOCK2_H -DHAVE_WINCRYPT_H -DHAVE_STDIO_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UTIME_H -DHAVE_ASSERT_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IO_H -DHAVE_LOCALE_H -DHAVE_SETJMP_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_TIME_H -DHAVE_PROCESS_H -DHAVE_STDDEF_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\cmTC_ece86.dir\CurlTests.c.obj /FdCMakeFiles\cmTC_ece86.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(469): error C2065: 'macOS': undeclared identifier
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(469): error C2143: syntax error: missing ')' before 'constant'
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\CMake\CurlTests.c(469): error C2059: syntax error: ')'
+ninja: build stopped: subcommand failed.
+
+
+Performing C SOURCE FILE Test HAVE_MSG_NOSIGNAL failed with the following output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_5cabe && [1/2] Building C object CMakeFiles\cmTC_5cabe.dir\src.c.obj
+FAILED: CMakeFiles/cmTC_5cabe.dir/src.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo -DHAVE_MSG_NOSIGNAL -IC:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\include /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_5cabe.dir\src.c.obj /FdCMakeFiles\cmTC_5cabe.dir\cmTC_5cabe.pdb /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\src.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\src.c(8): error C2065: 'MSG_NOSIGNAL': undeclared identifier
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#undef inline
+#include <winsock2.h>
+#include <windows.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+  int main(void) {
+    int flag = MSG_NOSIGNAL;
+    (void)flag;
+    return 0;
+  }
+Performing C SOURCE FILE Test HAVE_POLL_FINE failed with the following compile output:
+Change Dir: C:/Users/LucianoCIRCELLI/source/repos/containersLC/02/b/lucianocURL/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_11479 && [1/2] Building C object CMakeFiles\cmTC_11479.dir\src.c.obj
+FAILED: CMakeFiles/cmTC_11479.dir/src.c.obj 
+C:\PROGRA~1\MIB055~1\2022\PROFES~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo -DHAVE_POLL_FINE -IC:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\include /DWIN32 /D_WINDOWS  /Zi /Ob0 /Od /RTC1 -MDd    -D_WIN32_WINNT=0x0600 -D_WINSOCKAPI_= /showIncludes /FoCMakeFiles\cmTC_11479.dir\src.c.obj /FdCMakeFiles\cmTC_11479.dir\ /FS -c C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\src.c
+C:\Users\LucianoCIRCELLI\source\repos\containersLC\02\b\lucianocURL\out\build\x64-Debug\CMakeFiles\CMakeTmp\src.c(3): fatal error C1083: Cannot open include file: 'sys/time.h': No such file or directory
+ninja: build stopped: subcommand failed.
+
+
+...and run output:
+
+Return value: 1
+Source file was:
+
+    #include <stdlib.h>
+    #include <sys/time.h>
+
+    #ifdef HAVE_SYS_POLL_H
+    #  include <sys/poll.h>
+    #elif  HAVE_POLL_H
+    #  include <poll.h>
+    #endif
+
+    int main(void)
+    {
+        if(0 != poll(0, 0, 10)) {
+          return 1; /* fail */
+        }
+        else {
+          /* detect the 10.12 poll() breakage */
+          struct timeval before, after;
+          int rc;
+          size_t us;
+
+          gettimeofday(&before, NULL);
+          rc = poll(NULL, 0, 500);
+          gettimeofday(&after, NULL);
+
+          us = (after.tv_sec - before.tv_sec) * 1000000 +
+            (after.tv_usec - before.tv_usec);
+
+          if(us < 400000) {
+            return 1;
+          }
+        }
+        return 0;
+    }
