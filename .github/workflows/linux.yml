@@ -223,7 +223,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'rustls') }}
       run: |
-        git clone --depth=1 -b v0.8.2 --recursive https://github.com/rustls/rustls-ffi.git
+        git clone --depth=1 -b v0.9.1 --recursive https://github.com/rustls/rustls-ffi.git
         cd rustls-ffi
         make DESTDIR=$HOME/rustls install
       name: 'install rustls'
