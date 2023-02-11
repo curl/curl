@@ -89,8 +89,8 @@ struct socks_state {
  *
  * This is STUPID BLOCKING behavior. Only used by the SOCKS GSSAPI functions.
  */
-int Curl_blockread_all(struct Curl_easy *data,   /* transfer */
-                       curl_socket_t sockfd,     /* read from this socket */
+int Curl_blockread_all(struct Curl_cfilter *cf,
+                       struct Curl_easy *data,   /* transfer */
                        char *buf,                /* store read data here */
                        ssize_t buffersize,       /* max amount to read */
                        ssize_t *n)               /* amount bytes read */
@@ -98,6 +98,8 @@ int Curl_blockread_all(struct Curl_easy *data,   /* transfer */
   ssize_t nread = 0;
   ssize_t allread = 0;
   int result;
+  CURLcode err = CURLE_OK;
+
   *n = 0;
   for(;;) {
     timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
@@ -108,15 +110,19 @@ int Curl_blockread_all(struct Curl_easy *data,   /* transfer */
     }
     if(!timeout_ms)
       timeout_ms = TIMEDIFF_T_MAX;
-    if(SOCKET_READABLE(sockfd, timeout_ms) <= 0) {
+    if(SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0) {
       result = ~CURLE_OK;
       break;
     }
-    result = Curl_read_plain(data, sockfd, buf, buffersize, &nread);
-    if(CURLE_AGAIN == result)
-      continue;
-    if(result)
-      break;
+    nread = Curl_conn_cf_recv(cf->next, data, buf, buffersize, &err);
+    if(nread <= 0) {
+      result = err;
+      if(CURLE_AGAIN == err)
+        continue;
+      if(err) {
+        break;
+      }
+    }
 
     if(buffersize == nread) {
       allread += nread;
@@ -192,6 +198,68 @@ static void socksstate(struct socks_state *sx, struct Curl_easy *data,
 #endif
 }
 
+static CURLproxycode socks_state_send(struct Curl_cfilter *cf,
+                                      struct socks_state *sx,
+                                      struct Curl_easy *data,
+                                      CURLproxycode failcode,
+                                      const char *description)
+{
+  ssize_t nwritten;
+  CURLcode result;
+
+  nwritten = Curl_conn_cf_send(cf->next, data, (char *)sx->outp,
+                               sx->outstanding, &result);
+  if(nwritten <= 0) {
+    if(CURLE_AGAIN == result) {
+      return CURLPX_OK;
+    }
+    else if(CURLE_OK == result) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
+      return CURLPX_CLOSED;
+    }
+    failf(data, "Failed to send %s: %s", description,
+          curl_easy_strerror(result));
+    return failcode;
+  }
+  DEBUGASSERT(sx->outstanding >= nwritten);
+  /* not done, remain in state */
+  sx->outstanding -= nwritten;
+  sx->outp += nwritten;
+  return CURLPX_OK;
+}
+
+static CURLproxycode socks_state_recv(struct Curl_cfilter *cf,
+                                      struct socks_state *sx,
+                                      struct Curl_easy *data,
+                                      CURLproxycode failcode,
+                                      const char *description)
+{
+  ssize_t nread;
+  CURLcode result;
+
+  nread = Curl_conn_cf_recv(cf->next, data, (char *)sx->outp,
+                            sx->outstanding, &result);
+  if(nread <= 0) {
+    if(CURLE_AGAIN == result) {
+      return CURLPX_OK;
+    }
+    else if(CURLE_OK == result) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
+      return CURLPX_CLOSED;
+    }
+    failf(data, "SOCKS4: Failed receiving %s: %s", description,
+          curl_easy_strerror(result));
+    return failcode;
+  }
+  /* remain in reading state */
+  DEBUGASSERT(sx->outstanding >= nread);
+  sx->outstanding -= nread;
+  sx->outp += nread;
+  return CURLPX_OK;
+}
+
 /*
 * This function logs in to a SOCKS4 proxy and sends the specifics to the final
 * destination server.
@@ -212,10 +280,8 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     (conn->socks_proxy.proxytype == CURLPROXY_SOCKS4A) ? TRUE : FALSE;
   unsigned char *socksreq = (unsigned char *)data->state.buffer;
   CURLcode result;
-  curl_socket_t sockfd = conn->sock[cf->sockindex];
+  CURLproxycode presult;
   struct Curl_dns_entry *dns = NULL;
-  ssize_t actualread;
-  ssize_t written;
 
   /* make sure that the buffer is at least 600 bytes */
   DEBUGASSERT(READBUFFER_MIN >= 600);
@@ -375,19 +441,14 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     /* FALLTHROUGH */
   case CONNECT_REQ_SENDING:
     /* Send request */
-    result = Curl_write_plain(data, sockfd, (char *)sx->outp,
-                              sx->outstanding, &written);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "Failed to send SOCKS4 connect request.");
-      return CURLPX_SEND_CONNECT;
-    }
-    if(written != sx->outstanding) {
-      /* not done, remain in state */
-      sx->outstanding -= written;
-      sx->outp += written;
+    presult = socks_state_send(cf, sx, data, CURLPX_SEND_CONNECT,
+                               "SOCKS4 connect request");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
+      /* remain in sending state */
       return CURLPX_OK;
     }
-
     /* done sending! */
     sx->outstanding = 8; /* receive data size */
     sx->outp = socksreq;
@@ -396,22 +457,12 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     /* FALLTHROUGH */
   case CONNECT_SOCKS_READ:
     /* Receive response */
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
-                             sx->outstanding, &actualread);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "SOCKS4: Failed receiving connect request ack: %s",
-            curl_easy_strerror(result));
-      return CURLPX_RECV_CONNECT;
-    }
-    else if(!result && !actualread) {
-      /* connection closed */
-      failf(data, "connection to proxy closed");
-      return CURLPX_CLOSED;
-    }
-    else if(actualread != sx->outstanding) {
+    presult = socks_state_recv(cf, sx, data, CURLPX_RECV_CONNECT,
+                               "connect request ack");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
       /* remain in reading state */
-      sx->outstanding -= actualread;
-      sx->outp += actualread;
       return CURLPX_OK;
     }
     sxstate(sx, data, CONNECT_DONE);
@@ -518,10 +569,8 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   unsigned char *socksreq = (unsigned char *)data->state.buffer;
   char dest[256] = "unknown";  /* printable hostname:port */
   int idx;
-  ssize_t actualread;
-  ssize_t written;
   CURLcode result;
-  curl_socket_t sockfd = conn->sock[cf->sockindex];
+  CURLproxycode presult;
   bool socks5_resolve_local =
     (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ? TRUE : FALSE;
   const size_t hostname_len = strlen(sx->hostname);
@@ -567,30 +616,25 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     /* write the number of authentication methods */
     socksreq[1] = (unsigned char) (idx - 2);
 
-    result = Curl_write_plain(data, sockfd, socksreq, idx, &written);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "Unable to send initial SOCKS5 request.");
-      return CURLPX_SEND_CONNECT;
-    }
-    if(written != idx) {
-      sxstate(sx, data, CONNECT_SOCKS_SEND);
-      sx->outstanding = idx - written;
-      sx->outp = &socksreq[written];
+    sx->outp = socksreq;
+    sx->outstanding = idx;
+    presult = socks_state_send(cf, sx, data, CURLPX_SEND_CONNECT,
+                               "initial SOCKS5 request");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
+      /* remain in sending state */
       return CURLPX_OK;
     }
     sxstate(sx, data, CONNECT_SOCKS_READ);
     goto CONNECT_SOCKS_READ_INIT;
   case CONNECT_SOCKS_SEND:
-    result = Curl_write_plain(data, sockfd, (char *)sx->outp,
-                              sx->outstanding, &written);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "Unable to send initial SOCKS5 request.");
-      return CURLPX_SEND_CONNECT;
-    }
-    if(written != sx->outstanding) {
-      /* not done, remain in state */
-      sx->outstanding -= written;
-      sx->outp += written;
+    presult = socks_state_send(cf, sx, data, CURLPX_SEND_CONNECT,
+                               "initial SOCKS5 request");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
+      /* remain in sending state */
       return CURLPX_OK;
     }
     /* FALLTHROUGH */
@@ -600,21 +644,12 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sx->outp = socksreq; /* store it here */
     /* FALLTHROUGH */
   case CONNECT_SOCKS_READ:
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
-                             sx->outstanding, &actualread);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "Unable to receive initial SOCKS5 response.");
-      return CURLPX_RECV_CONNECT;
-    }
-    else if(!result && !actualread) {
-      /* connection closed */
-      failf(data, "Connection to proxy closed");
-      return CURLPX_CLOSED;
-    }
-    else if(actualread != sx->outstanding) {
+    presult = socks_state_recv(cf, sx, data, CURLPX_RECV_CONNECT,
+                               "initial SOCKS5 response");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
       /* remain in reading state */
-      sx->outstanding -= actualread;
-      sx->outp += actualread;
       return CURLPX_OK;
     }
     else if(socksreq[0] != 5) {
@@ -634,7 +669,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
     else if(allow_gssapi && (socksreq[1] == 1)) {
       sxstate(sx, data, CONNECT_GSSAPI_INIT);
-      result = Curl_SOCKS5_gssapi_negotiate(cf->sockindex, data);
+      result = Curl_SOCKS5_gssapi_negotiate(cf, data);
       if(result) {
         failf(data, "Unable to negotiate SOCKS5 GSS-API context.");
         return CURLPX_GSSAPI;
@@ -713,16 +748,12 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   }
     /* FALLTHROUGH */
   case CONNECT_AUTH_SEND:
-    result = Curl_write_plain(data, sockfd, sx->outp,
-                              sx->outstanding, &written);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "Failed to send SOCKS5 sub-negotiation request.");
-      return CURLPX_SEND_AUTH;
-    }
-    if(sx->outstanding != written) {
-      /* remain in state */
-      sx->outstanding -= written;
-      sx->outp += written;
+    presult = socks_state_send(cf, sx, data, CURLPX_SEND_AUTH,
+                               "SOCKS5 sub-negotiation request");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
+      /* remain in sending state */
       return CURLPX_OK;
     }
     sx->outp = socksreq;
@@ -730,21 +761,12 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sxstate(sx, data, CONNECT_AUTH_READ);
     /* FALLTHROUGH */
   case CONNECT_AUTH_READ:
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
-                             sx->outstanding, &actualread);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "Unable to receive SOCKS5 sub-negotiation response.");
-      return CURLPX_RECV_AUTH;
-    }
-    else if(!result && !actualread) {
-      /* connection closed */
-      failf(data, "connection to proxy closed");
-      return CURLPX_CLOSED;
-    }
-    else if(actualread != sx->outstanding) {
-      /* remain in state */
-      sx->outstanding -= actualread;
-      sx->outp += actualread;
+    presult = socks_state_recv(cf, sx, data, CURLPX_RECV_AUTH,
+                               "SOCKS5 sub-negotiation response");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
+      /* remain in reading state */
       return CURLPX_OK;
     }
     /* ignore the first (VER) byte */
@@ -909,16 +931,12 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sxstate(sx, data, CONNECT_REQ_SENDING);
     /* FALLTHROUGH */
   case CONNECT_REQ_SENDING:
-    result = Curl_write_plain(data, sockfd, (char *)sx->outp,
-                              sx->outstanding, &written);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "Failed to send SOCKS5 connect request.");
-      return CURLPX_SEND_REQUEST;
-    }
-    if(sx->outstanding != written) {
-      /* remain in state */
-      sx->outstanding -= written;
-      sx->outp += written;
+    presult = socks_state_send(cf, sx, data, CURLPX_SEND_REQUEST,
+                               "SOCKS5 connect request");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
+      /* remain in send state */
       return CURLPX_OK;
     }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
@@ -932,25 +950,15 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     sxstate(sx, data, CONNECT_REQ_READ);
     /* FALLTHROUGH */
   case CONNECT_REQ_READ:
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
-                             sx->outstanding, &actualread);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "Failed to receive SOCKS5 connect request ack.");
-      return CURLPX_RECV_REQACK;
-    }
-    else if(!result && !actualread) {
-      /* connection closed */
-      failf(data, "connection to proxy closed");
-      return CURLPX_CLOSED;
-    }
-    else if(actualread != sx->outstanding) {
-      /* remain in state */
-      sx->outstanding -= actualread;
-      sx->outp += actualread;
+    presult = socks_state_recv(cf, sx, data, CURLPX_RECV_REQACK,
+                               "SOCKS5 connect request ack");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
+      /* remain in reading state */
       return CURLPX_OK;
     }
-
-    if(socksreq[0] != 5) { /* version */
+    else if(socksreq[0] != 5) { /* version */
       failf(data,
             "SOCKS5 reply has wrong version, version should be 5.");
       return CURLPX_BAD_VERSION;
@@ -1031,21 +1039,12 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
 #endif
     /* FALLTHROUGH */
   case CONNECT_REQ_READ_MORE:
-    result = Curl_read_plain(data, sockfd, (char *)sx->outp,
-                             sx->outstanding, &actualread);
-    if(result && (CURLE_AGAIN != result)) {
-      failf(data, "Failed to receive SOCKS5 connect request ack.");
-      return CURLPX_RECV_ADDRESS;
-    }
-    else if(!result && !actualread) {
-      /* connection closed */
-      failf(data, "connection to proxy closed");
-      return CURLPX_CLOSED;
-    }
-    else if(actualread != sx->outstanding) {
-      /* remain in state */
-      sx->outstanding -= actualread;
-      sx->outp += actualread;
+    presult = socks_state_recv(cf, sx, data, CURLPX_RECV_ADDRESS,
+                               "SOCKS5 connect request address");
+    if(CURLPX_OK != presult)
+      return presult;
+    else if(sx->outstanding) {
+      /* remain in reading state */
       return CURLPX_OK;
     }
     sxstate(sx, data, CONNECT_DONE);
@@ -1170,7 +1169,7 @@ static int socks_cf_get_select_socks(struct Curl_cfilter *cf,
   if(!fds && cf->next->connected && !cf->connected && sx) {
     /* If we are not connected, the filter below is and has nothing
      * to wait on, we determine what to wait for. */
-    socks[0] = cf->conn->sock[cf->sockindex];
+    socks[0] = Curl_conn_cf_get_socket(cf, data);
     switch(sx->state) {
     case CONNECT_RESOLVING:
     case CONNECT_SOCKS_READ:

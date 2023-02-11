@@ -36,10 +36,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#if defined(WIN32) || defined(_WIN32)
-#define sleep(sec) Sleep ((sec)*1000)
-#endif
-
 int test(char *URL)
 {
   CURL *easy = NULL;

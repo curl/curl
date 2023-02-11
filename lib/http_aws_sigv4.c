@@ -48,9 +48,9 @@
   do {                                      \
     ret = Curl_hmacit(Curl_HMAC_SHA256,     \
                       (unsigned char *)k,   \
-                      (unsigned int)kl,     \
+                      kl,                   \
                       (unsigned char *)d,   \
-                      (unsigned int)dl, o); \
+                      dl, o);               \
     if(ret) {                               \
       goto fail;                            \
     }                                       \

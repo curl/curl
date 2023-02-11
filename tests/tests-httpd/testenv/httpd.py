@@ -31,7 +31,7 @@ import subprocess
 from datetime import timedelta, datetime
 from json import JSONEncoder
 import time
-from typing import List
+from typing import List, Union, Optional
 
 from .curl import CurlClient, ExecResult
 from .env import Env
@@ -60,6 +60,8 @@ class Httpd:
         self.env = env
         self._cmd = env.apachectl
         self._apache_dir = os.path.join(env.gen_dir, 'apache')
+        self._run_dir = os.path.join(self._apache_dir, 'run')
+        self._lock_dir = os.path.join(self._apache_dir, 'locks')
         self._docs_dir = os.path.join(self._apache_dir, 'docs')
         self._conf_dir = os.path.join(self._apache_dir, 'conf')
         self._conf_file = os.path.join(self._conf_dir, 'test.conf')
@@ -67,21 +69,24 @@ class Httpd:
         self._error_log = os.path.join(self._logs_dir, 'error_log')
         self._tmp_dir = os.path.join(self._apache_dir, 'tmp')
         self._mods_dir = None
-        if env.apxs is not None:
-            p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
-                               capture_output=True, text=True)
-            if p.returncode != 0:
-                raise Exception(f'{env.apxs} failed to query libexecdir: {p}')
-            self._mods_dir = p.stdout.strip()
-        else:
-            for md in self.COMMON_MODULES_DIRS:
-                if os.path.isdir(md):
-                    self._mods_dir = md
+        self._extra_configs = {}
+        assert env.apxs
+        p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
+                           capture_output=True, text=True)
+        if p.returncode != 0:
+            raise Exception(f'{env.apxs} failed to query libexecdir: {p}')
+        self._mods_dir = p.stdout.strip()
         if self._mods_dir is None:
             raise Exception(f'apache modules dir cannot be found')
+        if not os.path.exists(self._mods_dir):
+            raise Exception(f'apache modules dir does not exist: {self._mods_dir}')
         self._process = None
         self._rmf(self._error_log)
         self._init_curltest()
+
+    @property
+    def docs_dir(self):
+        return self._docs_dir
 
     def clear_logs(self):
         self._rmf(self._error_log)
@@ -89,10 +94,24 @@ class Httpd:
     def exists(self):
         return os.path.exists(self._cmd)
 
+    def set_extra_config(self, domain: str, lines: Optional[Union[str, List[str]]]):
+        if lines is None:
+            self._extra_configs.pop(domain, None)
+        else:
+            self._extra_configs[domain] = lines
+
     def _run(self, args, intext=''):
+        env = {}
+        for key, val in os.environ.items():
+            env[key] = val
+        env['APACHE_RUN_DIR'] = self._run_dir
+        env['APACHE_RUN_USER'] = os.environ['USER']
+        env['APACHE_LOCK_DIR'] = self._lock_dir
+        env['APACHE_CONFDIR'] = self._apache_dir
         p = subprocess.run(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                            cwd=self.env.gen_dir,
-                           input=intext.encode() if intext else None)
+                           input=intext.encode() if intext else None,
+                           env=env)
         start = datetime.now()
         return ExecResult(args=args, exit_code=p.returncode,
                           stdout=p.stdout.decode().splitlines(),
@@ -117,6 +136,7 @@ class Httpd:
         r = self._apachectl('start')
         if r.exit_code != 0:
             log.error(f'failed to start httpd: {r}')
+            return False
         return self.wait_live(timeout=timedelta(seconds=5))
 
     def stop(self):
@@ -130,6 +150,7 @@ class Httpd:
         return self.start()
 
     def reload(self):
+        self._write_config()
         r = self._apachectl("graceful")
         if r.exit_code != 0:
             log.error(f'failed to reload httpd: {r}')
@@ -202,9 +223,6 @@ class Httpd:
                 f'Listen {self.env.http_port}',
                 f'Listen {self.env.https_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
-                # we want the quest string in a response header, so we
-                # can check responses more easily
-                f'Header set rquery "%{{QUERY_STRING}}s"',
             ]
             conf.extend([  # plain http host for domain1
                 f'<VirtualHost *:{self.env.http_port}>',
@@ -226,6 +244,8 @@ class Httpd:
                 f'    DocumentRoot "{self._docs_dir}"',
             ])
             conf.extend(self._curltest_conf())
+            if domain1 in self._extra_configs:
+                conf.extend(self._extra_configs[domain1])
             conf.extend([
                 f'</VirtualHost>',
                 f'',
@@ -240,6 +260,8 @@ class Httpd:
                 f'    DocumentRoot "{self._docs_dir}/two"',
             ])
             conf.extend(self._curltest_conf())
+            if domain2 in self._extra_configs:
+                conf.extend(self._extra_configs[domain2])
             conf.extend([
                 f'</VirtualHost>',
                 f'',

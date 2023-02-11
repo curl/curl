@@ -71,22 +71,43 @@ bool stdin_upload(const char *uploadfile)
           !strcmp(uploadfile, ".")) ? TRUE : FALSE;
 }
 
+/* Convert a CURLUcode into a CURLcode */
+CURLcode urlerr_cvt(CURLUcode ucode)
+{
+  if(ucode == CURLUE_OUT_OF_MEMORY)
+    return CURLE_OUT_OF_MEMORY;
+  else if(ucode == CURLUE_UNSUPPORTED_SCHEME)
+    return CURLE_UNSUPPORTED_PROTOCOL;
+  else if(ucode == CURLUE_LACKS_IDN)
+    return CURLE_NOT_BUILT_IN;
+  else if(ucode == CURLUE_BAD_HANDLE)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return CURLE_URL_MALFORMAT;
+}
+
 /*
  * Adds the file name to the URL if it doesn't already have one.
  * url will be freed before return if the returned pointer is different
  */
 CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
 {
-  CURLcode result = CURLE_OUT_OF_MEMORY;
+  CURLcode result = CURLE_URL_MALFORMAT;
+  CURLUcode uerr;
   CURLU *uh = curl_url();
   char *path = NULL;
   if(uh) {
     char *ptr;
-    if(curl_url_set(uh, CURLUPART_URL, *inurlp,
-                    CURLU_GUESS_SCHEME|CURLU_NON_SUPPORT_SCHEME))
+    uerr = curl_url_set(uh, CURLUPART_URL, *inurlp,
+                    CURLU_GUESS_SCHEME|CURLU_NON_SUPPORT_SCHEME);
+    if(uerr) {
+      result = urlerr_cvt(uerr);
       goto fail;
-    if(curl_url_get(uh, CURLUPART_PATH, &path, 0))
+    }
+    uerr = curl_url_get(uh, CURLUPART_PATH, &path, 0);
+    if(uerr) {
+      result = urlerr_cvt(uerr);
       goto fail;
+    }
 
     ptr = strrchr(path, '/');
     if(!ptr || !*++ptr) {
@@ -111,7 +132,6 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
       if(encfile) {
         char *newpath;
         char *newurl;
-        CURLUcode uerr;
         if(ptr)
           /* there is a trailing slash on the path */
           newpath = aprintf("%s%s", path, encfile);
@@ -125,10 +145,15 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
           goto fail;
         uerr = curl_url_set(uh, CURLUPART_PATH, newpath, 0);
         free(newpath);
-        if(uerr)
+        if(uerr) {
+          result = urlerr_cvt(uerr);
           goto fail;
-        if(curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_DEFAULT_SCHEME))
+        }
+        uerr = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_DEFAULT_SCHEME);
+        if(uerr) {
+          result = urlerr_cvt(uerr);
           goto fail;
+        }
         free(*inurlp);
         *inurlp = newurl;
         result = CURLE_OK;
@@ -153,63 +178,70 @@ CURLcode get_url_file_name(char **filename, const char *url)
   const char *pc, *pc2;
   CURLU *uh = curl_url();
   char *path = NULL;
+  CURLUcode uerr;
 
   if(!uh)
     return CURLE_OUT_OF_MEMORY;
 
   *filename = NULL;
 
-  if(!curl_url_set(uh, CURLUPART_URL, url, CURLU_GUESS_SCHEME) &&
-     !curl_url_get(uh, CURLUPART_PATH, &path, 0)) {
-    curl_url_cleanup(uh);
+  uerr = curl_url_set(uh, CURLUPART_URL, url, CURLU_GUESS_SCHEME);
+  if(!uerr) {
+    uerr = curl_url_get(uh, CURLUPART_PATH, &path, 0);
+    if(!uerr) {
+      curl_url_cleanup(uh);
 
-    pc = strrchr(path, '/');
-    pc2 = strrchr(pc ? pc + 1 : path, '\\');
-    if(pc2)
-      pc = pc2;
+      pc = strrchr(path, '/');
+      pc2 = strrchr(pc ? pc + 1 : path, '\\');
+      if(pc2)
+        pc = pc2;
 
-    if(pc)
-      /* duplicate the string beyond the slash */
-      pc++;
-    else
-      /* no slash => empty string */
-      pc = "";
+      if(pc)
+        /* duplicate the string beyond the slash */
+        pc++;
+      else
+        /* no slash => empty string */
+        pc = "";
 
-    *filename = strdup(pc);
-    curl_free(path);
-    if(!*filename)
-      return CURLE_OUT_OF_MEMORY;
+      *filename = strdup(pc);
+      curl_free(path);
+      if(!*filename)
+        return CURLE_OUT_OF_MEMORY;
 
 #if defined(MSDOS) || defined(WIN32)
-    {
-      char *sanitized;
-      SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
-      Curl_safefree(*filename);
-      if(sc)
-        return CURLE_URL_MALFORMAT;
-      *filename = sanitized;
-    }
+      {
+        char *sanitized;
+        SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
+        Curl_safefree(*filename);
+        if(sc) {
+          if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
+            return CURLE_OUT_OF_MEMORY;
+          return CURLE_URL_MALFORMAT;
+        }
+        *filename = sanitized;
+      }
 #endif /* MSDOS || WIN32 */
 
-    /* in case we built debug enabled, we allow an environment variable
-     * named CURL_TESTDIR to prefix the given file name to put it into a
-     * specific directory
-     */
+      /* in case we built debug enabled, we allow an environment variable
+       * named CURL_TESTDIR to prefix the given file name to put it into a
+       * specific directory
+       */
 #ifdef DEBUGBUILD
-    {
-      char *tdir = curlx_getenv("CURL_TESTDIR");
-      if(tdir) {
-        char *alt = aprintf("%s/%s", tdir, *filename);
-        Curl_safefree(*filename);
-        *filename = alt;
-        curl_free(tdir);
-        if(!*filename)
-          return CURLE_OUT_OF_MEMORY;
+      {
+        char *tdir = curlx_getenv("CURL_TESTDIR");
+        if(tdir) {
+          char *alt = aprintf("%s/%s", tdir, *filename);
+          Curl_safefree(*filename);
+          *filename = alt;
+          curl_free(tdir);
+          if(!*filename)
+            return CURLE_OUT_OF_MEMORY;
+        }
       }
-    }
 #endif
-    return CURLE_OK;
+      return CURLE_OK;
+    }
   }
   curl_url_cleanup(uh);
-  return CURLE_URL_MALFORMAT;
+  return urlerr_cvt(uerr);
 }

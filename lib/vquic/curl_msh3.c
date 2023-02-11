@@ -34,6 +34,7 @@
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
+#include "progress.h"
 #include "h2h3.h"
 #include "curl_msh3.h"
 #include "socketpair.h"
@@ -115,6 +116,8 @@ struct cf_msh3_ctx {
   curl_socket_t sock[2]; /* fake socket pair until we get support in msh3 */
   char l_ip[MAX_IPADR_LEN];          /* local IP as string */
   int l_port;                        /* local port number */
+  struct curltime connect_started;   /* time the current attempt started */
+  struct curltime handshake_at;      /* time connect handshake finished */
   /* Flags written by msh3/msquic thread */
   bool handshake_complete;
   bool handshake_succeeded;
@@ -491,11 +494,12 @@ static int cf_msh3_get_select_socks(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     curl_socket_t *socks)
 {
+  struct cf_msh3_ctx *ctx = cf->ctx;
   struct HTTP *stream = data->req.p.http;
   int bitmap = GETSOCK_BLANK;
 
-  if(stream && cf->conn->sock[FIRSTSOCKET] != CURL_SOCKET_BAD) {
-    socks[0] = cf->conn->sock[FIRSTSOCKET];
+  if(stream && ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD) {
+    socks[0] = ctx->sock[SP_LOCAL];
 
     if(stream->recv_error) {
       bitmap |= GETSOCK_READSOCK(0);
@@ -544,6 +548,7 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    int event, int arg1, void *arg2)
 {
+  struct cf_msh3_ctx *ctx = cf->ctx;
   struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
 
@@ -553,7 +558,6 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_SETUP:
     result = msh3_data_setup(cf, data);
     break;
-
   case CF_CTRL_DATA_DONE:
     DEBUGF(LOG_CF(data, cf, "req: done"));
     if(stream) {
@@ -567,15 +571,17 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
       }
     }
     break;
-
   case CF_CTRL_DATA_DONE_SEND:
     DEBUGF(LOG_CF(data, cf, "req: send done"));
     stream->upload_done = TRUE;
     break;
-
   case CF_CTRL_CONN_INFO_UPDATE:
-    DEBUGF(LOG_CF(data, cf, "req: update"));
+    DEBUGF(LOG_CF(data, cf, "req: update info"));
     cf_msh3_active(cf, data);
+    break;
+  case CF_CTRL_CONN_REPORT_STATS:
+    if(cf->sockindex == FIRSTSOCKET)
+      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
     break;
 
   default:
@@ -657,12 +663,14 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   if(!ctx->qconn) {
+    ctx->connect_started = Curl_now();
     result = cf_connect_start(cf, data);
     if(result)
       goto out;
   }
 
   if(ctx->handshake_complete) {
+    ctx->handshake_at = Curl_now();
     if(ctx->handshake_succeeded) {
       cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
       cf->conn->httpversion = 30;
@@ -671,6 +679,7 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
       cf->conn->alpn = CURL_HTTP_VERSION_3;
       *done = TRUE;
       connkeep(cf->conn, "HTTP/3 default");
+      Curl_pgrsTime(data, TIMER_APPCONNECT);
     }
     else {
       failf(data, "failed to connect, handshake failed");
@@ -733,7 +742,7 @@ static void cf_msh3_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              int query, int *pres1, void **pres2)
+                              int query, int *pres1, void *pres2)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
 

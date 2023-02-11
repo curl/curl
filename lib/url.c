@@ -705,45 +705,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
   return result;
 }
 
-#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
-static void conn_reset_postponed_data(struct connectdata *conn, int num)
-{
-  struct postponed_data * const psnd = &(conn->postponed[num]);
-  if(psnd->buffer) {
-    DEBUGASSERT(psnd->allocated_size > 0);
-    DEBUGASSERT(psnd->recv_size <= psnd->allocated_size);
-    DEBUGASSERT(psnd->recv_size ?
-                (psnd->recv_processed < psnd->recv_size) :
-                (psnd->recv_processed == 0));
-    DEBUGASSERT(psnd->bindsock != CURL_SOCKET_BAD);
-    free(psnd->buffer);
-    psnd->buffer = NULL;
-    psnd->allocated_size = 0;
-    psnd->recv_size = 0;
-    psnd->recv_processed = 0;
-#ifdef DEBUGBUILD
-    psnd->bindsock = CURL_SOCKET_BAD; /* used only for DEBUGASSERT */
-#endif /* DEBUGBUILD */
-  }
-  else {
-    DEBUGASSERT(psnd->allocated_size == 0);
-    DEBUGASSERT(psnd->recv_size == 0);
-    DEBUGASSERT(psnd->recv_processed == 0);
-    DEBUGASSERT(psnd->bindsock == CURL_SOCKET_BAD);
-  }
-}
-
-static void conn_reset_all_postponed_data(struct connectdata *conn)
-{
-  conn_reset_postponed_data(conn, 0);
-  conn_reset_postponed_data(conn, 1);
-}
-#else  /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
-/* Use "do-nothing" macro instead of function when workaround not used */
-#define conn_reset_all_postponed_data(c) do {} while(0)
-#endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
-
-
 static void conn_shutdown(struct Curl_easy *data)
 {
   DEBUGASSERT(data);
@@ -792,7 +753,6 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->hostname_resolve);
   Curl_safefree(conn->secondaryhostname);
 
-  conn_reset_all_postponed_data(conn);
   Curl_llist_destroy(&conn->easyq, NULL);
   Curl_safefree(conn->localdev);
   Curl_free_primary_ssl_config(&conn->ssl_config);
@@ -1545,10 +1505,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->connection_id = -1;    /* no ID */
   conn->port = -1; /* unknown at this point */
   conn->remote_port = -1; /* unknown at this point */
-#if defined(USE_RECV_BEFORE_SEND_WORKAROUND) && defined(DEBUGBUILD)
-  conn->postponed[0].bindsock = CURL_SOCKET_BAD; /* no file descriptor */
-  conn->postponed[1].bindsock = CURL_SOCKET_BAD; /* no file descriptor */
-#endif /* USE_RECV_BEFORE_SEND_WORKAROUND && DEBUGBUILD */
 
   /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
@@ -2788,7 +2744,7 @@ static CURLcode override_login(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
     }
     /* no user was set but a password, set a blank user */
-    if(userp && !*userp && *passwdp) {
+    if(!*userp && *passwdp) {
       *userp = strdup("");
       if(!*userp)
         return CURLE_OUT_OF_MEMORY;
@@ -3369,6 +3325,20 @@ static void reuse_conn(struct Curl_easy *data,
   }
 #endif
 
+  /* Finding a connection for reuse in the cache matches, among other
+   * things on the "remote-relevant" hostname. This is not necessarily
+   * the authority of the URL, e.g. conn->host. For example:
+   * - we use a proxy (not tunneling). we want to send all requests
+   *   that use the same proxy on this connection.
+   * - we have a "connect-to" setting that may redirect the hostname of
+   *   a new request to the same remote endpoint of an existing conn.
+   *   We want to reuse an existing conn to the remote endpoint.
+   * Since connection reuse does not match on conn->host necessarily, we
+   * switch `existing` conn to `temp` conn's host settings.
+   * TODO: is this correct in the case of TLS connections that have
+   *       used the original hostname in SNI to negotiate? Do we send
+   *       requests for another host through the different SNI?
+   */
   Curl_free_idnconverted_hostname(&existing->host);
   Curl_free_idnconverted_hostname(&existing->conn_to_host);
   Curl_safefree(existing->host.rawalloc);
@@ -3384,8 +3354,6 @@ static void reuse_conn(struct Curl_easy *data,
 
   existing->hostname_resolve = temp->hostname_resolve;
   temp->hostname_resolve = NULL;
-
-  conn_reset_all_postponed_data(temp); /* free buffers */
 
   /* re-use init */
   existing->bits.reuse = TRUE; /* yes, we're re-using here */

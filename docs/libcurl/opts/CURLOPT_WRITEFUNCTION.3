@@ -80,35 +80,48 @@ libcurl will use 'fwrite' as a callback by default.
 For all protocols
 .SH EXAMPLE
 .nf
- struct memory {
-   char *response;
-   size_t size;
- };
+struct memory {
+  char *response;
+  size_t size;
+};
 
- static size_t cb(void *data, size_t size, size_t nmemb, void *userp)
- {
-   size_t realsize = size * nmemb;
-   struct memory *mem = (struct memory *)userp;
+static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
+{
+  size_t realsize = size * nmemb;
+  struct memory *mem = (struct memory *)clientp;
 
-   char *ptr = realloc(mem->response, mem->size + realsize + 1);
-   if(ptr == NULL)
-     return 0;  /* out of memory! */
+  char *ptr = realloc(mem->response, mem->size + realsize + 1);
+  if(ptr == NULL)
+    return 0;  /* out of memory! */
 
-   mem->response = ptr;
-   memcpy(&(mem->response[mem->size]), data, realsize);
-   mem->size += realsize;
-   mem->response[mem->size] = 0;
+  mem->response = ptr;
+  memcpy(&(mem->response[mem->size]), data, realsize);
+  mem->size += realsize;
+  mem->response[mem->size] = 0;
 
-   return realsize;
- }
+  return realsize;
+}
 
- struct memory chunk = {0};
+struct memory chunk = {0};
+CURLcode res;
+CURL *curl_handle = curl_easy_init();
 
- /* send all data to this function  */
- curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, cb);
+if (curl_handle)
+{
+  /* send all data to this function  */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, cb);
 
- /* we pass our 'chunk' struct to the callback function */
- curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+  /* we pass our 'chunk' struct to the callback function */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+  /* send a request */
+  res = curl_easy_perform(curl_handle);
+
+  /* remember to free the buffer */
+  free(chunk.response)
+
+  curl_easy_cleanup(curl_handle);
+}
 .fi
 .SH AVAILABILITY
 Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.

@@ -166,14 +166,11 @@ void Curl_pgrsResetTransferSizes(struct Curl_easy *data)
 
 /*
  *
- * Curl_pgrsTime(). Store the current time at the given label. This fetches a
- * fresh "now" and returns it.
- *
- * @unittest: 1399
+ * Curl_pgrsTimeWas(). Store the timestamp time at the given label.
  */
-struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
+void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
+                      struct curltime timestamp)
 {
-  struct curltime now = Curl_now();
   timediff_t *delta = NULL;
 
   switch(timer) {
@@ -183,15 +180,15 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
     break;
   case TIMER_STARTOP:
     /* This is set at the start of a transfer */
-    data->progress.t_startop = now;
+    data->progress.t_startop = timestamp;
     break;
   case TIMER_STARTSINGLE:
     /* This is set at the start of each single fetch */
-    data->progress.t_startsingle = now;
+    data->progress.t_startsingle = timestamp;
     data->progress.is_t_startransfer_set = false;
     break;
   case TIMER_STARTACCEPT:
-    data->progress.t_acceptdata = now;
+    data->progress.t_acceptdata = timestamp;
     break;
   case TIMER_NAMELOOKUP:
     delta = &data->progress.t_nslookup;
@@ -214,7 +211,7 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
      * changing the t_starttransfer time.
      */
     if(data->progress.is_t_startransfer_set) {
-      return now;
+      return;
     }
     else {
       data->progress.is_t_startransfer_set = true;
@@ -224,15 +221,30 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
     /* this is the normal end-of-transfer thing */
     break;
   case TIMER_REDIRECT:
-    data->progress.t_redirect = Curl_timediff_us(now, data->progress.start);
+    data->progress.t_redirect = Curl_timediff_us(timestamp,
+                                                 data->progress.start);
     break;
   }
   if(delta) {
-    timediff_t us = Curl_timediff_us(now, data->progress.t_startsingle);
+    timediff_t us = Curl_timediff_us(timestamp, data->progress.t_startsingle);
     if(us < 1)
       us = 1; /* make sure at least one microsecond passed */
     *delta += us;
   }
+}
+
+/*
+ *
+ * Curl_pgrsTime(). Store the current time at the given label. This fetches a
+ * fresh "now" and returns it.
+ *
+ * @unittest: 1399
+ */
+struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
+{
+  struct curltime now = Curl_now();
+
+  Curl_pgrsTimeWas(data, timer, now);
   return now;
 }
 

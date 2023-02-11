@@ -24,15 +24,16 @@
 #
 ###########################################################################
 #
-import datetime
 import logging
 import os
 import signal
 import subprocess
 import time
 from typing import Optional
+from datetime import datetime, timedelta
 
 from .env import Env
+from .curl import CurlClient
 
 
 log = logging.getLogger(__name__)
@@ -43,12 +44,18 @@ class Nghttpx:
     def __init__(self, env: Env):
         self.env = env
         self._cmd = env.nghttpx
-        self._pid_file = os.path.join(env.gen_dir, 'nghttpx.pid')
-        self._conf_file = os.path.join(env.gen_dir, 'nghttpx.conf')
-        self._error_log = os.path.join(env.gen_dir, 'nghttpx.log')
-        self._stderr = os.path.join(env.gen_dir, 'nghttpx.stderr')
+        self._run_dir = os.path.join(env.gen_dir, 'nghttpx')
+        self._pid_file = os.path.join(self._run_dir, 'nghttpx.pid')
+        self._conf_file = os.path.join(self._run_dir, 'nghttpx.conf')
+        self._error_log = os.path.join(self._run_dir, 'nghttpx.log')
+        self._stderr = os.path.join(self._run_dir, 'nghttpx.stderr')
+        self._tmp_dir = os.path.join(self._run_dir, 'tmp')
         self._process = None
         self._process: Optional[subprocess.Popen] = None
+        self._rmf(self._pid_file)
+        self._rmf(self._error_log)
+        self._mkpath(self._run_dir)
+        self._write_config()
 
     def exists(self):
         return os.path.exists(self._cmd)
@@ -63,10 +70,15 @@ class Nghttpx:
             return self._process.returncode is None
         return False
 
-    def start(self):
+    def start_if_needed(self):
+        if not self.is_running():
+            return self.start()
+        return True
+
+    def start(self, wait_live=True):
+        self._mkpath(self._tmp_dir)
         if self._process:
             self.stop()
-        self._write_config()
         args = [
             self._cmd,
             f'--frontend=*,{self.env.h3_port};quic',
@@ -82,31 +94,80 @@ class Nghttpx:
         ]
         ngerr = open(self._stderr, 'a')
         self._process = subprocess.Popen(args=args, stderr=ngerr)
-        return self._process.returncode is None
+        if self._process.returncode is not None:
+            return False
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
 
-    def stop(self):
+    def stop_if_running(self):
+        if self.is_running():
+            return self.stop()
+        return True
+
+    def stop(self, wait_dead=True):
+        self._mkpath(self._tmp_dir)
         if self._process:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
+            return not wait_dead or self.wait_dead(timeout=timedelta(seconds=5))
         return True
 
     def restart(self):
         self.stop()
         return self.start()
 
-    def reload(self, timeout: datetime.timedelta):
+    def reload(self, timeout: timedelta):
         if self._process:
             running = self._process
+            self._process = None
             os.kill(running.pid, signal.SIGQUIT)
-            self.start()
-            try:
-                log.debug(f'waiting for nghttpx({running.pid}) to exit.')
-                running.wait(timeout=timeout.seconds)
-                log.debug(f'nghttpx({running.pid}) terminated -> {running.returncode}')
+            end_wait = datetime.now() + timeout
+            if not self.start(wait_live=False):
+                self._process = running
+                return False
+            while datetime.now() < end_wait:
+                try:
+                    log.debug(f'waiting for nghttpx({running.pid}) to exit.')
+                    running.wait(2)
+                    log.debug(f'nghttpx({running.pid}) terminated -> {running.returncode}')
+                    break
+                except subprocess.TimeoutExpired:
+                    log.warning(f'nghttpx({running.pid}), not shut down yet.')
+                    os.kill(running.pid, signal.SIGQUIT)
+            if datetime.now() >= end_wait:
+                log.error(f'nghttpx({running.pid}), terminate forcefully.')
+                os.kill(running.pid, signal.SIGKILL)
+                running.terminate()
+                running.wait(1)
+            return self.wait_live(timeout=timedelta(seconds=5))
+        return False
+
+    def wait_dead(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        try_until = datetime.now() + timeout
+        while datetime.now() < try_until:
+            check_url = f'https://{self.env.domain1}:{self.env.h3_port}/'
+            r = curl.http_get(url=check_url, extra_args=['--http3-only'])
+            if r.exit_code != 0:
                 return True
-            except subprocess.TimeoutExpired:
-                log.error(f'SIGQUIT nghttpx({running.pid}), but did not shut down.')
+            log.debug(f'waiting for nghttpx to stop responding: {r}')
+            time.sleep(.1)
+        log.debug(f"Server still responding after {timeout}")
+        return False
+
+    def wait_live(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        try_until = datetime.now() + timeout
+        while datetime.now() < try_until:
+            check_url = f'https://{self.env.domain1}:{self.env.h3_port}/'
+            r = curl.http_get(url=check_url, extra_args=[
+                '--http3-only', '--trace', 'curl.trace', '--trace-time'
+            ])
+            if r.exit_code == 0:
+                return True
+            log.debug(f'waiting for nghttpx to become responsive: {r}')
+            time.sleep(.1)
+        log.error(f"Server still not responding after {timeout}")
         return False
 
     def _rmf(self, path):

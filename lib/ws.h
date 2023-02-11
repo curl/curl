@@ -46,24 +46,28 @@ struct websocket {
   size_t usedbuf; /* number of leading bytes in 'buf' the most recent complete
                      websocket frame uses */
   struct curl_ws_frame frame; /* the struct used for frame state */
-  curl_off_t oleft; /* outstanding number of payload bytes left from the
-                       server */
   size_t stillblen; /* number of bytes left in the buffer to deliver in
                          the next curl_ws_recv() call */
-  char *stillb; /* the stillblen pending bytes are here */
+  const char *stillb; /* the stillblen pending bytes are here */
   curl_off_t sleft; /* outstanding number of payload bytes left to send */
   unsigned int xori; /* xor index */
 };
 
-CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req);
-CURLcode Curl_ws_accept(struct Curl_easy *data);
+struct ws_conn {
+  struct dynbuf early; /* data already read when switching to ws */
+};
 
+CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req);
+CURLcode Curl_ws_accept(struct Curl_easy *data, const char *mem, size_t len);
 size_t Curl_ws_writecb(char *buffer, size_t size, size_t nitems, void *userp);
 void Curl_ws_done(struct Curl_easy *data);
-
+CURLcode Curl_ws_disconnect(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            bool dead_connection);
 #else
 #define Curl_ws_request(x,y) CURLE_OK
 #define Curl_ws_done(x) Curl_nop_stmt
+#define Curl_ws_free(x) Curl_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_WS_H */

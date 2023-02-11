@@ -267,10 +267,11 @@ static CURLcode CONNECT_host(struct Curl_easy *data,
 }
 
 #ifndef USE_HYPER
-static CURLcode start_CONNECT(struct Curl_easy *data,
-                              struct connectdata *conn,
+static CURLcode start_CONNECT(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
                               struct tunnel_state *ts)
 {
+  struct connectdata *conn = cf->conn;
   char *hostheader = NULL;
   char *host = NULL;
   const char *httpv;
@@ -476,7 +477,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 {
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  curl_socket_t tunnelsocket = cf->conn->sock[ts->sockindex];
+  curl_socket_t tunnelsocket = Curl_conn_cf_get_socket(cf, data);
   char *linep;
   size_t perline;
   int error;
@@ -665,12 +666,13 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
 #else /* USE_HYPER */
 /* The Hyper version of CONNECT */
-static CURLcode start_CONNECT(struct Curl_easy *data,
-                              struct connectdata *conn,
+static CURLcode start_CONNECT(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
                               struct tunnel_state *ts)
 {
+  struct connectdata *conn = cf->conn;
   struct hyptransfer *h = &data->hyp;
-  curl_socket_t tunnelsocket = conn->sock[ts->sockindex];
+  curl_socket_t tunnelsocket = Curl_conn_cf_get_socket(cf, data);
   hyper_io *io = NULL;
   hyper_request *req = NULL;
   hyper_headers *headers = NULL;
@@ -971,7 +973,7 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
     case TUNNEL_INIT:
       /* Prepare the CONNECT request and make a first attempt to send. */
       DEBUGF(LOG_CF(data, cf, "CONNECT start"));
-      result = start_CONNECT(data, cf->conn, ts);
+      result = start_CONNECT(cf, data, ts);
       if(result)
         goto out;
       tunnel_go_state(cf, ts, TUNNEL_CONNECT, data);
@@ -1125,15 +1127,13 @@ static int http_proxy_cf_get_select_socks(struct Curl_cfilter *cf,
                                           curl_socket_t *socks)
 {
   struct tunnel_state *ts = cf->ctx;
-  struct connectdata *conn = cf->conn;
   int fds;
 
-  DEBUGASSERT(conn);
   fds = cf->next->cft->get_select_socks(cf->next, data, socks);
   if(!fds && cf->next->connected && !cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are tunneling. */
-    socks[0] = conn->sock[cf->sockindex];
+    socks[0] = Curl_conn_cf_get_socket(cf, data);
     if(ts) {
       /* when we've sent a CONNECT to a proxy, we should rather either
          wait for the socket to become readable to be able to get the
@@ -1347,15 +1347,13 @@ static int cf_haproxy_get_select_socks(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
                                        curl_socket_t *socks)
 {
-  struct connectdata *conn = cf->conn;
   int fds;
 
-  DEBUGASSERT(conn);
   fds = cf->next->cft->get_select_socks(cf->next, data, socks);
   if(!fds && cf->next->connected && !cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are sending. */
-    socks[0] = conn->sock[cf->sockindex];
+    socks[0] = Curl_conn_cf_get_socket(cf, data);
     return GETSOCK_WRITESOCK(0);
   }
   return fds;

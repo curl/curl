@@ -499,7 +499,7 @@ static void cancel_async_handshake(struct Curl_cfilter *cf,
   (void)data;
   DEBUGASSERT(BACKEND);
 
-  if(QsoCancelOperation(cf->conn->sock[cf->sockindex], 0) > 0)
+  if(QsoCancelOperation(Curl_conn_cf_get_socket(cf, data), 0) > 0)
     QsoWaitForIOCompletion(BACKEND->iocport, &cstat, (struct timeval *) NULL);
 }
 
@@ -532,7 +532,7 @@ static int pipe_ssloverssl(struct Curl_cfilter *cf, int directions)
   DEBUGASSERT(connssl_next->backend);
   n = 1;
   fds[0].fd = BACKEND->remotefd;
-  fds[1].fd = cf->conn->sock[cf->sockindex];
+  fds[1].fd = Curl_conn_cf_get_socket(cf, data);
 
   if(directions & SOS_READ) {
     fds[0].events |= POLLOUT;
@@ -847,7 +847,7 @@ static CURLcode gskit_connect_step1(struct Curl_cfilter *cf,
     result = set_numeric(data, BACKEND->handle, GSK_OS400_READ_TIMEOUT, 1);
   if(!result)
     result = set_numeric(data, BACKEND->handle, GSK_FD, BACKEND->localfd >= 0?
-                         BACKEND->localfd: cf->conn->sock[cf->sockindex]);
+                         BACKEND->localfd: Curl_conn_cf_get_socket(cf, data));
   if(!result)
     result = set_ciphers(cf, data, BACKEND->handle, &protoflags);
   if(!protoflags) {
@@ -1208,7 +1208,7 @@ static int gskit_shutdown(struct Curl_cfilter *cf,
 
   close_one(cf, data);
   rc = 0;
-  what = SOCKET_READABLE(cf->conn->sock[cf->sockindex],
+  what = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data),
                          SSL_SHUTDOWN_TIMEOUT);
 
   while(loop--) {
@@ -1230,7 +1230,7 @@ static int gskit_shutdown(struct Curl_cfilter *cf,
        notify alert from the server. No way to gsk_secure_soc_read() now, so
        use read(). */
 
-    nread = read(cf->conn->sock[cf->sockindex], buf, sizeof(buf));
+    nread = read(Curl_conn_cf_get_socket(cf, data), buf, sizeof(buf));
 
     if(nread < 0) {
       char buffer[STRERROR_LEN];
@@ -1241,7 +1241,7 @@ static int gskit_shutdown(struct Curl_cfilter *cf,
     if(nread <= 0)
       break;
 
-    what = SOCKET_READABLE(cf->conn->sock[cf->sockindex], 0);
+    what = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data), 0);
   }
 
   return rc;

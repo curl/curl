@@ -28,12 +28,12 @@ CURLSHOPT_USERDATA - pointer passed to the lock and unlock mutex callbacks
 .nf
 #include <curl/curl.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_USERDATA, void *ptr);
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_USERDATA, void *clientp);
 .fi
 .SH DESCRIPTION
-The \fIptr\fP parameter is held verbatim by libcurl and is passed on as the
-\fIuserptr\fP argument to the callbacks set with \fICURLSHOPT_LOCKFUNC(3)\fP
-and \fICURLSHOPT_UNLOCKFUNC(3)\fP.
+The \fIclientp\fP parameter is held verbatim by libcurl and is passed on as
+the \fIclientp\fP argument to the callbacks set with
+\fICURLSHOPT_LOCKFUNC(3)\fP and \fICURLSHOPT_UNLOCKFUNC(3)\fP.
 .SH PROTOCOLS
 All
 .SH EXAMPLE

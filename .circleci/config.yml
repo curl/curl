@@ -78,7 +78,7 @@ commands:
     steps:
       - run:
           command: |
-            curl -LO https://github.com/wolfSSL/wolfssl/archive/v5.1.1-stable.tar.gz
+            curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v5.1.1-stable.tar.gz
             tar -xzf v5.1.1-stable.tar.gz
             cd wolfssl-5.1.1-stable
             ./autogen.sh
@@ -89,7 +89,7 @@ commands:
     steps:
       - run:
           command: |
-            curl -LO https://github.com/wolfSSL/wolfssh/archive/v1.4.8-stable.tar.gz
+            curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssh/archive/v1.4.8-stable.tar.gz
             tar -xzf v1.4.8-stable.tar.gz
             cd wolfssh-1.4.8-stable
             ./autogen.sh

@@ -107,7 +107,7 @@ if(WIN32)
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
     add_definitions(-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION})
-    set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION})
     set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
   endif()
   if(ENABLE_UNICODE)
@@ -333,7 +333,7 @@ include(CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
-  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_=")
+  list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_WINSOCKAPI_=)
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif()
 
@@ -356,24 +356,6 @@ check_function_exists(gethostname HAVE_GETHOSTNAME)
 if(WIN32)
   check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
-endif()
-
-# This check below for use of deprecated symbols is only temporary and is to
-# be removed again after a year's service. Remove after November 25, 2022.
-set(CURL_RECONFIG_REQUIRED 0)
-foreach(_LIB GSSAPI OPENLDAP LIBSSH LIBSSH2 BEARSSL MBEDTLS NSS OPENSSL
-        SCHANNEL SECTRANSP WOLFSSL)
-  if(CMAKE_USE_${_LIB})
-    set(CURL_RECONFIG_REQUIRED 1)
-    message(SEND_ERROR "The option CMAKE_USE_${_LIB} was renamed to CURL_USE_${_LIB}.")
-  endif()
-endforeach()
-if(CMAKE_USE_WINSSL)
-  set(CURL_RECONFIG_REQUIRED 1)
-  message(SEND_ERROR "The option CMAKE_USE_WINSSL was renamed to CURL_USE_SCHANNEL.")
-endif()
-if(CURL_RECONFIG_REQUIRED)
-  message(FATAL_ERROR "Reconfig required")
 endif()
 
 # check SSL libraries
@@ -420,7 +402,6 @@ if(CURL_USE_SCHANNEL)
 endif()
 if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
-  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DSECURITY_WIN32")
 endif()
 
 if(CURL_USE_SECTRANSP)
@@ -663,7 +644,7 @@ if(NOT CURL_DISABLE_LDAP)
           return 0;
         }"
       )
-      set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DLDAP_DEPRECATED=1")
+      list(APPEND CMAKE_REQUIRED_DEFINITIONS -DLDAP_DEPRECATED=1)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LDAP_LIB})
       if(HAVE_LIBLBER)
         list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LBER_LIB})

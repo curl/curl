@@ -141,7 +141,7 @@ CURLcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
 
 CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
-                           int query, int *pres1, void **pres2)
+                           int query, int *pres1, void *pres2)
 {
   return cf->next?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
@@ -323,6 +323,14 @@ int Curl_conn_cf_get_select_socks(struct Curl_cfilter *cf,
   return 0;
 }
 
+bool Curl_conn_cf_data_pending(struct Curl_cfilter *cf,
+                               const struct Curl_easy *data)
+{
+  if(cf)
+    return cf->cft->has_data_pending(cf, data);
+  return FALSE;
+}
+
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, CURLcode *err)
 {
@@ -362,6 +370,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     result = cf->cft->connect(cf, data, blocking, done);
     if(!result && *done) {
       Curl_conn_ev_update_info(data, data->conn);
+      Curl_conn_ev_report_stats(data, data->conn);
       data->conn->keepalive = Curl_now();
     }
   }
@@ -426,8 +435,6 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
   (void)data;
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  if(Curl_recv_has_postponed_data(data->conn, sockindex))
-    return TRUE;
 
   cf = data->conn->cfilter[sockindex];
   while(cf && !cf->connected) {
@@ -508,6 +515,28 @@ CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
   return result;
 }
 
+curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data)
+{
+  curl_socket_t sock;
+  if(cf && !cf->cft->query(cf, data, CF_QUERY_SOCKET, NULL, &sock))
+    return sock;
+  return CURL_SOCKET_BAD;
+}
+
+curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex)
+{
+  struct Curl_cfilter *cf;
+
+  cf = data->conn? data->conn->cfilter[sockindex] : NULL;
+  /* if the top filter has not connected, ask it (and its sub-filters)
+   * for the socket. Otherwise conn->sock[sockindex] should have it.
+   */
+  if(cf && !cf->connected)
+    return Curl_conn_cf_get_socket(cf, data);
+  return data->conn? data->conn->sock[sockindex] : CURL_SOCKET_BAD;
+}
+
 static CURLcode cf_cntrl_all(struct connectdata *conn,
                              struct Curl_easy *data,
                              bool ignore_result,
@@ -577,6 +606,12 @@ void Curl_conn_ev_update_info(struct Curl_easy *data,
                               struct connectdata *conn)
 {
   cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
+}
+
+void Curl_conn_ev_report_stats(struct Curl_easy *data,
+                               struct connectdata *conn)
+{
+  cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_REPORT_STATS, 0, NULL);
 }
 
 bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn)

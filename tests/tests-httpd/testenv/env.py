@@ -59,19 +59,41 @@ class EnvConfig:
         self.config = DEF_CONFIG
         # check cur and its features
         self.curl = CURL
-        self.curl_features = []
+        self.curl_props = {
+            'version': None,
+            'os': None,
+            'features': [],
+            'protocols': [],
+            'libs': [],
+            'lib_versions': [],
+        }
         self.curl_protos = []
         p = subprocess.run(args=[self.curl, '-V'],
                            capture_output=True, text=True)
         if p.returncode != 0:
             assert False, f'{self.curl} -V failed with exit code: {p.returncode}'
         for l in p.stdout.splitlines(keepends=False):
+            if l.startswith('curl '):
+                m = re.match(r'^curl (?P<version>\S+) (?P<os>\S+) (?P<libs>.*)$', l)
+                if m:
+                    self.curl_props['version'] = m.group('version')
+                    self.curl_props['os'] = m.group('os')
+                    self.curl_props['lib_versions'] = [
+                        lib.lower() for lib in m.group('libs').split(' ')
+                    ]
+                    self.curl_props['libs'] = [
+                        re.sub(r'/.*', '', lib) for lib in self.curl_props['lib_versions']
+                    ]
             if l.startswith('Features: '):
-                self.curl_features = [feat.lower() for feat in l[10:].split(' ')]
+                self.curl_props['features'] = [
+                    feat.lower() for feat in l[10:].split(' ')
+                ]
             if l.startswith('Protocols: '):
-                self.curl_protos = [prot.lower() for prot in l[11:].split(' ')]
+                self.curl_props['protocols'] = [
+                    prot.lower() for prot in l[11:].split(' ')
+                ]
         self.nghttpx_with_h3 = re.match(r'.* nghttp3/.*', p.stdout.strip())
-        log.error(f'nghttpx -v: {p.stdout}')
+        log.debug(f'nghttpx -v: {p.stdout}')
 
         self.http_port = self.config['test']['http_port']
         self.https_port = self.config['test']['https_port']
@@ -81,6 +103,7 @@ class EnvConfig:
         self.apxs = self.config['httpd']['apxs']
         if len(self.apxs) == 0:
             self.apxs = None
+        self._httpd_version = None
 
         self.examples_pem = {
             'key': 'xxx',
@@ -110,7 +133,40 @@ class EnvConfig:
                 self.nghttpx = None
             else:
                 self.nghttpx_with_h3 = re.match(r'.* nghttp3/.*', p.stdout.strip()) is not None
-                log.error(f'nghttpx -v: {p.stdout}')
+                log.debug(f'nghttpx -v: {p.stdout}')
+
+        self.caddy = self.config['caddy']['caddy']
+        if len(self.caddy.strip()) == 0:
+            self.caddy = None
+        if self.caddy is not None:
+            try:
+                p = subprocess.run(args=[self.caddy, 'version'],
+                                   capture_output=True, text=True)
+                if p.returncode != 0:
+                    # not a working caddy
+                    self.caddy = None
+            except:
+                self.caddy = None
+        self.caddy_http_port = self.config['caddy']['http_port']
+        self.caddy_https_port = self.config['caddy']['https_port']
+
+    @property
+    def httpd_version(self):
+        if self._httpd_version is None and self.apxs is not None:
+            p = subprocess.run(args=[self.apxs, '-q', 'HTTPD_VERSION'],
+                               capture_output=True, text=True)
+            if p.returncode != 0:
+                raise Exception(f'{self.apxs} failed to query HTTPD_VERSION: {p}')
+            self._httpd_version = p.stdout.strip()
+        return self._httpd_version
+
+    def _versiontuple(self, v):
+        v = re.sub(r'(\d+\.\d+(\.\d+)?)(-\S+)?', r'\1', v)
+        return tuple(map(int, v.split('.')))
+
+    def httpd_is_at_least(self, minv):
+        hv = self._versiontuple(self.httpd_version)
+        return hv >= self._versiontuple(minv)
 
     def is_complete(self) -> bool:
         return os.path.isfile(self.httpd) and \
@@ -147,12 +203,48 @@ class Env:
         return Env.CONFIG.nghttpx_with_h3
 
     @staticmethod
+    def have_h2_curl() -> bool:
+        return 'http2' in Env.CONFIG.curl_props['features']
+
+    @staticmethod
     def have_h3_curl() -> bool:
-        return 'http3' in Env.CONFIG.curl_features
+        return 'http3' in Env.CONFIG.curl_props['features']
+
+    @staticmethod
+    def curl_uses_lib(libname: str) -> bool:
+        return libname.lower() in Env.CONFIG.curl_props['libs']
+
+    @staticmethod
+    def curl_lib_version(libname: str) -> str:
+        prefix = f'{libname.lower()}/'
+        for lversion in Env.CONFIG.curl_props['lib_versions']:
+            if lversion.startswith(prefix):
+                return lversion[len(prefix):]
+        return 'unknown'
+
+    @staticmethod
+    def curl_os() -> str:
+        return Env.CONFIG.curl_props['os']
+
+    @staticmethod
+    def curl_version() -> str:
+        return Env.CONFIG.curl_props['version']
 
     @staticmethod
     def have_h3() -> bool:
         return Env.have_h3_curl() and Env.have_h3_server()
+
+    @staticmethod
+    def httpd_version() -> str:
+        return Env.CONFIG.httpd_version
+
+    @staticmethod
+    def httpd_is_at_least(minv) -> bool:
+        return Env.CONFIG.httpd_is_at_least(minv)
+
+    @staticmethod
+    def has_caddy() -> bool:
+        return Env.CONFIG.caddy is not None
 
     def __init__(self, pytestconfig=None):
         self._verbose = pytestconfig.option.verbose \
@@ -215,6 +307,18 @@ class Env:
         return self.CONFIG.h3_port
 
     @property
+    def caddy(self) -> str:
+        return self.CONFIG.caddy
+
+    @property
+    def caddy_https_port(self) -> str:
+        return self.CONFIG.caddy_https_port
+
+    @property
+    def caddy_http_port(self) -> str:
+        return self.CONFIG.caddy_http_port
+
+    @property
     def curl(self) -> str:
         return self.CONFIG.curl
 
@@ -241,3 +345,17 @@ class Env:
         if alpn_proto in ['h3']:
             return f'{domain}:{self.h3_port}'
         return f'{domain}:{self.http_port}'
+
+    def make_data_file(self, indir: str, fname: str, fsize: int) -> str:
+        fpath = os.path.join(indir, fname)
+        s10 = "0123456789"
+        s = (101 * s10) + s10[0:3]
+        with open(fpath, 'w') as fd:
+            for i in range(int(fsize / 1024)):
+                fd.write(f"{i:09d}-{s}\n")
+            remain = int(fsize % 1024)
+            if remain != 0:
+                i = int(fsize / 1024) + 1
+                s = f"{i:09d}-{s}\n"
+                fd.write(s[0:remain])
+        return fpath

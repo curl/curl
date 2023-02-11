@@ -27,6 +27,7 @@ jobs:
   autotools:
     name: ${{ matrix.build.name }}
     runs-on: 'ubuntu-latest'
+    container: ${{ matrix.build.container }}
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -114,8 +115,14 @@ jobs:
           install_packages: clang libnss3-dev libnghttp2-dev nss-plugin-pem
           configure: CC=clang CPPFLAGS="-isystem /usr/include/nss" --with-nss --enable-debug --with-nss-deprecated
 
+        - name: Slackware-openssl-gcc
+          configure: --with-openssl
+          # Docker Hub image that `container-job` executes in
+          container: 'andy5995/slackware-build-essential:15.0'
+
     steps:
-    - run: |
+    - if: ${{ matrix.build.container == null }}
+      run: |
         sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 libpsl-dev libbrotli-dev libzstd-dev ${{ matrix.build.install_packages }}
         sudo python3 -m pip install impacket
@@ -135,7 +142,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'bearssl') }}
       run: |
-        curl -LO https://bearssl.org/bearssl-0.6.tar.gz
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://bearssl.org/bearssl-0.6.tar.gz
         tar -xzf bearssl-0.6.tar.gz
         cd bearssl-0.6
         make
@@ -191,7 +198,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'quictls') }}
       run: |
-        git clone --depth=1 -b OpenSSL_1_1_1s+quic https://github.com/quictls/openssl
+        git clone --depth=1 -b OpenSSL_1_1_1t+quic https://github.com/quictls/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/quictls
         make install_sw
@@ -209,7 +216,7 @@ jobs:
     - if: ${{ contains(matrix.build.install_steps, 'rust') }}
       run: |
         cd $HOME
-        curl https://sh.rustup.rs -sSf | sh -s -- -y
+        curl -sSf --compressed https://sh.rustup.rs/ | sh -s -- -y
         source $HOME/.cargo/env
         rustup toolchain install nightly
       name: 'install rust'
@@ -233,7 +240,7 @@ jobs:
     - if: ${{ contains(matrix.build.install_steps, 'intel') }}
       run: |
         cd /tmp
-        curl https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo apt-key add -
+        curl -sSf --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo apt-key add -
         sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
         sudo apt install --no-install-recommends intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
         source /opt/intel/oneapi/setvars.sh
@@ -259,26 +266,3 @@ jobs:
       name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
-
-  slackware-15_0:
-    # Containers must run in Linux based operating systems
-    runs-on: ubuntu-latest
-    # Docker Hub image that `container-job` executes in
-    container: andy5995/slackware-build-essential:15.0
-    steps:
-    - uses: actions/checkout@v3
-
-    - run: autoreconf -fi
-      name: 'autoreconf'
-
-    - run: ./configure --enable-warnings --enable-werror --with-openssl
-      name: 'configure'
-
-    - run: make V=1 -j$(expr $(nproc) - 1)
-      name: 'make'
-
-    - run: make V=1 examples -j$(expr $(nproc) - 1)
-      name: 'make examples'
-
-    - run: make V=1 -C tests -j$(expr $(nproc) - 1)
-      name: 'make tests'

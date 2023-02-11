@@ -31,8 +31,10 @@ trailing colon). The header contents are exactly as sent over the network,
 with leading and trailing whitespace trimmed. Added in curl 7.84.0.
 
 .B NOTE:
-The %-symbol is a special symbol in the win32-environment, where all
-occurrences of % must be doubled when using this option.
+In Windows the %-symbol is a special symbol used to expand environment
+variables. In batch files all occurrences of % must be doubled when using this
+option to properly escape. If this option is used at the command prompt then
+the % cannot be escaped and unintended expansion is possible.
 
 The variables available are:
 .RS
@@ -63,7 +65,7 @@ server. (Added in 7.15.4)
 .B header_json
 A JSON object with all HTTP response headers from the recent transfer. Values
 are provided as arrays, since in the case of multiple headers there can be
-multiple values.
+multiple values. (Added in 7.83.0)
 
 The header names provided in lowercase, listed in order of appearance over the
 wire. Except for duplicated headers. They are grouped on the first occurrence

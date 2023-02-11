@@ -21,15 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
----
-- hosts: all
-  tasks:
-  - name: Pull down logs to executor
-    ignore_errors: True
-    synchronize:
-      src: "{{ zuul.project.src_dir }}/config.log"
-      dest: "{{ zuul.executor.log_root }}/config.log"
-      mode: pull
-      owner: false
-      group: false
-...
+
+clean-local:
+	rm -rf *.pyc __pycache__
+	rm -rf gen

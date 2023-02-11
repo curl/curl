@@ -218,29 +218,9 @@ static const struct group_name_map gnm[] = {
   { WOLFSSL_KYBER_LEVEL1, "KYBER_LEVEL1" },
   { WOLFSSL_KYBER_LEVEL3, "KYBER_LEVEL3" },
   { WOLFSSL_KYBER_LEVEL5, "KYBER_LEVEL5" },
-  { WOLFSSL_NTRU_HPS_LEVEL1, "NTRU_HPS_LEVEL1" },
-  { WOLFSSL_NTRU_HPS_LEVEL3, "NTRU_HPS_LEVEL3" },
-  { WOLFSSL_NTRU_HPS_LEVEL5, "NTRU_HPS_LEVEL5" },
-  { WOLFSSL_NTRU_HRSS_LEVEL3, "NTRU_HRSS_LEVEL3" },
-  { WOLFSSL_SABER_LEVEL1, "SABER_LEVEL1" },
-  { WOLFSSL_SABER_LEVEL3, "SABER_LEVEL3" },
-  { WOLFSSL_SABER_LEVEL5, "SABER_LEVEL5" },
-  { WOLFSSL_KYBER_90S_LEVEL1, "KYBER_90S_LEVEL1" },
-  { WOLFSSL_KYBER_90S_LEVEL3, "KYBER_90S_LEVEL3" },
-  { WOLFSSL_KYBER_90S_LEVEL5, "KYBER_90S_LEVEL5" },
-  { WOLFSSL_P256_NTRU_HPS_LEVEL1, "P256_NTRU_HPS_LEVEL1" },
-  { WOLFSSL_P384_NTRU_HPS_LEVEL3, "P384_NTRU_HPS_LEVEL3" },
-  { WOLFSSL_P521_NTRU_HPS_LEVEL5, "P521_NTRU_HPS_LEVEL5" },
-  { WOLFSSL_P384_NTRU_HRSS_LEVEL3, "P384_NTRU_HRSS_LEVEL3" },
-  { WOLFSSL_P256_SABER_LEVEL1, "P256_SABER_LEVEL1" },
-  { WOLFSSL_P384_SABER_LEVEL3, "P384_SABER_LEVEL3" },
-  { WOLFSSL_P521_SABER_LEVEL5, "P521_SABER_LEVEL5" },
   { WOLFSSL_P256_KYBER_LEVEL1, "P256_KYBER_LEVEL1" },
   { WOLFSSL_P384_KYBER_LEVEL3, "P384_KYBER_LEVEL3" },
   { WOLFSSL_P521_KYBER_LEVEL5, "P521_KYBER_LEVEL5" },
-  { WOLFSSL_P256_KYBER_90S_LEVEL1, "P256_KYBER_90S_LEVEL1" },
-  { WOLFSSL_P384_KYBER_90S_LEVEL3, "P384_KYBER_90S_LEVEL3" },
-  { WOLFSSL_P521_KYBER_90S_LEVEL5, "P521_KYBER_90S_LEVEL5" },
   { 0, NULL }
 };
 #endif
@@ -299,8 +279,7 @@ static long bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
 static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   CURLcode result = CURLE_OK;
 
@@ -315,8 +294,7 @@ static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
 static int bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   CURLcode result = CURLE_OK;
 
@@ -633,34 +611,18 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
 #ifdef HAVE_ALPN
-  if(cf->conn->bits.tls_enable_alpn) {
-    char protocols[128];
-    *protocols = '\0';
+  if(connssl->alpn) {
+    struct alpn_proto_buf proto;
+    CURLcode result;
 
-    /* wolfSSL's ALPN protocol name list format is a comma separated string of
-       protocols in descending order of preference, eg: "h2,http/1.1" */
-
-    if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
-      strcpy(protocols, ALPN_HTTP_1_0);
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_0);
-    }
-    else {
-#ifdef USE_HTTP2
-      if(data->state.httpwant >= CURL_HTTP_VERSION_2) {
-        strcpy(protocols + strlen(protocols), ALPN_H2 ",");
-        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
-      }
-#endif
-
-      strcpy(protocols + strlen(protocols), ALPN_HTTP_1_1);
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
-    }
-    if(wolfSSL_UseALPN(backend->handle, protocols,
-                       (unsigned)strlen(protocols),
+    result = Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    if(result ||
+       wolfSSL_UseALPN(backend->handle, (char *)proto.data, proto.len,
                        WOLFSSL_ALPN_CONTINUE_ON_MISMATCH) != SSL_SUCCESS) {
       failf(data, "SSL: failed setting ALPN protocols");
       return CURLE_SSL_CONNECT_ERROR;
     }
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 #endif /* HAVE_ALPN */
 
@@ -712,7 +674,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #else /* USE_BIO_CHAIN */
   /* pass the raw socket into the SSL layer */
-  if(!SSL_set_fd(backend->handle, (int)cf->conn->sock[cf->sockindex])) {
+  if(!SSL_set_fd(backend->handle, (int)Curl_conn_cf_get_socket(cf, data))) {
     failf(data, "SSL: SSL_set_fd failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -888,25 +850,11 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     rc = wolfSSL_ALPN_GetProtocol(backend->handle, &protocol, &protocol_len);
 
     if(rc == SSL_SUCCESS) {
-      infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, protocol_len, protocol);
-
-      if(protocol_len == ALPN_HTTP_1_1_LENGTH &&
-         !memcmp(protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH))
-        cf->conn->alpn = CURL_HTTP_VERSION_1_1;
-#ifdef USE_HTTP2
-      else if(data->state.httpwant >= CURL_HTTP_VERSION_2 &&
-              protocol_len == ALPN_H2_LENGTH &&
-              !memcmp(protocol, ALPN_H2, ALPN_H2_LENGTH))
-        cf->conn->alpn = CURL_HTTP_VERSION_2;
-#endif
-      else
-        infof(data, "ALPN, unrecognized protocol %.*s", protocol_len,
-              protocol);
-      Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                          BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+      Curl_alpn_set_negotiated(cf, data, (const unsigned char *)protocol,
+                               protocol_len);
     }
     else if(rc == SSL_ALPN_NOT_FOUND)
-      infof(data, VTLS_INFOF_NO_ALPN);
+      Curl_alpn_set_negotiated(cf, data, NULL, 0);
     else {
       failf(data, "ALPN, failure getting protocol, error %d", rc);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1171,7 +1119,7 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
 {
   CURLcode result;
   struct ssl_connect_data *connssl = cf->ctx;
-  curl_socket_t sockfd = cf->conn->sock[cf->sockindex];
+  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   int what;
 
   /* check if the connection has already been established */
