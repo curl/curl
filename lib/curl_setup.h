@@ -838,6 +838,13 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define USE_HTTP3
 #endif
 
+/* Certain Windows implementations are not aligned with what curl expects,
+   so always use the local one on this platform. E.g. the mingw-w64
+   implementation can return wrong results for non-ASCII inputs. */
+#if defined(HAVE_BASENAME) && defined(WIN32)
+#undef HAVE_BASENAME
+#endif
+
 #if defined(USE_UNIX_SOCKETS) && defined(WIN32)
 #  if defined(__MINGW32__) && !defined(LUP_SECURE)
      typedef u_short ADDRESS_FAMILY; /* Classic mingw, 11y+ old mingw-w64 */
