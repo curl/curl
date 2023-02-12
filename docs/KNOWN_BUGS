@@ -67,9 +67,6 @@ problems may have been fixed or changed somewhat since this was written.
  7. FTP
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
- 7.5 ASCII FTP
- 7.9 Passive transfer tries only one IP address
- 7.10 FTPS needs session reuse
  7.11 FTPS upload data loss with TLS 1.3
  7.12 FTPS directory listing hangs on Windows with Schannel
 
@@ -88,8 +85,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.7 signal-based resolver timeouts
- 11.8 DoH leaks memory after followlocation
- 11.9 DoH does not inherit all transfer options
  11.10 Blocking socket operations in non-blocking API
  11.11 A shared connection cache is not thread-safe
  11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
@@ -121,11 +116,8 @@ problems may have been fixed or changed somewhat since this was written.
  16. Applications
 
  17. HTTP/2
- 17.1 Excessive HTTP/2 packets with TCP_NODELAY
  17.2 HTTP/2 frames while in the connection pool kill reuse
  17.3 ENHANCE_YOUR_CALM causes infinite retries
- 17.4 Connection failures with parallel HTTP/2
- 17.5 HTTP/2 connections through HTTPS proxy frequently stall
 
  18. HTTP/3
  18.1 If the HTTP/3 server closes connection during upload curl hangs
@@ -470,38 +462,6 @@ problems may have been fixed or changed somewhat since this was written.
  thus fails to issue the correct command:
  https://curl.se/bug/view.cgi?id=635
 
-7.5 ASCII FTP
-
- FTP ASCII transfers do not follow RFC959. They do not convert the data
- accordingly (not for sending nor for receiving). RFC 959 section 3.1.1.1
- clearly describes how this should be done:
-
-    The sender converts the data from an internal character representation to
-    the standard 8-bit NVT-ASCII representation (see the Telnet
-    specification). The receiver will convert the data from the standard
-    form to his own internal form.
-
- Since 7.15.4 at least line endings are converted.
-
-7.9 Passive transfer tries only one IP address
-
- When doing FTP operations through a proxy at localhost, the reported spotted
- that curl only tried to connect once to the proxy, while it had multiple
- addresses and a failed connect on one address should make it try the next.
-
- After switching to passive mode (EPSV), curl should try all IP addresses for
- "localhost". Currently it tries ::1, but it should also try 127.0.0.1.
-
- See https://github.com/curl/curl/issues/1508
-
-7.10 FTPS needs session reuse
-
- When the control connection is reused for a subsequent transfer, some FTPS
- servers complain about "missing session reuse" for the data channel for the
- second transfer.
-
- https://github.com/curl/curl/issues/4654
-
 7.11 FTPS upload data loss with TLS 1.3
 
  During FTPS upload curl does not attempt to read TLS handshake messages sent
@@ -608,24 +568,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  Also, alarm() provides timeout resolution only to the nearest second. alarm
  ought to be replaced by setitimer on systems that support it.
-
-11.8 DoH leaks memory after followlocation
-
- https://github.com/curl/curl/issues/4592
-
-11.9 DoH does not inherit all transfer options
-
- Some options are not inherited because they are not relevant for the DoH SSL
- connections, or inheriting the option may result in unexpected behavior. For
- example the user's debug function callback is not inherited because it would
- be unexpected for internal handles (ie DoH handles) to be passed to that
- callback.
-
- If an option is not inherited then it is not possible to set it separately for
- DoH without a DoH-specific option. For example: CURLOPT_DOH_SSL_VERIFYHOST,
- CURLOPT_DOH_SSL_VERIFYPEER and CURLOPT_DOH_SSL_VERIFYSTATUS.
-
- See https://github.com/curl/curl/issues/6605
 
 11.10 Blocking socket operations in non-blocking API
 
@@ -779,16 +721,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 17. HTTP/2
 
-17.1 Excessive HTTP/2 packets with TCP_NODELAY
-
- Because of how curl sets TCP_NODELAY by default, HTTP/2 requests are issued
- using more separate TCP packets than it would otherwise need to use. This
- means spending more bytes than it has to. Just disabling TCP_NODELAY for
- HTTP/2 is also not the correct fix because that then makes the outgoing
- packets to get delayed.
-
- See https://github.com/curl/curl/issues/6363
-
 17.2 HTTP/2 frames while in the connection pool kill reuse
 
  If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
@@ -805,14 +737,6 @@ problems may have been fixed or changed somewhat since this was written.
  with ENHANCE_YOUR_CALM error code.
 
  See https://github.com/curl/curl/issues/5119
-
-17.4 Connection failures with parallel HTTP/2
-
- See https://github.com/curl/curl/issues/5611
-
-17.5 HTTP/2 connections through HTTPS proxy frequently stall
-
- See https://github.com/curl/curl/issues/6936
 
 18. HTTP/3
 
