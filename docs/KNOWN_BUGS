@@ -120,7 +120,6 @@ problems may have been fixed or changed somewhat since this was written.
  16. Applications
 
  17. HTTP/2
- 17.1 Excessive HTTP/2 packets with TCP_NODELAY
  17.2 HTTP/2 frames while in the connection pool kill reuse
  17.3 ENHANCE_YOUR_CALM causes infinite retries
  17.4 Connection failures with parallel HTTP/2
@@ -767,16 +766,6 @@ problems may have been fixed or changed somewhat since this was written.
 16. Applications
 
 17. HTTP/2
-
-17.1 Excessive HTTP/2 packets with TCP_NODELAY
-
- Because of how curl sets TCP_NODELAY by default, HTTP/2 requests are issued
- using more separate TCP packets than it would otherwise need to use. This
- means spending more bytes than it has to. Just disabling TCP_NODELAY for
- HTTP/2 is also not the correct fix because that then makes the outgoing
- packets to get delayed.
-
- See https://github.com/curl/curl/issues/6363
 
 17.2 HTTP/2 frames while in the connection pool kill reuse
 
