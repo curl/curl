@@ -66,7 +66,6 @@ problems may have been fixed or changed somewhat since this was written.
  7. FTP
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
- 7.5 ASCII FTP
  7.9 Passive transfer tries only one IP address
  7.11 FTPS upload data loss with TLS 1.3
  7.12 FTPS directory listing hangs on Windows with Schannel
@@ -454,19 +453,6 @@ problems may have been fixed or changed somewhat since this was written.
  logging in), the operation will fail since libcurl does not detect this and
  thus fails to issue the correct command:
  https://curl.se/bug/view.cgi?id=635
-
-7.5 ASCII FTP
-
- FTP ASCII transfers do not follow RFC959. They do not convert the data
- accordingly (not for sending nor for receiving). RFC 959 section 3.1.1.1
- clearly describes how this should be done:
-
-    The sender converts the data from an internal character representation to
-    the standard 8-bit NVT-ASCII representation (see the Telnet
-    specification). The receiver will convert the data from the standard
-    form to his own internal form.
-
- Since 7.15.4 at least line endings are converted.
 
 7.9 Passive transfer tries only one IP address
 
