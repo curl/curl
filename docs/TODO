@@ -68,6 +68,7 @@
  4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
+ 4.8 Passive transfer could try other IP addresses
 
  5. HTTP
  5.1 Provide the error body from a CONNECT response
@@ -563,6 +564,17 @@
  otherwise usedw data connection: https://www.nsftools.com/tips/RawFTP.htm#STAT
 
  This is not detailed in any FTP specification.
+
+4.8 Passive transfer could try other IP addresses
+
+ When doing FTP operations through a proxy at localhost, the reported spotted
+ that curl only tried to connect once to the proxy, while it had multiple
+ addresses and a failed connect on one address should make it try the next.
+
+ After switching to passive mode (EPSV), curl could try all IP addresses for
+ "localhost". Currently it tries ::1, but it should also try 127.0.0.1.
+
+ See https://github.com/curl/curl/issues/1508
 
 5. HTTP
 
