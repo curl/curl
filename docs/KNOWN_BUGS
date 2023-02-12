@@ -84,7 +84,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.7 signal-based resolver timeouts
- 11.8 DoH leaks memory after followlocation
  11.9 DoH does not inherit all transfer options
  11.10 Blocking socket operations in non-blocking API
  11.11 A shared connection cache is not thread-safe
@@ -559,10 +558,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  Also, alarm() provides timeout resolution only to the nearest second. alarm
  ought to be replaced by setitimer on systems that support it.
-
-11.8 DoH leaks memory after followlocation
-
- https://github.com/curl/curl/issues/4592
 
 11.9 DoH does not inherit all transfer options
 
