@@ -1282,6 +1282,8 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   struct HTTP *stream = data->req.p.http;
   ssize_t nread = -1;
 
+  (void)cf;
+
   if(stream->reset) {
     failf(data,
           "HTTP/3 stream %" PRId64 " reset by server", stream->stream3_id);
@@ -1331,6 +1333,8 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct HTTP *stream = data->req.p.http;
   ssize_t nread = -1;
   struct cf_call_data save;
+
+  (void)ctx;
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);

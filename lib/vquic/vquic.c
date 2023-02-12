@@ -327,6 +327,7 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              const struct Curl_addrinfo *ai,
                              int transport)
 {
+  (void)transport;
   DEBUGASSERT(transport == TRNSPRT_QUIC);
 #ifdef USE_NGTCP2
   return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
