@@ -78,7 +78,6 @@ jobs:
         curl -Lo gnutls https://www.gnupg.org/ftp/gcrypt/gnutls/$GNUTLS_VER_TAG/gnutls-$GNUTLS_VER.tar.xz
         tar -xf gnutls
         cd gnutls-$GNUTLS_VER
-        ./bootstrap
         ./configure ${{ matrix.build.gnutls-configure }} --prefix=$HOME/all
         make install
       name: 'install gnutls'
