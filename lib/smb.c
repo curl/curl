@@ -763,6 +763,11 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
   void *msg = NULL;
   const struct smb_nt_create_response *smb_m;
 
+  if(data->set.upload && (data->state.infilesize < 0)) {
+    failf(data, "SMB upload needs to know the size up front");
+    return CURLE_SEND_ERROR;
+  }
+
   /* Start the request */
   if(req->state == SMB_REQUESTING) {
     result = smb_send_tree_connect(data);
@@ -993,6 +998,7 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
   /* The share must be present */
   if(!slash) {
     Curl_safefree(smbc->share);
+    failf(data, "missing share in URL path for SMB");
     return CURLE_URL_MALFORMAT;
   }
 
