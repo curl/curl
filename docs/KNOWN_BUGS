@@ -84,7 +84,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.7 signal-based resolver timeouts
- 11.9 DoH does not inherit all transfer options
  11.10 Blocking socket operations in non-blocking API
  11.11 A shared connection cache is not thread-safe
  11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
@@ -558,20 +557,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  Also, alarm() provides timeout resolution only to the nearest second. alarm
  ought to be replaced by setitimer on systems that support it.
-
-11.9 DoH does not inherit all transfer options
-
- Some options are not inherited because they are not relevant for the DoH SSL
- connections, or inheriting the option may result in unexpected behavior. For
- example the user's debug function callback is not inherited because it would
- be unexpected for internal handles (ie DoH handles) to be passed to that
- callback.
-
- If an option is not inherited then it is not possible to set it separately for
- DoH without a DoH-specific option. For example: CURLOPT_DOH_SSL_VERIFYHOST,
- CURLOPT_DOH_SSL_VERIFYPEER and CURLOPT_DOH_SSL_VERIFYSTATUS.
-
- See https://github.com/curl/curl/issues/6605
 
 11.10 Blocking socket operations in non-blocking API
 
