@@ -270,10 +270,6 @@ sub single {
                 print STDERR "ERROR: no 'Long:' in $f\n";
                 return 1;
             }
-            if($multi !~ /(single|append|boolean|mutex)/) {
-                print STDERR "ERROR: bad 'Multi:' in $f\n";
-                return 1;
-            }
             if(!$category) {
                 print STDERR "ERROR: no 'Category:' in $f\n";
                 return 2;
@@ -374,6 +370,13 @@ sub single {
     elsif($multi eq "mutex") {
         push @extra,
             "\nProviding --$long multiple times has no extra effect.\n";
+    }
+    elsif($multi eq "custom") {
+        ; # left for the text to describe
+    }
+    else {
+        print STDERR "$f:$line:1:ERROR: unrecognized Multi: '$multi'\n";
+        return 2;
     }
 
     printdesc(@extra);
@@ -622,7 +625,9 @@ sub mainpage {
         $ret += single($f, 0);
     }
 
-    header("page-footer");
+    if(!$ret) {
+        header("page-footer");
+    }
     exit $ret if($ret);
 }
 
