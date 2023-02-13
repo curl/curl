@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2808
+ Contributors:                 2811
 
 This release includes the following changes:
 
@@ -13,6 +13,7 @@ This release includes the following changes:
  o src: add --http3-only [81]
  o tool_operate: share HSTS between handles
  o urlapi: add CURLU_PUNYCODE [25]
+ o writeout: add %{certs} and %{num_certs} [33]
 
 This release includes the following bugfixes:
 
@@ -25,6 +26,7 @@ This release includes the following bugfixes:
  o cmake: bump requirement to 3.7 [23]
  o cmake: check for sendmsg [39]
  o cmake: delete redundant macro definition `SECURITY_WIN32` [91]
+ o cmake: fix dev warning due to mismatched arg [160]
  o cmake: fix the snprintf detection [5]
  o cmake: remove deprecated symbols check [96]
  o cmake: set SOVERSION also for macOS [68]
@@ -101,9 +103,11 @@ This release includes the following bugfixes:
  o msh3: add support for request payload [28]
  o msh3: update to v0.5 Release [17]
  o msh3: update to v0.6 [60]
+ o multi: stop sending empty HTTP/3 UDP datagrams on Windows [136]
  o multihandle: turn bool struct fields into bits [26]
  o ngtcp2: add CURLOPT_SSL_CTX_FUNCTION support for openssl+wolfssl [62]
  o ngtcp2: fix the build without 'sendmsg' [38]
+ o ngtcp2: replace removed define and stop using removed function [164]
  o no-clobber.d: only use long form options in man page text [145]
  o noproxy: support for space-separated names is deprecated [66]
  o nss: implement data_pending method [43]
@@ -124,12 +128,16 @@ This release includes the following bugfixes:
  o runtests: consider warnings fatal and error on them [32]
  o runtests: fix detection of TLS backends [50]
  o runtests: make 'mbedtls' a testable feature
+ o rustls: improve error messages [162]
+ o scripts/delta: show percent of number of files changed since last tag
  o scripts: fix Appveyor job detection in cijobs.pl
  o scripts: set file mode +x on all perl and shell scripts [63]
  o sectransp: fix for incomplete read/writes [61]
  o SECURITY-PROCESS.md: document severity levels [20]
+ o setopt: Address undefined behaviour by checking for null [161]
  o setopt: move the SHA256 opt within #ifdef libssh2 [42]
  o setopt: use >, not >=, when checking if uarg is larger than uint-max [140]
+ o smb: return error on upload without size [142]
  o socketpair: allow localhost MITM sniffers [30]
  o strdup: name it Curl_strdup [16]
  o system.h: assume OS400 is always built with ILEC compiler [95]
@@ -162,11 +170,11 @@ This release includes the following bugfixes:
  o vtls: manage current easy handle in nested cfilter calls [90]
  o vtls: use ALPN HTTP/1.0 when HTTP/1.0 is used
  o winbuild: document that arm64 is supported [92]
+ o windows: always use curl's basename() implementation [157]
  o wolfssl: remove deprecated post-quantum algorithms [124]
  o workflows/linux.yml: merge 3 common packages [18]
  o write-out.d: add 'since version' to %{header_json} documentation [129]
  o write-out.d: clarify Windows % symbol escaping [86]
- o writeout: add %{certs} and %{num_certs} [33]
  o ws: fix autoping handling [70]
  o ws: fix multiframe send handling [143]
  o ws: fix recv of larger frames [144]
@@ -192,23 +200,25 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alexey Savchuk, Andrei Rybak, Andy Alt, Anthony Hu, Brian Green,
-  Cameron Blomquist, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  dekerser on github, Divy Le Ray, Esdras de Morais da Silva,
-  Federico Pellegrin, Fujii Hironori, Gerrit Renker, Gisle Vanem,
-  Gregory Panakkal, Hannah Schierling, Harry Sintonen, Hide Ishikawa,
-  highmtworks on github, Jakob Hirsch, John Bampton, John Porter,
-  John Sherrill, Jon Rumsey, Josh Brobst, Kvarec Lezki, Lucas Pardue,
-  Marc Aldorasi, Marcel Raad, Mark Roszko, Martin D'Aloia, Martin Waleczek,
-  Michael Osipov, Mike Duglas, Muhammad Hussein Ammari, Nick Banks,
-  nick-telia on github, norbertmm on github, odek86 on github,
+  Cameron Blomquist, Cherish98 on Github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, dekerser on github, Divy Le Ray, Dmitry Atamanov,
+  Esdras de Morais da Silva, Federico Pellegrin, Fujii Hironori, Gerrit Renker,
+  Gisle Vanem, Gregory Panakkal, Hannah Schierling, Harry Sintonen,
+  Hide Ishikawa, highmtworks on github, Jacob Hoffman-Andrews, Jakob Hirsch,
+  James Keast, John Bampton, John Porter, John Sherrill, Jon Rumsey,
+  Josh Brobst, Karthikdasari0423 on github, Kvarec Lezki, Lucas Pardue,
+  Marc Aldorasi, Marcel Raad, Marc Hörsken, Mark Roszko, Martin D'Aloia,
+  Martin Waleczek, Michael Osipov, Mike Duglas, Muhammad Hussein Ammari,
+  Nick Banks, nick-telia on github, norbertmm on github, odek86 on github,
   Patrick Monnerat, Paul Groke, Paul Howarth, Peter Wu, Philip Heiduck,
   Pronyushkin Petr, Radek Brich, Radu Hociung, RanBarLavie on github,
   Ray Satiro, Ryan Schmidt, Sébastien Helleu, Sergey Bronnikov,
   Sergio-IME on github, sergio-nsk on github, SerusDev on github, Stanley Wucw,
   Stefan Eissing, Stefan Talpalaru, Stephan Guilloux, Tatsuhiro Tsujikawa,
-  Thomas1664 on github, Thomas Klausner, Timmy Schierling, Viktor Szakats,
-  violetlige on github, William Tang, Yurii Rashkovskii
-  (69 contributors)
+  Thomas1664 on github, Thomas Klausner, Timmy Schierling,
+  UnicornZhang on Github, Viktor Szakats, violetlige on github, William Tang,
+  Yurii Rashkovskii
+  (76 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -347,10 +357,12 @@ References to bug reports and discussions on issues:
  [133] = https://curl.se/bug/?i=10322
  [134] = https://curl.se/bug/?i=10437
  [135] = https://curl.se/bug/?i=10434
+ [136] = https://curl.se/bug/?i=9086
  [138] = https://curl.se/bug/?i=10414
  [139] = https://curl.se/bug/?i=10130
  [140] = https://curl.se/bug/?i=10421
  [141] = https://curl.se/bug/?i=10451
+ [142] = https://curl.se/bug/?i=10484
  [143] = https://curl.se/bug/?i=10413
  [144] = https://curl.se/bug/?i=10438
  [145] = https://curl.se/bug/?i=10461
@@ -365,3 +377,8 @@ References to bug reports and discussions on issues:
  [154] = https://curl.se/bug/?i=10409
  [155] = https://curl.se/bug/?i=10432
  [156] = https://curl.se/bug/?i=10432
+ [157] = https://curl.se/bug/?i=10261
+ [160] = https://curl.se/bug/?i=10471
+ [161] = https://curl.se/bug/?i=10472
+ [162] = https://curl.se/bug/?i=10463
+ [164] = https://curl.se/bug/?i=10469
