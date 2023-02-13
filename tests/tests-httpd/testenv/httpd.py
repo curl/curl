@@ -44,9 +44,9 @@ class Httpd:
 
     MODULES = [
         'log_config', 'logio', 'unixd', 'version', 'watchdog',
-        'authn_core', 'authz_user', 'authz_core',
+        'authn_core', 'authz_user', 'authz_core', 'authz_host',
         'env', 'filter', 'headers', 'mime',
-        'rewrite', 'http2', 'ssl',
+        'rewrite', 'http2', 'ssl', 'proxy', 'proxy_http', 'proxy_connect',
         'mpm_event',
     ]
     COMMON_MODULES_DIRS = [
@@ -191,6 +191,8 @@ class Httpd:
         creds1 = self.env.get_credentials(domain1)
         domain2 = self.env.domain2
         creds2 = self.env.get_credentials(domain2)
+        proxy_domain = self.env.proxy_domain
+        proxy_creds = self.env.get_credentials(proxy_domain)
         self._mkpath(self._conf_dir)
         self._mkpath(self._logs_dir)
         self._mkpath(self._tmp_dir)
@@ -218,6 +220,8 @@ class Httpd:
                 f'ErrorLog {self._error_log}',
                 f'LogLevel {self._get_log_level()}',
                 f'LogLevel http:trace4',
+                f'LogLevel proxy:trace4',
+                f'LogLevel proxy_http:trace4',
                 f'H2MinWorkers 16',
                 f'H2MaxWorkers 128',
                 f'Listen {self.env.http_port}',
@@ -227,12 +231,40 @@ class Httpd:
             conf.extend([  # plain http host for domain1
                 f'<VirtualHost *:{self.env.http_port}>',
                 f'    ServerName {domain1}',
+                f'    ServerAlias localhost',
                 f'    DocumentRoot "{self._docs_dir}"',
             ])
             conf.extend(self._curltest_conf())
             conf.extend([
                 f'</VirtualHost>',
                 f'',
+            ])
+            conf.extend([  # http forward proxy
+                f'<VirtualHost *:{self.env.http_port}>',
+                f'    ServerName {proxy_domain}',
+                f'    Protocols http/1.1',
+                f'    ProxyRequests On',
+                f'    ProxyVia On',
+                f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
+                f'    <Proxy "*">',
+                f'      Require ip 127.0.0.1',
+                f'    </Proxy>',
+                f'</VirtualHost>',
+            ])
+            conf.extend([  # https forward proxy
+                f'<VirtualHost *:{self.env.https_port}>',
+                f'    ServerName {proxy_domain}',
+                f'    Protocols http/1.1',
+                f'    SSLEngine on',
+                f'    SSLCertificateFile {proxy_creds.cert_file}',
+                f'    SSLCertificateKeyFile {proxy_creds.pkey_file}',
+                f'    ProxyRequests On',
+                f'    ProxyVia On',
+                f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
+                f'    <Proxy "*">',
+                f'      Require ip 127.0.0.1',
+                f'    </Proxy>',
+                f'</VirtualHost>',
             ])
             conf.extend([  # https host for domain1, h1 + h2
                 f'<VirtualHost *:{self.env.https_port}>',

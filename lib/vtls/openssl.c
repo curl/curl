@@ -2122,6 +2122,22 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
   return FALSE;
 }
 
+static CURLcode
+ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
+                X509 *server_cert, const char *hostname,
+                const char *dispname);
+
+CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
+                              X509 *server_cert)
+{
+  const char *hostname, *dispname;
+  int port;
+
+  (void)conn;
+  Curl_conn_get_host(data, FIRSTSOCKET, &hostname, &dispname, &port);
+  return ossl_verifyhost(data, conn, server_cert, hostname, dispname);
+}
+
 /* Quote from RFC2818 section 3.1 "Server Identity"
 
    If a subjectAltName extension of type dNSName is present, that MUST
@@ -2144,8 +2160,10 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
 
    This function is now used from ngtcp2 (QUIC) as well.
 */
-CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                              X509 *server_cert)
+static CURLcode
+ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
+                X509 *server_cert, const char *hostname,
+                const char *dispname)
 {
   bool matched = FALSE;
   int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
@@ -2159,12 +2177,9 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   CURLcode result = CURLE_OK;
   bool dNSName = FALSE; /* if a dNSName field exists in the cert */
   bool iPAddress = FALSE; /* if a iPAddress field exists in the cert */
-  const char *hostname, *dispname;
-  int port;
   size_t hostlen;
 
   (void)conn;
-  Curl_conn_get_host(data, FIRSTSOCKET, &hostname, &dispname, &port);
   hostlen = strlen(hostname);
 
 #ifndef ENABLE_IPV6
@@ -4129,7 +4144,8 @@ static CURLcode servercert(struct Curl_cfilter *cf,
   BIO_free(mem);
 
   if(conn_config->verifyhost) {
-    result = Curl_ossl_verifyhost(data, conn, backend->server_cert);
+    result = ossl_verifyhost(data, conn, backend->server_cert,
+                             connssl->hostname, connssl->dispname);
     if(result) {
       X509_free(backend->server_cert);
       backend->server_cert = NULL;
