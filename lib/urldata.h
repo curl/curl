@@ -689,6 +689,7 @@ struct SingleRequest {
   struct dohdata *doh; /* DoH specific data for this request */
 #endif
   unsigned char setcookies;
+  unsigned char writer_stack_depth; /* Unencoding stack depth. */
   BIT(header);        /* incoming data has HTTP header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
   BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding

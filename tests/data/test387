@@ -47,7 +47,7 @@ Accept: */*
 61
 </errorcode>
 <stderr mode="text">
-curl: (61) Reject response due to 5 content encodings
+curl: (61) Reject response due to more than 5 content encodings
 </stderr>
 </verify>
 </testcase>
