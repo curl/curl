@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP/2
+HTTPS
+-w
+%header
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes" crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+h2c
+SSL
+headers-api
+</features>
+<server>
+http
+http/2
+</server>
+ <name>
+HTTP/2 GET
+ </name>
+<setenv>
+</setenv>
+ <command>
+-k --http2 -w '%{header_json}\n' "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER"
+</command>
+
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout crlf="yes">
+HTTP/2 200 
+date: Tue, 09 Nov 2010 14:49:00 GMT
+content-length: 6
+content-type: text/html
+funny-head: yesyes
+server: nghttpx
+via: 1.1 nghttpx
+
+-foo-
+{"date":["Tue, 09 Nov 2010 14:49:00 GMT"],
+"content-length":["6"],
+"content-type":["text/html"],
+"funny-head":["yesyes"],
+"server":["nghttpx"],
+"via":["1.1 nghttpx"]
+}
+</stdout>
+</verify>
+</testcase>
