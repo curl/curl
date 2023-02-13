@@ -262,9 +262,9 @@
 #endif
 
 #ifdef OPENSSL_IS_BORINGSSL
-typedef uint32_t errcode_t;
+typedef uint32_t sslerr_t;
 #else
-typedef unsigned long errcode_t;
+typedef unsigned long sslerr_t;
 #endif
 
 /*
@@ -1216,7 +1216,7 @@ SSL_CTX_use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
 
   if(ret) {
     X509 *ca;
-    errcode_t err;
+    sslerr_t err;
 
     if(!SSL_CTX_clear_chain_certs(ctx)) {
       ret = 0;
@@ -3906,7 +3906,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     }
     else {
       /* untreated error */
-      errcode_t errdetail;
+      sslerr_t errdetail;
       char error_buffer[256]="";
       CURLcode result;
       long lerr;
@@ -4463,7 +4463,7 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
      'size_t' */
   int err;
   char error_buffer[256];
-  errcode_t sslerror;
+  sslerr_t sslerror;
   int memlen;
   int rc;
   struct ssl_connect_data *connssl = cf->ctx;
