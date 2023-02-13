@@ -113,9 +113,11 @@ class EnvConfig:
         self.tld = 'tests-httpd.curl.se'
         self.domain1 = f"one.{self.tld}"
         self.domain2 = f"two.{self.tld}"
+        self.proxy_domain = f"proxy.{self.tld}"
         self.cert_specs = [
             CertificateSpec(domains=[self.domain1], key_type='rsa2048'),
             CertificateSpec(domains=[self.domain2], key_type='rsa2048'),
+            CertificateSpec(domains=[self.proxy_domain], key_type='rsa2048'),
             CertificateSpec(name="clientsX", sub_specs=[
                CertificateSpec(name="user1", client=True),
             ]),
@@ -293,6 +295,11 @@ class Env:
     @property
     def domain2(self) -> str:
         return self.CONFIG.domain2
+
+    @property
+    def proxy_domain(self) -> str:
+        return self.CONFIG.proxy_domain
+
 
     @property
     def http_port(self) -> str:
