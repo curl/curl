@@ -1047,7 +1047,6 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int is_transfer)
 {
   struct SingleRequest *k = &data->req;
-  int counter = 0;
   unsigned int order = is_transfer? 2: 1;
 
   do {
@@ -1084,9 +1083,9 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       if(!encoding)
         encoding = &error_encoding;  /* Defer error at stack use. */
 
-      if(++counter >= MAX_ENCODE_STACK) {
-        failf(data, "Reject response due to %u content encodings",
-              counter);
+      if(k->writer_stack_depth++ >= MAX_ENCODE_STACK) {
+        failf(data, "Reject response due to more than %u content encodings",
+              MAX_ENCODE_STACK);
         return CURLE_BAD_CONTENT_ENCODING;
       }
       /* Stack the unencoding stage. */
