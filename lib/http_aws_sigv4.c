@@ -344,6 +344,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   struct dynbuf canonical_headers;
   struct dynbuf signed_headers;
   char *date_header = NULL;
+  Curl_HttpReq httpreq;
+  const char *method = NULL;
   char *payload_hash = NULL;
   size_t payload_hash_len = 0;
   unsigned char sha_hash[SHA256_DIGEST_LENGTH];
@@ -432,6 +434,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     }
   }
 
+  Curl_http_method(data, conn, &method, &httpreq);
+
   /* AWS S3 requires a x-amz-content-sha256 header, and supports special
    * values like UNSIGNED-PAYLOAD */
   sign_as_s3 = (strcasecompare(provider0, "aws") &&
@@ -478,28 +482,21 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
 
-  {
-    Curl_HttpReq httpreq;
-    const char *method;
-
-    Curl_http_method(data, conn, &method, &httpreq);
-
-    canonical_request =
-      curl_maprintf("%s\n" /* HTTPRequestMethod */
-                    "%s\n" /* CanonicalURI */
-                    "%s\n" /* CanonicalQueryString */
-                    "%s\n" /* CanonicalHeaders */
-                    "%s\n" /* SignedHeaders */
-                    "%.*s",  /* HashedRequestPayload in hex */
-                    method,
-                    data->state.up.path,
-                    data->state.up.query ? data->state.up.query : "",
-                    Curl_dyn_ptr(&canonical_headers),
-                    Curl_dyn_ptr(&signed_headers),
-                    (int)payload_hash_len, payload_hash);
-    if(!canonical_request)
-      goto fail;
-  }
+  canonical_request =
+    curl_maprintf("%s\n" /* HTTPRequestMethod */
+                  "%s\n" /* CanonicalURI */
+                  "%s\n" /* CanonicalQueryString */
+                  "%s\n" /* CanonicalHeaders */
+                  "%s\n" /* SignedHeaders */
+                  "%.*s",  /* HashedRequestPayload in hex */
+                  method,
+                  data->state.up.path,
+                  data->state.up.query ? data->state.up.query : "",
+                  Curl_dyn_ptr(&canonical_headers),
+                  Curl_dyn_ptr(&signed_headers),
+                  (int)payload_hash_len, payload_hash);
+  if(!canonical_request)
+    goto fail;
 
   /* provider 0 lowercase */
   Curl_strntolower(provider0, provider0, strlen(provider0));
