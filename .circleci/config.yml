@@ -78,9 +78,10 @@ commands:
     steps:
       - run:
           command: |
-            curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v5.1.1-stable.tar.gz
-            tar -xzf v5.1.1-stable.tar.gz
-            cd wolfssl-5.1.1-stable
+            WOLFSSL_VER=5.5.4
+            curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
+            tar -xzf v$WOLFSSL_VER-stable.tar.gz
+            cd wolfssl-$WOLFSSL_VER-stable
             ./autogen.sh
             ./configure --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
             make install
@@ -89,9 +90,10 @@ commands:
     steps:
       - run:
           command: |
-            curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssh/archive/v1.4.8-stable.tar.gz
-            tar -xzf v1.4.8-stable.tar.gz
-            cd wolfssh-1.4.8-stable
+            WOLFSSH_VER=1.4.12
+            curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssh/archive/v$WOLFSSH_VER-stable.tar.gz
+            tar -xzf v$WOLFSSH_VER-stable.tar.gz
+            cd wolfssh-$WOLFSSH_VER-stable
             ./autogen.sh
             ./configure --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-examples
             make install

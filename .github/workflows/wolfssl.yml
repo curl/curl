@@ -50,9 +50,10 @@ jobs:
       name: 'install prereqs and impacket'
 
     - run: |
-        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v5.5.4-stable.tar.gz
-        tar -xzf v5.5.4-stable.tar.gz
-        cd wolfssl-5.5.4-stable
+        WOLFSSL_VER=5.5.4
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
+        tar -xzf v$WOLFSSL_VER-stable.tar.gz
+        cd wolfssl-$WOLFSSL_VER-stable
         ./autogen.sh
         ./configure --enable-tls13 ${{ matrix.build.wolfssl-configure }} --enable-harden --prefix=$HOME/wssl
         make install
