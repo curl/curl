@@ -75,8 +75,8 @@ jobs:
     - run: |
         GNUTLS_VER_TAG="v3.7"
         GNUTLS_VER="3.7.9"
-        curl -Lo gnutls https://www.gnupg.org/ftp/gcrypt/gnutls/$GNUTLS_VER_TAG/gnutls-$GNUTLS_VER.tar.xz
-        tar -xf gnutls
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://www.gnupg.org/ftp/gcrypt/gnutls/$GNUTLS_VER_TAG/gnutls-$GNUTLS_VER.tar.xz
+        tar -xf gnutls-$GNUTLS_VER.tar.xz
         cd gnutls-$GNUTLS_VER
         ./configure ${{ matrix.build.gnutls-configure }} --prefix=$HOME/all
         make install
