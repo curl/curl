@@ -77,6 +77,7 @@ jobs:
         curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/gnutls/gnutls/archive/refs/tags/$GNUTLS_VER.tar.gz
         tar -xf $GNUTLS_VER.tar.gz
         cd gnutls-$GNUTLS_VER
+        ./bootstrap
         ./configure ${{ matrix.build.gnutls-configure }} --prefix=$HOME/all
         make install
       name: 'install gnutls'
