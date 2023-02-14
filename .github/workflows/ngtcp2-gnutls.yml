@@ -73,7 +73,7 @@ jobs:
       name: 'install nettle'
 
     - run: |
-        git clone --depth=1 -b 3.7.8 https://github.com/gnutls/gnutls.git
+        git clone --depth=1 -b 3.8.0 https://github.com/gnutls/gnutls.git
         cd gnutls
         ./bootstrap
         ./configure ${{ matrix.build.gnutls-configure }} --prefix=$HOME/all
