@@ -73,10 +73,9 @@ jobs:
       name: 'install nettle'
 
     - run: |
-        GNUTLS_VER_TAG="v3.7"
-        GNUTLS_VER="3.7.9"
-        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://www.gnupg.org/ftp/gcrypt/gnutls/$GNUTLS_VER_TAG/gnutls-$GNUTLS_VER.tar.xz
-        tar -xf gnutls-$GNUTLS_VER.tar.xz
+        GNUTLS_VER=3.8.0
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/gnutls/gnutls/archive/refs/tags/$GNUTLS_VER.tar.gz
+        tar -xf $GNUTLS_VER.tar.gz
         cd gnutls-$GNUTLS_VER
         ./configure ${{ matrix.build.gnutls-configure }} --prefix=$HOME/all
         make install
