@@ -4,7 +4,7 @@ curl and libcurl 7.87.1
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2811
+ Contributors:                 2812
 
 This release includes the following changes:
 
@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o CI: add a workflow to automatically label pull requests [102]
  o CI: add pytest GHA to CI test/tests-httpd on a HTTP/3 setup [109]
  o CI: Retry failed downloads to reduce spurious failures
+ o CI: update wolfssl / wolfssh to 5.5.4 / 1.4.12 [167]
  o cmake: bump requirement to 3.7 [23]
  o cmake: check for sendmsg [39]
  o cmake: delete redundant macro definition `SECURITY_WIN32` [91]
@@ -31,14 +32,18 @@ This release includes the following bugfixes:
  o cmake: remove deprecated symbols check [96]
  o cmake: set SOVERSION also for macOS [68]
  o cmake: use list APPEND syntax for CMAKE_REQUIRED_DEFINITIONS [94]
+ o cmdline-opts/Makefile: on error, do not leave a partial [163]
  o CODEOWNERS: remove the peeps mentioned as CI owners [128]
  o connect: fix access of pointer before NULL check [83]
  o connect: fix build when not ENABLE_IPV6 [88]
  o connect: fix strategy testing for attempts, timeouts and happy-eyeball [110]
  o connections: introduce http/3 happy eyeballs [127]
+ o content_encoding: do not reset stage counter for each header [170]
+ o CONTRIBUTE: More formally specify the commit description [158]
  o cookies: fp is always not NULL [104]
  o copyright.pl: cease doing year verifications [74]
  o copyright: update all copyright lines and remove year ranges [35]
+ o curl.1: make help, version and manual sections "custom" [165]
  o curl.h: allow up to 10M buffer size [76]
  o curl.h: mark CURLSSLBACKEND_MESALINK as deprecated [52]
  o curl/websockets.h: extend the websocket frame struct
@@ -67,6 +72,7 @@ This release includes the following bugfixes:
  o GHA/macos.yml: bump to gcc-12 [106]
  o GHA/macos: use Xcode_14.0.1 for cmake builds [132]
  o GHA: add job on Slackware 15.0 [58]
+ o GHA: bump ngtcp2 workflow dependencies [169]
  o GHA: enable websockets in the torture job [148]
  o GHA: move the quiche job here from zuul [75]
  o GHA: use designated ngtcp2 and its dependencies versions [77]
@@ -124,7 +130,7 @@ This release includes the following bugfixes:
  o release-notes.pl: check fixes/closes lines better
  o Revert "x509asn1: avoid freeing unallocated pointers" [37]
  o runtest.pl: add expected fourth return value [40]
- o runtests: also tear down http2/http3 servers when https server is stopped [8]
+ o runtests: tear down http2/http3 servers when https server is stopped [8]
  o runtests: consider warnings fatal and error on them [32]
  o runtests: fix detection of TLS backends [50]
  o runtests: make 'mbedtls' a testable feature
@@ -145,6 +151,7 @@ This release includes the following bugfixes:
  o test2304: remove stdout verification
  o tests-httpd: basic infra to run curl against an apache httpd [72]
  o tests: add 3 new HTTP/2 test cases, plus https: support for nghttpx [9]
+ o tests: add tests for HTTP/2 and HTTP/3 to verify the header API [166]
  o tests: avoid use of sha1 in certificates [4]
  o tls: fixes for wolfssl + openssl combo builds [133]
  o tool_getparam: fix hiding of command line secrets [85]
@@ -192,7 +199,8 @@ Planned upcoming removals include:
 
  o gskit
  o NSS
- o Support for systems without 64 bit data types
+ o support for systems without 64 bit data types
+ o support for space-separated NOPROXY patterns
 
  See https://curl.se/dev/deprecate.html for details
 
@@ -200,25 +208,26 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alexey Savchuk, Andrei Rybak, Andy Alt, Anthony Hu, Brian Green,
-  Cameron Blomquist, Cherish98 on Github, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, dekerser on github, Divy Le Ray, Dmitry Atamanov,
-  Esdras de Morais da Silva, Federico Pellegrin, Fujii Hironori, Gerrit Renker,
-  Gisle Vanem, Gregory Panakkal, Hannah Schierling, Harry Sintonen,
-  Hide Ishikawa, highmtworks on github, Jacob Hoffman-Andrews, Jakob Hirsch,
-  James Keast, John Bampton, John Porter, John Sherrill, Jon Rumsey,
-  Josh Brobst, Karthikdasari0423 on github, Kvarec Lezki, Lucas Pardue,
-  Marc Aldorasi, Marcel Raad, Marc Hörsken, Mark Roszko, Martin D'Aloia,
-  Martin Waleczek, Michael Osipov, Mike Duglas, Muhammad Hussein Ammari,
-  Nick Banks, nick-telia on github, norbertmm on github, odek86 on github,
-  Patrick Monnerat, Paul Groke, Paul Howarth, Peter Wu, Philip Heiduck,
-  Pronyushkin Petr, Radek Brich, Radu Hociung, RanBarLavie on github,
-  Ray Satiro, Ryan Schmidt, Sébastien Helleu, Sergey Bronnikov,
-  Sergio-IME on github, sergio-nsk on github, SerusDev on github, Stanley Wucw,
-  Stefan Eissing, Stefan Talpalaru, Stephan Guilloux, Tatsuhiro Tsujikawa,
-  Thomas1664 on github, Thomas Klausner, Timmy Schierling,
+  Bruno Henrique Batista Cruz da Silva, Cameron Blomquist, Cherish98 on Github,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, dekerser on github,
+  Divy Le Ray, Dmitry Atamanov, Esdras de Morais da Silva, Federico Pellegrin,
+  Fujii Hironori, Gerrit Renker, Gisle Vanem, Gregory Panakkal,
+  Hannah Schierling, Harry Sintonen, Hide Ishikawa, highmtworks on github,
+  Jacob Hoffman-Andrews, Jakob Hirsch, James Keast, John Bampton, John Porter,
+  John Sherrill, Jon Rumsey, Josh Brobst, Karthikdasari0423 on github,
+  Kvarec Lezki, Lucas Pardue, Marc Aldorasi, Marcel Raad, Marc Hörsken,
+  Mark Roszko, Martin D'Aloia, Martin Waleczek, Michael Osipov, Mike Duglas,
+  Muhammad Hussein Ammari, Nick Banks, nick-telia on github,
+  norbertmm on github, odek86 on github, Patrick Monnerat, Paul Groke,
+  Paul Howarth, Peter Wu, Philip Heiduck, Pronyushkin Petr, Radek Brich,
+  Radu Hociung, RanBarLavie on github, Ray Satiro, Ryan Schmidt,
+  Sébastien Helleu, Sergey Bronnikov, Sergio-IME on github,
+  sergio-nsk on github, SerusDev on github, Stanley Wucw, Stefan Eissing,
+  Stefan Talpalaru, Stephan Guilloux, Tatsuhiro Tsujikawa,
+  Thomas1664 on github, Thomas Klausner, Timmy Schierling, u20221022 on github,
   UnicornZhang on Github, Viktor Szakats, violetlige on github, William Tang,
   Yurii Rashkovskii
-  (76 contributors)
+  (78 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -378,7 +387,14 @@ References to bug reports and discussions on issues:
  [155] = https://curl.se/bug/?i=10432
  [156] = https://curl.se/bug/?i=10432
  [157] = https://curl.se/bug/?i=10261
+ [158] = https://curl.se/bug/?i=10478
  [160] = https://curl.se/bug/?i=10471
  [161] = https://curl.se/bug/?i=10472
  [162] = https://curl.se/bug/?i=10463
+ [163] = https://curl.se/bug/?i=10497
  [164] = https://curl.se/bug/?i=10469
+ [165] = https://curl.se/bug/?i=10490
+ [166] = https://curl.se/bug/?i=10495
+ [167] = https://curl.se/bug/?i=10493
+ [169] = https://curl.se/bug/?i=10494
+ [170] = https://curl.se/bug/?i=10492
