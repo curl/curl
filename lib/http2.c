@@ -1923,6 +1923,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       drained_transfer(cf, data);
     }
 
+    *err = CURLE_OK;
     nread = retlen;
     DEBUGF(LOG_CF(data, cf, "[h2sid=%u] cf_h2_recv -> %zd",
                   stream->stream_id, nread));
