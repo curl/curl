@@ -58,13 +58,15 @@
 
 #define TIMESTAMP_SIZE 17
 
-static void sha256_to_hex(char *dst, unsigned char *sha, size_t dst_l)
+/* hex-encoded with trailing null */
+#define SHA256_HEX_LENGTH (2 * SHA256_DIGEST_LENGTH + 1)
+
+static void sha256_to_hex(char *dst, unsigned char *sha)
 {
   int i;
 
-  DEBUGASSERT(dst_l >= 65);
-  for(i = 0; i < 32; ++i) {
-    msnprintf(dst + (i * 2), dst_l - (i * 2), "%02x", sha[i]);
+  for(i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+    msnprintf(dst + (i * 2), SHA256_HEX_LENGTH - (i * 2), "%02x", sha[i]);
   }
 }
 
@@ -322,16 +324,16 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   size_t payload_hash_len = 0;
   const char *post_data = data->set.postfields;
   size_t post_data_len = 0;
-  unsigned char sha_hash[32];
-  char sha_hex[65];
+  unsigned char sha_hash[SHA256_DIGEST_LENGTH];
+  char sha_hex[SHA256_HEX_LENGTH];
   char *canonical_request = NULL;
   char *request_type = NULL;
   char *credential_scope = NULL;
   char *str_to_sign = NULL;
   const char *user = data->state.aptr.user ? data->state.aptr.user : "";
   char *secret = NULL;
-  unsigned char sign0[32] = {0};
-  unsigned char sign1[32] = {0};
+  unsigned char sign0[SHA256_DIGEST_LENGTH] = {0};
+  unsigned char sign1[SHA256_DIGEST_LENGTH] = {0};
   char *auth_headers = NULL;
 
   DEBUGASSERT(!proxy);
@@ -450,7 +452,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                      post_data_len))
       goto fail;
 
-    sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
+    sha256_to_hex(sha_hex, sha_hash);
     payload_hash = sha_hex;
     payload_hash_len = strlen(sha_hex);
   }
@@ -493,7 +495,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                    strlen(canonical_request)))
     goto fail;
 
-  sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
+  sha256_to_hex(sha_hex, sha_hash);
 
   /* provider 0 uppercase */
   Curl_strntoupper(provider0, provider0, strlen(provider0));
@@ -527,7 +529,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   HMAC_SHA256(sign0, sizeof(sign0), request_type, strlen(request_type), sign1);
   HMAC_SHA256(sign1, sizeof(sign1), str_to_sign, strlen(str_to_sign), sign0);
 
-  sha256_to_hex(sha_hex, sign0, sizeof(sha_hex));
+  sha256_to_hex(sha_hex, sign0);
 
   /* provider 0 uppercase */
   auth_headers = curl_maprintf("Authorization: %s4-HMAC-SHA256 "
