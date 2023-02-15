@@ -1,0 +1,70 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_AWS_SIGV4
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 100 Continue
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# this relies on the debug feature which allow to set the time
+<features>
+SSL
+debug
+crypto
+</features>
+<setenv>
+CURL_FORCEHOST=1
+</setenv>
+
+<name>
+HTTP AWS_SIGV4 for AWS S3: UPLOAD with unknown INFILESIZE
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+^Content-Type:.*
+^Accept:.*
+</strip>
+<protocol>
+PUT /aws_sigv4/testapi/test HTTP/1.1
+Host: exam.ple.com:9000
+Authorization: AWS4-HMAC-SHA256 Credential=xxx/19700101/us-east-1/s3/aws4_request, SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date, Signature=4a6e9b4af0542ffb83744c6852f8e1bfec14f2a67e6f6f037b39f172f79d62af
+X-Amz-Date: 19700101T000000Z
+x-amz-content-sha256: UNSIGNED-PAYLOAD
+Transfer-Encoding: chunked
+Expect: 100-continue
+
+0
+
+</protocol>
+</verify>
+</testcase>
