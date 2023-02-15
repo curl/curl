@@ -186,7 +186,7 @@ addr_first_match(const struct Curl_addrinfo *addr, int family)
 static const struct Curl_addrinfo *
 addr_next_match(const struct Curl_addrinfo *addr, int family)
 {
-  while(addr->ai_next) {
+  while(addr && addr->ai_next) {
     addr = addr->ai_next;
     if(addr->ai_family == family)
       return addr;
@@ -406,7 +406,8 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
   baller->ai_family = ai_family;
   baller->primary = primary;
   baller->delay_ms = delay_ms;
-  baller->timeoutms = (addr && addr->ai_next)? timeout_ms / 2 : timeout_ms;
+  baller->timeoutms = addr_next_match(baller->addr, baller->ai_family)?
+                        timeout_ms / 2 : timeout_ms;
   baller->timeout_id = timeout_id;
   baller->result = CURLE_COULDNT_CONNECT;
 
@@ -467,7 +468,7 @@ static void baller_initiate(struct Curl_cfilter *cf,
     wcf->sockindex = cf->sockindex;
   }
 
-  if(baller->addr && baller->addr->ai_next) {
+  if(addr_next_match(baller->addr, baller->ai_family)) {
     Curl_expire(data, baller->timeoutms, baller->timeout_id);
   }
 
@@ -498,8 +499,8 @@ static CURLcode baller_start(struct Curl_cfilter *cf,
 
   while(baller->addr) {
     baller->started = Curl_now();
-    baller->timeoutms = (baller->addr->ai_next == NULL) ?
-                         timeoutms : timeoutms / 2;
+    baller->timeoutms = addr_next_match(baller->addr, baller->ai_family) ?
+                         timeoutms / 2 : timeoutms;
     baller_initiate(cf, data, baller);
     if(!baller->result)
       break;
@@ -662,7 +663,8 @@ evaluate:
           DEBUGF(LOG_CF(data, cf, "%s done", baller->name));
         }
         else {
-          DEBUGF(LOG_CF(data, cf, "%s starting", baller->name));
+          DEBUGF(LOG_CF(data, cf, "%s starting (timeout=%ldms)",
+                        baller->name, baller->timeoutms));
           ++ongoing;
           ++added;
         }
@@ -799,6 +801,8 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                           timeout_ms,  EXPIRE_DNS_PER_NAME);
   if(result)
     return result;
+  DEBUGF(LOG_CF(data, cf, "created %s (timeout %ldms)",
+                ctx->baller[0]->name, ctx->baller[0]->timeoutms));
   if(addr1) {
     /* second one gets a delayed start */
     result = eyeballer_new(&ctx->baller[1], ctx->cf_create, addr1, ai_family1,
@@ -808,6 +812,8 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                             timeout_ms,  EXPIRE_DNS_PER_NAME2);
     if(result)
       return result;
+    DEBUGF(LOG_CF(data, cf, "created %s (timeout %ldms)",
+                  ctx->baller[1]->name, ctx->baller[1]->timeoutms));
   }
 
   Curl_expire(data, data->set.happy_eyeballs_timeout,
