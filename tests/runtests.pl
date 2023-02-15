@@ -1740,7 +1740,7 @@ sub runhttpserver {
     }
 
     # where is it?
-    my $port;
+    my $port = 0;
     if(!$port_or_path) {
         $port = $port_or_path = pidfromfile($portfile);
     }
@@ -1758,7 +1758,7 @@ sub runhttpserver {
     $pid2 = $pid3;
 
     if($verbose) {
-        logmsg "RUN: $srvrname server is on PID $httppid port $port\n";
+        logmsg "RUN: $srvrname server is on PID $httppid port $port_or_path\n";
     }
 
     return ($httppid, $pid2, $port);
