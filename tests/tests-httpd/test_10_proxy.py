@@ -45,26 +45,89 @@ class TestProxy:
             os.makedirs(push_dir)
 
     # download via http: proxy (no tunnel)
-    def test_10_01_http_get(self, env: Env, httpd, repeat):
+    def test_10_01_proxy_http(self, env: Env, httpd, repeat):
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=[
-                                 '--proxy', f'http://{env.proxy_domain}:{env.http_port}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.http_port}:127.0.0.1',
+                                 '--proxy', f'http://{env.proxy_domain}:{env.proxy_port}/',
+                                 '--resolve', f'{env.proxy_domain}:{env.proxy_port}:127.0.0.1',
                                ])
         assert r.exit_code == 0
         r.check_stats(count=1, exp_status=200)
 
     # download via https: proxy (no tunnel)
-    def test_10_02_http_get(self, env: Env, httpd, repeat):
+    def test_10_02_proxy_https(self, env: Env, httpd, repeat):
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=[
-                                 '--proxy', f'https://{env.proxy_domain}:{env.https_port}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.https_port}:127.0.0.1',
+                                 '--proxy', f'https://{env.proxy_domain}:{env.proxys_port}/',
+                                 '--resolve', f'{env.proxy_domain}:{env.proxys_port}:127.0.0.1',
                                  '--proxy-cacert', env.ca.cert_file,
                                ])
         assert r.exit_code == 0
         r.check_stats(count=1, exp_status=200)
+
+    # download http: via http: proxytunnel
+    def test_10_03_proxytunnel_http(self, env: Env, httpd, repeat):
+        curl = CurlClient(env=env)
+        url = f'http://localhost:{env.http_port}/data.json'
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=[
+                                 '--proxytunnel',
+                                 '--proxy', f'http://{env.proxy_domain}:{env.proxy_port}/',
+                                 '--resolve', f'{env.proxy_domain}:{env.proxy_port}:127.0.0.1',
+                               ])
+        assert r.exit_code == 0
+        r.check_stats(count=1, exp_status=200)
+
+    # download http: via https: proxytunnel
+    def test_10_04_proxy_https(self, env: Env, httpd, repeat):
+        curl = CurlClient(env=env)
+        url = f'http://localhost:{env.http_port}/data.json'
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=[
+                                 '--proxytunnel',
+                                 '--proxy', f'https://{env.proxy_domain}:{env.proxys_port}/',
+                                 '--resolve', f'{env.proxy_domain}:{env.proxys_port}:127.0.0.1',
+                                 '--proxy-cacert', env.ca.cert_file,
+                               ])
+        assert r.exit_code == 0
+        r.check_stats(count=1, exp_status=200)
+
+    # download https: with proto via http: proxytunnel
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_10_05_proxytunnel_http(self, env: Env, httpd, proto, repeat):
+        curl = CurlClient(env=env)
+        url = f'https://localhost:{env.https_port}/data.json'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
+                               with_headers=True,
+                               extra_args=[
+                                 '--proxytunnel',
+                                 '--proxy', f'http://{env.proxy_domain}:{env.proxy_port}/',
+                                 '--resolve', f'{env.proxy_domain}:{env.proxy_port}:127.0.0.1',
+                               ])
+        assert r.exit_code == 0
+        r.check_stats(count=1, exp_status=200)
+        exp_proto = 'HTTP/2' if proto == 'h2' else 'HTTP/1.1'
+        assert r.response['protocol'] == exp_proto
+
+    # download https: with proto via https: proxytunnel
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_10_06_proxy_https(self, env: Env, httpd, proto, repeat):
+        curl = CurlClient(env=env)
+        url = f'https://localhost:{env.https_port}/data.json'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
+                               with_headers=True,
+                               extra_args=[
+                                 '--proxytunnel',
+                                 '--proxy', f'https://{env.proxy_domain}:{env.proxys_port}/',
+                                 '--resolve', f'{env.proxy_domain}:{env.proxys_port}:127.0.0.1',
+                                 '--proxy-cacert', env.ca.cert_file,
+                               ])
+        assert r.exit_code == 0
+        r.check_stats(count=1, exp_status=200)
+        exp_proto = 'HTTP/2' if proto == 'h2' else 'HTTP/1.1'
+        assert r.response['protocol'] == exp_proto
+

@@ -226,6 +226,8 @@ class Httpd:
                 f'H2MaxWorkers 128',
                 f'Listen {self.env.http_port}',
                 f'Listen {self.env.https_port}',
+                f'Listen {self.env.proxy_port}',
+                f'Listen {self.env.proxys_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
             ]
             conf.extend([  # plain http host for domain1
@@ -238,33 +240,6 @@ class Httpd:
             conf.extend([
                 f'</VirtualHost>',
                 f'',
-            ])
-            conf.extend([  # http forward proxy
-                f'<VirtualHost *:{self.env.http_port}>',
-                f'    ServerName {proxy_domain}',
-                f'    Protocols http/1.1',
-                f'    ProxyRequests On',
-                f'    ProxyVia On',
-                f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
-                f'    <Proxy "*">',
-                f'      Require ip 127.0.0.1',
-                f'    </Proxy>',
-                f'</VirtualHost>',
-            ])
-            conf.extend([  # https forward proxy
-                f'<VirtualHost *:{self.env.https_port}>',
-                f'    ServerName {proxy_domain}',
-                f'    Protocols http/1.1',
-                f'    SSLEngine on',
-                f'    SSLCertificateFile {proxy_creds.cert_file}',
-                f'    SSLCertificateKeyFile {proxy_creds.pkey_file}',
-                f'    ProxyRequests On',
-                f'    ProxyVia On',
-                f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
-                f'    <Proxy "*">',
-                f'      Require ip 127.0.0.1',
-                f'    </Proxy>',
-                f'</VirtualHost>',
             ])
             conf.extend([  # https host for domain1, h1 + h2
                 f'<VirtualHost *:{self.env.https_port}>',
@@ -297,6 +272,33 @@ class Httpd:
             conf.extend([
                 f'</VirtualHost>',
                 f'',
+            ])
+            conf.extend([  # http forward proxy
+                f'<VirtualHost *:{self.env.proxy_port}>',
+                f'    ServerName {proxy_domain}',
+                f'    Protocols h2c, http/1.1',
+                f'    ProxyRequests On',
+                f'    ProxyVia On',
+                f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
+                f'    <Proxy "*">',
+                f'      Require ip 127.0.0.1',
+                f'    </Proxy>',
+                f'</VirtualHost>',
+            ])
+            conf.extend([  # https forward proxy
+                f'<VirtualHost *:{self.env.proxys_port}>',
+                f'    ServerName {proxy_domain}',
+                f'    Protocols h2, http/1.1',
+                f'    SSLEngine on',
+                f'    SSLCertificateFile {proxy_creds.cert_file}',
+                f'    SSLCertificateKeyFile {proxy_creds.pkey_file}',
+                f'    ProxyRequests On',
+                f'    ProxyVia On',
+                f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
+                f'    <Proxy "*">',
+                f'      Require ip 127.0.0.1',
+                f'    </Proxy>',
+                f'</VirtualHost>',
             ])
             fd.write("\n".join(conf))
         with open(os.path.join(self._conf_dir, 'mime.types'), 'w') as fd:
