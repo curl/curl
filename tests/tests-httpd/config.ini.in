@@ -34,11 +34,13 @@ apachectl = @APACHECTL@
 http_port = 5001
 https_port = 5002
 h3_port = 5002
+proxy_port = 5004
+proxys_port = 5005
 
 [nghttpx]
 nghttpx = @HTTPD_NGHTTPX@
 
 [caddy]
 caddy = @CADDY@
-http_port = 5003
-https_port = 5004
+http_port = 5010
+https_port = 5011
