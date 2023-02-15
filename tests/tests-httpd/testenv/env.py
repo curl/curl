@@ -97,6 +97,8 @@ class EnvConfig:
 
         self.http_port = self.config['test']['http_port']
         self.https_port = self.config['test']['https_port']
+        self.proxy_port = self.config['test']['proxy_port']
+        self.proxys_port = self.config['test']['proxys_port']
         self.h3_port = self.config['test']['h3_port']
         self.httpd = self.config['httpd']['httpd']
         self.apachectl = self.config['httpd']['apachectl']
@@ -115,7 +117,7 @@ class EnvConfig:
         self.domain2 = f"two.{self.tld}"
         self.proxy_domain = f"proxy.{self.tld}"
         self.cert_specs = [
-            CertificateSpec(domains=[self.domain1], key_type='rsa2048'),
+            CertificateSpec(domains=[self.domain1, 'localhost'], key_type='rsa2048'),
             CertificateSpec(domains=[self.domain2], key_type='rsa2048'),
             CertificateSpec(domains=[self.proxy_domain], key_type='rsa2048'),
             CertificateSpec(name="clientsX", sub_specs=[
@@ -300,7 +302,6 @@ class Env:
     def proxy_domain(self) -> str:
         return self.CONFIG.proxy_domain
 
-
     @property
     def http_port(self) -> str:
         return self.CONFIG.http_port
@@ -312,6 +313,14 @@ class Env:
     @property
     def h3_port(self) -> str:
         return self.CONFIG.h3_port
+
+    @property
+    def proxy_port(self) -> str:
+        return self.CONFIG.proxy_port
+
+    @property
+    def proxys_port(self) -> str:
+        return self.CONFIG.proxys_port
 
     @property
     def caddy(self) -> str:
