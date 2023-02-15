@@ -467,6 +467,7 @@ static CURLcode flush_output(struct Curl_cfilter *cf,
   }
   if((size_t)written < buflen) {
     Curl_dyn_tail(&ctx->outbuf, buflen - (size_t)written);
+    return CURLE_AGAIN;
   }
   else {
     Curl_dyn_reset(&ctx->outbuf);
@@ -1790,6 +1791,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     stream->pausedata += nread;
     stream->pauselen -= nread;
+    drain_this(cf, data);
 
     if(stream->pauselen == 0) {
       DEBUGF(LOG_CF(data, cf, "[h2sid=%u] Unpaused", stream->stream_id));
@@ -1798,18 +1800,6 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
       stream->pausedata = NULL;
       stream->pauselen = 0;
-
-      /* When NGHTTP2_ERR_PAUSE is returned from
-         data_source_read_callback, we might not process DATA frame
-         fully.  Calling nghttp2_session_mem_recv() again will
-         continue to process DATA frame, but if there is no incoming
-         frames, then we have to call it again with 0-length data.
-         Without this, on_stream_close callback will not be called,
-         and stream could be hanged. */
-      if(h2_process_pending_input(cf, data, err) != 0) {
-        nread = -1;
-        goto out;
-      }
     }
     DEBUGF(LOG_CF(data, cf, "[h2sid=%u] recv: returns unpaused %zd bytes",
                   stream->stream_id, nread));
