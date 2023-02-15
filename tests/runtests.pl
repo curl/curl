@@ -5382,7 +5382,7 @@ sub startservers {
         elsif($what eq "httptls") {
             if(!$httptlssrv) {
                 # for now, we can't run http TLS-EXT tests without gnutls-serv
-                return "no gnutls-serv";
+                return "no gnutls-serv (with SRP support)";
             }
             if($torture && $run{'httptls'} &&
                !responsive_httptls_server($verbose, "IPv4")) {
