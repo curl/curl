@@ -633,6 +633,10 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   unsigned long authmask = ~0ul;
 
+  /* We don't have to try to negotiate if we have a supplied user/password */
+  if(data->state.aptr.user && data->state.aptr.passwd)
+    authmask &= (unsigned long)~CURLAUTH_NEGOTIATE;
+
   if(!data->set.str[STRING_BEARER])
     authmask &= (unsigned long)~CURLAUTH_BEARER;
 
