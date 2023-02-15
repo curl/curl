@@ -210,7 +210,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   struct gss_channel_bindings_struct chan;
   size_t base64_sz = 0;
   struct sockaddr_in *remote_addr =
-    (struct sockaddr_in *)&conn->remote_addr->sa_addr;
+    (struct sockaddr_in *)(void *)&conn->remote_addr->sa_addr;
   char *stringp;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
