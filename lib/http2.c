@@ -868,6 +868,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       }
     }
+    if(frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
+      /* Stream has ended. If there is pending data, ensure that read
+         will occur to consume it. */
+      if(!data->state.drain && stream->memlen) {
+        drain_this(cf, data_s);
+        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+      }
+    }
     break;
   case NGHTTP2_HEADERS:
     DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] recv frame HEADERS", stream_id));
