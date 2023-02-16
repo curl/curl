@@ -209,6 +209,13 @@ class CurlClient:
         self._rmrf(self._run_dir)
         self._mkpath(self._run_dir)
 
+    @property
+    def run_dir(self) -> str:
+        return self._run_dir
+
+    def download_file(self, i: int) -> str:
+        return os.path.join(self.run_dir, f'download_{i}.data')
+
     def _rmf(self, path):
         if os.path.exists(path):
             return os.remove(path)
@@ -232,8 +239,11 @@ class CurlClient:
         if extra_args is None:
             extra_args = []
         extra_args.extend([
-            '-o', 'download.data',
+            '-o', 'download_#1.data',
         ])
+        # remove any existing ones
+        for i in range(100):
+            self._rmf(self.download_file(i))
         if with_stats:
             extra_args.extend([
                 '-w', '%{json}\\n'
