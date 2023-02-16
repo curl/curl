@@ -42,7 +42,7 @@ typedef enum {
 
 #ifndef CURL_DISABLE_HTTP
 
-#if defined(_WIN32) && (defined(ENABLE_QUIC) || defined(USE_NGHTTP2))
+#if defined(ENABLE_QUIC) || defined(USE_NGHTTP2)
 #include <stdint.h>
 #endif
 
