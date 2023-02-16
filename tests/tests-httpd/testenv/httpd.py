@@ -307,12 +307,12 @@ class Httpd:
             ]))
 
     def _get_log_level(self):
-        if self.env.verbose > 3:
-            return 'trace2'
-        if self.env.verbose > 2:
-            return 'trace1'
-        if self.env.verbose > 1:
-            return 'debug'
+        #if self.env.verbose > 3:
+        #    return 'trace2'
+        #if self.env.verbose > 2:
+        #    return 'trace1'
+        #if self.env.verbose > 1:
+        #    return 'debug'
         return 'info'
 
     def _curltest_conf(self) -> List[str]:

@@ -24,6 +24,8 @@
 #
 ###########################################################################
 #
+import difflib
+import filecmp
 import logging
 import os
 import pytest
@@ -43,21 +45,11 @@ class TestDownload:
         if env.have_h3():
             nghttpx.start_if_needed()
 
-    def _make_docs_file(self, docs_dir: str, fname: str, fsize: int):
-        fpath = os.path.join(docs_dir, fname)
-        data1k = 1024*'x'
-        flen = 0
-        with open(fpath, 'w') as fd:
-            while flen < fsize:
-                fd.write(data1k)
-                flen += len(data1k)
-        return flen
-
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
-        self._make_docs_file(docs_dir=httpd.docs_dir, fname='data1.data', fsize=1024*1024)
-        self._make_docs_file(docs_dir=httpd.docs_dir, fname='data10.data', fsize=10*1024*1024)
-        self._make_docs_file(docs_dir=httpd.docs_dir, fname='data100.data', fsize=100*1024*1024)
+        env.make_data_file(indir=httpd.docs_dir, fname="data-100k", fsize=100*1024)
+        env.make_data_file(indir=httpd.docs_dir, fname="data-1m", fsize=1024*1024)
+        env.make_data_file(indir=httpd.docs_dir, fname="data-10m", fsize=10*1024*1024)
 
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -173,7 +165,7 @@ class TestDownload:
     def test_02_08_1MB_serial(self, env: Env,
                               httpd, nghttpx, repeat, proto):
         count = 20
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data1.data?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data-1m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto)
         assert r.exit_code == 0
@@ -183,7 +175,7 @@ class TestDownload:
     def test_02_09_1MB_parallel(self, env: Env,
                               httpd, nghttpx, repeat, proto):
         count = 20
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data1.data?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data-1m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
@@ -195,7 +187,7 @@ class TestDownload:
     def test_02_10_10MB_serial(self, env: Env,
                               httpd, nghttpx, repeat, proto):
         count = 20
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data10.data?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto)
         assert r.exit_code == 0
@@ -205,10 +197,53 @@ class TestDownload:
     def test_02_11_10MB_parallel(self, env: Env,
                               httpd, nghttpx, repeat, proto):
         count = 20
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data10.data?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
         assert r.exit_code == 0
         r.check_stats(count=count, exp_status=200)
+
+    def test_02_20_h2_small_frames(self, env: Env, httpd, repeat):
+        # Test case to reproduce content corruption as observed in
+        # https://github.com/curl/curl/issues/10525
+        # To reliably reproduce, we need an Apache httpd that supports
+        # setting smaller frame sizes. This is not released yet, we
+        # test if it works and back out if not.
+        httpd.set_extra_config(env.domain1, lines=[
+            f'H2MaxDataFrameLen 1024',
+        ])
+        assert httpd.stop()
+        if not httpd.start():
+            # no, not supported, bail out
+            httpd.set_extra_config(env.domain1, lines=None)
+            assert httpd.start()
+            pytest.skip(f'H2MaxDataFrameLen not supported')
+        # ok, make 100 downloads with 2 parallel running and they
+        # are expected to stumble into the issue when using `lib/http2.c`
+        # from curl 7.88.0
+        count = 100
+        urln = f'https://{env.authority_for(env.domain1, "h2")}/data-1m?[0-{count-1}]'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[urln], alpn_proto="h2", extra_args=[
+            '--parallel', '--parallel-max', '2'
+        ])
+        assert r.exit_code == 0
+        r.check_stats(count=count, exp_status=200)
+        srcfile = os.path.join(httpd.docs_dir, 'data-1m')
+        for i in range(count):
+            dfile = curl.download_file(i)
+            assert os.path.exists(dfile)
+            if not filecmp.cmp(srcfile, dfile, shallow=False):
+                diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
+                                                    b=open(dfile).readlines(),
+                                                    fromfile=srcfile,
+                                                    tofile=dfile,
+                                                    n=1))
+                assert False, f'download {dfile} differs:\n{diff}'
+        # restore httpd defaults
+        httpd.set_extra_config(env.domain1, lines=None)
+        assert httpd.stop()
+        assert httpd.start()
+
