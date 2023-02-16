@@ -205,7 +205,7 @@ extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 * minor_status,
 extern int Curl_os400_connect(int sd, struct sockaddr *destaddr, int addrlen);
 extern int Curl_os400_bind(int sd, struct sockaddr *localaddr, int addrlen);
 extern int Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
-                             struct sockaddr *dstaddr, int addrlen);
+                             const struct sockaddr *dstaddr, int addrlen);
 extern int Curl_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
                                struct sockaddr *fromaddr, int *addrlen);
 extern int Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen);

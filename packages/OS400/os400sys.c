@@ -1265,7 +1265,7 @@ Curl_os400_bind(int sd, struct sockaddr *localaddr, int addrlen)
 
 int
 Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
-                  struct sockaddr *dstaddr, int addrlen)
+                  const struct sockaddr *dstaddr, int addrlen)
 {
   int i;
   struct sockaddr_storage laddr;
