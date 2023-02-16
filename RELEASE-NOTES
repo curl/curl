@@ -4,7 +4,7 @@ curl and libcurl 7.88.1
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2814
+ Contributors:                 2817
 
 This release includes the following changes:
 
@@ -12,8 +12,22 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o connnect: fix timeout handling to use full duration [4]
+ o curl: make --silent work stand-alone [15]
+ o http2: buffer/pausedata and output flush fix. [9]
+ o http2: set drain on stream end [8]
+ o http: include stdint.h more readily [6]
+ o krb5: silence cast-align warning [10]
+ o os400: correct Curl_os400_sendto() [13]
  o runtests: fix "uninitialized value $port" [1]
+ o setopt: allow HTTP3 when HTTP2 is not defined [12]
+ o socks: allow using DoH to resolve host names [16]
+ o tests-httpd: add proxy tests [14]
  o tests: make sure gnuserv-tls has SRP support before using it [2]
+ o tests: make the telnet server shut down a socket gracefully [7]
+ o tool_getparam: make --get a true boolean [5]
+ o tool_operate: allow debug builds to set buffersize [3]
+ o urlapi: do the port number extraction without using sscanf() [11]
 
 This release includes the following known bugs:
 
@@ -31,10 +45,27 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, fundawang on github, Kevin Ryan
-  (3 contributors)
+  Christian Hesse, Daniel Stenberg, fundawang on github, Harry Sintonen,
+  Jon Rumsey, Karthikdasari0423 on github, Kevin Ryan, Marcel Raad,
+  Michael Kaufmann, roughtex on github, Stefan Eissing, u20221022 on github,
+  積丹尼 Dan Jacobson
+  (13 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=10518
  [2] = https://curl.se/bug/?i=10522
+ [3] = https://curl.se/bug/?i=10532
+ [4] = https://curl.se/bug/?i=10514
+ [5] = https://curl.se/bug/?i=10527
+ [6] = https://curl.se/bug/?i=10516
+ [7] = https://curl.se/bug/?i=10509
+ [8] = https://curl.se/bug/?i=10530
+ [9] = https://curl.se/bug/?i=10529
+ [10] = https://curl.se/bug/?i=10528
+ [11] = https://curl.se/bug/?i=10541
+ [12] = https://curl.se/bug/?i=10538
+ [13] = https://curl.se/bug/?i=10539
+ [14] = https://curl.se/bug/?i=10519
+ [15] = https://curl.se/bug/?i=10535
+ [16] = https://curl.se/bug/?i=10537
