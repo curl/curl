@@ -85,6 +85,7 @@ jobs:
         cd mod_h2
         autoreconf -fi
         ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig"
+        make
         sudo make install
       name: 'install mod_h2'
 
