@@ -1298,12 +1298,22 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_SEEKDATA, input);
         my_setopt(curl, CURLOPT_SEEKFUNCTION, tool_seek_cb);
 
-        if(config->recvpersecond &&
-           (config->recvpersecond < BUFFER_SIZE))
-          /* use a smaller sized buffer for better sleeps */
-          my_setopt(curl, CURLOPT_BUFFERSIZE, (long)config->recvpersecond);
+#ifdef CURLDEBUG
+        if(getenv("CURL_BUFFERSIZE")) {
+          long size = strtol(getenv("CURL_BUFFERSIZE"), NULL, 10);
+          if(size)
+            my_setopt(curl, CURLOPT_BUFFERSIZE, size);
+        }
         else
-          my_setopt(curl, CURLOPT_BUFFERSIZE, (long)BUFFER_SIZE);
+#endif
+        {
+          if(config->recvpersecond &&
+             (config->recvpersecond < BUFFER_SIZE))
+            /* use a smaller sized buffer for better sleeps */
+            my_setopt(curl, CURLOPT_BUFFERSIZE, (long)config->recvpersecond);
+          else
+            my_setopt(curl, CURLOPT_BUFFERSIZE, (long)BUFFER_SIZE);
+        }
 
         my_setopt_str(curl, CURLOPT_URL, per->this_url);
         my_setopt(curl, CURLOPT_NOPROGRESS, global->noprogress?1L:0L);
