@@ -466,6 +466,12 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"https://[::%25fakeit];80/moo",
+   "",
+   0, 0, CURLUE_BAD_PORT_NUMBER},
+  {"https://[fe80::20c:29ff:fe9c:409b]-80/moo",
+   "",
+   0, 0, CURLUE_BAD_PORT_NUMBER},
 #ifdef USE_IDN
   {"https://räksmörgås.se/path?q#frag",
    "https://xn--rksmrgs-5wao1o.se/path?q#frag", 0, CURLU_PUNYCODE, CURLUE_OK},
@@ -658,11 +664,14 @@ static const struct urltestcase get_url_list[] = {
   {NULL, NULL, 0, 0, CURLUE_OK}
 };
 
-static int checkurl(const char *url, const char *out)
+static int checkurl(const char *org, const char *url, const char *out)
 {
   if(strcmp(out, url)) {
-    fprintf(stderr, "Wanted: %s\nGot   : %s\n",
-            out, url);
+    fprintf(stderr,
+            "Org:    %s\n"
+            "Wanted: %s\n"
+            "Got   : %s\n",
+            org, out, url);
     return 1;
   }
   return 0;
@@ -967,7 +976,7 @@ static int set_url(void)
           error++;
         }
         else {
-          if(checkurl(url, set_url_list[i].out)) {
+          if(checkurl(set_url_list[i].in, url, set_url_list[i].out)) {
             error++;
           }
         }
@@ -1020,7 +1029,7 @@ static int set_parts(void)
                   __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
           error++;
         }
-        else if(checkurl(url, set_parts_list[i].out)) {
+        else if(checkurl(set_parts_list[i].in, url, set_parts_list[i].out)) {
           error++;
         }
       }
@@ -1060,7 +1069,7 @@ static int get_url(void)
         error++;
       }
       else {
-        if(checkurl(url, get_url_list[i].out)) {
+        if(checkurl(get_url_list[i].in, url, get_url_list[i].out)) {
           error++;
         }
       }
@@ -1163,7 +1172,7 @@ static int append(void)
         error++;
       }
       else {
-        if(checkurl(url, append_list[i].out)) {
+        if(checkurl(append_list[i].in, url, append_list[i].out)) {
           error++;
         }
         curl_free(url);
