@@ -298,11 +298,9 @@ struct OperationConfig {
 };
 
 struct GlobalConfig {
-  int showerror;                  /* -1 == unset, default => show errors
-                                      0 => -s is used to NOT show errors
-                                      1 => -S has been used to show errors */
-  bool mute;                      /* don't show messages, --silent given */
-  bool noprogress;                /* don't show progress bar --silent given */
+  bool showerror;                 /* show errors when silent */
+  bool silent;                    /* don't show messages, --silent given */
+  bool noprogress;                /* don't show progress bar */
   bool isatty;                    /* Updated internally if output is a tty */
   FILE *errors;                   /* Error stream, defaults to stderr */
   bool errors_fopened;            /* Whether error stream isn't stderr */
