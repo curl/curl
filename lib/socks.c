@@ -316,7 +316,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     /* DNS resolve only for SOCKS4, not SOCKS4a */
     if(!protocol4a) {
       enum resolve_t rc =
-        Curl_resolv(data, sx->hostname, sx->remote_port, FALSE, &dns);
+        Curl_resolv(data, sx->hostname, sx->remote_port, TRUE, &dns);
 
       if(rc == CURLRESOLV_ERROR)
         return CURLPX_RESOLVE_HOST;
@@ -783,7 +783,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   case CONNECT_REQ_INIT:
     if(socks5_resolve_local) {
       enum resolve_t rc = Curl_resolv(data, sx->hostname, sx->remote_port,
-                                      FALSE, &dns);
+                                      TRUE, &dns);
 
       if(rc == CURLRESOLV_ERROR)
         return CURLPX_RESOLVE_HOST;
