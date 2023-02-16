@@ -396,12 +396,13 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
 #ifdef __VMS
   if(is_vms_shell()) {
     /* VMS DCL shell behavior */
-    if(!global->showerror)
+    if(global->silent && !global->showerror)
       vms_show = VMSSTS_HIDE;
   }
   else
 #endif
-    if(!config->synthetic_error && result && global->showerror) {
+    if(!config->synthetic_error && result &&
+       (!global->silent || global->showerror)) {
       const char *msg = per->errorbuffer;
       fprintf(global->errors, "curl: (%d) %s\n", result,
               (msg && msg[0]) ? msg : curl_easy_strerror(result));
@@ -413,7 +414,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       long code = 0;
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
       if(code >= 400) {
-        if(global->showerror)
+        if(!global->silent || global->showerror)
           fprintf(global->errors,
                   "curl: (%d) The requested URL returned error: %ld\n",
                   CURLE_HTTP_RETURNED_ERROR, code);
@@ -446,7 +447,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
-      if(global->showerror)
+      if(!global->silent || global->showerror)
         fprintf(global->errors, "curl: (%d) Failed writing body\n", result);
     }
   }
@@ -587,7 +588,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         int rc;
         /* We have written data to an output file, we truncate file
          */
-        if(!global->mute)
+        if(!global->silent)
           fprintf(global->errors, "Throwing away %"
                   CURL_FORMAT_CURL_OFF_T " bytes\n",
                   outs->bytes);
@@ -597,7 +598,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we can't just append as then we'll
              create something strange, bail out */
-          if(global->showerror)
+          if(!global->silent || global->showerror)
             fprintf(global->errors,
                     "curl: (23) Failed to truncate file\n");
           return CURLE_WRITE_ERROR;
@@ -613,7 +614,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
 #endif
         if(rc) {
-          if(global->showerror)
+          if(!global->silent || global->showerror)
             fprintf(global->errors,
                     "curl: (23) Failed seeking to end of file\n");
           return CURLE_WRITE_ERROR;
@@ -639,7 +640,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
-      if(global->showerror)
+      if(!global->silent || global->showerror)
         fprintf(global->errors, "curl: (%d) Failed writing body\n", result);
     }
     if(result && config->rm_partial) {
@@ -799,7 +800,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     if(!config->globoff && infiles && !inglob) {
       /* Unless explicitly shut off */
       result = glob_url(&inglob, infiles, &state->infilenum,
-                        global->showerror?global->errors:NULL);
+                        (!global->silent || global->showerror)?
+                        global->errors:NULL);
       if(result)
         break;
       config->state.inglob = inglob;
@@ -834,7 +836,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* Unless explicitly shut off, we expand '{...}' and '[...]'
              expressions and return total number of URLs in pattern set */
           result = glob_url(&state->urls, urlnode->url, &state->urlnum,
-                            global->showerror?global->errors:NULL);
+                            (!global->silent || global->showerror)?
+                            global->errors:NULL);
           if(result)
             break;
           urlnum = state->urlnum;
@@ -1316,7 +1319,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         }
 
         my_setopt_str(curl, CURLOPT_URL, per->this_url);
-        my_setopt(curl, CURLOPT_NOPROGRESS, global->noprogress?1L:0L);
+        my_setopt(curl, CURLOPT_NOPROGRESS,
+                  global->noprogress || global->silent?1L:0L);
         if(config->no_body)
           my_setopt(curl, CURLOPT_NOBODY, 1L);
 
@@ -1853,7 +1857,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         progressbarinit(&per->progressbar, config);
 
         if((global->progressmode == CURL_PROGRESS_BAR) &&
-           !global->noprogress && !global->mute) {
+           !global->noprogress && !global->silent) {
           /* we want the alternative style, then we have to implement it
              ourselves! */
           my_setopt(curl, CURLOPT_XFERINFOFUNCTION, tool_progress_cb);

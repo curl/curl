@@ -42,7 +42,7 @@ static void voutf(struct GlobalConfig *config,
                   va_list ap)
 {
   size_t width = (79 - strlen(prefix));
-  if(!config->mute) {
+  if(!config->silent) {
     size_t len;
     char *ptr;
     char *print_buffer;
@@ -132,7 +132,7 @@ void helpf(FILE *errors, const char *fmt, ...)
  */
 void errorf(struct GlobalConfig *config, const char *fmt, ...)
 {
-  if(!config->mute) {
+  if(!config->silent) {
     va_list ap;
     va_start(ap, fmt);
     voutf(config, ERROR_PREFIX, fmt, ap);

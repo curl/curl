@@ -2268,21 +2268,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* use remote file's time */
       config->remote_time = toggle;
       break;
-    case 's':
-      /* don't show progress meter, don't show errors : */
-      if(toggle)
-        global->mute = global->noprogress = TRUE;
-      else
-        global->mute = global->noprogress = FALSE;
-      if(global->showerror < 0)
-        /* if still on the default value, set showerror to the reverse of
-           toggle. This is to allow -S and -s to be used in an independent
-           order but still have the same effect. */
-        global->showerror = (!toggle)?TRUE:FALSE; /* toggle off */
+    case 's': /* --silent */
+      global->silent = toggle;
       break;
-    case 'S':
-      /* show errors */
-      global->showerror = toggle?1:0; /* toggle on if used with -s */
+    case 'S': /* --show-error */
+      global->showerror = toggle;
       break;
     case 't':
       /* Telnet options */
