@@ -294,7 +294,7 @@ static const struct LongShort aliases[]= {
   {"F",  "form",                     ARG_STRING},
   {"Fs", "form-string",              ARG_STRING},
   {"g",  "globoff",                  ARG_BOOL},
-  {"G",  "get",                      ARG_NONE},
+  {"G",  "get",                      ARG_BOOL},
   {"Ga", "request-target",           ARG_STRING},
   {"h",  "help",                     ARG_BOOL},
   {"H",  "header",                   ARG_STRING},
