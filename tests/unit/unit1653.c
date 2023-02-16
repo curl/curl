@@ -92,11 +92,16 @@ UNITTEST_START
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff;fea7:da15]:80");
+  ipv6port = strdup("[fe80::250:56ff;fea7:da15]:808");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
-  fail_unless(ret != CURLUE_OK, "parse_port true on error");
+  fail_unless(ret == CURLUE_OK, "parse_port returned error");
+  ret = curl_url_get(u, CURLUPART_PORT, &portnum, 0);
+  fail_unless(ret == CURLUE_OK, "curl_url_get portnum returned error");
+  fail_unless(portnum && !strcmp(portnum, "808"), "Check portnumber");
+
+  curl_free(portnum);
   free_and_clear(ipv6port);
   curl_url_cleanup(u);
 
@@ -180,15 +185,19 @@ UNITTEST_START
   free_and_clear(ipv6port);
   curl_url_cleanup(u);
 
-  /* Incorrect zone index syntax */
+  /* Incorrect zone index syntax, but the port extractor doesn't care */
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15!25eth3]:80");
+  ipv6port = strdup("[fe80::250:56ff:fea7:da15!25eth3]:180");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
-  fail_unless(ret != CURLUE_OK, "parse_port returned non-error");
+  fail_unless(ret == CURLUE_OK, "parse_port returned error");
+  ret = curl_url_get(u, CURLUPART_PORT, &portnum, 0);
+  fail_unless(ret == CURLUE_OK, "curl_url_get portnum returned error");
+  fail_unless(portnum && !strcmp(portnum, "180"), "Check portnumber");
+  curl_free(portnum);
   free_and_clear(ipv6port);
   curl_url_cleanup(u);
 

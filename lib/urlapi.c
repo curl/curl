@@ -493,35 +493,21 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
                                    bool has_scheme)
 {
-  char *portptr = NULL;
-  char endbracket;
-  int len;
+  char *portptr;
   char *hostname = Curl_dyn_ptr(host);
   /*
    * Find the end of an IPv6 address, either on the ']' ending bracket or
    * a percent-encoded zone index.
    */
-  if(1 == sscanf(hostname, "[%*45[0123456789abcdefABCDEF:.]%c%n",
-                 &endbracket, &len)) {
-    if(']' == endbracket)
-      portptr = &hostname[len];
-    else if('%' == endbracket) {
-      int zonelen = len;
-      if(1 == sscanf(hostname + zonelen, "%*[^]]%c%n", &endbracket, &len)) {
-        if(']' != endbracket)
-          return CURLUE_BAD_IPV6;
-        portptr = &hostname[--zonelen + len + 1];
-      }
-      else
-        return CURLUE_BAD_IPV6;
-    }
-    else
+  if(hostname[0] == '[') {
+    portptr = strchr(hostname, ']');
+    if(!portptr)
       return CURLUE_BAD_IPV6;
-
+    portptr++;
     /* this is a RFC2732-style specified IP-address */
-    if(portptr && *portptr) {
+    if(*portptr) {
       if(*portptr != ':')
-        return CURLUE_BAD_IPV6;
+        return CURLUE_BAD_PORT_NUMBER;
     }
     else
       portptr = NULL;
@@ -585,11 +571,9 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
     hostname++;
     hlen -= 2;
 
-    if(hostname[hlen] != ']')
-      return CURLUE_BAD_IPV6;
-
-    /* only valid letters are ok */
+    /* only valid IPv6 letters are ok */
     len = strspn(hostname, l);
+
     if(hlen != len) {
       hlen = len;
       if(hostname[len] == '%') {
@@ -603,8 +587,7 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
         while(*h && (*h != ']') && (i < 15))
           zoneid[i++] = *h++;
         if(!i || (']' != *h))
-          /* impossible to reach? */
-          return CURLUE_MALFORMED_INPUT;
+          return CURLUE_BAD_IPV6;
         zoneid[i] = 0;
         u->zoneid = strdup(zoneid);
         if(!u->zoneid)
