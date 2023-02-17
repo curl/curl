@@ -630,7 +630,6 @@ struct SingleRequest {
   curl_off_t pendingheader;      /* this many bytes left to send is actually
                                     header and not body */
   struct curltime start;         /* transfer started at this time */
-  struct curltime now;           /* current time */
   enum {
     HEADER_NORMAL,              /* no bad header at all */
     HEADER_PARTHEADER,          /* part of the chunk is a bad header, the rest

@@ -3962,7 +3962,6 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
     data->state.httpreq = HTTPREQ_HEAD;
 
   k->start = Curl_now(); /* start time */
-  k->now = k->start;   /* current time is now */
   k->header = TRUE; /* assume header */
   k->bytecount = 0;
   k->ignorebody = FALSE;
