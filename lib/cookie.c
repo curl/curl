@@ -557,16 +557,23 @@ Curl_cookie_add(struct Curl_easy *data,
           valuep = ptr;
           sep = TRUE;
           ptr = &valuep[vlen];
-        }
 
-        /* Strip off trailing whitespace from the value */
-        while(vlen && ISBLANK(valuep[vlen-1]))
-          vlen--;
+          /* Strip off trailing whitespace from the value */
+          while(vlen && ISBLANK(valuep[vlen-1]))
+            vlen--;
 
-        /* Skip leading whitespace from the value */
-        while(vlen && ISBLANK(*valuep)) {
-          valuep++;
-          vlen--;
+          /* Skip leading whitespace from the value */
+          while(vlen && ISBLANK(*valuep)) {
+            valuep++;
+            vlen--;
+          }
+
+          /* Reject cookies with a TAB inside the value */
+          if(memchr(valuep, '\t', vlen)) {
+            freecookie(co);
+            infof(data, "cookie contains TAB, dropping");
+            return NULL;
+          }
         }
 
         /*
@@ -579,13 +586,6 @@ Curl_cookie_add(struct Curl_easy *data,
           freecookie(co);
           infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
                 nlen, vlen);
-          return NULL;
-        }
-
-        /* Reject cookies with a TAB inside the value */
-        if(memchr(valuep, '\t', vlen)) {
-          freecookie(co);
-          infof(data, "cookie contains TAB, dropping");
           return NULL;
         }
 
