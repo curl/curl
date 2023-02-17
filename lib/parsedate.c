@@ -313,26 +313,29 @@ static bool match_time(const char *date,
                        int *h, int *m, int *s, char **endp)
 {
   const char *p;
-  *h = oneortwodigit(date, &p);
-  if((*h < 24) && (*p == ':') && ISDIGIT(p[1])) {
-    *m = oneortwodigit(&p[1], &p);
-    if(*m < 60) {
+  int hh, mm, ss = 0;
+  hh = oneortwodigit(date, &p);
+  if((hh < 24) && (*p == ':') && ISDIGIT(p[1])) {
+    mm = oneortwodigit(&p[1], &p);
+    if(mm < 60) {
       if((*p == ':') && ISDIGIT(p[1])) {
-        *s = oneortwodigit(&p[1], &p);
-        if(*s <= 60) {
+        ss = oneortwodigit(&p[1], &p);
+        if(ss <= 60) {
           /* valid HH:MM:SS */
           goto match;
         }
       }
       else {
         /* valid HH:MM */
-        *s = 0;
         goto match;
       }
     }
   }
   return FALSE; /* not a time string */
   match:
+  *h = hh;
+  *m = mm;
+  *s = ss;
   *endp = (char *)p;
   return TRUE;
 }
