@@ -239,7 +239,7 @@ directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 
 # `--http3`
 
-Use only HTTP/3: (works only when configured with curl with nghttp2)
+Use only HTTP/3: (works only when curl configured with nghttp2)
 
     curl --http3-only https://nghttp2.org:4433/
 
