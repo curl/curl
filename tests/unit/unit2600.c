@@ -23,10 +23,43 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#ifdef __VMS
+#include <in.h>
+#include <inet.h>
+#endif
+
+#ifdef HAVE_SETJMP_H
+#include <setjmp.h>
+#endif
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+
 #include "urldata.h"
 #include "connect.h"
 #include "cfilters.h"
 #include "curl_log.h"
+
+/* copied from hostip.c to switch using SIGALARM for timeouts.
+ * SIGALARM has only seconds resolution, so our tests will not work
+ * here. */
+#if defined(CURLRES_SYNCH) && \
+    defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP)
+#define USE_ALARM_TIMEOUT
+#endif
+
 
 static CURL *easy;
 
@@ -204,14 +237,14 @@ static void check_result(struct test_case *tc,
                          struct test_result *tr)
 {
   char msg[256];
-  timediff_t duration_ms;
+  timediff_t duration_ms = 0;
 
   if(tr->result != tc->exp_result
     && CURLE_OPERATION_TIMEDOUT != tr->result) {
     /* on CI we encounter the TIMEOUT result, since images get less CPU
      * and events are not as sharply timed. */
     curl_msprintf(msg, "%d: expected result %d but got %d",
-                  tc->id, CURLE_COULDNT_CONNECT, tr->result);
+                  tc->id, tc->exp_result, tr->result);
     fail(msg);
   }
   if(tr->cf4.creations != tc->exp_cf4_creations) {
@@ -224,6 +257,9 @@ static void check_result(struct test_case *tc,
                   tc->id, tc->exp_cf6_creations, tr->cf6.creations);
     fail(msg);
   }
+
+  (void)duration_ms;
+#ifndef USE_ALARM_TIMEOUT
   duration_ms = Curl_timediff(tr->ended, tr->started);
   if(duration_ms < tc->min_duration_ms) {
     curl_msprintf(msg, "%d: expected min duration of %dms, but took %dms",
@@ -235,6 +271,7 @@ static void check_result(struct test_case *tc,
                   tc->id, (int)tc->max_duration_ms, (int)duration_ms);
     fail(msg);
   }
+#endif
   if(tr->cf6.creations && tr->cf4.creations && tc->pref_family) {
     /* did ipv4 and ipv6 both, expect the preferred family to start right arway
      * with the other being delayed by the happy_eyeball_timeout */
@@ -249,7 +286,11 @@ static void check_result(struct test_case *tc,
                     tc->id, stats1->family, (int)stats1->first_created);
       fail(msg);
     }
+#ifndef USE_ALARM_TIMEOUT
     if(stats2->first_created < tc->he_timeout_ms) {
+#else
+    if(stats2->first_created < 1000) {
+#endif
       curl_msprintf(msg, "%d: expected ip%s to start delayed after %dms, "
                     "instead first attempt made after %dms",
                     tc->id, stats2->family, (int)tc->he_timeout_ms,
@@ -272,10 +313,17 @@ static void test_connect(struct test_case *tc)
   fail_unless(list, "error allocating resolve list entry");
   curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
   curl_easy_setopt(easy, CURLOPT_IPRESOLVE, (long)tc->ip_version);
+#ifdef USE_ALARM_TIMEOUT
+  curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
+  curl_easy_setopt(easy, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
+                   (tc->he_timeout_ms > tc->connect_timeout_ms)?
+                   3000L : 1000L);
+#else
   curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT_MS,
                    (long)tc->connect_timeout_ms);
   curl_easy_setopt(easy, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
                    (long)tc->he_timeout_ms);
+#endif
 
   curl_easy_setopt(easy, CURLOPT_URL, tc->url);
   memset(&tr, 0, sizeof(tr));
@@ -311,7 +359,6 @@ static void test_connect(struct test_case *tc)
 #define TURL "http://test.com:123"
 
 #define R_FAIL      CURLE_COULDNT_CONNECT
-#define R_TIME      CURLE_OPERATION_TIMEDOUT
 
 static struct test_case TEST_CASES[] = {
   /* TIMEOUT_MS,        FAIL_MS      CREATED    DURATION     Result, HE_PREF */
@@ -337,7 +384,7 @@ static struct test_case TEST_CASES[] = {
      500,  150,        200, 200,     1,  1,      350,  800,  R_FAIL, "v6" },
   /* mixed ip6+4, v6 starts, v4 kicks in on HE, fails after ~350ms */
   { 7, TURL, "test.com:123:::1,192.0.2.1,::2,::3", CURL_IPRESOLVE_WHATEVER,
-     500,  600,        200, 200,     0,  3,      350,  800,  R_TIME, "v6" },
+     500,  600,        200, 200,     0,  3,      350,  800,  R_FAIL, "v6" },
   /* mixed ip6+4, v6 starts, v4 never starts due to high HE, TIMEOUT */
   { 8, TURL, "test.com:123:192.0.2.1,::1", CURL_IPRESOLVE_V4,
      400,  150,        500, 500,     1,  0,      400,  600,  R_FAIL, NULL },
@@ -350,18 +397,9 @@ static struct test_case TEST_CASES[] = {
 #endif
 };
 
-/* copied from hostip.c to switch using SIGALARM for timeouts.
- * SIGALARM has only seconds resolution, so our tests will not work
- * here. */
-#if defined(CURLRES_SYNCH) && \
-    defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP)
-#define USE_ALARM_TIMEOUT
-#endif
-
-
 UNITTEST_START
 
-#if defined(DEBUGBUILD) && !defined(USE_ALARM_TIMEOUT)
+#if defined(DEBUGBUILD)
   size_t i;
 
   for(i = 0; i < sizeof(TEST_CASES)/sizeof(TEST_CASES[0]); ++i) {
