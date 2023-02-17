@@ -80,9 +80,12 @@
 2305
 %endif
 2043
-# Tests that are disabled here for rustls are SUPPOSED to work
+# The CRL test (313) doesn't work with rustls because rustls doesn't support
+# CRLs.
+# Tests that rely on connecting to an IP address over TLS don't work because
+# rustls doesn't support IP address certificates yet. That's the 400 series of
+# tests listed here, plus 1112 and 1272
 %if rustls
-312
 313
 400
 401
