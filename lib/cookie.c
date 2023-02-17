@@ -533,7 +533,7 @@ Curl_cookie_add(struct Curl_easy *data,
 
     ptr = lineptr;
     do {
-      size_t vlen = 0;
+      size_t vlen;
       size_t nlen;
 
       while(*ptr && ISBLANK(*ptr))
@@ -574,6 +574,10 @@ Curl_cookie_add(struct Curl_easy *data,
             infof(data, "cookie contains TAB, dropping");
             return NULL;
           }
+        }
+        else {
+          valuep = NULL;
+          vlen = 0;
         }
 
         /*
