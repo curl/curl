@@ -293,6 +293,53 @@ static time_t time2epoch(int sec, int min, int hour,
            + hour) * 60 + min) * 60 + sec;
 }
 
+/* Returns the value of a single-digit or two-digit decimal number, return
+   then pointer to after the number. The 'date' pointer is known to point to a
+   digit. */
+static int oneortwodigit(const char *date, const char **endp)
+{
+  int num = date[0] - '0';
+  if(ISDIGIT(date[1])) {
+    *endp = &date[2];
+    return num*10 + (date[1] - '0');
+  }
+  *endp = &date[1];
+  return num;
+}
+
+
+/* HH:MM:SS or HH:MM and accept single-digits too */
+static bool match_time(const char *date,
+                       int *h, int *m, int *s, char **endp)
+{
+  const char *p;
+  int hh, mm, ss = 0;
+  hh = oneortwodigit(date, &p);
+  if((hh < 24) && (*p == ':') && ISDIGIT(p[1])) {
+    mm = oneortwodigit(&p[1], &p);
+    if(mm < 60) {
+      if((*p == ':') && ISDIGIT(p[1])) {
+        ss = oneortwodigit(&p[1], &p);
+        if(ss <= 60) {
+          /* valid HH:MM:SS */
+          goto match;
+        }
+      }
+      else {
+        /* valid HH:MM */
+        goto match;
+      }
+    }
+  }
+  return FALSE; /* not a time string */
+  match:
+  *h = hh;
+  *m = mm;
+  *s = ss;
+  *endp = (char *)p;
+  return TRUE;
+}
+
 /*
  * parsedate()
  *
@@ -364,18 +411,10 @@ static int parsedate(const char *date, time_t *output)
       /* a digit */
       int val;
       char *end;
-      int len = 0;
       if((secnum == -1) &&
-         (3 == sscanf(date, "%02d:%02d:%02d%n",
-                      &hournum, &minnum, &secnum, &len))) {
-        /* time stamp! */
-        date += len;
-      }
-      else if((secnum == -1) &&
-              (2 == sscanf(date, "%02d:%02d%n", &hournum, &minnum, &len))) {
-        /* time stamp without seconds */
-        date += len;
-        secnum = 0;
+         match_time(date, &hournum, &minnum, &secnum, &end)) {
+        /* time stamp */
+        date = end;
       }
       else {
         long lval;
