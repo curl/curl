@@ -626,8 +626,6 @@ Curl_cookie_add(struct Curl_easy *data,
             badcookie = TRUE;
             break;
           }
-          co->name[nlen] = 0;
-          co->value[vlen] = 0;
           if(invalid_octets(co->value) || invalid_octets(co->name)) {
             infof(data, "invalid octets in name/value, cookie dropped");
             badcookie = TRUE;
