@@ -589,8 +589,13 @@ rem
         )
 
         move "%TMP_INSTALL_PATH%\lib\*.lib" "%OUTDIR%\DLL Debug" 1>nul
-        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Debug" 1>nul
-        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
+        if exist "%TMP_INSTALL_PATH%\lib\engines-3" (
+          move "%TMP_INSTALL_PATH%\lib\engines-3\*.dll" "%OUTDIR%\DLL Debug" 1>nul
+          move "%TMP_INSTALL_PATH%\lib\engines-3\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
+        ) else if exist "%TMP_INSTALL_PATH%\lib\engines-1_1" (
+          move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Debug" 1>nul
+          move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
+        )
         move "%TMP_INSTALL_PATH%\bin\*.dll" "%OUTDIR%\DLL Debug" 1>nul
         move "%TMP_INSTALL_PATH%\bin\*.exe" "%OUTDIR%\DLL Debug" 1>nul
         move "%TMP_INSTALL_PATH%\bin\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
@@ -615,8 +620,13 @@ rem
         )
 
         move "%TMP_INSTALL_PATH%\lib\*.lib" "%OUTDIR%\DLL Release" 1>nul
-        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Release" 1>nul
-        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Release" 1>nul
+        if exist "%TMP_INSTALL_PATH%\lib\engines-3" (
+          move "%TMP_INSTALL_PATH%\lib\engines-3\*.dll" "%OUTDIR%\DLL Release" 1>nul
+          move "%TMP_INSTALL_PATH%\lib\engines-3\*.pdb" "%OUTDIR%\DLL Release" 1>nul
+        ) else if exist "%TMP_INSTALL_PATH%\lib\engines-1_1" (
+          move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Release" 1>nul
+          move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Release" 1>nul
+        )
         move "%TMP_INSTALL_PATH%\bin\*.dll" "%OUTDIR%\DLL Release" 1>nul
         move "%TMP_INSTALL_PATH%\bin\*.exe" "%OUTDIR%\DLL Release" 1>nul
         move "%TMP_INSTALL_PATH%\bin\*.pdb" "%OUTDIR%\DLL Release" 1>nul
