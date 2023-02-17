@@ -505,7 +505,11 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
       return CURLUE_BAD_IPV6;
     portptr++;
     /* this is a RFC2732-style specified IP-address */
-    if(*portptr != ':')
+    if(*portptr) {
+      if(*portptr != ':')
+        return CURLUE_BAD_PORT_NUMBER;
+    }
+    else
       portptr = NULL;
   }
   else
@@ -567,11 +571,9 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
     hostname++;
     hlen -= 2;
 
-    if(hostname[hlen] != ']')
-      return CURLUE_BAD_IPV6;
-
-    /* only valid letters are ok */
+    /* only valid IPv6 letters are ok */
     len = strspn(hostname, l);
+
     if(hlen != len) {
       hlen = len;
       if(hostname[len] == '%') {
