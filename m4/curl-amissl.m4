@@ -55,11 +55,6 @@ if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
       AC_DEFINE_UNQUOTED(HAVE_OPENSSL3, 1, [Define to 1 if using OpenSSL 3 or later.])
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
                        openssl/pem.h openssl/ssl.h openssl/err.h)
-      dnl OpenSSLv3 marks the DES functions deprecated but we have no
-      dnl replacements (yet) so tell the compiler to not warn for them
-      dnl
-      dnl Ask OpenSSL to suppress the warnings.
-      CPPFLAGS="$CPPFLAGS -DOPENSSL_SUPPRESS_DEPRECATED"
     ],[
       AC_MSG_RESULT([no])
     ])
