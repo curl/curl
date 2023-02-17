@@ -25,7 +25,6 @@ imap
 ldap
 dict
 ftp
-ipv6
 </features>
  <name>
 URL API
