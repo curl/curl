@@ -862,4 +862,10 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #  endif
 #endif
 
+/* OpenSSLv3 marks DES, MD5 and ENGINE functions deprecated but we have no
+   replacements (yet) so tell the compiler to not warn for them. */
+#ifdef USE_OPENSSL
+#define OPENSSL_SUPPRESS_DEPRECATED
+#endif
+
 #endif /* HEADER_CURL_SETUP_H */

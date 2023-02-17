@@ -448,8 +448,6 @@ if(CURL_USE_OPENSSL)
   if(NOT DEFINED HAVE_BORINGSSL)
     check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
   endif()
-
-  add_definitions(-DOPENSSL_SUPPRESS_DEPRECATED)
 endif()
 
 if(CURL_USE_MBEDTLS)
