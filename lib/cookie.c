@@ -432,15 +432,19 @@ static void remove_expired(struct CookieInfo *cookies)
 }
 
 /* Make sure domain contains a dot or is localhost. */
-static bool bad_domain(const char *domain)
+static bool bad_domain(const char *domain, size_t len)
 {
-  if(strcasecompare(domain, "localhost"))
+  if((len == 9) && strncasecompare(domain, "localhost", 9))
     return FALSE;
   else {
     /* there must be a dot present, but that dot must not be a trailing dot */
-    char *dot = strchr(domain, '.');
-    if(dot)
-      return dot[1] ? FALSE : TRUE;
+    char *dot = memchr(domain, '.', len);
+    if(dot) {
+      size_t i = dot - domain;
+      if((len - i) > 1)
+        /* the dot is not the last byte */
+        return FALSE;
+    }
   }
   return TRUE;
 }
@@ -693,7 +697,7 @@ Curl_cookie_add(struct Curl_easy *data,
            * TLD or otherwise "protected" suffix. To reduce risk, we require a
            * dot OR the exact host name being "localhost".
            */
-          if(bad_domain(valuep))
+          if(bad_domain(valuep, vlen))
             domain = ":";
 #endif
 
@@ -1054,7 +1058,7 @@ Curl_cookie_add(struct Curl_easy *data,
       Curl_psl_release(data);
     }
     else
-      acceptable = !bad_domain(domain);
+      acceptable = !bad_domain(domain, strlen(domain));
 
     if(!acceptable) {
       infof(data, "cookie '%s' dropped, domain '%s' must not "
