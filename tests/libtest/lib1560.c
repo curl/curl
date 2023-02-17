@@ -466,6 +466,18 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"https://[fe80::0000:20c:29ff:fe9c:409b]:80/moo",
+   "https://[fe80::20c:29ff:fe9c:409b]:80/moo",
+   0, 0, CURLUE_OK},
+  {"https://[fe80::020c:29ff:fe9c:409b]:80/moo",
+   "https://[fe80::20c:29ff:fe9c:409b]:80/moo",
+   0, 0, CURLUE_OK},
+  {"https://[fe80:0000:0000:0000:020c:29ff:fe9c:409b]:80/moo",
+   "https://[fe80::20c:29ff:fe9c:409b]:80/moo",
+   0, 0, CURLUE_OK},
+  {"https://[fe80:0:0:0:409b::]:80/moo",
+   "https://[fe80::409b:0:0:0]:80/moo",
+   0, 0, CURLUE_OK},
   {"https://[::%25fakeit];80/moo",
    "",
    0, 0, CURLUE_BAD_PORT_NUMBER},
