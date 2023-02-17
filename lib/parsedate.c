@@ -212,56 +212,55 @@ static int checkday(const char *check, size_t len)
 {
   int i;
   const char * const *what;
-  bool found = FALSE;
   if(len > 3)
     what = &weekday[0];
-  else
+  else if(len == 3)
     what = &Curl_wkday[0];
+  else
+    return -1; /* too short */
   for(i = 0; i<7; i++) {
-    if(strcasecompare(check, what[0])) {
-      found = TRUE;
-      break;
-    }
+    size_t ilen = strlen(what[0]);
+    if((ilen == len) &&
+       strncasecompare(check, what[0], len))
+      return i;
     what++;
   }
-  return found?i:-1;
+  return -1;
 }
 
-static int checkmonth(const char *check)
+static int checkmonth(const char *check, size_t len)
 {
   int i;
-  const char * const *what;
-  bool found = FALSE;
+  const char * const *what = &Curl_month[0];
+  if(len != 3)
+    return -1; /* not a month */
 
-  what = &Curl_month[0];
   for(i = 0; i<12; i++) {
-    if(strcasecompare(check, what[0])) {
-      found = TRUE;
-      break;
-    }
+    if(strncasecompare(check, what[0], 3))
+      return i;
     what++;
   }
-  return found?i:-1; /* return the offset or -1, no real offset is -1 */
+  return -1; /* return the offset or -1, no real offset is -1 */
 }
 
 /* return the time zone offset between GMT and the input one, in number
    of seconds or -1 if the timezone wasn't found/legal */
 
-static int checktz(const char *check)
+static int checktz(const char *check, size_t len)
 {
   unsigned int i;
-  const struct tzinfo *what;
-  bool found = FALSE;
+  const struct tzinfo *what = tz;
+  if(len > 4) /* longer than any valid timezone */
+    return -1;
 
-  what = tz;
   for(i = 0; i< sizeof(tz)/sizeof(tz[0]); i++) {
-    if(strcasecompare(check, what->name)) {
-      found = TRUE;
-      break;
-    }
+    size_t ilen = strlen(what->name);
+    if((ilen == len) &&
+       strncasecompare(check, what->name, len))
+      return what->offset*60;
     what++;
   }
-  return found?what->offset*60:-1;
+  return -1;
 }
 
 static void skip(const char **date)
@@ -305,6 +304,9 @@ static time_t time2epoch(int sec, int min, int hour,
  * PARSEDATE_SOONER - time underflow at the low end of time_t
  */
 
+/* Wednesday is the longest name this parser knows about */
+#define NAME_LEN 12
+
 static int parsedate(const char *date, time_t *output)
 {
   time_t t = 0;
@@ -327,32 +329,32 @@ static int parsedate(const char *date, time_t *output)
 
     if(ISALPHA(*date)) {
       /* a name coming up */
-      char buf[32]="";
-      size_t len;
-      if(sscanf(date, "%31[ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                          "abcdefghijklmnopqrstuvwxyz]", buf))
-        len = strlen(buf);
-      else
-        len = 0;
-
-      if(wdaynum == -1) {
-        wdaynum = checkday(buf, len);
-        if(wdaynum != -1)
-          found = TRUE;
-      }
-      if(!found && (monnum == -1)) {
-        monnum = checkmonth(buf);
-        if(monnum != -1)
-          found = TRUE;
+      size_t len = 0;
+      const char *p = date;
+      while(ISALPHA(*p) && (len < NAME_LEN)) {
+        p++;
+        len++;
       }
 
-      if(!found && (tzoff == -1)) {
-        /* this just must be a time zone string */
-        tzoff = checktz(buf);
-        if(tzoff != -1)
-          found = TRUE;
-      }
+      if(len != NAME_LEN) {
+        if(wdaynum == -1) {
+          wdaynum = checkday(date, len);
+          if(wdaynum != -1)
+            found = TRUE;
+        }
+        if(!found && (monnum == -1)) {
+          monnum = checkmonth(date, len);
+          if(monnum != -1)
+            found = TRUE;
+        }
 
+        if(!found && (tzoff == -1)) {
+          /* this just must be a time zone string */
+          tzoff = checktz(date, len);
+          if(tzoff != -1)
+            found = TRUE;
+        }
+      }
       if(!found)
         return PARSEDATE_FAIL; /* bad string */
 
