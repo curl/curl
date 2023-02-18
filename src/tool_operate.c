@@ -1301,15 +1301,16 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_SEEKDATA, input);
         my_setopt(curl, CURLOPT_SEEKFUNCTION, tool_seek_cb);
 
-#ifdef CURLDEBUG
-        if(getenv("CURL_BUFFERSIZE")) {
-          long size = strtol(getenv("CURL_BUFFERSIZE"), NULL, 10);
-          if(size)
-            my_setopt(curl, CURLOPT_BUFFERSIZE, size);
-        }
-        else
-#endif
         {
+#ifdef CURLDEBUG
+          char *env = getenv("CURL_BUFFERSIZE");
+          if(env) {
+            long size = strtol(env, NULL, 10);
+            if(size)
+              my_setopt(curl, CURLOPT_BUFFERSIZE, size);
+          }
+          else
+#endif
           if(config->recvpersecond &&
              (config->recvpersecond < BUFFER_SIZE))
             /* use a smaller sized buffer for better sleeps */
