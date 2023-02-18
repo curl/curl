@@ -20,11 +20,14 @@ The file is saved in the current directory, or in the directory specified with
 
 If the server specifies a file name and a file with that name already exists
 in the destination directory, it will not be overwritten and an error will
-occur. If the server does not specify a file name then this option has no
-effect.
+occur - unless you allow it by using the --clobber option. If the server does
+not specify a file name then this option has no effect.
 
 There's no attempt to decode %-sequences (yet) in the provided file name, so
 this option may provide you with rather unexpected file names.
+
+This feature uses the name from the "filename" field, it does not yet support
+the "filename*" field (filenames with explicit character sets).
 
 **WARNING**: Exercise judicious use of this option, especially on Windows. A
 rogue server could send you the name of a DLL or other file that could be
