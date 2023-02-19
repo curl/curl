@@ -114,13 +114,42 @@ int Curl_socketpair(int domain, int type, int protocol,
   else {
     struct curltime check;
     struct curltime now = Curl_now();
+    char *p = (char *)&check;
+    size_t s = sizeof(check);
 
     /* write data to the socket */
     swrite(socks[0], &now, sizeof(now));
     /* verify that we read the correct data */
-    if((sizeof(now) != sread(socks[1], &check, sizeof(check)) ||
-        memcmp(&now, &check, sizeof(check))))
-      goto error;
+    do {
+      ssize_t nread = sread(socks[1], p, s);
+      if(nread == -1) {
+        int sockerr = SOCKERRNO;
+        if(
+#ifdef WSAEWOULDBLOCK
+          /* This is how Windows does it */
+          (WSAEWOULDBLOCK == sockerr)
+#else
+          /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
+             returned due to its inability to send off data without
+             blocking. We therefore treat both error codes the same here */
+          (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
+          (EINTR == sockerr) || (EINPROGRESS == sockerr)
+#endif
+          ) {
+          /* busy-loop */
+          continue;
+        }
+        goto error;
+      }
+      s -= nread;
+      if(s) {
+        p += nread;
+        continue;
+      }
+      if(memcmp(&now, &check, sizeof(check)))
+        goto error;
+      break;
+    } while(1);
   }
 
   sclose(listener);
