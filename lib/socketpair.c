@@ -85,9 +85,22 @@ int Curl_socketpair(int domain, int type, int protocol,
 
   socks[0] = socks[1] = CURL_SOCKET_BAD;
 
+#if defined(WIN32) || defined(__CYGWIN__)
+  /* don't set SO_REUSEADDR on Windows */
+  (void)reuse;
+#ifdef SO_EXCLUSIVEADDRUSE
+  {
+    int exclusive = 1;
+    if(setsockopt(listener, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
+                  (char *)&exclusive, (curl_socklen_t)sizeof(exclusive)) == -1)
+      goto error;
+  }
+#endif
+#else
   if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR,
                 (char *)&reuse, (curl_socklen_t)sizeof(reuse)) == -1)
     goto error;
+#endif
   if(bind(listener, &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
   if(getsockname(listener, &a.addr, &addrlen) == -1 ||
@@ -113,14 +126,52 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   else {
     struct curltime check;
-    struct curltime now = Curl_now();
+    struct curltime start = Curl_now();
+    char *p = (char *)&check;
+    size_t s = sizeof(check);
 
     /* write data to the socket */
-    swrite(socks[0], &now, sizeof(now));
+    swrite(socks[0], &start, sizeof(start));
     /* verify that we read the correct data */
-    if((sizeof(now) != sread(socks[1], &check, sizeof(check)) ||
-        memcmp(&now, &check, sizeof(check))))
-      goto error;
+    do {
+      ssize_t nread;
+
+      pfd[0].fd = socks[1];
+      pfd[0].events = POLLIN;
+      pfd[0].revents = 0;
+      (void)Curl_poll(pfd, 1, 1000); /* one second */
+
+      nread = sread(socks[1], p, s);
+      if(nread == -1) {
+        int sockerr = SOCKERRNO;
+        /* Don't block forever */
+        if(Curl_timediff(Curl_now(), start) > (60 * 1000))
+          goto error;
+        if(
+#ifdef WSAEWOULDBLOCK
+          /* This is how Windows does it */
+          (WSAEWOULDBLOCK == sockerr)
+#else
+          /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
+             returned due to its inability to send off data without
+             blocking. We therefore treat both error codes the same here */
+          (EWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
+          (EINTR == sockerr) || (EINPROGRESS == sockerr)
+#endif
+          ) {
+          continue;
+        }
+        goto error;
+      }
+      s -= nread;
+      if(s) {
+        p += nread;
+        continue;
+      }
+      if(memcmp(&start, &check, sizeof(check)))
+        goto error;
+      break;
+    } while(1);
   }
 
   sclose(listener);
