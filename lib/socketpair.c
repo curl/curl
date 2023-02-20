@@ -121,7 +121,14 @@ int Curl_socketpair(int domain, int type, int protocol,
     swrite(socks[0], &now, sizeof(now));
     /* verify that we read the correct data */
     do {
-      ssize_t nread = sread(socks[1], p, s);
+      ssize_t nread;
+
+      pfd[0].fd = socks[1];
+      pfd[0].events = POLLIN;
+      pfd[0].revents = 0;
+      (void)Curl_poll(pfd, 1, 1000); /* one second */
+
+      nread = sread(socks[1], p, s);
       if(nread == -1) {
         int sockerr = SOCKERRNO;
         if(
