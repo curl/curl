@@ -113,12 +113,12 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   else {
     struct curltime check;
-    struct curltime now = Curl_now();
+    struct curltime start = Curl_now();
     char *p = (char *)&check;
     size_t s = sizeof(check);
 
     /* write data to the socket */
-    swrite(socks[0], &now, sizeof(now));
+    swrite(socks[0], &start, sizeof(start));
     /* verify that we read the correct data */
     do {
       ssize_t nread;
@@ -131,6 +131,9 @@ int Curl_socketpair(int domain, int type, int protocol,
       nread = sread(socks[1], p, s);
       if(nread == -1) {
         int sockerr = SOCKERRNO;
+        /* Don't block more than 5 seconds */
+        if(Curl_timediff(Curl_now(), start) > 5000)
+          goto error;
         if(
 #ifdef WSAEWOULDBLOCK
           /* This is how Windows does it */
@@ -153,7 +156,7 @@ int Curl_socketpair(int domain, int type, int protocol,
         p += nread;
         continue;
       }
-      if(memcmp(&now, &check, sizeof(check)))
+      if(memcmp(&start, &check, sizeof(check)))
         goto error;
       break;
     } while(1);
