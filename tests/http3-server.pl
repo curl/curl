@@ -28,6 +28,7 @@
 
 use Cwd;
 use Cwd 'abs_path';
+use File::Basename;
 
 my $pidfile = "log/nghttpx.pid";
 my $logfile = "log/http3.log";
@@ -93,8 +94,7 @@ while(@ARGV) {
     shift @ARGV;
 }
 
-my $path   = getcwd();
-my $srcdir = $path;
+my $srcdir = dirname(__FILE__);
 $certfile = "$srcdir/certs/$cert.pem";
 $keyfile = "$srcdir/certs/$cert.key";
 $certfile = abs_path($certfile);

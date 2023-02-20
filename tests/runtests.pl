@@ -1677,7 +1677,7 @@ sub runhttpserver {
     my $pidfile;
     my $logfile;
     my $flags = "";
-    my $exe = "$perl $srcdir/httpserver.pl";
+    my $exe = "$perl $srcdir/http-server.pl";
     my $verbose_flag = "--verbose ";
 
     if($alt eq "ipv6") {
