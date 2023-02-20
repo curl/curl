@@ -88,6 +88,14 @@ int Curl_socketpair(int domain, int type, int protocol,
 #if defined(WIN32) || defined(__CYGWIN__)
   /* don't set SO_REUSEADDR on Windows */
   (void)reuse;
+#ifdef SO_EXCLUSIVEADDRUSE
+  {
+    int exclusive = 1;
+    if(setsockopt(listener, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
+                  (char *)&exclusive, (curl_socklen_t)sizeof(exclusive)) == -1)
+      goto error;
+  }
+#endif
 #else
   if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR,
                 (char *)&reuse, (curl_socklen_t)sizeof(reuse)) == -1)
