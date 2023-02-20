@@ -144,8 +144,8 @@ int Curl_socketpair(int domain, int type, int protocol,
       nread = sread(socks[1], p, s);
       if(nread == -1) {
         int sockerr = SOCKERRNO;
-        /* Don't block more than 5 seconds */
-        if(Curl_timediff(Curl_now(), start) > 5000)
+        /* Don't block forever */
+        if(Curl_timediff(Curl_now(), start) > (60 * 1000))
           goto error;
         if(
 #ifdef WSAEWOULDBLOCK
