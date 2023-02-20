@@ -84,7 +84,7 @@ struct writeoutvar {
                    bool use_json);
 };
 
-void ourWriteOut(const char *writeinfo, struct per_transfer *per,
+void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                  CURLcode per_result);
 
 #endif /* HEADER_CURL_TOOL_WRITEOUT_H */
