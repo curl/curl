@@ -1,4 +1,4 @@
-curl and libcurl 7.88.1
+curl and libcurl 8.0.0
 
  Public curl releases:         214
  Command line options:         250
@@ -12,31 +12,11 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o build-openssl.bat: keep OpenSSL 3 engine binaries [20]
- o cmake: fix Windows check for CryptAcquireContext [21]
- o connnect: fix timeout handling to use full duration [4]
- o curl: make --silent work stand-alone [15]
- o curl_setup: Suppress OpenSSL 3 deprecation warnings [19]
- o CURLOPT_WS_OPTIONS.3: fix the availability version [23]
- o GHA: update rustls dependency to 0.9.2 [24]
- o http2: buffer/pausedata and output flush fix. [9]
- o http2: set drain on stream end [8]
- o http: include stdint.h more readily [6]
- o krb5: silence cast-align warning [10]
- o lib1560: add IPv6 canonicalization tests [27]
- o os400: correct Curl_os400_sendto() [13]
- o remote-header-name.d: mention that filename* is not supported [22]
- o runtests: fix "uninitialized value $port" [1]
- o setopt: allow HTTP3 when HTTP2 is not defined [12]
- o socketpair: allow EWOULDBLOCK when reading the pair check bytes [17]
- o socks: allow using DoH to resolve host names [16]
- o tests-httpd: add proxy tests [14]
- o tests: make sure gnuserv-tls has SRP support before using it [2]
- o tests: make the telnet server shut down a socket gracefully [7]
- o tool_getparam: make --get a true boolean [5]
- o tool_operate: allow debug builds to set buffersize [3]
- o urlapi: do the port number extraction without using sscanf() [11]
- o urldata: remove `now` from struct SingleRequest - not needed [26]
+ o cookie: parse without sscanf()
+ o lib517: verify time stamps without leading zeroes plus some more
+ o parsedate: parse strings without using sscanf() [2]
+ o parsedate: replace sscanf( for time stamp parsing [1]
+ o tests: HTTP server fixups [3]
 
 This release includes the following known bugs:
 
@@ -54,37 +34,11 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  ALittleDruid on github, Christian Hesse, Daniel Stenberg,
-  fundawang on github, Gunamoi Software, Harry Sintonen, Jacob Hoffman-Andrews,
-  Jon Rumsey, Karthikdasari0423 on github, Kevin Ryan, Marcel Raad,
-  Michael Kaufmann, Philip Heiduck, Pierrick Charron, Ray Satiro,
-  roughtex on github, Stefan Eissing, u20221022 on github, 積丹尼 Dan Jacobson
-  (19 contributors)
+  Daniel Stenberg, Matt Jolly
+  (2 contributors)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=10518
- [2] = https://curl.se/bug/?i=10522
- [3] = https://curl.se/bug/?i=10532
- [4] = https://curl.se/bug/?i=10514
- [5] = https://curl.se/bug/?i=10527
- [6] = https://curl.se/bug/?i=10516
- [7] = https://curl.se/bug/?i=10509
- [8] = https://curl.se/bug/?i=10530
- [9] = https://curl.se/bug/?i=10529
- [10] = https://curl.se/bug/?i=10528
- [11] = https://curl.se/bug/?i=10541
- [12] = https://curl.se/bug/?i=10538
- [13] = https://curl.se/bug/?i=10539
- [14] = https://curl.se/bug/?i=10519
- [15] = https://curl.se/bug/?i=10535
- [16] = https://curl.se/bug/?i=10537
- [17] = https://curl.se/bug/?i=10561
- [19] = https://curl.se/bug/?i=10543
- [20] = https://curl.se/bug/?i=10542
- [21] = https://curl.se/bug/?i=10353
- [22] = https://curl.se/bug/?i=10555
- [23] = https://curl.se/bug/?i=10557
- [24] = https://curl.se/bug/?i=10553
- [26] = https://curl.se/bug/?i=10549
- [27] = https://curl.se/bug/?i=10552
+ [1] = https://curl.se/bug/?i=10547
+ [2] = https://curl.se/bug/?i=10547
+ [3] = https://curl.se/bug/?i=10568
