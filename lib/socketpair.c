@@ -85,9 +85,14 @@ int Curl_socketpair(int domain, int type, int protocol,
 
   socks[0] = socks[1] = CURL_SOCKET_BAD;
 
+#if defined(WIN32) || defined(__CYGWIN__)
+  /* don't set SO_REUSEADDR on Windows */
+  (void)reuse;
+#else
   if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR,
                 (char *)&reuse, (curl_socklen_t)sizeof(reuse)) == -1)
     goto error;
+#endif
   if(bind(listener, &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
   if(getsockname(listener, &a.addr, &addrlen) == -1 ||
