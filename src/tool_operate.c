@@ -984,12 +984,13 @@ static CURLcode single_transfer(struct GlobalConfig *global,
              */
             if(!per->prev || per->prev->config != config) {
               newfile = fopen(config->headerfile, "wb+");
-              fclose(newfile);
+              if(newfile)
+                fclose(newfile);
             }
             newfile = fopen(config->headerfile, "ab+");
 
             if(!newfile) {
-              warnf(global, "Failed to open %s\n", config->headerfile);
+              errorf(global, "Failed to open %s\n", config->headerfile);
               result = CURLE_WRITE_ERROR;
               break;
             }
