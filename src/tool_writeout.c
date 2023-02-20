@@ -376,14 +376,18 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
   return 1; /* return 1 if anything was written */
 }
 
-void ourWriteOut(const char *writeinfo, struct per_transfer *per,
+void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                  CURLcode per_result)
 {
   FILE *stream = stdout;
+  const char *writeinfo = config->writeout;
   const char *ptr = writeinfo;
   bool done = FALSE;
   struct curl_certinfo *certinfo;
   CURLcode res = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO, &certinfo);
+
+  if(!writeinfo)
+    return;
 
   if(!res && certinfo)
     per->certinfo = certinfo;
@@ -423,7 +427,7 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
                 stream = stdout;
                 break;
               case VAR_STDERR:
-                stream = stderr;
+                stream = config->global->errors;
                 break;
               case VAR_JSON:
                 ourWriteOutJSON(stream, variables, per, per_result);
