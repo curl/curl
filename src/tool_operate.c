@@ -661,7 +661,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
 
   /* Write the --write-out data before cleanup but after result is final */
   if(config->writeout)
-    ourWriteOut(config->writeout, per, result);
+    ourWriteOut(config, per, result);
 
   /* Close function-local opened file descriptors */
   if(per->heads.fopened && per->heads.stream)
