@@ -211,6 +211,7 @@ sub single {
     my $magic; # cmdline special option
     my $line;
     my $multi;
+    my $scope;
     my $experimental;
     while(<F>) {
         $line++;
@@ -252,6 +253,9 @@ sub single {
         }
         elsif(/^Multi: *(.*)/i) {
             $multi=$1;
+        }
+        elsif(/^Scope: *(.*)/i) {
+            $scope=$1;
         }
         elsif(/^Experimental: yes/i) {
             $experimental=1;
@@ -347,6 +351,16 @@ sub single {
     printdesc(@desc);
     undef @desc;
 
+    if($scope) {
+        if($scope eq "global") {
+            print "\nThis option is global and does not need to be specified for each use of --next.\n";
+        }
+        else {
+            print STDERR "$f:$line:1:ERROR: unrecognized scope: '$scope'\n";
+            return 2;
+        }
+    }
+
     my @extra;
     if($multi eq "single") {
         push @extra, "\nIf --$long is provided several times, the last set ".
@@ -406,6 +420,7 @@ sub single {
         }
         push @foot, seealso($standalone, $mstr);
     }
+
     if($requires) {
         my $l = manpageify($long);
         push @foot, "$l requires that the underlying libcurl".

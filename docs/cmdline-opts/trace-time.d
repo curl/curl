@@ -7,8 +7,6 @@ Category: verbose
 Example: --trace-time --trace-ascii output $URL
 See-also: trace verbose
 Multi: boolean
+Scope: global
 ---
 Prepends a time stamp to each trace or verbose line that curl displays.
-
-This option is global and does not need to be specified for each use of
---next.
