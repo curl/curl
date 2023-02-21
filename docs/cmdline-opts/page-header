@@ -201,3 +201,7 @@ prefix it with "no-". However, in this list we mostly only list and show the
 When --next is used, it resets the parser state and you start again with a
 clean option state, except for the options that are "global". Global options
 will retain their values and meaning even after --next.
+
+The following options are global:
+%GLOBALS.
+

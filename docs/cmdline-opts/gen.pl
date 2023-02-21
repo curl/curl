@@ -51,6 +51,7 @@ use POSIX qw(strftime);
 my $date = strftime "%B %d %Y", localtime;
 my $year = strftime "%Y", localtime;
 my $version = "unknown";
+my $globals;
 
 open(INC, "<../../include/curl/curlver.h");
 while(<INC>) {
@@ -520,6 +521,7 @@ sub header {
     while(<F>) {
         s/%DATE/$date/g;
         s/%VERSION/$version/g;
+        s/%GLOBALS/$globals/g;
         push @d, $_;
     }
     close(F);
@@ -535,7 +537,7 @@ sub listhelp {
  *                            | (__| |_| |  _ <| |___
  *                             \\___|\\___/|_| \\_\\_____|
  *
- * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel\@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -629,6 +631,36 @@ sub listcats {
     }
 }
 
+sub listglobals {
+    my (@files) = @_;
+    my @globalopts;
+
+    # Find all global options and output them
+    foreach my $f (sort @files) {
+        open(F, "<:crlf", "$f") ||
+            next;
+        my $long;
+        while(<F>) {
+            if(/^Long: *(.*)/i) {
+                $long=$1;
+            }
+            elsif(/^Scope: global/i) {
+                push @globalopts, $long;
+                last;
+            }
+            elsif(/^---/) {
+                last;
+            }
+        }
+        close(F);
+    }
+    return $ret if($ret);
+    for my $e (0 .. $#globalopts) {
+        $globals .= sprintf "%s--%s",  $e?($globalopts[$e+1] ? ", " : " and "):"",
+            $globalopts[$e],;
+    }
+}
+
 sub mainpage {
     my (@files) = @_;
     my $ret;
@@ -669,6 +701,7 @@ sub showprotocols {
 sub getargs {
     my ($f, @s) = @_;
     if($f eq "mainpage") {
+        listglobals(@s);
         mainpage(@s);
         return;
     }
