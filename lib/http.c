@@ -88,6 +88,7 @@
 #include "hsts.h"
 #include "ws.h"
 #include "c-hyper.h"
+#include "curl_ctype.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -4156,11 +4157,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     if(!k->headerline++) {
       /* This is the first header, it MUST be the error code line
          or else we consider this to be the body right away! */
-      int httpversion_major;
-      int rtspversion_major;
-      int nc = 0;
-#define HEADER1 headp /* no conversion needed, just use headp */
-
+      bool fine_statusline = FALSE;
       if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
         /*
          * https://datatracker.ietf.org/doc/html/rfc7230#section-3.1.2
@@ -4169,39 +4166,60 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          * says. We allow any three-digit number here, but we cannot make
          * guarantees on future behaviors since it isn't within the protocol.
          */
-        char separator;
-        char twoorthree[2];
         int httpversion = 0;
-        char digit4 = 0;
-        nc = sscanf(HEADER1,
-                    " HTTP/%1d.%1d%c%3d%c",
-                    &httpversion_major,
-                    &httpversion,
-                    &separator,
-                    &k->httpcode,
-                    &digit4);
+        char *p = headp;
 
-        if(nc == 1 && httpversion_major >= 2 &&
-           2 == sscanf(HEADER1, " HTTP/%1[23] %d", twoorthree, &k->httpcode)) {
-          conn->httpversion = 0;
-          nc = 4;
-          separator = ' ';
+        while(*p && ISBLANK(*p))
+          p++;
+        if(!strncmp(p, "HTTP/", 5)) {
+          p += 5;
+          switch(*p) {
+          case '1':
+            p++;
+            if((p[0] == '.') && (p[1] == '0' || p[1] == '1')) {
+              if(ISBLANK(p[2])) {
+                httpversion = 10 + (p[1] - '0');
+                p += 3;
+                if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+                  k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                    (p[2] - '0');
+                  p += 3;
+                  if(ISSPACE(*p))
+                    fine_statusline = TRUE;
+                }
+              }
+            }
+            if(!fine_statusline) {
+              failf(data, "Unsupported HTTP/1 subversion in response");
+              return CURLE_UNSUPPORTED_PROTOCOL;
+            }
+            break;
+          case '2':
+          case '3':
+            if(!ISBLANK(p[1]))
+              break;
+            httpversion = (*p - '0') * 10;
+            p += 2;
+            if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+              k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                (p[2] - '0');
+              p += 3;
+              if(!ISSPACE(*p))
+                break;
+              fine_statusline = TRUE;
+            }
+            break;
+          default: /* unsupported */
+            failf(data, "Unsupported HTTP version in response");
+            return CURLE_UNSUPPORTED_PROTOCOL;
+          }
         }
 
-        /* There can only be a 4th response code digit stored in 'digit4' if
-           all the other fields were parsed and stored first, so nc is 5 when
-           digit4 a digit.
-
-           The sscanf() line above will also allow zero-prefixed and negative
-           numbers, so we check for that too here.
-        */
-        else if(ISDIGIT(digit4) || (nc >= 4 && k->httpcode < 100)) {
-          failf(data, "Unsupported response code in HTTP response");
-          return CURLE_UNSUPPORTED_PROTOCOL;
-        }
-
-        if((nc >= 4) && (' ' == separator)) {
-          httpversion += 10 * httpversion_major;
+        if(fine_statusline) {
+          if(k->httpcode < 100) {
+            failf(data, "Unsupported response code in HTTP response");
+            return CURLE_UNSUPPORTED_PROTOCOL;
+          }
           switch(httpversion) {
           case 10:
           case 11:
@@ -4228,51 +4246,50 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
             conn->bundle->multiuse = BUNDLE_NO_MULTIUSE;
           }
         }
-        else if(!nc) {
-          /* this is the real world, not a Nirvana
-             NCSA 1.5.x returns this crap when asked for HTTP/1.1
-          */
-          nc = sscanf(HEADER1, " HTTP %3d", &k->httpcode);
-          conn->httpversion = 10;
-
+        else {
           /* If user has set option HTTP200ALIASES,
              compare header line against list of aliases
           */
-          if(!nc) {
-            statusline check =
-              checkhttpprefix(data,
-                              Curl_dyn_ptr(&data->state.headerb),
-                              Curl_dyn_len(&data->state.headerb));
-            if(check == STATUS_DONE) {
-              nc = 1;
-              k->httpcode = 200;
-              conn->httpversion = 10;
-            }
+          statusline check =
+            checkhttpprefix(data,
+                            Curl_dyn_ptr(&data->state.headerb),
+                            Curl_dyn_len(&data->state.headerb));
+          if(check == STATUS_DONE) {
+            fine_statusline = TRUE;
+            k->httpcode = 200;
+            conn->httpversion = 10;
           }
-        }
-        else {
-          failf(data, "Unsupported HTTP version in response");
-          return CURLE_UNSUPPORTED_PROTOCOL;
         }
       }
       else if(conn->handler->protocol & CURLPROTO_RTSP) {
-        char separator;
-        int rtspversion;
-        nc = sscanf(HEADER1,
-                    " RTSP/%1d.%1d%c%3d",
-                    &rtspversion_major,
-                    &rtspversion,
-                    &separator,
-                    &k->httpcode);
-        if((nc == 4) && (' ' == separator)) {
-          conn->httpversion = 11; /* For us, RTSP acts like HTTP 1.1 */
-        }
-        else {
-          nc = 0;
+        char *p = headp;
+        while(*p && ISBLANK(*p))
+          p++;
+        if(!strncmp(p, "RTSP/", 5)) {
+          p += 5;
+          if(ISDIGIT(*p)) {
+            p++;
+            if((p[0] == '.') && ISDIGIT(p[1])) {
+              if(ISBLANK(p[2])) {
+                p += 3;
+                if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+                  k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                    (p[2] - '0');
+                  p += 3;
+                  if(ISSPACE(*p)) {
+                    fine_statusline = TRUE;
+                    conn->httpversion = 11; /* RTSP acts like HTTP 1.1 */
+                  }
+                }
+              }
+            }
+          }
+          if(!fine_statusline)
+            return CURLE_WEIRD_SERVER_REPLY;
         }
       }
 
-      if(nc) {
+      if(fine_statusline) {
         result = Curl_http_statusline(data, conn);
         if(result)
           return result;
