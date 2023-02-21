@@ -173,7 +173,7 @@ bool progress_meter(struct GlobalConfig *global,
   struct timeval now;
   long diff;
 
-  if(global->noprogress)
+  if(global->noprogress || global->silent)
     return FALSE;
 
   now = tvnow();
