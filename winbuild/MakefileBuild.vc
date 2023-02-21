@@ -692,6 +692,12 @@ $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
 
 !ENDIF  # End of case where a config was provided.
 
+# Makefile.vc's clean removes (LIB)CURL_DIROBJ and DIRDIST dirs then calls
+# this clean. Note those are the original directories we control and not the
+# directories possibly modified by this makefile to point to user-specified
+# directories.
+# For example, don't remove DIRDIST here since it may contain user files if it
+# has been changed by WITH_PREFIX to a different output dir (eg C:\usr\local).
 clean:
 	@-erase /s *.dll 2> NUL
 	@-erase /s *.exp 2> NUL
@@ -701,6 +707,3 @@ clean:
 	@-erase /s *.pch 2> NUL
 	@-erase /s *.pdb 2> NUL
 	@-erase /s *.res 2> NUL
-	@if exist $(LIB_DIROBJ) rd /s/q $(LIB_DIROBJ)
-	@if exist $(CURL_DIROBJ)rd /s/q $(CURL_DIROBJ)
-	@if exist $(DIRDIST) rd /s/q $(DIRDIST)

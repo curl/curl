@@ -265,6 +265,10 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-msh3
 
 !MESSAGE configuration name: $(CONFIG_NAME_LIB)
 
+# Note these directories are removed by this makefile's 'clean' so they should
+# not be changed to point to user-specified directories that may contain other
+# data. MakefileBuild.vc uses the same variable names but allows some user
+# changes and therefore does not remove the directories.
 BUILD_DIR=../builds/$(CONFIG_NAME_LIB)
 LIBCURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
 CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
@@ -300,4 +304,7 @@ copy_from_lib:
 	FOR %%i IN ($(CURLX_CFILES:/=\)) DO copy %%i ..\src\
 
 clean:
+	@if exist $(LIBCURL_DIROBJ) rd /s /q $(LIBCURL_DIROBJ)
+	@if exist $(CURL_DIROBJ) rd /s /q $(CURL_DIROBJ)
+	@if exist $(DIRDIST) rd /s /q $(DIRDIST)
 	$(MAKE) /NOLOGO /F MakefileBuild.vc $@
