@@ -35,6 +35,7 @@ Each file has a set of meta-data and a body of text.
     Mutexed: (space separated list of options this overrides, no dashes)
     Protocols: (space separated list for which protocols this option works)
     Requires: (space separated list of features this requires, no dashes)
+    Scope: global (if the option is global)
     See-also: (space separated list of related options, no dashes)
     Short: (single letter, without dash)
     SPDX-License-Identifier: curl

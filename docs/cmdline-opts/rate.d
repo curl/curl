@@ -10,6 +10,7 @@ Example: --rate 14/m $URL
 Added: 7.84.0
 See-also: limit-rate retry-delay
 Multi: single
+Scope: global
 ---
 Specify the maximum transfer frequency you allow curl to use - in number of
 transfer starts per time unit (sometimes called request rate). Without this
