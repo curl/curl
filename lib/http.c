@@ -4177,20 +4177,19 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           case '1':
             p++;
             if((p[0] == '.') && (p[1] == '0' || p[1] == '1')) {
-              if(!ISBLANK(p[2]))
-                break;
-              httpversion = 10 + (p[1] - '0');
-              p += 3;
-              if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-                k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                  (p[2] - '0');
+              if(ISBLANK(p[2])) {
+                httpversion = 10 + (p[1] - '0');
                 p += 3;
-                if(!ISSPACE(*p))
-                  break;
-                fine_statusline = TRUE;
+                if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+                  k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                    (p[2] - '0');
+                  p += 3;
+                  if(ISSPACE(*p))
+                    fine_statusline = TRUE;
+                }
               }
             }
-            else {
+            if(!fine_statusline) {
               failf(data, "Unsupported HTTP/1 subversion in response");
               return CURLE_UNSUPPORTED_PROTOCOL;
             }
@@ -4271,20 +4270,22 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           if(ISDIGIT(*p)) {
             p++;
             if((p[0] == '.') && ISDIGIT(p[1])) {
-              if(!ISBLANK(p[2]))
-                break;
-              p += 3;
-              if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
-                k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
-                  (p[2] - '0');
+              if(ISBLANK(p[2])) {
                 p += 3;
-                if(!ISSPACE(*p))
-                  break;
-                fine_statusline = TRUE;
-                conn->httpversion = 11; /* For us, RTSP acts like HTTP 1.1 */
+                if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
+                  k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
+                    (p[2] - '0');
+                  p += 3;
+                  if(ISSPACE(*p)) {
+                    fine_statusline = TRUE;
+                    conn->httpversion = 11; /* RTSP acts like HTTP 1.1 */
+                  }
+                }
               }
             }
           }
+          if(!fine_statusline)
+            return CURLE_WEIRD_SERVER_REPLY;
         }
       }
 
