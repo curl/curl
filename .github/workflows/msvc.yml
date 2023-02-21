@@ -34,8 +34,8 @@ jobs:
 
       - name: Generate generated files
         run: |
-          echo "void hugehelp(void) {}" > src/tool_hugehelp.c
-          echo "int main(void) { return 0; }" > tests/libtest/lib1521.c
+          echo "void hugehelp(void) {}" > ${{ env.build }}/src/tool_hugehelp.c
+          echo "int main(void) { return 0; }" > ${{ env.build }}tests/libtest/lib1521.c
 
       - name: Configure CMake
         run: cmake -B ${{ env.build }}
