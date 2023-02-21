@@ -32,17 +32,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Generate generated files
-        run: |
-          echo "void hugehelp(void) {}" > ${{ env.build }}/src/tool_hugehelp.c
-          echo "int main(void) { return 0; }" > ${{ env.build }}tests/libtest/lib1521.c
-
       - name: Configure CMake
         run: cmake -B ${{ env.build }}
 
-      # Build is not required unless generated source files are used
-      # - name: Build CMake
-      #   run: cmake --build ${{ env.build }}
+      - name: Build CMake
+        run: cmake --build ${{ env.build }}
 
       - name: Initialize MSVC Code Analysis
         uses: microsoft/msvc-code-analysis-action@04825f6d9e00f87422d6bf04e1a38b1f3ed60d99
