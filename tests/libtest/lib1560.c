@@ -141,6 +141,10 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"https://example.com%252f%40@example.net",
+   "https | example.com%2f@ | [12] | [13] | example.net | [15] | / "
+   "| [16] | [17]",
+   0, CURLU_URLDECODE, CURLUE_OK },
 #ifdef USE_IDN
   {"https://räksmörgås.se",
    "https | [11] | [12] | [13] | xn--rksmrgs-5wao1o.se | "
