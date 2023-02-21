@@ -2165,9 +2165,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(config->url_out)
         /* existing node */
         url = config->url_out;
-      else
+      else {
+        if(!toggle && !config->default_node_flags)
+          break;
         /* there was no free node, create one! */
         config->url_out = url = new_getout(config);
+      }
 
       if(!url)
         return PARAM_NO_MEM;
