@@ -315,7 +315,9 @@ static void test_connect(struct test_case *tc)
   curl_easy_setopt(easy, CURLOPT_IPRESOLVE, (long)tc->ip_version);
 #ifdef USE_ALARM_TIMEOUT
   curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
-  curl_easy_setopt(easy, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, 1000L);
+  curl_easy_setopt(easy, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
+                   (tc->he_timeout_ms > tc->connect_timeout_ms)?
+                   3000L : 1000L);
 #else
   curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT_MS,
                    (long)tc->connect_timeout_ms);
