@@ -40,7 +40,7 @@ jobs:
 
       - name: Generate an empty lib1521.c
         run: |
-          echo "int main(void) { return 0; }" > ${{ env.build }}tests/libtest/lib1521.c
+          echo "int main(void) { return 0; }" > ${{ env.build }}/tests/libtest/lib1521.c
 
       - name: Initialize MSVC Code Analysis
         uses: microsoft/msvc-code-analysis-action@04825f6d9e00f87422d6bf04e1a38b1f3ed60d99
