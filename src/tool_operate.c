@@ -2472,8 +2472,10 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     else {
       /* setup the next one just before we delete this */
       result = create_transfer(global, share, &added);
-      if(result)
+      if(result) {
+        returncode = result;
         bailout = TRUE;
+      }
     }
 
     per = del_per_transfer(per);
@@ -2515,7 +2517,8 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
 
   /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
-    helpf(global->errors, "no URL specified!\n");
+    helpf(global->errors, "(%d) no URL specified!\n",
+          CURLE_FAILED_INIT);
     return CURLE_FAILED_INIT;
   }
 
