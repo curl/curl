@@ -11,8 +11,6 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-  schedule:
-    - cron: '22 22 * * 1'
 
 env:
   # Path to the CMake build directory.
