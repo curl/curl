@@ -8,9 +8,7 @@ Category: verbose
 Example: --stderr output.txt $URL
 Added: 6.2
 Multi: single
+Scope: global
 ---
 Redirect all writes to stderr to the specified file instead. If the file name
 is a plain '-', it is instead written to stdout.
-
-This option is global and does not need to be specified for each use of
---next.
