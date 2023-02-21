@@ -2202,16 +2202,18 @@ static int append_cert_to_array(struct Curl_easy *data,
                                 const unsigned char *buf, size_t buflen,
                                 CFMutableArrayRef array)
 {
-    CFDataRef certdata = CFDataCreate(kCFAllocatorDefault, buf, buflen);
     char *certp;
     CURLcode result;
+    SecCertificateRef cacert;
+    CFDataRef certdata;
+
+    certdata = CFDataCreate(kCFAllocatorDefault, buf, buflen);
     if(!certdata) {
       failf(data, "SSL: failed to allocate array for CA certificate");
       return CURLE_OUT_OF_MEMORY;
     }
 
-    SecCertificateRef cacert =
-      SecCertificateCreateWithData(kCFAllocatorDefault, certdata);
+    cacert = SecCertificateCreateWithData(kCFAllocatorDefault, certdata);
     CFRelease(certdata);
     if(!cacert) {
       failf(data, "SSL: failed to create SecCertificate from CA certificate");
@@ -2425,11 +2427,14 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 
   do {
     SecTrustRef trust;
-    OSStatus ret = SSLCopyPeerTrust(ctx, &trust);
+    OSStatus ret;
+    SecKeyRef keyRef;
+
+    ret = SSLCopyPeerTrust(ctx, &trust);
     if(ret != noErr || !trust)
       break;
 
-    SecKeyRef keyRef = SecTrustCopyPublicKey(trust);
+    keyRef = SecTrustCopyPublicKey(trust);
     CFRelease(trust);
     if(!keyRef)
       break;
@@ -2987,12 +2992,13 @@ static CURLcode sectransp_connect_step3(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
+  CURLcode result;
 
   DEBUGF(LOG_CF(data, cf, "connect_step3"));
   /* There is no step 3!
    * Well, okay, let's collect server certificates, and if verbose mode is on,
    * let's print the details of the server certificates. */
-  const CURLcode result = collect_server_cert(cf, data);
+  result = collect_server_cert(cf, data);
   if(result)
     return result;
 
