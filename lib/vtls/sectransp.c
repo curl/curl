@@ -2429,6 +2429,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
     SecTrustRef trust;
     OSStatus ret;
     SecKeyRef keyRef;
+    OSStatus success;
 
     ret = SSLCopyPeerTrust(ctx, &trust);
     if(ret != noErr || !trust)
@@ -2448,8 +2449,8 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 
 #elif SECTRANSP_PINNEDPUBKEY_V2
 
-    OSStatus success = SecItemExport(keyRef, kSecFormatOpenSSL, 0, NULL,
-                                     &publicKeyBits);
+    success = SecItemExport(keyRef, kSecFormatOpenSSL, 0, NULL,
+                            &publicKeyBits);
     CFRelease(keyRef);
     if(success != errSecSuccess || !publicKeyBits)
       break;
