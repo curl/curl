@@ -13,10 +13,17 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o cookie: parse without sscanf()
+ o CURLOPT_PIPEWAIT: allow waited reuse also for subsequent connections [10]
+ o docs/cmdline-opts: mark all global options [6]
+ o GHA: add Microsoft C++ Code Analysis [7]
  o lib517: verify time stamps without leading zeroes plus some more
  o parsedate: parse strings without using sscanf() [2]
  o parsedate: replace sscanf( for time stamp parsing [1]
  o tests: HTTP server fixups [3]
+ o tool_getparam: don't add a new node for just --no-remote-name [5]
+ o tool_operate: avoid fclose(NULL) on bad header dump file [12]
+ o tool_operate: propagate error codes for missing URL after --next [4]
+ o tool_progress: shut off progress meter for --silent in parallel [8]
 
 This release includes the following known bugs:
 
@@ -34,11 +41,19 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Matt Jolly
-  (2 contributors)
+  Daniel Stenberg, finkjsc on github, Jérémy Rabasco, Matt Jolly,
+  Stefan Eissing, u20221022 on github
+  (6 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=10547
  [2] = https://curl.se/bug/?i=10547
  [3] = https://curl.se/bug/?i=10568
+ [4] = https://curl.se/bug/?i=10558
+ [5] = https://curl.se/bug/?i=10564
+ [6] = https://curl.se/bug/?i=10566
+ [7] = https://curl.se/bug/?i=10583
+ [8] = https://curl.se/bug/?i=10573
+ [10] = https://curl.se/bug/?i=10456
+ [12] = https://curl.se/bug/?i=10570
