@@ -1814,27 +1814,18 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     /* positive EPSV response */
     char *ptr = strchr(str, '(');
     if(ptr) {
-      unsigned int num;
-      char separator[4];
+      char sep;
       ptr++;
-      if(5 == sscanf(ptr, "%c%c%c%u%c",
-                     &separator[0],
-                     &separator[1],
-                     &separator[2],
-                     &num,
-                     &separator[3])) {
-        const char sep1 = separator[0];
-        int i;
-
-        /* The four separators should be identical, or else this is an oddly
-           formatted reply and we bail out immediately. */
-        for(i = 1; i<4; i++) {
-          if(separator[i] != sep1) {
-            ptr = NULL; /* set to NULL to signal error */
-            break;
-          }
-        }
-        if(num > 0xffff) {
+      /* |||12345| */
+      sep = ptr[0];
+      /* the ISDIGIT() check here is because strtoul() accepts leading minus
+         etc */
+      if((ptr[1] == sep) && (ptr[2] == sep) && ISDIGIT(ptr[3])) {
+        char *endp;
+        unsigned long num = strtoul(&ptr[3], &endp, 10);
+        if(*endp != sep)
+          ptr = NULL;
+        else if(num > 0xffff) {
           failf(data, "Illegal port number in EPSV reply");
           return CURLE_FTP_WEIRD_PASV_REPLY;
         }
