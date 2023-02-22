@@ -41,6 +41,8 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 [Ferite](https://web.archive.org/web/20150102192018/ferite.org/) Written by Paul Querna
 
+[Fortran](https://github.com/interkosmos/fortran-curl) Written by Philipp Engel
+
 [Gambas](https://gambas.sourceforge.net/)
 
 [glib/GTK+](https://web.archive.org/web/20100526203452/atterer.net/glibcurl) Written by Richard Atterer
