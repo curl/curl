@@ -49,7 +49,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/redir">
+<file name="log/redir" mode="text">
 nonsense
 </file>
 </verify>
