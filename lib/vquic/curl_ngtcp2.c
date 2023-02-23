@@ -2126,9 +2126,7 @@ static void cf_ngtcp2_ctx_clear(struct cf_ngtcp2_ctx *ctx)
   struct cf_call_data save = ctx->call_data;
 
   if(ctx->qlogfd != -1) {
-    if(ctx->qlogfd > 0)
-      close(ctx->qlogfd);
-    ctx->qlogfd = -1;
+    close(ctx->qlogfd);
   }
 #ifdef USE_OPENSSL
   if(ctx->ssl)
@@ -2156,6 +2154,7 @@ static void cf_ngtcp2_ctx_clear(struct cf_ngtcp2_ctx *ctx)
     ngtcp2_conn_del(ctx->qconn);
 
   memset(ctx, 0, sizeof(*ctx));
+  ctx->qlogfd = -1;
   ctx->call_data = save;
 }
 
@@ -2471,6 +2470,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+  ctx->qlogfd = -1;
   cf_ngtcp2_ctx_clear(ctx);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
