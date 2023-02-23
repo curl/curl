@@ -25,8 +25,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) &&  \
-  (SIZEOF_CURL_OFF_T > 4)
+#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 
 #define BUILDING_CURL_SMB_C
 
