@@ -2126,7 +2126,8 @@ static void cf_ngtcp2_ctx_clear(struct cf_ngtcp2_ctx *ctx)
   struct cf_call_data save = ctx->call_data;
 
   if(ctx->qlogfd != -1) {
-    close(ctx->qlogfd);
+    if(ctx->qlogfd > 0)
+      close(ctx->qlogfd);
     ctx->qlogfd = -1;
   }
 #ifdef USE_OPENSSL
