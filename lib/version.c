@@ -357,8 +357,7 @@ static const char * const protocols[] = {
 #ifdef USE_SSH
   "sftp",
 #endif
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-   (SIZEOF_CURL_OFF_T > 4)
+#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
   "smb",
 #  ifdef USE_SSL
   "smbs",
