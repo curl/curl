@@ -253,19 +253,6 @@ static CURLcode socket_open(struct Curl_easy *data,
   else {
     /* opensocket callback not set, so simply create the socket now */
     *sockfd = socket(addr->family, addr->socktype, addr->protocol);
-    if(!*sockfd && addr->socktype == SOCK_DGRAM) {
-      /* This is icky and seems, at least, to happen on macOS:
-       * we get sockfd == 0 and if called again, we get a valid one > 0.
-       * If we close the 0, we sometimes get failures in multi poll, as
-       * 0 seems also be the fd for the sockpair used for WAKEUP polling.
-       * Very strange. Maybe this code should be ifdef'ed for macOS, but
-       * on "real" OS, fd 0 is stdin and we never see that. So...
-       */
-      fake_sclose(*sockfd);
-      *sockfd = socket(addr->family, addr->socktype, addr->protocol);
-      DEBUGF(infof(data, "QUIRK: UDP socket() gave handle 0, 2nd attempt %d",
-                   (int)*sockfd));
-    }
   }
 
   if(*sockfd == CURL_SOCKET_BAD)
