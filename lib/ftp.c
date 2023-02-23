@@ -2042,6 +2042,30 @@ static CURLcode ftp_state_port_resp(struct Curl_easy *data,
   return result;
 }
 
+static int twodigit(const char *p)
+{
+  return (p[0]-'0') * 10 + (p[1]-'0');
+}
+
+static bool ftp_213_date(const char *p, int *year, int *month, int *day,
+                         int *hour, int *minute, int *second)
+{
+  size_t len = strlen(p);
+  if(len < 14)
+    return FALSE;
+  *year = twodigit(&p[0]) * 100 + twodigit(&p[2]);
+  *month = twodigit(&p[4]);
+  *day = twodigit(&p[6]);
+  *hour = twodigit(&p[8]);
+  *minute = twodigit(&p[10]);
+  *second = twodigit(&p[12]);
+
+  if((*month > 12) || (*day > 31) || (*hour > 23) || (*minute > 59) ||
+     (*second > 60))
+    return FALSE;
+  return TRUE;
+}
+
 static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
                                     int ftpcode)
 {
@@ -2056,8 +2080,8 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
       /* we got a time. Format should be: "YYYYMMDDHHMMSS[.sss]" where the
          last .sss part is optional and means fractions of a second */
       int year, month, day, hour, minute, second;
-      if(6 == sscanf(&data->state.buffer[4], "%04d%02d%02d%02d%02d%02d",
-                     &year, &month, &day, &hour, &minute, &second)) {
+      if(ftp_213_date(&data->state.buffer[4],
+                      &year, &month, &day, &hour, &minute, &second)) {
         /* we have a time, reformat it */
         char timebuf[24];
         msnprintf(timebuf, sizeof(timebuf),
