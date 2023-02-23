@@ -841,10 +841,19 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
       case 2:
         /* Window Size */
         if(strncasecompare(option, "WS", 2)) {
-          if(sscanf(arg, "%hu%*[xX]%hu",
-                    &tn->subopt_wsx, &tn->subopt_wsy) == 2)
-            tn->us_preferred[CURL_TELOPT_NAWS] = CURL_YES;
-          else {
+          char *p;
+          unsigned long x = strtoul(arg, &p, 10);
+          unsigned long y = 0;
+          if(Curl_raw_tolower(*p) == 'x') {
+            p++;
+            y = strtoul(p, NULL, 10);
+            if(x && y && (x <= 0xffff) && (y <= 0xffff)) {
+              tn->subopt_wsx = (unsigned short)x;
+              tn->subopt_wsy = (unsigned short)y;
+              tn->us_preferred[CURL_TELOPT_NAWS] = CURL_YES;
+            }
+          }
+          if(!y) {
             failf(data, "Syntax error in telnet option: %s", head->data);
             result = CURLE_SETOPT_OPTION_SYNTAX;
           }
