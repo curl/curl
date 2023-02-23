@@ -908,8 +908,6 @@ static void suboption(struct Curl_easy *data)
   ssize_t bytes_written;
   size_t len;
   int err;
-  char varname[128] = "";
-  char varval[128] = "";
   struct TELNET *tn = data->req.p.telnet;
   struct connectdata *conn = data->conn;
 
@@ -947,19 +945,18 @@ static void suboption(struct Curl_easy *data)
 
       for(v = tn->telnet_vars; v; v = v->next) {
         size_t tmplen = (strlen(v->data) + 1);
-        /* Add the variable only if it fits */
+        /* Add the variable if it fits */
         if(len + tmplen < (int)sizeof(temp)-6) {
-          int rv;
-          char sep[2] = "";
-          varval[0] = 0;
-          rv = sscanf(v->data, "%127[^,]%1[,]%127s", varname, sep, varval);
-          if(rv == 1)
+          char *s = strchr(v->data, ',');
+          if(!s)
             len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%s", CURL_NEW_ENV_VAR, varname);
-          else if(rv >= 2)
+                             "%c%s", CURL_NEW_ENV_VAR, v->data);
+          else {
+            size_t vlen = s - v->data;
             len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%s%c%s", CURL_NEW_ENV_VAR, varname,
-                             CURL_NEW_ENV_VALUE, varval);
+                             "%c%.*s%c%s", CURL_NEW_ENV_VAR,
+                             (int)vlen, v->data, CURL_NEW_ENV_VALUE, ++s);
+          }
         }
       }
       msnprintf((char *)&temp[len], sizeof(temp) - len,
