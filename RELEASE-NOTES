@@ -4,7 +4,7 @@ curl and libcurl 8.0.0
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2818
+ Contributors:                 2824
 
 This release includes the following changes:
 
@@ -12,18 +12,39 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o .cirrus.yml: Bump to FreeBSD 13.2 [9]
+ o BINDINGS: add Fortran binding [33]
+ o CI: update ngtcp2 and nghttp2 for pytest [13]
  o cookie: parse without sscanf()
+ o curl: make -w's %{stderr} use the file set with --stderr [30]
  o CURLOPT_PIPEWAIT: allow waited reuse also for subsequent connections [10]
  o docs/cmdline-opts: mark all global options [6]
+ o ftp: make the EPSV response parser not use sscanf [25]
+ o ftp: replace sscanf for MDTM 213 response parsing [23]
+ o ftp: replace sscanf for PASV parsing [24]
  o GHA: add Microsoft C++ Code Analysis [7]
+ o http: rewrite the status line parser without sscanf [29]
+ o http_proxy: parse the status line without sscanf [16]
+ o krb5: avoid sscanf for parsing [18]
  o lib517: verify time stamps without leading zeroes plus some more
+ o misc: remove support for curl_off_t < 8 bytes [19]
+ o ngtcp2-gnutls.yml: bump to gnutls 3.8.0 [11]
+ o ngtcp2: fix unwanted close of file descriptor 0 [26]
  o parsedate: parse strings without using sscanf() [2]
  o parsedate: replace sscanf( for time stamp parsing [1]
+ o rtsp: avoid sscanf for parsing [15]
+ o sectransp: fix compiler warning c89 mixed code/declaration [32]
+ o select: stop treating POLLRDBAND as an error [27]
+ o telnet: parse NEW_ENVIRON without sscanf [20]
+ o telnet: parse telnet options without sscanf [22]
+ o telnet: parse the WS= argument without sscanf [21]
+ o test2600: detect when ALARM_TIMEOUT is in use and adjust [34]
  o tests: HTTP server fixups [3]
  o tool_getparam: don't add a new node for just --no-remote-name [5]
  o tool_operate: avoid fclose(NULL) on bad header dump file [12]
  o tool_operate: propagate error codes for missing URL after --next [4]
  o tool_progress: shut off progress meter for --silent in parallel [8]
+ o winbuild: fix makefile clean [31]
 
 This release includes the following known bugs:
 
@@ -41,9 +62,11 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, finkjsc on github, Jérémy Rabasco, Matt Jolly,
-  Stefan Eissing, u20221022 on github
-  (6 contributors)
+  Andy Alt, Daniel Stenberg, finkjsc on github, Harry Sintonen,
+  Jérémy Rabasco, Marcel Raad, Matt Jolly, opensslonzos-github on github,
+  Philip Heiduck, Philipp Engel, Ray Satiro, Sergey Fionov, Stefan Eissing,
+  u20221022 on github
+  (14 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -55,5 +78,26 @@ References to bug reports and discussions on issues:
  [6] = https://curl.se/bug/?i=10566
  [7] = https://curl.se/bug/?i=10583
  [8] = https://curl.se/bug/?i=10573
+ [9] = https://curl.se/bug/?i=10270
  [10] = https://curl.se/bug/?i=10456
+ [11] = https://curl.se/bug/?i=10507
  [12] = https://curl.se/bug/?i=10570
+ [13] = https://curl.se/bug/?i=10508
+ [15] = https://curl.se/bug/?i=10605
+ [16] = https://curl.se/bug/?i=10602
+ [18] = https://curl.se/bug/?i=10599
+ [19] = https://curl.se/bug/?i=10597
+ [20] = https://curl.se/bug/?i=10596
+ [21] = https://curl.se/bug/?i=10596
+ [22] = https://curl.se/bug/?i=10596
+ [23] = https://curl.se/bug/?i=10590
+ [24] = https://curl.se/bug/?i=10590
+ [25] = https://curl.se/bug/?i=10590
+ [26] = https://curl.se/bug/?i=10593
+ [27] = https://curl.se/bug/?i=10501
+ [29] = https://curl.se/bug/?i=10585
+ [30] = https://curl.se/bug/?i=10491
+ [31] = https://curl.se/bug/?i=10576
+ [32] = https://curl.se/bug/?i=10574
+ [33] = https://curl.se/bug/?i=10589
+ [34] = https://curl.se/bug/?i=10513
