@@ -755,12 +755,14 @@ CURLcode rtp_client_write(struct Curl_easy *data, char *ptr, size_t len)
 
 CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
 {
-  long CSeq = 0;
-
   if(checkprefix("CSeq:", header)) {
-    /* Store the received CSeq. Match is verified in rtsp_done */
-    int nc = sscanf(&header[4], ": %ld", &CSeq);
-    if(nc == 1) {
+    long CSeq = 0;
+    char *endp;
+    char *p = &header[5];
+    while(ISBLANK(*p))
+      p++;
+    CSeq = strtol(p, &endp, 10);
+    if(p != endp) {
       struct RTSP *rtsp = data->req.p.rtsp;
       rtsp->CSeq_recv = CSeq; /* mark the request */
       data->state.rtsp_CSeq_recv = CSeq; /* update the handle */
