@@ -184,6 +184,11 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host)
   if(!Curl_is_ASCII_name(host->name)) {
     char *decoded = idn_decode(host->name);
     if(decoded) {
+      if(!*decoded) {
+        /* zero length is a bad host name */
+        Curl_idn_free(decoded);
+        return CURLE_URL_MALFORMAT;
+      }
       /* successful */
       host->encalloc = decoded;
       /* change the name pointer to point to the encoded hostname */
