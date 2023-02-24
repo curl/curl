@@ -167,20 +167,25 @@ void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
 
 /*
  * Create a hostcache id string for the provided host + port, to be used by
- * the DNS caching. Without alloc.
+ * the DNS caching. Without alloc. Return length of the id string.
  */
-static void
+static size_t
 create_hostcache_id(const char *name,
                     size_t nlen, /* 0 or actual name length */
                     int port, char *ptr, size_t buflen)
 {
   size_t len = nlen ? nlen : strlen(name);
+  size_t olen = 0;
+  DEBUGASSERT(buflen >= MAX_HOSTCACHE_LEN);
   if(len > (buflen - 7))
     len = buflen - 7;
   /* store and lower case the name */
-  while(len--)
+  while(len--) {
     *ptr++ = Curl_raw_tolower(*name++);
-  msnprintf(ptr, 7, ":%u", port);
+    olen++;
+  }
+  olen += msnprintf(ptr, 7, ":%u", port);
+  return olen;
 }
 
 struct hostcache_prune_data {
@@ -262,20 +267,18 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
                                          int port)
 {
   struct Curl_dns_entry *dns = NULL;
-  size_t entry_len;
   char entry_id[MAX_HOSTCACHE_LEN];
 
   /* Create an entry id, based upon the hostname and port */
-  create_hostcache_id(hostname, 0, port, entry_id, sizeof(entry_id));
-  entry_len = strlen(entry_id);
+  size_t entry_len = create_hostcache_id(hostname, 0, port,
+                                         entry_id, sizeof(entry_id));
 
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
   /* No entry found in cache, check if we might have a wildcard entry */
   if(!dns && data->state.wildcard_resolve) {
-    create_hostcache_id("*", 1, port, entry_id, sizeof(entry_id));
-    entry_len = strlen(entry_id);
+    entry_len = create_hostcache_id("*", 1, port, entry_id, sizeof(entry_id));
 
     /* See if it's already in our dns cache */
     dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
@@ -464,8 +467,8 @@ Curl_cache_addr(struct Curl_easy *data,
   }
 
   /* Create an entry id, based upon the hostname and port */
-  create_hostcache_id(hostname, hostlen, port, entry_id, sizeof(entry_id));
-  entry_len = strlen(entry_id);
+  entry_len = create_hostcache_id(hostname, hostlen, port,
+                                  entry_id, sizeof(entry_id));
 
   dns->inuse = 1;   /* the cache has the first reference */
   dns->addr = addr; /* this is the address(es) */
@@ -1089,10 +1092,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         host_end = NULL;
 
       /* Create an entry id, based upon the hostname and port */
-      create_hostcache_id(&hostp->data[1], hlen, port,
-                          entry_id, sizeof(entry_id));
-      entry_len = strlen(entry_id);
-
+      entry_len = create_hostcache_id(&hostp->data[1], hlen, port,
+                                      entry_id, sizeof(entry_id));
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
@@ -1202,8 +1203,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       }
 
       /* Create an entry id, based upon the hostname and port */
-      create_hostcache_id(host_begin, hlen, port, entry_id, sizeof(entry_id));
-      entry_len = strlen(entry_id);
+      entry_len = create_hostcache_id(host_begin, hlen, port,
+                                      entry_id, sizeof(entry_id));
 
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
