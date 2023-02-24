@@ -403,7 +403,6 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
 {
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  int subversion = 0;
   (void)cf;
 
   if((checkprefix("WWW-Authenticate:", header) &&
@@ -461,11 +460,14 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
                              STRCONST("Proxy-Connection:"),
                              STRCONST("close")))
     ts->close_connection = TRUE;
-  else if(2 == sscanf(header, "HTTP/1.%d %d",
-                      &subversion,
-                      &k->httpcode)) {
+  else if(!strncmp(header, "HTTP/1.", 7) &&
+          ((header[7] == '0') || (header[7] == '1')) &&
+          (header[8] == ' ') &&
+          ISDIGIT(header[9]) && ISDIGIT(header[10]) && ISDIGIT(header[11]) &&
+          !ISDIGIT(header[12])) {
     /* store the HTTP code from the proxy */
-    data->info.httpproxycode = k->httpcode;
+    data->info.httpproxycode =  k->httpcode = (header[9] - '0') * 100 +
+      (header[10] - '0') * 10 + (header[11] - '0');
   }
   return result;
 }
