@@ -721,8 +721,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
     return 0;
 
   if(buf[3] != '-')
-    /* safe to ignore return code */
-    (void)sscanf(buf, "%d", &ret_code);
+    ret_code = atoi(buf);
 
   if(buf[decoded_len - 1] == '\n')
     buf[decoded_len - 1] = '\0';
@@ -765,8 +764,9 @@ static int sec_set_protection_level(struct Curl_easy *data)
 
     pbsz = strstr(data->state.buffer, "PBSZ=");
     if(pbsz) {
-      /* ignore return code, use default value if it fails */
-      (void)sscanf(pbsz, "PBSZ=%u", &buffer_size);
+      /* stick to default value if the check fails */
+      if(!strncmp(pbsz, "PBSZ=", 5) && ISDIGIT(pbsz[5]))
+        buffer_size = atoi(&pbsz[5]);
       if(buffer_size < conn->buffer_size)
         conn->buffer_size = buffer_size;
     }
