@@ -85,7 +85,7 @@ curl_off_t getfiletime(const char *filename, struct GlobalConfig *global)
   return result;
 }
 
-#if defined(HAVE_UTIME) || defined(HAVE_UTIMES) || (defined(WIN32)
+#if defined(HAVE_UTIME) || defined(HAVE_UTIMES) || defined(WIN32)
 void setfiletime(curl_off_t filetime, const char *filename,
                  struct GlobalConfig *global)
 {
@@ -150,5 +150,5 @@ void setfiletime(curl_off_t filetime, const char *filename,
 #endif
   }
 }
-#endif /* defined(HAVE_UTIME) || defined(HAVE_UTIMES) || \
-          (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
+#endif /* defined(HAVE_UTIME) || defined(HAVE_UTIMES) ||        \
+          defined(WIN32) */
