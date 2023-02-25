@@ -6,7 +6,7 @@ versions of libs and build tools.
 
 ## Portability
 
- We write curl and libcurl to compile with C89 compilers. On 32-bit and up
+ We write curl and libcurl to compile with C89 compilers on 32-bit and up
  machines. Most of libcurl assumes more or less POSIX compliance but that is
  not a requirement.
 
