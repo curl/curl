@@ -1077,19 +1077,20 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
     if(hostp->data[0] == '-') {
       unsigned long num;
       size_t entry_len;
-      size_t hlen;
+      size_t hlen = 0;
       host_end = strchr(&hostp->data[1], ':');
+
+      if(host_end) {
+        hlen = host_end - &hostp->data[1];
+        num = strtoul(++host_end, NULL, 10);
+        if(!hlen || (num > 0xffff))
+          host_end = NULL;
+      }
       if(!host_end) {
-        infof(data, "Couldn't parse CURLOPT_RESOLVE removal entry '%s'",
+        infof(data, "Bad syntax CURLOPT_RESOLVE removal entry '%s'",
               hostp->data);
         continue;
       }
-
-      hlen = host_end - &hostp->data[1];
-      num = strtoul(++host_end, NULL, 10);
-      if(!hlen || (num > 0xffff))
-        host_end = NULL;
-
       /* Create an entry id, based upon the hostname and port */
       entry_len = create_hostcache_id(&hostp->data[1], hlen, (int)num,
                                       entry_id, sizeof(entry_id));
