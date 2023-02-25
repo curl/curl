@@ -1066,8 +1066,6 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 {
   struct curl_slist *hostp;
   char *host_end;
-  size_t hlen;
-  int port = 0;
 
   /* Default is no wildcard found */
   data->state.wildcard_resolve = false;
@@ -1079,6 +1077,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
     if(hostp->data[0] == '-') {
       unsigned long num;
       size_t entry_len;
+      size_t hlen;
       host_end = strchr(&hostp->data[1], ':');
       if(!host_end) {
         infof(data, "Couldn't parse CURLOPT_RESOLVE removal entry '%s'",
@@ -1092,7 +1091,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         host_end = NULL;
 
       /* Create an entry id, based upon the hostname and port */
-      entry_len = create_hostcache_id(&hostp->data[1], hlen, port,
+      entry_len = create_hostcache_id(&hostp->data[1], hlen, (int)num,
                                       entry_id, sizeof(entry_id));
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -1114,11 +1113,13 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       char *addr_begin;
       char *addr_end;
       char *port_ptr;
+      int port = 0;
       char *end_ptr;
       bool permanent = TRUE;
       unsigned long tmp_port;
       bool error = true;
       char *host_begin = hostp->data;
+      size_t hlen = 0;
 
       if(host_begin[0] == '+') {
         host_begin++;
