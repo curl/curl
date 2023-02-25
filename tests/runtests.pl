@@ -1439,6 +1439,9 @@ my %protofunc = ('http' => \&verifyhttp,
                  'imap' => \&verifyftp,
                  'smtp' => \&verifyftp,
                  'ftps' => \&verifyftp,
+                 'pop3s' => \&verifyftp,
+                 'imaps' => \&verifyftp,
+                 'smtps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
                  'socks' => \&verifysocks,
@@ -1986,11 +1989,10 @@ sub runpingpongserver {
 }
 
 #######################################################################
-# start the ftps server (or rather, tunnel)
+# start the ftps/imaps/pop3s/smtps server (or rather, tunnel)
 #
-sub runftpsserver {
-    my ($verbose, $ipv6, $certfile) = @_;
-    my $proto = 'ftps';
+sub runsecureserver {
+    my ($verbose, $ipv6, $certfile, $proto, $clearport) = @_;
     my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = 1;
@@ -2031,23 +2033,25 @@ sub runftpsserver {
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'stunnel.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
-    $flags .= "--connect " . $PORT{"ftp"};
+    $flags .= "--connect $clearport";
 
-    my $ftpspid;
+    my $protospid;
     my $pid2;
-    my $port = 26713;
+    my $port = 26713 + ord $proto;
+    my %usedports = reverse %PORT;
     for (1 .. 10) {
         $port += int(rand(700));
+        next if exists $usedports{$port};
         my $options = "$flags --accept $port";
         my $cmd = "$perl $srcdir/secureserver.pl $options";
-        ($ftpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+        ($protospid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-        if($ftpspid <= 0 || !pidexists($ftpspid)) {
+        if($protospid <= 0 || !pidexists($protospid)) {
             # it is NOT alive
             stopserver($server, "$pid2");
             displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
-            $ftpspid = $pid2 = 0;
+            $protospid = $pid2 = 0;
             next;
         }
 
@@ -2055,14 +2059,14 @@ sub runftpsserver {
         $runcert{$server} = $certfile;
 
         if($verbose) {
-            logmsg "RUN: $srvrname server is PID $ftpspid port $port\n";
+            logmsg "RUN: $srvrname server is PID $protospid port $port\n";
         }
         last;
     }
 
-    logmsg "RUN: failed to start the $srvrname server\n" if(!$ftpspid);
+    logmsg "RUN: failed to start the $srvrname server\n" if(!$protospid);
 
-    return ($ftpspid, $pid2, $port);
+    return ($protospid, $pid2, $port);
 }
 
 #######################################################################
@@ -5162,40 +5166,42 @@ sub startservers {
                 $run{'rtsp-ipv6'}="$pid $pid2";
             }
         }
-        elsif($what eq "ftps") {
+        elsif($what =~ /^(ftp|imap|pop3|smtp)s$/) {
+            my $cproto = $1;
             if(!$stunnel) {
                 # we can't run ftps tests without stunnel
                 return "no stunnel";
             }
-            if($runcert{'ftps'} && ($runcert{'ftps'} ne $certfile)) {
+            if($runcert{$what} && ($runcert{$what} ne $certfile)) {
                 # stop server when running and using a different cert
-                if(stopserver('ftps')) {
-                    return "failed stopping FTPS server with different cert";
+                if(stopserver($what)) {
+                    return "failed stopping $what server with different cert";
                 }
             }
-            if($torture && $run{'ftp'} &&
-               !responsive_pingpong_server("ftp", "", $verbose)) {
-                if(stopserver('ftp')) {
-                    return "failed stopping unresponsive FTP server";
+            if($torture && $run{$cproto} &&
+               !responsive_pingpong_server($cproto, "", $verbose)) {
+                if(stopserver($cproto)) {
+                    return "failed stopping unresponsive $cproto server";
                 }
             }
-            if(!$run{'ftp'}) {
-                ($pid, $pid2) = runpingpongserver("ftp", "", $verbose);
+            if(!$run{$cproto}) {
+                ($pid, $pid2) = runpingpongserver($cproto, "", $verbose);
                 if($pid <= 0) {
-                    return "failed starting FTP server";
+                    return "failed starting $cproto server";
                 }
-                printf ("* pid ftp => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'ftp'}="$pid $pid2";
+                printf ("* pid $cproto => %d %d\n", $pid, $pid2) if($verbose);
+                $run{$cproto}="$pid $pid2";
             }
-            if(!$run{'ftps'}) {
-                ($pid, $pid2, $PORT{'ftps'}) =
-                    runftpsserver($verbose, "", $certfile);
+            if(!$run{$what}) {
+                ($pid, $pid2, $PORT{$what}) =
+                    runsecureserver($verbose, "", $certfile, $what,
+                                    protoport($cproto));
                 if($pid <= 0) {
-                    return "failed starting FTPS server (stunnel)";
+                    return "failed starting $what server (stunnel)";
                 }
-                logmsg sprintf("* pid ftps => %d %d\n", $pid, $pid2)
+                logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'ftps'}="$pid $pid2";
+                $run{$what}="$pid $pid2";
             }
         }
         elsif($what eq "file") {
