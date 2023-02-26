@@ -687,6 +687,10 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_DOH
   struct dohdata *doh; /* DoH specific data for this request */
 #endif
+#if defined(WIN32) && defined(USE_WINSOCK)
+  struct curltime last_sndbuf_update;  /* last time readwrite_upload called
+                                          win_update_buffer_size */
+#endif
   unsigned char setcookies;
   unsigned char writer_stack_depth; /* Unencoding stack depth. */
   BIT(header);        /* incoming data has HTTP header */
