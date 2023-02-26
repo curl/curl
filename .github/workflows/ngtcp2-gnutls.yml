@@ -102,7 +102,7 @@ jobs:
       name: 'install gnutls'
 
     - run: |
-        git clone --depth=1 -b v0.8.0 https://github.com/ngtcp2/nghttp3
+        git clone --depth=1 -b v0.10.0 https://github.com/ngtcp2/nghttp3
         cd nghttp3
         autoreconf -fi
         ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
