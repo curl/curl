@@ -689,6 +689,10 @@ struct SingleRequest {
 #endif
   unsigned char setcookies;
   unsigned char writer_stack_depth; /* Unencoding stack depth. */
+#if defined(WIN32) && defined(USE_WINSOCK)
+  struct curltime last_sndbuf_update;  /* last time readwrite_upload called
+                                          win_update_buffer_size */
+#endif
   BIT(header);        /* incoming data has HTTP header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
   BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding
