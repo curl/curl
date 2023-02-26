@@ -1075,7 +1075,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
     if(!hostp->data)
       continue;
     if(hostp->data[0] == '-') {
-      unsigned long num;
+      unsigned long num = 0;
       size_t entry_len;
       size_t hlen = 0;
       host_end = strchr(&hostp->data[1], ':');
