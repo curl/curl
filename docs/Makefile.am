@@ -33,6 +33,51 @@ GENHTMLPAGES = curl.html curl-config.html mk-ca-bundle.html
 PDFPAGES = curl.pdf curl-config.pdf mk-ca-bundle.pdf
 MANDISTPAGES = curl.1.dist curl-config.1.dist
 
+packextrasdir=@docdir@
+# Docs installed to @docdir@ (i.e. /usr/local/share/doc/curl by default;
+# configurable by passing '--docdir' to './configure')
+#
+# docs/README.md is omitted from installation because /README.md
+# will be installed instead.
+packextras_DATA = \
+ ALTSVC.md                                      \
+ BINDINGS.md                                    \
+ BUG-BOUNTY.md                                  \
+ BUGS.md                                        \
+ CIPHERS.md                                     \
+ CONNECTION-FILTERS.md                          \
+ CONTRIBUTE.md                                  \
+ DEPRECATE.md                                   \
+ EXPERIMENTAL.md                                \
+ FAQ                                            \
+ FEATURES.md                                    \
+ HELP-US.md                                     \
+ HISTORY.md                                     \
+ HSTS.md                                        \
+ HTTP2.md                                       \
+ HTTP3.md                                       \
+ HTTP-COOKIES.md                                \
+ HYPER.md                                       \
+ KNOWN_BUGS                                     \
+ MAIL-ETIQUETTE                                 \
+ MANUAL.md                                      \
+ MQTT.md                                        \
+ NEW-PROTOCOL.md                                \
+ options-in-versions                            \
+ PARALLEL-TRANSFERS.md                          \
+ RELEASE-PROCEDURE.md                           \
+ ROADMAP.md                                     \
+ RUSTLS.md                                      \
+ SECURITY-PROCESS.md                            \
+ SSLCERTS.md                                    \
+ SSL-PROBLEMS.md                                \
+ THANKS                                         \
+ TheArtOfHttpScripting.md                       \
+ TODO                                           \
+ URL-SYNTAX.md                                  \
+ VERSIONS.md                                    \
+ WEBSOCKET.md
+
 HTMLPAGES = $(GENHTMLPAGES)
 
 # Build targets in this file (.) before cmdline-opts to ensure that
@@ -44,57 +89,22 @@ CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
 
 EXTRA_DIST =                                    \
  $(noinst_man_MANS)                             \
- ALTSVC.md                                      \
- BINDINGS.md                                    \
+ $(packextras_DATA)                             \
  BUFREF.md                                      \
- BUG-BOUNTY.md                                  \
- BUGS.md                                        \
  CHECKSRC.md                                    \
- CIPHERS.md                                     \
  CMakeLists.txt                                 \
  CODE_OF_CONDUCT.md                             \
  CODE_REVIEW.md                                 \
  CODE_STYLE.md                                  \
- CONNECTION-FILTERS.md                          \
- CONTRIBUTE.md                                  \
  CURL-DISABLE.md                                \
- DEPRECATE.md                                   \
  DYNBUF.md                                      \
  EARLY-RELEASE.md                               \
- EXPERIMENTAL.md                                \
- FAQ                                            \
- FEATURES.md                                    \
- GOVERNANCE.md                                  \
- HELP-US.md                                     \
- HISTORY.md                                     \
- HSTS.md                                        \
- HTTP-COOKIES.md                                \
- HTTP2.md                                       \
- HTTP3.md                                       \
- HYPER.md                                       \
  INSTALL                                        \
  INSTALL.cmake                                  \
  INSTALL.md                                     \
  INTERNALS.md                                   \
- KNOWN_BUGS                                     \
- MAIL-ETIQUETTE                                 \
- MQTT.md                                        \
- NEW-PROTOCOL.md                                \
- options-in-versions                            \
- PARALLEL-TRANSFERS.md                          \
- README.md                                      \
- RELEASE-PROCEDURE.md                           \
- RUSTLS.md                                      \
- ROADMAP.md                                     \
- SECURITY-PROCESS.md                            \
- SSL-PROBLEMS.md                                \
- SSLCERTS.md                                    \
- THANKS                                         \
- TODO                                           \
- TheArtOfHttpScripting.md                       \
- URL-SYNTAX.md                                  \
- VERSIONS.md                                    \
- WEBSOCKET.md
+ GOVERNANCE.md                                  \
+ README.md
 
 MAN2HTML= roffit $< >$@
 
