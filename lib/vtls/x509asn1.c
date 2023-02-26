@@ -1127,7 +1127,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
       return result;
   }
   if(!certnum)
-    infof(data, "   Version: %lu (0x%lx)", version + 1, version);
+    infof(data, "   Version: %u (0x%x)", version + 1, version);
 
   /* Serial number. */
   ccp = ASN1tostr(&cert.serialNumber, 0);
