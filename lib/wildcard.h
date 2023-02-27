@@ -48,16 +48,16 @@ typedef void (*wildcard_dtor)(void *ptr);
 
 /* struct keeping information about wildcard download process */
 struct WildcardData {
-  wildcard_states state;
   char *path; /* path to the directory, where we trying wildcard-match */
   char *pattern; /* wildcard pattern */
   struct Curl_llist filelist; /* llist with struct Curl_fileinfo */
-  void *protdata; /* pointer to protocol specific temporary data */
+  struct ftp_wc *ftpwc; /* pointer to FTP wildcard data */
   wildcard_dtor dtor;
+  unsigned char state; /* wildcard_states */
 };
 
 CURLcode Curl_wildcard_init(struct WildcardData *wc);
-void Curl_wildcard_dtor(struct WildcardData *wc);
+void Curl_wildcard_dtor(struct WildcardData **wcp);
 
 struct Curl_easy;
 

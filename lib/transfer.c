@@ -1402,7 +1402,13 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 #ifndef CURL_DISABLE_FTP
     data->state.wildcardmatch = data->set.wildcard_enabled;
     if(data->state.wildcardmatch) {
-      struct WildcardData *wc = &data->wildcard;
+      struct WildcardData *wc;
+      if(!data->wildcard) {
+        data->wildcard = calloc(1, sizeof(struct WildcardData));
+        if(!data->wildcard)
+          return CURLE_OUT_OF_MEMORY;
+      }
+      wc = data->wildcard;
       if(wc->state < CURLWC_INIT) {
         result = Curl_wildcard_init(wc); /* init wildcard structures */
         if(result)

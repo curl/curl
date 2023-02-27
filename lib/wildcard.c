@@ -48,17 +48,18 @@ CURLcode Curl_wildcard_init(struct WildcardData *wc)
   return CURLE_OK;
 }
 
-void Curl_wildcard_dtor(struct WildcardData *wc)
+void Curl_wildcard_dtor(struct WildcardData **wcp)
 {
+  struct WildcardData *wc = *wcp;
   if(!wc)
     return;
 
   if(wc->dtor) {
-    wc->dtor(wc->protdata);
+    wc->dtor(wc->ftpwc);
     wc->dtor = ZERO_NULL;
-    wc->protdata = NULL;
+    wc->ftpwc = NULL;
   }
-  DEBUGASSERT(wc->protdata == NULL);
+  DEBUGASSERT(wc->ftpwc == NULL);
 
   Curl_llist_destroy(&wc->filelist, NULL);
   free(wc->path);
@@ -66,6 +67,8 @@ void Curl_wildcard_dtor(struct WildcardData *wc)
   free(wc->pattern);
   wc->pattern = NULL;
   wc->state = CURLWC_INIT;
+  free(wc);
+  *wcp = NULL;
 }
 
 #endif /* if disabled */
