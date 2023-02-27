@@ -1228,7 +1228,6 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
     return result;
 
   *n = (size_t)n1;
-  infof(data, "reached %s:%d", __FILE__, __LINE__);
   return CURLE_OK;
 }
 
