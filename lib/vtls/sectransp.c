@@ -2167,16 +2167,13 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
 
   for(;;) {
     n = read(fd, buf, sizeof(buf));
+    if(!n)
+      break;
     if(n < 0) {
       close(fd);
       Curl_dyn_free(&certs);
       return -1;
     }
-    else if(n == 0) {
-      close(fd);
-      break;
-    }
-
     if(Curl_dyn_addn(&certs, buf, n)) {
       close(fd);
       return -1;
