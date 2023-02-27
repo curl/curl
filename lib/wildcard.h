@@ -52,12 +52,12 @@ struct WildcardData {
   char *path; /* path to the directory, where we trying wildcard-match */
   char *pattern; /* wildcard pattern */
   struct Curl_llist filelist; /* llist with struct Curl_fileinfo */
-  void *protdata; /* pointer to protocol specific temporary data */
+  struct ftp_wc *wc; /* pointer to FTP data */
   wildcard_dtor dtor;
 };
 
 CURLcode Curl_wildcard_init(struct WildcardData *wc);
-void Curl_wildcard_dtor(struct WildcardData *wc);
+void Curl_wildcard_dtor(struct WildcardData **wcp);
 
 struct Curl_easy;
 

@@ -274,8 +274,8 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
                                     struct fileinfo *infop)
 {
   curl_fnmatch_callback compare;
-  struct WildcardData *wc = &data->wildcard;
-  struct ftp_wc *ftpwc = wc->protdata;
+  struct WildcardData *wc = data->wildcard;
+  struct ftp_wc *ftpwc = wc->wc;
   struct Curl_llist *llist = &wc->filelist;
   struct ftp_parselist_data *parser = ftpwc->parser;
   bool add = TRUE;
@@ -330,7 +330,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
 {
   size_t bufflen = size*nmemb;
   struct Curl_easy *data = (struct Curl_easy *)connptr;
-  struct ftp_wc *ftpwc = data->wildcard.protdata;
+  struct ftp_wc *ftpwc = data->wildcard->wc;
   struct ftp_parselist_data *parser = ftpwc->parser;
   struct fileinfo *infop;
   struct curl_fileinfo *finfo;
