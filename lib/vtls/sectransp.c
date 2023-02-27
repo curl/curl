@@ -2150,27 +2150,26 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
   return sep_end - in;
 }
 
+#define MAX_CERTS_SIZE (50*1024*1024) /* arbitrary - to catch mistakes */
+
 static int read_cert(const char *file, unsigned char **out, size_t *outlen)
 {
   int fd;
-  ssize_t n, len = 0, cap = 512;
-  unsigned char buf[512], *data;
+  ssize_t n;
+  unsigned char buf[512];
+  struct dynbuf certs;
+
+  Curl_dyn_init(&certs, MAX_CERTS_SIZE);
 
   fd = open(file, 0);
   if(fd < 0)
     return -1;
 
-  data = malloc(cap);
-  if(!data) {
-    close(fd);
-    return -1;
-  }
-
   for(;;) {
     n = read(fd, buf, sizeof(buf));
     if(n < 0) {
       close(fd);
-      free(data);
+      Curl_dyn_free(&certs);
       return -1;
     }
     else if(n == 0) {
@@ -2178,22 +2177,15 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
       break;
     }
 
-    if(len + n >= cap) {
-      cap *= 2;
-      data = Curl_saferealloc(data, cap);
-      if(!data) {
-        close(fd);
-        return -1;
-      }
+    if(Curl_dyn_addn(&certs, buf, n)) {
+      close(fd);
+      return -1;
     }
-
-    memcpy(data + len, buf, n);
-    len += n;
   }
-  data[len] = '\0';
+  close(fd);
 
-  *out = data;
-  *outlen = len;
+  *out = Curl_dyn_ptr(&certs);
+  *outlen = Curl_dyn_len(&certs);
 
   return 0;
 }
