@@ -444,7 +444,7 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
   struct cf_quiche_ctx *ctx = cf->ctx;
   int64_t stream3_id = data->req.p.http? data->req.p.http->stream3_id : -1;
   uint8_t buf[65536];
-  size_t bufsize = sizeof(buf);
+  int bufsize = (int)sizeof(buf);
   struct sockaddr_storage remote_addr;
   socklen_t remote_addrlen;
   quiche_recv_info recv_info;

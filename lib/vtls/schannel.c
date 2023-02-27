@@ -1201,18 +1201,18 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* The first four bytes will be an unsigned int indicating number
        of bytes of data in the rest of the buffer. */
     extension_len = (unsigned int *)(void *)(&alpn_buffer[cur]);
-    cur += sizeof(unsigned int);
+    cur += (int)sizeof(unsigned int);
 
     /* The next four bytes are an indicator that this buffer will contain
        ALPN data, as opposed to NPN, for example. */
     *(unsigned int *)(void *)&alpn_buffer[cur] =
       SecApplicationProtocolNegotiationExt_ALPN;
-    cur += sizeof(unsigned int);
+    cur += (int)sizeof(unsigned int);
 
     /* The next two bytes will be an unsigned short indicating the number
        of bytes used to list the preferred protocols. */
     list_len = (unsigned short*)(void *)(&alpn_buffer[cur]);
-    cur += sizeof(unsigned short);
+    cur += (int)sizeof(unsigned short);
 
     list_start_index = cur;
 
@@ -1225,7 +1225,9 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     cur += proto.len;
 
     *list_len = curlx_uitous(cur - list_start_index);
-    *extension_len = *list_len + sizeof(unsigned int) + sizeof(unsigned short);
+    *extension_len = *list_len +
+      (unsigned short)sizeof(unsigned int) +
+      (unsigned short)sizeof(unsigned short);
 
     InitSecBuffer(&inbuf, SECBUFFER_APPLICATION_PROTOCOLS, alpn_buffer, cur);
     InitSecBufferDesc(&inbuf_desc, &inbuf, 1);
