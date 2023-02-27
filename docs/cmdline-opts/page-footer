@@ -300,6 +300,12 @@ be one out of several problems, see the error message for details.
 .IP 96
 QUIC connection error. This error may be caused by an SSL library error. QUIC
 is the protocol used for HTTP/3 transfers.
+.IP 97
+Proxy handshake error.
+.IP 98
+A client-side certificate is required to complete the TLS handshake.
+.IP 99
+Poll or select returned fatal error.
 .IP XX
 More error codes will appear here in future releases. The existing ones
 are meant to never change.
