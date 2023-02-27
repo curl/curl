@@ -64,6 +64,8 @@
 #include "vtls/vtls.h"
 #include "curl_ngtcp2.h"
 
+#include "warnless.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -1762,7 +1764,7 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
   ssize_t recvd;
   int rv;
   uint8_t buf[65536];
-  size_t bufsize = sizeof(buf);
+  int bufsize = (int)sizeof(buf);
   size_t pktcount = 0, total_recvd = 0;
   struct sockaddr_storage remote_addr;
   socklen_t remote_addrlen;
@@ -2176,7 +2178,7 @@ static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
                                             (uint8_t *)buffer, sizeof(buffer),
                                             &ctx->last_error, ts);
     if(rc > 0) {
-      while((send(ctx->q.sockfd, buffer, rc, 0) == -1) &&
+      while((send(ctx->q.sockfd, buffer, (SEND_TYPE_ARG3)rc, 0) == -1) &&
             SOCKERRNO == EINTR);
     }
 
@@ -2200,6 +2202,7 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
   cf->ctx = NULL;
   /* No CF_DATA_RESTORE(cf, save) possible */
+  (void)save;
 }
 
 /*
