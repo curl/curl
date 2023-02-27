@@ -2192,12 +2192,9 @@ static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  /*
   struct cf_call_data save;
 
   CF_DATA_SAVE(save, cf, data);
-  */
-  (void)data;
   DEBUGF(LOG_CF(data, cf, "destroy"));
   if(ctx) {
     cf_ngtcp2_ctx_clear(ctx);
@@ -2205,6 +2202,7 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
   cf->ctx = NULL;
   /* No CF_DATA_RESTORE(cf, save) possible */
+  (void)save;
 }
 
 /*
