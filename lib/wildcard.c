@@ -61,14 +61,10 @@ void Curl_wildcard_dtor(struct WildcardData *wc)
   DEBUGASSERT(wc->protdata == NULL);
 
   Curl_llist_destroy(&wc->filelist, NULL);
-
-
   free(wc->path);
   wc->path = NULL;
   free(wc->pattern);
   wc->pattern = NULL;
-
-  wc->customptr = NULL;
   wc->state = CURLWC_INIT;
 }
 
