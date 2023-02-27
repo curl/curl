@@ -166,10 +166,6 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   }
   k->upgr101 = UPGR101_RECEIVED;
 
-  if(data->set.connect_only)
-    /* switch off non-blocking sockets */
-    (void)curlx_nonblock(conn->sock[FIRSTSOCKET], FALSE);
-
   return result;
 }
 
@@ -750,9 +746,6 @@ CURLcode Curl_ws_disconnect(struct Curl_easy *data,
   (void)data;
   (void)dead_connection;
   Curl_dyn_free(&wsc->early);
-
-  /* make sure this is non-blocking to avoid getting stuck in shutdown */
-  (void)curlx_nonblock(conn->sock[FIRSTSOCKET], TRUE);
   return CURLE_OK;
 }
 
