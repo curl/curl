@@ -270,6 +270,29 @@ class CurlClient:
                          with_stats=with_stats,
                          with_headers=with_headers)
 
+    def http_put(self, urls: List[str], data=None, fdata=None,
+                 alpn_proto: Optional[str] = None,
+                 with_stats: bool = True,
+                 with_headers: bool = False,
+                 extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        if fdata is not None:
+            extra_args.extend(['-T', fdata])
+        elif data is not None:
+            extra_args.extend(['-T', '-'])
+        extra_args.extend([
+            '-o', 'download_#1.data',
+        ])
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, intext=data,
+                         alpn_proto=alpn_proto, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=with_headers)
+
     def response_file(self, idx: int):
         return os.path.join(self._run_dir, f'download_{idx}.data')
 
@@ -303,7 +326,7 @@ class CurlClient:
                           duration=datetime.now() - start,
                           with_stats=with_stats)
 
-    def _raw(self, urls, timeout=10, options=None, insecure=False,
+    def _raw(self, urls, intext='', timeout=10, options=None, insecure=False,
              alpn_proto: Optional[str] = None,
              force_resolve=True,
              with_stats=False,
@@ -312,7 +335,7 @@ class CurlClient:
             urls=urls, timeout=timeout, options=options, insecure=insecure,
             alpn_proto=alpn_proto, force_resolve=force_resolve,
             with_headers=with_headers)
-        r = self._run(args, with_stats=with_stats)
+        r = self._run(args, intext=intext, with_stats=with_stats)
         if r.exit_code == 0 and with_headers:
             self._parse_headerfile(self._headerfile, r=r)
             if r.json:

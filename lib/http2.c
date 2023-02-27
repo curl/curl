@@ -942,6 +942,17 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] recv RST", stream_id));
     stream->reset = TRUE;
     break;
+    case NGHTTP2_WINDOW_UPDATE:
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%u] recv WINDOW_UPDATE", stream_id));
+      if(data_s->req.keepon & KEEP_SEND_PAUSE
+         && data_s->req.keepon & KEEP_SEND) {
+        data_s->req.keepon &= ~KEEP_SEND_PAUSE;
+        drain_this(cf, data_s);
+        Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
+        DEBUGF(LOG_CF(data, cf, "[h2sid=%u] unpausing after win update",
+               stream_id));
+      }
+      break;
   default:
     DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] recv frame %x",
                   stream_id, frame->hd.type));
@@ -1005,18 +1016,6 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
     drain_this(cf, data_s);
     return NGHTTP2_ERR_PAUSE;
   }
-
-#if 0
-  /* pause execution of nghttp2 if we received data for another handle
-     in order to process them first. */
-  if(CF_DATA_CURRENT(cf) != data_s) {
-    ctx->pause_stream_id = stream_id;
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] not call_data -> NGHTTP2_ERR_PAUSE",
-                  stream_id));
-    drain_this(cf, data_s);
-    return NGHTTP2_ERR_PAUSE;
-  }
-#endif
 
   return 0;
 }
@@ -1763,7 +1762,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
 
-  DEBUGF(LOG_CF(data, cf, "[h2sid=%u] recv: win %u/%u",
+  DEBUGF(LOG_CF(data, cf, "[h2sid=%u] cf_recv: win %u/%u",
                 stream->stream_id,
                 nghttp2_session_get_local_window_size(ctx->h2),
                 nghttp2_session_get_stream_local_window_size(ctx->h2,
@@ -1979,7 +1978,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t nwritten;
 
   CF_DATA_SAVE(save, cf, data);
-  DEBUGF(LOG_CF(data, cf, "send len=%zu", len));
+  DEBUGF(LOG_CF(data, cf, "cf_send(len=%zu) start", len));
 
   if(stream->stream_id != -1) {
     if(stream->close_handled) {
@@ -2009,16 +2008,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     }
 
-    /* The callback for stream input updates `upload_len` with what it
-     * has provided to nghttp2. If it has *not* been called, `upload_len`
-     * is unchanged and we should report a block on send. */
-    if(stream->upload_len == len) {
-      *err = CURLE_AGAIN;
-      nwritten = -1;
-      goto out;
-    }
-
-    nwritten = len - stream->upload_len;
+    nwritten = (ssize_t)len - (ssize_t)stream->upload_len;
     stream->upload_mem = NULL;
     stream->upload_len = 0;
 
@@ -2037,19 +2027,24 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       nghttp2_session_resume_data(ctx->h2, stream->stream_id);
     }
 
-#ifdef DEBUG_HTTP2
     if(!nwritten) {
-      infof(data, "http2_send: easy %p (stream %u) win %u/%u",
-            data, stream->stream_id,
-            nghttp2_session_get_remote_window_size(ctx->h2),
-            nghttp2_session_get_stream_remote_window_size(ctx->h2,
-                                                          stream->stream_id)
-        );
-
+      size_t rwin = nghttp2_session_get_stream_remote_window_size(ctx->h2,
+                                                          stream->stream_id);
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%u] cf_send: win %u/%zu",
+             stream->stream_id,
+             nghttp2_session_get_remote_window_size(ctx->h2), rwin));
+        if(rwin == 0) {
+          /* We cannot upload more as the stream's remote window size
+           * is 0. We need to receive WIN_UPDATEs before we can continue.
+           */
+          data->req.keepon |= KEEP_SEND_PAUSE;
+          DEBUGF(LOG_CF(data, cf, "[h2sid=%u] pausing send as remote flow "
+                 "window is exhausted", stream->stream_id));
+        }
     }
-    infof(data, "http2_send returns %zd for stream %u", nwritten,
-          stream->stream_id);
-#endif
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%u] cf_send returns %zd ",
+           stream->stream_id, nwritten));
+
     /* handled writing BODY for open stream. */
     goto out;
   }
