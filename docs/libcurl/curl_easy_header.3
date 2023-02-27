@@ -134,20 +134,7 @@ CURLHcode h =
 Added in 7.83.0. Officially supported since 7.84.0.
 .SH RETURN VALUE
 This function returns a CURLHcode indicating success or error.
-.IP "CURLHE_BADINDEX (1)"
-There is no header with the requested index.
-.IP "CURLHE_MISSING (2)"
-No such header exists.
-.IP "CURLHE_NOHEADERS (3)"
-No headers at all have been recorded.
-.IP "CURLHE_NOREQUEST (4)"
-There was no such request number.
-.IP "CURLHE_OUT_OF_MEMORY (5)"
-Out of resources
-.IP "CURLHE_BAD_ARGUMENT (6)"
-One or more of the given arguments are bad.
-.IP "CURLHE_NOT_BUILT_IN (7)"
-HTTP or the header API has been disabled in the build.
 .SH "SEE ALSO"
 .BR curl_easy_nextheader "(3), " curl_easy_perform "(3), "
-.BR CURLOPT_HEADERFUNCTION "(3), " CURLINFO_CONTENT_TYPE "(3) "
+.BR CURLOPT_HEADERFUNCTION "(3), " CURLINFO_CONTENT_TYPE "(3), "
+.BR libcurl-errors "(3) "

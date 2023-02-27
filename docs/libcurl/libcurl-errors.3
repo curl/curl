@@ -412,6 +412,23 @@ The scheme part of the URL contained bad or invalid characters.
 The URL contained an invalid number of slashes.
 .IP "CURLUE_BAD_USER (29)"
 The user part of the URL contained bad or invalid characters.
+.SH "CURLHcode"
+The header interface returns a \fICURLHcode\fP to indicate when an error has
+occurred.
+.IP "CURLHE_BADINDEX (1)"
+There is no header with the requested index.
+.IP "CURLHE_MISSING (2)"
+No such header exists.
+.IP "CURLHE_NOHEADERS (3)"
+No headers at all have been recorded.
+.IP "CURLHE_NOREQUEST (4)"
+There was no such request number.
+.IP "CURLHE_OUT_OF_MEMORY (5)"
+Out of resources
+.IP "CURLHE_BAD_ARGUMENT (6)"
+One or more of the given arguments are bad.
+.IP "CURLHE_NOT_BUILT_IN (7)"
+HTTP support or the header API has been disabled in the build.
 .SH "SEE ALSO"
 .BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
 .BR curl_share_strerror "(3), " curl_url_strerror "(3), "
