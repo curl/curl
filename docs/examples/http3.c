@@ -37,11 +37,9 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    /* Forcing HTTP/3 will make the connection fail if the server is not
-       accessible over QUIC + HTTP/3 on the given host and port.
-       Consider using CURLOPT_ALTSVC instead! */
+    /* Use HTTP/3 but fallback to earlier HTTP if necessary */
     curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
-                     (long)CURL_HTTP_VERSION_3ONLY);
+                     (long)CURL_HTTP_VERSION_3);
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
