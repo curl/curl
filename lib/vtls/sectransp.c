@@ -2179,6 +2179,11 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
     }
 
     if(len + n >= cap) {
+      if(cap > SSIZE_T_MAX/2) {
+        close(fd);
+        free(data);
+        return -1;
+      }
       cap *= 2;
       data = Curl_saferealloc(data, cap);
       if(!data) {
