@@ -160,13 +160,59 @@ static bool is_debug(void)
   return FALSE;
 }
 
+static void outdated(void)
+{
+  struct tm release;
+  const char *p;
+  unsigned long year, mon, day;
+  char *endp;
+  time_t relepoch;
+  time_t now;
+
+  p = LIBCURL_TIMESTAMP;
+#ifdef DEBUGBUILD
+  {
+    char *alt = getenv("CURL_TIMESTAMP");
+    if(alt)
+      p = alt;
+  }
+#endif
+
+  year = strtoul(p, &endp, 10);
+  if((year > 1997) && *endp == '-') {
+    p = ++endp;
+    mon = strtoul(p, &endp, 10);
+    if(mon && (*endp == '-')) {
+      p = ++endp;
+      day = strtoul(p, &endp, 10);
+      if(!day || (day > 31))
+        return;
+    }
+    else
+      return;
+  }
+  else
+    return;
+
+  memset(&release, 0, sizeof(release));
+  release.tm_year = (int)year - 1900;
+  release.tm_mon = (int)mon - 1;
+  release.tm_mday = (int)day;
+
+  relepoch = mktime(&release);
+  now = time(NULL);
+
+  if(((now - relepoch)/86400) > 350)
+    fprintf(stderr, "WARNING: this curl is outdated. Consider updating!\n");
+}
+
 void tool_version_info(void)
 {
   const char *const *builtin;
+  outdated();
   if(is_debug())
     fprintf(stderr, "WARNING: this libcurl is Debug-enabled, "
             "do not use in production\n\n");
-
   printf(CURL_ID "%s\n", curl_version());
 #ifdef CURL_PATCHSTAMP
   printf("Release-Date: %s, security patched: %s\n",
