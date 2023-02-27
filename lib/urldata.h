@@ -1739,6 +1739,7 @@ struct UserDefined {
   curl_fnmatch_callback fnmatch; /* callback to decide which file corresponds
                                     to pattern (e.g. if WILDCARDMATCH is on) */
   void *fnmatch_data;
+  void *wildcardptr;
 #endif
  /* GSS-API credential delegation, see the documentation of
     CURLOPT_GSSAPI_DELEGATION */

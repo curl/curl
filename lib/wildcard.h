@@ -54,7 +54,6 @@ struct WildcardData {
   struct Curl_llist filelist; /* llist with struct Curl_fileinfo */
   void *protdata; /* pointer to protocol specific temporary data */
   wildcard_dtor dtor;
-  void *customptr;  /* for CURLOPT_CHUNK_DATA pointer */
 };
 
 CURLcode Curl_wildcard_init(struct WildcardData *wc);
