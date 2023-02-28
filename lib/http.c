@@ -236,14 +236,10 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   data->req.p.http = http;
   connkeep(conn, "HTTP default");
 
-  if((data->state.httpwant == CURL_HTTP_VERSION_3)
-     || (data->state.httpwant == CURL_HTTP_VERSION_3ONLY)) {
+  if(data->state.httpwant == CURL_HTTP_VERSION_3ONLY) {
     CURLcode result = Curl_conn_may_http3(data, conn);
     if(result)
       return result;
-
-     /* TODO: HTTP lower version eyeballing */
-    conn->transport = TRNSPRT_QUIC;
   }
 
   return CURLE_OK;

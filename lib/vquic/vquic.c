@@ -364,6 +364,10 @@ bool Curl_conn_is_http3(const struct Curl_easy *data,
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn)
 {
+  if(conn->transport == TRNSPRT_UNIX) {
+    /* cannot do QUIC over a unix domain socket */
+    return CURLE_QUIC_CONNECT_ERROR;
+  }
   if(!(conn->handler->flags & PROTOPT_SSL)) {
     failf(data, "HTTP/3 requested for non-HTTPS URL");
     return CURLE_URL_MALFORMAT;
