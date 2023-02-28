@@ -2181,7 +2181,7 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
   }
   close(fd);
 
-  *out = Curl_dyn_ptr(&certs);
+  *out = Curl_dyn_uptr(&certs);
   *outlen = Curl_dyn_len(&certs);
 
   return 0;
