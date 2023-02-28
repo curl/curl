@@ -3477,7 +3477,7 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
           k->content_range = TRUE;
       }
     }
-    else
+    else if(416 != k->httpcode)
       data->state.resume_from = 0; /* get everything */
   }
 #if !defined(CURL_DISABLE_COOKIES)
