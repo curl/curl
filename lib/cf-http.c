@@ -266,7 +266,8 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
         Curl_expire(data, ctx->soft_eyeballs_timeout_ms, EXPIRE_ALPN_EYEBALLS);
     }
     else if(ctx->h21_baller.enabled)
-      cf_hc_baller_init(&ctx->h21_baller, cf, data, "h21", TRNSPRT_TCP);
+      cf_hc_baller_init(&ctx->h21_baller, cf, data, "h21",
+                       cf->conn->transport);
     ctx->state = CF_HC_CONNECT;
     /* FALLTHROUGH */
 
@@ -280,7 +281,8 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     }
 
     if(time_to_start_h21(cf, data, now)) {
-      cf_hc_baller_init(&ctx->h21_baller, cf, data, "h21", TRNSPRT_TCP);
+      cf_hc_baller_init(&ctx->h21_baller, cf, data, "h21",
+                        cf->conn->transport);
     }
 
     if(cf_hc_baller_is_active(&ctx->h21_baller)) {
