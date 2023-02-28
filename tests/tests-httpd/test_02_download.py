@@ -221,6 +221,30 @@ class TestDownload:
         assert r.exit_code == 0
         r.check_stats(count=count, exp_status=200)
 
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_12_head_serial_https(self, env: Env,
+                                     httpd, nghttpx, repeat, proto):
+        count = 100
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            '--head'
+        ])
+        assert r.exit_code == 0
+        r.check_stats(count=count, exp_status=200)
+
+    @pytest.mark.parametrize("proto", ['h2'])
+    def test_02_13_head_serial_h2c(self, env: Env,
+                                    httpd, nghttpx, repeat, proto):
+        count = 100
+        urln = f'http://{env.domain1}:{env.http_port}/data-10m?[0-{count-1}]'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            '--head', '--http2-prior-knowledge', '--fail-early'
+        ])
+        assert r.exit_code == 0
+        r.check_stats(count=count, exp_status=200)
+
     def test_02_20_h2_small_frames(self, env: Env, httpd, repeat):
         # Test case to reproduce content corruption as observed in
         # https://github.com/curl/curl/issues/10525
