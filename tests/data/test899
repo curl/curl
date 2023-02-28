@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-IMAP
+IMAPS
 Clear Text
 SASL
 SASL AUTH PLAIN
@@ -35,13 +35,13 @@ body
 # Client-side
 <client>
 <server>
-imap
+imaps
 </server>
  <name>
-IMAP plain authentication with fallback to clear text
+IMAPS plain authentication with fallback to clear text
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
+-k --ssl-reqd -u user:secret 'imaps://%HOSTIP:%IMAPSPORT/%TESTNUMBER/;MAILINDEX=1'
 </command>
 </client>
 

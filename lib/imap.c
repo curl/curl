@@ -1032,9 +1032,12 @@ static CURLcode imap_state_auth_resp(struct Curl_easy *data,
     default:
       break;
     }
-  else if((!imapc->login_disabled) && (imapc->preftype & IMAP_TYPE_CLEARTEXT))
+  else if(!imapc->login_disabled && imapc->ssldone &&
+          (imapc->preftype & IMAP_TYPE_CLEARTEXT)) {
     /* Perform clear text authentication on failure as per RFC-9051 */
+    infof(data, "Falling back to IMAP LOGIN");
     result = imap_perform_login(data, conn);
+  }
 
   return result;
 }
