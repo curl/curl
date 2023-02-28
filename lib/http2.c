@@ -2479,7 +2479,8 @@ bool Curl_http2_may_switch(struct Curl_easy *data,
                            int sockindex)
 {
   (void)sockindex;
-  if(data->state.httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
+  if(!Curl_conn_is_http2(data, conn, sockindex) &&
+     data->state.httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
 #ifndef CURL_DISABLE_PROXY
     if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
       /* We don't support HTTP/2 proxies yet. Also it's debatable
