@@ -1813,7 +1813,6 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
   Curl_conn_cf_add(data, conn, sockindex, cf);
 
   conn->sock[sockindex] = ctx->sock;
-  set_remote_ip(cf, data);
   set_local_ip(cf, data);
   ctx->active = TRUE;
   ctx->connected_at = Curl_now();
@@ -1826,6 +1825,36 @@ out:
     Curl_safefree(ctx);
   }
   return result;
+}
+
+static void set_accepted_remote_ip(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+#ifdef HAVE_GETPEERNAME
+  char buffer[STRERROR_LEN];
+  struct Curl_sockaddr_storage ssrem;
+  curl_socklen_t plen;
+
+  plen = sizeof(ssrem);
+  memset(&ssrem, 0, plen);
+  if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
+    int error = SOCKERRNO;
+    failf(data, "getpeername() failed with errno %d: %s",
+          error, Curl_strerror(error, buffer, sizeof(buffer)));
+    return;
+  }
+  if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
+                       ctx->r_ip, &ctx->r_port)) {
+    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
+          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+    return;
+  }
+#else
+  ctx->r_ip[0] = 0;
+  ctx->r_port = 0;
+  (void)data;
+#endif
 }
 
 CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
@@ -1844,13 +1873,14 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
   socket_close(data, conn, TRUE, ctx->sock);
   ctx->sock = *s;
   conn->sock[sockindex] = ctx->sock;
-  set_remote_ip(cf, data);
+  set_accepted_remote_ip(cf, data);
   set_local_ip(cf, data);
   ctx->active = TRUE;
   ctx->accepted = TRUE;
   ctx->connected_at = Curl_now();
   cf->connected = TRUE;
-  DEBUGF(LOG_CF(data, cf, "Curl_conn_tcp_accepted_set(%d)", (int)ctx->sock));
+  DEBUGF(LOG_CF(data, cf, "accepted_set(sock=%d, remote=%s port=%d)",
+         (int)ctx->sock, ctx->r_ip, ctx->r_port));
 
   return CURLE_OK;
 }
