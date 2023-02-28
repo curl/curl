@@ -181,6 +181,43 @@ struct ftp_parselist_data {
   } offsets;
 };
 
+static void fileinfo_dtor(void *user, void *element)
+{
+  (void)user;
+  Curl_fileinfo_cleanup(element);
+}
+
+CURLcode Curl_wildcard_init(struct WildcardData *wc)
+{
+  Curl_llist_init(&wc->filelist, fileinfo_dtor);
+  wc->state = CURLWC_INIT;
+
+  return CURLE_OK;
+}
+
+void Curl_wildcard_dtor(struct WildcardData **wcp)
+{
+  struct WildcardData *wc = *wcp;
+  if(!wc)
+    return;
+
+  if(wc->dtor) {
+    wc->dtor(wc->ftpwc);
+    wc->dtor = ZERO_NULL;
+    wc->ftpwc = NULL;
+  }
+  DEBUGASSERT(wc->ftpwc == NULL);
+
+  Curl_llist_destroy(&wc->filelist, NULL);
+  free(wc->path);
+  wc->path = NULL;
+  free(wc->pattern);
+  wc->pattern = NULL;
+  wc->state = CURLWC_INIT;
+  free(wc);
+  *wcp = NULL;
+}
+
 struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 {
   return calloc(1, sizeof(struct ftp_parselist_data));
