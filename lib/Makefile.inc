@@ -223,7 +223,6 @@ LIB_CFILES =         \
   version.c          \
   version_win32.c    \
   warnless.c         \
-  wildcard.c         \
   ws.c
 
 LIB_HFILES =         \
@@ -352,7 +351,6 @@ LIB_HFILES =         \
   urldata.h          \
   version_win32.h    \
   warnless.h         \
-  wildcard.h         \
   ws.h
 
 LIB_RCFILES = libcurl.rc
