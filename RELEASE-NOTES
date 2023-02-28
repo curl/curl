@@ -1,10 +1,10 @@
 curl and libcurl 8.0.0
 
- Public curl releases:         214
+ Public curl releases:         215
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2824
+ Contributors:                 2829
 
 This release includes the following changes:
 
@@ -14,37 +14,54 @@ This release includes the following bugfixes:
 
  o .cirrus.yml: Bump to FreeBSD 13.2 [9]
  o BINDINGS: add Fortran binding [33]
+ o cf-socket: fix handling of remote addr for accepted tcp sockets [17]
  o CI: update ngtcp2 and nghttp2 for pytest [13]
  o cookie: parse without sscanf()
  o curl: make -w's %{stderr} use the file set with --stderr [30]
  o CURLOPT_PIPEWAIT: allow waited reuse also for subsequent connections [10]
  o docs/cmdline-opts: mark all global options [6]
+ o easy: remove infof() debug leftover from curl_easy_recv [44]
+ o examples/http3.c: use CURL_HTTP_VERSION_3 [46]
  o ftp: make the EPSV response parser not use sscanf [25]
  o ftp: replace sscanf for MDTM 213 response parsing [23]
  o ftp: replace sscanf for PASV parsing [24]
- o GHA: add Microsoft C++ Code Analysis [7]
+ o hostip: avoid sscanf and extra buffer copies [42]
+ o http2: fix for http2-prior-knowledge when reusing connections [14]
+ o http: fix unix domain socket use in https connects [28]
  o http: rewrite the status line parser without sscanf [29]
  o http_proxy: parse the status line without sscanf [16]
+ o idn: return error if the conversion ends up with a blank host [45]
  o krb5: avoid sscanf for parsing [18]
  o lib517: verify time stamps without leading zeroes plus some more
+ o libcurl-errors.3: add the CURLHcode errors from curl_easy_header.3 [39]
  o misc: remove support for curl_off_t < 8 bytes [19]
+ o mqtt: on send error, return error [40]
  o ngtcp2-gnutls.yml: bump to gnutls 3.8.0 [11]
  o ngtcp2: fix unwanted close of file descriptor 0 [26]
+ o page-footer: add explanation for three missing exit codes [37]
  o parsedate: parse strings without using sscanf() [2]
  o parsedate: replace sscanf( for time stamp parsing [1]
+ o quic/schannel: fix compiler warnings [36]
+ o rate.d: single URLs make no sense in --rate example [38]
  o rtsp: avoid sscanf for parsing [15]
+ o runtests: use a hash table for server port numbers [51]
  o sectransp: fix compiler warning c89 mixed code/declaration [32]
  o select: stop treating POLLRDBAND as an error [27]
+ o setopt: move the CURLOPT_CHUNK_DATA pointer to the set struct [35]
  o telnet: parse NEW_ENVIRON without sscanf [20]
  o telnet: parse telnet options without sscanf [22]
  o telnet: parse the WS= argument without sscanf [21]
  o test2600: detect when ALARM_TIMEOUT is in use and adjust [34]
  o tests: HTTP server fixups [3]
+ o tests: support for imaps/pop3s/smtps protocols [50]
+ o tests: test secure mail protocols with explicit SSL requests [49]
  o tool_getparam: don't add a new node for just --no-remote-name [5]
  o tool_operate: avoid fclose(NULL) on bad header dump file [12]
  o tool_operate: propagate error codes for missing URL after --next [4]
  o tool_progress: shut off progress meter for --silent in parallel [8]
  o winbuild: fix makefile clean [31]
+ o ws: keep the socket non-blocking [41]
+ o x509asn1.c: use correct format specifier for infof() call [47]
 
 This release includes the following known bugs:
 
@@ -55,7 +72,6 @@ Planned upcoming removals include:
  o gskit
  o NSS
  o support for space-separated NOPROXY patterns
- o support for systems without 64 bit data types
 
  See https://curl.se/dev/deprecate.html for details
 
@@ -63,10 +79,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andy Alt, Daniel Stenberg, finkjsc on github, Harry Sintonen,
-  Jérémy Rabasco, Marcel Raad, Matt Jolly, opensslonzos-github on github,
-  Philip Heiduck, Philipp Engel, Ray Satiro, Sergey Fionov, Stefan Eissing,
-  u20221022 on github
-  (14 contributors)
+  Jelle van der Waa, Jérémy Rabasco, Maciej Domanski, Marcel Raad,
+  marski on github, Matt Jolly, opensslonzos-github on github,
+  Patrick Monnerat, Philip Heiduck, Philipp Engel, Ray Satiro,
+  rwmjones on github, Sergey Fionov, Stefan Eissing, u20221022 on github,
+  Viktor Szakats, 積丹尼 Dan Jacobson
+  (21 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -76,15 +94,16 @@ References to bug reports and discussions on issues:
  [4] = https://curl.se/bug/?i=10558
  [5] = https://curl.se/bug/?i=10564
  [6] = https://curl.se/bug/?i=10566
- [7] = https://curl.se/bug/?i=10583
  [8] = https://curl.se/bug/?i=10573
  [9] = https://curl.se/bug/?i=10270
  [10] = https://curl.se/bug/?i=10456
  [11] = https://curl.se/bug/?i=10507
  [12] = https://curl.se/bug/?i=10570
  [13] = https://curl.se/bug/?i=10508
+ [14] = https://curl.se/bug/?i=10634
  [15] = https://curl.se/bug/?i=10605
  [16] = https://curl.se/bug/?i=10602
+ [17] = https://curl.se/bug/?i=10622
  [18] = https://curl.se/bug/?i=10599
  [19] = https://curl.se/bug/?i=10597
  [20] = https://curl.se/bug/?i=10596
@@ -95,9 +114,25 @@ References to bug reports and discussions on issues:
  [25] = https://curl.se/bug/?i=10590
  [26] = https://curl.se/bug/?i=10593
  [27] = https://curl.se/bug/?i=10501
+ [28] = https://curl.se/bug/?i=10633
  [29] = https://curl.se/bug/?i=10585
  [30] = https://curl.se/bug/?i=10491
  [31] = https://curl.se/bug/?i=10576
  [32] = https://curl.se/bug/?i=10574
  [33] = https://curl.se/bug/?i=10589
  [34] = https://curl.se/bug/?i=10513
+ [35] = https://curl.se/bug/?i=10635
+ [36] = https://curl.se/bug/?i=10603
+ [37] = https://curl.se/bug/?i=10630
+ [38] = https://curl.se/bug/?i=10638
+ [39] = https://curl.se/bug/?i=10629
+ [40] = https://curl.se/bug/?i=10623
+ [41] = https://curl.se/bug/?i=10615
+ [42] = https://curl.se/bug/?i=10601
+ [44] = https://curl.se/bug/?i=10628
+ [45] = https://curl.se/bug/?i=10617
+ [46] = https://curl.se/bug/?i=10619
+ [47] = https://curl.se/bug/?i=10614
+ [49] = https://curl.se/bug/?i=10077
+ [50] = https://curl.se/bug/?i=10077
+ [51] = https://curl.se/bug/?i=10077
