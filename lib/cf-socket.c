@@ -1836,6 +1836,8 @@ static void set_accepted_remote_ip(struct Curl_cfilter *cf,
   struct Curl_sockaddr_storage ssrem;
   curl_socklen_t plen;
 
+  ctx->r_ip[0] = 0;
+  ctx->r_port = 0;
   plen = sizeof(ssrem);
   memset(&ssrem, 0, plen);
   if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
