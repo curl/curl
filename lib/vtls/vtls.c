@@ -1649,7 +1649,14 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data)
   CF_DATA_SAVE(save, cf, data);
   result = Curl_ssl->check_cxn(cf, data) != 0;
   CF_DATA_RESTORE(cf, save);
-  return result;
+  if(result > 0)
+    return TRUE;
+  if(result == 0)
+    return FALSE;
+  /* ssl backend does not know */
+  return cf->next?
+    cf->next->cft->is_alive(cf->next, data) :
+    FALSE; /* pessimistic in absence of data */
 }
 
 struct Curl_cftype Curl_cft_ssl = {
