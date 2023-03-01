@@ -4654,8 +4654,8 @@ AC_CONFIG_FILES([Makefile \
            tests/server/Makefile \
            tests/libtest/Makefile \
            tests/unit/Makefile \
-           tests/tests-httpd/config.ini \
-           tests/tests-httpd/Makefile \
+           tests/http/config.ini \
+           tests/http/Makefile \
            packages/Makefile \
            packages/vms/Makefile \
            curl-config \

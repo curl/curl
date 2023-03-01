@@ -112,7 +112,7 @@ class EnvConfig:
             'cert': 'xxx',
         }
         self.htdocs_dir = os.path.join(self.gen_dir, 'htdocs')
-        self.tld = 'tests-httpd.curl.se'
+        self.tld = 'http.curl.se'
         self.domain1 = f"one.{self.tld}"
         self.domain2 = f"two.{self.tld}"
         self.proxy_domain = f"proxy.{self.tld}"
