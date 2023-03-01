@@ -1468,35 +1468,33 @@ static bool cf_socket_conn_is_alive(struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
-  int sval;
+  struct pollfd pfd[1];
+  int r;
 
   (void)data;
   if(!ctx || ctx->sock == CURL_SOCKET_BAD)
     return FALSE;
 
-  sval = SOCKET_READABLE(ctx->sock, 0);
-  if(sval == 0) {
-    /* timeout */
-    return TRUE;
-  }
-  else if(sval & CURL_CSELECT_ERR) {
-    /* socket is in an error state */
+  /* Check with 0 timeout if there are any events pending on the socket */
+  pfd[0].fd = ctx->sock;
+  pfd[0].events = POLLRDNORM|POLLIN|POLLRDBAND|POLLPRI;
+  pfd[0].revents = 0;
+
+  r = Curl_poll(pfd, 1, 0);
+  if(r < 0) {
+    DEBUGF(LOG_CF(data, cf, "is_alive: poll error, assume dead"));
     return FALSE;
   }
-  else if(sval & CURL_CSELECT_IN) {
-    /* readable with no error. could still be closed */
-/* Minix 3.1 doesn't support any flags on recv; just assume socket is OK */
-#ifdef MSG_PEEK
-    /* use the socket */
-    char buf;
-    if(recv((RECV_TYPE_ARG1)ctx->sock, (RECV_TYPE_ARG2)&buf,
-            (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK) == 0) {
-      return FALSE;   /* FIN received */
-    }
-#endif
+  else if(r == 0) {
+    DEBUGF(LOG_CF(data, cf, "is_alive: poll timeout, assume alive"));
     return TRUE;
   }
+  else if(pfd[0].revents & (POLLERR|POLLHUP|POLLPRI|POLLNVAL)) {
+    DEBUGF(LOG_CF(data, cf, "is_alive: err/hup/etc events, assume dead"));
+    return FALSE;
+  }
 
+  DEBUGF(LOG_CF(data, cf, "is_alive: valid events, looks alive"));
   return TRUE;
 }
 
