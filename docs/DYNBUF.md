@@ -37,6 +37,8 @@ CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len);
 
 Append arbitrary data of a given length to the end of the buffer.
 
+If this function fails it calls `Curl_dyn_free` on `dynbuf`.
+
 ## `Curl_dyn_add`
 
 ```c
@@ -44,6 +46,8 @@ CURLcode Curl_dyn_add(struct dynbuf *s, const char *str);
 ```
 
 Append a C string to the end of the buffer.
+
+If this function fails it calls `Curl_dyn_free` on `dynbuf`.
 
 ## `Curl_dyn_addf`
 
@@ -53,6 +57,8 @@ CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...);
 
 Append a `printf()`-style string to the end of the buffer.
 
+If this function fails it calls `Curl_dyn_free` on `dynbuf`.
+
 ## `Curl_dyn_vaddf`
 
 ```c
@@ -60,6 +66,8 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap);
 ```
 
 Append a `vprintf()`-style string to the end of the buffer.
+
+If this function fails it calls `Curl_dyn_free` on `dynbuf`.
 
 ## `Curl_dyn_reset`
 
