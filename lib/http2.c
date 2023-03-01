@@ -942,17 +942,17 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] recv RST", stream_id));
     stream->reset = TRUE;
     break;
-    case NGHTTP2_WINDOW_UPDATE:
-      DEBUGF(LOG_CF(data, cf, "[h2sid=%u] recv WINDOW_UPDATE", stream_id));
-      if((data_s->req.keepon & KEEP_SEND_PAUSE) &&
-         (data_s->req.keepon & KEEP_SEND)) {
-        data_s->req.keepon &= ~KEEP_SEND_PAUSE;
-        drain_this(cf, data_s);
-        Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
-        DEBUGF(LOG_CF(data, cf, "[h2sid=%u] unpausing after win update",
-               stream_id));
-      }
-      break;
+  case NGHTTP2_WINDOW_UPDATE:
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%u] recv WINDOW_UPDATE", stream_id));
+    if((data_s->req.keepon & KEEP_SEND_PAUSE) &&
+       (data_s->req.keepon & KEEP_SEND)) {
+      data_s->req.keepon &= ~KEEP_SEND_PAUSE;
+      drain_this(cf, data_s);
+      Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%u] unpausing after win update",
+             stream_id));
+    }
+    break;
   default:
     DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] recv frame %x",
                   stream_id, frame->hd.type));
