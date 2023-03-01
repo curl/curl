@@ -99,8 +99,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
        include that as well when it uses this code */
     void *p = realloc(s->bufr, a);
     if(!p) {
-      Curl_safefree(s->bufr);
-      s->leng = s->allc = 0;
+      Curl_dyn_free(s);
       return CURLE_OUT_OF_MEMORY;
     }
     s->bufr = p;
