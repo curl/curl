@@ -29,13 +29,13 @@ from typing import Optional
 
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'http'))
 
 from testenv import Env, Nghttpx, Httpd
 
 
 def pytest_report_header(config, startdir):
-    return f"curl tests-httpd tests"
+    return f"curl http tests"
 
 
 def pytest_addoption(parser):

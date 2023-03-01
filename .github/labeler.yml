@@ -157,7 +157,7 @@ HTTP:
 - all: ['lib/h2h3.*']
 - all: ['lib/http*']
 - all: ['tests/http-server.pl']
-- all: ['tests/tests-httpd/*']
+- all: ['tests/http/*']
 
 HTTP/2:
 - all: ['docs/HTTP2.md']
