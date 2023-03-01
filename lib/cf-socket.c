@@ -1071,6 +1071,11 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     if(result)
       goto out;
 
+    if(cf->connected) {
+      *done = TRUE;
+      return CURLE_OK;
+    }
+
     /* Connect TCP socket */
     rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
     if(-1 == rc) {
