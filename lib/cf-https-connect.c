@@ -32,7 +32,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "multiif.h"
-#include "cf-http.h"
+#include "cf-https-connect.h"
 #include "http2.h"
 #include "vquic/vquic.h"
 

@@ -38,7 +38,7 @@
 #include "connect.h"
 #include "http2.h"
 #include "http_proxy.h"
-#include "cf-http.h"
+#include "cf-https-connect.h"
 #include "socks.h"
 #include "strtok.h"
 #include "vtls/vtls.h"
