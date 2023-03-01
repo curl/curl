@@ -59,7 +59,7 @@
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "cf-http.h"
+#include "cf-https-connect.h"
 #include "cf-socket.h"
 #include "select.h"
 #include "url.h" /* for Curl_safefree() */
