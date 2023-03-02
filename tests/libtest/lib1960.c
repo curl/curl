@@ -24,12 +24,12 @@
 #include "test.h"
 
 #ifdef WIN32
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600 /* override mingw v1's value that prevents the
+                               inet_pton() handling */
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
-
-/* because of mingw v1 */
-extern int inet_pton(int af, const char *src, void *dst);
 #endif
 
 #ifdef HAVE_NETINET_IN_H
