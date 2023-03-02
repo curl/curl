@@ -21,6 +21,9 @@ Content-Length: 0
 
 # Client-side
 <client>
+<precheck>
+lib%TESTNUMBER check
+</precheck>
 <server>
 http
 </server>

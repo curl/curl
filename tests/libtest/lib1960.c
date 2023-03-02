@@ -23,10 +23,9 @@
  ***************************************************************************/
 #include "test.h"
 
+#ifdef HAVE_INET_PTON
+
 #ifdef WIN32
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0600 /* override mingw v1's value that prevents the
-                               inet_pton() handling */
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
@@ -82,7 +81,12 @@ int test(char *URL)
   int status;
   curl_socket_t client_fd = CURL_SOCKET_BAD;
   struct sockaddr_in serv_addr;
-  unsigned short port = (unsigned short)atoi(libtest_arg3);
+  unsigned short port;
+
+  if(!strcmp("check", URL))
+    return 0; /* no output makes it not skipped */
+
+  port = (unsigned short)atoi(libtest_arg3);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -141,3 +145,11 @@ test_cleanup:
 
   return res;
 }
+#else
+int test(char *URL)
+{
+  (void)URL;
+  printf("Skip\n");
+  return 0;
+}
+#endif
