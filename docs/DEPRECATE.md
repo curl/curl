@@ -36,8 +36,8 @@ We remove support for building curl with the gskit TLS library in August 2023.
 We remove support for building curl with the original legacy mingw version 1
 in September 2023.
 
-During the deprecation period you can enable the support using configure's
-`--with-mingw1-deprecated` option.
+During the deprecation period you can enable the support with the configure
+option `--with-mingw1-deprecated`.
 
 mingw version 1 is old and deprecated software. There are much better and
 still support build environments to use to build curl and other software. For
