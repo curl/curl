@@ -436,6 +436,12 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
   bool connected;
 
   DEBUGF(infof(data, "ftp InitiateTransfer()"));
+  if(conn->bits.ftp_use_data_ssl &&
+     !Curl_conn_is_ssl(conn, SECONDARYSOCKET)) {
+    result = Curl_ssl_cfilter_add(data, conn, SECONDARYSOCKET);
+    if(result)
+      return result;
+  }
   result = Curl_conn_connect(data, SECONDARYSOCKET, TRUE, &connected);
   if(result || !connected)
     return result;
