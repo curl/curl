@@ -1221,7 +1221,6 @@ static int scopeid(void)
     error++;
   }
   else {
-    printf("we got %s\n", url);
     curl_free(url);
   }
 
@@ -1239,7 +1238,6 @@ static int scopeid(void)
     error++;
   }
   else {
-    printf("we got %s\n", url);
     curl_free(url);
   }
 
@@ -1257,7 +1255,6 @@ static int scopeid(void)
     error++;
   }
   else {
-    printf("we got %s\n", url);
     curl_free(url);
   }
 
@@ -1276,7 +1273,6 @@ static int scopeid(void)
     error++;
   }
   else {
-    printf("we got %s\n", url);
     curl_free(url);
   }
 
@@ -1287,7 +1283,6 @@ static int scopeid(void)
     error++;
   }
   else {
-    printf("we got %s\n", url);
     curl_free(url);
   }
 
@@ -1298,7 +1293,6 @@ static int scopeid(void)
     error++;
   }
   else {
-    printf("we got %s\n", url);
     curl_free(url);
   }
 
@@ -1316,7 +1310,6 @@ static int scopeid(void)
     error++;
   }
   else {
-    printf("we got %s\n", url);
     curl_free(url);
   }
 
@@ -1424,9 +1417,78 @@ static int clear_url(void)
   return error;
 }
 
+static char total[128000];
+static char bigpart[120000];
+
+/*
+ * verify ridiculous URL part sizes
+ */
+static int huge(void)
+{
+  const char *url = "%s://%s:%s@%s/%s?%s#%s";
+  const char *smallpart = "c";
+  int i;
+  CURLU *urlp = curl_url();
+  CURLUcode rc;
+  char part[]= {
+    CURLUPART_SCHEME,
+    CURLUPART_USER,
+    CURLUPART_PASSWORD,
+    CURLUPART_HOST,
+    CURLUPART_PATH,
+    CURLUPART_QUERY,
+    CURLUPART_FRAGMENT
+  };
+  int error = 0;
+  if(!urlp)
+    return 1;
+  bigpart[0] = '/'; /* for the path */
+  memset(&bigpart[1], 'a', sizeof(bigpart) - 2);
+  bigpart[sizeof(bigpart) - 1] = 0;
+
+  for(i = 0; i <  7; i++) {
+    char *partp;
+    msnprintf(total, sizeof(total),
+              url,
+              (i == 0)? &bigpart[1] : smallpart,
+              (i == 1)? &bigpart[1] : smallpart,
+              (i == 2)? &bigpart[1] : smallpart,
+              (i == 3)? &bigpart[1] : smallpart,
+              (i == 4)? &bigpart[1] : smallpart,
+              (i == 5)? &bigpart[1] : smallpart,
+              (i == 6)? &bigpart[1] : smallpart);
+    rc = curl_url_set(urlp, CURLUPART_URL, total, CURLU_NON_SUPPORT_SCHEME);
+    if((!i && (rc == CURLUE_BAD_SCHEME)) ||
+       (i && !rc)) {
+      ;
+    }
+    else {
+      printf("URL %u: failed to parse\n", i);
+      error++;
+    }
+
+    /* only extract if the parse worked */
+    if(!rc) {
+      curl_url_get(urlp, part[i], &partp, 0);
+      if(partp && !strcmp(partp, &bigpart[1 - (i == 4)]))
+        ;
+      else {
+        printf("URL %u part %u: failure\n", i, part[i]);
+        error++;
+      }
+      curl_free(partp);
+    }
+  }
+  curl_url_cleanup(urlp);
+  return error;
+}
+
 int test(char *URL)
 {
   (void)URL; /* not used */
+
+  if(huge())
+    return 9;
 
   if(get_nothing())
     return 7;
