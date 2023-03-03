@@ -109,8 +109,6 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_DATA_DONE_SEND        8  /* 0          NULL     ignored */
 /* update conn info at connection and data */
 #define CF_CTRL_CONN_INFO_UPDATE (256+0) /* 0          NULL     ignored */
-/* report conn statistics (timers) for connection and data */
-#define CF_CTRL_CONN_REPORT_STATS (256+1) /* 0         NULL     ignored */
 
 /**
  * Handle event/control for the filter.
@@ -138,6 +136,8 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
 #define CF_QUERY_CONNECT_REPLY_MS   2  /* number     -        */
 #define CF_QUERY_SOCKET             3  /* -          curl_socket_t */
+#define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
+#define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -435,10 +435,10 @@ void Curl_conn_ev_update_info(struct Curl_easy *data,
                               struct connectdata *conn);
 
 /**
- * Inform connection filters to report statistics.
+ * Update connection statistics
  */
-void Curl_conn_ev_report_stats(struct Curl_easy *data,
-                               struct connectdata *conn);
+void Curl_conn_report_connect_stats(struct Curl_easy *data,
+                                    struct connectdata *conn);
 
 /**
  * Check if FIRSTSOCKET's cfilter chain deems connection alive.

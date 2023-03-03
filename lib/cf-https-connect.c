@@ -376,6 +376,55 @@ static bool cf_hc_data_pending(struct Curl_cfilter *cf,
          || cf_hc_baller_data_pending(&ctx->h21_baller, data);
 }
 
+static struct curltime get_max_baller_time(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data,
+                                          int query)
+{
+  struct cf_hc_ctx *ctx = cf->ctx;
+  struct Curl_cfilter *cfb;
+  struct curltime t, tmax;
+
+  memset(&tmax, 0, sizeof(tmax));
+  memset(&t, 0, sizeof(t));
+  cfb = ctx->h21_baller.enabled? ctx->h21_baller.cf : NULL;
+  if(cfb && !cfb->cft->query(cfb, data, query, NULL, &t)) {
+    if((t.tv_sec || t.tv_usec) && Curl_timediff_us(t, tmax) > 0)
+      tmax = t;
+  }
+  memset(&t, 0, sizeof(t));
+  cfb = ctx->h3_baller.enabled? ctx->h3_baller.cf : NULL;
+  if(cfb && !cfb->cft->query(cfb, data, query, NULL, &t)) {
+    if((t.tv_sec || t.tv_usec) && Curl_timediff_us(t, tmax) > 0)
+      tmax = t;
+  }
+  return tmax;
+}
+
+static CURLcode cf_hc_query(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            int query, int *pres1, void *pres2)
+{
+  if(!cf->connected) {
+    switch(query) {
+    case CF_QUERY_TIMER_CONNECT: {
+      struct curltime *when = pres2;
+      *when = get_max_baller_time(cf, data, CF_QUERY_TIMER_CONNECT);
+      return CURLE_OK;
+    }
+    case CF_QUERY_TIMER_APPCONNECT: {
+      struct curltime *when = pres2;
+      *when = get_max_baller_time(cf, data, CF_QUERY_TIMER_APPCONNECT);
+      return CURLE_OK;
+    }
+    default:
+      break;
+    }
+  }
+  return cf->next?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
+}
+
 static void cf_hc_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   DEBUGF(LOG_CF(data, cf, "close"));
@@ -413,7 +462,7 @@ struct Curl_cftype Curl_cft_http_connect = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  cf_hc_query,
 };
 
 static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
