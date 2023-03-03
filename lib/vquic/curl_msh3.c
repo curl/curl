@@ -548,7 +548,6 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    int event, int arg1, void *arg2)
 {
-  struct cf_msh3_ctx *ctx = cf->ctx;
   struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
 
@@ -579,11 +578,6 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
     DEBUGF(LOG_CF(data, cf, "req: update info"));
     cf_msh3_active(cf, data);
     break;
-  case CF_CTRL_CONN_REPORT_STATS:
-    if(cf->sockindex == FIRSTSOCKET)
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
-    break;
-
   default:
     break;
   }
@@ -751,6 +745,19 @@ static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
     /* TODO: we do not have access to this so far, fake it */
     (void)ctx;
     *pres1 = 100;
+    return CURLE_OK;
+  }
+  case CF_QUERY_TIMER_CONNECT: {
+    struct curltime *when = pres2;
+    /* we do not know when the first byte arrived */
+    if(cf->connected)
+      *when = ctx->handshake_at;
+    return CURLE_OK;
+  }
+  case CF_QUERY_TIMER_APPCONNECT: {
+    struct curltime *when = pres2;
+    if(cf->connected)
+      *when = ctx->handshake_at;
     return CURLE_OK;
   }
   default:

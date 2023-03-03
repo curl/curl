@@ -957,6 +957,28 @@ static bool cf_he_data_pending(struct Curl_cfilter *cf,
   return FALSE;
 }
 
+static struct curltime get_max_baller_time(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data,
+                                          int query)
+{
+  struct cf_he_ctx *ctx = cf->ctx;
+  struct curltime t, tmax;
+  size_t i;
+
+  memset(&tmax, 0, sizeof(tmax));
+  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+    struct eyeballer *baller = ctx->baller[i];
+
+    memset(&t, 0, sizeof(t));
+    if(baller && baller->cf &&
+       !baller->cf->cft->query(baller->cf, data, query, NULL, &t)) {
+      if((t.tv_sec || t.tv_usec) && Curl_timediff_us(t, tmax) > 0)
+        tmax = t;
+    }
+  }
+  return tmax;
+}
+
 static CURLcode cf_he_query(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             int query, int *pres1, void *pres2)
@@ -984,7 +1006,16 @@ static CURLcode cf_he_query(struct Curl_cfilter *cf,
       DEBUGF(LOG_CF(data, cf, "query connect reply: %dms", *pres1));
       return CURLE_OK;
     }
-
+    case CF_QUERY_TIMER_CONNECT: {
+      struct curltime *when = pres2;
+      *when = get_max_baller_time(cf, data, CF_QUERY_TIMER_CONNECT);
+      return CURLE_OK;
+    }
+    case CF_QUERY_TIMER_APPCONNECT: {
+      struct curltime *when = pres2;
+      *when = get_max_baller_time(cf, data, CF_QUERY_TIMER_APPCONNECT);
+      return CURLE_OK;
+    }
     default:
       break;
     }

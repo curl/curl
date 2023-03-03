@@ -1441,22 +1441,6 @@ static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_CONN_INFO_UPDATE:
     cf_socket_active(cf, data);
     break;
-  case CF_CTRL_CONN_REPORT_STATS:
-    switch(ctx->transport) {
-    case TRNSPRT_UDP:
-    case TRNSPRT_QUIC:
-      /* Since UDP connected sockets work different from TCP, we use the
-       * time of the first byte from the peer as the "connect" time. */
-      if(ctx->got_first_byte) {
-        Curl_pgrsTimeWas(data, TIMER_CONNECT, ctx->first_byte_at);
-        break;
-      }
-      /* FALLTHROUGH */
-    default:
-      Curl_pgrsTimeWas(data, TIMER_CONNECT, ctx->connected_at);
-      break;
-    }
-    break;
   case CF_CTRL_DATA_SETUP:
     Curl_persistconninfo(data, cf->conn, ctx->l_ip, ctx->l_port);
     break;
@@ -1517,6 +1501,24 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     else
       *pres1 = -1;
     return CURLE_OK;
+  case CF_QUERY_TIMER_CONNECT: {
+    struct curltime *when = pres2;
+    switch(ctx->transport) {
+    case TRNSPRT_UDP:
+    case TRNSPRT_QUIC:
+      /* Since UDP connected sockets work different from TCP, we use the
+       * time of the first byte from the peer as the "connect" time. */
+      if(ctx->got_first_byte) {
+        *when = ctx->first_byte_at;
+        break;
+      }
+      /* FALLTHROUGH */
+    default:
+      *when = ctx->connected_at;
+      break;
+    }
+    return CURLE_OK;
+  }
   default:
     break;
   }
