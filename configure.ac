@@ -612,12 +612,25 @@ case $host in
       ]])
     ],[
       curl_mingw_original=yes
+      curl_mingw_die=yes
       AC_MSG_RESULT([yes])
     ],[
       AC_MSG_RESULT([no])
     ])
     ;;
 esac
+
+
+AC_ARG_WITH(mingw1-deprecated,dnl
+AS_HELP_STRING([--with-mingw1-deprecated],[confirm you realize support for mingw v1 is dying]),
+  if test X"$withval" != Xno; then
+    curl_mingw_die=
+  fi
+)
+
+if test -n "$curl_mingw_die"; then
+  AC_MSG_ERROR([support for mingw v1 is going away, enable temporarily with --with-mingw1-deprecated])
+fi
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
