@@ -615,7 +615,7 @@ case $host in
       curl_mingw_die=yes
       AC_MSG_RESULT([yes])
     ],[
-      AC_MSG_RESULT([no])
+      AC_MSG_RESULT([no: $host])
     ])
     ;;
 esac
