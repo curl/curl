@@ -1016,13 +1016,6 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_IDLE:
     /* anything to do? */
     break;
-  case CF_CTRL_CONN_REPORT_STATS:
-    if(cf->sockindex == FIRSTSOCKET) {
-      if(ctx->got_first_byte)
-        Curl_pgrsTimeWas(data, TIMER_CONNECT, ctx->first_byte_at);
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
-    }
-    break;
   default:
     break;
   }
@@ -1346,6 +1339,18 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
     else
       *pres1 = -1;
     return CURLE_OK;
+  case CF_QUERY_TIMER_CONNECT: {
+    struct curltime *when = pres2;
+    if(ctx->got_first_byte)
+      *when = ctx->first_byte_at;
+    return CURLE_OK;
+  }
+  case CF_QUERY_TIMER_APPCONNECT: {
+    struct curltime *when = pres2;
+    if(cf->connected)
+      *when = ctx->handshake_at;
+    return CURLE_OK;
+  }
   default:
     break;
   }

@@ -370,8 +370,11 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     result = cf->cft->connect(cf, data, blocking, done);
     if(!result && *done) {
       Curl_conn_ev_update_info(data, data->conn);
-      Curl_conn_ev_report_stats(data, data->conn);
+      Curl_conn_report_connect_stats(data, data->conn);
       data->conn->keepalive = Curl_now();
+    }
+    else if(result) {
+      Curl_conn_report_connect_stats(data, data->conn);
     }
   }
 
@@ -608,10 +611,24 @@ void Curl_conn_ev_update_info(struct Curl_easy *data,
   cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 }
 
-void Curl_conn_ev_report_stats(struct Curl_easy *data,
-                               struct connectdata *conn)
+void Curl_conn_report_connect_stats(struct Curl_easy *data,
+                                    struct connectdata *conn)
 {
-  cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_REPORT_STATS, 0, NULL);
+  struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
+  if(cf) {
+    struct curltime connected;
+    struct curltime appconnected;
+
+    memset(&connected, 0, sizeof(connected));
+    cf->cft->query(cf, data, CF_QUERY_TIMER_CONNECT, NULL, &connected);
+    if(connected.tv_sec || connected.tv_usec)
+      Curl_pgrsTimeWas(data, TIMER_CONNECT, connected);
+
+    memset(&appconnected, 0, sizeof(appconnected));
+    cf->cft->query(cf, data, CF_QUERY_TIMER_APPCONNECT, NULL, &appconnected);
+    if(appconnected.tv_sec || appconnected.tv_usec)
+      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, appconnected);
+  }
 }
 
 bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn)
