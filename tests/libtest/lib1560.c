@@ -1458,11 +1458,8 @@ static int huge(void)
               (i == 5)? &bigpart[1] : smallpart,
               (i == 6)? &bigpart[1] : smallpart);
     rc = curl_url_set(urlp, CURLUPART_URL, total, CURLU_NON_SUPPORT_SCHEME);
-    if((!i && (rc == CURLUE_BAD_SCHEME)) ||
-       (i && !rc)) {
-      ;
-    }
-    else {
+    if((!i && (rc != CURLUE_BAD_SCHEME)) ||
+       (i && rc)) {
       printf("URL %u: failed to parse\n", i);
       error++;
     }
@@ -1470,9 +1467,7 @@ static int huge(void)
     /* only extract if the parse worked */
     if(!rc) {
       curl_url_get(urlp, part[i], &partp, 0);
-      if(partp && !strcmp(partp, &bigpart[1 - (i == 4)]))
-        ;
-      else {
+      if(!partp || strcmp(partp, &bigpart[1 - (i == 4)])) {
         printf("URL %u part %u: failure\n", i, part[i]);
         error++;
       }
