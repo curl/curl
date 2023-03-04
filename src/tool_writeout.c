@@ -427,7 +427,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                 stream = stdout;
                 break;
               case VAR_STDERR:
-                stream = config->global->errors;
+                stream = stderr;
                 break;
               case VAR_JSON:
                 ourWriteOutJSON(stream, variables, per, per_result);
