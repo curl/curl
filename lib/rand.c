@@ -30,6 +30,10 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#ifdef HAVE_ARC4RANDOM
+/* Some platforms might have the prototype missing (ubuntu + libressl) */
+uint32_t arc4random(void);
+#endif
 
 #include <curl/curl.h>
 #include "vtls/vtls.h"
@@ -141,6 +145,11 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
     if(result != CURLE_NOT_BUILT_IN)
       return result;
   }
+#endif
+
+#ifdef HAVE_ARC4RANDOM
+  *rnd = (unsigned int)arc4random();
+  return CURLE_OK;
 #endif
 
 #if defined(RANDOM_FILE) && !defined(WIN32)

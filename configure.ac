@@ -3626,7 +3626,8 @@ AC_CHECK_FUNCS([fnmatch \
   setrlimit \
   snprintf \
   utime \
-  utimes
+  utimes \
+  arc4random
 ],[
 ],[
   func="$ac_func"
