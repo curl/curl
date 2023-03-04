@@ -110,7 +110,6 @@ problems may have been fixed or changed somewhat since this was written.
  15.9 cert paths autodetected when cross-compiling
  15.10 libpsl is not supported
  15.11 ExternalProject_Add does not set CURL_CA_PATH
- 15.12 cannot enable LDAPS on Windows
  15.13 CMake build with MIT Kerberos does not work
 
  16. Applications
@@ -701,10 +700,6 @@ problems may have been fixed or changed somewhat since this was written.
  ExternalProject_Add is used to build curl as a dependency.
 
  See https://github.com/curl/curl/issues/6313
-
-15.12 cannot enable LDAPS on Windows
-
- See https://github.com/curl/curl/issues/6284
 
 15.13 CMake build with MIT Kerberos does not work
 
