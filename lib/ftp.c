@@ -713,6 +713,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
 static const char * const ftp_state_names[]={
   "STOP",
   "WAIT220",
+  "HOST",
   "AUTH",
   "USER",
   "PASS",
@@ -2666,6 +2667,76 @@ static CURLcode ftp_state_acct_resp(struct Curl_easy *data,
   return result;
 }
 
+/* for 220 response from FTP_WAIT220 state or
+   2**, 500, 502 response from FTP_HOST state */
+static CURLcode ftp_state_wait_or_host_success_resp(struct Curl_easy *data,
+                                                    ftpstate state,
+                                                    const char * const *ftpauth
+                                                    )
+{
+  CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->conn;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
+
+  /* If we are at the FTP_WAIT220 state and ftp_send_host is true,
+     HOST command should be sent before others */
+  if(state == FTP_WAIT220 && data->set.ftp_send_host) {
+    result = Curl_pp_sendf(data, &ftpc->pp, "HOST %s",
+                           data->state.up.hostname);
+    if(!result)
+      state(data, FTP_HOST);
+    return result;
+  }
+
+#ifdef HAVE_GSSAPI
+  if(data->set.krb) {
+    /* If not anonymous login, try a secure login. Note that this
+       procedure is still BLOCKING. */
+
+    Curl_sec_request_prot(conn, "private");
+    /* We set private first as default, in case the line below fails to
+       set a valid level */
+    Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
+
+    if(Curl_sec_login(data, conn)) {
+      failf(data, "secure login failed");
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
+    infof(data, "Authentication successful");
+  }
+#endif
+
+  if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
+    /* We don't have a SSL/TLS control connection yet, but FTPS is
+       requested. Try a FTPS connection now */
+
+    ftpc->count3 = 0;
+    switch(data->set.ftpsslauth) {
+    case CURLFTPAUTH_DEFAULT:
+    case CURLFTPAUTH_SSL:
+      ftpc->count2 = 1; /* add one to get next */
+      ftpc->count1 = 0;
+      break;
+    case CURLFTPAUTH_TLS:
+      ftpc->count2 = -1; /* subtract one to get next */
+      ftpc->count1 = 1;
+      break;
+    default:
+      failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %d",
+            (int)data->set.ftpsslauth);
+      return CURLE_UNKNOWN_OPTION; /* we don't know what to do */
+    }
+    result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",
+                           ftpauth[ftpc->count1]);
+    if(!result)
+      state(data, FTP_AUTH);
+  }
+  else
+    result = ftp_state_user(data, conn);
+
+  return result;
+}
+
 
 static CURLcode ftp_statemachine(struct Curl_easy *data,
                                  struct connectdata *conn)
@@ -2702,51 +2773,18 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       }
 
       /* We have received a 220 response fine, now we proceed. */
-#ifdef HAVE_GSSAPI
-      if(data->set.krb) {
-        /* If not anonymous login, try a secure login. Note that this
-           procedure is still BLOCKING. */
+      result = ftp_state_wait_or_host_success_resp(data, FTP_WAIT220, ftpauth);
+      break;
 
-        Curl_sec_request_prot(conn, "private");
-        /* We set private first as default, in case the line below fails to
-           set a valid level */
-        Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
-
-        if(Curl_sec_login(data, conn)) {
-          failf(data, "secure login failed");
-          return CURLE_WEIRD_SERVER_REPLY;
-        }
-        infof(data, "Authentication successful");
+    case FTP_HOST:
+      if(ftpcode/100 == 2 || ftpcode == 500 || ftpcode == 502) {
+        result = ftp_state_wait_or_host_success_resp(data, FTP_HOST, ftpauth);
       }
-#endif
-
-      if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
-        /* We don't have a SSL/TLS control connection yet, but FTPS is
-           requested. Try a FTPS connection now */
-
-        ftpc->count3 = 0;
-        switch(data->set.ftpsslauth) {
-        case CURLFTPAUTH_DEFAULT:
-        case CURLFTPAUTH_SSL:
-          ftpc->count2 = 1; /* add one to get next */
-          ftpc->count1 = 0;
-          break;
-        case CURLFTPAUTH_TLS:
-          ftpc->count2 = -1; /* subtract one to get next */
-          ftpc->count1 = 1;
-          break;
-        default:
-          failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %d",
-                (int)data->set.ftpsslauth);
-          return CURLE_UNKNOWN_OPTION; /* we don't know what to do */
-        }
-        result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",
-                               ftpauth[ftpc->count1]);
-        if(!result)
-          state(data, FTP_AUTH);
+      else {
+        failf(data, "Virtual host unavailable. Got %03d from server.",
+              ftpcode);
+        return CURLE_FTP_HOST_UNAVAILABLE;
       }
-      else
-        result = ftp_state_user(data, conn);
       break;
 
     case FTP_AUTH:

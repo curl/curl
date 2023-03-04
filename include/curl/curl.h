@@ -640,6 +640,7 @@ typedef enum {
   CURLE_PROXY,                   /* 97 - proxy handshake error */
   CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
   CURLE_UNRECOVERABLE_POLL,      /* 99 - poll/select returned fatal error */
+  CURLE_FTP_HOST_UNAVAILABLE,    /* 100 - ftp HOST command returned error */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -2205,6 +2206,9 @@ typedef enum {
 
   /* Can leak things, gonna exit() soon */
   CURLOPT(CURLOPT_QUICK_EXIT, CURLOPTTYPE_LONG, 322),
+
+  /* Send HOST command to the FTP server */
+  CURLOPT(CURLOPT_FTP_SEND_HOST, CURLOPTTYPE_LONG, 323),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -87,6 +87,7 @@ DPAGES = \
   ftp-pasv.d \
   ftp-port.d \
   ftp-pret.d \
+  ftp-send-host.d \
   ftp-skip-pasv-ip.d \
   ftp-ssl-ccc-mode.d \
   ftp-ssl-ccc.d \

@@ -1302,6 +1302,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     break;
 
+  case CURLOPT_FTP_SEND_HOST:
+    data->set.ftp_send_host = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
     result = Curl_setstropt(&data->set.str[STRING_FTP_ALTERNATIVE_TO_USER],
                             va_arg(param, char *));

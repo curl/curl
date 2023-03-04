@@ -73,6 +73,7 @@
 --ftp-pasv                           7.11.0
 --ftp-port (-P)                      4.0
 --ftp-pret                           7.20.0
+--ftp-send-host                      8.1.0
 --ftp-skip-pasv-ip                   7.14.2
 --ftp-ssl-ccc                        7.16.1
 --ftp-ssl-ccc-mode                   7.16.2

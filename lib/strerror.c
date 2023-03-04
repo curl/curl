@@ -319,6 +319,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_UNRECOVERABLE_POLL:
     return "Unrecoverable error in select/poll";
 
+  case CURLE_FTP_HOST_UNAVAILABLE:
+    return "FTP: The server failed to find the virtual host";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:

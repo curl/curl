@@ -42,6 +42,7 @@ void config_init(struct OperationConfig *config)
   config->tcp_nodelay = TRUE; /* enabled by default */
   config->happy_eyeballs_timeout_ms = CURL_HET_DEFAULT;
   config->http09_allowed = FALSE;
+  config->ftp_send_host = FALSE;
   config->ftp_skip_ip = TRUE;
   config->file_clobber_mode = CLOBBER_DEFAULT;
 }

@@ -132,7 +132,8 @@ e96: QUIC connection error
 e97: proxy handshake error
 e98: SSL Client Certificate required
 e99: Unrecoverable error in select/poll
-e100: Unknown error
+e100: FTP: The server failed to find the virtual host
+e101: Unknown error
 m-1: Please call curl_multi_perform() soon
 m0: No error
 m1: Invalid multi handle

@@ -46,6 +46,7 @@ enum {
   FTP_STOP,    /* do nothing state, stops the state machine */
   FTP_WAIT220, /* waiting for the initial 220 response immediately after
                   a connect */
+  FTP_HOST,
   FTP_AUTH,
   FTP_USER,
   FTP_PASS,

@@ -178,6 +178,7 @@ struct OperationConfig {
   bool doh_verifystatus;
   bool create_dirs;
   bool ftp_create_dirs;
+  bool ftp_send_host;
   bool ftp_skip_ip;
   bool proxynegotiate;
   bool proxyntlm;

@@ -1823,6 +1823,7 @@ struct UserDefined {
   BIT(ftp_use_epsv);     /* if EPSV is to be attempted or not */
   BIT(ftp_use_eprt);     /* if EPRT is to be attempted or not */
   BIT(ftp_use_pret);     /* if PRET is to be used before PASV or not */
+  BIT(ftp_send_host);    /* send HOST command */
   BIT(ftp_skip_ip);      /* skip the IP address the FTP server passes on to
                             us */
   BIT(wildcard_enabled); /* enable wildcard matching */

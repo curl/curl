@@ -1,0 +1,60 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_FTP_SEND_HOST 3 "4 Mar 2023" "libcurl 8.1.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_FTP_SEND_HOST \- send HOST command
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_SEND_HOST, long send);
+.fi
+.SH DESCRIPTION
+Pass a long. If \fIsend\fP is set to 1, it instructs libcurl to send the HOST
+command after control connection is established to connect to the virtual host.
+
+.SH DEFAULT
+0
+.SH PROTOCOLS
+FTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
+
+  /* send HOST command */
+  curl_easy_setopt(curl, CURLOPT_FTP_SEND_HOST, 1L);
+  ret = curl_easy_perform(curl);
+
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 8.1.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_FTPPORT "(3), " CURLOPT_FTP_USE_EPRT "(3), "

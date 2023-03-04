@@ -1980,6 +1980,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
         my_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl?1L:0L);
 
+        /* curl 8.1.0 */
+        my_setopt(curl, CURLOPT_FTP_SEND_HOST, config->ftp_send_host?1L:0L);
+
         /* curl 7.14.2 */
         my_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip?1L:0L);
 

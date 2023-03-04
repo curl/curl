@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -221,6 +221,9 @@ const struct helptxt helptext[] = {
    CURLHELP_FTP},
   {"    --ftp-pret",
    "Send PRET before PASV",
+   CURLHELP_FTP},
+  {"    --ftp-send-host",
+   "Send HOST command",
    CURLHELP_FTP},
   {"    --ftp-skip-pasv-ip",
    "Skip the IP address for PASV",
