@@ -983,11 +983,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
              * for every transfer.
              */
             if(!per->prev || per->prev->config != config) {
-              newfile = fopen(config->headerfile, "wb+");
+              newfile = fopen(config->headerfile, "wb");
               if(newfile)
                 fclose(newfile);
             }
-            newfile = fopen(config->headerfile, "ab+");
+            newfile = fopen(config->headerfile, "ab");
 
             if(!newfile) {
               errorf(global, "Failed to open %s\n", config->headerfile);
