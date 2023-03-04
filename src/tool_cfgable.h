@@ -302,8 +302,6 @@ struct GlobalConfig {
   bool silent;                    /* don't show messages, --silent given */
   bool noprogress;                /* don't show progress bar */
   bool isatty;                    /* Updated internally if output is a tty */
-  FILE *errors;                   /* Error stream, defaults to stderr */
-  bool errors_fopened;            /* Whether error stream isn't stderr */
   char *trace_dump;               /* file to dump the network trace to */
   FILE *trace_stream;
   bool trace_fopened;

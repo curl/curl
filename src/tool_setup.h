@@ -37,6 +37,15 @@
 
 #include "curl_setup.h" /* from the lib directory */
 
+extern FILE *tool_stderr;
+
+#if !defined(CURL_DO_NOT_OVERRIDE_STDERR) && !defined(UNITTESTS)
+#ifdef stderr
+#undef stderr
+#endif
+#define stderr tool_stderr
+#endif
+
 /*
  * curl tool certainly uses libcurl's external interface.
  */
