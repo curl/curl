@@ -310,9 +310,6 @@ endif
 ifneq ($(findstring -ipv6,$(CFG)),)
   CPPFLAGS += -DENABLE_IPV6
 endif
-ifneq ($(findstring -ldaps,$(CFG)),)
-  CPPFLAGS += -DHAVE_LDAP_SSL
-endif
 
 ifneq ($(findstring -watt,$(CFG))$(MSDOS),)
   WATT_PATH ?= $(PROOT)/../watt
