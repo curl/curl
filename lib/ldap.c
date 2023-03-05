@@ -357,7 +357,15 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #ifdef USE_WIN32_LDAP
     /* Win32 LDAP SDK doesn't support insecure mode without CA! */
     server = ldap_sslinit(host, conn->port, 1);
+#if defined(_MSC_VER) && (_MSC_VER <= 1600)
+#pragma warning(push)
+/* 'type cast' : conversion from 'int' to 'void *' of greater size */
+#pragma warning(disable:4306)
+#endif
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
+#if defined(_MSC_VER) && (_MSC_VER <= 1600)
+#pragma warning(pop)
+#endif
 #else
     int ldap_option;
     char *ldap_ca = conn->ssl_config.CAfile;
