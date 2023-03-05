@@ -336,10 +336,9 @@ void Curl_cookie_loadfiles(struct Curl_easy *data)
   if(list) {
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     while(list) {
-      struct CookieInfo *newcookies = Curl_cookie_init(data,
-                                        list->data,
-                                        data->cookies,
-                                        data->set.cookiesession);
+      struct CookieInfo *newcookies =
+        Curl_cookie_init(data, list->data, data->cookies,
+                         data->set.cookiesession);
       if(!newcookies)
         /*
          * Failure may be due to OOM or a bad cookie; both are ignored
@@ -1800,11 +1799,6 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
   CURLcode res;
 
   if(data->set.str[STRING_COOKIEJAR]) {
-    /* If there is a list of cookie files to read, do it first so that
-       we have all the told files read before we write the new jar.
-       Curl_cookie_loadfiles() LOCKS and UNLOCKS the share itself! */
-    Curl_cookie_loadfiles(data);
-
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
 
     /* if we have a destination file for all the cookies to get dumped to */
