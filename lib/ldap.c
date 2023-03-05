@@ -140,15 +140,13 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp);
 #define ldap_err2string ldap_err2stringA
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER <= 1600)
+#if defined(USE_WIN32_LDAP) && defined(_MSC_VER) && (_MSC_VER <= 1600)
 /* Workaround for warning:
    'type cast' : conversion from 'int' to 'void *' of greater size */
-#ifdef USE_WIN32_LDAP
 #undef LDAP_OPT_ON
 #undef LDAP_OPT_OFF
 #define LDAP_OPT_ON   ((void *)(size_t)1)
 #define LDAP_OPT_OFF  ((void *)(size_t)0)
-#endif
 #endif
 
 static CURLcode ldap_do(struct Curl_easy *data, bool *done);
