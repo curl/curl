@@ -85,7 +85,8 @@ typedef ssize_t  Curl_cft_recv(struct Curl_cfilter *cf,
                                CURLcode *err);         /* error to return */
 
 typedef bool     Curl_cft_conn_is_alive(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data);
+                                        struct Curl_easy *data,
+                                        bool *input_pending);
 
 typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
                                           struct Curl_easy *data);
@@ -216,7 +217,8 @@ CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int event, int arg1, void *arg2);
 bool     Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data);
+                                   struct Curl_easy *data,
+                                   bool *input_pending);
 CURLcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
                                      struct Curl_easy *data);
 CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
@@ -443,7 +445,8 @@ void Curl_conn_report_connect_stats(struct Curl_easy *data,
 /**
  * Check if FIRSTSOCKET's cfilter chain deems connection alive.
  */
-bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn);
+bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
+                        bool *input_pending);
 
 /**
  * Try to upkeep the connection filters at sockindex.

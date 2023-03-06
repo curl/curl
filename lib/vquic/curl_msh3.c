@@ -769,11 +769,13 @@ static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
 }
 
 static bool cf_msh3_conn_is_alive(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data)
+                                  struct Curl_easy *data,
+                                  bool input_pending)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
 
   (void)data;
+  *input_pending = FALSE;
   return ctx && ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD && ctx->qconn &&
          ctx->connected;
 }
