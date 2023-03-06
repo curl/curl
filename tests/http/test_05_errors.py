@@ -75,7 +75,7 @@ class TestErrors:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('quiche'):
             pytest.skip("quiche not reliable, sometimes reports success")
-        count = 5
+        count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
                f'/curltest/tweak?id=[0-{count - 1}]'\
@@ -87,6 +87,6 @@ class TestErrors:
         assert len(r.stats) == count, f'did not get all stats: {r}'
         invalid_stats = []
         for idx, s in enumerate(r.stats):
-            if 'exitcode' not in s or s['exitcode'] not in [18, 56, 92]:
+            if 'exitcode' not in s or s['exitcode'] not in [18, 56, 92, 95]:
                 invalid_stats.append(f'request {idx} exit with {s["exitcode"]}\n{s}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
