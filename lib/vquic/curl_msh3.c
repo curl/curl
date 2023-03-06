@@ -548,7 +548,6 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    int event, int arg1, void *arg2)
 {
-  struct cf_msh3_ctx *ctx = cf->ctx;
   struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
 
