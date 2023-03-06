@@ -770,6 +770,17 @@ static void printsub(struct Curl_easy *data,
   }
 }
 
+static bool str_is_nonascii(const char *str)
+{
+  size_t len = strlen(str);
+  while(len--) {
+    if(*str & 0x80)
+      return TRUE;
+    str++;
+  }
+  return FALSE;
+}
+
 static CURLcode check_telnet_options(struct Curl_easy *data)
 {
   struct curl_slist *head;
@@ -781,6 +792,8 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
      was given on the command line */
   if(data->state.aptr.user) {
     char buffer[256];
+    if(str_is_nonascii(data->conn->user))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     msnprintf(buffer, sizeof(buffer), "USER,%s", data->conn->user);
     beg = curl_slist_append(tn->telnet_vars, buffer);
     if(!beg) {
@@ -800,6 +813,8 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
     if(sep) {
       olen = sep - option;
       arg = ++sep;
+      if(str_is_nonascii(arg))
+        continue;
       switch(olen) {
       case 5:
         /* Terminal type */
