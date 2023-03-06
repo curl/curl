@@ -110,4 +110,36 @@ class TestGoAway:
         assert r.duration >= timedelta(seconds=count)
         r.check_stats(count=count, exp_status=200, exp_exitcode=0)
 
+    # download files sequentially with delay, reload server for GOAWAY
+    def test_03_03_h1_goaway(self, env: Env, httpd, nghttpx, repeat):
+        proto = 'http/1.1'
+        count = 3
+        self.r = None
+        def long_run():
+            curl = CurlClient(env=env)
+            #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
+            urln = f'https://{env.authority_for(env.domain1, proto)}' \
+                   f'/curltest/tweak?id=[0-{count - 1}]'\
+                   '&chunks=10&chunk_size=1024&chunk_delay=100ms'
+            self.r = curl.http_download(urls=[urln], alpn_proto=proto)
+
+        t = Thread(target=long_run)
+        t.start()
+        # each request will take a second, reload the server in the middle
+        # of the first one.
+        time.sleep(1.5)
+        assert httpd.reload()
+        t.join()
+        r: ExecResult = self.r
+        assert r.exit_code == 0, f'{r}'
+        r.check_stats(count=count, exp_status=200)
+        # reload will shut down the connection gracefully with GOAWAY
+        # we expect to see a second connection opened afterwards
+        assert r.total_connects == 2
+        for idx, s in enumerate(r.stats):
+            if s['num_connects'] > 0:
+                log.debug(f'request {idx} connected')
+        # this should take `count` seconds to retrieve
+        assert r.duration >= timedelta(seconds=count)
+
 

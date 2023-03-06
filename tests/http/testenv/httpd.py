@@ -100,6 +100,9 @@ class Httpd:
         else:
             self._extra_configs[domain] = lines
 
+    def clear_extra_configs(self):
+        self._extra_configs = {}
+
     def _run(self, args, intext=''):
         env = {}
         for key, val in os.environ.items():
@@ -231,6 +234,8 @@ class Httpd:
                 f'Listen {self.env.proxys_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
             ]
+            if 'base' in self._extra_configs:
+                conf.extend(self._extra_configs['base'])
             conf.extend([  # plain http host for domain1
                 f'<VirtualHost *:{self.env.http_port}>',
                 f'    ServerName {domain1}',
