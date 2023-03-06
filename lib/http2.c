@@ -98,7 +98,6 @@ static size_t populate_binsettings(uint8_t *binsettings,
 struct cf_h2_ctx {
   nghttp2_session *h2;
   uint32_t max_concurrent_streams;
-  bool enable_push;
   /* The easy handle used in the current filter call, cleared at return */
   struct cf_call_data call_data;
 
@@ -116,6 +115,10 @@ struct cf_h2_ctx {
   int32_t pause_stream_id; /* stream ID which paused
                               nghttp2_session_mem_recv */
   size_t drain_total; /* sum of all stream's UrlState.drain */
+  int32_t goaway_error;
+  int32_t last_stream_id;
+  BIT(goaway);
+  BIT(enable_push);
 };
 
 /* How to access `call_data` from a cf_h2 filter */
@@ -829,9 +832,12 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       break;
     }
     case NGHTTP2_GOAWAY:
+      ctx->goaway = TRUE;
+      ctx->goaway_error = frame->goaway.error_code;
+      ctx->last_stream_id = frame->goaway.last_stream_id;
       if(data) {
         infof(data, "recveived GOAWAY, error=%d, last_stream=%u",
-                    frame->goaway.error_code, frame->goaway.last_stream_id);
+                    ctx->goaway_error, ctx->last_stream_id);
         multi_connchanged(data->multi);
       }
       break;
@@ -940,6 +946,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     break;
   case NGHTTP2_RST_STREAM:
     DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] recv RST", stream_id));
+    stream->closed = TRUE;
     stream->reset = TRUE;
     break;
   case NGHTTP2_WINDOW_UPDATE:
@@ -1722,6 +1729,18 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CF_DATA_SAVE(save, cf, data);
 
+  /* IFF transfer was RST by server or
+   * we got a final GOAWAY and the last processed stream ID, as announced
+   * by the server, is lower than this stream's ID, we will never see
+   * anything more for this stream, so give up */
+  if(stream->reset ||
+     (ctx->goaway && ctx->goaway_error &&
+      ctx->last_stream_id < stream->stream_id)) {
+    *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
+    nread = -1;
+    goto out;
+  }
+
   if(should_close_session(ctx)) {
     DEBUGF(LOG_CF(data, cf, "http2_recv: nothing to do in this session"));
     if(cf->conn->bits.close) {
@@ -1871,7 +1890,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         goto out;
       }
       else if(nread == 0) {
-        if(!stream->closed) {
+        if(!stream->closed || stream->reset) {
           /* This will happen when the server or proxy server is SIGKILLed
              during data transfer. We should emit an error since our data
              received may be incomplete. */
