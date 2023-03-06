@@ -79,7 +79,7 @@ class TestErrors:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
                f'/curltest/tweak?id=[0-{count - 1}]'\
-               '&chunks=3&chunk_size=16000&body_error=reset'
+               '&chunks=5&chunk_size=16000&body_error=reset'
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--retry', '0', '--parallel',
         ])
