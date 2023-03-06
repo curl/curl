@@ -818,7 +818,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       ctx->max_concurrent_streams = nghttp2_session_get_remote_settings(
           session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
       ctx->enable_push = nghttp2_session_get_remote_settings(
-          session, NGHTTP2_SETTINGS_ENABLE_PUSH);
+          session, NGHTTP2_SETTINGS_ENABLE_PUSH) != 0;
       DEBUGF(LOG_CF(data, cf, "MAX_CONCURRENT_STREAMS == %d",
                     ctx->max_concurrent_streams));
       DEBUGF(LOG_CF(data, cf, "ENABLE_PUSH == %s",
