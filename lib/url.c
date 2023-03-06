@@ -965,7 +965,20 @@ static bool extract_if_dead(struct connectdata *conn,
 
     }
     else {
-      dead = !Curl_conn_is_alive(data, conn);
+      bool input_pending;
+
+      dead = !Curl_conn_is_alive(data, conn, &input_pending);
+      if(input_pending) {
+        /* For reuse, we want a "clean" connection state. The includes
+         * that we expect - in general - no waiting input data. Input
+         * waiting might be a TLS Notify Close, for example. We reject
+         * that.
+         * For protocols where data from other other end may arrive at
+         * any time (HTTP/2 PING for example), the protocol handler needs
+         * to install its own `connection_check` callback.
+         */
+        dead = TRUE;
+      }
     }
 
     if(dead) {

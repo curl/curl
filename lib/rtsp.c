@@ -145,7 +145,8 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
   (void)data;
 
   if(checks_to_perform & CONNCHECK_ISDEAD) {
-    if(!Curl_conn_is_alive(data, conn))
+    bool input_pending;
+    if(!Curl_conn_is_alive(data, conn, &input_pending))
       ret_val |= CONNRESULT_DEAD;
   }
 

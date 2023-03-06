@@ -367,41 +367,42 @@ static void http2_stream_free(struct HTTP *stream)
 }
 
 /*
+ * Returns nonzero if current HTTP/2 session should be closed.
+ */
+static int should_close_session(struct cf_h2_ctx *ctx)
+{
+  return ctx->drain_total == 0 && !nghttp2_session_want_read(ctx->h2) &&
+    !nghttp2_session_want_write(ctx->h2);
+}
+
+/*
  * The server may send us data at any point (e.g. PING frames). Therefore,
  * we cannot assume that an HTTP/2 socket is dead just because it is readable.
  *
  * Check the lower filters first and, if successful, peek at the socket
  * and distinguish between closed and data.
  */
-static bool http2_connisdead(struct Curl_cfilter *cf, struct Curl_easy *data)
+static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              bool *input_pending)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  int sval;
-  bool dead = TRUE;
+  bool alive = TRUE;
 
-  if(!cf->next || !cf->next->cft->is_alive(cf->next, data))
-    return TRUE;
+  *input_pending = FALSE;
+  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
+    return FALSE;
 
-  sval = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data), 0);
-  if(sval == 0) {
-    /* timeout */
-    dead = FALSE;
-  }
-  else if(sval & CURL_CSELECT_ERR) {
-    /* socket is in an error state */
-    dead = TRUE;
-  }
-  else if(sval & CURL_CSELECT_IN) {
+  if(*input_pending) {
     /* This happens before we've sent off a request and the connection is
        not in use by any other transfer, there shouldn't be any data here,
        only "protocol frames" */
     CURLcode result;
     ssize_t nread = -1;
 
+    *input_pending = FALSE;
     Curl_attach_connection(data, cf->conn);
     nread = Curl_conn_cf_recv(cf->next, data,
                               ctx->inbuf, H2_BUFSIZE, &result);
-    dead = FALSE;
     if(nread != -1) {
       DEBUGF(LOG_CF(data, cf, "%d bytes stray data read before trying "
                     "h2 connection", (int)nread));
@@ -409,15 +410,19 @@ static bool http2_connisdead(struct Curl_cfilter *cf, struct Curl_easy *data)
       ctx->inbuflen = nread;
       if(h2_process_pending_input(cf, data, &result) < 0)
         /* immediate error, considered dead */
-        dead = TRUE;
+        alive = FALSE;
+      else {
+        alive = !should_close_session(ctx);
+      }
     }
-    else
+    else {
       /* the read failed so let's say this is dead anyway */
-      dead = TRUE;
+      alive = FALSE;
+    }
     Curl_detach_connection(data);
   }
 
-  return dead;
+  return alive;
 }
 
 static CURLcode http2_send_ping(struct Curl_cfilter *cf,
@@ -1452,15 +1457,6 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
 }
 
 /*
- * Returns nonzero if current HTTP/2 session should be closed.
- */
-static int should_close_session(struct cf_h2_ctx *ctx)
-{
-  return ctx->drain_total == 0 && !nghttp2_session_want_read(ctx->h2) &&
-    !nghttp2_session_want_write(ctx->h2);
-}
-
-/*
  * h2_process_pending_input() processes pending input left in
  * httpc->inbuf.  Then, call h2_session_send() to send pending data.
  * This function returns 0 if it succeeds, or -1 and error code will
@@ -2359,14 +2355,17 @@ static bool cf_h2_data_pending(struct Curl_cfilter *cf,
 }
 
 static bool cf_h2_is_alive(struct Curl_cfilter *cf,
-                           struct Curl_easy *data)
+                           struct Curl_easy *data,
+                           bool *input_pending)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   CURLcode result;
   struct cf_call_data save;
 
   CF_DATA_SAVE(save, cf, data);
-  result = (ctx && ctx->h2 && !http2_connisdead(cf, data));
+  result = (ctx && ctx->h2 && http2_connisalive(cf, data, input_pending));
+  DEBUGF(LOG_CF(data, cf, "conn alive -> %d, input_pending=%d",
+         result, *input_pending));
   CF_DATA_RESTORE(cf, save);
   return result;
 }

@@ -70,13 +70,6 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       curl_socket_t sock);
 
-/*
- * This function should return TRUE if the socket is to be assumed to
- * be dead. Most commonly this happens when the server has closed the
- * connection due to inactivity.
- */
-bool Curl_socket_is_dead(curl_socket_t sock);
-
 /**
  * Determine the curl code for a socket connect() == -1 with errno.
  */

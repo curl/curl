@@ -1650,10 +1650,11 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
-static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data)
+static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
+                            bool *input_pending)
 {
   struct cf_call_data save;
-  bool result;
+  int result;
   /*
    * This function tries to determine connection status.
    *
@@ -1663,15 +1664,19 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data)
    *    -1 means the connection status is unknown
    */
   CF_DATA_SAVE(save, cf, data);
-  result = Curl_ssl->check_cxn(cf, data) != 0;
+  result = Curl_ssl->check_cxn(cf, data);
   CF_DATA_RESTORE(cf, save);
-  if(result > 0)
+  if(result > 0) {
+    *input_pending = TRUE;
     return TRUE;
-  if(result == 0)
+  }
+  if(result == 0) {
+    *input_pending = FALSE;
     return FALSE;
+  }
   /* ssl backend does not know */
   return cf->next?
-    cf->next->cft->is_alive(cf->next, data) :
+    cf->next->cft->is_alive(cf->next, data, input_pending) :
     FALSE; /* pessimistic in absence of data */
 }
 

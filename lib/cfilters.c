@@ -124,10 +124,11 @@ ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 }
 
 bool Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
+                               struct Curl_easy *data,
+                               bool *input_pending)
 {
   return cf->next?
-    cf->next->cft->is_alive(cf->next, data) :
+    cf->next->cft->is_alive(cf->next, data, input_pending) :
     FALSE; /* pessimistic in absence of data */
 }
 
@@ -631,10 +632,12 @@ void Curl_conn_report_connect_stats(struct Curl_easy *data,
   }
 }
 
-bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn)
+bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
+                        bool *input_pending)
 {
   struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
-  return cf && !cf->conn->bits.close && cf->cft->is_alive(cf, data);
+  return cf && !cf->conn->bits.close &&
+         cf->cft->is_alive(cf, data, input_pending);
 }
 
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
