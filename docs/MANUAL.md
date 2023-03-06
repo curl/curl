@@ -298,6 +298,10 @@ Post a simple `name` and `phone` guestbook.
 
     curl -d "name=Rafael%20Sagula&phone=3320780" http://www.where.com/guest.cgi
 
+Or automatically [URL encode the data](https://everything.curl.dev/http/post/url-encode).
+
+    curl --data-urlencode "name=Rafael Sagula&phone=3320780" http://www.where.com/guest.cgi
+
 How to post a form with curl, lesson #1:
 
 Dig out all the `<input>` tags in the form that you want to fill in.
