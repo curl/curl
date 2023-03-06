@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
@@ -23,15 +24,26 @@
 #
 ###########################################################################
 #
-[global]
+import logging
+import socket
+from typing import Dict
 
-[httpd]
-apxs = @APXS@
-httpd = @HTTPD@
-apachectl = @APACHECTL@
+log = logging.getLogger(__name__)
 
-[nghttpx]
-nghttpx = @HTTPD_NGHTTPX@
 
-[caddy]
-caddy = @CADDY@
+def alloc_ports(port_specs: Dict[str, int]) -> Dict[str, int]:
+    ports = {}
+    socks = []
+    for name, ptype in port_specs.items():
+        try:
+            s = socket.socket(type=ptype)
+            s.bind(('', 0))
+            ports[name] = s.getsockname()[1]
+            socks.append(s)
+        except Exception as e:
+            raise e
+    for s in socks:
+        s.close()
+    return ports
+
+

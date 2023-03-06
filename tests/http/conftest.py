@@ -34,10 +34,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 from testenv import Env, Nghttpx, Httpd
 
 
-def pytest_report_header(config, startdir):
-    return f"curl http tests"
-
-
 @pytest.fixture(scope="package")
 def env(pytestconfig) -> Env:
     env = Env(pytestconfig=pytestconfig)
@@ -45,6 +41,10 @@ def env(pytestconfig) -> Env:
     logging.getLogger('').setLevel(level=level)
     env.setup()
     return env
+
+@pytest.fixture(scope="package", autouse=True)
+def log_global_env_facts(record_testsuite_property, env):
+    record_testsuite_property("http-port", env.http_port)
 
 
 @pytest.fixture(scope='package')

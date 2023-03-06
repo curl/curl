@@ -27,11 +27,15 @@
 import logging
 import os
 import re
+import socket
 import subprocess
+import sys
 from configparser import ConfigParser, ExtendedInterpolation
 from typing import Optional
 
 from .certs import CertificateSpec, TestCA, Credentials
+from .ports import alloc_ports
+
 
 log = logging.getLogger(__name__)
 
@@ -95,11 +99,14 @@ class EnvConfig:
         self.nghttpx_with_h3 = re.match(r'.* nghttp3/.*', p.stdout.strip())
         log.debug(f'nghttpx -v: {p.stdout}')
 
-        self.http_port = self.config['test']['http_port']
-        self.https_port = self.config['test']['https_port']
-        self.proxy_port = self.config['test']['proxy_port']
-        self.proxys_port = self.config['test']['proxys_port']
-        self.h3_port = self.config['test']['h3_port']
+        self.ports = alloc_ports(port_specs={
+            'http': socket.SOCK_STREAM,
+            'https': socket.SOCK_STREAM,
+            'proxy': socket.SOCK_STREAM,
+            'proxys': socket.SOCK_STREAM,
+            'caddy': socket.SOCK_STREAM,
+            'caddys': socket.SOCK_STREAM,
+        })
         self.httpd = self.config['httpd']['httpd']
         self.apachectl = self.config['httpd']['apachectl']
         self.apxs = self.config['httpd']['apxs']
@@ -126,6 +133,7 @@ class EnvConfig:
         ]
 
         self.nghttpx = self.config['nghttpx']['nghttpx']
+        self._nghttpx_version = None
         self.nghttpx_with_h3 = False
         if len(self.nghttpx) == 0:
             self.nghttpx = 'nghttpx'
@@ -136,10 +144,12 @@ class EnvConfig:
                 # not a working nghttpx
                 self.nghttpx = None
             else:
+                self._nghttpx_version = re.sub(r'^nghttpx\s*', '', p.stdout.strip())
                 self.nghttpx_with_h3 = re.match(r'.* nghttp3/.*', p.stdout.strip()) is not None
                 log.debug(f'nghttpx -v: {p.stdout}')
 
         self.caddy = self.config['caddy']['caddy']
+        self._caddy_version = None
         if len(self.caddy.strip()) == 0:
             self.caddy = None
         if self.caddy is not None:
@@ -149,10 +159,9 @@ class EnvConfig:
                 if p.returncode != 0:
                     # not a working caddy
                     self.caddy = None
+                self._caddy_version = re.sub(r' .*', '', p.stdout.strip())
             except:
                 self.caddy = None
-        self.caddy_http_port = self.config['caddy']['http_port']
-        self.caddy_https_port = self.config['caddy']['https_port']
 
     @property
     def httpd_version(self):
@@ -188,6 +197,14 @@ class EnvConfig:
         if not os.path.isfile(self.apxs):
             return f"apxs ({self.apxs}) not found"
         return None
+
+    @property
+    def nghttpx_version(self):
+        return self._nghttpx_version
+
+    @property
+    def caddy_version(self):
+        return self._caddy_version
 
 
 class Env:
@@ -241,6 +258,14 @@ class Env:
     @staticmethod
     def httpd_version() -> str:
         return Env.CONFIG.httpd_version
+
+    @staticmethod
+    def nghttpx_version() -> str:
+        return Env.CONFIG.nghttpx_version
+
+    @staticmethod
+    def caddy_version() -> str:
+        return Env.CONFIG.caddy_version
 
     @staticmethod
     def httpd_is_at_least(minv) -> bool:
@@ -303,36 +328,36 @@ class Env:
         return self.CONFIG.proxy_domain
 
     @property
-    def http_port(self) -> str:
-        return self.CONFIG.http_port
+    def http_port(self) -> int:
+        return self.CONFIG.ports['http']
 
     @property
-    def https_port(self) -> str:
-        return self.CONFIG.https_port
+    def https_port(self) -> int:
+        return self.CONFIG.ports['https']
 
     @property
-    def h3_port(self) -> str:
-        return self.CONFIG.h3_port
+    def h3_port(self) -> int:
+        return self.https_port
 
     @property
     def proxy_port(self) -> str:
-        return self.CONFIG.proxy_port
+        return self.CONFIG.ports['proxy']
 
     @property
     def proxys_port(self) -> str:
-        return self.CONFIG.proxys_port
+        return self.CONFIG.ports['proxys']
 
     @property
     def caddy(self) -> str:
         return self.CONFIG.caddy
 
     @property
-    def caddy_https_port(self) -> str:
-        return self.CONFIG.caddy_https_port
+    def caddy_https_port(self) -> int:
+        return self.CONFIG.ports['caddys']
 
     @property
-    def caddy_http_port(self) -> str:
-        return self.CONFIG.caddy_http_port
+    def caddy_http_port(self) -> int:
+        return self.CONFIG.ports['caddy']
 
     @property
     def curl(self) -> str:
