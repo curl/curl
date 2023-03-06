@@ -22,16 +22,30 @@
 #
 ###########################################################################
 #
-import logging
-import os
-import sys
-from typing import Optional
+import sys, os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), 'http'))
 
 import pytest
-
+from testenv import Env
 
 def pytest_report_header(config, startdir):
-    return f"curl tests"
+    # Env inits its base properties only once, we can report them here
+    env = Env()
+    report = [
+        f'Testing curl {env.curl_version()}',
+        f'  httpd: {env.httpd_version()}, http:{env.http_port} https:{env.https_port}',
+        f'  httpd-proxy: {env.httpd_version()}, http:{env.proxy_port} https:{env.proxys_port}'
+    ]
+    if env.have_h3_server():
+        report.extend([
+            f'  nghttpx: {env.nghttpx_version()}, h3:{env.https_port}'
+        ])
+    if env.has_caddy():
+        report.extend([
+            f'  Caddy: {env.caddy_version()}, http:{env.caddy_http_port} https:{env.caddy_https_port}'
+        ])
+    return '\n'.join(report)
 
 
 def pytest_addoption(parser):
