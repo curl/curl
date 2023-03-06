@@ -1118,7 +1118,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   for(ccp = cert.version.beg; ccp < cert.version.end; ccp++)
     version = (version << 8) | *(const unsigned char *) ccp;
   if(data->set.ssl.certinfo) {
-    ccp = curl_maprintf("%lx", version);
+    ccp = curl_maprintf("%x", version);
     if(!ccp)
       return CURLE_OUT_OF_MEMORY;
     result = Curl_ssl_push_certinfo(data, certnum, "Version", ccp);
