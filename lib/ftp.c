@@ -2675,7 +2675,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
   int ftpcode;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
-  static const char ftpauth[][4]  = { "SSL", "TLS" };
+  static const char * const ftpauth[] = { "SSL", "TLS" };
   size_t nread = 0;
 
   if(pp->sendleft)
