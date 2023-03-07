@@ -199,9 +199,10 @@ if (x) {;}
            _libcurl_save_libs=$LIBS
            LIBS="$LIBS $LIBCURL"
 
-           AC_CHECK_FUNC(curl_free,,
-              AC_DEFINE(curl_free,free,
-                [Define curl_free() as free() if our version of curl lacks curl_free.]))
+           AC_CHECK_DECL([curl_free],[],
+              [AC_DEFINE([curl_free],[free],
+                [Define curl_free() as free() if our version of curl lacks curl_free.])],
+              [[#include <curl/curl.h>]])
 
            CPPFLAGS=$_libcurl_save_cppflags
            LIBS=$_libcurl_save_libs
