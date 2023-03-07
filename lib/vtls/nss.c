@@ -1536,36 +1536,6 @@ static void nss_cleanup(void)
   initialized = 0;
 }
 
-/*
- * This function uses SSL_peek to determine connection status.
- *
- * Return codes:
- *     1 means the connection is still in place
- *     0 means the connection has been closed
- *    -1 means the connection status is unknown
- */
-static int nss_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
-  int rc;
-  char buf;
-
-  (void)data;
-  DEBUGASSERT(backend);
-
-  rc =
-    PR_Recv(backend->handle, (void *)&buf, 1, PR_MSG_PEEK,
-            PR_SecondsToInterval(1));
-  if(rc > 0)
-    return 1; /* connection still in place */
-
-  if(rc == 0)
-    return 0; /* connection has been closed */
-
-  return -1;  /* connection status unknown */
-}
-
 static void close_one(struct ssl_connect_data *connssl)
 {
   /* before the cleanup, check whether we are using a client certificate */
@@ -2524,7 +2494,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   nss_init,                     /* init */
   nss_cleanup,                  /* cleanup */
   nss_version,                  /* version */
-  nss_check_cxn,                /* check_cxn */
+  Curl_none_check_cxn,          /* check_cxn */
   /* NSS has no shutdown function provided and thus always fail */
   Curl_none_shutdown,           /* shutdown */
   nss_data_pending,             /* data_pending */

@@ -770,7 +770,7 @@ static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
 
 static bool cf_msh3_conn_is_alive(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  bool input_pending)
+                                  bool *input_pending)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
 
