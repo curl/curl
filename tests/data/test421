@@ -1,0 +1,85 @@
+<testcase>
+<info>
+<keywords>
+header_json
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 200 OK
+server: nginx
+date: Tue, 07 Mar 2023 15:14:41 GMT
+content-type: application/json
+content-length: 6
+vary: Accept-Encoding
+access-control-allow-origin: *
+vary: Accept-Encoding
+referrer-policy: strict-origin-when-cross-origin
+access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+access-control-max-age: 1728000
+access-control-allow-headers: Authorization, Content-Type, AuthorizationOauth, X-EARLY-ACCESS
+access-control-expose-headers: 
+vary: Accept
+etag: W/"2678f9ab2ba550d164e7cc014aefd31e"
+cache-control: max-age=0, private, must-revalidate
+x-request-id: 375b343b3d2ecf9b442c0daf00fc4a9a
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+referrer-policy: strict-origin-when-cross-origin
+feature-policy: accelerometer 'none'; camera 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; payment 'none'; usb 'none'
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET multiple headers and %{header_json}
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{stderr}%{header_json}\n' -s
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stderr mode="text">
+{"server":["nginx"],
+"date":["Tue, 07 Mar 2023 15:14:41 GMT"],
+"content-type":["application/json"],
+"content-length":["6"],
+"vary":["Accept-Encoding","Accept-Encoding","Accept"],
+"access-control-allow-origin":["*"],
+"referrer-policy":["strict-origin-when-cross-origin","strict-origin-when-cross-origin"],
+"access-control-allow-methods":["GET, POST, PUT, DELETE, OPTIONS"],
+"access-control-max-age":["1728000"],
+"access-control-allow-headers":["Authorization, Content-Type, AuthorizationOauth, X-EARLY-ACCESS"],
+"access-control-expose-headers":["\r"],
+"etag":["W/\"2678f9ab2ba550d164e7cc014aefd31e\""],
+"cache-control":["max-age=0, private, must-revalidate"],
+"x-request-id":["375b343b3d2ecf9b442c0daf00fc4a9a"],
+"strict-transport-security":["max-age=31536000; includeSubDomains"],
+"x-content-type-options":["nosniff"],
+"x-xss-protection":["1; mode=block"],
+"feature-policy":["accelerometer 'none'; camera 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; payment 'none'; usb 'none'"]
+}
+</stderr>
+</verify>
+</testcase>
