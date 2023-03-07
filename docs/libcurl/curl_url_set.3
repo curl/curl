@@ -54,6 +54,10 @@ does not know about, the \fBCURLU_NON_SUPPORT_SCHEME\fP flags bit must be
 set. Otherwise, this function returns \fICURLUE_UNSUPPORTED_SCHEME\fP on URL
 schemes it does not recognize.
 
+This function call has no particular maximum length for any provided input
+string. In the real world, excessively long field in URLs will cause problems
+even if this API accepts them.
+
 The \fIflags\fP argument is a bitmask with independent features.
 .SH PARTS
 .IP CURLUPART_URL
@@ -66,16 +70,25 @@ will be replaced with the information of the newly set URL.
 Pass a pointer to a null-terminated string to the \fIurl\fP parameter. The
 string must point to a correctly formatted "RFC 3986+" URL or be a NULL
 pointer.
+
+Unless \fICURLU_NO_AUTHORITY\fP is set, a blank host name is not allowed in
+the URL.
 .IP CURLUPART_SCHEME
 Scheme cannot be URL decoded on set. libcurl only accepts setting schemes up
 to 40 bytes long.
 .IP CURLUPART_USER
 .IP CURLUPART_PASSWORD
 .IP CURLUPART_OPTIONS
+The options field is an optional field that might follow the password in the
+userinfo part. It is only recognized/used when parsing URLs for the following
+schemes: pop3, smtp and imap. This function however allows users to
+independently set this field at will.
 .IP CURLUPART_HOST
 The host name. If it is IDNA the string must then be encoded as your locale
 says or UTF-8 (when WinIDN is used). If it is a bracketed IPv6 numeric address
 it may contain a zone id (or you can use CURLUPART_ZONEID).
+
+Unless \fICURLU_NO_AUTHORITY\fP is set, a blank host name is not allowed to set.
 .IP CURLUPART_ZONEID
 If the host name is a numeric IPv6 address, this field can also be set.
 .IP CURLUPART_PORT
