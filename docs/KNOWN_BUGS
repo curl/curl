@@ -80,7 +80,6 @@ problems may have been fixed or changed somewhat since this was written.
  10.3 FTPS over SOCKS
 
  11. Internals
- 11.1 Curl leaks .onion hostnames in DNS
  11.2 error buffer not set if connection to multiple addresses fails
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
@@ -524,14 +523,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 
 11. Internals
-
-11.1 Curl leaks .onion hostnames in DNS
-
- Curl sends DNS requests for hostnames with a .onion TLD. This leaks
- information about what the user is attempting to access, and violates this
- requirement of RFC7686: https://datatracker.ietf.org/doc/html/rfc7686
-
- Issue: https://github.com/curl/curl/issues/543
 
 11.2 error buffer not set if connection to multiple addresses fails
 
