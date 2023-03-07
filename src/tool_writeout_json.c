@@ -110,11 +110,6 @@ void headerJSON(FILE *stream, struct per_transfer *per)
   fputc('{', stream);
   while((header = curl_easy_nextheader(per->curl, CURLH_HEADER, -1,
                                        prev))) {
-    if(prev)
-      fputs(",\n", stream);
-    jsonWriteString(stream, header->name, TRUE);
-    fputc(':', stream);
-    prev = header;
     if(header->amount > 1) {
       if(!header->index) {
         /* act on the 0-index entry and pull the others in, then output in a
@@ -122,6 +117,11 @@ void headerJSON(FILE *stream, struct per_transfer *per)
         size_t a = header->amount;
         size_t i = 0;
         char *name = header->name;
+        if(prev)
+          fputs(",\n", stream);
+        jsonWriteString(stream, header->name, TRUE);
+        fputc(':', stream);
+        prev = header;
         fputc('[', stream);
         do {
           jsonWriteString(stream, header->value, FALSE);
@@ -132,13 +132,18 @@ void headerJSON(FILE *stream, struct per_transfer *per)
                               -1, &header))
             break;
         } while(1);
+        fputc(']', stream);
       }
-      fputc(']', stream);
     }
     else {
+      if(prev)
+        fputs(",\n", stream);
+      jsonWriteString(stream, header->name, TRUE);
+      fputc(':', stream);
       fputc('[', stream);
       jsonWriteString(stream, header->value, FALSE);
       fputc(']', stream);
+      prev = header;
     }
   }
   fputs("\n}", stream);
