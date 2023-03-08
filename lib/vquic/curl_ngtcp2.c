@@ -953,7 +953,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
 }
 
 /*
- * write_resp_raw() copies resonse data in raw format to the `data`'s
+ * write_resp_raw() copies response data in raw format to the `data`'s
   * receive buffer. If not enough space is available, it appends to the
  * `data`'s overflow buffer.
  */
