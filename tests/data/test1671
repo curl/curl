@@ -64,6 +64,8 @@ Accept: */*
 "etag":["\"21025-dc7-39462498\""],
 "accept-ranges":["bytes"],
 "set-cookie":["firstcookie=want1; path=/","2cookie=want2; path=/","cookie3=want3; path=/"],
+"funny-head":["yesyes"],
+"content-type":["text/html"],
 "content-length":["6"],
 "connection":["close"]
 }
