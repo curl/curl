@@ -39,7 +39,7 @@
 
 extern FILE *tool_stderr;
 
-#ifndef CURL_DO_NOT_OVERRIDE_STDERR
+#if !defined(CURL_DO_NOT_OVERRIDE_STDERR) && !defined(UNITTESTS)
 #ifdef stderr
 #undef stderr
 #endif
