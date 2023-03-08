@@ -46,7 +46,7 @@ http
 HTTP GET multiple headers and %{header_json}
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{stderr}%{header_json}' -s
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{stderr}%{header_json}\n' -s
 </command>
 </client>
 
@@ -60,7 +60,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stderr nonewline="yes" mode="text">
+<stderr mode="text">
 {"server":["nginx"],
 "date":["Tue, 07 Mar 2023 15:14:41 GMT"],
 "content-type":["application/json"],
