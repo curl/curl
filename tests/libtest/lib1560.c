@@ -141,6 +141,7 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"https://test%test", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://example.com%252f%40@example.net",
    "https | example.com%2f@ | [12] | [13] | example.net | [15] | / "
    "| [16] | [17]",
@@ -509,13 +510,10 @@ static const struct urltestcase get_url_list[] = {
   {"http://example.com%3a127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://example.com%09127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://example.com%2F127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
-  {"https://%this", "https://%25this/", 0, 0, CURLUE_OK},
-  {"https://h%c", "https://h%25c/", 0, 0, CURLUE_OK},
-  {"https://%%%%%%", "https://%25%25%25%25%25%25/", 0, 0, CURLUE_OK},
   {"https://%41", "https://A/", 0, 0, CURLUE_OK},
   {"https://%20", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://%41%0d", "", 0, 0, CURLUE_BAD_HOSTNAME},
-  {"https://%25", "https://%25/", 0, 0, CURLUE_OK},
+  {"https://%25", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://_%c0_", "https://_\xC0_/", 0, 0, CURLUE_OK},
   {"https://_%c0_", "https://_%C0_/", 0, CURLU_URLENCODE, CURLUE_OK},
 
