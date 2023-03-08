@@ -1374,7 +1374,7 @@ CURLU *curl_url_dup(CURLU *in)
 CURLUcode curl_url_get(CURLU *u, CURLUPart what,
                        char **part, unsigned int flags)
 {
-  char *ptr;
+  const char *ptr;
   CURLUcode ifmissing = CURLUE_UNKNOWN_PART;
   char portbuf[7];
   bool urldecode = (flags & CURLU_URLDECODE)?1:0;
