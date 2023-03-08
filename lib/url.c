@@ -341,6 +341,11 @@ void Curl_freeset(struct Curl_easy *data)
   data->state.url = NULL;
 
   Curl_mime_cleanpart(&data->set.mimepost);
+
+#ifndef CURL_DISABLE_COOKIES
+  curl_slist_free_all(data->set.cookielist);
+  data->set.cookielist = NULL;
+#endif
 }
 
 /* free the URL pieces */
@@ -431,9 +436,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_dyn_free(&data->state.headerb);
   Curl_safefree(data->state.ulbuf);
   Curl_flush_cookies(data, TRUE);
-#ifndef CURL_DISABLE_COOKIES
-  curl_slist_free_all(data->set.cookielist); /* clean up list */
-#endif
   Curl_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
   Curl_altsvc_cleanup(&data->asi);
   Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
