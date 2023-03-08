@@ -34,9 +34,6 @@
 /* In other tool files stderr is defined as tool_stderr by tool_setup.h */
 FILE *tool_stderr;
 
-/* true if tool_stderr has been freopened or set to stdout */
-bool tool_stderr_modified;
-
 void tool_init_stderr(void)
 {
   tool_stderr = stderr;
@@ -51,7 +48,6 @@ void tool_set_stderr_file(char *filename)
 
   if(!strcmp(filename, "-")) {
     tool_stderr = stdout;
-    tool_stderr_modified = true;
     return;
   }
 
@@ -73,5 +69,4 @@ void tool_set_stderr_file(char *filename)
     return;
   }
   tool_stderr = stderr;
-  tool_stderr_modified = true;
 }
