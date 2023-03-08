@@ -1441,11 +1441,8 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     break;
   case CURLUPART_PATH:
     ptr = u->path;
-    if(!ptr) {
-      ptr = u->path = strdup("/");
-      if(!u->path)
-        return CURLUE_OUT_OF_MEMORY;
-    }
+    if(!ptr)
+      ptr = "/";
     break;
   case CURLUPART_QUERY:
     ptr = u->query;
@@ -1555,8 +1552,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
               return CURLUE_OUT_OF_MEMORY;
             host++;
           }
-          free(u->host);
-          u->host = Curl_dyn_ptr(&enc);
+          allochost = Curl_dyn_ptr(&enc);
         }
       }
 
