@@ -1350,7 +1350,7 @@ void curl_url_cleanup(CURLU *u)
     }                                           \
   } while(0)
 
-CURLU *curl_url_dup(CURLU *in)
+CURLU *curl_url_dup(const CURLU *in)
 {
   struct Curl_URL *u = calloc(sizeof(struct Curl_URL), 1);
   if(u) {
@@ -1371,10 +1371,10 @@ CURLU *curl_url_dup(CURLU *in)
   return NULL;
 }
 
-CURLUcode curl_url_get(CURLU *u, CURLUPart what,
+CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
                        char **part, unsigned int flags)
 {
-  char *ptr;
+  const char *ptr;
   CURLUcode ifmissing = CURLUE_UNKNOWN_PART;
   char portbuf[7];
   bool urldecode = (flags & CURLU_URLDECODE)?1:0;
