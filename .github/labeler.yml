@@ -50,14 +50,14 @@ build:
 - all: ['winbuild/**']
 
 CI:
-- all: ['.azure-pipelines.yml']
-- all: ['.circleci/**']
-- all: ['.cirrus.yml']
-- all: ['.github/**']
-- all: ['appveyor.yml']
-- all: ['tests/azure.pm']
-- all: ['tests/appveyor.pm']
-- all: ['tests/CI.pm']
+- any: ['.azure-pipelines.yml']
+- any: ['.circleci/**']
+- any: ['.cirrus.yml']
+- any: ['.github/**']
+- any: ['appveyor.yml']
+- any: ['tests/azure.pm']
+- any: ['tests/appveyor.pm']
+- any: ['tests/CI.pm']
 
 cmake:
 - all: ['**/CMakeLists.txt']
@@ -68,6 +68,7 @@ cmdline tool:
 - all: ['src/**']
 
 connecting & proxies:
+- all: ['docs/CONNECTION-FILTERS.md']
 - all: ['docs/libcurl/opts/CURLINFO_CONNECT*']
 - all: ['docs/libcurl/opts/CURLINFO_PROXY*']
 - all: ['docs/libcurl/opts/CURLOPT_ADDRESS*']
@@ -81,6 +82,7 @@ connecting & proxies:
 - all: ['docs/libcurl/opts/CURLOPT_TCP*']
 - all: ['docs/libcurl/opts/CURLOPT_TIMEOUT*']
 - all: ['lib/cf-socket.*']
+- all: ['lib/cfilters.*']
 - all: ['lib/conncache.*']
 - all: ['lib/connect.*']
 - all: ['lib/http_proxy.*']
@@ -98,6 +100,7 @@ cookies:
 
 cryptography:
 - all: ['docs/CIPHERS.md']
+- all: ['docs/RUSTLS.md']
 - all: ['docs/libcurl/opts/CURLOPT_EGDSOCKET*']
 - all: ['lib/*sha256*']
 - all: ['lib/curl_des.*']
@@ -152,12 +155,15 @@ HTTP:
 - all: ['docs/libcurl/opts/CURLOPT_REFER*']
 - all: ['docs/libcurl/opts/CURLOPT_TRAILER*']
 - all: ['docs/libcurl/opts/CURLOPT_TRANSFER_ENCODING*']
-- all: ['lib/cf-http*']
+- all: ['lib/cf-https*']
 - all: ['lib/cookie.*']
 - all: ['lib/h2h3.*']
 - all: ['lib/http*']
+- all: ['tests/http*']
 - all: ['tests/http-server.pl']
 - all: ['tests/http/*']
+- all: ['tests/nghttp*']
+- all: ['tests/tests-http/*']
 
 HTTP/2:
 - all: ['docs/HTTP2.md']
@@ -166,6 +172,8 @@ HTTP/2:
 - all: ['tests/http2-server.pl']
 
 HTTP/3:
+- all: ['.github/workflows/ngtcp2*']
+- all: ['.github/workflows/pytest.yml']
 - all: ['docs/HTTP3.md']
 - all: ['lib/vquic/**']
 - all: ['tests/http3-server.pl']
@@ -182,7 +190,7 @@ LDAP:
 
 libcurl API:
 - all: ['docs/libcurl/ABI.md']
-- all: ['include/curl/**']
+- any: ['include/curl/**']
 
 MIME:
 - all: ['docs/libcurl/curl_mime_*']
@@ -204,6 +212,7 @@ name lookup:
 - all: ['lib/doh*']
 - all: ['lib/host*']
 - all: ['lib/idn*']
+- all: ['lib/inet_pton.*']
 - all: ['lib/socketpair*']
 - all: ['tests/server/resolve.c']
 
@@ -244,7 +253,7 @@ SMTP:
 - all: ['lib/smtp.*']
 
 tests:
-- all: ['tests/**']
+- any: ['tests/**']
 
 TFTP:
 - all: ['lib/tftp.*']
@@ -267,8 +276,10 @@ TLS:
 - all: ['lib/vtls/**']
 
 URL:
+- all: ['**/urlapi*']
 - all: ['docs/libcurl/curl_url*']
 - all: ['docs/URL-SYNTAX.md']
+- all: ['include/curl/urlapi.h']
 - all: ['lib/urlapi*']
 - all: ['lib/url.*']
 
@@ -276,6 +287,7 @@ WebSocket:
 - all: ['docs/WEBSOCKET.md*']
 - all: ['docs/libcurl/opts/CURLOPT_WS_*']
 - all: ['docs/libcurl/curl_ws_*']
+- all: ['include/curl/websockets.h']
 - all: ['lib/ws.*']
 
 Windows:
