@@ -22,9 +22,6 @@
 #
 ###########################################################################
 
-# TODO build a special libcurlu library for unittests.
-#return()
-
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
@@ -36,10 +33,18 @@ include_directories(
   ${CURL_BINARY_DIR}/include      # To be able to reach "curl/curl.h"
 )
 
-foreach(_testfile ${UNITPROGS})
-  add_executable(${_testfile} EXCLUDE_FROM_ALL ${_testfile}.c ${UNITFILES})
-  add_dependencies(testdeps ${_testfile})
-  target_link_libraries(${_testfile} libcurl ${CURL_LIBS})
-  set_target_properties(${_testfile}
-      PROPERTIES COMPILE_DEFINITIONS "UNITTESTS")
-endforeach()
+# TODO build a special libcurlu library for unittests.
+# Until that happens, only build the unit tests when creating a static libcurl
+# or else they will fail to link. Some of the tests require the special libcurlu
+# build, so filter those out until we get libcurlu.
+list(FILTER UNITPROGS EXCLUDE REGEX
+  "unit1394|unit1395|unit1604|unit1608|unit1621|unit1650|unit1653|unit1655|unit1660|unit2600")
+if(NOT BUILD_SHARED_LIBS)
+  foreach(_testfile ${UNITPROGS})
+    add_executable(${_testfile} EXCLUDE_FROM_ALL ${_testfile}.c ${UNITFILES})
+    add_dependencies(testdeps ${_testfile})
+    target_link_libraries(${_testfile} libcurl ${CURL_LIBS})
+    set_target_properties(${_testfile}
+        PROPERTIES COMPILE_DEFINITIONS "UNITTESTS")
+  endforeach()
+endif()
