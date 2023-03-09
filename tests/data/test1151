@@ -41,6 +41,9 @@ HTTP with too long cookies
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -c log/cookies%TESTNUMBER.txt
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

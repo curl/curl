@@ -118,6 +118,9 @@ Many Set-Cookie response headers
 <command>
 http://attack.invalid:%HTTPPORT/a/b/%TESTNUMBER -c log/cookie%TESTNUMBER --resolve attack.invalid:%HTTPPORT:%HOSTIP
 </command>
+<features>
+cookies
+</features>
 </client>
 
 #

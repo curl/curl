@@ -52,6 +52,9 @@ TZ=GMT
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b log/jar%TESTNUMBER.txt -b log/jar%TESTNUMBER-2.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

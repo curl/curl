@@ -27,6 +27,7 @@ Set-Cookie: a=b; Domain=.me.;
 # Client-side
 <client>
 <features>
+cookies
 proxy
 </features>
 <server>

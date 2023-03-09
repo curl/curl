@@ -40,6 +40,7 @@ example.fake	FALSE	/c	FALSE	2139150993	moo2	indeed
 example.fake	TRUE	/c	FALSE	2139150993	moo3	indeed
 </file>
 <features>
+cookies
 proxy
 </features>
 </client>

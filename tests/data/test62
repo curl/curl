@@ -42,6 +42,9 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/%T
 
 .foo.com	TRUE	/moo	TRUE	0	test3	maybe
 </file>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

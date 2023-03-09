@@ -45,6 +45,9 @@ HTTP with cookiejar without cookies left
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b none -c log/cookies%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

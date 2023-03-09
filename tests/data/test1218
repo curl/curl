@@ -33,6 +33,7 @@ HTTP cookies and domains with same prefix
 http://example.fake/c/%TESTNUMBER http://example.fake/c/%TESTNUMBER http://bexample.fake/c/%TESTNUMBER -b nonexisting -x %HOSTIP:%HTTPPORT
 </command>
 <features>
+cookies
 proxy
 </features>
 </client>

@@ -39,6 +39,7 @@ Set-Cookie: time=2
 # Client-side
 <client>
 <features>
+cookies
 ipv6
 </features>
 <server>

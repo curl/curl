@@ -62,6 +62,7 @@ HTTP cookie expiry date at Jan 1 00:00:00 GMT 1970
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -x %HOSTIP:%HTTPPORT -c log/cookies%TESTNUMBER.jar
 </command>
 <features>
+cookies
 proxy
 </features>
 </client>

@@ -133,6 +133,9 @@ http://test31.curl:%HTTPPORT/we/want/%TESTNUMBER -b none -c log/jar%TESTNUMBER.t
 <precheck>
 perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
 </precheck>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

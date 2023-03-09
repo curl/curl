@@ -29,6 +29,9 @@ Get same cookie page several times
  <command>
 "http://%HOSTIP:%HTTPPORT/want/{%TESTNUMBER,%TESTNUMBER,%TESTNUMBER}" -b none
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

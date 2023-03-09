@@ -77,6 +77,9 @@ HTTP Location: following with cookies
  <command>
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -c log/jar%TESTNUMBER
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"
