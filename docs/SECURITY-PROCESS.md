@@ -68,9 +68,9 @@ announcement.
   repository via a normal PR - but without mentioning it being a security
   vulnerability.
 
-- The monetary reward part of the bug-bounty is managed by the IBB team and
-  the reporter is asked to request the reward from them after the issue has
-  been completely handled and published by curl.
+- The monetary reward part of the bug-bounty is managed by the Internet Bug
+  Bounty team and the reporter is asked to request the reward from them after
+  the issue has been completely handled and published by curl.
 
 - No more than 10 days before release, inform
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
