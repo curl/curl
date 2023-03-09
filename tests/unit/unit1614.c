@@ -158,9 +158,7 @@ UNITTEST_START
       err++;
     }
   }
-  return err;
+  fail_if(err, "errors");
 }
-#else
-return 0;
 #endif
 UNITTEST_STOP
