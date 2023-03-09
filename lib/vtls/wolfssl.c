@@ -501,16 +501,6 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
               conn_config->CApath : "none");
         return CURLE_SSL_CACERT_BADFILE;
       }
-      else {
-        /* Just continue with a warning if no strict certificate
-           verification is required. */
-        infof(data, "error setting certificate verify locations,"
-              " continuing anyway:");
-      }
-    }
-    else {
-      /* Everything is fine. */
-      infof(data, "successfully set certificate verify locations:");
     }
     infof(data, " CAfile: %s",
           conn_config->CAfile ? conn_config->CAfile : "none");
