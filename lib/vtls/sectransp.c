@@ -3377,13 +3377,15 @@ static ssize_t sectransp_recv(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
 
   again:
+  *curlcode = CURLE_OK;
   err = SSLRead(backend->ssl_ctx, buf, buffersize, &processed);
 
   if(err != noErr) {
     switch(err) {
       case errSSLWouldBlock:  /* return how much we read (if anything) */
-        if(processed)
+        if(processed) {
           return (ssize_t)processed;
+        }
         *curlcode = CURLE_AGAIN;
         return -1L;
         break;
@@ -3395,7 +3397,7 @@ static ssize_t sectransp_recv(struct Curl_cfilter *cf,
       case errSSLClosedGraceful:
       case errSSLClosedNoNotify:
         *curlcode = CURLE_OK;
-        return -1L;
+        return 0;
         break;
 
         /* The below is errSSLPeerAuthCompleted; it's not defined in
@@ -3406,8 +3408,10 @@ static ssize_t sectransp_recv(struct Curl_cfilter *cf,
           CURLcode result = verify_cert(cf, data, conn_config->CAfile,
                                         conn_config->ca_info_blob,
                                         backend->ssl_ctx);
-          if(result)
-            return result;
+          if(result) {
+            *curlcode = result;
+            return -1;
+          }
         }
         goto again;
       default:
