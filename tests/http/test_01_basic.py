@@ -62,7 +62,7 @@ class TestBasic:
         assert r.json['server'] == env.domain1
 
     # simple https: GET, h2 wanted and got
-    def test_01_02_h2_get(self, env: Env, httpd):
+    def test_01_03_h2_get(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'
         r = curl.http_get(url=url, extra_args=['--http2'])
@@ -72,7 +72,7 @@ class TestBasic:
         assert r.json['server'] == env.domain1
 
     # simple https: GET, h2 unsupported, fallback to h1
-    def test_01_02_h2_unsupported(self, env: Env, httpd):
+    def test_01_04_h2_unsupported(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'https://{env.domain2}:{env.https_port}/data.json'
         r = curl.http_get(url=url, extra_args=['--http2'])
@@ -82,9 +82,8 @@ class TestBasic:
         assert r.json['server'] == env.domain2
 
     # simple h3: GET, want h3 and get it
-    @pytest.mark.skipif(condition=not Env.have_h3_curl(), reason="no h3 curl")
-    @pytest.mark.skipif(condition=not Env.have_h3_server(), reason="no h3 server")
-    def test_01_03_h3_get(self, env: Env, httpd, nghttpx):
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
+    def test_01_05_h3_get(self, env: Env, httpd, nghttpx):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.h3_port}/data.json'
         r = curl.http_get(url=url, extra_args=['--http3'])

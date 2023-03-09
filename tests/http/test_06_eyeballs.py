@@ -40,9 +40,11 @@ log = logging.getLogger(__name__)
 class TestEyeballs:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, nghttpx):
+    def _class_scope(self, env, httpd, nghttpx):
         if env.have_h3():
             nghttpx.start_if_needed()
+        httpd.clear_extra_configs()
+        httpd.reload()
 
     # download using only HTTP/3 on working server
     @pytest.mark.skipif(condition=not Env.have_h3(), reason=f"missing HTTP/3 support")

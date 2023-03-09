@@ -41,9 +41,11 @@ log = logging.getLogger(__name__)
 class TestGoAway:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, nghttpx):
+    def _class_scope(self, env, httpd, nghttpx):
         if env.have_h3():
             nghttpx.start_if_needed()
+        httpd.clear_extra_configs()
+        httpd.reload()
 
     # download files sequentially with delay, reload server for GOAWAY
     def test_03_01_h2_goaway(self, env: Env, httpd, nghttpx, repeat):
@@ -78,7 +80,7 @@ class TestGoAway:
         assert r.duration >= timedelta(seconds=count)
 
     # download files sequentially with delay, reload server for GOAWAY
-    @pytest.mark.skipif(condition=not Env.have_h3_server(), reason="no h3 server")
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx, repeat):
         proto = 'h3'
         count = 3

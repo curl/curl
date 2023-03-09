@@ -51,12 +51,12 @@ jobs:
         build:
         - name: quiche
           install_packages: zlib1g-dev
-          install_steps: quiche
+          install_steps: quiche pytest
           configure: LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release" --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src --enable-debug --with-quiche=/home/runner/work/curl/curl/quiche/target/release
 
         - name: bearssl
           install_packages: zlib1g-dev
-          install_steps: bearssl
+          install_steps: bearssl pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
 
         - name: bearssl-clang
@@ -66,7 +66,7 @@ jobs:
 
         - name: libressl
           install_packages: zlib1g-dev
-          install_steps: libressl
+          install_steps: libressl pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
 
         - name: libressl-clang
@@ -76,7 +76,7 @@ jobs:
 
         - name: mbedtls
           install_packages: libnghttp2-dev
-          install_steps: mbedtls
+          install_steps: mbedtls pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
 
         - name: mbedtls-clang
@@ -91,7 +91,7 @@ jobs:
 
         - name: openssl3
           install_packages: zlib1g-dev
-          install_steps: gcc-11 openssl3
+          install_steps: gcc-11 openssl3 pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
         - name: openssl3-O3
@@ -114,7 +114,7 @@ jobs:
           configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
 
         - name: rustls
-          install_steps: rust rustls
+          install_steps: rust rustls pytest
           configure: --with-rustls=$HOME/rustls --enable-debug
 
         - name: Intel compiler - without SSL
@@ -265,6 +265,18 @@ jobs:
         printenv >> $GITHUB_ENV
       name: 'install Intel compilers'
 
+    - if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+      run: |
+        sudo apt-get install apache2 apache2-dev libnghttp2-dev
+        sudo python3 -m pip install impacket pytest cryptography multipart
+        git clone --depth=1 -b master https://github.com/icing/mod_h2
+        cd mod_h2
+        autoreconf -fi
+        ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig"
+        make
+        sudo make install
+      name: 'install pytest and apach2-dev mod-h2'
+
     - run: autoreconf -fi
       name: 'autoreconf'
 
@@ -282,5 +294,14 @@ jobs:
 
     - run: make V=1 test-ci
       name: 'run tests'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
+
+    - if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+      # run for `tests` directory, so pytest does not pick up any other
+      # packages we might have built here
+      run:
+        pytest tests
+      name: 'run pytest'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"

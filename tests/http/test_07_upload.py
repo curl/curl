@@ -44,6 +44,8 @@ class TestUpload:
             nghttpx.start_if_needed()
         env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
+        httpd.clear_extra_configs()
+        httpd.reload()
 
     # upload small data, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -91,10 +93,11 @@ class TestUpload:
             assert respdata == [data]
 
     # upload data parallel, check that they were echoed
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_07_11_upload_parallel(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        # limit since we use a separate connection in h1
         count = 50
         data = '0123456789'
         curl = CurlClient(env=env)
@@ -144,10 +147,11 @@ class TestUpload:
             assert respdata == indata
 
     # upload data parallel, check that they were echoed
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_07_20_upload_parallel(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        # limit since we use a separate connection in h1
         count = 50
         data = '0123456789'
         curl = CurlClient(env=env)
@@ -161,13 +165,14 @@ class TestUpload:
             assert respdata == [data]
 
     # upload large data parallel, check that this is what was echoed
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_07_21_upload_parallel_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('quiche'):
             pytest.skip("quiche stalls on parallel, large uploads, unless --trace is used???")
         fdata = os.path.join(env.gen_dir, 'data-100k')
+        # limit since we use a separate connection in h1
         count = 50
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'

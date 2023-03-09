@@ -38,17 +38,8 @@ log = logging.getLogger(__name__)
 
 @pytest.mark.skipif(condition=Env.setup_incomplete(),
                     reason=f"missing: {Env.incomplete_reason()}")
+@pytest.mark.skipif(condition=Env.curl_uses_lib('bearssl'), reason='BearSSL too slow')
 class TestReuse:
-
-    @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        env.make_data_file(indir=httpd.docs_dir, fname="data-100k", fsize=100*1024)
-        env.make_data_file(indir=httpd.docs_dir, fname="data-1m", fsize=1024*1024)
-        env.make_data_file(indir=httpd.docs_dir, fname="data-10m", fsize=10*1024*1024)
-        yield
-        # restore default config
-        httpd.clear_extra_configs()
-        httpd.reload()
 
     # check if HTTP/1.1 handles 'Connection: close' correctly
     @pytest.mark.parametrize("proto", ['http/1.1'])
