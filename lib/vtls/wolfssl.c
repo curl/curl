@@ -94,6 +94,7 @@
 struct ssl_backend_data {
   SSL_CTX* ctx;
   SSL*     handle;
+  CURLcode io_result;       /* result of last BIO cfilter operation */
 };
 
 #ifdef OPENSSL_EXTRA
@@ -279,12 +280,16 @@ static long bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
 static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
+  struct ssl_connect_data *connssl = cf->ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
+  connssl->backend->io_result = result;
+  DEBUGF(LOG_CF(data, cf, "bio_write(len=%d) -> %zd, %d",
+                blen, nwritten, result));
   wolfSSL_BIO_clear_retry_flags(bio);
   if(nwritten < 0 && CURLE_AGAIN == result)
     BIO_set_retry_read(bio);
@@ -294,6 +299,7 @@ static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
 static int bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
+  struct ssl_connect_data *connssl = cf->ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   CURLcode result = CURLE_OK;
@@ -304,6 +310,9 @@ static int bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
+  connssl->backend->io_result = result;
+  DEBUGF(LOG_CF(data, cf, "bio_read(len=%d) -> %zd, %d",
+                blen, nread, result));
   wolfSSL_BIO_clear_retry_flags(bio);
   if(nread < 0 && CURLE_AGAIN == result)
     BIO_set_retry_read(bio);
@@ -789,6 +798,9 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
     }
 #endif
+    else if(backend->io_result == CURLE_AGAIN) {
+      return CURLE_OK;
+    }
     else {
       failf(data, "SSL_connect failed with error %d: %s", detail,
           ERR_error_string(detail, error_buffer));
@@ -948,7 +960,6 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
   ERR_clear_error();
 
   rc = SSL_write(backend->handle, mem, memlen);
-
   if(rc <= 0) {
     int err = SSL_get_error(backend->handle, rc);
 
@@ -956,9 +967,17 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
       /* there's data pending, re-invoke SSL_write() */
+      DEBUGF(LOG_CF(data, cf, "wolfssl_send(len=%zu) -> AGAIN", len));
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
+      if(backend->io_result == CURLE_AGAIN) {
+        DEBUGF(LOG_CF(data, cf, "wolfssl_send(len=%zu) -> AGAIN", len));
+        *curlcode = CURLE_AGAIN;
+        return -1;
+      }
+      DEBUGF(LOG_CF(data, cf, "wolfssl_send(len=%zu) -> %d, %d",
+                    len, rc, err));
       failf(data, "SSL write: %s, errno %d",
             ERR_error_string(err, error_buffer),
             SOCKERRNO);
@@ -966,6 +985,7 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
       return -1;
     }
   }
+  DEBUGF(LOG_CF(data, cf, "wolfssl_send(len=%zu) -> %d", len, rc));
   return rc;
 }
 
@@ -995,19 +1015,19 @@ static void wolfssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
-                            char *buf,
-                            size_t buffersize,
+                            char *buf, size_t blen,
                             CURLcode *curlcode)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_backend_data *backend = connssl->backend;
   char error_buffer[WOLFSSL_MAX_ERROR_SZ];
-  int buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
+  int buffsize = (blen > (size_t)INT_MAX) ? INT_MAX : (int)blen;
   int nread;
 
   DEBUGASSERT(backend);
 
   ERR_clear_error();
+  *curlcode = CURLE_OK;
 
   nread = SSL_read(backend->handle, buf, buffsize);
 
@@ -1016,22 +1036,31 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
 
     switch(err) {
     case SSL_ERROR_ZERO_RETURN: /* no more data */
-      break;
+      DEBUGF(LOG_CF(data, cf, "wolfssl_recv(len=%zu) -> CLOSED", blen));
+      *curlcode = CURLE_OK;
+      return 0;
     case SSL_ERROR_NONE:
       /* FALLTHROUGH */
     case SSL_ERROR_WANT_READ:
       /* FALLTHROUGH */
     case SSL_ERROR_WANT_WRITE:
       /* there's data pending, re-invoke SSL_read() */
+      DEBUGF(LOG_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen));
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
+      if(backend->io_result == CURLE_AGAIN) {
+        DEBUGF(LOG_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen));
+        *curlcode = CURLE_AGAIN;
+        return -1;
+      }
       failf(data, "SSL read: %s, errno %d",
             ERR_error_string(err, error_buffer), SOCKERRNO);
       *curlcode = CURLE_RECV_ERROR;
       return -1;
     }
   }
+  DEBUGF(LOG_CF(data, cf, "wolfssl_recv(len=%zu) -> %d", blen, nread));
   return nread;
 }
 
