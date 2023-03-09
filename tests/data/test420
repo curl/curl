@@ -48,6 +48,9 @@ http://%HOSTIP:%HTTPPORT/func_test/del_cookie -b log/cookie%TESTNUMBER -c log/sa
 #HttpOnly_%HOSTIP	FALSE	/	FALSE	1709598616	mycookie1	4900
 #HttpOnly_%HOSTIP	FALSE	/func_test/	FALSE	0	mycookie	1200
 </file>
+<features>
+cookies
+</features>
 </client>
 
 #

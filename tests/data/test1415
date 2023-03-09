@@ -47,6 +47,7 @@ TZ=GMT
 http://example.com/we/want/%TESTNUMBER -b none -c log/jar%TESTNUMBER.txt -x %HOSTIP:%HTTPPORT
 </command>
 <features>
+cookies
 proxy
 </features>
 </client>

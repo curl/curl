@@ -31,6 +31,9 @@ HTTP, receive cookies when using custom Host:, domain using only two dots
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -c log/jar%TESTNUMBER.txt -H "Host: host.NOT_DISCLOSED.se"
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

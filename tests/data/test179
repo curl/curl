@@ -39,6 +39,7 @@ supertrooper.fake	FALSE	/b	FALSE	0		moo1	indeed
 supertrooper.fake	FALSE	/c	FALSE	2139150993	moo2	indeed
 </file>
 <features>
+cookies
 proxy
 </features>
 </client>
