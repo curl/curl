@@ -869,7 +869,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
-    /* If body started on this stream, then receiving DATA is illegal. */
+    /* If !body started on this stream, then receiving DATA is illegal. */
     DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] recv frame DATA", stream_id));
     if(!stream->bodystarted) {
       rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
@@ -953,6 +953,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] recv RST", stream_id));
     stream->closed = TRUE;
     stream->reset = TRUE;
+    drain_this(cf, data);
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
     break;
   case NGHTTP2_WINDOW_UPDATE:
     DEBUGF(LOG_CF(data, cf, "[h2sid=%u] recv WINDOW_UPDATE", stream_id));
@@ -1041,44 +1043,43 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   struct HTTP *stream;
   int rv;
   (void)session;
-  (void)stream_id;
 
-  if(stream_id) {
-    /* get the stream from the hash based on Stream ID, stream ID zero is for
-       connection-oriented stuff */
-    data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-    if(!data_s) {
-      /* We could get stream ID not in the hash.  For example, if we
-         decided to reject stream (e.g., PUSH_PROMISE). */
-      return 0;
-    }
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] on_stream_close(), %s (err %d)",
-                  stream_id, nghttp2_http2_strerror(error_code), error_code));
-    stream = data_s->req.p.http;
-    if(!stream)
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-
-    stream->closed = TRUE;
-    if(CF_DATA_CURRENT(cf) != data_s) {
-      drain_this(cf, data_s);
-      Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
-    }
-    stream->error = error_code;
-
-    /* remove the entry from the hash as the stream is now gone */
-    rv = nghttp2_session_set_stream_user_data(session, stream_id, 0);
-    if(rv) {
-      infof(data_s, "http/2: failed to clear user_data for stream %u",
-            stream_id);
-      DEBUGASSERT(0);
-    }
-    if(stream_id == ctx->pause_stream_id) {
-      DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] closed the pause stream",
-                    stream_id));
-      ctx->pause_stream_id = 0;
-    }
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] closed, cleared", stream_id));
+  /* get the stream from the hash based on Stream ID, stream ID zero is for
+     connection-oriented stuff */
+  data_s = stream_id?
+             nghttp2_session_get_stream_user_data(session, stream_id) : NULL;
+  if(!data_s) {
+    return 0;
   }
+  stream = data_s->req.p.http;
+  DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] on_stream_close(), %s (err %d)",
+                stream_id, nghttp2_http2_strerror(error_code), error_code));
+  if(!stream)
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+
+  stream->closed = TRUE;
+  stream->error = error_code;
+  if(stream->error)
+    stream->reset = TRUE;
+
+  if(CF_DATA_CURRENT(cf) != data_s) {
+    drain_this(cf, data_s);
+    Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
+  }
+
+  /* remove `data_s` from the nghttp2 stream */
+  rv = nghttp2_session_set_stream_user_data(session, stream_id, 0);
+  if(rv) {
+    infof(data_s, "http/2: failed to clear user_data for stream %u",
+          stream_id);
+    DEBUGASSERT(0);
+  }
+  if(stream_id == ctx->pause_stream_id) {
+    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] closed the pause stream",
+                  stream_id));
+    ctx->pause_stream_id = 0;
+  }
+  DEBUGF(LOG_CF(data_s, cf, "[h2sid=%u] closed now", stream_id));
   return 0;
 }
 
@@ -1394,7 +1395,8 @@ static void http2_data_done(struct Curl_cfilter *cf,
     ctx->pause_stream_id = 0;
   }
 
-  if(premature || (!stream->closed && stream->stream_id)) {
+  (void)premature;
+  if(!stream->closed && stream->stream_id) {
     /* RST_STREAM */
     DEBUGF(LOG_CF(data, cf, "[h2sid=%u] RST", stream->stream_id));
     if(!nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
@@ -1588,8 +1590,6 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
     }
   }
 
-  /* Reset to FALSE to prevent infinite loop in readwrite_data function. */
-  stream->closed = FALSE;
   if(stream->error == NGHTTP2_REFUSED_STREAM) {
     DEBUGF(LOG_CF(data, cf, "[h2sid=%u] REFUSED_STREAM, try again on a new "
                   "connection", stream->stream_id));
@@ -1603,6 +1603,11 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
           stream->stream_id, nghttp2_http2_strerror(stream->error),
           stream->error);
     *err = CURLE_HTTP2_STREAM;
+    return -1;
+  }
+  else if(stream->reset) {
+    failf(data, "HTTP/2 stream %u was reset", stream->stream_id);
+    *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
     return -1;
   }
 
@@ -1640,7 +1645,7 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
 
   stream->close_handled = TRUE;
 
-  DEBUGF(LOG_CF(data, cf, "http2_recv returns 0, http2_handle_stream_close"));
+  DEBUGF(LOG_CF(data, cf, "[h2sid=%u] closed cleanly", stream->stream_id));
   return 0;
 }
 
@@ -1722,16 +1727,24 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct HTTP *stream = data->req.p.http;
   ssize_t nread = -1;
   struct cf_call_data save;
+  bool conn_is_closed = FALSE;
 
   CF_DATA_SAVE(save, cf, data);
 
-  /* IFF transfer was RST by server or
-   * we got a final GOAWAY and the last processed stream ID, as announced
-   * by the server, is lower than this stream's ID, we will never see
-   * anything more for this stream, so give up */
-  if(stream->reset ||
-     (ctx->goaway && ctx->goaway_error &&
+  /* If the h2 session has told us to GOAWAY with an error AND
+   * indicated the highest stream id it has processes AND
+   * the stream we are trying to read has a higher id, this
+   * means we will most likely not receive any more for it.
+   * Treat this as if the server explicitly had RST the stream */
+  if((ctx->goaway && ctx->goaway_error &&
+      ctx->last_stream_id > 0 &&
       ctx->last_stream_id < stream->stream_id)) {
+    stream->reset = TRUE;
+  }
+
+  /* If a stream is RST, it does not matter what state the h2 session
+   * is in, our answer to receiving data is always the same. */
+  if(stream->reset) {
     *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
     nread = -1;
     goto out;
@@ -1860,57 +1873,40 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     stream->memlen = 0;
 
     if(ctx->inbuflen > 0) {
-      DEBUGF(LOG_CF(data, cf, "Use data left in connection buffer, nread=%zd",
-                    ctx->inbuflen - ctx->nread_inbuf));
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%u] %zd bytes in inbuf",
+                    stream->stream_id, ctx->inbuflen - ctx->nread_inbuf));
       if(h2_process_pending_input(cf, data, err))
         return -1;
     }
 
-    while(stream->memlen == 0          /* have no data for this stream */
-          && !ctx->pause_stream_id     /* we are not paused either */
-          && ctx->inbuflen == 0) {     /* and out input buffer is empty */
+    while(stream->memlen == 0 &&       /* have no data for this stream */
+          !stream->closed &&           /* and it is not closed/reset */
+          !ctx->pause_stream_id &&     /* we are not paused either */
+          ctx->inbuflen == 0 &&       /* and out input buffer is empty */
+          !conn_is_closed) {          /* and connection is not closed */
       /* Receive data from the "lower" filters */
       nread = Curl_conn_cf_recv(cf->next, data, ctx->inbuf, H2_BUFSIZE, err);
       if(nread < 0) {
-        if(*err != CURLE_AGAIN)
-          failf(data, "Failed receiving HTTP2 data");
-        else if(stream->closed) {
-          /* received when the stream was already closed! */
-          nread = http2_handle_stream_close(cf, data, stream, err);
-          goto out;
+        DEBUGASSERT(*err);
+        if(*err == CURLE_AGAIN) {
+          break;
         }
-
-        /* nothing to read from the lower layers, clear drain */
-        drained_transfer(cf, data);
-        nread = -1;
-        goto out;
+        failf(data, "Failed receiving HTTP2 data");
+        conn_is_closed = TRUE;
       }
       else if(nread == 0) {
-        if(!stream->closed || stream->reset) {
-          /* This will happen when the server or proxy server is SIGKILLed
-             during data transfer. We should emit an error since our data
-             received may be incomplete. */
-          failf(data, "HTTP/2 stream %u was not closed cleanly before"
-                " end of the underlying stream",
-                stream->stream_id);
-          drained_transfer(cf, data);
-          *err = CURLE_PARTIAL_FILE;
-          nread = -1;
-          goto out;
-        }
-
-        DEBUGF(LOG_CF(data, cf, "[h2sid=%u] end of stream",
+        DEBUGF(LOG_CF(data, cf, "[h2sid=%u] underlying connection is closed",
                       stream->stream_id));
-        *err = CURLE_OK;
-        nread = 0;
-        goto out;
+        conn_is_closed = TRUE;
       }
-
-      DEBUGF(LOG_CF(data, cf, "read %zd from connection", nread));
-      ctx->inbuflen = nread;
-      DEBUGASSERT(ctx->nread_inbuf == 0);
-      if(h2_process_pending_input(cf, data, err))
-        return -1;
+      else {
+        DEBUGF(LOG_CF(data, cf, "[h2sid=%u] read %zd from connection",
+                      stream->stream_id, nread));
+        ctx->inbuflen = nread;
+        DEBUGASSERT(ctx->nread_inbuf == 0);
+        if(h2_process_pending_input(cf, data, err))
+          return -1;
+      }
     }
 
   }
@@ -1947,9 +1943,16 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     *err = CURLE_OK;
     nread = retlen;
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%u] cf_h2_recv -> %zd",
-                  stream->stream_id, nread));
     goto out;
+  }
+
+  if(conn_is_closed && !stream->closed) {
+    /* underlying connection is closed and we have nothing for the stream.
+     * Treat this as a RST */
+    stream->closed = stream->reset = TRUE;
+      failf(data, "HTTP/2 stream %u was not closed cleanly before"
+            " end of the underlying connection",
+            stream->stream_id);
   }
 
   if(stream->closed) {
@@ -1964,9 +1967,9 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   *err = CURLE_AGAIN;
   nread = -1;
-  DEBUGF(LOG_CF(data, cf, "[h2sid=%u] recv -> AGAIN",
-                stream->stream_id));
 out:
+  DEBUGF(LOG_CF(data, cf, "[h2sid=%u] cf_recv -> %zd, %d",
+                stream->stream_id, nread, *err));
   CF_DATA_RESTORE(cf, save);
   return nread;
 }
