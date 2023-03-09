@@ -316,10 +316,6 @@ UNITTEST_STOP
 #else
 
 UNITTEST_START
-{
-  /* nothing to do, just fail */
-  return 1;
-}
 UNITTEST_STOP
 
 #endif
