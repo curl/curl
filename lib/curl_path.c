@@ -32,70 +32,65 @@
 #include "escape.h"
 #include "memdebug.h"
 
+#define MAX_SSHPATH_LEN 100000 /* arbitrary */
+
 /* figure out the path to work with in this particular request */
 CURLcode Curl_getworkingpath(struct Curl_easy *data,
                              char *homedir,  /* when SFTP is used */
                              char **path) /* returns the  allocated
                                              real path to work with */
 {
-  char *real_path = NULL;
   char *working_path;
   size_t working_path_len;
+  struct dynbuf npath;
   CURLcode result =
     Curl_urldecode(data->state.up.path, 0, &working_path,
                    &working_path_len, REJECT_ZERO);
   if(result)
     return result;
 
+  /* new path to switch to in case we need to */
+  Curl_dyn_init(&npath, MAX_SSHPATH_LEN);
+
   /* Check for /~/, indicating relative to the user's home directory */
-  if(data->conn->handler->protocol & CURLPROTO_SCP) {
-    real_path = malloc(working_path_len + 1);
-    if(!real_path) {
+  if((data->conn->handler->protocol & CURLPROTO_SCP) &&
+     (working_path_len > 3) && (!memcmp(working_path, "/~/", 3))) {
+    /* It is referenced to the home directory, so strip the leading '/~/' */
+    if(Curl_dyn_addn(&npath, &working_path[3], working_path_len - 3)) {
       free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
-    if((working_path_len > 3) && (!memcmp(working_path, "/~/", 3)))
-      /* It is referenced to the home directory, so strip the leading '/~/' */
-      memcpy(real_path, working_path + 3, working_path_len - 2);
-    else
-      memcpy(real_path, working_path, 1 + working_path_len);
   }
-  else if(data->conn->handler->protocol & CURLPROTO_SFTP) {
-    if((working_path_len > 1) && (working_path[1] == '~')) {
-      size_t homelen = strlen(homedir);
-      real_path = malloc(homelen + working_path_len + 1);
-      if(!real_path) {
-        free(working_path);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      /* It is referenced to the home directory, so strip the
-         leading '/' */
-      memcpy(real_path, homedir, homelen);
-      /* Only add a trailing '/' if homedir does not end with one */
-      if(homelen == 0 || real_path[homelen - 1] != '/') {
-        real_path[homelen] = '/';
-        homelen++;
-        real_path[homelen] = '\0';
-      }
-      if(working_path_len > 3) {
-        memcpy(real_path + homelen, working_path + 3,
-               1 + working_path_len -3);
-      }
+  else if((data->conn->handler->protocol & CURLPROTO_SFTP) &&
+          (working_path_len > 2) && !memcmp(working_path, "/~/", 3)) {
+    size_t len;
+    const char *p;
+    int copyfrom = 3;
+    if(Curl_dyn_add(&npath, homedir)) {
+      free(working_path);
+      return CURLE_OUT_OF_MEMORY;
     }
-    else {
-      real_path = malloc(working_path_len + 1);
-      if(!real_path) {
-        free(working_path);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      memcpy(real_path, working_path, 1 + working_path_len);
+    /* Copy a separating '/' if homedir does not end with one */
+    len = Curl_dyn_len(&npath);
+    p = Curl_dyn_ptr(&npath);
+    if(len && (p[len-1] != '/'))
+      copyfrom = 2;
+
+    if(Curl_dyn_addn(&npath,
+                     &working_path[copyfrom], working_path_len - copyfrom)) {
+      free(working_path);
+      return CURLE_OUT_OF_MEMORY;
     }
   }
 
-  free(working_path);
+  if(Curl_dyn_len(&npath)) {
+    free(working_path);
 
-  /* store the pointer for the caller to receive */
-  *path = real_path;
+    /* store the pointer for the caller to receive */
+    *path = Curl_dyn_ptr(&npath);
+  }
+  else
+    *path = working_path;
 
   return CURLE_OK;
 }
