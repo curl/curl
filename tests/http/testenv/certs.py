@@ -441,7 +441,7 @@ class TestCA:
             x509.ExtendedKeyUsage([
                 ExtendedKeyUsageOID.SERVER_AUTH,
             ]),
-            critical=True
+            critical=False
         )
 
     @staticmethod

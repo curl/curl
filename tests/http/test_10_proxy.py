@@ -43,6 +43,8 @@ class TestProxy:
         push_dir = os.path.join(httpd.docs_dir, 'push')
         if not os.path.exists(push_dir):
             os.makedirs(push_dir)
+        httpd.clear_extra_configs()
+        httpd.reload()
 
     # download via http: proxy (no tunnel)
     def test_10_01_proxy_http(self, env: Env, httpd, repeat):
@@ -57,6 +59,8 @@ class TestProxy:
         r.check_stats(count=1, exp_status=200)
 
     # download via https: proxy (no tunnel)
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
+                        reason='curl lacks HTTPS-proxy support')
     def test_10_02_proxy_https(self, env: Env, httpd, repeat):
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
@@ -83,6 +87,8 @@ class TestProxy:
         r.check_stats(count=1, exp_status=200)
 
     # download http: via https: proxytunnel
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
+                        reason='curl lacks HTTPS-proxy support')
     def test_10_04_proxy_https(self, env: Env, httpd, repeat):
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
@@ -114,6 +120,8 @@ class TestProxy:
         assert r.response['protocol'] == exp_proto
 
     # download https: with proto via https: proxytunnel
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
+                        reason='curl lacks HTTPS-proxy support')
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     def test_10_06_proxy_https(self, env: Env, httpd, proto, repeat):
         curl = CurlClient(env=env)

@@ -58,6 +58,9 @@ class TestPush:
         ])
         # activate the new config
         httpd.reload()
+        yield
+        httpd.clear_extra_configs()
+        httpd.reload()
 
     # download a file that triggers a "103 Early Hints" response
     def test_09_01_early_hints(self, env: Env, httpd, repeat):

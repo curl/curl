@@ -61,8 +61,9 @@ jobs:
     - run: |
         sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
-        sudo python3 -m pip install impacket
-      name: 'install prereqs and impacket'
+        sudo apt-get install apache2 apache2-dev
+        sudo python3 -m pip install impacket pytest cryptography multipart
+      name: 'install prereqs and impacket, pytest, crypto'
 
     - run: |
         git clone --depth=1 -b openssl-3.0.8+quic https://github.com/quictls/openssl
@@ -95,6 +96,15 @@ jobs:
         make install
       name: 'install nghttp2'
 
+    - run: |
+        git clone --depth=1 -b master https://github.com/icing/mod_h2
+        cd mod_h2
+        autoreconf -fi
+        ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig"
+        make
+        sudo make install
+      name: 'install mod_h2'
+
     - uses: actions/checkout@v3
 
     - run: autoreconf -fi
@@ -116,3 +126,9 @@ jobs:
       name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
+
+    - run: pytest -v
+      name: 'run pytest'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
+
