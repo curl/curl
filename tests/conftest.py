@@ -37,7 +37,7 @@ def pytest_report_header(config, startdir):
         f'  httpd: {env.httpd_version()}, http:{env.http_port} https:{env.https_port}',
         f'  httpd-proxy: {env.httpd_version()}, http:{env.proxy_port} https:{env.proxys_port}'
     ]
-    if env.have_h3_server():
+    if env.have_h3():
         report.extend([
             f'  nghttpx: {env.nghttpx_version()}, h3:{env.https_port}'
         ])

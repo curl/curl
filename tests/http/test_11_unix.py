@@ -118,6 +118,7 @@ class TestUnix:
         assert r.exit_code == 35  # CONNECT_ERROR (as faker is not TLS)
 
     # download HTTP/3 via unix socket
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason='h3 not supported')
     def test_11_03_unix_connect_quic(self, env: Env, httpd, uds_faker, repeat):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'
