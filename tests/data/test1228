@@ -32,6 +32,7 @@ HTTP cookie path match
 http://example.fake/hoge/%TESTNUMBER http://example.fake/hogege/ -b nonexisting -x %HOSTIP:%HTTPPORT
 </command>
 <features>
+cookies
 proxy
 </features>
 </client>

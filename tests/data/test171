@@ -34,6 +34,7 @@ HTTP, get cookie with dot prefixed full domain
 -c log/jar%TESTNUMBER -x %HOSTIP:%HTTPPORT http://z.x.com/%TESTNUMBER
 </command>
 <features>
+cookies
 proxy
 </features>
 </client>

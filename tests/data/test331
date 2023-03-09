@@ -43,6 +43,7 @@ HTTP with cookie using host name 'moo'
 -x http://%HOSTIP:%HTTPPORT http://moo/we/want/%TESTNUMBER -b none http://moo/we/want/%TESTNUMBER0002
 </command>
 <features>
+cookies
 proxy
 </features>
 </client>
