@@ -63,10 +63,14 @@ announcement.
 - Update the "security advisory" with the CVE number.
 
 - The security team commits the fix in a private branch. The commit message
-  should ideally contain the CVE number.
+  should ideally contain the CVE number. If the severity level of the issue is
+  set to Low or Medium, the fix is allowed to get merged into the master
+  repository via a normal PR - but without mentioning it being a security
+  vulnerability.
 
-- The security team also decides on and delivers a monetary reward to the
-  reporter as per the bug-bounty policies.
+- The monetary reward part of the bug-bounty is managed by the Internet Bug
+  Bounty team and the reporter is asked to request the reward from them after
+  the issue has been completely handled and published by curl.
 
 - No more than 10 days before release, inform
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
