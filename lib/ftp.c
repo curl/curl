@@ -4092,6 +4092,8 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   }
 
   freedirs(ftpc);
+  Curl_safefree(ftpc->account);
+  Curl_safefree(ftpc->alternative_to_user);
   Curl_safefree(ftpc->prevpath);
   Curl_safefree(ftpc->server_os);
   Curl_pp_disconnect(pp);
@@ -4361,10 +4363,29 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   char *type;
   struct FTP *ftp;
   CURLcode result = CURLE_OK;
+  struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   data->req.p.ftp = ftp = calloc(sizeof(struct FTP), 1);
   if(!ftp)
     return CURLE_OUT_OF_MEMORY;
+
+  /* clone connection related data that is FTP specific */
+  if(data->set.str[STRING_FTP_ACCOUNT]) {
+    ftpc->account = strdup(data->set.str[STRING_FTP_ACCOUNT]);
+    if(!ftpc->account) {
+      free(ftp);
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+  if(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]) {
+    ftpc->alternative_to_user =
+      strdup(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
+    if(!ftpc->alternative_to_user) {
+      Curl_safefree(ftpc->account);
+      free(ftp);
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
 
   ftp->path = &data->state.up.path[1]; /* don't include the initial slash */
 
@@ -4400,7 +4421,9 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   /* get some initial data into the ftp struct */
   ftp->transfer = PPTRANSFER_BODY;
   ftp->downloadsize = 0;
-  conn->proto.ftpc.known_filesize = -1; /* unknown size for now */
+  ftpc->known_filesize = -1; /* unknown size for now */
+  ftpc->use_ssl = data->set.use_ssl;
+  ftpc->ccc = data->set.ftp_ccc;
 
   return result;
 }
