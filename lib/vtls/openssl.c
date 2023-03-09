@@ -3150,7 +3150,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
           return result;
       }
       if(imported_native_ca)
-        infof(data, "successfully imported Windows CA store");
+        infof(data, "imported Windows CA store");
       else
         infof(data, "error importing Windows CA store, continuing anyway");
     }
@@ -3163,7 +3163,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
       }
       else {
         imported_ca_info_blob = true;
-        infof(data, "successfully imported CA certificate blob");
+        infof(data, "imported CA certificate blob");
       }
     }
 
@@ -3176,8 +3176,6 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
           failf(data, "error setting certificate file: %s", ssl_cafile);
           return CURLE_SSL_CACERT_BADFILE;
         }
-        else
-          infof(data, "error setting certificate file, continuing anyway");
       }
       if(ssl_capath && !X509_STORE_load_path(store, ssl_capath)) {
         if(!imported_native_ca && !imported_ca_info_blob) {
@@ -3185,8 +3183,6 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
           failf(data, "error setting certificate path: %s", ssl_capath);
           return CURLE_SSL_CACERT_BADFILE;
         }
-        else
-          infof(data, "error setting certificate path, continuing anyway");
       }
 #else
       /* tell OpenSSL where to find CA certificates that are used to verify the
@@ -3199,10 +3195,6 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
                 ssl_cafile ? ssl_cafile : "none",
                 ssl_capath ? ssl_capath : "none");
           return CURLE_SSL_CACERT_BADFILE;
-        }
-        else {
-          infof(data, "error setting certificate verify locations,"
-                " continuing anyway");
         }
       }
 #endif
@@ -3230,7 +3222,6 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
       return CURLE_SSL_CRL_BADFILE;
     }
     /* Everything is fine. */
-    infof(data, "successfully loaded CRL file:");
     X509_STORE_set_flags(store,
                          X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
 
