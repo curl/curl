@@ -5,6 +5,8 @@ FTP
 PORT
 RETR
 NODATACONN425
+timeout
+FAILURE
 </keywords>
 </info>
 # Server-side

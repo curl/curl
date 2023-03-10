@@ -6,6 +6,7 @@ HTTP GET
 CURLPAUSE_RECV
 chunked Transfer-Encoding
 Trailer:
+DELAY
 </keywords>
 </info>
 

@@ -6,6 +6,8 @@ PORT
 RETR
 NODATACONN150
 flaky
+timeout
+FAILURE
 </keywords>
 </info>
 # Server-side
