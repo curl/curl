@@ -12,6 +12,8 @@ STOR
 multi
 EPRT refused
 NODATACONN
+timeout
+FAILURE
 </keywords>
 </info>
 
