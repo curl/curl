@@ -1352,7 +1352,8 @@ static CURLcode wolfssl_sha256sum(const unsigned char *tmp, /* input */
 {
   wc_Sha256 SHA256pw;
   (void)unused;
-  wc_InitSha256(&SHA256pw);
+  if(wc_InitSha256(&SHA256pw))
+    return CURLE_FAILED_INIT;
   wc_Sha256Update(&SHA256pw, tmp, (word32)tmplen);
   wc_Sha256Final(&SHA256pw, sha256sum);
   return CURLE_OK;

@@ -92,9 +92,10 @@
 
 typedef struct md4_ctx MD4_CTX;
 
-static void MD4_Init(MD4_CTX *ctx)
+static CURLcode MD4_Init(MD4_CTX *ctx)
 {
   md4_init(ctx);
+  return CURLE_OK;
 }
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
@@ -114,9 +115,10 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #elif defined(AN_APPLE_OS)
 typedef CC_MD4_CTX MD4_CTX;
 
-static void MD4_Init(MD4_CTX *ctx)
+static CURLcode MD4_Init(MD4_CTX *ctx)
 {
   (void)CC_MD4_Init(ctx);
+  return CURLE_OK;
 }
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
@@ -137,15 +139,21 @@ struct md4_ctx {
 };
 typedef struct md4_ctx MD4_CTX;
 
-static void MD4_Init(MD4_CTX *ctx)
+static CURLcode MD4_Init(MD4_CTX *ctx)
 {
   ctx->hCryptProv = 0;
   ctx->hHash = 0;
 
-  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
-    CryptCreateHash(ctx->hCryptProv, CALG_MD4, 0, 0, &ctx->hHash);
+  if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    return CURLE_OUT_OF_MEMORY;
+
+  if(!CryptCreateHash(ctx->hCryptProv, CALG_MD4, 0, 0, &ctx->hHash)) {
+    CryptReleaseContext(ctx->hCryptProv, 0);
+    return CURLE_FAILED_INIT;
   }
+
+  return CURLE_OK;
 }
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
@@ -176,10 +184,11 @@ struct md4_ctx {
 };
 typedef struct md4_ctx MD4_CTX;
 
-static void MD4_Init(MD4_CTX *ctx)
+static CURLcode MD4_Init(MD4_CTX *ctx)
 {
   ctx->data = NULL;
   ctx->size = 0;
+  return CURLE_OK;
 }
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
@@ -258,7 +267,7 @@ struct md4_ctx {
 };
 typedef struct md4_ctx MD4_CTX;
 
-static void MD4_Init(MD4_CTX *ctx);
+static CURLcode MD4_Init(MD4_CTX *ctx);
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size);
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
 
@@ -397,7 +406,7 @@ static const void *body(MD4_CTX *ctx, const void *data, unsigned long size)
   return ptr;
 }
 
-static void MD4_Init(MD4_CTX *ctx)
+static CURLcode MD4_Init(MD4_CTX *ctx)
 {
   ctx->a = 0x67452301;
   ctx->b = 0xefcdab89;
@@ -406,6 +415,7 @@ static void MD4_Init(MD4_CTX *ctx)
 
   ctx->lo = 0;
   ctx->hi = 0;
+  return CURLE_OK;
 }
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
@@ -496,14 +506,18 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #endif /* CRYPTO LIBS */
 
-void Curl_md4it(unsigned char *output, const unsigned char *input,
-                const size_t len)
+CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
+                    const size_t len)
 {
   MD4_CTX ctx;
+  CURLcode result;
 
-  MD4_Init(&ctx);
-  MD4_Update(&ctx, input, curlx_uztoui(len));
-  MD4_Final(output, &ctx);
+  result = MD4_Init(&ctx);
+  if(!result) {
+    MD4_Update(&ctx, input, curlx_uztoui(len));
+    MD4_Final(output, &ctx);
+  }
+  return result;
 }
 
 #endif /* USE_CURL_NTLM_CORE */
