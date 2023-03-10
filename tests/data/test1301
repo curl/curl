@@ -1,7 +1,6 @@
 <testcase>
 <info>
 <keywords>
-unittest
 curl_strequal
 </keywords>
 </info>
@@ -12,6 +11,9 @@ curl_strequal
 <server>
 none
 </server>
+<tool>
+lib%TESTNUMBER
+</tool>
  <name>
 curl_strequal tests
  </name>
