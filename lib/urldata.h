@@ -1061,6 +1061,7 @@ struct connectdata {
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
   unsigned char httpversion; /* the HTTP version*10 reported by the server */
   unsigned char connect_only;
+  unsigned char gssapi_delegation; /* inherited from set.gssapi_delegation */
 };
 
 /* The end of connectdata. */
