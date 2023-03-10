@@ -105,8 +105,11 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
-Expect: 100-continue
 
+This is data we upload with PUT
+a second line
+line three
+four is the number of lines
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
@@ -120,7 +123,6 @@ Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAL
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
-Expect: 100-continue
 
 This is data we upload with PUT
 a second line

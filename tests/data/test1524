@@ -61,7 +61,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 4
-Expect: 100-continue
 
 moo
 GET /blah/moo.html&testcase=/%TESTNUMBER0002 HTTP/1.1

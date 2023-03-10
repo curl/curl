@@ -41,7 +41,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 12
-Expect: 100-continue
 
 a few bytes
 </protocol>
