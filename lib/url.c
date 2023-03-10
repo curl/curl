@@ -1315,7 +1315,7 @@ ConnectionExists(struct Curl_easy *data,
            (data->state.httpwant < CURL_HTTP_VERSION_3))))
         continue;
 
-      if(get_protocol_family(needle->handler) == PROTO_FAMILY_SSH) {
+      if(get_protocol_family(needle->handler) & PROTO_FAMILY_SSH) {
         if(!ssh_config_matches(needle, check))
           continue;
       }
