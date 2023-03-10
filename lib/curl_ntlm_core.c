@@ -419,6 +419,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
 {
   size_t len = strlen(password);
   unsigned char *pw;
+  CURLcode result;
   if(len > SIZE_T_MAX/2) /* avoid integer overflow */
     return CURLE_OUT_OF_MEMORY;
   pw = len ? malloc(len * 2) : (unsigned char *)strdup("");
@@ -428,12 +429,13 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
   ascii_to_unicode_le(pw, password, len);
 
   /* Create NT hashed password. */
-  Curl_md4it(ntbuffer, pw, 2 * len);
-  memset(ntbuffer + 16, 0, 21 - 16);
+  result = Curl_md4it(ntbuffer, pw, 2 * len);
+  if(!result)
+    memset(ntbuffer + 16, 0, 21 - 16);
 
   free(pw);
 
-  return CURLE_OK;
+  return result;
 }
 
 #if !defined(USE_WINDOWS_SSPI)

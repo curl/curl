@@ -4730,7 +4730,10 @@ static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
   mdctx = EVP_MD_CTX_create();
   if(!mdctx)
     return CURLE_OUT_OF_MEMORY;
-  EVP_DigestInit(mdctx, EVP_sha256());
+  if(!EVP_DigestInit(mdctx, EVP_sha256())) {
+    EVP_MD_CTX_destroy(mdctx);
+    return CURLE_FAILED_INIT;
+  }
   EVP_DigestUpdate(mdctx, tmp, tmplen);
   EVP_DigestFinal_ex(mdctx, sha256sum, &len);
   EVP_MD_CTX_destroy(mdctx);
