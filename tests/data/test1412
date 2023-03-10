@@ -96,12 +96,6 @@ HTTP GET with --anyauth with two URLs (picking Digest)
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
-<file name="log/put%TESTNUMBER">
-This is data we upload with PUT
-a second line
-line three
-four is the number of lines
-</file>
 </client>
 
 # Verify data after the test has been "shot"
