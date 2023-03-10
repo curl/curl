@@ -288,33 +288,6 @@ static const struct Curl_handler * const protocols[] = {
   (struct Curl_handler *) NULL
 };
 
-/*
- * Dummy handler for undefined protocol schemes.
- */
-
-static const struct Curl_handler Curl_handler_dummy = {
-  "<no protocol>",                      /* scheme */
-  ZERO_NULL,                            /* setup_connection */
-  ZERO_NULL,                            /* do_it */
-  ZERO_NULL,                            /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  0,                                    /* defport */
-  0,                                    /* protocol */
-  0,                                    /* family */
-  PROTOPT_NONE                          /* flags */
-};
-
 void Curl_freeset(struct Curl_easy *data)
 {
   /* Free all dynamic strings stored in the data->set substructure. */
@@ -825,7 +798,7 @@ void Curl_disconnect(struct Curl_easy *data,
      disconnect and shutdown */
   Curl_attach_connection(data, conn);
 
-  if(conn->handler->disconnect)
+  if(conn->handler && conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(data, conn, dead_connection);
 
@@ -1508,10 +1481,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   struct connectdata *conn = calloc(1, sizeof(struct connectdata));
   if(!conn)
     return NULL;
-
-  conn->handler = &Curl_handler_dummy;  /* Be sure we have a handler defined
-                                           already from start to avoid NULL
-                                           situations and checks */
 
   /* and we setup a few fields in case we end up actually using this struct */
 
