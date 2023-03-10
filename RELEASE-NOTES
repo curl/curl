@@ -4,7 +4,7 @@ curl and libcurl 8.0.0
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2834
+ Contributors:                 2838
 
 This release includes the following changes:
 
@@ -20,21 +20,30 @@ This release includes the following bugfixes:
  o CI: update ngtcp2 and nghttp2 for pytest [13]
  o cmake: fix enabling LDAPS on Windows [55]
  o cmake: skip CA-path/bundle auto-detection in cross-builds [57]
+ o connect: fix time_connect and time_appconnect timer statistics [90]
+ o cookie: don't load cookies again when flushing [91]
  o cookie: parse without sscanf()
  o curl: make -w's %{stderr} use the file set with --stderr [30]
  o CURLOPT_PIPEWAIT: allow waited reuse also for subsequent connections [10]
  o DEPRECATE: the original legacy mingw version 1 [43]
+ o doc: fix compiler warning in libcurl.m4 [82]
  o docs/cmdline-opts: mark all global options [6]
+ o docs/SECURITY-PROCESS.md: updates [67]
+ o docs: extend the URL API descriptions [85]
  o docs: note '--data-urlencode' option [7]
  o DYNBUF.md: note Curl_dyn_add* calls Curl_dyn_free on failure [70]
  o easy: remove infof() debug leftover from curl_easy_recv [44]
  o examples/http3.c: use CURL_HTTP_VERSION_3 [46]
+ o ftp: active mode with SSL, add the filter [84]
  o ftp: allocate the wildcard struct on demand [59]
  o ftp: make the EPSV response parser not use sscanf [25]
  o ftp: replace sscanf for MDTM 213 response parsing [23]
  o ftp: replace sscanf for PASV parsing [24]
+ o gssapi: align global `gss_OID_desc` vars to silence ld warnings on macOS ventura [58]
+ o headers: make curl_easy_header and nextheader return different buffers [77]
  o hostip: avoid sscanf and extra buffer copies [42]
  o http2: fix for http2-prior-knowledge when reusing connections [14]
+ o http2: fix handling of RST and GOAWAY to recognize partial transfers [88]
  o http2: fix upload busy loop [71]
  o http: fix unix domain socket use in https connects [28]
  o http: rewrite the status line parser without sscanf [29]
@@ -44,6 +53,7 @@ This release includes the following bugfixes:
  o lib1560: test parsing URLs with ridiculously large fields [60]
  o lib517: verify time stamps without leading zeroes plus some more
  o libcurl-errors.3: add the CURLHcode errors from curl_easy_header.3 [39]
+ o libssh2: only set the memory callbacks when debugging [65]
  o Makefile.mk: delete redundant `HAVE_LDAP_SSL` macro [56]
  o misc: remove support for curl_off_t < 8 bytes [19]
  o mqtt: on send error, return error [40]
@@ -68,21 +78,30 @@ This release includes the following bugfixes:
  o test1470: test socks proxy using unix sockets and connect to https [63]
  o test1960: verify CURL_SOCKOPT_ALREADY_CONNECTED [64]
  o test2600: detect when ALARM_TIMEOUT is in use and adjust [34]
+ o tests: add `cookies` features [68]
  o tests: fix gnutls-serv check [53]
  o tests: HTTP server fixups [3]
  o tests: support for imaps/pop3s/smtps protocols [50]
  o tests: test secure mail protocols with explicit SSL requests [49]
+ o tests: use dynamic ports numbers in pytest suite [89]
  o tool: dump headers even if file is write-only [52]
  o tool_getparam: don't add a new node for just --no-remote-name [5]
  o tool_operate: avoid fclose(NULL) on bad header dump file [12]
  o tool_operate: propagate error codes for missing URL after --next [4]
  o tool_progress: shut off progress meter for --silent in parallel [8]
+ o tool_writeout_json. fix the output for duplicate header names [76]
  o transfer: limit Windows SO_SNDBUF updates to once a second [73]
+ o url: fix logic in connection reuse to deny reuse on "unclean" connections [86]
+ o urlapi: '%' is illegal in host names [80]
+ o urlapi: avoid mutating internals in getter routine [79]
  o urlapi: parse IPv6 literals without ENABLE_IPV6 [61]
+ o urlapi: take const args in _dup and _get functions [78]
  o wildcard: remove files and move functions into ftplistparser.c
  o winbuild: fix makefile clean [31]
+ o wolfSSL: ressurect the BIO `io_result` [54]
  o ws: keep the socket non-blocking [41]
  o x509asn1.c: use correct format specifier for infof() call [47]
+ o x509asn1: use plain %x, not %lx, when the arg is an int [87]
 
 This release includes the following known bugs:
 
@@ -99,15 +118,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andy Alt, Balakrishnan Balasubramanian, Brad Spencer, Cristian Morales Vega,
-  Daniel Stenberg, finkjsc on github, Grisha Levit, Harry Sintonen,
+  Andy Alt, Balakrishnan Balasubramanian, Boris Okunskiy, Brad Spencer,
+  Cristian Morales Vega, Dan Fandrich, Daniel Stenberg,
+  Evgeny Grin (Karlson2k), finkjsc on github, Grisha Levit, Harry Sintonen,
   Ilmari Lauhakangas, JackBoosY on github, Jan Engelhardt, Jelle van der Waa,
-  Jérémy Rabasco, Maciej Domanski, Marcel Raad, marski on github, Matt Jolly,
-  opensslonzos-github on github, Patrick Monnerat, Philip Heiduck,
-  Philipp Engel, Ray Satiro, rwmjones on github, SendSonS on github,
-  Sergey Fionov, Shankar Jadhavar, Stefan Eissing, u20221022 on github,
+  Jérémy Rabasco, Maciej Domanski, Marcel Raad, marski on github,
+  Master Inspire, Matt Jolly, opensslonzos-github on github, Patrick Monnerat,
+  Philip Heiduck, Philipp Engel, Ray Satiro, rcombs on github,
+  rwmjones on github, SandakovMM on github, SendSonS on github, Sergey Fionov,
+  Sergio Mijatovic, Shankar Jadhavar, Stefan Eissing, u20221022 on github,
   Viktor Szakats, 積丹尼 Dan Jacobson
-  (30 contributors)
+  (37 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -164,18 +185,37 @@ References to bug reports and discussions on issues:
  [51] = https://curl.se/bug/?i=10077
  [52] = https://curl.se/bug/?i=10675
  [53] = https://curl.se/bug/?i=10688
+ [54] = https://curl.se/bug/?i=10716
  [55] = https://curl.se/bug/?i=6284
  [56] = https://curl.se/bug/?i=10681
  [57] = https://curl.se/bug/?i=6178
+ [58] = https://curl.se/bug/?i=10718
  [59] = https://curl.se/bug/?i=10639
  [60] = https://curl.se/bug/?i=10665
  [61] = https://curl.se/bug/?i=10660
  [62] = https://curl.se/bug/?i=9843
  [63] = https://curl.se/bug/?i=10662
  [64] = https://curl.se/bug/?i=10651
+ [65] = https://curl.se/bug/?i=10721
  [66] = https://curl.se/bug/?i=10646
+ [67] = https://curl.se/bug/?i=10719
+ [68] = https://curl.se/bug/?i=10713
  [69] = https://curl.se/bug/?i=10626
  [70] = https://curl.se/bug/?i=10645
  [71] = https://curl.se/bug/?i=10449
  [72] = https://curl.se/bug/?i=10632
  [73] = https://curl.se/bug/?i=10611
+ [76] = https://curl.se/bug/?i=10704
+ [77] = https://curl.se/bug/?i=10704
+ [78] = https://curl.se/bug/?i=10708
+ [79] = https://curl.se/bug/?i=10708
+ [80] = https://curl.se/bug/?i=10711
+ [82] = https://curl.se/bug/?i=10710
+ [84] = https://curl.se/bug/?i=10666
+ [85] = https://curl.se/bug/?i=10701
+ [86] = https://curl.se/bug/?i=10690
+ [87] = https://curl.se/bug/?i=10689
+ [88] = https://curl.se/bug/?i=10693
+ [89] = https://curl.se/bug/?i=10692
+ [90] = https://curl.se/bug/?i=10670
+ [91] = https://curl.se/bug/?i=10677
