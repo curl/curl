@@ -990,11 +990,10 @@ FAQ
 
   4.16 My HTTP POST or PUT requests are slow
 
-  libcurl makes all POST and PUT requests (except for POST requests with a
-  tiny request body) use the "Expect: 100-continue" header. This header
-  allows the server to deny the operation early so that libcurl can bail out
-  before having to send any data. This is useful in authentication
-  cases and others.
+  libcurl makes all POST and PUT requests (except for requests with a small
+  request body) use the "Expect: 100-continue" header. This header allows the
+  server to deny the operation early so that libcurl can bail out before having
+  to send any data. This is useful in authentication cases and others.
 
   However, many servers do not implement the Expect: stuff properly and if the
   server does not respond (positively) within 1 second libcurl will continue

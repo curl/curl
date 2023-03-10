@@ -2340,7 +2340,16 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
         return result;
     }
 
-    if(http->postsize) {
+    /* For really small puts we don't use Expect: headers at all, and for
+       the somewhat bigger ones we allow the app to disable it. Just make
+       sure that the expect100header is always set to the preferred value
+       here. */
+    ptr = Curl_checkheaders(data, STRCONST("Expect"));
+    if(ptr) {
+      data->state.expect100header =
+        Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
+    }
+    else if(http->postsize > EXPECT_100_THRESHOLD || http->postsize < 0) {
       result = expect100(data, conn, r);
       if(result)
         return result;

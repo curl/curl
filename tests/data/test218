@@ -45,7 +45,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
-Expect: 100-continue
 
 %if hyper
 1E

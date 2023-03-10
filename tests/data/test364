@@ -43,7 +43,6 @@ Host: %HOSTIP:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 1201
-Expect: 100-continue
 
 %repeat[200 x banana]%
 </protocol>
