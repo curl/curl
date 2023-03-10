@@ -113,7 +113,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #elif defined(AN_APPLE_OS)
 typedef CC_MD4_CTX MD4_CTX;
 
-static void MD4_Init(MD4_CTX *ctx)
+static CURLcode MD4_Init(MD4_CTX *ctx)
 {
   (void)CC_MD4_Init(ctx);
   return CURLE_OK;
