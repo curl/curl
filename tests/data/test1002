@@ -97,7 +97,6 @@ User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 3
-Expect: 100-continue
 
 st
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 HTTP/1.1
@@ -116,7 +115,6 @@ User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 3
-Expect: 100-continue
 
 st
 </protocol>

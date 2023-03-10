@@ -51,7 +51,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 10
-Expect: 100-continue
 
 surprise!
 </protocol>

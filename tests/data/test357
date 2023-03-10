@@ -53,16 +53,9 @@ HTTP PUT with Expect: 100-continue and 417 response
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
 </command>
+# 1053700 x 'x', large enough to invoke the 100-continue behaviour
 <file name="log/test%TESTNUMBER.txt">
-Weird
-     file
-         to
-   upload
-for
-   testing
-the
-   PUT
-      feature
+%repeat[1053700 x x]%
 </file>
 </client>
 
@@ -73,24 +66,16 @@ PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 78
+Content-Length: 1053701
 Expect: 100-continue
 
 PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 78
+Content-Length: 1053701
 
-Weird
-     file
-         to
-   upload
-for
-   testing
-the
-   PUT
-      feature
+%repeat[1053700 x x]%
 </protocol>
 </verify>
 </testcase>

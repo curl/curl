@@ -58,7 +58,6 @@ PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 22
-Expect: 100-continue
 
 This is test PUT data
 POST /1948 HTTP/1.1

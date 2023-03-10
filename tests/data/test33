@@ -49,7 +49,6 @@ Content-Range: bytes 50-99/100
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 50
-Expect: 100-continue
 
 012345678
 012345678

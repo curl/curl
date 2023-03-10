@@ -49,7 +49,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 78
-Expect: 100-continue
 
 Weird
      file
