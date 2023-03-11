@@ -210,7 +210,7 @@ macos_task:
 
   pkginstall_script:
     - echo libtool autoconf automake pkg-config ${install_packages} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-    - "for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break || { echo Error: wait to try again; sleep 10; false; } done"
+    - "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
     - sudo -H python3 -m pip install --upgrade pip
     - sudo -H python3 -m pip install impacket
   configure_script:
