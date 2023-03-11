@@ -80,8 +80,6 @@ endif()
 
 if(ENABLE_UNICODE AND MINGW)
   target_link_libraries(${EXE_NAME} -municode)
-  # GCC doesn't know about wmain
-  set_source_files_properties(tool_main.c PROPERTIES COMPILE_FLAGS "-Wno-missing-prototypes -Wno-missing-declarations")
 endif()
 
 source_group("curlX source files" FILES ${CURLX_CFILES})
