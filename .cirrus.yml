@@ -21,10 +21,23 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Cirrus CI configuration
 # https://cirrus-ci.com/github/curl/curl
+#
+# Cirrus CI configuration:
+# https://cirrus-ci.org/guide/writing-tasks/
 
 freebsd_task:
+  skip: "changesIncludeOnly(
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'packages/**',
+    'plan9/**',
+    'projects/**',
+    'winbuild/**'
+    )"
+
   name: FreeBSD
 
   matrix:
@@ -77,6 +90,15 @@ freebsd_task:
     - make V=1 install
 
 windows_task:
+  skip: "changesIncludeOnly(
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'packages/**',
+    'plan9/**'
+    )"
+
   name: Windows
   timeout_in: 120m
   windows_container:
@@ -135,6 +157,17 @@ windows_task:
     %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
 
 macos_task:
+  skip: "changesIncludeOnly(
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'packages/**',
+    'plan9/**',
+    'projects/**',
+    'winbuild/**'
+    )"
+
   name: macOS arm64
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
