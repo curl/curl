@@ -1,5 +1,4 @@
-#***************************************************************************
-#                                  _   _ ____  _
+#*************************************************************************** #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
 #                            | (__| |_| |  _ <| |___
@@ -21,9 +20,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
+# https://dev.azure.com/daniel0244/curl/_build?view=runs
+#
+# Azure Pipelines configuration:
 # https://aka.ms/yaml
 
 trigger:
@@ -31,6 +30,14 @@ trigger:
     include:
     - 'master'
     - '*/ci'
+  paths:
+    exclude:
+    - '.circleci/*'
+    - '.cirrus.yml'
+    - '.github/*'
+    - 'appveyor.yml'
+    - 'packages/*'
+    - 'plan9/*'
 
 pr:
   branches:
