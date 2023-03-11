@@ -236,7 +236,18 @@ static void main_free(struct GlobalConfig *config)
 ** curl tool main function.
 */
 #ifdef _UNICODE
+
+#if defined(__GNUC__)
+/* GCC doesn't know about wmain() */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#endif
 int wmain(int argc, wchar_t *argv[])
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
 #else
 int main(int argc, char *argv[])
 #endif
