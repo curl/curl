@@ -32,11 +32,11 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
 
-CPPFLAGS += -I$(top_srcdir)/include        \
-            -I$(top_builddir)/lib          \
-            -I$(top_srcdir)/lib            \
-            -I$(top_srcdir)/src            \
-            -I$(top_srcdir)/tests/libtest
+AM_CPPFLAGS = -I$(top_srcdir)/include        \
+              -I$(top_builddir)/lib          \
+              -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/src            \
+              -I$(top_srcdir)/tests/libtest
 
 EXTRA_DIST = Makefile.inc CMakeLists.txt README.md
 
@@ -49,7 +49,7 @@ LDADD = $(top_builddir)/src/libcurltool.la   \
         $(top_builddir)/lib/libcurlu.la      \
         @LDFLAGS@ @LIBCURL_LIBS@ @NSS_LIBS@
 
-CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
+AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
