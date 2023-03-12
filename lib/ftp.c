@@ -4365,7 +4365,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
-  data->req.p.ftp = ftp = calloc(sizeof(struct FTP), 1);
+  ftp = calloc(sizeof(struct FTP), 1);
   if(!ftp)
     return CURLE_OUT_OF_MEMORY;
 
@@ -4386,6 +4386,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
     }
   }
+  data->req.p.ftp = ftp;
 
   ftp->path = &data->state.up.path[1]; /* don't include the initial slash */
 
