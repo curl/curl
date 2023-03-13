@@ -85,9 +85,7 @@ char **test_argv;
 
 struct timeval tv_test_start; /* for test timing */
 
-#ifdef UNITTESTS
 int unitfail; /* for unittests */
-#endif
 
 #ifdef CURLDEBUG
 static void memory_tracking_init(void)
