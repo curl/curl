@@ -35,8 +35,8 @@ authentication:
 build:
 - all: ['**/CMakeLists.txt']
 - all: ['**/Makefile.am']
+- all: ['**/Makefile.inc']
 - all: ['**/Makefile.mk']
-- all: ['**/*.inc']
 - all: ['**/*.m4']
 - all: ['**/*.mk']
 - all: ['lib/libcurl*.in']
@@ -64,8 +64,8 @@ cmake:
 - all: ['CMake/**']
 
 cmdline tool:
-- all: ['docs/cmdline-opts/**']
-- all: ['src/**']
+- any: ['docs/cmdline-opts/**']
+- any: ['src/**']
 
 connecting & proxies:
 - all: ['docs/CONNECTION-FILTERS.md']
@@ -276,12 +276,10 @@ TLS:
 - all: ['lib/vtls/**']
 
 URL:
-- all: ['**/urlapi*']
 - all: ['docs/libcurl/curl_url*']
 - all: ['docs/URL-SYNTAX.md']
 - all: ['include/curl/urlapi.h']
 - all: ['lib/urlapi*']
-- all: ['lib/url.*']
 
 WebSocket:
 - all: ['docs/WEBSOCKET.md*']
@@ -291,8 +289,11 @@ WebSocket:
 - all: ['lib/ws.*']
 
 Windows:
+- all: ['CMake/Platforms/WindowsCache.cmake']
 - all: ['lib/*win32*']
 - all: ['lib/curl_multibyte.*']
 - all: ['lib/rename.*']
+- all: ['lib/vtls/schannel*']
+- all: ['m4/curl-schannel.m4']
 - all: ['projects/**']
 - all: ['winbuild/**']
