@@ -47,29 +47,6 @@ if(WIN32 AND NOT CURL_STATICLIB)
   list(APPEND CSOURCES libcurl.rc)
 endif()
 
-# SET(CSOURCES
-# #  memdebug.c -not used
-# # nwlib.c - Not used
-# # strtok.c - specify later
-# # strtoofft.c - specify later
-# )
-
-# #OPTION(CURL_MALLOC_DEBUG "Debug mallocs in Curl" OFF)
-# MARK_AS_ADVANCED(CURL_MALLOC_DEBUG)
-# IF(CURL_MALLOC_DEBUG)
-# SET(CSOURCES ${CSOURCES}
-# memdebug.c
-# )
-# ENDIF(CURL_MALLOC_DEBUG)
-
-# # only build compat strtoofft if we need to
-# IF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
-# SET(CSOURCES ${CSOURCES}
-# strtoofft.c
-# )
-# ENDIF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
-
-
 # The rest of the build
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../include)
