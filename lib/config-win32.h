@@ -39,8 +39,16 @@
 #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1800)
+#if defined(__MINGW32__) || \
+    (defined(_MSC_VER) && (_MSC_VER >= 1800))
 #define HAVE_INTTYPES_H 1
+#endif
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#if defined(__MINGW32__) || defined(__POCC__) || \
+    (defined(_MSC_VER) && (_MSC_VER >= 1600)) || \
+    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x0582))
+#define HAVE_STDINT_H 1
 #endif
 
 /* Define if you have the <io.h> header file. */
