@@ -1055,7 +1055,6 @@ check_symbol_exists(gethostbyname_r "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME_R)
 
 check_symbol_exists(signal         "${CURL_INCLUDES}" HAVE_SIGNAL)
 check_symbol_exists(strtoll        "${CURL_INCLUDES}" HAVE_STRTOLL)
-check_symbol_exists(_strtoi64      "${CURL_INCLUDES}" HAVE__STRTOI64)
 check_symbol_exists(strerror_r     "${CURL_INCLUDES}" HAVE_STRERROR_R)
 check_symbol_exists(siginterrupt   "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
 check_symbol_exists(getaddrinfo    "${CURL_INCLUDES}" HAVE_GETADDRINFO)

@@ -51,7 +51,6 @@ endif()
 # #  memdebug.c -not used
 # # nwlib.c - Not used
 # # strtok.c - specify later
-# # strtoofft.c - specify later
 # )
 
 # #OPTION(CURL_MALLOC_DEBUG "Debug mallocs in Curl" OFF)
@@ -61,13 +60,6 @@ endif()
 # memdebug.c
 # )
 # ENDIF(CURL_MALLOC_DEBUG)
-
-# # only build compat strtoofft if we need to
-# IF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
-# SET(CSOURCES ${CSOURCES}
-# strtoofft.c
-# )
-# ENDIF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
 
 
 # The rest of the build
