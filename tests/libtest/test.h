@@ -73,9 +73,7 @@ extern int test(char *URL); /* the actual test function provided by each
 
 extern char *hexdump(const unsigned char *buffer, size_t len);
 
-#ifdef UNITTESTS
 extern int unitfail;
-#endif
 
 /*
 ** TEST_ERR_* values must be greater than CURL_LAST CURLcode in order
