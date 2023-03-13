@@ -323,6 +323,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
       struct OperationConfig *config = per->config; /* for the macro below */
 #ifdef CURL_DISABLE_LIBCURL_OPTION
       (void)config;
+      (void)global;
 #endif
       my_setopt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
     }
