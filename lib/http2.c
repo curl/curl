@@ -958,12 +958,12 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     break;
   case NGHTTP2_WINDOW_UPDATE:
     DEBUGF(LOG_CF(data, cf, "[h2sid=%u] recv WINDOW_UPDATE", stream_id));
-    if((data_s->req.keepon & KEEP_SEND_PAUSE) &&
+    if((data_s->req.keepon & KEEP_SEND_HOLD) &&
        (data_s->req.keepon & KEEP_SEND)) {
-      data_s->req.keepon &= ~KEEP_SEND_PAUSE;
+      data_s->req.keepon &= ~KEEP_SEND_HOLD;
       drain_this(cf, data_s);
       Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
-      DEBUGF(LOG_CF(data, cf, "[h2sid=%u] unpausing after win update",
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%u] un-holding after win update",
                     stream_id));
     }
     break;
@@ -2055,8 +2055,8 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
           /* We cannot upload more as the stream's remote window size
            * is 0. We need to receive WIN_UPDATEs before we can continue.
            */
-          data->req.keepon |= KEEP_SEND_PAUSE;
-          DEBUGF(LOG_CF(data, cf, "[h2sid=%u] pausing send as remote flow "
+          data->req.keepon |= KEEP_SEND_HOLD;
+          DEBUGF(LOG_CF(data, cf, "[h2sid=%u] holding send as remote flow "
                  "window is exhausted", stream->stream_id));
         }
     }
@@ -2189,7 +2189,7 @@ static int cf_h2_get_select_socks(struct Curl_cfilter *cf,
 
   /* we're (still uploading OR the HTTP/2 layer wants to send data) AND
      there's a window to send data in */
-  if((((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND) ||
+  if((((k->keepon & KEEP_SENDBITS) == KEEP_SEND) ||
       nghttp2_session_want_write(ctx->h2)) &&
      (nghttp2_session_get_remote_window_size(ctx->h2) &&
       nghttp2_session_get_stream_remote_window_size(ctx->h2,

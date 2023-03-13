@@ -1234,8 +1234,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
   /* Now update the "done" boolean we return */
-  *done = (0 == (k->keepon&(KEEP_RECV|KEEP_SEND|
-                            KEEP_RECV_PAUSE|KEEP_SEND_PAUSE))) ? TRUE : FALSE;
+  *done = (0 == (k->keepon&(KEEP_RECVBITS|KEEP_SENDBITS))) ? TRUE : FALSE;
   result = CURLE_OK;
 out:
   if(result)
