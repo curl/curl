@@ -950,7 +950,7 @@ static int cf_quiche_get_select_socks(struct Curl_cfilter *cf,
   rv |= GETSOCK_READSOCK(0);
 
   /* we're still uploading or the HTTP/3 layer wants to send data */
-  if(((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND)
+  if(((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
      && stream_is_writeable(cf, data))
     rv |= GETSOCK_WRITESOCK(0);
 

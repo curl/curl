@@ -903,7 +903,7 @@ static int cf_ngtcp2_get_select_socks(struct Curl_cfilter *cf,
   rv |= GETSOCK_READSOCK(0);
 
   /* we're still uploading or the HTTP/2 layer wants to send data */
-  if((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND &&
+  if((k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
      (!stream->h3out || stream->h3out->used < H3_SEND_SIZE) &&
      ngtcp2_conn_get_cwnd_left(ctx->qconn) &&
      ngtcp2_conn_get_max_data_left(ctx->qconn) &&
