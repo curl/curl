@@ -103,8 +103,8 @@ endif
 ### Optional features
 
 ifneq ($(findstring -debug,$(CFG)),)
+  CFLAGS += -g
   CPPFLAGS += -DDEBUGBUILD
-  LDFLAGS += -g
 else
   CPPFLAGS += -DNDEBUG
 endif
