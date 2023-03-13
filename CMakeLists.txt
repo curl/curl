@@ -989,7 +989,6 @@ check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
 check_include_file_concat("utime.h"          HAVE_UTIME_H)
 
 check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
-check_include_file_concat("stdint.h"        HAVE_STDINT_H)
 check_include_file_concat("sys/utsname.h"   HAVE_SYS_UTSNAME_H)
 
 check_type_size(size_t  SIZEOF_SIZE_T)
@@ -1263,8 +1262,6 @@ else()
   set(CURL_PULL_SYS_SOCKET_H ${HAVE_SYS_SOCKET_H})
   set(CURL_PULL_SYS_POLL_H ${HAVE_SYS_POLL_H})
 endif()
-set(CURL_PULL_STDINT_H ${HAVE_STDINT_H})
-set(CURL_PULL_INTTYPES_H ${HAVE_INTTYPES_H})
 
 include(CMake/OtherTests.cmake)
 
