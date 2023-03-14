@@ -456,6 +456,42 @@ struct Curl_multi *curl_multi_init(void)
                            CURL_DNS_HASH_SIZE);
 }
 
+static void link_easy(struct Curl_multi *multi,
+                      struct Curl_easy *data)
+{
+  /* We add the new easy entry last in the list. */
+  data->next = NULL; /* end of the line */
+  if(multi->easyp) {
+    struct Curl_easy *last = multi->easylp;
+    last->next = data;
+    data->prev = last;
+    multi->easylp = data; /* the new last node */
+  }
+  else {
+    /* first node, make prev NULL! */
+    data->prev = NULL;
+    multi->easylp = multi->easyp = data; /* both first and last */
+  }
+}
+
+/* unlink the given easy handle from the linked list of easy handles */
+static void unlink_easy(struct Curl_multi *multi,
+                        struct Curl_easy *data)
+{
+  /* make the previous node point to our next */
+  if(data->prev)
+    data->prev->next = data->next;
+  else
+    multi->easyp = data->next; /* point to first node */
+
+  /* make our next point to our previous node */
+  if(data->next)
+    data->next->prev = data->prev;
+  else
+    multi->easylp = data->prev; /* point to last node */
+}
+
+
 CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
                                 struct Curl_easy *data)
 {
@@ -551,19 +587,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->psl = &multi->psl;
 #endif
 
-  /* We add the new entry last in the list. */
-  data->next = NULL; /* end of the line */
-  if(multi->easyp) {
-    struct Curl_easy *last = multi->easylp;
-    last->next = data;
-    data->prev = last;
-    multi->easylp = data; /* the new last node */
-  }
-  else {
-    /* first node, make prev NULL! */
-    data->prev = NULL;
-    multi->easylp = multi->easyp = data; /* both first and last */
-  }
+  link_easy(multi, data);
 
   /* increase the node-counter */
   multi->num_easy++;
@@ -910,17 +934,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     }
   }
 
-  /* make the previous node point to our next */
-  if(data->prev)
-    data->prev->next = data->next;
-  else
-    multi->easyp = data->next; /* point to first node */
-
-  /* make our next point to our previous node */
-  if(data->next)
-    data->next->prev = data->prev;
-  else
-    multi->easylp = data->prev; /* point to last node */
+  unlink_easy(multi, data);
 
   /* NOTE NOTE NOTE
      We do not touch the easy handle here! */
