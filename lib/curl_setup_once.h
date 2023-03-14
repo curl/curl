@@ -69,6 +69,14 @@
 #include <unistd.h>
 #endif
 
+#ifdef USE_WOLFSSL
+#  if defined(HAVE_STDINT_H)
+#    include <stdint.h>
+#  elif defined(HAVE_INTTYPES_H)
+#    include <inttypes.h>
+#  endif
+#endif
+
 #ifdef __hpux
 #  if !defined(_XOPEN_SOURCE_EXTENDED) || defined(_KERNEL)
 #    ifdef _APP32_64BIT_OFF_T
