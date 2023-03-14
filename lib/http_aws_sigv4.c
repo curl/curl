@@ -318,7 +318,7 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
 {
   const char *post_data = data->set.postfields;
   size_t post_data_len = 0;
-  CURLcode ret = CURLE_OUT_OF_MEMORY;
+  CURLcode result;
 
   if(post_data) {
     if(data->set.postfieldsize < 0)
@@ -326,14 +326,11 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
     else
       post_data_len = (size_t)data->set.postfieldsize;
   }
-  ret = Curl_sha256it(sha_hash, (const unsigned char *) post_data,
-                      post_data_len);
-  if(ret)
-    goto fail;
-
-  sha256_to_hex(sha_hex, sha_hash);
-fail:
-  return ret;
+  result = Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+                         post_data_len);
+  if(!result)
+    sha256_to_hex(sha_hex, sha_hash);
+  return result;
 }
 
 #define S3_UNSIGNED_PAYLOAD "UNSIGNED-PAYLOAD"
@@ -355,7 +352,6 @@ static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
     ret = calc_payload_hash(data, sha_hash, sha_hex);
     if(ret)
       goto fail;
-    ret = CURLE_OUT_OF_MEMORY;
   }
   else {
     /* Fall back to s3's UNSIGNED-PAYLOAD */
@@ -501,7 +497,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
       ret = calc_payload_hash(data, sha_hash, sha_hex);
     if(ret)
       goto fail;
-    ret = CURLE_OUT_OF_MEMORY;
 
     payload_hash = sha_hex;
     /* may be shorter than SHA256_HEX_LENGTH, like S3_UNSIGNED_PAYLOAD */
