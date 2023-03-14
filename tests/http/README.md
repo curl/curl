@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 1998 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
 SPDX-License-Identifier: curl
 -->
@@ -18,7 +18,7 @@ platform darwin -- Python 3.9.15, pytest-6.2.0, py-1.10.0, pluggy-0.13.1
 rootdir: /Users/sei/projects/curl
 collected 5 items
 
-tests/httpd/test_01_basic.py .....                                                                                                                                                        
+tests/httpd/test_01_basic.py .....
 ```
 
 Pytest takes arguments. `-v` increases its verbosity and can be used several times. `-k <expr>` can be used to run only matching test cases. The `expr` can be something resembling a python test or just a string that needs to match test cases in their names.
@@ -27,7 +27,7 @@ Pytest takes arguments. `-v` increases its verbosity and can be used several tim
 curl> pytest -vv -k test_01_02
 ```
 
-runs all test cases that have `test_01_02` in their name. This does not have to be the start of the name. 
+runs all test cases that have `test_01_02` in their name. This does not have to be the start of the name.
 
 Depending on your setup, some test cases may be skipped and appear as `s` in the output. If you run pytest verbose, it will also give you the reason for skipping.
 
@@ -41,10 +41,10 @@ You will need:
 3. a local `curl` project build
 3. optionally, a `nghttpx` with HTTP/3 enabled or h3 test cases will be skipped.
 
-### Configuration 
+### Configuration
 
 Via curl's `configure` script you may specify:
- 
+
   * `--with-test-nghttpx=<path-of-nghttpx>` if you have nghttpx to use somewhere outside your `$PATH`.
   * `--with-test-httpd=<httpd-install-path>` if you have an Apache httpd installed somewhere else. On Debian/Ubuntu it will otherwise look into `/usr/bin` and `/usr/sbin` to find those.
 
@@ -88,7 +88,7 @@ In `conftest.py` 3 "fixtures" are defined that are used by all test cases:
 2. `httpd`: the Apache httpd instance, configured and started, then stopped at the end of the test suite. It has sites configured for the domains from `env`. It also loads a local module `mod_curltest?` and makes it available in certain locations. (more on mod_curltest below).
 3. `nghttpx`: an instance of nghttpx that provides HTTP/3 support. `nghttpx` proxies those requests to the `httpd` server. In a direct mapping, so you may access all the resources under the same path as with HTTP/2. Only the port number used for HTTP/3 requests will be different.
 
-`pytest` manages these fixture so that they are created once and terminated before exit. This means you can `Ctrl-C` a running pytest and the server will shutdown. Only when you brutally chop its head off, might there be servers left 
+`pytest` manages these fixture so that they are created once and terminated before exit. This means you can `Ctrl-C` a running pytest and the server will shutdown. Only when you brutally chop its head off, might there be servers left
 behind.
 
 ### Test Cases
@@ -108,7 +108,7 @@ The module source code is found in `testenv/mod_curltest`. It is compiled using 
 The module adds 2 "handlers" to the Apache server (right now). Handler are pieces of code that receive HTTP requests and generate the response. Those handlers are:
 
 * `curltest-echo`: hooked up on the path `/curltest/echo`. This one echoes a request and copies all data from the request body to the response body. Useful for simulating upload and checking that the data arrived as intended.
-* `curltest-tweak`: hooked up on the path `/curltest/tweak`. This handler is more of a Swiss army knife. It interprets parameters from the URL query string to drive its behavior.  
+* `curltest-tweak`: hooked up on the path `/curltest/tweak`. This handler is more of a Swiss army knife. It interprets parameters from the URL query string to drive its behavior.
   * `status=nnn`: generate a response with HTTP status code `nnn`.
   * `chunks=n`: generate `n` chunks of data in the response body, defaults to 3.
   * `chunk_size=nnn`: each chunk should contain `nnn` bytes of data. Maximum is 16KB right now.
@@ -121,15 +121,8 @@ The module adds 2 "handlers" to the Apache server (right now). Handler are piece
 
   * `d`: days (probably not useful here)
   * `h`: hours
-  * `mi`: minutes 
+  * `mi`: minutes
   * `s`: seconds (the default)
   * `ms`: milliseconds
 
 As you can see, `mod_curltest`'s tweak handler allow to simulate many kinds of responses. An example of its use is `test_03_01` where responses are delayed using `chunk_delay`. This gives the response a defined duration and the test uses that to reload `httpd` in the middle of the first request. A graceful reload in httpd lets ongoing requests finish, but will close the connection afterwards and tear down the serving process. The following request need then to open a new connection. This is verified by the test case.
- 
-
-
-
-
-
-
