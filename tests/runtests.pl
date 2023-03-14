@@ -5898,6 +5898,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
   -n       no valgrind
+  --no-debuginfod disable the valgrind debuginfod functionality
   -o variable=value set internal variable to the specified value
   -P proxy use the specified proxy
   -p       print log file contents when a test fails

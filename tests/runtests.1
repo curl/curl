@@ -57,6 +57,10 @@ Prefix a keyword with a tilde (~) to still run it, but ignore the results.
 .IP "-a"
 Continue running the rest of the test cases even if one test fails. By
 default, the test script stops as soon as an error is detected.
+.IP "-ac <curl>"
+Provide a path to a curl binary to talk to APIs (currently only CI test APIs).
+.IP "-am"
+Display test results in automake style output (PASS/FAIL: [number] [name]).
 .IP "-c <curl>"
 Provide a path to a custom curl binary to run the tests with. Default is the
 curl executable in the build tree.
@@ -81,6 +85,8 @@ Run the given test(s) with gdb. This is best used on a single test case and
 curl built --disable-shared. This then fires up gdb with command line set to
 run the specified test case. Simply (set a break-point and) type 'run' to
 start.
+.IP "-gw"
+Run the given test(s) with gdb as a windowed application.
 .IP "-h"
 Displays a help text about this program's command line options.
 .IP "-k"
@@ -176,4 +182,4 @@ documented earlier.
 .SH "WRITING TESTS"
 The simplest way to write test cases is to start with a similar existing test,
 save it with a new number and then adjust it to fit. There's an attempt to
-document the test case file format in the tests/FILEFORMAT.
+document the test case file format in the tests/FILEFORMAT.md.
