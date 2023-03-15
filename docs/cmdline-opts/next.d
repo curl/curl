@@ -20,7 +20,7 @@ for each.
 
 --next will reset all local options and only global ones will have their
 values survive over to the operation following the --next instruction. Global
-options include --verbose, --trace, --trace-ascii and --fail-early.
+options include --write-out, --verbose, --trace, --trace-ascii and --fail-early.
 
 For example, you can do both a GET and a POST in a single command line:
 
