@@ -134,7 +134,7 @@ IPv4 or IPv6. (Added in 7.29.0)
 The remote port number of the most recently done connection. (Added in 7.29.0)
 .TP
 .B response_code
-The numerical response code that was found in the last transfer (formerly
+The numerical response code that was found in the last transfer (formally
 known as "http_code"). (Added in 7.18.2)
 .TP
 .B scheme
