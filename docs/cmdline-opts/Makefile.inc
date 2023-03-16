@@ -96,6 +96,7 @@ DPAGES = \
   globoff.d \
   happy-eyeballs-timeout-ms.d \
   haproxy-protocol.d \
+  haproxy-clientip.d \
   head.d \
   header.d \
   help.d \

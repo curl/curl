@@ -82,6 +82,7 @@
 --globoff (-g)                       7.6
 --happy-eyeballs-timeout-ms          7.59.0
 --haproxy-protocol                   7.60.0
+--haproxy-clientip                   8.2.0
 --head (-I)                          4.0
 --header (-H)                        5.0
 --help (-h)                          4.0
