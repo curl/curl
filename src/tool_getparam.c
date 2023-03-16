@@ -2526,6 +2526,10 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
             else
               result = PARAM_NO_MEM;
           }
+          else {
+            errorf(global, "missing URL before --next\n");
+            result = PARAM_BAD_USE;
+          }
         }
         else if(!result && passarg)
           i++; /* we're supposed to skip this */
