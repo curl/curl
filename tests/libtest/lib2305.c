@@ -52,6 +52,9 @@ static void websocket(CURL *curl)
     CURLcode result =
       curl_ws_recv(curl, buffer, sizeof(buffer), &nread, &meta);
     if(result) {
+      if(result == CURLE_AGAIN)
+        /* crude busy-loop */
+        continue;
       printf("curl_ws_recv returned %d\n", (int)result);
       return;
     }
