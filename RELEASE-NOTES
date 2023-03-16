@@ -4,7 +4,7 @@ curl and libcurl 8.0.0
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2839
+ Contributors:                 2840
 
 This release includes the following changes:
 
@@ -13,12 +13,15 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o .cirrus.yml: Bump to FreeBSD 13.2 [9]
+ o aws_sigv4: fall back to UNSIGNED-PAYLOAD for sign_as_s3 [112]
  o BINDINGS: add Fortran binding [33]
  o build: drop the use of XC_AMEND_DISTCLEAN [62]
+ o build: fix stdint/inttypes detection with non-autotools [120]
  o cf-socket: fix handling of remote addr for accepted tcp sockets [17]
  o cf-socket: if socket is already connected, return CURLE_OK [69]
  o CI: don't run CI jobs if only another CI was changed [92]
  o CI: update ngtcp2 and nghttp2 for pytest [13]
+ o cmake: delete unused HAVE__STRTOI64 [117]
  o cmake: fix enabling LDAPS on Windows [55]
  o cmake: skip CA-path/bundle auto-detection in cross-builds [57]
  o connect: fix time_connect and time_appconnect timer statistics [90]
@@ -60,11 +63,14 @@ This release includes the following bugfixes:
  o lib1560: test parsing URLs with ridiculously large fields [60]
  o lib517: verify time stamps without leading zeroes plus some more
  o lib: silence clang/gcc -Wvla warnings in brotli headers [98]
+ o lib: skip Curl_llist_destroy calls [108]
  o libcurl-errors.3: add the CURLHcode errors from curl_easy_header.3 [39]
  o libssh2: only set the memory callbacks when debugging [65]
  o Makefile.mk: delete redundant `HAVE_LDAP_SSL` macro [56]
  o Makefile.mk: fix -g option in debug mode [81]
  o mqtt: on send error, return error [40]
+ o multi: make multi_perform ignore/unignore signals less often [116]
+ o multi: remove PENDING + MSGSENT handles from the main linked list [105]
  o ngtcp2-gnutls.yml: bump to gnutls 3.8.0 [11]
  o ngtcp2: fix unwanted close of file descriptor 0 [26]
  o page-footer: add explanation for three missing exit codes [37]
@@ -73,10 +79,12 @@ This release includes the following bugfixes:
  o quic/schannel: fix compiler warnings [36]
  o rand: use arc4random as fallback when available [48]
  o rate.d: single URLs make no sense in --rate example [38]
+ o RELEASE-PROCEDURE.md: update coming release dates
  o rtsp: avoid sscanf for parsing [15]
  o runtests: use a hash table for server port numbers [51]
  o sectransp: fix compiler warning c89 mixed code/declaration [32]
  o sectransp: make read_cert() use a dynbuf when loading [72]
+ o secure-transport: fix recv return code handling [114]
  o select: stop treating POLLRDBAND as an error [27]
  o setopt: move the CURLOPT_CHUNK_DATA pointer to the set struct [35]
  o socket: detect "dead" connections better, e.g. not fit for reuse [66]
@@ -88,6 +96,7 @@ This release includes the following bugfixes:
  o test1470: test socks proxy using unix sockets and connect to https [63]
  o test1960: verify CURL_SOCKOPT_ALREADY_CONNECTED [64]
  o test2600: detect when ALARM_TIMEOUT is in use and adjust [34]
+ o tests/http: add pytest to GHA and improve tests [118]
  o tests: add `cookies` features [68]
  o tests: add timeout, SLOWDOWN and DELAY keywords to tests
  o tests: fix gnutls-serv check [53]
@@ -98,6 +107,7 @@ This release includes the following bugfixes:
  o tests: make CPPFLAGS common to all unit tests
  o tests: make first.c the same for both lib tests and unit tests [75]
  o tests: support for imaps/pop3s/smtps protocols [50]
+ o tests: sync option lists in runtests.pl & its man page
  o tests: test secure mail protocols with explicit SSL requests [49]
  o tests: use AM_CPPFILES to modify flags in unit tests
  o tests: use dynamic ports numbers in pytest suite [89]
@@ -120,6 +130,7 @@ This release includes the following bugfixes:
  o urlapi: take const args in _dup and _get functions [78]
  o wildcard: remove files and move functions into ftplistparser.c
  o winbuild: fix makefile clean [31]
+ o wolfssl: add quic/ngtcp2 detection in cmake, and fix builds [113]
  o wolfSSL: ressurect the BIO `io_result` [54]
  o ws: keep the socket non-blocking [41]
  o x509asn1.c: use correct format specifier for infof() call [47]
@@ -141,17 +152,17 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andy Alt, Balakrishnan Balasubramanian, Boris Okunskiy, Brad Spencer,
-  Cristian Morales Vega, Dan Fandrich, Daniel Stenberg,
+  Casey Bodley, Cristian Morales Vega, Dan Fandrich, Daniel Stenberg,
   Evgeny Grin (Karlson2k), finkjsc on github, Grisha Levit, Harry Sintonen,
   Hiroki Kurosawa, Ilmari Lauhakangas, JackBoosY on github, Jan Engelhardt,
-  Jelle van der Waa, Jérémy Rabasco, Maciej Domanski, Marcel Raad,
-  marski on github, Master Inspire, Matt Jolly, opensslonzos-github on github,
-  Patrick Monnerat, Philip Heiduck, Philipp Engel, Ray Satiro,
-  rcombs on github, rwmjones on github, SandakovMM on github,
-  SendSonS on github, Sergey Fionov, Sergey Ryabinin, Sergio Mijatovic,
-  Shankar Jadhavar, Stefan Eissing, u20221022 on github, Viktor Szakats,
-  積丹尼 Dan Jacobson
-  (39 contributors)
+  Jelle van der Waa, Jérémy Rabasco, Jerome St-Louis, Maciej Domanski,
+  Marcel Raad, marski on github, Master Inspire, Matt Jolly,
+  opensslonzos-github on github, Patrick Monnerat, Philip Heiduck,
+  Philipp Engel, Ray Satiro, rcombs on github, rwmjones on github,
+  SandakovMM on github, SendSonS on github, Sergey Fionov, Sergey Ryabinin,
+  Sergio Mijatovic, Shankar Jadhavar, Stefan Eissing, u20221022 on github,
+  Viktor Szakats, 積丹尼 Dan Jacobson
+  (41 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -259,4 +270,13 @@ References to bug reports and discussions on issues:
  [102] = https://curl.se/bug/?i=10723
  [103] = https://curl.se/bug/?i=10732
  [104] = https://curl.se/bug/?i=10728
+ [105] = https://curl.se/bug/?i=10762
  [106] = https://curl.se/bug/?i=10694
+ [108] = https://curl.se/bug/?i=10764
+ [112] = https://curl.se/bug/?i=9995
+ [113] = https://curl.se/bug/?i=10739
+ [114] = https://curl.se/bug/?i=10717
+ [116] = https://curl.se/bug/?i=10750
+ [117] = https://curl.se/bug/?i=10756
+ [118] = https://curl.se/bug/?i=10699
+ [120] = https://curl.se/bug/?i=10745
