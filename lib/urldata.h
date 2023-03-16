@@ -1563,6 +1563,7 @@ enum dupstring {
   STRING_DNS_LOCAL_IP6,
   STRING_SSL_EC_CURVES,
   STRING_AWS_SIGV4, /* Parameters for V4 signature */
+  STRING_HAPROXY_CLIENT_IP,     /* CURLOPT_HAPROXY_CLIENT_IP */
 
   /* -- end of null-terminated strings -- */
 

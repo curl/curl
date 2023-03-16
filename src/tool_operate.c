@@ -2161,6 +2161,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->haproxy_protocol)
           my_setopt(curl, CURLOPT_HAPROXYPROTOCOL, 1L);
 
+        /* new in 8.2.0 */
+        if(config->haproxy_clientip)
+          my_setopt_str(curl, CURLOPT_HAPROXY_CLIENT_IP,
+              config->haproxy_clientip);
+
         if(config->disallow_username_in_url)
           my_setopt(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
 
