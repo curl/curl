@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+cmdline
+--next
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<name>
+use --next with missing URL before it
+</name>
+<command>
+-O -I --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+curl: missing URL before --next
+curl: option --next: is badly used here
+%if manual
+curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
+</stderr>
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>
