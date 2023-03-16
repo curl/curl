@@ -29,6 +29,8 @@
 
 #ifndef CURL_DISABLE_RTSP
 
+#include "dynbuf.h"
+
 extern const struct Curl_handler Curl_handler_rtsp;
 
 CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header);
@@ -45,8 +47,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header);
  * Currently, only used for tracking incomplete RTP data reads
  */
 struct rtsp_conn {
-  char *rtp_buf;
-  ssize_t rtp_bufsize;
+  struct dynbuf buf;
   int rtp_channel;
 };
 
