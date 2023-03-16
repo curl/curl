@@ -147,7 +147,6 @@ struct ssh_conn {
 
   char *homedir;              /* when doing SFTP we figure out home dir in the
                                  connect phase */
-  char *readdir_line;
   /* end of READDIR stuff */
 
   int secondCreateDirs;         /* counter use by the code to see if the
@@ -159,6 +158,7 @@ struct ssh_conn {
 #if defined(USE_LIBSSH)
   char *readdir_linkPath;
   size_t readdir_len, readdir_totalLen, readdir_currLen;
+  char *readdir_line;
 /* our variables */
   unsigned kbd_state; /* 0 or 1 */
   ssh_key privkey;

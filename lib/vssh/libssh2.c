@@ -2405,7 +2405,6 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       result = Curl_dyn_addf(&sshp->readdir, " -> %s", sshp->readdir_filename);
 
       if(result) {
-        sshc->readdir_line = NULL;
         Curl_safefree(sshp->readdir_filename);
         Curl_safefree(sshp->readdir_longentry);
         state(data, SSH_SFTP_CLOSE);
@@ -3009,12 +3008,9 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
 
       Curl_safefree(sshc->rsa_pub);
       Curl_safefree(sshc->rsa);
-
       Curl_safefree(sshc->quote_path1);
       Curl_safefree(sshc->quote_path2);
-
       Curl_safefree(sshc->homedir);
-      Curl_safefree(sshc->readdir_line);
 
       /* the code we are about to return */
       result = sshc->actualcode;
