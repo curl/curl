@@ -685,7 +685,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
   struct ssh_conn *sshc = &conn->proto.sshc;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc = SSH_NO_ERROR, err;
-  char *new_readdir_line;
   int seekerr = CURL_SEEKFUNC_OK;
   const char *err_msg;
   *block = 0;                   /* we're not blocking by default */
@@ -1432,7 +1431,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_SFTP_READDIR:
-
+      Curl_dyn_reset(&sshc->readdir_buf);
       if(sshc->readdir_attrs)
         sftp_attributes_free(sshc->readdir_attrs);
 
@@ -1468,17 +1467,12 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
                      sshc->readdir_len);
         }
         else {
-          sshc->readdir_currLen = strlen(sshc->readdir_longentry);
-          sshc->readdir_totalLen = 80 + sshc->readdir_currLen;
-          sshc->readdir_line = calloc(sshc->readdir_totalLen, 1);
-          if(!sshc->readdir_line) {
-            state(data, SSH_SFTP_CLOSE);
+          if(Curl_dyn_add(&sshc->readdir_buf, sshc->readdir_longentry)) {
             sshc->actualcode = CURLE_OUT_OF_MEMORY;
+            state(data, SSH_STOP);
             break;
           }
 
-          memcpy(sshc->readdir_line, sshc->readdir_longentry,
-                 sshc->readdir_currLen);
           if((sshc->readdir_attrs->flags & SSH_FILEXFER_ATTR_PERMISSIONS) &&
              ((sshc->readdir_attrs->permissions & SSH_S_IFMT) ==
               SSH_S_IFLNK)) {
@@ -1541,24 +1535,11 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
       Curl_safefree(sshc->readdir_linkPath);
 
-      /* get room for the filename and extra output */
-      sshc->readdir_totalLen += 4 + sshc->readdir_len;
-      new_readdir_line = Curl_saferealloc(sshc->readdir_line,
-                                          sshc->readdir_totalLen);
-      if(!new_readdir_line) {
-        sshc->readdir_line = NULL;
-        state(data, SSH_SFTP_CLOSE);
+      if(Curl_dyn_addf(&sshc->readdir_buf, " -> %s",
+                       sshc->readdir_filename)) {
         sshc->actualcode = CURLE_OUT_OF_MEMORY;
         break;
       }
-      sshc->readdir_line = new_readdir_line;
-
-      sshc->readdir_currLen += msnprintf(sshc->readdir_line +
-                                         sshc->readdir_currLen,
-                                         sshc->readdir_totalLen -
-                                         sshc->readdir_currLen,
-                                         " -> %s",
-                                         sshc->readdir_filename);
 
       sftp_attributes_free(sshc->readdir_link_attrs);
       sshc->readdir_link_attrs = NULL;
@@ -1568,21 +1549,19 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       state(data, SSH_SFTP_READDIR_BOTTOM);
       /* FALLTHROUGH */
     case SSH_SFTP_READDIR_BOTTOM:
-      sshc->readdir_currLen += msnprintf(sshc->readdir_line +
-                                         sshc->readdir_currLen,
-                                         sshc->readdir_totalLen -
-                                         sshc->readdir_currLen, "\n");
-      result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                 sshc->readdir_line,
-                                 sshc->readdir_currLen);
+      if(Curl_dyn_addn(&sshc->readdir_buf, "\n", 1))
+        result = CURLE_OUT_OF_MEMORY;
+      else
+        result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                   Curl_dyn_ptr(&sshc->readdir_buf),
+                                   Curl_dyn_len(&sshc->readdir_buf));
 
       if(!result) {
         /* output debug output if that is requested */
-        Curl_debug(data, CURLINFO_DATA_OUT, sshc->readdir_line,
-                   sshc->readdir_currLen);
-        data->req.bytecount += sshc->readdir_currLen;
+        Curl_debug(data, CURLINFO_DATA_OUT, Curl_dyn_ptr(&sshc->readdir_buf),
+                   Curl_dyn_len(&sshc->readdir_buf));
+        data->req.bytecount += Curl_dyn_len(&sshc->readdir_buf);
       }
-      Curl_safefree(sshc->readdir_line);
       ssh_string_free_char(sshc->readdir_tmp);
       sshc->readdir_tmp = NULL;
 
@@ -2021,7 +2000,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       Curl_safefree(sshc->rsa);
       Curl_safefree(sshc->quote_path1);
       Curl_safefree(sshc->quote_path2);
-      Curl_safefree(sshc->readdir_line);
+      Curl_dyn_free(&sshc->readdir_buf);
       Curl_safefree(sshc->readdir_linkPath);
       SSH_STRING_FREE_CHAR(sshc->homedir);
 
@@ -2166,11 +2145,12 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
                                        struct connectdata *conn)
 {
   struct SSHPROTO *ssh;
-  (void)conn;
+  struct ssh_conn *sshc = &conn->proto.sshc;
 
   data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
+  Curl_dyn_init(&sshc->readdir_buf, PATH_MAX * 2);
 
   return CURLE_OK;
 }

@@ -157,8 +157,8 @@ struct ssh_conn {
 
 #if defined(USE_LIBSSH)
   char *readdir_linkPath;
-  size_t readdir_len, readdir_totalLen, readdir_currLen;
-  char *readdir_line;
+  size_t readdir_len;
+  struct dynbuf readdir_buf;
 /* our variables */
   unsigned kbd_state; /* 0 or 1 */
   ssh_key privkey;
