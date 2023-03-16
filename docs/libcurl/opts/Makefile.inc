@@ -186,6 +186,7 @@ man_MANS =                                      \
   CURLOPT_GSSAPI_DELEGATION.3                   \
   CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3           \
   CURLOPT_HAPROXYPROTOCOL.3                     \
+  CURLOPT_HAPROXY_CLIENT_IP.3                   \
   CURLOPT_HEADER.3                              \
   CURLOPT_HEADERDATA.3                          \
   CURLOPT_HEADERFUNCTION.3                      \
