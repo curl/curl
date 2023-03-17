@@ -31,7 +31,11 @@ use --next with missing URL before it
 <stderr mode="text">
 curl: missing URL before --next
 curl: option --next: is badly used here
+%if manual
 curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
 </stderr>
 <errorcode>
 2
