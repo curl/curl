@@ -46,7 +46,7 @@ class ExecResult:
                  stdout: List[str], stderr: List[str],
                  duration: Optional[timedelta] = None,
                  with_stats: bool = False,
-                 exception: str = None):
+                 exception: Optional[str] = None):
         self._args = args
         self._exit_code = exit_code
         self._exception = exception
@@ -200,7 +200,7 @@ class CurlClient:
     }
 
     def __init__(self, env: Env, run_dir: Optional[str] = None,
-                 timeout: float = None):
+                 timeout: Optional[float] = None):
         self.env = env
         self._timeout = timeout if timeout else env.test_timeout
         self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
