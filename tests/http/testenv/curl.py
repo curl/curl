@@ -45,9 +45,11 @@ class ExecResult:
     def __init__(self, args: List[str], exit_code: int,
                  stdout: List[str], stderr: List[str],
                  duration: Optional[timedelta] = None,
-                 with_stats: bool = False):
+                 with_stats: bool = False,
+                 exception: Optional[str] = None):
         self._args = args
         self._exit_code = exit_code
+        self._exception = exception
         self._stdout = stdout
         self._stderr = stderr
         self._duration = duration if duration is not None else timedelta()
@@ -69,7 +71,8 @@ class ExecResult:
                 pass
 
     def __repr__(self):
-        return f"ExecResult[code={self.exit_code}, args={self._args}, stdout={self._stdout}, stderr={self._stderr}]"
+        return f"ExecResult[code={self.exit_code}, exception={self._exception}, "\
+               f"args={self._args}, stdout={self._stdout}, stderr={self._stderr}]"
 
     def _parse_stats(self):
         self._stats = []
@@ -78,7 +81,6 @@ class ExecResult:
                 self._stats.append(json.loads(l))
             except:
                 log.error(f'not a JSON stat: {l}')
-                log.error(f'stdout is: {"".join(self._stdout)}')
                 break
 
     @property
@@ -197,8 +199,10 @@ class CurlClient:
         'h3': '--http3-only',
     }
 
-    def __init__(self, env: Env, run_dir: Optional[str] = None):
+    def __init__(self, env: Env, run_dir: Optional[str] = None,
+                 timeout: Optional[float] = None):
         self.env = env
+        self._timeout = timeout if timeout else env.test_timeout
         self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
         self._run_dir = run_dir if run_dir else os.path.join(env.gen_dir, 'curl')
         self._stdoutfile = f'{self._run_dir}/curl.stdout'
@@ -320,14 +324,22 @@ class CurlClient:
         self._rmf(self._headerfile)
         self._rmf(self._tracefile)
         start = datetime.now()
-        with open(self._stdoutfile, 'w') as cout:
-            with open(self._stderrfile, 'w') as cerr:
-                p = subprocess.run(args, stderr=cerr, stdout=cout,
-                                   cwd=self._run_dir, shell=False,
-                                   input=intext.encode() if intext else None)
+        exception = None
+        try:
+            with open(self._stdoutfile, 'w') as cout:
+                with open(self._stderrfile, 'w') as cerr:
+                    p = subprocess.run(args, stderr=cerr, stdout=cout,
+                                       cwd=self._run_dir, shell=False,
+                                       input=intext.encode() if intext else None,
+                                       timeout=self._timeout)
+                    exitcode = p.returncode
+        except subprocess.TimeoutExpired as e:
+            log.warning(f'Timeout after {self._timeout}s: {args}')
+            exitcode = -1
+            exception = 'TimeoutExpired'
         coutput = open(self._stdoutfile).readlines()
         cerrput = open(self._stderrfile).readlines()
-        return ExecResult(args=args, exit_code=p.returncode,
+        return ExecResult(args=args, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
                           duration=datetime.now() - start,
                           with_stats=with_stats)

@@ -281,6 +281,7 @@ class Env:
         self._verbose = pytestconfig.option.verbose \
             if pytestconfig is not None else 0
         self._ca = None
+        self._test_timeout = 60.0  # seconds
 
     def issue_certs(self):
         if self._ca is None:
@@ -304,6 +305,14 @@ class Env:
     @property
     def verbose(self) -> int:
         return self._verbose
+
+    @property
+    def test_timeout(self) -> Optional[float]:
+        return self._test_timeout
+
+    @test_timeout.setter
+    def test_timeout(self, val: Optional[float]):
+        self._test_timeout = val
 
     @property
     def gen_dir(self) -> str:

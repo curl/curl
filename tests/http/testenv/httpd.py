@@ -171,7 +171,8 @@ class Httpd:
         return False
 
     def wait_live(self, timeout: timedelta):
-        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir,
+                          timeout=timeout.total_seconds())
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             r = curl.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')
