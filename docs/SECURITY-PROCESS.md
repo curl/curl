@@ -260,3 +260,11 @@ security vulnerabilities.
  - virtually every argument can contain sensitive data, depending on use
  - blanking all arguments would make it impractical for users to differentiate
    curl command lines in process listings
+
+## Busy-loops
+
+Busy-loops that consume 100% CPU time but eventually end (perhaps due to a set
+timeout value or otherwise) are not considered security problems. Applications
+are supposed to already handle situations when the transfer loop legitimately
+consumes 100% CPU time, so while a prolonged such busy-loop is a nasty bug, we
+do not consider it a security problem.
