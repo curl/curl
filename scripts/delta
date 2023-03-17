@@ -85,8 +85,8 @@ $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
 chomp $branch;
 # Number of files in git
 $afiles=`git ls-files | wc -l`;
-$deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start | wc -l`;
-$creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start | wc -l`;
+$deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start 2>/dev/null | wc -l`;
+$creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>/dev/null| wc -l`;
 
 # Time since that tag
 $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # unix timestamp
