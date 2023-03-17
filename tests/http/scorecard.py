@@ -72,7 +72,7 @@ class ScoreCard:
                 self.info('.')
                 curl = CurlClient(env=self.env)
                 url = f'https://{authority}/'
-                r = curl.http_download(urls=[url], alpn_proto=proto)
+                r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True)
                 if r.exit_code == 0 and len(r.stats) == 1:
                     c_samples.append(r.stats[0]['time_connect'])
                     hs_samples.append(r.stats[0]['time_appconnect'])
@@ -141,7 +141,7 @@ class ScoreCard:
         self.info(f'{sample_size}x single')
         for i in range(sample_size):
             curl = CurlClient(env=self.env)
-            r = curl.http_download(urls=[url], alpn_proto=proto)
+            r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True)
             err = self._check_downloads(r, count)
             if err:
                 errors.append(err)
@@ -163,7 +163,7 @@ class ScoreCard:
         self.info(f'{sample_size}x{count} serial')
         for i in range(sample_size):
             curl = CurlClient(env=self.env)
-            r = curl.http_download(urls=[url], alpn_proto=proto)
+            r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True)
             self.info(f'.')
             err = self._check_downloads(r, count)
             if err:
@@ -187,7 +187,7 @@ class ScoreCard:
         for i in range(sample_size):
             curl = CurlClient(env=self.env)
             start = datetime.now()
-            r = curl.http_download(urls=[url], alpn_proto=proto,
+            r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    extra_args=['--parallel'])
             err = self._check_downloads(r, count)
             if err:
