@@ -119,7 +119,6 @@ const struct Curl_handler Curl_handler_rtsp = {
   PROTOPT_NONE                          /* flags */
 };
 
-#define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
@@ -131,7 +130,6 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
   if(!rtsp)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_dyn_init(&conn->proto.rtspc.buf, MAX_RTP_BUFFERSIZE);
   return CURLE_OK;
 }
 
@@ -178,7 +176,7 @@ static CURLcode rtsp_disconnect(struct Curl_easy *data,
 {
   (void) dead;
   (void) data;
-  Curl_dyn_free(&conn->proto.rtspc.buf);
+  Curl_safefree(conn->proto.rtspc.rtp_buf);
   return CURLE_OK;
 }
 
@@ -599,14 +597,23 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
 
   char *rtp; /* moving pointer to rtp data */
   ssize_t rtp_dataleft; /* how much data left to parse in this round */
+  char *scratch;
   CURLcode result;
 
-  if(Curl_dyn_len(&rtspc->buf)) {
-    /* There was some leftover data the last time. Append new buffers */
-    if(Curl_dyn_addn(&rtspc->buf, k->str, *nread))
+  if(rtspc->rtp_buf) {
+    /* There was some leftover data the last time. Merge buffers */
+    char *newptr = Curl_saferealloc(rtspc->rtp_buf,
+                                    rtspc->rtp_bufsize + *nread);
+    if(!newptr) {
+      rtspc->rtp_buf = NULL;
+      rtspc->rtp_bufsize = 0;
       return CURLE_OUT_OF_MEMORY;
-    rtp = Curl_dyn_ptr(&rtspc->buf);
-    rtp_dataleft = Curl_dyn_len(&rtspc->buf);
+    }
+    rtspc->rtp_buf = newptr;
+    memcpy(rtspc->rtp_buf + rtspc->rtp_bufsize, k->str, *nread);
+    rtspc->rtp_bufsize += *nread;
+    rtp = rtspc->rtp_buf;
+    rtp_dataleft = rtspc->rtp_bufsize;
   }
   else {
     /* Just parse the request buffer directly */
@@ -634,11 +641,14 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
       /* We have the full RTP interleaved packet
        * Write out the header including the leading '$' */
       DEBUGF(infof(data, "RTP write channel %d rtp_length %d",
-                   rtspc->rtp_channel, rtp_length));
+             rtspc->rtp_channel, rtp_length));
       result = rtp_client_write(data, &rtp[0], rtp_length + 4);
       if(result) {
         failf(data, "Got an error writing an RTP packet");
         *readmore = FALSE;
+        Curl_safefree(rtspc->rtp_buf);
+        rtspc->rtp_buf = NULL;
+        rtspc->rtp_bufsize = 0;
         return result;
       }
 
@@ -662,12 +672,20 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
 
   if(rtp_dataleft && rtp[0] == '$') {
     DEBUGF(infof(data, "RTP Rewinding %zd %s", rtp_dataleft,
-                 *readmore ? "(READMORE)" : ""));
+          *readmore ? "(READMORE)" : ""));
 
     /* Store the incomplete RTP packet for a "rewind" */
-    Curl_dyn_reset(&rtspc->buf);
-    if(Curl_dyn_addn(&rtspc->buf, rtp, rtp_dataleft))
+    scratch = malloc(rtp_dataleft);
+    if(!scratch) {
+      Curl_safefree(rtspc->rtp_buf);
+      rtspc->rtp_buf = NULL;
+      rtspc->rtp_bufsize = 0;
       return CURLE_OUT_OF_MEMORY;
+    }
+    memcpy(scratch, rtp, rtp_dataleft);
+    Curl_safefree(rtspc->rtp_buf);
+    rtspc->rtp_buf = scratch;
+    rtspc->rtp_bufsize = rtp_dataleft;
 
     /* As far as the transfer is concerned, this data is consumed */
     *nread = 0;
@@ -687,7 +705,9 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
   *nread = rtp_dataleft;
 
   /* If we get here, we have finished with the leftover/merge buffer */
-  Curl_dyn_free(&rtspc->buf);
+  Curl_safefree(rtspc->rtp_buf);
+  rtspc->rtp_buf = NULL;
+  rtspc->rtp_bufsize = 0;
 
   return CURLE_OK;
 }
