@@ -374,6 +374,7 @@ class ScoreCard:
         rv = 0
         self.env = Env()
         self.env.setup()
+        self.env.test_timeout = None
         self.httpd = None
         self.nghttpx = None
         self.caddy = None
