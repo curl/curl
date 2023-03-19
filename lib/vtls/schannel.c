@@ -793,8 +793,11 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   backend->cred->client_cert_store = client_cert_store;
 #endif
 
-  /* Windows 10, 1809 (a.k.a. Windows 10 build 17763) */
-  if(curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
+  /* We support TLS 1.3 starting in Windows 10 version 1809 (OS build 17763) as
+     long as the user did not set a legacy algorithm list
+     (CURLOPT_SSL_CIPHER_LIST). */
+  if(!conn_config->cipher_list &&
+     curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL)) {
 
     char *ciphers13 = 0;
@@ -844,7 +847,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
         /* reject too-long cipher names */
         if(n > (LONGEST_ALG_ID - 1)) {
-          failf(data, "Cipher name too long, not checked.");
+          failf(data, "schannel: Cipher name too long, not checked");
           return CURLE_SSL_CIPHER;
         }
 
@@ -872,7 +875,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
           disable_aes_ccm_sha256 = FALSE;
         }
         else {
-          failf(data, "Passed in an unknown TLS 1.3 cipher.");
+          failf(data, "schannel: Unknown TLS 1.3 cipher: %s", tmp);
           return CURLE_SSL_CIPHER;
         }
 
@@ -887,7 +890,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     if(disable_aes_gcm_sha384 && disable_aes_gcm_sha256
        && disable_chacha_poly && disable_aes_ccm_8_sha256
        && disable_aes_ccm_sha256) {
-      failf(data, "All available TLS 1.3 ciphers were disabled.");
+      failf(data, "schannel: All available TLS 1.3 ciphers were disabled");
       return CURLE_SSL_CIPHER;
     }
 
@@ -1010,7 +1013,9 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                          &backend->cred->time_stamp);
   }
   else {
-    /* Pre-Windows 10 1809 */
+    /* Pre-Windows 10 1809 or the user set a legacy algorithm list. Although MS
+       doesn't document it, currently Schannel will not negotiate TLS 1.3 when
+       SCHANNEL_CRED is used. */
     ALG_ID algIds[NUM_CIPHERS];
     char *ciphers = conn_config->cipher_list;
     SCHANNEL_CRED schannel_cred = { 0 };
@@ -1019,9 +1024,20 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     schannel_cred.grbitEnabledProtocols = enabled_protocols;
 
     if(ciphers) {
+      if((enabled_protocols & SP_PROT_TLS1_3_CLIENT)) {
+        infof(data, "schannel: WARNING: This version of Schannel may "
+              "negotiate a less-secure TLS version than TLS 1.3 because the "
+              "user set an algorithm cipher list.");
+      }
+      if(conn_config->cipher_list13) {
+        failf(data, "schannel: This version of Schannel does not support "
+              "setting an algorithm cipher list and TLS 1.3 cipher list at "
+              "the same time");
+        return CURLE_SSL_CIPHER;
+      }
       result = set_ssl_ciphers(&schannel_cred, ciphers, algIds);
       if(CURLE_OK != result) {
-        failf(data, "Unable to set ciphers to from connection ssl config");
+        failf(data, "schannel: Failed setting algorithm cipher list");
         return result;
       }
     }
