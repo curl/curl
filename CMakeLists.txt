@@ -321,6 +321,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES AIX)
   set(_ALL_SOURCE 1)
 endif()
 
+# If we are on Haiku, make sure that the network library is brought in.
+if(${CMAKE_SYSTE_NAME} MATCHES Haiku)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lnetwork")
+endif()
+
 # Include all the necessary files for macros
 include(CMakePushCheckState)
 include(CheckFunctionExists)
