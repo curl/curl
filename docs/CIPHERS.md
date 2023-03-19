@@ -346,9 +346,12 @@ maps them to the following case-insensitive names.
 ## Schannel
 
 Schannel allows the enabling and disabling of encryption algorithms, but not
-specific cipher suites. They are
+specific cipher suites, prior to TLS 1.3. The algorithms are
 [defined](https://docs.microsoft.com/windows/desktop/SecCrypto/alg-id) by
 Microsoft.
+
+The algorithms below are for TLS 1.2 and earlier. TLS 1.3 is covered in the
+next section.
 
 There is also the case that the selected algorithm is not supported by the
 protocol or does not match the ciphers offered by the server during the SSL
@@ -412,13 +415,23 @@ are running an outdated OS you might still be supporting weak ciphers.
 
 ### TLS 1.3 cipher suites
 
-(Note these ciphers are set with `CURLOPT_TLS13_CIPHERS` and `--tls13-ciphers`)
+You can set TLS 1.3 ciphers for Schannel by using `CURLOPT_TLS13_CIPHERS` or
+`--tls13-ciphers` with the names below.
+
+If TLS 1.3 cipher suites are set then libcurl will add or restrict Schannel TLS
+1.3 algorithms automatically. Essentially, libcurl is emulating support for
+individual TLS 1.3 cipher suites since Schannel does not support it directly.
 
 `TLS_AES_256_GCM_SHA384`
 `TLS_AES_128_GCM_SHA256`
 `TLS_CHACHA20_POLY1305_SHA256`
 `TLS_AES_128_CCM_8_SHA256`
 `TLS_AES_128_CCM_SHA256`
+
+Note if you set TLS 1.3 ciphers without also setting the minimum TLS version to
+1.3 then it's possible Schannel may negotiate an earlier TLS version and cipher
+suite if your libcurl and OS settings allow it. You can set the minimum TLS
+version by using `CURLOPT_SSLVERSION` or `--tlsv1.3`.
 
 ## BearSSL
 
