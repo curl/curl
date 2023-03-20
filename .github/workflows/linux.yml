@@ -50,12 +50,12 @@ jobs:
       matrix:
         build:
         - name: quiche
-          install_packages: zlib1g-dev
+          install_packages: zlib1g-dev valgrind
           install_steps: quiche pytest
           configure: LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release" --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src --enable-debug --with-quiche=/home/runner/work/curl/curl/quiche/target/release
 
         - name: bearssl
-          install_packages: zlib1g-dev
+          install_packages: zlib1g-dev valgrind
           install_steps: bearssl pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
 
@@ -65,7 +65,7 @@ jobs:
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
 
         - name: libressl
-          install_packages: zlib1g-dev
+          install_packages: zlib1g-dev valgrind
           install_steps: libressl pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
 
@@ -75,7 +75,7 @@ jobs:
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
 
         - name: mbedtls
-          install_packages: libnghttp2-dev
+          install_packages: libnghttp2-dev valgrind
           install_steps: mbedtls pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
 
@@ -85,17 +85,17 @@ jobs:
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
 
         - name: msh3
-          install_packages: zlib1g-dev
+          install_packages: zlib1g-dev valgrind
           install_steps: quictls msh3
           configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
 
         - name: openssl3
-          install_packages: zlib1g-dev
+          install_packages: zlib1g-dev valgrind
           install_steps: gcc-11 openssl3 pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
         - name: openssl3-O3
-          install_packages: zlib1g-dev
+          install_packages: zlib1g-dev valgrind
           install_steps: gcc-11 openssl3
           configure: CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
@@ -105,25 +105,25 @@ jobs:
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
         - name: event-based
-          install_packages: libssh-dev
+          install_packages: libssh-dev valgrind
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
           tflags: -n -e '!TLS-SRP'
 
         - name: hyper
-          install_steps: rust hyper
+          install_steps: rust hyper valgrind
           configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
 
         - name: rustls
-          install_steps: rust rustls pytest
+          install_steps: rust rustls pytest valgrind
           configure: --with-rustls=$HOME/rustls --enable-debug
 
         - name: Intel compiler - without SSL
-          install_packages: zlib1g-dev
+          install_packages: zlib1g-dev valgrind
           install_steps: intel
           configure: CC=icc --enable-debug --without-ssl
 
         - name: Intel compiler - OpenSSL
-          install_packages: zlib1g-dev libssl-dev
+          install_packages: zlib1g-dev libssl-dev valgrind
           install_steps: intel
           configure: CC=icc --enable-debug --with-openssl
 
