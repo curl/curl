@@ -479,6 +479,7 @@ static void link_easy(struct Curl_multi *multi,
     data->prev = NULL;
     multi->easylp = multi->easyp = data; /* both first and last */
   }
+  data->multi = multi;
 }
 
 /* unlink the given easy handle from the linked list of easy handles */
@@ -498,6 +499,7 @@ static void unlink_easy(struct Curl_multi *multi,
     multi->easylp = data->prev; /* point to last node */
 
   data->prev = data->next = NULL;
+  data->multi = NULL;
 }
 
 
