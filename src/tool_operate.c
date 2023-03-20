@@ -1446,7 +1446,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* new in libcurl 7.36.0 */
           if(config->proxyheaders) {
             my_setopt_slist(curl, CURLOPT_PROXYHEADER, config->proxyheaders);
-            my_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
+            my_setopt(curl, CURLOPT_HEADEROPT, (long)CURLHEADER_SEPARATE);
           }
 
           /* new in libcurl 7.5 */
