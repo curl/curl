@@ -71,6 +71,7 @@
 #include "url.h"
 #include "share.h"
 #include "hostip.h"
+#include "dynhds.h"
 #include "http.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
@@ -1711,6 +1712,157 @@ CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
   }
   result = Curl_dyn_add(b, endofline_network);
   return result;
+}
+
+static bool hd_name_eq(const char *n1, size_t n1len,
+                       const char *n2, size_t n2len)
+{
+  if(n1len == n2len) {
+    return strncasecompare(n1, n2, n1len);
+  }
+  return FALSE;
+}
+
+CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
+                                bool is_connect,
+                                struct dynhds *hds)
+{
+  struct connectdata *conn = data->conn;
+  char *ptr;
+  struct curl_slist *h[2];
+  struct curl_slist *headers;
+  int numlists = 1; /* by default */
+  int i;
+
+#ifndef CURL_DISABLE_PROXY
+  enum proxy_use proxy;
+
+  if(is_connect)
+    proxy = HEADER_CONNECT;
+  else
+    proxy = conn->bits.httpproxy && !conn->bits.tunnel_proxy?
+      HEADER_PROXY:HEADER_SERVER;
+
+  switch(proxy) {
+  case HEADER_SERVER:
+    h[0] = data->set.headers;
+    break;
+  case HEADER_PROXY:
+    h[0] = data->set.headers;
+    if(data->set.sep_headers) {
+      h[1] = data->set.proxyheaders;
+      numlists++;
+    }
+    break;
+  case HEADER_CONNECT:
+    if(data->set.sep_headers)
+      h[0] = data->set.proxyheaders;
+    else
+      h[0] = data->set.headers;
+    break;
+  }
+#else
+  (void)is_connect;
+  h[0] = data->set.headers;
+#endif
+
+  /* loop through one or two lists */
+  for(i = 0; i < numlists; i++) {
+    for(headers = h[i]; headers; headers = headers->next) {
+      const char *name, *value;
+      size_t namelen, valuelen;
+
+      /* There are 2 quirks in place for custom headers:
+       * 1. setting only 'name:' to suppress a header from being sent
+       * 2. setting only 'name;' to send an empty (illegal) header
+       */
+      ptr = strchr(headers->data, ':');
+      if(ptr) {
+        name = headers->data;
+        namelen = ptr - headers->data;
+        ptr++; /* pass the colon */
+        while(*ptr && ISSPACE(*ptr))
+          ptr++;
+        if(*ptr) {
+          value = ptr;
+          valuelen = strlen(value);
+        }
+        else {
+          /* quirk #1, suppress this header */
+          continue;
+        }
+      }
+      else {
+        ptr = strchr(headers->data, ';');
+
+        if(!ptr) {
+          /* neither : nor ; in provided header value. We seem
+           * to ignore this silently */
+          continue;
+        }
+
+        name = headers->data;
+        namelen = ptr - headers->data;
+        ptr++; /* pass the semicolon */
+        while(*ptr && ISSPACE(*ptr))
+          ptr++;
+        if(!*ptr) {
+          /* quirk #2, send an empty header */
+          value = "";
+          valuelen = 0;
+        }
+        else {
+          /* this may be used for something else in the future,
+           * ignore this for now */
+          continue;
+        }
+      }
+
+      DEBUGASSERT(name && value);
+      if(data->state.aptr.host &&
+         /* a Host: header was sent already, don't pass on any custom Host:
+            header as that will produce *two* in the same request! */
+         hd_name_eq(name, namelen, STRCONST("Host:")))
+        ;
+      else if(data->state.httpreq == HTTPREQ_POST_FORM &&
+              /* this header (extended by formdata.c) is sent later */
+              hd_name_eq(name, namelen, STRCONST("Content-Type:")))
+        ;
+      else if(data->state.httpreq == HTTPREQ_POST_MIME &&
+              /* this header is sent later */
+              hd_name_eq(name, namelen, STRCONST("Content-Type:")))
+        ;
+      else if(conn->bits.authneg &&
+              /* while doing auth neg, don't allow the custom length since
+                 we will force length zero then */
+              hd_name_eq(name, namelen, STRCONST("Content-Length:")))
+        ;
+      else if(data->state.aptr.te &&
+              /* when asking for Transfer-Encoding, don't pass on a custom
+                 Connection: */
+              hd_name_eq(name, namelen, STRCONST("Connection:")))
+        ;
+      else if((conn->httpversion >= 20) &&
+              hd_name_eq(name, namelen, STRCONST("Transfer-Encoding:")))
+        /* HTTP/2 doesn't support chunked requests */
+        ;
+      else if((hd_name_eq(name, namelen, STRCONST("Authorization:")) ||
+               hd_name_eq(name, namelen, STRCONST("Cookie:"))) &&
+              /* be careful of sending this potentially sensitive header to
+                 other hosts */
+              !Curl_auth_allowed_to_host(data))
+        ;
+      else {
+        CURLcode result;
+
+        result = Curl_dynhds_add(hds, name, namelen, value, valuelen);
+        if(result)
+          return result;
+      }
+    }
+  }
+
+  return CURLE_OK;
 }
 
 CURLcode Curl_add_custom_headers(struct Curl_easy *data,
@@ -4342,6 +4494,125 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
      buffer. */
 
   return CURLE_OK;
+}
+
+
+/* Decode HTTP status code string. */
+CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len)
+{
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  int status = 0;
+  int i;
+
+  if(len != 3)
+    goto out;
+
+  for(i = 0; i < 3; ++i) {
+    char c = s[i];
+
+    if(c < '0' || c > '9')
+      goto out;
+
+    status *= 10;
+    status += c - '0';
+  }
+  result = CURLE_OK;
+out:
+  *pstatus = result? -1 : status;
+  return result;
+}
+
+CURLcode Curl_http_req_make(struct http_req **preq,
+                            const char *method,
+                            const char *scheme,
+                            const char *authority,
+                            const char *path)
+{
+  struct http_req *req;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+  size_t mlen;
+
+  DEBUGASSERT(method);
+  mlen = strlen(method);
+  if(mlen + 1 >= sizeof(req->method))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  req = calloc(1, sizeof(*req));
+  if(!req)
+    goto out;
+  memcpy(req->method, method, mlen);
+  if(scheme) {
+    req->scheme = strdup(scheme);
+    if(!req->scheme)
+      goto out;
+  }
+  if(authority) {
+    req->authority = strdup(authority);
+    if(!req->authority)
+      goto out;
+  }
+  if(path) {
+    req->path = strdup(path);
+    if(!req->path)
+      goto out;
+  }
+  Curl_dynhds_init(&req->headers, 128, DYN_H2_HEADERS);
+  result = CURLE_OK;
+
+out:
+  if(result && req)
+    Curl_http_req_free(req);
+  *preq = result? NULL : req;
+  return result;
+}
+
+void Curl_http_req_free(struct http_req *req)
+{
+  if(req) {
+    free(req->scheme);
+    free(req->authority);
+    free(req->path);
+    Curl_dynhds_free(&req->headers);
+    free(req);
+  }
+}
+
+CURLcode Curl_http_resp_make(struct http_resp **presp,
+                             int status,
+                             const char *description)
+{
+  struct http_resp *resp;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  resp = calloc(1, sizeof(*resp));
+  if(!resp)
+    goto out;
+
+  resp->status = status;
+  if(description) {
+    resp->description = strdup(description);
+    if(!resp->description)
+      goto out;
+  }
+  Curl_dynhds_init(&resp->headers, 128, DYN_H2_HEADERS);
+  result = CURLE_OK;
+
+out:
+  if(result && resp)
+    Curl_http_resp_free(resp);
+  *presp = result? NULL : resp;
+  return result;
+}
+
+void Curl_http_resp_free(struct http_resp *resp)
+{
+  if(resp) {
+    free(resp->description);
+    Curl_dynhds_free(&resp->headers);
+    if(resp->prev)
+      Curl_http_resp_free(resp->prev);
+    free(resp);
+  }
 }
 
 #endif /* CURL_DISABLE_HTTP */
