@@ -4,7 +4,7 @@ curl and libcurl 8.0.0
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2840
+ Contributors:                 2841
 
 This release includes the following changes:
 
@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o build: fix stdint/inttypes detection with non-autotools [120]
  o cf-socket: fix handling of remote addr for accepted tcp sockets [17]
  o cf-socket: if socket is already connected, return CURLE_OK [69]
+ o cf-socket: use port 80 when resolving name for local bind [109]
  o CI: don't run CI jobs if only another CI was changed [92]
  o CI: update ngtcp2 and nghttp2 for pytest [13]
  o cmake: delete unused HAVE__STRTOI64 [117]
@@ -27,6 +28,7 @@ This release includes the following bugfixes:
  o connect: fix time_connect and time_appconnect timer statistics [90]
  o cookie: don't load cookies again when flushing [91]
  o cookie: parse without sscanf()
+ o curl.h: require gcc 12.1 for the deprecation magic [110]
  o curl: make -w's %{stderr} use the file set with --stderr [30]
  o curl_path: create the new path with dynbuf [99]
  o CURLOPT_PIPEWAIT: allow waited reuse also for subsequent connections [10]
@@ -47,7 +49,7 @@ This release includes the following bugfixes:
  o ftp: make the EPSV response parser not use sscanf [25]
  o ftp: replace sscanf for MDTM 213 response parsing [23]
  o ftp: replace sscanf for PASV parsing [24]
- o gssapi: align global `gss_OID_desc` vars to silence ld warnings on macOS ventura [58]
+ o gssapi: align `gss_OID_desc` to silence ld warnings on macOS ventura [58]
  o headers: make curl_easy_header and nextheader return different buffers [77]
  o hostip: avoid sscanf and extra buffer copies [42]
  o http2: fix error handling during parallel operations [96]
@@ -61,11 +63,14 @@ This release includes the following bugfixes:
  o idn: return error if the conversion ends up with a blank host [45]
  o krb5: avoid sscanf for parsing [18]
  o lib1560: test parsing URLs with ridiculously large fields [60]
+ o lib2305: deal with CURLE_AGAIN [122]
  o lib517: verify time stamps without leading zeroes plus some more
  o lib: silence clang/gcc -Wvla warnings in brotli headers [98]
  o lib: skip Curl_llist_destroy calls [108]
  o libcurl-errors.3: add the CURLHcode errors from curl_easy_header.3 [39]
  o libssh2: only set the memory callbacks when debugging [65]
+ o libssh2: remove unused variable from libssh2's struct [124]
+ o libssh: use dynbuf instead of realloc [121]
  o Makefile.mk: delete redundant `HAVE_LDAP_SSL` macro [56]
  o Makefile.mk: fix -g option in debug mode [81]
  o mqtt: on send error, return error [40]
@@ -96,6 +101,7 @@ This release includes the following bugfixes:
  o test1470: test socks proxy using unix sockets and connect to https [63]
  o test1960: verify CURL_SOCKOPT_ALREADY_CONNECTED [64]
  o test2600: detect when ALARM_TIMEOUT is in use and adjust [34]
+ o test422: verify --next used without a prior URL [115]
  o tests/http: add pytest to GHA and improve tests [118]
  o tests: add `cookies` features [68]
  o tests: add timeout, SLOWDOWN and DELAY keywords to tests
@@ -114,6 +120,7 @@ This release includes the following bugfixes:
  o tool: dump headers even if file is write-only [52]
  o tool: improve --stderr handling [83]
  o tool_getparam: don't add a new node for just --no-remote-name [5]
+ o tool_getparam: error if --next is used without a prior URL [119]
  o tool_operate: avoid fclose(NULL) on bad header dump file [12]
  o tool_operate: propagate error codes for missing URL after --next [4]
  o tool_progress: shut off progress meter for --silent in parallel [8]
@@ -145,6 +152,7 @@ Planned upcoming removals include:
  o gskit
  o NSS
  o support for space-separated NOPROXY patterns
+ o support for the original legacy mingw version 1
 
  See https://curl.se/dev/deprecate.html for details
 
@@ -155,14 +163,14 @@ advice from friends like these:
   Casey Bodley, Cristian Morales Vega, Dan Fandrich, Daniel Stenberg,
   Evgeny Grin (Karlson2k), finkjsc on github, Grisha Levit, Harry Sintonen,
   Hiroki Kurosawa, Ilmari Lauhakangas, JackBoosY on github, Jan Engelhardt,
-  Jelle van der Waa, Jérémy Rabasco, Jerome St-Louis, Maciej Domanski,
-  Marcel Raad, marski on github, Master Inspire, Matt Jolly,
+  Jelle van der Waa, Jérémy Rabasco, Jerome St-Louis, kchow-FTNT on github,
+  Maciej Domanski, Marcel Raad, marski on github, Master Inspire, Matt Jolly,
   opensslonzos-github on github, Patrick Monnerat, Philip Heiduck,
   Philipp Engel, Ray Satiro, rcombs on github, rwmjones on github,
   SandakovMM on github, SendSonS on github, Sergey Fionov, Sergey Ryabinin,
   Sergio Mijatovic, Shankar Jadhavar, Stefan Eissing, u20221022 on github,
   Viktor Szakats, 積丹尼 Dan Jacobson
-  (41 contributors)
+  (42 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -273,10 +281,17 @@ References to bug reports and discussions on issues:
  [105] = https://curl.se/bug/?i=10762
  [106] = https://curl.se/bug/?i=10694
  [108] = https://curl.se/bug/?i=10764
+ [109] = https://curl.se/bug/?i=10759
+ [110] = https://curl.se/bug/?i=10726
  [112] = https://curl.se/bug/?i=9995
  [113] = https://curl.se/bug/?i=10739
  [114] = https://curl.se/bug/?i=10717
+ [115] = https://curl.se/bug/?i=10782
  [116] = https://curl.se/bug/?i=10750
  [117] = https://curl.se/bug/?i=10756
  [118] = https://curl.se/bug/?i=10699
+ [119] = https://curl.se/bug/?i=10782
  [120] = https://curl.se/bug/?i=10745
+ [121] = https://curl.se/bug/?i=10778
+ [122] = https://curl.se/bug/?i=10760
+ [124] = https://curl.se/bug/?i=10777
