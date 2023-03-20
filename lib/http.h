@@ -29,6 +29,7 @@
 #include <pthread.h>
 #endif
 
+#include "dynhds.h"
 #include "ws.h"
 
 typedef enum {
@@ -60,6 +61,7 @@ extern const struct Curl_handler Curl_handler_wss;
 #endif
 #endif /* websockets */
 
+struct dynhds;
 
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
@@ -97,6 +99,10 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  void *headers
 #endif
   );
+CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
+                                bool is_connect,
+                                struct dynhds *hds);
+
 CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
                                     struct dynbuf *buf,
                                     struct Curl_easy *handle);
@@ -327,5 +333,49 @@ Curl_http_output_auth(struct Curl_easy *data,
                       const char *path,
                       bool proxytunnel); /* TRUE if this is the request setting
                                             up the proxy tunnel */
+
+/* Decode HTTP status code string. */
+CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
+
+/**
+ * All about a core HTTP request, excluding body and trailers
+ */
+struct http_req {
+  char method[12];
+  char *scheme;
+  char *authority;
+  char *path;
+  struct dynhds headers;
+};
+
+/**
+ * Create a HTTP request struct.
+ */
+CURLcode Curl_http_req_make(struct http_req **preq,
+                            const char *method,
+                            const char *scheme,
+                            const char *authority,
+                            const char *path);
+
+void Curl_http_req_free(struct http_req *req);
+
+/**
+ * All about a core HTTP response, excluding body and trailers
+ */
+struct http_resp {
+  int status;
+  char *description;
+  struct dynhds headers;
+  struct http_resp *prev;
+};
+
+/**
+ * Create a HTTP response struct.
+ */
+CURLcode Curl_http_resp_make(struct http_resp **presp,
+                             int status,
+                             const char *description);
+
+void Curl_http_resp_free(struct http_resp *resp);
 
 #endif /* HEADER_CURL_HTTP_H */
