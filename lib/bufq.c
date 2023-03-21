@@ -501,7 +501,7 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
                              Curl_bufq_writer *writer, void *writer_ctx,
                              CURLcode *err)
 {
-  ssize_t nwritten = 0, total_written = 0;
+  ssize_t nwritten = 0, n;
   bool prefer_direct = (len >= data_pass_size(q));
 
   *err = CURLE_OK;
@@ -509,38 +509,36 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
     if(Curl_bufq_is_full(q) || (!Curl_bufq_is_empty(q) && prefer_direct)) {
       /* try to make room in case we are full
        * or empty the buffer when adding "large" data */
-      nwritten = Curl_bufq_pass(q, writer, writer_ctx, err);
-      if(nwritten < 0) {
+      n = Curl_bufq_pass(q, writer, writer_ctx, err);
+      if(n < 0) {
         if(*err != CURLE_AGAIN) {
           /* real error, fail */
           return -1;
         }
         /* would block */
-        nwritten = 0;
       }
-      /* nwritten here does not count for total_written */
     }
 
     if(Curl_bufq_is_empty(q) && prefer_direct) {
       /* empty and `data` is "large", try passing directly */
-      nwritten = writer(writer_ctx, buf, len, err);
-      if(nwritten < 0) {
+      n = writer(writer_ctx, buf, len, err);
+      if(n < 0) {
         if(*err != CURLE_AGAIN) {
           /* real error, fail */
           return -1;
         }
         /* passing would block */
-        nwritten = 0;
+        n = 0;
       }
-      buf += nwritten;
-      len -= nwritten;
-      total_written += nwritten;
+      buf += (size_t)n;
+      len -= (size_t)n;
+      nwritten += (size_t)n;
     }
 
     if(len) {
       /* Add whatever is remaining now to bufq */
-      nwritten = Curl_bufq_write(q, buf, len, err);
-      if(nwritten < 0) {
+      n = Curl_bufq_write(q, buf, len, err);
+      if(n < 0) {
         if(*err != CURLE_AGAIN) {
           /* real error, fail */
           return -1;
@@ -549,14 +547,14 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
         goto out;
       }
       /* Maybe only part of `data` has been added, continue to loop */
-      buf += (size_t)nwritten;
-      len -= (size_t)nwritten;
-      total_written += (size_t)nwritten;
+      buf += (size_t)n;
+      len -= (size_t)n;
+      nwritten += (size_t)n;
     }
   }
 
 out:
-  return total_written;
+  return nwritten;
 }
 
 ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
