@@ -45,8 +45,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define RTP_PKT_CHANNEL(p)   ((int)((unsigned char)((p)[1])))
-
 #define RTP_PKT_LENGTH(p)  ((((int)((unsigned char)((p)[2]))) << 8) | \
                              ((int)((unsigned char)((p)[3]))))
 
@@ -91,6 +89,8 @@ static int rtsp_getsock_do(struct Curl_easy *data, struct connectdata *conn,
 
 static
 CURLcode rtp_client_write(struct Curl_easy *data, char *ptr, size_t len);
+static
+CURLcode rtsp_parse_transport(struct Curl_easy *data, char *transport);
 
 
 /*
@@ -594,11 +594,14 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                                    bool *readmore) {
   struct SingleRequest *k = &data->req;
   struct rtsp_conn *rtspc = &(conn->proto.rtspc);
+  unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
 
   char *rtp; /* moving pointer to rtp data */
   ssize_t rtp_dataleft; /* how much data left to parse in this round */
   char *scratch;
   CURLcode result;
+  bool interleaved = false;
+  size_t skip_size = 0;
 
   if(rtspc->rtp_buf) {
     /* There was some leftover data the last time. Merge buffers */
@@ -621,52 +624,94 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     rtp_dataleft = *nread;
   }
 
-  while((rtp_dataleft > 0) &&
-        (rtp[0] == '$')) {
-    if(rtp_dataleft > 4) {
-      int rtp_length;
+  while(rtp_dataleft > 0) {
+    if(rtp[0] == '$') {
+      if(rtp_dataleft > 4) {
+        unsigned char rtp_channel;
+        int rtp_length;
+        int idx;
+        int off;
 
-      /* Parse the header */
-      /* The channel identifier immediately follows and is 1 byte */
-      rtspc->rtp_channel = RTP_PKT_CHANNEL(rtp);
+        /* Parse the header */
+        /* The channel identifier immediately follows and is 1 byte */
+        rtp_channel = (unsigned char)rtp[1];
+        idx = rtp_channel / 8;
+        off = rtp_channel % 8;
+        if(!(rtp_channel_mask[idx] & (1 << off))) {
+          /* invalid channel number, maybe not an RTP packet */
+          rtp++;
+          rtp_dataleft--;
+          skip_size++;
+          continue;
+        }
+        if(skip_size > 0) {
+          DEBUGF(infof(data, "Skip the malformed interleaved data %lu "
+                       "bytes", skip_size));
+        }
+        skip_size = 0;
+        rtspc->rtp_channel = rtp_channel;
 
-      /* The length is two bytes */
-      rtp_length = RTP_PKT_LENGTH(rtp);
+        /* The length is two bytes */
+        rtp_length = RTP_PKT_LENGTH(rtp);
 
-      if(rtp_dataleft < rtp_length + 4) {
-        /* Need more - incomplete payload */
+        if(rtp_dataleft < rtp_length + 4) {
+          /* Need more - incomplete payload */
+          *readmore = TRUE;
+          break;
+        }
+        interleaved = true;
+        /* We have the full RTP interleaved packet
+         * Write out the header including the leading '$' */
+        DEBUGF(infof(data, "RTP write channel %d rtp_length %d",
+                     rtspc->rtp_channel, rtp_length));
+        result = rtp_client_write(data, &rtp[0], rtp_length + 4);
+        if(result) {
+          *readmore = FALSE;
+          Curl_safefree(rtspc->rtp_buf);
+          rtspc->rtp_buf = NULL;
+          rtspc->rtp_bufsize = 0;
+          return result;
+        }
+
+        /* Move forward in the buffer */
+        rtp_dataleft -= rtp_length + 4;
+        rtp += rtp_length + 4;
+
+        if(data->set.rtspreq == RTSPREQ_RECEIVE) {
+          /* If we are in a passive receive, give control back
+           * to the app as often as we can.
+           */
+          k->keepon &= ~KEEP_RECV;
+        }
+      }
+      else {
+        /* Need more - incomplete header */
         *readmore = TRUE;
         break;
       }
-      /* We have the full RTP interleaved packet
-       * Write out the header including the leading '$' */
-      DEBUGF(infof(data, "RTP write channel %d rtp_length %d",
-             rtspc->rtp_channel, rtp_length));
-      result = rtp_client_write(data, &rtp[0], rtp_length + 4);
-      if(result) {
-        failf(data, "Got an error writing an RTP packet");
-        *readmore = FALSE;
-        Curl_safefree(rtspc->rtp_buf);
-        rtspc->rtp_buf = NULL;
-        rtspc->rtp_bufsize = 0;
-        return result;
-      }
-
-      /* Move forward in the buffer */
-      rtp_dataleft -= rtp_length + 4;
-      rtp += rtp_length + 4;
-
-      if(data->set.rtspreq == RTSPREQ_RECEIVE) {
-        /* If we are in a passive receive, give control back
-         * to the app as often as we can.
-         */
-        k->keepon &= ~KEEP_RECV;
-      }
     }
     else {
-      /* Need more - incomplete header */
-      *readmore = TRUE;
-      break;
+      /* If the following data begins with 'RTSP/', which might be an RTSP
+         message, we should stop skipping the data. */
+      /* If `k-> headerline> 0 && !interleaved` is true, we are maybe in the
+         middle of an RTSP message. It is difficult to determine this, so we
+         stop skipping. */
+      size_t prefix_len = (rtp_dataleft < 5) ? rtp_dataleft : 5;
+      if((k->headerline > 0 && !interleaved) ||
+         strncmp(rtp, "RTSP/", prefix_len) == 0) {
+        if(skip_size > 0) {
+          DEBUGF(infof(data, "Skip the malformed interleaved data %lu "
+                       "bytes", skip_size));
+        }
+        skip_size = 0;
+        break; /* maybe is an RTSP message */
+      }
+      /* Skip incorrect data util the next RTP packet or RTSP message */
+      do {
+        rtp++;
+        rtp_dataleft--;
+        skip_size++;
+      } while(rtp_dataleft > 0 && rtp[0] != '$' && rtp[0] != 'R');
     }
   }
 
@@ -822,7 +867,63 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
       (data->set.str[STRING_RTSP_SESSION_ID])[idlen] = '\0';
     }
   }
+  else if(checkprefix("Transport:", header)) {
+    CURLcode result;
+    result = rtsp_parse_transport(data, header + 10);
+    if(result)
+      return result;
+  }
   return CURLE_OK;
 }
+
+static
+CURLcode rtsp_parse_transport(struct Curl_easy *data, char *transport)
+{
+  /* If we receive multiple Transport response-headers, the linterleaved
+     channels of each response header is recorded and used together for
+     subsequent data validity checks.*/
+  /* e.g.: ' RTP/AVP/TCP;unicast;interleaved=5-6' */
+  char *start;
+  char *end;
+  start = transport;
+  while(start && *start) {
+    while(*start && ISBLANK(*start) )
+      start++;
+    end = strchr(start, ';');
+    if(checkprefix("interleaved=", start)) {
+      long chan1, chan2, chan;
+      char *endp;
+      char *p = start + 12;
+      chan1 = strtol(p, &endp, 10);
+      if(p != endp && chan1 >= 0 && chan1 <= 255) {
+        unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
+        chan2 = chan1;
+        if(*endp == '-') {
+          p = endp + 1;
+          chan2 = strtol(p, &endp, 10);
+          if(p == endp || chan2 < 0 || chan2 > 255) {
+            infof(data, "Unable to read the interleaved parameter from "
+                  "Transport header: [%s]", transport);
+            chan2 = chan1;
+          }
+        }
+        for(chan = chan1; chan <= chan2; chan++) {
+          long idx = chan / 8;
+          long off = chan % 8;
+          rtp_channel_mask[idx] |= (unsigned char)(1 << off);
+        }
+      }
+      else {
+        infof(data, "Unable to read the interleaved parameter from "
+              "Transport header: [%s]", transport);
+      }
+      break;
+    }
+    /* skip to next parameter */
+    start = (!end) ? end : (end + 1);
+  }
+  return CURLE_OK;
+}
+
 
 #endif /* CURL_DISABLE_RTSP or using Hyper */
