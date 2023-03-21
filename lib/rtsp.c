@@ -594,11 +594,13 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                                    bool *readmore) {
   struct SingleRequest *k = &data->req;
   struct rtsp_conn *rtspc = &(conn->proto.rtspc);
+  unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
 
   char *rtp; /* moving pointer to rtp data */
   ssize_t rtp_dataleft; /* how much data left to parse in this round */
   char *scratch;
   CURLcode result;
+  bool interleaved = false;
 
   if(rtspc->rtp_buf) {
     /* There was some leftover data the last time. Merge buffers */
@@ -621,52 +623,75 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     rtp_dataleft = *nread;
   }
 
-  while((rtp_dataleft > 0) &&
-        (rtp[0] == '$')) {
-    if(rtp_dataleft > 4) {
-      int rtp_length;
+  while(rtp_dataleft > 0) {
+    if(rtp[0] == '$') {
+      if(rtp_dataleft > 4) {
+        int rtp_length;
+        int idx;
+        int off;
 
-      /* Parse the header */
-      /* The channel identifier immediately follows and is 1 byte */
-      rtspc->rtp_channel = RTP_PKT_CHANNEL(rtp);
+        /* Parse the header */
+        /* The channel identifier immediately follows and is 1 byte */
+        rtspc->rtp_channel = RTP_PKT_CHANNEL(rtp);
+        idx = rtspc->rtp_channel / 8;
+        off = rtspc->rtp_channel % 8;
+        if(!(rtp_channel_mask[idx] & (1 << off))) {
+          /* invalid channel number, maybe not an RTP packet */
+          rtp++;
+          rtp_dataleft--;
+          continue;
+        }
 
-      /* The length is two bytes */
-      rtp_length = RTP_PKT_LENGTH(rtp);
+        /* The length is two bytes */
+        rtp_length = RTP_PKT_LENGTH(rtp);
 
-      if(rtp_dataleft < rtp_length + 4) {
-        /* Need more - incomplete payload */
+        if(rtp_dataleft < rtp_length + 4) {
+          /* Need more - incomplete payload */
+          *readmore = TRUE;
+          break;
+        }
+        interleaved = true;
+        /* We have the full RTP interleaved packet
+         * Write out the header including the leading '$' */
+        DEBUGF(infof(data, "RTP write channel %d rtp_length %d",
+                     rtspc->rtp_channel, rtp_length));
+        result = rtp_client_write(data, &rtp[0], rtp_length + 4);
+        if(result) {
+          failf(data, "Got an error writing an RTP packet");
+          *readmore = FALSE;
+          Curl_safefree(rtspc->rtp_buf);
+          rtspc->rtp_buf = NULL;
+          rtspc->rtp_bufsize = 0;
+          return result;
+        }
+
+        /* Move forward in the buffer */
+        rtp_dataleft -= rtp_length + 4;
+        rtp += rtp_length + 4;
+
+        if(data->set.rtspreq == RTSPREQ_RECEIVE) {
+          /* If we are in a passive receive, give control back
+           * to the app as often as we can.
+           */
+          k->keepon &= ~KEEP_RECV;
+        }
+      }
+      else {
+        /* Need more - incomplete header */
         *readmore = TRUE;
         break;
       }
-      /* We have the full RTP interleaved packet
-       * Write out the header including the leading '$' */
-      DEBUGF(infof(data, "RTP write channel %d rtp_length %d",
-             rtspc->rtp_channel, rtp_length));
-      result = rtp_client_write(data, &rtp[0], rtp_length + 4);
-      if(result) {
-        failf(data, "Got an error writing an RTP packet");
-        *readmore = FALSE;
-        Curl_safefree(rtspc->rtp_buf);
-        rtspc->rtp_buf = NULL;
-        rtspc->rtp_bufsize = 0;
-        return result;
-      }
-
-      /* Move forward in the buffer */
-      rtp_dataleft -= rtp_length + 4;
-      rtp += rtp_length + 4;
-
-      if(data->set.rtspreq == RTSPREQ_RECEIVE) {
-        /* If we are in a passive receive, give control back
-         * to the app as often as we can.
-         */
-        k->keepon &= ~KEEP_RECV;
-      }
     }
     else {
-      /* Need more - incomplete header */
-      *readmore = TRUE;
-      break;
+      size_t prefix_len = (rtp_dataleft < 5) ? rtp_dataleft : 5;
+      if(!interleaved || strncmp(rtp, "RTSP/", prefix_len) == 0) {
+        break; /* maybe is an RTSP message */
+      }
+      /* Skip incorrect data util the next RTP packet or RTSP message */
+      while(rtp_dataleft > 0 && rtp[0] != '$' && rtp[0] != 'R') {
+        rtp++;
+        rtp_dataleft--;
+      }
     }
   }
 
@@ -820,6 +845,49 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
         return CURLE_OUT_OF_MEMORY;
       memcpy(data->set.str[STRING_RTSP_SESSION_ID], start, idlen);
       (data->set.str[STRING_RTSP_SESSION_ID])[idlen] = '\0';
+    }
+  }
+  else if(checkprefix("Transport:", header)) {
+    /* e.g.: 'Transport: RTP/AVP/TCP;unicast;interleaved=5-6' */
+    char *start;
+    char *end;
+    start = header + 10;
+    while(*start) {
+      while(*start && *start != ';' && ISBLANK(*start) )
+        start++;
+      end = start;
+      while(*end && *end != ';')
+        end++;
+      if(checkprefix("interleaved=", start)) {
+        long chan1, chan2, chan;
+        char *endp;
+        char *p = start + 12;
+        chan1 = strtol(p, &endp, 10);
+        if(p != endp && chan1 >= 0 && chan1 <= 255) {
+          unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
+          chan2 = chan1;
+          if(*endp == '-') {
+            p = endp + 1;
+            chan2 = strtol(p, &endp, 10);
+            if(p == endp || chan2 < 0 || chan2 > 255) {
+              failf(data, "Unable to read the interleaved parameter from "
+                    "Transport header: [%s]", header);
+              chan2 = chan1;
+            }
+          }
+          for(chan = chan1; chan <= chan2; chan++) {
+            long idx = chan / 8;
+            long off = chan % 8;
+            rtp_channel_mask[idx] |= (unsigned char)(1 << off);
+          }
+        }
+        else {
+          failf(data, "Unable to read the interleaved parameter from "
+                "Transport header: [%s]", header);
+        }
+      }
+      /* skip to next parameter */
+      start = (!*end) ? end : (end + 1);
     }
   }
   return CURLE_OK;

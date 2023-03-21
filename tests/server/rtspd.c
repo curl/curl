@@ -304,6 +304,7 @@ static int ProcessRequest(struct httprequest *req)
 
         int rtp_channel = 0;
         int rtp_size = 0;
+        int rtp_size_err = 0;
         int rtp_partno = -1;
         char *rtp_scratch = NULL;
 
@@ -320,6 +321,7 @@ static int ProcessRequest(struct httprequest *req)
         if(cmdsize) {
           logmsg("Found a reply-servercmd section!");
           do {
+            rtp_size_err = 0;
             if(!strncmp(CMD_AUTH_REQUIRED, ptr, strlen(CMD_AUTH_REQUIRED))) {
               logmsg("instructed to require authorization header");
               req->auth_req = TRUE;
@@ -345,13 +347,15 @@ static int ProcessRequest(struct httprequest *req)
               logmsg("instructed to skip this number of bytes %d", num);
               req->skip = num;
             }
-            else if(3 == sscanf(ptr, "rtp: part %d channel %d size %d",
-                                &rtp_partno, &rtp_channel, &rtp_size)) {
+            else if(3 <= sscanf(ptr,
+                                "rtp: part %d channel %d size %d size_err %d",
+                                &rtp_partno, &rtp_channel, &rtp_size,
+                                &rtp_size_err)) {
 
               if(rtp_partno == req->partno) {
                 int i = 0;
-                logmsg("RTP: part %d channel %d size %d",
-                       rtp_partno, rtp_channel, rtp_size);
+                logmsg("RTP: part %d channel %d size %d size_err %d",
+                       rtp_partno, rtp_channel, rtp_size, rtp_size_err);
 
                 /* Make our scratch buffer enough to fit all the
                  * desired data and one for padding */
@@ -364,7 +368,7 @@ static int ProcessRequest(struct httprequest *req)
                 SET_RTP_PKT_CHN(rtp_scratch, rtp_channel);
 
                 /* Length follows and is a two byte short in network order */
-                SET_RTP_PKT_LEN(rtp_scratch, rtp_size);
+                SET_RTP_PKT_LEN(rtp_scratch, rtp_size + rtp_size_err);
 
                 /* Fill it with junk data */
                 for(i = 0; i < rtp_size; i += RTP_DATA_SIZE) {
