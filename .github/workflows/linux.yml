@@ -107,7 +107,7 @@ jobs:
         - name: openssl-sanitizer
           install_packages: zlib1g-dev libssh2-1-dev
           install_steps: gcc-11 openssl3 pytest
-          configure: |
+          configure: >
             CC=clang
             CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
             LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64 -fsanitize=memory,undefined -fno-sanitize-recover=undefined,integer"
