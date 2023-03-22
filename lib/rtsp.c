@@ -688,10 +688,10 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
         break; /* maybe is an RTSP message */
       }
       /* Skip incorrect data util the next RTP packet or RTSP message */
-      while(rtp_dataleft > 0 && rtp[0] != '$' && rtp[0] != 'R') {
+      do {
         rtp++;
         rtp_dataleft--;
-      }
+      } while(rtp_dataleft > 0 && rtp[0] != '$' && rtp[0] != 'R');
     }
   }
 

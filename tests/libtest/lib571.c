@@ -48,7 +48,7 @@
                              ((int)((unsigned char)((p)[3]))))
 
 #define RTP_DATA_SIZE 12
-static const char *RTP_DATA = "$_1234\n\0asdf";
+static const char *RTP_DATA = "$_1234\n\0Rsdf";
 
 static int rtp_packet_count = 0;
 

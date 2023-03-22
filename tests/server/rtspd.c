@@ -201,7 +201,7 @@ static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
 
 /* Default size to send away fake RTP data */
 #define RTP_DATA_SIZE 12
-static const char *RTP_DATA = "$_1234\n\0asdf";
+static const char *RTP_DATA = "$_1234\n\0Rsdf";
 
 static int ProcessRequest(struct httprequest *req)
 {
