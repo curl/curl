@@ -105,7 +105,7 @@ jobs:
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
         - name: openssl-sanitizer
-          install_packages: zlib1g-dev libssh2-1-dev
+          install_packages: zlib1g-dev libssh2-1-dev clang
           install_steps: gcc-11 openssl3 pytest
           configure: >
             CC=clang
