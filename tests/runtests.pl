@@ -4554,22 +4554,20 @@ sub singletest {
         # Verify the sent request
         my @out = loadarray($SERVERIN);
 
-        my @protstrip=@protocol;
-
         # check if there's any attributes on the verify/protocol section
         my %hash = getpartattr("verify", "protocol");
 
         if($hash{'nonewline'}) {
             # Yes, we must cut off the final newline from the final line
             # of the protocol data
-            chomp($protstrip[$#protstrip]);
+            chomp($protocol[$#protocol]);
         }
 
         for(@strip) {
             # strip off all lines that match the patterns from both arrays
             chomp $_;
             @out = striparray( $_, \@out);
-            @protstrip= striparray( $_, \@protstrip);
+            @protocol= striparray( $_, \@protocol);
         }
 
         my $strip;
@@ -4582,17 +4580,17 @@ sub singletest {
         }
 
         if($hash{'crlf'}) {
-            map subNewlines(1, \$_), @protstrip;
+            map subNewlines(1, \$_), @protocol;
         }
 
-        if((!$out[0] || ($out[0] eq "")) && $protstrip[0]) {
+        if((!$out[0] || ($out[0] eq "")) && $protocol[0]) {
             logmsg "\n $testnum: protocol FAILED!\n".
                 " There was no content at all in the file $SERVERIN.\n".
                 " Server glitch? Total curl failure? Returned: $cmdres\n";
             return $errorreturncode;
         }
 
-        $res = compare($testnum, $testname, "protocol", \@out, \@protstrip);
+        $res = compare($testnum, $testname, "protocol", \@out, \@protocol);
         if($res) {
             return $errorreturncode;
         }
@@ -4642,23 +4640,21 @@ sub singletest {
     my @proxyprot = getpart("verify", "proxy");
     if(@proxyprot) {
         # Verify the sent proxy request
-        my @out = loadarray($PROXYIN);
-        my @protstrip=@proxyprot;
-
         # check if there's any attributes on the verify/protocol section
         my %hash = getpartattr("verify", "proxy");
 
         if($hash{'nonewline'}) {
             # Yes, we must cut off the final newline from the final line
             # of the protocol data
-            chomp($protstrip[$#protstrip]);
+            chomp($proxyprot[$#proxyprot]);
         }
 
+        my @out = loadarray($PROXYIN);
         for(@strip) {
             # strip off all lines that match the patterns from both arrays
             chomp $_;
             @out = striparray( $_, \@out);
-            @protstrip= striparray( $_, \@protstrip);
+            @proxyprot= striparray( $_, \@proxyprot);
         }
 
         my $strip;
@@ -4671,10 +4667,10 @@ sub singletest {
 
         if($hash{'crlf'} ||
            ($has_hyper && ($keywords{"HTTP"} || $keywords{"HTTPS"}))) {
-            map subNewlines(0, \$_), @protstrip;
+            map subNewlines(0, \$_), @proxyprot;
         }
 
-        $res = compare($testnum, $testname, "proxy", \@out, \@protstrip);
+        $res = compare($testnum, $testname, "proxy", \@out, \@proxyprot);
         if($res) {
             return $errorreturncode;
         }
