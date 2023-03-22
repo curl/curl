@@ -111,7 +111,7 @@ jobs:
             CC=clang
             CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
             LDFLAGS="-fsanitize=memory,undefined -fno-sanitize-recover=undefined,integer"
-            LIBS="-lubsan"
+            LIBS="-ldl -lubsan"
             --with-openssl --enable-debug --enable-websockets
 
         - name: event-based
