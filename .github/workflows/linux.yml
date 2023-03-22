@@ -110,7 +110,7 @@ jobs:
           configure: >
             CC=clang
             CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
-            LDFLAGS="-fsanitize=memory,undefined -fno-sanitize-recover=undefined,integer"
+            LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer"
             LIBS="-ldl -lubsan"
             --with-openssl --enable-debug --enable-websockets
 
