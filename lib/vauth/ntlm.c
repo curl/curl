@@ -511,6 +511,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   size_t userlen = 0;
   size_t domlen = 0;
 
+  memset(lmresp, 0, sizeof(lmresp));
+  memset(ntresp, 0, sizeof(ntresp));
   user = strchr(userp, '\\');
   if(!user)
     user = strchr(userp, '/');
