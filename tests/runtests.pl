@@ -3686,22 +3686,40 @@ sub prepro {
     return @out;
 }
 
+# Massage the command result code into a useful form
+sub normalize_cmdres {
+    my $cmdres = $_[0];
+    my $signal_num  = $cmdres & 127;
+    my $dumped_core = $cmdres & 128;
+
+    if(!$anyway && ($signal_num || $dumped_core)) {
+        $cmdres = 1000;
+    }
+    else {
+        $cmdres >>= 8;
+        $cmdres = (2000 + $signal_num) if($signal_num && !$cmdres);
+    }
+    return ($cmdres, $dumped_core);
+}
+
+# See if Valgrind should actually be used
+sub use_valgrind {
+    if($valgrind) {
+        my @valgrindoption = getpart("verify", "valgrind");
+        if((!@valgrindoption) || ($valgrindoption[0] !~ /disable/)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 #######################################################################
-# Run a single specified test case
-#
-sub singletest {
-    my ($evbased, # 1 means switch on if possible (and "curl" is tested)
-                  # returns "not a test" if it can't be used for this test
-        $testnum,
-        $count,
-        $total)=@_;
-
-    #######################################################################
-    # Verify that this test case should be run
-
-    my @what;
-    my $why;
+# Verify that this test case should be run
+sub singletest_shouldrun {
+    my $testnum = $_[0];
+    my $why;   # why the test won't be run
     my $errorreturncode = 1; # 1 means normal error, 2 means ignored error
+    my @what;  # what features are needed
 
     # first, remove all lingering log files
     if(!cleardir($LOGDIR) && $clearlocks) {
@@ -3795,7 +3813,8 @@ sub singletest {
             chomp $k;
             if ($disabled_keywords{lc($k)}) {
                 $why = "disabled by keyword";
-            } elsif ($enabled_keywords{lc($k)}) {
+            }
+            elsif ($enabled_keywords{lc($k)}) {
                 $match = 1;
             }
             if ($ignored_keywords{lc($k)}) {
@@ -3835,9 +3854,14 @@ sub singletest {
         }
     }
 
+    return ($why, $errorreturncode);
+}
 
-    #######################################################################
-    # Register the test case with the CI environment
+
+#######################################################################
+# Register the test case with the CI environment
+sub singletest_registerci {
+    my $testnum = $_[0];
 
     # test definition may instruct to (un)set environment vars
     # this is done this early, so that the precheck can use environment
@@ -3855,9 +3879,8 @@ sub singletest {
     }
 
     # get the name of the test early
-    my @testname= getpart("client", "name");
-    my $testname = $testname[0];
-    $testname =~ s/\n//g;
+    my $testname= (getpart("client", "name"))[0];
+    chomp $testname;
 
     # create test result in CI services
     if(azure_check_environment() && $AZURE_RUN_ID) {
@@ -3866,10 +3889,13 @@ sub singletest {
     elsif(appveyor_check_environment()) {
         appveyor_create_test_result($ACURL, $testnum, $testname);
     }
+}
 
 
-    #######################################################################
-    # Start the servers needed to run this test case
+#######################################################################
+# Start the servers needed to run this test case
+sub singletest_startservers {
+    my ($testnum, $why) = @_;
 
     # remove test server commands file before servers are started/verified
     unlink($FTPDCMD) if(-f $FTPDCMD);
@@ -3877,7 +3903,7 @@ sub singletest {
     # timestamp required servers verification start
     $timesrvrini{$testnum} = Time::HiRes::time();
 
-    if(!$why) {
+    if (!$why) {
         $why = serverfortest($testnum);
     }
 
@@ -3889,9 +3915,14 @@ sub singletest {
     unlink($SERVER2IN);
     unlink($PROXYIN);
 
+    return $why;
+}
 
-    #######################################################################
-    # Check that test environment is fine to run this test case
+
+#######################################################################
+# Generate preprocessed test file
+sub singletest_preprocess {
+    my $testnum = $_[0];
 
     # Save a preprocessed version of the entire test file. This allows more
     # "basic" test case readers to enjoy variable replacements.
@@ -3909,7 +3940,12 @@ sub singletest {
 
     # in case the process changed the file, reload it
     loadtest("log/test${testnum}");
+}
 
+
+#######################################################################
+# Set up the test environment to run this test case
+sub singletest_setenv {
     my @setenv = getpart("client", "setenv");
     if(@setenv) {
         foreach my $s (@setenv) {
@@ -3943,38 +3979,51 @@ sub singletest {
         $ENV{http_proxy} = $proxy_address;
         $ENV{HTTPS_PROXY} = $proxy_address;
     }
+}
 
-    my $cmd;
-    if(!$why) {
-        my @precheck = getpart("client", "precheck");
-        if(@precheck) {
-            $cmd = $precheck[0];
-            chomp $cmd;
-            if($cmd) {
-                my @p = split(/ /, $cmd);
-                if($p[0] !~ /\//) {
-                    # the first word, the command, does not contain a slash so
-                    # we will scan the "improved" PATH to find the command to
-                    # be able to run it
-                    my $fullp = checktestcmd($p[0]);
 
-                    if($fullp) {
-                        $p[0] = $fullp;
-                    }
-                    $cmd = join(" ", @p);
+#######################################################################
+# Check that test environment is fine to run this test case
+sub singletest_precheck {
+    my $testnum = $_[0];
+    my $why;
+    my @precheck = getpart("client", "precheck");
+    if(@precheck) {
+        my $cmd = $precheck[0];
+        chomp $cmd;
+        if($cmd) {
+            my @p = split(/ /, $cmd);
+            if($p[0] !~ /\//) {
+                # the first word, the command, does not contain a slash so
+                # we will scan the "improved" PATH to find the command to
+                # be able to run it
+                my $fullp = checktestcmd($p[0]);
+
+                if($fullp) {
+                    $p[0] = $fullp;
                 }
-
-                my @o = `$cmd 2>log/precheck-$testnum`;
-                if($o[0]) {
-                    $why = $o[0];
-                    chomp $why;
-                } elsif($?) {
-                    $why = "precheck command error";
-                }
-                logmsg "prechecked $cmd\n" if($verbose);
+                $cmd = join(" ", @p);
             }
+
+            my @o = `$cmd 2>log/precheck-$testnum`;
+            if($o[0]) {
+                $why = $o[0];
+                chomp $why;
+            }
+            elsif($?) {
+                $why = "precheck command error";
+            }
+            logmsg "prechecked $cmd\n" if($verbose);
         }
     }
+    return $why;
+}
+
+
+#######################################################################
+# Print the test name and count tests
+sub singletest_count {
+    my ($testnum, $why) = @_;
 
     if($why && !$listonly) {
         # there's a problem, count it as "skipped"
@@ -3990,34 +4039,39 @@ sub singletest {
         }
 
         timestampskippedevents($testnum);
-        return -1;
+        return ("Skipped", -1);
     }
 
-    # at this point we've committed to run this test
+    # At this point we've committed to run this test
     logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
 
     # name of the test
+    my $testname= (getpart("client", "name"))[0];
+    chomp $testname;
     logmsg "[$testname]\n" if(!$short);
 
     if($listonly) {
         timestampskippedevents($testnum);
-        return 0; # look successful
     }
+    return ("", 0);  # successful
+}
 
 
-    #######################################################################
-    # Prepare the test environment to run this test case
+#######################################################################
+# Prepare the test environment to run this test case
+sub singletest_prepare {
+    my ($testnum, $why) = @_;
+
+    if($has_memory_tracking) {
+        unlink($memdump);
+    }
+    unlink("core");
 
     # if this section exists, it might be FTP server instructions:
     my @ftpservercmd = getpart("reply", "servercmd");
     push @ftpservercmd, "Testnum $testnum\n";
     # write the instructions to file
     writearray($FTPDCMD, \@ftpservercmd);
-
-    if($has_memory_tracking) {
-        unlink($memdump);
-    }
-    unlink("core");
 
     # create (possibly-empty) files before starting the test
     for my $partsuffix (('', '1', '2', '3', '4')) {
@@ -4028,7 +4082,7 @@ sub singletest {
             if(!$filename) {
                 logmsg "ERROR: section client=>file has no name attribute\n";
                 timestampskippedevents($testnum);
-                return -1;
+                return ("Syntax error", -1);
             }
             my $fileContent = join('', @inputfile);
 
@@ -4055,14 +4109,17 @@ sub singletest {
             close(OUTFILE);
         }
     }
+    return ($why, 0);
+}
 
 
-    #######################################################################
-    # Run the test command
+#######################################################################
+# Run the test command
+sub singletest_run {
+    my $testnum = $_[0];
 
     # get the command line options to use
-    my @blaha;
-    ($cmd, @blaha)= getpart("client", "command");
+    my ($cmd, @blaha)= getpart("client", "command");
     if($cmd) {
         # make some nice replace operations
         $cmd =~ s/\n//g; # no newlines please
@@ -4075,14 +4132,12 @@ sub singletest {
 
     my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
 
-    # if this section exists, we verify that the stdout contained this:
-    my @validstdout = getpart("verify", "stdout");
-
+    # if stdout section exists, we verify that the stdout contained this:
     my $out="";
     my %cmdhash = getpartattr("client", "command");
     if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-output/)) {
         #We may slap on --output!
-        if (!@validstdout ||
+        if (!partexists("verify", "stdout") ||
                 ($cmdhash{'option'} && $cmdhash{'option'} =~ /force-output/)) {
             $out=" --output $CURLOUT ";
         }
@@ -4104,7 +4159,7 @@ sub singletest {
     my $CMDLINE;
     my $cmdargs;
     my $cmdtype = $cmdhash{'type'} || "default";
-    my $fail_due_event_based = $evbased;
+    my $fail_due_event_based = $run_event_based;
     if($cmdtype eq "perl") {
         # run the command line prepended with "perl"
         $cmdargs ="$cmd";
@@ -4134,7 +4189,7 @@ sub singletest {
             $cmdargs .= "--trace-ascii log/trace$testnum ";
         }
         $cmdargs .= "--trace-time ";
-        if($evbased) {
+        if($run_event_based) {
             $cmdargs .= "--test-event ";
             $fail_due_event_based--;
         }
@@ -4162,7 +4217,7 @@ sub singletest {
         if(! -f $CMDLINE) {
             logmsg "The tool set in the test case for this: '$tool' does not exist\n";
             timestampskippedevents($testnum);
-            return -1;
+            return (-1, 0, 0, "", "", 0);
         }
         $DBGCURL=$CMDLINE;
     }
@@ -4170,7 +4225,7 @@ sub singletest {
     if($fail_due_event_based) {
         logmsg "This test cannot run event based\n";
         timestampskippedevents($testnum);
-        return -1;
+        return (-1, 0, 0, "", "", 0);
     }
 
     if($gdbthis) {
@@ -4200,20 +4255,15 @@ sub singletest {
         $CMDLINE="$CURL";
     }
 
-    my $usevalgrind;
-    if($valgrind && !$disablevalgrind) {
-        my @valgrindoption = getpart("verify", "valgrind");
-        if((!@valgrindoption) || ($valgrindoption[0] !~ /disable/)) {
-            $usevalgrind = 1;
-            my $valgrindcmd = "$valgrind ";
-            $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
-            $valgrindcmd .= "--quiet --leak-check=yes ";
-            $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
-            # $valgrindcmd .= "--gen-suppressions=all ";
-            $valgrindcmd .= "--num-callers=16 ";
-            $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
-            $CMDLINE = "$valgrindcmd $CMDLINE";
-        }
+    if(use_valgrind() && !$disablevalgrind) {
+        my $valgrindcmd = "$valgrind ";
+        $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
+        $valgrindcmd .= "--quiet --leak-check=yes ";
+        $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
+        # $valgrindcmd .= "--gen-suppressions=all ";
+        $valgrindcmd .= "--num-callers=16 ";
+        $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
+        $CMDLINE = "$valgrindcmd $CMDLINE";
     }
 
     $CMDLINE .= "$cmdargs >$STDOUT 2>$STDERR";
@@ -4256,25 +4306,21 @@ sub singletest {
         $cmdres=0; # makes it always continue after a debugged run
     }
     else {
-        $cmdres = runclient("$CMDLINE");
-        my $signal_num  = $cmdres & 127;
-        $dumped_core = $cmdres & 128;
-
-        if(!$anyway && ($signal_num || $dumped_core)) {
-            $cmdres = 1000;
-        }
-        else {
-            $cmdres >>= 8;
-            $cmdres = (2000 + $signal_num) if($signal_num && !$cmdres);
-        }
+        # Convert the raw result code into a more useful one
+        ($cmdres, $dumped_core) = normalize_cmdres(runclient("$CMDLINE"));
     }
 
     # timestamp finishing of test command
     $timetoolend{$testnum} = Time::HiRes::time();
 
+    return (0, $cmdres, $dumped_core, $CURLOUT, $tool, $disablevalgrind);
+}
 
-    #######################################################################
-    # Clean up after test command
+
+#######################################################################
+# Clean up after test command
+sub singletest_clean {
+    my ($testnum, $dumped_core)=@_;
 
     if(!$dumped_core) {
         if(-r "core") {
@@ -4301,6 +4347,7 @@ sub singletest {
     # So, if the lock file exists the script waits here a certain amount
     # of time until the server removes it, or the given time expires.
     my $serverlogslocktimeout = $defserverlogslocktimeout;
+    my %cmdhash = getpartattr("client", "command");
     if($cmdhash{'timeout'}) {
         # test is allowed to override default server logs lock timeout
         if($cmdhash{'timeout'} =~ /(\d+)/) {
@@ -4351,15 +4398,19 @@ sub singletest {
             }
         }
     }
+    return 0;
+}
 
 
-    #######################################################################
-    # Verify test succeeded
+#######################################################################
+# Verify test succeeded
+sub singletest_check {
+    my ($testnum, $cmdres, $CURLOUT, $tool, $disablevalgrind)=@_;
 
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
     if(@postcheck) {
-        $cmd = join("", @postcheck);
+        my $cmd = join("", @postcheck);
         chomp $cmd;
         if($cmd) {
             logmsg "postcheck $cmd\n" if($verbose);
@@ -4370,7 +4421,7 @@ sub singletest {
                 logmsg " postcheck FAILED\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return $errorreturncode;
+                return -3;
             }
         }
     }
@@ -4391,7 +4442,7 @@ sub singletest {
     if ($torture) {
         # timestamp test result verification end
         $timevrfyend{$testnum} = Time::HiRes::time();
-        return $cmdres;
+        return -2;
     }
 
     my @err = getpart("verify", "errorcode");
@@ -4399,9 +4450,12 @@ sub singletest {
     my $ok="";
     my $res;
     chomp $errorcode;
+    my $testname= (getpart("client", "name"))[0];
+    chomp $testname;
     # what parts to cut off from stdout/stderr
     my @stripfile = getpart("verify", "stripfile");
 
+    my @validstdout = getpart("verify", "stdout");
     if (@validstdout) {
         # verify redirected stdout
         my @actual = loadarray($STDOUT);
@@ -4445,7 +4499,7 @@ sub singletest {
 
         $res = compare($testnum, $testname, "stdout", \@actual, \@validstdout);
         if($res) {
-            return $errorreturncode;
+            return -3;
         }
         $ok .= "s";
     }
@@ -4497,7 +4551,7 @@ sub singletest {
 
         $res = compare($testnum, $testname, "stderr", \@actual, \@validstderr);
         if($res) {
-            return $errorreturncode;
+            return -3;
         }
         $ok .= "r";
     }
@@ -4550,12 +4604,12 @@ sub singletest {
             logmsg "\n $testnum: protocol FAILED!\n".
                 " There was no content at all in the file $SERVERIN.\n".
                 " Server glitch? Total curl failure? Returned: $cmdres\n";
-            return $errorreturncode;
+            return -3;
         }
 
         $res = compare($testnum, $testname, "protocol", \@out, \@protocol);
         if($res) {
-            return $errorreturncode;
+            return -3;
         }
 
         $ok .= "p";
@@ -4621,7 +4675,7 @@ sub singletest {
         my @out = loadarray($CURLOUT);
         $res = compare($testnum, $testname, "data", \@out, \@reply);
         if ($res) {
-            return $errorreturncode;
+            return -3;
         }
         $ok .= "d";
     }
@@ -4650,7 +4704,7 @@ sub singletest {
 
         $res = compare($testnum, $testname, "upload", \@out, \@upload);
         if ($res) {
-            return $errorreturncode;
+            return -3;
         }
         $ok .= "u";
     }
@@ -4694,7 +4748,7 @@ sub singletest {
 
         $res = compare($testnum, $testname, "proxy", \@out, \@proxyprot);
         if($res) {
-            return $errorreturncode;
+            return -3;
         }
 
         $ok .= "P";
@@ -4755,7 +4809,7 @@ sub singletest {
             $res = compare($testnum, $testname, "output ($filename)",
                            \@generated, \@outfile);
             if($res) {
-                return $errorreturncode;
+                return -3;
             }
 
             $outputok = 1; # output checked
@@ -4770,7 +4824,7 @@ sub singletest {
         my @out = loadarray($SOCKSIN);
         $res = compare($testnum, $testname, "socks", \@out, \@socksprot);
         if($res) {
-            return $errorreturncode;
+            return -3;
         }
     }
 
@@ -4796,11 +4850,13 @@ sub singletest {
         logmsg " exit FAILED\n";
         # timestamp test result verification end
         $timevrfyend{$testnum} = Time::HiRes::time();
-        return $errorreturncode;
+        return -3;
     }
 
     if($has_memory_tracking) {
         if(! -f $memdump) {
+            my %cmdhash = getpartattr("client", "command");
+            my $cmdtype = $cmdhash{'type'} || "default";
             logmsg "\n** ALERT! memory tracking with no output file?\n"
                 if(!$cmdtype eq "perl");
         }
@@ -4819,7 +4875,7 @@ sub singletest {
                 logmsg @memdata;
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return $errorreturncode;
+                return -3;
             }
             else {
                 $ok .= "m";
@@ -4831,12 +4887,12 @@ sub singletest {
     }
 
     if($valgrind) {
-        if($usevalgrind) {
+        if(use_valgrind() && !$disablevalgrind) {
             unless(opendir(DIR, "$LOGDIR")) {
                 logmsg "ERROR: unable to read $LOGDIR\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return $errorreturncode;
+                return -3;
             }
             my @files = readdir(DIR);
             closedir(DIR);
@@ -4851,7 +4907,7 @@ sub singletest {
                 logmsg "ERROR: valgrind log file missing for test $testnum\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return $errorreturncode;
+                return -3;
             }
             my @e = valgrindparse("$LOGDIR/$vgfile");
             if(@e && $e[0]) {
@@ -4864,7 +4920,7 @@ sub singletest {
                 }
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return $errorreturncode;
+                return -3;
             }
             $ok .= "v";
         }
@@ -4879,12 +4935,21 @@ sub singletest {
         $ok .= "-"; # valgrind not checked
     }
     # add 'E' for event-based
-    $ok .= $evbased ? "E" : "-";
+    $ok .= $run_event_based ? "E" : "-";
 
     logmsg "$ok " if(!$short);
 
     # timestamp test result verification end
     $timevrfyend{$testnum} = Time::HiRes::time();
+
+    return 0;
+}
+
+
+#######################################################################
+# Report a successful test
+sub singletest_success {
+    my ($testnum, $count, $total, $errorreturncode)=@_;
 
     my $sofar= time()-$start;
     my $esttotal = $sofar/$count * $total;
@@ -4900,12 +4965,111 @@ sub singletest {
                        $count, $total, $left, $took, $duration);
     }
     else {
+        my $testname= (getpart("client", "name"))[0];
+        chomp $testname;
         logmsg "PASS: $testnum - $testname\n";
     }
 
     if($errorreturncode==2) {
         logmsg "Warning: test$testnum result is ignored, but passed!\n";
     }
+}
+
+
+#######################################################################
+# Run a single specified test case
+#
+sub singletest {
+    my ($testnum, $count, $total)=@_;
+
+    #######################################################################
+    # Verify that the test should be run
+    my ($why, $errorreturncode) = singletest_shouldrun($testnum);
+
+
+    #######################################################################
+    # Register the test case with the CI environment
+    singletest_registerci($testnum);
+
+
+    #######################################################################
+    # Start the servers needed to run this test case
+    $why = singletest_startservers($testnum, $why);
+
+
+    #######################################################################
+    # Generate preprocessed test file
+    singletest_preprocess($testnum);
+
+
+    #######################################################################
+    # Set up the test environment to run this test case
+    singletest_setenv();
+
+
+    #######################################################################
+    # Check that the test environment is fine to run this test case
+    if (!$why && !$listonly) {
+        $why = singletest_precheck($testnum);
+    }
+
+
+    #######################################################################
+    # Print the test name and count tests
+    my $error;
+    ($why, $error) = singletest_count($testnum, $why);
+    if($error || $listonly) {
+        return $error;
+    }
+
+
+    #######################################################################
+    # Prepare the test environment to run this test case
+    ($why, $error) = singletest_prepare($testnum, $why);
+    if($error) {
+        return $error;
+    }
+
+
+    #######################################################################
+    # Run the test command
+    my $cmdres;
+    my $dumped_core;
+    my $CURLOUT;
+    my $tool;
+    my $disablevalgrind;
+    ($error, $cmdres, $dumped_core, $CURLOUT, $tool, $disablevalgrind) = singletest_run($testnum);
+    if($error) {
+        return $error;
+    }
+
+
+    #######################################################################
+    # Clean up after test command
+    $error = singletest_clean($testnum, $dumped_core);
+    if($error) {
+        return $error;
+    }
+
+
+    #######################################################################
+    # Verify that the test succeeded
+    $error = singletest_check($testnum, $cmdres, $CURLOUT, $tool, $disablevalgrind);
+    # TODO: try to simplify the return codes
+    if($error == -1) {
+      return $error;
+    }
+    elsif($error == -2) {
+      return $cmdres;
+    }
+    elsif($error == -3) {
+      return $errorreturncode;
+    }
+
+    #######################################################################
+    # Report a successful test
+    singletest_success($testnum, $count, $total, $errorreturncode);
+
 
     return 0;
 }
@@ -6302,7 +6466,7 @@ foreach $testnum (@at) {
     $lasttest = $testnum if($testnum > $lasttest);
     $count++;
 
-    my $error = singletest($run_event_based, $testnum, $count, scalar(@at));
+    my $error = singletest($testnum, $count, scalar(@at));
 
     # update test result in CI services
     if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
