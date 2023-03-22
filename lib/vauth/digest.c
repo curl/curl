@@ -694,6 +694,7 @@ static CURLcode auth_create_digest_http_message(
   char *hashthis = NULL;
   char *tmp = NULL;
 
+  memset(hashbuf, 0, sizeof(hashbuf));
   if(!digest->nc)
     digest->nc = 1;
 
