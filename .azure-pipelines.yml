@@ -36,6 +36,7 @@ trigger:
     - '.circleci/*'
     - '.cirrus.yml'
     - '.github/*'
+    - '.github/workflows/*'
     - 'appveyor.yml'
     - 'packages/*'
     - 'plan9/*'
