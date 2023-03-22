@@ -177,7 +177,7 @@ requests curl sends
 - **client** defines how the client should behave
 
 - **verify** defines how to verify that the data stored after a command has
-been run ended up correctly
+been run ended up correct
 
 Each main section has a number of available subsections that can be specified,
 that will be checked/used if specified.
@@ -192,8 +192,13 @@ tests. Keywords must begin with an alphabetic character, `-`, `[` or `{` and
 may actually consist of multiple words separated by spaces which are treated
 together as a single identifier.
 
-When using curl built with Hyper, the keywords must include HTTP or HTTPS for
-'hyper mode' to kick in and make line ending checks work for tests.
+When using curl built with Hyper, the keywords must include `HTTP` or `HTTPS`
+for 'hyper mode' to kick in and make line ending checks work for tests.
+
+When running a unittest and the keywords include `unittest`, the `<tool>`
+section can be left empty to use the standard unittest tool name `unitN` where
+`N` is the test number.
+
 ## `<reply>`
 
 ### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes"]>`
@@ -400,7 +405,9 @@ Features testable here are:
 
 - `alt-svc`
 - `bearssl`
+- `brotli`
 - `c-ares`
+- `CharConv`
 - `cookies`
 - `crypto`
 - `debug`
@@ -409,9 +416,12 @@ Features testable here are:
 - `GnuTLS`
 - `GSS-API`
 - `h2c`
+- `headers-api`
 - `HSTS`
 - `HTTP-auth`
 - `http/2`
+- `http/3`
+- `https-proxy`
 - `hyper`
 - `idn`
 - `ipv6`
@@ -426,8 +436,11 @@ Features testable here are:
 - `mbedtls`
 - `Mime`
 - `netrc`
+- `nghttpx`
+- `nghttpx-h3`
 - `NSS`
 - `NTLM`
+- `NTLM_WB`
 - `OpenSSL`
 - `parsedate`
 - `proxy`
@@ -445,6 +458,7 @@ Features testable here are:
 - `TLS-SRP`
 - `TrackMemory`
 - `typecheck`
+- `threadsafe`
 - `Unicode`
 - `unittest`
 - `unix-sockets`
@@ -454,6 +468,7 @@ Features testable here are:
 - `wolfssh`
 - `wolfssl`
 - `xattr`
+- `zstd`
 
 as well as each protocol that curl supports. A protocol only needs to be
 specified if it is different from the server (useful when the server is
