@@ -3443,6 +3443,7 @@ sub subVariables {
     }
 
     # test server ports
+    # Substitutes variables like %HTTPPORT and %SMTP6PORT with the server ports
     foreach my $proto ('DICT',
                        'FTP', 'FTP6', 'FTPS',
                        'GOPHER', 'GOPHER6', 'GOPHERS',
@@ -3777,8 +3778,8 @@ sub singletest {
         }
     }
 
+    my @info_keywords = getpart("info", "keywords");
     if(!$why) {
-        my @info_keywords = getpart("info", "keywords");
         my $match;
         my $k;
 
@@ -3824,7 +3825,7 @@ sub singletest {
     }
 
     if (!$why && defined $custom_skip_reasons{keyword}) {
-        foreach my $keyword (getpart("info", "keywords")) {
+        foreach my $keyword (@info_keywords) {
             foreach my $keyword_skip_pattern (keys %{$custom_skip_reasons{keyword}}) {
                 if ($keyword =~ /$keyword_skip_pattern/i) {
                     $why = $custom_skip_reasons{keyword}{$keyword_skip_pattern};
@@ -4007,8 +4008,7 @@ sub singletest {
         # check against the data section
         @reply = getpart("reply", "data");
         if(@reply) {
-            my %hash = getpartattr("reply", "data");
-            if($hash{'nonewline'}) {
+            if($replyattr{'nonewline'}) {
                 # cut off the final newline from the final line of the data
                 chomp($reply[$#reply]);
             }
@@ -4026,12 +4026,6 @@ sub singletest {
             map subNewlines(0, \$_), @reply;
         }
     }
-
-    # this is the valid protocol blurb curl should generate
-    my @protocol= getpart("verify", "protocol");
-
-    # this is the valid protocol blurb curl should generate to a proxy
-    my @proxyprot = getpart("verify", "proxy");
 
     # redirected stdout/stderr to these files
     $STDOUT="$LOGDIR/stdout$testnum";
@@ -4272,7 +4266,7 @@ sub singletest {
             $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
             $valgrindcmd .= "--quiet --leak-check=yes ";
             $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
-           # $valgrindcmd .= "--gen-suppressions=all ";
+            # $valgrindcmd .= "--gen-suppressions=all ";
             $valgrindcmd .= "--num-callers=16 ";
             $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
             $CMDLINE = "$valgrindcmd $CMDLINE";
@@ -4443,12 +4437,12 @@ sub singletest {
     my $ok="";
     my $res;
     chomp $errorcode;
+    # what parts to cut off from stdout/stderr
+    my @stripfile = getpart("verify", "stripfile");
+
     if (@validstdout) {
         # verify redirected stdout
         my @actual = loadarray($STDOUT);
-
-        # what parts to cut off from stdout
-        my @stripfile = getpart("verify", "stripfile");
 
         foreach my $strip (@stripfile) {
             chomp $strip;
@@ -4501,9 +4495,6 @@ sub singletest {
         # verify redirected stderr
         my @actual = loadarray($STDERR);
 
-        # what parts to cut off from stderr
-        my @stripfile = getpart("verify", "stripfile");
-
         foreach my $strip (@stripfile) {
             chomp $strip;
             my @newgen;
@@ -4551,12 +4542,17 @@ sub singletest {
         $ok .= "-"; # stderr not checked
     }
 
+    # what to cut off from the live protocol sent by curl
+    my @strip = getpart("verify", "strip");
+
+    # what parts to cut off from the protocol & upload
+    my @strippart = getpart("verify", "strippart");
+
+    # this is the valid protocol blurb curl should generate
+    my @protocol= getpart("verify", "protocol");
     if(@protocol) {
         # Verify the sent request
         my @out = loadarray($SERVERIN);
-
-        # what to cut off from the live protocol sent by curl
-        my @strip = getpart("verify", "strip");
 
         my @protstrip=@protocol;
 
@@ -4576,8 +4572,6 @@ sub singletest {
             @protstrip= striparray( $_, \@protstrip);
         }
 
-        # what parts to cut off from the protocol
-        my @strippart = getpart("verify", "strippart");
         my $strip;
 
         for $strip (@strippart) {
@@ -4626,9 +4620,6 @@ sub singletest {
     if(@upload) {
         # verify uploaded data
         my @out = loadarray("$LOGDIR/upload.$testnum");
-
-        # what parts to cut off from the upload
-        my @strippart = getpart("verify", "strippart");
         my $strip;
         for $strip (@strippart) {
             chomp $strip;
@@ -4647,14 +4638,11 @@ sub singletest {
         $ok .= "-"; # upload not checked
     }
 
+    # this is the valid protocol blurb curl should generate to a proxy
+    my @proxyprot = getpart("verify", "proxy");
     if(@proxyprot) {
         # Verify the sent proxy request
         my @out = loadarray($PROXYIN);
-
-        # what to cut off from the live protocol sent by curl, we use the
-        # same rules as for <protocol>
-        my @strip = getpart("verify", "strip");
-
         my @protstrip=@proxyprot;
 
         # check if there's any attributes on the verify/protocol section
@@ -4673,8 +4661,6 @@ sub singletest {
             @protstrip= striparray( $_, \@protstrip);
         }
 
-        # what parts to cut off from the protocol
-        my @strippart = getpart("verify", "strippart");
         my $strip;
         for $strip (@strippart) {
             chomp $strip;
