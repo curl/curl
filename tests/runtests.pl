@@ -5970,7 +5970,8 @@ if(!$randseed) {
         localtime(time);
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year+1900)*100 + $mon+1;
-    open(C, "$CURL --version 2>/dev/null|");
+    open(C, "$CURL --version 2>/dev/null|") ||
+        die "could not get curl version!";
     my @c = <C>;
     close(C);
     # use the first line of output and get the md5 out of it
