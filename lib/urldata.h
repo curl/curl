@@ -208,8 +208,17 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #define UPLOADBUFFER_MIN CURL_MAX_WRITE_SIZE
 
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
+#ifdef DEBUGBUILD
+/* On a debug build, we want to fail hard on easy handles that
+ * are not NULL, but no longer have the MAGIC touch. This gives
+ * us early warning on things only discovered by valgrind otherwise. */
+#define GOOD_EASY_HANDLE(x) \
+  (((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))? TRUE: \
+  (DEBUGASSERT(!(x)), FALSE))
+#else
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
+#endif
 
 #ifdef HAVE_GSSAPI
 /* Types needed for krb5-ftp connections */
