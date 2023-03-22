@@ -104,13 +104,23 @@ jobs:
           install_steps: openssl3
           configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
-        - name: openssl-sanitizer
+        - name: address-sanitizer
           install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
           install_steps: pytest
           configure: >
             CC=clang
             CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
             LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer"
+            LIBS="-ldl -lubsan"
+            --with-openssl --enable-debug --enable-websockets
+
+        - name: memory-sanitizer
+          install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
+          install_steps: pytest
+          configure: >
+            CC=clang
+            CFLAGS="-fsanitize=memory,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
+            LDFLAGS="-fsanitize=memory,undefined -fno-sanitize-recover=undefined,integer"
             LIBS="-ldl -lubsan"
             --with-openssl --enable-debug --enable-websockets
 
@@ -291,11 +301,7 @@ jobs:
       name: 'autoreconf'
 
     - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
-      continue-on-error: true
       name: 'configure'
-
-    - run: cat config.log
-      name: show config.log
 
     - run: make V=1
       name: 'make'
