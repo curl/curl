@@ -3229,6 +3229,12 @@ if test X"$want_quiche" != Xno; then
        AC_CHECK_HEADERS(quiche.h,
           experimental="$experimental HTTP3"
           AC_MSG_NOTICE([HTTP3 support is experimental])
+
+          warning=$(cat <<EOM
+Due to known problems in quiche we discourage use of it for doing HTTP/3
+with curl. Details in https://github.com/curl/curl/issues/10811
+EOM
+)
           curl_h3_msg="enabled (quiche)"
           QUICHE_ENABLED=1
           AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
@@ -4730,5 +4736,13 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
 if test -n "$experimental"; then
  cat >&2 << _EOF
   WARNING: $experimental enabled but marked EXPERIMENTAL. Use with caution!
+_EOF
+fi
+if test -n "$warning"; then
+ if test -n "$experimental"; then
+   echo ""
+ fi
+ cat >&2 << _EOF
+  WARNING: $warning
 _EOF
 fi

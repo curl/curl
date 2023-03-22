@@ -625,6 +625,9 @@ if(USE_QUICHE)
     check_symbol_exists(quiche_conn_set_qlog_fd "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
     cmake_pop_check_state()
   endif()
+  message(WARNING
+    "Due to known problems in quiche we discourage use of it for doing HTTP/3 "
+    "with curl. Details in https://github.com/curl/curl/issues/10811")
 endif()
 
 option(USE_MSH3 "Use msquic library for HTTP/3 support" OFF)
