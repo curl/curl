@@ -3696,13 +3696,14 @@ sub singletest {
         $count,
         $total)=@_;
 
+    #######################################################################
+    # Verify that this test case should be run
+
     my @what;
     my $why;
-    my $cmd;
-    my $disablevalgrind;
     my $errorreturncode = 1; # 1 means normal error, 2 means ignored error
 
-    # fist, remove all lingering log files
+    # first, remove all lingering log files
     if(!cleardir($LOGDIR) && $clearlocks) {
         clearlocks($LOGDIR);
         cleardir($LOGDIR);
@@ -3835,6 +3836,9 @@ sub singletest {
     }
 
 
+    #######################################################################
+    # Register the test case with the CI environment
+
     # test definition may instruct to (un)set environment vars
     # this is done this early, so that the precheck can use environment
     # variables and still bail out fine on errors
@@ -3863,6 +3867,10 @@ sub singletest {
         appveyor_create_test_result($ACURL, $testnum, $testname);
     }
 
+
+    #######################################################################
+    # Start the servers needed to run this test case
+
     # remove test server commands file before servers are started/verified
     unlink($FTPDCMD) if(-f $FTPDCMD);
 
@@ -3872,6 +3880,18 @@ sub singletest {
     if(!$why) {
         $why = serverfortest($testnum);
     }
+
+    # timestamp required servers verification end
+    $timesrvrend{$testnum} = Time::HiRes::time();
+
+    # remove server output logfile after servers are started/verified
+    unlink($SERVERIN);
+    unlink($SERVER2IN);
+    unlink($PROXYIN);
+
+
+    #######################################################################
+    # Check that test environment is fine to run this test case
 
     # Save a preprocessed version of the entire test file. This allows more
     # "basic" test case readers to enjoy variable replacements.
@@ -3889,9 +3909,6 @@ sub singletest {
 
     # in case the process changed the file, reload it
     loadtest("log/test${testnum}");
-
-    # timestamp required servers verification end
-    $timesrvrend{$testnum} = Time::HiRes::time();
 
     my @setenv = getpart("client", "setenv");
     if(@setenv) {
@@ -3927,6 +3944,7 @@ sub singletest {
         $ENV{HTTPS_PROXY} = $proxy_address;
     }
 
+    my $cmd;
     if(!$why) {
         my @precheck = getpart("client", "precheck");
         if(@precheck) {
@@ -3974,81 +3992,9 @@ sub singletest {
         timestampskippedevents($testnum);
         return -1;
     }
+
+    # at this point we've committed to run this test
     logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
-
-    my %replyattr = getpartattr("reply", "data");
-    my @reply;
-    if (partexists("reply", "datacheck")) {
-        for my $partsuffix (('', '1', '2', '3', '4')) {
-            my @replycheckpart = getpart("reply", "datacheck".$partsuffix);
-            if(@replycheckpart) {
-                my %replycheckpartattr = getpartattr("reply", "datacheck".$partsuffix);
-                # get the mode attribute
-                my $filemode=$replycheckpartattr{'mode'};
-                if($filemode && ($filemode eq "text") && $has_textaware) {
-                    # text mode when running on windows: fix line endings
-                    map s/\r\n/\n/g, @replycheckpart;
-                    map s/\n/\r\n/g, @replycheckpart;
-                }
-                if($replycheckpartattr{'nonewline'}) {
-                    # Yes, we must cut off the final newline from the final line
-                    # of the datacheck
-                    chomp($replycheckpart[$#replycheckpart]);
-                }
-                if($replycheckpartattr{'crlf'} ||
-                   ($has_hyper && ($keywords{"HTTP"}
-                                   || $keywords{"HTTPS"}))) {
-                    map subNewlines(0, \$_), @replycheckpart;
-                }
-                push(@reply, @replycheckpart);
-            }
-        }
-    }
-    else {
-        # check against the data section
-        @reply = getpart("reply", "data");
-        if(@reply) {
-            if($replyattr{'nonewline'}) {
-                # cut off the final newline from the final line of the data
-                chomp($reply[$#reply]);
-            }
-        }
-        # get the mode attribute
-        my $filemode=$replyattr{'mode'};
-        if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
-            map s/\r\n/\n/g, @reply;
-            map s/\n/\r\n/g, @reply;
-        }
-        if($replyattr{'crlf'} ||
-           ($has_hyper && ($keywords{"HTTP"}
-                           || $keywords{"HTTPS"}))) {
-            map subNewlines(0, \$_), @reply;
-        }
-    }
-
-    # redirected stdout/stderr to these files
-    $STDOUT="$LOGDIR/stdout$testnum";
-    $STDERR="$LOGDIR/stderr$testnum";
-
-    # if this section exists, we verify that the stdout contained this:
-    my @validstdout = getpart("verify", "stdout");
-    my @validstderr = getpart("verify", "stderr");
-
-    # if this section exists, we verify upload
-    my @upload = getpart("verify", "upload");
-    if(@upload) {
-      my %hash = getpartattr("verify", "upload");
-      if($hash{'nonewline'}) {
-          # cut off the final newline from the final line of the upload data
-          chomp($upload[$#upload]);
-      }
-    }
-
-    # if this section exists, it might be FTP server instructions:
-    my @ftpservercmd = getpart("reply", "servercmd");
-
-    my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
 
     # name of the test
     logmsg "[$testname]\n" if(!$short);
@@ -4058,40 +4004,20 @@ sub singletest {
         return 0; # look successful
     }
 
-    my @codepieces = getpart("client", "tool");
 
-    my $tool="";
-    if(@codepieces) {
-        $tool = $codepieces[0];
-        chomp $tool;
-        $tool .= exe_ext('TOOL');
-    }
+    #######################################################################
+    # Prepare the test environment to run this test case
 
-    # remove server output logfile
-    unlink($SERVERIN);
-    unlink($SERVER2IN);
-    unlink($PROXYIN);
-
+    # if this section exists, it might be FTP server instructions:
+    my @ftpservercmd = getpart("reply", "servercmd");
     push @ftpservercmd, "Testnum $testnum\n";
     # write the instructions to file
     writearray($FTPDCMD, \@ftpservercmd);
 
-    # get the command line options to use
-    my @blaha;
-    ($cmd, @blaha)= getpart("client", "command");
-
-    if($cmd) {
-        # make some nice replace operations
-        $cmd =~ s/\n//g; # no newlines please
-        # substitute variables in the command line
-    }
-    else {
-        # there was no command given, use something silly
-        $cmd="-";
-    }
     if($has_memory_tracking) {
         unlink($memdump);
     }
+    unlink("core");
 
     # create (possibly-empty) files before starting the test
     for my $partsuffix (('', '1', '2', '3', '4')) {
@@ -4130,10 +4056,30 @@ sub singletest {
         }
     }
 
-    my %cmdhash = getpartattr("client", "command");
+
+    #######################################################################
+    # Run the test command
+
+    # get the command line options to use
+    my @blaha;
+    ($cmd, @blaha)= getpart("client", "command");
+    if($cmd) {
+        # make some nice replace operations
+        $cmd =~ s/\n//g; # no newlines please
+        # substitute variables in the command line
+    }
+    else {
+        # there was no command given, use something silly
+        $cmd="-";
+    }
+
+    my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
+
+    # if this section exists, we verify that the stdout contained this:
+    my @validstdout = getpart("verify", "stdout");
 
     my $out="";
-
+    my %cmdhash = getpartattr("client", "command");
     if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-output/)) {
         #We may slap on --output!
         if (!@validstdout ||
@@ -4142,22 +4088,19 @@ sub singletest {
         }
     }
 
-    my $serverlogslocktimeout = $defserverlogslocktimeout;
-    if($cmdhash{'timeout'}) {
-        # test is allowed to override default server logs lock timeout
-        if($cmdhash{'timeout'} =~ /(\d+)/) {
-            $serverlogslocktimeout = $1 if($1 >= 0);
-        }
+    # redirected stdout/stderr to these files
+    $STDOUT="$LOGDIR/stdout$testnum";
+    $STDERR="$LOGDIR/stderr$testnum";
+
+    my @codepieces = getpart("client", "tool");
+    my $tool="";
+    if(@codepieces) {
+        $tool = $codepieces[0];
+        chomp $tool;
+        $tool .= exe_ext('TOOL');
     }
 
-    my $postcommanddelay = $defpostcommanddelay;
-    if($cmdhash{'delay'}) {
-        # test is allowed to specify a delay after command is executed
-        if($cmdhash{'delay'} =~ /(\d+)/) {
-            $postcommanddelay = $1 if($1 > 0);
-        }
-    }
-
+    my $disablevalgrind;
     my $CMDLINE;
     my $cmdargs;
     my $cmdtype = $cmdhash{'type'} || "default";
@@ -4283,8 +4226,6 @@ sub singletest {
     print CMDLOG "$CMDLINE\n";
     close(CMDLOG);
 
-    unlink("core");
-
     my $dumped_core;
     my $cmdres;
 
@@ -4331,6 +4272,10 @@ sub singletest {
     # timestamp finishing of test command
     $timetoolend{$testnum} = Time::HiRes::time();
 
+
+    #######################################################################
+    # Clean up after test command
+
     if(!$dumped_core) {
         if(-r "core") {
             # there's core file present now!
@@ -4355,7 +4300,13 @@ sub singletest {
     # including server request log files used for protocol verification.
     # So, if the lock file exists the script waits here a certain amount
     # of time until the server removes it, or the given time expires.
-
+    my $serverlogslocktimeout = $defserverlogslocktimeout;
+    if($cmdhash{'timeout'}) {
+        # test is allowed to override default server logs lock timeout
+        if($cmdhash{'timeout'} =~ /(\d+)/) {
+            $serverlogslocktimeout = $1 if($1 >= 0);
+        }
+    }
     if($serverlogslocktimeout) {
         my $lockretry = $serverlogslocktimeout * 20;
         while((-f $SERVERLOGS_LOCK) && $lockretry--) {
@@ -4375,6 +4326,13 @@ sub singletest {
     # gnutls-serv also lacks this synchronization mechanism, so gnutls-serv
     # based tests might need a small delay once that the client command has
     # run to avoid false test failures.
+    my $postcommanddelay = $defpostcommanddelay;
+    if($cmdhash{'delay'}) {
+        # test is allowed to specify a delay after command is executed
+        if($cmdhash{'delay'} =~ /(\d+)/) {
+            $postcommanddelay = $1 if($1 > 0);
+        }
+    }
 
     portable_sleep($postcommanddelay) if($postcommanddelay);
 
@@ -4393,6 +4351,10 @@ sub singletest {
             }
         }
     }
+
+
+    #######################################################################
+    # Verify test succeeded
 
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
@@ -4491,6 +4453,7 @@ sub singletest {
         $ok .= "-"; # stdout not checked
     }
 
+    my @validstderr = getpart("verify", "stderr");
     if (@validstderr) {
         # verify redirected stderr
         my @actual = loadarray($STDERR);
@@ -4602,6 +4565,57 @@ sub singletest {
         $ok .= "-"; # protocol not checked
     }
 
+    my %replyattr = getpartattr("reply", "data");
+    my @reply;
+    if (partexists("reply", "datacheck")) {
+        for my $partsuffix (('', '1', '2', '3', '4')) {
+            my @replycheckpart = getpart("reply", "datacheck".$partsuffix);
+            if(@replycheckpart) {
+                my %replycheckpartattr = getpartattr("reply", "datacheck".$partsuffix);
+                # get the mode attribute
+                my $filemode=$replycheckpartattr{'mode'};
+                if($filemode && ($filemode eq "text") && $has_textaware) {
+                    # text mode when running on windows: fix line endings
+                    map s/\r\n/\n/g, @replycheckpart;
+                    map s/\n/\r\n/g, @replycheckpart;
+                }
+                if($replycheckpartattr{'nonewline'}) {
+                    # Yes, we must cut off the final newline from the final line
+                    # of the datacheck
+                    chomp($replycheckpart[$#replycheckpart]);
+                }
+                if($replycheckpartattr{'crlf'} ||
+                   ($has_hyper && ($keywords{"HTTP"}
+                                   || $keywords{"HTTPS"}))) {
+                    map subNewlines(0, \$_), @replycheckpart;
+                }
+                push(@reply, @replycheckpart);
+            }
+        }
+    }
+    else {
+        # check against the data section
+        @reply = getpart("reply", "data");
+        if(@reply) {
+            if($replyattr{'nonewline'}) {
+                # cut off the final newline from the final line of the data
+                chomp($reply[$#reply]);
+            }
+        }
+        # get the mode attribute
+        my $filemode=$replyattr{'mode'};
+        if($filemode && ($filemode eq "text") && $has_textaware) {
+            # text mode when running on windows: fix line endings
+            map s/\r\n/\n/g, @reply;
+            map s/\n/\r\n/g, @reply;
+        }
+        if($replyattr{'crlf'} ||
+           ($has_hyper && ($keywords{"HTTP"}
+                           || $keywords{"HTTPS"}))) {
+            map subNewlines(0, \$_), @reply;
+        }
+    }
+
     if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
         # verify the received data
         my @out = loadarray($CURLOUT);
@@ -4615,7 +4629,15 @@ sub singletest {
         $ok .= "-"; # data not checked
     }
 
+    # if this section exists, we verify upload
+    my @upload = getpart("verify", "upload");
     if(@upload) {
+        my %hash = getpartattr("verify", "upload");
+        if($hash{'nonewline'}) {
+            # cut off the final newline from the final line of the upload data
+            chomp($upload[$#upload]);
+        }
+
         # verify uploaded data
         my @out = loadarray("$LOGDIR/upload.$testnum");
         my $strip;
