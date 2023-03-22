@@ -290,8 +290,12 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }} || { cat config.log; exit 1; }
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      continue-on-error: true
       name: 'configure'
+
+    - run: cat config.log
+      name: show config.log
 
     - run: make V=1
       name: 'make'
