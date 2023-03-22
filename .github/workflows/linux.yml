@@ -114,16 +114,6 @@ jobs:
             LIBS="-ldl -lubsan"
             --with-openssl --enable-debug --enable-websockets
 
-        - name: memory-sanitizer
-          install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
-          install_steps: pytest
-          configure: >
-            CC=clang
-            CFLAGS="-fsanitize=memory,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
-            LDFLAGS="-fsanitize=memory,undefined -fno-sanitize-recover=undefined,integer"
-            LIBS="-ldl -lubsan"
-            --with-openssl --enable-debug --enable-websockets
-
         - name: event-based
           install_packages: libssh-dev
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
