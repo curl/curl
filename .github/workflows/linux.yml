@@ -114,6 +114,16 @@ jobs:
             LIBS="-ldl -lubsan"
             --with-openssl --enable-debug --enable-websockets
 
+        - name: memory-sanitizer
+          install_packages: clang
+          install_steps:
+          configure: >
+            CC=clang
+            CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
+            LDFLAGS="-fsanitize=memory"
+            LIBS="-ldl"
+            --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websocketsx
+
         - name: event-based
           install_packages: libssh-dev valgrind
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
@@ -295,6 +305,9 @@ jobs:
 
     - run: make V=1
       name: 'make'
+
+    - run: ./src/curl -V
+      name: 'check curl -V output'
 
     - run: make V=1 examples
       name: 'make examples'
