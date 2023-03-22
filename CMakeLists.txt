@@ -1609,6 +1609,15 @@ write_basic_package_version_file(
     VERSION ${CURL_VERSION}
     COMPATIBILITY SameMajorVersion
 )
+file(READ "${version_config}" generated_version_config)
+file(WRITE "${version_config}"
+"if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
+    # Version 8 satisfies version 7... requirements
+    set(PACKAGE_FIND_VERSION_MAJOR 8)
+    set(PACKAGE_FIND_VERSION_COUNT 1)
+endif()
+${generated_version_config}"
+)
 
 # Use:
 # * TARGETS_EXPORT_NAME
