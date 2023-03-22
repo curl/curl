@@ -90,8 +90,17 @@
 
 #define CURL_MULTI_HANDLE 0x000bab1e
 
+#ifdef DEBUGBUILD
+/* On a debug build, we want to fail hard on multi handles that
+ * are not NULL, but no longer have the MAGIC touch. This gives
+ * us early warning on things only discovered by valgrind otherwise. */
+#define GOOD_MULTI_HANDLE(x) \
+  (((x) && (x)->magic == CURL_MULTI_HANDLE)? TRUE: \
+  (DEBUGASSERT(!(x)), FALSE))
+#else
 #define GOOD_MULTI_HANDLE(x) \
   ((x) && (x)->magic == CURL_MULTI_HANDLE)
+#endif
 
 static CURLMcode singlesocket(struct Curl_multi *multi,
                               struct Curl_easy *data);
