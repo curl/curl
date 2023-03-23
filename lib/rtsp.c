@@ -601,6 +601,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
   char *scratch;
   CURLcode result;
   bool interleaved = false;
+  size_t skip_size = 0;
 
   if(rtspc->rtp_buf) {
     /* There was some leftover data the last time. Merge buffers */
@@ -639,8 +640,14 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
           /* invalid channel number, maybe not an RTP packet */
           rtp++;
           rtp_dataleft--;
+          skip_size++;
           continue;
         }
+        if(skip_size > 0) {
+          DEBUGF(infof(data, "Skip the malformed interleaved data %lu "
+                       "bytes", skip_size));
+        }
+        skip_size = 0;
 
         /* The length is two bytes */
         rtp_length = RTP_PKT_LENGTH(rtp);
@@ -684,13 +691,20 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     }
     else {
       size_t prefix_len = (rtp_dataleft < 5) ? rtp_dataleft : 5;
-      if(!interleaved || strncmp(rtp, "RTSP/", prefix_len) == 0) {
+      if((k->headerline > 0 && !interleaved) ||
+         strncmp(rtp, "RTSP/", prefix_len) == 0) {
+        if(skip_size > 0) {
+          DEBUGF(infof(data, "Skip the malformed interleaved data %lu "
+                       "bytes", skip_size));
+        }
+        skip_size = 0;
         break; /* maybe is an RTSP message */
       }
       /* Skip incorrect data util the next RTP packet or RTSP message */
       do {
         rtp++;
         rtp_dataleft--;
+        skip_size++;
       } while(rtp_dataleft > 0 && rtp[0] != '$' && rtp[0] != 'R');
     }
   }
