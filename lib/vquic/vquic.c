@@ -53,7 +53,7 @@
 
 void Curl_quic_ver(char *p, size_t len)
 {
-#ifdef USE_NGTCP2
+#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   Curl_ngtcp2_ver(p, len);
 #elif defined(USE_QUICHE)
   Curl_quiche_ver(p, len);
@@ -330,7 +330,7 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
 {
   (void)transport;
   DEBUGASSERT(transport == TRNSPRT_QUIC);
-#ifdef USE_NGTCP2
+#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
 #elif defined(USE_QUICHE)
   return Curl_cf_quiche_create(pcf, data, conn, ai);
@@ -349,7 +349,7 @@ bool Curl_conn_is_http3(const struct Curl_easy *data,
                         const struct connectdata *conn,
                         int sockindex)
 {
-#ifdef USE_NGTCP2
+#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   return Curl_conn_is_ngtcp2(data, conn, sockindex);
 #elif defined(USE_QUICHE)
   return Curl_conn_is_quiche(data, conn, sockindex);
