@@ -149,7 +149,7 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
   char *newptr;
 
   if(!*buffer) {
-    *buffer = malloc(128);
+    *buffer = calloc(128, 1);
     if(!*buffer)
       return GPE_OUT_OF_MEMORY;
     *bufsize = 128;
@@ -171,6 +171,7 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
     newptr = realloc(*buffer, *bufsize * 2);
     if(!newptr)
       return GPE_OUT_OF_MEMORY;
+    memset(&newptr[*bufsize], 0, *bufsize);
     *buffer = newptr;
     *bufsize *= 2;
   }
