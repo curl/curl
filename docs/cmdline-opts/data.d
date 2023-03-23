@@ -35,3 +35,7 @@ data from a file named 'foobar' would thus be done with --data @foobar. When
 --data is told to read from a file like that, carriage returns and newlines
 will be stripped out. If you do not want the @ character to have a special
 interpretation use --data-raw instead.
+
+The data for this option is passed on to the server exactly as provided on the
+command line. curl will not convert it, change it or improve it. It is up to
+the user to provide the data in the correct form.
