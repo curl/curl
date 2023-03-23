@@ -325,7 +325,7 @@ my $listonly;     # only list the tests
 my $postmortem;   # display detailed info about failed tests
 my $err_unexpected; # error instead of warning on server unexpectedly alive
 my $run_event_based; # run curl with --test-event to test the event API
-my $run_disabeled; # run the specific tests even if listed in DISABLED
+my $run_disabled; # run the specific tests even if listed in DISABLED
 
 my %run;          # running server
 my %doesntrun;    # servers that don't work, identified by pidfile
@@ -3738,7 +3738,7 @@ sub singletest_shouldrun {
         logmsg "Warning: test$testnum not present in tests/data/Makefile.inc\n";
     }
     if($disabled{$testnum}) {
-        if(!$run_disabeled) {
+        if(!$run_disabled) {
             $why = "listed in DISABLED";
         }
         else {
@@ -5474,7 +5474,7 @@ sub startservers {
             # proxy runs as well
             my $f = startservers("http-proxy");
             if($f) {
-                return $f;1
+                return $f;
             }
 
             if(!$run{'https-proxy'}) {
@@ -5900,7 +5900,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-f") {
         # force - run the test case even if listed in DISABLED
-        $run_disabeled=1;
+        $run_disabled=1;
     }
     elsif($ARGV[0] eq "-E") {
         # load additional reasons to skip tests
