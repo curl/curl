@@ -80,6 +80,7 @@ use warnings FATAL => 'all';
 use Cwd;
 use Digest::MD5 qw(md5);
 use MIME::Base64;
+use List::Util 'sum';
 
 # Subs imported from serverhelp module
 use serverhelp qw(
@@ -193,12 +194,11 @@ my $memanalyze="$perl $srcdir/memanalyze.pl";
 my $pwd = getcwd();          # current working directory
 my $posix_pwd = $pwd;
 
-my $start;
+my $start;          # time at which testing started
 my $ftpchecktime=1; # time it took to verify our test FTP server
-my $scrambleorder;
 my $stunnel = checkcmd("stunnel4") || checkcmd("tstunnel") || checkcmd("stunnel");
 my $valgrind = checktestcmd("valgrind");
-my $valgrind_logfile="--logfile";
+my $valgrind_logfile="--logfile";  # the option name for valgrind 2.X
 my $valgrind_tool;
 my $gdb = checktestcmd("gdb");
 my $httptlssrv = find_httptlssrv();
@@ -276,7 +276,6 @@ my $has_textaware;  # set if running on a system that has a text mode concept
                     # on files. Windows for example
 my @protocols;   # array of lowercase supported protocol servers
 
-my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;  # key words of tests to skip
@@ -303,7 +302,7 @@ my %timesrvrlog; # timestamp for each test server logs lock removal
 my %timevrfyend; # timestamp for each test result verification end
 
 my $testnumcheck; # test number, set in singletest sub.
-my %oldenv;
+my %oldenv;       # environment variables before test is started
 my %feature;      # array of enabled features
 my %keywords;     # array of keywords from the test spec
 
@@ -326,6 +325,7 @@ my $postmortem;   # display detailed info about failed tests
 my $err_unexpected; # error instead of warning on server unexpectedly alive
 my $run_event_based; # run curl with --test-event to test the event API
 my $run_disabled; # run the specific tests even if listed in DISABLED
+my $scrambleorder;
 
 my %run;          # running server
 my %doesntrun;    # servers that don't work, identified by pidfile
@@ -3713,6 +3713,74 @@ sub use_valgrind {
     return 0;
 }
 
+
+# restore environment variables that were modified in test
+sub restore_test_env {
+    my $deleteoldenv = $_[0];   # 1 to delete the saved contents after restore
+    foreach my $var (keys %oldenv) {
+        if($oldenv{$var} eq 'notset') {
+            delete $ENV{$var} if($ENV{$var});
+        }
+        else {
+            $ENV{$var} = $oldenv{$var};
+        }
+        if($deleteoldenv) {
+            delete $oldenv{$var};
+        }
+    }
+}
+
+
+# Setup CI Test Run
+sub citest_starttestrun {
+    if(azure_check_environment()) {
+        $AZURE_RUN_ID = azure_create_test_run($ACURL);
+        logmsg "Azure Run ID: $AZURE_RUN_ID\n" if ($verbose);
+    }
+    # Appveyor doesn't require anything here
+}
+
+
+# Register the test case with the CI runner
+sub citest_starttest {
+    my $testnum = $_[0];
+
+    # get the name of the test early
+    my $testname= (getpart("client", "name"))[0];
+    chomp $testname;
+
+    # create test result in CI services
+    if(azure_check_environment() && $AZURE_RUN_ID) {
+        $AZURE_RESULT_ID = azure_create_test_result($ACURL, $AZURE_RUN_ID, $testnum, $testname);
+    }
+    elsif(appveyor_check_environment()) {
+        appveyor_create_test_result($ACURL, $testnum, $testname);
+    }
+}
+
+
+# Submit the test case result with the CI runner
+sub citest_finishtest {
+    my ($testnum, $error) = @_;
+    # update test result in CI services
+    if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
+        $AZURE_RESULT_ID = azure_update_test_result($ACURL, $AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
+                                                    $timeprepini{$testnum}, $timevrfyend{$testnum});
+    }
+    elsif(appveyor_check_environment()) {
+        appveyor_update_test_result($ACURL, $testnum, $error, $timeprepini{$testnum}, $timevrfyend{$testnum});
+    }
+}
+
+# Complete CI test run
+sub citest_finishtestrun {
+    if(azure_check_environment() && $AZURE_RUN_ID) {
+        $AZURE_RUN_ID = azure_update_test_run($ACURL, $AZURE_RUN_ID);
+    }
+    # Appveyor doesn't require anything here
+}
+
+
 #######################################################################
 # Verify that this test case should be run
 sub singletest_shouldrun {
@@ -3859,40 +3927,6 @@ sub singletest_shouldrun {
 
 
 #######################################################################
-# Register the test case with the CI environment
-sub singletest_registerci {
-    my $testnum = $_[0];
-
-    # test definition may instruct to (un)set environment vars
-    # this is done this early, so that the precheck can use environment
-    # variables and still bail out fine on errors
-
-    # restore environment variables that were modified in a previous run
-    foreach my $var (keys %oldenv) {
-        if($oldenv{$var} eq 'notset') {
-            delete $ENV{$var} if($ENV{$var});
-        }
-        else {
-            $ENV{$var} = $oldenv{$var};
-        }
-        delete $oldenv{$var};
-    }
-
-    # get the name of the test early
-    my $testname= (getpart("client", "name"))[0];
-    chomp $testname;
-
-    # create test result in CI services
-    if(azure_check_environment() && $AZURE_RUN_ID) {
-        $AZURE_RESULT_ID = azure_create_test_result($ACURL, $AZURE_RUN_ID, $testnum, $testname);
-    }
-    elsif(appveyor_check_environment()) {
-        appveyor_create_test_result($ACURL, $testnum, $testname);
-    }
-}
-
-
-#######################################################################
 # Start the servers needed to run this test case
 sub singletest_startservers {
     my ($testnum, $why) = @_;
@@ -4027,7 +4061,6 @@ sub singletest_count {
 
     if($why && !$listonly) {
         # there's a problem, count it as "skipped"
-        $skipped++;
         $skipped{$why}++;
         $teststat[$testnum]=$why; # store reason for this test case
 
@@ -4426,16 +4459,7 @@ sub singletest_check {
     }
 
     # restore environment variables that were modified
-    if(%oldenv) {
-        foreach my $var (keys %oldenv) {
-            if($oldenv{$var} eq 'notset') {
-                delete $ENV{$var} if($ENV{$var});
-            }
-            else {
-                $ENV{$var} = "$oldenv{$var}";
-            }
-        }
-    }
+    restore_test_env(0);
 
     # Skip all the verification on torture tests
     if ($torture) {
@@ -4987,8 +5011,16 @@ sub singletest {
 
 
     #######################################################################
+    # Restore environment variables that were modified in a previous run.
+    # Test definition may instruct to (un)set environment vars.
+    # This is done this early so that leftover variables don't affect starting
+    # servers.
+    restore_test_env(1);
+
+
+    #######################################################################
     # Register the test case with the CI environment
-    singletest_registerci($testnum);
+    citest_starttest($testnum);
 
 
     #######################################################################
@@ -6289,7 +6321,6 @@ if ( $TESTCASES eq "all") {
         if($disabled{$n}) {
             # skip disabled test cases
             my $why = "configured as DISABLED";
-            $skipped++;
             $skipped{$why}++;
             $teststat[$n]=$why; # store reason for this test case
             next;
@@ -6433,13 +6464,8 @@ sub displaylogs {
 }
 
 #######################################################################
-# Setup Azure Pipelines Test Run (if running in Azure DevOps)
-#
-
-if(azure_check_environment()) {
-    $AZURE_RUN_ID = azure_create_test_run($ACURL);
-    logmsg "Azure Run ID: $AZURE_RUN_ID\n" if ($verbose);
-}
+# Setup CI Test Run
+citest_starttestrun();
 
 #######################################################################
 # The main test-loop
@@ -6462,16 +6488,11 @@ foreach $testnum (@at) {
     $lasttest = $testnum if($testnum > $lasttest);
     $count++;
 
+    # execute one test case
     my $error = singletest($testnum, $count, scalar(@at));
 
-    # update test result in CI services
-    if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
-        $AZURE_RESULT_ID = azure_update_test_result($ACURL, $AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
-                                                    $timeprepini{$testnum}, $timevrfyend{$testnum});
-    }
-    elsif(appveyor_check_environment()) {
-        appveyor_update_test_result($ACURL, $testnum, $error, $timeprepini{$testnum}, $timevrfyend{$testnum});
-    }
+    # Submit the test case result with the CI environment
+    citest_finishtest($testnum, $error);
 
     if($error < 0) {
         # not a test we can run
@@ -6511,17 +6532,14 @@ foreach $testnum (@at) {
 my $sofar = time() - $start;
 
 #######################################################################
-# Finish Azure Pipelines Test Run (if running in Azure DevOps)
-#
-
-if(azure_check_environment() && $AZURE_RUN_ID) {
-    $AZURE_RUN_ID = azure_update_test_run($ACURL, $AZURE_RUN_ID);
-}
+# Finish CI Test Run
+citest_finishtestrun();
 
 # Tests done, stop the servers
 my $unexpected = stopservers($verbose);
 
-my $all = $total + $skipped;
+my $numskipped = %skipped ? sum values %skipped : 0;
+my $all = $total + $numskipped;
 
 runtimestats($lasttest);
 
@@ -6530,12 +6548,12 @@ if($all) {
         sprintf("%.0f", $sofar) ." seconds.\n";
 }
 
-if($skipped && !$short) {
+if(%skipped && !$short) {
     my $s=0;
     # Temporary hash to print the restraints sorted by the number
     # of their occurrences
     my %restraints;
-    logmsg "TESTINFO: $skipped tests were skipped due to these restraints:\n";
+    logmsg "TESTINFO: $numskipped tests were skipped due to these restraints:\n";
 
     for(keys %skipped) {
         my $r = $_;
