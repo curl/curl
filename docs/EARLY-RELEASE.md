@@ -8,10 +8,11 @@ away".
 
 ## Bugfix
 
-During the release cycle, and especially in the beginning of a new cycle,
-there are times when a bug is reported and after it has been subsequently
-fixed correctly, the discussion might be brought up: is this bug and
-associated fix important enough for an early patch release.
+During the release cycle, and especially in the beginning of a new cycle (the
+co called "cool down" period), there are times when a bug is reported and
+after it has been subsequently fixed correctly, the discussion might be
+brought up: is this bug and associated fix important enough for an early patch
+release.
 
 The question can only be properly asked once a fix has been created and landed
 in the git master branch.
@@ -28,9 +29,10 @@ big and we never release just a patch. There is only "release".
  - Is there a security advisory rated high or critical?
  - Is there a data corruption bug?
  - Did the bug cause an API/ABI breakage?
+ - Will the problem annoy an non-insignificant share of the user population?
 
-If the answer is yes to one or more of the above, an early release might
-indeed be warranted.
+If the answer is yes to one or more of the above, an early release might be
+warranted.
 
 More questions to ask ourselves when doing the assessment if the answers to
 the three ones above are all 'no'.

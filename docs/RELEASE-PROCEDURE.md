@@ -73,8 +73,8 @@ release date.
 Each 8 week (56 days) release cycle is divided into three distinct periods:
 
 - During the first 10 calendar days after a release, we are in "cool down". We
-  do not merge features but only bug-fixes. If any important enough regression
-  is reported, we might do a follow-up patch release.
+  do not merge features but only bug-fixes. If a critical regression is
+  reported, we might do a follow-up patch release.
 
 - During the following 3 weeks (21 days) there is a feature window: we allow
   new features and changes to curl and libcurl. If we accept any such changes,
