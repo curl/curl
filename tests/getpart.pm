@@ -23,14 +23,24 @@
 ###########################################################################
 
 #use strict;
+use Memoize;
+use MIME::Base64;
 
-my @xml;
-my $xmlfile;
+my @xml;      # test data file contents
+my $xmlfile;  # test data file name
 
 my $warning=0;
 my $trace=0;
 
-use MIME::Base64;
+# Normalize the part function arguments for proper caching. This includes the
+# file name in the arguments since that is an implied parameter that affects the
+# return value.  Any error messages will only be displayed the first time, but
+# those are disabled by default anyway, so should never been seen outside
+# development.
+sub normalize_part {
+    push @_, $xmlfile;
+    return join("\t", @_);
+}
 
 sub decode_hex {
     my $s = $_;
@@ -95,6 +105,7 @@ sub getpartattr {
     }
     return %hash;
 }
+memoize('getpartattr', NORMALIZER => 'normalize_part');  # cache each result
 
 sub getpart {
     my ($section, $part)=@_;
@@ -173,6 +184,7 @@ sub getpart {
     }
     return @this;
 }
+memoize('getpart', NORMALIZER => 'normalize_part');  # cache each result
 
 sub partexists {
     my ($section, $part)=@_;
@@ -192,6 +204,9 @@ sub partexists {
     }
     return 0; # does not exist
 }
+# The code currently never calls this more than once per part per file, so
+# caching a result that will never be used again just slows things down.
+# memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 # Return entire document as list of lines
 sub getall {
@@ -202,7 +217,7 @@ sub loadtest {
     my ($file)=@_;
 
     undef @xml;
-    $xmlfile = $file;
+    $xmlfile = "";
 
     if(open(XML, "<$file")) {
         binmode XML; # for crapage systems, use binary
@@ -218,6 +233,7 @@ sub loadtest {
         }
         return 1;
     }
+    $xmlfile = $file;
     return 0;
 }
 
