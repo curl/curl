@@ -70,9 +70,9 @@ We normally do releases every 8 weeks on Wednesdays. If critical problems
 arise, we can insert releases outside of the schedule or we can move the
 release date.
 
-Each 8 week (56 days) release cycle is split in three distinct periods.
+Each 8 week (56 days) release cycle is divided into three distinct periods:
 
-- During the first calendar 10 days after a release, we are in "cool down". We
+- During the first 10 calendar days after a release, we are in "cool down". We
   do not merge features but only bug-fixes. If any important enough regression
   is reported, we might do a follow-up patch release.
 
