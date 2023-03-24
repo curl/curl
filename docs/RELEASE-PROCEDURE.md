@@ -76,7 +76,7 @@ Each 8 week (56 days) release cycle is split in three distinct periods.
   do not merge features but only bug-fixes. If any important enough regression
   is reported, we might do a follow-up patch release.
 
-- During the follwing 3 weeks (21 days) there is a feature window: we allow
+- During the following 3 weeks (21 days) there is a feature window: we allow
   new features and changes to curl and libcurl. If we accept any such changes,
   we bump the minor number used for the next release.
 
