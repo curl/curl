@@ -1,14 +1,31 @@
-curl and libcurl 8.0.1
+curl and libcurl 8.1.0
 
- Public curl releases:         216
+ Public curl releases:         217
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
  Contributors:                 2841
 
+This release includes the following changes:
+
 This release includes the following bugfixes:
 
- o Revert "multi: remove PENDING + MSGSENT handles" [1]
+ o CI: fix brew retries on GHA
+ o CI: skip Azure for commits which change only GHA
+ o cmake: bring in the network library on Haiku [9]
+ o cmake: set SONAME for SunOS too [3]
+ o data.d: emphasize no conversion [5]
+ o digest: clear target buffer [8]
+ o GHA-linux: add an address-sanitizer build [15]
+ o GHA: add a memory-sanitizer job [2]
+ o GHA: run all linux test jobs with valgrind [14]
+ o gskit: various compile errors in OS400 [12]
+ o multi: add handle asserts in DEBUG builds [11]
+ o ngtcp2: adjust config and code checks for ngtcp2 without nghttp3 [4]
+ o ntlm: clear lm and nt response buffers before use [7]
+ o runtests: die if curl version can be found [10]
+ o server/getpart: clear target buffer before load [6]
+ o tool_operate: pass a long as CURLOPT_HEADEROPT argument [13]
 
 This release includes the following known bugs:
 
@@ -26,8 +43,23 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Daniel Stenberg, Kamil Dudka
+  Brian Lund, Dan Fandrich, Daniel Stenberg, Douglas R. Reno, Jon Rumsey,
+  Paul Howarth, Stefan Eissing
+  (7 contributors)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=10795
+ [2] = https://curl.se/bug/?i=10815
+ [3] = https://curl.se/bug/?i=10816
+ [4] = https://curl.se/bug/?i=10793
+ [5] = https://curl.se/bug/?i=10823
+ [6] = https://curl.se/bug/?i=10822
+ [7] = https://curl.se/bug/?i=10814
+ [8] = https://curl.se/bug/?i=10814
+ [9] = https://curl.se/bug/?i=10296
+ [10] = https://curl.se/bug/?i=10813
+ [11] = https://curl.se/bug/?i=10812
+ [12] = https://curl.se/bug/?i=10799
+ [13] = https://curl.se/bug/?i=10798
+ [14] = https://curl.se/bug/?i=10798
+ [15] = https://curl.se/bug/?i=10810
