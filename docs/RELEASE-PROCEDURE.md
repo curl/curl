@@ -107,7 +107,6 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- March 20, 2023 (8.0.0 - curl 25 years)
 - May 17, 2023
 - July 19, 2023
 - September 6, 2023
@@ -115,3 +114,4 @@ time of this writing):
 - December 27, 2023
 - February 21, 2024
 - April 17, 2024
+- June 12, 2024
