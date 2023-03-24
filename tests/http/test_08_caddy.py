@@ -68,7 +68,7 @@ class TestCaddy:
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{caddy.port}/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
 
     # download 1MB files sequentially
@@ -81,7 +81,7 @@ class TestCaddy:
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         # sequential transfers will open 1 connection
         assert r.total_connects == 1
@@ -98,7 +98,7 @@ class TestCaddy:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         if proto == 'http/1.1':
             # http/1.1 parallel transfers will open multiple connections
@@ -118,7 +118,7 @@ class TestCaddy:
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         # sequential transfers will open 1 connection
         assert r.total_connects == 1
@@ -137,7 +137,7 @@ class TestCaddy:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         if proto == 'http/1.1':
             # http/1.1 parallel transfers will open multiple connections

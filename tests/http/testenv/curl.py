@@ -44,6 +44,7 @@ class ExecResult:
 
     def __init__(self, args: List[str], exit_code: int,
                  stdout: List[str], stderr: List[str],
+                 trace: Optional[List[str]] = None,
                  duration: Optional[timedelta] = None,
                  with_stats: bool = False,
                  exception: Optional[str] = None):
@@ -52,6 +53,7 @@ class ExecResult:
         self._exception = exception
         self._stdout = stdout
         self._stderr = stderr
+        self._trace = trace
         self._duration = duration if duration is not None else timedelta()
         self._response = None
         self._responses = []
@@ -157,35 +159,64 @@ class ExecResult:
     def add_assets(self, assets: List):
         self._assets.extend(assets)
 
+    def check_exit_code(self, code: int):
+        assert self.exit_code == code, \
+            f'expected exit code {code}, '\
+            'got {self.exit_code}\n{self._dump_logs()}'
+
+    def check_exit_code_not(self, code: int):
+        assert self.exit_code != code, \
+            f'expected exit code other than {code}\n{self._dump_logs()}'
+
     def check_responses(self, count: int, exp_status: Optional[int] = None,
                         exp_exitcode: Optional[int] = None):
         assert len(self.responses) == count, \
-            f'response count: expected {count}, got {len(self.responses)}'
+            f'response count: expected {count}, ' \
+            f'got {len(self.responses)}\n{self._dump_logs()}'
         if exp_status is not None:
             for idx, x in enumerate(self.responses):
                 assert x['status'] == exp_status, \
-                    f'response #{idx} unexpectedstatus: {x["status"]}'
+                    f'response #{idx} status: expected {exp_status},'\
+                    f'got {x["status"]}\n{self._dump_logs()}'
         if exp_exitcode is not None:
             for idx, x in enumerate(self.responses):
                 if 'exitcode' in x:
-                    assert x['exitcode'] == 0, f'response #{idx} exitcode: {x["exitcode"]}'
+                    assert x['exitcode'] == 0, \
+                        f'response #{idx} exitcode: expected {exp_exitcode}, '\
+                        f'got {x["exitcode"]}\n{self._dump_logs()}'
         if self.with_stats:
-            assert len(self.stats) == count, f'{self}'
+            self.check_stats(count)
 
     def check_stats(self, count: int, exp_status: Optional[int] = None,
-                        exp_exitcode: Optional[int] = None):
+                    exp_exitcode: Optional[int] = None):
         assert len(self.stats) == count, \
-            f'stats count: expected {count}, got {len(self.stats)}'
+            f'stats count: expected {count}, got {len(self.stats)}\n{self._dump_logs()}'
         if exp_status is not None:
             for idx, x in enumerate(self.stats):
                 assert 'http_code' in x, \
-                    f'status #{idx} reports no http_code'
+                    f'status #{idx} reports no http_code\n{self._dump_logs()}'
                 assert x['http_code'] == exp_status, \
-                    f'status #{idx} unexpected http_code: {x["http_code"]}'
+                    f'status #{idx} http_code: expected {exp_status}, '\
+                    f'got {x["http_code"]}\n{self._dump_logs()}'
         if exp_exitcode is not None:
             for idx, x in enumerate(self.stats):
                 if 'exitcode' in x:
-                    assert x['exitcode'] == 0, f'status #{idx} exitcode: {x["exitcode"]}'
+                    assert x['exitcode'] == 0, \
+                        f'status #{idx} exitcode: expected {exp_exitcode}, '\
+                        f'got {x["exitcode"]}\n{self._dump_logs()}'
+
+    def _dump_logs(self):
+        lines = []
+        lines.append('>>--stdout ----------------------------------------------\n')
+        lines.extend(self._stdout)
+        if self._trace:
+            lines.append('>>--trace ----------------------------------------------\n')
+            lines.extend(self._trace)
+        else:
+            lines.append('>>--stderr ----------------------------------------------\n')
+            lines.extend(self._stderr)
+        lines.append('<<-------------------------------------------------------\n')
+        return ''.join(lines)
 
 
 class CurlClient:
@@ -200,7 +231,7 @@ class CurlClient:
     }
 
     def __init__(self, env: Env, run_dir: Optional[str] = None,
-                 timeout: Optional[float] = None):
+                 timeout: Optional[float] = None, silent: bool = False):
         self.env = env
         self._timeout = timeout if timeout else env.test_timeout
         self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
@@ -210,6 +241,7 @@ class CurlClient:
         self._headerfile = f'{self._run_dir}/curl.headers'
         self._tracefile = f'{self._run_dir}/curl.trace'
         self._log_path = f'{self._run_dir}/curl.log'
+        self._silent = silent
         self._rmrf(self._run_dir)
         self._mkpath(self._run_dir)
 
@@ -333,14 +365,17 @@ class CurlClient:
                                        input=intext.encode() if intext else None,
                                        timeout=self._timeout)
                     exitcode = p.returncode
-        except subprocess.TimeoutExpired as e:
+        except subprocess.TimeoutExpired:
             log.warning(f'Timeout after {self._timeout}s: {args}')
             exitcode = -1
             exception = 'TimeoutExpired'
         coutput = open(self._stdoutfile).readlines()
         cerrput = open(self._stderrfile).readlines()
+        ctrace = None
+        if os.path.exists(self._tracefile):
+            ctrace = open(self._tracefile).readlines()
         return ExecResult(args=args, exit_code=exitcode, exception=exception,
-                          stdout=coutput, stderr=cerrput,
+                          stdout=coutput, stderr=cerrput, trace=ctrace,
                           duration=datetime.now() - start,
                           with_stats=with_stats)
 
@@ -370,10 +405,12 @@ class CurlClient:
         args = [self._curl, "-s", "--path-as-is"]
         if with_headers:
             args.extend(["-D", self._headerfile])
-        if self.env.verbose > 1:
-            args.extend(['--trace', self._tracefile])
         if self.env.verbose > 2:
             args.extend(['--trace', self._tracefile, '--trace-time'])
+        elif self.env.verbose > 1:
+            args.extend(['--trace', self._tracefile])
+        elif not self._silent:
+            args.extend(['-v'])
 
         for url in urls:
             u = urlparse(urls[0])
@@ -457,4 +494,3 @@ class CurlClient:
 
         fin_response(response)
         return r
-

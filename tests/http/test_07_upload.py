@@ -34,8 +34,6 @@ from testenv import Env, CurlClient
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=Env.setup_incomplete(),
-                    reason=f"missing: {Env.incomplete_reason()}")
 class TestUpload:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -56,7 +54,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == [data]
@@ -70,7 +68,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
         indata = open(fdata).readlines()
         respdata = open(curl.response_file(0)).readlines()
@@ -86,7 +84,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
@@ -104,7 +102,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
@@ -120,7 +118,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         indata = open(fdata).readlines()
         r.check_stats(count=count, exp_status=200)
@@ -138,7 +136,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         indata = open(fdata).readlines()
         r.check_stats(count=count, exp_status=200)
@@ -158,7 +156,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
@@ -178,7 +176,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         indata = open(fdata).readlines()
         r.check_stats(count=count, exp_status=200)
@@ -197,7 +195,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_stats(count=count, exp_status=200)
@@ -216,7 +214,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]&chunk_delay=10ms'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_stats(count=count, exp_status=200)

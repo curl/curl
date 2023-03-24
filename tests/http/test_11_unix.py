@@ -83,9 +83,6 @@ Content-Length: 19
                 self._done = True
 
 
-
-@pytest.mark.skipif(condition=Env.setup_incomplete(),
-                    reason=f"missing: {Env.incomplete_reason()}")
 class TestUnix:
 
     @pytest.fixture(scope="class")
@@ -104,7 +101,7 @@ class TestUnix:
                                extra_args=[
                                  '--unix-socket', uds_faker.path,
                                ])
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
 
     # download https: via unix socket
@@ -115,7 +112,7 @@ class TestUnix:
                                extra_args=[
                                  '--unix-socket', uds_faker.path,
                                ])
-        assert r.exit_code == 35  # CONNECT_ERROR (as faker is not TLS)
+        r.check_exit_code(35)  
 
     # download HTTP/3 via unix socket
     @pytest.mark.skipif(condition=not Env.have_h3(), reason='h3 not supported')
@@ -127,4 +124,4 @@ class TestUnix:
                                extra_args=[
                                  '--unix-socket', uds_faker.path,
                                ])
-        assert r.exit_code == 96  # QUIC CONNECT ERROR
+        r.check_exit_code(96)  

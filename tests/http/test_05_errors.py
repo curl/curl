@@ -35,8 +35,6 @@ from testenv import Env, CurlClient, ExecResult
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=Env.setup_incomplete(),
-                    reason=f"missing: {Env.incomplete_reason()}")
 @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.55'),
                     reason=f"httpd version too old for this: {Env.httpd_version()}")
 class TestErrors:
@@ -62,7 +60,7 @@ class TestErrors:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--retry', '0'
         ])
-        assert r.exit_code != 0, f'{r}'
+        r.check_exit_code_not(0)
         invalid_stats = []
         for idx, s in enumerate(r.stats):
             if 'exitcode' not in s or s['exitcode'] not in [18, 56, 92]:
@@ -85,7 +83,7 @@ class TestErrors:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--retry', '0', '--parallel',
         ])
-        assert r.exit_code != 0, f'{r}'
+        r.check_exit_code_not(0)
         assert len(r.stats) == count, f'did not get all stats: {r}'
         invalid_stats = []
         for idx, s in enumerate(r.stats):
