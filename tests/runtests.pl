@@ -4453,7 +4453,7 @@ sub singletest_check {
                 logmsg " postcheck FAILED\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return -3;
+                return -1;
             }
         }
     }
@@ -4522,7 +4522,7 @@ sub singletest_check {
 
         $res = compare($testnum, $testname, "stdout", \@actual, \@validstdout);
         if($res) {
-            return -3;
+            return -1;
         }
         $ok .= "s";
     }
@@ -4574,7 +4574,7 @@ sub singletest_check {
 
         $res = compare($testnum, $testname, "stderr", \@actual, \@validstderr);
         if($res) {
-            return -3;
+            return -1;
         }
         $ok .= "r";
     }
@@ -4627,12 +4627,12 @@ sub singletest_check {
             logmsg "\n $testnum: protocol FAILED!\n".
                 " There was no content at all in the file $SERVERIN.\n".
                 " Server glitch? Total curl failure? Returned: $cmdres\n";
-            return -3;
+            return -1;
         }
 
         $res = compare($testnum, $testname, "protocol", \@out, \@protocol);
         if($res) {
-            return -3;
+            return -1;
         }
 
         $ok .= "p";
@@ -4698,7 +4698,7 @@ sub singletest_check {
         my @out = loadarray($CURLOUT);
         $res = compare($testnum, $testname, "data", \@out, \@reply);
         if ($res) {
-            return -3;
+            return -1;
         }
         $ok .= "d";
     }
@@ -4727,7 +4727,7 @@ sub singletest_check {
 
         $res = compare($testnum, $testname, "upload", \@out, \@upload);
         if ($res) {
-            return -3;
+            return -1;
         }
         $ok .= "u";
     }
@@ -4771,7 +4771,7 @@ sub singletest_check {
 
         $res = compare($testnum, $testname, "proxy", \@out, \@proxyprot);
         if($res) {
-            return -3;
+            return -1;
         }
 
         $ok .= "P";
@@ -4832,7 +4832,7 @@ sub singletest_check {
             $res = compare($testnum, $testname, "output ($filename)",
                            \@generated, \@outfile);
             if($res) {
-                return -3;
+                return -1;
             }
 
             $outputok = 1; # output checked
@@ -4847,7 +4847,7 @@ sub singletest_check {
         my @out = loadarray($SOCKSIN);
         $res = compare($testnum, $testname, "socks", \@out, \@socksprot);
         if($res) {
-            return -3;
+            return -1;
         }
     }
 
@@ -4873,7 +4873,7 @@ sub singletest_check {
         logmsg " exit FAILED\n";
         # timestamp test result verification end
         $timevrfyend{$testnum} = Time::HiRes::time();
-        return -3;
+        return -1;
     }
 
     if($has_memory_tracking) {
@@ -4898,7 +4898,7 @@ sub singletest_check {
                 logmsg @memdata;
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return -3;
+                return -1;
             }
             else {
                 $ok .= "m";
@@ -4915,7 +4915,7 @@ sub singletest_check {
                 logmsg "ERROR: unable to read $LOGDIR\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return -3;
+                return -1;
             }
             my @files = readdir(DIR);
             closedir(DIR);
@@ -4930,7 +4930,7 @@ sub singletest_check {
                 logmsg "ERROR: valgrind log file missing for test $testnum\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return -3;
+                return -1;
             }
             my @e = valgrindparse("$LOGDIR/$vgfile");
             if(@e && $e[0]) {
@@ -4943,7 +4943,7 @@ sub singletest_check {
                 }
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return -3;
+                return -1;
             }
             $ok .= "v";
         }
@@ -5083,15 +5083,14 @@ sub singletest {
     #######################################################################
     # Verify that the test succeeded
     $error = singletest_check($testnum, $cmdres, $CURLOUT, $tool, $disablevalgrind);
-    # TODO: try to simplify the return codes
     if($error == -1) {
-      return $error;
+      # return a test failure, either to be reported or to be ignored
+      return $errorreturncode;
     }
     elsif($error == -2) {
+      # torture test; there is no verification, so the run result holds the
+      # test success code
       return $cmdres;
-    }
-    elsif($error == -3) {
-      return $errorreturncode;
     }
 
     #######################################################################
