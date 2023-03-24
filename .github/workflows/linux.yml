@@ -116,7 +116,7 @@ jobs:
 
         - name: memory-sanitizer
           install_packages: clang
-          install_steps: pytest
+          install_steps:
           configure: >
             CC=clang
             CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
