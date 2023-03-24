@@ -66,27 +66,27 @@ curl release scheduling
 Release Cycle
 -------------
 
-We normally do releases every 8 weeks on Wednesdays. If critical problems
-arise, we can insert releases outside of the schedule or we can move the
-release date.
+We normally do releases every 8 weeks on Wednesdays. If important problems
+arise, we can insert releases outside the schedule or we can move the release
+date.
 
 Each 8 week (56 days) release cycle is divided into three distinct periods:
 
 - During the first 10 calendar days after a release, we are in "cool down". We
-  do not merge features but only bug-fixes. If a critical regression is
-  reported, we might do a follow-up patch release.
+  do not merge features but only bug-fixes. If a regression is reported, we
+  might do a follow-up patch release.
 
 - During the following 3 weeks (21 days) there is a feature window: we allow
   new features and changes to curl and libcurl. If we accept any such changes,
   we bump the minor number used for the next release.
 
 - During the next 25 days we are in feature freeze. We do not merge any
-  features or changes, we then only focus on fixing bugs and polishing things
-  to make a solid coming release.
+  features or changes, and we only focus on fixing bugs and polishing things
+  to make the pending release a solid one.
 
 If a future release date happens to end up on a "bad date", like in the middle
-of common public holidays or when the lead release manager is away traveling,
-the release date can be moved forwards or backwards a full week. This is then
+of common public holidays or when the lead release manager is unavailable, the
+release date can be moved forwards or backwards a full week. This is then
 advertised well in advance.
 
 Critical problems
