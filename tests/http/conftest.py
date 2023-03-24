@@ -39,6 +39,13 @@ def env(pytestconfig) -> Env:
     env = Env(pytestconfig=pytestconfig)
     level = logging.DEBUG if env.verbose > 0 else logging.INFO
     logging.getLogger('').setLevel(level=level)
+    if not env.curl_has_protocol('http'):
+        pytest.skip("curl built without HTTP support")
+    if not env.curl_has_protocol('https'):
+        pytest.skip("curl built without HTTPS support")
+    if env.setup_incomplete():
+        pytest.skip(env.incomplete_reason())
+
     env.setup()
     return env
 

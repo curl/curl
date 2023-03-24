@@ -70,7 +70,7 @@ class ScoreCard:
             errors = []
             for i in range(sample_size):
                 self.info('.')
-                curl = CurlClient(env=self.env)
+                curl = CurlClient(env=self.env, silent=True)
                 url = f'https://{authority}/'
                 r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True)
                 if r.exit_code == 0 and len(r.stats) == 1:
@@ -93,7 +93,7 @@ class ScoreCard:
                 errors = []
                 for i in range(sample_size):
                     self.info('.')
-                    curl = CurlClient(env=self.env)
+                    curl = CurlClient(env=self.env, silent=True)
                     args = [
                         '--http3-only' if proto == 'h3' else '--http2',
                         f'--{ipv}', f'https://{authority}/'
@@ -140,7 +140,7 @@ class ScoreCard:
         errors = []
         self.info(f'{sample_size}x single')
         for i in range(sample_size):
-            curl = CurlClient(env=self.env)
+            curl = CurlClient(env=self.env, silent=True)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True)
             err = self._check_downloads(r, count)
             if err:
@@ -162,7 +162,7 @@ class ScoreCard:
         url = f'{url}?[0-{count - 1}]'
         self.info(f'{sample_size}x{count} serial')
         for i in range(sample_size):
-            curl = CurlClient(env=self.env)
+            curl = CurlClient(env=self.env, silent=True)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True)
             self.info(f'.')
             err = self._check_downloads(r, count)
@@ -185,7 +185,7 @@ class ScoreCard:
         url = f'{url}?[0-{count - 1}]'
         self.info(f'{sample_size}x{count} parallel')
         for i in range(sample_size):
-            curl = CurlClient(env=self.env)
+            curl = CurlClient(env=self.env, silent=True)
             start = datetime.now()
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    extra_args=['--parallel'])
