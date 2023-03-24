@@ -195,8 +195,8 @@ together as a single identifier.
 When using curl built with Hyper, the keywords must include `HTTP` or `HTTPS`
 for 'hyper mode' to kick in and make line ending checks work for tests.
 
-When running a unittest and the keywords include `unittest`, the `<tool>`
-section can be left empty to use the standard unittest tool name `unitN` where
+When running a unit test and the keywords include `unittest`, the `<tool>`
+section can be left empty to use the standard unit test tool name `unitN` where
 `N` is the test number.
 
 ## `<reply>`
