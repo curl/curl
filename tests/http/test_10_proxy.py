@@ -34,8 +34,6 @@ from testenv import Env, CurlClient
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=Env.setup_incomplete(),
-                    reason=f"missing: {Env.incomplete_reason()}")
 class TestProxy:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -55,7 +53,7 @@ class TestProxy:
                                  '--proxy', f'http://{env.proxy_domain}:{env.proxy_port}/',
                                  '--resolve', f'{env.proxy_domain}:{env.proxy_port}:127.0.0.1',
                                ])
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
 
     # download via https: proxy (no tunnel)
@@ -70,7 +68,7 @@ class TestProxy:
                                  '--resolve', f'{env.proxy_domain}:{env.proxys_port}:127.0.0.1',
                                  '--proxy-cacert', env.ca.cert_file,
                                ])
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
 
     # download http: via http: proxytunnel
@@ -83,7 +81,7 @@ class TestProxy:
                                  '--proxy', f'http://{env.proxy_domain}:{env.proxy_port}/',
                                  '--resolve', f'{env.proxy_domain}:{env.proxy_port}:127.0.0.1',
                                ])
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
 
     # download http: via https: proxytunnel
@@ -99,7 +97,7 @@ class TestProxy:
                                  '--resolve', f'{env.proxy_domain}:{env.proxys_port}:127.0.0.1',
                                  '--proxy-cacert', env.ca.cert_file,
                                ])
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
 
     # download https: with proto via http: proxytunnel
@@ -114,7 +112,7 @@ class TestProxy:
                                  '--proxy', f'http://{env.proxy_domain}:{env.proxy_port}/',
                                  '--resolve', f'{env.proxy_domain}:{env.proxy_port}:127.0.0.1',
                                ])
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
         exp_proto = 'HTTP/2' if proto == 'h2' else 'HTTP/1.1'
         assert r.response['protocol'] == exp_proto
@@ -134,7 +132,7 @@ class TestProxy:
                                  '--resolve', f'{env.proxy_domain}:{env.proxys_port}:127.0.0.1',
                                  '--proxy-cacert', env.ca.cert_file,
                                ])
-        assert r.exit_code == 0
+        r.check_exit_code(0)  
         r.check_stats(count=1, exp_status=200)
         exp_proto = 'HTTP/2' if proto == 'h2' else 'HTTP/1.1'
         assert r.response['protocol'] == exp_proto

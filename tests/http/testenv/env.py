@@ -238,6 +238,11 @@ class Env:
         return feature.lower() in Env.CONFIG.curl_props['features']
 
     @staticmethod
+    def curl_has_protocol(protocol: str) -> bool:
+        return protocol.lower() in Env.CONFIG.curl_props['protocols']
+
+
+    @staticmethod
     def curl_lib_version(libname: str) -> str:
         prefix = f'{libname.lower()}/'
         for lversion in Env.CONFIG.curl_props['lib_versions']:

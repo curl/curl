@@ -36,8 +36,6 @@ from testenv import Env, CurlClient, ExecResult
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=Env.setup_incomplete(),
-                    reason=f"missing: {Env.incomplete_reason()}")
 class TestGoAway:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -68,7 +66,7 @@ class TestGoAway:
         assert httpd.reload()
         t.join()
         r: ExecResult = self.r
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
@@ -101,7 +99,7 @@ class TestGoAway:
         assert nghttpx.reload(timeout=timedelta(seconds=2))
         t.join()
         r: ExecResult = self.r
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
         assert r.total_connects == 2
@@ -133,7 +131,7 @@ class TestGoAway:
         assert httpd.reload()
         t.join()
         r: ExecResult = self.r
-        assert r.exit_code == 0, f'{r}'
+        r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
