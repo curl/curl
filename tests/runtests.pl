@@ -180,8 +180,6 @@ my $TESTCASES="all";
 my $perl="perl -I$srcdir";
 my $server_response_maxtime=13;
 
-my $debug_build=0;          # built debug enabled (--enable-debug)
-my $has_memory_tracking=0;  # built with memory tracking (--enable-curldebug)
 my $libtool;
 my $repeat = 0;
 
@@ -206,69 +204,14 @@ my $httptlssrv = find_httptlssrv();
 my $uname_release = `uname -r`;
 my $is_wsl = $uname_release =~ /Microsoft$/;
 
-my $has_ssl;        # set if libcurl is built with SSL support
-my $has_largefile;  # set if libcurl is built with large file support
-my $has_idn;        # set if libcurl is built with IDN support
 my $http_ipv6;      # set if HTTP server has IPv6 support
 my $http_unix;      # set if HTTP server has Unix sockets support
 my $ftp_ipv6;       # set if FTP server has IPv6 support
-my $tftp_ipv6;      # set if TFTP server has IPv6 support
-my $gopher_ipv6;    # set if Gopher server has IPv6 support
-my $has_ipv6;       # set if libcurl is built with IPv6 support
-my $has_unix;       # set if libcurl is built with Unix sockets support
-my $has_libz;       # set if libcurl is built with libz support
-my $has_brotli;     # set if libcurl is built with brotli support
-my $has_zstd;       # set if libcurl is built with zstd support
-my $has_getrlimit;  # set if system has getrlimit()
-my $has_ntlm;       # set if libcurl is built with NTLM support
-my $has_ntlm_wb;    # set if libcurl is built with NTLM delegation to winbind
-my $has_sspi;       # set if libcurl is built with Windows SSPI
-my $has_gssapi;     # set if libcurl is built with a GSS-API library
-my $has_kerberos;   # set if libcurl is built with Kerberos support
-my $has_spnego;     # set if libcurl is built with SPNEGO support
-my $has_charconv;   # set if libcurl is built with CharConv support
-my $has_tls_srp;    # set if libcurl is built with TLS-SRP support
-my $has_http2;      # set if libcurl is built with HTTP2 support
-my $has_h2c;        # set if libcurl is built with h2c support
-my $has_http3;      # set if libcurl is built with HTTP3 support
-my $has_httpsproxy; # set if libcurl is built with HTTPS-proxy support
-my $has_crypto;     # set if libcurl is built with cryptographic support
-my $has_cares;      # set if built with c-ares
-my $has_threadedres;# set if built with threaded resolver
-my $has_psl;        # set if libcurl is built with PSL support
-my $has_altsvc;     # set if libcurl is built with alt-svc support
-my $has_hsts;       # set if libcurl is built with HSTS support
-my $has_ldpreload;  # set if built for systems supporting LD_PRELOAD
-my $has_multissl;   # set if build with MultiSSL support
-my $has_manual;     # set if built with built-in manual
-my $has_win32;      # set if built for Windows
-my $has_mingw;      # set if built with MinGW (as opposed to MinGW-w64)
-my $has_hyper = 0;  # set if built with Hyper
-my $has_libssh2;    # set if built with libssh2
-my $has_libssh;     # set if built with libssh
-my $has_oldlibssh;  # set if built with libssh < 0.9.4
-my $has_wolfssh;    # set if built with wolfssh
-my $has_unicode;    # set if libcurl is built with Unicode support
-my $has_threadsafe; # set if libcurl is built with thread-safety support
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
 
-my $has_rustls;     # built with rustls
-my $has_openssl;    # built with a lib using an OpenSSL-like API
-my $has_gnutls;     # built with GnuTLS
-my $has_nss;        # built with NSS
-my $has_wolfssl;    # built with wolfSSL
-my $has_bearssl;    # built with BearSSL
-my $has_schannel;   # built with Schannel
-my $has_sectransp;  # built with Secure Transport
-my $has_boringssl;  # built with BoringSSL
-my $has_libressl;   # built with libressl
-my $has_mbedtls;    # built with mbedTLS
-
-my $has_sslpinning; # built with a TLS backend that supports pinning
-
-my $has_shared = "unknown";  # built shared
+my $has_shared;     # built as a shared library
 
 my $resolver;       # name of the resolver backend (for human presentation)
 
@@ -2929,92 +2872,10 @@ sub compare {
     return $result;
 }
 
-sub setupfeatures {
-    $feature{"alt-svc"} = $has_altsvc;
-    $feature{"bearssl"} = $has_bearssl;
-    $feature{"brotli"} = $has_brotli;
-    $feature{"c-ares"} = $has_cares;
-    $feature{"crypto"} = $has_crypto;
-    $feature{"debug"} = $debug_build;
-    $feature{"getrlimit"} = $has_getrlimit;
-    $feature{"GnuTLS"} = $has_gnutls;
-    $feature{"GSS-API"} = $has_gssapi;
-    $feature{"h2c"} = $has_h2c;
-    $feature{"HSTS"} = $has_hsts;
-    $feature{"http/2"} = $has_http2;
-    $feature{"http/3"} = $has_http3;
-    $feature{"https-proxy"} = $has_httpsproxy;
-    $feature{"hyper"} = $has_hyper;
-    $feature{"idn"} = $has_idn;
-    $feature{"ipv6"} = $has_ipv6;
-    $feature{"Kerberos"} = $has_kerberos;
-    $feature{"large_file"} = $has_largefile;
-    $feature{"ld_preload"} = ($has_ldpreload && !$debug_build);
-    $feature{"libssh"} = $has_libssh;
-    $feature{"libssh2"} = $has_libssh2;
-    $feature{"libz"} = $has_libz;
-    $feature{"manual"} = $has_manual;
-    $feature{"MinGW"} = $has_mingw;
-    $feature{"MultiSSL"} = $has_multissl;
-    $feature{"mbedtls"} = $has_mbedtls;
-    $feature{"NSS"} = $has_nss;
-    $feature{"NTLM"} = $has_ntlm;
-    $feature{"NTLM_WB"} = $has_ntlm_wb;
-    $feature{"oldlibssh"} = $has_oldlibssh;
-    $feature{"OpenSSL"} = $has_openssl || $has_libressl || $has_boringssl;
-    $feature{"PSL"} = $has_psl;
-    $feature{"rustls"} = $has_rustls;
-    $feature{"Schannel"} = $has_schannel;
-    $feature{"sectransp"} = $has_sectransp;
-    $feature{"SPNEGO"} = $has_spnego;
-    $feature{"SSL"} = $has_ssl;
-    $feature{"SSLpinning"} = $has_sslpinning;
-    $feature{"SSPI"} = $has_sspi;
-    $feature{"threaded-resolver"} = $has_threadedres;
-    $feature{"threadsafe"} = $has_threadsafe;
-    $feature{"TLS-SRP"} = $has_tls_srp;
-    $feature{"TrackMemory"} = $has_memory_tracking;
-    $feature{"Unicode"} = $has_unicode;
-    $feature{"unittest"} = $debug_build;
-    $feature{"unix-sockets"} = $has_unix;
-    $feature{"win32"} = $has_win32;
-    $feature{"wolfssh"} = $has_wolfssh;
-    $feature{"wolfssl"} = $has_wolfssl;
-    $feature{"zstd"} = $has_zstd;
-
-    # make each protocol an enabled "feature"
-    for my $p (@protocols) {
-        $feature{$p} = 1;
-    }
-    # 'socks' was once here but is now removed
-
-    #
-    # strings that must match the names used in server/disabled.c
-    #
-    $feature{"cookies"} = 1;
-    $feature{"DoH"} = 1;
-    $feature{"HTTP-auth"} = 1;
-    $feature{"Mime"} = 1;
-    $feature{"netrc"} = 1;
-    $feature{"parsedate"} = 1;
-    $feature{"proxy"} = 1;
-    $feature{"shuffle-dns"} = 1;
-    $feature{"typecheck"} = 1;
-    $feature{"verbose-strings"} = 1;
-    $feature{"wakeup"} = 1;
-    $feature{"headers-api"} = 1;
-    $feature{"xattr"} = 1;
-    $feature{"nghttpx"} = !!$ENV{'NGHTTPX'};
-    $feature{"nghttpx-h3"} = !!$nghttpx_h3;
-}
-
 #######################################################################
 # display information about curl and the host the test suite runs on
 #
-sub checksystem {
-
-    unlink($memdump); # remove this if there was one left
-
+sub checksystemfeatures {
     my $feat;
     my $curl;
     my $libcurl;
@@ -3058,84 +2919,88 @@ sub checksystem {
 
             $libcurl = $2;
             if($curl =~ /linux|bsd|solaris/) {
-                $has_ldpreload = 1;
+                # system support LD_PRELOAD; may be disabled later
+                $feature{"ld_preload"} = 1;
             }
             if($curl =~ /win32|Windows|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
                 # Win32-style path.
                 $pwd = pathhelp::sys_native_current_path();
                 $has_textaware = 1;
-                $has_win32 = 1;
-                $has_mingw = 1 if ($curl =~ /-pc-mingw32/);
+                $feature{"win32"} = 1;
+                # set if built with MinGW (as opposed to MinGW-w64)
+                $feature{"MinGW"} = 1 if ($curl =~ /-pc-mingw32/);
             }
            if ($libcurl =~ /\s(winssl|schannel)\b/i) {
-               $has_schannel=1;
-               $has_sslpinning=1;
+               $feature{"Schannel"} = 1;
+               $feature{"SSLpinning"} = 1;
            }
            elsif ($libcurl =~ /\sopenssl\b/i) {
-               $has_openssl=1;
-               $has_sslpinning=1;
+               $feature{"OpenSSL"} = 1;
+               $feature{"SSLpinning"} = 1;
            }
            elsif ($libcurl =~ /\sgnutls\b/i) {
-               $has_gnutls=1;
-               $has_sslpinning=1;
+               $feature{"GnuTLS"} = 1;
+               $feature{"SSLpinning"} = 1;
            }
            elsif ($libcurl =~ /\srustls-ffi\b/i) {
-               $has_rustls=1;
+               $feature{"rustls"} = 1;
            }
            elsif ($libcurl =~ /\snss\b/i) {
-               $has_nss=1;
-               $has_sslpinning=1;
+               $feature{"NSS"} = 1;
+               $feature{"SSLpinning"} = 1;
            }
            elsif ($libcurl =~ /\swolfssl\b/i) {
-               $has_wolfssl=1;
-               $has_sslpinning=1;
+               $feature{"wolfssl"} = 1;
+               $feature{"SSLpinning"} = 1;
            }
            elsif ($libcurl =~ /\sbearssl\b/i) {
-               $has_bearssl=1;
+               $feature{"bearssl"} = 1;
            }
            elsif ($libcurl =~ /\ssecuretransport\b/i) {
-               $has_sectransp=1;
-               $has_sslpinning=1;
+               $feature{"sectransp"} = 1;
+               $feature{"SSLpinning"} = 1;
            }
            elsif ($libcurl =~ /\sBoringSSL\b/i) {
-               $has_boringssl=1;
-               $has_sslpinning=1;
+               # OpenSSL compatible API
+               $feature{"OpenSSL"} = 1;
+               $feature{"SSLpinning"} = 1;
            }
            elsif ($libcurl =~ /\slibressl\b/i) {
-               $has_libressl=1;
-               $has_sslpinning=1;
+               # OpenSSL compatible API
+               $feature{"OpenSSL"} = 1;
+               $feature{"SSLpinning"} = 1;
            }
            elsif ($libcurl =~ /\smbedTLS\b/i) {
-               $has_mbedtls=1;
-               $has_sslpinning=1;
+               $feature{"mbedtls"} = 1;
+               $feature{"SSLpinning"} = 1;
            }
            if ($libcurl =~ /ares/i) {
-               $has_cares=1;
+               $feature{"c-ares"} = 1;
                $resolver="c-ares";
            }
            if ($libcurl =~ /Hyper/i) {
-               $has_hyper=1;
+               $feature{"hyper"} = 1;
            }
             if ($libcurl =~ /nghttp2/i) {
                 # nghttp2 supports h2c, hyper does not
-                $has_h2c=1;
+                $feature{"h2c"} = 1;
             }
             if ($libcurl =~ /libssh2/i) {
-                $has_libssh2=1;
+                $feature{"libssh2"} = 1;
             }
             if ($libcurl =~ /libssh\/([0-9.]*)\//i) {
-                $has_libssh=1;
+                $feature{"libssh"} = 1;
                 if($1 =~ /(\d+)\.(\d+).(\d+)/) {
                     my $v = $1 * 100 + $2 * 10 + $3;
                     if($v < 94) {
                         # before 0.9.4
-                        $has_oldlibssh = 1;
+                        $feature{"oldlibssh"} = 1;
                     }
                 }
             }
             if ($libcurl =~ /wolfssh/i) {
-                $has_wolfssh=1;
+                $feature{"wolfssh"} = 1;
             }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
@@ -3156,128 +3021,78 @@ sub checksystem {
         }
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
-            if($feat =~ /TrackMemory/i) {
-                # built with memory tracking support (--enable-curldebug)
-                $has_memory_tracking = 1;
-            }
-            if($feat =~ /debug/i) {
-                # curl was built with --enable-debug
-                $debug_build = 1;
-            }
-            if($feat =~ /SSL/i) {
-                # ssl enabled
-                $has_ssl=1;
-            }
-            if($feat =~ /MultiSSL/i) {
-                # multiple ssl backends available.
-                $has_multissl=1;
-            }
-            if($feat =~ /Largefile/i) {
-                # large file support
-                $has_largefile=1;
-            }
-            if($feat =~ /IDN/i) {
-                # IDN support
-                $has_idn=1;
-            }
-            if($feat =~ /IPv6/i) {
-                $has_ipv6 = 1;
-            }
-            if($feat =~ /UnixSockets/i) {
-                $has_unix = 1;
-            }
-            if($feat =~ /libz/i) {
-                $has_libz = 1;
-            }
-            if($feat =~ /brotli/i) {
-                $has_brotli = 1;
-            }
-            if($feat =~ /zstd/i) {
-                $has_zstd = 1;
-            }
-            if($feat =~ /NTLM/i) {
-                # NTLM enabled
-                $has_ntlm=1;
 
-                # Use this as a proxy for any cryptographic authentication
-                $has_crypto=1;
-            }
-            if($feat =~ /NTLM_WB/i) {
-                # NTLM delegation to winbind daemon ntlm_auth helper enabled
-                $has_ntlm_wb=1;
-            }
-            if($feat =~ /SSPI/i) {
-                # SSPI enabled
-                $has_sspi=1;
-            }
-            if($feat =~ /GSS-API/i) {
-                # GSS-API enabled
-                $has_gssapi=1;
-            }
-            if($feat =~ /Kerberos/i) {
-                # Kerberos enabled
-                $has_kerberos=1;
-
-                # Use this as a proxy for any cryptographic authentication
-                $has_crypto=1;
-            }
-            if($feat =~ /SPNEGO/i) {
-                # SPNEGO enabled
-                $has_spnego=1;
-
-                # Use this as a proxy for any cryptographic authentication
-                $has_crypto=1;
-            }
-            if($feat =~ /CharConv/i) {
-                # CharConv enabled
-                $has_charconv=1;
-            }
-            if($feat =~ /TLS-SRP/i) {
-                # TLS-SRP enabled
-                $has_tls_srp=1;
-            }
-            if($feat =~ /PSL/i) {
-                # PSL enabled
-                $has_psl=1;
-            }
-            if($feat =~ /alt-svc/i) {
-                # alt-svc enabled
-                $has_altsvc=1;
-            }
-            if($feat =~ /HSTS/i) {
-                $has_hsts=1;
-            }
+            # built with memory tracking support (--enable-curldebug); may be disabled later
+            $feature{"TrackMemory"} = $feat =~ /TrackMemory/i;
+            # curl was built with --enable-debug
+            $feature{"debug"} = $feat =~ /debug/i;
+            # ssl enabled
+            $feature{"SSL"} = $feat =~ /SSL/i;
+            # multiple ssl backends available.
+            $feature{"MultiSSL"} = $feat =~ /MultiSSL/i;
+            # large file support
+            $feature{"large_file"} = $feat =~ /Largefile/i;
+            # IDN support
+            $feature{"idn"} = $feat =~ /IDN/i;
+            # IPv6 support
+            $feature{"ipv6"} = $feat =~ /IPv6/i;
+            # Unix sockets support
+            $feature{"unix-sockets"} = $feat =~ /UnixSockets/i;
+            # libz compression
+            $feature{"libz"} = $feat =~ /libz/i;
+            # Brotli compression
+            $feature{"brotli"} = $feat =~ /brotli/i;
+            # Zstd compression
+            $feature{"zstd"} = $feat =~ /zstd/i;
+            # NTLM enabled
+            $feature{"NTLM"} = $feat =~ /NTLM/i;
+            # NTLM delegation to winbind daemon ntlm_auth helper enabled
+            $feature{"NTLM_WB"} = $feat =~ /NTLM_WB/i;
+            # SSPI enabled
+            $feature{"SSPI"} = $feat =~ /SSPI/i;
+            # GSS-API enabled
+            $feature{"GSS-API"} = $feat =~ /GSS-API/i;
+            # Kerberos enabled
+            $feature{"Kerberos"} = $feat =~ /Kerberos/i;
+            # SPNEGO enabled
+            $feature{"SPNEGO"} = $feat =~ /SPNEGO/i;
+            # CharConv enabled
+            $feature{"CharConv"} = $feat =~ /CharConv/i;
+            # TLS-SRP enabled
+            $feature{"TLS-SRP"} = $feat =~ /TLS-SRP/i;
+            # PSL enabled
+            $feature{"PSL"} = $feat =~ /PSL/i;
+            # alt-svc enabled
+            $feature{"alt-svc"} = $feat =~ /alt-svc/i;
+            # HSTS support
+            $feature{"HSTS"} = $feat =~ /HSTS/i;
             if($feat =~ /AsynchDNS/i) {
-                if(!$has_cares) {
+                if(!$feature{"c-ares"}) {
                     # this means threaded resolver
-                    $has_threadedres=1;
+                    $feature{"threaded-resolver"} = 1;
                     $resolver="threaded";
                 }
             }
-            if($feat =~ /HTTP2/) {
-                # http2 enabled
-                $has_http2=1;
-
+            # http2 enabled
+            $feature{"http/2"} = $feat =~ /HTTP2/;
+            if($feature{"http/2"}) {
                 push @protocols, 'http/2';
             }
-            if($feat =~ /HTTP3/) {
-                # http3 enabled
-                $has_http3=1;
-
+            # http3 enabled
+            $feature{"http/3"} = $feat =~ /HTTP3/;
+            if($feature{"http/3"}) {
                 push @protocols, 'http/3';
             }
-            if($feat =~ /HTTPS-proxy/) {
-                $has_httpsproxy=1;
-
+            # https proxy support
+            $feature{"https-proxy"} = $feat =~ /HTTPS-proxy/;
+            if($feature{"https-proxy"}) {
                 # 'https-proxy' is used as "server" so consider it a protocol
                 push @protocols, 'https-proxy';
             }
-            if($feat =~ /Unicode/i) {
-                $has_unicode = 1;
-            }
-            if($feat =~ /threadsafe/i) {
-                $has_threadsafe = 1;
-            }
+            # UNICODE support
+            $feature{"Unicode"} = $feat =~ /Unicode/i;
+            # Thread-safe init
+            $feature{"threadsafe"} = $feat =~ /threadsafe/i;
         }
         #
         # Test harness currently uses a non-stunnel server in order to
@@ -3287,7 +3102,7 @@ sub checksystem {
         # to differentiate this from classic stunnel based 'https' test
         # harness server.
         #
-        if($has_tls_srp) {
+        if($feature{"TLS-SRP"}) {
             my $add_httptls;
             for(@protocols) {
                 if($_ =~ /^https(-ipv6|)$/) {
@@ -3301,6 +3116,7 @@ sub checksystem {
             }
         }
     }
+
     if(!$curl) {
         logmsg "unable to get curl's version, further details are:\n";
         logmsg "issued command: \n";
@@ -3327,13 +3143,17 @@ sub checksystem {
         open(CONF, "<../lib/curl_config.h");
         while(<CONF>) {
             if($_ =~ /^\#define HAVE_GETRLIMIT/) {
-                $has_getrlimit = 1;
+                # set if system has getrlimit()
+                $feature{"getrlimit"} = 1;
             }
         }
         close(CONF);
     }
 
-    if($has_ipv6) {
+    # disable this feature unless debug mode is also enabled
+    $feature{"ld_preload"} = $feature{"ld_preload"} && !$feature{"debug"};
+
+    if($feature{"ipv6"}) {
         # client has IPv6 support
 
         # check if the HTTP server has it!
@@ -3342,7 +3162,6 @@ sub checksystem {
         if($sws[0] =~ /IPv6/) {
             # HTTP server has IPv6 support!
             $http_ipv6 = 1;
-            $gopher_ipv6 = 1;
         }
 
         # check if the FTP server has it!
@@ -3354,31 +3173,61 @@ sub checksystem {
         }
     }
 
-    if($has_unix) {
+    if($feature{"unix-sockets"}) {
         # client has Unix sockets support, check whether the HTTP server has it
         my $cmd = "server/sws".exe_ext('SRV')." --version";
         my @sws = `$cmd`;
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
 
-    if(!$has_memory_tracking && $torture) {
-        die "can't run torture tests since curl was built without ".
-            "TrackMemory feature (--enable-curldebug)";
-    }
-
     open(M, "$CURL -M 2>&1|");
     while(my $s = <M>) {
         if($s =~ /built-in manual was disabled at build-time/) {
-            $has_manual = 0;
+            $feature{"manual"} = 0;
             last;
         }
-        $has_manual = 1;
+        $feature{"manual"} = 1;
         last;
     }
     close(M);
 
+    $feature{"unittest"} = $feature{"debug"};
+    $feature{"nghttpx"} = !!$ENV{'NGHTTPX'};
+    $feature{"nghttpx-h3"} = !!$nghttpx_h3;
+
+    #
+    # strings that must exactly match the names used in server/disabled.c
+    #
+    $feature{"cookies"} = 1;
+    # Use this as a proxy for any cryptographic authentication
+    $feature{"crypto"} = $feature{"NTLM"} || $feature{"Kerberos"} || $feature{"SPNEGO"};
+    $feature{"DoH"} = 1;
+    $feature{"HTTP-auth"} = 1;
+    $feature{"Mime"} = 1;
+    $feature{"netrc"} = 1;
+    $feature{"parsedate"} = 1;
+    $feature{"proxy"} = 1;
+    $feature{"shuffle-dns"} = 1;
+    $feature{"typecheck"} = 1;
+    $feature{"verbose-strings"} = 1;
+    $feature{"wakeup"} = 1;
+    $feature{"headers-api"} = 1;
+    $feature{"xattr"} = 1;
+
+    # make each protocol an enabled "feature"
+    for my $p (@protocols) {
+        $feature{$p} = 1;
+    }
+    # 'socks' was once here but is now removed
+
     $has_shared = `sh $CURLCONFIG --built-shared`;
     chomp $has_shared;
+    $has_shared = $has_shared eq "yes";
+
+    if(!$feature{"TrackMemory"} && $torture) {
+        die "can't run torture tests since curl was built without ".
+            "TrackMemory feature (--enable-curldebug)";
+    }
 
     my $hostname=join(' ', runclientoutput("hostname"));
     my $hosttype=join(' ', runclientoutput("uname -a"));
@@ -3393,8 +3242,8 @@ sub checksystem {
             "* System: $hosttype",
             "* OS: $hostos\n");
 
-    if($has_memory_tracking && $has_threadedres) {
-        $has_memory_tracking = 0;
+    if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
+        $feature{"TrackMemory"} = 0;
         logmsg("*\n",
                "*** DISABLES memory tracking when using threaded resolver\n",
                "*\n");
@@ -3412,7 +3261,7 @@ sub checksystem {
     logmsg ("* Seed: $randseed\n");
 
     if($verbose) {
-        if($has_unix) {
+        if($feature{"unix-sockets"}) {
             logmsg "* Unix socket paths:\n";
             if($http_unix) {
                 logmsg sprintf("*   HTTP-Unix:%s\n", $HTTPUNIXPATH);
@@ -3423,7 +3272,6 @@ sub checksystem {
 
     logmsg "***************************************** \n";
 
-    setupfeatures();
     # toggle off the features that were disabled in the build
     for my $d(@disabled) {
         $feature{$d} = 0;
@@ -3670,7 +3518,7 @@ sub prepro {
             # necessary since those parts might be read by separate servers.
             if($s =~ /^ *<data(.*)\>/) {
                 if($1 =~ /crlf="yes"/ ||
-                   ($has_hyper && ($keywords{"HTTP"} || $keywords{"HTTPS"}))) {
+                   ($feature{"hyper"} && ($keywords{"HTTP"} || $keywords{"HTTPS"}))) {
                     $data_crlf = 1;
                 }
             }
@@ -3998,7 +3846,7 @@ sub singletest_setenv {
                             # print "Skipping LD_PRELOAD due to lack of OS support\n";
                             next;
                         }
-                        if($debug_build || ($has_shared ne "yes")) {
+                        if($feature{"debug"} || !$has_shared) {
                             # print "Skipping LD_PRELOAD due to no release shared build\n";
                             next;
                         }
@@ -4095,7 +3943,7 @@ sub singletest_count {
 sub singletest_prepare {
     my ($testnum, $why) = @_;
 
-    if($has_memory_tracking) {
+    if($feature{"TrackMemory"}) {
         unlink($memdump);
     }
     unlink("core");
@@ -4515,7 +4363,7 @@ sub singletest_check {
         }
 
         if($hash{'crlf'} ||
-           ($has_hyper && ($keywords{"HTTP"}
+           ($feature{"hyper"} && ($keywords{"HTTP"}
                            || $keywords{"HTTPS"}))) {
             map subNewlines(0, \$_), @validstdout;
         }
@@ -4554,7 +4402,7 @@ sub singletest_check {
 
         # get the mode attribute
         my $filemode=$hash{'mode'};
-        if($filemode && ($filemode eq "text") && $has_hyper) {
+        if($filemode && ($filemode eq "text") && $feature{"hyper"}) {
             # text mode check in hyper-mode. Sometimes necessary if the stderr
             # data *looks* like HTTP and thus has gotten CRLF newlines
             # mistakenly
@@ -4662,7 +4510,7 @@ sub singletest_check {
                     chomp($replycheckpart[$#replycheckpart]);
                 }
                 if($replycheckpartattr{'crlf'} ||
-                   ($has_hyper && ($keywords{"HTTP"}
+                   ($feature{"hyper"} && ($keywords{"HTTP"}
                                    || $keywords{"HTTPS"}))) {
                     map subNewlines(0, \$_), @replycheckpart;
                 }
@@ -4687,7 +4535,7 @@ sub singletest_check {
             map s/\n/\r\n/g, @reply;
         }
         if($replyattr{'crlf'} ||
-           ($has_hyper && ($keywords{"HTTP"}
+           ($feature{"hyper"} && ($keywords{"HTTP"}
                            || $keywords{"HTTPS"}))) {
             map subNewlines(0, \$_), @reply;
         }
@@ -4765,7 +4613,7 @@ sub singletest_check {
         }
 
         if($hash{'crlf'} ||
-           ($has_hyper && ($keywords{"HTTP"} || $keywords{"HTTPS"}))) {
+           ($feature{"hyper"} && ($keywords{"HTTP"} || $keywords{"HTTPS"}))) {
             map subNewlines(0, \$_), @proxyprot;
         }
 
@@ -4809,7 +4657,7 @@ sub singletest_check {
                 map s/\n/\r\n/g, @outfile;
             }
             if($hash{'crlf'} ||
-               ($has_hyper && ($keywords{"HTTP"}
+               ($feature{"hyper"} && ($keywords{"HTTP"}
                                || $keywords{"HTTPS"}))) {
                 map subNewlines(0, \$_), @outfile;
             }
@@ -4876,7 +4724,7 @@ sub singletest_check {
         return -1;
     }
 
-    if($has_memory_tracking) {
+    if($feature{"TrackMemory"}) {
         if(! -f $memdump) {
             my %cmdhash = getpartattr("client", "command");
             my $cmdtype = $cmdhash{'type'} || "default";
@@ -6253,7 +6101,8 @@ init_serverpidfile_hash();
 #
 
 if(!$listonly) {
-    checksystem();
+    unlink($memdump);  # remove this if there was one left
+    checksystemfeatures();
 }
 
 # globally disabled tests
