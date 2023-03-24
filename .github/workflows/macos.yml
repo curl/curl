@@ -112,7 +112,7 @@ jobs:
     # Run this command with retries because of spurious failures seen
     # while running the tests, for example
     # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
-    - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; false; } done; false Too many retries; done"
+    - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
       name: 'brew install'
 
     - run: python3 -m pip install impacket
@@ -171,7 +171,7 @@ jobs:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
-    - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; false; } done; false Too many retries; done"
+    - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
       name: 'brew install'
 
     - run: python3 -m pip install impacket
