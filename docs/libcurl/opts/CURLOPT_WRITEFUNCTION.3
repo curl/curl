@@ -118,7 +118,7 @@ if (curl_handle)
   res = curl_easy_perform(curl_handle);
 
   /* remember to free the buffer */
-  free(chunk.response)
+  free(chunk.response);
 
   curl_easy_cleanup(curl_handle);
 }
