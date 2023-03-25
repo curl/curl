@@ -866,12 +866,10 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
     char *start;
     char *end;
     start = header + 10;
-    while(*start) {
-      while(*start && *start != ';' && ISBLANK(*start) )
+    while(start && *start) {
+      while(*start && ISBLANK(*start) )
         start++;
-      end = start;
-      while(*end && *end != ';')
-        end++;
+      end = strchr(start, ';');
       if(checkprefix("interleaved=", start)) {
         long chan1, chan2, chan;
         char *endp;
@@ -901,7 +899,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
         }
       }
       /* skip to next parameter */
-      start = (!*end) ? end : (end + 1);
+      start = (!end) ? end : (end + 1);
     }
   }
   return CURLE_OK;
