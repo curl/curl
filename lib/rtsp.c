@@ -45,8 +45,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define RTP_PKT_CHANNEL(p)   ((int)((unsigned char)((p)[1])))
-
 #define RTP_PKT_LENGTH(p)  ((((int)((unsigned char)((p)[2]))) << 8) | \
                              ((int)((unsigned char)((p)[3]))))
 
@@ -627,15 +625,16 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
   while(rtp_dataleft > 0) {
     if(rtp[0] == '$') {
       if(rtp_dataleft > 4) {
+        unsigned char rtp_channel;
         int rtp_length;
         int idx;
         int off;
 
         /* Parse the header */
         /* The channel identifier immediately follows and is 1 byte */
-        rtspc->rtp_channel = RTP_PKT_CHANNEL(rtp);
-        idx = rtspc->rtp_channel / 8;
-        off = rtspc->rtp_channel % 8;
+        rtp_channel = (unsigned char)rtp[1];
+        idx = rtp_channel / 8;
+        off = rtp_channel % 8;
         if(!(rtp_channel_mask[idx] & (1 << off))) {
           /* invalid channel number, maybe not an RTP packet */
           rtp++;
@@ -648,6 +647,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                        "bytes", skip_size));
         }
         skip_size = 0;
+        rtspc->rtp_channel = rtp_channel;
 
         /* The length is two bytes */
         rtp_length = RTP_PKT_LENGTH(rtp);
