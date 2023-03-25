@@ -11,25 +11,31 @@ on:
     - '*/ci'
     paths-ignore:
     - '**/*.md'
+    - '**/CMakeLists.txt'
     - '.azure-pipelines.yml'
     - '.circleci/**'
     - '.cirrus.yml'
     - 'appveyor.yml'
+    - 'CMake/**'
     - 'packages/**'
     - 'plan9/**'
     - 'projects/**'
+    - 'tests/data/**'
     - 'winbuild/**'
   pull_request:
     branches:
     - master
     paths-ignore:
     - '**/*.md'
+    - '**/CMakeLists.txt'
     - '.azure-pipelines.yml'
     - '.cirrus.yml'
     - 'appveyor.yml'
+    - 'CMake/**'
     - 'packages/**'
     - 'plan9/**'
     - 'projects/**'
+    - 'tests/data/**'
     - 'winbuild/**'
 
 concurrency:

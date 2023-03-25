@@ -15,9 +15,11 @@ on:
     - '.circleci/**'
     - '.cirrus.yml'
     - 'appveyor.yml'
+    - 'docs/**'
     - 'packages/**'
     - 'plan9/**'
     - 'projects/**'
+    - 'tests/data/**'
     - 'winbuild/**'
   pull_request:
     branches:
@@ -28,9 +30,11 @@ on:
     - '.circleci/**'
     - '.cirrus.yml'
     - 'appveyor.yml'
+    - 'docs/**'
     - 'packages/**'
     - 'plan9/**'
     - 'projects/**'
+    - 'tests/data/**'
     - 'winbuild/**'
   schedule:
     - cron: '0 0 * * 4'

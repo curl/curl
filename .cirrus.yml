@@ -28,10 +28,12 @@
 
 freebsd_task:
   skip: "changesIncludeOnly(
+    '**/CMakeLists.txt',
     '.azure-pipelines.yml',
     '.circleci/**',
     '.github/**',
     'appveyor.yml',
+    'CMake/**',
     'packages/**',
     'plan9/**',
     'projects/**',
