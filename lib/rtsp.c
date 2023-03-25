@@ -89,6 +89,8 @@ static int rtsp_getsock_do(struct Curl_easy *data, struct connectdata *conn,
 
 static
 CURLcode rtp_client_write(struct Curl_easy *data, char *ptr, size_t len);
+static
+CURLcode rtsp_parse_transport(struct Curl_easy *data, char *transport);
 
 
 /*
@@ -862,47 +864,58 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
     }
   }
   else if(checkprefix("Transport:", header)) {
-    /* e.g.: 'Transport: RTP/AVP/TCP;unicast;interleaved=5-6' */
-    char *start;
-    char *end;
-    start = header + 10;
-    while(start && *start) {
-      while(*start && ISBLANK(*start) )
-        start++;
-      end = strchr(start, ';');
-      if(checkprefix("interleaved=", start)) {
-        long chan1, chan2, chan;
-        char *endp;
-        char *p = start + 12;
-        chan1 = strtol(p, &endp, 10);
-        if(p != endp && chan1 >= 0 && chan1 <= 255) {
-          unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
-          chan2 = chan1;
-          if(*endp == '-') {
-            p = endp + 1;
-            chan2 = strtol(p, &endp, 10);
-            if(p == endp || chan2 < 0 || chan2 > 255) {
-              failf(data, "Unable to read the interleaved parameter from "
-                    "Transport header: [%s]", header);
-              chan2 = chan1;
-            }
-          }
-          for(chan = chan1; chan <= chan2; chan++) {
-            long idx = chan / 8;
-            long off = chan % 8;
-            rtp_channel_mask[idx] |= (unsigned char)(1 << off);
-          }
-        }
-        else {
-          failf(data, "Unable to read the interleaved parameter from "
-                "Transport header: [%s]", header);
-        }
-      }
-      /* skip to next parameter */
-      start = (!end) ? end : (end + 1);
-    }
+    CURLcode result;
+    result = rtsp_parse_transport(data, header + 10);
+    if(result)
+      return result;
   }
   return CURLE_OK;
 }
+
+static
+CURLcode rtsp_parse_transport(struct Curl_easy *data, char *transport)
+{
+  /* e.g.: ' RTP/AVP/TCP;unicast;interleaved=5-6' */
+  char *start;
+  char *end;
+  start = transport;
+  while(start && *start) {
+    while(*start && ISBLANK(*start) )
+      start++;
+    end = strchr(start, ';');
+    if(checkprefix("interleaved=", start)) {
+      long chan1, chan2, chan;
+      char *endp;
+      char *p = start + 12;
+      chan1 = strtol(p, &endp, 10);
+      if(p != endp && chan1 >= 0 && chan1 <= 255) {
+        unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
+        chan2 = chan1;
+        if(*endp == '-') {
+          p = endp + 1;
+          chan2 = strtol(p, &endp, 10);
+          if(p == endp || chan2 < 0 || chan2 > 255) {
+            failf(data, "Unable to read the interleaved parameter from "
+                  "Transport header: [%s]", transport);
+            chan2 = chan1;
+          }
+        }
+        for(chan = chan1; chan <= chan2; chan++) {
+          long idx = chan / 8;
+          long off = chan % 8;
+          rtp_channel_mask[idx] |= (unsigned char)(1 << off);
+        }
+      }
+      else {
+        failf(data, "Unable to read the interleaved parameter from "
+              "Transport header: [%s]", transport);
+      }
+    }
+    /* skip to next parameter */
+    start = (!end) ? end : (end + 1);
+  }
+  return CURLE_OK;
+}
+
 
 #endif /* CURL_DISABLE_RTSP or using Hyper */
