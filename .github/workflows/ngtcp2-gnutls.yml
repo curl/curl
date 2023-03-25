@@ -11,10 +11,12 @@ on:
     - '*/ci'
     paths-ignore:
     - '**/*.md'
+    - '**/CMakeLists.txt'
     - '.azure-pipelines.yml'
     - '.circleci/**'
     - '.cirrus.yml'
     - 'appveyor.yml'
+    - 'CMake/**'
     - 'packages/**'
     - 'plan9/**'
     - 'projects/**'
@@ -24,10 +26,12 @@ on:
     - master
     paths-ignore:
     - '**/*.md'
+    - '**/CMakeLists.txt'
     - '.azure-pipelines.yml'
     - '.circleci/**'
     - '.cirrus.yml'
     - 'appveyor.yml'
+    - 'CMake/**'
     - 'packages/**'
     - 'plan9/**'
     - 'projects/**'
