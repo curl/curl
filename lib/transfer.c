@@ -1408,7 +1408,12 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
           return CURLE_OUT_OF_MEMORY;
       }
       wc = data->wildcard;
-      if(wc->state < CURLWC_INIT) {
+      if((wc->state < CURLWC_INIT) ||
+         (wc->state >= CURLWC_CLEAN)) {
+        if(wc->ftpwc)
+          wc->dtor(wc->ftpwc);
+        Curl_safefree(wc->pattern);
+        Curl_safefree(wc->path);
         result = Curl_wildcard_init(wc); /* init wildcard structures */
         if(result)
           return CURLE_OUT_OF_MEMORY;
