@@ -3977,8 +3977,10 @@ static CURLcode wc_statemach(struct Curl_easy *data)
     case CURLWC_DONE:
     case CURLWC_ERROR:
     case CURLWC_CLEAR:
-      if(wildcard->dtor)
+      if(wildcard->dtor) {
         wildcard->dtor(wildcard->ftpwc);
+        wildcard->ftpwc = NULL;
+      }
       return result;
     }
   }

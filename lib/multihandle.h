@@ -101,6 +101,8 @@ struct Curl_multi {
 
   struct Curl_llist pending; /* Curl_easys that are in the
                                 MSTATE_PENDING state */
+  struct Curl_llist msgsent; /* Curl_easys that are in the
+                                MSTATE_MSGSENT state */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;
