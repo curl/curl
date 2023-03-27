@@ -78,7 +78,7 @@ commands:
     steps:
       - run:
           command: |
-            WOLFSSL_VER=5.5.4
+            WOLFSSL_VER=5.6.0
             curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
             tar -xzf v$WOLFSSL_VER-stable.tar.gz
             cd wolfssl-$WOLFSSL_VER-stable
