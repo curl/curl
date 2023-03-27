@@ -76,6 +76,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   DEBUGASSERT(s->toobig);
   DEBUGASSERT(indx < s->toobig);
   DEBUGASSERT(!s->leng || s->bufr);
+  DEBUGASSERT(a <= s->toobig);
 
   if(fit > s->toobig) {
     Curl_dyn_free(s);
@@ -84,7 +85,9 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   else if(!a) {
     DEBUGASSERT(!indx);
     /* first invoke */
-    if(fit < MIN_FIRST_ALLOC)
+    if(MIN_FIRST_ALLOC > s->toobig)
+      a = s->toobig;
+    else if(fit < MIN_FIRST_ALLOC)
       a = MIN_FIRST_ALLOC;
     else
       a = fit;
@@ -92,6 +95,9 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   else {
     while(a < fit)
       a *= 2;
+    if(a > s->toobig)
+      /* no point in allocating a larger buffer than this is allowed to use */
+      a = s->toobig;
   }
 
   if(a != s->allc) {
