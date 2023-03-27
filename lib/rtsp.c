@@ -666,7 +666,6 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                      rtspc->rtp_channel, rtp_length));
         result = rtp_client_write(data, &rtp[0], rtp_length + 4);
         if(result) {
-          failf(data, "Got an error writing an RTP packet");
           *readmore = FALSE;
           Curl_safefree(rtspc->rtp_buf);
           rtspc->rtp_buf = NULL;
@@ -692,6 +691,11 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
       }
     }
     else {
+      /* If the following data begins with 'RTSP/', which might be an RTSP
+         message, we should stop skipping the data. */
+      /* If `k-> headerline> 0 && !interleaved` is true, we are maybe in the
+         middle of an RTSP message. It is difficult to determine this, so we
+         stop skipping. */
       size_t prefix_len = (rtp_dataleft < 5) ? rtp_dataleft : 5;
       if((k->headerline > 0 && !interleaved) ||
          strncmp(rtp, "RTSP/", prefix_len) == 0) {
@@ -875,6 +879,9 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
 static
 CURLcode rtsp_parse_transport(struct Curl_easy *data, char *transport)
 {
+  /* If we receive multiple Transport response-headers, the linterleaved
+     channels of each response header is recorded and used together for
+     subsequent data validity checks.*/
   /* e.g.: ' RTP/AVP/TCP;unicast;interleaved=5-6' */
   char *start;
   char *end;
@@ -895,7 +902,7 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, char *transport)
           p = endp + 1;
           chan2 = strtol(p, &endp, 10);
           if(p == endp || chan2 < 0 || chan2 > 255) {
-            failf(data, "Unable to read the interleaved parameter from "
+            infof(data, "Unable to read the interleaved parameter from "
                   "Transport header: [%s]", transport);
             chan2 = chan1;
           }
@@ -907,9 +914,10 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, char *transport)
         }
       }
       else {
-        failf(data, "Unable to read the interleaved parameter from "
+        infof(data, "Unable to read the interleaved parameter from "
               "Transport header: [%s]", transport);
       }
+      break;
     }
     /* skip to next parameter */
     start = (!end) ? end : (end + 1);
