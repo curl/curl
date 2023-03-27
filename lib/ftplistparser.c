@@ -430,7 +430,6 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           else {
             parser->state.UNIX.main = PL_UNIX_FILETYPE;
             /* start FSM again not considering size of directory */
-            len = 0;
             Curl_dyn_reset(&infop->buf);
             continue;
           }
@@ -456,7 +455,6 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                 goto fail;
               }
               parser->state.UNIX.main = PL_UNIX_FILETYPE;
-              len = 0;
               Curl_dyn_reset(&infop->buf);
             }
             else {
