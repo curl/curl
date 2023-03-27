@@ -331,7 +331,8 @@ struct curl_fileinfo {
 
   unsigned int flags;
 
-  /* used internally */
+  /* These are libcurl private struct fields. Previously used by libcurl, so
+     they must never be interfered with. */
   char *b_data;
   size_t b_size;
   size_t b_used;

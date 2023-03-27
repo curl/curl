@@ -30,6 +30,9 @@
 struct fileinfo {
   struct curl_fileinfo info;
   struct Curl_llist_element list;
+  char *mem;
+  size_t size;
+  size_t used;
 };
 
 struct fileinfo *Curl_fileinfo_alloc(void);
