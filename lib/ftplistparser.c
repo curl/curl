@@ -362,7 +362,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#define MAX_FTPLIST_BUFFER 1000000 /* arbitrarily set */
+#define MAX_FTPLIST_BUFFER 10000 /* arbitrarily set */
 
 size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                           void *connptr)
