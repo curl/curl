@@ -52,7 +52,9 @@
 ## Cookie file format
 
   The cookie file format is text based and stores one cookie per line. Lines
-  that start with `#` are treated as comments.
+  that start with `#` are treated as comments. An exception is lines that
+  start with `#HttpOnly_`, which is a prefix for cookies that have the
+  `HttpOnly` attribute set.
 
   Each line that specifies a single cookie consists of seven text fields
   separated with TAB characters. A valid line must end with a newline
