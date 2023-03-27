@@ -387,8 +387,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
 
   if(parser->os_type == OS_TYPE_UNKNOWN && bufflen > 0) {
     /* considering info about FILE response format */
-    parser->os_type = (buffer[0] >= '0' && buffer[0] <= '9') ?
-                       OS_TYPE_WIN_NT : OS_TYPE_UNIX;
+    parser->os_type = ISDIGIT(buffer[0]) ? OS_TYPE_WIN_NT : OS_TYPE_UNIX;
   }
 
   while(i < bufflen) { /* FSM */
@@ -545,7 +544,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         switch(parser->state.UNIX.sub.hlinks) {
         case PL_UNIX_HLINKS_PRESPACE:
           if(c != ' ') {
-            if(c >= '0' && c <= '9') {
+            if(ISDIGIT(c)) {
               parser->item_offset = infop->used - 1;
               parser->item_length = 1;
               parser->state.UNIX.sub.hlinks = PL_UNIX_HLINKS_NUMBER;
@@ -572,7 +571,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             parser->state.UNIX.main = PL_UNIX_USER;
             parser->state.UNIX.sub.user = PL_UNIX_USER_PRESPACE;
           }
-          else if(c < '0' || c > '9') {
+          else if(!ISDIGIT(c)) {
             parser->error = CURLE_FTP_BAD_FILE_LIST;
             goto fail;
           }
@@ -627,7 +626,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         switch(parser->state.UNIX.sub.size) {
         case PL_UNIX_SIZE_PRESPACE:
           if(c != ' ') {
-            if(c >= '0' && c <= '9') {
+            if(ISDIGIT(c)) {
               parser->item_offset = infop->used - 1;
               parser->item_length = 1;
               parser->state.UNIX.sub.size = PL_UNIX_SIZE_NUMBER;
