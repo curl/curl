@@ -371,11 +371,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
     data->multi_easy = NULL;
   }
 
-  /* Destroy the timeout list that is held in the easy handle. It is
-     /normally/ done by curl_multi_remove_handle() but this is "just in
-     case" */
-  Curl_llist_destroy(&data->state.timeoutlist, NULL);
-
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from
                       the multi handle, since that function uses the magic
                       field! */
