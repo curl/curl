@@ -74,6 +74,7 @@ BEGIN {
     }
 }
 
+use 5.006;
 use strict;
 # Promote all warnings to fatal
 use warnings FATAL => 'all';
