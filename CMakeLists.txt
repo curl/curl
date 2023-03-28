@@ -1183,6 +1183,8 @@ check_type_size("off_t"  SIZEOF_OFF_T)
 set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
 check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
+set(CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
+check_type_size("curl_socket_t"  SIZEOF_CURL_SOCKET_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "")
 
 if(WIN32)

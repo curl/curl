@@ -663,7 +663,8 @@ evaluate:
           DEBUGF(LOG_CF(data, cf, "%s done", baller->name));
         }
         else {
-          DEBUGF(LOG_CF(data, cf, "%s starting (timeout=%ldms)",
+          DEBUGF(LOG_CF(data, cf, "%s starting (timeout=%"
+                        CURL_FORMAT_TIMEDIFF_T "ms)",
                         baller->name, baller->timeoutms));
           ++ongoing;
           ++added;
@@ -801,7 +802,8 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                           timeout_ms,  EXPIRE_DNS_PER_NAME);
   if(result)
     return result;
-  DEBUGF(LOG_CF(data, cf, "created %s (timeout %ldms)",
+  DEBUGF(LOG_CF(data, cf, "created %s (timeout %"
+                CURL_FORMAT_TIMEDIFF_T "ms)",
                 ctx->baller[0]->name, ctx->baller[0]->timeoutms));
   if(addr1) {
     /* second one gets a delayed start */
@@ -812,7 +814,8 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                             timeout_ms,  EXPIRE_DNS_PER_NAME2);
     if(result)
       return result;
-    DEBUGF(LOG_CF(data, cf, "created %s (timeout %ldms)",
+    DEBUGF(LOG_CF(data, cf, "created %s (timeout %"
+                  CURL_FORMAT_TIMEDIFF_T "ms)",
                   ctx->baller[1]->name, ctx->baller[1]->timeoutms));
   }
 
