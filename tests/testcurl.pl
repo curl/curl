@@ -77,7 +77,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp $notes);
 
 # version of this script
-$version='2014-11-25';
+$version='2023-03-28';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
