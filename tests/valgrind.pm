@@ -22,6 +22,9 @@
 #
 ###########################################################################
 
+use strict;
+use warnings;
+
 use File::Basename;
 
 sub valgrindparse {
