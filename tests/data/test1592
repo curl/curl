@@ -5,6 +5,7 @@ HTTP
 multi
 resolve
 speedcheck
+flaky
 </keywords>
 </info>
 
