@@ -429,7 +429,7 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       /* try to get more data */
       size_t n;
       result = curl_easy_recv(data, &data->state.buffer[wsp->stillblen],
-                              data->set.buffer_size, &n);
+                              data->set.buffer_size - wsp->stillblen, &n);
       if(result)
         return result;
       if(!n) {
