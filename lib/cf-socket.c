@@ -786,14 +786,14 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
        * closed it) and we just forget about it.
        */
       if(ctx->sock == cf->conn->sock[cf->sockindex]) {
-        DEBUGF(LOG_CF(data, cf, "cf_socket_close(%d, active)",
-                     (int)ctx->sock));
+        DEBUGF(LOG_CF(data, cf, "cf_socket_close(%" CURL_FORMAT_SOCKET_T
+                      ", active)", ctx->sock));
         socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
         cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
       }
       else {
-        DEBUGF(LOG_CF(data, cf, "cf_socket_close(%d) no longer at "
-                      "conn->sock[], discarding", (int)ctx->sock));
+        DEBUGF(LOG_CF(data, cf, "cf_socket_close(%" CURL_FORMAT_SOCKET_T
+                      ") no longer at conn->sock[], discarding", ctx->sock));
         /* TODO: we do not want this to happen. Need to check which
          * code is messing with conn->sock[cf->sockindex] */
       }
@@ -803,8 +803,8 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
     else {
       /* this is our local socket, we did never publish it */
-      DEBUGF(LOG_CF(data, cf, "cf_socket_close(%d, not active)",
-                    (int)ctx->sock));
+      DEBUGF(LOG_CF(data, cf, "cf_socket_close(%" CURL_FORMAT_SOCKET_T
+                    ", not active)", ctx->sock));
       sclose(ctx->sock);
       ctx->sock = CURL_SOCKET_BAD;
     }
@@ -975,7 +975,8 @@ out:
     ctx->connected_at = Curl_now();
     cf->connected = TRUE;
   }
-  DEBUGF(LOG_CF(data, cf, "cf_socket_open() -> %d, fd=%d", result, ctx->sock));
+  DEBUGF(LOG_CF(data, cf, "cf_socket_open() -> %d, fd=%" CURL_FORMAT_SOCKET_T,
+                result, ctx->sock));
   return result;
 }
 
@@ -1016,7 +1017,8 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 #elif defined(TCP_FASTOPEN_CONNECT) /* Linux >= 4.11 */
     if(setsockopt(ctx->sock, IPPROTO_TCP, TCP_FASTOPEN_CONNECT,
                   (void *)&optval, sizeof(optval)) < 0)
-      infof(data, "Failed to enable TCP Fast Open on fd %d", ctx->sock);
+      infof(data, "Failed to enable TCP Fast Open on fd %"
+            CURL_FORMAT_SOCKET_T, ctx->sock);
 
     rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
 #elif defined(MSG_FASTOPEN) /* old Linux */
@@ -1580,9 +1582,10 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
     return Curl_socket_connect_result(data, ctx->r_ip, SOCKERRNO);
   }
   set_local_ip(cf, data);
-  DEBUGF(LOG_CF(data, cf, "%s socket %d connected: [%s:%d] -> [%s:%d]",
-         (ctx->transport == TRNSPRT_QUIC)? "QUIC" : "UDP",
-         ctx->sock, ctx->l_ip, ctx->l_port, ctx->r_ip, ctx->r_port));
+  DEBUGF(LOG_CF(data, cf, "%s socket %" CURL_FORMAT_SOCKET_T
+                " connected: [%s:%d] -> [%s:%d]",
+                (ctx->transport == TRNSPRT_QUIC)? "QUIC" : "UDP",
+                ctx->sock, ctx->l_ip, ctx->l_port, ctx->r_ip, ctx->r_port));
 
   (void)curlx_nonblock(ctx->sock, TRUE);
   switch(ctx->addr.family) {
@@ -1634,12 +1637,13 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
       result = cf_udp_setup_quic(cf, data);
       if(result)
         goto out;
-      DEBUGF(LOG_CF(data, cf, "cf_udp_connect(), opened socket=%d (%s:%d)",
+      DEBUGF(LOG_CF(data, cf, "cf_udp_connect(), opened socket=%"
+                    CURL_FORMAT_SOCKET_T " (%s:%d)",
                     ctx->sock, ctx->l_ip, ctx->l_port));
     }
     else {
-      DEBUGF(LOG_CF(data, cf, "cf_udp_connect(), opened socket=%d "
-                    "(unconnected)", ctx->sock));
+      DEBUGF(LOG_CF(data, cf, "cf_udp_connect(), opened socket=%"
+                    CURL_FORMAT_SOCKET_T " (unconnected)", ctx->sock));
     }
     *done = TRUE;
     cf->connected = TRUE;
@@ -1811,7 +1815,8 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
   ctx->active = TRUE;
   ctx->connected_at = Curl_now();
   cf->connected = TRUE;
-  DEBUGF(LOG_CF(data, cf, "Curl_conn_tcp_listen_set(%d)", (int)ctx->sock));
+  DEBUGF(LOG_CF(data, cf, "Curl_conn_tcp_listen_set(%"
+                CURL_FORMAT_SOCKET_T ")", ctx->sock));
 
 out:
   if(result) {
@@ -1875,8 +1880,9 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
   ctx->accepted = TRUE;
   ctx->connected_at = Curl_now();
   cf->connected = TRUE;
-  DEBUGF(LOG_CF(data, cf, "accepted_set(sock=%d, remote=%s port=%d)",
-         (int)ctx->sock, ctx->r_ip, ctx->r_port));
+  DEBUGF(LOG_CF(data, cf, "accepted_set(sock=%" CURL_FORMAT_SOCKET_T
+                ", remote=%s port=%d)",
+                ctx->sock, ctx->r_ip, ctx->r_port));
 
   return CURLE_OK;
 }

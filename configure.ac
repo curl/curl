@@ -3477,6 +3477,9 @@ CPPFLAGS="-I$srcdir/include $CPPFLAGS"
 CURL_SIZEOF(curl_off_t, [
 #include <curl/system.h>
 ])
+CURL_SIZEOF(curl_socket_t, [
+#include <curl/curl.h>
+])
 CPPFLAGS=$o
 
 AC_CHECK_TYPE(long long,
