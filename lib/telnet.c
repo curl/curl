@@ -773,6 +773,9 @@ static void printsub(struct Curl_easy *data,
 static bool str_is_nonascii(const char *str)
 {
   char c;
+#if defined(_MSC_VER)
+#  pragma warning(disable:4706) /* assignment within conditional expression */
+#endif
   while((c = *str++))
     if(c & 0x80)
       return TRUE;
