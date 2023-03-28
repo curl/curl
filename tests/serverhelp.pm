@@ -26,14 +26,11 @@ package serverhelp;
 
 use strict;
 use warnings;
-use Exporter;
-
 
 #***************************************************************************
 # Global symbols allowed without explicit package name
 #
 use vars qw(
-    @ISA
     @EXPORT_OK
     );
 
@@ -41,7 +38,7 @@ use vars qw(
 #***************************************************************************
 # Inherit Exporter's capabilities
 #
-@ISA = qw(Exporter);
+use base qw(Exporter);
 
 
 #***************************************************************************
@@ -118,7 +115,7 @@ sub servername_str {
     $idnum = 1 if(not $idnum);
     die "unsupported ID number: '$idnum'" unless($idnum &&
         ($idnum =~ /^(\d+)$/));
-    $idnum = '' unless($idnum > 1);
+    $idnum = '' if($idnum <= 1);
 
     return "${proto}${idnum}${ipver}";
 }
