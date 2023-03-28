@@ -770,6 +770,11 @@ static void printsub(struct Curl_easy *data,
   }
 }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+/* warning C4706: assignment within conditional expression */
+#pragma warning(disable:4706)
+#endif
 static bool str_is_nonascii(const char *str)
 {
   char c;
@@ -779,6 +784,9 @@ static bool str_is_nonascii(const char *str)
 
   return FALSE;
 }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 static CURLcode check_telnet_options(struct Curl_easy *data)
 {
