@@ -79,9 +79,9 @@ sub pidfromfile {
     my $pidfile = $_[0];
     my $pid = 0;
 
-    if(-f $pidfile && -s $pidfile && open(PIDFH, "<$pidfile")) {
-        $pid = 0 + <PIDFH>;
-        close(PIDFH);
+    if(-f $pidfile && -s $pidfile && open(my $pidfh, "<", "$pidfile")) {
+        $pid = 0 + <$pidfh>;
+        close($pidfh);
         $pid = 0 if($pid < 0);
     }
     return $pid;
@@ -380,7 +380,8 @@ sub killallsockfilters {
 sub set_advisor_read_lock {
     my ($filename) = @_;
 
-    if(open(FILEH, ">$filename") && close(FILEH)) {
+    my $fileh;
+    if(open($fileh, ">", "$filename") && close($fileh)) {
         return;
     }
     printf "Error creating lock file $filename error: $!";

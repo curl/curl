@@ -75,9 +75,9 @@ my %deprecated = (
     CURLINFO_SSL_DATA_OUT => 1,
     );
 sub allsymbols {
-    open(F, "<$symbolsinversions") ||
+    open(my $f, "<", "$symbolsinversions") ||
         die "$symbolsinversions: $|";
-    while(<F>) {
+    while(<$f>) {
         if($_ =~ /^([^ ]*) +(.*)/) {
             my ($name, $info) = ($1, $2);
             $symbol{$name}=$name;
@@ -87,7 +87,7 @@ sub allsymbols {
             }
         }
     }
-    close(F);
+    close($f);
 }
 
 sub scanmanpage {
@@ -102,7 +102,7 @@ sub scanmanpage {
     my @sh;
     my $SH="";
 
-    open(M, "<$file") || die "no such file: $file";
+    open(my $m, "<", "$file") || die "no such file: $file";
     if($file =~ /[\/\\](CURL|curl_)[^\/\\]*.3/) {
         # This is a man page for libcurl. It requires an example!
         $reqex = 1;
@@ -111,11 +111,11 @@ sub scanmanpage {
         }
     }
     my $line = 1;
-    while(<M>) {
+    while(<$m>) {
         chomp;
         if($_ =~ /^.so /) {
             # this man page is just a referral
-            close(M);
+            close($m);
             return;
         }
         if(($_ =~ /^\.SH SYNOPSIS/i) && ($reqex)) {
@@ -200,7 +200,7 @@ sub scanmanpage {
         }
         $line++;
     }
-    close(M);
+    close($m);
 
     if($reqex) {
         # only for libcurl options man-pages

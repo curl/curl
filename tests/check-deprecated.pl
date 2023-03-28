@@ -57,8 +57,8 @@ sub scan_header {
     my $incomment = 0;
     my $inenum = 0;
 
-    open H, "<$f";
-    while(<H>) {
+    open(my $h, "<", "$f");
+    while(<$h>) {
       s/^\s*(.*?)\s*$/$1/;      # Trim.
       # Remove multi-line comment trail.
       if($incomment) {
@@ -138,7 +138,7 @@ sub scan_header {
         $inenum = 0;
       }
     }
-    close H;
+    close $h;
 }
 
 # Scan function man page for options.
@@ -149,8 +149,8 @@ sub scan_man_for_opts {
     my $opt = "";
     my $line = "";
 
-    open M, "<$f";
-    while(<M>) {
+    open(my $m, "<", "$f");
+    while(<$m>) {
       if($_ =~ /^\./) {
         # roff directive found: end current option paragraph.
         my $o = $opt;
@@ -177,16 +177,15 @@ sub scan_man_for_opts {
         $line .= $_;
       }
     }
-    close M;
+    close $m;
 }
 
 # Scan man page for deprecation in DESCRIPTION and/or AVAILABILITY sections.
 sub scan_man_page {
     my ($path, $sym, $table)=@_;
     my $version = "X";
-    my $fh;
 
-    if(open $fh, "<$path") {
+    if(open(my $fh, "<", "$path")) {
       my $section = "";
       my $line = "";
 
@@ -238,9 +237,9 @@ sub scan_man_page {
 
 
 # Read symbols-in-versions.
-open(F, "<$libdocdir/symbols-in-versions") ||
+open(my $fh, "<", "$libdocdir/symbols-in-versions") ||
   die "$libdocdir/symbols-in-versions";
-while(<F>) {
+while(<$fh>) {
   if($_ =~ /^((?:CURL|LIBCURL)\S+)\s+\S+\s*(\S*)\s*(\S*)$/) {
     if($3 eq "") {
       $syminver{$1} = "X";
@@ -250,7 +249,7 @@ while(<F>) {
     }
   }
 }
-close(F);
+close($fh);
 
 # Get header file names,
 opendir(my $dh, $incdir) || die "Can't opendir $incdir";

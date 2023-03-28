@@ -387,23 +387,23 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     system "chmod 600 $hstprvkeyf";
     system "chmod 600 $cliprvkeyf";
     # Save md5 and sha256 hashes of public host key
-    open(RSAKEYFILE, "<$hstpubkeyf");
-    my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
-    close(RSAKEYFILE);
+    open(my $rsakeyfile, "<", "$hstpubkeyf");
+    my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
+    close($rsakeyfile);
     if(!$rsahostkey[1]) {
         logmsg 'Failed parsing base64 encoded RSA host key';
         exit 1;
     }
-    open(PUBMD5FILE, ">$hstpubmd5f");
-    print PUBMD5FILE md5_hex(decode_base64($rsahostkey[1]));
-    close(PUBMD5FILE);
+    open(my $pubmd5file, ">", "$hstpubmd5f");
+    print $pubmd5file md5_hex(decode_base64($rsahostkey[1]));
+    close($pubmd5file);
     if((! -e $hstpubmd5f) || (! -s $hstpubmd5f)) {
         logmsg 'Failed writing md5 hash of RSA host key';
         exit 1;
     }
-    open(PUBSHA256FILE, ">$hstpubsha256f");
-    print PUBSHA256FILE sha256_base64(decode_base64($rsahostkey[1]));
-    close(PUBSHA256FILE);
+    open(my $pubsha256file, ">", "$hstpubsha256f");
+    print $pubsha256file sha256_base64(decode_base64($rsahostkey[1]));
+    close($pubsha256file);
     if((! -e $hstpubsha256f) || (! -s $hstpubsha256f)) {
         logmsg 'Failed writing sha256 hash of RSA host key';
         exit 1;
@@ -780,12 +780,12 @@ if(system "\"$sshd\" -t -f $sshdconfig > $sshdlog 2>&1") {
 if((! -e $knownhosts) || (! -s $knownhosts)) {
     logmsg 'generating ssh client known hosts file...' if($verbose);
     unlink($knownhosts);
-    if(open(RSAKEYFILE, "<$hstpubkeyf")) {
-        my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
-        if(close(RSAKEYFILE)) {
-            if(open(KNOWNHOSTS, ">$knownhosts")) {
-                print KNOWNHOSTS "$listenaddr ssh-rsa $rsahostkey[1]\n";
-                if(!close(KNOWNHOSTS)) {
+    if(open(my $rsakeyfile, "<", "$hstpubkeyf")) {
+        my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
+        if(close($rsakeyfile)) {
+            if(open(my $knownhostsh, ">", "$knownhosts")) {
+                print $knownhostsh "$listenaddr ssh-rsa $rsahostkey[1]\n";
+                if(!close($knownhostsh)) {
                     $error = "Error: cannot close file $knownhosts";
                 }
             }
@@ -1121,9 +1121,9 @@ logmsg "RUN: $cmd" if($verbose);
 #
 if ($sshdid =~ /OpenSSH-Windows/) {
     # Fake pidfile for ssh server on Windows.
-    if(open(OUT, ">$pidfile")) {
-        print OUT $$ . "\n";
-        close(OUT);
+    if(open(my $out, ">", "$pidfile")) {
+        print $out $$ . "\n";
+        close($out);
     }
 
     # Flush output.
