@@ -43,7 +43,7 @@ versions of libs and build tools.
  - GNU Autoconf 2.59
  - GNU Automake 1.7
  - GNU M4       1.4
- - perl         5.004
+ - perl         5.6
  - roffit       0.5
  - nroff        any version that supports `-man [in] [out]`
  - cmake        3.7
