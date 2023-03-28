@@ -425,10 +425,10 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
     size_t datalen;
     unsigned int recvflags;
 
-    if(!wsp->stillblen) {
+    if(!wsp->stillblen || (result == CURLE_AGAIN)) {
       /* try to get more data */
       size_t n;
-      result = curl_easy_recv(data, data->state.buffer,
+      result = curl_easy_recv(data, &data->state.buffer[wsp->stillblen],
                               data->set.buffer_size, &n);
       if(result)
         return result;
@@ -438,10 +438,10 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
         return CURLE_GOT_NOTHING;
       }
       wsp->stillb = data->state.buffer;
-      wsp->stillblen = n;
+      wsp->stillblen += n;
     }
 
-    infof(data, "WS: %u bytes left to decode", (int)wsp->stillblen);
+    infof(data, "WS: %zu bytes left to decode", wsp->stillblen);
     if(!wsp->frame.bytesleft) {
       size_t headlen;
       curl_off_t oleft;
@@ -449,8 +449,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       result = ws_decode(data, (unsigned char *)wsp->stillb, wsp->stillblen,
                          &headlen, &datalen, &oleft, &recvflags);
       if(result == CURLE_AGAIN)
-        /* a packet fragment only */
-        break;
+        /* a packet fragment only, loop and try reading more */
+        continue;
       else if(result)
         return result;
       if(datalen > buflen) {
