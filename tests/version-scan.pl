@@ -39,8 +39,8 @@ my %manname;
 my %sourcename;
 my $error=0;
 
-open(M, "<$manpage");
-while(<M>) {
+open(my $m, "<", "$manpage");
+while(<$m>) {
     if($_ =~ / mask bit: (CURL_VERSION_[A-Z0-9_]+)/i) {
         $manversion{$1}++;
     }
@@ -48,23 +48,23 @@ while(<M>) {
         $manname{$1}++;
     }
 }
-close(M);
+close($m);
 
-open(H, "<$header");
-while(<H>) {
+open(my $h, "<", "$header");
+while(<$h>) {
     if($_ =~ /^\#define (CURL_VERSION_[A-Z0-9_]+)/i) {
         $headerversion{$1}++;
     }
 }
-close(H);
+close($h);
 
-open(S, "<$source");
-while(<S>) {
+open(my $s, "<", "$source");
+while(<$s>) {
     if($_ =~ /FEATURE\("([^"]*)"/) {
       $sourcename{$1}++;
     }
 }
-close(S);
+close($s);
 
 for my $h (keys %headerversion) {
     if(!$manversion{$h}) {

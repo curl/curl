@@ -35,8 +35,8 @@ my %error; # from the include file
 my %docs; # from libcurl-errors.3
 
 sub getdocserrors {
-    open(F, "<$root/docs/libcurl/libcurl-errors.3");
-    while(<F>) {
+    open(my $f, "<", "$root/docs/libcurl/libcurl-errors.3");
+    while(<$f>) {
         if($_ =~ /^.IP \"(CURL[EM]_[^ \t\"]*)/) {
             my ($symbol) = ($1);
             if($symbol =~ /OBSOLETE/) {
@@ -47,12 +47,12 @@ sub getdocserrors {
             }
         }
     }
-    close(F);
+    close($f);
 }
 
 sub getincludeerrors {
-    open(F, "<$root/docs/libcurl/symbols-in-versions");
-    while(<F>) {
+    open(my $f, "<", "$root/docs/libcurl/symbols-in-versions");
+    while(<$f>) {
         if($_ =~ /^(CURL[EM]_[^ \t]*)[ \t]*([0-9.]+)[ \t]*(.*)/) {
             my ($symbol, $added, $rest) = ($1,$2,$3);
             if($rest =~ /^([0-9.]+)/) {
@@ -63,7 +63,7 @@ sub getincludeerrors {
             }
         }
     }
-    close(F);
+    close($f);
 }
 
 getincludeerrors();

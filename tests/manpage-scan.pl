@@ -67,9 +67,9 @@ my %alias = (
 sub scanmanpage {
     my ($file, @words) = @_;
 
-    open(M, "<$file");
+    open(my $mh, "<", "$file");
     my @m;
-    while(<M>) {
+    while(<$mh>) {
         if($_ =~ /^\.IP (.*)/) {
             my $w = $1;
             # "unquote" minuses
@@ -77,7 +77,7 @@ sub scanmanpage {
             push @m, $w;
         }
     }
-    close(M);
+    close($mh);
 
     foreach my $m (@words) {
         my @g = grep(/$m/, @m);
@@ -88,22 +88,24 @@ sub scanmanpage {
     }
 }
 
+my $r;
+
 # check for define alises
-open(R, "<$curlh") ||
+open($r, "<", "$curlh") ||
     die "no curl.h";
-while(<R>) {
+while(<$r>) {
     if(/^\#define (CURL(OPT|INFO|MOPT)_\w+) (.*)/) {
         $alias{$1}=$3;
     }
 }
-close(R);
+close($r);
 
 my @curlopt;
 my @curlinfo;
 my @curlmopt;
-open(R, "<$syms") ||
+open($r, "<", "$syms") ||
     die "no input file";
-while(<R>) {
+while(<$r>) {
     chomp;
     my $l= $_;
     if($l =~ /(CURL(OPT|INFO|MOPT)_\w+) *([0-9.]*) *([0-9.-]*) *([0-9.]*)/) {
@@ -133,7 +135,7 @@ while(<R>) {
         }
     }
 }
-close(R);
+close($r);
 
 scanmanpage("$root/docs/libcurl/curl_easy_setopt.3", @curlopt);
 scanmanpage("$root/docs/libcurl/curl_easy_getinfo.3", @curlinfo);
@@ -174,12 +176,12 @@ my %opts = (
 
 #########################################################################
 # parse the curl code that parses the command line arguments!
-open(R, "<$root/src/tool_getparam.c") ||
+open($r, "<", "$root/src/tool_getparam.c") ||
     die "no input file";
 my $list;
 my @getparam; # store all parsed parameters
 
-while(<R>) {
+while(<$r>) {
     chomp;
     my $l= $_;
     if(/struct LongShort aliases/) {
@@ -206,15 +208,15 @@ while(<R>) {
         }
     }
 }
-close(R);
+close($r);
 
 #########################################################################
 # parse the curl.1 man page, extract all documented command line options
 # The man page may or may not be rebuilt, so check both possible locations
-open(R, "<$buildroot/docs/curl.1") || open(R, "<$root/docs/curl.1") ||
+open($r, "<", "$buildroot/docs/curl.1") || open($r, "<", "$root/docs/curl.1") ||
     die "no input file";
 my @manpage; # store all parsed parameters
-while(<R>) {
+while(<$r>) {
     chomp;
     my $l= $_;
     $l =~ s/\\-/-/g;
@@ -235,15 +237,15 @@ while(<R>) {
         }
     }
 }
-close(R);
+close($r);
 
 
 #########################################################################
 # parse the curl code that outputs the curl -h list
-open(R, "<$root/src/tool_listhelp.c") ||
+open($r, "<", "$root/src/tool_listhelp.c") ||
     die "no input file";
 my @toolhelp; # store all parsed parameters
-while(<R>) {
+while(<$r>) {
     chomp;
     my $l= $_;
     if(/^  \{\" *(.*)/) {
@@ -264,7 +266,7 @@ while(<R>) {
 
     }
 }
-close(R);
+close($r);
 
 #
 # Now we have three arrays with options to cross-reference.

@@ -224,20 +224,20 @@ sub logmsg {
             localtime($seconds);
         $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
     }
-    if(open(LOGFILEFH, ">>$logfile")) {
-        print LOGFILEFH $now;
-        print LOGFILEFH @_;
-        close(LOGFILEFH);
+    if(open(my $logfilefh, ">>", "$logfile")) {
+        print $logfilefh $now;
+        print $logfilefh @_;
+        close($logfilefh);
     }
 }
 
 sub ftpmsg {
   # append to the server.input file
-  open(INPUT, ">>log/server$idstr.input") ||
+  open(my $input, ">>", "log/server$idstr.input") ||
     logmsg "failed to open log/server$idstr.input\n";
 
-  print INPUT @_;
-  close(INPUT);
+  print $input @_;
+  close($input);
 
   # use this, open->print->close system only to make the file
   # open as little as possible, to make the test suite run
@@ -915,7 +915,7 @@ sub DATA_smtp {
 
         logmsg "Store test number $testno in $filename\n";
 
-        open(FILE, ">$filename") ||
+        open(my $file, ">", "$filename") ||
             return 0; # failed to open output
 
         my $line;
@@ -936,7 +936,7 @@ sub DATA_smtp {
                 read_mainsockf(\$line, $size);
 
                 $ulsize += $size;
-                print FILE $line if(!$nosave);
+                print $file $line if(!$nosave);
 
                 $raw .= $line;
                 if($raw =~ /(?:^|\x0d\x0a)\x2e\x0d\x0a/) {
@@ -963,10 +963,10 @@ sub DATA_smtp {
         }
 
         if($nosave) {
-            print FILE "$ulsize bytes would've been stored here\n";
+            print $file "$ulsize bytes would've been stored here\n";
         }
 
-        close(FILE);
+        close($file);
 
         logmsg "received $ulsize bytes upload\n";
 
@@ -1264,7 +1264,7 @@ sub APPEND_imap {
 
         logmsg "Store test number $testno in $filename\n";
 
-        open(FILE, ">$filename") ||
+        open(my $file, ">", "$filename") ||
             return 0; # failed to open output
 
         my $received = 0;
@@ -1285,7 +1285,7 @@ sub APPEND_imap {
 
                 if($datasize > 0) {
                     logmsg "> Appending $datasize bytes to file\n";
-                    print FILE substr($line, 0, $datasize) if(!$nosave);
+                    print $file substr($line, 0, $datasize) if(!$nosave);
                     $line = substr($line, $datasize);
 
                     $received += $datasize;
@@ -1309,10 +1309,10 @@ sub APPEND_imap {
         }
 
         if($nosave) {
-            print FILE "$size bytes would've been stored here\n";
+            print $file "$size bytes would've been stored here\n";
         }
 
-        close(FILE);
+        close($file);
 
         logmsg "received $size bytes upload\n";
 
@@ -2392,7 +2392,7 @@ sub STOR_ftp {
 
     sendcontrol "125 Gimme gimme gimme!\r\n";
 
-    open(FILE, ">$filename") ||
+    open(my $file, ">", "$filename") ||
         return 0; # failed to open output
 
     my $line;
@@ -2413,7 +2413,7 @@ sub STOR_ftp {
             #print STDERR "  GOT: $size bytes\n";
 
             $ulsize += $size;
-            print FILE $line if(!$nosave);
+            print $file $line if(!$nosave);
             logmsg "> Appending $size bytes to file\n";
         }
         elsif($line eq "DISC\n") {
@@ -2431,9 +2431,9 @@ sub STOR_ftp {
         }
     }
     if($nosave) {
-        print FILE "$ulsize bytes would've been stored here\n";
+        print $file "$ulsize bytes would've been stored here\n";
     }
-    close(FILE);
+    close($file);
     close_dataconn($disc);
     logmsg "received $ulsize bytes upload\n";
     if($storeresp) {
@@ -2815,12 +2815,12 @@ sub customize {
     %customcount = ();  #
     %delayreply = ();   #
 
-    open(CUSTOM, "<log/ftpserver.cmd") ||
+    open(my $custom, "<", "log/ftpserver.cmd") ||
         return 1;
 
     logmsg "FTPD: Getting commands from log/ftpserver.cmd\n";
 
-    while(<CUSTOM>) {
+    while(<$custom>) {
         if($_ =~ /REPLY \"([A-Z]+ [A-Za-z0-9+-\/=\*. ]+)\" (.*)/) {
             $fulltextreply{$1}=eval "qq{$2}";
             logmsg "FTPD: set custom reply for $1\n";
@@ -2924,7 +2924,7 @@ sub customize {
             logmsg "FTPD: run test case number: $testno\n";
         }
     }
-    close(CUSTOM);
+    close($custom);
 }
 
 #----------------------------------------------------------------------
@@ -3066,17 +3066,17 @@ startsf();
 # actual port
 if($portfile && !$port) {
     my $aport;
-    open(P, "<$portfile");
-    $aport = <P>;
-    close(P);
+    open(my $p, "<", "$portfile");
+    $aport = <$p>;
+    close($p);
     $port = 0 + $aport;
 }
 
 logmsg sprintf("%s server listens on port IPv${ipvnum}/${port}\n", uc($proto));
 
-open(PID, ">$pidfile");
-print PID $$."\n";
-close(PID);
+open(my $pid, ">", "$pidfile");
+print $pid $$."\n";
+close($pid);
 
 logmsg("logged pid $$ in $pidfile\n");
 

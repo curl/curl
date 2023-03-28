@@ -50,8 +50,8 @@ sub cmdfiles {
 sub mentions {
     my ($f) = @_;
     my @options;
-    open(F, "<$f");
-    while(<F>) {
+    open(my $fh, "<", "$f");
+    while(<$fh>) {
         chomp;
         if(/(.*) +([0-9.]+)/) {
             my ($flag, $version)=($1, $2);
@@ -71,13 +71,14 @@ sub mentions {
             $oiv{$flag} = $version;
         }
     }
+    close($fh);
     return @options;
 }
 
 sub versioncheck {
     my ($f, $v)=@_;
-    open(F, "<$cmddir/$f.d");
-    while(<F>) {
+    open(my $fh, "<", "$cmddir/$f.d");
+    while(<$fh>) {
         chomp;
         if(/^Added: ([0-9.]+)/) {
             if($1 ne $v) {
@@ -87,7 +88,7 @@ sub versioncheck {
             last;
         }
     }
-    close(F);
+    close($fh);
 }
 
 # get all the files
