@@ -277,26 +277,26 @@ if($stunnel_version >= 400) {
     $SIG{INT} = \&exit_signal_handler;
     $SIG{TERM} = \&exit_signal_handler;
     # stunnel configuration file
-    if(open(STUNCONF, ">$conffile")) {
-        print STUNCONF "CApath = $capath\n";
-        print STUNCONF "cert = $certfile\n";
-        print STUNCONF "debug = $loglevel\n";
-        print STUNCONF "socket = $socketopt\n";
+    if(open(my $stunconf, ">", "$conffile")) {
+        print $stunconf "CApath = $capath\n";
+        print $stunconf "cert = $certfile\n";
+        print $stunconf "debug = $loglevel\n";
+        print $stunconf "socket = $socketopt\n";
         if($fips_support) {
             # disable fips in case OpenSSL doesn't support it
-            print STUNCONF "fips = no\n";
+            print $stunconf "fips = no\n";
         }
         if(!$tstunnel_windows) {
             # do not use Linux-specific options on Windows
-            print STUNCONF "output = $logfile\n";
-            print STUNCONF "pid = $pidfile\n";
-            print STUNCONF "foreground = yes\n";
+            print $stunconf "output = $logfile\n";
+            print $stunconf "pid = $pidfile\n";
+            print $stunconf "foreground = yes\n";
         }
-        print STUNCONF "\n";
-        print STUNCONF "[curltest]\n";
-        print STUNCONF "accept = $accept_port\n";
-        print STUNCONF "connect = $target_port\n";
-        if(!close(STUNCONF)) {
+        print $stunconf "\n";
+        print $stunconf "[curltest]\n";
+        print $stunconf "accept = $accept_port\n";
+        print $stunconf "connect = $target_port\n";
+        if(!close($stunconf)) {
             print "$ssltext Error closing file $conffile\n";
             exit 1;
         }
@@ -338,9 +338,9 @@ print STDERR "RUN: $cmd\n" if($verbose);
 #
 if($tstunnel_windows) {
     # Fake pidfile for tstunnel on Windows.
-    if(open(OUT, ">$pidfile")) {
-        print OUT $$ . "\n";
-        close(OUT);
+    if(open(my $out, ">", "$pidfile")) {
+        print $out $$ . "\n";
+        close($out);
     }
 
     # Flush output.

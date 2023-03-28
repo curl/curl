@@ -350,7 +350,7 @@ delete $ENV{'CURL_CA_BUNDLE'} if($ENV{'CURL_CA_BUNDLE'});
 
 # provide defaults from our config file for ENV vars not explicitly
 # set by the caller
-if (open(my $fd, "< config")) {
+if (open(my $fd, "<", "config")) {
     while(my $line = <$fd>) {
         next if ($line =~ /^#/);
         chomp $line;
@@ -460,9 +460,9 @@ sub startnew {
 
     # Ugly hack but ssh client and gnutls-serv don't support pid files
     if ($fake) {
-        if(open(OUT, ">$pidfile")) {
-            print OUT $child . "\n";
-            close(OUT) || die "Failure writing pidfile";
+        if(open(my $out, ">", "$pidfile")) {
+            print $out $child . "\n";
+            close($out) || die "Failure writing pidfile";
             logmsg "startnew: $pidfile faked with pid=$child\n" if($verbose);
         }
         else {
@@ -478,9 +478,9 @@ sub startnew {
 
     my $count = $timeout;
     while($count--) {
-        if(-f $pidfile && -s $pidfile && open(PID, "<$pidfile")) {
-            $pid2 = 0 + <PID>;
-            close(PID);
+        if(-f $pidfile && -s $pidfile && open(my $pidh, "<", "$pidfile")) {
+            $pid2 = 0 + <$pidh>;
+            close($pidh);
             if(($pid2 > 0) && pidexists($pid2)) {
                 # if $pid2 is valid, then make sure this pid is alive, as
                 # otherwise it is just likely to be the _previous_ pidfile or
@@ -534,15 +534,15 @@ my $disttests = "";
 sub get_disttests {
     # If a non-default $TESTDIR is being used there may not be any
     # Makefile.inc in which case there's nothing to do.
-    open(D, "<$TESTDIR/Makefile.inc") or return;
-    while(<D>) {
+    open(my $dh, "<", "$TESTDIR/Makefile.inc") or return;
+    while(<$dh>) {
         chomp $_;
         if(($_ =~ /^#/) ||($_ !~ /test/)) {
             next;
         }
         $disttests .= $_;
     }
-    close(D);
+    close($dh);
 }
 
 #######################################################################
@@ -886,21 +886,21 @@ sub verifyhttp {
 
     if($res && $verbose) {
         logmsg "RUN: curl command returned $res\n";
-        if(open(FILE, "<$verifylog")) {
-            while(my $string = <FILE>) {
+        if(open(my $file, "<", "$verifylog")) {
+            while(my $string = <$file>) {
                 logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
             }
-            close(FILE);
+            close($file);
         }
     }
 
     my $data;
-    if(open(FILE, "<$verifyout")) {
-        while(my $string = <FILE>) {
+    if(open(my $file, "<", "$verifyout")) {
+        while(my $string = <$file>) {
             $data = $string;
             last; # only want first line
         }
-        close(FILE);
+        close($file);
     }
 
     if($data && ($data =~ /WE ROOLZ: (\d+)/)) {
@@ -1029,21 +1029,21 @@ sub verifyrtsp {
 
     if($res && $verbose) {
         logmsg "RUN: curl command returned $res\n";
-        if(open(FILE, "<$verifylog")) {
-            while(my $string = <FILE>) {
+        if(open(my $file, "<", "$verifylog")) {
+            while(my $string = <$file>) {
                 logmsg "RUN: $string" if($string !~ /^[ \t]*$/);
             }
-            close(FILE);
+            close($file);
         }
     }
 
     my $data;
-    if(open(FILE, "<$verifyout")) {
-        while(my $string = <FILE>) {
+    if(open(my $file, "<", "$verifyout")) {
+        while(my $string = <$file>) {
             $data = $string;
             last; # only want first line
         }
-        close(FILE);
+        close($file);
     }
 
     if($data && ($data =~ /RTSP_SERVER WE ROOLZ: (\d+)/)) {
@@ -1071,9 +1071,9 @@ sub verifyssh {
     my $server = servername_id($proto, $ipvnum, $idnum);
     my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
     my $pid = 0;
-    if(open(FILE, "<$pidfile")) {
-        $pid=0+<FILE>;
-        close(FILE);
+    if(open(my $file, "<", "$pidfile")) {
+        $pid=0+<$file>;
+        close($file);
     }
     if($pid > 0) {
         # if we have a pid it is actually our ssh server,
@@ -1113,14 +1113,14 @@ sub verifysftp {
     my $cmd = "\"$sftp\" -b $sftpcmds -F $sftpconfig -S \"$ssh\" $ip > $sftplog 2>&1";
     my $res = runclient($cmd);
     # Search for pwd command response in log file
-    if(open(SFTPLOGFILE, "<$sftplog")) {
-        while(<SFTPLOGFILE>) {
+    if(open(my $sftplogfile, "<", "$sftplog")) {
+        while(<$sftplogfile>) {
             if(/^Remote working directory: /) {
                 $verified = 1;
                 last;
             }
         }
-        close(SFTPLOGFILE);
+        close($sftplogfile);
     }
     return $verified;
 }
@@ -1172,25 +1172,25 @@ sub verifyhttptls {
 
     if($res && $verbose) {
         logmsg "RUN: curl command returned $res\n";
-        if(open(FILE, "<$verifylog")) {
-            while(my $string = <FILE>) {
+        if(open(my $file, "<", "$verifylog")) {
+            while(my $string = <$file>) {
                 logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
             }
-            close(FILE);
+            close($file);
         }
     }
 
     my $data;
-    if(open(FILE, "<$verifyout")) {
-        while(my $string = <FILE>) {
+    if(open(my $file, "<", "$verifyout")) {
+        while(my $string = <$file>) {
             $data .= $string;
         }
-        close(FILE);
+        close($file);
     }
 
-    if($data && ($data =~ /(GNUTLS|GnuTLS)/) && open(FILE, "<$pidfile")) {
-        $pid=0+<FILE>;
-        close(FILE);
+    if($data && ($data =~ /(GNUTLS|GnuTLS)/) && open(my $file, "<", "$pidfile")) {
+        $pid=0+<$file>;
+        close($file);
         if($pid > 0) {
             # if we have a pid it is actually our httptls server,
             # since runhttptlsserver() unlinks previous pidfile
@@ -1223,9 +1223,9 @@ sub verifysocks {
     my $server = servername_id($proto, $ipvnum, $idnum);
     my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
     my $pid = 0;
-    if(open(FILE, "<$pidfile")) {
-        $pid=0+<FILE>;
-        close(FILE);
+    if(open(my $file, "<", "$pidfile")) {
+        $pid=0+<$file>;
+        close($file);
     }
     if($pid > 0) {
         # if we have a pid it is actually our socks server,
@@ -2292,9 +2292,10 @@ sub runsshserver {
     }
 
     my $hstpubmd5f = "curl_host_rsa_key.pub_md5";
-    if(!open(PUBMD5FILE, "<", $hstpubmd5f) ||
-       (read(PUBMD5FILE, $SSHSRVMD5, 32) != 32) ||
-       !close(PUBMD5FILE) ||
+    my $hostfile;
+    if(!open($hostfile, "<", $hstpubmd5f) ||
+       (read($hostfile, $SSHSRVMD5, 32) != 32) ||
+       !close($hostfile) ||
        ($SSHSRVMD5 !~ /^[a-f0-9]{32}$/i))
     {
         my $msg = "Fatal: $srvrname pubkey md5 missing : \"$hstpubmd5f\" : $!";
@@ -2304,9 +2305,9 @@ sub runsshserver {
     }
 
     my $hstpubsha256f = "curl_host_rsa_key.pub_sha256";
-    if(!open(PUBSHA256FILE, "<", $hstpubsha256f) ||
-       (read(PUBSHA256FILE, $SSHSRVSHA256, 48) == 0) ||
-       !close(PUBSHA256FILE))
+    if(!open($hostfile, "<", $hstpubsha256f) ||
+       (read($hostfile, $SSHSRVSHA256, 48) == 0) ||
+       !close($hostfile))
     {
         my $msg = "Fatal: $srvrname pubkey sha256 missing : \"$hstpubsha256f\" : $!";
         logmsg "$msg\n";
@@ -2895,13 +2896,13 @@ sub checksystemfeatures {
     $versretval = runclient($versioncmd);
     $versnoexec = $!;
 
-    open(VERSOUT, "<$curlverout");
-    @version = <VERSOUT>;
-    close(VERSOUT);
+    open(my $versout, "<", "$curlverout");
+    @version = <$versout>;
+    close($versout);
 
-    open(DISABLED, "server/disabled".exe_ext('TOOL')."|");
-    @disabled = <DISABLED>;
-    close(DISABLED);
+    open(my $disabledh, "-|", "server/disabled".exe_ext('TOOL'));
+    @disabled = <$disabledh>;
+    close($disabledh);
 
     if($disabled[0]) {
         s/[\r\n]//g for @disabled;
@@ -3140,14 +3141,14 @@ sub checksystemfeatures {
     }
 
     if(-r "../lib/curl_config.h") {
-        open(CONF, "<../lib/curl_config.h");
-        while(<CONF>) {
+        open(my $conf, "<", "../lib/curl_config.h");
+        while(<$conf>) {
             if($_ =~ /^\#define HAVE_GETRLIMIT/) {
                 # set if system has getrlimit()
                 $feature{"getrlimit"} = 1;
             }
         }
-        close(CONF);
+        close($conf);
     }
 
     # disable this feature unless debug mode is also enabled
@@ -3180,8 +3181,8 @@ sub checksystemfeatures {
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
 
-    open(M, "$CURL -M 2>&1|");
-    while(my $s = <M>) {
+    open(my $manh, "-|", "$CURL -M 2>&1");
+    while(my $s = <$manh>) {
         if($s =~ /built-in manual was disabled at build-time/) {
             $feature{"manual"} = 0;
             last;
@@ -3189,7 +3190,7 @@ sub checksystemfeatures {
         $feature{"manual"} = 1;
         last;
     }
-    close(M);
+    close($manh);
 
     $feature{"unittest"} = $feature{"debug"};
     $feature{"nghttpx"} = !!$ENV{'NGHTTPX'};
@@ -3813,11 +3814,11 @@ sub singletest_preprocess {
     @entiretest = prepro($testnum, @entiretest);
 
     # save the new version
-    open(D, ">$otest") || die "Failure writing test file";
+    open(my $fulltesth, ">", "$otest") || die "Failure writing test file";
     foreach my $bytes (@entiretest) {
-        print D pack('a*', $bytes) or die "Failed to print '$bytes': $!";
+        print $fulltesth pack('a*', $bytes) or die "Failed to print '$bytes': $!";
     }
-    close(D) || die "Failure writing test file";
+    close($fulltesth) || die "Failure writing test file";
 
     # in case the process changed the file, reload it
     loadtest("log/test${testnum}");
@@ -3977,14 +3978,14 @@ sub singletest_prepare {
                     mkdir $d; # 0777
                 }
             }
-            open(OUTFILE, ">$filename");
-            binmode OUTFILE; # for crapage systems, use binary
+            open(my $outfile, ">", "$filename");
+            binmode $outfile; # for crapage systems, use binary
             if($fileattr{'nonewline'}) {
                 # cut off the final newline
                 chomp($fileContent);
             }
-            print OUTFILE $fileContent;
-            close(OUTFILE);
+            print $outfile $fileContent;
+            close($outfile);
         }
     }
     return ($why, 0);
@@ -4150,20 +4151,20 @@ sub singletest_run {
         logmsg "$CMDLINE\n";
     }
 
-    open(CMDLOG, ">", "$LOGDIR/$CURLLOG") || die "Failure writing log file";
-    print CMDLOG "$CMDLINE\n";
-    close(CMDLOG) || die "Failure writing log file";
+    open(my $cmdlog, ">", "$LOGDIR/$CURLLOG") || die "Failure writing log file";
+    print $cmdlog "$CMDLINE\n";
+    close($cmdlog) || die "Failure writing log file";
 
     my $dumped_core;
     my $cmdres;
 
     if($gdbthis) {
         my $gdbinit = "$TESTDIR/gdbinit$testnum";
-        open(GDBCMD, ">$LOGDIR/gdbcmd") || die "Failure writing gdb file";
-        print GDBCMD "set args $cmdargs\n";
-        print GDBCMD "show args\n";
-        print GDBCMD "source $gdbinit\n" if -e $gdbinit;
-        close(GDBCMD) || die "Failure writing gdb file";
+        open(my $gdbcmd, ">", "$LOGDIR/gdbcmd") || die "Failure writing gdb file";
+        print $gdbcmd "set args $cmdargs\n";
+        print $gdbcmd "show args\n";
+        print $gdbcmd "source $gdbinit\n" if -e $gdbinit;
+        close($gdbcmd) || die "Failure writing gdb file";
     }
 
     # Flush output.
@@ -4211,9 +4212,9 @@ sub singletest_clean {
         logmsg "core dumped\n";
         if(0 && $gdb) {
             logmsg "running gdb for post-mortem analysis:\n";
-            open(GDBCMD, ">$LOGDIR/gdbcmd2") || die "Failure writing gdb file";
-            print GDBCMD "bt\n";
-            close(GDBCMD) || die "Failure writing gdb file";
+            open(my $gdbcmd, ">", "$LOGDIR/gdbcmd2") || die "Failure writing gdb file";
+            print $gdbcmd "bt\n";
+            close($gdbcmd) || die "Failure writing gdb file";
             runclient("$gdb --directory libtest -x $LOGDIR/gdbcmd2 -batch $DBGCURL core ");
      #       unlink("$LOGDIR/gdbcmd2");
         }
@@ -6009,10 +6010,10 @@ if(!$randseed) {
         localtime(time);
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year+1900)*100 + $mon+1;
-    open(C, "$CURL --version 2>/dev/null|") ||
+    open(my $curlvh, "-|", "$CURL --version 2>/dev/null") ||
         die "could not get curl version!";
-    my @c = <C>;
-    close(C);
+    my @c = <$curlvh>;
+    close($curlvh);
     # use the first line of output and get the md5 out of it
     my $str = md5($c[0]);
     $randseed += unpack('S', $str);  # unsigned 16 bit value
@@ -6040,13 +6041,13 @@ if($valgrind) {
         if (($? >> 8)==0) {
             $valgrind_tool="--tool=memcheck";
         }
-        open(C, "<$CURL");
-        my $l = <C>;
+        open(my $curlh, "<", "$CURL");
+        my $l = <$curlh>;
         if($l =~ /^\#\!/) {
             # A shell script. This is typically when built with libtool,
             $valgrind="../libtool --mode=execute $valgrind";
         }
-        close(C);
+        close($curlh);
 
         # valgrind 3 renamed the --logfile option to --log-file!!!
         my $ver=join(' ', runclientoutput("valgrind --version"));
@@ -6064,10 +6065,10 @@ if($valgrind) {
 
 if ($gdbthis) {
     # open the executable curl and read the first 4 bytes of it
-    open(CHECK, "<$CURL");
+    open(my $check, "<", "$CURL");
     my $c;
-    sysread CHECK, $c, 4;
-    close(CHECK);
+    sysread $check, $c, 4;
+    close($check);
     if($c eq "#! /") {
         # A shell script. This is typically when built with libtool,
         $libtool = 1;
@@ -6112,15 +6113,15 @@ sub disabledtests {
     my ($file) = @_;
     my @input;
 
-    if(open(D, "<$file")) {
-        while(<D>) {
+    if(open(my $disabledh, "<", "$file")) {
+        while(<$disabledh>) {
             if(/^ *\#/) {
                 # allow comments
                 next;
             }
             push @input, $_;
         }
-        close(D);
+        close($disabledh);
 
         # preprocess the input to make conditionally disabled tests depending
         # on variables
@@ -6214,11 +6215,11 @@ if($scrambleorder) {
 # and excessively long files are elided
 sub displaylogcontent {
     my ($file)=@_;
-    if(open(SINGLE, "<$file")) {
+    if(open(my $single, "<", "$file")) {
         my $linecount = 0;
         my $truncate;
         my @tail;
-        while(my $string = <SINGLE>) {
+        while(my $string = <$single>) {
             $string =~ s/\r\n/\n/g;
             $string =~ s/[\r\f\032]/\n/g;
             $string .= "\n" unless ($string =~ /\n$/);
@@ -6234,7 +6235,7 @@ sub displaylogcontent {
                 $truncate = $linecount > 1000;
             }
         }
-        close(SINGLE);
+        close($single);
         if(@tail) {
             my $tailshow = 200;
             my $tailskip = 0;

@@ -220,12 +220,12 @@ sub loadtest {
     undef @xml;
     $xmlfile = "";
 
-    if(open(XML, "<$file")) {
-        binmode XML; # for crapage systems, use binary
-        while(<XML>) {
+    if(open(my $xmlh, "<", "$file")) {
+        binmode $xmlh; # for crapage systems, use binary
+        while(<$xmlh>) {
             push @xml, $_;
         }
-        close(XML);
+        close($xmlh);
     }
     else {
         # failure
@@ -246,12 +246,12 @@ sub fulltest {
 sub savetest {
     my ($file)=@_;
 
-    if(open(XML, ">$file")) {
-        binmode XML; # for crapage systems, use binary
+    if(open(my $xmlh, ">", "$file")) {
+        binmode $xmlh; # for crapage systems, use binary
         for(@xml) {
-            print XML $_;
+            print $xmlh $_;
         }
-        close(XML);
+        close($xmlh);
     }
     else {
         # failure
@@ -310,12 +310,12 @@ sub compareparts {
 sub writearray {
     my ($filename, $arrayref)=@_;
 
-    open(TEMP, ">$filename") || die "Failure writing file";
-    binmode(TEMP,":raw"); # cygwin fix by Kevin Roth
+    open(my $temp, ">", "$filename") || die "Failure writing file";
+    binmode($temp,":raw"); # cygwin fix by Kevin Roth
     for(@$arrayref) {
-        print TEMP $_;
+        print $temp $_;
     }
-    close(TEMP) || die "Failure writing file";
+    close($temp) || die "Failure writing file";
 }
 
 #
@@ -325,11 +325,11 @@ sub loadarray {
     my ($filename)=@_;
     my @array;
 
-    open(TEMP, "<$filename");
-    while(<TEMP>) {
+    open(my $temp, "<", "$filename");
+    while(<$temp>) {
         push @array, $_;
     }
-    close(TEMP);
+    close($temp);
     return @array;
 }
 
@@ -342,27 +342,27 @@ sub showdiff {
     my $file1="$logdir/check-generated";
     my $file2="$logdir/check-expected";
 
-    open(TEMP, ">$file1") || die "Failure writing diff file";
+    open(my $temp, ">", "$file1") || die "Failure writing diff file";
     for(@$firstref) {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
         $l =~ s/\n/[LF]/g;
         $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
-        print TEMP $l;
-        print TEMP "\n";
+        print $temp $l;
+        print $temp "\n";
     }
-    close(TEMP) || die "Failure writing diff file";
+    close($temp) || die "Failure writing diff file";
 
-    open(TEMP, ">$file2") || die "Failure writing diff file";
+    open($temp, ">", "$file2") || die "Failure writing diff file";
     for(@$secondref) {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
         $l =~ s/\n/[LF]/g;
         $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
-        print TEMP $l;
-        print TEMP "\n";
+        print $temp $l;
+        print $temp "\n";
     }
-    close(TEMP) || die "Failure writing diff file";
+    close($temp) || die "Failure writing diff file";
     my @out = `diff -u $file2 $file1 2>/dev/null`;
 
     if(!$out[0]) {

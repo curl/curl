@@ -66,8 +66,8 @@ my %rem;
 # included by it, which *should* be all headers
 sub scanenum {
     my ($file) = @_;
-    open H_IN, "-|", "$Cpreprocessor $i$file" || die "Cannot preprocess $file";
-    while ( <H_IN> ) {
+    open my $h_in, "-|", "$Cpreprocessor $i$file" || die "Cannot preprocess $file";
+    while ( <$h_in> ) {
         if ( /enum\s+(\S+\s+)?{/ .. /}/ ) {
             s/^\s+//;
             next unless /^CURL/;
@@ -76,18 +76,18 @@ sub scanenum {
             push @syms, $_;
         }
     }
-    close H_IN || die "Error preprocessing $file";
+    close $h_in || die "Error preprocessing $file";
 }
 
 sub scanheader {
     my ($f)=@_;
-    open H, "<$f";
-    while(<H>) {
+    open my $h, "<", "$f";
+    while(<$h>) {
         if (/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
             push @syms, $1;
         }
     }
-    close H;
+    close $h;
 }
 
 sub scanallheaders {
@@ -105,9 +105,9 @@ sub scanallheaders {
 sub checkmanpage {
     my ($m) = @_;
 
-    open(M, "<$m");
+    open(my $mh, "<", "$m");
     my $line = 1;
-    while(<M>) {
+    while(<$mh>) {
         # strip off formatting
         $_ =~ s/\\f[BPRI]//;
         # detect global-looking 'CURL[BLABLA]_*' symbols
@@ -120,7 +120,7 @@ sub checkmanpage {
         }
         $line++;
     }
-    close(M);
+    close($mh);
 }
 
 sub scanman3dir {
@@ -139,8 +139,8 @@ scanallheaders();
 scanman3dir("$root/docs/libcurl");
 scanman3dir("$root/docs/libcurl/opts");
 
-open S, "<$root/docs/libcurl/symbols-in-versions";
-while(<S>) {
+open my $s, "<", "$root/docs/libcurl/symbols-in-versions";
+while(<$s>) {
     if(/(^[^ \n]+) +(.*)/) {
         my ($sym, $rest)=($1, $2);
         if($doc{$sym}) {
@@ -157,7 +157,7 @@ while(<S>) {
         }
     }
 }
-close S;
+close $s;
 
 my $ignored=0;
 for my $e (sort @syms) {
