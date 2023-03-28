@@ -56,10 +56,10 @@ sub manpresent {
 
 sub file {
     my ($f) = @_;
-    open(F, "<$f") ||
+    open(my $fh, "<", "$f") ||
         die "no file";
     my $line = 1;
-    while(<F>) {
+    while(<$fh>) {
         chomp;
         my $l = $_;
         while($l =~ s/\\f(.)([^ ]*)\\f(.)//) {
@@ -100,7 +100,7 @@ sub file {
         }
         $line++;
     }
-    close(F);
+    close($fh);
 }
 
 foreach my $f (@f) {
