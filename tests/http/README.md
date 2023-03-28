@@ -4,13 +4,13 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-# The curl HTTPD Test Suite
+# The curl HTTP Test Suite
 
 This is an additional test suite using a combination of Apache httpd and nghttpx servers to perform various tests beyond the capabilities of the standard curl test suite.
 
 # Usage
 
-The test cases and necessary files are in `tests/httpd`. You can invoke `pytest` from there or from the top level curl checkout and it will find all tests.
+The test cases and necessary files are in `tests/http`. You can invoke `pytest` from there or from the top level curl checkout and it will find all tests.
 
 ```
 curl> pytest
@@ -18,7 +18,7 @@ platform darwin -- Python 3.9.15, pytest-6.2.0, py-1.10.0, pluggy-0.13.1
 rootdir: /Users/sei/projects/curl
 collected 5 items
 
-tests/httpd/test_01_basic.py .....
+tests/http/test_01_basic.py .....
 ```
 
 Pytest takes arguments. `-v` increases its verbosity and can be used several times. `-k <expr>` can be used to run only matching test cases. The `expr` can be something resembling a python test or just a string that needs to match test cases in their names.
