@@ -4,7 +4,7 @@ curl and libcurl 8.1.0
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2841
+ Contributors:                 2845
 
 This release includes the following changes:
 
@@ -13,19 +13,30 @@ This release includes the following bugfixes:
  o CI: fix brew retries on GHA
  o CI: skip Azure for commits which change only GHA
  o cmake: bring in the network library on Haiku [9]
+ o CMake: make config version 8 compatible with 7 [28]
  o cmake: set SONAME for SunOS too [3]
  o data.d: emphasize no conversion [5]
  o digest: clear target buffer [8]
+ o doc: curl_mime_init() strong easy handle binding has been relaxed in 7.87.0 [26]
+ o docs/cmdline-opts: document the dotless config path [1]
+ o dynbuf: never allocate larger than "toobig" [17]
+ o ftplistparser: move out private data from public struct [20]
+ o ftplistparser: replace realloc with dynbuf [18]
  o GHA-linux: add an address-sanitizer build [15]
  o GHA: add a memory-sanitizer job [2]
  o GHA: run all linux test jobs with valgrind [14]
  o gskit: various compile errors in OS400 [12]
+ o HTTP-COOKIES.md: mention the #HttpOnly_ prefix [16]
  o multi: add handle asserts in DEBUG builds [11]
+ o multi: remove PENDING + MSGSENT handles from the main linked list [23]
  o ngtcp2: adjust config and code checks for ngtcp2 without nghttp3 [4]
  o ntlm: clear lm and nt response buffers before use [7]
+ o RELEASE-PROCEDURE: update to new schedule [25]
  o runtests: die if curl version can be found [10]
  o server/getpart: clear target buffer before load [6]
+ o tests/http: add timeout to running curl in test cases [24]
  o tool_operate: pass a long as CURLOPT_HEADEROPT argument [13]
+ o url: remove call to Curl_llist_destroy in Curl_close [22]
 
 This release includes the following known bugs:
 
@@ -43,12 +54,15 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brian Lund, Dan Fandrich, Daniel Stenberg, Douglas R. Reno, Jon Rumsey,
-  Paul Howarth, Stefan Eissing
-  (7 contributors)
+  Andy Alt, Brian Lund, Chloe Kudryavtsev, Dan Fandrich, Dan Frandrich,
+  Daniel Stenberg, Douglas R. Reno, Harry Sintonen, Jakub Zakrzewski,
+  Jon Rumsey, Kai Pastor, Osaila on github, Patrick Monnerat, Paul Howarth,
+  Ray Satiro, Ronan Pigott, Stefan Eissing
+  (17 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=10849
  [2] = https://curl.se/bug/?i=10815
  [3] = https://curl.se/bug/?i=10816
  [4] = https://curl.se/bug/?i=10793
@@ -63,3 +77,13 @@ References to bug reports and discussions on issues:
  [13] = https://curl.se/bug/?i=10798
  [14] = https://curl.se/bug/?i=10798
  [15] = https://curl.se/bug/?i=10810
+ [16] = https://curl.se/bug/?i=10847
+ [17] = https://curl.se/bug/?i=10845
+ [18] = https://curl.se/bug/?i=10844
+ [20] = https://curl.se/bug/?i=10844
+ [22] = https://curl.se/bug/?i=10846
+ [23] = https://curl.se/bug/?i=10801
+ [24] = https://curl.se/bug/?i=10783
+ [25] = https://curl.se/bug/?i=10827
+ [26] = https://curl.se/bug/?i=10834
+ [28] = https://curl.se/bug/?i=10819
