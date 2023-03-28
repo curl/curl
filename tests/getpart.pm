@@ -22,7 +22,8 @@
 #
 ###########################################################################
 
-#use strict;
+use strict;
+use warnings;
 use Memoize;
 use MIME::Base64;
 
@@ -309,12 +310,12 @@ sub compareparts {
 sub writearray {
     my ($filename, $arrayref)=@_;
 
-    open(TEMP, ">$filename");
+    open(TEMP, ">$filename") || die "Failure writing file";
     binmode(TEMP,":raw"); # cygwin fix by Kevin Roth
     for(@$arrayref) {
         print TEMP $_;
     }
-    close(TEMP);
+    close(TEMP) || die "Failure writing file";
 }
 
 #
@@ -341,7 +342,7 @@ sub showdiff {
     my $file1="$logdir/check-generated";
     my $file2="$logdir/check-expected";
 
-    open(TEMP, ">$file1");
+    open(TEMP, ">$file1") || die "Failure writing diff file";
     for(@$firstref) {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
@@ -350,9 +351,9 @@ sub showdiff {
         print TEMP $l;
         print TEMP "\n";
     }
-    close(TEMP);
+    close(TEMP) || die "Failure writing diff file";
 
-    open(TEMP, ">$file2");
+    open(TEMP, ">$file2") || die "Failure writing diff file";
     for(@$secondref) {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
@@ -361,7 +362,7 @@ sub showdiff {
         print TEMP $l;
         print TEMP "\n";
     }
-    close(TEMP);
+    close(TEMP) || die "Failure writing diff file";
     my @out = `diff -u $file2 $file1 2>/dev/null`;
 
     if(!$out[0]) {
