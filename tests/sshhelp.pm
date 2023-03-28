@@ -26,7 +26,6 @@ package sshhelp;
 
 use strict;
 use warnings;
-use Exporter;
 use File::Spec;
 
 
@@ -34,7 +33,6 @@ use File::Spec;
 # Global symbols allowed without explicit package name
 #
 use vars qw(
-    @ISA
     @EXPORT_OK
     $sshdexe
     $sshexe
@@ -64,7 +62,7 @@ use vars qw(
 #***************************************************************************
 # Inherit Exporter's capabilities
 #
-@ISA = qw(Exporter);
+use base qw(Exporter);
 
 
 #***************************************************************************
@@ -214,7 +212,7 @@ sub dump_array {
     }
     elsif(open(TEXTFH, ">$filename")) {
         foreach my $line (@arr) {
-            $line .= "\n" unless($line =~ /\n$/);
+            $line .= "\n" if($line !~ /\n$/);
             print TEXTFH $line;
         }
         if(!close(TEXTFH)) {
@@ -319,6 +317,7 @@ sub find_file {
             return $file;
         }
     }
+    return "";
 }
 
 
@@ -337,6 +336,7 @@ sub find_exe_file {
             return $file if(($xext) && (lc($file) =~ /\Q$xext\E$/));
         }
     }
+    return "";
 }
 
 
@@ -420,6 +420,7 @@ sub find_httptlssrv {
         }
         return $p if($found);
     }
+    return "";
 }
 
 
