@@ -157,6 +157,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = "$path/". $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--sshport') {
         if($ARGV[1]) {
             if($ARGV[1] =~ /^(\d+)$/) {
