@@ -1019,7 +1019,7 @@ static int parse_servercmd(struct testcase *req)
   FILE *stream;
   int error;
 
-  stream = test2fopen(req->testno);
+  stream = test2fopen(req->testno, logdir);
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -1130,7 +1130,7 @@ static int validate_access(struct testcase *test,
 
     (void)parse_servercmd(test);
 
-    stream = test2fopen(testno);
+    stream = test2fopen(testno, logdir);
 
     if(0 != partno)
       msnprintf(partbuf, sizeof(partbuf), "data%ld", partno);

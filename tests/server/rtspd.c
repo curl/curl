@@ -290,7 +290,7 @@ static int ProcessRequest(struct httprequest *req)
                 req->testno, req->partno);
       logmsg("%s", logbuf);
 
-      stream = test2fopen(req->testno);
+      stream = test2fopen(req->testno, logdir);
 
       if(!stream) {
         int error = errno;
@@ -854,7 +854,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     count = strlen(buffer);
   }
   else {
-    FILE *stream = test2fopen(req->testno);
+    FILE *stream = test2fopen(req->testno, logdir);
     char partbuf[80]="data";
     if(0 != req->partno)
       msnprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
@@ -880,7 +880,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
 
     /* re-open the same file again */
-    stream = test2fopen(req->testno);
+    stream = test2fopen(req->testno, logdir);
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
