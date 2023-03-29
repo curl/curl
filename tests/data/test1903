@@ -33,7 +33,7 @@ CURLOPT_COOKIEFILE then reset then set again
 lib%TESTNUMBER
 </tool>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER
 </command>
 <file name="%LOGDIR/cookies%TESTNUMBER" mode="text">
 # Netscape HTTP Cookie File
