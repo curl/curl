@@ -4472,6 +4472,8 @@ sub singletest_check {
             logmsg "\n $testnum: protocol FAILED!\n".
                 " There was no content at all in the file $SERVERIN.\n".
                 " Server glitch? Total curl failure? Returned: $cmdres\n";
+            # timestamp test result verification end
+            $timevrfyend{$testnum} = Time::HiRes::time();
             return -1;
         }
 
