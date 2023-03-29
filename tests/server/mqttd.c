@@ -646,7 +646,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       /* there's a QoS byte (two bits) after the topic */
 
       logmsg("SUBSCRIBE to '%s' [%d]", topic, packet_id);
-      stream = test2fopen(testno);
+      stream = test2fopen(testno, logdir);
       error = getpart(&data, &datalen, "reply", "data", stream);
       if(!error) {
         if(!config.publish_before_suback) {
