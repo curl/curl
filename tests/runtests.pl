@@ -1885,6 +1885,7 @@ sub runpingpongserver {
 
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--portfile \"$portfile\" ";
     $flags .= "--srcdir \"$srcdir\" --proto $proto ";
     $flags .= "--id $idnum " if($idnum > 1);
