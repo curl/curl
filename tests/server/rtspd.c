@@ -133,11 +133,13 @@ static void storerequest(char *reqbuf, size_t totalsize);
 #endif
 
 const char *serverlogfile = DEFAULT_LOGFILE;
+const char *logdir = "log";
+char loglockfile[256];
 
 #define RTSPDVERSION "curl test suite RTSP server/0.1"
 
-#define REQUEST_DUMP  "log/server.input"
-#define RESPONSE_DUMP "log/server.response"
+#define REQUEST_DUMP  "server.input"
+#define RESPONSE_DUMP "server.response"
 
 /* very-big-path support */
 #define MAXDOCNAMELEN 140000
@@ -604,6 +606,9 @@ static void storerequest(char *reqbuf, size_t totalsize)
   size_t written;
   size_t writeleft;
   FILE *dump;
+  char dumpfile[256];
+
+  msnprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
 
   if(!reqbuf)
     return;
@@ -611,12 +616,12 @@ static void storerequest(char *reqbuf, size_t totalsize)
     return;
 
   do {
-    dump = fopen(REQUEST_DUMP, "ab");
+    dump = fopen(dumpfile, "ab");
   } while(!dump && ((error = errno) == EINTR));
   if(!dump) {
     logmsg("Error opening file %s error: %d %s",
-           REQUEST_DUMP, error, strerror(error));
-    logmsg("Failed to write request input to " REQUEST_DUMP);
+           dumpfile, error, strerror(error));
+    logmsg("Failed to write request input to %s", dumpfile);
     return;
   }
 
@@ -631,12 +636,12 @@ static void storerequest(char *reqbuf, size_t totalsize)
   } while((writeleft > 0) && ((error = errno) == EINTR));
 
   if(writeleft == 0)
-    logmsg("Wrote request (%zu bytes) input to " REQUEST_DUMP, totalsize);
+    logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
   else if(writeleft > 0) {
     logmsg("Error writing file %s error: %d %s",
-           REQUEST_DUMP, error, strerror(error));
+           dumpfile, error, strerror(error));
     logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
-           totalsize-writeleft, totalsize, REQUEST_DUMP);
+           totalsize-writeleft, totalsize, dumpfile);
   }
 
 storerequest_cleanup:
@@ -646,7 +651,7 @@ storerequest_cleanup:
   } while(res && ((error = errno) == EINTR));
   if(res)
     logmsg("Error closing file %s error: %d %s",
-           REQUEST_DUMP, error, strerror(error));
+           dumpfile, error, strerror(error));
 }
 
 /* return 0 on success, non-zero on failure */
@@ -775,8 +780,11 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   size_t responsesize;
   int error = 0;
   int res;
-
   static char weare[256];
+  char responsedump[256];
+
+  msnprintf(responsedump, sizeof(responsedump), "%s/%s",
+            logdir, RESPONSE_DUMP);
 
   logmsg("Send response number %ld part %ld", req->testno, req->partno);
 
@@ -916,12 +924,12 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   else
     prevbounce = FALSE;
 
-  dump = fopen(RESPONSE_DUMP, "ab");
+  dump = fopen(responsedump, "ab");
   if(!dump) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", RESPONSE_DUMP);
-    logmsg("couldn't create logfile: " RESPONSE_DUMP);
+    logmsg("Error opening file: %s", responsedump);
+    logmsg("couldn't create logfile: %s", responsedump);
     free(ptr);
     free(cmd);
     return -1;
@@ -978,7 +986,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   } while(res && ((error = errno) == EINTR));
   if(res)
     logmsg("Error closing file %s error: %d %s",
-           RESPONSE_DUMP, error, strerror(error));
+           responsedump, error, strerror(error));
 
   if(got_exit_signal) {
     free(ptr);
@@ -995,8 +1003,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     return -1;
   }
 
-  logmsg("Response sent (%zu bytes) and written to " RESPONSE_DUMP,
-         responsesize);
+  logmsg("Response sent (%zu bytes) and written to %s",
+         responsesize, responsedump);
   free(ptr);
 
   if(cmdsize > 0) {
@@ -1091,6 +1099,11 @@ int main(int argc, char *argv[])
       if(argc>arg)
         serverlogfile = argv[arg++];
     }
+    else if(!strcmp("--logdir", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        logdir = argv[arg++];
+    }
     else if(!strcmp("--ipv4", argv[arg])) {
 #ifdef ENABLE_IPV6
       ipv_inuse = "IPv4";
@@ -1125,6 +1138,7 @@ int main(int argc, char *argv[])
       puts("Usage: rtspd [option]\n"
            " --version\n"
            " --logfile [file]\n"
+           " --logdir [directory]\n"
            " --pidfile [file]\n"
            " --portfile [file]\n"
            " --ipv4\n"
@@ -1134,6 +1148,9 @@ int main(int argc, char *argv[])
       return 0;
     }
   }
+
+  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s",
+            logdir, SERVERLOGS_LOCK);
 
 #ifdef WIN32
   win32_init();
@@ -1279,7 +1296,7 @@ int main(int argc, char *argv[])
     ** logs should not be read until this lock is removed by this server.
     */
 
-    set_advisor_read_lock(SERVERLOGS_LOCK);
+    set_advisor_read_lock(loglockfile);
     serverlogslocked = 1;
 
     logmsg("====> Client connect");
@@ -1351,7 +1368,7 @@ int main(int argc, char *argv[])
 
     if(serverlogslocked) {
       serverlogslocked = 0;
-      clear_advisor_read_lock(SERVERLOGS_LOCK);
+      clear_advisor_read_lock(loglockfile);
     }
 
     if(req.testno == DOCNUMBER_QUIT)
@@ -1376,7 +1393,7 @@ server_cleanup:
 
   if(serverlogslocked) {
     serverlogslocked = 0;
-    clear_advisor_read_lock(SERVERLOGS_LOCK);
+    clear_advisor_read_lock(loglockfile);
   }
 
   restore_signal_handlers(false);

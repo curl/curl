@@ -32,7 +32,7 @@ long timediff(struct timeval newer, struct timeval older);
 #define TEST_DATA_PATH "%s/data/test%ld"
 #define ALTTEST_DATA_PATH "%s/log/test%ld"
 
-#define SERVERLOGS_LOCK "log/serverlogs.lock"
+#define SERVERLOGS_LOCK "serverlogs.lock"
 
 /* global variable, where to find the 'data' dir */
 extern const char *path;
