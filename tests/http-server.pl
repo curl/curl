@@ -49,6 +49,7 @@ my $proto = 'http';  # protocol the http server speaks
 my $pidfile;         # pid file
 my $portfile;        # port number file
 my $logfile;         # log file
+my $cmdfile;         # command file
 my $connect;         # IP to connect to on CONNECT
 my $srcdir;
 my $gopher = 0;
@@ -70,9 +71,21 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--config') {
+        if($ARGV[1]) {
+            $cmdfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--logfile') {
         if($ARGV[1]) {
             $logfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = $ARGV[1];
             shift @ARGV;
         }
     }
@@ -139,7 +152,9 @@ if(!$logfile) {
 }
 
 $flags .= "--pidfile \"$pidfile\" ".
+    "--cmdfile \"$cmdfile\" ".
     "--logfile \"$logfile\" ".
+    "--logdir \"$logdir\" ".
     "--portfile \"$portfile\" ";
 $flags .= "--gopher " if($gopher);
 $flags .= "--connect $connect " if($connect);
