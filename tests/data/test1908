@@ -51,7 +51,7 @@ lib%TESTNUMBER
 </tool>
 
 <command>
-%HOSTIP:%HTTPPORT/%TESTNUMBER
+%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/altsvc-%TESTNUMBER
 </command>
 </client>
 

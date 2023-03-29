@@ -24,8 +24,8 @@
 #include "test.h"
 #include "memdebug.h"
 
-static const char *HOSTHEADER = "Host: www.host.foo.com";
-static const char *JAR = "log/jar506";
+static const char * const HOSTHEADER = "Host: www.host.foo.com";
+#define JAR libtest_arg2
 #define THREADS 2
 
 /* struct containing data of a thread */
