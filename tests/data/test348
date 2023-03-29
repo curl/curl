@@ -21,7 +21,7 @@ ftp
  <name>
 FTP upload file with 552 disk full response
  </name>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
       see
@@ -30,7 +30,7 @@ works
   so does it?
 </file>
  <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 </client>
 

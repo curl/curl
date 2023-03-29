@@ -36,13 +36,13 @@ ftp
 FTP download, file with C-D inside, using -O -i -D file
 </name>
 <setenv>
-CURL_TESTDIR=%PWD/log
+CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -i -D log/heads%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -i -D %LOGDIR/heads%TESTNUMBER
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/name%TESTNUMBER
+perl %SRCDIR/libtest/notexists.pl %LOGDIR/name%TESTNUMBER
 </postcheck>
 </client>
 
@@ -60,7 +60,7 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file%TESTNUMBER">
+<file1 name="%LOGDIR/file%TESTNUMBER">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -72,7 +72,7 @@ Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 MOOOO
 </file1>
 
-<file2 name="log/heads%TESTNUMBER">
+<file2 name="%LOGDIR/heads%TESTNUMBER">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    
@@ -92,7 +92,7 @@ MOOOO
 s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 </stripfile2>
 
-<file3 name="log/stdout%TESTNUMBER">
+<file3 name="%LOGDIR/stdout%TESTNUMBER">
 </file3>
 
 </verify>

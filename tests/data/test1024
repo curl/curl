@@ -75,7 +75,7 @@ http
 HTTP Location: following with cookies
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -c log/jar%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -c %LOGDIR/jar%TESTNUMBER
 </command>
 <features>
 cookies

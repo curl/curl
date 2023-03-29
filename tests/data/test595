@@ -36,7 +36,7 @@ lib585
 verify close callbacks with passive FTP
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER log/ip%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 

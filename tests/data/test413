@@ -41,9 +41,9 @@ alt-svc using host name with trailing dot on host from file
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
  <command>
---alt-svc "log/altsvc-%TESTNUMBER" "http://whohoo:12345/%TESTNUMBER"
+--alt-svc "%LOGDIR/altsvc-%TESTNUMBER" "http://whohoo:12345/%TESTNUMBER"
 </command>
-<file name="log/altsvc-%TESTNUMBER">
+<file name="%LOGDIR/altsvc-%TESTNUMBER">
 h1 whohoo. 12345 h1 %HOSTIP %HTTPPORT "20290222 22:19:28" 0 0
 </file>
 

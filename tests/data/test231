@@ -23,9 +23,9 @@ file
 file:// with resume
  </name>
 <command option="no-include">
-file://localhost%FILE_PWD/log/test%TESTNUMBER.txt -C 10
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt -C 10
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 A01234567
 B01234567
 C01234567

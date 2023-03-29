@@ -30,9 +30,9 @@ http
 netrc with multiple logins - pick second
  </name>
  <command>
---netrc-optional --netrc-file log/netrc%TESTNUMBER http://user2@%HOSTIP:%HTTPPORT/
+--netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER http://user2@%HOSTIP:%HTTPPORT/
 </command>
-<file name="log/netrc%TESTNUMBER" >
+<file name="%LOGDIR/netrc%TESTNUMBER" >
 machine %HOSTIP login user1 password passwd1
 machine %HOSTIP login user2 password passwd2
 </file>

@@ -27,9 +27,9 @@ http
 --write-out from file with empty file
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w @log/blank%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w @%LOGDIR/blank%TESTNUMBER
 </command>
-<file name="log/blank%TESTNUMBER">
+<file name="%LOGDIR/blank%TESTNUMBER">
 </file>
 </client>
 

@@ -36,7 +36,7 @@ http
 HTTP header line folding
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D log/out%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/out%TESTNUMBER
 </command>
 </client>
 
@@ -50,7 +50,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/out%TESTNUMBER">
+<file name="%LOGDIR/out%TESTNUMBER">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 %if hyper

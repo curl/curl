@@ -40,7 +40,7 @@ http
 -w individual header output
 </name>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%header{etag} %header{nope} %header{DATE}\n' -o log/%TESTNUMBER.out
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%header{etag} %header{nope} %header{DATE}\n' -o %LOGDIR/%TESTNUMBER.out
 </command>
 </client>
 

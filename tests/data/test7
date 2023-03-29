@@ -32,7 +32,7 @@ http
 HTTP with cookie parser and header recording
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b none -D log/heads%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b none -D %LOGDIR/heads%TESTNUMBER.txt
 </command>
 </client>
 
@@ -45,7 +45,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/heads%TESTNUMBER.txt">
+<file name="%LOGDIR/heads%TESTNUMBER.txt">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

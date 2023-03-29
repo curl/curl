@@ -26,7 +26,7 @@ ftp
  <name>
 FTP STARTTLS pipelined server response
  </name>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
       see
@@ -35,7 +35,7 @@ works
   so does it?
 </file>
  <command>
---ssl --ftp-ssl-control ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt -u user:secret -P %CLIENTIP
+--ssl --ftp-ssl-control ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt -u user:secret -P %CLIENTIP
 </command>
 </client>
 

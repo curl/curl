@@ -67,9 +67,9 @@ crypto
 HTTP PUT with --anyauth authorization (picking Digest)
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T log/put%TESTNUMBER -u testuser:testpass --anyauth
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/put%TESTNUMBER -u testuser:testpass --anyauth
 </command>
-<file name="log/put%TESTNUMBER">
+<file name="%LOGDIR/put%TESTNUMBER">
 This is data we upload with PUT
 a second line
 line three

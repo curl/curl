@@ -82,7 +82,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/stderr%TESTNUMBER" mode="text">
+<file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
 %if !hyper
 * Ignoring Content-Length in CONNECT 200 response
 * Ignoring Transfer-Encoding in CONNECT 200 response

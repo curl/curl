@@ -35,7 +35,7 @@ nothing
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/memdump">
+<file name="%LOGDIR/memdump">
 MEM easy.c: malloc()
 MEM lib%TESTNUMBER.c: malloc()
 MEM lib%TESTNUMBER.c: free()

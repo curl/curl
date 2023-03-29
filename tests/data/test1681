@@ -33,9 +33,9 @@ http
 http
 </features>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/exist%TESTNUMBER --no-clobber -w '%{filename_effective}\n'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/exist%TESTNUMBER --no-clobber -w '%{filename_effective}\n'
 </command>
-<file name="log/exist%TESTNUMBER">
+<file name="%LOGDIR/exist%TESTNUMBER">
 to stay the same
 </file>
 </client>
@@ -43,10 +43,10 @@ to stay the same
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/exist%TESTNUMBER">
+<file name="%LOGDIR/exist%TESTNUMBER">
 to stay the same
 </file>
-<file1 name="log/exist%TESTNUMBER.1">
+<file1 name="%LOGDIR/exist%TESTNUMBER.1">
 HTTP/1.0 200 OK
 Connection: close
 Content-Type: text/plain
@@ -55,7 +55,7 @@ Content-Length: 4
 foo
 </file1>
 <stdout mode="text">
-log/exist%TESTNUMBER.1
+%LOGDIR/exist%TESTNUMBER.1
 </stdout>
 </verify>
 </testcase>

@@ -37,13 +37,13 @@ Content-Type: text/3
 #
 # Client-side
 <client>
-<file1 name="log/config%TESTNUMBER-a">
+<file1 name="%LOGDIR/config%TESTNUMBER-a">
 --next
 url = %HOSTIP:%HTTPPORT/%TESTNUMBER0001
 header = "a: a"
 data = "a"
 </file1>
-<file2 name="log/config%TESTNUMBER-b">
+<file2 name="%LOGDIR/config%TESTNUMBER-b">
 --next
 url = %HOSTIP:%HTTPPORT/%TESTNUMBER0002
 header = "b: b"
@@ -57,7 +57,7 @@ http
 Two -K uses with --next and then one on cmdline
  </name>
  <command>
--K log/config%TESTNUMBER-a -K log/config%TESTNUMBER-b --next -d c %HOSTIP:%HTTPPORT/%TESTNUMBER0003 -H "c: c"
+-K %LOGDIR/config%TESTNUMBER-a -K %LOGDIR/config%TESTNUMBER-b --next -d c %HOSTIP:%HTTPPORT/%TESTNUMBER0003 -H "c: c"
 </command>
 </client>
 

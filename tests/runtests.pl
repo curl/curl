@@ -156,6 +156,8 @@ my $LOGDIR="log";
 my $TESTDIR="$srcdir/data";
 my $LIBDIR="./libtest";
 my $UNITDIR="./unit";
+# TODO: $LOGDIR could eventually change later on, so must regenerate all the
+# paths depending on it after $LOGDIR itself changes.
 # TODO: change this to use server_inputfilename()
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
@@ -3332,6 +3334,7 @@ sub subVariables {
 
     # misc
     $$thing =~ s/${prefix}CURL/$CURL/g;
+    $$thing =~ s/${prefix}LOGDIR/$LOGDIR/g;
     $$thing =~ s/${prefix}PWD/$pwd/g;
     $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
     $$thing =~ s/${prefix}VERSION/$CURLVERSION/g;
@@ -3809,7 +3812,7 @@ sub singletest_preprocess {
     # Save a preprocessed version of the entire test file. This allows more
     # "basic" test case readers to enjoy variable replacements.
     my @entiretest = fulltest();
-    my $otest = "log/test$testnum";
+    my $otest = "$LOGDIR/test$testnum";
 
     @entiretest = prepro($testnum, @entiretest);
 
@@ -3821,7 +3824,7 @@ sub singletest_preprocess {
     close($fulltesth) || die "Failure writing test file";
 
     # in case the process changed the file, reload it
-    loadtest("log/test${testnum}");
+    loadtest("$LOGDIR/test${testnum}");
 }
 
 
@@ -3885,7 +3888,7 @@ sub singletest_precheck {
                 $cmd = join(" ", @p);
             }
 
-            my @o = `$cmd 2>log/precheck-$testnum`;
+            my @o = `$cmd 2> $LOGDIR/precheck-$testnum`;
             if($o[0]) {
                 $why = $o[0];
                 chomp $why;
@@ -3970,8 +3973,8 @@ sub singletest_prepare {
             # cut off the file name part
             $path =~ s/^(.*)\/[^\/]*/$1/;
             my @parts = split(/\//, $path);
-            if($parts[0] eq "log") {
-                # the file is in log/
+            if($parts[0] eq $LOGDIR) {
+                # the file is in $LOGDIR/
                 my $d = shift @parts;
                 for(@parts) {
                     $d .= "/$_";
@@ -4062,10 +4065,10 @@ sub singletest_run {
         $cmdargs = "$out$inc ";
 
         if($cmdhash{'option'} && ($cmdhash{'option'} =~ /binary-trace/)) {
-            $cmdargs .= "--trace log/trace$testnum ";
+            $cmdargs .= "--trace $LOGDIR/trace$testnum ";
         }
         else {
-            $cmdargs .= "--trace-ascii log/trace$testnum ";
+            $cmdargs .= "--trace-ascii $LOGDIR/trace$testnum ";
         }
         $cmdargs .= "--trace-time ";
         if($run_event_based) {
@@ -6356,7 +6359,7 @@ foreach my $testnum (@at) {
             $failed.= "$testnum ";
         }
         if($postmortem) {
-            # display all files in log/ in a nice way
+            # display all files in $LOGDIR/ in a nice way
             displaylogs($testnum);
         }
         if($error==2) {

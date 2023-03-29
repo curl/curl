@@ -32,11 +32,11 @@ https
 HTTPS GET with very long request header
  </name>
 # 14 characters repeated 3500 times makes 49000 bytes
-<file name="log/file%TESTNUMBER">
+<file name="%LOGDIR/file%TESTNUMBER">
 Long: %repeat[3500 x header content]%
 </file>
  <command>
--k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER -H @log/file%TESTNUMBER
+-k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER -H @%LOGDIR/file%TESTNUMBER
 </command>
 </client>
 

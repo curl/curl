@@ -34,7 +34,7 @@ http
 Both --etag-compare and -save store new Etag using non-existing file
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare log/etag%TESTNUMBER --etag-save log/etag%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER --etag-save %LOGDIR/etag%TESTNUMBER
 </command>
 </client>
 
@@ -49,7 +49,7 @@ Accept: */*
 If-None-Match: ""
 
 </protocol>
-<file name="log/etag%TESTNUMBER">
+<file name="%LOGDIR/etag%TESTNUMBER">
 "21025-dc7-11111"
 </file>
 </verify>

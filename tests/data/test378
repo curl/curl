@@ -21,7 +21,7 @@ none
 Reject using -T and -d at once
  </name>
  <command>
--T log/%TESTNUMBER -d input http://never-accessed
+-T %LOGDIR/%TESTNUMBER -d input http://never-accessed
 </command>
 </client>
 

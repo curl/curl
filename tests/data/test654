@@ -56,7 +56,7 @@ HTTP duplicate easy handle with mime data
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 This is data from a file
 </file>
 </client>

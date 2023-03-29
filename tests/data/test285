@@ -16,9 +16,9 @@ tftp
 TFTP send
  </name>
  <command>
--T log/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//
+-T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 a chunk of
 data
 sent

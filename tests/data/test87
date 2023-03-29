@@ -40,7 +40,7 @@ http
 urlglob with out of range -o #[num] usage
  </name>
  <command option="no-output">
-"http://%HOSTIP:%HTTPPORT/[%TESTNUMBER0001-%TESTNUMBER0002]" -o "log/dumpit%TESTNUMBER-#2.dump"
+"http://%HOSTIP:%HTTPPORT/[%TESTNUMBER0001-%TESTNUMBER0002]" -o "%LOGDIR/dumpit%TESTNUMBER-#2.dump"
 </command>
 </client>
 
@@ -50,7 +50,7 @@ urlglob with out of range -o #[num] usage
 # survives
 #
 <verify>
-<file name="log/dumpit%TESTNUMBER-#2.dump">
+<file name="%LOGDIR/dumpit%TESTNUMBER-#2.dump">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 16

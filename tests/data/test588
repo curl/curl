@@ -35,9 +35,9 @@ lib525
 FTP PORT upload using multi interface, EPRT doesn't work
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER log/upload%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Moooooooooooo
  upload this
 </file>

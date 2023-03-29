@@ -31,7 +31,7 @@ imap
 IMAP and envelope meta data after body transfer
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' -u user:secret -D log/head-%TESTNUMBER
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' -u user:secret -D %LOGDIR/head-%TESTNUMBER
 </command>
 </client>
 
@@ -45,7 +45,7 @@ A003 SELECT %TESTNUMBER
 A004 FETCH 123 BODY[1]
 A005 LOGOUT
 </protocol>
-<file name="log/head-%TESTNUMBER">
+<file name="%LOGDIR/head-%TESTNUMBER">
         _   _ ____  _     
     ___| | | |  _ \| |    
    / __| | | | |_) | |    

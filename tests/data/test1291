@@ -24,14 +24,14 @@ none
 Attempt to upload 1000 files but fail immediately
 </name>
 <command>
--K log/cmd%TESTNUMBER --fail-early
+-K %LOGDIR/cmd%TESTNUMBER --fail-early
 </command>
-<file name="log/upload-this">
+<file name="%LOGDIR/upload-this">
 XXXXXXXx
 </file>
 # generate the config file
 <precheck>
-perl -e 'for(1 .. 1000) { printf("upload-file=log/upload-this\nurl=htttttp://non-existing-host.haxx.se/upload/%TESTNUMBER\n", $_);}' > log/cmd%TESTNUMBER;
+perl -e 'for(1 .. 1000) { printf("upload-file=%LOGDIR/upload-this\nurl=htttttp://non-existing-host.haxx.se/upload/%TESTNUMBER\n", $_);}' > %LOGDIR/cmd%TESTNUMBER;
 </precheck>
 </client>
 

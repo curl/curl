@@ -53,7 +53,7 @@ http
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C - -f
 </command>
-<file name="log/curl%TESTNUMBER.out">
+<file name="%LOGDIR/curl%TESTNUMBER.out">
 012345678
 012345678
 012345678

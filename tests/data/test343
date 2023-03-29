@@ -33,11 +33,11 @@ http
 <name>
 Both --etag-compare and --etag-save to save new Etag
 </name>
-<file name="log/etag%TESTNUMBER">
+<file name="%LOGDIR/etag%TESTNUMBER">
 "21025-dc7-39462498"
 </file>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare log/etag%TESTNUMBER --etag-save log/out%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER --etag-save %LOGDIR/out%TESTNUMBER
 </command>
 </client>
 
@@ -52,7 +52,7 @@ Accept: */*
 If-None-Match: "21025-dc7-39462498"
 
 </protocol>
-<file name="log/out%TESTNUMBER">
+<file name="%LOGDIR/out%TESTNUMBER">
 "21025-dc7-11111"
 </file>
 </verify>

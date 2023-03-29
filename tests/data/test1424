@@ -46,11 +46,11 @@ http
 <name>
 HTTP GET -o fname without Content-Disposition (unmet time condition)
 </name>
-<file name="log/outfile%TESTNUMBER">
+<file name="%LOGDIR/outfile%TESTNUMBER">
 original contents
 </file>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -z "dec 12 11:00:00 1999 GMT" -o log/outfile%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -z "dec 12 11:00:00 1999 GMT" -o %LOGDIR/outfile%TESTNUMBER
 </command>
 </client>
 
@@ -66,7 +66,7 @@ If-Modified-Since: Sun, 12 Dec 1999 11:00:00 GMT
 
 </protocol>
 
-<file1 name="log/outfile%TESTNUMBER">
+<file1 name="%LOGDIR/outfile%TESTNUMBER">
 original contents
 </file1>
 
