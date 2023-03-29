@@ -109,7 +109,8 @@ my $datasockf_logfile;  # log file for secondary connection sockfilt process
 #**********************************************************************
 # global vars used for server logs advisor read lock handling
 #
-my $SERVERLOGS_LOCK = 'log/serverlogs.lock';
+my $SERVERLOGS_LOCK = "serverlogs.lock";
+my $serverlogs_lockfile;
 my $serverlogslocked = 0;
 
 #**********************************************************************
@@ -201,7 +202,7 @@ sub exit_signal_handler {
     unlink($portfile);
     if($serverlogslocked) {
         $serverlogslocked = 0;
-        clear_advisor_read_lock($SERVERLOGS_LOCK);
+        clear_advisor_read_lock($serverlogs_lockfile);
     }
     exit;
 }
@@ -233,8 +234,8 @@ sub logmsg {
 
 sub ftpmsg {
   # append to the server.input file
-  open(my $input, ">>", "log/server$idstr.input") ||
-    logmsg "failed to open log/server$idstr.input\n";
+  open(my $input, ">>", "$logdir/server$idstr.input") ||
+    logmsg "failed to open $logdir/server$idstr.input\n";
 
   print $input @_;
   close($input);
@@ -401,7 +402,7 @@ sub sysread_or_die {
         unlink($portfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
-            clear_advisor_read_lock($SERVERLOGS_LOCK);
+            clear_advisor_read_lock($serverlogs_lockfile);
         }
         exit;
     }
@@ -416,7 +417,7 @@ sub sysread_or_die {
         unlink($portfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
-            clear_advisor_read_lock($SERVERLOGS_LOCK);
+            clear_advisor_read_lock($serverlogs_lockfile);
         }
         exit;
     }
@@ -445,7 +446,7 @@ sub startsf {
         unlink($portfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
-            clear_advisor_read_lock($SERVERLOGS_LOCK);
+            clear_advisor_read_lock($serverlogs_lockfile);
         }
         die "Failed to start sockfilt!";
     }
@@ -911,7 +912,7 @@ sub DATA_smtp {
         sendcontrol "354 Show me the mail\r\n";
 
         my $testno = $smtp_client;
-        my $filename = "log/upload.$testno";
+        my $filename = "$logdir/upload.$testno";
 
         logmsg "Store test number $testno in $filename\n";
 
@@ -1260,7 +1261,7 @@ sub APPEND_imap {
         sendcontrol "+ Ready for literal data\r\n";
 
         my $testno = $mailbox;
-        my $filename = "log/upload.$testno";
+        my $filename = "$logdir/upload.$testno";
 
         logmsg "Store test number $testno in $filename\n";
 
@@ -2367,7 +2368,7 @@ sub RETR_ftp {
 sub STOR_ftp {
     my $testno=$_[0];
 
-    my $filename = "log/upload.$testno";
+    my $filename = "$logdir/upload.$testno";
 
     if($datasockf_conn eq 'no') {
         if($nodataconn425) {
@@ -2815,10 +2816,10 @@ sub customize {
     %customcount = ();  #
     %delayreply = ();   #
 
-    open(my $custom, "<", "log/ftpserver.cmd") ||
+    open(my $custom, "<", "$logdir/ftpserver.cmd") ||
         return 1;
 
-    logmsg "FTPD: Getting commands from log/ftpserver.cmd\n";
+    logmsg "FTPD: Getting commands from $logdir/ftpserver.cmd\n";
 
     while(<$custom>) {
         if($_ =~ /REPLY \"([A-Z]+ [A-Za-z0-9+-\/=\*. ]+)\" (.*)/) {
@@ -2945,6 +2946,7 @@ sub customize {
 # --pidfile   # server pid file
 # --portfile  # server port file
 # --logfile   # server log file
+# --logdir    # server log directory
 # --ipv4      # server IP version 4
 # --ipv6      # server IP version 6
 # --port      # server listener port
@@ -2990,6 +2992,12 @@ while(@ARGV) {
     elsif($ARGV[0] eq '--logfile') {
         if($ARGV[1]) {
             $logfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = $ARGV[1];
             shift @ARGV;
         }
     }
@@ -3044,6 +3052,7 @@ $mainsockf_pidfile = "$path/".
     mainsockf_pidfilename($proto, $ipvnum, $idnum);
 $mainsockf_logfile =
     mainsockf_logfilename($logdir, $proto, $ipvnum, $idnum);
+$serverlogs_lockfile = "$logdir/$SERVERLOGS_LOCK";
 
 if($proto eq 'ftp') {
     $datasockf_pidfile = "$path/".
@@ -3104,7 +3113,7 @@ while(1) {
     }
     logmsg "====> Client connect\n";
 
-    set_advisor_read_lock($SERVERLOGS_LOCK);
+    set_advisor_read_lock($serverlogs_lockfile);
     $serverlogslocked = 1;
 
     # flush data:
@@ -3327,7 +3336,7 @@ while(1) {
 
     if($serverlogslocked) {
         $serverlogslocked = 0;
-        clear_advisor_read_lock($SERVERLOGS_LOCK);
+        clear_advisor_read_lock($serverlogs_lockfile);
     }
 }
 
@@ -3335,7 +3344,7 @@ killsockfilters($proto, $ipvnum, $idnum, $verbose);
 unlink($pidfile);
 if($serverlogslocked) {
     $serverlogslocked = 0;
-    clear_advisor_read_lock($SERVERLOGS_LOCK);
+    clear_advisor_read_lock($serverlogs_lockfile);
 }
 
 exit;
