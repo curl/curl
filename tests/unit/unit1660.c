@@ -125,6 +125,7 @@ UNITTEST_START
   int i;
   const char *chost;
   CURL *easy;
+  char savename[256];
   if(!h)
     return 1;
 
@@ -136,7 +137,7 @@ UNITTEST_START
     return 1;
   }
 
-  Curl_hsts_loadfile(easy, h, "log/input1660");
+  Curl_hsts_loadfile(easy, h, arg);
 
   for(i = 0; headers[i].host ; i++) {
     if(headers[i].hdr) {
@@ -169,7 +170,8 @@ UNITTEST_START
     deltatime++; /* another second passed */
   }
 
-  (void)Curl_hsts_save(easy, h, "log/hsts1660");
+  msnprintf(savename, sizeof(savename), "%s.save", arg);
+  (void)Curl_hsts_save(easy, h, savename);
   Curl_hsts_cleanup(&h);
   curl_easy_cleanup(easy);
   curl_global_cleanup();
