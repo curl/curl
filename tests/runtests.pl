@@ -1479,6 +1479,7 @@ sub runhttp2server {
 
     $flags .= "--nghttpx \"$ENV{'NGHTTPX'}\" ";
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--connect $HOSTIP:" . protoport("http") . " ";
     $flags .= $verbose_flag if($debugprotocol);
 
@@ -1552,6 +1553,7 @@ sub runhttp3server {
 
     $flags .= "--nghttpx \"$ENV{'NGHTTPX'}\" ";
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--connect $HOSTIP:" . protoport("http") . " ";
     $flags .= "--cert \"$cert\" " if($cert);
     $flags .= $verbose_flag if($debugprotocol);
@@ -1639,7 +1641,9 @@ sub runhttpserver {
     $flags .= "--connect $HOSTIP " if($alt eq "proxy");
     $flags .= $verbose_flag if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--portfile $portfile ";
+    $flags .= "--config $FTPDCMD ";
     $flags .= "--id $idnum " if($idnum > 1);
     if($ipvnum eq "unix") {
         $flags .= "--unix-socket '$port_or_path' ";
