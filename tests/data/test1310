@@ -73,6 +73,8 @@ LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
 CURL_NTLM_WB_FILE=%PWD/server/fake_ntlm
 # set source directory so fake_ntlm can find the test files
 CURL_NTLM_AUTH_SRCDIR=%SRCDIR
+# set source directory so fake_ntlm can find the test and log files
+CURL_NTLM_LOGDIR=%LOGDIR
 # set the test number
 CURL_NTLM_AUTH_TESTNUM=%TESTNUMBER
  </setenv>
