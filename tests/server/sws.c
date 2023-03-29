@@ -146,16 +146,18 @@ static void storerequest(const char *reqbuf, size_t totalsize);
 #endif
 
 const char *serverlogfile = DEFAULT_LOGFILE;
+const char *logdir = "log";
+char loglockfile[256];
 
 #define SWSVERSION "curl test suite HTTP server/0.1"
 
-#define REQUEST_DUMP  "log/server.input"
-#define RESPONSE_DUMP "log/server.response"
+#define REQUEST_DUMP  "server.input"
+#define RESPONSE_DUMP "server.response"
 
 /* when told to run as proxy, we store the logs in different files so that
    they can co-exist with the same program running as a "server" */
-#define REQUEST_PROXY_DUMP  "log/proxy.input"
-#define RESPONSE_PROXY_DUMP "log/proxy.response"
+#define REQUEST_PROXY_DUMP  "proxy.input"
+#define RESPONSE_PROXY_DUMP "proxy.response"
 
 /* file in which additional instructions may be found */
 #define DEFAULT_CMDFILE "log/ftpserver.cmd"
@@ -787,7 +789,10 @@ static void storerequest(const char *reqbuf, size_t totalsize)
   size_t written;
   size_t writeleft;
   FILE *dump;
-  const char *dumpfile = is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP;
+  char dumpfile[256];
+
+  msnprintf(dumpfile, sizeof(dumpfile), "%s/%s",
+            logdir, is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP);
 
   if(!reqbuf)
     return;
@@ -1011,8 +1016,11 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   size_t responsesize;
   int error = 0;
   int res;
-  const char *responsedump = is_proxy?RESPONSE_PROXY_DUMP:RESPONSE_DUMP;
   static char weare[256];
+  char responsedump[256];
+
+  msnprintf(responsedump, sizeof(responsedump), "%s/%s",
+            logdir, is_proxy?RESPONSE_PROXY_DUMP:RESPONSE_DUMP);
 
   switch(req->rcmd) {
   default:
@@ -1832,7 +1840,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
   */
 
   if(!serverlogslocked)
-    set_advisor_read_lock(SERVERLOGS_LOCK);
+    set_advisor_read_lock(loglockfile);
   serverlogslocked += 1;
 
   logmsg("====> Client connect");
@@ -1983,6 +1991,11 @@ int main(int argc, char *argv[])
       if(argc>arg)
         serverlogfile = argv[arg++];
     }
+    else if(!strcmp("--logdir", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        logdir = argv[arg++];
+    }
     else if(!strcmp("--cmdfile", argv[arg])) {
       arg++;
       if(argc>arg)
@@ -2062,6 +2075,7 @@ int main(int argc, char *argv[])
       puts("Usage: sws [option]\n"
            " --version\n"
            " --logfile [file]\n"
+           " --logdir [directory]\n"
            " --pidfile [file]\n"
            " --portfile [file]\n"
            " --ipv4\n"
@@ -2074,6 +2088,9 @@ int main(int argc, char *argv[])
       return 0;
     }
   }
+
+  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s",
+            logdir, SERVERLOGS_LOCK);
 
 #ifdef WIN32
   win32_init();
@@ -2329,7 +2346,7 @@ int main(int argc, char *argv[])
 
             serverlogslocked -= 1;
             if(!serverlogslocked)
-              clear_advisor_read_lock(SERVERLOGS_LOCK);
+              clear_advisor_read_lock(loglockfile);
 
             if(req->testno == DOCNUMBER_QUIT)
               goto sws_cleanup;
@@ -2375,7 +2392,7 @@ sws_cleanup:
 
   if(serverlogslocked) {
     serverlogslocked = 0;
-    clear_advisor_read_lock(SERVERLOGS_LOCK);
+    clear_advisor_read_lock(loglockfile);
   }
 
   restore_signal_handlers(false);
