@@ -33,7 +33,7 @@ CURLOPT_COOKIELIST set to "FLUSH" of a shared cookie object
 lib%TESTNUMBER
 </tool>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER
 </command>
 <features>
 cookies

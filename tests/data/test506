@@ -74,7 +74,7 @@ TZ=GMT
 lib%TESTNUMBER
 </tool>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/jar%TESTNUMBER
 </command>
 </client>
 
