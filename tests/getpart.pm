@@ -325,11 +325,12 @@ sub loadarray {
     my ($filename)=@_;
     my @array;
 
-    open(my $temp, "<", "$filename");
-    while(<$temp>) {
-        push @array, $_;
+    if (open(my $temp, "<", "$filename")) {
+        while(<$temp>) {
+            push @array, $_;
+        }
+        close($temp);
     }
-    close($temp);
     return @array;
 }
 
