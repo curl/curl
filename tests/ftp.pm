@@ -384,7 +384,7 @@ sub set_advisor_read_lock {
     if(open($fileh, ">", "$filename") && close($fileh)) {
         return;
     }
-    printf "Error creating lock file $filename error: $!";
+    printf "Error creating lock file $filename error: $!\n";
 }
 
 
