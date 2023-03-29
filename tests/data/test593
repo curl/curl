@@ -37,9 +37,9 @@ lib591
 FTP multi PORT upload, no data conn and no transient neg. reply
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 log/upload%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %FTPTIME2 %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Moooooooooooo for %TESTNUMBER
  upload this
 </file>

@@ -41,7 +41,7 @@ Accept: */*
 <errorcode>
 22
 </errorcode>
-<file2 name="log/stderr%TESTNUMBER" mode="text">
+<file2 name="%LOGDIR/stderr%TESTNUMBER" mode="text">
 curl: (22) The requested URL returned error: 404
 </file2>
 </verify>

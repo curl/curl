@@ -28,9 +28,9 @@ win32
 basic file:// file with UTF-8 characters
 </name>
 <command option="no-include">
-file://localhost%FILE_PWD/log/%E3%83%86%E3%82%B9%E3%83%88%TESTNUMBER.txt
+file://localhost%FILE_PWD/%LOGDIR/%E3%83%86%E3%82%B9%E3%83%88%TESTNUMBER.txt
 </command>
-<file name="log/テスト%TESTNUMBER.txt">
+<file name="%LOGDIR/テスト%TESTNUMBER.txt">
 foo
    bar
 bar

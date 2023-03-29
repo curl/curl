@@ -34,12 +34,12 @@ http
 HTTP GET with -Ji and Content-Disposition with existing file
 </name>
 <setenv>
-CURL_TESTDIR=%PWD/log
+CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -Ji -O
 </command>
-<file name="log/name%TESTNUMBER">
+<file name="%LOGDIR/name%TESTNUMBER">
 initial content
 </file>
 </client>
@@ -51,7 +51,7 @@ initial content
 <errorcode>
 2
 </errorcode>
-<file name="log/name%TESTNUMBER">
+<file name="%LOGDIR/name%TESTNUMBER">
 initial content
 </file>
 

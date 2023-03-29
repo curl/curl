@@ -41,7 +41,7 @@ skip: 100
 # Client-side
 <client>
 # 100 x 'x'
-<file name="log/file%TESTNUMBER">
+<file name="%LOGDIR/file%TESTNUMBER">
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 </file>
 <server>
@@ -51,7 +51,7 @@ http
 HTTP PUT expect 100-continue with a 400
  </name>
  <command option="no-output">
--H "Expect: 100-continue" -T log/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T log/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+-H "Expect: 100-continue" -T %LOGDIR/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>
 

@@ -51,10 +51,10 @@ http
 HTTP PUT with Expect: 100-continue and 417 response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 # 1053700 x 'x', large enough to invoke the 100-continue behaviour
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 %repeat[1053700 x x]%
 </file>
 </client>

@@ -28,9 +28,9 @@ https
 HTTPS PUT of small file
  </name>
  <command>
--k https://%HOSTIP:%HTTPSPORT/we/want/%TESTNUMBER -T log/test%TESTNUMBER.txt
+-k https://%HOSTIP:%HTTPSPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 %repeat[200 x banana]%
 </file>
 </client>

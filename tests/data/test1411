@@ -36,10 +36,10 @@ http
 HTTP with zero size file PUT
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T log/empty%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/empty%TESTNUMBER
 </command>
 # create an empty file
-<file name="log/empty%TESTNUMBER">
+<file name="%LOGDIR/empty%TESTNUMBER">
 </file>
 </client>
 

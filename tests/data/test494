@@ -25,9 +25,9 @@ ftp
 skip 'macdef' when parsing netrc
  </name>
  <command>
---netrc --netrc-file log/netrc%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
+--netrc --netrc-file %LOGDIR/netrc%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
-<file name="log/netrc%TESTNUMBER" >
+<file name="%LOGDIR/netrc%TESTNUMBER" >
 
 macdef testmacro
 	bin

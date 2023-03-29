@@ -31,9 +31,9 @@ http
 HTTP using proxy and cookies with path checks
  </name>
  <command>
-http://supertrooper.fake/c/%TESTNUMBER -b log/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT
+http://supertrooper.fake/c/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
-<file name="log/injar%TESTNUMBER">
+<file name="%LOGDIR/injar%TESTNUMBER">
 supertrooper.fake	FALSE	/a	FALSE	2139150993	mooo	indeed
 supertrooper.fake	FALSE	/b	FALSE	0		moo1	indeed
 supertrooper.fake	FALSE	/c	FALSE	2139150993	moo2	indeed

@@ -39,7 +39,7 @@ http
 Try to open a non existing file with --etag-compare should return an error
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare log/etag%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER
 </command>
 </client>
 

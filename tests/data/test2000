@@ -32,9 +32,9 @@ file
 FTP RETR followed by FILE
  </name>
 <command option="no-include">
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER file://localhost%FILE_PWD/log/test%TESTNUMBER.txt
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar

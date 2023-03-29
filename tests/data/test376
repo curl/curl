@@ -35,7 +35,7 @@ http
 --remove-on-error
  </name>
  <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/save-%TESTNUMBER --remove-on-error
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/save-%TESTNUMBER --remove-on-error
 </command>
 </client>
 
@@ -58,7 +58,7 @@ Accept: */*
 </protocol>
 
 # the file should be empty now
-<file name="log/save-%TESTNUMBER">
+<file name="%LOGDIR/save-%TESTNUMBER">
 </file>
 </verify>
 </testcase>

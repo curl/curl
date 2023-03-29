@@ -23,9 +23,9 @@ lib%TESTNUMBER
 FTP upload and upload same file again without rewind
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER log/upload%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Contents
 of
 a file

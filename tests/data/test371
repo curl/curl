@@ -35,7 +35,7 @@ http
 using more -o than URLs in the command line
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/dump -o log/dump2 --no-progress-meter
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/dump -o %LOGDIR/dump2 --no-progress-meter
 </command>
 </client>
 

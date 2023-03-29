@@ -28,10 +28,10 @@ ftp
 FTP download, file without C-D inside, using -O -i -D file
 </name>
 <setenv>
-CURL_TESTDIR=%PWD/log
+CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -i -D log/heads%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -i -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>
 
@@ -49,14 +49,14 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file%TESTNUMBER">
+<file1 name="%LOGDIR/file%TESTNUMBER">
 fooo
 mooo
 </file1>
 
 # The final "221 bye bye baby" response to QUIT will not be recorded
 # since that is not considered part of this particular transfer!
-<file2 name="log/heads%TESTNUMBER">
+<file2 name="%LOGDIR/heads%TESTNUMBER">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    
@@ -76,7 +76,7 @@ mooo
 s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 </stripfile2>
 
-<file3 name="log/stdout%TESTNUMBER">
+<file3 name="%LOGDIR/stdout%TESTNUMBER">
 </file3>
 
 </verify>

@@ -34,7 +34,7 @@ http
 --output using #0
  </name>
  <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o 'log/base-#0'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o '%LOGDIR/base-#0'
 </command>
 </client>
 
@@ -48,7 +48,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/base-#0">
+<file name="%LOGDIR/base-#0">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

@@ -25,11 +25,11 @@ mqtt
 <name>
 MQTT with very long user name
 </name>
-<file name="log/input%TESTNUMBER">
+<file name="%LOGDIR/input%TESTNUMBER">
 user = %repeat[65536 x a]%:fakepasswd
 </file>
 <command option="binary-trace">
-mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER -K log/input%TESTNUMBER
+mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER -K %LOGDIR/input%TESTNUMBER
 </command>
 </client>
 

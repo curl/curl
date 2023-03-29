@@ -86,7 +86,7 @@ lib%TESTNUMBER
 RTSP RTP Interleaving Test
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER log/protofile%TESTNUMBER.txt
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER %LOGDIR/protofile%TESTNUMBER.txt
 </command>
 </client>
 
@@ -114,7 +114,7 @@ RTP PAYLOAD END CORRUPTED (11), [$]
 RTP: message size 63, channel 0
 </stdout>
 
-<file name="log/protofile%TESTNUMBER.txt">
+<file name="%LOGDIR/protofile%TESTNUMBER.txt">
 $99
 </file>
 </verify>

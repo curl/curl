@@ -34,9 +34,9 @@ http
 netrc with quoted password
  </name>
  <command>
---netrc-optional --netrc-file log/netrc%TESTNUMBER http://%HOSTIP:%HTTPPORT/
+--netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER http://%HOSTIP:%HTTPPORT/
 </command>
-<file name="log/netrc%TESTNUMBER" >
+<file name="%LOGDIR/netrc%TESTNUMBER" >
 machine %HOSTIP login user1 password "with spaces and \"\n\r\t\a"
 </file>
 </client>

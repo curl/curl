@@ -20,7 +20,7 @@ none
 -K with missing file causes error
  </name>
  <command>
--K log/missing http://localhost
+-K %LOGDIR/missing http://localhost
 </command>
 </client>
 
@@ -28,7 +28,7 @@ none
 # Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
-curl: cannot read config from 'log/missing'
+curl: cannot read config from '%LOGDIR/missing'
 curl: option -K: error encountered when reading a file
 %if manual
 curl: try 'curl --help' or 'curl --manual' for more information

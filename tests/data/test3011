@@ -36,7 +36,7 @@ http
 --output-dir with --create-dirs
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -O --output-dir %PWD/log/tmp --create-dirs
+http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -O --output-dir %PWD/%LOGDIR/tmp --create-dirs
 </command>
 </client>
 
@@ -50,7 +50,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/tmp/%TESTNUMBER">
+<file name="%LOGDIR/tmp/%TESTNUMBER">
 -foo-
 </file>
 </verify>

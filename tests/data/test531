@@ -29,9 +29,9 @@ lib525
 FTP PORT upload using multi interface and get 425 response
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER log/upload%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Moooooooooooo
 don't upload this
 </file>

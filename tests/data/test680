@@ -23,9 +23,9 @@ http
 netrc with quoted password but missing end quote
  </name>
  <command>
---netrc --netrc-file log/netrc%TESTNUMBER http://user1@http.example/
+--netrc --netrc-file %LOGDIR/netrc%TESTNUMBER http://user1@http.example/
 </command>
-<file name="log/netrc%TESTNUMBER" >
+<file name="%LOGDIR/netrc%TESTNUMBER" >
 machine %HOSTIP login user1 password "with spaces and \"\n\r\t\a
 </file>
 </client>

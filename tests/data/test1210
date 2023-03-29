@@ -36,7 +36,7 @@ http
 HTTP GET with -J without Content-Disposition
 </name>
 <setenv>
-CURL_TESTDIR=%PWD/log
+CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER?junk -J -O
@@ -53,7 +53,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/%TESTNUMBER">
+<file name="%LOGDIR/%TESTNUMBER">
 12345
 </file>
 

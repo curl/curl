@@ -33,7 +33,7 @@ proxy
 https
 </features>
 
-<file name="log/input%TESTNUMBER">
+<file name="%LOGDIR/input%TESTNUMBER">
 .hsts.example "99991001 04:47:41"
 </file>
 
@@ -41,7 +41,7 @@ https
 HSTS and %{url_effective} after upgrade
 </name>
 <command>
--x http://%HOSTIP:%HTTPPORT http://this.hsts.example/%TESTNUMBER --hsts log/input%TESTNUMBER -w '%{url_effective}\n'
+-x http://%HOSTIP:%HTTPPORT http://this.hsts.example/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -w '%{url_effective}\n'
 </command>
 </client>
 

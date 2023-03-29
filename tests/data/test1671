@@ -43,7 +43,7 @@ http
 -w header JSON output
 </name>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{header_json}\n' -o log/%TESTNUMBER.out
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{header_json}\n' -o %LOGDIR/%TESTNUMBER.out
 </command>
 </client>
 

@@ -23,12 +23,12 @@ http
 HTTP with multiple transfers in one -D
 </name>
 <command>
--D log/heads%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-D %LOGDIR/heads%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 <verify>
-<file name="log/heads%TESTNUMBER">
+<file name="%LOGDIR/heads%TESTNUMBER">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6

@@ -27,12 +27,12 @@ TELNET check of upload with stdout redirected
 GET /ignore/for/%TESTNUMBER HTTP/1.0
 
 </stdin>
-<file name="log/%TESTNUMBER.txt">
+<file name="%LOGDIR/%TESTNUMBER.txt">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </file>
  <command option="no-output">
-telnet://%HOSTIP:%HTTPPORT -T log/%TESTNUMBER.txt
+telnet://%HOSTIP:%HTTPPORT -T %LOGDIR/%TESTNUMBER.txt
 </command>
 </client>
 

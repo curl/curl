@@ -37,10 +37,10 @@ http
 HTTP GET with -O -J and Content-Disposition, -D file
 </name>
 <setenv>
-CURL_TESTDIR=%PWD/log
+CURL_TESTDIR=%PWD/%LOGDIR
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D log/heads%TESTNUMBER -w "curl saved to filename %{filename_effective}\n"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D %LOGDIR/heads%TESTNUMBER -w "curl saved to filename %{filename_effective}\n"
 </command>
 </client>
 
@@ -55,11 +55,11 @@ Accept: */*
 
 </protocol>
 
-<file1 name="log/name%TESTNUMBER">
+<file1 name="%LOGDIR/name%TESTNUMBER">
 12345
 </file1>
 
-<file2 name="log/heads%TESTNUMBER">
+<file2 name="%LOGDIR/heads%TESTNUMBER">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -70,8 +70,8 @@ Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 </file2>
 
-<file3 name="log/stdout%TESTNUMBER" mode="text">
-curl saved to filename %PWD/log/name%TESTNUMBER
+<file3 name="%LOGDIR/stdout%TESTNUMBER" mode="text">
+curl saved to filename %PWD/%LOGDIR/name%TESTNUMBER
 </file3>
 
 </verify>

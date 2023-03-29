@@ -29,9 +29,9 @@ http
 HTTP, junk session cookies
  </name>
  <command>
-%HOSTIP:%HTTPPORT/want/%TESTNUMBER -b log/injar%TESTNUMBER -j
+%HOSTIP:%HTTPPORT/want/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -j
 </command>
-<file name="log/injar%TESTNUMBER">
+<file name="%LOGDIR/injar%TESTNUMBER">
 %HOSTIP	FALSE	/	FALSE	2139150993	mooo	indeed
 %HOSTIP	FALSE	/	FALSE	0		moo1	indeed
 %HOSTIP	FALSE	/	FALSE	1		moo2	indeed

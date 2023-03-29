@@ -35,7 +35,7 @@ http
 HTTP GET with -O -i without Content-Disposition, -D stdout
 </name>
 <setenv>
-CURL_TESTDIR=%PWD/log
+CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -i -O -D -
@@ -53,7 +53,7 @@ Accept: */*
 
 </protocol>
 
-<file1 name="log/%TESTNUMBER">
+<file1 name="%LOGDIR/%TESTNUMBER">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -64,7 +64,7 @@ Content-Type: text/html
 12345
 </file1>
 
-<file2 name="log/stdout%TESTNUMBER">
+<file2 name="%LOGDIR/stdout%TESTNUMBER">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

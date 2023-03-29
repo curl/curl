@@ -37,7 +37,7 @@ http
 HTTP GET with -O and --remote-time
 </name>
 <setenv>
-CURL_TESTDIR=%PWD/log
+CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O --remote-time
@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O --remote-time
 # Verify the mtime of the file. The mtime is specifically chosen to be an even
 # number so that it can be represented exactly on a FAT filesystem.
 <postcheck>
-perl -e 'exit((stat("log/%TESTNUMBER"))[9] != 960898200)'
+perl -e 'exit((stat("%LOGDIR/%TESTNUMBER"))[9] != 960898200)'
 </postcheck>
 </client>
 
@@ -59,7 +59,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/%TESTNUMBER">
+<file name="%LOGDIR/%TESTNUMBER">
 12345
 </file>
 </verify>
