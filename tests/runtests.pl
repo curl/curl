@@ -3997,14 +3997,17 @@ sub singletest_prepare {
                     mkdir $d; # 0777
                 }
             }
-            open(my $outfile, ">", "$filename");
-            binmode $outfile; # for crapage systems, use binary
-            if($fileattr{'nonewline'}) {
-                # cut off the final newline
-                chomp($fileContent);
+            if (open(my $outfile, ">", "$filename")) {
+                binmode $outfile; # for crapage systems, use binary
+                if($fileattr{'nonewline'}) {
+                    # cut off the final newline
+                    chomp($fileContent);
+                }
+                print $outfile $fileContent;
+                close($outfile);
+            } else {
+                logmsg "ERROR: cannot write $filename\n";
             }
-            print $outfile $fileContent;
-            close($outfile);
         }
     }
     return ($why, 0);
