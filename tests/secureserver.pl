@@ -167,6 +167,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = "$path/". $ARGV[1];
+            shift @ARGV;
+        }
+    }
     else {
         print STDERR "\nWarning: secureserver.pl unknown parameter: $ARGV[0]\n";
     }
@@ -183,7 +189,7 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$conffile = "$path/${proto}_stunnel.conf";
+$conffile = "$logdir/${proto}_stunnel.conf";
 
 $capath = abs_path($path);
 $certfile = "$srcdir/". ($stuncert?"certs/$stuncert":"stunnel.pem");

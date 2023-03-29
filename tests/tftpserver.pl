@@ -74,6 +74,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--srcdir') {
         if($ARGV[1]) {
             $srcdir = $ARGV[1];
@@ -119,7 +125,8 @@ if(!$logfile) {
 
 $flags .= "--pidfile \"$pidfile\" ".
     "--portfile \"$portfile\" ".
-    "--logfile \"$logfile\" ";
+    "--logfile \"$logfile\" ".
+    "--logdir \"$logdir\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;

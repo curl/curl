@@ -1735,6 +1735,7 @@ sub runhttpsserver {
 
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'stunnel.pem');
@@ -1979,6 +1980,7 @@ sub runsecureserver {
 
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'stunnel.pem');
@@ -2063,7 +2065,8 @@ sub runtftpserver {
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" ".
         "--portfile \"$portfile\" ".
-        "--logfile \"$logfile\" ";
+        "--logfile \"$logfile\" ".
+        "--logdir \"$LOGDIR\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --port 0 --srcdir \"$srcdir\"";
 
@@ -2145,7 +2148,8 @@ sub runrtspserver {
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" ".
          "--portfile \"$portfile\" ".
-        "--logfile \"$logfile\" ";
+        "--logfile \"$logfile\" ".
+        "--logdir \"$LOGDIR\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --port 0 --srcdir \"$srcdir\"";
 
@@ -2231,6 +2235,7 @@ sub runsshserver {
     $flags .= "--verbose " if($verb);
     $flags .= "--debugprotocol " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" ";
+    $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
     $flags .= "--user \"$USER\"";
@@ -2368,7 +2373,9 @@ sub runmqttserver {
         " --port 0 ".
         " --pidfile $pidfile".
         " --portfile $portfile".
-        " --config $FTPDCMD";
+        " --config $FTPDCMD".
+        " --logfile $logfile".
+        " --logdir $LOGDIR";
     my ($sockspid, $pid2) = startnew($cmd, $pidfile, 30, 0);
 
     if($sockspid <= 0 || !pidexists($sockspid)) {
@@ -2429,6 +2436,8 @@ sub runsocksserver {
     if($is_unix) {
         $cmd="server/socksd".exe_ext('SRV').
             " --pidfile $pidfile".
+            " --reqfile $SOCKSIN".
+            " --logfile $logfile".
             " --unix-socket $SOCKSUNIXPATH".
             " --backend $HOSTIP".
             " --config $FTPDCMD";
@@ -2437,6 +2446,8 @@ sub runsocksserver {
             " --port 0 ".
             " --pidfile $pidfile".
             " --portfile $portfile".
+            " --reqfile $SOCKSIN".
+            " --logfile $logfile".
             " --backend $HOSTIP".
             " --config $FTPDCMD";
     }
