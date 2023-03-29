@@ -18,6 +18,9 @@ unittest
  <name>
 netrc parsing unit tests
  </name>
+<command>
+%LOGDIR/netrc%TESTNUMBER
+</command>
 <file name="%LOGDIR/netrc%TESTNUMBER">
 machine example.com login admin password passwd
 machine curl.example.com login none password none
