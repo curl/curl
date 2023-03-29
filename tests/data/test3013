@@ -39,7 +39,7 @@ http
 Two --output-dir with --next in between
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -O --output-dir %PWD/log http://%HOSTIP:%HTTPPORT/another/%TESTNUMBER -o second%TESTNUMBER --output-dir %PWD/log
+http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -O --output-dir %PWD/%LOGDIR http://%HOSTIP:%HTTPPORT/another/%TESTNUMBER -o second%TESTNUMBER --output-dir %PWD/%LOGDIR
 </command>
 </client>
 
@@ -58,10 +58,10 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/%TESTNUMBER">
+<file name="%LOGDIR/%TESTNUMBER">
 -foo-
 </file>
-<file2 name="log/second%TESTNUMBER">
+<file2 name="%LOGDIR/second%TESTNUMBER">
 -foo-
 </file2>
 </verify>

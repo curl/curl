@@ -24,9 +24,9 @@ file
 basic file:// file
  </name>
 <command option="no-include">
-file://localhost%FILE_PWD/log/test%TESTNUMBER.txt
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar

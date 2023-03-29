@@ -35,9 +35,9 @@ http
 HTTP PUT twice
  </name>
  <command>
--H "Expect:" -T log/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 -T log/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002.upload2
+-H "Expect:" -T %LOGDIR/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 -T %LOGDIR/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002.upload2
 </command>
-<file name="log/%TESTNUMBER">
+<file name="%LOGDIR/%TESTNUMBER">
 test
 </file>
 </client>

@@ -35,9 +35,9 @@ http
 Two globbed HTTP PUTs
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T '{log/in%TESTNUMBER,log/in%TESTNUMBER}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T '{%LOGDIR/in%TESTNUMBER,%LOGDIR/in%TESTNUMBER}'
 </command>
-<file name="log/in%TESTNUMBER">
+<file name="%LOGDIR/in%TESTNUMBER">
 surprise!
 </file>
 </client>

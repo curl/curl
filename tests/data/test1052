@@ -52,9 +52,9 @@ http
 HTTP 1.0 PUT with Location: following
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -0 -L -T log/test%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -0 -L -T %LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 Weird
      file
          to

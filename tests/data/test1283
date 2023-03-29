@@ -30,7 +30,7 @@ http
 globbing range with same start and stop
 </name>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/[a-a][1-1][b-b:1][2-2:1]/%TESTNUMBER -o "log/outfile%TESTNUMBER_#1#2#3#4.dump"
+http://%HOSTIP:%HTTPPORT/[a-a][1-1][b-b:1][2-2:1]/%TESTNUMBER -o "%LOGDIR/outfile%TESTNUMBER_#1#2#3#4.dump"
 </command>
 </client>
 
@@ -43,7 +43,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/outfile%TESTNUMBER_a1b2.dump">
+<file name="%LOGDIR/outfile%TESTNUMBER_a1b2.dump">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6

@@ -44,7 +44,7 @@ Content-Type: text/html
 
 # Client-side
 <client>
-<file name="log/cookies676">
+<file name="%LOGDIR/cookies676">
 %HOSTIP	TRUE	/we/want/	FALSE	2118138987	proven	yes
 </file>
 <server>

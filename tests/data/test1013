@@ -23,7 +23,7 @@ Compare curl --version with curl-config --protocols
 --version
 </command>
 <postcheck>
-%SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config log/stdout%TESTNUMBER protocols
+%SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config %LOGDIR/stdout%TESTNUMBER protocols
 </postcheck>
 </client>
 

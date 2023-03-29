@@ -24,8 +24,8 @@ with a `testcase` tag, which encompasses the remainder of the file.
 
 When a test is to be executed, the source file is first preprocessed and
 variables are substituted by their respective contents and the output
-version of the test file is stored as `log/testNUM`. That version is what will
-be read and used by the test servers.
+version of the test file is stored as `%LOGDIR/testNUM`. That version is what
+will be read and used by the test servers.
 
 ## Base64 Encoding
 
@@ -137,6 +137,7 @@ Available substitute variables include:
 - `%SOCKSUNIXPATH` - Absolute Path to the Unix socket of the SOCKS server
 - `%IMAP6PORT` - IPv6 port number of the IMAP server
 - `%IMAPPORT` - Port number of the IMAP server
+- `%LOGDIR` - Log directory relative to %PWD
 - `%MQTTPORT` - Port number of the MQTT server
 - `%TELNETPORT` - Port number of the telnet server
 - `%NOLISTENPORT` - Port number where no service is listening
@@ -554,7 +555,7 @@ parameter is the not negative integer number of seconds for the delay. This
 'delay' attribute is intended for specific test cases, and normally not
 needed.
 
-### `<file name="log/filename" [nonewline="yes"]>`
+### `<file name="%LOGDIR/filename" [nonewline="yes"]>`
 This creates the named file with this content before the test case is run,
 which is useful if the test case needs a file to act on.
 
@@ -620,7 +621,7 @@ before comparing with the one actually received by the client
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
 
-### `<file name="log/filename" [mode="text"]>`
+### `<file name="%LOGDIR/filename" [mode="text"]>`
 The file's contents must be identical to this after the test is complete. Use
 the mode="text" attribute if the output is in text mode on platforms that have
 a text/binary difference.

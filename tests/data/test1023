@@ -23,7 +23,7 @@ Compare curl --version with curl-config --vernum
 --version
 </command>
 <postcheck>
-%SRCDIR/libtest/test1022.pl ../curl-config log/stdout%TESTNUMBER vernum
+%SRCDIR/libtest/test1022.pl ../curl-config %LOGDIR/stdout%TESTNUMBER vernum
 </postcheck>
 </client>
 

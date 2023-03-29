@@ -54,7 +54,7 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
-<file name="log/stderr%TESTNUMBER" mode="text">
+<file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
 == Info: Connection #0 to host %HOSTIP left intact
 == Info: Connection #0 to host %HOSTIP left intact
 == Info: Connection #0 to host %HOSTIP left intact

@@ -32,9 +32,9 @@ http
 HTTP POST with server closing connection before (all) data is received
  </name>
  <command>
- -d @log/input%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H "Expect: 100-continue"
+ -d @%LOGDIR/input%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H "Expect: 100-continue"
 </command>
-<file name="log/input%TESTNUMBER">
+<file name="%LOGDIR/input%TESTNUMBER">
 This creates the named file with this content before the test case is run,
 which is useful if the test case needs a file to act on. We create this file
 rather large (larger than your typical TCP packet) so that not all of it can nor

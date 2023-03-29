@@ -16,12 +16,12 @@ Verify that runtests.pl accepts an -L option
 </name>
 
 <command type="perl">
-%SRCDIR/runtests.pl -L %SRCDIR/log/test1196-library.pl
+%SRCDIR/runtests.pl -L %SRCDIR/%LOGDIR/test1196-library.pl
 </command>
 # Create a simple perl snippet that lets runtests.pl
 # exit with a code we can check.
 <precheck>
-echo 'exit 123' > %SRCDIR/log/test1196-library.pl
+echo 'exit 123' > %SRCDIR/%LOGDIR/test1196-library.pl
 </precheck>
 
 </client>

@@ -35,12 +35,12 @@ http
 Two globbed HTTP PUTs to two globbed URLs
  </name>
  <command>
-'http://%HOSTIP:%HTTPPORT/{one,two}/' -T '{log/first%TESTNUMBER,log/second%TESTNUMBER}' -H "Testno: %TESTNUMBER"
+'http://%HOSTIP:%HTTPPORT/{one,two}/' -T '{%LOGDIR/first%TESTNUMBER,%LOGDIR/second%TESTNUMBER}' -H "Testno: %TESTNUMBER"
 </command>
-<file name="log/first%TESTNUMBER">
+<file name="%LOGDIR/first%TESTNUMBER">
 first %TESTNUMBER contents
 </file>
-<file1 name="log/second%TESTNUMBER">
+<file1 name="%LOGDIR/second%TESTNUMBER">
 second %TESTNUMBER contents
 </file1>
 </client>

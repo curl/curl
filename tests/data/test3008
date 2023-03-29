@@ -36,7 +36,7 @@ http
 --output-dir
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -O --output-dir %PWD/log
+http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -O --output-dir %PWD/%LOGDIR
 </command>
 </client>
 
@@ -50,7 +50,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/%TESTNUMBER">
+<file name="%LOGDIR/%TESTNUMBER">
 -foo-
 </file>
 </verify>

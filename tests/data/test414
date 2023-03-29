@@ -55,7 +55,7 @@ https
 HTTPS sec-cookie, HTTP redirect, same name cookie, redirect back
 </name>
 <command>
-https://attack.invalid:%HTTPSPORT/a/b/%TESTNUMBER -k -c log/cookie%TESTNUMBER --resolve attack.invalid:%HTTPSPORT:%HOSTIP --resolve attack.invalid:%HTTPPORT:%HOSTIP -L
+https://attack.invalid:%HTTPSPORT/a/b/%TESTNUMBER -k -c %LOGDIR/cookie%TESTNUMBER --resolve attack.invalid:%HTTPSPORT:%HOSTIP --resolve attack.invalid:%HTTPPORT:%HOSTIP -L
 </command>
 </client>
 

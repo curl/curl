@@ -24,9 +24,9 @@ lib%TESTNUMBER
 CURLINFO_PROTOCOL for file:// transfer
 </name>
 <command>
-file://%FILE_PWD/log/data%TESTNUMBER
+file://%FILE_PWD/%LOGDIR/data%TESTNUMBER
 </command>
-<file name="log/data%TESTNUMBER">
+<file name="%LOGDIR/data%TESTNUMBER">
 hello
 </file>
 </client>

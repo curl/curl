@@ -71,9 +71,9 @@ proxy
 HTTP PUT with Digest auth, resumed upload and modified method, twice
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 -T log/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 -T log/%TESTNUMBER -u auser:apasswd --digest -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 -T %LOGDIR/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 -T %LOGDIR/%TESTNUMBER -u auser:apasswd --digest -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
 </command>
-<file name="log/%TESTNUMBER">
+<file name="%LOGDIR/%TESTNUMBER">
 test
 </file>
 </client>
