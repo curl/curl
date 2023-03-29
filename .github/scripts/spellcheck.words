@@ -406,6 +406,7 @@ LineageOS
 linux
 ln
 localhost
+LOGDIR
 logfile
 lookups
 loopback
@@ -583,6 +584,7 @@ pthreads
 PTR
 ptr
 punycode
+PWD
 py
 pycurl
 pytest
