@@ -201,10 +201,10 @@ ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
  * Repeated calls return the same information until the buffer queue
  * is modified, see `Curl_bufq_skip()``
  */
-bool Curl_bufq_peek(const struct bufq *q,
+bool Curl_bufq_peek(struct bufq *q,
                     const unsigned char **pbuf, size_t *plen);
 
-bool Curl_bufq_peek_at(const struct bufq *q, size_t offset,
+bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
                        const unsigned char **pbuf, size_t *plen);
 
 /**

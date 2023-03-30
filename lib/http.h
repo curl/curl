@@ -29,6 +29,7 @@
 #include <pthread.h>
 #endif
 
+#include "bufq.h"
 #include "dynhds.h"
 #include "ws.h"
 
@@ -227,14 +228,12 @@ struct HTTP {
 #ifdef USE_NGHTTP2
   /*********** for HTTP/2 we store stream-local data here *************/
   int32_t stream_id; /* stream we are interested in */
-
-  /* We store non-final and final response headers here, per-stream */
-  struct dynbuf header_recvbuf;
-  size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
-                                  upper layer */
-  struct dynbuf trailer_recvbuf;
-  const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
-  size_t pauselen; /* the number of bytes left in data */
+  struct bufq h2_sendbuf; /* request body data buffere for sending */
+  size_t h2_send_hds_len; /* amount of bytes in first cf_send() that
+                             are header bytes. Or 0 if not known. */
+  struct bufq h2_recvbuf;
+  size_t h2_recv_hds_len; /* how many bytes in recvbuf are headers */
+  struct dynhds resp_trailers;
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
 
   char **push_headers;       /* allocated array */
@@ -346,6 +345,7 @@ struct http_req {
   char *authority;
   char *path;
   struct dynhds headers;
+  struct dynhds trailers;
 };
 
 /**
@@ -366,6 +366,7 @@ struct http_resp {
   int status;
   char *description;
   struct dynhds headers;
+  struct dynhds trailers;
   struct http_resp *prev;
 };
 

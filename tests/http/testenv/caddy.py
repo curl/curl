@@ -126,10 +126,8 @@ class Caddy:
             r = curl.http_get(url=check_url)
             if r.exit_code == 0:
                 return True
-            log.error(f'curl: {r}')
-            log.debug(f'waiting for caddy to become responsive: {r}')
             time.sleep(.1)
-        log.error(f"Server still not responding after {timeout}")
+        log.error(f"Caddy still not responding after {timeout}")
         return False
 
     def _rmf(self, path):
