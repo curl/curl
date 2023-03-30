@@ -50,6 +50,8 @@ class TestUpload:
     def test_07_01_upload_1_small(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
         data = '0123456789'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
@@ -64,6 +66,8 @@ class TestUpload:
     def test_07_02_upload_1_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
@@ -79,6 +83,8 @@ class TestUpload:
     def test_07_10_upload_sequential(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         count = 50
         data = '0123456789'
         curl = CurlClient(env=env)
@@ -95,6 +101,8 @@ class TestUpload:
     def test_07_11_upload_parallel(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         # limit since we use a separate connection in h1
         count = 50
         data = '0123456789'
@@ -113,6 +121,8 @@ class TestUpload:
     def test_07_20_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         count = 50
         curl = CurlClient(env=env)
@@ -131,6 +141,8 @@ class TestUpload:
     def test_07_12_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 2
         curl = CurlClient(env=env)
@@ -149,6 +161,8 @@ class TestUpload:
     def test_07_20_upload_parallel(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         # limit since we use a separate connection in h1
         count = 50
         data = '0123456789'
@@ -167,8 +181,8 @@ class TestUpload:
     def test_07_21_upload_parallel_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('quiche'):
-            pytest.skip("quiche stalls on parallel, large uploads, unless --trace is used???")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         # limit since we use a separate connection in h1
         count = 50
@@ -189,6 +203,8 @@ class TestUpload:
     def test_07_30_put_100k(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         count = 1
         curl = CurlClient(env=env)
@@ -208,6 +224,8 @@ class TestUpload:
     def test_07_31_put_10m(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
         curl = CurlClient(env=env)
