@@ -63,6 +63,8 @@ class EnvConfig:
         self.config = DEF_CONFIG
         # check cur and its features
         self.curl = CURL
+        if 'CURL' in os.environ:
+            self.curl = os.environ['CURL']
         self.curl_props = {
             'version': None,
             'os': None,

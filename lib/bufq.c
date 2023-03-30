@@ -287,12 +287,6 @@ bool Curl_bufq_is_full(const struct bufq *q)
   return chunk_is_full(q->tail);
 }
 
-static size_t data_pass_size(struct bufq *q)
-{
-  (void)q;
-  return 4*1024;
-}
-
 static struct buf_chunk *get_spare(struct bufq *q)
 {
   struct buf_chunk *chunk = NULL;
@@ -426,9 +420,12 @@ ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
   return nread;
 }
 
-bool Curl_bufq_peek(const struct bufq *q,
+bool Curl_bufq_peek(struct bufq *q,
                     const unsigned char **pbuf, size_t *plen)
 {
+  if(q->head && chunk_is_empty(q->head)) {
+    prune_head(q);
+  }
   if(q->head && !chunk_is_empty(q->head)) {
     chunk_peek(q->head, pbuf, plen);
     return TRUE;
@@ -438,7 +435,7 @@ bool Curl_bufq_peek(const struct bufq *q,
   return FALSE;
 }
 
-bool Curl_bufq_peek_at(const struct bufq *q, size_t offset,
+bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
                        const unsigned char **pbuf, size_t *plen)
 {
   struct buf_chunk *c = q->head;
@@ -502,13 +499,11 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
                              CURLcode *err)
 {
   ssize_t nwritten = 0, n;
-  bool prefer_direct = (len >= data_pass_size(q));
 
   *err = CURLE_OK;
   while(len) {
-    if(Curl_bufq_is_full(q) || (!Curl_bufq_is_empty(q) && prefer_direct)) {
-      /* try to make room in case we are full
-       * or empty the buffer when adding "large" data */
+    if(Curl_bufq_is_full(q)) {
+      /* try to make room in case we are full */
       n = Curl_bufq_pass(q, writer, writer_ctx, err);
       if(n < 0) {
         if(*err != CURLE_AGAIN) {
@@ -517,22 +512,6 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
         }
         /* would block */
       }
-    }
-
-    if(Curl_bufq_is_empty(q) && prefer_direct) {
-      /* empty and `data` is "large", try passing directly */
-      n = writer(writer_ctx, buf, len, err);
-      if(n < 0) {
-        if(*err != CURLE_AGAIN) {
-          /* real error, fail */
-          return -1;
-        }
-        /* passing would block */
-        n = 0;
-      }
-      buf += (size_t)n;
-      len -= (size_t)n;
-      nwritten += (size_t)n;
     }
 
     if(len) {

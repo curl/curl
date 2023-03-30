@@ -24,6 +24,8 @@
 #
 ###########################################################################
 #
+import difflib
+import filecmp
 import logging
 import os
 import pytest
@@ -178,11 +180,7 @@ class TestUpload:
                              extra_args=['--parallel'])
         r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
-        indata = open(fdata).readlines()
-        r.check_stats(count=count, exp_status=200)
-        for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
-            assert respdata == indata
+        self.check_download(count, fdata, curl)
 
     # PUT 100k
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -222,3 +220,14 @@ class TestUpload:
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == exp_data
 
+    def check_download(self, count, srcfile, curl):
+        for i in range(count):
+            dfile = curl.download_file(i)
+            assert os.path.exists(dfile)
+            if not filecmp.cmp(srcfile, dfile, shallow=False):
+                diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
+                                                    b=open(dfile).readlines(),
+                                                    fromfile=srcfile,
+                                                    tofile=dfile,
+                                                    n=1))
+                assert False, f'download {dfile} differs:\n{diff}'
