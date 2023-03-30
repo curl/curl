@@ -243,4 +243,5 @@ UNITTEST_START
   check_bufq(8, 8000, 10, 1234, 1234, BUFQ_OPT_NONE);
   check_bufq(8, 1024, 4, 129, 127, BUFQ_OPT_NO_SPARES);
 
+  return 0;
 UNITTEST_STOP

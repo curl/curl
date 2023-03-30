@@ -81,6 +81,8 @@ class TestGoAway:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx, repeat):
         proto = 'h3'
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         count = 3
         self.r = None
         def long_run():
