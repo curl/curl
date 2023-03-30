@@ -703,7 +703,6 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
           DEBUGF(infof(data, "Skip the malformed interleaved data %lu "
                        "bytes", skip_size));
         }
-        skip_size = 0;
         break; /* maybe is an RTSP message */
       }
       /* Skip incorrect data util the next RTP packet or RTSP message */
