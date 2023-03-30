@@ -159,8 +159,10 @@ class TestDownload:
         ])
         r.check_exit_code(0)  
         r.check_stats(count=count, exp_status=200)
-        # should have used 2 connections only (test servers allow 100 req/conn)
-        assert r.total_connects == 2, "h2 should use fewer connections here"
+        # should have used at most 2 connections only (test servers allow 100 req/conn)
+        # it may be just 1 on slow systems where request are answered faster than
+        # curl can exhaust the capacity or if curl runs with address-sanitizer speed
+        assert r.total_connects <= 2, "h2 should use fewer connections here"
 
     # download files parallel with http/1.1, check connection not reused
     @pytest.mark.parametrize("proto", ['http/1.1'])
