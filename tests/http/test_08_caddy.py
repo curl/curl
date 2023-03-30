@@ -57,6 +57,7 @@ class TestCaddy:
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, caddy):
         self._make_docs_file(docs_dir=caddy.docs_dir, fname='data1.data', fsize=1024*1024)
+        self._make_docs_file(docs_dir=caddy.docs_dir, fname='data5.data', fsize=5*1024*1024)
         self._make_docs_file(docs_dir=caddy.docs_dir, fname='data10.data', fsize=10*1024*1024)
         self._make_docs_file(docs_dir=caddy.docs_dir, fname='data100.data', fsize=100*1024*1024)
 
@@ -65,6 +66,8 @@ class TestCaddy:
     def test_08_01_download_1(self, env: Env, caddy: Caddy, repeat, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 itself crashes")
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{caddy.port}/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto)
@@ -77,6 +80,8 @@ class TestCaddy:
                                            repeat, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 itself crashes")
         count = 50
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
@@ -92,7 +97,9 @@ class TestCaddy:
                                          repeat, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
-        count = 50
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 itself crashes")
+        count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
@@ -106,14 +113,31 @@ class TestCaddy:
         else:
             assert r.total_connects == 1
 
-    # download 10MB files sequentially
+    # download 5MB files sequentially
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_08_04_download_10mb_sequential(self, env: Env, caddy: Caddy,
+    def test_08_04a_download_10mb_sequential(self, env: Env, caddy: Caddy,
                                            repeat, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('quiche'):
-            pytest.skip("quiche stalls after a certain amount of data")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 itself crashes")
+        count = 40
+        curl = CurlClient(env=env)
+        urln = f'https://{env.domain1}:{caddy.port}/data5.data?[0-{count-1}]'
+        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        assert r.exit_code == 0
+        r.check_stats(count=count, exp_status=200)
+        # sequential transfers will open 1 connection
+        assert r.total_connects == 1
+
+    # download 10MB files sequentially
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_08_04b_download_10mb_sequential(self, env: Env, caddy: Caddy,
+                                           repeat, proto):
+        if proto == 'h3' and not env.have_h3_curl():
+            pytest.skip("h3 not supported in curl")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 itself crashes")
         count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
@@ -129,8 +153,8 @@ class TestCaddy:
                                          repeat, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('quiche'):
-            pytest.skip("quiche stalls after a certain amount of data")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 itself crashes")
         count = 50
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
