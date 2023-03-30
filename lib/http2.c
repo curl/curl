@@ -524,7 +524,6 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  size_t buflen;
   ssize_t nwritten;
   CURLcode result;
 
@@ -532,8 +531,8 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
   if(Curl_bufq_is_empty(&ctx->outbufq))
     return CURLE_OK;
 
-  buflen = Curl_bufq_len(&ctx->outbufq);
-  DEBUGF(LOG_CF(data, cf, "h2 conn flush %zu bytes", buflen));
+  DEBUGF(LOG_CF(data, cf, "h2 conn flush %zu bytes",
+                Curl_bufq_len(&ctx->outbufq)));
   nwritten = Curl_bufq_pass(&ctx->outbufq, nw_out_writer, cf, &result);
   if(nwritten < 0 && result != CURLE_AGAIN) {
     return result;
