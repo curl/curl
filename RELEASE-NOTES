@@ -4,7 +4,7 @@ curl and libcurl 8.1.0
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2845
+ Contributors:                 2851
 
 This release includes the following changes:
 
@@ -14,7 +14,9 @@ This release includes the following bugfixes:
  o CI: skip Azure for commits which change only GHA
  o cmake: bring in the network library on Haiku [9]
  o CMake: make config version 8 compatible with 7 [28]
+ o cmake: picky-linker fixes for openssl, ZLIB, H3 and more [31]
  o cmake: set SONAME for SunOS too [3]
+ o curl_easy_getinfo.3: typo fix (duplicated "from the") [43]
  o data.d: emphasize no conversion [5]
  o digest: clear target buffer [8]
  o doc: curl_mime_init() strong easy handle binding has been relaxed in 7.87.0 [26]
@@ -25,18 +27,32 @@ This release includes the following bugfixes:
  o GHA-linux: add an address-sanitizer build [15]
  o GHA: add a memory-sanitizer job [2]
  o GHA: run all linux test jobs with valgrind [14]
+ o GHA: update ngtcp2-*.yml to v0.10.0 [21]
  o gskit: various compile errors in OS400 [12]
+ o hostip: refuse to resolve the .onion TLD [19]
  o HTTP-COOKIES.md: mention the #HttpOnly_ prefix [16]
+ o lib/sha256.c: typo fix in comment (duplicated "is available") [40]
+ o lib: add `bufq` and `dynhds` [34]
+ o lib: use correct printf flags for sockets and timediffs [36]
  o multi: add handle asserts in DEBUG builds [11]
  o multi: remove PENDING + MSGSENT handles from the main linked list [23]
  o ngtcp2: adjust config and code checks for ngtcp2 without nghttp3 [4]
  o ntlm: clear lm and nt response buffers before use [7]
+ o openssl: interop with AWS-LC [30]
+ o pytest: improvements for suitable curl and error output [35]
  o RELEASE-PROCEDURE: update to new schedule [25]
+ o rtsp: skip malformed RTSP interleaved frame data [33]
  o runtests: die if curl version can be found [10]
  o server/getpart: clear target buffer before load [6]
+ o telnet: simplify the implementation of str_is_nonascii() [42]
+ o test1592: add flaky keyword [39]
  o tests/http: add timeout to running curl in test cases [24]
+ o tests/http: fix log formatting on wrong exit code [27]
  o tool_operate: pass a long as CURLOPT_HEADEROPT argument [13]
  o url: remove call to Curl_llist_destroy in Curl_close [22]
+ o vlts: use full buffer size when receiving data if possible [32]
+ o wolfssl.yml: bump to version 5.6.0 [44]
+ o ws: handle reads before EAGAIN better [38]
 
 This release includes the following known bugs:
 
@@ -54,11 +70,13 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andy Alt, Brian Lund, Chloe Kudryavtsev, Dan Fandrich, Dan Frandrich,
-  Daniel Stenberg, Douglas R. Reno, Harry Sintonen, Jakub Zakrzewski,
-  Jon Rumsey, Kai Pastor, Osaila on github, Patrick Monnerat, Paul Howarth,
-  Ray Satiro, Ronan Pigott, Stefan Eissing
-  (17 contributors)
+  Andy Alt, Arne Soete, Ben Fritz, Brian Lund, Chloe Kudryavtsev, Dan Fandrich,
+  Dan Frandrich, Daniel Stenberg, dengjfzh on github, Douglas R. Reno,
+  Frank Gevaerts, Gisle Vanem, Harry Sintonen, Jakub Zakrzewski, Jim King,
+  Jon Rumsey, Kai Pastor, Kamil Dudka, Matt Jolly, Micah Snyder),
+  Osaila on github, Patrick Monnerat, Paul Howarth, Philip Heiduck, Ray Satiro,
+  Ronan Pigott, simplerobot on github, Stefan Eissing, Viktor Szakats
+  (29 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -80,10 +98,26 @@ References to bug reports and discussions on issues:
  [16] = https://curl.se/bug/?i=10847
  [17] = https://curl.se/bug/?i=10845
  [18] = https://curl.se/bug/?i=10844
+ [19] = https://curl.se/bug/?i=543
  [20] = https://curl.se/bug/?i=10844
+ [21] = https://curl.se/bug/?i=10612
  [22] = https://curl.se/bug/?i=10846
  [23] = https://curl.se/bug/?i=10801
  [24] = https://curl.se/bug/?i=10783
  [25] = https://curl.se/bug/?i=10827
  [26] = https://curl.se/bug/?i=10834
+ [27] = https://curl.se/bug/?i=10868
  [28] = https://curl.se/bug/?i=10819
+ [30] = https://curl.se/bug/?i=10320
+ [31] = https://curl.se/bug/?i=10857
+ [32] = https://curl.se/bug/?i=10736
+ [33] = https://curl.se/bug/?i=10808
+ [34] = https://curl.se/bug/?i=10720
+ [35] = https://curl.se/bug/?i=10829
+ [36] = https://curl.se/bug/?i=10737
+ [38] = https://curl.se/bug/?i=10831
+ [39] = https://curl.se/bug/?i=10860
+ [40] = https://curl.se/bug/?i=10851
+ [42] = https://curl.se/bug/?i=10852
+ [43] = https://curl.se/bug/?i=10850
+ [44] = https://curl.se/bug/?i=10843
