@@ -438,7 +438,6 @@ sub startnew {
     logmsg "startnew: $cmd\n" if ($verbose);
 
     my $child = fork();
-    my $pid2 = 0;
 
     if(not defined $child) {
         logmsg "startnew: fork() failure detected\n";
@@ -478,19 +477,15 @@ sub startnew {
         }
     }
 
+    my $pid2 = 0;
     my $count = $timeout;
     while($count--) {
-        if(-f $pidfile && -s $pidfile && open(my $pidh, "<", "$pidfile")) {
-            $pid2 = 0 + <$pidh>;
-            close($pidh);
-            if(($pid2 > 0) && pidexists($pid2)) {
-                # if $pid2 is valid, then make sure this pid is alive, as
-                # otherwise it is just likely to be the _previous_ pidfile or
-                # similar!
-                last;
-            }
-            # invalidate $pid2 if not actually alive
-            $pid2 = 0;
+        $pid2 = pidfromfile($pidfile);
+        if(($pid2 > 0) && pidexists($pid2)) {
+            # if $pid2 is valid, then make sure this pid is alive, as
+            # otherwise it is just likely to be the _previous_ pidfile or
+            # similar!
+            last;
         }
         if (checkdied($child)) {
             logmsg "startnew: child process has died, server might start up\n"
@@ -1066,26 +1061,15 @@ sub verifyrtsp {
 #######################################################################
 # Verify that the ssh server has written out its pidfile, recovering
 # the pid from the file and returning it if a process with that pid is
-# actually alive.
+# actually alive, or a negative value if the process is dead.
 #
 sub verifyssh {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
     my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
-    my $pid = 0;
-    if(open(my $file, "<", "$pidfile")) {
-        $pid=0+<$file>;
-        close($file);
-    }
-    if($pid > 0) {
-        # if we have a pid it is actually our ssh server,
-        # since runsshserver() unlinks previous pidfile
-        if(!pidexists($pid)) {
-            logmsg "RUN: SSH server has died after starting up\n";
-            checkdied($pid);
-            unlink($pidfile);
-            $pid = -1;
-        }
+    my $pid = processexists($pidfile);
+    if($pid < 0) {
+        logmsg "RUN: SSH server has died after starting up\n";
     }
     return $pid;
 }
@@ -1190,18 +1174,9 @@ sub verifyhttptls {
         close($file);
     }
 
-    if($data && ($data =~ /(GNUTLS|GnuTLS)/) && open(my $file, "<", "$pidfile")) {
-        $pid=0+<$file>;
-        close($file);
-        if($pid > 0) {
-            # if we have a pid it is actually our httptls server,
-            # since runhttptlsserver() unlinks previous pidfile
-            if(!pidexists($pid)) {
-                logmsg "RUN: $server server has died after starting up\n";
-                checkdied($pid);
-                unlink($pidfile);
-                $pid = -1;
-            }
+    if($data && ($data =~ /(GNUTLS|GnuTLS)/) && ($pid = processexists($pidfile))) {
+        if($pid < 0) {
+            logmsg "RUN: $server server has died after starting up\n";
         }
         return $pid;
     }
@@ -1224,20 +1199,9 @@ sub verifysocks {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
     my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
-    my $pid = 0;
-    if(open(my $file, "<", "$pidfile")) {
-        $pid=0+<$file>;
-        close($file);
-    }
-    if($pid > 0) {
-        # if we have a pid it is actually our socks server,
-        # since runsocksserver() unlinks previous pidfile
-        if(!pidexists($pid)) {
-            logmsg "RUN: SOCKS server has died after starting up\n";
-            checkdied($pid);
-            unlink($pidfile);
-            $pid = -1;
-        }
+    my $pid = processexists($pidfile);
+    if($pid < 0) {
+        logmsg "RUN: SOCKS server has died after starting up\n";
     }
     return $pid;
 }
