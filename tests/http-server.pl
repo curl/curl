@@ -23,13 +23,15 @@
 #
 #***************************************************************************
 
+use strict;
+use warnings;
+
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
     push(@INC, ".");
 }
 
-use strict;
-use warnings;
+use File::Basename;
 
 use serverhelp qw(
     server_pidfilename
@@ -57,6 +59,7 @@ my $gopher = 0;
 my $flags  = "";
 my $path   = '.';
 my $logdir = $path .'/log';
+my $piddir;
 
 while(@ARGV) {
     if($ARGV[0] eq '--pidfile') {
@@ -138,14 +141,24 @@ while(@ARGV) {
     shift @ARGV;
 }
 
-if(!$srcdir) {
-    $srcdir = $ENV{'srcdir'} || '.';
+#***************************************************************************
+# Initialize command line option dependent variables
+#
+
+if($pidfile) {
+    # Use our pidfile directory to store the other pidfiles
+    $piddir = dirname($pidfile);
 }
-if(!$pidfile) {
-    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
+else {
+    # Use the current directory to store all the pidfiles
+    $piddir = $path;
+    $pidfile = server_pidfilename($piddir, $proto, $ipvnum, $idnum);
 }
 if(!$portfile) {
-    $portfile = "$path/". server_portfilename($proto, $ipvnum, $idnum);
+    $portfile = server_portfilename($piddir, $proto, $ipvnum, $idnum);
+}
+if(!$srcdir) {
+    $srcdir = $ENV{'srcdir'} || '.';
 }
 if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);

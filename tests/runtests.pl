@@ -152,18 +152,19 @@ my $VCURL=$CURL;   # what curl binary to use to verify the servers with
 my $ACURL=$VCURL;  # what curl binary to use to talk to APIs (relevant for CI)
                    # ACURL is handy to set to the system one for reliability
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
-my $LOGDIR="log";
 my $TESTDIR="$srcdir/data";
 my $LIBDIR="./libtest";
 my $UNITDIR="./unit";
+my $LOGDIR="log";
 # TODO: $LOGDIR could eventually change later on, so must regenerate all the
 # paths depending on it after $LOGDIR itself changes.
+my $PIDDIR = "$LOGDIR/server";
 # TODO: change this to use server_inputfilename()
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $PROXYIN="$LOGDIR/proxy.input"; # what curl sent the proxy
 my $SOCKSIN="$LOGDIR/socksd-request.log"; # what curl sent to the SOCKS proxy
-my $CURLLOG="commands.log"; # all command lines run
+my $CURLLOG="$LOGDIR/commands.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy server instructions here
 my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
 my $CURLCONFIG="../curl-config"; # curl-config from current build
@@ -384,9 +385,9 @@ sub init_serverpidfile_hash {
       for my $ipvnum ((4, 6)) {
         for my $idnum ((1, 2, 3)) {
           my $serv = servername_id("$proto$ssl", $ipvnum, $idnum);
-          my $pidf = server_pidfilename("$proto$ssl", $ipvnum, $idnum);
+          my $pidf = server_pidfilename($PIDDIR, "$proto$ssl", $ipvnum, $idnum);
           $serverpidfile{$serv} = $pidf;
-          my $portf = server_portfilename("$proto$ssl", $ipvnum, $idnum);
+          my $portf = server_portfilename($PIDDIR, "$proto$ssl", $ipvnum, $idnum);
           $serverportfile{$serv} = $portf;
         }
       }
@@ -397,9 +398,9 @@ sub init_serverpidfile_hash {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
-        my $pidf = server_pidfilename($proto, $ipvnum, $idnum);
+        my $pidf = server_pidfilename($PIDDIR, $proto, $ipvnum, $idnum);
         $serverpidfile{$serv} = $pidf;
-        my $portf = server_portfilename($proto, $ipvnum, $idnum);
+        my $portf = server_portfilename($PIDDIR, $proto, $ipvnum, $idnum);
         $serverportfile{$serv} = $portf;
       }
     }
@@ -407,9 +408,9 @@ sub init_serverpidfile_hash {
   for my $proto (('http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
     for my $ssl (('', 's')) {
       my $serv = servername_id("$proto$ssl", "unix", 1);
-      my $pidf = server_pidfilename("$proto$ssl", "unix", 1);
+      my $pidf = server_pidfilename($PIDDIR, "$proto$ssl", "unix", 1);
       $serverpidfile{$serv} = $pidf;
-      my $portf = server_portfilename("$proto$ssl", "unix", 1);
+      my $portf = server_portfilename($PIDDIR, "$proto$ssl", "unix", 1);
       $serverportfile{$serv} = $portf;
     }
   }
@@ -757,7 +758,7 @@ sub stopserver {
         my $proto  = $1;
         my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
         my $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
-        killsockfilters($proto, $ipvnum, $idnum, $verbose);
+        killsockfilters($PIDDIR, $proto, $ipvnum, $idnum, $verbose);
     }
     #
     # All servers relative to the given one must be stopped also
@@ -1065,7 +1066,7 @@ sub verifyrtsp {
 #
 sub verifyssh {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    my $pidfile = server_pidfilename($PIDDIR, $proto, $ipvnum, $idnum);
     my $pid = processexists($pidfile);
     if($pid < 0) {
         logmsg "RUN: SSH server has died after starting up\n";
@@ -1119,7 +1120,7 @@ sub verifysftp {
 sub verifyhttptls {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
-    my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    my $pidfile = server_pidfilename($PIDDIR, $proto, $ipvnum, $idnum);
 
     my $verifyout = "$LOGDIR/".
         servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
@@ -1196,7 +1197,7 @@ sub verifyhttptls {
 #
 sub verifysocks {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $pidfile = server_pidfilename($proto, $ipvnum, $idnum);
+    my $pidfile = server_pidfilename($PIDDIR, $proto, $ipvnum, $idnum);
     my $pid = processexists($pidfile);
     if($pid < 0) {
         logmsg "RUN: SOCKS server has died after starting up\n";
@@ -2717,14 +2718,15 @@ sub clearlocks {
 #
 sub cleardir {
     my $dir = $_[0];
-    my $done = 1;
+    my $done = 1;  # success
     my $file;
 
     # Get all files
     opendir(my $dh, $dir) ||
         return 0; # can't open dir
     while($file = readdir($dh)) {
-        if(($file !~ /^(\.|\.\.)\z/)) {
+        # Don't clear the $PIDDIR since those need to live beyond one test
+        if(($file !~ /^(\.|\.\.)\z/) && "$dir/$file" ne $PIDDIR) {
             if(-d "$dir/$file") {
                 if(!cleardir("$dir/$file")) {
                     $done = 0;
@@ -4055,7 +4057,7 @@ sub singletest_run {
         logmsg "$CMDLINE\n";
     }
 
-    open(my $cmdlog, ">", "$LOGDIR/$CURLLOG") || die "Failure writing log file";
+    open(my $cmdlog, ">", $CURLLOG) || die "Failure writing log file";
     print $cmdlog "$CMDLINE\n";
     close($cmdlog) || die "Failure writing log file";
 
@@ -4860,7 +4862,7 @@ sub stopservers {
     #
     # kill sockfilter processes for all pingpong servers
     #
-    killallsockfilters($verb);
+    killallsockfilters($PIDDIR, $verb);
     #
     # kill all server pids from %run hash clearing them
     #
@@ -5991,6 +5993,7 @@ $SOCKSUNIXPATH    = $pwd."/socks$$.sock"; # HTTP server Unix domain socket path,
 
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
+mkdir($PIDDIR, 0777);
 
 #######################################################################
 # initialize some variables
