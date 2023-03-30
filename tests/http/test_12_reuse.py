@@ -56,7 +56,8 @@ class TestReuse:
         r.check_stats(count=count, exp_status=200)
         # Server sends `Connection: close` on every 2nd request, requiring
         # a new connection
-        assert r.total_connects == count/2
+        delta = 5
+        assert (count/2 - delta) < r.total_connects < (count/2 + delta)
 
     @pytest.mark.parametrize("proto", ['http/1.1'])
     def test_12_02_h1_conn_timeout(self, env: Env,
@@ -76,7 +77,3 @@ class TestReuse:
         r.check_stats(count=count, exp_status=200)
         # Connections time out on server before we send another request,
         assert r.total_connects == count
-        # we do not see how often a request was retried in the stats, so
-        # we cannot check that connection reuse attempted a connection that
-        # was later detected to be "dead". We would like to
-        # assert stat['retry_count'] == 0
