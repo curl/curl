@@ -162,7 +162,7 @@ class ExecResult:
     def check_exit_code(self, code: int):
         assert self.exit_code == code, \
             f'expected exit code {code}, '\
-            'got {self.exit_code}\n{self._dump_logs()}'
+            f'got {self.exit_code}\n{self._dump_logs()}'
 
     def check_exit_code_not(self, code: int):
         assert self.exit_code != code, \
