@@ -73,7 +73,7 @@ This will remove `amount` number of bytes from the `bufq`.
 
 ## lifetime
 
-`bufq` is initialized and free'ed similar to the `dynbuf` module. Code using `bufq` will
+`bufq` is initialized and freed similar to the `dynbuf` module. Code using `bufq` will
 hold a `struct bufq` somewhere. Before it uses it, it invokes:
 
 ```
@@ -100,7 +100,7 @@ Internally, a `bufq` uses allocation of fixed size, e.g. the "chunk_size", up to
 
 Each chunks has a `read` and `write` index. A `bufq` keeps its chunks in a list. Reading happens always at the head chunk, writing always goes to the tail chunk. When the head chunk becomes empty, it is removed. When the tail chunk becomes full, another chunk is added to the end of the list, becoming the new tail.
 
-Chunks that are no longer used are returned to a `spare` list by default. If the `bufq` is created with option `BUFQ_OPT_NO_SPARES` those chunks will be free'ed right away.
+Chunks that are no longer used are returned to a `spare` list by default. If the `bufq` is created with option `BUFQ_OPT_NO_SPARES` those chunks will be freed right away.
 
 If a `bufq` is created with a `bufc_pool`, the no longer used chunks are returned to the pool. Also `bufq` will ask the pool for a chunk when it needs one. More in section "pools".
 
