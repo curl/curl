@@ -27,13 +27,14 @@
 # harness. Actually just a layer that runs stunnel properly using the
 # non-secure test harness servers.
 
+use strict;
+use warnings;
+
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
     push(@INC, ".");
 }
 
-use strict;
-use warnings;
 use Cwd;
 use Cwd 'abs_path';
 
@@ -183,7 +184,7 @@ while(@ARGV) {
 # Initialize command line option dependent variables
 #
 if(!$pidfile) {
-    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
+    $pidfile = server_pidfilename($path, $proto, $ipvnum, $idnum);
 }
 if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);

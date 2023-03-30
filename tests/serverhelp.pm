@@ -146,18 +146,18 @@ sub servername_canon {
 # Return file name for server pid file.
 #
 sub server_pidfilename {
-    my ($proto, $ipver, $idnum) = @_;
+    my ($piddir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.pid';
-    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+    return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
 #***************************************************************************
 # Return file name for server port file.
 #
 sub server_portfilename {
-    my ($proto, $ipver, $idnum) = @_;
+    my ($piddir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.port';
-    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+    return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
 
@@ -206,11 +206,11 @@ sub server_outputfilename {
 # Return file name for main or primary sockfilter pid file.
 #
 sub mainsockf_pidfilename {
-    my ($proto, $ipver, $idnum) = @_;
+    my ($piddir, $proto, $ipver, $idnum) = @_;
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid':'_sockfilt.pid';
-    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+    return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
 
@@ -230,11 +230,11 @@ sub mainsockf_logfilename {
 # Return file name for data or secondary sockfilter pid file.
 #
 sub datasockf_pidfilename {
-    my ($proto, $ipver, $idnum) = @_;
+    my ($piddir, $proto, $ipver, $idnum) = @_;
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^ftps?$/));
     my $trailer = '_sockdata.pid';
-    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+    return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
 

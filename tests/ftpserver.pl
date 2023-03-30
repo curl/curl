@@ -40,6 +40,9 @@
 # All socket/network/TCP related stuff is done by the 'sockfilt' program.
 #
 
+use strict;
+use warnings;
+
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
     push(@INC, ".");
@@ -51,10 +54,9 @@ BEGIN {
     }
 }
 
-use strict;
-use warnings;
 use IPC::Open2;
 use Digest::MD5;
+use File::Basename;
 
 require "getpart.pm";
 require "ftp.pm";
@@ -88,6 +90,7 @@ my $cwd_testno;     # test case numbers extracted from CWD command
 my $testno = 0;     # test case number (read from ftpserver.cmd)
 my $path   = '.';
 my $logdir = $path .'/log';
+my $piddir;
 
 #**********************************************************************
 # global vars used for server address and primary listener port
@@ -98,8 +101,9 @@ my $listenaddr = '127.0.0.1';  # default address for listener port
 #**********************************************************************
 # global vars used for file names
 #
+my $PORTFILE="ftpserver.port"; # server port file name
+my $portfile;           # server port file path
 my $pidfile;            # server pid file name
-my $portfile=".ftpserver.port"; # server port file name
 my $logfile;            # server log file name
 my $mainsockf_pidfile;  # pid file for primary connection sockfilt process
 my $mainsockf_logfile;  # log file for primary connection sockfilt process
@@ -197,7 +201,7 @@ my $POP3_TIMESTAMP = "<1972.987654321\@curl>";
 sub exit_signal_handler {
     my $signame = shift;
     # For now, simply mimic old behavior.
-    killsockfilters($proto, $ipvnum, $idnum, $verbose);
+    killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
     unlink($pidfile);
     unlink($portfile);
     if($serverlogslocked) {
@@ -397,7 +401,7 @@ sub sysread_or_die {
         logmsg "Error: $srvrname server, sysread error: $!\n";
         logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. $srvrname server, sysread error: $!\n";
-        killsockfilters($proto, $ipvnum, $idnum, $verbose);
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
         unlink($portfile);
         if($serverlogslocked) {
@@ -412,7 +416,7 @@ sub sysread_or_die {
         logmsg "Error: $srvrname server, read zero\n";
         logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. $srvrname server, read zero\n";
-        killsockfilters($proto, $ipvnum, $idnum, $verbose);
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
         unlink($portfile);
         if($serverlogslocked) {
@@ -441,7 +445,7 @@ sub startsf {
 
     if($pong !~ /^PONG/) {
         logmsg "Failed sockfilt command: $mainsockfcmd\n";
-        killsockfilters($proto, $ipvnum, $idnum, $verbose);
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
         unlink($portfile);
         if($serverlogslocked) {
@@ -2453,7 +2457,7 @@ sub PASV_ftp {
 
     # kill previous data connection sockfilt when alive
     if($datasockf_runs eq 'yes') {
-        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt for $datasockf_mode data channel killed\n";
     }
     datasockf_state('STOPPED');
@@ -2494,7 +2498,7 @@ sub PASV_ftp {
         logmsg "DATA sockfilt unexpected response: $pong\n";
         logmsg "DATA sockfilt for passive data channel failed\n";
         logmsg "DATA sockfilt killed now\n";
-        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt not running\n";
         datasockf_state('STOPPED');
         sendcontrol "500 no free ports!\r\n";
@@ -2533,7 +2537,7 @@ sub PASV_ftp {
         logmsg "DATA sockfilt unknown listener port\n";
         logmsg "DATA sockfilt for passive data channel failed\n";
         logmsg "DATA sockfilt killed now\n";
-        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt not running\n";
         datasockf_state('STOPPED');
         sendcontrol "500 no free ports!\r\n";
@@ -2603,7 +2607,7 @@ sub PASV_ftp {
             "on port $pasvport\n";
         logmsg "accept failed or connection not even attempted\n";
         logmsg "DATA sockfilt killed now\n";
-        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt not running\n";
         datasockf_state('STOPPED');
         return;
@@ -2627,7 +2631,7 @@ sub PORT_ftp {
 
     # kill previous data connection sockfilt when alive
     if($datasockf_runs eq 'yes') {
-        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt for $datasockf_mode data channel killed\n";
     }
     datasockf_state('STOPPED');
@@ -2708,7 +2712,7 @@ sub PORT_ftp {
         logmsg "DATA sockfilt unexpected response: $pong\n";
         logmsg "DATA sockfilt for active data channel failed\n";
         logmsg "DATA sockfilt killed now\n";
-        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt not running\n";
         datasockf_state('STOPPED');
         # client shall timeout awaiting connection from server
@@ -3038,25 +3042,32 @@ while(@ARGV) {
 # Initialize command line option dependent variables
 #
 
+if($pidfile) {
+    # Use our pidfile directory to store the other pidfiles
+    $piddir = dirname($pidfile);
+}
+else {
+    # Use the current directory to store all the pidfiles
+    $piddir = $path;
+    $pidfile = server_pidfilename($piddir, $proto, $ipvnum, $idnum);
+}
+if(!$portfile) {
+    $portfile = $piddir . "/" . $PORTFILE;
+}
 if(!$srcdir) {
     $srcdir = $ENV{'srcdir'} || '.';
-}
-if(!$pidfile) {
-    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
 }
 if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$mainsockf_pidfile = "$path/".
-    mainsockf_pidfilename($proto, $ipvnum, $idnum);
+$mainsockf_pidfile = mainsockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
 $mainsockf_logfile =
     mainsockf_logfilename($logdir, $proto, $ipvnum, $idnum);
 $serverlogs_lockfile = "$logdir/$SERVERLOGS_LOCK";
 
 if($proto eq 'ftp') {
-    $datasockf_pidfile = "$path/".
-        datasockf_pidfilename($proto, $ipvnum, $idnum);
+    $datasockf_pidfile = datasockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
     $datasockf_logfile =
         datasockf_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
@@ -3093,7 +3104,7 @@ while(1) {
 
     # kill previous data connection sockfilt when alive
     if($datasockf_runs eq 'yes') {
-        killsockfilters($proto, $ipvnum, $idnum, $verbose, 'data');
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose, 'data');
         logmsg "DATA sockfilt for $datasockf_mode data channel killed now\n";
     }
     datasockf_state('STOPPED');
@@ -3340,7 +3351,7 @@ while(1) {
     }
 }
 
-killsockfilters($proto, $ipvnum, $idnum, $verbose);
+killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
 unlink($pidfile);
 if($serverlogslocked) {
     $serverlogslocked = 0;

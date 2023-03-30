@@ -117,7 +117,7 @@ if(!$srcdir) {
     $srcdir = $ENV{'srcdir'} || '.';
 }
 if(!$pidfile) {
-    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
+    $pidfile = server_pidfilename($path, $proto, $ipvnum, $idnum);
 }
 if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);

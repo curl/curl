@@ -322,7 +322,7 @@ sub killpid {
 # killsockfilters kills sockfilter processes for a given server.
 #
 sub killsockfilters {
-    my ($proto, $ipvnum, $idnum, $verbose, $which) = @_;
+    my ($piddir, $proto, $ipvnum, $idnum, $verbose, $which) = @_;
     my $server;
     my $pidfile;
     my $pid;
@@ -335,7 +335,7 @@ sub killsockfilters {
     $server = servername_id($proto, $ipvnum, $idnum) if($verbose);
 
     if(!$which || ($which eq 'main')) {
-        $pidfile = mainsockf_pidfilename($proto, $ipvnum, $idnum);
+        $pidfile = mainsockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
         $pid = processexists($pidfile);
         if($pid > 0) {
             printf("* kill pid for %s-%s => %d\n", $server,
@@ -349,7 +349,7 @@ sub killsockfilters {
     return if($proto ne 'ftp');
 
     if(!$which || ($which eq 'data')) {
-        $pidfile = datasockf_pidfilename($proto, $ipvnum, $idnum);
+        $pidfile = datasockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
         $pid = processexists($pidfile);
         if($pid > 0) {
             printf("* kill pid for %s-data => %d\n", $server,
@@ -365,12 +365,12 @@ sub killsockfilters {
 # killallsockfilters kills sockfilter processes for all servers.
 #
 sub killallsockfilters {
-    my $verbose = $_[0];
+    my ($piddir, $verbose) = @_;
 
     for my $proto (('ftp', 'imap', 'pop3', 'smtp')) {
         for my $ipvnum (('4', '6')) {
             for my $idnum (('1', '2')) {
-                killsockfilters($proto, $ipvnum, $idnum, $verbose);
+                killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
             }
         }
     }

@@ -177,14 +177,17 @@ while(@ARGV) {
     shift @ARGV;
 }
 
+#***************************************************************************
+# Initialize command line option dependent variables
+#
+
 
 #***************************************************************************
 # Default ssh daemon pid file name
 #
 if(!$pidfile) {
-    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
+    $pidfile = server_pidfilename($path, $proto, $ipvnum, $idnum);
 }
-
 
 #***************************************************************************
 # ssh and sftp server log file names
