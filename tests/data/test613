@@ -29,7 +29,7 @@ perl %SRCDIR/libtest/test%TESTNUMBER.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 SFTP directory retrieval
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
 </command>
 <postcheck>
 perl %SRCDIR/libtest/test%TESTNUMBER.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out

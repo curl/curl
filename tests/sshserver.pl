@@ -35,6 +35,7 @@ use Digest::MD5 'md5_hex';
 use Digest::SHA;
 use Digest::SHA 'sha256_base64';
 use MIME::Base64;
+use File::Basename;
 
 #***************************************************************************
 # Variables and subs imported from sshhelp module
@@ -96,6 +97,7 @@ my $idnum = 1;                # default ssh daemon instance number
 my $proto = 'ssh';            # protocol the ssh daemon speaks
 my $path = getcwd();          # current working directory
 my $logdir = $path .'/log';   # directory for log files
+my $piddir;                   # directory for server config files
 my $username = $ENV{USER};    # default user
 my $pidfile;                  # ssh daemon pid file
 my $identity = 'curl_client_key'; # default identity file
@@ -103,6 +105,14 @@ my $identity = 'curl_client_key'; # default identity file
 my $error;
 my @cfgarr;
 
+#***************************************************************************
+# Returns a path of the given file name in the log directory (PiddirPath)
+#
+sub pp {
+    my $file = $_[0];
+    return "$piddir/$file";
+    # TODO: do Windows path conversion here
+}
 
 #***************************************************************************
 # Parse command line options
@@ -181,12 +191,17 @@ while(@ARGV) {
 # Initialize command line option dependent variables
 #
 
-
 #***************************************************************************
-# Default ssh daemon pid file name
+# Default ssh daemon pid file name & directory
 #
-if(!$pidfile) {
-    $pidfile = server_pidfilename($path, $proto, $ipvnum, $idnum);
+if($pidfile) {
+    # Use our pidfile directory to store server config files
+    $piddir = dirname($pidfile);
+}
+else {
+    # Use the current directory to store server config files
+    $piddir = $path;
+    $pidfile = server_pidfilename($piddir, $proto, $ipvnum, $idnum);
 }
 
 #***************************************************************************
@@ -373,47 +388,47 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
 #***************************************************************************
 # Generate host and client key files for curl's tests
 #
-if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
-   (! -e $hstpubkeyf) || (! -s $hstpubkeyf) ||
-   (! -e $hstpubmd5f) || (! -s $hstpubmd5f) ||
-   (! -e $hstpubsha256f) || (! -s $hstpubsha256f) ||
-   (! -e $cliprvkeyf) || (! -s $cliprvkeyf) ||
-   (! -e $clipubkeyf) || (! -s $clipubkeyf)) {
+if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
+   (! -e pp($hstpubkeyf)) || (! -s pp($hstpubkeyf)) ||
+   (! -e pp($hstpubmd5f)) || (! -s pp($hstpubmd5f)) ||
+   (! -e pp($hstpubsha256f)) || (! -s pp($hstpubsha256f)) ||
+   (! -e pp($cliprvkeyf)) || (! -s pp($cliprvkeyf)) ||
+   (! -e pp($clipubkeyf)) || (! -s pp($clipubkeyf))) {
     # Make sure all files are gone so ssh-keygen doesn't complain
-    unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $hstpubsha256f,
-           $cliprvkeyf, $clipubkeyf);
+    unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f),
+           pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
     logmsg 'generating host keys...' if($verbose);
-    if(system "\"$sshkeygen\" -q -t rsa -f $hstprvkeyf -C 'curl test server' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($hstprvkeyf) . " -C 'curl test server' -N ''") {
         logmsg 'Could not generate host key';
         exit 1;
     }
     logmsg 'generating client keys...' if($verbose);
-    if(system "\"$sshkeygen\" -q -t rsa -f $cliprvkeyf -C 'curl test client' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($cliprvkeyf) . " -C 'curl test client' -N ''") {
         logmsg 'Could not generate client key';
         exit 1;
     }
     # Make sure that permissions are restricted so openssh doesn't complain
-    system "chmod 600 $hstprvkeyf";
-    system "chmod 600 $cliprvkeyf";
+    system "chmod 600 " . pp($hstprvkeyf);
+    system "chmod 600 " . pp($cliprvkeyf);
     # Save md5 and sha256 hashes of public host key
-    open(my $rsakeyfile, "<", "$hstpubkeyf");
+    open(my $rsakeyfile, "<", pp($hstpubkeyf));
     my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
     close($rsakeyfile);
     if(!$rsahostkey[1]) {
         logmsg 'Failed parsing base64 encoded RSA host key';
         exit 1;
     }
-    open(my $pubmd5file, ">", "$hstpubmd5f");
+    open(my $pubmd5file, ">", pp($hstpubmd5f));
     print $pubmd5file md5_hex(decode_base64($rsahostkey[1]));
     close($pubmd5file);
-    if((! -e $hstpubmd5f) || (! -s $hstpubmd5f)) {
+    if((! -e pp($hstpubmd5f)) || (! -s pp($hstpubmd5f))) {
         logmsg 'Failed writing md5 hash of RSA host key';
         exit 1;
     }
-    open(my $pubsha256file, ">", "$hstpubsha256f");
+    open(my $pubsha256file, ">", pp($hstpubsha256f));
     print $pubsha256file sha256_base64(decode_base64($rsahostkey[1]));
     close($pubsha256file);
-    if((! -e $hstpubsha256f) || (! -s $hstpubsha256f)) {
+    if((! -e pp($hstpubsha256f)) || (! -s pp($hstpubsha256f))) {
         logmsg 'Failed writing sha256 hash of RSA host key';
         exit 1;
     }
@@ -423,29 +438,31 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
 #***************************************************************************
 # Convert paths for curl's tests running on Windows with Cygwin/Msys OpenSSH
 #
-my $clipubkeyf_config = abs_path("$path/$clipubkeyf");
-my $hstprvkeyf_config = abs_path("$path/$hstprvkeyf");
-my $pidfile_config = $pidfile;
-my $sftpsrv_config = $sftpsrv;
-
-if (pathhelp::os_is_win()) {
+my $clipubkeyf_config;
+my $hstprvkeyf_config;
+my $pidfile_config;
+my $sftpsrv_config;
+if ($sshdid =~ /OpenSSH-Windows/) {
+    # Ensure to use native Windows paths with OpenSSH for Windows
+    $clipubkeyf_config = pathhelp::sys_native_abs_path(pp($clipubkeyf));
+    $hstprvkeyf_config = pathhelp::sys_native_abs_path(pp($hstprvkeyf));
+    $pidfile_config = pathhelp::sys_native_abs_path($pidfile);
+    $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
+}
+elsif (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $clipubkeyf_config = pathhelp::build_sys_abs_path($clipubkeyf_config);
     $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf_config);
     $pidfile_config = pathhelp::build_sys_abs_path($pidfile_config);
     $sftpsrv_config = "internal-sftp";
 }
-if ($sshdid =~ /OpenSSH-Windows/) {
-    # Ensure to use native Windows paths with OpenSSH for Windows
-    $clipubkeyf_config = pathhelp::sys_native_abs_path($clipubkeyf);
-    $hstprvkeyf_config = pathhelp::sys_native_abs_path($hstprvkeyf);
-    $pidfile_config = pathhelp::sys_native_abs_path($pidfile);
-    $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
-
-    $sshdconfig = pathhelp::sys_native_abs_path($sshdconfig);
-    $sshconfig = pathhelp::sys_native_abs_path($sshconfig);
-    $sftpconfig = pathhelp::sys_native_abs_path($sftpconfig);
+else {
+    $clipubkeyf_config = abs_path(pp($clipubkeyf));
+    $hstprvkeyf_config = abs_path(pp($hstprvkeyf));
+    $pidfile_config = $pidfile;
+    $sftpsrv_config = $sftpsrv;
 }
+my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 
 #***************************************************************************
 #  ssh daemon configuration file options we might use and version support
@@ -603,7 +620,7 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out initial sshd configuration file for curl's tests
 #
-$error = dump_array($sshdconfig, @cfgarr);
+$error = dump_array(pp($sshdconfig), @cfgarr);
 if($error) {
     logmsg $error;
     exit 1;
@@ -621,19 +638,19 @@ sub sshd_supports_opt {
         ($sshdid =~ /SunSSH/)) {
         # ssh daemon supports command line options -t -f and -o
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
-                    qx("$sshd" -t -f $sshdconfig -o "$option=$value" 2>&1);
+                    `\"$sshd\" -t -f $sshdconfig_abs -o \"$option=$value\" 2>&1`;
         return !$err;
     }
     if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 299)) {
         # ssh daemon supports command line options -t and -f
-        $err = dump_array($sshdconfig, (@cfgarr, "$option $value"));
+        $err = dump_array(pp($sshdconfig), (@cfgarr, "$option $value"));
         if($err) {
             logmsg $err;
             return 0;
         }
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
-                    qx("$sshd" -t -f $sshdconfig 2>&1);
-        unlink $sshdconfig;
+                    `\"$sshd\" -t -f $sshdconfig_abs 2>&1`;
+        unlink pp($sshdconfig);
         return !$err;
     }
     return 0;
@@ -765,7 +782,7 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out resulting sshd configuration file for curl's tests
 #
-$error = dump_array($sshdconfig, @cfgarr);
+$error = dump_array(pp($sshdconfig), @cfgarr);
 if($error) {
     logmsg $error;
     exit 1;
@@ -775,7 +792,7 @@ if($error) {
 #***************************************************************************
 # Verify that sshd actually supports our generated configuration file
 #
-if(system "\"$sshd\" -t -f $sshdconfig > $sshdlog 2>&1") {
+if(system "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1") {
     logmsg "sshd configuration file $sshdconfig failed verification";
     display_sshdlog();
     display_sshdconfig();
@@ -786,13 +803,13 @@ if(system "\"$sshd\" -t -f $sshdconfig > $sshdlog 2>&1") {
 #***************************************************************************
 # Generate ssh client host key database file for curl's tests
 #
-if((! -e $knownhosts) || (! -s $knownhosts)) {
+if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
     logmsg 'generating ssh client known hosts file...' if($verbose);
-    unlink($knownhosts);
-    if(open(my $rsakeyfile, "<", "$hstpubkeyf")) {
+    unlink(pp($knownhosts));
+    if(open(my $rsakeyfile, "<", pp($hstpubkeyf))) {
         my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
         if(close($rsakeyfile)) {
-            if(open(my $knownhostsh, ">", "$knownhosts")) {
+            if(open(my $knownhostsh, ">", pp($knownhosts))) {
                 print $knownhostsh "$listenaddr ssh-rsa $rsahostkey[1]\n";
                 if(!close($knownhostsh)) {
                     $error = "Error: cannot close file $knownhosts";
@@ -819,19 +836,23 @@ if((! -e $knownhosts) || (! -s $knownhosts)) {
 #***************************************************************************
 # Convert paths for curl's tests running on Windows using Cygwin OpenSSH
 #
-my $identity_config = abs_path("$path/$identity");
-my $knownhosts_config = abs_path("$path/$knownhosts");
-
-if (pathhelp::os_is_win()) {
+my $identity_config;
+my $knownhosts_config;
+if ($sshdid =~ /OpenSSH-Windows/) {
+    # Ensure to use native Windows paths with OpenSSH for Windows
+    $identity_config = pathhelp::sys_native_abs_path(pp($identity));
+    $knownhosts_config = pathhelp::sys_native_abs_path(pp($knownhosts));
+}
+elsif (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $identity_config = pathhelp::build_sys_abs_path($identity_config);
     $knownhosts_config = pathhelp::build_sys_abs_path($knownhosts_config);
 }
-if ($sshdid =~ /OpenSSH-Windows/) {
-    # Ensure to use native Windows paths with OpenSSH for Windows
-    $identity_config = pathhelp::sys_native_abs_path($identity);
-    $knownhosts_config = pathhelp::sys_native_abs_path($knownhosts);
+else {
+    $identity_config = abs_path(pp($identity));
+    $knownhosts_config = abs_path(pp($knownhosts));
 }
+
 
 #***************************************************************************
 #  ssh client configuration file options we might use and version support
@@ -1069,7 +1090,7 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out resulting ssh client configuration file for curl's tests
 #
-$error = dump_array($sshconfig, @cfgarr);
+$error = dump_array(pp($sshconfig), @cfgarr);
 if($error) {
     logmsg $error;
     exit 1;
@@ -1097,7 +1118,7 @@ for(my $i = scalar(@cfgarr) - 1; $i > 0; $i--) {
 #***************************************************************************
 # Write out resulting sftp client configuration file for curl's tests
 #
-$error = dump_array($sftpconfig, @cfgarr);
+$error = dump_array(pp($sftpconfig), @cfgarr);
 if($error) {
     logmsg $error;
     exit 1;
@@ -1111,7 +1132,7 @@ if($error) {
 logmsg 'generating sftp client commands file...' if($verbose);
 push @cfgarr, 'pwd';
 push @cfgarr, 'quit';
-$error = dump_array($sftpcmds, @cfgarr);
+$error = dump_array(pp($sftpcmds), @cfgarr);
 if($error) {
     logmsg $error;
     exit 1;
@@ -1121,7 +1142,7 @@ if($error) {
 #***************************************************************************
 # Prepare command line of ssh server daemon
 #
-my $cmd = "\"$sshd\" -e -D -f $sshdconfig > $sshdlog 2>&1";
+my $cmd = "\"$sshd\" -e -D -f $sshdconfig_abs > $sshdlog 2>&1";
 logmsg "SCP/SFTP server listening on port $port" if($verbose);
 logmsg "RUN: $cmd" if($verbose);
 
@@ -1168,8 +1189,8 @@ elsif($verbose && ($rc >> 8)) {
 #***************************************************************************
 # Clean up once the server has stopped
 #
-unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $hstpubsha256f,
-       $cliprvkeyf, $clipubkeyf, $knownhosts,
-       $sshdconfig, $sshconfig, $sftpconfig);
+unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f), pp($hstpubsha256f),
+       pp($cliprvkeyf), pp($clipubkeyf), pp($knownhosts),
+       pp($sshdconfig), pp($sshconfig), pp($sftpconfig));
 
 exit 0;
