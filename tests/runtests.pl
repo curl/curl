@@ -96,6 +96,8 @@ use serverhelp qw(
 
 # Variables and subs imported from sshhelp module
 use sshhelp qw(
+    $hstpubmd5f
+    $hstpubsha256f
     $sshdexe
     $sshexe
     $sftpexe
@@ -2214,7 +2216,6 @@ sub runsshserver {
         return (0,0,0);
     }
 
-    my $hstpubmd5f = "curl_host_rsa_key.pub_md5";
     my $hostfile;
     if(!open($hostfile, "<", $hstpubmd5f) ||
        (read($hostfile, $SSHSRVMD5, 32) != 32) ||
@@ -2227,7 +2228,6 @@ sub runsshserver {
         die $msg;
     }
 
-    my $hstpubsha256f = "curl_host_rsa_key.pub_sha256";
     if(!open($hostfile, "<", $hstpubsha256f) ||
        (read($hostfile, $SSHSRVSHA256, 48) == 0) ||
        !close($hostfile))
