@@ -102,6 +102,10 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
       ret = EINVAL;
   }
   *out_n = (int)nread;
+  /*
+  DEBUGF(LOG_CF(io_ctx->data, io_ctx->cf, "cf->next recv(len=%zu) -> %zd, %d",
+                len, nread, result));
+  */
   return ret;
 }
 
@@ -121,7 +125,53 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
       ret = EINVAL;
   }
   *out_n = (int)nwritten;
+  /*
+  DEBUGF(LOG_CF(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %zd, %d",
+                len, nwritten, result));
+  */
   return ret;
+}
+
+static ssize_t tls_recv_more(struct Curl_cfilter *cf,
+                             struct Curl_easy *data, CURLcode *err)
+{
+  struct ssl_connect_data *const connssl = cf->ctx;
+  struct ssl_backend_data *const backend = connssl->backend;
+  struct io_ctx io_ctx;
+  size_t tls_bytes_read = 0;
+  rustls_io_result io_error;
+  rustls_result rresult = 0;
+
+  io_ctx.cf = cf;
+  io_ctx.data = data;
+  io_error = rustls_connection_read_tls(backend->conn, read_cb, &io_ctx,
+                                        &tls_bytes_read);
+  if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
+    *err = CURLE_AGAIN;
+    return -1;
+  }
+  else if(io_error) {
+    char buffer[STRERROR_LEN];
+    failf(data, "reading from socket: %s",
+          Curl_strerror(io_error, buffer, sizeof(buffer)));
+    *err = CURLE_READ_ERROR;
+    return -1;
+  }
+
+  rresult = rustls_connection_process_new_packets(backend->conn);
+  if(rresult != RUSTLS_RESULT_OK) {
+    char errorbuf[255];
+    size_t errorlen;
+    rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
+    failf(data, "rustls_connection_process_new_packets: %.*s",
+      errorlen, errorbuf);
+    *err = map_error(rresult);
+    return -1;
+  }
+
+  backend->data_pending = TRUE;
+  *err = CURLE_OK;
+  return (ssize_t)tls_bytes_read;
 }
 
 /*
@@ -143,101 +193,79 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct ssl_connect_data *const connssl = cf->ctx;
   struct ssl_backend_data *const backend = connssl->backend;
   struct rustls_connection *rconn = NULL;
-  struct io_ctx io_ctx;
-
   size_t n = 0;
-  size_t tls_bytes_read = 0;
   size_t plain_bytes_copied = 0;
   rustls_result rresult = 0;
-  char errorbuf[255];
-  size_t errorlen;
-  rustls_io_result io_error;
+  ssize_t nread;
+  bool eof = FALSE;
 
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  io_ctx.cf = cf;
-  io_ctx.data = data;
-
-  io_error = rustls_connection_read_tls(rconn, read_cb, &io_ctx,
-                                        &tls_bytes_read);
-  if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-    DEBUGF(LOG_CF(data, cf, "cr_recv: EAGAIN or EWOULDBLOCK"));
-  }
-  else if(io_error) {
-    char buffer[STRERROR_LEN];
-    failf(data, "reading from socket: %s",
-          Curl_strerror(io_error, buffer, sizeof(buffer)));
-    *err = CURLE_READ_ERROR;
-    return -1;
-  }
-
-  DEBUGF(LOG_CF(data, cf, "cr_recv: read %ld TLS bytes", tls_bytes_read));
-
-  rresult = rustls_connection_process_new_packets(rconn);
-  if(rresult != RUSTLS_RESULT_OK) {
-    rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
-    failf(data, "rustls_connection_process_new_packets: %.*s",
-      errorlen, errorbuf);
-    *err = map_error(rresult);
-    return -1;
-  }
-
-  backend->data_pending = TRUE;
-
   while(plain_bytes_copied < plainlen) {
+    if(!backend->data_pending) {
+      if(tls_recv_more(cf, data, err) < 0) {
+        if(*err != CURLE_AGAIN) {
+          nread = -1;
+          goto out;
+        }
+        break;
+      }
+    }
+
     rresult = rustls_connection_read(rconn,
       (uint8_t *)plainbuf + plain_bytes_copied,
       plainlen - plain_bytes_copied,
       &n);
     if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
-      DEBUGF(LOG_CF(data, cf, "cr_recv: got PLAINTEXT_EMPTY. "
-                    "will try again later."));
       backend->data_pending = FALSE;
-      break;
     }
     else if(rresult == RUSTLS_RESULT_UNEXPECTED_EOF) {
       failf(data, "rustls: peer closed TCP connection "
         "without first closing TLS connection");
       *err = CURLE_READ_ERROR;
-      return -1;
+      nread = -1;
+      goto out;
     }
     else if(rresult != RUSTLS_RESULT_OK) {
       /* n always equals 0 in this case, don't need to check it */
+      char errorbuf[255];
+      size_t errorlen;
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
       failf(data, "rustls_connection_read: %.*s", errorlen, errorbuf);
       *err = CURLE_READ_ERROR;
-      return -1;
+      nread = -1;
+      goto out;
     }
     else if(n == 0) {
       /* n == 0 indicates clean EOF, but we may have read some other
          plaintext bytes before we reached this. Break out of the loop
          so we can figure out whether to return success or EOF. */
+      eof = TRUE;
       break;
     }
     else {
-      DEBUGF(LOG_CF(data, cf, "cr_recv: got %ld plain bytes", n));
       plain_bytes_copied += n;
     }
   }
 
   if(plain_bytes_copied) {
     *err = CURLE_OK;
-    return plain_bytes_copied;
+    nread = (ssize_t)plain_bytes_copied;
   }
-
-  /* If we wrote out 0 plaintext bytes, that means either we hit a clean EOF,
-     OR we got a RUSTLS_RESULT_PLAINTEXT_EMPTY.
-     If the latter, return CURLE_AGAIN so curl doesn't treat this as EOF. */
-  if(!backend->data_pending) {
+  else if(eof) {
+    *err = CURLE_OK;
+    nread = 0;
+  }
+  else {
     *err = CURLE_AGAIN;
-    return -1;
+    nread = -1;
   }
 
-  /* Zero bytes read, and no RUSTLS_RESULT_PLAINTEXT_EMPTY, means the TCP
-     connection was cleanly closed (with a close_notify alert). */
-  *err = CURLE_OK;
-  return 0;
+out:
+  DEBUGF(LOG_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d",
+                plainlen, nread, *err));
+  return nread;
 }
 
 /*
@@ -269,7 +297,10 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  DEBUGF(LOG_CF(data, cf, "cr_send: %ld plain bytes", plainlen));
+  DEBUGF(LOG_CF(data, cf, "cf_send: %ld plain bytes", plainlen));
+
+  io_ctx.cf = cf;
+  io_ctx.data = data;
 
   if(plainlen > 0) {
     rresult = rustls_connection_write(rconn, plainbuf, plainlen,
@@ -287,14 +318,11 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
 
-  io_ctx.cf = cf;
-  io_ctx.data = data;
-
   while(rustls_connection_wants_write(rconn)) {
     io_error = rustls_connection_write_tls(rconn, write_cb, &io_ctx,
                                            &tlswritten);
     if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-      DEBUGF(LOG_CF(data, cf, "cr_send: EAGAIN after %zu bytes",
+      DEBUGF(LOG_CF(data, cf, "cf_send: EAGAIN after %zu bytes",
                     tlswritten_total));
       *err = CURLE_AGAIN;
       return -1;
@@ -311,7 +339,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
-    DEBUGF(LOG_CF(data, cf, "cr_send: wrote %zu TLS bytes", tlswritten));
+    DEBUGF(LOG_CF(data, cf, "cf_send: wrote %zu TLS bytes", tlswritten));
     tlswritten_total += tlswritten;
   }
 
@@ -538,13 +566,12 @@ cr_connect_nonblocking(struct Curl_cfilter *cf,
     if(wants_read) {
       infof(data, "rustls_connection wants us to read_tls.");
 
-      cr_recv(cf, data, NULL, 0, &tmperr);
-      if(tmperr == CURLE_AGAIN) {
-        infof(data, "reading would block");
-        /* fall through */
-      }
-      else if(tmperr != CURLE_OK) {
-        if(tmperr == CURLE_READ_ERROR) {
+      if(tls_recv_more(cf, data, &tmperr) < 0) {
+        if(tmperr == CURLE_AGAIN) {
+          infof(data, "reading would block");
+          /* fall through */
+        }
+        else if(tmperr == CURLE_READ_ERROR) {
           return CURLE_SSL_CONNECT_ERROR;
         }
         else {
