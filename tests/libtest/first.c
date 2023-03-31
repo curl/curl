@@ -188,5 +188,7 @@ int main(int argc, char **argv)
   _flushall();
 #endif
 
-  return result;
+  /* Regular program status codes are limited to 0..127 and 126 and 127 have
+   * special meanings by the shell, so limit a normal return code to 125 */
+  return result <= 125 ? result : 125;
 }
