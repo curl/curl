@@ -17,6 +17,9 @@ FAILURE
 <server>
 none
 </server>
+<features>
+http
+</features>
 <name>
 Fail to resolve .onion. TLD
 </name>
