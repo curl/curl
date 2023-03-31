@@ -3791,7 +3791,7 @@ sub singletest_precheck {
             my @o = `$cmd 2> $LOGDIR/precheck-$testnum`;
             if($o[0]) {
                 $why = $o[0];
-                chomp $why;
+                $why =~ s/[\r\n]//g;
             }
             elsif($?) {
                 $why = "precheck command error";
