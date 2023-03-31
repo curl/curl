@@ -27,7 +27,7 @@ perl %SRCDIR/libtest/test%TESTNUMBER.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 SFTP post-quote rmdir
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "-rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
 <postcheck>
 perl %SRCDIR/libtest/test%TESTNUMBER.pl gone %PWD/%LOGDIR/test%TESTNUMBER.dir

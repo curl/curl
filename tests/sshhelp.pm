@@ -210,7 +210,7 @@ sub dump_array {
     if(!$filename) {
         $error = 'Error: Missing argument 1 for dump_array()';
     }
-    elsif(open(my $textfh, ">", "$filename")) {
+    elsif(open(my $textfh, ">", $filename)) {
         foreach my $line (@arr) {
             $line .= "\n" if($line !~ /\n$/);
             print $textfh $line;

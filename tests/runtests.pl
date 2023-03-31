@@ -1098,7 +1098,7 @@ sub verifysftp {
     }
     # Connect to sftp server, authenticate and run a remote pwd
     # command using our generated configuration and key files
-    my $cmd = "\"$sftp\" -b $sftpcmds -F $sftpconfig -S \"$ssh\" $ip > $sftplog 2>&1";
+    my $cmd = "\"$sftp\" -b $PIDDIR/$sftpcmds -F $PIDDIR/$sftpconfig -S \"$ssh\" $ip > $sftplog 2>&1";
     my $res = runclient($cmd);
     # Search for pwd command response in log file
     if(open(my $sftplogfile, "<", "$sftplog")) {
@@ -2212,12 +2212,12 @@ sub runsshserver {
 
     if(!$wport) {
         logmsg "RUN: couldn't start $srvrname. Tried these ports:";
-        logmsg "RUN: ".join(", ", @tports);
+        logmsg "RUN: ".join(", ", @tports)."\n";
         return (0,0,0);
     }
 
     my $hostfile;
-    if(!open($hostfile, "<", $hstpubmd5f) ||
+    if(!open($hostfile, "<", $PIDDIR . "/" . $hstpubmd5f) ||
        (read($hostfile, $SSHSRVMD5, 32) != 32) ||
        !close($hostfile) ||
        ($SSHSRVMD5 !~ /^[a-f0-9]{32}$/i))
@@ -2228,7 +2228,7 @@ sub runsshserver {
         die $msg;
     }
 
-    if(!open($hostfile, "<", $hstpubsha256f) ||
+    if(!open($hostfile, "<", $PIDDIR . "/" . $hstpubsha256f) ||
        (read($hostfile, $SSHSRVSHA256, 48) == 0) ||
        !close($hostfile))
     {
