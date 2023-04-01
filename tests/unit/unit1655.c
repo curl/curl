@@ -184,9 +184,7 @@ UNITTEST_STOP
 #else /* CURL_DISABLE_DOH */
 
 UNITTEST_START
-{
-  return 1; /* nothing to do, just fail */
-}
+/* nothing to do, just succeed */
 UNITTEST_STOP
 
 #endif

@@ -47,7 +47,7 @@ static void unit_stop(void)
 }
 
 UNITTEST_START
-{
+
   int i;
   CURLcode code;
   struct Curl_addrinfo *addrhead = addrs;
@@ -71,6 +71,4 @@ UNITTEST_START
 
   abort_unless(addrhead != addrs, "addresses are not being reordered");
 
-  return 0;
-}
 UNITTEST_STOP
