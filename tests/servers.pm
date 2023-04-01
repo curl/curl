@@ -930,7 +930,6 @@ sub verifysmb {
     if($verbose) {
         logmsg "RUN: Verifying our test $server server took $took seconds\n";
     }
-    $ftpchecktime = $took>=1?$took:1; # make sure it never is below 1
 
     return $pid;
 }
