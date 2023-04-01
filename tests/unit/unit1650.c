@@ -159,25 +159,27 @@ UNITTEST_START
   unsigned char buffer[256];
   size_t i;
   unsigned char *p;
+
   for(i = 0; i < sizeof(req) / sizeof(req[0]); i++) {
     int rc = doh_encode(req[i].name, req[i].type,
                         buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
       fprintf(stderr, "req %zu: Expected return code %d got %d\n", i,
               req[i].rc, rc);
-      return 1;
+      abort_if(rc != req[i].rc, "return code");
     }
-    else if(size != req[i].size) {
+    if(size != req[i].size) {
       fprintf(stderr, "req %zu: Expected size %zu got %zu\n", i,
               req[i].size, size);
       fprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
-      return 2;
+      abort_if(size != req[i].size, "size");
     }
-    else if(req[i].packet && memcmp(req[i].packet, buffer, size)) {
+    if(req[i].packet && memcmp(req[i].packet, buffer, size)) {
       fprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
       fprintf(stderr, "... instead of: %s\n",
              hexdump((unsigned char *)req[i].packet, size));
-      return 3;
+      abort_if(req[i].packet && memcmp(req[i].packet, buffer, size),
+               "contents");
     }
   }
 
@@ -193,7 +195,7 @@ UNITTEST_START
     if(rc != resp[i].rc) {
       fprintf(stderr, "resp %zu: Expected return code %d got %d\n", i,
               resp[i].rc, rc);
-      return 4;
+      abort_if(rc != resp[i].rc, "return code");
     }
     len = sizeof(buffer);
     ptr = (char *)buffer;
@@ -234,63 +236,61 @@ UNITTEST_START
     if(resp[i].out && strcmp((char *)buffer, resp[i].out)) {
       fprintf(stderr, "resp %zu: Expected %s got %s\n", i,
               resp[i].out, buffer);
-      return 1;
+      abort_if(resp[i].out && strcmp((char *)buffer, resp[i].out), "content");
+    }
+  }
+
+  /* pass all sizes into the decoder until full */
+  for(i = 0; i < sizeof(full49)-1; i++) {
+    struct dohentry d;
+    int rc;
+    memset(&d, 0, sizeof(d));
+    rc = doh_decode((const unsigned char *)full49, i, DNS_TYPE_A, &d);
+    if(!rc) {
+      /* none of them should work */
+      fprintf(stderr, "%zu: %d\n", i, rc);
+      abort_if(!rc, "error rc");
+    }
+  }
+
+  /* and try all pieces from the other end of the packet */
+  for(i = 1; i < sizeof(full49); i++) {
+    struct dohentry d;
+    int rc;
+    memset(&d, 0, sizeof(d));
+    rc = doh_decode((const unsigned char *)&full49[i], sizeof(full49)-i-1,
+                    DNS_TYPE_A, &d);
+    if(!rc) {
+      /* none of them should work */
+      fprintf(stderr, "2 %zu: %d\n", i, rc);
+      abort_if(!rc, "error rc");
     }
   }
 
   {
-    /* pass all sizes into the decoder until full */
-    for(i = 0; i < sizeof(full49)-1; i++) {
-      struct dohentry d;
-      int rc;
-      memset(&d, 0, sizeof(d));
-      rc = doh_decode((const unsigned char *)full49, i, DNS_TYPE_A, &d);
-      if(!rc) {
-        /* none of them should work */
-        fprintf(stderr, "%zu: %d\n", i, rc);
-        return 5;
-      }
+    int rc;
+    struct dohentry d;
+    struct dohaddr *a;
+    memset(&d, 0, sizeof(d));
+    rc = doh_decode((const unsigned char *)full49, sizeof(full49)-1,
+                    DNS_TYPE_A, &d);
+    fail_if(d.numaddr != 1, "missing address");
+    a = &d.addr[0];
+    p = &a->ip.v4[0];
+    msnprintf((char *)buffer, sizeof(buffer),
+              "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
+    if(rc || strcmp((char *)buffer, "127.0.0.1")) {
+      fprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
+      abort_if(rc || strcmp((char *)buffer, "127.0.0.1"), "bad address");
     }
-    /* and try all pieces from the other end of the packet */
-    for(i = 1; i < sizeof(full49); i++) {
-      struct dohentry d;
-      int rc;
-      memset(&d, 0, sizeof(d));
-      rc = doh_decode((const unsigned char *)&full49[i], sizeof(full49)-i-1,
-                      DNS_TYPE_A, &d);
-      if(!rc) {
-        /* none of them should work */
-        fprintf(stderr, "2 %zu: %d\n", i, rc);
-        return 7;
-      }
-    }
-    {
-      int rc;
-      struct dohentry d;
-      struct dohaddr *a;
-      memset(&d, 0, sizeof(d));
-      rc = doh_decode((const unsigned char *)full49, sizeof(full49)-1,
-                      DNS_TYPE_A, &d);
-      fail_if(d.numaddr != 1, "missing address");
-      a = &d.addr[0];
-      p = &a->ip.v4[0];
-      msnprintf((char *)buffer, sizeof(buffer),
-                "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
-      if(rc || strcmp((char *)buffer, "127.0.0.1")) {
-        fprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
-        return 7;
-      }
-      fail_if(d.numcname, "bad cname counter");
-    }
+    fail_if(d.numcname, "bad cname counter");
   }
 }
 UNITTEST_STOP
 
 #else /* CURL_DISABLE_DOH */
 UNITTEST_START
-{
-  return 1; /* nothing to do, just fail */
-}
+/* nothing to do, just succeed */
 UNITTEST_STOP
 
 

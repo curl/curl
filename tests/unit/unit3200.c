@@ -79,7 +79,6 @@ static const char *filecontents[] = {
 
 
 UNITTEST_START
-{
   size_t i;
   for(i = 0; i < NUMTESTS; i++) {
     FILE *fp;
@@ -157,6 +156,4 @@ UNITTEST_START
     fclose(fp);
     fprintf(stderr, "OK\n");
   }
-  return 0;
-}
 UNITTEST_STOP
