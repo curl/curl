@@ -166,11 +166,15 @@ class EnvConfig:
     @property
     def httpd_version(self):
         if self._httpd_version is None and self.apxs is not None:
-            p = subprocess.run(args=[self.apxs, '-q', 'HTTPD_VERSION'],
-                               capture_output=True, text=True)
-            if p.returncode != 0:
-                raise Exception(f'{self.apxs} failed to query HTTPD_VERSION: {p}')
-            self._httpd_version = p.stdout.strip()
+            try:
+                p = subprocess.run(args=[self.apxs, '-q', 'HTTPD_VERSION'],
+                                   capture_output=True, text=True)
+                if p.returncode != 0:
+                    log.error(f'{self.apxs} failed to query HTTPD_VERSION: {p}')
+                else:
+                    self._httpd_version = p.stdout.strip()
+            except Exception as e:
+                log.error(f'{self.apxs} failed to run: {e}')
         return self._httpd_version
 
     def _versiontuple(self, v):
@@ -178,6 +182,8 @@ class EnvConfig:
         return tuple(map(int, v.split('.')))
 
     def httpd_is_at_least(self, minv):
+        if self.httpd_version is None:
+            return False
         hv = self._versiontuple(self.httpd_version)
         return hv >= self._versiontuple(minv)
 
@@ -188,12 +194,14 @@ class EnvConfig:
                os.path.isfile(self.apxs)
 
     def get_incomplete_reason(self) -> Optional[str]:
+        if self.httpd is None or len(self.httpd.strip()) == 0:
+            return f'httpd not configured, see `--with-test-httpd=<path>`'
         if not os.path.isfile(self.httpd):
             return f'httpd ({self.httpd}) not found'
         if not os.path.isfile(self.apachectl):
             return f'apachectl ({self.apachectl}) not found'
         if self.apxs is None:
-            return f"apxs (provided by apache2-dev) not found"
+            return f"command apxs not found (commonly provided in apache2-dev)"
         if not os.path.isfile(self.apxs):
             return f"apxs ({self.apxs}) not found"
         return None
