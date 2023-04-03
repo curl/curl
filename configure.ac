@@ -323,10 +323,11 @@ AC_SUBST(CADDY)
 
 dnl we'd like a httpd+apachectl as test server
 dnl
+HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
                          [where to find httpd/apache2 for testing])],
   [request_httpd=$withval], [request_httpd=check])
-if test x"$request_httpd" = "xcheck"; then
+if test x"$request_httpd" = "xcheck" -o x"$request_httpd" = "xyes"; then
   if test -x "/usr/sbin/apache2" -a -x "/usr/sbin/apache2ctl"; then
     # common location on distros (debian/ubuntu)
     HTTPD="/usr/sbin/apache2"
@@ -334,6 +335,7 @@ if test x"$request_httpd" = "xcheck"; then
     AC_PATH_PROG([APXS], [apxs])
     if test "x$APXS" != "x"; then
       AC_MSG_NOTICE([apache2-dev not installed, httpd tests disabled])
+      HTTPD_ENABLED="no"
     fi
   else
     AC_PATH_PROG([HTTPD], [httpd])
@@ -343,25 +345,35 @@ if test x"$request_httpd" = "xcheck"; then
     AC_PATH_PROG([APACHECTL], [apachectl])
     AC_PATH_PROG([APXS], [apxs])
     if test "x$HTTPD" = "x" -o "x$APACHECTL" = "x"; then
-      AC_MSG_NOTICE([httpd/apache2 not in PATH, httpd tests disabled])
+      AC_MSG_NOTICE([httpd/apache2 not in PATH, http tests disabled])
+      HTTPD_ENABLED="no"
     fi
     if test "x$APXS" = "x"; then
-      AC_MSG_NOTICE([apxs not in PATH, httpd tests disabled])
+      AC_MSG_NOTICE([apxs not in PATH, http tests disabled])
+      HTTPD_ENABLED="no"
     fi
   fi
-else
+elif test x"$request_httpd" != "xno"; then
   HTTPD="${request_httpd}/bin/httpd"
   APACHECTL="${request_httpd}/bin/apachectl"
   APXS="${request_httpd}/bin/apxs"
   if test ! -x "${HTTPD}"; then
-    AC_MSG_NOTICE([httpd not found as ${HTTPD}, httpd tests disabled])
+    AC_MSG_NOTICE([httpd not found as ${HTTPD}, http tests disabled])
+    HTTPD_ENABLED="no"
   elif test ! -x "${APACHECTL}"; then
-    AC_MSG_NOTICE([apachectl not found as ${APACHECTL}, httpd tests disabled])
+    AC_MSG_NOTICE([apachectl not found as ${APACHECTL}, http tests disabled])
+    HTTPD_ENABLED="no"
   elif test ! -x "${APXS}"; then
-    AC_MSG_NOTICE([apxs not found as ${APXS}, httpd tests disabled])
+    AC_MSG_NOTICE([apxs not found as ${APXS}, http tests disabled])
+    HTTPD_ENABLED="no"
   else
     AC_MSG_NOTICE([using HTTPD=$HTTPD for tests])
   fi
+fi
+if test x"$HTTPD_ENABLED" = "xno"; then
+  HTTPD=""
+  APACHECTL=""
+  APXS=""
 fi
 AC_SUBST(HTTPD)
 AC_SUBST(APACHECTL)

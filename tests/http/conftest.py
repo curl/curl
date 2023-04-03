@@ -57,9 +57,11 @@ def log_global_env_facts(record_testsuite_property, env):
 @pytest.fixture(scope='package')
 def httpd(env) -> Httpd:
     httpd = Httpd(env=env)
-    assert httpd.exists(), f'httpd not found: {env.httpd}'
+    if not httpd.exists():
+        pytest.skip(f'httpd not found: {env.httpd}')
     httpd.clear_logs()
-    assert httpd.start()
+    if not httpd.start():
+        pytest.fail(f'failed to start httpd: {env.httpd}')
     yield httpd
     httpd.stop()
 
