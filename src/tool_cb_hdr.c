@@ -87,6 +87,12 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   }
 #endif
 
+#ifdef WIN32
+  /* Discard incomplete UTF-8 sequence buffered from body */
+  if(outs->utf8seq[0])
+    memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
+#endif
+
   /*
    * Write header data when curl option --dump-header (-D) is given.
    */
