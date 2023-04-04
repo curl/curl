@@ -1131,15 +1131,26 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     fraglen = strlen(fragment);
     if(fraglen > 1) {
       /* skip the leading '#' in the copy but include the terminating null */
-      u->fragment = Curl_memdup(fragment + 1, fraglen);
-      if(!u->fragment) {
-        result = CURLUE_OUT_OF_MEMORY;
-        goto fail;
+      if(flags & CURLU_URLENCODE) {
+        struct dynbuf enc;
+        Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+        if(urlencode_str(&enc, fragment + 1, fraglen, TRUE, FALSE)) {
+          result = CURLUE_OUT_OF_MEMORY;
+          goto fail;
+        }
+        u->fragment = Curl_dyn_ptr(&enc);
       }
+      else {
+        u->fragment = Curl_memdup(fragment + 1, fraglen);
+        if(!u->fragment) {
+          result = CURLUE_OUT_OF_MEMORY;
+          goto fail;
+        }
 
-      if(junkscan(u->fragment, flags)) {
-        result = CURLUE_BAD_FRAGMENT;
-        goto fail;
+        if(junkscan(u->fragment, flags)) {
+          result = CURLUE_BAD_FRAGMENT;
+          goto fail;
+        }
       }
     }
   }
