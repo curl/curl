@@ -141,6 +141,9 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"https://user@example.net?hello# space ",
+   "https | user | [12] | [13] | example.net | [15] | / | hello | %20space%20",
+   CURLU_ALLOW_SPACE|CURLU_URLENCODE, 0, CURLUE_OK},
   {"https://test%test", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://example.com%252f%40@example.net",
    "https | example.com%2f@ | [12] | [13] | example.net | [15] | / "
