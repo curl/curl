@@ -209,6 +209,70 @@ The total time, in seconds, that the full operation lasted.
 .B url
 The URL that was fetched. (Added in 7.75.0)
 .TP
+.B url.scheme
+The scheme part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.user
+The user part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.password
+The password part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.options
+The options part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.host
+The host part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.port
+The port number of the URL that was fetched. If no port number was specified,
+but the URL scheme is known, that scheme's default port number is
+shown. (Added in 8.1.0)
+.TP
+.B url.path
+The path part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.query
+The query part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.fragment
+The fragment part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.zoneid
+The zoneid part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.scheme
+The scheme part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.user
+The user part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.password
+The password part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.options
+The options part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.host
+The host part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.port
+The port number of the effective (last) URL that was fetched. If no port
+number was specified, but the URL scheme is known, that scheme's default port
+number is shown. (Added in 8.1.0)
+.TP
+.B urle.path
+The path part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.query
+The query part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.fragment
+The fragment part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.zoneid
+The zoneid part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
 .B urlnum
 The URL index number of this transfer, 0-indexed. De-globbed URLs share the
 same index number as the origin globbed URL. (Added in 7.75.0)
