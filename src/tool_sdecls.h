@@ -57,6 +57,9 @@
  * 'init' member holds original file size or offset at which truncation is
  * taking place. Always zero unless appending to a non-empty regular file.
  *
+ * [Windows]
+ * 'utf8seq' member holds an incomplete UTF-8 sequence destined for the console
+ * until it can be completed (1-4 bytes) + NUL.
  */
 
 struct OutStruct {
@@ -68,6 +71,9 @@ struct OutStruct {
   FILE *stream;
   curl_off_t bytes;
   curl_off_t init;
+#ifdef WIN32
+  unsigned char utf8seq[5];
+#endif
 };
 
 /*

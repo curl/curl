@@ -464,6 +464,12 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     }
   }
 
+#ifdef WIN32
+  /* Discard incomplete UTF-8 sequence buffered from body */
+  if(outs->utf8seq[0])
+    memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
+#endif
+
   /* if retry-max-time is non-zero, make sure we haven't exceeded the
      time */
   if(per->retry_numretries &&
