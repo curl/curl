@@ -121,13 +121,12 @@ use sshhelp qw(
     sshversioninfo
     );
 
+use appveyor;
+use azure;
+use getpart;   # array functions
 use pathhelp;
-
-require getpart;   # array functions
-require valgrind;  # valgrind report parser
-require ftp;
-require azure;
-require appveyor;
+use processhelp;
+use valgrind;  # valgrind report parser
 
 my $HOSTIP="127.0.0.1";   # address on which the test server listens
 my $HOST6IP="[::1]";      # address on which the test server listens

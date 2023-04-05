@@ -28,8 +28,8 @@ MANDISTPAGES = runtests.1.dist testcurl.1.dist
 
 EXTRA_DIST = appveyor.pm azure.pm badsymbols.pl check-deprecated.pl CMakeLists.txt \
  dictserver.py directories.pm disable-scan.pl error-codes.pl extern-scan.pl \
- FILEFORMAT.md ftp.pm ftpserver.pl getpart.pm http-server.pl http2-server.pl http3-server.pl \
- manpage-scan.pl manpage-syntax.pl markdown-uppercase.pl mem-include-scan.pl \
+ FILEFORMAT.md processhelp.pm ftpserver.pl getpart.pm http-server.pl http2-server.pl \
+ http3-server.pl manpage-scan.pl manpage-syntax.pl markdown-uppercase.pl mem-include-scan.pl \
  memanalyze.pl negtelnetserver.py nroff-scan.pl option-check.pl options-scan.pl \
  pathhelp.pm README.md rtspserver.pl runtests.1 runtests.pl secureserver.pl \
  serverhelp.pm smbserver.py sshhelp.pm sshserver.pl stunnel.pem symbol-scan.pl \
