@@ -68,6 +68,7 @@ class EnvConfig:
         self.curl_props = {
             'version': None,
             'os': None,
+            'fullname': None,
             'features': [],
             'protocols': [],
             'libs': [],
@@ -82,6 +83,7 @@ class EnvConfig:
             if l.startswith('curl '):
                 m = re.match(r'^curl (?P<version>\S+) (?P<os>\S+) (?P<libs>.*)$', l)
                 if m:
+                    self.curl_props['fullname'] = m.group(0)
                     self.curl_props['version'] = m.group('version')
                     self.curl_props['os'] = m.group('os')
                     self.curl_props['lib_versions'] = [
@@ -243,7 +245,6 @@ class Env:
     def curl_has_protocol(protocol: str) -> bool:
         return protocol.lower() in Env.CONFIG.curl_props['protocols']
 
-
     @staticmethod
     def curl_lib_version(libname: str) -> str:
         prefix = f'{libname.lower()}/'
@@ -255,6 +256,10 @@ class Env:
     @staticmethod
     def curl_os() -> str:
         return Env.CONFIG.curl_props['os']
+
+    @staticmethod
+    def curl_fullname() -> str:
+        return Env.CONFIG.curl_props['fullname']
 
     @staticmethod
     def curl_version() -> str:

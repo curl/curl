@@ -51,6 +51,7 @@ class ScoreCard:
         self.httpd = None
         self.nghttpx = None
         self.caddy = None
+        self._silent_curl = True
 
     def info(self, msg):
         if self.verbose > 0:
@@ -69,7 +70,7 @@ class ScoreCard:
             hs_samples = []
             errors = []
             for i in range(sample_size):
-                curl = CurlClient(env=self.env, silent=True)
+                curl = CurlClient(env=self.env, silent=self._silent_curl)
                 url = f'https://{authority}/'
                 r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True)
                 if r.exit_code == 0 and len(r.stats) == 1:
@@ -97,7 +98,7 @@ class ScoreCard:
                 hs_samples = []
                 errors = []
                 for i in range(sample_size):
-                    curl = CurlClient(env=self.env, silent=True)
+                    curl = CurlClient(env=self.env, silent=self._silent_curl)
                     args = [
                         '--http3-only' if proto == 'h3' else '--http2',
                         f'--{ipv}', f'https://{authority}/'
@@ -142,7 +143,7 @@ class ScoreCard:
         errors = []
         self.info(f'single...')
         for i in range(sample_size):
-            curl = CurlClient(env=self.env, silent=True)
+            curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    with_headers=False)
             err = self._check_downloads(r, count)
@@ -165,7 +166,7 @@ class ScoreCard:
         url = f'{url}?[0-{count - 1}]'
         self.info(f'serial...')
         for i in range(sample_size):
-            curl = CurlClient(env=self.env, silent=True)
+            curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    with_headers=False)
             err = self._check_downloads(r, count)
@@ -188,7 +189,7 @@ class ScoreCard:
         url = f'{url}?[0-{count - 1}]'
         self.info(f'parallel...')
         for i in range(sample_size):
-            curl = CurlClient(env=self.env, silent=True)
+            curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    with_headers=False,
                                    extra_args=['--parallel', '--parallel-max', str(count)])
@@ -364,7 +365,7 @@ class ScoreCard:
         p['version'] = Env.curl_lib_version(p['implementation'])
 
         score = {
-            'curl': self.env.curl_version(),
+            'curl': self.env.curl_fullname(),
             'os': self.env.curl_os(),
             'protocol': p,
         }
@@ -394,8 +395,7 @@ class ScoreCard:
         return f'{val:0.000f} r/s' if val >= 0 else '--'
 
     def print_score(self, score):
-        print(f'{score["protocol"]["name"].upper()} in curl {score["curl"]} ({score["os"]}) via '
-              f'{score["protocol"]["implementation"]}/{score["protocol"]["version"]} ')
+        print(f'{score["protocol"]["name"].upper()} in {score["curl"]}')
         if 'handshakes' in score:
             print(f'{"Handshakes":<24} {"ipv4":25} {"ipv6":28}')
             print(f'  {"Host":<17} {"Connect":>12} {"Handshake":>12} '
@@ -469,6 +469,8 @@ class ScoreCard:
                             help="evaluate httpd server only")
         parser.add_argument("--caddy", action='store_true', default=False,
                             help="evaluate caddy server only")
+        parser.add_argument("--curl-verbose", action='store_true', default=False,
+                            help="run curl with `-v`")
         parser.add_argument("protocol", default='h2', nargs='?', help="Name of protocol to score")
         args = parser.parse_args()
 
@@ -478,6 +480,8 @@ class ScoreCard:
             console.setLevel(logging.INFO)
             console.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
             logging.getLogger('').addHandler(console)
+        if args.curl_verbose:
+            self._silent_curl = False
 
         protocol = args.protocol
         handshakes = True
@@ -509,15 +513,16 @@ class ScoreCard:
         self.nghttpx = None
         self.caddy = None
         try:
-            self.httpd = Httpd(env=self.env)
-            assert self.httpd.exists(), f'httpd not found: {self.env.httpd}'
-            self.httpd.clear_logs()
-            assert self.httpd.start()
-            if 'h3' == protocol:
-                self.nghttpx = Nghttpx(env=self.env)
-                self.nghttpx.clear_logs()
-                assert self.nghttpx.start()
-            if self.env.caddy:
+            if test_httpd:
+                self.httpd = Httpd(env=self.env)
+                assert self.httpd.exists(), f'httpd not found: {self.env.httpd}'
+                self.httpd.clear_logs()
+                assert self.httpd.start()
+                if 'h3' == protocol:
+                    self.nghttpx = Nghttpx(env=self.env)
+                    self.nghttpx.clear_logs()
+                    assert self.nghttpx.start()
+            if test_caddy and self.env.caddy:
                 self.caddy = Caddy(env=self.env)
                 self.caddy.clear_logs()
                 assert self.caddy.start()
