@@ -4,26 +4,32 @@ curl and libcurl 8.1.0
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2851
+ Contributors:                 2852
 
 This release includes the following changes:
+
+ o tool_writeout: add URL component variables [41]
 
 This release includes the following bugfixes:
 
  o CI: fix brew retries on GHA
  o CI: skip Azure for commits which change only GHA
  o cmake: bring in the network library on Haiku [9]
+ o cmake: do not add zlib headers for openssl [49]
  o CMake: make config version 8 compatible with 7 [28]
  o cmake: picky-linker fixes for openssl, ZLIB, H3 and more [31]
  o cmake: set SONAME for SunOS too [3]
+ o configure: make quiche require quiche_conn_send_ack_eliciting [46]
  o curl_easy_getinfo.3: typo fix (duplicated "from the") [43]
  o data.d: emphasize no conversion [5]
  o digest: clear target buffer [8]
- o doc: curl_mime_init() strong easy handle binding has been relaxed in 7.87.0 [26]
+ o doc: curl_mime_init() strong easy binding was relaxed in 7.87.0 [26]
  o docs/cmdline-opts: document the dotless config path [1]
+ o docs: bump the minimum perl version to 5.6
  o dynbuf: never allocate larger than "toobig" [17]
  o ftplistparser: move out private data from public struct [20]
  o ftplistparser: replace realloc with dynbuf [18]
+ o getpart: better handle case of file not found
  o GHA-linux: add an address-sanitizer build [15]
  o GHA: add a memory-sanitizer job [2]
  o GHA: run all linux test jobs with valgrind [14]
@@ -31,6 +37,8 @@ This release includes the following bugfixes:
  o gskit: various compile errors in OS400 [12]
  o hostip: refuse to resolve the .onion TLD [19]
  o HTTP-COOKIES.md: mention the #HttpOnly_ prefix [16]
+ o http2: flow control and buffer improvements [54]
+ o http3: improvements across backends [51]
  o lib/sha256.c: typo fix in comment (duplicated "is available") [40]
  o lib: add `bufq` and `dynhds` [34]
  o lib: use correct printf flags for sockets and timediffs [36]
@@ -41,15 +49,29 @@ This release includes the following bugfixes:
  o openssl: interop with AWS-LC [30]
  o pytest: improvements for suitable curl and error output [35]
  o RELEASE-PROCEDURE: update to new schedule [25]
+ o rtsp: convert mallocs to dynbuf for RTP buffering [37]
  o rtsp: skip malformed RTSP interleaved frame data [33]
  o runtests: die if curl version can be found [10]
+ o runtests: don't start servers if -l is given
+ o runtests: show error message if file can't be written
+ o rustls: fix error in recv handling [50]
  o server/getpart: clear target buffer before load [6]
  o telnet: simplify the implementation of str_is_nonascii() [42]
  o test1592: add flaky keyword [39]
+ o test1960: point to the correct path for the precheck tool
  o tests/http: add timeout to running curl in test cases [24]
  o tests/http: fix log formatting on wrong exit code [27]
+ o tests/http: improved httpd detection [45]
+ o tests/http: relax connection check in test_07_02 [53]
+ o tests: document that the unittest keyword is special
+ o tests: move pidfiles and portfiles under the log directory [48]
+ o tests: move server config files under the pid dir [47]
+ o tests: silence some Perl::Critic warnings in test suite [56]
+ o tests: switch to 3-argument open in test suite
+ o tests: use %LOGDIR to refer to the log directory
  o tool_operate: pass a long as CURLOPT_HEADEROPT argument [13]
  o url: remove call to Curl_llist_destroy in Curl_close [22]
+ o urlapi: URL encoding for the URL missed the fragment [29]
  o vlts: use full buffer size when receiving data if possible [32]
  o wolfssl.yml: bump to version 5.6.0 [44]
  o ws: handle reads before EAGAIN better [38]
@@ -72,11 +94,12 @@ advice from friends like these:
 
   Andy Alt, Arne Soete, Ben Fritz, Brian Lund, Chloe Kudryavtsev, Dan Fandrich,
   Dan Frandrich, Daniel Stenberg, dengjfzh on github, Douglas R. Reno,
-  Frank Gevaerts, Gisle Vanem, Harry Sintonen, Jakub Zakrzewski, Jim King,
-  Jon Rumsey, Kai Pastor, Kamil Dudka, Matt Jolly, Micah Snyder),
-  Osaila on github, Patrick Monnerat, Paul Howarth, Philip Heiduck, Ray Satiro,
-  Ronan Pigott, simplerobot on github, Stefan Eissing, Viktor Szakats
-  (29 contributors)
+  Emil Engler, Frank Gevaerts, Gisle Vanem, Harry Sintonen, Jakub Zakrzewski,
+  Jim King, Jon Rumsey, Kai Pastor, Kamil Dudka, kwind on github, Matt Jolly,
+  Micah Snyder), Osaila on github, Patrick Monnerat, Paul Howarth,
+  Philip Heiduck, Ray Satiro, Ronan Pigott, simplerobot on github,
+  Stefan Eissing, Viktor Szakats
+  (31 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -108,6 +131,7 @@ References to bug reports and discussions on issues:
  [26] = https://curl.se/bug/?i=10834
  [27] = https://curl.se/bug/?i=10868
  [28] = https://curl.se/bug/?i=10819
+ [29] = https://curl.se/bug/?i=10887
  [30] = https://curl.se/bug/?i=10320
  [31] = https://curl.se/bug/?i=10857
  [32] = https://curl.se/bug/?i=10736
@@ -115,9 +139,21 @@ References to bug reports and discussions on issues:
  [34] = https://curl.se/bug/?i=10720
  [35] = https://curl.se/bug/?i=10829
  [36] = https://curl.se/bug/?i=10737
+ [37] = https://curl.se/bug/?i=10786
  [38] = https://curl.se/bug/?i=10831
  [39] = https://curl.se/bug/?i=10860
  [40] = https://curl.se/bug/?i=10851
+ [41] = https://curl.se/bug/?i=10853
  [42] = https://curl.se/bug/?i=10852
  [43] = https://curl.se/bug/?i=10850
  [44] = https://curl.se/bug/?i=10843
+ [45] = https://curl.se/bug/?i=10879
+ [46] = https://curl.se/bug/?i=10886
+ [47] = https://curl.se/bug/?i=10875
+ [48] = https://curl.se/bug/?i=10874
+ [49] = https://curl.se/bug/?i=10878
+ [50] = https://curl.se/bug/?i=10876
+ [51] = https://curl.se/bug/?i=10772
+ [53] = https://curl.se/bug/?i=10865
+ [54] = https://curl.se/bug/?i=10771
+ [56] = https://curl.se/bug/?i=10861
