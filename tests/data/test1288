@@ -42,7 +42,7 @@ http-proxy
 Suppress proxy CONNECT response headers
 </name>
 <command>
---proxytunnel --suppress-connect-headers --dump-header - --include --write-out "\nCONNECT CODE: %{http_connect}\nRECEIVED HEADER BYTE TOTAL: %{size_header}\n" --proxy %HOSTIP:%PROXYPORT http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER
+--proxytunnel --suppress-connect-headers --dump-header - --include --write-out "\nCONNECT CODE: %{http_connect}\nRECEIVED HEADER BYTE TOTAL: %{size_header}\n" --proxy %HOSTIP:%PROXYPORT http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER
 </command>
 <features>
 proxy
@@ -53,15 +53,15 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <proxy>
-CONNECT %HOSTIP.%TESTNUMBER:%HTTPPORT HTTP/1.1
-Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
+CONNECT %HOSTIP:%HTTPPORT HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
