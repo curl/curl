@@ -58,9 +58,9 @@ use IPC::Open2;
 use Digest::MD5;
 use File::Basename;
 
-require "getpart.pm";
-require "ftp.pm";
-require "directories.pm";
+use directories;
+use getpart;
+use processhelp;
 
 use serverhelp qw(
     servername_str

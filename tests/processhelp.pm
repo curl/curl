@@ -22,10 +22,27 @@
 #
 ###########################################################################
 
+package processhelp;
+
 use strict;
 use warnings;
 
 BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+        portable_sleep
+        pidfromfile
+        pidexists
+        pidwait
+        processexists
+        killpid
+        killsockfilters
+        killallsockfilters
+        set_advisor_read_lock
+        clear_advisor_read_lock
+    );
+
     # portable sleeping needs Time::HiRes
     eval {
         no warnings "all";

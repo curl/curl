@@ -22,8 +22,19 @@
 #
 ###########################################################################
 
+package valgrind;
+
 use strict;
 use warnings;
+
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+        valgrindparse
+    );
+}
+
 
 use File::Basename;
 

@@ -49,8 +49,8 @@
 #     interpreted incorrectly in Perl and Msys/Cygwin environment have low
 #     control on Win32 current drive and Win32 current path on specific drive.
 
-
 package pathhelp;
+
 use strict;
 use warnings;
 use Cwd 'abs_path';

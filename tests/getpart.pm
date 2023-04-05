@@ -22,8 +22,28 @@
 #
 ###########################################################################
 
+package getpart;
+
 use strict;
 use warnings;
+
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+        getpartattr
+        getpart
+        partexists
+        loadtest
+        fulltest
+        striparray
+        compareparts
+        writearray
+        loadarray
+        showdiff
+    );
+}
+
 use Memoize;
 use MIME::Base64;
 
@@ -209,11 +229,6 @@ sub partexists {
 # caching a result that will never be used again just slows things down.
 # memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
-# Return entire document as list of lines
-sub getall {
-    return @xml;
-}
-
 sub loadtest {
     my ($file)=@_;
 
@@ -238,6 +253,8 @@ sub loadtest {
     return 0;
 }
 
+
+# Return entire document as list of lines
 sub fulltest {
     return @xml;
 }
