@@ -61,6 +61,7 @@ BEGIN {
     our @EXPORT = qw(
       sys_native_abs_path
       sys_native_path
+      exe_ext
     );
 
     our @EXPORT_OK = qw(
@@ -778,6 +779,23 @@ sub simple_transform_win32_to_unix {
 
     $path = '/cygdrive' . $path if(drives_mounted_on_cygdrive());
     return $path;
+}
+#
+#***************************************************************************
+# Return file extension for executable files on this operating system
+#
+sub exe_ext {
+    my ($component, @arr) = @_;
+    if ($ENV{'CURL_TEST_EXE_EXT'}) {
+        return $ENV{'CURL_TEST_EXE_EXT'};
+    }
+    if ($ENV{'CURL_TEST_EXE_EXT_'.$component}) {
+        return $ENV{'CURL_TEST_EXE_EXT_'.$component};
+    }
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
+        $^O eq 'dos' || $^O eq 'os2') {
+        return '.exe';
+    }
 }
 
 1;    # End of module

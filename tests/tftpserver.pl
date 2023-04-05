@@ -23,20 +23,20 @@
 #
 #***************************************************************************
 
+use strict;
+use warnings;
+
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
     push(@INC, ".");
 }
-
-use strict;
-use warnings;
 
 use serverhelp qw(
     server_pidfilename
     server_logfilename
     );
 
-use sshhelp qw(
+use pathhelp qw(
     exe_ext
     );
 

@@ -29,7 +29,10 @@ use warnings;
 push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
 push(@INC, ".");
 
-use getpart; # array functions
+use getpart qw(
+    getpart
+    loadtest
+    );
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $TESTDIR="$srcdir/data";

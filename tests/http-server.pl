@@ -38,7 +38,7 @@ use serverhelp qw(
     server_logfilename
     );
 
-use sshhelp qw(
+use pathhelp qw(
     exe_ext
     );
 

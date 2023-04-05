@@ -27,39 +27,26 @@ package serverhelp;
 use strict;
 use warnings;
 
-#***************************************************************************
-# Global symbols allowed without explicit package name
-#
-use vars qw(
-    @EXPORT_OK
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT_OK = qw(
+        serverfactors
+        servername_id
+        servername_str
+        servername_canon
+        server_pidfilename
+        server_portfilename
+        server_logfilename
+        server_cmdfilename
+        server_inputfilename
+        server_outputfilename
+        mainsockf_pidfilename
+        mainsockf_logfilename
+        datasockf_pidfilename
+        datasockf_logfilename
     );
-
-
-#***************************************************************************
-# Inherit Exporter's capabilities
-#
-use base qw(Exporter);
-
-
-#***************************************************************************
-# Global symbols this module will export upon request
-#
-@EXPORT_OK = qw(
-    serverfactors
-    servername_id
-    servername_str
-    servername_canon
-    server_pidfilename
-    server_portfilename
-    server_logfilename
-    server_cmdfilename
-    server_inputfilename
-    server_outputfilename
-    mainsockf_pidfilename
-    mainsockf_logfilename
-    datasockf_pidfilename
-    datasockf_logfilename
-    );
+}
 
 
 #***************************************************************************
