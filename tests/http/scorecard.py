@@ -28,9 +28,10 @@ import argparse
 import json
 import logging
 import os
+import re
 import sys
 from statistics import mean
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from testenv import Env, Httpd, Nghttpx, CurlClient, Caddy, ExecResult
 
@@ -214,8 +215,8 @@ class ScoreCard:
             'errors': errors
         }
 
-    def download_url(self, url: str, proto: str, count: int):
-        self.info(f'  {url}: ')
+    def download_url(self, label: str, url: str, proto: str, count: int):
+        self.info(f'  {count}x{label}: ')
         props = {
             'single': self.transfer_single(url=url, proto=proto, count=10),
             'serial': self.transfer_serial(url=url, proto=proto, count=count),
@@ -225,10 +226,10 @@ class ScoreCard:
         self.info(f'ok.\n')
         return props
 
-    def downloads(self, proto: str, test_httpd: bool = True,
-                  test_caddy: bool = True) -> Dict[str, Any]:
+    def downloads(self, proto: str, count: int,
+                  fsizes: List[int]) -> Dict[str, Any]:
         scores = {}
-        if test_httpd:
+        if self.httpd:
             if proto == 'h3':
                 port = self.env.h3_port
                 via = 'nghttpx'
@@ -238,41 +239,37 @@ class ScoreCard:
                 via = 'httpd'
                 descr = f'port {port}'
             self.info(f'{via} downloads\n')
-            self._make_docs_file(docs_dir=self.httpd.docs_dir,
-                                 fname='score1.data', fsize=1024*1024)
-            url1 = f'https://{self.env.domain1}:{port}/score1.data'
-            self._make_docs_file(docs_dir=self.httpd.docs_dir,
-                                 fname='score10.data', fsize=10*1024*1024)
-            url10 = f'https://{self.env.domain1}:{port}/score10.data'
-            self._make_docs_file(docs_dir=self.httpd.docs_dir,
-                                 fname='score100.data', fsize=100*1024*1024)
-            url100 = f'https://{self.env.domain1}:{port}/score100.data'
             scores[via] = {
                 'description': descr,
-                '1MB': self.download_url(url=url1, proto=proto, count=50),
-                '10MB': self.download_url(url=url10, proto=proto, count=50),
-                '100MB': self.download_url(url=url100, proto=proto, count=50),
             }
-        if test_caddy and self.caddy:
+            for fsize in fsizes:
+                label = f'{int(fsize / 1024)}KB' if fsize < 1024*1024 else \
+                    f'{int(fsize / (1024 * 1024))}MB'
+                fname = f'score{label}.data'
+                self._make_docs_file(docs_dir=self.httpd.docs_dir,
+                                     fname=fname, fsize=fsize)
+                url = f'https://{self.env.domain1}:{port}/{fname}'
+                results = self.download_url(label=label, url=url,
+                                            proto=proto, count=count)
+                scores[via][label] = results
+        if self.caddy:
             port = self.caddy.port
             via = 'caddy'
             descr = f'port {port}'
             self.info('caddy downloads\n')
-            self._make_docs_file(docs_dir=self.caddy.docs_dir,
-                                 fname='score1.data', fsize=1024 * 1024)
-            url1 = f'https://{self.env.domain1}:{port}/score1.data'
-            self._make_docs_file(docs_dir=self.caddy.docs_dir,
-                                 fname='score10.data', fsize=10 * 1024 * 1024)
-            url10 = f'https://{self.env.domain1}:{port}/score10.data'
-            self._make_docs_file(docs_dir=self.caddy.docs_dir,
-                                 fname='score100.data', fsize=100 * 1024 * 1024)
-            url100 = f'https://{self.env.domain1}:{port}/score100.data'
             scores[via] = {
                 'description': descr,
-                '1MB': self.download_url(url=url1, proto=proto, count=50),
-                '10MB': self.download_url(url=url10, proto=proto, count=50),
-                '100MB': self.download_url(url=url100, proto=proto, count=50),
             }
+            for fsize in fsizes:
+                label = f'{int(fsize / 1024)}KB' if fsize < 1024*1024 else \
+                    f'{int(fsize / (1024 * 1024))}MB'
+                fname = f'score{label}.data'
+                self._make_docs_file(docs_dir=self.caddy.docs_dir,
+                                     fname=fname, fsize=fsize)
+                url = f'https://{self.env.domain1}:{port}/{fname}'
+                results = self.download_url(label=label, url=url,
+                                            proto=proto, count=count)
+                scores[via][label] = results
         return scores
 
     def do_requests(self, url: str, proto: str, count: int,
@@ -318,10 +315,9 @@ class ScoreCard:
         self.info(f'ok.\n')
         return props
 
-    def requests(self, proto: str, test_httpd: bool = True,
-                 test_caddy: bool = True) -> Dict[str, Any]:
+    def requests(self, proto: str) -> Dict[str, Any]:
         scores = {}
-        if test_httpd:
+        if self.httpd:
             if proto == 'h3':
                 port = self.env.h3_port
                 via = 'nghttpx'
@@ -338,7 +334,7 @@ class ScoreCard:
                 'description': descr,
                 '10KB': self.requests_url(url=url1, proto=proto, count=10000),
             }
-        if test_caddy and self.caddy:
+        if self.caddy:
             port = self.caddy.port
             via = 'caddy'
             descr = f'port {port}'
@@ -354,10 +350,9 @@ class ScoreCard:
 
     def score_proto(self, proto: str,
                     handshakes: bool = True,
-                    downloads: bool = True,
-                    requests: bool = True,
-                    test_httpd: bool = True,
-                    test_caddy: bool = True):
+                    downloads: Optional[List[int]] = None,
+                    download_count: int = 50,
+                    requests: bool = True):
         self.info(f"scoring {proto}\n")
         p = {}
         if proto == 'h3':
@@ -395,14 +390,12 @@ class ScoreCard:
         }
         if handshakes:
             score['handshakes'] = self.handshakes(proto=proto)
-        if downloads:
+        if downloads and len(downloads) > 0:
             score['downloads'] = self.downloads(proto=proto,
-                                                test_httpd=test_httpd,
-                                                test_caddy=test_caddy)
+                                                count=download_count,
+                                                fsizes=downloads)
         if requests:
-            score['requests'] = self.requests(proto=proto,
-                                              test_httpd=test_httpd,
-                                              test_caddy=test_caddy)
+            score['requests'] = self.requests(proto=proto)
         self.info("\n")
         return score
 
@@ -476,6 +469,20 @@ class ScoreCard:
                           f'   {"/".join(errors):<20}')
 
 
+def parse_size(s):
+    m = re.match(r'(\d+)(mb|kb|gb)?', s, re.IGNORECASE)
+    if m is None:
+        raise Exception(f'unrecognized size: {s}')
+    size = int(m.group(1))
+    if m.group(2).lower() == 'kb':
+        size *= 1024
+    elif m.group(2).lower() == 'mb':
+        size *= 1024 * 1024
+    elif m.group(2).lower() == 'gb':
+        size *= 1024 * 1024 * 1024
+    return size
+
+
 def main():
     parser = argparse.ArgumentParser(prog='scorecard', description="""
         Run a range of tests to give a scorecard for a HTTP protocol
@@ -489,6 +496,10 @@ def main():
                         default=False, help="evaluate handshakes only")
     parser.add_argument("-d", "--downloads", action='store_true',
                         default=False, help="evaluate downloads only")
+    parser.add_argument("--download", action='append', type=str,
+                        default=None, help="evaluate download size")
+    parser.add_argument("--download-count", action='store', type=int,
+                        default=50, help="perform that many downloads")
     parser.add_argument("-r", "--requests", action='store_true',
                         default=False, help="evaluate requests only")
     parser.add_argument("--httpd", action='store_true', default=False,
@@ -509,19 +520,23 @@ def main():
 
     protocol = args.protocol
     handshakes = True
-    downloads = True
+    downloads = [1024*1024, 10*1024*1024, 100*1024*1024]
     requests = True
     test_httpd = protocol != 'h3'
     test_caddy = True
     if args.handshakes:
-        downloads = False
+        downloads = None
         requests = False
     if args.downloads:
         handshakes = False
         requests = False
+    if args.download:
+        downloads = sorted([parse_size(x) for x in args.download])
+        handshakes = False
+        requests = False
     if args.requests:
         handshakes = False
-        downloads = False
+        downloads = None
     if args.caddy:
         test_caddy = True
         test_httpd = False
@@ -554,11 +569,11 @@ def main():
 
         card = ScoreCard(env=env, httpd=httpd, nghttpx=nghttpx, caddy=caddy,
                          verbose=args.verbose, curl_verbose=args.curl_verbose)
-        score = card.score_proto(proto=protocol, handshakes=handshakes,
+        score = card.score_proto(proto=protocol,
+                                 handshakes=handshakes,
                                  downloads=downloads,
-                                 requests=requests,
-                                 test_caddy=test_caddy,
-                                 test_httpd=test_httpd)
+                                 download_count=args.download_count,
+                                 requests=requests)
         if args.json:
             print(json.JSONEncoder(indent=2).encode(score))
         else:
