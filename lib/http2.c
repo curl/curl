@@ -1643,6 +1643,7 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t nread = -1;
 
   *err = CURLE_AGAIN;
+  drained_transfer(cf, data);
   if(!Curl_bufq_is_empty(&stream->h2_recvbuf)) {
     nread = Curl_bufq_read(&stream->h2_recvbuf,
                            (unsigned char *)buf, len, err);
@@ -1682,7 +1683,6 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   struct HTTP *stream = data->req.p.http;
   CURLcode result = CURLE_OK;
   ssize_t nread;
-  bool keep_reading = TRUE;
 
   /* Process network input buffer fist */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
@@ -1694,12 +1694,11 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
 
   /* Receive data from the "lower" filters, e.g. network until
    * it is time to stop or we have enough data for this stream */
-  while(keep_reading &&
-        !ctx->conn_closed &&               /* not closed the connection */
+  while(!ctx->conn_closed &&               /* not closed the connection */
         !stream->closed &&                 /* nor the stream */
         Curl_bufq_is_empty(&ctx->inbufq) && /* and we consumed our input */
         !Curl_bufq_is_full(&stream->h2_recvbuf) && /* enough? */
-        Curl_bufq_len(&stream->h2_recvbuf) < data->set.buffer_size) {
+       1 /* Curl_bufq_len(&stream->h2_recvbuf) < data->set.buffer_size */) {
 
     nread = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &result);
     DEBUGF(LOG_CF(data, cf, "read %zd bytes nw data -> %zd, %d",
@@ -1716,7 +1715,6 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
 
-    keep_reading = Curl_bufq_is_full(&ctx->inbufq);
     if(h2_process_pending_input(cf, data, &result))
       return result;
   }
@@ -1755,9 +1753,6 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
 
     nread = stream_recv(cf, data, buf, len, err);
-    if(Curl_bufq_is_empty(&stream->h2_recvbuf)) {
-      drained_transfer(cf, data);
-    }
   }
 
   if(nread > 0) {

@@ -76,12 +76,19 @@ static size_t chunk_read(struct buf_chunk *chunk,
   unsigned char *p = &chunk->x.data[chunk->r_offset];
   size_t n = chunk->w_offset - chunk->r_offset;
   DEBUGASSERT(chunk->w_offset >= chunk->r_offset);
-  if(n) {
-    n = CURLMIN(n, len);
-    memcpy(buf, p, n);
-    chunk->r_offset += n;
+  if(!n) {
+    return 0;
   }
-  return n;
+  else if(n <= len) {
+    memcpy(buf, p, n);
+    chunk->r_offset = chunk->w_offset = 0;
+    return n;
+  }
+  else {
+    memcpy(buf, p, len);
+    chunk->r_offset += len;
+    return len;
+  }
 }
 
 static ssize_t chunk_slurpn(struct buf_chunk *chunk, size_t max_len,

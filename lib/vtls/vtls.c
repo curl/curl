@@ -1578,45 +1578,20 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
                            CURLcode *err)
 {
   struct cf_call_data save;
-  ssize_t nread, n;
+  ssize_t nread;
 
   CF_DATA_SAVE(save, cf, data);
-  /* SSL backends like OpenSSL/wolfSSL prefer to give us 1 TLS record content
-   * at a time when reading. But commonly, more data is available.
-   * So we try to fill the buffer we are called with until we
-   * are full or no more data is available. */
-  *err = CURLE_OK;
-  nread = 0;
-  while(len) {
-    n = Curl_ssl->recv_plain(cf, data, buf, len, err);
-    if(n < 0) {
-      if(*err != CURLE_AGAIN) {
-        /* serious err, fail */
-        nread = -1;
-        goto out;
-      }
-      /* would block, return this to caller if we have read nothing so far,
-       * otherwise return amount read without error. */
-      if(nread == 0)
-        nread = -1;
-      else
-        *err = CURLE_OK;
-      goto out;
-    }
-    else if(n == 0) {
-      /* eof */
-      break;
-    }
-    else {
-      DEBUGASSERT((size_t)n <= len);
-      nread += (size_t)n;
-      buf += (size_t)n;
-      len -= (size_t)n;
-    }
+  nread = Curl_ssl->recv_plain(cf, data, buf, len, err);
+  if(nread > 0) {
+    DEBUGASSERT((size_t)nread <= len);
   }
-out:
-   CF_DATA_RESTORE(cf, save);
-   return nread;
+  else if(nread == 0) {
+    /* eof */
+    *err = CURLE_OK;
+  }
+  DEBUGF(LOG_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d", len, nread, *err));
+  CF_DATA_RESTORE(cf, save);
+  return nread;
 }
 
 static int ssl_cf_get_select_socks(struct Curl_cfilter *cf,
