@@ -98,22 +98,16 @@ use serverhelp qw(
 use sshhelp qw(
     $hstpubmd5f
     $hstpubsha256f
-    $sshdexe
     $sshexe
     $sftpexe
-    $sshconfig
     $sftpconfig
     $sshdlog
-    $sshlog
     $sftplog
     $sftpcmds
     display_sshdconfig
-    display_sshconfig
     display_sftpconfig
     display_sshdlog
-    display_sshlog
     display_sftplog
-    exe_ext
     find_sshd
     find_ssh
     find_sftp

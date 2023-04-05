@@ -59,7 +59,13 @@ use Digest::MD5;
 use File::Basename;
 
 use directories;
-use getpart;
+
+use getpart qw(
+    getpartattr
+    getpart
+    loadtest
+    );
+
 use processhelp;
 
 use serverhelp qw(
@@ -72,7 +78,7 @@ use serverhelp qw(
     datasockf_logfilename
     );
 
-use sshhelp qw(
+use pathhelp qw(
     exe_ext
     );
 
