@@ -44,7 +44,11 @@
 use strict;
 use warnings;
 
-use getpart;
+use getpart qw(
+    getpart
+    loadtest
+    fulltest
+    );
 
 # Boilerplate code for test tool
 my $head =
