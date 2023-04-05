@@ -649,7 +649,12 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  * Output the "normalized" version of that input string in plain quad decimal
  * integers and return TRUE.
  */
-static bool ipv4_normalize(const char *hostname, char *outp, size_t olen)
+
+#define IPV4_NOTANIP 1
+#define IPV4_BAD     2
+#define IPV4_CLEANED 3
+
+static int ipv4_normalize(const char *hostname, char *outp, size_t olen)
 {
   bool done = FALSE;
   int n = 0;
@@ -659,20 +664,10 @@ static bool ipv4_normalize(const char *hostname, char *outp, size_t olen)
   while(!done) {
     char *endp;
     unsigned long l;
-    if((*c < '0') || (*c > '9'))
+    if(!ISDIGIT(*c))
       /* most importantly this doesn't allow a leading plus or minus */
-      return FALSE;
+      return n ? IPV4_BAD :IPV4_NOTANIP;
     l = strtoul(c, &endp, 0);
-
-    /* overflow or nothing parsed at all */
-    if(((l == ULONG_MAX) && (errno == ERANGE)) ||  (endp == c))
-      return FALSE;
-
-#if SIZEOF_LONG > 4
-    /* a value larger than 32 bits */
-    if(l > UINT_MAX)
-      return FALSE;
-#endif
 
     parts[n] = l;
     c = endp;
@@ -680,7 +675,7 @@ static bool ipv4_normalize(const char *hostname, char *outp, size_t olen)
     switch (*c) {
     case '.' :
       if(n == 3)
-        return FALSE;
+        return IPV4_BAD;
       n++;
       c++;
       break;
@@ -690,8 +685,18 @@ static bool ipv4_normalize(const char *hostname, char *outp, size_t olen)
       break;
 
     default:
-      return FALSE;
+      return n ? IPV4_BAD : IPV4_NOTANIP;
     }
+
+    /* overflow */
+    if((l == ULONG_MAX) && (errno == ERANGE))
+      return IPV4_BAD;
+
+#if SIZEOF_LONG > 4
+    /* a value larger than 32 bits */
+    if(l > UINT_MAX)
+      return IPV4_BAD;
+#endif
   }
 
   /* this is deemed a valid IPv4 numerical address */
@@ -704,14 +709,14 @@ static bool ipv4_normalize(const char *hostname, char *outp, size_t olen)
     break;
   case 1: /* a.b -- 8.24 bits */
     if((parts[0] > 0xff) || (parts[1] > 0xffffff))
-      return FALSE;
+      return IPV4_BAD;
     msnprintf(outp, olen, "%u.%u.%u.%u",
               parts[0], (parts[1] >> 16) & 0xff,
               (parts[1] >> 8) & 0xff, parts[1] & 0xff);
     break;
   case 2: /* a.b.c -- 8.8.16 bits */
     if((parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xffff))
-      return FALSE;
+      return IPV4_BAD;
     msnprintf(outp, olen, "%u.%u.%u.%u",
               parts[0], parts[1], (parts[2] >> 8) & 0xff,
               parts[2] & 0xff);
@@ -719,12 +724,12 @@ static bool ipv4_normalize(const char *hostname, char *outp, size_t olen)
   case 3: /* a.b.c.d -- 8.8.8.8 bits */
     if((parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xff) ||
        (parts[3] > 0xff))
-      return FALSE;
+      return IPV4_BAD;
     msnprintf(outp, olen, "%u.%u.%u.%u",
               parts[0], parts[1], parts[2], parts[3]);
     break;
   }
-  return TRUE;
+  return IPV4_CLEANED;
 }
 
 /* if necessary, replace the host content with a URL decoded version */
@@ -1247,6 +1252,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
 
   if(Curl_dyn_len(&host)) {
     char normalized_ipv4[sizeof("255.255.255.255") + 1];
+    int norm;
 
     /*
      * Parse the login details and strip them out of the host name.
@@ -1262,21 +1268,28 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       goto fail;
     }
 
-    if(ipv4_normalize(Curl_dyn_ptr(&host),
-                      normalized_ipv4, sizeof(normalized_ipv4))) {
+    norm = ipv4_normalize(Curl_dyn_ptr(&host),
+                          normalized_ipv4, sizeof(normalized_ipv4));
+    switch(norm) {
+    case IPV4_CLEANED:
       Curl_dyn_reset(&host);
-      if(Curl_dyn_add(&host, normalized_ipv4)) {
+      if(Curl_dyn_add(&host, normalized_ipv4))
         result = CURLUE_OUT_OF_MEMORY;
-        goto fail;
-      }
-    }
-    else {
+      break;
+
+    case IPV4_NOTANIP:
       result = decode_host(&host);
       if(!result)
         result = hostname_check(u, Curl_dyn_ptr(&host), Curl_dyn_len(&host));
-      if(result)
-        goto fail;
+      break;
+
+    case IPV4_BAD:
+    default:
+      result = CURLUE_BAD_HOSTNAME; /* Bad IPv4 address even */
+      break;
     }
+    if(result)
+      goto fail;
 
     if((flags & CURLU_GUESS_SCHEME) && !schemep) {
       const char *hostname = Curl_dyn_ptr(&host);
