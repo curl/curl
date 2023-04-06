@@ -1794,9 +1794,17 @@ AC_MSG_CHECKING([if argv can be written to])
 CURL_RUN_IFELSE([[
 int main(int argc, char **argv)
 {
+#ifdef _WIN32
+  /* on Windows, writing to the argv does not hide the argument in
+     process lists so it can just be skipped */
+  (void)argc;
+  (void)argv;
+  return 1;
+#else
   (void)argc;
   argv[0][0] = ' ';
   return (argv[0][0] == ' ')?0:1;
+#endif
 }
 ]],[
   curl_cv_writable_argv=yes
