@@ -2034,12 +2034,17 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   size_t proto_len)
 {
   int can_multi = 0;
-  unsigned char *palpn = Curl_ssl_cf_is_proxy(cf)?
-                           &cf->conn->proxy_alpn : &cf->conn->alpn;
+  unsigned char *palpn =
+#ifndef CURL_DISABLE_PROXY
+    Curl_ssl_cf_is_proxy(cf)?
+    &cf->conn->proxy_alpn : &cf->conn->alpn;
+#else
+  &cf->conn->alpn;
+#endif
 
   if(proto && proto_len) {
     if(proto_len == ALPN_HTTP_1_1_LENGTH &&
-            !memcmp(ALPN_HTTP_1_1, proto, ALPN_HTTP_1_1_LENGTH)) {
+       !memcmp(ALPN_HTTP_1_1, proto, ALPN_HTTP_1_1_LENGTH)) {
       *palpn = CURL_HTTP_VERSION_1_1;
     }
     else if(proto_len == ALPN_HTTP_1_0_LENGTH &&
@@ -2055,7 +2060,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
 #endif
 #ifdef USE_HTTP3
     else if(proto_len == ALPN_H3_LENGTH &&
-       !memcmp(ALPN_H3, proto, ALPN_H3_LENGTH)) {
+            !memcmp(ALPN_H3, proto, ALPN_H3_LENGTH)) {
       *palpn = CURL_HTTP_VERSION_3;
       can_multi = 1;
     }
