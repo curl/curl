@@ -146,8 +146,8 @@ static void storerequest(const char *reqbuf, size_t totalsize);
 #endif
 
 const char *serverlogfile = DEFAULT_LOGFILE;
-const char *logdir = "log";
-char loglockfile[256];
+static const char *logdir = "log";
+static char loglockfile[256];
 
 #define SWSVERSION "curl test suite HTTP server/0.1"
 
@@ -1391,7 +1391,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 static void http_connect(curl_socket_t *infdp,
                          curl_socket_t rootfd,
                          const char *ipaddr,
-                         unsigned short ipport)
+                         unsigned short ipport,
+                         int keepalive_secs)
 {
   curl_socket_t serverfd[2] = {CURL_SOCKET_BAD, CURL_SOCKET_BAD};
   curl_socket_t clientfd[2] = {CURL_SOCKET_BAD, CURL_SOCKET_BAD};
@@ -1747,7 +1748,7 @@ static void http_connect(curl_socket_t *infdp,
     } /* (rc > 0) */
     else {
       timeout_count++;
-      if(timeout_count > 5) {
+      if(timeout_count > keepalive_secs) {
         logmsg("CONNECT proxy timeout after %d idle seconds!", timeout_count);
         break;
       }
@@ -1867,7 +1868,8 @@ static curl_socket_t accept_connection(curl_socket_t sock)
    is no data waiting, or < 0 if it should be closed */
 static int service_connection(curl_socket_t msgsock, struct httprequest *req,
                               curl_socket_t listensock,
-                              const char *connecthost)
+                              const char *connecthost,
+                              int keepalive_secs)
 {
   if(got_exit_signal)
     return -1;
@@ -1914,7 +1916,8 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
       return 1;
     }
     else {
-      http_connect(&msgsock, listensock, connecthost, req->connect_port);
+      http_connect(&msgsock, listensock, connecthost, req->connect_port,
+                   keepalive_secs);
       return -1;
     }
   }
@@ -1960,6 +1963,7 @@ int main(int argc, char *argv[])
   const char *socket_type = "IPv4";
   char port_str[11];
   const char *location_str = port_str;
+  int keepalive_secs = 5;
 
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
@@ -2056,6 +2060,21 @@ int main(int argc, char *argv[])
       arg++;
       if(argc>arg) {
         path = argv[arg];
+        arg++;
+      }
+    }
+    else if(!strcmp("--keepalive", argv[arg])) {
+      arg++;
+      if(argc>arg) {
+        char *endptr;
+        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
+        if((endptr != argv[arg] + strlen(argv[arg])) ||
+           (ulnum && ((ulnum < 0UL) || (ulnum > 65535UL)))) {
+          fprintf(stderr, "sws: invalid --keepalive argument (%s), must "
+                          "be number of seconds\n", argv[arg]);
+          return 0;
+        }
+        keepalive_secs = curlx_ultous(ulnum);
         arg++;
       }
     }
@@ -2320,7 +2339,7 @@ int main(int argc, char *argv[])
         /* Service this connection until it has nothing available */
         do {
           rc = service_connection(all_sockets[socket_idx], req, sock,
-                                  connecthost);
+                                  connecthost, keepalive_secs);
           if(got_exit_signal)
             goto sws_cleanup;
 

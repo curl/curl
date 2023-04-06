@@ -53,6 +53,7 @@ my $portfile;        # port number file
 my $logfile;         # log file
 my $cmdfile;         # command file
 my $connect;         # IP to connect to on CONNECT
+my $keepalive_secs;  # number of seconds to keep idle connections
 my $srcdir;
 my $gopher = 0;
 
@@ -126,6 +127,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--keepalive') {
+        if($ARGV[1]) {
+            $keepalive_secs = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--id') {
         if($ARGV[1] =~ /^(\d+)$/) {
             $idnum = $1 if($1 > 0);
@@ -171,6 +178,7 @@ $flags .= "--pidfile \"$pidfile\" ".
     "--portfile \"$portfile\" ";
 $flags .= "--gopher " if($gopher);
 $flags .= "--connect $connect " if($connect);
+$flags .= "--keepalive $keepalive_secs " if($keepalive_secs);
 if($ipvnum eq 'unix') {
     $flags .= "--unix-socket '$unix_socket' ";
 } else {
