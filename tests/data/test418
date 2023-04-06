@@ -10,98 +10,8 @@ gzip
 # Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.1 200 OK
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
-Transfer-Encoding: gzip
+HTTP/1.1 200 swsclose OK
+Content-Length: 6
 Transfer-Encoding: gzip
 Transfer-Encoding: gzip
 Transfer-Encoding: gzip
@@ -122,11 +32,14 @@ Transfer-Encoding: gzip
 <server>
 http
 </server>
- <name>
+<features>
+libz
+</features>
+<name>
 Response with multiple Transfer-Encoding headers
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -sS
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -sS --tr-encoding
 </command>
 </client>
 
@@ -138,6 +51,8 @@ GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
+Connection: TE
+TE: gzip
 
 </protocol>
 
