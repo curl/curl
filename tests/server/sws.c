@@ -2069,9 +2069,9 @@ int main(int argc, char *argv[])
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum && ((ulnum < 0UL) || (ulnum > 65535UL)))) {
+           (ulnum && (ulnum > 65535UL))) {
           fprintf(stderr, "sws: invalid --keepalive argument (%s), must "
-                          "be number of seconds\n", argv[arg]);
+                  "be number of seconds\n", argv[arg]);
           return 0;
         }
         keepalive_secs = curlx_ultous(ulnum);
