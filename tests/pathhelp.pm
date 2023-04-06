@@ -58,20 +58,16 @@ use Cwd 'abs_path';
 BEGIN {
     use base qw(Exporter);
 
-    our @EXPORT = qw(
-      sys_native_abs_path
-      sys_native_path
-      exe_ext
-    );
-
     our @EXPORT_OK = qw(
-      build_sys_abs_path
-      sys_native_current_path
-      normalize_path
-      os_is_win
-      $use_cygpath
-      should_use_cygpath
-      drives_mounted_on_cygdrive
+        os_is_win
+        exe_ext
+        sys_native_abs_path
+        sys_native_current_path
+        build_sys_abs_path
+        normalize_path
+        $use_cygpath
+        should_use_cygpath
+        drives_mounted_on_cygdrive
     );
 }
 
