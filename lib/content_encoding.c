@@ -1077,8 +1077,12 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       Curl_httpchunk_init(data);   /* init our chunky engine. */
     }
     else if(namelen) {
-      const struct content_encoding *encoding = find_encoding(name, namelen);
+      const struct content_encoding *encoding;
       struct contenc_writer *writer;
+      if(is_transfer && !data->set.http_transfer_encoding)
+        /* not requested, ignore */
+        return CURLE_OK;
+      encoding = find_encoding(name, namelen);
 
       if(!k->writer_stack) {
         k->writer_stack = new_unencoding_writer(data, &client_encoding,
