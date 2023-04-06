@@ -66,8 +66,7 @@ class TestGoAway:
         assert httpd.reload()
         t.join()
         r: ExecResult = self.r
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
         assert r.total_connects == 2
@@ -101,16 +100,14 @@ class TestGoAway:
         assert nghttpx.reload(timeout=timedelta(seconds=2))
         t.join()
         r: ExecResult = self.r
-        r.check_exit_code(0)  
+        # this should take `count` seconds to retrieve
+        assert r.duration >= timedelta(seconds=count)
+        r.check_response(count=count, http_status=200, connect_count=2)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
-        assert r.total_connects == 2
         for idx, s in enumerate(r.stats):
             if s['num_connects'] > 0:
                 log.debug(f'request {idx} connected')
-        # this should take `count` seconds to retrieve
-        assert r.duration >= timedelta(seconds=count)
-        r.check_stats(count=count, exp_status=200, exp_exitcode=0)
 
     # download files sequentially with delay, reload server for GOAWAY
     def test_03_03_h1_goaway(self, env: Env, httpd, nghttpx, repeat):
@@ -133,11 +130,9 @@ class TestGoAway:
         assert httpd.reload()
         t.join()
         r: ExecResult = self.r
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200, connect_count=2)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
-        assert r.total_connects == 2
         for idx, s in enumerate(r.stats):
             if s['num_connects'] > 0:
                 log.debug(f'request {idx} connected')

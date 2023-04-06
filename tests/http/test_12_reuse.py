@@ -37,6 +37,7 @@ log = logging.getLogger(__name__)
 
 
 @pytest.mark.skipif(condition=Env.curl_uses_lib('bearssl'), reason='BearSSL too slow')
+@pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
 class TestReuse:
 
     # check if HTTP/1.1 handles 'Connection: close' correctly
@@ -52,8 +53,7 @@ class TestReuse:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         # Server sends `Connection: close` on every 2nd request, requiring
         # a new connection
         assert r.total_connects == count/2
@@ -72,8 +72,7 @@ class TestReuse:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--rate', '30/m',
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         # Connections time out on server before we send another request,
         assert r.total_connects == count
         # we do not see how often a request was retried in the stats, so

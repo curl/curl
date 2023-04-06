@@ -31,8 +31,7 @@ import pytest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
-from testenv import Env, Nghttpx, Httpd
-
+from testenv import Env, Nghttpx, Httpd, NghttpxQuic, NghttpxFwd
 
 @pytest.fixture(scope="package")
 def env(pytestconfig) -> Env:
@@ -68,7 +67,16 @@ def httpd(env) -> Httpd:
 
 @pytest.fixture(scope='package')
 def nghttpx(env, httpd) -> Optional[Nghttpx]:
-    nghttpx = Nghttpx(env=env)
+    nghttpx = NghttpxQuic(env=env)
+    if env.have_h3():
+        nghttpx.clear_logs()
+        assert nghttpx.start()
+    yield nghttpx
+    nghttpx.stop()
+
+@pytest.fixture(scope='package')
+def nghttpx_fwd(env, httpd) -> Optional[Nghttpx]:
+    nghttpx = NghttpxFwd(env=env)
     if env.have_h3():
         nghttpx.clear_logs()
         assert nghttpx.start()

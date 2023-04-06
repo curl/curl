@@ -62,7 +62,7 @@ class TestErrors:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--retry', '0'
         ])
-        r.check_exit_code_not(0)
+        r.check_exit_code(False)
         invalid_stats = []
         for idx, s in enumerate(r.stats):
             if 'exitcode' not in s or s['exitcode'] not in [18, 56, 92]:
@@ -85,7 +85,7 @@ class TestErrors:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--retry', '0', '--parallel',
         ])
-        r.check_exit_code_not(0)
+        r.check_exit_code(False)
         assert len(r.stats) == count, f'did not get all stats: {r}'
         invalid_stats = []
         for idx, s in enumerate(r.stats):

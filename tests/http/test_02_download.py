@@ -59,8 +59,7 @@ class TestDownload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto)
-        r.check_exit_code(0)
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(http_status=200)
 
     # download 2 files
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -70,8 +69,7 @@ class TestDownload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
         r = curl.http_download(urls=[url], alpn_proto=proto)
-        r.check_exit_code(0)  
-        r.check_stats(count=2, exp_status=200)
+        r.check_response(http_status=200, count=2)
 
     # download 100 files sequentially
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -82,10 +80,7 @@ class TestDownload:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-99]'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        r.check_exit_code(0)
-        r.check_stats(count=100, exp_status=200)
-        # http/1.1 sequential transfers will open 1 connection
-        assert r.total_connects == 1
+        r.check_response(http_status=200, count=100, connect_count=1)
 
     # download 100 files parallel
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -99,14 +94,13 @@ class TestDownload:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel', '--parallel-max', f'{max_parallel}'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=100, exp_status=200)
+        r.check_response(http_status=200, count=100)
         if proto == 'http/1.1':
             # http/1.1 parallel transfers will open multiple connections
-            assert r.total_connects > 1
+            assert r.total_connects > 1, r.dump_logs()
         else:
             # http2 parallel transfers will use one connection (common limit is 100)
-            assert r.total_connects == 1
+            assert r.total_connects == 1, r.dump_logs()
 
     # download 500 files sequential
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -119,14 +113,13 @@ class TestDownload:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-499]'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        r.check_exit_code(0)  
-        r.check_stats(count=500, exp_status=200)
+        r.check_response(http_status=200, count=500)
         if proto == 'http/1.1':
             # http/1.1 parallel transfers will open multiple connections
-            assert r.total_connects > 1
+            assert r.total_connects > 1, r.dump_logs()
         else:
             # http2 parallel transfers will use one connection (common limit is 100)
-            assert r.total_connects == 1
+            assert r.total_connects == 1, r.dump_logs()
 
     # download 500 files parallel
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
@@ -141,10 +134,7 @@ class TestDownload:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel', '--parallel-max', f'{max_parallel}'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
-        # http2 parallel transfers will use one connection (common limit is 100)
-        assert r.total_connects == 1
+        r.check_response(http_status=200, count=count, connect_count=1)
 
     # download files parallel, check connection reuse/multiplex
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
@@ -159,8 +149,7 @@ class TestDownload:
                                with_stats=True, extra_args=[
             '--parallel', '--parallel-max', '200'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(http_status=200, count=count)
         # should have used at most 2 connections only (test servers allow 100 req/conn)
         # it may be just 1 on slow systems where request are answered faster than
         # curl can exhaust the capacity or if curl runs with address-sanitizer speed
@@ -177,8 +166,7 @@ class TestDownload:
                                with_stats=True, extra_args=[
             '--parallel'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         # http/1.1 should have used count connections
         assert r.total_connects == count, "http/1.1 should use this many connections"
 
@@ -191,8 +179,7 @@ class TestDownload:
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-1m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_09_1MB_parallel(self, env: Env,
@@ -205,8 +192,7 @@ class TestDownload:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_10_10MB_serial(self, env: Env,
@@ -217,8 +203,7 @@ class TestDownload:
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_11_10MB_parallel(self, env: Env,
@@ -233,8 +218,7 @@ class TestDownload:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
 
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_12_head_serial_https(self, env: Env,
@@ -247,8 +231,7 @@ class TestDownload:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--head'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
 
     @pytest.mark.parametrize("proto", ['h2'])
     def test_02_13_head_serial_h2c(self, env: Env,
@@ -261,8 +244,7 @@ class TestDownload:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--head', '--http2-prior-knowledge', '--fail-early'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
 
     def test_02_20_h2_small_frames(self, env: Env, httpd, repeat):
         # Test case to reproduce content corruption as observed in
@@ -288,8 +270,7 @@ class TestDownload:
         r = curl.http_download(urls=[urln], alpn_proto="h2", extra_args=[
             '--parallel', '--parallel-max', '2'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         srcfile = os.path.join(httpd.docs_dir, 'data-1m')
         for i in range(count):
             dfile = curl.download_file(i)

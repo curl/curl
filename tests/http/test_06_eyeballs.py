@@ -50,8 +50,7 @@ class TestEyeballs:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = curl.http_download(urls=[urln], extra_args=['--http3-only'])
-        r.check_exit_code(0)  
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(count=1, http_status=200)
         assert r.stats[0]['http_version'] == '3'
 
     # download using only HTTP/3 on missing server
@@ -61,7 +60,7 @@ class TestEyeballs:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = curl.http_download(urls=[urln], extra_args=['--http3-only'])
-        r.check_exit_code(7)  
+        r.check_response(exitcode=7, http_status=None)
 
     # download using HTTP/3 on missing server with fallback on h2
     @pytest.mark.skipif(condition=not Env.have_h3(), reason=f"missing HTTP/3 support")
@@ -70,8 +69,7 @@ class TestEyeballs:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = curl.http_download(urls=[urln], extra_args=['--http3'])
-        r.check_exit_code(0)  
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(count=1, http_status=200)
         assert r.stats[0]['http_version'] == '2'
 
     # download using HTTP/3 on missing server with fallback on http/1.1
@@ -81,8 +79,7 @@ class TestEyeballs:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain2, "h3")}/data.json'
         r = curl.http_download(urls=[urln], extra_args=['--http3'])
-        r.check_exit_code(0)  
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(count=1, http_status=200)
         assert r.stats[0]['http_version'] == '1.1'
 
     # make a successful https: transfer and observer the timer stats
@@ -90,8 +87,7 @@ class TestEyeballs:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json'
         r = curl.http_download(urls=[urln])
-        r.check_exit_code(0)  
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(count=1, http_status=200)
         assert r.stats[0]['time_connect'] > 0.0
         assert r.stats[0]['time_appconnect'] > 0.0
 
@@ -102,8 +98,7 @@ class TestEyeballs:
         r = curl.http_download(urls=[urln], extra_args=[
             '--resolve', f'not-valid.com:{env.https_port}:127.0.0.1'
         ])
-        r.check_exit_code_not(0)
-        r.check_stats(count=1, exp_status=0)
+        r.check_response(count=1, http_status=0, exitcode=False)
         assert r.stats[0]['time_connect'] > 0.0    # was tcp connected
         assert r.stats[0]['time_appconnect'] == 0  # but not SSL verified
 
@@ -114,8 +109,7 @@ class TestEyeballs:
         r = curl.http_download(urls=[urln], extra_args=[
             '--resolve', f'not-valid.com:{1}:127.0.0.1'
         ])
-        r.check_exit_code_not(0)
-        r.check_stats(count=1, exp_status=0)
+        r.check_response(count=1, http_status=None, exitcode=False)
         assert r.stats[0]['time_connect'] == 0     # no one should have listened
         assert r.stats[0]['time_appconnect'] == 0  # did not happen either
 

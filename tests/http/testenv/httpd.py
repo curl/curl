@@ -44,7 +44,9 @@ class Httpd:
 
     MODULES = [
         'log_config', 'logio', 'unixd', 'version', 'watchdog',
-        'authn_core', 'authz_user', 'authz_core', 'authz_host',
+        'authn_core', 'authn_file',
+        'authz_user', 'authz_core', 'authz_host',
+        'auth_basic', 'auth_digest',
         'env', 'filter', 'headers', 'mime',
         'rewrite', 'http2', 'ssl', 'proxy', 'proxy_http', 'proxy_connect',
         'mpm_event',
@@ -56,7 +58,7 @@ class Httpd:
 
     MOD_CURLTEST = None
 
-    def __init__(self, env: Env):
+    def __init__(self, env: Env, proxy_auth: bool = False):
         self.env = env
         self._cmd = env.apachectl
         self._apache_dir = os.path.join(env.gen_dir, 'apache')
@@ -68,7 +70,9 @@ class Httpd:
         self._logs_dir = os.path.join(self._apache_dir, 'logs')
         self._error_log = os.path.join(self._logs_dir, 'error_log')
         self._tmp_dir = os.path.join(self._apache_dir, 'tmp')
+        self._passwords = os.path.join(self._conf_dir, 'passwords')
         self._mods_dir = None
+        self._proxy_auth = proxy_auth
         self._extra_configs = {}
         assert env.apxs
         p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
@@ -102,6 +106,9 @@ class Httpd:
 
     def clear_extra_configs(self):
         self._extra_configs = {}
+
+    def set_proxy_auth(self, active: bool):
+        self._proxy_auth = active
 
     def _run(self, args, intext=''):
         env = {}
@@ -146,6 +153,7 @@ class Httpd:
         r = self._apachectl('stop')
         if r.exit_code == 0:
             return self.wait_dead(timeout=timedelta(seconds=5))
+        log.fatal(f'stopping httpd failed: {r}')
         return r.exit_code == 0
 
     def restart(self):
@@ -211,6 +219,9 @@ class Httpd:
                 'server': f'{domain2}',
             }
             fd.write(JSONEncoder().encode(data))
+        if self._proxy_auth:
+            with open(self._passwords, 'w') as fd:
+                fd.write('proxy:$apr1$FQfeInbs$WQZbODJlVg60j0ogEIlTW/\n')
         with open(self._conf_file, 'w') as fd:
             for m in self.MODULES:
                 if os.path.exists(os.path.join(self._mods_dir, f'mod_{m}.so')):
@@ -223,9 +234,6 @@ class Httpd:
                 f'PidFile httpd.pid',
                 f'ErrorLog {self._error_log}',
                 f'LogLevel {self._get_log_level()}',
-                f'LogLevel http:trace4',
-                f'LogLevel proxy:trace4',
-                f'LogLevel proxy_http:trace4',
                 f'H2MinWorkers 16',
                 f'H2MaxWorkers 128',
                 f'H2Direct on',
@@ -284,30 +292,33 @@ class Httpd:
             conf.extend([  # http forward proxy
                 f'<VirtualHost *:{self.env.proxy_port}>',
                 f'    ServerName {proxy_domain}',
-                f'    Protocols h2c, http/1.1',
+                f'    Protocols h2c http/1.1',
                 f'    ProxyRequests On',
                 f'    ProxyVia On',
                 f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
-                f'    <Proxy "*">',
-                f'      Require ip 127.0.0.1',
-                f'    </Proxy>',
+            ])
+            conf.extend(self._get_proxy_conf())
+            conf.extend([
                 f'</VirtualHost>',
+                f'',
             ])
             conf.extend([  # https forward proxy
                 f'<VirtualHost *:{self.env.proxys_port}>',
                 f'    ServerName {proxy_domain}',
-                f'    Protocols h2, http/1.1',
+                f'    Protocols h2 http/1.1',
                 f'    SSLEngine on',
                 f'    SSLCertificateFile {proxy_creds.cert_file}',
                 f'    SSLCertificateKeyFile {proxy_creds.pkey_file}',
                 f'    ProxyRequests On',
                 f'    ProxyVia On',
                 f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
-                f'    <Proxy "*">',
-                f'      Require ip 127.0.0.1',
-                f'    </Proxy>',
-                f'</VirtualHost>',
             ])
+            conf.extend(self._get_proxy_conf())
+            conf.extend([
+                f'</VirtualHost>',
+                f'',
+            ])
+
             fd.write("\n".join(conf))
         with open(os.path.join(self._conf_dir, 'mime.types'), 'w') as fd:
             fd.write("\n".join([
@@ -316,13 +327,31 @@ class Httpd:
                 ''
             ]))
 
+    def _get_proxy_conf(self):
+        if self._proxy_auth:
+            return [
+                f'    <Proxy "*">',
+                f'      AuthType Basic',
+                f'      AuthName "Restricted Proxy"',
+                f'      AuthBasicProvider file',
+                f'      AuthUserFile "{self._passwords}"',
+                f'      Require user proxy',
+                f'    </Proxy>',
+            ]
+        else:
+            return [
+                f'    <Proxy "*">',
+                f'      Require ip 127.0.0.1',
+                f'    </Proxy>',
+            ]
+
     def _get_log_level(self):
-        #if self.env.verbose > 3:
-        #    return 'trace2'
-        #if self.env.verbose > 2:
-        #    return 'trace1'
-        #if self.env.verbose > 1:
-        #    return 'debug'
+        if self.env.verbose > 3:
+            return 'trace2'
+        if self.env.verbose > 2:
+            return 'trace1'
+        if self.env.verbose > 1:
+            return 'debug'
         return 'info'
 
     def _curltest_conf(self) -> List[str]:

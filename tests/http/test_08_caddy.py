@@ -35,6 +35,7 @@ log = logging.getLogger(__name__)
 
 
 @pytest.mark.skipif(condition=not Env.has_caddy(), reason=f"missing caddy")
+@pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
 class TestCaddy:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -71,8 +72,7 @@ class TestCaddy:
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{caddy.port}/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto)
-        r.check_exit_code(0)  
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(count=1, http_status=200)
 
     # download 1MB files sequentially
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -86,10 +86,7 @@ class TestCaddy:
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
-        # sequential transfers will open 1 connection
-        assert r.total_connects == 1
+        r.check_response(count=count, http_status=200, connect_count=1)
 
     # download 1MB files parallel
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -105,13 +102,12 @@ class TestCaddy:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         if proto == 'http/1.1':
             # http/1.1 parallel transfers will open multiple connections
-            assert r.total_connects > 1
+            assert r.total_connects > 1, r.dump_logs()
         else:
-            assert r.total_connects == 1
+            assert r.total_connects == 1, r.dump_logs()
 
     # download 5MB files sequentially
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
@@ -125,10 +121,7 @@ class TestCaddy:
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data5.data?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        assert r.exit_code == 0
-        r.check_stats(count=count, exp_status=200)
-        # sequential transfers will open 1 connection
-        assert r.total_connects == 1
+        r.check_response(count=count, http_status=200, connect_count=1)
 
     # download 10MB files sequentially
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
@@ -142,10 +135,7 @@ class TestCaddy:
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
-        # sequential transfers will open 1 connection
-        assert r.total_connects == 1
+        r.check_response(count=count, http_status=200, connect_count=1)
 
     # download 10MB files parallel
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -161,11 +151,10 @@ class TestCaddy:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
-        r.check_exit_code(0)  
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         if proto == 'http/1.1':
             # http/1.1 parallel transfers will open multiple connections
-            assert r.total_connects > 1
+            assert r.total_connects > 1, r.dump_logs()
         else:
-            assert r.total_connects == 1
+            assert r.total_connects == 1, r.dump_logs()
 

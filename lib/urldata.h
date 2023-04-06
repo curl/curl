@@ -134,6 +134,7 @@ typedef unsigned int curl_prot_t;
 #include "hash.h"
 #include "splay.h"
 #include "dynbuf.h"
+#include "dynhds.h"
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct Curl_easy *data,   /* transfer */
@@ -1066,6 +1067,9 @@ struct connectdata {
                                     (ftp) */
   unsigned char alpn; /* APLN TLS negotiated protocol, a CURL_HTTP_VERSION*
                          value */
+#ifndef CURL_DISABLE_PROXY
+  unsigned char proxy_alpn; /* APLN of proxy tunnel, CURL_HTTP_VERSION* */
+#endif
   unsigned char transport; /* one of the TRNSPRT_* defines */
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
   unsigned char httpversion; /* the HTTP version*10 reported by the server */

@@ -3950,7 +3950,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
      * negotiated
      */
-    if(cf->conn->bits.tls_enable_alpn) {
+    if(connssl->alpn) {
       const unsigned char *neg_protocol;
       unsigned int len;
       SSL_get0_alpn_selected(backend->handle, &neg_protocol, &len);

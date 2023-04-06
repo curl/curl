@@ -852,14 +852,13 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
   struct Curl_cfilter *cf = (struct Curl_cfilter *)arg;
   struct ssl_connect_data *connssl = cf->ctx;
   struct Curl_easy *data = connssl->backend->data;
-  struct connectdata *conn = cf->conn;
   unsigned int buflenmax = 50;
   unsigned char buf[50];
   unsigned int buflen;
   SSLNextProtoState state;
 
   DEBUGASSERT(data);
-  if(!conn->bits.tls_enable_alpn) {
+  if(!connssl->alpn) {
     return;
   }
 
@@ -2096,7 +2095,7 @@ static CURLcode nss_setup_connect(struct Curl_cfilter *cf,
 
 #ifdef SSL_ENABLE_ALPN
   if(SSL_OptionSet(backend->handle, SSL_ENABLE_ALPN,
-                   cf->conn->bits.tls_enable_alpn ? PR_TRUE : PR_FALSE)
+                   connssl->alpn ? PR_TRUE : PR_FALSE)
       != SECSuccess)
     goto error;
 #endif

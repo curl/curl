@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HTTP_PROXY_H
-#define HEADER_CURL_HTTP_PROXY_H
+#ifndef HEADER_CURL_CF_HAPROXY_H
+#define HEADER_CURL_CF_HAPROXY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -25,25 +25,19 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
-
 #include "urldata.h"
 
-/* Default proxy timeout in milliseconds */
-#define PROXY_TIMEOUT (3600*1000)
+#if !defined(CURL_DISABLE_PROXY)
 
-void Curl_cf_http_proxy_get_host(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 const char **phost,
-                                 const char **pdisplay_host,
-                                 int *pport);
+CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               int sockindex);
 
-CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                         struct Curl_easy *data);
+CURLcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
+                                      struct Curl_easy *data);
 
-extern struct Curl_cftype Curl_cft_http_proxy;
+extern struct Curl_cftype Curl_cft_haproxy;
 
-#endif /* !CURL_DISABLE_PROXY  && !CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_PROXY */
 
-#endif /* HEADER_CURL_HTTP_PROXY_H */
+#endif /* HEADER_CURL_CF_HAPROXY_H */
