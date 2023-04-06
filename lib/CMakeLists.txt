@@ -133,6 +133,7 @@ if(WIN32)
   endif()
 else()
   # on not-Windows, check for writable argv[]
+    include(CheckCSourceRuns)
     check_c_source_runs("
 int main(int argc, char **argv)
 {
