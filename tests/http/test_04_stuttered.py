@@ -55,8 +55,7 @@ class TestStuttered:
                f'/curltest/tweak?id=[0-{count - 1}]'\
                '&chunks=100&chunk_size=100&chunk_delay=10ms'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        r.check_exit_code(0)  
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(count=1, http_status=200)
 
     # download 50 files in 100 chunks a 100 bytes with 10ms delay between
     # prepend 100 file requests to warm up connection processing limits
@@ -75,8 +74,7 @@ class TestStuttered:
                '&chunks=100&chunk_size=100&chunk_delay=10ms'
         r = curl.http_download(urls=[url1, urln], alpn_proto=proto,
                                extra_args=['--parallel'])
-        r.check_exit_code(0)  
-        r.check_stats(count=warmups+count, exp_status=200)
+        r.check_response(count=warmups+count, http_status=200)
         assert r.total_connects == 1
         t_avg, i_min, t_min, i_max, t_max = self.stats_spread(r.stats[warmups:], 'time_total')
         if t_max < (5 * t_min) and t_min < 2:
@@ -98,8 +96,7 @@ class TestStuttered:
                '&chunks=1000&chunk_size=10&chunk_delay=100us'
         r = curl.http_download(urls=[url1, urln], alpn_proto=proto,
                                extra_args=['--parallel'])
-        r.check_exit_code(0)  
-        r.check_stats(count=warmups+count, exp_status=200)
+        r.check_response(count=warmups+count, http_status=200)
         assert r.total_connects == 1
         t_avg, i_min, t_min, i_max, t_max = self.stats_spread(r.stats[warmups:], 'time_total')
         if t_max < (5 * t_min):
@@ -121,8 +118,7 @@ class TestStuttered:
                '&chunks=10000&chunk_size=1&chunk_delay=50us'
         r = curl.http_download(urls=[url1, urln], alpn_proto=proto,
                                extra_args=['--parallel'])
-        r.check_exit_code(0)  
-        r.check_stats(count=warmups+count, exp_status=200)
+        r.check_response(count=warmups+count, http_status=200)
         assert r.total_connects == 1
         t_avg, i_min, t_min, i_max, t_max = self.stats_spread(r.stats[warmups:], 'time_total')
         if t_max < (5 * t_min):

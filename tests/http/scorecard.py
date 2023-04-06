@@ -35,7 +35,6 @@ from typing import Dict, Any, Optional, List
 
 from testenv import Env, Httpd, Nghttpx, CurlClient, Caddy, ExecResult
 
-
 log = logging.getLogger(__name__)
 
 

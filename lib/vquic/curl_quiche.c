@@ -1547,7 +1547,7 @@ out:
   *pcf = (!result)? cf : NULL;
   if(result) {
     if(udp_cf)
-      Curl_conn_cf_discard(udp_cf, data);
+      Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
     Curl_safefree(cf);
     Curl_safefree(ctx);
   }

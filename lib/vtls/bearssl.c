@@ -849,7 +849,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
   DEBUGASSERT(backend);
 
-  if(cf->conn->bits.tls_enable_alpn) {
+  if(connssl->alpn) {
     const char *proto;
 
     proto = br_ssl_engine_get_selected_protocol(&backend->ctx.eng);

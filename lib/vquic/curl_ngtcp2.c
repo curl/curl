@@ -1090,33 +1090,6 @@ static int cb_h3_deferred_consume(nghttp3_conn *conn, int64_t stream3_id,
   return 0;
 }
 
-/* Decode HTTP status code.  Returns -1 if no valid status code was
-   decoded. (duplicate from http2.c) */
-static int decode_status_code(const uint8_t *value, size_t len)
-{
-  int i;
-  int res;
-
-  if(len != 3) {
-    return -1;
-  }
-
-  res = 0;
-
-  for(i = 0; i < 3; ++i) {
-    char c = value[i];
-
-    if(c < '0' || c > '9') {
-      return -1;
-    }
-
-    res *= 10;
-    res += c - '0';
-  }
-
-  return res;
-}
-
 static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
                              int fin, void *user_data, void *stream_user_data)
 {
@@ -1167,8 +1140,10 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
 
-    stream->status_code = decode_status_code(h3val.base, h3val.len);
-    DEBUGASSERT(stream->status_code != -1);
+    result = Curl_http_decode_status(&stream->status_code,
+                                     (const char *)h3val.base, h3val.len);
+    if(result)
+      return -1;
     ncopy = msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n",
                       stream->status_code);
     DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] status: %s",
@@ -2539,7 +2514,7 @@ out:
   *pcf = (!result)? cf : NULL;
   if(result) {
     if(udp_cf)
-      Curl_conn_cf_discard(udp_cf, data);
+      Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
     Curl_safefree(cf);
     Curl_safefree(ctx);
   }
