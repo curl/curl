@@ -59,6 +59,7 @@
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
+#include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-socket.h"
 #include "select.h"

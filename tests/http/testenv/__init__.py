@@ -24,9 +24,14 @@
 #
 ###########################################################################
 #
+import pytest
+pytest.register_assert_rewrite("testenv.env", "testenv.curl", "testenv.caddy",
+                               "testenv.httpd", "testenv.nghttpx")
+
 from .env import Env
 from .certs import TestCA, Credentials
 from .caddy import Caddy
 from .httpd import Httpd
 from .curl import CurlClient, ExecResult
 from .nghttpx import Nghttpx
+from .nghttpx import Nghttpx, NghttpxQuic, NghttpxFwd

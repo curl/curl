@@ -106,6 +106,7 @@ class EnvConfig:
             'https': socket.SOCK_STREAM,
             'proxy': socket.SOCK_STREAM,
             'proxys': socket.SOCK_STREAM,
+            'h2proxys': socket.SOCK_STREAM,
             'caddy': socket.SOCK_STREAM,
             'caddys': socket.SOCK_STREAM,
         })
@@ -230,8 +231,16 @@ class Env:
         return Env.CONFIG.get_incomplete_reason()
 
     @staticmethod
+    def have_nghttpx() -> bool:
+        return Env.CONFIG.nghttpx is not None
+
+    @staticmethod
     def have_h3_server() -> bool:
         return Env.CONFIG.nghttpx_with_h3
+
+    @staticmethod
+    def have_ssl_curl() -> bool:
+        return 'ssl' in Env.CONFIG.curl_props['features']
 
     @staticmethod
     def have_h2_curl() -> bool:
@@ -371,12 +380,20 @@ class Env:
         return self.https_port
 
     @property
-    def proxy_port(self) -> str:
+    def proxy_port(self) -> int:
         return self.CONFIG.ports['proxy']
 
     @property
-    def proxys_port(self) -> str:
+    def proxys_port(self) -> int:
         return self.CONFIG.ports['proxys']
+
+    @property
+    def h2proxys_port(self) -> int:
+        return self.CONFIG.ports['h2proxys']
+
+    def pts_port(self, proto: str = 'http/1.1') -> int:
+        # proxy tunnel port
+        return self.CONFIG.ports['h2proxys' if proto == 'h2' else 'proxys']
 
     @property
     def caddy(self) -> str:
