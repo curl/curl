@@ -44,7 +44,7 @@ typedef enum {
 
 #ifndef CURL_DISABLE_HTTP
 
-#if defined(ENABLE_QUIC) || defined(USE_NGHTTP2)
+#if defined(ENABLE_QUIC)
 #include <stdint.h>
 #endif
 
@@ -212,43 +212,16 @@ struct HTTP {
     HTTPSEND_BODY     /* sending body */
   } sending;
 
-  void *impl_ctx;     /* context for actual HTTP implementation */
-
 #ifdef USE_WEBSOCKETS
   struct websocket ws;
 #endif
 
 #ifndef CURL_DISABLE_HTTP
+  void *h2_ctx;              /* HTTP/2 implementation context */
+  void *h3_ctx;              /* HTTP/3 implementation context */
   struct dynbuf send_buffer; /* used if the request couldn't be sent in one
                                 chunk, points to an allocated send_buffer
                                 struct */
-#endif
-#ifdef USE_NGHTTP2
-  /*********** for HTTP/2 we store stream-local data here *************/
-  int32_t stream_id; /* stream we are interested in */
-  struct bufq h2_sendbuf; /* request body data buffere for sending */
-  size_t h2_send_hds_len; /* amount of bytes in first cf_send() that
-                             are header bytes. Or 0 if not known. */
-  struct bufq h2_recvbuf;
-  size_t h2_recv_hds_len; /* how many bytes in recvbuf are headers */
-  struct dynhds resp_trailers;
-  bool close_handled; /* TRUE if stream closure is handled by libcurl */
-
-  char **push_headers;       /* allocated array */
-  size_t push_headers_used;  /* number of entries filled in */
-  size_t push_headers_alloc; /* number of entries allocated */
-  uint32_t error; /* HTTP/2 stream error code */
-  bool bodystarted;
-  int status_code; /* HTTP status code */
-  char *mem;     /* points to a buffer in memory to store received data */
-  size_t len;    /* size of the buffer 'mem' points to */
-  size_t memlen; /* size of data copied to mem */
-  /* fields used by both HTTP/2 and HTTP/3 */
-  const uint8_t *upload_mem; /* points to a buffer to read from */
-  size_t upload_len; /* size of the buffer 'upload_mem' points to */
-  curl_off_t upload_left; /* number of bytes left to upload */
-  bool closed; /* TRUE on stream close */
-  bool reset;  /* TRUE on stream reset */
 #endif
 };
 

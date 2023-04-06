@@ -186,9 +186,9 @@ struct stream_ctx {
 };
 
 #define H3_STREAM_CTX(d)    ((struct stream_ctx *)(((d) && (d)->req.p.http)? \
-                             ((struct HTTP *)(d)->req.p.http)->impl_ctx \
+                             ((struct HTTP *)(d)->req.p.http)->h3_ctx \
                                : NULL))
-#define H3_STREAM_LCTX(d)   ((struct HTTP *)(d)->req.p.http)->impl_ctx
+#define H3_STREAM_LCTX(d)   ((struct HTTP *)(d)->req.p.http)->h3_ctx
 #define H3_STREAM_ID(d)     (H3_STREAM_CTX(d)? \
                              H3_STREAM_CTX(d)->id : -2)
 
@@ -197,6 +197,11 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
+
+  if(!data || !data->req.p.http) {
+    failf(data, "initialization failure, transfer not http initialized");
+    return CURLE_FAILED_INIT;
+  }
 
   if(stream)
     return CURLE_OK;
@@ -1517,7 +1522,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
                                size_t len)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct stream_ctx *stream = NULL;
   size_t nheader;
   CURLcode result = CURLE_OK;
   nghttp3_nv *nva = NULL;
@@ -1526,6 +1531,11 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   struct h2h3req *hreq = NULL;
   nghttp3_data_reader reader;
   nghttp3_data_reader *preader = NULL;
+
+  result = h3_data_setup(cf, data);
+  if(result)
+    goto out;
+  stream = H3_STREAM_CTX(data);
 
   rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &stream->id, NULL);
   if(rc) {
@@ -1579,7 +1589,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
                 stream->id, data->state.url));
 
 out:
-  if(!result && rc) {
+  if(stream && !result && rc) {
     switch(rc) {
     case NGHTTP3_ERR_CONN_CLOSING:
       DEBUGF(LOG_CF(data, cf, "h3sid[%"PRId64"] failed to send, "
@@ -1612,13 +1622,13 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(ctx->h3conn);
   *err = CURLE_OK;
 
-  if(stream->closed) {
+  if(stream && stream->closed) {
     *err = CURLE_HTTP3;
     sent = -1;
     goto out;
   }
 
-  if(stream->id < 0) {
+  if(!stream || stream->id < 0) {
     CURLcode result = h3_stream_open(cf, data, buf, len);
     if(result) {
       DEBUGF(LOG_CF(data, cf, "failed to open stream -> %d", result));
@@ -2070,10 +2080,8 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
   (void)arg1;
   (void)arg2;
   switch(event) {
-  case CF_CTRL_DATA_SETUP: {
-    result = h3_data_setup(cf, data);
+  case CF_CTRL_DATA_SETUP:
     break;
-  }
   case CF_CTRL_DATA_DONE: {
     h3_data_done(cf, data);
     break;
@@ -2232,10 +2240,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   quic_settings(ctx, data);
 
   result = vquic_ctx_init(&ctx->q);
-  if(result)
-    return result;
-
-  result = h3_data_setup(cf, data);
   if(result)
     return result;
 
