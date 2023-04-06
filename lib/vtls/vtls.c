@@ -1813,8 +1813,14 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   bool use_alpn = conn->bits.tls_enable_alpn;
   int httpwant = CURL_HTTP_VERSION_1_1;
 
-#if defined(USE_HTTP2) && defined(DEBUGBUILD)
-  if(conn->bits.tunnel_proxy && getenv("CURL_PROXY_TUNNEL_H2")) {
+#ifdef USE_HTTP2
+  if(conn->bits.tunnel_proxy &&
+     ((conn->http_proxy.proxytype == CURLPROXY_HTTPS2)
+#ifdef DEBUGBUILD
+      || getenv("CURL_PROXY_TUNNEL_H2")
+#endif
+       )
+    ) {
     use_alpn = TRUE;
     httpwant = CURL_HTTP_VERSION_2;
   }

@@ -1305,7 +1305,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
 
   if((conn->handler->flags & PROTOPT_SSL
 #ifndef CURL_DISABLE_PROXY
-      || conn->http_proxy.proxytype == CURLPROXY_HTTPS
+      || IS_HTTPS_PROXY(conn->http_proxy.proxytype)
 #endif
        )
      && conn->httpversion != 20) {
