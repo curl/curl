@@ -44,6 +44,9 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
 
 extern struct Curl_cftype Curl_cft_http_proxy;
 
+#define IS_HTTPS_PROXY(t) (((t) == CURLPROXY_HTTPS) ||  \
+                           ((t) == CURLPROXY_HTTPS2))
+
 #endif /* !CURL_DISABLE_PROXY  && !CURL_DISABLE_HTTP */
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */
