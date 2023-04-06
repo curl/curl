@@ -131,6 +131,17 @@ if(WIN32)
       set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
     endif()
   endif()
+else()
+  # on not-Windows, check for writable argv[]
+    include(CheckCSourceRuns)
+    check_c_source_runs("
+int main(int argc, char **argv)
+{
+  (void)argc;
+  argv[0][0] = ' ';
+  return (argv[0][0] == ' ')?0:1;
+}"
+      HAVE_WRITABLE_ARGV)
 endif()
 
 target_include_directories(${LIB_NAME} INTERFACE
