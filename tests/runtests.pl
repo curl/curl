@@ -1552,6 +1552,8 @@ sub runhttpserver {
     my $idnum = 1;
     my $exe = "$perl $srcdir/http-server.pl";
     my $verbose_flag = "--verbose ";
+    my $keepalive_secs = 30; # forwarded to sws, was 5 by default which
+                             # led to pukes in CI jobs
 
     if($alt eq "ipv6") {
         # if IPv6, use a different setup
@@ -1590,6 +1592,7 @@ sub runhttpserver {
     my $flags = "";
     $flags .= "--gopher " if($proto eq "gopher");
     $flags .= "--connect $HOSTIP " if($alt eq "proxy");
+    $flags .= "--keepalive $keepalive_secs ";
     $flags .= $verbose_flag if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--logdir \"$LOGDIR\" ";
