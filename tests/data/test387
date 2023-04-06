@@ -9,8 +9,9 @@ gzip
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data nocheck="yes" crlf="yes">
 HTTP/1.1 200 OK
+Content-Length: 6
 Transfer-Encoding: gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip
 
 -foo-
@@ -23,11 +24,14 @@ Transfer-Encoding: gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,gzip,g
 <server>
 http
 </server>
- <name>
+<features>
+libz
+</features>
+<name>
 Response with overly long compression chain
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -sS
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -sS --tr-encoding
 </command>
 </client>
 
@@ -39,6 +43,8 @@ GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
+Connection: TE
+TE: gzip
 
 </protocol>
 
