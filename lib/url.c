@@ -1209,17 +1209,19 @@ ConnectionExists(struct Curl_easy *data,
         if(needle->bits.tunnel_proxy != check->bits.tunnel_proxy)
           continue;
 
-        if(needle->http_proxy.proxytype == CURLPROXY_HTTPS) {
+        if(IS_HTTPS_PROXY(needle->http_proxy.proxytype)) {
           /* use https proxy */
-          if(needle->handler->flags&PROTOPT_SSL) {
+          if(needle->http_proxy.proxytype !=
+             check->http_proxy.proxytype)
+            continue;
+          else if(needle->handler->flags&PROTOPT_SSL) {
             /* use double layer ssl */
             if(!Curl_ssl_config_matches(&needle->proxy_ssl_config,
                                         &check->proxy_ssl_config))
               continue;
           }
-
-          if(!Curl_ssl_config_matches(&needle->ssl_config,
-                                      &check->ssl_config))
+          else if(!Curl_ssl_config_matches(&needle->ssl_config,
+                                           &check->ssl_config))
             continue;
         }
       }
@@ -1521,8 +1523,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->bits.httpproxy = (conn->bits.proxy &&
                           (conn->http_proxy.proxytype == CURLPROXY_HTTP ||
                            conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0 ||
-                           conn->http_proxy.proxytype == CURLPROXY_HTTPS)) ?
-                           TRUE : FALSE;
+                           IS_HTTPS_PROXY(conn->http_proxy.proxytype))) ?
+    TRUE : FALSE;
   conn->bits.socksproxy = (conn->bits.proxy &&
                            !conn->bits.httpproxy) ? TRUE : FALSE;
 
@@ -2154,8 +2156,12 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       goto error;
     }
 
-    if(strcasecompare("https", scheme))
-      proxytype = CURLPROXY_HTTPS;
+    if(strcasecompare("https", scheme)) {
+      if(proxytype != CURLPROXY_HTTPS2)
+        proxytype = CURLPROXY_HTTPS;
+      else
+        proxytype = CURLPROXY_HTTPS2;
+    }
     else if(strcasecompare("socks5h", scheme))
       proxytype = CURLPROXY_SOCKS5_HOSTNAME;
     else if(strcasecompare("socks5", scheme))
@@ -2183,9 +2189,9 @@ static CURLcode parse_proxy(struct Curl_easy *data,
 #ifdef USE_SSL
   if(!Curl_ssl_supports(data, SSLSUPP_HTTPS_PROXY))
 #endif
-    if(proxytype == CURLPROXY_HTTPS) {
+    if(IS_HTTPS_PROXY(proxytype)) {
       failf(data, "Unsupported proxy \'%s\', libcurl is built without the "
-                  "HTTPS-proxy support.", proxy);
+            "HTTPS-proxy support.", proxy);
       result = CURLE_NOT_BUILT_IN;
       goto error;
     }
@@ -2242,7 +2248,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
          given */
       port = (int)data->set.proxyport;
     else {
-      if(proxytype == CURLPROXY_HTTPS)
+      if(IS_HTTPS_PROXY(proxytype))
         port = CURL_DEFAULT_HTTPS_PROXY_PORT;
       else
         port = CURL_DEFAULT_PROXY_PORT;
