@@ -2037,10 +2037,11 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
   unsigned char *palpn =
 #ifndef CURL_DISABLE_PROXY
     Curl_ssl_cf_is_proxy(cf)?
-    &cf->conn->proxy_alpn : &cf->conn->alpn;
+    &cf->conn->proxy_alpn : &cf->conn->alpn
 #else
-  &cf->conn->alpn;
+    &cf->conn->alpn
 #endif
+    ;
 
   if(proto && proto_len) {
     if(proto_len == ALPN_HTTP_1_1_LENGTH &&
