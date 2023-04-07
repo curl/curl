@@ -106,7 +106,7 @@ connect_sub:
 #endif
     default:
       DEBUGF(LOG_CF(data, cf, "installing subfilter for default HTTP/1.1"));
-      infof(data, "CONNECT tunnel: unsupported ALPN(%d) negotiated");
+      infof(data, "CONNECT tunnel: unsupported ALPN(%d) negotiated", alpn);
       result = CURLE_COULDNT_CONNECT;
       goto out;
     }
