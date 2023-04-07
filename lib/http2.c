@@ -222,7 +222,7 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
   struct stream_ctx *stream = H2_STREAM_CTX(data);
 
   (void)cf;
-  if(!data || !data->req.p.http) {
+  if(!data->req.p.http) {
     failf(data, "initialization failure, transfer not http initialized");
     return CURLE_FAILED_INIT;
   }
