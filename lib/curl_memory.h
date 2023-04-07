@@ -52,38 +52,11 @@
  * mentioned above will compile without any indication, but it will
  * trigger weird memory related issues at runtime.
  *
- * OTOH some source files from 'lib' subdirectory may additionally be
- * used directly as source code when using some curlx_ functions by
- * third party programs that don't even use libcurl at all. When using
- * these source files in this way it is necessary these are compiled
- * with CURLX_NO_MEMORY_CALLBACKS defined, in order to ensure that no
- * attempt of calling libcurl's memory callbacks is done from code
- * which can not use this machinery.
- *
- * Notice that libcurl's 'memory tracking' system works chaining into
- * the memory callback machinery. This implies that when compiling
- * 'lib' source files with CURLX_NO_MEMORY_CALLBACKS defined this file
- * disengages usage of libcurl's 'memory tracking' system, defining
- * MEMDEBUG_NODEFINES and overriding CURLDEBUG purpose.
- *
- * CURLX_NO_MEMORY_CALLBACKS takes precedence over CURLDEBUG. This is
- * done in order to allow building a 'memory tracking' enabled libcurl
- * and at the same time allow building programs which do not use it.
- *
- * Programs and libraries in 'tests' subdirectories have specific
- * purposes and needs, and as such each one will use whatever fits
- * best, depending additionally whether it links with libcurl or not.
- *
- * Caveat emptor. Proper curlx_* separation is a work in progress
- * the same as CURLX_NO_MEMORY_CALLBACKS usage, some adjustments may
- * still be required. IOW don't use them yet, there are sharp edges.
  */
 
 #ifdef HEADER_CURL_MEMDEBUG_H
 #error "Header memdebug.h shall not be included before curl_memory.h"
 #endif
-
-#ifndef CURLX_NO_MEMORY_CALLBACKS
 
 #ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
 /*
@@ -146,13 +119,4 @@ extern curl_wcsdup_callback Curl_cwcsdup;
 #endif
 
 #endif /* CURLDEBUG */
-
-#else /* CURLX_NO_MEMORY_CALLBACKS */
-
-#ifndef MEMDEBUG_NODEFINES
-#define MEMDEBUG_NODEFINES
-#endif
-
-#endif /* CURLX_NO_MEMORY_CALLBACKS */
-
 #endif /* HEADER_CURL_MEMORY_H */
