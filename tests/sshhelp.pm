@@ -63,7 +63,6 @@ BEGIN {
         find_sftp
         find_sshkeygen
         find_httptlssrv
-        logmsg
         sshversioninfo
     );
 }
@@ -172,17 +171,6 @@ sub dump_array {
         $error = "Error: cannot write file $filename";
     }
     return $error;
-}
-
-
-#***************************************************************************
-# Display a message
-#
-sub logmsg {
-    my ($line) = @_;
-    chomp $line if($line);
-    $line .= "\n";
-    print "$line";
 }
 
 
