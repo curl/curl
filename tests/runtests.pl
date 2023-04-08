@@ -5980,8 +5980,8 @@ if ($gdbthis) {
     }
 }
 
-$HTTPUNIXPATH    = "http$$.sock"; # HTTP server Unix domain socket path
-$SOCKSUNIXPATH    = $pwd."/socks$$.sock"; # HTTP server Unix domain socket path, absolute path
+$HTTPUNIXPATH  = "$PIDDIR/http.sock";  # HTTP server Unix domain socket path
+$SOCKSUNIXPATH = "$PIDDIR/socks.sock"; # SOCKS server Unix domain socket path
 
 #######################################################################
 # clear and create logging directory:
