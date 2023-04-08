@@ -46,12 +46,6 @@ use warnings;
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
     push(@INC, ".");
-    # sub second timestamping needs Time::HiRes
-    eval {
-        no warnings "all";
-        require Time::HiRes;
-        import  Time::HiRes qw( gettimeofday );
-    }
 }
 
 use IPC::Open2;
@@ -69,6 +63,8 @@ use getpart qw(
 use processhelp;
 
 use serverhelp qw(
+    logmsg
+    $logfile
     servername_str
     server_pidfilename
     server_logfilename
@@ -110,7 +106,6 @@ my $listenaddr = '127.0.0.1';  # default address for listener port
 my $PORTFILE="ftpserver.port"; # server port file name
 my $portfile;           # server port file path
 my $pidfile;            # server pid file name
-my $logfile;            # server log file name
 my $mainsockf_pidfile;  # pid file for primary connection sockfilt process
 my $mainsockf_logfile;  # log file for primary connection sockfilt process
 my $datasockf_pidfile;  # pid file for secondary connection sockfilt process
@@ -215,31 +210,6 @@ sub exit_signal_handler {
         clear_advisor_read_lock($serverlogs_lockfile);
     }
     exit;
-}
-
-#**********************************************************************
-# logmsg is general message logging subroutine for our test servers.
-#
-sub logmsg {
-    my $now;
-    # sub second timestamping needs Time::HiRes
-    if($Time::HiRes::VERSION) {
-        my ($seconds, $usec) = gettimeofday();
-        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-            localtime($seconds);
-        $now = sprintf("%02d:%02d:%02d.%06d ", $hour, $min, $sec, $usec);
-    }
-    else {
-        my $seconds = time();
-        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-            localtime($seconds);
-        $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
-    }
-    if(open(my $logfilefh, ">>", "$logfile")) {
-        print $logfilefh $now;
-        print $logfilefh @_;
-        close($logfilefh);
-    }
 }
 
 sub ftpmsg {
