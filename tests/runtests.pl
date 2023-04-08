@@ -6005,10 +6005,10 @@ init_serverpidfile_hash();
 if(!$listonly) {
     unlink($memdump);  # remove this if there was one left
     checksystemfeatures();
-}
 
-# globally disabled tests
-disabledtests("$TESTDIR/DISABLED");
+    # globally disabled tests
+    disabledtests("$TESTDIR/DISABLED");
+}
 
 #######################################################################
 # Fetch all disabled tests, if there are any
