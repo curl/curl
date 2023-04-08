@@ -1728,9 +1728,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   }
 
   switch(what) {
-  case CURLUPART_SCHEME:
-    if(strlen(part) > MAX_SCHEME_LEN)
-      /* too long */
+  case CURLUPART_SCHEME: {
+    size_t plen = strlen(part);
+    const char *s = part;
+    if((plen > MAX_SCHEME_LEN) || (plen < 1))
+      /* too long or too short */
       return CURLUE_BAD_SCHEME;
     if(!(flags & CURLU_NON_SUPPORT_SCHEME) &&
        /* verify that it is a fine scheme */
@@ -1738,7 +1740,15 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       return CURLUE_UNSUPPORTED_SCHEME;
     storep = &u->scheme;
     urlencode = FALSE; /* never */
+    /* ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) */
+    while(plen--) {
+      if(ISALNUM(*s) || (*s == '+') || (*s == '-') || (*s == '.'))
+        s++; /* fine */
+      else
+        return CURLUE_BAD_SCHEME;
+    }
     break;
+  }
   case CURLUPART_USER:
     storep = &u->user;
     break;

@@ -713,6 +713,11 @@ static const struct setcase set_parts_list[] = {
    CURLUE_OK, CURLUE_OK},
 
   {"https://example.com/",
+   /* Set a bad scheme *including* :// */
+   "scheme=https://,",
+   "https://example.com/",
+   0, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK, CURLUE_BAD_SCHEME},
+  {"https://example.com/",
    /* Set a 41 bytes scheme. That's too long so the old scheme remains set. */
    "scheme=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc,",
    "https://example.com/",
