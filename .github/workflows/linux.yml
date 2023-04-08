@@ -191,7 +191,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'libressl') }}
       run: |
-        git clone --depth=1 -b v3.6.1 https://github.com/libressl-portable/portable.git libressl-git
+        git clone --depth=1 -b v3.7.2 https://github.com/libressl-portable/portable.git libressl-git
         cd libressl-git
         ./autogen.sh
         ./configure --prefix=$HOME/libressl
@@ -221,7 +221,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
       run: |
-        git clone --depth=1 -b v3.3.0 https://github.com/ARMmbed/mbedtls
+        git clone --depth=1 -b v3.4.0 https://github.com/ARMmbed/mbedtls
         cd mbedtls
         make DESTDIR=$HOME/mbed install
       name: 'install mbedtls'
