@@ -1468,6 +1468,13 @@ sub runhttptlsserver {
 #
 sub runpingpongserver {
     my ($proto, $id, $verb, $ipv6) = @_;
+
+    # Check the requested server
+    if($proto !~ /^(?:ftp|imap|pop3|smtp)$/) {
+        print STDERR "Unsupported protocol $proto!!\n";
+        return (0,0);
+    }
+
     my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
@@ -1532,13 +1539,7 @@ sub runpingpongserver {
     logmsg "RUN: $srvrname server is PID $ftppid port $port\n" if($verb);
 
     # Assign the correct port variable!
-    if($proto =~ /^(?:ftp|imap|pop3|smtp)$/) {
-        $PORT{$proto . ($ipvnum == 6? '6': '')} = $port;
-    }
-    else {
-        print STDERR "Unsupported protocol $proto!!\n";
-        return (0,0);
-    }
+    $PORT{$proto . ($ipvnum == 6? '6': '')} = $port;
 
     return ($pid2, $ftppid);
 }
