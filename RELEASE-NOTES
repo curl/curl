@@ -4,10 +4,12 @@ curl and libcurl 8.1.0
  Command line options:         250
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2852
+ Contributors:                 2854
 
 This release includes the following changes:
 
+ o CURLPROXY_HTTPS2: for HTTPS proxy that may speak HTTP/2 [57]
+ o proxy: http2 proxy tunnel implementation [68]
  o tool_writeout: add URL component variables [41]
 
 This release includes the following bugfixes:
@@ -19,7 +21,10 @@ This release includes the following bugfixes:
  o CMake: make config version 8 compatible with 7 [28]
  o cmake: picky-linker fixes for openssl, ZLIB, H3 and more [31]
  o cmake: set SONAME for SunOS too [3]
+ o config-dos.h: fix SIZEOF_CURL_OFF_T for MS-DOS/DJGPP [52]
+ o configure: don't set HAVE_WRITABLE_ARGV on Windows [64]
  o configure: make quiche require quiche_conn_send_ack_eliciting [46]
+ o content_encoding: only do tranfer-encoding compression if asked to [61]
  o curl_easy_getinfo.3: typo fix (duplicated "from the") [43]
  o data.d: emphasize no conversion [5]
  o digest: clear target buffer [8]
@@ -38,9 +43,12 @@ This release includes the following bugfixes:
  o hostip: refuse to resolve the .onion TLD [19]
  o HTTP-COOKIES.md: mention the #HttpOnly_ prefix [16]
  o http2: flow control and buffer improvements [54]
+ o http2: move HTTP/2 stream vars into local context [67]
  o http3: improvements across backends [51]
+ o lib/cmake: add HAVE_WRITABLE_ARGV check [63]
  o lib/sha256.c: typo fix in comment (duplicated "is available") [40]
  o lib: add `bufq` and `dynhds` [34]
+ o lib: remove CURLX_NO_MEMORY_CALLBACKS [55]
  o lib: use correct printf flags for sockets and timediffs [36]
  o multi: add handle asserts in DEBUG builds [11]
  o multi: remove PENDING + MSGSENT handles from the main linked list [23]
@@ -63,7 +71,9 @@ This release includes the following bugfixes:
  o tests/http: fix log formatting on wrong exit code [27]
  o tests/http: improved httpd detection [45]
  o tests/http: relax connection check in test_07_02 [53]
+ o tests: 1078 1288 1297 use valid IPv4 addresses
  o tests: document that the unittest keyword is special
+ o tests: increase sws timeout for more robust testing [66]
  o tests: move pidfiles and portfiles under the log directory [48]
  o tests: move server config files under the pid dir [47]
  o tests: silence some Perl::Critic warnings in test suite [56]
@@ -71,8 +81,10 @@ This release includes the following bugfixes:
  o tests: use %LOGDIR to refer to the log directory
  o tool_operate: pass a long as CURLOPT_HEADEROPT argument [13]
  o url: remove call to Curl_llist_destroy in Curl_close [22]
+ o urlapi: detect and error on illegal IPv4 addresses [70]
  o urlapi: URL encoding for the URL missed the fragment [29]
  o vlts: use full buffer size when receiving data if possible [32]
+ o vtls and h2 improvements [69]
  o wolfssl.yml: bump to version 5.6.0 [44]
  o ws: handle reads before EAGAIN better [38]
 
@@ -92,14 +104,14 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andy Alt, Arne Soete, Ben Fritz, Brian Lund, Chloe Kudryavtsev, Dan Fandrich,
-  Dan Frandrich, Daniel Stenberg, dengjfzh on github, Douglas R. Reno,
-  Emil Engler, Frank Gevaerts, Gisle Vanem, Harry Sintonen, Jakub Zakrzewski,
-  Jim King, Jon Rumsey, Kai Pastor, Kamil Dudka, kwind on github, Matt Jolly,
-  Micah Snyder), Osaila on github, Patrick Monnerat, Paul Howarth,
-  Philip Heiduck, Ray Satiro, Ronan Pigott, simplerobot on github,
-  Stefan Eissing, Viktor Szakats
-  (31 contributors)
+  Ali Khodkar, Andy Alt, Arne Soete, Ben Fritz, Brian Lund, Chloe Kudryavtsev,
+  Dan Fandrich, Dan Frandrich, Daniel Stenberg, dengjfzh on github,
+  Douglas R. Reno, Emil Engler, Frank Gevaerts, Gisle Vanem, Harry Sintonen,
+  Jakub Zakrzewski, Jim King, Jon Rumsey, Kai Pastor, Kamil Dudka,
+  kwind on github, Matt Jolly, Micah Snyder), Osaila on github,
+  Patrick Monnerat, Paul Howarth, Philip Heiduck, Ray Satiro, Ronan Pigott,
+  simplerobot on github, Stefan Eissing, SuperIlu on github, Viktor Szakats
+  (33 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -154,6 +166,17 @@ References to bug reports and discussions on issues:
  [49] = https://curl.se/bug/?i=10878
  [50] = https://curl.se/bug/?i=10876
  [51] = https://curl.se/bug/?i=10772
+ [52] = https://curl.se/bug/?i=10905
  [53] = https://curl.se/bug/?i=10865
  [54] = https://curl.se/bug/?i=10771
+ [55] = https://curl.se/bug/?i=10908
  [56] = https://curl.se/bug/?i=10861
+ [57] = https://curl.se/bug/?i=10900
+ [61] = https://curl.se/bug/?i=10899
+ [63] = https://curl.se/bug/?i=10896
+ [64] = https://curl.se/bug/?i=10896
+ [66] = https://curl.se/bug/?i=10898
+ [67] = https://curl.se/bug/?i=10877
+ [68] = https://curl.se/bug/?i=10780
+ [69] = https://curl.se/bug/?i=10891
+ [70] = https://curl.se/bug/?i=10894
