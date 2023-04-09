@@ -32,6 +32,7 @@
 #ifdef WIN32
 #  include <stdlib.h>
 #  include <tlhelp32.h>
+#  include <wchar.h>
 #  include "tool_cfgable.h"
 #  include "tool_libinfo.h"
 #endif
