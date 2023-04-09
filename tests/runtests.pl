@@ -1502,7 +1502,8 @@ sub singletest_startservers {
             warn "Test case $testnum has no server(s) specified";
             $why = "no server specified";
         } else {
-            $why = serverfortest(@what);
+            my $err;
+            ($why, $err) = serverfortest(@what);
         }
     }
 
