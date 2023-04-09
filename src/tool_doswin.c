@@ -768,7 +768,7 @@ _CRTIMP char    **__cdecl __p__acmdln(void);
 _CRTIMP wchar_t **__cdecl __p__wcmdln(void);
 static void clean_cmdln(void)
 {
-  memset (_acmdln,  'x', strlen(_acmdln));
+  memset(_acmdln, 'x', strlen(_acmdln));
   wmemset(_wcmdln, L'x', wcslen(_wcmdln));
 }
 
