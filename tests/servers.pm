@@ -40,7 +40,6 @@ BEGIN {
             $HOSTIP
             $HOST6IP
             $HTTPUNIXPATH
-            $testnumcheck
             $sshdid
             $SSHSRVMD5
             $SSHSRVSHA256
@@ -122,7 +121,6 @@ my %runcert;      # cert file currently in use by an ssl running server
 our $HOSTIP="127.0.0.1";   # address on which the test server listens
 our $HOST6IP="[::1]";      # address on which the test server listens
 our $HTTPUNIXPATH; # HTTP server Unix domain socket path
-our $testnumcheck; # test number, set in singletest sub.
 our $sshdid;      # for socks server, ssh daemon version id
 our $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
 our $SSHSRVSHA256 = "[uninitialized]"; # SHA256 of ssh server public key
@@ -190,13 +188,6 @@ sub initserverconfig {
         }
     }
     init_serverpidfile_hash();
-}
-
-#######################################################################
-# Call main's displaylogs
-# TODO: instead, make the caller call displaylogs() in case of error
-sub displaylogs {
-    return main::displaylogs(@_);
 }
 
 #######################################################################
@@ -1150,7 +1141,6 @@ sub runhttpserver {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
-        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1167,7 +1157,6 @@ sub runhttpserver {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver($server, "$httppid $pid2");
-        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1385,7 +1374,6 @@ sub runhttpsserver {
         if($httpspid <= 0 || !pidexists($httpspid)) {
             # it is NOT alive
             stopserver($server, "$pid2");
-            displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
             $httpspid = $pid2 = 0;
             next;
@@ -1453,7 +1441,6 @@ sub runhttptlsserver {
         if($httptlspid <= 0 || !pidexists($httptlspid)) {
             # it is NOT alive
             stopserver($server, "$pid2");
-            displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
             $httptlspid = $pid2 = 0;
             next;
@@ -1520,7 +1507,6 @@ sub runpingpongserver {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
-        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0);
     }
@@ -1536,7 +1522,6 @@ sub runpingpongserver {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver($server, "$ftppid $pid2");
-        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0);
     }
@@ -1606,7 +1591,6 @@ sub runsecureserver {
         if($protospid <= 0 || !pidexists($protospid)) {
             # it is NOT alive
             stopserver($server, "$pid2");
-            displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
             $protospid = $pid2 = 0;
             next;
@@ -1677,7 +1661,6 @@ sub runtftpserver {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
-        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1690,7 +1673,6 @@ sub runtftpserver {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver($server, "$tftppid $pid2");
-        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1755,7 +1737,6 @@ sub runrtspserver {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
-        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -1768,7 +1749,6 @@ sub runrtspserver {
         logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         stopserver($server, "$rtsppid $pid2");
-        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
@@ -2095,7 +2075,6 @@ sub rundictserver {
         if($dictpid <= 0 || !pidexists($dictpid)) {
             # it is NOT alive
             stopserver($server, "$pid2");
-            displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
             $dictpid = $pid2 = 0;
             next;
@@ -2162,7 +2141,6 @@ sub runsmbserver {
         if($smbpid <= 0 || !pidexists($smbpid)) {
             # it is NOT alive
             stopserver($server, "$pid2");
-            displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
             $smbpid = $pid2 = 0;
             next;
@@ -2228,7 +2206,6 @@ sub runnegtelnetserver {
         if($ntelpid <= 0 || !pidexists($ntelpid)) {
             # it is NOT alive
             stopserver($server, "$pid2");
-            displaylogs($testnumcheck);
             $doesntrun{$pidfile} = 1;
             $ntelpid = $pid2 = 0;
             next;
