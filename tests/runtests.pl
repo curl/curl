@@ -3056,7 +3056,7 @@ sub checksystemfeatures {
         close($conf);
     }
 
-    # disable this feature unless debug mode is also enabled
+    # allow this feature only if debug mode is disabled
     $feature{"ld_preload"} = $feature{"ld_preload"} && !$feature{"debug"};
 
     if($feature{"ipv6"}) {
