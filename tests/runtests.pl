@@ -507,10 +507,9 @@ sub startnew {
 # Check for a command in the PATH of the test server.
 #
 sub checkcmd {
-    my ($cmd)=@_;
+    my ($cmd, @extrapaths)=@_;
     my @paths=(split(m/[:]/, $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
-               "/sbin", "/usr/bin", "/usr/local/bin",
-               "$LIBDIR/.libs", "$LIBDIR");
+               "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
     for(@paths) {
         if( -x "$_/$cmd" && ! -d "$_/$cmd") {
             # executable bit but not a directory!
@@ -543,7 +542,8 @@ sub get_disttests {
 #
 sub checktestcmd {
     my ($cmd)=@_;
-    return checkcmd($cmd);
+    my @testpaths=("$LIBDIR/.libs", "$LIBDIR");
+    return checkcmd($cmd, @testpaths);
 }
 
 #######################################################################
