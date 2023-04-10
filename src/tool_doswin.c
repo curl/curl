@@ -763,6 +763,7 @@ static void init_terminal(void)
 }
 
 /* clean possible sensitive information from the win32 command-line */
+#ifdef NDEBUG
 #define _acmdln (*__p__acmdln())
 #define _wcmdln (*__p__wcmdln())
 _CRTIMP char    **__cdecl __p__acmdln(void);
@@ -772,6 +773,9 @@ static void clean_cmdln(void)
   memset(_acmdln, 'x', strlen(_acmdln));
   wmemset(_wcmdln, L'x', wcslen(_wcmdln));
 }
+#else
+#define clean_cmdln() ((void)0)
+#endif
 
 LARGE_INTEGER tool_freq;
 bool tool_isVistaOrGreater;
