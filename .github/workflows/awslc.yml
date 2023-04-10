@@ -40,7 +40,7 @@ jobs:
       name: 'install prereqs and impacket'
 
     - run: |
-        curl -LO https://github.com/awslabs/aws-lc/archive/refs/tags/v1.3.0.tar.gz
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/awslabs/aws-lc/archive/refs/tags/v1.3.0.tar.gz
         tar xzf v1.3.0.tar.gz
         mkdir aws-lc-1.3.0-build
         cd aws-lc-1.3.0-build
@@ -84,7 +84,7 @@ jobs:
       name: 'install prereqs and impacket'
 
     - run: |
-        curl -LO https://github.com/awslabs/aws-lc/archive/refs/tags/v1.3.0.tar.gz
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/awslabs/aws-lc/archive/refs/tags/v1.3.0.tar.gz
         tar xzf v1.3.0.tar.gz
         mkdir aws-lc-1.3.0-build
         cd aws-lc-1.3.0-build
