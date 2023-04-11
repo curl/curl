@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -498,6 +498,9 @@ const struct helptxt helptext[] = {
   {"    --proxy-header <header/@file>",
    "Pass custom header(s) to proxy",
    CURLHELP_PROXY},
+  {"    --proxy-http2",
+   "Use HTTP/2 with HTTPS proxy",
+   CURLHELP_HTTP | CURLHELP_PROXY},
   {"    --proxy-insecure",
    "Do HTTPS proxy connections without verifying the proxy",
    CURLHELP_PROXY | CURLHELP_TLS},

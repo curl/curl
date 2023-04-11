@@ -178,6 +178,7 @@ DPAGES = \
   proxy-crlfile.d \
   proxy-digest.d \
   proxy-header.d \
+  proxy-http2.d \
   proxy-insecure.d \
   proxy-key-type.d \
   proxy-key.d \
