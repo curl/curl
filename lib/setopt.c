@@ -115,7 +115,11 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
   /* Parse the login details if specified. It not then we treat NULL as a hint
      to clear the existing data */
   if(option) {
-    result = Curl_parse_login_details(option, strlen(option),
+    size_t len = strlen(option);
+    if(len > CURL_MAX_INPUT_LENGTH)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
+    result = Curl_parse_login_details(option, len,
                                       (userp ? &user : NULL),
                                       (passwdp ? &passwd : NULL),
                                       NULL);
