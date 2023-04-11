@@ -219,13 +219,15 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
                                  struct stream_ctx **pstream)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H2_STREAM_CTX(data);
+  struct stream_ctx *stream;
 
   (void)cf;
+  DEBUGASSERT(data);
   if(!data->req.p.http) {
     failf(data, "initialization failure, transfer not http initialized");
     return CURLE_FAILED_INIT;
   }
+  stream = H2_STREAM_CTX(data);
   if(stream) {
     *pstream = stream;
     return CURLE_OK;
