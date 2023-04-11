@@ -165,6 +165,7 @@
 --proxy-crlfile                      7.52.0
 --proxy-digest                       7.12.0
 --proxy-header                       7.37.0
+--proxy-http2                        8.1.0
 --proxy-insecure                     7.52.0
 --proxy-key                          7.52.0
 --proxy-key-type                     7.52.0
