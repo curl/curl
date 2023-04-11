@@ -241,6 +241,10 @@ sub single {
             $protocols=$1;
         }
         elsif(/^See-also: *(.*)/i) {
+            if($seealso) {
+                print STDERR "ERROR: duplicated See-also in $f\n";
+                return 1;
+            }
             $seealso=$1;
         }
         elsif(/^Requires: *(.*)/i) {
