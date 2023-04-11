@@ -2222,7 +2222,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             /* DO was not completed in one function call, we must continue
                DOING... */
             multistate(data, MSTATE_DOING);
-            rc = CURLM_OK;
           }
 
           /* after DO, go DO_DONE... or DO_MORE */
@@ -2230,7 +2229,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             /* we're supposed to do more, but we need to sit down, relax
                and wait a little while first */
             multistate(data, MSTATE_DOING_MORE);
-            rc = CURLM_OK;
           }
           else {
             /* we're done with the DO, now DID */
@@ -2331,9 +2329,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                      MSTATE_DID : MSTATE_DOING);
           rc = CURLM_CALL_MULTI_PERFORM;
         }
-        else
-          /* stay in DO_MORE */
-          rc = CURLM_OK;
+        /* else
+           stay in DO_MORE */
       }
       else {
         /* failure detected */
@@ -2562,7 +2559,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
            won't get stuck on this transfer at the expense of other concurrent
            transfers */
         Curl_expire(data, 0, EXPIRE_RUN_NOW);
-        rc = CURLM_OK;
       }
       break;
     }
