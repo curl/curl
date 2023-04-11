@@ -65,7 +65,6 @@ BEGIN {
         sys_native_current_path
         build_sys_abs_path
         normalize_path
-        $use_cygpath
         should_use_cygpath
         drives_mounted_on_cygdrive
     );
@@ -97,21 +96,19 @@ BEGIN {
     }
 }
 
-our $use_cygpath;    # Only for Win32:
+my $use_cygpath;     # Only for Win32:
                      #  undef - autodetect
-                     #      1 - use cygpath
                      #      0 - do not use cygpath
+                     #      1 - use cygpath
 
 # Returns boolean true if 'cygpath' utility should be used for path conversion.
 sub should_use_cygpath {
-    if(!os_is_win()) {
-        $use_cygpath = 0;
-        return 0;
-    }
     return $use_cygpath if defined $use_cygpath;
-
-    $use_cygpath = (qx{cygpath -u '.\\' 2>/dev/null} eq "./\n" && $? == 0);
-
+    if(os_is_win()) {
+        $use_cygpath = (qx{cygpath -u '.\\' 2>/dev/null} eq "./\n" && $? == 0);
+    } else {
+        $use_cygpath = 0;
+    }
     return $use_cygpath;
 }
 
