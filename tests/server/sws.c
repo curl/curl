@@ -2030,8 +2030,9 @@ int main(int argc, char *argv[])
 #ifdef USE_UNIX_SOCKETS
         unix_socket = argv[arg];
         if(strlen(unix_socket) >= sizeof(me.sau.sun_path)) {
-          fprintf(stderr, "sws: socket path must be shorter than %zu chars\n",
-                  sizeof(me.sau.sun_path));
+          fprintf(stderr,
+                  "sws: socket path must be shorter than %zu chars: %s\n",
+                  sizeof(me.sau.sun_path), unix_socket);
           return 0;
         }
         socket_type = "unix";
