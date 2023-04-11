@@ -1410,7 +1410,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 #if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)
   if(!conn->cfilter[sockindex] &&
      conn->handler->protocol == CURLPROTO_HTTPS &&
-     (ssl_mode == CURL_CF_SSL_ENABLE || ssl_mode != CURL_CF_SSL_DISABLE)) {
+     ssl_mode != CURL_CF_SSL_DISABLE) {
 
     result = Curl_cf_https_setup(data, conn, sockindex, remotehost);
     if(result)
