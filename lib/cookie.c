@@ -1222,7 +1222,6 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
                                     bool newsession)
 {
   struct CookieInfo *c;
-  bool fromfile = TRUE;
   char *line = NULL;
   FILE *handle = NULL;
 
@@ -1244,22 +1243,23 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     /* we got an already existing one, use that */
     c = inc;
   }
-  c->running = FALSE; /* this is not running, this is init */
+  c->newsession = newsession; /* new session? */
 
-  if(file && *file && data) {
+  if(data) {
     FILE *fp = NULL;
-    if(file && !strcmp(file, "-"))
-      fp = stdin;
-    else {
-      fp = fopen(file, "rb");
-      if(!fp)
-        infof(data, "WARNING: failed to open cookie file \"%s\"", file);
-      else
-        handle = fp;
+    if(file) {
+      if(!strcmp(file, "-"))
+        fp = stdin;
+      else {
+        fp = fopen(file, "rb");
+        if(!fp)
+          infof(data, "WARNING: failed to open cookie file \"%s\"", file);
+        else
+          handle = fp;
+      }
     }
 
-    c->newsession = newsession; /* new session? */
-
+    c->running = FALSE; /* this is not running, this is init */
     if(fp) {
       char *lineptr;
       bool headerline;
@@ -1290,13 +1290,12 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
        */
       remove_expired(c);
 
-      if(fromfile)
-        fclose(fp);
+      if(handle)
+        fclose(handle);
     }
     data->state.cookie_engine = TRUE;
+    c->running = TRUE;          /* now, we're running */
   }
-
-  c->running = TRUE;          /* now, we're running */
 
   return c;
 
