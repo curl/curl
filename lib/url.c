@@ -3900,7 +3900,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
   result = create_conn(data, &conn, asyncp);
 
   if(!result) {
-    if(CONN_INUSE(conn) > 1)
+    if(conn && CONN_INUSE(conn) > 1)
       /* multiplexed */
       *protocol_done = TRUE;
     else if(!*asyncp) {
