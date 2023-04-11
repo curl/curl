@@ -2022,7 +2022,7 @@ CURLcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
     len = strlen(spec->entries[i]);
     if(len >= ALPN_NAME_MAX)
       return CURLE_FAILED_INIT;
-    if(off + len + 2 >= (int)sizeof(buf->data))
+    if(off + len + 2 >= sizeof(buf->data))
       return CURLE_FAILED_INIT;
     if(off)
       buf->data[off++] = ',';
