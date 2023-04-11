@@ -950,17 +950,123 @@ static CURLcode recvbuf_write_hds(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static CURLcode on_stream_frame(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                const nghttp2_frame *frame)
+{
+  struct cf_h2_ctx *ctx = cf->ctx;
+  struct stream_ctx *stream = H2_STREAM_CTX(data);
+  int32_t stream_id = frame->hd.stream_id;
+  CURLcode result;
+  int rv;
+
+  if(!stream) {
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] No proto pointer", stream_id));
+    return CURLE_FAILED_INIT;
+  }
+
+  switch(frame->hd.type) {
+  case NGHTTP2_DATA:
+    /* If !body started on this stream, then receiving DATA is illegal. */
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv frame DATA", stream_id));
+    if(!stream->bodystarted) {
+      rv = nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
+                                     stream_id, NGHTTP2_PROTOCOL_ERROR);
+
+      if(nghttp2_is_fatal(rv)) {
+        return CURLE_RECV_ERROR;
+      }
+    }
+    if(frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
+      /* Stream has ended. If there is pending data, ensure that read
+         will occur to consume it. */
+      if(!data->state.drain && !Curl_bufq_is_empty(&stream->recvbuf)) {
+        drain_this(cf, data);
+        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+      }
+    }
+    break;
+  case NGHTTP2_HEADERS:
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv frame HEADERS", stream_id));
+    if(stream->bodystarted) {
+      /* Only valid HEADERS after body started is trailer HEADERS.  We
+         buffer them in on_header callback. */
+      break;
+    }
+
+    /* nghttp2 guarantees that :status is received, and we store it to
+       stream->status_code. Fuzzing has proven this can still be reached
+       without status code having been set. */
+    if(stream->status_code == -1)
+      return CURLE_RECV_ERROR;
+
+    /* Only final status code signals the end of header */
+    if(stream->status_code / 100 != 1) {
+      stream->bodystarted = TRUE;
+      stream->status_code = -1;
+    }
+
+    result = recvbuf_write_hds(cf, data, STRCONST("\r\n"));
+    if(result)
+      return result;
+
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] %zu header bytes",
+                  stream_id, Curl_bufq_len(&stream->recvbuf)));
+    if(CF_DATA_CURRENT(cf) != data) {
+      drain_this(cf, data);
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    }
+    break;
+  case NGHTTP2_PUSH_PROMISE:
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv PUSH_PROMISE", stream_id));
+    rv = push_promise(cf, data, &frame->push_promise);
+    if(rv) { /* deny! */
+      DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
+      rv = nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
+                                     frame->push_promise.promised_stream_id,
+                                     NGHTTP2_CANCEL);
+      if(nghttp2_is_fatal(rv))
+        return CURLE_SEND_ERROR;
+      else if(rv == CURL_PUSH_ERROROUT) {
+        DEBUGF(LOG_CF(data, cf, "[h2sid=%d] fail in PUSH_PROMISE received",
+                      stream_id));
+        return CURLE_RECV_ERROR;
+      }
+    }
+    break;
+  case NGHTTP2_RST_STREAM:
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv RST", stream_id));
+    stream->closed = TRUE;
+    stream->reset = TRUE;
+    drain_this(cf, data);
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    break;
+  case NGHTTP2_WINDOW_UPDATE:
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv WINDOW_UPDATE", stream_id));
+    if((data->req.keepon & KEEP_SEND_HOLD) &&
+       (data->req.keepon & KEEP_SEND)) {
+      data->req.keepon &= ~KEEP_SEND_HOLD;
+      drain_this(cf, data);
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%d] un-holding after win update",
+                    stream_id));
+    }
+    break;
+  default:
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv frame %x",
+                  stream_id, frame->hd.type));
+    break;
+  }
+  return CURLE_OK;
+}
+
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
   struct Curl_cfilter *cf = userp;
   struct cf_h2_ctx *ctx = cf->ctx;
-  struct Curl_easy *data_s = NULL;
-  struct stream_ctx *stream = NULL;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  int rv;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf), *data_s;
   int32_t stream_id = frame->hd.stream_id;
-  CURLcode result;
 
   DEBUGASSERT(data);
   if(!stream_id) {
@@ -1006,6 +1112,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
     return 0;
   }
+
   data_s = nghttp2_session_get_stream_user_data(session, stream_id);
   if(!data_s) {
     DEBUGF(LOG_CF(data, cf, "[h2sid=%d] No Curl_easy associated",
@@ -1013,105 +1120,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  stream = H2_STREAM_CTX(data_s);
-  if(!stream) {
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] No proto pointer", stream_id));
-    return NGHTTP2_ERR_CALLBACK_FAILURE;
-  }
-
-  switch(frame->hd.type) {
-  case NGHTTP2_DATA:
-    /* If !body started on this stream, then receiving DATA is illegal. */
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] recv frame DATA", stream_id));
-    if(!stream->bodystarted) {
-      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                     stream_id, NGHTTP2_PROTOCOL_ERROR);
-
-      if(nghttp2_is_fatal(rv)) {
-        return NGHTTP2_ERR_CALLBACK_FAILURE;
-      }
-    }
-    if(frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
-      /* Stream has ended. If there is pending data, ensure that read
-         will occur to consume it. */
-      if(!data->state.drain && !Curl_bufq_is_empty(&stream->recvbuf)) {
-        drain_this(cf, data_s);
-        Curl_expire(data, 0, EXPIRE_RUN_NOW);
-      }
-    }
-    break;
-  case NGHTTP2_HEADERS:
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] recv frame HEADERS", stream_id));
-    if(stream->bodystarted) {
-      /* Only valid HEADERS after body started is trailer HEADERS.  We
-         buffer them in on_header callback. */
-      break;
-    }
-
-    /* nghttp2 guarantees that :status is received, and we store it to
-       stream->status_code. Fuzzing has proven this can still be reached
-       without status code having been set. */
-    if(stream->status_code == -1)
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-
-    /* Only final status code signals the end of header */
-    if(stream->status_code / 100 != 1) {
-      stream->bodystarted = TRUE;
-      stream->status_code = -1;
-    }
-
-    result = recvbuf_write_hds(cf, data_s, STRCONST("\r\n"));
-    if(result)
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] %zu header bytes",
-                  stream_id, Curl_bufq_len(&stream->recvbuf)));
-    if(CF_DATA_CURRENT(cf) != data_s) {
-      drain_this(cf, data_s);
-      Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
-    }
-    break;
-  case NGHTTP2_PUSH_PROMISE:
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] recv PUSH_PROMISE", stream_id));
-    rv = push_promise(cf, data_s, &frame->push_promise);
-    if(rv) { /* deny! */
-      int h2;
-      DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
-      h2 = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                     frame->push_promise.promised_stream_id,
-                                     NGHTTP2_CANCEL);
-      if(nghttp2_is_fatal(h2))
-        return NGHTTP2_ERR_CALLBACK_FAILURE;
-      else if(rv == CURL_PUSH_ERROROUT) {
-        DEBUGF(LOG_CF(data_s, cf, "Fail the parent stream (too)"));
-        return NGHTTP2_ERR_CALLBACK_FAILURE;
-      }
-    }
-    break;
-  case NGHTTP2_RST_STREAM:
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] recv RST", stream_id));
-    stream->closed = TRUE;
-    stream->reset = TRUE;
-    drain_this(cf, data);
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
-    break;
-  case NGHTTP2_WINDOW_UPDATE:
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv WINDOW_UPDATE", stream_id));
-    if((data_s->req.keepon & KEEP_SEND_HOLD) &&
-       (data_s->req.keepon & KEEP_SEND)) {
-      data_s->req.keepon &= ~KEEP_SEND_HOLD;
-      drain_this(cf, data_s);
-      Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
-      DEBUGF(LOG_CF(data, cf, "[h2sid=%d] un-holding after win update",
-                    stream_id));
-    }
-    break;
-  default:
-    DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] recv frame %x",
-                  stream_id, frame->hd.type));
-    break;
-  }
-  return 0;
+  return on_stream_frame(cf, data_s, frame)? NGHTTP2_ERR_CALLBACK_FAILURE : 0;
 }
 
 static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
