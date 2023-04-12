@@ -79,14 +79,14 @@ jobs:
       name: 'install prereqs and impacket, pytest, crypto'
 
     - run: |
-        git clone --depth=1 -b openssl-3.0.8+quic https://github.com/quictls/openssl
+        git clone --quiet --depth=1 -b openssl-3.0.8+quic https://github.com/quictls/openssl
         cd openssl
         ./config --prefix=$HOME/all --libdir=$HOME/all/lib
         make install_sw
       name: 'install quictls'
 
     - run: |
-        git clone --depth=1 https://gitlab.com/gnutls/nettle.git
+        git clone --quiet --depth=1 https://gitlab.com/gnutls/nettle.git
         cd nettle
         ./.bootstrap
         ./configure LDFLAGS="-Wl,-rpath,$HOME/all/lib" ${{ matrix.build.nettle-configure }} --prefix=$HOME/all --libdir=$HOME/all/lib --disable-documentation
@@ -94,7 +94,7 @@ jobs:
       name: 'install nettle'
 
     - run: |
-        git clone --depth=1 -b 3.8.0 https://github.com/gnutls/gnutls.git
+        git clone --quiet --depth=1 -b 3.8.0 https://github.com/gnutls/gnutls.git
         cd gnutls
         ./bootstrap
         ./configure ${{ matrix.build.gnutls-configure }} --prefix=$HOME/all
@@ -102,7 +102,7 @@ jobs:
       name: 'install gnutls'
 
     - run: |
-        git clone --depth=1 -b v0.10.0 https://github.com/ngtcp2/nghttp3
+        git clone --quiet --depth=1 -b v0.10.0 https://github.com/ngtcp2/nghttp3
         cd nghttp3
         autoreconf -fi
         ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
@@ -110,7 +110,7 @@ jobs:
       name: 'install nghttp3'
 
     - run: |
-        git clone --depth=1 -b v0.13.1 https://github.com/ngtcp2/ngtcp2
+        git clone --quiet --depth=1 -b v0.13.1 https://github.com/ngtcp2/ngtcp2
         cd ngtcp2
         autoreconf -fi
         ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl --with-gnutls
@@ -118,7 +118,7 @@ jobs:
       name: 'install ngtcp2'
 
     - run: |
-        git clone --depth=1 -b v1.52.0 https://github.com/nghttp2/nghttp2
+        git clone --quiet --depth=1 -b v1.52.0 https://github.com/nghttp2/nghttp2
         cd nghttp2
         autoreconf -fi
         ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-http3
@@ -126,7 +126,7 @@ jobs:
       name: 'install nghttp2'
 
     - run: |
-        git clone --depth=1 -b master https://github.com/icing/mod_h2
+        git clone --quiet --depth=1 -b master https://github.com/icing/mod_h2
         cd mod_h2
         autoreconf -fi
         ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig"
