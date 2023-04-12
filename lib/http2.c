@@ -1099,7 +1099,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       if(data) {
         DEBUGF(LOG_CF(data, cf, "recv GOAWAY, error=%d, last_stream=%u",
                       ctx->goaway_error, ctx->last_stream_id));
-        infof(data, "recveived GOAWAY, error=%d, last_stream=%u",
+        infof(data, "received GOAWAY, error=%d, last_stream=%u",
                     ctx->goaway_error, ctx->last_stream_id);
         multi_connchanged(data->multi);
       }
