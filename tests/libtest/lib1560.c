@@ -698,6 +698,24 @@ static int checkurl(const char *org, const char *url, const char *out)
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static const struct setcase set_parts_list[] = {
   {"https://example.com/",
+   "host=http://fake,",
+   "",
+   0, /* get */
+   0, /* set */
+   CURLUE_OK, CURLUE_BAD_HOSTNAME},
+  {"https://example.com/",
+   "host=test%,",
+   "",
+   0, /* get */
+   0, /* set */
+   CURLUE_OK, CURLUE_BAD_HOSTNAME},
+  {"https://example.com/",
+   "host=te st,",
+   "",
+   0, /* get */
+   0, /* set */
+   CURLUE_OK, CURLUE_BAD_HOSTNAME},
+  {"https://example.com/",
    "host=0xff,", /* '++' there's no automatic URL decode when settin this
                   part */
    "https://0xff/",
@@ -712,6 +730,11 @@ static const struct setcase set_parts_list[] = {
    CURLU_URLENCODE, /* encode on set */
    CURLUE_OK, CURLUE_OK},
 
+  {"https://example.com/",
+   /* Set a bad scheme *including* :// */
+   "scheme=https://,",
+   "https://example.com/",
+   0, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK, CURLUE_BAD_SCHEME},
   {"https://example.com/",
    /* Set a 41 bytes scheme. That's too long so the old scheme remains set. */
    "scheme=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc,",

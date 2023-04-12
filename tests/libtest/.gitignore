@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: curl
 
-chkdecimalpoint
 chkhostname
 lib[1234][0-9][0-9][0-9]
 lib[56][0-9][0-9]

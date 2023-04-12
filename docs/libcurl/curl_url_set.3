@@ -58,6 +58,11 @@ This function call has no particular maximum length for any provided input
 string. In the real world, excessively long field in URLs will cause problems
 even if this API accepts them.
 
+When setting or updating contents of individual URL parts, this API might
+accept data that would not be otherwise possible to set in the string when it
+gets populated as a result of a full URL parse. Beware. If done so, extracting
+a full URL later on from such components might render an invalid URL.
+
 The \fIflags\fP argument is a bitmask with independent features.
 .SH PARTS
 .IP CURLUPART_URL

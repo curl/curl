@@ -82,7 +82,7 @@
 #define SIZEOF_INT             4
 #define SIZEOF_LONG            4
 #define SIZEOF_SIZE_T          4
-#define SIZEOF_CURL_OFF_T      4
+#define SIZEOF_CURL_OFF_T      8
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 

@@ -49,8 +49,8 @@
 #     interpreted incorrectly in Perl and Msys/Cygwin environment have low
 #     control on Win32 current drive and Win32 current path on specific drive.
 
-
 package pathhelp;
+
 use strict;
 use warnings;
 use Cwd 'abs_path';
@@ -58,19 +58,15 @@ use Cwd 'abs_path';
 BEGIN {
     use base qw(Exporter);
 
-    our @EXPORT = qw(
-      sys_native_abs_path
-      sys_native_path
-    );
-
     our @EXPORT_OK = qw(
-      build_sys_abs_path
-      sys_native_current_path
-      normalize_path
-      os_is_win
-      $use_cygpath
-      should_use_cygpath
-      drives_mounted_on_cygdrive
+        os_is_win
+        exe_ext
+        sys_native_abs_path
+        sys_native_current_path
+        build_sys_abs_path
+        normalize_path
+        should_use_cygpath
+        drives_mounted_on_cygdrive
     );
 }
 
@@ -100,21 +96,19 @@ BEGIN {
     }
 }
 
-our $use_cygpath;    # Only for Win32:
+my $use_cygpath;     # Only for Win32:
                      #  undef - autodetect
-                     #      1 - use cygpath
                      #      0 - do not use cygpath
+                     #      1 - use cygpath
 
 # Returns boolean true if 'cygpath' utility should be used for path conversion.
 sub should_use_cygpath {
-    if(!os_is_win()) {
-        $use_cygpath = 0;
-        return 0;
-    }
     return $use_cygpath if defined $use_cygpath;
-
-    $use_cygpath = (qx{cygpath -u '.\\' 2>/dev/null} eq "./\n" && $? == 0);
-
+    if(os_is_win()) {
+        $use_cygpath = (qx{cygpath -u '.\\' 2>/dev/null} eq "./\n" && $? == 0);
+    } else {
+        $use_cygpath = 0;
+    }
     return $use_cygpath;
 }
 
@@ -778,6 +772,23 @@ sub simple_transform_win32_to_unix {
 
     $path = '/cygdrive' . $path if(drives_mounted_on_cygdrive());
     return $path;
+}
+#
+#***************************************************************************
+# Return file extension for executable files on this operating system
+#
+sub exe_ext {
+    my ($component, @arr) = @_;
+    if ($ENV{'CURL_TEST_EXE_EXT'}) {
+        return $ENV{'CURL_TEST_EXE_EXT'};
+    }
+    if ($ENV{'CURL_TEST_EXE_EXT_'.$component}) {
+        return $ENV{'CURL_TEST_EXE_EXT_'.$component};
+    }
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
+        $^O eq 'dos' || $^O eq 'os2') {
+        return '.exe';
+    }
 }
 
 1;    # End of module

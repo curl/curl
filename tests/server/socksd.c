@@ -1017,8 +1017,8 @@ int main(int argc, char *argv[])
         unix_socket = argv[arg];
         if(strlen(unix_socket) >= sizeof(sau.sun_path)) {
           fprintf(stderr,
-                  "socksd: socket path must be shorter than %zu chars\n",
-              sizeof(sau.sun_path));
+                  "socksd: socket path must be shorter than %zu chars: %s\n",
+              sizeof(sau.sun_path), unix_socket);
           return 0;
         }
         socket_domain = AF_UNIX;

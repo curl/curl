@@ -38,8 +38,6 @@
  */
 void Curl_http2_ver(char *p, size_t len);
 
-const char *Curl_http2_strerror(uint32_t err);
-
 CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
                                     struct Curl_easy *data);
 

@@ -22,51 +22,76 @@
 #
 #***************************************************************************
 
+# This perl module contains functions useful in writing test servers.
+
 package serverhelp;
 
 use strict;
 use warnings;
 
-#***************************************************************************
-# Global symbols allowed without explicit package name
-#
-use vars qw(
-    @EXPORT_OK
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT_OK = qw(
+        logmsg
+        $logfile
+        serverfactors
+        servername_id
+        servername_str
+        servername_canon
+        server_pidfilename
+        server_portfilename
+        server_logfilename
+        server_cmdfilename
+        server_inputfilename
+        server_outputfilename
+        mainsockf_pidfilename
+        mainsockf_logfilename
+        datasockf_pidfilename
+        datasockf_logfilename
     );
 
+    # sub second timestamping needs Time::HiRes
+    eval {
+        no warnings "all";
+        require Time::HiRes;
+        import  Time::HiRes qw( gettimeofday );
+    }
+}
 
-#***************************************************************************
-# Inherit Exporter's capabilities
-#
-use base qw(Exporter);
 
-
-#***************************************************************************
-# Global symbols this module will export upon request
-#
-@EXPORT_OK = qw(
-    serverfactors
-    servername_id
-    servername_str
-    servername_canon
-    server_pidfilename
-    server_portfilename
-    server_logfilename
-    server_cmdfilename
-    server_inputfilename
-    server_outputfilename
-    mainsockf_pidfilename
-    mainsockf_logfilename
-    datasockf_pidfilename
-    datasockf_logfilename
-    );
-
+our $logfile;  # server log file name, for logmsg
 
 #***************************************************************************
 # Just for convenience, test harness uses 'https' and 'httptls' literals as
 # values for 'proto' variable in order to differentiate different servers.
 # 'https' literal is used for stunnel based https test servers, and 'httptls'
 # is used for non-stunnel https test servers.
+
+#**********************************************************************
+# logmsg is general message logging subroutine for our test servers.
+#
+sub logmsg {
+    my $now;
+    # sub second timestamping needs Time::HiRes
+    if($Time::HiRes::VERSION) {
+        my ($seconds, $usec) = gettimeofday();
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+            localtime($seconds);
+        $now = sprintf("%02d:%02d:%02d.%06d ", $hour, $min, $sec, $usec);
+    }
+    else {
+        my $seconds = time();
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+            localtime($seconds);
+        $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
+    }
+    if(open(my $logfilefh, ">>", "$logfile")) {
+        print $logfilefh $now;
+        print $logfilefh @_;
+        close($logfilefh);
+    }
+}
 
 
 #***************************************************************************
