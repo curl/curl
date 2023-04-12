@@ -81,6 +81,7 @@ connecting & proxies:
 - all: ['docs/libcurl/opts/CURLOPT_SOCKS*']
 - all: ['docs/libcurl/opts/CURLOPT_TCP*']
 - all: ['docs/libcurl/opts/CURLOPT_TIMEOUT*']
+- all: ['lib/cf-*proxy.*']
 - all: ['lib/cf-socket.*']
 - all: ['lib/cfilters.*']
 - all: ['lib/conncache.*']
@@ -164,7 +165,7 @@ HTTP:
 - all: ['tests/http-server.pl']
 - all: ['tests/http/*']
 - all: ['tests/nghttp*']
-- all: ['tests/tests-http/*']
+- all: ['tests/tests-httpd/*']
 
 HTTP/2:
 - all: ['docs/HTTP2.md']
@@ -297,4 +298,5 @@ Windows:
 - all: ['lib/vtls/schannel*']
 - all: ['m4/curl-schannel.m4']
 - all: ['projects/**']
+- all: ['src/tool_doswin.c']
 - all: ['winbuild/**']
