@@ -1269,7 +1269,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
 
   c->newsession = newsession; /* new session? */
 
-  if(fp && data) {
+  if(fp) {
     char *lineptr;
     bool headerline;
 
