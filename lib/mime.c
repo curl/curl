@@ -750,7 +750,6 @@ static void mime_file_free(void *ptr)
     part->fp = NULL;
   }
   Curl_safefree(part->data);
-  part->data = NULL;
 }
 
 
@@ -1341,7 +1340,6 @@ CURLcode curl_mime_name(curl_mimepart *part, const char *name)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   Curl_safefree(part->name);
-  part->name = NULL;
 
   if(name) {
     part->name = strdup(name);
@@ -1359,7 +1357,6 @@ CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   Curl_safefree(part->filename);
-  part->filename = NULL;
 
   if(filename) {
     part->filename = strdup(filename);
@@ -1459,7 +1456,6 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   Curl_safefree(part->mimetype);
-  part->mimetype = NULL;
 
   if(mimetype) {
     part->mimetype = strdup(mimetype);
