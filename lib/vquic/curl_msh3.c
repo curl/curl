@@ -288,6 +288,9 @@ static CURLcode write_resp_raw(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   ssize_t nwritten;
 
+  if(!stream)
+    return CURLE_RECV_ERROR;
+
   nwritten = Curl_bufq_write(&stream->recvbuf, mem, memlen, &result);
   if(nwritten < 0) {
     return result;
@@ -311,7 +314,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
   CURLcode result;
   (void)Request;
 
-  if(stream->recv_header_complete) {
+  if(!stream || stream->recv_header_complete) {
     return;
   }
 
@@ -366,6 +369,9 @@ static bool MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
    * length (buflen is an inout parameter).
    */
   (void)Request;
+  if(!stream)
+    return FALSE;
+
   msh3_lock_acquire(&stream->recv_lock);
 
   if(!stream->recv_header_complete) {
@@ -395,6 +401,8 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
   struct stream_ctx *stream = H3_STREAM_CTX(data);
 
   (void)Request;
+  if(!stream)
+    return;
   msh3_lock_acquire(&stream->recv_lock);
   stream->closed = TRUE;
   stream->recv_header_complete = true;
@@ -410,6 +418,9 @@ static void MSH3_CALL msh3_shutdown_complete(MSH3_REQUEST *Request,
 {
   struct Curl_easy *data = IfContext;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
+
+  if(!stream)
+    return;
   (void)Request;
   (void)stream;
 }
@@ -419,6 +430,8 @@ static void MSH3_CALL msh3_data_sent(MSH3_REQUEST *Request,
 {
   struct Curl_easy *data = IfContext;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
+  if(!stream)
+    return;
   (void)Request;
   (void)stream;
   (void)SendContext;
@@ -431,6 +444,10 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   struct stream_ctx *stream = H3_STREAM_CTX(data);
   ssize_t nread = -1;
 
+  if(!stream) {
+    *err = CURLE_RECV_ERROR;
+    return -1;
+  }
   (void)cf;
   if(stream->reset) {
     failf(data, "HTTP/3 stream reset by server");
@@ -480,6 +497,10 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_call_data save;
 
   (void)cf;
+  if(!stream) {
+    *err = CURLE_RECV_ERROR;
+    return -1;
+  }
   CF_DATA_SAVE(save, cf, data);
   DEBUGF(LOG_CF(data, cf, "req: recv with %zu byte buffer", len));
 
@@ -535,6 +556,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   CF_DATA_SAVE(save, cf, data);
 
   /* Sizes must match for cast below to work" */
+  DEBUGASSERT(stream);
   DEBUGASSERT(sizeof(MSH3_HEADER) == sizeof(struct h2h3pseudo));
   DEBUGF(LOG_CF(data, cf, "req: send %zu bytes", len));
 
@@ -628,7 +650,7 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
 
   (void)cf;
-  if(stream->req) {
+  if(stream && stream->req) {
     msh3_lock_acquire(&stream->recv_lock);
     DEBUGF(LOG_CF((struct Curl_easy *)data, cf, "data pending = %zu",
                   Curl_bufq_len(&stream->recvbuf)));
@@ -678,11 +700,14 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
     break;
   case CF_CTRL_DATA_DONE_SEND:
     DEBUGF(LOG_CF(data, cf, "req: send done"));
-    stream->upload_done = TRUE;
-    if(stream && stream->req) {
-      char buf[1];
-      if(!MsH3RequestSend(stream->req, MSH3_REQUEST_FLAG_FIN, buf, 0, data)) {
-        result = CURLE_SEND_ERROR;
+    if(stream) {
+      stream->upload_done = TRUE;
+      if(stream->req) {
+        char buf[1];
+        if(!MsH3RequestSend(stream->req, MSH3_REQUEST_FLAG_FIN,
+                            buf, 0, data)) {
+          result = CURLE_SEND_ERROR;
+        }
       }
     }
     break;
