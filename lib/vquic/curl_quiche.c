@@ -1055,12 +1055,13 @@ static bool stream_is_writeable(struct Curl_cfilter *cf,
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
+  quiche_stream_iter *qiter;
   bool is_writable = FALSE;
 
   if(!stream)
     return FALSE;
   /* surely, there must be a better way */
-  quiche_stream_iter *qiter = quiche_conn_writable(ctx->qconn);
+  qiter = quiche_conn_writable(ctx->qconn);
   if(qiter) {
     uint64_t stream_id;
     while(quiche_stream_iter_next(qiter, &stream_id)) {
