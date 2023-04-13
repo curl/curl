@@ -1605,10 +1605,6 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
     result = cf_socket_open(cf, data);
     if(result) {
       DEBUGF(LOG_CF(data, cf, "cf_udp_connect(), open failed -> %d", result));
-      if(ctx->sock != CURL_SOCKET_BAD) {
-        socket_close(data, cf->conn, TRUE, ctx->sock);
-        ctx->sock = CURL_SOCKET_BAD;
-      }
       goto out;
     }
 
