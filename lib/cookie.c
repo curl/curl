@@ -515,8 +515,6 @@ Curl_cookie_add(struct Curl_easy *data,
 
   if(httpheader) {
     /* This line was read off an HTTP-header */
-    const char *namep;
-    const char *valuep;
     const char *ptr;
 
     size_t linelength = strlen(lineptr);
@@ -539,8 +537,9 @@ Curl_cookie_add(struct Curl_easy *data,
       if(nlen) {
         bool done = FALSE;
         bool sep = FALSE;
+        const char *namep = ptr;
+        const char *valuep;
 
-        namep = ptr;
         ptr += nlen;
 
         /* trim trailing spaces and tabs after name */
