@@ -152,8 +152,8 @@ run-time when curl starts up.
 ## configure finding libs in wrong directory
 
 When the configure script checks for third-party libraries, it adds those
-directories to the LDFLAGS variable and then tries linking to see if it
-works. When successful, the found directory is kept in the LDFLAGS variable
+directories to the `LDFLAGS` variable and then tries linking to see if it
+works. When successful, the found directory is kept in the `LDFLAGS` variable
 when the script continues to execute and do more tests and possibly check for
 more libraries.
 
