@@ -78,7 +78,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.5 Connection information when using TCP Fast Open
  11.7 signal-based resolver timeouts
  11.10 Blocking socket operations in non-blocking API
- 11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
  11.16 libcurl uses renames instead of locking for atomic operations
 
  12. LDAP
@@ -477,15 +476,6 @@ problems may have been fixed or changed somewhat since this was written.
 11.10 Blocking socket operations in non-blocking API
 
  The list of blocking socket operations is in TODO section "More non-blocking".
-
-11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
-
- When libcurl creates sockets with socketpair(), those are not "exposed" in
- CURLOPT_OPENSOCKETFUNCTION and therefore might surprise and be unknown to
- applications that expect and want all sockets known beforehand. One way to
- address this issue is to introduce a CURLOPT_OPENSOCKETPAIRFUNCTION callback.
-
- https://github.com/curl/curl/issues/5747
 
 11.16 libcurl uses renames instead of locking for atomic operations
 
