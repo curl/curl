@@ -524,22 +524,20 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
       }
     }
 
-    if(len) {
-      /* Add whatever is remaining now to bufq */
-      n = Curl_bufq_write(q, buf, len, err);
-      if(n < 0) {
-        if(*err != CURLE_AGAIN) {
-          /* real error, fail */
-          return -1;
-        }
-        /* no room in bufq, bail out */
-        goto out;
+    /* Add whatever is remaining now to bufq */
+    n = Curl_bufq_write(q, buf, len, err);
+    if(n < 0) {
+      if(*err != CURLE_AGAIN) {
+        /* real error, fail */
+        return -1;
       }
-      /* Maybe only part of `data` has been added, continue to loop */
-      buf += (size_t)n;
-      len -= (size_t)n;
-      nwritten += (size_t)n;
+      /* no room in bufq, bail out */
+      goto out;
     }
+    /* Maybe only part of `data` has been added, continue to loop */
+    buf += (size_t)n;
+    len -= (size_t)n;
+    nwritten += (size_t)n;
   }
 
 out:
