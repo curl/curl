@@ -23,7 +23,6 @@ problems may have been fixed or changed somewhat since this was written.
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
- 2.15 Renegotiate from server may cause hang for OpenSSL backend
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -173,17 +172,6 @@ problems may have been fixed or changed somewhat since this was written.
 2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
 
  https://github.com/curl/curl/issues/8741
-
-2.15 Renegotiate from server may cause hang for OpenSSL backend
-
- A race condition has been observed when, immediately after the initial
- handshake, curl has sent an HTTP request to the server and at the same time
- the server has sent a TLS hello request (renegotiate) to curl. Both are
- waiting for the other to respond. OpenSSL is supposed to send a handshake
- response but does not.
-
- https://github.com/curl/curl/issues/6785
- https://github.com/openssl/openssl/issues/14722
 
 3. Email protocols
 
