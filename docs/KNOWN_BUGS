@@ -78,7 +78,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.5 Connection information when using TCP Fast Open
  11.7 signal-based resolver timeouts
  11.10 Blocking socket operations in non-blocking API
- 11.11 A shared connection cache is not thread-safe
  11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
  11.16 libcurl uses renames instead of locking for atomic operations
 
@@ -478,14 +477,6 @@ problems may have been fixed or changed somewhat since this was written.
 11.10 Blocking socket operations in non-blocking API
 
  The list of blocking socket operations is in TODO section "More non-blocking".
-
-11.11 A shared connection cache is not thread-safe
-
- The share interface offers CURL_LOCK_DATA_CONNECT to have multiple easy
- handle share a connection cache, but due to how connections are used they are
- still not thread-safe when used shared.
-
- See https://github.com/curl/curl/issues/4915 and lib1541.c
 
 11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
 
