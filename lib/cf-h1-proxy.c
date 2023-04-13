@@ -215,7 +215,6 @@ static void tunnel_go_state(struct Curl_cfilter *cf,
        make sure that it isn't accidentally used for the document request
        after we've connected. So let's free and clear it here. */
     Curl_safefree(data->state.aptr.proxyuserpwd);
-    data->state.aptr.proxyuserpwd = NULL;
 #ifdef USE_HYPER
     data->state.hconnect = FALSE;
 #endif
@@ -1043,8 +1042,7 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
   DEBUGASSERT(ts->tunnel_state == TUNNEL_RESPONSE);
   if(data->info.httpproxycode/100 != 2) {
     /* a non-2xx response and we have no next url to try. */
-    free(data->req.newurl);
-    data->req.newurl = NULL;
+    Curl_safefree(data->req.newurl);
     /* failure, close this connection to avoid re-use */
     streamclose(conn, "proxy CONNECT failure");
     tunnel_go_state(cf, ts, TUNNEL_FAILED, data);
