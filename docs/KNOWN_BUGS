@@ -77,7 +77,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.7 signal-based resolver timeouts
- 11.10 Blocking socket operations in non-blocking API
  11.16 libcurl uses renames instead of locking for atomic operations
 
  12. LDAP
@@ -472,10 +471,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  Also, alarm() provides timeout resolution only to the nearest second. alarm
  ought to be replaced by setitimer on systems that support it.
-
-11.10 Blocking socket operations in non-blocking API
-
- The list of blocking socket operations is in TODO section "More non-blocking".
 
 11.16 libcurl uses renames instead of locking for atomic operations
 
