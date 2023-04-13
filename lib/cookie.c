@@ -1432,7 +1432,7 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
       /* now check if the domain is correct */
       if(!co->domain ||
          (co->tailmatch && !is_ip &&
-          tailmatch(co->domain, co->domain? strlen(co->domain):0, host)) ||
+          tailmatch(co->domain, strlen(co->domain), host)) ||
          ((!co->tailmatch || is_ip) && strcasecompare(host, co->domain)) ) {
         /*
          * the right part of the host matches the domain stuff in the
