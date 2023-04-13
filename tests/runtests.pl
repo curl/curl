@@ -348,7 +348,7 @@ sub runclientoutput {
 #    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
 #    sleep 2;    # time to allow the NFS server to be updated
 #    return @out;
- }
+}
 
 #######################################################################
 # Memory allocation test and failure torture testing.
@@ -2001,11 +2001,10 @@ sub singletest_clean {
     return 0;
 }
 
-
 #######################################################################
-# Verify test succeeded
-sub singletest_check {
-    my ($testnum, $cmdres, $CURLOUT, $tool, $disablevalgrind)=@_;
+# Verify that the postcheck succeeded
+sub singletest_postcheck {
+    my ($testnum)=@_;
 
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
@@ -2025,9 +2024,13 @@ sub singletest_check {
             }
         }
     }
+    return 0;
+}
 
-    # restore environment variables that were modified
-    restore_test_env(0);
+#######################################################################
+# Verify test succeeded
+sub singletest_check {
+    my ($testnum, $cmdres, $CURLOUT, $tool, $disablevalgrind)=@_;
 
     # Skip all the verification on torture tests
     if ($torture) {
@@ -2647,6 +2650,19 @@ sub singletest {
         return $error;
     }
 
+    #######################################################################
+    # Verify that the postcheck succeeded
+    $error = singletest_postcheck($testnum);
+    if($error == -1) {
+      # return a test failure, either to be reported or to be ignored
+      return $errorreturncode;
+    }
+
+
+    #######################################################################
+    # restore environment variables that were modified
+    restore_test_env(0);
+
 
     #######################################################################
     # Verify that the test succeeded
@@ -2660,6 +2676,7 @@ sub singletest {
       # test success code
       return $cmdres;
     }
+
 
     #######################################################################
     # Report a successful test
