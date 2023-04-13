@@ -20,7 +20,6 @@ problems may have been fixed or changed somewhat since this was written.
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
- 2.9 TLS session cache does not work with TFO
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
@@ -156,10 +155,6 @@ problems may have been fixed or changed somewhat since this was written.
  This seems to be a limitation in the underlying Schannel API.
 
  https://github.com/curl/curl/issues/3284
-
-2.9 TLS session cache does not work with TFO
-
- See https://github.com/curl/curl/issues/4301
 
 2.11 Schannel TLS 1.2 handshake bug in old Windows versions
 
