@@ -1120,17 +1120,11 @@ Curl_cookie_add(struct Curl_easy *data,
       if(replace_old) {
         /* the domains were identical */
 
-        if(clist->spath && co->spath) {
-          if(strcasecompare(clist->spath, co->spath))
-            replace_old = TRUE;
-          else
-            replace_old = FALSE;
-        }
-        else if(!clist->spath && !co->spath)
-          replace_old = TRUE;
-        else
+        if(clist->spath && co->spath &&
+           !strcasecompare(clist->spath, co->spath))
           replace_old = FALSE;
-
+        else if(!clist->spath != !co->spath)
+          replace_old = FALSE;
       }
 
       if(replace_old && !co->livecookie && clist->livecookie) {
