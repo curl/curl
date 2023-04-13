@@ -541,7 +541,6 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     if(rest[0])
       return CURLUE_BAD_PORT_NUMBER;
 
-    *rest = 0;
     u->portnum = port;
     /* generate a new port number string to get rid of leading zeroes etc */
     u->port = aprintf("%ld", port);
