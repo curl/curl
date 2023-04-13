@@ -376,7 +376,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(Curl_checkheaders(data, STRCONST("User-Agent")) &&
      data->state.aptr.uagent) {
     Curl_safefree(data->state.aptr.uagent);
-    data->state.aptr.uagent = NULL;
   }
   else if(!Curl_checkheaders(data, STRCONST("User-Agent")) &&
           data->set.str[STRING_USERAGENT]) {
@@ -396,8 +395,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   Curl_safefree(data->state.aptr.ref);
   if(data->state.referer && !Curl_checkheaders(data, STRCONST("Referer")))
     data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
-  else
-    data->state.aptr.ref = NULL;
 
   p_referrer = data->state.aptr.ref;
 
@@ -478,7 +475,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * with basic and digest, it will be freed anyway by the next request
    */
   Curl_safefree(data->state.aptr.userpwd);
-  data->state.aptr.userpwd = NULL;
 
   if(result)
     return result;
