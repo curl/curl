@@ -439,7 +439,6 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
   ssize_t nread;
-  bool keep_reading = TRUE;
 
   /* Process network input buffer fist */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
@@ -451,8 +450,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
 
   /* Receive data from the "lower" filters, e.g. network until
    * it is time to stop or we have enough data for this stream */
-  while(keep_reading &&
-        !ctx->conn_closed &&               /* not closed the connection */
+  while(!ctx->conn_closed &&               /* not closed the connection */
         !ctx->tunnel.closed &&             /* nor the tunnel */
         Curl_bufq_is_empty(&ctx->inbufq) && /* and we consumed our input */
         !Curl_bufq_is_full(&ctx->tunnel.recvbuf)) {
@@ -472,7 +470,6 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
 
-    keep_reading = Curl_bufq_is_full(&ctx->inbufq);
     if(h2_process_pending_input(cf, data, &result))
       return result;
   }
