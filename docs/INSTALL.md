@@ -158,7 +158,7 @@ when the script continues to execute and do more tests and possibly check for
 more libraries.
 
 This can make subsequent checks for libraries wrongly detect another
-installation in a directory that was previously added to LDFLAGS by another
+installation in a directory that was previously added to `LDFLAGS` by another
 library check.
 
 # Windows
