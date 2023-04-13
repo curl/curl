@@ -2163,6 +2163,7 @@ CURLcode Curl_http_useragent(struct Curl_easy *data)
 CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
 {
   const char *ptr;
+  struct dynamically_allocated_data *aptr = &data->state.aptr;
   if(!data->state.this_is_a_follow) {
     /* Free to avoid leaking memory on multiple requests */
     free(data->state.first_host);
@@ -2174,7 +2175,7 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
     data->state.first_remote_port = conn->remote_port;
     data->state.first_remote_protocol = conn->handler->protocol;
   }
-  Curl_safefree(data->state.aptr.host);
+  Curl_safefree(aptr->host);
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
@@ -2209,19 +2210,16 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
         if(colon)
           *colon = 0; /* The host must not include an embedded port number */
       }
-      Curl_safefree(data->state.aptr.cookiehost);
-      data->state.aptr.cookiehost = cookiehost;
+      Curl_safefree(aptr->cookiehost);
+      aptr->cookiehost = cookiehost;
     }
 #endif
 
     if(strcmp("Host:", ptr)) {
-      data->state.aptr.host = aprintf("Host:%s\r\n", &ptr[5]);
-      if(!data->state.aptr.host)
+      aptr->host = aprintf("Host:%s\r\n", &ptr[5]);
+      if(!aptr->host)
         return CURLE_OUT_OF_MEMORY;
     }
-    else
-      /* when clearing the header */
-      data->state.aptr.host = NULL;
   }
   else {
     /* When building Host: headers, we must put the host name within
@@ -2234,18 +2232,14 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
         (conn->remote_port == PORT_HTTP)) )
       /* if(HTTPS on port 443) OR (HTTP on port 80) then don't include
          the port number in the host string */
-      data->state.aptr.host = aprintf("Host: %s%s%s\r\n",
-                                    conn->bits.ipv6_ip?"[":"",
-                                    host,
-                                    conn->bits.ipv6_ip?"]":"");
+      aptr->host = aprintf("Host: %s%s%s\r\n", conn->bits.ipv6_ip?"[":"",
+                           host, conn->bits.ipv6_ip?"]":"");
     else
-      data->state.aptr.host = aprintf("Host: %s%s%s:%d\r\n",
-                                    conn->bits.ipv6_ip?"[":"",
-                                    host,
-                                    conn->bits.ipv6_ip?"]":"",
-                                    conn->remote_port);
+      aptr->host = aprintf("Host: %s%s%s:%d\r\n", conn->bits.ipv6_ip?"[":"",
+                           host, conn->bits.ipv6_ip?"]":"",
+                           conn->remote_port);
 
-    if(!data->state.aptr.host)
+    if(!aptr->host)
       /* without Host: we can't make a nice request */
       return CURLE_OUT_OF_MEMORY;
   }
