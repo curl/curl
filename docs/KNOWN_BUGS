@@ -37,7 +37,6 @@ problems may have been fixed or changed somewhat since this was written.
  5.2 curl-config --libs contains private details
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
- 5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky CI builds
@@ -233,23 +232,6 @@ problems may have been fixed or changed somewhat since this was written.
   https://curl.se/bug/?i=345
   https://curl.se/bug/?i=731
   https://curl.se/bug/?i=3747
-
-5.8 configure finding libs in wrong directory
-
- When the configure script checks for third-party libraries, it adds those
- directories to the LDFLAGS variable and then tries linking to see if it
- works. When successful, the found directory is kept in the LDFLAGS variable
- when the script continues to execute and do more tests and possibly check for
- more libraries.
-
- This can make subsequent checks for libraries wrongly detect another
- installation in a directory that was previously added to LDFLAGS by another
- library check.
-
- A possibly better way to do these checks would be to keep the pristine LDFLAGS
- even after successful checks and instead add those verified paths to a
- separate variable that only after all library checks have been performed gets
- appended to LDFLAGS.
 
 5.9 Utilize Requires.private directives in libcurl.pc
 
