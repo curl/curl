@@ -117,10 +117,7 @@ problems may have been fixed or changed somewhat since this was written.
  17.3 ENHANCE_YOUR_CALM causes infinite retries
 
  18. HTTP/3
- 18.1 If the HTTP/3 server closes connection during upload curl hangs
- 18.2 Transfer closed with n bytes remaining to read
- 18.4 timeout when reusing an http3 connection
- 18.9 connection migration does not work
+ 18.1 connection migration does not work
 
 ==============================================================================
 
@@ -718,23 +715,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 18. HTTP/3
 
-18.1 If the HTTP/3 server closes connection during upload curl hangs
-
- See https://github.com/curl/curl/issues/6606
-
-18.2 Transfer closed with n bytes remaining to read
-
- HTTP/3 transfers with the Jetty HTTP/3 server seem to not work.
-
- https://github.com/curl/curl/issues/8523
-
-18.4 timeout when reusing an http3 connection
-
- HTTP/3 with quiche seems to not work and always timeout a subsequent transfer
- that reuses an already established connection
-
- https://github.com/curl/curl/issues/8764
-
-18.9 connection migration does not work
+18.1 connection migration does not work
 
  https://github.com/curl/curl/issues/7695
