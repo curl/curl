@@ -330,7 +330,6 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter)
     struct Curl_hash_element *he = iter->current_element->ptr;
     return he;
   }
-  iter->current_element = NULL;
   return NULL;
 }
 
