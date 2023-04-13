@@ -688,6 +688,8 @@ static void report_consumed_data(struct Curl_cfilter *cf,
   struct stream_ctx *stream = H3_STREAM_CTX(data);
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
 
+  if(!stream)
+    return;
   /* the HTTP/1.1 response headers are written to the buffer, but
    * consuming those does not count against flow control. */
   if(stream->recv_buf_nonflow) {
@@ -984,7 +986,7 @@ static int cf_ngtcp2_get_select_socks(struct Curl_cfilter *cf,
   if((k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
      ngtcp2_conn_get_cwnd_left(ctx->qconn) &&
      ngtcp2_conn_get_max_data_left(ctx->qconn) &&
-     nghttp3_conn_is_stream_writable(ctx->h3conn, stream->id))
+     stream && nghttp3_conn_is_stream_writable(ctx->h3conn, stream->id))
     rv |= GETSOCK_WRITESOCK(0);
 
   DEBUGF(LOG_CF(data, cf, "get_select_socks -> %x (sock=%d)",
@@ -1015,6 +1017,10 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   (void)app_error_code;
   (void)cf;
 
+  /* we might be called by nghttp3 after we already cleaned up */
+  if(!stream)
+    return 0;
+
   DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] h3 close(err=%" PRId64 ")",
                 stream_id, app_error_code));
   stream->closed = TRUE;
@@ -1041,6 +1047,9 @@ static CURLcode write_resp_raw(struct Curl_cfilter *cf,
   ssize_t nwritten;
 
   (void)cf;
+  if(!stream) {
+    return CURLE_RECV_ERROR;
+  }
   nwritten = Curl_bufq_write(&stream->recvbuf, mem, memlen, &result);
   /* DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] add recvbuf(len=%zu) "
                 "-> %zd, %d", stream->id, memlen, nwritten, result));
@@ -1107,6 +1116,8 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
   (void)fin;
   (void)cf;
 
+  if(!stream)
+    return 0;
   /* add a CRLF only if we've received some headers */
   result = write_resp_raw(cf, data, "\r\n", 2, FALSE);
   if(result) {
@@ -1140,6 +1151,10 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   (void)token;
   (void)flags;
   (void)cf;
+
+  /* we might have cleaned up this transfer already */
+  if(!stream)
+    return 0;
 
   if(token == NGHTTP3_QPACK_TOKEN__STATUS) {
     char line[14]; /* status line is always 13 characters long */
@@ -1306,7 +1321,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   ssize_t nread = -1;
 
   (void)cf;
-
+  DEBUGASSERT(stream);
   if(stream->reset) {
     failf(data,
           "HTTP/3 stream %" PRId64 " reset by server", stream->id);
@@ -1365,6 +1380,11 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(ctx->h3conn);
   *err = CURLE_OK;
 
+  if(!stream) {
+    *err = CURLE_RECV_ERROR;
+    goto out;
+  }
+
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
     nread = Curl_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
@@ -1414,7 +1434,7 @@ out:
     goto out;
   }
   DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] cf_recv(len=%zu) -> %zd, %d",
-                stream->id, len, nread, *err));
+                stream? stream->id : -1, len, nread, *err));
   CF_DATA_RESTORE(cf, save);
   return nread;
 }
@@ -1428,6 +1448,8 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   struct stream_ctx *stream = H3_STREAM_CTX(data);
 
   (void)cf;
+  if(!stream)
+    return 0;
   /* The server ackknowledged `datalen` of bytes from our request body.
    * This is a delta. We have kept this data in `sendbuf` for
    * re-transmissions and can free it now. */
@@ -1471,6 +1493,8 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   (void)user_data;
   (void)veccnt;
 
+  if(!stream)
+    return NGHTTP3_ERR_CALLBACK_FAILURE;
   /* nghttp3 keeps references to the sendbuf data until it is ACKed
    * by the server (see `cb_h3_acked_req_body()` for updates).
    * `sendbuf_len_in_flight` is the amount of bytes in `sendbuf`
@@ -2065,7 +2089,7 @@ static bool cf_ngtcp2_data_pending(struct Curl_cfilter *cf,
 {
   const struct stream_ctx *stream = H3_STREAM_CTX(data);
   (void)cf;
-  return !Curl_bufq_is_empty(&stream->recvbuf);
+  return stream && !Curl_bufq_is_empty(&stream->recvbuf);
 }
 
 static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
@@ -2088,8 +2112,10 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
   }
   case CF_CTRL_DATA_DONE_SEND: {
     struct stream_ctx *stream = H3_STREAM_CTX(data);
-    stream->upload_done = TRUE;
-    (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
+    if(stream) {
+      stream->upload_done = TRUE;
+      (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
+    }
     break;
   }
   case CF_CTRL_DATA_IDLE:
