@@ -1420,9 +1420,9 @@ sub singletest_shouldrun {
         }
     }
 
-    my @info_keywords = getpart("info", "keywords");
+    my @info_keywords;
     if(!$why) {
-        my $match;
+        @info_keywords = getpart("info", "keywords");
 
         # Clear the list of keywords from the last test
         %keywords = ();
@@ -1431,6 +1431,7 @@ sub singletest_shouldrun {
             $why = "missing the <keywords> section!";
         }
 
+        my $match;
         for my $k (@info_keywords) {
             chomp $k;
             if ($disabled_keywords{lc($k)}) {
@@ -1483,7 +1484,7 @@ sub singletest_shouldrun {
 #######################################################################
 # Start the servers needed to run this test case
 sub singletest_startservers {
-    my ($testnum, $why) = @_;
+    my ($testnum) = @_;
 
     # remove test server commands file before servers are started/verified
     unlink($FTPDCMD) if(-f $FTPDCMD);
@@ -1491,7 +1492,8 @@ sub singletest_startservers {
     # timestamp required servers verification start
     $timesrvrini{$testnum} = Time::HiRes::time();
 
-    if (!$why && !$listonly) {
+    my $why;
+    if (!$listonly) {
         my @what = getpart("client", "server");
         if(!$what[0]) {
             warn "Test case $testnum has no server(s) specified";
@@ -1636,7 +1638,7 @@ sub singletest_count {
         }
 
         timestampskippedevents($testnum);
-        return ("Skipped", -1);
+        return -1;
     }
 
     # At this point we've committed to run this test
@@ -1650,14 +1652,14 @@ sub singletest_count {
     if($listonly) {
         timestampskippedevents($testnum);
     }
-    return ("", 0);  # successful
+    return 0;
 }
 
 
 #######################################################################
 # Prepare the test environment to run this test case
 sub singletest_prepare {
-    my ($testnum, $why) = @_;
+    my ($testnum) = @_;
 
     if($feature{"TrackMemory"}) {
         unlink($memdump);
@@ -1679,7 +1681,7 @@ sub singletest_prepare {
             if(!$filename) {
                 logmsg "ERROR: section client=>file has no name attribute\n";
                 timestampskippedevents($testnum);
-                return ("Syntax error", -1);
+                return -1;
             }
             my $fileContent = join('', @inputfile);
 
@@ -1709,7 +1711,7 @@ sub singletest_prepare {
             }
         }
     }
-    return ($why, 0);
+    return 0;
 }
 
 
@@ -2582,7 +2584,7 @@ sub singletest {
     # Restore environment variables that were modified in a previous run.
     # Test definition may instruct to (un)set environment vars.
     # This is done this early so that leftover variables don't affect starting
-    # servers.
+    # servers or CI registration.
     restore_test_env(1);
 
 
@@ -2590,33 +2592,41 @@ sub singletest {
     # Register the test case with the CI environment
     citest_starttest($testnum);
 
+    if(!$why) {
 
-    #######################################################################
-    # Start the servers needed to run this test case
-    $why = singletest_startservers($testnum, $why);
+        ###################################################################
+        # Start the servers needed to run this test case
+        $why = singletest_startservers($testnum);
 
+        if(!$why) {
 
-    #######################################################################
-    # Generate preprocessed test file
-    singletest_preprocess($testnum);
-
-
-    #######################################################################
-    # Set up the test environment to run this test case
-    singletest_setenv();
+            ###############################################################
+            # Generate preprocessed test file
+            singletest_preprocess($testnum);
 
 
-    #######################################################################
-    # Check that the test environment is fine to run this test case
-    if (!$why && !$listonly) {
-        $why = singletest_precheck($testnum);
+            ###############################################################
+            # Set up the test environment to run this test case
+            singletest_setenv();
+
+
+            ###############################################################
+            # Check that the test environment is fine to run this test case
+            if (!$listonly) {
+                $why = singletest_precheck($testnum);
+            }
+        }
+    } else {
+
+        # set zero servers verification time when they aren't started
+        $timesrvrini{$testnum} = $timesrvrend{$testnum} = Time::HiRes::time();
     }
 
 
     #######################################################################
     # Print the test name and count tests
     my $error;
-    ($why, $error) = singletest_count($testnum, $why);
+    $error = singletest_count($testnum, $why);
     if($error || $listonly) {
         return $error;
     }
@@ -2624,7 +2634,7 @@ sub singletest {
 
     #######################################################################
     # Prepare the test environment to run this test case
-    ($why, $error) = singletest_prepare($testnum, $why);
+    $error = singletest_prepare($testnum);
     if($error) {
         return $error;
     }
