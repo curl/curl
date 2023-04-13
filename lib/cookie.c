@@ -515,8 +515,6 @@ Curl_cookie_add(struct Curl_easy *data,
 
   if(httpheader) {
     /* This line was read off an HTTP-header */
-    const char *namep;
-    const char *valuep;
     const char *ptr;
 
     size_t linelength = strlen(lineptr);
@@ -539,8 +537,9 @@ Curl_cookie_add(struct Curl_easy *data,
       if(nlen) {
         bool done = FALSE;
         bool sep = FALSE;
+        const char *namep = ptr;
+        const char *valuep;
 
-        namep = ptr;
         ptr += nlen;
 
         /* trim trailing spaces and tabs after name */
@@ -1120,17 +1119,11 @@ Curl_cookie_add(struct Curl_easy *data,
       if(replace_old) {
         /* the domains were identical */
 
-        if(clist->spath && co->spath) {
-          if(strcasecompare(clist->spath, co->spath))
-            replace_old = TRUE;
-          else
-            replace_old = FALSE;
-        }
-        else if(!clist->spath && !co->spath)
-          replace_old = TRUE;
-        else
+        if(clist->spath && co->spath &&
+           !strcasecompare(clist->spath, co->spath))
           replace_old = FALSE;
-
+        else if(!clist->spath != !co->spath)
+          replace_old = FALSE;
       }
 
       if(replace_old && !co->livecookie && clist->livecookie) {
@@ -1438,7 +1431,7 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
       /* now check if the domain is correct */
       if(!co->domain ||
          (co->tailmatch && !is_ip &&
-          tailmatch(co->domain, co->domain? strlen(co->domain):0, host)) ||
+          tailmatch(co->domain, strlen(co->domain), host)) ||
          ((!co->tailmatch || is_ip) && strcasecompare(host, co->domain)) ) {
         /*
          * the right part of the host matches the domain stuff in the
