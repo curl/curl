@@ -178,7 +178,7 @@ static CURLcode start_req(struct h1_req_parser *parser,
   m = parser->line;
   m_len = p - parser->line;
   target = p + 1;
-  target_len = 0;
+  target_len = hv_len = 0;
   hv = NULL;
 
   /* URL may contain spaces so scan backwards */
