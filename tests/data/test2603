@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+http1
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+http1 parser unit tests
+ </name>
+</client>
+</testcase>

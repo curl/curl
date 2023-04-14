@@ -112,13 +112,36 @@ UNITTEST_START
     Curl_dyn_init(&dbuf, 32*1024);
     fail_if(Curl_dynhds_h1_dprint(&hds, &dbuf), "h1 print failed");
     if(Curl_dyn_ptr(&dbuf)) {
-      fprintf(stderr, "%s", Curl_dyn_ptr(&dbuf));
       fail_if(strcmp(Curl_dyn_ptr(&dbuf),
                      "test1: 123\r\ntest1: 123\r\nBla-Bla: thingies\r\n"),
                      "h1 format differs");
     }
     Curl_dyn_free(&dbuf);
   }
+
+  Curl_dynhds_free(&hds);
+  Curl_dynhds_init(&hds, 128, 4*1024);
+  /* continuation without previous header fails */
+  result = Curl_dynhds_h1_cadd_line(&hds, " indented value");
+  fail_unless(result, "add should have failed");
+
+  /* continuation with previous header must succeed */
+  fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti1: val1"), "add");
+  fail_if(Curl_dynhds_h1_cadd_line(&hds, " val2"), "add indent");
+  fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti2: val1"), "add");
+  fail_if(Curl_dynhds_h1_cadd_line(&hds, "\tval2"), "add indent");
+  fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti3: val1"), "add");
+  fail_if(Curl_dynhds_h1_cadd_line(&hds, "     val2"), "add indent");
+
+  Curl_dyn_init(&dbuf, 32*1024);
+  fail_if(Curl_dynhds_h1_dprint(&hds, &dbuf), "h1 print failed");
+  if(Curl_dyn_ptr(&dbuf)) {
+    fprintf(stderr, "indent concat: %s\n", Curl_dyn_ptr(&dbuf));
+    fail_if(strcmp(Curl_dyn_ptr(&dbuf),
+                   "ti1: val1 val2\r\nti2: val1 val2\r\nti3: val1 val2\r\n"),
+                   "wrong format");
+  }
+  Curl_dyn_free(&dbuf);
 
   Curl_dynhds_free(&hds);
 
