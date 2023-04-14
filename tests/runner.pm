@@ -106,13 +106,6 @@ sub prepro {
 }
 
 #######################################################################
-# Call main's timestampskippedevents
-# TODO: figure out where this should live
-sub timestampskippedevents {
-    return main::timestampskippedevents(@_);
-}
-
-#######################################################################
 # Call main's runclient
 # TODO: move this into a helper package
 sub runclient {
@@ -493,7 +486,6 @@ sub singletest_prepare {
         if(@inputfile || $filename) {
             if(!$filename) {
                 logmsg "ERROR: section client=>file has no name attribute\n";
-                timestampskippedevents($testnum);
                 return -1;
             }
             my $fileContent = join('', @inputfile);
@@ -631,7 +623,6 @@ sub singletest_run {
 
         if(! -f $CMDLINE) {
             logmsg "The tool set in the test case for this: '$tool' does not exist\n";
-            timestampskippedevents($testnum);
             return (-1, 0, 0, "", "", 0);
         }
         $DBGCURL=$CMDLINE;
@@ -639,7 +630,6 @@ sub singletest_run {
 
     if($fail_due_event_based) {
         logmsg "This test cannot run event based\n";
-        timestampskippedevents($testnum);
         return (-1, 0, 0, "", "", 0);
     }
 
