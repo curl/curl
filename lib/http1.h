@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_H2H3_H
-#define HEADER_CURL_H2H3_H
+#ifndef HEADER_CURL_HTTP1_H
+#define HEADER_CURL_HTTP1_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,40 +23,37 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
 #include "curl_setup.h"
 
-#define H2H3_PSEUDO_METHOD ":method"
-#define H2H3_PSEUDO_SCHEME ":scheme"
-#define H2H3_PSEUDO_AUTHORITY ":authority"
-#define H2H3_PSEUDO_PATH ":path"
-#define H2H3_PSEUDO_STATUS ":status"
+#ifndef CURL_DISABLE_HTTP
+#include "bufq.h"
+#include "http.h"
 
-struct h2h3pseudo {
-  const char *name;
-  size_t namelen;
-  const char *value;
-  size_t valuelen;
+#define H1_PARSE_OPT_NONE       (0)
+#define H1_PARSE_OPT_STRICT     (1 << 0)
+
+struct h1_req_parser {
+  struct http_req *req;
+  struct bufq scratch;
+  size_t scratch_skip;
+  const char *line;
+  size_t max_line_len;
+  size_t line_len;
+  bool done;
 };
 
-struct h2h3req {
-  size_t entries;
-  struct h2h3pseudo header[1]; /* the array is allocated to contain entries */
-};
+void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len);
+void Curl_h1_req_parse_free(struct h1_req_parser *parser);
 
-/*
- * Curl_pseudo_headers() creates the array with pseudo headers to be
- * used in an HTTP/2 or HTTP/3 request. Returns an allocated struct.
- * Free it with Curl_pseudo_free().
- */
-CURLcode Curl_pseudo_headers(struct Curl_easy *data,
-                             const char *request,
-                             const size_t len,
-                             size_t* hdrlen /* optional */,
-                             struct h2h3req **hp);
+ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
+                               const char *buf, size_t buflen,
+                               const char *scheme_default, int options,
+                               CURLcode *err);
 
-/*
- * Curl_pseudo_free() frees a h2h3req struct.
- */
-void Curl_pseudo_free(struct h2h3req *hp);
+CURLcode Curl_h1_req_dprint(const struct http_req *req,
+                            struct dynbuf *dbuf);
 
-#endif /* HEADER_CURL_H2H3_H */
+
+#endif /* !CURL_DISABLE_HTTP */
+#endif /* HEADER_CURL_HTTP1_H */

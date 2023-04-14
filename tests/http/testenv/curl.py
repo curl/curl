@@ -317,6 +317,26 @@ class CurlClient:
         if not os.path.exists(path):
             return os.makedirs(path)
 
+    def get_proxy_args(self, proto: str = 'http/1.1',
+                       proxys: bool = True, tunnel: bool = False):
+        if proxys:
+            pport = self.env.pts_port(proto) if tunnel else self.env.proxys_port
+            xargs = [
+                '--proxy', f'https://{self.env.proxy_domain}:{pport}/',
+                '--resolve', f'{self.env.proxy_domain}:{pport}:127.0.0.1',
+                '--proxy-cacert', self.env.ca.cert_file,
+            ]
+            if proto == 'h2':
+                xargs.append('--proxy-http2')
+        else:
+            xargs = [
+                '--proxy', f'http://{self.env.proxy_domain}:{self.env.proxy_port}/',
+                '--resolve', f'{self.env.proxy_domain}:{self.env.proxy_port}:127.0.0.1',
+            ]
+        if tunnel:
+            xargs.append('--proxytunnel')
+        return xargs
+
     def http_get(self, url: str, extra_args: Optional[List[str]] = None):
         return self._raw(url, options=extra_args, with_stats=False)
 

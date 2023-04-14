@@ -1814,13 +1814,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   int httpwant = CURL_HTTP_VERSION_1_1;
 
 #ifdef USE_HTTP2
-  if(conn->bits.tunnel_proxy &&
-     ((conn->http_proxy.proxytype == CURLPROXY_HTTPS2)
-#ifdef DEBUGBUILD
-      || getenv("CURL_PROXY_TUNNEL_H2")
-#endif
-       )
-    ) {
+  if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
     httpwant = CURL_HTTP_VERSION_2;
   }
@@ -2042,7 +2036,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
   int can_multi = 0;
   unsigned char *palpn =
 #ifndef CURL_DISABLE_PROXY
-    Curl_ssl_cf_is_proxy(cf)?
+    (cf->conn->bits.tunnel_proxy && Curl_ssl_cf_is_proxy(cf))?
     &cf->conn->proxy_alpn : &cf->conn->alpn
 #else
     &cf->conn->alpn
