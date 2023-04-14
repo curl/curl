@@ -95,6 +95,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
   CURLUcode uerr;
   CURLU *uh = curl_url();
   char *path = NULL;
+  char *query = NULL;
   if(uh) {
     char *ptr;
     uerr = curl_url_set(uh, CURLUPART_URL, *inurlp,
@@ -108,7 +109,13 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
       result = urlerr_cvt(uerr);
       goto fail;
     }
-
+    uerr = curl_url_get(uh, CURLUPART_QUERY, &query, 0);
+    if(query) {
+      curl_free(query);
+      curl_free(path);
+      curl_url_cleanup(uh);
+      return CURLE_OK;
+    }
     ptr = strrchr(path, '/');
     if(!ptr || !*++ptr) {
       /* The URL path has no file name part, add the local file name. In order
