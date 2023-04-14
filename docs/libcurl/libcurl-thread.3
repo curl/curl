@@ -40,7 +40,7 @@ interface but you must provide your own locking and set
 \fIcurl_share_setopt(3)\fP CURLSHOPT_LOCKFUNC and CURLSHOPT_UNLOCKFUNC.
 
 Note that some items are specifically documented as not thread-safe in the
-share API (the conection pool and HSTS cache for example).
+share API (the connection pool and HSTS cache for example).
 .SH TLS
 If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
 then of course using the underlying SSL library multi-threaded and those libs
