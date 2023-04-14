@@ -129,9 +129,11 @@ static ssize_t next_line(struct h1_req_parser *parser,
     if(buflen) {
       const char *line_end;
       size_t add_len;
+      ssize_t pos;
 
       line_end = memchr(buf, '\n', buflen);
-      add_len = (line_end? (line_end - buf + 1) : buflen);
+      pos = line_end? (line_end - buf + 1) : -1;
+      add_len = (pos >= 0)? (size_t)pos : buflen;
       nread = Curl_bufq_write(&parser->scratch,
                               (const unsigned char *)buf, add_len, err);
       if(nread < 0) {
