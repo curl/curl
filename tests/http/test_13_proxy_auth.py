@@ -53,8 +53,8 @@ class TestProxyAuth:
         httpd.reload()
 
     def get_tunnel_proto_used(self, r: ExecResult):
-        for l in r.trace_lines:
-            m = re.match(r'.* CONNECT tunnel: (\S+) negotiated$', l)
+        for line in r.trace_lines:
+            m = re.match(r'.* CONNECT tunnel: (\S+) negotiated$', line)
             if m:
                 return m.group(1)
         assert False, f'tunnel protocol not found in:\n{"".join(r.trace_lines)}'
