@@ -3136,7 +3136,17 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     DEBUGASSERT(Curl_conn_is_http3(data, conn, FIRSTSOCKET));
     break;
   case CURL_HTTP_VERSION_2:
-    DEBUGASSERT(Curl_conn_is_http2(data, conn, FIRSTSOCKET));
+#ifndef CURL_DISABLE_PROXY
+    if(!Curl_conn_is_http2(data, conn, FIRSTSOCKET) &&
+       conn->bits.proxy && !conn->bits.tunnel_proxy
+      ) {
+      result = Curl_http2_switch(data, conn, FIRSTSOCKET);
+      if(result)
+        return result;
+    }
+    else
+#endif
+      DEBUGASSERT(Curl_conn_is_http2(data, conn, FIRSTSOCKET));
     break;
   case CURL_HTTP_VERSION_1_1:
     /* continue with HTTP/1.1 when explicitly requested */
@@ -4516,40 +4526,207 @@ out:
   return result;
 }
 
+/* simple implementation of strndup(), which isn't portable */
+static char *my_strndup(const char *ptr, size_t len)
+{
+  char *copy = malloc(len + 1);
+  if(!copy)
+    return NULL;
+  memcpy(copy, ptr, len);
+  copy[len] = '\0';
+  return copy;
+}
+
 CURLcode Curl_http_req_make(struct http_req **preq,
-                            const char *method,
-                            const char *scheme,
-                            const char *authority,
-                            const char *path)
+                            const char *method, size_t m_len,
+                            const char *scheme, size_t s_len,
+                            const char *authority, size_t a_len,
+                            const char *path, size_t p_len)
 {
   struct http_req *req;
   CURLcode result = CURLE_OUT_OF_MEMORY;
-  size_t mlen;
 
   DEBUGASSERT(method);
-  mlen = strlen(method);
-  if(mlen + 1 >= sizeof(req->method))
+  if(m_len + 1 >= sizeof(req->method))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   req = calloc(1, sizeof(*req));
   if(!req)
     goto out;
-  memcpy(req->method, method, mlen);
+  memcpy(req->method, method, m_len);
   if(scheme) {
-    req->scheme = strdup(scheme);
+    req->scheme = my_strndup(scheme, s_len);
     if(!req->scheme)
       goto out;
   }
   if(authority) {
-    req->authority = strdup(authority);
+    req->authority = my_strndup(authority, a_len);
     if(!req->authority)
       goto out;
   }
   if(path) {
-    req->path = strdup(path);
+    req->path = my_strndup(path, p_len);
     if(!req->path)
       goto out;
   }
+  Curl_dynhds_init(&req->headers, 0, DYN_H2_HEADERS);
+  Curl_dynhds_init(&req->trailers, 0, DYN_H2_TRAILERS);
+  result = CURLE_OK;
+
+out:
+  if(result && req)
+    Curl_http_req_free(req);
+  *preq = result? NULL : req;
+  return result;
+}
+
+static CURLcode req_assign_url_authority(struct http_req *req, CURLU *url)
+{
+  char *user, *pass, *host, *port;
+  struct dynbuf buf;
+  CURLUcode uc;
+  CURLcode result = CURLE_URL_MALFORMAT;
+
+  user = pass = host = port = NULL;
+  Curl_dyn_init(&buf, DYN_HTTP_REQUEST);
+
+  uc = curl_url_get(url, CURLUPART_HOST, &host, 0);
+  if(uc && uc != CURLUE_NO_HOST)
+    goto out;
+  if(!host) {
+    req->authority = NULL;
+    result = CURLE_OK;
+    goto out;
+  }
+
+  uc = curl_url_get(url, CURLUPART_PORT, &port, CURLU_NO_DEFAULT_PORT);
+  if(uc && uc != CURLUE_NO_PORT)
+    goto out;
+  uc = curl_url_get(url, CURLUPART_USER, &user, 0);
+  if(uc && uc != CURLUE_NO_USER)
+    goto out;
+  if(user) {
+    uc = curl_url_get(url, CURLUPART_PASSWORD, &user, 0);
+    if(uc && uc != CURLUE_NO_PASSWORD)
+      goto out;
+  }
+
+  if(user) {
+    result = Curl_dyn_add(&buf, user);
+    if(result)
+      goto out;
+    if(pass) {
+      result = Curl_dyn_addf(&buf, ":%s", pass);
+      if(result)
+        goto out;
+    }
+    result = Curl_dyn_add(&buf, "@");
+    if(result)
+      goto out;
+  }
+  result = Curl_dyn_add(&buf, host);
+  if(result)
+    goto out;
+  if(port) {
+    result = Curl_dyn_addf(&buf, ":%s", port);
+    if(result)
+      goto out;
+  }
+  req->authority = strdup(Curl_dyn_ptr(&buf));
+  if(!req->authority)
+    goto out;
+  result = CURLE_OK;
+
+out:
+  free(user);
+  free(pass);
+  free(host);
+  free(port);
+  Curl_dyn_free(&buf);
+  return result;
+}
+
+static CURLcode req_assign_url_path(struct http_req *req, CURLU *url)
+{
+  char *path, *query;
+  struct dynbuf buf;
+  CURLUcode uc;
+  CURLcode result = CURLE_URL_MALFORMAT;
+
+  path = query = NULL;
+  Curl_dyn_init(&buf, DYN_HTTP_REQUEST);
+
+  uc = curl_url_get(url, CURLUPART_PATH, &path, CURLU_PATH_AS_IS);
+  if(uc)
+    goto out;
+  uc = curl_url_get(url, CURLUPART_QUERY, &query, 0);
+  if(uc && uc != CURLUE_NO_QUERY)
+    goto out;
+
+  if(!path && !query) {
+    req->path = NULL;
+  }
+  else if(path && !query) {
+    req->path = path;
+    path = NULL;
+  }
+  else {
+    if(path) {
+      result = Curl_dyn_add(&buf, path);
+      if(result)
+        goto out;
+    }
+    if(query) {
+      result = Curl_dyn_addf(&buf, "?%s", query);
+      if(result)
+        goto out;
+    }
+    req->path = strdup(Curl_dyn_ptr(&buf));
+    if(!req->path)
+      goto out;
+  }
+  result = CURLE_OK;
+
+out:
+  free(path);
+  free(query);
+  Curl_dyn_free(&buf);
+  return result;
+}
+
+CURLcode Curl_http_req_make2(struct http_req **preq,
+                             const char *method, size_t m_len,
+                             CURLU *url, const char *scheme_default)
+{
+  struct http_req *req;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+  CURLUcode uc;
+
+  DEBUGASSERT(method);
+  if(m_len + 1 >= sizeof(req->method))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  req = calloc(1, sizeof(*req));
+  if(!req)
+    goto out;
+  memcpy(req->method, method, m_len);
+
+  uc = curl_url_get(url, CURLUPART_SCHEME, &req->scheme, 0);
+  if(uc && uc != CURLUE_NO_SCHEME)
+    goto out;
+  if(!req->scheme && scheme_default) {
+    req->scheme = strdup(scheme_default);
+    if(!req->scheme)
+      goto out;
+  }
+
+  result = req_assign_url_authority(req, url);
+  if(result)
+    goto out;
+  result = req_assign_url_path(req, url);
+  if(result)
+    goto out;
+
   Curl_dynhds_init(&req->headers, 0, DYN_H2_HEADERS);
   Curl_dynhds_init(&req->trailers, 0, DYN_H2_TRAILERS);
   result = CURLE_OK;
@@ -4571,6 +4748,97 @@ void Curl_http_req_free(struct http_req *req)
     Curl_dynhds_free(&req->trailers);
     free(req);
   }
+}
+
+struct name_const {
+  const char *name;
+  size_t namelen;
+};
+
+static struct name_const H2_NON_FIELD[] = {
+  { STRCONST("Host") },
+  { STRCONST("Upgrade") },
+  { STRCONST("Connection") },
+  { STRCONST("Keep-Alive") },
+  { STRCONST("Proxy-Connection") },
+  { STRCONST("Transfer-Encoding") },
+};
+
+static bool h2_non_field(const char *name, size_t namelen)
+{
+  size_t i;
+  for(i = 0; i < sizeof(H2_NON_FIELD)/sizeof(H2_NON_FIELD[0]); ++i) {
+    if(namelen < H2_NON_FIELD[i].namelen)
+      return FALSE;
+    if(namelen == H2_NON_FIELD[i].namelen &&
+       strcasecompare(H2_NON_FIELD[i].name, name))
+      return TRUE;
+  }
+  return FALSE;
+}
+
+CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
+                             struct http_req *req, struct Curl_easy *data)
+{
+  const char *scheme = NULL, *authority = NULL;
+  struct dynhds_entry *e;
+  size_t i;
+  CURLcode result;
+
+  DEBUGASSERT(req);
+  DEBUGASSERT(h2_headers);
+
+  if(req->scheme) {
+    scheme = req->scheme;
+  }
+  else if(strcmp("CONNECT", req->method)) {
+    scheme = Curl_checkheaders(data, STRCONST(HTTP_PSEUDO_SCHEME));
+    if(scheme) {
+      scheme += sizeof(HTTP_PSEUDO_SCHEME);
+      while(*scheme && ISBLANK(*scheme))
+        scheme++;
+      infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
+    }
+    else {
+      scheme = (data->conn && data->conn->handler->flags & PROTOPT_SSL)?
+                "https" : "http";
+    }
+  }
+
+  if(req->authority) {
+    authority = req->authority;
+  }
+  else {
+    e = Curl_dynhds_get(&req->headers, STRCONST("Host"));
+    if(e)
+      authority = e->value;
+  }
+
+  Curl_dynhds_reset(h2_headers);
+  Curl_dynhds_set_opts(h2_headers, DYNHDS_OPT_LOWERCASE);
+  result = Curl_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_METHOD),
+                           req->method, strlen(req->method));
+  if(!result && scheme) {
+    result = Curl_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_SCHEME),
+                             scheme, strlen(scheme));
+  }
+  if(!result && authority) {
+    result = Curl_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_AUTHORITY),
+                             authority, strlen(authority));
+  }
+  if(!result && req->path) {
+    result = Curl_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_PATH),
+                             req->path, strlen(req->path));
+  }
+  for(i = 0; !result && i < Curl_dynhds_count(&req->headers); ++i) {
+    e = Curl_dynhds_getn(&req->headers, i);
+    if(!h2_non_field(e->name, e->namelen)) {
+      result = Curl_dynhds_add(h2_headers, e->name, e->namelen,
+                               e->value, e->valuelen);
+    }
+  }
+
+  return result;
 }
 
 CURLcode Curl_http_resp_make(struct http_resp **presp,

@@ -50,14 +50,6 @@ class TestProxy:
         httpd.clear_extra_configs()
         httpd.reload()
 
-    def set_tunnel_proto(self, proto):
-        if proto == 'h2':
-            os.environ['CURL_PROXY_TUNNEL_H2'] = '1'
-            return 'HTTP/2'
-        else:
-            os.environ.pop('CURL_PROXY_TUNNEL_H2', None)
-            return 'HTTP/1.1'
-
     def get_tunnel_proto_used(self, r: ExecResult):
         for l in r.trace_lines:
             m = re.match(r'.* CONNECT tunnel: (\S+) negotiated$', l)
@@ -71,37 +63,60 @@ class TestProxy:
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=[
-                                 '--proxy', f'http://{env.proxy_domain}:{env.proxy_port}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.proxy_port}:127.0.0.1',
-                               ])
+                               extra_args=curl.get_proxy_args(proxys=False))
         r.check_response(count=1, http_status=200)
 
     # download via https: proxy (no tunnel)
     @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
                         reason='curl lacks HTTPS-proxy support')
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
-    def test_10_02_proxy_https(self, env: Env, httpd, nghttpx_fwd, repeat):
+    def test_10_02_proxys_down(self, env: Env, httpd, nghttpx_fwd, proto, repeat):
+        if proto == 'h2' and not env.curl_uses_lib('nghttp2'):
+            pytest.skip('only supported with nghttp2')
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(proto=proto)
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=[
-                                 '--proxy', f'https://{env.proxy_domain}:{env.proxys_port}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.proxys_port}:127.0.0.1',
-                                 '--proxy-cacert', env.ca.cert_file,
-                               ])
-        r.check_response(count=1, http_status=200)
+                               extra_args=xargs)
+        r.check_response(count=1, http_status=200,
+                         protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
+
+    # upload via https: with proto (no tunnel)
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("fname, fcount", [
+        ['data.json', 5],
+        ['data-100k', 5],
+        ['data-1m', 2]
+    ])
+    @pytest.mark.skipif(condition=not Env.have_nghttpx(),
+                        reason="no nghttpx available")
+    def test_10_02_proxys_up(self, env: Env, httpd, nghttpx, proto,
+                             fname, fcount, repeat):
+        if proto == 'h2' and not env.curl_uses_lib('nghttp2'):
+            pytest.skip('only supported with nghttp2')
+        count = fcount
+        srcfile = os.path.join(httpd.docs_dir, fname)
+        curl = CurlClient(env=env)
+        url = f'http://localhost:{env.http_port}/curltest/echo?id=[0-{count-1}]'
+        xargs = curl.get_proxy_args(proto=proto)
+        r = curl.http_upload(urls=[url], data=f'@{srcfile}', alpn_proto=proto,
+                             extra_args=xargs)
+        r.check_response(count=count, http_status=200,
+                         protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
+        indata = open(srcfile).readlines()
+        for i in range(count):
+            respdata = open(curl.response_file(i)).readlines()
+            assert respdata == indata
 
     # download http: via http: proxytunnel
     def test_10_03_proxytunnel_http(self, env: Env, httpd, repeat):
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(proxys=False, tunnel=True)
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=[
-                                 '--proxytunnel',
-                                 '--proxy', f'http://{env.proxy_domain}:{env.proxy_port}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.proxy_port}:127.0.0.1',
-                               ])
+                               extra_args=xargs)
         r.check_response(count=1, http_status=200)
 
     # download http: via https: proxytunnel
@@ -111,13 +126,9 @@ class TestProxy:
     def test_10_04_proxy_https(self, env: Env, httpd, nghttpx_fwd, repeat):
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(tunnel=True)
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=[
-                                 '--proxytunnel',
-                                 '--proxy', f'https://{env.proxy_domain}:{env.pts_port()}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.pts_port()}:127.0.0.1',
-                                 '--proxy-cacert', env.ca.cert_file,
-                               ])
+                               extra_args=xargs)
         r.check_response(count=1, http_status=200)
 
     # download https: with proto via http: proxytunnel
@@ -126,13 +137,10 @@ class TestProxy:
     def test_10_05_proxytunnel_http(self, env: Env, httpd, proto, repeat):
         curl = CurlClient(env=env)
         url = f'https://localhost:{env.https_port}/data.json'
+        xargs = curl.get_proxy_args(proxys=False, tunnel=True)
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
                                with_headers=True,
-                               extra_args=[
-                                 '--proxytunnel',
-                                 '--proxy', f'http://{env.proxy_domain}:{env.proxy_port}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.proxy_port}:127.0.0.1',
-                               ])
+                               extra_args=xargs)
         r.check_response(count=1, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
 
@@ -145,20 +153,15 @@ class TestProxy:
     def test_10_06_proxytunnel_https(self, env: Env, httpd, nghttpx_fwd, proto, tunnel, repeat):
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        exp_tunnel_proto = self.set_tunnel_proto(tunnel)
         curl = CurlClient(env=env)
         url = f'https://localhost:{env.https_port}/data.json?[0-0]'
+        xargs = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
-                               with_headers=True,
-                               extra_args=[
-                                 '--proxytunnel',
-                                 '--proxy', f'https://{env.proxy_domain}:{env.pts_port(tunnel)}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.pts_port(tunnel)}:127.0.0.1',
-                                 '--proxy-cacert', env.ca.cert_file,
-                               ])
+                               with_headers=True, extra_args=xargs)
         r.check_response(count=1, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
-        assert self.get_tunnel_proto_used(r) == exp_tunnel_proto
+        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
+            if tunnel == 'h2' else 'HTTP/1.1'
         srcfile = os.path.join(httpd.docs_dir, 'data.json')
         dfile = curl.download_file(0)
         assert filecmp.cmp(srcfile, dfile, shallow=False)
@@ -178,20 +181,15 @@ class TestProxy:
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
         count = fcount
-        exp_tunnel_proto = self.set_tunnel_proto(tunnel)
         curl = CurlClient(env=env)
         url = f'https://localhost:{env.https_port}/{fname}?[0-{count-1}]'
+        xargs = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
-                               with_headers=True,
-                               extra_args=[
-                                 '--proxytunnel',
-                                 '--proxy', f'https://{env.proxy_domain}:{env.pts_port(tunnel)}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.pts_port(tunnel)}:127.0.0.1',
-                                 '--proxy-cacert', env.ca.cert_file,
-                               ])
+                               with_headers=True, extra_args=xargs)
         r.check_response(count=count, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
-        assert self.get_tunnel_proto_used(r) == exp_tunnel_proto
+        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
+            if tunnel == 'h2' else 'HTTP/1.1'
         srcfile = os.path.join(httpd.docs_dir, fname)
         for i in range(count):
             dfile = curl.download_file(i)
@@ -213,20 +211,15 @@ class TestProxy:
             pytest.skip('only supported with nghttp2')
         count = fcount
         srcfile = os.path.join(httpd.docs_dir, fname)
-        exp_tunnel_proto = self.set_tunnel_proto(tunnel)
         curl = CurlClient(env=env)
         url = f'https://localhost:{env.https_port}/curltest/echo?id=[0-{count-1}]'
+        xargs = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r = curl.http_upload(urls=[url], data=f'@{srcfile}', alpn_proto=proto,
-                             extra_args=[
-                               '--proxytunnel',
-                               '--proxy', f'https://{env.proxy_domain}:{env.pts_port(tunnel)}/',
-                               '--resolve', f'{env.proxy_domain}:{env.pts_port(tunnel)}:127.0.0.1',
-                               '--proxy-cacert', env.ca.cert_file,
-                             ])
-        assert self.get_tunnel_proto_used(r) == exp_tunnel_proto
+                             extra_args=xargs)
+        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
+            if tunnel == 'h2' else 'HTTP/1.1'
         r.check_response(count=count, http_status=200)
         indata = open(srcfile).readlines()
-        r.check_response(count=count, http_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == indata
@@ -237,20 +230,15 @@ class TestProxy:
     def test_10_09_reuse_ser(self, env: Env, httpd, nghttpx_fwd, tunnel, repeat):
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
-        exp_tunnel_proto = self.set_tunnel_proto(tunnel)
         curl = CurlClient(env=env)
         url1 = f'https://localhost:{env.https_port}/data.json'
         url2 = f'http://localhost:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r = curl.http_download(urls=[url1, url2], alpn_proto='http/1.1', with_stats=True,
-                               with_headers=True,
-                               extra_args=[
-                                 '--proxytunnel',
-                                 '--proxy', f'https://{env.proxy_domain}:{env.pts_port(tunnel)}/',
-                                 '--resolve', f'{env.proxy_domain}:{env.pts_port(tunnel)}:127.0.0.1',
-                                 '--proxy-cacert', env.ca.cert_file,
-                               ])
+                               with_headers=True, extra_args=xargs)
         r.check_response(count=2, http_status=200)
-        assert self.get_tunnel_proto_used(r) == exp_tunnel_proto
+        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
+            if tunnel == 'h2' else 'HTTP/1.1'
         if tunnel == 'h2':
             # TODO: we would like to reuse the first connection for the
             # second URL, but this is currently not possible

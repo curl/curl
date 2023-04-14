@@ -34,7 +34,7 @@
 #include "bufq.h"
 #include "dynbuf.h"
 #include "dynhds.h"
-#include "h2h3.h"
+#include "http1.h"
 #include "http_proxy.h"
 #include "multiif.h"
 #include "cf-h2-proxy.h"
@@ -648,8 +648,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  if(namelen == sizeof(H2H3_PSEUDO_STATUS) - 1 &&
-     memcmp(H2H3_PSEUDO_STATUS, name, namelen) == 0) {
+  if(namelen == sizeof(HTTP_PSEUDO_STATUS) - 1 &&
+     memcmp(HTTP_PSEUDO_STATUS, name, namelen) == 0) {
     int http_status;
     struct http_resp *resp;
 
@@ -783,60 +783,28 @@ static CURLcode h2_submit(int32_t *pstream_id,
                           nghttp2_data_source_read_callback read_callback,
                           void *read_ctx)
 {
+  struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
   unsigned int i;
   int32_t stream_id = -1;
-  size_t nheader, j;
-  CURLcode result = CURLE_OUT_OF_MEMORY;
+  size_t nheader;
+  CURLcode result;
 
   (void)cf;
-  nheader = req->headers.hds_len + 1; /* ":method" is a MUST */
-  if(req->scheme)
-    ++nheader;
-  if(req->authority)
-    ++nheader;
-  if(req->path)
-    ++nheader;
-
-  nva = malloc(sizeof(nghttp2_nv) * nheader);
-  if(!nva)
+  Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
+  result = Curl_http_req_to_h2(&h2_headers, req, data);
+  if(result)
     goto out;
 
-  nva[0].name = (unsigned char *)H2H3_PSEUDO_METHOD;
-  nva[0].namelen = sizeof(H2H3_PSEUDO_METHOD) - 1;
-  nva[0].value = (unsigned char *)req->method;
-  nva[0].valuelen = strlen(req->method);
-  nva[0].flags = NGHTTP2_NV_FLAG_NONE;
-  i = 1;
-  if(req->scheme) {
-    nva[i].name = (unsigned char *)H2H3_PSEUDO_SCHEME;
-    nva[i].namelen = sizeof(H2H3_PSEUDO_SCHEME) - 1;
-    nva[i].value = (unsigned char *)req->scheme;
-    nva[i].valuelen = strlen(req->scheme);
-    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
-    ++i;
-  }
-  if(req->authority) {
-    nva[i].name = (unsigned char *)H2H3_PSEUDO_AUTHORITY;
-    nva[i].namelen = sizeof(H2H3_PSEUDO_AUTHORITY) - 1;
-    nva[i].value = (unsigned char *)req->authority;
-    nva[i].valuelen = strlen(req->authority);
-    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
-    ++i;
-  }
-  if(req->path) {
-    nva[i].name = (unsigned char *)H2H3_PSEUDO_PATH;
-    nva[i].namelen = sizeof(H2H3_PSEUDO_PATH) - 1;
-    nva[i].value = (unsigned char *)req->path;
-    nva[i].valuelen = strlen(req->path);
-    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
-    ++i;
+  nheader = Curl_dynhds_count(&h2_headers);
+  nva = malloc(sizeof(nghttp2_nv) * nheader);
+  if(!nva) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
   }
 
-  for(j = 0; i < nheader; i++, j++) {
-    struct dynhds_entry *e = Curl_dynhds_getn(&req->headers, j);
-    if(!e)
-      break;
+  for(i = 0; i < nheader; ++i) {
+    struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
     nva[i].name = (unsigned char *)e->name;
     nva[i].namelen = e->namelen;
     nva[i].value = (unsigned char *)e->value;
@@ -866,7 +834,8 @@ static CURLcode h2_submit(int32_t *pstream_id,
   result = CURLE_OK;
 
 out:
-  Curl_safefree(nva);
+  free(nva);
+  Curl_dynhds_free(&h2_headers);
   *pstream_id = stream_id;
   return result;
 }
@@ -881,7 +850,9 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
 
   infof(data, "Establish HTTP/2 proxy tunnel to %s", ts->authority);
 
-  result = Curl_http_req_make(&req, "CONNECT", NULL, ts->authority, NULL);
+  result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT")-1,
+                              NULL, 0, ts->authority, strlen(ts->authority),
+                              NULL, 0);
   if(result)
     goto out;
 

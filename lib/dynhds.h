@@ -48,7 +48,11 @@ struct dynhds {
   size_t max_entries;   /* size limit number of entries */
   size_t strs_len; /* length of all strings */
   size_t max_strs_size; /* max length of all strings */
+  int opts;
 };
+
+#define DYNHDS_OPT_NONE          (0)
+#define DYNHDS_OPT_LOWERCASE     (1 << 0)
 
 /**
  * Init for use on first time or after a reset.
@@ -72,6 +76,12 @@ void Curl_dynhds_reset(struct dynhds *dynhds);
  * Return the number of header entries.
  */
 size_t Curl_dynhds_count(struct dynhds *dynhds);
+
+/**
+ * Set the options to use, replacing any existing ones.
+ * This will not have an effect on already existing headers.
+ */
+void Curl_dynhds_set_opts(struct dynhds *dynhds, int opts);
 
 /**
  * Return the n-th header entry or NULL if it does not exist.
@@ -140,11 +150,18 @@ CURLcode Curl_dynhds_cset(struct dynhds *dynhds,
 
 /**
  * Add a single header from a HTTP/1.1 formatted line at the end. Line
- * may contain a delimiting \r\n or just \n. And characters after
+ * may contain a delimiting \r\n or just \n. Any characters after
  * that will be ignored.
  */
 CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line);
 
+/**
+ * Add a single header from a HTTP/1.1 formatted line at the end. Line
+ * may contain a delimiting \r\n or just \n. Any characters after
+ * that will be ignored.
+ */
+CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
+                                 const char *line, size_t line_len);
 
 /**
  * Add the headers to the given `dynbuf` in HTTP/1.1 format with

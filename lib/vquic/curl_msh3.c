@@ -35,7 +35,7 @@
 #include "cf-socket.h"
 #include "connect.h"
 #include "progress.h"
-#include "h2h3.h"
+#include "http1.h"
 #include "curl_msh3.h"
 #include "socketpair.h"
 #include "vquic/vquic.h"
@@ -321,7 +321,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
   msh3_lock_acquire(&stream->recv_lock);
 
   if((hd->NameLength == 7) &&
-     !strncmp(H2H3_PSEUDO_STATUS, (char *)hd->Name, 7)) {
+     !strncmp(HTTP_PSEUDO_STATUS, (char *)hd->Name, 7)) {
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
 
@@ -548,36 +548,75 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
-  struct h2h3req *hreq;
-  size_t hdrlen = 0;
+  struct h1_req_parser h1;
+  struct dynhds h2_headers;
+  MSH3_HEADER *nva = NULL;
+  size_t nheader, i;
   ssize_t nwritten = -1;
   struct cf_call_data save;
+  bool eos;
 
   CF_DATA_SAVE(save, cf, data);
 
+  Curl_h1_req_parse_init(&h1, (4*1024));
+  Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
+
   /* Sizes must match for cast below to work" */
   DEBUGASSERT(stream);
-  DEBUGASSERT(sizeof(MSH3_HEADER) == sizeof(struct h2h3pseudo));
   DEBUGF(LOG_CF(data, cf, "req: send %zu bytes", len));
 
   if(!stream->req) {
     /* The first send on the request contains the headers and possibly some
        data. Parse out the headers and create the request, then if there is
        any data left over go ahead and send it too. */
+    nwritten = Curl_h1_req_parse_read(&h1, buf, len, NULL, 0, err);
+    if(nwritten < 0)
+      goto out;
+    DEBUGASSERT(h1.done);
+    DEBUGASSERT(h1.req);
 
-    *err = Curl_pseudo_headers(data, buf, len, &hdrlen, &hreq);
+    *err = Curl_http_req_to_h2(&h2_headers, h1.req, data);
     if(*err) {
-      failf(data, "Curl_pseudo_headers failed");
-      *err = CURLE_SEND_ERROR;
+      nwritten = -1;
       goto out;
     }
 
-    DEBUGF(LOG_CF(data, cf, "req: send %zu headers", hreq->entries));
+    nheader = Curl_dynhds_count(&h2_headers);
+    nva = malloc(sizeof(MSH3_HEADER) * nheader);
+    if(!nva) {
+      *err = CURLE_OUT_OF_MEMORY;
+      nwritten = -1;
+      goto out;
+    }
+
+    for(i = 0; i < nheader; ++i) {
+      struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
+      nva[i].Name = e->name;
+      nva[i].NameLength = e->namelen;
+      nva[i].Value = e->value;
+      nva[i].ValueLength = e->valuelen;
+    }
+
+    switch(data->state.httpreq) {
+    case HTTPREQ_POST:
+    case HTTPREQ_POST_FORM:
+    case HTTPREQ_POST_MIME:
+    case HTTPREQ_PUT:
+      /* known request body size or -1 */
+      eos = FALSE;
+      break;
+    default:
+      /* there is not request body */
+      eos = TRUE;
+      stream->upload_done = TRUE;
+      break;
+    }
+
+    DEBUGF(LOG_CF(data, cf, "req: send %zu headers", nheader));
     stream->req = MsH3RequestOpen(ctx->qconn, &msh3_request_if, data,
-                                  (MSH3_HEADER*)hreq->header, hreq->entries,
-                                  hdrlen == len ? MSH3_REQUEST_FLAG_FIN :
+                                  nva, nheader,
+                                  eos ? MSH3_REQUEST_FLAG_FIN :
                                   MSH3_REQUEST_FLAG_NONE);
-    Curl_pseudo_free(hreq);
     if(!stream->req) {
       failf(data, "request open failed");
       *err = CURLE_SEND_ERROR;
@@ -608,6 +647,9 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   set_quic_expire(cf, data);
+  free(nva);
+  Curl_h1_req_parse_free(&h1);
+  Curl_dynhds_free(&h2_headers);
   CF_DATA_RESTORE(cf, save);
   return nwritten;
 }

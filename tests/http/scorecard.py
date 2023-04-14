@@ -281,7 +281,7 @@ class ScoreCard:
             if max_parallel > 1 else []
         self.info(f'{max_parallel}...')
         for i in range(sample_size):
-            curl = CurlClient(env=self.env)
+            curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    with_headers=False,
                                    extra_args=extra_args)
@@ -459,13 +459,11 @@ class ScoreCard:
                     for key, val in sval.items():
                         if 'errors' in val:
                             errors.extend(val['errors'])
-                    print(f'  {dkey:<8} {skey:>8} '
-                          f'{self.fmt_reqs(sval["serial"]["speed"]):>12} '
-                          f'{self.fmt_reqs(sval["par-6"]["speed"]):>12} '
-                          f'{self.fmt_reqs(sval["par-25"]["speed"]):>12} '
-                          f'{self.fmt_reqs(sval["par-50"]["speed"]):>12} '
-                          f'{self.fmt_reqs(sval["par-100"]["speed"]):>12} '
-                          f'   {"/".join(errors):<20}')
+                    line = f'  {dkey:<8} {skey:>8} '
+                    for k in sval.keys():
+                        line += f'{self.fmt_reqs(sval[k]["speed"]):>12} '
+                    line += f'   {"/".join(errors):<20}'
+                    print(line)
 
 
 def parse_size(s):
