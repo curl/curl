@@ -30,13 +30,17 @@ libcurl is thread safe but has no internal thread synchronization. You may have
 to provide your own locking should you meet any of the thread safety exceptions
 below.
 
-\fBHandles.\fP You must \fBnever\fP share the same handle in multiple threads.
-You can pass the handles around among threads, but you must never use a single
-handle from more than one thread at any given time.
-
-\fBShared objects.\fP You can share certain data between multiple handles by
-using the share interface but you must provide your own locking and set
+.SH "Handles"
+You must \fBnever\fP share the same handle in multiple threads.  You can pass
+the handles around among threads, but you must never use a single handle from
+more than one thread at any given time.
+.SH "Shared objects"
+You can share certain data between multiple handles by using the share
+interface but you must provide your own locking and set
 \fIcurl_share_setopt(3)\fP CURLSHOPT_LOCKFUNC and CURLSHOPT_UNLOCKFUNC.
+
+Note that some items are specifically documented as not thread-safe in the
+share API (the conection pool and HSTS cache for example).
 .SH TLS
 If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
 then of course using the underlying SSL library multi-threaded and those libs
