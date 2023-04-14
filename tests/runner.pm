@@ -64,8 +64,8 @@ use globalconfig;
 #######################################################################
 # Global variables set elsewhere but used only by this package
 our $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
-our $valgrind_logfile="--logfile";  # the option name for valgrind 2.X
-our $valgrind_tool;
+our $valgrind_logfile="--log-file";  # the option name for valgrind >=3
+our $valgrind_tool="--tool=memcheck";
 our $gdb = checktestcmd("gdb");
 our $gdbthis;      # run test case with gdb debugger
 our $gdbxwin;      # use windowed gdb when using gdb
