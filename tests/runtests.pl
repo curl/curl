@@ -1851,6 +1851,7 @@ sub singletest {
       return $errorreturncode;
     }
     elsif($error == -2) {
+      timestampskippedevents($testnum);
       return $error;
     }
     elsif($error > 0) {
