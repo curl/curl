@@ -699,6 +699,15 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   process_pending_handles(data->multi); /* connection / multiplex */
 
+  Curl_safefree(data->state.ulbuf);
+
+  /* if the transfer was completed in a paused state there can be buffered
+     data left to free */
+  for(i = 0; i < data->state.tempcount; i++) {
+    Curl_dyn_free(&data->state.tempwrite[i].b);
+  }
+  data->state.tempcount = 0;
+
   CONNCACHE_LOCK(data);
   Curl_detach_connection(data);
   if(CONN_INUSE(conn)) {
@@ -717,14 +726,6 @@ static CURLcode multi_done(struct Curl_easy *data,
     conn->dns_entry = NULL;
   }
   Curl_hostcache_prune(data);
-  Curl_safefree(data->state.ulbuf);
-
-  /* if the transfer was completed in a paused state there can be buffered
-     data left to free */
-  for(i = 0; i < data->state.tempcount; i++) {
-    Curl_dyn_free(&data->state.tempwrite[i].b);
-  }
-  data->state.tempcount = 0;
 
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this connection. This is ignored for requests taking
