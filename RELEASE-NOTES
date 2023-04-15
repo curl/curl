@@ -1,19 +1,26 @@
 curl and libcurl 8.1.0
 
  Public curl releases:         217
- Command line options:         250
+ Command line options:         251
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2854
+ Contributors:                 2858
 
 This release includes the following changes:
 
+ o curl: add --proxy-http2 [62]
  o CURLPROXY_HTTPS2: for HTTPS proxy that may speak HTTP/2 [57]
  o proxy: http2 proxy tunnel implementation [68]
  o tool_writeout: add URL component variables [41]
 
 This release includes the following bugfixes:
 
+ o bufq: simplify since expression is always true [72]
+ o cf-h1-proxy: skip an extra NULL assign [80]
+ o cf-h2-proxy: fix processing ingress to stop too early [76]
+ o cf-socket: add socket recv buffering for most tcp cases [90]
+ o cf-socket: Disable socket receive buffer by default [75]
+ o cf-socket: remove dead code discovered by PVS [82]
  o CI: fix brew retries on GHA
  o CI: skip Azure for commits which change only GHA
  o cmake: bring in the network library on Haiku [9]
@@ -21,50 +28,74 @@ This release includes the following bugfixes:
  o CMake: make config version 8 compatible with 7 [28]
  o cmake: picky-linker fixes for openssl, ZLIB, H3 and more [31]
  o cmake: set SONAME for SunOS too [3]
+ o CMakeLists.txt: fix typo for Haiku detection [95]
  o config-dos.h: fix SIZEOF_CURL_OFF_T for MS-DOS/DJGPP [52]
  o configure: don't set HAVE_WRITABLE_ARGV on Windows [64]
  o configure: make quiche require quiche_conn_send_ack_eliciting [46]
+ o connect: fix https connection setup to treat ssl_mode correctly [94]
  o content_encoding: only do tranfer-encoding compression if asked to [61]
+ o cookie: address PVS nits [74]
+ o cookie: clarify that init with data set to NULL reads no file [99]
+ o curl: do NOT append file name to path for upload when there's a query [58]
  o curl_easy_getinfo.3: typo fix (duplicated "from the") [43]
+ o curl_url_set.3: mention that users can set content rather freely [105]
  o data.d: emphasize no conversion [5]
  o digest: clear target buffer [8]
  o doc: curl_mime_init() strong easy binding was relaxed in 7.87.0 [26]
  o docs/cmdline-opts: document the dotless config path [1]
  o docs: bump the minimum perl version to 5.6
  o dynbuf: never allocate larger than "toobig" [17]
+ o ftp: fix 'portsock' variable was assigned the same value [78]
+ o ftp: remove dead code [79]
  o ftplistparser: move out private data from public struct [20]
  o ftplistparser: replace realloc with dynbuf [18]
+ o gen.pl: error on duplicated See-Also fields [102]
  o getpart: better handle case of file not found
  o GHA-linux: add an address-sanitizer build [15]
  o GHA: add a memory-sanitizer job [2]
  o GHA: run all linux test jobs with valgrind [14]
+ o GHA: suppress git clone output [89]
  o GHA: update ngtcp2-*.yml to v0.10.0 [21]
  o gskit: various compile errors in OS400 [12]
+ o hash: fix assigning same value [73]
  o hostip: refuse to resolve the .onion TLD [19]
  o HTTP-COOKIES.md: mention the #HttpOnly_ prefix [16]
  o http2: flow control and buffer improvements [54]
  o http2: move HTTP/2 stream vars into local context [67]
+ o http2: remove unused Curl_http2_strerror function declaration [108]
+ o http3: check stream_ctx more thoroughly in all backends [77]
  o http3: improvements across backends [51]
+ o http: skip a double NULL assign [83]
+ o KNOWN_BUGS: remove fixed or outdated issues, move non-bugs [65]
  o lib/cmake: add HAVE_WRITABLE_ARGV check [63]
  o lib/sha256.c: typo fix in comment (duplicated "is available") [40]
+ o lib1560: verify that more bad host names are rejected [104]
  o lib: add `bufq` and `dynhds` [34]
  o lib: remove CURLX_NO_MEMORY_CALLBACKS [55]
  o lib: use correct printf flags for sockets and timediffs [36]
+ o mime: skip NULL assigns after Curl_safefree() [84]
  o multi: add handle asserts in DEBUG builds [11]
+ o multi: remove a few superfluous assigns [97]
  o multi: remove PENDING + MSGSENT handles from the main linked list [23]
  o ngtcp2: adjust config and code checks for ngtcp2 without nghttp3 [4]
+ o noproxy: pointer to local array 'hostip' is stored outside scope [93]
  o ntlm: clear lm and nt response buffers before use [7]
  o openssl: interop with AWS-LC [30]
  o pytest: improvements for suitable curl and error output [35]
  o RELEASE-PROCEDURE: update to new schedule [25]
  o rtsp: convert mallocs to dynbuf for RTP buffering [37]
  o rtsp: skip malformed RTSP interleaved frame data [33]
+ o rtsp: skip NULL assigns after Curl_safefree() [85]
  o runtests: die if curl version can be found [10]
  o runtests: don't start servers if -l is given
+ o runtests: lots of refactoring
  o runtests: show error message if file can't be written
  o rustls: fix error in recv handling [50]
+ o schannel: add clarifying comment [98]
  o server/getpart: clear target buffer before load [6]
+ o smb: remove double assign [86]
  o telnet: simplify the implementation of str_is_nonascii() [42]
+ o test1169: fix so it works properly everywhere [106]
  o test1592: add flaky keyword [39]
  o test1960: point to the correct path for the precheck tool
  o tests/http: add timeout to running curl in test cases [24]
@@ -74,14 +105,23 @@ This release includes the following bugfixes:
  o tests: 1078 1288 1297 use valid IPv4 addresses
  o tests: document that the unittest keyword is special
  o tests: increase sws timeout for more robust testing [66]
+ o tests: log a too-long Unix socket path in sws and socksd
+ o tests: make test_12_01 a bit more forgiving on connection counts
  o tests: move pidfiles and portfiles under the log directory [48]
  o tests: move server config files under the pid dir [47]
  o tests: silence some Perl::Critic warnings in test suite [56]
+ o tests: stop using strndup(), which isn't portable
  o tests: switch to 3-argument open in test suite
+ o tests: turn perl modules into full packages
  o tests: use %LOGDIR to refer to the log directory
  o tool_operate: pass a long as CURLOPT_HEADEROPT argument [13]
+ o transfer: skip extra assign [87]
+ o url: fix PVS nits [71]
  o url: remove call to Curl_llist_destroy in Curl_close [22]
+ o urlapi: cleanups and improvements [91]
  o urlapi: detect and error on illegal IPv4 addresses [70]
+ o urlapi: prevent setting invalid schemes with *url_set() [107]
+ o urlapi: skip a pointless assign [88]
  o urlapi: URL encoding for the URL missed the fragment [29]
  o vlts: use full buffer size when receiving data if possible [32]
  o vtls and h2 improvements [69]
@@ -104,14 +144,15 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Ali Khodkar, Andy Alt, Arne Soete, Ben Fritz, Brian Lund, Chloe Kudryavtsev,
-  Dan Fandrich, Dan Frandrich, Daniel Stenberg, dengjfzh on github,
-  Douglas R. Reno, Emil Engler, Frank Gevaerts, Gisle Vanem, Harry Sintonen,
-  Jakub Zakrzewski, Jim King, Jon Rumsey, Kai Pastor, Kamil Dudka,
+  Ali Khodkar, Andy Alt, Arne Soete, Ben Fritz, Biswapriyo Nath, Brian Lund,
+  Chloe Kudryavtsev, Colman Mbuya, Dan Fandrich, Dan Frandrich,
+  Daniel Stenberg, dengjfzh on github, Dirk Rosenkranz, Douglas R. Reno,
+  Emil Engler, Frank Gevaerts, Gisle Vanem, Harry Sintonen, Jakub Zakrzewski,
+  Jim King, Jon Rumsey, Josh McCullough, Kai Pastor, Kamil Dudka, Kvarec Lezki,
   kwind on github, Matt Jolly, Micah Snyder), Osaila on github,
   Patrick Monnerat, Paul Howarth, Philip Heiduck, Ray Satiro, Ronan Pigott,
   simplerobot on github, Stefan Eissing, SuperIlu on github, Viktor Szakats
-  (33 contributors)
+  (38 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -172,11 +213,46 @@ References to bug reports and discussions on issues:
  [55] = https://curl.se/bug/?i=10908
  [56] = https://curl.se/bug/?i=10861
  [57] = https://curl.se/bug/?i=10900
+ [58] = https://curl.se/mail/archive-2023-04/0008.html
  [61] = https://curl.se/bug/?i=10899
+ [62] = https://curl.se/bug/?i=10926
  [63] = https://curl.se/bug/?i=10896
  [64] = https://curl.se/bug/?i=10896
+ [65] = https://curl.se/bug/?i=10963
  [66] = https://curl.se/bug/?i=10898
  [67] = https://curl.se/bug/?i=10877
  [68] = https://curl.se/bug/?i=10780
  [69] = https://curl.se/bug/?i=10891
  [70] = https://curl.se/bug/?i=10894
+ [71] = https://curl.se/bug/?i=10959
+ [72] = https://curl.se/bug/?i=10958
+ [73] = https://curl.se/bug/?i=10956
+ [74] = https://curl.se/bug/?i=10954
+ [75] = https://curl.se/bug/?i=10961
+ [76] = https://curl.se/bug/?i=10952
+ [77] = https://curl.se/bug/?i=10951
+ [78] = https://curl.se/bug/?i=10955
+ [79] = https://curl.se/bug/?i=10957
+ [80] = https://curl.se/bug/?i=10953
+ [82] = https://curl.se/bug/?i=10960
+ [83] = https://curl.se/bug/?i=10950
+ [84] = https://curl.se/bug/?i=10947
+ [85] = https://curl.se/bug/?i=10946
+ [86] = https://curl.se/bug/?i=10945
+ [87] = https://curl.se/bug/?i=10944
+ [88] = https://curl.se/bug/?i=10943
+ [89] = https://curl.se/bug/?i=10939
+ [90] = https://curl.se/bug/?i=10787
+ [91] = https://curl.se/bug/?i=10935
+ [93] = https://curl.se/bug/?i=10933
+ [94] = https://curl.se/bug/?i=10934
+ [95] = https://curl.se/bug/?i=10937
+ [97] = https://curl.se/bug/?i=10932
+ [98] = https://curl.se/bug/?i=10931
+ [99] = https://curl.se/bug/?i=10930
+ [102] = https://curl.se/bug/?i=10925
+ [104] = https://curl.se/bug/?i=10922
+ [105] = https://curl.se/bug/?i=10921
+ [106] = https://curl.se/bug/?i=10889
+ [107] = https://curl.se/bug/?i=10911
+ [108] = https://curl.se/bug/?i=10912
