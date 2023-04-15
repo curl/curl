@@ -33,6 +33,7 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
+        prepro
         restore_test_env
         runner_test_preprocess
         runner_test_run
@@ -47,6 +48,11 @@ BEGIN {
         $valgrind_tool
         $gdb
     );
+
+    # these are for debugging only
+    our @EXPORT_OK = qw(
+        singletest_preprocess
+    );
 }
 
 use pathhelp qw(
@@ -59,6 +65,7 @@ use processhelp qw(
 use servers;
 use getpart;
 use globalconfig;
+use testutil;
 
 
 #######################################################################
@@ -98,21 +105,6 @@ sub displaylogs{
 }
 
 #######################################################################
-# Call main's prepro
-# TODO: figure out where this should live; since it needs to know
-# things in main:: only, maybe the test file should be preprocessed there
-sub prepro {
-    return main::prepro(@_);
-}
-
-#######################################################################
-# Call main's runclient
-# TODO: move this into a helper package
-sub runclient {
-    return main::runclient(@_);
-}
-
-#######################################################################
 # Check for a command in the PATH of the machine running curl.
 #
 sub checktestcmd {
@@ -147,6 +139,58 @@ sub normalize_cmdres {
     }
     return ($cmdres, $dumped_core);
 }
+
+# 'prepro' processes the input array and replaces %-variables in the array
+# etc. Returns the processed version of the array
+sub prepro {
+    my $testnum = shift;
+    my (@entiretest) = @_;
+    my $show = 1;
+    my @out;
+    my $data_crlf;
+    for my $s (@entiretest) {
+        my $f = $s;
+        if($s =~ /^ *%if (.*)/) {
+            my $cond = $1;
+            my $rev = 0;
+
+            if($cond =~ /^!(.*)/) {
+                $cond = $1;
+                $rev = 1;
+            }
+            $rev ^= $feature{$cond} ? 1 : 0;
+            $show = $rev;
+            next;
+        }
+        elsif($s =~ /^ *%else/) {
+            $show ^= 1;
+            next;
+        }
+        elsif($s =~ /^ *%endif/) {
+            $show = 1;
+            next;
+        }
+        if($show) {
+            # The processor does CRLF replacements in the <data*> sections if
+            # necessary since those parts might be read by separate servers.
+            if($s =~ /^ *<data(.*)\>/) {
+                if($1 =~ /crlf="yes"/ ||
+                   ($feature{"hyper"} && ($keywords{"HTTP"} || $keywords{"HTTPS"}))) {
+                    $data_crlf = 1;
+                }
+            }
+            elsif(($s =~ /^ *<\/data/) && $data_crlf) {
+                $data_crlf = 0;
+            }
+            subvariables(\$s, $testnum, "%");
+            subbase64(\$s);
+            subnewlines(0, \$s) if($data_crlf);
+            push @out, $s;
+        }
+    }
+    return @out;
+}
+
 
 #######################################################################
 # Memory allocation test and failure torture testing.
