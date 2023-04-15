@@ -61,6 +61,7 @@ BEGIN {
             serverfortest
             stopserver
             stopservers
+            subvariables
         )
     );
 }
@@ -103,6 +104,7 @@ use pathhelp qw(
 
 use processhelp;
 use globalconfig;
+use testutil;
 
 
 my %serverpidfile; # all server pid file names, identified by server id
@@ -117,6 +119,10 @@ my $httptlssrv = find_httptlssrv();
 my %run;          # running server
 my %runcert;      # cert file currently in use by an ssl running server
 my $serverstartretries=10; # number of times to attempt to start server
+my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
+my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
+my $posix_pwd=$pwd;        # current working directory
+my $h2cver = "h2c"; # this version is decided by the nghttp2 lib being used
 
 # Variables shared with runtests.pl
 our $HOSTIP="127.0.0.1";   # address on which the test server listens
@@ -139,20 +145,6 @@ our $stunnel; # path to stunnel command
 
 sub logmsg {
     return main::logmsg(@_);
-}
-
-#######################################################################
-# Call main's runclient
-# TODO: move this into a helper package
-sub runclient {
-    return main::runclient(@_);
-}
-
-#######################################################################
-# Call main's runclientoutput
-# TODO: move this into a helper package
-sub runclientoutput {
-    return main::runclientoutput(@_);
 }
 
 #######################################################################
@@ -2940,6 +2932,100 @@ sub stopservers {
     }
 
     return $result;
+}
+
+
+#######################################################################
+# substitute the variable stuff into either a joined up file or
+# a command, in either case passed by reference
+#
+sub subvariables {
+    my ($thing, $testnum, $prefix) = @_;
+    my $port;
+
+    if(!$prefix) {
+        $prefix = "%";
+    }
+
+    # test server ports
+    # Substitutes variables like %HTTPPORT and %SMTP6PORT with the server ports
+    foreach my $proto ('DICT',
+                       'FTP', 'FTP6', 'FTPS',
+                       'GOPHER', 'GOPHER6', 'GOPHERS',
+                       'HTTP', 'HTTP6', 'HTTPS',
+                       'HTTPSPROXY', 'HTTPTLS', 'HTTPTLS6',
+                       'HTTP2', 'HTTP2TLS',
+                       'HTTP3',
+                       'IMAP', 'IMAP6', 'IMAPS',
+                       'MQTT',
+                       'NOLISTEN',
+                       'POP3', 'POP36', 'POP3S',
+                       'RTSP', 'RTSP6',
+                       'SMB', 'SMBS',
+                       'SMTP', 'SMTP6', 'SMTPS',
+                       'SOCKS',
+                       'SSH',
+                       'TELNET',
+                       'TFTP', 'TFTP6') {
+        $port = protoport(lc $proto);
+        $$thing =~ s/${prefix}(?:$proto)PORT/$port/g;
+    }
+    # Special case: for PROXYPORT substitution, use httpproxy.
+    $port = protoport('httpproxy');
+    $$thing =~ s/${prefix}PROXYPORT/$port/g;
+
+    # server Unix domain socket paths
+    $$thing =~ s/${prefix}HTTPUNIXPATH/$HTTPUNIXPATH/g;
+    $$thing =~ s/${prefix}SOCKSUNIXPATH/$SOCKSUNIXPATH/g;
+
+    # client IP addresses
+    $$thing =~ s/${prefix}CLIENT6IP/$CLIENT6IP/g;
+    $$thing =~ s/${prefix}CLIENTIP/$CLIENTIP/g;
+
+    # server IP addresses
+    $$thing =~ s/${prefix}HOST6IP/$HOST6IP/g;
+    $$thing =~ s/${prefix}HOSTIP/$HOSTIP/g;
+
+    # misc
+    $$thing =~ s/${prefix}CURL/$CURL/g;
+    $$thing =~ s/${prefix}LOGDIR/$LOGDIR/g;
+    $$thing =~ s/${prefix}PWD/$pwd/g;
+    $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
+    $$thing =~ s/${prefix}VERSION/$CURLVERSION/g;
+    $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
+
+    my $file_pwd = $pwd;
+    if($file_pwd !~ /^\//) {
+        $file_pwd = "/$file_pwd";
+    }
+    my $ssh_pwd = $posix_pwd;
+    # this only works after the SSH server has been started
+    # TODO: call sshversioninfo early and store $sshdid so this substitution
+    # always works
+    if ($sshdid && $sshdid =~ /OpenSSH-Windows/) {
+        $ssh_pwd = $file_pwd;
+    }
+
+    $$thing =~ s/${prefix}FILE_PWD/$file_pwd/g;
+    $$thing =~ s/${prefix}SSH_PWD/$ssh_pwd/g;
+    $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
+    $$thing =~ s/${prefix}USER/$USER/g;
+
+    $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
+    $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
+
+    # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
+    # used for time-out tests and that would work on most hosts as these
+    # adjust for the startup/check time for this particular host. We needed to
+    # do this to make the test suite run better on very slow hosts.
+    my $ftp2 = $ftpchecktime * 2;
+    my $ftp3 = $ftpchecktime * 3;
+
+    $$thing =~ s/${prefix}FTPTIME2/$ftp2/g;
+    $$thing =~ s/${prefix}FTPTIME3/$ftp3/g;
+
+    # HTTP2
+    $$thing =~ s/${prefix}H2CVER/$h2cver/g;
 }
 
 
