@@ -80,6 +80,22 @@
 #include "memdebug.h"
 
 
+#if defined(ENABLE_IPV6) && defined(IPV6_V6ONLY) && defined(WIN32)
+/* It makes support for IPv4-mapped IPv6 addresses.
+ * Linux kernel, NetBSD, FreeBSD and Darwin: default is off;
+ * Windows Vista and later: default is on;
+ * DragonFly BSD: acts like off, and dummy setting;
+ * OpenBSD and earlier Windows: unsupported.
+ * Linux: controlled by /proc/sys/net/ipv6/bindv6only.
+ */
+static void set_ipv6_v6only(curl_socket_t sockfd, int on)
+{
+  (void)setsockopt(sockfd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&on, sizeof(on));
+}
+#else
+#define set_ipv6_v6only(x,y)
+#endif
+
 static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
 {
 #if defined(TCP_NODELAY)
@@ -944,8 +960,10 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
     goto out;
 
 #ifdef ENABLE_IPV6
-  if(ctx->addr.family == AF_INET6)
+  if(ctx->addr.family == AF_INET6) {
+    set_ipv6_v6only(ctx->sock, 0);
     ipmsg = "  Trying [%s]:%d...";
+  }
   else
 #endif
     ipmsg = "  Trying %s:%d...";
