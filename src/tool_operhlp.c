@@ -110,7 +110,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
       goto fail;
     }
     uerr = curl_url_get(uh, CURLUPART_QUERY, &query, 0);
-    if(query) {
+    if(!uerr && query) {
       curl_free(query);
       curl_free(path);
       curl_url_cleanup(uh);
