@@ -71,7 +71,7 @@ jobs:
       name: 'install prereqs and impacket, pytest, crypto'
 
     - run: |
-        git clone --quiet --depth=1 -b openssl-3.0.8+quic https://github.com/quictls/openssl
+        git clone --quiet --depth=1 -b openssl-3.0.9+quic https://github.com/quictls/openssl
         cd openssl
         ./config --prefix=$HOME/all --libdir=$HOME/all/lib
         make install_sw
@@ -140,4 +140,3 @@ jobs:
       name: 'run pytest'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
-
