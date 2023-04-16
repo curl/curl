@@ -725,7 +725,7 @@ push @cfgarr, '#';
 #
 if(sshd_supports_opt('AddressFamily','any')) {
     # Address family must be specified before ListenAddress
-    splice @cfgarr, 14, 0, 'AddressFamily any';
+    splice @cfgarr, 11, 0, 'AddressFamily any';
 }
 if(sshd_supports_opt('Compression','no')) {
     push @cfgarr, 'Compression no';
