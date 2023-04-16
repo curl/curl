@@ -24,8 +24,6 @@
 #include "curlcheck.h"
 #include "curl_get_line.h"
 
-#define TESTINPUT "log/curl_get_line2101"
-
 /* The test XML does not supply a way to write files without newlines
  * so we write our own
  */
@@ -81,7 +79,6 @@ static const char *filecontents[] = {
 
 
 UNITTEST_START
-{
   size_t i;
   for(i = 0; i < NUMTESTS; i++) {
     FILE *fp;
@@ -89,12 +86,12 @@ UNITTEST_START
     int len = 4096;
     char *line;
 
-    fp = fopen(TESTINPUT, "wb");
+    fp = fopen(arg, "wb");
     abort_unless(fp != NULL, "Cannot open testfile");
     fwrite(filecontents[i], 1, strlen(filecontents[i]), fp);
     fclose(fp);
 
-    fp = fopen(TESTINPUT, "rb");
+    fp = fopen(arg, "rb");
     abort_unless(fp != NULL, "Cannot open testfile");
 
     fprintf(stderr, "Test %d...", i);
@@ -159,6 +156,4 @@ UNITTEST_START
     fclose(fp);
     fprintf(stderr, "OK\n");
   }
-  return 0;
-}
 UNITTEST_STOP

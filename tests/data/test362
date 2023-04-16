@@ -15,7 +15,7 @@ ftp
  <name>
 FTP resume upload file with nothing to start from
  </name>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
       see
@@ -24,7 +24,7 @@ works
   so does it?
 </file>
  <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt --continue-at -
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt --continue-at -
 </command>
 </client>
 

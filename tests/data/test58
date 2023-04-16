@@ -26,9 +26,9 @@ http
 HTTP PUT from file with weird letters
 </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/ -T log/%TESTNUMBERte[]st.txt -g
+http://%HOSTIP:%HTTPPORT/we/want/ -T %LOGDIR/%TESTNUMBERte[]st.txt -g
 </command>
-<file name="log/%TESTNUMBERte[]st.txt">
+<file name="%LOGDIR/%TESTNUMBERte[]st.txt">
 a few bytes
 </file>
 </client>

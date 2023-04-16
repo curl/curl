@@ -24,7 +24,7 @@ http://%HOSTIP:%NOLISTENPORT/path/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/stdout%TESTNUMBER">
+<file name="%LOGDIR/stdout%TESTNUMBER">
 We are done
 </file>
 </verify>

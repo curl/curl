@@ -38,9 +38,9 @@ http
 Send capped huge number of matching cookies
 </name>
 <command>
-http://attack.invalid:%HTTPPORT/a/b/%TESTNUMBER -b log/cookie%TESTNUMBER --resolve attack.invalid:%HTTPPORT:%HOSTIP -L
+http://attack.invalid:%HTTPPORT/a/b/%TESTNUMBER -b %LOGDIR/cookie%TESTNUMBER --resolve attack.invalid:%HTTPPORT:%HOSTIP -L
 </command>
-<file name="log/cookie%TESTNUMBER" mode="text">
+<file name="%LOGDIR/cookie%TESTNUMBER" mode="text">
 attack.invalid	TRUE	/	FALSE	0	name1	could-be-large-1
 attack.invalid	TRUE	/	FALSE	0	name2	could-be-large-2
 attack.invalid	TRUE	/	FALSE	0	name3	could-be-large-3

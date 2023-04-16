@@ -41,7 +41,7 @@ The variables available are:
 .TP 15
 .B certs
 Output the certificate chain with details. Supported only by the OpenSSL,
-GnuTLS, Schannel, NSS, GSKit and Secure Transport backends (Added in 7.88.0)
+GnuTLS, Schannel, NSS, GSKit and Secure Transport backends. (Added in 7.88.0)
 .TP
 .B content_type
 The Content-Type of the requested document, if there was any.
@@ -97,7 +97,7 @@ The http method used in the most recent HTTP request. (Added in 7.72.0)
 .TP
 .B num_certs
 Number of server certificates received in the TLS handshake. Supported only by
-the OpenSSL, GnuTLS, Schannel, NSS, GSKit and Secure Transport backends (Added
+the OpenSSL, GnuTLS, Schannel, NSS, GSKit and Secure Transport backends. (Added
 in 7.88.0)
 .TP
 .B num_connects
@@ -111,7 +111,7 @@ redirect). Note that the status line IS NOT a header. (Added in 7.73.0)
 Number of redirects that were followed in the request. (Added in 7.12.3)
 .TP
 .B onerror
-The rest of the output is only shown if the transfer returned a non-zero error
+The rest of the output is only shown if the transfer returned a non-zero error.
 (Added in 7.75.0)
 .TP
 .B proxy_ssl_verify_result
@@ -208,6 +208,70 @@ The total time, in seconds, that the full operation lasted.
 .TP
 .B url
 The URL that was fetched. (Added in 7.75.0)
+.TP
+.B url.scheme
+The scheme part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.user
+The user part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.password
+The password part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.options
+The options part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.host
+The host part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.port
+The port number of the URL that was fetched. If no port number was specified,
+but the URL scheme is known, that scheme's default port number is
+shown. (Added in 8.1.0)
+.TP
+.B url.path
+The path part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.query
+The query part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.fragment
+The fragment part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B url.zoneid
+The zoneid part of the URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.scheme
+The scheme part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.user
+The user part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.password
+The password part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.options
+The options part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.host
+The host part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.port
+The port number of the effective (last) URL that was fetched. If no port
+number was specified, but the URL scheme is known, that scheme's default port
+number is shown. (Added in 8.1.0)
+.TP
+.B urle.path
+The path part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.query
+The query part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.fragment
+The fragment part of the effective (last) URL that was fetched. (Added in 8.1.0)
+.TP
+.B urle.zoneid
+The zoneid part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
 .B urlnum
 The URL index number of this transfer, 0-indexed. De-globbed URLs share the

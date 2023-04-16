@@ -44,7 +44,7 @@ Content-Type: text/html
 
 # Client-side
 <client>
-<file name="log/cookies676">
+<file name="%LOGDIR/cookies%TESTNUMBER">
 %HOSTIP	TRUE	/we/want/	FALSE	2118138987	proven	yes
 </file>
 <server>
@@ -59,7 +59,7 @@ lib%TESTNUMBER
 verify setting CURLOPT_COOKIEFILE to NULL again
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies676
 </command>
 <features>
 cookies

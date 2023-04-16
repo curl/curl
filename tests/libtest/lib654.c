@@ -109,7 +109,7 @@ int test(char *URL)
   hdrs = curl_slist_append(hdrs, "X-Test-Number: 654");
   curl_mime_headers(part, hdrs, TRUE);
   part = curl_mime_addpart(mime);
-  curl_mime_filedata(part, "log/file654.txt");
+  curl_mime_filedata(part, libtest_arg2);
   part = curl_mime_addpart(mime);
   curl_mime_data_cb(part, (curl_off_t) -1, read_callback, NULL, free_callback,
                     &pooh);

@@ -24,9 +24,9 @@ lib%TESTNUMBER
 SFTP upload using multi interface
  </name>
  <command>
-Sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/upload%TESTNUMBER.txt %PWD/log/file%TESTNUMBER.txt %USER:
+Sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/upload%TESTNUMBER.txt %PWD/%LOGDIR/file%TESTNUMBER.txt %USER: %LOGDIR/server/curl_client_key.pub %LOGDIR/server/curl_client_key
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Moooooooooooo
  upload this
 </file>
@@ -41,7 +41,7 @@ disable
 </strip>
 <protocol>
 </protocol>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Moooooooooooo
  upload this
 </file>

@@ -30,9 +30,9 @@ void logmsg(const char *msg, ...);
 long timediff(struct timeval newer, struct timeval older);
 
 #define TEST_DATA_PATH "%s/data/test%ld"
-#define ALTTEST_DATA_PATH "%s/log/test%ld"
+#define ALTTEST_DATA_PATH "%s/test%ld"
 
-#define SERVERLOGS_LOCK "log/serverlogs.lock"
+#define SERVERLOGS_LOCK "serverlogs.lock"
 
 /* global variable, where to find the 'data' dir */
 extern const char *path;
@@ -57,7 +57,7 @@ void win32_cleanup(void);
 #endif  /* WIN32 */
 
 /* fopens the test case file */
-FILE *test2fopen(long testno);
+FILE *test2fopen(long testno, const char *logdir);
 
 int wait_ms(int timeout_ms);
 curl_off_t our_getpid(void);

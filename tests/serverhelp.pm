@@ -22,54 +22,76 @@
 #
 #***************************************************************************
 
+# This perl module contains functions useful in writing test servers.
+
 package serverhelp;
 
 use strict;
 use warnings;
-use Exporter;
 
+BEGIN {
+    use base qw(Exporter);
 
-#***************************************************************************
-# Global symbols allowed without explicit package name
-#
-use vars qw(
-    @ISA
-    @EXPORT_OK
+    our @EXPORT_OK = qw(
+        logmsg
+        $logfile
+        serverfactors
+        servername_id
+        servername_str
+        servername_canon
+        server_pidfilename
+        server_portfilename
+        server_logfilename
+        server_cmdfilename
+        server_inputfilename
+        server_outputfilename
+        mainsockf_pidfilename
+        mainsockf_logfilename
+        datasockf_pidfilename
+        datasockf_logfilename
     );
 
+    # sub second timestamping needs Time::HiRes
+    eval {
+        no warnings "all";
+        require Time::HiRes;
+        import  Time::HiRes qw( gettimeofday );
+    }
+}
 
-#***************************************************************************
-# Inherit Exporter's capabilities
-#
-@ISA = qw(Exporter);
 
-
-#***************************************************************************
-# Global symbols this module will export upon request
-#
-@EXPORT_OK = qw(
-    serverfactors
-    servername_id
-    servername_str
-    servername_canon
-    server_pidfilename
-    server_portfilename
-    server_logfilename
-    server_cmdfilename
-    server_inputfilename
-    server_outputfilename
-    mainsockf_pidfilename
-    mainsockf_logfilename
-    datasockf_pidfilename
-    datasockf_logfilename
-    );
-
+our $logfile;  # server log file name, for logmsg
 
 #***************************************************************************
 # Just for convenience, test harness uses 'https' and 'httptls' literals as
 # values for 'proto' variable in order to differentiate different servers.
 # 'https' literal is used for stunnel based https test servers, and 'httptls'
 # is used for non-stunnel https test servers.
+
+#**********************************************************************
+# logmsg is general message logging subroutine for our test servers.
+#
+sub logmsg {
+    my $now;
+    # sub second timestamping needs Time::HiRes
+    if($Time::HiRes::VERSION) {
+        my ($seconds, $usec) = gettimeofday();
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+            localtime($seconds);
+        $now = sprintf("%02d:%02d:%02d.%06d ", $hour, $min, $sec, $usec);
+    }
+    else {
+        my $seconds = time();
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+            localtime($seconds);
+        $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
+    }
+    if(open(my $logfilefh, ">>", "$logfile")) {
+        print $logfilefh $now;
+        print $logfilefh @_;
+        close($logfilefh);
+    }
+}
 
 
 #***************************************************************************
@@ -118,7 +140,7 @@ sub servername_str {
     $idnum = 1 if(not $idnum);
     die "unsupported ID number: '$idnum'" unless($idnum &&
         ($idnum =~ /^(\d+)$/));
-    $idnum = '' unless($idnum > 1);
+    $idnum = '' if($idnum <= 1);
 
     return "${proto}${idnum}${ipver}";
 }
@@ -149,18 +171,18 @@ sub servername_canon {
 # Return file name for server pid file.
 #
 sub server_pidfilename {
-    my ($proto, $ipver, $idnum) = @_;
+    my ($piddir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.pid';
-    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+    return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
 #***************************************************************************
 # Return file name for server port file.
 #
 sub server_portfilename {
-    my ($proto, $ipver, $idnum) = @_;
+    my ($piddir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.port';
-    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+    return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
 
@@ -209,11 +231,11 @@ sub server_outputfilename {
 # Return file name for main or primary sockfilter pid file.
 #
 sub mainsockf_pidfilename {
-    my ($proto, $ipver, $idnum) = @_;
+    my ($piddir, $proto, $ipver, $idnum) = @_;
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid':'_sockfilt.pid';
-    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+    return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
 
@@ -233,11 +255,11 @@ sub mainsockf_logfilename {
 # Return file name for data or secondary sockfilter pid file.
 #
 sub datasockf_pidfilename {
-    my ($proto, $ipver, $idnum) = @_;
+    my ($piddir, $proto, $ipver, $idnum) = @_;
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^ftps?$/));
     my $trailer = '_sockdata.pid';
-    return '.'. servername_canon($proto, $ipver, $idnum) ."$trailer";
+    return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
 

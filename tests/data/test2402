@@ -96,7 +96,7 @@ Via: 2 nghttpx
 <strip>
 ^Host:.*
 </strip>
-<file name="log/stderr%TESTNUMBER" mode="text">
+<file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
 * Connection #0 to host localhost left intact
 * Connection #0 to host localhost left intact
 * Connection #0 to host localhost left intact

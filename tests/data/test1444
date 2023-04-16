@@ -31,7 +31,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --remote-time
 # Verify the mtime of the file. The mtime is specifically chosen to be an even
 # number so that it can be represented exactly on a FAT filesystem.
 <postcheck>
-perl -e 'exit((stat("log/curl%TESTNUMBER.out"))[9] != 1234567890)'
+perl -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 1234567890)'
 </postcheck>
 </client>
 

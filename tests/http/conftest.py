@@ -31,14 +31,20 @@ import pytest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
-from testenv import Env, Nghttpx, Httpd
-
+from testenv import Env, Nghttpx, Httpd, NghttpxQuic, NghttpxFwd
 
 @pytest.fixture(scope="package")
 def env(pytestconfig) -> Env:
     env = Env(pytestconfig=pytestconfig)
     level = logging.DEBUG if env.verbose > 0 else logging.INFO
     logging.getLogger('').setLevel(level=level)
+    if not env.curl_has_protocol('http'):
+        pytest.skip("curl built without HTTP support")
+    if not env.curl_has_protocol('https'):
+        pytest.skip("curl built without HTTPS support")
+    if env.setup_incomplete():
+        pytest.skip(env.incomplete_reason())
+
     env.setup()
     return env
 
@@ -50,16 +56,27 @@ def log_global_env_facts(record_testsuite_property, env):
 @pytest.fixture(scope='package')
 def httpd(env) -> Httpd:
     httpd = Httpd(env=env)
-    assert httpd.exists(), f'httpd not found: {env.httpd}'
+    if not httpd.exists():
+        pytest.skip(f'httpd not found: {env.httpd}')
     httpd.clear_logs()
-    assert httpd.start()
+    if not httpd.start():
+        pytest.fail(f'failed to start httpd: {env.httpd}')
     yield httpd
     httpd.stop()
 
 
 @pytest.fixture(scope='package')
 def nghttpx(env, httpd) -> Optional[Nghttpx]:
-    nghttpx = Nghttpx(env=env)
+    nghttpx = NghttpxQuic(env=env)
+    if env.have_h3():
+        nghttpx.clear_logs()
+        assert nghttpx.start()
+    yield nghttpx
+    nghttpx.stop()
+
+@pytest.fixture(scope='package')
+def nghttpx_fwd(env, httpd) -> Optional[Nghttpx]:
+    nghttpx = NghttpxFwd(env=env)
     if env.have_h3():
         nghttpx.clear_logs()
         assert nghttpx.start()

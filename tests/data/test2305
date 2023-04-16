@@ -44,13 +44,13 @@ WebSocket curl_ws_recv() loop reading three larger frames
 lib%TESTNUMBER
 </tool>
 <command>
-ws://%HOSTIP:%HTTPPORT/%TESTNUMBER log/save%TESTNUMBER
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/save%TESTNUMBER
 </command>
 </client>
 
 #
 <verify>
-<file name="log/save%TESTNUMBER">
+<file name="%LOGDIR/save%TESTNUMBER">
 %repeat[256 x helothisisdaniel]%
 %repeat[256 x helothisisdaniel]%
 %repeat[256 x helothisisdaniel]%

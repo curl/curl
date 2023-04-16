@@ -47,11 +47,11 @@ http
  <name>
 HTTP POST from file with 301 redirect and --post301
  </name>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 field=data
 </file>
  <command>
-http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d @log/test%TESTNUMBER.txt --post301
+http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d @%LOGDIR/test%TESTNUMBER.txt --post301
 </command>
 </client>
 

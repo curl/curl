@@ -18,5 +18,8 @@ unittest
  <name>
 curl_get_line unit tests
  </name>
+<command>
+%LOGDIR/curl_get_line%TESTNUMBER
+</command>
 </client>
 </testcase>

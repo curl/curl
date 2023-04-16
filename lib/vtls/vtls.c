@@ -130,6 +130,33 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
   return !memcmp(first->data, second->data, first->len); /* same data */
 }
 
+#ifdef USE_SSL
+static const struct alpn_spec ALPN_SPEC_H10 = {
+  { ALPN_HTTP_1_0 }, 1
+};
+static const struct alpn_spec ALPN_SPEC_H11 = {
+  { ALPN_HTTP_1_1 }, 1
+};
+#ifdef USE_HTTP2
+static const struct alpn_spec ALPN_SPEC_H2_H11 = {
+  { ALPN_H2, ALPN_HTTP_1_1 }, 2
+};
+#endif
+
+static const struct alpn_spec *alpn_get_spec(int httpwant, bool use_alpn)
+{
+  if(!use_alpn)
+    return NULL;
+  if(httpwant == CURL_HTTP_VERSION_1_0)
+    return &ALPN_SPEC_H10;
+#ifdef USE_HTTP2
+  if(httpwant >= CURL_HTTP_VERSION_2)
+    return &ALPN_SPEC_H2_H11;
+#endif
+  return &ALPN_SPEC_H11;
+}
+#endif /* USE_SSL */
+
 
 bool
 Curl_ssl_config_matches(struct ssl_primary_config *data,
@@ -291,7 +318,7 @@ static bool ssl_prefs_check(struct Curl_easy *data)
 }
 
 static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
-                                           const struct alpn_spec *alpn)
+                                     const struct alpn_spec *alpn)
 {
   struct ssl_connect_data *ctx;
 
@@ -1581,8 +1608,15 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
   ssize_t nread;
 
   CF_DATA_SAVE(save, cf, data);
-  *err = CURLE_OK;
   nread = Curl_ssl->recv_plain(cf, data, buf, len, err);
+  if(nread > 0) {
+    DEBUGASSERT((size_t)nread <= len);
+  }
+  else if(nread == 0) {
+    /* eof */
+    *err = CURLE_OK;
+  }
+  DEBUGF(LOG_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d", len, nread, *err));
   CF_DATA_RESTORE(cf, save);
   return nread;
 }
@@ -1726,7 +1760,8 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 
   DEBUGASSERT(data->conn);
 
-  ctx = cf_ctx_new(data, Curl_alpn_get_spec(data, conn));
+  ctx = cf_ctx_new(data, alpn_get_spec(data->state.httpwant,
+                                       conn->bits.tls_enable_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1767,6 +1802,7 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
 }
 
 #ifndef CURL_DISABLE_PROXY
+
 static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
                                     struct Curl_easy *data,
                                     struct connectdata *conn)
@@ -1774,8 +1810,23 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   struct Curl_cfilter *cf = NULL;
   struct ssl_connect_data *ctx;
   CURLcode result;
+  bool use_alpn = conn->bits.tls_enable_alpn;
+  int httpwant = CURL_HTTP_VERSION_1_1;
 
-  ctx = cf_ctx_new(data, Curl_alpn_get_proxy_spec(data, conn));
+#ifdef USE_HTTP2
+  if(conn->bits.tunnel_proxy &&
+     ((conn->http_proxy.proxytype == CURLPROXY_HTTPS2)
+#ifdef DEBUGBUILD
+      || getenv("CURL_PROXY_TUNNEL_H2")
+#endif
+       )
+    ) {
+    use_alpn = TRUE;
+    httpwant = CURL_HTTP_VERSION_2;
+  }
+#endif
+
+  ctx = cf_ctx_new(data, alpn_get_spec(httpwant, use_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1844,15 +1895,16 @@ void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
                                  int sockindex)
 {
-  struct Curl_cfilter *cf = data->conn? data->conn->cfilter[sockindex] : NULL;
+  struct Curl_cfilter *cf, *head;
   CURLcode result = CURLE_OK;
 
   (void)data;
-  for(; cf; cf = cf->next) {
+  head = data->conn? data->conn->cfilter[sockindex] : NULL;
+  for(cf = head; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_ssl) {
       if(Curl_ssl->shut_down(cf, data))
         result = CURLE_SSL_SHUTDOWN_FAILED;
-      Curl_conn_cf_discard(cf, data);
+      Curl_conn_cf_discard_sub(head, cf, data, FALSE);
       break;
     }
   }
@@ -1936,42 +1988,6 @@ struct Curl_cfilter *Curl_ssl_cf_get_ssl(struct Curl_cfilter *cf)
   return NULL;
 }
 
-static const struct alpn_spec ALPN_SPEC_H10 = {
-  { ALPN_HTTP_1_0 }, 1
-};
-static const struct alpn_spec ALPN_SPEC_H11 = {
-  { ALPN_HTTP_1_1 }, 1
-};
-#ifdef USE_HTTP2
-static const struct alpn_spec ALPN_SPEC_H2_H11 = {
-  { ALPN_H2, ALPN_HTTP_1_1 }, 2
-};
-#endif
-
-const struct alpn_spec *
-Curl_alpn_get_spec(struct Curl_easy *data, struct connectdata *conn)
-{
-  if(!conn->bits.tls_enable_alpn)
-    return NULL;
-  if(data->state.httpwant == CURL_HTTP_VERSION_1_0)
-    return &ALPN_SPEC_H10;
-#ifdef USE_HTTP2
-  if(data->state.httpwant >= CURL_HTTP_VERSION_2)
-    return &ALPN_SPEC_H2_H11;
-#endif
-  return &ALPN_SPEC_H11;
-}
-
-const struct alpn_spec *
-Curl_alpn_get_proxy_spec(struct Curl_easy *data, struct connectdata *conn)
-{
-  if(!conn->bits.tls_enable_alpn)
-    return NULL;
-  if(data->state.httpwant == CURL_HTTP_VERSION_1_0)
-    return &ALPN_SPEC_H10;
-  return &ALPN_SPEC_H11;
-}
-
 CURLcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
                                 const struct alpn_spec *spec)
 {
@@ -2006,7 +2022,7 @@ CURLcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
     len = strlen(spec->entries[i]);
     if(len >= ALPN_NAME_MAX)
       return CURLE_FAILED_INIT;
-    if(off + len + 2 >= (int)sizeof(buf->data))
+    if(off + len + 2 >= sizeof(buf->data))
       return CURLE_FAILED_INIT;
     if(off)
       buf->data[off++] = ',';
@@ -2024,32 +2040,40 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   size_t proto_len)
 {
   int can_multi = 0;
+  unsigned char *palpn =
+#ifndef CURL_DISABLE_PROXY
+    Curl_ssl_cf_is_proxy(cf)?
+    &cf->conn->proxy_alpn : &cf->conn->alpn
+#else
+    &cf->conn->alpn
+#endif
+    ;
 
   if(proto && proto_len) {
     if(proto_len == ALPN_HTTP_1_1_LENGTH &&
-            !memcmp(ALPN_HTTP_1_1, proto, ALPN_HTTP_1_1_LENGTH)) {
-      cf->conn->alpn = CURL_HTTP_VERSION_1_1;
+       !memcmp(ALPN_HTTP_1_1, proto, ALPN_HTTP_1_1_LENGTH)) {
+      *palpn = CURL_HTTP_VERSION_1_1;
     }
     else if(proto_len == ALPN_HTTP_1_0_LENGTH &&
             !memcmp(ALPN_HTTP_1_0, proto, ALPN_HTTP_1_0_LENGTH)) {
-      cf->conn->alpn = CURL_HTTP_VERSION_1_0;
+      *palpn = CURL_HTTP_VERSION_1_0;
     }
 #ifdef USE_HTTP2
     else if(proto_len == ALPN_H2_LENGTH &&
             !memcmp(ALPN_H2, proto, ALPN_H2_LENGTH)) {
-      cf->conn->alpn = CURL_HTTP_VERSION_2;
+      *palpn = CURL_HTTP_VERSION_2;
       can_multi = 1;
     }
 #endif
 #ifdef USE_HTTP3
     else if(proto_len == ALPN_H3_LENGTH &&
-       !memcmp(ALPN_H3, proto, ALPN_H3_LENGTH)) {
-      cf->conn->alpn = CURL_HTTP_VERSION_3;
+            !memcmp(ALPN_H3, proto, ALPN_H3_LENGTH)) {
+      *palpn = CURL_HTTP_VERSION_3;
       can_multi = 1;
     }
 #endif
     else {
-      cf->conn->alpn = CURL_HTTP_VERSION_NONE;
+      *palpn = CURL_HTTP_VERSION_NONE;
       failf(data, "unsupported ALPN protocol: '%.*s'", (int)proto_len, proto);
       /* TODO: do we want to fail this? Previous code just ignored it and
        * some vtls backends even ignore the return code of this function. */
@@ -2059,12 +2083,14 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
     infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, (int)proto_len, proto);
   }
   else {
-    cf->conn->alpn = CURL_HTTP_VERSION_NONE;
+    *palpn = CURL_HTTP_VERSION_NONE;
     infof(data, VTLS_INFOF_NO_ALPN);
   }
 
 out:
-  Curl_multiuse_state(data, can_multi? BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+  if(!Curl_ssl_cf_is_proxy(cf))
+    Curl_multiuse_state(data, can_multi?
+                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   return CURLE_OK;
 }
 

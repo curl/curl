@@ -28,7 +28,7 @@ ftp
 FTP download, file without Content-Disposition inside, using -O
 </name>
 <setenv>
-CURL_TESTDIR=%PWD/log
+CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
 ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O
@@ -49,12 +49,12 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file%TESTNUMBER">
+<file1 name="%LOGDIR/file%TESTNUMBER">
 fooo
 mooo
 </file1>
 
-<file2 name="log/stdout%TESTNUMBER">
+<file2 name="%LOGDIR/stdout%TESTNUMBER">
 </file2>
 
 </verify>

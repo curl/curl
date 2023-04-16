@@ -22,15 +22,46 @@
 #
 ###########################################################################
 
-#use strict;
+package getpart;
 
-my @xml;
-my $xmlfile;
+use strict;
+use warnings;
+
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+        getpartattr
+        getpart
+        partexists
+        loadtest
+        fulltest
+        striparray
+        compareparts
+        writearray
+        loadarray
+        showdiff
+    );
+}
+
+use Memoize;
+use MIME::Base64;
+
+my @xml;      # test data file contents
+my $xmlfile;  # test data file name
 
 my $warning=0;
 my $trace=0;
 
-use MIME::Base64;
+# Normalize the part function arguments for proper caching. This includes the
+# file name in the arguments since that is an implied parameter that affects the
+# return value.  Any error messages will only be displayed the first time, but
+# those are disabled by default anyway, so should never been seen outside
+# development.
+sub normalize_part {
+    push @_, $xmlfile;
+    return join("\t", @_);
+}
 
 sub decode_hex {
     my $s = $_;
@@ -95,6 +126,7 @@ sub getpartattr {
     }
     return %hash;
 }
+memoize('getpartattr', NORMALIZER => 'normalize_part');  # cache each result
 
 sub getpart {
     my ($section, $part)=@_;
@@ -173,6 +205,7 @@ sub getpart {
     }
     return @this;
 }
+memoize('getpart', NORMALIZER => 'normalize_part');  # cache each result
 
 sub partexists {
     my ($section, $part)=@_;
@@ -192,24 +225,22 @@ sub partexists {
     }
     return 0; # does not exist
 }
-
-# Return entire document as list of lines
-sub getall {
-    return @xml;
-}
+# The code currently never calls this more than once per part per file, so
+# caching a result that will never be used again just slows things down.
+# memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {
     my ($file)=@_;
 
     undef @xml;
-    $xmlfile = $file;
+    $xmlfile = "";
 
-    if(open(XML, "<$file")) {
-        binmode XML; # for crapage systems, use binary
-        while(<XML>) {
+    if(open(my $xmlh, "<", "$file")) {
+        binmode $xmlh; # for crapage systems, use binary
+        while(<$xmlh>) {
             push @xml, $_;
         }
-        close(XML);
+        close($xmlh);
     }
     else {
         # failure
@@ -218,9 +249,12 @@ sub loadtest {
         }
         return 1;
     }
+    $xmlfile = $file;
     return 0;
 }
 
+
+# Return entire document as list of lines
 sub fulltest {
     return @xml;
 }
@@ -229,12 +263,12 @@ sub fulltest {
 sub savetest {
     my ($file)=@_;
 
-    if(open(XML, ">$file")) {
-        binmode XML; # for crapage systems, use binary
+    if(open(my $xmlh, ">", "$file")) {
+        binmode $xmlh; # for crapage systems, use binary
         for(@xml) {
-            print XML $_;
+            print $xmlh $_;
         }
-        close(XML);
+        close($xmlh);
     }
     else {
         # failure
@@ -293,12 +327,12 @@ sub compareparts {
 sub writearray {
     my ($filename, $arrayref)=@_;
 
-    open(TEMP, ">$filename");
-    binmode(TEMP,":raw"); # cygwin fix by Kevin Roth
+    open(my $temp, ">", "$filename") || die "Failure writing file";
+    binmode($temp,":raw"); # cygwin fix by Kevin Roth
     for(@$arrayref) {
-        print TEMP $_;
+        print $temp $_;
     }
-    close(TEMP);
+    close($temp) || die "Failure writing file";
 }
 
 #
@@ -308,11 +342,12 @@ sub loadarray {
     my ($filename)=@_;
     my @array;
 
-    open(TEMP, "<$filename");
-    while(<TEMP>) {
-        push @array, $_;
+    if (open(my $temp, "<", "$filename")) {
+        while(<$temp>) {
+            push @array, $_;
+        }
+        close($temp);
     }
-    close(TEMP);
     return @array;
 }
 
@@ -325,27 +360,27 @@ sub showdiff {
     my $file1="$logdir/check-generated";
     my $file2="$logdir/check-expected";
 
-    open(TEMP, ">$file1");
+    open(my $temp, ">", "$file1") || die "Failure writing diff file";
     for(@$firstref) {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
         $l =~ s/\n/[LF]/g;
         $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
-        print TEMP $l;
-        print TEMP "\n";
+        print $temp $l;
+        print $temp "\n";
     }
-    close(TEMP);
+    close($temp) || die "Failure writing diff file";
 
-    open(TEMP, ">$file2");
+    open($temp, ">", "$file2") || die "Failure writing diff file";
     for(@$secondref) {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
         $l =~ s/\n/[LF]/g;
         $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
-        print TEMP $l;
-        print TEMP "\n";
+        print $temp $l;
+        print $temp "\n";
     }
-    close(TEMP);
+    close($temp) || die "Failure writing diff file";
     my @out = `diff -u $file2 $file1 2>/dev/null`;
 
     if(!$out[0]) {

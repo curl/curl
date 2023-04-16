@@ -146,16 +146,18 @@ static void storerequest(const char *reqbuf, size_t totalsize);
 #endif
 
 const char *serverlogfile = DEFAULT_LOGFILE;
+static const char *logdir = "log";
+static char loglockfile[256];
 
 #define SWSVERSION "curl test suite HTTP server/0.1"
 
-#define REQUEST_DUMP  "log/server.input"
-#define RESPONSE_DUMP "log/server.response"
+#define REQUEST_DUMP  "server.input"
+#define RESPONSE_DUMP "server.response"
 
 /* when told to run as proxy, we store the logs in different files so that
    they can co-exist with the same program running as a "server" */
-#define REQUEST_PROXY_DUMP  "log/proxy.input"
-#define RESPONSE_PROXY_DUMP "log/proxy.response"
+#define REQUEST_PROXY_DUMP  "proxy.input"
+#define RESPONSE_PROXY_DUMP "proxy.response"
 
 /* file in which additional instructions may be found */
 #define DEFAULT_CMDFILE "log/ftpserver.cmd"
@@ -262,7 +264,7 @@ static int parse_servercmd(struct httprequest *req)
   FILE *stream;
   int error;
 
-  stream = test2fopen(req->testno);
+  stream = test2fopen(req->testno, logdir);
   req->close = FALSE;
   req->connmon = FALSE;
 
@@ -787,7 +789,10 @@ static void storerequest(const char *reqbuf, size_t totalsize)
   size_t written;
   size_t writeleft;
   FILE *dump;
-  const char *dumpfile = is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP;
+  char dumpfile[256];
+
+  msnprintf(dumpfile, sizeof(dumpfile), "%s/%s",
+            logdir, is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP);
 
   if(!reqbuf)
     return;
@@ -1011,8 +1016,11 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   size_t responsesize;
   int error = 0;
   int res;
-  const char *responsedump = is_proxy?RESPONSE_PROXY_DUMP:RESPONSE_DUMP;
   static char weare[256];
+  char responsedump[256];
+
+  msnprintf(responsedump, sizeof(responsedump), "%s/%s",
+            logdir, is_proxy?RESPONSE_PROXY_DUMP:RESPONSE_DUMP);
 
   switch(req->rcmd) {
   default:
@@ -1084,7 +1092,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
     logmsg("Send response test%ld section <%s>", req->testno, partbuf);
 
-    stream = test2fopen(req->testno);
+    stream = test2fopen(req->testno, logdir);
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -1106,7 +1114,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
 
     /* re-open the same file again */
-    stream = test2fopen(req->testno);
+    stream = test2fopen(req->testno, logdir);
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -1383,7 +1391,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 static void http_connect(curl_socket_t *infdp,
                          curl_socket_t rootfd,
                          const char *ipaddr,
-                         unsigned short ipport)
+                         unsigned short ipport,
+                         int keepalive_secs)
 {
   curl_socket_t serverfd[2] = {CURL_SOCKET_BAD, CURL_SOCKET_BAD};
   curl_socket_t clientfd[2] = {CURL_SOCKET_BAD, CURL_SOCKET_BAD};
@@ -1739,7 +1748,7 @@ static void http_connect(curl_socket_t *infdp,
     } /* (rc > 0) */
     else {
       timeout_count++;
-      if(timeout_count > 5) {
+      if(timeout_count > keepalive_secs) {
         logmsg("CONNECT proxy timeout after %d idle seconds!", timeout_count);
         break;
       }
@@ -1832,7 +1841,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
   */
 
   if(!serverlogslocked)
-    set_advisor_read_lock(SERVERLOGS_LOCK);
+    set_advisor_read_lock(loglockfile);
   serverlogslocked += 1;
 
   logmsg("====> Client connect");
@@ -1859,7 +1868,8 @@ static curl_socket_t accept_connection(curl_socket_t sock)
    is no data waiting, or < 0 if it should be closed */
 static int service_connection(curl_socket_t msgsock, struct httprequest *req,
                               curl_socket_t listensock,
-                              const char *connecthost)
+                              const char *connecthost,
+                              int keepalive_secs)
 {
   if(got_exit_signal)
     return -1;
@@ -1906,7 +1916,8 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
       return 1;
     }
     else {
-      http_connect(&msgsock, listensock, connecthost, req->connect_port);
+      http_connect(&msgsock, listensock, connecthost, req->connect_port,
+                   keepalive_secs);
       return -1;
     }
   }
@@ -1952,6 +1963,7 @@ int main(int argc, char *argv[])
   const char *socket_type = "IPv4";
   char port_str[11];
   const char *location_str = port_str;
+  int keepalive_secs = 5;
 
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
@@ -1983,6 +1995,11 @@ int main(int argc, char *argv[])
       if(argc>arg)
         serverlogfile = argv[arg++];
     }
+    else if(!strcmp("--logdir", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        logdir = argv[arg++];
+    }
     else if(!strcmp("--cmdfile", argv[arg])) {
       arg++;
       if(argc>arg)
@@ -2013,8 +2030,9 @@ int main(int argc, char *argv[])
 #ifdef USE_UNIX_SOCKETS
         unix_socket = argv[arg];
         if(strlen(unix_socket) >= sizeof(me.sau.sun_path)) {
-          fprintf(stderr, "sws: socket path must be shorter than %zu chars\n",
-                  sizeof(me.sau.sun_path));
+          fprintf(stderr,
+                  "sws: socket path must be shorter than %zu chars: %s\n",
+                  sizeof(me.sau.sun_path), unix_socket);
           return 0;
         }
         socket_type = "unix";
@@ -2046,6 +2064,21 @@ int main(int argc, char *argv[])
         arg++;
       }
     }
+    else if(!strcmp("--keepalive", argv[arg])) {
+      arg++;
+      if(argc>arg) {
+        char *endptr;
+        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
+        if((endptr != argv[arg] + strlen(argv[arg])) ||
+           (ulnum && (ulnum > 65535UL))) {
+          fprintf(stderr, "sws: invalid --keepalive argument (%s), must "
+                  "be number of seconds\n", argv[arg]);
+          return 0;
+        }
+        keepalive_secs = curlx_ultous(ulnum);
+        arg++;
+      }
+    }
     else if(!strcmp("--connect", argv[arg])) {
       /* The connect host IP number that the proxy will connect to no matter
          what the client asks for, but also use this as a hint that we run as
@@ -2062,6 +2095,7 @@ int main(int argc, char *argv[])
       puts("Usage: sws [option]\n"
            " --version\n"
            " --logfile [file]\n"
+           " --logdir [directory]\n"
            " --pidfile [file]\n"
            " --portfile [file]\n"
            " --ipv4\n"
@@ -2074,6 +2108,9 @@ int main(int argc, char *argv[])
       return 0;
     }
   }
+
+  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s",
+            logdir, SERVERLOGS_LOCK);
 
 #ifdef WIN32
   win32_init();
@@ -2303,7 +2340,7 @@ int main(int argc, char *argv[])
         /* Service this connection until it has nothing available */
         do {
           rc = service_connection(all_sockets[socket_idx], req, sock,
-                                  connecthost);
+                                  connecthost, keepalive_secs);
           if(got_exit_signal)
             goto sws_cleanup;
 
@@ -2329,7 +2366,7 @@ int main(int argc, char *argv[])
 
             serverlogslocked -= 1;
             if(!serverlogslocked)
-              clear_advisor_read_lock(SERVERLOGS_LOCK);
+              clear_advisor_read_lock(loglockfile);
 
             if(req->testno == DOCNUMBER_QUIT)
               goto sws_cleanup;
@@ -2375,7 +2412,7 @@ sws_cleanup:
 
   if(serverlogslocked) {
     serverlogslocked = 0;
-    clear_advisor_read_lock(SERVERLOGS_LOCK);
+    clear_advisor_read_lock(loglockfile);
   }
 
   restore_signal_handlers(false);

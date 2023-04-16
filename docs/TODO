@@ -171,6 +171,9 @@
  18.24 Use multiple parallel transfers for a single download
  18.25 Prevent terminal injection when writing to terminal
  18.26 Custom progress meter update interval
+ 18.27 -J and -O with %-encoded file names
+ 18.28 -J with -C -
+ 18.29 --retry and transfer timeouts
 
  19. Build
  19.1 roffit
@@ -219,12 +222,21 @@
  SIOCGIFADDR on newer Solaris versions as they claim the latter is obsolete.
  To support IPv6 interface addresses for network interfaces properly.
 
-1.4 alt-svc sharing
+1.4 Better and more sharing
 
  The share interface could benefit from allowing the alt-svc cache to be
  possible to share between easy handles.
 
  See https://github.com/curl/curl/issues/4476
+
+ The share interface offers CURL_LOCK_DATA_CONNECT to have multiple easy
+ handle share a connection cache, but due to how connections are used they are
+ still not thread-safe when used shared.
+
+ See https://github.com/curl/curl/issues/4915 and lib1541.c
+
+ The share interface offers CURL_LOCK_DATA_HSTS to have multiple easy handle
+ share a HSTS cache, but this is not thread-safe.
 
 1.5 get rid of PATH_MAX
 
@@ -1230,6 +1242,43 @@
  want the occasional progress meter update to see that the transfer is
  progressing and has not stuck, but they may not appreciate the
  many-times-a-second frequency curl can end up doing it with now.
+
+18.27 -J and -O with %-encoded file names
+
+ -J/--remote-header-name does not decode %-encoded file names. RFC6266 details
+ how it should be done. The can of worm is basically that we have no charset
+ handling in curl and ascii >=128 is a challenge for us. Not to mention that
+ decoding also means that we need to check for nastiness that is attempted,
+ like "../" sequences and the like. Probably everything to the left of any
+ embedded slashes should be cut off.
+ https://curl.se/bug/view.cgi?id=1294
+
+ -O also does not decode %-encoded names, and while it has even less
+ information about the charset involved the process is similar to the -J case.
+
+ Note that we will not add decoding to -O without the user asking for it with
+ some other means as well, since -O has always been documented to use the name
+ exactly as specified in the URL.
+
+18.28 -J with -C -
+
+ When using -J (with -O), automatically resumed downloading together with "-C
+ -" fails. Without -J the same command line works. This happens because the
+ resume logic is worked out before the target file name (and thus its
+ pre-transfer size) has been figured out. This can be improved.
+
+ https://curl.se/bug/view.cgi?id=1169
+
+18.29 --retry and transfer timeouts
+
+ If using --retry and the transfer timeouts (possibly due to using -m or
+ -y/-Y) the next attempt does not resume the transfer properly from what was
+ downloaded in the previous attempt but will truncate and restart at the
+ original position where it was at before the previous failed attempt. See
+ https://curl.se/mail/lib-2008-01/0080.html and Mandriva bug report
+ https://qa.mandriva.com/show_bug.cgi?id=22565
+
+
 
 19. Build
 

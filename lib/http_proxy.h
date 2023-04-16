@@ -25,34 +25,28 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
+#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+
 #include "urldata.h"
 
-#if !defined(CURL_DISABLE_PROXY)
-
-#if !defined(CURL_DISABLE_HTTP)
 /* Default proxy timeout in milliseconds */
 #define PROXY_TIMEOUT (3600*1000)
 
-CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int sockindex);
+void Curl_cf_http_proxy_get_host(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 const char **phost,
+                                 const char **pdisplay_host,
+                                 int *pport);
 
 CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
                                          struct Curl_easy *data);
 
 extern struct Curl_cftype Curl_cft_http_proxy;
 
-#endif /* !CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_PROXY  && !CURL_DISABLE_HTTP */
 
-CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               int sockindex);
-
-CURLcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
-                                      struct Curl_easy *data);
-
-extern struct Curl_cftype Curl_cft_haproxy;
-
-#endif /* !CURL_DISABLE_PROXY */
+#define IS_HTTPS_PROXY(t) (((t) == CURLPROXY_HTTPS) ||  \
+                           ((t) == CURLPROXY_HTTPS2))
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */

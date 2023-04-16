@@ -770,16 +770,23 @@ static void printsub(struct Curl_easy *data,
   }
 }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+/* warning C4706: assignment within conditional expression */
+#pragma warning(disable:4706)
+#endif
 static bool str_is_nonascii(const char *str)
 {
-  size_t len = strlen(str);
-  while(len--) {
-    if(*str & 0x80)
+  char c;
+  while((c = *str++))
+    if(c & 0x80)
       return TRUE;
-    str++;
-  }
+
   return FALSE;
 }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 static CURLcode check_telnet_options(struct Curl_easy *data)
 {

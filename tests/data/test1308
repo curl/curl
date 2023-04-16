@@ -21,7 +21,10 @@ Mime
  <name>
 formpost unit tests
  </name>
-<file name="log/test-%TESTNUMBER">
+<command>
+%LOGDIR/test-%TESTNUMBER
+</command>
+<file name="%LOGDIR/test-%TESTNUMBER">
 Piece of the file that is to uploaded as a formpost
 </file>
 </client>

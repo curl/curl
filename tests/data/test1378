@@ -23,10 +23,10 @@ ftp
 FTP DL, file without Content-Disposition inside, using -o fname
 </name>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o log/download%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o %LOGDIR/download%TESTNUMBER
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/file%TESTNUMBER
+perl %SRCDIR/libtest/notexists.pl %LOGDIR/file%TESTNUMBER
 </postcheck>
 </client>
 
@@ -44,12 +44,12 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/download%TESTNUMBER">
+<file1 name="%LOGDIR/download%TESTNUMBER">
 fooo
 mooo
 </file1>
 
-<file2 name="log/stdout%TESTNUMBER">
+<file2 name="%LOGDIR/stdout%TESTNUMBER">
 </file2>
 
 </verify>

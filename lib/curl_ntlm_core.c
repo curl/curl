@@ -83,6 +83,10 @@
 #    define DES_ecb_encrypt des_ecb_encrypt
 #    define DESKEY(x) x
 #    define DESKEYARG(x) x
+#  elif defined(OPENSSL_IS_AWSLC)
+#    define DES_set_key_unchecked (void)DES_set_key
+#    define DESKEYARG(x) *x
+#    define DESKEY(x) &x
 #  else
 #    define DESKEYARG(x) *x
 #    define DESKEY(x) &x

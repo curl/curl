@@ -39,7 +39,7 @@ http
 --etag-save with blank incoming header
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save log/etag%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save %LOGDIR/etag%TESTNUMBER
 </command>
 </client>
 
@@ -53,7 +53,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/etag%TESTNUMBER">
+<file name="%LOGDIR/etag%TESTNUMBER">
 </file>
 </verify>
 

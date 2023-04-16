@@ -24,9 +24,9 @@ sftp
 SFTP retrieval with byte range relative to end of file
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt -r -9 --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt -r -9 --insecure
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh test
 </file>

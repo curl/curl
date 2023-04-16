@@ -283,21 +283,31 @@ void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
   *pnext = tail;
 }
 
-void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data)
+bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
+                              struct Curl_cfilter *discard,
+                              struct Curl_easy *data,
+                              bool destroy_always)
 {
-  struct Curl_cfilter **pprev = &cf->conn->cfilter[cf->sockindex];
+  struct Curl_cfilter **pprev = &cf->next;
+  bool found = FALSE;
 
-  /* remove from chain if still in there */
+  /* remove from sub-chain and destroy */
   DEBUGASSERT(cf);
   while (*pprev) {
     if (*pprev == cf) {
-      *pprev = cf->next;
+      *pprev = discard->next;
+      discard->next = NULL;
+      found = TRUE;
       break;
     }
     pprev = &((*pprev)->next);
   }
-  cf->cft->destroy(cf, data);
-  free(cf);
+  if(found || destroy_always) {
+    discard->next = NULL;
+    discard->cft->destroy(discard, data);
+    free(discard);
+  }
+  return found;
 }
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
@@ -405,10 +415,8 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
-bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
+bool Curl_conn_cf_is_ssl(struct Curl_cfilter *cf)
 {
-  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
-
   for(; cf; cf = cf->next) {
     if(cf->cft->flags & CF_TYPE_SSL)
       return TRUE;
@@ -416,6 +424,11 @@ bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
       return FALSE;
   }
   return FALSE;
+}
+
+bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
+{
+  return conn? Curl_conn_cf_is_ssl(conn->cfilter[sockindex]) : FALSE;
 }
 
 bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)

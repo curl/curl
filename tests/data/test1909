@@ -36,7 +36,7 @@ http
 HTTP GET --retry-all-errors to overcome partial transfer
  </name>
  <command option="no-output,no-include">
---retry 1 --retry-all-errors -o log/outfile%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--retry 1 --retry-all-errors -o %LOGDIR/outfile%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -56,7 +56,7 @@ Accept: */*
 
 </protocol>
 
-<file1 name="log/outfile%TESTNUMBER">
+<file1 name="%LOGDIR/outfile%TESTNUMBER">
 data
 </file1>
 

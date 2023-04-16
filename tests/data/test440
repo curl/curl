@@ -34,7 +34,7 @@ https
 </features>
 
 # no trailing dot in the file only in the URL
-<file name="log/input%TESTNUMBER">
+<file name="%LOGDIR/input%TESTNUMBER">
 this.hsts.example "99991001 04:47:41"
 </file>
 
@@ -42,7 +42,7 @@ this.hsts.example "99991001 04:47:41"
 HSTS with trailing-dot host name in URL but none in hsts file
 </name>
 <command>
--x http://%HOSTIP:%HTTPPORT http://this.hsts.example./%TESTNUMBER --hsts log/input%TESTNUMBER -w '%{url_effective}\n'
+-x http://%HOSTIP:%HTTPPORT http://this.hsts.example./%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -w '%{url_effective}\n'
 </command>
 </client>
 

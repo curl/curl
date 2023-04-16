@@ -49,7 +49,7 @@ http
 HTTP GET with chunked encoding and chunked trailer without CRs
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D log/heads%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>
 
@@ -63,7 +63,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/heads%TESTNUMBER">
+<file name="%LOGDIR/heads%TESTNUMBER">
 HTTP/1.1 200 funky chunky!
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked

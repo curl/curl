@@ -47,9 +47,9 @@ lib%TESTNUMBER
 HTTP mimepost early end of data detection
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/file%TESTNUMBER.txt
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 This is data from a file
 </file>
 </client>

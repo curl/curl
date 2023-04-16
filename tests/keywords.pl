@@ -24,11 +24,15 @@
 ###########################################################################
 
 use strict;
+use warnings;
 
 push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
 push(@INC, ".");
 
-require "getpart.pm"; # array functions
+use getpart qw(
+    getpart
+    loadtest
+    );
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $TESTDIR="$srcdir/data";

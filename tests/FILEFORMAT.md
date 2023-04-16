@@ -24,8 +24,8 @@ with a `testcase` tag, which encompasses the remainder of the file.
 
 When a test is to be executed, the source file is first preprocessed and
 variables are substituted by their respective contents and the output
-version of the test file is stored as `log/testNUM`. That version is what will
-be read and used by the test servers.
+version of the test file is stored as `%LOGDIR/testNUM`. That version is what
+will be read and used by the test servers.
 
 ## Base64 Encoding
 
@@ -134,9 +134,10 @@ Available substitute variables include:
 - `%HTTPTLS6PORT` - IPv6 port number of the HTTP TLS server
 - `%HTTPTLSPORT` - Port number of the HTTP TLS server
 - `%HTTPUNIXPATH` - Path to the Unix socket of the HTTP server
-- `%SOCKSUNIXPATH` - Absolute Path to the Unix socket of the SOCKS server
+- `%SOCKSUNIXPATH` - Path to the Unix socket of the SOCKS server
 - `%IMAP6PORT` - IPv6 port number of the IMAP server
 - `%IMAPPORT` - Port number of the IMAP server
+- `%LOGDIR` - Log directory relative to %PWD
 - `%MQTTPORT` - Port number of the MQTT server
 - `%TELNETPORT` - Port number of the telnet server
 - `%NOLISTENPORT` - Port number where no service is listening
@@ -177,7 +178,7 @@ requests curl sends
 - **client** defines how the client should behave
 
 - **verify** defines how to verify that the data stored after a command has
-been run ended up correctly
+been run ended up correct
 
 Each main section has a number of available subsections that can be specified,
 that will be checked/used if specified.
@@ -192,8 +193,13 @@ tests. Keywords must begin with an alphabetic character, `-`, `[` or `{` and
 may actually consist of multiple words separated by spaces which are treated
 together as a single identifier.
 
-When using curl built with Hyper, the keywords must include HTTP or HTTPS for
-'hyper mode' to kick in and make line ending checks work for tests.
+When using curl built with Hyper, the keywords must include `HTTP` or `HTTPS`
+for 'hyper mode' to kick in and make line ending checks work for tests.
+
+When running a unit test and the keywords include `unittest`, the `<tool>`
+section can be left empty to use the standard unit test tool name `unitN` where
+`N` is the test number.
+
 ## `<reply>`
 
 ### `<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes"]>`
@@ -400,7 +406,9 @@ Features testable here are:
 
 - `alt-svc`
 - `bearssl`
+- `brotli`
 - `c-ares`
+- `CharConv`
 - `cookies`
 - `crypto`
 - `debug`
@@ -409,9 +417,12 @@ Features testable here are:
 - `GnuTLS`
 - `GSS-API`
 - `h2c`
+- `headers-api`
 - `HSTS`
 - `HTTP-auth`
 - `http/2`
+- `http/3`
+- `https-proxy`
 - `hyper`
 - `idn`
 - `ipv6`
@@ -426,8 +437,11 @@ Features testable here are:
 - `mbedtls`
 - `Mime`
 - `netrc`
+- `nghttpx`
+- `nghttpx-h3`
 - `NSS`
 - `NTLM`
+- `NTLM_WB`
 - `OpenSSL`
 - `parsedate`
 - `proxy`
@@ -445,6 +459,7 @@ Features testable here are:
 - `TLS-SRP`
 - `TrackMemory`
 - `typecheck`
+- `threadsafe`
 - `Unicode`
 - `unittest`
 - `unix-sockets`
@@ -454,6 +469,7 @@ Features testable here are:
 - `wolfssh`
 - `wolfssl`
 - `xattr`
+- `zstd`
 
 as well as each protocol that curl supports. A protocol only needs to be
 specified if it is different from the server (useful when the server is
@@ -539,7 +555,7 @@ parameter is the not negative integer number of seconds for the delay. This
 'delay' attribute is intended for specific test cases, and normally not
 needed.
 
-### `<file name="log/filename" [nonewline="yes"]>`
+### `<file name="%LOGDIR/filename" [nonewline="yes"]>`
 This creates the named file with this content before the test case is run,
 which is useful if the test case needs a file to act on.
 
@@ -605,7 +621,7 @@ before comparing with the one actually received by the client
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
 
-### `<file name="log/filename" [mode="text"]>`
+### `<file name="%LOGDIR/filename" [mode="text"]>`
 The file's contents must be identical to this after the test is complete. Use
 the mode="text" attribute if the output is in text mode on platforms that have
 a text/binary difference.

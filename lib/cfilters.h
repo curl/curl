@@ -254,11 +254,16 @@ void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
                                struct Curl_cfilter *cf_new);
 
 /**
- * Discard, e.g. remove and destroy a specific filter instance.
- * If the filter is attached to a connection, it will be removed before
- * it is destroyed.
+ * Discard, e.g. remove and destroy `discard` iff
+ * it still is in the filter chain below `cf`. If `discard`
+ * is no longer found beneath `cf` return FALSE.
+ * if `destroy_always` is TRUE, will call `discard`s destroy
+ * function and free it even if not found in the subchain.
  */
-void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data);
+bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
+                              struct Curl_cfilter *discard,
+                              struct Curl_easy *data,
+                              bool destroy_always);
 
 /**
  * Discard all cfilters starting with `*pcf` and clearing it afterwards.
@@ -291,6 +296,12 @@ CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             bool ignore_result,
                             int event, int arg1, void *arg2);
+
+/**
+ * Determine if the connection filter chain is using SSL to the remote host
+ * (or will be once connected).
+ */
+bool Curl_conn_cf_is_ssl(struct Curl_cfilter *cf);
 
 /**
  * Get the socket used by the filter chain starting at `cf`.

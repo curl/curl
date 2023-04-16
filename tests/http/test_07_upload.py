@@ -24,6 +24,8 @@
 #
 ###########################################################################
 #
+import difflib
+import filecmp
 import logging
 import os
 import pytest
@@ -34,8 +36,6 @@ from testenv import Env, CurlClient
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=Env.setup_incomplete(),
-                    reason=f"missing: {Env.incomplete_reason()}")
 class TestUpload:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -52,12 +52,13 @@ class TestUpload:
     def test_07_01_upload_1_small(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
         data = '0123456789'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(count=1, http_status=200)
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == [data]
 
@@ -66,12 +67,13 @@ class TestUpload:
     def test_07_02_upload_1_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(count=1, http_status=200)
         indata = open(fdata).readlines()
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == indata
@@ -81,13 +83,14 @@ class TestUpload:
     def test_07_10_upload_sequential(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         count = 50
         data = '0123456789'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == [data]
@@ -97,6 +100,8 @@ class TestUpload:
     def test_07_11_upload_parallel(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         # limit since we use a separate connection in h1
         count = 50
         data = '0123456789'
@@ -104,8 +109,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == [data]
@@ -115,15 +119,16 @@ class TestUpload:
     def test_07_20_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         count = 50
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         indata = open(fdata).readlines()
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == indata
@@ -133,15 +138,15 @@ class TestUpload:
     def test_07_12_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 2
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         indata = open(fdata).readlines()
-        r.check_stats(count=count, exp_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == indata
@@ -151,6 +156,8 @@ class TestUpload:
     def test_07_20_upload_parallel(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         # limit since we use a separate connection in h1
         count = 50
         data = '0123456789'
@@ -158,8 +165,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == [data]
@@ -169,8 +175,8 @@ class TestUpload:
     def test_07_21_upload_parallel_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('quiche'):
-            pytest.skip("quiche stalls on parallel, large uploads, unless --trace is used???")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         # limit since we use a separate connection in h1
         count = 50
@@ -178,29 +184,25 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
-        indata = open(fdata).readlines()
-        r.check_stats(count=count, exp_status=200)
-        for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
-            assert respdata == indata
+        r.check_response(count=count, http_status=200)
+        self.check_download(count, fdata, curl)
 
     # PUT 100k
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_07_30_put_100k(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-100k')
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         exp_data = [f'{os.path.getsize(fdata)}']
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == exp_data
@@ -210,17 +212,29 @@ class TestUpload:
     def test_07_31_put_10m(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]&chunk_delay=10ms'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                              extra_args=['--parallel'])
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         exp_data = [f'{os.path.getsize(fdata)}']
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == exp_data
 
+    def check_download(self, count, srcfile, curl):
+        for i in range(count):
+            dfile = curl.download_file(i)
+            assert os.path.exists(dfile)
+            if not filecmp.cmp(srcfile, dfile, shallow=False):
+                diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
+                                                    b=open(dfile).readlines(),
+                                                    fromfile=srcfile,
+                                                    tofile=dfile,
+                                                    n=1))
+                assert False, f'download {dfile} differs:\n{diff}'

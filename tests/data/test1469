@@ -16,7 +16,7 @@ none
 Space in FTP upload URL
  </name>
  <command>
-"ftp://%HOSTIP:%NOLISTENPORT/%TESTNUMBER%/with space/" -T log/irrelevant-file
+"ftp://%HOSTIP:%NOLISTENPORT/%TESTNUMBER%/with space/" -T %LOGDIR/irrelevant-file
 </command>
 </client>
 

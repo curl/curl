@@ -36,8 +36,6 @@ from testenv import Env, CurlClient, ExecResult
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=Env.setup_incomplete(),
-                    reason=f"missing: {Env.incomplete_reason()}")
 class TestGoAway:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -68,8 +66,7 @@ class TestGoAway:
         assert httpd.reload()
         t.join()
         r: ExecResult = self.r
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
         assert r.total_connects == 2
@@ -83,6 +80,8 @@ class TestGoAway:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx, repeat):
         proto = 'h3'
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 stalls here")
         count = 3
         self.r = None
         def long_run():
@@ -101,16 +100,14 @@ class TestGoAway:
         assert nghttpx.reload(timeout=timedelta(seconds=2))
         t.join()
         r: ExecResult = self.r
-        assert r.exit_code == 0, f'{r}'
+        # this should take `count` seconds to retrieve
+        assert r.duration >= timedelta(seconds=count)
+        r.check_response(count=count, http_status=200, connect_count=2)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
-        assert r.total_connects == 2
         for idx, s in enumerate(r.stats):
             if s['num_connects'] > 0:
                 log.debug(f'request {idx} connected')
-        # this should take `count` seconds to retrieve
-        assert r.duration >= timedelta(seconds=count)
-        r.check_stats(count=count, exp_status=200, exp_exitcode=0)
 
     # download files sequentially with delay, reload server for GOAWAY
     def test_03_03_h1_goaway(self, env: Env, httpd, nghttpx, repeat):
@@ -133,11 +130,9 @@ class TestGoAway:
         assert httpd.reload()
         t.join()
         r: ExecResult = self.r
-        assert r.exit_code == 0, f'{r}'
-        r.check_stats(count=count, exp_status=200)
+        r.check_response(count=count, http_status=200, connect_count=2)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
-        assert r.total_connects == 2
         for idx, s in enumerate(r.stats):
             if s['num_connects'] > 0:
                 log.debug(f'request {idx} connected')

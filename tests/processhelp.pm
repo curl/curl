@@ -22,7 +22,27 @@
 #
 ###########################################################################
 
+package processhelp;
+
+use strict;
+use warnings;
+
 BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+        portable_sleep
+        pidfromfile
+        pidexists
+        pidwait
+        processexists
+        killpid
+        killsockfilters
+        killallsockfilters
+        set_advisor_read_lock
+        clear_advisor_read_lock
+    );
+
     # portable sleeping needs Time::HiRes
     eval {
         no warnings "all";
@@ -34,9 +54,6 @@ BEGIN {
         require Win32;
     }
 }
-
-use strict;
-use warnings;
 
 use serverhelp qw(
     servername_id
@@ -79,10 +96,10 @@ sub pidfromfile {
     my $pidfile = $_[0];
     my $pid = 0;
 
-    if(-f $pidfile && -s $pidfile && open(PIDFH, "<$pidfile")) {
-        $pid = 0 + <PIDFH>;
-        close(PIDFH);
-        $pid = 0 unless($pid > 0);
+    if(-f $pidfile && -s $pidfile && open(my $pidfh, "<", "$pidfile")) {
+        $pid = 0 + <$pidfh>;
+        close($pidfh);
+        $pid = 0 if($pid < 0);
     }
     return $pid;
 }
@@ -230,8 +247,8 @@ sub processexists {
 # with a SIGTERM signal and SIGKILLs those which haven't died on time.
 #
 sub killpid {
-    use POSIX ":sys_wait_h";
     my ($verbose, $pidlist) = @_;
+    use POSIX ":sys_wait_h";
     my @requested;
     my @signalled;
     my @reapchild;
@@ -322,7 +339,7 @@ sub killpid {
 # killsockfilters kills sockfilter processes for a given server.
 #
 sub killsockfilters {
-    my ($proto, $ipvnum, $idnum, $verbose, $which) = @_;
+    my ($piddir, $proto, $ipvnum, $idnum, $verbose, $which) = @_;
     my $server;
     my $pidfile;
     my $pid;
@@ -335,7 +352,7 @@ sub killsockfilters {
     $server = servername_id($proto, $ipvnum, $idnum) if($verbose);
 
     if(!$which || ($which eq 'main')) {
-        $pidfile = mainsockf_pidfilename($proto, $ipvnum, $idnum);
+        $pidfile = mainsockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
         $pid = processexists($pidfile);
         if($pid > 0) {
             printf("* kill pid for %s-%s => %d\n", $server,
@@ -349,7 +366,7 @@ sub killsockfilters {
     return if($proto ne 'ftp');
 
     if(!$which || ($which eq 'data')) {
-        $pidfile = datasockf_pidfilename($proto, $ipvnum, $idnum);
+        $pidfile = datasockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
         $pid = processexists($pidfile);
         if($pid > 0) {
             printf("* kill pid for %s-data => %d\n", $server,
@@ -365,12 +382,12 @@ sub killsockfilters {
 # killallsockfilters kills sockfilter processes for all servers.
 #
 sub killallsockfilters {
-    my $verbose = $_[0];
+    my ($piddir, $verbose) = @_;
 
     for my $proto (('ftp', 'imap', 'pop3', 'smtp')) {
         for my $ipvnum (('4', '6')) {
             for my $idnum (('1', '2')) {
-                killsockfilters($proto, $ipvnum, $idnum, $verbose);
+                killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
             }
         }
     }
@@ -380,11 +397,11 @@ sub killallsockfilters {
 sub set_advisor_read_lock {
     my ($filename) = @_;
 
-    if(open(FILEH, ">$filename")) {
-        close(FILEH);
+    my $fileh;
+    if(open($fileh, ">", "$filename") && close($fileh)) {
         return;
     }
-    printf "Error creating lock file $filename error: $!";
+    printf "Error creating lock file $filename error: $!\n";
 }
 
 

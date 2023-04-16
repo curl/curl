@@ -39,7 +39,8 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#define LOGFILE "log/fake_ntlm%ld.log"
+#define LOGFILE "%s/fake_ntlm%ld.log"
+const char *logdir = "log";
 
 const char *serverlogfile;
 
@@ -159,6 +160,11 @@ int main(int argc, char *argv[])
     }
   }
 
+  env = getenv("CURL_NTLM_LOGDIR");
+  if(env) {
+    logdir = env;
+  }
+
   env = getenv("CURL_NTLM_AUTH_TESTNUM");
   if(env) {
     char *endptr;
@@ -175,7 +181,7 @@ int main(int argc, char *argv[])
   }
 
   /* logmsg cannot be used until this file name is set */
-  msnprintf(logfilename, sizeof(logfilename), LOGFILE, testnum);
+  msnprintf(logfilename, sizeof(logfilename), LOGFILE, logdir, testnum);
   serverlogfile = logfilename;
 
   logmsg("fake_ntlm (user: %s) (proto: %s) (domain: %s) (cached creds: %s)",
@@ -187,7 +193,7 @@ int main(int argc, char *argv[])
     path = env;
   }
 
-  stream = test2fopen(testnum);
+  stream = test2fopen(testnum, logdir);
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -204,7 +210,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  stream = test2fopen(testnum);
+  stream = test2fopen(testnum, logdir);
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -222,7 +228,7 @@ int main(int argc, char *argv[])
 
   while(fgets(buf, sizeof(buf), stdin)) {
     if(strcmp(buf, type1_input) == 0) {
-      stream = test2fopen(testnum);
+      stream = test2fopen(testnum, logdir);
       if(!stream) {
         error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -243,7 +249,7 @@ int main(int argc, char *argv[])
       fflush(stdout);
     }
     else if(strncmp(buf, type3_input, strlen(type3_input)) == 0) {
-      stream = test2fopen(testnum);
+      stream = test2fopen(testnum, logdir);
       if(!stream) {
         error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));

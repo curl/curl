@@ -20,7 +20,7 @@ sftp
 SFTP syntactically invalid host key
  </name>
  <command>
---hostpubmd5 00 --key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%NOLISTENPORT%SSH_PWD/log/irrelevant-file --insecure
+--hostpubmd5 00 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%NOLISTENPORT%SSH_PWD/%LOGDIR/irrelevant-file --insecure
 </command>
 </client>
 

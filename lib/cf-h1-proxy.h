@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_H1_PROXY_H
+#define HEADER_CURL_H1_PROXY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,22 +24,16 @@
  *
  ***************************************************************************/
 
-#include "curl_printf.h"
+#include "curl_setup.h"
 
-#include <string.h>
-#include <locale.h>
+#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
-#define TOTAL_STR_LEN 4
+CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data);
 
-int main(void)
-{
-  char zero[TOTAL_STR_LEN] = {'\0'};
-  int chars;
+extern struct Curl_cftype Curl_cft_h1_proxy;
 
-  setlocale(LC_NUMERIC, "");
-  chars = msnprintf(zero, TOTAL_STR_LEN, "%.1f", 0.0);
-  if((chars == (TOTAL_STR_LEN - 1)) && (strcmp(zero, "0.0") == 0))
-    return 0;
-  else
-    return 1;
-}
+
+#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
+
+#endif /* HEADER_CURL_H1_PROXY_H */

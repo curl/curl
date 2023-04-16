@@ -28,14 +28,14 @@ sftp
 SFTP correct sha256 host key
  </name>
  <command>
---hostpubsha256 %SSHSRVSHA256 --key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt
+--hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt
 </command>
 <setenv>
 # Needed for MSYS2 to not treat the argument as a POSIX path list
 # that has to be converted to Windows paths
 MSYS2_ARG_CONV_EXCL=*
 </setenv>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 test
 </file>
 </client>

@@ -41,10 +41,12 @@ log = logging.getLogger(__name__)
 
 class Nghttpx:
 
-    def __init__(self, env: Env):
+    def __init__(self, env: Env, port: int, name: str):
         self.env = env
+        self._name = name
+        self._port = port
         self._cmd = env.nghttpx
-        self._run_dir = os.path.join(env.gen_dir, 'nghttpx')
+        self._run_dir = os.path.join(env.gen_dir, name)
         self._pid_file = os.path.join(self._run_dir, 'nghttpx.pid')
         self._conf_file = os.path.join(self._run_dir, 'nghttpx.conf')
         self._error_log = os.path.join(self._run_dir, 'nghttpx.log')
@@ -76,27 +78,7 @@ class Nghttpx:
         return True
 
     def start(self, wait_live=True):
-        self._mkpath(self._tmp_dir)
-        if self._process:
-            self.stop()
-        args = [
-            self._cmd,
-            f'--frontend=*,{self.env.h3_port};quic',
-            f'--backend=127.0.0.1,{self.env.https_port};{self.env.domain1};sni={self.env.domain1};proto=h2;tls',
-            f'--backend=127.0.0.1,{self.env.http_port}',
-            f'--log-level=INFO',
-            f'--pid-file={self._pid_file}',
-            f'--errorlog-file={self._error_log}',
-            f'--conf={self._conf_file}',
-            f'--cacert={self.env.ca.cert_file}',
-            self.env.get_credentials(self.env.domain1).pkey_file,
-            self.env.get_credentials(self.env.domain1).cert_file,
-        ]
-        ngerr = open(self._stderr, 'a')
-        self._process = subprocess.Popen(args=args, stderr=ngerr)
-        if self._process.returncode is not None:
-            return False
-        return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
+        pass
 
     def stop_if_running(self):
         if self.is_running():
@@ -146,7 +128,7 @@ class Nghttpx:
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            check_url = f'https://{self.env.domain1}:{self.env.h3_port}/'
+            check_url = f'https://{self.env.domain1}:{self._port}/'
             r = curl.http_get(url=check_url, extra_args=['--http3-only'])
             if r.exit_code != 0:
                 return True
@@ -159,7 +141,7 @@ class Nghttpx:
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            check_url = f'https://{self.env.domain1}:{self.env.h3_port}/'
+            check_url = f'https://{self.env.domain1}:{self._port}/'
             r = curl.http_get(url=check_url, extra_args=[
                 '--http3-only', '--trace', 'curl.trace', '--trace-time'
             ])
@@ -184,3 +166,94 @@ class Nghttpx:
             fd.write("\n".join([
                 '# do we need something here?'
             ]))
+
+
+class NghttpxQuic(Nghttpx):
+
+    def __init__(self, env: Env):
+        super().__init__(env=env, name='nghttpx-quic', port=env.h3_port)
+
+    def start(self, wait_live=True):
+        self._mkpath(self._tmp_dir)
+        if self._process:
+            self.stop()
+        args = [
+            self._cmd,
+            f'--frontend=*,{self.env.h3_port};quic',
+            f'--backend=127.0.0.1,{self.env.https_port};{self.env.domain1};sni={self.env.domain1};proto=h2;tls',
+            f'--backend=127.0.0.1,{self.env.http_port}',
+            f'--log-level=INFO',
+            f'--pid-file={self._pid_file}',
+            f'--errorlog-file={self._error_log}',
+            f'--conf={self._conf_file}',
+            f'--cacert={self.env.ca.cert_file}',
+            self.env.get_credentials(self.env.domain1).pkey_file,
+            self.env.get_credentials(self.env.domain1).cert_file,
+            f'--frontend-http3-window-size=1M',
+            f'--frontend-http3-max-window-size=10M',
+            f'--frontend-http3-connection-window-size=10M',
+            f'--frontend-http3-max-connection-window-size=100M',
+        ]
+        ngerr = open(self._stderr, 'a')
+        self._process = subprocess.Popen(args=args, stderr=ngerr)
+        if self._process.returncode is not None:
+            return False
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
+
+
+class NghttpxFwd(Nghttpx):
+
+    def __init__(self, env: Env):
+        super().__init__(env=env, name='nghttpx-fwd', port=env.h2proxys_port)
+
+    def start(self, wait_live=True):
+        self._mkpath(self._tmp_dir)
+        if self._process:
+            self.stop()
+        args = [
+            self._cmd,
+            f'--http2-proxy',
+            f'--frontend=*,{self.env.h2proxys_port}',
+            f'--backend=127.0.0.1,{self.env.proxy_port}',
+            f'--log-level=INFO',
+            f'--pid-file={self._pid_file}',
+            f'--errorlog-file={self._error_log}',
+            f'--conf={self._conf_file}',
+            f'--cacert={self.env.ca.cert_file}',
+            self.env.get_credentials(self.env.proxy_domain).pkey_file,
+            self.env.get_credentials(self.env.proxy_domain).cert_file,
+        ]
+        ngerr = open(self._stderr, 'a')
+        self._process = subprocess.Popen(args=args, stderr=ngerr)
+        if self._process.returncode is not None:
+            return False
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
+
+    def wait_dead(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        try_until = datetime.now() + timeout
+        while datetime.now() < try_until:
+            check_url = f'https://{self.env.proxy_domain}:{self.env.h2proxys_port}/'
+            r = curl.http_get(url=check_url)
+            if r.exit_code != 0:
+                return True
+            log.debug(f'waiting for nghttpx-fwd to stop responding: {r}')
+            time.sleep(.1)
+        log.debug(f"Server still responding after {timeout}")
+        return False
+
+    def wait_live(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        try_until = datetime.now() + timeout
+        while datetime.now() < try_until:
+            check_url = f'https://{self.env.proxy_domain}:{self.env.h2proxys_port}/'
+            r = curl.http_get(url=check_url, extra_args=[
+                '--trace', 'curl.trace', '--trace-time'
+            ])
+            if r.exit_code == 0:
+                return True
+            log.debug(f'waiting for nghttpx-fwd to become responsive: {r}')
+            time.sleep(.1)
+        log.error(f"Server still not responding after {timeout}")
+        return False
+

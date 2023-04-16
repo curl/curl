@@ -83,9 +83,6 @@ Content-Length: 19
                 self._done = True
 
 
-
-@pytest.mark.skipif(condition=Env.setup_incomplete(),
-                    reason=f"missing: {Env.incomplete_reason()}")
 class TestUnix:
 
     @pytest.fixture(scope="class")
@@ -104,10 +101,10 @@ class TestUnix:
                                extra_args=[
                                  '--unix-socket', uds_faker.path,
                                ])
-        assert r.exit_code == 0
-        r.check_stats(count=1, exp_status=200)
+        r.check_response(count=1, http_status=200)
 
     # download https: via unix socket
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
     def test_11_02_unix_connect_http(self, env: Env, httpd, uds_faker, repeat):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'
@@ -115,7 +112,7 @@ class TestUnix:
                                extra_args=[
                                  '--unix-socket', uds_faker.path,
                                ])
-        assert r.exit_code == 35  # CONNECT_ERROR (as faker is not TLS)
+        r.check_response(exitcode=35, http_status=None)
 
     # download HTTP/3 via unix socket
     @pytest.mark.skipif(condition=not Env.have_h3(), reason='h3 not supported')
@@ -127,4 +124,4 @@ class TestUnix:
                                extra_args=[
                                  '--unix-socket', uds_faker.path,
                                ])
-        assert r.exit_code == 96  # QUIC CONNECT ERROR
+        r.check_response(exitcode=96, http_status=None)

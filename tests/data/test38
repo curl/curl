@@ -28,9 +28,9 @@ http
 HTTP resume request without server supporting it
  </name>
  <command option="no-output">
-http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o log/fewl%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o %LOGDIR/fewl%TESTNUMBER.txt
 </command>
-<file name="log/fewl%TESTNUMBER.txt">
+<file name="%LOGDIR/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>
@@ -51,7 +51,7 @@ Accept: */*
 </protocol>
 
 # the download target file must remain untouched
-<file name="log/fewl%TESTNUMBER.txt">
+<file name="%LOGDIR/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>

@@ -59,6 +59,7 @@
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
+#include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-socket.h"
 #include "select.h"
@@ -663,7 +664,8 @@ evaluate:
           DEBUGF(LOG_CF(data, cf, "%s done", baller->name));
         }
         else {
-          DEBUGF(LOG_CF(data, cf, "%s starting (timeout=%ldms)",
+          DEBUGF(LOG_CF(data, cf, "%s starting (timeout=%"
+                        CURL_FORMAT_TIMEDIFF_T "ms)",
                         baller->name, baller->timeoutms));
           ++ongoing;
           ++added;
@@ -801,7 +803,8 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                           timeout_ms,  EXPIRE_DNS_PER_NAME);
   if(result)
     return result;
-  DEBUGF(LOG_CF(data, cf, "created %s (timeout %ldms)",
+  DEBUGF(LOG_CF(data, cf, "created %s (timeout %"
+                CURL_FORMAT_TIMEDIFF_T "ms)",
                 ctx->baller[0]->name, ctx->baller[0]->timeoutms));
   if(addr1) {
     /* second one gets a delayed start */
@@ -812,7 +815,8 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                             timeout_ms,  EXPIRE_DNS_PER_NAME2);
     if(result)
       return result;
-    DEBUGF(LOG_CF(data, cf, "created %s (timeout %ldms)",
+    DEBUGF(LOG_CF(data, cf, "created %s (timeout %"
+                  CURL_FORMAT_TIMEDIFF_T "ms)",
                   ctx->baller[1]->name, ctx->baller[1]->timeoutms));
   }
 
@@ -1219,7 +1223,7 @@ connect_sub_chain:
 
   if(ctx->state < CF_SETUP_CNNCT_HTTP_PROXY && cf->conn->bits.httpproxy) {
 #ifdef USE_SSL
-    if(cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS
+    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype)
        && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
       result = Curl_cf_ssl_proxy_insert_after(cf, data);
       if(result)
@@ -1405,9 +1409,8 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)
   if(!conn->cfilter[sockindex] &&
-     conn->handler->protocol == CURLPROTO_HTTPS &&
-     (ssl_mode == CURL_CF_SSL_ENABLE || ssl_mode != CURL_CF_SSL_DISABLE)) {
-
+     conn->handler->protocol == CURLPROTO_HTTPS) {
+    DEBUGASSERT(ssl_mode != CURL_CF_SSL_DISABLE);
     result = Curl_cf_https_setup(data, conn, sockindex, remotehost);
     if(result)
       goto out;

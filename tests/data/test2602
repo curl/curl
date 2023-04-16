@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+dynhds
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+dynhds unit tests
+ </name>
+</client>
+</testcase>

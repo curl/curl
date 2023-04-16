@@ -23,8 +23,21 @@
 #
 ###########################################################################
 
+package appveyor;
+
 use strict;
 use warnings;
+
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+      appveyor_check_environment
+      appveyor_create_test_result
+      appveyor_update_test_result
+    );
+}
+
 
 my %APPVEYOR_TEST_NAMES;
 

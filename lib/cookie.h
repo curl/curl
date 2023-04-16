@@ -61,7 +61,6 @@ struct Cookie {
 struct CookieInfo {
   /* linked list of cookies we know of */
   struct Cookie *cookies[COOKIE_HASH_SIZE];
-
   char *filename;  /* file we read from/write to */
   long numcookies; /* number of cookies in the "jar" */
   bool running;    /* state info, for cookie adding information */

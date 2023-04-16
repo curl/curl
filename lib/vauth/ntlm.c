@@ -380,8 +380,8 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   (void)data;
   (void)userp;
   (void)passwdp;
-  (void)service,
-  (void)hostname,
+  (void)service;
+  (void)hostname;
 
   /* Clean up any former leftovers and initialise to defaults */
   Curl_auth_cleanup_ntlm(ntlm);

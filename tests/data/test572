@@ -73,10 +73,10 @@ lib%TESTNUMBER
 RTSP GET_PARAMETER (Put/Heartbeat/Post)
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER %LOGDIR/file%TESTNUMBER.txt
 </command>
 # file written before test command runs
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 scale
 speed
 </file>

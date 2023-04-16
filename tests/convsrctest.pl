@@ -42,7 +42,13 @@
 # - URL as literal string vs. passed as argument
 #=======================================================================
 use strict;
-require "getpart.pm";
+use warnings;
+
+use getpart qw(
+    getpart
+    loadtest
+    fulltest
+    );
 
 # Boilerplate code for test tool
 my $head =
@@ -165,7 +171,7 @@ sub generate_c {
         }
     }
 
-    print ("/* $comment */\n",
+    print("/* $comment */\n",
            $head,
            @decl,
            $init,
@@ -196,7 +202,7 @@ sub generate_test {
     # Traverse the pseudo-XML transforming as required
     my @new;
     my(@path,$path,$skip);
-    foreach (getall()) {
+    foreach (fulltest()) {
         if(my($end) = /\s*<(\/?)testcase>/) {
             push @new, $_;
             push @new, "# $comment\n"

@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 SOCKS5
 SOCKS5h
+unix sockets
 </keywords>
 </info>
 
@@ -42,7 +43,7 @@ socks5unix
 HTTP GET with host name using SOCKS5h via unix sockets
  </name>
  <command>
-http://this.is.a.host.name:%HTTPPORT/%TESTNUMBER --proxy socks5h://localhost%SOCKSUNIXPATH
+http://this.is.a.host.name:%HTTPPORT/%TESTNUMBER --proxy socks5h://localhost%PWD/%SOCKSUNIXPATH
 </command>
 </client>
 

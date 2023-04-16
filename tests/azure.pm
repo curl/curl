@@ -23,8 +23,22 @@
 #
 ###########################################################################
 
+package azure;
+
 use strict;
 use warnings;
+
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+        azure_check_environment
+        azure_create_test_run
+        azure_create_test_result
+        azure_update_test_result
+        azure_update_test_run
+    );
+}
 
 use POSIX qw(strftime);
 

@@ -134,6 +134,7 @@ typedef unsigned int curl_prot_t;
 #include "hash.h"
 #include "splay.h"
 #include "dynbuf.h"
+#include "dynhds.h"
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct Curl_easy *data,   /* transfer */
@@ -1066,6 +1067,9 @@ struct connectdata {
                                     (ftp) */
   unsigned char alpn; /* APLN TLS negotiated protocol, a CURL_HTTP_VERSION*
                          value */
+#ifndef CURL_DISABLE_PROXY
+  unsigned char proxy_alpn; /* APLN of proxy tunnel, CURL_HTTP_VERSION* */
+#endif
   unsigned char transport; /* one of the TRNSPRT_* defines */
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
   unsigned char httpversion; /* the HTTP version*10 reported by the server */
@@ -1362,6 +1366,9 @@ struct UrlState {
   long rtsp_next_client_CSeq; /* the session's next client CSeq */
   long rtsp_next_server_CSeq; /* the session's next server CSeq */
   long rtsp_CSeq_recv; /* most recent CSeq received */
+
+  unsigned char rtp_channel_mask[32]; /* for the correctness checking of the
+                                         interleaved data */
 #endif
 
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
@@ -1903,7 +1910,8 @@ struct Curl_easy {
   struct Curl_easy *prev;
 
   struct connectdata *conn;
-  struct Curl_llist_element connect_queue;
+  struct Curl_llist_element connect_queue; /* for the pending and msgsent
+                                              lists */
   struct Curl_llist_element conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */

@@ -483,11 +483,6 @@ static int invalid_octets(const char *p)
  */
 struct Cookie *
 Curl_cookie_add(struct Curl_easy *data,
-                /*
-                 * The 'data' pointer here may be NULL at times, and thus
-                 * must only be used very carefully for things that can deal
-                 * with data being NULL. Such as infof() and similar
-                 */
                 struct CookieInfo *c,
                 bool httpheader, /* TRUE if HTTP header-style line */
                 bool noexpire, /* if TRUE, skip remove_expired() */
@@ -508,10 +503,7 @@ Curl_cookie_add(struct Curl_easy *data,
   bool badcookie = FALSE; /* cookies are good by default. mmmmm yummy */
   size_t myhash;
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-#endif
-
+  DEBUGASSERT(data);
   DEBUGASSERT(MAX_SET_COOKIE_AMOUNT <= 255); /* counter is an unsigned char */
   if(data->req.setcookies >= MAX_SET_COOKIE_AMOUNT)
     return NULL;
@@ -523,8 +515,6 @@ Curl_cookie_add(struct Curl_easy *data,
 
   if(httpheader) {
     /* This line was read off an HTTP-header */
-    const char *namep;
-    const char *valuep;
     const char *ptr;
 
     size_t linelength = strlen(lineptr);
@@ -547,8 +537,9 @@ Curl_cookie_add(struct Curl_easy *data,
       if(nlen) {
         bool done = FALSE;
         bool sep = FALSE;
+        const char *namep = ptr;
+        const char *valuep;
 
-        namep = ptr;
         ptr += nlen;
 
         /* trim trailing spaces and tabs after name */
@@ -1128,17 +1119,11 @@ Curl_cookie_add(struct Curl_easy *data,
       if(replace_old) {
         /* the domains were identical */
 
-        if(clist->spath && co->spath) {
-          if(strcasecompare(clist->spath, co->spath))
-            replace_old = TRUE;
-          else
-            replace_old = FALSE;
-        }
-        else if(!clist->spath && !co->spath)
-          replace_old = TRUE;
-        else
+        if(clist->spath && co->spath &&
+           !strcasecompare(clist->spath, co->spath))
           replace_old = FALSE;
-
+        else if(!clist->spath != !co->spath)
+          replace_old = FALSE;
       }
 
       if(replace_old && !co->livecookie && clist->livecookie) {
@@ -1219,7 +1204,8 @@ Curl_cookie_add(struct Curl_easy *data,
  *
  * If 'newsession' is TRUE, discard all "session cookies" on read from file.
  *
- * Note that 'data' might be called as NULL pointer.
+ * Note that 'data' might be called as NULL pointer. If data is NULL, 'file'
+ * will be ignored.
  *
  * Returns NULL on out of memory. Invalid cookies are ignored.
  */
@@ -1229,9 +1215,8 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
                                     bool newsession)
 {
   struct CookieInfo *c;
-  FILE *fp = NULL;
-  bool fromfile = TRUE;
   char *line = NULL;
+  FILE *handle = NULL;
 
   if(!inc) {
     /* we didn't get a struct, create one */
@@ -1251,61 +1236,59 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     /* we got an already existing one, use that */
     c = inc;
   }
-  c->running = FALSE; /* this is not running, this is init */
-
-  if(file && !strcmp(file, "-")) {
-    fp = stdin;
-    fromfile = FALSE;
-  }
-  else if(!file || !*file) {
-    /* points to an empty string or NULL */
-    fp = NULL;
-  }
-  else {
-    fp = fopen(file, "rb");
-    if(!fp)
-      infof(data, "WARNING: failed to open cookie file \"%s\"", file);
-  }
-
   c->newsession = newsession; /* new session? */
 
-  if(fp) {
-    char *lineptr;
-    bool headerline;
-
-    line = malloc(MAX_COOKIE_LINE);
-    if(!line)
-      goto fail;
-    while(Curl_get_line(line, MAX_COOKIE_LINE, fp)) {
-      if(checkprefix("Set-Cookie:", line)) {
-        /* This is a cookie line, get it! */
-        lineptr = &line[11];
-        headerline = TRUE;
-      }
+  if(data) {
+    FILE *fp = NULL;
+    if(file) {
+      if(!strcmp(file, "-"))
+        fp = stdin;
       else {
-        lineptr = line;
-        headerline = FALSE;
+        fp = fopen(file, "rb");
+        if(!fp)
+          infof(data, "WARNING: failed to open cookie file \"%s\"", file);
+        else
+          handle = fp;
       }
-      while(*lineptr && ISBLANK(*lineptr))
-        lineptr++;
-
-      Curl_cookie_add(data, c, headerline, TRUE, lineptr, NULL, NULL, TRUE);
     }
-    free(line); /* free the line buffer */
 
-    /*
-     * Remove expired cookies from the hash. We must make sure to run this
-     * after reading the file, and not on every cookie.
-     */
-    remove_expired(c);
+    c->running = FALSE; /* this is not running, this is init */
+    if(fp) {
+      char *lineptr;
+      bool headerline;
 
-    if(fromfile)
-      fclose(fp);
-  }
+      line = malloc(MAX_COOKIE_LINE);
+      if(!line)
+        goto fail;
+      while(Curl_get_line(line, MAX_COOKIE_LINE, fp)) {
+        if(checkprefix("Set-Cookie:", line)) {
+          /* This is a cookie line, get it! */
+          lineptr = &line[11];
+          headerline = TRUE;
+        }
+        else {
+          lineptr = line;
+          headerline = FALSE;
+        }
+        while(*lineptr && ISBLANK(*lineptr))
+          lineptr++;
 
-  c->running = TRUE;          /* now, we're running */
-  if(data)
+        Curl_cookie_add(data, c, headerline, TRUE, lineptr, NULL, NULL, TRUE);
+      }
+      free(line); /* free the line buffer */
+
+      /*
+       * Remove expired cookies from the hash. We must make sure to run this
+       * after reading the file, and not on every cookie.
+       */
+      remove_expired(c);
+
+      if(handle)
+        fclose(handle);
+    }
     data->state.cookie_engine = TRUE;
+    c->running = TRUE;          /* now, we're running */
+  }
 
   return c;
 
@@ -1317,8 +1300,8 @@ fail:
    */
   if(!inc)
     Curl_cookie_cleanup(c);
-  if(fromfile && fp)
-    fclose(fp);
+  if(handle)
+    fclose(handle);
   return NULL; /* out of memory */
 }
 
@@ -1448,7 +1431,7 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
       /* now check if the domain is correct */
       if(!co->domain ||
          (co->tailmatch && !is_ip &&
-          tailmatch(co->domain, co->domain? strlen(co->domain):0, host)) ||
+          tailmatch(co->domain, strlen(co->domain), host)) ||
          ((!co->tailmatch || is_ip) && strcasecompare(host, co->domain)) ) {
         /*
          * the right part of the host matches the domain stuff in the

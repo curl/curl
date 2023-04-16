@@ -819,7 +819,6 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
       next_state = SMB_UPLOAD;
     }
     else {
-      smb_m = (const struct smb_nt_create_response*) msg;
       data->req.size = smb_swap64(smb_m->end_of_file);
       if(data->req.size < 0) {
         req->result = CURLE_WEIRD_SERVER_REPLY;

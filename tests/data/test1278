@@ -34,7 +34,7 @@ http
 verify extra --no-remote-name
 </name>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-progress-meter -o log/out%TESTNUMBER --no-remote-name -w '%{stderr}yes\n'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-progress-meter -o %LOGDIR/out%TESTNUMBER --no-remote-name -w '%{stderr}yes\n'
 </command>
 </client>
 

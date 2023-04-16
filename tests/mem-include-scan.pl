@@ -43,8 +43,8 @@ sub scanfile {
 
     print STDERR "checking $file...\n";
 
-    open(F, "<$file");
-    while(<F>) {
+    open(my $f, "<", "$file");
+    while(<$f>) {
         if($_ =~ /\W(free|alloc|strdup)\(/) {
             $memfunc++;
         }
@@ -56,14 +56,14 @@ sub scanfile {
         }
         elsif($_ =~ /mem-include-scan/) {
             # free pass
-            close(F);
+            close($f);
             return 0;
         }
         if($memfunc && $memdebug && $curlmem) {
             last;
         }
     }
-    close(F);
+    close($f);
 
 
     if($memfunc) {

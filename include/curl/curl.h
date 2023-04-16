@@ -174,8 +174,9 @@ typedef enum {
 } curl_sslbackend;
 
 /* aliases for library clones and renames */
-#define CURLSSLBACKEND_LIBRESSL CURLSSLBACKEND_OPENSSL
+#define CURLSSLBACKEND_AWSLC CURLSSLBACKEND_OPENSSL
 #define CURLSSLBACKEND_BORINGSSL CURLSSLBACKEND_OPENSSL
+#define CURLSSLBACKEND_LIBRESSL CURLSSLBACKEND_OPENSSL
 
 /* deprecated names: */
 #define CURLSSLBACKEND_CYASSL CURLSSLBACKEND_WOLFSSL
@@ -331,7 +332,8 @@ struct curl_fileinfo {
 
   unsigned int flags;
 
-  /* used internally */
+  /* These are libcurl private struct fields. Previously used by libcurl, so
+     they must never be interfered with. */
   char *b_data;
   size_t b_size;
   size_t b_used;
@@ -778,7 +780,8 @@ typedef enum {
                            CONNECT HTTP/1.1 */
   CURLPROXY_HTTP_1_0 = 1,   /* added in 7.19.4, force to use CONNECT
                                HTTP/1.0  */
-  CURLPROXY_HTTPS = 2, /* added in 7.52.0 */
+  CURLPROXY_HTTPS = 2,  /* HTTPS but stick to HTTP/1 added in 7.52.0 */
+  CURLPROXY_HTTPS2 = 3, /* HTTPS and attempt HTTP/2 added in 8.1.0 */
   CURLPROXY_SOCKS4 = 4, /* support added in 7.15.2, enum existed already
                            in 7.10 */
   CURLPROXY_SOCKS5 = 5, /* added in 7.10 */

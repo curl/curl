@@ -323,10 +323,11 @@ AC_SUBST(CADDY)
 
 dnl we'd like a httpd+apachectl as test server
 dnl
+HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
                          [where to find httpd/apache2 for testing])],
   [request_httpd=$withval], [request_httpd=check])
-if test x"$request_httpd" = "xcheck"; then
+if test x"$request_httpd" = "xcheck" -o x"$request_httpd" = "xyes"; then
   if test -x "/usr/sbin/apache2" -a -x "/usr/sbin/apache2ctl"; then
     # common location on distros (debian/ubuntu)
     HTTPD="/usr/sbin/apache2"
@@ -334,6 +335,7 @@ if test x"$request_httpd" = "xcheck"; then
     AC_PATH_PROG([APXS], [apxs])
     if test "x$APXS" != "x"; then
       AC_MSG_NOTICE([apache2-dev not installed, httpd tests disabled])
+      HTTPD_ENABLED="no"
     fi
   else
     AC_PATH_PROG([HTTPD], [httpd])
@@ -343,25 +345,35 @@ if test x"$request_httpd" = "xcheck"; then
     AC_PATH_PROG([APACHECTL], [apachectl])
     AC_PATH_PROG([APXS], [apxs])
     if test "x$HTTPD" = "x" -o "x$APACHECTL" = "x"; then
-      AC_MSG_NOTICE([httpd/apache2 not in PATH, httpd tests disabled])
+      AC_MSG_NOTICE([httpd/apache2 not in PATH, http tests disabled])
+      HTTPD_ENABLED="no"
     fi
     if test "x$APXS" = "x"; then
-      AC_MSG_NOTICE([apxs not in PATH, httpd tests disabled])
+      AC_MSG_NOTICE([apxs not in PATH, http tests disabled])
+      HTTPD_ENABLED="no"
     fi
   fi
-else
+elif test x"$request_httpd" != "xno"; then
   HTTPD="${request_httpd}/bin/httpd"
   APACHECTL="${request_httpd}/bin/apachectl"
   APXS="${request_httpd}/bin/apxs"
   if test ! -x "${HTTPD}"; then
-    AC_MSG_NOTICE([httpd not found as ${HTTPD}, httpd tests disabled])
+    AC_MSG_NOTICE([httpd not found as ${HTTPD}, http tests disabled])
+    HTTPD_ENABLED="no"
   elif test ! -x "${APACHECTL}"; then
-    AC_MSG_NOTICE([apachectl not found as ${APACHECTL}, httpd tests disabled])
+    AC_MSG_NOTICE([apachectl not found as ${APACHECTL}, http tests disabled])
+    HTTPD_ENABLED="no"
   elif test ! -x "${APXS}"; then
-    AC_MSG_NOTICE([apxs not found as ${APXS}, httpd tests disabled])
+    AC_MSG_NOTICE([apxs not found as ${APXS}, http tests disabled])
+    HTTPD_ENABLED="no"
   else
     AC_MSG_NOTICE([using HTTPD=$HTTPD for tests])
   fi
+fi
+if test x"$HTTPD_ENABLED" = "xno"; then
+  HTTPD=""
+  APACHECTL=""
+  APXS=""
 fi
 AC_SUBST(HTTPD)
 AC_SUBST(APACHECTL)
@@ -1782,9 +1794,17 @@ AC_MSG_CHECKING([if argv can be written to])
 CURL_RUN_IFELSE([[
 int main(int argc, char **argv)
 {
+#ifdef _WIN32
+  /* on Windows, writing to the argv does not hide the argument in
+     process lists so it can just be skipped */
+  (void)argc;
+  (void)argv;
+  return 1;
+#else
   (void)argc;
   argv[0][0] = ' ';
   return (argv[0][0] == ' ')?0:1;
+#endif
 }
 ]],[
   curl_cv_writable_argv=yes
@@ -3224,7 +3244,7 @@ if test X"$want_quiche" != Xno; then
     if test "x$cross_compiling" != "xyes"; then
       DIR_QUICHE=`echo $LD_QUICHE | $SED -e 's/^-L//'`
     fi
-    AC_CHECK_LIB(quiche, quiche_connect,
+    AC_CHECK_LIB(quiche, quiche_conn_send_ack_eliciting,
       [
        AC_CHECK_HEADERS(quiche.h,
           experimental="$experimental HTTP3"
@@ -3476,6 +3496,9 @@ o=$CPPFLAGS
 CPPFLAGS="-I$srcdir/include $CPPFLAGS"
 CURL_SIZEOF(curl_off_t, [
 #include <curl/system.h>
+])
+CURL_SIZEOF(curl_socket_t, [
+#include <curl/curl.h>
 ])
 CPPFLAGS=$o
 

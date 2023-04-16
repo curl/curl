@@ -20,11 +20,9 @@ problems may have been fixed or changed somewhat since this was written.
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
- 2.9 TLS session cache does not work with TFO
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
- 2.15 Renegotiate from server may cause hang for OpenSSL backend
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -33,20 +31,14 @@ problems may have been fixed or changed somewhat since this was written.
  3.4 AUTH PLAIN for SMTP is not working on all servers
 
  4. Command line
- 4.1 -J and -O with %-encoded file names
- 4.2 -J with -C - fails
- 4.3 --retry and transfer timeouts
 
  5. Build and portability issues
  5.1 OS400 port requires deprecated IBM library
  5.2 curl-config --libs contains private details
- 5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
- 5.6 make distclean loops forever
- 5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
- 5.12 flaky Windows CI builds
+ 5.12 flaky CI builds
  5.13 long paths are not fully supported on Windows
  5.14 Windows Unicode builds use homedir in current locale
 
@@ -80,14 +72,10 @@ problems may have been fixed or changed somewhat since this was written.
  10.3 FTPS over SOCKS
 
  11. Internals
- 11.1 Curl leaks .onion hostnames in DNS
  11.2 error buffer not set if connection to multiple addresses fails
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.7 signal-based resolver timeouts
- 11.10 Blocking socket operations in non-blocking API
- 11.11 A shared connection cache is not thread-safe
- 11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
  11.16 libcurl uses renames instead of locking for atomic operations
 
  12. LDAP
@@ -103,11 +91,9 @@ problems may have been fixed or changed somewhat since this was written.
  15.2 support build with GnuTLS
  15.3 unusable tool_hugehelp.c with MinGW
  15.4 build docs/curl.1
- 15.5 build on Linux links libcurl to libdl
  15.6 uses -lpthread instead of Threads::Threads
  15.7 generated .pc file contains strange entries
  15.8 libcurl.pc uses absolute library paths
- 15.10 libpsl is not supported
  15.11 ExternalProject_Add does not set CURL_CA_PATH
  15.13 CMake build with MIT Kerberos does not work
 
@@ -118,10 +104,7 @@ problems may have been fixed or changed somewhat since this was written.
  17.3 ENHANCE_YOUR_CALM causes infinite retries
 
  18. HTTP/3
- 18.1 If the HTTP/3 server closes connection during upload curl hangs
- 18.2 Transfer closed with n bytes remaining to read
- 18.4 timeout when reusing an http3 connection
- 18.9 connection migration does not work
+ 18.1 connection migration does not work
 
 ==============================================================================
 
@@ -164,10 +147,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/3284
 
-2.9 TLS session cache does not work with TFO
-
- See https://github.com/curl/curl/issues/4301
-
 2.11 Schannel TLS 1.2 handshake bug in old Windows versions
 
  In old versions of Windows such as 7 and 8.1 the Schannel TLS 1.2 handshake
@@ -185,17 +164,6 @@ problems may have been fixed or changed somewhat since this was written.
 2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
 
  https://github.com/curl/curl/issues/8741
-
-2.15 Renegotiate from server may cause hang for OpenSSL backend
-
- A race condition has been observed when, immediately after the initial
- handshake, curl has sent an HTTP request to the server and at the same time
- the server has sent a TLS hello request (renegotiate) to curl. Both are
- waiting for the other to respond. OpenSSL is supposed to send a handshake
- response but does not.
-
- https://github.com/curl/curl/issues/6785
- https://github.com/openssl/openssl/issues/14722
 
 3. Email protocols
 
@@ -226,40 +194,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 4. Command line
 
-4.1 -J and -O with %-encoded file names
-
- -J/--remote-header-name does not decode %-encoded file names. RFC6266 details
- how it should be done. The can of worm is basically that we have no charset
- handling in curl and ascii >=128 is a challenge for us. Not to mention that
- decoding also means that we need to check for nastiness that is attempted,
- like "../" sequences and the like. Probably everything to the left of any
- embedded slashes should be cut off.
- https://curl.se/bug/view.cgi?id=1294
-
- -O also does not decode %-encoded names, and while it has even less
- information about the charset involved the process is similar to the -J case.
-
- Note that we will not add decoding to -O without the user asking for it with
- some other means as well, since -O has always been documented to use the name
- exactly as specified in the URL.
-
-4.2 -J with -C - fails
-
- When using -J (with -O), automatically resumed downloading together with "-C
- -" fails. Without -J the same command line works. This happens because the
- resume logic is worked out before the target file name (and thus its
- pre-transfer size) has been figured out.
- https://curl.se/bug/view.cgi?id=1169
-
-4.3 --retry and transfer timeouts
-
- If using --retry and the transfer timeouts (possibly due to using -m or
- -y/-Y) the next attempt does not resume the transfer properly from what was
- downloaded in the previous attempt but will truncate and restart at the
- original position where it was at before the previous failed attempt. See
- https://curl.se/mail/lib-2008-01/0080.html and Mandriva bug report
- https://qa.mandriva.com/show_bug.cgi?id=22565
-
 5. Build and portability issues
 
 5.1 OS400 port requires deprecated IBM library
@@ -276,10 +210,6 @@ problems may have been fixed or changed somewhat since this was written.
  run that might be needed only for building libcurl. Further, curl-config
  --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
 
-5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
-
- See https://github.com/curl/curl/issues/2905
-
 5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
 
  If a URL or filename cannot be encoded using the user's current codepage then
@@ -293,30 +223,6 @@ problems may have been fixed or changed somewhat since this was written.
   https://curl.se/bug/?i=731
   https://curl.se/bug/?i=3747
 
-5.6 make distclean loops forever
-
- Due to an issue (probably) in automake, "make distclean" can end up in a
- never-ending loop.
-
- See https://github.com/curl/curl/issues/7716
-
-5.8 configure finding libs in wrong directory
-
- When the configure script checks for third-party libraries, it adds those
- directories to the LDFLAGS variable and then tries linking to see if it
- works. When successful, the found directory is kept in the LDFLAGS variable
- when the script continues to execute and do more tests and possibly check for
- more libraries.
-
- This can make subsequent checks for libraries wrongly detect another
- installation in a directory that was previously added to LDFLAGS by another
- library check.
-
- A possibly better way to do these checks would be to keep the pristine LDFLAGS
- even after successful checks and instead add those verified paths to a
- separate variable that only after all library checks have been performed gets
- appended to LDFLAGS.
-
 5.9 Utilize Requires.private directives in libcurl.pc
 
  https://github.com/curl/curl/issues/864
@@ -327,7 +233,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/3841
 
-5.12 flaky Windows CI builds
+5.12 flaky CI builds
 
  We run many CI builds for each commit and PR on github, and especially a
  number of the Windows builds are flaky. This means that we rarely get all CI
@@ -525,14 +431,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 11. Internals
 
-11.1 Curl leaks .onion hostnames in DNS
-
- Curl sends DNS requests for hostnames with a .onion TLD. This leaks
- information about what the user is attempting to access, and violates this
- requirement of RFC7686: https://datatracker.ietf.org/doc/html/rfc7686
-
- Issue: https://github.com/curl/curl/issues/543
-
 11.2 error buffer not set if connection to multiple addresses fails
 
  If you ask libcurl to resolve a hostname like example.com to IPv6 addresses
@@ -566,27 +464,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  Also, alarm() provides timeout resolution only to the nearest second. alarm
  ought to be replaced by setitimer on systems that support it.
-
-11.10 Blocking socket operations in non-blocking API
-
- The list of blocking socket operations is in TODO section "More non-blocking".
-
-11.11 A shared connection cache is not thread-safe
-
- The share interface offers CURL_LOCK_DATA_CONNECT to have multiple easy
- handle share a connection cache, but due to how connections are used they are
- still not thread-safe when used shared.
-
- See https://github.com/curl/curl/issues/4915 and lib1541.c
-
-11.15 CURLOPT_OPENSOCKETPAIRFUNCTION is missing
-
- When libcurl creates sockets with socketpair(), those are not "exposed" in
- CURLOPT_OPENSOCKETFUNCTION and therefore might surprise and be unknown to
- applications that expect and want all sockets known beforehand. One way to
- address this issue is to introduce a CURLOPT_OPENSOCKETPAIRFUNCTION callback.
-
- https://github.com/curl/curl/issues/5747
 
 11.16 libcurl uses renames instead of locking for atomic operations
 
@@ -657,12 +534,6 @@ problems may have been fixed or changed somewhat since this was written.
  it being there already. This makes the --manual option not work and test
  cases like 1139 cannot function.
 
-15.5 build on Linux links libcurl to libdl
-
- ... which it should not need to!
-
- See https://github.com/curl/curl/issues/6165
-
 15.6 uses -lpthread instead of Threads::Threads
 
  See https://github.com/curl/curl/issues/6166
@@ -681,10 +552,6 @@ problems may have been fixed or changed somewhat since this was written.
  autotools equivalent would say Libs.private: -lssl -lcrypto -lz
 
  See https://github.com/curl/curl/issues/6169
-
-15.10 libpsl is not supported
-
- See https://github.com/curl/curl/issues/6214
 
 15.11 ExternalProject_Add does not set CURL_CA_PATH
 
@@ -727,23 +594,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 18. HTTP/3
 
-18.1 If the HTTP/3 server closes connection during upload curl hangs
-
- See https://github.com/curl/curl/issues/6606
-
-18.2 Transfer closed with n bytes remaining to read
-
- HTTP/3 transfers with the Jetty HTTP/3 server seem to not work.
-
- https://github.com/curl/curl/issues/8523
-
-18.4 timeout when reusing an http3 connection
-
- HTTP/3 with quiche seems to not work and always timeout a subsequent transfer
- that reuses an already established connection
-
- https://github.com/curl/curl/issues/8764
-
-18.9 connection migration does not work
+18.1 connection migration does not work
 
  https://github.com/curl/curl/issues/7695

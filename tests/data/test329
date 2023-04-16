@@ -31,10 +31,10 @@ moo
 
 # Client-side
 <client>
-<file name="log/jar%TESTNUMBER.txt" mode="text">
+<file name="%LOGDIR/jar%TESTNUMBER.txt" mode="text">
 .host.foo.com	TRUE	/we/want/	FALSE	2147483647	test	no
 </file>
-<file name="log/jar%TESTNUMBER-2.txt" mode="text">
+<file name="%LOGDIR/jar%TESTNUMBER-2.txt" mode="text">
 .host.foo.com	TRUE	/we/want/	FALSE	2147483647	tester	yes
 </file>
 <server>
@@ -50,7 +50,7 @@ HTTP cookie with Max-Age=0
 TZ=GMT
 </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b log/jar%TESTNUMBER.txt -b log/jar%TESTNUMBER-2.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b %LOGDIR/jar%TESTNUMBER.txt -b %LOGDIR/jar%TESTNUMBER-2.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002
 </command>
 <features>
 cookies
