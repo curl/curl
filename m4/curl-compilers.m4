@@ -818,6 +818,9 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "300"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [bad-function-cast])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion])
+            dnl Disable pointer to bool conversion warnings since they cause
+            dnl lib/securetransp.c cause several warnings for checks we want.
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-pointer-bool-conversion"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [empty-body])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [ignored-qualifiers])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [type-limits])
