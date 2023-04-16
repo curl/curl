@@ -507,9 +507,6 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         dnl warn about compile-time arguments used during link-time, like
         dnl -O and -g and -pedantic.
         tmp_CFLAGS="$tmp_CFLAGS -Qunused-arguments"
-        dnl Disable pointer to bool conversion warnings since they cause
-        dnl lib/securetransp.c cause several warnings for checks we want.
-        tmp_CFLAGS="$tmp_CFLAGS -Wno-pointer-bool-conversion"
         ;;
         #
       DEC_C)
@@ -818,9 +815,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "300"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [bad-function-cast])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion])
-            dnl Disable pointer to bool conversion warnings since they cause
-            dnl lib/securetransp.c cause several warnings for checks we want.
-            tmp_CFLAGS="$tmp_CFLAGS -Wno-pointer-bool-conversion"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [empty-body])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [ignored-qualifiers])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [type-limits])
@@ -866,6 +860,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [extra-semi-stmt])
           fi
         fi
+        dnl Disable pointer to bool conversion warnings since they cause
+        dnl lib/securetransp.c cause several warnings for checks we want.
+        dnl This option should be placed after -Wconversion.
+        tmp_CFLAGS="$tmp_CFLAGS -Wno-pointer-bool-conversion"
         ;;
         #
       DEC_C)
