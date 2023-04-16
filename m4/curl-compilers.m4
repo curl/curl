@@ -816,6 +816,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only clang 3.0 or later (possibly earlier)
           if test "$compiler_num" -ge "300"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [bad-function-cast])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [empty-body])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [ignored-qualifiers])
