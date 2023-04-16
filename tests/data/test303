@@ -30,6 +30,9 @@ SSL
 <server>
 https
 </server>
+<killserver>
+https
+</killserver>
  <name>
 HTTPS with 8 secs timeout
  </name>
