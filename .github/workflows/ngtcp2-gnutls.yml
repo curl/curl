@@ -79,7 +79,7 @@ jobs:
       name: 'install prereqs and impacket, pytest, crypto'
 
     - run: |
-        git clone --quiet --depth=1 -b openssl-3.0.8+quic https://github.com/quictls/openssl
+        git clone --quiet --depth=1 -b openssl-3.1.0+quic https://github.com/quictls/openssl
         cd openssl
         ./config --prefix=$HOME/all --libdir=$HOME/all/lib
         make install_sw
@@ -110,7 +110,7 @@ jobs:
       name: 'install nghttp3'
 
     - run: |
-        git clone --quiet --depth=1 -b v0.13.1 https://github.com/ngtcp2/ngtcp2
+        git clone --quiet --depth=1 -b v0.14.1 https://github.com/ngtcp2/ngtcp2
         cd ngtcp2
         autoreconf -fi
         ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl --with-gnutls
