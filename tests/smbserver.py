@@ -29,8 +29,10 @@ from __future__ import (absolute_import, division, print_function,
 import argparse
 import logging
 import os
+import signal
 import sys
 import tempfile
+import threading
 
 # Import our curl test data helper
 from util import ClosingFileHandler, TestData
@@ -57,6 +59,49 @@ SERVER_MAGIC = "SERVER_MAGIC"
 TESTS_MAGIC = "TESTS_MAGIC"
 VERIFIED_REQ = "verifiedserver"
 VERIFIED_RSP = "WE ROOLZ: {pid}\n"
+
+
+class ShutdownHandler(threading.Thread):
+    """Cleanly shut down the SMB server
+
+    This can only be done from another thread while the server is in
+    serve_forever(), so a thread is spawned here that waits for a shutdown
+    signal before doing its thing. Use in a with statement around the
+    serve_forever() call.
+    """
+
+    def __init__(self, server):
+        super(ShutdownHandler, self).__init__()
+        self.server = server
+        self.shutdown_event = threading.Event()
+
+    def __enter__(self):
+        self.start()
+        signal.signal(signal.SIGINT, self._sighandler)
+        signal.signal(signal.SIGTERM, self._sighandler)
+
+    def __exit__(self, *_):
+        # Call for shutdown just in case it wasn't done already
+        self.shutdown_event.set()
+        # Wait for thread, and therefore also the server, to finish
+        self.join()
+        # Uninstall our signal handlers
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        signal.signal(signal.SIGTERM, signal.SIG_DFL)
+        # Delete any temporary files created by the server during its run
+        log.info("Deleting %d temporary files", len(self.server.tmpfiles))
+        for f in self.server.tmpfiles:
+            os.unlink(f)
+
+    def _sighandler(self, _signum, _frame):
+        # Wake up the cleanup task
+        self.shutdown_event.set()
+
+    def run(self):
+        # Wait for shutdown signal
+        self.shutdown_event.wait()
+        # Notify the server to shut down
+        self.server.shutdown()
 
 
 def smbserver(options):
@@ -105,7 +150,12 @@ def smbserver(options):
                                test_data_directory=test_data_dir)
     log.info("[SMB] setting up SMB server on port %s", options.port)
     smb_server.processConfigFile()
-    smb_server.serve_forever()
+
+    # Start a thread that cleanly shuts down the server on a signal
+    with ShutdownHandler(smb_server):
+        # This will block until smb_server.shutdown() is called
+        smb_server.serve_forever()
+
     return 0
 
 
@@ -122,6 +172,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
         imp_smbserver.SMBSERVER.__init__(self,
                                          address,
                                          config_parser=config_parser)
+        self.tmpfiles = []
 
         # Set up a test data object so we can get test data later.
         self.ctd = TestData(test_data_directory)
@@ -181,6 +232,8 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
             else:
                 assert (path == TESTS_MAGIC)
                 fid, full_path = self.get_test_path(requested_file)
+
+            self.tmpfiles.append(full_path)
 
             resp_parms = imp_smb.SMBNtCreateAndXResponse_Parameters()
             resp_data = ""
