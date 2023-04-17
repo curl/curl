@@ -143,7 +143,7 @@ while(@ARGV) {
         $verbose = 1;
     }
     else {
-        print STDERR "\nWarning: httpserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: http-server.pl unknown parameter: $ARGV[0]\n";
     }
     shift @ARGV;
 }
