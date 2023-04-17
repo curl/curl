@@ -1372,11 +1372,14 @@ sub runhttpsserver {
 
         if($httpspid <= 0 || !pidexists($httpspid)) {
             # it is NOT alive
-            stopserver($server, "$pid2");
+            # don't call stopserver since that will also kill the dependent
+            # server that has already been started properly
             $doesntrun{$pidfile} = 1;
             $httpspid = $pid2 = 0;
             next;
         }
+
+        $doesntrun{$pidfile} = 0;
         # we have a server!
         if($verb) {
             logmsg "RUN: $srvrname server is PID $httpspid port $port\n";
@@ -1586,12 +1589,14 @@ sub runsecureserver {
         $port += 1 + int(rand(700));
         next if exists $usedports{$port};
         my $options = "$flags --accept $port";
+
         my $cmd = "$perl $srcdir/secureserver.pl $options";
         ($protospid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
         if($protospid <= 0 || !pidexists($protospid)) {
             # it is NOT alive
-            stopserver($server, "$pid2");
+            # don't call stopserver since that will also kill the dependent
+            # server that has already been started properly
             $doesntrun{$pidfile} = 1;
             $protospid = $pid2 = 0;
             next;
