@@ -97,6 +97,7 @@ check_PROGRAMS = \
   postit2 \
   postit2-formadd \
   progressfunc \
+  protofeats \
   resolve \
   sendrecv \
   sepheaders \
