@@ -1204,8 +1204,8 @@ sub runhttp2server {
     my $port2 = 23114;
     my %usedports = reverse %PORT;
     for(1 .. $serverstartretries) {
-        $port += int(rand(900));
-        $port2 += int(rand(900));
+        $port += 1 + int(rand(900));
+        $port2 += 1 + int(rand(900));
         next if exists $usedports{$port} || $usedports{$port2};
         my $aflags = "--port $port --port2 $port2 $flags";
 
@@ -1275,7 +1275,7 @@ sub runhttp3server {
     my $port = 24113;
     my %usedports = reverse %PORT;
     for(1 .. $serverstartretries) {
-        $port += int(rand(900));
+        $port += 1 + int(rand(900));
         next if exists $usedports{$port};
         my $aflags = "--port $port $flags";
 
@@ -1363,7 +1363,7 @@ sub runhttpsserver {
     my $port = 24512; # start attempt
     my %usedports = reverse %PORT;
     for (1 .. $serverstartretries) {
-        $port += int(rand(600));
+        $port += 1 + int(rand(600));
         next if exists $usedports{$port};
         my $options = "$flags --accept $port";
 
@@ -1432,7 +1432,7 @@ sub runhttptlsserver {
     my %usedports = reverse %PORT;
     my ($httptlspid, $pid2);
     for (1 .. $serverstartretries) {
-        $port += int(rand(800));
+        $port += 1 + int(rand(800));
         next if exists $usedports{$port};
         my $allflags = "--port $port $flags";
 
@@ -1583,7 +1583,7 @@ sub runsecureserver {
     my $port = 26713 + ord $proto;
     my %usedports = reverse %PORT;
     for (1 .. $serverstartretries) {
-        $port += int(rand(700));
+        $port += 1 + int(rand(700));
         next if exists $usedports{$port};
         my $options = "$flags --accept $port";
         my $cmd = "$perl $srcdir/secureserver.pl $options";
@@ -1821,7 +1821,7 @@ sub runsshserver {
         # sshd doesn't have a way to pick an unused random port number, so
         # instead we iterate over possible port numbers to use until we find
         # one that works
-        $port += int(rand(500));
+        $port += 1 + int(rand(500));
         next if exists $usedports{$port};
         push @tports, $port;
 
@@ -2070,7 +2070,7 @@ sub rundictserver {
     my %usedports = reverse %PORT;
     my ($dictpid, $pid2);
     for(1 .. $serverstartretries) {
-        $port += int(rand(900));
+        $port += 1 + int(rand(900));
         next if exists $usedports{$port};
         my $aflags = "--port $port $flags";
         my $cmd = "$srcdir/dictserver.py $aflags";
@@ -2138,7 +2138,7 @@ sub runsmbserver {
     my $port = 31923;
     my %usedports = reverse %PORT;
     for(1 .. $serverstartretries) {
-        $port += int(rand(760));
+        $port += 1 + int(rand(760));
         next if exists $usedports{$port};
         my $aflags = "--port $port $flags";
         my $cmd = "$srcdir/smbserver.py $aflags";
@@ -2205,7 +2205,7 @@ sub runnegtelnetserver {
     my $port = 32000;
     my %usedports = reverse %PORT;
     for(1 .. $serverstartretries) {
-        $port += int(rand(800));
+        $port += 1 + int(rand(800));
         next if exists $usedports{$port};
         my $aflags = "--port $port $flags";
         my $cmd = "$srcdir/negtelnetserver.py $aflags";
