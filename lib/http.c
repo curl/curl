@@ -3136,15 +3136,17 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     DEBUGASSERT(Curl_conn_is_http3(data, conn, FIRSTSOCKET));
     break;
   case CURL_HTTP_VERSION_2:
+#ifndef CURL_DISABLE_PROXY
     if(!Curl_conn_is_http2(data, conn, FIRSTSOCKET) &&
-       conn->bits.proxy && !conn->bits.tunnel_proxy) {
+       conn->bits.proxy && !conn->bits.tunnel_proxy
+      ) {
       result = Curl_http2_switch(data, conn, FIRSTSOCKET);
       if(result)
         return result;
     }
-    else {
+    else
+#endif
       DEBUGASSERT(Curl_conn_is_http2(data, conn, FIRSTSOCKET));
-    }
     break;
   case CURL_HTTP_VERSION_1_1:
     /* continue with HTTP/1.1 when explicitly requested */
