@@ -355,8 +355,9 @@ in the global data section of the module's source code.
   No vararg procedure support exists in ILE/RPG: for this reason, the following
 considerations apply:
 _ Procedures curl_easy_setopt_long(), curl_easy_setopt_object(),
-  curl_easy_setopt_function() and curl_easy_setopt_offset() are all alias
-  prototypes to curl_easy_setopt(), but with different parameter lists.
+  curl_easy_setopt_function(), curl_easy_setopt_offset() and
+  curl_easy_setopt_blob() are all alias prototypes to curl_easy_setopt(), but
+  with different parameter lists.
 _ Procedures curl_easy_getinfo_string(), curl_easy_getinfo_long(),
   curl_easy_getinfo_double(), curl_easy_getinfo_slist(),
   curl_easy_getinfo_ptr(), curl_easy_getinfo_socket() and
@@ -365,6 +366,11 @@ _ Procedures curl_easy_getinfo_string(), curl_easy_getinfo_long(),
 _ Procedures curl_multi_setopt_long(), curl_multi_setopt_object(),
   curl_multi_setopt_function() and curl_multi_setopt_offset() are all alias
   prototypes to curl_multi_setopt(), but with different parameter lists.
+_ Procedures curl_share_setopt_int(), curl_share_setopt_ptr() and
+  curl_share_setopt_proc() are all alias prototypes to curl_share_setopt,
+  but with different parameter lists.
+_ Procedure curl_easy_setopt_blob_ccsid() is an alias of
+  curl_easy_setopt_ccsid() supporting blob encoding conversion.
 _ The prototype of procedure curl_formadd() allows specifying a pointer option
   and the CURLFORM_END option. This makes possible to use an option array
   without any additional definition. If some specific incompatible argument
@@ -372,5 +378,6 @@ _ The prototype of procedure curl_formadd() allows specifying a pointer option
   alias. The same applies to curl_formadd_ccsid() too.
 
   Since RPG cannot cast a long to a pointer, procedure curl_form_long_value()
-is provided for that purpose: this allows storing a long value in the curl_forms
-array.
+is provided for that purpose: this allows storing a long value in the
+curl_forms array. Please note the form API is deprecated and the MIME API
+should be used instead.
