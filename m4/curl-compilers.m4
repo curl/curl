@@ -507,9 +507,6 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         dnl warn about compile-time arguments used during link-time, like
         dnl -O and -g and -pedantic.
         tmp_CFLAGS="$tmp_CFLAGS -Qunused-arguments"
-        dnl Disable pointer to bool conversion warnings since they cause
-        dnl lib/securetransp.c cause several warnings for checks we want.
-        tmp_CFLAGS="$tmp_CFLAGS -Wno-pointer-bool-conversion"
         ;;
         #
       DEC_C)
@@ -814,8 +811,19 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shift-sign-overflow])
           fi
           #
+          dnl Only clang 3.0 or later (possibly earlier)
+          if test "$compiler_num" -ge "300"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [bad-function-cast])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [empty-body])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [ignored-qualifiers])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [type-limits])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [no-sign-conversion])
+          fi
+          #
           dnl Only clang 3.2 or later
           if test "$compiler_num" -ge "302"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [enum-conversion])
             case $host_os in
             cygwin* | mingw*)
               dnl skip missing-variable-declarations warnings for cygwin and
@@ -825,6 +833,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-variable-declarations])
               ;;
             esac
+          fi
+          #
+          dnl Only clang 3.4 or later
+          if test "$compiler_num" -ge "304"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-const-variable])
           fi
           #
           dnl Only clang 3.6 or later
@@ -847,6 +860,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [extra-semi-stmt])
           fi
         fi
+        dnl Disable pointer to bool conversion warnings since they cause
+        dnl lib/securetransp.c cause several warnings for checks we want.
+        dnl This option should be placed after -Wconversion.
+        tmp_CFLAGS="$tmp_CFLAGS -Wno-pointer-bool-conversion"
         ;;
         #
       DEC_C)
