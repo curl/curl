@@ -212,10 +212,6 @@ struct HTTP {
     HTTPSEND_BODY     /* sending body */
   } sending;
 
-#ifdef USE_WEBSOCKETS
-  struct websocket ws;
-#endif
-
 #ifndef CURL_DISABLE_HTTP
   void *h2_ctx;              /* HTTP/2 implementation context */
   void *h3_ctx;              /* HTTP/3 implementation context */

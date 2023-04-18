@@ -1030,7 +1030,7 @@ struct connectdata {
     struct mqtt_conn mqtt;
 #endif
 #ifdef USE_WEBSOCKETS
-    struct ws_conn ws;
+    struct websocket *ws;
 #endif
   } proto;
 
