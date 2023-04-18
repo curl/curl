@@ -1561,24 +1561,26 @@ sub singletest {
     # Verify that the test should be run
     my ($why, $errorreturncode) = singletest_shouldrun($testnum);
 
+    if(!$listonly) {
 
-    #######################################################################
-    # Restore environment variables that were modified in a previous run.
-    # Test definition may instruct to (un)set environment vars.
-    # This is done this early so that leftover variables don't affect starting
-    # servers or CI registration.
-    restore_test_env(1);
+        ###################################################################
+        # Restore environment variables that were modified in a previous run.
+        # Test definition may instruct to (un)set environment vars.
+        # This is done this early so that leftover variables don't affect
+        # starting servers or CI registration.
+        restore_test_env(1);
 
-    #######################################################################
-    # Register the test case with the CI environment
-    citest_starttest($testnum);
+        ###################################################################
+        # Register the test case with the CI environment
+        citest_starttest($testnum);
 
-    if(!$why) {
-        $why = runner_test_preprocess($testnum);
-    } else {
+        if(!$why) {
+            $why = runner_test_preprocess($testnum);
+        } else {
 
-        # set zero servers verification time when they aren't started
-        $timesrvrini{$testnum} = $timesrvrend{$testnum} = Time::HiRes::time();
+            # set zero servers verification time when they aren't started
+            $timesrvrini{$testnum} = $timesrvrend{$testnum} = Time::HiRes::time();
+        }
     }
 
     #######################################################################
@@ -2389,8 +2391,10 @@ foreach my $testnum (@at) {
     # execute one test case
     my $error = singletest($testnum, $count, scalar(@at));
 
-    # Submit the test case result with the CI environment
-    citest_finishtest($testnum, $error);
+    if(!$listonly) {
+        # Submit the test case result with the CI environment
+        citest_finishtest($testnum, $error);
+    }
 
     if($error < 0) {
         # not a test we can run
