@@ -118,11 +118,16 @@ my $server_response_maxtime=13;
 my $httptlssrv = find_httptlssrv();
 my %run;          # running server
 my %runcert;      # cert file currently in use by an ssl running server
-my $serverstartretries=10; # number of times to attempt to start server
 my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
 my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
 my $posix_pwd=$pwd;        # current working directory
 my $h2cver = "h2c"; # this version is decided by the nghttp2 lib being used
+my $serverstartretries=10; # number of times to attempt to start server;
+                           # don't increase without making sure generated port
+                           # numbers will always be valid (<=65535)
+my $portrange = 999;       # space from which to choose a random port
+                           # don't increase without making sure generated port
+                           # numbers will always be valid (<=65535)
 
 # Variables shared with runtests.pl
 our $HOSTIP="127.0.0.1";   # address on which the test server listens
@@ -1200,12 +1205,12 @@ sub runhttp2server {
     $flags .= $verbose_flag if($debugprotocol);
 
     my ($http2pid, $pid2);
-    my $port = 23113;
-    my $port2 = 23114;
+    my $port = 32813;
+    my $port2 = 32814;
     my %usedports = reverse %PORT;
     for(1 .. $serverstartretries) {
-        $port += 1 + int(rand(900));
-        $port2 += 1 + int(rand(900));
+        $port += 1 + int(rand($portrange));
+        $port2 += 1 + int(rand($portrange));
         next if exists $usedports{$port} || $usedports{$port2};
         my $aflags = "--port $port --port2 $port2 $flags";
 
@@ -1272,10 +1277,10 @@ sub runhttp3server {
     $flags .= $verbose_flag if($debugprotocol);
 
     my ($http3pid, $pid3);
-    my $port = 24113;
+    my $port = 33813;
     my %usedports = reverse %PORT;
     for(1 .. $serverstartretries) {
-        $port += 1 + int(rand(900));
+        $port += 1 + int(rand($portrange));
         next if exists $usedports{$port};
         my $aflags = "--port $port $flags";
 
@@ -1360,10 +1365,10 @@ sub runhttpsserver {
 
     my $pid2;
     my $httpspid;
-    my $port = 24512; # start attempt
+    my $port = 34813;
     my %usedports = reverse %PORT;
     for (1 .. $serverstartretries) {
-        $port += 1 + int(rand(600));
+        $port += 1 + int(rand($portrange));
         next if exists $usedports{$port};
         my $options = "$flags --accept $port";
 
@@ -1431,11 +1436,11 @@ sub runhttptlsserver {
     $flags .= "--srppasswd $srcdir/certs/srp-verifier-db ";
     $flags .= "--srppasswdconf $srcdir/certs/srp-verifier-conf";
 
-    my $port = 24367;
+    my $port = 35813;
     my %usedports = reverse %PORT;
     my ($httptlspid, $pid2);
     for (1 .. $serverstartretries) {
-        $port += 1 + int(rand(800));
+        $port += 1 + int(rand($portrange));
         next if exists $usedports{$port};
         my $allflags = "--port $port $flags";
 
@@ -1583,10 +1588,13 @@ sub runsecureserver {
 
     my $protospid;
     my $pid2;
-    my $port = 26713 + ord $proto;
+    # this calculation happens to be a perfect hash function for spreading
+    # out the port ranges for the 4 possible protocols (at the time of this
+    # writing) that will be used here
+    my $port = 36813 + 1000 * ((ord $proto) % 4);
     my %usedports = reverse %PORT;
     for (1 .. $serverstartretries) {
-        $port += 1 + int(rand(700));
+        $port += 1 + int(rand($portrange));
         next if exists $usedports{$port};
         my $options = "$flags --accept $port";
 
@@ -1777,7 +1785,6 @@ sub runsshserver {
     my $proto = 'ssh';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
-    my $port = 20000; # no lower port
 
     if(!$USER) {
         logmsg "Can't start ssh server due to lack of USER name";
@@ -1821,12 +1828,13 @@ sub runsshserver {
 
     my $wport = 0,
     my @tports;
+    my $port = 40813;
     my %usedports = reverse %PORT;
     for(1 .. $serverstartretries) {
         # sshd doesn't have a way to pick an unused random port number, so
         # instead we iterate over possible port numbers to use until we find
         # one that works
-        $port += 1 + int(rand(500));
+        $port += 1 + int(rand($portrange));
         next if exists $usedports{$port};
         push @tports, $port;
 
@@ -2071,11 +2079,11 @@ sub rundictserver {
     $flags .= "--srcdir \"$srcdir\" ";
     $flags .= "--host $HOSTIP";
 
-    my $port = 29000;
+    my $port = 41813;
     my %usedports = reverse %PORT;
     my ($dictpid, $pid2);
     for(1 .. $serverstartretries) {
-        $port += 1 + int(rand(900));
+        $port += 1 + int(rand($portrange));
         next if exists $usedports{$port};
         my $aflags = "--port $port $flags";
         my $cmd = "$srcdir/dictserver.py $aflags";
@@ -2140,10 +2148,10 @@ sub runsmbserver {
     $flags .= "--host $HOSTIP";
 
     my ($smbpid, $pid2);
-    my $port = 31923;
+    my $port = 42813;
     my %usedports = reverse %PORT;
     for(1 .. $serverstartretries) {
-        $port += 1 + int(rand(760));
+        $port += 1 + int(rand($portrange));
         next if exists $usedports{$port};
         my $aflags = "--port $port $flags";
         my $cmd = "$srcdir/smbserver.py $aflags";
@@ -2207,10 +2215,10 @@ sub runnegtelnetserver {
     $flags .= "--srcdir \"$srcdir\"";
 
     my ($ntelpid, $pid2);
-    my $port = 32000;
+    my $port = 43813;
     my %usedports = reverse %PORT;
     for(1 .. $serverstartretries) {
-        $port += 1 + int(rand(800));
+        $port += 1 + int(rand($portrange));
         next if exists $usedports{$port};
         my $aflags = "--port $port $flags";
         my $cmd = "$srcdir/negtelnetserver.py $aflags";
