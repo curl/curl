@@ -105,5 +105,9 @@ CURL_EXTERN CURLHcode curl_easy_header_ccsid(CURL *easy, const char *name,
                                              unsigned int ccsid);
 CURL_EXTERN const char *curl_from_ccsid(const char *s, unsigned int ccsid);
 CURL_EXTERN const char *curl_to_ccsid(const char *s, unsigned int ccsid);
+CURL_EXTERN CURLcode curl_easy_setopt_RPGnum_(CURL *easy,
+                                              CURLoption tag, curl_off_t arg);
+CURL_EXTERN CURLcode curl_multi_setopt_RPGnum_(CURLM *multi, CURLMoption tag,
+                                               curl_off_t arg);
 
 #endif
