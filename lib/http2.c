@@ -2229,6 +2229,10 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
     if(result)
       return result;
 
+    if(!pause) {
+      drain_this(cf, data);
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    }
     DEBUGF(infof(data, "Set HTTP/2 window size to %u for stream %u",
                  window, stream->id));
 
