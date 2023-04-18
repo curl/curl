@@ -3359,4 +3359,49 @@
      d  s                              *   value options(*string)               const char *
      d  ccsid                        10u 0 value
       *
+      **************************************************************************
+      *                       Procedure overloading
+      **************************************************************************
+      *
+      /if defined(*V7R4M0)
+     d curl_easy_setopt_RPGnum_...
+     d                 pr                  extproc('curl_easy_setopt_RPGnum_')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  option                             value like(CURLoption)
+     d  numarg                       20i 0 value
+      *
+     d curl_easy_setopt...
+     d                 pr                  like(CURLcode)
+     d                                     overload(curl_easy_setopt_RPGnum_:
+     d                                              curl_easy_setopt_object:
+     d                                              curl_easy_setopt_function)
+      *
+     d curl_multi_setopt_RPGnum_...
+     d                 pr                  extproc('curl_multi_setopt_RPGnum_')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURLM *
+     d  option                             value like(CURLMoption)
+     d  numarg                       20i 0 value
+      *
+     d curl_multi_setopt...
+     d                 pr                  like(CURLcode)
+     d                                     overload(curl_multi_setopt_RPGnum_:
+     d                                              curl_multi_setopt_object:
+     d                                              curl_multi_setopt_function)
+      *
+     d curl_share_setopt...
+     d                 pr                  like(CURLcode)
+     d                                     overload(curl_share_setopt_int:
+     d                                              curl_share_setopt_ptr:
+     d                                              curl_share_setopt_proc)
+      *
+     d curl_easy_getinfo...
+     d                 pr                  like(CURLcode)
+     d                                     overload(curl_easy_getinfo_long:
+     d                                              curl_easy_getinfo_off_t:
+     d                                              curl_easy_getinfo_double:
+     d                                              curl_easy_getinfo_ptr)
+      /endif
+      *
       /endif

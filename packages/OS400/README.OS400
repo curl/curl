@@ -376,6 +376,10 @@ _ The prototype of procedure curl_formadd() allows specifying a pointer option
   without any additional definition. If some specific incompatible argument
   list is used in the ILE/RPG program, the latter must define a specialised
   alias. The same applies to curl_formadd_ccsid() too.
+_ Since V7R4M0, procedure overloading is used to emulate limited "vararg-like"
+  definitions of curl_easy_setopt(), curl_multi_setopt(), curl_share_setopt()
+  and curl_easy_getinfo(). Blob and CCSID alternatives are NOT included in
+  overloading.
 
   Since RPG cannot cast a long to a pointer, procedure curl_form_long_value()
 is provided for that purpose: this allows storing a long value in the
