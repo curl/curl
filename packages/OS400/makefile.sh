@@ -37,7 +37,7 @@ cd "${TOPDIR}"
 
 if action_needed "${LIBIFSNAME}"
 then    CMD="CRTLIB LIB(${TARGETLIB}) TEXT('curl: multiprotocol support API')"
-        system "${CMD}"
+        CLcommand "${CMD}"
 fi
 
 
@@ -46,7 +46,7 @@ fi
 if action_needed "${LIBIFSNAME}/DOCS.FILE"
 then    CMD="CRTSRCPF FILE(${TARGETLIB}/DOCS) RCDLEN(240)"
         CMD="${CMD} CCSID(${TGTCCSID}) TEXT('Documentation texts')"
-        system "${CMD}"
+        CLcommand "${CMD}"
 fi
 
 
@@ -66,7 +66,7 @@ do      MEMBER="`basename \"${TEXT}\" .OS400`"
         if action_needed "${MEMBER}" "${TEXT}"
         then    CMD="CPY OBJ('${TEXT}') TOOBJ('${MEMBER}') TOCCSID(${TGTCCSID})"
                 CMD="${CMD} DTAFMT(*TEXT) REPLACE(*YES)"
-                system "${CMD}"
+                CLcommand "${CMD}"
         fi
 done
 

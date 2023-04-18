@@ -23,9 +23,9 @@
 #
 ###########################################################################
 
-system ()
+CLcommand()
 {
-    /usr/bin/system "$@" || exit 1
+        /usr/bin/system "${@}" || exit 1
 }
 
 setenv()
@@ -58,8 +58,8 @@ export SCRIPTDIR TOPDIR
 
 #  Extract the SONAME from the library makefile.
 
-SONAME=`sed -e '/^VERSIONINFO=/!d' -e 's/^.* \([0-9]*\):.*$/\1/' -e 'q' \
-                                                < "${TOPDIR}/lib/Makefile.am"`
+SONAME=`sed -e '/^VERSIONCHANGE=/!d;s/^.*=\([0-9]*\).*/\1/'             \
+                                        < "${TOPDIR}/lib/Makefile.soname"`
 export SONAME
 
 
@@ -79,6 +79,8 @@ setenv OPTIMIZE         '10'                    # Optimization level
 setenv OUTPUT           '*NONE'                 # Compilation output option.
 setenv TGTRLS           '*CURRENT'              # Target OS release.
 setenv IFSDIR           '/curl'                 # Installation IFS directory.
+setenv QADRTDIR         '/QIBM/ProdData/qadrt'  # QADRT IFS directory.
+setenv QADRTLIB         'QADRT'                 # QADRT object library.
 
 #       Define ZLIB availability and locations.
 
@@ -216,7 +218,7 @@ make_module()
 #       CMD="${CMD} SYSIFCOPT(*IFS64IO) OPTION(*INCDIRFIRST *SHOWINC *SHOWSYS)"
         CMD="${CMD} SYSIFCOPT(*IFS64IO) OPTION(*INCDIRFIRST)"
         CMD="${CMD} LOCALETYPE(*LOCALE) FLAG(10)"
-        CMD="${CMD} INCDIR('/qibm/proddata/qadrt/include'"
+        CMD="${CMD} INCDIR('${QADRTDIR}/include'"
         CMD="${CMD} '${TOPDIR}/include/curl' '${TOPDIR}/include' '${SRCDIR}'"
         CMD="${CMD} '${TOPDIR}/packages/OS400'"
 
@@ -248,7 +250,7 @@ make_module()
         then    CMD="${CMD} DEFINE(${DEFINES})"
         fi
 
-        system "${CMD}"
+        CLcommand "${CMD}"
         rm -f __tmpsrcf.c
         LINK=YES
 }
