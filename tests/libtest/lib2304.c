@@ -67,6 +67,20 @@ static int recv_pong(CURL *curl, const char *exected_payload)
   return (int)result;
 }
 
+static int recv_any(CURL *curl)
+{
+  size_t rlen;
+  struct curl_ws_frame *meta;
+  char buffer[256];
+  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+  if(result)
+    return result;
+
+  fprintf(stderr, "recv_any: got %u bytes rflags %x\n", (int)rlen,
+          meta->flags);
+  return 0;
+}
+
 /* just close the connection */
 static void websocket_close(CURL *curl)
 {
@@ -82,6 +96,7 @@ static void websocket(CURL *curl)
   int i = 0;
   fprintf(stderr, "ws: websocket() starts\n");
   do {
+    recv_any(curl);
     fprintf(stderr, "Send ping\n");
     if(ping(curl, "foobar"))
       return;
