@@ -843,6 +843,9 @@ sub singletest_clean {
         foreach my $server (@killtestservers) {
             chomp $server;
             if(stopserver($server)) {
+                logmsg " killserver FAILED\n";
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1; # normal error if asked to fail on unexpected alive
             }
         }
