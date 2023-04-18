@@ -1,0 +1,108 @@
+      * Curl simple URL request (free-format RPG)
+      *
+        ctl-opt dftactgrp(*NO) actgrp(*NEW)
+                option(*NOSHOWCPY)
+                bnddir('CURL');
+      *
+      **************************************************************************
+      *                                  _   _ ____  _
+      *  Project                     ___| | | |  _ \| |
+      *                             / __| | | | |_) | |
+      *                            | (__| |_| |  _ <| |___
+      *                             \___|\___/|_| \_\_____|
+      *
+      * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+      *
+      * This software is licensed as described in the file COPYING, which
+      * you should have received as part of this distribution. The terms
+      * are also available at https://curl.se/docs/copyright.html.
+      *
+      * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+      * copies of the Software, and permit persons to whom the Software is
+      * furnished to do so, under the terms of the COPYING file.
+      *
+      * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+      * ANY KIND, either express or implied.
+      *
+      * SPDX-License-Identifier: curl
+      *
+      **************************************************************************
+
+      /include H,CURL.INC
+
+      * Simple free-format RPG program to request the URL given as command line
+      * parameter and output its response.
+
+        dcl-pi *N;
+            url char(120);
+        end-pi;
+
+        dcl-s urllen int(10);           // URL length
+
+      **************************************************************************
+
+        urllen = trimmed_length(url: %len(url));
+
+        // Do the curl stuff.
+
+        curl_global_init(CURL_GLOBAL_ALL);
+        main();
+        curl_global_cleanup();
+        *inlr = *on;            // Exit
+
+      **************************************************************************
+      * Main procedure: do the curl job.
+      **************************************************************************
+
+        dcl-proc main;
+            dcl-pi *N end-pi;
+
+            dcl-s h pointer;                                            // Easy handle
+            dcl-s result like(CURLcode) inz(CURLE_OUT_OF_MEMORY);       // Curl return code
+            dcl-s errmsgp pointer;                                      // Error string pointer
+            dcl-s response char(52);                                    // For error display
+
+            // Create and fill curl handle.
+
+            h = curl_easy_init();
+            if h <> *NULL;
+                curl_easy_setopt_ccsid(h: CURLOPT_URL: %subst(url: 1: urllen):
+                                       0);
+                curl_easy_setopt(h: CURLOPT_FOLLOWLOCATION: 1);
+
+                // Perform the request.
+
+                result = curl_easy_perform(h);
+                curl_easy_cleanup(h);       // Release handle
+            endif;
+
+            // Check for error and report if some.
+
+            if result <> CURLE_OK;
+                errmsgp = curl_easy_strerror_ccsid(result: 0);
+                response = %str(errmsgp);
+                dsply '' '*EXT' response;
+            endif;
+        end-proc;
+      *
+      **************************************************************************
+      * Get the length of right-trimmed string
+      **************************************************************************
+      *
+        dcl-proc trimmed_length;
+            dcl-pi *N uns(10);
+                string char(9999999) const options(*varsize);
+                length uns(10) value;
+            end-pi;
+
+            dcl-s len uns(10);
+
+            len = %scan(X'00': string: 1: length); // Limit to zero-terminated string
+            if len = 0;
+                len = length + 1;
+            endif;
+            if len <= 1;
+                return 0;
+            endif;
+            return %checkr(' ': string: len - 1);  // Trim right
+        end-proc;

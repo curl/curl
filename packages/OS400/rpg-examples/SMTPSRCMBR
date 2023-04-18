@@ -1,0 +1,239 @@
+      * Curl SMTP send source member as attachment
+      *
+     h DFTACTGRP(*NO) ACTGRP(*NEW)
+     h OPTION(*NOSHOWCPY)
+     h BNDDIR('CURL')
+      *
+      **************************************************************************
+      *                                  _   _ ____  _
+      *  Project                     ___| | | |  _ \| |
+      *                             / __| | | | |_) | |
+      *                            | (__| |_| |  _ <| |___
+      *                             \___|\___/|_| \_\_____|
+      *
+      * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+      *
+      * This software is licensed as described in the file COPYING, which
+      * you should have received as part of this distribution. The terms
+      * are also available at https://curl.se/docs/copyright.html.
+      *
+      * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+      * copies of the Software, and permit persons to whom the Software is
+      * furnished to do so, under the terms of the COPYING file.
+      *
+      * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+      * ANY KIND, either express or implied.
+      *
+      * SPDX-License-Identifier: curl
+      *
+      **************************************************************************
+      *
+      /include H,CURL.INC
+      *
+      * Example to SMTP send source member as attachment via SMTP.
+      *
+     fRPGXAMPLESif   e             disk    extmbr(program_name)
+     f                                     rename(RPGXAMPLES: record)
+     d                 pi
+     d url                           60                                         SMTP server URL
+     d recipient_mail                40                                         Recipient mail addr
+      *
+     d program_name    c                   'SMTPSRCMBR'                         Member name to send
+     d sender_name     c                   'Curl'                               Sender name
+     d sender_mail     c                   'curl@example.com'                   Sender e-mail
+     d recipient_name  c                   'WIMC'                               Recipient name
+     d crlf            c                   X'0D25'
+      *
+     d urllen          s             10u 0                                      URL length
+     d rcptmlen        s             10u 0                                      Recipient mail len
+      *
+      **************************************************************************
+
+        urllen = trimmed_length(url: %len(url));
+        rcptmlen = trimmed_length(recipient_mail: %len(recipient_mail));
+
+        // Do the curl stuff.
+
+        curl_global_init(CURL_GLOBAL_ALL);
+        main();
+        curl_global_cleanup();
+        *inlr = *on;            // Exit
+      *
+      **************************************************************************
+      * Main procedure: do the curl job.
+      **************************************************************************
+      *
+     p main            b
+     d main            pi
+      *
+     d h               s               *                                        Easy handle
+     d result          s                   like(CURLcode)                       Curl return code
+     d                                     inz(CURLE_OUT_OF_MEMORY)
+     d errmsgp         s               *                                        Error string pointer
+     d response        s             52                                         For error display
+     d headers         s               *   inz(*NULL)                           Mail headers
+     d rcpts           s               *   inz(*NULL)                           List of recipients
+     d mime            s               *                                        Mail MIME structure
+     d mimepart        s               *                                        Mail part
+
+            // Create and fill curl handle.
+
+        h = curl_easy_init();
+        if h <> *NULL;
+            rcpts = curl_slist_append_ccsid(rcpts:
+                                        %subst(recipient_mail: 1: rcptmlen): 0);
+            headers = curl_slist_append_ccsid(headers: 'From: ' + sender_name +
+                                                       ' <' + sender_mail + '>':
+                                              0);
+            headers = curl_slist_append_ccsid(headers: 'To: ' + recipient_name +
+                           ' <' + %subst(recipient_mail: 1: rcptmlen) + '>': 0);
+            headers = curl_slist_append_ccsid(headers: 'Subject: An ILE/RPG ' +
+                                              'source program': 0);
+            headers = curl_slist_append_ccsid(headers: 'Date: ' + mail_date():
+                                              0);
+            curl_easy_setopt_ccsid(h: CURLOPT_URL: %subst(url: 1: urllen): 0);
+            curl_easy_setopt_ccsid(h: CURLOPT_MAIL_FROM: sender_mail: 0);
+            curl_easy_setopt(h: CURLOPT_MAIL_RCPT: rcpts);
+            curl_easy_setopt(h: CURLOPT_HTTPHEADER: headers);
+            mime = curl_mime_init(h);
+            mimepart = curl_mime_addpart(mime);
+            curl_mime_data_ccsid(mimepart: 'Please find the ILE/RPG program ' +
+                                           program_name + ' source code in ' +
+                                           'attachment.' + crlf:
+                                 CURL_ZERO_TERMINATED: 0);
+            mimepart = curl_mime_addpart(mime);
+            curl_mime_data_cb(mimepart: -1: %paddr(out_data_cb): *NULL: *NULL:
+                              *NULL);
+            curl_mime_filename_ccsid(mimepart: program_name: 0);
+            curl_mime_encoder_ccsid(mimepart: 'quoted-printable': 0);
+            curl_easy_setopt(h: CURLOPT_MIMEPOST: mime);
+
+            // Perform the request.
+
+            setll *start RPGXAMPLES;
+            result = curl_easy_perform(h);
+
+            // Cleanup.
+
+            curl_mime_free(mime);
+            curl_slist_free_all(headers);
+            curl_slist_free_all(rcpts);
+            curl_easy_cleanup(h);       // Release handle
+        endif;
+
+        // Check for error and report if some.
+
+        if result <> CURLE_OK;
+            errmsgp = curl_easy_strerror_ccsid(result: 0);
+            response = %str(errmsgp);
+            dsply '' '*EXT' response;
+        else;
+            response = 'Mail sent';
+            dsply '' '*EXT' response;
+        endif;
+     p main            e
+      *
+      **************************************************************************
+      * Attachment data callback procedure.
+      **************************************************************************
+      *
+     p out_data_cb     b
+     d out_data_cb     pi            10u 0
+     d  ptr                            *   value                                Output data pointer
+     d  size                         10u 0 value                                Data element size
+     d  nmemb                        10u 0 value                                Data element count
+     d  userdata                       *   value                                User data pointer
+      *
+     d buffer          s        9999999    based(ptr)                           Output buffer
+     d line            s        9999999    based(lineptr)                       ASCII line pointer
+     d linelen         s             10u 0
+     d i               s             10u 0                                      Buffer position
+      *
+        size = size * nmemb;                                   // The size in bytes.
+        i = 0;
+        dow size - i >= %len(SRCDTA) + %len(crlf) and not %eof(RPGXAMPLES);
+            read record;
+            lineptr = curl_from_ccsid(%trimr(SRCDTA) + crlf: 0);
+            linelen = %scan(X'00': line) - 1;
+            %subst(buffer: i + 1: linelen) = %str(lineptr);
+            curl_free(lineptr);
+            i = i + linelen;
+        enddo;
+        return i;
+     p out_data_cb     e
+      *
+      **************************************************************************
+      * Mail-formatted date procedure.
+      **************************************************************************
+      *
+     p mail_date       b
+     d mail_date       pi            50    varying
+      *
+     d sysval          ds                  qualified                            To retrieve timezone
+     d  numsysval                    10u 0
+     d  offset                       10u 0
+     d                              100
+      *
+     d get_sysval      pr                  extpgm('QWCRSVAL')
+     d  outdata                            likeds(sysval)
+     d  outsize                      10u 0 const
+     d  numsysval                    10u 0 const
+     d  name                         10    const
+     d  errcode                   10000    options(*varsize)
+      *
+     d now             ds                  qualified
+     d  ts                             z
+     d  year                          4s 0 overlay(ts: 1)
+     d  month                         2s 0 overlay(ts: 6)
+     d  day                           2s 0 overlay(ts: 9)
+     d  hour                          2s 0 overlay(ts: 12)
+     d  minute                        2    overlay(ts: 15)
+     d  second                        2    overlay(ts: 18)
+      *
+     d sysvalinfo      ds                  qualified based(sysvalinfoptr)
+     d  name                         10
+     d  type                          1
+     d  status                        1
+     d  length                       10u 0
+     d  value                     99999
+      *
+     d qusec           ds                  qualified
+     d                               10u 0 inz(0)
+      *
+     d weekday         s             10u 0
+      *
+        now.ts = %timestamp(*SYS);
+        get_sysval(sysval: %len(sysval): 1: 'QUTCOFFSET': qusec);
+        sysvalinfoptr = %addr(sysval) + sysval.offset;
+        weekday = %rem(%diff(now.ts: %timestamp('2001-01-01-00.00.00.000000'):
+                                                *DAYS): 7);
+        return %subst('MonTueWedThuFriSatSun': 3 * weekday + 1: 3) + ', ' +
+               %char(now.day) + ' ' +
+               %subst('JanFebMarAprMayJunJulAugSepOctNovDec':
+                      3 * now.month - 2: 3) + ' ' +
+               %char(now.year) + ' ' +
+               %char(now.hour) + ':' + now.minute + ':' + now.second + ' ' +
+               %subst(sysvalinfo.value: 1: sysvalinfo.length);
+     p mail_date       e
+      *
+      **************************************************************************
+      * Get the length of right-trimmed string
+      **************************************************************************
+      *
+     p trimmed_length  b
+     d trimmed_length  pi            10u 0
+     d  string                   999999    const options(*varsize)
+     d  length                       10u 0 value
+      *
+     d addrdiff        s             10i 0
+     d len             s             10u 0
+      *
+        len = %scan(X'00': string: 1: length); // Limit to zero-terminated string
+        if len = 0;
+            len = length + 1;
+        endif;
+        if len <= 1;
+            return 0;
+        endif;
+        return %checkr(' ': string: len - 1);  // Trim right
+     p trimmed_length  e
