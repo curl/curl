@@ -70,23 +70,21 @@ sed -e ':begin'                                                         \
 INCLUDES="'`pwd`'"
 
 # Create a small C program to check ccsidcurl.c is up to date
-if action_needed "${LIBIFSNAME}/CHKSTRINGS.PGM"
-then
-  CMD="CRTBNDC PGM(${TARGETLIB}/CHKSTRINGS) SRCSTMF('${SCRIPTDIR}/chkstrings.c')"
-  CMD="${CMD} INCDIR('${TOPDIR}/include/curl' '${TOPDIR}/include' '${SRCDIR}' ${INCLUDES})"
-  system -i "${CMD}"
-  if [ $? -ne 0 ]
-  then
-    echo "ERROR: Failed to build CHKSTRINGS *PGM object!"
-    exit 2
-  else
-    ${LIBIFSNAME}/CHKSTRINGS.PGM
-    if [ $? -ne 0 ]
-    then
-      echo "ERROR: CHKSTRINGS failed!"
-      exit 2
-    fi
-  fi
+if action_needed "${LIBIFSNAME}/CHKSTRINGS.PGM" "${SCRIPTDIR}/chkstrings.c"
+then    CMD="CRTBNDC PGM(${TARGETLIB}/CHKSTRINGS)"
+        CMD="${CMD} SRCSTMF('${SCRIPTDIR}/chkstrings.c')"
+        CMD="${CMD} INCDIR('${TOPDIR}/include/curl' '${TOPDIR}/include'"
+        CMD="${CMD} '${SRCDIR}' ${INCLUDES})"
+        CMD="${CMD} TGTCCSID(${TGTCCSID})"
+        if CLcommand -i "${CMD}"
+        then    if "${LIBIFSNAME}/CHKSTRINGS.PGM"
+                then    :
+                else    echo "ERROR: CHKSTRINGS failed!"
+                        exit 2
+                fi
+        else    echo "ERROR: Failed to build CHKSTRINGS *PGM object!"
+                exit 2
+        fi
 fi
 
 make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"
@@ -108,12 +106,12 @@ if [ "${LINK}" ]
 then    rm -rf "${LIBIFSNAME}/${STATBNDDIR}.BNDDIR"
         CMD="CRTBNDDIR BNDDIR(${TARGETLIB}/${STATBNDDIR})"
         CMD="${CMD} TEXT('LibCurl API static binding directory')"
-        system "${CMD}"
+        CLcommand "${CMD}"
 
         for MODULE in ${MODULES}
         do      CMD="ADDBNDDIRE BNDDIR(${TARGETLIB}/${STATBNDDIR})"
                 CMD="${CMD} OBJ((${TARGETLIB}/${MODULE} *MODULE))"
-                system "${CMD}"
+                CLcommand "${CMD}"
         done
 fi
 
@@ -124,7 +122,7 @@ fi
 if action_needed "${LIBIFSNAME}/TOOLS.FILE"
 then    CMD="CRTSRCPF FILE(${TARGETLIB}/TOOLS) RCDLEN(112)"
         CMD="${CMD} TEXT('curl: build tools')"
-        system "${CMD}"
+        CLcommand "${CMD}"
 fi
 
 
@@ -192,7 +190,7 @@ then    CMD="CRTSRVPGM SRVPGM(${TARGETLIB}/${SRVPGM})"
         CMD="${CMD} BNDSRVPGM(QADRTTS QGLDCLNT QGLDBRDR)"
         CMD="${CMD} TEXT('curl API library')"
         CMD="${CMD} TGTRLS(${TGTRLS})"
-        system "${CMD}"
+        CLcommand "${CMD}"
         LINK=YES
 fi
 
@@ -207,52 +205,8 @@ if [ "${LINK}" ]
 then    rm -rf "${LIBIFSNAME}/${DYNBNDDIR}.BNDDIR"
         CMD="CRTBNDDIR BNDDIR(${TARGETLIB}/${DYNBNDDIR})"
         CMD="${CMD} TEXT('LibCurl API dynamic binding directory')"
-        system "${CMD}"
+        CLcommand "${CMD}"
         CMD="ADDBNDDIRE BNDDIR(${TARGETLIB}/${DYNBNDDIR})"
         CMD="${CMD} OBJ((*LIBL/${SRVPGM} *SRVPGM))"
-        system "${CMD}"
-fi
-
-
-#       Rebuild the formdata test if needed.
-
-if [ "${TEST_FORMDATA}" ]
-then    MODULES=
-        make_module TFORMDATA   formdata.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TSTREQUAL   strequal.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TMEMDEBUG   memdebug.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TMPRINTF    mprintf.c       "'_FORM_DEBUG' 'CURLDEBUG'"
-        make_module TSTRERROR   strerror.c      "'_FORM_DEBUG' 'CURLDEBUG'"
-        #       The following modules should not be needed (see comment in
-        #               formdata.c. However, there are some unsatisfied
-        #               external references leading in the following
-        #               modules to be (recursively) needed.
-        MODULES="${MODULES} EASY STRDUP SSLGEN GSKIT HOSTIP HOSTIP4 HOSTIP6"
-        MODULES="${MODULES} URL HASH TRANSFER GETINFO COOKIE SENDF SELECT"
-        MODULES="${MODULES} INET_NTOP SHARE HOSTTHRE MULTI LLIST FTP HTTP"
-        MODULES="${MODULES} HTTP_DIGES HTTP_CHUNK HTTP_NEGOT TIMEVAL HOSTSYN"
-        MODULES="${MODULES} CONNECT SOCKS PROGRESS ESCAPE INET_PTON GETENV"
-        MODULES="${MODULES} DICT LDAP TELNET FILE TFTP NETRC PARSEDATE"
-        MODULES="${MODULES} SPEEDCHECK SPLAY BASE64 SECURITY IF2IP MD5"
-        MODULES="${MODULES} KRB5 OS400SYS"
-
-        PGMIFSNAME="${LIBIFSNAME}/TFORMDATA.PGM"
-
-        if action_needed "${PGMIFSNAME}"
-        then    LINK=YES
-        fi
-
-        if [ "${LINK}" ]
-        then    CMD="CRTPGM PGM(${TARGETLIB}/TFORMDATA)"
-                CMD="${CMD} ENTMOD(QADRT/QADRTMAIN2)"
-                CMD="${CMD} MODULE("
-
-                for MODULE in ${MODULES}
-                do      CMD="${CMD} ${TARGETLIB}/${MODULE}"
-                done
-
-                CMD="${CMD} ) BNDSRVPGM(QADRTTS)"
-                CMD="${CMD} TGTRLS(${TGTRLS})"
-                system "${CMD}"
-        fi
+        CLcommand "${CMD}"
 fi
