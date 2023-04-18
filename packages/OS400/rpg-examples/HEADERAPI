@@ -1,0 +1,146 @@
+      * Curl header API: extract headers post transfer
+      *
+     h DFTACTGRP(*NO) ACTGRP(*NEW)
+     h OPTION(*NOSHOWCPY)
+     h BNDDIR('CURL')
+      *
+      **************************************************************************
+      *                                  _   _ ____  _
+      *  Project                     ___| | | |  _ \| |
+      *                             / __| | | | |_) | |
+      *                            | (__| |_| |  _ <| |___
+      *                             \___|\___/|_| \_\_____|
+      *
+      * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+      *
+      * This software is licensed as described in the file COPYING, which
+      * you should have received as part of this distribution. The terms
+      * are also available at https://curl.se/docs/copyright.html.
+      *
+      * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+      * copies of the Software, and permit persons to whom the Software is
+      * furnished to do so, under the terms of the COPYING file.
+      *
+      * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+      * ANY KIND, either express or implied.
+      *
+      * SPDX-License-Identifier: curl
+      *
+      **************************************************************************
+      *
+      /include H,CURL.INC
+      *
+      * Extract headers post transfer with the header API.
+      *
+     d                 pi
+     d url                          120
+      *
+     d urllen          s             10u 0                                      URL length
+      *
+      **************************************************************************
+
+        urllen = trimmed_length(url: %len(url));
+
+        // Do the curl stuff.
+
+        curl_global_init(CURL_GLOBAL_ALL);
+        main();
+        curl_global_cleanup();
+        *inlr = *on;            // Exit
+      *
+      **************************************************************************
+      * Main procedure: do the curl job.
+      **************************************************************************
+      *
+     p main            b
+     d main            pi
+      *
+     d h               s               *                                        Easy handle
+     d result          s                   like(CURLcode)                       Curl return code
+     d                                     inz(CURLE_OUT_OF_MEMORY)
+     d header          ds                  likeds(curl_header) based(hp)
+     d strp1           s               *                                        Work string pointer
+     d strp2           s               *                                        Work string pointer
+     d inout           s             52                                         For error display
+
+        // Create and fill curl handle.
+
+        h = curl_easy_init();
+        if h <> *NULL;
+            curl_easy_setopt_ccsid(h: CURLOPT_URL: %subst(url: 1: urllen): 0);
+            curl_easy_setopt(h: CURLOPT_FOLLOWLOCATION: 1);
+            curl_easy_setopt(h: CURLOPT_WRITEFUNCTION: %paddr(in_data_cb));     // Ignore input data
+
+            // Perform the request.
+
+            result = curl_easy_perform(h);
+        endif;
+
+        // Check for error and report if some.
+
+        if result <> CURLE_OK;
+            inout = %str(curl_easy_strerror_ccsid(result: 0));
+            dsply '' '*EXT' inout;
+        else;
+            if curl_easy_header_ccsid(h: 'Content-Type': 0: CURLH_HEADER: -1:
+                                      hp: 0) = CURLHE_OK;
+                strp2 = curl_to_ccsid(header.value: 0);
+                inout = 'Content-Type: ' + %str(strp2);
+                dsply inout;
+                curl_free(strp2);
+            endif;
+            dsply '    All server headers:';
+            hp = *NULL;
+            dow *on;
+                hp = curl_easy_nextheader(h: CURLH_HEADER: -1: hp);
+                if hp = *NULL;
+                    leave;
+                endif;
+                strp1 = curl_to_ccsid(header.name: 0);
+                strp2 = curl_to_ccsid(header.value: 0);
+                inout = %str(strp1) + ': ' + %str(strp2) +
+                        ' (' + %char(header.amount) + ')';
+                curl_free(strp2);
+                curl_free(strp1);
+                dsply inout;
+            enddo;
+            inout = 'Done';
+            dsply '' '*EXT' inout;
+            curl_easy_cleanup(h);       // Release handle
+        endif;
+     p main            e
+      *
+      **************************************************************************
+      * Dummy data input callback procedure.
+      **************************************************************************
+      *
+     p in_data_cb      b
+     d in_data_cb      pi            10u 0
+     d  ptr                            *   value                                Input data pointer
+     d  size                         10u 0 value                                Data element size
+     d  nmemb                        10u 0 value                                Data element count
+     d  userdata                       *   value                                User data pointer
+      *
+        return size * nmemb;
+     p in_data_cb      e
+      *
+      **************************************************************************
+      * Get the length of right-trimmed string
+      **************************************************************************
+      *
+     p trimmed_length  b
+     d trimmed_length  pi            10u 0
+     d  string                   999999    const options(*varsize)
+     d  length                       10u 0 value
+      *
+     d len             s             10u 0
+      *
+        len = %scan(X'00': string: 1: length); // Limit to zero-terminated string
+        if len = 0;
+            len = length + 1;
+        endif;
+        if len <= 1;
+            return 0;
+        endif;
+        return %checkr(' ': string: len - 1);  // Trim right
+     p trimmed_length  e

@@ -71,6 +71,36 @@ do      MEMBER="`basename \"${TEXT}\" .OS400`"
 done
 
 
+#       Create the RPGXAMPLES source file if it does not exist.
+
+if action_needed "${LIBIFSNAME}/RPGXAMPLES.FILE"
+then    CMD="CRTSRCPF FILE(${TARGETLIB}/RPGXAMPLES) RCDLEN(240)"
+        CMD="${CMD} CCSID(${TGTCCSID}) TEXT('ILE/RPG examples')"
+        CLcommand "${CMD}"
+fi
+
+
+#       Copy RPG examples if needed.
+
+for EXAMPLE in "${SCRIPTDIR}/rpg-examples"/*
+do      MEMBER="`basename \"${EXAMPLE}\"`"
+        IFSMEMBER="${LIBIFSNAME}/RPGXAMPLES.FILE/`db2_name \"${MEMBER}\"`.MBR"
+
+        [ -e "${EXAMPLE}" ] || continue
+
+        if action_needed "${IFSMEMBER}" "${EXAMPLE}"
+        then    CMD="CPY OBJ('${EXAMPLE}') TOOBJ('${IFSMEMBER}')"
+                CMD="${CMD} TOCCSID(${TGTCCSID}) DTAFMT(*TEXT) REPLACE(*YES)"
+                CLcommand "${CMD}"
+                MBRTEXT=`sed -e '1!d;/^      \*/!d;s/^ *\* *//'         \
+                             -e 's/ *$//;s/'"'"'/&&/g' < "${EXAMPLE}"`
+                CMD="CHGPFM FILE(${TARGETLIB}/RPGXAMPLES) MBR(${MEMBER})"
+                CMD="${CMD} SRCTYPE(RPGLE) TEXT('${MBRTEXT}')"
+                CLcommand "${CMD}"
+        fi
+done
+
+
 #       Build in each directory.
 
 # for SUBDIR in include lib src tests
