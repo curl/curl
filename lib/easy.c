@@ -1223,6 +1223,26 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
   return CURLE_OK;
 }
 
+#ifdef USE_WEBSOCKETS
+CURLcode Curl_connect_only_attach(struct Curl_easy *data)
+{
+  curl_socket_t sfd;
+  CURLcode result;
+  struct connectdata *c = NULL;
+
+  result = easy_connection(data, &sfd, &c);
+  if(result)
+    return result;
+
+  if(!data->conn)
+    /* on first invoke, the transfer has been detached from the connection and
+       needs to be reattached */
+    Curl_attach_connection(data, c);
+
+  return CURLE_OK;
+}
+#endif /* USE_WEBSOCKETS */
+
 /*
  * Sends data over the connected socket.
  *

@@ -271,10 +271,8 @@ static CURLcode chop_write(struct Curl_easy *data,
   if(type & CLIENTWRITE_BODY) {
 #ifdef USE_WEBSOCKETS
     if(conn->handler->protocol & (CURLPROTO_WS|CURLPROTO_WSS)) {
-      struct HTTP *ws = data->req.p.http;
       writebody = Curl_ws_writecb;
-      ws->ws.data = data;
-      writebody_ptr = ws;
+      writebody_ptr = data;
     }
     else
 #endif

@@ -33,28 +33,44 @@
 #define REQTYPE struct dynbuf
 #endif
 
-/* this is the largest single fragment size we support */
-#define MAX_WS_SIZE 65535
-
-/* part of 'struct HTTP', when used in the 'struct SingleRequest' in the
-   Curl_easy struct */
-struct websocket {
-  bool contfragment; /* set TRUE if the previous fragment sent was not final */
-  unsigned char mask[4]; /* 32 bit mask for this connection */
-  struct Curl_easy *data; /* used for write callback handling */
-  struct dynbuf buf;
-  size_t usedbuf; /* number of leading bytes in 'buf' the most recent complete
-                     websocket frame uses */
-  struct curl_ws_frame frame; /* the struct used for frame state */
-  size_t stillblen; /* number of bytes left in the buffer to deliver in
-                         the next curl_ws_recv() call */
-  const char *stillb; /* the stillblen pending bytes are here */
-  curl_off_t sleft; /* outstanding number of payload bytes left to send */
-  unsigned int xori; /* xor index */
+/* a client-side WS frame decoder, parsing frame headers and
+ * payload, keeping track of current position and stats */
+enum ws_dec_state {
+  WS_DEC_INIT,
+  WS_DEC_HEAD,
+  WS_DEC_PAYLOAD
 };
 
-struct ws_conn {
-  struct dynbuf early; /* data already read when switching to ws */
+struct ws_decoder {
+  int frame_age;        /* zero */
+  int frame_flags;      /* See the CURLWS_* defines */
+  curl_off_t payload_offset;   /* the offset parsing is at */
+  curl_off_t payload_len;
+  unsigned char head[10];
+  int head_len, head_total;
+  enum ws_dec_state state;
+};
+
+/* a client-side WS frame encoder, generating frame headers and
+ * converting payloads, tracking remaining data in current frame */
+struct ws_encoder {
+  curl_off_t payload_len;  /* payload length of current frame */
+  curl_off_t payload_remain;  /* remaining payload of current */
+  unsigned int xori; /* xor index */
+  unsigned char mask[4]; /* 32 bit mask for this connection */
+  unsigned char firstbyte; /* first byte of frame we encode */
+  bool contfragment; /* set TRUE if the previous fragment sent was not final */
+};
+
+/* A websocket connection with en- and decoder that treat frames
+ * and keep track of boundaries. */
+struct websocket {
+  struct Curl_easy *data; /* used for write callback handling */
+  struct ws_decoder dec;  /* decode of we frames */
+  struct ws_encoder enc;  /* decode of we frames */
+  struct bufq recvbuf;    /* raw data from the server */
+  struct bufq sendbuf;    /* raw data to be sent to the server */
+  struct curl_ws_frame frame;  /* the current WS FRAME received */
 };
 
 CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req);

@@ -30,6 +30,10 @@
 CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
                        size_t buflen, ssize_t *n);
 
+#ifdef USE_WEBSOCKETS
+CURLcode Curl_connect_only_attach(struct Curl_easy *data);
+#endif
+
 #ifdef CURLDEBUG
 CURL_EXTERN CURLcode curl_easy_perform_ev(struct Curl_easy *easy);
 #endif
