@@ -607,7 +607,7 @@ sub singletest_run {
     }
 
     my $disablevalgrind;
-    my $CMDLINE;
+    my $CMDLINE="";
     my $cmdargs;
     my $cmdtype = $cmdhash{'type'} || "default";
     my $fail_due_event_based = $run_event_based;
