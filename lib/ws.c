@@ -900,6 +900,23 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
   size_t space;
   CURLcode result;
 
+  *sent = 0;
+  if(!data->conn && data->set.connect_only) {
+    result = Curl_connect_only_attach(data);
+    if(result)
+      return result;
+  }
+  if(!data->conn) {
+    failf(data, "No associated connection");
+    return CURLE_SEND_ERROR;
+  }
+  if(!data->conn->proto.ws) {
+    failf(data, "Not a websocket transfer on connection #%ld",
+          data->conn->connection_id);
+    return CURLE_SEND_ERROR;
+  }
+  ws = data->conn->proto.ws;
+
   if(data->set.ws_raw_mode) {
     if(totalsize || sendflags)
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -909,10 +926,6 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
     /* raw mode sends exactly what was requested, and this is from within
        the write callback */
     if(Curl_is_in_callback(data)) {
-      if(!data->conn) {
-        failf(data, "No associated connection");
-        return CURLE_SEND_ERROR;
-      }
       result = Curl_write(data, data->conn->writesockfd, buffer, buflen,
                           &nwritten);
     }
@@ -926,13 +939,6 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
   }
 
   /* Not RAW mode, buf we do the frame encoding */
-  if(!data->conn || !data->conn->proto.ws) {
-    failf(data, "Not a websocket transfer");
-    return CURLE_FAILED_INIT;
-  }
-  ws = data->conn->proto.ws;
-  *sent = 0;
-
   result = ws_flush(data, ws, FALSE);
   if(result)
     return result;

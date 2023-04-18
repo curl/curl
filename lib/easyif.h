@@ -30,6 +30,8 @@
 CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
                        size_t buflen, ssize_t *n);
 
+CURLcode Curl_connect_only_attach(struct Curl_easy *data);
+
 #ifdef CURLDEBUG
 CURL_EXTERN CURLcode curl_easy_perform_ev(struct Curl_easy *easy);
 #endif
