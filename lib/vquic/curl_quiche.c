@@ -1145,8 +1145,8 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
     break;
   }
   case CF_CTRL_DATA_IDLE:
-    /* result = cf_flush_egress(cf, data);
-    DEBUGF(LOG_CF(data, cf, "data idle, flush egress -> %d", result)); */
+    result = cf_flush_egress(cf, data);
+    DEBUGF(LOG_CF(data, cf, "data idle, flush egress -> %d", result));
     break;
   default:
     break;
