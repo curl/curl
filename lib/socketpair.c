@@ -126,7 +126,8 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   else {
     struct curltime check;
-    struct curltime start = Curl_now();
+    struct curltime start = {};
+    start = Curl_now();
     char *p = (char *)&check;
     size_t s = sizeof(check);
 
