@@ -96,5 +96,14 @@ CURL_EXTERN const struct curl_easyoption *curl_easy_option_by_name_ccsid(
 CURL_EXTERN const char *curl_easy_option_get_name_ccsid(
                                          const struct curl_easyoption *option,
                                          unsigned int ccsid);
+CURL_EXTERN const char *curl_url_strerror_ccsid(CURLUcode error,
+                                                unsigned int ccsid);
+CURL_EXTERN CURLHcode curl_easy_header_ccsid(CURL *easy, const char *name,
+                                             size_t index, unsigned int origin,
+                                             int request,
+                                             struct curl_header **hout,
+                                             unsigned int ccsid);
+CURL_EXTERN const char *curl_from_ccsid(const char *s, unsigned int ccsid);
+CURL_EXTERN const char *curl_to_ccsid(const char *s, unsigned int ccsid);
 
 #endif

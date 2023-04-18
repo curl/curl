@@ -32,7 +32,6 @@
 /* Per-thread item identifiers. */
 
 typedef enum {
-        LK_SSL_ERROR,
         LK_GSK_ERROR,
         LK_LDAP_ERROR,
         LK_CURL_VERSION,
@@ -41,6 +40,7 @@ typedef enum {
         LK_EASY_STRERROR,
         LK_SHARE_STRERROR,
         LK_MULTI_STRERROR,
+        LK_URL_STRERROR,
         LK_ZLIB_VERSION,
         LK_ZLIB_MSG,
         LK_LAST
