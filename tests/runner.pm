@@ -37,7 +37,6 @@ BEGIN {
         restore_test_env
         runner_test_preprocess
         runner_test_run
-        use_valgrind
         checktestcmd
         $DBGCURL
         $gdbthis
@@ -762,7 +761,7 @@ sub singletest_run {
     # timestamp finishing of test command
     $timetoolend{$testnum} = Time::HiRes::time();
 
-    return (0, $cmdres, $dumped_core, $CURLOUT, $tool, $disablevalgrind);
+    return (0, $cmdres, $dumped_core, $CURLOUT, $tool, use_valgrind() && !$disablevalgrind);
 }
 
 
@@ -933,8 +932,8 @@ sub runner_test_run {
     my $dumped_core;
     my $CURLOUT;
     my $tool;
-    my $disablevalgrind;
-    ($error, $cmdres, $dumped_core, $CURLOUT, $tool, $disablevalgrind) = singletest_run($testnum);
+    my $usedvalgrind;
+    ($error, $cmdres, $dumped_core, $CURLOUT, $tool, $usedvalgrind) = singletest_run($testnum);
     if($error) {
         return -2;
     }
@@ -957,7 +956,7 @@ sub runner_test_run {
     # restore environment variables that were modified
     restore_test_env(0);
 
-    return (0, $cmdres, $CURLOUT, $tool, $disablevalgrind);
+    return (0, $cmdres, $CURLOUT, $tool, $usedvalgrind);
 }
 
 1;

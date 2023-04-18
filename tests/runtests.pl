@@ -1014,7 +1014,7 @@ sub singletest_count {
 #######################################################################
 # Verify test succeeded
 sub singletest_check {
-    my ($testnum, $cmdres, $CURLOUT, $tool, $disablevalgrind)=@_;
+    my ($testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind)=@_;
 
     # Skip all the verification on torture tests
     if ($torture) {
@@ -1462,7 +1462,7 @@ sub singletest_check {
     }
 
     if($valgrind) {
-        if(use_valgrind() && !$disablevalgrind) {
+        if($usedvalgrind) {
             if(!opendir(DIR, "$LOGDIR")) {
                 logmsg "ERROR: unable to read $LOGDIR\n";
                 # timestamp test result verification end
@@ -1500,7 +1500,7 @@ sub singletest_check {
             $ok .= "v";
         }
         else {
-            if($verbose && !$disablevalgrind) {
+            if($verbose) {
                 logmsg " valgrind SKIPPED\n";
             }
             $ok .= "-"; # skipped
@@ -1594,8 +1594,8 @@ sub singletest {
     my $cmdres;
     my $CURLOUT;
     my $tool;
-    my $disablevalgrind;
-    ($error, $cmdres, $CURLOUT, $tool, $disablevalgrind) = runner_test_run($testnum);
+    my $usedvalgrind;
+    ($error, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runner_test_run($testnum);
     if($error == -1) {
       # return a test failure, either to be reported or to be ignored
       return $errorreturncode;
@@ -1610,7 +1610,7 @@ sub singletest {
 
     #######################################################################
     # Verify that the test succeeded
-    $error = singletest_check($testnum, $cmdres, $CURLOUT, $tool, $disablevalgrind);
+    $error = singletest_check($testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind);
     if($error == -1) {
       # return a test failure, either to be reported or to be ignored
       return $errorreturncode;
