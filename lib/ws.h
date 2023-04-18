@@ -38,7 +38,7 @@
 enum ws_dec_state {
   WS_DEC_INIT,
   WS_DEC_HEAD,
-  WS_DEC_PAYLOAD,
+  WS_DEC_PAYLOAD
 };
 
 struct ws_decoder {
