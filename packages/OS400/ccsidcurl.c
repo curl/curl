@@ -1299,6 +1299,29 @@ curl_form_long_value(long value)
 }
 
 
+CURLcode
+curl_easy_setopt_RPGnum_(CURL *easy, CURLoption tag, curl_off_t arg)
+{
+  /* ILE/RPG procedure overloading cannot discriminate between different
+     size and/or signedness of format arguments. This provides a generic
+     wrapper that adapts size to the given tag expectation.
+     This procedure is not intended to be explicitly called from user code. */
+  if(tag / 10000 != CURLOPTTYPE_OFF_T)
+    return curl_easy_setopt(easy, tag, (long) arg);
+  return curl_easy_setopt(easy, tag, arg);
+}
+
+
+CURLcode
+curl_multi_setopt_RPGnum_(CURLM *multi, CURLMoption tag, curl_off_t arg)
+{
+  /* Likewise, for multi handle. */
+  if(tag / 10000 != CURLOPTTYPE_OFF_T)
+    return curl_multi_setopt(multi, tag, (long) arg);
+  return curl_multi_setopt(multi, tag, arg);
+}
+
+
 char *
 curl_pushheader_bynum_cssid(struct curl_pushheaders *h,
                             size_t num, unsigned int ccsid)
