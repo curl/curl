@@ -39,9 +39,6 @@ concurrency:
 
 permissions: {}
 
-env:
-  DEVELOPER_DIR: /Applications/Xcode_14.0.1.app/Contents/Developer
-
 jobs:
   autotools:
     name: ${{ matrix.build.name }}
@@ -170,6 +167,9 @@ jobs:
           install: nghttp2 openssl libssh2
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON
     steps:
+    - run: sudo xcode-select --switch /Applications/Xcode_14.0.1.app/Contents/Developer
+      name: 'switch to xcode 14.0.1'
+    
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
