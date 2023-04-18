@@ -125,9 +125,9 @@ int Curl_socketpair(int domain, int type, int protocol,
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
   else {
-    // clang msan doesn't like memory reads from
-    // unaligned structures that haven't been fully
-    // initialized, so we use memset here
+    /* clang msan doesn't like memory reads from
+       unaligned structures that haven't been fully
+       initialized, so we use memset here */
     struct curltime check;
     memset(&check, 0, sizeof(check));
     struct curltime start;
