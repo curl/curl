@@ -4,7 +4,7 @@ curl and libcurl 8.1.0
  Command line options:         251
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2858
+ Contributors:                 2859
 
 This release includes the following changes:
 
@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o autotools: sync up clang picky warnings with cmake [114]
  o bufq: simplify since expression is always true [72]
  o cf-h1-proxy: skip an extra NULL assign [80]
  o cf-h2-proxy: fix processing ingress to stop too early [76]
@@ -28,6 +29,7 @@ This release includes the following bugfixes:
  o CMake: make config version 8 compatible with 7 [28]
  o cmake: picky-linker fixes for openssl, ZLIB, H3 and more [31]
  o cmake: set SONAME for SunOS too [3]
+ o cmake: speed up and extend picky clang/gcc options [116]
  o CMakeLists.txt: fix typo for Haiku detection [95]
  o config-dos.h: fix SIZEOF_CURL_OFF_T for MS-DOS/DJGPP [52]
  o configure: don't set HAVE_WRITABLE_ARGV on Windows [64]
@@ -38,11 +40,13 @@ This release includes the following bugfixes:
  o cookie: clarify that init with data set to NULL reads no file [99]
  o curl: do NOT append file name to path for upload when there's a query [58]
  o curl_easy_getinfo.3: typo fix (duplicated "from the") [43]
+ o curl_easy_unescape.3: rename the argument [113]
  o curl_url_set.3: mention that users can set content rather freely [105]
  o data.d: emphasize no conversion [5]
  o digest: clear target buffer [8]
  o doc: curl_mime_init() strong easy binding was relaxed in 7.87.0 [26]
  o docs/cmdline-opts: document the dotless config path [1]
+ o docs/examples/protofeats.c: outputs all protocols and features [110]
  o docs: bump the minimum perl version to 5.6
  o dynbuf: never allocate larger than "toobig" [17]
  o ftp: fix 'portsock' variable was assigned the same value [78]
@@ -75,13 +79,19 @@ This release includes the following bugfixes:
  o lib: use correct printf flags for sockets and timediffs [36]
  o mime: skip NULL assigns after Curl_safefree() [84]
  o multi: add handle asserts in DEBUG builds [11]
+ o multi: free up more data earleier in DONE [118]
  o multi: remove a few superfluous assigns [97]
  o multi: remove PENDING + MSGSENT handles from the main linked list [23]
  o ngtcp2: adjust config and code checks for ngtcp2 without nghttp3 [4]
  o noproxy: pointer to local array 'hostip' is stored outside scope [93]
  o ntlm: clear lm and nt response buffers before use [7]
  o openssl: interop with AWS-LC [30]
+ o OS400: fix and complete ILE/RPG binding [96]
+ o OS400: implement EBCDIC support for recent features [100]
+ o OS400: improve vararg emulation [92]
+ o OS400: provide ILE/RPG usage examples [81]
  o pytest: improvements for suitable curl and error output [35]
+ o quiche: Enable IDLE egress handling [109]
  o RELEASE-PROCEDURE: update to new schedule [25]
  o rtsp: convert mallocs to dynbuf for RTP buffering [37]
  o rtsp: skip malformed RTSP interleaved frame data [33]
@@ -89,6 +99,7 @@ This release includes the following bugfixes:
  o runtests: die if curl version can be found [10]
  o runtests: don't start servers if -l is given
  o runtests: lots of refactoring
+ o runtests: refactor into more packages [60]
  o runtests: show error message if file can't be written
  o rustls: fix error in recv handling [50]
  o schannel: add clarifying comment [98]
@@ -98,10 +109,14 @@ This release includes the following bugfixes:
  o test1169: fix so it works properly everywhere [106]
  o test1592: add flaky keyword [39]
  o test1960: point to the correct path for the precheck tool
+ o test303: kill server after test
  o tests/http: add timeout to running curl in test cases [24]
  o tests/http: fix log formatting on wrong exit code [27]
  o tests/http: improved httpd detection [45]
  o tests/http: relax connection check in test_07_02 [53]
+ o tests/keywords.pl: remove [111]
+ o tests/libtest/lib1900.c: remove
+ o tests/sshserver.pl: Define AddressFamily earlier [103]
  o tests: 1078 1288 1297 use valid IPv4 addresses
  o tests: document that the unittest keyword is special
  o tests: increase sws timeout for more robust testing [66]
@@ -144,15 +159,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Ali Khodkar, Andy Alt, Arne Soete, Ben Fritz, Biswapriyo Nath, Brian Lund,
-  Chloe Kudryavtsev, Colman Mbuya, Dan Fandrich, Dan Frandrich,
-  Daniel Stenberg, dengjfzh on github, Dirk Rosenkranz, Douglas R. Reno,
-  Emil Engler, Frank Gevaerts, Gisle Vanem, Harry Sintonen, Jakub Zakrzewski,
-  Jim King, Jon Rumsey, Josh McCullough, Kai Pastor, Kamil Dudka, Kvarec Lezki,
-  kwind on github, Matt Jolly, Micah Snyder), Osaila on github,
-  Patrick Monnerat, Paul Howarth, Philip Heiduck, Ray Satiro, Ronan Pigott,
-  simplerobot on github, Stefan Eissing, SuperIlu on github, Viktor Szakats
-  (38 contributors)
+  Ali Khodkar, Andreas Falkenhahn, Andy Alt, Arne Soete, Ben Fritz,
+  Biswapriyo Nath, Brian Lund, Chloe Kudryavtsev, Colman Mbuya, Dan Fandrich,
+  Dan Frandrich, Daniel Stenberg, dengjfzh on github, Dirk Rosenkranz,
+  Douglas R. Reno, eaglegai on github, Emil Engler, Frank Gevaerts,
+  Gisle Vanem, Harry Sintonen, Jakub Zakrzewski, Jim King, Jon Rumsey,
+  Josh McCullough, Kai Pastor, Kamil Dudka, Kvarec Lezki, kwind on github,
+  Marcel Raad, Matt Jolly, Micah Snyder), Osaila on github, Patrick Monnerat,
+  Paul Howarth, Paweł Wegner, Philip Heiduck, Ray Satiro, Ronan Pigott,
+  Sevan Janiyan, simplerobot on github, Stefan Eissing, SuperIlu on github,
+  Viktor Szakats
+  (43 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -214,6 +231,7 @@ References to bug reports and discussions on issues:
  [56] = https://curl.se/bug/?i=10861
  [57] = https://curl.se/bug/?i=10900
  [58] = https://curl.se/mail/archive-2023-04/0008.html
+ [60] = https://curl.se/bug/?i=10995
  [61] = https://curl.se/bug/?i=10899
  [62] = https://curl.se/bug/?i=10926
  [63] = https://curl.se/bug/?i=10896
@@ -234,6 +252,7 @@ References to bug reports and discussions on issues:
  [78] = https://curl.se/bug/?i=10955
  [79] = https://curl.se/bug/?i=10957
  [80] = https://curl.se/bug/?i=10953
+ [81] = https://curl.se/bug/?i=10994
  [82] = https://curl.se/bug/?i=10960
  [83] = https://curl.se/bug/?i=10950
  [84] = https://curl.se/bug/?i=10947
@@ -244,15 +263,26 @@ References to bug reports and discussions on issues:
  [89] = https://curl.se/bug/?i=10939
  [90] = https://curl.se/bug/?i=10787
  [91] = https://curl.se/bug/?i=10935
+ [92] = https://curl.se/bug/?i=10994
  [93] = https://curl.se/bug/?i=10933
  [94] = https://curl.se/bug/?i=10934
  [95] = https://curl.se/bug/?i=10937
+ [96] = https://curl.se/bug/?i=10994
  [97] = https://curl.se/bug/?i=10932
  [98] = https://curl.se/bug/?i=10931
  [99] = https://curl.se/bug/?i=10930
+ [100] = https://curl.se/bug/?i=10994
  [102] = https://curl.se/bug/?i=10925
+ [103] = https://curl.se/bug/?i=10983
  [104] = https://curl.se/bug/?i=10922
  [105] = https://curl.se/bug/?i=10921
  [106] = https://curl.se/bug/?i=10889
  [107] = https://curl.se/bug/?i=10911
  [108] = https://curl.se/bug/?i=10912
+ [109] = https://curl.se/bug/?i=11000
+ [110] = https://curl.se/bug/?i=10991
+ [111] = https://curl.se/bug/?i=10895
+ [113] = https://curl.se/bug/?i=10979
+ [114] = https://curl.se/bug/?i=10974
+ [116] = https://curl.se/bug/?i=10973
+ [118] = https://curl.se/bug/?i=10971
