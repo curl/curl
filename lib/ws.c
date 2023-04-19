@@ -358,22 +358,10 @@ static void update_meta(struct websocket *ws,
 static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
                         const char *msg)
 {
-  const char *name = ws_frame_name_of_flags(enc->frame_flags);
-  bool fin, cont;
-
-  fin = cont = FALSE;
-  if(!(enc->frame_flags & CURLWS_CONT)) {
-    fin = TRUE;
-    cont = enc->contfragment;
-  }
-  else if(enc->contfragment) {
-    cont = TRUE;
-  }
-  else {
-    cont = TRUE;
-  }
   infof(data, "WS-ENC: %s [%s%s%s payload=%zd/%zd]", msg,
-        name, cont? " CONT" : "", fin? "" : " NON-FIN",
+        ws_frame_name_of_op(enc->firstbyte),
+        (enc->firstbyte & WSBIT_OPCODE_CONT)? " CONT" : "",
+        (enc->firstbyte & WSBIT_FIN)? "" : " NON-FIN",
         enc->payload_len - enc->payload_remain, enc->payload_len);
 }
 
@@ -461,7 +449,7 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
     enc->contfragment = TRUE;
   }
 
-  head[0] = firstbyte;
+  head[0] = enc->firstbyte = firstbyte;
   if(payload_len > 65535) {
     head[1] = 127 | WSBIT_MASK;
     head[2] = (unsigned char)((payload_len >> 56) & 0xff);
@@ -485,7 +473,6 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
     hlen = 2;
   }
 
-  enc->frame_flags = flags;
   enc->payload_remain = enc->payload_len = payload_len;
   ws_enc_info(enc, data, "sending");
 
