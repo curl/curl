@@ -62,12 +62,6 @@ BEGIN {
         %feature
         %keywords
         @protocols
-        %timesrvrend
-        %timesrvrini
-        %timesrvrlog
-        %timetoolend
-        %timetoolini
-        %timevrfyend
     );
 }
 use pathhelp qw(exe_ext);
@@ -117,11 +111,5 @@ our @protocols;   # array of lowercase supported protocol servers
 our %feature;     # hash of enabled features
 our $has_shared;  # built as a shared library
 our %keywords;    # hash of keywords from the test spec
-our %timesrvrini; # timestamp for each test required servers verification start
-our %timesrvrend; # timestamp for each test required servers verification end
-our %timetoolini; # timestamp for each test command run starting
-our %timetoolend; # timestamp for each test command run stopping
-our %timesrvrlog; # timestamp for each test server logs lock removal
-our %timevrfyend; # timestamp for each test result verification end
 
 1;

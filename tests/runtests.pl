@@ -143,6 +143,12 @@ my %ignored;            # ignored results of test cases
 my $timestats;   # time stamping and stats generation
 my $fullstats;   # show time stats for every single test
 my %timeprepini; # timestamp for each test preparation start
+my %timesrvrini; # timestamp for each test required servers verification start
+my %timesrvrend; # timestamp for each test required servers verification end
+my %timetoolini; # timestamp for each test command run starting
+my %timetoolend; # timestamp for each test command run stopping
+my %timesrvrlog; # timestamp for each test server logs lock removal
+my %timevrfyend; # timestamp for each test result verification end
 
 #######################################################################
 # variables that command line options may set
@@ -831,6 +837,28 @@ sub citest_finishtestrun {
         $AZURE_RUN_ID = azure_update_test_run($ACURL, $AZURE_RUN_ID);
     }
     # Appveyor doesn't require anything here
+}
+
+
+# add one set of test timings from the runner to global set
+sub updatetesttimings {
+    my ($testnum, %testtimings)=@_;
+
+    if(defined $testtimings{"timesrvrini"}) {
+        $timesrvrini{$testnum} = $testtimings{"timesrvrini"};
+    }
+    if(defined $testtimings{"timesrvrend"}) {
+        $timesrvrend{$testnum} = $testtimings{"timesrvrend"};
+    }
+    if(defined $testtimings{"timetoolini"}) {
+        $timetoolini{$testnum} = $testtimings{"timetoolini"};
+    }
+    if(defined $testtimings{"timetoolend"}) {
+        $timetoolend{$testnum} = $testtimings{"timetoolend"};
+    }
+    if(defined $testtimings{"timesrvrlog"}) {
+        $timesrvrlog{$testnum} = $testtimings{"timesrvrlog"};
+    }
 }
 
 
@@ -1575,7 +1603,9 @@ sub singletest {
         citest_starttest($testnum);
 
         if(!$why) {
-            $why = runner_test_preprocess($testnum);
+            my $testtimings;
+            ($why, $testtimings) = runner_test_preprocess($testnum);
+            updatetesttimings($testnum, %$testtimings);
         } else {
 
             # set zero servers verification time when they aren't started
@@ -1597,17 +1627,24 @@ sub singletest {
     my $CURLOUT;
     my $tool;
     my $usedvalgrind;
-    ($error, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runner_test_run($testnum);
+    my $testtimings;
+    ($error, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runner_test_run($testnum);
+    updatetesttimings($testnum, %$testtimings);
     if($error == -1) {
-      # return a test failure, either to be reported or to be ignored
-      return $errorreturncode;
+        # no further verification will occur
+        $timevrfyend{$testnum} = Time::HiRes::time();
+        # return a test failure, either to be reported or to be ignored
+        return $errorreturncode;
     }
     elsif($error == -2) {
-      timestampskippedevents($testnum);
-      return $error;
+        # fill in the missing timings on error
+        timestampskippedevents($testnum);
+        return $error;
     }
     elsif($error > 0) {
-      return $error;
+        # no further verification will occur
+        $timevrfyend{$testnum} = Time::HiRes::time();
+        return $error;
     }
 
     #######################################################################
@@ -1931,13 +1968,14 @@ while(@ARGV) {
     elsif($ARGV[0] eq "-r") {
         # run time statistics needs Time::HiRes
         if($Time::HiRes::VERSION) {
-            keys(%timeprepini) = 1000;
-            keys(%timesrvrini) = 1000;
-            keys(%timesrvrend) = 1000;
-            keys(%timetoolini) = 1000;
-            keys(%timetoolend) = 1000;
-            keys(%timesrvrlog) = 1000;
-            keys(%timevrfyend) = 1000;
+            # presize hashes appropriately to hold an entire test run
+            keys(%timeprepini) = 2000;
+            keys(%timesrvrini) = 2000;
+            keys(%timesrvrend) = 2000;
+            keys(%timetoolini) = 2000;
+            keys(%timetoolend) = 2000;
+            keys(%timesrvrlog) = 2000;
+            keys(%timevrfyend) = 2000;
             $timestats=1;
             $fullstats=0;
         }
@@ -1945,13 +1983,14 @@ while(@ARGV) {
     elsif($ARGV[0] eq "-rf") {
         # run time statistics needs Time::HiRes
         if($Time::HiRes::VERSION) {
-            keys(%timeprepini) = 1000;
-            keys(%timesrvrini) = 1000;
-            keys(%timesrvrend) = 1000;
-            keys(%timetoolini) = 1000;
-            keys(%timetoolend) = 1000;
-            keys(%timesrvrlog) = 1000;
-            keys(%timevrfyend) = 1000;
+            # presize hashes appropriately to hold an entire test run
+            keys(%timeprepini) = 2000;
+            keys(%timesrvrini) = 2000;
+            keys(%timesrvrend) = 2000;
+            keys(%timetoolini) = 2000;
+            keys(%timetoolend) = 2000;
+            keys(%timesrvrlog) = 2000;
+            keys(%timevrfyend) = 2000;
             $timestats=1;
             $fullstats=1;
         }
