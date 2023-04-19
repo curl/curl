@@ -464,20 +464,20 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
   head[0] = firstbyte;
   if(payload_len > 65535) {
     head[1] = 127 | WSBIT_MASK;
-    head[2] = (payload_len >> 56) & 0xff;
-    head[3] = (payload_len >> 48) & 0xff;
-    head[4] = (payload_len >> 40) & 0xff;
-    head[5] = (payload_len >> 32) & 0xff;
-    head[6] = (payload_len >> 24) & 0xff;
-    head[7] = (payload_len >> 16) & 0xff;
-    head[8] = (payload_len >> 8) & 0xff;
-    head[9] = payload_len & 0xff;
+    head[2] = (unsigned char)((payload_len >> 56) & 0xff);
+    head[3] = (unsigned char)((payload_len >> 48) & 0xff);
+    head[4] = (unsigned char)((payload_len >> 40) & 0xff);
+    head[5] = (unsigned char)((payload_len >> 32) & 0xff);
+    head[6] = (unsigned char)((payload_len >> 24) & 0xff);
+    head[7] = (unsigned char)((payload_len >> 16) & 0xff);
+    head[8] = (unsigned char)((payload_len >> 8) & 0xff);
+    head[9] = (unsigned char)(payload_len & 0xff);
     hlen = 10;
   }
   else if(payload_len > 126) {
     head[1] = 126 | WSBIT_MASK;
-    head[2] = (payload_len >> 8) & 0xff;
-    head[3] = payload_len & 0xff;
+    head[2] = (unsigned char)((payload_len >> 8) & 0xff);
+    head[3] = (unsigned char)(payload_len & 0xff);
     hlen = 4;
   }
   else {
