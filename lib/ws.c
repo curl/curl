@@ -86,16 +86,6 @@ static const char *ws_frame_name_of_op(unsigned char proto_opcode)
   return "???";
 }
 
-static const char *ws_frame_name_of_flags(int flags)
-{
-  size_t i;
-  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
-    if(WS_FRAMES[i].flags & flags)
-      return WS_FRAMES[i].name;
-  }
-  return "???";
-}
-
 static int ws_frame_op2flags(unsigned char proto_opcode)
 {
   unsigned char opcode = proto_opcode & WSBIT_OPCODE_MASK;
