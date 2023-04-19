@@ -4606,7 +4606,7 @@ static CURLcode req_assign_url_authority(struct http_req *req, CURLU *url)
   if(uc && uc != CURLUE_NO_USER)
     goto out;
   if(user) {
-    uc = curl_url_get(url, CURLUPART_PASSWORD, &user, 0);
+    uc = curl_url_get(url, CURLUPART_PASSWORD, &pass, 0);
     if(uc && uc != CURLUE_NO_PASSWORD)
       goto out;
   }
