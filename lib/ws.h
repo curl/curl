@@ -54,7 +54,9 @@ struct ws_decoder {
 /* a client-side WS frame encoder, generating frame headers and
  * converting payloads, tracking remaining data in current frame */
 struct ws_encoder {
-  curl_off_t payload_remain;  /* how much of the current frame remains */
+  int frame_flags;         /* flags of current frame */
+  curl_off_t payload_len;  /* payload length of current frame */
+  curl_off_t payload_remain;  /* remaining payload of current */
   unsigned int xori; /* xor index */
   unsigned char mask[4]; /* 32 bit mask for this connection */
   bool contfragment; /* set TRUE if the previous fragment sent was not final */

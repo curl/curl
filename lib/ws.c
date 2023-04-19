@@ -60,12 +60,98 @@
 #define WS_CHUNK_SIZE 65535
 #define WS_CHUNK_COUNT 2
 
+struct ws_frame_meta {
+  char proto_opcode;
+  int flags;
+  const char *name;
+};
+
+static struct ws_frame_meta WS_FRAMES[] = {
+  { WSBIT_OPCODE_CONT,  CURLWS_CONT,   "CONT" },
+  { WSBIT_OPCODE_TEXT,  CURLWS_TEXT,   "TEXT" },
+  { WSBIT_OPCODE_BIN,   CURLWS_BINARY, "BIN" },
+  { WSBIT_OPCODE_CLOSE, CURLWS_CLOSE,  "CLOSE" },
+  { WSBIT_OPCODE_PING,  CURLWS_PING,   "PING" },
+  { WSBIT_OPCODE_PONG,  CURLWS_PONG,   "PONG" },
+};
+
+static const char *ws_frame_name_of_op(unsigned char proto_opcode)
+{
+  unsigned char opcode = proto_opcode & WSBIT_OPCODE_MASK;
+  size_t i;
+  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+    if(WS_FRAMES[i].proto_opcode == opcode)
+      return WS_FRAMES[i].name;
+  }
+  return "???";
+}
+
+static const char *ws_frame_name_of_flags(int flags)
+{
+  size_t i;
+  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+    if(WS_FRAMES[i].flags & flags)
+      return WS_FRAMES[i].name;
+  }
+  return "???";
+}
+
+static int ws_frame_op2flags(unsigned char proto_opcode)
+{
+  unsigned char opcode = proto_opcode & WSBIT_OPCODE_MASK;
+  size_t i;
+  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+    if(WS_FRAMES[i].proto_opcode == opcode)
+      return WS_FRAMES[i].flags;
+  }
+  return 0;
+}
+
+static unsigned char ws_frame_flags2op(int flags)
+{
+  size_t i;
+  for(i = 0; i < sizeof(WS_FRAMES)/sizeof(WS_FRAMES[0]); ++i) {
+    if(WS_FRAMES[i].flags & flags)
+      return WS_FRAMES[i].proto_opcode;
+  }
+  return 0;
+}
+
+static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
+                        const char *msg)
+{
+  switch(dec->head_len) {
+  case 0:
+    break;
+  case 1:
+    infof(data, "WS-DEC: %s [%s%s]", msg,
+          ws_frame_name_of_op(dec->head[0]),
+          (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL");
+    break;
+  default:
+    if(dec->head_len < dec->head_total) {
+      infof(data, "WS-DEC: %s [%s%s](%d/%d)", msg,
+            ws_frame_name_of_op(dec->head[0]),
+            (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+            dec->head_len, dec->head_total);
+    }
+    else {
+      infof(data, "WS-DEC: %s [%s%s payload=%zd/%zd]", msg,
+            ws_frame_name_of_op(dec->head[0]),
+            (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+            dec->payload_offset, dec->payload_len);
+    }
+    break;
+  }
+}
+
 typedef ssize_t ws_write_payload(const unsigned char *buf, size_t buflen,
                                  int frame_age, int frame_flags,
                                  curl_off_t payload_offset,
                                  curl_off_t payload_len,
                                  void *userp,
                                  CURLcode *err);
+
 
 static void ws_dec_reset(struct ws_decoder *dec)
 {
@@ -91,48 +177,17 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
 
   while(Curl_bufq_peek(inraw, &inbuf, &inlen)) {
     if(dec->head_len == 0) {
-      unsigned char opcode;
-      bool fin;
-
       dec->head[0] = *inbuf;
       Curl_bufq_skip(inraw, 1);
 
-      fin = dec->head[0] & WSBIT_FIN;
-      opcode = dec->head[0] & WSBIT_OPCODE_MASK;
-      infof(data, "WS:%d received FIN bit %u", __LINE__, (int)fin);
-      dec->frame_flags = 0;
-      switch(opcode) {
-      case WSBIT_OPCODE_CONT:
-        if(!fin)
-          dec->frame_flags |= CURLWS_CONT;
-        infof(data, "WS: received OPCODE CONT");
-        break;
-      case WSBIT_OPCODE_TEXT:
-        infof(data, "WS: received OPCODE TEXT");
-        dec->frame_flags |= CURLWS_TEXT;
-        break;
-      case WSBIT_OPCODE_BIN:
-        infof(data, "WS: received OPCODE BINARY");
-        dec->frame_flags |= CURLWS_BINARY;
-        break;
-      case WSBIT_OPCODE_CLOSE:
-        infof(data, "WS: received OPCODE CLOSE");
-        dec->frame_flags |= CURLWS_CLOSE;
-        break;
-      case WSBIT_OPCODE_PING:
-        infof(data, "WS: received OPCODE PING");
-        dec->frame_flags |= CURLWS_PING;
-        break;
-      case WSBIT_OPCODE_PONG:
-        infof(data, "WS: received OPCODE PONG");
-        dec->frame_flags |= CURLWS_PONG;
-        break;
-      default:
-        failf(data, "WS: unknown opcode: %x", opcode);
+      dec->frame_flags  = ws_frame_op2flags(dec->head[0]);
+      if(!dec->frame_flags) {
+        failf(data, "WS: unknown opcode: %x", dec->head[0]);
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
       dec->head_len = 1;
+      /* ws_dec_info(dec, data, "seeing opcode"); */
       continue;
     }
     else if(dec->head_len == 1) {
@@ -158,15 +213,16 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       else {
         dec->head_total = 2;
       }
-      infof(data, "WS: frame head has %d bytes", dec->head_total);
     }
 
     if(dec->head_len < dec->head_total) {
       dec->head[dec->head_len] = *inbuf;
       Curl_bufq_skip(inraw, 1);
       ++dec->head_len;
-      if(dec->head_len < dec->head_total)
+      if(dec->head_len < dec->head_total) {
+        /* ws_dec_info(dec, data, "decoding head"); */
         continue;
+      }
     }
     /* got the complete frame head */
     DEBUGASSERT(dec->head_len == dec->head_total);
@@ -193,15 +249,17 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       failf(data, "WS: unexpected frame header length");
       return CURLE_RECV_ERROR;
     }
+
     dec->frame_age = 0;
     dec->payload_offset = 0;
-    infof(data, "WS: frame payload has %zu bytes", dec->payload_len);
+    ws_dec_info(dec, data, "decoded");
     return CURLE_OK;
   }
   return CURLE_AGAIN;
 }
 
 static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
+                                    struct Curl_easy *data,
                                     struct bufq *inraw,
                                     ws_write_payload *write_payload,
                                     void *write_ctx)
@@ -212,6 +270,7 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
   CURLcode result;
   curl_off_t remain = dec->payload_len - dec->payload_offset;
 
+  (void)data;
   while(remain && Curl_bufq_peek(inraw, &inbuf, &inlen)) {
     if((curl_off_t)inlen > remain)
       inlen = (size_t)remain;
@@ -223,6 +282,8 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
     Curl_bufq_skip(inraw, (size_t)nwritten);
     dec->payload_offset += (curl_off_t)nwritten;
     remain = dec->payload_len - dec->payload_offset;
+    /* infof(data, "WS-DEC: passed  %zd bytes payload, %zd remain",
+          nwritten, remain); */
   }
 
   return remain? CURLE_AGAIN : CURLE_OK;
@@ -270,7 +331,8 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     }
     /* FALLTHROUGH */
   case WS_DEC_PAYLOAD:
-    result = ws_dec_pass_payload(dec, inraw, write_payload, write_ctx);
+    result = ws_dec_pass_payload(dec, data, inraw, write_payload, write_ctx);
+    ws_dec_info(dec, data, "passing");
     if(result)
       return result;
     /* paylod parsing done */
@@ -291,6 +353,28 @@ static void update_meta(struct websocket *ws,
   ws->frame.offset = payload_offset;
   ws->frame.len = cur_len;
   ws->frame.bytesleft = (payload_len - payload_offset - cur_len);
+}
+
+static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
+                        const char *msg)
+{
+  const char *name = ws_frame_name_of_flags(enc->frame_flags);
+  bool fin, cont;
+
+  fin = cont = FALSE;
+  if(!(enc->frame_flags & CURLWS_CONT)) {
+    fin = TRUE;
+    cont = enc->contfragment;
+  }
+  else if(enc->contfragment) {
+    cont = TRUE;
+  }
+  else {
+    cont = TRUE;
+  }
+  infof(data, "WS-ENC: %s [%s%s%s payload=%zd/%zd]", msg,
+        name, cont? " CONT" : "", fin? "" : " NON-FIN",
+        enc->payload_len - enc->payload_remain, enc->payload_len);
 }
 
 static void ws_enc_reset(struct ws_encoder *enc)
@@ -330,7 +414,8 @@ static void ws_enc_init(struct ws_encoder *enc)
 
 static ssize_t ws_enc_write_head(struct Curl_easy *data,
                                  struct ws_encoder *enc,
-                                 size_t len, unsigned int flags,
+                                 unsigned int flags,
+                                 curl_off_t payload_len,
                                  struct bufq *out,
                                  CURLcode *err)
 {
@@ -348,25 +433,11 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
     return -1;
   }
 
-  if(flags & CURLWS_TEXT) {
-    opcode = WSBIT_OPCODE_TEXT;
-    infof(data, "WS: send OPCODE TEXT");
-  }
-  else if(flags & CURLWS_CLOSE) {
-    opcode = WSBIT_OPCODE_CLOSE;
-    infof(data, "WS: send OPCODE CLOSE");
-  }
-  else if(flags & CURLWS_PING) {
-    opcode = WSBIT_OPCODE_PING;
-    infof(data, "WS: send OPCODE PING");
-  }
-  else if(flags & CURLWS_PONG) {
-    opcode = WSBIT_OPCODE_PONG;
-    infof(data, "WS: send OPCODE PONG");
-  }
-  else {
-    opcode = WSBIT_OPCODE_BIN;
-    infof(data, "WS: send OPCODE BINARY");
+  opcode = ws_frame_flags2op(flags);
+  if(!opcode) {
+    failf(data, "WS: provided flags not recognized '%x'", flags);
+    *err = CURLE_SEND_ERROR;
+    return -1;
   }
 
   if(!(flags & CURLWS_CONT)) {
@@ -379,41 +450,44 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
       firstbyte |= WSBIT_FIN | WSBIT_OPCODE_CONT;
 
     enc->contfragment = FALSE;
-    infof(data, "WS: set FIN");
   }
   else if(enc->contfragment) {
     /* the previous fragment was not a final one and this isn't either, keep a
        CONT opcode and no FIN bit */
     firstbyte |= WSBIT_OPCODE_CONT;
-    infof(data, "WS: keep CONT, no FIN");
   }
   else {
     firstbyte = opcode;
     enc->contfragment = TRUE;
-    infof(data, "WS: set CONT, no FIN");
   }
 
   head[0] = firstbyte;
-  if(len > 65535) {
+  if(payload_len > 65535) {
     head[1] = 127 | WSBIT_MASK;
-    head[2] = (len >> 8) & 0xff;
-    head[3] = len & 0xff;
+    head[2] = (payload_len >> 56) & 0xff;
+    head[3] = (payload_len >> 48) & 0xff;
+    head[4] = (payload_len >> 40) & 0xff;
+    head[5] = (payload_len >> 32) & 0xff;
+    head[6] = (payload_len >> 24) & 0xff;
+    head[7] = (payload_len >> 16) & 0xff;
+    head[8] = (payload_len >> 8) & 0xff;
+    head[9] = payload_len & 0xff;
     hlen = 10;
   }
-  else if(len > 126) {
+  else if(payload_len > 126) {
     head[1] = 126 | WSBIT_MASK;
-    head[2] = (len >> 8) & 0xff;
-    head[3] = len & 0xff;
+    head[2] = (payload_len >> 8) & 0xff;
+    head[3] = payload_len & 0xff;
     hlen = 4;
   }
   else {
-    head[1] = (unsigned char)len | WSBIT_MASK;
+    head[1] = (unsigned char)payload_len | WSBIT_MASK;
     hlen = 2;
   }
 
-  infof(data, "WS: send FIN bit %u (byte %02x), payload len=%zu",
-        firstbyte & WSBIT_FIN ? 1 : 0,
-        firstbyte, len);
+  enc->frame_flags = flags;
+  enc->payload_remain = enc->payload_len = payload_len;
+  ws_enc_info(enc, data, "sending");
 
   /* add 4 bytes mask */
   memcpy(&head[hlen], &enc->mask, 4);
@@ -430,11 +504,11 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
     *err = CURLE_SEND_ERROR;
     return -1;
   }
-  enc->payload_remain = len;
   return n;
 }
 
 static ssize_t ws_enc_write_payload(struct ws_encoder *enc,
+                                    struct Curl_easy *data,
                                     const unsigned char *buf, size_t buflen,
                                     struct bufq *out, CURLcode *err)
 {
@@ -463,6 +537,7 @@ static ssize_t ws_enc_write_payload(struct ws_encoder *enc,
     enc->xori &= 3;
   }
   enc->payload_remain -= (curl_off_t)i;
+  ws_enc_info(enc, data, "buffered");
   return (ssize_t)i;
 }
 
@@ -835,20 +910,26 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
       }
     }
 
-    infof(data, "WS: %zu bytes left to decode", Curl_bufq_len(&ws->recvbuf));
     result = ws_dec_pass(&ws->dec, data, &ws->recvbuf,
                          ws_client_collect, &ctx);
     if(result == CURLE_AGAIN) {
-      if(!ctx.written)
+      if(!ctx.written) {
+        ws_dec_info(&ws->dec, data, "need more input");
         continue;  /* nothing written, try more input */
+      }
+      done = TRUE;
+      break;
     }
     else if(result) {
       return result;
     }
-
-    DEBUGASSERT(ctx.written);
-    done = TRUE;
-    break;
+    else if(ctx.written) {
+      /* The decoded frame is passed back to our caller.
+       * There are frames like PING were we auto-respond to and
+       * that we do not return. For these `ctx.written` is not set. */
+      done = TRUE;
+      break;
+    }
   }
 
   /* update frame information to be passed back */
@@ -856,8 +937,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
               ctx.payload_len, ctx.bufidx);
   *metap = &ws->frame;
   *nread = ws->frame.len;
-  infof(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %zd, %zd left)",
-        buflen, *nread, ws->frame.offset, ws->frame.bytesleft);
+  /* infof(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %zd, %zd left)",
+        buflen, *nread, ws->frame.offset, ws->frame.bytesleft); */
   return CURLE_OK;
 }
 
@@ -876,13 +957,24 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
       else
         result = Curl_write(data, data->conn->writesockfd, out, outlen, &n);
       if(result) {
-        if(!complete || (result != CURLE_AGAIN))
+        if(result == CURLE_AGAIN) {
+          if(!complete) {
+            infof(data, "WS: flush EAGAIN, %zu bytes remain in buffer",
+                  Curl_bufq_len(&ws->sendbuf));
+            return result;
+          }
+          /* TODO: the current design does not allow for buffered writes.
+           * We need to flush the buffer now. There is no ws_flush() later */
+          n = 0;
+          continue;
+        }
+        else if(result) {
+          failf(data, "WS: flush, write error %d", result);
           return result;
-        /* TODO: the current design does not allow for buffered writes.
-         * We need to flush the buffer now. There is no ws_flush() later */
-        n = 0;
+        }
       }
       else {
+        infof(data, "WS: flushed %zu bytes", (size_t)n);
         Curl_bufq_skip(&ws->sendbuf, (size_t)n);
       }
     }
@@ -953,7 +1045,7 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
   if(sendflags & CURLWS_OFFSET) {
     if(totalsize) {
       /* a frame series 'totalsize' bytes big, this is the first */
-      n = ws_enc_write_head(data, &ws->enc, totalsize, sendflags,
+      n = ws_enc_write_head(data, &ws->enc, sendflags, totalsize,
                             &ws->sendbuf, &result);
       if(n < 0)
         return result;
@@ -966,19 +1058,18 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
     }
   }
   else if(!ws->enc.payload_remain) {
-    n = ws_enc_write_head(data, &ws->enc, buflen, sendflags,
+    n = ws_enc_write_head(data, &ws->enc, sendflags, (curl_off_t)buflen,
                           &ws->sendbuf, &result);
     if(n < 0)
       return result;
   }
 
-  n = ws_enc_write_payload(&ws->enc, buffer, buflen, &ws->sendbuf, &result);
+  n = ws_enc_write_payload(&ws->enc, data,
+                           buffer, buflen, &ws->sendbuf, &result);
   if(n < 0)
     return result;
 
   *sent = (size_t)n;
-  infof(data, "WS: wanted to send %zu bytes, buffered %zu bytes",
-        buflen, *sent);
   return ws_flush(data, ws, TRUE);
 }
 
