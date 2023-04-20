@@ -527,6 +527,12 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
 
   case QUICHE_H3_EVENT_FINISHED:
     DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"][FINISHED]", stream3_id));
+    if(!stream->resp_hds_complete) {
+      result = write_resp_raw(cf, data, "\r\n", 2);
+      if(result)
+        return result;
+      stream->resp_hds_complete = TRUE;
+    }
     stream->closed = TRUE;
     streamclose(cf->conn, "End of stream");
     break;
