@@ -964,8 +964,15 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
 
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] FRAME[DATA len=%zu pad=%zu], "
+                  "buffered=%zu, window=%d/%d",
+                  stream_id, frame->hd.length, frame->data.padlen,
+                  Curl_bufq_len(&stream->recvbuf),
+                  nghttp2_session_get_stream_effective_recv_data_length(
+                    ctx->h2, stream->id),
+                  nghttp2_session_get_stream_effective_local_window_size(
+                    ctx->h2, stream->id)));
     /* If !body started on this stream, then receiving DATA is illegal. */
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv frame DATA", stream_id));
     if(!stream->bodystarted) {
       rv = nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
                                      stream_id, NGHTTP2_PROTOCOL_ERROR);
@@ -980,7 +987,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     }
     break;
   case NGHTTP2_HEADERS:
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv frame HEADERS", stream_id));
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] FRAME[HEADERS]", stream_id));
     if(stream->bodystarted) {
       /* Only valid HEADERS after body started is trailer HEADERS.  We
          buffer them in on_header callback. */
@@ -1011,7 +1018,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     }
     break;
   case NGHTTP2_PUSH_PROMISE:
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv PUSH_PROMISE", stream_id));
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] FRAME[PUSH_PROMISE]", stream_id));
     rv = push_promise(cf, data, &frame->push_promise);
     if(rv) { /* deny! */
       DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
@@ -1028,14 +1035,14 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     }
     break;
   case NGHTTP2_RST_STREAM:
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv RST", stream_id));
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] FARME[RST]", stream_id));
     stream->closed = TRUE;
     stream->reset = TRUE;
     drain_this(cf, data);
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
     break;
   case NGHTTP2_WINDOW_UPDATE:
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv WINDOW_UPDATE", stream_id));
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] FRAME[WINDOW_UPDATE]", stream_id));
     if((data->req.keepon & KEEP_SEND_HOLD) &&
        (data->req.keepon & KEEP_SEND)) {
       data->req.keepon &= ~KEEP_SEND_HOLD;
@@ -1046,7 +1053,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     }
     break;
   default:
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] recv frame %x",
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] FRAME[%x]",
                   stream_id, frame->hd.type));
     break;
   }
@@ -1068,7 +1075,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     switch(frame->hd.type) {
     case NGHTTP2_SETTINGS: {
       uint32_t max_conn = ctx->max_concurrent_streams;
-      DEBUGF(LOG_CF(data, cf, "recv frame SETTINGS"));
+      DEBUGF(LOG_CF(data, cf, "FRAME[SETTINGS]"));
       ctx->max_concurrent_streams = nghttp2_session_get_remote_settings(
           session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
       ctx->enable_push = nghttp2_session_get_remote_settings(
@@ -1090,7 +1097,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       ctx->goaway_error = frame->goaway.error_code;
       ctx->last_stream_id = frame->goaway.last_stream_id;
       if(data) {
-        DEBUGF(LOG_CF(data, cf, "recv GOAWAY, error=%d, last_stream=%u",
+        DEBUGF(LOG_CF(data, cf, "FRAME[GOAWAY, error=%d, last_stream=%u]",
                       ctx->goaway_error, ctx->last_stream_id));
         infof(data, "received GOAWAY, error=%d, last_stream=%u",
                     ctx->goaway_error, ctx->last_stream_id);
@@ -1098,7 +1105,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       }
       break;
     case NGHTTP2_WINDOW_UPDATE:
-      DEBUGF(LOG_CF(data, cf, "recv frame WINDOW_UPDATE"));
+      DEBUGF(LOG_CF(data, cf, "FRAME[WINDOW_UPDATE]"));
       break;
     default:
       DEBUGF(LOG_CF(data, cf, "recv frame %x on 0", frame->hd.type));
@@ -1162,10 +1169,6 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   }
 
   DEBUGASSERT((size_t)nwritten == len);
-  DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] %zd/%zu DATA recvd, "
-                "(buffer now holds %zu)",
-                stream_id, nwritten, len, Curl_bufq_len(&stream->recvbuf)));
-
   return 0;
 }
 
@@ -1704,11 +1707,13 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(nread < 0) {
     if(stream->closed) {
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%d] returning CLOSE", stream->id));
       nread = http2_handle_stream_close(cf, data, err);
     }
     else if(stream->reset ||
             (ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) ||
             (ctx->goaway && ctx->last_stream_id < stream->id)) {
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%d] returning ERR", stream->id));
       *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
       nread = -1;
     }
@@ -1759,7 +1764,8 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
                   Curl_bufq_len(&ctx->inbufq), nread, result));
     if(nread < 0) {
       if(result != CURLE_AGAIN) {
-        failf(data, "Failed receiving HTTP2 data");
+        failf(data, "Failed receiving HTTP2 data: %d(%s)", result,
+              curl_easy_strerror(result));
         return result;
       }
       break;
@@ -1791,12 +1797,6 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CF_DATA_SAVE(save, cf, data);
 
-  DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_recv: win %u/%u",
-                stream->id,
-                nghttp2_session_get_local_window_size(ctx->h2),
-                nghttp2_session_get_stream_local_window_size(ctx->h2,
-                                                             stream->id)
-           ));
   nread = stream_recv(cf, data, buf, len, err);
   if(nread < 0 && *err != CURLE_AGAIN)
     goto out;
@@ -1823,8 +1823,6 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         stream->resp_hds_len = 0;
       }
       if(data_consumed) {
-        DEBUGF(LOG_CF(data, cf, "[h2sid=%d] increase window by %zu",
-                      stream->id, data_consumed));
         nghttp2_session_consume(ctx->h2, stream->id, data_consumed);
       }
     }
@@ -1832,6 +1830,9 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(stream->closed) {
       DEBUGF(LOG_CF(data, cf, "[h2sid=%d] closed stream, set drain",
                     stream->id));
+      drain_this(cf, data);
+    }
+    else if(!Curl_bufq_is_empty(&stream->recvbuf)) {
       drain_this(cf, data);
     }
   }
@@ -1842,8 +1843,15 @@ out:
     *err = result;
     nread = -1;
   }
-  DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_recv(len=%zu) -> %zd %d",
-                stream->id, len, nread, *err));
+  DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_recv(len=%zu) -> %zd %d, "
+                "buffered=%zu, window=%d/%d",
+                stream->id, len, nread, *err,
+                Curl_bufq_len(&stream->recvbuf),
+                nghttp2_session_get_stream_effective_recv_data_length(
+                  ctx->h2, stream->id),
+                nghttp2_session_get_stream_effective_local_window_size(
+                  ctx->h2, stream->id)));
+
   CF_DATA_RESTORE(cf, save);
   return nread;
 }
@@ -2224,15 +2232,17 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
       return CURLE_HTTP2;
     }
 
+    if(pause) {
+      drained_transfer(cf, data);
+    }
+    else {
+      drain_this(cf, data);
+    }
     /* make sure the window update gets sent */
     result = h2_progress_egress(cf, data);
     if(result)
       return result;
 
-    if(!pause) {
-      drain_this(cf, data);
-      Curl_expire(data, 0, EXPIRE_RUN_NOW);
-    }
     DEBUGF(infof(data, "Set HTTP/2 window size to %u for stream %u",
                  window, stream->id));
 
