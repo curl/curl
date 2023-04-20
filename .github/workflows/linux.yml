@@ -45,6 +45,8 @@ jobs:
     runs-on: 'ubuntu-latest'
     container: ${{ matrix.build.container }}
     timeout-minutes: 90
+    env:
+      LIBRESSL_VER: 3.6.1
     strategy:
       fail-fast: false
       matrix:
@@ -188,9 +190,6 @@ jobs:
         cp inc/*.h $HOME/bear/include
         cp build/libbearssl.* $HOME/bear/lib
       name: 'install bearssl'
-
-    - if: ${{ contains(matrix.build.install_steps, 'libressl') }}
-      run: echo "LIBRESSL_VER=3.6.1" >> $GITHUB_ENV
 
     - if: ${{ contains(matrix.build.install_steps, 'libressl') }}
       id: cache-libressl
