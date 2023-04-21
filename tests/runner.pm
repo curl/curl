@@ -98,13 +98,6 @@ sub logmsg {
 }
 
 #######################################################################
-# Call main's displaylogs
-# TODO: this will eventually stop being called in this package
-sub displaylogs{
-    return main::displaylogs(@_);
-}
-
-#######################################################################
 # Check for a command in the PATH of the machine running curl.
 #
 sub checktestcmd {
@@ -389,25 +382,31 @@ sub restore_test_env {
 sub singletest_startservers {
     my ($testnum, $testtimings) = @_;
 
-    # remove test server commands file before servers are started/verified
-    unlink($FTPDCMD) if(-f $FTPDCMD);
+    # remove old test server files before servers are started/verified
+    unlink($FTPDCMD);
+    unlink($SERVERIN);
+    unlink($SERVER2IN);
+    unlink($PROXYIN);
 
     # timestamp required servers verification start
     $$testtimings{"timesrvrini"} = Time::HiRes::time();
 
     my $why;
+    my $error;
     if (!$listonly) {
         my @what = getpart("client", "server");
         if(!$what[0]) {
             warn "Test case $testnum has no server(s) specified";
             $why = "no server specified";
+            $error = -1;
         } else {
             my $err;
             ($why, $err) = serverfortest(@what);
             if($err == 1) {
-                # Error indicates an actual problem starting the server, so
-                # display the server logs
-                displaylogs($testnum);
+                # Error indicates an actual problem starting the server
+                $error = -2;
+            } else {
+                $error = -1;
             }
         }
     }
@@ -415,12 +414,7 @@ sub singletest_startservers {
     # timestamp required servers verification end
     $$testtimings{"timesrvrend"} = Time::HiRes::time();
 
-    # remove server output logfile after servers are started/verified
-    unlink($SERVERIN);
-    unlink($SERVER2IN);
-    unlink($PROXYIN);
-
-    return $why;
+    return ($why, $error);
 }
 
 
@@ -532,6 +526,11 @@ sub singletest_prepare {
         unlink($memdump);
     }
     unlink("core");
+
+    # remove server output logfiles after servers are started/verified
+    unlink($SERVERIN);
+    unlink($SERVER2IN);
+    unlink($PROXYIN);
 
     # if this section exists, it might be FTP server instructions:
     my @ftpservercmd = getpart("reply", "servercmd");
@@ -915,7 +914,7 @@ sub runner_test_preprocess {
 
     ###################################################################
     # Start the servers needed to run this test case
-    my $why = singletest_startservers($testnum, \%testtimings);
+    my ($why, $error) = singletest_startservers($testnum, \%testtimings);
 
     if(!$why) {
 
@@ -933,9 +932,10 @@ sub runner_test_preprocess {
         # Check that the test environment is fine to run this test case
         if (!$listonly) {
             $why = singletest_precheck($testnum);
+            $error = -1;
         }
     }
-    return ($why, \%testtimings);
+    return ($why, $error, \%testtimings);
 }
 
 
