@@ -36,6 +36,8 @@ BEGIN {
         checktestcmd
         prepro
         restore_test_env
+        runner_clearlocks
+        runner_stopservers
         runner_test_preprocess
         runner_test_run
         $DBGCURL
@@ -63,6 +65,7 @@ use processhelp qw(
     );
 use servers qw(
     checkcmd
+    clearlocks
     serverfortest
     stopserver
     stopservers
@@ -993,6 +996,21 @@ sub runner_test_run {
 
 
     return (0, \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
+}
+
+
+###################################################################
+# Kill the server processes that still have lock files in a directory
+sub runner_clearlocks {
+    my ($lockdir)=@_;
+    clearlocks($lockdir);
+}
+
+
+###################################################################
+# Kill all server processes
+sub runner_stopservers {
+    return stopservers($verbose);
 }
 
 1;

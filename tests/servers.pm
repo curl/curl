@@ -54,9 +54,7 @@ BEGIN {
 
         # functions
         qw(
-            clearlocks
             initserverconfig
-            stopservers
         )
     );
 
@@ -64,8 +62,10 @@ BEGIN {
         # functions
         qw(
             checkcmd
+            clearlocks
             serverfortest
             stopserver
+            stopservers
             subvariables
         ),
 
