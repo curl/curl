@@ -1319,6 +1319,8 @@ struct UrlState {
   char *scratch; /* huge buffer[set.buffer_size*2] for upload CRLF replacing */
   long followlocation; /* redirect counter */
   int requests; /* request counter: redirects + authentication retakes */
+  int dselect_bits; /* != 0 -> bitmask of socket events for this transfer
+                     * overriding anything the socket may report */
 #ifdef HAVE_SIGNAL
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
   void (*prev_signal)(int sig);
@@ -1374,9 +1376,6 @@ struct UrlState {
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
-  size_t drain; /* Increased when this stream has data to read, even if its
-                   socket is not necessarily is readable. Decreased when
-                   checked. */
   struct Curl_data_priority priority; /* shallow copy of data->set */
 #endif
 

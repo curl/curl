@@ -709,11 +709,6 @@ static void report_consumed_data(struct Curl_cfilter *cf,
                                          consumed);
     ngtcp2_conn_extend_max_offset(ctx->qconn, consumed);
   }
-  if(!stream->closed && data->state.drain &&
-     Curl_bufq_is_empty(&stream->recvbuf)) {
-     /* nothing buffered any more */
-     data->state.drain = 0;
-  }
 }
 
 static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
@@ -995,12 +990,18 @@ static int cf_ngtcp2_get_select_socks(struct Curl_cfilter *cf,
   return rv;
 }
 
-static void notify_drain(struct Curl_cfilter *cf,
+static void drain_stream(struct Curl_cfilter *cf,
                          struct Curl_easy *data)
 {
+  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  int bits;
+
   (void)cf;
-  if(!data->state.drain) {
-    data->state.drain = 1;
+  bits = CURL_CSELECT_IN;
+  if(stream && !stream->upload_done)
+    bits |= CURL_CSELECT_OUT;
+  if(data->state.dselect_bits != bits) {
+    data->state.dselect_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
@@ -1028,7 +1029,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   if(app_error_code == NGHTTP3_H3_INTERNAL_ERROR) {
     stream->reset = TRUE;
   }
-  notify_drain(cf, data);
+  drain_stream(cf, data);
   return 0;
 }
 
@@ -1082,9 +1083,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   (void)stream3_id;
 
   result = write_resp_raw(cf, data, buf, buflen, TRUE);
-  if(CF_DATA_CURRENT(cf) != data) {
-    notify_drain(cf, data);
-  }
+  drain_stream(cf, data);
   return result? -1 : 0;
 }
 
@@ -1129,9 +1128,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
   if(stream->status_code / 100 != 1) {
     stream->resp_hds_complete = TRUE;
   }
-  if(CF_DATA_CURRENT(cf) != data) {
-    notify_drain(cf, data);
-  }
+  drain_stream(cf, data);
   return 0;
 }
 
@@ -1358,7 +1355,6 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   nread = 0;
 
 out:
-  data->state.drain = 0;
   return nread;
 }
 
@@ -1413,16 +1409,13 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(nread > 0) {
-    if(1 || !Curl_bufq_is_empty(&stream->recvbuf)) {
-      notify_drain(cf, data);
-    }
+    drain_stream(cf, data);
   }
   else {
     if(stream->closed) {
       nread = recv_closed_stream(cf, data, err);
       goto out;
     }
-    data->state.drain = FALSE;
     *err = CURLE_AGAIN;
     nread = -1;
   }
@@ -1468,7 +1461,7 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
     if((data->req.keepon & KEEP_SEND_HOLD) &&
        (data->req.keepon & KEEP_SEND)) {
       data->req.keepon &= ~KEEP_SEND_HOLD;
-      notify_drain(cf, data);
+      drain_stream(cf, data);
       DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] unpausing acks",
                     stream_id));
     }
