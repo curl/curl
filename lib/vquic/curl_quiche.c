@@ -299,11 +299,18 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static void notify_drain(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void drain_stream(struct Curl_cfilter *cf,
+                         struct Curl_easy *data)
 {
+  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  int bits;
+
   (void)cf;
-  if(!data->state.drain) {
-    data->state.drain = 1;
+  bits = CURL_CSELECT_IN;
+  if(stream && !stream->upload_done)
+    bits |= CURL_CSELECT_OUT;
+  if(data->state.dselect_bits != bits) {
+    data->state.dselect_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
@@ -573,9 +580,7 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
     }
     else {
       result = h3_process_event(cf, sdata, stream3_id, ev);
-      if(sdata != data) {
-        notify_drain(cf, sdata);
-      }
+      drain_stream(cf, sdata);
       if(result) {
         DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] error processing event %s "
                       "for [h3sid=%"PRId64"] -> %d",
@@ -842,13 +847,18 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(nread > 0) {
-    data->state.drain = (!Curl_bufq_is_empty(&stream->recvbuf) ||
-                         stream->closed);
+    if(stream->closed)
+      drain_stream(cf, data);
   }
   else {
-    data->state.drain = FALSE;
     if(stream->closed) {
       nread = recv_closed_stream(cf, data, err);
+      goto out;
+    }
+    else if(quiche_conn_is_draining(ctx->qconn)) {
+      failf(data, "QUIC connection is draining");
+      *err = CURLE_HTTP3;
+      nread = -1;
       goto out;
     }
     *err = CURLE_AGAIN;
@@ -1059,24 +1069,9 @@ static bool stream_is_writeable(struct Curl_cfilter *cf,
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
-  quiche_stream_iter *qiter;
-  bool is_writable = FALSE;
 
-  if(!stream)
-    return FALSE;
-  /* surely, there must be a better way */
-  qiter = quiche_conn_writable(ctx->qconn);
-  if(qiter) {
-    uint64_t stream_id;
-    while(quiche_stream_iter_next(qiter, &stream_id)) {
-      if(stream_id == (uint64_t)stream->id) {
-        is_writable = TRUE;
-        break;
-      }
-    }
-    quiche_stream_iter_free(qiter);
-  }
-  return is_writable;
+  return stream &&
+         quiche_conn_stream_writable(ctx->qconn, (uint64_t)stream->id, 1);
 }
 
 static int cf_quiche_get_select_socks(struct Curl_cfilter *cf,
@@ -1146,7 +1141,8 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
   }
   case CF_CTRL_DATA_IDLE:
     result = cf_flush_egress(cf, data);
-    DEBUGF(LOG_CF(data, cf, "data idle, flush egress -> %d", result));
+    if(result)
+      DEBUGF(LOG_CF(data, cf, "data idle, flush egress -> %d", result));
     break;
   default:
     break;
