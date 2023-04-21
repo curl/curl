@@ -36,8 +36,14 @@ BEGIN {
     our @EXPORT = qw(
         runclient
         runclientoutput
+        setlogfunc
         subbase64
         subnewlines
+    );
+
+    our @EXPORT_OK = qw(
+        clearlogs
+        logmsg
     );
 }
 
@@ -48,6 +54,45 @@ use globalconfig qw(
     $verbose
 );
 
+my $logfunc;      # optional reference to function for logging
+my @logmessages;  # array holding logged messages
+
+
+#######################################################################
+# Log an informational message
+# If a log callback function was set in setlogfunc, it is called. If not,
+# then the log message is buffered until retrieved by clearlogs.
+#
+# logmsg must only be called by one of the runner_* entry points and functions
+# called by them, or else logs risk being lost, since those are the only
+# functions that know about and will return buffered logs.
+sub logmsg {
+    if(!scalar(@_)) {
+        return;
+    }
+    if(defined $logfunc) {
+        &$logfunc(@_);
+        return;
+    }
+    push @logmessages, @_;
+}
+
+#######################################################################
+# Set the function to use for logging
+sub setlogfunc {
+    ($logfunc)=@_;
+}
+
+#######################################################################
+# Clear the buffered log messages after returning them
+sub clearlogs {
+    my $loglines = join('', @logmessages);
+    undef @logmessages;
+    return $loglines;
+}
+
+
+#######################################################################
 sub subbase64 {
     my ($thing) = @_;
 

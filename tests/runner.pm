@@ -40,6 +40,7 @@ BEGIN {
         runner_stopservers
         runner_test_preprocess
         runner_test_run
+        setlogfunc
         $DBGCURL
         $gdb
         $gdbthis
@@ -73,7 +74,13 @@ use servers qw(
     );
 use getpart;
 use globalconfig;
-use testutil;
+use testutil qw(
+    clearlogs
+    logmsg
+    runclient
+    subbase64
+    subnewlines
+    );
 
 
 #######################################################################
@@ -97,13 +104,6 @@ my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
 my $defserverlogslocktimeout = 2; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 
-
-#######################################################################
-# Log an informational message
-# This just calls main's logmsg for now.
-sub logmsg {
-    return main::logmsg(@_);
-}
 
 #######################################################################
 # Check for a command in the PATH of the machine running curl.
@@ -907,6 +907,10 @@ sub runner_test_preprocess {
     my ($testnum)=@_;
     my %testtimings;
 
+    if(clearlogs()) {
+        logmsg "Warning: log messages were lost\n";
+    }
+
     # timestamp test preparation start
     # TODO: this metric now shows only a portion of the prep time; better would
     # be to time singletest_preprocess below instead
@@ -943,29 +947,32 @@ sub runner_test_preprocess {
             $error = -1;
         }
     }
-    return ($why, $error, \%testtimings);
+    return ($why, $error, clearlogs(), \%testtimings);
 }
 
 
 ###################################################################
 # Run a single test case with an environment that already been prepared
 # Returns 0=success, -1=skippable failure, -2=permanent error,
-#   1=unskippable test failure, as first integer, plus more return
-#   values when error is 0
+#   1=unskippable test failure, as first integer, plus any log messages,
+#   plus more return values when error is 0
 sub runner_test_run {
     my ($testnum)=@_;
 
-    my %testtimings;
+    if(clearlogs()) {
+        logmsg "Warning: log messages were lost\n";
+    }
 
     #######################################################################
     # Prepare the test environment to run this test case
     my $error = singletest_prepare($testnum);
     if($error) {
-        return -2;
+        return (-2, clearlogs());
     }
 
     #######################################################################
     # Run the test command
+    my %testtimings;
     my $cmdres;
     my $dumped_core;
     my $CURLOUT;
@@ -973,29 +980,28 @@ sub runner_test_run {
     my $usedvalgrind;
     ($error, $cmdres, $dumped_core, $CURLOUT, $tool, $usedvalgrind) = singletest_run($testnum, \%testtimings);
     if($error) {
-        return (-2, \%testtimings);
+        return (-2, clearlogs(), \%testtimings);
     }
 
     #######################################################################
     # Clean up after test command
     $error = singletest_clean($testnum, $dumped_core, \%testtimings);
     if($error) {
-        return ($error, \%testtimings);
+        return ($error, clearlogs(), \%testtimings);
     }
 
     #######################################################################
     # Verify that the postcheck succeeded
     $error = singletest_postcheck($testnum);
     if($error) {
-        return ($error, \%testtimings);
+        return ($error, clearlogs(), \%testtimings);
     }
 
     #######################################################################
     # restore environment variables that were modified
     restore_test_env(0);
 
-
-    return (0, \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
+    return (0, clearlogs(), \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
 }
 
 
@@ -1003,14 +1009,21 @@ sub runner_test_run {
 # Kill the server processes that still have lock files in a directory
 sub runner_clearlocks {
     my ($lockdir)=@_;
+    if(clearlogs()) {
+        logmsg "Warning: log messages were lost\n";
+    }
     clearlocks($lockdir);
+    return clearlogs();
 }
 
 
 ###################################################################
 # Kill all server processes
 sub runner_stopservers {
-    return stopservers($verbose);
+    my $error = stopservers($verbose);
+    my $logs = clearlogs();
+    return ($error, $logs);
 }
+
 
 1;
