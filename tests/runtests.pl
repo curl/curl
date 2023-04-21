@@ -139,6 +139,7 @@ my %ignored_keywords;   # key words of tests to ignore results
 my %enabled_keywords;   # key words of tests to run
 my %disabled;           # disabled test cases
 my %ignored;            # ignored results of test cases
+my %ignoretestcodes;    # if test results are to be ignored
 
 my $timestats;   # time stamping and stats generation
 my $fullstats;   # show time stats for every single test
@@ -325,6 +326,27 @@ sub compare {
 }
 
 #######################################################################
+# Parse and store the protocols in curl's Protocols: line
+sub parseprotocols {
+    my ($line)=@_;
+
+    @protocols = split(' ', lc($line));
+
+    # Generate a "proto-ipv6" version of each protocol to match the
+    # IPv6 <server> name and a "proto-unix" to match the variant which
+    # uses Unix domain sockets. This works even if support isn't
+    # compiled in because the <features> test will fail.
+    push @protocols, map(("$_-ipv6", "$_-unix"), @protocols);
+
+    # 'http-proxy' is used in test cases to do CONNECT through
+    push @protocols, 'http-proxy';
+
+    # 'none' is used in test cases to mean no server
+    push @protocols, 'none';
+}
+
+
+#######################################################################
 # Check & display information about curl and the host the test suite runs on.
 # Information to do with servers is displayed in displayserverfeatures, after
 # the server initialization is performed.
@@ -458,19 +480,7 @@ sub checksystemfeatures {
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             # these are the protocols compiled in to this libcurl
-            @protocols = split(' ', lc($1));
-
-            # Generate a "proto-ipv6" version of each protocol to match the
-            # IPv6 <server> name and a "proto-unix" to match the variant which
-            # uses Unix domain sockets. This works even if support isn't
-            # compiled in because the <features> test will fail.
-            push @protocols, map(("$_-ipv6", "$_-unix"), @protocols);
-
-            # 'http-proxy' is used in test cases to do CONNECT through
-            push @protocols, 'http-proxy';
-
-            # 'none' is used in test cases to mean no server
-            push @protocols, 'none';
+            parseprotocols($1);
         }
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
@@ -844,6 +854,9 @@ sub citest_finishtestrun {
 sub updatetesttimings {
     my ($testnum, %testtimings)=@_;
 
+    if(defined $testtimings{"timeprepini"}) {
+        $timeprepini{$testnum} = $testtimings{"timeprepini"};
+    }
     if(defined $testtimings{"timesrvrini"}) {
         $timesrvrini{$testnum} = $testtimings{"timesrvrini"};
     }
@@ -870,15 +883,6 @@ sub singletest_shouldrun {
     my $errorreturncode = 1; # 1 means normal error, 2 means ignored error
     my @what;  # what features are needed
 
-    # first, remove all lingering log files
-    if(!cleardir($LOGDIR) && $clearlocks) {
-        clearlocks($LOGDIR);
-        cleardir($LOGDIR);
-    }
-
-    # timestamp test preparation start
-    $timeprepini{$testnum} = Time::HiRes::time();
-
     if($disttests !~ /test$testnum(\W|\z)/ ) {
         logmsg "Warning: test$testnum not present in tests/data/Makefile.inc\n";
     }
@@ -895,7 +899,6 @@ sub singletest_shouldrun {
         $errorreturncode = 2;
     }
 
-    # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
         if($verbose) {
             # this is not a test
@@ -946,9 +949,6 @@ sub singletest_shouldrun {
     if(!$why) {
         @info_keywords = getpart("info", "keywords");
 
-        # Clear the list of keywords from the last test
-        %keywords = ();
-
         if(!$info_keywords[0]) {
             $why = "missing the <keywords> section!";
         }
@@ -966,8 +966,6 @@ sub singletest_shouldrun {
                 logmsg "Warning: test$testnum result is ignored due to $k\n";
                 $errorreturncode = 2;
             }
-
-            $keywords{$k} = 1;
         }
 
         if(!$why && !$match && %enabled_keywords) {
@@ -1585,39 +1583,35 @@ sub singletest_success {
 sub singletest {
     my ($testnum, $count, $total)=@_;
 
-    #######################################################################
-    # Verify that the test should be run
-    my ($why, $errorreturncode) = singletest_shouldrun($testnum);
-
-    if(!$listonly) {
-
-        ###################################################################
-        # Restore environment variables that were modified in a previous run.
-        # Test definition may instruct to (un)set environment vars.
-        # This is done this early so that leftover variables don't affect
-        # starting servers or CI registration.
-        restore_test_env(1);
-
-        ###################################################################
-        # Register the test case with the CI environment
-        citest_starttest($testnum);
-
-        if(!$why) {
-            my $testtimings;
-            ($why, $testtimings) = runner_test_preprocess($testnum);
-            updatetesttimings($testnum, %$testtimings);
-        } else {
-
-            # set zero servers verification time when they aren't started
-            $timesrvrini{$testnum} = $timesrvrend{$testnum} = Time::HiRes::time();
-        }
+    # first, remove all lingering log files
+    if(!cleardir($LOGDIR) && $clearlocks) {
+        clearlocks($LOGDIR);
+        cleardir($LOGDIR);
     }
+
+    ###################################################################
+    # Restore environment variables that were modified in a previous run.
+    # Test definition may instruct to (un)set environment vars.
+    # This is done this early so that leftover variables don't affect
+    # starting servers or CI registration.
+    restore_test_env(1);
+
+    ###################################################################
+    # Load test file so CI registration can get the right data before the
+    # runner is called
+    loadtest("${TESTDIR}/test${testnum}");
+
+    ###################################################################
+    # Register the test case with the CI environment
+    citest_starttest($testnum);
+
+    my ($why, $testtimings) = runner_test_preprocess($testnum);
+    updatetesttimings($testnum, %$testtimings);
 
     #######################################################################
     # Print the test name and count tests
-    my $error;
-    $error = singletest_count($testnum, $why);
-    if($error || $listonly) {
+    my $error = singletest_count($testnum, $why);
+    if($error) {
         return $error;
     }
 
@@ -1627,14 +1621,13 @@ sub singletest {
     my $CURLOUT;
     my $tool;
     my $usedvalgrind;
-    my $testtimings;
     ($error, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runner_test_run($testnum);
     updatetesttimings($testnum, %$testtimings);
     if($error == -1) {
         # no further verification will occur
         $timevrfyend{$testnum} = Time::HiRes::time();
         # return a test failure, either to be reported or to be ignored
-        return $errorreturncode;
+        return ignoreresultcode($testnum);
     }
     elsif($error == -2) {
         # fill in the missing timings on error
@@ -1651,8 +1644,8 @@ sub singletest {
     # Verify that the test succeeded
     $error = singletest_check($testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind);
     if($error == -1) {
-      # return a test failure, either to be reported or to be ignored
-      return $errorreturncode;
+        # return a test failure, either to be reported or to be ignored
+        return ignoreresultcode($testnum);
     }
     elsif($error == -2) {
       # torture test; there is no verification, so the run result holds the
@@ -1663,7 +1656,7 @@ sub singletest {
 
     #######################################################################
     # Report a successful test
-    singletest_success($testnum, $count, $total, $errorreturncode);
+    singletest_success($testnum, $count, $total, ignoreresultcode($testnum));
 
 
     return 0;
@@ -1804,6 +1797,19 @@ sub runtimestats {
 
     logmsg "\n";
 }
+
+#######################################################################
+# returns code indicating why a test was skipped
+# 0=unknown test, 1=use test result, 2=ignore test result
+#
+sub ignoreresultcode {
+    my ($testnum)=@_;
+    if(defined $ignoretestcodes{$testnum}) {
+        return $ignoretestcodes{$testnum};
+    }
+    return 0;
+}
+
 
 #######################################################################
 # Check options to this test program
@@ -2422,18 +2428,33 @@ my $count=0;
 
 $start = time();
 
+# scan all tests to find ones we should try to run
+my @runtests;
 foreach my $testnum (@at) {
-
     $lasttest = $testnum if($testnum > $lasttest);
+    my ($why, $errorreturncode) = singletest_shouldrun($testnum);
+    if($why || $listonly) {
+        # Display test name now--test will be completely skipped later
+        my $error = singletest_count($testnum, $why);
+        next;
+    }
+    $ignoretestcodes{$testnum} = $errorreturncode;
+    push(@runtests, $testnum);
+}
+
+if($listonly) {
+    exit(0);
+}
+
+# run through each candidate test and execute it
+foreach my $testnum (@runtests) {
     $count++;
 
     # execute one test case
     my $error = singletest($testnum, $count, scalar(@at));
 
-    if(!$listonly) {
-        # Submit the test case result with the CI environment
-        citest_finishtest($testnum, $error);
-    }
+    # Submit the test case result with the CI environment
+    citest_finishtest($testnum, $error);
 
     if($error < 0) {
         # not a test we can run

@@ -232,6 +232,11 @@ sub partexists {
 sub loadtest {
     my ($file)=@_;
 
+    if(defined $xmlfile && $file eq $xmlfile) {
+        # This test is already loaded
+        return
+    }
+
     undef @xml;
     $xmlfile = "";
 
