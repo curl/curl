@@ -195,7 +195,7 @@ $ENV{'COLUMNS'}=79; # screen width!
 sub catch_zap {
     my $signame = shift;
     logmsg "runtests.pl received SIG$signame, exiting\n";
-    stopservers($verbose);
+    runner_stopservers();
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
@@ -1412,7 +1412,7 @@ sub singletest_check {
             if(!$filename) {
                 logmsg "ERROR: section verify=>file$partsuffix ".
                        "has no name attribute\n";
-                stopservers($verbose);
+                runner_stopservers();
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
@@ -1626,7 +1626,7 @@ sub singletest {
 
     # first, remove all lingering log files
     if(!cleardir($LOGDIR) && $clearlocks) {
-        clearlocks($LOGDIR);
+        runner_clearlocks($LOGDIR);
         cleardir($LOGDIR);
     }
 
@@ -2546,7 +2546,7 @@ my $sofar = time() - $start;
 citest_finishtestrun();
 
 # Tests done, stop the servers
-my $unexpected = stopservers($verbose);
+my $unexpected = runner_stopservers();
 
 my $numskipped = %skipped ? sum values %skipped : 0;
 my $all = $total + $numskipped;
