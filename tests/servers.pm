@@ -1483,7 +1483,7 @@ sub runpingpongserver {
 
     # Check the requested server
     if($proto !~ /^(?:ftp|imap|pop3|smtp)$/) {
-        print STDERR "Unsupported protocol $proto!!\n";
+        logmsg "Unsupported protocol $proto!!\n";
         return (4, 0, 0);
     }
 
@@ -1813,6 +1813,7 @@ sub runsshserver {
     my $sshd = find_sshd();
     if($sshd) {
         ($sshdid,$sshdvernum,$sshdverstr,$sshderror) = sshversioninfo($sshd);
+        logmsg $sshderror if($sshderror);
     }
 
     my $pid = processexists($pidfile);
@@ -2298,7 +2299,7 @@ sub responsive_pingpong_server {
         $port = protoport($protoip);
     }
     else {
-        print STDERR "Unsupported protocol $proto!!\n";
+        logmsg "Unsupported protocol $proto!!\n";
         return 0;
     }
 
@@ -2409,7 +2410,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting ". uc($what) ." server", $serr);
                 }
-                printf ("* pid $what => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2) if($verbose);
                 $run{$what}="$pid $pid2";
             }
         }
@@ -2559,7 +2560,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting RTSP server", $serr);
                 }
-                printf ("* pid rtsp => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid rtsp => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'rtsp'}="$pid $pid2";
             }
         }
@@ -2603,7 +2604,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting $cproto server", $serr);
                 }
-                printf ("* pid $cproto => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid $cproto => %d %d\n", $pid, $pid2) if($verbose);
                 $run{$cproto}="$pid $pid2";
             }
             if(!$run{$what}) {
@@ -2645,7 +2646,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting HTTP server", $serr);
                 }
-                printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
             if(!$run{'https'}) {
@@ -2685,8 +2686,8 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting GOPHER server", $serr);
                 }
-                printf ("* pid gopher => %d %d\n", $pid, $pid2) if($verbose);
-                print "GOPHERPORT => $port\n" if($verbose);
+                logmsg sprintf("* pid gopher => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg "GOPHERPORT => $port\n" if($verbose);
                 $run{'gopher'}="$pid $pid2";
             }
             if(!$run{'gophers'}) {
@@ -2699,7 +2700,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid gophers => %d %d\n", $pid, $pid2)
                     if($verbose);
-                print "GOPHERSPORT => $port\n" if($verbose);
+                logmsg "GOPHERSPORT => $port\n" if($verbose);
                 $run{'gophers'}="$pid $pid2";
             }
         }
@@ -2791,7 +2792,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting TFTP server", $serr);
                 }
-                printf ("* pid tftp => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid tftp => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'tftp'}="$pid $pid2";
             }
         }
@@ -2808,7 +2809,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting TFTP-IPv6 server", $serr);
                 }
-                printf("* pid tftp-ipv6 => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid tftp-ipv6 => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'tftp-ipv6'}="$pid $pid2";
             }
         }
@@ -2818,7 +2819,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting SSH server", $serr);
                 }
-                printf ("* pid ssh => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid ssh => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'ssh'}="$pid $pid2";
             }
         }
@@ -2828,7 +2829,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting socks server", $serr);
                 }
-                printf ("* pid socks => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid socks => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'socks'}="$pid $pid2";
             }
         }
@@ -2838,7 +2839,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting socks5unix server", $serr);
                 }
-                printf ("* pid socks5unix => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid socks5unix => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'socks5unix'}="$pid $pid2";
             }
         }
@@ -2848,7 +2849,7 @@ sub startservers {
                 if($pid <= 0) {
                     return ("failed starting mqtt server", $serr);
                 }
-                printf ("* pid mqtt => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf("* pid mqtt => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'mqtt'}="$pid $pid2";
             }
         }
