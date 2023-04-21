@@ -31,16 +31,15 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
-        getpartattr
-        getpart
-        partexists
-        loadtest
-        fulltest
-        striparray
         compareparts
-        writearray
+        fulltest
+        getpart
+        getpartattr
         loadarray
-        showdiff
+        loadtest
+        partexists
+        striparray
+        writearray
     );
 }
 
@@ -354,45 +353,6 @@ sub loadarray {
         close($temp);
     }
     return @array;
-}
-
-# Given two array references, this function will store them in two temporary
-# files, run 'diff' on them, store the result and return the diff output!
-
-sub showdiff {
-    my ($logdir, $firstref, $secondref)=@_;
-
-    my $file1="$logdir/check-generated";
-    my $file2="$logdir/check-expected";
-
-    open(my $temp, ">", "$file1") || die "Failure writing diff file";
-    for(@$firstref) {
-        my $l = $_;
-        $l =~ s/\r/[CR]/g;
-        $l =~ s/\n/[LF]/g;
-        $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
-        print $temp $l;
-        print $temp "\n";
-    }
-    close($temp) || die "Failure writing diff file";
-
-    open($temp, ">", "$file2") || die "Failure writing diff file";
-    for(@$secondref) {
-        my $l = $_;
-        $l =~ s/\r/[CR]/g;
-        $l =~ s/\n/[LF]/g;
-        $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
-        print $temp $l;
-        print $temp "\n";
-    }
-    close($temp) || die "Failure writing diff file";
-    my @out = `diff -u $file2 $file1 2>/dev/null`;
-
-    if(!$out[0]) {
-        @out = `diff -c $file2 $file1 2>/dev/null`;
-    }
-
-    return @out;
 }
 
 
