@@ -50,6 +50,7 @@ BEGIN {
 
     # these are for debugging only
     our @EXPORT_OK = qw(
+        readtestkeywords
         singletest_preprocess
     );
 }
@@ -188,6 +189,21 @@ sub prepro {
         }
     }
     return @out;
+}
+
+
+#######################################################################
+# Load test keywords into %keywords hash
+#
+sub readtestkeywords {
+    my @info_keywords = getpart("info", "keywords");
+
+    # Clear the list of keywords from the last test
+    %keywords = ();
+    for my $k (@info_keywords) {
+        chomp $k;
+        $keywords{$k} = 1;
+    }
 }
 
 
@@ -349,6 +365,7 @@ sub torture {
 }
 
 
+#######################################################################
 # restore environment variables that were modified in test
 sub restore_test_env {
     my $deleteoldenv = $_[0];   # 1 to delete the saved contents after restore
@@ -880,8 +897,20 @@ sub singletest_postcheck {
 # Get ready to run a single test case
 sub runner_test_preprocess {
     my ($testnum)=@_;
-
     my %testtimings;
+
+    # timestamp test preparation start
+    # TODO: this metric now shows only a portion of the prep time; better would
+    # be to time singletest_preprocess below instead
+    $testtimings{"timeprepini"} = Time::HiRes::time();
+
+    ###################################################################
+    # Load test metadata
+    # ignore any error here--if there were one, it would have been
+    # caught during the selection phase and this test would not be
+    # running now
+    loadtest("${TESTDIR}/test${testnum}");
+    readtestkeywords();
 
     ###################################################################
     # Start the servers needed to run this test case
@@ -891,13 +920,13 @@ sub runner_test_preprocess {
 
         ###############################################################
         # Generate preprocessed test file
+        # This must be done after the servers are started so server
+        # variables are available for substitution.
         singletest_preprocess($testnum);
-
 
         ###############################################################
         # Set up the test environment to run this test case
         singletest_setenv();
-
 
         ###############################################################
         # Check that the test environment is fine to run this test case
