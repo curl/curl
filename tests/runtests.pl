@@ -1646,12 +1646,19 @@ sub singletest {
     # Register the test case with the CI environment
     citest_starttest($testnum);
 
-    my ($why, $testtimings) = runner_test_preprocess($testnum);
+    my ($why, $error, $testtimings) = runner_test_preprocess($testnum);
+    if($error == -2) {
+        if($postmortem) {
+            # Error indicates an actual problem starting the server, so
+            # display the server logs
+            displaylogs($testnum);
+        }
+    }
     updatetesttimings($testnum, %$testtimings);
 
     #######################################################################
     # Print the test name and count tests
-    my $error = singletest_count($testnum, $why);
+    $error = singletest_count($testnum, $why);
     if($error) {
         return $error;
     }
