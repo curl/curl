@@ -189,12 +189,33 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static void notify_drain(struct Curl_cfilter *cf,
+static void drain_stream_from_other_thread(struct Curl_easy *data,
+                                           struct stream_ctx *stream)
+{
+  int bits;
+
+  /* risky */
+  bits = CURL_CSELECT_IN;
+  if(stream && !stream->upload_done)
+    bits |= CURL_CSELECT_OUT;
+  if(data->state.dselect_bits != bits) {
+    data->state.dselect_bits = bits;
+    /* cannot expire from other thread */
+  }
+}
+
+static void drain_stream(struct Curl_cfilter *cf,
                          struct Curl_easy *data)
 {
+  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  int bits;
+
   (void)cf;
-  if(!data->state.drain) {
-    data->state.drain = 1;
+  bits = CURL_CSELECT_IN;
+  if(stream && !stream->upload_done)
+    bits |= CURL_CSELECT_OUT;
+  if(data->state.dselect_bits != bits) {
+    data->state.dselect_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
@@ -350,7 +371,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
     }
   }
 
-  data->state.drain = 1;
+  drain_stream_from_other_thread(data, stream);
   msh3_lock_release(&stream->recv_lock);
 }
 
@@ -469,7 +490,6 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   nread = 0;
 
 out:
-  data->state.drain = 0;
   return nread;
 }
 
@@ -508,7 +528,6 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(stream->recv_error) {
     failf(data, "request aborted");
-    data->state.drain = 0;
     *err = stream->recv_error;
     goto out;
   }
@@ -522,10 +541,8 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                   len, nread, *err));
     if(nread < 0)
       goto out;
-    if(!Curl_bufq_is_empty(&stream->recvbuf) ||
-       stream->closed) {
-       notify_drain(cf, data);
-    }
+    if(stream->closed)
+       drain_stream(cf, data);
   }
   else if(stream->closed) {
     nread = recv_closed_stream(cf, data, err);
@@ -669,15 +686,14 @@ static int cf_msh3_get_select_socks(struct Curl_cfilter *cf,
 
     if(stream->recv_error) {
       bitmap |= GETSOCK_READSOCK(0);
-      notify_drain(cf, data);
+      drain_stream(cf, data);
     }
     else if(stream->req) {
       bitmap |= GETSOCK_READSOCK(0);
-      notify_drain(cf, data);
+      drain_stream(cf, data);
     }
   }
-  DEBUGF(LOG_CF(data, cf, "select_sock %u -> %d",
-                (uint32_t)data->state.drain, bitmap));
+  DEBUGF(LOG_CF(data, cf, "select_sock -> %d", bitmap));
   CF_DATA_RESTORE(cf, save);
   return bitmap;
 }
@@ -698,6 +714,8 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
                   Curl_bufq_len(&stream->recvbuf)));
     pending = !Curl_bufq_is_empty(&stream->recvbuf);
     msh3_lock_release(&stream->recv_lock);
+    if(pending)
+      drain_stream(cf, (struct Curl_easy *)data);
   }
 
   CF_DATA_RESTORE(cf, save);

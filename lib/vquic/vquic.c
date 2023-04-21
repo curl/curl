@@ -398,7 +398,6 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
       ;
     if(nread == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
-        DEBUGF(LOG_CF(data, cf, "ingress, recvmsg -> EAGAIN"));
         goto out;
       }
       if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
