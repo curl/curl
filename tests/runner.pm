@@ -360,6 +360,7 @@ sub torture {
         }
     }
 
+    logmsg "\n" if($verbose);
     logmsg "torture OK\n";
     return 0;
 }
@@ -464,16 +465,16 @@ sub singletest_setenv {
             else {
                 if($var =~ /^LD_PRELOAD/) {
                     if(exe_ext('TOOL') && (exe_ext('TOOL') eq '.exe')) {
-                        # print "Skipping LD_PRELOAD due to lack of OS support\n";
+                        logmsg "Skipping LD_PRELOAD due to lack of OS support\n" if($verbose);
                         next;
                     }
                     if($feature{"debug"} || !$has_shared) {
-                        # print "Skipping LD_PRELOAD due to no release shared build\n";
+                        logmsg "Skipping LD_PRELOAD due to no release shared build\n" if($verbose);
                         next;
                     }
                 }
                 $ENV{$var} = "$content";
-                print "setenv $var = $content\n" if($verbose);
+                logmsg "setenv $var = $content\n" if($verbose);
             }
         }
     }
