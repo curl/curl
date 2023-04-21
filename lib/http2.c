@@ -1512,9 +1512,9 @@ out:
 
 static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
+                                         struct stream_ctx *stream,
                                          CURLcode *err)
 {
-  struct stream_ctx *stream = H2_STREAM_CTX(data);
   ssize_t rv = 0;
 
   if(stream->error == NGHTTP2_REFUSED_STREAM) {
@@ -1675,7 +1675,7 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(nread < 0) {
     if(stream->closed) {
-      nread = http2_handle_stream_close(cf, data, err);
+      nread = http2_handle_stream_close(cf, data, stream, err);
     }
     else if(stream->reset ||
             (ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) ||
@@ -1975,7 +1975,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     }
     else if(stream->closed) {
-      nwritten = http2_handle_stream_close(cf, data, err);
+      nwritten = http2_handle_stream_close(cf, data, stream, err);
       goto out;
     }
     /* If stream_id != -1, we have dispatched request HEADERS, and now
@@ -2012,7 +2012,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     if(should_close_session(ctx)) {
       if(stream->closed) {
-        nwritten = http2_handle_stream_close(cf, data, err);
+        nwritten = http2_handle_stream_close(cf, data, stream, err);
       }
       else {
         DEBUGF(LOG_CF(data, cf, "send: nothing to do in this session"));
@@ -2062,7 +2062,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     if(should_close_session(ctx)) {
       if(stream->closed) {
-        nwritten = http2_handle_stream_close(cf, data, err);
+        nwritten = http2_handle_stream_close(cf, data, stream, err);
       }
       else {
         DEBUGF(LOG_CF(data, cf, "send: nothing to do in this session"));
