@@ -195,7 +195,8 @@ $ENV{'COLUMNS'}=79; # screen width!
 sub catch_zap {
     my $signame = shift;
     logmsg "runtests.pl received SIG$signame, exiting\n";
-    runner_stopservers();
+    my ($unexpected, $logs) = runner_stopservers();
+    logmsg $logs;
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
@@ -1412,7 +1413,8 @@ sub singletest_check {
             if(!$filename) {
                 logmsg "ERROR: section verify=>file$partsuffix ".
                        "has no name attribute\n";
-                runner_stopservers();
+                my ($unexpected, $logs) = runner_stopservers();
+                logmsg $logs;
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
@@ -1626,7 +1628,8 @@ sub singletest {
 
     # first, remove all lingering log files
     if(!cleardir($LOGDIR) && $clearlocks) {
-        runner_clearlocks($LOGDIR);
+        my $logs = runner_clearlocks($LOGDIR);
+        logmsg $logs;
         cleardir($LOGDIR);
     }
 
@@ -1646,7 +1649,8 @@ sub singletest {
     # Register the test case with the CI environment
     citest_starttest($testnum);
 
-    my ($why, $error, $testtimings) = runner_test_preprocess($testnum);
+    my ($why, $error, $logs, $testtimings) = runner_test_preprocess($testnum);
+    logmsg $logs;
     if($error == -2) {
         if($postmortem) {
             # Error indicates an actual problem starting the server, so
@@ -1669,7 +1673,8 @@ sub singletest {
     my $CURLOUT;
     my $tool;
     my $usedvalgrind;
-    ($error, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runner_test_run($testnum);
+    ($error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runner_test_run($testnum);
+    logmsg $logs;
     updatetesttimings($testnum, %$testtimings);
     if($error == -1) {
         # no further verification will occur
@@ -2231,6 +2236,8 @@ mkdir($PIDDIR, 0777);
 #
 
 get_disttests();
+# Disable buffered logging for now
+setlogfunc(\&logmsg);
 
 #######################################################################
 # Output curl version and host info being tested
@@ -2546,7 +2553,8 @@ my $sofar = time() - $start;
 citest_finishtestrun();
 
 # Tests done, stop the servers
-my $unexpected = runner_stopservers();
+my ($unexpected, $logs) = runner_stopservers();
+logmsg $logs;
 
 my $numskipped = %skipped ? sum values %skipped : 0;
 my $all = $total + $numskipped;

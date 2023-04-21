@@ -114,7 +114,11 @@ use pathhelp qw(
 
 use processhelp;
 use globalconfig;
-use testutil;
+use testutil qw(
+    logmsg
+    runclient
+    runclientoutput
+    );
 
 
 my %serverpidfile; # all server pid file names, identified by server id
@@ -154,13 +158,6 @@ our $err_unexpected; # error instead of warning on server unexpectedly alive
 our $debugprotocol; # nonzero for verbose server logs
 our $stunnel; # path to stunnel command
 
-#######################################################################
-# Log an informational message
-# This just calls main's logmsg for now.
-
-sub logmsg {
-    return main::logmsg(@_);
-}
 
 #######################################################################
 # Check for a command in the PATH of the test server.

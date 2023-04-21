@@ -59,6 +59,9 @@ use runner qw(
     readtestkeywords
     singletest_preprocess
 );
+use testutil qw(
+    setlogfunc
+);
 use getpart;
 
 
@@ -119,6 +122,7 @@ sub init_protocols {
 # Initialize the test harness to run tests
 #
 sub init_tests {
+    setlogfunc(\&logmsg);
     init_protocols();
     initserverconfig();
 }
