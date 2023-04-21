@@ -33,19 +33,19 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
+        checktestcmd
         prepro
         restore_test_env
         runner_test_preprocess
         runner_test_run
-        checktestcmd
         $DBGCURL
+        $gdb
         $gdbthis
         $gdbxwin
         $shallow
         $tortalloc
         $valgrind_logfile
         $valgrind_tool
-        $gdb
     );
 
     # these are for debugging only
@@ -61,8 +61,13 @@ use pathhelp qw(
 use processhelp qw(
     portable_sleep
     );
-
-use servers;
+use servers qw(
+    checkcmd
+    serverfortest
+    stopserver
+    stopservers
+    subvariables
+    );
 use getpart;
 use globalconfig;
 use testutil;

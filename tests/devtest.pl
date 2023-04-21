@@ -49,7 +49,12 @@ BEGIN {
 }
 
 use globalconfig;
-use servers;
+use servers qw(
+    initserverconfig
+    protoport
+    serverfortest
+    stopservers
+);
 use runner qw(
     readtestkeywords
     singletest_preprocess

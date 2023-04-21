@@ -54,14 +54,24 @@ BEGIN {
 
         # functions
         qw(
-            initserverconfig
-            checkcmd
             clearlocks
-            protoport
+            initserverconfig
+            stopservers
+        )
+    );
+
+    our @EXPORT_OK = (
+        # functions
+        qw(
+            checkcmd
             serverfortest
             stopserver
-            stopservers
             subvariables
+        ),
+
+        # for debugging only
+        qw(
+            protoport
         )
     );
 }
