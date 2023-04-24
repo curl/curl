@@ -71,7 +71,12 @@ static bool pmatch(const char *hostname, size_t hostlen,
  * apparent distinction between a name and an IP. We need to detect the use of
  * an IP address and not wildcard match on such names.
  *
+ * Only match on "*" being used for the leftmost label, not "a*", "a*b" nor
+ * "*b".
+ *
  * Return TRUE on a match. FALSE if not.
+ *
+ * @unittest: 1397
  */
 
 static bool hostmatch(const char *hostname,
@@ -79,53 +84,42 @@ static bool hostmatch(const char *hostname,
                       const char *pattern,
                       size_t patternlen)
 {
-  const char *pattern_label_end, *wildcard, *hostname_label_end;
-  size_t prefixlen, suffixlen;
+  const char *pattern_label_end;
+
+  DEBUGASSERT(pattern);
+  DEBUGASSERT(patternlen);
+  DEBUGASSERT(hostname);
+  DEBUGASSERT(hostlen);
 
   /* normalize pattern and hostname by stripping off trailing dots */
-  DEBUGASSERT(patternlen);
   if(hostname[hostlen-1]=='.')
     hostlen--;
   if(pattern[patternlen-1]=='.')
     patternlen--;
 
-  wildcard = memchr(pattern, '*', patternlen);
-  if(!wildcard)
+  if(strncmp(pattern, "*.", 2))
     return pmatch(hostname, hostlen, pattern, patternlen);
 
   /* detect IP address as hostname and fail the match if so */
-  if(Curl_host_is_ipnum(hostname))
+  else if(Curl_host_is_ipnum(hostname))
     return FALSE;
 
   /* We require at least 2 dots in the pattern to avoid too wide wildcard
      match. */
   pattern_label_end = memchr(pattern, '.', patternlen);
   if(!pattern_label_end ||
-     (memrchr(pattern, '.', patternlen) == pattern_label_end) ||
-     strncasecompare(pattern, "xn--", 4))
+     (memrchr(pattern, '.', patternlen) == pattern_label_end))
     return pmatch(hostname, hostlen, pattern, patternlen);
-
-  hostname_label_end = memchr(hostname, '.', hostlen);
-  if(!hostname_label_end)
-    return FALSE;
   else {
-    size_t skiphost = hostname_label_end - hostname;
-    size_t skiplen = pattern_label_end - pattern;
-    if(!pmatch(hostname_label_end, hostlen - skiphost,
-               pattern_label_end, patternlen - skiplen))
-      return FALSE;
+    const char *hostname_label_end = memchr(hostname, '.', hostlen);
+    if(hostname_label_end) {
+      size_t skiphost = hostname_label_end - hostname;
+      size_t skiplen = pattern_label_end - pattern;
+      return pmatch(hostname_label_end, hostlen - skiphost,
+                    pattern_label_end, patternlen - skiplen);
+    }
   }
-  /* The wildcard must match at least one character, so the left-most
-     label of the hostname is at least as large as the left-most label
-     of the pattern. */
-  if(hostname_label_end - hostname < pattern_label_end - pattern)
-    return FALSE;
-
-  prefixlen = wildcard - pattern;
-  suffixlen = pattern_label_end - (wildcard + 1);
-  return strncasecompare(pattern, hostname, prefixlen) &&
-    strncasecompare(wildcard + 1, hostname_label_end - suffixlen,
-                    suffixlen) ? TRUE : FALSE;
+  return FALSE;
 }
 
 /*
