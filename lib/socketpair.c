@@ -24,6 +24,8 @@
 
 #include "curl_setup.h"
 #include "socketpair.h"
+#include "urldata.h"
+#include "rand.h"
 
 #if !defined(HAVE_SOCKETPAIR) && !defined(CURL_DISABLE_SOCKETPAIR)
 #ifdef WIN32
@@ -131,7 +133,7 @@ int Curl_socketpair(int domain, int type, int protocol,
     char *p = (char *)&check[0];
     size_t s = sizeof(check);
 
-    if(Curl_rand(data, rnd, sizeof(rnd)))
+    if(Curl_rand(NULL, rnd, sizeof(rnd)))
       goto error;
 
     /* write data to the socket */
