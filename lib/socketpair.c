@@ -24,6 +24,8 @@
 
 #include "curl_setup.h"
 #include "socketpair.h"
+#include "urldata.h"
+#include "rand.h"
 
 #if !defined(HAVE_SOCKETPAIR) && !defined(CURL_DISABLE_SOCKETPAIR)
 #ifdef WIN32
@@ -125,13 +127,17 @@ int Curl_socketpair(int domain, int type, int protocol,
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
   else {
-    struct curltime check;
     struct curltime start = Curl_now();
-    char *p = (char *)&check;
+    char rnd[9];
+    char check[sizeof(rnd)];
+    char *p = &check[0];
     size_t s = sizeof(check);
 
+    if(Curl_rand(NULL, (unsigned char *)rnd, sizeof(rnd)))
+      goto error;
+
     /* write data to the socket */
-    swrite(socks[0], &start, sizeof(start));
+    swrite(socks[0], rnd, sizeof(rnd));
     /* verify that we read the correct data */
     do {
       ssize_t nread;
@@ -168,7 +174,7 @@ int Curl_socketpair(int domain, int type, int protocol,
         p += nread;
         continue;
       }
-      if(memcmp(&start, &check, sizeof(check)))
+      if(memcmp(rnd, check, sizeof(check)))
         goto error;
       break;
     } while(1);
