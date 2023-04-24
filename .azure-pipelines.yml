@@ -45,6 +45,15 @@ pr:
   branches:
     include:
     - 'master'
+  paths:
+    exclude:
+    - '.circleci/*'
+    - '.cirrus.yml'
+    - '.github/*'
+    - '.github/workflows/*'
+    - 'appveyor.yml'
+    - 'packages/*'
+    - 'plan9/*'
 
 stages:
 

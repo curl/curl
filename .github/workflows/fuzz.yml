@@ -29,6 +29,7 @@ on:
     - '**/*.md'
     - '**/CMakeLists.txt'
     - '.azure-pipelines.yml'
+    - '.circleci/**'
     - '.cirrus.yml'
     - 'appveyor.yml'
     - 'CMake/**'
