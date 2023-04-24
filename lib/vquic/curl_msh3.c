@@ -739,6 +739,17 @@ static void cf_msh3_active(struct Curl_cfilter *cf, struct Curl_easy *data)
   ctx->active = TRUE;
 }
 
+static CURLcode h3_data_pause(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              bool pause)
+{
+  if(!pause) {
+    drain_stream(cf, data);
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  }
+  return CURLE_OK;
+}
+
 static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    int event, int arg1, void *arg2)
@@ -754,6 +765,9 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
   switch(event) {
   case CF_CTRL_DATA_SETUP:
     result = h3_data_setup(cf, data);
+    break;
+  case CF_CTRL_DATA_PAUSE:
+    result = h3_data_pause(cf, data, (arg1 != 0));
     break;
   case CF_CTRL_DATA_DONE:
     h3_data_done(cf, data);
