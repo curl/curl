@@ -183,8 +183,8 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 }
 
 /*
- * Curl_rand() stores 'num' number of random unsigned integers in the buffer
- * 'rndptr' points to.
+ * Curl_rand() stores 'num' number of random unsigned characters in the buffer
+ * 'rnd' points to.
  *
  * If libcurl is built without TLS support or with a TLS backend that lacks a
  * proper random API (rustls, Gskit or mbedTLS), this function will use "weak"
