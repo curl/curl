@@ -133,7 +133,7 @@ int Curl_socketpair(int domain, int type, int protocol,
     char *p = &check[0];
     size_t s = sizeof(check);
 
-    if(Curl_rand(NULL, rnd, sizeof(rnd)))
+    if(Curl_rand(NULL, (unsigned char *)rnd, sizeof(rnd)))
       goto error;
 
     /* write data to the socket */
