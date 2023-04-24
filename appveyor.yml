@@ -357,6 +357,15 @@ branches:
         - master
         - /\/ci$/
 
+skip_commits:
+  files:
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - '.github/**'
+    - 'packages/**'
+    - 'plan9/**'
+
 artifacts:
   - path: '**/curl.exe'
     name: curl
