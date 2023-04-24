@@ -2210,6 +2210,15 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
     if(result)
       return result;
 
+    if(!pause) {
+      /* Unpausing a h2 transfer, requires it to be run again. The server
+       * may send new DATA on us increasing the flow window, and it may
+       * not. We may have already buffered and exhausted the new window
+       * by operating on things in flight during the handling of other
+       * transfers. */
+      drain_stream(cf, data, stream);
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    }
     DEBUGF(infof(data, "Set HTTP/2 window size to %u for stream %u",
                  window, stream->id));
 
