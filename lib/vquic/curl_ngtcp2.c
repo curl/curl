@@ -2096,6 +2096,19 @@ static bool cf_ngtcp2_data_pending(struct Curl_cfilter *cf,
   return stream && !Curl_bufq_is_empty(&stream->recvbuf);
 }
 
+static CURLcode h3_data_pause(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              bool pause)
+{
+  /* TODO: there seems right now no API in ngtcp2 to shrink/enlarge
+   * the streams windows. As we do in HTTP/2. */
+  if(!pause) {
+    drain_stream(cf, data);
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  }
+  return CURLE_OK;
+}
+
 static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
                                      int event, int arg1, void *arg2)
@@ -2109,6 +2122,9 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
   (void)arg2;
   switch(event) {
   case CF_CTRL_DATA_SETUP:
+    break;
+  case CF_CTRL_DATA_PAUSE:
+    result = h3_data_pause(cf, data, (arg1 != 0));
     break;
   case CF_CTRL_DATA_DONE: {
     h3_data_done(cf, data);
