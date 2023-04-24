@@ -40,3 +40,97 @@ UNITPROGS = unit1300          unit1302 unit1303 unit1304 unit1305 unit1307 \
  unit1660 unit1661 \
  unit2600 unit2601 unit2602 unit2603 \
  unit3200
+
+unit1300_SOURCES = unit1300.c $(UNITFILES)
+
+unit1302_SOURCES = unit1302.c $(UNITFILES)
+
+unit1303_SOURCES = unit1303.c $(UNITFILES)
+
+unit1304_SOURCES = unit1304.c $(UNITFILES)
+
+unit1305_SOURCES = unit1305.c $(UNITFILES)
+
+unit1307_SOURCES = unit1307.c $(UNITFILES)
+
+unit1308_SOURCES = unit1308.c $(UNITFILES)
+
+unit1309_SOURCES = unit1309.c $(UNITFILES)
+
+unit1323_SOURCES = unit1323.c $(UNITFILES)
+
+unit1330_SOURCES = unit1330.c $(UNITFILES)
+
+unit1394_SOURCES = unit1394.c $(UNITFILES)
+unit1394_LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
+unit1394_LDFLAGS = $(top_builddir)/src/libcurltool.la
+unit1394_LIBS =
+
+unit1395_SOURCES = unit1395.c $(UNITFILES)
+
+unit1396_SOURCES = unit1396.c $(UNITFILES)
+
+unit1397_SOURCES = unit1397.c $(UNITFILES)
+
+unit1398_SOURCES = unit1398.c $(UNITFILES)
+
+unit1399_SOURCES = unit1399.c $(UNITFILES)
+
+unit1600_SOURCES = unit1600.c $(UNITFILES)
+
+unit1601_SOURCES = unit1601.c $(UNITFILES)
+
+unit1602_SOURCES = unit1602.c $(UNITFILES)
+
+unit1603_SOURCES = unit1603.c $(UNITFILES)
+
+unit1604_SOURCES = unit1604.c $(UNITFILES)
+
+unit1605_SOURCES = unit1605.c $(UNITFILES)
+
+unit1606_SOURCES = unit1606.c $(UNITFILES)
+
+unit1607_SOURCES = unit1607.c $(UNITFILES)
+
+unit1608_SOURCES = unit1608.c $(UNITFILES)
+
+unit1609_SOURCES = unit1609.c $(UNITFILES)
+
+unit1610_SOURCES = unit1610.c $(UNITFILES)
+
+unit1611_SOURCES = unit1611.c $(UNITFILES)
+
+unit1612_SOURCES = unit1612.c $(UNITFILES)
+
+unit1614_SOURCES = unit1614.c $(UNITFILES)
+
+unit1620_SOURCES = unit1620.c $(UNITFILES)
+
+unit1621_SOURCES = unit1621.c $(UNITFILES)
+unit1621_LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la @NSS_LIBS@
+
+unit1650_SOURCES = unit1650.c $(UNITFILES)
+
+unit1651_SOURCES = unit1651.c $(UNITFILES)
+
+unit1652_SOURCES = unit1652.c $(UNITFILES)
+
+unit1653_SOURCES = unit1653.c $(UNITFILES)
+
+unit1654_SOURCES = unit1654.c $(UNITFILES)
+
+unit1655_SOURCES = unit1655.c $(UNITFILES)
+
+unit1660_SOURCES = unit1660.c $(UNITFILES)
+
+unit1661_SOURCES = unit1661.c $(UNITFILES)
+
+unit2600_SOURCES = unit2600.c $(UNITFILES)
+
+unit2601_SOURCES = unit2601.c $(UNITFILES)
+
+unit2602_SOURCES = unit2602.c $(UNITFILES)
+
+unit2603_SOURCES = unit2603.c $(UNITFILES)
+
+unit3200_SOURCES = unit3200.c $(UNITFILES)
