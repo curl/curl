@@ -130,7 +130,7 @@ int Curl_socketpair(int domain, int type, int protocol,
     struct curltime start = Curl_now();
     char rnd[9];
     char check[sizeof(rnd)];
-    char *p = (char *)&check[0];
+    char *p = &check[0];
     size_t s = sizeof(check);
 
     if(Curl_rand(NULL, rnd, sizeof(rnd)))
