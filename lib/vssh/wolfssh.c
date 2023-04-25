@@ -557,7 +557,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       break;
     case SSH_SFTP_TRANS_INIT:
-      if(data->set.upload)
+      if(data->state.upload)
         state(data, SSH_SFTP_UPLOAD_INIT);
       else {
         if(sftp_scp->path[strlen(sftp_scp->path)-1] == '/')

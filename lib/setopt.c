@@ -333,8 +333,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * We want to sent data to the remote host. If this is HTTP, that equals
      * using the PUT request.
      */
-    data->set.upload = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    if(data->set.upload) {
+    arg = va_arg(param, long);
+    if(arg) {
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->set.method = HTTPREQ_PUT;
       data->set.opt_no_body = FALSE; /* this is implied */
@@ -664,7 +664,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     }
     else
       data->set.method = HTTPREQ_GET;
-    data->set.upload = FALSE;
     break;
 
 #ifndef CURL_DISABLE_MIME
@@ -888,7 +887,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     if(va_arg(param, long)) {
       data->set.method = HTTPREQ_GET;
-      data->set.upload = FALSE; /* switch off upload */
       data->set.opt_no_body = FALSE; /* this is implied */
     }
     break;

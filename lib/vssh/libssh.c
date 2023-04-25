@@ -1209,7 +1209,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
     }
 
     case SSH_SFTP_TRANS_INIT:
-      if(data->set.upload)
+      if(data->state.upload)
         state(data, SSH_SFTP_UPLOAD_INIT);
       else {
         if(protop->path[strlen(protop->path)-1] == '/')
@@ -1802,7 +1802,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       /* Functions from the SCP subsystem cannot handle/return SSH_AGAIN */
       ssh_set_blocking(sshc->ssh_session, 1);
 
-      if(data->set.upload) {
+      if(data->state.upload) {
         if(data->state.infilesize < 0) {
           failf(data, "SCP requires a known file size for upload");
           sshc->actualcode = CURLE_UPLOAD_FAILED;
@@ -1907,7 +1907,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
       }
     case SSH_SCP_DONE:
-      if(data->set.upload)
+      if(data->state.upload)
         state(data, SSH_SCP_SEND_EOF);
       else
         state(data, SSH_SCP_CHANNEL_FREE);
