@@ -328,6 +328,9 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     /* paylod parsing done */
     dec->state = WS_DEC_INIT;
     break;
+  default:
+    /* we covered all enums above, but some code analyzers are whimps */
+    result = CURLE_FAILED_INIT;
   }
   return result;
 }
