@@ -67,6 +67,7 @@ This release includes the following bugfixes:
  o http2: flow control and buffer improvements [54]
  o http2: move HTTP/2 stream vars into local context [67]
  o http2: remove unused Curl_http2_strerror function declaration [108]
+ o HTTP3/quiche: terminate h1 response header when no body is sent [112]
  o http3: check stream_ctx more thoroughly in all backends [77]
  o http3: improvements across backends [51]
  o http: skip a double NULL assign [83]
@@ -98,6 +99,7 @@ This release includes the following bugfixes:
  o rtsp: skip NULL assigns after Curl_safefree() [85]
  o runtests: die if curl version can be found [10]
  o runtests: don't start servers if -l is given
+ o runtests: fix quoting in Appveyor and Azure test integration [117]
  o runtests: lots of refactoring
  o runtests: refactor into more packages [60]
  o runtests: show error message if file can't be written
@@ -282,7 +284,9 @@ References to bug reports and discussions on issues:
  [109] = https://curl.se/bug/?i=11000
  [110] = https://curl.se/bug/?i=10991
  [111] = https://curl.se/bug/?i=10895
+ [112] = https://curl.se/bug/?i=11003
  [113] = https://curl.se/bug/?i=10979
  [114] = https://curl.se/bug/?i=10974
  [116] = https://curl.se/bug/?i=10973
+ [117] = https://curl.se/bug/?i=11010
  [118] = https://curl.se/bug/?i=10971
