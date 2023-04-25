@@ -87,8 +87,12 @@ static bool hostmatch(const char *hostname,
   const char *pattern_label_end, *hostname_label_end;
   size_t suffixlen;
 
-  /* normalize pattern and hostname by stripping off trailing dots */
+  DEBUGASSERT(pattern);
   DEBUGASSERT(patternlen);
+  DEBUGASSERT(hostname);
+  DEBUGASSERT(hostlen);
+
+  /* normalize pattern and hostname by stripping off trailing dots */
   if(hostname[hostlen-1]=='.')
     hostlen--;
   if(pattern[patternlen-1]=='.')
@@ -126,7 +130,7 @@ static bool hostmatch(const char *hostname,
 
   suffixlen = pattern_label_end - (pattern + 1);
   return strncasecompare(pattern + 1, hostname_label_end - suffixlen,
-                         suffixlen) ? TRUE : FALSE;
+                         suffixlen);
 }
 
 /*
