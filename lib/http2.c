@@ -192,7 +192,7 @@ static void drain_stream(struct Curl_cfilter *cf,
                          struct Curl_easy *data,
                          struct stream_ctx *stream)
 {
-  int bits;
+  unsigned char bits;
 
   (void)cf;
   bits = CURL_CSELECT_IN;
