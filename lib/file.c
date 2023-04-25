@@ -240,7 +240,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
-  if(!data->set.upload && (fd == -1)) {
+  if(!data->state.upload && (fd == -1)) {
     failf(data, "Couldn't open file %s", data->state.up.path);
     file_done(data, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
@@ -422,7 +422,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   Curl_pgrsStartNow(data);
 
-  if(data->set.upload)
+  if(data->state.upload)
     return file_upload(data);
 
   file = data->req.p.file;

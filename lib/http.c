@@ -2112,7 +2112,7 @@ void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
   Curl_HttpReq httpreq = (Curl_HttpReq)data->state.httpreq;
   const char *request;
   if((conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
-     data->set.upload)
+     data->state.upload)
     httpreq = HTTPREQ_PUT;
 
   /* Now set the 'request' pointer to the proper request string */
@@ -2423,7 +2423,7 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
     if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
        (((httpreq == HTTPREQ_POST_MIME || httpreq == HTTPREQ_POST_FORM) &&
          http->postsize < 0) ||
-        ((data->set.upload || httpreq == HTTPREQ_POST) &&
+        ((data->state.upload || httpreq == HTTPREQ_POST) &&
          data->state.infilesize == -1))) {
       if(conn->bits.authneg)
         /* don't enable chunked during auth neg */

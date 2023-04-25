@@ -1462,6 +1462,7 @@ struct UrlState {
   BIT(rewindbeforesend);/* TRUE when the sending couldn't be stopped even
                            though it will be discarded. We must call the data
                            rewind callback before trying to send again. */
+  BIT(upload);         /* upload request */
 };
 
 /*
@@ -1838,7 +1839,6 @@ struct UserDefined {
   BIT(http_auto_referer); /* set "correct" referer when following
                              location: */
   BIT(opt_no_body);    /* as set with CURLOPT_NOBODY */
-  BIT(upload);         /* upload request */
   BIT(verbose);        /* output verbosity */
   BIT(krb);            /* Kerberos connection requested */
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */
