@@ -32,7 +32,7 @@ CURLMOPT_SOCKETFUNCTION \- callback informed about what to wait for
 int socket_callback(CURL *easy,      /* easy handle */
                     curl_socket_t s, /* socket */
                     int what,        /* describes the socket */
-                    void *clientp,     /* private callback pointer */
+                    void *clientp,   /* private callback pointer */
                     void *socketp);  /* private socket pointer */
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_SOCKETFUNCTION, socket_callback);
@@ -87,8 +87,8 @@ All
 .nf
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
-  GlobalInfo *g = (GlobalInfo*) cbp;
-  SockInfo *fdp = (SockInfo*) sockp;
+  GlobalInfo *g = cbp;
+  SockInfo *fdp = sockp;
 
   if(what == CURL_POLL_REMOVE) {
     remsock(fdp);
