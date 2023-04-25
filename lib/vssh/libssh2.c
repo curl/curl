@@ -3274,7 +3274,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
                                               my_libssh2_free,
                                               my_libssh2_realloc, data);
 #else
-  sshc->ssh_session = libssh2_session_init();
+  sshc->ssh_session = libssh2_session_init_ex(NULL, NULL, NULL, data);
 #endif
   if(!sshc->ssh_session) {
     failf(data, "Failure initialising ssh session");
