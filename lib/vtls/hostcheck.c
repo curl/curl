@@ -84,8 +84,7 @@ static bool hostmatch(const char *hostname,
                       const char *pattern,
                       size_t patternlen)
 {
-  const char *pattern_label_end, *hostname_label_end;
-  size_t suffixlen;
+  const char *pattern_label_end;
 
   DEBUGASSERT(pattern);
   DEBUGASSERT(patternlen);
@@ -111,26 +110,16 @@ static bool hostmatch(const char *hostname,
   if(!pattern_label_end ||
      (memrchr(pattern, '.', patternlen) == pattern_label_end))
     return pmatch(hostname, hostlen, pattern, patternlen);
-
-  hostname_label_end = memchr(hostname, '.', hostlen);
-  if(!hostname_label_end)
-    return FALSE;
   else {
-    size_t skiphost = hostname_label_end - hostname;
-    size_t skiplen = pattern_label_end - pattern;
-    if(!pmatch(hostname_label_end, hostlen - skiphost,
-               pattern_label_end, patternlen - skiplen))
-      return FALSE;
+    const char *hostname_label_end = memchr(hostname, '.', hostlen);
+    if(hostname_label_end) {
+      size_t skiphost = hostname_label_end - hostname;
+      size_t skiplen = pattern_label_end - pattern;
+      return pmatch(hostname_label_end, hostlen - skiphost,
+                    pattern_label_end, patternlen - skiplen);
+    }
   }
-  /* The wildcard must match at least one character, so the left-most
-     label of the hostname is at least as large as the left-most label
-     of the pattern. */
-  if(hostname_label_end - hostname < pattern_label_end - pattern)
-    return FALSE;
-
-  suffixlen = pattern_label_end - (pattern + 1);
-  return strncasecompare(pattern + 1, hostname_label_end - suffixlen,
-                         suffixlen);
+  return FALSE;
 }
 
 /*
