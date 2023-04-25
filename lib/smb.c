@@ -530,7 +530,7 @@ static CURLcode smb_send_open(struct Curl_easy *data)
   byte_count = strlen(req->path);
   msg.name_length = smb_swap16((unsigned short)byte_count);
   msg.share_access = smb_swap32(SMB_FILE_SHARE_ALL);
-  if(data->set.upload) {
+  if(data->state.upload) {
     msg.access = smb_swap32(SMB_GENERIC_READ | SMB_GENERIC_WRITE);
     msg.create_disposition = smb_swap32(SMB_FILE_OVERWRITE_IF);
   }
@@ -762,7 +762,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
   void *msg = NULL;
   const struct smb_nt_create_response *smb_m;
 
-  if(data->set.upload && (data->state.infilesize < 0)) {
+  if(data->state.upload && (data->state.infilesize < 0)) {
     failf(data, "SMB upload needs to know the size up front");
     return CURLE_SEND_ERROR;
   }
@@ -813,7 +813,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
     smb_m = (const struct smb_nt_create_response*) msg;
     req->fid = smb_swap16(smb_m->fid);
     data->req.offset = 0;
-    if(data->set.upload) {
+    if(data->state.upload) {
       data->req.size = data->state.infilesize;
       Curl_pgrsSetUploadSize(data, data->req.size);
       next_state = SMB_UPLOAD;

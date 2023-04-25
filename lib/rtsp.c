@@ -493,7 +493,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
      rtspreq == RTSPREQ_SET_PARAMETER ||
      rtspreq == RTSPREQ_GET_PARAMETER) {
 
-    if(data->set.upload) {
+    if(data->state.upload) {
       putsize = data->state.infilesize;
       data->state.httpreq = HTTPREQ_PUT;
 
@@ -512,7 +512,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
         result =
           Curl_dyn_addf(&req_buffer,
                         "Content-Length: %" CURL_FORMAT_CURL_OFF_T"\r\n",
-                        (data->set.upload ? putsize : postsize));
+                        (data->state.upload ? putsize : postsize));
         if(result)
           return result;
       }

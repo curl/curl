@@ -1511,11 +1511,11 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && !imap->custom &&
-          (imap->uid || imap->mindex || data->set.upload ||
+          (imap->uid || imap->mindex || data->state.upload ||
           data->set.mimepost.kind != MIMEKIND_NONE)) {
     /* Handle responses after FETCH or APPEND transfer has finished */
 
-    if(!data->set.upload && data->set.mimepost.kind == MIMEKIND_NONE)
+    if(!data->state.upload && data->set.mimepost.kind == MIMEKIND_NONE)
       state(data, IMAP_FETCH_FINAL);
     else {
       /* End the APPEND command first by sending an empty line */
@@ -1581,7 +1581,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
     selected = TRUE;
 
   /* Start the first command in the DO phase */
-  if(data->set.upload || data->set.mimepost.kind != MIMEKIND_NONE)
+  if(data->state.upload || data->set.mimepost.kind != MIMEKIND_NONE)
     /* APPEND can be executed directly */
     result = imap_perform_append(data);
   else if(imap->custom && (selected || !imap->mailbox))

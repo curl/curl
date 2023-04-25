@@ -1419,7 +1419,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && data->set.mail_rcpt &&
-          (data->set.upload || data->set.mimepost.kind)) {
+          (data->state.upload || data->set.mimepost.kind)) {
     /* Calculate the EOB taking into account any terminating CRLF from the
        previous line of the email or the CRLF of the DATA command when there
        is "no mail data". RFC-5321, sect. 4.1.1.4.
@@ -1511,7 +1511,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
   smtp->eob = 2;
 
   /* Start the first command in the DO phase */
-  if((data->set.upload || data->set.mimepost.kind) && data->set.mail_rcpt)
+  if((data->state.upload || data->set.mimepost.kind) && data->set.mail_rcpt)
     /* MAIL transfer */
     result = smtp_perform_mail(data);
   else
