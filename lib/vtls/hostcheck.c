@@ -94,7 +94,7 @@ static bool hostmatch(const char *hostname,
   if(pattern[patternlen-1]=='.')
     patternlen--;
 
-  if(!strncmp(pattern, "*.", 2))
+  if(strncmp(pattern, "*.", 2))
     return pmatch(hostname, hostlen, pattern, patternlen);
 
   /* detect IP address as hostname and fail the match if so */
