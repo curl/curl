@@ -203,7 +203,7 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   (void)instruction;
   (void)instruction_len;
 #endif  /* CURL_LIBSSH2_DEBUG */
-  if(num_prompts == 1) {
+  if(data && num_prompts == 1) {
     struct connectdata *conn = data->conn;
     responses[0].text = strdup(conn->passwd);
     responses[0].length = curlx_uztoui(strlen(conn->passwd));
