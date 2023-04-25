@@ -70,10 +70,17 @@
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
 #endif
 
-#if defined(CURLRES_SYNCH) && \
-    defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP)
+#if defined(CURLRES_SYNCH) &&                   \
+  defined(HAVE_ALARM) &&                        \
+  defined(SIGALRM) &&                           \
+  defined(HAVE_SIGSETJMP) &&                    \
+  defined(GLOBAL_INIT_IS_THREADSAFE)
 /* alarm-based timeouts can only be used with all the dependencies satisfied */
 #define USE_ALARM_TIMEOUT
+#endif
+
+#ifdef USE_ALARM_TIMEOUT
+#include "easy_lock.h"
 #endif
 
 #define MAX_HOSTCACHE_LEN (255 + 7) /* max FQDN + colon + port number + zero */
@@ -254,11 +261,12 @@ void Curl_hostcache_prune(struct Curl_easy *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
-#ifdef HAVE_SIGSETJMP
+#ifdef USE_ALARM_TIMEOUT
 /* Beware this is a global and unique instance. This is used to store the
    return address that we can jump back to from inside a signal handler. This
    is not thread-safe stuff. */
 sigjmp_buf curl_jmpenv;
+curl_simple_lock curl_jmpenv_lock;
 #endif
 
 /* lookup address, returns entry if found and not stale */
@@ -832,7 +840,6 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 static
 void alarmfunc(int sig)
 {
-  /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void)sig;
   siglongjmp(curl_jmpenv, 1);
 }
@@ -912,6 +919,8 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
      This should be the last thing we do before calling Curl_resolv(),
      as otherwise we'd have to worry about variables that get modified
      before we invoke Curl_resolv() (and thus use "volatile"). */
+  curl_simple_lock_lock(&curl_jmpenv_lock);
+
   if(sigsetjmp(curl_jmpenv, 1)) {
     /* this is coming from a siglongjmp() after an alarm signal */
     failf(data, "name lookup timed out");
@@ -979,6 +988,8 @@ clean_up:
   signal(SIGALRM, keep_sigact);
 #endif
 #endif /* HAVE_SIGACTION */
+
+  curl_simple_lock_unlock(&curl_jmpenv_lock);
 
   /* switch back the alarm() to either zero or to what it was before minus
      the time we spent until now! */
