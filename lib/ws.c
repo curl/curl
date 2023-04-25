@@ -310,7 +310,7 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     dec->state = WS_DEC_PAYLOAD;
     if(dec->payload_len == 0) {
       ssize_t nwritten;
-      const unsigned char tmp;
+      const unsigned char tmp = '\0';
       /* special case of a 0 length frame, need to write once */
       nwritten = write_payload(&tmp, 0, dec->frame_age, dec->frame_flags,
                                0, 0, write_ctx, &result);
