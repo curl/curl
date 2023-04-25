@@ -192,7 +192,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 static void drain_stream_from_other_thread(struct Curl_easy *data,
                                            struct stream_ctx *stream)
 {
-  int bits;
+  unsigned char bits;
 
   /* risky */
   bits = CURL_CSELECT_IN;
@@ -208,7 +208,7 @@ static void drain_stream(struct Curl_cfilter *cf,
                          struct Curl_easy *data)
 {
   struct stream_ctx *stream = H3_STREAM_CTX(data);
-  int bits;
+  unsigned char bits;
 
   (void)cf;
   bits = CURL_CSELECT_IN;

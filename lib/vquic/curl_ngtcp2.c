@@ -994,7 +994,7 @@ static void drain_stream(struct Curl_cfilter *cf,
                          struct Curl_easy *data)
 {
   struct stream_ctx *stream = H3_STREAM_CTX(data);
-  int bits;
+  unsigned char bits;
 
   (void)cf;
   bits = CURL_CSELECT_IN;

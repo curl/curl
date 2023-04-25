@@ -1049,7 +1049,6 @@ struct connectdata {
      wrong connections. */
   char *localdev;
   unsigned short localportrange;
-  int cselect_bits; /* bitmask of socket events */
   int waitfor;      /* current READ/WRITE bits to wait for */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
@@ -1065,6 +1064,7 @@ struct connectdata {
   unsigned short localport;
   unsigned short secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
+  unsigned char cselect_bits; /* bitmask of socket events */
   unsigned char alpn; /* APLN TLS negotiated protocol, a CURL_HTTP_VERSION*
                          value */
 #ifndef CURL_DISABLE_PROXY
@@ -1319,8 +1319,6 @@ struct UrlState {
   char *scratch; /* huge buffer[set.buffer_size*2] for upload CRLF replacing */
   long followlocation; /* redirect counter */
   int requests; /* request counter: redirects + authentication retakes */
-  int dselect_bits; /* != 0 -> bitmask of socket events for this transfer
-                     * overriding anything the socket may report */
 #ifdef HAVE_SIGNAL
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
   void (*prev_signal)(int sig);
@@ -1346,11 +1344,6 @@ struct UrlState {
 
   /* a place to store the most recently set (S)FTP entrypath */
   char *most_recent_ftp_entrypath;
-  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
-                             to be used in the library's request(s) */
-  unsigned char httpversion; /* the lowest HTTP version*10 reported by any
-                                server involved in this request */
-
 #if !defined(WIN32) && !defined(MSDOS) && !defined(__EMX__)
 /* do FTP line-end conversions on most platforms */
 #define CURL_DO_LINEEND_CONV
@@ -1383,8 +1376,6 @@ struct UrlState {
   void *in;                      /* CURLOPT_READDATA */
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
-  unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
-                            is this */
   char *url;        /* work URL, copied from UserDefined */
   char *referer;    /* referer string */
   struct curl_slist *resolve; /* set to point to the set.resolve list when
@@ -1425,6 +1416,15 @@ struct UrlState {
     char *proxypasswd;
   } aptr;
 
+  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
+                             to be used in the library's request(s) */
+  unsigned char httpversion; /* the lowest HTTP version*10 reported by any
+                                server involved in this request */
+  unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
+                            is this */
+  unsigned char dselect_bits; /* != 0 -> bitmask of socket events for this
+                                 transfer overriding anything the socket may
+                                 report */
 #ifdef CURLDEBUG
   BIT(conncache_lock);
 #endif
