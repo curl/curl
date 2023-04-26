@@ -138,6 +138,8 @@ static size_t chunk_skip(struct buf_chunk *chunk, size_t amount)
   if(n) {
     n = CURLMIN(n, amount);
     chunk->r_offset += n;
+    if(chunk->r_offset == chunk->w_offset)
+      chunk->r_offset = chunk->w_offset = 0;
   }
   return n;
 }
@@ -288,6 +290,13 @@ size_t Curl_bufq_space(const struct bufq *q)
   size_t space = 0;
   if(q->tail)
     space += chunk_space(q->tail);
+  if(q->spare) {
+    struct buf_chunk *chunk = q->spare;
+    while(chunk) {
+      space += chunk->dlen;
+      chunk = chunk->next;
+    }
+  }
   if(q->chunk_count < q->max_chunks) {
     space += (q->max_chunks - q->chunk_count) * q->chunk_size;
   }
@@ -611,6 +620,8 @@ ssize_t Curl_bufq_slurpn(struct bufq *q, size_t max_len,
         /* blocked on first read or real error, fail */
         nread = -1;
       }
+      else
+        *err = CURLE_OK;
       break;
     }
     else if(n == 0) {

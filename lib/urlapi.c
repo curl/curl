@@ -432,6 +432,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   DEBUGASSERT(login);
 
+  *offset = 0;
   ptr = memchr(login, '@', len);
   if(!ptr)
     goto out;
@@ -462,14 +463,17 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
       result = CURLUE_USER_NOT_ALLOWED;
       goto out;
     }
+    free(u->user);
     u->user = userp;
   }
 
   if(passwdp) {
+    free(u->password);
     u->password = passwdp;
   }
 
   if(optionsp) {
+    free(u->options);
     u->options = optionsp;
   }
 
@@ -543,6 +547,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
 
     u->portnum = port;
     /* generate a new port number string to get rid of leading zeroes etc */
+    free(u->port);
     u->port = aprintf("%ld", port);
     if(!u->port)
       return CURLUE_OUT_OF_MEMORY;
@@ -761,6 +766,75 @@ static CURLUcode urldecode_host(struct dynbuf *host)
   }
 
   return CURLUE_OK;
+}
+
+static CURLUcode parse_authority(struct Curl_URL *u,
+                                 const char *auth, size_t authlen,
+                                 unsigned int flags,
+                                 struct dynbuf *host,
+                                 bool has_scheme)
+{
+  size_t offset;
+  CURLUcode result;
+
+  /*
+   * Parse the login details and strip them out of the host name.
+   */
+  result = parse_hostname_login(u, auth, authlen, flags, &offset);
+  if(result)
+    goto out;
+
+  if(Curl_dyn_addn(host, auth + offset, authlen - offset)) {
+    result = CURLUE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  result = Curl_parse_port(u, host, has_scheme);
+  if(result)
+    goto out;
+
+  switch(ipv4_normalize(host)) {
+  case HOST_IPV4:
+    break;
+  case HOST_IPV6:
+    result = ipv6_parse(u, Curl_dyn_ptr(host), Curl_dyn_len(host));
+    break;
+  case HOST_NAME:
+    result = urldecode_host(host);
+    if(!result)
+      result = hostname_check(u, Curl_dyn_ptr(host), Curl_dyn_len(host));
+    break;
+  case HOST_ERROR:
+    result = CURLUE_OUT_OF_MEMORY;
+    break;
+  case HOST_BAD:
+  default:
+    result = CURLUE_BAD_HOSTNAME; /* Bad IPv4 address even */
+    break;
+  }
+
+out:
+  return result;
+}
+
+CURLUcode curl_url_set_authority(CURLU *u, const char *authority,
+                                 unsigned int flags)
+{
+  CURLUcode result;
+  struct dynbuf host;
+
+  DEBUGASSERT(authority);
+  Curl_dyn_init(&host, CURL_MAX_INPUT_LENGTH);
+
+  result = parse_authority(u, authority, strlen(authority), flags,
+                           &host, !!u->scheme);
+  if(result)
+    Curl_dyn_free(&host);
+  else {
+    free(u->host);
+    u->host = Curl_dyn_ptr(&host);
+  }
+  return result;
 }
 
 /*
@@ -1091,48 +1165,8 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     /* this pathlen also contains the query and the fragment */
     pathlen = urllen - (path - url);
     if(hostlen) {
-      /* number of bytes into the string the host name starts: */
-      size_t offset = 0;
 
-      /*
-       * Parse the login details and strip them out of the host name.
-       */
-      result = parse_hostname_login(u, hostp, hostlen, flags, &offset);
-      if(!result) {
-        hostp += offset;
-        hostlen -= offset;
-        if(Curl_dyn_addn(&host, hostp, hostlen))
-          result = CURLUE_OUT_OF_MEMORY;
-        else
-          result = Curl_parse_port(u, &host, schemelen);
-      }
-      if(!result) {
-        int norm = ipv4_normalize(&host);
-        switch(norm) {
-        case HOST_IPV4:
-          break;
-
-        case HOST_IPV6:
-          result = ipv6_parse(u, Curl_dyn_ptr(&host), Curl_dyn_len(&host));
-          break;
-
-        case HOST_NAME:
-          result = urldecode_host(&host);
-          if(!result)
-            result = hostname_check(u, Curl_dyn_ptr(&host),
-                                    Curl_dyn_len(&host));
-          break;
-
-        case HOST_ERROR:
-          result = CURLUE_OUT_OF_MEMORY;
-          break;
-
-        case HOST_BAD:
-        default:
-          result = CURLUE_BAD_HOSTNAME; /* Bad IPv4 address even */
-          break;
-        }
-      }
+      result = parse_authority(u, hostp, hostlen, flags, &host, schemelen);
       if(result)
         goto fail;
 

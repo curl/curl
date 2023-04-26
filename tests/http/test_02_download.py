@@ -30,7 +30,7 @@ import logging
 import os
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, CurlClient, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -47,9 +47,12 @@ class TestDownload:
 
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
-        env.make_data_file(indir=httpd.docs_dir, fname="data-100k", fsize=100*1024)
-        env.make_data_file(indir=httpd.docs_dir, fname="data-1m", fsize=1024*1024)
-        env.make_data_file(indir=httpd.docs_dir, fname="data-10m", fsize=10*1024*1024)
+        indir = httpd.docs_dir
+        env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
+        env.make_data_file(indir=indir, fname="data-100k", fsize=100*1024)
+        env.make_data_file(indir=indir, fname="data-1m", fsize=1024*1024)
+        env.make_data_file(indir=indir, fname="data-10m", fsize=10*1024*1024)
+        env.make_data_file(indir=indir, fname="data-50m", fsize=50*1024*1024)
 
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -272,8 +275,29 @@ class TestDownload:
         ])
         r.check_response(count=count, http_status=200)
         srcfile = os.path.join(httpd.docs_dir, 'data-1m')
+        self.check_downloads(curl, srcfile, count)
+        # restore httpd defaults
+        httpd.set_extra_config(env.domain1, lines=None)
+        assert httpd.stop()
+        assert httpd.start()
+
+    # download via lib client, pause/resume at different offsets
+    @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
+    def test_02_21_h2_lib_download(self, env: Env, httpd, nghttpx, pause_offset, repeat):
+        count = 10
+        docname = 'data-10m'
+        url = f'https://localhost:{env.https_port}/{docname}'
+        client = LocalClient(name='h2-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[str(count), str(pause_offset), url])
+        r.check_exit_code(0)
+        srcfile = os.path.join(httpd.docs_dir, docname)
+        self.check_downloads(client, srcfile, count)
+
+    def check_downloads(self, client, srcfile: str, count: int):
         for i in range(count):
-            dfile = curl.download_file(i)
+            dfile = client.download_file(i)
             assert os.path.exists(dfile)
             if not filecmp.cmp(srcfile, dfile, shallow=False):
                 diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
@@ -282,8 +306,3 @@ class TestDownload:
                                                     tofile=dfile,
                                                     n=1))
                 assert False, f'download {dfile} differs:\n{diff}'
-        # restore httpd defaults
-        httpd.set_extra_config(env.domain1, lines=None)
-        assert httpd.stop()
-        assert httpd.start()
-

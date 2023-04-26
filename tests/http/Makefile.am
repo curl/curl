@@ -22,6 +22,16 @@
 #
 ###########################################################################
 
+SUBDIRS = clients
+
 clean-local:
 	rm -rf *.pyc __pycache__
 	rm -rf gen
+
+check: clients
+
+clients:
+	@(cd clients; $(MAKE) check)
+
+checksrc:
+	cd clients && $(MAKE) checksrc

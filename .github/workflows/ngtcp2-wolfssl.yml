@@ -70,8 +70,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
         sudo apt-get install apache2 apache2-dev
-        sudo python3 -m pip install impacket pytest cryptography multipart
-      name: 'install prereqs and impacket, pytest, crypto'
+      name: 'install prereqs'
 
     - run: |
         git clone --quiet --depth=1 https://github.com/wolfSSL/wolfssl.git
@@ -122,6 +121,10 @@ jobs:
       name: 'install mod_h2'
 
     - uses: actions/checkout@v3
+
+    - run: |
+        sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt
+      name: 'install python test prereqs'
 
     - run: autoreconf -fi
       name: 'autoreconf'

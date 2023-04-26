@@ -455,7 +455,7 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
     head[9] = (unsigned char)(payload_len & 0xff);
     hlen = 10;
   }
-  else if(payload_len > 126) {
+  else if(payload_len >= 126) {
     head[1] = 126 | WSBIT_MASK;
     head[2] = (unsigned char)((payload_len >> 8) & 0xff);
     head[3] = (unsigned char)(payload_len & 0xff);
@@ -786,6 +786,14 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
   size_t nwritten;
   curl_off_t remain = (payload_len - (payload_offset + buflen));
 
+  if(!ctx->bufidx) {
+    /* first write */
+    ctx->frame_age = frame_age;
+    ctx->frame_flags = frame_flags;
+    ctx->payload_offset = payload_offset;
+    ctx->payload_len = payload_len;
+  }
+
   if((frame_flags & CURLWS_PING) && !remain) {
     /* auto-respond to PINGs, only works for single-frame payloads atm */
     size_t bytes;
@@ -810,13 +818,6 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
     }
     *err = CURLE_OK;
     memcpy(ctx->buffer, buf, nwritten);
-    if(!ctx->bufidx) {
-      /* first write */
-      ctx->frame_age = frame_age;
-      ctx->frame_flags = frame_flags;
-      ctx->payload_offset = payload_offset;
-      ctx->payload_len = payload_len;
-    }
     ctx->bufidx += nwritten;
   }
   return nwritten;
@@ -831,7 +832,7 @@ static ssize_t nw_in_recv(void *reader_ctx,
 
   *err = curl_easy_recv(data, buf, buflen, &nread);
   if(*err)
-    return *err;
+    return -1;
   return (ssize_t)nread;
 }
 
@@ -888,6 +889,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
         infof(data, "connection expectedly closed?");
         return CURLE_GOT_NOTHING;
       }
+      DEBUGF(infof(data, "curl_ws_recv, added %zu bytes from network",
+                   Curl_bufq_len(&ws->recvbuf)));
     }
 
     result = ws_dec_pass(&ws->dec, data, &ws->recvbuf,
@@ -1015,12 +1018,13 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
   if(result)
     return result;
 
-  /* Limit what we are willing to buffer */
+  /* TODO: the current design does not allow partial writes, afaict.
+   * It is not clear who the application is supposed to react. */
   space = Curl_bufq_space(&ws->sendbuf);
+  DEBUGF(infof(data, "curl_ws_send(len=%zu), sendbuf len=%zu space %zu",
+               buflen, Curl_bufq_len(&ws->sendbuf), space));
   if(space < 14)
     return CURLE_AGAIN;
-  if(buflen > space)
-    buflen = space;
 
   if(sendflags & CURLWS_OFFSET) {
     if(totalsize) {
