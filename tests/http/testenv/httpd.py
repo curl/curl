@@ -260,6 +260,7 @@ class Httpd:
             conf.extend([  # https host for domain1, h1 + h2
                 f'<VirtualHost *:{self.env.https_port}>',
                 f'    ServerName {domain1}',
+                f'    ServerAlias localhost',
                 f'    Protocols h2 http/1.1',
                 f'    SSLEngine on',
                 f'    SSLCertificateFile {creds1.cert_file}',

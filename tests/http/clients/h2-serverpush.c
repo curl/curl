@@ -35,6 +35,7 @@
 
 /* curl stuff */
 #include <curl/curl.h>
+#include <curl/mprintf.h>
 
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
@@ -128,7 +129,7 @@ int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-#define OUTPUTFILE "dl"
+#define OUTPUTFILE "download_0.data"
 
 static int setup(CURL *hnd, const char *url)
 {
@@ -137,22 +138,16 @@ static int setup(CURL *hnd, const char *url)
     /* failed */
     return 1;
 
-  /* write to this file */
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
-
-  /* set the same URL */
   curl_easy_setopt(hnd, CURLOPT_URL, url);
+  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+
+  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
 
   /* please be verbose */
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
-
-  /* HTTP/2 please */
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-
-  /* we use a self-signed test server, skip verification during debugging */
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
 
 #if (CURLPIPE_MULTIPLEX > 0)
   /* wait for pipe connection to confirm */
@@ -174,17 +169,18 @@ static int server_push_callback(CURL *parent,
   char filename[128];
   FILE *out;
   static unsigned int count = 0;
+  int rv;
 
   (void)parent; /* we have no use for this */
-
-  snprintf(filename, 128, "push%u", count++);
+  curl_msnprintf(filename, sizeof(filename)-1, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
   if(!out) {
     /* if we cannot save it, deny it */
     fprintf(stderr, "Failed to create output file for push\n");
-    return CURL_PUSH_DENY;
+    rv = CURL_PUSH_DENY;
+    goto out;
   }
 
   /* write to this file */
@@ -204,7 +200,10 @@ static int server_push_callback(CURL *parent,
   }
 
   (*transfers)++; /* one more */
-  return CURL_PUSH_OK;
+  rv = CURL_PUSH_OK;
+
+out:
+  return rv;
 }
 
 
@@ -217,29 +216,26 @@ int main(int argc, char *argv[])
   CURLM *multi_handle;
   int transfers = 1; /* we start with one */
   struct CURLMsg *m;
-  const char *url = "https://localhost:8443/index.html";
+  const char *url;
 
-  if(argc == 2)
-    url = argv[1];
+  if(argc != 2) {
+    fprintf(stderr, "need URL as argument\n");
+    return 2;
+  }
+  url = argv[1];
 
-  /* init a multi stack */
   multi_handle = curl_multi_init();
+  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+  curl_multi_setopt(multi_handle, CURLMOPT_PUSHFUNCTION, server_push_callback);
+  curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
 
   easy = curl_easy_init();
-
-  /* set options */
   if(setup(easy, url)) {
     fprintf(stderr, "failed\n");
     return 1;
   }
 
-  /* add the easy transfer */
   curl_multi_add_handle(multi_handle, easy);
-
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHFUNCTION, server_push_callback);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
-
   do {
     int still_running; /* keep number of running handles */
     CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
@@ -256,7 +252,6 @@ int main(int argc, char *argv[])
      * created and added one or more easy handles but we need to clean them up
      * when we are done.
      */
-
     do {
       int msgq = 0;
       m = curl_multi_info_read(multi_handle, &msgq);
@@ -271,7 +266,6 @@ int main(int argc, char *argv[])
   } while(transfers); /* as long as we have transfers going */
 
   curl_multi_cleanup(multi_handle);
-
 
   return 0;
 }

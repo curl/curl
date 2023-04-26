@@ -3,5 +3,6 @@
 # SPDX-License-Identifier: curl
 
 ignoreRules = [ "DEAD_STORE", "subprocess_without_shell_equals_true" ]
+ignoreFiles = [ "tests/http/**" ]
 build = "make"
 setup = ".lift/setup.sh"

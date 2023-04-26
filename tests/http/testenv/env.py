@@ -33,6 +33,8 @@ import sys
 from configparser import ConfigParser, ExtendedInterpolation
 from typing import Optional
 
+import pytest
+
 from .certs import CertificateSpec, TestCA, Credentials
 from .ports import alloc_ports
 
@@ -60,6 +62,7 @@ class EnvConfig:
     def __init__(self):
         self.tests_dir = TESTS_HTTPD_PATH
         self.gen_dir = os.path.join(self.tests_dir, 'gen')
+        self.project_dir = os.path.dirname(os.path.dirname(self.tests_dir))
         self.config = DEF_CONFIG
         # check cur and its features
         self.curl = CURL
@@ -109,6 +112,7 @@ class EnvConfig:
             'h2proxys': socket.SOCK_STREAM,
             'caddy': socket.SOCK_STREAM,
             'caddys': socket.SOCK_STREAM,
+            'ws': socket.SOCK_STREAM,
         })
         self.httpd = self.config['httpd']['httpd']
         self.apachectl = self.config['httpd']['apachectl']
@@ -348,6 +352,10 @@ class Env:
         return self.CONFIG.gen_dir
 
     @property
+    def project_dir(self) -> str:
+        return self.CONFIG.project_dir
+
+    @property
     def ca(self):
         return self._ca
 
@@ -408,6 +416,10 @@ class Env:
         return self.CONFIG.ports['caddy']
 
     @property
+    def ws_port(self) -> int:
+        return self.CONFIG.ports['ws']
+
+    @property
     def curl(self) -> str:
         return self.CONFIG.curl
 
@@ -448,3 +460,13 @@ class Env:
                 s = f"{i:09d}-{s}\n"
                 fd.write(s[0:remain])
         return fpath
+
+    def make_clients(self):
+        client_dir = os.path.join(self.project_dir, 'tests/http/clients')
+        p = subprocess.run(['make'], capture_output=True, text=True,
+                           cwd=client_dir)
+        if p.returncode != 0:
+            pytest.exit(f"`make`in {client_dir} failed:\n{p.stderr}")
+            return False
+        return True
+

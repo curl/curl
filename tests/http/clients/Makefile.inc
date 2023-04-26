@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -23,16 +21,10 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-#
-import pytest
-pytest.register_assert_rewrite("testenv.env", "testenv.curl", "testenv.caddy",
-                               "testenv.httpd", "testenv.nghttpx")
 
-from .env import Env
-from .certs import TestCA, Credentials
-from .caddy import Caddy
-from .httpd import Httpd
-from .curl import CurlClient, ExecResult
-from .client import LocalClient
-from .nghttpx import Nghttpx
-from .nghttpx import Nghttpx, NghttpxQuic, NghttpxFwd
+# These are all libcurl example programs to be test compiled
+check_PROGRAMS = \
+  h2-serverpush \
+  h2-download \
+  ws-data \
+  ws-pingpong
