@@ -75,8 +75,6 @@ problems may have been fixed or changed somewhat since this was written.
  11.2 error buffer not set if connection to multiple addresses fails
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
- 11.7 signal-based resolver timeouts
- 11.16 libcurl uses renames instead of locking for atomic operations
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -452,27 +450,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/1332 and
  https://github.com/curl/curl/issues/4296
-
-11.7 signal-based resolver timeouts
-
- libcurl built without an asynchronous resolver library uses alarm() to time
- out DNS lookups. When a timeout occurs, this causes libcurl to jump from the
- signal handler back into the library with a sigsetjmp, which effectively
- causes libcurl to continue running within the signal handler. This is
- non-portable and could cause problems on some platforms. A discussion on the
- problem is available at https://curl.se/mail/lib-2008-09/0197.html
-
- Also, alarm() provides timeout resolution only to the nearest second. alarm
- ought to be replaced by setitimer on systems that support it.
-
-11.16 libcurl uses renames instead of locking for atomic operations
-
- For saving cookies, alt-svc and hsts files. This is bad when for example the
- file is stored in a directory where the application has no write permission
- but it has permission for the file.
-
- https://github.com/curl/curl/issues/6882
- https://github.com/curl/curl/pull/6884
 
 12. LDAP
 
