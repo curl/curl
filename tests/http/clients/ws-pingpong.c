@@ -59,8 +59,8 @@ static CURLcode recv_pong(CURL *curl, const char *exected_payload)
   char buffer[256];
   CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
   if(result) {
-    fprintf(stderr, "ws: curl_ws_recv returned %u, received %zu\n",
-            (int)result, rlen);
+    fprintf(stderr, "ws: curl_ws_recv returned %u, received %ld\n",
+            (int)result, (long)rlen);
     return result;
   }
 
