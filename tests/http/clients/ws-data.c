@@ -126,8 +126,8 @@ static CURLcode recv_binary(CURL *curl, char *exp_data, size_t exp_len)
       return CURLE_RECV_ERROR;
     }
     if(frame->offset != (curl_off_t)r_offset) {
-      fprintf(stderr, "recv_data: frame offset, expected %ld, got %zu\n",
-              (long)r_offset, frame->offset);
+      fprintf(stderr, "recv_data: frame offset, expected %ld, got %ld\n",
+              (long)r_offset, (long)frame->offset);
       return CURLE_RECV_ERROR;
     }
     if(frame->bytesleft != (curl_off_t)(exp_len - r_offset - nread)) {
@@ -177,7 +177,7 @@ static CURLcode data_echo(CURL *curl, size_t plen_min, size_t plen_max)
   if(!send_buf)
     return CURLE_OUT_OF_MEMORY;
   for(i = 0; i < plen_max; ++i) {
-    send_buf[i] = '0' + (i % 10);
+    send_buf[i] = '0' + (char)(i % 10);
   }
 
   for(len = plen_min; len <= plen_max; ++len) {
