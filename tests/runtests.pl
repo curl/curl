@@ -150,6 +150,7 @@ my %timetoolini; # timestamp for each test command run starting
 my %timetoolend; # timestamp for each test command run stopping
 my %timesrvrlog; # timestamp for each test server logs lock removal
 my %timevrfyend; # timestamp for each test result verification end
+my $runnerid;    # ID for runner async calls
 
 #######################################################################
 # variables that command line options may set
@@ -185,8 +186,13 @@ sub logmsg {
 sub catch_zap {
     my $signame = shift;
     logmsg "runtests.pl received SIG$signame, exiting\n";
-    my ($unexpected, $logs) = runner_stopservers();
-    logmsg $logs;
+    # TODO: make this set a flag that is checked in the main test loop
+    if($runnerid) {
+        runnerac_stopservers($runnerid);
+        runnerar();  # ignore the results
+        # Kill the runner entirely
+        runnerac_shutdown($runnerid);
+    }
     die "Somebody sent me a SIG$signame";
 }
 $SIG{INT} = \&catch_zap;
@@ -1403,7 +1409,8 @@ sub singletest_check {
             if(!$filename) {
                 logmsg "ERROR: section verify=>file$partsuffix ".
                        "has no name attribute\n";
-                my ($unexpected, $logs) = runner_stopservers();
+                runnerac_stopservers($runnerid);
+                my ($rid, $unexpected, $logs) = runnerar();
                 logmsg $logs;
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
@@ -1620,7 +1627,8 @@ sub singletest {
 
     # first, remove all lingering log files
     if(!cleardir($logdir) && $clearlocks) {
-        my $logs = runner_clearlocks($logdir);
+        runnerac_clearlocks($runnerid, $logdir);
+        my ($rid, $logs) = runnerar();
         logmsg $logs;
         cleardir($logdir);
     }
@@ -1641,7 +1649,8 @@ sub singletest {
     # Register the test case with the CI environment
     citest_starttest($testnum);
 
-    my ($why, $error, $logs, $testtimings) = runner_test_preprocess($testnum);
+    runnerac_test_preprocess($runnerid, $testnum);
+    my ($rid, $why, $error, $logs, $testtimings) = runnerar();
     logmsg $logs;
     if($error == -2) {
         if($postmortem) {
@@ -1667,7 +1676,8 @@ sub singletest {
     my $CURLOUT;
     my $tool;
     my $usedvalgrind;
-    ($error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runner_test_run($testnum);
+    runnerac_test_run($runnerid, $testnum);
+    ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar();
     logmsg $logs;
     updatetesttimings($testnum, %$testtimings);
     if($error == -1) {
@@ -2251,7 +2261,6 @@ setlogfunc(\&logmsg);
 #
 
 if(!$listonly) {
-    unlink("$LOGDIR/$MEMDUMP");  # remove this if there was one left
     checksystemfeatures();
 }
 
@@ -2513,7 +2522,7 @@ citest_starttestrun();
 # Initialize the runner to prepare to run tests
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
-runner_init($LOGDIR);
+$runnerid = runner_init($LOGDIR);
 
 #######################################################################
 # The main test-loop
@@ -2567,8 +2576,16 @@ my $sofar = time() - $start;
 citest_finishtestrun();
 
 # Tests done, stop the servers
-my ($unexpected, $logs) = runner_stopservers();
+runnerac_stopservers($runnerid);
+my ($rid, $unexpected, $logs) = runnerar();
 logmsg $logs;
+
+# Kill the runner
+# There is a race condition here since we don't know exactly when the runner
+# has finished shutting itself down
+runnerac_shutdown($runnerid);
+undef $runnerid;
+sleep 0;  # give runner a chance to run
 
 my $numskipped = %skipped ? sum values %skipped : 0;
 my $all = $total + $numskipped;
