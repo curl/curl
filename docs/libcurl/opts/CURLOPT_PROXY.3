@@ -48,7 +48,12 @@ proxy is used.
 .IP http://
 HTTP Proxy. Default when no scheme or proxy type is specified.
 .IP https://
-HTTPS Proxy. (Added in 7.52.0 for OpenSSL, GnuTLS and NSS)
+HTTPS Proxy. (Added in 7.52.0 for OpenSSL, GnuTLS and NSS. Since 7.87.0, it
+also works for BearSSL, mbedTLS, rustls, Schannel, Secure Transport and
+wolfSSL.)
+
+This will use HTTP/1 by default. Setting \fICURLOPT_PROXYTYPE(3)\fP to
+\fBCURLPROXY_HTTPS2\fP allows libcurl to negotiate using HTTP/2 with proxy.
 .IP socks4://
 SOCKS4 Proxy.
 .IP socks4a://
