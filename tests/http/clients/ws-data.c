@@ -177,7 +177,7 @@ static CURLcode data_echo(CURL *curl, size_t plen_min, size_t plen_max)
   if(!send_buf)
     return CURLE_OUT_OF_MEMORY;
   for(i = 0; i < plen_max; ++i) {
-    send_buf[i] = '0' + (char)(i % 10);
+    send_buf[i] = (char)('0' + ((int)i % 10));
   }
 
   for(len = plen_min; len <= plen_max; ++len) {
