@@ -4693,6 +4693,7 @@ AC_CONFIG_FILES([Makefile \
            tests/unit/Makefile \
            tests/http/config.ini \
            tests/http/Makefile \
+           tests/http/clients/Makefile \
            packages/Makefile \
            packages/vms/Makefile \
            curl-config \

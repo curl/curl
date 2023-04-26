@@ -46,6 +46,8 @@ def env(pytestconfig) -> Env:
         pytest.skip(env.incomplete_reason())
 
     env.setup()
+    if not env.make_clients():
+        pytest.exit(1)
     return env
 
 @pytest.fixture(scope="package", autouse=True)

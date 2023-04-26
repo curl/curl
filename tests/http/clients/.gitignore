@@ -1,0 +1,8 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+h2-serverpush
+h2-download
+ws-data
+ws-pingpong
