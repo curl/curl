@@ -354,7 +354,8 @@ sub compare {
 
         if(!$short) {
             logmsg "\n $testnum: $subject FAILED:\n";
-            logmsg showdiff($LOGDIR, $firstref, $secondref);
+            my $logdir = getlogdir($testnum);
+            logmsg showdiff($logdir, $firstref, $secondref);
         }
         elsif(!$automakestyle) {
             logmsg "FAILED\n";
@@ -918,6 +919,15 @@ sub updatetesttimings {
 
 
 #######################################################################
+# Return the log directory for the given test
+# There is only one directory for the moment
+sub getlogdir {
+    my $testnum = $_[0];
+    return $LOGDIR;
+}
+
+
+#######################################################################
 # Verify that this test case should be run
 sub singletest_shouldrun {
     my $testnum = $_[0];
@@ -1091,6 +1101,7 @@ sub singletest_check {
         return -2;
     }
 
+    my $logdir = getlogdir($testnum);
     my @err = getpart("verify", "errorcode");
     my $errorcode = $err[0] || "0";
     my $ok="";
@@ -1104,7 +1115,7 @@ sub singletest_check {
     my @validstdout = getpart("verify", "stdout");
     if (@validstdout) {
         # verify redirected stdout
-        my @actual = loadarray($STDOUT);
+        my @actual = loadarray(stdoutfilename($logdir, $testnum));
 
         foreach my $strip (@stripfile) {
             chomp $strip;
@@ -1156,7 +1167,7 @@ sub singletest_check {
     my @validstderr = getpart("verify", "stderr");
     if (@validstderr) {
         # verify redirected stderr
-        my @actual = loadarray($STDERR);
+        my @actual = loadarray(stderrfilename($logdir, $testnum));
 
         foreach my $strip (@stripfile) {
             chomp $strip;
@@ -1339,7 +1350,7 @@ sub singletest_check {
         }
 
         # verify uploaded data
-        my @out = loadarray("$LOGDIR/upload.$testnum");
+        my @out = loadarray("$logdir/upload.$testnum");
         for my $strip (@strippart) {
             chomp $strip;
             for(@out) {
@@ -1532,8 +1543,8 @@ sub singletest_check {
 
     if($valgrind) {
         if($usedvalgrind) {
-            if(!opendir(DIR, "$LOGDIR")) {
-                logmsg "ERROR: unable to read $LOGDIR\n";
+            if(!opendir(DIR, "$logdir")) {
+                logmsg "ERROR: unable to read $logdir\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
@@ -1553,7 +1564,7 @@ sub singletest_check {
                 $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
             }
-            my @e = valgrindparse("$LOGDIR/$vgfile");
+            my @e = valgrindparse("$logdir/$vgfile");
             if(@e && $e[0]) {
                 if($automakestyle) {
                     logmsg "FAIL: $testnum - $testname - valgrind\n";
@@ -1626,11 +1637,13 @@ sub singletest_success {
 sub singletest {
     my ($testnum, $count, $total)=@_;
 
+    my $logdir = getlogdir($testnum);
+
     # first, remove all lingering log files
-    if(!cleardir($LOGDIR) && $clearlocks) {
-        my $logs = runner_clearlocks($LOGDIR);
+    if(!cleardir($logdir) && $clearlocks) {
+        my $logs = runner_clearlocks($logdir);
         logmsg $logs;
-        cleardir($LOGDIR);
+        cleardir($logdir);
     }
 
     ###################################################################
@@ -2409,12 +2422,13 @@ sub displaylogcontent {
 
 sub displaylogs {
     my ($testnum)=@_;
-    opendir(DIR, "$LOGDIR") ||
+    my $logdir = getlogdir($testnum);
+    opendir(DIR, "$logdir") ||
         die "can't open dir: $!";
     my @logs = readdir(DIR);
     closedir(DIR);
 
-    logmsg "== Contents of files in the $LOGDIR/ dir after test $testnum\n";
+    logmsg "== Contents of files in the $logdir/ dir after test $testnum\n";
     foreach my $log (sort @logs) {
         if($log =~ /\.(\.|)$/) {
             next; # skip "." and ".."
@@ -2425,7 +2439,7 @@ sub displaylogs {
         if(($log eq "memdump") || ($log eq "core")) {
             next; # skip "memdump" and  "core"
         }
-        if((-d "$LOGDIR/$log") || (! -s "$LOGDIR/$log")) {
+        if((-d "$logdir/$log") || (! -s "$logdir/$log")) {
             next; # skip directory and empty files
         }
         if(($log =~ /^stdout\d+/) && ($log !~ /^stdout$testnum/)) {
@@ -2459,7 +2473,7 @@ sub displaylogs {
             next; # skip test$testnum since it can be very big
         }
         logmsg "=== Start of file $log\n";
-        displaylogcontent("$LOGDIR/$log");
+        displaylogcontent("$logdir/$log");
         logmsg "=== End of file $log\n";
     }
 }
