@@ -333,11 +333,11 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
   return result;
 }
 
-#define S3_UNSIGNED_PAYLOAD "UNSIGNED-PAYLOAD"
+#define SIGV4_UNSIGNED_PAYLOAD "UNSIGNED-PAYLOAD"
 
-static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
+static CURLcode calc_payload_hash_w_hdr(struct Curl_easy *data,
                                      Curl_HttpReq httpreq, char *provider1,
-                                     unsigned char *sha_hash,
+                                     char *service, unsigned char *sha_hash,
                                      char *sha_hex, char *header)
 {
   bool empty_method = (httpreq == HTTPREQ_GET || httpreq == HTTPREQ_HEAD);
@@ -347,17 +347,18 @@ static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
   bool post_payload = (httpreq == HTTPREQ_POST && data->set.postfields);
   CURLcode ret = CURLE_OUT_OF_MEMORY;
 
-  if(empty_payload || post_payload) {
-    /* Calculate a real hash when we know the request payload */
+  if(strcasecompare(service, "s3") &&
+      (empty_payload || post_payload)) {
+    /* Calculate a real hash when we know the request payload to s3 */
     ret = calc_payload_hash(data, sha_hash, sha_hex);
     if(ret)
       goto fail;
   }
   else {
-    /* Fall back to s3's UNSIGNED-PAYLOAD */
-    size_t len = sizeof(S3_UNSIGNED_PAYLOAD) - 1;
+    /* Fall back to sigv4's UNSIGNED-PAYLOAD */
+    size_t len = sizeof(SIGV4_UNSIGNED_PAYLOAD) - 1;
     DEBUGASSERT(len < SHA256_HEX_LENGTH); /* 16 < 65 */
-    memcpy(sha_hex, S3_UNSIGNED_PAYLOAD, len);
+    memcpy(sha_hex, SIGV4_UNSIGNED_PAYLOAD, len);
     sha_hex[len] = 0;
   }
 
@@ -380,7 +381,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char provider1[MAX_SIGV4_LEN + 1]="";
   char region[MAX_SIGV4_LEN + 1]="";
   char service[MAX_SIGV4_LEN + 1]="";
-  bool sign_as_s3 = false;
+  bool sign_payload_w_hdr = false;
   const char *hostname = conn->host.name;
   time_t clock;
   struct tm tm;
@@ -482,24 +483,25 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   Curl_http_method(data, conn, &method, &httpreq);
 
-  /* AWS S3 requires a x-amz-content-sha256 header, and supports special
-   * values like UNSIGNED-PAYLOAD */
-  sign_as_s3 = (strcasecompare(provider0, "aws") &&
-                strcasecompare(service, "s3"));
+  /* multiple AWS services require a x-amz-content-sha256 header, and support
+  or require special values like UNSIGNED-PAYLOAD */
+  sign_payload_w_hdr = (strcasecompare(provider0, "aws") &&
+                (strcasecompare(service, "s3") ||
+                strcasecompare(service, "vpc-lattice-svcs")));
 
   payload_hash = parse_content_sha_hdr(data, provider1, &payload_hash_len);
 
   if(!payload_hash) {
-    if(sign_as_s3)
-      ret = calc_s3_payload_hash(data, httpreq, provider1, sha_hash,
-                                 sha_hex, content_sha256_hdr);
+    if(sign_payload_w_hdr)
+      ret = calc_payload_hash_w_hdr(data, httpreq, provider1, service,
+                                 sha_hash, sha_hex, content_sha256_hdr);
     else
       ret = calc_payload_hash(data, sha_hash, sha_hex);
     if(ret)
       goto fail;
 
     payload_hash = sha_hex;
-    /* may be shorter than SHA256_HEX_LENGTH, like S3_UNSIGNED_PAYLOAD */
+    /* may be shorter than SHA256_HEX_LENGTH, like SIGV4_UNSIGNED_PAYLOAD */
     payload_hash_len = strlen(sha_hex);
   }
 
