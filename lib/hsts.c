@@ -204,7 +204,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       p++;
     if(*p == ';')
       p++;
-  } while (*p);
+  } while(*p);
 
   if(!gotma)
     /* max-age is mandatory */

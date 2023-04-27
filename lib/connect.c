@@ -548,7 +548,7 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
     baller->result = Curl_conn_cf_connect(baller->cf, data, 0, connected);
 
     if(!baller->result) {
-      if (*connected) {
+      if(*connected) {
         baller->connected = TRUE;
         baller->is_done = TRUE;
       }

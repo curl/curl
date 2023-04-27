@@ -1554,7 +1554,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     }
     /* Find last position of a cipher in the ciphers string */
     cipher_end = cipher_start;
-    while (*cipher_end != '\0' && !is_separator(*cipher_end)) {
+    while(*cipher_end != '\0' && !is_separator(*cipher_end)) {
       ++cipher_end;
     }
 

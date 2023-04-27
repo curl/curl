@@ -4180,7 +4180,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
       size_t dirAlloc = 0;
       const char *str = rawPath;
       for(; *str != 0; ++str)
-        if (*str == '/')
+        if(*str == '/')
           ++dirAlloc;
 
       if(dirAlloc) {
