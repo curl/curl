@@ -65,7 +65,8 @@ commands:
     steps:
       - run:
           command: |
-            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev && sudo python3 -m pip install impacket
+            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip
+            sudo python3 -m pip install impacket
 
   configure-libssh:
     steps:
