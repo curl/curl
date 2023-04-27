@@ -33,6 +33,8 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_srcdir)/include is for libcurl's external include files
 
 AM_CPPFLAGS = -I$(top_srcdir)/include   \
+              -I$(top_builddir)/lib     \
+              -I$(top_srcdir)/lib       \
               -DCURL_DISABLE_DEPRECATION
 
 LIBDIR = $(top_builddir)/lib
