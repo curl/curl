@@ -1096,7 +1096,7 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
 
 out:
   *done = (result == CURLE_OK) && tunnel_is_established(cf->ctx);
-  if (*done) {
+  if(*done) {
     cf->connected = TRUE;
     tunnel_free(cf, data);
   }

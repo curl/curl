@@ -192,7 +192,7 @@ static CURLcode make_headers(struct Curl_easy *data,
   }
 
 
-  if (*content_sha256_header) {
+  if(*content_sha256_header) {
     tmp_head = curl_slist_append(head, content_sha256_header);
     if(!tmp_head)
       goto fail;

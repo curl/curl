@@ -678,7 +678,7 @@ static int ipv4_normalize(struct dynbuf *host)
     parts[n] = l;
     c = endp;
 
-    switch (*c) {
+    switch(*c) {
     case '.' :
       if(n == 3)
         return HOST_BAD;
