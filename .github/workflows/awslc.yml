@@ -70,19 +70,23 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror --with-openssl=$HOME/awslc
-      name: 'configure'
+    - run: |
+        mkdir build
+        cd build
+        ../configure --enable-warnings --enable-werror --with-openssl=$HOME/awslc
+        cd ..
+      name: 'configure out-of-tree'
 
-    - run: make -j 2 V=1
+    - run: make -C build -j 2 V=1
       name: 'make'
 
-    - run: make -j 2 V=1 examples
+    - run: make -C build -j 2 V=1 examples
       name: 'make examples'
 
-    - run: make -j 2 V=1 -C tests
+    - run: make -C build -j 2 V=1 -C tests
       name: 'make tests'
 
-    - run: make V=1 test-ci
+    - run: make -C build V=1 test-ci
       name: 'run tests'
 
   cmake:
@@ -113,7 +117,7 @@ jobs:
 
     # CMAKE_COMPILE_WARNING_AS_ERROR is available in cmake 3.24 or later
     - run: cmake -Bbuild -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON -DCMAKE_COMPILE_WARNING_AS_ERROR=ON .
-      name: 'cmake generate'
+      name: 'cmake generate out-of-tree'
 
     - run: cmake --build build --parallel
       name: 'cmake build'
