@@ -25,6 +25,11 @@
  * Websockets pingpong
  * </DESC>
  */
+
+/* curl stuff */
+#include "curl_setup.h"
+#include <curl/curl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,11 +37,6 @@
 /* somewhat unix-specific */
 #include <sys/time.h>
 #include <unistd.h>
-
-
-/* curl stuff */
-#include <curl/curl.h>
-#include "curl_setup.h"
 
 #ifdef USE_WEBSOCKETS
 
