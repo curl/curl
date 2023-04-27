@@ -25,6 +25,11 @@
  * HTTP/2 server push
  * </DESC>
  */
+
+/* curl stuff */
+#include <curl/curl.h>
+#include <curl/mprintf.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,10 +37,6 @@
 /* somewhat unix-specific */
 #include <sys/time.h>
 #include <unistd.h>
-
-/* curl stuff */
-#include <curl/curl.h>
-#include <curl/mprintf.h>
 
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
