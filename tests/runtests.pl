@@ -182,16 +182,6 @@ sub logmsg {
     }
 }
 
-# enable memory debugging if curl is compiled with it
-$ENV{'CURL_MEMDEBUG'} = "$LOGDIR/$MEMDUMP";
-$ENV{'CURL_ENTROPY'}="12345678";
-$ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
-$ENV{'CURL_GLOBAL_INIT'}=1; # debug curl_global_init/cleanup use
-$ENV{'HOME'}=$pwd;
-$ENV{'CURL_HOME'}=$ENV{'HOME'};
-$ENV{'XDG_CONFIG_HOME'}=$ENV{'HOME'};
-$ENV{'COLUMNS'}=79; # screen width!
-
 sub catch_zap {
     my $signame = shift;
     logmsg "runtests.pl received SIG$signame, exiting\n";
@@ -2231,7 +2221,6 @@ if ($gdbthis) {
 
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
-mkdir("$LOGDIR/$PIDDIR", 0777);
 
 #######################################################################
 # initialize some variables
@@ -2468,11 +2457,7 @@ sub displaylogs {
 }
 
 #######################################################################
-# Setup CI Test Run
-citest_starttestrun();
-
-#######################################################################
-# The main test-loop
+# Scan tests to find suitable candidates
 #
 
 my $failed;
@@ -2504,6 +2489,19 @@ if($listonly) {
     exit(0);
 }
 
+#######################################################################
+# Setup CI Test Run
+citest_starttestrun();
+
+#######################################################################
+# Initialize the runner to prepare to run tests
+cleardir($LOGDIR);
+mkdir($LOGDIR, 0777);
+runner_init($LOGDIR);
+
+#######################################################################
+# The main test-loop
+#
 # run through each candidate test and execute it
 foreach my $testnum (@runtests) {
     $count++;
