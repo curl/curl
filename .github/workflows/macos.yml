@@ -126,8 +126,7 @@ jobs:
     - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}  --enable-websockets
       name: 'configure'
       env:
-        # -Wvla is caused by brotli
-        CFLAGS: "-Wno-vla -mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
+        CFLAGS: "-mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
 
     - run: make V=1
       name: 'make'
