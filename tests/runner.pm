@@ -36,6 +36,7 @@ BEGIN {
         checktestcmd
         prepro
         restore_test_env
+        runner_init
         runner_clearlocks
         runner_stopservers
         runner_test_preprocess
@@ -115,6 +116,28 @@ sub stdoutfilename {
 sub stderrfilename {
     my ($logdir, $testnum)=@_;
     return "$logdir/stderr$testnum";
+}
+
+#######################################################################
+# Initialize the runner and prepare it to run tests
+#
+sub runner_init {
+    my ($logdir)=@_;
+
+    # Set this directory as ours
+    # TODO: This will need to be uncommented once there are multiple runners
+    #$LOGDIR = $logdir;
+    mkdir("$LOGDIR/$PIDDIR", 0777);
+
+    # enable memory debugging if curl is compiled with it
+    $ENV{'CURL_MEMDEBUG'} = "$LOGDIR/$MEMDUMP";
+    $ENV{'CURL_ENTROPY'}="12345678";
+    $ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
+    $ENV{'CURL_GLOBAL_INIT'}=1; # debug curl_global_init/cleanup use
+    $ENV{'HOME'}=$pwd;
+    $ENV{'CURL_HOME'}=$ENV{'HOME'};
+    $ENV{'XDG_CONFIG_HOME'}=$ENV{'HOME'};
+    $ENV{'COLUMNS'}=79; # screen width!
 }
 
 #######################################################################
