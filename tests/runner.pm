@@ -227,7 +227,7 @@ sub torture {
     my ($testcmd, $testnum, $gdbline) = @_;
 
     # remove memdump first to be sure we get a new nice and clean one
-    unlink($memdump);
+    unlink("$LOGDIR/$MEMDUMP");
 
     # First get URL from test server, ignore the output/result
     runclient($testcmd);
@@ -236,7 +236,7 @@ sub torture {
 
     # memanalyze -v is our friend, get the number of allocations made
     my $count=0;
-    my @out = `$memanalyze -v $memdump`;
+    my @out = `$memanalyze -v "$LOGDIR/$MEMDUMP"`;
     for(@out) {
         if(/^Operations: (\d+)/) {
             $count = $1;
@@ -291,7 +291,7 @@ sub torture {
         $ENV{'CURL_MEMLIMIT'} = $limit;
 
         # remove memdump first to be sure we get a new nice and clean one
-        unlink($memdump);
+        unlink("$LOGDIR/$MEMDUMP");
 
         my $cmd = $testcmd;
         if($valgrind && !$gdbthis) {
@@ -349,7 +349,7 @@ sub torture {
             $fail=1;
         }
         else {
-            my @memdata=`$memanalyze $memdump`;
+            my @memdata=`$memanalyze "$LOGDIR/$MEMDUMP"`;
             my $leak=0;
             for(@memdata) {
                 if($_ ne "") {
@@ -361,7 +361,7 @@ sub torture {
             if($leak) {
                 logmsg "** MEMORY FAILURE\n";
                 logmsg @memdata;
-                logmsg `$memanalyze -l $memdump`;
+                logmsg `$memanalyze -l "$LOGDIR/$MEMDUMP"`;
                 $fail = 1;
             }
         }
@@ -403,10 +403,9 @@ sub singletest_startservers {
     my ($testnum, $testtimings) = @_;
 
     # remove old test server files before servers are started/verified
-    unlink($FTPDCMD);
-    unlink($SERVERIN);
-    unlink($SERVER2IN);
-    unlink($PROXYIN);
+    unlink("$LOGDIR/$FTPDCMD");
+    unlink("$LOGDIR/$SERVERIN");
+    unlink("$LOGDIR/$PROXYIN");
 
     # timestamp required servers verification start
     $$testtimings{"timesrvrini"} = Time::HiRes::time();
@@ -543,20 +542,19 @@ sub singletest_prepare {
     my ($testnum) = @_;
 
     if($feature{"TrackMemory"}) {
-        unlink($memdump);
+        unlink("$LOGDIR/$MEMDUMP");
     }
     unlink("core");
 
     # remove server output logfiles after servers are started/verified
-    unlink($SERVERIN);
-    unlink($SERVER2IN);
-    unlink($PROXYIN);
+    unlink("$LOGDIR/$SERVERIN");
+    unlink("$LOGDIR/$PROXYIN");
 
     # if this section exists, it might be FTP server instructions:
     my @ftpservercmd = getpart("reply", "servercmd");
     push @ftpservercmd, "Testnum $testnum\n";
     # write the instructions to file
-    writearray($FTPDCMD, \@ftpservercmd);
+    writearray("$LOGDIR/$FTPDCMD", \@ftpservercmd);
 
     # create (possibly-empty) files before starting the test
     for my $partsuffix (('', '1', '2', '3', '4')) {

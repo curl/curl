@@ -183,7 +183,7 @@ sub logmsg {
 }
 
 # enable memory debugging if curl is compiled with it
-$ENV{'CURL_MEMDEBUG'} = $memdump;
+$ENV{'CURL_MEMDEBUG'} = "$LOGDIR/$MEMDUMP";
 $ENV{'CURL_ENTROPY'}="12345678";
 $ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
 $ENV{'CURL_GLOBAL_INIT'}=1; # debug curl_global_init/cleanup use
@@ -277,7 +277,7 @@ sub cleardir {
         return 0; # can't open dir
     while($file = readdir($dh)) {
         # Don't clear the $PIDDIR since those need to live beyond one test
-        if(($file !~ /^(\.|\.\.)\z/) && "$dir/$file" ne $PIDDIR) {
+        if(($file !~ /^(\.|\.\.)\z/) && "$file" ne $PIDDIR) {
             if(-d "$dir/$file") {
                 if(!cleardir("$dir/$file")) {
                     $done = 0;
@@ -1215,7 +1215,7 @@ sub singletest_check {
     my @protocol= getpart("verify", "protocol");
     if(@protocol) {
         # Verify the sent request
-        my @out = loadarray($SERVERIN);
+        my @out = loadarray("$logdir/$SERVERIN");
 
         # check if there's any attributes on the verify/protocol section
         my %hash = getpartattr("verify", "protocol");
@@ -1246,7 +1246,7 @@ sub singletest_check {
 
         if((!$out[0] || ($out[0] eq "")) && $protocol[0]) {
             logmsg "\n $testnum: protocol FAILED!\n".
-                " There was no content at all in the file $SERVERIN.\n".
+                " There was no content at all in the file $logdir/$SERVERIN.\n".
                 " Server glitch? Total curl failure? Returned: $cmdres\n";
             # timestamp test result verification end
             $timevrfyend{$testnum} = Time::HiRes::time();
@@ -1370,7 +1370,7 @@ sub singletest_check {
             chomp($proxyprot[-1]);
         }
 
-        my @out = loadarray($PROXYIN);
+        my @out = loadarray("$logdir/$PROXYIN");
         for(@strip) {
             # strip off all lines that match the patterns from both arrays
             chomp $_;
@@ -1498,14 +1498,14 @@ sub singletest_check {
     }
 
     if($feature{"TrackMemory"}) {
-        if(! -f $memdump) {
+        if(! -f "$logdir/$MEMDUMP") {
             my %cmdhash = getpartattr("client", "command");
             my $cmdtype = $cmdhash{'type'} || "default";
             logmsg "\n** ALERT! memory tracking with no output file?\n"
                 if(!$cmdtype eq "perl");
         }
         else {
-            my @memdata=`$memanalyze $memdump`;
+            my @memdata=`$memanalyze "$logdir/$MEMDUMP"`;
             my $leak=0;
             for(@memdata) {
                 if($_ ne "") {
@@ -2231,7 +2231,7 @@ if ($gdbthis) {
 
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
-mkdir($PIDDIR, 0777);
+mkdir("$LOGDIR/$PIDDIR", 0777);
 
 #######################################################################
 # initialize some variables
@@ -2246,7 +2246,7 @@ setlogfunc(\&logmsg);
 #
 
 if(!$listonly) {
-    unlink($memdump);  # remove this if there was one left
+    unlink("$LOGDIR/$MEMDUMP");  # remove this if there was one left
     checksystemfeatures();
 }
 
