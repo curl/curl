@@ -778,17 +778,6 @@ sub displayserverfeatures {
     logmsg sprintf("%s", $http_ipv6?"HTTP-IPv6 ":"");
     logmsg sprintf("%s", $http_unix?"HTTP-unix ":"");
     logmsg sprintf("%s\n", $ftp_ipv6?"FTP-IPv6 ":"");
-
-    if($verbose) {
-        if($feature{"unix-sockets"}) {
-            logmsg "* Unix socket paths:\n";
-            if($http_unix) {
-                logmsg sprintf("*   HTTP-Unix:%s\n", $HTTPUNIXPATH);
-                logmsg sprintf("*   Socks-Unix:%s\n", $SOCKSUNIXPATH);
-            }
-        }
-    }
-
     logmsg "***************************************** \n";
 }
 
@@ -1476,7 +1465,7 @@ sub singletest_check {
     my @socksprot = getpart("verify", "socks");
     if(@socksprot) {
         # Verify the sent SOCKS proxy details
-        my @out = loadarray($SOCKSIN);
+        my @out = loadarray("$logdir/$SOCKSIN");
         $res = compare($testnum, $testname, "socks", \@out, \@socksprot);
         if($res) {
             return -1;
