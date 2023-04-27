@@ -90,6 +90,7 @@ my %warnings = (
     'SPACEBEFORECOMMA' => 'space before a comma',
     'SPACEBEFOREPAREN' => 'space before an open parenthesis',
     'SPACESEMICOLON'   => 'space before semicolon',
+    'SPACESWITCHCOLON' => 'space before colon of switch label',
     'TABS'             => 'TAB characters not allowed',
     'TRAILINGSPACE'    => 'Trailing whitespace on the line',
     'TYPEDEFSTRUCT'    => 'typedefed struct',
@@ -688,6 +689,12 @@ sub scanfile {
         if($l =~ /^(.*[^ ].*) ;$/) {
             checkwarn("SPACESEMICOLON",
                       $line, length($1), $file, $ol, "no space before semicolon");
+        }
+
+        # check for space before the colon in a switch label
+        if($l =~ /^( *(case .+|default)) :/) {
+            checkwarn("SPACESWITCHCOLON",
+                      $line, length($1), $file, $ol, "no space before colon of switch label");
         }
 
         # scan for use of banned functions
