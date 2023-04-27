@@ -79,7 +79,12 @@
 /* spare chunks we keep for a full window */
 #define H2_STREAM_POOL_SPARES   (H2_STREAM_WINDOW_SIZE / H2_CHUNK_SIZE)
 
-#define HTTP2_HUGE_WINDOW_SIZE (16 * H2_STREAM_WINDOW_SIZE)
+/* We need to accomodate the max number of streams with their window
+ * sizes on the overall connection. Streams might become PAUSED which
+ * will block their received QUOTA in the connection window. And if we
+ * run out of space, the server is blocked from sending us any data.
+ * See #10988 for an issue with this. */
+#define HTTP2_HUGE_WINDOW_SIZE (100 * H2_STREAM_WINDOW_SIZE)
 
 #define H2_SETTINGS_IV_LEN  3
 #define H2_BINSETTINGS_LEN 80
@@ -1018,7 +1023,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     }
     break;
   case NGHTTP2_RST_STREAM:
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] FARME[RST]", stream_id));
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] FRAME[RST]", stream_id));
     stream->closed = TRUE;
     stream->reset = TRUE;
     drain_stream(cf, data, stream);
@@ -1813,13 +1818,15 @@ out:
     nread = -1;
   }
   DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_recv(len=%zu) -> %zd %d, "
-                "buffered=%zu, window=%d/%d",
+                "buffered=%zu, window=%d/%d, connection %d/%d",
                 stream->id, len, nread, *err,
                 Curl_bufq_len(&stream->recvbuf),
                 nghttp2_session_get_stream_effective_recv_data_length(
                   ctx->h2, stream->id),
                 nghttp2_session_get_stream_effective_local_window_size(
-                  ctx->h2, stream->id)));
+                  ctx->h2, stream->id),
+                nghttp2_session_get_effective_local_window_size(ctx->h2),
+                HTTP2_HUGE_WINDOW_SIZE));
 
   CF_DATA_RESTORE(cf, save);
   return nread;
