@@ -353,7 +353,8 @@ static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
 {
   infof(data, "WS-ENC: %s [%s%s%s payload=%zd/%zd]", msg,
         ws_frame_name_of_op(enc->firstbyte),
-        (enc->firstbyte & WSBIT_OPCODE_CONT)? " CONT" : "",
+        (enc->firstbyte & WSBIT_OPCODE_MASK) == WSBIT_OPCODE_CONT ?
+        " CONT" : "",
         (enc->firstbyte & WSBIT_FIN)? "" : " NON-FIN",
         enc->payload_len - enc->payload_remain, enc->payload_len);
 }
