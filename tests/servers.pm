@@ -37,16 +37,7 @@ BEGIN {
     our @EXPORT = (
         # variables
         qw(
-            $HOSTIP
-            $HOST6IP
-            $HTTPUNIXPATH
-            $sshdid
-            $SSHSRVMD5
-            $SSHSRVSHA256
-            $SOCKSUNIXPATH
             $SOCKSIN
-            $USER
-            $ftpchecktime
             $err_unexpected
             $debugprotocol
             $stunnel
@@ -142,21 +133,21 @@ my $serverstartretries=10; # number of times to attempt to start server;
 my $portrange = 999;       # space from which to choose a random port
                            # don't increase without making sure generated port
                            # numbers will always be valid (<=65535)
+my $HOSTIP="127.0.0.1";    # address on which the test server listens
+my $HOST6IP="[::1]";       # address on which the test server listens
+my $HTTPUNIXPATH;          # HTTP server Unix domain socket path
+my $SOCKSUNIXPATH;         # socks server Unix domain socket path
+my $SSHSRVMD5 = "[uninitialized]";    # MD5 of ssh server public key
+my $SSHSRVSHA256 = "[uninitialized]"; # SHA256 of ssh server public key
+my $USER;                  # name of the current user
+my $sshdid;                # for socks server, ssh daemon version id
+my $ftpchecktime=1;        # time it took to verify our test FTP server
 
 # Variables shared with runtests.pl
-our $HOSTIP="127.0.0.1";   # address on which the test server listens
-our $HOST6IP="[::1]";      # address on which the test server listens
-our $HTTPUNIXPATH; # HTTP server Unix domain socket path
-our $sshdid;      # for socks server, ssh daemon version id
-our $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
-our $SSHSRVSHA256 = "[uninitialized]"; # SHA256 of ssh server public key
-our $SOCKSUNIXPATH;  # socks server Unix domain socket path
-our $SOCKSIN; # what curl sent to the SOCKS proxy
-our $USER; # name of the current user
-our $ftpchecktime=1; # time it took to verify our test FTP server
+our $SOCKSIN="socksd-request.log"; # what curl sent to the SOCKS proxy
 our $err_unexpected; # error instead of warning on server unexpectedly alive
-our $debugprotocol; # nonzero for verbose server logs
-our $stunnel; # path to stunnel command
+our $debugprotocol;  # nonzero for verbose server logs
+our $stunnel;        # path to stunnel command
 
 
 #######################################################################
@@ -179,7 +170,6 @@ sub checkcmd {
 #######################################################################
 # Initialize configuration variables
 sub initserverconfig {
-    $SOCKSIN="$LOGDIR/socksd-request.log"; # what curl sent to the SOCKS proxy
     $SOCKSUNIXPATH = "$PIDDIR/socks.sock"; # SOCKS server Unix domain socket path
     $HTTPUNIXPATH = "$PIDDIR/http.sock";   # HTTP server Unix domain socket path
     $stunnel = checkcmd("stunnel4") || checkcmd("tstunnel") || checkcmd("stunnel");
@@ -2014,7 +2004,7 @@ sub runsocksserver {
     if($is_unix) {
         $cmd="server/socksd".exe_ext('SRV').
             " --pidfile $pidfile".
-            " --reqfile $SOCKSIN".
+            " --reqfile $LOGDIR/$SOCKSIN".
             " --logfile $logfile".
             " --unix-socket $SOCKSUNIXPATH".
             " --backend $HOSTIP".
@@ -2024,7 +2014,7 @@ sub runsocksserver {
             " --port 0 ".
             " --pidfile $pidfile".
             " --portfile $portfile".
-            " --reqfile $SOCKSIN".
+            " --reqfile $LOGDIR/$SOCKSIN".
             " --logfile $logfile".
             " --backend $HOSTIP".
             " --config $FTPDCMD";
