@@ -369,7 +369,7 @@ ParameterError proto2num(struct OperationConfig *config,
 
     /* Process token modifiers */
     while(!ISALNUM(*token)) { /* may be NULL if token is all modifiers */
-      switch (*token++) {
+      switch(*token++) {
       case '=':
         action = set;
         break;

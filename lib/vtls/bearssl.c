@@ -897,7 +897,7 @@ static ssize_t bearssl_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   for(;;) {
     *err = bearssl_run_until(cf, data, BR_SSL_SENDAPP);
-    if (*err != CURLE_OK)
+    if(*err)
       return -1;
     app = br_ssl_engine_sendapp_buf(&backend->ctx.eng, &applen);
     if(!app) {

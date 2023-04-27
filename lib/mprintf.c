@@ -400,7 +400,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         /* out of allowed range */
         return 1;
 
-      switch (*fmt) {
+      switch(*fmt) {
       case 'S':
         flags |= FLAGS_ALT;
         /* FALLTHROUGH */

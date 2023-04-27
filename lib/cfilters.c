@@ -293,8 +293,8 @@ bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
 
   /* remove from sub-chain and destroy */
   DEBUGASSERT(cf);
-  while (*pprev) {
-    if (*pprev == cf) {
+  while(*pprev) {
+    if(*pprev == cf) {
       *pprev = discard->next;
       discard->next = NULL;
       found = TRUE;

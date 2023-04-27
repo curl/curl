@@ -100,7 +100,7 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
   pat->globindex = globindex;
 
   while(!done) {
-    switch (*pattern) {
+    switch(*pattern) {
     case '\0':                  /* URL ended while set was still open */
       return GLOBERROR("unmatched brace", opos, CURLE_URL_MALFORMAT);
 
@@ -411,7 +411,7 @@ static CURLcode glob_parse(struct URLGlob *glob, char *pattern,
       res = glob_fixed(glob, glob->glob_buffer, sublen);
     }
     else {
-      switch (*pattern) {
+      switch(*pattern) {
       case '\0': /* done  */
         break;
 
