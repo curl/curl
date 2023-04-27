@@ -4,7 +4,7 @@ curl and libcurl 8.1.0
  Command line options:         251
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2859
+ Contributors:                 2863
 
 This release includes the following changes:
 
@@ -22,6 +22,8 @@ This release includes the following bugfixes:
  o cf-socket: add socket recv buffering for most tcp cases [90]
  o cf-socket: Disable socket receive buffer by default [75]
  o cf-socket: remove dead code discovered by PVS [82]
+ o cf-socket: turn off IPV6_V6ONLY on Windows if it is supported [123]
+ o checksrc: fix SPACEBEFOREPAREN for conditions starting with "*" [115]
  o CI: fix brew retries on GHA
  o CI: skip Azure for commits which change only GHA
  o cmake: bring in the network library on Haiku [9]
@@ -41,13 +43,16 @@ This release includes the following bugfixes:
  o curl: do NOT append file name to path for upload when there's a query [58]
  o curl_easy_getinfo.3: typo fix (duplicated "from the") [43]
  o curl_easy_unescape.3: rename the argument [113]
+ o curl_path: bring back support for SFTP path ending in /~ [130]
  o curl_url_set.3: mention that users can set content rather freely [105]
  o data.d: emphasize no conversion [5]
  o digest: clear target buffer [8]
  o doc: curl_mime_init() strong easy binding was relaxed in 7.87.0 [26]
  o docs/cmdline-opts: document the dotless config path [1]
  o docs/examples/protofeats.c: outputs all protocols and features [110]
+ o docs/libcurl/curl_*escape.3: rename "url" argument to "input"/"string" [131]
  o docs: bump the minimum perl version to 5.6
+ o docs: clarify that more backends have HTTPS proxy support [127]
  o dynbuf: never allocate larger than "toobig" [17]
  o ftp: fix 'portsock' variable was assigned the same value [78]
  o ftp: remove dead code [79]
@@ -61,14 +66,22 @@ This release includes the following bugfixes:
  o GHA: suppress git clone output [89]
  o GHA: update ngtcp2-*.yml to v0.10.0 [21]
  o gskit: various compile errors in OS400 [12]
+ o h2/h3: replace `state.drain` counter with `state.dselect_bits` [141]
  o hash: fix assigning same value [73]
+ o hostcheck: fix host name wildcard checking [134]
+ o hostip: add locks around use of global buffer for alarm() [129]
  o hostip: refuse to resolve the .onion TLD [19]
  o HTTP-COOKIES.md: mention the #HttpOnly_ prefix [16]
+ o http2: always EXPIRE_RUN_NOW unpaused http/2 transfers [139]
+ o http2: enlarge the connection window [101]
  o http2: flow control and buffer improvements [54]
  o http2: move HTTP/2 stream vars into local context [67]
+ o http2: pass `stream` to http2_handle_stream_close to avoid NULL checks [140]
  o http2: remove unused Curl_http2_strerror function declaration [108]
  o HTTP3/quiche: terminate h1 response header when no body is sent [112]
  o http3: check stream_ctx more thoroughly in all backends [77]
+ o HTTP3: document the ngtcp2/nghttp3 versions to use for building curl [143]
+ o http3: expire unpaused transfers in all HTTP/3 backends [138]
  o http3: improvements across backends [51]
  o http: skip a double NULL assign [83]
  o KNOWN_BUGS: remove fixed or outdated issues, move non-bugs [65]
@@ -77,7 +90,11 @@ This release includes the following bugfixes:
  o lib1560: verify that more bad host names are rejected [104]
  o lib: add `bufq` and `dynhds` [34]
  o lib: remove CURLX_NO_MEMORY_CALLBACKS [55]
+ o lib: unify the upload/method handling [144]
  o lib: use correct printf flags for sockets and timediffs [36]
+ o libssh2: fix crash in keyboard callback [126]
+ o libssh: tell it to use SFTP non-blocking [59]
+ o man pages: simplify the .TH sections [133]
  o mime: skip NULL assigns after Curl_safefree() [84]
  o multi: add handle asserts in DEBUG builds [11]
  o multi: free up more data earleier in DONE [118]
@@ -107,6 +124,8 @@ This release includes the following bugfixes:
  o schannel: add clarifying comment [98]
  o server/getpart: clear target buffer before load [6]
  o smb: remove double assign [86]
+ o smbserver: remove temporary files before exit [135]
+ o socketpair: verify with a random value [142]
  o telnet: simplify the implementation of str_is_nonascii() [42]
  o test1169: fix so it works properly everywhere [106]
  o test1592: add flaky keyword [39]
@@ -114,7 +133,9 @@ This release includes the following bugfixes:
  o test303: kill server after test
  o tests/http: add timeout to running curl in test cases [24]
  o tests/http: fix log formatting on wrong exit code [27]
+ o tests/http: fix out-of-tree builds [121]
  o tests/http: improved httpd detection [45]
+ o tests/http: more tests with specific clients [125]
  o tests/http: relax connection check in test_07_02 [53]
  o tests/keywords.pl: remove [111]
  o tests/libtest/lib1900.c: remove
@@ -140,8 +161,11 @@ This release includes the following bugfixes:
  o urlapi: prevent setting invalid schemes with *url_set() [107]
  o urlapi: skip a pointless assign [88]
  o urlapi: URL encoding for the URL missed the fragment [29]
+ o urldata: copy CURLOPT_AWS_SIGV4 value on handle duplication [137]
+ o urldata: shrink *select_bits int => unsigned char [124]
  o vlts: use full buffer size when receiving data if possible [32]
  o vtls and h2 improvements [69]
+ o Websocket: enhanced en-/decoding [136]
  o wolfssl.yml: bump to version 5.6.0 [44]
  o ws: handle reads before EAGAIN better [38]
 
@@ -161,17 +185,18 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Ali Khodkar, Andreas Falkenhahn, Andy Alt, Arne Soete, Ben Fritz,
-  Biswapriyo Nath, Brian Lund, Chloe Kudryavtsev, Colman Mbuya, Dan Fandrich,
-  Dan Frandrich, Daniel Stenberg, dengjfzh on github, Dirk Rosenkranz,
-  Douglas R. Reno, eaglegai on github, Emil Engler, Frank Gevaerts,
-  Gisle Vanem, Harry Sintonen, Jakub Zakrzewski, Jim King, Jon Rumsey,
-  Josh McCullough, Kai Pastor, Kamil Dudka, Kvarec Lezki, kwind on github,
-  Marcel Raad, Matt Jolly, Micah Snyder), Osaila on github, Patrick Monnerat,
-  Paul Howarth, Paweł Wegner, Philip Heiduck, Ray Satiro, Ronan Pigott,
+  Ali Khodkar, Andreas Falkenhahn, Andreas Huebner, Andy Alt, Arne Soete,
+  Ben Fritz, Biswapriyo Nath, Boris Kuschel, Brian Lund, Chloe Kudryavtsev,
+  Colman Mbuya, Dan Fandrich, Dan Frandrich, Daniel Stenberg,
+  dengjfzh on github, Dirk Rosenkranz, Douglas R. Reno, eaglegai on github,
+  Emanuele Torre, Emil Engler, Frank Gevaerts, Gisle Vanem, Harry Sintonen,
+  Hiroki Kurosawa, Jakub Zakrzewski, Jim King, Jon Rumsey, Josh McCullough,
+  Kai Pastor, Kamil Dudka, Kvarec Lezki, kwind on github, Marcel Raad,
+  Matt Jolly, Micah Snyder), Osaila on github, Patrick Monnerat, Paul Howarth,
+  Pavel Mayorov, Paweł Wegner, Philip Heiduck, Ray Satiro, Ronan Pigott,
   Sevan Janiyan, simplerobot on github, Stefan Eissing, SuperIlu on github,
-  Viktor Szakats
-  (43 contributors)
+  Viktor Szakats, YX Hao
+  (49 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -233,6 +258,7 @@ References to bug reports and discussions on issues:
  [56] = https://curl.se/bug/?i=10861
  [57] = https://curl.se/bug/?i=10900
  [58] = https://curl.se/mail/archive-2023-04/0008.html
+ [59] = https://curl.se/bug/?i=11020
  [60] = https://curl.se/bug/?i=10995
  [61] = https://curl.se/bug/?i=10899
  [62] = https://curl.se/bug/?i=10926
@@ -274,6 +300,7 @@ References to bug reports and discussions on issues:
  [98] = https://curl.se/bug/?i=10931
  [99] = https://curl.se/bug/?i=10930
  [100] = https://curl.se/bug/?i=10994
+ [101] = https://curl.se/bug/?i=10988
  [102] = https://curl.se/bug/?i=10925
  [103] = https://curl.se/bug/?i=10983
  [104] = https://curl.se/bug/?i=10922
@@ -287,6 +314,28 @@ References to bug reports and discussions on issues:
  [112] = https://curl.se/bug/?i=11003
  [113] = https://curl.se/bug/?i=10979
  [114] = https://curl.se/bug/?i=10974
+ [115] = https://curl.se/bug/?i=11044
  [116] = https://curl.se/bug/?i=10973
  [117] = https://curl.se/bug/?i=11010
  [118] = https://curl.se/bug/?i=10971
+ [121] = https://curl.se/bug/?i=11036
+ [123] = https://curl.se/bug/?i=10975
+ [124] = https://curl.se/bug/?i=11025
+ [125] = https://curl.se/bug/?i=11006
+ [126] = https://curl.se/bug/?i=11024
+ [127] = https://curl.se/bug/?i=11033
+ [129] = https://curl.se/bug/?i=11030
+ [130] = https://curl.se/bug/?i=11001
+ [131] = https://curl.se/bug/?i=11027
+ [133] = https://curl.se/bug/?i=11029
+ [134] = https://curl.se/bug/?i=11018
+ [135] = https://curl.se/bug/?i=10990
+ [136] = https://curl.se/bug/?i=10962
+ [137] = https://curl.se/bug/?i=11021
+ [138] = https://curl.se/bug/?i=11005
+ [139] = https://curl.se/bug/?i=11005
+ [140] = https://curl.se/bug/?i=11005
+ [141] = https://curl.se/bug/?i=11005
+ [142] = https://curl.se/bug/?i=10993
+ [143] = https://curl.se/bug/?i=11019
+ [144] = https://curl.se/bug/?i=11017
