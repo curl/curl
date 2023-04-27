@@ -3180,6 +3180,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   struct Curl_easy *data = NULL;
   struct Curl_tree *t;
   struct curltime now = Curl_now();
+  SIGPIPE_VARIABLE(pipe_st);
+  bool first = FALSE;
+  bool nosig = FALSE;
 
   if(checkall) {
     /* *perform() deals with running_handles on its own */
@@ -3254,18 +3257,23 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   do {
     /* the first loop lap 'data' can be NULL */
     if(data) {
-      SIGPIPE_VARIABLE(pipe_st);
-
-      sigpipe_ignore(data, &pipe_st);
+      if(!first) {
+        first = TRUE;
+        nosig = data->set.no_signal;
+        sigpipe_restore(&pipe_st);
+      }
+      else if(data->set.no_signal != nosig) {
+        sigpipe_restore(&pipe_st);
+        sigpipe_ignore(data, &pipe_st);
+      }
       result = multi_runsingle(multi, &now, data);
-      sigpipe_restore(&pipe_st);
 
       if(CURLM_OK >= result) {
         /* get the socket(s) and check if the state has been changed since
            last */
         result = singlesocket(multi, data);
         if(result)
-          return result;
+          break;
       }
     }
 
@@ -3279,6 +3287,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     }
 
   } while(t);
+  if(first)
+    sigpipe_restore(&pipe_st);
 
   *running_handles = multi->num_alive;
   return result;
