@@ -1597,7 +1597,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         MOVE_TO_SFTP_CLOSE_STATE();
         break;
       }
-
+      sftp_file_set_nonblocking(sshc->sftp_file);
       state(data, SSH_SFTP_DOWNLOAD_STAT);
       break;
 
