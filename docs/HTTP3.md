@@ -275,7 +275,7 @@ The `happy-eyeballs-timeout-ms` value is the **hard** timeout, meaning after tha
 
 So, without you specifying anything, the hard timeout is 200ms and the soft is 100ms:
 
- * Ideally, the whole QUIC handshake happens and curl has a HTTP/3 connection in less than 100ms. 
+ * Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection in less than 100ms.
  * When QUIC is not supported (or UDP does not work for this network path), no reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
  * In the worst case, UDP replies start before 100ms, but drag on. This will start the TLS+TCP connection after 200ms.
  * When the QUIC handshake fails, the TLS+TCP connection is attempted right away. For example, when the QUIC server presents the wrong certificate.
@@ -300,8 +300,8 @@ ones. You can easily create huge local files like `truncate -s=8G 8GB` - they
 are huge but do not occupy that much space on disk since they are just big
 holes.
 
-In my Debian setup I just installed **apache2**. It runs on port 80 and has a
-document root in `/var/www/html`. I can get the 8GB file from it with `curl
+In a Debian setup you can install **apache2**. It runs on port 80 and has a
+document root in `/var/www/html`. Download the 8GB file from apache with `curl
 localhost/8GB -o dev/null`
 
 In this description we setup and run an HTTP/3 reverse-proxy in front of the

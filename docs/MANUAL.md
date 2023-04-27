@@ -786,17 +786,15 @@ by default.
 Default protocol version used by curl is LDAP version 3. Version 2 will be
 used as a fallback mechanism in case version 3 fails to connect.
 
-LDAP is a complex thing and writing an LDAP query is not an easy task. I do
-advise you to dig up the syntax description for that elsewhere. One such place
-might be: [RFC 2255, The LDAP URL Format](https://curl.se/rfc/rfc2255.txt)
+LDAP is a complex thing and writing an LDAP query is not an easy
+task. Familiarize yourself with the exact syntax description elsewhere. One
+such place might be: [RFC 2255, The LDAP URL
+Format](https://curl.se/rfc/rfc2255.txt)
 
-To show you an example, this is how I can get all people from my local LDAP
-server that has a certain sub-domain in their email address:
+To show you an example, this is how to get all people from an LDAP server that
+has a certain sub-domain in their email address:
 
     curl -B "ldap://ldap.frontec.se/o=frontec??sub?mail=*sth.frontec.se"
-
-If I want the same info in HTML format, I can get it by not using the `-B`
-(enforce ASCII) flag.
 
 You also can use authentication when accessing LDAP catalog:
 
