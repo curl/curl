@@ -64,7 +64,7 @@ resolution screens:
    newspapers have used columns for decades or centuries.
 
 2. Narrower columns allow developers to easier show multiple pieces of code
-   next to each other in different windows. I often have two or three source
+   next to each other in different windows. It allows two or three source
    code windows next to each other on the same screen - as well as multiple
    terminal and debugging windows.
 
