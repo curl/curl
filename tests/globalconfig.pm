@@ -44,14 +44,13 @@ BEGIN {
         $listonly
         $LOGDIR
         $memanalyze
-        $memdump
+        $MEMDUMP
         $perl
         $PIDDIR
         $proxy_address
         $PROXYIN
         $pwd
         $run_event_based
-        $SERVER2IN
         $SERVERIN
         $srcdir
         $TESTDIR
@@ -87,15 +86,6 @@ our $pwd = getcwd();  # current working directory
 our $srcdir = $ENV{'srcdir'} || '.';  # root of the test source code
 our $perl="perl -I$srcdir"; # invoke perl like this
 our $LOGDIR="log";  # root of the log directory
-# TODO: $LOGDIR could eventually change later on, so must regenerate all the
-# paths depending on it after $LOGDIR itself changes.
-our $PIDDIR = "$LOGDIR/server";  # root of the server directory with PID files
-# TODO: change this to use server_inputfilename()
-our $SERVERIN="$LOGDIR/server.input";    # what curl sent the server
-our $SERVER2IN="$LOGDIR/server2.input";  # what curl sent the second server
-our $PROXYIN="$LOGDIR/proxy.input";      # what curl sent the proxy
-our $memdump="$LOGDIR/memdump";  # file that the memory debugging creates
-our $FTPDCMD="$LOGDIR/ftpserver.cmd";    # copy server instructions here
 our $LIBDIR="./libtest";
 our $TESTDIR="$srcdir/data";
 our $CURL="../src/curl".exe_ext('TOOL'); # what curl binary to run on the tests
@@ -105,6 +95,13 @@ our $VCURL=$CURL;  # what curl binary to use to verify the servers with
 # the path to the script that analyzes the memory debug output file
 our $memanalyze="$perl $srcdir/memanalyze.pl";
 our $valgrind;     # path to valgrind, or empty if disabled
+
+# paths in $LOGDIR
+our $PIDDIR = "server";         # root of the server directory with PID files
+our $SERVERIN="server.input";   # what curl sent the server
+our $PROXYIN="proxy.input";     # what curl sent the proxy
+our $MEMDUMP="memdump";         # file that the memory debugging creates
+our $FTPDCMD="ftpserver.cmd";   # copy server instructions here
 
 # other config variables
 our @protocols;   # array of lowercase supported protocol servers
