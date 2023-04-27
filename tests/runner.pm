@@ -40,7 +40,8 @@ BEGIN {
         runner_stopservers
         runner_test_preprocess
         runner_test_run
-        setlogfunc
+        stderrfilename
+        stdoutfilename
         $DBGCURL
         $gdb
         $gdbthis
@@ -104,6 +105,17 @@ my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
 my $defserverlogslocktimeout = 2; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 
+
+# redirected stdout/stderr to these files
+sub stdoutfilename {
+    my ($logdir, $testnum)=@_;
+    return "$logdir/stdout$testnum";
+}
+
+sub stderrfilename {
+    my ($logdir, $testnum)=@_;
+    return "$logdir/stderr$testnum";
+}
 
 #######################################################################
 # Check for a command in the PATH of the machine running curl.
@@ -618,10 +630,6 @@ sub singletest_run {
         }
     }
 
-    # redirected stdout/stderr to these files
-    $STDOUT="$LOGDIR/stdout$testnum";
-    $STDERR="$LOGDIR/stderr$testnum";
-
     my @codepieces = getpart("client", "tool");
     my $tool="";
     if(@codepieces) {
@@ -675,7 +683,7 @@ sub singletest_run {
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
-        $CURLOUT = $STDOUT; # sends received data to stdout
+        $CURLOUT = stdoutfilename($LOGDIR, $testnum); # sends received data to stdout
 
         # Default the tool to a unit test with the same name as the test spec
         if($keywords{"unittest"} && !$tool) {
@@ -739,7 +747,8 @@ sub singletest_run {
         $CMDLINE = "$valgrindcmd $CMDLINE";
     }
 
-    $CMDLINE .= "$cmdargs >$STDOUT 2>$STDERR";
+    $CMDLINE .= "$cmdargs > " . stdoutfilename($LOGDIR, $testnum) .
+                " 2> " . stderrfilename($LOGDIR, $testnum);
 
     if($verbose) {
         logmsg "$CMDLINE\n";
