@@ -160,6 +160,9 @@ static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
   }
 }
 
+static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data);
+
 /**
  * All about the H3 internals of a stream
  */
@@ -271,6 +274,16 @@ static void http2_data_done(struct Curl_cfilter *cf,
       if(!nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
                                     stream->id, NGHTTP2_STREAM_CLOSED))
         (void)nghttp2_session_send(ctx->h2);
+    }
+    if(!Curl_bufq_is_empty(&stream->recvbuf)) {
+      /* Anything in the recvbuf is still being counted
+       * in stream and connection window flow control. Need
+       * to free that space or the connection window might get
+       * exhausted eventually. */
+      nghttp2_session_consume(ctx->h2, stream->id,
+                              Curl_bufq_len(&stream->recvbuf));
+      /* give WINDOW_UPATE a chance to be sent */
+      h2_progress_egress(cf, data);
     }
 
     /* -1 means unassigned and 0 means cleared */
@@ -1825,7 +1838,7 @@ out:
                   ctx->h2, stream->id),
                 nghttp2_session_get_stream_effective_local_window_size(
                   ctx->h2, stream->id),
-                nghttp2_session_get_effective_local_window_size(ctx->h2),
+                nghttp2_session_get_local_window_size(ctx->h2),
                 HTTP2_HUGE_WINDOW_SIZE));
 
   CF_DATA_RESTORE(cf, save);

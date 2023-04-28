@@ -89,12 +89,13 @@ struct transfer {
   FILE *out;
   curl_off_t recv_size;
   curl_off_t pause_at;
+  int started;
   int paused;
   int resumed;
   int done;
 };
 
-static size_t transfer_count;
+static size_t transfer_count = 1;
 static struct transfer *transfers;
 
 static struct transfer *get_transfer_for_easy(CURL *easy)
@@ -116,7 +117,7 @@ static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
   if(!t->resumed &&
      t->recv_size < t->pause_at &&
      ((curl_off_t)(t->recv_size + (nitems * buflen)) >= t->pause_at)) {
-    fprintf(stderr, "transfer %d: PAUSE\n", t->idx);
+    fprintf(stderr, "[t-%d] PAUSE\n", t->idx);
     t->paused = 1;
     return CURL_WRITEFUNC_PAUSE;
   }
@@ -131,7 +132,7 @@ static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
 
   nwritten = fwrite(buf, nitems, buflen, t->out);
   if(nwritten < 0) {
-    fprintf(stderr, "transfer %d: write failure\n", t->idx);
+    fprintf(stderr, "[t-%d] write failure\n", t->idx);
     return 0;
   }
   t->recv_size += nwritten;
@@ -161,27 +162,69 @@ static int setup(CURL *hnd, const char *url, struct transfer *t)
   return 0; /* all is good */
 }
 
+static void usage(const char *msg)
+{
+  if(msg)
+    fprintf(stderr, "%s\n", msg);
+  fprintf(stderr,
+    "usage: [options] url\n"
+    "  download a url with following options:\n"
+    "  -m number  max parallel downloads\n"
+    "  -n number  total downloads\n"
+    "  -p number  pause transfer after `number` response bytes\n"
+    "  -C number  cancel a transfer with probability (0-100)\n"
+  );
+}
+
 /*
  * Download a file over HTTP/2, take care of server push.
  */
 int main(int argc, char *argv[])
 {
   CURLM *multi_handle;
-  int active_transfers;
   struct CURLMsg *m;
   const char *url;
-  size_t i;
-  long pause_offset;
+  size_t i, n;
+  int active_transfers, cancel_prob = 0, max_parallel = 1;
+  long pause_offset = 0;
+  int abort_paused = 0;
   struct transfer *t;
+  int ch;
 
-  if(argc != 4) {
-    fprintf(stderr, "usage: h2-download count pause-offset url\n");
+  while((ch = getopt(argc, argv, "ahm:n:P:C:")) != -1) {
+    switch(ch) {
+    case 'h':
+      usage(NULL);
+      return 2;
+      break;
+    case 'a':
+      abort_paused = 1;
+      break;
+    case 'm':
+      max_parallel = (int)strtol(optarg, NULL, 10);
+      break;
+    case 'n':
+      transfer_count = (size_t)strtol(optarg, NULL, 10);
+      break;
+    case 'P':
+      pause_offset = strtol(optarg, NULL, 10);
+      break;
+    case 'C':
+      cancel_prob = (int)strtol(optarg, NULL, 10);
+      break;
+    default:
+     usage("invalid option");
+     return 1;
+    }
+  }
+  argc -= optind;
+  argv += optind;
+
+  if(argc != 1) {
+    usage("not enough arguments");
     return 2;
   }
-
-  transfer_count = (size_t)strtol(argv[1], NULL, 10);
-  pause_offset = strtol(argv[2], NULL, 10);
-  url = argv[3];
+  url = argv[0];
 
   transfers = calloc(transfer_count, sizeof(*transfers));
   if(!transfers) {
@@ -197,13 +240,20 @@ int main(int argc, char *argv[])
     t = &transfers[i];
     t->idx = (int)i;
     t->pause_at = (curl_off_t)pause_offset * i;
+  }
+
+  n = (max_parallel < transfer_count)? max_parallel : transfer_count;
+  for(i = 0; i < n; ++i) {
+    t = &transfers[i];
     t->easy = curl_easy_init();
     if(!t->easy || setup(t->easy, url, t)) {
-      fprintf(stderr, "setup of transfer #%d failed\n", (int)i);
+      fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
       return 1;
     }
     curl_multi_add_handle(multi_handle, t->easy);
+    t->started = 1;
     ++active_transfers;
+    fprintf(stderr, "[t-%d] STARTED\n", t->idx);
   }
 
   do {
@@ -219,11 +269,6 @@ int main(int argc, char *argv[])
     if(mc)
       break;
 
-    /*
-     * A little caution when doing server push is that libcurl itself has
-     * created and added one or more easy handles but we need to clean them up
-     * when we are done.
-     */
     do {
       int msgq = 0;
       m = curl_multi_info_read(multi_handle, &msgq);
@@ -239,18 +284,53 @@ int main(int argc, char *argv[])
           curl_easy_cleanup(e);
       }
       else {
-        /* nothing happending, resume one paused transfer if there is one */
-        for(i = 0; i < transfer_count; ++i) {
-          t = &transfers[i];
-          if(!t->done && t->paused) {
-            t->resumed = 1;
-            t->paused = 0;
-            curl_easy_pause(t->easy, CURLPAUSE_CONT);
-            fprintf(stderr, "transfer %d: RESUME\n", t->idx);
-            break;
+        /* nothing happening, maintenance */
+        if(abort_paused) {
+          /* abort paused transfers */
+          for(i = 0; i < transfer_count; ++i) {
+            t = &transfers[i];
+            if(!t->done && t->paused && t->easy) {
+              curl_multi_remove_handle(multi_handle, t->easy);
+              t->done = 1;
+              active_transfers--;
+              fprintf(stderr, "[t-%d] ABORTED\n", t->idx);
+            }
+          }
+        }
+        else {
+          /* resume one paused transfer */
+          for(i = 0; i < transfer_count; ++i) {
+            t = &transfers[i];
+            if(!t->done && t->paused) {
+              t->resumed = 1;
+              t->paused = 0;
+              curl_easy_pause(t->easy, CURLPAUSE_CONT);
+              fprintf(stderr, "[t-%d] RESUMED\n", t->idx);
+              break;
+            }
           }
         }
 
+        while(active_transfers < max_parallel) {
+          for(i = 0; i < transfer_count; ++i) {
+            t = &transfers[i];
+            if(!t->started) {
+              t->easy = curl_easy_init();
+              if(!t->easy || setup(t->easy, url, t)) {
+                fprintf(stderr, "[t-%d] FAILEED setup\n", (int)i);
+                return 1;
+              }
+              curl_multi_add_handle(multi_handle, t->easy);
+              t->started = 1;
+              ++active_transfers;
+              fprintf(stderr, "[t-%d] STARTED\n", t->idx);
+              break;
+            }
+          }
+          /* all started */
+          if(i == transfer_count)
+            break;
+        }
       }
     } while(m);
 

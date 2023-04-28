@@ -281,25 +281,65 @@ class TestDownload:
         assert httpd.stop()
         assert httpd.start()
 
-    # download via lib client, pause/resume at different offsets
+    # download via lib client, 1 at a time, pause/resume at different offsets
     @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
-    def test_02_21_h2_lib_download(self, env: Env, httpd, nghttpx, pause_offset, repeat):
+    def test_02_21_h2_lib_serial(self, env: Env, httpd, nghttpx, pause_offset, repeat):
         count = 10
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='h2-download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        r = client.run(args=[str(count), str(pause_offset), url])
+        r = client.run(args=[
+             '-n', f'{count}', '-P', f'{pause_offset}', url
+        ])
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
 
-    def check_downloads(self, client, srcfile: str, count: int):
+    # download via lib client, several at a time, pause/resume
+    @pytest.mark.parametrize("pause_offset", [100*1023])
+    def test_02_22_h2_lib_parallel_resume(self, env: Env, httpd, nghttpx, pause_offset, repeat):
+        count = 10
+        max_parallel = 5
+        docname = 'data-10m'
+        url = f'https://localhost:{env.https_port}/{docname}'
+        client = LocalClient(name='h2-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+            '-n', f'{count}', '-m', f'{max_parallel}',
+            '-P', f'{pause_offset}', url
+        ])
+        r.check_exit_code(0)
+        srcfile = os.path.join(httpd.docs_dir, docname)
+        self.check_downloads(client, srcfile, count)
+
+    # download, several at a time, pause and abort paused
+    @pytest.mark.parametrize("pause_offset", [100*1023])
+    def test_02_23_h2_lib_parallel_abort(self, env: Env, httpd, nghttpx, pause_offset, repeat):
+        count = 200
+        max_parallel = 100
+        docname = 'data-10m'
+        url = f'https://localhost:{env.https_port}/{docname}'
+        client = LocalClient(name='h2-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+            '-n', f'{count}', '-m', f'{max_parallel}', '-a',
+            '-P', f'{pause_offset}', url
+        ])
+        r.check_exit_code(0)
+        srcfile = os.path.join(httpd.docs_dir, docname)
+        # downloads should be there, but not necessarily complete
+        self.check_downloads(client, srcfile, count, complete=False)
+
+    def check_downloads(self, client, srcfile: str, count: int,
+                        complete: bool = True):
         for i in range(count):
             dfile = client.download_file(i)
             assert os.path.exists(dfile)
-            if not filecmp.cmp(srcfile, dfile, shallow=False):
+            if complete and not filecmp.cmp(srcfile, dfile, shallow=False):
                 diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
                                                     b=open(dfile).readlines(),
                                                     fromfile=srcfile,
