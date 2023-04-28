@@ -211,7 +211,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
   data_sec = conn->data_prot;
   DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
-  conn->data_prot = data_sec;
+  conn->data_prot = (unsigned char)data_sec;
 #endif
 
   Curl_debug(data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
@@ -316,7 +316,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
                          &gotbytes);
 #ifdef HAVE_GSSAPI
       DEBUGASSERT(prot  > PROT_NONE && prot < PROT_LAST);
-      conn->data_prot = prot;
+      conn->data_prot = (unsigned char)prot;
 #endif
       if(result == CURLE_AGAIN)
         return CURLE_OK; /* return */
