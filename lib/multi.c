@@ -3260,7 +3260,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       if(!first) {
         first = TRUE;
         nosig = data->set.no_signal;
-        sigpipe_restore(&pipe_st);
+        sigpipe_ignore(data, &pipe_st);
       }
       else if(data->set.no_signal != nosig) {
         sigpipe_restore(&pipe_st);
