@@ -42,11 +42,14 @@ concurrency:
   group: ngtcp2-openssl-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   autotools:
     name: ${{ matrix.build.name }}
     runs-on: 'ubuntu-latest'
     timeout-minutes: 60
+    permissions: read-all
     strategy:
       fail-fast: false
       matrix:
