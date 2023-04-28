@@ -49,7 +49,6 @@ jobs:
     name: ${{ matrix.build.name }}
     runs-on: 'ubuntu-latest'
     timeout-minutes: 60
-    permissions: read-all
     strategy:
       fail-fast: false
       matrix:
