@@ -765,6 +765,32 @@ sub scanfile {
             }
         }
 
+        # if the previous line starts with if/while/for AND ends with a closed
+        # parenthesis and there's an equal number of open and closed
+        # parentheses, check that this line is indented $indent more steps, if
+        # not a cpp line
+        elsif(!$prevp && ($prevl =~ /^( *)(if|while|for)(\(.*\))\z/)) {
+            my $first = length($1);
+            my $op = $3;
+            my $cl = $3;
+
+            $op =~ s/[^(]//g;
+            $cl =~ s/[^)]//g;
+
+            if(length($op) == length($cl)) {
+                # this line has some character besides spaces
+                if($l =~ /^( *)[^ ]/) {
+                    my $second = length($1);
+                    my $expect = $first+$indent;
+                    if($expect != $second) {
+                        my $diff = $second - $first;
+                        checkwarn("INDENTATION", $line, length($1), $file, $ol,
+                                  "not indented $indent steps (uses $diff)");
+                    }
+                }
+            }
+        }
+
         # check for 'char * name'
         if(($l =~ /(^.*(char|int|long|void|CURL|CURLM|CURLMsg|[cC]url_[A-Za-z_]+|struct [a-zA-Z_]+) *(\*+)) (\w+)/) && ($4 !~ /^(const|volatile)$/)) {
             checkwarn("ASTERISKSPACE",

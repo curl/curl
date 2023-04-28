@@ -1107,7 +1107,7 @@ static int mime_subparts_seek(void *instream, curl_off_t offset, int whence)
     return CURL_SEEKFUNC_CANTSEEK;    /* Only support full rewind. */
 
   if(mime->state.state == MIMESTATE_BEGIN)
-   return CURL_SEEKFUNC_OK;           /* Already rewound. */
+    return CURL_SEEKFUNC_OK;           /* Already rewound. */
 
   for(part = mime->firstpart; part; part = part->nextpart) {
     int res = mime_part_rewind(part);
@@ -1734,7 +1734,7 @@ const char *Curl_mime_contenttype(const char *filename)
       size_t len2 = strlen(ctts[i].extension);
 
       if(len1 >= len2 && strcasecompare(nameend - len2, ctts[i].extension))
-          return ctts[i].type;
+        return ctts[i].type;
     }
   }
   return NULL;

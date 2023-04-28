@@ -542,7 +542,7 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(nread < 0)
       goto out;
     if(stream->closed)
-       drain_stream(cf, data);
+      drain_stream(cf, data);
   }
   else if(stream->closed) {
     nread = recv_closed_stream(cf, data, err);
