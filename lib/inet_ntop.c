@@ -164,7 +164,7 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
   /* Was it a trailing run of 0x00's?
    */
   if(best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ))
-     *tp++ = ':';
+    *tp++ = ':';
   *tp++ = '\0';
 
   /* Check for overflow, copy, and we're done.
