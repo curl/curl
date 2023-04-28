@@ -172,7 +172,6 @@ static void usage(const char *msg)
     "  -m number  max parallel downloads\n"
     "  -n number  total downloads\n"
     "  -p number  pause transfer after `number` response bytes\n"
-    "  -C number  cancel a transfer with probability (0-100)\n"
   );
 }
 
@@ -184,14 +183,14 @@ int main(int argc, char *argv[])
   CURLM *multi_handle;
   struct CURLMsg *m;
   const char *url;
-  size_t i, n;
-  int active_transfers, cancel_prob = 0, max_parallel = 1;
+  size_t i, n, max_parallel = 1;
+  int active_transfers;
   long pause_offset = 0;
   int abort_paused = 0;
   struct transfer *t;
   int ch;
 
-  while((ch = getopt(argc, argv, "ahm:n:P:C:")) != -1) {
+  while((ch = getopt(argc, argv, "ahm:n:P:")) != -1) {
     switch(ch) {
     case 'h':
       usage(NULL);
@@ -201,16 +200,13 @@ int main(int argc, char *argv[])
       abort_paused = 1;
       break;
     case 'm':
-      max_parallel = (int)strtol(optarg, NULL, 10);
+      max_parallel = (size_t)strtol(optarg, NULL, 10);
       break;
     case 'n':
       transfer_count = (size_t)strtol(optarg, NULL, 10);
       break;
     case 'P':
       pause_offset = strtol(optarg, NULL, 10);
-      break;
-    case 'C':
-      cancel_prob = (int)strtol(optarg, NULL, 10);
       break;
     default:
      usage("invalid option");
