@@ -241,7 +241,7 @@ void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
   dest->addrlen = ai->ai_addrlen;
 
   if(dest->addrlen > sizeof(struct Curl_sockaddr_storage))
-     dest->addrlen = sizeof(struct Curl_sockaddr_storage);
+    dest->addrlen = sizeof(struct Curl_sockaddr_storage);
   memcpy(&dest->sa_addr, ai->ai_addr, dest->addrlen);
 }
 
@@ -1222,7 +1222,7 @@ static bool cf_socket_data_pending(struct Curl_cfilter *cf,
 
   (void)data;
   if(!Curl_bufq_is_empty(&ctx->recvbuf))
-     return TRUE;
+    return TRUE;
 
   readable = SOCKET_READABLE(ctx->sock, 0);
   return (readable > 0 && (readable & CURL_CSELECT_IN));

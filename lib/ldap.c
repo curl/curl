@@ -731,7 +731,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     }
 
     if(ber)
-       ber_free(ber, 0);
+      ber_free(ber, 0);
   }
 
 quit:
@@ -1069,7 +1069,7 @@ static int _ldap_url_parse(struct Curl_easy *data,
 
   *ludpp = NULL;
   if(!ludp)
-     return LDAP_NO_MEMORY;
+    return LDAP_NO_MEMORY;
 
   rc = _ldap_url_parse2(data, conn, ludp);
   if(rc != LDAP_SUCCESS) {

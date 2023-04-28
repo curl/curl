@@ -1548,7 +1548,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
 
     /* Skip separators */
     while(is_separator(*cipher_start))
-       cipher_start++;
+      cipher_start++;
     if(*cipher_start == '\0') {
       break;
     }

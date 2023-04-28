@@ -1710,7 +1710,7 @@ static CURLcode qng_verify_peer(struct Curl_cfilter *cf,
   Curl_conn_get_host(data, cf->sockindex, &hostname, &disp_hostname, &port);
   snihost = Curl_ssl_snihost(data, hostname, NULL);
   if(!snihost)
-      return CURLE_PEER_FAILED_VERIFICATION;
+    return CURLE_PEER_FAILED_VERIFICATION;
 
   cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   cf->conn->httpversion = 30;
