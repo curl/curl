@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
   struct CURLMsg *m;
   const char *url;
   size_t i, n, max_parallel = 1;
-  int active_transfers;
+  size_t active_transfers;
   long pause_offset = 0;
   int abort_paused = 0;
   struct transfer *t;
