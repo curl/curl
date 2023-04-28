@@ -3259,12 +3259,13 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     if(data) {
       if(!first) {
         first = TRUE;
-        nosig = data->set.no_signal;
+        nosig = data->set.no_signal; /* initial state */
         sigpipe_ignore(data, &pipe_st);
       }
       else if(data->set.no_signal != nosig) {
         sigpipe_restore(&pipe_st);
         sigpipe_ignore(data, &pipe_st);
+        nosig = data->set.no_signal; /* remember new state */
       }
       result = multi_runsingle(multi, &now, data);
 
