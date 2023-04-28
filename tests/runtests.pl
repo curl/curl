@@ -1656,6 +1656,8 @@ sub singletest {
     # Print the test name and count tests
     $error = singletest_count($testnum, $why);
     if($error) {
+        # Submit the test case result with the CI environment
+        citest_finishtest($testnum, $error);
         return $error;
     }
 
@@ -1671,17 +1673,24 @@ sub singletest {
     if($error == -1) {
         # no further verification will occur
         $timevrfyend{$testnum} = Time::HiRes::time();
+        my $err = ignoreresultcode($testnum);
+        # Submit the test case result with the CI environment
+        citest_finishtest($testnum, $err);
         # return a test failure, either to be reported or to be ignored
-        return ignoreresultcode($testnum);
+        return $err;
     }
     elsif($error == -2) {
         # fill in the missing timings on error
         timestampskippedevents($testnum);
+        # Submit the test case result with the CI environment
+        citest_finishtest($testnum, $error);
         return $error;
     }
     elsif($error > 0) {
         # no further verification will occur
         $timevrfyend{$testnum} = Time::HiRes::time();
+        # Submit the test case result with the CI environment
+        citest_finishtest($testnum, $error);
         return $error;
     }
 
@@ -1689,13 +1698,18 @@ sub singletest {
     # Verify that the test succeeded
     $error = singletest_check($testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind);
     if($error == -1) {
+        my $err = ignoreresultcode($testnum);
+        # Submit the test case result with the CI environment
+        citest_finishtest($testnum, $err);
         # return a test failure, either to be reported or to be ignored
-        return ignoreresultcode($testnum);
+        return $err;
     }
     elsif($error == -2) {
-      # torture test; there is no verification, so the run result holds the
-      # test success code
-      return $cmdres;
+        # torture test; there is no verification, so the run result holds the
+        # test success code
+        # Submit the test case result with the CI environment
+        citest_finishtest($testnum, $cmdres);
+        return $cmdres;
     }
 
 
@@ -1703,6 +1717,8 @@ sub singletest {
     # Report a successful test
     singletest_success($testnum, $count, $total, ignoreresultcode($testnum));
 
+    # Submit the test case result with the CI environment
+    citest_finishtest($testnum, 0);
 
     return 0;
 }
@@ -2508,9 +2524,6 @@ foreach my $testnum (@runtests) {
 
     # execute one test case
     my $error = singletest($testnum, $count, scalar(@runtests));
-
-    # Submit the test case result with the CI environment
-    citest_finishtest($testnum, $error);
 
     if($error < 0) {
         # not a test we can run
