@@ -150,12 +150,22 @@ my %timetoolini; # timestamp for each test command run starting
 my %timetoolend; # timestamp for each test command run stopping
 my %timesrvrlog; # timestamp for each test server logs lock removal
 my %timevrfyend; # timestamp for each test result verification end
-my $runnerid;    # ID for runner async calls
+my $globalabort; # flag signalling program abort
+
+# values for $singletest_state
+use constant {
+    ST_INIT => 0,
+    ST_CLEARLOCKS => 1,
+    ST_INITED => 2,
+    ST_PREPROCESS => 3,
+    ST_RUN => 4,
+};
+my $singletest_state = ST_INIT; # current state of singletest()
+
 
 #######################################################################
 # variables that command line options may set
 #
-
 my $short;
 my $no_debuginfod;
 my $keepoutfiles; # keep stdout and stderr files after tests
@@ -186,14 +196,7 @@ sub logmsg {
 sub catch_zap {
     my $signame = shift;
     logmsg "runtests.pl received SIG$signame, exiting\n";
-    # TODO: make this set a flag that is checked in the main test loop
-    if($runnerid) {
-        runnerac_stopservers($runnerid);
-        runnerar();  # ignore the results
-        # Kill the runner entirely
-        runnerac_shutdown($runnerid);
-    }
-    die "Somebody sent me a SIG$signame";
+    $globalabort = 1;
 }
 $SIG{INT} = \&catch_zap;
 $SIG{TERM} = \&catch_zap;
@@ -1077,7 +1080,7 @@ sub singletest_count {
 #######################################################################
 # Verify test succeeded
 sub singletest_check {
-    my ($testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind)=@_;
+    my ($runnerid, $testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind)=@_;
 
     # Skip all the verification on torture tests
     if ($torture) {
@@ -1619,118 +1622,153 @@ sub singletest_success {
 
 #######################################################################
 # Run a single specified test case
+# This is structured as a state machine which changes states after an
+# asynchronous call is made that awaits a response. The function returns with
+# an error code and a flag that indicates if the state machine has completed,
+# which means (if not) the function must be called again once the response has
+# arrived.
 #
 sub singletest {
-    my ($testnum, $count, $total)=@_;
+    my ($runnerid, $testnum, $count, $total)=@_;
 
-    my $logdir = getlogdir($testnum);
+    if($singletest_state == ST_INIT) {
+        my $logdir = getlogdir($testnum);
 
-    # first, remove all lingering log files
-    if(!cleardir($logdir) && $clearlocks) {
-        runnerac_clearlocks($runnerid, $logdir);
+        # first, remove all lingering log files
+        if(!cleardir($logdir) && $clearlocks) {
+            runnerac_clearlocks($runnerid, $logdir);
+            $singletest_state = ST_CLEARLOCKS;
+        } else {
+            $singletest_state = ST_INITED;
+            # Recursively call the state machine again because there is no
+            # event expected that would otherwise trigger a new call.
+            return singletest(@_);
+        }
+
+    } elsif($singletest_state == ST_CLEARLOCKS) {
         my ($rid, $logs) = runnerar();
         logmsg $logs;
+        my $logdir = getlogdir($testnum);
         cleardir($logdir);
-    }
+        $singletest_state = ST_INITED;
+        # Recursively call the state machine again because there is no
+        # event expected that would otherwise trigger a new call.
+        return singletest(@_);
 
-    ###################################################################
-    # Restore environment variables that were modified in a previous run.
-    # Test definition may instruct to (un)set environment vars.
-    # This is done this early so that leftover variables don't affect
-    # starting servers or CI registration.
-    restore_test_env(1);
+    } elsif($singletest_state == ST_INITED) {
+        ###################################################################
+        # Restore environment variables that were modified in a previous run.
+        # Test definition may instruct to (un)set environment vars.
+        # This is done this early so that leftover variables don't affect
+        # starting servers or CI registration.
+        restore_test_env(1);
 
-    ###################################################################
-    # Load test file so CI registration can get the right data before the
-    # runner is called
-    loadtest("${TESTDIR}/test${testnum}");
+        ###################################################################
+        # Load test file so CI registration can get the right data before the
+        # runner is called
+        loadtest("${TESTDIR}/test${testnum}");
 
-    ###################################################################
-    # Register the test case with the CI environment
-    citest_starttest($testnum);
+        ###################################################################
+        # Register the test case with the CI environment
+        citest_starttest($testnum);
 
-    runnerac_test_preprocess($runnerid, $testnum);
-    my ($rid, $why, $error, $logs, $testtimings) = runnerar();
-    logmsg $logs;
-    if($error == -2) {
-        if($postmortem) {
-            # Error indicates an actual problem starting the server, so
-            # display the server logs
-            displaylogs($testnum);
+        runnerac_test_preprocess($runnerid, $testnum);
+        $singletest_state = ST_PREPROCESS;
+
+    } elsif($singletest_state == ST_PREPROCESS) {
+        my ($rid, $why, $error, $logs, $testtimings) = runnerar();
+        logmsg $logs;
+        if($error == -2) {
+            if($postmortem) {
+                # Error indicates an actual problem starting the server, so
+                # display the server logs
+                displaylogs($testnum);
+            }
         }
-    }
-    updatetesttimings($testnum, %$testtimings);
+        updatetesttimings($testnum, %$testtimings);
 
-    #######################################################################
-    # Print the test name and count tests
-    $error = singletest_count($testnum, $why);
-    if($error) {
+        #######################################################################
+        # Print the test name and count tests
+        $error = singletest_count($testnum, $why);
+        if($error) {
+            # Submit the test case result with the CI environment
+            citest_finishtest($testnum, $error);
+            $singletest_state = ST_INIT;
+            return ($error, 0);
+        }
+
+        #######################################################################
+        # Execute this test number
+        my $cmdres;
+        my $CURLOUT;
+        my $tool;
+        my $usedvalgrind;
+        runnerac_test_run($runnerid, $testnum);
+        $singletest_state = ST_RUN;
+
+    } elsif($singletest_state == ST_RUN) {
+        my ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar();
+        logmsg $logs;
+        updatetesttimings($testnum, %$testtimings);
+        if($error == -1) {
+            # no further verification will occur
+            $timevrfyend{$testnum} = Time::HiRes::time();
+            my $err = ignoreresultcode($testnum);
+            # Submit the test case result with the CI environment
+            citest_finishtest($testnum, $err);
+            $singletest_state = ST_INIT;
+            # return a test failure, either to be reported or to be ignored
+            return ($err, 0);
+        }
+        elsif($error == -2) {
+            # fill in the missing timings on error
+            timestampskippedevents($testnum);
+            # Submit the test case result with the CI environment
+            citest_finishtest($testnum, $error);
+            $singletest_state = ST_INIT;
+            return ($error, 0);
+        }
+        elsif($error > 0) {
+            # no further verification will occur
+            $timevrfyend{$testnum} = Time::HiRes::time();
+            # Submit the test case result with the CI environment
+            citest_finishtest($testnum, $error);
+            $singletest_state = ST_INIT;
+            return ($error, 0);
+        }
+
+        #######################################################################
+        # Verify that the test succeeded
+        $error = singletest_check($runnerid, $testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind);
+        if($error == -1) {
+            my $err = ignoreresultcode($testnum);
+            # Submit the test case result with the CI environment
+            citest_finishtest($testnum, $err);
+            $singletest_state = ST_INIT;
+            # return a test failure, either to be reported or to be ignored
+            return ($err, 0);
+        }
+        elsif($error == -2) {
+            # torture test; there is no verification, so the run result holds the
+            # test success code
+            # Submit the test case result with the CI environment
+            citest_finishtest($testnum, $cmdres);
+            $singletest_state = ST_INIT;
+            return ($cmdres, 0);
+        }
+
+
+        #######################################################################
+        # Report a successful test
+        singletest_success($testnum, $count, $total, ignoreresultcode($testnum));
+
         # Submit the test case result with the CI environment
-        citest_finishtest($testnum, $error);
-        return $error;
-    }
+        citest_finishtest($testnum, 0);
+        $singletest_state = ST_INIT;
 
-    #######################################################################
-    # Execute this test number
-    my $cmdres;
-    my $CURLOUT;
-    my $tool;
-    my $usedvalgrind;
-    runnerac_test_run($runnerid, $testnum);
-    ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar();
-    logmsg $logs;
-    updatetesttimings($testnum, %$testtimings);
-    if($error == -1) {
-        # no further verification will occur
-        $timevrfyend{$testnum} = Time::HiRes::time();
-        my $err = ignoreresultcode($testnum);
-        # Submit the test case result with the CI environment
-        citest_finishtest($testnum, $err);
-        # return a test failure, either to be reported or to be ignored
-        return $err;
+        return (0, 0);  # state machine is finished
     }
-    elsif($error == -2) {
-        # fill in the missing timings on error
-        timestampskippedevents($testnum);
-        # Submit the test case result with the CI environment
-        citest_finishtest($testnum, $error);
-        return $error;
-    }
-    elsif($error > 0) {
-        # no further verification will occur
-        $timevrfyend{$testnum} = Time::HiRes::time();
-        # Submit the test case result with the CI environment
-        citest_finishtest($testnum, $error);
-        return $error;
-    }
-
-    #######################################################################
-    # Verify that the test succeeded
-    $error = singletest_check($testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind);
-    if($error == -1) {
-        my $err = ignoreresultcode($testnum);
-        # Submit the test case result with the CI environment
-        citest_finishtest($testnum, $err);
-        # return a test failure, either to be reported or to be ignored
-        return $err;
-    }
-    elsif($error == -2) {
-        # torture test; there is no verification, so the run result holds the
-        # test success code
-        # Submit the test case result with the CI environment
-        citest_finishtest($testnum, $cmdres);
-        return $cmdres;
-    }
-
-
-    #######################################################################
-    # Report a successful test
-    singletest_success($testnum, $count, $total, ignoreresultcode($testnum));
-
-    # Submit the test case result with the CI environment
-    citest_finishtest($testnum, 0);
-
-    return 0;
+    return (0, 1);  # state machine must be called again on event
 }
 
 #######################################################################
@@ -2522,48 +2560,77 @@ citest_starttestrun();
 # Initialize the runner to prepare to run tests
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
-$runnerid = runner_init($LOGDIR);
+my $runnerid = runner_init($LOGDIR);
 
 #######################################################################
 # The main test-loop
 #
 # run through each candidate test and execute it
+nexttest:
 foreach my $testnum (@runtests) {
     $count++;
 
-    # execute one test case
-    my $error = singletest($testnum, $count, scalar(@runtests));
+    # Loop over state machine waiting for singletest to complete
+    my $again;
+    while () {
+        # check the abort flag
+        if($globalabort) {
+            logmsg "Aborting tests\n";
+            if($again) {
+                logmsg "Waiting for test to finish...\n";
+                # Wait for the last request to complete and throw it away so
+                # that IPC calls & responses stay in sync
+                # TODO: send a signal to the runner to interrupt a long test
+                runnerar();
+            }
+            last nexttest;
+        }
 
-    if($error < 0) {
-        # not a test we can run
-        next;
-    }
+        # execute one test case
+        my $error;
+        ($error, $again) = singletest($runnerid, $testnum, $count, scalar(@runtests));
+        if($again) {
+            # Wait for asynchronous response
+            if(!runnerar_ready(0.05)) {
+                # TODO: If a response isn't ready, this is a chance to do
+                # something else first
+            }
+            next;  # another iteration of the same singletest
+        }
 
-    $total++; # number of tests we've run
+        # Test has completed
+        if($error < 0) {
+            # not a test we can run
+            next nexttest;
+        }
 
-    if($error>0) {
-        if($error==2) {
-            # ignored test failures
-            $failedign .= "$testnum ";
+        $total++; # number of tests we've run
+
+        if($error>0) {
+            if($error==2) {
+                # ignored test failures
+                $failedign .= "$testnum ";
+            }
+            else {
+                $failed.= "$testnum ";
+            }
+            if($postmortem) {
+                # display all files in $LOGDIR/ in a nice way
+                displaylogs($testnum);
+            }
+            if($error==2) {
+                $ign++; # ignored test result counter
+            }
+            elsif(!$anyway) {
+                # a test failed, abort
+                logmsg "\n - abort tests\n";
+                last;
+            }
         }
-        else {
-            $failed.= "$testnum ";
+        elsif(!$error) {
+            $ok++; # successful test counter
         }
-        if($postmortem) {
-            # display all files in $LOGDIR/ in a nice way
-            displaylogs($testnum);
-        }
-        if($error==2) {
-            $ign++; # ignored test result counter
-        }
-        elsif(!$anyway) {
-            # a test failed, abort
-            logmsg "\n - abort tests\n";
-            last;
-        }
-    }
-    elsif(!$error) {
-        $ok++; # successful test counter
+        next nexttest;
     }
 
     # loop for next test
