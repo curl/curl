@@ -1146,12 +1146,13 @@ sub runnerar {
 
 ###################################################################
 # Returns nonzero if a response from an async call is ready
+# argument is 0 for nonblocking, undef for blocking, anything else for timeout
 # Called by controller
 sub runnerar_ready {
     my ($blocking) = @_;
     my $rin = "";
     vec($rin, fileno($controllerr), 1) = 1;
-    return select(my $rout=$rin, undef, my $eout=$rin, $blocking ? undef : 0);
+    return select(my $rout=$rin, undef, my $eout=$rin, $blocking);
 }
 
 ###################################################################
@@ -1184,7 +1185,7 @@ sub ipcrecv {
     elsif($funcname eq "runner_shutdown") {
         runner_shutdown(@$argsarrayref);
         # Special case: no response
-        return;
+        return 1;
     }
     elsif($funcname eq "runner_stopservers") {
         @res = runner_stopservers(@$argsarrayref);
@@ -1203,6 +1204,8 @@ sub ipcrecv {
     $buf = freeze \@res;
 
     syswrite($runnerw, (pack "L", length($buf)) . $buf);
+
+    return 0;
 }
 
 ###################################################################
