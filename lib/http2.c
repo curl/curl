@@ -282,8 +282,8 @@ static void http2_data_done(struct Curl_cfilter *cf,
        * exhausted eventually. */
       nghttp2_session_consume(ctx->h2, stream->id,
                               Curl_bufq_len(&stream->recvbuf));
-      /* give WINDOW_UPATE a chance to be sent */
-      h2_progress_egress(cf, data);
+      /* give WINDOW_UPATE a chance to be sent, but ignore any error */
+      (void)h2_progress_egress(cf, data);
     }
 
     /* -1 means unassigned and 0 means cleared */
