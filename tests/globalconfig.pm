@@ -85,7 +85,8 @@ our $CURLVERSION="";  # curl's reported version number
 our $pwd = getcwd();  # current working directory
 our $srcdir = $ENV{'srcdir'} || '.';  # root of the test source code
 our $perl="perl -I$srcdir"; # invoke perl like this
-our $LOGDIR="log";  # root of the log directory
+our $LOGDIR="log";  # root of the log directory; this will be different for
+                    # each runner in multiprocess mode
 our $LIBDIR="./libtest";
 our $TESTDIR="$srcdir/data";
 our $CURL="../src/curl".exe_ext('TOOL'); # what curl binary to run on the tests

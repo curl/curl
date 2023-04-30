@@ -174,6 +174,7 @@ my $postmortem;   # display detailed info about failed tests
 my $run_disabled; # run the specific tests even if listed in DISABLED
 my $scrambleorder;
 my $randseed = 0;
+my $jobs = 0;
 
 # Azure Pipelines specific variables
 my $AZURE_RUN_ID = 0;
@@ -748,6 +749,10 @@ sub checksystemfeatures {
             "* System: $hosttype",
             "* OS: $hostos\n");
 
+    if($jobs) {
+        # Only show if not the default for now
+        logmsg "* Jobs: $jobs\n";
+    }
     if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
         logmsg("*\n",
                "*** DISABLES memory tracking when using threaded resolver\n",
@@ -1633,7 +1638,6 @@ sub singletest {
 
     if($singletest_state == ST_INIT) {
         my $logdir = getlogdir($testnum);
-
         # first, remove all lingering log files
         if(!cleardir($logdir) && $clearlocks) {
             runnerac_clearlocks($runnerid, $logdir);
@@ -1661,7 +1665,7 @@ sub singletest {
         # Test definition may instruct to (un)set environment vars.
         # This is done this early so that leftover variables don't affect
         # starting servers or CI registration.
-        restore_test_env(1);
+        # restore_test_env(1);
 
         ###################################################################
         # Load test file so CI registration can get the right data before the
@@ -1686,6 +1690,11 @@ sub singletest {
             }
         }
         updatetesttimings($testnum, %$testtimings);
+
+        #######################################################################
+        # Load test file for this test number
+        my $logdir = getlogdir($testnum);
+        loadtest("${logdir}/test${testnum}");
 
         #######################################################################
         # Print the test name and count tests
@@ -1739,6 +1748,12 @@ sub singletest {
 
         #######################################################################
         # Verify that the test succeeded
+        #
+        # Load test file for this test number
+        my $logdir = getlogdir($testnum);
+        loadtest("${logdir}/test${testnum}");
+        readtestkeywords();
+
         $error = singletest_check($runnerid, $testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind);
         if($error == -1) {
             my $err = ignoreresultcode($testnum);
@@ -2076,6 +2091,14 @@ while(@ARGV) {
         # lists the test case names only
         $listonly=1;
     }
+    elsif($ARGV[0] =~ /^-j(.*)/) {
+        # parallel jobs
+        $jobs=1;
+        my $xtra = $1;
+        if($xtra =~ s/(\d+)$//) {
+            $jobs = $1;
+        }
+    }
     elsif($ARGV[0] eq "-k") {
         # keep stdout and stderr files after tests
         $keepoutfiles=1;
@@ -2133,6 +2156,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -g       run the test case with gdb
   -gw      run the test case with gdb as a windowed application
   -h       this help text
+  -j[N]    spawn this number of processes to run tests (default 0, max. 1)
   -k       keep stdout and stderr files present after tests
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
@@ -2291,8 +2315,10 @@ mkdir($LOGDIR, 0777);
 #
 
 get_disttests();
-# Disable buffered logging for now
-setlogfunc(\&logmsg);
+if(!$jobs) {
+    # Disable buffered logging with only one test job
+    setlogfunc(\&logmsg);
+}
 
 #######################################################################
 # Output curl version and host info being tested
@@ -2560,7 +2586,7 @@ citest_starttestrun();
 # Initialize the runner to prepare to run tests
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
-my $runnerid = runner_init($LOGDIR);
+my $runnerid = runner_init($LOGDIR, $jobs);
 
 #######################################################################
 # The main test-loop
