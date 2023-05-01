@@ -71,13 +71,16 @@ sub githubactions {
                 elsif($r =~ /macos/) {
                     $os = "macos";
                 }
+                elsif($r =~ /windows/) {
+                    $os = "windows";
+                }
 
                 # commit previously counted jobs
                 $c += $j;
                 # non-matrix job
                 $j = 1;
             }
-            elsif($_ =~ /matrix:/) {
+            elsif($_ =~ /^\s*matrix:/) {
                 # switch to matrix mode
                 $m = 0;
                 $j = 0;
@@ -125,7 +128,7 @@ sub githubactions {
                     push @cc, $1;
                     $m++;
                 }
-                elsif($_ =~ /steps:/) {
+                elsif($_ =~ /^\s*steps:/) {
                     # disable matrix mode
                     $m = -1;
                 }
