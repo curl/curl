@@ -1418,7 +1418,10 @@ sub singletest_check {
                 logmsg "ERROR: section verify=>file$partsuffix ".
                        "has no name attribute\n";
                 runnerac_stopservers($runnerid);
-                my ($rid, $unexpected, $logs) = runnerar();
+                # TODO: this is a blocking call that will stall the controller,
+                # but this error condition should never happen except during
+                # development.
+                my ($rid, $unexpected, $logs) = runnerar($runnerid);
                 logmsg $logs;
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
@@ -1650,7 +1653,7 @@ sub singletest {
         }
 
     } elsif($singletest_state == ST_CLEARLOCKS) {
-        my ($rid, $logs) = runnerar();
+        my ($rid, $logs) = runnerar($runnerid);
         logmsg $logs;
         my $logdir = getlogdir($testnum);
         cleardir($logdir);
@@ -1680,7 +1683,7 @@ sub singletest {
         $singletest_state = ST_PREPROCESS;
 
     } elsif($singletest_state == ST_PREPROCESS) {
-        my ($rid, $why, $error, $logs, $testtimings) = runnerar();
+        my ($rid, $why, $error, $logs, $testtimings) = runnerar($runnerid);
         logmsg $logs;
         if($error == -2) {
             if($postmortem) {
@@ -1716,7 +1719,7 @@ sub singletest {
         $singletest_state = ST_RUN;
 
     } elsif($singletest_state == ST_RUN) {
-        my ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar();
+        my ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar($runnerid);
         logmsg $logs;
         updatetesttimings($testnum, %$testtimings);
         if($error == -1) {
@@ -2607,7 +2610,7 @@ foreach my $testnum (@runtests) {
                 # Wait for the last request to complete and throw it away so
                 # that IPC calls & responses stay in sync
                 # TODO: send a signal to the runner to interrupt a long test
-                runnerar();
+                runnerar(runnerar_ready());
             }
             last nexttest;
         }
@@ -2670,7 +2673,7 @@ citest_finishtestrun();
 
 # Tests done, stop the servers
 runnerac_stopservers($runnerid);
-my ($rid, $unexpected, $logs) = runnerar();
+my ($rid, $unexpected, $logs) = runnerar($runnerid);
 logmsg $logs;
 
 # Kill the runner
