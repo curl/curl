@@ -126,12 +126,15 @@ my $CURLLOG="$LOGDIR/commands.log"; # all command lines run
 my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
 my $defserverlogslocktimeout = 2; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
-my $controllerw;    # pipe that controller writes to
+my $multiprocess;   # nonzero with a separate test runner process
+
+# pipes
 my $runnerr;        # pipe that runner reads from
 my $runnerw;        # pipe that runner writes to
-my $controllerr;    # pipe that controller reads from
-my $multiprocess;   # nonzero with a separate test runner process
-my $onerunnerid;    # a single runner ID
+
+# per-runner variables, indexed by runner ID; these are used by controller only
+my %controllerr;    # pipe that controller reads from
+my %controllerw;    # pipe that controller writes to
 
 # redirected stdout/stderr to these files
 sub stdoutfilename {
@@ -165,9 +168,11 @@ sub runner_init {
     $ENV{'COLUMNS'}=79; # screen width!
 
     # create pipes for communication with runner
-    pipe $runnerr, $controllerw;
-    pipe $controllerr, $runnerw;
+    my ($thisrunnerr, $thiscontrollerw, $thiscontrollerr, $thisrunnerw);
+    pipe $thisrunnerr, $thiscontrollerw;
+    pipe $thiscontrollerr, $thisrunnerw;
 
+    my $thisrunnerid;
     if($multiprocess) {
         # Create a separate process in multiprocess mode
         my $child = fork();
@@ -176,12 +181,14 @@ sub runner_init {
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
 
-            $onerunnerid = $$;
-            print "Runner $onerunnerid starting\n" if($verbose);
+            $thisrunnerid = $$;
+            print "Runner $thisrunnerid starting\n" if($verbose);
 
             # Here we are the child (runner).
-            close($controllerw);
-            close($controllerr);
+            close($thiscontrollerw);
+            close($thiscontrollerr);
+            $runnerr = $thisrunnerr;
+            $runnerw = $thisrunnerw;
 
             # Set this directory as ours
             $LOGDIR = $logdir;
@@ -191,25 +198,30 @@ sub runner_init {
             event_loop();
 
             # Can't rely on logmsg here in case it's buffered
-            print "Runner $onerunnerid exiting\n" if($verbose);
+            print "Runner $thisrunnerid exiting\n" if($verbose);
             exit 0;
         }
 
         # Here we are the parent (controller).
-        close($runnerw);
-        close($runnerr);
+        close($thisrunnerw);
+        close($thisrunnerr);
 
-        $onerunnerid = $child;
+        $thisrunnerid = $child;
 
     } else {
         # Create our pid directory
         mkdir("$LOGDIR/$PIDDIR", 0777);
 
         # Don't create a separate process
-        $onerunnerid = "integrated";
+        $thisrunnerid = "integrated";
     }
 
-    return $onerunnerid;
+    $controllerw{$thisrunnerid} = $thiscontrollerw;
+    $runnerr = $thisrunnerr;
+    $runnerw = $thisrunnerw;
+    $controllerr{$thisrunnerid} = $thiscontrollerr;
+
+    return $thisrunnerid;
 }
 
 #######################################################################
@@ -1132,13 +1144,14 @@ sub runnerac_clearlocks {
 # received.
 # Called by controller
 sub runnerac_shutdown {
+    my ($runnerid)=$_[0];
     controlleripccall(\&runner_shutdown, @_);
 
     # These have no more use
-    close($controllerw);
-    undef $controllerw;
-    close($controllerr);
-    undef $controllerr;
+    close($controllerw{$runnerid});
+    undef $controllerw{$runnerid};
+    close($controllerr{$runnerid});
+    undef $controllerr{$runnerid};
 }
 
 # Async call of runner_stopservers
@@ -1175,7 +1188,7 @@ sub controlleripccall {
     my $margs = freeze \@_;
 
     # Send IPC call via pipe
-    syswrite($controllerw, (pack "L", length($margs)) . $margs);
+    syswrite($controllerw{$runnerid}, (pack "L", length($margs)) . $margs);
 
     if(!$multiprocess) {
         # Call the remote function here in single process mode
@@ -1188,13 +1201,14 @@ sub controlleripccall {
 # The first return value is the runner ID
 # Called by controller
 sub runnerar {
+    my ($runnerid) = @_;
     my $datalen;
-    if (sysread($controllerr, $datalen, 4) <= 0) {
+    if (sysread($controllerr{$runnerid}, $datalen, 4) <= 0) {
         die "error in runnerar\n";
     }
     my $len=unpack("L", $datalen);
     my $buf;
-    if (sysread($controllerr, $buf, $len) <= 0) {
+    if (sysread($controllerr{$runnerid}, $buf, $len) <= 0) {
         die "error in runnerar\n";
     }
 
@@ -1202,19 +1216,41 @@ sub runnerar {
     my $resarrayref = thaw $buf;
 
     # First argument is runner ID
-    unshift @$resarrayref, $onerunnerid;
+    # TODO: remove this; it's unneeded since it's passed in
+    unshift @$resarrayref, $runnerid;
     return @$resarrayref;
 }
 
 ###################################################################
-# Returns nonzero if a response from an async call is ready
+# Returns runnder ID if a response from an async call is ready
 # argument is 0 for nonblocking, undef for blocking, anything else for timeout
 # Called by controller
 sub runnerar_ready {
     my ($blocking) = @_;
     my $rin = "";
-    vec($rin, fileno($controllerr), 1) = 1;
-    return select(my $rout=$rin, undef, my $eout=$rin, $blocking);
+    my %idbyfileno;
+    my $maxfileno=0;
+    foreach my $p (keys(%controllerr)) {
+        my $fd = fileno($controllerr{$p});
+        vec($rin, $fd, 1) = 1;
+        $idbyfileno{$fd} = $p;  # save the runner ID for each pipe fd
+        if($fd > $maxfileno) {
+            $maxfileno = $fd;
+        }
+    }
+
+    # Wait for any pipe from any runner to be ready
+    # TODO: this is relatively slow with hundreds of fds
+    # TODO: handle errors
+    if(select(my $rout=$rin, undef, undef, $blocking)) {
+        for my $fd (0..$maxfileno) {
+            if(vec($rin, $fd, 1)) {
+                return $idbyfileno{$fd};
+            }
+        }
+        die "Internal pipe readiness inconsistency\n";
+    }
+    return undef;
 }
 
 ###################################################################
