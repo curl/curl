@@ -1258,6 +1258,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     failf(data, "can't create quiche config");
     return CURLE_FAILED_INIT;
   }
+  quiche_config_enable_pacing(ctx->cfg, false);
   quiche_config_set_max_idle_timeout(ctx->cfg, QUIC_IDLE_TIMEOUT);
   quiche_config_set_initial_max_data(ctx->cfg, (1 * 1024 * 1024)
     /* (QUIC_MAX_STREAMS/2) * H3_STREAM_WINDOW_SIZE */);
