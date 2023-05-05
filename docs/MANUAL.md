@@ -18,9 +18,13 @@ Get a directory listing of an FTP site:
 
     curl ftp://ftp.funet.fi
 
-Get the definition of curl from a dictionary:
+Get the all terms matching curl from a dictionary:
 
     curl dict://dict.org/m:curl
+
+Get the definition of curl from a dictionary:
+
+    curl dict://dict.org/d:curl
 
 Fetch two documents at once:
 
@@ -997,4 +1001,3 @@ a curl angle.
 ### `curl-and-python`
 
 Python hackers using curl with or without the python binding pycurl.
-
