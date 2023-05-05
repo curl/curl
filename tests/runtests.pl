@@ -405,7 +405,7 @@ sub checksystemfeatures {
 
     my $curlverout="$LOGDIR/curlverout.log";
     my $curlvererr="$LOGDIR/curlvererr.log";
-    my $versioncmd="$CURL --version 1>$curlverout 2>$curlvererr";
+    my $versioncmd=shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
 
     unlink($curlverout);
     unlink($curlvererr);
@@ -686,7 +686,7 @@ sub checksystemfeatures {
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
 
-    open(my $manh, "-|", "$CURL -M 2>&1");
+    open(my $manh, "-|", shell_quote($CURL) . " -M 2>&1");
     while(my $s = <$manh>) {
         if($s =~ /built-in manual was disabled at build-time/) {
             $feature{"manual"} = 0;
@@ -1960,7 +1960,7 @@ while(@ARGV) {
     }
     elsif ($ARGV[0] eq "-c") {
         # use this path to curl instead of default
-        $DBGCURL=$CURL="\"$ARGV[1]\"";
+        $DBGCURL=$CURL=$ARGV[1];
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-vc") {
@@ -1970,12 +1970,12 @@ while(@ARGV) {
         # the development version as then it won't be able to run any tests
         # since it can't verify the servers!
 
-        $VCURL="\"$ARGV[1]\"";
+        $VCURL=shell_quote($ARGV[1]);
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-ac") {
         # use this curl only to talk to APIs (currently only CI test APIs)
-        $ACURL="\"$ARGV[1]\"";
+        $ACURL=shell_quote($ARGV[1]);
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-d") {
@@ -2236,7 +2236,7 @@ if(!$randseed) {
         localtime(time);
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year+1900)*100 + $mon+1;
-    open(my $curlvh, "-|", "$CURL --version 2>/dev/null") ||
+    open(my $curlvh, "-|", shell_quote($CURL) . " --version 2>/dev/null") ||
         die "could not get curl version!";
     my @c = <$curlvh>;
     close($curlvh) || die "could not get curl version!";
