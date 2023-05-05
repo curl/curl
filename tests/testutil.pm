@@ -37,6 +37,7 @@ BEGIN {
         runclient
         runclientoutput
         setlogfunc
+        shell_quote
         subbase64
         subnewlines
     );
@@ -183,6 +184,21 @@ sub runclientoutput {
 #    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
 #    sleep 2;    # time to allow the NFS server to be updated
 #    return @out;
+}
+
+
+#######################################################################
+# Quote an argument for passing safely to a Bourne shell
+# This does the same thing as String::ShellQuote but doesn't need a package.
+#
+sub shell_quote {
+    my ($s)=@_;
+    if($s !~ m/^[-+=.,_\/:a-zA-Z0-9]+$/) {
+        # string contains a "dangerous" character--quote it
+        $s =~ s/'/'"'"'/g;
+        $s = "'" . $s . "'";
+    }
+    return $s;
 }
 
 1;
