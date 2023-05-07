@@ -35,12 +35,12 @@ The eleven fields for each CVE in `vuln.pm` are, in order:
 
 ### `Makefile`
 
-The new CVE webpage file name needs to be added in the `Makefile`'s `CVELIST`
+The new CVE web page file name needs to be added in the `Makefile`'s `CVELIST`
 macro.
 
 When the markdown is in place and the `Makefile` and `vuln.pm` are updated,
-all other files and metadata for all curl CVEs and versions get generated
-automatically using those files.
+all other files and metadata for all curl advisories and versions get
+generated automatically using those files.
 
 ## Document format
 
