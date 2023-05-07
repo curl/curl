@@ -1398,19 +1398,30 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         switch(config->httpreq) {
         case HTTPREQ_SIMPLEPOST:
-          my_setopt_str(curl, CURLOPT_POSTFIELDS,
-                        config->postfields);
-          my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
-                    config->postfieldsize);
+          if(config->resume_from) {
+            errorf(global, "cannot mix --continue-at with --data\n");
+            result = CURLE_FAILED_INIT;
+          }
+          else {
+            my_setopt_str(curl, CURLOPT_POSTFIELDS,
+                          config->postfields);
+            my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
+                      config->postfieldsize);
+          }
           break;
         case HTTPREQ_MIMEPOST:
           /* free previous remainders */
           curl_mime_free(config->mimepost);
           config->mimepost = NULL;
-          result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
-          if(result)
-            break;
-          my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
+          if(config->resume_from) {
+            errorf(global, "cannot mix --continue-at with --form\n");
+            result = CURLE_FAILED_INIT;
+          }
+          else {
+            result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
+            if(!result)
+              my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
+          }
           break;
         default:
           break;
