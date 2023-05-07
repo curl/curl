@@ -1325,6 +1325,12 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     }
   }
 
+  if(data->set.postfields && data->set.set_resume_from) {
+    /* we can't */
+    failf(data, "cannot mix POSTFIELDS with RESUME_FROM");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
   data->state.prefer_ascii = data->set.prefer_ascii;
   data->state.list_only = data->set.list_only;
   data->state.httpreq = data->set.method;
