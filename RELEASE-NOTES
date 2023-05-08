@@ -4,7 +4,7 @@ curl and libcurl 8.1.0
  Command line options:         251
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2863
+ Contributors:                 2867
 
 This release includes the following changes:
 
@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o amiga: Fix CA certificate paths for AmiSSL and MorphOS [150]
  o autotools: sync up clang picky warnings with cmake [114]
  o bufq: simplify since expression is always true [72]
  o cf-h1-proxy: skip an extra NULL assign [80]
@@ -23,9 +24,14 @@ This release includes the following bugfixes:
  o cf-socket: Disable socket receive buffer by default [75]
  o cf-socket: remove dead code discovered by PVS [82]
  o cf-socket: turn off IPV6_V6ONLY on Windows if it is supported [123]
+ o checksrc: check for spaces before the colon of switch labels [160]
+ o checksrc: find bad indentation in conditions without open brace [152]
  o checksrc: fix SPACEBEFOREPAREN for conditions starting with "*" [115]
+ o ci: `-Wno-vla` no longer necessary [158]
  o CI: fix brew retries on GHA
+ o CI: Set minimal permissions on workflow ngtcp2-quictls.yml [153]
  o CI: skip Azure for commits which change only GHA
+ o CI: use another glob syntax for matching files on Appveyor
  o cmake: bring in the network library on Haiku [9]
  o cmake: do not add zlib headers for openssl [49]
  o CMake: make config version 8 compatible with 7 [28]
@@ -35,6 +41,7 @@ This release includes the following bugfixes:
  o CMakeLists.txt: fix typo for Haiku detection [95]
  o config-dos.h: fix SIZEOF_CURL_OFF_T for MS-DOS/DJGPP [52]
  o configure: don't set HAVE_WRITABLE_ARGV on Windows [64]
+ o configure: fix detection of apxs (for httpd) [157]
  o configure: make quiche require quiche_conn_send_ack_eliciting [46]
  o connect: fix https connection setup to treat ssl_mode correctly [94]
  o content_encoding: only do tranfer-encoding compression if asked to [61]
@@ -51,9 +58,11 @@ This release includes the following bugfixes:
  o docs/cmdline-opts: document the dotless config path [1]
  o docs/examples/protofeats.c: outputs all protocols and features [110]
  o docs/libcurl/curl_*escape.3: rename "url" argument to "input"/"string" [131]
+ o docs/SECURITY-ADVISORY.md: how to write a curl security advisory [128]
  o docs: bump the minimum perl version to 5.6
  o docs: clarify that more backends have HTTPS proxy support [127]
  o dynbuf: never allocate larger than "toobig" [17]
+ o easy_cleanup: require a "good" handle to act [149]
  o ftp: fix 'portsock' variable was assigned the same value [78]
  o ftp: remove dead code [79]
  o ftplistparser: move out private data from public struct [20]
@@ -73,6 +82,7 @@ This release includes the following bugfixes:
  o hostip: refuse to resolve the .onion TLD [19]
  o HTTP-COOKIES.md: mention the #HttpOnly_ prefix [16]
  o http2: always EXPIRE_RUN_NOW unpaused http/2 transfers [139]
+ o http2: do flow window accounting for cancelled streams [155]
  o http2: enlarge the connection window [101]
  o http2: flow control and buffer improvements [54]
  o http2: move HTTP/2 stream vars into local context [67]
@@ -84,6 +94,7 @@ This release includes the following bugfixes:
  o http3: expire unpaused transfers in all HTTP/3 backends [138]
  o http3: improvements across backends [51]
  o http: skip a double NULL assign [83]
+ o ipv4.d/ipv6.d: they are "mutex", not "boolean" [122]
  o KNOWN_BUGS: remove fixed or outdated issues, move non-bugs [65]
  o lib/cmake: add HAVE_WRITABLE_ARGV check [63]
  o lib/sha256.c: typo fix in comment (duplicated "is available") [40]
@@ -95,8 +106,10 @@ This release includes the following bugfixes:
  o libssh2: fix crash in keyboard callback [126]
  o libssh: tell it to use SFTP non-blocking [59]
  o man pages: simplify the .TH sections [133]
+ o MANUAL.md: add dict example for looking up a single definition [132]
  o mime: skip NULL assigns after Curl_safefree() [84]
  o multi: add handle asserts in DEBUG builds [11]
+ o multi: add multi-ignore logic to multi_socket_action [154]
  o multi: free up more data earleier in DONE [118]
  o multi: remove a few superfluous assigns [97]
  o multi: remove PENDING + MSGSENT handles from the main linked list [23]
@@ -108,7 +121,9 @@ This release includes the following bugfixes:
  o OS400: implement EBCDIC support for recent features [100]
  o OS400: improve vararg emulation [92]
  o OS400: provide ILE/RPG usage examples [81]
+ o pingpong: fix compiler warning "assigning an enum to unsigned char" [156]
  o pytest: improvements for suitable curl and error output [35]
+ o quiche: disable pacing while pacing is not actually performed [148]
  o quiche: Enable IDLE egress handling [109]
  o RELEASE-PROCEDURE: update to new schedule [25]
  o rtsp: convert mallocs to dynbuf for RTP buffering [37]
@@ -116,10 +131,12 @@ This release includes the following bugfixes:
  o rtsp: skip NULL assigns after Curl_safefree() [85]
  o runtests: die if curl version can be found [10]
  o runtests: don't start servers if -l is given
+ o runtests: fix -c option when run with valgrind [145]
  o runtests: fix quoting in Appveyor and Azure test integration [117]
  o runtests: lots of refactoring
  o runtests: refactor into more packages [60]
  o runtests: show error message if file can't be written
+ o runtests: spawn a new process for the test runner [146]
  o rustls: fix error in recv handling [50]
  o schannel: add clarifying comment [98]
  o server/getpart: clear target buffer before load [6]
@@ -152,7 +169,10 @@ This release includes the following bugfixes:
  o tests: switch to 3-argument open in test suite
  o tests: turn perl modules into full packages
  o tests: use %LOGDIR to refer to the log directory
+ o tool_cb_hdr: Fix 'Location:' formatting for early VTE terminals [147]
  o tool_operate: pass a long as CURLOPT_HEADEROPT argument [13]
+ o tool_operate: refuse (--data or --form) and --continue-at combo [119]
+ o transfer: refuse POSTFIELDS + RESUME_FROM combo [120]
  o transfer: skip extra assign [87]
  o url: fix PVS nits [71]
  o url: remove call to Curl_llist_destroy in Curl_close [22]
@@ -188,15 +208,17 @@ advice from friends like these:
   Ali Khodkar, Andreas Falkenhahn, Andreas Huebner, Andy Alt, Arne Soete,
   Ben Fritz, Biswapriyo Nath, Boris Kuschel, Brian Lund, Chloe Kudryavtsev,
   Colman Mbuya, Dan Fandrich, Dan Frandrich, Daniel Stenberg,
-  dengjfzh on github, Dirk Rosenkranz, Douglas R. Reno, eaglegai on github,
-  Emanuele Torre, Emil Engler, Frank Gevaerts, Gisle Vanem, Harry Sintonen,
-  Hiroki Kurosawa, Jakub Zakrzewski, Jim King, Jon Rumsey, Josh McCullough,
-  Kai Pastor, Kamil Dudka, Kvarec Lezki, kwind on github, Marcel Raad,
-  Matt Jolly, Micah Snyder), Osaila on github, Patrick Monnerat, Paul Howarth,
-  Pavel Mayorov, Paweł Wegner, Philip Heiduck, Ray Satiro, Ronan Pigott,
-  Sevan Janiyan, simplerobot on github, Stefan Eissing, SuperIlu on github,
-  Viktor Szakats, YX Hao
-  (49 contributors)
+  dengjfzh on github, Diogo Teles Sant'Anna, Dirk Rosenkranz, Douglas R. Reno,
+  eaglegai on github, Emanuele Torre, Emil Engler, François Michel,
+  Frank Gevaerts, Gisle Vanem, Harry Sintonen, Hiroki Kurosawa,
+  Jakub Zakrzewski, Jim King, Jon Rumsey, Josh McCullough, Kai Pastor,
+  Kamil Dudka, Kvarec Lezki, kwind on github, Marcel Raad, Matt Jolly,
+  Micah Snyder), nobedee on github, Oliver Chang, Osaila on github,
+  Patrick Monnerat, Paul Howarth, Pavel Mayorov, Paweł Wegner, Philip Heiduck,
+  Ray Satiro, Ronan Pigott, Sevan Janiyan, simplerobot on github,
+  Smackd0wn on github, Stefan Eissing, SuperIlu on github, Viktor Szakats,
+  YX Hao
+  (54 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -318,15 +340,20 @@ References to bug reports and discussions on issues:
  [116] = https://curl.se/bug/?i=10973
  [117] = https://curl.se/bug/?i=11010
  [118] = https://curl.se/bug/?i=10971
+ [119] = https://curl.se/bug/?i=11081
+ [120] = https://curl.se/bug/?i=11081
  [121] = https://curl.se/bug/?i=11036
+ [122] = https://curl.se/bug/?i=11085
  [123] = https://curl.se/bug/?i=10975
  [124] = https://curl.se/bug/?i=11025
  [125] = https://curl.se/bug/?i=11006
  [126] = https://curl.se/bug/?i=11024
  [127] = https://curl.se/bug/?i=11033
+ [128] = https://curl.se/bug/?i=11080
  [129] = https://curl.se/bug/?i=11030
  [130] = https://curl.se/bug/?i=11001
  [131] = https://curl.se/bug/?i=11027
+ [132] = https://curl.se/bug/?i=11077
  [133] = https://curl.se/bug/?i=11029
  [134] = https://curl.se/bug/?i=11018
  [135] = https://curl.se/bug/?i=10990
@@ -339,3 +366,17 @@ References to bug reports and discussions on issues:
  [142] = https://curl.se/bug/?i=10993
  [143] = https://curl.se/bug/?i=11019
  [144] = https://curl.se/bug/?i=11017
+ [145] = https://curl.se/bug/?i=11074
+ [146] = https://curl.se/bug/?i=11064
+ [147] = https://curl.se/bug/?i=10428
+ [148] = https://curl.se/bug/?i=11068
+ [149] = https://curl.se/bug/?i=11061
+ [150] = https://curl.se/bug/?i=11059
+ [152] = https://curl.se/bug/?i=11054
+ [153] = https://curl.se/bug/?i=11055
+ [154] = https://curl.se/bug/?i=11045
+ [155] = https://curl.se/bug/?i=11052
+ [156] = https://curl.se/bug/?i=11050
+ [157] = https://curl.se/bug/?i=11051
+ [158] = https://curl.se/bug/?i=11048
+ [160] = https://curl.se/bug/?i=11047
