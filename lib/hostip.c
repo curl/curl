@@ -85,6 +85,8 @@
 
 #define MAX_HOSTCACHE_LEN (255 + 7) /* max FQDN + colon + port number + zero */
 
+#define MAX_DNS_CACHE_SIZE 29999
+
 /*
  * hostip.c explained
  * ==================
@@ -198,6 +200,7 @@ create_hostcache_id(const char *name,
 struct hostcache_prune_data {
   time_t now;
   int cache_timeout;
+  int oldest; /* oldest time in cache not pruned */
 };
 
 /*
@@ -210,28 +213,39 @@ struct hostcache_prune_data {
 static int
 hostcache_timestamp_remove(void *datap, void *hc)
 {
-  struct hostcache_prune_data *data =
+  struct hostcache_prune_data *prune =
     (struct hostcache_prune_data *) datap;
   struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
 
-  return (0 != c->timestamp)
-    && (data->now - c->timestamp >= data->cache_timeout);
+  if(c->timestamp) {
+    /* age in seconds */
+    time_t age = prune->now - c->timestamp;
+    if(age >= prune->cache_timeout)
+      return TRUE;
+    if(age > prune->oldest)
+      prune->oldest = (int)age;
+  }
+  return FALSE;
 }
 
 /*
  * Prune the DNS cache. This assumes that a lock has already been taken.
+ * Returns the 'age' of the oldest still kept entry.
  */
-static void
+static int
 hostcache_prune(struct Curl_hash *hostcache, int cache_timeout, time_t now)
 {
   struct hostcache_prune_data user;
 
   user.cache_timeout = cache_timeout;
   user.now = now;
+  user.oldest = 0;
 
   Curl_hash_clean_with_criterium(hostcache,
                                  (void *) &user,
                                  hostcache_timestamp_remove);
+
+  return user.oldest;
 }
 
 /*
@@ -241,10 +255,11 @@ hostcache_prune(struct Curl_hash *hostcache, int cache_timeout, time_t now)
 void Curl_hostcache_prune(struct Curl_easy *data)
 {
   time_t now;
+  /* the timeout may be set -1 (forever) */
+  int timeout = data->set.dns_cache_timeout;
 
-  if((data->set.dns_cache_timeout == -1) || !data->dns.hostcache)
-    /* cache forever means never prune, and NULL hostcache means
-       we can't do it */
+  if(!data->dns.hostcache)
+    /* NULL hostcache means we can't do it */
     return;
 
   if(data->share)
@@ -252,10 +267,15 @@ void Curl_hostcache_prune(struct Curl_easy *data)
 
   time(&now);
 
-  /* Remove outdated and unused entries from the hostcache */
-  hostcache_prune(data->dns.hostcache,
-                  data->set.dns_cache_timeout,
-                  now);
+  do {
+    /* Remove outdated and unused entries from the hostcache */
+    int oldest = hostcache_prune(data->dns.hostcache, timeout, now);
+
+    timeout = oldest;
+
+    /* if the cache size is still too big, use the oldest age as new
+       prune limit */
+  } while(timeout && (data->dns.hostcache->size > MAX_DNS_CACHE_SIZE));
 
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
@@ -298,6 +318,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
 
     time(&user.now);
     user.cache_timeout = data->set.dns_cache_timeout;
+    user.oldest = 0;
 
     if(hostcache_timestamp_remove(&user, dns)) {
       infof(data, "Hostname in DNS cache was stale, zapped");
