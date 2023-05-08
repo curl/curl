@@ -13,11 +13,8 @@ error detection
 #
 # Client-side
 <client>
-<feature>
-http
-</feature>
 <server>
-none
+http
 </server>
 <name>
 try --data with --continue-at
@@ -31,7 +28,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -d foobar -C 3
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-3
+2
 </errorcode>
 </verify>
 </testcase>
