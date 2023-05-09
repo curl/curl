@@ -1010,7 +1010,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
         if(authp->picked == CURLAUTH_NEGOTIATE) {
           CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
           if(!result) {
-            DEBUGASSERT(!data->req.newurl);
+            free(data->req.newurl);
             data->req.newurl = strdup(data->state.url);
             if(!data->req.newurl)
               return CURLE_OUT_OF_MEMORY;
