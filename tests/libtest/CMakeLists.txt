@@ -24,6 +24,12 @@
 set(TARGET_LABEL_PREFIX "Test ")
 
 function(setup_test TEST_NAME)          # ARGN are the files in the test
+
+  if(NOT BUILD_SHARED_LIBS)
+    # These are part of the libcurl static lib. Do not compile/link them again.
+    list(REMOVE_ITEM ARGN ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
+  endif()
+
   add_executable(${TEST_NAME} EXCLUDE_FROM_ALL ${ARGN})
   add_dependencies(testdeps ${TEST_NAME})
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)

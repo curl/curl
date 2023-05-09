@@ -33,10 +33,6 @@
 
 #if defined(WIN32) && !defined(MSDOS)
 
-/* set in win32_init() */
-extern LARGE_INTEGER tool_freq;
-extern bool tool_isVistaOrGreater;
-
 /* In case of bug fix this function has a counterpart in timeval.c */
 struct timeval tvnow(void)
 {

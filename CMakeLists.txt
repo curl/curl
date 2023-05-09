@@ -97,6 +97,8 @@ endif()
 
 include_directories(${CURL_SOURCE_DIR}/include)
 
+set(CMAKE_UNITY_BUILD_BATCH_SIZE 0)
+
 option(CURL_WERROR "Turn compiler warnings into errors" OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
 option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)

@@ -146,7 +146,7 @@
 #define ioErr -36
 #define paramErr -50
 
-struct ssl_backend_data {
+struct st_ssl_backend_data {
   SSLContextRef ssl_ctx;
   bool ssl_direction; /* true if writing, false if reading */
   size_t ssl_write_buffered_length;
@@ -836,7 +836,8 @@ static OSStatus bio_cf_in_read(SSLConnectionRef connection,
 {
   struct Curl_cfilter *cf = (struct Curl_cfilter *)connection;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   CURLcode result;
@@ -872,7 +873,8 @@ static OSStatus bio_cf_out_write(SSLConnectionRef connection,
 {
   struct Curl_cfilter *cf = (struct Curl_cfilter *)connection;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   CURLcode result;
@@ -1338,7 +1340,8 @@ static CURLcode set_ssl_version_min_max(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   long ssl_version = conn_config->version;
   long ssl_version_max = conn_config->version_max;
@@ -1633,7 +1636,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   const struct curl_blob *ssl_cablob = conn_config->ca_info_blob;
@@ -2515,7 +2519,8 @@ static CURLcode sectransp_connect_step2(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   OSStatus err;
   SSLCipherSuite cipher;
@@ -2896,7 +2901,8 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
   CURLcode result = ssl_config->certinfo ?
     CURLE_PEER_FAILED_VERIFICATION : CURLE_OK;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   CFArrayRef server_certs = NULL;
   SecCertificateRef server_cert;
   OSStatus err;
@@ -3139,7 +3145,8 @@ static CURLcode sectransp_connect(struct Curl_cfilter *cf,
 static void sectransp_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
 
   (void) data;
 
@@ -3166,7 +3173,8 @@ static int sectransp_shutdown(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   ssize_t nread;
   int what;
   int rc;
@@ -3244,7 +3252,8 @@ static bool sectransp_data_pending(struct Curl_cfilter *cf,
                                    const struct Curl_easy *data)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   OSStatus err;
   size_t buffer;
 
@@ -3308,7 +3317,8 @@ static ssize_t sectransp_send(struct Curl_cfilter *cf,
                               CURLcode *curlcode)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   size_t processed = 0UL;
   OSStatus err;
 
@@ -3376,7 +3386,8 @@ static ssize_t sectransp_recv(struct Curl_cfilter *cf,
                               CURLcode *curlcode)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   size_t processed = 0UL;
   OSStatus err;
@@ -3434,7 +3445,8 @@ again:
 static void *sectransp_get_internals(struct ssl_connect_data *connssl,
                                      CURLINFO info UNUSED_PARAM)
 {
-  struct ssl_backend_data *backend = connssl->backend;
+  struct st_ssl_backend_data *backend =
+    (struct st_ssl_backend_data *)connssl->backend;
   (void)info;
   DEBUGASSERT(backend);
   return backend->ssl_ctx;
@@ -3450,7 +3462,7 @@ const struct Curl_ssl Curl_ssl_sectransp = {
 #endif /* SECTRANSP_PINNEDPUBKEY */
   SSLSUPP_HTTPS_PROXY,
 
-  sizeof(struct ssl_backend_data),
+  sizeof(struct st_ssl_backend_data),
 
   Curl_none_init,                     /* init */
   Curl_none_cleanup,                  /* cleanup */

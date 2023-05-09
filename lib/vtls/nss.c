@@ -81,7 +81,7 @@
 /* enough to fit the string "PEM Token #[0|1]" */
 #define SLOTSIZE 13
 
-struct ssl_backend_data {
+struct nss_ssl_backend_data {
   PRFileDesc *handle;
   char *client_nickname;
   struct Curl_easy *data;
@@ -489,7 +489,8 @@ static CURLcode nss_create_object(struct ssl_connect_data *connssl,
 
   const int slot_id = (cacert) ? 0 : 1;
   char *slot_name = aprintf("PEM Token #%d", slot_id);
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(backend);
 
@@ -806,7 +807,9 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
   struct Curl_cfilter *cf = (struct Curl_cfilter *)arg;
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_easy *data = connssl->backend->data;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
+  struct Curl_easy *data = backend->data;
 
   DEBUGASSERT(data);
 #ifdef SSL_ENABLE_OCSP_STAPLING
@@ -851,7 +854,9 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
 {
   struct Curl_cfilter *cf = (struct Curl_cfilter *)arg;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->backend->data;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
+  struct Curl_easy *data = backend->data;
   unsigned int buflenmax = 50;
   unsigned char buf[50];
   unsigned int buflen;
@@ -1055,7 +1060,9 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
 {
   struct Curl_cfilter *cf = (struct Curl_cfilter *)arg;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->backend->data;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
+  struct Curl_easy *data = backend->data;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config;
   PRErrorCode err = PR_GetError();
@@ -1117,7 +1124,8 @@ static CURLcode cmp_peer_pubkey(struct ssl_connect_data *connssl,
                                 const char *pinnedpubkey)
 {
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = NULL;
   CERTCertificate *cert;
 
@@ -1173,7 +1181,8 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
                                   struct SECKEYPrivateKeyStr **pRetKey)
 {
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)arg;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = NULL;
   const char *nickname = NULL;
   static const char pem_slotname[] = "PEM Token #1";
@@ -1538,7 +1547,8 @@ static void nss_cleanup(void)
 static void close_one(struct ssl_connect_data *connssl)
 {
   /* before the cleanup, check whether we are using a client certificate */
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
   bool client_cert = true;
 
   DEBUGASSERT(backend);
@@ -1580,7 +1590,8 @@ static void close_one(struct ssl_connect_data *connssl)
 static void nss_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
   (void)data;
   DEBUGASSERT(backend);
 
@@ -1796,7 +1807,8 @@ static CURLcode nss_fail_connect(struct Curl_cfilter *cf,
                                  CURLcode curlerr)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(backend);
 
@@ -1826,7 +1838,8 @@ static CURLcode nss_set_blocking(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   PRSocketOptionData sock_opt;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(backend);
 
@@ -1849,7 +1862,8 @@ static CURLcode nss_setup_connect(struct Curl_cfilter *cf,
   PRBool ssl_cbc_random_iv;
   curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct Curl_cfilter *cf_ssl_next = Curl_ssl_cf_get_ssl(cf->next);
@@ -2031,14 +2045,16 @@ static CURLcode nss_setup_connect(struct Curl_cfilter *cf,
   /* Is there an SSL filter "in front" of us or are we writing directly
    * to the socket? */
   if(connssl_next) {
+    struct nss_ssl_backend_data *backend_next =
+      (struct nss_ssl_backend_data *)connssl_next->backend;
     /* The filter should be connected by now, with full handshake */
-    DEBUGASSERT(connssl_next->backend->handle);
+    DEBUGASSERT(backend_next->handle);
     DEBUGASSERT(ssl_connection_complete == connssl_next->state);
     /* We tell our NSS instance to use do IO with the 'next' NSS
     * instance. This NSS instance will take ownership of the next
     * one, including its destruction. We therefore need to `disown`
     * the next filter's handle, once import succeeds. */
-    nspr_io = connssl_next->backend->handle;
+    nspr_io = backend->handle;
     second_layer = TRUE;
   }
   else {
@@ -2077,8 +2093,11 @@ static CURLcode nss_setup_connect(struct Curl_cfilter *cf,
 
   PR_Close(model); /* We don't need this any more */
   model = NULL;
-  if(connssl_next) /* steal the NSS handle we just imported successfully */
-    connssl_next->backend->handle = NULL;
+  if(connssl_next) { /* steal the NSS handle we just imported successfully */
+    struct nss_ssl_backend_data *backend_next =
+      (struct nss_ssl_backend_data *)connssl_next->backend;
+    backend_next->handle = NULL;
+  }
 
   /* This is the password associated with the cert that we're using */
   if(ssl_config->key_passwd) {
@@ -2154,7 +2173,8 @@ static CURLcode nss_do_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode result = CURLE_SSL_CONNECT_ERROR;
@@ -2299,7 +2319,8 @@ static ssize_t nss_send(struct Curl_cfilter *cf,
                         CURLcode *curlcode)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
   ssize_t rc;
 
   (void)data;
@@ -2337,7 +2358,9 @@ static bool
 nss_data_pending(struct Curl_cfilter *cf, const struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  PRFileDesc *fd = connssl->backend->handle->lower;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
+  PRFileDesc *fd = backend->handle->lower;
   char buf;
 
   (void) data;
@@ -2353,7 +2376,8 @@ static ssize_t nss_recv(struct Curl_cfilter *cf,
                         CURLcode *curlcode)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
   ssize_t nread;
 
   (void)data;
@@ -2455,7 +2479,8 @@ static bool nss_false_start(void)
 static void *nss_get_internals(struct ssl_connect_data *connssl,
                                CURLINFO info UNUSED_PARAM)
 {
-  struct ssl_backend_data *backend = connssl->backend;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
   (void)info;
   DEBUGASSERT(backend);
   return backend->handle;
@@ -2465,9 +2490,11 @@ static bool nss_attach_data(struct Curl_cfilter *cf,
                             struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
 
-  if(!connssl->backend->data)
-    connssl->backend->data = data;
+  if(!backend->data)
+    backend->data = data;
   return TRUE;
 }
 
@@ -2475,9 +2502,11 @@ static void nss_detach_data(struct Curl_cfilter *cf,
                             struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
+  struct nss_ssl_backend_data *backend =
+    (struct nss_ssl_backend_data *)connssl->backend;
 
-  if(connssl->backend->data == data)
-    connssl->backend->data = NULL;
+  if(backend->data == data)
+    backend->data = NULL;
 }
 
 const struct Curl_ssl Curl_ssl_nss = {
@@ -2488,7 +2517,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_HTTPS_PROXY,
 
-  sizeof(struct ssl_backend_data),
+  sizeof(struct nss_ssl_backend_data),
 
   nss_init,                     /* init */
   nss_cleanup,                  /* cleanup */

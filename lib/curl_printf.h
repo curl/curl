@@ -37,6 +37,7 @@
 # undef vprintf
 # undef vfprintf
 # undef vsnprintf
+# undef mvsnprintf
 # undef aprintf
 # undef vaprintf
 # define printf curl_mprintf

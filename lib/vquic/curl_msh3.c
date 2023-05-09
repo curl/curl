@@ -123,6 +123,7 @@ struct cf_msh3_ctx {
 };
 
 /* How to access `call_data` from a cf_msh3 filter */
+#undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_msh3_ctx *)(cf)->ctx)->call_data
 

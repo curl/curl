@@ -69,6 +69,12 @@ add_library(
   ALIAS ${LIB_NAME}
   )
 
+if(ENABLE_CURLDEBUG)
+  # We must compile memdebug.c separately to avoid memdebug.h redefinitions
+  # being applied to memdebug.c itself.
+  set_source_files_properties(memdebug.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+endif()
+
 if(NOT BUILD_SHARED_LIBS)
     set_target_properties(${LIB_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS CURL_STATICLIB)
 endif()

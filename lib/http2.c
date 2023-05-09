@@ -137,6 +137,7 @@ struct cf_h2_ctx {
 };
 
 /* How to access `call_data` from a cf_h2 filter */
+#undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_h2_ctx *)(cf)->ctx)->call_data
 

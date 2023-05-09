@@ -43,7 +43,7 @@
 
 /* ---- Base64 Encoding/Decoding Table --- */
 /* Padding character string starts at offset 64. */
-static const char base64[]=
+static const char base64encdec[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 /* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
@@ -120,7 +120,7 @@ CURLcode Curl_base64_decode(const char *src,
   /* replaces
   {
     unsigned char c;
-    const unsigned char *p = (const unsigned char *)base64;
+    const unsigned char *p = (const unsigned char *)base64encdec;
     for(c = 0; *p; c++, p++)
       lookup[*p] = c;
   }
@@ -264,7 +264,7 @@ static CURLcode base64_encode(const char *table64,
 CURLcode Curl_base64_encode(const char *inputbuff, size_t insize,
                             char **outptr, size_t *outlen)
 {
-  return base64_encode(base64, inputbuff, insize, outptr, outlen);
+  return base64_encode(base64encdec, inputbuff, insize, outptr, outlen);
 }
 
 /*
