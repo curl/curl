@@ -49,7 +49,7 @@ struct finder {
 
 /* The order of the variables below is important, as the index number is used
    in the findfile() function */
-static const struct finder list[] = {
+static const struct finder conf_list[] = {
   { "CURL_HOME", NULL, FALSE },
   { "XDG_CONFIG_HOME", NULL, FALSE }, /* index == 1, used in the code */
   { "HOME", NULL, FALSE },
@@ -109,8 +109,8 @@ char *findfile(const char *fname, int dotscore)
   if(!fname[0])
     return NULL;
 
-  for(i = 0; list[i].env; i++) {
-    char *home = curl_getenv(list[i].env);
+  for(i = 0; conf_list[i].env; i++) {
+    char *home = curl_getenv(conf_list[i].env);
     if(home) {
       char *path;
       const char *filename = fname;
@@ -120,14 +120,14 @@ char *findfile(const char *fname, int dotscore)
         curl_free(home);
         continue;
       }
-      if(list[i].append) {
-        char *c = curl_maprintf("%s%s", home, list[i].append);
+      if(conf_list[i].append) {
+        char *c = curl_maprintf("%s%s", home, conf_list[i].append);
         curl_free(home);
         if(!c)
           return NULL;
         home = c;
       }
-      if(list[i].withoutdot) {
+      if(conf_list[i].withoutdot) {
         if(!dotscore || xdg) {
           /* this is not looking for .curlrc, or the XDG_CONFIG_HOME was
              defined so we skip the extended check */

@@ -38,7 +38,7 @@
 #include "memdebug.h"
 
 
-#define MAX_URL_LEN   (4*1024)
+#define H1_MAX_URL_LEN   (4*1024)
 
 void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len)
 {
@@ -231,7 +231,7 @@ static CURLcode start_req(struct h1_req_parser *parser,
   else {
     /* origin-form OR absolute-form */
     CURLUcode uc;
-    char tmp[MAX_URL_LEN];
+    char tmp[H1_MAX_URL_LEN];
 
     /* default, unless we see an absolute URL */
     path = target;

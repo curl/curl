@@ -55,8 +55,64 @@
  */
 
 #ifdef HEADER_CURL_MEMDEBUG_H
-#error "Header memdebug.h shall not be included before curl_memory.h"
+/* cleanup after memdebug.h */
+
+#ifdef MEMDEBUG_NODEFINES
+#ifdef CURLDEBUG
+
+#undef strdup
+#undef malloc
+#undef calloc
+#undef realloc
+#undef free
+#undef send
+#undef recv
+
+#ifdef WIN32
+#  ifdef UNICODE
+#    undef wcsdup
+#    undef _wcsdup
+#    undef _tcsdup
+#  else
+#    undef _tcsdup
+#  endif
 #endif
+
+#undef socket
+#undef accept
+#ifdef HAVE_SOCKETPAIR
+#undef socketpair
+#endif
+
+#ifdef HAVE_GETADDRINFO
+#if defined(getaddrinfo) && defined(__osf__)
+#undef ogetaddrinfo
+#else
+#undef getaddrinfo
+#endif
+#endif /* HAVE_GETADDRINFO */
+
+#ifdef HAVE_FREEADDRINFO
+#undef freeaddrinfo
+#endif /* HAVE_FREEADDRINFO */
+
+/* sclose is probably already defined, redefine it! */
+#undef sclose
+#undef fopen
+#undef fdopen
+#undef fclose
+
+#endif /* MEMDEBUG_NODEFINES */
+#endif /* CURLDEBUG */
+
+#undef HEADER_CURL_MEMDEBUG_H
+#endif /* HEADER_CURL_MEMDEBUG_H */
+
+/*
+** Following section applies even when CURLDEBUG is not defined.
+*/
+
+#undef fake_sclose
 
 #ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
 /*

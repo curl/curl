@@ -221,12 +221,12 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
 }
 
 /*
- * state()
+ * sasl_state()
  *
  * This is the ONLY way to change SASL state!
  */
-static void state(struct SASL *sasl, struct Curl_easy *data,
-                  saslstate newstate)
+static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
+                       saslstate newstate)
 {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
@@ -508,7 +508,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
 
     if(!result) {
       *progress = SASL_INPROGRESS;
-      state(sasl, data, Curl_bufref_ptr(&resp) ? state2 : state1);
+      sasl_state(sasl, data, Curl_bufref_ptr(&resp) ? state2 : state1);
     }
   }
 
@@ -548,14 +548,14 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     if(code != sasl->params->finalcode)
       result = CURLE_LOGIN_DENIED;
     *progress = SASL_DONE;
-    state(sasl, data, SASL_STOP);
+    sasl_state(sasl, data, SASL_STOP);
     return result;
   }
 
   if(sasl->state != SASL_CANCEL && sasl->state != SASL_OAUTH2_RESP &&
      code != sasl->params->contcode) {
     *progress = SASL_DONE;
-    state(sasl, data, SASL_STOP);
+    sasl_state(sasl, data, SASL_STOP);
     return CURLE_LOGIN_DENIED;
   }
 
@@ -698,7 +698,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     if(code == sasl->params->finalcode) {
       /* Final response was received so we are done */
       *progress = SASL_DONE;
-      state(sasl, data, SASL_STOP);
+      sasl_state(sasl, data, SASL_STOP);
       return result;
     }
     else if(code == sasl->params->contcode) {
@@ -708,7 +708,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     }
     else {
       *progress = SASL_DONE;
-      state(sasl, data, SASL_STOP);
+      sasl_state(sasl, data, SASL_STOP);
       return CURLE_LOGIN_DENIED;
     }
 
@@ -745,7 +745,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
 
   Curl_bufref_free(&resp);
 
-  state(sasl, data, newstate);
+  sasl_state(sasl, data, newstate);
 
   return result;
 }

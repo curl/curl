@@ -73,7 +73,7 @@ struct ssl_connect_data {
   char *hostname;                   /* hostname for verification */
   char *dispname;                   /* display version of hostname */
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
-  struct ssl_backend_data *backend; /* vtls backend specific props */
+  void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
   struct curltime handshake_done;   /* time when handshake finished */
   int port;                         /* remote port at origin */
@@ -81,6 +81,7 @@ struct ssl_connect_data {
 };
 
 
+#undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct ssl_connect_data *)(cf)->ctx)->call_data
 

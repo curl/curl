@@ -57,7 +57,7 @@
 /* to play well with debug builds, we can *set* a fixed time this will
    return */
 time_t deltatime; /* allow for "adjustments" for unit test purposes */
-static time_t debugtime(void *unused)
+static time_t hsts_debugtime(void *unused)
 {
   char *timestr = getenv("CURL_TIME");
   (void)unused;
@@ -70,7 +70,8 @@ static time_t debugtime(void *unused)
   }
   return time(NULL);
 }
-#define time(x) debugtime(x)
+#undef time
+#define time(x) hsts_debugtime(x)
 #endif
 
 struct hsts *Curl_hsts_init(void)
