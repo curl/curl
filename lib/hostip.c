@@ -199,8 +199,8 @@ create_hostcache_id(const char *name,
 
 struct hostcache_prune_data {
   time_t now;
+  time_t oldest; /* oldest time in cache not pruned. */
   int cache_timeout;
-  int oldest; /* oldest time in cache not pruned */
 };
 
 /*
@@ -223,7 +223,7 @@ hostcache_timestamp_remove(void *datap, void *hc)
     if(age >= prune->cache_timeout)
       return TRUE;
     if(age > prune->oldest)
-      prune->oldest = (int)age;
+      prune->oldest = age;
   }
   return FALSE;
 }
@@ -232,8 +232,9 @@ hostcache_timestamp_remove(void *datap, void *hc)
  * Prune the DNS cache. This assumes that a lock has already been taken.
  * Returns the 'age' of the oldest still kept entry.
  */
-static int
-hostcache_prune(struct Curl_hash *hostcache, int cache_timeout, time_t now)
+static time_t
+hostcache_prune(struct Curl_hash *hostcache, int cache_timeout,
+                time_t now)
 {
   struct hostcache_prune_data user;
 
@@ -269,9 +270,12 @@ void Curl_hostcache_prune(struct Curl_easy *data)
 
   do {
     /* Remove outdated and unused entries from the hostcache */
-    int oldest = hostcache_prune(data->dns.hostcache, timeout, now);
+    time_t oldest = hostcache_prune(data->dns.hostcache, timeout, now);
 
-    timeout = oldest;
+    if(oldest < INT_MAX)
+      timeout = (int)oldest; /* we know it fits */
+    else
+      timeout = INT_MAX - 1;
 
     /* if the cache size is still too big, use the oldest age as new
        prune limit */
