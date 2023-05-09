@@ -376,9 +376,9 @@ static bool cf_hc_data_pending(struct Curl_cfilter *cf,
          || cf_hc_baller_data_pending(&ctx->h21_baller, data);
 }
 
-static struct curltime get_max_baller_time(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data,
-                                          int query)
+static struct curltime cf_get_max_baller_time(struct Curl_cfilter *cf,
+                                              struct Curl_easy *data,
+                                              int query)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   struct Curl_cfilter *cfb;
@@ -408,12 +408,12 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
     switch(query) {
     case CF_QUERY_TIMER_CONNECT: {
       struct curltime *when = pres2;
-      *when = get_max_baller_time(cf, data, CF_QUERY_TIMER_CONNECT);
+      *when = cf_get_max_baller_time(cf, data, CF_QUERY_TIMER_CONNECT);
       return CURLE_OK;
     }
     case CF_QUERY_TIMER_APPCONNECT: {
       struct curltime *when = pres2;
-      *when = get_max_baller_time(cf, data, CF_QUERY_TIMER_APPCONNECT);
+      *when = cf_get_max_baller_time(cf, data, CF_QUERY_TIMER_APPCONNECT);
       return CURLE_OK;
     }
     default:

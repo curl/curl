@@ -282,11 +282,11 @@ static CURLcode pop3_get_message(struct Curl_easy *data, struct bufref *out)
 
 /***********************************************************************
  *
- * state()
+ * pop3_state()
  *
  * This is the ONLY way to change POP3 state!
  */
-static void state(struct Curl_easy *data, pop3state newstate)
+static void pop3_state(struct Curl_easy *data, pop3state newstate)
 {
   struct pop3_conn *pop3c = &data->conn->proto.pop3c;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -335,7 +335,7 @@ static CURLcode pop3_perform_capa(struct Curl_easy *data,
   result = Curl_pp_sendf(data, &pop3c->pp, "%s", "CAPA");
 
   if(!result)
-    state(data, POP3_CAPA);
+    pop3_state(data, POP3_CAPA);
 
   return result;
 }
@@ -353,7 +353,7 @@ static CURLcode pop3_perform_starttls(struct Curl_easy *data,
   CURLcode result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s", "STLS");
 
   if(!result)
-    state(data, POP3_STARTTLS);
+    pop3_state(data, POP3_STARTTLS);
 
   return result;
 }
@@ -383,7 +383,7 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
   if(!result) {
     pop3c->ssldone = ssldone;
     if(pop3c->state != POP3_UPGRADETLS)
-      state(data, POP3_UPGRADETLS);
+      pop3_state(data, POP3_UPGRADETLS);
 
     if(pop3c->ssldone) {
       pop3_to_pop3s(conn);
@@ -408,7 +408,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
   if(!data->state.aptr.user) {
-    state(data, POP3_STOP);
+    pop3_state(data, POP3_STOP);
 
     return result;
   }
@@ -417,7 +417,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
   result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "USER %s",
                          conn->user ? conn->user : "");
   if(!result)
-    state(data, POP3_USER);
+    pop3_state(data, POP3_USER);
 
   return result;
 }
@@ -442,7 +442,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
   if(!data->state.aptr.user) {
-    state(data, POP3_STOP);
+    pop3_state(data, POP3_STOP);
 
     return result;
   }
@@ -468,7 +468,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   result = Curl_pp_sendf(data, &pop3c->pp, "APOP %s %s", conn->user, secret);
 
   if(!result)
-    state(data, POP3_APOP);
+    pop3_state(data, POP3_APOP);
 
   return result;
 }
@@ -552,7 +552,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
   /* Check we have enough data to authenticate with and end the
      connect phase if we don't */
   if(!Curl_sasl_can_authenticate(&pop3c->sasl, data)) {
-    state(data, POP3_STOP);
+    pop3_state(data, POP3_STOP);
     return result;
   }
 
@@ -562,7 +562,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
 
     if(!result)
       if(progress == SASL_INPROGRESS)
-        state(data, POP3_AUTH);
+        pop3_state(data, POP3_AUTH);
   }
 
   if(!result && progress == SASL_IDLE) {
@@ -620,7 +620,7 @@ static CURLcode pop3_perform_command(struct Curl_easy *data)
                             pop3->custom : command));
 
   if(!result)
-    state(data, POP3_COMMAND);
+    pop3_state(data, POP3_COMMAND);
 
   return result;
 }
@@ -638,7 +638,7 @@ static CURLcode pop3_perform_quit(struct Curl_easy *data,
   CURLcode result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s", "QUIT");
 
   if(!result)
-    state(data, POP3_QUIT);
+    pop3_state(data, POP3_QUIT);
 
   return result;
 }
@@ -831,7 +831,7 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
   if(!result)
     switch(progress) {
     case SASL_DONE:
-      state(data, POP3_STOP);  /* Authenticated */
+      pop3_state(data, POP3_STOP);  /* Authenticated */
       break;
     case SASL_IDLE:            /* No mechanism left after cancellation */
 #ifndef CURL_DISABLE_CRYPTO_AUTH
@@ -869,7 +869,7 @@ static CURLcode pop3_state_apop_resp(struct Curl_easy *data, int pop3code,
   }
   else
     /* End of connect phase */
-    state(data, POP3_STOP);
+    pop3_state(data, POP3_STOP);
 
   return result;
 }
@@ -892,7 +892,7 @@ static CURLcode pop3_state_user_resp(struct Curl_easy *data, int pop3code,
     result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "PASS %s",
                            conn->passwd ? conn->passwd : "");
   if(!result)
-    state(data, POP3_PASS);
+    pop3_state(data, POP3_PASS);
 
   return result;
 }
@@ -910,7 +910,7 @@ static CURLcode pop3_state_pass_resp(struct Curl_easy *data, int pop3code,
   }
   else
     /* End of connect phase */
-    state(data, POP3_STOP);
+    pop3_state(data, POP3_STOP);
 
   return result;
 }
@@ -929,7 +929,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
   (void)instate; /* no use for this yet */
 
   if(pop3code != '+') {
-    state(data, POP3_STOP);
+    pop3_state(data, POP3_STOP);
     return CURLE_WEIRD_SERVER_REPLY;
   }
 
@@ -967,7 +967,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
   }
 
   /* End of DO phase */
-  state(data, POP3_STOP);
+  pop3_state(data, POP3_STOP);
 
   return result;
 }
@@ -1037,12 +1037,12 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
       break;
 
     case POP3_QUIT:
-      state(data, POP3_STOP);
+      pop3_state(data, POP3_STOP);
       break;
 
     default:
       /* internal error */
-      state(data, POP3_STOP);
+      pop3_state(data, POP3_STOP);
       break;
     }
   } while(!result && pop3c->state != POP3_STOP && Curl_pp_moredata(pp));
@@ -1143,7 +1143,7 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
     return result;
 
   /* Start off waiting for the server greeting response */
-  state(data, POP3_SERVERGREET);
+  pop3_state(data, POP3_SERVERGREET);
 
   result = pop3_multi_statemach(data, done);
 

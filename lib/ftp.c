@@ -4423,4 +4423,6 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   return result;
 }
 
+#undef state
+
 #endif /* CURL_DISABLE_FTP */
