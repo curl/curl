@@ -1294,7 +1294,7 @@ int cert_stuff(struct Curl_easy *data,
       /* SSL_CTX_use_certificate_chain_file() only works on PEM files */
       cert_use_result = cert_blob ?
         SSL_CTX_use_certificate_chain_blob(ctx, cert_blob, key_passwd) :
-      SSL_CTX_use_certificate_chain_file(ctx, cert_file);
+        SSL_CTX_use_certificate_chain_file(ctx, cert_file);
       if(cert_use_result != 1) {
         failf(data,
               "could not load PEM client certificate from %s, " OSSL_PACKAGE
