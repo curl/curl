@@ -165,13 +165,14 @@ struct cf_ngtcp2_ctx {
 };
 
 /* How to access `call_data` from a cf_ngtcp2 filter */
+#undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_ngtcp2_ctx *)(cf)->ctx)->call_data
 
 /**
  * All about the H3 internals of a stream
  */
-struct stream_ctx {
+struct h3_stream_ctx {
   int64_t id; /* HTTP/3 protocol identifier */
   struct bufq sendbuf;   /* h3 request body */
   struct bufq recvbuf;   /* h3 response body */
@@ -186,18 +187,18 @@ struct stream_ctx {
   bool send_closed; /* stream is local closed */
 };
 
-#define H3_STREAM_CTX(d)    ((struct stream_ctx *)(((d) && (d)->req.p.http)? \
-                             ((struct HTTP *)(d)->req.p.http)->h3_ctx \
-                               : NULL))
-#define H3_STREAM_LCTX(d)   ((struct HTTP *)(d)->req.p.http)->h3_ctx
-#define H3_STREAM_ID(d)     (H3_STREAM_CTX(d)? \
-                             H3_STREAM_CTX(d)->id : -2)
+#define H3_STREAM_CTX(d)  ((struct h3_stream_ctx *)(((d) && (d)->req.p.http)? \
+                           ((struct HTTP *)(d)->req.p.http)->h3_ctx \
+                             : NULL))
+#define H3_STREAM_LCTX(d) ((struct HTTP *)(d)->req.p.http)->h3_ctx
+#define H3_STREAM_ID(d)   (H3_STREAM_CTX(d)? \
+                           H3_STREAM_CTX(d)->id : -2)
 
 static CURLcode h3_data_setup(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
 
   if(!data || !data->req.p.http) {
     failf(data, "initialization failure, transfer not http initialized");
@@ -229,7 +230,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
 
 static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
 
   (void)cf;
   if(stream) {
@@ -686,7 +687,7 @@ static void report_consumed_data(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  size_t consumed)
 {
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
 
   if(!stream)
@@ -969,7 +970,7 @@ static int cf_ngtcp2_get_select_socks(struct Curl_cfilter *cf,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct SingleRequest *k = &data->req;
   int rv = GETSOCK_BLANK;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   struct cf_call_data save;
 
   CF_DATA_SAVE(save, cf, data);
@@ -991,10 +992,10 @@ static int cf_ngtcp2_get_select_socks(struct Curl_cfilter *cf,
   return rv;
 }
 
-static void drain_stream(struct Curl_cfilter *cf,
-                         struct Curl_easy *data)
+static void h3_drain_stream(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
 {
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   unsigned char bits;
 
   (void)cf;
@@ -1013,7 +1014,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct Curl_easy *data = stream_user_data;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   (void)conn;
   (void)stream_id;
   (void)app_error_code;
@@ -1031,7 +1032,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
     stream->reset = TRUE;
     stream->send_closed = TRUE;
   }
-  drain_stream(cf, data);
+  h3_drain_stream(cf, data);
   return 0;
 }
 
@@ -1045,7 +1046,7 @@ static CURLcode write_resp_raw(struct Curl_cfilter *cf,
                                const void *mem, size_t memlen,
                                bool flow)
 {
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   CURLcode result = CURLE_OK;
   ssize_t nwritten;
 
@@ -1085,7 +1086,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   (void)stream3_id;
 
   result = write_resp_raw(cf, data, buf, buflen, TRUE);
-  drain_stream(cf, data);
+  h3_drain_stream(cf, data);
   return result? -1 : 0;
 }
 
@@ -1110,7 +1111,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct Curl_easy *data = stream_user_data;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
@@ -1130,7 +1131,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
   if(stream->status_code / 100 != 1) {
     stream->resp_hds_complete = TRUE;
   }
-  drain_stream(cf, data);
+  h3_drain_stream(cf, data);
   return 0;
 }
 
@@ -1143,7 +1144,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   nghttp3_vec h3name = nghttp3_rcbuf_get_buf(name);
   nghttp3_vec h3val = nghttp3_rcbuf_get_buf(value);
   struct Curl_easy *data = stream_user_data;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
@@ -1314,7 +1315,7 @@ fail:
 
 static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  struct stream_ctx *stream,
+                                  struct h3_stream_ctx *stream,
                                   CURLcode *err)
 {
   ssize_t nread = -1;
@@ -1364,7 +1365,7 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                               char *buf, size_t len, CURLcode *err)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   ssize_t nread = -1;
   struct cf_call_data save;
 
@@ -1410,7 +1411,7 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(nread > 0) {
-    drain_stream(cf, data);
+    h3_drain_stream(cf, data);
   }
   else {
     if(stream->closed) {
@@ -1438,7 +1439,7 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct Curl_easy *data = stream_user_data;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   size_t skiplen;
 
   (void)cf;
@@ -1465,7 +1466,7 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
     if((data->req.keepon & KEEP_SEND_HOLD) &&
        (data->req.keepon & KEEP_SEND)) {
       data->req.keepon &= ~KEEP_SEND_HOLD;
-      drain_stream(cf, data);
+      h3_drain_stream(cf, data);
       DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] unpausing acks",
                     stream_id));
     }
@@ -1481,7 +1482,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct Curl_easy *data = stream_user_data;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   ssize_t nwritten = 0;
   size_t nvecs = 0;
   (void)cf;
@@ -1547,7 +1548,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
                               CURLcode *err)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = NULL;
+  struct h3_stream_ctx *stream = NULL;
   struct h1_req_parser h1;
   struct dynhds h2_headers;
   size_t nheader;
@@ -1658,7 +1659,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                               const void *buf, size_t len, CURLcode *err)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   ssize_t sent = 0;
   struct cf_call_data save;
 
@@ -2101,7 +2102,7 @@ out:
 static bool cf_ngtcp2_data_pending(struct Curl_cfilter *cf,
                                    const struct Curl_easy *data)
 {
-  const struct stream_ctx *stream = H3_STREAM_CTX(data);
+  const struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   (void)cf;
   return stream && !Curl_bufq_is_empty(&stream->recvbuf);
 }
@@ -2113,7 +2114,7 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
   /* TODO: there seems right now no API in ngtcp2 to shrink/enlarge
    * the streams windows. As we do in HTTP/2. */
   if(!pause) {
-    drain_stream(cf, data);
+    h3_drain_stream(cf, data);
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
   return CURLE_OK;
@@ -2141,7 +2142,7 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
     break;
   }
   case CF_CTRL_DATA_DONE_SEND: {
-    struct stream_ctx *stream = H3_STREAM_CTX(data);
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
     if(stream && !stream->send_closed) {
       stream->send_closed = TRUE;
       stream->upload_left = Curl_bufq_len(&stream->sendbuf);

@@ -36,8 +36,8 @@
 #  error "Can't compile SCHANNEL support without SSPI."
 #endif
 
-#define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
 #include "schannel.h"
+#include "schannel_int.h"
 
 #ifdef HAS_MANUAL_VERIFY_API
 
@@ -54,7 +54,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define BACKEND connssl->backend
+#define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
 #define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
 #define BEGIN_CERT "-----BEGIN CERTIFICATE-----"

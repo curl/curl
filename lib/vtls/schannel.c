@@ -33,13 +33,12 @@
 
 #ifdef USE_SCHANNEL
 
-#define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
-
 #ifndef USE_WINDOWS_SSPI
 #  error "Can't compile SCHANNEL support without SSPI."
 #endif
 
 #include "schannel.h"
+#include "schannel_int.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "strcase.h"
@@ -186,9 +185,9 @@
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
-static CURLcode pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    const char *pinnedpubkey);
+static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
+                                             struct Curl_easy *data,
+                                             const char *pinnedpubkey);
 
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
                           void *BufDataPtr, unsigned long BufByteSize)
@@ -207,9 +206,9 @@ static void InitSecBufferDesc(SecBufferDesc *desc, SecBuffer *BufArr,
 }
 
 static CURLcode
-set_ssl_version_min_max(DWORD *enabled_protocols,
-                        struct Curl_cfilter *cf,
-                        struct Curl_easy *data)
+schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
+                                 struct Curl_cfilter *cf,
+                                 struct Curl_easy *data)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   long ssl_version = conn_config->version;
@@ -500,7 +499,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   DWORD flags = 0;
   DWORD enabled_protocols = 0;
 
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)(connssl->backend);
 
   DEBUGASSERT(backend);
 
@@ -563,7 +563,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
   {
-    result = set_ssl_version_min_max(&enabled_protocols, cf, data);
+    result = schannel_set_ssl_version_min_max(&enabled_protocols, cf, data);
     if(result != CURLE_OK)
       return result;
     break;
@@ -1075,7 +1075,8 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   ssize_t written = -1;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SecBuffer outbuf;
@@ -1349,7 +1350,8 @@ static CURLcode
 schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   int i;
   ssize_t nread = -1, written = -1;
@@ -1607,7 +1609,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   if(pubkey_ptr) {
-    result = pkp_pin_peer_pubkey(cf, data, pubkey_ptr);
+    result = schannel_pkp_pin_peer_pubkey(cf, data, pubkey_ptr);
     if(result) {
       failf(data, "SSL: public key does not match pinned public key");
       return result;
@@ -1686,7 +1688,8 @@ static CURLcode
 schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode result = CURLE_OK;
   SECURITY_STATUS sspi_status = SEC_E_OK;
@@ -1931,7 +1934,8 @@ schannel_connect_common(struct Curl_cfilter *cf,
      * Available on Windows 7 or later.
      */
     {
-      struct ssl_backend_data *backend = connssl->backend;
+      struct schannel_ssl_backend_data *backend =
+        (struct schannel_ssl_backend_data *)connssl->backend;
       DEBUGASSERT(backend);
       cf->conn->sslContext = &backend->ctxt->ctxt_handle;
     }
@@ -1960,7 +1964,8 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   SecBufferDesc outbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(backend);
 
@@ -2110,7 +2115,8 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   /* we want the length of the encrypted buffer to be at least large enough
      that it can hold all the bytes requested and some TLS record overhead. */
   size_t min_encdata_length = len + CURL_SCHANNEL_BUFFER_FREE_SIZE;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(backend);
 
@@ -2443,12 +2449,13 @@ static bool schannel_data_pending(struct Curl_cfilter *cf,
                                   const struct Curl_easy *data)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
 
   (void)data;
   DEBUGASSERT(backend);
 
-  if(connssl->backend->ctxt) /* SSL/TLS is in use */
+  if(backend->ctxt) /* SSL/TLS is in use */
     return (backend->decdata_offset > 0 ||
             (backend->encdata_offset > 0 && !backend->encdata_is_incomplete));
   else
@@ -2486,12 +2493,13 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
    * Shutting Down an Schannel Connection
    */
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(data);
   DEBUGASSERT(backend);
 
-  if(connssl->backend->ctxt) {
+  if(backend->ctxt) {
     infof(data, "schannel: shutting down SSL/TLS connection with %s port %d",
           connssl->hostname, connssl->port);
   }
@@ -2611,12 +2619,13 @@ static CURLcode schannel_random(struct Curl_easy *data UNUSED_PARAM,
   return Curl_win32_random(entropy, length);
 }
 
-static CURLcode pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    const char *pinnedpubkey)
+static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
+                                             struct Curl_easy *data,
+                                             const char *pinnedpubkey)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
   CERT_CONTEXT *pCertContextServer = NULL;
 
   /* Result is returned to caller */
@@ -2742,7 +2751,8 @@ static CURLcode schannel_sha256sum(const unsigned char *input,
 static void *schannel_get_internals(struct ssl_connect_data *connssl,
                                     CURLINFO info UNUSED_PARAM)
 {
-  struct ssl_backend_data *backend = connssl->backend;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
   (void)info;
   DEBUGASSERT(backend);
   return &backend->ctxt->ctxt_handle;
@@ -2759,7 +2769,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   SSLSUPP_TLS13_CIPHERSUITES |
   SSLSUPP_HTTPS_PROXY,
 
-  sizeof(struct ssl_backend_data),
+  sizeof(struct schannel_ssl_backend_data),
 
   schannel_init,                     /* init */
   schannel_cleanup,                  /* cleanup */

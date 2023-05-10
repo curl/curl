@@ -72,6 +72,7 @@ LIB_VTLS_HFILES =           \
   vtls/openssl.h            \
   vtls/rustls.h             \
   vtls/schannel.h           \
+  vtls/schannel_int.h       \
   vtls/sectransp.h          \
   vtls/vtls.h               \
   vtls/vtls_int.h           \
