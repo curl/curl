@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if defined(USE_CURL_NTLM_CORE)
 
 #include <string.h>
 
@@ -504,4 +504,4 @@ void Curl_md4it(unsigned char *output, const unsigned char *input,
   MD4_Final(output, &ctx);
 }
 
-#endif /* CURL_DISABLE_CRYPTO_AUTH */
+#endif /* USE_CURL_NTLM_CORE */
