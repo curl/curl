@@ -1816,11 +1816,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   result = Curl_idnconvert_hostname(&conn->host);
   if(result)
     return result;
-  if(conn->bits.conn_to_host) {
-    result = Curl_idnconvert_hostname(&conn->conn_to_host);
-    if(result)
-      return result;
-  }
 
 #ifndef CURL_DISABLE_HSTS
   /* HSTS upgrade */
@@ -3480,6 +3475,11 @@ static CURLcode create_conn(struct Curl_easy *data,
       return result;
   }
 #endif
+  if(conn->bits.conn_to_host) {
+    result = Curl_idnconvert_hostname(&conn->conn_to_host);
+    if(result)
+      return result;
+  }
 
   /*************************************************************
    * Check whether the host and the "connect to host" are equal.
