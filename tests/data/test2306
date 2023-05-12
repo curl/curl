@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+#
+# This reproduces the #11101 issue, when the second response comes back
+# with the first header being "folded"
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+<data2 nocheck="yes">
+HTTP/1.1 200 OK
+	Access-Control-Allow-Origin: *
+	Connection: Keep-Alive
+	Content-Type: text/html; charset=utf-8
+Date: Wed, 10 May 2023 14:58:08 GMT
+
+-foo-
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool to run
+<tool>
+lib%TESTNUMBER
+</tool>
+
+ <name>
+HTTP GET re-used handle but only folded headers
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
