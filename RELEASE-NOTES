@@ -39,6 +39,7 @@ This release includes the following bugfixes:
  o cmake: set SONAME for SunOS too [3]
  o cmake: speed up and extend picky clang/gcc options [116]
  o CMakeLists.txt: fix typo for Haiku detection [95]
+ o compressed.d: clarify the words on "not notifying headers" [163]
  o config-dos.h: fix SIZEOF_CURL_OFF_T for MS-DOS/DJGPP [52]
  o configure: don't set HAVE_WRITABLE_ARGV on Windows [64]
  o configure: fix detection of apxs (for httpd) [157]
@@ -52,6 +53,7 @@ This release includes the following bugfixes:
  o curl_easy_unescape.3: rename the argument [113]
  o curl_path: bring back support for SFTP path ending in /~ [130]
  o curl_url_set.3: mention that users can set content rather freely [105]
+ o CURLOPT_IPRESOLVE.3: this for host names, not IP addresses [165]
  o data.d: emphasize no conversion [5]
  o digest: clear target buffer [8]
  o doc: curl_mime_init() strong easy binding was relaxed in 7.87.0 [26]
@@ -79,6 +81,7 @@ This release includes the following bugfixes:
  o hash: fix assigning same value [73]
  o hostcheck: fix host name wildcard checking [134]
  o hostip: add locks around use of global buffer for alarm() [129]
+ o hostip: enforce a maximum DNS cache size independent of timeout value [166]
  o hostip: refuse to resolve the .onion TLD [19]
  o HTTP-COOKIES.md: mention the #HttpOnly_ prefix [16]
  o http2: always EXPIRE_RUN_NOW unpaused http/2 transfers [139]
@@ -93,6 +96,7 @@ This release includes the following bugfixes:
  o HTTP3: document the ngtcp2/nghttp3 versions to use for building curl [143]
  o http3: expire unpaused transfers in all HTTP/3 backends [138]
  o http3: improvements across backends [51]
+ o http: free the url before storing a new copy [162]
  o http: skip a double NULL assign [83]
  o ipv4.d/ipv6.d: they are "mutex", not "boolean" [122]
  o KNOWN_BUGS: remove fixed or outdated issues, move non-bugs [65]
@@ -104,6 +108,7 @@ This release includes the following bugfixes:
  o lib: unify the upload/method handling [144]
  o lib: use correct printf flags for sockets and timediffs [36]
  o libssh2: fix crash in keyboard callback [126]
+ o libssh2: free fingerprint better [164]
  o libssh: tell it to use SFTP non-blocking [59]
  o man pages: simplify the .TH sections [133]
  o MANUAL.md: add dict example for looking up a single definition [132]
@@ -113,6 +118,7 @@ This release includes the following bugfixes:
  o multi: free up more data earleier in DONE [118]
  o multi: remove a few superfluous assigns [97]
  o multi: remove PENDING + MSGSENT handles from the main linked list [23]
+ o ngtcp2: adapted to 0.15.0 [151]
  o ngtcp2: adjust config and code checks for ngtcp2 without nghttp3 [4]
  o noproxy: pointer to local array 'hostip' is stored outside scope [93]
  o ntlm: clear lm and nt response buffers before use [7]
@@ -209,16 +215,16 @@ advice from friends like these:
   Ben Fritz, Biswapriyo Nath, Boris Kuschel, Brian Lund, Chloe Kudryavtsev,
   Colman Mbuya, Dan Fandrich, Dan Frandrich, Daniel Stenberg,
   dengjfzh on github, Diogo Teles Sant'Anna, Dirk Rosenkranz, Douglas R. Reno,
-  eaglegai on github, Emanuele Torre, Emil Engler, François Michel,
-  Frank Gevaerts, Gisle Vanem, Harry Sintonen, Hiroki Kurosawa,
-  Jakub Zakrzewski, Jim King, Jon Rumsey, Josh McCullough, Kai Pastor,
-  Kamil Dudka, Kvarec Lezki, kwind on github, Marcel Raad, Matt Jolly,
-  Micah Snyder), nobedee on github, Oliver Chang, Osaila on github,
+  Dylan Anthony, eaglegai on github, Emanuele Torre, Emil Engler,
+  François Michel, Frank Gevaerts, Gisle Vanem, Harry Sintonen,
+  Hiroki Kurosawa, Jakub Zakrzewski, Jim King, Jon Rumsey, Josh McCullough,
+  Kai Pastor, Kamil Dudka, Kvarec Lezki, kwind on github, Marcel Raad,
+  Matt Jolly, Micah Snyder), nobedee on github, Oliver Chang, Osaila on github,
   Patrick Monnerat, Paul Howarth, Pavel Mayorov, Paweł Wegner, Philip Heiduck,
   Ray Satiro, Ronan Pigott, Sevan Janiyan, simplerobot on github,
   Smackd0wn on github, Stefan Eissing, SuperIlu on github, Viktor Szakats,
-  YX Hao
-  (54 contributors)
+  Wei Chong Tan, YX Hao
+  (56 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -372,6 +378,7 @@ References to bug reports and discussions on issues:
  [148] = https://curl.se/bug/?i=11068
  [149] = https://curl.se/bug/?i=11061
  [150] = https://curl.se/bug/?i=11059
+ [151] = https://curl.se/bug/?i=11031
  [152] = https://curl.se/bug/?i=11054
  [153] = https://curl.se/bug/?i=11055
  [154] = https://curl.se/bug/?i=11045
@@ -380,3 +387,8 @@ References to bug reports and discussions on issues:
  [157] = https://curl.se/bug/?i=11051
  [158] = https://curl.se/bug/?i=11048
  [160] = https://curl.se/bug/?i=11047
+ [162] = https://curl.se/bug/?i=11093
+ [163] = https://curl.se/bug/?i=11091
+ [164] = https://curl.se/bug/?i=11088
+ [165] = https://curl.se/bug/?i=11087
+ [166] = https://curl.se/bug/?i=11084
