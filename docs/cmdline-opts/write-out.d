@@ -5,7 +5,7 @@ Short: w
 Arg: <format>
 Help: Use output FORMAT after completion
 Category: verbose
-Example: -w '%{http_code}\\n' $URL
+Example: -w '%{response_code}\\n' $URL
 Added: 6.5
 See-also: verbose head
 Multi: single
