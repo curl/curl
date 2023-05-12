@@ -140,7 +140,7 @@ struct cf_ngtcp2_ctx {
   uint32_t version;
   ngtcp2_settings settings;
   ngtcp2_transport_params transport_params;
-  ngtcp2_connection_close_error last_error;
+  ngtcp2_ccerr last_error;
   ngtcp2_crypto_conn_ref conn_ref;
 #ifdef USE_OPENSSL
   SSL_CTX *sslctx;
@@ -729,9 +729,9 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] read_stream(len=%zu) -> %zd",
                 stream_id, buflen, nconsumed));
   if(nconsumed < 0) {
-    ngtcp2_connection_close_error_set_application_error(
-        &ctx->last_error,
-        nghttp3_err_infer_quic_app_error_code((int)nconsumed), NULL, 0);
+    ngtcp2_ccerr_set_application_error(
+      &ctx->last_error,
+      nghttp3_err_infer_quic_app_error_code((int)nconsumed), NULL, 0);
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -788,8 +788,8 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
   DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] quic close(err=%"
                 PRIu64 ") -> %d", stream3_id, app_error_code, rv));
   if(rv) {
-    ngtcp2_connection_close_error_set_application_error(
-        &ctx->last_error, nghttp3_err_infer_quic_app_error_code(rv), NULL, 0);
+    ngtcp2_ccerr_set_application_error(
+      &ctx->last_error, nghttp3_err_infer_quic_app_error_code(rv), NULL, 0);
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
@@ -1257,7 +1257,7 @@ static int init_ngh3_conn(struct Curl_cfilter *cf)
   int rc;
   int64_t ctrl_stream_id, qpack_enc_stream_id, qpack_dec_stream_id;
 
-  if(ngtcp2_conn_get_max_local_streams_uni(ctx->qconn) < 3) {
+  if(ngtcp2_conn_get_streams_uni_left(ctx->qconn) < 3) {
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
@@ -1781,13 +1781,12 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
                   ngtcp2_strerror(rv)));
     if(!ctx->last_error.error_code) {
       if(rv == NGTCP2_ERR_CRYPTO) {
-        ngtcp2_connection_close_error_set_transport_error_tls_alert(
-            &ctx->last_error,
-            ngtcp2_conn_get_tls_alert(ctx->qconn), NULL, 0);
+        ngtcp2_ccerr_set_tls_alert(&ctx->last_error,
+                                   ngtcp2_conn_get_tls_alert(ctx->qconn),
+                                   NULL, 0);
       }
       else {
-        ngtcp2_connection_close_error_set_transport_error_liberr(
-            &ctx->last_error, rv, NULL, 0);
+        ngtcp2_ccerr_set_liberr(&ctx->last_error, rv, NULL, 0);
       }
     }
 
@@ -1874,9 +1873,9 @@ static ssize_t read_pkt_to_send(void *userp,
       if(veccnt < 0) {
         failf(x->data, "nghttp3_conn_writev_stream returned error: %s",
               nghttp3_strerror((int)veccnt));
-        ngtcp2_connection_close_error_set_application_error(
-            &ctx->last_error,
-            nghttp3_err_infer_quic_app_error_code((int)veccnt), NULL, 0);
+        ngtcp2_ccerr_set_application_error(
+          &ctx->last_error,
+          nghttp3_err_infer_quic_app_error_code((int)veccnt), NULL, 0);
         *err = CURLE_SEND_ERROR;
         return -1;
       }
@@ -1916,8 +1915,7 @@ static ssize_t read_pkt_to_send(void *userp,
         DEBUGASSERT(ndatalen == -1);
         failf(x->data, "ngtcp2_conn_writev_stream returned error: %s",
               ngtcp2_strerror((int)n));
-        ngtcp2_connection_close_error_set_transport_error_liberr(
-            &ctx->last_error, (int)n, NULL, 0);
+        ngtcp2_ccerr_set_liberr(&ctx->last_error, (int)n, NULL, 0);
         *err = CURLE_SEND_ERROR;
         nwritten = -1;
         goto out;
@@ -1964,8 +1962,7 @@ static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
   if(rv) {
     failf(data, "ngtcp2_conn_handle_expiry returned error: %s",
           ngtcp2_strerror(rv));
-    ngtcp2_connection_close_error_set_transport_error_liberr(&ctx->last_error,
-                                                             rv, NULL, 0);
+    ngtcp2_ccerr_set_liberr(&ctx->last_error, rv, NULL, 0);
     return CURLE_SEND_ERROR;
   }
 
@@ -2317,7 +2314,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->ssl);
 #endif
 
-  ngtcp2_connection_close_error_default(&ctx->last_error);
+  ngtcp2_ccerr_default(&ctx->last_error);
 
   ctx->conn_ref.get_conn = get_conn;
   ctx->conn_ref.user_data = cf;
