@@ -4,13 +4,13 @@ curl and libcurl 8.1.0
  Command line options:         251
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2867
+ Contributors:                 2872
 
 This release includes the following changes:
 
  o curl: add --proxy-http2 [62]
  o CURLPROXY_HTTPS2: for HTTPS proxy that may speak HTTP/2 [57]
- o proxy: http2 proxy tunnel implementation [68]
+ o hostip: refuse to resolve the .onion TLD [19]
  o tool_writeout: add URL component variables [41]
 
 This release includes the following bugfixes:
@@ -45,7 +45,7 @@ This release includes the following bugfixes:
  o configure: fix detection of apxs (for httpd) [157]
  o configure: make quiche require quiche_conn_send_ack_eliciting [46]
  o connect: fix https connection setup to treat ssl_mode correctly [94]
- o content_encoding: only do tranfer-encoding compression if asked to [61]
+ o content_encoding: only do transfer-encoding compression if asked to [61]
  o cookie: address PVS nits [74]
  o cookie: clarify that init with data set to NULL reads no file [99]
  o curl: do NOT append file name to path for upload when there's a query [58]
@@ -75,14 +75,13 @@ This release includes the following bugfixes:
  o GHA: add a memory-sanitizer job [2]
  o GHA: run all linux test jobs with valgrind [14]
  o GHA: suppress git clone output [89]
- o GHA: update ngtcp2-*.yml to v0.10.0 [21]
  o gskit: various compile errors in OS400 [12]
  o h2/h3: replace `state.drain` counter with `state.dselect_bits` [141]
  o hash: fix assigning same value [73]
+ o headers: clear (possibly) lingering pointer in init [167]
  o hostcheck: fix host name wildcard checking [134]
  o hostip: add locks around use of global buffer for alarm() [129]
  o hostip: enforce a maximum DNS cache size independent of timeout value [166]
- o hostip: refuse to resolve the .onion TLD [19]
  o HTTP-COOKIES.md: mention the #HttpOnly_ prefix [16]
  o http2: always EXPIRE_RUN_NOW unpaused http/2 transfers [139]
  o http2: do flow window accounting for cancelled streams [155]
@@ -112,6 +111,8 @@ This release includes the following bugfixes:
  o libssh: tell it to use SFTP non-blocking [59]
  o man pages: simplify the .TH sections [133]
  o MANUAL.md: add dict example for looking up a single definition [132]
+ o md(4|5): don't use deprecated iOS functions [21]
+ o md4: only build when used [68]
  o mime: skip NULL assigns after Curl_safefree() [84]
  o multi: add handle asserts in DEBUG builds [11]
  o multi: add multi-ignore logic to multi_socket_action [154]
@@ -180,6 +181,7 @@ This release includes the following bugfixes:
  o tool_operate: refuse (--data or --form) and --continue-at combo [119]
  o transfer: refuse POSTFIELDS + RESUME_FROM combo [120]
  o transfer: skip extra assign [87]
+ o url: fix null dispname for --connect-to option [161]
  o url: fix PVS nits [71]
  o url: remove call to Curl_llist_destroy in Curl_close [22]
  o urlapi: cleanups and improvements [91]
@@ -193,6 +195,7 @@ This release includes the following bugfixes:
  o vtls and h2 improvements [69]
  o Websocket: enhanced en-/decoding [136]
  o wolfssl.yml: bump to version 5.6.0 [44]
+ o write-out.d: Use response_code in example [159]
  o ws: handle reads before EAGAIN better [38]
 
 This release includes the following known bugs:
@@ -221,10 +224,10 @@ advice from friends like these:
   Kai Pastor, Kamil Dudka, Kvarec Lezki, kwind on github, Marcel Raad,
   Matt Jolly, Micah Snyder), nobedee on github, Oliver Chang, Osaila on github,
   Patrick Monnerat, Paul Howarth, Pavel Mayorov, Paweł Wegner, Philip Heiduck,
-  Ray Satiro, Ronan Pigott, Sevan Janiyan, simplerobot on github,
-  Smackd0wn on github, Stefan Eissing, SuperIlu on github, Viktor Szakats,
-  Wei Chong Tan, YX Hao
-  (56 contributors)
+  Ray Satiro, Ronan Pigott, Sevan Janiyan, Shohei Maeda, simplerobot on github,
+  Smackd0wn on github, Stefan Eissing, Steve Herrell, SuperIlu on github,
+  Viktor Szakats, Vítor Galvão, Wei Chong Tan, YX Hao
+  (59 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -248,7 +251,7 @@ References to bug reports and discussions on issues:
  [18] = https://curl.se/bug/?i=10844
  [19] = https://curl.se/bug/?i=543
  [20] = https://curl.se/bug/?i=10844
- [21] = https://curl.se/bug/?i=10612
+ [21] = https://curl.se/bug/?i=11098
  [22] = https://curl.se/bug/?i=10846
  [23] = https://curl.se/bug/?i=10801
  [24] = https://curl.se/bug/?i=10783
@@ -295,7 +298,7 @@ References to bug reports and discussions on issues:
  [65] = https://curl.se/bug/?i=10963
  [66] = https://curl.se/bug/?i=10898
  [67] = https://curl.se/bug/?i=10877
- [68] = https://curl.se/bug/?i=10780
+ [68] = https://curl.se/bug/?i=11102
  [69] = https://curl.se/bug/?i=10891
  [70] = https://curl.se/bug/?i=10894
  [71] = https://curl.se/bug/?i=10959
@@ -386,9 +389,12 @@ References to bug reports and discussions on issues:
  [156] = https://curl.se/bug/?i=11050
  [157] = https://curl.se/bug/?i=11051
  [158] = https://curl.se/bug/?i=11048
+ [159] = https://curl.se/bug/?i=11107
  [160] = https://curl.se/bug/?i=11047
+ [161] = https://curl.se/bug/?i=11106
  [162] = https://curl.se/bug/?i=11093
  [163] = https://curl.se/bug/?i=11091
  [164] = https://curl.se/bug/?i=11088
  [165] = https://curl.se/bug/?i=11087
  [166] = https://curl.se/bug/?i=11084
+ [167] = https://curl.se/bug/?i=11101
