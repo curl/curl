@@ -14,7 +14,7 @@ To build in environments that support configure, after having extracted
 everything from git, do this:
 
 autoreconf -fi
-./configure
+./configure --with-openssl
 make
 
   Daniel uses a ./configure line similar to this for easier development:
