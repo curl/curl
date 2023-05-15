@@ -28,6 +28,7 @@ import difflib
 import filecmp
 import logging
 import os
+from datetime import timedelta
 import pytest
 
 from testenv import Env, CurlClient, LocalClient
@@ -333,6 +334,21 @@ class TestDownload:
         srcfile = os.path.join(httpd.docs_dir, docname)
         # downloads should be there, but not necessarily complete
         self.check_downloads(client, srcfile, count, complete=False)
+
+    # speed limited download
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_02_24_speed_limit(self, env: Env, httpd, nghttpx, proto, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 1
+        url = f'https://{env.authority_for(env.domain1, proto)}/data-1m'
+        curl = CurlClient(env=env)
+        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+            '--limit-rate', f'{196 * 1024}'
+        ])
+        r.check_response(count=count, http_status=200)
+        assert r.duration > timedelta(seconds=4), \
+            f'rate limited transfer should take more than 4s, not {r.duration}'
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
