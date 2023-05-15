@@ -49,10 +49,6 @@ Files: lib/libcurl.vers.in
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-Files: mlc_config.json
-Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
-License: curl
-
 Files: packages/OS400/README.OS400
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
