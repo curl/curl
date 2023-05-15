@@ -6,7 +6,7 @@ Help: Use AWS V4 signature authentication
 Category: auth http
 Added: 7.75.0
 See-also: basic user
-Example: --aws-sigv4 "aws:amz:east-2:es" --user "key:secret" $URL
+Example: --aws-sigv4 "aws:amz:us-east-2:es" --user "key:secret" $URL
 Multi: single
 ---
 Use AWS V4 signature authentication in the transfer.
