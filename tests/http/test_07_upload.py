@@ -227,6 +227,21 @@ class TestUpload:
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == exp_data
 
+    # issue #10591
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_32_issue_10591(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        count = 1
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto)
+        r.check_response(count=count, http_status=200)
+        r.check_response(count=count, http_status=200)
+
     def check_download(self, count, srcfile, curl):
         for i in range(count):
             dfile = curl.download_file(i)

@@ -61,13 +61,10 @@ int test(char *URL)
   struct WriteThis pooh;
 
   if(!strcmp(URL, "check")) {
-#if (defined(WIN32) || defined(__CYGWIN__)) && \
-    !defined(USE_RECV_BEFORE_SEND_WORKAROUND)
-    printf("test requires recv-before-send workaround on Windows\n");
-    return 1; /* skip since test will fail on Windows without workaround */
-#else
+    /* We used to run this on Windows only if USE_RECV_BEFORE_SEND_WORKAROUND
+     * is in place, but the feature has other issues. Let's run this test
+     * in all siutations, see what our Window CI says. */
     return 0; /* sure, run this! */
-#endif
   }
 
   pooh.readptr = data;
