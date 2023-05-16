@@ -186,6 +186,17 @@ dnl
 INITIAL_LDFLAGS=$LDFLAGS
 INITIAL_LIBS=$LIBS
 
+dnl
+dnl Generates a shell script to run the compiler with LD_LIBRARY_PATH set to
+dnl the value used right now. This lets CURL_RUN_IFELSE set LD_LIBRARY_PATH to
+dnl something different but only have that affect the execution of the results
+dnl of the compile, not change the libraries for the compiler itself.
+dnl
+compilersh="run-compiler"
+echo "CC=$CC" > $compilersh
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> $compilersh
+echo 'exec $CC $@' >> $compilersh
+
 dnl **********************************************************************
 dnl See which TLS backend(s) that are requested. Just do all the
 dnl TLS AC_ARG_WITH() invokes here and do the checks later
@@ -4395,6 +4406,8 @@ else
   LIBCURL_NO_SHARED=
 fi
 AC_SUBST(LIBCURL_NO_SHARED)
+
+rm $compilersh
 
 dnl
 dnl For keeping supported features and protocols also in pkg-config file
