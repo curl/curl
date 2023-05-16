@@ -70,6 +70,8 @@
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
 #endif
 
+#include "easy_lock.h"
+
 #if defined(CURLRES_SYNCH) &&                   \
   defined(HAVE_ALARM) &&                        \
   defined(SIGALRM) &&                           \
@@ -77,10 +79,6 @@
   defined(GLOBAL_INIT_IS_THREADSAFE)
 /* alarm-based timeouts can only be used with all the dependencies satisfied */
 #define USE_ALARM_TIMEOUT
-#endif
-
-#ifdef USE_ALARM_TIMEOUT
-#include "easy_lock.h"
 #endif
 
 #define MAX_HOSTCACHE_LEN (255 + 7) /* max FQDN + colon + port number + zero */
