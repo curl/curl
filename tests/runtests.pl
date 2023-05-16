@@ -160,7 +160,10 @@ use constant {
     ST_PREPROCESS => 3,
     ST_RUN => 4,
 };
-my $singletest_state = ST_INIT; # current state of singletest()
+my %singletest_state;  # current state of singletest() by runner ID
+my %runnerids;         # runner IDs by number
+my @runnersidle;       # runner IDs idle and ready to execute a test
+my %runnerfortest;     # runner IDs by testnum
 
 
 #######################################################################
@@ -1639,30 +1642,35 @@ sub singletest_success {
 sub singletest {
     my ($runnerid, $testnum, $count, $total)=@_;
 
-    if($singletest_state == ST_INIT) {
+    if(!exists $singletest_state{$runnerid}) {
+        # First time in singletest() for this test
+        $singletest_state{$runnerid} = ST_INIT;
+    }
+
+    if($singletest_state{$runnerid} == ST_INIT) {
         my $logdir = getlogdir($testnum);
         # first, remove all lingering log files
         if(!cleardir($logdir) && $clearlocks) {
             runnerac_clearlocks($runnerid, $logdir);
-            $singletest_state = ST_CLEARLOCKS;
+            $singletest_state{$runnerid} = ST_CLEARLOCKS;
         } else {
-            $singletest_state = ST_INITED;
+            $singletest_state{$runnerid} = ST_INITED;
             # Recursively call the state machine again because there is no
             # event expected that would otherwise trigger a new call.
             return singletest(@_);
         }
 
-    } elsif($singletest_state == ST_CLEARLOCKS) {
+    } elsif($singletest_state{$runnerid} == ST_CLEARLOCKS) {
         my ($rid, $logs) = runnerar($runnerid);
         logmsg $logs;
         my $logdir = getlogdir($testnum);
         cleardir($logdir);
-        $singletest_state = ST_INITED;
+        $singletest_state{$runnerid} = ST_INITED;
         # Recursively call the state machine again because there is no
         # event expected that would otherwise trigger a new call.
         return singletest(@_);
 
-    } elsif($singletest_state == ST_INITED) {
+    } elsif($singletest_state{$runnerid} == ST_INITED) {
         ###################################################################
         # Restore environment variables that were modified in a previous run.
         # Test definition may instruct to (un)set environment vars.
@@ -1680,9 +1688,9 @@ sub singletest {
         citest_starttest($testnum);
 
         runnerac_test_preprocess($runnerid, $testnum);
-        $singletest_state = ST_PREPROCESS;
+        $singletest_state{$runnerid} = ST_PREPROCESS;
 
-    } elsif($singletest_state == ST_PREPROCESS) {
+    } elsif($singletest_state{$runnerid} == ST_PREPROCESS) {
         my ($rid, $why, $error, $logs, $testtimings) = runnerar($runnerid);
         logmsg $logs;
         if($error == -2) {
@@ -1705,7 +1713,7 @@ sub singletest {
         if($error) {
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $error);
-            $singletest_state = ST_INIT;
+            $singletest_state{$runnerid} = ST_INIT;
             return ($error, 0);
         }
 
@@ -1716,9 +1724,9 @@ sub singletest {
         my $tool;
         my $usedvalgrind;
         runnerac_test_run($runnerid, $testnum);
-        $singletest_state = ST_RUN;
+        $singletest_state{$runnerid} = ST_RUN;
 
-    } elsif($singletest_state == ST_RUN) {
+    } elsif($singletest_state{$runnerid} == ST_RUN) {
         my ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar($runnerid);
         logmsg $logs;
         updatetesttimings($testnum, %$testtimings);
@@ -1728,7 +1736,7 @@ sub singletest {
             my $err = ignoreresultcode($testnum);
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $err);
-            $singletest_state = ST_INIT;
+            $singletest_state{$runnerid} = ST_INIT;
             # return a test failure, either to be reported or to be ignored
             return ($err, 0);
         }
@@ -1737,7 +1745,7 @@ sub singletest {
             timestampskippedevents($testnum);
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $error);
-            $singletest_state = ST_INIT;
+            $singletest_state{$runnerid} = ST_INIT;
             return ($error, 0);
         }
         elsif($error > 0) {
@@ -1745,7 +1753,7 @@ sub singletest {
             $timevrfyend{$testnum} = Time::HiRes::time();
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $error);
-            $singletest_state = ST_INIT;
+            $singletest_state{$runnerid} = ST_INIT;
             return ($error, 0);
         }
 
@@ -1762,7 +1770,7 @@ sub singletest {
             my $err = ignoreresultcode($testnum);
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $err);
-            $singletest_state = ST_INIT;
+            $singletest_state{$runnerid} = ST_INIT;
             # return a test failure, either to be reported or to be ignored
             return ($err, 0);
         }
@@ -1771,7 +1779,7 @@ sub singletest {
             # test success code
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $cmdres);
-            $singletest_state = ST_INIT;
+            $singletest_state{$runnerid} = ST_INIT;
             return ($cmdres, 0);
         }
 
@@ -1782,7 +1790,7 @@ sub singletest {
 
         # Submit the test case result with the CI environment
         citest_finishtest($testnum, 0);
-        $singletest_state = ST_INIT;
+        $singletest_state{$runnerid} = ST_INIT;
 
         return (0, 0);  # state machine is finished
     }
@@ -1937,6 +1945,31 @@ sub ignoreresultcode {
     return 0;
 }
 
+#######################################################################
+# Put the given runner ID onto the queue of runners ready for a new task
+#
+sub runnerready {
+    my ($runnerid)=@_;
+    push @runnersidle, $runnerid;
+}
+
+#######################################################################
+# Pick a test runner for the given test
+#
+sub pickrunner {
+    my ($testnum)=@_;
+    if(!scalar(%runnerids)) {
+        # No runners have been created; create one now
+        my $runnernum = 1;
+        cleardir($LOGDIR);
+        mkdir($LOGDIR, 0777);
+        $runnerids{$runnernum} = runner_init($LOGDIR, $jobs);
+        runnerready($runnerids{$runnernum});
+    }
+    scalar(@runnersidle) || die "No runners available";
+
+    return pop @runnersidle;
+}
 
 #######################################################################
 # Check options to this test program
@@ -2576,6 +2609,7 @@ foreach my $testnum (@at) {
     $ignoretestcodes{$testnum} = $errorreturncode;
     push(@runtests, $testnum);
 }
+my $totaltests = scalar(@runtests);
 
 if($listonly) {
     exit(0);
@@ -2584,12 +2618,6 @@ if($listonly) {
 #######################################################################
 # Setup CI Test Run
 citest_starttestrun();
-
-#######################################################################
-# Initialize the runner to prepare to run tests
-cleardir($LOGDIR);
-mkdir($LOGDIR, 0777);
-my $runnerid = runner_init($LOGDIR, $jobs);
 
 #######################################################################
 # The main test-loop
@@ -2616,8 +2644,13 @@ foreach my $testnum (@runtests) {
         }
 
         # execute one test case
+        if(!exists($runnerfortest{$testnum})) {
+            # New test; pick a runner for it
+            my $runnerid = pickrunner($testnum);
+            $runnerfortest{$testnum} = $runnerid;
+        }
         my $error;
-        ($error, $again) = singletest($runnerid, $testnum, $count, scalar(@runtests));
+        ($error, $again) = singletest($runnerfortest{$testnum}, $testnum, $count, $totaltests);
         if($again) {
             # Wait for asynchronous response
             if(!runnerar_ready(0.05)) {
@@ -2628,6 +2661,7 @@ foreach my $testnum (@runtests) {
         }
 
         # Test has completed
+        runnerready($runnerfortest{$testnum});
         if($error < 0) {
             # not a test we can run
             next nexttest;
@@ -2672,16 +2706,26 @@ my $sofar = time() - $start;
 citest_finishtestrun();
 
 # Tests done, stop the servers
-runnerac_stopservers($runnerid);
-my ($rid, $unexpected, $logs) = runnerar($runnerid);
-logmsg $logs;
+foreach my $runnerid (values %runnerids) {
+    runnerac_stopservers($runnerid);
+}
 
-# Kill the runner
-# There is a race condition here since we don't know exactly when the runner
-# has finished shutting itself down
-runnerac_shutdown($runnerid);
-undef $runnerid;
-sleep 0;  # give runner a chance to run
+# Wait for servers to stop
+my $unexpected;
+foreach my $runnerid (values %runnerids) {
+    my ($rid, $unexpect, $logs) = runnerar($runnerid);
+    $unexpected ||= $unexpect;
+    logmsg $logs;
+}
+
+# Kill the runners
+# There is a race condition here since we don't know exactly when the runners
+# have each finished shutting themselves down, but we're about to exit so it
+# doesn't make much difference.
+foreach my $runnerid (values %runnerids) {
+    runnerac_shutdown($runnerid);
+    sleep 0;  # give runner a context switch so it can shut itself down
+}
 
 my $numskipped = %skipped ? sum values %skipped : 0;
 my $all = $total + $numskipped;
