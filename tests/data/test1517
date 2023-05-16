@@ -11,9 +11,9 @@ early response
 #
 # This test checks to make sure curl can call recv() without failing after a
 # send() fails on the same socket (#657). Most OSes should support this
-# natively but on Windows curl must be built with a workaround (#668) for the
-# test to succeed. The precheck will skip this test on Windows if curl was
-# built without the workaround (USE_RECV_BEFORE_SEND_WORKAROUND isn't defined).
+# natively. On Windows there were reported problems and a workaround via
+# define USE_RECV_BEFORE_SEND_WORKAROUND was added.
+# This proved problematic in other cases and was removed again.
 #
 # Server-side
 <reply>

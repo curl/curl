@@ -1235,20 +1235,6 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   curl_socket_t fdsave;
   ssize_t nwritten;
 
-#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
-  /* WinSock will destroy unread received data if send() is
-     failed.
-     To avoid lossage of received data, recv() must be
-     performed before every send() if any incoming data is
-     available. */
-  if(ctx->buffer_recv && !Curl_bufq_is_full(&ctx->recvbuf)) {
-    nwritten = Curl_bufq_slurp(&ctx->recvbuf, nw_in_read, &rctx, err);
-    if(nwritten < 0 && *err != CURLE_AGAIN) {
-      return -1;
-    }
-  }
-#endif
-
   *err = CURLE_OK;
   fdsave = cf->conn->sock[cf->sockindex];
   cf->conn->sock[cf->sockindex] = ctx->sock;
@@ -1405,20 +1391,11 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
     conn_set_primary_ip(cf, data);
     set_local_ip(cf, data);
     Curl_persistconninfo(data, cf->conn, ctx->l_ip, ctx->l_port);
-    /* We buffer only for TCP transfers that do not install their own read
-     * function. Those may still have expectations about socket behaviours from
-     * the past.
-     *
-     * Note buffering is currently disabled by default because we have stalls
+    /* buffering is currently disabled by default because we have stalls
      * in parallel transfers where not all buffered data is consumed and no
      * socket events happen.
      */
-#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
-    ctx->buffer_recv = (ctx->transport == TRNSPRT_TCP &&
-                        (cf->conn->recv[cf->sockindex] == Curl_conn_recv));
-#else
     ctx->buffer_recv = FALSE;
-#endif
   }
   ctx->active = TRUE;
 }

@@ -777,23 +777,6 @@ endings either CRLF or LF so 't' is appropriate.
 #define FOPEN_APPENDTEXT "a"
 #endif
 
-/* Windows workaround to recv before every send, because apparently Winsock
- * destroys destroys recv() buffer when send() failed.
- * This workaround is now disabled by default since it caused hard to fix bugs.
- * Define USE_RECV_BEFORE_SEND_WORKAROUND to enable it.
- * https://github.com/curl/curl/issues/657
- * https://github.com/curl/curl/pull/10409
- */
-#if !defined(DONT_USE_RECV_BEFORE_SEND_WORKAROUND)
-#  if defined(WIN32) || defined(__CYGWIN__)
-/* #    define USE_RECV_BEFORE_SEND_WORKAROUND */
-#  endif
-#else  /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
-#  ifdef USE_RECV_BEFORE_SEND_WORKAROUND
-#    undef USE_RECV_BEFORE_SEND_WORKAROUND
-#  endif
-#endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
-
 /* for systems that don't detect this in configure */
 #ifndef CURL_SA_FAMILY_T
 #  if defined(HAVE_SA_FAMILY_T)
