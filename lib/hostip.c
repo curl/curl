@@ -287,8 +287,8 @@ void Curl_hostcache_prune(struct Curl_easy *data)
 /* Beware this is a global and unique instance. This is used to store the
    return address that we can jump back to from inside a signal handler. This
    is not thread-safe stuff. */
-sigjmp_buf curl_jmpenv;
-curl_simple_lock curl_jmpenv_lock;
+static sigjmp_buf curl_jmpenv;
+static curl_simple_lock curl_jmpenv_lock;
 #endif
 
 /* lookup address, returns entry if found and not stale */
