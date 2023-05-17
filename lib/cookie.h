@@ -69,7 +69,7 @@ struct CookieInfo {
   curl_off_t next_expiration; /* the next time at which expiration happens */
 };
 
-/* The maximum sizes we accept for a cookies. RFC 6265 section 6.1 says
+/* The maximum sizes we accept for cookies. RFC 6265 section 6.1 says
    "general-use user agents SHOULD provide each of the following minimum
    capabilities":
 
