@@ -1203,14 +1203,17 @@ sub controlleripccall {
 # Called by controller
 sub runnerar {
     my ($runnerid) = @_;
+    my $err;
     my $datalen;
-    if (sysread($controllerr{$runnerid}, $datalen, 4) <= 0) {
-        die "error in runnerar\n";
+    while(! defined ($err = sysread($controllerr{$runnerid}, $datalen, 4)) || $err <= 0) {
+        $!{EINTR} || die "error in runnerar: $!\n";
+        # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
     my $len=unpack("L", $datalen);
     my $buf;
-    if (sysread($controllerr{$runnerid}, $buf, $len) <= 0) {
-        die "error in runnerar\n";
+    while(! defined ($err = sysread($controllerr{$runnerid}, $buf, $len)) || $err <= 0) {
+        $!{EINTR} || die "error in runnerar: $!\n";
+        # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
 
     # Decode response values
@@ -1259,14 +1262,17 @@ sub runnerar_ready {
 # The IPC is read from the $runnerr pipe and the response is
 # written to the $runnerw pipe
 sub ipcrecv {
+    my $err;
     my $datalen;
-    if (sysread($runnerr, $datalen, 4) <= 0) {
-        die "error in ipcrecv\n";
+    while(! defined ($err = sysread($runnerr, $datalen, 4)) || $err <= 0) {
+        $!{EINTR} || die "error in ipcrecv: $!\n";
+        # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
     my $len=unpack("L", $datalen);
     my $buf;
-    if (sysread($runnerr, $buf, $len) <= 0) {
-        die "error in ipcrecv\n";
+    while(! defined ($err = sysread($runnerr, $buf, $len)) || $err <= 0) {
+        $!{EINTR} || die "error in ipcrecv: $!\n";
+        # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
 
     # Decode the function name and arguments
