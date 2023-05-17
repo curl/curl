@@ -131,8 +131,8 @@ if(WIN32)
       set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
     endif()
   endif()
-else()
-  # on not-Windows, check for writable argv[]
+elseif(NOT CMAKE_CROSSCOMPILING)
+  # on not-Windows and not-crosscompiling, check for writable argv[]
     include(CheckCSourceRuns)
     check_c_source_runs("
 int main(int argc, char **argv)
