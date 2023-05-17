@@ -4,7 +4,7 @@ curl and libcurl 8.1.0
  Command line options:         251
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2872
+ Contributors:                 2875
 
 This release includes the following changes:
 
@@ -17,6 +17,7 @@ This release includes the following bugfixes:
 
  o amiga: Fix CA certificate paths for AmiSSL and MorphOS [150]
  o autotools: sync up clang picky warnings with cmake [114]
+ o aws-sigv4.d: fix region identifier in example [168]
  o bufq: simplify since expression is always true [72]
  o cf-h1-proxy: skip an extra NULL assign [80]
  o cf-h2-proxy: fix processing ingress to stop too early [76]
@@ -75,6 +76,7 @@ This release includes the following bugfixes:
  o GHA: add a memory-sanitizer job [2]
  o GHA: run all linux test jobs with valgrind [14]
  o GHA: suppress git clone output [89]
+ o GIT-INFO: add --with-openssl [171]
  o gskit: various compile errors in OS400 [12]
  o h2/h3: replace `state.drain` counter with `state.dselect_bits` [141]
  o hash: fix assigning same value [73]
@@ -150,6 +152,7 @@ This release includes the following bugfixes:
  o smb: remove double assign [86]
  o smbserver: remove temporary files before exit [135]
  o socketpair: verify with a random value [142]
+ o ssh: Add support for libssh2 read timeout [170]
  o telnet: simplify the implementation of str_is_nonascii() [42]
  o test1169: fix so it works properly everywhere [106]
  o test1592: add flaky keyword [39]
@@ -216,18 +219,19 @@ advice from friends like these:
 
   Ali Khodkar, Andreas Falkenhahn, Andreas Huebner, Andy Alt, Arne Soete,
   Ben Fritz, Biswapriyo Nath, Boris Kuschel, Brian Lund, Chloe Kudryavtsev,
-  Colman Mbuya, Dan Fandrich, Dan Frandrich, Daniel Stenberg,
-  dengjfzh on github, Diogo Teles Sant'Anna, Dirk Rosenkranz, Douglas R. Reno,
-  Dylan Anthony, eaglegai on github, Emanuele Torre, Emil Engler,
-  François Michel, Frank Gevaerts, Gisle Vanem, Harry Sintonen,
-  Hiroki Kurosawa, Jakub Zakrzewski, Jim King, Jon Rumsey, Josh McCullough,
-  Kai Pastor, Kamil Dudka, Kvarec Lezki, kwind on github, Marcel Raad,
-  Matt Jolly, Micah Snyder), nobedee on github, Oliver Chang, Osaila on github,
-  Patrick Monnerat, Paul Howarth, Pavel Mayorov, Paweł Wegner, Philip Heiduck,
-  Ray Satiro, Ronan Pigott, Sevan Janiyan, Shohei Maeda, simplerobot on github,
+  Colman Mbuya, Dan Fandrich, Dan Frandrich, Daniel Silverstone,
+  Daniel Stenberg, dengjfzh on github, Diogo Teles Sant'Anna, Dirk Rosenkranz,
+  Douglas R. Reno, Dylan Anthony, eaglegai on github, Emanuele Torre,
+  Emil Engler, François Michel, Frank Gevaerts, Gisle Vanem, Harry Sintonen,
+  Hiroki Kurosawa, Jakub Zakrzewski, Janne Blomqvist, Jim King, Jon Rumsey,
+  Josh McCullough, Kai Pastor, Kamil Dudka, Kvarec Lezki, kwind on github,
+  Marc Deslauriers, Marcel Raad, Matt Jolly, Micah Snyder), nobedee on github,
+  Oliver Chang, Osaila on github, Osama Albahrani, Patrick Monnerat,
+  Paul Howarth, Pavel Mayorov, Paweł Wegner, Philip Heiduck, Ray Satiro,
+  Ronan Pigott, Sevan Janiyan, Shohei Maeda, simplerobot on github,
   Smackd0wn on github, Stefan Eissing, Steve Herrell, SuperIlu on github,
-  Viktor Szakats, Vítor Galvão, Wei Chong Tan, YX Hao
-  (59 contributors)
+  Thomas Taylor, Viktor Szakats, Vítor Galvão, Wei Chong Tan, YX Hao
+  (64 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -398,3 +402,6 @@ References to bug reports and discussions on issues:
  [165] = https://curl.se/bug/?i=11087
  [166] = https://curl.se/bug/?i=11084
  [167] = https://curl.se/bug/?i=11101
+ [168] = https://curl.se/bug/?i=11117
+ [170] = https://curl.se/bug/?i=10965
+ [171] = https://curl.se/bug/?i=11110
