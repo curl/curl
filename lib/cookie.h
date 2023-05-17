@@ -69,9 +69,9 @@ struct CookieInfo {
   curl_off_t next_expiration; /* the next time at which expiration happens */
 };
 
-/* This is the maximum line length we accept for a cookie line. RFC 6265
-   section 6.1 says "general-use user agents SHOULD provide each of the
-   following minimum capabilities":
+/* The maximum sizes we accept for a cookies. RFC 6265 section 6.1 says
+   "general-use user agents SHOULD provide each of the following minimum
+   capabilities":
 
    - At least 4096 bytes per cookie (as measured by the sum of the length of
      the cookie's name, value, and attributes).
@@ -80,16 +80,24 @@ struct CookieInfo {
    "If the sum of the lengths of the name string and the value string is more
    than 4096 octets, abort these steps and ignore the set-cookie-string
    entirely."
-
-   We allow max 5000 bytes cookie header. Max 4095 bytes length per cookie
-   name and value. Name + value may not exceed 4096 bytes.
-
 */
+
+/** Limits for INCOMING cookies **/
+
+/* The longest we allow a line to be when reading a cookie from a HTTP header
+   or from a cookie jar */
 #define MAX_COOKIE_LINE 5000
 
 /* Maximum length of an incoming cookie name or content we deal with. Longer
    cookies are ignored. */
 #define MAX_NAME 4096
+
+/* Maximum number of Set-Cookie: lines accepted in a single response. If more
+   such header lines are received, they are ignored. This value must be less
+   than 256 since an unsigned char is used to count. */
+#define MAX_SET_COOKIE_AMOUNT 50
+
+/** Limits for OUTGOING cookies **/
 
 /* Maximum size for an outgoing cookie line libcurl will use in an http
    request. This is the default maximum length used in some versions of Apache
@@ -100,11 +108,6 @@ struct CookieInfo {
    there might be more cookies that match. One reason to cap the number is to
    keep the maximum HTTP request within the maximum allowed size. */
 #define MAX_COOKIE_SEND_AMOUNT 150
-
-/* Maximum number of Set-Cookie: lines accepted in a single response. If more
-   such header lines are received, they are ignored. This value must be less
-   than 256 since an unsigned char is used to count. */
-#define MAX_SET_COOKIE_AMOUNT 50
 
 struct Curl_easy;
 /*
