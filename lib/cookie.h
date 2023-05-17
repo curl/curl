@@ -76,10 +76,9 @@ struct CookieInfo {
    - At least 4096 bytes per cookie (as measured by the sum of the length of
      the cookie's name, value, and attributes).
 
-   In the 6265bis draft-10 document section 5.4 it is phrased even stronger:
-   "If the sum of the lengths of the name string and the value string is more
-   than 4096 octets, abort these steps and ignore the set-cookie-string
-   entirely."
+   In the 6265bis draft document section 5.4 it is phrased even stronger: "If
+   the sum of the lengths of the name string and the value string is more than
+   4096 octets, abort these steps and ignore the set-cookie-string entirely."
 */
 
 /** Limits for INCOMING cookies **/
