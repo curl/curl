@@ -69,12 +69,17 @@ struct CookieInfo {
   curl_off_t next_expiration; /* the next time at which expiration happens */
 };
 
-/* This is the maximum line length we accept for a cookie line. RFC 2109
-   section 6.3 says:
+/* This is the maximum line length we accept for a cookie line. RFC 6265
+   section 6.1 says "general-use user agents SHOULD provide each of the
+   following minimum capabilities":
 
-   "at least 4096 bytes per cookie (as measured by the size of the characters
-   that comprise the cookie non-terminal in the syntax description of the
-   Set-Cookie header)"
+   - At least 4096 bytes per cookie (as measured by the sum of the length of
+     the cookie's name, value, and attributes).
+
+   In the 6265bis draft-10 document section 5.4 it is phrased even stronger:
+   "If the sum of the lengths of the name string and the value string is more
+   than 4096 octets, abort these steps and ignore the set-cookie-string
+   entirely."
 
    We allow max 5000 bytes cookie header. Max 4095 bytes length per cookie
    name and value. Name + value may not exceed 4096 bytes.
@@ -85,7 +90,6 @@ struct CookieInfo {
 /* Maximum length of an incoming cookie name or content we deal with. Longer
    cookies are ignored. */
 #define MAX_NAME 4096
-#define MAX_NAME_TXT "4095"
 
 /* Maximum size for an outgoing cookie line libcurl will use in an http
    request. This is the default maximum length used in some versions of Apache
