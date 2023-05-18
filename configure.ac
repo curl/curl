@@ -906,13 +906,11 @@ if test X"$want_hyper" != Xno; then
   AC_MSG_NOTICE([Disable RTSP support with hyper])
   AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
   AC_SUBST(CURL_DISABLE_RTSP, [1])
-
 else
-
   AC_MSG_CHECKING([whether to support rtsp])
   AC_ARG_ENABLE(rtsp,
-  AS_HELP_STRING([--enable-rtsp],[Enable RTSP support])
-  AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
+AS_HELP_STRING([--enable-rtsp],[Enable RTSP support])
+AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
   [ case "$enableval" in
     no)
        AC_MSG_RESULT(no)
@@ -4271,14 +4269,13 @@ AS_HELP_STRING([--disable-headers-api],[Disable headers-api support]),
 
 dnl only check for HSTS if there's SSL present
 if test -n "$SSL_ENABLED"; then
-
   dnl ************************************************************
   dnl switch on/off hsts
   dnl
   AC_MSG_CHECKING([whether to support HSTS])
   AC_ARG_ENABLE(hsts,
-  AS_HELP_STRING([--enable-hsts],[Enable HSTS support])
-  AS_HELP_STRING([--disable-hsts],[Disable HSTS support]),
+AS_HELP_STRING([--enable-hsts],[Enable HSTS support])
+AS_HELP_STRING([--disable-hsts],[Disable HSTS support]),
   [ case "$enableval" in
     no)
        AC_MSG_RESULT(no)
