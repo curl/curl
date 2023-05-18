@@ -67,7 +67,7 @@ int main(void)
     goto cleanup;
   }
 
-  cleanup:
+cleanup:
   curl_url_cleanup(urlp);
   curl_easy_cleanup(curl);
   return 0;

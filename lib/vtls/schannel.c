@@ -2358,7 +2358,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                "schannel: decrypted data buffer: offset %zu length %zu",
                backend->decdata_offset, backend->decdata_length));
 
-  cleanup:
+cleanup:
   /* Warning- there is no guarantee the encdata state is valid at this point */
   DEBUGF(infof(data, "schannel: schannel_recv cleanup"));
 

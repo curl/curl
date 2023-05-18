@@ -1212,7 +1212,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   Curl_safefree(data->state.aptr.userpwd);
   Curl_safefree(data->state.aptr.proxyuserpwd);
   return CURLE_OK;
-  error:
+error:
   DEBUGASSERT(result);
   if(io)
     hyper_io_free(io);

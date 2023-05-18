@@ -227,7 +227,7 @@ UNITTEST_START
       continue;
     }
   }
-  error:
+error:
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);

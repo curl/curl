@@ -347,7 +347,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
   free(nurl);
   return CURLE_OK;
 
-  error:
+error:
   free(nurl);
   Curl_close(&doh);
   return result;
@@ -409,7 +409,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 #endif
   return NULL;
 
-  error:
+error:
   curl_slist_free_all(dohp->headers);
   data->req.doh->headers = NULL;
   for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {

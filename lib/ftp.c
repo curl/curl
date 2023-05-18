@@ -3838,7 +3838,7 @@ static CURLcode init_wc_data(struct Curl_easy *data)
   infof(data, "Wildcard - Parsing started");
   return CURLE_OK;
 
-  fail:
+fail:
   if(ftpwc) {
     Curl_ftp_parselist_data_free(&ftpwc->parser);
     free(ftpwc);

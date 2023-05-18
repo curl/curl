@@ -354,7 +354,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
       }
     }
     /* FALLTHROUGH */
-  CONNECT_RESOLVED:
+CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
     struct Curl_addrinfo *hp = NULL;
     /*
@@ -394,7 +394,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
       return CURLPX_RESOLVE_HOST;
   }
     /* FALLTHROUGH */
-  CONNECT_REQ_INIT:
+CONNECT_REQ_INIT:
   case CONNECT_REQ_INIT:
     /*
      * This is currently not supporting "Identification Protocol (RFC1413)".
@@ -638,7 +638,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
       return CURLPX_OK;
     }
     /* FALLTHROUGH */
-  CONNECT_SOCKS_READ_INIT:
+CONNECT_SOCKS_READ_INIT:
   case CONNECT_SOCKS_READ_INIT:
     sx->outstanding = 2; /* expect two bytes */
     sx->outp = socksreq; /* store it here */
@@ -700,7 +700,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   default: /* do nothing! */
     break;
 
-  CONNECT_AUTH_INIT:
+CONNECT_AUTH_INIT:
   case CONNECT_AUTH_INIT: {
     /* Needs user name and password */
     size_t proxy_user_len, proxy_password_len;
@@ -779,7 +779,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     /* Everything is good so far, user was authenticated! */
     sxstate(sx, data, CONNECT_REQ_INIT);
     /* FALLTHROUGH */
-  CONNECT_REQ_INIT:
+CONNECT_REQ_INIT:
   case CONNECT_REQ_INIT:
     if(socks5_resolve_local) {
       enum resolve_t rc = Curl_resolv(data, sx->hostname, sx->remote_port,
@@ -818,7 +818,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
       }
     }
     /* FALLTHROUGH */
-  CONNECT_RESOLVED:
+CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
     struct Curl_addrinfo *hp = NULL;
     size_t destlen;
@@ -873,7 +873,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     Curl_resolv_unlock(data, dns); /* not used anymore from now on */
     goto CONNECT_REQ_SEND;
   }
-  CONNECT_RESOLVE_REMOTE:
+CONNECT_RESOLVE_REMOTE:
   case CONNECT_RESOLVE_REMOTE:
     /* Authentication is complete, now specify destination to the proxy */
     len = 0;
@@ -913,7 +913,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     }
     /* FALLTHROUGH */
 
-  CONNECT_REQ_SEND:
+CONNECT_REQ_SEND:
   case CONNECT_REQ_SEND:
     /* PORT MSB */
     socksreq[len++] = (unsigned char)((sx->remote_port >> 8) & 0xff);

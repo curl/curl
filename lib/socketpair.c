@@ -183,7 +183,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   sclose(listener);
   return 0;
 
-  error:
+error:
   sclose(listener);
   sclose(socks[0]);
   sclose(socks[1]);

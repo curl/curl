@@ -3376,7 +3376,7 @@ static ssize_t sectransp_recv(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  again:
+again:
   *curlcode = CURLE_OK;
   err = SSLRead(backend->ssl_ctx, buf, buffersize, &processed);
 

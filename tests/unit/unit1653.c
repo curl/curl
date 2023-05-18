@@ -224,7 +224,7 @@ UNITTEST_START
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret == CURLUE_BAD_PORT_NUMBER, "parse_port did wrong");
-  fail:
+fail:
   free(ipv6port);
   curl_url_cleanup(u);
 

@@ -831,7 +831,7 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     result = Curl_pin_peer_pubkey(data,
                                   pinnedpubkey,
                                   &pubkey[PUB_DER_MAX_BYTES - size], size);
-    pinnedpubkey_error:
+pinnedpubkey_error:
     mbedtls_x509_crt_free(p);
     free(p);
     free(pubkey);

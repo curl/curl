@@ -1238,7 +1238,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         goto err;
 
       error = false;
-   err:
+err:
       if(error) {
         failf(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'",
               hostp->data);

@@ -1172,7 +1172,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     if(num > 20)
       num = 20;
 
-    retry:
+retry:
     written = swrite(sock, buffer, num);
     if(written < 0) {
       if((EWOULDBLOCK == SOCKERRNO) || (EAGAIN == SOCKERRNO)) {

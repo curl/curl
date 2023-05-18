@@ -481,7 +481,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   *offset = ptr - login;
   return CURLUE_OK;
 
-  out:
+out:
 
   free(userp);
   free(passwdp);
@@ -1317,7 +1317,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   u->host = Curl_dyn_ptr(&host);
 
   return result;
-  fail:
+fail:
   Curl_dyn_free(&host);
   free_urlhandle(u);
   return result;
@@ -1380,7 +1380,7 @@ CURLU *curl_url_dup(const CURLU *in)
     u->portnum = in->portnum;
   }
   return u;
-  fail:
+fail:
   curl_url_cleanup(u);
   return NULL;
 }
@@ -1876,7 +1876,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         free(*storep);
         *storep = Curl_dyn_ptr(&enc);
         return CURLUE_OK;
-        nomem:
+nomem:
         free((char *)newp);
         return CURLUE_OUT_OF_MEMORY;
       }

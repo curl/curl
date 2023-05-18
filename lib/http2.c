@@ -806,7 +806,7 @@ static int set_transfer_url(struct Curl_easy *data,
   uc = curl_url_get(u, CURLUPART_URL, &url, 0);
   if(uc)
     rc = 4;
-  fail:
+fail:
   curl_url_cleanup(u);
   if(rc)
     return rc;
@@ -930,7 +930,7 @@ static int push_promise(struct Curl_cfilter *cf,
     DEBUGF(LOG_CF(data, cf, "Got PUSH_PROMISE, ignore it"));
     rv = CURL_PUSH_DENY;
   }
-  fail:
+fail:
   return rv;
 }
 

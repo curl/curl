@@ -312,7 +312,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  error:
+error:
   free(eword);
   free(path);
   return result;

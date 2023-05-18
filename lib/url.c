@@ -1587,7 +1587,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->gssapi_delegation = data->set.gssapi_delegation;
 
   return conn;
-  error:
+error:
 
   free(conn->localdev);
   free(conn);
@@ -2301,7 +2301,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   }
 #endif
 
-  error:
+error:
   free(proxyuser);
   free(proxypasswd);
   free(host);
@@ -2898,7 +2898,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
 
   *port_result = port;
 
-  error:
+error:
   free(host_dup);
   return result;
 }
