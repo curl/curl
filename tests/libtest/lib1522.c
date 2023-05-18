@@ -92,7 +92,7 @@ int test(char *URL)
   else {
     printf("curl_easy_perform() failed. e = %d\n", code);
   }
-  test_cleanup:
+test_cleanup:
   curl_slist_free_all(pHeaderList);
   curl_easy_cleanup(curl);
   curl_global_cleanup();

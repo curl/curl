@@ -332,7 +332,7 @@ static bool match_time(const char *date,
     }
   }
   return FALSE; /* not a time string */
-  match:
+match:
   *h = hh;
   *m = mm;
   *s = ss;

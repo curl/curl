@@ -743,11 +743,11 @@ static int dprintf_formatf(
 
       goto number;
 
-      unsigned_number:
+unsigned_number:
       /* Unsigned number of base BASE.  */
       is_neg = 0;
 
-      number:
+number:
       /* Number of base BASE.  */
 
       /* Supply a default precision if none was given.  */

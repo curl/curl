@@ -1305,7 +1305,7 @@ static int init_ngh3_conn(struct Curl_cfilter *cf)
   }
 
   return CURLE_OK;
-  fail:
+fail:
 
   return result;
 }

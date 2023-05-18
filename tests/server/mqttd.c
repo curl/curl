@@ -702,7 +702,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     }
   } while(1);
 
-  end:
+end:
   if(buffer)
     free(buffer);
   if(dump)

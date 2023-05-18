@@ -170,7 +170,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
       /* nothing to do */
       result = CURLE_OK;
   }
-  fail:
+fail:
   curl_url_cleanup(uh);
   curl_free(path);
   return result;

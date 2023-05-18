@@ -295,7 +295,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
       }
     }
 
-    fail:
+fail:
     *posp += (pattern - *patternp);
 
     if(!endp || !step_n ||

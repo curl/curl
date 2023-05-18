@@ -191,7 +191,7 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
   }
   return CURLE_OK;
 
-  fail:
+fail:
   Curl_safefree(*path);
   return CURLE_QUOTE_ERROR;
 }

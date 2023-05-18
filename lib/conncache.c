@@ -246,7 +246,7 @@ CURLcode Curl_conncache_add_conn(struct Curl_easy *data)
                "The cache now contains %zu members",
                conn->connection_id, connc->num_conn));
 
-  unlock:
+unlock:
   CONNCACHE_UNLOCK(data);
 
   return result;

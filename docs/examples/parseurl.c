@@ -74,7 +74,7 @@ int main(void)
     curl_free(path);
   }
 
-  fail:
+fail:
   curl_url_cleanup(h); /* free url handle */
   return 0;
 }

@@ -398,7 +398,7 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
     goto fail;
   }
 
-  fail:
+fail:
   free(out);
   return result;
 }
@@ -424,7 +424,7 @@ static CURLcode http_output_bearer(struct Curl_easy *data)
     goto fail;
   }
 
-  fail:
+fail:
   return result;
 }
 
