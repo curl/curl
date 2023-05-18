@@ -984,6 +984,14 @@ static const struct redircase set_url_list[] = {
    "../newpage",
    "http://user:foo@example.com/newpage",
    0, 0, CURLUE_OK},
+  {"http://user:foo@example.com/path?query#frag",
+   "http://example org/",
+   "http://example org/",
+   0, CURLU_ALLOW_SPACE, CURLUE_OK},
+  {"http://user:foo@example.com/path?query#frag",
+   "http://?hi",
+   "http:///?hi",
+   0, CURLU_NO_AUTHORITY, CURLUE_OK},
   {NULL, NULL, NULL, 0, 0, CURLUE_OK}
 };
 
