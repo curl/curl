@@ -900,7 +900,7 @@ int formparse(struct OperationConfig *config,
     goto fail;
   }
   err = 0;
-  fail:
+fail:
   Curl_safefree(contents);
   curl_slist_free_all(headers);
   return err;

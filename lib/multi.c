@@ -448,7 +448,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   return multi;
 
-  error:
+error:
 
   sockhash_destroy(&multi->sockhash);
   Curl_hash_destroy(&multi->hostcache);
@@ -2625,7 +2625,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       multi_handle_timeout(data, nowp, &stream_error, &result, TRUE);
     }
 
-    statemachine_end:
+statemachine_end:
 
     if(data->mstate < MSTATE_COMPLETED) {
       if(result) {

@@ -112,7 +112,7 @@ int test(char *URL)
   }
 
   curl_multi_remove_handle(mcurl, curl);
-  fail:
+fail:
   curl_easy_cleanup(curl);
   curl_multi_cleanup(mcurl);
 

@@ -90,7 +90,7 @@ int test(char *URL)
   curl_easy_setopt(ch, CURLOPT_SHARE, NULL);
 
   curl_multi_remove_handle(cm, ch);
-  cleanup:
+cleanup:
   curl_easy_cleanup(ch);
   curl_share_cleanup(sh);
   curl_multi_cleanup(cm);

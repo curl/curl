@@ -178,7 +178,7 @@ CURLcode Curl_base64_decode(const char *src,
   *outlen = rawlen;
 
   return CURLE_OK;
-  bad:
+bad:
   free(newstr);
   return CURLE_BAD_CONTENT_ENCODING;
 }

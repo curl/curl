@@ -605,7 +605,7 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
   unsigned char packet;
 
   switch(mqtt->state) {
-  MQTT_SUBACK_COMING:
+MQTT_SUBACK_COMING:
   case MQTT_SUBACK_COMING:
     result = mqtt_verify_suback(data);
     if(result)
@@ -688,7 +688,7 @@ static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
     result = CURLE_WEIRD_SERVER_REPLY;
     goto end;
   }
-  end:
+end:
   return result;
 }
 

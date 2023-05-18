@@ -209,7 +209,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   return CURLE_OK;
 
-  fail:
+fail:
   initialized--; /* undo the increase */
   return CURLE_FAILED_INIT;
 }
@@ -993,7 +993,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
 
   return outcurl;
 
-  fail:
+fail:
 
   if(outcurl) {
 #ifndef CURL_DISABLE_COOKIES

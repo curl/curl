@@ -64,7 +64,7 @@ int test(char *URL)
 
   res = curl_easy_perform(curl);
 
-  test_cleanup:
+test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

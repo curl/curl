@@ -117,7 +117,7 @@ static struct altsvc *altsvc_createid(const char *srchost,
   as->dst.port = curlx_ultous(dstport);
 
   return as;
-  error:
+error:
   altsvc_free(as);
   return NULL;
 }
@@ -217,7 +217,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   }
   return result;
 
-  fail:
+fail:
   Curl_safefree(asi->filename);
   free(line);
   fclose(fp);

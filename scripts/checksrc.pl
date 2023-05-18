@@ -75,6 +75,7 @@ my %warnings = (
     'INCLUDEDUP',      => 'same file is included again',
     'INDENTATION'      => 'wrong start column for code',
     'LONGLINE'         => "Line longer than $max_column",
+    'SPACEBEFORELABEL' => 'labels not at the start of the line',
     'MULTISPACE'       => 'multiple spaces used when not suitable',
     'NOSPACEEQUALS'    => 'equals sign without preceding space',
     'NOTEQUALSZERO',   => 'if/while comparison with != 0',
@@ -695,6 +696,11 @@ sub scanfile {
         if($l =~ /^( *(case .+|default)) :/) {
             checkwarn("SPACESWITCHCOLON",
                       $line, length($1), $file, $ol, "no space before colon of switch label");
+        }
+
+        if($prevl !~ /\?\z/ && $l =~ /^ +([A-Za-z_][A-Za-z0-9_]*):$/ && $1 ne 'default') {
+            checkwarn("SPACEBEFORELABEL",
+                      $line, length($1), $file, $ol, "no space before label");
         }
 
         # scan for use of banned functions

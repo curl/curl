@@ -106,7 +106,7 @@ UNITTEST_START
   Curl_altsvc_save(curl, asi, outname);
 
   curl_easy_cleanup(curl);
-  fail:
+fail:
   Curl_altsvc_cleanup(&asi);
 }
 #endif

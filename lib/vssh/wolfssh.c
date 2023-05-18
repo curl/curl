@@ -425,7 +425,7 @@ static CURLcode wssh_connect(struct Curl_easy *data, bool *done)
     state(data, SSH_SFTP_INIT);
 
   return wssh_multi_statemach(data, done);
-  error:
+error:
   wolfSSH_free(sshc->ssh_session);
   wolfSSH_CTX_free(sshc->ctx);
   return CURLE_FAILED_INIT;
