@@ -1860,7 +1860,7 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
   nghttp2_priority_spec pri_spec;
   ssize_t nwritten;
 
-  Curl_h1_req_parse_init(&h1, (4*1024));
+  Curl_h1_req_parse_init(&h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   *err = http2_data_setup(cf, data, &stream);
