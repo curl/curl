@@ -164,7 +164,8 @@ my %singletest_state;  # current state of singletest() by runner ID
 my %runnerids;         # runner IDs by number
 my @runnersidle;       # runner IDs idle and ready to execute a test
 my %runnerfortest;     # runner IDs by testnum
-
+my %countfortest;      # test count by testnum
+my %runnersrunning;    # tests currently running by runner ID
 
 #######################################################################
 # variables that command line options may set
@@ -1693,6 +1694,7 @@ sub singletest {
     } elsif($singletest_state{$runnerid} == ST_PREPROCESS) {
         my ($rid, $why, $error, $logs, $testtimings) = runnerar($runnerid);
         logmsg $logs;
+        updatetesttimings($testnum, %$testtimings);
         if($error == -2) {
             if($postmortem) {
                 # Error indicates an actual problem starting the server, so
@@ -1700,7 +1702,6 @@ sub singletest {
                 displaylogs($testnum);
             }
         }
-        updatetesttimings($testnum, %$testtimings);
 
         #######################################################################
         # Load test file for this test number
@@ -1954,18 +1955,23 @@ sub runnerready {
 }
 
 #######################################################################
+# Create test runners
+#
+sub createrunners {
+    my ($numrunners)=@_;
+    # No runners have been created; create one now
+    my $runnernum = 1;
+    cleardir($LOGDIR);
+    mkdir($LOGDIR, 0777);
+    $runnerids{$runnernum} = runner_init($LOGDIR, $jobs);
+    runnerready($runnerids{$runnernum});
+}
+
+#######################################################################
 # Pick a test runner for the given test
 #
 sub pickrunner {
     my ($testnum)=@_;
-    if(!scalar(%runnerids)) {
-        # No runners have been created; create one now
-        my $runnernum = 1;
-        cleardir($LOGDIR);
-        mkdir($LOGDIR, 0777);
-        $runnerids{$runnernum} = runner_init($LOGDIR, $jobs);
-        runnerready($runnerids{$runnernum});
-    }
     scalar(@runnersidle) || die "No runners available";
 
     return pop @runnersidle;
@@ -2620,83 +2626,120 @@ if($listonly) {
 citest_starttestrun();
 
 #######################################################################
+# Start test runners
+#
+my $numrunners = $jobs < scalar(@runtests) ? $jobs : scalar(@runtests);
+createrunners($numrunners);
+
+#######################################################################
 # The main test-loop
 #
+# Every iteration through the loop consists of these steps:
+#   - if the global abort flag is set, exit the loop; we are done
+#   - if a runner is idle, start a new test on it
+#   - if all runners are idle, exit the loop; we are done
+#   - if a runner has a response for us, process the response
+
 # run through each candidate test and execute it
-nexttest:
-foreach my $testnum (@runtests) {
-    $count++;
-
-    # Loop over state machine waiting for singletest to complete
-    my $again;
-    while () {
-        # check the abort flag
-        if($globalabort) {
-            logmsg "Aborting tests\n";
-            if($again) {
-                logmsg "Waiting for test to finish...\n";
-                # Wait for the last request to complete and throw it away so
-                # that IPC calls & responses stay in sync
-                # TODO: send a signal to the runner to interrupt a long test
-                runnerar(runnerar_ready());
-            }
-            last nexttest;
+while () {
+    # check the abort flag
+    if($globalabort) {
+        logmsg "Aborting tests\n";
+        logmsg "Waiting for tests to finish...\n";
+        # Wait for the last requests to complete and throw them away so
+        # that IPC calls & responses stay in sync
+        # TODO: send a signal to the runners to interrupt a long test
+        foreach my $rid (keys %runnersrunning) {
+            runnerar($rid);
+            delete $runnersrunning{$rid};
         }
-
-        # execute one test case
-        if(!exists($runnerfortest{$testnum})) {
-            # New test; pick a runner for it
-            my $runnerid = pickrunner($testnum);
-            $runnerfortest{$testnum} = $runnerid;
-        }
-        my $error;
-        ($error, $again) = singletest($runnerfortest{$testnum}, $testnum, $count, $totaltests);
-        if($again) {
-            # Wait for asynchronous response
-            if(!runnerar_ready(0.05)) {
-                # TODO: If a response isn't ready, this is a chance to do
-                # something else first
-            }
-            next;  # another iteration of the same singletest
-        }
-
-        # Test has completed
-        runnerready($runnerfortest{$testnum});
-        if($error < 0) {
-            # not a test we can run
-            next nexttest;
-        }
-
-        $total++; # number of tests we've run
-
-        if($error>0) {
-            if($error==2) {
-                # ignored test failures
-                $failedign .= "$testnum ";
-            }
-            else {
-                $failed.= "$testnum ";
-            }
-            if($postmortem) {
-                # display all files in $LOGDIR/ in a nice way
-                displaylogs($testnum);
-            }
-            if($error==2) {
-                $ign++; # ignored test result counter
-            }
-            elsif(!$anyway) {
-                # a test failed, abort
-                logmsg "\n - abort tests\n";
-                last nexttest;
-            }
-        }
-        elsif(!$error) {
-            $ok++; # successful test counter
-        }
-        next nexttest;
+        last;
     }
 
-    # loop for next test
+    # Start a new test if possible
+    if(scalar(@runnersidle) && scalar(@runtests)) {
+        # A runner is ready to run a test, and tests are still available to run
+        # so start a new test.
+        $count++;
+        my $testnum = shift(@runtests);
+
+        # pick a runner for this new test
+        my $runnerid = pickrunner($testnum);
+        exists $runnerfortest{$testnum} && die "Internal error: test already running";
+        $runnerfortest{$testnum} = $runnerid;
+        $countfortest{$testnum} = $count;
+
+        # Start the test
+        my $rid = $runnerfortest{$testnum};
+        my ($error, $again) = singletest($rid, $testnum, $countfortest{$testnum}, $totaltests);
+        if($again) {
+            # this runner is busy running a test
+            $runnersrunning{$rid} = $testnum;
+        } else {
+            # We make this assumption to avoid having to handle $error here
+            die "Internal error: test must not complete on first call";
+        }
+    }
+
+    # See if we've completed all the tests
+    if(!scalar(%runnersrunning)) {
+        # No runners are running; we must be done
+        scalar(@runtests) && die 'Internal error: tests to run';
+        last;
+    }
+
+    # See if a test runner needs attention
+    # If we could be running more tests, wait just a moment so we can schedule
+    # a new one shortly. If all runners are busy, wait indefinitely for one to
+    # finish.
+    my $runnerwait = scalar(@runnersidle) && scalar(@runtests) ? 0 : undef;
+    my $ridready = runnerar_ready($runnerwait);
+    if($ridready) {
+        # This runner is ready to be serviced
+        my $testnum = $runnersrunning{$ridready};
+        delete $runnersrunning{$ridready};
+        my ($error, $again) = singletest($ridready, $testnum, $countfortest{$testnum}, $totaltests);
+        if($again) {
+            # this runner is busy running a test
+            $runnersrunning{$ridready} = $testnum;
+        } else {
+            # Test is complete
+            runnerready($ridready);
+print "COMPLETED $testnum \n" if($verbose); #. join(",", keys(%runnersrunning)) . "\n";
+
+            if($error < 0) {
+                # not a test we can run
+                next;
+            }
+
+            $total++; # number of tests we've run
+
+            if($error>0) {
+                if($error==2) {
+                    # ignored test failures
+                    $failedign .= "$testnum ";
+                }
+                else {
+                    $failed.= "$testnum ";
+                }
+                if($postmortem) {
+                    # display all files in $LOGDIR/ in a nice way
+                    displaylogs($testnum);
+                }
+                if($error==2) {
+                    $ign++; # ignored test result counter
+                }
+                elsif(!$anyway) {
+                    # a test failed, abort
+                    logmsg "\n - abort tests\n";
+                    undef @runtests;  # empty out the remaining tests
+                }
+            }
+            elsif(!$error) {
+                $ok++; # successful test counter
+            }
+        }
+    }
 }
 
 my $sofar = time() - $start;
