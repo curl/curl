@@ -644,8 +644,8 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  * Handle partial IPv4 numerical addresses and different bases, like
  * '16843009', '0x7f', '0x7f.1' '0177.1.1.1' etc.
  *
- * If the given input string is syntactically wrong or any part for example is
- * too big, this function returns FALSE and doesn't create any output.
+ * If the given input string is syntactically wrong IPv4 or any part for
+ * example is too big, this function returns HOST_NAME.
  *
  * Output the "normalized" version of that input string in plain quad decimal
  * integers.
