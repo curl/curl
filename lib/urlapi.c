@@ -617,7 +617,8 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
 }
 
 static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
-                                size_t hlen) /* length of hostname */
+                                size_t hlen, /* length of hostname */
+                                unsigned int flags)
 {
   size_t len;
   DEBUGASSERT(hostname);
@@ -627,8 +628,10 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
   else if(hostname[0] == '[')
     return ipv6_parse(u, hostname, hlen);
   else {
-    /* letters from the second string are not ok */
-    len = strcspn(hostname, " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()%");
+    static char bad_chars[] = " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()%";
+    len = strcspn(hostname, (flags & CURLU_ALLOW_SPACE)
+                            ? &bad_chars[1] /* space is allowed */
+                            : bad_chars);
     if(hlen != len)
       /* hostname with bad content */
       return CURLUE_BAD_HOSTNAME;
@@ -801,8 +804,9 @@ static CURLUcode parse_authority(struct Curl_URL *u,
     break;
   case HOST_NAME:
     result = urldecode_host(host);
-    if(!result)
-      result = hostname_check(u, Curl_dyn_ptr(host), Curl_dyn_len(host));
+    if(!result && !(flags & CURLU_NO_AUTHORITY))
+      result = hostname_check(u, Curl_dyn_ptr(host), Curl_dyn_len(host),
+                              flags);
     break;
   case HOST_ERROR:
     result = CURLUE_OUT_OF_MEMORY;
@@ -1888,7 +1892,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         /* Skip hostname check, it's allowed to be empty. */
       }
       else {
-        if(!n || hostname_check(u, (char *)newp, n)) {
+        if(!n || hostname_check(u, (char *)newp, n, flags)) {
           free((char *)newp);
           return CURLUE_BAD_HOSTNAME;
         }
