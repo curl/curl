@@ -61,6 +61,7 @@
 #include "doh.h"
 #include "warnless.h"
 #include "strcase.h"
+#include "easy_lock.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -69,8 +70,6 @@
 #if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
 #endif
-
-#include "easy_lock.h"
 
 #if defined(CURLRES_SYNCH) &&                   \
   defined(HAVE_ALARM) &&                        \
