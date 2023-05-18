@@ -61,8 +61,8 @@
  * for the intended use of this function in the library.
  *
  * Return values:
- *   -1 = system call error, invalid timeout value, or interrupted
- *    0 = specified timeout has elapsed
+ *   -1 = system call error, or invalid timeout value
+ *    0 = specified timeout has elapsed, or interrupted
  */
 int Curl_wait_ms(timediff_t timeout_ms)
 {
@@ -99,8 +99,13 @@ int Curl_wait_ms(timediff_t timeout_ms)
   }
 #endif /* HAVE_POLL_FINE */
 #endif /* USE_WINSOCK */
-  if(r)
-    r = -1;
+  if(r) {
+    if((r == -1) && (SOCKERRNO == EINTR))
+      /* make EINTR from select or poll not a "lethal" error */
+      r = 0;
+    else
+      r = -1;
+  }
   return r;
 }
 
