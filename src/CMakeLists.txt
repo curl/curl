@@ -58,13 +58,17 @@ transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
 if(WIN32)
-  list(APPEND CURL_FILES curl.rc)
+  list(APPEND CURL_CFILES curl.rc)
 endif()
 
-# CURL_FILES comes from Makefile.inc
+# CURL_CFILES, CURLX_CFILES, CURL_HFILES come from Makefile.inc
+if(NOT BUILD_SHARED_LIBS)
+  set(CURLX_CFILES ../lib/dynbuf.c)
+endif()
+
 add_executable(
   ${EXE_NAME}
-  ${CURL_FILES}
+  ${CURL_CFILES} ${CURLX_CFILES} ${CURL_HFILES}
   )
 
 add_executable(

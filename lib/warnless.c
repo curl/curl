@@ -35,9 +35,12 @@
 
 #endif /* __INTEL_COMPILER && __unix__ */
 
-#define BUILDING_WARNLESS_C 1
-
 #include "warnless.h"
+
+#ifdef WIN32
+#undef read
+#undef write
+#endif
 
 #include <limits.h>
 
