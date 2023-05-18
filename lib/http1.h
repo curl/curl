@@ -33,6 +33,8 @@
 #define H1_PARSE_OPT_NONE       (0)
 #define H1_PARSE_OPT_STRICT     (1 << 0)
 
+#define H1_PARSE_DEFAULT_MAX_LINE_LEN (8 * 1024)
+
 struct h1_req_parser {
   struct http_req *req;
   struct bufq scratch;
