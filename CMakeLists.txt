@@ -673,9 +673,7 @@ if(NOT CURL_DISABLE_LDAP)
   endif()
 
   # Now that we know, we're not using windows LDAP...
-  if(USE_WIN32_LDAP)
-    check_include_file_concat("winldap.h" HAVE_WINLDAP_H)
-  else()
+  if(NOT USE_WIN32_LDAP)
     # Check for LDAP
     set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
     check_library_exists_concat(${CMAKE_LDAP_LIB} ldap_init HAVE_LIBLDAP)
