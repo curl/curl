@@ -1312,13 +1312,12 @@ fail:
 
 static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
+                                  struct stream_ctx *stream,
                                   CURLcode *err)
 {
-  struct stream_ctx *stream = H3_STREAM_CTX(data);
   ssize_t nread = -1;
 
   (void)cf;
-  DEBUGASSERT(stream);
   if(stream->reset) {
     failf(data,
           "HTTP/3 stream %" PRId64 " reset by server", stream->id);
@@ -1413,7 +1412,7 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   else {
     if(stream->closed) {
-      nread = recv_closed_stream(cf, data, err);
+      nread = recv_closed_stream(cf, data, stream, err);
       goto out;
     }
     *err = CURLE_AGAIN;
