@@ -1226,7 +1226,7 @@ sub runnerar {
 }
 
 ###################################################################
-# Returns runnder ID if a response from an async call is ready
+# Returns runner ID if a response from an async call is ready
 # argument is 0 for nonblocking, undef for blocking, anything else for timeout
 # Called by controller
 sub runnerar_ready {
@@ -1248,7 +1248,7 @@ sub runnerar_ready {
     # TODO: handle errors
     if(select(my $rout=$rin, undef, undef, $blocking)) {
         for my $fd (0..$maxfileno) {
-            if(vec($rin, $fd, 1)) {
+            if(vec($rout, $fd, 1)) {
                 return $idbyfileno{$fd};
             }
         }
