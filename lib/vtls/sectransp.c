@@ -900,12 +900,12 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
   /* The first ciphers in the ciphertable are continuous. Here we do small
      optimization and instead of loop directly get SSL name by cipher number.
   */
+  size_t i;
   if(cipher <= SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA) {
     return ciphertable[cipher].name;
   }
   /* Iterate through the rest of the ciphers */
-  for(size_t i = SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA + 1;
-      i < NUM_OF_CIPHERS;
+  for(i = SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA + 1; i < NUM_OF_CIPHERS;
       ++i) {
     if(ciphertable[i].num == cipher) {
       return ciphertable[i].name;
@@ -1429,7 +1429,8 @@ static CURLcode set_ssl_version_min_max(struct Curl_cfilter *cf,
 
 static bool is_cipher_suite_strong(SSLCipherSuite suite_num)
 {
-  for(size_t i = 0; i < NUM_OF_CIPHERS; ++i) {
+  size_t i;
+  for(i = 0; i < NUM_OF_CIPHERS; ++i) {
     if(ciphertable[i].num == suite_num) {
       return !ciphertable[i].weak;
     }
@@ -1545,6 +1546,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     size_t cipher_len = 0;
     const char *cipher_end = NULL;
     bool tls_name = FALSE;
+    size_t i;
 
     /* Skip separators */
     while(is_separator(*cipher_start))
@@ -1568,7 +1570,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     /* Iterate through the cipher table and look for the cipher, starting
        the cipher number 0x01 because the 0x00 is not the real cipher */
     cipher_len = cipher_end - cipher_start;
-    for(size_t i = 1; i < NUM_OF_CIPHERS; ++i) {
+    for(i = 1; i < NUM_OF_CIPHERS; ++i) {
       const char *table_cipher_name = NULL;
       if(tls_name) {
         table_cipher_name = ciphertable[i].name;
