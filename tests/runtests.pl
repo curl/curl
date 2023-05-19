@@ -2371,6 +2371,7 @@ if(!$listonly) {
 
 #######################################################################
 # initialize configuration needed to set up servers
+# TODO: rearrange things so this can be called only in runner_init()
 #
 initserverconfig();
 

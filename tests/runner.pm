@@ -89,6 +89,7 @@ use processhelp qw(
 use servers qw(
     checkcmd
     clearlocks
+    initserverconfig
     serverfortest
     stopserver
     stopservers
@@ -159,7 +160,7 @@ sub runner_init {
     $multiprocess = !!$jobs;
 
     # enable memory debugging if curl is compiled with it
-    $ENV{'CURL_MEMDEBUG'} = "$LOGDIR/$MEMDUMP";
+    $ENV{'CURL_MEMDEBUG'} = "$logdir/$MEMDUMP";
     $ENV{'CURL_ENTROPY'}="12345678";
     $ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
     $ENV{'CURL_GLOBAL_INIT'}=1; # debug curl_global_init/cleanup use
@@ -201,6 +202,9 @@ sub runner_init {
             # Set this directory as ours
             $LOGDIR = $logdir;
             mkdir("$LOGDIR/$PIDDIR", 0777);
+
+            # Initialize various server variables
+            initserverconfig();
 
             # handle IPC calls
             event_loop();
