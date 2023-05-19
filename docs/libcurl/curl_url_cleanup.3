@@ -32,6 +32,9 @@ void curl_url_cleanup(CURLU *handle);
 .fi
 .SH DESCRIPTION
 Frees all the resources associated with the given \fICURLU\fP handle!
+
+Passing in a NULL pointer in \fIhandle\fP will make this function return
+immediately with no action.
 .SH EXAMPLE
 .nf
   CURLU *url = curl_url();
