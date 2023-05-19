@@ -168,6 +168,13 @@ sub runner_init {
     $ENV{'XDG_CONFIG_HOME'}=$ENV{'HOME'};
     $ENV{'COLUMNS'}=79; # screen width!
 
+    # Incorporate the $logdir into the random seed and re-seed the PRNG.
+    # This gives each runner a unique yet consistent seed which provides
+    # more unique port number selection in each runner, yet is deterministic
+    # across runs.
+    $randseed += unpack('%16C*', $logdir);
+    srand $randseed;
+
     # create pipes for communication with runner
     my ($thisrunnerr, $thiscontrollerw, $thiscontrollerr, $thisrunnerw);
     pipe $thisrunnerr, $thiscontrollerw;
