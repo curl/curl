@@ -1,0 +1,44 @@
+#ifndef HEADER_CURL_GEMINI_H
+#define HEADER_CURL_GEMINI_H
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ ***************************************************************************/
+
+#if defined USE_SSL && !defined CURL_DISABLE_GEMINI
+extern const struct Curl_handler Curl_handler_gemini;
+
+#define GEMINI_STATUS_SIZE 2
+#define GEMINI_META_MAX 1024
+#define GEMINI_TERMINATION "\r\n"
+
+struct GEMINI {
+  char request[GEMINI_META_MAX + sizeof(GEMINI_TERMINATION)];
+  size_t reqindex;
+  size_t reqlen;
+  char response[GEMINI_STATUS_SIZE + 1 + GEMINI_META_MAX];
+  size_t reslen;
+};
+
+#endif
+
+#endif /* HEADER_CURL_GEMINI_H */

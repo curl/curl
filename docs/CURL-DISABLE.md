@@ -28,6 +28,10 @@ Disable the FILE protocol
 
 Disable the FTP (and FTPS) protocol
 
+## CURL_DISABLE_GEMINI
+
+Disable the GEMINI protocol.
+
 ## `CURL_DISABLE_GETOPTIONS`
 
 Disable the `curl_easy_options` API calls that lets users get information

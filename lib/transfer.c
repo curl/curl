@@ -1482,7 +1482,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
                      char *newurl,    /* the Location: string */
                      followtype type) /* see transfer.h */
 {
-#ifdef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_GEMINI)
   (void)data;
   (void)newurl;
   (void)type;

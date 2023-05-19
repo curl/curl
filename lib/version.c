@@ -313,6 +313,9 @@ static const char * const protocols[] = {
 #if defined(USE_SSL) && !defined(CURL_DISABLE_FTP)
   "ftps",
 #endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_GEMINI)
+  "gemini",
+#endif
 #ifndef CURL_DISABLE_GOPHER
   "gopher",
 #endif

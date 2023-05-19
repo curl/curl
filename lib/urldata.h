@@ -52,6 +52,7 @@
 #define PORT_RTMPS PORT_HTTPS
 #define PORT_GOPHER 70
 #define PORT_MQTT 1883
+#define PORT_GEMINI 1965
 
 #ifdef USE_WEBSOCKETS
 /* CURLPROTO_GOPHERS (29) is the highest publicly used protocol bit number,
@@ -169,6 +170,7 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #include "rtsp.h"
 #include "smb.h"
 #include "mqtt.h"
+#include "gemini.h"
 #include "ftplistparser.h"
 #include "multihandle.h"
 #include "c-hyper.h"
@@ -693,6 +695,7 @@ struct SingleRequest {
     struct SMTP *smtp;
     struct SSHPROTO *ssh;
     struct TELNET *telnet;
+    struct GEMINI *gemini;
   } p;
 #ifndef CURL_DISABLE_DOH
   struct dohdata *doh; /* DoH specific data for this request */

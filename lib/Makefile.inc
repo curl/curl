@@ -150,6 +150,7 @@ LIB_CFILES =         \
   formdata.c         \
   ftp.c              \
   ftplistparser.c    \
+  gemini.c           \
   getenv.c           \
   getinfo.c          \
   gopher.c           \
@@ -294,6 +295,7 @@ LIB_HFILES =         \
   functypes.h        \
   ftp.h              \
   ftplistparser.h    \
+  gemini.h           \
   getinfo.h          \
   gopher.h           \
   hash.h             \

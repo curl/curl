@@ -110,6 +110,7 @@
 #include "http_ntlm.h"
 #include "curl_rtmp.h"
 #include "gopher.h"
+#include "gemini.h"
 #include "mqtt.h"
 #include "http_proxy.h"
 #include "conncache.h"
@@ -270,6 +271,10 @@ static const struct Curl_handler * const protocols[] = {
 #ifdef USE_SSL
   &Curl_handler_gophers,
 #endif
+#endif
+
+#if defined(USE_SSL) && !defined(CURL_DISABLE_GEMINI)
+  &Curl_handler_gemini,
 #endif
 
 #ifdef USE_LIBRTMP

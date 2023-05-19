@@ -176,6 +176,9 @@
 #  ifndef CURL_DISABLE_FTP
 #    define CURL_DISABLE_FTP
 #  endif
+#  ifndef CURL_DISABLE_GEMINI
+#    define CURL_DISABLE_GEMINI
+#  endif
 #  ifndef CURL_DISABLE_GOPHER
 #    define CURL_DISABLE_GOPHER
 #  endif

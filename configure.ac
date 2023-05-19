@@ -1071,6 +1071,23 @@ AS_HELP_STRING([--disable-gopher],[Disable Gopher support]),
        AC_MSG_RESULT(yes)
 )
 
+AC_MSG_CHECKING([whether to support gemini])
+AC_ARG_ENABLE(gemini,
+AS_HELP_STRING([--enable-gemini],[Enable Gemini support])
+AS_HELP_STRING([--disable-gemini],[Disable Gemini support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_Gemini, 1, [to disable Gemini])
+       AC_SUBST(CURL_DISABLE_Gemini, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+
 AC_MSG_CHECKING([whether to support mqtt])
 AC_ARG_ENABLE(mqtt,
 AS_HELP_STRING([--enable-mqtt],[Enable MQTT support])
@@ -4590,6 +4607,11 @@ if test "x$CURL_DISABLE_GOPHER" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS GOPHER"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS GOPHERS"
+  fi
+fi
+if test "x$CURL_DISABLE_GEMINI" != "x1"; then
+  if test "x$SSL_ENABLED" = "x1"; then
+    SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS GEMINI"
   fi
 fi
 if test "x$CURL_DISABLE_MQTT" != "x1"; then
