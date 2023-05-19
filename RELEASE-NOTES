@@ -12,7 +12,23 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o cf-socket: completely remove the disabled USE_RECV_BEFORE_SEND_WORKAROUND [12]
+ o checksrc: disallow spaces before labels [16]
+ o cmake: repair cross compiling [10]
+ o configure: fix --help alignment [9]
+ o configure: generate a script to run the compiler [11]
+ o curl_easy_getinfo: clarify on return data types [15]
+ o docs: document that curl_url_cleanup(NULL) is a safe no-op [4]
+ o hostip: move easy_lock.h include above curl_memory.h [14]
+ o http2: double http request parser max line length [8]
+ o ngtcp2: fix compiler warning about possible null-deref [3]
+ o ngtcp2: proper handling of uint64_t when adjusting send buffer [1]
  o os400: update chkstrings.c [2]
+ o select: avoid returning an error on EINTR from select() or poll() [5]
+ o url: provide better error message when URLs fail to parse [18]
+ o urlapi: allow numerical parts in the host name [7]
+ o urlapi: respect CURLU_ALLOW_SPACE and CURLU_NO_AUTHORITY for redirects [13]
+ o vquic.c: make recvfrom_packets static, avoid compiler warning [6]
 
 This release includes the following known bugs:
 
@@ -30,9 +46,28 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, James Fuller, Jon Rumsey
-  (3 contributors)
+  Antoine Pitrou, Colin Cross, Daniel Stenberg, Emanuele Torre,
+  Emilio Cobos Álvarez, Hind Montassif, James Fuller, Jonas Bülow, Jon Rumsey,
+  Keitagit-kun on github, Pavel Kalyugin, Stefan Eissing, Viktor Szakats,
+  Deal(一线灵)
+  (14 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=11149
  [2] = https://curl.se/bug/?i=11132
+ [3] = https://curl.se/bug/?i=11147
+ [4] = https://curl.se/bug/?i=11150
+ [5] = https://curl.se/bug/?i=11135
+ [6] = https://curl.se/bug/?i=11146
+ [7] = https://curl.se/bug/?i=11129
+ [8] = https://curl.se/bug/?i=11138
+ [9] = https://curl.se/bug/?i=11142
+ [10] = https://curl.se/bug/?i=11130
+ [11] = https://curl.se/bug/?i=11114
+ [12] = https://curl.se/bug/?i=11118
+ [13] = https://curl.se/bug/?i=11136
+ [14] = https://curl.se/bug/?i=11140
+ [15] = https://curl.se/bug/?i=11126
+ [16] = https://curl.se/bug/?i=11134
+ [18] = https://curl.se/bug/?i=11137
