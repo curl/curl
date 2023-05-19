@@ -45,6 +45,10 @@
 #pragma clang diagnostic ignored "-Wtautological-pointer-compare"
 #endif /* __clang__ */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Werror=address"
+#endif
+
 #include <limits.h>
 
 #include <Security/Security.h>
@@ -234,7 +238,7 @@ struct st_cipher {
    insert in between existing items to appropriate place based on
    cipher suite IANA number
 */
-const static struct st_cipher ciphertable[] = {
+static const struct st_cipher ciphertable[] = {
   /* SSL version 3.0 and initial TLS 1.0 cipher suites.
      Defined since SDK 10.2.8 */
   CIPHER_DEF_SSLTLS(NULL_WITH_NULL_NULL,                           /* 0x0000 */
