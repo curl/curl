@@ -177,7 +177,6 @@ my $clearlocks;   # force removal of files by killing locking processes
 my $postmortem;   # display detailed info about failed tests
 my $run_disabled; # run the specific tests even if listed in DISABLED
 my $scrambleorder;
-my $randseed = 0;
 my $jobs = 0;
 
 # Azure Pipelines specific variables
