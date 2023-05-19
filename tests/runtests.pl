@@ -161,6 +161,8 @@ use constant {
     ST_RUN => 4,
 };
 my %singletest_state;  # current state of singletest() by runner ID
+my %singletest_logs;   # log messages while in singletest array ref by runner
+my $singletest_bufferedrunner; # runner ID which is buffering logs
 my %runnerids;         # runner IDs by number
 my @runnersidle;       # runner IDs idle and ready to execute a test
 my %runnerfortest;     # runner IDs by testnum
@@ -187,14 +189,64 @@ my $AZURE_RESULT_ID = 0;
 # logmsg is our general message logging subroutine.
 #
 sub logmsg {
+    if($singletest_bufferedrunner) {
+        # Logs are currently being buffered
+        return singletest_logmsg(@_);
+    }
     for(@_) {
         my $line = $_;
+        if(!$line) {
+            next;
+        }
         if ($is_wsl) {
             # use \r\n for WSL shell
             $line =~ s/\r?\n$/\r\n/g;
         }
         print "$line";
     }
+}
+
+#######################################################################
+# enable logmsg buffering for the given runner ID
+#
+sub logmsg_bufferfortest {
+    my ($runnerid)=@_;
+    if($jobs) {
+        # Only enable buffering in multiprocess mode
+        $singletest_bufferedrunner = $runnerid;
+    }
+}
+#######################################################################
+# Store a log message in a buffer for this test
+# The messages can then be displayed all at once at the end of the test
+# which prevents messages from different tests from being interleaved.
+sub singletest_logmsg {
+    if(!exists $singletest_logs{$singletest_bufferedrunner}) {
+        # initialize to a reference to an empty anonymous array
+        $singletest_logs{$singletest_bufferedrunner} = [];
+    }
+    my $logsref = $singletest_logs{$singletest_bufferedrunner};
+    push @$logsref, @_;
+}
+
+#######################################################################
+# Stop buffering log messages, but don't touch them
+sub singletest_unbufferlogs {
+    undef $singletest_bufferedrunner;
+}
+
+#######################################################################
+# Clear the buffered log messages & stop buffering after returning them
+sub singletest_dumplogs {
+    if(!defined $singletest_bufferedrunner) {
+        # probably not multiprocess mode and logs weren't buffered
+        return undef;
+    }
+    my $logsref = $singletest_logs{$singletest_bufferedrunner};
+    my $msg = join("", @$logsref);
+    delete $singletest_logs{$singletest_bufferedrunner};
+    singletest_unbufferlogs();
+    return $msg;
 }
 
 sub catch_zap {
@@ -1630,10 +1682,9 @@ sub singletest_success {
     }
 }
 
-
 #######################################################################
 # Run a single specified test case
-# This is structured as a state machine which changes states after an
+# This is structured as a state machine which changes state after an
 # asynchronous call is made that awaits a response. The function returns with
 # an error code and a flag that indicates if the state machine has completed,
 # which means (if not) the function must be called again once the response has
@@ -1642,6 +1693,8 @@ sub singletest_success {
 sub singletest {
     my ($runnerid, $testnum, $count, $total)=@_;
 
+    # start buffering logmsg; stop it on return
+    logmsg_bufferfortest($runnerid);
     if(!exists $singletest_state{$runnerid}) {
         # First time in singletest() for this test
         $singletest_state{$runnerid} = ST_INIT;
@@ -1714,6 +1767,7 @@ sub singletest {
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $error);
             $singletest_state{$runnerid} = ST_INIT;
+            logmsg singletest_dumplogs();
             return ($error, 0);
         }
 
@@ -1737,6 +1791,7 @@ sub singletest {
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $err);
             $singletest_state{$runnerid} = ST_INIT;
+            logmsg singletest_dumplogs();
             # return a test failure, either to be reported or to be ignored
             return ($err, 0);
         }
@@ -1746,6 +1801,7 @@ sub singletest {
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $error);
             $singletest_state{$runnerid} = ST_INIT;
+            logmsg singletest_dumplogs();
             return ($error, 0);
         }
         elsif($error > 0) {
@@ -1754,6 +1810,7 @@ sub singletest {
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $error);
             $singletest_state{$runnerid} = ST_INIT;
+            logmsg singletest_dumplogs();
             return ($error, 0);
         }
 
@@ -1771,6 +1828,7 @@ sub singletest {
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $err);
             $singletest_state{$runnerid} = ST_INIT;
+            logmsg singletest_dumplogs();
             # return a test failure, either to be reported or to be ignored
             return ($err, 0);
         }
@@ -1780,6 +1838,7 @@ sub singletest {
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $cmdres);
             $singletest_state{$runnerid} = ST_INIT;
+            logmsg singletest_dumplogs();
             return ($cmdres, 0);
         }
 
@@ -1792,8 +1851,10 @@ sub singletest {
         citest_finishtest($testnum, 0);
         $singletest_state{$runnerid} = ST_INIT;
 
+        logmsg singletest_dumplogs();
         return (0, 0);  # state machine is finished
     }
+    singletest_unbufferlogs();
     return (0, 1);  # state machine must be called again on event
 }
 
@@ -2644,6 +2705,7 @@ createrunners($numrunners);
 while () {
     # check the abort flag
     if($globalabort) {
+        logmsg singletest_dumplogs();
         logmsg "Aborting tests\n";
         logmsg "Waiting for tests to finish...\n";
         # Wait for the last requests to complete and throw them away so
