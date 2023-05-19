@@ -52,7 +52,7 @@ struct x509_context {
   int cert_num;
 };
 
-struct ssl_backend_data {
+struct bearssl_ssl_backend_data {
   br_ssl_client_context ctx;
   struct x509_context x509;
   unsigned char buf[BR_SSL_BUFSIZE_BIDI];
@@ -574,7 +574,8 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct bearssl_ssl_backend_data *backend =
+    (struct bearssl_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
@@ -751,7 +752,8 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
                                   unsigned target)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct bearssl_ssl_backend_data *backend =
+    (struct bearssl_ssl_backend_data *)connssl->backend;
   unsigned state;
   unsigned char *buf;
   size_t len;
@@ -820,7 +822,8 @@ static CURLcode bearssl_connect_step2(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct bearssl_ssl_backend_data *backend =
+    (struct bearssl_ssl_backend_data *)connssl->backend;
   CURLcode ret;
 
   DEBUGASSERT(backend);
@@ -842,7 +845,8 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct bearssl_ssl_backend_data *backend =
+    (struct bearssl_ssl_backend_data *)connssl->backend;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode ret;
 
@@ -889,7 +893,8 @@ static ssize_t bearssl_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                             const void *buf, size_t len, CURLcode *err)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct bearssl_ssl_backend_data *backend =
+    (struct bearssl_ssl_backend_data *)connssl->backend;
   unsigned char *app;
   size_t applen;
 
@@ -923,7 +928,8 @@ static ssize_t bearssl_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                             char *buf, size_t len, CURLcode *err)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct bearssl_ssl_backend_data *backend =
+    (struct bearssl_ssl_backend_data *)connssl->backend;
   unsigned char *app;
   size_t applen;
 
@@ -1050,10 +1056,12 @@ static bool bearssl_data_pending(struct Curl_cfilter *cf,
                                  const struct Curl_easy *data)
 {
   struct ssl_connect_data *ctx = cf->ctx;
+  struct bearssl_ssl_backend_data *backend;
 
   (void)data;
   DEBUGASSERT(ctx && ctx->backend);
-  return br_ssl_engine_current_state(&ctx->backend->ctx.eng) & BR_SSL_RECVAPP;
+  backend = (struct bearssl_ssl_backend_data *)ctx->backend;
+  return br_ssl_engine_current_state(&backend->ctx.eng) & BR_SSL_RECVAPP;
 }
 
 static CURLcode bearssl_random(struct Curl_easy *data UNUSED_PARAM,
@@ -1101,7 +1109,8 @@ static CURLcode bearssl_connect_nonblocking(struct Curl_cfilter *cf,
 static void *bearssl_get_internals(struct ssl_connect_data *connssl,
                                    CURLINFO info UNUSED_PARAM)
 {
-  struct ssl_backend_data *backend = connssl->backend;
+  struct bearssl_ssl_backend_data *backend =
+    (struct bearssl_ssl_backend_data *)connssl->backend;
   DEBUGASSERT(backend);
   return &backend->ctx;
 }
@@ -1109,7 +1118,8 @@ static void *bearssl_get_internals(struct ssl_connect_data *connssl,
 static void bearssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct bearssl_ssl_backend_data *backend =
+    (struct bearssl_ssl_backend_data *)connssl->backend;
   size_t i;
 
   DEBUGASSERT(backend);
@@ -1147,7 +1157,7 @@ static CURLcode bearssl_sha256sum(const unsigned char *input,
 const struct Curl_ssl Curl_ssl_bearssl = {
   { CURLSSLBACKEND_BEARSSL, "bearssl" }, /* info */
   SSLSUPP_CAINFO_BLOB | SSLSUPP_SSL_CTX | SSLSUPP_HTTPS_PROXY,
-  sizeof(struct ssl_backend_data),
+  sizeof(struct bearssl_ssl_backend_data),
 
   Curl_none_init,                  /* init */
   Curl_none_cleanup,               /* cleanup */

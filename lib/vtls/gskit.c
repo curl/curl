@@ -103,14 +103,14 @@
 #define CURL_GSKPROTO_TLSV12_MASK        (1 << CURL_GSKPROTO_TLSV12)
 #define CURL_GSKPROTO_LAST      5
 
-struct ssl_backend_data {
+struct gskit_ssl_backend_data {
   gsk_handle handle;
   int iocport;
   int localfd;
   int remotefd;
 };
 
-#define BACKEND connssl->backend
+#define BACKEND ((struct gskit_ssl_backend_data *)connssl->backend)
 
 /* Supported ciphers. */
 struct gskit_cipher {
@@ -518,6 +518,7 @@ static int pipe_ssloverssl(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct Curl_cfilter *cf_ssl_next = Curl_ssl_cf_get_ssl(cf->next);
   struct ssl_connect_data *connssl_next = cf_ssl_next?
                                             cf_ssl_next->ctx : NULL;
+  struct gskit_ssl_backend_data *backend_next;
   struct pollfd fds[2];
   int n;
   int m;
@@ -531,6 +532,8 @@ static int pipe_ssloverssl(struct Curl_cfilter *cf, struct Curl_easy *data,
     return 0;   /* No SSL over SSL: OK. */
 
   DEBUGASSERT(connssl_next->backend);
+  backend_next = (struct gskit_ssl_backend_data *)connssl_next->backend;
+
   n = 1;
   fds[0].fd = BACKEND->remotefd;
   fds[1].fd = Curl_conn_cf_get_socket(cf, data);
@@ -550,8 +553,7 @@ static int pipe_ssloverssl(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(fds[0].revents & POLLOUT) {
     /* Try getting data from HTTPS proxy and pipe it upstream. */
     n = 0;
-    i = gsk_secure_soc_read(connssl_next->backend->handle,
-                            buf, sizeof(buf), &n);
+    i = gsk_secure_soc_read(backend_next->handle, buf, sizeof(buf), &n);
     switch(i) {
     case GSK_OK:
       if(n) {
@@ -575,7 +577,7 @@ static int pipe_ssloverssl(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(n < 0)
       return -1;
     if(n) {
-      i = gsk_secure_soc_write(connssl_next->backend->handle, buf, n, &m);
+      i = gsk_secure_soc_write(backend_next->handle, buf, n, &m);
       if(i != GSK_OK || n != m)
         return -1;
       ret = 1;
@@ -1294,7 +1296,7 @@ const struct Curl_ssl Curl_ssl_gskit = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY,
 
-  sizeof(struct ssl_backend_data),
+  sizeof(struct gskit_ssl_backend_data),
 
   gskit_init,                     /* init */
   gskit_cleanup,                  /* cleanup */
