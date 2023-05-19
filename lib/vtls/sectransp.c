@@ -46,7 +46,8 @@
 #endif /* __clang__ */
 
 #ifdef __GNUC__
-#pragma GCC diagnostic ignored "-Werror=address"
+#pragma GCC diagnostic ignored "-Waddress"
+#pragma GCC diagnostic ignored "-Wundef"
 #endif
 
 #include <limits.h>
