@@ -1438,6 +1438,7 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   struct Curl_cfilter *cf = user_data;
   struct Curl_easy *data = stream_user_data;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
+  size_t skiplen;
 
   (void)cf;
   if(!stream)
@@ -1445,9 +1446,12 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   /* The server ackknowledged `datalen` of bytes from our request body.
    * This is a delta. We have kept this data in `sendbuf` for
    * re-transmissions and can free it now. */
-  Curl_bufq_skip(&stream->sendbuf, datalen);
-  DEBUGASSERT(stream->sendbuf_len_in_flight >= datalen);
-  stream->sendbuf_len_in_flight -= datalen;
+  if(datalen >= (uint64_t)stream->sendbuf_len_in_flight)
+    skiplen = stream->sendbuf_len_in_flight;
+  else
+    skiplen = (size_t)datalen;
+  Curl_bufq_skip(&stream->sendbuf, skiplen);
+  stream->sendbuf_len_in_flight -= skiplen;
 
   /* `sendbuf` *might* now have more room. If so, resume this
    * possibly paused stream. And also tell our transfer engine that
