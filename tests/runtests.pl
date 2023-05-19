@@ -966,10 +966,26 @@ sub updatetesttimings {
 
 
 #######################################################################
+# Return the log directory for the given test runner
+sub getrunnernumlogdir {
+    my $runnernum = $_[0];
+    return $jobs > 1 ? $LOGDIR . $runnernum : $LOGDIR;
+}
+
+#######################################################################
 # Return the log directory for the given test runner ID
 sub getrunnerlogdir {
     my $runnerid = $_[0];
-    return $LOGDIR;
+    if($jobs <= 1) {
+        return $LOGDIR;
+    }
+    # TODO: speed up this O(n) operation
+    for my $runnernum (keys %runnerids) {
+        if($runnerid eq $runnerids{$runnernum}) {
+            return $LOGDIR . $runnernum;
+        }
+    }
+    die "Internal error: runner ID $runnerid not found";
 }
 
 
@@ -2017,13 +2033,17 @@ sub runnerready {
 #
 sub createrunners {
     my ($numrunners)=@_;
-    # No runners have been created; create one now
-    my $runnernum = 1;
-    cleardir($LOGDIR);
-    mkdir($LOGDIR, 0777);
-    $runnerids{$runnernum} = runner_init($LOGDIR, $jobs);
-    my $dir = getrunnerlogdir($runnerids{$runnernum});
-    runnerready($runnerids{$runnernum});
+    if(! $numrunners) {
+        $numrunners++;
+    }
+    # create $numrunners runners with minimum 1
+    for my $runnernum (1..$numrunners) {
+        my $dir = getrunnernumlogdir($runnernum);
+        cleardir($dir);
+        mkdir($dir, 0777);
+        $runnerids{$runnernum} = runner_init($dir, $jobs);
+        runnerready($runnerids{$runnernum});
+    }
 }
 
 #######################################################################
@@ -2408,6 +2428,8 @@ if ($gdbthis) {
 # clear and create logging directory:
 #
 
+# TODO: figure how to get around this. This dir is needed for checksystemfeatures()
+# Maybe create & use & delete a temporary directory in that function
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
 
