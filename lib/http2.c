@@ -68,7 +68,7 @@
  * use 16K as chunk size, as that fits H2 DATA frames well */
 #define H2_CHUNK_SIZE           (16 * 1024)
 /* this is how much we want "in flight" for a stream */
-#define H2_STREAM_WINDOW_SIZE   (512 * 1024)
+#define H2_STREAM_WINDOW_SIZE   (10 * 1024 * 1024)
 /* on receving from TLS, we prep for holding a full stream window */
 #define H2_NW_RECV_CHUNKS       (H2_STREAM_WINDOW_SIZE / H2_CHUNK_SIZE)
 /* on send into TLS, we just want to accumulate small frames */
