@@ -1044,6 +1044,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     stream->closed = TRUE;
     stream->reset = TRUE;
     stream->send_closed = TRUE;
+    data->req.keepon &= ~KEEP_SEND_HOLD;
     drain_stream(cf, data, stream);
     break;
   case NGHTTP2_WINDOW_UPDATE:
