@@ -777,7 +777,7 @@ static CURLcode h2_submit(int32_t *pstream_id,
                           struct Curl_cfilter *cf,
                           struct Curl_easy *data,
                           nghttp2_session *h2,
-                          struct http_req *req,
+                          struct httpreq *req,
                           const nghttp2_priority_spec *pri_spec,
                           void *stream_user_data,
                           nghttp2_data_source_read_callback read_callback,
@@ -846,7 +846,7 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   CURLcode result;
-  struct http_req *req = NULL;
+  struct httpreq *req = NULL;
 
   infof(data, "Establish HTTP/2 proxy tunnel to %s", ts->authority);
 

@@ -260,7 +260,7 @@ CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
 /**
  * All about a core HTTP request, excluding body and trailers
  */
-struct http_req {
+struct httpreq {
   char method[12];
   char *scheme;
   char *authority;
@@ -272,17 +272,17 @@ struct http_req {
 /**
  * Create a HTTP request struct.
  */
-CURLcode Curl_http_req_make(struct http_req **preq,
+CURLcode Curl_http_req_make(struct httpreq **preq,
                             const char *method, size_t m_len,
                             const char *scheme, size_t s_len,
                             const char *authority, size_t a_len,
                             const char *path, size_t p_len);
 
-CURLcode Curl_http_req_make2(struct http_req **preq,
+CURLcode Curl_http_req_make2(struct httpreq **preq,
                              const char *method, size_t m_len,
                              CURLU *url, const char *scheme_default);
 
-void Curl_http_req_free(struct http_req *req);
+void Curl_http_req_free(struct httpreq *req);
 
 #define HTTP_PSEUDO_METHOD ":method"
 #define HTTP_PSEUDO_SCHEME ":scheme"
@@ -306,7 +306,7 @@ void Curl_http_req_free(struct http_req *req);
  * @param data       the handle to lookup defaults like ' :scheme' from
  */
 CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
-                             struct http_req *req, struct Curl_easy *data);
+                             struct httpreq *req, struct Curl_easy *data);
 
 /**
  * All about a core HTTP response, excluding body and trailers
