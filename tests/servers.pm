@@ -180,11 +180,19 @@ sub getfreeport {
     return $server->sockport();
 }
 
+use File::Temp qw/ tempfile/;
+
 #######################################################################
 # Initialize configuration variables
 sub initserverconfig {
-    $SOCKSUNIXPATH = "$LOGDIR/$PIDDIR/socks.sock"; # SOCKS Unix domain socket
-    $HTTPUNIXPATH = "$LOGDIR/$PIDDIR/http.sock";   # HTTP Unix domain socket
+    my ($fh, $socks) = tempfile("/tmp/curl-socksd-XXXXXXXX");
+    close($fh);
+    unlink($socks);
+    my ($f2, $http) = tempfile("/tmp/curl-http-XXXXXXXX");
+    close($f2);
+    unlink($http);
+    $SOCKSUNIXPATH = $socks; # SOCKS Unix domain socket
+    $HTTPUNIXPATH = $http;   # HTTP Unix domain socket
     $stunnel = checkcmd("stunnel4") || checkcmd("tstunnel") || checkcmd("stunnel");
 
     # get the name of the current user
