@@ -102,7 +102,7 @@ int main(void)
       if(timeout.tv_sec > 1)
         timeout.tv_sec = 1;
       else
-        timeout.tv_usec = (curl_timeo % 1000) * 1000;
+        timeout.tv_usec = (int)(curl_timeo % 1000) * 1000;
     }
 
     /* get file descriptors from the transfers */
