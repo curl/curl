@@ -42,7 +42,7 @@ socks5unix
 HTTP GET via SOCKS5 proxy via unix sockets
  </name>
  <command>
---socks5 localhost%PWD/%SOCKSUNIXPATH http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--socks5 localhost%SOCKSUNIXPATH http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
