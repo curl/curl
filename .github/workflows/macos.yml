@@ -86,7 +86,7 @@ jobs:
         - name: gcc SecureTransport http2
           install: nghttp2
           configure: CC=gcc-12 --enable-debug --with-secure-transport
-          macosx-version-min: 10.8
+          macosx-version-min: 10.13
         - name: OpenSSL http2
           install: nghttp2 openssl
           configure: --enable-debug --with-openssl=/usr/local/opt/openssl
