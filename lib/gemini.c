@@ -89,6 +89,7 @@ static CURLcode gemini_connect(struct Curl_easy *data, bool *done)
     return CURLE_URL_MALFORMAT;
   }
 
+  *done = true;
   return CURLE_OK;
 }
 
@@ -202,8 +203,9 @@ static CURLcode gemini_doing(struct Curl_easy *data, bool *done)
   if(gemini->response[0] == '1') {
     char *meta = &gemini->response[0];
     size_t meta_len = gemini->reslen;
+    char *msg;
+    msg = "Status Code: ";
     meta[meta_len] = '\0';
-    char *msg = "Status Code: ";
 
     /* Write msg */
     result = Curl_client_write(data, CLIENTWRITE_BODY, msg, strlen(msg));
@@ -279,7 +281,7 @@ const struct Curl_handler Curl_handler_gemini = {
   "GEMINI",                             /* scheme */
   gemini_setup_connection,              /* setup_connection */
   gemini_doing,                         /* do_it */
-  ZERO_NULL,                            /* done */
+  gemini_done,                          /* done */
   ZERO_NULL,                            /* do_more */
   gemini_connect,                       /* connect_it */
   gemini_connecting,                    /* connecting */

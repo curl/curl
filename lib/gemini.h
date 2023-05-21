@@ -33,10 +33,10 @@ extern const struct Curl_handler Curl_handler_gemini;
 
 struct GEMINI {
   char request[GEMINI_META_MAX + sizeof(GEMINI_TERMINATION)];
-  size_t reqindex;
-  size_t reqlen;
+  ssize_t reqindex;
+  ssize_t reqlen;
   char response[GEMINI_STATUS_SIZE + 1 + GEMINI_META_MAX];
-  size_t reslen;
+  ssize_t reslen;
 };
 
 #endif
