@@ -81,7 +81,7 @@
 /* spare chunks we keep for a full window */
 #define H2_STREAM_POOL_SPARES   (H2_STREAM_WINDOW_SIZE / H2_CHUNK_SIZE)
 
-/* We need to accomodate the max number of streams with their window
+/* We need to accommodate the max number of streams with their window
  * sizes on the overall connection. Streams might become PAUSED which
  * will block their received QUOTA in the connection window. And if we
  * run out of space, the server is blocked from sending us any data.
@@ -327,7 +327,7 @@ static int h2_client_new(struct Curl_cfilter *cf,
   int rc = nghttp2_option_new(&o);
   if(rc)
     return rc;
-  /* We handle window updates ourself to enfore buffer limits */
+  /* We handle window updates ourself to enforce buffer limits */
   nghttp2_option_set_no_auto_window_update(o, 1);
 #if NGHTTP2_VERSION_NUM >= 0x013200
   /* with 1.50.0 */

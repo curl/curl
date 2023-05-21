@@ -76,7 +76,7 @@ static void expect_timer_seconds(struct Curl_easy *data, int seconds)
 }
 
 /* Scenario: simulate a redirect. When a redirect occurs, t_nslookup,
- * t_connect, t_appconnect, t_pretransfer, and t_starttransfer are addative.
+ * t_connect, t_appconnect, t_pretransfer, and t_starttransfer are additive.
  * E.g., if t_starttransfer took 2 seconds initially and took another 1
  * second for the redirect request, then the resulting t_starttransfer should
  * be 3 seconds. */

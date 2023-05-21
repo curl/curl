@@ -747,7 +747,7 @@ CURLcode Curl_socket_connect_result(struct Curl_easy *data,
 }
 
 /* We have a recv buffer to enhance reads with len < NW_SMALL_READS.
- * This happens often on TLS connections where the TLS implemenation
+ * This happens often on TLS connections where the TLS implementation
  * tries to read the head of a TLS record, determine the length of the
  * full record and then make a subsequent read for that.
  * On large reads, we will not fill the buffer to avoid the double copy. */

@@ -172,7 +172,7 @@ static const struct Curl_OID OIDtable[] = {
  * It is intended to support certificate information gathering for SSL backends
  * that offer a mean to get certificates as a whole, but do not supply
  * entry points to get particular certificate sub-fields.
- * Please note there is no pretention here to rewrite a full SSL library.
+ * Please note there is no pretension here to rewrite a full SSL library.
  */
 
 static const char *getASN1Element(struct Curl_asn1Element *elem,
