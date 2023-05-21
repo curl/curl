@@ -2281,7 +2281,7 @@
      d  CURLSTS_DONE   c                   1
      d  CURLSTS_FAIL   c                   2
       *
-      *  Renaming CURLMsg to CURL_Msg to avoid case-insensivity name clash.
+      *  Renaming CURLMsg to CURL_Msg to avoid case-insensitivity name clash.
       *
      d CURL_Msg        ds                  based(######ptr######)
      d                                     qualified

@@ -208,7 +208,7 @@ make_module()
         #               putting it in an include file makes it only active
         #               for that include file.
         #       Thus we build a temporary file with the pragma prepended to
-        #               the source file and we compile that themporary file.
+        #               the source file and we compile that temporary file.
 
         echo "#line 1 \"${2}\"" > __tmpsrcf.c
         echo "#pragma convert(819)" >> __tmpsrcf.c

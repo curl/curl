@@ -219,7 +219,7 @@ bool Curl_auth_is_spnego_supported(void);
    message */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                          const char *user,
-                                         const char *passwood,
+                                         const char *password,
                                          const char *service,
                                          const char *host,
                                          const char *chlg64,

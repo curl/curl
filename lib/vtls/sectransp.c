@@ -2719,7 +2719,7 @@ check_handshake:
         failf(data, "Peer rejected unexpected message");
         break;
 #if CURL_BUILD_MAC_10_11 || CURL_BUILD_IOS_9
-      /* Treaing non-fatal error as fatal like before */
+      /* Treating non-fatal error as fatal like before */
       case errSSLClientHelloReceived:
         failf(data, "A non-fatal result for providing a server name "
                     "indication");

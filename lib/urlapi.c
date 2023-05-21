@@ -651,7 +651,7 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  */
 
 #define HOST_ERROR   -1 /* out of memory */
-#define HOST_BAD     -2 /* bad IPv4 adddress */
+#define HOST_BAD     -2 /* bad IPv4 address */
 
 #define HOST_NAME    1
 #define HOST_IPV4    2

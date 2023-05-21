@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# This module contains miscellanous functions needed in several parts of
+# This module contains miscellaneous functions needed in several parts of
 # the test suite.
 
 package testutil;
