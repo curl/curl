@@ -43,6 +43,7 @@
 static CURLcode gemini_setup_connection(struct Curl_easy *data,
                                         struct connectdata *conn)
 {
+  (void)conn;
   DEBUGASSERT(data->req.p.gemini == NULL);
 
   data->req.p.gemini = calloc(1, sizeof(struct GEMINI));
@@ -112,7 +113,7 @@ static CURLcode gemini_doing(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   struct GEMINI *gemini = data->req.p.gemini;
-  size_t rx_size = GEMINI_STATUS_SIZE + 1 + GEMINI_META_MAX;
+  ssize_t rx_size = GEMINI_STATUS_SIZE + 1 + GEMINI_META_MAX;
 
   /* Send request */
   if(gemini->reqindex < gemini->reqlen) {
@@ -174,7 +175,7 @@ static CURLcode gemini_doing(struct Curl_easy *data, bool *done)
   /* Redirect: 3x <redirect url>\r\n */
   if(gemini->response[0] == '3') {
     char *redirect = &gemini->response[3];
-    size_t redirect_len = gemini->reslen - 5;
+    ssize_t redirect_len = gemini->reslen - 5;
     redirect[redirect_len] = '\0';
 
     /* Redirect URL must not start with 0xFEFF */
@@ -202,16 +203,8 @@ static CURLcode gemini_doing(struct Curl_easy *data, bool *done)
   /* Input: 1x <meta>\r\n */
   if(gemini->response[0] == '1') {
     char *meta = &gemini->response[0];
-    size_t meta_len = gemini->reslen;
-    char *msg;
-    msg = "Status Code: ";
+    ssize_t meta_len = gemini->reslen;
     meta[meta_len] = '\0';
-
-    /* Write msg */
-    result = Curl_client_write(data, CLIENTWRITE_BODY, msg, strlen(msg));
-
-    if(result)
-      return result;
 
     /* Write Meta: 1x <meta>\r\n */
     result = Curl_client_write(data, CLIENTWRITE_BODY, meta, meta_len);
