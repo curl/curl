@@ -34,7 +34,7 @@ Set-Cookie: mycookie1=; Path=/; Max-Age=-1; Expires=Thu, 01 Jan 1970 00:00:00 GM
 http
 </server>
  <name>
-Setting cookies set with expried dates that were loaded from jar
+Setting cookies set with expired dates that were loaded from jar
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/func_test/del_cookie -b %LOGDIR/cookie%TESTNUMBER -c %LOGDIR/save%TESTNUMBER

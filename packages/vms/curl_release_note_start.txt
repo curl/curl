@@ -2,7 +2,7 @@ From file: CURL_RELEASE_NOTE_START.TXT
 
 Note: These kits are produced by a hobbyist and are providing any support
 or any commitment to supply bug fixes or future releases.  This code is
-as-is with no warrantees.
+as-is with no warranties.
 
 The testing of this build of curl was minimal and involved building some of
 the sample and test programs, accessing a public HTTPS: website, doing a

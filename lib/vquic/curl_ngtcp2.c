@@ -1443,7 +1443,7 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   (void)cf;
   if(!stream)
     return 0;
-  /* The server ackknowledged `datalen` of bytes from our request body.
+  /* The server acknowledged `datalen` of bytes from our request body.
    * This is a delta. We have kept this data in `sendbuf` for
    * re-transmissions and can free it now. */
   if(datalen >= (uint64_t)stream->sendbuf_len_in_flight)

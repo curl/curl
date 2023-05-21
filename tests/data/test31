@@ -11,7 +11,7 @@ cookiejar
 #
 # The cookies set come in two versions. This is because when curl is built
 # with Hyper, the API provides the headers already "sanitized" so we cannot
-# compapare with the exact server contents unlesss it too sends the data
+# compare with the exact server contents unless it too sends the data
 # "clean".
 
 <reply>
