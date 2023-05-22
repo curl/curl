@@ -181,8 +181,8 @@ void Curl_bufcp_init(struct bufc_pool *pool,
   pool->spare_max = spare_max;
 }
 
-CURLcode Curl_bufcp_take(struct bufc_pool *pool,
-                         struct buf_chunk **pchunk)
+static CURLcode bufcp_take(struct bufc_pool *pool,
+                           struct buf_chunk **pchunk)
 {
   struct buf_chunk *chunk = NULL;
 
@@ -205,8 +205,8 @@ CURLcode Curl_bufcp_take(struct bufc_pool *pool,
   return CURLE_OK;
 }
 
-void Curl_bufcp_put(struct bufc_pool *pool,
-                    struct buf_chunk *chunk)
+static void bufcp_put(struct bufc_pool *pool,
+                      struct buf_chunk *chunk)
 {
   if(pool->spare_count >= pool->spare_max) {
     free(chunk);
@@ -335,7 +335,7 @@ static struct buf_chunk *get_spare(struct bufq *q)
     return NULL;
 
   if(q->pool) {
-    if(Curl_bufcp_take(q->pool, &chunk))
+    if(bufcp_take(q->pool, &chunk))
       return NULL;
     ++q->chunk_count;
     return chunk;
@@ -360,7 +360,7 @@ static void prune_head(struct bufq *q)
     if(q->tail == chunk)
       q->tail = q->head;
     if(q->pool) {
-      Curl_bufcp_put(q->pool, chunk);
+      bufcp_put(q->pool, chunk);
       --q->chunk_count;
     }
     else if((q->chunk_count > q->max_chunks) ||
@@ -605,9 +605,18 @@ ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
   return nread;
 }
 
-ssize_t Curl_bufq_slurpn(struct bufq *q, size_t max_len,
-                         Curl_bufq_reader *reader, void *reader_ctx,
-                         CURLcode *err)
+/**
+ * Read up to `max_len` bytes and append it to the end of the buffer queue.
+ * if `max_len` is 0, no limit is imposed and the call behaves exactly
+ * the same as `Curl_bufq_slurp()`.
+ * Returns the total amount of buf read (may be 0) or -1 on other
+ * reader errors.
+ * Note that even in case of a -1 chunks may have been read and
+ * the buffer queue will have different length than before.
+ */
+static ssize_t bufq_slurpn(struct bufq *q, size_t max_len,
+                           Curl_bufq_reader *reader, void *reader_ctx,
+                           CURLcode *err)
 {
   ssize_t nread = 0, n;
 
@@ -646,6 +655,5 @@ ssize_t Curl_bufq_slurpn(struct bufq *q, size_t max_len,
 ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
                         void *reader_ctx, CURLcode *err)
 {
-  return Curl_bufq_slurpn(q, 0, reader, reader_ctx, err);
+  return bufq_slurpn(q, 0, reader, reader_ctx, err);
 }
-

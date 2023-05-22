@@ -1060,12 +1060,23 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   cf_he_query,
 };
 
-CURLcode Curl_cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
-                                       struct Curl_easy *data,
-                                       struct connectdata *conn,
-                                       cf_ip_connect_create *cf_create,
-                                       const struct Curl_dns_entry *remotehost,
-                                       int transport)
+/**
+ * Create a happy eyeball connection filter that uses the, once resolved,
+ * address information to connect on ip families based on connection
+ * configuration.
+ * @param pcf        output, the created cfilter
+ * @param data       easy handle used in creation
+ * @param conn       connection the filter is created for
+ * @param cf_create  method to create the sub-filters performing the
+ *                   actual connects.
+ */
+static CURLcode
+cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
+                         struct Curl_easy *data,
+                         struct connectdata *conn,
+                         cf_ip_connect_create *cf_create,
+                         const struct Curl_dns_entry *remotehost,
+                         int transport)
 {
   struct cf_he_ctx *ctx = NULL;
   CURLcode result;
@@ -1124,20 +1135,6 @@ static cf_ip_connect_create *get_cf_create(int transport)
   return NULL;
 }
 
-#ifdef DEBUGBUILD
-void Curl_debug_set_transport_provider(int transport,
-                                       cf_ip_connect_create *cf_create)
-{
-  size_t i;
-  for(i = 0; i < ARRAYSIZE(transport_providers); ++i) {
-    if(transport == transport_providers[i].transport) {
-      transport_providers[i].cf_create = cf_create;
-      return;
-    }
-  }
-}
-#endif /* DEBUGBUILD */
-
 static CURLcode cf_he_insert_after(struct Curl_cfilter *cf_at,
                                    struct Curl_easy *data,
                                    const struct Curl_dns_entry *remotehost,
@@ -1154,9 +1151,9 @@ static CURLcode cf_he_insert_after(struct Curl_cfilter *cf_at,
     DEBUGF(LOG_CF(data, cf_at, "unsupported transport type %d", transport));
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
-  result = Curl_cf_happy_eyeballs_create(&cf, data, cf_at->conn,
-                                         cf_create, remotehost,
-                                         transport);
+  result = cf_happy_eyeballs_create(&cf, data, cf_at->conn,
+                                    cf_create, remotehost,
+                                    transport);
   if(result)
     return result;
 
@@ -1359,12 +1356,12 @@ out:
   return result;
 }
 
-CURLcode Curl_cf_setup_add(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           int sockindex,
-                           const struct Curl_dns_entry *remotehost,
-                           int transport,
-                           int ssl_mode)
+static CURLcode cf_setup_add(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             int sockindex,
+                             const struct Curl_dns_entry *remotehost,
+                             int transport,
+                             int ssl_mode)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
@@ -1377,6 +1374,21 @@ CURLcode Curl_cf_setup_add(struct Curl_easy *data,
 out:
   return result;
 }
+
+#ifdef DEBUGBUILD
+/* used by unit2600.c */
+void Curl_debug_set_transport_provider(int transport,
+                                       cf_ip_connect_create *cf_create)
+{
+  size_t i;
+  for(i = 0; i < ARRAYSIZE(transport_providers); ++i) {
+    if(transport == transport_providers[i].transport) {
+      transport_providers[i].cf_create = cf_create;
+      return;
+    }
+  }
+}
+#endif /* DEBUGBUILD */
 
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,
@@ -1419,8 +1431,8 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
   /* Still no cfilter set, apply default. */
   if(!conn->cfilter[sockindex]) {
-    result = Curl_cf_setup_add(data, conn, sockindex, remotehost,
-                               conn->transport, ssl_mode);
+    result = cf_setup_add(data, conn, sockindex, remotehost,
+                          conn->transport, ssl_mode);
     if(result)
       goto out;
   }
