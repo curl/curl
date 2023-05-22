@@ -12,6 +12,7 @@ check the changelog of the current development status, as one or more of these
 problems may have been fixed or changed somewhat since this was written.
 
  1. HTTP
+ 1.1 hyper memory-leaks
  1.5 Expect-100 meets 417
 
  2. TLS
@@ -107,6 +108,12 @@ problems may have been fixed or changed somewhat since this was written.
 ==============================================================================
 
 1. HTTP
+
+1.1 hyper memory-leaks
+
+ Building curl with the hyper backend causes mysterious memory-leaks
+
+ https://github.com/curl/curl/issues/10803
 
 1.5 Expect-100 meets 417
 
