@@ -129,7 +129,11 @@
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
-static void conn_free(struct Curl_easy *data, struct connectdata *conn);
+#ifdef USE_NGHTTP2
+static void data_priority_cleanup(struct Curl_easy *data);
+#else
+#define data_priority_cleanup(x)
+#endif
 
 /* Some parts of the code (e.g. chunked encoding) assume this buffer has at
  * more than just a few bytes to play with. Don't let it become too small or
@@ -420,7 +424,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_resolver_cancel(data);
   Curl_resolver_cleanup(data->state.async.resolver);
 
-  Curl_data_priority_cleanup(data);
+  data_priority_cleanup(data);
 
   /* No longer a dirty share, if it exists */
   if(data->share) {
@@ -4027,9 +4031,9 @@ CURLcode Curl_data_priority_add_child(struct Curl_easy *parent,
 
 #endif /* USE_NGHTTP2 */
 
-void Curl_data_priority_cleanup(struct Curl_easy *data)
-{
 #ifdef USE_NGHTTP2
+static void data_priority_cleanup(struct Curl_easy *data)
+{
   while(data->set.priority.children) {
     struct Curl_easy *tmp = data->set.priority.children->data;
     priority_remove_child(data, tmp);
@@ -4039,9 +4043,8 @@ void Curl_data_priority_cleanup(struct Curl_easy *data)
 
   if(data->set.priority.parent)
     priority_remove_child(data->set.priority.parent, data);
-#endif
-  (void)data;
 }
+#endif
 
 void Curl_data_priority_clear_state(struct Curl_easy *data)
 {

@@ -228,22 +228,6 @@ out:
   return result;
 }
 
-CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               int sockindex)
-{
-  struct Curl_cfilter *cf;
-  CURLcode result;
-
-  result = cf_haproxy_create(&cf, data);
-  if(result)
-    goto out;
-  Curl_conn_cf_add(data, conn, sockindex, cf);
-
-out:
-  return result;
-}
-
 CURLcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
                                       struct Curl_easy *data)
 {

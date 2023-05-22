@@ -197,10 +197,6 @@ void Curl_cf_def_destroy_this(struct Curl_cfilter *cf,
 
 /* Default implementations for the type functions, implementing pass-through
  * the filter chain. */
-void     Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data);
-CURLcode Curl_cf_def_connect(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             bool blocking, bool *done);
 void     Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
                               const char **phost, const char **pdisplay_host,
                               int *pport);
@@ -286,8 +282,6 @@ void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 int Curl_conn_cf_get_select_socks(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   curl_socket_t *socks);
-bool Curl_conn_cf_data_pending(struct Curl_cfilter *cf,
-                               const struct Curl_easy *data);
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, CURLcode *err);
 ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -448,12 +442,6 @@ void Curl_conn_ev_update_info(struct Curl_easy *data,
                               struct connectdata *conn);
 
 /**
- * Update connection statistics
- */
-void Curl_conn_report_connect_stats(struct Curl_easy *data,
-                                    struct connectdata *conn);
-
-/**
  * Check if FIRSTSOCKET's cfilter chain deems connection alive.
  */
 bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
@@ -466,6 +454,7 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
                               struct connectdata *conn,
                               int sockindex);
 
+void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
                         const char **phost, const char **pdisplay_host,
                         int *pport);

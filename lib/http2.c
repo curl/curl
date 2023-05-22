@@ -2465,7 +2465,8 @@ out:
   return result;
 }
 
-bool Curl_cf_is_http2(struct Curl_cfilter *cf, const struct Curl_easy *data)
+static bool Curl_cf_is_http2(struct Curl_cfilter *cf,
+                             const struct Curl_easy *data)
 {
   (void)data;
   for(; cf; cf = cf->next) {

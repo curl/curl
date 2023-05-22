@@ -104,31 +104,6 @@ typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       const struct Curl_addrinfo *ai,
                                       int transport);
 
-/**
- * Create a happy eyeball connection filter that uses the, once resolved,
- * address information to connect on ip families based on connection
- * configuration.
- * @param pcf        output, the created cfilter
- * @param data       easy handle used in creation
- * @param conn       connection the filter is created for
- * @param cf_create  method to create the sub-filters performing the
- *                   actual connects.
- */
-CURLcode
-Curl_cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
-                              struct Curl_easy *data,
-                              struct connectdata *conn,
-                              cf_ip_connect_create *cf_create,
-                              const struct Curl_dns_entry *remotehost,
-                              int transport);
-
-CURLcode Curl_cf_setup_add(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           int sockindex,
-                           const struct Curl_dns_entry *remotehost,
-                           int transport,
-                           int ssl_mode);
-
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,
                                     const struct Curl_dns_entry *remotehost,

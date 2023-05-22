@@ -1238,19 +1238,6 @@ struct Curl_cftype Curl_cft_socks_proxy = {
   Curl_cf_def_query,
 };
 
-CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
-                                   struct connectdata *conn,
-                                   int sockindex)
-{
-  struct Curl_cfilter *cf;
-  CURLcode result;
-
-  result = Curl_cf_create(&cf, &Curl_cft_socks_proxy, NULL);
-  if(!result)
-    Curl_conn_cf_add(data, conn, sockindex, cf);
-  return result;
-}
-
 CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
                                           struct Curl_easy *data)
 {

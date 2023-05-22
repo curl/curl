@@ -224,11 +224,11 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-CURLcode vquic_send_packets(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
-                            struct cf_quic_ctx *qctx,
-                            const uint8_t *pkt, size_t pktlen, size_t gsolen,
-                            size_t *psent)
+static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct cf_quic_ctx *qctx,
+                                   const uint8_t *pkt, size_t pktlen,
+                                   size_t gsolen, size_t *psent)
 {
   if(qctx->no_gso && pktlen > gsolen) {
     return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);

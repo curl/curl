@@ -128,7 +128,7 @@ static void freednsentry(void *freethis);
 /*
  * Return # of addresses in a Curl_addrinfo struct
  */
-int Curl_num_addresses(const struct Curl_addrinfo *addr)
+static int num_addresses(const struct Curl_addrinfo *addr)
 {
   int i = 0;
   while(addr) {
@@ -410,7 +410,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                                     struct Curl_addrinfo **addr)
 {
   CURLcode result = CURLE_OK;
-  const int num_addrs = Curl_num_addresses(*addr);
+  const int num_addrs = num_addresses(*addr);
 
   if(num_addrs > 1) {
     struct Curl_addrinfo **nodes;

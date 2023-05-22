@@ -29,10 +29,6 @@
 
 #if !defined(CURL_DISABLE_PROXY)
 
-CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               int sockindex);
-
 CURLcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
                                       struct Curl_easy *data);
 
