@@ -181,6 +181,7 @@
  19.3 Do not use GNU libtool on OpenBSD
  19.4 Package curl for Windows in a signed installer
  19.5 make configure use --cache-file more and better
+ 19.6 build curl with Windows Unicode support
 
  20. Test suite
  20.1 SSL tunnel
@@ -1319,6 +1320,13 @@
  invokes run much faster.
 
  See https://github.com/curl/curl/issues/7753
+
+19.6 build curl with Windows Unicode support
+
+ The user wants an easier way to tell autotools to build curl with Windows
+ Unicode support, like ./configure --enable-windows-unicode
+
+ See https://github.com/curl/curl/issues/7229
 
 20. Test suite
 
