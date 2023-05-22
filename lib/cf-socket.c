@@ -212,9 +212,13 @@ tcpkeepalive(struct Curl_easy *data,
   }
 }
 
-void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
-                           const struct Curl_addrinfo *ai,
-                           int transport)
+/**
+ * Assign the address `ai` to the Curl_sockaddr_ex `dest` and
+ * set the transport used.
+ */
+static void sock_assign_addr(struct Curl_sockaddr_ex *dest,
+                             const struct Curl_addrinfo *ai,
+                             int transport)
 {
   /*
    * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -306,7 +310,7 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
     /* if the caller doesn't want info back, use a local temp copy */
     addr = &dummy;
 
-  Curl_sock_assign_addr(addr, ai, transport);
+  sock_assign_addr(addr, ai, transport);
   return socket_open(data, addr, sockfd);
 }
 
@@ -717,8 +721,11 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   return rc;
 }
 
-CURLcode Curl_socket_connect_result(struct Curl_easy *data,
-                                    const char *ipaddress, int error)
+/**
+ * Determine the curl code for a socket connect() == -1 with errno.
+ */
+static CURLcode socket_connect_result(struct Curl_easy *data,
+                                      const char *ipaddress, int error)
 {
   char buffer[STRERROR_LEN];
 
@@ -781,7 +788,7 @@ static void cf_socket_ctx_init(struct cf_socket_ctx *ctx,
   memset(ctx, 0, sizeof(*ctx));
   ctx->sock = CURL_SOCKET_BAD;
   ctx->transport = transport;
-  Curl_sock_assign_addr(&ctx->addr, ai, transport);
+  sock_assign_addr(&ctx->addr, ai, transport);
   Curl_bufq_init(&ctx->recvbuf, NW_RECV_CHUNK_SIZE, NW_RECV_CHUNKS);
 }
 
@@ -1128,7 +1135,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     /* Connect TCP socket */
     rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
     if(-1 == rc) {
-      result = Curl_socket_connect_result(data, ctx->r_ip, SOCKERRNO);
+      result = socket_connect_result(data, ctx->r_ip, SOCKERRNO);
       goto out;
     }
   }
@@ -1562,7 +1569,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 
   rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
   if(-1 == rc) {
-    return Curl_socket_connect_result(data, ctx->r_ip, SOCKERRNO);
+    return socket_connect_result(data, ctx->r_ip, SOCKERRNO);
   }
   set_local_ip(cf, data);
   DEBUGF(LOG_CF(data, cf, "%s socket %" CURL_FORMAT_SOCKET_T
@@ -1866,7 +1873,10 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-bool Curl_cf_is_socket(struct Curl_cfilter *cf)
+/**
+ * Return TRUE iff `cf` is a socket filter.
+ */
+static bool cf_is_socket(struct Curl_cfilter *cf)
 {
   return cf && (cf->cft == &Curl_cft_tcp ||
                 cf->cft == &Curl_cft_udp ||
@@ -1881,7 +1891,7 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
                              const char **pr_ip_str, int *pr_port,
                              const char **pl_ip_str, int *pl_port)
 {
-  if(Curl_cf_is_socket(cf) && cf->ctx) {
+  if(cf_is_socket(cf) && cf->ctx) {
     struct cf_socket_ctx *ctx = cf->ctx;
 
     if(psock)

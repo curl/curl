@@ -87,12 +87,6 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       curl_socket_t sock);
 
-/**
- * Determine the curl code for a socket connect() == -1 with errno.
- */
-CURLcode Curl_socket_connect_result(struct Curl_easy *data,
-                                    const char *ipaddress, int error);
-
 #ifdef USE_WINSOCK
 /* When you run a program that uses the Windows Sockets API, you may
    experience slow performance when you copy data to a TCP server.
@@ -108,13 +102,6 @@ void Curl_sndbufset(curl_socket_t sockfd);
 #define Curl_sndbufset(y) Curl_nop_stmt
 #endif
 
-/**
- * Assign the address `ai` to the Curl_sockaddr_ex `dest` and
- * set the transport used.
- */
-void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
-                           const struct Curl_addrinfo *ai,
-                           int transport);
 
 /**
  * Creates a cfilter that opens a TCP socket to the given address
@@ -170,11 +157,6 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex,
                                     curl_socket_t *s);
-
-/**
- * Return TRUE iff `cf` is a socket filter.
- */
-bool Curl_cf_is_socket(struct Curl_cfilter *cf);
 
 /**
  * Peek at the socket and remote ip/port the socket filter is using.

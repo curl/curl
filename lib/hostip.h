@@ -132,9 +132,6 @@ void Curl_init_dnscache(struct Curl_hash *hash, int hashsize);
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct Curl_easy *data);
 
-/* Return # of addresses in a Curl_addrinfo struct */
-int Curl_num_addresses(const struct Curl_addrinfo *addr);
-
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 

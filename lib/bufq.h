@@ -60,11 +60,6 @@ struct bufc_pool {
 void Curl_bufcp_init(struct bufc_pool *pool,
                      size_t chunk_size, size_t spare_max);
 
-CURLcode Curl_bufcp_take(struct bufc_pool *pool,
-                         struct buf_chunk **pchunk);
-void Curl_bufcp_put(struct bufc_pool *pool,
-                    struct buf_chunk *chunk);
-
 void Curl_bufcp_free(struct bufc_pool *pool);
 
 /**
@@ -250,19 +245,6 @@ typedef ssize_t Curl_bufq_reader(void *reader_ctx,
  */
 ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
                         void *reader_ctx, CURLcode *err);
-
-/**
- * Read up to `max_len` bytes and append it to the end of the buffer queue.
- * if `max_len` is 0, no limit is imposed and the call behaves exactly
- * the same as `Curl_bufq_slurp()`.
- * Returns the total amount of buf read (may be 0) or -1 on other
- * reader errors.
- * Note that even in case of a -1 chunks may have been read and
- * the buffer queue will have different length than before.
- */
-ssize_t Curl_bufq_slurpn(struct bufq *q, size_t max_len,
-                         Curl_bufq_reader *reader, void *reader_ctx,
-                         CURLcode *err);
 
 /**
  * Read *once* up to `max_len` bytes and append it to the buffer.

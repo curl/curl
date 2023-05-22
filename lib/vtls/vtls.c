@@ -781,20 +781,6 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
   return result;
 }
 
-/*
- * This is a convenience function for push_certinfo_len that takes a zero
- * terminated value.
- */
-CURLcode Curl_ssl_push_certinfo(struct Curl_easy *data,
-                                int certnum,
-                                const char *label,
-                                const char *value)
-{
-  size_t valuelen = strlen(value);
-
-  return Curl_ssl_push_certinfo_len(data, certnum, label, value, valuelen);
-}
-
 CURLcode Curl_ssl_random(struct Curl_easy *data,
                          unsigned char *entropy,
                          size_t length)
@@ -1834,19 +1820,6 @@ out:
   return result;
 }
 
-CURLcode Curl_ssl_cfilter_proxy_add(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    int sockindex)
-{
-  struct Curl_cfilter *cf;
-  CURLcode result;
-
-  result = cf_ssl_proxy_create(&cf, data, conn);
-  if(!result)
-    Curl_conn_cf_add(data, conn, sockindex, cf);
-  return result;
-}
-
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
                                         struct Curl_easy *data)
 {
@@ -1958,19 +1931,6 @@ Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf)
   return Curl_ssl_cf_is_proxy(cf)?
     &cf->conn->proxy_ssl_config : &cf->conn->ssl_config;
 #endif
-}
-
-struct ssl_primary_config *
-Curl_ssl_get_primary_config(struct Curl_easy *data,
-                            struct connectdata *conn,
-                            int sockindex)
-{
-  struct Curl_cfilter *cf;
-
-  (void)data;
-  DEBUGASSERT(conn);
-  cf = get_ssl_cf_engaged(conn, sockindex);
-  return cf? Curl_ssl_cf_get_primary_config(cf) : NULL;
 }
 
 struct Curl_cfilter *Curl_ssl_cf_get_ssl(struct Curl_cfilter *cf)

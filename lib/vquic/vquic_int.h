@@ -47,12 +47,6 @@ struct cf_quic_ctx {
 CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx);
 void vquic_ctx_free(struct cf_quic_ctx *qctx);
 
-CURLcode vquic_send_packets(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
-                            struct cf_quic_ctx *qctx,
-                            const uint8_t *pkt, size_t pktlen, size_t gsolen,
-                            size_t *psent);
-
 void vquic_push_blocked_pkt(struct Curl_cfilter *cf,
                             struct cf_quic_ctx *qctx,
                             const uint8_t *pkt, size_t pktlen, size_t gsolen);
