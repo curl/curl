@@ -1793,7 +1793,7 @@ sub runsshserver {
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
 
     if(!$USER) {
-        logmsg "Can't start ssh server due to lack of USER name";
+        logmsg "Can't start ssh server due to lack of USER name\n";
         return (4, 0, 0, 0);
     }
 
