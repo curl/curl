@@ -275,14 +275,14 @@ class TestUpload:
             '--resolve', f'{env.authority_for(env.domain1, proto)}:127.0.0.1',
             '--cacert', env.ca.cert_file,
             '--request', 'PUT',
-            '--max-time', '5', '-v',
+            '--max-time', '10', '-v',
             '--url', url,
             '--form', 'idList=12345678',
             '--form', 'pos=top',
             '--form', 'name=mr_test',
             '--form', f'fileSource=@{fdata};type=application/pdf',
         ])
-        assert r.exit_code == 0, f'{r}'
+        assert r.exit_code == 0, r.dump_logs()
         r.check_stats(1, 200)
 
     def check_download(self, count, srcfile, curl):

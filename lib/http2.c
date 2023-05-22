@@ -1200,6 +1200,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   stream->error = error_code;
   if(stream->error)
     stream->reset = TRUE;
+  data_s->req.keepon &= ~KEEP_SEND_HOLD;
 
   drain_stream(cf, data_s, stream);
 
@@ -1676,7 +1677,9 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
       goto out;
   }
 
-  rv = nghttp2_session_send(ctx->h2);
+  while(!rv && nghttp2_session_want_write(ctx->h2))
+    rv = nghttp2_session_send(ctx->h2);
+
 out:
   if(nghttp2_is_fatal(rv)) {
     DEBUGF(LOG_CF(data, cf, "nghttp2_session_send error (%s)%d",
@@ -1996,13 +1999,6 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   CF_DATA_SAVE(save, cf, data);
 
   if(stream && stream->id != -1) {
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send: win %u/%u",
-                stream->id,
-                nghttp2_session_get_remote_window_size(ctx->h2),
-                nghttp2_session_get_stream_remote_window_size(
-                  ctx->h2, stream->id)
-           ));
-
     if(stream->close_handled) {
       infof(data, "stream %u closed", stream->id);
       *err = CURLE_HTTP2_STREAM;
@@ -2021,6 +2017,8 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         goto out;
       nwritten = 0;
     }
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%u] bufq_write(len=%zu) -> %zd, %d",
+                  stream->id, len, nwritten, *err));
 
     if(!Curl_bufq_is_empty(&stream->sendbuf)) {
       rv = nghttp2_session_resume_data(ctx->h2, stream->id);
@@ -2063,14 +2061,16 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send: win %u/%zu",
              stream->id,
              nghttp2_session_get_remote_window_size(ctx->h2), rwin));
-        if(rwin == 0) {
-          /* We cannot upload more as the stream's remote window size
-           * is 0. We need to receive WIN_UPDATEs before we can continue.
-           */
-          data->req.keepon |= KEEP_SEND_HOLD;
-          DEBUGF(LOG_CF(data, cf, "[h2sid=%d] holding send as remote flow "
-                 "window is exhausted", stream->id));
-        }
+      if(rwin == 0) {
+        /* We cannot upload more as the stream's remote window size
+         * is 0. We need to receive WIN_UPDATEs before we can continue.
+         */
+        data->req.keepon |= KEEP_SEND_HOLD;
+        DEBUGF(LOG_CF(data, cf, "[h2sid=%d] holding send as remote flow "
+               "window is exhausted", stream->id));
+      }
+      nwritten = -1;
+      *err = CURLE_AGAIN;
     }
     /* handled writing BODY for open stream. */
     goto out;
@@ -2109,8 +2109,24 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send -> %zd, %d",
-         stream? stream->id : -1, nwritten, *err));
+  if(stream) {
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) -> %zd, %d, "
+                  "buffered=%zu, upload_left=%zu, stream-window=%d, "
+                  "connection-window=%d",
+                  stream->id, len, nwritten, *err,
+                  Curl_bufq_len(&stream->sendbuf),
+                  (ssize_t)stream->upload_left,
+                  nghttp2_session_get_stream_remote_window_size(
+                    ctx->h2, stream->id),
+                  nghttp2_session_get_remote_window_size(ctx->h2)));
+    drain_stream(cf, data, stream);
+  }
+  else {
+    DEBUGF(LOG_CF(data, cf, "cf_send(len=%zu) -> %zd, %d, "
+                  "connection-window=%d",
+                  len, nwritten, *err,
+                  nghttp2_session_get_remote_window_size(ctx->h2)));
+  }
   CF_DATA_RESTORE(cf, save);
   return nwritten;
 }
@@ -2313,6 +2329,7 @@ static bool cf_h2_data_pending(struct Curl_cfilter *cf,
   struct stream_ctx *stream = H2_STREAM_CTX(data);
 
   if(ctx && (!Curl_bufq_is_empty(&ctx->inbufq)
+            || (stream && !Curl_bufq_is_empty(&stream->sendbuf))
             || (stream && !Curl_bufq_is_empty(&stream->recvbuf))))
     return TRUE;
   return cf->next? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
