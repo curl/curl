@@ -56,7 +56,7 @@ announcement.
   problem is, its impact, which versions it affects, solutions or workarounds,
   when the release is out and make sure to credit all contributors properly.
   Figure out the CWE (Common Weakness Enumeration) number for the flaw. See
-  `SECURITY-ADVISSORY.md` for help on creating the advisory.
+  [SECURITY-ADVISORY](SECURITY-ADVISORY.md) for help on creating the advisory.
 
 - Request a CVE number from
   [HackerOne](https://docs.hackerone.com/programs/cve-requests.html)
