@@ -134,9 +134,7 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
     va_list ap;
     int len;
     char buffer[MAXINFO + 2];
-    len = msnprintf(buffer, MAXINFO, "[CONN-%ld%s-%s] ",
-                    cf->conn->connection_id, cf->sockindex? "/2" : "",
-                    cf->cft->name);
+    len = msnprintf(buffer, MAXINFO, "[%s] ", cf->cft->name);
     va_start(ap, fmt);
     len += mvsnprintf(buffer + len, MAXINFO - len, fmt, ap);
     va_end(ap);

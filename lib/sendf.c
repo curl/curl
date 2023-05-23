@@ -419,8 +419,6 @@ CURLcode Curl_read(struct Curl_easy *data,   /* transfer */
   *n += nread;
   result = CURLE_OK;
 out:
-  /* DEBUGF(infof(data, "Curl_read(handle=%p) -> %d, nread=%ld",
-        data, result, nread)); */
   return result;
 }
 

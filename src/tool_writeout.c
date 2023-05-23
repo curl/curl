@@ -75,6 +75,7 @@ static const struct httpmap http_version[] = {
 static const struct writeoutvar variables[] = {
   {"certs", VAR_CERT, CURLINFO_NONE, writeString},
   {"content_type", VAR_CONTENT_TYPE, CURLINFO_CONTENT_TYPE, writeString},
+  {"conn_id", VAR_CONN_ID, CURLINFO_CONN_ID, writeOffset},
   {"errormsg", VAR_ERRORMSG, CURLINFO_NONE, writeString},
   {"exitcode", VAR_EXITCODE, CURLINFO_NONE, writeLong},
   {"filename_effective", VAR_EFFECTIVE_FILENAME, CURLINFO_NONE, writeString},
@@ -145,6 +146,7 @@ static const struct writeoutvar variables[] = {
   {"urle.zoneid", VAR_INPUT_URLEZONEID, CURLINFO_NONE, writeString},
   {"url_effective", VAR_EFFECTIVE_URL, CURLINFO_EFFECTIVE_URL, writeString},
   {"urlnum", VAR_URLNUM, CURLINFO_NONE, writeLong},
+  {"xfer_id", VAR_EASY_ID, CURLINFO_XFER_ID, writeOffset},
   {NULL, VAR_NONE, CURLINFO_NONE, NULL}
 };
 

@@ -179,7 +179,7 @@ ssize_t Curl_conn_recv(struct Curl_easy *data, int num, char *buf,
   if(cf) {
     return cf->cft->do_recv(cf, data, buf, len, code);
   }
-  failf(data, CMSGI(data->conn, num, "recv: no filter connected"));
+  failf(data, "recv: no filter connected");
   *code = CURLE_FAILED_INIT;
   return -1;
 }
@@ -198,7 +198,7 @@ ssize_t Curl_conn_send(struct Curl_easy *data, int num,
   if(cf) {
     return cf->cft->do_send(cf, data, mem, len, code);
   }
-  failf(data, CMSGI(data->conn, num, "send: no filter connected"));
+  failf(data, "send: no filter connected");
   DEBUGASSERT(0);
   *code = CURLE_FAILED_INIT;
   return -1;
