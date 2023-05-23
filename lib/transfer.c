@@ -474,7 +474,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     else {
       /* read nothing but since we wanted nothing we consider this an OK
          situation to proceed from */
-      DEBUGF(infof(data, DMSG(data, "readwrite_data: we're done")));
+      DEBUGF(infof(data, "readwrite_data: we're done"));
       nread = 0;
     }
 
@@ -771,7 +771,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
 out:
   if(result)
-    DEBUGF(infof(data, DMSG(data, "readwrite_data() -> %d"), result));
+    DEBUGF(infof(data, "readwrite_data() -> %d", result));
   return result;
 }
 
@@ -1236,7 +1236,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   *done = (0 == (k->keepon&(KEEP_RECVBITS|KEEP_SENDBITS))) ? TRUE : FALSE;
 out:
   if(result)
-    DEBUGF(infof(data, DMSG(data, "Curl_readwrite() -> %d"), result));
+    DEBUGF(infof(data, "Curl_readwrite() -> %d", result));
   return result;
 }
 

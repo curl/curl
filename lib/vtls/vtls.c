@@ -453,7 +453,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
     }
   }
 
-  DEBUGF(infof(data, DMSG(data, "%s Session ID in cache for %s %s://%s:%d"),
+  DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d",
                no_match? "Didn't find": "Found",
                Curl_ssl_cf_is_proxy(cf) ? "proxy" : "host",
                cf->conn->handler->scheme, connssl->hostname, connssl->port));
@@ -601,8 +601,8 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
   if(added)
     *added = TRUE;
 
-  DEBUGF(infof(data, DMSG(data, "Added Session ID to cache for %s://%s:%d"
-               " [%s]"), store->scheme, store->name, store->remote_port,
+  DEBUGF(infof(data, "Added Session ID to cache for %s://%s:%d [%s]",
+               store->scheme, store->name, store->remote_port,
                Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server"));
   return CURLE_OK;
 }

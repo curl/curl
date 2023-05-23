@@ -118,23 +118,4 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
 
 #define LOG_CF_IS_DEBUG(cf, data)        Curl_log_cf_is_debug(cf, data)
 
-/* Macros intended for DEBUGF logging, use like:
- * DEBUGF(infof(data, CFMSG(cf, "this filter %s rocks"), "very much"));
- * and it will output:
- * [CONN-1-0][CF-SSL] this filter very much rocks
- * on connection #1 with sockindex 0 for filter of type "SSL". */
-#define DMSG(d,msg)  \
-  "[CONN-%ld] "msg, (d)->conn->connection_id
-#define DMSGI(d,i,msg)  \
-  "[CONN-%ld-%d] "msg, (d)->conn->connection_id, (i)
-#define CMSG(c,msg)  \
-  "[CONN-%ld] "msg, (c)->connection_id
-#define CMSGI(c,i,msg)  \
-  "[CONN-%ld-%d] "msg, (c)->connection_id, (i)
-#define CFMSG(cf,msg)  \
-  "[CONN-%ld-%d][CF-%s] "msg, (cf)->conn->connection_id, \
-  (cf)->sockindex, (cf)->cft->name
-
-
-
 #endif /* HEADER_CURL_LOG_H */

@@ -659,6 +659,9 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
     /* most recent connection is not yet defined */
     data->state.lastconnect_id = -1;
+    data->state.recent_conn_id = -1;
+    /* and not assigned an id yet */
+    data->id = -1;
 
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */
@@ -680,7 +683,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 static void conn_shutdown(struct Curl_easy *data)
 {
   DEBUGASSERT(data);
-  infof(data, "Closing connection %ld", data->conn->connection_id);
+  infof(data, "Closing connection");
 
   /* possible left-overs from the async name resolvers */
   Curl_resolver_cancel(data);
@@ -763,7 +766,8 @@ void Curl_disconnect(struct Curl_easy *data,
   /* the transfer must be detached from the connection */
   DEBUGASSERT(!data->conn);
 
-  DEBUGF(infof(data, "Curl_disconnect(conn #%ld, dead=%d)",
+  DEBUGF(infof(data, "Curl_disconnect(conn #%"
+         CURL_FORMAT_CURL_OFF_T ", dead=%d)",
          conn->connection_id, dead_connection));
   /*
    * If this connection isn't marked to force-close, leave it open if there
@@ -952,7 +956,8 @@ static bool extract_if_dead(struct connectdata *conn,
     }
 
     if(dead) {
-      infof(data, "Connection %ld seems to be dead", conn->connection_id);
+      infof(data, "Connection %" CURL_FORMAT_CURL_OFF_T " seems to be dead",
+            conn->connection_id);
       Curl_conncache_remove_conn(data, conn, FALSE);
       return TRUE;
     }
@@ -1148,7 +1153,7 @@ ConnectionExists(struct Curl_easy *data,
              completed yet and until then we don't re-use this connection */
           if(!check->primary_ip[0]) {
             infof(data,
-                  "Connection #%ld is still name resolving, can't reuse",
+                  "Connection #%zd is still name resolving, can't reuse",
                   check->connection_id);
             continue;
           }
@@ -1158,8 +1163,8 @@ ConnectionExists(struct Curl_easy *data,
       if(!Curl_conn_is_connected(check, FIRSTSOCKET)) {
         foundPendingCandidate = TRUE;
         /* Don't pick a connection that hasn't connected yet */
-        infof(data, "Connection #%ld isn't open enough, can't reuse",
-              check->connection_id);
+        infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T
+              "isn't open enough, can't reuse", check->connection_id);
         continue;
       }
 
@@ -1335,8 +1340,8 @@ ConnectionExists(struct Curl_easy *data,
             if(!Curl_ssl_config_matches(&needle->ssl_config,
                                         &check->ssl_config)) {
               DEBUGF(infof(data,
-                           "Connection #%ld has different SSL parameters, "
-                           "can't reuse",
+                           "Connection #%" CURL_FORMAT_CURL_OFF_T
+                           " has different SSL parameters, can't reuse",
                            check->connection_id));
               continue;
             }
@@ -1477,14 +1482,14 @@ void Curl_verboseconnect(struct Curl_easy *data,
                          struct connectdata *conn)
 {
   if(data->set.verbose)
-    infof(data, "Connected to %s (%s) port %u (#%ld)",
+    infof(data, "Connected to %s (%s) port %u",
 #ifndef CURL_DISABLE_PROXY
           conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
           conn->bits.httpproxy ? conn->http_proxy.host.dispname :
 #endif
           conn->bits.conn_to_host ? conn->conn_to_host.dispname :
           conn->host.dispname,
-          conn->primary_ip, conn->port, conn->connection_id);
+          conn->primary_ip, conn->port);
 }
 #endif
 
@@ -3678,15 +3683,14 @@ static CURLcode create_conn(struct Curl_easy *data,
     *in_connect = conn;
 
 #ifndef CURL_DISABLE_PROXY
-    infof(data, "Re-using existing connection #%ld with %s %s",
-          conn->connection_id,
+    infof(data, "Re-using existing connection with %s %s",
           conn->bits.proxy?"proxy":"host",
           conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
           conn->http_proxy.host.name ? conn->http_proxy.host.dispname :
           conn->host.dispname);
 #else
-    infof(data, "Re-using existing connection #%ld with host %s",
-          conn->connection_id, conn->host.dispname);
+    infof(data, "Re-using existing connection with host %s",
+          conn->host.dispname);
 #endif
   }
   else {

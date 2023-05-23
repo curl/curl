@@ -224,7 +224,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   stream->recv_buf_nonflow = 0;
 
   H3_STREAM_LCTX(data) = stream;
-  DEBUGF(LOG_CF(data, cf, "data setup (easy %p)", (void *)data));
+  DEBUGF(LOG_CF(data, cf, "data setup"));
   return CURLE_OK;
 }
 
@@ -1670,8 +1670,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
-  infof(data, "Using HTTP/3 Stream ID: %" PRId64 " (easy handle %p)",
-        stream->id, (void *)data);
+  infof(data, "Using HTTP/3 Stream ID: %" PRId64, stream->id);
   DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] opened for %s",
                 stream->id, data->state.url));
 

@@ -2924,7 +2924,9 @@ typedef enum {
   CURLINFO_REFERER          = CURLINFO_STRING + 60,
   CURLINFO_CAINFO           = CURLINFO_STRING + 61,
   CURLINFO_CAPATH           = CURLINFO_STRING + 62,
-  CURLINFO_LASTONE          = 62
+  CURLINFO_XFER_ID          = CURLINFO_OFF_T + 63,
+  CURLINFO_CONN_ID          = CURLINFO_OFF_T + 64,
+  CURLINFO_LASTONE          = 64
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

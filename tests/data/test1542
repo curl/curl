@@ -58,7 +58,7 @@ Accept: */*
 == Info: Connection #0 to host %HOSTIP left intact
 == Info: Connection #0 to host %HOSTIP left intact
 == Info: Connection #0 to host %HOSTIP left intact
-== Info: Closing connection 0
+== Info: Closing connection
 == Info: Connection #1 to host %HOSTIP left intact
 </file>
 <stripfile>
