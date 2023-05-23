@@ -194,7 +194,7 @@ dnl of the compile, not change the libraries for the compiler itself.
 dnl
 compilersh="run-compiler"
 echo "CC=\"$CC\"" > $compilersh
-echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> $compilersh
+echo "LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"" >> $compilersh
 echo 'exec $CC $@' >> $compilersh
 
 dnl **********************************************************************
