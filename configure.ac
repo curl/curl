@@ -193,9 +193,13 @@ dnl something different but only have that affect the execution of the results
 dnl of the compile, not change the libraries for the compiler itself.
 dnl
 compilersh="run-compiler"
-echo "CC=\"$CC\"" > $compilersh
-echo "LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"" >> $compilersh
-echo 'exec $CC $@' >> $compilersh
+export "CURL_SAVED_CC=$CC"
+export "CURL_SAVED_LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+cat <<\EOF > "$compilersh"
+export "CC=$CURL_SAVED_CC"
+export "LD_LIBRARY_PATH=$CURL_SAVED_LD_LIBRARY_PATH"
+exec $CC "$@"
+EOF
 
 dnl **********************************************************************
 dnl See which TLS backend(s) that are requested. Just do all the
