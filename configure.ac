@@ -2811,7 +2811,7 @@ if test X"$want_nghttp2" != Xno; then
     LD_H2=-L${want_nghttp2_path}/lib$libsuff
     CPP_H2=-I${want_nghttp2_path}/include
     DIR_H2=${want_nghttp2_path}/lib$libsuff
-  elif test X"$want_nghttp2" != Xdefault; then
+  else
     dnl no nghttp2 pkg-config found and no custom directory specified,
     dnl deal with it
     AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
