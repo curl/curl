@@ -1903,6 +1903,12 @@ struct Curl_easy {
   /* First a simple identifier to easier detect if a user mix up this easy
      handle with a multi handle. Set this to CURLEASY_MAGIC_NUMBER */
   unsigned int magic;
+  long id; /* once an easy handle is tied to a connection cache
+              a non-negative number to distinguish this transfer from
+              other using the same cache. For easier tracking
+              in log output.
+              This may wrap around after LONG_MAX to 0 again, so it
+              has no uniqueness guarantuee for very large processings. */
 
   /* first, two fields for the linked list of these */
   struct Curl_easy *next;

@@ -464,6 +464,20 @@ struct Curl_multi *curl_multi_init(void)
                            CURL_DNS_HASH_SIZE);
 }
 
+#ifdef DEBUGBUILD
+static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
+{
+  if(!multi->warned) {
+    infof(data, "!!! WARNING !!!");
+    infof(data, "This is a debug build of libcurl, "
+          "do not use in production.");
+    multi->warned = true;
+  }
+}
+#else
+#define multi_warn_debug(x,y) Curl_nop_stmt
+#endif
+
 /* returns TRUE if the easy handle is supposed to be present in the main link
    list */
 static bool in_main_list(struct Curl_easy *data)
@@ -623,7 +637,12 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->set.server_response_timeout;
   data->state.conn_cache->closure_handle->set.no_signal =
     data->set.no_signal;
+  data->id = data->state.conn_cache->next_easy_id++;
+  if(data->state.conn_cache->next_easy_id <= 0)
+    data->state.conn_cache->next_easy_id = 0;
   CONNCACHE_UNLOCK(data);
+
+  multi_warn_debug(multi, data);
 
   return CURLM_OK;
 }
@@ -1895,14 +1914,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     multistate(data, MSTATE_COMPLETED);
   }
 
-#ifdef DEBUGBUILD
-  if(!multi->warned) {
-    infof(data, "!!! WARNING !!!");
-    infof(data, "This is a debug build of libcurl, "
-          "do not use in production.");
-    multi->warned = true;
-  }
-#endif
+  multi_warn_debug(multi, data);
 
   do {
     /* A "stream" here is a logical stream if the protocol can handle that
@@ -3690,7 +3702,7 @@ void Curl_expire_clear(struct Curl_easy *data)
     }
 
 #ifdef DEBUGBUILD
-    infof(data, "Expire cleared (transfer %p)", data);
+    infof(data, "Expire cleared (easy handle %p)", data);
 #endif
     nowp->tv_sec = 0;
     nowp->tv_usec = 0;
