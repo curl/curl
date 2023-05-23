@@ -1,38 +1,21 @@
-curl and libcurl 8.1.1
+curl and libcurl 8.2.0
 
- Public curl releases:         218
+ Public curl releases:         219
  Command line options:         251
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2875
+ Contributors:                 2886
+
+This release includes the following changes:
+
+ o
 
 This release includes the following bugfixes:
 
- o cf-socket: completely remove the disabled USE_RECV_BEFORE_SEND_WORKAROUND [12]
- o checksrc: disallow spaces before labels [16]
- o cmake: avoid `list(PREPEND)` for compatibility [24]
- o cmake: repair cross compiling [10]
- o configure: fix --help alignment [9]
- o configure: generate a script to run the compiler [11]
- o curl_easy_getinfo: clarify on return data types [15]
- o docs: document that curl_url_cleanup(NULL) is a safe no-op [4]
- o hostip: move easy_lock.h include above curl_memory.h [14]
- o http2: double http request parser max line length [8]
- o http2: increase stream window size to 10 MB [22]
- o http2: upload improvements [21]
- o lib: fix conversion warnings with gcc on macOS
- o lib: rename struct 'http_req' to 'httpreq' [23]
- o ngtcp2: fix compiler warning about possible null-deref [3]
- o ngtcp2: proper handling of uint64_t when adjusting send buffer [1]
- o os400: update chkstrings.c [2]
- o runtests: handle interrupted reads from IPC pipes
- o runtests: use the correct fd after select [20]
- o sectransp.c: make the code c89 compatible [17]
- o select: avoid returning an error on EINTR from select() or poll() [5]
- o test425: fix the log directory for the upload
- o url: provide better error message when URLs fail to parse [18]
- o urlapi: allow numerical parts in the host name [7]
- o vquic.c: make recvfrom_packets static, avoid compiler warning [6]
+ o lib: remove unused functions, make single-use static [3]
+ o scripts/singleuse.pl: add more API calls
+ o configure: quote the assignments for run-compiler [1]
+ o misc: fix spelling mistakes [2]
 
 This release includes the following known bugs:
 
@@ -50,34 +33,11 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Antoine Pitrou, Colin Cross, correctmost on github, Dan Fandrich,
-  Daniel Stenberg, Emanuele Torre, Emilio Cobos Álvarez, FeignClaims on github,
-  Hind Montassif, James Fuller, Jonas Bülow, Jon Rumsey,
-  Keitagit-kun on Github, pandada8 on github, Pavel Kalyugin, Ray Satiro,
-  Stefan Eissing, Viktor Szakats, Deal(一线灵)
-  (19 contributors)
+  Christian Hesse, Daniel Stenberg, musvaage on github
+  (3 contributors)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=11149
- [2] = https://curl.se/bug/?i=11132
- [3] = https://curl.se/bug/?i=11147
- [4] = https://curl.se/bug/?i=11150
- [5] = https://curl.se/bug/?i=11135
- [6] = https://curl.se/bug/?i=11146
- [7] = https://curl.se/bug/?i=11129
- [8] = https://curl.se/bug/?i=11138
- [9] = https://curl.se/bug/?i=11142
- [10] = https://curl.se/bug/?i=11130
- [11] = https://curl.se/bug/?i=11114
- [12] = https://curl.se/bug/?i=11118
- [14] = https://curl.se/bug/?i=11140
- [15] = https://curl.se/bug/?i=11126
- [16] = https://curl.se/bug/?i=11134
- [17] = https://curl.se/bug/?i=11155
- [18] = https://curl.se/bug/?i=11137
- [20] = https://curl.se/bug/?i=11160
- [21] = https://curl.se/bug/?i=11165
- [22] = https://curl.se/bug/?i=11162
- [23] = https://curl.se/bug/?i=11163
- [24] = https://curl.se/bug/?i=11141
+ [1] = https://curl.se/bug/?i=11179
+ [2] = https://curl.se/bug/?i=11171
+ [3] = https://curl.se/bug/?i=11174
