@@ -698,6 +698,12 @@ static int checkurl(const char *org, const char *url, const char *out)
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static const struct setcase set_parts_list[] = {
   {"https://example.com/",
+   "host=example.com%2fmoo,",
+   "",
+   0, /* get */
+   0, /* set */
+   CURLUE_OK, CURLUE_BAD_HOSTNAME},
+  {"https://example.com/",
    "host=http://fake,",
    "",
    0, /* get */
