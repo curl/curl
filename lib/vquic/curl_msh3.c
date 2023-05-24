@@ -1051,7 +1051,7 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
+  int = Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
   ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
   ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
 
