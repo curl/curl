@@ -73,6 +73,5 @@ sed 's/^ *//'
 
 )| \
 sed -f ./docs/THANKS-filter | \
-grep -a ' ' | \
 sort -fu | \
 grep -aixvf ./docs/THANKS
