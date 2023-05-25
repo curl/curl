@@ -78,18 +78,18 @@ sed 's/^ *//'
 
 )| \
 sed -f ./docs/THANKS-filter | \
-grep -a ' ' | \
 sort -fu | \
 awk '{
- num++;
- n = sprintf("%s%s%s,", n, length(n)?" ":"", $0);
- #print n;
- if(length(n) > 77) {
-   printf("  %s\n", p);
-   n=sprintf("%s,", $0);
+ if(length($0)) {
+   num++;
+   n = sprintf("%s%s%s,", n, length(n)?" ":"", $0);
+   #print n;
+   if(length(n) > 77) {
+     printf("  %s\n", p);
+     n=sprintf("%s,", $0);
+   }
+   p=n;
  }
- p=n;
-
 }
 
  END {
