@@ -1,4 +1,4 @@
-curl and libcurl 8.2.0
+curl and libcurl 8.1.2
 
  Public curl releases:         219
  Command line options:         251
@@ -12,6 +12,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o libssh: when keyboard-interactive auth fails, try password [4]
+ o urlapi: remove superfluous host name check [6]
+ o http2: fix EOF handling on uploads with auth negotiation [7]
  o lib: remove unused functions, make single-use static [3]
  o scripts/singleuse.pl: add more API calls
  o configure: quote the assignments for run-compiler [1]
@@ -33,11 +36,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Christian Hesse, Daniel Stenberg, musvaage on github
-  (3 contributors)
+  Aleksander Mazur, Christian Hesse, Daniel Stenberg, Emanuele Torre,
+  musvaage on github, Stefan Eissing, 左潇峰
+  (7 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=11179
  [2] = https://curl.se/bug/?i=11171
  [3] = https://curl.se/bug/?i=11174
+ [4] = https://curl.se/bug/?i=11196
+ [5] = https://curl.se/bug/?i=11182
+ [6] = https://curl.se/bug/?i=11195
+ [7] = https://curl.se/bug/?i=11194
