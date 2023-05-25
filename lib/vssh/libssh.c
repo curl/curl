@@ -899,11 +899,11 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       if(rc == SSH_OK) {
         sshc->authed = TRUE;
         infof(data, "completed keyboard interactive authentication");
+        state(data, SSH_AUTH_DONE);
       }
       else {
         MOVE_TO_PASSWD_AUTH;
       }
-      state(data, SSH_AUTH_DONE);
       break;
 
     case SSH_AUTH_PASS_INIT:
