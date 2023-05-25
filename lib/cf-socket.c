@@ -216,9 +216,9 @@ tcpkeepalive(struct Curl_easy *data,
  * Assign the address `ai` to the Curl_sockaddr_ex `dest` and
  * set the transport used.
  */
-static void sock_assign_addr(struct Curl_sockaddr_ex *dest,
-                             const struct Curl_addrinfo *ai,
-                             int transport)
+void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
+                           const struct Curl_addrinfo *ai,
+                           int transport)
 {
   /*
    * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -310,7 +310,7 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
     /* if the caller doesn't want info back, use a local temp copy */
     addr = &dummy;
 
-  sock_assign_addr(addr, ai, transport);
+  Curl_sock_assign_addr(addr, ai, transport);
   return socket_open(data, addr, sockfd);
 }
 
@@ -788,7 +788,7 @@ static void cf_socket_ctx_init(struct cf_socket_ctx *ctx,
   memset(ctx, 0, sizeof(*ctx));
   ctx->sock = CURL_SOCKET_BAD;
   ctx->transport = transport;
-  sock_assign_addr(&ctx->addr, ai, transport);
+  Curl_sock_assign_addr(&ctx->addr, ai, transport);
   Curl_bufq_init(&ctx->recvbuf, NW_RECV_CHUNK_SIZE, NW_RECV_CHUNKS);
 }
 

@@ -102,6 +102,13 @@ void Curl_sndbufset(curl_socket_t sockfd);
 #define Curl_sndbufset(y) Curl_nop_stmt
 #endif
 
+/**
+ * Assign the address `ai` to the Curl_sockaddr_ex `dest` and
+ * set the transport used.
+ */
+void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
+                           const struct Curl_addrinfo *ai,
+                           int transport);
 
 /**
  * Creates a cfilter that opens a TCP socket to the given address
