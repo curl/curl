@@ -39,9 +39,52 @@ static void dump(const char *timebuf, const char *text,
                  trace tracetype, curl_infotype infotype);
 
 /*
+ * Return the formatted HH:MM:SS for the tv_sec given.
+ * NOT thread safe.
+ */
+static const char *hms_for_sec(time_t tv_sec)
+{
+  static time_t cached_tv_sec;
+  static char hms_buf[12];
+  static time_t epoch_offset;
+  static int known_epoch;
+
+  if(tv_sec != cached_tv_sec) {
+    struct tm *now;
+    time_t secs;
+    /* recalculate */
+    if(!known_epoch) {
+      epoch_offset = time(NULL) - tv_sec;
+      known_epoch = 1;
+    }
+    secs = epoch_offset + tv_sec;
+    /* !checksrc! disable BANNEDFUNC 1 */
+    now = localtime(&secs);  /* not thread safe but we don't care */
+    msnprintf(hms_buf, sizeof(hms_buf), "%02d:%02d:%02d",
+              now->tm_hour, now->tm_min, now->tm_sec);
+    cached_tv_sec = tv_sec;
+  }
+  return hms_buf;
+}
+
+static void log_line_start(FILE *log, const char *intro, curl_infotype type)
+{
+  /*
+   * This is the trace look that is similar to what libcurl makes on its
+   * own.
+   */
+  static const char * const s_infotype[] = {
+    "* ", "< ", "> ", "{ ", "} ", "{ ", "} "
+  };
+  if(intro && *intro)
+    fprintf(log, "%s%s", intro, s_infotype[type]);
+  else
+    fputs(s_infotype[type], log);
+}
+
+/*
 ** callback for CURLOPT_DEBUGFUNCTION
 */
-
 int tool_debug_cb(CURL *handle, curl_infotype type,
                   char *data, size_t size,
                   void *userdata)
@@ -52,24 +95,13 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   const char *text;
   struct timeval tv;
   char timebuf[20];
-  time_t secs;
 
   (void)handle; /* not used */
 
   if(config->tracetime) {
-    struct tm *now;
-    static time_t epoch_offset;
-    static int    known_offset;
     tv = tvnow();
-    if(!known_offset) {
-      epoch_offset = time(NULL) - tv.tv_sec;
-      known_offset = 1;
-    }
-    secs = epoch_offset + tv.tv_sec;
-    /* !checksrc! disable BANNEDFUNC 1 */
-    now = localtime(&secs);  /* not thread safe but we don't care */
-    msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
-              now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+    msnprintf(timebuf, sizeof(timebuf), "%s.%06ld ",
+              hms_for_sec(tv.tv_sec), (long)tv.tv_usec);
   }
   else
     timebuf[0] = 0;
@@ -96,13 +128,6 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   }
 
   if(config->tracetype == TRACE_PLAIN) {
-    /*
-     * This is the trace look that is similar to what libcurl makes on its
-     * own.
-     */
-    static const char * const s_infotype[] = {
-      "*", "<", ">", "{", "}", "{", "}"
-    };
     static bool newl = FALSE;
     static bool traced_data = FALSE;
 
@@ -114,7 +139,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
         for(i = 0; i < size - 1; i++) {
           if(data[i] == '\n') { /* LF */
             if(!newl) {
-              fprintf(output, "%s%s ", timebuf, s_infotype[type]);
+              log_line_start(output, timebuf, type);
             }
             (void)fwrite(data + st, i - st + 1, 1, output);
             st = i + 1;
@@ -122,7 +147,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
           }
         }
         if(!newl)
-          fprintf(output, "%s%s ", timebuf, s_infotype[type]);
+          log_line_start(output, timebuf, type);
         (void)fwrite(data + st, i - st + 1, 1, output);
       }
       newl = (size && (data[size - 1] != '\n')) ? TRUE : FALSE;
@@ -131,7 +156,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
     case CURLINFO_TEXT:
     case CURLINFO_HEADER_IN:
       if(!newl)
-        fprintf(output, "%s%s ", timebuf, s_infotype[type]);
+        log_line_start(output, timebuf, type);
       (void)fwrite(data, size, 1, output);
       newl = (size && (data[size - 1] != '\n')) ? TRUE : FALSE;
       traced_data = FALSE;
@@ -147,7 +172,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
            function */
         if(!config->isatty || ((output != stderr) && (output != stdout))) {
           if(!newl)
-            fprintf(output, "%s%s ", timebuf, s_infotype[type]);
+            log_line_start(output, timebuf, type);
           fprintf(output, "[%zu bytes data]\n", size);
           newl = FALSE;
           traced_data = TRUE;
