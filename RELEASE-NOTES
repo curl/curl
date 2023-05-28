@@ -4,7 +4,7 @@ curl and libcurl 8.1.2
  Command line options:         251
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
- Contributors:                 2886
+ Contributors:                 2888
 
 This release includes the following changes:
 
@@ -12,13 +12,17 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o libssh: when keyboard-interactive auth fails, try password [4]
- o urlapi: remove superfluous host name check [6]
- o http2: fix EOF handling on uploads with auth negotiation [7]
- o lib: remove unused functions, make single-use static [3]
- o scripts/singleuse.pl: add more API calls
  o configure: quote the assignments for run-compiler [1]
+ o configure: without pkg-config and no custom path, use -lnghttp2 [8]
+ o curl: cache the --trace-time value for a second [9]
+ o http2: fix EOF handling on uploads with auth negotiation [7]
+ o http3: send EOF indicator early as possible [11]
+ o lib: remove unused functions, make single-use static [3]
+ o libcurl.m4: remove trailing 'dnl' that causes this to break autoconf [10]
+ o libssh: when keyboard-interactive auth fails, try password [4]
  o misc: fix spelling mistakes [2]
+ o scripts/singleuse.pl: add more API calls
+ o urlapi: remove superfluous host name check [6]
 
 This release includes the following known bugs:
 
@@ -36,9 +40,10 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksander Mazur, Christian Hesse, Daniel Stenberg, Emanuele Torre,
-  musvaage on github, Stefan Eissing, 左潇峰
-  (7 contributors)
+  Aleksander Mazur, Christian Hesse, correctmost on github, Dan Fandrich,
+  Daniel Stenberg, Emanuele Torre, Gisle Vanem, Kev Jackson,
+  musvaage on github, Sergey Fionov, Stefan Eissing, Viktor Szakats, 左潇峰
+  (13 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -46,6 +51,9 @@ References to bug reports and discussions on issues:
  [2] = https://curl.se/bug/?i=11171
  [3] = https://curl.se/bug/?i=11174
  [4] = https://curl.se/bug/?i=11196
- [5] = https://curl.se/bug/?i=11182
  [6] = https://curl.se/bug/?i=11195
  [7] = https://curl.se/bug/?i=11194
+ [8] = https://curl.se/bug/?i=11186
+ [9] = https://curl.se/bug/?i=11211
+ [10] = https://curl.se/bug/?i=11212
+ [11] = https://curl.se/bug/?i=11205
