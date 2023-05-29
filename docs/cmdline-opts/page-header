@@ -180,6 +180,16 @@ response data to the terminal.
 If you prefer a progress "bar" instead of the regular meter, --progress-bar is
 your friend. You can also disable the progress meter completely with the
 --silent option.
+.SH VERSION
+This man page describes curl %VERSION. If you use a later version, chances are
+this man page does not fully document it. If you use an earlier version, this
+document tries to include version information about which specific version
+that introduced changes.
+
+You can always learn which the latest curl version is by running
+.nf
+curl https://curl.se/info
+.fi
 .SH OPTIONS
 Options start with one or two dashes. Many of the options require an
 additional value next to them.
@@ -204,4 +214,3 @@ will retain their values and meaning even after --next.
 
 The following options are global:
 %GLOBALS.
-
