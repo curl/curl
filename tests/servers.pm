@@ -28,6 +28,7 @@
 
 package servers;
 
+use IO::Socket;
 use strict;
 use warnings;
 
@@ -127,9 +128,6 @@ my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
 my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
 my $posix_pwd=$pwd;        # current working directory
 my $h2cver = "h2c"; # this version is decided by the nghttp2 lib being used
-my $serverstartretries=10; # number of times to attempt to start server;
-                           # don't increase without making sure generated port
-                           # numbers will always be valid (<=65535)
 my $portrange = 999;       # space from which to choose a random port
                            # don't increase without making sure generated port
                            # numbers will always be valid (<=65535)
@@ -166,6 +164,21 @@ sub checkcmd {
     return "";
 }
 
+#######################################################################
+# Create a server socket on a random (unused) port, then close it and
+# return the port number
+#
+sub getfreeport {
+    my ($ipnum) = @_;
+    my $server = IO::Socket->new(LocalPort => 0,
+                                 Domain => $ipnum == 6 ? AF_INET6 : AF_INET,
+                                 Type      => SOCK_STREAM,
+                                 Reuse     => 1,
+                                 Listen    => 10 )
+        or die "Couldn't create tcp server socket: $@\n";
+
+    return $server->sockport();
+}
 
 #######################################################################
 # Initialize configuration variables
@@ -1210,37 +1223,27 @@ sub runhttp2server {
     $flags .= "--connect $HOSTIP:" . protoport("http") . " ";
     $flags .= $verbose_flag if($debugprotocol);
 
-    my ($http2pid, $pid2);
-    my $port = 32813;
-    my $port2 = 32814;
-    my %usedports = reverse %PORT;
-    for(1 .. $serverstartretries) {
-        $port += 1 + int(rand($portrange));
-        $port2 += 1 + int(rand($portrange));
-        next if exists $usedports{$port} || $usedports{$port2};
-        my $aflags = "--port $port --port2 $port2 $flags";
+    my $port = getfreeport($ipvnum);
+    my $port2 = getfreeport($ipvnum);
+    my $aflags = "--port $port --port2 $port2 $flags";
+    my $cmd = "$exe $aflags";
+    my ($http2pid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-        my $cmd = "$exe $aflags";
-        ($http2pid, $pid2) = startnew($cmd, $pidfile, 15, 0);
-
-        if($http2pid <= 0 || !pidexists($http2pid)) {
-            # it is NOT alive
-            stopserver($server, "$pid2");
-            $doesntrun{$pidfile} = 1;
-            $http2pid = $pid2 = 0;
-            next;
-        }
-        $doesntrun{$pidfile} = 0;
-
-        if($verb) {
-            logmsg "RUN: $srvrname server PID $http2pid ".
-                   "http-port $port https-port $port2 ".
-                   "backend $HOSTIP:" . protoport("http") . "\n";
-        }
-        last;
+    if($http2pid <= 0 || !pidexists($http2pid)) {
+        # it is NOT alive
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        $http2pid = $pid2 = 0;
+        logmsg "RUN: failed to start the $srvrname server\n";
+        return (3, 0, 0, 0, 0);
     }
+    $doesntrun{$pidfile} = 0;
 
-    logmsg "RUN: failed to start the $srvrname server\n" if(!$http2pid);
+    if($verb) {
+        logmsg "RUN: $srvrname server PID $http2pid ".
+            "http-port $port https-port $port2 ".
+            "backend $HOSTIP:" . protoport("http") . "\n";
+    }
 
     return (0+!$http2pid, $http2pid, $pid2, $port, $port2);
 }
@@ -1282,33 +1285,24 @@ sub runhttp3server {
     $flags .= "--cert \"$cert\" " if($cert);
     $flags .= $verbose_flag if($debugprotocol);
 
-    my ($http3pid, $pid3);
-    my $port = 33813;
-    my %usedports = reverse %PORT;
-    for(1 .. $serverstartretries) {
-        $port += 1 + int(rand($portrange));
-        next if exists $usedports{$port};
-        my $aflags = "--port $port $flags";
+    my $port = getfreeport($ipvnum);
+    my $aflags = "--port $port $flags";
+    my $cmd = "$exe $aflags";
+    my ($http3pid, $pid3) = startnew($cmd, $pidfile, 15, 0);
 
-        my $cmd = "$exe $aflags";
-        ($http3pid, $pid3) = startnew($cmd, $pidfile, 15, 0);
-
-        if($http3pid <= 0 || !pidexists($http3pid)) {
-            # it is NOT alive
-            stopserver($server, "$pid3");
-            $doesntrun{$pidfile} = 1;
-            $http3pid = $pid3 = 0;
-            next;
-        }
-        $doesntrun{$pidfile} = 0;
-
-        if($verb) {
-            logmsg "RUN: $srvrname server PID $http3pid port $port\n";
-        }
-        last;
+    if($http3pid <= 0 || !pidexists($http3pid)) {
+        # it is NOT alive
+        stopserver($server, "$pid3");
+        $doesntrun{$pidfile} = 1;
+        $http3pid = $pid3 = 0;
+        logmsg "RUN: failed to start the $srvrname server\n";
+        return (3, 0, 0, 0);
     }
+    $doesntrun{$pidfile} = 0;
 
-    logmsg "RUN: failed to start the $srvrname server\n" if(!$http3pid);
+    if($verb) {
+        logmsg "RUN: $srvrname server PID $http3pid port $port\n";
+    }
 
     return (0+!$http3pid, $http3pid, $pid3, $port);
 }
@@ -1369,36 +1363,28 @@ sub runhttpsserver {
         $flags .= "--connect " . protoport("httpproxy");
     }
 
-    my $pid2;
-    my $httpspid;
-    my $port = 34813;
-    my %usedports = reverse %PORT;
-    for (1 .. $serverstartretries) {
-        $port += 1 + int(rand($portrange));
-        next if exists $usedports{$port};
-        my $options = "$flags --accept $port";
+    my $port = getfreeport($ipvnum);
+    my $options = "$flags --accept $port";
+    my $cmd = "$perl $srcdir/secureserver.pl $options";
+    my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-        my $cmd = "$perl $srcdir/secureserver.pl $options";
-        ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
-
-        if($httpspid <= 0 || !pidexists($httpspid)) {
-            # it is NOT alive
-            # don't call stopserver since that will also kill the dependent
-            # server that has already been started properly
-            $doesntrun{$pidfile} = 1;
-            $httpspid = $pid2 = 0;
-            next;
-        }
-
-        $doesntrun{$pidfile} = 0;
-        # we have a server!
-        if($verb) {
-            logmsg "RUN: $srvrname server is PID $httpspid port $port\n";
-        }
-        last;
+    if($httpspid <= 0 || !pidexists($httpspid)) {
+        # it is NOT alive
+        # don't call stopserver since that will also kill the dependent
+        # server that has already been started properly
+        $doesntrun{$pidfile} = 1;
+        $httpspid = $pid2 = 0;
+        logmsg "RUN: failed to start the $srvrname server\n";
+        return (3, 0, 0, 0);
     }
+
+    $doesntrun{$pidfile} = 0;
+    # we have a server!
+    if($verb) {
+        logmsg "RUN: $srvrname server is PID $httpspid port $port\n";
+    }
+
     $runcert{$server} = $certfile;
-    logmsg "RUN: failed to start the $srvrname server\n" if(!$httpspid);
 
     return (0+!$httpspid, $httpspid, $pid2, $port);
 }
@@ -1442,32 +1428,24 @@ sub runhttptlsserver {
     $flags .= "--srppasswd $srcdir/certs/srp-verifier-db ";
     $flags .= "--srppasswdconf $srcdir/certs/srp-verifier-conf";
 
-    my $port = 35813;
-    my %usedports = reverse %PORT;
-    my ($httptlspid, $pid2);
-    for (1 .. $serverstartretries) {
-        $port += 1 + int(rand($portrange));
-        next if exists $usedports{$port};
-        my $allflags = "--port $port $flags";
+    my $port = getfreeport($ipvnum);
+    my $allflags = "--port $port $flags";
+    my $cmd = "$httptlssrv $allflags > $logfile 2>&1";
+    my ($httptlspid, $pid2) = startnew($cmd, $pidfile, 10, 1);
 
-        my $cmd = "$httptlssrv $allflags > $logfile 2>&1";
-        ($httptlspid, $pid2) = startnew($cmd, $pidfile, 10, 1);
-
-        if($httptlspid <= 0 || !pidexists($httptlspid)) {
-            # it is NOT alive
-            stopserver($server, "$pid2");
-            $doesntrun{$pidfile} = 1;
-            $httptlspid = $pid2 = 0;
-            next;
-        }
-        $doesntrun{$pidfile} = 0;
-
-        if($verb) {
-            logmsg "RUN: $srvrname server PID $httptlspid port $port\n";
-        }
-        last;
+    if($httptlspid <= 0 || !pidexists($httptlspid)) {
+        # it is NOT alive
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        $httptlspid = $pid2 = 0;
+        logmsg "RUN: failed to start the $srvrname server\n";
+        return (3, 0, 0, 0);
     }
-    logmsg "RUN: failed to start the $srvrname server\n" if(!$httptlspid);
+    $doesntrun{$pidfile} = 0;
+
+    if($verb) {
+        logmsg "RUN: $srvrname server PID $httptlspid port $port\n";
+    }
     return (0+!$httptlspid, $httptlspid, $pid2, $port);
 }
 
@@ -1592,40 +1570,28 @@ sub runsecureserver {
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
     $flags .= "--connect $clearport";
 
-    my $protospid;
-    my $pid2;
-    # this calculation happens to be a perfect hash function for spreading
-    # out the port ranges for the 4 possible protocols (at the time of this
-    # writing) that will be used here
-    my $port = 36813 + 1000 * ((ord $proto) % 4);
-    my %usedports = reverse %PORT;
-    for (1 .. $serverstartretries) {
-        $port += 1 + int(rand($portrange));
-        next if exists $usedports{$port};
-        my $options = "$flags --accept $port";
+    my $port = getfreeport($ipvnum);
+    my $options = "$flags --accept $port";
 
-        my $cmd = "$perl $srcdir/secureserver.pl $options";
-        ($protospid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+    my $cmd = "$perl $srcdir/secureserver.pl $options";
+    my ($protospid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-        if($protospid <= 0 || !pidexists($protospid)) {
-            # it is NOT alive
-            # don't call stopserver since that will also kill the dependent
-            # server that has already been started properly
-            $doesntrun{$pidfile} = 1;
-            $protospid = $pid2 = 0;
-            next;
-        }
-
-        $doesntrun{$pidfile} = 0;
-        $runcert{$server} = $certfile;
-
-        if($verb) {
-            logmsg "RUN: $srvrname server is PID $protospid port $port\n";
-        }
-        last;
+    if($protospid <= 0 || !pidexists($protospid)) {
+        # it is NOT alive
+        # don't call stopserver since that will also kill the dependent
+        # server that has already been started properly
+        $doesntrun{$pidfile} = 1;
+        $protospid = $pid2 = 0;
+        logmsg "RUN: failed to start the $srvrname server\n";
+        return (3, 0, 0, 0);
     }
 
-    logmsg "RUN: failed to start the $srvrname server\n" if(!$protospid);
+    $doesntrun{$pidfile} = 0;
+    $runcert{$server} = $certfile;
+
+    if($verb) {
+        logmsg "RUN: $srvrname server is PID $protospid port $port\n";
+    }
 
     return (0+!$protospid, $protospid, $pid2, $port);
 }
@@ -1830,70 +1796,52 @@ sub runsshserver {
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
     $flags .= "--user \"$USER\"";
 
-    my $sshpid;
-    my $pid2;
-
-    my $wport = 0,
     my @tports;
-    my $port = 40813;
-    my %usedports = reverse %PORT;
-    for(1 .. $serverstartretries) {
-        # sshd doesn't have a way to pick an unused random port number, so
-        # instead we iterate over possible port numbers to use until we find
-        # one that works
-        $port += 1 + int(rand($portrange));
-        next if exists $usedports{$port};
-        push @tports, $port;
+    my $port = getfreeport($ipvnum);
 
-        my $options = "$flags --sshport $port";
+    push @tports, $port;
 
-        my $cmd = "$perl $srcdir/sshserver.pl $options";
-        ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
+    my $options = "$flags --sshport $port";
 
-        # on loaded systems sshserver start up can take longer than the
-        # timeout passed to startnew, when this happens startnew completes
-        # without being able to read the pidfile and consequently returns a
-        # zero pid2 above.
-        if($sshpid <= 0 || !pidexists($sshpid)) {
-            # it is NOT alive
-            stopserver($server, "$pid2");
-            $doesntrun{$pidfile} = 1;
-            $sshpid = $pid2 = 0;
-            next;
-        }
+    my $cmd = "$perl $srcdir/sshserver.pl $options";
+    my ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
 
-        # once it is known that the ssh server is alive, sftp server
-        # verification is performed actually connecting to it, authenticating
-        # and performing a very simple remote command.  This verification is
-        # tried only one time.
-
-        $sshdlog = server_logfilename($LOGDIR, 'ssh', $ipvnum, $idnum);
-        $sftplog = server_logfilename($LOGDIR, 'sftp', $ipvnum, $idnum);
-
-        if(verifysftp('sftp', $ipvnum, $idnum, $ip, $port) < 1) {
-            logmsg "RUN: SFTP server failed verification\n";
-            # failed to talk to it properly. Kill the server and return failure
-            display_sftplog();
-            display_sftpconfig();
-            display_sshdlog();
-            display_sshdconfig();
-            stopserver($server, "$sshpid $pid2");
-            $doesntrun{$pidfile} = 1;
-            $sshpid = $pid2 = 0;
-            next;
-        }
-        # we're happy, no need to loop anymore!
-        $doesntrun{$pidfile} = 0;
-        $wport = $port;
-        last;
+    # on loaded systems sshserver start up can take longer than the
+    # timeout passed to startnew, when this happens startnew completes
+    # without being able to read the pidfile and consequently returns a
+    # zero pid2 above.
+    if($sshpid <= 0 || !pidexists($sshpid)) {
+        # it is NOT alive
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        $sshpid = $pid2 = 0;
+        logmsg "RUN: failed to start the $srvrname server on $port\n";
+        return (3, 0, 0, 0);
     }
-    logmsg "RUN: failed to start the $srvrname server on $port\n" if(!$sshpid);
 
-    if(!$wport) {
-        logmsg "RUN: couldn't start $srvrname. Tried these ports:";
-        logmsg "RUN: ".join(", ", @tports)."\n";
-        return (1, 0,0,0);
+    # once it is known that the ssh server is alive, sftp server
+    # verification is performed actually connecting to it, authenticating
+    # and performing a very simple remote command.  This verification is
+    # tried only one time.
+
+    $sshdlog = server_logfilename($LOGDIR, 'ssh', $ipvnum, $idnum);
+    $sftplog = server_logfilename($LOGDIR, 'sftp', $ipvnum, $idnum);
+
+    if(verifysftp('sftp', $ipvnum, $idnum, $ip, $port) < 1) {
+        logmsg "RUN: SFTP server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        display_sftplog();
+        display_sftpconfig();
+        display_sshdlog();
+        display_sshdconfig();
+        stopserver($server, "$sshpid $pid2");
+        $doesntrun{$pidfile} = 1;
+        $sshpid = $pid2 = 0;
+        logmsg "RUN: failed to verifty the $srvrname server on $port\n";
+        return (5, 0, 0, 0);
     }
+    # we're happy, no need to loop anymore!
+    $doesntrun{$pidfile} = 0;
 
     my $hostfile;
     if(!open($hostfile, "<", "$LOGDIR/$PIDDIR/$hstpubmd5f") ||
@@ -1917,9 +1865,9 @@ sub runsshserver {
         die $msg;
     }
 
-    logmsg "RUN: $srvrname on PID $pid2 port $wport\n" if($verb);
+    logmsg "RUN: $srvrname on PID $pid2 port $port\n" if($verb);
 
-    return (0, $pid2, $sshpid, $wport);
+    return (0, $pid2, $sshpid, $port);
 }
 
 #######################################################################
@@ -2086,31 +2034,24 @@ sub rundictserver {
     $flags .= "--srcdir \"$srcdir\" ";
     $flags .= "--host $HOSTIP";
 
-    my $port = 41813;
-    my %usedports = reverse %PORT;
-    my ($dictpid, $pid2);
-    for(1 .. $serverstartretries) {
-        $port += 1 + int(rand($portrange));
-        next if exists $usedports{$port};
-        my $aflags = "--port $port $flags";
-        my $cmd = "$srcdir/dictserver.py $aflags";
-        ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+    my $port = getfreeport($ipvnum);
+    my $aflags = "--port $port $flags";
+    my $cmd = "$srcdir/dictserver.py $aflags";
+    my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-        if($dictpid <= 0 || !pidexists($dictpid)) {
-            # it is NOT alive
-            stopserver($server, "$pid2");
-            $doesntrun{$pidfile} = 1;
-            $dictpid = $pid2 = 0;
-            next;
-        }
-        $doesntrun{$pidfile} = 0;
-
-        if($verb) {
-            logmsg "RUN: $srvrname server PID $dictpid port $port\n";
-        }
-        last;
+    if($dictpid <= 0 || !pidexists($dictpid)) {
+        # it is NOT alive
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        $dictpid = $pid2 = 0;
+        logmsg "RUN: failed to start the $srvrname server\n";
+        return (3, 0, 0, 0);
     }
-    logmsg "RUN: failed to start the $srvrname server\n" if(!$dictpid);
+    $doesntrun{$pidfile} = 0;
+
+    if($verb) {
+        logmsg "RUN: $srvrname server PID $dictpid port $port\n";
+    }
 
     return (0+!$dictpid, $dictpid, $pid2, $port);
 }
@@ -2154,31 +2095,24 @@ sub runsmbserver {
     $flags .= "--srcdir \"$srcdir\" ";
     $flags .= "--host $HOSTIP";
 
-    my ($smbpid, $pid2);
-    my $port = 42813;
-    my %usedports = reverse %PORT;
-    for(1 .. $serverstartretries) {
-        $port += 1 + int(rand($portrange));
-        next if exists $usedports{$port};
-        my $aflags = "--port $port $flags";
-        my $cmd = "$srcdir/smbserver.py $aflags";
-        ($smbpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+    my $port = getfreeport($ipvnum);
+    my $aflags = "--port $port $flags";
+    my $cmd = "$srcdir/smbserver.py $aflags";
+    my ($smbpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-        if($smbpid <= 0 || !pidexists($smbpid)) {
-            # it is NOT alive
-            stopserver($server, "$pid2");
-            $doesntrun{$pidfile} = 1;
-            $smbpid = $pid2 = 0;
-            next;
-        }
-        $doesntrun{$pidfile} = 0;
-
-        if($verb) {
-            logmsg "RUN: $srvrname server PID $smbpid port $port\n";
-        }
-        last;
+    if($smbpid <= 0 || !pidexists($smbpid)) {
+        # it is NOT alive
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        $smbpid = $pid2 = 0;
+        logmsg "RUN: failed to start the $srvrname server\n";
+        return (3, 0, 0, 0);
     }
-    logmsg "RUN: failed to start the $srvrname server\n" if(!$smbpid);
+    $doesntrun{$pidfile} = 0;
+
+    if($verb) {
+        logmsg "RUN: $srvrname server PID $smbpid port $port\n";
+    }
 
     return (0+!$smbpid, $smbpid, $pid2, $port);
 }
@@ -2221,31 +2155,24 @@ sub runnegtelnetserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--srcdir \"$srcdir\"";
 
-    my ($ntelpid, $pid2);
-    my $port = 43813;
-    my %usedports = reverse %PORT;
-    for(1 .. $serverstartretries) {
-        $port += 1 + int(rand($portrange));
-        next if exists $usedports{$port};
-        my $aflags = "--port $port $flags";
-        my $cmd = "$srcdir/negtelnetserver.py $aflags";
-        ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+    my $port = getfreeport($ipvnum);
+    my $aflags = "--port $port $flags";
+    my $cmd = "$srcdir/negtelnetserver.py $aflags";
+    my ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-        if($ntelpid <= 0 || !pidexists($ntelpid)) {
-            # it is NOT alive
-            stopserver($server, "$pid2");
-            $doesntrun{$pidfile} = 1;
-            $ntelpid = $pid2 = 0;
-            next;
-        }
-        $doesntrun{$pidfile} = 0;
-
-        if($verb) {
-            logmsg "RUN: $srvrname server PID $ntelpid port $port\n";
-        }
-        last;
+    if($ntelpid <= 0 || !pidexists($ntelpid)) {
+        # it is NOT alive
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        $ntelpid = $pid2 = 0;
+        logmsg "RUN: failed to start the $srvrname server\n";
+        return (3, 0, 0, 0);
     }
-    logmsg "RUN: failed to start the $srvrname server\n" if(!$ntelpid);
+    $doesntrun{$pidfile} = 0;
+
+    if($verb) {
+        logmsg "RUN: $srvrname server PID $ntelpid port $port\n";
+    }
 
     return (0+!$ntelpid, $ntelpid, $pid2, $port);
 }
