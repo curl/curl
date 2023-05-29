@@ -22,14 +22,14 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_MAIL_RCPT_ALLLOWFAILS 3 "16 Jan 2020" libcurl libcurl
+.TH CURLOPT_MAIL_RCPT_ALLOWFAILS 3 "16 Jan 2020" libcurl libcurl
 .SH NAME
-CURLOPT_MAIL_RCPT_ALLLOWFAILS \- allow RCPT TO command to fail for some recipients
+CURLOPT_MAIL_RCPT_ALLOWFAILS \- allow RCPT TO command to fail for some recipients
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_RCPT_ALLLOWFAILS,
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_RCPT_ALLOWFAILS,
                           long allow);
 .SH DESCRIPTION
 If \fIallow\fP is set to 1L, allow RCPT TO command to fail for some recipients.
@@ -59,7 +59,7 @@ if(curl) {
   list = curl_slist_append(list, "invalidemailaddress");
 
   curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
-  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT_ALLLOWFAILS, 1L);
+  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS, 1L);
 
   ret = curl_easy_perform(curl);
   curl_slist_free_all(list);
@@ -67,6 +67,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
+This option was called CURLOPT_MAIL_RCPT_ALLLOWFAILS before 8.2.0
+
 Added in 7.69.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
