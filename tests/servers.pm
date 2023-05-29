@@ -119,6 +119,7 @@ my $sshdvernum;  # for socks server, ssh daemon version number
 my $sshdverstr;  # for socks server, ssh daemon version string
 my $sshderror;   # for socks server, ssh daemon version error
 my %doesntrun;    # servers that don't work, identified by pidfile
+my %PORT = (nolisten => 47); # port we use for a local non-listening service
 my $server_response_maxtime=13;
 my $httptlssrv = find_httptlssrv();
 my %run;          # running server
@@ -127,6 +128,9 @@ my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
 my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
 my $posix_pwd=$pwd;        # current working directory
 my $h2cver = "h2c"; # this version is decided by the nghttp2 lib being used
+my $portrange = 999;       # space from which to choose a random port
+                           # don't increase without making sure generated port
+                           # numbers will always be valid (<=65535)
 my $HOSTIP="127.0.0.1";    # address on which the test server listens
 my $HOST6IP="[::1]";       # address on which the test server listens
 my $HTTPUNIXPATH;          # HTTP server Unix domain socket path
