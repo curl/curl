@@ -1796,7 +1796,6 @@ sub runsshserver {
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
     $flags .= "--user \"$USER\"";
 
-    my $wport = 0,
     my @tports;
     my $port = getfreeport($ipvnum);
 
@@ -1866,9 +1865,9 @@ sub runsshserver {
         die $msg;
     }
 
-    logmsg "RUN: $srvrname on PID $pid2 port $wport\n" if($verb);
+    logmsg "RUN: $srvrname on PID $pid2 port $port\n" if($verb);
 
-    return (0, $pid2, $sshpid, $wport);
+    return (0, $pid2, $sshpid, $port);
 }
 
 #######################################################################
