@@ -2711,7 +2711,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* Set the list of mail recipients */
     data->set.mail_rcpt = va_arg(param, struct curl_slist *);
     break;
-  case CURLOPT_MAIL_RCPT_ALLLOWFAILS:
+  case CURLOPT_MAIL_RCPT_ALLOWFAILS:
     /* allow RCPT TO command to fail for some recipients */
     data->set.mail_rcpt_allowfails = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
