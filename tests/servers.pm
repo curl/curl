@@ -1235,7 +1235,7 @@ sub runhttp2server {
         $doesntrun{$pidfile} = 1;
         $http2pid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
-        return;
+        return (3, 0, 0, 0, 0);
     }
     $doesntrun{$pidfile} = 0;
 
@@ -1296,7 +1296,7 @@ sub runhttp3server {
         $doesntrun{$pidfile} = 1;
         $http3pid = $pid3 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
-        return;
+        return (3, 0, 0, 0);
     }
     $doesntrun{$pidfile} = 0;
 
@@ -1375,7 +1375,7 @@ sub runhttpsserver {
         $doesntrun{$pidfile} = 1;
         $httpspid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
-        return;
+        return (3, 0, 0, 0);
     }
 
     $doesntrun{$pidfile} = 0;
@@ -1439,7 +1439,7 @@ sub runhttptlsserver {
         $doesntrun{$pidfile} = 1;
         $httptlspid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
-        return;
+        return (3, 0, 0, 0);
     }
     $doesntrun{$pidfile} = 0;
 
@@ -1583,7 +1583,7 @@ sub runsecureserver {
         $doesntrun{$pidfile} = 1;
         $protospid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
-        return;
+        return (3, 0, 0, 0);
     }
 
     $doesntrun{$pidfile} = 0;
@@ -1816,7 +1816,7 @@ sub runsshserver {
         $doesntrun{$pidfile} = 1;
         $sshpid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server on $port\n";
-        return;
+        return (3, 0, 0, 0);
     }
 
     # once it is known that the ssh server is alive, sftp server
@@ -1838,7 +1838,7 @@ sub runsshserver {
         $doesntrun{$pidfile} = 1;
         $sshpid = $pid2 = 0;
         logmsg "RUN: failed to verifty the $srvrname server on $port\n";
-        return;
+        return (5, 0, 0, 0);
     }
     # we're happy, no need to loop anymore!
     $doesntrun{$pidfile} = 0;
@@ -2045,7 +2045,7 @@ sub rundictserver {
         $doesntrun{$pidfile} = 1;
         $dictpid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
-        return;
+        return (3, 0, 0, 0);
     }
     $doesntrun{$pidfile} = 0;
 
@@ -2106,7 +2106,7 @@ sub runsmbserver {
         $doesntrun{$pidfile} = 1;
         $smbpid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n" if(!$smbpid);
-        next;
+        next (3, 0, 0, 0);
     }
     $doesntrun{$pidfile} = 0;
 
@@ -2166,7 +2166,7 @@ sub runnegtelnetserver {
         $doesntrun{$pidfile} = 1;
         $ntelpid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n";
-        return;
+        return (3, 0, 0, 0);
     }
     $doesntrun{$pidfile} = 0;
 
