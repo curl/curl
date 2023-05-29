@@ -2106,7 +2106,7 @@ sub runsmbserver {
         $doesntrun{$pidfile} = 1;
         $smbpid = $pid2 = 0;
         logmsg "RUN: failed to start the $srvrname server\n" if(!$smbpid);
-        next (3, 0, 0, 0);
+        return (3, 0, 0, 0);
     }
     $doesntrun{$pidfile} = 0;
 
