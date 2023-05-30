@@ -2653,7 +2653,7 @@ foreach my $testnum (@runtests) {
             elsif(!$anyway) {
                 # a test failed, abort
                 logmsg "\n - abort tests\n";
-                last;
+                last nexttest;
             }
         }
         elsif(!$error) {
