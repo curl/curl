@@ -6,10 +6,6 @@ curl and libcurl 8.1.2
  Public functions in libcurl:  91
  Contributors:                 2888
 
-This release includes the following changes:
-
- o
-
 This release includes the following bugfixes:
 
  o configure: quote the assignments for run-compiler [1]
@@ -17,10 +13,13 @@ This release includes the following bugfixes:
  o curl: cache the --trace-time value for a second [9]
  o http2: fix EOF handling on uploads with auth negotiation [7]
  o http3: send EOF indicator early as possible [11]
+ o lib1560: verify more scheme guessing [5]
  o lib: remove unused functions, make single-use static [3]
  o libcurl.m4: remove trailing 'dnl' that causes this to break autoconf [10]
  o libssh: when keyboard-interactive auth fails, try password [4]
  o misc: fix spelling mistakes [2]
+ o page-header: mention curl version and how to figure out current release [13]
+ o page-header: minor wording polish in the URL segment [12]
  o scripts/singleuse.pl: add more API calls
  o urlapi: remove superfluous host name check [6]
 
@@ -51,9 +50,12 @@ References to bug reports and discussions on issues:
  [2] = https://curl.se/bug/?i=11171
  [3] = https://curl.se/bug/?i=11174
  [4] = https://curl.se/bug/?i=11196
+ [5] = https://curl.se/bug/?i=11219
  [6] = https://curl.se/bug/?i=11195
  [7] = https://curl.se/bug/?i=11194
  [8] = https://curl.se/bug/?i=11186
  [9] = https://curl.se/bug/?i=11211
  [10] = https://curl.se/bug/?i=11212
  [11] = https://curl.se/bug/?i=11205
+ [12] = https://curl.se/bug/?i=11217
+ [13] = https://curl.se/bug/?i=11216
