@@ -319,6 +319,17 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
     if(S_ISREG(fileinfo.st_mode))
       uploadfilesize = fileinfo.st_size;
 
+#ifdef DEBUGBUILD
+    /* allow dedicated test cases to override */
+    {
+      char *ev = getenv("CURL_UPLOAD_SIZE");
+      if(ev) {
+        int sz = atoi(ev);
+        uploadfilesize = (curl_off_t)sz;
+      }
+    }
+#endif
+
     if(uploadfilesize != -1) {
       struct OperationConfig *config = per->config; /* for the macro below */
 #ifdef CURL_DISABLE_LIBCURL_OPTION
