@@ -2408,15 +2408,19 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case '\0':  /* --parallel */
         global->parallel = toggle;
         break;
-      case 'b':   /* --parallel-max */
-        err = str2unum(&global->parallel_max, nextarg);
+      case 'b': {  /* --parallel-max */
+        long val;
+        err = str2unum(&val, nextarg);
         if(err)
           return err;
-        if(global->parallel_max > MAX_PARALLEL)
+        if(val > MAX_PARALLEL)
           global->parallel_max = MAX_PARALLEL;
-        else if(global->parallel_max < 1)
+        else if(val < 1)
           global->parallel_max = PARALLEL_DEFAULT;
+        else
+          global->parallel_max = (unsigned short)val;
         break;
+      }
       case 'c':   /* --parallel-connect */
         global->parallel_connect = toggle;
         break;
