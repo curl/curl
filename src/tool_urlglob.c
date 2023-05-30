@@ -64,9 +64,9 @@ static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
  *
  * Multiplies and checks for overflow.
  */
-static int multiply(unsigned long *amount, long with)
+static int multiply(curl_off_t *amount, curl_off_t with)
 {
-  unsigned long sum = *amount * with;
+  curl_off_t sum = *amount * with;
   if(!with) {
     *amount = 0;
     return 0;
@@ -78,7 +78,7 @@ static int multiply(unsigned long *amount, long with)
 }
 
 static CURLcode glob_set(struct URLGlob *glob, char **patternp,
-                         size_t *posp, unsigned long *amount,
+                         size_t *posp, curl_off_t *amount,
                          int globindex)
 {
   /* processes a set expression with the point behind the opening '{'
@@ -123,7 +123,8 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
       *buf = '\0';
       if(pat->content.Set.elements) {
         char **new_arr = realloc(pat->content.Set.elements,
-                                 (pat->content.Set.size + 1) * sizeof(char *));
+                                 (size_t)(pat->content.Set.size + 1) *
+                                 sizeof(char *));
         if(!new_arr)
           return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
@@ -172,7 +173,7 @@ static CURLcode glob_set(struct URLGlob *glob, char **patternp,
 }
 
 static CURLcode glob_range(struct URLGlob *glob, char **patternp,
-                           size_t *posp, unsigned long *amount,
+                           size_t *posp, curl_off_t *amount,
                            int globindex)
 {
   /* processes a range expression with the point behind the opening '['
@@ -360,7 +361,7 @@ static bool peek_ipv6(const char *str, size_t *skip)
 }
 
 static CURLcode glob_parse(struct URLGlob *glob, char *pattern,
-                           size_t pos, unsigned long *amount)
+                           size_t pos, curl_off_t *amount)
 {
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
@@ -437,7 +438,7 @@ static CURLcode glob_parse(struct URLGlob *glob, char *pattern,
   return res;
 }
 
-CURLcode glob_url(struct URLGlob **glob, char *url, unsigned long *urlnum,
+CURLcode glob_url(struct URLGlob **glob, char *url, curl_off_t *urlnum,
                   FILE *error)
 {
   /*
@@ -445,7 +446,7 @@ CURLcode glob_url(struct URLGlob **glob, char *url, unsigned long *urlnum,
    * as the specified URL!
    */
   struct URLGlob *glob_expand;
-  unsigned long amount = 0;
+  curl_off_t amount = 0;
   char *glob_buffer;
   CURLcode res;
 
@@ -496,7 +497,7 @@ CURLcode glob_url(struct URLGlob **glob, char *url, unsigned long *urlnum,
 void glob_cleanup(struct URLGlob *glob)
 {
   size_t i;
-  int elem;
+  curl_off_t elem;
 
   if(!glob)
     return;

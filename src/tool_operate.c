@@ -205,7 +205,7 @@ static curl_off_t VmsSpecialSize(const char *name,
 
 struct per_transfer *transfers; /* first node */
 static struct per_transfer *transfersl; /* last node */
-static long all_pers;
+static curl_off_t all_pers;
 
 /* add_per_transfer creates a new 'per_transfer' node in the linked
    list of transfers */
@@ -806,7 +806,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     }
 
     {
-      unsigned long urlnum;
+      curl_off_t urlnum;
 
       if(!state->up && !infiles)
         Curl_nop_stmt;
