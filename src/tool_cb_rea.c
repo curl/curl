@@ -35,6 +35,7 @@
 #include "tool_cb_rea.h"
 #include "tool_operate.h"
 #include "tool_util.h"
+#include "tool_msgs.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -45,12 +46,18 @@
 size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 {
   ssize_t rc = 0;
-  struct InStruct *in = userdata;
-  struct OperationConfig *config = in->config;
+  struct per_transfer *per = userdata;
+  struct OperationConfig *config = per->config;
+
+  if((per->uploadfilesize != -1) &&
+     (per->uploadedsofar == per->uploadfilesize)) {
+    /* done */
+    return 0;
+  }
 
   if(config->timeout_ms) {
     struct timeval now = tvnow();
-    long msdelta = tvdiff(now, in->per->start);
+    long msdelta = tvdiff(now, per->start);
 
     if(msdelta > config->timeout_ms)
       /* timeout */
@@ -68,24 +75,33 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       timeout.tv_usec = (int)((wait%1000)*1000);
 
       FD_ZERO(&bits);
-      FD_SET(in->fd, &bits);
-      if(!select(in->fd + 1, &bits, NULL, NULL, &timeout))
+      FD_SET(per->infd, &bits);
+      if(!select(per->infd + 1, &bits, NULL, NULL, &timeout))
         return 0; /* timeout */
     }
 #endif
   }
 
-  rc = read(in->fd, buffer, sz*nmemb);
+  rc = read(per->infd, buffer, sz*nmemb);
   if(rc < 0) {
     if(errno == EAGAIN) {
       errno = 0;
-      in->config->readbusy = TRUE;
+      config->readbusy = TRUE;
       return CURL_READFUNC_PAUSE;
     }
     /* since size_t is unsigned we can't return negative values fine */
     rc = 0;
   }
-  in->config->readbusy = FALSE;
+  if((per->uploadfilesize != -1) &&
+     (per->uploadedsofar + rc > per->uploadfilesize)) {
+    /* do not allow uploading more than originally set out to do */
+    curl_off_t delta = per->uploadedsofar + rc - per->uploadfilesize;
+    warnf(per->config->global, "File size larger in the end than when "
+          "started. Dropping at least %" CURL_FORMAT_CURL_OFF_T " bytes",
+          delta);
+    rc = (ssize_t)(per->uploadfilesize - per->uploadedsofar);
+  }
+  config->readbusy = FALSE;
 
   /* when select() returned zero here, it timed out */
   return (size_t)rc;
