@@ -294,7 +294,7 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
 
 #ifdef DEBUGBUILD
   if(ret)
-    warnf(config, "option %s returned error (%d)\n", name, (int)ret);
+    warnf(config, "option %s returned error (%d)", name, (int)ret);
 #endif
 nomem:
   return ret;
