@@ -37,11 +37,11 @@ struct State {
   char *outfiles;
   char *httpgetfields;
   char *uploadfile;
-  unsigned long infilenum; /* number of files to upload */
-  unsigned long up;  /* upload file counter within a single upload glob */
-  unsigned long urlnum; /* how many iterations this single URL has with ranges
+  curl_off_t infilenum; /* number of files to upload */
+  curl_off_t up;        /* upload file counter within a single upload glob */
+  curl_off_t urlnum;    /* how many iterations this single URL has with ranges
                            etc */
-  unsigned long li;
+  curl_off_t li;
 };
 
 struct OperationConfig {
@@ -317,7 +317,7 @@ struct GlobalConfig {
   bool test_event_based;
 #endif
   bool parallel;
-  long parallel_max;
+  unsigned short parallel_max; /* MAX_PARALLEL is the maximum */
   bool parallel_connect;
   char *help_category;            /* The help category, if set */
   struct OperationConfig *first;
