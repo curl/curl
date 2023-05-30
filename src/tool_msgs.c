@@ -42,6 +42,7 @@ static void voutf(struct GlobalConfig *config,
                   va_list ap)
 {
   size_t width = (79 - strlen(prefix));
+  DEBUGASSERT(!strchr(fmt, '\n'));
   if(!config->silent) {
     size_t len;
     char *ptr;
@@ -74,6 +75,7 @@ static void voutf(struct GlobalConfig *config,
       }
       else {
         fputs(ptr, stderr);
+        fputs("\n", stderr);
         len = 0;
       }
     }
@@ -115,9 +117,11 @@ void helpf(FILE *errors, const char *fmt, ...)
   if(fmt) {
     va_list ap;
     va_start(ap, fmt);
+    DEBUGASSERT(!strchr(fmt, '\n'));
     fputs("curl: ", errors); /* prefix it */
     vfprintf(errors, fmt, ap);
     va_end(ap);
+    fputs("\n", errors); /* newline it */
   }
   fprintf(errors, "curl: try 'curl --help' "
 #ifdef USE_MANUAL
