@@ -26,7 +26,6 @@
 #include "tool_setup.h"
 #include "tool_sdecls.h"
 #include "tool_urlglob.h"
-#include "tool_formparse.h"
 
 struct GlobalConfig;
 
