@@ -193,11 +193,15 @@ dnl something different but only have that affect the execution of the results
 dnl of the compile, not change the libraries for the compiler itself.
 dnl
 compilersh="run-compiler"
-export "CURL_SAVED_CC=$CC"
-export "CURL_SAVED_LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+CURL_SAVED_CC="$CC"
+export CURL_SAVED_CC
+CURL_SAVED_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+export CURL_SAVED_LD_LIBRARY_PATH
 cat <<\EOF > "$compilersh"
-export "CC=$CURL_SAVED_CC"
-export "LD_LIBRARY_PATH=$CURL_SAVED_LD_LIBRARY_PATH"
+CC="$CURL_SAVED_CC"
+export CC
+LD_LIBRARY_PATH="$CURL_SAVED_LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH
 exec $CC "$@"
 EOF
 
