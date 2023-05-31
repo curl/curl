@@ -62,7 +62,7 @@ bool tool_create_output_file(struct OutStruct *outs,
   DEBUGASSERT(config);
   global = config->global;
   if(!fname || !*fname) {
-    warnf(global, "Remote filename has no length!");
+    warnf(global, "Remote filename has no length");
     return FALSE;
   }
 
@@ -176,13 +176,13 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   if(config->show_headers) {
     if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {
       warnf(config->global, "Header data size exceeds single call write "
-            "limit!");
+            "limit");
       return CURL_WRITEFUNC_ERROR;
     }
   }
   else {
     if(bytes > (size_t)CURL_MAX_WRITE_SIZE) {
-      warnf(config->global, "Data size exceeds single call write limit!");
+      warnf(config->global, "Data size exceeds single call write limit");
       return CURL_WRITEFUNC_ERROR;
     }
   }
