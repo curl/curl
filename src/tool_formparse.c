@@ -584,7 +584,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         sep = *p;
         *endpos = '\0';
         if(slist_append(&headers, hdr)) {
-          errorf(config->global, "Out of memory for field header!");
+          errorf(config->global, "Out of memory for field header");
           curl_slist_free_all(headers);
           return -1;
         }
