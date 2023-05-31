@@ -34,6 +34,7 @@
 #include "curlx.h"
 
 #include "tool_dirhie.h"
+#include "tool_msgs.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -44,38 +45,38 @@
 #  endif
 #endif
 
-static void show_dir_errno(FILE *errors, const char *name)
+static void show_dir_errno(struct GlobalConfig *global, const char *name)
 {
   switch(errno) {
 #ifdef EACCES
   case EACCES:
-    fprintf(errors, "You don't have permission to create %s.\n", name);
+    errorf(global, "You don't have permission to create %s", name);
     break;
 #endif
 #ifdef ENAMETOOLONG
   case ENAMETOOLONG:
-    fprintf(errors, "The directory name %s is too long.\n", name);
+    errorf(global, "The directory name %s is too long", name);
     break;
 #endif
 #ifdef EROFS
   case EROFS:
-    fprintf(errors, "%s resides on a read-only file system.\n", name);
+    errorf(global, "%s resides on a read-only file system", name);
     break;
 #endif
 #ifdef ENOSPC
   case ENOSPC:
-    fprintf(errors, "No space left on the file system that will "
-            "contain the directory %s.\n", name);
+    errorf(global, "No space left on the file system that will "
+           "contain the directory %s", name);
     break;
 #endif
 #ifdef EDQUOT
   case EDQUOT:
-    fprintf(errors, "Cannot create directory %s because you "
-            "exceeded your quota.\n", name);
+    errorf(global, "Cannot create directory %s because you "
+           "exceeded your quota", name);
     break;
 #endif
   default:
-    fprintf(errors, "Error creating directory %s.\n", name);
+    errorf(global, "Error creating directory %s", name);
     break;
   }
 }
@@ -95,7 +96,7 @@ static void show_dir_errno(FILE *errors, const char *name)
 #endif
 
 
-CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
+CURLcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
 {
   char *tempdir;
   char *tempdir2;
@@ -151,7 +152,7 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
       /* Create directory. Ignore access denied error to allow traversal. */
       if(!skip && (-1 == mkdir(dirbuildup, (mode_t)0000750)) &&
          (errno != EACCES) && (errno != EEXIST)) {
-        show_dir_errno(errors, dirbuildup);
+        show_dir_errno(global, dirbuildup);
         result = CURLE_WRITE_ERROR;
         break; /* get out of loop */
       }

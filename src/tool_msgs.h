@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "tool_cfgable.h"
 
 void warnf(struct GlobalConfig *config, const char *fmt, ...);
 void notef(struct GlobalConfig *config, const char *fmt, ...);

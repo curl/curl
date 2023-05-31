@@ -136,7 +136,7 @@ void helpf(FILE *errors, const char *fmt, ...)
  */
 void errorf(struct GlobalConfig *config, const char *fmt, ...)
 {
-  if(!config->silent) {
+  if(!config->silent || config->showerror) {
     va_list ap;
     va_start(ap, fmt);
     voutf(config, ERROR_PREFIX, fmt, ap);
