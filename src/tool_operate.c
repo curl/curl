@@ -1051,11 +1051,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             result = get_url_file_name(&per->outfile, per->this_url);
             if(result) {
               errorf(global, "Failed to extract a sensible file name"
-                     " from the URL to use for storage!");
+                     " from the URL to use for storage");
               break;
             }
             if(!*per->outfile && !config->content_disposition) {
-              errorf(global, "Remote file name has no length!");
+              errorf(global, "Remote file name has no length");
               result = CURLE_WRITE_ERROR;
               break;
             }
@@ -1067,11 +1067,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             Curl_safefree(storefile);
             if(result) {
               /* bad globbing */
-              warnf(global, "bad output glob!");
+              warnf(global, "bad output glob");
               break;
             }
             if(!*per->outfile) {
-              warnf(global, "output glob produces empty string!");
+              warnf(global, "output glob produces empty string");
               result = CURLE_WRITE_ERROR;
               break;
             }
@@ -1173,7 +1173,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             warnf(global,
                   "Using --anyauth or --proxy-anyauth with upload from stdin"
                   " involves a big risk of it not working. Use a temporary"
-                  " file or a fixed auth type instead!");
+                  " file or a fixed auth type instead");
           }
 
           DEBUGASSERT(per->infdopen == FALSE);
@@ -1485,7 +1485,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_HTTP09_ALLOWED,
                     config->http09_allowed ? 1L : 0L);
           if(result) {
-            errorf(global, "HTTP/0.9 is not supported in this build!");
+            errorf(global, "HTTP/0.9 is not supported in this build");
             return result;
           }
 
@@ -1797,7 +1797,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               break;
           }
           else
-            warnf(global, "Couldn't find a known_hosts file!");
+            warnf(global, "Couldn't find a known_hosts file");
         }
 
         if(config->no_body || config->remote_time) {
