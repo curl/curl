@@ -2570,9 +2570,9 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
     const char *reason = param2text(result);
 
     if(orig_opt && strcmp(":", orig_opt))
-      helpf(stderr, "option %s: %s\n", orig_opt, reason);
+      helpf(stderr, "option %s: %s", orig_opt, reason);
     else
-      helpf(stderr, "%s\n", reason);
+      helpf(stderr, "%s", reason);
   }
 
   curlx_unicodefree(orig_opt);

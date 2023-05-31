@@ -306,7 +306,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
     if((per->infd == -1) || fstat(per->infd, &fileinfo))
 #endif
     {
-      helpf(stderr, "Can't open '%s'!\n", per->uploadfile);
+      helpf(stderr, "Can't open '%s'", per->uploadfile);
       if(per->infd != -1) {
         close(per->infd);
         per->infd = STDIN_FILENO;
@@ -2523,7 +2523,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
 
   /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
-    helpf(stderr, "(%d) no URL specified!\n", CURLE_FAILED_INIT);
+    helpf(stderr, "(%d) no URL specified", CURLE_FAILED_INIT);
     return CURLE_FAILED_INIT;
   }
 
@@ -2581,7 +2581,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
           if(!config->capath) {
             curl_free(env);
             curl_easy_cleanup(curltls);
-            helpf(stderr, "out of memory\n");
+            errorf(global, "out of memory");
             return CURLE_OUT_OF_MEMORY;
           }
           capath_from_env = true;
