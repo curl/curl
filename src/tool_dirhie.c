@@ -50,33 +50,33 @@ static void show_dir_errno(struct GlobalConfig *global, const char *name)
   switch(errno) {
 #ifdef EACCES
   case EACCES:
-    errorf(global, "You don't have permission to create %s.\n", name);
+    errorf(global, "You don't have permission to create %s", name);
     break;
 #endif
 #ifdef ENAMETOOLONG
   case ENAMETOOLONG:
-    errorf(global, "The directory name %s is too long.\n", name);
+    errorf(global, "The directory name %s is too long", name);
     break;
 #endif
 #ifdef EROFS
   case EROFS:
-    errorf(global, "%s resides on a read-only file system.\n", name);
+    errorf(global, "%s resides on a read-only file system", name);
     break;
 #endif
 #ifdef ENOSPC
   case ENOSPC:
     errorf(global, "No space left on the file system that will "
-           "contain the directory %s.\n", name);
+           "contain the directory %s", name);
     break;
 #endif
 #ifdef EDQUOT
   case EDQUOT:
     errorf(global, "Cannot create directory %s because you "
-           "exceeded your quota.\n", name);
+           "exceeded your quota", name);
     break;
 #endif
   default:
-    errorf(global, "Error creating directory %s.\n", name);
+    errorf(global, "Error creating directory %s", name);
     break;
   }
 }

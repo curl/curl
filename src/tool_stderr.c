@@ -55,7 +55,7 @@ void tool_set_stderr_file(struct GlobalConfig *global, char *filename)
      subsequent freopen will fail. */
   fp = fopen(filename, FOPEN_WRITETEXT);
   if(!fp) {
-    warnf(global, "Warning: Failed to open %s!\n", filename);
+    warnf(global, "Warning: Failed to open %s", filename);
     return;
   }
   fclose(fp);
