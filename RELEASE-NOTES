@@ -1,27 +1,21 @@
-curl and libcurl 8.1.2
+curl and libcurl 8.2.0
 
- Public curl releases:         219
+ Public curl releases:         220
  Command line options:         251
  curl_easy_setopt() options:   302
  Public functions in libcurl:  91
  Contributors:                 2888
 
+This release includes the following changes:
+
+
 This release includes the following bugfixes:
 
- o configure: quote the assignments for run-compiler [1]
- o configure: without pkg-config and no custom path, use -lnghttp2 [8]
- o curl: cache the --trace-time value for a second [9]
- o http2: fix EOF handling on uploads with auth negotiation [7]
- o http3: send EOF indicator early as possible [11]
- o lib1560: verify more scheme guessing [5]
- o lib: remove unused functions, make single-use static [3]
- o libcurl.m4: remove trailing 'dnl' that causes this to break autoconf [10]
- o libssh: when keyboard-interactive auth fails, try password [4]
- o misc: fix spelling mistakes [2]
- o page-header: mention curl version and how to figure out current release [13]
- o page-header: minor wording polish in the URL segment [12]
- o scripts/singleuse.pl: add more API calls
- o urlapi: remove superfluous host name check [6]
+ o configure: fix run-compiler for old /bin/sh [4]
+ o circleci: install impacket & wolfssl 5.6.0 [1]
+ o tool_urlglob: use curl_off_t instead of longs [2]
+ o scripts: Fix GHA matrix job detection in cijobs.pl
+ o runtests: abort test run after failure without -a [3]
 
 This release includes the following known bugs:
 
@@ -39,23 +33,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksander Mazur, Christian Hesse, correctmost on github, Dan Fandrich,
-  Daniel Stenberg, Emanuele Torre, Gisle Vanem, Kev Jackson,
-  musvaage on github, Sergey Fionov, Stefan Eissing, Viktor Szakats, 左潇峰
-  (13 contributors)
+  Alejandro R. Sedeño, Dan Fandrich, Daniel Stenberg, Philip Heiduck
+  (4 contributors)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=11179
- [2] = https://curl.se/bug/?i=11171
- [3] = https://curl.se/bug/?i=11174
- [4] = https://curl.se/bug/?i=11196
- [5] = https://curl.se/bug/?i=11219
- [6] = https://curl.se/bug/?i=11195
- [7] = https://curl.se/bug/?i=11194
- [8] = https://curl.se/bug/?i=11186
- [9] = https://curl.se/bug/?i=11211
- [10] = https://curl.se/bug/?i=11212
- [11] = https://curl.se/bug/?i=11205
- [12] = https://curl.se/bug/?i=11217
- [13] = https://curl.se/bug/?i=11216
+ [1] = https://curl.se/bug/?i=11221
+ [2] = https://curl.se/bug/?i=11224
+ [3] = https://curl.se/bug/?i=11225
+ [4] = https://curl.se/bug/?i=11228
