@@ -506,7 +506,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
 
       /* verify that this is a fine type specifier */
       if(2 != sscanf(type, "%127[^/ ]/%127[^;, \n]", type_major, type_minor)) {
-        warnf(config->global, "Illegally formatted content-type field!");
+        warnf(config->global, "Illegally formatted content-type field");
         curl_slist_free_all(headers);
         return -1; /* illegal content-type syntax! */
       }
@@ -584,7 +584,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         sep = *p;
         *endpos = '\0';
         if(slist_append(&headers, hdr)) {
-          errorf(config->global, "Out of memory for field header!");
+          errorf(config->global, "Out of memory for field header");
           curl_slist_free_all(headers);
           return -1;
         }
@@ -772,7 +772,7 @@ int formparse(struct OperationConfig *config,
     else if(!name && !strcmp(contp, ")") && !literal_value) {
       /* Ending a multipart. */
       if(*mimecurrent == *mimeroot) {
-        warnf(config->global, "no multipart to terminate!");
+        warnf(config->global, "no multipart to terminate");
         goto fail;
       }
       *mimecurrent = (*mimecurrent)->parent;
@@ -896,7 +896,7 @@ int formparse(struct OperationConfig *config,
     SET_TOOL_MIME_PTR(part, name);
   }
   else {
-    warnf(config->global, "Illegally formatted input field!");
+    warnf(config->global, "Illegally formatted input field");
     goto fail;
   }
   err = 0;

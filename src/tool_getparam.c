@@ -539,7 +539,7 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
     /* for plain bytes, leave as-is */
     break;
   default:
-    warnf(global, "unsupported %s unit. Use G, M, K or B!", which);
+    warnf(global, "unsupported %s unit. Use G, M, K or B", which);
     return PARAM_BAD_USE;
   }
   *value_out = value;
@@ -1255,7 +1255,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'z': /* --libcurl */
 #ifdef CURL_DISABLE_LIBCURL_OPTION
         warnf(global,
-              "--libcurl option was disabled at build-time!");
+              "--libcurl option was disabled at build-time");
         return PARAM_OPTION_UNKNOWN;
 #else
         GetStr(&global->libcurl, nextarg);
@@ -1345,7 +1345,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 #ifdef CURLDEBUG
         global->test_event_based = toggle;
 #else
-        warnf(global, "--test-event is ignored unless a debug build!");
+        warnf(global, "--test-event is ignored unless a debug build");
 #endif
         break;
       case 'M': /* --unix-socket */
@@ -2016,7 +2016,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         bool use_stdin = !strcmp(&nextarg[1], "-");
         FILE *file = use_stdin?stdin:fopen(&nextarg[1], FOPEN_READTEXT);
         if(!file)
-          warnf(global, "Failed to open %s!", &nextarg[1]);
+          warnf(global, "Failed to open %s", &nextarg[1]);
         else {
           err = file2memory(&string, &len, file);
           if(!err && string) {
@@ -2238,7 +2238,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         }
         warnf(global,
               "A specified range MUST include at least one dash (-). "
-              "Appending one for you!");
+              "Appending one for you");
         msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
         Curl_safefree(config->range);
         config->range = strdup(buffer);
