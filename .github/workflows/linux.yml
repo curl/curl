@@ -91,12 +91,12 @@ jobs:
 
         - name: openssl3
           install_packages: zlib1g-dev valgrind
-          install_steps: gcc-11 openssl3 pytest
+          install_steps: gcc-13 openssl3 pytest
           configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
         - name: openssl3-O3
           install_packages: zlib1g-dev valgrind
-          install_steps: gcc-11 openssl3
+          install_steps: gcc-13 openssl3
           configure: CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib64" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
 
         - name: openssl3-clang
@@ -168,15 +168,14 @@ jobs:
 
     - uses: actions/checkout@v3
 
-    - if: ${{ contains(matrix.build.install_steps, 'gcc-11') }}
+    - if: ${{ contains(matrix.build.install_steps, 'gcc-13') }}
       run: |
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
         sudo apt-get update
-        sudo apt-get install gcc-11
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
-        sudo update-alternatives --set gcc /usr/bin/gcc-11
+        sudo apt-get install gcc-13
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100
+        sudo update-alternatives --set gcc /usr/bin/gcc-13
         gcc --version
-      name: 'install gcc-11'
+      name: 'install gcc-13'
 
     - if: ${{ contains(matrix.build.install_steps, 'bearssl') }}
       run: |
