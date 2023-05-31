@@ -417,7 +417,7 @@ static int read_field_headers(struct OperationConfig *config,
       if(hdrlen) {
         hdrbuf[hdrlen] = '\0';
         if(slist_append(pheaders, hdrbuf)) {
-          fprintf(stderr, "Out of memory for field headers!\n");
+          errorf(config->global, "Out of memory for field headers");
           return -1;
         }
         hdrlen = 0;
@@ -427,8 +427,8 @@ static int read_field_headers(struct OperationConfig *config,
     switch(c) {
     case EOF:
       if(ferror(fp)) {
-        fprintf(stderr, "Header file %s read error: %s\n", filename,
-                strerror(errno));
+        errorf(config->global, "Header file %s read error: %s", filename,
+               strerror(errno));
         return -1;
       }
       return 0;    /* Done. */
@@ -584,7 +584,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         sep = *p;
         *endpos = '\0';
         if(slist_append(&headers, hdr)) {
-          fprintf(stderr, "Out of memory for field header!\n");
+          errorf(config->global, "Out of memory for field header!");
           curl_slist_free_all(headers);
           return -1;
         }

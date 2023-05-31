@@ -384,6 +384,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   struct OutStruct *outs = &per->outs;
   CURL *curl = per->curl;
   struct OperationConfig *config = per->config;
+  int rc;
 
   if(!curl || !config)
     return result;
@@ -424,7 +425,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     }
   /* Set file extended attributes */
   if(!result && config->xattr && outs->fopened && outs->stream) {
-    int rc = fwrite_xattr(curl, per->this_url, fileno(outs->stream));
+    rc = fwrite_xattr(curl, per->this_url, fileno(outs->stream));
     if(rc)
       warnf(config->global, "Error setting extended attributes on '%s': %s",
             outs->filename, strerror(errno));
@@ -444,12 +445,11 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
 
   if(!outs->s_isreg && outs->stream) {
     /* Dump standard stream buffered data */
-    int rc = fflush(outs->stream);
+    rc = fflush(outs->stream);
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
-      if(!global->silent || global->showerror)
-        fprintf(stderr, "curl: (%d) Failed writing body\n", result);
+      errorf(global, "Failed writing body");
     }
   }
 
@@ -586,7 +586,6 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
           per->retry_sleep = RETRY_SLEEP_MAX;
       }
       if(outs->bytes && outs->filename && outs->stream) {
-        int rc;
         /* We have written data to an output file, we truncate file
          */
         notef(config->global,
@@ -598,8 +597,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we can't just append as then we'll
              create something strange, bail out */
-          if(!global->silent || global->showerror)
-            fprintf(stderr, "curl: (23) Failed to truncate file\n");
+          errorf(config->global, "Failed to truncate file");
           return CURLE_WRITE_ERROR;
         }
         /* now seek to the end of the file, the position where we
@@ -613,8 +611,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
 #endif
         if(rc) {
-          if(!global->silent || global->showerror)
-            fprintf(stderr, "curl: (23) Failed seeking to end of file\n");
+          errorf(config->global, "Failed seeking to end of file");
           return CURLE_WRITE_ERROR;
         }
         outs->bytes = 0; /* clear for next round */
@@ -634,12 +631,11 @@ noretry:
 
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
-    int rc = fclose(outs->stream);
+    rc = fclose(outs->stream);
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
-      if(!global->silent || global->showerror)
-        fprintf(stderr, "curl: (%d) Failed writing body\n", result);
+      errorf(config->global, "curl: (%d) Failed writing body", result);
     }
     if(result && config->rm_partial) {
       notef(global, "Removing output file: %s", outs->filename);
@@ -1094,7 +1090,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
              file output call */
 
           if(config->create_dirs) {
-            result = create_dir_hierarchy(per->outfile, stderr);
+            result = create_dir_hierarchy(per->outfile, global);
             /* create_dir_hierarchy shows error upon CURLE_WRITE_ERROR */
             if(result)
               break;

@@ -1038,7 +1038,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'v': /* --stderr */
-        tool_set_stderr_file(nextarg);
+        tool_set_stderr_file(global, nextarg);
         break;
       case 'w': /* --interface */
         /* interface */
