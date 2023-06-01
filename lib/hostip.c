@@ -682,13 +682,20 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   CURLcode result;
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
   struct connectdata *conn = data->conn;
-  /* We should intentionally error and not resolve .onion TLDs */
-  size_t hostname_len = strlen(hostname);
-  if(hostname_len >= 7 &&
-     (curl_strequal(&hostname[hostname_len - 6], ".onion") ||
-      curl_strequal(&hostname[hostname_len - 7], ".onion."))) {
-    failf(data, "Not resolving .onion address (RFC 7686)");
-    return CURLRESOLV_ERROR;
+
+  /* We should intentionally error and not resolve .onion TLDs, however,
+   * there are cases where a user may knowingly want to do so. */
+  char *allow_dot_onion = curl_getenv("CURL_ALLOW_DOT_ONION");
+  if(allow_dot_onion)
+    curl_free(allow_dot_onion);
+  else {
+    size_t hostname_len = strlen(hostname);
+    if(hostname_len >= 7 &&
+       (curl_strequal(&hostname[hostname_len - 6], ".onion") ||
+        curl_strequal(&hostname[hostname_len - 7], ".onion."))) {
+      failf(data, "Not resolving .onion address (RFC 7686)");
+      return CURLRESOLV_ERROR;
+    }
   }
   *entry = NULL;
 #ifndef CURL_DISABLE_DOH
