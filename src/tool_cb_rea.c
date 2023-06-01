@@ -99,7 +99,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     warnf(per->config->global, "File size larger in the end than when "
           "started. Dropping at least %" CURL_FORMAT_CURL_OFF_T " bytes",
           delta);
-    rc = per->uploadfilesize - per->uploadedsofar;
+    rc = (ssize_t)(per->uploadfilesize - per->uploadedsofar);
   }
   config->readbusy = FALSE;
 
