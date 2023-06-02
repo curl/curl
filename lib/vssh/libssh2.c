@@ -889,6 +889,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
     }
 
     if(found) {
+      int rc;
       infof(data, "Found host %s in %s",
             conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
 
@@ -938,9 +939,15 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
       }
 
       infof(data, "Set \"%s\" as SSH hostkey type", hostkey_method);
-      result = libssh2_session_error_to_CURLE(
-        libssh2_session_method_pref(
-          sshc->ssh_session, LIBSSH2_METHOD_HOSTKEY, hostkey_method));
+      rc = libssh2_session_method_pref(sshc->ssh_session,
+                                       LIBSSH2_METHOD_HOSTKEY, hostkey_method);
+      if(rc) {
+        char *errmsg = NULL;
+        int errlen;
+        libssh2_session_last_error(sshc->ssh_session, &errmsg, &errlen, 0);
+        failf(data, "libssh2: %s", errmsg);
+        result = libssh2_session_error_to_CURLE(rc);
+      }
     }
     else {
       infof(data, "Did not find host %s in %s",
