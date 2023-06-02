@@ -74,7 +74,7 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
     defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 
 #define LOG_CF(data, cf, ...) \
-  do { if(Curl_log_cf_is_debug(cf)) \
+  do { if(Curl_log_cf_is_debug(cf, data)) \
          Curl_log_cf_debug(data, cf, __VA_ARGS__); } while(0)
 #else
 #define LOG_CF Curl_log_cf_debug
@@ -90,8 +90,10 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...);
 #endif
 
-#define Curl_log_cf_is_debug(cf) \
-    ((cf) && (cf)->cft->log_level >= CURL_LOG_DEBUG)
+#define Curl_log_cf_is_debug(cf, data) \
+    ((data) && (data)->set.verbose && \
+     (cf) && (cf)->cft->log_level >= CURL_LOG_DEBUG)
+
 
 #else /* !DEBUGBUILD */
 
@@ -110,11 +112,11 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...);
 #endif
 
-#define Curl_log_cf_is_debug(x)   ((void)(x), FALSE)
+#define Curl_log_cf_is_debug(x,y)   ((void)(x), (void)(y), FALSE)
 
 #endif  /* !DEBUGBUILD */
 
-#define LOG_CF_IS_DEBUG(x)        Curl_log_cf_is_debug(x)
+#define LOG_CF_IS_DEBUG(cf, data)        Curl_log_cf_is_debug(cf, data)
 
 /* Macros intended for DEBUGF logging, use like:
  * DEBUGF(infof(data, CFMSG(cf, "this filter %s rocks"), "very much"));

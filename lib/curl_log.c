@@ -130,7 +130,7 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
-  if(data && Curl_log_cf_is_debug(cf)) {
+  if(data && Curl_log_cf_is_debug(cf, data)) {
     va_list ap;
     int len;
     char buffer[MAXINFO + 2];
