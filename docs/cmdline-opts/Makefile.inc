@@ -30,6 +30,7 @@ DPAGES = \
   append.d \
   aws-sigv4.d \
   basic.d \
+  ca-native.d \
   cacert.d \
   capath.d \
   cert-status.d \
@@ -170,6 +171,7 @@ DPAGES = \
   proto.d \
   proxy-anyauth.d \
   proxy-basic.d \
+  proxy-ca-native.d \
   proxy-cacert.d \
   proxy-capath.d \
   proxy-cert-type.d \
