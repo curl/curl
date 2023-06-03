@@ -259,7 +259,8 @@ struct OperationConfig {
   bool ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
                                   revocation list errors */
 
-  bool native_ca_store;        /* use the native os ca store */
+  bool native_ca_store;        /* use the native OS CA store */
+  bool proxy_native_ca_store;  /* use the native OS CA store for proxy */
   bool ssl_auto_client_cert;   /* automatically locate and use a client
                                   certificate for authentication (Schannel) */
   bool proxy_ssl_auto_client_cert; /* proxy version of ssl_auto_client_cert */

@@ -16,6 +16,7 @@
 --append (-a)                        4.8
 --aws-sigv4                          7.75.0
 --basic                              7.10.6
+--ca-native                          8.2.0
 --cacert                             7.5
 --capath                             7.9.8
 --cert (-E)                          5.0
@@ -157,6 +158,7 @@
 --proxy (-x)                         4.0
 --proxy-anyauth                      7.13.2
 --proxy-basic                        7.12.0
+--proxy-ca-native                    8.2.0
 --proxy-cacert                       7.52.0
 --proxy-capath                       7.52.0
 --proxy-cert                         7.52.0
