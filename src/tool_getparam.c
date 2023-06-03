@@ -247,6 +247,8 @@ static const struct LongShort aliases[]= {
   {"Ed", "key-type",                 ARG_STRING},
   {"Ee", "pass",                     ARG_STRING},
   {"Ef", "engine",                   ARG_STRING},
+  {"EG", "ca-native",                ARG_BOOL},
+  {"EH", "proxy-ca-native",          ARG_BOOL},
   {"Eg", "capath",                   ARG_FILENAME},
   {"Eh", "pubkey",                   ARG_STRING},
   {"Ei", "hostpubmd5",               ARG_STRING},
@@ -1723,8 +1725,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         cleanarg(clearthis);
         GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
         break;
-      case 'a': /* CA info PEM file */
+      case 'a': /* --cacert CA info PEM file */
         GetStr(&config->cacert, nextarg);
+        break;
+      case 'G': /* --ca-native */
+        config->native_ca_store = toggle;
+        break;
+      case 'H': /* --proxy-ca-native */
+        config->proxy_native_ca_store = toggle;
         break;
       case 'b': /* cert file type */
         GetStr(&config->cert_type, nextarg);

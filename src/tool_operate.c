@@ -1779,7 +1779,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               (config->proxy_ssl_allow_beast ?
                CURLSSLOPT_ALLOW_BEAST : 0) |
               (config->proxy_ssl_auto_client_cert ?
-               CURLSSLOPT_AUTO_CLIENT_CERT : 0);
+               CURLSSLOPT_AUTO_CLIENT_CERT : 0) |
+              (config->proxy_native_ca_store ?
+               CURLSSLOPT_NATIVE_CA : 0);
 
             if(mask)
               my_setopt_bitmask(curl, CURLOPT_PROXY_SSL_OPTIONS, mask);
