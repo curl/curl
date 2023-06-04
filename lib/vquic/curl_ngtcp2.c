@@ -328,7 +328,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   t->initial_max_streams_uni = QUIC_MAX_STREAMS;
   t->max_idle_timeout = QUIC_IDLE_TIMEOUT;
   if(ctx->qlogfd != -1) {
-    s->qlog.write = qlog_callback;
+    s->qlog_write = qlog_callback;
   }
 }
 
@@ -903,13 +903,13 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
   return 0;
 }
 
-static int cb_recv_rx_key(ngtcp2_conn *tconn, ngtcp2_crypto_level level,
+static int cb_recv_rx_key(ngtcp2_conn *tconn, ngtcp2_encryption_level level,
                           void *user_data)
 {
   struct Curl_cfilter *cf = user_data;
   (void)tconn;
 
-  if(level != NGTCP2_CRYPTO_LEVEL_APPLICATION) {
+  if(level != NGTCP2_ENCRYPTION_LEVEL_1RTT) {
     return 0;
   }
 
@@ -1208,7 +1208,8 @@ static int cb_h3_stop_sending(nghttp3_conn *conn, int64_t stream_id,
   (void)conn;
   (void)stream_user_data;
 
-  rv = ngtcp2_conn_shutdown_stream_read(ctx->qconn, stream_id, app_error_code);
+  rv = ngtcp2_conn_shutdown_stream_read(ctx->qconn, 0, stream_id,
+                                        app_error_code);
   if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -1226,7 +1227,7 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t stream_id,
   (void)conn;
   (void)data;
 
-  rv = ngtcp2_conn_shutdown_stream_write(ctx->qconn, stream_id,
+  rv = ngtcp2_conn_shutdown_stream_write(ctx->qconn, 0, stream_id,
                                          app_error_code);
   DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] reset -> %d", stream_id, rv));
   if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
@@ -1250,7 +1251,8 @@ static nghttp3_callbacks ngh3_callbacks = {
   cb_h3_stop_sending,
   NULL, /* end_stream */
   cb_h3_reset_stream,
-  NULL /* shutdown */
+  NULL, /* shutdown */
+  NULL /* recv_settings */
 };
 
 static int init_ngh3_conn(struct Curl_cfilter *cf)
@@ -2403,7 +2405,7 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
 
 out:
   if(result == CURLE_RECV_ERROR && ctx->qconn &&
-     ngtcp2_conn_is_in_draining_period(ctx->qconn)) {
+     ngtcp2_conn_in_draining_period(ctx->qconn)) {
     /* When a QUIC server instance is shutting down, it may send us a
      * CONNECTION_CLOSE right away. Our connection then enters the DRAINING
      * state.
