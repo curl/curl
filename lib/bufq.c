@@ -532,7 +532,7 @@ ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
     if(!chunk_written) {
       if(!nwritten) {
         /* treat as blocked */
-        *err != CURLE_AGAIN;
+        *err = CURLE_AGAIN;
         nwritten = -1;
       }
       break;
