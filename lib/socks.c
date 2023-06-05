@@ -161,7 +161,7 @@ static void socksstate(struct socks_state *sx, struct Curl_easy *data,
   enum connect_t oldstate = sx->state;
 #ifdef DEBUG_AND_VERBOSE
   /* synced with the state list in urldata.h */
-  static const char * const statename[] = {
+  static const char * const socks_statename[] = {
     "INIT",
     "SOCKS_INIT",
     "SOCKS_SEND",
@@ -193,7 +193,7 @@ static void socksstate(struct socks_state *sx, struct Curl_easy *data,
 #ifdef DEBUG_AND_VERBOSE
   infof(data,
         "SXSTATE: %s => %s; line %d",
-        statename[oldstate], statename[sx->state],
+        socks_statename[oldstate], socks_statename[sx->state],
         lineno);
 #endif
 }

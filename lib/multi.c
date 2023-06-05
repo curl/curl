@@ -112,7 +112,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 static void process_pending_handles(struct Curl_multi *multi);
 
 #ifdef DEBUGBUILD
-static const char * const statename[]={
+static const char * const multi_statename[]={
   "INIT",
   "PENDING",
   "CONNECT",
@@ -201,7 +201,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 
     infof(data,
           "STATE: %s => %s handle %p; line %d (connection #%ld)",
-          statename[oldstate], statename[data->mstate],
+          multi_statename[oldstate], multi_statename[data->mstate],
           (void *)data, lineno, connection_id);
   }
 #endif
@@ -3798,7 +3798,7 @@ void Curl_multi_dump(struct Curl_multi *multi)
       /* only display handles that are not completed */
       fprintf(stderr, "handle %p, state %s, %d sockets\n",
               (void *)data,
-              statename[data->mstate], data->numsocks);
+              multi_statename[data->mstate], data->numsocks);
       for(i = 0; i < data->numsocks; i++) {
         curl_socket_t s = data->sockets[i];
         struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
