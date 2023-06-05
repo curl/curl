@@ -42,6 +42,7 @@ BEGIN {
         $has_shared
         $LIBDIR
         $listonly
+        $LOCKDIR
         $LOGDIR
         $memanalyze
         $MEMDUMP
@@ -100,6 +101,7 @@ our $memanalyze="$perl $srcdir/memanalyze.pl";
 our $valgrind;     # path to valgrind, or empty if disabled
 
 # paths in $LOGDIR
+our $LOCKDIR = "lock";          # root of the server directory with lock files
 our $PIDDIR = "server";         # root of the server directory with PID files
 our $SERVERIN="server.input";   # what curl sent the server
 our $PROXYIN="proxy.input";     # what curl sent the proxy

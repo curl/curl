@@ -1964,6 +1964,7 @@ int main(int argc, char *argv[])
   char port_str[11];
   const char *location_str = port_str;
   int keepalive_secs = 5;
+  const char *protocol_type = "HTTP";
 
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
@@ -2008,6 +2009,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--gopher", argv[arg])) {
       arg++;
       use_gopher = TRUE;
+      protocol_type = "GOPHER";
       end_of_headers = "\r\n"; /* gopher style is much simpler */
     }
     else if(!strcmp("--ipv4", argv[arg])) {
@@ -2109,8 +2111,9 @@ int main(int argc, char *argv[])
     }
   }
 
-  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s",
-            logdir, SERVERLOGS_LOCK);
+  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s/sws-%s%s-%s.lock",
+            logdir, SERVERLOGS_LOCKDIR, protocol_type,
+            is_proxy ? "-proxy" : "", socket_type);
 
 #ifdef WIN32
   win32_init();
@@ -2227,7 +2230,7 @@ int main(int argc, char *argv[])
     msnprintf(port_str, sizeof(port_str), "port %hu", port);
 
   logmsg("Running %s %s version on %s",
-         use_gopher?"GOPHER":"HTTP", socket_type, location_str);
+         protocol_type, socket_type, location_str);
 
   /* start accepting connections */
   rc = listen(sock, 5);

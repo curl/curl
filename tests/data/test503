@@ -76,6 +76,7 @@ Host: machine.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: Basic dGVzdDppbmc=
 Proxy-Connection: Keep-Alive
 
+[DISCONNECT]
 </proxy>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
