@@ -2433,7 +2433,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           global->parallel_max = (unsigned short)val;
         break;
       }
-      case 'c':   /* --parallel-connect */
+      case 'c':   /* --parallel-immediate */
         global->parallel_connect = toggle;
         break;
       }
