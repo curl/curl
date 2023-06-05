@@ -78,6 +78,10 @@ use pathhelp qw(
     exe_ext
     );
 
+use globalconfig qw(
+    $LOCKDIR
+    );
+
 #**********************************************************************
 # global vars...
 #
@@ -114,7 +118,6 @@ my $datasockf_logfile;  # log file for secondary connection sockfilt process
 #**********************************************************************
 # global vars used for server logs advisor read lock handling
 #
-my $SERVERLOGS_LOCK = "serverlogs.lock";
 my $serverlogs_lockfile;
 my $serverlogslocked = 0;
 
@@ -3040,7 +3043,6 @@ if(!$logfile) {
 $mainsockf_pidfile = mainsockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
 $mainsockf_logfile =
     mainsockf_logfilename($logdir, $proto, $ipvnum, $idnum);
-$serverlogs_lockfile = "$logdir/$SERVERLOGS_LOCK";
 
 if($proto eq 'ftp') {
     $datasockf_pidfile = datasockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
@@ -3049,6 +3051,7 @@ if($proto eq 'ftp') {
 }
 
 $srvrname = servername_str($proto, $ipvnum, $idnum);
+$serverlogs_lockfile = "$logdir/$LOCKDIR/${srvrname}.lock";
 
 $idstr = "$idnum" if($idnum > 1);
 

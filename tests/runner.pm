@@ -125,7 +125,6 @@ our $tortalloc;
 my %oldenv;       # environment variables before test is started
 my $UNITDIR="./unit";
 my $CURLLOG="$LOGDIR/commands.log"; # all command lines run
-my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
 my $defserverlogslocktimeout = 2; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 my $multiprocess;   # nonzero with a separate test runner process
@@ -202,6 +201,7 @@ sub runner_init {
             # Set this directory as ours
             $LOGDIR = $logdir;
             mkdir("$LOGDIR/$PIDDIR", 0777);
+            mkdir("$LOGDIR/$LOCKDIR", 0777);
 
             # Initialize various server variables
             initserverconfig();
@@ -348,6 +348,20 @@ sub readtestkeywords {
     }
 }
 
+
+#######################################################################
+# Return a list of log locks that still exist
+#
+sub logslocked {
+    opendir(my $lockdir, "$LOGDIR/$LOCKDIR");
+    my @locks;
+    foreach (readdir $lockdir) {
+        if(/^(.*)\.lock$/) {
+            push @locks, $1;
+        }
+    }
+    return @locks;
+}
 
 #######################################################################
 # Memory allocation test and failure torture testing.
@@ -966,13 +980,15 @@ sub singletest_clean {
     }
     if($serverlogslocktimeout) {
         my $lockretry = $serverlogslocktimeout * 20;
-        while((-f $SERVERLOGS_LOCK) && $lockretry--) {
+        my @locks;
+        while((@locks = logslocked()) && $lockretry--) {
             portable_sleep(0.05);
         }
         if(($lockretry < 0) &&
            ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
             logmsg "Warning: server logs lock timeout ",
-                   "($serverlogslocktimeout seconds) expired\n";
+                   "($serverlogslocktimeout seconds) expired (locks: " .
+                   join(", ", @locks) . ")\n";
         }
     }
 
