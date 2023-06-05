@@ -63,6 +63,7 @@
 #include "slist.h"
 #include "mime.h"
 #include "amigaos.h"
+#include "macos.h"
 #include "warnless.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"
@@ -180,6 +181,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 #endif
+
+  if(Curl_macos_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_macos_init failed\n"));
+    goto fail;
+  }
 
   if(Curl_resolver_global_init()) {
     DEBUGF(fprintf(stderr, "Error: resolver_global_init failed\n"));
