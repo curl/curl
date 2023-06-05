@@ -2277,7 +2277,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -g       run the test case with gdb
   -gw      run the test case with gdb as a windowed application
   -h       this help text
-  -j[N]    spawn this number of processes to run tests (default 0, max. 1)
+  -j[N]    spawn this number of processes to run tests (default 0)
   -k       keep stdout and stderr files present after tests
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
