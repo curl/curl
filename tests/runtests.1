@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH runtests.pl 1 "19 Jan 2021" runtests runtests
+.TH runtests.pl 1 "06 Jun 2023" runtests runtests
 .SH NAME
 runtests.pl \- run one or more test cases
 .SH SYNOPSIS
@@ -65,7 +65,9 @@ Display test results in automake style output (PASS/FAIL: [number] [name]).
 Provide a path to a custom curl binary to run the tests with. Default is the
 curl executable in the build tree.
 .IP "-d"
-Enable protocol debug: have the servers display protocol output.
+Enable protocol debug: have the servers display protocol output.  If used in
+conjuction with parallel testing, it will be difficult to associate the logs
+with the test being run.
 .IP "-E <exclude_file>"
 Load the \fBexclude_file\fP with additional reasons why certain tests
 should be skipped. Useful when testing with external HTTP proxies in
@@ -87,11 +89,18 @@ run the specified test case. Simply (set a break-point and) type 'run' to
 start.
 .IP "-gw"
 Run the given test(s) with gdb as a windowed application.
-.IP "-h"
+.IP "-h, --help"
 Displays a help text about this program's command line options.
 .IP "-k"
 Keep output and log files in log/ after a test run, even if no error was
 detected. Useful for debugging.
+.IP "-j[num]"
+Spawn num processes to run tests. This defaults to 0 to run tests serially
+within a single process. Using a number greater than one allows multiple tests
+to run in parallel, speeding up a test run. The optimum number is dependent on
+the system and set of tests to run, but 7*number of CPU cores is a good figure
+to start with, or 1.3*number of CPU cores if Valgrind is in use. Enabling
+parallel tests is not recommended in conjunction with the \-g option.
 .IP "-L <file>"
 Load and execute the specified file which should contain perl code.
 This option allows one to change \fIruntests.pl\fP behaviour by overwriting
@@ -161,7 +170,9 @@ combination with \fI-g\fP.
 .IP "-u"
 Error instead of warning on server unexpectedly alive.
 .IP "-v"
-Enable verbose output. Speaks more than default.
+Enable verbose output. Speaks more than by default. If used in conjuction with
+parallel testing, it will be difficult to associate the logs with the test
+being run.
 .IP "-vc <curl>"
 Provide a path to a custom curl binary to run when verifying that the servers
 running are indeed our test servers. Default is the curl executable in the
