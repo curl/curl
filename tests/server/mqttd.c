@@ -1016,8 +1016,8 @@ int main(int argc, char *argv[])
     }
   }
 
-  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s",
-            logdir, SERVERLOGS_LOCK);
+  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
+            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
 #ifdef WIN32
   win32_init();

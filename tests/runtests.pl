@@ -330,8 +330,10 @@ sub cleardir {
     opendir(my $dh, $dir) ||
         return 0; # can't open dir
     while($file = readdir($dh)) {
-        # Don't clear the $PIDDIR since those need to live beyond one test
-        if(($file !~ /^(\.|\.\.)\z/) && "$file" ne $PIDDIR) {
+        # Don't clear the $PIDDIR or $LOCKDIR since those need to live beyond
+        # one test
+        if(($file !~ /^(\.|\.\.)\z/) &&
+            "$file" ne $PIDDIR && "$file" ne $LOCKDIR) {
             if(-d "$dir/$file") {
                 if(!cleardir("$dir/$file")) {
                     $done = 0;
@@ -1716,9 +1718,12 @@ sub singletest {
 
     if($singletest_state{$runnerid} == ST_INIT) {
         my $logdir = getrunnerlogdir($runnerid);
-        # first, remove all lingering log files
-        if(!cleardir($logdir) && $clearlocks) {
-            runnerac_clearlocks($runnerid, $logdir);
+        # first, remove all lingering log & lock files
+        if((!cleardir($logdir) || !cleardir("$logdir/$LOCKDIR"))
+            && $clearlocks) {
+            # On Windows, lock files can't be deleted when the process still
+            # has them open, so kill those processes first
+            runnerac_clearlocks($runnerid, "$logdir/$LOCKDIR");
             $singletest_state{$runnerid} = ST_CLEARLOCKS;
         } else {
             $singletest_state{$runnerid} = ST_INITED;
@@ -2432,6 +2437,7 @@ if ($gdbthis) {
 # Maybe create & use & delete a temporary directory in that function
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
+mkdir("$LOGDIR/$LOCKDIR", 0777);
 
 #######################################################################
 # initialize some variables
@@ -2777,6 +2783,7 @@ while () {
     if($ridready) {
         # This runner is ready to be serviced
         my $testnum = $runnersrunning{$ridready};
+        defined $testnum ||  die 'Internal error: test for runner unknown';
         delete $runnersrunning{$ridready};
         my ($error, $again) = singletest($ridready, $testnum, $countforrunner{$ridready}, $totaltests);
         if($again) {

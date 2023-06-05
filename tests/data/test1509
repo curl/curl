@@ -78,6 +78,7 @@ CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Proxy-Connection: Keep-Alive
 
+[DISCONNECT]
 </proxy>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
