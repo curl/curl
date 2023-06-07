@@ -30,7 +30,7 @@ curl_ws_recv - receive WebSocket data
 #include <curl/easy.h>
 
 CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
-                      size_t *recv, struct curl_ws_frame **meta);
+                      size_t *recv, const struct curl_ws_frame **meta);
 .fi
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
@@ -43,13 +43,13 @@ If there is more fragment data to deliver than what fits in the provided
 \fIbuffer\fP, libcurl returns a full buffer and the application needs to call
 this function again to continue draining the buffer.
 
-The \fImeta\fP pointer gets set to point to a \fIstruct curl_ws_frame\fP that
-contains information about the received data. See the \fIcurl_ws_meta(3)\fP
-for details on that struct.
+The \fImeta\fP pointer gets set to point to a \fIconst struct curl_ws_frame\fP
+that contains information about the received data. See the
+\fIcurl_ws_meta(3)\fP for details on that struct.
 .SH EXAMPLE
 .nf
   size_t rlen;
-  struct curl_ws_frame *meta;
+  const struct curl_ws_frame *meta;
   char buffer[256];
   CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
 .fi

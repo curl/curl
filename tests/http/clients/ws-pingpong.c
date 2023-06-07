@@ -55,7 +55,7 @@ static CURLcode ping(CURL *curl, const char *send_payload)
 static CURLcode recv_pong(CURL *curl, const char *exected_payload)
 {
   size_t rlen;
-  struct curl_ws_frame *meta;
+  const struct curl_ws_frame *meta;
   char buffer[256];
   CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
   if(result) {

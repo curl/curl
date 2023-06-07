@@ -32,7 +32,7 @@ static size_t writecb(char *b, size_t size, size_t nitems, void *p)
 {
   CURL *easy = p;
   size_t i;
-  struct curl_ws_frame *frame = curl_ws_meta(easy);
+  const struct curl_ws_frame *frame = curl_ws_meta(easy);
   fprintf(stderr, "Type: %s\n", frame->flags & CURLWS_BINARY ?
           "binary" : "text");
   fprintf(stderr, "Bytes: %u", (unsigned int)(nitems * size));

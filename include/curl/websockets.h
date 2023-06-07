@@ -54,7 +54,7 @@ struct curl_ws_frame {
  */
 CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
                                   size_t *recv,
-                                  struct curl_ws_frame **metap);
+                                  const struct curl_ws_frame **metap);
 
 /* sendflags for curl_ws_send() */
 #define CURLWS_PONG       (1<<6)
@@ -75,7 +75,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
 #define CURLWS_RAW_MODE (1<<0)
 
-CURL_EXTERN struct curl_ws_frame *curl_ws_meta(CURL *curl);
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 
 #ifdef  __cplusplus
 }

@@ -36,7 +36,7 @@ struct curl_ws_frame {
   curl_off_t bytesleft; /* number of pending bytes left of the payload */
 };
 
-struct curl_ws_frame *curl_ws_meta(CURL *curl);
+const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 .fi
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
@@ -93,7 +93,7 @@ static size_t writecb(unsigned char *buffer,
                       size_t size, size_t nitems, void *p)
 {
   struct customdata *c = (struct customdata *)p;
-  struct curl_ws_frame *m = curl_ws_meta(c->easy);
+  const struct curl_ws_frame *m = curl_ws_meta(c->easy);
 
   /* m->flags tells us about the traffic */
 }
