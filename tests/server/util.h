@@ -53,6 +53,10 @@ void win32_perror(const char *msg);
 
 void win32_init(void);
 void win32_cleanup(void);
+const char *sstrerror(int err);
+#else   /* WIN32 */
+
+#define sstrerror(e) strerror(e)
 #endif  /* WIN32 */
 
 /* fopens the test case file */

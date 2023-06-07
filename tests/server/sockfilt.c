@@ -1091,7 +1091,7 @@ static bool juggle(curl_socket_t *sockfdp,
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
         logmsg("accept(%d, NULL, NULL) failed with error: (%d) %s",
-               sockfd, error, strerror(error));
+               sockfd, error, sstrerror(error));
       }
       else {
         logmsg("====> Client connect");
@@ -1155,7 +1155,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     if(rc) {
       error = SOCKERRNO;
       logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
-             error, strerror(error));
+             error, sstrerror(error));
       if(maxretr) {
         rc = wait_ms(delay);
         if(rc) {
@@ -1207,7 +1207,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   if(rc) {
     error = SOCKERRNO;
     logmsg("Error binding socket on port %hu: (%d) %s",
-           *listenport, error, strerror(error));
+           *listenport, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }
@@ -1229,7 +1229,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error: (%d) %s",
-             error, strerror(error));
+             error, sstrerror(error));
       sclose(sock);
       return CURL_SOCKET_BAD;
     }
@@ -1267,7 +1267,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   if(0 != rc) {
     error = SOCKERRNO;
     logmsg("listen(%d, 5) failed with error: (%d) %s",
-           sock, error, strerror(error));
+           sock, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }
@@ -1414,8 +1414,7 @@ int main(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s",
-           error, strerror(error));
+    logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
     write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
   }
@@ -1451,7 +1450,7 @@ int main(int argc, char *argv[])
     if(rc) {
       error = SOCKERRNO;
       logmsg("Error connecting to port %hu: (%d) %s",
-             connectport, error, strerror(error));
+             connectport, error, sstrerror(error));
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }
