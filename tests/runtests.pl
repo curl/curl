@@ -2437,6 +2437,7 @@ if ($gdbthis) {
 # Maybe create & use & delete a temporary directory in that function
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
+mkdir("$LOGDIR/$LOCKDIR", 0777);
 
 #######################################################################
 # initialize some variables
