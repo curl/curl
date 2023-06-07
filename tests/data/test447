@@ -42,9 +42,9 @@ HTTP PUT with growing file
 CURL_UPLOAD_SIZE=498
 </setenv>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T log/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER
 </command>
-<file name="log/%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 %repeat[100 x hello]%
 </file>
 </client>
