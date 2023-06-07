@@ -969,7 +969,7 @@ sub updatetesttimings {
 # Return the log directory for the given test runner
 sub getrunnernumlogdir {
     my $runnernum = $_[0];
-    return $jobs > 1 ? $LOGDIR . $runnernum : $LOGDIR;
+    return $jobs > 1 ? "$LOGDIR/$runnernum" : $LOGDIR;
 }
 
 #######################################################################
@@ -982,7 +982,7 @@ sub getrunnerlogdir {
     # TODO: speed up this O(n) operation
     for my $runnernum (keys %runnerids) {
         if($runnerid eq $runnerids{$runnernum}) {
-            return $LOGDIR . $runnernum;
+            return "$LOGDIR/$runnernum";
         }
     }
     die "Internal error: runner ID $runnerid not found";
