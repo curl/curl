@@ -147,16 +147,22 @@ void logmsg(const char *msg, ...)
 }
 
 #ifdef WIN32
+/* use instead of strerror() on generic Windows */
+static const char *win32_strerror(int err, char *buf, size_t buflen)
+{
+  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
+                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                     LANG_NEUTRAL, buf, (DWORD)buflen, NULL))
+    msnprintf(buf, buflen, "Unknown error %lu (%#lx)", err, err);
+  return buf;
+}
+
 /* use instead of perror() on generic windows */
 void win32_perror(const char *msg)
 {
   char buf[512];
   DWORD err = SOCKERRNO;
-
-  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
-                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                     LANG_NEUTRAL, buf, sizeof(buf), NULL))
-    msnprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
+  win32_strerror(err, buf, sizeof(buf));
   if(msg)
     fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
@@ -196,6 +202,13 @@ void win32_cleanup(void)
 
   /* flush buffers of all streams regardless of their mode */
   _flushall();
+}
+
+/* socket-safe strerror (works on WinSock errors, too */
+const char *sstrerror(int err)
+{
+  static char buf[512];
+  return win32_strerror(err, buf, sizeof(buf));
 }
 #endif  /* WIN32 */
 
@@ -819,23 +832,22 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     sau->sun_family = AF_UNIX;
     strncpy(sau->sun_path, unix_socket, sizeof(sau->sun_path) - 1);
     rc = bind(sock, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
-    if(0 != rc && errno == EADDRINUSE) {
+    if(0 != rc && SOCKERRNO == EADDRINUSE) {
       struct_stat statbuf;
       /* socket already exists. Perhaps it is stale? */
       curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
       if(CURL_SOCKET_BAD == unixfd) {
-        error = SOCKERRNO;
-        logmsg("Error binding socket, failed to create socket at %s: (%d) %s",
-               unix_socket, error, strerror(error));
-        return rc;
+        logmsg("Failed to create socket at %s: (%d) %s",
+               unix_socket, SOCKERRNO, sstrerror(SOCKERRNO));
+        return -1;
       }
       /* check whether the server is alive */
       rc = connect(unixfd, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
-      error = errno;
+      error = SOCKERRNO;
       sclose(unixfd);
-      if(ECONNREFUSED != error) {
-        logmsg("Error binding socket, failed to connect to %s: (%d) %s",
-               unix_socket, error, strerror(error));
+      if(0 != rc && ECONNREFUSED != error) {
+        logmsg("Failed to connect to %s: (%d) %s",
+               unix_socket, error, sstrerror(error));
         return rc;
       }
       /* socket server is not alive, now check if it was actually a socket. */
@@ -852,9 +864,8 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
       }
 #ifdef S_IFSOCK
       if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
-        logmsg("Error binding socket, failed to stat %s: (%d) %s",
-               unix_socket, error, strerror(error));
-        return rc;
+        logmsg("Error binding socket, failed to stat %s", unix_socket);
+        return -1;
       }
 #endif
       /* dead socket, cleanup and retry bind */
