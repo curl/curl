@@ -882,8 +882,8 @@ struct connectdata {
 #define CONN_INUSE(c) ((c)->easyq.size)
 
   /**** Fields set when inited and not modified again */
-  long connection_id; /* Contains a unique number to make it easier to
-                         track the connections in the log output */
+  curl_off_t connection_id; /* Contains a unique number to make it easier to
+                               track the connections in the log output */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -1294,7 +1294,7 @@ struct UrlState {
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
 
-  long lastconnect_id; /* The last connection, -1 if undefined */
+  curl_off_t lastconnect_id; /* The last connection, -1 if undefined */
   struct dynbuf headerb; /* buffer to store headers in */
 
   char *buffer; /* download buffer */
@@ -1903,12 +1903,13 @@ struct Curl_easy {
   /* First a simple identifier to easier detect if a user mix up this easy
      handle with a multi handle. Set this to CURLEASY_MAGIC_NUMBER */
   unsigned int magic;
-  long id; /* once an easy handle is tied to a connection cache
-              a non-negative number to distinguish this transfer from
-              other using the same cache. For easier tracking
-              in log output.
-              This may wrap around after LONG_MAX to 0 again, so it
-              has no uniqueness guarantuee for very large processings. */
+  /* once an easy handle is tied to a connection cache
+     a non-negative number to distinguish this transfer from
+     other using the same cache. For easier tracking
+     in log output.
+     This may wrap around after LONG_MAX to 0 again, so it
+     has no uniqueness guarantuee for very large processings. */
+  curl_off_t id;
 
   /* first, two fields for the linked list of these */
   struct Curl_easy *next;

@@ -987,7 +987,7 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
     return CURLE_SEND_ERROR;
   }
   if(!data->conn->proto.ws) {
-    failf(data, "Not a websocket transfer on connection #%ld",
+    failf(data, "Not a websocket transfer on connection #%zd",
           data->conn->connection_id);
     return CURLE_SEND_ERROR;
   }

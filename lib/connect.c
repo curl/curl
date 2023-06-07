@@ -253,7 +253,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 }
 
 struct connfind {
-  long id_tofind;
+  curl_off_t id_tofind;
   struct connectdata *found;
 };
 

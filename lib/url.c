@@ -682,7 +682,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 static void conn_shutdown(struct Curl_easy *data)
 {
   DEBUGASSERT(data);
-  infof(data, "Closing connection %ld", data->conn->connection_id);
+  infof(data, "Closing connection %zd", data->conn->connection_id);
 
   /* possible left-overs from the async name resolvers */
   Curl_resolver_cancel(data);
@@ -765,7 +765,7 @@ void Curl_disconnect(struct Curl_easy *data,
   /* the transfer must be detached from the connection */
   DEBUGASSERT(!data->conn);
 
-  DEBUGF(infof(data, "Curl_disconnect(conn #%ld, dead=%d)",
+  DEBUGF(infof(data, "Curl_disconnect(conn #%zd, dead=%d)",
          conn->connection_id, dead_connection));
   /*
    * If this connection isn't marked to force-close, leave it open if there
@@ -954,7 +954,7 @@ static bool extract_if_dead(struct connectdata *conn,
     }
 
     if(dead) {
-      infof(data, "Connection %ld seems to be dead", conn->connection_id);
+      infof(data, "Connection %zd seems to be dead", conn->connection_id);
       Curl_conncache_remove_conn(data, conn, FALSE);
       return TRUE;
     }
@@ -1150,7 +1150,7 @@ ConnectionExists(struct Curl_easy *data,
              completed yet and until then we don't re-use this connection */
           if(!check->primary_ip[0]) {
             infof(data,
-                  "Connection #%ld is still name resolving, can't reuse",
+                  "Connection #%zd is still name resolving, can't reuse",
                   check->connection_id);
             continue;
           }
@@ -1160,7 +1160,7 @@ ConnectionExists(struct Curl_easy *data,
       if(!Curl_conn_is_connected(check, FIRSTSOCKET)) {
         foundPendingCandidate = TRUE;
         /* Don't pick a connection that hasn't connected yet */
-        infof(data, "Connection #%ld isn't open enough, can't reuse",
+        infof(data, "Connection #%zd isn't open enough, can't reuse",
               check->connection_id);
         continue;
       }
@@ -1337,7 +1337,7 @@ ConnectionExists(struct Curl_easy *data,
             if(!Curl_ssl_config_matches(&needle->ssl_config,
                                         &check->ssl_config)) {
               DEBUGF(infof(data,
-                           "Connection #%ld has different SSL parameters, "
+                           "Connection #%zd has different SSL parameters, "
                            "can't reuse",
                            check->connection_id));
               continue;
@@ -1479,7 +1479,7 @@ void Curl_verboseconnect(struct Curl_easy *data,
                          struct connectdata *conn)
 {
   if(data->set.verbose)
-    infof(data, "Connected to %s (%s) port %u (#%ld)",
+    infof(data, "Connected to %s (%s) port %u (#%zd)",
 #ifndef CURL_DISABLE_PROXY
           conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
           conn->bits.httpproxy ? conn->http_proxy.host.dispname :
@@ -3680,14 +3680,14 @@ static CURLcode create_conn(struct Curl_easy *data,
     *in_connect = conn;
 
 #ifndef CURL_DISABLE_PROXY
-    infof(data, "Re-using existing connection #%ld with %s %s",
+    infof(data, "Re-using existing connection #%zd with %s %s",
           conn->connection_id,
           conn->bits.proxy?"proxy":"host",
           conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
           conn->http_proxy.host.name ? conn->http_proxy.host.dispname :
           conn->host.dispname);
 #else
-    infof(data, "Re-using existing connection #%ld with host %s",
+    infof(data, "Re-using existing connection #%zd with host %s",
           conn->connection_id, conn->host.dispname);
 #endif
   }

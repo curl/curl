@@ -1777,7 +1777,7 @@ static CURLcode imap_sendf(struct Curl_easy *data, const char *fmt, ...)
 
   /* Calculate the tag based on the connection ID and command ID */
   msnprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
-            'A' + curlx_sltosi(data->conn->connection_id % 26),
+            'A' + curlx_sltosi((long)(data->conn->connection_id % 26)),
             ++imapc->cmdid);
 
   /* start with a blank buffer */

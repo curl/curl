@@ -772,7 +772,7 @@ static CURLcode multi_done(struct Curl_easy *data,
 #endif
      ) || conn->bits.close
        || (premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
-    DEBUGF(infof(data, "multi_done, not re-using connection=%ld, forbid=%d"
+    DEBUGF(infof(data, "multi_done, not re-using connection=%zd, forbid=%d"
                  ", close=%d, premature=%d, conn_multiplex=%d",
                  conn->connection_id,
                  data->set.reuse_forbid, conn->bits.close, premature,
@@ -795,7 +795,7 @@ static CURLcode multi_done(struct Curl_easy *data,
     /* create string before returning the connection */
     long connection_id = conn->connection_id;
     msnprintf(buffer, sizeof(buffer),
-              "Connection #%ld to host %s left intact",
+              "Connection #%zd to host %s left intact",
               connection_id, host);
     /* the connection is no longer in use by this transfer */
     CONNCACHE_UNLOCK(data);
