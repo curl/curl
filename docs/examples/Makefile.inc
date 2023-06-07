@@ -118,6 +118,7 @@ check_PROGRAMS = \
   sslbackend \
   url2file \
   urlapi \
+  websocket \
   websocket-cb
 
 # These examples require external dependencies that may not be commonly
