@@ -104,7 +104,7 @@ jobs:
       name: 'install ngtcp2'
 
     - run: |
-        git clone --quiet --depth=1 -b v1.53.0 https://github.com/nghttp2/nghttp2
+        git clone --quiet --depth=1 -b v1.54.0 https://github.com/nghttp2/nghttp2
         cd nghttp2
         autoreconf -fi
         ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-http3
