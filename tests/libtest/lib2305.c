@@ -40,7 +40,7 @@ static void websocket_close(CURL *curl)
 static void websocket(CURL *curl)
 {
   char buffer[256];
-  struct curl_ws_frame *meta;
+  const struct curl_ws_frame *meta;
   size_t nread;
   size_t i = 0;
   FILE *save = fopen(libtest_arg2, FOPEN_WRITETEXT);

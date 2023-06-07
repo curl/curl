@@ -101,7 +101,7 @@ static CURLcode send_binary(CURL *curl, char *buf, size_t buflen)
 
 static CURLcode recv_binary(CURL *curl, char *exp_data, size_t exp_len)
 {
-  struct curl_ws_frame *frame;
+  const struct curl_ws_frame *frame;
   char recvbuf[256];
   size_t r_offset, nread;
   CURLcode result;
