@@ -839,7 +839,7 @@ static ssize_t nw_in_recv(void *reader_ctx,
 
 CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
                                   size_t buflen, size_t *nread,
-                                  struct curl_ws_frame **metap)
+                                  const struct curl_ws_frame **metap)
 {
   struct connectdata *conn = data->conn;
   struct websocket *ws;
@@ -1082,7 +1082,7 @@ CURLcode Curl_ws_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
 {
   /* we only return something for websocket, called from within the callback
      when not using raw mode */
@@ -1096,7 +1096,7 @@ CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
 
 CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
                                   size_t *nread,
-                                  struct curl_ws_frame **metap)
+                                  const struct curl_ws_frame **metap)
 {
   (void)curl;
   (void)buffer;
@@ -1120,7 +1120,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
   return CURLE_NOT_BUILT_IN;
 }
 
-CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
 {
   (void)data;
   return NULL;
