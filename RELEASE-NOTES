@@ -1,32 +1,42 @@
 curl and libcurl 8.2.0
 
  Public curl releases:         220
- Command line options:         251
- curl_easy_setopt() options:   302
+ Command line options:         254
+ curl_easy_setopt() options:   303
  Public functions in libcurl:  91
- Contributors:                 2892
+ Contributors:                 2894
 
 This release includes the following changes:
 
+ o curl: add --ca-native and --proxy-ca-native [24]
  o CURLOPT_MAIL_RCPT_ALLOWFAILS: replace CURLOPT_MAIL_RCPT_ALLLOWFAILS [5]
+ o haproxy: add --haproxy-clientip flag to spoof client IPs [23]
 
 This release includes the following bugfixes:
 
+ o bufq: make write/pass methods more robust [21]
+ o build: drop unused/redundant `HAVE_WINLDAP_H` [25]
  o circleci: install impacket & wolfssl 5.6.0 [1]
+ o cmake: add support for "unity" builds [13]
  o configure: fix run-compiler for old /bin/sh [4]
  o curl: count uploaded data to stop at the originally given size [14]
  o curl_log: evaluate log statement only when transfer is verbose [8]
+ o examples/websocket.c: websocket example using CONNECT_ONLY [17]
  o http2: better support for --limit-rate [7]
  o libssh2: provide error message when setting host key type fails [9]
  o libssh2: use custom memory functions [12]
  o runtests: abort test run after failure without -a [3]
+ o runtests: create multiple test runners when requested [20]
  o scripts: Fix GHA matrix job detection in cijobs.pl
  o system.h: remove __IBMC__/__IBMCPP__ guards and apply to all z/OS compiles [10]
  o tests/servers.pm: pick unused port number with a server socket [16]
  o tests/servers: generate temp names in /tmp for unix domain sockets [6]
  o tool: remove exclamation marks from error/warning messages
  o tool: remove newlines from all helpf/notef/warnf/errorf calls [15]
+ o tool_getparam: fix comment [22]
  o tool_urlglob: use curl_off_t instead of longs [2]
+ o urlapi: scheme must start with alpha [26]
+ o websocket-cb: example doing WebSocket download using callback [18]
 
 This release includes the following known bugs:
 
@@ -44,10 +54,11 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, Andy Fiddaman, Dan Fandrich, Daniel Stenberg,
-  Emanuele Torre, Igor Todorovski, JustAnotherArchivist on github,
-  MaeIsBad on github, Mark Seuffert, Philip Heiduck, Stefan Eissing
-  (11 contributors)
+  ad0p on github, Alejandro R. Sedeño, Andy Fiddaman, Boris Verkhovskiy,
+  Dan Fandrich, Daniel Stenberg, Emanuele Torre, Igor Todorovski,
+  JustAnotherArchivist on github, MaeIsBad on github, Mark Seuffert,
+  Philip Heiduck, Raito Bezarius, Stefan Eissing, Viktor Szakats
+  (15 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -62,6 +73,16 @@ References to bug reports and discussions on issues:
  [9] = https://curl.se/bug/?i=11240
  [10] = https://curl.se/bug/?i=11241
  [12] = https://curl.se/bug/?i=11235
+ [13] = https://curl.se/bug/?i=11095
  [14] = https://curl.se/bug/?i=11222
  [15] = https://curl.se/bug/?i=11226
  [16] = https://curl.se/bug/?i=11220
+ [17] = https://curl.se/bug/?i=11262
+ [18] = https://curl.se/bug/?i=11260
+ [20] = https://curl.se/bug/?i=10818
+ [21] = https://curl.se/bug/?i=11247
+ [22] = https://curl.se/bug/?i=11253
+ [23] = https://curl.se/bug/?i=10779
+ [24] = https://curl.se/bug/?i=11049
+ [25] = https://curl.se/bug/?i=11245
+ [26] = https://curl.se/bug/?i=11249
