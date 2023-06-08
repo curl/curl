@@ -17,5 +17,5 @@ cipher suite details on this URL:
  https://curl.se/docs/ssl-ciphers.html
 
 This option is currently used only when curl is built to use OpenSSL 1.1.1 or
-later. If you are using a different SSL backend you can try setting TLS 1.3
-cipher suites by using the --ciphers option.
+later or Schannel. If you are using a different SSL backend you can try
+setting TLS 1.3 cipher suites by using the --ciphers option.
