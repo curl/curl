@@ -188,9 +188,8 @@ Returns a \fICURLUcode\fP error value, which is CURLUE_OK (0) if everything
 went fine. See the \fIlibcurl-errors(3)\fP man page for the full list with
 descriptions.
 
-A URL string passed on to \fIcurl_url_set(3)\fP for the \fBCURLUPART_URL\fP
-part, must be shorter than 8000000 bytes otherwise it returns
-\fBCURLUE_MALFORMED_INPUT\fP (added in 7.65.0).
+The input string passed to \fIcurl_url_set(3)\fP must be shorter than eight
+million bytes. Otherwise this function returns \fBCURLUE_MALFORMED_INPUT\fP.
 
 If this function returns an error, no URL part is set.
 .SH "SEE ALSO"
