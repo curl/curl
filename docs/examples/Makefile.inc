@@ -116,6 +116,7 @@ check_PROGRAMS = \
   smtp-tls \
   smtp-vrfy \
   sslbackend \
+  unixsocket \
   url2file \
   urlapi \
   websocket \
