@@ -56,7 +56,7 @@ struct curl_khkey {
 int ssh_keycallback(CURL *easy,
                     const struct curl_khkey *knownkey,
                     const struct curl_khkey *foundkey,
-                    enum curl_khmatch,
+                    enum curl_khmatch match,
                     void *clientp);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_KEYFUNCTION,
@@ -108,7 +108,7 @@ SFTP and SCP
 static int keycb(CURL *easy,
                  const struct curl_khkey *knownkey,
                  const struct curl_khkey *foundkey,
-                 enum curl_khmatch,
+                 enum curl_khmatch match,
                  void *clientp)
 {
   /* 'clientp' points to the callback_data struct */
