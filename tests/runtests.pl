@@ -2779,6 +2779,7 @@ while () {
     # a new one shortly. If all runners are busy, wait indefinitely for one to
     # finish.
     my $runnerwait = scalar(@runnersidle) && scalar(@runtests) ? 0 : undef;
+print STDERR "TESTING waiting indefinitely for test completion\n" if(!scalar(@runtests));
     my $ridready = runnerar_ready($runnerwait);
     if($ridready) {
         # This runner is ready to be serviced
