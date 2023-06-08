@@ -39,9 +39,6 @@ concurrency:
 
 permissions: {}
 
-env:
-  DEVELOPER_DIR: /Applications/Xcode_14.0.1.app/Contents/Developer
-
 jobs:
   autotools:
     name: ${{ matrix.build.name }}
@@ -170,6 +167,21 @@ jobs:
           install: nghttp2 openssl libssh2
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON
     steps:
+
+    - run: |
+        cd /Applications/Xcode_14.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/os/
+        sudo rm -f clock.h object.h workgroup_base.h workgroup_interval.h workgroup_object.h workgroup_parallel.h
+        curl -O https://raw.githubusercontent.com/pheiduck/curl/macos_build_fixup/.github/workflows/macos_patches/clock.h
+        curl -O https://raw.githubusercontent.com/pheiduck/curl/macos_build_fixup/.github/workflows/macos_patches/object.h
+        curl -O https://raw.githubusercontent.com/pheiduck/curl/macos_build_fixup/.github/workflows/macos_patches/workgroup_base.h
+        curl -O https://raw.githubusercontent.com/pheiduck/curl/macos_build_fixup/.github/workflows/macos_patches/workgroup_interval.h
+        curl -O https://raw.githubusercontent.com/pheiduck/curl/macos_build_fixup/.github/workflows/macos_patches/workgroup_object.h
+        curl -O https://raw.githubusercontent.com/pheiduck/curl/macos_build_fixup/.github/workflows/macos_patches/workgroup_parallel.h
+        cd /Applications/Xcode_14.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/dispatch/
+        sudo rm -f base.h
+        curl -O https://raw.githubusercontent.com/pheiduck/curl/macos_build_fixup/.github/workflows/macos_patches/base.h
+      name: 'patch xcode'
+
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
