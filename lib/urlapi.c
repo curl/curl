@@ -1642,6 +1642,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   bool leadingslash = FALSE;
   bool appendquery = FALSE;
   bool equalsencode = FALSE;
+  size_t nalloc;
 
   if(!u)
     return CURLUE_BAD_HANDLE;
@@ -1693,6 +1694,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     }
     return CURLUE_OK;
   }
+
+  nalloc = strlen(part);
+  if(nalloc > CURL_MAX_INPUT_LENGTH)
+    /* excessive input length */
+    return CURLUE_MALFORMED_INPUT;
 
   switch(what) {
   case CURLUPART_SCHEME: {
@@ -1800,14 +1806,8 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   }
   DEBUGASSERT(storep);
   {
-    const char *newp = part;
-    size_t nalloc = strlen(part);
+    const char *newp;
     struct dynbuf enc;
-
-    if(nalloc > CURL_MAX_INPUT_LENGTH)
-      /* excessive input length */
-      return CURLUE_MALFORMED_INPUT;
-
     Curl_dyn_init(&enc, nalloc * 3 + 1 + leadingslash);
 
     if(leadingslash && (part[0] != '/')) {
