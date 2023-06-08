@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Upload to FTP, resuming failed transfers.
+ * Upload to FTP, resuming failed transfers. Active mode.
  * </DESC>
  */
 
@@ -96,8 +96,12 @@ static int upload(CURL *curlhandle, const char *remotepath,
   curl_easy_setopt(curlhandle, CURLOPT_READFUNCTION, readfunc);
   curl_easy_setopt(curlhandle, CURLOPT_READDATA, f);
 
-  /* disable passive mode */
+  /* enable active mode */
   curl_easy_setopt(curlhandle, CURLOPT_FTPPORT, "-");
+
+  /* allow the server no more than 7 seconds to connect back */
+  curl_easy_setopt(curlhandle, CURLOPT_ACCEPTTIMEOUT_MS, 7000L);
+
   curl_easy_setopt(curlhandle, CURLOPT_FTP_CREATE_MISSING_DIRS, 1L);
 
   curl_easy_setopt(curlhandle, CURLOPT_VERBOSE, 1L);
