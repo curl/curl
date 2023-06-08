@@ -101,8 +101,8 @@ Port cannot be URL encoded on set. The given port number is provided as a
 string and the decimal number must be between 1 and 65535. Anything else will
 return an error.
 .IP CURLUPART_PATH
-If a path is set in the URL without a leading slash, a slash will be inserted
-automatically when this URL is read from the handle.
+If a path is set in the URL without a leading slash, a slash will be prepended
+automatically.
 .IP CURLUPART_QUERY
 The query part will also get spaces converted to pluses when asked to URL
 encode on set with the \fICURLU_URLENCODE\fP bit.
