@@ -27,7 +27,11 @@
  */
 #include <stdio.h>
 #include <curl/curl.h>
+#ifdef WIN32
+#include <netioapi.h>
+#else
 #include <net/if.h>
+#endif
 
 int main(void)
 {
