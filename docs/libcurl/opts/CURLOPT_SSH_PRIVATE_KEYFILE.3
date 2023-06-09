@@ -33,8 +33,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_PRIVATE_KEYFILE,
                           char *filename);
 .SH DESCRIPTION
 Pass a char * pointing to a \fIfilename\fP for your private key. If not used,
-libcurl defaults to \fB$HOME/.ssh/id_dsa\fP if the HOME environment variable
-is set, and just "id_dsa" in the current directory if HOME is not set.
+libcurl defaults to \fB$HOME/.ssh/id_rsa\fP or \fB$HOME/.ssh/id_dsa\fP if the
+HOME environment variable is set, and just \fB"id_rsa"\fP or \fB"id_dsa"\fP in
+the current directory if HOME is not set.
 
 If the file is password-protected, set the password with
 \fICURLOPT_KEYPASSWD(3)\fP.
