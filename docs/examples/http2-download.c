@@ -170,12 +170,11 @@ static void setup(struct transfer *t, int num)
   curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
   curl_easy_setopt(hnd, CURLOPT_DEBUGDATA, t);
 
+  /* enlarge the receive buffer for potentially higher transfer speeds */
+  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 100000L);
+
   /* HTTP/2 please */
   curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-
-  /* we use a self-signed test server, skip verification during debugging */
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
 
 #if (CURLPIPE_MULTIPLEX > 0)
   /* wait for pipe connection to confirm */
