@@ -32,7 +32,7 @@ char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num);
 .fi
 .SH DESCRIPTION
 This is a function that is only functional within a
-\fBCURLMOPT_PUSHFUNCTION(3)\fP callback. It makes no sense to try to use it
+\fICURLMOPT_PUSHFUNCTION(3)\fP callback. It makes no sense to try to use it
 elsewhere and it has no function then.
 
 It returns the value for the header field at the given index \fBnum\fP, for
@@ -54,7 +54,7 @@ int curl_push_callback(CURL *parent,
   do {
      field = curl_pushheader_bynum(headers, i);
      if(field)
-       fprintf(stderr, "Push header: %s\n", field);
+       fprintf(stderr, "Push header: %s\\n", field);
      i++;
   } while(field);
   return CURL_PUSH_OK; /* permission granted */

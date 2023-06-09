@@ -32,7 +32,7 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name);
 .fi
 .SH DESCRIPTION
 This is a function that is only functional within a
-\fBCURLMOPT_PUSHFUNCTION(3)\fP callback. It makes no sense to try to use it
+\fICURLMOPT_PUSHFUNCTION(3)\fP callback. It makes no sense to try to use it
 elsewhere and it has no function then.
 
 It returns the value for the given header field name (or NULL) for the

@@ -67,11 +67,11 @@ multi handle, the callback must not do that by itself.
 
 The callback can access PUSH_PROMISE headers with two accessor
 functions. These functions can only be used from within this callback and they
-can only access the PUSH_PROMISE headers: \fBcurl_pushheader_byname(3)\fP and
-\fBcurl_pushheader_bynum(3)\fP. The normal response headers will be passed to
+can only access the PUSH_PROMISE headers: \fIcurl_pushheader_byname(3)\fP and
+\fIcurl_pushheader_bynum(3)\fP. The normal response headers will be passed to
 the header callback for pushed streams just as for normal streams.
 
-The header fields can also be accessed with \fBcurl_easy_header(3)\fP,
+The header fields can also be accessed with \fIcurl_easy_header(3)\fP,
 introduced in later libcurl versions.
 .SH CALLBACK RETURN VALUE
 .IP "CURL_PUSH_OK (0)"
