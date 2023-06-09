@@ -35,7 +35,7 @@
 
 #ifdef __MINGW32__
 /* figure out how this can be used with mingw */
-#define if_nametoindex(x)
+#define if_nametoindex(x) 0
 #endif
 
 int main(void)
