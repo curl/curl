@@ -433,7 +433,6 @@ CURLINFO_COOKIELIST             7.14.1
 CURLINFO_DATA_IN                7.9.6
 CURLINFO_DATA_OUT               7.9.6
 CURLINFO_DOUBLE                 7.4.1
-CURLINFO_EASY_ID                8.2.0
 CURLINFO_EFFECTIVE_METHOD       7.72.0
 CURLINFO_EFFECTIVE_URL          7.4
 CURLINFO_END                    7.9.6
@@ -505,6 +504,7 @@ CURLINFO_TLS_SSL_PTR            7.48.0
 CURLINFO_TOTAL_TIME             7.4.1
 CURLINFO_TOTAL_TIME_T           7.61.0
 CURLINFO_TYPEMASK               7.4.1
+CURLINFO_XFER_ID                8.2.0
 CURLIOCMD_NOP                   7.12.3
 CURLIOCMD_RESTARTREAD           7.12.3
 CURLIOE_FAILRESTART             7.12.3

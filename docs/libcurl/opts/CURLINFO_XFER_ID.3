@@ -22,23 +22,25 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLINFO_EASY_ID 3 "07 June 2023" "libcurl" "libcurl"
+.TH CURLINFO_XFER_ID 3 "07 June 2023" "libcurl" "libcurl"
 .SH NAME
-CURLINFO_EASY_ID \- get the ID of the handle
+CURLINFO_XFER_ID \- get the ID of a transfer
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_EASY_ID,
-                           curl_off_t *easy_id);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_XFER_ID,
+                           curl_off_t *xfer_id);
 .fi
 .SH DESCRIPTION
 Pass a pointer to a \fIcurl_off_t\fP to receive the identifier of the
-last transfer done with the handle. Stores -1 if the identifier has not
-been assigned yet.
+current/last transfer done with the handle. Stores -1 if no transfer
+has been started yet for the handle.
 
-A handle gets this identifier assigned once the transfer is started.
-A subsequent transfer started using the same handle will get a new identifier.
+The transfer id is unique among all transfers performed using the same
+connection cache. This is implicitly the case for all transfers in the
+same multi handle.
+
 .SH PROTOCOLS
 All
 .SH EXAMPLE
@@ -51,10 +53,10 @@ if(curl) {
   res = curl_easy_perform(curl);
 
   if(!res) {
-    curl_off_t transfer_id;
-    res = curl_easy_getinfo(curl, CURLINFO_EASY_ID, &transfer_id);
+    curl_off_t xfer_id;
+    res = curl_easy_getinfo(curl, CURLINFO_XFER_ID, &xfer_id);
     if(!res) {
-      printf("Transfer ID: %" CURL_FORMAT_CURL_OFF_T "\\n", transfer_id);
+      printf("Transfer ID: %" CURL_FORMAT_CURL_OFF_T "\\n", xfer_id);
     }
   }
 }

@@ -415,7 +415,7 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_RETRY_AFTER:
     *param_offt = data->info.retry_after;
     break;
-  case CURLINFO_EASY_ID:
+  case CURLINFO_XFER_ID:
     *param_offt = data->id;
     break;
   case CURLINFO_CONN_ID:
