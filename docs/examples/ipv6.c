@@ -33,6 +33,11 @@
 #include <net/if.h>
 #endif
 
+#ifdef __MINGW32__
+/* figure out how this can be used with mingw */
+#define if_nametoindex(x)
+#endif
+
 int main(void)
 {
   CURL *curl;
