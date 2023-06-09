@@ -659,6 +659,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
     /* most recent connection is not yet defined */
     data->state.lastconnect_id = -1;
+    data->state.recent_conn_id = -1;
     /* and not assigned an id yet */
     data->id = -1;
 

@@ -761,6 +761,7 @@ static CURLcode multi_done(struct Curl_easy *data,
      but currently we have no such detail knowledge.
   */
 
+  data->state.recent_conn_id = conn->connection_id;
   if((data->set.reuse_forbid
 #if defined(USE_NTLM)
       && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
@@ -802,6 +803,7 @@ static CURLcode multi_done(struct Curl_easy *data,
     if(Curl_conncache_return_conn(data, conn)) {
       /* remember the most recently used connection */
       data->state.lastconnect_id = connection_id;
+      data->state.recent_conn_id = connection_id;
       infof(data, "%s", buffer);
     }
     else
