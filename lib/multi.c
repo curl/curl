@@ -194,7 +194,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(data->mstate >= MSTATE_PENDING &&
      data->mstate < MSTATE_COMPLETED) {
-    long connection_id = -5000;
+     curl_off_t connection_id = -5000;
 
     if(data->conn)
       connection_id = data->conn->connection_id;
@@ -794,7 +794,7 @@ static CURLcode multi_done(struct Curl_easy *data,
       conn->bits.conn_to_host ? conn->conn_to_host.dispname :
       conn->host.dispname;
     /* create string before returning the connection */
-    long connection_id = conn->connection_id;
+    curl_off_t connection_id = conn->connection_id;
     msnprintf(buffer, sizeof(buffer),
               "Connection #%zd to host %s left intact",
               connection_id, host);
