@@ -29,9 +29,6 @@ CURLMOPT_PUSHFUNCTION \- callback that approves or denies server pushes
 .nf
 #include <curl/curl.h>
 
-char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num);
-char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name);
-
 int curl_push_callback(CURL *parent,
                        CURL *easy,
                        size_t num_headers,
@@ -70,17 +67,12 @@ multi handle, the callback must not do that by itself.
 
 The callback can access PUSH_PROMISE headers with two accessor
 functions. These functions can only be used from within this callback and they
-can only access the PUSH_PROMISE headers. The normal response headers will be
-passed to the header callback for pushed streams just as for normal streams.
-.IP curl_pushheader_bynum
-Returns the header at index \fInum\fP (or NULL). The returned pointer points
-to a "name:value" string that will be freed when this callback returns.
-.IP curl_pushheader_byname
-Returns the value for the given header name (or NULL). This is a shortcut so
-that the application does not have to loop through all headers to find the one
-it is interested in. The data pointed will be freed when this callback
-returns. If more than one header field use the same name, this returns only
-the first one.
+can only access the PUSH_PROMISE headers: \fIcurl_pushheader_byname(3)\fP and
+\fIcurl_pushheader_bynum(3)\fP. The normal response headers will be passed to
+the header callback for pushed streams just as for normal streams.
+
+The header fields can also be accessed with \fIcurl_easy_header(3)\fP,
+introduced in later libcurl versions.
 .SH CALLBACK RETURN VALUE
 .IP "CURL_PUSH_OK (0)"
 The application has accepted the stream and it can now start receiving data,
