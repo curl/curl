@@ -58,7 +58,14 @@ struct curltime Curl_now(void)
   return now;
 }
 
-#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
+#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||  \
+  defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
+
+#ifdef HAVE_CLOCK_GETTIME_MONOTONIC_RAW
+#define USE_TIMER CLOCK_MONOTONIC_RAW
+#else
+#define USE_TIMER CLOCK_MONOTONIC
+#endif
 
 struct curltime Curl_now(void)
 {
@@ -92,7 +99,7 @@ struct curltime Curl_now(void)
         (HAVE_BUILTIN_AVAILABLE == 1)
     have_clock_gettime &&
 #endif
-    (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
+    (0 == clock_gettime(USE_TIMER, &tsnow))) {
     cnow.tv_sec = tsnow.tv_sec;
     cnow.tv_usec = (unsigned int)(tsnow.tv_nsec / 1000);
   }
