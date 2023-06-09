@@ -95,6 +95,7 @@ CURL *make_handle(char *url)
   curl_easy_setopt(handle, CURLOPT_ACCEPT_ENCODING, "");
   curl_easy_setopt(handle, CURLOPT_TIMEOUT, 5L);
   curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(handle, CURLOPT_AUTOREFERER, 1L);
   curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 10L);
   curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, 2L);
   curl_easy_setopt(handle, CURLOPT_COOKIEFILE, "");
