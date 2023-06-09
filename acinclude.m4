@@ -1072,6 +1072,38 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   dnl until library linking and run-time checks for clock_gettime succeed.
 ])
 
+dnl CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW
+dnl -------------------------------------------------
+dnl Check if monotonic clock_gettime is available.
+
+AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW], [
+  AC_CHECK_HEADERS(sys/types.h sys/time.h)
+  AC_MSG_CHECKING([for raw monotonic clock_gettime])
+  #
+  if test "x$dontwant_rt" = "xno" ; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#include <time.h>
+      ]],[[
+        struct timespec ts;
+        (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC_RAW, 1,
+        [Define to 1 if you have the clock_gettime function and raw monotonic timer.])
+    ],[
+      AC_MSG_RESULT([no])
+    ])
+  fi
+])
+
 
 dnl CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
 dnl -------------------------------------------------

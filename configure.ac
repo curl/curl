@@ -1339,6 +1339,9 @@ dnl check for additional required libraries.
 dnl **********************************************************************
 CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
 
+dnl Check for even better option
+CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW
+
 dnl **********************************************************************
 dnl The preceding library checks are all potentially useful for test
 dnl servers and libtest cases which require networking and clock_gettime
