@@ -72,6 +72,7 @@ check_PROGRAMS = \
   imap-ssl \
   imap-store \
   imap-tls \
+  ipv6 \
   multi-app \
   multi-debugcallback \
   multi-double \
