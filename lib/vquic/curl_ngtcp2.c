@@ -925,13 +925,13 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
   return 0;
 }
 
-static int cb_recv_rx_key(ngtcp2_conn *tconn, ngtcp2_encryption_level level,
+static int cb_recv_rx_key(ngtcp2_conn *tconn, ngtcp2_crypto_level level,
                           void *user_data)
 {
   struct Curl_cfilter *cf = user_data;
   (void)tconn;
 
-  if(level != NGTCP2_ENCRYPTION_LEVEL_1RTT) {
+  if(level != NGTCP2_CRYPTO_LEVEL_EARLY) {
     return 0;
   }
 
@@ -2426,7 +2426,7 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
 
 out:
   if(result == CURLE_RECV_ERROR && ctx->qconn &&
-     ngtcp2_conn_in_draining_period(ctx->qconn)) {
+     ngtcp2_conn_is_in_draining_period(ctx->qconn)) {
     /* When a QUIC server instance is shutting down, it may send us a
      * CONNECTION_CLOSE right away. Our connection then enters the DRAINING
      * state.
