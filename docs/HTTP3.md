@@ -55,7 +55,7 @@ Build (patched) OpenSSL
 Build nghttp3
 
      % cd ..
-     % git clone -b v0.11.0 https://github.com/ngtcp2/nghttp3
+     % git clone -b v0.12.0 https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
@@ -65,7 +65,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v0.15.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v0.16.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
@@ -98,7 +98,7 @@ Build GnuTLS
 Build nghttp3
 
      % cd ..
-     % git clone -b v0.11.0 https://github.com/ngtcp2/nghttp3
+     % git clone -b v0.12.0 https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
@@ -108,7 +108,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v0.15.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v0.16.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
@@ -139,7 +139,7 @@ Build wolfSSL
 Build nghttp3
 
      % cd ..
-     % git clone -b v0.11.0 https://github.com/ngtcp2/nghttp3
+     % git clone -b v0.12.0 https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
@@ -149,7 +149,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b v0.15.0 https://github.com/ngtcp2/ngtcp2
+     % git clone -b v0.16.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-wolfssl
