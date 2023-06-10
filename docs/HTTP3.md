@@ -39,8 +39,8 @@ Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and 
 
 For now, `ngtcp2` and `nghttp3` are still *experimental* which means their evolution bring breaking changes. Therefore, the proper version of both libraries need to be used when building curl. These are
 
- * `ngtcp2`: v0.15.0
- * `nghttp3`: v0.11.0
+ * `ngtcp2`: v0.16.0
+ * `nghttp3`: v0.12.0
 
 ## Build with OpenSSL
 
