@@ -61,12 +61,6 @@ struct curltime Curl_now(void)
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||  \
   defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
 
-#ifdef HAVE_CLOCK_GETTIME_MONOTONIC_RAW
-#define USE_TIMER CLOCK_MONOTONIC_RAW
-#else
-#define USE_TIMER CLOCK_MONOTONIC
-#endif
-
 struct curltime Curl_now(void)
 {
   /*
@@ -94,12 +88,25 @@ struct curltime Curl_now(void)
     have_clock_gettime = TRUE;
 #endif
 
+#ifdef HAVE_CLOCK_GETTIME_MONOTONIC_RAW
+  if(
+#if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) &&    \
+        (HAVE_BUILTIN_AVAILABLE == 1)
+    have_clock_gettime &&
+#endif
+    (0 == clock_gettime(CLOCK_MONOTONIC_RAW, &tsnow))) {
+    cnow.tv_sec = tsnow.tv_sec;
+    cnow.tv_usec = (unsigned int)(tsnow.tv_nsec / 1000);
+  }
+  else
+#endif
+
   if(
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
         (HAVE_BUILTIN_AVAILABLE == 1)
     have_clock_gettime &&
 #endif
-    (0 == clock_gettime(USE_TIMER, &tsnow))) {
+    (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
     cnow.tv_sec = tsnow.tv_sec;
     cnow.tv_usec = (unsigned int)(tsnow.tv_nsec / 1000);
   }
