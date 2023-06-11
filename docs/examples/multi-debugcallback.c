@@ -36,7 +36,10 @@
 /* curl stuff */
 #include <curl/curl.h>
 
+#if defined __STDC_VERSION__ && __STDC_VERSION__ > 201710L
 typedef char bool;
+#endif
+
 #define TRUE 1
 
 static
