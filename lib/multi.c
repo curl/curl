@@ -643,6 +643,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   CONNCACHE_UNLOCK(data);
 
   multi_warn_debug(multi, data);
+  infof(data, "processing: %s", data->state.url);
 
   return CURLM_OK;
 }
