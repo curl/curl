@@ -64,6 +64,17 @@
 
     curl --trace-ascii d.txt --trace-time http://example.com/
 
+## See which Transfer
+
+ When doing parallel transfers, it is relevant to see which transfer is
+ doing what. When response headers are received (and logged) you need to
+ know which transfer these are for.
+ [`--trace-ids`](https://curl.se/docs/manpage.html#--trace-ids) option
+ is what you need. It will prepend the transfer and connection identifier
+ to each trace output line:
+
+    curl --trace-ascii d.txt --trace-ids http://example.com/
+
 ## See the Response
 
  By default curl sends the response to stdout. You need to redirect it

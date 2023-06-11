@@ -252,6 +252,7 @@
 --tr-encoding                        7.21.6
 --trace                              7.9.7
 --trace-ascii                        7.9.7
+--trace-ids                          8.2.0
 --trace-time                         7.14.0
 --unix-socket                        7.40.0
 --upload-file (-T)                   4.0

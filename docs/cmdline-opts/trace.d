@@ -7,7 +7,7 @@ Mutexed: verbose trace-ascii
 Category: verbose
 Example: --trace log.txt $URL
 Added: 7.9.7
-See-also: trace-ascii trace-time
+See-also: trace-ascii trace-ids trace-time
 Multi: single
 Scope: global
 ---
