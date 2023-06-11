@@ -205,6 +205,7 @@ static const struct LongShort aliases[]= {
   {"$Z", "compressed-ssh",           ARG_BOOL},
   {"$~", "happy-eyeballs-timeout-ms", ARG_STRING},
   {"$!", "retry-all-errors",         ARG_BOOL},
+  {"$%", "trace-ids",                ARG_BOOL},
   {"0",   "http1.0",                 ARG_NONE},
   {"01",  "http1.1",                 ARG_NONE},
   {"02",  "http2",                   ARG_NONE},
@@ -1406,6 +1407,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(err)
           return err;
         /* 0 is a valid value for this timeout */
+        break;
+      case '%': /* --trace-ids */
+        global->traceids = toggle;
         break;
       }
       break;
