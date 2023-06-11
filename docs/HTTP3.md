@@ -46,7 +46,7 @@ For now, `ngtcp2` and `nghttp3` are still *experimental* which means their evolu
 
 Build (patched) OpenSSL
 
-     % git clone --depth 1 -b openssl-3.0.8+quic https://github.com/quictls/openssl
+     % git clone --depth 1 -b openssl-3.0.9+quic https://github.com/quictls/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere1>
      % make
