@@ -42,10 +42,10 @@ Using PUT with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 
 If you use PUT to an HTTP 1.1 server, you can upload data without knowing the
-size before starting the transfer if you use chunked encoding. You enable this
-by adding a header like "Transfer-Encoding: chunked" with
-\fICURLOPT_HTTPHEADER(3)\fP. With HTTP 1.0 or without chunked transfer, you
-must specify the size.
+size before starting the transfer. The library enables this by adding a header
+"Transfer-Encoding: chunked". With HTTP 1.0 or if you prefer not to use chunked
+transfer, you must specify the size of the data with
+\fICURLOPT_INFILESIZE(3)\fP or \fICURLOPT_INFILESIZE_LARGE(3)\fP.
 .SH DEFAULT
 0, default is download
 .SH PROTOCOLS
