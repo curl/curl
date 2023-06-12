@@ -4,7 +4,7 @@ curl and libcurl 8.2.0
  Command line options:         254
  curl_easy_setopt() options:   303
  Public functions in libcurl:  91
- Contributors:                 2894
+ Contributors:                 2898
 
 This release includes the following changes:
 
@@ -21,22 +21,43 @@ This release includes the following bugfixes:
  o configure: fix run-compiler for old /bin/sh [4]
  o curl: count uploaded data to stop at the originally given size [14]
  o curl_log: evaluate log statement only when transfer is verbose [8]
+ o curl_mprintf.3: minor fix of the example
+ o curl_pushheader_byname/bynum.3: document in their own man pages [37]
+ o curl_url_set: enforce the max string length check for all parts [38]
+ o CURLOPT_AWS_SIGV4.3: remove unused variable from example [11]
+ o CURLOPT_SSH_PRIVATE_KEYFILE.3: expand on the file search [31]
+ o docs: fix missing parameter names in examples [41]
+ o docs: update HTTP3.md for newer ngtcp2 and nghttp3 [28]
+ o example/crawler: also set CURLOPT_AUTOREFERER [35]
+ o example/http2-download: set CURLOPT_BUFFERSIZE [34]
+ o example/ipv6: feature CURLOPT_ADDRESS_SCOPE in use [27]
+ o examples/ftpuploadresume.c: add use of CURLOPT_ACCEPTTIMEOUT_MS [39]
+ o examples/https.c: use CURLOPT_CA_CACHE_TIMEOUT [19]
+ o examples/unixsocket.c: example using CURLOPT_UNIX_SOCKET_PATH [40]
  o examples/websocket.c: websocket example using CONNECT_ONLY [17]
  o http2: better support for --limit-rate [7]
  o libssh2: provide error message when setting host key type fails [9]
  o libssh2: use custom memory functions [12]
+ o ngtcp2: build with 0.16.0 and nghttp3 0.12.0 [33]
+ o ngtcp2: use ever increasing timestamp in io [32]
  o runtests: abort test run after failure without -a [3]
  o runtests: create multiple test runners when requested [20]
+ o runtests: make test file directories in log/N [44]
+ o runtests; give each server a unique log lock file [43]
  o scripts: Fix GHA matrix job detection in cijobs.pl
  o system.h: remove __IBMC__/__IBMCPP__ guards and apply to all z/OS compiles [10]
  o tests/servers.pm: pick unused port number with a server socket [16]
  o tests/servers: generate temp names in /tmp for unix domain sockets [6]
+ o tests: fix error messages & handling around sockets [30]
+ o tls13-ciphers.d: include Schannel [36]
  o tool: remove exclamation marks from error/warning messages
  o tool: remove newlines from all helpf/notef/warnf/errorf calls [15]
  o tool_getparam: fix comment [22]
  o tool_urlglob: use curl_off_t instead of longs [2]
+ o urlapi: have *set(PATH) prepend a slash if one is missing [42]
  o urlapi: scheme must start with alpha [26]
  o websocket-cb: example doing WebSocket download using callback [18]
+ o ws: make the curl_ws_meta() return pointer a const [45]
 
 This release includes the following known bugs:
 
@@ -54,11 +75,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  ad0p on github, Alejandro R. Sedeño, Andy Fiddaman, Boris Verkhovskiy,
-  Dan Fandrich, Daniel Stenberg, Emanuele Torre, Igor Todorovski,
-  JustAnotherArchivist on github, MaeIsBad on github, Mark Seuffert,
-  Philip Heiduck, Raito Bezarius, Stefan Eissing, Viktor Szakats
-  (15 contributors)
+  ad0p on github, Alejandro R. Sedeño, Andy Fiddaman, Anssi Kolehmainen,
+  atjg on github, Boris Verkhovskiy, Dan Fandrich, Daniel Stenberg,
+  Emanuele Torre, Igor Todorovski, JustAnotherArchivist on github,
+  Karthikdasari0423, MaeIsBad on github, Mark Seuffert, Pedro Henrique,
+  Philip Heiduck, Raito Bezarius, Stefan Eissing, Viktor Szakats, Wyatt OʼDay
+  (20 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -72,6 +94,7 @@ References to bug reports and discussions on issues:
  [8] = https://curl.se/bug/?i=11238
  [9] = https://curl.se/bug/?i=11240
  [10] = https://curl.se/bug/?i=11241
+ [11] = https://curl.se/bug/?i=11302
  [12] = https://curl.se/bug/?i=11235
  [13] = https://curl.se/bug/?i=11095
  [14] = https://curl.se/bug/?i=11222
@@ -79,6 +102,7 @@ References to bug reports and discussions on issues:
  [16] = https://curl.se/bug/?i=11220
  [17] = https://curl.se/bug/?i=11262
  [18] = https://curl.se/bug/?i=11260
+ [19] = https://curl.se/bug/?i=11290
  [20] = https://curl.se/bug/?i=10818
  [21] = https://curl.se/bug/?i=11247
  [22] = https://curl.se/bug/?i=11253
@@ -86,3 +110,21 @@ References to bug reports and discussions on issues:
  [24] = https://curl.se/bug/?i=11049
  [25] = https://curl.se/bug/?i=11245
  [26] = https://curl.se/bug/?i=11249
+ [27] = https://curl.se/bug/?i=11282
+ [28] = https://curl.se/bug/?i=11295
+ [30] = https://curl.se/bug/?i=11265
+ [31] = https://curl.se/bug/?i=11289
+ [32] = https://curl.se/bug/?i=11288
+ [33] = https://curl.se/bug/?i=11184
+ [34] = https://curl.se/bug/?i=11284
+ [35] = https://curl.se/bug/?i=11283
+ [36] = https://curl.se/bug/?i=11271
+ [37] = https://curl.se/bug/?i=11286
+ [38] = https://curl.se/bug/?i=11273
+ [39] = https://curl.se/bug/?i=11277
+ [40] = https://curl.se/bug/?i=11276
+ [41] = https://curl.se/bug/?i=11278
+ [42] = https://curl.se/mail/lib-2023-06/0015.html
+ [43] = https://curl.se/bug/?i=11231
+ [44] = https://curl.se/bug/?i=11267
+ [45] = https://curl.se/bug/?i=11261
