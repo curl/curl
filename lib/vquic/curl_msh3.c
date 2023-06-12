@@ -173,7 +173,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   msh3_lock_initialize(&stream->recv_lock);
   Curl_bufq_init2(&stream->recvbuf, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
-  DEBUGF(LOG_CF(data, cf, "data setup (easy %p)", (void *)data));
+  DEBUGF(LOG_CF(data, cf, "data setup"));
   return CURLE_OK;
 }
 

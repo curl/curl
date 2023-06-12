@@ -1947,8 +1947,8 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
 
   h2_pri_spec(data, &pri_spec);
 
-  DEBUGF(LOG_CF(data, cf, "send request allowed %d (easy handle %p)",
-                nghttp2_session_check_request_allowed(ctx->h2), (void *)data));
+  DEBUGF(LOG_CF(data, cf, "send request allowed %d",
+                nghttp2_session_check_request_allowed(ctx->h2)));
 
   switch(data->state.httpreq) {
   case HTTPREQ_POST:
@@ -1984,8 +1984,7 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
 
   DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) submit %s",
                 stream_id, len, data->state.url));
-  infof(data, "Using Stream ID: %u (easy handle %p)",
-        stream_id, (void *)data);
+  infof(data, "Using Stream ID: %u", stream_id);
   stream->id = stream_id;
   stream->local_window_size = H2_STREAM_WINDOW_SIZE;
   if(data->set.max_recv_speed) {
@@ -2542,7 +2541,7 @@ CURLcode Curl_http2_switch(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
-  DEBUGF(infof(data, DMSGI(data, sockindex, "switching to HTTP/2")));
+  DEBUGF(infof(data, "switching to HTTP/2"));
 
   result = http2_cfilter_add(&cf, data, conn, sockindex);
   if(result)
@@ -2601,7 +2600,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
-  DEBUGF(infof(data, DMSGI(data, sockindex, "upgrading to HTTP/2")));
+  DEBUGF(infof(data, "upgrading to HTTP/2"));
   DEBUGASSERT(data->req.upgr101 == UPGR101_RECEIVED);
 
   result = http2_cfilter_add(&cf, data, conn, sockindex);

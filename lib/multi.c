@@ -194,15 +194,10 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(data->mstate >= MSTATE_PENDING &&
      data->mstate < MSTATE_COMPLETED) {
-     curl_off_t connection_id = -5000;
-
-    if(data->conn)
-      connection_id = data->conn->connection_id;
-
     infof(data,
-          "STATE: %s => %s handle %p; line %d (connection #%ld)",
+          "STATE: %s => %s handle %p; line %d",
           multi_statename[oldstate], multi_statename[data->mstate],
-          (void *)data, lineno, connection_id);
+          (void *)data, lineno);
   }
 #endif
 
@@ -3705,7 +3700,7 @@ void Curl_expire_clear(struct Curl_easy *data)
     }
 
 #ifdef DEBUGBUILD
-    infof(data, "Expire cleared (easy handle %p)", data);
+    infof(data, "Expire cleared");
 #endif
     nowp->tv_sec = 0;
     nowp->tv_usec = 0;
