@@ -27,19 +27,15 @@
  */
 #include <stdio.h>
 #include <curl/curl.h>
-#ifdef WIN32
-#include <netioapi.h>
-#else
-#include <net/if.h>
-#endif
 
-#ifdef __MINGW32__
-/* figure out how this can be used with mingw */
-#define if_nametoindex(x) 0
+#ifndef WIN32
+#include <net/if.h>
 #endif
 
 int main(void)
 {
+#ifndef WIN32
+  /* Windows users need to find how to use if_nametoindex() */
   CURL *curl;
   CURLcode res;
 
@@ -61,5 +57,7 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+#endif
   return 0;
 }
+
