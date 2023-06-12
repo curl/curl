@@ -98,7 +98,7 @@ sub subbase64 {
     my ($thing) = @_;
 
     # cut out the base64 piece
-    if($$thing =~ s/%b64\[(.*)\]b64%/%%B64%%/i) {
+    while($$thing =~ s/%b64\[(.*?)\]b64%/%%B64%%/i) {
         my $d = $1;
         # encode %NN characters
         $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
@@ -107,13 +107,13 @@ sub subbase64 {
         $$thing =~ s/%%B64%%/$enc/;
     }
     # hex decode
-    if($$thing =~ s/%hex\[(.*)\]hex%/%%HEX%%/i) {
+    while($$thing =~ s/%hex\[(.*?)\]hex%/%%HEX%%/i) {
         # decode %NN characters
         my $d = $1;
         $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
         $$thing =~ s/%%HEX%%/$d/;
     }
-    if($$thing =~ s/%repeat\[(\d+) x (.*)\]%/%%REPEAT%%/i) {
+    while($$thing =~ s/%repeat\[(\d+) x (.*?)\]%/%%REPEAT%%/i) {
         # decode %NN characters
         my ($d, $n) = ($2, $1);
         $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
