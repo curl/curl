@@ -1823,7 +1823,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           struct curl_slist *cl;
 
           /* The maximum size needs to match MAX_NAME in cookie.h */
-#define MAX_COOKIE_LINE 4096
+#define MAX_COOKIE_LINE 8200
           curlx_dyn_init(&cookies, MAX_COOKIE_LINE);
           for(cl = config->cookies; cl; cl = cl->next) {
             if(cl == config->cookies)
