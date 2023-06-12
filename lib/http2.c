@@ -1992,7 +1992,7 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
      * Let's limit our stream window size around that, otherwise the server
      * will send in large bursts only. We make the window 50% larger to
      * allow for data in flight and avoid stalling. */
-    size_t n = (((data->set.max_recv_speed - 1) / H2_CHUNK_SIZE) + 1);
+    curl_off_t n = (((data->set.max_recv_speed - 1) / H2_CHUNK_SIZE) + 1);
     n += CURLMAX((n/2), 1);
     if(n < (H2_STREAM_WINDOW_SIZE / H2_CHUNK_SIZE) &&
        n < (UINT_MAX / H2_CHUNK_SIZE)) {
