@@ -893,8 +893,8 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
   /* only do this if pinnedpubkey starts with "sha256//", length 8 */
   if(strncmp(pinnedpubkey, "sha256//", 8) == 0) {
     CURLcode encode;
-    size_t encodedlen, pinkeylen;
-    char *encoded, *pinkeycopy, *begin_pos, *end_pos;
+    size_t encodedlen = 0, pinkeylen;
+    char *encoded = NULL, *pinkeycopy, *begin_pos, *end_pos;
     unsigned char *sha256sumdigest;
 
     if(!Curl_ssl->sha256sum) {
