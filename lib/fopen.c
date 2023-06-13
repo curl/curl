@@ -85,7 +85,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     if((fstat(fd, &nsb) != -1) &&
        (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
       /* if the user and group are the same, clone the original mode */
-      if(fchmod(fd, sb.st_mode) == -1)
+      if(fchmod(fd, (mode_t)sb.st_mode) == -1)
         goto fail;
     }
   }
