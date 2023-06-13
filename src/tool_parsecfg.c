@@ -77,6 +77,100 @@ static FILE *execpath(const char *filename, char **pathp)
 }
 #endif
 
+static int envreplace(struct GlobalConfig *global,
+                      const char *line, struct curlx_dynbuf *out,
+                      bool *replaced)
+{
+  CURLcode result;
+  char *envp;
+  bool added = FALSE;
+  *replaced = FALSE;
+  curlx_dyn_init(out, MAX_CONFIG_LINE_LENGTH);
+  do {
+    envp = strstr(line, "${");
+    if((envp > line) && envp[-1] == '\\') {
+      /* preceding backslash, we want this verbatim */
+
+      /* insert the text up to this point, minus the backslash */
+      result = curlx_dyn_addn(out, line, envp - line - 1);
+      if(result)
+        return 2;
+
+      /* output '${' then continue from here */
+      result = curlx_dyn_addn(out, "${", 2);
+      if(result)
+        return 2;
+      line = &envp[2];
+    }
+    else if(envp) {
+      char name[128];
+      size_t nlen;
+      size_t i;
+      char *clp = strchr(envp, '}');
+
+      if(!clp) {
+        /* uneven braces */
+        warnf(global, "missing close brace in config file");
+        break;
+      }
+
+      nlen = clp - &envp[2];
+      if(!nlen || (nlen >= sizeof(name))) {
+        warnf(global, "odd env variable name in config file");
+        /* insert the text as-is since this is not an env variable */
+        result = curlx_dyn_addn(out, line, clp - line + 1);
+        if(result)
+          return 2;
+      }
+      else {
+        /* insert the text up to this point */
+        result = curlx_dyn_addn(out, line, envp - line);
+        if(result)
+          return 2;
+
+        /* copy the name to separate buffer */
+        memcpy(name, &envp[2], nlen);
+        name[nlen] = 0;
+
+        /* verify that the name looks sensible */
+        for(i = 0; (i < nlen) &&
+              (ISALNUM(name[i]) || (name[i] == '_')); i++);
+        if(i != nlen) {
+          warnf(global, "weird-looking environment name in config file");
+          /* insert the text as-is since this is not an env variable */
+          result = curlx_dyn_addn(out, envp, clp - envp + 1);
+          if(result)
+            return 2;
+        }
+        else {
+          char *value = curl_getenv(name);
+          if(value) {
+            if(*value) {
+              /* insert the value */
+              result = curlx_dyn_add(out, value);
+              if(result)
+                return 2;
+            }
+            curl_free(value);
+          }
+          added = true;
+        }
+      }
+      line = &clp[1];
+    }
+
+  } while(envp);
+  if(added && *line) {
+    /* add the "suffix" as well */
+    result = curlx_dyn_add(out, line);
+    if(result)
+      return 2;
+  }
+  *replaced = added;
+  if(!added)
+    curlx_dyn_free(out);
+  return 0;
+}
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
 int parseconfig(const char *filename, struct GlobalConfig *global)
@@ -126,6 +220,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     bool dashed_option;
     struct curlx_dynbuf buf;
     bool fileerror;
+    bool replaced = FALSE;
     curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
 
@@ -220,10 +315,25 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           param = NULL;
       }
 
+      if(param) {
+        struct curlx_dynbuf nbuf;
+        res = envreplace(global, param, &nbuf, &replaced);
+        if(res)
+          break;
+        if(replaced)
+          param = curlx_dyn_ptr(&nbuf);
+      }
+
 #ifdef DEBUG_CONFIG
       fprintf(stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
       res = getparameter(option, param, NULL, &usedarg, global, operation);
+
+      if(replaced) {
+        free(param);
+        param = NULL;
+      }
+
       operation = global->last;
 
       if(!res && param && *param && !usedarg)

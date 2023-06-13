@@ -21,12 +21,18 @@ if so, the colon or equals characters can be used as separators. If the option
 is specified with one or two dashes, there can be no colon or equals character
 between the option and its parameter.
 
-If the parameter contains whitespace (or starts with : or =), the parameter
-must be enclosed within quotes. Within double quotes, the following escape
-sequences are available: \\\\, \\", \\t, \\n, \\r and \\v. A backslash
-preceding any other letter is ignored.
+If the parameter contains whitespace or starts with a colon (:) or equals sign
+(=), it must be specified enclosed within double quotes (\&"). Within double
+quotes the following escape sequences are available: \\\\, \\", \\t, \\n, \\r
+and \\v. A backslash preceding any other letter is ignored.
 
-If the first column of a config line is a '#' character, the rest of the line
+Environment variable contents can be used in parameters using ${name}. This
+gets the contents of the environment variable "name" inserted, or a blank if
+the name does not exist as an environment variable. Insert "${" verbatim
+in the string by prefixing it with a backslash, like "\\${". (Added in
+8.2.0)
+
+If the first non-blank column of a config line is a '#' character, that line
 will be treated as a comment.
 
 Only write one option per physical line in the config file.
