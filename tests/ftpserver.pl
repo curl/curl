@@ -79,6 +79,7 @@ use pathhelp qw(
     );
 
 use globalconfig qw(
+    $SERVERCMD
     $LOCKDIR
     );
 
@@ -93,7 +94,7 @@ my $proto = 'ftp';  # default server protocol
 my $srcdir;         # directory where ftpserver.pl is located
 my $srvrname;       # server name for presentation purposes
 my $cwd_testno;     # test case numbers extracted from CWD command
-my $testno = 0;     # test case number (read from ftpserver.cmd)
+my $testno = 0;     # test case number (read from server.cmd)
 my $path   = '.';
 my $logdir = $path .'/log';
 my $piddir;
@@ -2799,10 +2800,10 @@ sub customize {
     %customcount = ();  #
     %delayreply = ();   #
 
-    open(my $custom, "<", "$logdir/ftpserver.cmd") ||
+    open(my $custom, "<", "$logdir/$SERVERCMD") ||
         return 1;
 
-    logmsg "FTPD: Getting commands from $logdir/ftpserver.cmd\n";
+    logmsg "FTPD: Getting commands from $logdir/$SERVERCMD\n";
 
     while(<$custom>) {
         if($_ =~ /REPLY \"([A-Z]+ [A-Za-z0-9+-\/=\*. ]+)\" (.*)/) {
