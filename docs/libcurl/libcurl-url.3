@@ -75,14 +75,15 @@ When a URL has been parsed or parts have been set, you can extract those
 pieces from the handle at any time.
 
 .nf
+  rc = curl_url_get(h, CURLUPART_FRAGMENT, &fragment, 0);
   rc = curl_url_get(h, CURLUPART_HOST, &host, 0);
+  rc = curl_url_get(h, CURLUPART_PASSWORD, &password, 0);
+  rc = curl_url_get(h, CURLUPART_PATH, &path, 0);
+  rc = curl_url_get(h, CURLUPART_PORT, &port, 0);
+  rc = curl_url_get(h, CURLUPART_QUERY, &query, 0);
   rc = curl_url_get(h, CURLUPART_SCHEME, &scheme, 0);
   rc = curl_url_get(h, CURLUPART_USER, &user, 0);
-  rc = curl_url_get(h, CURLUPART_PASSWORD, &password, 0);
-  rc = curl_url_get(h, CURLUPART_PORT, &port, 0);
-  rc = curl_url_get(h, CURLUPART_PATH, &path, 0);
-  rc = curl_url_get(h, CURLUPART_QUERY, &query, 0);
-  rc = curl_url_get(h, CURLUPART_FRAGMENT, &fragment, 0);
+  rc = curl_url_get(h, CURLUPART_ZONEID, &zoneid, 0);
 .fi
 
 Extracted parts are not URL decoded unless the user also asks for it with the
@@ -95,14 +96,15 @@ A user set individual URL parts, either after having parsed a full URL or
 instead of parsing such.
 
 .nf
+  rc = curl_url_set(urlp, CURLUPART_FRAGMENT, "anchor", 0);
   rc = curl_url_set(urlp, CURLUPART_HOST, "www.example.com", 0);
+  rc = curl_url_set(urlp, CURLUPART_PASSWORD, "doe", 0);
+  rc = curl_url_set(urlp, CURLUPART_PATH, "/index.html", 0);
+  rc = curl_url_set(urlp, CURLUPART_PORT, "443", 0);
+  rc = curl_url_set(urlp, CURLUPART_QUERY, "name=john", 0);
   rc = curl_url_set(urlp, CURLUPART_SCHEME, "https", 0);
   rc = curl_url_set(urlp, CURLUPART_USER, "john", 0);
-  rc = curl_url_set(urlp, CURLUPART_PASSWORD, "doe", 0);
-  rc = curl_url_set(urlp, CURLUPART_PORT, "443", 0);
-  rc = curl_url_set(urlp, CURLUPART_PATH, "/index.html", 0);
-  rc = curl_url_set(urlp, CURLUPART_QUERY, "name=john", 0);
-  rc = curl_url_set(urlp, CURLUPART_FRAGMENT, "anchor", 0);
+  rc = curl_url_set(urlp, CURLUPART_ZONEID, "eth0", 0);
 .fi
 
 Set parts are not URL encoded unless the user asks for it with the
