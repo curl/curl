@@ -250,11 +250,28 @@ sub singletest_dumplogs {
 
 sub catch_zap {
     my $signame = shift;
-    logmsg "runtests.pl received SIG$signame, exiting\n";
+    print "runtests.pl received SIG$signame, exiting\r\n";
     $globalabort = 1;
 }
 $SIG{INT} = \&catch_zap;
 $SIG{TERM} = \&catch_zap;
+
+sub catch_usr1 {
+    print "runtests.pl internal state:\r\n";
+    print scalar(%runnersrunning) . " busy test runner(s) of " . scalar(keys %runnerids) . "\r\n";
+    foreach my $rid (sort(keys(%runnersrunning))) {
+        my $runnernum = "unknown";
+        foreach my $rnum (keys %runnerids) {
+            if($runnerids{$rnum} == $rid) {
+                $runnernum = $rnum;
+                last;
+            }
+        }
+        print "Runner $runnernum (id $rid) running test $runnersrunning{$rid} in state $singletest_state{$rid}\r\n";
+    }
+}
+
+$SIG{USR1} = \&catch_usr1;
 
 ##########################################################################
 # Clear all possible '*_proxy' environment variables for various protocols
@@ -2734,14 +2751,17 @@ while () {
     if($globalabort) {
         logmsg singletest_dumplogs();
         logmsg "Aborting tests\n";
-        logmsg "Waiting for tests to finish...\n";
+        logmsg "Waiting for " . scalar((keys %runnersrunning)) . " outstanding test(s) to finish...\n";
         # Wait for the last requests to complete and throw them away so
         # that IPC calls & responses stay in sync
         # TODO: send a signal to the runners to interrupt a long test
         foreach my $rid (keys %runnersrunning) {
             runnerar($rid);
             delete $runnersrunning{$rid};
+            logmsg ".";
+            $| = 1;
         }
+        logmsg "\n";
         last;
     }
 
@@ -2770,7 +2790,7 @@ while () {
     # See if we've completed all the tests
     if(!scalar(%runnersrunning)) {
         # No runners are running; we must be done
-        scalar(@runtests) && die 'Internal error: tests to run';
+        scalar(@runtests) && die 'Internal error: still have tests to run';
         last;
     }
 
@@ -2783,7 +2803,7 @@ while () {
     if($ridready) {
         # This runner is ready to be serviced
         my $testnum = $runnersrunning{$ridready};
-        defined $testnum ||  die 'Internal error: test for runner unknown';
+        defined $testnum ||  die "Internal error: test for runner $ridready unknown";
         delete $runnersrunning{$ridready};
         my ($error, $again) = singletest($ridready, $testnum, $countforrunner{$ridready}, $totaltests);
         if($again) {
