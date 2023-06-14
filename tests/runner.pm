@@ -185,9 +185,10 @@ sub runner_init {
         # Create a separate process in multiprocess mode
         my $child = fork();
         if(0 == $child) {
-            # TODO: set up a better signal handler
+            # TODO: set up better signal handlers
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
+            $SIG{USR1} = 'IGNORE';
 
             $thisrunnerid = $$;
             print "Runner $thisrunnerid starting\n" if($verbose);
@@ -1270,6 +1271,7 @@ sub runnerar_ready {
             $maxfileno = $fd;
         }
     }
+    $maxfileno || die "Internal error: no runners are available to wait on\n";
 
     # Wait for any pipe from any runner to be ready
     # TODO: this is relatively slow with hundreds of fds
@@ -1293,13 +1295,13 @@ sub ipcrecv {
     my $err;
     my $datalen;
     while(! defined ($err = sysread($runnerr, $datalen, 4)) || $err <= 0) {
-        $!{EINTR} || die "error in ipcrecv: $!\n";
+        $!{EINTR} || die "error $err in ipcrecv: $! in runner $$ for $LOGDIR\n";
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
     my $len=unpack("L", $datalen);
     my $buf;
     while(! defined ($err = sysread($runnerr, $buf, $len)) || $err <= 0) {
-        $!{EINTR} || die "error in ipcrecv: $!\n";
+        $!{EINTR} || die "error $err in ipcrecv: $! in runner $$ for $LOGDIR\n";
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
 
@@ -1336,7 +1338,7 @@ sub ipcrecv {
     # Marshall the results to return
     $buf = freeze \@res;
 
-    syswrite($runnerw, (pack "L", length($buf)) . $buf);
+    defined syswrite($runnerw, (pack "L", length($buf)) . $buf) || $!{EINTR} || die "error $err in ipcrecv write: $! in runner $$ for $LOGDIR\n";
 
     return 0;
 }
