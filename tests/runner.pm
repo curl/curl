@@ -546,7 +546,7 @@ sub singletest_startservers {
     my ($testnum, $testtimings) = @_;
 
     # remove old test server files before servers are started/verified
-    unlink("$LOGDIR/$FTPDCMD");
+    unlink("$LOGDIR/$SERVERCMD");
     unlink("$LOGDIR/$SERVERIN");
     unlink("$LOGDIR/$PROXYIN");
 
@@ -697,7 +697,7 @@ sub singletest_prepare {
     my @ftpservercmd = getpart("reply", "servercmd");
     push @ftpservercmd, "Testnum $testnum\n";
     # write the instructions to file
-    writearray("$LOGDIR/$FTPDCMD", \@ftpservercmd);
+    writearray("$LOGDIR/$SERVERCMD", \@ftpservercmd);
 
     # create (possibly-empty) files before starting the test
     for my $partsuffix (('', '1', '2', '3', '4')) {

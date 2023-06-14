@@ -160,7 +160,7 @@ static char loglockfile[256];
 #define RESPONSE_PROXY_DUMP "proxy.response"
 
 /* file in which additional instructions may be found */
-#define DEFAULT_CMDFILE "log/ftpserver.cmd"
+#define DEFAULT_CMDFILE "log/server.cmd"
 const char *cmdfile = DEFAULT_CMDFILE;
 
 /* very-big-path support */
