@@ -2775,10 +2775,10 @@ while () {
     }
 
     # See if a test runner needs attention
-    # If we could be running more tests, wait just a moment so we can schedule
-    # a new one shortly. If all runners are busy, wait indefinitely for one to
-    # finish.
-    my $runnerwait = scalar(@runnersidle) && scalar(@runtests) ? 0 : undef;
+    # If we could be running more tests, don't wait so we can schedule a new
+    # one immediately. If all runners are busy, wait a fraction of a second
+    # for one to finish so we can still loop around to check the abort flag.
+    my $runnerwait = scalar(@runnersidle) && scalar(@runtests) ? 0 : 0.5;
     my $ridready = runnerar_ready($runnerwait);
     if($ridready) {
         # This runner is ready to be serviced
