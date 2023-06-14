@@ -43,11 +43,10 @@ over HTTP and "WSS" is for doing WebSocket securely over HTTPS.
 A WebSocket request is done as an HTTP/1 GET request with an "Upgrade
 WebSocket" request header field. When the upgrade is accepted by the server,
 it responds with a 101 Switching and then the client can speak WebSocket with
-the server.
-
+the server. The communcation can happen in both directions at the same time.
 .SH MESSAGES
-WebSocket communication is message based. That means that is sends and
-receives entire messages, not streams like TCP. A WebSocket message is sent
+WebSocket communication is message based. That means that both ends send and
+receive entire messages, not streams like TCP. A WebSocket message is sent
 over the wire in one or more frames. Each frame in a message can have a size
 up to 2^63 bytes.
 
