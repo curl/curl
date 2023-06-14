@@ -41,12 +41,14 @@ TFTP retrieve with mode=netascii
 #
 # Verify pseudo protocol after the test has been "shot"
 <verify>
+<strip>
+^timeout = [5-6]$
+</strip>
 <protocol>
 opcode = 1
 mode = netascii
 tsize = 0
 blksize = 512
-timeout = 6
 filename = /%TESTNUMBER
 </protocol>
 </verify>
