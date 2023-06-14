@@ -212,6 +212,11 @@ sub runner_init {
 
             # Can't rely on logmsg here in case it's buffered
             print "Runner $thisrunnerid exiting\n" if($verbose);
+
+            # To reach this point, either the controller has sent
+            # runnerac_stopservers() and runnerac_shutdown() or we have called
+            # runnerabort(). In both cases, there are no more of our servers
+            # running and we can safely exit.
             exit 0;
         }
 
@@ -1288,20 +1293,41 @@ sub runnerar_ready {
 }
 
 ###################################################################
+# Cleanly abort and exit the runner
+# This uses print since there is no longer any controller to write logs.
+sub runnerabort{
+    print "Controller is gone: runner $$ for $LOGDIR exiting\n";
+    my ($error, $logs) = runner_stopservers();
+    print $logs;
+    runner_shutdown();
+}
+
+###################################################################
 # Receive an IPC call in the runner and execute it
 # The IPC is read from the $runnerr pipe and the response is
 # written to the $runnerw pipe
+# Returns 0 if more IPC calls are expected or 1 if the runner should exit
 sub ipcrecv {
     my $err;
     my $datalen;
     while(! defined ($err = sysread($runnerr, $datalen, 4)) || $err <= 0) {
-        $!{EINTR} || die "error $err in ipcrecv: $! in runner $$ for $LOGDIR\n";
+        if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
+            # pipe has closed; controller is gone and we must exit
+            runnerabort();
+            # Special case: no response will be forthcoming
+            return 1;
+        }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
     my $len=unpack("L", $datalen);
     my $buf;
     while(! defined ($err = sysread($runnerr, $buf, $len)) || $err <= 0) {
-        $!{EINTR} || die "error $err in ipcrecv: $! in runner $$ for $LOGDIR\n";
+        if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
+            # pipe has closed; controller is gone and we must exit
+            runnerabort();
+            # Special case: no response will be forthcoming
+            return 1;
+        }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
 
@@ -1319,7 +1345,7 @@ sub ipcrecv {
     }
     elsif($funcname eq "runner_shutdown") {
         runner_shutdown(@$argsarrayref);
-        # Special case: no response
+        # Special case: no response will be forthcoming
         return 1;
     }
     elsif($funcname eq "runner_stopservers") {
@@ -1338,7 +1364,15 @@ sub ipcrecv {
     # Marshall the results to return
     $buf = freeze \@res;
 
-    defined syswrite($runnerw, (pack "L", length($buf)) . $buf) || $!{EINTR} || die "error $err in ipcrecv write: $! in runner $$ for $LOGDIR\n";
+    while(! defined ($err = syswrite($runnerw, (pack "L", length($buf)) . $buf)) || $err <= 0) {
+        if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
+            # pipe has closed; controller is gone and we must exit
+            runnerabort();
+            # Special case: no response will be forthcoming
+            return 1;
+        }
+        # system call was interrupted, probably by ^C; restart it so we stay in sync
+    }
 
     return 0;
 }
