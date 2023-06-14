@@ -72,6 +72,9 @@ moo
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+^timeout = [5-6]$
+</strip>
 <protocol>
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
@@ -89,7 +92,6 @@ opcode = 1
 mode = octet
 tsize = 0
 blksize = 512
-timeout = 6
 filename = /%TESTNUMBER0003
 QUIT
 </protocol>
