@@ -117,4 +117,5 @@ man_MANS = \
  libcurl-thread.3 \
  libcurl-tutorial.3 \
  libcurl-url.3 \
+ libcurl-ws.3 \
  libcurl.3
