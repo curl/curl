@@ -30,15 +30,15 @@ data.
 .SH INCLUDE
 You still only include <curl/curl.h> in your code.
 .SH SETUP
-WebSocket is also often known as WebSockets, in plural. It is done by
+WebSocket is also often known as \fIWebSockets\fP, in plural. It is done by
 upgrading a regular HTTP(S) GET request to a WebSocket connection.
 
 WebSocket is a TCP-like message-based communication protocol done over HTTP,
 specified in RFC 6455.
 
 To initiate a WebSocket session with libcurl, setup an easy handle to use a
-URL with a "ws://" or "wss://" scheme. "ws" is for cleartext communication
-over HTTP and "wss" is for doing WebSocket securely over HTTPS.
+URL with a "WS://" or "WSS://" scheme. "WS" is for cleartext communication
+over HTTP and "WSS" is for doing WebSocket securely over HTTPS.
 
 A WebSocket request is done as an HTTP/1 GET request with an "Upgrade
 WebSocket" request header field. When the upgrade is accepted by the server,
@@ -72,7 +72,7 @@ flexible than limited to plain downloads or uploads, libcurl offers two
 different API models to use it:
 
 1. Using a write callback with \fICURLOPT_WRITEFUNCTION(3)\fP much like other
-downloads for when the traffic is download centric
+downloads for when the traffic is download oriented.
 
 2. Using \fICURLOPT_CONNECT_ONLY(3)\fP and use the WebSocket recv/send
 functions at will.
