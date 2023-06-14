@@ -80,13 +80,22 @@ expected fragment size in the first call and it needs to be zero in subsequent
 calls.
 .SH EXAMPLE
 .nf
-
+int ping(CURL *curl, const char *send_payload)
+{
+  size_t sent;
+  CURLcode result =
+    curl_ws_send(curl, send_payload, strlen(send_payload), &sent, 0,
+                 CURLWS_PING);
+  return (int)result;
+}
 .fi
 .SH AVAILABILITY
 Added in 7.86.0.
 .SH RETURN VALUE
-
+\fICURLE_OK\fP (zero) means that the data was sent properly, non-zero means an
+error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
+man page for the full list with descriptions.
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3), " curl_easy_perform "(3), "
 .BR curl_easy_getinfo "(3), "
-.BR curl_ws_recv "(3) "
+.BR curl_ws_recv "(3), " libcurl-ws "(3), "

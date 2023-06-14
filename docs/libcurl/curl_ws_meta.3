@@ -109,11 +109,10 @@ static size_t writecb(unsigned char *buffer,
 .SH AVAILABILITY
 Added in 7.86.0.
 .SH RETURN VALUE
-This function returns a pointer to a \fIcurl_ws_frame\fP struct with
+This function returns a pointer to a \fIcurl_ws_frame\fP struct with read-only
 information that is valid for this specific callback invocation. If it cannot
 return this information, or if the function is called in the wrong context, it
 returns NULL.
 .SH "SEE ALSO"
-.BR curl_easy_setopt "(3), "
-.BR curl_easy_getinfo "(3), "
-.BR curl_ws_send "(3), " curl_ws_recv "(3), "
+.BR curl_easy_setopt "(3), " curl_easy_getinfo "(3), "
+.BR curl_ws_send "(3), " curl_ws_recv "(3), " libcurl-ws "(3), "
