@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+cookies
 </keywords>
 </info>
 
@@ -50,6 +51,9 @@ Keep Cookie: header within 8190 bytes
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -c %LOGDIR/cookies%TESTNUMBER -L
 </command>
+<features>
+cookies
+</features>
 </client>
 
 #
