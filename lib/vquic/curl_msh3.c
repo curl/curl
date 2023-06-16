@@ -646,7 +646,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   else {
     /* request is open */
-    DEBUGF(LOG_CF(data, cf, "req: send %zd body bytes", len));
+    DEBUGF(LOG_CF(data, cf, "req: send %zu body bytes", len));
     if(len > 0xFFFFFFFF) {
       len = 0xFFFFFFFF;
     }

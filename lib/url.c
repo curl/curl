@@ -1152,8 +1152,8 @@ ConnectionExists(struct Curl_easy *data,
           /* primary_ip[0] is NUL only if the resolving of the name hasn't
              completed yet and until then we don't re-use this connection */
           if(!check->primary_ip[0]) {
-            infof(data,
-                  "Connection #%zd is still name resolving, can't reuse",
+            infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T " is still "
+                        "name resolving, can't reuse",
                   check->connection_id);
             continue;
           }
