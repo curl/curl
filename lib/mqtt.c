@@ -636,7 +636,7 @@ MQTT_SUBACK_COMING:
 
     /* -- switched state -- */
     remlen = mq->remaining_length;
-    infof(data, "Remaining length: %zd bytes", remlen);
+    infof(data, "Remaining length: %zu bytes", remlen);
     if(data->set.max_filesize &&
        (curl_off_t)remlen > data->set.max_filesize) {
       failf(data, "Maximum file size exceeded");

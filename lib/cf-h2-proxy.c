@@ -449,7 +449,7 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
 
   /* Process network input buffer fist */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
-    DEBUGF(LOG_CF(data, cf, "Process %zd bytes in connection buffer",
+    DEBUGF(LOG_CF(data, cf, "Process %zu bytes in connection buffer",
                   Curl_bufq_len(&ctx->inbufq)));
     if(proxy_h2_process_pending_input(cf, data, &result) < 0)
       return result;
@@ -463,7 +463,7 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
         !Curl_bufq_is_full(&ctx->tunnel.recvbuf)) {
 
     nread = Curl_bufq_slurp(&ctx->inbufq, proxy_nw_in_reader, cf, &result);
-    DEBUGF(LOG_CF(data, cf, "read %zd bytes nw data -> %zd, %d",
+    DEBUGF(LOG_CF(data, cf, "read %zu bytes nw data -> %zd, %d",
                   Curl_bufq_len(&ctx->inbufq), nread, result));
     if(nread < 0) {
       if(result != CURLE_AGAIN) {

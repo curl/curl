@@ -1466,8 +1466,8 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
   if(nread > 0 && stream->upload_left != -1)
     stream->upload_left -= nread;
 
-  DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] req_body_read(len=%zu) left=%zd"
-                " -> %zd, %d",
+  DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] req_body_read(len=%zu) left=%"
+                            CURL_FORMAT_CURL_OFF_T " -> %zd, %d",
                 stream_id, length, stream->upload_left, nread, result));
 
   if(stream->upload_left == 0)
@@ -1757,7 +1757,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
 
   /* Process network input buffer fist */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
-    DEBUGF(LOG_CF(data, cf, "Process %zd bytes in connection buffer",
+    DEBUGF(LOG_CF(data, cf, "Process %zu bytes in connection buffer",
                   Curl_bufq_len(&ctx->inbufq)));
     if(h2_process_pending_input(cf, data, &result) < 0)
       return result;
@@ -1778,7 +1778,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
     }
 
     nread = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &result);
-    /* DEBUGF(LOG_CF(data, cf, "read %zd bytes nw data -> %zd, %d",
+    /* DEBUGF(LOG_CF(data, cf, "read %zu bytes nw data -> %zd, %d",
                   Curl_bufq_len(&ctx->inbufq), nread, result)); */
     if(nread < 0) {
       if(result != CURLE_AGAIN) {

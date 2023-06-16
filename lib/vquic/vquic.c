@@ -362,7 +362,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   }
 
 out:
-  DEBUGF(LOG_CF(data, cf, "recvd %zu packets with %zd bytes -> %d",
+  DEBUGF(LOG_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
                 pkts, total_nread, result));
   return result;
 }
@@ -425,7 +425,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   }
 
 out:
-  DEBUGF(LOG_CF(data, cf, "recvd %zu packets with %zd bytes -> %d",
+  DEBUGF(LOG_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
                 pkts, total_nread, result));
   return result;
 }
@@ -482,7 +482,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
   }
 
 out:
-  DEBUGF(LOG_CF(data, cf, "recvd %zu packets with %zd bytes -> %d",
+  DEBUGF(LOG_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
                 pkts, total_nread, result));
   return result;
 }
