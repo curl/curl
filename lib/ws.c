@@ -126,8 +126,9 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
             dec->head_len, dec->head_total);
     }
     else {
-      infof(data, "WS-DEC: %s [%s%s payload=%zd/%zd]", msg,
-            ws_frame_name_of_op(dec->head[0]),
+      infof(data, "WS-DEC: %s [%s%s payload=%" CURL_FORMAT_CURL_OFF_T
+                  "/%" CURL_FORMAT_CURL_OFF_T "]",
+            msg, ws_frame_name_of_op(dec->head[0]),
             (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
             dec->payload_offset, dec->payload_len);
     }
@@ -272,7 +273,8 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
     Curl_bufq_skip(inraw, (size_t)nwritten);
     dec->payload_offset += (curl_off_t)nwritten;
     remain = dec->payload_len - dec->payload_offset;
-    /* infof(data, "WS-DEC: passed  %zd bytes payload, %zd remain",
+    /* infof(data, "WS-DEC: passed  %zd bytes payload, %"
+                CURL_FORMAT_CURL_OFF_T " remain",
           nwritten, remain); */
   }
 
@@ -351,8 +353,9 @@ static void update_meta(struct websocket *ws,
 static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
                         const char *msg)
 {
-  infof(data, "WS-ENC: %s [%s%s%s payload=%zd/%zd]", msg,
-        ws_frame_name_of_op(enc->firstbyte),
+  infof(data, "WS-ENC: %s [%s%s%s payload=%" CURL_FORMAT_CURL_OFF_T
+              "/%" CURL_FORMAT_CURL_OFF_T "]",
+        msg, ws_frame_name_of_op(enc->firstbyte),
         (enc->firstbyte & WSBIT_OPCODE_MASK) == WSBIT_OPCODE_CONT ?
         " CONT" : "",
         (enc->firstbyte & WSBIT_FIN)? "" : " NON-FIN",
@@ -921,7 +924,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
               ctx.payload_len, ctx.bufidx);
   *metap = &ws->frame;
   *nread = ws->frame.len;
-  /* infof(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %zd, %zd left)",
+  /* infof(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
+              CURL_FORMAT_CURL_OFF_T ", %" CURL_FORMAT_CURL_OFF_T " left)",
         buflen, *nread, ws->frame.offset, ws->frame.bytesleft); */
   return CURLE_OK;
 }
@@ -1036,7 +1040,8 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
     }
     else {
       if((curl_off_t)buflen > ws->enc.payload_remain) {
-        infof(data, "WS: unaligned frame size (sending %zu instead of %zd)",
+        infof(data, "WS: unaligned frame size (sending %zu instead of %"
+                    CURL_FORMAT_CURL_OFF_T ")",
               buflen, ws->enc.payload_remain);
       }
     }

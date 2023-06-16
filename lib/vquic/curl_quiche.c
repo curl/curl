@@ -649,7 +649,7 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
     }
   }
   else if((size_t)nread < pktlen) {
-    DEBUGF(LOG_CF(r->data, r->cf, "ingress, quiche only read %zd/%zd bytes",
+    DEBUGF(LOG_CF(r->data, r->cf, "ingress, quiche only read %zd/%zu bytes",
                   nread, pktlen));
   }
 
@@ -883,7 +883,8 @@ out:
   }
   if(nread > 0)
     ctx->data_recvd += nread;
-  DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] cf_recv(total=%zd) -> %zd, %d",
+  DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] cf_recv(total=%"
+                          CURL_FORMAT_CURL_OFF_T ") -> %zd, %d",
                 stream->id, ctx->data_recvd, nread, *err));
   return nread;
 }
@@ -1067,7 +1068,7 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         stream->send_closed = TRUE;
 
       DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] send body(len=%zu, "
-                    "left=%zd) -> %zd",
+                              "left=%" CURL_FORMAT_CURL_OFF_T ") -> %zd",
                     stream->id, len, stream->upload_left, nwritten));
       *err = CURLE_OK;
     }
