@@ -134,6 +134,7 @@ struct cf_h2_ctx {
   BIT(conn_closed);
   BIT(goaway);
   BIT(enable_push);
+  BIT(nw_out_blocked);
 };
 
 /* How to access `call_data` from a cf_h2 filter */
@@ -647,12 +648,16 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
   if(Curl_bufq_is_empty(&ctx->outbufq))
     return CURLE_OK;
 
-  DEBUGF(LOG_CF(data, cf, "h2 conn flush %zu bytes",
-                Curl_bufq_len(&ctx->outbufq)));
   nwritten = Curl_bufq_pass(&ctx->outbufq, nw_out_writer, cf, &result);
-  if(nwritten < 0 && result != CURLE_AGAIN) {
+  if(nwritten < 0) {
+    if(result == CURLE_AGAIN) {
+      DEBUGF(LOG_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
+                    Curl_bufq_len(&ctx->outbufq)));
+      ctx->nw_out_blocked = 1;
+    }
     return result;
   }
+  DEBUGF(LOG_CF(data, cf, "nw send buffer flushed"));
   return CURLE_OK;
 }
 
@@ -679,14 +684,17 @@ static ssize_t send_callback(nghttp2_session *h2,
                                   nw_out_writer, cf, &result);
   if(nwritten < 0) {
     if(result == CURLE_AGAIN) {
+      ctx->nw_out_blocked = 1;
       return NGHTTP2_ERR_WOULDBLOCK;
     }
     failf(data, "Failed sending HTTP2 data");
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
 
-  if(!nwritten)
+  if(!nwritten) {
+    ctx->nw_out_blocked = 1;
     return NGHTTP2_ERR_WOULDBLOCK;
+  }
 
   return nwritten;
 }
@@ -1693,7 +1701,8 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
       goto out;
   }
 
-  while(!rv && nghttp2_session_want_write(ctx->h2))
+  ctx->nw_out_blocked = 0;
+  while(!rv && !ctx->nw_out_blocked && nghttp2_session_want_write(ctx->h2))
     rv = nghttp2_session_send(ctx->h2);
 
 out:
@@ -1854,7 +1863,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   result = h2_progress_egress(cf, data);
-  if(result) {
+  if(result && result != CURLE_AGAIN) {
     *err = result;
     nread = -1;
   }
@@ -2026,6 +2035,20 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CF_DATA_SAVE(save, cf, data);
 
+  result = h2_progress_egress(cf, data);
+  if(result) {
+    *err = result;
+    nwritten = -1;
+    goto out;
+  }
+
+  result = h2_progress_ingress(cf, data);
+  if(result) {
+    *err = result;
+    nwritten = -1;
+    goto out;
+  }
+
   if(stream && stream->id != -1) {
     if(stream->close_handled) {
       infof(data, "stream %u closed", stream->id);
@@ -2039,6 +2062,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     /* If stream_id != -1, we have dispatched request HEADERS, and now
        are going to send or sending request body in DATA frame */
+    DEBUGASSERT(Curl_bufq_is_empty(&stream->sendbuf));
     nwritten = Curl_bufq_write(&stream->sendbuf, buf, len, err);
     if(nwritten < 0) {
       if(*err != CURLE_AGAIN)
@@ -2057,18 +2081,25 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
     }
 
-    result = h2_progress_ingress(cf, data);
-    if(result) {
+    result = h2_progress_egress(cf, data);
+    if(result && result != CURLE_AGAIN) {
       *err = result;
       nwritten = -1;
       goto out;
     }
 
-    result = h2_progress_egress(cf, data);
-    if(result) {
-      *err = result;
-      nwritten = -1;
-      goto out;
+    if(!Curl_bufq_is_empty(&stream->sendbuf)) {
+      /* Did not turn all data into HTTP/2 DATA frames,
+       * reset the streams send buffer and substract the not
+       * written amount from the returned length */
+      ssize_t blen = (ssize_t)Curl_bufq_len(&stream->sendbuf);
+      DEBUGF(LOG_CF(data, cf, "cf_send, stream buffer holds %zd/%zd unwritten",
+                    blen, nwritten));
+      if(nwritten > blen)
+        nwritten -= blen;
+      else /* defensive, should not happen */
+        nwritten = 0;
+      Curl_bufq_reset(&stream->sendbuf);
     }
 
     if(should_close_session(ctx)) {
@@ -2117,7 +2148,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     result = h2_progress_egress(cf, data);
-    if(result) {
+    if(result && result != CURLE_AGAIN) {
       *err = result;
       nwritten = -1;
       goto out;
@@ -2140,21 +2171,25 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 out:
   if(stream) {
     DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) -> %zd, %d, "
-                  "buffered=%zu, upload_left=%zu, stream-window=%d, "
-                  "connection-window=%d",
+                  "buffered=%zu, upload_left=%" CURL_FORMAT_CURL_OFF_T
+                  ", stream-window=%d, "
+                  "connection-window=%d, stream_send_buffer(%zu), "
+                  "nw_send_buffer(%zu)",
                   stream->id, len, nwritten, *err,
                   Curl_bufq_len(&stream->sendbuf),
                   (ssize_t)stream->upload_left,
                   nghttp2_session_get_stream_remote_window_size(
                     ctx->h2, stream->id),
-                  nghttp2_session_get_remote_window_size(ctx->h2)));
-    drain_stream(cf, data, stream);
+                  nghttp2_session_get_remote_window_size(ctx->h2),
+                  Curl_bufq_len(&stream->sendbuf),
+                  Curl_bufq_len(&ctx->outbufq)));
   }
   else {
     DEBUGF(LOG_CF(data, cf, "cf_send(len=%zu) -> %zd, %d, "
-                  "connection-window=%d",
+                  "connection-window=%d, nw_send_buffer(%zu)",
                   len, nwritten, *err,
-                  nghttp2_session_get_remote_window_size(ctx->h2)));
+                  nghttp2_session_get_remote_window_size(ctx->h2),
+                  Curl_bufq_len(&ctx->outbufq)));
   }
   CF_DATA_RESTORE(cf, save);
   return nwritten;
@@ -2273,7 +2308,6 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
   DEBUGASSERT(data);
   if(ctx && ctx->h2 && stream) {
     uint32_t window = pause? 0 : stream->local_window_size;
-    CURLcode result;
 
     int rv = nghttp2_session_set_local_window_size(ctx->h2,
                                                    NGHTTP2_FLAG_NONE,
@@ -2288,10 +2322,8 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
     if(!pause)
       drain_stream(cf, data, stream);
 
-    /* make sure the window update gets sent */
-    result = h2_progress_egress(cf, data);
-    if(result)
-      return result;
+    /* attempt to send the window update */
+    (void)h2_progress_egress(cf, data);
 
     if(!pause) {
       /* Unpausing a h2 transfer, requires it to be run again. The server
