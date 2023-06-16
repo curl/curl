@@ -1171,7 +1171,7 @@ sub runner_test_run {
 # Async call runner_clearlocks
 # Called by controller
 sub runnerac_clearlocks {
-    controlleripccall(\&runner_clearlocks, @_);
+    return controlleripccall(\&runner_clearlocks, @_);
 }
 
 # Async call runner_shutdown
@@ -1180,36 +1180,38 @@ sub runnerac_clearlocks {
 # Called by controller
 sub runnerac_shutdown {
     my ($runnerid)=$_[0];
-    controlleripccall(\&runner_shutdown, @_);
+    my $err = controlleripccall(\&runner_shutdown, @_);
 
     # These have no more use
     close($controllerw{$runnerid});
     undef $controllerw{$runnerid};
     close($controllerr{$runnerid});
     undef $controllerr{$runnerid};
+    return $err;
 }
 
 # Async call of runner_stopservers
 # Called by controller
 sub runnerac_stopservers {
-    controlleripccall(\&runner_stopservers, @_);
+    return controlleripccall(\&runner_stopservers, @_);
 }
 
 # Async call of runner_test_preprocess
 # Called by controller
 sub runnerac_test_preprocess {
-    controlleripccall(\&runner_test_preprocess, @_);
+    return controlleripccall(\&runner_test_preprocess, @_);
 }
 
 # Async call of runner_test_run
 # Called by controller
 sub runnerac_test_run {
-    controlleripccall(\&runner_test_run, @_);
+    return controlleripccall(\&runner_test_run, @_);
 }
 
 ###################################################################
 # Call an arbitrary function via IPC
 # The first argument is the function reference, the second is the runner ID
+# Returns 0 on success, -1 on error writing to runner
 # Called by controller (indirectly, via a more specific function)
 sub controlleripccall {
     my $funcref = shift @_;
@@ -1223,30 +1225,44 @@ sub controlleripccall {
     my $margs = freeze \@_;
 
     # Send IPC call via pipe
-    syswrite($controllerw{$runnerid}, (pack "L", length($margs)) . $margs);
+    my $err;
+    while(! defined ($err = syswrite($controllerw{$runnerid}, (pack "L", length($margs)) . $margs)) || $err <= 0) {
+        if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
+            # Runner has likely died
+            return -1;
+        }
+        # system call was interrupted, probably by ^C; restart it so we stay in sync
+    }
 
     if(!$multiprocess) {
         # Call the remote function here in single process mode
         ipcrecv();
      }
+     return 0;
 }
 
 ###################################################################
 # Receive async response of a previous call via IPC
-# The first return value is the runner ID
+# The first return value is the runner ID or undef on error
 # Called by controller
 sub runnerar {
     my ($runnerid) = @_;
     my $err;
     my $datalen;
     while(! defined ($err = sysread($controllerr{$runnerid}, $datalen, 4)) || $err <= 0) {
-        $!{EINTR} || die "error in runnerar: $!\n";
+        if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
+            # Runner is likely dead and closed the pipe
+            return undef;
+        }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
     my $len=unpack("L", $datalen);
     my $buf;
     while(! defined ($err = sysread($controllerr{$runnerid}, $buf, $len)) || $err <= 0) {
-        $!{EINTR} || die "error in runnerar: $!\n";
+        if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
+            # Runner is likely dead and closed the pipe
+            return undef;
+        }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
 
@@ -1260,7 +1276,9 @@ sub runnerar {
 }
 
 ###################################################################
-# Returns runner ID if a response from an async call is ready
+# Returns runner ID if a response from an async call is ready or error
+# First value is ready, second is error, however an error case shows up
+# as ready in Linux, so you can't trust it.
 # argument is 0 for nonblocking, undef for blocking, anything else for timeout
 # Called by controller
 sub runnerar_ready {
@@ -1279,18 +1297,25 @@ sub runnerar_ready {
     $maxfileno || die "Internal error: no runners are available to wait on\n";
 
     # Wait for any pipe from any runner to be ready
+    # This may be interrupted and return EINTR, but this is ignored and the
+    # caller will need to later call this function again.
     # TODO: this is relatively slow with hundreds of fds
-    # TODO: handle errors
-    if(select(my $rout=$rin, undef, undef, $blocking)) {
+    my $ein = $rin;
+    if(select(my $rout=$rin, undef, my $eout=$ein, $blocking) >= 1) {
         for my $fd (0..$maxfileno) {
+            # Return an error condition first in case it's both
+            if(vec($eout, $fd, 1)) {
+                return (undef, $idbyfileno{$fd});
+            }
             if(vec($rout, $fd, 1)) {
-                return $idbyfileno{$fd};
+                return ($idbyfileno{$fd}, undef);
             }
         }
         die "Internal pipe readiness inconsistency\n";
     }
-    return undef;
+    return (undef, undef);
 }
+
 
 ###################################################################
 # Cleanly abort and exit the runner
