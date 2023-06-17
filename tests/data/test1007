@@ -17,7 +17,7 @@ tftp
 TFTP send with invalid permission on server
  </name>
  <command>
--T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//invalid-file
+-T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//invalid-file -sS
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 This data will not be sent
@@ -38,5 +38,8 @@ blksize = 512
 timeout = 6
 filename = /invalid-file
 </protocol>
+<stderr mode="text">
+curl: (69) TFTP: Access Violation
+</stderr>
 </verify>
 </testcase>
