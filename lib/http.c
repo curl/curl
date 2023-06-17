@@ -2832,16 +2832,18 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
     }
     if(co) {
       struct Cookie *store = co;
+      size_t clen = 8; /* hold the size of the generated Cookie: header */
       /* now loop through all cookies that matched */
       while(co) {
         if(co->value) {
-          if(0 == count) {
+          size_t add;
+          if(!count) {
             result = Curl_dyn_addn(r, STRCONST("Cookie: "));
             if(result)
               break;
           }
-          if((Curl_dyn_len(r) + strlen(co->name) + strlen(co->value) + 1) >=
-             MAX_COOKIE_HEADER_LEN) {
+          add = strlen(co->name) + strlen(co->value) + 1;
+          if(clen + add >= MAX_COOKIE_HEADER_LEN) {
             infof(data, "Restricted outgoing cookies due to header size, "
                   "'%s' not sent", co->name);
             linecap = TRUE;
@@ -2851,6 +2853,7 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
                                  co->name, co->value);
           if(result)
             break;
+          clen += add + (count ? 2 : 0);
           count++;
         }
         co = co->next; /* next cookie please */
