@@ -1365,17 +1365,21 @@ static void conn_set_primary_ip(struct Curl_cfilter *cf,
 
   plen = sizeof(ssrem);
   memset(&ssrem, 0, plen);
-  if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
-    int error = SOCKERRNO;
-    failf(data, "getpeername() failed with errno %d: %s",
-          error, Curl_strerror(error, buffer, sizeof(buffer)));
-    return;
-  }
-  if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
-                       cf->conn->primary_ip, &port)) {
-    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    return;
+  if(!(data->conn->handler->protocol & CURLPROTO_TFTP)) {
+    /* TFTP does not connect the endpoint: getpeername() failed with errno
+       107: Transport endpoint is not connected */
+    if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
+      int error = SOCKERRNO;
+      failf(data, "getpeername() failed with errno %d: %s",
+            error, Curl_strerror(error, buffer, sizeof(buffer)));
+      return;
+    }
+    if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
+                         cf->conn->primary_ip, &port)) {
+      failf(data, "ssrem inet_ntop() failed with errno %d: %s",
+            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+      return;
+    }
   }
 #else
   cf->conn->primary_ip[0] = 0;
