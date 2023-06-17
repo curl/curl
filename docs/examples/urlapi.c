@@ -58,6 +58,9 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_CURLU, urlp);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
+    /* only allow HTTP, TFTP and SFTP */
+    curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,tftp,sftp");
+
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)
