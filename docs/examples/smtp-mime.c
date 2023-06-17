@@ -102,6 +102,9 @@ int main(void)
     recipients = curl_slist_append(recipients, CC);
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
+    /* allow one of the recipients to fail and still consider it okay */
+    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS, 1L);
+
     /* Build and set the message header list. */
     for(cpp = headers_text; *cpp; cpp++)
       headers = curl_slist_append(headers, *cpp);
