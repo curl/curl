@@ -135,6 +135,7 @@ struct cf_h2_ctx {
   BIT(goaway);
   BIT(enable_push);
   BIT(nw_out_blocked);
+  BIT(nw_out_sent);
 };
 
 /* How to access `call_data` from a cf_h2 filter */
@@ -657,6 +658,9 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
     }
     return result;
   }
+  else if(nwritten > 0) {
+      ctx->nw_out_sent = 1;
+  }
   DEBUGF(LOG_CF(data, cf, "nw send buffer flushed"));
   return CURLE_OK;
 }
@@ -695,7 +699,7 @@ static ssize_t send_callback(nghttp2_session *h2,
     ctx->nw_out_blocked = 1;
     return NGHTTP2_ERR_WOULDBLOCK;
   }
-
+  ctx->nw_out_sent = 1;
   return nwritten;
 }
 
@@ -2035,9 +2039,19 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CF_DATA_SAVE(save, cf, data);
 
+  ctx->nw_out_sent = 0;
   result = h2_progress_egress(cf, data);
   if(result) {
     *err = result;
+    nwritten = -1;
+    goto out;
+  }
+  else if(ctx->nw_out_sent) {
+    /* We have written pending output, the network socket may block
+     * on sending more, which is fatal if `buf` is the last part of
+     * an upload. Better return and let polling select on the network
+     * socket again. */
+    *err = CURLE_AGAIN;
     nwritten = -1;
     goto out;
   }
@@ -2170,6 +2184,39 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   if(stream) {
+    if(nwritten > 0 && !Curl_bufq_is_empty(&ctx->outbufq) &&
+        !stream->upload_left) {
+      CURLcode rv2;
+      int i;
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) of last upload "
+                    "chunk was not complete (%zu buffered), "
+                    "using timed write to finish",
+                    stream->id, len, Curl_bufq_len(&ctx->outbufq)));
+      for(i = 0; i < 1000; ++i) {
+        rv2 = nw_out_flush(cf, data);
+        if(!rv2) {
+          DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send() out flushed",
+                        stream->id));
+          break;
+        }
+        else if(rv2 == CURLE_AGAIN) {
+          DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send() pausing "
+                        "10ms before next flush attempt",
+                        stream->id));
+          Curl_wait_ms(10);
+        }
+        else {
+          *err = rv2;
+          nwritten = -1;
+          goto last_out;
+        }
+      }
+      if(rv2 == CURLE_AGAIN) {
+        failf(data, "[HTTP/2] [h2sid=%d] cf_send() failed to flush "
+                      "nw out buffer of %zu bytes",
+                      stream->id, Curl_bufq_len(&ctx->outbufq));
+      }
+    }
     DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) -> %zd, %d, "
                   "buffered=%zu, upload_left=%" CURL_FORMAT_CURL_OFF_T
                   ", stream-window=%d, "
@@ -2191,6 +2238,7 @@ out:
                   nghttp2_session_get_remote_window_size(ctx->h2),
                   Curl_bufq_len(&ctx->outbufq)));
   }
+last_out:
   CF_DATA_RESTORE(cf, save);
   return nwritten;
 }
