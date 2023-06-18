@@ -31,6 +31,7 @@ check_PROGRAMS = \
   chkspeed \
   cookie_interface \
   debug \
+  default-scheme \
   externalsocket \
   fileupload \
   ftp-wildcard \
