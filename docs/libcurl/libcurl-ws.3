@@ -58,6 +58,18 @@ arrive for the same frame.
 
 A message has an unknown size until the last frame header for the message has
 been received since only frames have set sizes.
+.SH "Raw mode"
+libcurl can be told to speak WebSocket in "raw mode" by setting the
+\fBCURLWS_RAW_MODE\fP bit to the \fICURLOPT_WS_OPTIONS(3)\fP option.
+
+Raw WebSocket means that libcurl will pass on the data from the network
+without parsing it leaving that entirely to the application. This mode assumes
+that the user of this knows WebSocket and can parse and figure out the data
+all by itself.
+
+This mode is intended for applications that already have a WebSocket
+parser/engine that want to switch over to use libcurl for enabling WebSocket,
+but keep parts of the existing software architecture.
 .SH PING
 WebSocket is designed to allow long-lived sessions and in order to keep the
 connections alive, both ends can send PING messages for the other end to
