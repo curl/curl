@@ -1370,7 +1370,8 @@ static void conn_set_primary_ip(struct Curl_cfilter *cf,
        107: Transport endpoint is not connected */
     if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
       int error = SOCKERRNO;
-      failf(data, "getpeername() failed with errno %d: %s",
+      failf(data, "%x getpeername() failed with errno %d: %s",
+            data->conn->handler->protocol,
             error, Curl_strerror(error, buffer, sizeof(buffer)));
       return;
     }
