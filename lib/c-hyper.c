@@ -71,9 +71,13 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
   DEBUGASSERT(conn);
   (void)ctx;
 
+  DEBUGF(infof(data, "Curl_hyper_recv(%zu)", buflen));
   result = Curl_read(data, conn->sockfd, (char *)buf, buflen, &nread);
+  if(!result && !nread)
+    result = CURLE_AGAIN;
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
+    DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> EAGAIN", buflen));
     if(data->hyp.read_waker)
       hyper_waker_free(data->hyp.read_waker);
     data->hyp.read_waker = hyper_context_waker(ctx);
@@ -87,6 +91,7 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
     failf(data, "Curl_read failed");
     return HYPER_IO_ERROR;
   }
+  DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> %zd", buflen, nread));
   return (size_t)nread;
 }
 
@@ -98,8 +103,12 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   CURLcode result;
   ssize_t nwrote;
 
+  DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
   result = Curl_write(data, conn->sockfd, (void *)buf, buflen, &nwrote);
+  if(!result && !nwrote)
+    result = CURLE_AGAIN;
   if(result == CURLE_AGAIN) {
+    DEBUGF(infof(data, "Curl_hyper_send(%zu) -> EAGAIN", buflen));
     /* would block, register interest */
     if(data->hyp.write_waker)
       hyper_waker_free(data->hyp.write_waker);
@@ -114,6 +123,7 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
     failf(data, "Curl_write failed");
     return HYPER_IO_ERROR;
   }
+  DEBUGF(infof(data, "Curl_hyper_send(%zu) -> %zd", buflen, nwrote));
   return (size_t)nwrote;
 }
 
@@ -433,8 +443,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       break;
     }
     else if(t != HYPER_TASK_RESPONSE) {
-      *didwhat = KEEP_RECV;
-      break;
+      continue;
     }
     /* HYPER_TASK_RESPONSE */
 

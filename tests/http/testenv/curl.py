@@ -491,7 +491,7 @@ class CurlClient:
         elif self.env.verbose > 1:
             args.extend(['--trace', self._tracefile])
         elif not self._silent:
-            args.extend(['-v'])
+            args.extend(['-v', '--trace-time', '--trace-ids'])
 
         for url in urls:
             u = urlparse(urls[0])
