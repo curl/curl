@@ -29,6 +29,7 @@ check_PROGRAMS = \
   anyauthput \
   certinfo \
   chkspeed \
+  connect-to \
   cookie_interface \
   debug \
   default-scheme \
