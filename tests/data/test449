@@ -37,10 +37,10 @@ VALUE2=curl
 BLANK=
 </setenv>
 <name>
-Environment variable within config file
+Environment variables in config file w/o [expand]
 </name>
 <file name="%LOGDIR/cmd">
-[expand] -d 1{{FUNVALUE}}2{{VALUE2}}3{{CURL_NOT_SET}}4{{BLANK}}5\{{verbatim}}6{{not.good}}7{{}}
+-d 1{{FUNVALUE}}2{{VALUE2}}3{{CURL_NOT_SET}}4{{BLANK}}5\{{verbatim}}6{{not.good}}7{{}}
 </file>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
@@ -55,10 +55,10 @@ POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 47
+Content-Length: 83
 Content-Type: application/x-www-form-urlencoded
 
-1contents2curl345{{verbatim}}6{{not.good}}7{{}}
+1{{FUNVALUE}}2{{VALUE2}}3{{CURL_NOT_SET}}4{{BLANK}}5\{{verbatim}}6{{not.good}}7{{}}
 </protocol>
 </verify>
 </testcase>

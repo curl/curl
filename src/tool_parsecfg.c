@@ -227,6 +227,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     while(my_get_line(file, &buf, &fileerror)) {
       int res;
       bool alloced_param = FALSE;
+      bool expand = FALSE;
       lineno++;
       line = curlx_dyn_ptr(&buf);
       if(!line) {
@@ -247,6 +248,14 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       case '\0':
         curlx_dyn_reset(&buf);
         continue;
+      }
+
+      /* check for magic commands before the option */
+      if(!strncmp(line, "[expand]", 8)) {
+        expand = TRUE;
+        line += 8;
+        while(*line && ISSPACE(*line))
+          line++;
       }
 
       /* the option keywords starts here */
@@ -315,7 +324,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           param = NULL;
       }
 
-      if(param) {
+      if(param && expand) {
         struct curlx_dynbuf nbuf;
         res = envreplace(global, param, &nbuf, &replaced);
         if(res)
