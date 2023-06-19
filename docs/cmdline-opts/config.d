@@ -26,16 +26,19 @@ If the parameter contains whitespace or starts with a colon (:) or equals sign
 quotes the following escape sequences are available: \\\\, \\", \\t, \\n, \\r
 and \\v. A backslash preceding any other letter is ignored.
 
-Environment variable contents can be used in parameters using {{name}}. This
-gets the contents of the environment variable "name" inserted, or a blank if
-the name does not exist as an environment variable. Insert "{{" verbatim
-in the string by prefixing it with a backslash, like "\\{{". (Added in
-8.2.0)
-
 If the first non-blank column of a config line is a '#' character, that line
 will be treated as a comment.
 
 Only write one option per physical line in the config file.
+
+Environment variable contents can be used in option parameters using
+"{{name}}" (without the quotes) if the line starts with the special
+instruction "[expand]". This gets the contents of the environment variable
+"name" inserted, or a blank if the name does not exist as an environment
+variable. Insert "{{" verbatim in the string by prefixing it with a backslash,
+like "\\{{". (Added in 8.2.0) Example:
+
+ [expand] url = "https://example.com/api/{{USER}}/method"
 
 Specify the filename to --config as '-' to make curl read the file from stdin.
 
