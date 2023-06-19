@@ -590,6 +590,7 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
     *err = CURLE_AGAIN;
     return -1;
   }
+  *err = CURLE_OK;
   return nwritten;
 }
 
