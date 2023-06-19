@@ -141,7 +141,6 @@ COMPLICATED_EXAMPLES = \
   multi-event.c \
   multi-uv.c \
   multithread.c \
-  opensslthreadlock.c \
   sessioninfo.c \
   smooth-gtk-thread.c \
   synctime.c \
