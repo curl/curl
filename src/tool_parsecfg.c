@@ -87,7 +87,7 @@ static int envreplace(struct GlobalConfig *global,
   *replaced = FALSE;
   curlx_dyn_init(out, MAX_CONFIG_LINE_LENGTH);
   do {
-    envp = strstr(line, "${");
+    envp = strstr(line, "{{");
     if((envp > line) && envp[-1] == '\\') {
       /* preceding backslash, we want this verbatim */
 
@@ -96,8 +96,8 @@ static int envreplace(struct GlobalConfig *global,
       if(result)
         return 2;
 
-      /* output '${' then continue from here */
-      result = curlx_dyn_addn(out, "${", 2);
+      /* output '{{' then continue from here */
+      result = curlx_dyn_addn(out, "{{", 2);
       if(result)
         return 2;
       line = &envp[2];
@@ -106,11 +106,11 @@ static int envreplace(struct GlobalConfig *global,
       char name[128];
       size_t nlen;
       size_t i;
-      char *clp = strchr(envp, '}');
+      char *clp = strstr(envp, "}}");
 
       if(!clp) {
         /* uneven braces */
-        warnf(global, "missing close brace in config file");
+        warnf(global, "missing close '}}' in config file");
         break;
       }
 
@@ -118,7 +118,7 @@ static int envreplace(struct GlobalConfig *global,
       if(!nlen || (nlen >= sizeof(name))) {
         warnf(global, "odd env variable name in config file");
         /* insert the text as-is since this is not an env variable */
-        result = curlx_dyn_addn(out, line, clp - line + 1);
+        result = curlx_dyn_addn(out, line, clp - line + 2);
         if(result)
           return 2;
       }
@@ -138,7 +138,7 @@ static int envreplace(struct GlobalConfig *global,
         if(i != nlen) {
           warnf(global, "weird-looking environment name in config file");
           /* insert the text as-is since this is not an env variable */
-          result = curlx_dyn_addn(out, envp, clp - envp + 1);
+          result = curlx_dyn_addn(out, envp, clp - envp + 2);
           if(result)
             return 2;
         }
@@ -156,7 +156,7 @@ static int envreplace(struct GlobalConfig *global,
           added = true;
         }
       }
-      line = &clp[1];
+      line = &clp[2];
     }
 
   } while(envp);
