@@ -256,6 +256,19 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         line += 8;
         while(*line && ISSPACE(*line))
           line++;
+
+        switch(*line) {
+        case '#':
+        case '/':
+        case '\r':
+        case '\n':
+        case '*':
+        case '\0':
+          curlx_dyn_reset(&buf);
+          warnf(operation->global, "%s:%d: warning: stand-alone expand "
+                "instruction", filename, lineno, option);
+          continue;
+        }
       }
 
       /* the option keywords starts here */
