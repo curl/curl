@@ -153,8 +153,8 @@ jobs:
         - CC: clang
           CXX: clang++
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
-        - CC: gcc-10
-          CXX: g++-10
+        - CC: gcc-9
+          CXX: g++-9
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         build:
         - name: OpenSSL
@@ -167,7 +167,7 @@ jobs:
           install: nghttp2 openssl libssh2
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON
     steps:
-    - run: echo libtool autoconf automake pkg-config gcc@10 ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+    - run: echo libtool autoconf automake pkg-config gcc@9 ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
     - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
