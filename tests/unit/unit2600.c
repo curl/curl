@@ -347,7 +347,7 @@ static void test_connect(struct test_case *tc)
 
 /*
  * How these test cases work:
- * - replace the creation of the TCP socket filter with out test filter
+ * - replace the creation of the TCP socket filter with our test filter
  * - test filter does nothing and reports failure after configured delay
  * - we feed addresses into the resolve cache to simulate different cases
  * - we monitor how many instances of ipv4/v6 attempts are made and when
