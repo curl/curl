@@ -4,7 +4,7 @@ curl and libcurl 8.2.0
  Command line options:         255
  curl_easy_setopt() options:   303
  Public functions in libcurl:  91
- Contributors:                 2900
+ Contributors:                 2903
 
 This release includes the following changes:
 
@@ -18,6 +18,7 @@ This release includes the following bugfixes:
 
  o bufq: make write/pass methods more robust [21]
  o build: drop unused/redundant `HAVE_WINLDAP_H` [25]
+ o cf-socket: skip getpeername()/getsockname for TFTP [65]
  o circleci: install impacket & wolfssl 5.6.0 [1]
  o cmake: add support for "unity" builds [13]
  o configure: fix run-compiler for old /bin/sh [4]
@@ -33,18 +34,30 @@ This release includes the following bugfixes:
  o docs: fix missing parameter names in examples [41]
  o docs: update CURLOPT_UPLOAD.3 [63]
  o docs: update HTTP3.md for newer ngtcp2 and nghttp3 [28]
+ o example/connect-to: show CURLOPT_CONNECT_TO [47]
  o example/crawler: also set CURLOPT_AUTOREFERER [35]
+ o example/crawler: make it use a few more options
+ o example/default-scheme: set the default scheme for schemeless URLs [67]
+ o example/hsts-preload: show one way to HSTS preload [68]
  o example/http2-download: set CURLOPT_BUFFERSIZE [34]
  o example/ipv6: feature CURLOPT_ADDRESS_SCOPE in use [27]
+ o example/opensslthreadlock: remove [59]
  o examples/ftpuploadresume.c: add use of CURLOPT_ACCEPTTIMEOUT_MS [39]
+ o examples/http-options: show how to send "OPTIONS *" [69]
  o examples/https.c: use CURLOPT_CA_CACHE_TIMEOUT [19]
  o examples/multi-debugcallback.c: avoid the bool typedef [29]
+ o examples/smtp-mime: use CURLOPT_MAIL_RCPT_ALLOWFAILS [71]
  o examples/unixsocket.c: example using CURLOPT_UNIX_SOCKET_PATH [40]
  o examples/websocket.c: websocket example using CONNECT_ONLY [17]
+ o examples: make use of CURLOPT_(REDIR_|)PROTOCOLS_STR [70]
  o fopen: fix conversion warning on 32-bit Android [49]
+ o HTTP/2: upload handling fixes [56]
  o http2: better support for --limit-rate [7]
  o http2: fix variable type [50]
  o HTTP3.md: update openssl version [57]
+ o http: rectify the outgoing Cookie: header field size check [72]
+ o hyper: unslow [51]
+ o imap: Provide method to disable SASL if it is advertised [75]
  o libcurl-url.3: also mention CURLUPART_ZONEID
  o libcurl-ws.3. WebSocket API overview [48]
  o libssh2: provide error message when setting host key type fails [9]
@@ -52,8 +65,10 @@ This release includes the following bugfixes:
  o ngtcp2: build with 0.16.0 and nghttp3 0.12.0 [33]
  o ngtcp2: use ever increasing timestamp in io [32]
  o runtests: abort test run after failure without -a [3]
+ o runtests: better handle ^C during slow tests
  o runtests: create multiple test runners when requested [20]
  o runtests: make test file directories in log/N [44]
+ o runtests: rename server command file
  o runtests; give each server a unique log lock file [43]
  o scripts: Fix GHA matrix job detection in cijobs.pl
  o system.h: remove __IBMC__/__IBMCPP__ guards and apply to all z/OS compiles [10]
@@ -61,6 +76,7 @@ This release includes the following bugfixes:
  o tests/servers.pm: pick unused port number with a server socket [16]
  o tests/servers: generate temp names in /tmp for unix domain sockets [6]
  o tests: fix error messages & handling around sockets [30]
+ o tests: improve reliability of TFTP tests
  o testutil: allow multiple %-operators on the same line [62]
  o timeval: use CLOCK_MONOTONIC_RAW if available [52]
  o tls13-ciphers.d: include Schannel [36]
@@ -92,12 +108,14 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   ad0p on github, Alejandro R. Sedeño, Andy Fiddaman, Anssi Kolehmainen,
-  atjg on github, Boris Verkhovskiy, Cristian Rodríguez, Dan Fandrich,
-  Daniel Stenberg, Emanuele Torre, Harry Sintonen, Igor Todorovski,
-  JustAnotherArchivist on github, Karthikdasari0423, lizhuang0630 on github,
-  MaeIsBad on github, Marcel Raad, Mark Seuffert, Oleg Jukovec, Pedro Henrique,
-  Philip Heiduck, Raito Bezarius, Stefan Eissing, Viktor Szakats, Wyatt OʼDay
-  (25 contributors)
+  atjg on github, Boris Verkhovskiy, Chris Talbot, Cristian Rodríguez,
+  Dan Fandrich, Daniel Stenberg, Dion Williams, Emanuele Torre, Gisle Vanem,
+  Harry Sintonen, Igor Todorovski, JustAnotherArchivist on github,
+  Karthikdasari0423, lizhuang0630 on github, MaeIsBad on github, Marcel Raad,
+  Mark Seuffert, Oleg Jukovec, Pedro Henrique, Philip Heiduck, Raito Bezarius,
+  Ray Satiro, Sean McArthur, Sergey Alirzaev, Stefan Eissing, Viktor Szakats,
+  Wyatt OʼDay
+  (31 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -147,16 +165,28 @@ References to bug reports and discussions on issues:
  [44] = https://curl.se/bug/?i=11267
  [45] = https://curl.se/bug/?i=11261
  [46] = https://curl.se/bug/?i=11317
+ [47] = https://curl.se/bug/?i=11340
  [48] = https://curl.se/bug/?i=11314
  [49] = https://curl.se/bug/?i=11313
  [50] = https://curl.se/bug/?i=11312
+ [51] = https://curl.se/bug/?i=11203
  [52] = https://curl.se/bug/?i=11291
  [53] = https://curl.se/bug/?i=11185
  [54] = https://curl.se/bug/?i=11185
  [55] = https://curl.se/bug/?i=11304
+ [56] = https://curl.se/bug/?i=11342
  [57] = https://curl.se/bug/?i=11297
  [58] = https://curl.se/bug/?i=11306
+ [59] = https://curl.se/bug/?i=11341
  [60] = https://curl.se/bug/?i=11303
  [61] = https://curl.se/bug/?i=11303
  [62] = https://curl.se/bug/?i=11303
  [63] = https://curl.se/bug/?i=11300
+ [65] = https://curl.se/bug/?i=11332
+ [67] = https://curl.se/bug/?i=11338
+ [68] = https://curl.se/bug/?i=11337
+ [69] = https://curl.se/bug/?i=11333
+ [70] = https://curl.se/bug/?i=11334
+ [71] = https://curl.se/bug/?i=11335
+ [72] = https://curl.se/bug/?i=11331
+ [75] = https://curl.se/bug/?i=10041
