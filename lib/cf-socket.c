@@ -1360,8 +1360,8 @@ out:
 static void conn_set_primary_ip(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
-  struct cf_socket_ctx *ctx = cf->ctx;
 #ifdef HAVE_GETPEERNAME
+  struct cf_socket_ctx *ctx = cf->ctx;
   if(!(data->conn->handler->protocol & CURLPROTO_TFTP)) {
     /* TFTP does not connect the endpoint: getpeername() failed with errno
        107: Transport endpoint is not connected */
