@@ -105,6 +105,7 @@ use testutil qw(
     subbase64
     subnewlines
     );
+use valgrind;
 
 
 #######################################################################
