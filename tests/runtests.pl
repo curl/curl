@@ -1504,13 +1504,16 @@ sub singletest_check {
 
             my $filename=$hash{'name'};
             if(!$filename) {
-                logmsg "ERROR: section verify=>file$partsuffix ".
+                logmsg " $testnum: IGNORED: section verify=>file$partsuffix ".
                        "has no name attribute\n";
                 if (runnerac_stopservers($runnerid)) {
                     logmsg "ERROR: runner $runnerid seems to have died\n";
                 } else {
 
                     # TODO: this is a blocking call that will stall the controller,
+                    if($verbose) {
+                        logmsg "WARNING: blocking call in async function\n";
+                    }
                     # but this error condition should never happen except during
                     # development.
                     my ($rid, $unexpected, $logs) = runnerar($runnerid);
@@ -1596,7 +1599,7 @@ sub singletest_check {
             logmsg sprintf("\n%s returned $cmdres, when expecting %s\n",
                            (!$tool)?"curl":$tool, $errorcode);
         }
-        logmsg " exit FAILED\n";
+        logmsg " $testnum: exit FAILED\n";
         # timestamp test result verification end
         $timevrfyend{$testnum} = Time::HiRes::time();
         return -1;

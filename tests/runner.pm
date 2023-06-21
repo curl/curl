@@ -515,7 +515,7 @@ sub torture {
             }
         }
         if($fail) {
-            logmsg " Failed on function number $limit in test.\n",
+            logmsg " $testnum: torture FAILED: function number $limit in test.\n",
             " invoke with \"-t$limit\" to repeat this single case.\n";
             stopservers($verbose);
             return 1;
@@ -712,7 +712,7 @@ sub singletest_prepare {
         my $filename=$fileattr{'name'};
         if(@inputfile || $filename) {
             if(!$filename) {
-                logmsg "ERROR: section client=>file has no name attribute\n";
+                logmsg " $testnum: IGNORED: section client=>file has no name attribute\n";
                 return -1;
             }
             my $fileContent = join('', @inputfile);
@@ -846,14 +846,14 @@ sub singletest_run {
         }
 
         if(! -f $CMDLINE) {
-            logmsg "The tool set in the test case for this: '$tool' does not exist\n";
+            logmsg " $testnum: IGNORED: The tool set in the test case for this: '$tool' does not exist\n";
             return (-1, 0, 0, "", "", 0);
         }
         $DBGCURL=$CMDLINE;
     }
 
     if($fail_due_event_based) {
-        logmsg "This test cannot run event based\n";
+        logmsg " $testnum: IGNORED: This test cannot run event based\n";
         return (-1, 0, 0, "", "", 0);
     }
 
@@ -1026,7 +1026,7 @@ sub singletest_clean {
         foreach my $server (@killtestservers) {
             chomp $server;
             if(stopserver($server)) {
-                logmsg " killserver FAILED\n";
+                logmsg " $testnum: killserver FAILED\n";
                 return 1; # normal error if asked to fail on unexpected alive
             }
         }
@@ -1050,7 +1050,7 @@ sub singletest_postcheck {
             # Must run the postcheck command in torture mode in order
             # to clean up, but the result can't be relied upon.
             if($rc != 0 && !$torture) {
-                logmsg " postcheck FAILED\n";
+                logmsg " $testnum: postcheck FAILED\n";
                 return -1;
             }
         }
