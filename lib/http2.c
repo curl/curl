@@ -1584,16 +1584,16 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
     *err = CURLE_SEND_ERROR; /* trigger Curl_retry_request() later */
     return -1;
   }
-  else if(stream->reset) {
-    failf(data, "HTTP/2 stream %u was reset", stream->id);
-    *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
-    return -1;
-  }
   else if(stream->error != NGHTTP2_NO_ERROR) {
     failf(data, "HTTP/2 stream %u was not closed cleanly: %s (err %u)",
           stream->id, nghttp2_http2_strerror(stream->error),
           stream->error);
     *err = CURLE_HTTP2_STREAM;
+    return -1;
+  }
+  else if(stream->reset) {
+    failf(data, "HTTP/2 stream %u was reset", stream->id);
+    *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
     return -1;
   }
 

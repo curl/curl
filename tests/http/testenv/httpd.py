@@ -376,6 +376,9 @@ class Httpd:
                 f'    <Location /curltest/tweak>',
                 f'      SetHandler curltest-tweak',
                 f'    </Location>',
+                f'    <Location /curltest/1_1>',
+                f'      SetHandler curltest-1_1-required',
+                f'    </Location>',
             ])
         if self._auth_digest:
             lines.extend([
