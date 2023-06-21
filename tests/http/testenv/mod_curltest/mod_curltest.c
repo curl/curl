@@ -37,6 +37,7 @@ static void curltest_hooks(apr_pool_t *pool);
 static int curltest_echo_handler(request_rec *r);
 static int curltest_put_handler(request_rec *r);
 static int curltest_tweak_handler(request_rec *r);
+static int curltest_1_1_required(request_rec *r);
 
 AP_DECLARE_MODULE(curltest) = {
   STANDARD20_MODULE_STUFF,
@@ -84,6 +85,7 @@ static void curltest_hooks(apr_pool_t *pool)
   ap_hook_handler(curltest_echo_handler, NULL, NULL, APR_HOOK_MIDDLE);
   ap_hook_handler(curltest_put_handler, NULL, NULL, APR_HOOK_MIDDLE);
   ap_hook_handler(curltest_tweak_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_1_1_required, NULL, NULL, APR_HOOK_MIDDLE);
 }
 
 #define SECS_PER_HOUR      (60*60)
@@ -400,7 +402,7 @@ cleanup:
   if(rv == APR_SUCCESS) {
     return OK;
   }
-  if(error_bucket && 0) {
+  if(error_bucket) {
     http_status = ap_map_http_request_error(rv, HTTP_BAD_REQUEST);
     b = ap_bucket_error_create(http_status, NULL, r->pool, c->bucket_alloc);
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r,
@@ -512,3 +514,70 @@ cleanup:
   return DECLINED;
 }
 
+static int curltest_1_1_required(request_rec *r)
+{
+  conn_rec *c = r->connection;
+  apr_bucket_brigade *bb;
+  apr_bucket *b;
+  apr_status_t rv;
+  char buffer[16*1024];
+  const char *ct;
+  const char *request_id = "none";
+  apr_time_t chunk_delay = 0;
+  apr_array_header_t *args = NULL;
+  long l;
+  int i;
+
+  if(strcmp(r->handler, "curltest-1_1-required")) {
+    return DECLINED;
+  }
+
+  if (HTTP_VERSION_MAJOR(r->proto_num) > 1) {
+    apr_table_setn(r->notes, "ssl-renegotiate-forbidden", "1");
+    ap_die(HTTP_FORBIDDEN, r);
+    return OK;
+  }
+
+  ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "1_1_handler: processing");
+  r->status = 200;
+  r->clength = -1;
+  r->chunked = 1;
+  apr_table_unset(r->headers_out, "Content-Length");
+  /* Discourage content-encodings */
+  apr_table_unset(r->headers_out, "Content-Encoding");
+  apr_table_setn(r->subprocess_env, "no-brotli", "1");
+  apr_table_setn(r->subprocess_env, "no-gzip", "1");
+
+  ct = apr_table_get(r->headers_in, "content-type");
+  ap_set_content_type(r, ct? ct : "text/plain");
+
+  bb = apr_brigade_create(r->pool, c->bucket_alloc);
+  /* flush response */
+  b = apr_bucket_flush_create(c->bucket_alloc);
+  APR_BRIGADE_INSERT_TAIL(bb, b);
+  rv = ap_pass_brigade(r->output_filters, bb);
+  if (APR_SUCCESS != rv) goto cleanup;
+
+  /* we are done */
+  rv = apr_brigade_printf(bb, NULL, NULL, "well done!");
+  if(APR_SUCCESS != rv) goto cleanup;
+  b = apr_bucket_eos_create(c->bucket_alloc);
+  APR_BRIGADE_INSERT_TAIL(bb, b);
+  ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "1_1_handler: request read");
+
+  rv = ap_pass_brigade(r->output_filters, bb);
+
+cleanup:
+  if(rv == APR_SUCCESS
+     || r->status != HTTP_OK
+     || c->aborted) {
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "1_1_handler: done");
+    return OK;
+  }
+  else {
+    /* no way to know what type of error occurred */
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "1_1_handler failed");
+    return AP_FILTER_ERROR;
+  }
+  return DECLINED;
+}
