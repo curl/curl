@@ -1608,6 +1608,7 @@ sub singletest_check {
             my $cmdtype = $cmdhash{'type'} || "default";
             logmsg "\n** ALERT! memory tracking with no output file?\n"
                 if(!$cmdtype eq "perl");
+            $ok .= "-"; # problem with memory checking
         }
         else {
             my @memdata=`$memanalyze "$logdir/$MEMDUMP"`;
