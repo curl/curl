@@ -92,3 +92,20 @@ class TestErrors:
             if 'exitcode' not in s or s['exitcode'] not in [18, 55, 56, 92, 95]:
                 invalid_stats.append(f'request {idx} exit with {s["exitcode"]}\n{s}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
+
+    # access a resource that, on h2, RST the stream with HTTP_1_1_REQUIRED
+    def test_05_03_required(self, env: Env, httpd, nghttpx, repeat):
+        curl = CurlClient(env=env)
+        proto = 'http/1.1'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/1_1'
+        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        r.check_exit_code(0)
+        r.check_response(http_status=200, count=1)
+        proto = 'h2'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/1_1'
+        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        r.check_exit_code(0)
+        r.check_response(http_status=200, count=1)
+        # check that we did a downgrade
+        assert r.stats[0]['http_version'] == '1.1', r.dump_logs()
+
