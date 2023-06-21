@@ -23,7 +23,6 @@
  1.4 alt-svc sharing
  1.5 get rid of PATH_MAX
  1.6 native IDN support on macOS
- 1.7 Support HTTP/2 for HTTP(S) proxies
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
  1.10 auto-detect proxy
@@ -257,12 +256,6 @@
  and an IDN host name is used in a URL.
 
  See initial work in https://github.com/curl/curl/pull/5371
-
-1.7 Support HTTP/2 for HTTP(S) proxies
-
- Support for doing HTTP/2 to HTTP and HTTPS proxies is still missing.
-
- See https://github.com/curl/curl/issues/3570
 
 1.8 CURLOPT_RESOLVE for any port number
 
