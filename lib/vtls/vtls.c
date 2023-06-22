@@ -1592,6 +1592,7 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
   ssize_t nread;
 
   CF_DATA_SAVE(save, cf, data);
+  *err = CURLE_OK;
   nread = Curl_ssl->recv_plain(cf, data, buf, len, err);
   if(nread > 0) {
     DEBUGASSERT((size_t)nread <= len);
