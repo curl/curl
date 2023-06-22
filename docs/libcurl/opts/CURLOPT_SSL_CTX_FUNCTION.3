@@ -61,6 +61,9 @@ necessary. For example, you can use this function to call library-specific
 callbacks to add additional validation code for certificates, and even to
 change the actual URI of an HTTPS request.
 
+For OpenSSL, asynchronous certificate verification via
+\fISSL_set_retry_verify\fP is supported. (Added in 8.3.0)
+
 WARNING: The \fICURLOPT_SSL_CTX_FUNCTION(3)\fP callback allows the application
 to reach in and modify SSL details in the connection without libcurl itself
 knowing anything about it, which then subsequently can lead to libcurl
