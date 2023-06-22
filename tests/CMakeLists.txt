@@ -88,6 +88,6 @@ add_runtests(test-am        "-a -am")
 add_runtests(test-full      "-a -p -r")
 # ~flaky means that it'll ignore results of tests using the flaky keyword
 add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
-add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm")
+add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j2")
 add_runtests(test-torture   "-a -t")
 add_runtests(test-event     "-a -e")
