@@ -62,7 +62,7 @@ if(WIN32)
 endif()
 
 # CURL_CFILES, CURLX_CFILES, CURL_HFILES come from Makefile.inc
-if(NOT BUILD_SHARED_LIBS)
+if(BUILD_STATIC_CURL)
   set(CURLX_CFILES ../lib/dynbuf.c)
 endif()
 
@@ -107,7 +107,7 @@ include_directories(
   )
 
 #Build curl executable
-target_link_libraries(${EXE_NAME} libcurl ${CURL_LIBS})
+target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 
 ################################################################################
 
