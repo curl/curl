@@ -132,9 +132,6 @@
 /* Use Windows LDAP implementation */
 #cmakedefine USE_WIN32_LDAP 1
 
-/* when not building a shared library */
-#cmakedefine CURL_STATICLIB 1
-
 /* your Entropy Gathering Daemon socket pathname */
 #cmakedefine EGD_SOCKET ${EGD_SOCKET}
 
