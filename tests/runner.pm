@@ -189,7 +189,10 @@ sub runner_init {
             # TODO: set up better signal handlers
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
-            $SIG{USR1} = 'IGNORE';
+            eval {
+                # some msys2 perl versions don't define SIGUSR1
+                $SIG{USR1} = 'IGNORE';
+            };
 
             $thisrunnerid = $$;
             print "Runner $thisrunnerid starting\n" if($verbose);
