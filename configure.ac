@@ -438,7 +438,7 @@ Select from these:
 fi
 
 AC_ARG_WITH(darwinssl,,
-  AC_MSG_ERROR([--with-darwin-ssl no longer works!]))
+  AC_MSG_ERROR([--with-darwin-ssl and --without-darwin-ssl no longer work!]))
 
 dnl
 dnl Detect the canonical host and target build environment
@@ -2204,7 +2204,7 @@ fi
 AM_CONDITIONAL([USE_GSASL], [test "$curl_gsasl_msg" = "enabled"])
 
 AC_ARG_WITH(libmetalink,,
-  AC_MSG_ERROR([--with-libmetalink no longer works!]))
+  AC_MSG_ERROR([--with-libmetalink and --without-libmetalink no longer work!]))
 
 dnl **********************************************************************
 dnl Check for the presence of LIBSSH2 libraries and headers
