@@ -3864,6 +3864,12 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       return CURLE_OK;
     }
 #endif
+#ifdef SSL_ERROR_WANT_RETRY_VERIFY
+    if(SSL_ERROR_WANT_RETRY_VERIFY == detail) {
+      connssl->connecting_state = ssl_connect_2;
+      return CURLE_OK;
+    }
+#endif
     else if(backend->io_result == CURLE_AGAIN) {
       return CURLE_OK;
     }
