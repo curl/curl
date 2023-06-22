@@ -221,6 +221,24 @@ static void cf_h2_proxy_ctx_free(struct cf_h2_proxy_ctx *ctx)
   }
 }
 
+static void drain_tunnel(struct Curl_cfilter *cf,
+                         struct Curl_easy *data,
+                         struct tunnel_stream *tunnel)
+{
+  unsigned char bits;
+
+  (void)cf;
+  bits = CURL_CSELECT_IN;
+  if(!tunnel->closed && !tunnel->reset && tunnel->upload_blocked_len)
+    bits |= CURL_CSELECT_OUT;
+  if(data->state.dselect_bits != bits) {
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] DRAIN dselect_bits=%x",
+                  tunnel->stream_id, bits));
+    data->state.dselect_bits = bits;
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  }
+}
+
 static ssize_t proxy_nw_in_reader(void *reader_ctx,
                                   unsigned char *buf, size_t buflen,
                                   CURLcode *err)
@@ -230,7 +248,7 @@ static ssize_t proxy_nw_in_reader(void *reader_ctx,
   ssize_t nread;
 
   nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, buflen, err);
-  DEBUGF(LOG_CF(data, cf, "nw_in recv(len=%zu) -> %zd, %d",
+  DEBUGF(LOG_CF(data, cf, "nw_in_reader(len=%zu) -> %zd, %d",
          buflen, nread, *err));
   return nread;
 }
@@ -244,7 +262,8 @@ static ssize_t proxy_h2_nw_out_writer(void *writer_ctx,
   ssize_t nwritten;
 
   nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, buflen, err);
-  DEBUGF(LOG_CF(data, cf, "nw_out send(len=%zu) -> %zd", buflen, nwritten));
+  DEBUGF(LOG_CF(data, cf, "nw_out_writer(len=%zu) -> %zd, %d",
+                buflen, nwritten, *err));
   return nwritten;
 }
 
@@ -435,14 +454,6 @@ static int proxy_h2_process_pending_input(struct Curl_cfilter *cf,
       DEBUGF(LOG_CF(data, cf, "process_pending_input: %zu bytes left "
                     "in connection buffer", Curl_bufq_len(&ctx->inbufq)));
     }
-  }
-
-  if(nghttp2_session_check_request_allowed(ctx->h2) == 0) {
-    /* No more requests are allowed in the current session, so
-       the connection may not be reused. This is set when a
-       GOAWAY frame has been received or when the limit of stream
-       identifiers has been reached. */
-    connclose(cf->conn, "http/2: No new requests allowed");
   }
 
   return 0;
@@ -1230,6 +1241,12 @@ static ssize_t cf_h2_proxy_recv(struct Curl_cfilter *cf,
   }
 
 out:
+  if(!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) &&
+     (nread >= 0 || *err == CURLE_AGAIN)) {
+    /* data pending and no fatal error to report. Need to trigger
+     * draining to avoid stalling when no socket events happen. */
+    drain_tunnel(cf, data, &ctx->tunnel);
+  }
   DEBUGF(LOG_CF(data, cf, "[h2sid=%u] cf_recv(len=%zu) -> %zd %d",
                 ctx->tunnel.stream_id, len, nread, *err));
   CF_DATA_RESTORE(cf, save);
@@ -1367,6 +1384,59 @@ out:
   return nwritten;
 }
 
+static bool proxy_h2_connisalive(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 bool *input_pending)
+{
+  struct cf_h2_proxy_ctx *ctx = cf->ctx;
+  bool alive = TRUE;
+
+  *input_pending = FALSE;
+  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
+    return FALSE;
+
+  if(*input_pending) {
+    /* This happens before we've sent off a request and the connection is
+       not in use by any other transfer, there shouldn't be any data here,
+       only "protocol frames" */
+    CURLcode result;
+    ssize_t nread = -1;
+
+    *input_pending = FALSE;
+    nread = Curl_bufq_slurp(&ctx->inbufq, proxy_nw_in_reader, cf, &result);
+    if(nread != -1) {
+      if(proxy_h2_process_pending_input(cf, data, &result) < 0)
+        /* immediate error, considered dead */
+        alive = FALSE;
+      else {
+        alive = !should_close_session(ctx);
+      }
+    }
+    else if(result != CURLE_AGAIN) {
+      /* the read failed so let's say this is dead anyway */
+      alive = FALSE;
+    }
+  }
+
+  return alive;
+}
+
+static bool cf_h2_proxy_is_alive(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 bool *input_pending)
+{
+  struct cf_h2_proxy_ctx *ctx = cf->ctx;
+  CURLcode result;
+  struct cf_call_data save;
+
+  CF_DATA_SAVE(save, cf, data);
+  result = (ctx && ctx->h2 && proxy_h2_connisalive(cf, data, input_pending));
+  DEBUGF(LOG_CF(data, cf, "conn alive -> %d, input_pending=%d",
+         result, *input_pending));
+  CF_DATA_RESTORE(cf, save);
+  return result;
+}
+
 struct Curl_cftype Curl_cft_h2_proxy = {
   "H2-PROXY",
   CF_TYPE_IP_CONNECT,
@@ -1380,7 +1450,7 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   cf_h2_proxy_send,
   cf_h2_proxy_recv,
   Curl_cf_def_cntrl,
-  Curl_cf_def_conn_is_alive,
+  cf_h2_proxy_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_def_query,
 };

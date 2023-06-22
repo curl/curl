@@ -194,6 +194,7 @@ class TestProxy:
         for i in range(count):
             dfile = curl.download_file(i)
             assert filecmp.cmp(srcfile, dfile, shallow=False)
+        assert r.total_connects == 1, r.dump_logs()
 
     # upload many https: with proto via https: proxytunnel
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
@@ -223,6 +224,7 @@ class TestProxy:
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == indata
+        assert r.total_connects == 1, r.dump_logs()
 
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
     @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])

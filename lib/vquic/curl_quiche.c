@@ -1555,13 +1555,11 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
        not in use by any other transfer, there shouldn't be any data here,
        only "protocol frames" */
     *input_pending = FALSE;
-    Curl_attach_connection(data, cf->conn);
     if(cf_process_ingress(cf, data))
       alive = FALSE;
     else {
       alive = TRUE;
     }
-    Curl_detach_connection(data);
   }
 
   return alive;
