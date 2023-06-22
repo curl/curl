@@ -1367,6 +1367,59 @@ out:
   return nwritten;
 }
 
+static bool proxy_h2_connisalive(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 bool *input_pending)
+{
+  struct cf_h2_proxy_ctx *ctx = cf->ctx;
+  bool alive = TRUE;
+
+  *input_pending = FALSE;
+  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
+    return FALSE;
+
+  if(*input_pending) {
+    /* This happens before we've sent off a request and the connection is
+       not in use by any other transfer, there shouldn't be any data here,
+       only "protocol frames" */
+    CURLcode result;
+    ssize_t nread = -1;
+
+    *input_pending = FALSE;
+    nread = Curl_bufq_slurp(&ctx->inbufq, proxy_nw_in_reader, cf, &result);
+    if(nread != -1) {
+      if(proxy_h2_process_pending_input(cf, data, &result) < 0)
+        /* immediate error, considered dead */
+        alive = FALSE;
+      else {
+        alive = !should_close_session(ctx);
+      }
+    }
+    else if(result != CURLE_AGAIN) {
+      /* the read failed so let's say this is dead anyway */
+      alive = FALSE;
+    }
+  }
+
+  return alive;
+}
+
+static bool cf_h2_proxy_is_alive(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 bool *input_pending)
+{
+  struct cf_h2_proxy_ctx *ctx = cf->ctx;
+  CURLcode result;
+  struct cf_call_data save;
+
+  CF_DATA_SAVE(save, cf, data);
+  result = (ctx && ctx->h2 && proxy_h2_connisalive(cf, data, input_pending));
+  DEBUGF(LOG_CF(data, cf, "conn alive -> %d, input_pending=%d",
+         result, *input_pending));
+  CF_DATA_RESTORE(cf, save);
+  return result;
+}
+
 struct Curl_cftype Curl_cft_h2_proxy = {
   "H2-PROXY",
   CF_TYPE_IP_CONNECT,
@@ -1380,7 +1433,7 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   cf_h2_proxy_send,
   cf_h2_proxy_recv,
   Curl_cf_def_cntrl,
-  Curl_cf_def_conn_is_alive,
+  cf_h2_proxy_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_def_query,
 };

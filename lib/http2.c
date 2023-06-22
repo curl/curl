@@ -588,7 +588,6 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
     ssize_t nread = -1;
 
     *input_pending = FALSE;
-    Curl_attach_connection(data, cf->conn);
     nread = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &result);
     if(nread != -1) {
       DEBUGF(LOG_CF(data, cf, "%zd bytes stray data read before trying "
@@ -600,11 +599,10 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
         alive = !should_close_session(ctx);
       }
     }
-    else {
+    else if(result != CURLE_AGAIN) {
       /* the read failed so let's say this is dead anyway */
       alive = FALSE;
     }
-    Curl_detach_connection(data);
   }
 
   return alive;
