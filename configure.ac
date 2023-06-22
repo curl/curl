@@ -1706,7 +1706,8 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
 fi
 
 if test x$CURL_DISABLE_LDAP != x1 ; then
-  AC_CHECK_FUNCS([ldap_url_parse])
+  AC_CHECK_FUNCS([ldap_url_parse \
+                  ldap_init_fd])
 
   if test "$LDAPLIBNAME" = "wldap32"; then
     curl_ldap_msg="enabled (winldap)"
