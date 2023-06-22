@@ -30,47 +30,58 @@ aborted.
 You must send syntactically correct FTP commands as RFC 959 defines to FTP
 servers, or one of the commands listed below to SFTP servers.
 
-This option can be used multiple times.
-
 SFTP is a binary protocol. Unlike for FTP, curl interprets SFTP quote commands
 itself before sending them to the server. File names may be quoted
 shell-style to embed spaces or special characters. Following is the list of
 all supported SFTP quote commands:
 .RS
-.IP "atime date file"
+.TP
+.B "atime date file"
 The atime command sets the last access time of the file named by the file
 operand. The <date expression> can be all sorts of date strings, see the
 *curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
-.IP "chgrp group file"
+.TP
+.B "chgrp group file"
 The chgrp command sets the group ID of the file named by the file operand to
 the group ID specified by the group operand. The group operand is a decimal
 integer group ID.
-.IP "chmod mode file"
+.TP
+.B "chmod mode file"
 The chmod command modifies the file mode bits of the specified file. The
 mode operand is an octal integer mode number.
-.IP "chown user file"
+.TP
+.B "chown user file"
 The chown command sets the owner of the file named by the file operand to the
 user ID specified by the user operand. The user operand is a decimal
 integer user ID.
-.IP "ln source_file target_file"
+.TP
+.B "ln source_file target_file"
 The ln and symlink commands create a symbolic link at the target_file location
 pointing to the source_file location.
-.IP "mkdir directory_name"
+.TP
+.B "mkdir directory_name"
 The mkdir command creates the directory named by the directory_name operand.
-.IP "mtime date file"
+.TP
+.B "mtime date file"
 The mtime command sets the last modification time of the file named by the
 file operand. The <date expression> can be all sorts of date strings, see the
 *curl_getdate(3)* man page for date expression details. (Added in 7.73.0)
-.IP "pwd"
+.TP
+.B "pwd"
 The pwd command returns the absolute pathname of the current working directory.
-.IP "rename source target"
+.TP
+.B "rename source target"
 The rename command renames the file or directory named by the source
 operand to the destination path named by the target operand.
-.IP "rm file"
+.TP
+.B "rm file"
 The rm command removes the file specified by the file operand.
-.IP "rmdir directory"
+.TP
+.B "rmdir directory"
 The rmdir command removes the directory entry specified by the directory
 operand, provided it is empty.
-.IP "symlink source_file target_file"
+.TP
+.B "symlink source_file target_file"
 See ln.
 .RE
+.IP
