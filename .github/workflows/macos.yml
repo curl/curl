@@ -176,9 +176,6 @@ jobs:
     - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
       name: 'brew install'
 
-    - run: python3 -m pip install impacket
-      name: 'pip3 install'
-
     - uses: actions/checkout@v3
 
     - run: cmake -S. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
