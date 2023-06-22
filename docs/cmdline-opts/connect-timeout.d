@@ -15,8 +15,8 @@ limits the connection phase, so if curl connects within the given period it
 will continue - if not it will exit.  Since version 7.32.0, this option
 accepts decimal values.
 
-The "connection phase" is considered complete when the requested TCP, TLS or
-QUIC handshakes are done.
+The "connection phase" is considered complete when the DNS lookup and
+requested TCP, TLS or QUIC handshakes are done.
 
 The decimal value needs to provided using a dot (.) as decimal separator - not
 the local version even if it might be using another separator.
