@@ -271,7 +271,10 @@ sub catch_usr1 {
     }
 }
 
-$SIG{USR1} = \&catch_usr1;
+eval {
+    # some msys2 perl versions don't define SIGUSR1
+    $SIG{USR1} = \&catch_usr1;
+};
 $SIG{PIPE} = 'IGNORE';  # these errors are captured in the read/write calls
 
 ##########################################################################
