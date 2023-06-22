@@ -21,3 +21,4 @@ service ticket, which is a matter of realm policy.
 .IP "always"
 Unconditionally allow the server to delegate.
 .RE
+.IP

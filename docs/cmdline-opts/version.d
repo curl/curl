@@ -83,3 +83,4 @@ Unix sockets support is provided.
 .IP "zstd"
 Automatic decompression (via zstd) of compressed files over HTTP is supported.
 .RE
+.IP
