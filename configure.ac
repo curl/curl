@@ -1718,7 +1718,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
       AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
       AC_SUBST(USE_OPENLDAP, [1])
     else
-      AC_MSG_ERROR([too old OpenLDAP found, can't use])
+      curl_ldap_msg="enabled (ancient OpenLDAP)"
     fi
   fi
 fi
