@@ -1713,10 +1713,12 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
     curl_ldap_msg="enabled (winldap)"
     AC_DEFINE(USE_WIN32_LDAP, 1, [Use Windows LDAP implementation])
   else
-    curl_ldap_msg="enabled (OpenLDAP)"
     if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then
+      curl_ldap_msg="enabled (OpenLDAP)"
       AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
       AC_SUBST(USE_OPENLDAP, [1])
+    else
+      AC_MSG_ERROR([too old OpenLDAP found, can't use])
     fi
   fi
 fi
