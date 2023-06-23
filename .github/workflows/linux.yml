@@ -39,6 +39,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  MAKEFLAGS: -j 3
+
 jobs:
   autotools:
     name: ${{ matrix.build.name }}
@@ -231,7 +234,7 @@ jobs:
         git clone --quiet --depth=1 https://github.com/openssl/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/openssl3
-        make install_sw
+        make -j1 install_sw
       name: 'install openssl'
 
     - if: ${{ contains(matrix.build.install_steps, 'quictls') }}
@@ -239,7 +242,7 @@ jobs:
         git clone --quiet --depth=1 -b OpenSSL_1_1_1t+quic https://github.com/quictls/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/quictls
-        make install_sw
+        make -j1 install_sw
       name: 'install quictls'
 
     - if: ${{ contains(matrix.build.install_steps, 'msh3') }}

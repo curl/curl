@@ -122,12 +122,12 @@ commands:
 
   build:
     steps:
-      - run: make V=1
-      - run: make V=1 examples
+      - run: make -j3 V=1
+      - run: make -j3 V=1 examples
 
   test:
     steps:
-      - run: make V=1 test-ci
+      - run: make -j3 V=1 test-ci
 
 executors:
   ubuntu:

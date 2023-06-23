@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Linux
+name: Linux torture
 
 on:
   push:
@@ -43,6 +43,9 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+
+env:
+  MAKEFLAGS: -j 3
 
 jobs:
   autotools:
