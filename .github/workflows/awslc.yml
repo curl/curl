@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Linux
+name: Linux AWS-LC
 
 on:
   push:
@@ -39,6 +39,9 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+
+env:
+  MAKEFLAGS: -j 3
 
 jobs:
   autoconf:
@@ -77,13 +80,13 @@ jobs:
         cd ..
       name: 'configure out-of-tree'
 
-    - run: make -C build -j 2 V=1
+    - run: make -C build V=1
       name: 'make'
 
-    - run: make -C build -j 2 V=1 examples
+    - run: make -C build V=1 examples
       name: 'make examples'
 
-    - run: make -C build -j 2 V=1 -C tests
+    - run: make -C build V=1 -C tests
       name: 'make tests'
 
     - run: make -C build V=1 test-ci

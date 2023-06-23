@@ -53,7 +53,7 @@ freebsd_task:
   env:
     CIRRUS_CLONE_DEPTH: 10
     CRYPTOGRAPHY_DONT_BUILD_RUST: 1
-    MAKE_FLAGS: -j 2
+    MAKE_FLAGS: -j 3
 
   pkginstall_script:
     - pkg update -f
@@ -145,7 +145,7 @@ windows_task:
   env:
     CIRRUS_CLONE_DEPTH: 10
     MSYS2_PATH_TYPE: inherit
-    MAKEFLAGS: -j 2
+    MAKEFLAGS: -j 3
 
   prepare_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && %prepare%"
@@ -241,7 +241,7 @@ macos_task:
 
   env:
     CIRRUS_CLONE_DEPTH: 10
-    MAKE_FLAGS: -j 4
+    MAKE_FLAGS: -j 12
 
   pkginstall_script:
     - echo libtool autoconf automake pkg-config ${install_packages} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
@@ -278,7 +278,7 @@ linux_musl_task:
 
   env:
     CIRRUS_CLONE_DEPTH: 10
-    MAKEFLAGS: -j 2
+    MAKEFLAGS: -j 3
 
   pkginstall_script:
     - apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo

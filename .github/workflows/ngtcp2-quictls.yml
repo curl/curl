@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: ngtcp2
+name: ngtcp2 quictls
 
 on:
   push:
@@ -44,6 +44,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  MAKEFLAGS: -j 3
+
 jobs:
   autotools:
     name: ${{ matrix.build.name }}
@@ -74,7 +77,7 @@ jobs:
         git clone --quiet --depth=1 -b openssl-3.0.9+quic https://github.com/quictls/openssl
         cd openssl
         ./config --prefix=$HOME/all --libdir=$HOME/all/lib
-        make install_sw
+        make -j1 install_sw
       name: 'install quictls'
 
     - run: |
