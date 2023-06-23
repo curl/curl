@@ -1683,7 +1683,7 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
                                   struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H2_STREAM_CTX(data);
+  int32_t stream_id = H2_STREAM_ID(data);
   int rv = 0;
 
   if((sweight_wanted(data) != sweight_in_effect(data)) ||
@@ -1694,10 +1694,10 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
 
     h2_pri_spec(data, &pri_spec);
     DEBUGF(LOG_CF(data, cf, "[h2sid=%d] Queuing PRIORITY",
-                  stream->id));
-    DEBUGASSERT(stream->id != -1);
+                  stream_id));
+    DEBUGASSERT(stream_id != -1);
     rv = nghttp2_submit_priority(ctx->h2, NGHTTP2_FLAG_NONE,
-                                 stream->id, &pri_spec);
+                                 stream_id, &pri_spec);
     if(rv)
       goto out;
   }
