@@ -304,7 +304,7 @@
 
  Back in late 1995 they defined an additional way to post data over HTTP. It
  is documented in the RFC 1867, why this method sometimes is referred to as
- RFC1867-posting.
+ RFC 1867-posting.
 
  This method is mainly designed to better support file uploads. A form that
  allows a user to upload a file could be written like this in HTML:

@@ -473,18 +473,18 @@ that list to libcurl.
 While the simple examples above cover the majority of all cases where HTTP
 POST operations are required, they do not do multi-part formposts. Multi-part
 formposts were introduced as a better way to post (possibly large) binary data
-and were first documented in the RFC1867 (updated in RFC2388). they are called
-multi-part because they are built by a chain of parts, each part being a single
-unit of data. Each part has its own name and contents. You can in fact create
-and post a multi-part formpost with the regular libcurl POST support described
-above, but that would require that you build a formpost yourself and provide
-to libcurl. To make that easier, libcurl provides a MIME API consisting in
-several functions: using those, you can create and fill a multi-part form.
-Function \fIcurl_mime_init(3)\fP creates a multi-part body; you can then
-append new parts to a multi-part body using \fIcurl_mime_addpart(3)\fP.
-There are three possible data sources for a part: memory using
-\fIcurl_mime_data(3)\fP, file using \fIcurl_mime_filedata(3)\fP and
-user-defined data read callback using \fIcurl_mime_data_cb(3)\fP.
+and were first documented in the RFC 1867 (updated in RFC 2388). they are
+called multi-part because they are built by a chain of parts, each part being
+a single unit of data. Each part has its own name and contents. You can in
+fact create and post a multi-part formpost with the regular libcurl POST
+support described above, but that would require that you build a formpost
+yourself and provide to libcurl. To make that easier, libcurl provides a MIME
+API consisting in several functions: using those, you can create and fill a
+multi-part form.  Function \fIcurl_mime_init(3)\fP creates a multi-part body;
+you can then append new parts to a multi-part body using
+\fIcurl_mime_addpart(3)\fP.  There are three possible data sources for a part:
+memory using \fIcurl_mime_data(3)\fP, file using \fIcurl_mime_filedata(3)\fP
+and user-defined data read callback using \fIcurl_mime_data_cb(3)\fP.
 \fIcurl_mime_name(3)\fP sets a part's (i.e.: form field) name, while
 \fIcurl_mime_filename(3)\fP fills in the remote file name. With
 \fIcurl_mime_type(3)\fP, you can tell the MIME type of a part,
@@ -1057,9 +1057,9 @@ Not all protocols are HTTP-like, and thus the above may not help you when
 you want to make, for example, your FTP transfers to behave differently.
 
 Sending custom commands to an FTP server means that you need to send the
-commands exactly as the FTP server expects them (RFC959 is a good guide here),
-and you can only use commands that work on the control-connection alone. All
-kinds of commands that require data interchange and thus need a
+commands exactly as the FTP server expects them (RFC 959 is a good guide
+here), and you can only use commands that work on the control-connection
+alone. All kinds of commands that require data interchange and thus need a
 data-connection must be left to libcurl's own judgment. Also be aware that
 libcurl will do its best to change directory to the target directory before
 doing any transfer, so if you change directory (with CWD or similar) you might

@@ -188,7 +188,7 @@
  20.3 more protocols supported
  20.4 more platforms supported
  20.5 Add support for concurrent connections
- 20.6 Use the RFC6265 test suite
+ 20.6 Use the RFC 6265 test suite
  20.7 Support LD_PRELOAD on macOS
  20.8 Run web-platform-tests URL tests
 
@@ -570,7 +570,7 @@
 
 4.5 ASCII support
 
- FTP ASCII transfers do not follow RFC959. They do not convert the data
+ FTP ASCII transfers do not follow RFC 959. They do not convert the data
  accordingly.
 
 4.6 GSSAPI via Windows SSPI
@@ -1239,7 +1239,7 @@
 
 18.27 -J and -O with %-encoded file names
 
- -J/--remote-header-name does not decode %-encoded file names. RFC6266 details
+ -J/--remote-header-name does not decode %-encoded file names. RFC 6266 details
  how it should be done. The can of worm is basically that we have no charset
  handling in curl and ascii >=128 is a challenge for us. Not to mention that
  decoding also means that we need to check for nastiness that is attempted,
@@ -1358,7 +1358,7 @@
  should not do in these tests) and thus the wait for connections loop is never
  entered to receive the second connection.
 
-20.6 Use the RFC6265 test suite
+20.6 Use the RFC 6265 test suite
 
  A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
  https://github.com/abarth/http-state/tree/master/tests

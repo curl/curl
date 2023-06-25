@@ -54,11 +54,11 @@ static const char *payload_text =
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
   "rfcpedant.example.org>\r\n"
   "Subject: SMTP example message\r\n"
-  "\r\n" /* empty line to divide headers from body, see RFC5322 */
+  "\r\n" /* empty line to divide headers from body, see RFC 5322 */
   "The body of the message starts here.\r\n"
   "\r\n"
   "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
-  "Check RFC5322.\r\n";
+  "Check RFC 5322.\r\n";
 
 struct upload_status {
   size_t bytes_read;

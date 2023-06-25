@@ -43,7 +43,7 @@
  - PUT
  - HEAD
  - POST
- - multipart formpost (RFC1867-style)
+ - multipart formpost (RFC 1867-style)
  - authentication: Basic, Digest, NTLM (9) and Negotiate (SPNEGO) (3)
    to server and proxy
  - resume (both GET and PUT)
