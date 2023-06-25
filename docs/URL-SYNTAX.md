@@ -52,7 +52,7 @@ security concerns:
 
 3. Such a URL might use other schemes than you thought of or planned for.
 
-## "RFC3986 plus"
+## "RFC 3986 plus"
 
 curl recognizes a URL syntax that we call "RFC 3986 plus". It is grounded on
 the well established RFC 3986 to make sure previously written command lines and

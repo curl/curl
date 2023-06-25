@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SOCKS5_GSSAPI_NEC, long nec);
 .fi
 .SH DESCRIPTION
 Pass a long set to 1 to enable or 0 to disable. As part of the GSSAPI
-negotiation a protection mode is negotiated. The RFC1961 says in section
+negotiation a protection mode is negotiated. The RFC 1961 says in section
 4.3/4.4 it should be protected, but the NEC reference implementation does not.
 If enabled, this option allows the unprotected exchange of the protection mode
 negotiation.

@@ -17,7 +17,7 @@
   For a long time, the only spec explaining how to use cookies was the
   original [Netscape spec from 1994](https://curl.se/rfc/cookie_spec.html).
 
-  In 2011, [RFC6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
+  In 2011, [RFC 6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
   published and details how cookies work within HTTP. In 2016, an update which
   added support for prefixes was
   [proposed](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-cookie-prefixes-00),
@@ -26,7 +26,7 @@
   to deprecate modification of 'secure' cookies from non-secure origins. Both
   of these drafts have been incorporated into a proposal to
   [replace](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-11)
-  RFC6265. Cookie prefixes and secure cookie modification protection has been
+  RFC 6265. Cookie prefixes and secure cookie modification protection has been
   implemented by curl.
 
   curl considers `http://localhost` to be a *secure context*, meaning that it

@@ -51,7 +51,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `ADH-RC4-MD5`
 `ADH-DES-CBC3-SHA`
 
-### AES cipher suites from RFC3268, extending TLS v1.0
+### AES cipher suites from RFC 3268, extending TLS v1.0
 
 `AES128-SHA`
 `AES256-SHA`
@@ -66,7 +66,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `ADH-AES128-SHA`
 `ADH-AES256-SHA`
 
-### SEED cipher suites from RFC4162, extending TLS v1.0
+### SEED cipher suites from RFC 4162, extending TLS v1.0
 
 `SEED-SHA`
 `DH-DSS-SEED-SHA`
@@ -148,7 +148,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `ECDHE-ECDSA-AES128-CCM8`
 `ECDHE-ECDSA-AES256-CCM8`
 
-### Camellia HMAC-Based cipher suites from RFC6367, extending TLS v1.2
+### Camellia HMAC-Based cipher suites from RFC 6367, extending TLS v1.2
 
 `ECDHE-ECDSA-CAMELLIA128-SHA256`
 `ECDHE-ECDSA-CAMELLIA256-SHA384`
