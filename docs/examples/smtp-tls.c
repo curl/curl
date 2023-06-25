@@ -51,11 +51,11 @@ static const char *payload_text =
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
   "rfcpedant.example.org>\r\n"
   "Subject: SMTP example message\r\n"
-  "\r\n" /* empty line to divide headers from body, see RFC5322 */
+  "\r\n" /* empty line to divide headers from body, see RFC 5322 */
   "The body of the message starts here.\r\n"
   "\r\n"
   "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
-  "Check RFC5322.\r\n";
+  "Check RFC 5322.\r\n";
 
 struct upload_status {
   size_t bytes_read;
@@ -101,7 +101,7 @@ int main(void)
 
     /* This is the URL for your mailserver. Note the use of port 587 here,
      * instead of the normal SMTP port (25). Port 587 is commonly used for
-     * secure mail submission (see RFC4403), but you should use whatever
+     * secure mail submission (see RFC 4403), but you should use whatever
      * matches your server configuration. */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mainserver.example.net:587");
 

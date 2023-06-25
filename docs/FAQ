@@ -817,7 +817,7 @@ FAQ
 
   4.5 Why do I get return code XXX from an HTTP server?
 
-  RFC2616 clearly explains the return codes. This is a short transcript. Go
+  RFC 2616 clearly explains the return codes. This is a short transcript. Go
   read the RFC for exact details:
 
     4.5.1 "400 Bad Request"
@@ -985,7 +985,7 @@ FAQ
 
   To use explicit FTPS, you use an FTP:// URL and the --ftp-ssl option (or one
   of its related flavors). This is the most common method, and the one
-  mandated by RFC4217. This kind of connection will then of course use the
+  mandated by RFC 4217. This kind of connection will then of course use the
   standard FTP port 21 by default.
 
   4.16 My HTTP POST or PUT requests are slow
@@ -1332,7 +1332,7 @@ FAQ
   directory listing. How does it know what's a file and what's a directory and
   what's a symlink etc. If the FTP server supports the MLSD command then it
   will return data in a machine-readable format that can be parsed for type.
-  The types are specified by RFC3659 section 7.5.1. If MLSD is not supported
+  The types are specified by RFC 3659 section 7.5.1. If MLSD is not supported
   then you have to work with what you are given. The LIST output format is
   entirely at the server's own liking and the NLST output does not reveal any
   types and in many cases does not even include all the directory entries.

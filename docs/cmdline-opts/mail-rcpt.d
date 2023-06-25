@@ -15,7 +15,7 @@ option several times to send to multiple recipients.
 
 When performing an address verification (VRFY command), the recipient should be
 specified as the user name or user name and domain (as per Section 3.5 of
-RFC5321). (Added in 7.34.0)
+RFC 5321). (Added in 7.34.0)
 
 When performing a mailing list expand (EXPN command), the recipient should be
 specified using the mailing list name, such as "Friends" or "London-Office".
