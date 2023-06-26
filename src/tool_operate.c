@@ -696,10 +696,12 @@ noretry:
 /*
  * Return the protocol token for the scheme used in the given URL
  */
-static const char *url_proto(char *url)
+static struct URLProtoResult url_proto(char *url)
 {
+  struct URLProtoResult res;
   CURLU *uh = curl_url();
-  const char *proto = NULL;
+  res.proto = NULL;
+  res.result = CURLE_URL_MALFORMAT;
 
   if(uh) {
     if(url) {
@@ -709,14 +711,24 @@ static const char *url_proto(char *url)
         if(!curl_url_get(uh, CURLUPART_SCHEME, &schemep,
                          CURLU_DEFAULT_SCHEME) &&
            schemep) {
-          proto = proto_token(schemep);
+          res.proto = proto_token(schemep);
+
+          if(!res.proto) {
+            res.result = CURLE_UNSUPPORTED_PROTOCOL;
+          }
+          else
+            res.result = CURLE_OK;
           curl_free(schemep);
         }
       }
     }
     curl_url_cleanup(uh);
   }
-  return proto? proto: "???";   /* Never match if not found. */
+
+  if(res.result)
+    res.proto = "???";
+
+  return res;
 }
 
 /* create the next (singular) transfer */
@@ -860,7 +872,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         struct OutStruct *etag_save;
         struct HdrCbData *hdrcbdata = NULL;
         struct OutStruct etag_first;
-        const char *use_proto;
+        struct URLProtoResult use_proto;
         CURL *curl;
 
         /* --etag-save */
@@ -1515,7 +1527,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt_str(curl, CURLOPT_KEYPASSWD, config->key_passwd);
         my_setopt_str(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
 
-        if(use_proto == proto_scp || use_proto == proto_sftp) {
+        if(use_proto.proto == proto_scp || use_proto.proto == proto_sftp) {
 
           /* SSH and SSL private key uses same command-line option */
           /* new in libcurl 7.16.1 */
@@ -1791,7 +1803,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->path_as_is)
           my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
 
-        if((use_proto == proto_scp || use_proto == proto_sftp) &&
+        if((use_proto.proto == proto_scp || use_proto.proto == proto_sftp) &&
            !config->insecure_ok) {
           char *known = findfile(".ssh/known_hosts", FALSE);
           if(known) {

@@ -327,6 +327,11 @@ struct GlobalConfig {
   struct OperationConfig *last;   /* Always last in the struct */
 };
 
+struct URLProtoResult {
+  const char *proto;              /* The protocol as discovered by url_proto */
+  CURLcode result;                /* The result of protocol parsing */
+};
+
 void config_init(struct OperationConfig *config);
 void config_free(struct OperationConfig *config);
 
