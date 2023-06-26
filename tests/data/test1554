@@ -69,12 +69,6 @@ run 1: foobar and so on fun!
 <- Mutex unlock
 -> Mutex lock
 <- Mutex unlock
-%if hyper
--> Mutex lock
-<- Mutex unlock
--> Mutex lock
-<- Mutex unlock
-%endif
 run 1: foobar and so on fun!
 -> Mutex lock
 <- Mutex unlock
