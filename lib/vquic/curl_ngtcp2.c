@@ -1766,12 +1766,6 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   pktx_init(&pktx, cf, data);
   *err = CURLE_OK;
 
-  if(stream && stream->closed) {
-    *err = CURLE_HTTP3;
-    sent = -1;
-    goto out;
-  }
-
   result = cf_progress_ingress(cf, data, &pktx);
   if(result) {
     *err = result;
@@ -1799,6 +1793,11 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     sent = (ssize_t)stream->upload_blocked_len;
     stream->upload_blocked_len = 0;
+  }
+  else if(stream->closed) {
+    *err = CURLE_HTTP3;
+    sent = -1;
+    goto out;
   }
   else {
     sent = Curl_bufq_write(&stream->sendbuf, buf, len, err);
