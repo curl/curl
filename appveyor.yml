@@ -128,7 +128,7 @@ environment:
         DISABLED_TESTS: "!1139 !1501 ~1056"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
-      - job_name: "CMake, mingw-w64, Debug x64, Schannel, Static, Unicode"
+      - job_name: "CMake, mingw-w64, gcc 8, Debug x64, Schannel, Static, Unicode"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
@@ -143,7 +143,7 @@ environment:
         ADD_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
-      - job_name: "CMake, mingw-w64, Debug x64, Schannel, Static, Unicode"
+      - job_name: "CMake, mingw-w64, gcc 7, Debug x64, Schannel, Static, Unicode"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
