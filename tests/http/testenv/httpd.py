@@ -303,6 +303,7 @@ class Httpd:
                 f'    ServerName {proxy_domain}',
                 f'    Protocols h2c http/1.1',
                 f'    ProxyRequests On',
+                f'    H2ProxyRequests On',
                 f'    ProxyVia On',
                 f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
             ])
@@ -319,6 +320,7 @@ class Httpd:
                 f'    SSLCertificateFile {proxy_creds.cert_file}',
                 f'    SSLCertificateKeyFile {proxy_creds.pkey_file}',
                 f'    ProxyRequests On',
+                f'    H2ProxyRequests On',
                 f'    ProxyVia On',
                 f'    AllowCONNECT {self.env.http_port} {self.env.https_port}',
             ])
