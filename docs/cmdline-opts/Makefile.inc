@@ -144,6 +144,7 @@ DPAGES = \
   netrc.d \
   next.d \
   no-alpn.d \
+  no-append-filename.d \
   no-buffer.d \
   no-clobber.d \
   no-keepalive.d \

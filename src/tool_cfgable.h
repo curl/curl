@@ -296,6 +296,7 @@ struct OperationConfig {
   struct State state;             /* for create_transfer() */
   bool rm_partial;                /* on error, remove partially written output
                                      files */
+  bool no_append_filename;        /* Don't append filename to URL */
 };
 
 struct GlobalConfig {

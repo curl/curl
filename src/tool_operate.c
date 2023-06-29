@@ -1150,7 +1150,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           outs->s_isreg = TRUE;
         }
 
-        if(per->uploadfile && !stdin_upload(per->uploadfile)) {
+        if(per->uploadfile && !stdin_upload(per->uploadfile) &&
+           !config->no_append_filename) {
           /*
            * We have specified a file to upload and it isn't "-".
            */

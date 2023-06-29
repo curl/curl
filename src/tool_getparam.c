@@ -80,6 +80,7 @@ static const struct LongShort aliases[]= {
   {"*4", "dns-ipv4-addr",            ARG_STRING},
   {"*6", "dns-ipv6-addr",            ARG_STRING},
   {"*a", "random-file",              ARG_FILENAME},
+  {"*A", "append-filename",          ARG_BOOL},
   {"*b", "egd-file",                 ARG_STRING},
   {"*B", "oauth2-bearer",            ARG_STRING},
   {"*c", "connect-timeout",          ARG_STRING},
@@ -821,6 +822,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'a': /* random-file */
         break;
+      case 'A': /* append-filename */
+        config->no_append_filename = (!toggle)?TRUE:FALSE;
       case 'b': /* egd-file */
         break;
       case 'B': /* OAuth 2.0 bearer token */
