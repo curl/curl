@@ -51,7 +51,7 @@ void dumpeasysrc(struct GlobalConfig *config);
 #define easysrc_init() CURLE_OK
 #define easysrc_cleanup()
 #define dumpeasysrc(x)
-#define easysrc_perform(x) CURLE_OK
+#define easysrc_perform() CURLE_OK
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 
