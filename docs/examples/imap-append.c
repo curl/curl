@@ -99,10 +99,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will create a new message 100. Note that you should perform an
-     * EXAMINE command to obtain the UID of the next message to create and a
-     * SELECT to ensure you are creating the message in the OUTBOX. */
-    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/100");
+    /* This will create a new message in folder "Sent". */
+    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/Sent");
 
     /* In this case, we are using a callback function to specify the data. You
      * could just use the CURLOPT_READDATA option to specify a FILE pointer to
