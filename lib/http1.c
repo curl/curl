@@ -38,124 +38,97 @@
 #include "memdebug.h"
 
 
-#define H1_MAX_URL_LEN   (4*1024)
+#define H1_MAX_URL_LEN   (8*1024)
 
 void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len)
 {
   memset(parser, 0, sizeof(*parser));
   parser->max_line_len = max_line_len;
-  Curl_bufq_init(&parser->scratch, max_line_len, 1);
+  Curl_dyn_init(&parser->scratch, max_line_len);
 }
 
 void Curl_h1_req_parse_free(struct h1_req_parser *parser)
 {
   if(parser) {
     Curl_http_req_free(parser->req);
-    Curl_bufq_free(&parser->scratch);
+    Curl_dyn_free(&parser->scratch);
     parser->req = NULL;
     parser->done = FALSE;
   }
 }
 
+static CURLcode trim_line(struct h1_req_parser *parser, int options)
+{
+  DEBUGASSERT(parser->line);
+  if(parser->line_len) {
+    if(parser->line[parser->line_len - 1] == '\n')
+      --parser->line_len;
+    if(parser->line_len) {
+      if(parser->line[parser->line_len - 1] == '\r')
+        --parser->line_len;
+      else if(options & H1_PARSE_OPT_STRICT)
+        return CURLE_URL_MALFORMAT;
+    }
+    else if(options & H1_PARSE_OPT_STRICT)
+      return CURLE_URL_MALFORMAT;
+  }
+  else if(options & H1_PARSE_OPT_STRICT)
+    return CURLE_URL_MALFORMAT;
+
+  if(parser->line_len > parser->max_line_len) {
+    return CURLE_URL_MALFORMAT;
+  }
+  return CURLE_OK;
+}
+
 static ssize_t detect_line(struct h1_req_parser *parser,
-                           const char *buf, const size_t buflen, int options,
+                           const char *buf, const size_t buflen,
                            CURLcode *err)
 {
   const char  *line_end;
-  size_t len;
 
   DEBUGASSERT(!parser->line);
   line_end = memchr(buf, '\n', buflen);
   if(!line_end) {
-    *err = (buflen > parser->max_line_len)? CURLE_URL_MALFORMAT : CURLE_AGAIN;
+    *err = CURLE_AGAIN;
     return -1;
   }
-  len = line_end - buf + 1;
-  if(len > parser->max_line_len) {
-    *err = CURLE_URL_MALFORMAT;
-    return -1;
-  }
-
-  if(options & H1_PARSE_OPT_STRICT) {
-    if((len == 1) || (buf[len - 2] != '\r')) {
-      *err = CURLE_URL_MALFORMAT;
-      return -1;
-    }
-    parser->line = buf;
-    parser->line_len = len - 2;
-  }
-  else {
-    parser->line = buf;
-    parser->line_len = len - (((len == 1) || (buf[len - 2] != '\r'))? 1 : 2);
-  }
+  parser->line = buf;
+  parser->line_len = line_end - buf + 1;
   *err = CURLE_OK;
-  return (ssize_t)len;
+  return (ssize_t)parser->line_len;
 }
 
 static ssize_t next_line(struct h1_req_parser *parser,
                          const char *buf, const size_t buflen, int options,
                          CURLcode *err)
 {
-  ssize_t nread = 0, n;
+  ssize_t nread = 0;
 
   if(parser->line) {
-    if(parser->scratch_skip) {
-      /* last line was from scratch. Remove it now, since we are done
-       * with it and look for the next one. */
-      Curl_bufq_skip_and_shift(&parser->scratch, parser->scratch_skip);
-      parser->scratch_skip = 0;
-    }
     parser->line = NULL;
     parser->line_len = 0;
+    Curl_dyn_reset(&parser->scratch);
   }
 
-  if(Curl_bufq_is_empty(&parser->scratch)) {
-    nread = detect_line(parser, buf, buflen, options, err);
-    if(nread < 0) {
-      if(*err != CURLE_AGAIN)
+  nread = detect_line(parser, buf, buflen, err);
+  if(nread >= 0) {
+    if(Curl_dyn_len(&parser->scratch)) {
+      /* append detected line to scratch to have the complete line */
+      *err = Curl_dyn_addn(&parser->scratch, parser->line, parser->line_len);
+      if(*err)
         return -1;
-      /* not a complete line, add to scratch for later revisit */
-      nread = Curl_bufq_write(&parser->scratch,
-                              (const unsigned char *)buf, buflen, err);
-      return nread;
+      parser->line = Curl_dyn_ptr(&parser->scratch);
+      parser->line_len = Curl_dyn_len(&parser->scratch);
     }
-    /* found one */
+    *err = trim_line(parser, options);
+    if(*err)
+      return -1;
   }
-  else {
-    const char *sbuf;
-    size_t sbuflen;
-
-    /* scratch contains bytes from last attempt, add more to it */
-    if(buflen) {
-      const char *line_end;
-      size_t add_len;
-      ssize_t pos;
-
-      line_end = memchr(buf, '\n', buflen);
-      pos = line_end? (line_end - buf + 1) : -1;
-      add_len = (pos >= 0)? (size_t)pos : buflen;
-      nread = Curl_bufq_write(&parser->scratch,
-                              (const unsigned char *)buf, add_len, err);
-      if(nread < 0) {
-        /* Unable to add anything to scratch is an error, since we should
-         * have seen a line there then before. */
-        if(*err == CURLE_AGAIN)
-          *err = CURLE_URL_MALFORMAT;
-        return -1;
-      }
-    }
-
-    if(Curl_bufq_peek(&parser->scratch,
-                      (const unsigned char **)&sbuf, &sbuflen)) {
-      n = detect_line(parser, sbuf, sbuflen, options, err);
-      if(n < 0 && *err != CURLE_AGAIN)
-        return -1;  /* real error */
-      parser->scratch_skip = (size_t)n;
-    }
-    else {
-      /* we SHOULD be able to peek at scratch data */
-      DEBUGASSERT(0);
-    }
+  else if(*err == CURLE_AGAIN) {
+    /* no line end in `buf`, add it to our scratch */
+    *err = Curl_dyn_addn(&parser->scratch, (const unsigned char *)buf, buflen);
+    nread = (*err)? -1 : (ssize_t)buflen;
   }
   return nread;
 }
@@ -328,7 +301,7 @@ ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
         goto out;
       }
       parser->done = TRUE;
-      Curl_bufq_free(&parser->scratch);
+      Curl_dyn_reset(&parser->scratch);
       /* last chance adjustments */
     }
     else {
