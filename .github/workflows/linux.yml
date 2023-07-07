@@ -327,7 +327,7 @@ jobs:
       # run for `tests` directory, so pytest does not pick up any other
       # packages we might have built here
       run:
-        pytest tests
+        pytest -v tests
       name: 'run pytest'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
