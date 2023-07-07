@@ -33,11 +33,11 @@
 #define H1_PARSE_OPT_NONE       (0)
 #define H1_PARSE_OPT_STRICT     (1 << 0)
 
-#define H1_PARSE_DEFAULT_MAX_LINE_LEN (8 * 1024)
+#define H1_PARSE_DEFAULT_MAX_LINE_LEN   DYN_HTTP_REQUEST
 
 struct h1_req_parser {
   struct httpreq *req;
-  struct bufq scratch;
+  struct dynbuf scratch;
   size_t scratch_skip;
   const char *line;
   size_t max_line_len;
