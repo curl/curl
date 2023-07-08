@@ -73,14 +73,14 @@ struct curl_header *h;
 
 /* extract the normal headers from the first request */
 while((h = curl_easy_nextheader(easy, CURLH_HEADER, 0, prev))) {
-   print "%s: %s\\n", h->name, h->value);
+   printf("%s: %s\\n", h->name, h->value);
    prev = h;
 }
 
 /* extract the normal headers + 1xx + trailers from the last request */
 unsigned int origin = CURLH_HEADER| CURLH_1XX | CURLH_TRAILER;
 while((h = curl_easy_nextheader(easy, origin, -1, prev))) {
-   print "%s: %s\\n", h->name, h->value);
+   printf("%s: %s\\n", h->name, h->value);
    prev = h;
 }
 .fi
