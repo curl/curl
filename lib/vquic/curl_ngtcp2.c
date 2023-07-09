@@ -988,7 +988,7 @@ static ngtcp2_callbacks ng_callbacks = {
 
 /**
  * Connection maintenance like timeouts on packet ACKs etc. are done by us, not
- * the OS like for TCP. POLL evenets on the socket therefore are not
+ * the OS like for TCP. POLL events on the socket therefore are not
  * sufficient.
  * ngtcp2 tells us when it wants to be invoked again. We handle that via
  * the `Curl_expire()` mechanisms.
@@ -1785,7 +1785,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     DEBUGASSERT(len >= stream->upload_blocked_len);
     if(len < stream->upload_blocked_len) {
       /* Did we get called again with a smaller `len`? This should not
-       * happend. We are not prepared to handle that. */
+       * happen. We are not prepared to handle that. */
       failf(data, "HTTP/3 send again with decreased length");
       *err = CURLE_HTTP3;
       sent = -1;
@@ -1820,7 +1820,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(stream && sent > 0 && stream->sendbuf_len_in_flight) {
     /* We have unacknowledged DATA and cannot report success to our
      * caller. Instead we EAGAIN and remember how much we have already
-     * "written" into our variour internal connection buffers.
+     * "written" into our various internal connection buffers.
      * We put the stream upload on HOLD, until this gets ACKed. */
     stream->upload_blocked_len = sent;
     DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] cf_send(len=%zu), "
