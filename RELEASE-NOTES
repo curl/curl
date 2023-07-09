@@ -4,7 +4,7 @@ curl and libcurl 8.2.0
  Command line options:         255
  curl_easy_setopt() options:   303
  Public functions in libcurl:  91
- Contributors:                 2903
+ Contributors:                 2912
 
 This release includes the following changes:
 
@@ -18,11 +18,21 @@ This release includes the following bugfixes:
 
  o bufq: make write/pass methods more robust [21]
  o build: drop unused/redundant `HAVE_WINLDAP_H` [25]
+ o cf-socket: move ctx declaration under HAVE_GETPEERNAME [91]
  o cf-socket: skip getpeername()/getsockname for TFTP [65]
+ o checksrc: modernise perl file open [87]
+ o CI: don't install impacket if tests are not run
+ o CI: enable parallel make in more builds
  o circleci: install impacket & wolfssl 5.6.0 [1]
  o cmake: add support for "unity" builds [13]
+ o cmake: stop CMake from quietly ignoring missing Brotli [81]
+ o configure: add check for ldap_init_fd [80]
  o configure: fix run-compiler for old /bin/sh [4]
+ o configure: the --without forms of the options are also gone [79]
+ o connect-timeout.d: mention that the DNS lookup is included [85]
+ o curl.h: include <sys/select.h> for vxworks [78]
  o curl: count uploaded data to stop at the originally given size [14]
+ o curl_easy_nextheader.3: add missing open parenthesis examples [74]
  o curl_log: evaluate log statement only when transfer is verbose [8]
  o curl_mprintf.3: minor fix of the example
  o curl_pushheader_byname/bynum.3: document in their own man pages [37]
@@ -31,6 +41,7 @@ This release includes the following bugfixes:
  o CURLOPT_INFILESIZE.3: mention -1 triggers chunked [55]
  o CURLOPT_SSH_PRIVATE_KEYFILE.3: expand on the file search [31]
  o docs/libcurl/libcurl.3: cleanups and improvements [46]
+ o docs: add more .IP after .RE to fix indentation of generate paragraphs [82]
  o docs: fix missing parameter names in examples [41]
  o docs: update CURLOPT_UPLOAD.3 [63]
  o docs: update HTTP3.md for newer ngtcp2 and nghttp3 [28]
@@ -53,9 +64,14 @@ This release includes the following bugfixes:
  o fopen: fix conversion warning on 32-bit Android [49]
  o HTTP/2: upload handling fixes [56]
  o http2: better support for --limit-rate [7]
+ o http2: error stream resets with code CURLE_HTTP2_STREAM [84]
+ o http2: fix crash in handling stream weights [76]
  o http2: fix variable type [50]
+ o http2: h2 and h2-PROXY connection alive check fixes [83]
+ o http2: raise header limitations above and beyond [73]
  o HTTP3.md: update openssl version [57]
  o http: rectify the outgoing Cookie: header field size check [72]
+ o hyper: fix EOF handling on input [66]
  o hyper: unslow [51]
  o imap: Provide method to disable SASL if it is advertised [75]
  o libcurl-url.3: also mention CURLUPART_ZONEID
@@ -64,15 +80,22 @@ This release includes the following bugfixes:
  o libssh2: use custom memory functions [12]
  o ngtcp2: build with 0.16.0 and nghttp3 0.12.0 [33]
  o ngtcp2: use ever increasing timestamp in io [32]
+ o quote.d: fix indentation of generated paragraphs [86]
  o runtests: abort test run after failure without -a [3]
  o runtests: better handle ^C during slow tests
+ o runtests: consistently write the test check summary block
  o runtests: create multiple test runners when requested [20]
+ o runtests: include missing valgrind package [89]
  o runtests: make test file directories in log/N [44]
  o runtests: rename server command file
+ o runtests: use more consistent failure lines
+ o runtests: work around a perl without SIGUSR1 [88]
  o runtests; give each server a unique log lock file [43]
  o scripts: Fix GHA matrix job detection in cijobs.pl
  o system.h: remove __IBMC__/__IBMCPP__ guards and apply to all z/OS compiles [10]
+ o test2600: fix the description [90]
  o test427: verify sending more cookies than fit in a 8190 bytes line [61]
+ o tests/http: Add mod_h2 directive `H2ProxyRequests` [77]
  o tests/servers.pm: pick unused port number with a server socket [16]
  o tests/servers: generate temp names in /tmp for unix domain sockets [6]
  o tests: fix error messages & handling around sockets [30]
@@ -85,6 +108,7 @@ This release includes the following bugfixes:
  o tool_getparam: fix comment [22]
  o tool_operate: allow cookie lines up to 8200 bytes [60]
  o tool_urlglob: use curl_off_t instead of longs [2]
+ o transfer: clear credentials when redirecting to absolute URL [64]
  o urlapi: have *set(PATH) prepend a slash if one is missing [42]
  o urlapi: scheme must start with alpha [26]
  o vtls: avoid memory leak if sha256 call fails [58]
@@ -109,13 +133,14 @@ advice from friends like these:
 
   ad0p on github, Alejandro R. Sedeño, Andy Fiddaman, Anssi Kolehmainen,
   atjg on github, Boris Verkhovskiy, Chris Talbot, Cristian Rodríguez,
-  Dan Fandrich, Daniel Stenberg, Dion Williams, Emanuele Torre, Gisle Vanem,
-  Harry Sintonen, Igor Todorovski, JustAnotherArchivist on github,
+  Dan Fandrich, Daniel Stenberg, Dion Williams, divinity76, Emanuele Torre,
+  Gisle Vanem, Harry Sintonen, humbleacolyte, Igor Todorovski, James Lucas,
+  jbgoog on github, Juan Cruz Viotti, JustAnotherArchivist on github,
   Karthikdasari0423, lizhuang0630 on github, MaeIsBad on github, Marcel Raad,
-  Mark Seuffert, Oleg Jukovec, Pedro Henrique, Philip Heiduck, Raito Bezarius,
-  Ray Satiro, Sean McArthur, Sergey Alirzaev, Stefan Eissing, Viktor Szakats,
-  Wyatt OʼDay
-  (31 contributors)
+  Mark Seuffert, Michał Petryka, Oleg Jukovec, Paul Wise, Pedro Henrique,
+  Philip Heiduck, Raito Bezarius, Ray Satiro, Sean McArthur, Sergey Alirzaev,
+  Sheshadri.V, Stefan Eissing, Viktor Szakats, vlkl-sap on github, Wyatt OʼDay
+  (40 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -182,11 +207,31 @@ References to bug reports and discussions on issues:
  [61] = https://curl.se/bug/?i=11303
  [62] = https://curl.se/bug/?i=11303
  [63] = https://curl.se/bug/?i=11300
+ [64] = https://curl.se/bug/?i=11410
  [65] = https://curl.se/bug/?i=11332
+ [66] = https://curl.se/bug/?i=11377
  [67] = https://curl.se/bug/?i=11338
  [68] = https://curl.se/bug/?i=11337
  [69] = https://curl.se/bug/?i=11333
  [70] = https://curl.se/bug/?i=11334
  [71] = https://curl.se/bug/?i=11335
  [72] = https://curl.se/bug/?i=11331
+ [73] = https://curl.se/bug/?i=11405
+ [74] = https://curl.se/bug/?i=11409
  [75] = https://curl.se/bug/?i=10041
+ [76] = https://curl.se/bug/?i=11379
+ [77] = https://curl.se/bug/?i=11392
+ [78] = https://curl.se/bug/?i=11356
+ [79] = https://curl.se/bug/?i=11378
+ [80] = https://curl.se/bug/?i=11372
+ [81] = https://curl.se/bug/?i=11376
+ [82] = https://curl.se/bug/?i=11375
+ [83] = https://curl.se/bug/?i=11368
+ [84] = https://curl.se/bug/?i=11357
+ [85] = https://curl.se/bug/?i=11370
+ [86] = https://curl.se/bug/?i=11371
+ [87] = https://curl.se/bug/?i=11358
+ [88] = https://curl.se/bug/?i=11350
+ [89] = https://curl.se/bug/?i=11364
+ [90] = https://curl.se/bug/?i=11354
+ [91] = https://curl.se/bug/?i=11352
