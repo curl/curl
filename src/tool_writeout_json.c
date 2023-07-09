@@ -62,7 +62,7 @@ void jsonWriteString(FILE *stream, const char *in, bool lowercase)
       break;
     default:
       if(*i < 32) {
-        fprintf(stream, "u%04x", *i);
+        fprintf(stream, "\\u%04x", *i);
       }
       else {
         char out = *i;
