@@ -56,13 +56,13 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   int fd = -1;
   *tempname = NULL;
 
-  if(stat(filename, &sb) == -1 || !S_ISREG(sb.st_mode)) {
-    /* a non-regular file, fallback to direct fopen() */
-    *fh = fopen(filename, FOPEN_WRITETEXT);
-    if(*fh)
-      return CURLE_OK;
+  *fh = fopen(filename, FOPEN_WRITETEXT);
+  if(!*fh)
     goto fail;
-  }
+  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode))
+    return CURLE_OK;
+  fclose(*fh);
+  *fh = NULL;
 
   result = Curl_rand_hex(data, randsuffix, sizeof(randsuffix));
   if(result)
