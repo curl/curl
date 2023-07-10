@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(__APPLE__) && defined(TARGET_OS_OSX) && TARGET_OS_OSX
+#if defined(__APPLE__) && (!defined(TARGET_OS_OSX) || TARGET_OS_OSX)
 
 CURLcode Curl_macos_init(void);
 
