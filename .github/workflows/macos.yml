@@ -55,60 +55,60 @@ jobs:
         - name: normal
           install: nghttp2
           configure: --without-ssl
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: debug
           install: nghttp2
           configure: --enable-debug --without-ssl
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: libssh2
           install: nghttp2 libssh2
           configure: --enable-debug --with-libssh2 --without-ssl
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: libssh-c-ares
           install: openssl nghttp2 libssh
           configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl --enable-ares
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: libssh
           install: openssl nghttp2 libssh
           configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: c-ares
           install: nghttp2
           configure: --enable-debug --enable-ares --without-ssl
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: HTTP only
           install: nghttp2
           configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
-          macosx-version-min: 10.15
+          macosx-version-min: 12.0
         - name: SecureTransport http2
           install: nghttp2
           configure: --enable-debug --with-secure-transport
-          macosx-version-min: 10.8
+          macosx-version-min: 12.0
         - name: gcc SecureTransport
           configure: CC=gcc-12 --enable-debug --with-secure-transport
-          macosx-version-min: 10.8
+          macosx-version-min: 12.0
         - name: OpenSSL http2
           install: nghttp2 openssl
           configure: --enable-debug --with-openssl=/usr/local/opt/openssl
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: LibreSSL http2
           install: nghttp2 libressl
           configure: --enable-debug --with-openssl=/usr/local/opt/libressl
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: torture
           install: nghttp2 openssl
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl
           tflags: -n -t --shallow=25 !FTP
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: torture-ftp
           install: nghttp2 openssl
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl
           tflags: -n -t --shallow=20 FTP
-          macosx-version-min: 10.9
+          macosx-version-min: 12.0
         - name: macOS 10.15
           install: nghttp2 libssh2 openssl
           configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl
-          macosx-version-min: 10.15
+          macosx-version-min: 12.0
     steps:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
@@ -156,10 +156,10 @@ jobs:
         compiler:
         - CC: clang
           CXX: clang++
-          CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
+          CFLAGS: "-mmacosx-version-min=12.0 -Wno-deprecated-declarations"
         - CC: gcc-12
           CXX: g++-12
-          CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
+          CFLAGS: "-mmacosx-version-min=12.0 -Wno-error=undef -Wno-error=conversion"
         build:
         - name: OpenSSL
           install: nghttp2 openssl
