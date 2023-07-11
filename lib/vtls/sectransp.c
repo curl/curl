@@ -1612,7 +1612,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
          The message is a bit cryptic and longer than necessary but can be
          understood by humans. */
       failf(data, "SSL: cipher string \"%s\" contains unsupported cipher name"
-            " starting position %d and ending position %d",
+            " starting position %zd and ending position %zd",
             ciphers,
             cipher_start - ciphers,
             cipher_end - ciphers);
@@ -2485,7 +2485,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
         spkiHeaderLength = 23;
         break;
       default:
-        infof(data, "SSL: unhandled public key length: %d", pubkeylen);
+        infof(data, "SSL: unhandled public key length: %zu", pubkeylen);
 #elif SECTRANSP_PINNEDPUBKEY_V2
       default:
         /* ecDSA secp256r1 pubkeylen == 91 header already included?
