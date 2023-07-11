@@ -76,7 +76,8 @@ jobs:
       name: 'install prereqs'
 
     - run: |
-        git clone --quiet --depth=1 https://github.com/wolfSSL/wolfssl.git
+        WOLFSSL_VER=v5.6.3-stable
+        git clone --quiet --depth=1 -b $WOLFSSL_VER https://github.com/wolfSSL/wolfssl.git
         cd wolfssl
         ./autogen.sh
         ./configure ${{ matrix.build.wolfssl-configure }} --prefix=$HOME/all
