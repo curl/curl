@@ -56,10 +56,10 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   int fd = -1;
   *tempname = NULL;
 
-  *fh = fopen(filename, FOPEN_WRITETEXT);
-  if (!*fh)
+  *fh = fopen(filename, FOPEN_WRITETEXT, 0600);
+  if(!*fh)
     goto fail;
-  if (fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode))
+  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode))
     return CURLE_OK;
   fclose(*fh);
   *fh = NULL;
