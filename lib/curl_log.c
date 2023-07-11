@@ -207,6 +207,8 @@ CURLcode Curl_log_init(void)
     }
     free(tmp);
   }
+#else
+  (void)cf_types;
 #endif
   return CURLE_OK;
 }
