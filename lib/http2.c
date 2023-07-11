@@ -2076,8 +2076,8 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     else {
       /* If stream_id != -1, we have dispatched request HEADERS and
-        * optionally request body, and now are going to send or sending
-        * more request body in DATA frame */
+       * optionally request body, and now are going to send or sending
+       * more request body in DATA frame */
       nwritten = Curl_bufq_write(&stream->sendbuf, buf, len, err);
       if(nwritten < 0) {
         if(*err != CURLE_AGAIN)
