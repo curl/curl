@@ -2015,7 +2015,7 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
   body = (const char *)buf + nwritten;
   bodylen = len - nwritten;
 
-  if(bodylen > 0) {
+  if(bodylen) {
     /* We have request body to send in DATA frame */
     ssize_t n = Curl_bufq_write(&stream->sendbuf, body, bodylen, err);
     if(n < 0) {
