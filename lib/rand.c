@@ -36,6 +36,7 @@ uint32_t arc4random(void);
 #endif
 
 #include <curl/curl.h>
+#include "urldata.h"
 #include "vtls/vtls.h"
 #include "sendf.h"
 #include "timeval.h"

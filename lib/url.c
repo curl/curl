@@ -1494,13 +1494,7 @@ void Curl_verboseconnect(struct Curl_easy *data,
 {
   if(data->set.verbose)
     infof(data, "Connected to %s (%s) port %u",
-#ifndef CURL_DISABLE_PROXY
-          conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
-          conn->bits.httpproxy ? conn->http_proxy.host.dispname :
-#endif
-          conn->bits.conn_to_host ? conn->conn_to_host.dispname :
-          conn->host.dispname,
-          conn->primary_ip, conn->port);
+          CURL_CONN_HOST_DISPNAME(conn), conn->primary_ip, conn->port);
 }
 #endif
 

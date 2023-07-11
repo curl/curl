@@ -32,55 +32,43 @@ struct Curl_cfilter;
  */
 CURLcode Curl_log_init(void);
 
-
-void Curl_infof(struct Curl_easy *, const char *fmt, ...);
-void Curl_failf(struct Curl_easy *, const char *fmt, ...);
-
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-
-#if defined(HAVE_VARIADIC_MACROS_C99)
-#define infof(...)  Curl_nop_stmt
-#elif defined(HAVE_VARIADIC_MACROS_GCC)
-#define infof(x...)  Curl_nop_stmt
-#else
-#error "missing VARIADIC macro define, fix and rebuild!"
-#endif
-
-#else /* CURL_DISABLE_VERBOSE_STRINGS */
-
-#define infof Curl_infof
-
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
-
-#define failf Curl_failf
-
-
-#define CURL_LOG_DEFAULT  0
-#define CURL_LOG_DEBUG    1
-#define CURL_LOG_TRACE    2
-
-
 /* the function used to output verbose information */
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
                 char *ptr, size_t size);
 
-#ifdef DEBUGBUILD
-
-/* explainer: we have some mix configuration and werror settings
- * that define HAVE_VARIADIC_MACROS_C99 even though C89 is enforced
- * on gnuc and some other compiler. Need to treat carefully.
+/**
+ * Output an informational message when transfer's verbose logging is enabled.
  */
-#if defined(HAVE_VARIADIC_MACROS_C99) && \
-    defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-
-#define LOG_CF(data, cf, ...) \
-  do { if(Curl_log_cf_is_debug(cf, data)) \
-         Curl_log_cf_debug(data, cf, __VA_ARGS__); } while(0)
+void Curl_infof(struct Curl_easy *data,
+#if defined(__GNUC__) && !defined(printf) &&                    \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
+  !defined(__MINGW32__)
+                       const char *fmt, ...)
+                       __attribute__((format(printf, 2, 3)));
 #else
-#define LOG_CF Curl_log_cf_debug
+                       const char *fmt, ...);
 #endif
 
-void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
+/**
+ * Output a failure message on registered callbacks for transfer.
+ */
+void Curl_failf(struct Curl_easy *data,
+#if defined(__GNUC__) && !defined(printf) &&                    \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
+  !defined(__MINGW32__)
+                       const char *fmt, ...)
+                       __attribute__((format(printf, 2, 3)));
+#else
+                       const char *fmt, ...);
+#endif
+
+#define failf Curl_failf
+
+/**
+ * Output an informational message when both transfer's verbose logging
+ * and connection filters verbose logging are enabled.
+ */
+void Curl_log_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
 #if defined(__GNUC__) && !defined(printf) &&                    \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
   !defined(__MINGW32__)
@@ -90,32 +78,55 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...);
 #endif
 
-#define Curl_log_cf_is_debug(cf, data) \
-    ((data) && (data)->set.verbose && \
-     (cf) && (cf)->cft->log_level >= CURL_LOG_DEBUG)
+#define CURL_LOG_LVL_NONE  0
+#define CURL_LOG_LVL_INFO  1
 
 
-#else /* !DEBUGBUILD */
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+/* informational messages enabled */
 
+#define Curl_log_is_verbose(data)    ((data) && (data)->set.verbose)
+#define Curl_log_cf_is_verbose(cf, data) \
+                            ((data) && (data)->set.verbose && \
+                            (cf) && (cf)->cft->log_level >= CURL_LOG_LVL_INFO)
+
+/* explainer: we have some mix configuration and werror settings
+ * that define HAVE_VARIADIC_MACROS_C99 even though C89 is enforced
+ * on gnuc and some other compiler. Need to treat carefully.
+ */
 #if defined(HAVE_VARIADIC_MACROS_C99) && \
     defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-#define LOG_CF(...)               Curl_nop_stmt
-#define Curl_log_cf_debug(...)    Curl_nop_stmt
-#elif defined(HAVE_VARIADIC_MACROS_GCC) && \
-    defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-#define LOG_CF(x...)              Curl_nop_stmt
-#define Curl_log_cf_debug(x...)   Curl_nop_stmt
+
+#define infof(data, ...) \
+  do { if(Curl_log_is_verbose(data)) \
+         Curl_infof(data, __VA_ARGS__); } while(0)
+#define CURL_LOG_CF(data, cf, ...) \
+  do { if(Curl_log_cf_is_verbose(cf, data)) \
+         Curl_log_cf_infof(data, cf, __VA_ARGS__); } while(0)
+
+#else /* no variadic macro args */
+#define infof Curl_infof
+#define CURL_LOG_CF Curl_log_cf_infof
+#endif /* variadic macro args */
+
+#else /* !CURL_DISABLE_VERBOSE_STRINGS */
+/* All informational messages are not compiled in for size savings */
+
+#define Curl_log_is_verbose(d)        ((void)(d), FALSE)
+#define Curl_log_cf_is_verbose(x,y)   ((void)(x), (void)(y), FALSE)
+
+#if defined(HAVE_VARIADIC_MACROS_C99)
+#define infof(...)  Curl_nop_stmt
+#define CURL_LOG_CF(...)  Curl_nop_stmt
+#define Curl_log_cf_infof(...)  Curl_nop_stmt
+#elif defined(HAVE_VARIADIC_MACROS_GCC)
+#define infof(x...)  Curl_nop_stmt
+#define CURL_LOG_CF(x...)  Curl_nop_stmt
+#define Curl_log_cf_infof(x...)  Curl_nop_stmt
 #else
-#define LOG_CF                    Curl_log_cf_debug
-/* without c99, we seem unable to completely define away this function. */
-void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
-                       const char *fmt, ...);
+#error "missing VARIADIC macro define, fix and rebuild!"
 #endif
 
-#define Curl_log_cf_is_debug(x,y)   ((void)(x), (void)(y), FALSE)
-
-#endif  /* !DEBUGBUILD */
-
-#define LOG_CF_IS_DEBUG(cf, data)        Curl_log_cf_is_debug(cf, data)
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
 
 #endif /* HEADER_CURL_LOG_H */

@@ -124,13 +124,13 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-#ifdef DEBUGBUILD
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 
-void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_log_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
-  if(data && Curl_log_cf_is_debug(cf, data)) {
+  if(data && Curl_log_cf_is_verbose(cf, data)) {
     va_list ap;
     int len;
     char buffer[MAXINFO + 2];
@@ -179,12 +179,13 @@ static struct Curl_cftype *cf_types[] = {
   NULL,
 };
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 CURLcode Curl_log_init(void)
 {
+#ifdef DEBUGBUILD
+  /* WIP: we use the auto-init from an env var only in DEBUG builds for
+   * convenience.
+   * TODO: add a method in the API to set a log config string explicitly
+    * by the app, e.g. the curl tool */
   const char *setting = getenv("CURL_DEBUG");
   if(setting) {
     char *token, *tok_buf, *tmp;
@@ -198,7 +199,7 @@ CURLcode Curl_log_init(void)
     while(token) {
       for(i = 0; cf_types[i]; ++i) {
         if(strcasecompare(token, cf_types[i]->name)) {
-          cf_types[i]->log_level = CURL_LOG_DEBUG;
+          cf_types[i]->log_level = CURL_LOG_LVL_INFO;
           break;
         }
       }
@@ -206,9 +207,10 @@ CURLcode Curl_log_init(void)
     }
     free(tmp);
   }
+#endif
   return CURLE_OK;
 }
-#else /* DEBUGBUILD */
+#else /* !CURL_DISABLE_VERBOSE_STRINGS) */
 
 CURLcode Curl_log_init(void)
 {
@@ -216,7 +218,7 @@ CURLcode Curl_log_init(void)
 }
 
 #if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
-void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_log_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   (void)data;

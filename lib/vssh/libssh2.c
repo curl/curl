@@ -2534,7 +2534,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           if(from > size) {
             failf(data, "Offset (%"
                   CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
-                  CURL_FORMAT_CURL_OFF_T ")", from, attrs.filesize);
+                  CURL_FORMAT_CURL_OFF_T ")", from,
+                  (curl_off_t)attrs.filesize);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
           if(from > to) {
@@ -2560,7 +2561,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             failf(data, "Offset (%"
                   CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
                   CURL_FORMAT_CURL_OFF_T ")",
-                  data->state.resume_from, attrs.filesize);
+                  data->state.resume_from, (curl_off_t)attrs.filesize);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
           /* download from where? */
@@ -2570,7 +2571,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           if((curl_off_t)attrs.filesize < data->state.resume_from) {
             failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
                   ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
-                  data->state.resume_from, attrs.filesize);
+                  data->state.resume_from, (curl_off_t)attrs.filesize);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
         }

@@ -164,7 +164,7 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
 static struct Curl_cftype cft_test = {
   "TEST",
   CF_TYPE_IP_CONNECT,
-  CURL_LOG_DEFAULT,
+  CURL_LOG_LVL_NONE,
   cf_test_destroy,
   cf_test_connect,
   Curl_cf_def_close,
