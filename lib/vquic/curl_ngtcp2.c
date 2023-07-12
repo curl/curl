@@ -33,7 +33,7 @@
 #ifdef OPENSSL_IS_BORINGSSL
 #include <ngtcp2/ngtcp2_crypto_boringssl.h>
 #else
-#include <ngtcp2/ngtcp2_crypto_openssl.h>
+#include <ngtcp2/ngtcp2_crypto_quictls.h>
 #endif
 #include "vtls/openssl.h"
 #elif defined(USE_GNUTLS)
@@ -407,8 +407,8 @@ static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
     goto out;
   }
 #else
-  if(ngtcp2_crypto_openssl_configure_client_context(ssl_ctx) != 0) {
-    failf(data, "ngtcp2_crypto_openssl_configure_client_context failed");
+  if(ngtcp2_crypto_quictls_configure_client_context(ssl_ctx) != 0) {
+    failf(data, "ngtcp2_crypto_quictls_configure_client_context failed");
     goto out;
   }
 #endif

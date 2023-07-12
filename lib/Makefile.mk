@@ -239,7 +239,7 @@ ifeq ($(findstring -nghttp3,$(CFG))$(findstring -ngtcp2,$(CFG)),-nghttp3-ngtcp2)
       ifneq ($(wildcard $(OPENSSL_INCLUDE)/openssl/aead.h),)
         NGTCP2_LIBS := -lngtcp2_crypto_boringssl
       else  # including libressl
-        NGTCP2_LIBS := -lngtcp2_crypto_openssl
+        NGTCP2_LIBS := -lngtcp2_crypto_quictls
       endif
     else ifneq ($(findstring -wolfssl,$(CFG)),)
       NGTCP2_LIBS := -lngtcp2_crypto_wolfssl
