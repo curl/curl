@@ -860,6 +860,9 @@ static OSStatus bio_cf_in_read(SSLConnectionRef connection,
     }
     nread = 0;
   }
+  else if(nread == 0) {
+    rtn = errSSLClosedGraceful;
+  }
   else if((size_t)nread < *dataLength) {
     rtn = errSSLWouldBlock;
   }
