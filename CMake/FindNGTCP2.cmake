@@ -31,7 +31,7 @@ Find the ngtcp2 library
 This module accepts optional COMPONENTS to control the crypto library (these are
 mutually exclusive)::
 
-  OpenSSL:  Use libngtcp2_crypto_openssl
+  OpenSSL:  Use libngtcp2_crypto_quictls
   GnuTLS:   Use libngtcp2_crypto_gnutls
 
 Result Variables
