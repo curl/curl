@@ -81,7 +81,7 @@ jobs:
       name: 'install quictls'
 
     - run: |
-        git clone --quiet --depth=1 -b v0.12.0 https://github.com/ngtcp2/nghttp3
+        git clone --quiet --depth=1 -b v0.13.0 https://github.com/ngtcp2/nghttp3
         cd nghttp3
         autoreconf -fi
         ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
@@ -89,7 +89,7 @@ jobs:
       name: 'install nghttp3'
 
     - run: |
-        git clone --quiet --depth=1 -b v0.16.0 https://github.com/ngtcp2/ngtcp2
+        git clone --quiet --depth=1 -b v0.17.0 https://github.com/ngtcp2/ngtcp2
         cd ngtcp2
         autoreconf -fi
         ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl
@@ -97,7 +97,7 @@ jobs:
       name: 'install ngtcp2'
 
     - run: |
-        git clone --quiet --depth=1 -b v1.54.0 https://github.com/nghttp2/nghttp2
+        git clone --quiet --depth=1 -b v1.55.0 https://github.com/nghttp2/nghttp2
         cd nghttp2
         autoreconf -fi
         ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-http3
