@@ -177,6 +177,12 @@ jobs:
     - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
       name: 'brew install'
 
+    - run: |
+        if test -d /usr/local/include/openssl; then
+          brew unlink openssl
+        fi
+      name: 'brew unlink openssl'
+
     - uses: actions/checkout@v3
 
     - run: cmake -S. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
