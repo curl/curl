@@ -29,7 +29,8 @@ preceding any other letter is ignored.
 If the first column of a config line is a '#' character, the rest of the line
 will be treated as a comment.
 
-Only write one option per physical line in the config file.
+Only write one option per physical line in the config file. A single line is
+required to be no more than 10 megabytes (since 8.2.0).
 
 Specify the filename to --config as '-' to make curl read the file from stdin.
 
