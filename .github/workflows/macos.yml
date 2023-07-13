@@ -119,6 +119,17 @@ jobs:
     - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
       name: 'brew install'
 
+    - run: |
+        case "${{ matrix.build.install }}" in
+          *openssl*)
+            ;;
+          *)
+            if test -d /usr/local/include/openssl; then
+              brew unlink openssl
+            fi;;
+        esac
+      name: 'brew unlink openssl'
+
     - run: python3 -m pip install impacket
       name: 'pip3 install'
 
@@ -176,6 +187,17 @@ jobs:
 
     - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
       name: 'brew install'
+
+    - run: |
+        case "${{ matrix.build.install }}" in
+          *openssl*)
+            ;;
+          *)
+            if test -d /usr/local/include/openssl; then
+              brew unlink openssl
+            fi;;
+        esac
+      name: 'brew unlink openssl'
 
     - uses: actions/checkout@v3
 
