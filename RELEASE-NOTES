@@ -21,10 +21,12 @@ This release includes the following bugfixes:
  o cf-socket: move ctx declaration under HAVE_GETPEERNAME [91]
  o cf-socket: skip getpeername()/getsockname for TFTP [65]
  o checksrc: modernise perl file open [87]
+ o checksrc: quote the file name to work with "funny" letters [93]
  o CI: don't install impacket if tests are not run
  o CI: enable parallel make in more builds
  o circleci: install impacket & wolfssl 5.6.0 [1]
  o cmake: add support for "unity" builds [13]
+ o cmake: make use of snprintf [102]
  o cmake: stop CMake from quietly ignoring missing Brotli [81]
  o configure: add check for ldap_init_fd [80]
  o configure: fix run-compiler for old /bin/sh [4]
@@ -39,12 +41,14 @@ This release includes the following bugfixes:
  o curl_url_set: enforce the max string length check for all parts [38]
  o CURLOPT_AWS_SIGV4.3: remove unused variable from example [11]
  o CURLOPT_INFILESIZE.3: mention -1 triggers chunked [55]
+ o CURLOPT_MIMEPOST.3: clarify what setting to NULL means [95]
  o CURLOPT_SSH_PRIVATE_KEYFILE.3: expand on the file search [31]
  o docs/libcurl/libcurl.3: cleanups and improvements [46]
  o docs: add more .IP after .RE to fix indentation of generate paragraphs [82]
  o docs: fix missing parameter names in examples [41]
  o docs: update CURLOPT_UPLOAD.3 [63]
  o docs: update HTTP3.md for newer ngtcp2 and nghttp3 [28]
+ o docs: use a space after RFC when spelling out RFC numbers [105]
  o example/connect-to: show CURLOPT_CONNECT_TO [47]
  o example/crawler: also set CURLOPT_AUTOREFERER [35]
  o example/crawler: make it use a few more options
@@ -52,6 +56,7 @@ This release includes the following bugfixes:
  o example/hsts-preload: show one way to HSTS preload [68]
  o example/http2-download: set CURLOPT_BUFFERSIZE [34]
  o example/ipv6: feature CURLOPT_ADDRESS_SCOPE in use [27]
+ o example/maxconnects: set maxconnect example [98]
  o example/opensslthreadlock: remove [59]
  o examples/ftpuploadresume.c: add use of CURLOPT_ACCEPTTIMEOUT_MS [39]
  o examples/http-options: show how to send "OPTIONS *" [69]
@@ -62,6 +67,8 @@ This release includes the following bugfixes:
  o examples/websocket.c: websocket example using CONNECT_ONLY [17]
  o examples: make use of CURLOPT_(REDIR_|)PROTOCOLS_STR [70]
  o fopen: fix conversion warning on 32-bit Android [49]
+ o fopen: optimize [101]
+ o hostip.c: Move macOS-specific calls into global init call [104]
  o HTTP/2: upload handling fixes [56]
  o http2: better support for --limit-rate [7]
  o http2: error stream resets with code CURLE_HTTP2_STREAM [84]
@@ -69,16 +76,20 @@ This release includes the following bugfixes:
  o http2: fix variable type [50]
  o http2: h2 and h2-PROXY connection alive check fixes [83]
  o http2: raise header limitations above and beyond [73]
+ o http2: send HEADER & DATA together if possible [99]
  o HTTP3.md: update openssl version [57]
+ o http3/ngtcp2: upload EAGAIN handling [108]
  o http: rectify the outgoing Cookie: header field size check [72]
  o hyper: fix EOF handling on input [66]
  o hyper: unslow [51]
+ o imap-append.c: update to make it more likely to work [106]
  o imap: Provide method to disable SASL if it is advertised [75]
  o libcurl-url.3: also mention CURLUPART_ZONEID
  o libcurl-ws.3. WebSocket API overview [48]
  o libssh2: provide error message when setting host key type fails [9]
  o libssh2: use custom memory functions [12]
  o ngtcp2: build with 0.16.0 and nghttp3 0.12.0 [33]
+ o ngtcp2: build with 0.17.0 and nghttp3 0.13.0 [96]
  o ngtcp2: use ever increasing timestamp in io [32]
  o quote.d: fix indentation of generated paragraphs [86]
  o runtests: abort test run after failure without -a [3]
@@ -92,6 +103,7 @@ This release includes the following bugfixes:
  o runtests: work around a perl without SIGUSR1 [88]
  o runtests; give each server a unique log lock file [43]
  o scripts: Fix GHA matrix job detection in cijobs.pl
+ o sectransp: fix EOF handling [92]
  o system.h: remove __IBMC__/__IBMCPP__ guards and apply to all z/OS compiles [10]
  o test2600: fix the description [90]
  o test427: verify sending more cookies than fit in a 8190 bytes line [61]
@@ -105,9 +117,11 @@ This release includes the following bugfixes:
  o tls13-ciphers.d: include Schannel [36]
  o tool: remove exclamation marks from error/warning messages
  o tool: remove newlines from all helpf/notef/warnf/errorf calls [15]
+ o tool_easysrc.h: correct `easysrc_perform` for `CURL_DISABLE_LIBCURL_OPTION` [109]
  o tool_getparam: fix comment [22]
  o tool_operate: allow cookie lines up to 8200 bytes [60]
  o tool_urlglob: use curl_off_t instead of longs [2]
+ o tool_writeout_json: fix encoding of control characters [107]
  o transfer: clear credentials when redirecting to absolute URL [64]
  o urlapi: have *set(PATH) prepend a slash if one is missing [42]
  o urlapi: scheme must start with alpha [26]
@@ -132,15 +146,18 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   ad0p on github, Alejandro R. Sedeño, Andy Fiddaman, Anssi Kolehmainen,
-  atjg on github, Boris Verkhovskiy, Chris Talbot, Cristian Rodríguez,
-  Dan Fandrich, Daniel Stenberg, Dion Williams, divinity76, Emanuele Torre,
-  Gisle Vanem, Harry Sintonen, humbleacolyte, Igor Todorovski, James Lucas,
-  jbgoog on github, Juan Cruz Viotti, JustAnotherArchivist on github,
-  Karthikdasari0423, lizhuang0630 on github, MaeIsBad on github, Marcel Raad,
-  Mark Seuffert, Michał Petryka, Oleg Jukovec, Paul Wise, Pedro Henrique,
-  Philip Heiduck, Raito Bezarius, Ray Satiro, Sean McArthur, Sergey Alirzaev,
-  Sheshadri.V, Stefan Eissing, Viktor Szakats, vlkl-sap on github, Wyatt OʼDay
-  (40 contributors)
+  atjg on github, Boris Verkhovskiy, Brian Nixon, Chris Talbot,
+  Cristian Rodríguez, Dan Fandrich, Daniel Stenberg, Dion Williams, divinity76,
+  Emanuele Torre, Frank Gevaerts, Gisle Vanem, GitHub, Harry Sintonen,
+  humbleacolyte, Igor Todorovski, James Fuller, James Lucas, jbgoog on github,
+  Juan Cruz Viotti, JustAnotherArchivist on github, Karthikdasari0423,
+  lizhuang0630 on github, MaeIsBad on github, Marcel Raad, Margu,
+  Mark Seuffert, Michał Petryka, Oleg Jukovec, Ondřej Koláček, Paul Wise,
+  Pedro Henrique, Philip Heiduck, Pontakorn Prasertsuk, Raito Bezarius,
+  Ray Satiro, SaltyMilk, Sean McArthur, selmelc on hackerone, Sergey Alirzaev,
+  Sheshadri.V, Stan Hu, Stefan Eissing, Tatsuhiro Tsujikawa, Viktor Szakats,
+  vlkl-sap on github, Wyatt OʼDay
+  (51 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -235,3 +252,17 @@ References to bug reports and discussions on issues:
  [89] = https://curl.se/bug/?i=11364
  [90] = https://curl.se/bug/?i=11354
  [91] = https://curl.se/bug/?i=11352
+ [92] = https://curl.se/bug/?i=11427
+ [93] = https://curl.se/bug/?i=11437
+ [95] = https://curl.se/bug/?i=11430
+ [96] = https://curl.se/bug/?i=11428
+ [98] = https://curl.se/bug/?i=11343
+ [99] = https://curl.se/bug/?i=11420
+ [101] = https://curl.se/bug/?i=11419
+ [102] = https://curl.se/bug/?i=11423
+ [104] = https://curl.se/bug/?i=11252
+ [105] = https://curl.se/bug/?i=11382
+ [106] = https://curl.se/bug/?i=10300
+ [107] = https://curl.se/bug/?i=11414
+ [108] = https://curl.se/bug/?i=11389
+ [109] = https://curl.se/bug/?i=11398
