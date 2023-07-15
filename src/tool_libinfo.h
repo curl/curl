@@ -50,6 +50,7 @@ extern bool feature_brotli;
 extern bool feature_hsts;
 extern bool feature_http2;
 extern bool feature_http3;
+extern bool feature_httpsproxy;
 extern bool feature_libz;
 extern bool feature_ntlm;
 extern bool feature_ntlm_wb;
