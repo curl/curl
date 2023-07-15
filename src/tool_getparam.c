@@ -1438,10 +1438,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case '2':
         /* HTTP version 2.0 */
+        if(!feature_http2)
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         sethttpver(global, config, CURL_HTTP_VERSION_2_0);
         break;
       case '3': /* --http2-prior-knowledge */
         /* HTTP version 2.0 over clean TCP */
+        if(!feature_http2)
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         sethttpver(global, config, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
         break;
       case '4': /* --http3 */
@@ -1462,6 +1466,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'a':
         /* --proxy-http2 */
+        if(!feature_httpsproxy || !feature_http2)
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->proxyver = CURLPROXY_HTTPS2;
         break;
       }
