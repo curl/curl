@@ -359,6 +359,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct wolfssl_ssl_backend_data *backend =
     (struct wolfssl_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   const struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SSL_METHOD* req_method = NULL;
 #ifdef HAVE_LIBOQS
@@ -371,6 +372,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #else
 #define use_sni(x)  Curl_nop_stmt
 #endif
+  bool imported_ca_info_blob = false;
 
   DEBUGASSERT(backend);
 
@@ -504,13 +506,28 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
     }
   }
+
+  if(ca_info_blob) {
+    if(wolfSSL_CTX_load_verify_buffer(
+      backend->ctx, ca_info_blob->data, ca_info_blob->len,
+      SSL_FILETYPE_PEM
+    ) != SSL_SUCCESS) {
+      failf(data, "error importing CA certificate blob");
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+    else {
+      imported_ca_info_blob = true;
+      infof(data, "successfully imported CA certificate blob");
+    }
+  }
+
 #ifndef NO_FILESYSTEM
   /* load trusted cacert */
   if(conn_config->CAfile) {
     if(1 != SSL_CTX_load_verify_locations(backend->ctx,
                                       conn_config->CAfile,
                                       conn_config->CApath)) {
-      if(conn_config->verifypeer) {
+      if(conn_config->verifypeer && !imported_ca_info_blob) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:"
               " CAfile: %s CApath: %s",
@@ -1341,6 +1358,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 #ifdef USE_BIO_CHAIN
   SSLSUPP_HTTPS_PROXY |
 #endif
+  SSLSUPP_CAINFO_BLOB |
   SSLSUPP_SSL_CTX,
 
   sizeof(struct wolfssl_ssl_backend_data),
