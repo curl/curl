@@ -415,8 +415,13 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
     break;
   case CURL_SSLVERSION_TLSv1_2:
+#ifndef WOLFSSL_NO_TLS12
     req_method = TLSv1_2_client_method();
     use_sni(TRUE);
+#else
+    failf(data, "wolfSSL does not support TLS 1.2");
+    return CURLE_NOT_BUILT_IN;
+#endif
     break;
   case CURL_SSLVERSION_TLSv1_3:
 #ifdef WOLFSSL_TLS13
