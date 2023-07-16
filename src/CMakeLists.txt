@@ -76,6 +76,14 @@ add_executable(
   ALIAS ${EXE_NAME}
   )
 
+add_library(
+  curltool # special libcurltool library just for unittests
+  STATIC
+  EXCLUDE_FROM_ALL
+  ${CURL_CFILES} ${CURLX_CFILES} ${CURL_HFILES}
+)
+target_compile_definitions(curltool PUBLIC UNITTESTS CURL_STATICLIB)
+
 if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
