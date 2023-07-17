@@ -1098,6 +1098,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   struct Curl_cfilter *cf = userp;
   struct cf_h2_ctx *ctx = cf->ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf), *data_s;
+  struct stream_ctx *stream;
   int32_t stream_id = frame->hd.stream_id;
 
   DEBUGASSERT(data);
@@ -1130,9 +1131,12 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       if((data->req.keepon & KEEP_SEND_HOLD) &&
          (data->req.keepon & KEEP_SEND)) {
         data->req.keepon &= ~KEEP_SEND_HOLD;
-        drain_stream(cf, data, stream);
-        DEBUGF(LOG_CF(data, cf, "[h2sid=%d] un-holding after SETTINGS",
-                      stream_id));
+        stream = H2_STREAM_CTX(data);
+        if(stream) {
+          drain_stream(cf, data, stream);
+          DEBUGF(LOG_CF(data, cf, "[h2sid=%d] un-holding after SETTINGS",
+                        stream_id));
+        }
       }
       break;
     }
