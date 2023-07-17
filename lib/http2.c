@@ -1122,6 +1122,21 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                       ctx->max_concurrent_streams));
         multi_connchanged(data->multi);
       }
+      /* Since the initial stream window is 64K, a request might be on HOLD,
+       * due to exhaustion. The (initial) SETTINGS may announce a much larger
+       * window and *assume* that we treat this like a WINDOW_UPDATE. Some
+       * servers send an explicit WINDOW_UPDATE, but not all seem to do that.
+       * To be safe, we UNHOLD a stream in order not to stall. */
+      if((data->req.keepon & KEEP_SEND_HOLD) &&
+         (data->req.keepon & KEEP_SEND)) {
+        struct stream_ctx *stream = H2_STREAM_CTX(data);
+        data->req.keepon &= ~KEEP_SEND_HOLD;
+        if(stream) {
+          drain_stream(cf, data, stream);
+          DEBUGF(LOG_CF(data, cf, "[h2sid=%d] un-holding after SETTINGS",
+                        stream_id));
+        }
+      }
       break;
     }
     case NGHTTP2_GOAWAY:
