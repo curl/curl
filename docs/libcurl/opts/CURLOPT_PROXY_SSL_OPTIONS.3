@@ -62,9 +62,11 @@ library). If combined with \fICURLSSLOPT_NO_REVOKE\fP, the latter takes
 precedence. (Added in 7.70.0)
 .IP CURLSSLOPT_NATIVE_CA
 Tell libcurl to use the operating system's native CA store for certificate
-verification. Works only on Windows when built to use OpenSSL. If you set this
-option and also set a CA certificate file or directory then during verification
-those certificates are searched in addition to the native CA store.
+verification. Works only on Windows, Linux (Debian, Ubuntu, Gentoo, Fedora,
+RHEL), macOS, Android and iOS when built to use wolfSSL (since 8.3.0) or on
+Windows when built to use OpenSSL. If you set this option and also set a CA
+certificate file or directory then during verification those certificates
+are searched in addition to the native CA store.
 (Added in 7.71.0)
 .IP CURLSSLOPT_AUTO_CLIENT_CERT
 Tell libcurl to automatically locate and use a client certificate for

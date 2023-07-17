@@ -372,6 +372,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #else
 #define use_sni(x)  Curl_nop_stmt
 #endif
+  bool imported_native_ca = false;
   bool imported_ca_info_blob = false;
 
   DEBUGASSERT(backend);
@@ -507,13 +508,32 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
 
+#ifndef NO_FILESYSTEM
+  /* load native CA certificates */
+  if(ssl_config->native_ca_store) {
+    if(wolfSSL_CTX_load_system_CA_certs(backend->ctx) != WOLFSSL_SUCCESS) {
+      infof(data, "error importing native CA store, continuing anyway");
+    }
+    else {
+      imported_native_ca = true;
+      infof(data, "successfully imported native CA store");
+    }
+  }
+#endif /* !NO_FILESYSTEM */
+
+  /* load certificate blob */
   if(ca_info_blob) {
     if(wolfSSL_CTX_load_verify_buffer(
       backend->ctx, ca_info_blob->data, ca_info_blob->len,
       SSL_FILETYPE_PEM
     ) != SSL_SUCCESS) {
-      failf(data, "error importing CA certificate blob");
-      return CURLE_SSL_CACERT_BADFILE;
+      if(imported_native_ca) {
+        infof(data, "error importing CA certificate blob, continuing anyway");
+      }
+      else {
+        failf(data, "error importing CA certificate blob");
+        return CURLE_SSL_CACERT_BADFILE;
+      }
     }
     else {
       imported_ca_info_blob = true;
@@ -527,7 +547,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(1 != SSL_CTX_load_verify_locations(backend->ctx,
                                       conn_config->CAfile,
                                       conn_config->CApath)) {
-      if(conn_config->verifypeer && !imported_ca_info_blob) {
+      if(conn_config->verifypeer && !imported_ca_info_blob &&
+         !imported_native_ca) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:"
               " CAfile: %s CApath: %s",
