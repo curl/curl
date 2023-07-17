@@ -150,6 +150,7 @@ cyassl
 Cygwin
 daniel
 datatracker
+Debian
 decrypt
 deepcode
 DELE
@@ -216,6 +217,7 @@ Falkeborn
 Fandrich
 Fastly
 fcpp
+Fedora
 Feltzing
 ffi
 filesize
@@ -243,6 +245,7 @@ gcc
 GCM
 gdb
 Genode
+Gentoo
 Gergely
 getaddrinfo
 getenv
@@ -624,6 +627,7 @@ resending
 RETR
 retransmit
 retrigger
+RHEL
 RICS
 Rikard
 rmdir
@@ -785,6 +789,7 @@ tvOS
 txt
 typedef
 typedefed
+Ubuntu
 ucLinux
 UDP
 UI
