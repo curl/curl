@@ -885,7 +885,7 @@ out:
     ctx->data_recvd += nread;
   DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] cf_recv(total=%"
                 CURL_FORMAT_CURL_OFF_T ") -> %zd, %d",
-                stream ? stream->id : NULL,
+                stream ? stream->id : (int64_t)0,
                 ctx->data_recvd, nread, *err));
   return nread;
 }
