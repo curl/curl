@@ -261,7 +261,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
     }
     /* We pass NULL as |output_name_type| to avoid a leak. */
     gss_display_name(&min, gssname, &output_buffer, NULL);
-    infof(data, "Trying against %s", output_buffer.value);
+    infof(data, "Trying against %s", (char *)output_buffer.value);
     gssresp = GSS_C_NO_BUFFER;
     *context = GSS_C_NO_CONTEXT;
 
