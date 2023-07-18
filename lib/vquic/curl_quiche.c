@@ -329,7 +329,7 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
   else {
     DEBUGASSERT(data->multi);
     for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
-      if(H3_STREAM_ID(sdata) == stream3_id) {
+      if((sdata->conn == data->conn) && H3_STREAM_ID(sdata) == stream3_id) {
         return sdata;
       }
     }
