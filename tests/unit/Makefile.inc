@@ -62,9 +62,6 @@ unit1323_SOURCES = unit1323.c $(UNITFILES)
 unit1330_SOURCES = unit1330.c $(UNITFILES)
 
 unit1394_SOURCES = unit1394.c $(UNITFILES)
-unit1394_LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
-unit1394_LDFLAGS = $(top_builddir)/src/libcurltool.la
-unit1394_LIBS =
 
 unit1395_SOURCES = unit1395.c $(UNITFILES)
 
