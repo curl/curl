@@ -4,7 +4,7 @@ curl and libcurl 8.2.0
  Command line options:         255
  curl_easy_setopt() options:   303
  Public functions in libcurl:  91
- Contributors:                 2912
+ Contributors:                 2922
 
 This release includes the following changes:
 
@@ -18,10 +18,12 @@ This release includes the following bugfixes:
 
  o bufq: make write/pass methods more robust [21]
  o build: drop unused/redundant `HAVE_WINLDAP_H` [25]
+ o cf-socket: don't bypass fclosesocket callback if cancelled before connect [114]
  o cf-socket: move ctx declaration under HAVE_GETPEERNAME [91]
  o cf-socket: skip getpeername()/getsockname for TFTP [65]
  o checksrc: modernise perl file open [87]
  o checksrc: quote the file name to work with "funny" letters [93]
+ o CI: brew fix for openssl in default path [116]
  o CI: don't install impacket if tests are not run
  o CI: enable parallel make in more builds
  o circleci: install impacket & wolfssl 5.6.0 [1]
@@ -34,6 +36,7 @@ This release includes the following bugfixes:
  o connect-timeout.d: mention that the DNS lookup is included [85]
  o curl.h: include <sys/select.h> for vxworks [78]
  o curl: count uploaded data to stop at the originally given size [14]
+ o curl: return error when asked to use an unsupported HTTP version [113]
  o curl_easy_nextheader.3: add missing open parenthesis examples [74]
  o curl_log: evaluate log statement only when transfer is verbose [8]
  o curl_mprintf.3: minor fix of the example
@@ -77,6 +80,7 @@ This release includes the following bugfixes:
  o http2: h2 and h2-PROXY connection alive check fixes [83]
  o http2: raise header limitations above and beyond [73]
  o http2: send HEADER & DATA together if possible [99]
+ o http2: treat initial SETTINGS as a WINDOW_UPDATE [100]
  o HTTP3.md: update openssl version [57]
  o http3/ngtcp2: upload EAGAIN handling [108]
  o http: rectify the outgoing Cookie: header field size check [72]
@@ -84,13 +88,16 @@ This release includes the following bugfixes:
  o hyper: unslow [51]
  o imap-append.c: update to make it more likely to work [106]
  o imap: Provide method to disable SASL if it is advertised [75]
+ o krb5: add typecast to please Coverity
  o libcurl-url.3: also mention CURLUPART_ZONEID
  o libcurl-ws.3. WebSocket API overview [48]
  o libssh2: provide error message when setting host key type fails [9]
  o libssh2: use custom memory functions [12]
- o ngtcp2: build with 0.16.0 and nghttp3 0.12.0 [33]
+ o ngtcp2: assigning timeout, but value is overwritten before used [103]
  o ngtcp2: build with 0.17.0 and nghttp3 0.13.0 [96]
  o ngtcp2: use ever increasing timestamp in io [32]
+ o quiche: avoid NULL deref in debug logging [97]
+ o quiche: fix defects found in latest coverity report [94]
  o quote.d: fix indentation of generated paragraphs [86]
  o runtests: abort test run after failure without -a [3]
  o runtests: better handle ^C during slow tests
@@ -120,6 +127,7 @@ This release includes the following bugfixes:
  o tool_easysrc.h: correct `easysrc_perform` for `CURL_DISABLE_LIBCURL_OPTION` [109]
  o tool_getparam: fix comment [22]
  o tool_operate: allow cookie lines up to 8200 bytes [60]
+ o tool_parsecfg: accept line lengths up to 10M [115]
  o tool_urlglob: use curl_off_t instead of longs [2]
  o tool_writeout_json: fix encoding of control characters [107]
  o transfer: clear credentials when redirecting to absolute URL [64]
@@ -127,6 +135,8 @@ This release includes the following bugfixes:
  o urlapi: scheme must start with alpha [26]
  o vtls: avoid memory leak if sha256 call fails [58]
  o websocket-cb: example doing WebSocket download using callback [18]
+ o wolfssl: detect when TLS 1.2 support is not built into wolfssl [111]
+ o wolfssl: support setting CA certificates as blob [110]
  o ws: make the curl_ws_meta() return pointer a const [45]
 
 This release includes the following known bugs:
@@ -146,10 +156,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   ad0p on github, Alejandro R. Sedeño, Andy Fiddaman, Anssi Kolehmainen,
-  atjg on github, Boris Verkhovskiy, Brian Nixon, Chris Talbot,
-  Cristian Rodríguez, Dan Fandrich, Daniel Stenberg, Dion Williams, divinity76,
-  Emanuele Torre, Frank Gevaerts, Gisle Vanem, GitHub, Harry Sintonen,
-  humbleacolyte, Igor Todorovski, James Fuller, James Lucas, jbgoog on github,
+  Antoine du Hamel, atjg on github, Boris Verkhovskiy, Brian Nixon,
+  Chris Paulson-Ellis, Chris Talbot, Cristian Rodríguez, Dan Fandrich,
+  Daniel Stenberg, Derzsi Dániel, Dion Williams, divinity76, Emanuele Torre,
+  Frank Gevaerts, Gisle Vanem, Graham Campbell, Harry Sintonen, humbleacolyte,
+  Igor Todorovski, James Fuller, James Lucas, jbgoog on github,
   Juan Cruz Viotti, JustAnotherArchivist on github, Karthikdasari0423,
   lizhuang0630 on github, MaeIsBad on github, Marcel Raad, Margu,
   Mark Seuffert, Michał Petryka, Oleg Jukovec, Ondřej Koláček, Paul Wise,
@@ -157,7 +168,7 @@ advice from friends like these:
   Ray Satiro, SaltyMilk, Sean McArthur, selmelc on hackerone, Sergey Alirzaev,
   Sheshadri.V, Stan Hu, Stefan Eissing, Tatsuhiro Tsujikawa, Viktor Szakats,
   vlkl-sap on github, Wyatt OʼDay
-  (51 contributors)
+  (54 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -193,7 +204,6 @@ References to bug reports and discussions on issues:
  [30] = https://curl.se/bug/?i=11265
  [31] = https://curl.se/bug/?i=11289
  [32] = https://curl.se/bug/?i=11288
- [33] = https://curl.se/bug/?i=11184
  [34] = https://curl.se/bug/?i=11284
  [35] = https://curl.se/bug/?i=11283
  [36] = https://curl.se/bug/?i=11271
@@ -254,15 +264,25 @@ References to bug reports and discussions on issues:
  [91] = https://curl.se/bug/?i=11352
  [92] = https://curl.se/bug/?i=11427
  [93] = https://curl.se/bug/?i=11437
+ [94] = https://curl.se/bug/?i=11455
  [95] = https://curl.se/bug/?i=11430
  [96] = https://curl.se/bug/?i=11428
+ [97] = https://curl.se/bug/?i=11454
  [98] = https://curl.se/bug/?i=11343
  [99] = https://curl.se/bug/?i=11420
+ [100] = https://curl.se/bug/?i=11450
  [101] = https://curl.se/bug/?i=11419
  [102] = https://curl.se/bug/?i=11423
+ [103] = https://curl.se/bug/?i=11453
  [104] = https://curl.se/bug/?i=11252
  [105] = https://curl.se/bug/?i=11382
  [106] = https://curl.se/bug/?i=10300
  [107] = https://curl.se/bug/?i=11414
  [108] = https://curl.se/bug/?i=11389
  [109] = https://curl.se/bug/?i=11398
+ [110] = https://curl.se/bug/?i=11445
+ [111] = https://curl.se/bug/?i=11444
+ [113] = https://curl.se/bug/?i=11440
+ [114] = https://curl.se/bug/?i=11439
+ [115] = https://curl.se/bug/?i=11431
+ [116] = https://curl.se/bug/?i=11413
