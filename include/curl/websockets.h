@@ -56,11 +56,11 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
                                   size_t *recv,
                                   const struct curl_ws_frame **metap);
 
-/* sendflags for curl_ws_send() */
+/* flags for curl_ws_send() */
 #define CURLWS_PONG       (1<<6)
 
 /*
- * NAME curl_easy_send()
+ * NAME curl_ws_send()
  *
  * DESCRIPTION
  *
@@ -69,8 +69,8 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
  */
 CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
                                   size_t buflen, size_t *sent,
-                                  curl_off_t framesize,
-                                  unsigned int sendflags);
+                                  curl_off_t fragsize,
+                                  unsigned int flags);
 
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
 #define CURLWS_RAW_MODE (1<<0)
