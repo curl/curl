@@ -37,7 +37,7 @@
  * made, the EXPECTED_STRING_LASTZEROTERMINATED/EXPECTED_STRING_LAST
  * values can be updated to match the latest enum values in urldata.h.
  */
-#define EXPECTED_STRING_LASTZEROTERMINATED  (STRING_AWS_SIGV4 + 1)
+#define EXPECTED_STRING_LASTZEROTERMINATED  (STRING_HAPROXY_CLIENT_IP + 1)
 #define EXPECTED_STRING_LAST                (STRING_COPYPOSTFIELDS + 1)
 
 int main(int argc, char *argv[])
