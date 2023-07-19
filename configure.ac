@@ -2835,9 +2835,9 @@ if test X"$want_nghttp2" != Xno; then
   CPPFLAGS="$CPPFLAGS $CPP_H2"
   LIBS="$LIB_H2 $LIBS"
 
-  # use nghttp2_session_set_local_window_size to require nghttp2
-  # >= 1.12.0
-  AC_CHECK_LIB(nghttp2, nghttp2_session_set_local_window_size,
+  # use nghttp2_session_get_stream_local_window_size to require nghttp2
+  # >= 1.15.0
+  AC_CHECK_LIB(nghttp2, nghttp2_session_get_stream_local_window_size,
     [
      AC_CHECK_HEADERS(nghttp2/nghttp2.h,
         curl_h2_msg="enabled (nghttp2)"
