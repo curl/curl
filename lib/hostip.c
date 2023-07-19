@@ -557,6 +557,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
 static struct Curl_addrinfo *get_localhost(int port, const char *name)
 {
   struct Curl_addrinfo *ca;
+  struct Curl_addrinfo *ca6;
   const size_t ss_size = sizeof(struct sockaddr_in);
   const size_t hostlen = strlen(name);
   struct sockaddr_in sa;
@@ -583,8 +584,12 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
   memcpy(ca->ai_addr, &sa, ss_size);
   ca->ai_canonname = (char *)ca->ai_addr + ss_size;
   strcpy(ca->ai_canonname, name);
-  ca->ai_next = get_localhost6(port, name);
-  return ca;
+
+  ca6 = get_localhost6(port, name);
+  if(!ca6)
+    return ca;
+  ca6->ai_next = ca;
+  return ca6;
 }
 
 #ifdef ENABLE_IPV6
