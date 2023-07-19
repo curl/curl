@@ -32,7 +32,7 @@ if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
         #include <libraries/amisslmaster.h>
         #include <openssl/opensslv.h>
       ]],[[
-        #if defined(AMISSL_CURRENT_VERSION) && (AMISSL_CURRENT_VERSION >= AMISSL_V303) && \
+        #if defined(AMISSL_CURRENT_VERSION) && defined(AMISSL_V3xx) && \
             defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && \
             defined(PROTO_AMISSL_H)
         return 0;
