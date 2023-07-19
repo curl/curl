@@ -426,7 +426,7 @@ static ssize_t stream_resp_read(void *reader_ctx,
     return nread;
   }
   else {
-    *err = stream->resp_got_header? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
+    *err = CURLE_AGAIN;
     return -1;
   }
 }
@@ -457,8 +457,8 @@ static CURLcode cf_recv_body(struct Curl_cfilter *cf,
   if(nwritten < 0 && result != CURLE_AGAIN) {
     DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] recv_body error %zd",
                   stream->id, nwritten));
-    failf(data, "Error %zd in HTTP/3 response body for stream[%"PRId64"]",
-          nwritten, stream->id);
+    failf(data, "Error %d in HTTP/3 response body for stream[%"PRId64"]",
+          result, stream->id);
     stream->closed = TRUE;
     stream->reset = TRUE;
     stream->send_closed = TRUE;
@@ -591,8 +591,13 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
                       "for [h3sid=%"PRId64"] -> %d",
                       stream? stream->id : -1, cf_ev_name(ev),
                       stream3_id, result));
-        quiche_h3_event_free(ev);
-        return result;
+        if(data == sdata) {
+          /* Only report this error to the caller if it is about the
+           * transfer we were called with. Otherwise we fail a transfer
+           * due to a problem in another one. */
+          quiche_h3_event_free(ev);
+          return result;
+        }
       }
       quiche_h3_event_free(ev);
     }
@@ -1147,10 +1152,8 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
   (void)arg1;
   (void)arg2;
   switch(event) {
-  case CF_CTRL_DATA_SETUP: {
-    result = h3_data_setup(cf, data);
+  case CF_CTRL_DATA_SETUP:
     break;
-  }
   case CF_CTRL_DATA_PAUSE:
     result = h3_data_pause(cf, data, (arg1 != 0));
     break;
@@ -1338,11 +1341,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                               "qlog title", "curl qlog");
   }
 #endif
-
-  /* we do not get a setup event for the initial transfer */
-  result = h3_data_setup(cf, data);
-  if(result)
-    return result;
 
   result = cf_flush_egress(cf, data);
   if(result)
