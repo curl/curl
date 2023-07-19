@@ -1528,7 +1528,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   DEBUGASSERT(connssl);
   DEBUGASSERT(cf->conn->host.name);
 
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  result = (cf->next->cft->connect)(cf->next, data, blocking, done);
   if(result || !*done)
     goto out;
 

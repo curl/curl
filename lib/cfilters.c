@@ -293,7 +293,7 @@ CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               bool blocking, bool *done)
 {
   if(cf)
-    return cf->cft->connect(cf, data, blocking, done);
+    return (cf->cft->connect)(cf, data, blocking, done);
   return CURLE_FAILED_INIT;
 }
 
@@ -348,7 +348,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 
   *done = cf->connected;
   if(!*done) {
-    result = cf->cft->connect(cf, data, blocking, done);
+    result = (cf->cft->connect)(cf, data, blocking, done);
     if(!result && *done) {
       Curl_conn_ev_update_info(data, data->conn);
       conn_report_connect_stats(data, data->conn);

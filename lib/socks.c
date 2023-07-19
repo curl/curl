@@ -1115,7 +1115,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  result = (cf->next->cft->connect)(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 

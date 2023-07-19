@@ -115,7 +115,7 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  result = (cf->next->cft->connect)(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
