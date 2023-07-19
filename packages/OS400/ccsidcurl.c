@@ -1164,6 +1164,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   case CURLOPT_USERNAME:
   case CURLOPT_USERPWD:
   case CURLOPT_XOAUTH2_BEARER:
+  case CURLOPT_HAPROXY_CLIENT_IP:
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 
