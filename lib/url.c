@@ -414,7 +414,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
     Curl_hsts_cleanup(&data->hsts);
   curl_slist_free_all(data->set.hstslist); /* clean up list */
 #endif
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
   Curl_safefree(data->info.contenttype);

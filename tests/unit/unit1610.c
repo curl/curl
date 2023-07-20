@@ -39,7 +39,9 @@ static void unit_stop(void)
 
 UNITTEST_START
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
+    || defined(USE_LIBSSH2)
+
   const char string1[] = "1";
   const char string2[] = "hello-you-fool";
   unsigned char output[SHA256_DIGEST_LENGTH];

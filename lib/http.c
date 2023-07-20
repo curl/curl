@@ -341,6 +341,8 @@ char *Curl_copy_header_value(const char *header)
 }
 
 #ifndef CURL_DISABLE_HTTP_AUTH
+
+#ifndef CURL_DISABLE_BASIC_AUTH
 /*
  * http_output_basic() sets up an Authorization: header (or the proxy version)
  * for HTTP Basic authentication.
@@ -402,6 +404,9 @@ fail:
   return result;
 }
 
+#endif
+
+#ifndef CURL_DISABLE_BEARER_AUTH
 /*
  * http_output_bearer() sets up an Authorization: header
  * for HTTP Bearer authentication.
@@ -429,6 +434,8 @@ fail:
 
 #endif
 
+#endif
+
 /* pickoneauth() selects the most favourable authentication method from the
  * ones available and the ones we want.
  *
@@ -445,18 +452,26 @@ static bool pickoneauth(struct auth *pick, unsigned long mask)
      of preference in case of the existence of multiple accepted types. */
   if(avail & CURLAUTH_NEGOTIATE)
     pick->picked = CURLAUTH_NEGOTIATE;
+#ifndef CURL_DISABLE_BEARER_AUTH
   else if(avail & CURLAUTH_BEARER)
     pick->picked = CURLAUTH_BEARER;
+#endif
+#ifndef CURL_DISABLE_DIGEST_AUTH
   else if(avail & CURLAUTH_DIGEST)
     pick->picked = CURLAUTH_DIGEST;
+#endif
   else if(avail & CURLAUTH_NTLM)
     pick->picked = CURLAUTH_NTLM;
   else if(avail & CURLAUTH_NTLM_WB)
     pick->picked = CURLAUTH_NTLM_WB;
+#ifndef CURL_DISABLE_BASIC_AUTH
   else if(avail & CURLAUTH_BASIC)
     pick->picked = CURLAUTH_BASIC;
+#endif
+#ifndef CURL_DISABLE_AWS
   else if(avail & CURLAUTH_AWS_SIGV4)
     pick->picked = CURLAUTH_AWS_SIGV4;
+#endif
   else {
     pick->picked = CURLAUTH_PICKNONE; /* we select to use nothing */
     picked = FALSE;
@@ -722,11 +737,11 @@ output_auth_headers(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   (void)conn;
 
-#ifdef CURL_DISABLE_CRYPTO_AUTH
+#ifdef CURL_DISABLE_DIGEST_AUTH
   (void)request;
   (void)path;
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_AWS
   if(authstatus->picked == CURLAUTH_AWS_SIGV4) {
     auth = "AWS_SIGV4";
     result = Curl_output_aws_sigv4(data, proxy);
@@ -762,7 +777,7 @@ output_auth_headers(struct Curl_easy *data,
   }
   else
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
   if(authstatus->picked == CURLAUTH_DIGEST) {
     auth = "Digest";
     result = Curl_output_digest(data,
@@ -774,6 +789,7 @@ output_auth_headers(struct Curl_easy *data,
   }
   else
 #endif
+#ifndef CURL_DISABLE_BASIC_AUTH
   if(authstatus->picked == CURLAUTH_BASIC) {
     /* Basic */
     if(
@@ -793,6 +809,8 @@ output_auth_headers(struct Curl_easy *data,
        functions work that way */
     authstatus->done = TRUE;
   }
+#endif
+#ifndef CURL_DISABLE_BEARER_AUTH
   if(authstatus->picked == CURLAUTH_BEARER) {
     /* Bearer */
     if((!proxy && data->set.str[STRING_BEARER] &&
@@ -807,6 +825,7 @@ output_auth_headers(struct Curl_easy *data,
        functions work that way */
     authstatus->done = TRUE;
   }
+#endif
 
   if(auth) {
 #ifndef CURL_DISABLE_PROXY
@@ -1068,7 +1087,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       }
       else
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
         if(checkprefix("Digest", auth) && is_valid_auth_separator(auth[6])) {
           if((authp->avail & CURLAUTH_DIGEST) != 0)
             infof(data, "Ignoring duplicate digest auth header.");
@@ -1091,6 +1110,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
         }
         else
 #endif
+#ifndef CURL_DISABLE_BASIC_AUTH
           if(checkprefix("Basic", auth) &&
              is_valid_auth_separator(auth[5])) {
             *availp |= CURLAUTH_BASIC;
@@ -1105,6 +1125,8 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
             }
           }
           else
+#endif
+#ifndef CURL_DISABLE_BEARER_AUTH
             if(checkprefix("Bearer", auth) &&
                is_valid_auth_separator(auth[6])) {
               *availp |= CURLAUTH_BEARER;
@@ -1117,6 +1139,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                 data->state.authproblem = TRUE;
               }
             }
+#endif
 
     /* there may be multiple methods on one line, so keep reading */
     while(*auth && *auth != ',') /* read up to the next comma */

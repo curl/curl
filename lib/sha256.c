@@ -25,7 +25,8 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
+    || defined(USE_LIBSSH2)
 
 #include "warnless.h"
 #include "curl_sha256.h"
@@ -541,4 +542,4 @@ const struct HMAC_params Curl_HMAC_SHA256[] = {
 };
 
 
-#endif /* CURL_DISABLE_CRYPTO_AUTH */
+#endif /* AWS, DIGEST, or libSSH2 */

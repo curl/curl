@@ -30,7 +30,7 @@
 
 struct Curl_easy;
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if !defined(CURL_DISABLE_DIGEST_AUTH)
 struct digestdata;
 #endif
 
@@ -86,7 +86,7 @@ CURLcode Curl_auth_create_login_message(const char *value,
 CURLcode Curl_auth_create_external_message(const char *user,
                                            struct bufref *out);
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#ifndef CURL_DISABLE_DIGEST_AUTH
 /* This is used to generate a CRAM-MD5 response message */
 CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
                                            const char *userp,
@@ -119,7 +119,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
 /* This is used to clean up the digest specific data */
 void Curl_auth_digest_cleanup(struct digestdata *digest);
-#endif /* !CURL_DISABLE_CRYPTO_AUTH */
+#endif /* !CURL_DISABLE_DIGEST_AUTH */
 
 #ifdef USE_GSASL
 /* This is used to evaluate if MECH is supported by gsasl */

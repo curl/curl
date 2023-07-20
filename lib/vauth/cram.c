@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#ifndef CURL_DISABLE_DIGEST_AUTH
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -94,4 +94,4 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   return CURLE_OK;
 }
 
-#endif /* !CURL_DISABLE_CRYPTO_AUTH */
+#endif /* !CURL_DISABLE_DIGEST_AUTH */

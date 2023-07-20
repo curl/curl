@@ -336,6 +336,7 @@ struct Curl_ssl_session {
 #include "curl_sspi.h"
 #endif
 
+#ifndef CURL_DISABLE_DIGEST_AUTH
 /* Struct used for Digest challenge-response authentication */
 struct digestdata {
 #if defined(USE_WINDOWS_SSPI)
@@ -359,6 +360,7 @@ struct digestdata {
   BIT(userhash);
 #endif
 };
+#endif
 
 typedef enum {
   NTLMSTATE_NONE,
@@ -1347,7 +1349,7 @@ struct UrlState {
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
   void (*prev_signal)(int sig);
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
   struct digestdata digest;      /* state data for host Digest auth */
   struct digestdata proxydigest; /* state data for proxy Digest auth */
 #endif

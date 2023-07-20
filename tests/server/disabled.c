@@ -43,8 +43,20 @@ static const char *disabled[]={
 #ifdef CURL_DISABLE_COOKIES
   "cookies",
 #endif
-#ifdef CURL_DISABLE_CRYPTO_AUTH
-  "crypto",
+#ifdef CURL_DISABLE_BASIC_AUTH
+  "basic-auth",
+#endif
+#ifdef CURL_DISABLE_BEARER_AUTH
+  "bearer-auth",
+#endif
+#ifdef CURL_DISABLE_DIGEST_AUTH
+  "digest-auth",
+#endif
+#ifdef CURL_DISABLE_NEGOTIATE_AUTH
+  "negotiate-auth",
+#endif
+#ifdef CURL_DISABLE_AWS
+  "aws",
 #endif
 #ifdef CURL_DISABLE_DOH
   "DoH",

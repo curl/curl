@@ -26,7 +26,8 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
+    || !defined(CURL_DISABLE_AWS)
 
 #include <curl/curl.h>
 
@@ -169,4 +170,4 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_CRYPTO_AUTH */
+#endif /* Using NTLM (without SSPI) or AWS */

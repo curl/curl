@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_AWS)
 
 #include "urldata.h"
 #include "strcase.h"
@@ -646,4 +646,4 @@ fail:
   return ret;
 }
 
-#endif /* !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH) */
+#endif /* !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_AWS) */

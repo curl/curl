@@ -420,7 +420,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
     }
     else
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
     if((enabledmechs & SASL_MECH_DIGEST_MD5) &&
        Curl_auth_is_digest_supported()) {
       mech = SASL_MECH_STRING_DIGEST_MD5;
@@ -530,8 +530,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   struct bufref resp;
   const char *hostname, *disp_hostname;
   int port;
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) ||     \
-  defined(USE_NTLM)
+#if defined(USE_KERBEROS5) || defined(USE_NTLM) \
+    || !defined(CURL_DISABLE_DIGEST_AUTH)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;
@@ -577,7 +577,6 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_EXTERNAL:
     result = Curl_auth_create_external_message(conn->user, &resp);
     break;
-#ifndef CURL_DISABLE_CRYPTO_AUTH
 #ifdef USE_GSASL
   case SASL_GSASL:
     result = get_server_message(sasl, data, &serverdata);
@@ -587,6 +586,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
       newstate = SASL_GSASL;
     break;
 #endif
+#ifndef CURL_DISABLE_DIGEST_AUTH
   case SASL_CRAMMD5:
     result = get_server_message(sasl, data, &serverdata);
     if(!result)
