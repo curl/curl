@@ -567,7 +567,6 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   */
   struct connectdata *conn = cf->conn;
   unsigned char *socksreq = (unsigned char *)data->state.buffer;
-  char dest[256] = "unknown";  /* printable hostname:port */
   int idx;
   CURLcode result;
   CURLproxycode presult;
@@ -820,8 +819,8 @@ CONNECT_REQ_INIT:
     /* FALLTHROUGH */
 CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
+    char dest[MAX_IPADR_LEN] = "unknown";  /* printable address */
     struct Curl_addrinfo *hp = NULL;
-    size_t destlen;
     if(dns)
       hp = dns->addr;
     if(!hp) {
@@ -831,8 +830,6 @@ CONNECT_RESOLVED:
     }
 
     Curl_printable_address(hp, dest, sizeof(dest));
-    destlen = strlen(dest);
-    msnprintf(dest + destlen, sizeof(dest) - destlen, ":%d", sx->remote_port);
 
     len = 0;
     socksreq[len++] = 5; /* version (SOCKS5) */
@@ -848,7 +845,8 @@ CONNECT_RESOLVED:
         socksreq[len++] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[i];
       }
 
-      infof(data, "SOCKS5 connect to IPv4 %s (locally resolved)", dest);
+      infof(data, "SOCKS5 connect to %s:%d (locally resolved)", dest,
+            sx->remote_port);
     }
 #ifdef ENABLE_IPV6
     else if(hp->ai_family == AF_INET6) {
@@ -862,7 +860,8 @@ CONNECT_RESOLVED:
           ((unsigned char *)&saddr_in6->sin6_addr.s6_addr)[i];
       }
 
-      infof(data, "SOCKS5 connect to IPv6 %s (locally resolved)", dest);
+      infof(data, "SOCKS5 connect to [%s]:%d (locally resolved)", dest,
+            sx->remote_port);
     }
 #endif
     else {
