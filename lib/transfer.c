@@ -1558,10 +1558,6 @@ CURLcode Curl_follow(struct Curl_easy *data,
     /* If this is not redirect due to a 401 or 407 response and an absolute
        URL: don't allow a custom port number */
     disallowport = TRUE;
-    if(!data->set.allow_auth_to_other_hosts) {
-      Curl_safefree(data->state.aptr.user);
-      Curl_safefree(data->state.aptr.passwd);
-    }
   }
 
   DEBUGASSERT(data->state.uh);
