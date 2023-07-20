@@ -970,10 +970,10 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
   return CURLE_OK;
 }
 
-CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
+CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
                                   size_t buflen, size_t *sent,
-                                  curl_off_t totalsize,
-                                  unsigned int sendflags)
+                                  curl_off_t fragsize,
+                                  unsigned int flags)
 {
   struct websocket *ws;
   ssize_t nwritten, n;
@@ -997,7 +997,7 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
   ws = data->conn->proto.ws;
 
   if(data->set.ws_raw_mode) {
-    if(totalsize || sendflags)
+    if(fragsize || flags)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     if(!buflen)
       /* nothing to do */
@@ -1030,10 +1030,10 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
   if(space < 14)
     return CURLE_AGAIN;
 
-  if(sendflags & CURLWS_OFFSET) {
-    if(totalsize) {
-      /* a frame series 'totalsize' bytes big, this is the first */
-      n = ws_enc_write_head(data, &ws->enc, sendflags, totalsize,
+  if(flags & CURLWS_OFFSET) {
+    if(fragsize) {
+      /* a frame series 'fragsize' bytes big, this is the first */
+      n = ws_enc_write_head(data, &ws->enc, flags, fragsize,
                             &ws->sendbuf, &result);
       if(n < 0)
         return result;
@@ -1047,7 +1047,7 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
     }
   }
   else if(!ws->enc.payload_remain) {
-    n = ws_enc_write_head(data, &ws->enc, sendflags, (curl_off_t)buflen,
+    n = ws_enc_write_head(data, &ws->enc, flags, (curl_off_t)buflen,
                           &ws->sendbuf, &result);
     if(n < 0)
       return result;
@@ -1112,15 +1112,15 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
 
 CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
                                   size_t buflen, size_t *sent,
-                                  curl_off_t framesize,
-                                  unsigned int sendflags)
+                                  curl_off_t fragsize,
+                                  unsigned int flags)
 {
   (void)curl;
   (void)buffer;
   (void)buflen;
   (void)sent;
-  (void)framesize;
-  (void)sendflags;
+  (void)fragsize;
+  (void)flags;
   return CURLE_NOT_BUILT_IN;
 }
 
