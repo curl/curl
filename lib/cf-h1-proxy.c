@@ -1074,7 +1074,7 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
   }
 
   DEBUGF(LOG_CF(data, cf, "connect"));
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
@@ -1146,7 +1146,7 @@ static void cf_h1_proxy_close(struct Curl_cfilter *cf,
     h1_tunnel_go_state(cf, cf->ctx, H1_TUNNEL_INIT, data);
   }
   if(cf->next)
-    cf->next->cft->close(cf->next, data);
+    cf->next->cft->do_close(cf->next, data);
 }
 
 

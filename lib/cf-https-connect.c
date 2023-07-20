@@ -432,7 +432,7 @@ static void cf_hc_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf->connected = FALSE;
 
   if(cf->next) {
-    cf->next->cft->close(cf->next, data);
+    cf->next->cft->do_close(cf->next, data);
     Curl_conn_cf_discard_chain(&cf->next, data);
   }
 }

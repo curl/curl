@@ -71,7 +71,7 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
 
   DEBUGF(LOG_CF(data, cf, "connect"));
 connect_sub:
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
@@ -181,7 +181,7 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
     ctx->cf_protocol = NULL;
   }
   if(cf->next)
-    cf->next->cft->close(cf->next, data);
+    cf->next->cft->do_close(cf->next, data);
 }
 
 

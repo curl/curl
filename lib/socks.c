@@ -1115,7 +1115,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
@@ -1193,7 +1193,7 @@ static void socks_proxy_cf_close(struct Curl_cfilter *cf,
   DEBUGASSERT(cf->next);
   cf->connected = FALSE;
   socks_proxy_cf_free(cf);
-  cf->next->cft->close(cf->next, data);
+  cf->next->cft->do_close(cf->next, data);
 }
 
 static void socks_proxy_cf_destroy(struct Curl_cfilter *cf,
