@@ -845,7 +845,7 @@ CONNECT_RESOLVED:
         socksreq[len++] = ((unsigned char *)&saddr_in->sin_addr.s_addr)[i];
       }
 
-      infof(data, "SOCKS5 connect to IPv4 %s:%d (locally resolved)", dest,
+      infof(data, "SOCKS5 connect to %s:%d (locally resolved)", dest,
             sx->remote_port);
     }
 #ifdef ENABLE_IPV6
@@ -860,7 +860,7 @@ CONNECT_RESOLVED:
           ((unsigned char *)&saddr_in6->sin6_addr.s6_addr)[i];
       }
 
-      infof(data, "SOCKS5 connect to IPv6 [%s]:%d (locally resolved)", dest,
+      infof(data, "SOCKS5 connect to [%s]:%d (locally resolved)", dest,
             sx->remote_port);
     }
 #endif
