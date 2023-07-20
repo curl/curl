@@ -420,7 +420,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
     }
     else
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(CURL_DISABLE_DIGEST_AUTH)
     if((enabledmechs & SASL_MECH_DIGEST_MD5) &&
        Curl_auth_is_digest_supported()) {
       mech = SASL_MECH_STRING_DIGEST_MD5;
@@ -587,6 +587,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
       newstate = SASL_GSASL;
     break;
 #endif
+#ifndef CURL_DISABLE_DIGEST_AUTH
   case SASL_CRAMMD5:
     result = get_server_message(sasl, data, &serverdata);
     if(!result)
@@ -605,6 +606,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_DIGESTMD5_RESP:
     /* Keep response NULL to output an empty line. */
     break;
+#endif
 #endif
 
 #ifdef USE_NTLM

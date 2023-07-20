@@ -3975,6 +3975,82 @@ AS_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
 )
 
 dnl ************************************************************
+dnl disable basic authentication
+dnl
+AC_MSG_CHECKING([whether to enable basic authentication method])
+AC_ARG_ENABLE(basic-auth,
+AS_HELP_STRING([--enable-basic-auth],[Enable basic authentication])
+AS_HELP_STRING([--disable-basic-auth],[Disable basic authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_BASIC_AUTH, 1, [to disable basic authentication])
+       CURL_DISABLE_BASIC_AUTH=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable bearer authentication
+dnl
+AC_MSG_CHECKING([whether to enable bearer authentication method])
+AC_ARG_ENABLE(bearer-auth,
+AS_HELP_STRING([--enable-bearer-auth],[Enable bearer authentication])
+AS_HELP_STRING([--disable-bearer-auth],[Disable bearer authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_BEARER_AUTH, 1, [to disable bearer authentication])
+       CURL_DISABLE_BEARER_AUTH=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable digest authentication
+dnl
+AC_MSG_CHECKING([whether to enable digest authentication method])
+AC_ARG_ENABLE(digest-auth,
+AS_HELP_STRING([--enable-digest-auth],[Enable digest authentication])
+AS_HELP_STRING([--disable-digest-auth],[Disable digest authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_DIGEST_AUTH, 1, [to disable digest authentication])
+       CURL_DISABLE_DIGEST_AUTH=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable aws
+dnl
+AC_MSG_CHECKING([whether to enable aws sig methods])
+AC_ARG_ENABLE(aws,
+AS_HELP_STRING([--enable-aws],[Enable AWS sig support])
+AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable AWS sig support])
+       CURL_DISABLE_AWS=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl disable NTLM support
 dnl
 AC_MSG_CHECKING([whether to support NTLM])

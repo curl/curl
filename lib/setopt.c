@@ -677,6 +677,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif
 
+#if !defined(CURL_DISABLE_AWS)
   case CURLOPT_AWS_SIGV4:
     /*
      * String that is merged to some authentication
@@ -690,6 +691,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(data->set.str[STRING_AWS_SIGV4])
       data->set.httpauth = CURLAUTH_AWS_SIGV4;
     break;
+#endif
 
   case CURLOPT_REFERER:
     /*

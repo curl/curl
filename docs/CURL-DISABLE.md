@@ -12,6 +12,22 @@ Disable support for HTTP cookies.
 
 Disable support for authentication methods using crypto.
 
+## `CURL_DISABLE_BASIC_AUTH`
+
+Disable support for the Basic authentication methods.
+
+## `CURL_DISABLE_BEARER_AUTH`
+
+Disable support for the Bearer authentication methods.
+
+## `CURL_DISABLE_DIGEST_AUTH`
+
+Disable support for the Digest authentication methods.
+
+## `CURL_DISABLE_AWS`
+
+Disable AWS-SIG4 support.
+
 ## `CURL_DISABLE_DICT`
 
 Disable the DICT protocol
