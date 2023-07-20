@@ -830,9 +830,25 @@ CONNECT_RESOLVED:
       return CURLPX_RESOLVE_HOST;
     }
 
-    Curl_printable_address(hp, dest, sizeof(dest));
-    destlen = strlen(dest);
-    msnprintf(dest + destlen, sizeof(dest) - destlen, ":%d", sx->remote_port);
+#ifdef ENABLE_IPV6
+    if(hp->ai_family == AF_INET6) {
+      dest[0] = '[';
+      Curl_printable_address(hp, dest + 1, sizeof(dest) - 1);
+      destlen = strlen(dest);
+      dest[destlen] = ']';
+      ++destlen;
+      msnprintf(dest + destlen, sizeof(dest) - destlen,
+                ":%d", sx->remote_port);
+    }
+    else
+#else
+    {
+      Curl_printable_address(hp, dest, sizeof(dest));
+      destlen = strlen(dest);
+      msnprintf(dest + destlen, sizeof(dest) - destlen,
+                ":%d", sx->remote_port);
+    }
+#endif
 
     len = 0;
     socksreq[len++] = 5; /* version (SOCKS5) */
