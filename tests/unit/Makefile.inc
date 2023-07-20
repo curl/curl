@@ -104,7 +104,6 @@ unit1614_SOURCES = unit1614.c $(UNITFILES)
 unit1620_SOURCES = unit1620.c $(UNITFILES)
 
 unit1621_SOURCES = unit1621.c $(UNITFILES)
-unit1621_LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la @NSS_LIBS@
 
 unit1650_SOURCES = unit1650.c $(UNITFILES)
 
