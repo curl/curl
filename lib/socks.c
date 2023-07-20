@@ -567,7 +567,6 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   */
   struct connectdata *conn = cf->conn;
   unsigned char *socksreq = (unsigned char *)data->state.buffer;
-  char dest[MAX_IPADR_LEN] = "unknown";  /* printable address */
   int idx;
   CURLcode result;
   CURLproxycode presult;
@@ -820,6 +819,7 @@ CONNECT_REQ_INIT:
     /* FALLTHROUGH */
 CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
+    char dest[MAX_IPADR_LEN] = "unknown";  /* printable address */
     struct Curl_addrinfo *hp = NULL;
     if(dns)
       hp = dns->addr;
