@@ -3380,6 +3380,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     }
   }
 
+  if(data->req.upload_done)
+    Curl_conn_ev_data_done_send(data);
+
   if((conn->httpversion >= 20) && data->req.upload_chunky)
     /* upload_chunky was set above to set up the request in a chunky fashion,
        but is disabled here again to avoid that the chunked encoded version is
