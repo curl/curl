@@ -24,7 +24,8 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(CURL_DISABLE_AWS)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH) && \
+  !defined(CURL_DISABLE_AWS)
 
 #include "urldata.h"
 #include "strcase.h"
