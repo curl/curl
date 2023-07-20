@@ -115,7 +115,7 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
@@ -168,7 +168,7 @@ static void cf_haproxy_close(struct Curl_cfilter *cf,
   cf->connected = FALSE;
   cf_haproxy_ctx_reset(cf->ctx);
   if(cf->next)
-    cf->next->cft->close(cf->next, data);
+    cf->next->cft->do_close(cf->next, data);
 }
 
 static int cf_haproxy_get_select_socks(struct Curl_cfilter *cf,

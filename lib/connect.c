@@ -937,7 +937,7 @@ static void cf_he_close(struct Curl_cfilter *cf,
   ctx->state = SCFST_INIT;
 
   if(cf->next) {
-    cf->next->cft->close(cf->next, data);
+    cf->next->cft->do_close(cf->next, data);
     Curl_conn_cf_discard_chain(&cf->next, data);
   }
 }
@@ -1291,7 +1291,7 @@ static void cf_setup_close(struct Curl_cfilter *cf,
   ctx->state = CF_SETUP_INIT;
 
   if(cf->next) {
-    cf->next->cft->close(cf->next, data);
+    cf->next->cft->do_close(cf->next, data);
     Curl_conn_cf_discard_chain(&cf->next, data);
   }
 }

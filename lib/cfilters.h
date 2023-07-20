@@ -168,8 +168,8 @@ struct Curl_cftype {
   int flags;                              /* flags of filter type */
   int log_level;                          /* log level for such filters */
   Curl_cft_destroy_this *destroy;         /* destroy resources of this cf */
-  Curl_cft_connect *connect;              /* establish connection */
-  Curl_cft_close *close;                  /* close conn */
+  Curl_cft_connect *do_connect;           /* establish connection */
+  Curl_cft_close *do_close;               /* close conn */
   Curl_cft_get_host *get_host;            /* host filter talks to */
   Curl_cft_get_select_socks *get_select_socks;/* sockets to select on */
   Curl_cft_data_pending *has_data_pending;/* conn has data pending */

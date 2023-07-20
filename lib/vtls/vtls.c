@@ -1504,7 +1504,7 @@ static void ssl_cf_close(struct Curl_cfilter *cf,
 
   CF_DATA_SAVE(save, cf, data);
   cf_close(cf, data);
-  cf->next->cft->close(cf->next, data);
+  cf->next->cft->do_close(cf->next, data);
   CF_DATA_RESTORE(cf, save);
 }
 
@@ -1528,7 +1528,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   DEBUGASSERT(connssl);
   DEBUGASSERT(cf->conn->host.name);
 
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
     goto out;
 
