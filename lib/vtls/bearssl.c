@@ -624,38 +624,32 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(ca_info_blob) {
-    struct cafile_source source;
-    source.type = CAFILE_SOURCE_BLOB;
-    source.data = ca_info_blob->data;
-    source.len = ca_info_blob->len;
+  if(verifypeer) {
+    if(ca_info_blob) {
+      struct cafile_source source;
+      source.type = CAFILE_SOURCE_BLOB;
+      source.data = ca_info_blob->data;
+      source.len = ca_info_blob->len;
 
-    ret = load_cafile(&source, &backend->anchors, &backend->anchors_len);
-    if(ret != CURLE_OK) {
-      if(verifypeer) {
+      ret = load_cafile(&source, &backend->anchors, &backend->anchors_len);
+      if(ret != CURLE_OK) {
         failf(data, "error importing CA certificate blob");
         return ret;
       }
-      /* Only warn if no certificate verification is required. */
-      infof(data, "error importing CA certificate blob, continuing anyway");
     }
-  }
 
-  if(ssl_cafile) {
-    struct cafile_source source;
-    source.type = CAFILE_SOURCE_PATH;
-    source.data = ssl_cafile;
-    source.len = 0;
+    if(ssl_cafile) {
+      struct cafile_source source;
+      source.type = CAFILE_SOURCE_PATH;
+      source.data = ssl_cafile;
+      source.len = 0;
 
-    ret = load_cafile(&source, &backend->anchors, &backend->anchors_len);
-    if(ret != CURLE_OK) {
-      if(verifypeer) {
+      ret = load_cafile(&source, &backend->anchors, &backend->anchors_len);
+      if(ret != CURLE_OK) {
         failf(data, "error setting certificate verify locations."
               " CAfile: %s", ssl_cafile);
         return ret;
       }
-      infof(data, "error setting certificate verify locations,"
-            " continuing anyway:");
     }
   }
 
