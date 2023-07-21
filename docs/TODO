@@ -72,7 +72,7 @@
 
  5. HTTP
  5.1 Provide the error body from a CONNECT response
- 5.2 Set custom client ip when using haproxy protocol
+ 5.2 Obey Retry-After in redirects
  5.3 Rearrange request header order
  5.4 Allow SAN names in HTTP/2 server push
  5.5 auth= in URLs
@@ -609,12 +609,13 @@
 
  See https://github.com/curl/curl/issues/9513
 
-5.2 Set custom client ip when using haproxy protocol
+5.2 Obey Retry-After in redirects
 
- This would allow testing servers with different client ip addresses (without
- using x-forward-for header).
+ The Retry-After is said to dicate "the minimum time that the user agent is
+ asked to wait before issuing the redirected request" and libcurl does not
+ obey this.
 
- https://github.com/curl/curl/issues/5125
+ See https://github.com/curl/curl/issues/11447
 
 5.3 Rearrange request header order
 
