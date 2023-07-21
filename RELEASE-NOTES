@@ -4,14 +4,30 @@ curl and libcurl 8.2.1
  Command line options:         255
  curl_easy_setopt() options:   303
  Public functions in libcurl:  91
- Contributors:                 2922
+ Contributors:                 2924
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o amigaos: fix sys/mbuf.h m_len macro clash [9]
+ o amissl: add missing signal.h include [8]
+ o amissl: fix AmiSSL v5 detection [2]
+ o cfilters: rename close/connect functions to avoid clashes [12]
  o ciphers.d: put URL in first column [1]
+ o cmake: add `libcurlu`/`libcurltool` for unit tests [5]
+ o configure: check for nghttp2_session_get_stream_local_window_size [14]
+ o hostip: return IPv6 first for localhost resolves [16]
+ o http2: fix regression on upload EOF handling [13]
+ o libcurl-errors.3: add CURLUE_OK [11]
+ o os400: correct EXPECTED_STRING_LASTZEROTERMINATED [7]
+ o quiche: fix lookup of transfer at multi [18]
+ o quiche: fix segfault and other things [15]
+ o socks: print ipv6 address within brackets [10]
+ o tool: fix tool_seek_cb build when SIZEOF_CURL_OFF_T > SIZEOF_OFF_T [17]
+ o transfer: do not clear the credentials on redirect to absolute URL [6]
+ o unittest: remove unneeded *_LDADD [3]
 
 This release includes the following known bugs:
 
@@ -29,9 +45,27 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, John Haugabook
-  (2 contributors)
+  Aleksander Mazur, Alois Klink, Chilledheart on github, Christian Schmitz,
+  Cloudogu Siebels, Daniel Stenberg, Harry Sintonen, John Haugabook,
+  Jon Rumsey, Oliver Roberts, Paul Howarth, Stefan Eissing, ウさん
+  (13 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=11464
+ [2] = https://curl.se/bug/?i=11477
+ [3] = https://curl.se/bug/?i=11494
+ [5] = https://curl.se/bug/?i=11446
+ [6] = https://curl.se/bug/?i=11486
+ [7] = https://curl.se/bug/?i=11476
+ [8] = https://curl.se/bug/?i=11478
+ [9] = https://curl.se/bug/?i=11479
+ [10] = https://curl.se/bug/?i=11483
+ [11] = https://curl.se/bug/?i=11488
+ [12] = https://curl.se/bug/?i=11491
+ [13] = https://curl.se/bug/?i=11485
+ [14] = https://curl.se/bug/?i=11470
+ [15] = https://curl.se/bug/?i=11449
+ [16] = https://curl.se/bug/?i=11465
+ [17] = https://curl.se/bug/?i=11468
+ [18] = https://curl.se/bug/?i=11462
