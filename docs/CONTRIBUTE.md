@@ -210,7 +210,7 @@ A short guide to how to write git commit messages in the curl project.
         as you are implicitly approving it by committing]
     [Authored-by: John Doe - credit the original author of the code; only use
         this if you can't use "git commit --author=..."]
-    {Signed-off-by: John Doe - we don't use this, but don't bother removing it]
+    [Signed-off-by: John Doe - we don't use this, but don't bother removing it]
     [whatever-else-by: credit all helpers, finders, doers; try to use one of
         the following keywords if at all possible, for consistency:
         Acked-by:, Assisted-by:, Co-authored-by:, Found-by:, Reported-by:,
