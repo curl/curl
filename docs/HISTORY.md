@@ -430,3 +430,8 @@ April: added the cyassl backend (later renamed to WolfSSL)
 
  The curl.se website serves 16,500 GB/month over 462M requests, the
  official docker image has been pulled 4,098,015,431 times.
+
+2023
+----
+
+August: Dropped support for the NSS library

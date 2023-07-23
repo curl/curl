@@ -82,7 +82,7 @@ If you set this environment variable to a file name, curl will store TLS
 secrets from its connections in that file when invoked to enable you to
 analyze the TLS traffic in real time using network analyzing tools such as
 Wireshark. This works with the following TLS backends: OpenSSL, libressl,
-BoringSSL, GnuTLS, NSS and wolfSSL.
+BoringSSL, GnuTLS and wolfSSL.
 .IP "USERPROFILE <dir>"
 On Windows, this variable is used when trying to find the home directory. If
 the other, primary, variable are all unset. If set, curl will use the path

@@ -50,7 +50,6 @@ LIB_VTLS_CFILES =           \
   vtls/keylog.c             \
   vtls/mbedtls.c            \
   vtls/mbedtls_threadlock.c \
-  vtls/nss.c                \
   vtls/openssl.c            \
   vtls/rustls.c             \
   vtls/schannel.c           \
@@ -68,7 +67,6 @@ LIB_VTLS_HFILES =           \
   vtls/keylog.h             \
   vtls/mbedtls.h            \
   vtls/mbedtls_threadlock.h \
-  vtls/nssg.h               \
   vtls/openssl.h            \
   vtls/rustls.h             \
   vtls/schannel.h           \

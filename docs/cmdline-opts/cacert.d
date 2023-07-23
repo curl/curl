@@ -23,9 +23,6 @@ The windows version of curl will automatically look for a CA certs file named
 'curl-ca-bundle.crt', either in the same directory as curl.exe, or in the
 Current Working Directory, or in any folder along your PATH.
 
-If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
-(libnsspem.so) needs to be available for this option to work properly.
-
 (iOS and macOS only) If curl is built against Secure Transport, then this
 option is supported for backward compatibility with other SSL engines, but it
 should not be set. If the option is not set, then curl will use the

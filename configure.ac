@@ -147,7 +147,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{openssl,gnutls,nss,mbedtls,wolfssl,schannel,secure-transport,amissl,bearssl,rustls} )"
+    curl_ssl_msg="no      (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,secure-transport,amissl,bearssl,rustls} )"
     curl_ssh_msg="no      (--with-{libssh,libssh2})"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -298,28 +298,6 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to th
   fi
 ])
 
-OPT_NSS_AWARE=no
-AC_ARG_WITH(nss-deprecated,dnl
-AS_HELP_STRING([--with-nss-deprecated],[confirm you realize NSS is going away]),
-  if test X"$withval" != Xno; then
-    OPT_NSS_AWARE=$withval
-  fi
-)
-
-OPT_NSS=no
-AC_ARG_WITH(nss,dnl
-AS_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root]),
-  OPT_NSS=$withval
-  if test X"$withval" != Xno; then
-
-    if test X"$OPT_NSS_AWARE" = "Xno" ; then
-      AC_MSG_ERROR([NSS use must be confirmed using --with-nss-deprecated. NSS support will be dropped from curl in August 2022. See docs/DEPRECATE.md])
-    fi
-
-    [TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS"]
-  fi
-)
-
 TEST_NGHTTPX=nghttpx
 AC_ARG_WITH(test-nghttpx,dnl
 AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
@@ -427,7 +405,6 @@ Select from these:
   --with-bearssl
   --with-gnutls
   --with-mbedtls
-  --with-nss
   --with-openssl (also works for BoringSSL and libressl)
   --with-rustls
   --with-schannel
@@ -2091,7 +2068,6 @@ CURL_WITH_MBEDTLS
 CURL_WITH_WOLFSSL
 CURL_WITH_BEARSSL
 CURL_WITH_RUSTLS
-CURL_WITH_NSS
 
 dnl link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$USE_SCHANNEL" = "x1"; then
@@ -2104,11 +2080,11 @@ if test "x$curl_cv_native_windows" = "xyes" &&
   LIBS="-lbcrypt $LIBS"
 fi
 
-case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED"
+case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED"
 in
 x)
   AC_MSG_ERROR([TLS not detected, you will not be able to use HTTPS, FTPS, NTLM and more.
-Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl or --with-rustls to address this.])
+Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl or --with-rustls to address this.])
   ;;
 x1)
   # one SSL backend is enabled
@@ -2121,7 +2097,7 @@ xD)
   ;;
 xD*)
   AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an ssl library
-(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl, --with-rustls).
+(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl, --with-rustls).
 Since these are conflicting parameters, verify which is the desired one and drop the other.])
   ;;
 *)
@@ -2504,8 +2480,6 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="OPENSSL_"
         elif test "x$GNUTLS_ENABLED" = "x1"; then
           versioned_symbols_flavour="GNUTLS_"
-        elif test "x$NSS_ENABLED" = "x1"; then
-          versioned_symbols_flavour="NSS_"
         elif test "x$WOLFSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="WOLFSSL_"
         elif test "x$SCHANNEL_ENABLED" = "x1"; then
@@ -4490,7 +4464,7 @@ use_curl_ntlm_core=no
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
     "x$CURL_DISABLE_NTLM" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
+      -o "x$GNUTLS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
       -o "x$WOLFSSL_NTLM" = "x1"; then
@@ -4529,7 +4503,6 @@ dnl if not explicitly turned off, HTTPS-proxy comes with some TLS backends
 if test "x$https_proxy" != "xno"; then
   if test "x$OPENSSL_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" \
-      -o "x$NSS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \
       -o "x$RUSTLS_ENABLED" = "x1" \
       -o "x$BEARSSL_ENABLED" = "x1" \

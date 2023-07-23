@@ -541,10 +541,6 @@ sub checksystemfeatures {
            elsif ($libcurl =~ /\srustls-ffi\b/i) {
                $feature{"rustls"} = 1;
            }
-           elsif ($libcurl =~ /\snss\b/i) {
-               $feature{"NSS"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
            elsif ($libcurl =~ /\swolfssl\b/i) {
                $feature{"wolfssl"} = 1;
                $feature{"SSLpinning"} = 1;

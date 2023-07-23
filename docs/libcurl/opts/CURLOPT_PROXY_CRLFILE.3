@@ -38,11 +38,11 @@ Pass a char * to a null-terminated string naming a \fIfile\fP with the
 concatenation of CRL (in PEM format) to use in the certificate validation that
 occurs during the SSL exchange.
 
-When curl is built to use NSS or GnuTLS, there is no way to influence the use
-of CRL passed to help in the verification process. When libcurl is built with
-OpenSSL support, X509_V_FLAG_CRL_CHECK and X509_V_FLAG_CRL_CHECK_ALL are both
-set, requiring CRL check against all the elements of the certificate chain if
-a CRL file is passed.
+When curl is built to use GnuTLS, there is no way to influence the use of CRL
+passed to help in the verification process. When libcurl is built with OpenSSL
+support, X509_V_FLAG_CRL_CHECK and X509_V_FLAG_CRL_CHECK_ALL are both set,
+requiring CRL check against all the elements of the certificate chain if a CRL
+file is passed.
 
 This option makes sense only when used in combination with the
 \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP option.

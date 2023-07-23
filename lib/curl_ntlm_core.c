@@ -38,7 +38,7 @@
    1. USE_OPENSSL
    2. USE_WOLFSSL
    3. USE_GNUTLS
-   4. USE_NSS
+   4. -
    5. USE_MBEDTLS
    6. USE_SECTRANSP
    7. USE_OS400CRYPTO
@@ -47,7 +47,7 @@
    This ensures that:
    - the same SSL branch gets activated throughout this source
      file even if multiple backends are enabled at the same time.
-   - OpenSSL and NSS have higher priority than Windows Crypt, due
+   - OpenSSL has higher priority than Windows Crypt, due
      to issues with the latter supporting NTLM2Session responses
      in NTLM type-3 messages.
  */
@@ -95,12 +95,6 @@
 #elif defined(USE_GNUTLS)
 
 #  include <nettle/des.h>
-
-#elif defined(USE_NSS)
-
-#  include <nss.h>
-#  include <pk11pub.h>
-#  include <hasht.h>
 
 #elif defined(USE_MBEDTLS)
 
@@ -186,70 +180,6 @@ static void setup_des_key(const unsigned char *key_56,
 
   /* Set the key */
   des_set_key(des, (const uint8_t *) key);
-}
-
-#elif defined(USE_NSS)
-
-/*
- * encrypt_des() expands a 56 bit key KEY_56 to 64 bit and encrypts 64 bit of
- * data, using the expanded key. IN should point to 64 bits of source data,
- * OUT to a 64 bit output buffer.
- */
-static bool encrypt_des(const unsigned char *in, unsigned char *out,
-                        const unsigned char *key_56)
-{
-  const CK_MECHANISM_TYPE mech = CKM_DES_ECB; /* DES cipher in ECB mode */
-  char key[8];                                /* expanded 64 bit key */
-  SECItem key_item;
-  PK11SymKey *symkey = NULL;
-  SECItem *param = NULL;
-  PK11Context *ctx = NULL;
-  int out_len;                                /* not used, required by NSS */
-  bool rv = FALSE;
-
-  /* use internal slot for DES encryption (requires NSS to be initialized) */
-  PK11SlotInfo *slot = PK11_GetInternalKeySlot();
-  if(!slot)
-    return FALSE;
-
-  /* Expand the 56-bit key to 64-bits */
-  extend_key_56_to_64(key_56, key);
-
-  /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
-
-  /* Import the key */
-  key_item.data = (unsigned char *)key;
-  key_item.len = sizeof(key);
-  symkey = PK11_ImportSymKey(slot, mech, PK11_OriginUnwrap, CKA_ENCRYPT,
-                             &key_item, NULL);
-  if(!symkey)
-    goto fail;
-
-  /* Create the DES encryption context */
-  param = PK11_ParamFromIV(mech, /* no IV in ECB mode */ NULL);
-  if(!param)
-    goto fail;
-  ctx = PK11_CreateContextBySymKey(mech, CKA_ENCRYPT, symkey, param);
-  if(!ctx)
-    goto fail;
-
-  /* Perform the encryption */
-  if(SECSuccess == PK11_CipherOp(ctx, out, &out_len, /* outbuflen */ 8,
-                                 (unsigned char *)in, /* inbuflen */ 8)
-      && SECSuccess == PK11_Finalize(ctx))
-    rv = /* all OK */ TRUE;
-
-fail:
-  /* cleanup */
-  if(ctx)
-    PK11_DestroyContext(ctx, PR_TRUE);
-  if(symkey)
-    PK11_FreeSymKey(symkey);
-  if(param)
-    SECITEM_FreeItem(param, PR_TRUE);
-  PK11_FreeSlot(slot);
-  return rv;
 }
 
 #elif defined(USE_MBEDTLS)
@@ -402,7 +332,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   des_encrypt(&des, 8, results + 8, plaintext);
   setup_des_key(keys + 14, &des);
   des_encrypt(&des, 8, results + 16, plaintext);
-#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_SECTRANSP) \
+#elif defined(USE_MBEDTLS) || defined(USE_SECTRANSP)            \
   || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
@@ -444,7 +374,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     des_encrypt(&des, 8, lmbuffer, magic);
     setup_des_key(pw + 7, &des);
     des_encrypt(&des, 8, lmbuffer + 8, magic);
-#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_SECTRANSP) \
+#elif defined(USE_MBEDTLS) || defined(USE_SECTRANSP)            \
   || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
     encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);

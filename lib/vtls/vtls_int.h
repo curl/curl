@@ -217,7 +217,6 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
 
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
-#include "nssg.h"           /* NSS versions */
 #include "gskit.h"          /* Global Secure ToolKit versions */
 #include "wolfssl.h"        /* wolfSSL versions */
 #include "schannel.h"       /* Schannel SSPI version */

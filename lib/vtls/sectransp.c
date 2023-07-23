@@ -1293,7 +1293,7 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
 
 /* This code was borrowed from nss.c, with some modifications:
  * Determine whether the nickname passed in is a filename that needs to
- * be loaded as a PEM or a regular NSS nickname.
+ * be loaded as a PEM or a nickname.
  *
  * returns 1 for a file
  * returns 0 for not a file
