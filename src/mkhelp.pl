@@ -51,6 +51,7 @@ while (<STDIN>) {
     # remove trailing CR from line. msysgit checks out files as line+CRLF
     $line =~ s/\r$//;
 
+    $line =~ s/\x1b\x5b[0-9]+m//g; # escape sequence
     if($line =~ /^([ \t]*\n|curl)/i) {
         # cut off headers and empty lines
         $wline++; # count number of cut off lines
