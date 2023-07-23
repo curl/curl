@@ -36,6 +36,7 @@ problems may have been fixed or changed somewhat since this was written.
  5. Build and portability issues
  5.1 OS400 port requires deprecated IBM library
  5.2 curl-config --libs contains private details
+ 5.3 building for old macOS fails with gcc
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
  5.9 Utilize Requires.private directives in libcurl.pc
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
@@ -214,6 +215,13 @@ problems may have been fixed or changed somewhat since this was written.
  "curl-config --libs" will include details set in LDFLAGS when configure is
  run that might be needed only for building libcurl. Further, curl-config
  --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
+
+5.3 building for old macOS fails with gcc
+
+ Building curl for certain old macOS versions fails when gcc is used. We
+ command using clang in those cases.
+
+ See https://github.com/curl/curl/issues/11441
 
 5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
 
