@@ -4,7 +4,7 @@ curl and libcurl 8.2.1
  Command line options:         255
  curl_easy_setopt() options:   303
  Public functions in libcurl:  91
- Contributors:                 2924
+ Contributors:                 2927
 
 This release includes the following changes:
 
@@ -17,17 +17,24 @@ This release includes the following bugfixes:
  o cfilters: rename close/connect functions to avoid clashes [12]
  o ciphers.d: put URL in first column [1]
  o cmake: add `libcurlu`/`libcurltool` for unit tests [5]
+ o cmake: update ngtcp2 detection [4]
  o configure: check for nghttp2_session_get_stream_local_window_size [14]
+ o CONTRIBUTE: drop mention of copyright year ranges [20]
+ o CONTRIBUTE: fix syntax in commit message description [21]
  o hostip: return IPv6 first for localhost resolves [16]
  o http2: fix regression on upload EOF handling [13]
+ o http: VLH, very large header test and fixes [19]
  o libcurl-errors.3: add CURLUE_OK [11]
  o os400: correct EXPECTED_STRING_LASTZEROTERMINATED [7]
  o quiche: fix lookup of transfer at multi [18]
  o quiche: fix segfault and other things [15]
+ o rustls: update rustls-ffi 0.10.0 [24]
  o socks: print ipv6 address within brackets [10]
+ o src/mkhelp: strip off escape sequences [22]
  o tool: fix tool_seek_cb build when SIZEOF_CURL_OFF_T > SIZEOF_OFF_T [17]
  o transfer: do not clear the credentials on redirect to absolute URL [6]
  o unittest: remove unneeded *_LDADD [3]
+ o websocket: rename arguments/variables to match docs [25]
 
 This release includes the following known bugs:
 
@@ -45,16 +52,19 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksander Mazur, Alois Klink, Chilledheart on github, Christian Schmitz,
-  Cloudogu Siebels, Daniel Stenberg, Harry Sintonen, John Haugabook,
-  Jon Rumsey, Oliver Roberts, Paul Howarth, Stefan Eissing, ウさん
-  (13 contributors)
+  Aleksander Mazur, Alois Klink, Andrei Rybak, Brad Harder,
+  Chilledheart on github, Christian Schmitz, Cloudogu Siebels, Daniel Stenberg,
+  Harry Sintonen, Jacob Hoffman-Andrews, Jan Macku, John Haugabook, Jon Rumsey,
+  Oliver Roberts, Paul Howarth, Stefan Eissing, VictorVG on github,
+  Viktor Szakats, Yair Lenga, ウさん
+  (20 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=11464
  [2] = https://curl.se/bug/?i=11477
  [3] = https://curl.se/bug/?i=11494
+ [4] = https://curl.se/bug/?i=11508
  [5] = https://curl.se/bug/?i=11446
  [6] = https://curl.se/bug/?i=11486
  [7] = https://curl.se/bug/?i=11476
@@ -69,3 +79,9 @@ References to bug reports and discussions on issues:
  [16] = https://curl.se/bug/?i=11465
  [17] = https://curl.se/bug/?i=11468
  [18] = https://curl.se/bug/?i=11462
+ [19] = https://curl.se/bug/?i=11509
+ [20] = https://curl.se/bug/?i=11504
+ [21] = https://curl.se/bug/?i=11504
+ [22] = https://curl.se/bug/?i=11501
+ [24] = https://curl.se/bug/?i=10865
+ [25] = https://curl.se/bug/?i=11493
