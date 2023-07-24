@@ -1835,6 +1835,8 @@ out:
     *err = result;
     sent = -1;
   }
+  DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] cf_send(len=%zu) -> %zd, %d",
+                stream? stream->id : -1, len, sent, *err));
   CF_DATA_RESTORE(cf, save);
   return sent;
 }

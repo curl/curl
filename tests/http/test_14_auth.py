@@ -42,6 +42,7 @@ class TestAuth:
     def _class_scope(self, env, httpd, nghttpx):
         if env.have_h3():
             nghttpx.start_if_needed()
+        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
         httpd.clear_extra_configs()
         httpd.reload()
 
@@ -79,3 +80,51 @@ class TestAuth:
             '--digest', '--user', 'test:test'
         ])
         r.check_response(http_status=200)
+
+    # PUT data, digest auth large pw
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_14_04_digest_large_pw(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        data='0123456789'
+        password = 'x' * 65535
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
+        r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
+            '--digest', '--user', f'test:{password}'
+        ])
+        # digest does not submit the password, but a hash of it, so all
+        # works and, since the pw is not correct, we get a 401
+        r.check_response(http_status=401)
+
+    # PUT data, basic auth large pw
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_14_05_basic_large_pw(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        # just large enought that nghttp2 will submit
+        password = 'x' * (47 * 1024)
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
+            '--basic', '--user', f'test:{password}'
+        ])
+        # but apache denies on length limit
+        r.check_response(http_status=431)
+
+    # PUT data, basic auth with very large pw
+    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    def test_14_06_basic_very_large_pw(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        data='0123456789'
+        password = 'x' * (64 * 1024)
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
+            '--basic', '--user', f'test:{password}'
+        ])
+        # request was never sent
+        r.check_response(exitcode=55, http_status=0)

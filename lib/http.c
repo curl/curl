@@ -1308,7 +1308,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
       || IS_HTTPS_PROXY(conn->http_proxy.proxytype)
 #endif
        )
-     && conn->httpversion != 20) {
+     && conn->httpversion < 20) {
     /* Make sure this doesn't send more body bytes than what the max send
        speed says. The request bytes do not count to the max speed.
     */
@@ -4571,8 +4571,8 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
     if(!req->path)
       goto out;
   }
-  Curl_dynhds_init(&req->headers, 0, DYN_H2_HEADERS);
-  Curl_dynhds_init(&req->trailers, 0, DYN_H2_TRAILERS);
+  Curl_dynhds_init(&req->headers, 0, DYN_HTTP_REQUEST);
+  Curl_dynhds_init(&req->trailers, 0, DYN_HTTP_REQUEST);
   result = CURLE_OK;
 
 out:
@@ -4729,8 +4729,8 @@ CURLcode Curl_http_req_make2(struct httpreq **preq,
   if(result)
     goto out;
 
-  Curl_dynhds_init(&req->headers, 0, DYN_H2_HEADERS);
-  Curl_dynhds_init(&req->trailers, 0, DYN_H2_TRAILERS);
+  Curl_dynhds_init(&req->headers, 0, DYN_HTTP_REQUEST);
+  Curl_dynhds_init(&req->trailers, 0, DYN_HTTP_REQUEST);
   result = CURLE_OK;
 
 out:
@@ -4860,8 +4860,8 @@ CURLcode Curl_http_resp_make(struct http_resp **presp,
     if(!resp->description)
       goto out;
   }
-  Curl_dynhds_init(&resp->headers, 0, DYN_H2_HEADERS);
-  Curl_dynhds_init(&resp->trailers, 0, DYN_H2_TRAILERS);
+  Curl_dynhds_init(&resp->headers, 0, DYN_HTTP_REQUEST);
+  Curl_dynhds_init(&resp->trailers, 0, DYN_HTTP_REQUEST);
   result = CURLE_OK;
 
 out:
