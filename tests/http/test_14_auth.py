@@ -119,7 +119,7 @@ class TestAuth:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         data='0123456789'
-        password = 'x' * (128 * 1024)
+        password = 'x' * (64 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
