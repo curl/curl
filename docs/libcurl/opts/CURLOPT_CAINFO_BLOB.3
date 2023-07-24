@@ -37,8 +37,9 @@ Pass a pointer to a curl_blob structure, which contains information (pointer
 and size) about a memory block with binary data of PEM encoded content holding
 one or more certificates to verify the HTTPS server with.
 
-If \fICURLOPT_SSL_VERIFYPEER(3)\fP is zero and you avoid verifying the
-server's certificate, \fICURLOPT_CAINFO_BLOB(3)\fP is not needed.
+If \fICURLOPT_SSL_VERIFYPEER(3)\fP is zero and you avoid verifying the server's
+certificate, any certificates provided by using \fICURLOPT_CAINFO_BLOB(3)\fP
+are not used.
 
 This option overrides \fICURLOPT_CAINFO(3)\fP.
 .SH DEFAULT
