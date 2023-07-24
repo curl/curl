@@ -191,7 +191,7 @@ This mechanism is useful for applications that use OpenSSL for TLS protocol
 handling and cryptographic operations while delegating certificate verification
 to the platform's native trust store.
 
-WARNING: Be very careful when implementing custom certificate verification.
+WARNING: Be extremely careful when implementing custom certificate verification.
 Providing your own verification function disables the default verification
 performed by OpenSSL. This includes checks for certificate revocation. If you do
 not perform these checks yourself, your application may be vulnerable to
