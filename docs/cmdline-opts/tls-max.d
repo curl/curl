@@ -3,7 +3,7 @@ SPDX-License-Identifier: curl
 Long: tls-max
 Arg: <VERSION>
 Tags: Versions
-Protocols: SSL
+Protocols: TLS
 Added: 7.54.0
 Requires: TLS
 See-also: tlsv1.0 tlsv1.1 tlsv1.2 tlsv1.3
