@@ -59,11 +59,14 @@ jobs:
         - name: quiche
           install: >-
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
+          openssl-version: 3.0.9+quic
+          install_steps: pytest
           configure: >-
             LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release"
             --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src
             --enable-debug
             --with-quiche=/home/runner/work/curl/curl/quiche/target/release
+            --with-test-nghttpx="$HOME/all/bin/nghttpx"
           ngtcp2-configure: >-
             --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
 
@@ -74,8 +77,19 @@ jobs:
         sudo apt-get install apache2 apache2-dev
       name: 'install prereqs and impacket, pytest, crypto'
 
-    - run: |
-        git clone --quiet --depth=1 -b openssl-3.0.9+quic https://github.com/quictls/openssl
+    - name: Cache openssl build
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-openssl
+      with:
+        path: |
+          ~/openssl
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.build.openssl-version }}
+
+    - name: Build openssl-quictls
+    - if: steps.cache-openssl.outputs.cache-hit != 'true'
+      run: |
+        git clone --quiet --depth=1 -b openssl-${{ matrix.build.openssl-version }} https://github.com/quictls/openssl
         cd openssl
         ./config --prefix=$HOME/all --libdir=$HOME/all/lib
         make -j1 install_sw
@@ -105,14 +119,17 @@ jobs:
         make install
       name: 'install nghttp2'
 
-    - run: |
+    - if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+      run: |
+        sudo apt-get install apache2 apache2-dev libnghttp2-dev
+        sudo python3 -m pip install -r tests/http/requirements.txt
         git clone --quiet --depth=1 -b master https://github.com/icing/mod_h2
         cd mod_h2
         autoreconf -fi
         ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig"
         make
         sudo make install
-      name: 'install mod_h2'
+      name: 'install pytest and apach2-dev mod-h2'
 
     - uses: actions/checkout@v3
 
