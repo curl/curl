@@ -24,21 +24,16 @@
 
 #include "curl_setup.h"
 
-#if defined(__APPLE__)
-
-#if !defined(TARGET_OS_OSX) || TARGET_OS_OSX
+#ifdef CURL_MACOS_CALL_COPYPROXIES
 
 #include <curl/curl.h>
 
 #include "macos.h"
 
-#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
-#endif
 
 CURLcode Curl_macos_init(void)
 {
-#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
   {
     /*
      * The automagic conversion from IPv4 literals to IPv6 literals only
@@ -46,17 +41,15 @@ CURLcode Curl_macos_init(void)
      * first. As Curl currently doesn't support system-wide HTTP proxies, we
      * therefore don't use any value this function might return.
      *
-     * This function is only available on a macOS and is not needed for
-     * IPv4-only builds, hence the conditions above.
+     * This function is only available on macOS and is not needed for
+     * IPv4-only builds, hence the conditions for defining
+     * CURL_MACOS_CALL_COPYPROXIES in curl_setup.h.
      */
     CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
     if(dict)
       CFRelease(dict);
   }
-#endif
   return CURLE_OK;
 }
 
-#endif /* TARGET_OS_OSX */
-
-#endif /* __APPLE__ */
+#endif
