@@ -23,9 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
 #include "curl_setup.h"
 
-#if defined(__APPLE__) && (!defined(TARGET_OS_OSX) || TARGET_OS_OSX)
+#ifdef CURL_MACOS_CALL_COPYPROXIES
 
 CURLcode Curl_macos_init(void);
 
