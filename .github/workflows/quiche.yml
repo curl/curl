@@ -1,0 +1,165 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: quiche
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+    - '**/CMakeLists.txt'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'CMake/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**/*.md'
+    - '**/CMakeLists.txt'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'CMake/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: quiche-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  MAKEFLAGS: -j 3
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: quiche
+          install: >-
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
+          configure: >-
+            LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release"
+            --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src
+            --enable-debug
+            --with-quiche=/home/runner/work/curl/curl/quiche/target/release
+          ngtcp2-configure: >-
+            --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
+
+    steps:
+    - run: |
+        sudo apt-get update
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
+        sudo apt-get install apache2 apache2-dev
+      name: 'install prereqs and impacket, pytest, crypto'
+
+    - run: |
+        git clone --quiet --depth=1 -b openssl-3.0.9+quic https://github.com/quictls/openssl
+        cd openssl
+        ./config --prefix=$HOME/all --libdir=$HOME/all/lib
+        make -j1 install_sw
+      name: 'install quictls'
+
+    - run: |
+        git clone --quiet --depth=1 -b v0.13.0 https://github.com/ngtcp2/nghttp3
+        cd nghttp3
+        autoreconf -fi
+        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
+        make install
+      name: 'install nghttp3'
+
+    - run: |
+        git clone --quiet --depth=1 -b v0.17.0 https://github.com/ngtcp2/ngtcp2
+        cd ngtcp2
+        autoreconf -fi
+        ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl
+        make install
+      name: 'install ngtcp2'
+
+    - run: |
+        git clone --quiet --depth=1 -b v1.55.1 https://github.com/nghttp2/nghttp2
+        cd nghttp2
+        autoreconf -fi
+        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-http3
+        make install
+      name: 'install nghttp2'
+
+    - run: |
+        git clone --quiet --depth=1 -b master https://github.com/icing/mod_h2
+        cd mod_h2
+        autoreconf -fi
+        ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig"
+        make
+        sudo make install
+      name: 'install mod_h2'
+
+    - uses: actions/checkout@v3
+
+    - run: |
+        sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt
+      name: 'install python test prereqs'
+
+    - run: |
+        git clone --quiet --depth=1 --recursive https://github.com/cloudflare/quiche.git
+        cd quiche
+        #### Work-around https://github.com/curl/curl/issues/7927 #######
+        #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
+        sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
+
+        # /home/runner/work/curl/curl/boringssl
+
+        cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
+        mkdir -v quiche/deps/boringssl/src/lib
+        ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
+
+        # include dir
+        # /home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src/include
+        # lib dir
+        # /home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src/lib
+      name: 'build quiche and boringssl'
+
+    - run: autoreconf -fi
+      name: 'autoreconf'
+
+    - run: ./configure ${{ matrix.build.configure }}
+      name: 'configure'
+
+    - run: make V=1
+      name: 'make'
+
+    - run: make V=1 examples
+      name: 'make examples'
+
+    - run: make V=1 -C tests
+      name: 'make tests'
+
+    - run: make V=1 test-ci
+      name: 'run tests'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
+
+    - run: pytest -v
+      name: 'run pytest'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
