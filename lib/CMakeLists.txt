@@ -150,6 +150,7 @@ if(BUILD_SHARED_LIBS)
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc)
   endif()
   target_link_libraries(${LIB_SHARED} PRIVATE ${CURL_LIBS})
+  # Remove the "lib" prefix since the library is already named "libcurl".
   set_target_properties(${LIB_SHARED} PROPERTIES
     PREFIX "" OUTPUT_NAME ${LIBCURL_OUTPUT_NAME}
     IMPORT_PREFIX "" IMPORT_SUFFIX "${IMPORT_LIB_SUFFIX}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
