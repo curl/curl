@@ -86,7 +86,6 @@ jobs:
           ~/openssl
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.build.openssl-version }}
 
-    - name: Build openssl-quictls
     - if: steps.cache-openssl.outputs.cache-hit != 'true'
       run: |
         git clone --quiet --depth=1 -b openssl-${{ matrix.build.openssl-version }} https://github.com/quictls/openssl
