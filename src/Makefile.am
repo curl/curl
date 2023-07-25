@@ -85,7 +85,7 @@ endif
 CLEANFILES = tool_hugehelp.c
 # Use the C locale to ensure that only ASCII characters appear in the
 # embedded text.
-NROFF=env LC_ALL=C @NROFF@ @MANOPT@ # figured out by the configure script
+NROFF=env LC_ALL=C @NROFF@ @MANOPT@ 2>/dev/null # figured out by the configure script
 
 EXTRA_DIST = mkhelp.pl \
  Makefile.mk curl.rc Makefile.inc CMakeLists.txt

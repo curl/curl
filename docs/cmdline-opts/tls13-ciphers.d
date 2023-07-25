@@ -7,7 +7,7 @@ Protocols: TLS
 Category: tls
 Example: --tls13-ciphers TLS_AES_128_GCM_SHA256 $URL
 Added: 7.61.0
-See-also: ciphers curves proxy‐tls13‐ciphers
+See-also: ciphers curves proxy-tls13-ciphers
 Multi: single
 ---
 Specifies which cipher suites to use in the connection if it negotiates TLS
