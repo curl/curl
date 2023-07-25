@@ -10,3 +10,9 @@ See-also: ciphers curves proxy
 Multi: single
 ---
 Same as --ciphers but used in HTTPS proxy context.
+
+Specifies which ciphers to use in the connection to the HTTPS proxy. The list
+of ciphers must specify valid ciphers. Read up on SSL cipher list details on
+this URL:
+
+https://curl.se/docs/ssl-ciphers.html
