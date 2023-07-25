@@ -102,6 +102,9 @@ class TestAuth:
     def test_14_05_basic_large_pw(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
+            # See <https://github.com/cloudflare/quiche/issues/1573>
+            pytest.skip("quiche has problems with large requests")
         # just large enought that nghttp2 will submit
         password = 'x' * (47 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
@@ -118,7 +121,9 @@ class TestAuth:
     def test_14_06_basic_very_large_pw(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        data='0123456789'
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
+            # See <https://github.com/cloudflare/quiche/issues/1573>
+            pytest.skip("quiche has problems with large requests")
         password = 'x' * (64 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
         curl = CurlClient(env=env)
