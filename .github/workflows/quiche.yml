@@ -79,8 +79,9 @@ jobs:
         sudo apt-get install apache2 apache2-dev
       name: 'install prereqs and impacket, pytest, crypto'
 
-    - name: cache-nghttpx
+    - name: cache nghttpx
       uses: actions/cache@v3
+      id: cache-nghttpx
       env:
         cache-name: cache-nghttpx
       with:
@@ -122,8 +123,9 @@ jobs:
         make install
       name: 'install nghttp2'
 
-    - name: cache-quiche
+    - name: cache quiche
       uses: actions/cache@v3
+      id: cache-quiche
       env:
         cache-name: cache-quiche
       with:
