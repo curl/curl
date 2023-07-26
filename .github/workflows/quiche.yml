@@ -67,7 +67,7 @@ jobs:
           install_steps: pytest
           configure: >-
             LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
-            --with-openssl=/home/runner/work/quiche/quiche/deps/boringssl/src
+            --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
             --enable-debug
             --with-quiche=/home/runner/quiche/target/release
             --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
