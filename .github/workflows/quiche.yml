@@ -132,6 +132,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
+        cd $HOME
         git clone --quiet --depth=1 -b ${{ matrix.build.quiche-version }} --recursive https://github.com/cloudflare/quiche.git
         cd quiche
         #### Work-around https://github.com/curl/curl/issues/7927 #######
