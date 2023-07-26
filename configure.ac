@@ -3960,7 +3960,7 @@ dnl disable cryptographic authentication
 dnl
 AC_MSG_CHECKING([whether to enable cryptographic authentication methods])
 AC_ARG_ENABLE(crypto-auth,
-AS_HELP_STRING([--enable-crypto-auth],[Enable cryptographic authentication])
+AS_HELP_STRING([--enable-crypto-auth],[Enable cryptographic authentication (default)])
 AS_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
 [ case "$enableval" in
   no)
@@ -3979,7 +3979,7 @@ dnl disable basic authentication
 dnl
 AC_MSG_CHECKING([whether to enable basic authentication method])
 AC_ARG_ENABLE(basic-auth,
-AS_HELP_STRING([--enable-basic-auth],[Enable basic authentication])
+AS_HELP_STRING([--enable-basic-auth],[Enable basic authentication (default)])
 AS_HELP_STRING([--disable-basic-auth],[Disable basic authentication]),
 [ case "$enableval" in
   no)
@@ -3998,7 +3998,7 @@ dnl disable bearer authentication
 dnl
 AC_MSG_CHECKING([whether to enable bearer authentication method])
 AC_ARG_ENABLE(bearer-auth,
-AS_HELP_STRING([--enable-bearer-auth],[Enable bearer authentication])
+AS_HELP_STRING([--enable-bearer-auth],[Enable bearer authentication (default)])
 AS_HELP_STRING([--disable-bearer-auth],[Disable bearer authentication]),
 [ case "$enableval" in
   no)
@@ -4017,7 +4017,7 @@ dnl disable digest authentication
 dnl
 AC_MSG_CHECKING([whether to enable digest authentication method])
 AC_ARG_ENABLE(digest-auth,
-AS_HELP_STRING([--enable-digest-auth],[Enable digest authentication])
+AS_HELP_STRING([--enable-digest-auth],[Enable digest authentication (default)])
 AS_HELP_STRING([--disable-digest-auth],[Disable digest authentication]),
 [ case "$enableval" in
   no)
@@ -4032,11 +4032,31 @@ AS_HELP_STRING([--disable-digest-auth],[Disable digest authentication]),
 )
 
 dnl ************************************************************
+dnl disable negotiate authentication
+dnl
+AC_MSG_CHECKING([whether to enable negotiate authentication method])
+AC_ARG_ENABLE(negotiate-auth,
+AS_HELP_STRING([--enable-negotiate-auth],[Enable negotiate authentication (default)])
+AS_HELP_STRING([--disable-negotiate-auth],[Disable negotiate authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_NEGOTIATE, 1, [to disable negotiate authentication])
+       CURL_DISABLE_NEGOTIATE=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+
+dnl ************************************************************
 dnl disable aws
 dnl
 AC_MSG_CHECKING([whether to enable aws sig methods])
 AC_ARG_ENABLE(aws,
-AS_HELP_STRING([--enable-aws],[Enable AWS sig support])
+AS_HELP_STRING([--enable-aws],[Enable AWS sig support (default)])
 AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
 [ case "$enableval" in
   no)
