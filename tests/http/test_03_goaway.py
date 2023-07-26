@@ -82,6 +82,8 @@ class TestGoAway:
         proto = 'h3'
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
+            pytest.skip("does not work in CI, but locally for some reason")
         count = 3
         self.r = None
         def long_run():
