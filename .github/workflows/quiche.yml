@@ -60,15 +60,16 @@ jobs:
           install: >-
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
           openssl-version: 3.0.9+quic
+          nghttp3-version: v0.13.0
+          ngtcp2-version: v0.17.0
+          nghttp2-version: v1.55.1
           install_steps: pytest
           configure: >-
             LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release"
             --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src
             --enable-debug
             --with-quiche=/home/runner/work/curl/curl/quiche/target/release
-            --with-test-nghttpx="$HOME/all/bin/nghttpx"
-          ngtcp2-configure: >-
-            --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
+            --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
 
     steps:
     - run: |
@@ -80,41 +81,44 @@ jobs:
     - name: Cache openssl build
       uses: actions/cache@v3
       env:
-        cache-name: cache-openssl
+        cache-name: cache-nghttpx
       with:
         path: |
-          ~/openssl
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.build.openssl-version }}
+          $HOME/nghttpx
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-openssl-${{ matrix.build.openssl-version }}-nghttp3-${{ matrix.build.nghttp3-version }}-ngtcp2-${{ matrix.build.ngtcp2-version }}-nghttp2-${{ matrix.build.nghttp2-version }}
 
-    - if: steps.cache-openssl.outputs.cache-hit != 'true'
+    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
         git clone --quiet --depth=1 -b openssl-${{ matrix.build.openssl-version }} https://github.com/quictls/openssl
         cd openssl
-        ./config --prefix=$HOME/all --libdir=$HOME/all/lib
+        ./config --prefix=$HOME/nghttpx --libdir=$HOME/nghttpx/lib
         make -j1 install_sw
       name: 'install quictls'
 
-    - run: |
-        git clone --quiet --depth=1 -b v0.13.0 https://github.com/ngtcp2/nghttp3
+    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
+      run: |
+        git clone --quiet --depth=1 -b ${{ matrix.build.nghttp3-version }} https://github.com/ngtcp2/nghttp3
         cd nghttp3
         autoreconf -fi
-        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-lib-only
+        ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only
         make install
       name: 'install nghttp3'
 
-    - run: |
-        git clone --quiet --depth=1 -b v0.17.0 https://github.com/ngtcp2/ngtcp2
+    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
+      run: |
+        git clone --quiet --depth=1 -b ${{ matrix.build.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
         cd ngtcp2
         autoreconf -fi
-        ./configure ${{ matrix.build.ngtcp2-configure }} --with-openssl
+        ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only --with-openssl
         make install
       name: 'install ngtcp2'
 
-    - run: |
-        git clone --quiet --depth=1 -b v1.55.1 https://github.com/nghttp2/nghttp2
+    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
+      run: |
+        git clone --quiet --depth=1 -b ${{ matrix.build.nghttp2-version }} https://github.com/nghttp2/nghttp2
         cd nghttp2
         autoreconf -fi
-        ./configure --prefix=$HOME/all PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" --enable-http3
+        ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-http3
         make install
       name: 'install nghttp2'
 
@@ -124,7 +128,7 @@ jobs:
         git clone --quiet --depth=1 -b master https://github.com/icing/mod_h2
         cd mod_h2
         autoreconf -fi
-        ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig"
+        ./configure
         make
         sudo make install
       name: 'install apach2-dev and mod-h2'
