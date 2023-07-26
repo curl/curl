@@ -63,12 +63,13 @@ jobs:
           nghttp3-version: v0.13.0
           ngtcp2-version: v0.17.0
           nghttp2-version: v1.55.1
+          quiche-version: 0.17.2
           install_steps: pytest
           configure: >-
-            LDFLAGS="-Wl,-rpath,/home/runner/work/curl/curl/quiche/target/release"
-            --with-openssl=/home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src
+            LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
+            --with-openssl=/home/runner/work/quiche/quiche/deps/boringssl/src
             --enable-debug
-            --with-quiche=/home/runner/work/curl/curl/quiche/target/release
+            --with-quiche=/home/runner/quiche/target/release
             --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
 
     steps:
@@ -78,13 +79,12 @@ jobs:
         sudo apt-get install apache2 apache2-dev
       name: 'install prereqs and impacket, pytest, crypto'
 
-    - name: Cache openssl build
+    - name: Cache nghttpx build
       uses: actions/cache@v3
       env:
         cache-name: cache-nghttpx
       with:
-        path: |
-          $HOME/nghttpx
+        path: /home/runner/nghttpx
         key: ${{ runner.os }}-build-${{ env.cache-name }}-openssl-${{ matrix.build.openssl-version }}-nghttp3-${{ matrix.build.nghttp3-version }}-ngtcp2-${{ matrix.build.ngtcp2-version }}-nghttp2-${{ matrix.build.nghttp2-version }}
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
@@ -122,6 +122,32 @@ jobs:
         make install
       name: 'install nghttp2'
 
+    - name: Cache quiche build
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-quiche
+      with:
+        path: /home/runner/quiche
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-quiche-${{ matrix.build.quiche-version }}
+
+    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
+      run: |
+        git clone --quiet --depth=1 -b ${{ matrix.build.quiche-version }} --recursive https://github.com/cloudflare/quiche.git
+        cd quiche
+        #### Work-around https://github.com/curl/curl/issues/7927 #######
+        #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
+        sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
+
+        cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
+        mkdir -v quiche/deps/boringssl/src/lib
+        ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
+
+        # include dir
+        # /home/runner/quiche/quiche/deps/boringssl/src/include
+        # lib dir
+        # /home/runner/quiche/quiche/deps/boringssl/src/lib
+      name: 'build quiche and boringssl'
+
     - if: ${{ contains(matrix.build.install_steps, 'pytest') }}
       run: |
         sudo apt-get install apache2 apache2-dev libnghttp2-dev
@@ -138,25 +164,6 @@ jobs:
     - run: |
         sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt
       name: 'install python test prereqs'
-
-    - run: |
-        git clone --quiet --depth=1 --recursive https://github.com/cloudflare/quiche.git
-        cd quiche
-        #### Work-around https://github.com/curl/curl/issues/7927 #######
-        #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
-        sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
-
-        # /home/runner/work/curl/curl/boringssl
-
-        cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
-        mkdir -v quiche/deps/boringssl/src/lib
-        ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
-
-        # include dir
-        # /home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src/include
-        # lib dir
-        # /home/runner/work/curl/curl/quiche/quiche/deps/boringssl/src/lib
-      name: 'build quiche and boringssl'
 
     - run: autoreconf -fi
       name: 'autoreconf'
