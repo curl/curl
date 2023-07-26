@@ -42,7 +42,8 @@ extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
 
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);
-
-#endif /* WIN32 */
+#else  /* WIN32 */
+#define Curl_win32_init(x) CURLE_OK
+#endif /* !WIN32 */
 
 #endif /* HEADER_CURL_SYSTEM_WIN32_H */
