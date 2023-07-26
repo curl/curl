@@ -652,7 +652,8 @@
 #endif
 
 /* Single point where USE_SPNEGO definition might be defined */
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(CURL_DISABLE_NEGOTIATE) && \
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && \
+    !defined(CURL_DISABLE_NEGOTIATE_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_SPNEGO
 #endif

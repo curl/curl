@@ -4041,8 +4041,8 @@ AS_HELP_STRING([--disable-negotiate-auth],[Disable negotiate authentication]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_NEGOTIATE, 1, [to disable negotiate authentication])
-       CURL_DISABLE_NEGOTIATE=1
+       AC_DEFINE(CURL_DISABLE_NEGOTIATE_AUTH, 1, [to disable negotiate authentication])
+       CURL_DISABLE_NEGOTIATE_AUTH=1
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
