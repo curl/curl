@@ -69,6 +69,7 @@ problems may have been fixed or changed somewhat since this was written.
  9.2 wolfssh: publickey auth does not work
  9.3 Remote recursive folder creation with SFTP
  9.4 libssh blocking and infinite loop problem
+ 9.5 cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
  10. SOCKS
  10.3 FTPS over SOCKS
@@ -434,6 +435,11 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/8632
 
+9.5 cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
+
+ Running SCP and SFTP tests on cygwin makes this warning message appear.
+
+ https://github.com/curl/curl/issues/11244
 
 10. SOCKS
 
