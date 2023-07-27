@@ -46,6 +46,12 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
+  openssl-version: 3.0.9+quic
+  nghttp3-version: v0.13.0
+  ngtcp2-version: v0.17.0
+  nghttp2-version: v1.55.1
+  gnutls-version: 3.8.0
+  wolfssl-version: v5.6.3-stable
 
 jobs:
   autotools:
@@ -55,12 +61,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        openssl-version: 3.0.9+quic
-        nghttp3-version: v0.13.0
-        ngtcp2-version: v0.17.0
-        nghttp2-version: v1.55.1
-        gnutls-version: 3.8.0
-        wolfssl-version: v5.6.3-stable
         install: >-
           libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
           nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin
@@ -98,11 +98,11 @@ jobs:
         cache-name: cache-nghttpx
       with:
         path: /home/runner/nghttpx
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-openssl-${{ matrix.openssl-version }}-nghttp3-${{ matrix.nghttp3-version }}-ngtcp2-${{ matrix.ngtcp2-version }}-nghttp2-${{ matrix.nghttp2-version }}-gnutls-${{ matrix.gnutls-version }}-wolfssl-${{ matrix.wolfssl-version }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-openssl-${{ env.openssl-version }}-nghttp3-${{ env.nghttp3-version }}-ngtcp2-${{ env.ngtcp2-version }}-nghttp2-${{ env.nghttp2-version }}-gnutls-${{ env.gnutls-version }}-wolfssl-${{ env.wolfssl-version }}
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b openssl-${{ matrix.openssl-version }} https://github.com/quictls/openssl
+        git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/quictls/openssl
         cd openssl
         ./config --prefix=$HOME/nghttpx --libdir=$HOME/nghttpx/lib
         make -j1 install_sw
@@ -110,7 +110,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ matrix.gnutls-version }} https://github.com/gnutls/gnutls.git
+        git clone --quiet --depth=1 -b ${{ env.gnutls-version }} https://github.com/gnutls/gnutls.git
         cd gnutls
         ./bootstrap
         ./configure ${{ matrix.gnutls-configure }} --prefix=$HOME/nghttpx
@@ -119,7 +119,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ matrix.wolfssl-version }} https://github.com/wolfSSL/wolfssl.git
+        git clone --quiet --depth=1 -b ${{ env.wolfssl-version }} https://github.com/wolfSSL/wolfssl.git
         cd wolfssl
         ./autogen.sh
         ./configure ${{ matrix.build.wolfssl-configure }} --prefix=$HOME/nghttpx
@@ -128,7 +128,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ matrix.nghttp3-version }} https://github.com/ngtcp2/nghttp3
+        git clone --quiet --depth=1 -b ${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
         cd nghttp3
         autoreconf -fi
         ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only
@@ -137,7 +137,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ matrix.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
+        git clone --quiet --depth=1 -b ${{ env.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
         cd ngtcp2
         autoreconf -fi
         ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only --with-openssl --with-gnutls --with-wolfssl
@@ -146,7 +146,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ matrix.nghttp2-version }} https://github.com/nghttp2/nghttp2
+        git clone --quiet --depth=1 -b ${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
         cd nghttp2
         autoreconf -fi
         ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-http3
