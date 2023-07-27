@@ -102,7 +102,7 @@ endif()
 
 # Add "_imp" as a suffix before the extension to avoid conflicting with
 # the statically linked "libcurl.lib" (typically with MSVC)
-if(WIN32 AND BUILD_SHARED_LIBS AND
+if(WIN32 AND
    NOT IMPORT_LIB_SUFFIX AND
    CMAKE_STATIC_LIBRARY_SUFFIX STREQUAL CMAKE_IMPORT_LIBRARY_SUFFIX)
   set(IMPORT_LIB_SUFFIX "_imp")
