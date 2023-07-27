@@ -46,6 +46,12 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
+  openssl-version: 3.0.9+quic
+  nghttp3-version: v0.13.0
+  ngtcp2-version: v0.17.0
+  nghttp2-version: v1.55.1
+  quiche-version: 0.17.2
+  mod_h2-version: v2.0.21
 
 jobs:
   autotools:
@@ -59,11 +65,6 @@ jobs:
         - name: quiche
           install: >-
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
-          openssl-version: 3.0.9+quic
-          nghttp3-version: v0.13.0
-          ngtcp2-version: v0.17.0
-          nghttp2-version: v1.55.1
-          quiche-version: 0.17.2
           install_steps: pytest
           configure: >-
             LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
@@ -76,7 +77,7 @@ jobs:
     - run: |
         sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
-        sudo apt-get install apache2 apache2-dev
+        sudo apt-get install apache2 apache2-dev libnghttp2-dev
       name: 'install prereqs and impacket, pytest, crypto'
 
     - name: cache nghttpx
@@ -86,11 +87,11 @@ jobs:
         cache-name: cache-nghttpx
       with:
         path: /home/runner/nghttpx
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-openssl-${{ matrix.build.openssl-version }}-nghttp3-${{ matrix.build.nghttp3-version }}-ngtcp2-${{ matrix.build.ngtcp2-version }}-nghttp2-${{ matrix.build.nghttp2-version }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-openssl-${{ env.openssl-version }}-nghttp3-${{ env.nghttp3-version }}-ngtcp2-${{ env.ngtcp2-version }}-nghttp2-${{ env.nghttp2-version }}
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b openssl-${{ matrix.build.openssl-version }} https://github.com/quictls/openssl
+        git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/quictls/openssl
         cd openssl
         ./config --prefix=$HOME/nghttpx --libdir=$HOME/nghttpx/lib
         make -j1 install_sw
@@ -98,7 +99,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ matrix.build.nghttp3-version }} https://github.com/ngtcp2/nghttp3
+        git clone --quiet --depth=1 -b ${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
         cd nghttp3
         autoreconf -fi
         ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only
@@ -107,7 +108,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ matrix.build.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
+        git clone --quiet --depth=1 -b ${{ env.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
         cd ngtcp2
         autoreconf -fi
         ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only --with-openssl
@@ -116,7 +117,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ matrix.build.nghttp2-version }} https://github.com/nghttp2/nghttp2
+        git clone --quiet --depth=1 -b ${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
         cd nghttp2
         autoreconf -fi
         ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-http3
@@ -130,12 +131,12 @@ jobs:
         cache-name: cache-quiche
       with:
         path: /home/runner/quiche
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-quiche-${{ matrix.build.quiche-version }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-quiche-${{ env.quiche-version }}
 
     - if: steps.cache-quiche.outputs.cache-hit != 'true'
       run: |
         cd $HOME
-        git clone --quiet --depth=1 -b ${{ matrix.build.quiche-version }} --recursive https://github.com/cloudflare/quiche.git
+        git clone --quiet --depth=1 -b ${{ env.quiche-version }} --recursive https://github.com/cloudflare/quiche.git
         cd quiche
         #### Work-around https://github.com/curl/curl/issues/7927 #######
         #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
@@ -151,16 +152,29 @@ jobs:
         # /home/runner/quiche/quiche/deps/boringssl/src/lib
       name: 'build quiche and boringssl'
 
-    - if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+    - name: cache mod_h2
+      uses: actions/cache@v3
+      id: cache-mod_h2
+      env:
+        cache-name: cache-mod_h2
+      with:
+        path: /home/runner/mod_h2
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
+
+    - if: steps.cache-mod_h2.outputs.cache-hit != 'true'
       run: |
-        sudo apt-get install apache2 apache2-dev libnghttp2-dev
-        git clone --quiet --depth=1 -b master https://github.com/icing/mod_h2
+        cd $HOME
+        git clone --quiet --depth=1 -b  ${{ env.mod_h2-version }} https://github.com/icing/mod_h2
         cd mod_h2
         autoreconf -fi
         ./configure
         make
+      name: 'build mod_h2'
+
+    - run: |
+        cd $HOME/mod_h2
         sudo make install
-      name: 'install apach2-dev and mod-h2'
+      name: 'install mod_h2'
 
     - uses: actions/checkout@v3
 
