@@ -107,7 +107,7 @@ endif()
 if(WIN32 AND BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS AND
    NOT STATIC_LIB_SUFFIX AND NOT IMPORT_LIB_SUFFIX AND
    CMAKE_STATIC_LIBRARY_SUFFIX STREQUAL CMAKE_IMPORT_LIBRARY_SUFFIX)
-  set(STATIC_LIB_SUFFIX "_imp")  # TODO: Change to "_static"?
+  set(IMPORT_LIB_SUFFIX "_imp")  # TODO: Change to set(STATIC_LIB_SUFFIX "_static")?
 endif()
 
 # we want it to be called libcurl on all platforms
