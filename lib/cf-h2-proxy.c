@@ -1309,6 +1309,13 @@ static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
     }
   }
 
+  result = proxy_h2_progress_ingress(cf, data);
+  if(result) {
+    *err = result;
+    nwritten = -1;
+    goto out;
+  }
+
   /* Call the nghttp2 send loop and flush to write ALL buffered data,
    * headers and/or request body completely out to the network */
   result = proxy_h2_progress_egress(cf, data);
