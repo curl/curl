@@ -52,7 +52,7 @@ env:
   nghttp2-version: v1.55.1
   gnutls-version: 3.8.0
   wolfssl-version: v5.6.3-stable
-  mod_h2-version: v2.0.20
+  mod_h2-version: v2.0.21
 
 jobs:
   autotools:
