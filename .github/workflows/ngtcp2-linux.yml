@@ -158,12 +158,27 @@ jobs:
         make install
       name: 'install nghttp2'
 
-    - run: |
-        git clone --quiet --depth=1 -b master https://github.com/icing/mod_h2
+    - name: cache mod_h2
+      uses: actions/cache@v3
+      id: cache-mod_h2
+      env:
+        cache-name: cache-mod_h2
+      with:
+        path: /home/runner/mod_h2
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
+
+    - if: steps.cache-mod_h2.outputs.cache-hit != 'true'
+      run: |
+        cd $HOME
+        git clone --quiet --depth=1 -b  ${{ env.mod_h2-version }} https://github.com/icing/mod_h2
         cd mod_h2
         autoreconf -fi
         ./configure
         make
+      name: 'build mod_h2'
+
+    - run: |
+        cd $HOME/mod_h2
         sudo make install
       name: 'install mod_h2'
 
