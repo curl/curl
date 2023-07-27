@@ -1150,16 +1150,11 @@ ConnectionExists(struct Curl_easy *data,
           continue;
         }
 
-        if(Curl_resolver_asynch()) {
-          /* primary_ip[0] is NUL only if the resolving of the name hasn't
-             completed yet and until then we don't re-use this connection */
-          if(!check->primary_ip[0]) {
-            infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T " is still "
-                        "name resolving, can't reuse",
-                  check->connection_id);
-            continue;
-          }
-        }
+        if(Curl_resolver_asynch() &&
+           /* primary_ip[0] is NUL only if the resolving of the name hasn't
+              completed yet and until then we don't re-use this connection */
+           !check->primary_ip[0])
+          continue;
       }
 
       if(!Curl_conn_is_connected(check, FIRSTSOCKET)) {
