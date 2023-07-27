@@ -100,14 +100,12 @@ endif()
 
 ## Library definition
 
-# Ensure that the static library and import library filenames are different,
-# when building both static and shared library. On Windows, with certain
-# toolchains (e.g. MSVC) these libraries get the same by default, overwriting
-# each other. MinGW is not affected.
-if(WIN32 AND BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS AND
-   NOT STATIC_LIB_SUFFIX AND NOT IMPORT_LIB_SUFFIX AND
+# Add "_imp" as a suffix before the extension to avoid conflicting with
+# the statically linked "libcurl.lib" (typically with MSVC)
+if(WIN32 AND BUILD_SHARED_LIBS AND
+   NOT IMPORT_LIB_SUFFIX AND
    CMAKE_STATIC_LIBRARY_SUFFIX STREQUAL CMAKE_IMPORT_LIBRARY_SUFFIX)
-  set(IMPORT_LIB_SUFFIX "_imp")  # TODO: Change to set(STATIC_LIB_SUFFIX "_static")?
+  set(IMPORT_LIB_SUFFIX "_imp")
 endif()
 
 # we want it to be called libcurl on all platforms
