@@ -61,35 +61,36 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        install: >-
-          libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev
-          nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin
-          libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools
-          texinfo texlive texlive-extra-utils autopoint libev-dev
-        common-configure: >-
-          PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
-          --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug
-          --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
-        gnutls-configure: >-
-          PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/all/lib -L$HOME/all/lib"
-          --with-included-libtasn1 --with-included-unistring
-          --disable-guile --disable-doc --disable-tests --disable-tools
-        wolfssl-configure: >-
-          --enable-all --enable-quic
         build:
         - name: quictls
-          configure: ${{ matrix.common-configure }} --with-openssl=$HOME/nghttpx
+          configure: >-
+            PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
+            --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug
+            --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
+            --with-openssl=$HOME/nghttpx
         - name: gnutls
-          configure: ${{ matrix.common-configure }} --with-gnutls=$HOME/nghttpx
+          configure: >-
+            PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
+            --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug
+            --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
+            --with-gnutls=$HOME/nghttpx
         - name: wolfssl
-          configure: ${{ matrix.common-configure }} --with-wolfssl=$HOME/nghttpx
+          configure: >-
+            PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
+            --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug
+            --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
+            --with-wolfssl=$HOME/nghttpx
 
     steps:
     - run: |
         sudo apt-get update
-        sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
-        sudo apt-get install apache2 apache2-dev libnghttp2-dev
-      name: 'install prereqs and impacket, pytest, crypto'
+        sudo apt-get install libtool autoconf automake pkg-config stunnel4 \
+          libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev \
+          nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
+          libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
+          texinfo texlive texlive-extra-utils autopoint libev-dev \
+          apache2 apache2-dev libnghttp2-dev
+      name: 'install prereqs and impacket, pytest, crypto, apache2'
 
     - name: cache nghttpx
       uses: actions/cache@v3
@@ -113,7 +114,10 @@ jobs:
         git clone --quiet --depth=1 -b ${{ env.gnutls-version }} https://github.com/gnutls/gnutls.git
         cd gnutls
         ./bootstrap
-        ./configure ${{ matrix.gnutls-configure }} --prefix=$HOME/nghttpx
+        ./configure  --prefix=$HOME/nghttpx \
+          PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib -L$HOME/nghttpx/lib" \
+          --with-included-libtasn1 --with-included-unistring \
+          --disable-guile --disable-doc --disable-tests --disable-tools
         make install
       name: 'install gnutls'
 
@@ -122,7 +126,7 @@ jobs:
         git clone --quiet --depth=1 -b ${{ env.wolfssl-version }} https://github.com/wolfSSL/wolfssl.git
         cd wolfssl
         ./autogen.sh
-        ./configure ${{ matrix.build.wolfssl-configure }} --prefix=$HOME/nghttpx
+        ./configure --enable-all --enable-quic --prefix=$HOME/nghttpx
         make install
       name: 'install wolfssl'
 
