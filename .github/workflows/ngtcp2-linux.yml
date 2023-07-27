@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: ngtcp2
+name: ngtcp2-linux
 
 on:
   push:
