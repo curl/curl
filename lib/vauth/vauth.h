@@ -30,7 +30,7 @@
 
 struct Curl_easy;
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(CURL_DISABLE_DIGEST_AUTH)
 struct digestdata;
 #endif
 
