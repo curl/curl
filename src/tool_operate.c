@@ -2595,16 +2595,16 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
           }
           capath_from_env = true;
         }
-        else {
-          env = curlx_getenv("SSL_CERT_FILE");
-          if(env) {
-            config->cacert = strdup(env);
-            if(!config->cacert) {
-              curl_free(env);
-              curl_easy_cleanup(curltls);
-              errorf(global, "out of memory");
-              return CURLE_OUT_OF_MEMORY;
-            }
+        env = curlx_getenv("SSL_CERT_FILE");
+        if(env) {
+          config->cacert = strdup(env);
+          if(!config->cacert) {
+            curl_free(env);
+            if(capath_from_env)
+              free(config->capath);
+            curl_easy_cleanup(curltls);
+            errorf(global, "out of memory");
+            return CURLE_OUT_OF_MEMORY;
           }
         }
       }
