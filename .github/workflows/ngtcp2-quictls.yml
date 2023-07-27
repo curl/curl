@@ -72,7 +72,7 @@ jobs:
     - run: |
         sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install }}
-        sudo apt-get install apache2 apache2-dev
+        sudo apt-get install apache2 apache2-dev libnghttp2-dev
       name: 'install prereqs and impacket, pytest, crypto'
 
     - name: cache nghttpx
