@@ -68,7 +68,7 @@ jobs:
         path: /home/runner/awslc
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
 
-    - name: 'build awslc'
+    - name: build awslc
       if: steps.cache-awslc.outputs.cache-hit != 'true'
       run: |
         curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
@@ -127,7 +127,7 @@ jobs:
         path: /home/runner/awslc
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
 
-    - name: 'build awslc'
+    - name: build awslc
       if: steps.cache-awslc.outputs.cache-hit != 'true'
       run: |
         curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
