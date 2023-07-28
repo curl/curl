@@ -1665,7 +1665,6 @@ struct Adder_args
   struct Curl_easy *data;
   CURLcode result;
   int idx;
-  int certs_count;
 };
 
 static bool
@@ -1676,10 +1675,7 @@ add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, void *raw_arg)
   if(valid_cert_encoding(ccert_context)) {
     const char *beg = (const char *) ccert_context->pbCertEncoded;
     const char *end = beg + ccert_context->cbCertEncoded;
-    int insert_index = (args->certs_count - 1) - args->idx;
-    args->result = Curl_extract_certinfo(args->data, insert_index,
-                                         beg, end);
-    args->idx++;
+    args->result = Curl_extract_certinfo(args->data, (args->idx)++, beg, end);
   }
   return args->result == CURLE_OK;
 }
@@ -1813,7 +1809,6 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       struct Adder_args args;
       args.data = data;
       args.idx = 0;
-      args.certs_count = certs_count;
       traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
       result = args.result;
     }
