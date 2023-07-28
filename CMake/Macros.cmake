@@ -29,8 +29,19 @@
 # order of least-to-most-dependent.  Some libraries depend on others
 # to link correctly.
 macro(check_library_exists_concat LIBRARY SYMBOL VARIABLE)
-  check_library_exists("${LIBRARY};${CURL_LIBS}" ${SYMBOL} "${CMAKE_LIBRARY_PATH}"
+  # Enumerate CURL_LIBS and add each library to CMAKE_REQUIRED_LIBRARIES if it
+  # is not a CMake target. System libraries should not depend on CMake targets.
+  set(CMAKE_REQUIRED_LIBRARIES)
+  foreach(LIB ${CURL_LIBS})
+    if (NOT TARGET ${LIB})
+      set(CMAKE_REQUIRED_LIBRARIES ${LIB} ${CMAKE_REQUIRED_LIBRARIES})
+    endif()
+  endforeach()
+  # Using CMake targets in the call to check_library_exists() may cause it to fail
+  # unless the target is IMPORTED.
+  check_library_exists("${LIBRARY}" ${SYMBOL} "${CMAKE_LIBRARY_PATH}"
     ${VARIABLE})
+  set(CMAKE_REQUIRED_LIBRARIES)
   if(${VARIABLE})
     set(CURL_LIBS ${LIBRARY} ${CURL_LIBS})
   endif()
