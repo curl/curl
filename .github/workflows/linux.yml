@@ -46,6 +46,7 @@ env:
   mbedtls-version: v3.3.0
   mod_h2-version: v2.0.21
   msh3-version: v0.6.0
+  openssl3-version: openssl-3.1.1
   quictls-version: OpenSSL_1_1_1t+quic
   rustls-version: v0.10.0
 
@@ -240,13 +241,23 @@ jobs:
         cd mbedtls
         make DESTDIR=$HOME/mbedtls install
 
-    - if: contains(matrix.build.install_steps, 'openssl3')
+    - name: cache openssl3
+      if: contains(matrix.build.install_steps, 'openssl3')
+      uses: actions/cache@v3
+      id: cache-openssl3
+      env:
+        cache-name: cache-openssl3
+      with:
+        path: /home/runner/openssl3
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl3-version }}
+
+    - name: 'install openssl3'
+      if: contains(matrix.build.install_steps, 'openssl3') && steps.cache-openssl3.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 https://github.com/openssl/openssl
+        git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/openssl3
         make -j1 install_sw
-      name: 'install openssl'
 
     - name: cache quictls
       if: contains(matrix.build.install_steps, 'quictls')
