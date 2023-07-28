@@ -41,6 +41,14 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
+  bearssl-version: 0.6
+  libressl-version: v3.6.1
+  mbedtls-version: v3.3.0
+  mod_h2-version: v2.0.21
+  msh3-version: v0.6.0
+  openssl3-version: openssl-3.1.1
+  quictls-version: OpenSSL_1_1_1t+quic
+  rustls-version: v0.10.0
 
 jobs:
   autotools:
@@ -55,12 +63,12 @@ jobs:
         - name: bearssl
           install_packages: zlib1g-dev valgrind
           install_steps: bearssl pytest
-          configure: LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
+          configure: LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
 
         - name: bearssl-clang
           install_packages: zlib1g-dev clang
           install_steps: bearssl
-          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bear/lib" --with-bearssl=$HOME/bear --enable-debug
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
 
         - name: libressl
           install_packages: zlib1g-dev valgrind
@@ -75,12 +83,12 @@ jobs:
         - name: mbedtls
           install_packages: libnghttp2-dev valgrind
           install_steps: mbedtls pytest
-          configure: LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
+          configure: LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
         - name: mbedtls-clang
           install_packages: libnghttp2-dev clang
           install_steps: mbedtls
-          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbed/lib" --with-mbedtls=$HOME/mbed --enable-debug
+          configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
         - name: msh3
           install_packages: zlib1g-dev valgrind
@@ -157,7 +165,7 @@ jobs:
           container: 'andy5995/slackware-build-essential:15.0'
 
     steps:
-    - if: ${{ matrix.build.container == null }}
+    - if: matrix.build.container == null
       run: |
         sudo apt-get update
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 libpsl-dev libbrotli-dev libzstd-dev ${{ matrix.build.install_packages }}
@@ -166,7 +174,7 @@ jobs:
 
     - uses: actions/checkout@v3
 
-    - if: ${{ contains(matrix.build.install_steps, 'gcc-11') }}
+    - if: contains(matrix.build.install_steps, 'gcc-11')
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
         sudo apt-get update
@@ -176,59 +184,119 @@ jobs:
         gcc --version
       name: 'install gcc-11'
 
-    - if: ${{ contains(matrix.build.install_steps, 'bearssl') }}
-      run: |
-        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://bearssl.org/bearssl-0.6.tar.gz
-        tar -xzf bearssl-0.6.tar.gz
-        cd bearssl-0.6
-        make
-        mkdir -p $HOME/bear/lib $HOME/bear/include
-        cp inc/*.h $HOME/bear/include
-        cp build/libbearssl.* $HOME/bear/lib
-      name: 'install bearssl'
+    - name: cache bearssl
+      if: contains(matrix.build.install_steps, 'bearssl')
+      uses: actions/cache@v3
+      id: cache-bearssl
+      env:
+        cache-name: cache-bearssl
+      with:
+        path: /home/runner/bearssl
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-bearssl-${{ env.bearssl-version }}
 
-    - if: ${{ contains(matrix.build.install_steps, 'libressl') }}
+    - name: 'build bearssl'
+      if: contains(matrix.build.install_steps, 'bearssl') && steps.cache-bearssl.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b v3.6.1 https://github.com/libressl-portable/portable.git libressl-git
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://bearssl.org/bearssl-${{ env.bearssl-version }}.tar.gz
+        tar -xzf bearssl-${{ env.bearssl-version }}.tar.gz
+        cd bearssl-${{ env.bearssl-version }}
+        make
+        mkdir -p $HOME/bearssl/lib $HOME/bearssl/include
+        cp inc/*.h $HOME/bearssl/include
+        cp build/libbearssl.* $HOME/bearssl/lib
+
+    - name: cache libressl
+      if: contains(matrix.build.install_steps, 'libressl')
+      uses: actions/cache@v3
+      id: cache-libressl
+      env:
+        cache-name: cache-libressl
+      with:
+        path: /home/runner/libressl
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-libressl-${{ env.libressl-version }}
+
+    - name: 'build libressl'
+      if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
+      run: |
+        git clone --quiet --depth=1 -b ${{ env.libressl-version }} https://github.com/libressl-portable/portable.git libressl-git
         cd libressl-git
         ./autogen.sh
         ./configure --prefix=$HOME/libressl
         make install
-      name: 'install libressl'
 
-    - if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
+    - name: cache mbedtls
+      if: contains(matrix.build.install_steps, 'mbedtls')
+      uses: actions/cache@v3
+      id: cache-mbedtls
+      env:
+        cache-name: cache-mbedtls
+      with:
+        path: /home/runner/mbedtls
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-mbedtls-${{ env.mbedtls-version }}
+
+    - name: 'build mbedtls'
+      if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b v3.3.0 https://github.com/ARMmbed/mbedtls
+        git clone --quiet --depth=1 -b ${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
         cd mbedtls
-        make DESTDIR=$HOME/mbed install
-      name: 'install mbedtls'
+        make DESTDIR=$HOME/mbedtls install
 
-    - if: ${{ contains(matrix.build.install_steps, 'openssl3') }}
+    - name: cache openssl3
+      if: contains(matrix.build.install_steps, 'openssl3')
+      uses: actions/cache@v3
+      id: cache-openssl3
+      env:
+        cache-name: cache-openssl3
+      with:
+        path: /home/runner/openssl3
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl3-version }}
+
+    - name: 'install openssl3'
+      if: contains(matrix.build.install_steps, 'openssl3') && steps.cache-openssl3.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 https://github.com/openssl/openssl
+        git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/openssl3
         make -j1 install_sw
-      name: 'install openssl'
 
-    - if: ${{ contains(matrix.build.install_steps, 'quictls') }}
+    - name: cache quictls
+      if: contains(matrix.build.install_steps, 'quictls')
+      uses: actions/cache@v3
+      id: cache-quictls
+      env:
+        cache-name: cache-quictls
+      with:
+        path: /home/runner/quictls
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-quictls-${{ env.quictls-version }}
+
+    - name: 'build quictls'
+      if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b OpenSSL_1_1_1t+quic https://github.com/quictls/openssl
+        git clone --quiet --depth=1 -b ${{ env.quictls-version }} https://github.com/quictls/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/quictls
         make -j1 install_sw
-      name: 'install quictls'
 
-    - if: ${{ contains(matrix.build.install_steps, 'msh3') }}
+    - name: cache msh3
+      if: contains(matrix.build.install_steps, 'msh3')
+      uses: actions/cache@v3
+      id: cache-msh3
+      env:
+        cache-name: cache-msh3
+      with:
+        path: /home/runner/msh3
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-msh3-${{ env.msh3-version }}
+
+    - name: 'build msh3'
+      if: contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet -b v0.6.0 --depth=1 --recursive https://github.com/nibanks/msh3
+        git clone --quiet -b ${{ env.msh3-version }} --depth=1 --recursive https://github.com/nibanks/msh3
         cd msh3 && mkdir build && cd build
         cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3 ..
         cmake --build .
         cmake --install .
-      name: 'install msh3'
 
-    - if: ${{ contains(matrix.build.install_steps, 'rust') }}
+    - if: contains(matrix.build.install_steps, 'rust')
       run: |
         cd $HOME
         curl -sSf --compressed https://sh.rustup.rs/ | sh -s -- -y
@@ -236,14 +304,24 @@ jobs:
         rustup toolchain install nightly
       name: 'install rust'
 
-    - if: ${{ contains(matrix.build.install_steps, 'rustls') }}
+    - name: cache rustls
+      if: contains(matrix.build.install_steps, 'rustls')
+      uses: actions/cache@v3
+      id: cache-rustls
+      env:
+        cache-name: cache-rustls
+      with:
+        path: /home/runner/rustls
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-rustls-${{ env.rustls-version }}
+
+    - name: 'build rustls'
+      if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b v0.10.0 --recursive https://github.com/rustls/rustls-ffi.git
+        git clone --quiet --depth=1 -b ${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
         cd rustls-ffi
         make DESTDIR=$HOME/rustls install
-      name: 'install rustls'
 
-    - if: ${{ contains(matrix.build.install_steps, 'hyper') }}
+    - if: contains(matrix.build.install_steps, 'hyper')
       run: |
         cd $HOME
         git clone --quiet --depth=1 https://github.com/hyperium/hyper.git
@@ -252,7 +330,7 @@ jobs:
         echo "LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib" >> $GITHUB_ENV
       name: 'install hyper'
 
-    - if: ${{ contains(matrix.build.install_steps, 'intel') }}
+    - if: contains(matrix.build.install_steps, 'intel')
       run: |
         cd /tmp
         curl -sSf --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo apt-key add -
@@ -262,17 +340,37 @@ jobs:
         printenv >> $GITHUB_ENV
       name: 'install Intel compilers'
 
-    - if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+    - if: contains(matrix.build.install_steps, 'pytest')
       run: |
         sudo apt-get install apache2 apache2-dev libnghttp2-dev
         sudo python3 -m pip install -r tests/http/requirements.txt
-        git clone --quiet --depth=1 -b master https://github.com/icing/mod_h2
+      name: 'install pytest and apach2-dev'
+
+    - name: cache mod_h2
+      if: contains(matrix.build.install_steps, 'pytest')
+      uses: actions/cache@v3
+      id: cache-mod_h2
+      env:
+        cache-name: cache-mod_h2
+      with:
+        path: /home/runner/mod_h2
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
+
+    - name: 'build mod_h2'
+      if: contains(matrix.build.install_steps, 'pytest') && steps.cache-mod_h2.outputs.cache-hit != 'true'
+      run: |
+        cd $HOME
+        git clone --quiet --depth=1 -b  ${{ env.mod_h2-version }} https://github.com/icing/mod_h2
         cd mod_h2
         autoreconf -fi
-        ./configure PKG_CONFIG_PATH="$HOME/all/lib/pkgconfig"
+        ./configure
         make
+
+    - name: 'install mod_h2'
+      if: contains(matrix.build.install_steps, 'pytest')
+      run: |
+        cd $HOME/mod_h2
         sudo make install
-      name: 'install pytest and apach2-dev mod-h2'
 
     - run: autoreconf -fi
       name: 'autoreconf'
@@ -297,7 +395,7 @@ jobs:
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
 
-    - if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+    - if: contains(matrix.build.install_steps, 'pytest')
       # run for `tests` directory, so pytest does not pick up any other
       # packages we might have built here
       run:
