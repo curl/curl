@@ -42,6 +42,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
+  awslc-version: 1.3.0
 
 jobs:
   autoconf:
@@ -58,15 +59,26 @@ jobs:
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
 
-    - run: |
-        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/awslabs/aws-lc/archive/refs/tags/v1.3.0.tar.gz
-        tar xzf v1.3.0.tar.gz
-        mkdir aws-lc-1.3.0-build
-        cd aws-lc-1.3.0-build
-        cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-1.3.0
+    - name: cache awslc
+      uses: actions/cache@v3
+      id: cache-awslc
+      env:
+        cache-name: cache-awslc
+      with:
+        path: /home/runner/awslc
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
+
+    - name: build awslc
+      if: steps.cache-awslc.outputs.cache-hit != 'true'
+      run: |
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+          https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
+        tar xzf v${{ env.awslc-version }}.tar.gz
+        mkdir aws-lc-${{ env.awslc-version }}-build
+        cd aws-lc-${{ env.awslc-version }}-build
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
         cmake --build . --parallel
         cmake --install .
-      name: 'install awslc'
 
     - uses: actions/checkout@v3
 
@@ -106,15 +118,26 @@ jobs:
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
 
-    - run: |
-        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/awslabs/aws-lc/archive/refs/tags/v1.3.0.tar.gz
-        tar xzf v1.3.0.tar.gz
-        mkdir aws-lc-1.3.0-build
-        cd aws-lc-1.3.0-build
-        cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-1.3.0
+    - name: cache awslc
+      uses: actions/cache@v3
+      id: cache-awslc
+      env:
+        cache-name: cache-awslc
+      with:
+        path: /home/runner/awslc
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
+
+    - name: build awslc
+      if: steps.cache-awslc.outputs.cache-hit != 'true'
+      run: |
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+          https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
+        tar xzf v${{ env.awslc-version }}.tar.gz
+        mkdir aws-lc-${{ env.awslc-version }}-build
+        cd aws-lc-${{ env.awslc-version }}-build
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
         cmake --build . --parallel
         cmake --install .
-      name: 'install awslc'
 
     - uses: actions/checkout@v3
 
