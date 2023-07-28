@@ -304,7 +304,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}-rustls-${{ env.rustls-version }}
 
     - name: 'build rustls'
-     if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
+      if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
       run: |
         git clone --quiet --depth=1 -b ${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
         cd rustls-ffi
