@@ -41,6 +41,12 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
+  bearssl-version: 0.6
+  libressl-version: v3.6.1
+  mbedtls-version: v3.3.0
+  msh3-version: v0.6.0
+  quictls-version: OpenSSL_1_1_1t+quic
+  rustls-version: v0.10.0
 
 jobs:
   autotools:
@@ -178,27 +184,39 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'bearssl') }}
       run: |
-        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://bearssl.org/bearssl-0.6.tar.gz
-        tar -xzf bearssl-0.6.tar.gz
-        cd bearssl-0.6
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://bearssl.org/bearssl-${{ env.bearssl-version }}.tar.gz
+        tar -xzf bearssl-${{ env.bearssl-version }}.tar.gz
+        cd bearssl-${{ env.bearssl-version }}
         make
         mkdir -p $HOME/bear/lib $HOME/bear/include
         cp inc/*.h $HOME/bear/include
         cp build/libbearssl.* $HOME/bear/lib
       name: 'install bearssl'
 
-    - if: ${{ contains(matrix.build.install_steps, 'libressl') }}
+    - name: cache libressl
+      if: ${{ contains(matrix.build.install_steps, 'libressl') }}
+      uses: actions/cache@v3
+      id: cache-libressl
+      env:
+        cache-name: cache-libressl
+      with:
+        path: /home/runner/libressl
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-libressl-${{ env.libressl-version }}
+
+    - name: 'build libressl'
+      if: |
+        ${{ contains(matrix.build.install_steps, 'libressl') }} &&
+        steps.cache-libressl.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b v3.6.1 https://github.com/libressl-portable/portable.git libressl-git
+        git clone --quiet --depth=1 -b ${{ env.libressl-version }} https://github.com/libressl-portable/portable.git libressl-git
         cd libressl-git
         ./autogen.sh
         ./configure --prefix=$HOME/libressl
         make install
-      name: 'install libressl'
 
     - if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
       run: |
-        git clone --quiet --depth=1 -b v3.3.0 https://github.com/ARMmbed/mbedtls
+        git clone --quiet --depth=1 -b ${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
         cd mbedtls
         make DESTDIR=$HOME/mbed install
       name: 'install mbedtls'
@@ -213,7 +231,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'quictls') }}
       run: |
-        git clone --quiet --depth=1 -b OpenSSL_1_1_1t+quic https://github.com/quictls/openssl
+        git clone --quiet --depth=1 -b ${{ env.quictls-version }} https://github.com/quictls/openssl
         cd openssl
         ./config enable-tls1_3 --prefix=$HOME/quictls
         make -j1 install_sw
@@ -221,7 +239,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'msh3') }}
       run: |
-        git clone --quiet -b v0.6.0 --depth=1 --recursive https://github.com/nibanks/msh3
+        git clone --quiet -b ${{ env.msh3-version }} --depth=1 --recursive https://github.com/nibanks/msh3
         cd msh3 && mkdir build && cd build
         cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3 ..
         cmake --build .
@@ -238,7 +256,7 @@ jobs:
 
     - if: ${{ contains(matrix.build.install_steps, 'rustls') }}
       run: |
-        git clone --quiet --depth=1 -b v0.10.0 --recursive https://github.com/rustls/rustls-ffi.git
+        git clone --quiet --depth=1 -b ${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
         cd rustls-ffi
         make DESTDIR=$HOME/rustls install
       name: 'install rustls'
