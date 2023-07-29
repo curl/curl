@@ -164,39 +164,6 @@ peer verification is disabled. Secure Transport on OS X will run either OCSP
 or CRL checks on certificates if those features are enabled, and this behavior
 can be adjusted in the preferences of Keychain Access.
 
-Advanced: Custom Certificate Verification with OpenSSL
-------------------------------------------------------
-
-When using libcurl with the OpenSSL backend, you can replace the default
-certificate verification function by calling
-[`SSL_CTX_set_cert_verify_callback`](https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set_cert_verify_callback.html)
-within the SSL context callback (refer to
-[`CURLOPT_SSL_CTX_FUNCTION`](https://curl.se/libcurl/c/CURLOPT_SSL_CTX_FUNCTION.html)).
-
-The verification function must return `1` for successful verification and `0` to
-indicate verification failure.
-
-In certain cases, you may need to suspend TLS processing while waiting for
-external I/O during certificate verification. The verification function can call
-[`SSL_set_retry_verify`](https://www.openssl.org/docs/manmaster/man3/SSL_set_retry_verify.html)
-before returning `0` to indicate that the verification outcome is still pending.
-Once verification completes, the application should call
-[`curl_multi_wakeup`](https://curl.se/libcurl/c/curl_multi_wakeup.html) to
-re-enter the
-[`SSL_connect`](https://www.openssl.org/docs/man1.0.2/man3/SSL_connect.html)
-state machine and return the final verification outcome from its next call to
-the verification function.
-
-This mechanism is useful for applications that use OpenSSL for TLS protocol
-handling and cryptographic operations while delegating certificate verification
-to the platform's native trust store.
-
-WARNING: Be extremely careful when implementing custom certificate verification.
-Providing your own verification function disables the default verification
-performed by OpenSSL. This includes checks for certificate revocation. If you do
-not perform these checks yourself, your application may be vulnerable to
-man-in-the-middle attacks.
-
 HTTPS proxy
 -----------
 
