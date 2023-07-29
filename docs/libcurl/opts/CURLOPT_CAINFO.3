@@ -42,14 +42,6 @@ accessible file.
 This option is by default set to the system path where libcurl's CA
 certificate bundle is assumed to be stored, as established at build time.
 
-If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
-(libnsspem.so) needs to be available for this option to work properly.
-Starting with curl 7.55.0, if both \fICURLOPT_CAINFO(3)\fP and
-\fICURLOPT_CAPATH(3)\fP are unset, NSS-linked libcurl tries to load
-libnssckbi.so, which contains a more comprehensive set of trust information
-than supported by nss-pem, because libnssckbi.so also includes information
-about distrusted certificates.
-
 (iOS and macOS) When curl uses Secure Transport this option is supported. If
 the option is not set, then curl will use the certificates in the system and
 user Keychain to verify the peer.

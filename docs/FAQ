@@ -422,10 +422,10 @@ FAQ
   backends.
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
-  libressl, BoringSSL, AWS-LC, GnuTLS, wolfSSL, NSS, mbedTLS, Secure
-  Transport (native iOS/OS X), Schannel (native Windows), GSKit (native IBM
-  i), BearSSL, or Rustls. They all have their pros and cons, and we try to
-  maintain a comparison of them here: https://curl.se/docs/ssl-compared.html
+  libressl, BoringSSL, AWS-LC, GnuTLS, wolfSSL, mbedTLS, Secure Transport
+  (native iOS/OS X), Schannel (native Windows), GSKit (native IBM i), BearSSL,
+  or Rustls. They all have their pros and cons, and we try to maintain a
+  comparison of them here: https://curl.se/docs/ssl-compared.html
 
   2.4 Does curl support SOCKS (RFC 1928) ?
 
@@ -902,7 +902,7 @@ FAQ
 
   4.9 curl cannot authenticate to a server that requires NTLM?
 
-  NTLM support requires OpenSSL, GnuTLS, mbedTLS, NSS, Secure Transport, or
+  NTLM support requires OpenSSL, GnuTLS, mbedTLS, Secure Transport, or
   Microsoft Windows libraries at build-time to provide this functionality.
 
   4.10 My HTTP request using HEAD, PUT or DELETE does not work

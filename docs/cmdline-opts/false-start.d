@@ -14,5 +14,5 @@ where a TLS client will start sending application data before verifying the
 server's Finished message, thus saving a round trip when performing a full
 handshake.
 
-This is currently only implemented in the NSS and Secure Transport (on iOS 7.0
-or later, or OS X 10.9 or later) backends.
+This is currently only implemented in the Secure Transport (on iOS 7.0 or
+later, or OS X 10.9 or later) backend.

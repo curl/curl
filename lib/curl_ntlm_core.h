@@ -28,15 +28,6 @@
 
 #if defined(USE_CURL_NTLM_CORE)
 
-/* If NSS is the first available SSL backend (see order in curl_ntlm_core.c)
-   then it must be initialized to be used by NTLM. */
-#if !defined(USE_OPENSSL) && \
-    !defined(USE_WOLFSSL) && \
-    !defined(USE_GNUTLS) && \
-    defined(USE_NSS)
-#define NTLM_NEEDS_NSS_INIT
-#endif
-
 #if defined(USE_OPENSSL)
 #  include <openssl/ssl.h>
 #elif defined(USE_WOLFSSL)

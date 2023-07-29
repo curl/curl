@@ -48,7 +48,7 @@ proxy is used.
 .IP http://
 HTTP Proxy. Default when no scheme or proxy type is specified.
 .IP https://
-HTTPS Proxy. (Added in 7.52.0 for OpenSSL, GnuTLS and NSS. Since 7.87.0, it
+HTTPS Proxy. (Added in 7.52.0 for OpenSSL and GnuTLS Since 7.87.0, it
 also works for BearSSL, mbedTLS, rustls, Schannel, Secure Transport and
 wolfSSL.)
 
@@ -123,9 +123,6 @@ Since 7.21.7 the proxy string supports the socks protocols as "schemes".
 
 Since 7.50.2, unsupported schemes in proxy strings cause libcurl to return
 error.
-
-curl built to use NSS cannot connect to an HTTPS server over a unix domain
-socket.
 .SH RETURN VALUE
 Returns CURLE_OK if proxies are supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

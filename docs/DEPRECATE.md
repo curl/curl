@@ -6,19 +6,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## NSS
-
-We remove support for building curl with the NSS TLS library in August 2023.
-
-- There are few users left who use curl+NSS
-- NSS has few users outside of curl as well (primarily Firefox)
-- NSS is harder than ever to find documentation for
-- NSS was always "best" used with Red Hat Linux when they provided additional
-  features on top of the regular NSS that is not shipped by the vanilla library
-
-Starting in 7.82.0, building curl to use NSS configure requires the additional
-flag `--with-nss-deprecated` in an attempt to highlight these plans.
-
 ## gskit
 
 We remove support for building curl with the gskit TLS library in August 2023.
@@ -69,3 +56,4 @@ curl will remove the support for space-separated names in July 2024.
  - PolarSSL
  - NPN
  - Support for systems without 64 bit data types
+ - NSS

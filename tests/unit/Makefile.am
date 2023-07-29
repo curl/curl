@@ -47,7 +47,7 @@ LIBS = $(BLANK_AT_MAKETIME)
 
 LDADD = $(top_builddir)/src/libcurltool.la   \
         $(top_builddir)/lib/libcurlu.la      \
-        @LDFLAGS@ @LIBCURL_LIBS@ @NSS_LIBS@
+        @LDFLAGS@ @LIBCURL_LIBS@
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 

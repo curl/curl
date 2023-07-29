@@ -24,12 +24,11 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE) && !defined(USE_WOLFSSL) && \
-    (defined(USE_GNUTLS) || \
-     defined(USE_NSS) || \
-     defined(USE_SECTRANSP) || \
-     defined(USE_OS400CRYPTO) || \
-     defined(USE_WIN32_CRYPTO))
+#if defined(USE_CURL_NTLM_CORE) && !defined(USE_WOLFSSL) &&     \
+  (defined(USE_GNUTLS) ||                                       \
+   defined(USE_SECTRANSP) ||                                    \
+   defined(USE_OS400CRYPTO) ||                                  \
+   defined(USE_WIN32_CRYPTO))
 
 #include "curl_des.h"
 

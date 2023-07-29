@@ -439,7 +439,6 @@ Features testable here are:
 - `netrc`
 - `nghttpx`
 - `nghttpx-h3`
-- `NSS`
 - `NTLM`
 - `NTLM_WB`
 - `OpenSSL`

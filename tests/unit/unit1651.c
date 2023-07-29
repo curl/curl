@@ -34,8 +34,8 @@ static void unit_stop(void)
 {
 
 }
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) ||    \
-  defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
+#if defined(USE_GSKIT) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
+  defined(USE_SECTRANSP)
 
 /* cert captured from gdb when connecting to curl.se on October 26
    2018 */

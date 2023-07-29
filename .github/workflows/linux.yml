@@ -153,10 +153,6 @@ jobs:
           install_steps: intel
           configure: CC=icc --enable-debug --with-openssl
 
-        - name: NSS
-          install_packages: clang libnss3-dev libnghttp2-dev nss-plugin-pem
-          configure: CC=clang CPPFLAGS="-isystem /usr/include/nss" --with-nss --enable-debug --with-nss-deprecated
-
         - name: Slackware-openssl-with-gssapi-gcc
           # These are essentially the same flags used to build the curl Slackware package
           # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild

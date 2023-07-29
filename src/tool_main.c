@@ -37,11 +37,6 @@
 #include <fcntl.h>
 #endif
 
-#ifdef USE_NSS
-#include <nspr.h>
-#include <plarenas.h>
-#endif
-
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
 #include "curlx.h"
@@ -213,14 +208,6 @@ static void main_free(struct GlobalConfig *config)
   /* Cleanup the easy handle */
   /* Main cleanup */
   curl_global_cleanup();
-#ifdef USE_NSS
-  if(PR_Initialized()) {
-    /* prevent valgrind from reporting still reachable mem from NSPR arenas */
-    PL_ArenaFinish();
-    /* prevent valgrind from reporting possibly lost memory (fd cache, ...) */
-    PR_Cleanup();
-  }
-#endif
   free_globalconfig(config);
 
   /* Free the config structures */

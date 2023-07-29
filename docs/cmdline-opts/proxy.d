@@ -21,7 +21,7 @@ Unix domain sockets are supported for socks proxy. Set localhost for the host
 part. e.g. socks5h://localhost/path/to/socket.sock
 
 HTTPS proxy support via https:// protocol prefix was added in 7.52.0 for
-OpenSSL, GnuTLS and NSS. Since 7.87.0, it also works for BearSSL, mbedTLS,
+OpenSSL and GnuTLS. Since 7.87.0, it also works for BearSSL, mbedTLS,
 rustls, Schannel, Secure Transport and wolfSSL.
 
 Unrecognized and unsupported proxy protocols cause an error since 7.52.0.

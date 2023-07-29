@@ -688,9 +688,6 @@ ${SIZEOF_TIME_T_CODE}
 /* If you want to build curl with the built-in manual */
 #cmakedefine USE_MANUAL 1
 
-/* if NSS is enabled */
-#cmakedefine USE_NSS 1
-
 /* if you have the PK11_CreateManagedGenericObject function */
 #cmakedefine HAVE_PK11_CREATEMANAGEDGENERICOBJECT 1
 
