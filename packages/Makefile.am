@@ -32,6 +32,7 @@ EXTRA_DIST = README.md \
   OS400/curlmain.c \
   OS400/curl.inc.in \
   OS400/initscript.sh \
+  OS400/config400.default \
   OS400/make-include.sh \
   OS400/make-lib.sh \
   OS400/make-src.sh \

@@ -62,41 +62,12 @@ SONAME=`sed -e '/^VERSIONCHANGE=/!d;s/^.*=\([0-9]*\).*/\1/'             \
                                         < "${TOPDIR}/lib/Makefile.soname"`
 export SONAME
 
+#	Get OS/400 configuration parameters.
 
-################################################################################
-#
-#                       Tunable configuration parameters.
-#
-################################################################################
-
-setenv TARGETLIB        'CURL'                  # Target OS/400 program library.
-setenv STATBNDDIR       'CURL_A'                # Static binding directory.
-setenv DYNBNDDIR        'CURL'                  # Dynamic binding directory.
-setenv SRVPGM           "CURL.${SONAME}"        # Service program.
-setenv TGTCCSID         '500'                   # Target CCSID of objects.
-setenv DEBUG            '*ALL'                  # Debug level.
-setenv OPTIMIZE         '10'                    # Optimization level
-setenv OUTPUT           '*NONE'                 # Compilation output option.
-setenv TGTRLS           '*CURRENT'              # Target OS release.
-setenv IFSDIR           '/curl'                 # Installation IFS directory.
-setenv QADRTDIR         '/QIBM/ProdData/qadrt'  # QADRT IFS directory.
-
-#       Define ZLIB availability and locations.
-
-setenv WITH_ZLIB        0                       # Define to 1 to enable.
-setenv ZLIB_INCLUDE     '/zlib/include'         # ZLIB include IFS directory.
-setenv ZLIB_LIB         'ZLIB'                  # ZLIB library.
-setenv ZLIB_BNDDIR      'ZLIB_A'                # ZLIB binding directory.
-
-#       Define LIBSSH2 availability and locations.
-
-setenv WITH_LIBSSH2     0                       # Define to 1 to enable.
-setenv LIBSSH2_INCLUDE  '/libssh2/include'      # LIBSSH2 include IFS directory.
-setenv LIBSSH2_LIB      'LIBSSH2'               # LIBSSH2 library.
-setenv LIBSSH2_BNDDIR   'LIBSSH2_A'             # LIBSSH2 binding directory.
-
-
-################################################################################
+. "${SCRIPTDIR}/config400.default"
+if [ -f "${SCRIPTDIR}/config400.override" ]
+then	. "${SCRIPTDIR}/config400.override"
+fi
 
 #       Need to get the version definitions.
 
