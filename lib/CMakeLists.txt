@@ -108,10 +108,46 @@ if(WIN32 AND
   set(IMPORT_LIB_SUFFIX "_imp")
 endif()
 
+# On supported platforms, do a single compilation pass for libcurl sources
+# and reuse these objects to generate both static and shared target.
+# This is possible where PIC is the default for both shared and static and
+# there is a way to tell the linker which libcurl symbols it should export
+# (vs. marking these symbols exportable at compile-time).
+if(WIN32 AND NOT DEFINED SHARE_LIB_OBJECT)
+  set(SHARE_LIB_OBJECT ON)
+endif()
+
+if(SHARE_LIB_OBJECT)
+  set(LIB_OBJECT "libcurl_object")
+  add_library(${LIB_OBJECT} OBJECT ${HHEADERS} ${CSOURCES})
+  target_link_libraries(${LIB_OBJECT} PRIVATE ${CURL_LIBS})
+  set_target_properties(${LIB_OBJECT} PROPERTIES
+    COMPILE_DEFINITIONS "BUILDING_LIBCURL"
+    INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB")
+  if(HIDES_CURL_PRIVATE_SYMBOLS)
+    set_target_properties(${LIB_OBJECT} PROPERTIES
+      COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS"
+      COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
+  endif()
+  if(CURL_HAS_LTO)
+    set_target_properties(${LIB_OBJECT} PROPERTIES
+      INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+      INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
+  endif()
+
+  target_include_directories(${LIB_OBJECT} INTERFACE
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
+
+  set(LIB_SOURCE $<TARGET_OBJECTS:${LIB_OBJECT}>)
+else()
+  set(LIB_SOURCE ${HHEADERS} ${CSOURCES})
+endif()
+
 # we want it to be called libcurl on all platforms
 if(BUILD_STATIC_LIBS)
   list(APPEND libcurl_export ${LIB_STATIC})
-  add_library(${LIB_STATIC} STATIC ${HHEADERS} ${CSOURCES})
+  add_library(${LIB_STATIC} STATIC ${LIB_SOURCE})
   add_library(${PROJECT_NAME}::${LIB_STATIC} ALIAS ${LIB_STATIC})
   target_link_libraries(${LIB_STATIC} PRIVATE ${CURL_LIBS})
   # Remove the "lib" prefix since the library is already named "libcurl".
@@ -142,10 +178,10 @@ endif()
 
 if(BUILD_SHARED_LIBS)
   list(APPEND libcurl_export ${LIB_SHARED})
-  add_library(${LIB_SHARED} SHARED ${HHEADERS} ${CSOURCES})
+  add_library(${LIB_SHARED} SHARED ${LIB_SOURCE})
   add_library(${PROJECT_NAME}::${LIB_SHARED} ALIAS ${LIB_SHARED})
   if(WIN32)
-    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc)
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc ${CURL_SOURCE_DIR}/libcurl.def)
   endif()
   target_link_libraries(${LIB_SHARED} PRIVATE ${CURL_LIBS})
   # Remove the "lib" prefix since the library is already named "libcurl".
