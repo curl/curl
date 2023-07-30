@@ -155,9 +155,6 @@
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
 
-/* Define if you have the <ssl.h> header file. */
-#undef HAVE_SSL_H
-
 /* Define if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
