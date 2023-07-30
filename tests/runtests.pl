@@ -1558,6 +1558,12 @@ sub singletest_check {
                 @generated = @newgen;
             }
 
+            if($hash{'nonewline'}) {
+                # cut off the final newline from the final line of the
+                # output data
+                chomp($outfile[-1]);
+            }
+
             $res = compare($runnerid, $testnum, $testname, "output ($filename)",
                            \@generated, \@outfile);
             if($res) {

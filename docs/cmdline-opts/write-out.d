@@ -25,10 +25,18 @@ output a newline by using \\n, a carriage return with \\r and a tab space with
 The output will be written to standard output, but this can be switched to
 standard error by using %{stderr}.
 
-Output HTTP headers from the most recent request by using \fB%header{name}\fP
-where \fBname\fP is the case insensitive name of the header (without the
-trailing colon). The header contents are exactly as sent over the network,
-with leading and trailing whitespace trimmed. Added in curl 7.84.0.
+Output HTTP headers from the most recent request by using *%header{name}*
+where *name* is the case insensitive name of the header (without the trailing
+colon). The header contents are exactly as sent over the network, with leading
+and trailing whitespace trimmed. Added in curl 7.84.0.
+
+Select a specific target destination file to write the output to, by using
+*%output{name}* where *name* is the full file name. The output following that
+instruction is then written to that file. More than one *%output{}* instruction
+can be specified in the same write-out argument. If the file name cannot be
+created, curl will leave the output to the one used prior to the *%output{}*
+instruction. Use *%output{>>name}* to append data to an existing file. Added in
+curl 8.3.0.
 
 .B NOTE:
 In Windows the %-symbol is a special symbol used to expand environment
