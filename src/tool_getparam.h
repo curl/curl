@@ -48,6 +48,7 @@ typedef enum {
   PARAM_CONTDISP_SHOW_HEADER, /* --include and --remote-header-name */
   PARAM_CONTDISP_RESUME_FROM, /* --continue-at and --remote-header-name */
   PARAM_READ_ERROR,
+  PARAM_EXPAND_ERROR, /* --expand problem */
   PARAM_LAST
 } ParameterError;
 

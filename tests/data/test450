@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+--config
+variables
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Variable from file that is trimmed and URL encoded
+</name>
+<file name="%LOGDIR/junk">
+        space with space
+</file>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable what@%LOGDIR/junk --expand-data "{{what:trim:url}}"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes" nonewline="yes">
+POST /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 20
+Content-Type: application/x-www-form-urlencoded
+
+space%20with%20space
+</protocol>
+</verify>
+</testcase>

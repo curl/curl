@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_WRITEOUT_JSON_H
-#define HEADER_CURL_TOOL_WRITEOUT_JSON_H
+#ifndef HEADER_CURL_VAR_H
+#define HEADER_CURL_VAR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,15 +23,26 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
-#include "tool_writeout.h"
 
-int jsonquoted(const char *in, size_t len,
-               struct curlx_dynbuf *out, bool lowercase);
+#include "tool_getparam.h"
+#include "dynbuf.h"
 
-void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
-                     struct per_transfer *per, CURLcode per_result);
-void headerJSON(FILE *stream, struct per_transfer *per);
-void jsonWriteString(FILE *stream, const char *in, bool lowercase);
+struct var {
+  struct var *next;
+  const char *name;
+  const char *content;
+  size_t clen; /* content length */
+};
 
-#endif /* HEADER_CURL_TOOL_WRITEOUT_H */
+struct GlobalConfig;
+
+ParameterError setvariable(struct GlobalConfig *global, const char *input);
+ParameterError varexpand(struct GlobalConfig *global,
+                         const char *line, struct curlx_dynbuf *out,
+                         bool *replaced);
+
+/* free everything */
+void varcleanup(struct GlobalConfig *global);
+
+#endif /* HEADER_CURL_VAR_H */
+
