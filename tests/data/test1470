@@ -35,7 +35,6 @@ Funny-head: yesyes
 <features>
 proxy
 unix-sockets
-!NSS
 </features>
 <server>
 https

@@ -84,9 +84,6 @@ a TLS extension that sends the hostname to the server. The server may use that
 information to do such things as sending back a specific certificate for the
 hostname, or forwarding the request to a specific origin server. Some hostnames
 may be inaccessible if SNI is not sent.
-
-NSS: If \fICURLOPT_SSL_VERIFYPEER(3)\fP is zero,
-\fICURLOPT_SSL_VERIFYHOST(3)\fP is also set to zero and cannot be overridden.
 .SH DEFAULT
 2
 .SH PROTOCOLS
