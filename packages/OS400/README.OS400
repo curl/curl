@@ -275,9 +275,11 @@ _ Install the curl source directory in IFS. Do NOT install it in the
 _ Enter Qshell (QSH, not PASE)
 _ Change current directory to the curl installation directory
 _ Change current directory to ./packages/OS400
-_ Edit file iniscript.sh. You may want to change tunable configuration
-  parameters, like debug info generation, optimization level, listing option,
-  target library, ZLIB/LIBSSH2 availability and location, etc.
+- If you want to change the default configuration parameters like debug info
+  generation, optimization level, listing option, target library, ZLIB/LIBSSH2
+  availability and location, etc., copy file config400.default to
+  config400.override and edit the latter. Do not edit the original default file
+  as it might be overwritten by a subsequent source installation.
 _ Copy any file in the current directory to makelog (i.e.:
   cp initscript.sh makelog): this is intended to create the makelog file with
   an ASCII CCSID!
@@ -285,8 +287,8 @@ _ Enter the command "sh makefile.sh > makelog 2>&1"
 _ Examine the makelog file to check for compilation errors. CZM0383 warnings on
   C or system standard API come from QADRT inlining and can safely be ignored.
 
-  Leaving file initscript.sh unchanged, this will produce the following OS/400
-objects:
+  Without configuration parameters override, this will produce the following
+OS/400 objects:
 _ Library CURL. All other objects will be stored in this library.
 _ Modules for all libcurl units.
 _ Binding directory CURL_A, to be used at calling program link time for
@@ -297,6 +299,8 @@ _ Service program CURL.<soname>, where <soname> is extracted from the
   when this program has dynamically bound curl at link time.
 _ Binding directory CURL. To be used to dynamically bind libcurl when linking a
   calling program.
+- CLI tool bound program CURL.
+- CLI command CURL.
 _ Source file H. It contains all the include members needed to compile a C/C++
   module using libcurl, and an ILE/RPG /copy member for support in this
   language.
@@ -305,11 +309,9 @@ _ CCSIDCURL member in file H. This defines the non-standard EBCDIC wrappers for
   C and C++.
 _ CURL.INC member in file H. This defines everything needed by an ILE/RPG
   program using libcurl.
-_ LIBxxx modules and programs. Although the test environment is not supported
-  on OS/400, the libcurl test programs are compiled for manual tests.
 _ IFS directory /curl/include/curl containing the C header files for IFS source
   C/C++ compilation and curl.inc.rpgle for IFS source ILE/RPG compilation.
-
+- IFS link /curl/bin/curl to CLI tool program.
 
 
 Special programming consideration:
