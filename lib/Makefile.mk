@@ -388,6 +388,7 @@ ifdef WIN32
 CURL_DLL_SUFFIX ?=
 libcurl_dll_LIBRARY := libcurl$(CURL_DLL_SUFFIX).dll
 libcurl_dll_a_LIBRARY := libcurl.dll.a
+CURL_LDFLAGS_LIB += $(PROOT)/libcurl.def
 ifdef MAP
 libcurl_map_LIBRARY := libcurl$(CURL_DLL_SUFFIX).map
 CURL_LDFLAGS_LIB += -Wl,-Map,$(libcurl_map_LIBRARY)
