@@ -40,7 +40,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   (void) clientp;
   (void) purpose;
   setsockopt(curlfd, SOL_SOCKET, SO_SNDBUF,
-             (const char *)&sndbufsize, sizeof(sndbufsize));
+             (char *)&sndbufsize, sizeof(sndbufsize));
 #else
   (void)clientp;
   (void)curlfd;
