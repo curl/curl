@@ -52,7 +52,6 @@
 #   HAVE_RAND_EGD: `RAND_egd` present in OpenSSL
 #   HAVE_AWSLC: OpenSSL is AWS-LC
 #   HAVE_BORINGSSL: OpenSSL is BoringSSL
-#   HAVE_PK11_CREATEMANAGEDGENERICOBJECTL: `PK11_CreateManagedGenericObject` present in NSS
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in QUICHE
 #   HAVE_ZSTD_CREATEDSTREAM: `ZSTD_createDStream` present in Zstd
