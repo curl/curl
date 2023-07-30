@@ -62,11 +62,11 @@ SONAME=`sed -e '/^VERSIONCHANGE=/!d;s/^.*=\([0-9]*\).*/\1/'             \
                                         < "${TOPDIR}/lib/Makefile.soname"`
 export SONAME
 
-#	Get OS/400 configuration parameters.
+#       Get OS/400 configuration parameters.
 
 . "${SCRIPTDIR}/config400.default"
 if [ -f "${SCRIPTDIR}/config400.override" ]
-then	. "${SCRIPTDIR}/config400.override"
+then    . "${SCRIPTDIR}/config400.override"
 fi
 
 #       Need to get the version definitions.

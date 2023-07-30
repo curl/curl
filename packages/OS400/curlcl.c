@@ -32,6 +32,10 @@
 #include <miptrnam.h>
 #include <mih/callpgmv.h>
 
+#ifndef CURLPGM
+#define CURLPGM "CURL"
+#endif
+
 
 /* Variable-length string, with 16-bit length. */
 typedef struct {
@@ -158,7 +162,7 @@ main(int argsc, arguments *args)
       exitcode = -2;
     }
     else {
-      _SYSPTR pgmptr = rslvsp(WLI_PGM, (char *) "CURL", library, _AUTH_NONE);
+      _SYSPTR pgmptr = rslvsp(WLI_PGM, (char *) CURLPGM, library, _AUTH_NONE);
       _LU_Work_Area_T *luwrka = (_LU_Work_Area_T *) _LUWRKA();
 
       parse_command_line(args->cmdargs->string, args->cmdargs->len,

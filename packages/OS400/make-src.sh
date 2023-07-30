@@ -59,7 +59,7 @@ done
 #       Link modules into program.
 
 MODULES="`echo \"${MODULES}\" | sed \"s/[^ ][^ ]*/${TARGETLIB}\/&/g\"`"
-CMD="CRTPGM PGM(${TARGETLIB}/CURL)"
+CMD="CRTPGM PGM(${TARGETLIB}/${CURLPGM})"
 CMD="${CMD} ENTMOD(${TARGETLIB}/CURLMAIN)"
 CMD="${CMD} MODULE(${MODULES})"
 CMD="${CMD} BNDSRVPGM(${TARGETLIB}/${SRVPGM} QADRTTS)"
@@ -76,14 +76,15 @@ then    mkdir -p "${IFSBIN}"
 fi
 
 rm -f "${IFSBIN}/curl"
-ln -s "/QSYS.LIB/${TARGETLIB}.LIB/CURL.PGM" "${IFSBIN}/curl"
+ln -s "/QSYS.LIB/${TARGETLIB}.LIB/${CURLPGM}.PGM" "${IFSBIN}/curl"
 
 
 #       Create the CL interface program.
 
 if action_needed "${LIBIFSNAME}/CURLCL.PGM" "${SCRIPTDIR}/curlcl.c"
-then    CMD="CRTBNDC PGM(${TARGETLIB}/CURLCL)"
+then    CMD="CRTBNDC PGM(${TARGETLIB}/${CURLCLI})"
         CMD="${CMD} SRCSTMF('${SCRIPTDIR}/curlcl.c')"
+        CMD="${CMD} DEFINE('CURLPGM=\"${CURLPGM}\"')"
         CMD="${CMD} TGTCCSID(${TGTCCSID})"
         CLcommand "${CMD}"
 fi
@@ -91,8 +92,8 @@ fi
 
 #       Create the CL command.
 
-if action_needed "${LIBIFSNAME}/CURL.CMD" "${SCRIPTDIR}/curl.cmd"
-then    CMD="CRTCMD CMD(${TARGETLIB}/CURL) PGM(${TARGETLIB}/CURLCL)"
+if action_needed "${LIBIFSNAME}/${CURLCMD}.CMD" "${SCRIPTDIR}/curl.cmd"
+then    CMD="CRTCMD CMD(${TARGETLIB}/${CURLCMD}) PGM(${TARGETLIB}/${CURLCLI})"
         CMD="${CMD} SRCSTMF('${SCRIPTDIR}/curl.cmd')"
         CLcommand "${CMD}"
 fi

@@ -29,6 +29,9 @@ setenv TARGETLIB        'CURL'                  # Target OS/400 program library.
 setenv STATBNDDIR       'CURL_A'                # Static binding directory.
 setenv DYNBNDDIR        'CURL'                  # Dynamic binding directory.
 setenv SRVPGM           "CURL.${SONAME}"        # Service program.
+setenv CURLPGM          'CURL'                  # CLI tool bound program.
+setenv CURLCMD          'CURL'                  # CL command name.
+setenv CURLCLI          'CURLCL'                # CL interface program.
 setenv TGTCCSID         '500'                   # Target CCSID of objects.
 setenv DEBUG            '*ALL'                  # Debug level.
 setenv OPTIMIZE         '10'                    # Optimization level
