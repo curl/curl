@@ -389,18 +389,6 @@ static int error_callback(nghttp2_session *session, const char *msg,
                           size_t len, void *userp);
 
 /*
- * multi_connchanged() is called to tell that there is a connection in
- * this multi handle that has changed state (multiplexing become possible, the
- * number of allowed streams changed or similar), and a subsequent use of this
- * multi handle should move CONNECT_PEND handles back to CONNECT to have them
- * retry.
- */
-static void multi_connchanged(struct Curl_multi *multi)
-{
-  multi->recheckstate = TRUE;
-}
-
-/*
  * Initialize the cfilter context
  */
 static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
@@ -1120,7 +1108,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
         /* only signal change if the value actually changed */
         DEBUGF(LOG_CF(data, cf, "MAX_CONCURRENT_STREAMS now %u",
                       ctx->max_concurrent_streams));
-        multi_connchanged(data->multi);
+        Curl_multi_connchanged(data->multi);
       }
       /* Since the initial stream window is 64K, a request might be on HOLD,
        * due to exhaustion. The (initial) SETTINGS may announce a much larger
@@ -1148,7 +1136,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                       ctx->goaway_error, ctx->last_stream_id));
         infof(data, "received GOAWAY, error=%d, last_stream=%u",
                     ctx->goaway_error, ctx->last_stream_id);
-        multi_connchanged(data->multi);
+        Curl_multi_connchanged(data->multi);
       }
       break;
     case NGHTTP2_WINDOW_UPDATE:
@@ -1838,7 +1826,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t nread = -1;
   CURLcode result;
   struct cf_call_data save;
-
+  DEBUGASSERT(stream);
   CF_DATA_SAVE(save, cf, data);
 
   nread = stream_recv(cf, data, buf, len, err);
@@ -2601,7 +2589,7 @@ CURLcode Curl_http2_switch(struct Curl_easy *data,
   conn->httpversion = 20; /* we know we're on HTTP/2 now */
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
-  multi_connchanged(data->multi);
+  Curl_multi_connchanged(data->multi);
 
   if(cf->next) {
     bool done;
@@ -2629,7 +2617,7 @@ CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf->conn->httpversion = 20; /* we know we're on HTTP/2 now */
   cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
-  multi_connchanged(data->multi);
+  Curl_multi_connchanged(data->multi);
 
   if(cf_h2->next) {
     bool done;
@@ -2686,7 +2674,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   conn->httpversion = 20; /* we know we're on HTTP/2 now */
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
-  multi_connchanged(data->multi);
+  Curl_multi_connchanged(data->multi);
 
   if(cf->next) {
     bool done;
