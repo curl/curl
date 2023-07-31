@@ -135,9 +135,6 @@
 /* Use Windows LDAP implementation */
 #cmakedefine USE_WIN32_LDAP 1
 
-/* your Entropy Gathering Daemon socket pathname */
-#cmakedefine EGD_SOCKET ${EGD_SOCKET}
-
 /* Define if you want to enable IPv6 support */
 #cmakedefine ENABLE_IPV6 1
 
@@ -399,9 +396,6 @@
 
 /* Define to 1 if OpenSSL has the `SSL_set0_wbio` function. */
 #cmakedefine HAVE_SSL_SET0_WBIO 1
-
-/* Define to 1 if you have the `RAND_egd' function. */
-#cmakedefine HAVE_RAND_EGD 1
 
 /* Define to 1 if you have the recv function. */
 #cmakedefine HAVE_RECV 1
