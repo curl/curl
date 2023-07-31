@@ -266,7 +266,7 @@
 #define HAVE_OPENSSL_VERSION
 #endif
 
-#ifdef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 typedef uint32_t sslerr_t;
 #else
 typedef unsigned long sslerr_t;
@@ -2306,7 +2306,11 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   int i, ocsp_status;
+#if defined(OPENSSL_IS_AWSLC)
+  const uint8_t *status;
+#else
   unsigned char *status;
+#endif
   const unsigned char *p;
   CURLcode result = CURLE_OK;
   OCSP_RESPONSE *rsp = NULL;
@@ -2404,7 +2408,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
     goto end;
   }
 
-  for(i = 0; i < sk_X509_num(ch); i++) {
+  for(i = 0; i < (int)sk_X509_num(ch); i++) {
     X509 *issuer = sk_X509_value(ch, i);
     if(X509_check_issued(issuer, cert) == X509_V_OK) {
       id = OCSP_cert_to_id(EVP_sha1(), cert, issuer);
