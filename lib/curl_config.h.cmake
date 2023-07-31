@@ -397,6 +397,9 @@
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine HAVE_PWD_H 1
 
+/* Define to 1 if OpenSSL has the `SSL_set0_wbio` function. */
+#cmakedefine HAVE_SSL_SET0_WBIO 1
+
 /* Define to 1 if you have the `RAND_egd' function. */
 #cmakedefine HAVE_RAND_EGD 1
 
