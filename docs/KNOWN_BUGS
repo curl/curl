@@ -31,6 +31,7 @@ problems may have been fixed or changed somewhat since this was written.
  3.2 No disconnect command
  3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
  3.4 AUTH PLAIN for SMTP is not working on all servers
+ 3.5 APOP authentication fails on POP3
 
  4. Command line
 
@@ -204,6 +205,10 @@ problems may have been fixed or changed somewhat since this was written.
  work correctly.
 
  See https://github.com/curl/curl/issues/4080
+
+3.5 APOP authentication fails on POP3
+
+ See https://github.com/curl/curl/issues/10073
 
 4. Command line
 
