@@ -44,16 +44,16 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define H2_CHUNK_SIZE  (16*1024)
+#define PROXY_H2_CHUNK_SIZE  (16*1024)
 
 #define PROXY_HTTP2_HUGE_WINDOW_SIZE (100 * 1024 * 1024)
 #define H2_TUNNEL_WINDOW_SIZE        (10 * 1024 * 1024)
 
-#define PROXY_H2_NW_RECV_CHUNKS  (H2_TUNNEL_WINDOW_SIZE / H2_CHUNK_SIZE)
+#define PROXY_H2_NW_RECV_CHUNKS  (H2_TUNNEL_WINDOW_SIZE / PROXY_H2_CHUNK_SIZE)
 #define PROXY_H2_NW_SEND_CHUNKS   1
 
-#define H2_TUNNEL_RECV_CHUNKS   (H2_TUNNEL_WINDOW_SIZE / H2_CHUNK_SIZE)
-#define H2_TUNNEL_SEND_CHUNKS   ((128 * 1024) / H2_CHUNK_SIZE)
+#define H2_TUNNEL_RECV_CHUNKS   (H2_TUNNEL_WINDOW_SIZE / PROXY_H2_CHUNK_SIZE)
+#define H2_TUNNEL_SEND_CHUNKS   ((128 * 1024) / PROXY_H2_CHUNK_SIZE)
 
 
 typedef enum {
@@ -87,9 +87,9 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
 
   ts->state = H2_TUNNEL_INIT;
   ts->stream_id = -1;
-  Curl_bufq_init2(&ts->recvbuf, H2_CHUNK_SIZE, H2_TUNNEL_RECV_CHUNKS,
+  Curl_bufq_init2(&ts->recvbuf, PROXY_H2_CHUNK_SIZE, H2_TUNNEL_RECV_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
-  Curl_bufq_init(&ts->sendbuf, H2_CHUNK_SIZE, H2_TUNNEL_SEND_CHUNKS);
+  Curl_bufq_init(&ts->sendbuf, PROXY_H2_CHUNK_SIZE, H2_TUNNEL_SEND_CHUNKS);
 
   if(cf->conn->bits.conn_to_host)
     hostname = cf->conn->conn_to_host.name;
@@ -322,8 +322,8 @@ static CURLcode cf_h2_proxy_ctx_init(struct Curl_cfilter *cf,
   DEBUGASSERT(!ctx->h2);
   memset(&ctx->tunnel, 0, sizeof(ctx->tunnel));
 
-  Curl_bufq_init(&ctx->inbufq, H2_CHUNK_SIZE, PROXY_H2_NW_RECV_CHUNKS);
-  Curl_bufq_init(&ctx->outbufq, H2_CHUNK_SIZE, PROXY_H2_NW_SEND_CHUNKS);
+  Curl_bufq_init(&ctx->inbufq, PROXY_H2_CHUNK_SIZE, PROXY_H2_NW_RECV_CHUNKS);
+  Curl_bufq_init(&ctx->outbufq, PROXY_H2_CHUNK_SIZE, PROXY_H2_NW_SEND_CHUNKS);
 
   if(tunnel_stream_init(cf, &ctx->tunnel))
     goto out;
@@ -388,7 +388,7 @@ out:
   return result;
 }
 
-static int should_close_session(struct cf_h2_proxy_ctx *ctx)
+static int proxy_h2_should_close_session(struct cf_h2_proxy_ctx *ctx)
 {
   return !nghttp2_session_want_read(ctx->h2) &&
     !nghttp2_session_want_write(ctx->h2);
@@ -1363,7 +1363,7 @@ static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
     nwritten = -1;
     goto out;
   }
-  else if(should_close_session(ctx)) {
+  else if(proxy_h2_should_close_session(ctx)) {
     /* nghttp2 thinks this session is done. If the stream has not been
      * closed, this is an error state for out transfer */
     if(ctx->tunnel.closed) {
@@ -1416,7 +1416,7 @@ static bool proxy_h2_connisalive(struct Curl_cfilter *cf,
         /* immediate error, considered dead */
         alive = FALSE;
       else {
-        alive = !should_close_session(ctx);
+        alive = !proxy_h2_should_close_session(ctx);
       }
     }
     else if(result != CURLE_AGAIN) {
