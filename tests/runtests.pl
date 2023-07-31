@@ -314,7 +314,7 @@ if (!$ENV{"NGHTTPX"}) {
     $ENV{"NGHTTPX"} = checktestcmd("nghttpx");
 }
 if ($ENV{"NGHTTPX"}) {
-    my $nghttpx_version=join(' ', `"$ENV{'NGHTTPX'} -v 2>/dev/null"`);
+    my $nghttpx_version=join(' ', `"$ENV{'NGHTTPX'}" -v 2>/dev/null`);
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
     chomp $nghttpx_h3;
 }
