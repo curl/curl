@@ -1672,9 +1672,62 @@ static int huge(void)
   return error;
 }
 
+static int urldup(void)
+{
+  const char *input_url = "http://"
+    "user:pwd@"
+    "[2a04:4e42:e00::347%25eth0]"
+    ":80"
+    "/path"
+    "?query"
+    "#fraggie";
+  CURLU *copy = NULL;
+  char *h_str = NULL, *copy_str = NULL;
+  CURLUcode rc;
+  CURLU *h = curl_url();
+
+  if(!h)
+    goto err;
+
+  rc = curl_url_set(h, CURLUPART_URL, input_url, 0);
+  if(rc)
+    goto err;
+  copy = curl_url_dup(h);
+
+  rc = curl_url_get(h, CURLUPART_URL, &h_str, 0);
+  if(rc)
+    goto err;
+
+  rc = curl_url_get(copy, CURLUPART_URL, &copy_str, 0);
+  if(rc)
+    goto err;
+
+  if(strcmp(input_url, h_str) ||
+     strcmp(h_str, copy_str)) {
+    printf("Original:  %s\nParsed:    %s\nCopy:      %s\n",
+           input_url, h_str, copy_str);
+    goto err;
+  }
+
+  curl_free(copy_str);
+  curl_free(h_str);
+  curl_url_cleanup(copy);
+  curl_url_cleanup(h);
+  return 0;
+err:
+  curl_free(copy_str);
+  curl_free(h_str);
+  curl_url_cleanup(copy);
+  curl_url_cleanup(h);
+  return 1;
+}
+
 int test(char *URL)
 {
   (void)URL; /* not used */
+
+  if(urldup())
+    return 11;
 
   if(setget_parts())
     return 10;
