@@ -33,10 +33,10 @@ Funny-head: yesyes
 http
 </server>
 <name>
-use -w %file{}
+use -w %output{}
 </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%file{%LOGDIR/output}%{http_code}\n'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%output{%LOGDIR/output}%{http_code}\n'
 </command>
 </client>
 

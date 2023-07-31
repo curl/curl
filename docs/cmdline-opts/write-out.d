@@ -31,11 +31,11 @@ colon). The header contents are exactly as sent over the network, with leading
 and trailing whitespace trimmed. Added in curl 7.84.0.
 
 Select a specific target destination file to write the output to, by using
-*%file{name}* where *name* is the full file name. The output following that
-instruction is then written to that file. More than one *%file{}* instruction
+*%output{name}* where *name* is the full file name. The output following that
+instruction is then written to that file. More than one *%output{}* instruction
 can be specified in the same write-out argument. If the file name cannot be
-created, curl will leave the output to the one used prior to the *%file{}*
-instruction. Use *%file{>>name}* to append data to an existing file. Added in
+created, curl will leave the output to the one used prior to the *%output{}*
+instruction. Use *%output{>>name}* to append data to an existing file. Added in
 curl 8.3.0.
 
 .B NOTE:
