@@ -49,6 +49,7 @@
 # https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
 #
 # The following variables are available:
+#   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL
 #   HAVE_RAND_EGD: `RAND_egd` present in OpenSSL
 #   HAVE_AWSLC: OpenSSL is AWS-LC
 #   HAVE_BORINGSSL: OpenSSL is BoringSSL
@@ -477,9 +478,6 @@ if(CURL_USE_OPENSSL)
   endif()
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
-  if(NOT DEFINED HAVE_RAND_EGD)
-    check_symbol_exists(RAND_egd "${CURL_INCLUDES}" HAVE_RAND_EGD)
-  endif()
   if(NOT DEFINED HAVE_BORINGSSL)
     check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
   endif()
@@ -513,7 +511,7 @@ if(CURL_USE_WOLFSSL)
 endif()
 
 # Keep ZLIB detection after TLS detection,
-# and before calling CheckQuicSupportInOpenSSL.
+# and before calling openssl_check_symbol_exists().
 
 set(HAVE_LIBZ OFF)
 set(USE_ZLIB OFF)
@@ -565,49 +563,52 @@ if(CURL_ZSTD)
   endif()
 endif()
 
+# Check symbol in OpenSSL-like TLS backends.
+macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE)
+  cmake_push_check_state()
+  if(USE_OPENSSL)
+    set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
+    set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
+    if(HAVE_LIBZ)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
+    endif()
+    if(WIN32)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
+      if(NOT HAVE_MINGW_ORIGINAL)
+        list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
+      endif()
+    endif()
+  elseif(USE_WOLFSSL)
+    set(CMAKE_REQUIRED_INCLUDES   "${WolfSSL_INCLUDE_DIRS}")
+    set(CMAKE_REQUIRED_LIBRARIES  "${WolfSSL_LIBRARIES}")
+    if(HAVE_LIBZ)
+      list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")  # Public wolfSSL headers require zlib headers
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
+    endif()
+    if(WIN32)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")
+    endif()
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS -DHAVE_UINTPTR_T)  # to pull in stdint.h (as of wolfSSL v5.5.4)
+  endif()
+  check_symbol_exists("${SYMBOL}" "${FILES}" "${VARIABLE}")
+  cmake_pop_check_state()
+endmacro()
+
+if(USE_OPENSSL OR USE_WOLFSSL)
+  if(NOT DEFINED HAVE_SSL_SET0_WBIO)
+    openssl_check_symbol_exists(SSL_set0_wbio "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
+  endif()
+  if(NOT DEFINED HAVE_RAND_EGD)
+    openssl_check_symbol_exists(RAND_egd "${CURL_INCLUDES}" HAVE_RAND_EGD)
+  endif()
+endif()
+
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
 if(USE_NGHTTP2)
   find_package(NGHTTP2 REQUIRED)
   include_directories(${NGHTTP2_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
 endif()
-
-function(CheckQuicSupportInOpenSSL)
-  # Be sure that the OpenSSL/wolfSSL library actually supports QUIC.
-  if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
-    cmake_push_check_state()
-    if(USE_WOLFSSL)
-      set(CMAKE_REQUIRED_INCLUDES   "${WolfSSL_INCLUDE_DIRS}")
-      set(CMAKE_REQUIRED_LIBRARIES  "${WolfSSL_LIBRARIES}")
-      if(HAVE_LIBZ)
-        list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")  # Public wolfSSL headers require zlib headers
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
-      endif()
-      if(WIN32)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")
-      endif()
-      list(APPEND CMAKE_REQUIRED_DEFINITIONS -DHAVE_UINTPTR_T)  # to pull in stdint.h (as of wolfSSL v5.5.4)
-      check_symbol_exists(wolfSSL_set_quic_method "wolfssl/options.h;wolfssl/openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
-    else()
-      set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
-      set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
-      if(HAVE_LIBZ)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
-      endif()
-      if(WIN32)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
-        if(NOT HAVE_MINGW_ORIGINAL)
-          list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
-        endif()
-      endif()
-      check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
-    endif()
-    cmake_pop_check_state()
-  endif()
-  if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
-    message(FATAL_ERROR "QUIC support is missing in OpenSSL/LibreSSL/BoringSSL/wolfSSL. Try setting -DOPENSSL_ROOT_DIR")
-  endif()
-endfunction()
 
 option(USE_NGTCP2 "Use ngtcp2 and nghttp3 libraries for HTTP/3 support" OFF)
 if(USE_NGTCP2)
@@ -619,7 +620,19 @@ if(USE_NGTCP2)
     else()
       find_package(NGTCP2 REQUIRED quictls)
     endif()
-    CheckQuicSupportInOpenSSL()
+
+    # Be sure that the OpenSSL/wolfSSL library actually supports QUIC.
+    if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
+      if(USE_OPENSSL)
+        openssl_check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+      elseif(USE_WOLFSSL)
+        openssl_check_symbol_exists(wolfSSL_set_quic_method "wolfssl/options.h;wolfssl/openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+      endif()
+    endif()
+    if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
+      message(FATAL_ERROR "QUIC support is missing in OpenSSL/LibreSSL/BoringSSL/wolfSSL. Try setting -DOPENSSL_ROOT_DIR")
+    endif()
+
   elseif(USE_GNUTLS)
     # TODO add GnuTLS support as vtls library.
     find_package(NGTCP2 REQUIRED GnuTLS)
