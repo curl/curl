@@ -83,7 +83,6 @@ my %defaulton = (
     'zstd' => 1,
     'brotli' => 1,
     'random' => 1,
-    'egd-socket' => 1,
     'ca-bundle' => 1,
     'ca-path' => 1,
     'libssh2' => 1,
