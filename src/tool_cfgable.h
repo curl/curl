@@ -256,6 +256,9 @@ struct OperationConfig {
   long gssapi_delegation;
   bool ssl_allow_beast;     /* allow this SSL vulnerability */
   bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy */
+  bool ssl_allow_unsafe_reneg;       /* allow SSL unsafe renegotiation */
+  bool proxy_ssl_allow_unsafe_reneg; /* allow SSL unsafe renegotiation for
+                                        proxy */
   bool ssl_no_revoke;       /* disable SSL certificate revocation checks */
   bool ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
                                   revocation list errors */

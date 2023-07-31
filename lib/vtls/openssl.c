@@ -3565,6 +3565,11 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
     ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 #endif
 
+#ifdef SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION
+  if(ssl_config->unsafe_legacy_reneg)
+    ctx_options |= SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION;
+#endif
+
   switch(ssl_version) {
   case CURL_SSLVERSION_SSLv2:
   case CURL_SSLVERSION_SSLv3:

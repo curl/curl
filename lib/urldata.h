@@ -299,6 +299,7 @@ struct ssl_config_data {
   BIT(certinfo);     /* gather lots of certificate info */
   BIT(falsestart);
   BIT(enable_beast); /* allow this flaw for interoperability's sake */
+  BIT(unsafe_legacy_reneg); /* allows UNSAFE renegotiations */
   BIT(no_revoke);    /* disable SSL certificate revocation checks */
   BIT(no_partialchain); /* don't accept partial certificate chains */
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation

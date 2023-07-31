@@ -191,6 +191,7 @@ DPAGES = \
   proxy-pinnedpubkey.d \
   proxy-service-name.d \
   proxy-ssl-allow-beast.d \
+  proxy-ssl-allow-unsafe-reneg.d \
   proxy-ssl-auto-client-cert.d \
   proxy-tls13-ciphers.d \
   proxy-tlsauthtype.d \
@@ -237,6 +238,7 @@ DPAGES = \
   speed-limit.d \
   speed-time.d \
   ssl-allow-beast.d \
+  ssl-allow-unsafe-reneg.d \
   ssl-auto-client-cert.d \
   ssl-no-revoke.d \
   ssl-reqd.d \

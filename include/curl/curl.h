@@ -936,6 +936,11 @@ typedef enum {
    a client certificate for authentication. (Schannel) */
 #define CURLSSLOPT_AUTO_CLIENT_CERT (1<<5)
 
+/* - CURLSSLOPT_ALLOW_UNSAFE_RENEG tells libcurl to allow **UNSAFE* legacy
+   renegotations. This weakens security significantly and opens up the
+   connections for attacks */
+#define CURLSSLOPT_ALLOW_UNSAFE_RENEG (1<<6)
+
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
    this value, keep them in sync. */

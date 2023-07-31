@@ -294,6 +294,8 @@ static const struct LongShort aliases[]= {
   {"EC", "etag-save",                ARG_FILENAME},
   {"ED", "etag-compare",             ARG_FILENAME},
   {"EE", "curves",                   ARG_STRING},
+  {"EI", "ssl-allow-unsafe-reneg",   ARG_BOOL},
+  {"EJ", "proxy-ssl-allow-unsafe-reneg", ARG_BOOL},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -2047,6 +2049,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case 'E':
         GetStr(&config->ssl_ec_curves, nextarg);
+        break;
+
+      case 'I': /* --ssl-allow-unsafe-reneg */
+        if(feature_ssl)
+          config->ssl_allow_unsafe_reneg = toggle;
+        break;
+
+      case 'J': /* --proxy-ssl-allow-unsafe-reneg */
+        if(feature_ssl)
+          config->proxy_ssl_allow_unsafe_reneg = toggle;
         break;
 
       default: /* unknown flag */

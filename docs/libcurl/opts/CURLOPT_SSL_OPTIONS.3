@@ -75,6 +75,11 @@ default behavior in libcurl with Schannel. Since the server can request any
 certificate that supports client authentication in the OS certificate store it
 could be a privacy violation and unexpected.
 (Added in 7.77.0)
+.IP CURLSSLOPT_ALLOW_UNSAFE_RENEG
+Tells libcurl (built to use OpenSSL) to allow \fBUNSAFE\fP legacy
+renegotiation. This weakens security significantly and opens up the connections
+for attacks. See CVE-2009-3555. If this bit is not set, unsafe renegotiation
+will be refused and fail with OpenSSL 3+. (Added in 8.3.0)
 .SH DEFAULT
 0
 .SH PROTOCOLS

@@ -82,6 +82,23 @@
   but on the other hand it allows curl to connect to that kind of strange
   servers.
 
+## Allow unsafe legacy renegotiation
+
+  A protocol flaw in how renegotiation works in TLS 1.2 and earlier caused all
+  SSL libraries to fix their code to support a revised standard known as
+  "secure renegotiation". Despite this, SSL libraries have continued to support
+  the original renegotiation standard, now referred to as "unsafe legacy
+  renegotiation", by default for compatibility with peers missing the fix.
+
+  OpenSSL 3 has an option to allow unsafe legacy renegotiation and no longer
+  allows it by default. If curl returns an error from OpenSSL that is similar
+  to "SSL routines::unsafe legacy renegotiation disabled" then you will have to
+  explicitly allow unsafe legacy renegotiation to connect to that server.
+
+  When curl is built with the OpenSSL backend, to connect to such outdated
+  servers you can use the option --ssl-allow-unsafe-reneg. libcurl users can
+  use CURLOPT_SSL_OPTIONS with option value CURLSSLOPT_ALLOW_UNSAFE_RENEG.
+
 ## Disabling certificate revocation checks
 
   Some SSL backends may do certificate revocation checks (CRL, OCSP, etc)
