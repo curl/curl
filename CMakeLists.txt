@@ -50,7 +50,6 @@
 #
 # The following variables are available:
 #   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL
-#   HAVE_RAND_EGD: `RAND_egd` present in OpenSSL
 #   HAVE_AWSLC: OpenSSL is AWS-LC
 #   HAVE_BORINGSSL: OpenSSL is BoringSSL
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
@@ -597,9 +596,6 @@ endmacro()
 if(USE_OPENSSL OR USE_WOLFSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
     openssl_check_symbol_exists(SSL_set0_wbio "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
-  endif()
-  if(NOT DEFINED HAVE_RAND_EGD)
-    openssl_check_symbol_exists(RAND_egd "${CURL_INCLUDES}" HAVE_RAND_EGD)
   endif()
 endif()
 
