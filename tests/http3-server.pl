@@ -34,7 +34,7 @@ my $logdir = "log";
 my $pidfile = "$logdir/nghttpx.pid";
 my $logfile = "$logdir/http3.log";
 my $nghttpx = "nghttpx";
-my $listenport = 9015;
+my $listenport = 9017;
 my $connect = "127.0.0.1,8990";
 my $cert = "Server-localhost-sv";
 my $conf = "nghttpx.conf";
@@ -108,6 +108,7 @@ $certfile = abs_path($certfile);
 $keyfile = abs_path($keyfile);
 
 my $cmdline="$nghttpx --http2-proxy --backend=$connect ".
+    "--frontend=\"*,$listenport\" ".
     "--frontend=\"*,$listenport;quic\" ".
     "--log-level=INFO ".
     "--pid-file=$pidfile ".
