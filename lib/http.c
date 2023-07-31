@@ -4058,6 +4058,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           /* Switching Protocols */
           if(k->upgr101 == UPGR101_H2) {
             /* Switching to HTTP/2 */
+            DEBUGASSERT(conn->httpversion < 20);
             infof(data, "Received 101, Switching to HTTP/2");
             k->upgr101 = UPGR101_RECEIVED;
 
@@ -4100,6 +4101,11 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         }
       }
       else {
+        if(k->upgr101 == UPGR101_H2) {
+          /* A requested upgrade was denied, poke the multi handle to possibly
+             allow a pending pipewait to continue */
+          Curl_multi_connchanged(data->multi);
+        }
         k->header = FALSE; /* no more header to parse! */
 
         if((k->size == -1) && !k->chunk && !conn->bits.close &&
