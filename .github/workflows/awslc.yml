@@ -42,7 +42,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
-  awslc-version: 1.3.0
+  awslc-version: 1.13.0
 
 jobs:
   autoconf:
