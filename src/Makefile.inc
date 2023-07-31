@@ -32,13 +32,14 @@
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we re-use the code here to avoid duplication.
 CURLX_CFILES = \
+  ../lib/base64.c \
+  ../lib/curl_multibyte.c \
+  ../lib/dynbuf.c \
+  ../lib/nonblock.c \
   ../lib/strtoofft.c \
   ../lib/timediff.c \
-  ../lib/nonblock.c \
-  ../lib/warnless.c \
-  ../lib/curl_multibyte.c \
   ../lib/version_win32.c \
-  ../lib/dynbuf.c
+  ../lib/warnless.c
 
 CURLX_HFILES = \
   ../lib/curl_setup.h \
@@ -91,7 +92,8 @@ CURL_CFILES = \
   tool_vms.c \
   tool_writeout.c \
   tool_writeout_json.c \
-  tool_xattr.c
+  tool_xattr.c \
+  var.c
 
 CURL_HFILES = \
   slist_wc.h \
@@ -135,7 +137,8 @@ CURL_HFILES = \
   tool_vms.h \
   tool_writeout.h \
   tool_writeout_json.h \
-  tool_xattr.h
+  tool_xattr.h \
+  var.h
 
 CURL_RCFILES = curl.rc
 

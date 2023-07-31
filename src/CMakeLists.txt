@@ -63,7 +63,7 @@ endif()
 
 # CURL_CFILES, CURLX_CFILES, CURL_HFILES come from Makefile.inc
 if(BUILD_STATIC_CURL)
-  set(CURLX_CFILES ../lib/dynbuf.c)
+  set(CURLX_CFILES ../lib/dynbuf.c ../lib/base64.c)
 endif()
 
 add_executable(
