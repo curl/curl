@@ -607,9 +607,9 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           else
             fputs("%header{", stream);
         }
-        else if(!strncmp("file{", &ptr[1], 5)) {
+        else if(!strncmp("output{", &ptr[1], 7)) {
           bool append = FALSE;
-          ptr += 6;
+          ptr += 8;
           if((ptr[0] == '>') && (ptr[1] == '>')) {
             append = TRUE;
             ptr += 2;
@@ -635,7 +635,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             ptr = end + 1;
           }
           else
-            fputs("%file{", stream);
+            fputs("%output{", stream);
         }
         else {
           /* illegal syntax, then just output the characters that are used */
