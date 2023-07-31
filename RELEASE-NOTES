@@ -1,22 +1,33 @@
 curl and libcurl 8.3.0
 
  Public curl releases:         222
- Command line options:         255
+ Command line options:         256
  curl_easy_setopt() options:   303
  Public functions in libcurl:  91
- Contributors:                 2929
+ Contributors:                 2932
 
 This release includes the following changes:
 
+ o nss: remove support for this TLS library [10]
+ o tool: add "variable" support [1]
+ o wolfssl: support loading system CA certificates [8]
 
 This release includes the following bugfixes:
 
  o bearssl: don't load CA certs when peer verification is disabled [33]
+ o CI: add caching to many jobs [19]
+ o cmake: support building static and shared libcurl in one go [17]
+ o configure, cmake, lib: more form api deprecation [7]
+ o configure: use the pkg-config --libs-only-l flag for libssh2 [16]
  o easy: remove #ifdefs to make code easier on the eye [34]
  o GHA: adding quiche workflow [35]
  o http2: disable asssertion blocking OSSFuzz testing [31]
  o http2: fix in h2 proxy tunnel: progress in ingress on sending [32]
+ o macOS: fix target detection more [11]
+ o Revert "schannel: reverse the order of certinfo insertions" [14]
+ o tool_operate: allow both SSL_CERT_FILE and SSL_CERT_DIR [12]
  o url: remove infof() output for "still name resolving" [28]
+ o winbuild: improve check for static zlib [15]
 
 This release includes the following known bugs:
 
@@ -25,7 +36,6 @@ This release includes the following known bugs:
 Planned upcoming removals include:
 
  o gskit
- o NSS
  o support for space-separated NOPROXY patterns
  o support for the original legacy mingw version 1
 
@@ -34,12 +44,25 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, kyled-dell on github, Ray Satiro, Stefan Eissing,
-  yushicheng7788 on github
-  (5 contributors)
+  Daniel Stenberg, Derzsi Dániel, Emanuele Torre, Gabriel Corona,
+  kyled-dell on github, Marcel Raad, Nathan Moinvaziri, Patrick Monnerat,
+  Ray Satiro, Ryan Schmidt, Stefan Eissing, Thomas M. DuBuisson,
+  Viktor Szakats, wangzhikun, Wilhelm von Thiele, yushicheng7788 on github
+  (16 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=11346
+ [7] = https://curl.se/bug/?i=9621
+ [8] = https://curl.se/bug/?i=11452
+ [10] = https://curl.se/bug/?i=11459
+ [11] = https://curl.se/bug/?i=11502
+ [12] = https://curl.se/bug/?i=11325
+ [14] = https://curl.se/bug/?i=11536
+ [15] = https://curl.se/bug/?i=11521
+ [16] = https://curl.se/bug/?i=11538
+ [17] = https://curl.se/bug/?i=11505
+ [19] = https://curl.se/bug/?i=11532
  [28] = https://curl.se/bug/?i=11394
  [31] = https://curl.se/bug/?i=11500
  [32] = https://curl.se/bug/?i=11527
