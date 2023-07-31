@@ -1149,7 +1149,8 @@ static OSStatus CopyIdentityWithLabel(char *label,
             status = noErr;
             break;
           }
-          CFRelease(common_name);
+          if(common_name)
+            CFRelease(common_name);
         }
         CFRelease(cert);
       }
