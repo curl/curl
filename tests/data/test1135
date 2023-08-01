@@ -116,6 +116,9 @@ CURL_EXTERN const struct curl_easyoption *curl_easy_option_by_id
 CURL_EXTERN const struct curl_easyoption *curl_easy_option_next
 CURL_EXTERN CURLHcode curl_easy_header
 CURL_EXTERN struct curl_header *curl_easy_nextheader
+CURL_EXTERN CURLcode curl_ws_recv
+CURL_EXTERN CURLcode curl_ws_send
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta
 </stdout>
 </verify>
 

@@ -39,6 +39,7 @@ my @incs = (
     "$root/include/curl/urlapi.h",
     "$root/include/curl/options.h",
     "$root/include/curl/header.h",
+    "$root/include/curl/websockets.h",
     );
 
 my $verbose=0;
