@@ -55,7 +55,7 @@ int main(void)
        returns CURLE_PEER_FAILED_VERIFICATION */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-    /* Letting the wrong host name in the certficate be okay, the transfer
+    /* Letting the wrong host name in the certificate be okay, the transfer
        goes through but will (most likely) cause a 404 or similar because it
        sends an unknown name in the Host: header field */
     res = curl_easy_perform(curl);
