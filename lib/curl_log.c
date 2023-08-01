@@ -70,6 +70,27 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
       case CURLINFO_TEXT:
       case CURLINFO_HEADER_OUT:
       case CURLINFO_HEADER_IN:
+#ifdef DEBUGBUILD
+#define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
+#define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
+                                   CURL_FORMAT_CURL_OFF_T "] "
+        do {
+          char idsbuf[60];
+          curl_off_t xfer_id = -1, conn_id = -1;
+          curl_easy_getinfo(data, CURLINFO_XFER_ID, &xfer_id);
+          if(xfer_id < 0)
+            break;
+          curl_easy_getinfo(data, CURLINFO_CONN_ID, &conn_id);
+          if(conn_id >= 0) {
+            msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
+                      xfer_id, conn_id);
+          }
+          else {
+            msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
+          }
+          fwrite(idsbuf, strlen(idsbuf), 1, data->set.err);
+        } while(0);
+#endif
         fwrite(s_infotype[type], 2, 1, data->set.err);
         fwrite(ptr, size, 1, data->set.err);
         break;

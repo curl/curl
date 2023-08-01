@@ -85,7 +85,17 @@ main (int argc, char *argv[])
         curl_easy_getinfo(msg->easy_handle, CURLINFO_XFER_ID, &xfer_id);
         curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &status);
         --running_handles;
-        if (status != 206) {
+        if (msg->data.result == CURLE_SEND_ERROR ||
+            msg->data.result == CURLE_RECV_ERROR) {
+          /* We get these if the server had a GOAWAY in transit on
+           * re-using a connection */
+        }
+        else if (msg->data.result) {
+          fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
+                  ": failed with %d\n", xfer_id, msg->data.result);
+          exit(1);
+        }
+        else if (status != 206) {
           fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
                   ": wrong http status %ld (expected 206)\n", xfer_id, status);
           exit(1);
