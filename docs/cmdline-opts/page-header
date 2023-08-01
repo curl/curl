@@ -129,7 +129,7 @@ function to a variable expansion, add them colon separated to the right side
 of the variable. Variable content holding null bytes that are not encoded when
 expanded, will cause error.
 
-Exmaple: get the contents of a file called $HOME/.secret into a variable
+Example: get the contents of a file called $HOME/.secret into a variable
 called "fix". Make sure that the content is trimmed and percent-encoded sent
 as POST data:
 
