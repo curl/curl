@@ -28,18 +28,41 @@
 use strict;
 use warnings;
 
-# we may get the dir root pointed out
-my $root=$ARGV[0] || ".";
+my $sort = 0;
 
-my @incs = (
-    "$root/include/curl/curl.h",
-    "$root/include/curl/easy.h",
-    "$root/include/curl/mprintf.h",
-    "$root/include/curl/multi.h",
-    "$root/include/curl/urlapi.h",
-    "$root/include/curl/options.h",
-    "$root/include/curl/header.h",
-    );
+# we may get the dir root pointed out
+my $root = shift @ARGV;
+while(defined $root) {
+
+    if($root =~ /--heading=(.*)/) {
+        print "$1\n";
+        $root = shift @ARGV;
+        next;
+    }
+    elsif($root =~ /--sort/) {
+        $sort = 1;
+        $root = shift @ARGV;
+        next;
+    }
+
+    last;
+}
+
+if(!defined $root) {
+    $root = ".";
+}
+
+$root = "$root/include/curl";
+opendir(D, "$root") || die "Cannot open directory $root: $!\n";
+my @dir = readdir(D);
+closedir(D);
+
+my @incs;
+foreach (sort(@dir)) {
+    if($_ =~ /\.h$/) {
+        push(@incs, "$root/$_");
+    }
+}
 
 my $verbose=0;
 my $summary=0;
@@ -49,8 +72,8 @@ my @syms;
 my %doc;
 my %rem;
 
-sub scanheader {
-    my ($f)=@_;
+my @out;
+foreach my $f (@incs) {
     open H, "<$f" || die;
     my $first = "";
     while(<H>) {
@@ -59,7 +82,8 @@ sub scanheader {
         if (/^(^CURL_EXTERN .*)\(/) {
             my $decl = $1;
             $decl =~ s/\r$//;
-            print "$decl\n";
+            $decl =~ /([a-z_]+)$/;
+            push(@out, "$1");
         }
         elsif (/^(^CURL_EXTERN .*)/) {
             # handle two-line declarations
@@ -72,7 +96,8 @@ sub scanheader {
                 my $decl = $1;
                 $decl =~ s/\r$//;
                 $first .= $decl;
-                print "$first\n";
+                $first =~ /([a-z_]+)$/;
+                push(@out, "$1");
             }
             $first = "";
         }
@@ -80,6 +105,10 @@ sub scanheader {
     close H;
 }
 
-foreach my $i (@incs) {
-    scanheader($i);
+if($sort) {
+    @out = sort(@out);
+}
+
+foreach (@out) {
+    print("$_\n");
 }

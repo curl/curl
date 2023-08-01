@@ -608,7 +608,7 @@ have a text/binary difference.
 If `nonewline` is set, we will cut off the trailing newline of this given data
 before comparing with the one actually received by the client
 
-### `<stdout [mode="text"] [nonewline="yes"] [crlf="yes"]>`
+### `<stdout [mode="text"] [nonewline="yes"] [crlf="yes"] [loadfile="filename"]>`
 This verifies that this data was passed to stdout.
 
 Use the mode="text" attribute if the output is in text mode on platforms that
@@ -619,6 +619,8 @@ before comparing with the one actually received by the client
 
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
+
+`loadfile="filename"` makes loading the data from an external file.
 
 ### `<file name="%LOGDIR/filename" [mode="text"]>`
 The file's contents must be identical to this after the test is complete. Use
