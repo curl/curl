@@ -179,36 +179,55 @@ static struct Curl_cftype *cf_types[] = {
   NULL,
 };
 
+CURLcode Curl_log_configure(const char *config)
+{
+  char *token, *tok_buf, *tmp;
+  size_t i;
+  int lvl;
+
+  tmp = strdup(config);
+  if(!tmp)
+    return CURLE_OUT_OF_MEMORY;
+
+  token = strtok_r(tmp, ", ", &tok_buf);
+  while(token) {
+    switch(*token) {
+      case '-':
+        lvl = CURL_LOG_LVL_NONE;
+        ++token;
+        break;
+      case '+':
+        lvl = CURL_LOG_LVL_INFO;
+        ++token;
+        break;
+      default:
+        lvl = CURL_LOG_LVL_INFO;
+        break;
+    }
+    for(i = 0; cf_types[i]; ++i) {
+      if(strcasecompare(token, "all")) {
+        cf_types[i]->log_level = lvl;
+      }
+      else if(strcasecompare(token, cf_types[i]->name)) {
+        cf_types[i]->log_level = lvl;
+        break;
+      }
+    }
+    token = strtok_r(NULL, ", ", &tok_buf);
+  }
+  free(tmp);
+  return CURLE_OK;
+}
+
 CURLcode Curl_log_init(void)
 {
 #ifdef DEBUGBUILD
   /* WIP: we use the auto-init from an env var only in DEBUG builds for
-   * convenience.
-   * TODO: add a method in the API to set a log config string explicitly
-    * by the app, e.g. the curl tool */
-  const char *setting = getenv("CURL_DEBUG");
-  if(setting) {
-    char *token, *tok_buf, *tmp;
-    size_t i;
-
-    tmp = strdup(setting);
-    if(!tmp)
-      return CURLE_OUT_OF_MEMORY;
-
-    token = strtok_r(tmp, ", ", &tok_buf);
-    while(token) {
-      for(i = 0; cf_types[i]; ++i) {
-        if(strcasecompare(token, cf_types[i]->name)) {
-          cf_types[i]->log_level = CURL_LOG_LVL_INFO;
-          break;
-        }
-      }
-      token = strtok_r(NULL, ", ", &tok_buf);
-    }
-    free(tmp);
+   * convenience. */
+  const char *config = getenv("CURL_DEBUG");
+  if(config) {
+    return Curl_log_configure(config);
   }
-#else
-  (void)cf_types;
 #endif
   return CURLE_OK;
 }

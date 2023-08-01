@@ -32,6 +32,24 @@ struct Curl_cfilter;
  */
 CURLcode Curl_log_init(void);
 
+/**
+ * Configure log settings. May be called several times during global
+ * initialization. Later calls may not take effect.
+ *
+ * Configuration format supported:
+ * - comma-separated list of component names to enable logging on.
+ *   E.g. 'http/2,ssl'. Unkown names are ignored. Names are compared
+ *   case-insensitive.
+ * - component 'all' applies to all known log components
+ * - prefixing a component with '+' or '-' will en-/disable logging for
+ *   that component
+ * Example: 'all,-ssl' would enable logging for all components but the
+ * SSL filters.
+ *
+ * @param config configuration string
+ */
+CURLcode Curl_log_configure(const char *config);
+
 /* the function used to output verbose information */
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
                 char *ptr, size_t size);
