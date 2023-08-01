@@ -55,6 +55,7 @@ curl_free
 curl_global_init
 curl_global_init_mem
 curl_global_cleanup
+curl_global_trace
 curl_global_sslset
 curl_slist_append
 curl_slist_free_all

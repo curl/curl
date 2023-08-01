@@ -315,6 +315,21 @@ void curl_global_cleanup(void)
   global_init_unlock();
 }
 
+/**
+ * curl_global_log_config() globally initializes curl logging.
+ */
+CURLcode curl_global_log_config(const char *config)
+{
+  CURLcode result;
+  global_init_lock();
+
+  result = Curl_log_configure(config);
+
+  global_init_unlock();
+
+  return result;
+}
+
 /*
  * curl_global_sslset() globally initializes the SSL backend to use.
  */
