@@ -60,7 +60,8 @@ sub scanheader {
         if (/^(^CURL_EXTERN .*)\(/) {
             my $decl = $1;
             $decl =~ s/\r$//;
-            print "$decl\n";
+            $decl =~ /([a-z_]+)$/;
+            print "$1\n";
         }
         elsif (/^(^CURL_EXTERN .*)/) {
             # handle two-line declarations
@@ -73,7 +74,8 @@ sub scanheader {
                 my $decl = $1;
                 $decl =~ s/\r$//;
                 $first .= $decl;
-                print "$first\n";
+                $first =~ /([a-z_]+)$/;
+                print "$1\n";
             }
             $first = "";
         }
