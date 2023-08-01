@@ -1,0 +1,44 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: exports
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - '**/exports-check.yml'
+    - 'include/*.h'
+    - 'libcurl.def'
+  pull_request:
+    branches:
+    - master
+    paths:
+    - '**/exports-check.yml'
+    - 'include/*.h'
+    - 'libcurl.def'
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: check libcurl.def exports
+      run: |
+        {
+          echo 'EXPORTS'
+          {
+            # CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
+            cat ./include/curl/*.h | tr -d '\r' \
+              | tr '\n' '\t' | sed -E 's/ CURL_DEPRECATED\([0-9.]+, "[^\"]*"\)(\t| )/ /g' | tr '\t' '\n' \
+              | grep -a '^CURL_EXTERN ' | grep -a -F '(' \
+              | sed 's/CURL_EXTERN \([a-zA-Z_\* ]*\)[\* ]\([a-z_]*\)(\(.*\)$/\2/g'
+            # curl_easy_option_by_name(const char *name);
+            cat ./include/curl/*.h | tr -d '\r' \
+              | grep -a -E '^ *\*? *[a-z_]+ *\(.+\);$' \
+              | sed -E 's/^ *\*? *([a-z_]+) *\(.+$/\1/g'
+          } | grep -a -v '^$' | sort -u
+        } | diff -u ./libcurl.def -
