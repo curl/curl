@@ -1826,7 +1826,19 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t nread = -1;
   CURLcode result;
   struct cf_call_data save;
-  DEBUGASSERT(stream);
+
+  if(!stream) {
+    /* Abnormal call sequence: either this transfer has never opened a stream
+     * (unlikely) or the transfer has been done, cleaned up its resources, but
+     * a read() is called anyway. It is not clear what the calling sequence
+     * is for such a case. */
+    failf(data, "[%zd-%zd], http/2 recv on a transfer never opened "
+          "or already cleared", (ssize_t)data->id,
+          (ssize_t)cf->conn->connection_id);
+    *err = CURLE_HTTP2;
+    return -1;
+  }
+
   CF_DATA_SAVE(save, cf, data);
 
   nread = stream_recv(cf, data, buf, len, err);

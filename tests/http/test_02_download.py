@@ -350,6 +350,22 @@ class TestDownload:
         assert r.duration > timedelta(seconds=4), \
             f'rate limited transfer should take more than 4s, not {r.duration}'
 
+    # make extreme paralllel h2 upgrades, check invalid conn reuse
+    # before protocol switch has happened
+    def test_02_25_h2_upgrade_x(self, env: Env, httpd, repeat):
+        # not locally reproducable timeouts with certain SSL libs
+        # Since this test is about connection reuse handling, we skip
+        # it on these builds. Although we would certainly like to understand
+        # why this happens.
+        if env.curl_uses_lib('bearssl'):
+            pytest.skip('CI workflows timeout on bearssl build')
+        url = f'http://localhost:{env.http_port}/data-100k'
+        client = LocalClient(name='h2-upgrade-extreme', env=env, timeout=15)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[url])
+        assert r.exit_code == 0, f'{client.dump_logs()}'
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):
