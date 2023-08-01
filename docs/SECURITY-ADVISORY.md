@@ -1,6 +1,6 @@
 # Anatomy of a curl security advisory
 
-As described in the [Security Process](http://curl.local/dev/secprocess.html)
+As described in the [Security Process](https://curl.se/dev/secprocess.html)
 document, when a security vulnerability has been reported to the project and
 confirmed, we author an advisory document for for the issue. It should ideally
 be written in cooperation with the reporter to make sure all the angles and
