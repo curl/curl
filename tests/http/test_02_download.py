@@ -350,6 +350,18 @@ class TestDownload:
         assert r.duration > timedelta(seconds=4), \
             f'rate limited transfer should take more than 4s, not {r.duration}'
 
+    # make extreme paralllel h2 upgrades, check invalid conn reuse
+    # before protocol switch has happened
+    def test_02_25_h2_upgrade_x(self, env: Env, httpd, repeat):
+        url = f'http://localhost:{env.http_port}/data-100k'
+        client = LocalClient(name='h2-upgrade-extreme', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[url])
+        with open(f'{env.gen_dir}/test_02_27.stderr', 'w') as fd:
+            fd.write(r.stderr)
+        assert r.exit_code == 0, f'see {env.gen_dir}/test_02_27.stderr'
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):

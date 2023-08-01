@@ -305,6 +305,21 @@ class TestUpload:
         assert r.exit_code == 0, r.dump_logs()
         r.check_stats(1, 200)
 
+    # upload large data on a h1 to h2 upgrade
+    def test_07_35_h1_h2_upgrade_upload(self, env: Env, httpd, nghttpx, repeat):
+        fdata = os.path.join(env.gen_dir, 'data-100k')
+        curl = CurlClient(env=env)
+        url = f'http://{env.domain1}:{env.http_port}/curltest/echo?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', extra_args=[
+            '--http2'
+        ])
+        r.check_response(count=1, http_status=200)
+        # apache does not Upgrade on request with a body
+        assert r.stats[0]['http_version'] == '1.1', f'{r}'
+        indata = open(fdata).readlines()
+        respdata = open(curl.response_file(0)).readlines()
+        assert respdata == indata
+
     def check_download(self, count, srcfile, curl):
         for i in range(count):
             dfile = curl.download_file(i)
