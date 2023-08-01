@@ -77,6 +77,7 @@ buildconf
 Caddy
 calloc
 CAPA
+capath
 CCC
 CDN
 CentOS
@@ -187,6 +188,7 @@ EBCDIC
 ECC
 ECDHE
 ECH
+ECONNREFUSED
 eCOS
 EFnet
 EGD
@@ -259,6 +261,7 @@ ggcov
 Ghedini
 Gisle
 Glesys
+globbed
 globbing
 gmail
 GnuTLS
@@ -304,9 +307,9 @@ hsts
 HTC
 html
 http
+HTTPAUTH
 httpd
 HTTPD
-HTTPAUTH
 httpget
 HttpGet
 HTTPS
@@ -325,6 +328,7 @@ ifdef
 ifdefed
 Ifdefs
 ifdefs
+IIS
 ILE
 Illumos
 IMAP
@@ -335,6 +339,7 @@ impacket
 init
 initializer
 inlined
+interop
 interoperable
 interoperates
 IoT
@@ -364,6 +369,7 @@ keepalive
 Keil
 kerberos
 Keychain
+keychain
 KiB
 kickstart
 Kirei
@@ -500,6 +506,7 @@ NEC
 Necko
 NetBSD
 netrc
+netstat
 Netware
 NFS
 nghttp
@@ -558,6 +565,7 @@ permafailing
 PINGs
 pipelining
 PKCS
+pkcs
 PKGBUILD
 PKI
 pluggable
@@ -591,6 +599,7 @@ PTR
 ptr
 punycode
 PWD
+pwd
 py
 pycurl
 pytest
@@ -608,6 +617,7 @@ RBS
 ReactOS
 README
 realloc
+Realtime
 rebase
 RECV
 recv
@@ -781,6 +791,7 @@ toolset
 toplevel
 TPF
 TrackMemory
+transcode
 Tru
 Tse
 Tsujikawa
@@ -798,9 +809,12 @@ UIDL
 Ultrix
 Unary
 unassign
+UNC
 uncompress
+unencoded
 unencrypted
 unescape
+Unglobbed
 UNICOS
 unix
 UnixSockets
@@ -826,6 +840,7 @@ USD
 userdata
 Userinfo
 userinfo
+USERPROFILE
 UTF
 UX
 valgrind
@@ -849,6 +864,7 @@ watchOS
 WAV
 WB
 web page
+WebDAV
 WebOS
 WebSocket
 WEBSOCKET
@@ -872,6 +888,7 @@ WS
 WSS
 www
 Xbox
+XDG
 xdigit
 Xilinx
 XP
