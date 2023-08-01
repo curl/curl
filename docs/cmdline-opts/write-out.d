@@ -38,7 +38,7 @@ created, curl will leave the output to the one used prior to the *%output{}*
 instruction. Use *%output{>>name}* to append data to an existing file. Added in
 curl 8.3.0.
 
-.B NOTE:
+**NOTE:**
 In Windows the %-symbol is a special symbol used to expand environment
 variables. In batch files all occurrences of % must be doubled when using this
 option to properly escape. If this option is used at the command prompt then
@@ -47,30 +47,30 @@ the % cannot be escaped and unintended expansion is possible.
 The variables available are:
 .RS
 .TP 15
-.B certs
+**certs**
 Output the certificate chain with details. Supported only by the OpenSSL,
 GnuTLS, Schannel, GSKit and Secure Transport backends. (Added in 7.88.0)
 .TP
-.B content_type
+**content_type**
 The Content-Type of the requested document, if there was any.
 .TP
-.B errormsg
+**errormsg**
 The error message. (Added in 7.75.0)
 .TP
-.B exitcode
-The numerical exitcode of the transfer. (Added in 7.75.0)
+**exitcode**
+The numerical exit code of the transfer. (Added in 7.75.0)
 .TP
-.B filename_effective
+**filename_effective**
 The ultimate filename that curl writes out to. This is only meaningful if curl
 is told to write to a file with the --remote-name or --output
 option. It's most useful in combination with the --remote-header-name
 option. (Added in 7.26.0)
 .TP
-.B ftp_entry_path
+**ftp_entry_path**
 The initial path curl ended up in when logging on to the remote FTP
 server. (Added in 7.15.4)
 .TP
-.B header_json
+**header_json**
 A JSON object with all HTTP response headers from the recent transfer. Values
 are provided as arrays, since in the case of multiple headers there can be
 multiple values. (Added in 7.83.0)
@@ -79,213 +79,213 @@ The header names provided in lowercase, listed in order of appearance over the
 wire. Except for duplicated headers. They are grouped on the first occurrence
 of that header, each value is presented in the JSON array.
 .TP
-.B http_code
+**http_code**
 The numerical response code that was found in the last retrieved HTTP(S) or
 FTP(s) transfer.
 .TP
-.B http_connect
+**http_connect**
 The numerical code that was found in the last response (from a proxy) to a
 curl CONNECT request. (Added in 7.12.4)
 .TP
-.B http_version
+**http_version**
 The http version that was effectively used. (Added in 7.50.0)
 .TP
-.B json
+**json**
 A JSON object with all available keys.
 .TP
-.B local_ip
+**local_ip**
 The IP address of the local end of the most recently done connection - can be
 either IPv4 or IPv6. (Added in 7.29.0)
 .TP
-.B local_port
+**local_port**
 The local port number of the most recently done connection. (Added in 7.29.0)
 .TP
-.B method
+**method**
 The http method used in the most recent HTTP request. (Added in 7.72.0)
 .TP
-.B num_certs
+**num_certs**
 Number of server certificates received in the TLS handshake. Supported only by
 the OpenSSL, GnuTLS, Schannel, GSKit and Secure Transport backends. (Added
 in 7.88.0)
 .TP
-.B num_connects
+**num_connects**
 Number of new connects made in the recent transfer. (Added in 7.12.3)
 .TP
-.B num_headers
+**num_headers**
 The number of response headers in the most recent request (restarted at each
 redirect). Note that the status line IS NOT a header. (Added in 7.73.0)
 .TP
-.B num_redirects
+**num_redirects**
 Number of redirects that were followed in the request. (Added in 7.12.3)
 .TP
-.B onerror
+**onerror**
 The rest of the output is only shown if the transfer returned a non-zero error.
 (Added in 7.75.0)
 .TP
-.B proxy_ssl_verify_result
+**proxy_ssl_verify_result**
 The result of the HTTPS proxy's SSL peer certificate verification that was
 requested. 0 means the verification was successful. (Added in 7.52.0)
 .TP
-.B redirect_url
+**redirect_url**
 When an HTTP request was made without --location to follow redirects (or when
 --max-redirs is met), this variable will show the actual URL a redirect
 *would* have gone to. (Added in 7.18.2)
 .TP
-.B referer
+**referer**
 The Referer: header, if there was any. (Added in 7.76.0)
 .TP
-.B remote_ip
+**remote_ip**
 The remote IP address of the most recently done connection - can be either
 IPv4 or IPv6. (Added in 7.29.0)
 .TP
-.B remote_port
+**remote_port**
 The remote port number of the most recently done connection. (Added in 7.29.0)
 .TP
-.B response_code
+**response_code**
 The numerical response code that was found in the last transfer (formerly
 known as "http_code"). (Added in 7.18.2)
 .TP
-.B scheme
+**scheme**
 The URL scheme (sometimes called protocol) that was effectively used. (Added in 7.52.0)
 .TP
-.B size_download
+**size_download**
 The total amount of bytes that were downloaded. This is the size of the
 body/data that was transferred, excluding headers.
 .TP
-.B size_header
+**size_header**
 The total amount of bytes of the downloaded headers.
 .TP
-.B size_request
+**size_request**
 The total amount of bytes that were sent in the HTTP request.
 .TP
-.B size_upload
+**size_upload**
 The total amount of bytes that were uploaded. This is the size of the
 body/data that was transferred, excluding headers.
 .TP
-.B speed_download
+**speed_download**
 The average download speed that curl measured for the complete download. Bytes
 per second.
 .TP
-.B speed_upload
+**speed_upload**
 The average upload speed that curl measured for the complete upload. Bytes per
 second.
 .TP
-.B ssl_verify_result
+**ssl_verify_result**
 The result of the SSL peer certificate verification that was requested. 0
 means the verification was successful. (Added in 7.19.0)
 .TP
-.B stderr
+**stderr**
 From this point on, the --write-out output will be written to standard
 error. (Added in 7.63.0)
 .TP
-.B stdout
+**stdout**
 From this point on, the --write-out output will be written to standard output.
 This is the default, but can be used to switch back after switching to stderr.
 (Added in 7.63.0)
 .TP
-.B time_appconnect
+**time_appconnect**
 The time, in seconds, it took from the start until the SSL/SSH/etc
 connect/handshake to the remote host was completed. (Added in 7.19.0)
 .TP
-.B time_connect
+**time_connect**
 The time, in seconds, it took from the start until the TCP connect to the
 remote host (or proxy) was completed.
 .TP
-.B time_namelookup
+**time_namelookup**
 The time, in seconds, it took from the start until the name resolving was
 completed.
 .TP
-.B time_pretransfer
+**time_pretransfer**
 The time, in seconds, it took from the start until the file transfer was just
 about to begin. This includes all pre-transfer commands and negotiations that
 are specific to the particular protocol(s) involved.
 .TP
-.B time_redirect
+**time_redirect**
 The time, in seconds, it took for all redirection steps including name lookup,
 connect, pretransfer and transfer before the final transaction was
 started. time_redirect shows the complete execution time for multiple
 redirections. (Added in 7.12.3)
 .TP
-.B time_starttransfer
+**time_starttransfer**
 The time, in seconds, it took from the start until the first byte was just
 about to be transferred. This includes time_pretransfer and also the time the
 server needed to calculate the result.
 .TP
-.B time_total
+**time_total**
 The total time, in seconds, that the full operation lasted.
 .TP
-.B url
+**url**
 The URL that was fetched. (Added in 7.75.0)
 .TP
-.B url.scheme
+**url.scheme**
 The scheme part of the URL that was fetched. (Added in 8.1.0)
 .TP
-.B url.user
+**url.user**
 The user part of the URL that was fetched. (Added in 8.1.0)
 .TP
-.B url.password
+**url.password**
 The password part of the URL that was fetched. (Added in 8.1.0)
 .TP
-.B url.options
+**url.options**
 The options part of the URL that was fetched. (Added in 8.1.0)
 .TP
-.B url.host
+**url.host**
 The host part of the URL that was fetched. (Added in 8.1.0)
 .TP
-.B url.port
+**url.port**
 The port number of the URL that was fetched. If no port number was specified,
 but the URL scheme is known, that scheme's default port number is
 shown. (Added in 8.1.0)
 .TP
-.B url.path
+**url.path**
 The path part of the URL that was fetched. (Added in 8.1.0)
 .TP
-.B url.query
+**url.query**
 The query part of the URL that was fetched. (Added in 8.1.0)
 .TP
-.B url.fragment
+**url.fragment**
 The fragment part of the URL that was fetched. (Added in 8.1.0)
 .TP
-.B url.zoneid
-The zoneid part of the URL that was fetched. (Added in 8.1.0)
+**url.zoneid**
+The zone id part of the URL that was fetched. (Added in 8.1.0)
 .TP
-.B urle.scheme
+**urle.scheme**
 The scheme part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
-.B urle.user
+**urle.user**
 The user part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
-.B urle.password
+**urle.password**
 The password part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
-.B urle.options
+**urle.options**
 The options part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
-.B urle.host
+**urle.host**
 The host part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
-.B urle.port
+**urle.port**
 The port number of the effective (last) URL that was fetched. If no port
 number was specified, but the URL scheme is known, that scheme's default port
 number is shown. (Added in 8.1.0)
 .TP
-.B urle.path
+**urle.path**
 The path part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
-.B urle.query
+**urle.query**
 The query part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
-.B urle.fragment
+**urle.fragment**
 The fragment part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
-.B urle.zoneid
-The zoneid part of the effective (last) URL that was fetched. (Added in 8.1.0)
+**urle.zoneid**
+The zone id part of the effective (last) URL that was fetched. (Added in 8.1.0)
 .TP
-.B urlnum
-The URL index number of this transfer, 0-indexed. De-globbed URLs share the
+**urlnum**
+The URL index number of this transfer, 0-indexed. Unglobbed URLs share the
 same index number as the origin globbed URL. (Added in 7.75.0)
 .TP
-.B url_effective
+**url_effective**
 The URL that was fetched last. This is most meaningful if you have told curl
 to follow location: headers.
 .RE
