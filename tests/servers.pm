@@ -1845,7 +1845,7 @@ sub runsshserver {
         stopserver($server, "$sshpid $pid2");
         $doesntrun{$pidfile} = 1;
         $sshpid = $pid2 = 0;
-        logmsg "RUN: failed to verifty the $srvrname server on $port\n";
+        logmsg "RUN: failed to verify the $srvrname server on $port\n";
         return (5, 0, 0, 0);
     }
     # we're happy, no need to loop anymore!

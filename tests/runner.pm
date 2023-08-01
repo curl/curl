@@ -1363,7 +1363,7 @@ sub ipcrecv {
     # Decode the function name and arguments
     my $argsarrayref = thaw $buf;
 
-    # The name of the function to call is the frist argument
+    # The name of the function to call is the first argument
     my $funcname = shift @$argsarrayref;
 
     # print "ipcrecv $funcname\n";
