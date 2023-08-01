@@ -39,7 +39,6 @@ problems may have been fixed or changed somewhat since this was written.
  5.1 OS400 port requires deprecated IBM library
  5.2 curl-config --libs contains private details
  5.3 building for old macOS fails with gcc
- 5.4 build for iOS simulator on macOS 13.2 with Xcode 14
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
  5.6 cygwin: make install installs curl-config.1 twice
  5.9 Utilize Requires.private directives in libcurl.pc
@@ -237,10 +236,6 @@ problems may have been fixed or changed somewhat since this was written.
  command using clang in those cases.
 
  See https://github.com/curl/curl/issues/11441
-
-5.4 build for iOS simulator on macOS 13.2 with Xcode 14
-
- https://github.com/curl/curl/issues/11215
 
 5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
 
