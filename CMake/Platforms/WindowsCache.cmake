@@ -24,6 +24,11 @@
 if(NOT UNIX)
   if(WIN32)
 
+    set(HAVE_WINDOWS_H 1)
+    set(HAVE_WS2TCPIP_H 1)
+    set(HAVE_WINSOCK2_H 1)
+    set(HAVE_WINCRYPT_H 1)
+
     if(MINGW)
       set(HAVE_SNPRINTF 1)
       set(HAVE_UNISTD_H 1)
