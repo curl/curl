@@ -34,18 +34,12 @@ CURLcode curl_global_log_config(const char *config);
 This function configures the logging behaviour, allowing to make some
 parts of curl more verbose or silent than others.
 
-This function may be called during the initialisation phase of a program. It
+This function may be called during the initialization phase of a program. It
 does not have to be. It can be called several times even, possibly overwriting
 settings of previous calls.
 
 Calling this function after transfers have been started is undefined. On
 some platforms/architectures it might take effect, on others not.
-
-The config stringflags option is a bit pattern that tells libcurl exactly what features to
-init, as described below. Set the desired bits by ORing the values together.
-In normal operation, you must specify CURL_GLOBAL_ALL. Do not use any other
-value unless you are familiar with it and mean to control internal operations
-of libcurl.
 
 This function is thread-safe since libcurl 8.3.0 if
 \fIcurl_version_info(3)\fP has the CURL_VERSION_THREADSAFE feature bit set
