@@ -83,11 +83,11 @@ Accept: */*
 ^Host:.*
 </strip>
 <file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
-* Connection #0 to host server1.example.com left intact
-* Connection #1 to host server2.example.com left intact
-* Connection #2 to host server3.example.com left intact
-* Closing connection
-* Connection #3 to host server4.example.com left intact
+[0-0] * Connection #0 to host server1.example.com left intact
+[1-1] * Connection #1 to host server2.example.com left intact
+[2-2] * Connection #2 to host server3.example.com left intact
+[3-0] * Closing connection
+[3-3] * Connection #3 to host server4.example.com left intact
 </file>
 <stripfile>
 $_ = '' if (($_ !~ /left intact/) && ($_ !~ /Closing connection/))
