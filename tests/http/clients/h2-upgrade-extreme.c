@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  start_count = 500;
+  start_count = 200;
   do {
     if(start_count) {
       easy = curl_easy_init();

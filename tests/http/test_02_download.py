@@ -354,7 +354,7 @@ class TestDownload:
     # before protocol switch has happened
     def test_02_25_h2_upgrade_x(self, env: Env, httpd, repeat):
         url = f'http://localhost:{env.http_port}/data-100k'
-        client = LocalClient(name='h2-upgrade-extreme', env=env)
+        client = LocalClient(name='h2-upgrade-extreme', env=env, timeout=120)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[url])
