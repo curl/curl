@@ -60,19 +60,20 @@ the case insensitive name of the particular backend to use when curl is
 invoked. Setting a name that is not a built-in alternative will make curl
 stay with the default.
 
-SSL backend names (case-insensitive): bearssl, gnutls, gskit, mbedtls,
-nss, openssl, rustls, schannel, secure-transport, wolfssl
+SSL backend names (case-insensitive): **bearssl**, **gnutls**, **gskit**,
+**mbedtls**, **openssl**, **rustls**, **schannel**, **secure-transport**,
+**wolfssl**
 .IP "HOME <dir>"
 If set, this is used to find the home directory when that is needed. Like when
 looking for the default .curlrc. *CURL_HOME* and *XDG_CONFIG_HOME*
 have preference.
 .IP "QLOGDIR <directory name>"
 If curl was built with HTTP/3 support, setting this environment variable to a
-local directory will make curl produce qlogs in that directory, using file
+local directory will make curl produce **qlogs** in that directory, using file
 names named after the destination connection id (in hex). Do note that these
 files can become rather large. Works with both QUIC backends.
 .IP SHELL
-Used on VMS when trying to detect if using a DCL or a "unix" shell.
+Used on VMS when trying to detect if using a **DCL** or a **unix** shell.
 .IP "SSL_CERT_DIR <dir>"
 If set, will be used as the --capath value.
 .IP "SSL_CERT_FILE <path>"
@@ -86,7 +87,7 @@ BoringSSL, GnuTLS and wolfSSL.
 .IP "USERPROFILE <dir>"
 On Windows, this variable is used when trying to find the home directory. If
 the other, primary, variable are all unset. If set, curl will use the path
-"$USERPROFILE\\Application Data".
+**"$USERPROFILE\\Application Data"**.
 .IP "XDG_CONFIG_HOME <dir>"
 If *CURL_HOME* is not set, this variable is checked when looking for a
 default .curlrc file.
@@ -243,7 +244,7 @@ Requested FTP SSL level failed.
 .IP 65
 Sending the data requires a rewind that failed.
 .IP 66
-Failed to initialise SSL Engine.
+Failed to initialize SSL Engine.
 .IP 67
 The user name, password, or similar was not accepted and curl failed to log in.
 .IP 68

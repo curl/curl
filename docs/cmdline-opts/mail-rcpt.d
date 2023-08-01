@@ -13,7 +13,7 @@ Multi: append
 Specify a single email address, user name or mailing list name. Repeat this
 option several times to send to multiple recipients.
 
-When performing an address verification (VRFY command), the recipient should be
+When performing an address verification (*VRFY* command), the recipient should be
 specified as the user name or user name and domain (as per Section 3.5 of
 RFC 5321). (Added in 7.34.0)
 

@@ -112,7 +112,7 @@ You an access and expand environment variables by first importing them. You
 can select to either require the environment variable to be set or you can
 provide a default value in case it is not already set. Plain --variable %name
 imports the variable called 'name' but exits with an error if that environment
-variable is not alreadty set. To provide a default value if it is not set, use
+variable is not already set. To provide a default value if it is not set, use
 --variable %name=content or --variable %name@content.
 
 Example. Get the USER environment variable into the URL, fail if USER is not
@@ -123,11 +123,11 @@ set:
 
 When expanding variables, curl supports a set of functions that can make the
 variable contents more convenient to use. It can trim leading and trailing
-white space with "trim", it can output the contents as a JSON quoted string
-with "json" and it can URL encode the string with "urlencode". You apply
-function to a variable expansion, add them colon separated to the right side
-of the variable. Variable content holding null bytes that are not encoded when
-expanded, will cause error.
+white space with *trim*, it can output the contents as a JSON quoted string
+with *json*, URL encode the string with *url* or base64 encode it with
+*b64*. You apply function to a variable expansion, add them colon separated to
+the right side of the variable. Variable content holding null bytes that are
+not encoded when expanded, will cause error.
 
 Example: get the contents of a file called $HOME/.secret into a variable
 called "fix". Make sure that the content is trimmed and percent-encoded sent
@@ -179,7 +179,7 @@ not supported (yet).
 Downloading from a pop3 server means getting a mail. With or without using
 TLS.
 .IP RTMP(S)
-The Realtime Messaging Protocol is primarily used to server streaming media
+The **Realtime Messaging Protocol** is primarily used to serve streaming media
 and curl can download it.
 .IP RTSP
 curl supports RTSP 1.0 downloads.
@@ -240,12 +240,12 @@ between it and its value.
 
 Short version options that do not need any additional values can be used
 immediately next to each other, like for example you can specify all the
-options -O, -L and -v at once as -OLv.
+options *-O*, *-L* and *-v* at once as *-OLv*.
 
 In general, all boolean options are enabled with --**option** and yet again
 disabled with --**no-**option. That is, you use the same option name but
 prefix it with "no-". However, in this list we mostly only list and show the
---option version of them.
+*--option* version of them.
 
 When --next is used, it resets the parser state and you start again with a
 clean option state, except for the options that are "global". Global options

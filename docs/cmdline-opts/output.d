@@ -44,6 +44,6 @@ To suppress response bodies, you can redirect output to /dev/null:
 
   curl example.com -o /dev/null
 
-Or for Windows use nul:
+Or for Windows use **nul**:
 
   curl example.com -o nul
