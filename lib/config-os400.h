@@ -143,9 +143,6 @@
 /* Define if you have the <pwd.h> header file. */
 #define HAVE_PWD_H
 
-/* Define if you have the `RAND_egd' function. */
-#undef HAVE_RAND_EGD
-
 /* Define if you have the `select' function. */
 #define HAVE_SELECT
 

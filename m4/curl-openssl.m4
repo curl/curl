@@ -259,8 +259,6 @@ if test "x$OPT_OPENSSL" != xno; then
   if test X"$OPENSSL_ENABLED" = X"1"; then
     dnl These can only exist if OpenSSL exists
 
-    AC_CHECK_FUNCS( RAND_egd )
-
     AC_MSG_CHECKING([for BoringSSL])
     AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[

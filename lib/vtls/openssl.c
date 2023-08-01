@@ -996,20 +996,6 @@ static CURLcode ossl_seed(struct Curl_easy *data)
     return CURLE_OK;
 #endif
 
-#if defined(HAVE_RAND_EGD) && defined(EGD_SOCKET)
-  /* available in OpenSSL 0.9.5 and later */
-  /* EGD_SOCKET is set at configure time or not at all */
-  {
-    /* If there's an option and a define, the option overrides the
-       define */
-    int ret = RAND_egd(EGD_SOCKET);
-    if(-1 != ret) {
-      if(rand_enough())
-        return CURLE_OK;
-    }
-  }
-#endif
-
   /* fallback to a custom seeding of the PRNG using a hash based on a current
      time */
   do {
