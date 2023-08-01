@@ -1120,8 +1120,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
         data->req.keepon &= ~KEEP_SEND_HOLD;
         if(stream) {
           drain_stream(cf, data, stream);
-          DEBUGF(LOG_CF(data, cf, "[h2sid=%d] un-holding after SETTINGS",
-                        stream_id));
+          CURL_LOG_CF(data, cf, "[h2sid=%d] un-holding after SETTINGS",
+                      stream_id);
         }
       }
       break;

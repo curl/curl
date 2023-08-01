@@ -1075,7 +1075,6 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
 
   CURL_LOG_CF(data, cf, "connect");
   result = cf->next->cft->do_connect(cf->next, data, blocking, done);
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
