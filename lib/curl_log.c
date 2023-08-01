@@ -70,7 +70,10 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
       case CURLINFO_TEXT:
       case CURLINFO_HEADER_OUT:
       case CURLINFO_HEADER_IN:
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && 0
+/* This is useful in debugging parallel transfers using libcurl, but we
+ * cannot enable it by default since we check log output in test cases
+ * that are build with and without DEBUG. */
 #define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
 #define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
                                    CURL_FORMAT_CURL_OFF_T "] "
