@@ -48,6 +48,7 @@ build:
 - all: ['plan9/**']
 - all: ['projects/**']
 - all: ['winbuild/**']
+- all: ['libcurl.def']
 
 CI:
 - any: ['.azure-pipelines.yml']
@@ -300,3 +301,4 @@ Windows:
 - all: ['projects/**']
 - all: ['src/tool_doswin.c']
 - all: ['winbuild/**']
+- all: ['libcurl.def']
