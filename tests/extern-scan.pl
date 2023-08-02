@@ -29,7 +29,12 @@ use strict;
 use warnings;
 
 # we may get the dir root pointed out
-my $root=$ARGV[0] || ".";
+my $root=$ARGV[0] || "."; shift;
+
+my $header=shift;
+if($header) {
+    print "$header\n";
+}
 
 my @incs = (
     "$root/include/curl/curl.h",

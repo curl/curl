@@ -1195,6 +1195,14 @@ sub singletest_check {
     my @stripfile = getpart("verify", "stripfile");
 
     my @validstdout = getpart("verify", "stdout");
+    if (!@validstdout) {
+        @validstdout = getpart("verify", "stdoutwithfile");
+        if (@validstdout) {
+            open(my $tmp, "<", "$srcdir/@validstdout") || die "Cannot open file $srcdir/@validstdout";
+            @validstdout = <$tmp>;
+            close($tmp);
+        }
+    }
     if (@validstdout) {
         # verify redirected stdout
         my @actual = loadarray(stdoutfilename($logdir, $testnum));
