@@ -61,6 +61,10 @@ class LocalClient:
     def run_dir(self) -> str:
         return self._run_dir
 
+    @property
+    def stderr_file(self) -> str:
+        return self._stderrfile
+
     def exists(self) -> bool:
         return os.path.exists(self.path)
 
@@ -103,3 +107,12 @@ class LocalClient:
         return ExecResult(args=myargs, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
                           duration=datetime.now() - start)
+
+    def dump_logs(self):
+        lines = []
+        lines.append('>>--stdout ----------------------------------------------\n')
+        lines.extend(open(self._stdoutfile).readlines())
+        lines.append('>>--stderr ----------------------------------------------\n')
+        lines.extend(open(self._stderrfile).readlines())
+        lines.append('<<-------------------------------------------------------\n')
+        return ''.join(lines)

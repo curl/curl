@@ -35,6 +35,141 @@
 #include <curl/mprintf.h>
 
 
+/*
+ * Return the formatted HH:MM:SS for the tv_sec given.
+ * NOT thread safe.
+ */
+static const char *hms_for_sec(time_t tv_sec)
+{
+  static time_t cached_tv_sec;
+  static char hms_buf[12];
+  static time_t epoch_offset;
+  static int known_epoch;
+
+  if(tv_sec != cached_tv_sec) {
+    struct tm *now;
+    time_t secs;
+    /* recalculate */
+    if(!known_epoch) {
+      epoch_offset = time(NULL) - tv_sec;
+      known_epoch = 1;
+    }
+    secs = epoch_offset + tv_sec;
+    /* !checksrc! disable BANNEDFUNC 1 */
+    now = localtime(&secs);  /* not thread safe but we don't care */
+    curl_msnprintf(hms_buf, sizeof(hms_buf), "%02d:%02d:%02d",
+                   now->tm_hour, now->tm_min, now->tm_sec);
+    cached_tv_sec = tv_sec;
+  }
+  return hms_buf;
+}
+
+static void log_line_start(FILE *log, const char *timebuf,
+                           const char *idsbuf, curl_infotype type)
+{
+  /*
+   * This is the trace look that is similar to what libcurl makes on its
+   * own.
+   */
+  static const char * const s_infotype[] = {
+    "* ", "< ", "> ", "{ ", "} ", "{ ", "} "
+  };
+  if((timebuf && *timebuf) || (idsbuf && *idsbuf))
+    fprintf(log, "%s%s%s", timebuf, idsbuf, s_infotype[type]);
+  else
+    fputs(s_infotype[type], log);
+}
+
+#define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
+#define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
+                                   CURL_FORMAT_CURL_OFF_T "] "
+/*
+** callback for CURLOPT_DEBUGFUNCTION
+*/
+static int debug_cb(CURL *handle, curl_infotype type,
+                    char *data, size_t size,
+                    void *userdata)
+{
+  FILE *output = stderr;
+  const char *text;
+  struct timeval tv;
+  char timebuf[20];
+  static int newl = 0;
+  static int traced_data = 0;
+  char idsbuf[60];
+  curl_off_t xfer_id, conn_id;
+
+  (void)handle; /* not used */
+  (void)userdata;
+
+  gettimeofday(&tv, NULL);
+  curl_msnprintf(timebuf, sizeof(timebuf), "%s.%06ld ",
+                 hms_for_sec(tv.tv_sec), (long)tv.tv_usec);
+
+  if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
+    if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
+        conn_id >= 0) {
+      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
+                     xfer_id, conn_id);
+    }
+    else {
+      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
+    }
+  }
+  else
+    idsbuf[0] = 0;
+
+  switch(type) {
+  case CURLINFO_HEADER_OUT:
+    if(size > 0) {
+      size_t st = 0;
+      size_t i;
+      for(i = 0; i < size - 1; i++) {
+        if(data[i] == '\n') { /* LF */
+          if(!newl) {
+            log_line_start(output, timebuf, idsbuf, type);
+          }
+          (void)fwrite(data + st, i - st + 1, 1, output);
+          st = i + 1;
+          newl = 0;
+        }
+      }
+      if(!newl)
+        log_line_start(output, timebuf, idsbuf, type);
+      (void)fwrite(data + st, i - st + 1, 1, output);
+    }
+    newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
+    traced_data = 0;
+    break;
+  case CURLINFO_TEXT:
+  case CURLINFO_HEADER_IN:
+    if(!newl)
+      log_line_start(output, timebuf, idsbuf, type);
+    (void)fwrite(data, size, 1, output);
+    newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
+    traced_data = 0;
+    break;
+  case CURLINFO_DATA_OUT:
+  case CURLINFO_DATA_IN:
+  case CURLINFO_SSL_DATA_IN:
+  case CURLINFO_SSL_DATA_OUT:
+    if(!traced_data) {
+      if(!newl)
+        log_line_start(output, timebuf, idsbuf, type);
+      fprintf(output, "[%zu bytes data]\n", size);
+      newl = 0;
+      traced_data = 1;
+    }
+    break;
+  default: /* nada */
+    newl = 0;
+    traced_data = 1;
+    break;
+  }
+
+  return 0;
+}
+
 static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *opaque)
 {
   (void)ptr;
@@ -74,6 +209,7 @@ int main(int argc, char *argv[])
         exit(1);
       }
       curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+      curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, debug_cb);
       curl_easy_setopt(easy, CURLOPT_URL, url);
       curl_easy_setopt(easy, CURLOPT_NOSIGNAL, 1L);
       curl_easy_setopt(easy, CURLOPT_AUTOREFERER, 1L);
@@ -101,7 +237,15 @@ int main(int argc, char *argv[])
              curl_multi_strerror(mc));
       exit(1);
     }
-    fprintf(stderr, "running_handles = %d\n", running_handles);
+
+    if(running_handles) {
+      mc = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
+      if(mc != CURLM_OK) {
+        fprintf(stderr, "curl_multi_poll: %s\n",
+               curl_multi_strerror(mc));
+        exit(1);
+      }
+    }
 
     /* Check for finished handles and remove. */
     while((msg = curl_multi_info_read(multi, &msgs_in_queue))) {
@@ -110,7 +254,6 @@ int main(int argc, char *argv[])
         curl_off_t xfer_id;
         curl_easy_getinfo(msg->easy_handle, CURLINFO_XFER_ID, &xfer_id);
         curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &status);
-        --running_handles;
         if(msg->data.result == CURLE_SEND_ERROR ||
             msg->data.result == CURLE_RECV_ERROR) {
           /* We get these if the server had a GOAWAY in transit on
@@ -128,20 +271,16 @@ int main(int argc, char *argv[])
         }
         curl_multi_remove_handle(multi, msg->easy_handle);
         curl_easy_cleanup(msg->easy_handle);
-        fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T" retiring\n",
-                xfer_id);
+        fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T" retiring "
+                "(%d now running)\n", xfer_id, running_handles);
       }
     }
 
-    if(running_handles) {
-      mc = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
-      if(mc != CURLM_OK) {
-        fprintf(stderr, "curl_multi_poll: %s\n",
-               curl_multi_strerror(mc));
-        exit(1);
-      }
-    }
+    fprintf(stderr, "running_handles=%d, yet_to_start=%d\n",
+            running_handles, start_count);
+
   } while(running_handles > 0 || start_count);
 
+  fprintf(stderr, "exiting\n");
   exit(EXIT_SUCCESS);
 }
