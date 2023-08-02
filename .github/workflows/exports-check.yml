@@ -28,7 +28,4 @@ jobs:
     - uses: actions/checkout@v3
     - name: check libcurl.def exports
       run: |
-        {
-          echo 'EXPORTS'
-          ./tests/extern-scan.pl | sort
-        } | diff -u ./libcurl.def -
+        ./tests/extern-scan.pl . EXPORTS | diff -u ./libcurl.def -
