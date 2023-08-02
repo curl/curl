@@ -1195,14 +1195,16 @@ sub singletest_check {
     my @stripfile = getpart("verify", "stripfile");
 
     my @validstdout = getpart("verify", "stdout");
-    if (!@validstdout) {
-        @validstdout = getpart("verify", "stdoutwithfile");
-        if (@validstdout) {
-            open(my $tmp, "<", "$srcdir/@validstdout") || die "Cannot open file $srcdir/@validstdout";
-            @validstdout = <$tmp>;
-            close($tmp);
-        }
+    # get all attributes
+    my %hash = getpartattr("verify", "stdout");
+
+    my $loadfile=$hash{'loadfile'};
+    if ($loadfile) {
+        open(my $tmp, "<", "$loadfile") || die "Cannot open file $loadfile";
+        @validstdout = <$tmp>;
+        close($tmp);
     }
+
     if (@validstdout) {
         # verify redirected stdout
         my @actual = loadarray(stdoutfilename($logdir, $testnum));
@@ -1220,9 +1222,6 @@ sub singletest_check {
             # length) because of replacements
             @actual = @newgen;
         }
-
-        # get all attributes
-        my %hash = getpartattr("verify", "stdout");
 
         # get the mode attribute
         my $filemode=$hash{'mode'};

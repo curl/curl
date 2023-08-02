@@ -27,9 +27,8 @@ Verify CURL_EXTERN order
 </client>
 
 <verify>
-<stdoutwithfile>
-../libcurl.def
-</stdoutwithfile>
+<stdout loadfile="%SRCDIR/../libcurl.def" mode="text">
+</stdout>
 </verify>
 
 </testcase>
