@@ -43,7 +43,7 @@
 #include "bufq.h"
 #include "dynbuf.h"
 #include "cfilters.h"
-#include "curl_log.h"
+#include "curl_trc.h"
 #include "curl_msh3.h"
 #include "curl_ngtcp2.h"
 #include "curl_quiche.h"
@@ -254,7 +254,7 @@ CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     result = vquic_send_packets(cf, data, qctx, buf, blen, gsolen, &sent);
-    CURL_LOG_CF(data, cf, "vquic_send(len=%zu, gso=%zu) -> %d, sent=%zu",
+    CURL_TRC_CF(data, cf, "vquic_send(len=%zu, gso=%zu) -> %d, sent=%zu",
                 blen, gsolen, result, sent);
     if(result) {
       if(result == CURLE_AGAIN) {
@@ -286,7 +286,7 @@ CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
   qctx->split_len = Curl_bufq_len(&qctx->sendbuf) - tail_len;
   qctx->split_gsolen = gsolen;
   qctx->gsolen = tail_gsolen;
-  CURL_LOG_CF(data, cf, "vquic_send_tail_split: [%zu gso=%zu][%zu gso=%zu]",
+  CURL_TRC_CF(data, cf, "vquic_send_tail_split: [%zu gso=%zu][%zu gso=%zu]",
               qctx->split_len, qctx->split_gsolen,
               tail_len, qctx->gsolen);
   return vquic_flush(cf, data, qctx);
@@ -328,7 +328,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       ;
     if(mcount == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
-        CURL_LOG_CF(data, cf, "ingress, recvmmsg -> EAGAIN");
+        CURL_TRC_CF(data, cf, "ingress, recvmmsg -> EAGAIN");
         goto out;
       }
       if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
@@ -347,7 +347,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       goto out;
     }
 
-    CURL_LOG_CF(data, cf, "recvmmsg() -> %d packets", mcount);
+    CURL_TRC_CF(data, cf, "recvmmsg() -> %d packets", mcount);
     pkts += mcount;
     for(i = 0; i < mcount; ++i) {
       total_nread += mmsg[i].msg_len;
@@ -360,7 +360,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_LOG_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
+  CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
               pkts, total_nread, result);
   return result;
 }
@@ -423,7 +423,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_LOG_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
+  CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
               pkts, total_nread, result);
   return result;
 }
@@ -452,7 +452,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
       ;
     if(nread == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
-        CURL_LOG_CF(data, cf, "ingress, recvfrom -> EAGAIN");
+        CURL_TRC_CF(data, cf, "ingress, recvfrom -> EAGAIN");
         goto out;
       }
       if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
@@ -480,7 +480,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_LOG_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
+  CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
               pkts, total_nread, result);
   return result;
 }

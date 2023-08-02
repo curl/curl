@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#include "curl_log.h"
+#include "curl_trc.h"
 
 
 #define CLIENTWRITE_BODY    (1<<0)

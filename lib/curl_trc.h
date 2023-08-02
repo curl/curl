@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_LOG_H
-#define HEADER_CURL_LOG_H
+#ifndef HEADER_CURL_TRC_H
+#define HEADER_CURL_TRC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -30,10 +30,10 @@ struct Curl_cfilter;
 /**
  * Init logging, return != 0 on failure.
  */
-CURLcode Curl_log_init(void);
+CURLcode Curl_trc_init(void);
 
 /**
- * Configure log settings. May be called several times during global
+ * Configure tracing. May be called several times during global
  * initialization. Later calls may not take effect.
  *
  * Configuration format supported:
@@ -48,7 +48,7 @@ CURLcode Curl_log_init(void);
  *
  * @param config configuration string
  */
-CURLcode Curl_log_configure(const char *config);
+CURLcode Curl_trc_opt(const char *config);
 
 /* the function used to output verbose information */
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
@@ -86,7 +86,7 @@ void Curl_failf(struct Curl_easy *data,
  * Output an informational message when both transfer's verbose logging
  * and connection filters verbose logging are enabled.
  */
-void Curl_log_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
 #if defined(__GNUC__) && !defined(printf) &&                    \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && \
   !defined(__MINGW32__)
@@ -103,8 +103,8 @@ void Curl_log_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 /* informational messages enabled */
 
-#define Curl_log_is_verbose(data)    ((data) && (data)->set.verbose)
-#define Curl_log_cf_is_verbose(cf, data) \
+#define Curl_trc_is_verbose(data)    ((data) && (data)->set.verbose)
+#define Curl_trc_cf_is_verbose(cf, data) \
                             ((data) && (data)->set.verbose && \
                             (cf) && (cf)->cft->log_level >= CURL_LOG_LVL_INFO)
 
@@ -116,35 +116,35 @@ void Curl_log_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
     defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 
 #define infof(data, ...) \
-  do { if(Curl_log_is_verbose(data)) \
+  do { if(Curl_trc_is_verbose(data)) \
          Curl_infof(data, __VA_ARGS__); } while(0)
-#define CURL_LOG_CF(data, cf, ...) \
-  do { if(Curl_log_cf_is_verbose(cf, data)) \
-         Curl_log_cf_infof(data, cf, __VA_ARGS__); } while(0)
+#define CURL_TRC_CF(data, cf, ...) \
+  do { if(Curl_trc_cf_is_verbose(cf, data)) \
+         Curl_trc_cf_infof(data, cf, __VA_ARGS__); } while(0)
 
 #else /* no variadic macro args */
 #define infof Curl_infof
-#define CURL_LOG_CF Curl_log_cf_infof
+#define CURL_TRC_CF Curl_trc_cf_infof
 #endif /* variadic macro args */
 
 #else /* !CURL_DISABLE_VERBOSE_STRINGS */
 /* All informational messages are not compiled in for size savings */
 
-#define Curl_log_is_verbose(d)        ((void)(d), FALSE)
-#define Curl_log_cf_is_verbose(x,y)   ((void)(x), (void)(y), FALSE)
+#define Curl_trc_is_verbose(d)        ((void)(d), FALSE)
+#define Curl_trc_cf_is_verbose(x,y)   ((void)(x), (void)(y), FALSE)
 
 #if defined(HAVE_VARIADIC_MACROS_C99)
 #define infof(...)  Curl_nop_stmt
-#define CURL_LOG_CF(...)  Curl_nop_stmt
-#define Curl_log_cf_infof(...)  Curl_nop_stmt
+#define CURL_TRC_CF(...)  Curl_nop_stmt
+#define Curl_trc_cf_infof(...)  Curl_nop_stmt
 #elif defined(HAVE_VARIADIC_MACROS_GCC)
 #define infof(x...)  Curl_nop_stmt
-#define CURL_LOG_CF(x...)  Curl_nop_stmt
-#define Curl_log_cf_infof(x...)  Curl_nop_stmt
+#define CURL_TRC_CF(x...)  Curl_nop_stmt
+#define Curl_trc_cf_infof(x...)  Curl_nop_stmt
 #else
 #error "missing VARIADIC macro define, fix and rebuild!"
 #endif
 
 #endif /* CURL_DISABLE_VERBOSE_STRINGS */
 
-#endif /* HEADER_CURL_LOG_H */
+#endif /* HEADER_CURL_TRC_H */

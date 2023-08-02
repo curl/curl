@@ -21,14 +21,14 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_global_log_config 3 "01 August 2023" "libcurl" "libcurl"
+.TH curl_global_trace 3 "01 August 2023" "libcurl" "libcurl"
 .SH NAME
-curl_global_log_config - Global libcurl logging configuration
+curl_global_trace - Global libcurl logging configuration
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_global_log_config(const char *config);
+CURLcode curl_global_trace(const char *config);
 .fi
 .SH DESCRIPTION
 This function configures the logging behavior, allowing to make some
@@ -73,10 +73,10 @@ on how to control that.
 .SH EXAMPLE
 .nf
  /* log details of HTTP/2 and SSL handling */
- curl_global_log_config("http/2,ssl");
+ curl_global_trace("http/2,ssl");
 
  /* log all details, except SSL handling */
- curl_global_log_config("all,-ssl");
+ curl_global_trace("all,-ssl");
 
 .fi
 .SH AVAILABILITY

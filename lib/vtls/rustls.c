@@ -124,7 +124,7 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   }
   *out_n = (int)nwritten;
   /*
-  CURL_LOG_CFX(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %zd, %d",
+  CURL_TRC_CFX(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %zd, %d",
                 len, nwritten, result));
   */
   return ret;
@@ -263,7 +263,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  CURL_LOG_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d",
+  CURL_TRC_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d",
               plainlen, nread, *err);
   return nread;
 }
@@ -298,7 +298,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  CURL_LOG_CF(data, cf, "cf_send: %ld plain bytes", plainlen);
+  CURL_TRC_CF(data, cf, "cf_send: %ld plain bytes", plainlen);
 
   io_ctx.cf = cf;
   io_ctx.data = data;
@@ -323,7 +323,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     io_error = rustls_connection_write_tls(rconn, write_cb, &io_ctx,
                                            &tlswritten);
     if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-      CURL_LOG_CF(data, cf, "cf_send: EAGAIN after %zu bytes",
+      CURL_TRC_CF(data, cf, "cf_send: EAGAIN after %zu bytes",
                   tlswritten_total);
       *err = CURLE_AGAIN;
       return -1;
@@ -340,7 +340,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
-    CURL_LOG_CF(data, cf, "cf_send: wrote %zu TLS bytes", tlswritten);
+    CURL_TRC_CF(data, cf, "cf_send: wrote %zu TLS bytes", tlswritten);
     tlswritten_total += tlswritten;
   }
 

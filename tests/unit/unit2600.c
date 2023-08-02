@@ -50,7 +50,7 @@
 #include "urldata.h"
 #include "connect.h"
 #include "cfilters.h"
-#include "curl_log.h"
+#include "curl_trc.h"
 
 /* copied from hostip.c to switch using SIGALARM for timeouts.
  * SIGALARM has only seconds resolution, so our tests will not work

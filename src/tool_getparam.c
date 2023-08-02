@@ -713,7 +713,7 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
     if(strcasecompare(name, "all")) {
       global->traceids = toggle;
       global->tracetime = toggle;
-      result = curl_global_log_config(token);
+      result = curl_global_trace(token);
       if(result)
         goto out;
     }
@@ -724,7 +724,7 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
       global->tracetime = toggle;
     }
     else {
-      result = curl_global_log_config(token);
+      result = curl_global_trace(token);
       if(result)
         goto out;
     }

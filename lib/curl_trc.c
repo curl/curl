@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 
-#include "curl_log.h"
+#include "curl_trc.h"
 #include "urldata.h"
 #include "easyif.h"
 #include "cfilters.h"
@@ -126,11 +126,11 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 
-void Curl_log_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
-  if(data && Curl_log_cf_is_verbose(cf, data)) {
+  if(data && Curl_trc_cf_is_verbose(cf, data)) {
     va_list ap;
     int len;
     char buffer[MAXINFO + 2];
@@ -179,7 +179,7 @@ static struct Curl_cftype *cf_types[] = {
   NULL,
 };
 
-CURLcode Curl_log_configure(const char *config)
+CURLcode Curl_trc_opt(const char *config)
 {
   char *token, *tok_buf, *tmp;
   size_t i;
@@ -219,27 +219,27 @@ CURLcode Curl_log_configure(const char *config)
   return CURLE_OK;
 }
 
-CURLcode Curl_log_init(void)
+CURLcode Curl_trc_init(void)
 {
 #ifdef DEBUGBUILD
   /* WIP: we use the auto-init from an env var only in DEBUG builds for
    * convenience. */
   const char *config = getenv("CURL_DEBUG");
   if(config) {
-    return Curl_log_configure(config);
+    return Curl_trc_opt(config);
   }
 #endif
   return CURLE_OK;
 }
 #else /* !CURL_DISABLE_VERBOSE_STRINGS) */
 
-CURLcode Curl_log_init(void)
+CURLcode Curl_trc_init(void)
 {
   return CURLE_OK;
 }
 
 #if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
-void Curl_log_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   (void)data;

@@ -217,7 +217,7 @@ static void drain_stream(struct Curl_cfilter *cf,
      (stream->upload_left || stream->upload_blocked_len))
     bits |= CURL_CSELECT_OUT;
   if(data->state.dselect_bits != bits) {
-    CURL_LOG_CF(data, cf, "[h2sid=%d] DRAIN dselect_bits=%x",
+    CURL_TRC_CF(data, cf, "[h2sid=%d] DRAIN dselect_bits=%x",
                 stream->id, bits);
     data->state.dselect_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
@@ -281,7 +281,7 @@ static void http2_data_done(struct Curl_cfilter *cf,
   if(ctx->h2) {
     if(!stream->closed && stream->id > 0) {
       /* RST_STREAM */
-      CURL_LOG_CF(data, cf, "[h2sid=%d] premature DATA_DONE, RST stream",
+      CURL_TRC_CF(data, cf, "[h2sid=%d] premature DATA_DONE, RST stream",
                   stream->id);
       if(!nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
                                     stream->id, NGHTTP2_STREAM_CLOSED))
@@ -535,7 +535,7 @@ static int h2_process_pending_input(struct Curl_cfilter *cf,
       break;
     }
     else {
-      CURL_LOG_CF(data, cf, "process_pending_input: %zu bytes left "
+      CURL_TRC_CF(data, cf, "process_pending_input: %zu bytes left "
                   "in connection buffer", Curl_bufq_len(&ctx->inbufq));
     }
   }
@@ -578,7 +578,7 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
     *input_pending = FALSE;
     nread = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &result);
     if(nread != -1) {
-      CURL_LOG_CF(data, cf, "%zd bytes stray data read before trying "
+      CURL_TRC_CF(data, cf, "%zd bytes stray data read before trying "
                   "h2 connection", nread);
       if(h2_process_pending_input(cf, data, &result) < 0)
         /* immediate error, considered dead */
@@ -641,13 +641,13 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
   nwritten = Curl_bufq_pass(&ctx->outbufq, nw_out_writer, cf, &result);
   if(nwritten < 0) {
     if(result == CURLE_AGAIN) {
-      CURL_LOG_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
+      CURL_TRC_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
                   Curl_bufq_len(&ctx->outbufq));
       ctx->nw_out_blocked = 1;
     }
     return result;
   }
-  CURL_LOG_CF(data, cf, "nw send buffer flushed");
+  CURL_TRC_CF(data, cf, "nw send buffer flushed");
   return Curl_bufq_is_empty(&ctx->outbufq)? CURLE_OK: CURLE_AGAIN;
 }
 
@@ -839,7 +839,7 @@ static int push_promise(struct Curl_cfilter *cf,
   struct cf_h2_ctx *ctx = cf->ctx;
   int rv; /* one of the CURL_PUSH_* defines */
 
-  CURL_LOG_CF(data, cf, "[h2sid=%d] PUSH_PROMISE received",
+  CURL_TRC_CF(data, cf, "[h2sid=%d] PUSH_PROMISE received",
               frame->promised_stream_id);
   if(data->multi->push_cb) {
     struct stream_ctx *stream;
@@ -859,7 +859,7 @@ static int push_promise(struct Curl_cfilter *cf,
     heads.data = data;
     heads.frame = frame;
     /* ask the application */
-    CURL_LOG_CF(data, cf, "Got PUSH_PROMISE, ask application");
+    CURL_TRC_CF(data, cf, "Got PUSH_PROMISE, ask application");
 
     stream = H2_STREAM_CTX(data);
     if(!stream) {
@@ -931,7 +931,7 @@ static int push_promise(struct Curl_cfilter *cf,
     }
   }
   else {
-    CURL_LOG_CF(data, cf, "Got PUSH_PROMISE, ignore it");
+    CURL_TRC_CF(data, cf, "Got PUSH_PROMISE, ignore it");
     rv = CURL_PUSH_DENY;
   }
 fail:
@@ -968,14 +968,14 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
   int rv;
 
   if(!stream) {
-    CURL_LOG_CF(data, cf, "[h2sid=%d] No proto pointer", stream_id);
+    CURL_TRC_CF(data, cf, "[h2sid=%d] No proto pointer", stream_id);
     return CURLE_FAILED_INIT;
   }
 
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
     rbuflen = Curl_bufq_len(&stream->recvbuf);
-    CURL_LOG_CF(data, cf, "[h2sid=%d] FRAME[DATA len=%zu pad=%zu], "
+    CURL_TRC_CF(data, cf, "[h2sid=%d] FRAME[DATA len=%zu pad=%zu], "
                 "buffered=%zu, window=%d/%d",
                 stream_id, frame->hd.length, frame->data.padlen, rbuflen,
                 nghttp2_session_get_stream_effective_recv_data_length(
@@ -1010,7 +1010,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     }
     break;
   case NGHTTP2_HEADERS:
-    CURL_LOG_CF(data, cf, "[h2sid=%d] FRAME[HEADERS]", stream_id);
+    CURL_TRC_CF(data, cf, "[h2sid=%d] FRAME[HEADERS]", stream_id);
     if(stream->bodystarted) {
       /* Only valid HEADERS after body started is trailer HEADERS.  We
          buffer them in on_header callback. */
@@ -1033,12 +1033,12 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     if(result)
       return result;
 
-    CURL_LOG_CF(data, cf, "[h2sid=%d] %zu header bytes",
+    CURL_TRC_CF(data, cf, "[h2sid=%d] %zu header bytes",
                 stream_id, Curl_bufq_len(&stream->recvbuf));
     drain_stream(cf, data, stream);
     break;
   case NGHTTP2_PUSH_PROMISE:
-    CURL_LOG_CF(data, cf, "[h2sid=%d] FRAME[PUSH_PROMISE]", stream_id);
+    CURL_TRC_CF(data, cf, "[h2sid=%d] FRAME[PUSH_PROMISE]", stream_id);
     rv = push_promise(cf, data, &frame->push_promise);
     if(rv) { /* deny! */
       DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
@@ -1048,14 +1048,14 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
       if(nghttp2_is_fatal(rv))
         return CURLE_SEND_ERROR;
       else if(rv == CURL_PUSH_ERROROUT) {
-        CURL_LOG_CF(data, cf, "[h2sid=%d] fail in PUSH_PROMISE received",
+        CURL_TRC_CF(data, cf, "[h2sid=%d] fail in PUSH_PROMISE received",
                     stream_id);
         return CURLE_RECV_ERROR;
       }
     }
     break;
   case NGHTTP2_RST_STREAM:
-    CURL_LOG_CF(data, cf, "[h2sid=%d] FRAME[RST]", stream_id);
+    CURL_TRC_CF(data, cf, "[h2sid=%d] FRAME[RST]", stream_id);
     stream->closed = TRUE;
     stream->reset = TRUE;
     stream->send_closed = TRUE;
@@ -1063,17 +1063,17 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     drain_stream(cf, data, stream);
     break;
   case NGHTTP2_WINDOW_UPDATE:
-    CURL_LOG_CF(data, cf, "[h2sid=%d] FRAME[WINDOW_UPDATE]", stream_id);
+    CURL_TRC_CF(data, cf, "[h2sid=%d] FRAME[WINDOW_UPDATE]", stream_id);
     if((data->req.keepon & KEEP_SEND_HOLD) &&
        (data->req.keepon & KEEP_SEND)) {
       data->req.keepon &= ~KEEP_SEND_HOLD;
       drain_stream(cf, data, stream);
-      CURL_LOG_CF(data, cf, "[h2sid=%d] un-holding after win update",
+      CURL_TRC_CF(data, cf, "[h2sid=%d] un-holding after win update",
                   stream_id);
     }
     break;
   default:
-    CURL_LOG_CF(data, cf, "[h2sid=%d] FRAME[%x]", stream_id, frame->hd.type);
+    CURL_TRC_CF(data, cf, "[h2sid=%d] FRAME[%x]", stream_id, frame->hd.type);
     break;
   }
   return CURLE_OK;
@@ -1094,18 +1094,18 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     switch(frame->hd.type) {
     case NGHTTP2_SETTINGS: {
       uint32_t max_conn = ctx->max_concurrent_streams;
-      CURL_LOG_CF(data, cf, "FRAME[SETTINGS]");
+      CURL_TRC_CF(data, cf, "FRAME[SETTINGS]");
       ctx->max_concurrent_streams = nghttp2_session_get_remote_settings(
           session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
       ctx->enable_push = nghttp2_session_get_remote_settings(
           session, NGHTTP2_SETTINGS_ENABLE_PUSH) != 0;
-      CURL_LOG_CF(data, cf, "MAX_CONCURRENT_STREAMS == %d",
+      CURL_TRC_CF(data, cf, "MAX_CONCURRENT_STREAMS == %d",
                   ctx->max_concurrent_streams);
-      CURL_LOG_CF(data, cf, "ENABLE_PUSH == %s",
+      CURL_TRC_CF(data, cf, "ENABLE_PUSH == %s",
                   ctx->enable_push ? "TRUE" : "false");
       if(data && max_conn != ctx->max_concurrent_streams) {
         /* only signal change if the value actually changed */
-        CURL_LOG_CF(data, cf, "MAX_CONCURRENT_STREAMS now %u",
+        CURL_TRC_CF(data, cf, "MAX_CONCURRENT_STREAMS now %u",
                     ctx->max_concurrent_streams);
         Curl_multi_connchanged(data->multi);
       }
@@ -1120,7 +1120,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
         data->req.keepon &= ~KEEP_SEND_HOLD;
         if(stream) {
           drain_stream(cf, data, stream);
-          CURL_LOG_CF(data, cf, "[h2sid=%d] un-holding after SETTINGS",
+          CURL_TRC_CF(data, cf, "[h2sid=%d] un-holding after SETTINGS",
                       stream_id);
         }
       }
@@ -1131,7 +1131,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       ctx->goaway_error = frame->goaway.error_code;
       ctx->last_stream_id = frame->goaway.last_stream_id;
       if(data) {
-        CURL_LOG_CF(data, cf, "FRAME[GOAWAY, error=%d, last_stream=%u]",
+        CURL_TRC_CF(data, cf, "FRAME[GOAWAY, error=%d, last_stream=%u]",
                     ctx->goaway_error, ctx->last_stream_id);
         infof(data, "received GOAWAY, error=%d, last_stream=%u",
                     ctx->goaway_error, ctx->last_stream_id);
@@ -1139,17 +1139,17 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       }
       break;
     case NGHTTP2_WINDOW_UPDATE:
-      CURL_LOG_CF(data, cf, "FRAME[WINDOW_UPDATE]");
+      CURL_TRC_CF(data, cf, "FRAME[WINDOW_UPDATE]");
       break;
     default:
-      CURL_LOG_CF(data, cf, "recv frame %x on 0", frame->hd.type);
+      CURL_TRC_CF(data, cf, "recv frame %x on 0", frame->hd.type);
     }
     return 0;
   }
 
   data_s = nghttp2_session_get_stream_user_data(session, stream_id);
   if(!data_s) {
-    CURL_LOG_CF(data, cf, "[h2sid=%d] No Curl_easy associated", stream_id);
+    CURL_TRC_CF(data, cf, "[h2sid=%d] No Curl_easy associated", stream_id);
     return 0;
   }
 
@@ -1176,7 +1176,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
     /* Receiving a Stream ID not in the hash should not happen - unless
        we have aborted a transfer artificially and there were more data
        in the pipeline. Silently ignore. */
-    CURL_LOG_CF(CF_DATA_CURRENT(cf), cf, "[h2sid=%d] Data for unknown",
+    CURL_TRC_CF(CF_DATA_CURRENT(cf), cf, "[h2sid=%d] Data for unknown",
                 stream_id);
     /* consumed explicitly as no one will read it */
     nghttp2_session_consume(session, stream_id, len);
@@ -1219,7 +1219,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     return 0;
   }
   stream = H2_STREAM_CTX(data_s);
-  CURL_LOG_CF(data_s, cf, "[h2sid=%d] on_stream_close(), %s (err %d)",
+  CURL_TRC_CF(data_s, cf, "[h2sid=%d] on_stream_close(), %s (err %d)",
               stream_id, nghttp2_http2_strerror(error_code), error_code);
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1239,7 +1239,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
           stream_id);
     DEBUGASSERT(0);
   }
-  CURL_LOG_CF(data_s, cf, "[h2sid=%d] closed now", stream_id);
+  CURL_TRC_CF(data_s, cf, "[h2sid=%d] closed now", stream_id);
   return 0;
 }
 
@@ -1256,7 +1256,7 @@ static int on_begin_headers(nghttp2_session *session,
     return 0;
   }
 
-  CURL_LOG_CF(data_s, cf, "on_begin_headers() was called");
+  CURL_TRC_CF(data_s, cf, "on_begin_headers() was called");
 
   if(frame->hd.type != NGHTTP2_HEADERS) {
     return 0;
@@ -1363,7 +1363,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
   if(stream->bodystarted) {
     /* This is a trailer */
-    CURL_LOG_CF(data_s, cf, "[h2sid=%d] trailer: %.*s: %.*s",
+    CURL_TRC_CF(data_s, cf, "[h2sid=%d] trailer: %.*s: %.*s",
                 stream->id, (int)namelen, name, (int)valuelen, value);
     result = Curl_dynhds_add(&stream->resp_trailers,
                              (const char *)name, namelen,
@@ -1401,7 +1401,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     if(CF_DATA_CURRENT(cf) != data_s)
       Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
 
-    CURL_LOG_CF(data_s, cf, "[h2sid=%d] status: HTTP/2 %03d",
+    CURL_TRC_CF(data_s, cf, "[h2sid=%d] status: HTTP/2 %03d",
                 stream->id, stream->status_code);
     return 0;
   }
@@ -1425,7 +1425,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(CF_DATA_CURRENT(cf) != data_s)
     Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
 
-  CURL_LOG_CF(data_s, cf, "[h2sid=%d] header: %.*s: %.*s",
+  CURL_TRC_CF(data_s, cf, "[h2sid=%d] header: %.*s: %.*s",
               stream->id, (int)namelen, name, (int)valuelen, value);
 
   return 0; /* 0 is successful */
@@ -1472,7 +1472,7 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
   if(nread > 0 && stream->upload_left != -1)
     stream->upload_left -= nread;
 
-  CURL_LOG_CF(data_s, cf, "[h2sid=%d] req_body_read(len=%zu) left=%"
+  CURL_TRC_CF(data_s, cf, "[h2sid=%d] req_body_read(len=%zu) left=%"
               CURL_FORMAT_CURL_OFF_T " -> %zd, %d",
               stream_id, length, stream->upload_left, nread, result);
 
@@ -1547,7 +1547,7 @@ static CURLcode http2_data_done_send(struct Curl_cfilter *cf,
   if(!ctx || !ctx->h2 || !stream)
     goto out;
 
-  CURL_LOG_CF(data, cf, "[h2sid=%d] data done send", stream->id);
+  CURL_TRC_CF(data, cf, "[h2sid=%d] data done send", stream->id);
   if(!stream->send_closed) {
     stream->send_closed = TRUE;
     if(stream->upload_left) {
@@ -1572,7 +1572,7 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
   ssize_t rv = 0;
 
   if(stream->error == NGHTTP2_REFUSED_STREAM) {
-    CURL_LOG_CF(data, cf, "[h2sid=%d] REFUSED_STREAM, try again on a new "
+    CURL_TRC_CF(data, cf, "[h2sid=%d] REFUSED_STREAM, try again on a new "
                 "connection", stream->id);
     connclose(cf->conn, "REFUSED_STREAM"); /* don't use this anymore */
     data->state.refused_stream = TRUE;
@@ -1634,7 +1634,7 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
   rv = 0;
 
 out:
-  CURL_LOG_CF(data, cf, "handle_stream_close -> %zd, %d", rv, *err);
+  CURL_TRC_CF(data, cf, "handle_stream_close -> %zd, %d", rv, *err);
   return rv;
 }
 
@@ -1691,7 +1691,7 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
     nghttp2_priority_spec pri_spec;
 
     h2_pri_spec(data, &pri_spec);
-    CURL_LOG_CF(data, cf, "[h2sid=%d] Queuing PRIORITY", stream->id);
+    CURL_TRC_CF(data, cf, "[h2sid=%d] Queuing PRIORITY", stream->id);
     DEBUGASSERT(stream->id != -1);
     rv = nghttp2_submit_priority(ctx->h2, NGHTTP2_FLAG_NONE,
                                  stream->id, &pri_spec);
@@ -1705,7 +1705,7 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
 
 out:
   if(nghttp2_is_fatal(rv)) {
-    CURL_LOG_CF(data, cf, "nghttp2_session_send error (%s)%d",
+    CURL_TRC_CF(data, cf, "nghttp2_session_send error (%s)%d",
                 nghttp2_strerror(rv), rv);
     return CURLE_SEND_ERROR;
   }
@@ -1723,7 +1723,7 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
     nread = Curl_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
-    CURL_LOG_CF(data, cf, "recvbuf read(len=%zu) -> %zd, %d",
+    CURL_TRC_CF(data, cf, "recvbuf read(len=%zu) -> %zd, %d",
                 len, nread, *err);
     if(nread < 0)
       goto out;
@@ -1732,13 +1732,13 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(nread < 0) {
     if(stream->closed) {
-      CURL_LOG_CF(data, cf, "[h2sid=%d] returning CLOSE", stream->id);
+      CURL_TRC_CF(data, cf, "[h2sid=%d] returning CLOSE", stream->id);
       nread = http2_handle_stream_close(cf, data, stream, err);
     }
     else if(stream->reset ||
             (ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) ||
             (ctx->goaway && ctx->last_stream_id < stream->id)) {
-      CURL_LOG_CF(data, cf, "[h2sid=%d] returning ERR", stream->id);
+      CURL_TRC_CF(data, cf, "[h2sid=%d] returning ERR", stream->id);
       *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
       nread = -1;
     }
@@ -1749,7 +1749,7 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  CURL_LOG_CF(data, cf, "stream_recv(len=%zu) -> %zd, %d", len, nread, *err);
+  CURL_TRC_CF(data, cf, "stream_recv(len=%zu) -> %zd, %d", len, nread, *err);
   return nread;
 }
 
@@ -1763,7 +1763,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
 
   /* Process network input buffer fist */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
-    CURL_LOG_CF(data, cf, "Process %zu bytes in connection buffer",
+    CURL_TRC_CF(data, cf, "Process %zu bytes in connection buffer",
                 Curl_bufq_len(&ctx->inbufq));
     if(h2_process_pending_input(cf, data, &result) < 0)
       return result;
@@ -1850,7 +1850,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     if(stream->closed) {
-      CURL_LOG_CF(data, cf, "[h2sid=%d] closed stream, set drain", stream->id);
+      CURL_TRC_CF(data, cf, "[h2sid=%d] closed stream, set drain", stream->id);
       drain_stream(cf, data, stream);
     }
   }
@@ -1861,7 +1861,7 @@ out:
     *err = result;
     nread = -1;
   }
-  CURL_LOG_CF(data, cf, "[h2sid=%d] cf_recv(len=%zu) -> %zd %d, "
+  CURL_TRC_CF(data, cf, "[h2sid=%d] cf_recv(len=%zu) -> %zd %d, "
               "buffered=%zu, window=%d/%d, connection %d/%d",
               stream->id, len, nread, *err,
               Curl_bufq_len(&stream->recvbuf),
@@ -1951,7 +1951,7 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
 
   h2_pri_spec(data, &pri_spec);
 
-  CURL_LOG_CF(data, cf, "send request allowed %d",
+  CURL_TRC_CF(data, cf, "send request allowed %d",
               nghttp2_session_check_request_allowed(ctx->h2));
 
   switch(data->state.httpreq) {
@@ -1979,14 +1979,14 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
   Curl_safefree(nva);
 
   if(stream_id < 0) {
-    CURL_LOG_CF(data, cf, "send: nghttp2_submit_request error (%s)%u",
+    CURL_TRC_CF(data, cf, "send: nghttp2_submit_request error (%s)%u",
                 nghttp2_strerror(stream_id), stream_id);
     *err = CURLE_SEND_ERROR;
     nwritten = -1;
     goto out;
   }
 
-  CURL_LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) submit %s",
+  CURL_TRC_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) submit %s",
               stream_id, len, data->state.url);
   infof(data, "Using Stream ID: %u", stream_id);
   stream->id = stream_id;
@@ -2019,7 +2019,7 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
   }
 
 out:
-  CURL_LOG_CF(data, cf, "[h2sid=%d] submit -> %zd, %d",
+  CURL_TRC_CF(data, cf, "[h2sid=%d] submit -> %zd, %d",
               stream? stream->id : -1, nwritten, *err);
   *pstream = stream;
   Curl_h1_req_parse_free(&h1);
@@ -2132,7 +2132,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       /* H2 flow window exhaustion. We need to HOLD upload until we get
        * a WINDOW_UPDATE from the server. */
       data->req.keepon |= KEEP_SEND_HOLD;
-      CURL_LOG_CF(data, cf, "[h2sid=%d] holding send as remote flow "
+      CURL_TRC_CF(data, cf, "[h2sid=%d] holding send as remote flow "
                   "window is exhausted", stream->id);
     }
 
@@ -2140,7 +2140,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
      * We have unwritten state that needs us being invoked again and EAGAIN
      * is the only way to ensure that. */
     stream->upload_blocked_len = nwritten;
-    CURL_LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) BLOCK: win %u/%zu "
+    CURL_TRC_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) BLOCK: win %u/%zu "
                 "blocked_len=%zu",
                 stream->id, len,
                 nghttp2_session_get_remote_window_size(ctx->h2), rwin,
@@ -2156,7 +2156,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       nwritten = http2_handle_stream_close(cf, data, stream, err);
     }
     else {
-      CURL_LOG_CF(data, cf, "send: nothing to do in this session");
+      CURL_TRC_CF(data, cf, "send: nothing to do in this session");
       *err = CURLE_HTTP2;
       nwritten = -1;
     }
@@ -2164,7 +2164,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   if(stream) {
-    CURL_LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) -> %zd, %d, "
+    CURL_TRC_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) -> %zd, %d, "
                 "upload_left=%" CURL_FORMAT_CURL_OFF_T ", "
                 "h2 windows %d-%d (stream-conn), "
                 "buffers %zu-%zu (stream-conn)",
@@ -2177,7 +2177,7 @@ out:
                 Curl_bufq_len(&ctx->outbufq));
   }
   else {
-    CURL_LOG_CF(data, cf, "cf_send(len=%zu) -> %zd, %d, "
+    CURL_TRC_CF(data, cf, "cf_send(len=%zu) -> %zd, %d, "
                 "connection-window=%d, nw_send_buffer(%zu)",
                 len, nwritten, *err,
                 nghttp2_session_get_remote_window_size(ctx->h2),
@@ -2398,7 +2398,7 @@ static bool cf_h2_is_alive(struct Curl_cfilter *cf,
 
   CF_DATA_SAVE(save, cf, data);
   result = (ctx && ctx->h2 && http2_connisalive(cf, data, input_pending));
-  CURL_LOG_CF(data, cf, "conn alive -> %d, input_pending=%d",
+  CURL_TRC_CF(data, cf, "conn alive -> %d, input_pending=%d",
               result, *input_pending);
   CF_DATA_RESTORE(cf, save);
   return result;
