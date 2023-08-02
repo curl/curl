@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
              curl_multi_strerror(mc));
       exit(1);
     }
+    fprintf(stderr, "running_handles = %d\n", running_handles);
 
     /* Check for finished handles and remove. */
     while((msg = curl_multi_info_read(multi, &msgs_in_queue))) {
@@ -132,14 +133,14 @@ int main(int argc, char *argv[])
       }
     }
 
-    mc = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_poll: %s\n",
-             curl_multi_strerror(mc));
-      exit(1);
+    if(running_handles) {
+      mc = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
+      if(mc != CURLM_OK) {
+        fprintf(stderr, "curl_multi_poll: %s\n",
+               curl_multi_strerror(mc));
+        exit(1);
+      }
     }
-
-    fprintf(stderr, "running_handles = %d\n", running_handles);
   } while(running_handles > 0 || start_count);
 
   exit(EXIT_SUCCESS);
