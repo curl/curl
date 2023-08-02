@@ -88,6 +88,11 @@ foreach my $f (@incs) {
     close H;
 }
 
+my $flag=shift;
+if($flag && $flag eq "--sort") {
+    @out = sort(@out);
+}
+
 foreach (@out) {
     print("$_\n");
 }
