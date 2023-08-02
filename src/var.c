@@ -154,11 +154,11 @@ static ParameterError varfunc(struct GlobalConfig *global,
         }
 
         /* put it in the output */
-        if(curlx_dyn_add(out, enc)) {
+        if(curlx_dyn_add(out, enc))
           err = PARAM_NO_MEM;
-          break;
-        }
         curl_free(enc);
+        if(err)
+          break;
       }
     }
     else if(FUNCMATCH(f, FUNC_B64, FUNC_B64_LEN)) {
