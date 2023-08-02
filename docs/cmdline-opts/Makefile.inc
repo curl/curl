@@ -192,6 +192,8 @@ DPAGES = \
   proxy-service-name.d \
   proxy-ssl-allow-beast.d \
   proxy-ssl-auto-client-cert.d \
+  proxy-ssl-no-revoke.d \
+  proxy-ssl-revoke-best-effort.d \
   proxy-tls13-ciphers.d \
   proxy-tlsauthtype.d \
   proxy-tlspassword.d \

@@ -257,8 +257,12 @@ struct OperationConfig {
   bool ssl_allow_beast;     /* allow this SSL vulnerability */
   bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy */
   bool ssl_no_revoke;       /* disable SSL certificate revocation checks */
+  bool proxy_ssl_no_revoke;       /* disable SSL certificate revocation checks
+                                     for proxy */
   bool ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
                                   revocation list errors */
+  bool proxy_ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
+                                        revocation list errors for proxy */
 
   bool native_ca_store;        /* use the native OS CA store */
   bool proxy_native_ca_store;  /* use the native OS CA store for proxy */

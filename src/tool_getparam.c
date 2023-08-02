@@ -295,6 +295,8 @@ static const struct LongShort aliases[]= {
   {"EC", "etag-save",                ARG_FILENAME},
   {"ED", "etag-compare",             ARG_FILENAME},
   {"EE", "curves",                   ARG_STRING},
+  {"EK", "proxy-ssl-no-revoke",      ARG_BOOL},
+  {"EL", "proxy-ssl-revoke-best-effort", ARG_BOOL},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -2108,6 +2110,16 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
       case 'E':
         GetStr(&config->ssl_ec_curves, nextarg);
+        break;
+
+      case 'K': /* --proxy-ssl-no-revoke */
+        if(feature_ssl)
+          config->proxy_ssl_no_revoke = TRUE;
+        break;
+
+      case 'L': /* --proxy-ssl-revoke-best-effort */
+        if(feature_ssl)
+          config->proxy_ssl_revoke_best_effort = TRUE;
         break;
 
       default: /* unknown flag */
