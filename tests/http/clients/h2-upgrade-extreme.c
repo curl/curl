@@ -91,7 +91,6 @@ static int debug_cb(CURL *handle, curl_infotype type,
                     void *userdata)
 {
   FILE *output = stderr;
-  const char *text;
   struct timeval tv;
   char timebuf[20];
   static int newl = 0;
@@ -156,7 +155,7 @@ static int debug_cb(CURL *handle, curl_infotype type,
     if(!traced_data) {
       if(!newl)
         log_line_start(output, timebuf, idsbuf, type);
-      fprintf(output, "[%zu bytes data]\n", size);
+      fprintf(output, "[%ld bytes data]\n", (long)size);
       newl = 0;
       traced_data = 1;
     }
