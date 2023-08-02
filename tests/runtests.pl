@@ -1198,9 +1198,9 @@ sub singletest_check {
     # get all attributes
     my %hash = getpartattr("verify", "stdout");
 
-    my $loadfile=$hash{'loadfile'};
+    my $loadfile = $hash{'loadfile'};
     if ($loadfile) {
-        open(my $tmp, "<", "$loadfile") || die "Cannot open file $loadfile";
+        open(my $tmp, "<", "$loadfile") || die "Cannot open file $loadfile: $!";
         @validstdout = <$tmp>;
         close($tmp);
     }

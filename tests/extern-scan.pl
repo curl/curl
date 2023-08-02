@@ -55,11 +55,11 @@ while(defined $root) {
 }
 
 if(!defined $root) {
-    $root=".";
+    $root = ".";
 }
 
 my @incs;
-if($allheaders == 1) {
+if($allheaders) {
     $root = "$root/include/curl";
     opendir(D, "$root") || die "Cannot open directory $root: $!\n";
     my @dir = readdir(D);
@@ -125,7 +125,7 @@ foreach my $f (@incs) {
     close H;
 }
 
-if($sort == 1) {
+if($sort) {
     @out = sort(@out);
 }
 
