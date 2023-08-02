@@ -64,6 +64,10 @@ extern const struct Curl_handler Curl_handler_wss;
 
 struct dynhds;
 
+CURLcode Curl_bump_headersize(struct Curl_easy *data,
+                              size_t delta,
+                              bool connect_only);
+
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
@@ -182,6 +186,11 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
 #ifndef EXPECT_100_THRESHOLD
 #define EXPECT_100_THRESHOLD (1024*1024)
 #endif
+
+/* MAX_HTTP_RESP_HEADER_SIZE is the maximum size of all response headers
+   combined that libcurl allows for a single HTTP response, any HTTP
+   version. This count includes CONNECT response headers. */
+#define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
 
 #endif /* CURL_DISABLE_HTTP */
 

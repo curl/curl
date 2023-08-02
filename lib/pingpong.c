@@ -341,7 +341,9 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       ssize_t clipamount = 0;
       bool restart = FALSE;
 
-      data->req.headerbytecount += (long)gotbytes;
+      result = Curl_bump_headersize(data, gotbytes, FALSE);
+      if(result)
+        return result;
 
       pp->nread_resp += gotbytes;
       for(i = 0; i < gotbytes; ptr++, i++) {

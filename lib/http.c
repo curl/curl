@@ -3920,6 +3920,29 @@ static CURLcode verify_header(struct Curl_easy *data)
   return CURLE_OK;
 }
 
+CURLcode Curl_bump_headersize(struct Curl_easy *data,
+                              size_t delta,
+                              bool connect_only)
+{
+  size_t bad = 0;
+  if(delta < MAX_HTTP_RESP_HEADER_SIZE) {
+    if(!connect_only)
+      data->req.headerbytecount += (unsigned int)delta;
+    data->info.header_size += (unsigned int)delta;
+    if(data->info.header_size > MAX_HTTP_RESP_HEADER_SIZE)
+      bad = data->info.header_size;
+  }
+  else
+    bad = data->info.header_size + delta;
+  if(bad) {
+    failf(data, "Too large response headers: %zu > %zu",
+          bad, MAX_HTTP_RESP_HEADER_SIZE);
+    return CURLE_RECV_ERROR;
+  }
+  return CURLE_OK;
+}
+
+
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
@@ -4173,8 +4196,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       if(result)
         return result;
 
-      data->info.header_size += (long)headerlen;
-      data->req.headerbytecount += (long)headerlen;
+      result = Curl_bump_headersize(data, headerlen, FALSE);
+      if(result)
+        return result;
 
       /*
        * When all the headers have been parsed, see if we should give
@@ -4496,8 +4520,10 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     if(result)
       return result;
 
-    data->info.header_size += Curl_dyn_len(&data->state.headerb);
-    data->req.headerbytecount += Curl_dyn_len(&data->state.headerb);
+    result = Curl_bump_headersize(data, Curl_dyn_len(&data->state.headerb),
+                                  FALSE);
+    if(result)
+      return result;
 
     Curl_dyn_reset(&data->state.headerb);
   }

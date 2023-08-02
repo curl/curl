@@ -587,7 +587,9 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         return result;
     }
 
-    data->info.header_size += (long)perline;
+    result = Curl_bump_headersize(data, perline, TRUE);
+    if(result)
+      return result;
 
     /* Newlines are CRLF, so the CR is ignored as the line isn't
        really terminated until the LF comes. Treat a following CR
