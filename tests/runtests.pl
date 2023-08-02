@@ -1203,6 +1203,9 @@ sub singletest_check {
         open(my $tmp, "<", "$loadfile") || die "Cannot open file $loadfile: $!";
         @validstdout = <$tmp>;
         close($tmp);
+
+        # Enforce LF newlines on load
+        s/\r\n/\n/g for @validstdout;
     }
 
     if (@validstdout) {
