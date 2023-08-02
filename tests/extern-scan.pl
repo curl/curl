@@ -28,24 +28,61 @@
 use strict;
 use warnings;
 
-# we may get the dir root pointed out
-my $root=$ARGV[0] || "."; shift;
+my $allheaders = 0;
+my $sort = 0;
 
-my $header=shift;
-if($header) {
-    print "$header\n";
+# we may get the dir root pointed out
+my $root = shift @ARGV;
+while(defined $root) {
+
+    if($root =~ /--heading=(.*)/) {
+        print "$1\n";
+        $root = shift @ARGV;
+        next;
+    }
+    elsif($root =~ /--allheaders/) {
+        $allheaders = 1;
+        $root = shift @ARGV;
+        next;
+    }
+    elsif($root =~ /--sort/) {
+        $sort = 1;
+        $root = shift @ARGV;
+        next;
+    }
+
+    last;
 }
 
-my @incs = (
-    "$root/include/curl/curl.h",
-    "$root/include/curl/easy.h",
-    "$root/include/curl/mprintf.h",
-    "$root/include/curl/multi.h",
-    "$root/include/curl/urlapi.h",
-    "$root/include/curl/options.h",
-    "$root/include/curl/header.h",
-    "$root/include/curl/websockets.h",
-    );
+if(!defined $root) {
+    $root=".";
+}
+
+my @incs;
+if($allheaders == 1) {
+    $root = "$root/include/curl";
+    opendir(D, "$root") || die "Cannot open directory $root: $!\n";
+    my @dir = readdir(D);
+    closedir(D);
+
+    foreach (sort(@dir)) {
+        if($_ =~ /\.h$/) {
+            push(@incs, "$root/$_");
+        }
+    }
+}
+else {
+    @incs = (
+        "$root/include/curl/curl.h",
+        "$root/include/curl/easy.h",
+        "$root/include/curl/mprintf.h",
+        "$root/include/curl/multi.h",
+        "$root/include/curl/urlapi.h",
+        "$root/include/curl/options.h",
+        "$root/include/curl/header.h",
+        "$root/include/curl/websockets.h",
+        );
+}
 
 my $verbose=0;
 my $summary=0;
@@ -88,8 +125,7 @@ foreach my $f (@incs) {
     close H;
 }
 
-my $flag=shift;
-if($flag && $flag eq "--sort") {
+if($sort == 1) {
     @out = sort(@out);
 }
 
