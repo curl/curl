@@ -182,8 +182,11 @@ static int hyper_each_header(void *userdata,
     }
   }
 
-  data->info.header_size += (curl_off_t)len;
-  data->req.headerbytecount += (curl_off_t)len;
+  result = Curl_bump_headersize(data, len, FALSE);
+  if(result) {
+    data->state.hresult = result;
+    return HYPER_ITER_BREAK;
+  }
   return HYPER_ITER_CONTINUE;
 }
 
@@ -313,9 +316,8 @@ static CURLcode status_line(struct Curl_easy *data,
     if(result)
       return result;
   }
-  data->info.header_size += (curl_off_t)len;
-  data->req.headerbytecount += (curl_off_t)len;
-  return CURLE_OK;
+  result = Curl_bump_headersize(data, len, FALSE);
+  return result;
 }
 
 /*
