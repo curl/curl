@@ -28,6 +28,7 @@ curl_getenv
 curl_global_cleanup
 curl_global_init
 curl_global_init_mem
+curl_global_log_config
 curl_global_sslset
 curl_maprintf
 curl_mfprintf
