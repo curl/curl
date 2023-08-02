@@ -64,7 +64,6 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   info->filetime = -1; /* -1 is an illegal time and thus means unknown */
   info->timecond = FALSE;
 
-  info->header_size = 0;
   info->request_size = 0;
   info->proxyauthavail = 0;
   info->httpauthavail = 0;
@@ -241,7 +240,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
       *param_longp = (long)data->info.filetime;
     break;
   case CURLINFO_HEADER_SIZE:
-    *param_longp = (long)data->info.header_size;
+    *param_longp = (long)data->req.headerbytecount;
     break;
   case CURLINFO_REQUEST_SIZE:
     *param_longp = (long)data->info.request_size;

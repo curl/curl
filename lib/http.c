@@ -4173,7 +4173,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       if(result)
         return result;
 
-      data->info.header_size += (long)headerlen;
       data->req.headerbytecount += (long)headerlen;
 
       /*
@@ -4496,7 +4495,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     if(result)
       return result;
 
-    data->info.header_size += Curl_dyn_len(&data->state.headerb);
     data->req.headerbytecount += Curl_dyn_len(&data->state.headerb);
 
     Curl_dyn_reset(&data->state.headerb);

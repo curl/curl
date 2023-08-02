@@ -1089,7 +1089,6 @@ struct PureInfo {
   int httpversion; /* the http version number X.Y = X*10+Y */
   time_t filetime; /* If requested, this is might get set. Set to -1 if the
                       time was unretrievable. */
-  curl_off_t header_size;  /* size of read header(s) in bytes */
   curl_off_t request_size; /* the amount of bytes sent in the request(s) */
   unsigned long proxyauthavail; /* what proxy auth types were announced */
   unsigned long httpauthavail;  /* what host auth types were announced */

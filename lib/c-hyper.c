@@ -182,7 +182,6 @@ static int hyper_each_header(void *userdata,
     }
   }
 
-  data->info.header_size += (curl_off_t)len;
   data->req.headerbytecount += (curl_off_t)len;
   return HYPER_ITER_CONTINUE;
 }
@@ -313,7 +312,6 @@ static CURLcode status_line(struct Curl_easy *data,
     if(result)
       return result;
   }
-  data->info.header_size += (curl_off_t)len;
   data->req.headerbytecount += (curl_off_t)len;
   return CURLE_OK;
 }
