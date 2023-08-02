@@ -213,7 +213,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       value = memchr(ptr, ':', cb);
     if(value) {
       size_t namelen = value - ptr;
-      fprintf(outs->stream, BOLD "%.*s" BOLDOFF ":", namelen, ptr);
+      fprintf(outs->stream, BOLD "%.*s" BOLDOFF ":", (int)namelen, ptr);
 #ifndef LINK
       fwrite(&value[1], cb - namelen - 1, 1, outs->stream);
 #else
@@ -402,7 +402,7 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
      !strcmp("ftp", scheme) ||
      !strcmp("ftps", scheme)) {
     fprintf(stream, LINK "%s" LINKST "%.*s" LINKOFF,
-            finalurl, loclen, location);
+            finalurl, (int)loclen, location);
     goto locdone;
   }
 

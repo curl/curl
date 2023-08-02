@@ -328,7 +328,8 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
         if(!rest)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */
-        msnprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
+        msnprintf(preamble, sizeof(preamble), "%*s", (int)strlen(preamble),
+                  "");
       }
     }
     /* If any bits have no definition, output an explicit value.
@@ -371,7 +372,8 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
         if(!rest)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */
-        msnprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
+        msnprintf(preamble, sizeof(preamble), "%*s", (int)strlen(preamble),
+                  "");
       }
     }
     /* If any bits have no definition, output an explicit value.
