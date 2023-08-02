@@ -14,8 +14,8 @@ if set to a single dash (-)). The name is a case sensitive identifier that
 must consist of no other letters than a-z, A-Z, 0-9 or underscore. The
 specified content is then associated with this identifier.
 
-The name must be unique within a command line invoke, setting the same
-variable name again will be ignored.
+Setting the same variable name again will overwrite the old contents with the
+new.
 
 The contents of a variable can be referenced in a later command line option
 when that option name is prefixed with "--expand-", and the name is used as
