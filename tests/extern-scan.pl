@@ -55,8 +55,8 @@ my @syms;
 my %doc;
 my %rem;
 
-sub scanheader {
-    my ($f)=@_;
+my @out;
+foreach my $f (@incs) {
     open H, "<$f" || die;
     my $first = "";
     while(<H>) {
@@ -66,7 +66,7 @@ sub scanheader {
             my $decl = $1;
             $decl =~ s/\r$//;
             $decl =~ /([a-z_]+)$/;
-            print "$1\n";
+            push(@out, "$1");
         }
         elsif (/^(^CURL_EXTERN .*)/) {
             # handle two-line declarations
@@ -80,7 +80,7 @@ sub scanheader {
                 $decl =~ s/\r$//;
                 $first .= $decl;
                 $first =~ /([a-z_]+)$/;
-                print "$1\n";
+                push(@out, "$1");
             }
             $first = "";
         }
@@ -88,6 +88,11 @@ sub scanheader {
     close H;
 }
 
-foreach my $i (@incs) {
-    scanheader($i);
+my $flag=shift;
+if($flag && $flag eq "--sort") {
+    @out = sort(@out);
+}
+
+foreach (@out) {
+    print("$_\n");
 }
