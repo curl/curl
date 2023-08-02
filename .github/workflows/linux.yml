@@ -42,8 +42,8 @@ permissions: {}
 env:
   MAKEFLAGS: -j 3
   bearssl-version: 0.6
-  libressl-version: v3.6.1
-  mbedtls-version: v3.3.0
+  libressl-version: v3.7.3
+  mbedtls-version: v3.4.0
   mod_h2-version: v2.0.21
   msh3-version: v0.6.0
   openssl3-version: openssl-3.1.1
