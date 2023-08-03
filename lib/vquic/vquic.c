@@ -49,6 +49,7 @@
 #include "curl_quiche.h"
 #include "vquic.h"
 #include "vquic_int.h"
+#include "strerror.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -343,8 +344,10 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      failf(data, "QUIC: recvmsg() unexpectedly returned %d (errno=%d)",
-                  mcount, SOCKERRNO);
+      char errstr[STRERROR_LEN];
+      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      failf(data, "QUIC: recvmsg() unexpectedly returned %d (errno=%d; %s)",
+                  mcount, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
@@ -410,8 +413,10 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d)",
-                  nread, SOCKERRNO);
+      char errstr[STRERROR_LEN];
+      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
+                  nread, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
@@ -467,8 +472,10 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d)",
-                  nread, SOCKERRNO);
+      char errstr[STRERROR_LEN];
+      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d; %s)",
+                  nread, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
