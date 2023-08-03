@@ -50,7 +50,13 @@ Accept: */*
 </protocol>
 # curl: (56) Too large response headers: 307215 > 307200
 <errorcode>
+%if hyper
+# hyper returns a generic error that libcurl converts to an even more
+# generic error
+1
+%else
 56
+%endif
 </errorcode>
 </verify>
 </testcase>
