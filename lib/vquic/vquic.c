@@ -309,6 +309,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   struct sockaddr_storage remote_addr[MMSG_NUM];
   size_t total_nread, pkts;
   int mcount, i, n;
+  char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(max_pkts > 0);
@@ -344,7 +345,6 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      char errstr[STRERROR_LEN];
       Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmsg() unexpectedly returned %d (errno=%d; %s)",
                   mcount, SOCKERRNO, errstr);
@@ -383,6 +383,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   struct sockaddr_storage remote_addr;
   size_t total_nread, pkts;
   ssize_t nread;
+  char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
 
   msg_iov.iov_base = buf;
@@ -413,7 +414,6 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      char errstr[STRERROR_LEN];
       Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
                   nread, SOCKERRNO, errstr);
@@ -448,6 +448,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
   socklen_t remote_addrlen = sizeof(remote_addr);
   size_t total_nread, pkts;
   ssize_t nread;
+  char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(max_pkts > 0);
@@ -472,7 +473,6 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      char errstr[STRERROR_LEN];
       Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d; %s)",
                   nread, SOCKERRNO, errstr);
