@@ -49,6 +49,7 @@
 #include "curl_quiche.h"
 #include "vquic.h"
 #include "vquic_int.h"
+#include "strerror.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -306,6 +307,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   struct sockaddr_storage remote_addr[MMSG_NUM];
   size_t total_nread, pkts;
   int mcount, i, n;
+  char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(max_pkts > 0);
@@ -341,8 +343,9 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      failf(data, "QUIC: recvmsg() unexpectedly returned %d (errno=%d)",
-                  mcount, SOCKERRNO);
+      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      failf(data, "QUIC: recvmsg() unexpectedly returned %d (errno=%d; %s)",
+                  mcount, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
@@ -378,6 +381,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   struct sockaddr_storage remote_addr;
   size_t total_nread, pkts;
   ssize_t nread;
+  char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
 
   msg_iov.iov_base = buf;
@@ -408,8 +412,9 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d)",
-                  nread, SOCKERRNO);
+      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
+                  nread, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
@@ -441,6 +446,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
   socklen_t remote_addrlen = sizeof(remote_addr);
   size_t total_nread, pkts;
   ssize_t nread;
+  char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(max_pkts > 0);
@@ -465,8 +471,9 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d)",
-                  nread, SOCKERRNO);
+      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d; %s)",
+                  nread, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
