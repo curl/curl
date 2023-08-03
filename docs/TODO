@@ -40,7 +40,7 @@
  1.23 Offer API to flush the connection pool
  1.25 Expose tried IP addresses that failed
  1.28 FD_CLOEXEC
- 1.29 Upgrade to websockets
+ 1.29 WebSocket read callback
  1.30 config file parsing
  1.31 erase secrets from heap/stack after use
  1.32 add asynch getaddrinfo support
@@ -401,13 +401,12 @@
 
  https://github.com/curl/curl/issues/2252
 
-1.29 Upgrade to websockets
+1.29 WebSocket read callback
 
- libcurl could offer a smoother path to get to a websocket connection.
- See https://github.com/curl/curl/issues/3523
+ Call the read callback once the connection is established to allow sending
+ the first message in the connection.
 
- Michael Kaufmann suggestion here:
- https://curl.se/video/curlup-2017/2017-03-19_05_Michael_Kaufmann_Websocket_support_for_curl.mp4
+ https://github.com/curl/curl/issues/11402
 
 1.30 config file parsing
 
