@@ -30,7 +30,7 @@
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-haproxy.h"
-#include "curl_log.h"
+#include "curl_trc.h"
 #include "multiif.h"
 
 /* The last 3 #include files should be in this order */
@@ -157,14 +157,14 @@ static void cf_haproxy_destroy(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   (void)data;
-  DEBUGF(LOG_CF(data, cf, "destroy"));
+  CURL_TRC_CF(data, cf, "destroy");
   cf_haproxy_ctx_free(cf->ctx);
 }
 
 static void cf_haproxy_close(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
-  DEBUGF(LOG_CF(data, cf, "close"));
+  CURL_TRC_CF(data, cf, "close");
   cf->connected = FALSE;
   cf_haproxy_ctx_reset(cf->ctx);
   if(cf->next)

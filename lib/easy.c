@@ -158,8 +158,8 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
   }
 
-  if(Curl_log_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_log_init failed\n"));
+  if(Curl_trc_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_trc_init failed\n"));
     goto fail;
   }
 
@@ -313,6 +313,21 @@ void curl_global_cleanup(void)
   easy_init_flags = 0;
 
   global_init_unlock();
+}
+
+/**
+ * curl_global_trace() globally initializes curl logging.
+ */
+CURLcode curl_global_trace(const char *config)
+{
+  CURLcode result;
+  global_init_lock();
+
+  result = Curl_trc_opt(config);
+
+  global_init_unlock();
+
+  return result;
 }
 
 /*

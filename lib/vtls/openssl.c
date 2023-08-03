@@ -722,8 +722,8 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
-  DEBUGF(LOG_CF(data, cf, "bio_cf_out_write(len=%d) -> %d, err=%d",
-                blen, (int)nwritten, result));
+  CURL_TRC_CF(data, cf, "bio_cf_out_write(len=%d) -> %d, err=%d",
+              blen, (int)nwritten, result);
   BIO_clear_retry_flags(bio);
   backend->io_result = result;
   if(nwritten < 0) {
@@ -749,8 +749,8 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
-  DEBUGF(LOG_CF(data, cf, "bio_cf_in_read(len=%d) -> %d, err=%d",
-                blen, (int)nread, result));
+  CURL_TRC_CF(data, cf, "bio_cf_in_read(len=%d) -> %d, err=%d",
+              blen, (int)nread, result);
   BIO_clear_retry_flags(bio);
   backend->io_result = result;
   if(nread < 0) {

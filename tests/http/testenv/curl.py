@@ -337,8 +337,10 @@ class CurlClient:
             xargs.append('--proxytunnel')
         return xargs
 
-    def http_get(self, url: str, extra_args: Optional[List[str]] = None):
-        return self._raw(url, options=extra_args, with_stats=False)
+    def http_get(self, url: str, extra_args: Optional[List[str]] = None,
+                 def_tracing: bool = True):
+        return self._raw(url, options=extra_args, with_stats=False,
+                         def_tracing=def_tracing)
 
     def http_download(self, urls: List[str],
                       alpn_proto: Optional[str] = None,
@@ -463,11 +465,13 @@ class CurlClient:
              force_resolve=True,
              with_stats=False,
              with_headers=True,
-             with_trace=False):
+             with_trace=False,
+             def_tracing=True):
         args = self._complete_args(
             urls=urls, timeout=timeout, options=options, insecure=insecure,
             alpn_proto=alpn_proto, force_resolve=force_resolve,
-            with_headers=with_headers, with_trace=with_trace)
+            with_headers=with_headers, with_trace=with_trace,
+            def_tracing=def_tracing)
         r = self._run(args, intext=intext, with_stats=with_stats)
         if r.exit_code == 0 and with_headers:
             self._parse_headerfile(self._headerfile, r=r)
@@ -479,15 +483,20 @@ class CurlClient:
                        insecure=False, force_resolve=True,
                        alpn_proto: Optional[str] = None,
                        with_headers: bool = True,
-                       with_trace: bool = False):
+                       with_trace: bool = False,
+                       def_tracing: bool = True):
         if not isinstance(urls, list):
             urls = [urls]
 
-        args = [self._curl, "-s", "--path-as-is", '--trace-time', '--trace-ids']
+        args = [self._curl, "-s", "--path-as-is"]
+        if def_tracing:
+            args.extend(['--trace-time', '--trace-ids'])
         if with_headers:
             args.extend(["-D", self._headerfile])
         if with_trace or self.env.verbose > 2:
             args.extend(['--trace', self._tracefile])
+        elif def_tracing is False:
+            pass
         elif self.env.verbose > 1:
             args.extend(['--trace-ascii', self._tracefile])
         elif not self._silent:

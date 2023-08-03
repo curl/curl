@@ -209,6 +209,7 @@ static const struct LongShort aliases[]= {
   {"$~", "happy-eyeballs-timeout-ms", ARG_STRING},
   {"$!", "retry-all-errors",         ARG_BOOL},
   {"$%", "trace-ids",                ARG_BOOL},
+  {"$&", "trace-config",             ARG_STRING},
   {"0",   "http1.0",                 ARG_NONE},
   {"01",  "http1.1",                 ARG_NONE},
   {"02",  "http2",                   ARG_NONE},
@@ -679,6 +680,61 @@ static void sethttpver(struct GlobalConfig *global,
     warnf(global, "Overrides previous HTTP version option");
 
   config->httpversion = httpversion;
+}
+
+static CURLcode set_trace_config(struct GlobalConfig *global,
+                                 const char *config)
+{
+  CURLcode result = CURLE_OK;
+  char *token, *tmp, *name;
+  bool toggle;
+
+  tmp = strdup(config);
+  if(!tmp)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Allow strtok() here since this isn't used threaded */
+  /* !checksrc! disable BANNEDFUNC 2 */
+  token = strtok(tmp, ", ");
+  while(token) {
+    switch(*token) {
+      case '-':
+        toggle = FALSE;
+        name = token + 1;
+        break;
+      case '+':
+        toggle = TRUE;
+        name = token + 1;
+        break;
+      default:
+        toggle = TRUE;
+        name = token;
+        break;
+    }
+
+    if(strcasecompare(name, "all")) {
+      global->traceids = toggle;
+      global->tracetime = toggle;
+      result = curl_global_trace(token);
+      if(result)
+        goto out;
+    }
+    else if(strcasecompare(name, "ids")) {
+      global->traceids = toggle;
+    }
+    else if(strcasecompare(name, "time")) {
+      global->tracetime = toggle;
+    }
+    else {
+      result = curl_global_trace(token);
+      if(result)
+        goto out;
+    }
+    token = strtok(NULL, ", ");
+  }
+out:
+  free(tmp);
+  return result;
 }
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
@@ -1462,6 +1518,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case '%': /* --trace-ids */
         global->traceids = toggle;
+        break;
+      case '&': /* --trace-config */
+        if(set_trace_config(global, nextarg)) {
+          err = PARAM_NO_MEM;
+        }
         break;
       }
       break;

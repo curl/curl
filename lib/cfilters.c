@@ -238,7 +238,7 @@ void Curl_conn_cf_add(struct Curl_easy *data,
   cf->conn = conn;
   cf->sockindex = index;
   conn->cfilter[index] = cf;
-  DEBUGF(LOG_CF(data, cf, "added"));
+  CURL_TRC_CF(data, cf, "added");
 }
 
 void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,

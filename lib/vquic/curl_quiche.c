@@ -217,11 +217,10 @@ static void stream_send_suspend(struct Curl_cfilter *cf,
     data->req.keepon |= KEEP_SEND_HOLD;
     ++ctx->sends_on_hold;
     if(H3_STREAM_ID(data) >= 0)
-      DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] suspend sending",
-                    H3_STREAM_ID(data)));
+      CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] suspend sending",
+                  H3_STREAM_ID(data));
     else
-      DEBUGF(LOG_CF(data, cf, "[%s] suspend sending",
-                    data->state.url));
+      CURL_TRC_CF(data, cf, "[%s] suspend sending", data->state.url);
   }
 }
 
@@ -234,11 +233,10 @@ static void stream_send_resume(struct Curl_cfilter *cf,
     data->req.keepon &= ~KEEP_SEND_HOLD;
     --ctx->sends_on_hold;
     if(H3_STREAM_ID(data) >= 0)
-      DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] resume sending",
-                    H3_STREAM_ID(data)));
+      CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] resume sending",
+                  H3_STREAM_ID(data));
     else
-      DEBUGF(LOG_CF(data, cf, "[%s] resume sending",
-                    data->state.url));
+      CURL_TRC_CF(data, cf, "[%s] resume sending", data->state.url);
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
@@ -277,7 +275,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   stream->id = -1;
   Curl_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
-  DEBUGF(LOG_CF(data, cf, "data setup"));
+  CURL_TRC_CF(data, cf, "data setup");
   return CURLE_OK;
 }
 
@@ -288,8 +286,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   (void)cf;
   if(stream) {
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] easy handle is done",
-                  stream->id));
+    CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] easy handle is done", stream->id);
     if(stream_send_is_suspended(data)) {
       data->req.keepon &= ~KEEP_SEND_HOLD;
       --ctx->sends_on_hold;
@@ -397,10 +394,10 @@ static int cb_each_header(uint8_t *name, size_t name_len,
       result = write_resp_raw(x->cf, x->data, "\r\n", 2);
   }
   if(result) {
-    DEBUGF(LOG_CF(x->data, x->cf,
-                  "[h3sid=%"PRId64"][HEADERS][%.*s: %.*s] error %d",
-                  stream? stream->id : -1, (int)name_len, name,
-                  (int)value_len, value, result));
+    CURL_TRC_CF(x->data, x->cf,
+                "[h3sid=%"PRId64"][HEADERS][%.*s: %.*s] error %d",
+                stream? stream->id : -1, (int)name_len, name,
+                (int)value_len, value, result);
   }
   return result;
 }
@@ -455,8 +452,8 @@ static CURLcode cf_recv_body(struct Curl_cfilter *cf,
                              stream_resp_read, &cb_ctx, &result);
 
   if(nwritten < 0 && result != CURLE_AGAIN) {
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] recv_body error %zd",
-                  stream->id, nwritten));
+    CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] recv_body error %zd",
+                stream->id, nwritten);
     failf(data, "Error %d in HTTP/3 response body for stream[%"PRId64"]",
           result, stream->id);
     stream->closed = TRUE;
@@ -514,7 +511,7 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
             rc, stream3_id);
       return CURLE_RECV_ERROR;
     }
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"][HEADERS]", stream3_id));
+    CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"][HEADERS]", stream3_id);
     break;
 
   case QUICHE_H3_EVENT_DATA:
@@ -524,7 +521,7 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
     break;
 
   case QUICHE_H3_EVENT_RESET:
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"][RESET]", stream3_id));
+    CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"][RESET]", stream3_id);
     stream->closed = TRUE;
     stream->reset = TRUE;
     stream->send_closed = TRUE;
@@ -532,7 +529,7 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
     break;
 
   case QUICHE_H3_EVENT_FINISHED:
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"][FINISHED]", stream3_id));
+    CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"][FINISHED]", stream3_id);
     if(!stream->resp_hds_complete) {
       result = write_resp_raw(cf, data, "\r\n", 2);
       if(result)
@@ -544,12 +541,12 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
     break;
 
   case QUICHE_H3_EVENT_GOAWAY:
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"][GOAWAY]", stream3_id));
+    CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"][GOAWAY]", stream3_id);
     break;
 
   default:
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] recv, unhandled event %d",
-                  stream3_id, quiche_h3_event_type(ev)));
+    CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] recv, unhandled event %d",
+                stream3_id, quiche_h3_event_type(ev));
     break;
   }
   return result;
@@ -571,26 +568,25 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
       break;
     }
     else if(stream3_id < 0) {
-      DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] error poll: %"PRId64,
-                    stream? stream->id : -1, stream3_id));
+      CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] error poll: %"PRId64,
+                  stream? stream->id : -1, stream3_id);
       return CURLE_HTTP3;
     }
 
     sdata = get_stream_easy(cf, data, stream3_id);
     if(!sdata) {
-      DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] discard event %s for "
-                    "unknown [h3sid=%"PRId64"]",
-                    stream? stream->id : -1, cf_ev_name(ev),
-                    stream3_id));
+      CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] discard event %s for "
+                  "unknown [h3sid=%"PRId64"]",
+                  stream? stream->id : -1, cf_ev_name(ev), stream3_id);
     }
     else {
       result = h3_process_event(cf, sdata, stream3_id, ev);
       drain_stream(cf, sdata);
       if(result) {
-        DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] error processing event %s "
-                      "for [h3sid=%"PRId64"] -> %d",
-                      stream? stream->id : -1, cf_ev_name(ev),
-                      stream3_id, result));
+        CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] error processing event %s "
+                    "for [h3sid=%"PRId64"] -> %d",
+                    stream? stream->id : -1, cf_ev_name(ev),
+                    stream3_id, result);
         if(data == sdata) {
           /* Only report this error to the caller if it is about the
            * transfer we were called with. Otherwise we fail a transfer
@@ -633,7 +629,7 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
                            &recv_info);
   if(nread < 0) {
     if(QUICHE_ERR_DONE == nread) {
-      DEBUGF(LOG_CF(r->data, r->cf, "ingress, quiche is DONE"));
+      CURL_TRC_CF(r->data, r->cf, "ingress, quiche is DONE");
       return CURLE_OK;
     }
     else if(QUICHE_ERR_TLS_FAIL == nread) {
@@ -650,8 +646,8 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
     }
   }
   else if((size_t)nread < pktlen) {
-    DEBUGF(LOG_CF(r->data, r->cf, "ingress, quiche only read %zd/%zu bytes",
-                  nread, pktlen));
+    CURL_TRC_CF(r->data, r->cf, "ingress, quiche only read %zd/%zu bytes",
+                nread, pktlen);
   }
 
   return CURLE_OK;
@@ -742,9 +738,6 @@ static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
     /* add the next packet to send, if any, to our buffer */
     nread = Curl_bufq_sipn(&ctx->q.sendbuf, 0,
                            read_pkt_to_send, &readx, &result);
-    /* DEBUGF(LOG_CF(data, cf, "sip packet(maxlen=%zu) -> %zd, %d",
-                  (size_t)0, nread, result)); */
-
     if(nread < 0) {
       if(result != CURLE_AGAIN)
         return result;
@@ -795,8 +788,8 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
     failf(data,
           "HTTP/3 stream %" PRId64 " reset by server", stream->id);
     *err = stream->resp_got_header? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] cf_recv, was reset -> %d",
-                  stream->id, *err));
+    CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] cf_recv, was reset -> %d",
+                stream->id, *err);
   }
   else if(!stream->resp_got_header) {
     failf(data,
@@ -805,14 +798,14 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
           stream->id);
     /* *err = CURLE_PARTIAL_FILE; */
     *err = CURLE_RECV_ERROR;
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] cf_recv, closed incomplete"
-                  " -> %d", stream->id, *err));
+    CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] cf_recv, closed incomplete"
+                " -> %d", stream->id, *err);
   }
   else {
     *err = CURLE_OK;
     nread = 0;
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] cf_recv, closed ok"
-                  " -> %d", stream->id, *err));
+    CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] cf_recv, closed ok"
+                " -> %d", stream->id, *err);
   }
   return nread;
 }
@@ -833,14 +826,14 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
     nread = Curl_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] read recvbuf(len=%zu) "
-                  "-> %zd, %d", stream->id, len, nread, *err));
+    CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] read recvbuf(len=%zu) "
+                "-> %zd, %d", stream->id, len, nread, *err);
     if(nread < 0)
       goto out;
   }
 
   if(cf_process_ingress(cf, data)) {
-    DEBUGF(LOG_CF(data, cf, "cf_recv, error on ingress"));
+    CURL_TRC_CF(data, cf, "cf_recv, error on ingress");
     *err = CURLE_RECV_ERROR;
     nread = -1;
     goto out;
@@ -850,8 +843,8 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(nread < 0 && !Curl_bufq_is_empty(&stream->recvbuf)) {
     nread = Curl_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
-    DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] read recvbuf(len=%zu) "
-                  "-> %zd, %d", stream->id, len, nread, *err));
+    CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] read recvbuf(len=%zu) "
+                "-> %zd, %d", stream->id, len, nread, *err);
     if(nread < 0)
       goto out;
   }
@@ -878,16 +871,16 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 out:
   result = cf_flush_egress(cf, data);
   if(result) {
-    DEBUGF(LOG_CF(data, cf, "cf_recv, flush egress failed"));
+    CURL_TRC_CF(data, cf, "cf_recv, flush egress failed");
     *err = result;
     nread = -1;
   }
   if(nread > 0)
     ctx->data_recvd += nread;
-  DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] cf_recv(total=%"
-                CURL_FORMAT_CURL_OFF_T ") -> %zd, %d",
-                stream ? stream->id : (int64_t)0,
-                ctx->data_recvd, nread, *err));
+  CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] cf_recv(total=%"
+              CURL_FORMAT_CURL_OFF_T ") -> %zd, %d",
+              stream ? stream->id : (int64_t)0,
+              ctx->data_recvd, nread, *err);
   return nread;
 }
 
@@ -975,16 +968,16 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
     if(QUICHE_H3_ERR_STREAM_BLOCKED == stream3_id) {
       /* quiche seems to report this error if the connection window is
        * exhausted. Which happens frequently and intermittent. */
-      DEBUGF(LOG_CF(data, cf, "send_request(%s) rejected with BLOCKED",
-                    data->state.url));
+      CURL_TRC_CF(data, cf, "send_request(%s) rejected with BLOCKED",
+                  data->state.url);
       stream_send_suspend(cf, data);
       *err = CURLE_AGAIN;
       nwritten = -1;
       goto out;
     }
     else {
-      DEBUGF(LOG_CF(data, cf, "send_request(%s) -> %" PRId64,
-                    data->state.url, stream3_id));
+      CURL_TRC_CF(data, cf, "send_request(%s) -> %" PRId64,
+                  data->state.url, stream3_id);
     }
     *err = CURLE_SEND_ERROR;
     nwritten = -1;
@@ -998,8 +991,8 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
   stream->reset = FALSE;
 
   infof(data, "Using HTTP/3 Stream ID: %" PRId64, stream3_id);
-  DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] opened for %s",
-                stream3_id, data->state.url));
+  CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] opened for %s",
+              stream3_id, data->state.url);
 
 out:
   free(nva);
@@ -1037,8 +1030,8 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       /* TODO: we seem to be blocked on flow control and should HOLD
        * sending. But when do we open again? */
       if(!quiche_conn_stream_writable(ctx->qconn, stream->id, len)) {
-        DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] send_body(len=%zu) "
-                      "-> window exhausted", stream->id, len));
+        CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] send_body(len=%zu) "
+                    "-> window exhausted", stream->id, len);
         stream_send_suspend(cf, data);
       }
       *err = CURLE_AGAIN;
@@ -1046,15 +1039,15 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     }
     else if(nwritten == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
-      DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] send_body(len=%zu) "
-                    "-> exceeds size", stream->id, len));
+      CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] send_body(len=%zu) "
+                  "-> exceeds size", stream->id, len);
       *err = CURLE_SEND_ERROR;
       nwritten = -1;
       goto out;
     }
     else if(nwritten < 0) {
-      DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] send_body(len=%zu) "
-                    "-> quiche err %zd", stream->id, len, nwritten));
+      CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] send_body(len=%zu) "
+                  "-> quiche err %zd", stream->id, len, nwritten);
       *err = CURLE_SEND_ERROR;
       nwritten = -1;
       goto out;
@@ -1068,9 +1061,9 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       if(stream->upload_left == 0)
         stream->send_closed = TRUE;
 
-      DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] send body(len=%zu, "
-                              "left=%" CURL_FORMAT_CURL_OFF_T ") -> %zd",
-                    stream->id, len, stream->upload_left, nwritten));
+      CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] send body(len=%zu, "
+                  "left=%" CURL_FORMAT_CURL_OFF_T ") -> %zd",
+                  stream->id, len, stream->upload_left, nwritten);
       *err = CURLE_OK;
     }
   }
@@ -1081,8 +1074,8 @@ out:
     *err = result;
     nwritten = -1;
   }
-  DEBUGF(LOG_CF(data, cf, "[h3sid=%" PRId64 "] cf_send(len=%zu) -> %zd, %d",
-                stream? stream->id : -1, len, nwritten, *err));
+  CURL_TRC_CF(data, cf, "[h3sid=%" PRId64 "] cf_send(len=%zu) -> %zd, %d",
+              stream? stream->id : -1, len, nwritten, *err);
   return nwritten;
 }
 
@@ -1171,15 +1164,15 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
       stream->upload_left = 0;
       body[0] = 'X';
       sent = cf_quiche_send(cf, data, body, 0, &result);
-      DEBUGF(LOG_CF(data, cf, "[h3sid=%"PRId64"] DONE_SEND -> %zd, %d",
-                    stream->id, sent, result));
+      CURL_TRC_CF(data, cf, "[h3sid=%"PRId64"] DONE_SEND -> %zd, %d",
+                  stream->id, sent, result);
     }
     break;
   }
   case CF_CTRL_DATA_IDLE:
     result = cf_flush_egress(cf, data);
     if(result)
-      DEBUGF(LOG_CF(data, cf, "data idle, flush egress -> %d", result));
+      CURL_TRC_CF(data, cf, "data idle, flush egress -> %d", result);
     break;
   default:
     break;
@@ -1210,7 +1203,7 @@ static CURLcode cf_verify_peer(struct Curl_cfilter *cf,
       goto out;
   }
   else
-    DEBUGF(LOG_CF(data, cf, "Skipped certificate verification"));
+    CURL_TRC_CF(data, cf, "Skipped certificate verification");
 
   ctx->h3config = quiche_h3_config_new();
   if(!ctx->h3config) {
@@ -1357,8 +1350,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
       offset += 1 + alpn_len;
     }
 
-    DEBUGF(LOG_CF(data, cf, "Sent QUIC client Initial, ALPN: %s",
-                   alpn_protocols + 1));
+    CURL_TRC_CF(data, cf, "Sent QUIC client Initial, ALPN: %s",
+                alpn_protocols + 1);
   }
 
   return CURLE_OK;
@@ -1389,7 +1382,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
 
   if(ctx->reconnect_at.tv_sec && Curl_timediff(now, ctx->reconnect_at) < 0) {
     /* Not time yet to attempt the next connect */
-    DEBUGF(LOG_CF(data, cf, "waiting for reconnect time"));
+    CURL_TRC_CF(data, cf, "waiting for reconnect time");
     goto out;
   }
 
@@ -1412,12 +1405,12 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
     goto out;
 
   if(quiche_conn_is_established(ctx->qconn)) {
-    DEBUGF(LOG_CF(data, cf, "handshake complete after %dms",
-           (int)Curl_timediff(now, ctx->started_at)));
+    CURL_TRC_CF(data, cf, "handshake complete after %dms",
+                (int)Curl_timediff(now, ctx->started_at));
     ctx->handshake_at = now;
     result = cf_verify_peer(cf, data);
     if(!result) {
-      DEBUGF(LOG_CF(data, cf, "peer verified"));
+      CURL_TRC_CF(data, cf, "peer verified");
       cf->connected = TRUE;
       cf->conn->alpn = CURL_HTTP_VERSION_3;
       *done = TRUE;
@@ -1436,8 +1429,8 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
      */
     int reconn_delay_ms = 200;
 
-    DEBUGF(LOG_CF(data, cf, "connect, remote closed, reconnect after %dms",
-                  reconn_delay_ms));
+    CURL_TRC_CF(data, cf, "connect, remote closed, reconnect after %dms",
+                reconn_delay_ms);
     Curl_conn_cf_close(cf->next, data);
     cf_quiche_ctx_clear(ctx);
     result = Curl_conn_cf_connect(cf->next, data, FALSE, done);
@@ -1503,7 +1496,7 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
       max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
     *pres1 = (max_streams > INT_MAX)? INT_MAX : (int)max_streams;
-    DEBUGF(LOG_CF(data, cf, "query: MAX_CONCURRENT -> %d", *pres1));
+    CURL_TRC_CF(data, cf, "query: MAX_CONCURRENT -> %d", *pres1);
     return CURLE_OK;
   }
   case CF_QUERY_CONNECT_REPLY_MS:

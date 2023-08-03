@@ -29,6 +29,7 @@ curl_global_cleanup
 curl_global_init
 curl_global_init_mem
 curl_global_sslset
+curl_global_trace
 curl_maprintf
 curl_mfprintf
 curl_mime_addpart

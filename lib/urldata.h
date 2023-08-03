@@ -1076,6 +1076,18 @@ struct connectdata {
   unsigned char gssapi_delegation; /* inherited from set.gssapi_delegation */
 };
 
+#ifndef CURL_DISABLE_PROXY
+#define CURL_CONN_HOST_DISPNAME(c) \
+          ((c)->bits.socksproxy ? (c)->socks_proxy.host.dispname : \
+            (c)->bits.httpproxy ? (c)->http_proxy.host.dispname : \
+              (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
+                (c)->host.dispname)
+#else
+#define CURL_CONN_HOST_DISPNAME(c) \
+          (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
+            (c)->host.dispname)
+#endif
+
 /* The end of connectdata. */
 
 /*

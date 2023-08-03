@@ -290,8 +290,8 @@ static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
   backend->io_result = result;
-  DEBUGF(LOG_CF(data, cf, "bio_write(len=%d) -> %zd, %d",
-                blen, nwritten, result));
+  CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %zd, %d",
+              blen, nwritten, result);
   wolfSSL_BIO_clear_retry_flags(bio);
   if(nwritten < 0 && CURLE_AGAIN == result)
     BIO_set_retry_read(bio);
@@ -315,8 +315,7 @@ static int bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
   backend->io_result = result;
-  DEBUGF(LOG_CF(data, cf, "bio_read(len=%d) -> %zd, %d",
-                blen, nread, result));
+  CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %zd, %d", blen, nread, result);
   wolfSSL_BIO_clear_retry_flags(bio);
   if(nread < 0 && CURLE_AGAIN == result)
     BIO_set_retry_read(bio);
@@ -1018,17 +1017,16 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
       /* there's data pending, re-invoke SSL_write() */
-      DEBUGF(LOG_CF(data, cf, "wolfssl_send(len=%zu) -> AGAIN", len));
+      CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> AGAIN", len);
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
       if(backend->io_result == CURLE_AGAIN) {
-        DEBUGF(LOG_CF(data, cf, "wolfssl_send(len=%zu) -> AGAIN", len));
+        CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> AGAIN", len);
         *curlcode = CURLE_AGAIN;
         return -1;
       }
-      DEBUGF(LOG_CF(data, cf, "wolfssl_send(len=%zu) -> %d, %d",
-                    len, rc, err));
+      CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> %d, %d", len, rc, err);
       failf(data, "SSL write: %s, errno %d",
             ERR_error_string(err, error_buffer),
             SOCKERRNO);
@@ -1036,7 +1034,7 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
       return -1;
     }
   }
-  DEBUGF(LOG_CF(data, cf, "wolfssl_send(len=%zu) -> %d", len, rc));
+  CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> %d", len, rc);
   return rc;
 }
 
@@ -1089,7 +1087,7 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
 
     switch(err) {
     case SSL_ERROR_ZERO_RETURN: /* no more data */
-      DEBUGF(LOG_CF(data, cf, "wolfssl_recv(len=%zu) -> CLOSED", blen));
+      CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> CLOSED", blen);
       *curlcode = CURLE_OK;
       return 0;
     case SSL_ERROR_NONE:
@@ -1098,12 +1096,12 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
       /* FALLTHROUGH */
     case SSL_ERROR_WANT_WRITE:
       /* there's data pending, re-invoke SSL_read() */
-      DEBUGF(LOG_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen));
+      CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen);
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
       if(backend->io_result == CURLE_AGAIN) {
-        DEBUGF(LOG_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen));
+        CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen);
         *curlcode = CURLE_AGAIN;
         return -1;
       }
@@ -1113,7 +1111,7 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
       return -1;
     }
   }
-  DEBUGF(LOG_CF(data, cf, "wolfssl_recv(len=%zu) -> %d", blen, nread));
+  CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> %d", blen, nread);
   return nread;
 }
 

@@ -69,7 +69,7 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  DEBUGF(LOG_CF(data, cf, "connect"));
+  CURL_TRC_CF(data, cf, "connect");
 connect_sub:
   result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
@@ -86,7 +86,7 @@ connect_sub:
     case CURL_HTTP_VERSION_NONE:
     case CURL_HTTP_VERSION_1_0:
     case CURL_HTTP_VERSION_1_1:
-      DEBUGF(LOG_CF(data, cf, "installing subfilter for HTTP/1.1"));
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
       infof(data, "CONNECT tunnel: HTTP/1.%d negotiated",
             (alpn == CURL_HTTP_VERSION_1_0)? 0 : 1);
       result = Curl_cf_h1_proxy_insert_after(cf, data);
@@ -96,7 +96,7 @@ connect_sub:
       break;
 #ifdef USE_NGHTTP2
     case CURL_HTTP_VERSION_2:
-      DEBUGF(LOG_CF(data, cf, "installing subfilter for HTTP/2"));
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/2");
       infof(data, "CONNECT tunnel: HTTP/2 negotiated");
       result = Curl_cf_h2_proxy_insert_after(cf, data);
       if(result)
@@ -105,7 +105,7 @@ connect_sub:
       break;
 #endif
     default:
-      DEBUGF(LOG_CF(data, cf, "installing subfilter for default HTTP/1.1"));
+      CURL_TRC_CF(data, cf, "installing subfilter for default HTTP/1.1");
       infof(data, "CONNECT tunnel: unsupported ALPN(%d) negotiated", alpn);
       result = CURLE_COULDNT_CONNECT;
       goto out;
@@ -156,7 +156,7 @@ static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
   struct cf_proxy_ctx *ctx = cf->ctx;
 
   (void)data;
-  DEBUGF(LOG_CF(data, cf, "destroy"));
+  CURL_TRC_CF(data, cf, "destroy");
   free(ctx);
 }
 
@@ -165,7 +165,7 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
 
-  DEBUGF(LOG_CF(data, cf, "close"));
+  CURL_TRC_CF(data, cf, "close");
   cf->connected = FALSE;
   if(ctx->cf_protocol) {
     struct Curl_cfilter *f;

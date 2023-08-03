@@ -265,6 +265,7 @@ DPAGES = \
   tlsv1.d \
   tr-encoding.d \
   trace-ascii.d \
+  trace-config.d \
   trace-ids.d \
   trace-time.d \
   trace.d \

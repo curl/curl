@@ -54,6 +54,7 @@ man_MANS = \
  curl_global_cleanup.3 \
  curl_global_init.3 \
  curl_global_init_mem.3 \
+ curl_global_trace.3 \
  curl_global_sslset.3 \
  curl_mime_addpart.3 \
  curl_mime_data.3 \
