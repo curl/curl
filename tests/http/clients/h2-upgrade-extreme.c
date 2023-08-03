@@ -35,37 +35,7 @@
 #include <curl/mprintf.h>
 
 
-/*
- * Return the formatted HH:MM:SS for the tv_sec given.
- * NOT thread safe.
- */
-static const char *hms_for_sec(time_t tv_sec)
-{
-  static time_t cached_tv_sec;
-  static char hms_buf[12];
-  static time_t epoch_offset;
-  static int known_epoch;
-
-  if(tv_sec != cached_tv_sec) {
-    struct tm *now;
-    time_t secs;
-    /* recalculate */
-    if(!known_epoch) {
-      epoch_offset = time(NULL) - tv_sec;
-      known_epoch = 1;
-    }
-    secs = epoch_offset + tv_sec;
-    /* !checksrc! disable BANNEDFUNC 1 */
-    now = localtime(&secs);  /* not thread safe but we don't care */
-    curl_msnprintf(hms_buf, sizeof(hms_buf), "%02d:%02d:%02d",
-                   now->tm_hour, now->tm_min, now->tm_sec);
-    cached_tv_sec = tv_sec;
-  }
-  return hms_buf;
-}
-
-static void log_line_start(FILE *log, const char *timebuf,
-                           const char *idsbuf, curl_infotype type)
+static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
   /*
    * This is the trace look that is similar to what libcurl makes on its
@@ -74,8 +44,8 @@ static void log_line_start(FILE *log, const char *timebuf,
   static const char * const s_infotype[] = {
     "* ", "< ", "> ", "{ ", "} ", "{ ", "} "
   };
-  if((timebuf && *timebuf) || (idsbuf && *idsbuf))
-    fprintf(log, "%s%s%s", timebuf, idsbuf, s_infotype[type]);
+  if(idsbuf && *idsbuf)
+    fprintf(log, "%s%s", idsbuf, s_infotype[type]);
   else
     fputs(s_infotype[type], log);
 }
@@ -91,8 +61,6 @@ static int debug_cb(CURL *handle, curl_infotype type,
                     void *userdata)
 {
   FILE *output = stderr;
-  struct timeval tv;
-  char timebuf[20];
   static int newl = 0;
   static int traced_data = 0;
   char idsbuf[60];
@@ -100,10 +68,6 @@ static int debug_cb(CURL *handle, curl_infotype type,
 
   (void)handle; /* not used */
   (void)userdata;
-
-  gettimeofday(&tv, NULL);
-  curl_msnprintf(timebuf, sizeof(timebuf), "%s.%06ld ",
-                 hms_for_sec(tv.tv_sec), (long)tv.tv_usec);
 
   if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
@@ -126,7 +90,7 @@ static int debug_cb(CURL *handle, curl_infotype type,
       for(i = 0; i < size - 1; i++) {
         if(data[i] == '\n') { /* LF */
           if(!newl) {
-            log_line_start(output, timebuf, idsbuf, type);
+            log_line_start(output, idsbuf, type);
           }
           (void)fwrite(data + st, i - st + 1, 1, output);
           st = i + 1;
@@ -134,7 +98,7 @@ static int debug_cb(CURL *handle, curl_infotype type,
         }
       }
       if(!newl)
-        log_line_start(output, timebuf, idsbuf, type);
+        log_line_start(output, idsbuf, type);
       (void)fwrite(data + st, i - st + 1, 1, output);
     }
     newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
@@ -143,7 +107,7 @@ static int debug_cb(CURL *handle, curl_infotype type,
   case CURLINFO_TEXT:
   case CURLINFO_HEADER_IN:
     if(!newl)
-      log_line_start(output, timebuf, idsbuf, type);
+      log_line_start(output, idsbuf, type);
     (void)fwrite(data, size, 1, output);
     newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
     traced_data = 0;
@@ -154,7 +118,7 @@ static int debug_cb(CURL *handle, curl_infotype type,
   case CURLINFO_SSL_DATA_OUT:
     if(!traced_data) {
       if(!newl)
-        log_line_start(output, timebuf, idsbuf, type);
+        log_line_start(output, idsbuf, type);
       fprintf(output, "[%ld bytes data]\n", (long)size);
       newl = 0;
       traced_data = 1;
