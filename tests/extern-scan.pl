@@ -28,7 +28,6 @@
 use strict;
 use warnings;
 
-my $allheaders = 0;
 my $sort = 0;
 
 # we may get the dir root pointed out
@@ -37,11 +36,6 @@ while(defined $root) {
 
     if($root =~ /--heading=(.*)/) {
         print "$1\n";
-        $root = shift @ARGV;
-        next;
-    }
-    elsif($root =~ /--allheaders/) {
-        $allheaders = 1;
         $root = shift @ARGV;
         next;
     }
@@ -58,30 +52,16 @@ if(!defined $root) {
     $root = ".";
 }
 
-my @incs;
-if($allheaders) {
-    $root = "$root/include/curl";
-    opendir(D, "$root") || die "Cannot open directory $root: $!\n";
-    my @dir = readdir(D);
-    closedir(D);
+$root = "$root/include/curl";
+opendir(D, "$root") || die "Cannot open directory $root: $!\n";
+my @dir = readdir(D);
+closedir(D);
 
-    foreach (sort(@dir)) {
-        if($_ =~ /\.h$/) {
-            push(@incs, "$root/$_");
-        }
+my @incs;
+foreach (sort(@dir)) {
+    if($_ =~ /\.h$/) {
+        push(@incs, "$root/$_");
     }
-}
-else {
-    @incs = (
-        "$root/include/curl/curl.h",
-        "$root/include/curl/easy.h",
-        "$root/include/curl/mprintf.h",
-        "$root/include/curl/multi.h",
-        "$root/include/curl/urlapi.h",
-        "$root/include/curl/options.h",
-        "$root/include/curl/header.h",
-        "$root/include/curl/websockets.h",
-        );
 }
 
 my $verbose=0;
