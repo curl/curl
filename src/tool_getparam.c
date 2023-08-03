@@ -686,14 +686,16 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
                                  const char *config)
 {
   CURLcode result = CURLE_OK;
-  char *token, *tok_buf, *tmp, *name;
+  char *token, *tmp, *name;
   bool toggle;
 
   tmp = strdup(config);
   if(!tmp)
     return CURLE_OUT_OF_MEMORY;
 
-  token = strtok_r(tmp, ", ", &tok_buf);
+  /* Allow strtok() here since this isn't used threaded */
+  /* !checksrc! disable BANNEDFUNC 2 */
+  token = strtok(tmp, ", ");
   while(token) {
     switch(*token) {
       case '-':
@@ -728,7 +730,7 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
       if(result)
         goto out;
     }
-    token = strtok_r(NULL, ", ", &tok_buf);
+    token = strtok(NULL, ", ");
   }
 out:
   free(tmp);
