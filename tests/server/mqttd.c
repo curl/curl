@@ -119,8 +119,8 @@ static struct configurable config;
 
 const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *configfile = DEFAULT_CONFIG;
-const char *logdir = "log";
-char loglockfile[256];
+static const char *logdir = "log";
+static char loglockfile[256];
 
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
