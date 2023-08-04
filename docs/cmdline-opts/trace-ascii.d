@@ -18,3 +18,7 @@ the output sent to stdout.
 This is similar to --trace, but leaves out the hex part and only shows the
 ASCII part of the dump. It makes smaller output that might be easier to read
 for untrained humans.
+
+Note that verbose output of curl activities and network traffic might contain
+sensitive data, including user names, credentials or secret data content. Be
+aware and be careful when sharing trace logs with others.
