@@ -33,10 +33,15 @@ struct entry {
 };
 
 static const struct entry preload_hosts[] = {
-  /* curl turns 39 that day just before 31-bit time_t overflow */
+#if (SIZEOF_TIME_T < 5)
   { "1.example.com", "20370320 01:02:03" },
   { "2.example.com", "20370320 03:02:01" },
   { "3.example.com", "20370319 01:02:03" },
+#else
+  { "1.example.com", "25250320 01:02:03" },
+  { "2.example.com", "25250320 03:02:01" },
+  { "3.example.com", "25250319 01:02:03" },
+#endif
   { "4.example.com", "" },
   { NULL, NULL } /* end of list marker */
 };

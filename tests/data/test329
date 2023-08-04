@@ -32,10 +32,10 @@ moo
 # Client-side
 <client>
 <file name="%LOGDIR/jar%TESTNUMBER.txt" mode="text">
-.host.foo.com	TRUE	/we/want/	FALSE	2147483647	test	no
+.host.foo.com	TRUE	/we/want/	FALSE	22147483647	test	no
 </file>
 <file name="%LOGDIR/jar%TESTNUMBER-2.txt" mode="text">
-.host.foo.com	TRUE	/we/want/	FALSE	2147483647	tester	yes
+.host.foo.com	TRUE	/we/want/	FALSE	22147483647	tester	yes
 </file>
 <server>
 http

@@ -34,10 +34,10 @@ HTTP cookie domains tailmatching the host name
 http://example.fake/c/%TESTNUMBER http://bexample.fake/c/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
 <file name="%LOGDIR/injar%TESTNUMBER">
-example.fake	FALSE	/a	FALSE	2139150993	mooo	indeed
+example.fake	FALSE	/a	FALSE	22139150993	mooo	indeed
 example.fake	FALSE	/b	FALSE	0		moo1	indeed
-example.fake	FALSE	/c	FALSE	2139150993	moo2	indeed
-example.fake	TRUE	/c	FALSE	2139150993	moo3	indeed
+example.fake	FALSE	/c	FALSE	22139150993	moo2	indeed
+example.fake	TRUE	/c	FALSE	22139150993	moo3	indeed
 </file>
 <features>
 cookies
