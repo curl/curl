@@ -320,6 +320,7 @@ void curl_global_cleanup(void)
  */
 CURLcode curl_global_trace(const char *config)
 {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   CURLcode result;
   global_init_lock();
 
@@ -328,6 +329,10 @@ CURLcode curl_global_trace(const char *config)
   global_init_unlock();
 
   return result;
+#else
+  (void)config;
+  return CURLE_OK;
+#endif
 }
 
 /*
