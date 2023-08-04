@@ -36,7 +36,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b %LOGDIR/jar%TESTNUMBER.txt -b "t
 
 .%HOSTIP	TRUE	/silly/	FALSE	0	ismatch	this
 .%HOSTIP	TRUE	/	FALSE	0	partmatch	present
-%HOSTIP	FALSE	/we/want/	FALSE	2139150993	nodomain	value
+%HOSTIP	FALSE	/we/want/	FALSE	22139150993	nodomain	value
 </file>
 <features>
 cookies

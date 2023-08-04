@@ -32,7 +32,7 @@ HTTP, junk session cookies
 %HOSTIP:%HTTPPORT/want/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -j
 </command>
 <file name="%LOGDIR/injar%TESTNUMBER">
-%HOSTIP	FALSE	/	FALSE	2139150993	mooo	indeed
+%HOSTIP	FALSE	/	FALSE	22139150993	mooo	indeed
 %HOSTIP	FALSE	/	FALSE	0		moo1	indeed
 %HOSTIP	FALSE	/	FALSE	1		moo2	indeed
 </file>

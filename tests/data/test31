@@ -54,10 +54,17 @@ Set-Cookie: partmatch=present; domain=test31.curl ; path=/;
 Set-Cookie:eat=this; domain=moo.foo.moo;
 Set-Cookie: eat=this-too; domain=.foo.moo;
 Set-Cookie: nodomainnovalue
+%if large-time
+Set-Cookie:   nodomain=value; expires=Fri Feb 13 11:56:27 GMT 2525
+Set-Cookie: novalue; domain=reallysilly
+Set-Cookie: test=yes; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2525
+Set-Cookie: test2=yes; domain=se; expires=Sat Feb 2 11:56:27 GMT 2525
+%else
 Set-Cookie:   nodomain=value; expires=Fri Feb 13 11:56:27 GMT 2037
 Set-Cookie: novalue; domain=reallysilly
 Set-Cookie: test=yes; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
 Set-Cookie: test2=yes; domain=se; expires=Sat Feb 2 11:56:27 GMT 2030
+%endif
 Set-Cookie: magic=yessir; path=/silly/; HttpOnly
 Set-Cookie: blexp=yesyes; domain=test31.curl; domain=test31.curl; expiry=totally bad;
 Set-Cookie: partialip=nono; domain=.0.0.1;
@@ -96,10 +103,17 @@ Set-Cookie: partmatch=present; domain=test31.curl ; path=/;
 Set-Cookie: eat=this; domain=moo.foo.moo;
 Set-Cookie: eat=this-too; domain=.foo.moo;
 Set-Cookie: nodomainnovalue
+%if large-time
+Set-Cookie: nodomain=value; expires=Fri Feb 13 11:56:27 GMT 2525
+Set-Cookie: novalue; domain=reallysilly
+Set-Cookie: test=yes; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2525
+Set-Cookie: test2=yes; domain=se; expires=Sat Feb 2 11:56:27 GMT 2525
+%else
 Set-Cookie: nodomain=value; expires=Fri Feb 13 11:56:27 GMT 2037
 Set-Cookie: novalue; domain=reallysilly
 Set-Cookie: test=yes; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
 Set-Cookie: test2=yes; domain=se; expires=Sat Feb 2 11:56:27 GMT 2030
+%endif
 Set-Cookie: magic=yessir; path=/silly/; HttpOnly
 Set-Cookie: blexp=yesyes; domain=test31.curl; domain=test31.curl; expiry=totally bad;
 Set-Cookie: partialip=nono; domain=.0.0.1;
@@ -157,7 +171,11 @@ test31.curl	FALSE	/we/want/	FALSE	0	withspaces2	before equals
 test31.curl	FALSE	/we/want/	FALSE	0	withspaces	yes  within and around
 .test31.curl	TRUE	/we/want/	FALSE	0	blexp	yesyes
 #HttpOnly_test31.curl	FALSE	/silly/	FALSE	0	magic	yessir
+%if large-time
+test31.curl	FALSE	/we/want/	FALSE	17517902187	nodomain	value
+%else
 test31.curl	FALSE	/we/want/	FALSE	2118138987	nodomain	value
+%endif
 .test31.curl	TRUE	/	FALSE	0	partmatch	present
 #HttpOnly_.test31.curl	TRUE	/p4/	FALSE	0	httponly	myvalue1
 #HttpOnly_.test31.curl	TRUE	/p4/	FALSE	0	httpo4	value4
