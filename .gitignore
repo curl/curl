@@ -66,3 +66,6 @@ libstandaloneengine.a
 tests/string
 tests/config
 
+# compdb
+.cache/
+compile_commands.json
