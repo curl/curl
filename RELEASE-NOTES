@@ -4,13 +4,15 @@ curl and libcurl 8.3.0
  Command line options:         256
  curl_easy_setopt() options:   303
  Public functions in libcurl:  91
- Contributors:                 2942
+ Contributors:                 2946
 
 This release includes the following changes:
 
  o curl: make %output{} in -w specify a file to write to [36]
  o nss: remove support for this TLS library [10]
  o tool: add "variable" support [1]
+ o trace: make tracing available in non-debug builds [41]
+ o url: change default value for CURLOPT_MAXREDIRS to 30 [46]
  o wolfssl: support loading system CA certificates [8]
 
 This release includes the following bugfixes:
@@ -32,18 +34,26 @@ This release includes the following bugfixes:
  o http2: avoid too early connection re-use/multiplexing [20]
  o http2: disable asssertion blocking OSSFuzz testing [31]
  o http2: fix in h2 proxy tunnel: progress in ingress on sending [32]
+ o http2: upgrade tests and add fix for non-existing stream [44]
+ o http: return error when receiving too large header set [43]
+ o lib: fix a few *printf() flag mistakes [47]
  o macOS: fix target detection more [11]
  o misc: fix various typos [18]
+ o openssl: make aws-lc version support OCSP [48]
  o openssl: Support async cert verify callback [24]
  o resolve: use PF_INET6 family lookups when CURL_IPRESOLVE_V6 is set [2]
  o Revert "schannel: reverse the order of certinfo insertions" [14]
+ o schannel: fix user-set legacy algorithms in Windows 10 & 11 [53]
  o sectransp: prevent CFRelease() of NULL [26]
+ o tests: ensure `libcurl.def` contains all exports [45]
  o tests: fix h3 server check and parallel instances [6]
+ o tool: make the length argument an int for printf()-.* flags [49]
  o tool_cb_wrt: fix invalid unicode for windows console [25]
  o tool_operate: allow both SSL_CERT_FILE and SSL_CERT_DIR [12]
  o url: remove infof() output for "still name resolving" [28]
  o urlapi: fix heap buffer overflow [30]
  o urlapi: make sure zoneid is also duplicated in curl_url_dup [29]
+ o vquic: show stringified messages for errno [40]
  o vtls: clarify "ALPN: offers" message [27]
  o winbuild: improve check for static zlib [15]
 
@@ -64,12 +74,13 @@ advice from friends like these:
 
   Alexander Jaeger, Dan Fandrich, Daniel Stenberg, Derzsi Dániel,
   Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre, Gabriel Corona,
-  Guillaume Algis, Joseph Tharayil, kyled-dell on github, Maksim Arhipov,
-  Marcel Raad, Maurício Meneghini Fauth, Nathan Moinvaziri, Pablo Busse,
-  Patrick Monnerat, Ray Satiro, Richard W.M. Jones, Rutger Broekhoff,
-  Ryan Schmidt, Sergey, Stefan Eissing, Thomas M. DuBuisson, Viktor Szakats,
-  wangzhikun, Wilhelm von Thiele, yushicheng7788 on github
-  (28 contributors)
+  Gisle Vanem, Goro FUJI, Guillaume Algis, Joseph Tharayil,
+  kyled-dell on github, Maksim Arhipov, Marcel Raad, Maurício Meneghini Fauth,
+  Nathan Moinvaziri, Niall McGee, Pablo Busse, Patrick Monnerat, Ray Satiro,
+  Richard W.M. Jones, Rutger Broekhoff, Ryan Schmidt, Samuel Chiang, Sergey,
+  Stefan Eissing, Thomas M. DuBuisson, Viktor Szakats, wangzhikun,
+  Wilhelm von Thiele, yushicheng7788 on github, zhihaoy on github
+  (33 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -108,3 +119,13 @@ References to bug reports and discussions on issues:
  [34] = https://curl.se/bug/?i=11525
  [35] = https://curl.se/bug/?i=11517
  [36] = https://curl.se/bug/?i=11416
+ [40] = https://curl.se/bug/?i=11584
+ [41] = https://curl.se/bug/?i=11421
+ [43] = https://curl.se/bug/?i=11582
+ [44] = https://curl.se/bug/?i=11563
+ [45] = https://curl.se/bug/?i=11570
+ [46] = https://curl.se/bug/?i=11581
+ [47] = https://curl.se/bug/?i=11579
+ [48] = https://curl.se/bug/?i=11568
+ [49] = https://curl.se/bug/?i=11578
+ [53] = https://curl.se/bug/?i=10741
