@@ -1085,7 +1085,7 @@ struct connectdata {
 #else
 #define CURL_CONN_HOST_DISPNAME(c) \
           (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
-            (c)->host.dispname)
+            (c)->host.dispname
 #endif
 
 /* The end of connectdata. */
