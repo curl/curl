@@ -1,3 +1,4 @@
+
 .\" **************************************************************************
 .\" *                                  _   _ ____  _
 .\" *  Project                     ___| | | |  _ \| |
@@ -5,7 +6,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +23,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_URL 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_URL 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_URL \- URL for this transfer
 .SH SYNOPSIS
@@ -38,7 +39,7 @@ format:
 
 scheme://host:port/path
 
-For a greater explanation of the format please see RFC3986.
+For a greater explanation of the format please see RFC 3986.
 
 libcurl does not validate the syntax or use this variable until the transfer is
 issued. Even if you set a crazy value here, \fIcurl_easy_setopt(3)\fP will

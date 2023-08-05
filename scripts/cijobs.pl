@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -71,13 +71,16 @@ sub githubactions {
                 elsif($r =~ /macos/) {
                     $os = "macos";
                 }
+                elsif($r =~ /windows/) {
+                    $os = "windows";
+                }
 
                 # commit previously counted jobs
                 $c += $j;
                 # non-matrix job
                 $j = 1;
             }
-            elsif($_ =~ /matrix:/) {
+            elsif($_ =~ /^\s*matrix:/) {
                 # switch to matrix mode
                 $m = 0;
                 $j = 0;
@@ -125,7 +128,7 @@ sub githubactions {
                     push @cc, $1;
                     $m++;
                 }
-                elsif($_ =~ /steps:/) {
+                elsif($_ =~ /^\s*steps:/) {
                     # disable matrix mode
                     $m = -1;
                 }
@@ -237,7 +240,7 @@ sub appveyor {
             }
         }
         $job{'line'} = $line;
-        if($_ =~ /^      - APPVEYOR_BUILD_WORKER_IMAGE: \"(.*)\"/) {
+        if($_ =~ /^        APPVEYOR_BUILD_WORKER_IMAGE: \"(.*)\"/) {
             $job{'image'}= $1;
         }
         elsif($_ =~ /^        BUILD_SYSTEM: (.*)/) {

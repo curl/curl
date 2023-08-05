@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,12 +44,12 @@ CURLcode Curl_range(struct Curl_easy *data)
   if(data->state.use_range && data->state.range) {
     CURLofft from_t;
     CURLofft to_t;
-    from_t = curlx_strtoofft(data->state.range, &ptr, 0, &from);
+    from_t = curlx_strtoofft(data->state.range, &ptr, 10, &from);
     if(from_t == CURL_OFFT_FLOW)
       return CURLE_RANGE_ERROR;
-    while(*ptr && (ISSPACE(*ptr) || (*ptr == '-')))
+    while(*ptr && (ISBLANK(*ptr) || (*ptr == '-')))
       ptr++;
-    to_t = curlx_strtoofft(ptr, &ptr2, 0, &to);
+    to_t = curlx_strtoofft(ptr, &ptr2, 10, &to);
     if(to_t == CURL_OFFT_FLOW)
       return CURLE_RANGE_ERROR;
     if((to_t == CURL_OFFT_INVAL) && !from_t) {

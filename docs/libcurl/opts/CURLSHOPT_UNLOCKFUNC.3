@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,14 +21,14 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH CURLSHOPT_UNLOCKFUNC 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.TH CURLSHOPT_UNLOCKFUNC 3 "8 Aug 2003" libcurl libcurl
 .SH NAME
 CURLSHOPT_UNLOCKFUNC - mutex unlock callback
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-void unlockcb(CURL *handle, curl_lock_data data, void *userptr);
+void unlockcb(CURL *handle, curl_lock_data data, void *clientp);
 
 CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_UNLOCKFUNC, unlockcb);
 .fi
@@ -45,9 +45,7 @@ is released.
 The \fIdata\fP argument tells what kind of data libcurl wants to unlock. Make
 sure that the callback uses a different lock for each kind of data.
 
-\fIaccess\fP defines what access type libcurl wants, shared or single.
-
-\fIuserptr\fP is the private pointer you set with \fICURLSHOPT_USERDATA\fP.
+\fIclientp\fP is the private pointer you set with \fICURLSHOPT_USERDATA\fP.
 This pointer is not used by libcurl itself.
 .SH PROTOCOLS
 All

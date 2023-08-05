@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,6 +57,13 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
                                   curl_off_t limit,
                                   struct curltime start,
                                   struct curltime now);
+/**
+ * Update progress timer with the elapsed time from its start to `timestamp`.
+ * This allows updating timers later and is used by happy eyeballing, where
+ * we only want to record the winner's times.
+ */
+void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
+                      struct curltime timestamp);
 
 #define PGRS_HIDE    (1<<4)
 #define PGRS_UL_SIZE_KNOWN (1<<5)

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -262,7 +262,6 @@ static struct passwd *vms_getpwuid(uid_t uid)
 #define PKCS12_parse PKCS12_PARSE
 #define RAND_add RAND_ADD
 #define RAND_bytes RAND_BYTES
-#define RAND_egd RAND_EGD
 #define RAND_file_name RAND_FILE_NAME
 #define RAND_load_file RAND_LOAD_FILE
 #define RAND_status RAND_STATUS

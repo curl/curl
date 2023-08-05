@@ -27,7 +27,7 @@ Content-Type: text/html
 #
 # Client-side
 <client>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 %repeat[1000 x hellofile!]%
 </file>
 <server>
@@ -38,7 +38,7 @@ ftp
 curl HTTP, FILE and FTP in parallel
 </name>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER file://localhost%FILE_PWD/log/test%TESTNUMBER.txt ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 --parallel -o log/%TESTNUMBER.a -o log/%TESTNUMBER.b -o log/%TESTNUMBER.c
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 --parallel -o %LOGDIR/%TESTNUMBER.a -o %LOGDIR/%TESTNUMBER.b -o %LOGDIR/%TESTNUMBER.c
 </command>
 </client>
 

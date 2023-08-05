@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_PROXY 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_PROXY 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_PROXY \- proxy to use
 .SH SYNOPSIS
@@ -48,7 +48,12 @@ proxy is used.
 .IP http://
 HTTP Proxy. Default when no scheme or proxy type is specified.
 .IP https://
-HTTPS Proxy. (Added in 7.52.0 for OpenSSL, GnuTLS and NSS)
+HTTPS Proxy. (Added in 7.52.0 for OpenSSL and GnuTLS Since 7.87.0, it
+also works for BearSSL, mbedTLS, rustls, Schannel, Secure Transport and
+wolfSSL.)
+
+This will use HTTP/1 by default. Setting \fICURLOPT_PROXYTYPE(3)\fP to
+\fBCURLPROXY_HTTPS2\fP allows libcurl to negotiate using HTTP/2 with proxy.
 .IP socks4://
 SOCKS4 Proxy.
 .IP socks4a://
@@ -80,6 +85,9 @@ localhost for the host part. e.g. socks5h://localhost/path/to/socket.sock
 
 The application does not have to keep the string around after setting this
 option.
+
+When a proxy is used, the active FTP mode as set with \fICUROPT_FTPPORT(3)\fP,
+cannot be used.
 .SH "Environment variables"
 libcurl respects the proxy environment variables named \fBhttp_proxy\fP,
 \fBftp_proxy\fP, \fBsftp_proxy\fP etc. If set, libcurl will use the specified

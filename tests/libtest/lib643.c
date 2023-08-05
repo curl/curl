@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,23 +35,6 @@ struct WriteThis {
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-#ifdef LIB644
-  static int count = 0;
-  (void)ptr;
-  (void)size;
-  (void)nmemb;
-  (void)userp;
-  switch(count++) {
-  case 0: /* Return a single byte. */
-    *ptr = '\n';
-    return 1;
-  case 1: /* Request abort. */
-    return CURL_READFUNC_ABORT;
-  }
-  printf("Wrongly called >2 times\n");
-  exit(1); /* trigger major failure */
-#else
-
   struct WriteThis *pooh = (struct WriteThis *)userp;
   int eof = !*pooh->readptr;
 
@@ -71,7 +54,6 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   }
 
   return 0;                         /* no more data left to deliver */
-#endif
 }
 
 static int once(char *URL, bool oldstyle)

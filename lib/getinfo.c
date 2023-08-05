@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -415,6 +415,13 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_RETRY_AFTER:
     *param_offt = data->info.retry_after;
     break;
+  case CURLINFO_XFER_ID:
+    *param_offt = data->id;
+    break;
+  case CURLINFO_CONN_ID:
+    *param_offt = data->conn?
+                  data->conn->connection_id : data->state.recent_conn_id;
+    break;
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -533,13 +540,7 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
 
 #ifdef USE_SSL
       if(conn && tsi->backend != CURLSSLBACKEND_NONE) {
-        unsigned int i;
-        for(i = 0; i < (sizeof(conn->ssl) / sizeof(conn->ssl[0])); ++i) {
-          if(conn->ssl[i].use) {
-            tsi->internals = Curl_ssl->get_internals(&conn->ssl[i], info);
-            break;
-          }
-        }
+        tsi->internals = Curl_ssl_get_internals(data, FIRSTSOCKET, info, 0);
       }
 #endif
     }
@@ -578,7 +579,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   CURLcode result = CURLE_UNKNOWN_OPTION;
 
   if(!data)
-    return result;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, info);
 

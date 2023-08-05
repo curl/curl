@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: mail-rcpt-allowfails
 Help: Allow RCPT TO command to fail for some recipients
@@ -7,6 +7,7 @@ Added: 7.69.0
 Category: smtp
 Example: --mail-rcpt-allowfails --mail-rcpt dest@example.com smtp://example.com
 See-also: mail-rcpt
+Multi: boolean
 ---
 When sending data to multiple recipients, by default curl will abort SMTP
 conversation if at least one of the recipients causes RCPT TO command to

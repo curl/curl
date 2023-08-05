@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_CAPATH 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_CAPATH 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_CAPATH \- directory holding CA certificates
 .SH SYNOPSIS
@@ -34,12 +34,12 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CAPATH, char *capath);
 .SH DESCRIPTION
 Pass a char * to a null-terminated string naming a directory holding multiple
 CA certificates to verify the peer with. If libcurl is built against OpenSSL,
-the certificate directory must be prepared using the openssl c_rehash utility.
+the certificate directory must be prepared using the OpenSSL c_rehash utility.
 This makes sense only when used in combination with the
 \fICURLOPT_SSL_VERIFYPEER(3)\fP option.
 
 The \fICURLOPT_CAPATH(3)\fP function apparently does not work in Windows due
-to some limitation in openssl.
+to some limitation in OpenSSL.
 
 The application does not have to keep the string around after setting this
 option.
@@ -61,7 +61,7 @@ if(curl) {
 .fi
 .SH AVAILABILITY
 This option is supported by the OpenSSL, GnuTLS and mbedTLS (since 7.56.0)
-backends. The NSS backend provides the option only for backward compatibility.
+backends.
 .SH RETURN VALUE
 CURLE_OK if supported; or an error such as:
 

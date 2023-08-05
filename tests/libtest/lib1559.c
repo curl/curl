@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,7 @@
 #define EXCESSIVE 10*1000*1000
 int test(char *URL)
 {
-  CURLcode res = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   char *longurl = malloc(EXCESSIVE);
   CURLU *u;

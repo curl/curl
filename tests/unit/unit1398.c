@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -88,5 +88,9 @@ fail_unless(!strcmp(output, "     bug     bu"), "wrong output");
 rc = curl_msnprintf(output, 16, "%8d%8d", 1234, 5678);
 fail_unless(rc == 15, "return code should be 15");
 fail_unless(!strcmp(output, "    1234    567"), "wrong output");
+
+/* double precision */
+rc = curl_msnprintf(output, 24, "%.*1$.99d", 3, 5678);
+fail_unless(rc == 0, "return code should be 0");
 
 UNITTEST_STOP

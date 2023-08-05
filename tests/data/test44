@@ -20,6 +20,9 @@ blablabla
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -27,10 +30,10 @@ http
 HTTP RFC1867-type formposting without Expect: header
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=daniel -F tool=curl -F file=@log/test%TESTNUMBER.txt -H "Expect:"
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=daniel -F tool=curl -F file=@%LOGDIR/test%TESTNUMBER.txt -H "Expect:"
 </command>
 # We create this file before the command is invoked!
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo-
 This is a moo-
 bar

@@ -7,8 +7,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2012 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,6 +31,7 @@
  * be shared.
  */
 
+#include <curl/curl.h>
 #include "timeval.h"
 
 struct connectdata;
@@ -38,7 +39,8 @@ struct connectdata;
 struct conncache {
   struct Curl_hash hash;
   size_t num_conn;
-  long next_connection_id;
+  curl_off_t next_connection_id;
+  curl_off_t next_easy_id;
   struct curltime last_cleanup;
   /* handle used for closing cached connections */
   struct Curl_easy *closure_handle;

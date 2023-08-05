@@ -6,6 +6,6 @@ database = EdelCurlRoot-ca.db
 certificate = EdelCurlRoot-ca.crt
 private_key = EdelCurlRoot-ca.key
 crlnumber = EdelCurlRoot-ca.cnt
-default_md = sha1
+default_md = sha256
 default_days = 365
 default_crl_days = 30

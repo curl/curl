@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,6 +64,17 @@ struct gss_ctx_id_t_desc_struct {
   OM_uint32 flags;
   char creds[MAX_CREDS_LENGTH];
 };
+
+/* simple implementation of strndup(), which isn't portable */
+static char *my_strndup(const char *ptr, size_t len)
+{
+  char *copy = malloc(len + 1);
+  if(!copy)
+    return NULL;
+  memcpy(copy, ptr, len);
+  copy[len] = '\0';
+  return copy;
+}
 
 OM_uint32 gss_init_sec_context(OM_uint32 *min,
             gss_const_cred_id_t initiator_cred_handle,
@@ -280,7 +291,7 @@ OM_uint32 gss_import_name(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
-  name = strndup(input_name_buffer->value, input_name_buffer->length);
+  name = my_strndup(input_name_buffer->value, input_name_buffer->length);
   if(!name) {
     *min = GSS_NO_MEMORY;
     return GSS_S_FAILURE;

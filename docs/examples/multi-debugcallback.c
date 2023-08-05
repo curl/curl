@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,13 +36,10 @@
 /* curl stuff */
 #include <curl/curl.h>
 
-typedef char bool;
 #define TRUE 1
 
-static
-void dump(const char *text,
-          FILE *stream, unsigned char *ptr, size_t size,
-          bool nohex)
+static void dump(const char *text, FILE *stream, unsigned char *ptr,
+                 size_t size, char nohex)
 {
   size_t i;
   size_t c;
@@ -126,7 +123,7 @@ int my_trace(CURL *handle, curl_infotype type,
 }
 
 /*
- * Simply download a HTTP file.
+ * Simply download an HTTP file.
  */
 int main(void)
 {

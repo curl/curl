@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@ struct URLPattern {
   union {
     struct {
       char **elements;
-      int size;
+      curl_off_t size;
       int ptr_s;
     } Set;
     struct {
@@ -48,11 +48,11 @@ struct URLPattern {
       int step;
     } CharRange;
     struct {
-      unsigned long min_n;
-      unsigned long max_n;
+      curl_off_t min_n;
+      curl_off_t max_n;
       int padlength;
-      unsigned long ptr_n;
-      unsigned long step;
+      curl_off_t ptr_n;
+      curl_off_t step;
     } NumRange;
   } content;
 };
@@ -70,7 +70,7 @@ struct URLGlob {
   size_t pos;        /* column position of error or 0 */
 };
 
-CURLcode glob_url(struct URLGlob**, char *, unsigned long *, FILE *);
+CURLcode glob_url(struct URLGlob**, char *, curl_off_t *, FILE *);
 CURLcode glob_next_url(char **, struct URLGlob *);
 CURLcode glob_match_url(char **, char *, struct URLGlob *);
 void glob_cleanup(struct URLGlob *glob);

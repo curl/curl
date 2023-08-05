@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -95,6 +95,7 @@ if test "x$OPT_WOLFSSL" != xno; then
    They are set up properly later if it is detected.  */
 #undef SIZEOF_LONG
 #undef SIZEOF_LONG_LONG
+#include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
 	]],[[
 	  return wolfSSL_Init();
@@ -122,7 +123,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       check_for_ca_bundle=1
 
       dnl wolfssl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
-      AX_COMPILE_CHECK_SIZEOF(long long)
+      CURL_SIZEOF(long long)
 
       LIBS="$addlib -lm $LIBS"
 
@@ -142,6 +143,15 @@ if test "x$OPT_WOLFSSL" != xno; then
         ]
         )
 
+      dnl if this symbol is present, we can make use of BIO filter chains
+      AC_CHECK_FUNC(wolfSSL_BIO_set_shutdown,
+        [
+            AC_DEFINE(HAVE_WOLFSSL_FULL_BIO, 1,
+                      [if you have wolfSSL_BIO_set_shutdown])
+            WOLFSSL_FULL_BIO=1
+        ]
+        )
+
       if test -n "$wolfssllibpath"; then
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
@@ -153,7 +163,8 @@ if test "x$OPT_WOLFSSL" != xno; then
           AC_MSG_NOTICE([Added $wolfssllibpath to CURL_LIBRARY_PATH])
         fi
       fi
-
+    else
+        AC_MSG_ERROR([--with-wolfssl but wolfSSL was not found or doesn't work])
     fi
 
   fi dnl wolfSSL not disabled

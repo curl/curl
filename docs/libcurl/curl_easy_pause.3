@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_easy_pause 3 "17 Dec 2007" "libcurl 7.18.0" "libcurl Manual"
+.TH curl_easy_pause 3 "17 Dec 2007" "libcurl" "libcurl"
 .SH NAME
 curl_easy_pause - pause and unpause a connection
 .SH SYNOPSIS
@@ -45,8 +45,11 @@ While it may feel tempting, take care and notice that you cannot call this
 function from another thread. To unpause, you may for example call it from the
 progress callback (\fICURLOPT_PROGRESSFUNCTION(3)\fP).
 
-When this function is called to unpause receiving, the chance is high that you
-will get your write callback called before this function returns.
+When this function is called to unpause receiving, the write callback might
+get called before this function returns to deliver cached content. When
+libcurl delivers such cached data to the write callback, it will be delivered
+as fast as possible, which may overstep the boundary set in
+\fICURLOPT_MAX_RECV_SPEED_LARGE(3)\fP etc.
 
 The \fBhandle\fP argument identifies the transfer you want to pause or
 unpause.

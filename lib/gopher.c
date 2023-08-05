@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,6 +30,7 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "progress.h"
 #include "gopher.h"
@@ -117,7 +118,9 @@ static CURLcode gopher_connect(struct Curl_easy *data, bool *done)
 static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
-  CURLcode result = Curl_ssl_connect(data, conn, FIRSTSOCKET);
+  CURLcode result;
+
+  result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
   if(result)
     connclose(conn, "Failed TLS connection");
   *done = TRUE;
@@ -236,4 +239,4 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
   return CURLE_OK;
 }
-#endif /*CURL_DISABLE_GOPHER*/
+#endif /* CURL_DISABLE_GOPHER */

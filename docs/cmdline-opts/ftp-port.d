@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ftp-port
 Arg: <address>
@@ -11,6 +11,7 @@ Example: -P - ftp:/example.com
 Example: -P eth0 ftp:/example.com
 Example: -P 192.168.0.2 ftp:/example.com
 Added: 4.0
+Multi: single
 ---
 Reverses the default initiator/listener roles when connecting with FTP. This
 option makes curl use active mode. curl then tells the server to connect back
@@ -28,12 +29,12 @@ e.g. "my.host.domain" to specify the machine
 make curl pick the same IP address that is already used for the control
 connection
 .RE
+.IP
 
-If this option is used several times, the last one will be used. Disable the
-use of PORT with --ftp-pasv. Disable the attempt to use the EPRT command
-instead of PORT by using --disable-eprt. EPRT is really PORT++.
+Disable the use of PORT with --ftp-pasv. Disable the attempt to use the EPRT
+command instead of PORT by using --disable-eprt. EPRT is really PORT++.
 
-You can also append \&":[start]-[end]\&" to the right of the address, to tell
+You can also append ":[start]-[end]\&" to the right of the address, to tell
 curl what TCP port range to use. That means you specify a port range, from a
 lower to a higher number. A single number works as well, but do note that it
 increases the risk of failure since the port may not be available.

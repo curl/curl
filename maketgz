@@ -9,7 +9,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -64,6 +64,7 @@ numeric=`perl -e 'printf("%02x%02x%02x\n", '"$major, $minor, $patch);"`
 HEADER=include/curl/curlver.h
 CHEADER=src/tool_version.h
 PLIST=lib/libcurl.plist
+PLISTO=$PLIST
 
 if test -z "$only"; then
   ext=".dist"
@@ -93,6 +94,9 @@ rm -f "$HEADER.bak"
 # Replace version number in header file:
 sed -i.bak 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER
 rm -f "$CHEADER.bak"
+
+# Replace version number in plist file:
+sed "s/@CURL_PLIST_VERSION@/$curlversion/g" < $PLISTO.in >$PLIST
 
 if test -n "$only"; then
   # done!

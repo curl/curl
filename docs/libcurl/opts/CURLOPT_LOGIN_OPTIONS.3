@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_LOGIN_OPTIONS 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_LOGIN_OPTIONS 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_LOGIN_OPTIONS \- login options
 .SH SYNOPSIS
@@ -35,13 +35,19 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOGIN_OPTIONS, char *options);
 Pass a char * as parameter, which should be pointing to the null-terminated
 \fIoptions\fP string to use for the transfer.
 
-For more information about the login options please see RFC2384, RFC5092 and
-IETF draft draft-earhart-url-smtp-00.txt
+For more information about the login options please see RFC 2384, RFC 5092 and
+the IETF draft \fBdraft-earhart-url-smtp-00.txt\fP.
 
 \fICURLOPT_LOGIN_OPTIONS(3)\fP can be used to set protocol specific login
 options, such as the preferred authentication mechanism via "AUTH=NTLM" or
 "AUTH=*", and should be used in conjunction with the \fICURLOPT_USERNAME(3)\fP
 option.
+
+Since 8.2.0, IMAP supports the login option "AUTH=+LOGIN". With this option,
+curl uses the plain (not SASL) LOGIN IMAP command even if the server advertises
+SASL authentication. Care should be taken in using this option, as it will send
+out your password in plain text. This will not work if the IMAP server disables
+the plain LOGIN (e.g. to prevent password snooping).
 
 The application does not have to keep the string around after setting this
 option.

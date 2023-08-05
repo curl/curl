@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_share_init 3 "Aug 3, 2003" "libcurl 7.10.7" "libcurl Manual"
+.TH curl_share_init 3 "Aug 3, 2003" "libcurl" "libcurl"
 .SH NAME
 curl_share_init - Create a shared object
 .SH SYNOPSIS
@@ -31,10 +31,11 @@ curl_share_init - Create a shared object
 CURLSH *curl_share_init();
 .fi
 .SH DESCRIPTION
-This function returns a CURLSH handle to be used as input to all the other
-share-functions, sometimes referred to as a share handle in some places in the
-documentation. This init call MUST have a corresponding call to
-\fIcurl_share_cleanup\fP when all operations using the share are complete.
+This function returns a pointer to a \fICURLSH\fP handle to be used as input
+to all the other share-functions, sometimes referred to as a share handle in
+some places in the documentation. This init call MUST have a corresponding
+call to \fIcurl_share_cleanup(3)\fP when all operations using the share are
+complete.
 
 This \fIshare handle\fP is what you pass to curl using the
 \fICURLOPT_SHARE(3)\fP option with \fIcurl_easy_setopt(3)\fP, to make that

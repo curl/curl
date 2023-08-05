@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,10 +27,38 @@
 #include "curl_setup.h"
 
 #ifdef ENABLE_QUIC
+struct Curl_cfilter;
+struct Curl_easy;
+struct connectdata;
+struct Curl_addrinfo;
+
+void Curl_quic_ver(char *p, size_t len);
+
 CURLcode Curl_qlogdir(struct Curl_easy *data,
                       unsigned char *scid,
                       size_t scidlen,
                       int *qlogfdp);
-#endif
+
+
+CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
+                             struct Curl_easy *data,
+                             struct connectdata *conn,
+                             const struct Curl_addrinfo *ai,
+                             int transport);
+
+bool Curl_conn_is_http3(const struct Curl_easy *data,
+                        const struct connectdata *conn,
+                        int sockindex);
+
+extern struct Curl_cftype Curl_cft_http3;
+
+#else /* ENABLE_QUIC */
+
+#define Curl_conn_is_http3(a,b,c)   FALSE
+
+#endif /* !ENABLE_QUIC */
+
+CURLcode Curl_conn_may_http3(struct Curl_easy *data,
+                             const struct connectdata *conn);
 
 #endif /* HEADER_CURL_VQUIC_QUIC_H */

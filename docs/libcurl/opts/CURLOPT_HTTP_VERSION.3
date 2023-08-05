@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_HTTP_VERSION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_HTTP_VERSION 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_HTTP_VERSION \- HTTP protocol version to use
 .SH SYNOPSIS
@@ -66,13 +66,12 @@ prior knowledge that the server supports HTTP/2 straight away. HTTPS requests
 will still do HTTP/2 the standard way with negotiated protocol version in the
 TLS handshake. (Added in 7.49.0)
 .IP CURL_HTTP_VERSION_3
-(Added in 7.66.0) Setting this value will make libcurl attempt to use HTTP/3
-directly to server given in the URL. Note that this cannot gracefully
-downgrade to earlier HTTP version if the server does not support HTTP/3.
-
-For more reliably upgrading to HTTP/3, set the preferred version to something
-lower and let the server announce its HTTP/3 support via Alt-Svc:. See
-\fICURLOPT_ALTSVC(3)\fP.
+(Added in 7.66.0) This option makes libcurl attempt to use HTTP/3 to the host
+given in the URL, with fallback to earlier HTTP versions if needed.
+.IP CURL_HTTP_VERSION_3ONLY
+(Added in 7.88.0) Setting this value will make libcurl attempt to use HTTP/3
+directly to server given in the URL but will not downgrade to earlier HTTP
+version if the server does not support HTTP/3.
 .SH DEFAULT
 Since curl 7.62.0: CURL_HTTP_VERSION_2TLS
 
@@ -85,7 +84,8 @@ CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode ret;
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
+                   (long)CURL_HTTP_VERSION_2TLS);
   ret = curl_easy_perform(curl);
   if(ret == CURLE_HTTP_RETURNED_ERROR) {
     /* an HTTP response error problem */

@@ -1,0 +1,32 @@
+<testcase>
+<info>
+<keywords>
+URL
+</keywords>
+</info>
+
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+65536 bytes long host name in URL
+</name>
+<file name="%LOGDIR/input%TESTNUM">
+url = http://%repeat[65536 x a]%/399
+</file>
+<command>
+-K %LOGDIR/input%TESTNUM
+</command>
+</client>
+
+<verify>
+# 3 == CURLE_URL_MALFORMAT
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

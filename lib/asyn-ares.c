@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -45,15 +45,6 @@
 #ifdef __VMS
 #include <in.h>
 #include <inet.h>
-#endif
-
-#ifdef HAVE_PROCESS_H
-#include <process.h>
-#endif
-
-#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
-#undef in_addr_t
-#define in_addr_t unsigned long
 #endif
 
 #include "urldata.h"
@@ -115,6 +106,7 @@ struct thread_data {
 #ifndef HAVE_CARES_GETADDRINFO
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 #endif
+  char hostname[1];
 };
 
 /* How long we are willing to wait for additional parallel responses after
@@ -252,8 +244,6 @@ void Curl_resolver_kill(struct Curl_easy *data)
  */
 static void destroy_async_data(struct Curl_async *async)
 {
-  free(async->hostname);
-
   if(async->tdata) {
     struct thread_data *res = async->tdata;
     if(res) {
@@ -265,8 +255,6 @@ static void destroy_async_data(struct Curl_async *async)
     }
     async->tdata = NULL;
   }
-
-  async->hostname = NULL;
 }
 
 /*
@@ -749,7 +737,7 @@ static void addrinfo_cb(void *arg, int status, int timeouts,
  * Curl_resolver_getaddrinfo() - when using ares
  *
  * Returns name information about the given hostname and port number. If
- * successful, the 'hostent' is returned and the forth argument will point to
+ * successful, the 'hostent' is returned and the fourth argument will point to
  * memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
@@ -758,25 +746,18 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                                                 int port,
                                                 int *waitp)
 {
-  char *bufp;
-
+  struct thread_data *res = NULL;
+  size_t namelen = strlen(hostname);
   *waitp = 0; /* default to synchronous response */
 
-  bufp = strdup(hostname);
-  if(bufp) {
-    struct thread_data *res = NULL;
-    free(data->state.async.hostname);
-    data->state.async.hostname = bufp;
+  res = calloc(sizeof(struct thread_data) + namelen, 1);
+  if(res) {
+    strcpy(res->hostname, hostname);
+    data->state.async.hostname = res->hostname;
     data->state.async.port = port;
     data->state.async.done = FALSE;   /* not done */
     data->state.async.status = 0;     /* clear */
     data->state.async.dns = NULL;     /* clear */
-    res = calloc(sizeof(struct thread_data), 1);
-    if(!res) {
-      free(data->state.async.hostname);
-      data->state.async.hostname = NULL;
-      return NULL;
-    }
     data->state.async.tdata = res;
 
     /* initial status - failed */
@@ -789,13 +770,22 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
       int pf = PF_INET;
       memset(&hints, 0, sizeof(hints));
 #ifdef CURLRES_IPV6
-      if(Curl_ipv6works(data))
+      if((data->conn->ip_version != CURL_IPRESOLVE_V4) &&
+         Curl_ipv6works(data)) {
         /* The stack seems to be IPv6-enabled */
-        pf = PF_UNSPEC;
+        if(data->conn->ip_version == CURL_IPRESOLVE_V6)
+          pf = PF_INET6;
+        else
+          pf = PF_UNSPEC;
+      }
 #endif /* CURLRES_IPV6 */
       hints.ai_family = pf;
       hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP)?
         SOCK_STREAM : SOCK_DGRAM;
+      /* Since the service is a numerical one, set the hint flags
+       * accordingly to save a call to getservbyname in inside C-Ares
+       */
+      hints.ai_flags = ARES_AI_NUMERICSERV;
       msnprintf(service, sizeof(service), "%d", port);
       res->num_pending = 1;
       ares_getaddrinfo((ares_channel)data->state.async.resolver, hostname,
@@ -804,7 +794,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 #else
 
 #ifdef HAVE_CARES_IPV6
-    if(Curl_ipv6works(data)) {
+    if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
       /* The stack seems to be IPv6-enabled */
       res->num_pending = 2;
 

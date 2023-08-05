@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: fail-early
 Help: Fail on first transfer error, do not continue
@@ -6,6 +6,8 @@ Added: 7.52.0
 Category: curl
 Example: --fail-early $URL https://two.example
 See-also: fail fail-with-body
+Multi: boolean
+Scope: global
 ---
 Fail and exit on the first detected transfer error.
 
@@ -18,8 +20,6 @@ successful transfers.
 Using this option, curl will instead return an error on the first transfer
 that fails, independent of the amount of URLs that are given on the command
 line. This way, no transfer failures go undetected by scripts and similar.
-
-This option is global and does not need to be specified for each use of --next.
 
 This option does not imply --fail, which causes transfers to fail due to the
 server's HTTP status code. You can combine the two options, however note --fail

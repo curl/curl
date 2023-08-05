@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: form
 Short: F
@@ -10,6 +10,7 @@ Category: http upload
 Example: --form "name=curl" --form "file=@loadthis" $URL
 Added: 5.0
 See-also: data form-string form-escape
+Multi: append
 ---
 For HTTP protocol family, this lets curl emulate a filled-in form in which a
 user has pressed the submit button. This causes curl to POST data using the
@@ -34,8 +35,8 @@ be effectively read at transmission time; since the full size is unknown
 before the transfer starts, such data is sent as chunks by HTTP and rejected
 by IMAP.
 
-Example: send an image to an HTTP server, where \&'profile' is the name of the
-form-field to which the file portrait.jpg will be the input:
+Example: send an image to an HTTP server, where 'profile' is the name of the
+form-field to which the file **portrait.jpg** will be the input:
 
  curl -F profile=@portrait.jpg https://example.com/upload.cgi
 
@@ -132,5 +133,3 @@ base64 attached file:
       -F '=@localfile;encoder=base64' ... smtp://example.com
 
 See further examples and details in the MANUAL.
-
-This option can be used multiple times.

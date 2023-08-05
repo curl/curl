@@ -5,8 +5,8 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Howard Chu, <hyc@openldap.org>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,6 +47,7 @@
 #include "transfer.h"
 #include "curl_ldap.h"
 #include "curl_base64.h"
+#include "cfilters.h"
 #include "connect.h"
 #include "curl_sasl.h"
 #include "strcase.h"
@@ -294,7 +295,7 @@ static CURLcode oldap_parse_login_options(struct connectdata *conn)
     const char *value;
 
     while(*ptr && *ptr != '=')
-        ptr++;
+      ptr++;
 
     value = ptr + 1;
 
@@ -500,8 +501,7 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
   struct ldapconninfo *li = conn->proto.ldapc;
   bool ssldone = 0;
 
-  result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
-                                        FIRSTSOCKET, &ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   if(!result) {
     state(data, newstate);
 
@@ -1068,8 +1068,8 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 
         if(!binary) {
           /* check for leading or trailing whitespace */
-          if(ISSPACE(bvals[i].bv_val[0]) ||
-             ISSPACE(bvals[i].bv_val[bvals[i].bv_len - 1]))
+          if(ISBLANK(bvals[i].bv_val[0]) ||
+             ISBLANK(bvals[i].bv_val[bvals[i].bv_len - 1]))
             binval = 1;
           else {
             /* check for unprintable characters */
@@ -1153,7 +1153,7 @@ ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
   (void)arg;
   if(opt == LBER_SB_OPT_DATA_READY) {
     struct Curl_easy *data = sbiod->sbiod_pvt;
-    return Curl_ssl_data_pending(data->conn, FIRSTSOCKET);
+    return Curl_conn_data_pending(data, FIRSTSOCKET);
   }
   return 0;
 }

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2019 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -150,6 +150,11 @@ my %api = (
     'curl_url_strerror' => 'API',
     'curl_version' => 'API',
     'curl_version_info' => 'API',
+    'curl_easy_header' => 'API',
+    'curl_easy_nextheader' => 'API',
+    'curl_ws_meta' => 'API',
+    'curl_ws_recv' => 'API',
+    'curl_ws_send' => 'API',
 
     # the following functions are provided globally in debug builds
     'curl_easy_perform_ev' => 'debug-build',

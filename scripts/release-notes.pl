@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2020 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -88,6 +88,7 @@ sub getref {
 # 'num'
 # 'https://github.com/curl/curl/issues/6939'
 # 'https://github.com/curl/curl-www/issues/69'
+# 'https://elsewhere.example.com/discussion'
 
 sub extract {
     my ($ref)=@_;
@@ -99,10 +100,11 @@ sub extract {
         # return the plain number
         return $1;
     }
-    else {
-        # return the URL
+    elsif($ref =~ /:\/\//) {
+        # contains a '://', return the URL
         return $ref;
     }
+    # false alarm, not a valid line
 }
 
 my $short;
@@ -123,6 +125,7 @@ for my $l (@gitlog) {
     elsif(($l =~ /^    (.*)/) && !$first) {
         # first line
         $short = $1;
+        $short =~ s/ ?\[(ci skip|skip ci)\]//g;
         $first = 1;
         push @line, $short;
     }
@@ -131,13 +134,16 @@ for my $l (@gitlog) {
         my $line = $1;
 
         if($line =~ /^Fixes(:|) *(.*)/i) {
-            push @fixes, extract($2);
+            my $ref = extract($2);
+            push @fixes, $ref if($ref);
         }
         elsif($line =~ /^Clo(s|)es(:|) *(.*)/i) {
-            push @closes, extract($3);
+            my $ref = extract($3);
+            push @closes, $ref if($ref);
         }
         elsif($line =~ /^Bug: (.*)/i) {
-            push @bug, extract($1);
+            my $ref = extract($1);
+            push @bug, $ref if($ref);
         }
     }
 }

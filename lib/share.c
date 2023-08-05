@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,9 +29,11 @@
 #include "share.h"
 #include "psl.h"
 #include "vtls/vtls.h"
-#include "curl_memory.h"
+#include "hsts.h"
 
-/* The last #include file should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
 #include "memdebug.h"
 
 struct Curl_share *
@@ -41,7 +43,7 @@ curl_share_init(void)
   if(share) {
     share->magic = CURL_GOOD_SHARE;
     share->specifier |= (1<<CURL_LOCK_DATA_SHARE);
-    Curl_init_dnscache(&share->hostcache);
+    Curl_init_dnscache(&share->hostcache, 23);
   }
 
   return share;
@@ -85,6 +87,18 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
           res = CURLSHE_NOMEM;
       }
 #else   /* CURL_DISABLE_HTTP */
+      res = CURLSHE_NOT_BUILT_IN;
+#endif
+      break;
+
+    case CURL_LOCK_DATA_HSTS:
+#ifndef CURL_DISABLE_HSTS
+      if(!share->hsts) {
+        share->hsts = Curl_hsts_init();
+        if(!share->hsts)
+          res = CURLSHE_NOMEM;
+      }
+#else   /* CURL_DISABLE_HSTS */
       res = CURLSHE_NOT_BUILT_IN;
 #endif
       break;
@@ -137,6 +151,16 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
         share->cookies = NULL;
       }
 #else   /* CURL_DISABLE_HTTP */
+      res = CURLSHE_NOT_BUILT_IN;
+#endif
+      break;
+
+    case CURL_LOCK_DATA_HSTS:
+#ifndef CURL_DISABLE_HSTS
+      if(share->hsts) {
+        Curl_hsts_cleanup(&share->hsts);
+      }
+#else   /* CURL_DISABLE_HSTS */
       res = CURLSHE_NOT_BUILT_IN;
 #endif
       break;
@@ -205,6 +229,10 @@ curl_share_cleanup(struct Curl_share *share)
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   Curl_cookie_cleanup(share->cookies);
+#endif
+
+#ifndef CURL_DISABLE_HSTS
+  Curl_hsts_cleanup(&share->hsts);
 #endif
 
 #ifdef USE_SSL

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2016 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -56,14 +56,18 @@ sub manpresent {
 
 sub file {
     my ($f) = @_;
-    open(F, "<$f") ||
+    open(my $fh, "<", "$f") ||
         die "no file";
     my $line = 1;
-    while(<F>) {
+    while(<$fh>) {
         chomp;
         my $l = $_;
         while($l =~ s/\\f(.)([^ ]*)\\f(.)//) {
             my ($pre, $str, $post)=($1, $2, $3);
+            if($str =~ /^\\f[ib]/i) {
+                print "error: $f:$line: double-highlight\n";
+                $errors++;
+            }
             if($post ne "P") {
                 print "error: $f:$line: missing \\fP after $str\n";
                 $errors++;
@@ -96,7 +100,7 @@ sub file {
         }
         $line++;
     }
-    close(F);
+    close($fh);
 }
 
 foreach my $f (@f) {

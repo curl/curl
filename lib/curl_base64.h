@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,11 +24,18 @@
  *
  ***************************************************************************/
 
+#ifndef BUILDING_LIBCURL
+/* this renames functions so that the tool code can use the same code
+   without getting symbol collisions */
+#define Curl_base64_encode(a,b,c,d) curlx_base64_encode(a,b,c,d)
+#define Curl_base64url_encode(a,b,c,d) curlx_base64url_encode(a,b,c,d)
+#define Curl_base64_decode(a,b,c) curlx_base64_decode(a,b,c)
+#endif
+
 CURLcode Curl_base64_encode(const char *inputbuff, size_t insize,
                             char **outptr, size_t *outlen);
 CURLcode Curl_base64url_encode(const char *inputbuff, size_t insize,
                                char **outptr, size_t *outlen);
 CURLcode Curl_base64_decode(const char *src,
                             unsigned char **outptr, size_t *outlen);
-
 #endif /* HEADER_CURL_BASE64_H */

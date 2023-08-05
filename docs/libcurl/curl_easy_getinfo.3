@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl_easy_getinfo 3 "11 Feb 2009" "libcurl 7.19.4" "libcurl Manual"
+.TH curl_easy_getinfo 3 "11 Feb 2009" "libcurl" "libcurl"
 .SH NAME
 curl_easy_getinfo - extract information from a curl handle
 .SH SYNOPSIS
@@ -33,12 +33,11 @@ CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );
 .fi
 .SH DESCRIPTION
 Request internal information from the curl session with this function. The
-third argument \fBMUST\fP be a pointer to a long, a pointer to a char *, a
-pointer to a struct curl_slist * or a pointer to a double (as this
-documentation describes further down). The data pointed-to will be filled in
-accordingly and can be relied upon only if the function returns CURLE_OK. Use
-this function AFTER a performed transfer if you want to get transfer related
-data.
+third argument \fBMUST\fP be pointing to the specific type of the used option
+which is documented in each man page of the option. The data pointed-to will
+be filled in accordingly and can be relied upon only if the function returns
+CURLE_OK. Use this function AFTER a performed transfer if you want to get
+transfer related data.
 
 You should not free the memory returned by this function unless it is
 explicitly mentioned below.
@@ -170,7 +169,7 @@ Upload size. See \fICURLINFO_CONTENT_LENGTH_UPLOAD_T(3)\fP
 Content type from the Content-Type header.
 See \fICURLINFO_CONTENT_TYPE(3)\fP
 .IP CURLINFO_RETRY_AFTER
-The value from the from the Retry-After header.
+The value from the Retry-After header.
 See \fICURLINFO_RETRY_AFTER(3)\fP
 .IP CURLINFO_PRIVATE
 User's private data pointer.
@@ -203,7 +202,7 @@ See \fICURLINFO_LOCAL_PORT(3)\fP
 List of all known cookies.
 See \fICURLINFO_COOKIELIST(3)\fP
 .IP CURLINFO_LASTSOCKET
-Last socket used.
+(Deprecated) Last socket used.
 See \fICURLINFO_LASTSOCKET(3)\fP
 .IP CURLINFO_ACTIVESOCKET
 The session's active socket.
@@ -243,11 +242,17 @@ See \fICURLINFO_RTSP_SERVER_CSEQ(3)\fP
 RTSP CSeq last received.
 See \fICURLINFO_RTSP_CSEQ_RECV(3)\fP
 .IP CURLINFO_PROTOCOL
-The protocol used for the connection. (Added in 7.52.0)
+(Deprecated) The protocol used for the connection. (Added in 7.52.0)
 See \fICURLINFO_PROTOCOL(3)\fP
 .IP CURLINFO_SCHEME
 The scheme used for the connection. (Added in 7.52.0)
 See \fICURLINFO_SCHEME(3)\fP
+.IP CURLINFO_CONN_ID
+The ID of the last connection used by the transfer. (Added in 8.2.0)
+See \fICURLINFO_CONN_ID(3)\fP
+.IP CURLINFO_XFER_ID
+The ID of the transfer. (Added in 8.2.0)
+See \fICURLINFO_XFER_ID(3)\fP
 .SH TIMES
 .nf
 An overview of the six time values available from curl_easy_getinfo()

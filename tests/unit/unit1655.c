@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,7 +47,7 @@ UNITTEST_START
  * Prove detection of other invalid input.
  */
 do {
-  const char *max =
+  static const char max[] =
     /* ..|....1.........2.........3.........4.........5.........6... */
     /* 3456789012345678901234567890123456789012345678901234567890123 */
     "this.is.a.maximum-length.hostname."                  /* 34:  34 */
@@ -59,7 +59,7 @@ do {
     "that.is.two-hundred.and.fifty-six."                  /* 34: 231 */
     "including.the.last.null."                            /* 24: 255 */
     "";
-  const char *toolong =
+  static const char toolong[] =
     /* ..|....1.........2.........3.........4.........5.........6... */
     /* 3456789012345678901234567890123456789012345678901234567890123 */
     "here.is.a.hostname.which.is.just.barely.too.long."   /* 49:  49 */
@@ -70,10 +70,10 @@ do {
     "a.trailing.dot.may.have.up.to."                      /* 30: 230 */
     "255.characters.never.more."                          /* 26: 256 */
     "";
-  const char *emptylabel =
+  static const char emptylabel[] =
     "this.is.an.otherwise-valid.hostname."
     ".with.an.empty.label.";
-  const char *outsizelabel =
+  static const char outsizelabel[] =
     "this.is.an.otherwise-valid.hostname."
     "with-a-label-of-greater-length-than-the-sixty-three-characters-"
     "specified.in.the.RFCs.";
@@ -105,7 +105,7 @@ do {
     struct demo victim;
     DOHcode d;
 
-    victim.canary1 = 87; /* magic numbers, arbritrarily picked */
+    victim.canary1 = 87; /* magic numbers, arbitrarily picked */
     victim.canary2 = 35;
     victim.canary3 = 41;
     d = doh_encode(name, DNS_TYPE_A, victim.dohbuffer,
@@ -184,9 +184,7 @@ UNITTEST_STOP
 #else /* CURL_DISABLE_DOH */
 
 UNITTEST_START
-{
-  return 1; /* nothing to do, just fail */
-}
+/* nothing to do, just succeed */
 UNITTEST_STOP
 
 #endif

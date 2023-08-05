@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -123,13 +123,13 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   }
   return 0;
 
-  test_cleanup:
+test_cleanup:
 
   return 1;
 }
 
 /* for debugging: */
-/*#define SINGLETEST 9*/
+/* #define SINGLETEST 9 */
 
 int test(char *URL)
 {
@@ -164,7 +164,7 @@ int test(char *URL)
   printf("%d\n", status);
   return status;
 
-  test_cleanup:
+test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

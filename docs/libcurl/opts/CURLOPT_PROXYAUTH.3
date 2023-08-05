@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_PROXYAUTH 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_PROXYAUTH 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_PROXYAUTH \- HTTP proxy authentication methods
 .SH SYNOPSIS
@@ -40,8 +40,8 @@ you allow it to use. For some methods, this will induce an extra network
 round-trip. Set the actual name and password with the
 \fICURLOPT_PROXYUSERPWD(3)\fP option.
 
-The bitmask can be constructed by or'ing together the bits fully listed and
-described in the \fICURLOPT_HTTPAUTH(3)\fP man page.
+The bitmask can be constructed by the bits listed and described in the
+\fICURLOPT_HTTPAUTH(3)\fP man page.
 .SH DEFAULT
 CURLAUTH_BASIC
 .SH PROTOCOLS

@@ -25,9 +25,9 @@ ftps
 FTPS PORT upload with CWD
  </name>
  <command>
--k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/CWD/STOR/RETR/%TESTNUMBER -T log/upload%TESTNUMBER -P -
+-k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/CWD/STOR/RETR/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -P -
 </command>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 Moooooooooooo
  upload this
 </file>

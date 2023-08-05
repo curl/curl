@@ -72,14 +72,14 @@ lib%TESTNUMBER
 HTTP GET with progress callback and redirects changing content sizes
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip%TESTNUMBER">
+<file name="%LOGDIR/ip%TESTNUMBER">
 CL -1
 </file>
 </verify>

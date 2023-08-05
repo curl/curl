@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -50,7 +50,6 @@ static void sigpipe_ignore(struct Curl_easy *data,
   if(!data->set.no_signal) {
     struct sigaction action;
     /* first, extract the existing situation */
-    memset(&ig->old_pipe_act, 0, sizeof(struct sigaction));
     sigaction(SIGPIPE, NULL, &ig->old_pipe_act);
     action = ig->old_pipe_act;
     /* ignore this signal */

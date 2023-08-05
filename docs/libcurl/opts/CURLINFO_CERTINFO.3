@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLINFO_CERTINFO 3 "12 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
+.TH CURLINFO_CERTINFO 3 "12 Sep 2015" "libcurl" "libcurl"
 .SH NAME
 CURLINFO_CERTINFO \- get the TLS certificate chain
 .SH SYNOPSIS
@@ -33,13 +33,13 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CERTINFO,
                            struct curl_certinfo **chainp);
 .fi
 .SH DESCRIPTION
-Pass a pointer to a 'struct curl_certinfo *' and you will get it set to point to
-a struct that holds a number of linked lists with info about the certificate
-chain, assuming you had \fICURLOPT_CERTINFO(3)\fP enabled when the request was
-made. The struct reports how many certs it found and then you can extract info
-for each of those certs by following the linked lists. The info chain is
-provided in a series of data in the format "name:content" where the content is
-for the specific named data. See also the certinfo.c example.
+Pass a pointer to a \fIstruct curl_certinfo *\fP and you will get it set to
+point to a struct that holds a number of linked lists with info about the
+certificate chain, assuming you had \fICURLOPT_CERTINFO(3)\fP enabled when the
+request was made. The struct reports how many certs it found and then you can
+extract info for each of those certs by following the linked lists. The info
+chain is provided in a series of data in the format "name:content" where the
+content is for the specific named data. See also the \fIcertinfo.c\fP example.
 .SH PROTOCOLS
 All TLS-based
 .SH EXAMPLE
@@ -75,8 +75,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-This option is only working in libcurl built with OpenSSL, NSS, Schannel, GSKit
-or Secure Transport support. Schannel support added in 7.50.0. Secure Transport
+This option is only working in libcurl built with OpenSSL, Schannel, GSKit or
+Secure Transport support. Schannel support added in 7.50.0. Secure Transport
 support added in 7.79.0.
 
 Added in 7.19.1

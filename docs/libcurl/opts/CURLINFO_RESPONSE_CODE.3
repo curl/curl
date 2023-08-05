@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLINFO_RESPONSE_CODE 3 "28 Aug 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
+.TH CURLINFO_RESPONSE_CODE 3 "28 Aug 2015" libcurl libcurl
 .SH NAME
 CURLINFO_RESPONSE_CODE \- get the last response code
 .SH SYNOPSIS
@@ -33,7 +33,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_RESPONSE_CODE, long *codep);
 .fi
 .SH DESCRIPTION
 Pass a pointer to a long to receive the last received HTTP, FTP, SMTP or
-LDAP (openldap only) response code. This option was previously known as
+LDAP (OpenLDAP only) response code. This option was previously known as
 CURLINFO_HTTP_CODE in libcurl 7.10.7 and earlier.
 The stored value will be zero if no server response code has been received.
 Note that a proxy's CONNECT response should

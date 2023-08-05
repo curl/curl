@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+--data-urlencode
+--url-query
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 I am cool swsclose
+Server: Cool server/10.0
+Content-Length: 0
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+--url-query with --data-urlencode
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --url-query "my name is moo[]" --url-query "yes=s i r" --url-query "v_alue@%LOGDIR/%TESTNUMBER.txt" --url-query @%LOGDIR/%TESTNUMBER.txt --url-query "+%3d%3d" --data-urlencode "start=once upon the time"
+</command>
+<file name="%LOGDIR/%TESTNUMBER.txt">
+content to _?!#$'|<>
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol nonewline="yes">
+POST /%TESTNUMBER?my+name+is+moo%5b%5d&yes=s+i+r&v_alue=content+to+_%3f%21%23%24%27%7c%3c%3e%0a&content+to+_%3f%21%23%24%27%7c%3c%3e%0a&%3d%3d HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 24
+Content-Type: application/x-www-form-urlencoded
+
+start=once+upon+the+time
+</protocol>
+</verify>
+</testcase>

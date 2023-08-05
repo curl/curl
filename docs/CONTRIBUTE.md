@@ -4,9 +4,7 @@ This document is intended to offer guidelines on how to best contribute to the
 curl project. This concerns new features as well as corrections to existing
 flaws or bugs.
 
-## Learning curl
-
-### Join the Community
+## Join the Community
 
 Skip over to [https://curl.se/mail/](https://curl.se/mail/) and join
 the appropriate mailing list(s). Read up on details before you post
@@ -23,7 +21,7 @@ If you are at all interested in the code side of things, consider clicking
 'watch' on the [curl repo on GitHub](https://github.com/curl/curl) to be
 notified of pull requests and new issues posted there.
 
-### License and copyright
+## License and copyright
 
 When contributing with code, you agree to put your changes and new code under
 the same license curl and libcurl is already using unless stated and agreed
@@ -46,7 +44,7 @@ patch/code to us. We will credit you for your changes as far as possible, to
 give credit but also to keep a trace back to who made what changes. Please
 always provide us with your full real name when contributing,
 
-### What To Read
+## What To Read
 
 Source code, the man pages, the [INTERNALS
 document](https://curl.se/dev/internals.html),
@@ -124,7 +122,7 @@ If you do not have test cases or perhaps you have done something that is hard
 to write tests for, do explain exactly how you have otherwise tested and
 verified your changes.
 
-## Sharing Your Changes
+## Submit Your Changes
 
 ### How to get your changes into the main sources
 
@@ -133,19 +131,24 @@ GitHub](https://github.com/curl/curl/pulls), but you can also send your plain
 patch to [the curl-library mailing
 list](https://curl.se/mail/list.cgi?list=curl-library).
 
-Either way, your change will be reviewed and discussed there and you will be
-expected to correct flaws pointed out and update accordingly, or the change
-risks stalling and eventually just getting deleted without action. As a
-submitter of a change, you are the owner of that change until it has been merged.
+If you opt to post a patch on the mailing list, chances are someone will
+convert it into a pull request for you, to have the CI jobs verify it proper
+before it can be merged. Be prepared that some feedback on the proposed change
+might then come on GitHub.
 
-Respond on the list or on github about the change and answer questions and/or
+Your change will be reviewed and discussed and you will be expected to correct
+flaws pointed out and update accordingly, or the change risks stalling and
+eventually just getting deleted without action. As a submitter of a change,
+you are the owner of that change until it has been merged.
+
+Respond on the list or on GitHub about the change and answer questions and/or
 fix nits/flaws. This is important. We will take lack of replies as a sign that
 you are not anxious to get your patch accepted and we tend to simply drop such
 changes.
 
 ### About pull requests
 
-With github it is easy to send a [pull
+With GitHub it is easy to send a [pull
 request](https://github.com/curl/curl/pulls) to the curl project to have
 changes merged.
 
@@ -154,12 +157,12 @@ git commit that is easy to merge and they are easy to track and not that easy
 to lose in the flood of many emails, like they sometimes do on the mailing
 lists.
 
-Every pull request submitted will automatically be
-tested in several different ways. [See CI.md for more
+Every pull request submitted will automatically be tested in several different
+ways. [See the CI document for more
 information](https://github.com/curl/curl/blob/master/tests/CI.md).
 
 Sometimes the tests fail due to a dependency service temporarily being offline
-or otherwise unavailable, eg. package downloads. In this case you can just
+or otherwise unavailable, e.g. package downloads. In this case you can just
 try to update your pull requests to rerun the tests later as described below.
 
 You can update your pull requests by pushing new commits or force-pushing
@@ -175,44 +178,72 @@ checks and qualifications this pull request must also receive more "votes" of
 user support. More signs that people want this to happen. It could be in the
 form of messages saying so, or thumbs-up reactions on GitHub.
 
-### Making quality patches
+### Making quality changes
 
 Make the patch against as recent source versions as possible.
 
-If you have followed the tips in this document and your patch still has not been
-incorporated or responded to after some weeks, consider resubmitting it to the
-list or better yet: change it to a pull request.
+If you have followed the tips in this document and your patch still has not
+been incorporated or responded to after some weeks, consider resubmitting it
+to the list or better yet: change it to a pull request.
 
-### Write good commit messages
+### Commit messages
 
-A short guide to how to write commit messages in the curl project.
+A short guide to how to write git commit messages in the curl project.
 
     ---- start ----
     [area]: [short line describing the main effect]
            -- empty line --
-    [full description, no wider than 72 columns that describe as much as
+    [full description, no wider than 72 columns that describes as much as
     possible as to why this change is made, and possibly what things
-    it fixes and everything else that is related]
+    it fixes and everything else that is related, with unwieldy URLs replaced
+    with references like [0], [1], etc.]
            -- empty line --
-    [Closes/Fixes #1234 - if this closes or fixes a github issue]
-    [Bug: URL to source of the report or more related discussion]
-    [Reported-by: John Doe - credit the reporter]
-    [whatever-else-by: credit all helpers, finders, doers]
+    [[0] URL - Reference to a URL in the description, almost like Markdown;
+        the last numbered reference is followed by an -- empty line -- ]
+    [Follow-up to {shorthash} - if this fixes or continues a previous commit;
+        add a Ref: that commit's PR or issue if it's not a small, obvious fix;
+        followed by an -- empty line -- ]
+    [Bug: URL to the source of the report or more related discussion; use Fixes
+        for GitHub issues instead when that is appropriate]
+    [Approved-by: John Doe - credit someone who approved the PR; if you are
+        committing this for someone else using --author=... you don't need this
+        as you are implicitly approving it by committing]
+    [Authored-by: John Doe - credit the original author of the code; only use
+        this if you can't use "git commit --author=..."]
+    [Signed-off-by: John Doe - we don't use this, but don't bother removing it]
+    [whatever-else-by: credit all helpers, finders, doers; try to use one of
+        the following keywords if at all possible, for consistency:
+        Acked-by:, Assisted-by:, Co-authored-by:, Found-by:, Reported-by:,
+        Reviewed-by:, Suggested-by:, Tested-by:]
+    [Ref: #1234 - if this is related to a GitHub issue or PR, possibly one that
+                  has already been closed]
+    [Ref: URL to more information about the commit; use Bug: instead for
+        a reference to a bug on another bug tracker]
+    [Fixes #1234 - if this closes a GitHub issue; GitHub will actually
+        close the issue once this commit is merged]
+    [Closes #1234 - if this closes a GitHub PR; GitHub will actually
+        close the PR once this commit is merged]
     ---- stop ----
 
 The first line is a succinct description of the change:
 
  - use the imperative, present tense: "change" not "changed" nor "changes"
- - do not capitalize first letter
- - no dot (.) at the end
+ - do not capitalize the first letter
+ - no period (.) at the end
 
 The `[area]` in the first line can be `http2`, `cookies`, `openssl` or
 similar. There's no fixed list to select from but using the same "area" as
 other related changes could make sense.
 
-Do not forget to use commit --author="" if you commit someone else's work, and
+Do not forget to use commit --author=... if you commit someone else's work, and
 make sure that you have your own user and email setup correctly in git before
-you commit
+you commit.
+
+Add whichever header lines as appropriate, with one line per person if more
+than one person was involved. There's no need to credit yourself unless you are
+using --author=... which hides your identity. Don't include people's e-mail
+addresses in headers to avoid spam, unless they're already public from a
+previous commit; saying `{userid} on github` is OK.
 
 ### Write Access to git Repository
 
@@ -242,7 +273,7 @@ can make patches out of your changes that are suitable for mailing:
 
     git format-patch remotes/origin/master
 
-This creates files in your local directory named NNNN-[name].patch for each
+This creates files in your local directory named `NNNN-[name].patch` for each
 commit.
 
 Now send those patches off to the curl-library list. You can of course opt to
@@ -264,17 +295,22 @@ can use diff recursively:
     diff -ur curl-original-dir curl-modified-sources-dir > my-fixes.diff
 
 The GNU diff and GNU patch tools exist for virtually all platforms, including
-all kinds of Unixes and Windows:
-
-For unix-like operating systems:
-
- - [https://savannah.gnu.org/projects/patch/](https://savannah.gnu.org/projects/patch/)
- - [https://www.gnu.org/software/diffutils/](https://www.gnu.org/software/diffutils/)
-
-For Windows:
-
- - [https://gnuwin32.sourceforge.io/packages/patch.htm](https://gnuwin32.sourceforge.io/packages/patch.htm)
- - [https://gnuwin32.sourceforge.io/packages/diffutils.htm](https://gnuwin32.sourceforge.io/packages/diffutils.htm)
+all kinds of Unixes and Windows.
 
 ### Useful resources
  - [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
+
+## Update copyright and license information
+
+There is a CI job called **REUSE compliance / check** that will run on every
+pull request and commit to verify that the *REUSE state* of all files are
+still fine.
+
+This means that all files need to have their license and copyright information
+clearly stated. Ideally by having the standard curl source code header, with
+the SPDX-License-Identifier included. If the header does not work, you can use a
+smaller header or add the information for a specific file to the `.reuse/dep5`
+file.
+
+You can manually verify the copyright and compliance status by running the
+`./scripts/copyright.pl` script in the root of the git repository.

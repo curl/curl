@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,7 +62,6 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "inet_pton.h"
-#include "util.h"
 #include "server_sockaddr.h"
 #include "warnless.h"
 
@@ -113,13 +112,15 @@ struct configurable {
   int testnum;
 };
 
-#define REQUEST_DUMP  "log/server.input"
+#define REQUEST_DUMP  "server.input"
 #define CONFIG_VERSION 5
 
 static struct configurable config;
 
 const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *configfile = DEFAULT_CONFIG;
+const char *logdir = "log";
+char loglockfile[256];
 
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
@@ -505,14 +506,16 @@ static curl_socket_t mqttit(curl_socket_t fd)
   char client_id[MAX_CLIENT_ID_LENGTH];
   long testno;
   FILE *stream = NULL;
-
+  FILE *dump;
+  char dumpfile[256];
 
   static const char protocol[7] = {
     0x00, 0x04,       /* protocol length */
     'M','Q','T','T',  /* protocol name */
     0x04              /* protocol level */
   };
-  FILE *dump = fopen(REQUEST_DUMP, "ab");
+  msnprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
+  dump = fopen(dumpfile, "ab");
   if(!dump)
     goto end;
 
@@ -643,7 +646,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       /* there's a QoS byte (two bits) after the topic */
 
       logmsg("SUBSCRIBE to '%s' [%d]", topic, packet_id);
-      stream = test2fopen(testno);
+      stream = test2fopen(testno, logdir);
       error = getpart(&data, &datalen, "reply", "data", stream);
       if(!error) {
         if(!config.publish_before_suback) {
@@ -699,7 +702,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     }
   } while(1);
 
-  end:
+end:
   if(buffer)
     free(buffer);
   if(dump)
@@ -768,14 +771,14 @@ static bool incoming(curl_socket_t listenfd)
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
         logmsg("accept(%d, NULL, NULL) failed with error: (%d) %s",
-               sockfd, error, strerror(error));
+               sockfd, error, sstrerror(error));
       }
       else {
         logmsg("====> Client connect, fd %d. Read config from %s",
                newfd, configfile);
-        set_advisor_read_lock(SERVERLOGS_LOCK);
+        set_advisor_read_lock(loglockfile);
         (void)mqttit(newfd); /* until done */
-        clear_advisor_read_lock(SERVERLOGS_LOCK);
+        clear_advisor_read_lock(loglockfile);
 
         logmsg("====> Client disconnect");
         sclose(newfd);
@@ -807,7 +810,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     if(rc) {
       error = SOCKERRNO;
       logmsg("setsockopt(SO_REUSEADDR) failed with error: (%d) %s",
-             error, strerror(error));
+             error, sstrerror(error));
       if(maxretr) {
         rc = wait_ms(delay);
         if(rc) {
@@ -857,7 +860,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   if(rc) {
     error = SOCKERRNO;
     logmsg("Error binding socket on port %hu: (%d) %s",
-           *listenport, error, strerror(error));
+           *listenport, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }
@@ -879,7 +882,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error: (%d) %s",
-             error, strerror(error));
+             error, sstrerror(error));
       sclose(sock);
       return CURL_SOCKET_BAD;
     }
@@ -911,7 +914,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   if(0 != rc) {
     error = SOCKERRNO;
     logmsg("listen(%d, 5) failed with error: (%d) %s",
-           sock, error, strerror(error));
+           sock, error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }
@@ -963,6 +966,11 @@ int main(int argc, char *argv[])
       if(argc>arg)
         serverlogfile = argv[arg++];
     }
+    else if(!strcmp("--logdir", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        logdir = argv[arg++];
+    }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6
       ipv_inuse = "IPv6";
@@ -998,6 +1006,7 @@ int main(int argc, char *argv[])
            " --config [file]\n"
            " --version\n"
            " --logfile [file]\n"
+           " --logdir [directory]\n"
            " --pidfile [file]\n"
            " --portfile [file]\n"
            " --ipv4\n"
@@ -1006,6 +1015,9 @@ int main(int argc, char *argv[])
       return 0;
     }
   }
+
+  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
+            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
 #ifdef WIN32
   win32_init();
@@ -1029,8 +1041,7 @@ int main(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket: (%d) %s",
-           error, strerror(error));
+    logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
     goto mqttd_cleanup;
   }
 

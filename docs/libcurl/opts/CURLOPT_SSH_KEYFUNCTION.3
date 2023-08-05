@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSH_KEYFUNCTION 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SSH_KEYFUNCTION 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_SSH_KEYFUNCTION \- callback for known host matching logic
 .SH SYNOPSIS
@@ -34,9 +34,8 @@ enum curl_khstat {
   CURLKHSTAT_FINE,
   CURLKHSTAT_REJECT, /* reject the connection, return an error */
   CURLKHSTAT_DEFER,  /* do not accept it, but we cannot answer right
-                        now so this causes a CURLE_DEFER error but
-                        otherwise the connection will be left intact
-                        etc */
+                        now. Causes a CURLE_PEER_FAILED_VERIFICATION error but
+                        the connection will be left intact */
   CURLKHSTAT_FINE_REPLACE
 };
 
@@ -57,7 +56,7 @@ struct curl_khkey {
 int ssh_keycallback(CURL *easy,
                     const struct curl_khkey *knownkey,
                     const struct curl_khkey *foundkey,
-                    enum curl_khmatch,
+                    enum curl_khmatch match,
                     void *clientp);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_KEYFUNCTION,
@@ -109,7 +108,7 @@ SFTP and SCP
 static int keycb(CURL *easy,
                  const struct curl_khkey *knownkey,
                  const struct curl_khkey *foundkey,
-                 enum curl_khmatch,
+                 enum curl_khmatch match,
                  void *clientp)
 {
   /* 'clientp' points to the callback_data struct */

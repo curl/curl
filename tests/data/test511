@@ -44,6 +44,8 @@ USER anonymous
 PASS ftp@example.com
 PWD
 MDTM %TESTNUMBER
+TYPE I
+SIZE %TESTNUMBER
 QUIT
 </protocol>
 </verify>

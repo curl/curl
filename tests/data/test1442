@@ -19,7 +19,7 @@ file
 Check --write-out with trailing \
 </name>
 <command>
-file://localhost/%PWD/log/non-existent-file.txt --write-out '\'
+file://localhost/%PWD/%LOGDIR/non-existent-file.txt --write-out '\'
 </command>
 </client>
 

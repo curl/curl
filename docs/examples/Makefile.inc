@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -29,8 +29,10 @@ check_PROGRAMS = \
   anyauthput \
   certinfo \
   chkspeed \
+  connect-to \
   cookie_interface \
   debug \
+  default-scheme \
   externalsocket \
   fileupload \
   ftp-wildcard \
@@ -46,6 +48,8 @@ check_PROGRAMS = \
   getredirect \
   getreferrer \
   headerapi \
+  hsts-preload \
+  http-options \
   http-post \
   http2-download \
   http2-pushinmemory \
@@ -72,6 +76,8 @@ check_PROGRAMS = \
   imap-ssl \
   imap-store \
   imap-tls \
+  ipv6 \
+  maxconnects  \
   multi-app \
   multi-debugcallback \
   multi-double \
@@ -97,6 +103,7 @@ check_PROGRAMS = \
   postit2 \
   postit2-formadd \
   progressfunc \
+  protofeats \
   resolve \
   sendrecv \
   sepheaders \
@@ -115,16 +122,17 @@ check_PROGRAMS = \
   smtp-tls \
   smtp-vrfy \
   sslbackend \
+  unixsocket \
   url2file \
-  urlapi
+  urlapi \
+  websocket \
+  websocket-cb
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.
 COMPLICATED_EXAMPLES = \
   cacertinmem.c \
   crawler.c \
-  curlgtk.c \
-  curlx.c \
   ephiperfifo.c \
   evhiperfifo.c \
   ghiper.c \
@@ -135,7 +143,6 @@ COMPLICATED_EXAMPLES = \
   multi-event.c \
   multi-uv.c \
   multithread.c \
-  opensslthreadlock.c \
   sessioninfo.c \
   smooth-gtk-thread.c \
   synctime.c \

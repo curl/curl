@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Short: B
 Long: use-ascii
@@ -8,6 +8,7 @@ Category: misc
 Example: -B ftp://example.com/README
 Added: 5.0
 See-also: crlf data-ascii
+Multi: boolean
 ---
 Enable ASCII transfer. For FTP, this can also be enforced by using a URL that
 ends with ";type=A". This option causes data sent to stdout to be in text mode

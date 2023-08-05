@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -97,13 +97,13 @@ int test(char *URL)
   stream_uri = NULL;
 
   /* PUT style GET_PARAMETERS */
-  params = open("log/file572.txt", O_RDONLY);
+  params = open(libtest_arg2, O_RDONLY);
   fstat(params, &file_info);
   close(params);
 
-  paramsf = fopen("log/file572.txt", "rb");
+  paramsf = fopen(libtest_arg2, "rb");
   if(!paramsf) {
-    fprintf(stderr, "can't open log/file572.txt\n");
+    fprintf(stderr, "can't open %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }

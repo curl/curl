@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2021 - 2022, Max Dymond, <max.dymond@microsoft.com>
+ * Copyright (C) Max Dymond, <max.dymond@microsoft.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms

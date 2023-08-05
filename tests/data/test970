@@ -44,7 +44,7 @@ CURL_VERSION=curl-unit-test-fake-version
 HTTP GET with JSON output
 </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{json}' -o log/out%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{json}' -o %LOGDIR/out%TESTNUMBER
 </command>
 </client>
 
@@ -59,7 +59,7 @@ Accept: */*
 
 </protocol>
 <stdout nonewline="yes">
-{"content_type":"text/html","errormsg":null,"exitcode":0,"filename_effective":"log/out%TESTNUMBER","ftp_entry_path":null,"http_code":200,"http_connect":0,"http_version":"1.1","local_ip":"127.0.0.1","local_port":13,"method":"GET","num_connects":1,"num_headers":9,"num_redirects":0,"proxy_ssl_verify_result":0,"redirect_url":null,"referer":null,"remote_ip":"%HOSTIP","remote_port":%HTTPPORT,"response_code":200,"scheme":"HTTP","size_download":445,"size_header":4019,"size_request":4019,"size_upload":0,"speed_download":13,"speed_upload":13,"ssl_verify_result":0,"time_appconnect":0.000013,"time_connect":0.000013,"time_namelookup":0.000013,"time_pretransfer":0.000013,"time_redirect":0.000013,"time_starttransfer":0.000013,"time_total":0.000013,"url":"http://%HOSTIP:%HTTPPORT/%TESTNUMBER","url_effective":"http://%HOSTIP:%HTTPPORT/%TESTNUMBER","urlnum":0,"curl_version":"curl-unit-test-fake-version"}
+{"certs":"","content_type":"text/html","conn_id":0,"errormsg":null,"exitcode":0,"filename_effective":"%LOGDIR/out%TESTNUMBER","ftp_entry_path":null,"http_code":200,"http_connect":0,"http_version":"1.1","local_ip":"127.0.0.1","local_port":13,"method":"GET","num_certs":0,"num_connects":1,"num_headers":9,"num_redirects":0,"proxy_ssl_verify_result":0,"redirect_url":null,"referer":null,"remote_ip":"%HOSTIP","remote_port":%HTTPPORT,"response_code":200,"scheme":"HTTP","size_download":445,"size_header":4019,"size_request":4019,"size_upload":0,"speed_download":13,"speed_upload":13,"ssl_verify_result":0,"time_appconnect":0.000013,"time_connect":0.000013,"time_namelookup":0.000013,"time_pretransfer":0.000013,"time_redirect":0.000013,"time_starttransfer":0.000013,"time_total":0.000013,"url":"http://%HOSTIP:%HTTPPORT/%TESTNUMBER","url.scheme":"http","url.user":null,"url.password":null,"url.options":null,"url.host":"%HOSTIP","url.port":"%HTTPPORT","url.path":"/%TESTNUMBER","url.query":null,"url.fragment":null,"url.zoneid":null,"urle.scheme":"http","urle.user":null,"urle.password":null,"urle.options":null,"urle.host":"%HOSTIP","urle.port":"%HTTPPORT","urle.path":"/%TESTNUMBER","urle.query":null,"urle.fragment":null,"urle.zoneid":null,"url_effective":"http://%HOSTIP:%HTTPPORT/%TESTNUMBER","urlnum":0,"xfer_id":0,"curl_version":"curl-unit-test-fake-version"}
 </stdout>
 </verify>
 </testcase>

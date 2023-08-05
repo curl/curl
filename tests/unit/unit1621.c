@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,13 +41,10 @@ static void unit_stop(void)
   (!defined(HAVE_FSETXATTR) && \
   (!defined(__FreeBSD_version) || (__FreeBSD_version < 500000)))
 UNITTEST_START
-{
-  return 0;
-}
 UNITTEST_STOP
 #else
 
-bool stripcredentials(char **url);
+char *stripcredentials(const char *url);
 
 struct checkthis {
   const char *input;
@@ -67,27 +64,18 @@ static const struct checkthis tests[] = {
 
 UNITTEST_START
 {
-  bool cleanup;
-  char *url;
   int i;
-  int rc = 0;
 
   for(i = 0; tests[i].input; i++) {
-    url = (char *)tests[i].input;
-    cleanup = stripcredentials(&url);
+    const char *url = tests[i].input;
+    char *stripped = stripcredentials(url);
     printf("Test %u got input \"%s\", output: \"%s\"\n",
-           i, tests[i].input, url);
+           i, tests[i].input, stripped);
 
-    if(strcmp(tests[i].output, url)) {
-      fprintf(stderr, "Test %u got input \"%s\", expected output \"%s\"\n"
-              " Actual output: \"%s\"\n", i, tests[i].input, tests[i].output,
-              url);
-      rc++;
-    }
-    if(cleanup)
-      curl_free(url);
+    fail_if(stripped && strcmp(tests[i].output, stripped),
+            tests[i].output);
+    curl_free(stripped);
   }
-  return rc;
 }
 UNITTEST_STOP
 #endif

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -30,6 +30,7 @@ DPAGES = \
   append.d \
   aws-sigv4.d \
   basic.d \
+  ca-native.d \
   cacert.d \
   capath.d \
   cert-status.d \
@@ -95,6 +96,7 @@ DPAGES = \
   globoff.d \
   happy-eyeballs-timeout-ms.d \
   haproxy-protocol.d \
+  haproxy-clientip.d \
   head.d \
   header.d \
   help.d \
@@ -107,6 +109,7 @@ DPAGES = \
   http2-prior-knowledge.d \
   http2.d \
   http3.d \
+  http3-only.d \
   ignore-content-length.d \
   include.d \
   insecure.d \
@@ -169,6 +172,7 @@ DPAGES = \
   proto.d \
   proxy-anyauth.d \
   proxy-basic.d \
+  proxy-ca-native.d \
   proxy-cacert.d \
   proxy-capath.d \
   proxy-cert-type.d \
@@ -177,6 +181,7 @@ DPAGES = \
   proxy-crlfile.d \
   proxy-digest.d \
   proxy-header.d \
+  proxy-http2.d \
   proxy-insecure.d \
   proxy-key-type.d \
   proxy-key.d \
@@ -260,14 +265,18 @@ DPAGES = \
   tlsv1.d \
   tr-encoding.d \
   trace-ascii.d \
+  trace-config.d \
+  trace-ids.d \
   trace-time.d \
   trace.d \
   unix-socket.d \
   upload-file.d \
   url.d \
+  url-query.d \
   use-ascii.d \
   user-agent.d \
   user.d \
+  variable.d \
   verbose.d \
   version.d \
   write-out.d \

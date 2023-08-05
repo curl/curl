@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -626,8 +626,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
    * ignored. We allow setting CA location for schannel only when explicitly
    * specified by the user via CURLOPT_CAINFO / --cacert.
    */
-  if((curlinfo->features & CURL_VERSION_SSL) &&
-     backend != CURLSSLBACKEND_SCHANNEL) {
+  if(feature_ssl && backend != CURLSSLBACKEND_SCHANNEL) {
 
     DWORD res_len;
     TCHAR buf[PATH_MAX];

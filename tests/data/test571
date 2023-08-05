@@ -19,6 +19,7 @@ RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: asdf
 CSeq: 1
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1
 
 </data1>
 
@@ -54,6 +55,7 @@ rtp: part 2 channel 0 size 500
 rtp: part 2 channel 0 size 196
 rtp: part 2 channel 0 size 124
 rtp: part 2 channel 0 size 824
+rtp: part 2 channel 0 size 18 size_err -6
 rtp: part 3 channel 1 size 10
 rtp: part 3 channel 0 size 50
 rtp: part 4 channel 0 size 798
@@ -62,6 +64,12 @@ rtp: part 4 channel 1 size 30
 rtp: part 4 channel 0 size 2048
 rtp: part 4 channel 0 size 85
 rtp: part 4 channel 1 size 24
+rtp: part 4 channel 0 size 17 size_err -4
+rtp: part 4 channel 0 size 33
+rtp: part 4 channel 0 size 127
+rtp: part 4 channel 1 size 24 size_err 11
+rtp: part 4 channel 0 size 37
+rtp: part 4 channel 0 size 63
 </servercmd>
 </reply>
 
@@ -78,7 +86,7 @@ lib%TESTNUMBER
 RTSP RTP Interleaving Test
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER log/protofile%TESTNUMBER.txt
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER %LOGDIR/protofile%TESTNUMBER.txt
 </command>
 </client>
 
@@ -89,6 +97,7 @@ RTP: message size 500, channel 0
 RTP: message size 196, channel 0
 RTP: message size 124, channel 0
 RTP: message size 824, channel 0
+RTP: message size 12, channel 0
 RTP: message size 10, channel 1
 RTP: message size 50, channel 0
 RTP: message size 798, channel 0
@@ -97,9 +106,15 @@ RTP: message size 30, channel 1
 RTP: message size 2048, channel 0
 RTP: message size 85, channel 0
 RTP: message size 24, channel 1
+RTP: message size 13, channel 0
+RTP: message size 33, channel 0
+RTP: message size 127, channel 0
+RTP: message size 35, channel 1
+RTP PAYLOAD END CORRUPTED (11), [$]
+RTP: message size 63, channel 0
 </stdout>
 
-<file name="log/protofile%TESTNUMBER.txt">
+<file name="%LOGDIR/protofile%TESTNUMBER.txt">
 $99
 </file>
 </verify>

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -43,12 +43,12 @@ CMAKE_DIST =                                    \
  CMake/FindNGHTTP2.cmake                        \
  CMake/FindNGHTTP3.cmake                        \
  CMake/FindNGTCP2.cmake                         \
- CMake/FindNSS.cmake                            \
  CMake/FindQUICHE.cmake                         \
  CMake/FindWolfSSL.cmake                        \
  CMake/FindZstd.cmake                           \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
+ CMake/PickyWarnings.cmake                      \
  CMake/Platforms/WindowsCache.cmake             \
  CMake/Utilities.cmake                          \
  CMakeLists.txt
@@ -148,7 +148,8 @@ PLAN9_DIST = plan9/include/mkfile \
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in            \
  RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework $(CMAKE_DIST)        \
- $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat
+ $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat \
+ libcurl.def
 
 CLEANFILES = $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ) $(VC11_LIBVCXPROJ)        \
  $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ) $(VC14_LIBVCXPROJ) \

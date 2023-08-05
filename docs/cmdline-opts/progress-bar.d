@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Short: #
 Long: progress-bar
@@ -7,6 +7,8 @@ Category: verbose
 Example: -# -O $URL
 Added: 5.10
 See-also: styled-output
+Multi: boolean
+Scope: global
 ---
 Make curl display transfer progress as a simple progress bar instead of the
 standard, more informational, meter.
@@ -16,6 +18,3 @@ shows a percentage if the transfer size is known. For transfers without a
 known size, there will be space ship (-=o=-) that moves back and forth but
 only while data is being transferred, with a set of flying hash sign symbols on
 top.
-
-This option is global and does not need to be specified for each use of
---next.

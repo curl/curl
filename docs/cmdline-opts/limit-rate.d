@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: limit-rate
 Arg: <speed>
@@ -8,7 +8,8 @@ Example: --limit-rate 100K $URL
 Example: --limit-rate 1000 $URL
 Example: --limit-rate 10M $URL
 Added: 7.10
-See-also: speed-limit speed-time
+See-also: rate speed-limit speed-time
+Multi: single
 ---
 Specify the maximum transfer rate you want curl to use - for both downloads
 and uploads. This feature is useful if you have a limited pipe and you would like
@@ -26,5 +27,3 @@ the set threshold over a period of multiple seconds.
 If you also use the --speed-limit option, that option will take precedence and
 might cripple the rate-limiting slightly, to help keeping the speed-limit
 logic working.
-
-If this option is used several times, the last one will be used.

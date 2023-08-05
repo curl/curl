@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_POST 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_POST 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_POST \- make an HTTP POST
 .SH SYNOPSIS
@@ -68,6 +68,10 @@ When setting \fICURLOPT_POST(3)\fP to 1, libcurl will automatically set
 If you issue a POST request and then want to make a HEAD or GET using the same
 re-used handle, you must explicitly set the new request type using
 \fICURLOPT_NOBODY(3)\fP or \fICURLOPT_HTTPGET(3)\fP or similar.
+
+When setting \fICURLOPT_POST(3)\fP to 0, libcurl resets the request type to
+the default to disable the POST. Typically that would mean it's reset to GET.
+Instead you should set a new request type explicitly as described above.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS

@@ -2,7 +2,7 @@ From file: CURL_RELEASE_NOTE_START.TXT
 
 Note: These kits are produced by a hobbyist and are providing any support
 or any commitment to supply bug fixes or future releases.  This code is
-as-is with no warrantees.
+as-is with no warranties.
 
 The testing of this build of curl was minimal and involved building some of
 the sample and test programs, accessing a public HTTPS: website, doing a
@@ -58,12 +58,12 @@ For the HP SSL work around to work for GNV do the following:
  dcl @gnv\$gnu:[vms_bin]curl.com $*
  ^Z
 
-Similar work arounds will be needed for any program linked with GNV$LIBCURL
+Similar workarounds will be needed for any program linked with GNV$LIBCURL
 until the HP OpenSSL is upgraded to the current 1.4 version or later.
 
 If you are installing a "daily" build instead of a release build of Curl, some
 things have been changed so that it can be installed at the same time as
-a production build with out conflicts.
+a production build without conflicts.
 
    The CURL_DAILY_STARTUP.COM will be supplied instead of CURL_STARTUP.COM.
    This file is actually not used with the daily package and is provided as

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH runtests.pl 1 "19 Jan 2021" "Curl 7.75.0" "runtests"
+.TH runtests.pl 1 "06 Jun 2023" runtests runtests
 .SH NAME
 runtests.pl \- run one or more test cases
 .SH SYNOPSIS
@@ -57,11 +57,17 @@ Prefix a keyword with a tilde (~) to still run it, but ignore the results.
 .IP "-a"
 Continue running the rest of the test cases even if one test fails. By
 default, the test script stops as soon as an error is detected.
+.IP "-ac <curl>"
+Provide a path to a curl binary to talk to APIs (currently only CI test APIs).
+.IP "-am"
+Display test results in automake style output (PASS/FAIL: [number] [name]).
 .IP "-c <curl>"
 Provide a path to a custom curl binary to run the tests with. Default is the
 curl executable in the build tree.
 .IP "-d"
-Enable protocol debug: have the servers display protocol output.
+Enable protocol debug: have the servers display protocol output.  If used in
+conjunction with parallel testing, it will be difficult to associate the logs
+with the test being run.
 .IP "-E <exclude_file>"
 Load the \fBexclude_file\fP with additional reasons why certain tests
 should be skipped. Useful when testing with external HTTP proxies in
@@ -81,27 +87,39 @@ Run the given test(s) with gdb. This is best used on a single test case and
 curl built --disable-shared. This then fires up gdb with command line set to
 run the specified test case. Simply (set a break-point and) type 'run' to
 start.
-.IP "-h"
+.IP "-gw"
+Run the given test(s) with gdb as a windowed application.
+.IP "-h, --help"
 Displays a help text about this program's command line options.
 .IP "-k"
 Keep output and log files in log/ after a test run, even if no error was
 detected. Useful for debugging.
+.IP "-j[num]"
+Spawn num processes to run tests. This defaults to 0 to run tests serially
+within a single process. Using a number greater than one allows multiple tests
+to run in parallel, speeding up a test run. The optimum number is dependent on
+the system and set of tests to run, but 7*number of CPU cores is a good figure
+to start with, or 1.3*number of CPU cores if Valgrind is in use. Enabling
+parallel tests is not recommended in conjunction with the \-g option.
 .IP "-L <file>"
 Load and execute the specified file which should contain perl code.
-This option allows to change \fIruntests.pl\fP behaviour by overwriting
+This option allows one to change \fIruntests.pl\fP behaviour by overwriting
 functions and variables and is useful when testing external proxies
 using curl's regression test suite.
 .IP "-l"
 Lists all test case names.
 .IP "-n"
 Disable the check for and use of valgrind.
+.IP "--no-debuginfod"
+Delete the DEBUGINFOD_URLS variable if that is defined. Makes valgrind, gdb
+etc not able to use this functionality.
 .IP "-o <variablename=value>"
 Overwrite the specified internal \fBvariable\fP with \fBvalue\fP.
 Useful to change variables that didn't get a dedicated flag to change them.
 Check the source to see which variables are available.
 .IP "-P <proxy>"
 Use the specified HTTP proxy when executing tests, even if the tests
-themselves don't specify a proxy. This option allows to test external
+themselves don't specify a proxy. This option allows one to test external
 proxies using curl's regression test suite.
 .IP "-p"
 Prints out all files in "log/" to stdout when a test case fails. Very
@@ -130,7 +148,7 @@ extended the test sequence.
 .IP "-s"
 Shorter output. Speaks less than default.
 .IP "--seed=[num]"
-When using \fI--shallow\fP or \fI-R\rP that random certain aspects of the
+When using \fI--shallow\fP or \fI-R\fP that randomize certain aspects of the
 behavior, this option can set the initial seed. If not set, the random seed
 will be set based on the currently set local year and month and the first line
 of the "curl -V" output.
@@ -152,7 +170,9 @@ combination with \fI-g\fP.
 .IP "-u"
 Error instead of warning on server unexpectedly alive.
 .IP "-v"
-Enable verbose output. Speaks more than default.
+Enable verbose output. Speaks more than by default. If used in conjunction with
+parallel testing, it will be difficult to associate the logs with the test
+being run.
 .IP "-vc <curl>"
 Provide a path to a custom curl binary to run when verifying that the servers
 running are indeed our test servers. Default is the curl executable in the
@@ -173,4 +193,4 @@ documented earlier.
 .SH "WRITING TESTS"
 The simplest way to write test cases is to start with a similar existing test,
 save it with a new number and then adjust it to fit. There's an attempt to
-document the test case file format in the tests/FILEFORMAT.
+document the test case file format in the tests/FILEFORMAT.md.

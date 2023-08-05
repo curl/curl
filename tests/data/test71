@@ -21,6 +21,9 @@ blablabla
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -30,14 +33,14 @@ HTTP and -F upload in config file
 <stdin>
 -F name=daniel
 -F tool=curl
--F file=@log/test%TESTNUMBER.txt
+-F file=@%LOGDIR/test%TESTNUMBER.txt
 user-agent = ""
 </stdin>
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -K -
 </command>
 # We create this file before the command is invoked!
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo-
 This is a moo-
 bar

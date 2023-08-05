@@ -47,7 +47,7 @@ http
 HTTP GET a globbed range with -f
  </name>
  <command>
--f 'http://%HOSTIP:%HTTPPORT/[%TESTNUMBER0000-%TESTNUMBER0001]' -o log/#1
+-f 'http://%HOSTIP:%HTTPPORT/[%TESTNUMBER0000-%TESTNUMBER0001]' -o %LOGDIR/#1
 </command>
 </client>
 

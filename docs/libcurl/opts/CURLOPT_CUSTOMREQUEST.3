@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_CUSTOMREQUEST 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_CUSTOMREQUEST 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_CUSTOMREQUEST \- custom request method
 .SH SYNOPSIS
@@ -74,16 +74,16 @@ For example:
 When you tell libcurl to use a custom request it will behave like a LIST or
 RETR command was sent where it expects data to be returned by the server. As
 such \fICURLOPT_NOBODY(3)\fP should be used when specifying commands such as
-DELE and NOOP for example.
+\fBDELE\fP and \fBNOOP\fP for example.
 .IP SMTP
-Instead of a HELP or VRFY when issuing SMTP based requests.
+Instead of a \fBHELP\fP or \fBVRFY\fP when issuing SMTP based requests.
 
 For example:
 
-Normally a multiline response is returned which can be used, in conjunction
+Normally a multi line response is returned which can be used, in conjunction
 with \fICURLOPT_MAIL_RCPT(3)\fP, to specify an EXPN request. If the
 \fICURLOPT_NOBODY(3)\fP option is specified then the request can be used to
-issue NOOP and RSET commands.
+issue \fBNOOP\fP and \fBRSET\fP commands.
 
 The application does not have to keep the string around after setting this
 option.

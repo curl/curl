@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@ SRCPF="${LIBIFSNAME}/H.FILE"
 if action_needed "${SRCPF}"
 then    CMD="CRTSRCPF FILE(${TARGETLIB}/H) RCDLEN(112)"
         CMD="${CMD} CCSID(${TGTCCSID}) TEXT('curl: Header files')"
-        system "${CMD}"
+        CLcommand "${CMD}"
 fi
 
 
@@ -98,9 +98,9 @@ ln -s "${SRCPF}/CURL.INC.MBR" "${IFSINCLUDE}/curl.inc.rpgle"
 
 if action_needed "${LIBIFSNAME}/CURL.FILE"
 then    :
-else    system "DLTF FILE(${TARGETLIB}/CURL)"
+else    CLcommand "DLTF FILE(${TARGETLIB}/CURL)"
 fi
 
 CMD="CRTDUPOBJ OBJ(H) FROMLIB(${TARGETLIB}) OBJTYPE(*FILE) TOLIB(*FROMLIB)"
 CMD="${CMD} NEWOBJ(CURL) DATA(*YES)"
-system "${CMD}"
+CLcommand "${CMD}"

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,9 +35,14 @@
 
 #endif /* __INTEL_COMPILER && __unix__ */
 
-#define BUILDING_WARNLESS_C 1
-
 #include "warnless.h"
+
+#ifdef WIN32
+#undef read
+#undef write
+#endif
+
+#include <limits.h>
 
 #define CURL_MASK_UCHAR   ((unsigned char)~0)
 #define CURL_MASK_SCHAR   (CURL_MASK_UCHAR >> 1)
@@ -373,6 +378,9 @@ ssize_t curlx_write(int fd, const void *buf, size_t count)
 {
   return (ssize_t)write(fd, buf, curlx_uztoui(count));
 }
+
+/* Ensure that warnless.h continues to have an effect in "unity" builds. */
+#undef HEADER_CURL_WARNLESS_H
 
 #endif /* WIN32 */
 

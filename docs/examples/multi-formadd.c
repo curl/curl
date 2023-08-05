@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,6 +24,11 @@
 /* <DESC>
  * using the multi interface to do a multipart formpost without blocking
  * </DESC>
+ */
+
+/*
+ * Warning: this example uses the deprecated form api. See "multi-post.c"
+ *          for a similar example using the mime api.
  */
 
 #include <stdio.h>
@@ -49,14 +54,14 @@ int main(void)
   curl_formadd(&formpost,
                &lastptr,
                CURLFORM_COPYNAME, "sendfile",
-               CURLFORM_FILE, "postit2.c",
+               CURLFORM_FILE, "multi-formadd.c",
                CURLFORM_END);
 
   /* Fill in the filename field */
   curl_formadd(&formpost,
                &lastptr,
                CURLFORM_COPYNAME, "filename",
-               CURLFORM_COPYCONTENTS, "postit2.c",
+               CURLFORM_COPYCONTENTS, "multi-formadd.c",
                CURLFORM_END);
 
   /* Fill in the submit field too, even if this is rarely needed */

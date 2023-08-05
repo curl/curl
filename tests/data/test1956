@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_AWS_SIGV4
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+Location: /%TESTNUMBER
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# this relies on the debug feature which allow to set the time
+<features>
+SSL
+debug
+crypto
+</features>
+<setenv>
+CURL_FORCEHOST=1
+</setenv>
+
+<name>
+HTTP AWS_SIGV4 with X-Xxx-Content-Sha256 of empty payload
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+^Content-Type:.*
+^Accept:.*
+</strip>
+<protocol>
+GET /aws_sigv4/testapi/test HTTP/1.1
+Host: exam.ple.com:9000
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;x-xxx-content-sha256;x-xxx-date, Signature=dfe78c8846a9b7d65d1eb4c1d6ea7bc886650d03f3568088cb8d5b4c3778287f
+X-Xxx-Date: 19700101T000000Z
+X-Xxx-Content-Sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+</protocol>
+</verify>
+</testcase>

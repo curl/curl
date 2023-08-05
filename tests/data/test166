@@ -20,6 +20,9 @@ blablabla
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -27,10 +30,10 @@ http
 HTTP formpost a file with spaces in name
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=@log/fie ld %TESTNUMBER"
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=@%LOGDIR/fie ld %TESTNUMBER"
 </command>
 # We create this file before the command is invoked!
-<file name="log/fie ld %TESTNUMBER">
+<file name="%LOGDIR/fie ld %TESTNUMBER">
 data inside the file
 </file>
 </client>

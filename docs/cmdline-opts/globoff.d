@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: globoff
 Short: g
@@ -7,6 +7,7 @@ Category: curl
 Example: -g "https://example.com/{[]}}}}"
 Added: 7.6
 See-also: config disable
+Multi: boolean
 ---
 This option switches off the "URL globbing parser". When you set this option,
 you can specify URLs that contain the letters {}[] without having curl itself

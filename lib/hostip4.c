@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,10 +41,6 @@
 #ifdef __VMS
 #include <in.h>
 #include <inet.h>
-#endif
-
-#ifdef HAVE_PROCESS_H
-#include <process.h>
 #endif
 
 #include "urldata.h"
@@ -112,7 +108,8 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 #endif /* CURLRES_SYNCH */
 #endif /* CURLRES_IPV4 */
 
-#if defined(CURLRES_IPV4) && !defined(CURLRES_ARES)
+#if defined(CURLRES_IPV4) && \
+   !defined(CURLRES_ARES) && !defined(CURLRES_AMIGA)
 
 /*
  * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
@@ -124,14 +121,15 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                                           int port)
 {
-#if !defined(HAVE_GETADDRINFO_THREADSAFE) && defined(HAVE_GETHOSTBYNAME_R_3)
+#if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE)) && \
+   defined(HAVE_GETHOSTBYNAME_R_3)
   int res;
 #endif
   struct Curl_addrinfo *ai = NULL;
   struct hostent *h = NULL;
   struct hostent *buf = NULL;
 
-#if defined(HAVE_GETADDRINFO_THREADSAFE)
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE)
   struct addrinfo hints;
   char sbuf[12];
   char *sbufptr = NULL;
@@ -279,14 +277,16 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     h = NULL; /* set return code to NULL */
     free(buf);
   }
-#else /* HAVE_GETADDRINFO_THREADSAFE || HAVE_GETHOSTBYNAME_R */
+#else /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
+          HAVE_GETHOSTBYNAME_R */
   /*
    * Here is code for platforms that don't have a thread safe
    * getaddrinfo() nor gethostbyname_r() function or for which
    * gethostbyname() is the preferred one.
    */
   h = gethostbyname((void *)hostname);
-#endif /* HAVE_GETADDRINFO_THREADSAFE || HAVE_GETHOSTBYNAME_R */
+#endif /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
+           HAVE_GETHOSTBYNAME_R */
 
   if(h) {
     ai = Curl_he2ai(h, port);
@@ -297,4 +297,5 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 
   return ai;
 }
-#endif /* defined(CURLRES_IPV4) && !defined(CURLRES_ARES) */
+#endif /* defined(CURLRES_IPV4) && !defined(CURLRES_ARES) &&
+                                   !defined(CURLRES_AMIGA) */

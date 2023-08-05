@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,6 +25,14 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#if defined(USE_MSH3) && !defined(_WIN32)
+#include <pthread.h>
+#endif
+
+#include "bufq.h"
+#include "dynhds.h"
+#include "ws.h"
+
 typedef enum {
   HTTPREQ_GET,
   HTTPREQ_POST,
@@ -36,11 +44,7 @@ typedef enum {
 
 #ifndef CURL_DISABLE_HTTP
 
-#ifdef USE_NGHTTP2
-#include <nghttp2/nghttp2.h>
-#endif
-
-#if defined(_WIN32) && defined(ENABLE_QUIC)
+#if defined(ENABLE_QUIC)
 #include <stdint.h>
 #endif
 
@@ -49,6 +53,20 @@ extern const struct Curl_handler Curl_handler_http;
 #ifdef USE_SSL
 extern const struct Curl_handler Curl_handler_https;
 #endif
+
+#ifdef USE_WEBSOCKETS
+extern const struct Curl_handler Curl_handler_ws;
+
+#ifdef USE_SSL
+extern const struct Curl_handler Curl_handler_wss;
+#endif
+#endif /* websockets */
+
+struct dynhds;
+
+CURLcode Curl_bump_headersize(struct Curl_easy *data,
+                              size_t delta,
+                              bool connect_only);
 
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
@@ -63,8 +81,10 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const struct connectdata *conn,
                              const char *thisheader,
                              const size_t thislen);
+struct HTTP; /* see below */
 CURLcode Curl_buffer_send(struct dynbuf *in,
                           struct Curl_easy *data,
+                          struct HTTP *http,
                           curl_off_t *bytes_written,
                           curl_off_t included_body_bytes,
                           int socketindex);
@@ -84,6 +104,10 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  void *headers
 #endif
   );
+CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
+                                bool is_connect,
+                                struct dynhds *hds);
+
 CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
                                     struct dynbuf *buf,
                                     struct Curl_easy *handle);
@@ -163,34 +187,12 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
 #define EXPECT_100_THRESHOLD (1024*1024)
 #endif
 
+/* MAX_HTTP_RESP_HEADER_SIZE is the maximum size of all response headers
+   combined that libcurl allows for a single HTTP response, any HTTP
+   version. This count includes CONNECT response headers. */
+#define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
+
 #endif /* CURL_DISABLE_HTTP */
-
-#ifdef USE_NGHTTP3
-struct h3out; /* see ngtcp2 */
-#endif
-
-#ifdef USE_MSH3
-#ifdef _WIN32
-#define msh3_lock CRITICAL_SECTION
-#define msh3_lock_initialize(lock) InitializeCriticalSection(lock)
-#define msh3_lock_uninitialize(lock) DeleteCriticalSection(lock)
-#define msh3_lock_acquire(lock) EnterCriticalSection(lock)
-#define msh3_lock_release(lock) LeaveCriticalSection(lock)
-#else /* !_WIN32 */
-#include <pthread.h>
-#define msh3_lock pthread_mutex_t
-#define msh3_lock_initialize(lock) { \
-  pthread_mutexattr_t attr; \
-  pthread_mutexattr_init(&attr); \
-  pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE); \
-  pthread_mutex_init(lock, &attr); \
-  pthread_mutexattr_destroy(&attr); \
-}
-#define msh3_lock_uninitialize(lock) pthread_mutex_destroy(lock)
-#define msh3_lock_acquire(lock) pthread_mutex_lock(lock)
-#define msh3_lock_release(lock) pthread_mutex_unlock(lock)
-#endif /* _WIN32 */
-#endif /* USE_MSH3 */
 
 /****************************************************************************
  * HTTP unique setup
@@ -210,6 +212,7 @@ struct HTTP {
     void *fread_in;           /* backup storage for fread_in pointer */
     const char *postdata;
     curl_off_t postsize;
+    struct Curl_easy *data;
   } backup;
 
   enum {
@@ -219,118 +222,11 @@ struct HTTP {
   } sending;
 
 #ifndef CURL_DISABLE_HTTP
+  void *h2_ctx;              /* HTTP/2 implementation context */
+  void *h3_ctx;              /* HTTP/3 implementation context */
   struct dynbuf send_buffer; /* used if the request couldn't be sent in one
                                 chunk, points to an allocated send_buffer
                                 struct */
-#endif
-#ifdef USE_NGHTTP2
-  /*********** for HTTP/2 we store stream-local data here *************/
-  int32_t stream_id; /* stream we are interested in */
-
-  bool bodystarted;
-  /* We store non-final and final response headers here, per-stream */
-  struct dynbuf header_recvbuf;
-  size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
-                                  upper layer */
-  struct dynbuf trailer_recvbuf;
-  int status_code; /* HTTP status code */
-  const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
-  size_t pauselen; /* the number of bytes left in data */
-  bool close_handled; /* TRUE if stream closure is handled by libcurl */
-
-  char **push_headers;       /* allocated array */
-  size_t push_headers_used;  /* number of entries filled in */
-  size_t push_headers_alloc; /* number of entries allocated */
-  uint32_t error; /* HTTP/2 stream error code */
-#endif
-#if defined(USE_NGHTTP2) || defined(USE_NGHTTP3)
-  bool closed; /* TRUE on HTTP2 stream close */
-  char *mem;     /* points to a buffer in memory to store received data */
-  size_t len;    /* size of the buffer 'mem' points to */
-  size_t memlen; /* size of data copied to mem */
-#endif
-#if defined(USE_NGHTTP2) || defined(ENABLE_QUIC)
-  /* fields used by both HTTP/2 and HTTP/3 */
-  const uint8_t *upload_mem; /* points to a buffer to read from */
-  size_t upload_len; /* size of the buffer 'upload_mem' points to */
-  curl_off_t upload_left; /* number of bytes left to upload */
-#endif
-
-#ifdef ENABLE_QUIC
-#ifndef USE_MSH3
-  /*********** for HTTP/3 we store stream-local data here *************/
-  int64_t stream3_id; /* stream we are interested in */
-  bool firstheader;  /* FALSE until headers arrive */
-  bool firstbody;  /* FALSE until body arrives */
-  bool h3req;    /* FALSE until request is issued */
-#endif
-  bool upload_done;
-#endif
-#ifdef USE_NGHTTP3
-  size_t unacked_window;
-  struct h3out *h3out; /* per-stream buffers for upload */
-  struct dynbuf overflow; /* excess data received during a single Curl_read */
-#endif
-#ifdef USE_MSH3
-  struct MSH3_REQUEST *req;
-  msh3_lock recv_lock;
-  /* Receive Buffer (Headers and Data) */
-  uint8_t* recv_buf;
-  size_t recv_buf_alloc;
-  /* Receive Headers */
-  size_t recv_header_len;
-  bool recv_header_complete;
-  /* Receive Data */
-  size_t recv_data_len;
-  bool recv_data_complete;
-  /* General Receive Error */
-  CURLcode recv_error;
-#endif
-};
-
-#ifdef USE_NGHTTP2
-/* h2 settings for this connection */
-struct h2settings {
-  uint32_t max_concurrent_streams;
-  bool enable_push;
-};
-#endif
-
-struct http_conn {
-#ifdef USE_NGHTTP2
-#define H2_BINSETTINGS_LEN 80
-  uint8_t binsettings[H2_BINSETTINGS_LEN];
-  size_t  binlen; /* length of the binsettings data */
-
-  /* We associate the connnectdata struct with the connection, but we need to
-     make sure we can identify the current "driving" transfer. This is a
-     work-around for the lack of nghttp2_session_set_user_data() in older
-     nghttp2 versions that we want to support. (Added in 1.31.0) */
-  struct Curl_easy *trnsfr;
-
-  nghttp2_session *h2;
-  Curl_send *send_underlying; /* underlying send Curl_send callback */
-  Curl_recv *recv_underlying; /* underlying recv Curl_recv callback */
-  char *inbuf; /* buffer to receive data from underlying socket */
-  size_t inbuflen; /* number of bytes filled in inbuf */
-  size_t nread_inbuf; /* number of bytes read from in inbuf */
-  /* We need separate buffer for transmission and reception because we
-     may call nghttp2_session_send() after the
-     nghttp2_session_mem_recv() but mem buffer is still not full. In
-     this case, we wrongly sends the content of mem buffer if we share
-     them for both cases. */
-  int32_t pause_stream_id; /* stream ID which paused
-                              nghttp2_session_mem_recv */
-  size_t drain_total; /* sum of all stream's UrlState.drain */
-
-  /* this is a hash of all individual streams (Curl_easy structs) */
-  struct h2settings settings;
-
-  /* list of settings that will be sent */
-  nghttp2_settings_entry local_settings[3];
-  size_t local_settings_num;
-#else
-  int unused; /* prevent a compiler warning */
 #endif
 };
 
@@ -366,10 +262,79 @@ Curl_http_output_auth(struct Curl_easy *data,
                       bool proxytunnel); /* TRUE if this is the request setting
                                             up the proxy tunnel */
 
-/*
- * Curl_allow_auth_to_host() tells if authentication, cookies or other
- * "sensitive data" can (still) be sent to this host.
+/* Decode HTTP status code string. */
+CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
+
+
+/**
+ * All about a core HTTP request, excluding body and trailers
  */
-bool Curl_allow_auth_to_host(struct Curl_easy *data);
+struct httpreq {
+  char method[12];
+  char *scheme;
+  char *authority;
+  char *path;
+  struct dynhds headers;
+  struct dynhds trailers;
+};
+
+/**
+ * Create a HTTP request struct.
+ */
+CURLcode Curl_http_req_make(struct httpreq **preq,
+                            const char *method, size_t m_len,
+                            const char *scheme, size_t s_len,
+                            const char *authority, size_t a_len,
+                            const char *path, size_t p_len);
+
+CURLcode Curl_http_req_make2(struct httpreq **preq,
+                             const char *method, size_t m_len,
+                             CURLU *url, const char *scheme_default);
+
+void Curl_http_req_free(struct httpreq *req);
+
+#define HTTP_PSEUDO_METHOD ":method"
+#define HTTP_PSEUDO_SCHEME ":scheme"
+#define HTTP_PSEUDO_AUTHORITY ":authority"
+#define HTTP_PSEUDO_PATH ":path"
+#define HTTP_PSEUDO_STATUS ":status"
+
+/**
+ * Create the list of HTTP/2 headers which represent the request,
+ * using HTTP/2 pseudo headers preceeding the `req->headers`.
+ *
+ * Applies the following transformations:
+ * - if `authority` is set, any "Host" header is removed.
+ * - if `authority` is unset and a "Host" header is present, use
+ *   that as `authority` and remove "Host"
+ * - removes and Connection header fields as defined in rfc9113 ch. 8.2.2
+ * - lower-cases the header field names
+ *
+ * @param h2_headers will contain the HTTP/2 headers on success
+ * @param req        the request to transform
+ * @param data       the handle to lookup defaults like ' :scheme' from
+ */
+CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
+                             struct httpreq *req, struct Curl_easy *data);
+
+/**
+ * All about a core HTTP response, excluding body and trailers
+ */
+struct http_resp {
+  int status;
+  char *description;
+  struct dynhds headers;
+  struct dynhds trailers;
+  struct http_resp *prev;
+};
+
+/**
+ * Create a HTTP response struct.
+ */
+CURLcode Curl_http_resp_make(struct http_resp **presp,
+                             int status,
+                             const char *description);
+
+void Curl_http_resp_free(struct http_resp *resp);
 
 #endif /* HEADER_CURL_HTTP_H */

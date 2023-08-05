@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_DEFAULT_PROTOCOL 3 "18 Aug 2015" "libcurl 7.45.0" "curl_easy_setopt options"
+.TH CURLOPT_DEFAULT_PROTOCOL 3 "18 Aug 2015" libcurl libcurl
 .SH NAME
 CURLOPT_DEFAULT_PROTOCOL \- default protocol to use if the URL is missing a
 scheme name
@@ -43,11 +43,11 @@ dict, file, ftp, ftps, gopher, http, https, imap, imaps, ldap, ldaps, pop3,
 pop3s, rtsp, scp, sftp, smb, smbs, smtp, smtps, telnet, tftp
 
 An unknown or unsupported protocol causes error
-\fICURLE_UNSUPPORTED_PROTOCOL\fP when libcurl parses a schemeless URL. Parsing
-happens when \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP is
-called. The protocols supported by libcurl will vary depending on how it was
-built. Use \fIcurl_version_info(3)\fP if you need a list of protocol names
-supported by the build of libcurl that you are using.
+\fICURLE_UNSUPPORTED_PROTOCOL\fP when libcurl parses a URL without a
+scheme. Parsing happens when \fIcurl_easy_perform(3)\fP or
+\fIcurl_multi_perform(3)\fP is called. The protocols supported by libcurl will
+vary depending on how it was built. Use \fIcurl_version_info(3)\fP if you need
+a list of protocol names supported by the build of libcurl that you are using.
 
 This option does not change the default proxy protocol (http).
 

@@ -1,19 +1,47 @@
-# Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
 
 name: macOS
 
 on:
-  # Trigger the workflow on push or pull requests, but only for the
-  # master branch
   push:
     branches:
     - master
     - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
   pull_request:
     branches:
     - master
+    paths-ignore:
+    - '**/*.md'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_14.0.1.app/Contents/Developer
+  MAKEFLAGS: -j 5
 
 jobs:
   autotools:
@@ -56,6 +84,9 @@ jobs:
           install: nghttp2
           configure: --enable-debug --with-secure-transport
           macosx-version-min: 10.8
+        - name: gcc SecureTransport
+          configure: CC=gcc-12 --enable-debug --with-secure-transport
+          macosx-version-min: 10.8
         - name: OpenSSL http2
           install: nghttp2 openssl
           configure: --enable-debug --with-openssl=/usr/local/opt/openssl
@@ -85,8 +116,19 @@ jobs:
     # Run this command with retries because of spurious failures seen
     # while running the tests, for example
     # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
-    - run: brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
+    - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
       name: 'brew install'
+
+    - run: |
+        case "${{ matrix.build.install }}" in
+          *openssl*)
+            ;;
+          *)
+            if test -d /usr/local/include/openssl; then
+              brew unlink openssl
+            fi;;
+        esac
+      name: 'brew unlink openssl'
 
     - run: python3 -m pip install impacket
       name: 'pip3 install'
@@ -96,11 +138,10 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}  --enable-websockets
       name: 'configure'
       env:
-        # -Wvla is caused by brotli
-        CFLAGS: "-Wno-vla -mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
+        CFLAGS: "-mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
 
     - run: make V=1
       name: 'make'
@@ -108,8 +149,11 @@ jobs:
     - run: make V=1 examples
       name: 'make examples'
 
+    - run: make V=1 -C tests
+      name: 'make tests'
+
     - run: make V=1 test-ci
-      name: 'test'
+      name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }} ~1452"
 
@@ -124,8 +168,8 @@ jobs:
         - CC: clang
           CXX: clang++
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-deprecated-declarations"
-        - CC: gcc-9
-          CXX: g++-9
+        - CC: gcc-12
+          CXX: g++-12
           CFLAGS: "-mmacosx-version-min=10.15 -Wno-error=undef -Wno-error=conversion"
         build:
         - name: OpenSSL
@@ -133,23 +177,31 @@ jobs:
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
         - name: LibreSSL
           install: nghttp2 libressl
-          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCMAKE_UNITY_BUILD=ON
         - name: libssh2
           install: nghttp2 openssl libssh2
-          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_USE_LIBSSH2=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON
     steps:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
       name: 'brew bundle'
 
-    - run: brew update && brew bundle install --no-lock --file /tmp/Brewfile
+    - run: "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
       name: 'brew install'
 
-    - run: python3 -m pip install impacket
-      name: 'pip3 install'
+    - run: |
+        case "${{ matrix.build.install }}" in
+          *openssl*)
+            ;;
+          *)
+            if test -d /usr/local/include/openssl; then
+              brew unlink openssl
+            fi;;
+        esac
+      name: 'brew unlink openssl'
 
     - uses: actions/checkout@v3
 
-    - run: cmake -H. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
+    - run: cmake -S. -Bbuild -DCURL_WERROR=ON -DPICKY_COMPILER=ON ${{ matrix.build.generate }}
       name: 'cmake generate'
 
     - run: cmake --build build

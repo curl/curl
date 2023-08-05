@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: etag-compare
 Arg: <file>
@@ -8,6 +8,7 @@ Added: 7.68.0
 Category: http
 Example: --etag-compare etag.txt $URL
 See-also: etag-save time-cond
+Multi: single
 ---
 This option makes a conditional HTTP request for the specific ETag read
 from the given file by sending a custom If-None-Match header using the

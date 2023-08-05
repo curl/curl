@@ -1,0 +1,70 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP/3
+HTTPS
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 201 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Connection: close
+Content-Length: 0
+Funny-head: yesyes
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+debug
+http
+http/3
+</features>
+<server>
+http
+http/3
+</server>
+ <name>
+HTTP/3 POST
+ </name>
+<setenv>
+</setenv>
+ <command>
+-k --http3 "https://%HOSTIP:%HTTP3PORT/%TESTNUMBER" -d "moo"
+</command>
+
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+HTTP/3 201 
+date: Tue, 09 Nov 2010 14:49:00 GMT
+content-length: 0
+funny-head: yesyes
+via: 1.1 nghttpx
+
+</stdout>
+<protocol nonewline="yes">
+POST https://%HOSTIP:%HTTP3PORT/2501 HTTP/1.1
+Host: %HOSTIP:%HTTP3PORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 3
+Content-Type: application/x-www-form-urlencoded
+Via: 3 nghttpx
+
+moo
+</protocol>
+</verify>
+</testcase>

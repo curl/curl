@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -75,12 +75,10 @@ ssize_t curlx_read(int fd, void *buf, size_t count);
 
 ssize_t curlx_write(int fd, const void *buf, size_t count);
 
-#ifndef BUILDING_WARNLESS_C
-#  undef  read
-#  define read(fd, buf, count)  curlx_read(fd, buf, count)
-#  undef  write
-#  define write(fd, buf, count) curlx_write(fd, buf, count)
-#endif
+#undef  read
+#define read(fd, buf, count)  curlx_read(fd, buf, count)
+#undef  write
+#define write(fd, buf, count) curlx_write(fd, buf, count)
 
 #endif /* WIN32 */
 

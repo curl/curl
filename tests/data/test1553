@@ -28,6 +28,9 @@ body
 #
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 imap
 </server>

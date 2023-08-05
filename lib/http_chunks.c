@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -100,7 +100,7 @@ void Curl_httpchunk_init(struct Curl_easy *data)
 CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
                               char *datap,
                               ssize_t datalen,
-                              ssize_t *wrotep,
+                              ssize_t *wrote,
                               CURLcode *extrap)
 {
   CURLcode result = CURLE_OK;
@@ -109,12 +109,11 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
   struct SingleRequest *k = &data->req;
   size_t piece;
   curl_off_t length = (curl_off_t)datalen;
-  size_t *wrote = (size_t *)wrotep;
 
   *wrote = 0; /* nothing's written yet */
 
   /* the original data is written to the client, but we go on with the
-     chunk read process, to properly calculate the content length*/
+     chunk read process, to properly calculate the content length */
   if(data->set.http_te_skip && !k->ignorebody) {
     result = Curl_client_write(data, CLIENTWRITE_BODY, datap, datalen);
     if(result) {
@@ -126,7 +125,7 @@ CHUNKcode Curl_httpchunk_read(struct Curl_easy *data,
   while(length) {
     switch(ch->state) {
     case CHUNK_HEX:
-      if(isxdigit_ascii(*datap)) {
+      if(ISXDIGIT(*datap)) {
         if(ch->hexindex < CHUNK_MAXNUM_LEN) {
           ch->hexbuffer[ch->hexindex] = *datap;
           datap++;

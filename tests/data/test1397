@@ -2,8 +2,7 @@
 <info>
 <keywords>
 unittest
-ssl
-wildcard
+Curl_cert_hostcheck
 </keywords>
 </info>
 
@@ -16,9 +15,8 @@ none
 <features>
 unittest
 </features>
- <name>
-Check wildcard certificate matching function Curl_cert_hostcheck
- </name>
+<name>
+Curl_cert_hostcheck unit tests
+</name>
 </client>
-
 </testcase>

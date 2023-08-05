@@ -2,7 +2,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2022 Daniel Stenberg
+ * Copyright (C) Daniel Stenberg
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -41,8 +41,13 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include "urldata.h"
+#include "cfilters.h"
+#include "cf-socket.h"
 #include "curl_base64.h"
 #include "ftp.h"
 #include "curl_gssapi.h"
@@ -142,11 +147,8 @@ krb5_decode(void *app_data, void *buf, int len,
   enc.value = buf;
   enc.length = len;
   maj = gss_unwrap(&min, *context, &enc, &dec, NULL, NULL);
-  if(maj != GSS_S_COMPLETE) {
-    if(len >= 4)
-      strcpy(buf, "599 ");
+  if(maj != GSS_S_COMPLETE)
     return -1;
-  }
 
   memcpy(buf, dec.value, dec.length);
   len = curlx_uztosi(dec.length);
@@ -207,8 +209,8 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   gss_ctx_id_t *context = app_data;
   struct gss_channel_bindings_struct chan;
   size_t base64_sz = 0;
-  struct sockaddr_in **remote_addr =
-    (struct sockaddr_in **)&conn->ip_addr->ai_addr;
+  struct sockaddr_in *remote_addr =
+    (struct sockaddr_in *)(void *)&conn->remote_addr->sa_addr;
   char *stringp;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
@@ -220,7 +222,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   chan.initiator_address.value = &conn->local_addr.sin_addr.s_addr;
   chan.acceptor_addrtype = GSS_C_AF_INET;
   chan.acceptor_address.length = l - 4;
-  chan.acceptor_address.value = &(*remote_addr)->sin_addr.s_addr;
+  chan.acceptor_address.value = &remote_addr->sin_addr.s_addr;
   chan.application_data.length = 0;
   chan.application_data.value = NULL;
 
@@ -259,7 +261,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
     }
     /* We pass NULL as |output_name_type| to avoid a leak. */
     gss_display_name(&min, gssname, &output_buffer, NULL);
-    infof(data, "Trying against %s", output_buffer.value);
+    infof(data, "Trying against %s", (char *)output_buffer.value);
     gssresp = GSS_C_NO_BUFFER;
     *context = GSS_C_NO_CONTEXT;
 
@@ -454,15 +456,15 @@ static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
 /* Read |len| from the socket |fd| and store it in |to|. Return a CURLcode
    saying whether an error occurred or CURLE_OK if |len| was read. */
 static CURLcode
-socket_read(curl_socket_t fd, void *to, size_t len)
+socket_read(struct Curl_easy *data, int sockindex, void *to, size_t len)
 {
   char *to_p = to;
   CURLcode result;
   ssize_t nread = 0;
 
   while(len > 0) {
-    result = Curl_read_plain(fd, to_p, len, &nread);
-    if(!result) {
+    nread = Curl_conn_recv(data, sockindex, to_p, len, &result);
+    if(nread > 0) {
       len -= nread;
       to_p += nread;
     }
@@ -480,7 +482,7 @@ socket_read(curl_socket_t fd, void *to, size_t len)
    CURLcode saying whether an error occurred or CURLE_OK if |len| was
    written. */
 static CURLcode
-socket_write(struct Curl_easy *data, curl_socket_t fd, const void *to,
+socket_write(struct Curl_easy *data, int sockindex, const void *to,
              size_t len)
 {
   const char *to_p = to;
@@ -488,8 +490,8 @@ socket_write(struct Curl_easy *data, curl_socket_t fd, const void *to,
   ssize_t written;
 
   while(len > 0) {
-    result = Curl_write_plain(data, fd, to_p, len, &written);
-    if(!result) {
+    written = Curl_conn_send(data, sockindex, to_p, len, &result);
+    if(written > 0) {
       len -= written;
       to_p += written;
     }
@@ -502,30 +504,37 @@ socket_write(struct Curl_easy *data, curl_socket_t fd, const void *to,
   return CURLE_OK;
 }
 
-static CURLcode read_data(struct connectdata *conn,
-                          curl_socket_t fd,
+static CURLcode read_data(struct Curl_easy *data, int sockindex,
                           struct krb5buffer *buf)
 {
+  struct connectdata *conn = data->conn;
   int len;
   CURLcode result;
+  int nread;
 
-  result = socket_read(fd, &len, sizeof(len));
+  result = socket_read(data, sockindex, &len, sizeof(len));
   if(result)
     return result;
 
   if(len) {
     /* only realloc if there was a length */
     len = ntohl(len);
-    buf->data = Curl_saferealloc(buf->data, len);
+    if(len > CURL_MAX_INPUT_LENGTH)
+      len = 0;
+    else
+      buf->data = Curl_saferealloc(buf->data, len);
   }
   if(!len || !buf->data)
     return CURLE_OUT_OF_MEMORY;
 
-  result = socket_read(fd, buf->data, len);
+  result = socket_read(data, sockindex, buf->data, len);
   if(result)
     return result;
-  buf->size = conn->mech->decode(conn->app_data, buf->data, len,
-                                 conn->data_prot, conn);
+  nread = conn->mech->decode(conn->app_data, buf->data, len,
+                             conn->data_prot, conn);
+  if(nread < 0)
+    return CURLE_RECV_ERROR;
+  buf->size = (size_t)nread;
   buf->index = 0;
   return CURLE_OK;
 }
@@ -547,13 +556,12 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   size_t bytes_read;
   size_t total_read = 0;
   struct connectdata *conn = data->conn;
-  curl_socket_t fd = conn->sock[sockindex];
 
   *err = CURLE_OK;
 
   /* Handle clear text response. */
   if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR)
-    return sread(fd, buffer, len);
+    return Curl_conn_recv(data, sockindex, buffer, len, err);
 
   if(conn->in_buffer.eof_flag) {
     conn->in_buffer.eof_flag = 0;
@@ -566,7 +574,7 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   buffer += bytes_read;
 
   while(len > 0) {
-    if(read_data(conn, fd, &conn->in_buffer))
+    if(read_data(data, sockindex, &conn->in_buffer))
       return -1;
     if(conn->in_buffer.size == 0) {
       if(bytes_read > 0)
@@ -713,8 +721,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
     return 0;
 
   if(buf[3] != '-')
-    /* safe to ignore return code */
-    (void)sscanf(buf, "%d", &ret_code);
+    ret_code = atoi(buf);
 
   if(buf[decoded_len - 1] == '\n')
     buf[decoded_len - 1] = '\0';
@@ -757,8 +764,9 @@ static int sec_set_protection_level(struct Curl_easy *data)
 
     pbsz = strstr(data->state.buffer, "PBSZ=");
     if(pbsz) {
-      /* ignore return code, use default value if it fails */
-      (void)sscanf(pbsz, "PBSZ=%u", &buffer_size);
+      /* stick to default value if the check fails */
+      if(!strncmp(pbsz, "PBSZ=", 5) && ISDIGIT(pbsz[5]))
+        buffer_size = atoi(&pbsz[5]);
       if(buffer_size < conn->buffer_size)
         conn->buffer_size = buffer_size;
     }

@@ -23,6 +23,9 @@ hello
 
 # Client-side
 <client>
+<features>
+form-api
+</features>
 <server>
 http
 </server>
@@ -38,9 +41,9 @@ curl_formadd with huge COPYCONTENTS
  Some data from stdin
 </stdin>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/test%TESTNUMBER.filedata
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/test%TESTNUMBER.filedata
 </command>
-<file name="log/test%TESTNUMBER.filedata">
+<file name="%LOGDIR/test%TESTNUMBER.filedata">
 This is data from a file.
 </file>
 </client>

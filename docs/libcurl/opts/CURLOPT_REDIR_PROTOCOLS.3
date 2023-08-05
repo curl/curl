@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_REDIR_PROTOCOLS 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_REDIR_PROTOCOLS 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_REDIR_PROTOCOLS \- protocols allowed to redirect to
 .SH SYNOPSIS
@@ -32,6 +32,10 @@ CURLOPT_REDIR_PROTOCOLS \- protocols allowed to redirect to
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REDIR_PROTOCOLS, long bitmask);
 .fi
 .SH DESCRIPTION
+This option is deprecated. We strongly recommend using
+\fICURLOPT_REDIR_PROTOCOLS_STR(3)\fP instead because this option cannot
+control all available protocols!
+
 Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
 limits what protocols libcurl may use in a transfer that it follows to in a
 redirect when \fICURLOPT_FOLLOWLOCATION(3)\fP is enabled. This allows you to
@@ -101,7 +105,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.19.4, before then it would follow all protocols.
+Added in 7.19.4, before then it would follow all protocols. Deprecated
+since 7.85.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

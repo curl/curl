@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,7 +61,7 @@ debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
 static CURLcode
 unit_setup(void)
 {
-  int res = 0;
+  CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   data = curl_easy_init();
@@ -71,7 +71,7 @@ unit_setup(void)
   }
   curl_easy_setopt(data, CURLOPT_DEBUGFUNCTION, debugf_cb);
   curl_easy_setopt(data, CURLOPT_VERBOSE, 1L);
-  return CURLE_OK;
+  return res;
 }
 
 static void

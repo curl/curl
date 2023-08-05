@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSH_PRIVATE_KEYFILE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SSH_PRIVATE_KEYFILE 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_SSH_PRIVATE_KEYFILE \- private key file for SSH auth
 .SH SYNOPSIS
@@ -33,8 +33,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_PRIVATE_KEYFILE,
                           char *filename);
 .SH DESCRIPTION
 Pass a char * pointing to a \fIfilename\fP for your private key. If not used,
-libcurl defaults to \fB$HOME/.ssh/id_dsa\fP if the HOME environment variable
-is set, and just "id_dsa" in the current directory if HOME is not set.
+libcurl defaults to \fB$HOME/.ssh/id_rsa\fP or \fB$HOME/.ssh/id_dsa\fP if the
+HOME environment variable is set, and just \fB"id_rsa"\fP or \fB"id_dsa"\fP in
+the current directory if HOME is not set.
 
 If the file is password-protected, set the password with
 \fICURLOPT_KEYPASSWD(3)\fP.

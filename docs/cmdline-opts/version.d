@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: version
 Short: V
@@ -7,6 +7,7 @@ Category: important curl
 Example: --version
 Added: 4.0
 See-also: help manual
+Multi: custom
 ---
 Displays information about curl and the libcurl version it uses.
 
@@ -82,3 +83,4 @@ Unix sockets support is provided.
 .IP "zstd"
 Automatic decompression (via zstd) of compressed files over HTTP is supported.
 .RE
+.IP

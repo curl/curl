@@ -23,7 +23,7 @@ http
  <name>
 HTTP PUT with resume
  </name>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 012345678
 012345678
 012345678
@@ -36,7 +36,7 @@ HTTP PUT with resume
 012345678
 </file>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -Tlog/test%TESTNUMBER.txt -C 50
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C 50
 </command>
 </client>
 
@@ -49,7 +49,6 @@ Content-Range: bytes 50-99/100
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 50
-Expect: 100-continue
 
 012345678
 012345678

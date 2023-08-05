@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: insecure
 Short: k
@@ -8,6 +8,7 @@ See-also: proxy-insecure cacert capath
 Category: tls sftp scp
 Example: --insecure $URL
 Added: 7.10
+Multi: boolean
 ---
 By default, every secure connection curl makes is verified to be secure before
 the transfer takes place. This option makes curl skip the verification step
@@ -22,6 +23,11 @@ See this online resource for further details:
 
 For SFTP and SCP, this option makes curl skip the *known_hosts* verification.
 *known_hosts* is a file normally stored in the user's home directory in the
-\&.ssh subdirectory, which contains host names and their public keys.
+".ssh" subdirectory, which contains host names and their public keys.
 
 **WARNING**: using this option makes the transfer insecure.
+
+When curl uses secure protocols it trusts responses and allows for example
+HSTS and Alt-Svc information to be stored and used subsequently. Using
+--insecure can make curl trust and use such information from malicious
+servers.

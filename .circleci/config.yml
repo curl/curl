@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2021, 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -65,7 +65,8 @@ commands:
     steps:
       - run:
           command: |
-            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
+            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip
+            sudo python3 -m pip install impacket
 
   configure-libssh:
     steps:
@@ -78,23 +79,25 @@ commands:
     steps:
       - run:
           command: |
-            curl -LO https://github.com/wolfSSL/wolfssl/archive/v5.1.1-stable.tar.gz
-            tar -xzf v5.1.1-stable.tar.gz
-            cd wolfssl-5.1.1-stable
+            WOLFSSL_VER=5.6.0
+            curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
+            tar -xzf v$WOLFSSL_VER-stable.tar.gz
+            cd wolfssl-$WOLFSSL_VER-stable
             ./autogen.sh
             ./configure --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
-            make && make install
+            make install
 
   install-wolfssh:
     steps:
       - run:
           command: |
-            curl -LO https://github.com/wolfSSL/wolfssh/archive/v1.4.8-stable.tar.gz
-            tar -xzf v1.4.8-stable.tar.gz
-            cd wolfssh-1.4.8-stable
+            WOLFSSH_VER=1.4.12
+            curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssh/archive/v$WOLFSSH_VER-stable.tar.gz
+            tar -xzf v$WOLFSSH_VER-stable.tar.gz
+            cd wolfssh-$WOLFSSH_VER-stable
             ./autogen.sh
             ./configure --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-examples
-            make && make install
+            make install
 
   configure-cares:
     steps:
@@ -119,12 +122,12 @@ commands:
 
   build:
     steps:
-      - run: make V=1
-      - run: make V=1 examples
+      - run: make -j3 V=1
+      - run: make -j3 V=1 examples
 
   test:
     steps:
-      - run: make V=1 test-ci
+      - run: make -j3 V=1 test-ci
 
 executors:
   ubuntu:

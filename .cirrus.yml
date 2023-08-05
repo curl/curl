@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,29 +21,46 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Cirrus CI configuration
 # https://cirrus-ci.com/github/curl/curl
+#
+# Cirrus CI configuration:
+# https://cirrus-ci.org/guide/writing-tasks/
 
 freebsd_task:
+  skip: "changesIncludeOnly(
+    '**/CMakeLists.txt',
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'CMake/**',
+    'packages/**',
+    'plan9/**',
+    'projects/**',
+    'winbuild/**'
+    )"
+
   name: FreeBSD
 
   matrix:
-    - name: FreeBSD 13.1
+    - name: FreeBSD 13.2
       freebsd_instance:
-        image_family: freebsd-13-1
-    - name: FreeBSD 12.3
+        image_family: freebsd-13-2
+    - name: FreeBSD 12.4
       freebsd_instance:
-        image_family: freebsd-12-3
+        image_family: freebsd-12-4
 
   env:
     CIRRUS_CLONE_DEPTH: 10
     CRYPTOGRAPHY_DONT_BUILD_RUST: 1
-    MAKE_FLAGS: -j 2
+    MAKE_FLAGS: -j 3
 
   pkginstall_script:
     - pkg update -f
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel py38-pip
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
     - pkg delete -y curl
+    - python -m ensurepip --default-pip
+    - python -m pip install --upgrade pip
     - pip install "cryptography<3.2"
     - pip install "pyOpenSSL<20.0"
     - pip install "impacket"
@@ -75,6 +92,15 @@ freebsd_task:
     - make V=1 install
 
 windows_task:
+  skip: "changesIncludeOnly(
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'packages/**',
+    'plan9/**'
+    )"
+
   name: Windows
   timeout_in: 120m
   windows_container:
@@ -88,44 +114,181 @@ windows_task:
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2 mingw-w64-i686-python-pip mingw-w64-i686-python-wheel mingw-w64-i686-python-pyopenssl && python3 -m pip install --prefer-binary impacket
         configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
         tests: "~571"
+        make_cmd: make V=1
     - name: Windows 32-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw32:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-i686-libssh2 mingw-w64-i686-python-pip mingw-w64-i686-python-wheel mingw-w64-i686-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static
+        configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static  --enable-websockets
         tests: "~571"
-        curl_LDFLAGS: -all-static
+        make_cmd: make LDFLAGS=-all-static V=1
         PKG_CONFIG: pkg-config --static
     - name: Windows 64-bit shared/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2 mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-wheel mingw-w64-x86_64-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2
+        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2  --enable-websockets
         tests: "~571"
+        make_cmd: make V=1
     - name: Windows 64-bit static/release Schannel/SSPI/WinIDN/libssh2
       env:
         container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys2-mingw64:ltsc2019
         container_cmd: C:\msys64\usr\bin\sh
         prepare: pacman -S --needed --noconfirm --noprogressbar libssh2-devel mingw-w64-x86_64-libssh2 mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-wheel mingw-w64-x86_64-python-pyopenssl && python3 -m pip install --prefer-binary impacket
-        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static
+        configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-werror --enable-sspi --with-schannel --with-winidn --with-libssh2 --disable-shared --enable-static --enable-websockets
         tests: "~571"
-        curl_LDFLAGS: -all-static
+        make_cmd: make LDFLAGS=-all-static V=1
         PKG_CONFIG: pkg-config --static
 
   env:
     CIRRUS_CLONE_DEPTH: 10
     MSYS2_PATH_TYPE: inherit
-    MAKEFLAGS: -j 2
+    MAKEFLAGS: -j 3
 
   prepare_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && %prepare%"
   configure_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && autoreconf -fi && ./configure %configure%"
   compile_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 && make V=1 examples && cd tests && make V=1"
+    %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% && %make_cmd% examples && cd tests && %make_cmd%"
   install_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
+    %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% install && PATH=/usr/bin:/bin find . -type f -path '*/.libs/*.exe' -print -execdir mv -t .. {} \;"
   test_script: |
-    %container_cmd% -l -c "cd $(echo '%cd%') && make V=1 TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
+    %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
+
+macos_task:
+  skip: "changesIncludeOnly(
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'packages/**',
+    'plan9/**',
+    'projects/**',
+    'winbuild/**'
+    )"
+
+  name: macOS arm64
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
+
+  matrix:
+    - name: macOS arm64 normal
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2
+        configure: --without-ssl
+    - name: macOS arm64 debug
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2
+        configure: --without-ssl --enable-debug
+    - name: macOS arm64 libssh2
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2 libssh2
+        configure: --without-ssl --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2
+        TFLAGS: -n !SFTP !SCP
+    - name: macOS arm64 libssh-c-ares
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2 openssl libssh
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-libssh --enable-ares
+    - name: macOS arm64 libssh
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2 openssl libssh
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-libssh
+    - name: macOS arm64 c-ares
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2
+        configure: --without-ssl --enable-debug --enable-ares
+    - name: macOS arm64 HTTP only
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.15
+        install_packages: nghttp2
+        configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+    - name: macOS arm64 SecureTransport http2
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.8
+        install_packages: nghttp2
+        configure: --with-secure-transport
+    - name: macOS arm64 OpenSSL http2
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
+    - name: macOS arm64 LibreSSL http2
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2 libressl
+        configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl
+    - name: macOS arm64 torture
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
+        TFLAGS: -n -t --shallow=25 !FTP
+    - name: macOS arm64 torture-ftp
+      env:
+        CFLAGS: -Wno-vla -mmacosx-version-min=10.9
+        install_packages: nghttp2 openssl
+        configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/opt/homebrew/opt/openssl
+        TFLAGS: -n -t --shallow=20 FTP
+
+  env:
+    CIRRUS_CLONE_DEPTH: 10
+    MAKE_FLAGS: -j 12
+
+  pkginstall_script:
+    - echo libtool autoconf automake pkg-config ${install_packages} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+    - "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
+    - sudo -H python3 -m pip install --upgrade pip
+    - sudo -H python3 -m pip install impacket
+  configure_script:
+    - autoreconf -fi
+    - ./configure --enable-warnings --enable-werror --enable-websockets ${configure}
+  compile_script:
+    - make V=1 && make V=1 examples && cd tests && make V=1
+  test_script:
+    - make V=1 test-ci
+  install_script:
+    - sudo -H make V=1 install
+
+linux_musl_task:
+  skip: "changesIncludeOnly(
+    '**/CMakeLists.txt',
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'CMake/**',
+    'packages/**',
+    'plan9/**',
+    'projects/**',
+    'winbuild/**'
+    )"
+  name: Linux MUSL
+  container:
+    image: alpine:3.18
+    memory: 800M
+
+  env:
+    CIRRUS_CLONE_DEPTH: 10
+    MAKEFLAGS: -j 3
+
+  pkginstall_script:
+    - apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo
+  configure_script:
+    - autoreconf -fi
+    - ./configure --enable-warnings --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
+  compile_script:
+    - make V=1 && make V=1 examples && make -C tests V=1
+  test_script:
+    # TODO: ssh tests don't work, likely because we're running as root
+    - USER=nobody make V=1 test-ci
+  install_script:
+    - make V=1 install

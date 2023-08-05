@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: output
 Arg: <file>
@@ -11,6 +11,7 @@ Example: "http://{one,two}.example.com" -o "file_#1.txt"
 Example: "http://{site,host}.host[1-5].com" -o "#1_#2"
 Example: -o file $URL -o file2 https://example.net
 Added: 4.0
+Multi: append
 ---
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
 multiple documents, you should quote the URL and you can use '#' followed by a
@@ -43,6 +44,6 @@ To suppress response bodies, you can redirect output to /dev/null:
 
   curl example.com -o /dev/null
 
-Or for Windows use nul:
+Or for Windows use **nul**:
 
   curl example.com -o nul

@@ -22,6 +22,9 @@ Connection: close
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -29,10 +32,10 @@ http
 HTTP RFC1867-type formposting - -F with three files, one with explicit type
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=value -F 'file=@log/test%TESTNUMBER.txt,log/test%TESTNUMBER.txt;type=magic/content,log/test%TESTNUMBER.txt'
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=value -F 'file=@%LOGDIR/test%TESTNUMBER.txt,%LOGDIR/test%TESTNUMBER.txt;type=magic/content,%LOGDIR/test%TESTNUMBER.txt'
 </command>
 # We create this file before the command is invoked!
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 dummy data
 </file>
 </client>

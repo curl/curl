@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
  * </DESC>
  */
 /* Example code that uploads a file name 'foo' to a remote script that accepts
- * "HTML form based" (as described in RFC1738) uploads using HTTP POST.
+ * "HTML form based" (as described in RFC 1738) uploads using HTTP POST.
  *
  * The imaginary form we will fill in looks like:
  *

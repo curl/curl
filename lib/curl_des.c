@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2022, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,12 +24,11 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE) && !defined(USE_WOLFSSL) && \
-    (defined(USE_GNUTLS) || \
-     defined(USE_NSS) || \
-     defined(USE_SECTRANSP) || \
-     defined(USE_OS400CRYPTO) || \
-     defined(USE_WIN32_CRYPTO))
+#if defined(USE_CURL_NTLM_CORE) && !defined(USE_WOLFSSL) &&     \
+  (defined(USE_GNUTLS) ||                                       \
+   defined(USE_SECTRANSP) ||                                    \
+   defined(USE_OS400CRYPTO) ||                                  \
+   defined(USE_WIN32_CRYPTO))
 
 #include "curl_des.h"
 
@@ -41,7 +40,7 @@
  *
  * The function is a port of the Java based oddParity() function over at:
  *
- * https://davenport.sourceforge.io/ntlm.html
+ * https://davenport.sourceforge.net/ntlm.html
  *
  * Parameters:
  *

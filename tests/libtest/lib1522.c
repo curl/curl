@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -92,7 +92,7 @@ int test(char *URL)
   else {
     printf("curl_easy_perform() failed. e = %d\n", code);
   }
-  test_cleanup:
+test_cleanup:
   curl_slist_free_all(pHeaderList);
   curl_easy_cleanup(curl);
   curl_global_cleanup();

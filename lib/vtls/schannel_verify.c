@@ -5,9 +5,9 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
- * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) Mark Salisbury, <mark.salisbury@hp.com>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,12 +36,13 @@
 #  error "Can't compile SCHANNEL support without SSPI."
 #endif
 
-#define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
 #include "schannel.h"
+#include "schannel_int.h"
 
 #ifdef HAS_MANUAL_VERIFY_API
 
 #include "vtls.h"
+#include "vtls_int.h"
 #include "sendf.h"
 #include "strerror.h"
 #include "curl_multibyte.h"
@@ -53,7 +54,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define BACKEND connssl->backend
+#define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
 #define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
 #define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
@@ -458,7 +459,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 
 static CURLcode verify_host(struct Curl_easy *data,
                             CERT_CONTEXT *pCertContextServer,
-                            const char * const conn_hostname)
+                            const char *conn_hostname)
 {
   CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
   TCHAR *cert_hostname_buff = NULL;
@@ -562,17 +563,18 @@ cleanup:
   return result;
 }
 
-CURLcode Curl_verify_certificate(struct Curl_easy *data,
-                                 struct connectdata *conn, int sockindex)
+CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SECURITY_STATUS sspi_status;
-  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
   HCERTCHAINENGINE cert_chain_engine = NULL;
   HCERTSTORE trust_store = NULL;
-  const char * const conn_hostname = SSL_HOST_NAME();
 
   DEBUGASSERT(BACKEND);
 
@@ -589,7 +591,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
   }
 
   if(result == CURLE_OK &&
-      (SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(ca_info_blob)) &&
+      (conn_config->CAfile || conn_config->ca_info_blob) &&
       BACKEND->use_manual_cred_validation) {
     /*
      * Create a chain engine that uses the certificates in the CA file as
@@ -616,7 +618,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
         result = CURLE_SSL_CACERT_BADFILE;
       }
       else {
-        const struct curl_blob *ca_info_blob = SSL_CONN_CONFIG(ca_info_blob);
+        const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
         if(ca_info_blob) {
           result = add_certs_data_to_store(trust_store,
                                            (const char *)ca_info_blob->data,
@@ -626,7 +628,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
         }
         else {
           result = add_certs_file_to_store(trust_store,
-                                           SSL_CONN_CONFIG(CAfile),
+                                           conn_config->CAfile,
                                            data);
         }
       }
@@ -669,7 +671,7 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
                                 NULL,
                                 pCertContextServer->hCertStore,
                                 &ChainPara,
-                                (SSL_SET_OPTION(no_revoke) ? 0 :
+                                (ssl_config->no_revoke ? 0 :
                                  CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {
@@ -718,8 +720,8 @@ CURLcode Curl_verify_certificate(struct Curl_easy *data,
   }
 
   if(result == CURLE_OK) {
-    if(SSL_CONN_CONFIG(verifyhost)) {
-      result = verify_host(data, pCertContextServer, conn_hostname);
+    if(conn_config->verifyhost) {
+      result = verify_host(data, pCertContextServer, connssl->hostname);
     }
   }
 

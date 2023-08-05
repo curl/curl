@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 
   /* curl_easy_setopt(handle, CURLOPT_VERBOSE, 1L); */
 
-  /* set an URL containing wildcard pattern (only in the last part) */
+  /* set a URL containing wildcard pattern (only in the last part) */
   if(argc == 2)
     curl_easy_setopt(handle, CURLOPT_URL, argv[1]);
   else

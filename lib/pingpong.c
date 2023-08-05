@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 #include "curl_setup.h"
 
 #include "urldata.h"
+#include "cfilters.h"
 #include "sendf.h"
 #include "select.h"
 #include "progress.h"
@@ -102,12 +103,12 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   else
     interval_ms = 0; /* immediate */
 
-  if(Curl_ssl_data_pending(conn, FIRSTSOCKET))
+  if(Curl_conn_data_pending(data, FIRSTSOCKET))
     rc = 1;
   else if(Curl_pp_moredata(pp))
     /* We are receiving and there is data in the cache so just read it */
     rc = 1;
-  else if(!pp->sendleft && Curl_ssl_data_pending(conn, FIRSTSOCKET))
+  else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
   else
@@ -210,7 +211,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
   data_sec = conn->data_prot;
   DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
-  conn->data_prot = data_sec;
+  conn->data_prot = (unsigned char)data_sec;
 #endif
 
   Curl_debug(data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
@@ -315,7 +316,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
                          &gotbytes);
 #ifdef HAVE_GSSAPI
       DEBUGASSERT(prot  > PROT_NONE && prot < PROT_LAST);
-      conn->data_prot = prot;
+      conn->data_prot = (unsigned char)prot;
 #endif
       if(result == CURLE_AGAIN)
         return CURLE_OK; /* return */
@@ -330,7 +331,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     else if(gotbytes <= 0) {
       keepon = FALSE;
       result = CURLE_RECV_ERROR;
-      failf(data, "response reading failed");
+      failf(data, "response reading failed (errno: %d)", SOCKERRNO);
     }
     else {
       /* we got a whole chunk of data, which can be anything from one
@@ -340,7 +341,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       ssize_t clipamount = 0;
       bool restart = FALSE;
 
-      data->req.headerbytecount += (long)gotbytes;
+      data->req.headerbytecount += (unsigned int)gotbytes;
 
       pp->nread_resp += gotbytes;
       for(i = 0; i < gotbytes; ptr++, i++) {
@@ -398,7 +399,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       }
       else if(keepon) {
 
-        if((perline == gotbytes) && (gotbytes > data->set.buffer_size/2)) {
+        if((perline == gotbytes) &&
+           (gotbytes > (ssize_t)data->set.buffer_size/2)) {
           /* We got an excessive line without newlines and we need to deal
              with it. We keep the first bytes of the line then we throw
              away the rest. */

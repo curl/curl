@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLMOPT_TIMERDATA 3 "17 Jun 2014" "libcurl 7.37.0" "curl_multi_setopt options"
+.TH CURLMOPT_TIMERDATA 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLMOPT_TIMERDATA \- custom pointer to pass to timer callback
 .SH SYNOPSIS
@@ -35,7 +35,7 @@ A data \fBpointer\fP to pass to the timer callback set with the
 \fICURLMOPT_TIMERFUNCTION(3)\fP option.
 
 This pointer will not be touched by libcurl but will only be passed in to the
-timer callbacks's \fBuserp\fP argument.
+timer callbacks's \fBclientp\fP argument.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -53,9 +53,9 @@ static gboolean timeout_cb(gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
-static int timerfunc(CURLM *multi, long timeout_ms, void *userp)
+static int timerfunc(CURLM *multi, long timeout_ms, void *clientp)
 {
-  guint *id = userp;
+  guint *id = clientp;
 
   if(id)
     g_source_remove(*id);

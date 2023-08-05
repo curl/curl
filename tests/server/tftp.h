@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,7 +34,7 @@
   ((__GNUC__ == 2) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 7)))
 #  define PACKED_STRUCT __attribute__((__packed__))
 #else
-#  define PACKED_STRUCT /*NOTHING*/
+#  define PACKED_STRUCT /* NOTHING */
 #endif
 
 /* Using a packed struct as binary in a program is begging for problems, but

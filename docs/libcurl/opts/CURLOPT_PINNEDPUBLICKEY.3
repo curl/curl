@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_PINNEDPUBLICKEY 3 "27 Aug 2014" "libcurl 7.38.0" "curl_easy_setopt options"
+.TH CURLOPT_PINNEDPUBLICKEY 3 "27 Aug 2014" libcurl libcurl
 .SH NAME
 CURLOPT_PINNEDPUBLICKEY \- pinned public key
 .SH SYNOPSIS
@@ -104,23 +104,23 @@ PEM/DER support:
 
   7.39.0-7.48.0,7.58.1+: GSKit
 
-  7.43.0: NSS and wolfSSL
+  7.43.0: wolfSSL
 
-  7.47.0: mbedtls
+  7.47.0: mbedTLS
 
-  7.54.1: SecureTransport on macOS 10.7+/iOS 10+
+  7.54.1: Secure Transport on macOS 10.7+/iOS 10+
 
-  7.58.1: SChannel
+  7.58.1: Schannel
 
 sha256 support:
 
-  7.44.0: OpenSSL, GnuTLS, NSS and wolfSSL
+  7.44.0: OpenSSL, GnuTLS and wolfSSL
 
-  7.47.0: mbedtls
+  7.47.0: mbedTLS
 
-  7.54.1: SecureTransport on macOS 10.7+/iOS 10+
+  7.54.1: Secure Transport on macOS 10.7+/iOS 10+
 
-  7.58.1: SChannel Windows XP SP3+
+  7.58.1: Schannel Windows XP SP3+
 
 Other SSL backends not supported.
 .SH RETURN VALUE

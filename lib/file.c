@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,6 +71,8 @@
 
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
 #define DOS_FILESYSTEM 1
+#elif defined(__amigaos4__)
+#define AMIGA_FILESYSTEM 1
 #endif
 
 #ifdef OPEN_NEEDS_ARG3
@@ -148,9 +150,19 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   char *actual_path;
 #endif
   size_t real_path_len;
+  CURLcode result;
 
-  CURLcode result = Curl_urldecode(data->state.up.path, 0, &real_path,
-                                   &real_path_len, REJECT_ZERO);
+  if(file->path) {
+    /* already connected.
+     * the handler->connect_it() is normally only called once, but
+     * FILE does a special check on setting up the connection which
+     * calls this explicitly. */
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  result = Curl_urldecode(data->state.up.path, 0, &real_path,
+                          &real_path_len, REJECT_ZERO);
   if(result)
     return result;
 
@@ -196,13 +208,39 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     return CURLE_URL_MALFORMAT;
   }
 
+  #ifdef AMIGA_FILESYSTEM
+  /*
+   * A leading slash in an AmigaDOS path denotes the parent
+   * directory, and hence we block this as it is relative.
+   * Absolute paths start with 'volumename:', so we check for
+   * this first. Failing that, we treat the path as a real unix
+   * path, but only if the application was compiled with -lunix.
+   */
+  fd = -1;
+  file->path = real_path;
+
+  if(real_path[0] == '/') {
+    extern int __unix_path_semantics;
+    if(strchr(real_path + 1, ':')) {
+      /* Amiga absolute path */
+      fd = open_readonly(real_path + 1, O_RDONLY);
+      file->path++;
+    }
+    else if(__unix_path_semantics) {
+      /* -lunix fallback */
+      fd = open_readonly(real_path, O_RDONLY);
+    }
+  }
+  #else
   fd = open_readonly(real_path, O_RDONLY);
   file->path = real_path;
+  #endif
 #endif
+  Curl_safefree(file->freepath);
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
-  if(!data->set.upload && (fd == -1)) {
+  if(!data->state.upload && (fd == -1)) {
     failf(data, "Couldn't open file %s", data->state.up.path);
     file_done(data, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
@@ -236,7 +274,7 @@ static CURLcode file_disconnect(struct Curl_easy *data,
 {
   (void)dead_connection; /* not used */
   (void)conn;
-  return file_done(data, 0, 0);
+  return file_done(data, CURLE_OK, FALSE);
 }
 
 #ifdef DOS_FILESYSTEM
@@ -302,7 +340,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
   while(!result) {
     size_t nread;
-    size_t nwrite;
+    ssize_t nwrite;
     size_t readcount;
     result = Curl_fillreadbuffer(data, data->set.buffer_size, &readcount);
     if(result)
@@ -313,7 +351,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
     nread = readcount;
 
-    /*skip bytes before resume point*/
+    /* skip bytes before resume point */
     if(data->state.resume_from) {
       if((curl_off_t)nread <= data->state.resume_from) {
         data->state.resume_from -= nread;
@@ -331,7 +369,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
     /* write the data to the target */
     nwrite = write(fd, buf2, nread);
-    if(nwrite != nread) {
+    if((size_t)nwrite != nread) {
       result = CURLE_SEND_ERROR;
       break;
     }
@@ -384,7 +422,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   Curl_pgrsStartNow(data);
 
-  if(data->set.upload)
+  if(data->state.upload)
     return file_upload(data);
 
   file = data->req.p.file;
@@ -444,13 +482,13 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
               tm->tm_hour,
               tm->tm_min,
               tm->tm_sec,
-              data->set.opt_no_body ? "": "\r\n");
+              data->req.no_body ? "": "\r\n");
     result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
     if(result)
       return result;
     /* set the file size to make it available post transfer */
     Curl_pgrsSetDownloadSize(data, expected_size);
-    if(data->set.opt_no_body)
+    if(data->req.no_body)
       return result;
   }
 

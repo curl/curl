@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_PROXY_SSL_CIPHER_LIST 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
+.TH CURLOPT_PROXY_SSL_CIPHER_LIST 3 "16 Nov 2016" libcurl libcurl
 .SH NAME
 CURLOPT_PROXY_SSL_CIPHER_LIST \- ciphers to use for HTTPS proxy
 .SH SYNOPSIS
@@ -42,11 +42,6 @@ normally used, \&!, \&- and \&+ can be used as operators.
 For OpenSSL and GnuTLS valid examples of cipher lists include \fBRC4-SHA\fP,
 \fBSHA1+DES\fP, \fBTLSv1\fP and \fBDEFAULT\fP. The default list is normally
 set when you compile OpenSSL.
-
-For NSS, valid examples of cipher lists include \fBrsa_rc4_128_md5\fP,
-\fBrsa_aes_128_sha\fP, etc. With NSS you do not add/remove ciphers. If one uses
-this option then all known ciphers are disabled and only those passed in are
-enabled.
 
 For WolfSSL, valid examples of cipher lists include \fBECDHE-RSA-RC4-SHA\fP,
 \fBAES256-SHA:AES256-SHA256\fP, etc.

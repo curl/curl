@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,8 +27,6 @@
 #include <curl/curl.h>
 
 #include "strcase.h"
-
-static char raw_tolower(char in);
 
 /* Mapping table to go from lowercase to uppercase for plain ASCII.*/
 static const unsigned char touppermap[256] = {
@@ -79,22 +77,19 @@ char Curl_raw_toupper(char in)
 
 /* Portable, consistent tolower. Do not use tolower() because its behavior is
    altered by the current locale. */
-static char raw_tolower(char in)
+char Curl_raw_tolower(char in)
 {
   return tolowermap[(unsigned char) in];
 }
 
 /*
- * Curl_strcasecompare() is for doing "raw" case insensitive strings. This is
- * meant to be locale independent and only compare strings we know are safe
- * for this.  See
- * https://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for some
- * further explanation to why this function is necessary.
- *
- * @unittest: 1301
+ * curl_strequal() is for doing "raw" case insensitive strings. This is meant
+ * to be locale independent and only compare strings we know are safe for
+ * this. See https://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for
+ * further explanations as to why this function is necessary.
  */
 
-int Curl_strcasecompare(const char *first, const char *second)
+static int casecompare(const char *first, const char *second)
 {
   while(*first && *second) {
     if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
@@ -110,25 +105,22 @@ int Curl_strcasecompare(const char *first, const char *second)
   return !*first == !*second;
 }
 
-int Curl_safe_strcasecompare(const char *first, const char *second)
+/* --- public function --- */
+int curl_strequal(const char *first, const char *second)
 {
   if(first && second)
     /* both pointers point to something then compare them */
-    return Curl_strcasecompare(first, second);
+    return casecompare(first, second);
 
   /* if both pointers are NULL then treat them as equal */
   return (NULL == first && NULL == second);
 }
 
-/*
- * @unittest: 1301
- */
-int Curl_strncasecompare(const char *first, const char *second, size_t max)
+static int ncasecompare(const char *first, const char *second, size_t max)
 {
   while(*first && *second && max) {
-    if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second)) {
-      break;
-    }
+    if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
+      return 0;
     max--;
     first++;
     second++;
@@ -139,6 +131,16 @@ int Curl_strncasecompare(const char *first, const char *second, size_t max)
   return Curl_raw_toupper(*first) == Curl_raw_toupper(*second);
 }
 
+/* --- public function --- */
+int curl_strnequal(const char *first, const char *second, size_t max)
+{
+  if(first && second)
+    /* both pointers point to something then compare them */
+    return ncasecompare(first, second, max);
+
+  /* if both pointers are NULL then treat them as equal if max is non-zero */
+  return (NULL == first && NULL == second && max);
+}
 /* Copy an upper case version of the string from src to dest.  The
  * strings may overlap.  No more than n characters of the string are copied
  * (including any NUL) and the destination string will NOT be
@@ -165,7 +167,7 @@ void Curl_strntolower(char *dest, const char *src, size_t n)
     return;
 
   do {
-    *dest++ = raw_tolower(*src);
+    *dest++ = Curl_raw_tolower(*src);
   } while(*src++ && --n);
 }
 
@@ -179,13 +181,24 @@ bool Curl_safecmp(char *a, char *b)
   return !a && !b;
 }
 
-/* --- public functions --- */
+/*
+ * Curl_timestrcmp() returns 0 if the two strings are identical. The time this
+ * function spends is a function of the shortest string, not of the contents.
+ */
+int Curl_timestrcmp(const char *a, const char *b)
+{
+  int match = 0;
+  int i = 0;
 
-int curl_strequal(const char *first, const char *second)
-{
-  return Curl_strcasecompare(first, second);
-}
-int curl_strnequal(const char *first, const char *second, size_t max)
-{
-  return Curl_strncasecompare(first, second, max);
+  if(a && b) {
+    while(1) {
+      match |= a[i]^b[i];
+      if(!a[i] || !b[i])
+        break;
+      i++;
+    }
+  }
+  else
+    return a || b;
+  return match;
 }

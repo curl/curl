@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2022, 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_HSTS_CTRL 3 "4 Sep 2020" "libcurl 7.74.0" "curl_easy_setopt options"
+.TH CURLOPT_HSTS_CTRL 3 "4 Sep 2020" libcurl libcurl
 .SH NAME
 CURLOPT_HSTS_CTRL \- control HSTS behavior
 .SH SYNOPSIS
@@ -57,7 +57,7 @@ HTTPS and HTTP
 .nf
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
+  curl_easy_setopt(curl, CURLOPT_HSTS_CTRL, (long)CURLHSTS_ENABLE);
   curl_easy_perform(curl);
 }
 .fi

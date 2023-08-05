@@ -19,6 +19,9 @@ blablabla
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -26,10 +29,10 @@ http
 HTTP RFC1867-type formposting with filename/data contains ',', ';', '"'
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "file=@\"log/test%TESTNUMBER,and;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"log/test%TESTNUMBER,and;.txt"' -F 'file3=@"log/test%TESTNUMBER,and;.txt";type=m/f,"log/test%TESTNUMBER,and;.txt"' -F a="{\"field1\":\"value1\",\"field2\":\"value2\"}" -F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "file=@\"%LOGDIR/test%TESTNUMBER,and;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"%LOGDIR/test%TESTNUMBER,and;.txt"' -F 'file3=@"%LOGDIR/test%TESTNUMBER,and;.txt";type=m/f,"%LOGDIR/test%TESTNUMBER,and;.txt"' -F a="{\"field1\":\"value1\",\"field2\":\"value2\"}" -F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
 </command>
 # We create this file before the command is invoked!
-<file name="log/test%TESTNUMBER,and;.txt">
+<file name="%LOGDIR/test%TESTNUMBER,and;.txt">
 foo bar
 This is a bar foo
 bar

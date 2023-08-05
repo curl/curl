@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2006 - 2022, David Shaw <dshaw@jabberwocky.com>
+# Copyright (C) David Shaw <dshaw@jabberwocky.com>
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -199,9 +199,10 @@ if (x) {;}
            _libcurl_save_libs=$LIBS
            LIBS="$LIBS $LIBCURL"
 
-           AC_CHECK_FUNC(curl_free,,
-              AC_DEFINE(curl_free,free,
-                [Define curl_free() as free() if our version of curl lacks curl_free.]))
+           AC_CHECK_DECL([curl_free],[],
+              [AC_DEFINE([curl_free],[free],
+                [Define curl_free() as free() if our version of curl lacks curl_free.])],
+              [[#include <curl/curl.h>]])
 
            CPPFLAGS=$_libcurl_save_cppflags
            LIBS=$_libcurl_save_libs
@@ -271,4 +272,4 @@ if (x) {;}
   fi
 
   unset _libcurl_with
-])dnl
+])

@@ -29,7 +29,7 @@ SFTP with multi interface, remove handle early
 # name resolve will cause it to return rather quickly and thus we could trigger
 # the problem we're looking to verify.
  <command>
-sftp://localhost:%SSHPORT%SSH_PWD/log/upload%TESTNUMBER.txt %USER:
+sftp://localhost:%SSHPORT%SSH_PWD/%LOGDIR/upload%TESTNUMBER.txt %USER: %LOGDIR/server/curl_client_key.pub %LOGDIR/server/curl_client_key
 </command>
 </client>
 

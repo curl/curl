@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -78,13 +78,13 @@ int test(char *URL)
   free(stream_uri);
   stream_uri = NULL;
 
-  sdp = open("log/file568.txt", O_RDONLY);
+  sdp = open(libtest_arg2, O_RDONLY);
   fstat(sdp, &file_info);
   close(sdp);
 
-  sdpf = fopen("log/file568.txt", "rb");
+  sdpf = fopen(libtest_arg2, "rb");
   if(!sdpf) {
-    fprintf(stderr, "can't open log/file568.txt\n");
+    fprintf(stderr, "can't open %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }

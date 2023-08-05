@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: netrc
 Short: n
@@ -7,6 +7,8 @@ Category: curl
 Example: --netrc $URL
 Added: 4.6
 See-also: netrc-file config user
+Mutexed: netrc-file netrc-optional
+Multi: boolean
 ---
 Makes curl scan the *.netrc* (*_netrc* on Windows) file in the user's home
 directory for login name and password. This is typically used for FTP on
@@ -17,9 +19,9 @@ neither world- nor group-readable). The environment variable "HOME" is used
 to find the home directory.
 
 A quick and simple example of how to setup a *.netrc* to allow curl to FTP to
-the machine host.domain.com with user name \&'myself' and password \&'secret'
+the machine host.domain.com with user name 'myself' and password 'secret'
 could look similar to:
 
  machine host.domain.com
  login myself
- password secret"
+ password secret

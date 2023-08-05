@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: basic
 Help: Use HTTP Basic Authentication
@@ -7,6 +7,7 @@ Protocols: HTTP
 Category: auth
 Example: -u name:password --basic $URL
 Added: 7.10.6
+Multi: mutex
 ---
 Tells curl to use HTTP Basic authentication with the remote host. This is the
 default and this option is usually pointless, unless you use it to override a

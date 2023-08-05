@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2022, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,7 +39,7 @@ int test(char *URL)
   if(hnd) {
     curl_easy_setopt(hnd, CURLOPT_URL, URL);
     curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
-    curl_easy_setopt(hnd, CURLOPT_ALTSVC, "log/altsvc-1908");
+    curl_easy_setopt(hnd, CURLOPT_ALTSVC, libtest_arg2);
     ret = curl_easy_perform(hnd);
 
     if(!ret) {

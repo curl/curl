@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+#
+<reply>
+<data nocheck="yes" nonewline="yes">
+HTTP/1.1 200 Oblivious
+Server: test-server/fake
+Something: else
+Content-Length:  6
+
+hello
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+# require debug for the forced CURL_ENTROPY
+<features>
+debug
+ws
+</features>
+<server>
+http
+</server>
+<name>
+WebSockets but gets a 200 back
+</name>
+<tool>
+lib2302
+</tool>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: webbie-sox/3
+Accept: */*
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
+
+</protocol>
+# 22 == CURLE_HTTP_RETURNED_ERROR
+<errorcode>
+22
+</errorcode>
+</verify>
+</testcase>

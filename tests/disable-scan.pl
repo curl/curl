@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -95,7 +95,7 @@ sub scan_docs {
     my $line = 0;
     while(<F>) {
         $line++;
-        if(/^## (CURL_DISABLE_[A-Z_]+)/g) {
+        if(/^## `(CURL_DISABLE_[A-Z_]+)/g) {
             my ($sym)=($1);
             $docs{$sym} = $line;
         }

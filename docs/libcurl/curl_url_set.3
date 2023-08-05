@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_url_set 3 "6 Aug 2018" "libcurl" "libcurl Manual"
+.TH curl_url_set 3 "6 Aug 2018" "libcurl" "libcurl"
 .SH NAME
 curl_url_set - set a URL part
 .SH SYNOPSIS
@@ -46,13 +46,22 @@ The application does not have to keep \fIcontent\fP around after a successful
 call.
 
 Setting a part to a NULL pointer will effectively remove that part's contents
-from the CURLU handle.
+from the \fICURLU\fP handle.
 
 By default, this API only accepts URLs using schemes for protocols that are
 supported built-in. To make libcurl parse URLs generically even for schemes it
 does not know about, the \fBCURLU_NON_SUPPORT_SCHEME\fP flags bit must be
 set. Otherwise, this function returns \fICURLUE_UNSUPPORTED_SCHEME\fP on URL
 schemes it does not recognize.
+
+This function call has no particular maximum length for any provided input
+string. In the real world, excessively long field in URLs will cause problems
+even if this API accepts them.
+
+When setting or updating contents of individual URL parts, this API might
+accept data that would not be otherwise possible to set in the string when it
+gets populated as a result of a full URL parse. Beware. If done so, extracting
+a full URL later on from such components might render an invalid URL.
 
 The \fIflags\fP argument is a bitmask with independent features.
 .SH PARTS
@@ -66,16 +75,25 @@ will be replaced with the information of the newly set URL.
 Pass a pointer to a null-terminated string to the \fIurl\fP parameter. The
 string must point to a correctly formatted "RFC 3986+" URL or be a NULL
 pointer.
+
+Unless \fICURLU_NO_AUTHORITY\fP is set, a blank host name is not allowed in
+the URL.
 .IP CURLUPART_SCHEME
 Scheme cannot be URL decoded on set. libcurl only accepts setting schemes up
 to 40 bytes long.
 .IP CURLUPART_USER
 .IP CURLUPART_PASSWORD
 .IP CURLUPART_OPTIONS
+The options field is an optional field that might follow the password in the
+userinfo part. It is only recognized/used when parsing URLs for the following
+schemes: pop3, smtp and imap. This function however allows users to
+independently set this field at will.
 .IP CURLUPART_HOST
 The host name. If it is IDNA the string must then be encoded as your locale
 says or UTF-8 (when WinIDN is used). If it is a bracketed IPv6 numeric address
 it may contain a zone id (or you can use CURLUPART_ZONEID).
+
+Unless \fICURLU_NO_AUTHORITY\fP is set, a blank host name is not allowed to set.
 .IP CURLUPART_ZONEID
 If the host name is a numeric IPv6 address, this field can also be set.
 .IP CURLUPART_PORT
@@ -83,25 +101,28 @@ Port cannot be URL encoded on set. The given port number is provided as a
 string and the decimal number must be between 1 and 65535. Anything else will
 return an error.
 .IP CURLUPART_PATH
-If a path is set in the URL without a leading slash, a slash will be inserted
-automatically when this URL is read from the handle.
+If a path is set in the URL without a leading slash, a slash will be prepended
+automatically.
 .IP CURLUPART_QUERY
 The query part will also get spaces converted to pluses when asked to URL
-encode on set with the CURLU_URLENCODE bit.
+encode on set with the \fICURLU_URLENCODE\fP bit.
 
-If used together with the \fICURLU_APPENDQUERY\fP bit, the provided part will
-be appended on the end of the existing query - and if the previous part did not
-end with an ampersand (&), an ampersand will be inserted before the new
-appended part.
-
-When \fICURLU_APPENDQUERY\fP is used together with \fICURLU_URLENCODE\fP, the
-first '=' symbol will not be URL encoded.
+If used together with the \fICURLU_APPENDQUERY\fP bit, the provided part is
+appended on the end of the existing query.
 
 The question mark in the URL is not part of the actual query contents.
 .IP CURLUPART_FRAGMENT
 The hash sign in the URL is not part of the actual fragment contents.
 .SH FLAGS
 The flags argument is zero, one or more bits set in a bitmask.
+.IP CURLU_APPENDQUERY
+Can be used when setting the \fICURLUPART_QUERY\fP component. The provided new
+part will then instead be appended at the end of the existing query - and if
+the previous part did not end with an ampersand (&), an ampersand gets
+inserted before the new appended part.
+
+When \fICURLU_APPENDQUERY\fP is used together with \fICURLU_URLENCODE\fP, the
+first '=' symbol will not be URL encoded.
 .IP CURLU_NON_SUPPORT_SCHEME
 If set, allows \fIcurl_url_set(3)\fP to set a non-supported scheme.
 .IP CURLU_URLENCODE
@@ -136,7 +157,7 @@ the path. That is the procedure where curl otherwise removes sequences of
 dot-slash and dot-dot etc. The same option used for transfers is called
 \fICURLOPT_PATH_AS_IS(3)\fP.
 .IP CURLU_ALLOW_SPACE
-If set, a the URL parser allows space (ASCII 32) where possible. The URL
+If set, the URL parser allows space (ASCII 32) where possible. The URL
 syntax does normally not allow spaces anywhere, but they should be encoded as
 %20 or '+'. When spaces are allowed, they are still not allowed in the scheme.
 When space is used and allowed in a URL, it will be stored as-is unless
@@ -144,6 +165,10 @@ When space is used and allowed in a URL, it will be stored as-is unless
 space before stored. This affects how the URL will be constructed when
 \fIcurl_url_get(3)\fP is subsequently used to extract the full URL or
 individual parts. (Added in 7.78.0)
+.IP CURLU_DISALLOW_USER
+If set, the URL parser will not accept embedded credentials for the
+\fBCURLUPART_URL\fP, and will instead return \fBCURLUE_USER_NOT_ALLOWED\fP for
+such URLs.
 .SH EXAMPLE
 .nf
   CURLUcode rc;
@@ -159,13 +184,12 @@ individual parts. (Added in 7.78.0)
 .SH AVAILABILITY
 Added in 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
 .SH RETURN VALUE
-Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
-fine. See the \fIlibcurl-errors(3)\fP man page for the full list with
+Returns a \fICURLUcode\fP error value, which is CURLUE_OK (0) if everything
+went fine. See the \fIlibcurl-errors(3)\fP man page for the full list with
 descriptions.
 
-A URL string passed on to \fIcurl_url_set(3)\fP for the \fBCURLUPART_URL\fP
-part, must be shorter than 8000000 bytes otherwise it returns
-\fBCURLUE_MALFORMED_INPUT\fP (added in 7.65.0).
+The input string passed to \fIcurl_url_set(3)\fP must be shorter than eight
+million bytes. Otherwise this function returns \fBCURLUE_MALFORMED_INPUT\fP.
 
 If this function returns an error, no URL part is set.
 .SH "SEE ALSO"

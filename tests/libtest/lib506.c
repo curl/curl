@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,8 +24,8 @@
 #include "test.h"
 #include "memdebug.h"
 
-static const char *HOSTHEADER = "Host: www.host.foo.com";
-static const char *JAR = "log/jar506";
+static const char * const HOSTHEADER = "Host: www.host.foo.com";
+#define JAR libtest_arg2
 #define THREADS 2
 
 /* struct containing data of a thread */
@@ -349,7 +349,7 @@ int test(char *URL)
   printf("-----------------\n");
   curl_slist_free_all(cookies);
 
-  /* try to free share, expect to fail because share is in use*/
+  /* try to free share, expect to fail because share is in use */
   printf("try SHARE_CLEANUP...\n");
   scode = curl_share_cleanup(share);
   if(scode == CURLSHE_OK) {

@@ -35,12 +35,12 @@ http
 Two globbed HTTP PUTs to two globbed URLs
  </name>
  <command>
-'http://%HOSTIP:%HTTPPORT/{one,two}/' -T '{log/first%TESTNUMBER,log/second%TESTNUMBER}' -H "Testno: %TESTNUMBER"
+'http://%HOSTIP:%HTTPPORT/{one,two}/' -T '{%LOGDIR/first%TESTNUMBER,%LOGDIR/second%TESTNUMBER}' -H "Testno: %TESTNUMBER"
 </command>
-<file name="log/first%TESTNUMBER">
+<file name="%LOGDIR/first%TESTNUMBER">
 first %TESTNUMBER contents
 </file>
-<file1 name="log/second%TESTNUMBER">
+<file1 name="%LOGDIR/second%TESTNUMBER">
 second %TESTNUMBER contents
 </file1>
 </client>
@@ -55,7 +55,6 @@ User-Agent: curl/%VERSION
 Accept: */*
 Testno: %TESTNUMBER
 Content-Length: 19
-Expect: 100-continue
 
 first %TESTNUMBER contents
 PUT /two/first%TESTNUMBER HTTP/1.1
@@ -64,7 +63,6 @@ User-Agent: curl/%VERSION
 Accept: */*
 Testno: %TESTNUMBER
 Content-Length: 19
-Expect: 100-continue
 
 first %TESTNUMBER contents
 PUT /one/second%TESTNUMBER HTTP/1.1
@@ -73,7 +71,6 @@ User-Agent: curl/%VERSION
 Accept: */*
 Testno: %TESTNUMBER
 Content-Length: 20
-Expect: 100-continue
 
 second %TESTNUMBER contents
 PUT /two/second%TESTNUMBER HTTP/1.1
@@ -82,7 +79,6 @@ User-Agent: curl/%VERSION
 Accept: */*
 Testno: %TESTNUMBER
 Content-Length: 20
-Expect: 100-continue
 
 second %TESTNUMBER contents
 </protocol>

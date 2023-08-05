@@ -1,17 +1,16 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ciphers
 Arg: <list of ciphers>
 Help: SSL ciphers to use
 Protocols: TLS
 Category: tls
-See-also: tlsv1.3
+See-also: tlsv1.3 tls13-ciphers proxy-ciphers
 Example: --ciphers ECDHE-ECDSA-AES256-CCM8 $URL
 Added: 7.9
+Multi: single
 ---
 Specifies which ciphers to use in the connection. The list of ciphers must
 specify valid ciphers. Read up on SSL cipher list details on this URL:
 
- https://curl.se/docs/ssl-ciphers.html
-
-If this option is used several times, the last one will be used.
+https://curl.se/docs/ssl-ciphers.html

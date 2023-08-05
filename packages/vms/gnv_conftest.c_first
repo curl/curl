@@ -1,8 +1,6 @@
 /* File: GNV$CONFTEST.C_FIRST
  *
- * $Id$
- *
- * Copyright 2013 - 2022, John Malmberg
+ * Copyright (C) John Malmberg
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,11 +29,10 @@ char ldap_url_parse(void) {return 0;}
 /* These are to pass the test that does not use headers */
 /* Because configure does an #undef which keeps us from using #define */
 /* char CRYPTO_add_lock(void) {return 0;} */
-char SSL_connnect(void) {return 0;}
+char SSL_connect(void) {return 0;}
 char ENGINE_init(void) {return 0;}
 char RAND_status(void) {return 0;}
 /* char RAND_screen(void) {return 0;} In headers, but not present */
-char RAND_egd(void) {return 0;}
 char CRYPTO_cleanup_all_ex_data(void) {return 0;}
 char SSL_get_shutdown(void) {return 0;}
 char ENGINE_load_builtin_engines (void) {return 0;}
@@ -48,7 +45,6 @@ char ENGINE_load_builtin_engines (void) {return 0;}
 #define ENGINE_init ENGINE_INIT
 #define RAND_status RAND_STATUS
 /* #define RAND_screen RAND_SCREEN */
-#define RAND_egd RAND_EGD
 #define CRYPTO_cleanup_all_ex_data CRYPTO_CLEANUP_ALL_EX_DATA
 #define SSL_get_shutdown SSL_GET_SHUTDOWN
 #define ENGINE_load_builtin_engines ENGINE_LOAD_BUILTIN_ENGINES

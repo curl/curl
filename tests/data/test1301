@@ -1,8 +1,7 @@
 <testcase>
 <info>
 <keywords>
-unittest
-curl_strcasecompare
+curl_strequal
 </keywords>
 </info>
 
@@ -12,11 +11,11 @@ curl_strcasecompare
 <server>
 none
 </server>
-<features>
-unittest
-</features>
+<tool>
+lib%TESTNUMBER
+</tool>
  <name>
-curl_strcasecompare unit tests
+curl_strequal tests
  </name>
 </client>
 </testcase>

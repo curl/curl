@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2022 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_HSTS 3 "5 Feb 2019" "libcurl 7.74.0" "curl_easy_setopt options"
+.TH CURLOPT_HSTS 3 "5 Feb 2019" libcurl libcurl
 .SH NAME
 CURLOPT_HSTS \- HSTS cache file name
 .SH SYNOPSIS
@@ -50,8 +50,8 @@ physical line. Each line in the file has the following format:
 [host] [stamp]
 
 [host] is the domain name for the entry and the name is dot-prefixed if it is
-a includeSubDomain entry (if the entry is valid for all subdmains to the name
-as well or only for the exact name).
+an entry valid for all subdomains to the name as well or only for the exact
+name.
 
 [stamp] is the time (in UTC) when the entry expires and it uses the format
 \&"YYYYMMDD HH:MM:SS".

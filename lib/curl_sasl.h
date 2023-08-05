@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,9 +125,9 @@ struct SASL {
   unsigned short authmechs;  /* Accepted authentication mechanisms */
   unsigned short prefmech;   /* Preferred authentication mechanism */
   unsigned short authused;   /* Auth mechanism used for the connection */
-  bool resetprefs;           /* For URL auth option parsing. */
-  bool mutual_auth;          /* Mutual authentication enabled (GSSAPI only) */
-  bool force_ir;             /* Protocol always supports initial response */
+  BIT(resetprefs);           /* For URL auth option parsing. */
+  BIT(mutual_auth);          /* Mutual authentication enabled (GSSAPI only) */
+  BIT(force_ir);             /* Protocol always supports initial response */
 };
 
 /* This is used to test whether the line starts with the given mechanism */

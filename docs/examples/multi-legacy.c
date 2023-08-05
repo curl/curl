@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@
 #include <curl/curl.h>
 
 /*
- * Download a HTTP file and upload an FTP file simultaneously.
+ * Download an HTTP file and upload an FTP file simultaneously.
  */
 
 #define HANDLECOUNT 2   /* Number of simultaneous transfers */
@@ -102,7 +102,7 @@ int main(void)
       if(timeout.tv_sec > 1)
         timeout.tv_sec = 1;
       else
-        timeout.tv_usec = (curl_timeo % 1000) * 1000;
+        timeout.tv_usec = (int)(curl_timeo % 1000) * 1000;
     }
 
     /* get file descriptors from the transfers */

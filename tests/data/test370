@@ -22,7 +22,7 @@ none
 --etag-save with bad path - no transfer
 </name>
 <command>
-http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --etag-save log/nowhere/etag%TESTNUMBER
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --etag-save %LOGDIR/nowhere/etag%TESTNUMBER
 </command>
 </client>
 

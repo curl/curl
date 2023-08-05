@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_PROXY_TLS13_CIPHERS 3 "25 May 2018" "libcurl 7.61.0" "curl_easy_setopt options"
+.TH CURLOPT_PROXY_TLS13_CIPHERS 3 "25 May 2018" libcurl libcurl
 .SH NAME
 CURLOPT_PROXY_TLS13_CIPHERS \- ciphers suites for proxy TLS 1.3
 .SH SYNOPSIS
@@ -44,7 +44,7 @@ you will find more details about cipher lists on this URL:
 
 This option is currently used only when curl is built to use OpenSSL 1.1.1 or
 later. If you are using a different SSL backend you can try setting TLS 1.3
-cipher suites by using the CURLOPT_PROXY_SSL_CIPHER_LIST option.
+cipher suites by using the \fICURLOPT_PROXY_SSL_CIPHER_LIST(3)\fP option.
 
 The application does not have to keep the string around after setting this
 option.
@@ -58,7 +58,7 @@ CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
   curl_easy_setopt(curl, CURLOPT_PROXY_TLS13_CIPHERS,
-                   "TLS13-CHACHA20-POLY1305-SHA256");
+                   "TLS_CHACHA20_POLY1305_SHA256");
   ret = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }

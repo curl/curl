@@ -1,0 +1,76 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+cookies
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="yes" nocheck="yes">
+HTTP/1.1 301 move along
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Set-Cookie: long1=%repeat[400 x abcdefgh]%; path="/"
+Set-Cookie: long2=%repeat[400 x abcdefgh]%; path="/"
+Set-Cookie: long3=%repeat[400 x abcdefgh]%; path="/"
+Location: %TESTNUMBER0002
+
+-foo-
+</data>
+
+<data2 crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data2>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Keep Cookie: header within 8190 bytes
+</name>
+
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -c %LOGDIR/cookies%TESTNUMBER -L
+</command>
+<features>
+cookies
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Cookie: long3=%repeat[400 x abcdefgh]%; long2=%repeat[400 x abcdefgh]%
+
+</protocol>
+</verify>
+</testcase>

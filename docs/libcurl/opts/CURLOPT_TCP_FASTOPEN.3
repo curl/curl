@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_TCP_FASTOPEN 3 "16 Feb 2016" "libcurl 7.49.0" "curl_easy_setopt options"
+.TH CURLOPT_TCP_FASTOPEN 3 "16 Feb 2016" libcurl libcurl
 .SH NAME
 CURLOPT_TCP_FASTOPEN \- TCP Fast Open
 .SH SYNOPSIS
@@ -34,9 +34,12 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_FASTOPEN, long enable);
 .SH DESCRIPTION
 Pass a long as parameter set to 1L to enable or 0 to disable.
 
-TCP Fast Open (RFC7413) is a mechanism that allows data to be carried in the
+TCP Fast Open (RFC 7413) is a mechanism that allows data to be carried in the
 SYN and SYN-ACK packets and consumed by the receiving end during the initial
 connection handshake, saving up to one full round-trip time (RTT).
+
+Beware: the TLS session cache does not work when TCP Fast Open is enabled. TCP
+Fast Open is also known to be problematic on or across certain networks.
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -51,8 +54,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.49.0. This option is currently only supported on Linux and  OS X
-El Capitan.
+Added in 7.49.0. This option is currently only supported on Linux and macOS
+10.11 or later.
 .SH RETURN VALUE
 Returns CURLE_OK if fast open is supported by the operating system, otherwise
 returns CURLE_NOT_BUILT_IN.

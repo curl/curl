@@ -5,6 +5,8 @@ FTP
 PORT
 RETR
 421
+timeout
+FAILURE
 </keywords>
 </info>
 # Server-side

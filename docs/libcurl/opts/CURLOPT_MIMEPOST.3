@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_MIMEPOST 3 "22 Aug 2017" "libcurl 7.56.0" "curl_easy_setopt options"
+.TH CURLOPT_MIMEPOST 3 "22 Aug 2017" libcurl libcurl
 .SH NAME
 CURLOPT_MIMEPOST \- send data from mime structure
 .SH SYNOPSIS
@@ -39,13 +39,33 @@ This setting is supported by the HTTP protocol to post forms and by the
 SMTP and IMAP protocols to provide the email data to send/upload.
 
 This option is the preferred way of posting an HTTP form, replacing and
-extending the deprecated \fICURLOPT_HTTPPOST(3)\fP option.
+extending the \fICURLOPT_HTTPPOST(3)\fP option.
+
+When setting \fICURLOPT_MIMEPOST(3)\fP to NULL, libcurl resets the request
+type for HTTP to the default to disable the POST. Typically that would mean it
+is reset to GET. Instead you should set a desired request method explicitly.
 .SH PROTOCOLS
 HTTP, SMTP, IMAP.
 .SH EXAMPLE
-Using this option implies the use of several mime structure building
-functions: see https://curl.se/libcurl/c/smtp-mime.html for a complete
-example.
+.nf
+ curl_mime *multipart = curl_mime_init(handle);
+ curl_mimepart *part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "name");
+ curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "project");
+ curl_mime_data(part, "curl", CURL_ZERO_TERMINATED);
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "logotype-image");
+ curl_mime_filedata(part, "curl.png");
+
+ /* Set the form info */
+ curl_easy_setopt(handle, CURLOPT_MIMEPOST, multipart);
+
+ curl_easy_perform(handle); /* post away! */
+
+ curl_mime_free(multipart); /* free the post data */
+.fi
 .SH AVAILABILITY
 Added in 7.56.0
 .SH RETURN VALUE

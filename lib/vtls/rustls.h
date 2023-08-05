@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020 - 2022, Jacob Hoffman-Andrews,
+ * Copyright (C) Jacob Hoffman-Andrews,
  * <github@hoffman-andrews.com>
  *
  * This software is licensed as described in the file COPYING, which

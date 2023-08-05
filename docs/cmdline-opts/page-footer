@@ -22,7 +22,7 @@ SMTP, LDAP, etc.
 Sets the proxy server to use if no protocol-specific proxy is set.
 .IP "NO_PROXY <comma-separated list of hosts/domains>"
 list of host names that should not go through any proxy. If set to an asterisk
-\&'*' only, it matches all hosts. Each name in this list is matched as either
+'*' only, it matches all hosts. Each name in this list is matched as either
 a domain name which contains the hostname, or the hostname itself.
 
 This environment variable disables use of the proxy even when specified with
@@ -37,9 +37,10 @@ accesses the target URL through the proxy.
 The list of host names can also be include numerical IP addresses, and IPv6
 versions should then be given without enclosing brackets.
 
-IPv6 numerical addresses are compared as strings, so they will only match if
-the representations are the same: "::1" is the same as "::0:1" but they do not
-match.
+Since 7.86.0, IP addresses can be specified using CIDR notation: an appended
+slash and number specifies the number of "network bits" out of the address to
+use in the comparison. For example "192.168.0.0/16" would match all addresses
+starting with "192.168".
 .IP "APPDATA <dir>"
 On Windows, this variable is used when trying to find the home directory. If
 the primary home variable are all unset.
@@ -48,10 +49,10 @@ If set, the specified number of characters will be used as the terminal width
 when the alternative progress-bar is shown. If not set, curl will try to
 figure it out using other ways.
 .IP "CURL_CA_BUNDLE <file>"
-If set, will be used as the \fI--cacert\fP value.
+If set, will be used as the --cacert value.
 .IP "CURL_HOME <dir>"
 If set, is the first variable curl checks when trying to find its home
-directory. If not set, it continues to check \fBXDG_CONFIG_HOME\fP.
+directory. If not set, it continues to check *XDG_CONFIG_HOME*
 .IP "CURL_SSL_BACKEND <TLS backend>"
 If curl was built with support for "MultiSSL", meaning that it has built-in
 support for more than one TLS backend, this environment variable can be set to
@@ -59,35 +60,36 @@ the case insensitive name of the particular backend to use when curl is
 invoked. Setting a name that is not a built-in alternative will make curl
 stay with the default.
 
-SSL backend names (case-insensitive): bearssl, gnutls, gskit, mbedtls,
-nss, openssl, rustls, schannel, secure-transport, wolfssl
+SSL backend names (case-insensitive): **bearssl**, **gnutls**, **gskit**,
+**mbedtls**, **openssl**, **rustls**, **schannel**, **secure-transport**,
+**wolfssl**
 .IP "HOME <dir>"
 If set, this is used to find the home directory when that is needed. Like when
-looking for the default .curlrc. \fBCURL_HOME\fP and \fBXDG_CONFIG_HOME\fP
+looking for the default .curlrc. *CURL_HOME* and *XDG_CONFIG_HOME*
 have preference.
 .IP "QLOGDIR <directory name>"
 If curl was built with HTTP/3 support, setting this environment variable to a
-local directory will make curl produce qlogs in that directory, using file
+local directory will make curl produce **qlogs** in that directory, using file
 names named after the destination connection id (in hex). Do note that these
 files can become rather large. Works with both QUIC backends.
 .IP SHELL
-Used on VMS when trying to detect if using a DCL or a "unix" shell.
+Used on VMS when trying to detect if using a **DCL** or a **unix** shell.
 .IP "SSL_CERT_DIR <dir>"
-If set, will be used as the \fI--capath\fP value.
+If set, will be used as the --capath value.
 .IP "SSL_CERT_FILE <path>"
-If set, will be used as the \fI--cacert\fP value.
+If set, will be used as the --cacert value.
 .IP "SSLKEYLOGFILE <file name>"
 If you set this environment variable to a file name, curl will store TLS
 secrets from its connections in that file when invoked to enable you to
 analyze the TLS traffic in real time using network analyzing tools such as
 Wireshark. This works with the following TLS backends: OpenSSL, libressl,
-BoringSSL, GnuTLS, NSS and wolfSSL.
+BoringSSL, GnuTLS and wolfSSL.
 .IP "USERPROFILE <dir>"
 On Windows, this variable is used when trying to find the home directory. If
 the other, primary, variable are all unset. If set, curl will use the path
-"$USERPROFILE\\Application Data".
+**"$USERPROFILE\\Application Data"**.
 .IP "XDG_CONFIG_HOME <dir>"
-If \fBCURL_HOME\fP is not set, this variable is checked when looking for a
+If *CURL_HOME* is not set, this variable is checked when looking for a
 default .curlrc file.
 .SH "PROXY PROTOCOL PREFIXES"
 The proxy string may be specified with a protocol:// prefix to specify
@@ -217,8 +219,6 @@ option to curl that was passed on to libcurl and rejected. Read up in the
 manual!
 .IP 49
 Malformed telnet option.
-.IP 51
-The peer's SSL certificate or SSH MD5 fingerprint was not OK.
 .IP 52
 The server did not reply anything, which here is considered an error.
 .IP 53
@@ -237,8 +237,6 @@ Could not use specified SSL cipher.
 Peer certificate cannot be authenticated with known CA certificates.
 .IP 61
 Unrecognized transfer encoding.
-.IP 62
-Invalid LDAP URL.
 .IP 63
 Maximum file size exceeded.
 .IP 64
@@ -246,7 +244,7 @@ Requested FTP SSL level failed.
 .IP 65
 Sending the data requires a rewind that failed.
 .IP 66
-Failed to initialise SSL Engine.
+Failed to initialize SSL Engine.
 .IP 67
 The user name, password, or similar was not accepted and curl failed to log in.
 .IP 68
@@ -263,10 +261,6 @@ Unknown TFTP transfer ID.
 File already exists (TFTP).
 .IP 74
 No such user (TFTP).
-.IP 75
-Character conversion failed.
-.IP 76
-Character conversion functions required.
 .IP 77
 Problem reading the SSL CA cert (path? access rights?).
 .IP 78
@@ -307,6 +301,12 @@ be one out of several problems, see the error message for details.
 .IP 96
 QUIC connection error. This error may be caused by an SSL library error. QUIC
 is the protocol used for HTTP/3 transfers.
+.IP 97
+Proxy handshake error.
+.IP 98
+A client-side certificate is required to complete the TLS handshake.
+.IP 99
+Poll or select returned fatal error.
 .IP XX
 More error codes will appear here in future releases. The existing ones
 are meant to never change.

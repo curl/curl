@@ -29,9 +29,9 @@ http
 HTTP resume request over proxy with auth without server supporting it
  </name>
  <command option="no-output">
--x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o log/fewl%TESTNUMBER.txt -U daniel:stenberg
+-x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o %LOGDIR/fewl%TESTNUMBER.txt -U daniel:stenberg
 </command>
-<file name="log/fewl%TESTNUMBER.txt">
+<file name="%LOGDIR/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>
@@ -57,7 +57,7 @@ Proxy-Connection: Keep-Alive
 </protocol>
 
 # the download target file must remain untouched
-<file name="log/fewl%TESTNUMBER.txt">
+<file name="%LOGDIR/fewl%TESTNUMBER.txt">
 This text is here to simulate a partly downloaded file to resume
 download on.
 </file>

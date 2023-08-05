@@ -14,6 +14,9 @@ MULTIPART
 #
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 smtp
 </server>
@@ -27,14 +30,14 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F "=(;type=multipart/alternative" -F "= <body>This is the html version</body>;headers=X-test1: this is a header;type=text/html;headers=X-test2: this is another header " -F "=This is the plain text version;headers=@log/headers%TESTNUMBER" -F "=)" -F "=@log/test%TESTNUMBER.txt;headers=<log/headers%TESTNUMBER" -H "From: different" -H "To: another" -H "Reply-To: <followup@example.com>"
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F "=(;type=multipart/alternative" -F "= <body>This is the html version</body>;headers=X-test1: this is a header;type=text/html;headers=X-test2: this is another header " -F "=This is the plain text version;headers=@%LOGDIR/headers%TESTNUMBER" -F "=)" -F "=@%LOGDIR/test%TESTNUMBER.txt;headers=<%LOGDIR/headers%TESTNUMBER" -H "From: different" -H "To: another" -H "Reply-To: <followup@example.com>"
 </command>
-<file1 name="log/test%TESTNUMBER.txt">
+<file1 name="%LOGDIR/test%TESTNUMBER.txt">
 This is an attached file.
 
 It may contain any type of data.
 </file1>
-<file2 name="log/headers%TESTNUMBER">
+<file2 name="%LOGDIR/headers%TESTNUMBER">
 # This line is a comment
 X-fileheader1: This is a header from a file 
 

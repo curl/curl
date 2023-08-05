@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2016, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -45,13 +45,6 @@
 
 #define HASHKEY_SIZE 128
 
-static void conn_llist_dtor(void *user, void *element)
-{
-  struct connectdata *conn = element;
-  (void)user;
-  conn->bundle = NULL;
-}
-
 static CURLcode bundle_create(struct connectbundle **bundlep)
 {
   DEBUGASSERT(*bundlep == NULL);
@@ -62,17 +55,12 @@ static CURLcode bundle_create(struct connectbundle **bundlep)
   (*bundlep)->num_connections = 0;
   (*bundlep)->multiuse = BUNDLE_UNKNOWN;
 
-  Curl_llist_init(&(*bundlep)->conn_list, (Curl_llist_dtor) conn_llist_dtor);
+  Curl_llist_init(&(*bundlep)->conn_list, NULL);
   return CURLE_OK;
 }
 
 static void bundle_destroy(struct connectbundle *bundle)
 {
-  if(!bundle)
-    return;
-
-  Curl_llist_destroy(&bundle->conn_list, NULL);
-
   free(bundle);
 }
 
@@ -258,7 +246,7 @@ CURLcode Curl_conncache_add_conn(struct Curl_easy *data)
                "The cache now contains %zu members",
                conn->connection_id, connc->num_conn));
 
-  unlock:
+unlock:
   CONNCACHE_UNLOCK(data);
 
   return result;
@@ -498,7 +486,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
       conn = curr->ptr;
 
       if(!CONN_INUSE(conn) && !conn->bits.close &&
-         !conn->bits.connect_only) {
+         !conn->connect_only) {
         /* Set higher score for the age passed since the connection was used */
         score = Curl_timediff(now, conn->lastused);
 

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SEEKDATA 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SEEKDATA 3 "16 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_SEEKDATA \- pointer passed to the seek callback
 .SH SYNOPSIS
@@ -41,9 +41,9 @@ If you do not set this, NULL is passed to the callback.
 HTTP, FTP, SFTP
 .SH EXAMPLE
 .nf
-static int seek_cb(void *userp, curl_off_t offset, int origin)
+static int seek_cb(void *clientp, curl_off_t offset, int origin)
 {
-  struct data *d = (struct data *)userp;
+  struct data *d = (struct data *)clientp;
   lseek(d->our_fd, offset, origin);
   return CURL_SEEKFUNC_OK;
 }

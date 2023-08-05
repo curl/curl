@@ -1,8 +1,8 @@
 
 Implementation notes:
 
-  This is a true OS/400 implementation, not a PASE implementation (for PASE,
-use AIX implementation).
+  This is a true OS/400 ILE implementation, not a PASE implementation (for
+PASE, use AIX implementation).
 
   The biggest problem with OS/400 is EBCDIC. Libcurl implements an internal
 conversion mechanism, but it has been designed for computers that have a
@@ -96,6 +96,7 @@ options:
         CURLOPT_PASSWORD
         CURLOPT_PINNEDPUBLICKEY
         CURLOPT_PRE_PROXY
+        CURLOPT_PROTOCOLS_STR
         CURLOPT_PROXY
         CURLOPT_PROXYPASSWORD
         CURLOPT_PROXYUSERNAME
@@ -117,6 +118,7 @@ options:
         CURLOPT_PROXY_TLSAUTH_USERNAME
         CURLOPT_RANDOM_FILE
         CURLOPT_RANGE
+        CURLOPT_REDIR_PROTOCOLS_STR
         CURLOPT_REFERER
         CURLOPT_REQUEST_TARGET
         CURLOPT_RTSP_SESSION_UID
@@ -126,6 +128,7 @@ options:
         CURLOPT_SERVICE_NAME
         CURLOPT_SOCKS5_GSSAPI_SERVICE
         CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
+        CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256
         CURLOPT_SSH_KNOWNHOSTS
         CURLOPT_SSH_PRIVATE_KEYFILE
         CURLOPT_SSH_PUBLIC_KEYFILE
@@ -145,11 +148,13 @@ options:
         CURLOPT_USERNAME
         CURLOPT_USERPWD
         CURLOPT_XOAUTH2_BEARER
-  Else it is the same as for curl_easy_setopt().
+  All blob options are also supported.
+  In all other cases, it ignores the ccsid parameter and behaves as
+curl_easy_setopt().
   Note that CURLOPT_ERRORBUFFER is not in the list above, since it gives the
 address of an (empty) character buffer, not the address of a string.
-CURLOPT_POSTFIELDS stores the address of static binary data (of type void *) and
-thus is not converted. If CURLOPT_COPYPOSTFIELDS is issued after
+CURLOPT_POSTFIELDS stores the address of static binary data (of type void *)
+and thus is not converted. If CURLOPT_COPYPOSTFIELDS is issued after
 CURLOPT_POSTFIELDSIZE != -1, the data size is adjusted according to the
 CCSID conversion result length.
 
@@ -195,6 +200,13 @@ CCSID. Returned structures should be freed with curl_certinfo_free_all()
 after use.
   Other options are processed like in curl_easy_getinfo().
 
+_ curl_easy_strerror_ccsid(), curl_multi_strerror_ccsid(),
+curl_share_strerror_ccsid() and curl_url_strerror_ccsid() work as their
+non-ccsid version and return a string encoded in the additional ccsid
+parameter. These strings belong to libcurl and may not be freed by the caller.
+A subsequent call to the same procedure in the same thread invalidates the
+previous result.
+
 _ curl_pushheader_bynum_cssid() and curl_pushheader_byname_ccsid()
   Although the prototypes are self-explanatory, the returned string pointer
 should be released with curl_free() after use, as opposite to the non-ccsid
@@ -207,6 +219,17 @@ metadata structure. As each curl_easyoption structure holds the option name in
 ASCII, the curl_easy_option_get_name_ccsid() function allows getting it in any
 supported ccsid. However the caller should release the returned pointer with
 curl_free() after use.
+
+_ curl_easy_header_ccsid() works as its non-CCSID counterpart but requires an
+additional ccsid parameter specifying the name parameter encoding. The output
+hout parameter is kept in libcurl's encoding and should not be altered.
+
+_ curl_from_ccsid() and curl_to_ccsid() are string encoding conversion
+functions between ASCII (latin1) and the given CCSID. The first parameter is
+the source string, the second is the CCSID and the returned value is a pointer
+to the dynamically allocated string. These functions do not impact on Curl's
+behavior and are only provided for user convenience. After use, returned values
+must be released with curl_free().
 
 
   Standard compilation environment does support neither autotools nor make;
@@ -270,7 +293,8 @@ _ Copy any file in the current directory to makelog (i.e.:
   cp initscript.sh makelog): this is intended to create the makelog file with
   an ASCII CCSID!
 _ Enter the command "sh makefile.sh > makelog 2>&1"
-_ Examine the makelog file to check for compilation errors.
+_ Examine the makelog file to check for compilation errors. CZM0383 warnings on
+  C or system standard API come from QADRT inlining and can safely be ignored.
 
   Leaving file initscript.sh unchanged, this will produce the following OS/400
 objects:
@@ -316,9 +340,9 @@ _ Do not use original source include files unless you know what you are doing.
 
 ILE/RPG support:
 
-  Since 95% of the OS/400 programmers use ILE/RPG exclusively, a definition
-  /INCLUDE member is provided for this language. To include all libcurl
-  definitions in an ILE/RPG module, line
+  Since most of the ILE OS/400 programmers use ILE/RPG exclusively, a
+definition /INCLUDE member is provided for this language. To include all
+libcurl definitions in an ILE/RPG module, line
 
      h bnddir('CURL/CURL')
 
@@ -331,8 +355,9 @@ in the global data section of the module's source code.
   No vararg procedure support exists in ILE/RPG: for this reason, the following
 considerations apply:
 _ Procedures curl_easy_setopt_long(), curl_easy_setopt_object(),
-  curl_easy_setopt_function() and curl_easy_setopt_offset() are all alias
-  prototypes to curl_easy_setopt(), but with different parameter lists.
+  curl_easy_setopt_function(), curl_easy_setopt_offset() and
+  curl_easy_setopt_blob() are all alias prototypes to curl_easy_setopt(), but
+  with different parameter lists.
 _ Procedures curl_easy_getinfo_string(), curl_easy_getinfo_long(),
   curl_easy_getinfo_double(), curl_easy_getinfo_slist(),
   curl_easy_getinfo_ptr(), curl_easy_getinfo_socket() and
@@ -341,12 +366,22 @@ _ Procedures curl_easy_getinfo_string(), curl_easy_getinfo_long(),
 _ Procedures curl_multi_setopt_long(), curl_multi_setopt_object(),
   curl_multi_setopt_function() and curl_multi_setopt_offset() are all alias
   prototypes to curl_multi_setopt(), but with different parameter lists.
+_ Procedures curl_share_setopt_int(), curl_share_setopt_ptr() and
+  curl_share_setopt_proc() are all alias prototypes to curl_share_setopt,
+  but with different parameter lists.
+_ Procedure curl_easy_setopt_blob_ccsid() is an alias of
+  curl_easy_setopt_ccsid() supporting blob encoding conversion.
 _ The prototype of procedure curl_formadd() allows specifying a pointer option
   and the CURLFORM_END option. This makes possible to use an option array
   without any additional definition. If some specific incompatible argument
   list is used in the ILE/RPG program, the latter must define a specialised
   alias. The same applies to curl_formadd_ccsid() too.
+_ Since V7R4M0, procedure overloading is used to emulate limited "vararg-like"
+  definitions of curl_easy_setopt(), curl_multi_setopt(), curl_share_setopt()
+  and curl_easy_getinfo(). Blob and CCSID alternatives are NOT included in
+  overloading.
 
   Since RPG cannot cast a long to a pointer, procedure curl_form_long_value()
-is provided for that purpose: this allows storing a long value in the curl_forms
-array.
+is provided for that purpose: this allows storing a long value in the
+curl_forms array. Please note the form API is deprecated and the MIME API
+should be used instead.

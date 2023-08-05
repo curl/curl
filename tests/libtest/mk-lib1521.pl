@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2017 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,6 +31,8 @@ my $minlong = "LONG_MIN";
 my $maxlong = "LONG_MAX";
 # maximum long unsigned value
 my $maxulong = "ULONG_MAX";
+my $line = "";
+my $incomment = 0;
 
 print <<HEADER
 /***************************************************************************
@@ -40,7 +42,7 @@ print <<HEADER
  *                            | (__| |_| |  _ <| |___
  *                             \\___|\\___/|_| \\_\\_____|
  *
- * Copyright (C) 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,6 +58,7 @@ print <<HEADER
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#define CURL_DISABLE_DEPRECATION  /* Deprecated options are tested too */
 #include "test.h"
 #include "memdebug.h"
 #include <limits.h>
@@ -182,7 +185,54 @@ HEADER
     ;
 
 while(<STDIN>) {
-    if($_ =~ /^  CURLOPT\(([^ ]*), ([^ ]*), (\d*)\)/) {
+    s/^\s*(.*?)\s*$/$1/;      # Trim.
+    # Remove multi-line comment trail.
+    if($incomment) {
+        if($_ !~ /.*?\*\/\s*(.*)$/) {
+            next;
+        }
+        $_ = $1;
+        $incomment = 0;
+    }
+    if($line ne "") {
+        # Unfold line.
+        $_ = "$line $1";
+        $line = "";
+    }
+    # Remove comments.
+    while($_ =~ /^(.*?)\/\*.*?\*\/(.*)$/) {
+        $_ = "$1 $2";
+    }
+    s/^\s*(.*?)\s*$/$1/;      # Trim again.
+    if($_ =~ /^(.*)\/\*/) {
+        $_ = $1;
+        $incomment = 1;
+    }
+    # Ignore preprocessor directives and blank lines.
+    if($_ =~ /^(?:#|$)/) {
+        next;
+    }
+    # Handle lines that may be continued as if they were folded.
+    if($_ !~ /[;,{}]$/) {
+        # Folded line.
+        $line = $_;
+        next;
+    }
+    if($_ =~ / CURL_DEPRECATED\(/) {
+        # Drop deprecation info.
+        if($_ !~ /^(.*?) CURL_DEPRECATED\(.*?"\)(.*)$/) {
+            # Needs unfolding.
+            $line = $_;
+            next;
+        }
+        $_ = $1 . $2;
+    }
+    if($_ =~ /^CURLOPT(?:DEPRECATED)?\(/ && $_ !~ /\),$/) {
+        # Multi-line CURLOPTs need unfolding.
+        $line = $_;
+        next;
+    }
+    if($_ =~ /^CURLOPT(?:DEPRECATED)?\(([^ ]*), ([^ ]*), (\d*)[,)]/) {
         my ($name, $type, $val)=($1, $2, $3);
         my $w="  ";
         my $pref = "${w}res = curl_easy_setopt(curl, $name,";
@@ -258,11 +308,11 @@ while(<STDIN>) {
             exit 22; # exit to make this noticed!
         }
     }
-    elsif($_ =~ /^  CURLINFO_NONE/) {
+    elsif($_ =~ /^CURLINFO_NONE/) {
        $infomode = 1;
     }
     elsif($infomode &&
-          ($_ =~ /^  CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
+          ($_ =~ /^CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
        my ($info, $type)=($1, $2);
        my $c = "  res = curl_easy_getinfo(curl, CURLINFO_$info,";
        my $check = "  if(UNEX(res)) {\n    geterr(\"$info\", res, __LINE__);\n    goto test_cleanup;\n  }\n";

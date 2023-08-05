@@ -17,7 +17,9 @@ You can download and install curl and libcurl using the [vcpkg](https://github.c
     ./vcpkg integrate install
     vcpkg install curl[tool]
 
-The curl port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+The curl port in vcpkg is kept up to date by Microsoft team members and
+community contributors. If the version is out of date, please [create an issue
+or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 
 ## Building from git
 
@@ -72,8 +74,8 @@ Without pkg-config installed, use this:
 
     ./configure --with-openssl=/opt/OpenSSL
 
-If you insist on forcing a build without SSL support, even though you may
-have OpenSSL installed in your system, you can run configure like this:
+If you insist on forcing a build without SSL support, you can run configure
+like this:
 
     ./configure --without-ssl
 
@@ -90,17 +92,32 @@ provide this option to gcc to set a hard-coded path to the runtime linker:
 
     LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-openssl
 
-## More Options
+## Static builds
 
 To force a static library compile, disable the shared library creation by
 running configure like:
 
     ./configure --disable-shared
 
-To tell the configure script to skip searching for thread-safe functions, add
-an option like:
+The configure script is primarily done to work with shared/dynamic third party
+dependencies. When linking with shared libraries, the dependency "chain" is
+handled automatically by the library loader - on all modern systems.
 
-    ./configure --disable-thread
+If you instead link with a static library, you need to provide all the
+dependency libraries already at the link command line.
+
+Figuring out all the dependency libraries for a given library is hard, as it
+might involve figuring out the dependencies of the dependencies and they vary
+between platforms and change between versions.
+
+When using static dependencies, the build scripts will mostly assume that you,
+the user, will provide all the necessary additional dependency libraries as
+additional arguments in the build. With configure, by setting `LIBS` or
+`LDFLAGS` on the command line.
+
+Building statically is not for the faint of heart.
+
+## Debug
 
 If you are a curl developer and use gcc, you might want to enable more debug
 options with the `--enable-debug` option.
@@ -117,12 +134,31 @@ These options are provided to select the TLS backend to use.
  - BearSSL: `--with-bearssl`
  - GnuTLS: `--with-gnutls`.
  - mbedTLS: `--with-mbedtls`
- - NSS: `--with-nss`
- - OpenSSL: `--with-openssl` (also for BoringSSL and libressl)
+ - OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, libressl, and quictls)
  - rustls: `--with-rustls`
- - schannel: `--with-schannel`
- - secure transport: `--with-secure-transport`
+ - Schannel: `--with-schannel`
+ - Secure Transport: `--with-secure-transport`
  - wolfSSL: `--with-wolfssl`
+
+You can build curl with *multiple* TLS backends at your choice, but some TLS
+backends cannot be combined: if you build with an OpenSSL fork (or wolfSSL),
+you cannot add another OpenSSL fork (or wolfSSL) simply because they have
+conflicting identical symbol names.
+
+When you build with multiple TLS backends, you can select the active one at
+run-time when curl starts up.
+
+## configure finding libs in wrong directory
+
+When the configure script checks for third-party libraries, it adds those
+directories to the `LDFLAGS` variable and then tries linking to see if it
+works. When successful, the found directory is kept in the `LDFLAGS` variable
+when the script continues to execute and do more tests and possibly check for
+more libraries.
+
+This can make subsequent checks for libraries wrongly detect another
+installation in a directory that was previously added to `LDFLAGS` by another
+library check.
 
 # Windows
 
@@ -140,14 +176,14 @@ These options are provided to select the TLS backend to use.
  - [Run-Time Library Compiler Options](https://docs.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
  - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://docs.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
 
-If your app is misbehaving in some strange way, or it is suffering from
-memory corruption, before asking for further help, please try first to
-rebuild every single library your app uses as well as your app using the
-debug multithreaded dynamic C runtime.
+If your app is misbehaving in some strange way, or it is suffering from memory
+corruption, before asking for further help, please try first to rebuild every
+single library your app uses as well as your app using the debug
+multi-threaded dynamic C runtime.
 
  If you get linkage errors read section 5.7 of the FAQ document.
 
-## MingW32
+## MinGW32
 
 Make sure that MinGW32's bin directory is in the search path, for example:
 
@@ -165,32 +201,35 @@ make targets available to build libcurl with more features, use:
    and SSPI support.
 
 If you have any problems linking libraries or finding header files, be sure
-to verify that the provided `Makefile.m32` files use the proper paths, and
+to verify that the provided `Makefile.mk` files use the proper paths, and
 adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 
 ```cmd
-set ZLIB_PATH=c:\zlib-1.2.8
-set OPENSSL_PATH=c:\openssl-1.0.2c
-set LIBSSH2_PATH=c:\libssh2-1.6.0
+set ZLIB_PATH=c:\zlib-1.2.12
+set OPENSSL_PATH=c:\openssl-3.0.5
+set LIBSSH2_PATH=c:\libssh2-1.10.0
 ```
 
-It is also possible to build with other LDAP SDKs than MS LDAP; currently
-it is possible to build with native Win32 OpenLDAP, or with the Novell CLDAP
-SDK. If you want to use these you need to set these vars:
+It is also possible to build with other LDAP installations than MS LDAP;
+currently it is possible to build with native Win32 OpenLDAP, or with the
+*Novell CLDAP* SDK. If you want to use these you need to set these vars:
 
 ```cmd
-set LDAP_SDK=c:\openldap
-set USE_LDAP_OPENLDAP=1
+set CPPFLAGS=-Ic:/openldap/include -DCURL_HAS_OPENLDAP_LDAPSDK
+set LDFLAGS=-Lc:/openldap/lib
+set LIBS=-lldap -llber
 ```
 
 or for using the Novell SDK:
 
 ```cmd
-set USE_LDAP_NOVELL=1
+set CPPFLAGS=-Ic:/openldapsdk/inc -DCURL_HAS_NOVELL_LDAPSDK
+set LDFLAGS=-Lc:/openldapsdk/lib/mscvc
+set LIBS=-lldapsdk -lldapssl -lldapx
 ```
 
-If you want to enable LDAPS support then set LDAPS=1.
+If you want to enable LDAPS support then append `-ldaps` to the make target.
 
 ## Cygwin
 
@@ -200,6 +239,30 @@ executable in `/bin/` or you will see the configure fail toward the end.
 
 Run `make`
 
+## MS-DOS
+
+Requires DJGPP in the search path and pointing to the Watt-32 stack via
+`WATT_PATH=c:/djgpp/net/watt`.
+
+Run `make -f Makefile.dist djgpp` in the root curl dir.
+
+For build configuration options, please see the MinGW32 section.
+
+Notes:
+
+ - DJGPP 2.04 beta has a `sscanf()` bug so the URL parsing is not done
+   properly. Use DJGPP 2.03 until they fix it.
+
+ - Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
+   things go wrong because things like FS-extensions and `errno` values have
+   been changed between releases.
+
+## AmigaOS
+
+Run `make -f Makefile.dist amiga` in the root curl dir.
+
+For build configuration options, please see the MinGW32 section.
+
 ## Disabling Specific Protocols in Windows builds
 
 The configure utility, unfortunately, is not available for the Windows
@@ -207,7 +270,7 @@ environment, therefore, you cannot use the various disable-protocol options of
 the configure utility on this platform.
 
 You can use specific defines to disable specific protocols and features. See
-[CURL-DISABLE.md](CURL-DISABLE.md) for the full list.
+[CURL-DISABLE](CURL-DISABLE.md) for the full list.
 
 If you want to set any of these defines you have the following options:
 
@@ -241,13 +304,11 @@ lwIP header file `<lwip/opt.h>` (or another lwIP header that includes this)
 before including any libcurl header. Your program does not need the
 `USE_LWIPSOCK` preprocessor definition which is for libcurl internals only.
 
-Compilation has been verified with [lwIP
-1.4.0](https://download.savannah.gnu.org/releases/lwip/lwip-1.4.0.zip) and
-[contrib-1.4.0](https://download.savannah.gnu.org/releases/lwip/contrib-1.4.0.zip).
+Compilation has been verified with lwIP 1.4.0.
 
 This BSD-style lwIP TCP/IP stack support must be considered experimental given
 that it has been verified that lwIP 1.4.0 still needs some polish, and libcurl
-might yet need some additional adjustment, caveat emptor.
+might yet need some additional adjustment.
 
 ## Important static libcurl usage note
 
@@ -267,8 +328,7 @@ Windows you should choose another SSL backend such as OpenSSL.
 
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
-Transport for SSL/TLS, use the configure option `--with-secure-transport`. (It
-is not necessary to use the option `--without-openssl`.)
+Transport for SSL/TLS, use the configure option `--with-secure-transport`.
 
 When Secure Transport is in use, the curl options `--cacert` and `--capath`
 and their libcurl equivalents, will be ignored, because Secure Transport uses
@@ -326,7 +386,7 @@ In all above, the built libraries and executables can be found in the
 
 # Android
 
-When building curl for Android it's recommended to use a Linux environment
+When building curl for Android it's recommended to use a Linux/macOS environment
 since using curl's `configure` script is the easiest way to build curl
 for Android. Before you can build curl for Android, you need to install the
 Android NDK first. This can be done using the SDK Manager that is part of
@@ -336,16 +396,16 @@ launching `configure`. On macOS, those variables could look like this to compile
 for `aarch64` and API level 29:
 
 ```bash
-export NDK=~/Library/Android/sdk/ndk/20.1.5948944
-export HOST_TAG=darwin-x86_64
-export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
-export AR=$TOOLCHAIN/bin/aarch64-linux-android-ar
-export AS=$TOOLCHAIN/bin/aarch64-linux-android-as
-export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
-export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
-export LD=$TOOLCHAIN/bin/aarch64-linux-android-ld
-export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
-export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
+export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
+export HOST_TAG=darwin-x86_64 # Same tag for Apple Silicon. Other OS values here: https://developer.android.com/ndk/guides/other_build_systems#overview
+export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
+export AR=$TOOLCHAIN/bin/llvm-ar
+export AS=$TOOLCHAIN/bin/llvm-as
+export CC=$TOOLCHAIN/bin/aarch64-linux-android21-clang
+export CXX=$TOOLCHAIN/bin/aarch64-linux-android21-clang++
+export LD=$TOOLCHAIN/bin/ld
+export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
+export STRIP=$TOOLCHAIN/bin/llvm-strip
 ```
 
 When building on Linux or targeting other API levels or architectures, you need
@@ -361,11 +421,10 @@ OpenSSL, follow the OpenSSL build instructions and then install `libssl.a` and
 `$TOOLCHAIN/sysroot/usr/include`. Now you can build curl for Android using
 OpenSSL like this:
 
-    ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
-
-Note, however, that you must target at least Android M (API level 23) or `configure`
-will not be able to detect OpenSSL since `stderr` (and the like) were not defined
-before Android M.
+```bash
+LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you will need to the SSL/TLS layer's transitive dependencies if you are linking statically.
+./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
+```
 
 # IBM i
 
@@ -383,12 +442,12 @@ For IBM i (formerly OS/400), you can use curl in two different ways:
 There are some additional limitations and quirks with curl on this platform;
 they affect both environments.
 
-## Multithreading notes
+## Multi-threading notes
 
 By default, jobs in IBM i will not start with threading enabled. (Exceptions
 include interactive PASE sessions started by `QP2TERM` or SSH.) If you use
-curl in an environment without threading when options like async DNS were
-enabled, you will get messages like:
+curl in an environment without threading when options like asynchronous DNS
+were enabled, you will get messages like:
 
 ```
 getaddrinfo() thread failed to start
@@ -408,9 +467,9 @@ Download and unpack the curl package.
 
 Set environment variables to point to the cross-compile toolchain and call
 configure with any options you need. Be sure and specify the `--host` and
-`--build` parameters at configuration time. The following script is an
-example of cross-compiling for the IBM 405GP PowerPC processor using the
-toolchain from MonteVista for Hardhat Linux.
+`--build` parameters at configuration time. The following script is an example
+of cross-compiling for the IBM 405GP PowerPC processor using the toolchain on
+Linux.
 
 ```bash
 #! /bin/sh
@@ -462,7 +521,7 @@ know your application is not going to need. Besides specifying the
 use, here are some other flags that can reduce the size of the library by
 disabling support for some feature:
 
- - `--disable-alt-svc` (HTTP Alt-Srv)
+ - `--disable-alt-svc` (HTTP Alt-Svc)
  - `--disable-ares` (the C-ARES DNS library)
  - `--disable-cookies` (HTTP cookies)
  - `--disable-crypto-auth` (cryptographic authentication)
@@ -479,8 +538,8 @@ disabling support for some feature:
  - `--disable-ntlm-wb` (NTLM WinBind)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
- - `--disable-pthreads` (multithreading)
- - `--disable-socketpair` (socketpair for async name resolving)
+ - `--disable-pthreads` (multi-threading)
+ - `--disable-socketpair` (socketpair for asynchronous name resolving)
  - `--disable-threaded-resolver`  (threaded name resolver)
  - `--disable-tls-srp` (Secure Remote Password authentication for TLS)
  - `--disable-unix-sockets` (UNIX sockets)
@@ -526,8 +585,8 @@ line. Following is a list of appropriate key words for those configure options
 that are not automatically detected:
 
  - `--disable-cookies`          !cookies
- - `--disable-dateparse`        !RETRY-AFTER !CURLOPT_TIMECONDITION !CURLINFO_FILETIME !If-Modified-Since !getdate !-z
- - `--disable-libcurl-option`   !--libcurl
+ - `--disable-dateparse`        !RETRY-AFTER !`CURLOPT_TIMECONDITION` !`CURLINFO_FILETIME` !`If-Modified-Since` !`curl_getdate` !`-z`
+ - `--disable-libcurl-option`   !`--libcurl`
  - `--disable-verbose`          !verbose\ logs
 
 # PORTS
@@ -536,21 +595,23 @@ This is a probably incomplete list of known CPU architectures and operating
 systems that curl has been compiled for. If you know a system curl compiles
 and runs on, that is not listed, please let us know!
 
-## 85 Operating Systems
+## 92 Operating Systems
 
-AIX, AmigaOS, Android, Aros, BeOS, Blackberry 10, Blackberry Tablet OS, Cell
-OS, ChromeOS, Cisco IOS, Cygwin, Dragonfly BSD, eCOS, FreeBSD, FreeDOS,
-FreeRTOS, Fuchsia, Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd,
-Illumos, Integrity, iOS, ipadOS, IRIX, LineageOS, Linux, Lua RTOS, Mac OS 9,
-macOS, Mbed, Micrium, MINIX, MorphOS, MPE/iX, MS-DOS, NCR MP-RAS, NetBSD,
-Netware, Nintendo Switch, NonStop OS, NuttX, OpenBSD, OpenStep, Orbis OS,
-OS/2, OS/400, OS21, Plan 9, PlayStation Portable, QNX, Qubes OS, ReactOS,
-Redox, RICS OS, Sailfish OS, SCO Unix, Serenity, SINIX-Z, Solaris, SunOS,
-Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix, UNICOS,
-UnixWare, VMS, vxWorks, WebOS, Wii system software, Windows, Windows CE, Xbox
-System, z/OS, z/TPF, z/VM, z/VSE
+    AIX, AmigaOS, Android, Aros, BeOS, Blackberry 10, Blackberry Tablet OS,
+    Cell OS, Chrome OS, Cisco IOS, Cygwin, DG/UX, Dragonfly BSD, DR DOS, eCOS,
+    FreeBSD, FreeDOS, FreeRTOS, Fuchsia, Garmin OS, Genode, Haiku, HardenedBSD,
+    HP-UX, Hurd, Illumos, Integrity, iOS, ipadOS, IRIX, Linux, Lua RTOS,
+    Mac OS 9, macOS, Mbed, Micrium, MINIX, MorphOS, MPE/iX, MS-DOS, NCR MP-RAS,
+    NetBSD, Netware, Nintendo Switch, NonStop OS, NuttX, Omni OS, OpenBSD,
+    OpenStep, Orbis OS, OS/2, OS/400, OS21, Plan 9, PlayStation Portable, QNX,
+    Qubes OS, ReactOS, Redox, RICS OS, RTEMS, Sailfish OS, SCO Unix, Serenity,
+    SINIX-Z, Solaris, SunOS, Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS,
+    ucLinux, Ultrix, UNICOS, UnixWare, VMS, vxWorks, watchOS, WebOS,
+    Wii system software, Windows, Windows CE, Xbox System, Xenix, Zephyr,
+    z/OS, z/TPF, z/VM, z/VSE
 
-## 22 CPU Architectures
+## 26 CPU Architectures
 
-Alpha, ARC, ARM, AVR32, Cell, HP-PA, Itanium, m68k, MicroBlaze, MIPS, Nios,
-OpenRISC, POWER, PowerPC, RISC-V, s390, SH4, SPARC, VAX, x86, x86-64, Xtensa
+    Alpha, ARC, ARM, AVR32, CompactRISC, Elbrus, ETRAX, HP-PA, Itanium,
+    LoongArch, m68k, m88k, MicroBlaze, MIPS, Nios, OpenRISC, POWER, PowerPC,
+    RISC-V, s390, SH4, SPARC, Tilera, VAX, x86, Xtensa

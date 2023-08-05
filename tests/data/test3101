@@ -1,0 +1,88 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP Basic auth
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 401 Authorization Required swsbounce
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
+WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
+Content-Length: 26
+Content-Type: text/html; charset=iso-8859-1
+
+This is not the real page
+</data>
+
+# This is supposed to be returned when the server gets a
+# Authorization: Digest line passed-in from the client
+<data1>
+HTTP/1.1 200 OK
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 23
+Connection: close
+
+This IS the real page!
+</data1>
+
+<datacheck>
+HTTP/1.1 401 Authorization Required swsbounce
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
+WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
+Content-Length: 26
+Content-Type: text/html; charset=iso-8859-1
+
+HTTP/1.1 200 OK
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 23
+Connection: close
+
+This IS the real page!
+</datacheck>
+</reply>
+
+# Client-Side
+<client>
+# require https because the code sets that as an acceptable redirect proto
+<features>
+https
+</features>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+HTTP auth without redirection protocols
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjpwYXNzd29yZA==
+Accept: */*
+
+</protocol>
+</verify>
+
+</testcase>

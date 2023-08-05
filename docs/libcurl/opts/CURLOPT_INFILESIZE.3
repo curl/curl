@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_INFILESIZE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_INFILESIZE 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_INFILESIZE \- size of the input file to send off
 .SH SYNOPSIS
@@ -41,6 +41,9 @@ For uploading using SCP, this option or \fICURLOPT_INFILESIZE_LARGE(3)\fP is
 mandatory.
 
 To unset this value again, set it to -1.
+
+Using \fICURLOPT_UPLOAD(3)\fP to a HTTP/1.1 server and this value set to -1,
+makes libcurl do a chunked transfer-encoded upload.
 
 When sending emails using SMTP, this command can be used to specify the
 optional SIZE parameter for the MAIL FROM command.

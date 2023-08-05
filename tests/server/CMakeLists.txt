@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2009 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -36,6 +36,7 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
     ${CURL_SOURCE_DIR}/lib      # To be able to reach "curl_setup_once.h"
     ${CURL_BINARY_DIR}/lib      # To be able to reach "curl_config.h"
     ${CURL_BINARY_DIR}/include  # To be able to reach "curl/curl.h"
+    ${CURL_SOURCE_DIR}/src      # To be able to reach "tool_xattr.h"
     )
   if(USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
@@ -49,10 +50,8 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   # to build the servers.  In order to achieve proper linkage of these
   # files on Win32 targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
-  if(BUILD_SHARED_LIBS)
-    set_target_properties(${TEST_NAME} PROPERTIES
-      COMPILE_DEFINITIONS CURL_STATICLIB)       # ${UPPER_TEST_NAME}
-  endif()
+  set_target_properties(${TEST_NAME} PROPERTIES
+    COMPILE_DEFINITIONS CURL_STATICLIB)       # ${UPPER_TEST_NAME}
   set_target_properties(${TEST_NAME} PROPERTIES
     PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
 endfunction()

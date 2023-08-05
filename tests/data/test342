@@ -33,11 +33,11 @@ http
 <name>
 Check if --etag-compare set correct etag in header
 </name>
-<file name="log/etag%TESTNUMBER">
+<file name="%LOGDIR/etag%TESTNUMBER">
 "21025-dc7-39462498"
 </file>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare log/etag%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER
 </command>
 </client>
 

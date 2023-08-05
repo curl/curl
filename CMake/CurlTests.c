@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -183,28 +183,6 @@ if (sizeof (bool *) )
 #include <string.h>
 #include <float.h>
 int main() { return 0; }
-#endif
-#ifdef HAVE_GETADDRINFO
-#include <netdb.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
-int main(void) {
-    struct addrinfo hints, *ai;
-    int error;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-#ifndef getaddrinfo
-    (void)getaddrinfo;
-#endif
-    error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);
-    if (error) {
-        return 1;
-    }
-    return 0;
-}
 #endif
 #ifdef HAVE_FILE_OFFSET_BITS
 #ifdef _FILE_OFFSET_BITS
@@ -513,6 +491,42 @@ main() {
   int res2 = gcc_vmacro2(1, 2);
   (void)res3;
   (void)res2;
+  return 0;
+}
+#endif
+#ifdef HAVE_ATOMIC
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+#ifdef HAVE_STDATOMIC_H
+#  include <stdatomic.h>
+#endif
+/* includes end */
+
+int
+main() {
+  _Atomic int i = 1;
+  i = 0;  // Force an atomic-write operation.
+  return i;
+}
+#endif
+#ifdef HAVE_WIN32_WINNT
+/* includes start */
+#ifdef WIN32
+#  include "../lib/setup-win32.h"
+#endif
+/* includes end */
+
+#define enquote(x) #x
+#define expand(x) enquote(x)
+#pragma message("_WIN32_WINNT=" expand(_WIN32_WINNT))
+
+int
+main() {
   return 0;
 }
 #endif

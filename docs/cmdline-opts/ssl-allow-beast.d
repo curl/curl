@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ssl-allow-beast
 Help: Allow security flaw to improve interop
@@ -6,6 +6,7 @@ Added: 7.25.0
 Category: tls
 Example: --ssl-allow-beast $URL
 See-also: proxy-ssl-allow-beast insecure
+Multi: boolean
 ---
 This option tells curl to not work around a security flaw in the SSL3 and
 TLS1.0 protocols known as BEAST.  If this option is not used, the SSL layer

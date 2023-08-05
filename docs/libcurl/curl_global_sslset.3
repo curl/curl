@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_global_sslset 3 "15 July 2017" "libcurl 7.56" "libcurl Manual"
+.TH curl_global_sslset 3 "15 July 2017" "libcurl" "libcurl"
 .SH NAME
 curl_global_sslset - Select SSL backend to use with libcurl
 .SH SYNOPSIS
@@ -35,7 +35,7 @@ typedef struct {
 
 typedef enum {
   CURLSSLBACKEND_NONE = 0,
-  CURLSSLBACKEND_OPENSSL = 1,
+  CURLSSLBACKEND_OPENSSL = 1, /* or one of its forks */
   CURLSSLBACKEND_GNUTLS = 2,
   CURLSSLBACKEND_NSS = 3,
   CURLSSLBACKEND_GSKIT = 5,
@@ -45,8 +45,9 @@ typedef enum {
   CURLSSLBACKEND_SECURETRANSPORT = 9,
   CURLSSLBACKEND_AXTLS = 10, /* deprecated */
   CURLSSLBACKEND_MBEDTLS = 11,
-  CURLSSLBACKEND_MESALINK = 12,
-  CURLSSLBACKEND_BEARSSL = 13
+  CURLSSLBACKEND_MESALINK = 12, /* deprecated */
+  CURLSSLBACKEND_BEARSSL = 13,
+  CURLSSLBACKEND_RUSTLS = 14
 } curl_sslbackend;
 
 CURLsslset curl_global_sslset(curl_sslbackend id,
@@ -64,17 +65,17 @@ The backend can be identified by the \fIid\fP
 both \fIid\fP and \fIname\fP are specified, the \fIname\fP will be ignored.
 
 If neither \fIid\fP nor \fPname\fP are specified, the function will fail with
-CURLSSLSET_UNKNOWN_BACKEND and set the \fIavail\fP pointer to the
+\fBCURLSSLSET_UNKNOWN_BACKEND\fP and set the \fIavail\fP pointer to the
 NULL-terminated list of available backends. The available backends are those
 that this particular build of libcurl supports.
 
 Since libcurl 7.60.0, the \fIavail\fP pointer will always be set to the list
 of alternatives if non-NULL.
 
-Upon success, the function returns CURLSSLSET_OK.
+Upon success, the function returns \fBCURLSSLSET_OK\fP.
 
 If the specified SSL backend is not available, the function returns
-CURLSSLSET_UNKNOWN_BACKEND and sets the \fIavail\fP pointer to a
+\fBCURLSSLSET_UNKNOWN_BACKEND\fP and sets the \fIavail\fP pointer to a
 NULL-terminated list of available SSL backends. In this case, you may call the
 function again to try to select a different backend.
 
@@ -88,6 +89,15 @@ This function is thread-safe since libcurl 7.84.0 if
 If this is not thread-safe, you must not call this function when any other
 thread in the program (i.e. a thread sharing the same memory) is running.
 This does not just mean no other thread that is using libcurl.
+.SH OpenSSL
+The name "OpenSSL" is used for all versions of OpenSSL and its associated
+forks/flavors in this function. OpenSSL, BoringSSL, libressl, quictls and
+AmiSSL are all supported by libcurl, but in the eyes of
+\fIcurl_global_sslset(3)\fP they are all just "OpenSSL". They all mostly
+provide the same API.
+
+\fIcurl_version_info(3)\fP can return more specific info about the exact
+OpenSSL flavor and version number is use.
 .SH EXAMPLE
 .nf
   /* choose a specific backend */
@@ -105,7 +115,8 @@ This does not just mean no other thread that is using libcurl.
 This function was added in libcurl 7.56.0. Before this version, there was no
 support for choosing SSL backends at runtime.
 .SH RETURN VALUE
-If this function returns CURLSSLSET_OK, the backend was successfully selected.
+If this function returns \fICURLSSLSET_OK\fP, the backend was successfully
+selected.
 
 If the chosen backend is unknown (or support for the chosen backend has not
 been compiled into libcurl), the function returns

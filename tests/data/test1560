@@ -12,6 +12,9 @@ URLAPI
 <server>
 none
 </server>
+<setenv>
+LANG=en_US.UTF-8
+</setenv>
 <features>
 file
 https
@@ -22,7 +25,6 @@ imap
 ldap
 dict
 ftp
-ipv6
 </features>
  <name>
 URL API
@@ -34,13 +36,6 @@ lib%TESTNUMBER
 
 <verify>
 <stdout>
-we got [fe80::20c:29ff:fe9c:409b]
-we got https://[::1]/hello.html
-we got https://example.com/hello.html
-we got https://[fe80::20c:29ff:fe9c:409b%25eth0]/hello.html
-we got [fe80::20c:29ff:fe9c:409b]
-we got eth0
-we got https://[fe80::20c:29ff:fe9c:409b%25clown]/hello.html
 success
 </stdout>
 </verify>

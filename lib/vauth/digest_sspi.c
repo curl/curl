@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2016, Steve Holme, <steve_holme@hotmail.com>.
- * Copyright (C) 2015 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -259,7 +259,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
       char content[DIGEST_MAX_CONTENT_LENGTH];
 
       /* Pass all additional spaces here */
-      while(*chlg && ISSPACE(*chlg))
+      while(*chlg && ISBLANK(*chlg))
         chlg++;
 
       /* Extract a value=content pair */
@@ -292,7 +292,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
         break; /* We're done here */
 
       /* Pass all additional spaces here */
-      while(*chlg && ISSPACE(*chlg))
+      while(*chlg && ISBLANK(*chlg))
         chlg++;
 
       /* Allow the list to be comma-separated */
@@ -307,7 +307,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
 /*
  * Curl_auth_decode_digest_http_message()
  *
- * This is used to decode a HTTP DIGEST challenge message into the separate
+ * This is used to decode an HTTP DIGEST challenge message into the separate
  * attributes.
  *
  * Parameters:
@@ -333,7 +333,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
       char value[DIGEST_MAX_VALUE_LENGTH];
       char content[DIGEST_MAX_CONTENT_LENGTH];
 
-      while(*p && ISSPACE(*p))
+      while(*p && ISBLANK(*p))
         p++;
 
       if(!Curl_auth_digest_get_pair(p, value, content, &p))
@@ -345,7 +345,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         break;
       }
 
-      while(*p && ISSPACE(*p))
+      while(*p && ISBLANK(*p))
         p++;
 
       if(',' == *p)
@@ -371,7 +371,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 /*
  * Curl_auth_create_digest_http_message()
  *
- * This is used to generate a HTTP DIGEST response message ready for sending
+ * This is used to generate an HTTP DIGEST response message ready for sending
  * to the recipient.
  *
  * Parameters:
@@ -431,8 +431,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
      has changed then delete that context. */
   if((userp && !digest->user) || (!userp && digest->user) ||
      (passwdp && !digest->passwd) || (!passwdp && digest->passwd) ||
-     (userp && digest->user && strcmp(userp, digest->user)) ||
-     (passwdp && digest->passwd && strcmp(passwdp, digest->passwd))) {
+     (userp && digest->user && Curl_timestrcmp(userp, digest->user)) ||
+     (passwdp && digest->passwd && Curl_timestrcmp(passwdp, digest->passwd))) {
     if(digest->http_context) {
       s_pSecFn->DeleteSecurityContext(digest->http_context);
       Curl_safefree(digest->http_context);

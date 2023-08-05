@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: remote-name
 Short: O
@@ -7,6 +7,7 @@ Category: important output
 Example: -O https://example.com/filename
 Added: 4.0
 See-also: remote-name-all output-dir remote-header-name
+Multi: append
 ---
 Write output to a local file named like the remote file we get. (Only the file
 part of the remote file is used, the path is cut off.)

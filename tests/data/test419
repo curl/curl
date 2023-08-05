@@ -1,0 +1,35 @@
+<testcase>
+<info>
+<keywords>
+--dump-header
+failure
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+--dump-header to file that cannot be created
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D loggg/save-here/fails
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+23
+</errorcode>
+</verify>
+</testcase>

@@ -5,6 +5,7 @@ FTP
 RETR
 multi
 LIST
+DELAY
 </keywords>
 </info>
 

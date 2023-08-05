@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
+FORM
 </keywords>
 </info>
 
@@ -38,6 +39,9 @@ hello
 
 # Client-side
 <client>
+<features>
+form-api
+</features>
 <server>
 http
 </server>

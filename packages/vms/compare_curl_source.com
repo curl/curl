@@ -1,7 +1,5 @@
 $! Compare_curl_source.com
 $!
-$! $Id$
-$!
 $! This procedure compares the files in two directories and reports the
 $! differences.  It is customized for the vmsports repository layout.
 $!
@@ -69,7 +67,7 @@ $!
 $!   This is to make sure that the backup save set for the unmodified
 $!   source is up to date.
 $!
-$! Copyright 2013 - 2022, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -85,7 +83,6 @@ $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
 $! SPDX-License-Identifier: ISC
 $!
-$! 18-Aug-2011  J. Malmberg
 $!==========================================================================
 $!
 $! Update missing/changed files.

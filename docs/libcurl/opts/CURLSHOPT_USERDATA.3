@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,19 +21,19 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH CURLSHOPT_USERDATA 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.TH CURLSHOPT_USERDATA 3 "8 Aug 2003" libcurl libcurl
 .SH NAME
-CURLSHOPT_USERDATA - pointer passed to the (un)lock mutex callbacks
+CURLSHOPT_USERDATA - pointer passed to the lock and unlock mutex callbacks
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_USERDATA, void *ptr);
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_USERDATA, void *clientp);
 .fi
 .SH DESCRIPTION
-The \fIptr\fP parameter is held verbatim by libcurl and is passed on as the
-\fIuserptr\fP argument to the callbacks set with \fICURLSHOPT_LOCKFUNC(3)\fP
-and \fICURLSHOPT_UNLOCKFUNC(3)\fP.
+The \fIclientp\fP parameter is held verbatim by libcurl and is passed on as
+the \fIclientp\fP argument to the callbacks set with
+\fICURLSHOPT_LOCKFUNC(3)\fP and \fICURLSHOPT_UNLOCKFUNC(3)\fP.
 .SH PROTOCOLS
 All
 .SH EXAMPLE

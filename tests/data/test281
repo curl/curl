@@ -28,9 +28,9 @@ http
 HTTP PUT from file with 100 + 401 responses and -f without auth given
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -f -T log/test%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -f -T %LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 Weird
      file
          to
@@ -49,7 +49,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 38
-Expect: 100-continue
 
 Weird
      file

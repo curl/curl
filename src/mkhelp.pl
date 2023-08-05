@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -51,6 +51,7 @@ while (<STDIN>) {
     # remove trailing CR from line. msysgit checks out files as line+CRLF
     $line =~ s/\r$//;
 
+    $line =~ s/\x1b\x5b[0-9]+m//g; # escape sequence
     if($line =~ /^([ \t]*\n|curl)/i) {
         # cut off headers and empty lines
         $wline++; # count number of cut off lines
@@ -227,10 +228,6 @@ foot();
 
 sub foot {
   print <<FOOT
-#else /* !USE_MANUAL */
-/* built-in manual is disabled, blank function */
-#include "tool_hugehelp.h"
-void hugehelp(void) {}
 #endif /* USE_MANUAL */
 FOOT
   ;

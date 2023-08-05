@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_HSTSWRITEFUNCTION 3 "14 Sep 2020" "libcurl 7.74.0" "curl_easy_setopt options"
+.TH CURLOPT_HSTSWRITEFUNCTION 3 "14 Sep 2020" libcurl libcurl
 .SH NAME
 CURLOPT_HSTSWRITEFUNCTION \- write callback for HSTS hosts
 .SH SYNOPSIS
@@ -42,7 +42,7 @@ struct curl_index {
 };
 
 CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *sts,
-                      struct curl_index *count, void *userp);
+                      struct curl_index *count, void *clientp);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
 .fi
@@ -53,14 +53,14 @@ This callback function gets called by libcurl repeatedly to allow the
 application to store the in-memory HSTS cache when libcurl is about to discard
 it.
 
-Set the \fIuserp\fP argument with the \fICURLOPT_HSTSWRITEDATA(3)\fP option or
-it will be NULL.
+Set the \fIclientp\fP argument with the \fICURLOPT_HSTSWRITEDATA(3)\fP option
+or it will be NULL.
 
 When the callback is invoked, the \fIsts\fP pointer points to a populated
-struct: Read the host name to 'name' (it is 'namelen' bytes long and null
-terminated. The 'includeSubDomains' field is non-zero if the entry matches
-subdomains. The 'expire' string is a date stamp null-terminated string using
-the syntax YYYYMMDD HH:MM:SS.
+struct: Read the host name to 'name' (it is \fInamelen\fP bytes long and null
+terminated. The \fIincludeSubDomains\fP field is non-zero if the entry matches
+subdomains. The \fIexpire\fP string is a date stamp null-terminated string
+using the syntax YYYYMMDD HH:MM:SS.
 
 The callback should return \fICURLSTS_OK\fP if it succeeded and is prepared to
 be called again (for another host) or \fICURLSTS_DONE\fP if there's nothing

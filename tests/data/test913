@@ -23,14 +23,14 @@ smtp
  <name>
 SMTP with large message SIZE
  </name>
-<file name="log/test%TESTNUMBER.eml">
+<file name="%LOGDIR/test%TESTNUMBER.eml">
 From: different
 To: another
 
 body
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/test%TESTNUMBER.eml
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/test%TESTNUMBER.eml
 </command>
 </client>
 

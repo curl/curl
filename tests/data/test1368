@@ -31,10 +31,10 @@ http
 HTTP GET -o fname -J without Content-Disposition, -D file
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -o log/outfile%TESTNUMBER -D log/heads%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -o %LOGDIR/outfile%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/%TESTNUMBER
+perl %SRCDIR/libtest/notexists.pl %LOGDIR/%TESTNUMBER
 </postcheck>
 </client>
 
@@ -49,11 +49,11 @@ Accept: */*
 
 </protocol>
 
-<file1 name="log/outfile%TESTNUMBER">
+<file1 name="%LOGDIR/outfile%TESTNUMBER">
 12345
 </file1>
 
-<file2 name="log/heads%TESTNUMBER">
+<file2 name="%LOGDIR/heads%TESTNUMBER">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -63,7 +63,7 @@ Content-Type: text/html
 
 </file2>
 
-<file3 name="log/stdout%TESTNUMBER">
+<file3 name="%LOGDIR/stdout%TESTNUMBER">
 </file3>
 
 </verify>

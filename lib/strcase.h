@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,14 +35,11 @@
  * Result is 1 if text matches and 0 if not.
  */
 
-#define strcasecompare(a,b) Curl_strcasecompare(a,b)
-#define strncasecompare(a,b,c) Curl_strncasecompare(a,b,c)
-
-int Curl_strcasecompare(const char *first, const char *second);
-int Curl_safe_strcasecompare(const char *first, const char *second);
-int Curl_strncasecompare(const char *first, const char *second, size_t max);
+#define strcasecompare(a,b) curl_strequal(a,b)
+#define strncasecompare(a,b,c) curl_strnequal(a,b,c)
 
 char Curl_raw_toupper(char in);
+char Curl_raw_tolower(char in);
 
 /* checkprefix() is a shorter version of the above, used when the first
    argument is the string literal */
@@ -52,5 +49,6 @@ void Curl_strntoupper(char *dest, const char *src, size_t n);
 void Curl_strntolower(char *dest, const char *src, size_t n);
 
 bool Curl_safecmp(char *a, char *b);
+int Curl_timestrcmp(const char *first, const char *second);
 
 #endif /* HEADER_CURL_STRCASE_H */

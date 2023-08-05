@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2012 - 2022, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -18,7 +18,7 @@ rem * furnished to do so, under the terms of the COPYING file.
 rem *
 rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
-rem * 
+rem *
 rem * SPDX-License-Identifier: curl
 rem *
 rem ***************************************************************************
@@ -75,7 +75,7 @@ rem ***************************************************************************
       set "VC_PATH=Microsoft Visual Studio 14.0\VC"
     ) else if /i "%~1" == "vc14.1" (
       set VC_VER=14.1
-      set VC_DESC=VC14.1
+      set VC_DESC=VC14.10
 
       rem Determine the VC14.1 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
@@ -88,7 +88,7 @@ rem ***************************************************************************
       )
     ) else if /i "%~1" == "vc14.2" (
       set VC_VER=14.2
-      set VC_DESC=VC14.2
+      set VC_DESC=VC14.20
 
       rem Determine the VC14.2 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
@@ -101,7 +101,7 @@ rem ***************************************************************************
       )
     ) else if /i "%~1" == "vc14.3" (
       set VC_VER=14.3
-      set VC_DESC=VC14.3
+      set VC_DESC=VC14.30
 
       rem Determine the VC14.3 path based on the installed edition in descending
       rem order (Enterprise, then Professional and finally Community)
@@ -589,8 +589,13 @@ rem
         )
 
         move "%TMP_INSTALL_PATH%\lib\*.lib" "%OUTDIR%\DLL Debug" 1>nul
-        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Debug" 1>nul
-        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
+        if exist "%TMP_INSTALL_PATH%\lib\engines-3" (
+          move "%TMP_INSTALL_PATH%\lib\engines-3\*.dll" "%OUTDIR%\DLL Debug" 1>nul
+          move "%TMP_INSTALL_PATH%\lib\engines-3\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
+        ) else if exist "%TMP_INSTALL_PATH%\lib\engines-1_1" (
+          move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Debug" 1>nul
+          move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
+        )
         move "%TMP_INSTALL_PATH%\bin\*.dll" "%OUTDIR%\DLL Debug" 1>nul
         move "%TMP_INSTALL_PATH%\bin\*.exe" "%OUTDIR%\DLL Debug" 1>nul
         move "%TMP_INSTALL_PATH%\bin\*.pdb" "%OUTDIR%\DLL Debug" 1>nul
@@ -615,8 +620,13 @@ rem
         )
 
         move "%TMP_INSTALL_PATH%\lib\*.lib" "%OUTDIR%\DLL Release" 1>nul
-        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Release" 1>nul
-        move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Release" 1>nul
+        if exist "%TMP_INSTALL_PATH%\lib\engines-3" (
+          move "%TMP_INSTALL_PATH%\lib\engines-3\*.dll" "%OUTDIR%\DLL Release" 1>nul
+          move "%TMP_INSTALL_PATH%\lib\engines-3\*.pdb" "%OUTDIR%\DLL Release" 1>nul
+        ) else if exist "%TMP_INSTALL_PATH%\lib\engines-1_1" (
+          move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.dll" "%OUTDIR%\DLL Release" 1>nul
+          move "%TMP_INSTALL_PATH%\lib\engines-1_1\*.pdb" "%OUTDIR%\DLL Release" 1>nul
+        )
         move "%TMP_INSTALL_PATH%\bin\*.dll" "%OUTDIR%\DLL Release" 1>nul
         move "%TMP_INSTALL_PATH%\bin\*.exe" "%OUTDIR%\DLL Release" 1>nul
         move "%TMP_INSTALL_PATH%\bin\*.pdb" "%OUTDIR%\DLL Release" 1>nul

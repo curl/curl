@@ -20,7 +20,7 @@ smtp
  <name>
 SMTP with --crlf
  </name>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 From: different
 To: another
 
@@ -34,7 +34,7 @@ the
 --crlf option
 </file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/upload%TESTNUMBER --crlf
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/upload%TESTNUMBER --crlf
 </command>
 </client>
 

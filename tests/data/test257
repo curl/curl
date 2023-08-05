@@ -71,13 +71,13 @@ http
 HTTP Location: following with --netrc-optional
  </name>
  <command>
-http://supersite.com/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT --netrc-optional --netrc-file log/netrc%TESTNUMBER
+http://supersite.com/want/%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER
 </command>
 <features>
 proxy
 </features>
 # netrc auth for two out of three sites:
-<file name="log/netrc%TESTNUMBER">
+<file name="%LOGDIR/netrc%TESTNUMBER">
 machine supersite.com login user1 password passwd1
 machine anotherone.com login user2 password passwd2
 </file>

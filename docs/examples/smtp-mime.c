@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * SMTP example showing how to send mime emails
+ * Send SMTP mime emails
  * </DESC>
  */
 
@@ -101,6 +101,9 @@ int main(void)
     recipients = curl_slist_append(recipients, TO);
     recipients = curl_slist_append(recipients, CC);
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+
+    /* allow one of the recipients to fail and still consider it okay */
+    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS, 1L);
 
     /* Build and set the message header list. */
     for(cpp = headers_text; *cpp; cpp++)

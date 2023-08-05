@@ -26,7 +26,7 @@ ftp
  <name>
 FTP require STARTTLS while preauthenticated
  </name>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 data
     to
       see
@@ -35,7 +35,7 @@ works
   so does it?
 </file>
  <command>
---ssl-reqd --ftp-ssl-control ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/test%TESTNUMBER.txt -u user:secret
+--ssl-reqd --ftp-ssl-control ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt -u user:secret
 </command>
 </client>
 

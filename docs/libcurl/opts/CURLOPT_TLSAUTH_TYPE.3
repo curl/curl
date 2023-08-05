@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_TLSAUTH_TYPE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_TLSAUTH_TYPE 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_TLSAUTH_TYPE \- TLS authentication methods
 .SH SYNOPSIS
@@ -37,7 +37,7 @@ the method of the TLS authentication. Supported method is "SRP".
 
 .IP SRP
 TLS-SRP authentication. Secure Remote Password authentication for TLS is
-defined in RFC5054 and provides mutual authentication if both sides have a
+defined in RFC 5054 and provides mutual authentication if both sides have a
 shared secret. To use TLS-SRP, you must also set the
 \fICURLOPT_TLSAUTH_USERNAME(3)\fP and \fICURLOPT_TLSAUTH_PASSWORD(3)\fP
 options.

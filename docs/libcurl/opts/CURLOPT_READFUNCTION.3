@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_READFUNCTION 3 "25 Jun 2020" "libcurl 7.71.0" "curl_easy_setopt options"
+.TH CURLOPT_READFUNCTION 3 "25 Jun 2020" libcurl libcurl
 .SH NAME
 CURLOPT_READFUNCTION \- read callback for data uploads
 .SH SYNOPSIS
@@ -40,7 +40,7 @@ This callback function gets called by libcurl as soon as it needs to read data
 in order to send it to the peer - like if you ask it to upload or post data to
 the server. The data area pointed at by the pointer \fIbuffer\fP should be
 filled up with at most \fIsize\fP multiplied with \fInitems\fP number of bytes
-by your function.
+by your function. \fIsize\fP is always 1.
 
 Set the \fIuserdata\fP argument with the \fICURLOPT_READDATA(3)\fP option.
 

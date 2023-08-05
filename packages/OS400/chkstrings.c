@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,8 +37,8 @@
  * made, the EXPECTED_STRING_LASTZEROTERMINATED/EXPECTED_STRING_LAST
  * values can be updated to match the latest enum values in urldata.h.
  */
-#define EXPECTED_STRING_LASTZEROTERMINATED  (STRING_SSL_EC_CURVES + 1)
-#define EXPECTED_STRING_LAST                (STRING_AWS_SIGV4 + 1)
+#define EXPECTED_STRING_LASTZEROTERMINATED  (STRING_HAPROXY_CLIENT_IP + 1)
+#define EXPECTED_STRING_LAST                (STRING_COPYPOSTFIELDS + 1)
 
 int main(int argc, char *argv[])
 {

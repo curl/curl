@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -109,7 +109,7 @@ int test(char *URL)
   hdrs = curl_slist_append(hdrs, "X-Test-Number: 654");
   curl_mime_headers(part, hdrs, TRUE);
   part = curl_mime_addpart(mime);
-  curl_mime_filedata(part, "log/file654.txt");
+  curl_mime_filedata(part, libtest_arg2);
   part = curl_mime_addpart(mime);
   curl_mime_data_cb(part, (curl_off_t) -1, read_callback, NULL, free_callback,
                     &pooh);

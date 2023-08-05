@@ -1,0 +1,71 @@
+<testcase>
+<info>
+<keywords>
+curl_easy_nextheader
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK
+Date: Thu, 01 Nov 2001 14:49:00 GMT
+Server:       test with trailing space     
+Content-Type: text/html
+Content-Length: 0
+Set-Cookie: onecookie=data;
+Set-Cookie: secondcookie=2data;
+Set-Cookie: cookie3=data3;
+Location: /%TESTNUMBER0002
+
+</data>
+<data2 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: the other one
+Content-Type: text/html
+Content-Length: 0
+Set-Cookie: 1cookie=data1;
+Set-Cookie: 2cookie=data2;
+
+</data2>
+
+<data3 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: the other one
+Content-Type: text/html
+Content-Length: 0
+
+</data3>
+</reply>
+
+# Client-side
+<client>
+<features>
+headers-api
+</features>
+<server>
+http
+</server>
+
+<name>
+curl_easy_nextheader on second request after first did redirects
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+count = 2
+count = 1
+</stdout>
+</verify>
+</testcase>

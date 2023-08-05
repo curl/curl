@@ -27,7 +27,7 @@ Connection: close
 http
 </server>
  <name>
-Appened dash if -r range specified without one
+Append dash if -r range specified without one
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -r 4

@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Short: 0
 Long: http1.0
@@ -10,6 +10,7 @@ Help: Use HTTP 1.0
 Category: http
 Example: --http1.0 $URL
 See-also: http0.9 http1.1
+Multi: mutex
 ---
 Tells curl to use HTTP version 1.0 instead of using its internally preferred
 HTTP version.

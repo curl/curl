@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,7 +61,7 @@ int test(char *URL)
   res = curl_easy_perform(curl);
 
   if(!res) {
-    /* we are connected, now get a HTTP document the raw way */
+    /* we are connected, now get an HTTP document the raw way */
     const char *request =
       "GET /556 HTTP/1.1\r\n"
       "Host: ninja\r\n\r\n";

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -64,32 +64,28 @@
 # hyper support remains EXPERIMENTAL as long as there's a test number
 # listed below
 %if hyper
-265
 266
-565
 579
 587
-670
-671
-672
-673
 # 1021 re-added here due to flakiness
 1021
 1117
-1274
 1417
 1533
 1540
 1591
-1940
-1941
-1942
 1943
+2301
+2302
+2305
 %endif
 2043
-# Tests that are disabled here for rustls are SUPPOSED to work
+# The CRL test (313) doesn't work with rustls because rustls doesn't support
+# CRLs.
+# Tests that rely on connecting to an IP address over TLS don't work because
+# rustls doesn't support IP address certificates yet. That's the 400 series of
+# tests listed here, plus 1112 and 1272
 %if rustls
-312
 313
 400
 401
@@ -99,6 +95,9 @@
 407
 408
 409
+987
+988
+989
 1112
 1272
 %endif

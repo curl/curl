@@ -18,8 +18,8 @@ slow
 # require the threaded resolver only because it means pthreads might
 # be used for it
 <features>
+threadsafe
 threaded-resolver
-!win32
 </features>
 <server>
 none

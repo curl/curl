@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -32,14 +32,14 @@
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we re-use the code here to avoid duplication.
 CURLX_CFILES = \
+  ../lib/base64.c \
+  ../lib/curl_multibyte.c \
+  ../lib/dynbuf.c \
+  ../lib/nonblock.c \
   ../lib/strtoofft.c \
   ../lib/timediff.c \
-  ../lib/nonblock.c \
-  ../lib/warnless.c \
-  ../lib/curl_ctype.c \
-  ../lib/curl_multibyte.c \
   ../lib/version_win32.c \
-  ../lib/dynbuf.c
+  ../lib/warnless.c
 
 CURLX_HFILES = \
   ../lib/curl_setup.h \
@@ -80,10 +80,10 @@ CURL_CFILES = \
   tool_msgs.c \
   tool_operate.c \
   tool_operhlp.c \
-  tool_panykey.c \
   tool_paramhlp.c \
   tool_parsecfg.c \
   tool_progress.c \
+  tool_stderr.c \
   tool_strdup.c \
   tool_setopt.c \
   tool_sleep.c \
@@ -92,7 +92,8 @@ CURL_CFILES = \
   tool_vms.c \
   tool_writeout.c \
   tool_writeout_json.c \
-  tool_xattr.c
+  tool_xattr.c \
+  var.c
 
 CURL_HFILES = \
   slist_wc.h \
@@ -121,7 +122,6 @@ CURL_HFILES = \
   tool_msgs.h \
   tool_operate.h \
   tool_operhlp.h \
-  tool_panykey.h \
   tool_paramhlp.h \
   tool_parsecfg.h \
   tool_progress.h \
@@ -129,6 +129,7 @@ CURL_HFILES = \
   tool_setopt.h \
   tool_setup.h \
   tool_sleep.h \
+  tool_stderr.h \
   tool_strdup.h \
   tool_urlglob.h \
   tool_util.h \
@@ -136,7 +137,8 @@ CURL_HFILES = \
   tool_vms.h \
   tool_writeout.h \
   tool_writeout_json.h \
-  tool_xattr.h
+  tool_xattr.h \
+  var.h
 
 CURL_RCFILES = curl.rc
 

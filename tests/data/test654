@@ -39,6 +39,9 @@ hello
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -51,9 +54,9 @@ lib%TESTNUMBER
 HTTP duplicate easy handle with mime data
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/file%TESTNUMBER.txt
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 This is data from a file
 </file>
 </client>

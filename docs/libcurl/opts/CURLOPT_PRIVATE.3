@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_PRIVATE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_PRIVATE 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_PRIVATE \- store a private pointer
 .SH SYNOPSIS
@@ -34,8 +34,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PRIVATE, void *pointer);
 .SH DESCRIPTION
 Pass a void * as parameter, pointing to data that should be associated with
 this curl handle.  The pointer can subsequently be retrieved using
-\fIcurl_easy_getinfo(3)\fP with the CURLINFO_PRIVATE option. libcurl itself
-never does anything with this data.
+\fIcurl_easy_getinfo(3)\fP with the \fICURLINFO_PRIVATE(3)\fP option. libcurl
+itself never does anything with this data.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

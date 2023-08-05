@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2022 Jeroen Ooms <jeroenooms@gmail.com>
+ * Copyright (C) Jeroen Ooms <jeroenooms@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -95,8 +95,17 @@ CURL *make_handle(char *url)
   curl_easy_setopt(handle, CURLOPT_ACCEPT_ENCODING, "");
   curl_easy_setopt(handle, CURLOPT_TIMEOUT, 5L);
   curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
+  /* only allow redirects to HTTP and HTTPS URLs */
+  curl_easy_setopt(handle, CURLOPT_REDIR_PROTOCOLS_STR, "http,https");
+  curl_easy_setopt(handle, CURLOPT_AUTOREFERER, 1L);
   curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 10L);
-  curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, 2L);
+  /* each transfer needs to be done within 20 seconds! */
+  curl_easy_setopt(handle, CURLOPT_TIMEOUT_MS, 20000L);
+  /* connect fast or fail */
+  curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
+  /* skip files larger than a gigabyte */
+  curl_easy_setopt(handle, CURLOPT_MAXFILESIZE_LARGE,
+                   (curl_off_t)1024*1024*1024);
   curl_easy_setopt(handle, CURLOPT_COOKIEFILE, "");
   curl_easy_setopt(handle, CURLOPT_FILETIME, 1L);
   curl_easy_setopt(handle, CURLOPT_USERAGENT, "mini crawler");

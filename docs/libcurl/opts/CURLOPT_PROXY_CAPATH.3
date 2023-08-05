@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_PROXY_CAPATH 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
+.TH CURLOPT_PROXY_CAPATH 3 "16 Nov 2016" libcurl libcurl
 .SH NAME
 CURLOPT_PROXY_CAPATH \- directory holding HTTPS proxy CA certificates
 .SH SYNOPSIS
@@ -34,9 +34,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAPATH, char *capath);
 .SH DESCRIPTION
 Pass a char * to a null-terminated string naming a directory holding multiple
 CA certificates to verify the HTTPS proxy with. If libcurl is built against
-OpenSSL, the certificate directory must be prepared using the openssl c_rehash
-utility. This makes sense only when \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is
-enabled (which it is by default).
+OpenSSL, the certificate directory must be prepared using the OpenSSL
+\fBc_rehash\fP utility. This makes sense only when
+\fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is enabled (which it is by default).
 
 The application does not have to keep the string around after setting this
 option.
@@ -62,7 +62,7 @@ if(curl) {
 Added in 7.52.0
 
 This option is supported by the OpenSSL, GnuTLS, and mbedTLS (since 7.56.0)
-backends. The NSS backend provides the option only for backward compatibility.
+backends.
 .SH RETURN VALUE
 CURLE_OK if supported; or an error such as:
 

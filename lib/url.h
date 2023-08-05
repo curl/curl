@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,12 +46,8 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);
 
-const struct Curl_handler *Curl_builtin_scheme(const char *scheme);
-
-bool Curl_is_ASCII_name(const char *hostname);
-CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,
-                                  struct hostname *host);
-void Curl_free_idnconverted_hostname(struct hostname *host);
+const struct Curl_handler *Curl_builtin_scheme(const char *scheme,
+                                               size_t schemelen);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
@@ -63,21 +59,18 @@ void Curl_free_idnconverted_hostname(struct hostname *host);
 void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
 #endif
 
-#ifdef CURL_DISABLE_PROXY
-#define CONNECT_PROXY_SSL() FALSE
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+void Curl_data_priority_clear_state(struct Curl_easy *data);
 #else
+#define Curl_data_priority_clear_state(x)
+#endif /* !(defined(USE_HTTP2) || defined(USE_HTTP3)) */
 
-#define CONNECT_PROXY_SSL()\
-  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
-  !conn->bits.proxy_ssl_connected[sockindex])
-
-#define CONNECT_FIRSTSOCKET_PROXY_SSL()\
-  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
-  !conn->bits.proxy_ssl_connected[FIRSTSOCKET])
-
-#define CONNECT_SECONDARYSOCKET_PROXY_SSL()\
-  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
-  !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
-#endif /* !CURL_DISABLE_PROXY */
+#ifdef USE_NGHTTP2
+CURLcode Curl_data_priority_add_child(struct Curl_easy *parent,
+                                      struct Curl_easy *child,
+                                      bool exclusive);
+#else
+#define Curl_data_priority_add_child(x, y, z) CURLE_NOT_BUILT_IN
+#endif
 
 #endif /* HEADER_CURL_URL_H */

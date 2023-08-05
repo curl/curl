@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ftp-skip-pasv-ip
 Help: Skip the IP address for PASV
@@ -7,6 +7,7 @@ Added: 7.14.2
 See-also: ftp-pasv
 Category: ftp
 Example: --ftp-skip-pasv-ip ftp://example.com/
+Multi: boolean
 ---
 Tell curl to not use the IP address the server suggests in its response
 to curl's PASV command when curl connects the data connection. Instead curl

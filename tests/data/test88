@@ -63,9 +63,9 @@ crypto
 HTTP PUT with Digest authorization
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T log/put%TESTNUMBER -u testuser:testpass --digest
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/put%TESTNUMBER -u testuser:testpass --digest
 </command>
-<file name="log/put%TESTNUMBER">
+<file name="%LOGDIR/put%TESTNUMBER">
 This is data we upload with PUT
 a second line
 line three
@@ -88,7 +88,6 @@ Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145"
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85
-Expect: 100-continue
 
 This is data we upload with PUT
 a second line

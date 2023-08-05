@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_RTSP_REQUEST 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_RTSP_REQUEST 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_RTSP_REQUEST \- RTSP request
 .SH SYNOPSIS
@@ -61,10 +61,11 @@ extract and use the session ID in the response to this request. The session ID
 is not needed for this method.
 .IP CURL_RTSPREQ_PLAY
 Send a Play command to the server. Use the \fICURLOPT_RANGE(3)\fP option to
-modify the playback time (e.g. 'npt=10-15').
+modify the playback time (e.g. \fInpt=10-15\fP).
 .IP CURL_RTSPREQ_PAUSE
 Send a Pause command to the server. Use the \fICURLOPT_RANGE(3)\fP option with
-a single value to indicate when the stream should be halted. (e.g. npt='25')
+a single value to indicate when the stream should be
+halted. (e.g. \fInpt=25\fP)
 .IP CURL_RTSPREQ_TEARDOWN
 This command terminates an RTSP session. Simply closing a connection does not
 terminate the RTSP session since it is valid to control an RTSP session over

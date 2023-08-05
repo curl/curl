@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -24,7 +24,3 @@
 # Loads 'TESTCASES' from for the 'make show' target in runtests.pl
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-
-# Prints all available test cases. Do not quote TESTCASES, it must be displayed
-# as a space-separated string rather than comma-separated (a list in CMake).
-add_custom_target(show COMMAND echo ${TESTCASES})

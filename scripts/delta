@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2018-2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -59,8 +59,20 @@ $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 $contribs = $acontribs - $bcontribs;
 
 # number of setops:
-$asetopts=`grep '^  CURLOPT(' include/curl/curl.h  | grep -cv OBSOLETE`;
-$bsetopts=`git show $start:include/curl/curl.h | grep '^  CURLOPT(' | grep -cv OBSOLETE`;
+sub setopts {
+    my ($f)=@_;
+    open(H, "$f");
+    my $opts;
+    while(<H>) {
+        if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/))  {
+            $opts++;
+        }
+    }
+    close(H);
+    return $opts;
+}
+$asetopts = setopts("<include/curl/curl.h");
+$bsetopts = setopts("git show $start:include/curl/curl.h|");
 $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
@@ -73,8 +85,8 @@ $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
 chomp $branch;
 # Number of files in git
 $afiles=`git ls-files | wc -l`;
-$deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start | wc -l`;
-$creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start | wc -l`;
+$deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start 2>/dev/null | wc -l`;
+$creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>/dev/null| wc -l`;
 
 # Time since that tag
 $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # unix timestamp
@@ -150,7 +162,7 @@ printf "Added files:                    %d (total %d)\n",
 printf "Deleted files:                  %d (delta: %d)\n", $deletes,
     $creates - $deletes;
 print "Diffstat:$diffstat" if(!$fileschanged);
-printf "Files changed:                  %d\n", $fileschanged;
+printf "Files changed:                  %d (%.2f%%)\n", $fileschanged, $fileschanged*100/$afiles;
 printf "Lines inserted:                 %d\n", $insertions;
 printf "Lines deleted:                  %d (delta: %d)\n", $deletions,
     $insertions - $deletions;

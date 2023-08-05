@@ -6,41 +6,54 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## NSS
+## gskit
 
-We remove support for building curl with the NSS TLS library in August 2022.
+We remove support for building curl with the gskit TLS library in August 2023.
 
-- There are very few users left who use curl+NSS
-- NSS has very few users outside of curl as well (primarily Firefox)
-- NSS is harder than ever to find documentation for
-- NSS was always "best" used with Red Hat Linux when they provided additional
-  features on top of the regular NSS that is not shipped by the vanilla library
+- This is a niche TLS library, only running on some IBM systems
+- no regular curl contributors use this backend
+- no CI builds use or verify this backend
+- gskit, or the curl adaption for it, lacks many modern TLS features making it
+  an inferior solution
+- build breakages in this code take weeks or more to get detected
+- fixing gskit code is mostly done "flying blind"
 
-Starting in 7.82.0, building curl to use NSS configure requires the additional
-flag --with-nss-deprecated in an attempt to highlight these plans.
+## mingw v1
 
-## NPN
+We remove support for building curl with the original legacy mingw version 1
+in September 2023.
 
-We make selecting NPN a no-op starting in August 2022.
+During the deprecation period you can enable the support with the configure
+option `--with-mingw1-deprecated`.
 
-**Next Protocol Negotiation** is a TLS extension that was created and used for
-agreeing to use the SPDY protocol (the precursor to HTTP/2) for HTTPS. In the
-early days of HTTP/2, before the spec was finalized and shipped, the protocol
-could be enabled using this extension with some servers.
+mingw version 1 is old and deprecated software. There are much better and
+still support build environments to use to build curl and other software. For
+example [MinGW-w64](https://www.mingw-w64.org/).
 
-curl supports the NPN extension with some TLS backends since then, with a
-command line option `--npn` and in libcurl with `CURLOPT_SSL_ENABLE_NPN`.
+## space-separated `NOPROXY` patterns
 
-HTTP/2 proper is made to use the ALPN (Application-Layer Protocol Negotiation)
-extension and the NPN extension has no purposes anymore. The HTTP/2 spec was
-published in May 2015.
+When specifying patterns/domain names for curl that should *not* go through a
+proxy, the curl tool features the `--noproxy` command line option and the
+library supports the `NO_PROXY` environment variable and the `CURLOPT_NOPROXY`
+libcurl option.
 
-Today, use of NPN in the wild should be extremely rare and most likely totally
-extinct. Chrome removed NPN support in Chrome 51, shipped in
-June 2016. Removed in Firefox 53, April 2017.
+They all set the same list of patterns. This list is documented to be a set of
+**comma-separated** names, but can also be provided separated with just
+space. The ability to just use spaces for this has never been documented but
+some users may still have come to rely on this.
+
+Several other tools and utilities also parse the `NO_PROXY` environment
+variable but do not consider a space to be a valid separator. Using spaces for
+separator is probably less portable and might cause more friction than commas
+do. Users should use commas for this for greater portability.
+
+curl will remove the support for space-separated names in July 2024.
 
 ## past removals
 
  - Pipelining
  - axTLS
  - PolarSSL
+ - NPN
+ - Support for systems without 64 bit data types
+ - NSS

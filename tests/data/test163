@@ -20,6 +20,9 @@ blablabla
 
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 http
 </server>
@@ -27,10 +30,10 @@ http
 HTTP multipart formpost with contents from a file
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=<log/field%TESTNUMBER" -F tool=curl
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=<%LOGDIR/field%TESTNUMBER" -F tool=curl
 </command>
 # We create this file before the command is invoked!
-<file name="log/field%TESTNUMBER">
+<file name="%LOGDIR/field%TESTNUMBER">
 contents
 from
 a

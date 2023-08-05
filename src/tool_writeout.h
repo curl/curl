@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,8 +29,11 @@
 typedef enum {
   VAR_NONE,       /* must be the first */
   VAR_APPCONNECT_TIME,
+  VAR_CERT,
   VAR_CONNECT_TIME,
   VAR_CONTENT_TYPE,
+  VAR_CONN_ID,
+  VAR_EASY_ID,
   VAR_EFFECTIVE_FILENAME,
   VAR_EFFECTIVE_METHOD,
   VAR_EFFECTIVE_URL,
@@ -43,10 +46,32 @@ typedef enum {
   VAR_HTTP_CODE_PROXY,
   VAR_HTTP_VERSION,
   VAR_INPUT_URL,
+  VAR_INPUT_URLSCHEME,
+  VAR_INPUT_URLUSER,
+  VAR_INPUT_URLPASSWORD,
+  VAR_INPUT_URLOPTIONS,
+  VAR_INPUT_URLHOST,
+  VAR_INPUT_URLPORT,
+  VAR_INPUT_URLPATH,
+  VAR_INPUT_URLQUERY,
+  VAR_INPUT_URLFRAGMENT,
+  VAR_INPUT_URLZONEID,
+  /* the same ones again for url *effective* */
+  VAR_INPUT_URLESCHEME,
+  VAR_INPUT_URLEUSER,
+  VAR_INPUT_URLEPASSWORD,
+  VAR_INPUT_URLEOPTIONS,
+  VAR_INPUT_URLEHOST,
+  VAR_INPUT_URLEPORT,
+  VAR_INPUT_URLEPATH,
+  VAR_INPUT_URLEQUERY,
+  VAR_INPUT_URLEFRAGMENT,
+  VAR_INPUT_URLEZONEID,
   VAR_JSON,
   VAR_LOCAL_IP,
   VAR_LOCAL_PORT,
   VAR_NAMELOOKUP_TIME,
+  VAR_NUM_CERTS,
   VAR_NUM_CONNECTS,
   VAR_NUM_HEADERS,
   VAR_ONERROR,
@@ -82,7 +107,7 @@ struct writeoutvar {
                    bool use_json);
 };
 
-void ourWriteOut(const char *writeinfo, struct per_transfer *per,
+void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                  CURLcode per_result);
 
 #endif /* HEADER_CURL_TOOL_WRITEOUT_H */

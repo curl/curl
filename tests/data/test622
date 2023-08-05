@@ -22,9 +22,9 @@ sftp
 SFTP put failure
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/nonexistent-directory/nonexistent-file --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/nonexistent-directory/nonexistent-file --insecure
 </command>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
 </file>

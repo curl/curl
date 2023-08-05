@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,8 +55,8 @@ int test(char *URL)
 
   curl_easy_setopt(ch, CURLOPT_SHARE, sh);
   curl_easy_setopt(ch, CURLOPT_URL, URL);
-  curl_easy_setopt(ch, CURLOPT_COOKIEFILE, "log/cookies1905");
-  curl_easy_setopt(ch, CURLOPT_COOKIEJAR, "log/cookies1905");
+  curl_easy_setopt(ch, CURLOPT_COOKIEFILE, libtest_arg2);
+  curl_easy_setopt(ch, CURLOPT_COOKIEJAR, libtest_arg2);
 
   curl_multi_add_handle(cm, ch);
 
@@ -90,7 +90,7 @@ int test(char *URL)
   curl_easy_setopt(ch, CURLOPT_SHARE, NULL);
 
   curl_multi_remove_handle(cm, ch);
-  cleanup:
+cleanup:
   curl_easy_cleanup(ch);
   curl_share_cleanup(sh);
   curl_multi_cleanup(cm);

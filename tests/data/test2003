@@ -58,9 +58,9 @@ tftp
 HTTP GET followed by FTP RETR followed by FILE followed by TFTP RRQ then again in reverse order
  </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 file://localhost%FILE_PWD/log/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003 file://localhost%FILE_PWD/log/test%TESTNUMBER.txt ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar
@@ -72,6 +72,9 @@ moo
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+^timeout = [5-6]$
+</strip>
 <protocol>
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
@@ -89,13 +92,11 @@ opcode = 1
 mode = octet
 tsize = 0
 blksize = 512
-timeout = 6
 filename = /%TESTNUMBER0003
 opcode = 1
 mode = octet
 tsize = 0
 blksize = 512
-timeout = 6
 filename = /%TESTNUMBER0003
 EPSV
 SIZE %TESTNUMBER0002

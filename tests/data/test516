@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
+FORM
 </keywords>
 </info>
 
@@ -21,6 +22,9 @@ OK
 
 # Client-side
 <client>
+<features>
+form-api
+</features>
 <server>
 http
 </server>
@@ -30,7 +34,7 @@ lib%TESTNUMBER
 </tool>
 
  <name>
-make a HTTPPOST set to NULL
+make an HTTPPOST set to NULL
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

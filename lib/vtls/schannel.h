@@ -7,8 +7,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012, Marc Hoersken, <info@marc-hoersken.de>, et al.
- * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Marc Hoersken, <info@marc-hoersken.de>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,10 +28,31 @@
 
 #ifdef USE_SCHANNEL
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4201)
+#endif
+#include <subauth.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+/* Wincrypt must be included before anything that could include OpenSSL. */
+#if defined(USE_WIN32_CRYPTO)
+#include <wincrypt.h>
+/* Undefine wincrypt conflicting symbols for BoringSSL. */
+#undef X509_NAME
+#undef X509_EXTENSIONS
+#undef PKCS7_ISSUER_AND_SERIAL
+#undef PKCS7_SIGNER_INFO
+#undef OCSP_REQUEST
+#undef OCSP_RESPONSE
+#endif
+
 #include <schnlsp.h>
 #include <schannel.h>
 #include "curl_sspi.h"
 
+#include "cfilters.h"
 #include "urldata.h"
 
 /* <wincrypt.h> has been included via the above <schnlsp.h>.
@@ -55,58 +76,8 @@
 
 extern const struct Curl_ssl Curl_ssl_schannel;
 
-CURLcode Curl_verify_certificate(struct Curl_easy *data,
-                                 struct connectdata *conn, int sockindex);
-
-/* structs to expose only in schannel.c and schannel_verify.c */
-#ifdef EXPOSE_SCHANNEL_INTERNAL_STRUCTS
-
-#ifdef __MINGW32__
-#include <_mingw.h>
-#ifdef __MINGW64_VERSION_MAJOR
-#define HAS_MANUAL_VERIFY_API
-#endif
-#else
-#include <wincrypt.h>
-#ifdef CERT_CHAIN_REVOCATION_CHECK_CHAIN
-#define HAS_MANUAL_VERIFY_API
-#endif
-#endif
-
-struct Curl_schannel_cred {
-  CredHandle cred_handle;
-  TimeStamp time_stamp;
-  TCHAR *sni_hostname;
-  int refcount;
-};
-
-struct Curl_schannel_ctxt {
-  CtxtHandle ctxt_handle;
-  TimeStamp time_stamp;
-};
-
-struct ssl_backend_data {
-  struct Curl_schannel_cred *cred;
-  struct Curl_schannel_ctxt *ctxt;
-  SecPkgContext_StreamSizes stream_sizes;
-  size_t encdata_length, decdata_length;
-  size_t encdata_offset, decdata_offset;
-  unsigned char *encdata_buffer, *decdata_buffer;
-  /* encdata_is_incomplete: if encdata contains only a partial record that
-     can't be decrypted without another Curl_read_plain (that is, status is
-     SEC_E_INCOMPLETE_MESSAGE) then set this true. after Curl_read_plain writes
-     more bytes into encdata then set this back to false. */
-  bool encdata_is_incomplete;
-  unsigned long req_flags, ret_flags;
-  CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
-  bool recv_sspi_close_notify; /* true if connection closed by close_notify */
-  bool recv_connection_closed; /* true if connection closed, regardless how */
-  bool use_alpn; /* true if ALPN is used for this connection */
-#ifdef HAS_MANUAL_VERIFY_API
-  bool use_manual_cred_validation; /* true if manual cred validation is used */
-#endif
-};
-#endif /* EXPOSE_SCHANNEL_INTERNAL_STRUCTS */
+CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data);
 
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */

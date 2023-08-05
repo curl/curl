@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
   // Initialize CURL connection
 
   if(!init(conn, argv[1])) {
-    fprintf(stderr, "Connection initializion failed\n");
+    fprintf(stderr, "Connection initialization failed\n");
     exit(EXIT_FAILURE);
   }
 

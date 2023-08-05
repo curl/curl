@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,10 +41,6 @@
 #ifdef __VMS
 #include <in.h>
 #include <inet.h>
-#endif
-
-#ifdef HAVE_PROCESS_H
-#include <process.h>
 #endif
 
 #include "urldata.h"
@@ -96,8 +92,8 @@ static void dump_addrinfo(struct connectdata *conn,
  * non-ares version).
  *
  * Returns name information about the given hostname and port number. If
- * successful, the 'addrinfo' is returned and the forth argument will point to
- * memory we need to free after use. That memory *MUST* be freed with
+ * successful, the 'addrinfo' is returned and the fourth argument will point
+ * to memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
 struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
@@ -117,7 +113,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   *waitp = 0; /* synchronous response only */
 
-  if(Curl_ipv6works(data))
+  if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
     /* The stack seems to be IPv6-enabled */
     pf = PF_UNSPEC;
 

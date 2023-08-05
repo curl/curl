@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: post303
 Help: Do not switch to GET after following a 303
@@ -7,6 +7,7 @@ See-also: post302 post301 location
 Added: 7.26.0
 Category: http post
 Example: --post303 --location -d "data" $URL
+Multi: boolean
 ---
 Tells curl to violate RFC 7231/6.4.4 and not convert POST requests into GET
 requests when following 303 redirections. A server may require a POST to

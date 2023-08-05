@@ -14,6 +14,9 @@ MULTIPART
 #
 # Client-side
 <client>
+<features>
+Mime
+</features>
 <server>
 smtp
 </server>
@@ -27,9 +30,9 @@ To: another
 body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is the email inline text with a very long line containing the special character = and that should be split by encoder.;headers=Content-disposition: "inline";encoder=quoted-printable' -F "=@log/test%TESTNUMBER.txt;encoder=base64" -H "From: different" -H "To: another"
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is the email inline text with a very long line containing the special character = and that should be split by encoder.;headers=Content-disposition: "inline";encoder=quoted-printable' -F "=@%LOGDIR/test%TESTNUMBER.txt;encoder=base64" -H "From: different" -H "To: another"
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 This is an attached file.
 
 It may contain any type of data and will be encoded in base64 for transfer.

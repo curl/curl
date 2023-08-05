@@ -16,13 +16,13 @@ Verify that runtests.pl accepts an exclude file with the -E option
 </name>
 
 <command type="perl">
-%SRCDIR/runtests.pl -o TESTDIR=%SRCDIR/log/data -o LOGDIR=%SRCDIR/log/log -E %SRCDIR/log/test%TESTNUMBER-exclude-file 1
+%SRCDIR/runtests.pl -o TESTDIR=%LOGDIR/data -o LOGDIR=%LOGDIR/log -E %LOGDIR/test%TESTNUMBER-exclude-file 1
 </command>
 <precheck>
-mkdir %SRCDIR/log/data ; mkdir %SRCDIR/log/log; cp %SRCDIR/data/test1 %SRCDIR/log/data; echo 'test:1:Test should not run for unit test %TESTNUMBER' > %SRCDIR/log/test%TESTNUMBER-exclude-file
+mkdir %LOGDIR/data ; mkdir %LOGDIR/log; cp %SRCDIR/data/test1 %LOGDIR/data; echo 'test:1:Test should not run for unit test %TESTNUMBER' > %LOGDIR/test%TESTNUMBER-exclude-file
 </precheck>
 <postcheck>
-grep -q "Test should not run for unit test %TESTNUMBER" %SRCDIR/log/stdout%TESTNUMBER
+grep -q "Test should not run for unit test %TESTNUMBER" %LOGDIR/stdout%TESTNUMBER
 </postcheck>
 
 </client>

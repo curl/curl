@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,7 +112,7 @@ int test(char *URL)
   }
 
   curl_multi_remove_handle(mcurl, curl);
-  fail:
+fail:
   curl_easy_cleanup(curl);
   curl_multi_cleanup(mcurl);
 

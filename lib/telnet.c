@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -571,7 +571,7 @@ void rec_do(struct Curl_easy *data, int option)
         sendsuboption(data, option);
     }
     else if(tn->subnegotiation[option] == CURL_YES) {
-      /* send information to achieve this option*/
+      /* send information to achieve this option */
       tn->us[option] = CURL_YES;
       send_negotiation(data, CURL_WILL, option);
       sendsuboption(data, option);
@@ -770,22 +770,39 @@ static void printsub(struct Curl_easy *data,
   }
 }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+/* warning C4706: assignment within conditional expression */
+#pragma warning(disable:4706)
+#endif
+static bool str_is_nonascii(const char *str)
+{
+  char c;
+  while((c = *str++))
+    if(c & 0x80)
+      return TRUE;
+
+  return FALSE;
+}
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 static CURLcode check_telnet_options(struct Curl_easy *data)
 {
   struct curl_slist *head;
   struct curl_slist *beg;
-  char option_keyword[128] = "";
-  char option_arg[256] = "";
   struct TELNET *tn = data->req.p.telnet;
-  struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
-  int binary_option;
 
   /* Add the user name as an environment variable if it
      was given on the command line */
   if(data->state.aptr.user) {
-    msnprintf(option_arg, sizeof(option_arg), "USER,%s", conn->user);
-    beg = curl_slist_append(tn->telnet_vars, option_arg);
+    char buffer[256];
+    if(str_is_nonascii(data->conn->user))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    msnprintf(buffer, sizeof(buffer), "USER,%s", data->conn->user);
+    beg = curl_slist_append(tn->telnet_vars, buffer);
     if(!beg) {
       curl_slist_free_all(tn->telnet_vars);
       tn->telnet_vars = NULL;
@@ -795,68 +812,100 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
     tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
   }
 
-  for(head = data->set.telnet_options; head; head = head->next) {
-    if(sscanf(head->data, "%127[^= ]%*[ =]%255s",
-              option_keyword, option_arg) == 2) {
-
-      /* Terminal type */
-      if(strcasecompare(option_keyword, "TTYPE")) {
-        strncpy(tn->subopt_ttype, option_arg, 31);
-        tn->subopt_ttype[31] = 0; /* String termination */
-        tn->us_preferred[CURL_TELOPT_TTYPE] = CURL_YES;
+  for(head = data->set.telnet_options; head && !result; head = head->next) {
+    size_t olen;
+    char *option = head->data;
+    char *arg;
+    char *sep = strchr(option, '=');
+    if(sep) {
+      olen = sep - option;
+      arg = ++sep;
+      if(str_is_nonascii(arg))
         continue;
-      }
-
-      /* Display variable */
-      if(strcasecompare(option_keyword, "XDISPLOC")) {
-        strncpy(tn->subopt_xdisploc, option_arg, 127);
-        tn->subopt_xdisploc[127] = 0; /* String termination */
-        tn->us_preferred[CURL_TELOPT_XDISPLOC] = CURL_YES;
-        continue;
-      }
-
-      /* Environment variable */
-      if(strcasecompare(option_keyword, "NEW_ENV")) {
-        beg = curl_slist_append(tn->telnet_vars, option_arg);
-        if(!beg) {
-          result = CURLE_OUT_OF_MEMORY;
-          break;
+      switch(olen) {
+      case 5:
+        /* Terminal type */
+        if(strncasecompare(option, "TTYPE", 5)) {
+          strncpy(tn->subopt_ttype, arg, 31);
+          tn->subopt_ttype[31] = 0; /* String termination */
+          tn->us_preferred[CURL_TELOPT_TTYPE] = CURL_YES;
         }
-        tn->telnet_vars = beg;
-        tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
-        continue;
-      }
+        else
+          result = CURLE_UNKNOWN_OPTION;
+        break;
 
-      /* Window Size */
-      if(strcasecompare(option_keyword, "WS")) {
-        if(sscanf(option_arg, "%hu%*[xX]%hu",
-                  &tn->subopt_wsx, &tn->subopt_wsy) == 2)
-          tn->us_preferred[CURL_TELOPT_NAWS] = CURL_YES;
-        else {
-          failf(data, "Syntax error in telnet option: %s", head->data);
-          result = CURLE_SETOPT_OPTION_SYNTAX;
-          break;
+      case 8:
+        /* Display variable */
+        if(strncasecompare(option, "XDISPLOC", 8)) {
+          strncpy(tn->subopt_xdisploc, arg, 127);
+          tn->subopt_xdisploc[127] = 0; /* String termination */
+          tn->us_preferred[CURL_TELOPT_XDISPLOC] = CURL_YES;
         }
-        continue;
-      }
+        else
+          result = CURLE_UNKNOWN_OPTION;
+        break;
 
-      /* To take care or not of the 8th bit in data exchange */
-      if(strcasecompare(option_keyword, "BINARY")) {
-        binary_option = atoi(option_arg);
-        if(binary_option != 1) {
-          tn->us_preferred[CURL_TELOPT_BINARY] = CURL_NO;
-          tn->him_preferred[CURL_TELOPT_BINARY] = CURL_NO;
+      case 7:
+        /* Environment variable */
+        if(strncasecompare(option, "NEW_ENV", 7)) {
+          beg = curl_slist_append(tn->telnet_vars, arg);
+          if(!beg) {
+            result = CURLE_OUT_OF_MEMORY;
+            break;
+          }
+          tn->telnet_vars = beg;
+          tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
         }
-        continue;
-      }
+        else
+          result = CURLE_UNKNOWN_OPTION;
+        break;
 
-      failf(data, "Unknown telnet option %s", head->data);
-      result = CURLE_UNKNOWN_OPTION;
-      break;
+      case 2:
+        /* Window Size */
+        if(strncasecompare(option, "WS", 2)) {
+          char *p;
+          unsigned long x = strtoul(arg, &p, 10);
+          unsigned long y = 0;
+          if(x && (x <= 0xffff) && Curl_raw_tolower(*p) == 'x') {
+            p++;
+            y = strtoul(p, NULL, 10);
+            if(y && (y <= 0xffff)) {
+              tn->subopt_wsx = (unsigned short)x;
+              tn->subopt_wsy = (unsigned short)y;
+              tn->us_preferred[CURL_TELOPT_NAWS] = CURL_YES;
+            }
+          }
+          if(!y) {
+            failf(data, "Syntax error in telnet option: %s", head->data);
+            result = CURLE_SETOPT_OPTION_SYNTAX;
+          }
+        }
+        else
+          result = CURLE_UNKNOWN_OPTION;
+        break;
+
+      case 6:
+        /* To take care or not of the 8th bit in data exchange */
+        if(strncasecompare(option, "BINARY", 6)) {
+          int binary_option = atoi(arg);
+          if(binary_option != 1) {
+            tn->us_preferred[CURL_TELOPT_BINARY] = CURL_NO;
+            tn->him_preferred[CURL_TELOPT_BINARY] = CURL_NO;
+          }
+        }
+        else
+          result = CURLE_UNKNOWN_OPTION;
+        break;
+      default:
+        failf(data, "Unknown telnet option %s", head->data);
+        result = CURLE_UNKNOWN_OPTION;
+        break;
+      }
     }
-    failf(data, "Syntax error in telnet option: %s", head->data);
-    result = CURLE_SETOPT_OPTION_SYNTAX;
-    break;
+    else {
+      failf(data, "Syntax error in telnet option: %s", head->data);
+      result = CURLE_SETOPT_OPTION_SYNTAX;
+    }
   }
 
   if(result) {
@@ -881,8 +930,6 @@ static void suboption(struct Curl_easy *data)
   ssize_t bytes_written;
   size_t len;
   int err;
-  char varname[128] = "";
-  char varval[128] = "";
   struct TELNET *tn = data->req.p.telnet;
   struct connectdata *conn = data->conn;
 
@@ -920,19 +967,18 @@ static void suboption(struct Curl_easy *data)
 
       for(v = tn->telnet_vars; v; v = v->next) {
         size_t tmplen = (strlen(v->data) + 1);
-        /* Add the variable only if it fits */
+        /* Add the variable if it fits */
         if(len + tmplen < (int)sizeof(temp)-6) {
-          int rv;
-          char sep[2] = "";
-          varval[0] = 0;
-          rv = sscanf(v->data, "%127[^,]%1[,]%127s", varname, sep, varval);
-          if(rv == 1)
+          char *s = strchr(v->data, ',');
+          if(!s)
             len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%s", CURL_NEW_ENV_VAR, varname);
-          else if(rv >= 2)
+                             "%c%s", CURL_NEW_ENV_VAR, v->data);
+          else {
+            size_t vlen = s - v->data;
             len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%s%c%s", CURL_NEW_ENV_VAR, varname,
-                             CURL_NEW_ENV_VALUE, varval);
+                             "%c%.*s%c%s", CURL_NEW_ENV_VAR,
+                             (int)vlen, v->data, CURL_NEW_ENV_VALUE, ++s);
+          }
         }
       }
       msnprintf((char *)&temp[len], sizeof(temp) - len,
@@ -1064,7 +1110,7 @@ CURLcode telrcv(struct Curl_easy *data,
       break;
 
     case CURL_TS_IAC:
-    process_iac:
+process_iac:
       DEBUGASSERT(startwrite < 0);
       switch(c) {
       case CURL_WILL:
@@ -1200,7 +1246,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
 
     j = 0;
     for(i = 0; i < nread; i++) {
-      outbuf[j++] = buffer[i];
+      outbuf[j++] = (unsigned char)buffer[i];
       if((unsigned char)buffer[i] == CURL_IAC)
         outbuf[j++] = CURL_IAC;
     }
@@ -1248,9 +1294,6 @@ static CURLcode telnet_done(struct Curl_easy *data,
 
   curl_slist_free_all(tn->telnet_vars);
   tn->telnet_vars = NULL;
-
-  Curl_safefree(data->req.p.telnet);
-
   return CURLE_OK;
 }
 
@@ -1491,6 +1534,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   }
 
   while(keepon) {
+    DEBUGF(infof(data, "telnet_do, poll %d fds", poll_cnt));
     switch(Curl_poll(pfd, poll_cnt, interval_ms)) {
     case -1:                    /* error, stop reading */
       keepon = FALSE;
@@ -1509,6 +1553,13 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         /* returned not-zero, this an error */
         if(result) {
           keepon = FALSE;
+          /* TODO: in test 1452, macOS sees a ECONNRESET sometimes?
+           * Is this the telnet test server not shutting down the socket
+           * in a clean way? Seems to be timing related, happens more
+           * on slow debug build */
+          if(data->state.os_errno == ECONNRESET) {
+            DEBUGF(infof(data, "telnet_do, unexpected ECONNRESET on recv"));
+          }
           break;
         }
         /* returned zero but actually received 0 or less here,

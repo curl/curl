@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSL_VERIFYPEER 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SSL_VERIFYPEER 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_SSL_VERIFYPEER \- verify the peer's SSL certificate
 .SH SYNOPSIS
@@ -62,14 +62,10 @@ verification makes the communication insecure. Just having encryption on a
 transfer is not enough as you cannot be sure that you are communicating with
 the correct end-point.
 
-NOTE: even when this option is disabled, depending on the used TLS backend,
-curl may still load the certificate file specified in
-\fICURLOPT_CAINFO(3)\fP. curl default settings in some distributions might use
-quite a large file as a default setting for \fICURLOPT_CAINFO(3)\fP, so
-loading the file can be quite expensive, especially when dealing with many
-connections. Thus, in some situations, you might want to disable verification
-fully to save resources by setting \fICURLOPT_CAINFO(3)\fP to NULL - but
-please also consider the warning above!
+When libcurl uses secure protocols it trusts responses and allows for example
+HSTS and Alt-Svc information to be stored and used subsequently. Disabling
+certificate verification can make libcurl trust and use such information from
+malicious servers.
 .SH DEFAULT
 By default, curl assumes a value of 1.
 .SH PROTOCOLS

@@ -1,28 +1,54 @@
-# Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
 
 name: CodeQL
 
 on:
-  # Trigger the workflow on push or pull requests, but only for the
-  # master branch
   push:
     branches:
     - master
     - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'docs/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'tests/data/**'
+    - 'winbuild/**'
   pull_request:
     branches:
     - master
+    paths-ignore:
+    - '**/*.md'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'docs/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'tests/data/**'
+    - 'winbuild/**'
   schedule:
     - cron: '0 0 * * 4'
 
-permissions:
-  security-events: write
+concurrency:
+  group: ${{ github.workflow }}
+
+permissions: {}
 
 jobs:
   codeql:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3

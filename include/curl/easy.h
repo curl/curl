@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,13 +48,13 @@ CURL_EXTERN void curl_easy_cleanup(CURL *curl);
  *
  * DESCRIPTION
  *
- * Request internal information from the curl session with this function.  The
- * third argument MUST be a pointer to a long, a pointer to a char * or a
- * pointer to a double (as the documentation describes elsewhere).  The data
- * pointed to will be filled in accordingly and can be relied upon only if the
- * function returns CURLE_OK.  This function is intended to get used *AFTER* a
- * performed transfer, all results from this function are undefined until the
- * transfer is completed.
+ * Request internal information from the curl session with this function.
+ * The third argument MUST be pointing to the specific type of the used option
+ * which is documented in each man page of the option. The data pointed to
+ * will be filled in accordingly and can be relied upon only if the function
+ * returns CURLE_OK. This function is intended to get used *AFTER* a performed
+ * transfer, all results from this function are undefined until the transfer
+ * is completed.
  */
 CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
 
@@ -119,7 +119,7 @@ CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
 CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
 
 #ifdef  __cplusplus
-}
+} /* end of extern "C" */
 #endif
 
 #endif

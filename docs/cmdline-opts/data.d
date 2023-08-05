@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: data
 Short: d
@@ -12,6 +12,7 @@ Example: -d "name=curl" $URL
 Example: -d "name=curl" -d "tool=cmdline" $URL
 Example: -d @filename $URL
 Added: 4.0
+Multi: append
 ---
 Sends the specified data in a POST request to the HTTP server, in the same way
 that a browser does when a user has filled in an HTML form and presses the
@@ -25,12 +26,16 @@ the @ character. To post data purely binary, you should instead use the
 
 If any of these options is used more than once on the same command line, the
 data pieces specified will be merged with a separating &-symbol. Thus, using
-\&'-d name=daniel -d skill=lousy' would generate a post chunk that looks like
-\&'name=daniel&skill=lousy'.
+'-d name=daniel -d skill=lousy' would generate a post chunk that looks like
+'name=daniel&skill=lousy'.
 
 If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from stdin. Posting
-data from a file named \&'foobar' would thus be done with --data @foobar. When
+data from a file named 'foobar' would thus be done with --data @foobar. When
 --data is told to read from a file like that, carriage returns and newlines
 will be stripped out. If you do not want the @ character to have a special
 interpretation use --data-raw instead.
+
+The data for this option is passed on to the server exactly as provided on the
+command line. curl will not convert it, change it or improve it. It is up to
+the user to provide the data in the correct form.

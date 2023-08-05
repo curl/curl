@@ -5,6 +5,8 @@ FTP
 PORT
 RETR
 NODATACONN
+timeout
+FAILURE
 </keywords>
 </info>
 # Server-side

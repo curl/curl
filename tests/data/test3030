@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+
+-foo-
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+HTTP with multiple transfers in one -D
+</name>
+<command>
+-D %LOGDIR/heads%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<file name="%LOGDIR/heads%TESTNUMBER">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+
+</file>
+</verify>
+
+</testcase>

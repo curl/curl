@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSL_VERIFYHOST 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SSL_VERIFYHOST 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_SSL_VERIFYHOST \- verify the certificate's name against host
 .SH SYNOPSIS
@@ -67,15 +67,23 @@ The default value for this option is 2.
 This option controls checking the server's certificate's claimed identity.
 The server could be lying.  To control lying, see
 \fICURLOPT_SSL_VERIFYPEER(3)\fP.
+
+WARNING: disabling verification of the certificate allows bad guys to
+man-in-the-middle the communication without you knowing it. Disabling
+verification makes the communication insecure. Just having encryption on a
+transfer is not enough as you cannot be sure that you are communicating with
+the correct end-point.
+
+When libcurl uses secure protocols it trusts responses and allows for example
+HSTS and Alt-Svc information to be stored and used subsequently. Disabling
+certificate verification can make libcurl trust and use such information from
+malicious servers.
 .SH LIMITATIONS
 Secure Transport: If \fIverify\fP value is 0, then SNI is also disabled. SNI is
 a TLS extension that sends the hostname to the server. The server may use that
 information to do such things as sending back a specific certificate for the
 hostname, or forwarding the request to a specific origin server. Some hostnames
 may be inaccessible if SNI is not sent.
-
-NSS: If \fICURLOPT_SSL_VERIFYPEER(3)\fP is zero,
-\fICURLOPT_SSL_VERIFYHOST(3)\fP is also set to zero and cannot be overridden.
 .SH DEFAULT
 2
 .SH PROTOCOLS

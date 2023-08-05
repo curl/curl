@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_USE_SSL 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_USE_SSL 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_USE_SSL \- request using SSL / TLS for the transfer
 .SH SYNOPSIS
@@ -59,7 +59,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/file.ext");
 
   /* require use of SSL for this, or fail */
-  curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+  curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 
   /* Perform the request */
   curl_easy_perform(curl);
@@ -68,7 +68,7 @@ if(curl) {
 .SH AVAILABILITY
 Added in 7.11.0. This option was known as CURLOPT_FTP_SSL up to 7.16.4, and
 the constants were known as CURLFTPSSL_*
-Handled by LDAP since 7.81.0. Fully supported by the openldap backend only.
+Handled by LDAP since 7.81.0. Fully supported by the OpenLDAP backend only.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

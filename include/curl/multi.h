@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -124,7 +124,7 @@ struct curl_waitfd {
 /*
  * Name:    curl_multi_init()
  *
- * Desc:    inititalize multi-style curl usage
+ * Desc:    initialize multi-style curl usage
  *
  * Returns: a new CURLM handle to use in all 'curl_multi' functions.
  */
@@ -318,16 +318,16 @@ typedef int (*curl_multi_timer_callback)(CURLM *multi,    /* multi handle */
                                          void *userp);    /* private callback
                                                              pointer */
 
-CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
-                                        int *running_handles);
+CURL_EXTERN CURLMcode CURL_DEPRECATED(7.19.5, "Use curl_multi_socket_action()")
+curl_multi_socket(CURLM *multi_handle, curl_socket_t s, int *running_handles);
 
 CURL_EXTERN CURLMcode curl_multi_socket_action(CURLM *multi_handle,
                                                curl_socket_t s,
                                                int ev_bitmask,
                                                int *running_handles);
 
-CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle,
-                                            int *running_handles);
+CURL_EXTERN CURLMcode CURL_DEPRECATED(7.19.5, "Use curl_multi_socket_action()")
+curl_multi_socket_all(CURLM *multi_handle, int *running_handles);
 
 #ifndef CURL_ALLOW_OLD_MULTI_SOCKET
 /* This macro below was added in 7.16.3 to push users who recompile to use

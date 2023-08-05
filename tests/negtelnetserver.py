@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2017 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -29,7 +29,9 @@ from __future__ import (absolute_import, division, print_function,
 import argparse
 import logging
 import os
+import socket
 import sys
+import time
 
 from util import ClosingFileHandler
 
@@ -66,9 +68,9 @@ def telnetserver(options):
 
     # Need to set the allow_reuse on the class, not on the instance.
     socketserver.TCPServer.allow_reuse_address = True
-    server = socketserver.TCPServer(local_bind, NegotiatingTelnetHandler)
-    server.serve_forever()
-
+    with socketserver.TCPServer(local_bind, NegotiatingTelnetHandler) as server:
+        server.serve_forever()
+    # leaving `with` calls server.close() automatically
     return ScriptRC.SUCCESS
 
 
@@ -90,7 +92,7 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             neg.send_wont("NAWS")
 
             # Get the data passed through the negotiator
-            data = neg.recv(1024)
+            data = neg.recv(4*1024)
             log.debug("Incoming data: %r", data)
 
             if VERIFIED_REQ.encode('utf-8') in data:
@@ -108,6 +110,12 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             if response_data:
                 log.debug("Sending %r", response_data)
                 self.request.sendall(response_data)
+
+            # put some effort into making a clean socket shutdown
+            # that does not give the client ECONNRESET
+            self.request.settimeout(0.1)
+            self.request.recv(4*1024)
+            self.request.shutdown(socket.SHUT_RDWR)
 
         except IOError:
             log.exception("IOError hit during request")

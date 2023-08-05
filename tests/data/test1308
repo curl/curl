@@ -4,23 +4,28 @@
 unittest
 curl_formadd
 curl_formget
+FORM
 </keywords>
 </info>
 
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 http
+form-api
 </features>
+<server>
+none
+</server>
  <name>
 formpost unit tests
  </name>
-<file name="log/test-%TESTNUMBER">
+<command>
+%LOGDIR/test-%TESTNUMBER
+</command>
+<file name="%LOGDIR/test-%TESTNUMBER">
 Piece of the file that is to uploaded as a formpost
 </file>
 </client>

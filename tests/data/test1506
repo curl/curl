@@ -82,11 +82,11 @@ Accept: */*
 <strip>
 ^Host:.*
 </strip>
-<file name="log/stderr%TESTNUMBER" mode="text">
+<file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
 * Connection #0 to host server1.example.com left intact
 * Connection #1 to host server2.example.com left intact
 * Connection #2 to host server3.example.com left intact
-* Closing connection 0
+* Closing connection
 * Connection #3 to host server4.example.com left intact
 </file>
 <stripfile>

@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: dns-interface
 Arg: <interface>
@@ -9,6 +9,7 @@ Added: 7.33.0
 Requires: c-ares
 Category: dns
 Example: --dns-interface eth0 $URL
+Multi: single
 ---
 Tell curl to send outgoing DNS requests through <interface>. This option is a
 counterpart to --interface (which does not affect DNS). The supplied string

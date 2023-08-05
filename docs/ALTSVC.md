@@ -14,7 +14,7 @@ curl features support for the Alt-Svc: HTTP header.
 
 # Alt-Svc cache file format
 
-This a text based file with one line per entry and each line consists of nine
+This is a text based file with one line per entry and each line consists of nine
 space separated fields.
 
 ## Example

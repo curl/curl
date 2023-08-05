@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,9 +21,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
+# https://dev.azure.com/daniel0244/curl/_build?view=runs
+#
+# Azure Pipelines configuration:
 # https://aka.ms/yaml
 
 trigger:
@@ -31,11 +31,29 @@ trigger:
     include:
     - 'master'
     - '*/ci'
+  paths:
+    exclude:
+    - '.circleci/*'
+    - '.cirrus.yml'
+    - '.github/*'
+    - '.github/workflows/*'
+    - 'appveyor.yml'
+    - 'packages/*'
+    - 'plan9/*'
 
 pr:
   branches:
     include:
     - 'master'
+  paths:
+    exclude:
+    - '.circleci/*'
+    - '.cirrus.yml'
+    - '.github/*'
+    - '.github/workflows/*'
+    - 'appveyor.yml'
+    - 'packages/*'
+    - 'plan9/*'
 
 stages:
 
@@ -59,7 +77,7 @@ stages:
       matrix:
         default:
           name: default
-          install: jsonlint
+          install:
           configure: --enable-debug --with-openssl
         disable_ipv6:
           name: w/o IPv6
@@ -77,7 +95,7 @@ stages:
           name: torture
           install: libnghttp2-dev
           configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl
-          tests: -n -t --shallow=40 !FTP
+          tests: -n -t --shallow=25 !FTP
     steps:
     - script: sudo apt-get update && sudo apt-get install -y stunnel4 python3-impacket libzstd-dev libbrotli-dev $(install)
       displayName: 'apt install'
@@ -95,7 +113,7 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "-r $(tests)"
+        TFLAGS: "-ac /usr/bin/curl -r $(tests)"
 
 - stage: distcheck
   dependsOn: []
@@ -158,23 +176,23 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - script: sudo apt-get update && sudo apt-get install -y clang-tools-10 clang-9 libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
+    - script: sudo apt-get update && sudo apt-get install -y clang-tools clang libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
       displayName: 'apt install'
       retryCountOnTaskFailure: 3
 
     - script: autoreconf -fi
       displayName: 'autoreconf'
 
-    - script: scan-build-10 ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
+    - script: scan-build ./configure --enable-debug --enable-werror --with-openssl --with-libssh2
       displayName: 'configure'
       env:
-        CC: "clang-9"
-        CCX: "clang++-9"
+        CC: "clang"
+        CCX: "clang++"
 
-    - script: scan-build-10 --status-bugs make
+    - script: scan-build --status-bugs make
       displayName: 'make'
 
-    - script: scan-build-10 --status-bugs make examples
+    - script: scan-build --status-bugs make examples
       displayName: 'make examples'
 
 ##########################################
@@ -223,7 +241,7 @@ stages:
           name: 32-bit (legacy)
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys1-mingw:ltsc2019
           container_cmd: C:\MinGW\msys\1.0\bin\sh
-          configure: --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug --without-ssl
+          configure: --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug --without-ssl --with-mingw1-deprecated
           tests: "!203 !1143"
         v1_mingw32:
           name: 32-bit w/o zlib
@@ -255,7 +273,7 @@ stages:
           name: 32-bit Schannel/SSPI/WinIDN (legacy)
           container_img: ghcr.io/mback2k/curl-docker-winbuildenv/msys1-mingw:ltsc2019
           container_cmd: C:\MinGW\msys\1.0\bin\sh
-          configure: --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug --enable-sspi --with-schannel --with-winidn
+          configure: --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug --enable-sspi --with-schannel --with-winidn --with-mingw1-deprecated
           tests: "!203 !305 !311 !312 !313 !404 !1143 !2033 !2035 !2038 !2041 !2042 !2048 !2070 !2079 !2087 !3023 !3024"
         v1_mingw32_schannel:
           name: 32-bit Schannel/SSPI/WinIDN w/o zlib
@@ -294,4 +312,4 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "!IDN !SCP ~612 ~1056 $(tests)"
+        TFLAGS: "-ac /usr/bin/curl.exe !IDN !SCP ~612 ~1056 $(tests)"

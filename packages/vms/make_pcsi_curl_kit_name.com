@@ -1,14 +1,12 @@
 $! File: MAKE_PCSI_CURL_KIT_NAME.COM
 $!
-$! $Id$
-$!
 $! Calculates the PCSI kit name for use in building an installation kit.
 $! PCSI is HP's PolyCenter Software Installation Utility.
 $!
 $! The results are stored in as logical names so that other procedures
 $! can use them.
 $!
-$! Copyright 2013 - 2022, John Malmberg
+$! Copyright (C) John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -23,8 +21,6 @@ $! ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 $! OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 $!
 $! SPDX-License-Identifier: ISC
-$!
-$! 11-Jun-2009 J. Malmberg
 $!
 $!========================================================================
 $!

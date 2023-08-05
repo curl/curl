@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2009 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,9 +31,9 @@ CURLX_SRCS = \
  ../../lib/strtoofft.c \
  ../../lib/warnless.c \
  ../../lib/timediff.c \
- ../../lib/curl_ctype.c \
  ../../lib/dynbuf.c \
  ../../lib/strdup.c \
+ ../../lib/strcase.c \
  ../../lib/curl_multibyte.c
 
 CURLX_HDRS = \

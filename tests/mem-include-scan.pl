@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -43,8 +43,8 @@ sub scanfile {
 
     print STDERR "checking $file...\n";
 
-    open(F, "<$file");
-    while(<F>) {
+    open(my $f, "<", "$file");
+    while(<$f>) {
         if($_ =~ /\W(free|alloc|strdup)\(/) {
             $memfunc++;
         }
@@ -56,14 +56,14 @@ sub scanfile {
         }
         elsif($_ =~ /mem-include-scan/) {
             # free pass
-            close(F);
+            close($f);
             return 0;
         }
         if($memfunc && $memdebug && $curlmem) {
             last;
         }
     }
-    close(F);
+    close($f);
 
 
     if($memfunc) {

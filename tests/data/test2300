@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 101 Switching to WebSockets swsclose
+Server: test-server/fake
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+</data>
+# allow upgrade
+<servercmd>
+upgrade
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+# for the forced CURL_ENTROPY
+<features>
+debug
+ws
+</features>
+<server>
+http
+</server>
+ <name>
+WebSockets upgrade only
+ </name>
+ <command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol nocheck="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
+
+</protocol>
+<errorcode>
+52
+</errorcode>
+</verify>
+</testcase>

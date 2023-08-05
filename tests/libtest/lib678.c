@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,12 +44,12 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
       else
         datasize = (size_t)cert_tell;
       if(continue_reading)
-         continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
+        continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
       if(continue_reading)
-          data = malloc(datasize + 1);
+        data = malloc(datasize + 1);
       if((!data) ||
-          ((int)fread(data, datasize, 1, fInCert) != 1))
-          continue_reading = FALSE;
+         ((int)fread(data, datasize, 1, fInCert) != 1))
+        continue_reading = FALSE;
       fclose(fInCert);
       if(!continue_reading) {
         free(data);

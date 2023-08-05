@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: aws-sigv4
 Arg: <provider1[:provider2[:region[:service]]]>
@@ -6,7 +6,8 @@ Help: Use AWS V4 signature authentication
 Category: auth http
 Added: 7.75.0
 See-also: basic user
-Example: --aws-sigv4 "aws:amz:east-2:es" --user "key:secret" $URL
+Example: --aws-sigv4 "aws:amz:us-east-2:es" --user "key:secret" $URL
+Multi: single
 ---
 Use AWS V4 signature authentication in the transfer.
 

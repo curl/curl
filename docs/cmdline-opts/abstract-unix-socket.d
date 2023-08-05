@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: abstract-unix-socket
 Arg: <path>
@@ -8,6 +8,7 @@ Protocols: HTTP
 Category: connection
 See-also: unix-socket
 Example: --abstract-unix-socket socketpath $URL
+Multi: single
 ---
 Connect through an abstract Unix domain socket, instead of using the network.
 Note: netstat shows the path of an abstract socket prefixed with '@', however

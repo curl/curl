@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -50,7 +50,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                         bool *comeback);
 int Curl_single_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);
-CURLcode Curl_readrewind(struct Curl_easy *data);
 CURLcode Curl_fillreadbuffer(struct Curl_easy *data, size_t bytes,
                              size_t *nreadp);
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url);

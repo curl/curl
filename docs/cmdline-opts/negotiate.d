@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: negotiate
 Help: Use HTTP Negotiate (SPNEGO) authentication
@@ -7,6 +7,7 @@ See-also: basic ntlm anyauth proxy-negotiate
 Category: auth http
 Example: --negotiate -u : $URL
 Added: 7.10.6
+Multi: mutex
 ---
 Enables Negotiate (SPNEGO) authentication.
 

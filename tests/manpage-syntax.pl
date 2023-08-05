@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2019 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -62,15 +62,32 @@ my @funcorder = (
 my %shline; # section => line number
 
 my %symbol;
+
+# some CURLINFO_ symbols are not actual options for curl_easy_getinfo,
+# mark them as "deprecated" to hide them from link-warnings
+my %deprecated = (
+    CURLINFO_TEXT => 1,
+    CURLINFO_HEADER_IN => 1,
+    CURLINFO_HEADER_OUT => 1,
+    CURLINFO_DATA_IN => 1,
+    CURLINFO_DATA_OUT => 1,
+    CURLINFO_SSL_DATA_IN => 1,
+    CURLINFO_SSL_DATA_OUT => 1,
+    );
 sub allsymbols {
-    open(F, "<$symbolsinversions") ||
+    open(my $f, "<", "$symbolsinversions") ||
         die "$symbolsinversions: $|";
-    while(<F>) {
-        if($_ =~ /^([^ ]*)/) {
-            $symbol{$1}=$1;
+    while(<$f>) {
+        if($_ =~ /^([^ ]*) +(.*)/) {
+            my ($name, $info) = ($1, $2);
+            $symbol{$name}=$name;
+
+            if($info =~ /([0-9.]+) +([0-9.]+)/) {
+                $deprecated{$name}=$info;
+            }
         }
     }
-    close(F);
+    close($f);
 }
 
 sub scanmanpage {
@@ -83,8 +100,9 @@ sub scanmanpage {
     my $shc = 0;
     my $optpage = 0; # option or function
     my @sh;
+    my $SH="";
 
-    open(M, "<$file") || die "no such file: $file";
+    open(my $m, "<", "$file") || die "no such file: $file";
     if($file =~ /[\/\\](CURL|curl_)[^\/\\]*.3/) {
         # This is a man page for libcurl. It requires an example!
         $reqex = 1;
@@ -93,11 +111,11 @@ sub scanmanpage {
         }
     }
     my $line = 1;
-    while(<M>) {
+    while(<$m>) {
         chomp;
         if($_ =~ /^.so /) {
             # this man page is just a referral
-            close(M);
+            close($m);
             return;
         }
         if(($_ =~ /^\.SH SYNOPSIS/i) && ($reqex)) {
@@ -131,6 +149,7 @@ sub scanmanpage {
             $n =~ s/\"(.*)\"\z/$1/;
             push @sh, $n;
             $shline{$n} = $line;
+            $SH = $n;
         }
 
         if($_ =~ /^\'/) {
@@ -141,6 +160,27 @@ sub scanmanpage {
             my ($format, $rest) = ($1, $2);
             if($rest !~ /\\fP/) {
                 print STDERR "$file:$line missing \\f${format} terminator!\n";
+                $errors++;
+            }
+        }
+        if($_ =~ /(.*)\\f([^BIP])/) {
+            my ($pre, $format) = ($1, $2);
+            if($pre !~ /\\\z/) {
+                # only if there wasn't another backslash before the \f
+                print STDERR "$file:$line suspicious \\f format!\n";
+                $errors++;
+            }
+        }
+        if($optpage && $SH && ($SH !~ /^(SYNOPSIS|EXAMPLE|NAME|SEE ALSO)/i) &&
+           ($_ =~ /(.*)(CURL(OPT_|MOPT_|INFO_)[A-Z0-9_]*)/)) {
+            # an option with its own man page, check that it is tagged
+            # for linking
+            my ($pref, $symbol) = ($1, $2);
+            if($deprecated{$symbol}) {
+                # let it be
+            }
+            elsif($pref !~ /\\fI\z/) {
+                print STDERR "$file:$line option $symbol missing \\fI tagging\n";
                 $errors++;
             }
         }
@@ -160,7 +200,7 @@ sub scanmanpage {
         }
         $line++;
     }
-    close(M);
+    close($m);
 
     if($reqex) {
         # only for libcurl options man-pages

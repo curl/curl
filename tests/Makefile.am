@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -26,15 +26,15 @@ HTMLPAGES = testcurl.html runtests.html
 PDFPAGES = testcurl.pdf runtests.pdf
 MANDISTPAGES = runtests.1.dist testcurl.1.dist
 
-EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl           \
- getpart.pm FILEFORMAT.md README.md stunnel.pem memanalyze.pl testcurl.pl     \
- valgrind.pm ftp.pm sshserver.pl sshhelp.pm pathhelp.pm testcurl.1 runtests.1 \
- serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl      \
- CMakeLists.txt mem-include-scan.pl valgrind.supp extern-scan.pl              \
- manpage-scan.pl nroff-scan.pl http2-server.pl dictserver.py                  \
- negtelnetserver.py smbserver.py util.py                                      \
- disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl               \
- azure.pm appveyor.pm version-scan.pl options-scan.pl
+EXTRA_DIST = appveyor.pm azure.pm badsymbols.pl check-deprecated.pl CMakeLists.txt \
+ devtest.pl dictserver.py directories.pm disable-scan.pl error-codes.pl extern-scan.pl FILEFORMAT.md \
+ processhelp.pm ftpserver.pl getpart.pm globalconfig.pm http-server.pl http2-server.pl \
+ http3-server.pl manpage-scan.pl manpage-syntax.pl markdown-uppercase.pl mem-include-scan.pl \
+ memanalyze.pl negtelnetserver.py nroff-scan.pl option-check.pl options-scan.pl \
+ pathhelp.pm README.md rtspserver.pl runner.pm runtests.1 runtests.pl secureserver.pl \
+ serverhelp.pm servers.pm smbserver.py sshhelp.pm sshserver.pl stunnel.pem symbol-scan.pl \
+ testcurl.1 testcurl.pl testutil.pm tftpserver.pl util.py valgrind.pm \
+ valgrind.supp version-scan.pl
 
 DISTCLEANFILES = configurehelp.pm
 
@@ -49,7 +49,7 @@ BUILD_UNIT =
 DIST_UNIT = unit
 endif
 
-SUBDIRS = certs data server libtest $(BUILD_UNIT)
+SUBDIRS = certs data server libtest http $(BUILD_UNIT)
 DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
@@ -75,7 +75,7 @@ TEST_E = -a -e
 TEST_NF = -a -p !flaky
 
 # special CI target derived from nonflaky with CI-specific flags
-TEST_CI = $(TEST_NF) -r -rm
+TEST_CI = $(TEST_NF) -rm
 endif
 
 # make sure that PERL is pointing to an executable
@@ -120,6 +120,7 @@ checksrc:
 	cd libtest && $(MAKE) checksrc
 	cd unit && $(MAKE) checksrc
 	cd server && $(MAKE) checksrc
+	cd http && $(MAKE) checksrc
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes

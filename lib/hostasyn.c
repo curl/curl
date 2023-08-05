@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,10 +43,6 @@
 #include <inet.h>
 #endif
 
-#ifdef HAVE_PROCESS_H
-#include <process.h>
-#endif
-
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
@@ -82,7 +78,7 @@ CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
       dns = Curl_cache_addr(data, ai,
-                            data->state.async.hostname,
+                            data->state.async.hostname, 0,
                             data->state.async.port);
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);

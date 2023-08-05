@@ -16,9 +16,9 @@ tftp
 TFTP send
  </name>
  <command>
--T log/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//
+-T %LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT// --connect-time 549
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 a chunk of
 data
 sent
@@ -40,7 +40,7 @@ opcode = 2
 mode = octet
 tsize = 32
 blksize = 512
-timeout = 6
+timeout = 10
 filename = /test%TESTNUMBER.txt
 </protocol>
 </verify>

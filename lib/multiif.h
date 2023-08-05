@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,9 +41,12 @@ void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);
 CURLcode Curl_preconnect(struct Curl_easy *data);
 
+void Curl_multi_connchanged(struct Curl_multi *multi);
+
 /* Internal version of curl_multi_init() accepts size parameters for the
-   socket and connection hashes */
-struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
+   socket, connection and dns hashes */
+struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize,
+                                     int dnssize);
 
 /* the write bits start at bit 16 for the *getsock() bitmap */
 #define GETSOCK_WRITEBITSTART 16

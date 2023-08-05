@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_MIME
+#ifndef CURL_DISABLE_FORM_API
 
 /* used by FormAdd for temporary storage */
 struct FormInfo {
@@ -53,10 +53,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
                           curl_mimepart *,
                           struct curl_httppost *post,
                           curl_read_callback fread_func);
-#else
-/* disabled */
-#define Curl_getformdata(a,b,c,d) CURLE_NOT_BUILT_IN
-#endif
+#endif /* CURL_DISABLE_FORM_API */
 
 
 #endif /* HEADER_CURL_FORMDATA_H */

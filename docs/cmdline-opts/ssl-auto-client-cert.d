@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: ssl-auto-client-cert
 Help: Use auto client certificate (Schannel)
@@ -6,6 +6,7 @@ Added: 7.77.0
 See-also: proxy-ssl-auto-client-cert
 Category: tls
 Example: --ssl-auto-client-cert $URL
+Multi: boolean
 ---
 Tell libcurl to automatically locate and use a client certificate for
 authentication, when requested by the server. This option is only supported

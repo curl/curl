@@ -17,7 +17,7 @@ scp
 SCP incorrect host key
  </name>
  <command>
---hostpubmd5 00000000000000000000000000000000 --key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/log/irrelevant-file --insecure
+--hostpubmd5 00000000000000000000000000000000 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/irrelevant-file --insecure
 </command>
 </client>
 

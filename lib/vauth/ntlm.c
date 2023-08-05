@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,7 +29,7 @@
 /*
  * NTLM details:
  *
- * https://davenport.sourceforge.io/ntlm.html
+ * https://davenport.sourceforge.net/ntlm.html
  * https://www.innovation.ch/java/ntlm.html
  */
 
@@ -44,12 +44,6 @@
 #include "warnless.h"
 #include "rand.h"
 #include "vtls/vtls.h"
-
-/* SSL backend-specific #if branches in this file must be kept in the order
-   documented in curl_ntlm_core. */
-#if defined(NTLM_NEEDS_NSS_INIT)
-#include "vtls/nssg.h" /* for Curl_nss_force_init() */
-#endif
 
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "vauth/vauth.h"
@@ -88,8 +82,6 @@ static void ntlm_print_flags(FILE *handle, unsigned long flags)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_DATAGRAM_STYLE ");
   if(flags & NTLMFLAG_NEGOTIATE_LM_KEY)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_LM_KEY ");
-  if(flags & NTLMFLAG_NEGOTIATE_NETWARE)
-    fprintf(handle, "NTLMFLAG_NEGOTIATE_NETWARE ");
   if(flags & NTLMFLAG_NEGOTIATE_NTLM_KEY)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_NTLM_KEY ");
   if(flags & (1<<10))
@@ -276,12 +268,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   const unsigned char *type2 = Curl_bufref_ptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
-#if defined(NTLM_NEEDS_NSS_INIT)
-  /* Make sure the crypto backend is initialized */
-  result = Curl_nss_force_init(data);
-  if(result)
-    return result;
-#elif defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void)data;
 #endif
 
@@ -382,8 +369,8 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   (void)data;
   (void)userp;
   (void)passwdp;
-  (void)service,
-  (void)hostname,
+  (void)service;
+  (void)hostname;
 
   /* Clean up any former leftovers and initialise to defaults */
   Curl_auth_cleanup_ntlm(ntlm);
@@ -513,6 +500,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   size_t userlen = 0;
   size_t domlen = 0;
 
+  memset(lmresp, 0, sizeof(lmresp));
+  memset(ntresp, 0, sizeof(ntresp));
   user = strchr(userp, '\\');
   if(!user)
     user = strchr(userp, '/');
@@ -600,7 +589,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
     /* A safer but less compatible alternative is:
      *   Curl_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], lmresp);
-     * See https://davenport.sourceforge.io/ntlm.html#ntlmVersion2 */
+     * See https://davenport.sourceforge.net/ntlm.html#ntlmVersion2 */
   }
 
   if(unicode) {
@@ -658,7 +647,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                    /* LanManager response */
                    /* NT response */
 
-                   0,                /* zero termination */
+                   0,                /* null-termination */
                    0, 0, 0,          /* type-3 long, the 24 upper bits */
 
                    SHORTPAIR(0x18),  /* LanManager response length, twice */

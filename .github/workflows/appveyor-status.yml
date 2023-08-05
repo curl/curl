@@ -1,0 +1,41 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: AppVeyor Status Report
+
+on:
+  status
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.sha }}-${{ github.event.target_url }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.sender.login == 'appveyor[bot]' }}
+    permissions:
+      statuses: write
+    steps:
+      - name: Create individual AppVeyor build statuses
+        if: ${{ github.event.sha && github.event.target_url }}
+        env:
+          APPVEYOR_COMMIT_SHA: ${{ github.event.sha }}
+          APPVEYOR_TARGET_URL: ${{ github.event.target_url }}
+          APPVEYOR_REPOSITORY: ${{ github.event.repository.full_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo ${APPVEYOR_TARGET_URL} | sed 's/\/project\//\/api\/projects\//' | xargs -t -n1 curl -s | \
+            jq -c '.build.jobs[] | {target_url: ($target_url + "/job/" + .jobId),
+                                    context: (.name | sub("^(Environment: )?"; "AppVeyor / ")),
+                                    state: (.status | sub("queued"; "pending")
+                                                    | sub("starting"; "pending")
+                                                    | sub("running"; "pending")
+                                                    | sub("failed"; "failure")
+                                                    | sub("cancelled"; "error")),
+                                    description: .status}' \
+                --arg target_url ${APPVEYOR_TARGET_URL} | tee /dev/stderr | parallel --pipe -j 1 -N 1 \
+              gh api --silent --input - repos/${APPVEYOR_REPOSITORY}/statuses/${APPVEYOR_COMMIT_SHA}

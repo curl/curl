@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -102,7 +102,6 @@ if test "x$OPT_OPENSSL" != xno; then
       SSL_LDFLAGS="-L$LIB_OPENSSL"
       SSL_CPPFLAGS="-I$PREFIX_OPENSSL/include"
     fi
-    SSL_CPPFLAGS="$SSL_CPPFLAGS -I$PREFIX_OPENSSL/include/openssl"
     ;;
   esac
 
@@ -150,7 +149,7 @@ if test "x$OPT_OPENSSL" != xno; then
      fi
      if test "$PKGCONFIG" = "no" -a -n "$PREFIX_OPENSSL" ; then
        # only set this if pkg-config wasn't used
-       CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include/openssl -I$PREFIX_OPENSSL/include"
+       CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include"
      fi
      # Linking previously failed, try extra paths from --with-openssl or
      # pkg-config.  Use a different function name to avoid reusing the earlier
@@ -260,8 +259,6 @@ if test "x$OPT_OPENSSL" != xno; then
   if test X"$OPENSSL_ENABLED" = X"1"; then
     dnl These can only exist if OpenSSL exists
 
-    AC_CHECK_FUNCS( RAND_egd )
-
     AC_MSG_CHECKING([for BoringSSL])
     AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
@@ -276,6 +273,24 @@ if test "x$OPT_OPENSSL" != xno; then
         AC_DEFINE_UNQUOTED(HAVE_BORINGSSL, 1,
                            [Define to 1 if using BoringSSL.])
         ssl_msg="BoringSSL"
+    ],[
+        AC_MSG_RESULT([no])
+    ])
+
+    AC_MSG_CHECKING([for AWS-LC])
+    AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+                #include <openssl/base.h>
+                ]],[[
+                #ifndef OPENSSL_IS_AWSLC
+                #error not AWS-LC
+                #endif
+       ]])
+    ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE_UNQUOTED(HAVE_AWSLC, 1,
+                           [Define to 1 if using AWS-LC.])
+        ssl_msg="AWS-LC"
     ],[
         AC_MSG_RESULT([no])
     ])
@@ -311,11 +326,6 @@ if test "x$OPT_OPENSSL" != xno; then
       AC_MSG_RESULT([yes])
       AC_DEFINE_UNQUOTED(HAVE_OPENSSL3, 1,
         [Define to 1 if using OpenSSL 3 or later.])
-      dnl OpenSSLv3 marks the DES functions deprecated but we have no
-      dnl replacements (yet) so tell the compiler to not warn for them
-      dnl
-      dnl Ask OpenSSL to suppress the warnings.
-      CPPFLAGS="$CPPFLAGS -DOPENSSL_SUPPRESS_DEPRECATED"
       ssl_msg="OpenSSL v3+"
     ],[
       AC_MSG_RESULT([no])
@@ -351,16 +361,6 @@ dnl Check for the random seed preferences
 dnl **********************************************************************
 
 if test X"$OPENSSL_ENABLED" = X"1"; then
-  AC_ARG_WITH(egd-socket,
-  AS_HELP_STRING([--with-egd-socket=FILE],
-                 [Entropy Gathering Daemon socket pathname]),
-      [ EGD_SOCKET="$withval" ]
-  )
-  if test -n "$EGD_SOCKET" ; then
-          AC_DEFINE_UNQUOTED(EGD_SOCKET, "$EGD_SOCKET",
-          [your Entropy Gathering Daemon socket pathname] )
-  fi
-
   dnl Check for user-specified random device
   AC_ARG_WITH(random,
   AS_HELP_STRING([--with-random=FILE],

@@ -1,19 +1,51 @@
-# Copyright (C) 2000 - 2022 Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
 
-name: Linux
+name: Linux wolfSSL
 
 on:
-  # Trigger the workflow on push or pull requests, but only for the
-  # master branch
   push:
     branches:
     - master
     - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+    - '**/CMakeLists.txt'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'CMake/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
   pull_request:
     branches:
     - master
+    paths-ignore:
+    - '**/*.md'
+    - '**/CMakeLists.txt'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'CMake/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: wolfssl-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  MAKEFLAGS: -j 3
 
 jobs:
   autotools:
@@ -41,12 +73,13 @@ jobs:
       name: 'install prereqs and impacket'
 
     - run: |
-        curl -LO https://github.com/wolfSSL/wolfssl/archive/v5.0.0-stable.tar.gz
-        tar -xzf v5.0.0-stable.tar.gz
-        cd wolfssl-5.0.0-stable
+        WOLFSSL_VER=5.6.3
+        curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
+        tar -xzf v$WOLFSSL_VER-stable.tar.gz
+        cd wolfssl-$WOLFSSL_VER-stable
         ./autogen.sh
         ./configure --enable-tls13 ${{ matrix.build.wolfssl-configure }} --enable-harden --prefix=$HOME/wssl
-        make && make install
+        make install
       name: 'install wolfssl'
 
     - uses: actions/checkout@v3
@@ -63,7 +96,10 @@ jobs:
     - run: make V=1 examples
       name: 'make examples'
 
+    - run: make V=1 -C tests
+      name: 'make tests'
+
     - run: make V=1 test-ci
-      name: 'test'
+      name: 'run tests'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"

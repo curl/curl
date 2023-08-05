@@ -1,4 +1,4 @@
-c: Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: retry-all-errors
 Help: Retry all errors (use with --retry)
@@ -6,14 +6,15 @@ Added: 7.71.0
 Category: curl
 Example: --retry 5 --retry-all-errors $URL
 See-also: retry
+Multi: boolean
 ---
 Retry on any error. This option is used together with --retry.
 
 This option is the "sledgehammer" of retrying. Do not use this option by
-default (eg in curlrc), there may be unintended consequences such as sending or
-receiving duplicate data. Do not use with redirected input or output. You'd be
-much better off handling your unique problems in shell script. Please read the
-example below.
+default (for example in your **curlrc**), there may be unintended consequences
+such as sending or receiving duplicate data. Do not use with redirected input
+or output. You'd be much better off handling your unique problems in shell
+script. Please read the example below.
 
 **WARNING**: For server compatibility curl attempts to retry failed flaky
 transfers as close as possible to how they were started, but this is not

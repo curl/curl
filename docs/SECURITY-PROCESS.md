@@ -19,13 +19,13 @@ No information should be made public about a vulnerability until it is
 formally announced at the end of this process. That means, for example, that a
 bug tracker entry must NOT be created to track the issue since that will make
 the issue public and it should not be discussed on any of the project's public
-mailing lists. Also messages associated with any commits should not make any
+mailing lists. Messages associated with any commits should not make any
 reference to the security nature of the commit if done prior to the public
 announcement.
 
 - The person discovering the issue, the reporter, reports the vulnerability on
-  [https://hackerone.com/curl](https://hackerone.com/curl). Issues filed there
-  reach a handful of selected and trusted people.
+  [HackerOne](https://hackerone.com/curl). Issues filed there reach a handful
+  of selected and trusted people.
 
 - Messages that do not relate to the reporting or managing of an undisclosed
   security vulnerability in curl or libcurl are ignored and no further action
@@ -40,7 +40,7 @@ announcement.
 
 - If the report is rejected, the team writes to the reporter to explain why.
 
-- If the report is accepted, the team writes to the reporter to let him/her
+- If the report is accepted, the team writes to the reporter to let them
   know it is accepted and that they are working on a fix.
 
 - The security team discusses the problem, works out a fix, considers the
@@ -55,7 +55,9 @@ announcement.
 - Write a security advisory draft about the problem that explains what the
   problem is, its impact, which versions it affects, solutions or workarounds,
   when the release is out and make sure to credit all contributors properly.
-  Figure out the CWE (Common Weakness Enumeration) number for the flaw.
+  Figure out the CWE (Common Weakness Enumeration) number for the flaw. See
+  [SECURITY-ADVISORY](https://curl.se/dev/advisory.html) for help on creating
+  the advisory.
 
 - Request a CVE number from
   [HackerOne](https://docs.hackerone.com/programs/cve-requests.html)
@@ -63,10 +65,14 @@ announcement.
 - Update the "security advisory" with the CVE number.
 
 - The security team commits the fix in a private branch. The commit message
-  should ideally contain the CVE number.
+  should ideally contain the CVE number. If the severity level of the issue is
+  set to Low or Medium, the fix is allowed to get merged into the master
+  repository via a normal PR - but without mentioning it being a security
+  vulnerability.
 
-- The security team also decides on and delivers a monetary reward to the
-  reporter as per the bug-bounty policies.
+- The monetary reward part of the bug-bounty is managed by the Internet Bug
+  Bounty team and the reporter is asked to request the reward from them after
+  the issue has been completely handled and published by curl.
 
 - No more than 10 days before release, inform
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
@@ -112,9 +118,9 @@ somewhat over time and a list somewhere will only risk getting outdated.
 
 2. Name the advisory file after the allocated CVE id.
 
-3. Add a line on the top of the array in `curl-www/docs/vuln.pm'.
+3. Add a line on the top of the array in `curl-www/docs/vuln.pm`.
 
-4. Put the new advisory markdown file in the curl-www/docs/ directory. Add it
+4. Put the new advisory markdown file in the `curl-www/docs/` directory. Add it
    to the git repository.
 
 5. Run `make` in your local web checkout and verify that things look fine.
@@ -122,7 +128,7 @@ somewhat over time and a list somewhere will only risk getting outdated.
 6. On security advisory release day, push the changes on the curl-www
    repository's remote master branch.
 
-## Hackerone
+## HackerOne
 
 Request the issue to be disclosed. If there are sensitive details present in
 the report and discussion, those should be redacted from the disclosure. The
@@ -133,6 +139,49 @@ has been published.
 
 See [BUG-BOUNTY](https://curl.se/docs/bugbounty.html) for details on the
 bug bounty program.
+
+# Severity levels
+
+The curl project's security team rates security problems using four severity
+levels depending how serious we consider the problem to be. We use **Low**,
+**Medium**, **High** and **Critical**. We refrain from using numerical scoring
+of vulnerabilities.
+
+When deciding severity level on a particular issue, we take all the factors
+into account: attack vector, attack complexity, required privileges, necessary
+build configuration, protocols involved, platform specifics and also what
+effects a possible exploit or trigger of the issue can lead do, including
+confidentiality, integrity or availability problems.
+
+## Low
+
+This is a security problem that is truly hard or unlikely to exploit or
+trigger. Due to timing, platform requirements or the fact that options or
+protocols involved are rare etc. [Past
+example](https://curl.se/docs/CVE-2022-43552.html)
+
+## Medium
+
+This is a security problem that is less hard than **Low** to exploit or
+trigger. Less strict timing, wider platforms availability or involving more
+widely used options or protocols. A problem that usually needs something else
+to also happen to become serious. [Past
+example](https://curl.se/docs/CVE-2022-32206.html)
+
+## High
+
+This issue in itself a serious problem with real world impact. Flaws that can
+easily compromise the confidentiality, integrity or availability of resources.
+Exploiting or triggering this problem is not hard. [Past
+example](https://curl.se/docs/CVE-2019-3822.html)
+
+## Critical
+
+Easily exploitable by a remote unauthenticated attacker and lead to system
+compromise (arbitrary code execution) without requiring user interaction, with
+a common configuration on a popular platform. This issue has few restrictions
+and requirements and can be exploited easily using most curl configurations.
+[Past example](https://curl.se/docs/CVE-2000-0973.html)
 
 # Not security issues
 
@@ -158,7 +207,7 @@ stall and never end, so applications that cannot deal with never-ending
 transfers already need to have counter-measures established.
 
 If the problem avoids the regular counter-measures when it causes a never-
-ending transfer, it might very well be a security problem.
+ending transfer, it might be a security problem.
 
 ## Not practically possible
 
@@ -208,7 +257,15 @@ security vulnerabilities.
 
  - not all systems allow the arguments to be blanked in the first place
  - since curl blanks the argument itself they will be readable for a short
-   moment in time no matter what
+   moment no matter what
  - virtually every argument can contain sensitive data, depending on use
  - blanking all arguments would make it impractical for users to differentiate
    curl command lines in process listings
+
+## Busy-loops
+
+Busy-loops that consume 100% CPU time but eventually end (perhaps due to a set
+timeout value or otherwise) are not considered security problems. Applications
+are supposed to already handle situations when the transfer loop legitimately
+consumes 100% CPU time, so while a prolonged such busy-loop is a nasty bug, we
+do not consider it a security problem.

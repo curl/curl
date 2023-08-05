@@ -1,0 +1,65 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: -6
+Content-Type: text/html
+Funny-head: yesyes
+
+moooooooooooo
+</data>
+<datacheck>
+%if hyper
+%else
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+%endif
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP response with control code then negative Content-Length
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+# Hyper curl returns unsupported protocol
+# built-in curl returns weird_server_reply
+<errorcode>
+%if hyper
+1
+%else
+8
+%endif
+</errorcode>
+</verify>
+</testcase>

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2013 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -55,7 +55,7 @@ cat ./docs/THANKS
   fi
  ) | \
 
-egrep -ai '(^Author|^Commit|by):' | \
+grep -Eai '(^Author|^Commit|by):' | \
 cut -d: -f2- | \
 cut '-d(' -f1 | \
 cut '-d<' -f1 | \
@@ -73,6 +73,5 @@ sed 's/^ *//'
 
 )| \
 sed -f ./docs/THANKS-filter | \
-grep -a ' ' | \
 sort -fu | \
 grep -aixvf ./docs/THANKS
