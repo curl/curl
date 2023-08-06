@@ -79,7 +79,7 @@ foreach my $f (@incs) {
     while(<H>) {
         s/CURL_DEPRECATED\(.*"\)//;
         s/  */ /g;
-        if (/^(^CURL_EXTERN .*)\(/) {
+        if (/^(^CURL_EXTERN .*?)\(/) {
             my $decl = $1;
             $decl =~ s/\r$//;
             $decl =~ /([a-z_]+)$/;

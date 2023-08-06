@@ -170,11 +170,13 @@ for my $e (sort @syms) {
     #
     # CURLINC_ - defines for header dual-include prevention, ignore those.
     #
+    # CURL_TEMP_ - are defined and *undefined* again within the file
+    #
     # *_LAST and *_LASTENTRY are just prefix for the placeholders used for the
     # last entry in many enum series.
     #
 
-    if($e =~ /(OBSOLETE|^CURL_EXTERN|^CURLINC_|_LAST\z|_LASTENTRY\z)/) {
+    if($e =~ /(OBSOLETE|^CURL_EXTERN|^CURLINC_|_LAST\z|_LASTENTRY\z|^CURL_TEMP_)/) {
         $ignored++;
         next;
     }
