@@ -68,7 +68,6 @@ int test(char *URL)
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
   curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, dload_progress_cb);
 
-  printf("Start: %d\n", time(NULL));
   ret = run(hnd, 1, 2);
   if(ret)
     fprintf(stderr, "error %d: %s\n", ret, buffer);
@@ -79,7 +78,6 @@ int test(char *URL)
   else
     ret = CURLE_OK;
 
-  printf("End: %d\n", time(NULL));
   curl_easy_cleanup(hnd);
   curl_global_cleanup();
 

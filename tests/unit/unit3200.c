@@ -94,7 +94,7 @@ UNITTEST_START
     fp = fopen(arg, "rb");
     abort_unless(fp != NULL, "Cannot open testfile");
 
-    fprintf(stderr, "Test %d...", i);
+    fprintf(stderr, "Test %zd...", i);
     switch(i) {
       case 0:
         line = Curl_get_line(buf, len, fp);
