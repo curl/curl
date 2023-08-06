@@ -101,7 +101,12 @@ problems may have been fixed or changed somewhat since this was written.
  15.11 ExternalProject_Add does not set CURL_CA_PATH
  15.13 CMake build with MIT Kerberos does not work
 
- 16. Applications
+ 16. aws-sigv4
+ 16.1 aws-sigv4 doesn't sign requests with * correctly
+ 16.2 aws-sigv4 doesn't sign requests with valueless queries correctly
+ 16.3 aws-sigv4 is missing the amz-content-sha256 header
+ 16.4 aws-sigv4 does not sort query string parameters before signing
+ 16.5 aws-sigv4 does not sign requests with empty URL query correctly
 
  17. HTTP/2
  17.2 HTTP/2 frames while in the connection pool kill reuse
@@ -588,7 +593,27 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/6904
 
-16. Applications
+16. aws-sigv4
+
+16.1 aws-sigv4 doesn't sign requests with * correctly
+
+ https://github.com/curl/curl/issues/7559
+
+16.2 aws-sigv4 doesn't sign requests with valueless queries correctly
+
+ https://github.com/curl/curl/issues/8107
+
+16.3 aws-sigv4 is missing the amz-content-sha256 header
+
+ https://github.com/curl/curl/issues/8810
+
+16.4 aws-sigv4 does not sort query string parameters before signing
+
+ https://github.com/curl/curl/issues/9717
+
+16.5 aws-sigv4 does not sign requests with empty URL query correctly
+
+ https://github.com/curl/curl/issues/10129
 
 17. HTTP/2
 
