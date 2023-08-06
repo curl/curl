@@ -58,7 +58,7 @@ static void websocket(CURL *curl)
       printf("curl_ws_recv returned %d\n", (int)result);
       return;
     }
-    printf("%u: nread %u Age %u Flags %x "
+    printf("%u: nread %zu Age %u Flags %x "
            "Offset %" CURL_FORMAT_CURL_OFF_T " "
            "Bytesleft %" CURL_FORMAT_CURL_OFF_T "\n",
            (int)i,

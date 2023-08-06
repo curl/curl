@@ -63,7 +63,7 @@ static int recv_pong(CURL *curl, const char *exected_payload)
     }
   }
   fprintf(stderr, "ws: curl_ws_recv returned %u, received %u\n", (int)result,
-         rlen);
+          (int)rlen);
   return (int)result;
 }
 

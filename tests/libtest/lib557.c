@@ -27,6 +27,8 @@
  * curl_m*printf formatting capabilities and handling of some data types.
  */
 
+#define CURL_NO_FMT_CHECKS /* disable compiler *printf format checks */
+
 #include "test.h"
 
 #include <limits.h>

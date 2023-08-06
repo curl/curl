@@ -54,13 +54,13 @@ UNITTEST_START
   for(i = 0; i < sizeof(tests)/sizeof(tests[0]); i++) {
     timediff_t result = Curl_timediff(tests[i].first, tests[i].second);
     if(result != tests[i].result) {
-      printf("%d.%06u to %d.%06u got %d, but expected %d\n",
-             tests[i].first.tv_sec,
+      printf("%ld.%06u to %ld.%06u got %d, but expected %ld\n",
+             (long)tests[i].first.tv_sec,
              tests[i].first.tv_usec,
-             tests[i].second.tv_sec,
+             (long)tests[i].second.tv_sec,
              tests[i].second.tv_usec,
-             result,
-             tests[i].result);
+             (int)result,
+             (long)tests[i].result);
       fail("unexpected result!");
     }
   }
