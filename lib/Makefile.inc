@@ -44,7 +44,6 @@ LIB_VAUTH_HFILES =      \
 
 LIB_VTLS_CFILES =           \
   vtls/bearssl.c            \
-  vtls/gskit.c              \
   vtls/gtls.c               \
   vtls/hostcheck.c          \
   vtls/keylog.c             \
@@ -61,7 +60,6 @@ LIB_VTLS_CFILES =           \
 
 LIB_VTLS_HFILES =           \
   vtls/bearssl.h            \
-  vtls/gskit.h              \
   vtls/gtls.h               \
   vtls/hostcheck.h          \
   vtls/keylog.h             \

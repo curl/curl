@@ -423,9 +423,9 @@ FAQ
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
   libressl, BoringSSL, AWS-LC, GnuTLS, wolfSSL, mbedTLS, Secure Transport
-  (native iOS/OS X), Schannel (native Windows), GSKit (native IBM i), BearSSL,
-  or Rustls. They all have their pros and cons, and we try to maintain a
-  comparison of them here: https://curl.se/docs/ssl-compared.html
+  (native iOS/OS X), Schannel (native Windows), BearSSL or Rustls. They all
+  have their pros and cons, and we try to maintain a comparison of them here:
+  https://curl.se/docs/ssl-compared.html
 
   2.4 Does curl support SOCKS (RFC 1928) ?
 
