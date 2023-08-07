@@ -444,29 +444,24 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     /* interface */
     if(!is_host) {
 #ifdef SO_BINDTODEVICE
-      /* I am not sure any other OSs than Linux that provide this feature,
-       * and at the least I cannot test. --Ben
+      /*
+       * This binds the local socket to a particular interface. This will
+       * force even requests to other local interfaces to go out the external
+       * interface. Only bind to the interface when specified as interface,
+       * not just as a hostname or ip address.
        *
-       * This feature allows one to tightly bind the local socket to a
-       * particular interface.  This will force even requests to other
-       * local interfaces to go out the external interface.
-       *
-       *
-       * Only bind to the interface when specified as interface, not just
-       * as a hostname or ip address.
-       *
-       * interface might be a VRF, eg: vrf-blue, which means it cannot be
-       * converted to an IP address and would fail Curl_if2ip. Simply try
-       * to use it straight away.
+       * The interface might be a VRF, eg: vrf-blue, which means it cannot be
+       * converted to an IP address and would fail Curl_if2ip. Simply try to
+       * use it straight away.
        */
       if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
                     dev, (curl_socklen_t)strlen(dev) + 1) == 0) {
-        /* This is typically "errno 1, error: Operation not permitted" if
-         * you're not running as root or another suitable privileged
-         * user.
-         * If it succeeds it means the parameter was a valid interface and
-         * not an IP address. Return immediately.
+        /* This is often "errno 1, error: Operation not permitted" if you're
+         * not running as root or another suitable privileged user. If it
+         * succeeds it means the parameter was a valid interface and not an IP
+         * address. Return immediately.
          */
+        infof(data, "socket successfully bound to interface '%s'", dev);
         return CURLE_OK;
       }
 #endif
