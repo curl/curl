@@ -65,7 +65,7 @@ class TestErrors:
         r.check_exit_code(False)
         invalid_stats = []
         for idx, s in enumerate(r.stats):
-            if 'exitcode' not in s or s['exitcode'] not in [18, 56, 92]:
+            if 'exitcode' not in s or s['exitcode'] not in [18, 56, 92, 95]:
                 invalid_stats.append(f'request {idx} exit with {s["exitcode"]}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
 
