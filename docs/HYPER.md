@@ -57,6 +57,7 @@ The hyper backend does not support
 - `--raw` and disabling `CURLOPT_HTTP_TRANSFER_DECODING`
 - RTSP
 - hyper is much stricter about what HTTP header contents it allows
+- leading whitespace in first HTTP/1 response header
 - HTTP/0.9
 - HTTP/2 upgrade using HTTP:// URLs. Aka 'h2c'
 

@@ -43,6 +43,7 @@ int test(char *URL)
 
   /* re-use handle, do a second transfer */
   curl_easy_setopt(cl, CURLOPT_URL, URL2);
+  curl_easy_setopt(cl, CURLOPT_VERBOSE, 1L);
   curl_easy_perform(cl);
   curl_easy_cleanup(cl);
   curl_global_cleanup();

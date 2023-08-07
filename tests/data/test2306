@@ -24,10 +24,10 @@ Funny-head: yesyes
 -foo-
 </data>
 <data2 nocheck="yes">
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsclose
 	Access-Control-Allow-Origin: *
-	Connection: Keep-Alive
-	Content-Type: text/html; charset=utf-8
+Connection: Keep-Alive
+Content-Type: text/html; charset=utf-8
 Date: Wed, 10 May 2023 14:58:08 GMT
 
 -foo-
@@ -45,7 +45,7 @@ lib%TESTNUMBER
 </tool>
 
  <name>
-HTTP GET re-used handle but only folded headers
+HTTP GET re-used handle with first header folded
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
