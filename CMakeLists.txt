@@ -371,9 +371,6 @@ check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
 if(WIN32)
-  check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
-  check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
-
   # Matching logic used for Curl_win32_random()
   if(MINGW)
     check_c_source_compiles("
@@ -1075,7 +1072,7 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 
 # Check for some functions that are used
-if(HAVE_LIBWS2_32)
+if(WIN32)
   set(CMAKE_REQUIRED_LIBRARIES ws2_32)
 elseif(HAVE_LIBSOCKET)
   set(CMAKE_REQUIRED_LIBRARIES socket)
