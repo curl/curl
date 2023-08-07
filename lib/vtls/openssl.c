@@ -1691,7 +1691,7 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
 static int ossl_init(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) &&  \
-  !defined(LIBRESSL_VERSION_NUMBER)
+  (!defined(LIBRESSL_VERSION_NUMBER) || LIBRESSL_VERSION_NUMBER >= 0x2070000fL)
   const uint64_t flags =
 #ifdef OPENSSL_INIT_ENGINE_ALL_BUILTIN
     /* not present in BoringSSL */
