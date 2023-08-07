@@ -1,10 +1,10 @@
 curl and libcurl 8.3.0
 
  Public curl releases:         222
- Command line options:         256
+ Command line options:         257
  curl_easy_setopt() options:   303
- Public functions in libcurl:  91
- Contributors:                 2946
+ Public functions in libcurl:  92
+ Contributors:                 2947
 
 This release includes the following changes:
 
@@ -18,6 +18,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o bearssl: don't load CA certs when peer verification is disabled [33]
+ o cf-socket: log successful interface bind [39]
  o CI: add caching to many jobs [19]
  o cmake: add support for single libcurl compilation pass [21]
  o cmake: cache more config and delete unused ones [4]
@@ -26,16 +27,23 @@ This release includes the following bugfixes:
  o cmake: support building static and shared libcurl in one go [17]
  o configure, cmake, lib: more form api deprecation [7]
  o configure: use the pkg-config --libs-only-l flag for libssh2 [16]
+ o CURLOPT_SSL_VERIFYPEER.3: mention it does not load CA certs when disabled [42]
  o docs/cmdline-opts: spellfixes, typos and polish [9]
+ o docs/cmdline: add small "warning" to verbose options [59]
+ o docs/cmdline: remove repeated working for negotiate + ntlm [58]
  o docs: link to the website versions instead of markdowns [3]
  o easy: remove #ifdefs to make code easier on the eye [34]
  o egd: delete feature detection and related source code [5]
  o GHA: adding quiche workflow [35]
+ o headers: accept leading whitespaces on first response header [37]
  o http2: avoid too early connection re-use/multiplexing [20]
+ o http2: cleanup trace messages [56]
  o http2: disable asssertion blocking OSSFuzz testing [31]
  o http2: fix in h2 proxy tunnel: progress in ingress on sending [32]
  o http2: upgrade tests and add fix for non-existing stream [44]
+ o http3/ngtcp2: shorten handshake, trace cleanup [13]
  o http: return error when receiving too large header set [43]
+ o include/curl/mprintf.h: add __attribute__ for the prototypes [38]
  o lib: fix a few *printf() flag mistakes [47]
  o macOS: fix target detection more [11]
  o misc: fix various typos [18]
@@ -45,6 +53,7 @@ This release includes the following bugfixes:
  o Revert "schannel: reverse the order of certinfo insertions" [14]
  o schannel: fix user-set legacy algorithms in Windows 10 & 11 [53]
  o sectransp: prevent CFRelease() of NULL [26]
+ o tests/tftpd+mqttd: make variables static to silence picky warnings [57]
  o tests: ensure `libcurl.def` contains all exports [45]
  o tests: fix h3 server check and parallel instances [6]
  o tool: make the length argument an int for printf()-.* flags [49]
@@ -74,13 +83,14 @@ advice from friends like these:
 
   Alexander Jaeger, Dan Fandrich, Daniel Stenberg, Derzsi Dániel,
   Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre, Gabriel Corona,
-  Gisle Vanem, Goro FUJI, Guillaume Algis, Joseph Tharayil,
-  kyled-dell on github, Maksim Arhipov, Marcel Raad, Maurício Meneghini Fauth,
-  Nathan Moinvaziri, Niall McGee, Pablo Busse, Patrick Monnerat, Ray Satiro,
-  Richard W.M. Jones, Rutger Broekhoff, Ryan Schmidt, Samuel Chiang, Sergey,
-  Stefan Eissing, Thomas M. DuBuisson, Viktor Szakats, wangzhikun,
-  Wilhelm von Thiele, yushicheng7788 on github, zhihaoy on github
-  (33 contributors)
+  Gisle Vanem, Goro FUJI, Graham Campbell, Guillaume Algis, Joseph Tharayil,
+  junsik on github, kyled-dell on github, Maksim Arhipov, Marcel Raad,
+  Maurício Meneghini Fauth, Nathan Moinvaziri, Niall McGee, Pablo Busse,
+  Patrick Monnerat, Ray Satiro, Richard W.M. Jones, Rutger Broekhoff,
+  Ryan Schmidt, Samuel Chiang, Sergey, Stefan Eissing, Thomas M. DuBuisson,
+  Viktor Szakats, wangzhikun, Wilhelm von Thiele, yushicheng7788 on github,
+  zhihaoy on github
+  (35 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -96,6 +106,7 @@ References to bug reports and discussions on issues:
  [10] = https://curl.se/bug/?i=11459
  [11] = https://curl.se/bug/?i=11502
  [12] = https://curl.se/bug/?i=11325
+ [13] = https://curl.se/bug/?i=11609
  [14] = https://curl.se/bug/?i=11536
  [15] = https://curl.se/bug/?i=11521
  [16] = https://curl.se/bug/?i=11538
@@ -119,8 +130,12 @@ References to bug reports and discussions on issues:
  [34] = https://curl.se/bug/?i=11525
  [35] = https://curl.se/bug/?i=11517
  [36] = https://curl.se/bug/?i=11416
+ [37] = https://curl.se/bug/?i=11605
+ [38] = https://curl.se/bug/?i=11589
+ [39] = https://curl.se/bug/?i=11608
  [40] = https://curl.se/bug/?i=11584
  [41] = https://curl.se/bug/?i=11421
+ [42] = https://curl.se/bug/?i=11606
  [43] = https://curl.se/bug/?i=11582
  [44] = https://curl.se/bug/?i=11563
  [45] = https://curl.se/bug/?i=11570
@@ -129,3 +144,7 @@ References to bug reports and discussions on issues:
  [48] = https://curl.se/bug/?i=11568
  [49] = https://curl.se/bug/?i=11578
  [53] = https://curl.se/bug/?i=10741
+ [56] = https://curl.se/bug/?i=11592
+ [57] = https://curl.se/bug/?i=11594
+ [58] = https://curl.se/bug/?i=11597
+ [59] = https://curl.se/bug/?i=11596
