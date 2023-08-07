@@ -42,6 +42,7 @@
 
 #ifdef USE_WOLFSSL
 #include <wolfssl/options.h>
+#define VOID_MD4_INIT
 #ifdef NO_MD4
 #define WOLFSSL_NO_MD4
 #endif
@@ -510,6 +511,12 @@ CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
                     const size_t len)
 {
   MD4_CTX ctx;
+#ifdef VOID_MD4_INIT
+  MD4_Init(&ctx);
+  MD4_Update(&ctx, input, curlx_uztoui(len));
+  MD4_Final(output, &ctx);
+  return CURLE_OK;
+#else
   CURLcode result;
 
   result = MD4_Init(&ctx);
@@ -518,6 +525,7 @@ CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
     MD4_Final(output, &ctx);
   }
   return result;
+#endif
 }
 
 #endif /* USE_CURL_NTLM_CORE */
