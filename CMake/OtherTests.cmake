@@ -38,7 +38,7 @@ if(HAVE_WINDOWS_H)
   set(_source_epilogue
       "${_source_epilogue}\n#ifndef WIN32_LEAN_AND_MEAN\n#define WIN32_LEAN_AND_MEAN\n#endif")
   set(signature_call_conv "PASCAL")
-  if(HAVE_LIBWS2_32)
+  if(WIN32)
     set(CMAKE_REQUIRED_LIBRARIES ws2_32)
   endif()
 else()
@@ -133,4 +133,3 @@ if(NOT CMAKE_CROSSCOMPILING)
     }" HAVE_POLL_FINE)
   endif()
 endif()
-
