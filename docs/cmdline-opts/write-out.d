@@ -49,7 +49,7 @@ The variables available are:
 .TP 15
 **certs**
 Output the certificate chain with details. Supported only by the OpenSSL,
-GnuTLS, Schannel, GSKit and Secure Transport backends. (Added in 7.88.0)
+GnuTLS, Schannel and Secure Transport backends. (Added in 7.88.0)
 .TP
 **content_type**
 The Content-Type of the requested document, if there was any.
@@ -105,7 +105,7 @@ The http method used in the most recent HTTP request. (Added in 7.72.0)
 .TP
 **num_certs**
 Number of server certificates received in the TLS handshake. Supported only by
-the OpenSSL, GnuTLS, Schannel, GSKit and Secure Transport backends. (Added
+the OpenSSL, GnuTLS, Schannel and Secure Transport backends. (Added
 in 7.88.0)
 .TP
 **num_connects**

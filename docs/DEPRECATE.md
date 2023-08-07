@@ -6,18 +6,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## gskit
-
-We remove support for building curl with the gskit TLS library in August 2023.
-
-- This is a niche TLS library, only running on some IBM systems
-- no regular curl contributors use this backend
-- no CI builds use or verify this backend
-- gskit, or the curl adaption for it, lacks many modern TLS features making it
-  an inferior solution
-- build breakages in this code take weeks or more to get detected
-- fixing gskit code is mostly done "flying blind"
-
 ## mingw v1
 
 We remove support for building curl with the original legacy mingw version 1
@@ -57,3 +45,5 @@ curl will remove the support for space-separated names in July 2024.
  - NPN
  - Support for systems without 64 bit data types
  - NSS
+ - gskit
+

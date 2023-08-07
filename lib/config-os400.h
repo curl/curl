@@ -338,9 +338,6 @@
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
 
-/* Define to use the GSKit package. */
-#define USE_GSKIT
-
 /* Define to use the OS/400 crypto library. */
 #define USE_OS400CRYPTO
 
