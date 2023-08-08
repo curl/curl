@@ -418,10 +418,13 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
         if(code == HYPERE_ABORTED_BY_CALLBACK)
           result = CURLE_OK;
-        else if((code == HYPERE_UNEXPECTED_EOF) && !data->req.bytecount)
+        else if((code == HYPERE_UNEXPECTED_EOF) && !data->req.bytecount &&
+                !data->req.headerbytecount)
           result = CURLE_GOT_NOTHING;
-        else if(code == HYPERE_INVALID_PEER_MESSAGE)
+        else if(code == HYPERE_INVALID_PEER_MESSAGE) {
+          data->req.headerbytecount++;
           result = CURLE_UNSUPPORTED_PROTOCOL; /* maybe */
+        }
         else
           result = CURLE_RECV_ERROR;
       }
