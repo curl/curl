@@ -411,10 +411,9 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
-/* mingw-w64, mingw using >= MSVCR80, and visual studio >= 2005 (MSVCR80)
+/* mingw-w64, and visual studio >= 2005 (MSVCR80)
    all default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
 #if defined(__MINGW64_VERSION_MAJOR) || \
-    (defined(__MINGW32__) && (__MSVCRT_VERSION__ >= 0x0800)) || \
     (defined(_MSC_VER) && (_MSC_VER >= 1400))
 #  ifndef _USE_32BIT_TIME_T
 #    define SIZEOF_TIME_T 8
