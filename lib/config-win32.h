@@ -70,8 +70,7 @@
 #define HAVE_SIGNAL_H 1
 
 /* Define to 1 if you have the <stdbool.h> header file. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || \
-    defined(__MINGW64_VERSION_MAJOR)
+#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
 #define HAVE_STDBOOL_H 1
 #endif
 
@@ -138,7 +137,7 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the <libgen.h> header file. */
-#if defined(__MINGW64_VERSION_MAJOR)
+#if defined(__MINGW32__)
 #define HAVE_LIBGEN_H 1
 #endif
 
@@ -153,8 +152,7 @@
 /* #define TIME_WITH_SYS_TIME 1 */
 
 /* Define to 1 if bool is an available type. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || \
-    defined(__MINGW64_VERSION_MAJOR)
+#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
 #define HAVE_BOOL_T 1
 #endif
 
@@ -166,7 +164,7 @@
 #define HAVE_CLOSESOCKET 1
 
 /* Define if you have the ftruncate function. */
-#if defined(__MINGW64_VERSION_MAJOR)
+#if defined(__MINGW32__)
 #define HAVE_FTRUNCATE 1
 #endif
 
@@ -274,12 +272,12 @@
 #endif
 
 /* Define to 1 if you have the `basename' function. */
-#if defined(__MINGW64_VERSION_MAJOR)
+#if defined(__MINGW32__)
 #define HAVE_BASENAME 1
 #endif
 
 /* Define to 1 if you have the strtok_r function. */
-#if defined(__MINGW64_VERSION_MAJOR)
+#if defined(__MINGW32__)
 #define HAVE_STRTOK_R 1
 #endif
 
@@ -411,8 +409,7 @@
 
 /* mingw-w64, and visual studio >= 2005 (MSVCR80)
    all default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
-#if defined(__MINGW64_VERSION_MAJOR) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 1400))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1400)) || defined(__MINGW32__)
 #  ifndef _USE_32BIT_TIME_T
 #    define SIZEOF_TIME_T 8
 #  else
@@ -561,14 +558,14 @@ Vista
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
-#if defined(USE_WIN32_LARGE_FILES) && defined(__MINGW64_VERSION_MAJOR)
+#if defined(USE_WIN32_LARGE_FILES) && defined(__MINGW32__)
 #  ifndef _FILE_OFFSET_BITS
 #  define _FILE_OFFSET_BITS 64
 #  endif
 #endif
 
 /* Define to the size of `off_t', as computed by sizeof. */
-#if defined(__MINGW64_VERSION_MAJOR) && \
+#if defined(__MINGW32__) && \
   defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS == 64)
 #  define SIZEOF_OFF_T 8
 #else

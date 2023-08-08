@@ -28,14 +28,8 @@
 
 #ifdef USE_SCHANNEL
 
-#ifdef __MINGW32__
-#ifdef __MINGW64_VERSION_MAJOR
+#if defined(__MINGW32__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)
 #define HAS_MANUAL_VERIFY_API
-#endif
-#else
-#ifdef CERT_CHAIN_REVOCATION_CHECK_CHAIN
-#define HAS_MANUAL_VERIFY_API
-#endif
 #endif
 
 #if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)   \
