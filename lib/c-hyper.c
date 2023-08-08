@@ -421,7 +421,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
           result = CURLE_OK;
           break;
         case HYPERE_UNEXPECTED_EOF:
-          if(!data->req.bytecount && !data->req.headerbytecount)
+          if(!data->req.bytecount)
             result = CURLE_GOT_NOTHING;
           else
             result = CURLE_RECV_ERROR;
