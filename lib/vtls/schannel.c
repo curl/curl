@@ -108,13 +108,6 @@
 #define BCRYPT_SHA384_ALGORITHM L"SHA384"
 #endif
 
-/* Workaround broken compilers like MinGW.
-   Return the number of elements in a statically sized array.
-*/
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 #ifdef HAS_CLIENT_CERT_PATH
 #ifdef UNICODE
 #define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_W
