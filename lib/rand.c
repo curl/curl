@@ -51,12 +51,7 @@ uint32_t arc4random(void);
 
 #ifdef WIN32
 
-#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
-#  define HAVE_MINGW_ORIGINAL
-#endif
-
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600 && \
-  !defined(HAVE_MINGW_ORIGINAL)
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
 #  define HAVE_WIN_BCRYPTGENRANDOM
 #  include <bcrypt.h>
 #  ifdef _MSC_VER

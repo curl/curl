@@ -830,9 +830,6 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #if defined(USE_UNIX_SOCKETS) && defined(WIN32)
-#  if defined(__MINGW32__) && !defined(LUP_SECURE)
-     typedef u_short ADDRESS_FAMILY; /* Classic mingw, 11y+ old mingw-w64 */
-#  endif
 #  if !defined(UNIX_PATH_MAX)
      /* Replicating logic present in afunix.h
         (distributed with newer Windows 10 SDK versions only) */

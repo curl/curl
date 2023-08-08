@@ -579,67 +579,6 @@ else
 fi
 AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_unittests = xyes)
 
-# For original MinGW (ie not MinGW-w64) define the Windows minimum supported OS
-# version to Windows XP (0x501) if it hasn't already been defined by the user.
-# Without this override original MinGW defaults the version to Windows NT 4.0.
-# Note original MinGW sets _WIN32_WINNT if not defined to whatever WINVER is.
-case $host in
-  *-*-mingw32*)
-    AC_MSG_CHECKING([if MinGW minimum supported OS should be set to XP])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#include <_mingw.h>
-      ]],[[
-#if defined(__MINGW64_VERSION_MAJOR) || \
-    defined(WINVER) || \
-    defined(_WIN32_WINNT)
-#error
-#endif
-      ]])
-    ],[
-      CPPFLAGS="$CPPFLAGS -DWINVER=0x501"
-      AC_MSG_RESULT([yes])
-    ],[
-      AC_MSG_RESULT([no])
-    ])
-    ;;
-esac
-
-# Detect original MinGW (not MinGW-w64)
-curl_mingw_original=no
-case $host in
-  *-*-mingw32*)
-    AC_MSG_CHECKING([using original MinGW (not MinGW-w64)])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#include <_mingw.h>
-      ]],[[
-#if defined(__MINGW64_VERSION_MAJOR)
-#error
-#endif
-      ]])
-    ],[
-      curl_mingw_original=yes
-      curl_mingw_die=yes
-      AC_MSG_RESULT([yes])
-    ],[
-      AC_MSG_RESULT([no])
-    ])
-    ;;
-esac
-
-
-AC_ARG_WITH(mingw1-deprecated,dnl
-AS_HELP_STRING([--with-mingw1-deprecated],[confirm you realize support for mingw v1 is dying]),
-  if test X"$withval" != Xno; then
-    curl_mingw_die=
-  fi
-)
-
-if test -n "$curl_mingw_die"; then
-  AC_MSG_ERROR([support for mingw v1 is going away, enable temporarily with --with-mingw1-deprecated])
-fi
-
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
@@ -2080,8 +2019,7 @@ if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$USE_SCHANNEL" = "x1"; then
 fi
 
 dnl link bcrypt for BCryptGenRandom() (used when building for Vista or newer)
-if test "x$curl_cv_native_windows" = "xyes" &&
-   test "x$curl_mingw_original" = "xno"; then
+if test "x$curl_cv_native_windows" = "xyes"; then
   LIBS="-lbcrypt $LIBS"
 fi
 

@@ -385,19 +385,6 @@ if(WIN32)
   if(USE_LIBRTMP)
     list(APPEND CURL_LIBS "winmm")
   endif()
-
-  # Matching logic used for Curl_win32_random()
-  if(MINGW)
-    check_c_source_compiles("
-      #include <_mingw.h>
-      #if defined(__MINGW64_VERSION_MAJOR)
-      #error
-      #endif
-      int main(void) {
-        return 0;
-      }"
-      HAVE_MINGW_ORIGINAL)
-  endif()
 endif()
 
 # check SSL libraries
@@ -488,9 +475,7 @@ if(CURL_USE_OPENSSL)
 
   if(WIN32)
     list(APPEND CURL_LIBS "ws2_32")
-    if(NOT HAVE_MINGW_ORIGINAL)
-      list(APPEND CURL_LIBS "bcrypt")  # for OpenSSL/LibreSSL
-    endif()
+    list(APPEND CURL_LIBS "bcrypt")  # for OpenSSL/LibreSSL
   endif()
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
@@ -595,9 +580,7 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE)
     endif()
     if(WIN32)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
-      if(NOT HAVE_MINGW_ORIGINAL)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
-      endif()
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
     endif()
   elseif(USE_WOLFSSL)
     set(CMAKE_REQUIRED_INCLUDES   "${WolfSSL_INCLUDE_DIRS}")
@@ -1360,11 +1343,7 @@ if(WIN32)
     list(APPEND CURL_LIBS "advapi32" "crypt32")
   endif()
 
-  if(NOT HAVE_MINGW_ORIGINAL)
-    list(APPEND CURL_LIBS "bcrypt")
-  else()
-    set(HAVE_FTRUNCATE OFF)
-  endif()
+  list(APPEND CURL_LIBS "bcrypt")
 endif()
 
 if(MSVC)

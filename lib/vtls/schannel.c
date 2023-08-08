@@ -175,12 +175,6 @@
 #  define CALG_SHA_256 0x0000800c
 #endif
 
-/* Work around typo in classic MinGW's w32api up to version 5.0,
-   see https://osdn.net/projects/mingw/ticket/38391 */
-#if !defined(ALG_CLASS_DHASH) && defined(ALG_CLASS_HASH)
-#define ALG_CLASS_DHASH ALG_CLASS_HASH
-#endif
-
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
@@ -2752,8 +2746,7 @@ static void schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
-    /* workaround for original MinGW, should be (const BYTE*) */
-    if(!CryptHashData(hHash, (BYTE*)input, (DWORD)inputlen, 0))
+    if(!CryptHashData(hHash, (const BYTE*)input, (DWORD)inputlen, 0))
       break; /* failed */
 
     /* get hash size */
