@@ -213,6 +213,7 @@ static CURLcode my_md5_init(my_md5_ctx *ctx)
 
   if(!CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash)) {
     CryptReleaseContext(ctx->hCryptProv, 0);
+    ctx->hCryptProv = 0;
     return CURLE_FAILED_INIT;
   }
 

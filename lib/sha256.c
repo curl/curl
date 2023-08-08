@@ -227,6 +227,7 @@ static CURLcode my_sha256_init(my_sha256_ctx *ctx)
 
   if(!CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash)) {
     CryptReleaseContext(ctx->hCryptProv, 0);
+    ctx->hCryptProv = 0;
     return CURLE_FAILED_INIT;
   }
 
