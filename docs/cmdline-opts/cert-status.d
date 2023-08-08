@@ -16,4 +16,4 @@ If this option is enabled and the server sends an invalid (e.g. expired)
 response, if the response suggests that the server certificate has been
 revoked, or no response at all is received, the verification fails.
 
-This is currently only implemented in the OpenSSL, GnuTLS and NSS backends.
+This is currently only implemented in the OpenSSL and GnuTLS backends.

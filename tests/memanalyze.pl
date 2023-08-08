@@ -81,22 +81,22 @@ if(! -f $file) {
     exit;
 }
 
-open(FILE, "<$file");
+open(my $fileh, "<", "$file");
 
 if($showlimit) {
-    while(<FILE>) {
+    while(<$fileh>) {
         if(/^LIMIT.*memlimit$/) {
             print $_;
             last;
         }
     }
-    close(FILE);
+    close($fileh);
     exit;
 }
 
 
 my $lnum=0;
-while(<FILE>) {
+while(<$fileh>) {
     chomp $_;
     $line = $_;
     $lnum++;
@@ -375,7 +375,7 @@ while(<FILE>) {
         print "Not recognized prefix line: $line\n";
     }
 }
-close(FILE);
+close($fileh);
 
 if($totalmem) {
     print "Leak detected: memory still allocated: $totalmem bytes\n";

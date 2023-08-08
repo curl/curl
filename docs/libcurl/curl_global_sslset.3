@@ -21,7 +21,7 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_global_sslset 3 "15 July 2017" "libcurl 7.56" "libcurl Manual"
+.TH curl_global_sslset 3 "15 July 2017" "libcurl" "libcurl"
 .SH NAME
 curl_global_sslset - Select SSL backend to use with libcurl
 .SH SYNOPSIS
@@ -38,7 +38,7 @@ typedef enum {
   CURLSSLBACKEND_OPENSSL = 1, /* or one of its forks */
   CURLSSLBACKEND_GNUTLS = 2,
   CURLSSLBACKEND_NSS = 3,
-  CURLSSLBACKEND_GSKIT = 5,
+  CURLSSLBACKEND_GSKIT = 5, /* deprecated */
   CURLSSLBACKEND_POLARSSL = 6, /* deprecated */
   CURLSSLBACKEND_WOLFSSL = 7,
   CURLSSLBACKEND_SCHANNEL = 8,

@@ -29,7 +29,7 @@ http
 --etag-save with bad path then working transfer
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save log/nowhere/etag%TESTNUMBER --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER --include --output log/curl%TESTNUMBER.out
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save %LOGDIR/nowhere/etag%TESTNUMBER --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER --include --output %LOGDIR/curl%TESTNUMBER.out
 </command>
 </client>
 

@@ -26,6 +26,9 @@
 #include "tool_setup.h"
 #include "tool_writeout.h"
 
+int jsonquoted(const char *in, size_t len,
+               struct curlx_dynbuf *out, bool lowercase);
+
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
                      struct per_transfer *per, CURLcode per_result);
 void headerJSON(FILE *stream, struct per_transfer *per);

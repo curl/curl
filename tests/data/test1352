@@ -29,7 +29,7 @@ ftp
 FTP download, file without C-D inside, using -O -J -D stdout
 </name>
 <setenv>
-CURL_TESTDIR=%PWD/log
+CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
 ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -J -D -
@@ -50,14 +50,14 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/file%TESTNUMBER">
+<file1 name="%LOGDIR/file%TESTNUMBER">
 fooo
 mooo
 </file1>
 
 # The final "221 bye bye baby" response to QUIT will not be recorded
 # since that is not considered part of this particular transfer!
-<file2 name="log/stdout%TESTNUMBER">
+<file2 name="%LOGDIR/stdout%TESTNUMBER">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    

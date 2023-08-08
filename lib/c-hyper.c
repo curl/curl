@@ -71,9 +71,11 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
   DEBUGASSERT(conn);
   (void)ctx;
 
+  DEBUGF(infof(data, "Curl_hyper_recv(%zu)", buflen));
   result = Curl_read(data, conn->sockfd, (char *)buf, buflen, &nread);
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
+    DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> EAGAIN", buflen));
     if(data->hyp.read_waker)
       hyper_waker_free(data->hyp.read_waker);
     data->hyp.read_waker = hyper_context_waker(ctx);
@@ -87,6 +89,7 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
     failf(data, "Curl_read failed");
     return HYPER_IO_ERROR;
   }
+  DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> %zd", buflen, nread));
   return (size_t)nread;
 }
 
@@ -98,8 +101,12 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   CURLcode result;
   ssize_t nwrote;
 
+  DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
   result = Curl_write(data, conn->sockfd, (void *)buf, buflen, &nwrote);
+  if(!result && !nwrote)
+    result = CURLE_AGAIN;
   if(result == CURLE_AGAIN) {
+    DEBUGF(infof(data, "Curl_hyper_send(%zu) -> EAGAIN", buflen));
     /* would block, register interest */
     if(data->hyp.write_waker)
       hyper_waker_free(data->hyp.write_waker);
@@ -114,6 +121,7 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
     failf(data, "Curl_write failed");
     return HYPER_IO_ERROR;
   }
+  DEBUGF(infof(data, "Curl_hyper_send(%zu) -> %zd", buflen, nwrote));
   return (size_t)nwrote;
 }
 
@@ -174,8 +182,11 @@ static int hyper_each_header(void *userdata,
     }
   }
 
-  data->info.header_size += (curl_off_t)len;
-  data->req.headerbytecount += (curl_off_t)len;
+  result = Curl_bump_headersize(data, len, FALSE);
+  if(result) {
+    data->state.hresult = result;
+    return HYPER_ITER_BREAK;
+  }
   return HYPER_ITER_CONTINUE;
 }
 
@@ -305,9 +316,8 @@ static CURLcode status_line(struct Curl_easy *data,
     if(result)
       return result;
   }
-  data->info.header_size += (curl_off_t)len;
-  data->req.headerbytecount += (curl_off_t)len;
-  return CURLE_OK;
+  result = Curl_bump_headersize(data, len, FALSE);
+  return result;
 }
 
 /*
@@ -433,8 +443,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       break;
     }
     else if(t != HYPER_TASK_RESPONSE) {
-      *didwhat = KEEP_RECV;
-      break;
+      continue;
     }
     /* HYPER_TASK_RESPONSE */
 
@@ -485,7 +494,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     if(k->upgr101 == UPGR101_WS) {
       if(http_status == 101) {
         /* verify the response */
-        result = Curl_ws_accept(data);
+        result = Curl_ws_accept(data, NULL, 0);
         if(result)
           return result;
       }
@@ -1212,7 +1221,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   Curl_safefree(data->state.aptr.userpwd);
   Curl_safefree(data->state.aptr.proxyuserpwd);
   return CURLE_OK;
-  error:
+error:
   DEBUGASSERT(result);
   if(io)
     hyper_io_free(io);

@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+header line folding
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+ Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Content-Length: 6
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+first HTTP header starts with white space
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+%if hyper
+# curl: (1) Hyper: [6] invalid HTTP header parsed
+<errorcode>
+1
+</errorcode>
+%endif
+</verify>
+</testcase>

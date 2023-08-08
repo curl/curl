@@ -117,7 +117,7 @@ static struct altsvc *altsvc_createid(const char *srchost,
   as->dst.port = curlx_ultous(dstport);
 
   return as;
-  error:
+error:
   altsvc_free(as);
   return NULL;
 }
@@ -217,7 +217,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   }
   return result;
 
-  fail:
+fail:
   Curl_safefree(asi->filename);
   free(line);
   fclose(fp);
@@ -424,7 +424,7 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
 #ifdef DEBUGBUILD
 /* to play well with debug builds, we can *set* a fixed time this will
    return */
-static time_t debugtime(void *unused)
+static time_t altsvc_debugtime(void *unused)
 {
   char *timestr = getenv("CURL_TIME");
   (void)unused;
@@ -434,7 +434,8 @@ static time_t debugtime(void *unused)
   }
   return time(NULL);
 }
-#define time(x) debugtime(x)
+#undef time
+#define time(x) altsvc_debugtime(x)
 #endif
 
 #define ISNEWLINE(x) (((x) == '\n') || (x) == '\r')

@@ -53,7 +53,7 @@ print <<HEADER
 .\\" * SPDX-License-Identifier: curl
 .\\" *
 .\\" **************************************************************************
-.TH libcurl-symbols 3 "$date" "libcurl $version" "libcurl symbols"
+.TH libcurl-symbols 3 "$date" "libcurl" "libcurl"
 .SH NAME
 libcurl-symbols \\- libcurl symbol version information
 .SH "libcurl symbols"

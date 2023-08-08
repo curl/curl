@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,6 +51,9 @@ const struct helptxt helptext[] = {
   {"    --basic",
    "Use HTTP Basic Authentication",
    CURLHELP_AUTH},
+  {"    --ca-native",
+   "Use CA certificates from the native OS",
+   CURLHELP_TLS},
   {"    --cacert <file>",
    "CA certificate to verify peer against",
    CURLHELP_TLS},
@@ -243,6 +246,9 @@ const struct helptxt helptext[] = {
   {"    --happy-eyeballs-timeout-ms <milliseconds>",
    "Time for IPv6 before trying IPv4",
    CURLHELP_CONNECTION},
+  {"    --haproxy-clientip",
+   "Sets client IP in HAProxy PROXY protocol v1 header",
+   CURLHELP_HTTP | CURLHELP_PROXY},
   {"    --haproxy-protocol",
    "Send HAProxy PROXY protocol v1 header",
    CURLHELP_HTTP | CURLHELP_PROXY},
@@ -274,7 +280,7 @@ const struct helptxt helptext[] = {
    "Use HTTP 1.1",
    CURLHELP_HTTP},
   {"    --http2",
-   "Use HTTP 2",
+   "Use HTTP/2",
    CURLHELP_HTTP},
   {"    --http2-prior-knowledge",
    "Use HTTP 2 without HTTP/1.1 Upgrade",
@@ -474,6 +480,9 @@ const struct helptxt helptext[] = {
   {"    --proxy-basic",
    "Use Basic authentication on the proxy",
    CURLHELP_PROXY | CURLHELP_AUTH},
+  {"    --proxy-ca-native",
+   "Use CA certificates from the native OS for proxy",
+   CURLHELP_TLS},
   {"    --proxy-cacert <file>",
    "CA certificate to verify peer against for proxy",
    CURLHELP_PROXY | CURLHELP_TLS},
@@ -498,6 +507,9 @@ const struct helptxt helptext[] = {
   {"    --proxy-header <header/@file>",
    "Pass custom header(s) to proxy",
    CURLHELP_PROXY},
+  {"    --proxy-http2",
+   "Use HTTP/2 with HTTPS proxy",
+   CURLHELP_HTTP | CURLHELP_PROXY},
   {"    --proxy-insecure",
    "Do HTTPS proxy connections without verifying the proxy",
    CURLHELP_PROXY | CURLHELP_TLS},
@@ -747,6 +759,12 @@ const struct helptxt helptext[] = {
   {"    --trace-ascii <file>",
    "Like --trace, but without hex output",
    CURLHELP_VERBOSE},
+  {"    --trace-config",
+   "Configure which details to log in trace/verbose output",
+   CURLHELP_VERBOSE},
+  {"    --trace-ids",
+   "Add transfer and connection identifiers to trace/verbose output",
+   CURLHELP_VERBOSE},
   {"    --trace-time",
    "Add time stamps to trace/verbose output",
    CURLHELP_VERBOSE},
@@ -771,6 +789,9 @@ const struct helptxt helptext[] = {
   {"-A, --user-agent <name>",
    "Send User-Agent <name> to server",
    CURLHELP_IMPORTANT | CURLHELP_HTTP},
+  {"    --variable <name=text/@file>",
+   "Set variable",
+   CURLHELP_CURL},
   {"-v, --verbose",
    "Make the operation more talkative",
    CURLHELP_IMPORTANT | CURLHELP_VERBOSE},

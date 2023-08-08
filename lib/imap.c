@@ -45,9 +45,6 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_UTSNAME_H
-#include <sys/utsname.h>
-#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -385,11 +382,11 @@ static CURLcode imap_get_message(struct Curl_easy *data, struct bufref *out)
 
 /***********************************************************************
  *
- * state()
+ * imap_state()
  *
  * This is the ONLY way to change IMAP state!
  */
-static void state(struct Curl_easy *data, imapstate newstate)
+static void imap_state(struct Curl_easy *data, imapstate newstate)
 {
   struct imap_conn *imapc = &data->conn->proto.imapc;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -441,7 +438,7 @@ static CURLcode imap_perform_capability(struct Curl_easy *data,
   result = imap_sendf(data, "CAPABILITY");
 
   if(!result)
-    state(data, IMAP_CAPABILITY);
+    imap_state(data, IMAP_CAPABILITY);
 
   return result;
 }
@@ -458,7 +455,7 @@ static CURLcode imap_perform_starttls(struct Curl_easy *data)
   CURLcode result = imap_sendf(data, "STARTTLS");
 
   if(!result)
-    state(data, IMAP_STARTTLS);
+    imap_state(data, IMAP_STARTTLS);
 
   return result;
 }
@@ -487,7 +484,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   if(!result) {
     imapc->ssldone = ssldone;
     if(imapc->state != IMAP_UPGRADETLS)
-      state(data, IMAP_UPGRADETLS);
+      imap_state(data, IMAP_UPGRADETLS);
 
     if(imapc->ssldone) {
       imap_to_imaps(conn);
@@ -514,7 +511,7 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
   if(!data->state.aptr.user) {
-    state(data, IMAP_STOP);
+    imap_state(data, IMAP_STOP);
 
     return result;
   }
@@ -531,7 +528,7 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
   free(passwd);
 
   if(!result)
-    state(data, IMAP_LOGIN);
+    imap_state(data, IMAP_LOGIN);
 
   return result;
 }
@@ -615,7 +612,7 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
      with and end the connect phase if we don't */
   if(imapc->preauth ||
      !Curl_sasl_can_authenticate(&imapc->sasl, data)) {
-    state(data, IMAP_STOP);
+    imap_state(data, IMAP_STOP);
     return result;
   }
 
@@ -624,7 +621,7 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
 
   if(!result) {
     if(progress == SASL_INPROGRESS)
-      state(data, IMAP_AUTHENTICATE);
+      imap_state(data, IMAP_AUTHENTICATE);
     else if(!imapc->login_disabled && (imapc->preftype & IMAP_TYPE_CLEARTEXT))
       /* Perform clear text authentication */
       result = imap_perform_login(data, conn);
@@ -667,7 +664,7 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
   }
 
   if(!result)
-    state(data, IMAP_LIST);
+    imap_state(data, IMAP_LIST);
 
   return result;
 }
@@ -707,7 +704,7 @@ static CURLcode imap_perform_select(struct Curl_easy *data)
   free(mailbox);
 
   if(!result)
-    state(data, IMAP_SELECT);
+    imap_state(data, IMAP_SELECT);
 
   return result;
 }
@@ -749,7 +746,7 @@ static CURLcode imap_perform_fetch(struct Curl_easy *data)
     return CURLE_URL_MALFORMAT;
   }
   if(!result)
-    state(data, IMAP_FETCH);
+    imap_state(data, IMAP_FETCH);
 
   return result;
 }
@@ -820,7 +817,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data)
   free(mailbox);
 
   if(!result)
-    state(data, IMAP_APPEND);
+    imap_state(data, IMAP_APPEND);
 
   return result;
 }
@@ -846,7 +843,7 @@ static CURLcode imap_perform_search(struct Curl_easy *data)
   result = imap_sendf(data, "SEARCH %s", imap->query);
 
   if(!result)
-    state(data, IMAP_SEARCH);
+    imap_state(data, IMAP_SEARCH);
 
   return result;
 }
@@ -863,7 +860,7 @@ static CURLcode imap_perform_logout(struct Curl_easy *data)
   CURLcode result = imap_sendf(data, "LOGOUT");
 
   if(!result)
-    state(data, IMAP_LOGOUT);
+    imap_state(data, IMAP_LOGOUT);
 
   return result;
 }
@@ -1017,7 +1014,7 @@ static CURLcode imap_state_auth_resp(struct Curl_easy *data,
   if(!result)
     switch(progress) {
     case SASL_DONE:
-      state(data, IMAP_STOP);  /* Authenticated */
+      imap_state(data, IMAP_STOP);  /* Authenticated */
       break;
     case SASL_IDLE:            /* No mechanism left after cancellation */
       if((!imapc->login_disabled) && (imapc->preftype & IMAP_TYPE_CLEARTEXT))
@@ -1049,7 +1046,7 @@ static CURLcode imap_state_login_resp(struct Curl_easy *data,
   }
   else
     /* End of connect phase */
-    state(data, IMAP_STOP);
+    imap_state(data, IMAP_STOP);
 
   return result;
 }
@@ -1075,7 +1072,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
     result = CURLE_QUOTE_ERROR;
   else
     /* End of DO phase */
-    state(data, IMAP_STOP);
+    imap_state(data, IMAP_STOP);
 
   return result;
 }
@@ -1143,7 +1140,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
 
   if(imapcode != '*') {
     Curl_pgrsSetDownloadSize(data, -1);
-    state(data, IMAP_STOP);
+    imap_state(data, IMAP_STOP);
     return CURLE_REMOTE_FILE_NOT_FOUND;
   }
 
@@ -1178,7 +1175,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
 
       if(!chunk) {
         /* no size, we're done with the data */
-        state(data, IMAP_STOP);
+        imap_state(data, IMAP_STOP);
         return CURLE_OK;
       }
       result = Curl_client_write(data, CLIENTWRITE_BODY, pp->cache, chunk);
@@ -1224,7 +1221,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
   }
 
   /* End of DO phase */
-  state(data, IMAP_STOP);
+  imap_state(data, IMAP_STOP);
 
   return result;
 }
@@ -1242,7 +1239,7 @@ static CURLcode imap_state_fetch_final_resp(struct Curl_easy *data,
     result = CURLE_WEIRD_SERVER_REPLY;
   else
     /* End of DONE phase */
-    state(data, IMAP_STOP);
+    imap_state(data, IMAP_STOP);
 
   return result;
 }
@@ -1265,7 +1262,7 @@ static CURLcode imap_state_append_resp(struct Curl_easy *data, int imapcode,
     Curl_setup_transfer(data, -1, -1, FALSE, FIRSTSOCKET);
 
     /* End of DO phase */
-    state(data, IMAP_STOP);
+    imap_state(data, IMAP_STOP);
   }
 
   return result;
@@ -1284,7 +1281,7 @@ static CURLcode imap_state_append_final_resp(struct Curl_easy *data,
     result = CURLE_UPLOAD_FAILED;
   else
     /* End of DONE phase */
-    state(data, IMAP_STOP);
+    imap_state(data, IMAP_STOP);
 
   return result;
 }
@@ -1372,7 +1369,7 @@ static CURLcode imap_statemachine(struct Curl_easy *data,
       /* fallthrough, just stop! */
     default:
       /* internal error */
-      state(data, IMAP_STOP);
+      imap_state(data, IMAP_STOP);
       break;
     }
   } while(!result && imapc->state != IMAP_STOP && Curl_pp_moredata(pp));
@@ -1475,7 +1472,7 @@ static CURLcode imap_connect(struct Curl_easy *data, bool *done)
     return result;
 
   /* Start off waiting for the server greeting response */
-  state(data, IMAP_SERVERGREET);
+  imap_state(data, IMAP_SERVERGREET);
 
   /* Start off with an response id of '*' */
   strcpy(imapc->resptag, "*");
@@ -1511,17 +1508,17 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && !imap->custom &&
-          (imap->uid || imap->mindex || data->set.upload ||
+          (imap->uid || imap->mindex || data->state.upload ||
           data->set.mimepost.kind != MIMEKIND_NONE)) {
     /* Handle responses after FETCH or APPEND transfer has finished */
 
-    if(!data->set.upload && data->set.mimepost.kind == MIMEKIND_NONE)
-      state(data, IMAP_FETCH_FINAL);
+    if(!data->state.upload && data->set.mimepost.kind == MIMEKIND_NONE)
+      imap_state(data, IMAP_FETCH_FINAL);
     else {
       /* End the APPEND command first by sending an empty line */
       result = Curl_pp_sendf(data, &conn->proto.imapc.pp, "%s", "");
       if(!result)
-        state(data, IMAP_APPEND_FINAL);
+        imap_state(data, IMAP_APPEND_FINAL);
     }
 
     /* Run the state-machine */
@@ -1581,7 +1578,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
     selected = TRUE;
 
   /* Start the first command in the DO phase */
-  if(data->set.upload || data->set.mimepost.kind != MIMEKIND_NONE)
+  if(data->state.upload || data->set.mimepost.kind != MIMEKIND_NONE)
     /* APPEND can be executed directly */
     result = imap_perform_append(data);
   else if(imap->custom && (selected || !imap->mailbox))
@@ -1777,7 +1774,7 @@ static CURLcode imap_sendf(struct Curl_easy *data, const char *fmt, ...)
 
   /* Calculate the tag based on the connection ID and command ID */
   msnprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
-            'A' + curlx_sltosi(data->conn->connection_id % 26),
+            'A' + curlx_sltosi((long)(data->conn->connection_id % 26)),
             ++imapc->cmdid);
 
   /* start with a blank buffer */
@@ -1925,39 +1922,53 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *ptr = conn->options;
+  bool prefer_login = false;
 
   while(!result && ptr && *ptr) {
     const char *key = ptr;
     const char *value;
 
     while(*ptr && *ptr != '=')
-        ptr++;
+      ptr++;
 
     value = ptr + 1;
 
     while(*ptr && *ptr != ';')
       ptr++;
 
-    if(strncasecompare(key, "AUTH=", 5))
+    if(strncasecompare(key, "AUTH=+LOGIN", 11)) {
+      /* User prefers plaintext LOGIN over any SASL, including SASL LOGIN */
+      prefer_login = true;
+      imapc->sasl.prefmech = SASL_AUTH_NONE;
+    }
+    else if(strncasecompare(key, "AUTH=", 5)) {
+      prefer_login = false;
       result = Curl_sasl_parse_url_auth_option(&imapc->sasl,
                                                value, ptr - value);
-    else
+    }
+    else {
+      prefer_login = false;
       result = CURLE_URL_MALFORMAT;
+    }
 
     if(*ptr == ';')
       ptr++;
   }
 
-  switch(imapc->sasl.prefmech) {
-  case SASL_AUTH_NONE:
-    imapc->preftype = IMAP_TYPE_NONE;
-    break;
-  case SASL_AUTH_DEFAULT:
-    imapc->preftype = IMAP_TYPE_ANY;
-    break;
-  default:
-    imapc->preftype = IMAP_TYPE_SASL;
-    break;
+  if(prefer_login)
+    imapc->preftype = IMAP_TYPE_CLEARTEXT;
+  else {
+    switch(imapc->sasl.prefmech) {
+    case SASL_AUTH_NONE:
+      imapc->preftype = IMAP_TYPE_NONE;
+      break;
+    case SASL_AUTH_DEFAULT:
+      imapc->preftype = IMAP_TYPE_ANY;
+      break;
+    default:
+      imapc->preftype = IMAP_TYPE_SASL;
+      break;
+    }
   }
 
   return result;

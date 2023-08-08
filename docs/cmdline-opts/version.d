@@ -7,7 +7,7 @@ Category: important curl
 Example: --version
 Added: 4.0
 See-also: help manual
-Multi: boolean
+Multi: custom
 ---
 Displays information about curl and the libcurl version it uses.
 
@@ -83,3 +83,4 @@ Unix sockets support is provided.
 .IP "zstd"
 Automatic decompression (via zstd) of compressed files over HTTP is supported.
 .RE
+.IP

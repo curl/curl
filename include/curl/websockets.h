@@ -33,6 +33,7 @@ struct curl_ws_frame {
   int flags;            /* See the CURLWS_* defines */
   curl_off_t offset;    /* the offset of this data into the frame */
   curl_off_t bytesleft; /* number of pending bytes left of the payload */
+  size_t len;           /* size of the current data chunk */
 };
 
 /* flag bits */
@@ -53,13 +54,13 @@ struct curl_ws_frame {
  */
 CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
                                   size_t *recv,
-                                  struct curl_ws_frame **metap);
+                                  const struct curl_ws_frame **metap);
 
-/* sendflags for curl_ws_send() */
+/* flags for curl_ws_send() */
 #define CURLWS_PONG       (1<<6)
 
 /*
- * NAME curl_easy_send()
+ * NAME curl_ws_send()
  *
  * DESCRIPTION
  *
@@ -68,13 +69,13 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
  */
 CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
                                   size_t buflen, size_t *sent,
-                                  curl_off_t framesize,
-                                  unsigned int sendflags);
+                                  curl_off_t fragsize,
+                                  unsigned int flags);
 
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
 #define CURLWS_RAW_MODE (1<<0)
 
-CURL_EXTERN struct curl_ws_frame *curl_ws_meta(CURL *curl);
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 
 #ifdef  __cplusplus
 }

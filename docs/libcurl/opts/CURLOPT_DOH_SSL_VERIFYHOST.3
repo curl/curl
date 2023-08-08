@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_DOH_SSL_VERIFYHOST 3 "11 Feb 2021" "libcurl 7.76.0" "curl_easy_setopt options"
+.TH CURLOPT_DOH_SSL_VERIFYHOST 3 "11 Feb 2021" libcurl libcurl
 .SH NAME
 CURLOPT_DOH_SSL_VERIFYHOST \- verify the host name in the DoH SSL certificate
 .SH SYNOPSIS
@@ -55,10 +55,7 @@ When the \fIverify\fP value is set to 0L, the connection succeeds regardless of
 the names used in the certificate. Use that ability with caution!
 
 See also \fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP to verify the digital signature
-of the DoH server certificate.  If libcurl is built against NSS and
-\fICURLOPT_DOH_SSL_VERIFYPEER(3)\fP is zero,
-\fICURLOPT_DOH_SSL_VERIFYHOST(3)\fP is also set to zero and cannot be
-overridden.
+of the DoH server certificate.
 .SH DEFAULT
 2
 .SH PROTOCOLS

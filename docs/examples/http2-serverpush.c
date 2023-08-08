@@ -130,7 +130,7 @@ int my_trace(CURL *handle, curl_infotype type,
 
 #define OUTPUTFILE "dl"
 
-static int setup(CURL *hnd)
+static int setup(CURL *hnd, const char *url)
 {
   FILE *out = fopen(OUTPUTFILE, "wb");
   if(!out)
@@ -141,7 +141,7 @@ static int setup(CURL *hnd)
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
 
   /* set the same URL */
-  curl_easy_setopt(hnd, CURLOPT_URL, "https://localhost:8443/index.html");
+  curl_easy_setopt(hnd, CURLOPT_URL, url);
 
   /* please be verbose */
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
@@ -211,12 +211,16 @@ static int server_push_callback(CURL *parent,
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-int main(void)
+int main(int argc, char *argv[])
 {
   CURL *easy;
   CURLM *multi_handle;
   int transfers = 1; /* we start with one */
   struct CURLMsg *m;
+  const char *url = "https://localhost:8443/index.html";
+
+  if(argc == 2)
+    url = argv[1];
 
   /* init a multi stack */
   multi_handle = curl_multi_init();
@@ -224,7 +228,7 @@ int main(void)
   easy = curl_easy_init();
 
   /* set options */
-  if(setup(easy)) {
+  if(setup(easy, url)) {
     fprintf(stderr, "failed\n");
     return 1;
   }

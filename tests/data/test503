@@ -59,7 +59,7 @@ simple multi http:// through proxytunnel with authentication info
  <command>
 http://machine.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar
@@ -76,6 +76,7 @@ Host: machine.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: Basic dGVzdDppbmc=
 Proxy-Connection: Keep-Alive
 
+[DISCONNECT]
 </proxy>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1

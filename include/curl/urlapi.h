@@ -117,14 +117,14 @@ CURL_EXTERN void curl_url_cleanup(CURLU *handle);
  * curl_url_dup() duplicates a CURLU handle and returns a new copy. The new
  * handle must also be freed with curl_url_cleanup().
  */
-CURL_EXTERN CURLU *curl_url_dup(CURLU *in);
+CURL_EXTERN CURLU *curl_url_dup(const CURLU *in);
 
 /*
  * curl_url_get() extracts a specific part of the URL from a CURLU
  * handle. Returns error code. The returned pointer MUST be freed with
  * curl_free() afterwards.
  */
-CURL_EXTERN CURLUcode curl_url_get(CURLU *handle, CURLUPart what,
+CURL_EXTERN CURLUcode curl_url_get(const CURLU *handle, CURLUPart what,
                                    char **part, unsigned int flags);
 
 /*

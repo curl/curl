@@ -33,9 +33,9 @@ http
 http
 </features>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o log/exist%TESTNUMBER --clobber
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/exist%TESTNUMBER --clobber
 </command>
-<file name="log/exist%TESTNUMBER">
+<file name="%LOGDIR/exist%TESTNUMBER">
 to be overwritten
 </file>
 </client>
@@ -43,7 +43,7 @@ to be overwritten
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/exist%TESTNUMBER">
+<file name="%LOGDIR/exist%TESTNUMBER">
 HTTP/1.0 200 OK
 Connection: close
 Content-Type: text/plain

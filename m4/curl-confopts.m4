@@ -475,9 +475,8 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
 
 dnl CURL_CHECK_LIB_ARES
 dnl -------------------------------------------------
-dnl When c-ares library support has been requested,
-dnl performs necessary checks and adjustsments needed
-dnl to enable support of this library.
+dnl When c-ares library support has been requested, performs necessary checks
+dnl and adjustments needed to enable support of this library.
 
 AC_DEFUN([CURL_CHECK_LIB_ARES], [
   #

@@ -31,7 +31,7 @@ Find the ngtcp2 library
 This module accepts optional COMPONENTS to control the crypto library (these are
 mutually exclusive)::
 
-  OpenSSL:  Use libngtcp2_crypto_openssl
+  OpenSSL:  Use libngtcp2_crypto_quictls
   GnuTLS:   Use libngtcp2_crypto_gnutls
 
 Result Variables
@@ -71,7 +71,7 @@ endif()
 if(NGTCP2_FIND_COMPONENTS)
   set(NGTCP2_CRYPTO_BACKEND "")
   foreach(component IN LISTS NGTCP2_FIND_COMPONENTS)
-    if(component MATCHES "^(BoringSSL|OpenSSL|GnuTLS)")
+    if(component MATCHES "^(BoringSSL|quictls|wolfSSL|GnuTLS)")
       if(NGTCP2_CRYPTO_BACKEND)
         message(FATAL_ERROR "NGTCP2: Only one crypto library can be selected")
       endif()

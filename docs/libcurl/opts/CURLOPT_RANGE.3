@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_RANGE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_RANGE 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_RANGE \- byte range to request
 .SH SYNOPSIS
@@ -43,7 +43,7 @@ techniques). Unfortunately, the HTTP standard (RFC 7233 section 3.1) allows
 servers to ignore range requests so even when you set \fICURLOPT_RANGE(3)\fP
 for a request, you may end up getting the full response sent back.
 
-For RTSP, the formatting of a range should follow RFC2326 Section 12.29. For
+For RTSP, the formatting of a range should follow RFC 2326 Section 12.29. For
 RTSP, byte ranges are \fBnot\fP permitted. Instead, ranges should be given in
 \fBnpt\fP, \fButc\fP, or \fBsmpte\fP formats.
 

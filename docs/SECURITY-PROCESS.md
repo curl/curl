@@ -55,7 +55,9 @@ announcement.
 - Write a security advisory draft about the problem that explains what the
   problem is, its impact, which versions it affects, solutions or workarounds,
   when the release is out and make sure to credit all contributors properly.
-  Figure out the CWE (Common Weakness Enumeration) number for the flaw.
+  Figure out the CWE (Common Weakness Enumeration) number for the flaw. See
+  [SECURITY-ADVISORY](https://curl.se/dev/advisory.html) for help on creating
+  the advisory.
 
 - Request a CVE number from
   [HackerOne](https://docs.hackerone.com/programs/cve-requests.html)
@@ -63,10 +65,14 @@ announcement.
 - Update the "security advisory" with the CVE number.
 
 - The security team commits the fix in a private branch. The commit message
-  should ideally contain the CVE number.
+  should ideally contain the CVE number. If the severity level of the issue is
+  set to Low or Medium, the fix is allowed to get merged into the master
+  repository via a normal PR - but without mentioning it being a security
+  vulnerability.
 
-- The security team also decides on and delivers a monetary reward to the
-  reporter as per the bug-bounty policies.
+- The monetary reward part of the bug-bounty is managed by the Internet Bug
+  Bounty team and the reporter is asked to request the reward from them after
+  the issue has been completely handled and published by curl.
 
 - No more than 10 days before release, inform
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
@@ -175,8 +181,7 @@ Easily exploitable by a remote unauthenticated attacker and lead to system
 compromise (arbitrary code execution) without requiring user interaction, with
 a common configuration on a popular platform. This issue has few restrictions
 and requirements and can be exploited easily using most curl configurations.
-
-No past curl vulnerability has had this severity level.
+[Past example](https://curl.se/docs/CVE-2000-0973.html)
 
 # Not security issues
 
@@ -256,3 +261,11 @@ security vulnerabilities.
  - virtually every argument can contain sensitive data, depending on use
  - blanking all arguments would make it impractical for users to differentiate
    curl command lines in process listings
+
+## Busy-loops
+
+Busy-loops that consume 100% CPU time but eventually end (perhaps due to a set
+timeout value or otherwise) are not considered security problems. Applications
+are supposed to already handle situations when the transfer loop legitimately
+consumes 100% CPU time, so while a prolonged such busy-loop is a nasty bug, we
+do not consider it a security problem.

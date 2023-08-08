@@ -53,8 +53,6 @@ static char *max5data(curl_off_t bytes, char *max5)
               CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
               (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
 
-#if (SIZEOF_CURL_OFF_T > 4)
-
   else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
     /* 'XXXXM' is good until we're at 10000MB or above */
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
@@ -77,16 +75,8 @@ static char *max5data(curl_off_t bytes, char *max5)
     /* up to 10000PB, display without decimal: XXXXP */
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "P", bytes/ONE_PETABYTE);
 
-    /* 16384 petabytes (16 exabytes) is the maximum a 64 bit unsigned number
-       can hold, but our data type is signed so 8192PB will be the maximum. */
-
-#else
-
-  else
-    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
-
-#endif
-
+  /* 16384 petabytes (16 exabytes) is the maximum a 64 bit unsigned number can
+     hold, but our data type is signed so 8192PB will be the maximum. */
   return max5;
 }
 
@@ -173,7 +163,7 @@ bool progress_meter(struct GlobalConfig *global,
   struct timeval now;
   long diff;
 
-  if(global->noprogress)
+  if(global->noprogress || global->silent)
     return FALSE;
 
   now = tvnow();
@@ -183,7 +173,7 @@ bool progress_meter(struct GlobalConfig *global,
     header = TRUE;
     fputs("DL% UL%  Dled  Uled  Xfers  Live "
           "Total     Current  Left    Speed\n",
-          global->errors);
+          stderr);
   }
   if(final || (diff > 500)) {
     char time_left[10];
@@ -285,7 +275,7 @@ bool progress_meter(struct GlobalConfig *global,
     }
     time2str(time_spent, spent);
 
-    fprintf(global->errors,
+    fprintf(stderr,
             "\r"
             "%-3s " /* percent downloaded */
             "%-3s " /* percent uploaded */

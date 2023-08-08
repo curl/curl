@@ -38,14 +38,14 @@ lib%TESTNUMBER
 HTTP POST lower than MAX_INITIAL_POST_SIZE with progress callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip%TESTNUMBER">
+<file name="%LOGDIR/ip%TESTNUMBER">
 PASSED, UL data matched data size
 </file>
 </verify>

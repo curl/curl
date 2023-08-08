@@ -43,7 +43,7 @@ http
 -w header JSON output
 </name>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{header_json}\n' -o log/%TESTNUMBER.out
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{header_json}\n' -o %LOGDIR/%TESTNUMBER.out
 </command>
 </client>
 
@@ -64,6 +64,8 @@ Accept: */*
 "etag":["\"21025-dc7-39462498\""],
 "accept-ranges":["bytes"],
 "set-cookie":["firstcookie=want1; path=/","2cookie=want2; path=/","cookie3=want3; path=/"],
+"funny-head":["yesyes"],
+"content-type":["text/html"],
 "content-length":["6"],
 "connection":["close"]
 }

@@ -23,10 +23,23 @@
 #
 ###########################################################################
 
+package appveyor;
+
 use strict;
 use warnings;
 
-my %APPVEYOR_TEST_NAMES;
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+      appveyor_check_environment
+      appveyor_create_test_result
+      appveyor_update_test_result
+    );
+}
+
+
+my %APPVEYOR_TEST_NAMES;  # JSON and shell-quoted test names by test number
 
 sub appveyor_check_environment {
     if(defined $ENV{'APPVEYOR_API_URL'} && $ENV{'APPVEYOR_API_URL'}) {
@@ -38,20 +51,20 @@ sub appveyor_check_environment {
 sub appveyor_create_test_result {
     my ($curl, $testnum, $testname)=@_;
     $testname =~ s/\\/\\\\/g;
-    $testname =~ s/\'/\\\'/g;
     $testname =~ s/\"/\\\"/g;
+    $testname =~ s/\'/'"'"'/g;
     my $appveyor_baseurl="$ENV{'APPVEYOR_API_URL'}";
-    my $appveyor_result=`$curl --silent --noproxy "*" \\
-    --header "Content-Type: application/json" \\
-    --data "
+    my $appveyor_result=`$curl --silent --noproxy '*' \\
+    --header 'Content-Type: application/json' \\
+    --data '
         {
-            'testName': '$testname',
-            'testFramework': 'runtests.pl',
-            'fileName': 'tests/data/test$testnum',
-            'outcome': 'Running'
+            "testName": "$testname",
+            "testFramework": "runtests.pl",
+            "fileName": "tests/data/test$testnum",
+            "outcome": "Running"
         }
-    " \\
-    "$appveyor_baseurl/api/tests"`;
+    ' \\
+    '$appveyor_baseurl/api/tests'`;
     print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
     $APPVEYOR_TEST_NAMES{$testnum}=$testname;
 }
@@ -85,31 +98,31 @@ sub appveyor_update_test_result {
         $appveyor_category = 'Error';
     }
     my $appveyor_baseurl="$ENV{'APPVEYOR_API_URL'}";
-    my $appveyor_result=`$curl --silent --noproxy "*" --request PUT \\
-    --header "Content-Type: application/json" \\
-    --data "
+    my $appveyor_result=`$curl --silent --noproxy '*' --request PUT \\
+    --header 'Content-Type: application/json' \\
+    --data '
         {
-            'testName': '$testname',
-            'testFramework': 'runtests.pl',
-            'fileName': 'tests/data/test$testnum',
-            'outcome': '$appveyor_outcome',
-            'durationMilliseconds': $appveyor_duration,
-            'ErrorMessage': 'Test $testnum $appveyor_outcome'
+            "testName": "$testname",
+            "testFramework": "runtests.pl",
+            "fileName": "tests/data/test$testnum",
+            "outcome": "$appveyor_outcome",
+            "durationMilliseconds": $appveyor_duration,
+            "ErrorMessage": "Test $testnum $appveyor_outcome"
         }
-    " \\
-    "$appveyor_baseurl/api/tests"`;
+    ' \\
+    '$appveyor_baseurl/api/tests'`;
     print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
     if($appveyor_category eq 'Error') {
-        $appveyor_result=`$curl --silent --noproxy "*" \\
-        --header "Content-Type: application/json" \\
-        --data "
+        $appveyor_result=`$curl --silent --noproxy '*' \\
+        --header 'Content-Type: application/json' \\
+        --data '
             {
-                'message': '$appveyor_outcome: $testname',
-                'category': '$appveyor_category',
-                'details': 'Test $testnum $appveyor_outcome'
+                "message": "$appveyor_outcome: $testname",
+                "category": "$appveyor_category",
+                "details": "Test $testnum $appveyor_outcome"
             }
-        " \\
-        "$appveyor_baseurl/api/build/messages"`;
+        ' \\
+        '$appveyor_baseurl/api/build/messages'`;
         print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
     }
 }

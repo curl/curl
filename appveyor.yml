@@ -21,10 +21,14 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# https://ci.appveyor.com/project/curlorg/curl/history
+# Appveyor configuration
+# https://www.appveyor.com/docs/appveyor-yml/
 
 version: 7.50.0.{build}
 
 environment:
+    UNITY: "OFF"
     matrix:
       # generated CMake-based Visual Studio Release builds
       - job_name: "CMake, VS2008, Release x86, Schannel"
@@ -39,7 +43,7 @@ environment:
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
-      - job_name: "CMake, VS2022, Release x64, OpenSSL, WebSockets"
+      - job_name: "CMake, VS2022, Release x64, OpenSSL, WebSockets, Unity"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 17 2022"
@@ -53,6 +57,7 @@ environment:
         SHARED: ON
         DISABLED_TESTS: ""
         WEBSOCKETS: ON
+        UNITY: "ON"
       - job_name: "CMake, VS2022, Release arm64, Schannel, Static"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
@@ -123,7 +128,7 @@ environment:
         DISABLED_TESTS: "!1139 !1501 ~1056"
         ADD_PATH: "C:\\msys64\\usr\\bin"
       # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
-      - job_name: "CMake, mingw-w64, Debug x64, Schannel, Static, Unicode"
+      - job_name: "CMake, mingw-w64, gcc 8, Debug x64, Schannel, Static, Unicode"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
@@ -138,7 +143,7 @@ environment:
         ADD_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
-      - job_name: "CMake, mingw-w64, Debug x64, Schannel, Static, Unicode"
+      - job_name: "CMake, mingw-w64, gcc 7, Debug x64, Schannel, Static, Unicode"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
@@ -153,6 +158,21 @@ environment:
         ADD_PATH: "C:\\mingw-w64\\x86_64-7.2.0-posix-seh-rt_v5-rev1\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
+      - job_name: "CMake, mingw-w64, Debug x64, Schannel, Static, Unity"
+        APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: CMake
+        PRJ_GEN: "MSYS Makefiles"
+        PRJ_CFG: Debug
+        OPENSSL: OFF
+        SCHANNEL: ON
+        ENABLE_UNICODE: OFF
+        HTTP_ONLY: OFF
+        TESTING: OFF
+        SHARED: OFF
+        ADD_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin;C:\\msys64\\usr\\bin"
+        MSYS2_ARG_CONV_EXCL: "/*"
+        BUILD_OPT: -k
+        UNITY: "ON"
       - job_name: "CMake, mingw-w64, Debug x86, Schannel, Static"
         APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
@@ -294,6 +314,7 @@ build_script:
         -DBUILD_SHARED_LIBS=%SHARED%
         -DBUILD_TESTING=%TESTING%
         -DENABLE_WEBSOCKETS=%WEBSOCKETS%
+        -DCMAKE_UNITY_BUILD=%UNITY%
         -DCURL_WERROR=ON
         -DENABLE_DEBUG=ON
         -DENABLE_UNICODE=%ENABLE_UNICODE%
@@ -354,8 +375,17 @@ branches:
         - master
         - /\/ci$/
 
+skip_commits:
+  files:
+    - '.azure-pipelines.yml'
+    - '.circleci/**/*'
+    - '.cirrus.yml'
+    - '.github/**/*'
+    - 'packages/**/*'
+    - 'plan9/**/*'
+
 artifacts:
   - path: '**/curl.exe'
     name: curl
   - path: '**/*curl*.dll'
-    name: libcurl
+    name: libcurl dll

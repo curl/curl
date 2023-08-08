@@ -147,7 +147,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{openssl,gnutls,nss,mbedtls,wolfssl,schannel,secure-transport,amissl,bearssl,rustls} )"
+    curl_ssl_msg="no      (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,secure-transport,amissl,bearssl,rustls} )"
     curl_ssh_msg="no      (--with-{libssh,libssh2})"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -175,7 +175,7 @@ curl_headers_msg="enabled (--disable-headers-api)"
     ssl_backends=
      curl_h1_msg="enabled (internal)"
      curl_h2_msg="no      (--with-nghttp2, --with-hyper)"
-     curl_h3_msg="no      (--with-ngtcp2, --with-quiche --with-msh3)"
+     curl_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-msh3)"
 
 enable_altsvc="yes"
 hsts="yes"
@@ -185,6 +185,25 @@ dnl Save some initial values the user might have provided
 dnl
 INITIAL_LDFLAGS=$LDFLAGS
 INITIAL_LIBS=$LIBS
+
+dnl
+dnl Generates a shell script to run the compiler with LD_LIBRARY_PATH set to
+dnl the value used right now. This lets CURL_RUN_IFELSE set LD_LIBRARY_PATH to
+dnl something different but only have that affect the execution of the results
+dnl of the compile, not change the libraries for the compiler itself.
+dnl
+compilersh="run-compiler"
+CURL_SAVED_CC="$CC"
+export CURL_SAVED_CC
+CURL_SAVED_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+export CURL_SAVED_LD_LIBRARY_PATH
+cat <<\EOF > "$compilersh"
+CC="$CURL_SAVED_CC"
+export CC
+LD_LIBRARY_PATH="$CURL_SAVED_LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH
+exec $CC "$@"
+EOF
 
 dnl **********************************************************************
 dnl See which TLS backend(s) that are requested. Just do all the
@@ -279,28 +298,6 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to th
   fi
 ])
 
-OPT_NSS_AWARE=no
-AC_ARG_WITH(nss-deprecated,dnl
-AS_HELP_STRING([--with-nss-deprecated],[confirm you realize NSS is going away]),
-  if test X"$withval" != Xno; then
-    OPT_NSS_AWARE=$withval
-  fi
-)
-
-OPT_NSS=no
-AC_ARG_WITH(nss,dnl
-AS_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root]),
-  OPT_NSS=$withval
-  if test X"$withval" != Xno; then
-
-    if test X"$OPT_NSS_AWARE" = "Xno" ; then
-      AC_MSG_ERROR([NSS use must be confirmed using --with-nss-deprecated. NSS support will be dropped from curl in August 2022. See docs/DEPRECATE.md])
-    fi
-
-    [TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }NSS"]
-  fi
-)
-
 TEST_NGHTTPX=nghttpx
 AC_ARG_WITH(test-nghttpx,dnl
 AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
@@ -311,19 +308,31 @@ AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
 )
 AC_SUBST(TEST_NGHTTPX)
 
+CADDY=caddy
+AC_ARG_WITH(test-caddy,dnl
+AS_HELP_STRING([--with-test-caddy=PATH],[where to find caddy for testing]),
+  CADDY=$withval
+  if test X"$OPT_CADDY" = "Xno" ; then
+      CADDY=""
+  fi
+)
+AC_SUBST(CADDY)
+
 dnl we'd like a httpd+apachectl as test server
 dnl
+HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
                          [where to find httpd/apache2 for testing])],
   [request_httpd=$withval], [request_httpd=check])
-if test x"$request_httpd" = "xcheck"; then
+if test x"$request_httpd" = "xcheck" -o x"$request_httpd" = "xyes"; then
   if test -x "/usr/sbin/apache2" -a -x "/usr/sbin/apache2ctl"; then
     # common location on distros (debian/ubuntu)
     HTTPD="/usr/sbin/apache2"
     APACHECTL="/usr/sbin/apache2ctl"
     AC_PATH_PROG([APXS], [apxs])
-    if test "x$APXS" != "x"; then
+    if test "x$APXS" = "x"; then
       AC_MSG_NOTICE([apache2-dev not installed, httpd tests disabled])
+      HTTPD_ENABLED="no"
     fi
   else
     AC_PATH_PROG([HTTPD], [httpd])
@@ -333,38 +342,56 @@ if test x"$request_httpd" = "xcheck"; then
     AC_PATH_PROG([APACHECTL], [apachectl])
     AC_PATH_PROG([APXS], [apxs])
     if test "x$HTTPD" = "x" -o "x$APACHECTL" = "x"; then
-      AC_MSG_NOTICE([httpd/apache2 not in PATH, httpd tests disabled])
+      AC_MSG_NOTICE([httpd/apache2 not in PATH, http tests disabled])
+      HTTPD_ENABLED="no"
     fi
     if test "x$APXS" = "x"; then
-      AC_MSG_NOTICE([apxs not in PATH, httpd tests disabled])
+      AC_MSG_NOTICE([apxs not in PATH, http tests disabled])
+      HTTPD_ENABLED="no"
     fi
   fi
-else
+elif test x"$request_httpd" != "xno"; then
   HTTPD="${request_httpd}/bin/httpd"
   APACHECTL="${request_httpd}/bin/apachectl"
   APXS="${request_httpd}/bin/apxs"
   if test ! -x "${HTTPD}"; then
-    AC_MSG_NOTICE([httpd not found as ${HTTPD}, httpd tests disabled])
+    AC_MSG_NOTICE([httpd not found as ${HTTPD}, http tests disabled])
+    HTTPD_ENABLED="no"
   elif test ! -x "${APACHECTL}"; then
-    AC_MSG_NOTICE([apachectl not found as ${APACHECTL}, httpd tests disabled])
+    AC_MSG_NOTICE([apachectl not found as ${APACHECTL}, http tests disabled])
+    HTTPD_ENABLED="no"
   elif test ! -x "${APXS}"; then
-    AC_MSG_NOTICE([apxs not found as ${APXS}, httpd tests disabled])
+    AC_MSG_NOTICE([apxs not found as ${APXS}, http tests disabled])
+    HTTPD_ENABLED="no"
   else
     AC_MSG_NOTICE([using HTTPD=$HTTPD for tests])
   fi
+fi
+if test x"$HTTPD_ENABLED" = "xno"; then
+  HTTPD=""
+  APACHECTL=""
+  APXS=""
 fi
 AC_SUBST(HTTPD)
 AC_SUBST(APACHECTL)
 AC_SUBST(APXS)
 
 dnl the nghttpx we might use in httpd testing
-if test "x$TEST_NGHTTPX" != "x"; then
+if test "x$TEST_NGHTTPX" != "x" -a "x$TEST_NGHTTPX" != "xnghttpx"; then
   HTTPD_NGHTTPX="$TEST_NGHTTPX"
 else
-  AC_PATH_PROG([HTTPD_NGHTTPX], [nghttpx])
+  AC_PATH_PROG([HTTPD_NGHTTPX], [nghttpx], [],
+    [$PATH:/usr/bin:/usr/local/bin])
 fi
-    AC_PATH_PROG([APXS], [apxs])
 AC_SUBST(HTTPD_NGHTTPX)
+
+dnl the Caddy server we might use in testing
+if test "x$TEST_CADDY" != "x"; then
+  CADDY="$TEST_CADDY"
+else
+  AC_PATH_PROG([CADDY], [caddy])
+fi
+AC_SUBST(CADDY)
 
 dnl If no TLS choice has been made, check if it was explicitly disabled or
 dnl error out to force the user to decide.
@@ -378,7 +405,6 @@ Select from these:
   --with-bearssl
   --with-gnutls
   --with-mbedtls
-  --with-nss
   --with-openssl (also works for BoringSSL and libressl)
   --with-rustls
   --with-schannel
@@ -389,7 +415,7 @@ Select from these:
 fi
 
 AC_ARG_WITH(darwinssl,,
-  AC_MSG_ERROR([--with-darwin-ssl no longer works!]))
+  AC_MSG_ERROR([--with-darwin-ssl and --without-darwin-ssl no longer work!]))
 
 dnl
 dnl Detect the canonical host and target build environment
@@ -594,12 +620,25 @@ case $host in
       ]])
     ],[
       curl_mingw_original=yes
+      curl_mingw_die=yes
       AC_MSG_RESULT([yes])
     ],[
       AC_MSG_RESULT([no])
     ])
     ;;
 esac
+
+
+AC_ARG_WITH(mingw1-deprecated,dnl
+AS_HELP_STRING([--with-mingw1-deprecated],[confirm you realize support for mingw v1 is dying]),
+  if test X"$withval" != Xno; then
+    curl_mingw_die=
+  fi
+)
+
+if test -n "$curl_mingw_die"; then
+  AC_MSG_ERROR([support for mingw v1 is going away, enable temporarily with --with-mingw1-deprecated])
+fi
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
@@ -619,13 +658,11 @@ case X-"$curl_cv_native_windows" in
     CURL_CHECK_HEADER_WINSOCK2
     CURL_CHECK_HEADER_WS2TCPIP
     CURL_CHECK_HEADER_WINCRYPT
-    CURL_CHECK_HEADER_WINLDAP
     ;;
   *)
     curl_cv_header_winsock2_h="no"
     curl_cv_header_ws2tcpip_h="no"
     curl_cv_header_wincrypt_h="no"
-    curl_cv_header_winldap_h="no"
     ;;
 esac
 CURL_CHECK_WIN32_LARGEFILE
@@ -852,13 +889,11 @@ if test X"$want_hyper" != Xno; then
   AC_MSG_NOTICE([Disable RTSP support with hyper])
   AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
   AC_SUBST(CURL_DISABLE_RTSP, [1])
-
 else
-
   AC_MSG_CHECKING([whether to support rtsp])
   AC_ARG_ENABLE(rtsp,
-  AS_HELP_STRING([--enable-rtsp],[Enable RTSP support])
-  AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
+AS_HELP_STRING([--enable-rtsp],[Enable RTSP support])
+AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
   [ case "$enableval" in
     no)
        AC_MSG_RESULT(no)
@@ -1281,6 +1316,9 @@ dnl check for additional required libraries.
 dnl **********************************************************************
 CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
 
+dnl Check for even better option
+CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW
+
 dnl **********************************************************************
 dnl The preceding library checks are all potentially useful for test
 dnl servers and libtest cases which require networking and clock_gettime
@@ -1645,16 +1683,19 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
 fi
 
 if test x$CURL_DISABLE_LDAP != x1 ; then
-  AC_CHECK_FUNCS([ldap_url_parse])
+  AC_CHECK_FUNCS([ldap_url_parse \
+                  ldap_init_fd])
 
   if test "$LDAPLIBNAME" = "wldap32"; then
     curl_ldap_msg="enabled (winldap)"
     AC_DEFINE(USE_WIN32_LDAP, 1, [Use Windows LDAP implementation])
   else
-    curl_ldap_msg="enabled (OpenLDAP)"
     if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then
+      curl_ldap_msg="enabled (OpenLDAP)"
       AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
       AC_SUBST(USE_OPENLDAP, [1])
+    else
+      curl_ldap_msg="enabled (ancient OpenLDAP)"
     fi
   fi
 fi
@@ -1751,9 +1792,17 @@ AC_MSG_CHECKING([if argv can be written to])
 CURL_RUN_IFELSE([[
 int main(int argc, char **argv)
 {
+#ifdef _WIN32
+  /* on Windows, writing to the argv does not hide the argument in
+     process lists so it can just be skipped */
+  (void)argc;
+  (void)argv;
+  return 1;
+#else
   (void)argc;
   argv[0][0] = ' ';
   return (argv[0][0] == ' ')?0:1;
+#endif
 }
 ]],[
   curl_cv_writable_argv=yes
@@ -2019,7 +2068,6 @@ CURL_WITH_MBEDTLS
 CURL_WITH_WOLFSSL
 CURL_WITH_BEARSSL
 CURL_WITH_RUSTLS
-CURL_WITH_NSS
 
 dnl link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$USE_SCHANNEL" = "x1"; then
@@ -2032,11 +2080,11 @@ if test "x$curl_cv_native_windows" = "xyes" &&
   LIBS="-lbcrypt $LIBS"
 fi
 
-case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED"
+case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED"
 in
 x)
   AC_MSG_ERROR([TLS not detected, you will not be able to use HTTPS, FTPS, NTLM and more.
-Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl or --with-rustls to address this.])
+Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl or --with-rustls to address this.])
   ;;
 x1)
   # one SSL backend is enabled
@@ -2049,7 +2097,7 @@ xD)
   ;;
 xD*)
   AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an ssl library
-(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl, --with-rustls).
+(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl, --with-rustls).
 Since these are conflicting parameters, verify which is the desired one and drop the other.])
   ;;
 *)
@@ -2132,7 +2180,7 @@ fi
 AM_CONDITIONAL([USE_GSASL], [test "$curl_gsasl_msg" = "enabled"])
 
 AC_ARG_WITH(libmetalink,,
-  AC_MSG_ERROR([--with-libmetalink no longer works!]))
+  AC_MSG_ERROR([--with-libmetalink and --without-libmetalink no longer work!]))
 
 dnl **********************************************************************
 dnl Check for the presence of LIBSSH2 libraries and headers
@@ -2170,7 +2218,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
     CURL_CHECK_PKGCONFIG(libssh2)
 
     if test "$PKGCONFIG" != "no" ; then
-      LIB_SSH2=`$PKGCONFIG --libs libssh2`
+      LIB_SSH2=`$PKGCONFIG --libs-only-l libssh2`
       LD_SSH2=`$PKGCONFIG --libs-only-L libssh2`
       CPP_SSH2=`$PKGCONFIG --cflags-only-I libssh2`
       version=`$PKGCONFIG --modversion libssh2`
@@ -2432,8 +2480,6 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="OPENSSL_"
         elif test "x$GNUTLS_ENABLED" = "x1"; then
           versioned_symbols_flavour="GNUTLS_"
-        elif test "x$NSS_ENABLED" = "x1"; then
-          versioned_symbols_flavour="NSS_"
         elif test "x$WOLFSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="WOLFSSL_"
         elif test "x$SCHANNEL_ENABLED" = "x1"; then
@@ -2755,15 +2801,17 @@ if test X"$want_nghttp2" != Xno; then
     dnl no nghttp2 pkg-config found and no custom directory specified,
     dnl deal with it
     AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
+  else
+    LIB_H2="-lnghttp2"
   fi
 
   LDFLAGS="$LDFLAGS $LD_H2"
   CPPFLAGS="$CPPFLAGS $CPP_H2"
   LIBS="$LIB_H2 $LIBS"
 
-  # use nghttp2_session_set_local_window_size to require nghttp2
-  # >= 1.12.0
-  AC_CHECK_LIB(nghttp2, nghttp2_session_set_local_window_size,
+  # use nghttp2_session_get_stream_local_window_size to require nghttp2
+  # >= 1.15.0
+  AC_CHECK_LIB(nghttp2, nghttp2_session_get_stream_local_window_size,
     [
      AC_CHECK_HEADERS(nghttp2/nghttp2.h,
         curl_h2_msg="enabled (nghttp2)"
@@ -2873,42 +2921,42 @@ if test X"$want_tcp2" != Xno; then
 fi
 
 if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1"; then
-  dnl backup the pre-ngtcp2_crypto_openssl variables
+  dnl backup the pre-ngtcp2_crypto_quictls variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  CURL_CHECK_PKGCONFIG(libngtcp2_crypto_openssl, $want_tcp2_path)
+  CURL_CHECK_PKGCONFIG(libngtcp2_crypto_quictls, $want_tcp2_path)
 
   if test "$PKGCONFIG" != "no" ; then
-    LIB_NGTCP2_CRYPTO_OPENSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path])
-      $PKGCONFIG --libs-only-l libngtcp2_crypto_openssl`
-    AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_OPENSSL])
+    LIB_NGTCP2_CRYPTO_QUICTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+      $PKGCONFIG --libs-only-l libngtcp2_crypto_quictls`
+    AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_QUICTLS])
 
-    CPP_NGTCP2_CRYPTO_OPENSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
-      $PKGCONFIG --cflags-only-I libngtcp2_crypto_openssl`
-    AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_OPENSSL])
+    CPP_NGTCP2_CRYPTO_QUICTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
+      $PKGCONFIG --cflags-only-I libngtcp2_crypto_quictls`
+    AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_QUICTLS])
 
-    LD_NGTCP2_CRYPTO_OPENSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path])
-      $PKGCONFIG --libs-only-L libngtcp2_crypto_openssl`
-    AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_OPENSSL])
+    LD_NGTCP2_CRYPTO_QUICTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+      $PKGCONFIG --libs-only-L libngtcp2_crypto_quictls`
+    AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_QUICTLS])
 
-    LDFLAGS="$LDFLAGS $LD_NGTCP2_CRYPTO_OPENSSL"
-    CPPFLAGS="$CPPFLAGS $CPP_NGTCP2_CRYPTO_OPENSSL"
-    LIBS="$LIB_NGTCP2_CRYPTO_OPENSSL $LIBS"
+    LDFLAGS="$LDFLAGS $LD_NGTCP2_CRYPTO_QUICTLS"
+    CPPFLAGS="$CPPFLAGS $CPP_NGTCP2_CRYPTO_QUICTLS"
+    LIBS="$LIB_NGTCP2_CRYPTO_QUICTLS $LIBS"
 
     if test "x$cross_compiling" != "xyes"; then
-      DIR_NGTCP2_CRYPTO_OPENSSL=`echo $LD_NGTCP2_CRYPTO_OPENSSL | $SED -e 's/^-L//'`
+      DIR_NGTCP2_CRYPTO_QUICTLS=`echo $LD_NGTCP2_CRYPTO_QUICTLS | $SED -e 's/^-L//'`
     fi
-    AC_CHECK_LIB(ngtcp2_crypto_openssl, ngtcp2_crypto_recv_client_initial_cb,
+    AC_CHECK_LIB(ngtcp2_crypto_quictls, ngtcp2_crypto_recv_client_initial_cb,
       [
        AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
           NGTCP2_ENABLED=1
-          AC_DEFINE(USE_NGTCP2_CRYPTO_OPENSSL, 1, [if ngtcp2_crypto_openssl is in use])
-          AC_SUBST(USE_NGTCP2_CRYPTO_OPENSSL, [1])
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_OPENSSL"
+          AC_DEFINE(USE_NGTCP2_CRYPTO_QUICTLS, 1, [if ngtcp2_crypto_quictls is in use])
+          AC_SUBST(USE_NGTCP2_CRYPTO_QUICTLS, [1])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_QUICTLS"
           export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_OPENSSL to CURL_LIBRARY_PATH])
+          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_QUICTLS to CURL_LIBRARY_PATH])
        )
       ],
         dnl not found, revert back to clean variables
@@ -2918,11 +2966,11 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1"; then
     )
 
   else
-    dnl no ngtcp2_crypto_openssl pkg-config found, deal with it
+    dnl no ngtcp2_crypto_quictls pkg-config found, deal with it
     if test X"$want_tcp2" != Xdefault; then
       dnl To avoid link errors, we do not allow --with-ngtcp2 without
       dnl a pkgconfig file
-      AC_MSG_ERROR([--with-ngtcp2 was specified but could not find ngtcp2_crypto_openssl pkg-config file.])
+      AC_MSG_ERROR([--with-ngtcp2 was specified but could not find ngtcp2_crypto_quictls pkg-config file.])
     fi
   fi
 fi
@@ -3193,7 +3241,7 @@ if test X"$want_quiche" != Xno; then
     if test "x$cross_compiling" != "xyes"; then
       DIR_QUICHE=`echo $LD_QUICHE | $SED -e 's/^-L//'`
     fi
-    AC_CHECK_LIB(quiche, quiche_connect,
+    AC_CHECK_LIB(quiche, quiche_conn_send_ack_eliciting,
       [
        AC_CHECK_HEADERS(quiche.h,
           experimental="$experimental HTTP3"
@@ -3446,6 +3494,9 @@ CPPFLAGS="-I$srcdir/include $CPPFLAGS"
 CURL_SIZEOF(curl_off_t, [
 #include <curl/system.h>
 ])
+CURL_SIZEOF(curl_socket_t, [
+#include <curl/curl.h>
+])
 CPPFLAGS=$o
 
 AC_CHECK_TYPE(long long,
@@ -3454,17 +3505,8 @@ AC_CHECK_TYPE(long long,
    longlong="yes"
 )
 
-
 if test ${ac_cv_sizeof_curl_off_t} -lt 8; then
-  AC_ARG_WITH(n64-deprecated,dnl
-AS_HELP_STRING([--with-n64-deprecated],[confirm you realize support for systems without 64 bit data types is going away]),
-  if test X"$withval" != Xno; then
-    OPT_N64_AWARE=$withval
-  fi
-)
-  if test -z "$OPT_N64_AWARE"; then
-    AC_MSG_ERROR([support for systems without 64 bit curl_off_t is deprecated, use --with-n64-deprecated until then])
-  fi
+  AC_MSG_ERROR([64 bit curl_off_t is required])
 fi
 
 # check for ssize_t
@@ -3617,7 +3659,8 @@ AC_CHECK_FUNCS([fnmatch \
   setrlimit \
   snprintf \
   utime \
-  utimes
+  utimes \
+  arc4random
 ],[
 ],[
   func="$ac_func"
@@ -4084,6 +4127,32 @@ AS_HELP_STRING([--disable-mime],[Disable mime API support]),
 )
 
 dnl ************************************************************
+dnl disable form API support
+dnl
+AC_MSG_CHECKING([whether to support the form API])
+AC_ARG_ENABLE(form-api,
+AS_HELP_STRING([--enable-form-api],[Enable form API support])
+AS_HELP_STRING([--disable-form-api],[Disable form API support]),
+[ case "$enableval" in
+  no)  AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_FORM_API, 1, [disable form API])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       test "$enable_mime" = no &&
+         AC_MSG_ERROR(MIME support needs to be enabled in order to enable form API support)
+       ;;
+  esac ],
+[
+  if test "$enable_mime" = no; then
+    enable_form_api=no
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_FORM_API, 1, [disable form API])
+  else
+    AC_MSG_RESULT(yes)
+  fi ]
+)
+
+dnl ************************************************************
 dnl disable date parsing
 dnl
 AC_MSG_CHECKING([whether to support date parsing])
@@ -4214,14 +4283,13 @@ AS_HELP_STRING([--disable-headers-api],[Disable headers-api support]),
 
 dnl only check for HSTS if there's SSL present
 if test -n "$SSL_ENABLED"; then
-
   dnl ************************************************************
   dnl switch on/off hsts
   dnl
   AC_MSG_CHECKING([whether to support HSTS])
   AC_ARG_ENABLE(hsts,
-  AS_HELP_STRING([--enable-hsts],[Enable HSTS support])
-  AS_HELP_STRING([--disable-hsts],[Disable HSTS support]),
+AS_HELP_STRING([--enable-hsts],[Enable HSTS support])
+AS_HELP_STRING([--disable-hsts],[Disable HSTS support]),
   [ case "$enableval" in
     no)
        AC_MSG_RESULT(no)
@@ -4350,6 +4418,8 @@ else
 fi
 AC_SUBST(LIBCURL_NO_SHARED)
 
+rm $compilersh
+
 dnl
 dnl For keeping supported features and protocols also in pkg-config file
 dnl since it is more cross-compile friendly than curl-config
@@ -4420,7 +4490,7 @@ use_curl_ntlm_core=no
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
     "x$CURL_DISABLE_NTLM" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
+      -o "x$GNUTLS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
       -o "x$WOLFSSL_NTLM" = "x1"; then
@@ -4459,7 +4529,6 @@ dnl if not explicitly turned off, HTTPS-proxy comes with some TLS backends
 if test "x$https_proxy" != "xno"; then
   if test "x$OPENSSL_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" \
-      -o "x$NSS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \
       -o "x$RUSTLS_ENABLED" = "x1" \
       -o "x$BEARSSL_ENABLED" = "x1" \
@@ -4645,7 +4714,9 @@ AC_CONFIG_FILES([Makefile \
            tests/server/Makefile \
            tests/libtest/Makefile \
            tests/unit/Makefile \
-           tests/tests-httpd/config.ini \
+           tests/http/config.ini \
+           tests/http/Makefile \
+           tests/http/clients/Makefile \
            packages/Makefile \
            packages/vms/Makefile \
            curl-config \
@@ -4654,8 +4725,6 @@ AC_CONFIG_FILES([Makefile \
 AC_OUTPUT
 
 CURL_GENERATE_CONFIGUREHELP_PM
-
-XC_AMEND_DISTCLEAN([lib src tests/unit tests/server tests/libtest docs/examples])
 
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 

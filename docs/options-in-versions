@@ -16,6 +16,7 @@
 --append (-a)                        4.8
 --aws-sigv4                          7.75.0
 --basic                              7.10.6
+--ca-native                          8.2.0
 --cacert                             7.5
 --capath                             7.9.8
 --cert (-E)                          5.0
@@ -81,6 +82,7 @@
 --globoff (-g)                       7.6
 --happy-eyeballs-timeout-ms          7.59.0
 --haproxy-protocol                   7.60.0
+--haproxy-clientip                   8.2.0
 --head (-I)                          4.0
 --header (-H)                        5.0
 --help (-h)                          4.0
@@ -157,6 +159,7 @@
 --proxy (-x)                         4.0
 --proxy-anyauth                      7.13.2
 --proxy-basic                        7.12.0
+--proxy-ca-native                    8.2.0
 --proxy-cacert                       7.52.0
 --proxy-capath                       7.52.0
 --proxy-cert                         7.52.0
@@ -165,6 +168,7 @@
 --proxy-crlfile                      7.52.0
 --proxy-digest                       7.12.0
 --proxy-header                       7.37.0
+--proxy-http2                        8.1.0
 --proxy-insecure                     7.52.0
 --proxy-key                          7.52.0
 --proxy-key-type                     7.52.0
@@ -248,6 +252,8 @@
 --tr-encoding                        7.21.6
 --trace                              7.9.7
 --trace-ascii                        7.9.7
+--trace-config                       8.3.0
+--trace-ids                          8.2.0
 --trace-time                         7.14.0
 --unix-socket                        7.40.0
 --upload-file (-T)                   4.0
@@ -256,6 +262,7 @@
 --use-ascii (-B)                     5.0
 --user (-u)                          4.0
 --user-agent (-A)                    4.5.1
+--variable                           8.3.0
 --verbose (-v)                       4.0
 --version (-V)                       4.0
 --write-out (-w)                     6.5

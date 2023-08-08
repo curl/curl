@@ -181,13 +181,13 @@ curl_easy_strerror(CURLcode error)
   case CURLE_INTERFACE_FAILED:
     return "Failed binding local connection end";
 
-  case CURLE_TOO_MANY_REDIRECTS :
+  case CURLE_TOO_MANY_REDIRECTS:
     return "Number of redirects hit maximum amount";
 
   case CURLE_UNKNOWN_OPTION:
     return "An unknown option was passed in to libcurl";
 
-  case CURLE_SETOPT_OPTION_SYNTAX :
+  case CURLE_SETOPT_OPTION_SYNTAX:
     return "Malformed option provided in a setopt";
 
   case CURLE_GOT_NOTHING:
@@ -938,7 +938,7 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(!get_winapi_error(err, buf, buflen)) {
-    msnprintf(buf, buflen, "Unknown error %u (0x%08X)", err, err);
+    msnprintf(buf, buflen, "Unknown error %lu (0x%08lX)", err, err);
   }
 #else
   {

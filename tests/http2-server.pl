@@ -27,9 +27,11 @@
 # nghttpx runs as a proxy in front of our "actual" HTTP/1 server.
 use Cwd;
 use Cwd 'abs_path';
+use File::Basename;
 
-my $pidfile = "log/nghttpx.pid";
-my $logfile = "log/http2.log";
+my $logdir = "log";
+my $pidfile = "$logdir/nghttpx.pid";
+my $logfile = "$logdir/http2.log";
 my $nghttpx = "nghttpx";
 my $listenport = 9015;
 my $listenport2 = 9016;
@@ -81,6 +83,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--conf') {
         if($ARGV[1]) {
             $conf = $ARGV[1];
@@ -93,8 +101,7 @@ while(@ARGV) {
     shift @ARGV;
 }
 
-my $path   = getcwd();
-my $srcdir = $path;
+my $srcdir = dirname(__FILE__);
 $certfile = "$srcdir/certs/$cert.pem";
 $keyfile = "$srcdir/certs/$cert.key";
 $certfile = abs_path($certfile);

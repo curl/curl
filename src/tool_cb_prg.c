@@ -116,8 +116,8 @@ static void fly(struct ProgressData *bar, bool moved)
 
 #define MAX_BARLENGTH 256
 
-#if (SIZEOF_CURL_OFF_T == 4)
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFF)
+#if (SIZEOF_CURL_OFF_T < 8)
+#error "too small curl_off_t"
 #else
    /* assume SIZEOF_CURL_OFF_T == 8 */
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
@@ -274,7 +274,7 @@ void progressbarinit(struct ProgressData *bar,
   else if(bar->width > MAX_BARLENGTH)
     bar->width = MAX_BARLENGTH;
 
-  bar->out = config->global->errors;
+  bar->out = stderr;
   bar->tick = 150;
   bar->barmove = 1;
 }

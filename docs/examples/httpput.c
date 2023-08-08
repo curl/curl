@@ -101,8 +101,8 @@ int main(int argc, char **argv)
     /* now specify which file to upload */
     curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
 
-    /* provide the size of the upload, we specicially typecast the value
-       to curl_off_t since we must be sure to use the correct data size */
+    /* provide the size of the upload, we typecast the value to curl_off_t
+       since we must be sure to use the correct data size */
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
                      (curl_off_t)file_info.st_size);
 

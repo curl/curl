@@ -60,10 +60,8 @@ void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
 #endif
 
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
-void Curl_data_priority_cleanup(struct Curl_easy *data);
 void Curl_data_priority_clear_state(struct Curl_easy *data);
 #else
-#define Curl_data_priority_cleanup(x)
 #define Curl_data_priority_clear_state(x)
 #endif /* !(defined(USE_HTTP2) || defined(USE_HTTP3)) */
 

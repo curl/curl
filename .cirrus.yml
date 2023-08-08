@@ -21,16 +21,31 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Cirrus CI configuration
 # https://cirrus-ci.com/github/curl/curl
+#
+# Cirrus CI configuration:
+# https://cirrus-ci.org/guide/writing-tasks/
 
 freebsd_task:
+  skip: "changesIncludeOnly(
+    '**/CMakeLists.txt',
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'CMake/**',
+    'packages/**',
+    'plan9/**',
+    'projects/**',
+    'winbuild/**'
+    )"
+
   name: FreeBSD
 
   matrix:
-    - name: FreeBSD 13.1
+    - name: FreeBSD 13.2
       freebsd_instance:
-        image_family: freebsd-13-1
+        image_family: freebsd-13-2
     - name: FreeBSD 12.4
       freebsd_instance:
         image_family: freebsd-12-4
@@ -38,7 +53,7 @@ freebsd_task:
   env:
     CIRRUS_CLONE_DEPTH: 10
     CRYPTOGRAPHY_DONT_BUILD_RUST: 1
-    MAKE_FLAGS: -j 2
+    MAKE_FLAGS: -j 3
 
   pkginstall_script:
     - pkg update -f
@@ -77,6 +92,15 @@ freebsd_task:
     - make V=1 install
 
 windows_task:
+  skip: "changesIncludeOnly(
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'packages/**',
+    'plan9/**'
+    )"
+
   name: Windows
   timeout_in: 120m
   windows_container:
@@ -121,7 +145,7 @@ windows_task:
   env:
     CIRRUS_CLONE_DEPTH: 10
     MSYS2_PATH_TYPE: inherit
-    MAKEFLAGS: -j 2
+    MAKEFLAGS: -j 3
 
   prepare_script: |
     %container_cmd% -l -c "cd $(echo '%cd%') && %prepare%"
@@ -135,6 +159,17 @@ windows_task:
     %container_cmd% -l -c "cd $(echo '%cd%') && %make_cmd% TFLAGS='!IDN !SCP ~612 ~1056 %tests%' test-ci"
 
 macos_task:
+  skip: "changesIncludeOnly(
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'packages/**',
+    'plan9/**',
+    'projects/**',
+    'winbuild/**'
+    )"
+
   name: macOS arm64
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-xcode:latest
@@ -206,11 +241,11 @@ macos_task:
 
   env:
     CIRRUS_CLONE_DEPTH: 10
-    MAKE_FLAGS: -j 4
+    MAKE_FLAGS: -j 12
 
   pkginstall_script:
     - echo libtool autoconf automake pkg-config ${install_packages} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-    - brew update && for i in 1 2 3; do brew bundle install --no-lock --file /tmp/Brewfile && break || sleep 1; done
+    - "while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done"
     - sudo -H python3 -m pip install --upgrade pip
     - sudo -H python3 -m pip install impacket
   configure_script:
@@ -222,3 +257,38 @@ macos_task:
     - make V=1 test-ci
   install_script:
     - sudo -H make V=1 install
+
+linux_musl_task:
+  skip: "changesIncludeOnly(
+    '**/CMakeLists.txt',
+    '.azure-pipelines.yml',
+    '.circleci/**',
+    '.github/**',
+    'appveyor.yml',
+    'CMake/**',
+    'packages/**',
+    'plan9/**',
+    'projects/**',
+    'winbuild/**'
+    )"
+  name: Linux MUSL
+  container:
+    image: alpine:3.18
+    memory: 800M
+
+  env:
+    CIRRUS_CLONE_DEPTH: 10
+    MAKEFLAGS: -j 3
+
+  pkginstall_script:
+    - apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo
+  configure_script:
+    - autoreconf -fi
+    - ./configure --enable-warnings --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
+  compile_script:
+    - make V=1 && make V=1 examples && make -C tests V=1
+  test_script:
+    # TODO: ssh tests don't work, likely because we're running as root
+    - USER=nobody make V=1 test-ci
+  install_script:
+    - make V=1 install

@@ -24,6 +24,7 @@
 #include "tool_setup.h"
 
 #include "tool_cfgable.h"
+#include "tool_formparse.h"
 #include "tool_main.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -53,6 +54,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->useragent);
   Curl_safefree(config->altsvc);
   Curl_safefree(config->hsts);
+  Curl_safefree(config->haproxy_clientip);
   curl_slist_free_all(config->cookies);
   Curl_safefree(config->cookiejar);
   curl_slist_free_all(config->cookiefiles);

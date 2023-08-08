@@ -370,7 +370,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
 
       /* tsize should be ignored on upload: Who cares about the size of the
          remote file? */
-      if(!data->set.upload) {
+      if(!data->state.upload) {
         if(!tsize) {
           failf(data, "invalid tsize -:%s:- value in OACK packet", value);
           return CURLE_TFTP_ILLEGAL;
@@ -451,7 +451,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
       return result;
     }
 
-    if(data->set.upload) {
+    if(data->state.upload) {
       /* If we are uploading, send an WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
       state->data->req.upload_fromhere =
@@ -486,7 +486,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
     if(!data->set.tftp_no_options) {
       char buf[64];
       /* add tsize option */
-      if(data->set.upload && (data->state.infilesize != -1))
+      if(data->state.upload && (data->state.infilesize != -1))
         msnprintf(buf, sizeof(buf), "%" CURL_FORMAT_CURL_OFF_T,
                   data->state.infilesize);
       else
@@ -540,7 +540,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
     break;
 
   case TFTP_EVENT_OACK:
-    if(data->set.upload) {
+    if(data->state.upload) {
       result = tftp_connect_for_tx(state, event);
     }
     else {

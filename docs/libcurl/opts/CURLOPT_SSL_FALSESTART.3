@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSL_FALSESTART 3 "14 Feb 2015" "libcurl 7.41.0" "curl_easy_setopt options"
+.TH CURLOPT_SSL_FALSESTART 3 "14 Feb 2015" libcurl libcurl
 .SH NAME
 CURLOPT_SSL_FALSESTART \- TLS false start
 .SH SYNOPSIS
@@ -52,8 +52,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.42.0. This option is currently only supported by the NSS and
-Secure Transport (on iOS 7.0 or later, or OS X 10.9 or later) TLS backends.
+Added in 7.42.0. This option is currently only supported by the Secure
+Transport (on iOS 7.0 or later, or OS X 10.9 or later) TLS backend.
 .SH RETURN VALUE
 Returns CURLE_OK if false start is supported by the SSL backend, otherwise
 returns CURLE_NOT_BUILT_IN.

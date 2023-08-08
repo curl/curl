@@ -35,9 +35,9 @@ http
 Two globbed HTTP PUTs, the second upload file is missing
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T '{log/in%TESTNUMBER,log/bad%TESTNUMBER}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T '{%LOGDIR/in%TESTNUMBER,%LOGDIR/bad%TESTNUMBER}'
 </command>
-<file name="log/in%TESTNUMBER">
+<file name="%LOGDIR/in%TESTNUMBER">
 surprise!
 </file>
 </client>
@@ -51,7 +51,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 10
-Expect: 100-continue
 
 surprise!
 </protocol>

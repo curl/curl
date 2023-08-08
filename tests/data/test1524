@@ -45,9 +45,9 @@ http
 HTTP PUT with 303 redirect
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -T log/upload%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -T %LOGDIR/upload%TESTNUMBER.txt
 </command>
-<file name="log/upload%TESTNUMBER.txt">
+<file name="%LOGDIR/upload%TESTNUMBER.txt">
 moo
 </file>
 </client>
@@ -61,7 +61,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 4
-Expect: 100-continue
 
 moo
 GET /blah/moo.html&testcase=/%TESTNUMBER0002 HTTP/1.1

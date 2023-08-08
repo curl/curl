@@ -79,6 +79,9 @@ static const char *disabled[]={
 #ifndef USE_XATTR
   "xattr",
 #endif
+#ifdef CURL_DISABLE_FORM_API
+  "form-api",
+#endif
   NULL
 };
 

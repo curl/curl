@@ -115,7 +115,11 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
   /* Parse the login details if specified. It not then we treat NULL as a hint
      to clear the existing data */
   if(option) {
-    result = Curl_parse_login_details(option, strlen(option),
+    size_t len = strlen(option);
+    if(len > CURL_MAX_INPUT_LENGTH)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
+    result = Curl_parse_login_details(option, len,
                                       (userp ? &user : NULL),
                                       (passwdp ? &passwd : NULL),
                                       NULL);
@@ -174,7 +178,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
 
       *val |= h->protocol;
     }
-  } while(str++);
+  } while(str && str++);
 
   if(!*val)
     /* no protocol listed */
@@ -329,8 +333,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * We want to sent data to the remote host. If this is HTTP, that equals
      * using the PUT request.
      */
-    data->set.upload = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    if(data->set.upload) {
+    arg = va_arg(param, long);
+    if(arg) {
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->set.method = HTTPREQ_PUT;
       data->set.opt_no_body = FALSE; /* this is implied */
@@ -660,10 +664,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     }
     else
       data->set.method = HTTPREQ_GET;
-    data->set.upload = FALSE;
     break;
 
-#ifndef CURL_DISABLE_MIME
+#ifndef CURL_DISABLE_FORM_API
   case CURLOPT_HTTPPOST:
     /*
      * Set to make us do HTTP POST
@@ -884,7 +887,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     if(va_arg(param, long)) {
       data->set.method = HTTPREQ_GET;
-      data->set.upload = FALSE; /* switch off upload */
       data->set.opt_no_body = FALSE; /* this is implied */
     }
     break;
@@ -895,22 +897,38 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * the listed enums in curl/curl.h.
      */
     arg = va_arg(param, long);
-    if(arg < CURL_HTTP_VERSION_NONE)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-#ifdef ENABLE_QUIC
-    if(arg == CURL_HTTP_VERSION_3)
-      ;
-    else
-#endif
-#ifndef USE_HTTP2
-    if(arg >= CURL_HTTP_VERSION_2)
-      return CURLE_UNSUPPORTED_PROTOCOL;
-#else
-    if(arg >= CURL_HTTP_VERSION_LAST)
-      return CURLE_UNSUPPORTED_PROTOCOL;
-    if(arg == CURL_HTTP_VERSION_NONE)
+    switch(arg) {
+    case CURL_HTTP_VERSION_NONE:
+#ifdef USE_HTTP2
+      /* TODO: this seems an undesirable quirk to force a behaviour on
+       * lower implementations that they should recognize independently? */
       arg = CURL_HTTP_VERSION_2TLS;
 #endif
+      /* accepted */
+      break;
+    case CURL_HTTP_VERSION_1_0:
+    case CURL_HTTP_VERSION_1_1:
+      /* accepted */
+      break;
+#ifdef USE_HTTP2
+    case CURL_HTTP_VERSION_2_0:
+    case CURL_HTTP_VERSION_2TLS:
+    case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
+      /* accepted */
+      break;
+#endif
+#ifdef ENABLE_QUIC
+    case CURL_HTTP_VERSION_3:
+    case CURL_HTTP_VERSION_3ONLY:
+      /* accepted */
+      break;
+#endif
+    default:
+      /* not accepted */
+      if(arg < CURL_HTTP_VERSION_NONE)
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      return CURLE_UNSUPPORTED_PROTOCOL;
+    }
     data->set.httpwant = (unsigned char)arg;
     break;
 
@@ -1139,7 +1157,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_PROXYTYPE:
     /*
-     * Set proxy type. HTTP/HTTP_1_0/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
+     * Set proxy type.
      */
     arg = va_arg(param, long);
     if((arg < CURLPROXY_HTTP) || (arg > CURLPROXY_SOCKS5_HOSTNAME))
@@ -1452,7 +1470,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_TIMEOUT_MS:
     uarg = va_arg(param, unsigned long);
-    if(uarg >= UINT_MAX)
+    if(uarg > UINT_MAX)
       uarg = UINT_MAX;
     data->set.timeout = (unsigned int)uarg;
     break;
@@ -1470,7 +1488,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_CONNECTTIMEOUT_MS:
     uarg = va_arg(param, unsigned long);
-    if(uarg >= UINT_MAX)
+    if(uarg > UINT_MAX)
       uarg = UINT_MAX;
     data->set.connecttimeout = (unsigned int)uarg;
     break;
@@ -1481,7 +1499,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * The maximum time for curl to wait for FTP server connect
      */
     uarg = va_arg(param, unsigned long);
-    if(uarg >= UINT_MAX)
+    if(uarg > UINT_MAX)
       uarg = UINT_MAX;
     data->set.accepttimeout = (unsigned int)uarg;
     break;
@@ -1848,6 +1866,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set to send the HAProxy Proxy Protocol header
      */
     data->set.haproxyprotocol = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+  case CURLOPT_HAPROXY_CLIENT_IP:
+    /*
+     * Set the client IP to send through HAProxy PROXY protocol
+     */
+    result = Curl_setstropt(&data->set.str[STRING_HAPROXY_CLIENT_IP],
+                            va_arg(param, char *));
+    /* We enable implicitly the HAProxy protocol if we use this flag. */
+    data->set.haproxyprotocol = TRUE;
     break;
 #endif
   case CURLOPT_INTERFACE:
@@ -2353,7 +2380,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     if((arg < CURLUSESSL_NONE) || (arg >= CURLUSESSL_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.use_ssl = (curl_usessl)arg;
+    data->set.use_ssl = (unsigned char)arg;
     break;
 
   case CURLOPT_SSL_OPTIONS:
@@ -2693,7 +2720,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* Set the list of mail recipients */
     data->set.mail_rcpt = va_arg(param, struct curl_slist *);
     break;
-  case CURLOPT_MAIL_RCPT_ALLLOWFAILS:
+  case CURLOPT_MAIL_RCPT_ALLOWFAILS:
     /* allow RCPT TO command to fail for some recipients */
     data->set.mail_rcpt_allowfails = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
@@ -2833,7 +2860,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.fnmatch = va_arg(param, curl_fnmatch_callback);
     break;
   case CURLOPT_CHUNK_DATA:
-    data->wildcard.customptr = va_arg(param, void *);
+    data->set.wildcardptr = va_arg(param, void *);
     break;
   case CURLOPT_FNMATCH_DATA:
     data->set.fnmatch_data = va_arg(param, void *);
@@ -2981,7 +3008,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
     uarg = va_arg(param, unsigned long);
-    if(uarg >= UINT_MAX)
+    if(uarg > UINT_MAX)
       uarg = UINT_MAX;
     data->set.happy_eyeballs_timeout = (unsigned int)uarg;
     break;

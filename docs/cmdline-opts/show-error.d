@@ -8,8 +8,6 @@ Category: curl
 Example: --show-error --silent $URL
 Added: 5.9
 Multi: boolean
+Scope: global
 ---
 When used with --silent, it makes curl show an error message if it fails.
-
-This option is global and does not need to be specified for each use of
---next.

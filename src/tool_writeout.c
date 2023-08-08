@@ -75,6 +75,7 @@ static const struct httpmap http_version[] = {
 static const struct writeoutvar variables[] = {
   {"certs", VAR_CERT, CURLINFO_NONE, writeString},
   {"content_type", VAR_CONTENT_TYPE, CURLINFO_CONTENT_TYPE, writeString},
+  {"conn_id", VAR_CONN_ID, CURLINFO_CONN_ID, writeOffset},
   {"errormsg", VAR_ERRORMSG, CURLINFO_NONE, writeString},
   {"exitcode", VAR_EXITCODE, CURLINFO_NONE, writeLong},
   {"filename_effective", VAR_EFFECTIVE_FILENAME, CURLINFO_NONE, writeString},
@@ -123,8 +124,29 @@ static const struct writeoutvar variables[] = {
    writeTime},
   {"time_total", VAR_TOTAL_TIME, CURLINFO_TOTAL_TIME_T, writeTime},
   {"url", VAR_INPUT_URL, CURLINFO_NONE, writeString},
+  {"url.scheme", VAR_INPUT_URLSCHEME, CURLINFO_NONE, writeString},
+  {"url.user", VAR_INPUT_URLUSER, CURLINFO_NONE, writeString},
+  {"url.password", VAR_INPUT_URLPASSWORD, CURLINFO_NONE, writeString},
+  {"url.options", VAR_INPUT_URLOPTIONS, CURLINFO_NONE, writeString},
+  {"url.host", VAR_INPUT_URLHOST, CURLINFO_NONE, writeString},
+  {"url.port", VAR_INPUT_URLPORT, CURLINFO_NONE, writeString},
+  {"url.path", VAR_INPUT_URLPATH, CURLINFO_NONE, writeString},
+  {"url.query", VAR_INPUT_URLQUERY, CURLINFO_NONE, writeString},
+  {"url.fragment", VAR_INPUT_URLFRAGMENT, CURLINFO_NONE, writeString},
+  {"url.zoneid", VAR_INPUT_URLZONEID, CURLINFO_NONE, writeString},
+  {"urle.scheme", VAR_INPUT_URLESCHEME, CURLINFO_NONE, writeString},
+  {"urle.user", VAR_INPUT_URLEUSER, CURLINFO_NONE, writeString},
+  {"urle.password", VAR_INPUT_URLEPASSWORD, CURLINFO_NONE, writeString},
+  {"urle.options", VAR_INPUT_URLEOPTIONS, CURLINFO_NONE, writeString},
+  {"urle.host", VAR_INPUT_URLEHOST, CURLINFO_NONE, writeString},
+  {"urle.port", VAR_INPUT_URLEPORT, CURLINFO_NONE, writeString},
+  {"urle.path", VAR_INPUT_URLEPATH, CURLINFO_NONE, writeString},
+  {"urle.query", VAR_INPUT_URLEQUERY, CURLINFO_NONE, writeString},
+  {"urle.fragment", VAR_INPUT_URLEFRAGMENT, CURLINFO_NONE, writeString},
+  {"urle.zoneid", VAR_INPUT_URLEZONEID, CURLINFO_NONE, writeString},
   {"url_effective", VAR_EFFECTIVE_URL, CURLINFO_EFFECTIVE_URL, writeString},
   {"urlnum", VAR_URLNUM, CURLINFO_NONE, writeLong},
+  {"xfer_id", VAR_EASY_ID, CURLINFO_XFER_ID, writeOffset},
   {NULL, VAR_NONE, CURLINFO_NONE, NULL}
 };
 
@@ -165,12 +187,94 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
   return 1; /* return 1 if anything was written */
 }
 
+static int urlpart(struct per_transfer *per, writeoutid vid,
+                   const char **contentp)
+{
+  CURLU *uh = curl_url();
+  int rc = 0;
+  if(uh) {
+    CURLUPart cpart = CURLUPART_HOST;
+    char *part = NULL;
+    const char *url = NULL;
+
+    if(vid >= VAR_INPUT_URLEHOST) {
+      if(curl_easy_getinfo(per->curl, CURLINFO_EFFECTIVE_URL, &url))
+        rc = 5;
+    }
+    else
+      url = per->this_url;
+
+    if(!rc) {
+      switch(vid) {
+      case VAR_INPUT_URLSCHEME:
+      case VAR_INPUT_URLESCHEME:
+        cpart = CURLUPART_SCHEME;
+        break;
+      case VAR_INPUT_URLUSER:
+      case VAR_INPUT_URLEUSER:
+        cpart = CURLUPART_USER;
+        break;
+      case VAR_INPUT_URLPASSWORD:
+      case VAR_INPUT_URLEPASSWORD:
+        cpart = CURLUPART_PASSWORD;
+        break;
+      case VAR_INPUT_URLOPTIONS:
+      case VAR_INPUT_URLEOPTIONS:
+        cpart = CURLUPART_OPTIONS;
+        break;
+      case VAR_INPUT_URLHOST:
+      case VAR_INPUT_URLEHOST:
+        cpart = CURLUPART_HOST;
+        break;
+      case VAR_INPUT_URLPORT:
+      case VAR_INPUT_URLEPORT:
+        cpart = CURLUPART_PORT;
+        break;
+      case VAR_INPUT_URLPATH:
+      case VAR_INPUT_URLEPATH:
+        cpart = CURLUPART_PATH;
+        break;
+      case VAR_INPUT_URLQUERY:
+      case VAR_INPUT_URLEQUERY:
+        cpart = CURLUPART_QUERY;
+        break;
+      case VAR_INPUT_URLFRAGMENT:
+      case VAR_INPUT_URLEFRAGMENT:
+        cpart = CURLUPART_FRAGMENT;
+        break;
+      case VAR_INPUT_URLZONEID:
+      case VAR_INPUT_URLEZONEID:
+        cpart = CURLUPART_ZONEID;
+        break;
+      default:
+        /* not implemented */
+        rc = 4;
+        break;
+      }
+    }
+    if(!rc && curl_url_set(uh, CURLUPART_URL, url,
+                           CURLU_GUESS_SCHEME|CURLU_NON_SUPPORT_SCHEME))
+      rc = 2;
+
+    if(!rc && curl_url_get(uh, cpart, &part, CURLU_DEFAULT_PORT))
+      rc = 3;
+
+    if(!rc && part)
+      *contentp = part;
+    curl_url_cleanup(uh);
+  }
+  else
+    return 1;
+  return rc;
+}
+
 static int writeString(FILE *stream, const struct writeoutvar *wovar,
                        struct per_transfer *per, CURLcode per_result,
                        bool use_json)
 {
   bool valid = false;
   const char *strinfo = NULL;
+  const char *freestr = NULL;
   struct dynbuf buf;
   curlx_dyn_init(&buf, 256*1024);
 
@@ -262,6 +366,33 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
         valid = true;
       }
       break;
+    case VAR_INPUT_URLSCHEME:
+    case VAR_INPUT_URLUSER:
+    case VAR_INPUT_URLPASSWORD:
+    case VAR_INPUT_URLOPTIONS:
+    case VAR_INPUT_URLHOST:
+    case VAR_INPUT_URLPORT:
+    case VAR_INPUT_URLPATH:
+    case VAR_INPUT_URLQUERY:
+    case VAR_INPUT_URLFRAGMENT:
+    case VAR_INPUT_URLZONEID:
+    case VAR_INPUT_URLESCHEME:
+    case VAR_INPUT_URLEUSER:
+    case VAR_INPUT_URLEPASSWORD:
+    case VAR_INPUT_URLEOPTIONS:
+    case VAR_INPUT_URLEHOST:
+    case VAR_INPUT_URLEPORT:
+    case VAR_INPUT_URLEPATH:
+    case VAR_INPUT_URLEQUERY:
+    case VAR_INPUT_URLEFRAGMENT:
+    case VAR_INPUT_URLEZONEID:
+      if(per->this_url) {
+        if(!urlpart(per, wovar->id, &strinfo)) {
+          freestr = strinfo;
+          valid = true;
+        }
+      }
+      break;
     default:
       DEBUGASSERT(0);
       break;
@@ -281,6 +412,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
     if(use_json)
       fprintf(stream, "\"%s\":null", wovar->name);
   }
+  curl_free((char *)freestr);
 
   curlx_dyn_free(&buf);
   return 1; /* return 1 if anything was written */
@@ -376,14 +508,19 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
   return 1; /* return 1 if anything was written */
 }
 
-void ourWriteOut(const char *writeinfo, struct per_transfer *per,
+void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                  CURLcode per_result)
 {
   FILE *stream = stdout;
+  const char *writeinfo = config->writeout;
   const char *ptr = writeinfo;
   bool done = FALSE;
   struct curl_certinfo *certinfo;
   CURLcode res = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO, &certinfo);
+  bool fclose_stream = FALSE;
+
+  if(!writeinfo)
+    return;
 
   if(!res && certinfo)
     per->certinfo = certinfo;
@@ -420,9 +557,15 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
                   done = TRUE;
                 break;
               case VAR_STDOUT:
+                if(fclose_stream)
+                  fclose(stream);
+                fclose_stream = FALSE;
                 stream = stdout;
                 break;
               case VAR_STDERR:
+                if(fclose_stream)
+                  fclose(stream);
+                fclose_stream = FALSE;
                 stream = stderr;
                 break;
               case VAR_JSON:
@@ -464,6 +607,36 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
           else
             fputs("%header{", stream);
         }
+        else if(!strncmp("output{", &ptr[1], 7)) {
+          bool append = FALSE;
+          ptr += 8;
+          if((ptr[0] == '>') && (ptr[1] == '>')) {
+            append = TRUE;
+            ptr += 2;
+          }
+          end = strchr(ptr, '}');
+          if(end) {
+            char fname[512]; /* holds the longest file name */
+            size_t flen = end - ptr;
+            if(flen < sizeof(fname)) {
+              FILE *stream2;
+              memcpy(fname, ptr, flen);
+              fname[flen] = 0;
+              stream2 = fopen(fname, append? FOPEN_APPENDTEXT :
+                              FOPEN_WRITETEXT);
+              if(stream2) {
+                /* only change if the open worked */
+                if(fclose_stream)
+                  fclose(stream);
+                stream = stream2;
+                fclose_stream = TRUE;
+              }
+            }
+            ptr = end + 1;
+          }
+          else
+            fputs("%output{", stream);
+        }
         else {
           /* illegal syntax, then just output the characters that are used */
           fputc('%', stream);
@@ -496,4 +669,6 @@ void ourWriteOut(const char *writeinfo, struct per_transfer *per,
       ptr++;
     }
   }
+  if(fclose_stream)
+    fclose(stream);
 }

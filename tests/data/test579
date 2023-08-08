@@ -68,14 +68,14 @@ lib%TESTNUMBER
 small chunked HTTP POSTs with digest auth. and progress callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip%TESTNUMBER">
+<file name="%LOGDIR/ip%TESTNUMBER">
 Progress callback called with UL 0 out of 0
 Progress callback called with UL 8 out of 0
 Progress callback called with UL 16 out of 0

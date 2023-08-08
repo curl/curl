@@ -31,7 +31,7 @@ http
  <name>
 HTTP PUT with resume from end of already-uploaded file
  </name>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 012345678
 012345678
 012345678
@@ -44,7 +44,7 @@ HTTP PUT with resume from end of already-uploaded file
 012345678
 </file>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -Tlog/test%TESTNUMBER.txt -C -
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C -
 </command>
 </client>
 
@@ -59,7 +59,6 @@ Content-Range: bytes 0-99/100
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 100
-Expect: 100-continue
 
 012345678
 012345678

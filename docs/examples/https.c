@@ -63,6 +63,9 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 #endif
 
+    /* cache the CA cert bundle in memory for a week */
+    curl_easy_setopt(curl, CURLOPT_CA_CACHE_TIMEOUT, 604800L);
+
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
     /* Check for errors */

@@ -101,30 +101,19 @@ void Curl_conncontrol(struct connectdata *conn,
 typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       struct Curl_easy *data,
                                       struct connectdata *conn,
-                                      const struct Curl_addrinfo *ai);
+                                      const struct Curl_addrinfo *ai,
+                                      int transport);
+
+CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
+                                    struct Curl_easy *data,
+                                    const struct Curl_dns_entry *remotehost,
+                                    int transport,
+                                    int ssl_mode);
 
 /**
- * Create a happy eyeball connection filter that uses the, once resolved,
- * address information to connect on ip families based on connection
- * configuration.
- * @param pcf        output, the created cfilter
- * @param data       easy handle used in creation
- * @param conn       connection the filter is created for
- * @param cf_create  method to create the sub-filters performing the
- *                   actual connects.
- */
-CURLcode
-Curl_cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
-                              struct Curl_easy *data,
-                              struct connectdata *conn,
-                              cf_ip_connect_create *cf_create,
-                              const struct Curl_dns_entry *remotehost);
-
-/**
- * Setup the cfilters at `sockindex` in connection `conn`, invoking
- * the instance `setup(remotehost)` methods. If no filter chain is
- * installed yet, inspects the configuration in `data` to install a
- * suitable filter chain.
+ * Setup the cfilters at `sockindex` in connection `conn`.
+ * If no filter chain is installed yet, inspects the configuration
+ * in `data` and `conn? to install a suitable filter chain.
  */
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
@@ -134,5 +123,10 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
 extern struct Curl_cftype Curl_cft_happy_eyeballs;
 extern struct Curl_cftype Curl_cft_setup;
+
+#ifdef DEBUGBUILD
+void Curl_debug_set_transport_provider(int transport,
+                                       cf_ip_connect_create *cf_create);
+#endif
 
 #endif /* HEADER_CURL_CONNECT_H */

@@ -23,20 +23,20 @@
 #
 #***************************************************************************
 
+use strict;
+use warnings;
+
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
     push(@INC, ".");
 }
-
-use strict;
-use warnings;
 
 use serverhelp qw(
     server_pidfilename
     server_logfilename
     );
 
-use sshhelp qw(
+use pathhelp qw(
     exe_ext
     );
 
@@ -71,6 +71,12 @@ while(@ARGV) {
     elsif($ARGV[0] eq '--logfile') {
         if($ARGV[1]) {
             $logfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = $ARGV[1];
             shift @ARGV;
         }
     }
@@ -111,7 +117,7 @@ if(!$srcdir) {
     $srcdir = $ENV{'srcdir'} || '.';
 }
 if(!$pidfile) {
-    $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);
+    $pidfile = server_pidfilename($path, $proto, $ipvnum, $idnum);
 }
 if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
@@ -119,7 +125,8 @@ if(!$logfile) {
 
 $flags .= "--pidfile \"$pidfile\" ".
     "--portfile \"$portfile\" ".
-    "--logfile \"$logfile\" ";
+    "--logfile \"$logfile\" ".
+    "--logdir \"$logdir\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;

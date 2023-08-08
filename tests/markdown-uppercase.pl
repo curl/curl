@@ -38,11 +38,11 @@ sub checkfile {
     if($f !~ /\.md\z/) {
         return;
     }
-    open(F, "<$f");
+    open(my $fh, "<", "$f");
     my $l = 1;
     my $prevl;
     my $ignore = 0;
-    while(<F>) {
+    while(<$fh>) {
         my $line = $_;
         chomp $line;
         if($line =~ /^(\`\`\`|\~\~\~)/) {
@@ -86,7 +86,7 @@ sub checkfile {
         $prevl = $line;
         $l++;
     }
-    close(F);
+    close($fh);
 }
 
 

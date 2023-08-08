@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+gzip
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 swsclose OK
+Content-Length: 6
+Transfer-Encoding: gzip
+Transfer-Encoding: gzip
+Transfer-Encoding: gzip
+Transfer-Encoding: gzip
+Transfer-Encoding: gzip
+Transfer-Encoding: gzip
+Transfer-Encoding: gzip
+Transfer-Encoding: gzip
+Transfer-Encoding: gzip
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+libz
+</features>
+<name>
+Response with multiple Transfer-Encoding headers
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -sS --tr-encoding
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Connection: TE
+TE: gzip
+
+</protocol>
+
+# CURLE_BAD_CONTENT_ENCODING is 61
+<errorcode>
+61
+</errorcode>
+<stderr mode="text">
+curl: (61) Reject response due to more than 5 content encodings
+</stderr>
+</verify>
+</testcase>

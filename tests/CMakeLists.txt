@@ -21,6 +21,8 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+set(CMAKE_UNITY_BUILD OFF)
+
 add_custom_target(testdeps)
 add_subdirectory(data)
 add_subdirectory(libtest)

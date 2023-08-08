@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Linux
+name: Linux torture
 
 on:
   push:
@@ -11,11 +11,31 @@ on:
     - '*/ci'
     paths-ignore:
     - '**/*.md'
+    - '**/CMakeLists.txt'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'CMake/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
   pull_request:
     branches:
     - master
     paths-ignore:
     - '**/*.md'
+    - '**/CMakeLists.txt'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'CMake/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
 
 concurrency:
   # Hardcoded workflow filename as workflow name above is just Linux again
@@ -23,6 +43,9 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+
+env:
+  MAKEFLAGS: -j 3
 
 jobs:
   autotools:
@@ -35,7 +58,7 @@ jobs:
         build:
         - name: torture
           install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
-          configure: --with-openssl --enable-debug --enable-ares
+          configure: --with-openssl --enable-debug --enable-ares --enable-websockets
           tflags: -n -t --shallow=25 !FTP
         - name: torture-ftp
           install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev

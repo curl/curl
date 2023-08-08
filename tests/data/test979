@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Basic
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="yes" nocheck="yes">
+HTTP/1.1 302 go go go
+Content-Length: 8
+Location: http://%HOSTIP:%HTTPPORT/user/%TESTNUMBER0002
+Content-Type: text/html
+Funny-head: yesyes
+
+notreal
+</data>
+<data2 crlf="yes">
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/html
+Funny-head: yesyes
+
+final
+</data2>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+-u with redirect to absolute URL using same origin and auth
+</name>
+<command>
+http://first:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER -L -u smith:doggie
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic c21pdGg6ZG9nZ2ll
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /user/%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic c21pdGg6ZG9nZ2ll
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

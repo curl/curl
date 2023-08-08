@@ -184,10 +184,17 @@
       *
      d CURL_WRITEFUNC_PAUSE...
      d                 c                   X'10000001'
+     d CURL_WRITEFUNC_ERROR...
+     d                 c                   X'FFFFFFFF'
       *
      d CURL_TRAILERFUNC_OK...
      d                 c                   0
      d CURL_TRAILERFUNC_ABORT...
+     d                 c                   1
+      *
+     d CURL_PREREQFUNC_OK...
+     d                 c                   0
+     d CURL_PREREQFUNC_ABORT...
      d                 c                   1
       *
      d CURLAUTH_NONE   c                   X'00000000'
@@ -278,6 +285,10 @@
      d                 c                   4
      d CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE...
      d                 c                   5
+     d CURL_HTTP_VERSION_3...
+     d                 c                   30
+     d CURL_HTTP_VERSION_3ONLY...
+     d                 c                   31
       *
      d CURL_NETRC_IGNORED...
      d                 c                   0
@@ -330,7 +341,7 @@
      d                 c                   7
       *
      d CURL_ZERO_TERMINATED...
-     d                 c                   -1
+     d                 c                   X'FFFFFFFF'
       *
      d CURL_POLL_NONE  c                   0
      d CURL_POLL_IN    c                   1
@@ -339,6 +350,10 @@
      d                 c                   3
      d CURL_POLL_REMOVE...
      d                 c                   4
+      *
+     d CURL_BLOB_NOCOPY...
+     d                 c                   0
+     d CURL_BLOB_COPY  c                   1
       *
      d CURL_CSELECT_IN...
      d                 c                   X'00000001'
@@ -424,8 +439,29 @@
      d                 c                   X'00000200'
      d CURLU_NO_AUTHORITY...
      d                 c                   X'00000400'
+     d CURLU_ALLOW_SPACE...
+     d                 c                   X'00000800'
+     d CURLU_PUNYCODE...
+     d                 c                   X'00001000'
       *
      d CURLOT_FLAG_ALIAS...
+     d                 c                   X'00000001'
+      *
+     d CURLH_HEADER    c                   X'00000001'
+     d CURLH_TRAILER   c                   X'00000002'
+     d CURLH_CONNECT   c                   X'00000004'
+     d CURLH_1XX       c                   X'00000008'
+     d CURLH_PSEUDO    c                   X'00000010'
+      *
+     d CURLWS_TEXT     c                   X'00000001'
+     d CURLWS_BINARY   c                   X'00000002'
+     d CURLWS_CONT     c                   X'00000004'
+     d CURLWS_CLOSE    c                   X'00000008'
+     d CURLWS_PING     c                   X'00000010'
+     d CURLWS_OFFSET   c                   X'00000020'
+     d CURLWS_PONG     c                   X'00000040'
+      *
+     d CURLWS_RAW_MODE...
      d                 c                   X'00000001'
       *
       **************************************************************************
@@ -533,7 +569,7 @@
      d                 c                   47
      d  CURLE_UNKNOWN_OPTION...
      d                 c                   48
-     d  CURLE_TELNET_OPTION_SYNTAX...
+     d  CURLE_SETOPT_OPTION_SYNTAX...
      d                 c                   49
      d  CURLE_OBSOLETE50...
      d                 c                   50
@@ -559,7 +595,7 @@
      d                 c                   60
      d  CURLE_BAD_CONTENT_ENCODING...
      d                 c                   61
-     d  CURLE_LDAP_INVALID_URL...
+     d  CURLE_OBSOLETE62...
      d                 c                   62
      d  CURLE_FILESIZE_EXCEEDED...
      d                 c                   63
@@ -585,20 +621,18 @@
      d                 c                   73
      d  CURLE_TFTP_NOSUCHUSER...
      d                 c                   74
-     d  CURLE_CONV_FAILED...
+     d  CURLE_OBSOLETE75...
      d                 c                   75
-     d  CURLE_CONV_REQD...
+     d  CURLE_OBSOLETE76...
      d                 c                   76
      d  CURLE_SSL_CACERT_BADFILE...
      d                 c                   77
      d  CURLE_REMOTE_FILE_NOT_FOUND...
      d                 c                   78
-     d  CURLE_SSH...
-     d                 c                   79
+     d  CURLE_SSH      c                   79
      d  CURLE_SSL_SHUTDOWN_FAILED...
      d                 c                   80
-     d  CURLE_AGAIN...
-     d                 c                   81
+     d  CURLE_AGAIN    c                   81
      d  CURLE_SSL_CRL_BADFILE...
      d                 c                   82
      d  CURLE_SSL_ISSUER_ERROR...
@@ -625,12 +659,14 @@
      d                 c                   93
      d  CURLE_AUTH_ERROR...
      d                 c                   94
-     d  CURLE_HTTP3...
-     d                 c                   95
+     d  CURLE_HTTP3    c                   95
      d  CURLE_QUIC_CONNECT_ERROR...
      d                 c                   96
-     d  CURLE_PROXY...
-     d                 c                   97
+     d  CURLE_PROXY    c                   97
+     d  CURLE_SSL_CLIENTCERT...
+     d                 c                   98
+     d  CURLE_UNRECOVERABLE_POLL...
+     d                 c                   99
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLE_URL_MALFORMAT_USER...
@@ -679,6 +715,8 @@
      d                 c                   46
      d  CURLE_UNKNOWN_TELNET_OPTION...
      d                 c                   48
+     d  CURLE_TELNET_OPTION_SYNTAX...
+     d                 c                   49
      d  CURLE_OBSOLETE...
      d                 c                   50
      d  CURLE_SHARE_IN_USE...
@@ -687,12 +725,18 @@
      d                 c                   60
      d  CURLE_SSL_PEER_CERTIFICATE...
      d                 c                   60
+     d  CURLE_LDAP_INVALID_URL...
+     d                 c                   62
      d  CURLE_FTP_SSL_FAILED...
      d                 c                   64
      d  CURLE_TFTP_DISKFULL...
      d                 c                   70
      d  CURLE_TFTP_EXISTS...
      d                 c                   73
+     d  CURLE_CONV_FAILED...
+     d                 c                   75
+     d  CURLE_CONV_REQD...
+     d                 c                   76
      d  CURLE_ALREADY_COMPLETE...
      d                 c                   99999
       /endif
@@ -821,6 +865,8 @@
      d                 c                   1
      d  CURLPROXY_HTTPS...
      d                 c                   2
+     d  CURLPROXY_HTTPS2...
+     d                 c                   3
      d  CURLPROXY_SOCKS4...
      d                 c                   4
      d  CURLPROXY_SOCKS5...
@@ -1208,8 +1254,6 @@
      d                 c                   00111
      d  CURLOPT_SERVER_RESPONSE_TIMEOUT...
      d                 c                   00112
-     d  CURLOPT_SERVER_RESPONSE_TIMEOUT...                                      Alias
-     d                 c                   00112
      d  CURLOPT_IPRESOLVE...
      d                 c                   00113
      d  CURLOPT_MAXFILESIZE...
@@ -1545,7 +1589,7 @@
      d                 c                   00288
      d  CURLOPT_SASL_AUTHZID...
      d                 c                   10289
-     d  CURLOPT_MAIL_RCPT_ALLLOWFAILS...
+     d  CURLOPT_MAIL_RCPT_ALLOWFAILS...
      d                 c                   00290
      d  CURLOPT_SSLCERT_BLOB...
      d                 c                   40291
@@ -1587,10 +1631,30 @@
      d                 c                   40309
      d  CURLOPT_PROXY_CAINFO_BLOB...
      d                 c                   40310
+     d  CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256...
+     d                 c                   10311
+     d  CURLOPT_PREREQFUNCTION...
+     d                 c                   20312
+     d  CURLOPT_PREREQDATA...
+     d                 c                   10313
      d  CURLOPT_MAXLIFETIME_CONN...
      d                 c                   00314
      d  CURLOPT_MIME_OPTIONS...
      d                 c                   00315
+     d  CURLOPT_SSH_HOSTKEYFUNCTION...
+     d                 c                   20316
+     d  CURLOPT_SSH_HOSTKEYDATA...
+     d                 c                   10317
+     d  CURLOPT_PROTOCOLS_STR...
+     d                 c                   10318
+     d  CURLOPT_REDIR_PROTOCOLS_STR...
+     d                 c                   10319
+     d  CURLOPT_WS_OPTIONS...
+     d                 c                   00320
+     d  CURLOPT_CA_CACHE_TIMEOUT...
+     d                 c                   00321
+     d  CURLOPT_QUICK_EXIT...
+     d                 c                   00322
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1618,6 +1682,8 @@
      d                 c                   00119
      d  CURLOPT_POST301...
      d                 c                   00161
+     d  CURLOPT_FTP_RESPONSE_TIMEOUT...
+     d                 c                   00112
       /endif
       *
      d CURLFORMcode    s             10i 0 based(######ptr######)               Enum
@@ -1820,6 +1886,10 @@
      d                 c                   X'0020003B'
      d  CURLINFO_REFERER...                                                     CURLINFO_STRING + 60
      d                 c                   X'0010003C'
+     d  CURLINFO_CAINFO...                                                      CURLINFO_STRING + 61
+     d                 c                   X'0010003D'
+     d  CURLINFO_CAPATH...                                                      CURLINFO_STRING + 62
+     d                 c                   X'0010003E'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
@@ -1857,9 +1927,11 @@
      d  CURLSSLBACKEND_RUSTLS...
      d                 c                   14
       * Aliases for clones.
-     d  CURLSSLBACKEND_LIBRESSL...
+     d  CURLSSLBACKEND_AWSLC...
      d                 c                   1
      d  CURLSSLBACKEND_BORINGSSL...
+     d                 c                   1
+     d  CURLSSLBACKEND_LIBRESSL...
      d                 c                   1
      d  CURLSSLBACKEND_WOLFSSL...
      d                 c                   6
@@ -1893,8 +1965,10 @@
      d                 c                   5
      d  CURL_LOCK_DATA_PSL...
      d                 c                   6
-     d  CURL_LOCK_DATA_LAST...
+     d  CURL_LOCK_DATA_HSTS...
      d                 c                   7
+     d  CURL_LOCK_DATA_LAST...
+     d                 c                   8
       *
      d curl_lock_access...
      d                 s             10i 0 based(######ptr######)               Enum
@@ -1977,8 +2051,27 @@
      d                 c                   8
      d  CURLVERSION_TENTH...
      d                 c                   9
+     d  CURLVERSION_ELEVENTH...
+     d                 c                   10
      d  CURLVERSION_NOW...
-     d                 c                   9                                    CURLVERSION_TENTH
+     d                 c                   10                                   CURLVERSION_ELEVENTH
+      *
+     d CURLHcode       s             10i 0 based(######ptr######)               Enum
+     d  CURLHE_OK      c                   0
+     d  CURLHE_BADINDEX...
+     d                 c                   1
+     d  CURLHE_MISSING...
+     d                 c                   2
+     d  CURLHE_NOHEADERS...
+     d                 c                   3
+     d  CURLHE_NOREQUEST...
+     d                 c                   4
+     d  CURLHE_OUT_OF_MEMORY...
+     d                 c                   5
+     d  CURLHE_BAD_ARGUMENT...
+     d                 c                   6
+     d  CURLHE_NOT_BUILT_IN...
+     d                 c                   7
       *
      d curlsocktype    s             10i 0 based(######ptr######)               Enum
      d  CURLSOCKTYPE_IPCXN...
@@ -2132,6 +2225,32 @@
      d                 c                   16
      d  CURLUE_NO_FRAGMENT...
      d                 c                   17
+     d  CURLUE_NO_ZONEID...
+     d                 c                   18
+     d  CURLUE_BAD_FILE_URL...
+     d                 c                   19
+     d  CURLUE_BAD_FRAGMENT...
+     d                 c                   20
+     d  CURLUE_BAD_HOSTNAME...
+     d                 c                   21
+     d  CURLUE_BAD_IPV6...
+     d                 c                   22
+     d  CURLUE_BAD_LOGIN...
+     d                 c                   23
+     d  CURLUE_BAD_PASSWORD...
+     d                 c                   24
+     d  CURLUE_BAD_PATH...
+     d                 c                   25
+     d  CURLUE_BAD_QUERY...
+     d                 c                   26
+     d  CURLUE_BAD_SCHEME...
+     d                 c                   27
+     d  CURLUE_BAD_SLASHES...
+     d                 c                   28
+     d  CURLUE_BAD_USER...
+     d                 c                   29
+     d  CURLUE_LACKS_IDN...
+     d                 c                   30
       *
      d CURLUPart       s             10i 0 based(######ptr######)               Enum
      d  CURLUPART_URL  c                   0
@@ -2162,7 +2281,7 @@
      d  CURLSTS_DONE   c                   1
      d  CURLSTS_FAIL   c                   2
       *
-      *  Renaming CURLMsg to CURL_Msg to avoid case-insensivity name clash.
+      *  Renaming CURLMsg to CURL_Msg to avoid case-insensitivity name clash.
       *
      d CURL_Msg        ds                  based(######ptr######)
      d                                     qualified
@@ -2279,6 +2398,8 @@
      d                                 *                                        const char *
      d  gsasl_version...
      d                                 *                                        const char *
+     d  feature_names...
+     d                                 *                                        const char *
       *
      d curl_certinfo   ds                  based(######ptr######)
      d                                     qualified
@@ -2336,6 +2457,29 @@
      d                                     qualified
      d  index                        10u 0                                      size_t
      d  total                        10u 0                                      size_t
+      *
+     d curl_header     ds                  based(######ptr######)
+     d                                     qualified
+     d  name                           *                                        char *
+     d  value                          *                                        char *
+     d  amount                       10u 0                                      size_t
+     d  index                        10u 0                                      size_t
+     d  origin                       10u 0
+     d  anchor                         *                                        void *
+      *
+     d curl_blob       ds                  based(######ptr######)
+     d                                     qualified
+     d  data                           *                                        void *
+     d  len                          10u 0                                      size_t
+     d  flags                        10u 0
+      *
+     d curl_ws_frame   ds                  based(######ptr######)
+     d                                     qualified
+     d  age                          10i 0
+     d  flags                        10i 0
+     d  offset                             like(curl_off_t)
+     d  bytesleft                          like(curl_off_t)
+     d  len                          10u 0                                      size_t
       *
      d curl_formget_callback...
      d                 s               *   based(######ptr######) procptr
@@ -2430,6 +2574,15 @@
      d curl_hstswrite_callback...
      d                 s               *   based(######ptr######) procptr
       *
+     d curl_prereq_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_sshhostkeycallback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_ws_write_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
       **************************************************************************
       *                              Prototypes
       **************************************************************************
@@ -2470,7 +2623,7 @@
      d                                     like(CURLcode)
      d  part                           *   value                                curl_mimepart *
      d  data                           *   value options(*string)
-     d  datasize                     10u 0                                      size_t
+     d  datasize                     10u 0 value                                size_t
       *
      d curl_mime_filedata...
      d                 pr                  extproc('curl_mime_filedata')
@@ -2669,6 +2822,14 @@
      d  curl                           *   value                                CURL *
      d  option                             value like(CURLoption)
      d  offsetarg                          value like(curl_off_t)
+     d                                     options(*nopass)
+      *
+     d curl_easy_setopt_blob...
+     d                 pr                  extproc('curl_easy_setopt')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  option                             value like(CURLoption)
+     d  blob                               const likeds(curl_blob)
      d                                     options(*nopass)
       *
       *
@@ -2940,6 +3101,43 @@
      d                 pr              *   extproc('curl_easy_next')            curl_easyoption *
      d  prev                           *   value                                curl_easyoption *
       *
+     d curl_ws_recv    pr                  extproc('curl_ws_recv')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  buffer                         *   value                                void *
+     d  buflen                       10u 0 value                                size_t
+     d  recv                         10u 0                                      size_t *
+     d  metap                              likeds(curl_ws_frame)
+      *
+     d curl_ws_send    pr                  extproc('curl_ws_send')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  buffer                         *   value                                const void *
+     d  buflen                       10u 0 value                                size_t
+     d  sent                         10u 0                                      size_t *
+     d  framesize                          like(curl_off_t)
+     d  sendflags                    10u 0 value
+      *
+     d curl_ws_meta    pr              *   extproc('curl_ws_meta')              curl_ws_frame *
+     d  curl                           *   value                                CURL *
+      *
+     d curl_easy_header...
+     d                 pr                  extproc('curl_easy_header')          curl_header *
+     d                                     like(CURLHcode)
+     d  curl                           *   value                                CURL *
+     d  name                           *   value options(*string)               const char *
+     d  index                        10u 0 value                                size_t
+     d  origin                       10u 0 value
+     d  request                      10i 0 value
+     d  hout                           *                                        curl_header **
+      *
+     d curl_easy_nextheader...
+     d                 pr              *   extproc('curl_easy_nextheader')      curl_header *
+     d  curl                           *   value                                CURL *
+     d  origin                       10u 0 value
+     d  request                      10i 0 value
+     d  prev                           *   value                                curl_header *
+      *
       **************************************************************************
       *                CCSID wrapper procedure prototypes
       **************************************************************************
@@ -3038,6 +3236,15 @@
      d  objectarg                      *   value options(*string: *nopass)
      d  ccsid                        10u 0 value options(*nopass)
       *
+     d curl_easy_setopt_blob_ccsid...
+     d                 pr                  extproc('curl_easy_setopt_ccsid')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  option                             value like(CURLoption)
+     d  blob                               const likeds(curl_blob)
+     d                                     options(*nopass)
+     d  ccsid                        10u 0 value options(*nopass)
+      *
      d curl_pushheader_bynum_ccsid...
      d                 pr              *   extproc(                             char *
      d                                       'curl_pushheader_bynum_ccsid')
@@ -3086,7 +3293,7 @@
      d                                     like(CURLcode)
      d  part                           *   value                                curl_mimepart *
      d  data                           *   value options(*string)
-     d  datasize                     10u 0                                      size_t
+     d  datasize                     10u 0 value                                size_t
      d  ccsid                        10u 0 value
       *
      d curl_mime_filedata_ccsid...
@@ -3114,6 +3321,11 @@
      d  flags                        10u 0 value
      d  ccsid                        10u 0 value
       *
+     d curl_url_strerror_ccsid...
+     d                 pr              *   extproc('curl_url_strerror_ccsid')   const char *
+     d  code                               value like(CURLUcode)
+     d  ccsid                        10u 0 value
+      *
      d curl_easy_option_by_name_ccsid...
      d                 pr              *   extproc(                             curl_easyoption *
      d                                      'curl_easy_option_by_name_ccsid')
@@ -3125,5 +3337,71 @@
      d                                       'curl_easy_option_get_name_ccsid')
      d  option                         *   value                                curl_easyoption *
      d  ccsid                        10u 0 value
+      *
+     d curl_easy_header_ccsid...
+     d                 pr                  extproc('curl_easy_header_ccsid')    curl_header *
+     d                                     like(CURLHcode)
+     d  curl                           *   value                                CURL *
+     d  name                           *   value options(*string)               const char *
+     d  index                        10u 0 value                                size_t
+     d  origin                       10u 0 value
+     d  request                      10i 0 value
+     d  hout                           *                                        curl_header **
+     d  ccsid                        10u 0 value
+      *
+     d curl_from_ccsid...
+     d                 pr              *   extproc('curl_from_ccsid')           const char *
+     d  s                              *   value options(*string)               const char *
+     d  ccsid                        10u 0 value
+      *
+     d curl_to_ccsid...
+     d                 pr              *   extproc('curl_to_ccsid')             const char *
+     d  s                              *   value options(*string)               const char *
+     d  ccsid                        10u 0 value
+      *
+      **************************************************************************
+      *                       Procedure overloading
+      **************************************************************************
+      *
+      /if defined(*V7R4M0)
+     d curl_easy_setopt_RPGnum_...
+     d                 pr                  extproc('curl_easy_setopt_RPGnum_')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  option                             value like(CURLoption)
+     d  numarg                       20i 0 value
+      *
+     d curl_easy_setopt...
+     d                 pr                  like(CURLcode)
+     d                                     overload(curl_easy_setopt_RPGnum_:
+     d                                              curl_easy_setopt_object:
+     d                                              curl_easy_setopt_function)
+      *
+     d curl_multi_setopt_RPGnum_...
+     d                 pr                  extproc('curl_multi_setopt_RPGnum_')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURLM *
+     d  option                             value like(CURLMoption)
+     d  numarg                       20i 0 value
+      *
+     d curl_multi_setopt...
+     d                 pr                  like(CURLcode)
+     d                                     overload(curl_multi_setopt_RPGnum_:
+     d                                              curl_multi_setopt_object:
+     d                                              curl_multi_setopt_function)
+      *
+     d curl_share_setopt...
+     d                 pr                  like(CURLcode)
+     d                                     overload(curl_share_setopt_int:
+     d                                              curl_share_setopt_ptr:
+     d                                              curl_share_setopt_proc)
+      *
+     d curl_easy_getinfo...
+     d                 pr                  like(CURLcode)
+     d                                     overload(curl_easy_getinfo_long:
+     d                                              curl_easy_getinfo_off_t:
+     d                                              curl_easy_getinfo_double:
+     d                                              curl_easy_getinfo_ptr)
+      /endif
       *
       /endif

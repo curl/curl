@@ -29,6 +29,7 @@ e.g. "my.host.domain" to specify the machine
 make curl pick the same IP address that is already used for the control
 connection
 .RE
+.IP
 
 Disable the use of PORT with --ftp-pasv. Disable the attempt to use the EPRT
 command instead of PORT by using --disable-eprt. EPRT is really PORT++.

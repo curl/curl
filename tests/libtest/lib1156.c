@@ -103,7 +103,7 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   hasbody = 0;
   res = curl_easy_perform(curl);
   if(res != p->result) {
-    printf("%d: bad error code (%d): resume=%s, fail=%s, http416=%s, "
+    printf("%zd: bad error code (%d): resume=%s, fail=%s, http416=%s, "
            "content-range=%s, expected=%d\n", num, res,
            (p->flags & F_RESUME)? "yes": "no",
            (p->flags & F_FAIL)? "yes": "no",
@@ -123,7 +123,7 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   }
   return 0;
 
-  test_cleanup:
+test_cleanup:
 
   return 1;
 }
@@ -164,7 +164,7 @@ int test(char *URL)
   printf("%d\n", status);
   return status;
 
-  test_cleanup:
+test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

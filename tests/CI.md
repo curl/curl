@@ -59,8 +59,8 @@ are configured:
 GitHub Actions runs the following tests:
 
 - Mac OS tests with a variety of different compilation options
-- Fuzz tests ([see tests/fuzz/README for
-    more info](https://github.com/curl/curl/blob/master/tests/fuzz/README)).
+- Fuzz tests ([see the curl-fuzzer repo for more
+  info](https://github.com/curl/curl-fuzzer)).
 - Curl compiled using the Rust TLS backend with Hyper
 - CodeQL static analysis
 
@@ -92,23 +92,7 @@ The tests are configured in `appveyor.yml`.
 
 ### Zuul
 
-[Zuul](https://zuul-ci.org/) is an open source CI tool. A number of Curl tests
-are run at [curl.zuul.vexxhost.dev](https://curl.zuul.vexxhost.dev/builds):
-
-- Source code is formatted according to expectations (`make checksrc`).
-- Curl compiled with a number of different TLS configurations (WolfSSL, rustls,
-BoringSSL, etc).
-- Curl compiled with different C compilers.
-
-As of November 2021, the tests run (sometimes) but do not run consistently and
-do not report results to the GitHub checks runner - you need to manually check
-for failures. See [#7522](https://github.com/curl/curl/issues/7522) for more
-information.
-
-As of November 2021 Daniel Stenberg is the only person with administrator
-access to the Zuul CI environment.
-
-These are configured in `zuul.d` and have test runners in `scripts/zuul`.
+Not used anymore.
 
 ### Circle CI
 

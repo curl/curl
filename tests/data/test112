@@ -20,9 +20,9 @@ ftp
 FTP PASV upload resume
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/upload%TESTNUMBER -C 40
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -C 40
 </command>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 this is the *****crap******** that we're gonna upload
 
 worx?

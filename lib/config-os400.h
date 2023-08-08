@@ -68,9 +68,6 @@
 /* Define this as a suitable file to read random data from */
 #undef RANDOM_FILE
 
-/* Define this to your Entropy Gathering Daemon socket pathname */
-#undef EGD_SOCKET
-
 /* Define to 1 if you have the alarm function. */
 #define HAVE_ALARM 1
 
@@ -143,9 +140,6 @@
 /* Define if you have the <pwd.h> header file. */
 #define HAVE_PWD_H
 
-/* Define if you have the `RAND_egd' function. */
-#undef HAVE_RAND_EGD
-
 /* Define if you have the `select' function. */
 #define HAVE_SELECT
 
@@ -160,9 +154,6 @@
 
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
-
-/* Define if you have the <ssl.h> header file. */
-#undef HAVE_SSL_H
 
 /* Define if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -346,9 +337,6 @@
 
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
-
-/* Define to use the GSKit package. */
-#define USE_GSKIT
 
 /* Define to use the OS/400 crypto library. */
 #define USE_OS400CRYPTO

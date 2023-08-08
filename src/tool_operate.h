@@ -50,7 +50,6 @@ struct per_transfer {
   struct OutStruct outs;
   struct OutStruct heads;
   struct OutStruct etag_save;
-  struct InStruct input;
   struct HdrCbData hdrcbdata;
   long num_headers;
   bool was_last_header_empty;
@@ -68,6 +67,8 @@ struct per_transfer {
   curl_off_t dlnow;
   curl_off_t ultotal;
   curl_off_t ulnow;
+  curl_off_t uploadfilesize; /* expected total amount */
+  curl_off_t uploadedsofar; /* amount delivered from the callback */
   bool dltotal_added; /* if the total has been added from this */
   bool ultotal_added;
 

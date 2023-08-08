@@ -202,7 +202,7 @@ size_t tool_mime_stdin_read(char *buffer,
       if(ferror(stdin)) {
         /* Show error only once. */
         if(sip->config) {
-          warnf(sip->config, "stdin: %s\n", strerror(errno));
+          warnf(sip->config, "stdin: %s", strerror(errno));
           sip->config = NULL;
         }
         return CURL_READFUNC_ABORT;
@@ -369,7 +369,7 @@ static char *get_param_word(struct OperationConfig *config, char **str,
           ++ptr;
         }
         if(trailing_data)
-          warnf(config->global, "Trailing data after quoted form parameter\n");
+          warnf(config->global, "Trailing data after quoted form parameter");
         *str = ptr;
         return word_begin + 1;
       }
@@ -417,8 +417,7 @@ static int read_field_headers(struct OperationConfig *config,
       if(hdrlen) {
         hdrbuf[hdrlen] = '\0';
         if(slist_append(pheaders, hdrbuf)) {
-          fprintf(config->global->errors,
-                  "Out of memory for field headers!\n");
+          errorf(config->global, "Out of memory for field headers");
           return -1;
         }
         hdrlen = 0;
@@ -428,8 +427,8 @@ static int read_field_headers(struct OperationConfig *config,
     switch(c) {
     case EOF:
       if(ferror(fp)) {
-        fprintf(config->global->errors,
-                "Header file %s read error: %s\n", filename, strerror(errno));
+        errorf(config->global, "Header file %s read error: %s", filename,
+               strerror(errno));
         return -1;
       }
       return 0;    /* Done. */
@@ -449,7 +448,7 @@ static int read_field_headers(struct OperationConfig *config,
     pos++;
     if(!incomment) {
       if(hdrlen == sizeof(hdrbuf) - 1) {
-        warnf(config->global, "File %s line %d: header too long (truncated)\n",
+        warnf(config->global, "File %s line %d: header too long (truncated)",
               filename, lineno);
         c = ' ';
       }
@@ -507,7 +506,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
 
       /* verify that this is a fine type specifier */
       if(2 != sscanf(type, "%127[^/ ]/%127[^;, \n]", type_major, type_minor)) {
-        warnf(config->global, "Illegally formatted content-type field!\n");
+        warnf(config->global, "Illegally formatted content-type field");
         curl_slist_free_all(headers);
         return -1; /* illegal content-type syntax! */
       }
@@ -559,7 +558,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         *endpos = '\0';
         fp = fopen(hdrfile, FOPEN_READTEXT);
         if(!fp)
-          warnf(config->global, "Cannot read from %s: %s\n", hdrfile,
+          warnf(config->global, "Cannot read from %s: %s", hdrfile,
                 strerror(errno));
         else {
           int i = read_field_headers(config, hdrfile, fp, &headers);
@@ -585,7 +584,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
         sep = *p;
         *endpos = '\0';
         if(slist_append(&headers, hdr)) {
-          fprintf(config->global->errors, "Out of memory for field header!\n");
+          errorf(config->global, "Out of memory for field header");
           curl_slist_free_all(headers);
           return -1;
         }
@@ -621,7 +620,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
       sep = *p;
       *endpos = '\0';
       if(*unknown)
-        warnf(config->global, "skip unknown form field: %s\n", unknown);
+        warnf(config->global, "skip unknown form field: %s", unknown);
     }
   }
 
@@ -632,25 +631,25 @@ static int get_param_part(struct OperationConfig *config, char endchar,
   if(ptype)
     *ptype = type;
   else if(type)
-    warnf(config->global, "Field content type not allowed here: %s\n", type);
+    warnf(config->global, "Field content type not allowed here: %s", type);
 
   if(pfilename)
     *pfilename = filename;
   else if(filename)
     warnf(config->global,
-          "Field file name not allowed here: %s\n", filename);
+          "Field file name not allowed here: %s", filename);
 
   if(pencoder)
     *pencoder = encoder;
   else if(encoder)
     warnf(config->global,
-          "Field encoder not allowed here: %s\n", encoder);
+          "Field encoder not allowed here: %s", encoder);
 
   if(pheaders)
     *pheaders = headers;
   else if(headers) {
     warnf(config->global,
-          "Field headers not allowed here: %s\n", headers->data);
+          "Field headers not allowed here: %s", headers->data);
     curl_slist_free_all(headers);
   }
 
@@ -773,7 +772,7 @@ int formparse(struct OperationConfig *config,
     else if(!name && !strcmp(contp, ")") && !literal_value) {
       /* Ending a multipart. */
       if(*mimecurrent == *mimeroot) {
-        warnf(config->global, "no multipart to terminate!\n");
+        warnf(config->global, "no multipart to terminate");
         goto fail;
       }
       *mimecurrent = (*mimecurrent)->parent;
@@ -819,7 +818,7 @@ int formparse(struct OperationConfig *config,
                libcurl. */
           if(part->size > 0) {
             warnf(config->global,
-                  "error while reading standard input\n");
+                  "error while reading standard input");
             goto fail;
           }
           Curl_safefree(part->data);
@@ -856,7 +855,7 @@ int formparse(struct OperationConfig *config,
                libcurl. */
           if(part->size > 0) {
             warnf(config->global,
-                  "error while reading standard input\n");
+                  "error while reading standard input");
             goto fail;
           }
           Curl_safefree(part->data);
@@ -889,7 +888,7 @@ int formparse(struct OperationConfig *config,
       if(sep) {
         *contp = (char) sep;
         warnf(config->global,
-              "garbage at end of field specification: %s\n", contp);
+              "garbage at end of field specification: %s", contp);
       }
     }
 
@@ -897,11 +896,11 @@ int formparse(struct OperationConfig *config,
     SET_TOOL_MIME_PTR(part, name);
   }
   else {
-    warnf(config->global, "Illegally formatted input field!\n");
+    warnf(config->global, "Illegally formatted input field");
     goto fail;
   }
   err = 0;
-  fail:
+fail:
   Curl_safefree(contents);
   curl_slist_free_all(headers);
   return err;

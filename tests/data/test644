@@ -58,7 +58,7 @@ CURL_FAKE_XATTR=1
 --xattr with redirect
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --xattr -L -o log/out%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --xattr -L -o %LOGDIR/out%TESTNUMBER
 </command>
 </client>
 

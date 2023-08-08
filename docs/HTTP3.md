@@ -35,11 +35,18 @@ To fix before we remove the experimental label:
 
 # ngtcp2 version
 
+Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and a QUIC supporting TLS library. The supported TLS libraries are covered below.
+
+For now, `ngtcp2` and `nghttp3` are still *experimental* which means their evolution bring breaking changes. Therefore, the proper version of both libraries need to be used when building curl. These are
+
+ * `ngtcp2`: v0.18.0
+ * `nghttp3`: v0.14.0
+
 ## Build with OpenSSL
 
 Build (patched) OpenSSL
 
-     % git clone --depth 1 -b openssl-3.0.7+quic https://github.com/quictls/openssl
+     % git clone --depth 1 -b openssl-3.0.10+quic https://github.com/quictls/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere1>
      % make
@@ -48,7 +55,7 @@ Build (patched) OpenSSL
 Build nghttp3
 
      % cd ..
-     % git clone https://github.com/ngtcp2/nghttp3
+     % git clone -b v0.14.0 https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
@@ -58,7 +65,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone https://github.com/ngtcp2/ngtcp2
+     % git clone -b v0.18.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
@@ -91,7 +98,7 @@ Build GnuTLS
 Build nghttp3
 
      % cd ..
-     % git clone https://github.com/ngtcp2/nghttp3
+     % git clone -b v0.14.0 https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
@@ -101,7 +108,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone https://github.com/ngtcp2/ngtcp2
+     % git clone -b v0.18.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
@@ -132,7 +139,7 @@ Build wolfSSL
 Build nghttp3
 
      % cd ..
-     % git clone https://github.com/ngtcp2/nghttp3
+     % git clone -b v0.14.0 https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % autoreconf -fi
      % ./configure --prefix=<somewhere2> --enable-lib-only
@@ -142,7 +149,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone https://github.com/ngtcp2/ngtcp2
+     % git clone -b v0.18.0 https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-wolfssl
@@ -160,6 +167,8 @@ Build curl
      % make install
 
 # quiche version
+
+Since the quiche build manages its dependencies, curl can be built against the latest version. You are *probably* able to build against their main branch, but in case of problems, we recommend their latest release tag.
 
 ## build
 
@@ -210,7 +219,7 @@ Run from `/usr/local/bin/curl`.
 
 Build msh3:
 
-     % git clone -b v0.5.0 --depth 1 --recursive https://github.com/nibanks/msh3
+     % git clone -b v0.6.0 --depth 1 --recursive https://github.com/nibanks/msh3
      % cd msh3 && mkdir build && cd build
      % cmake -G 'Visual Studio 17 2022' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
      % cmake --build . --config Release
@@ -239,7 +248,11 @@ directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 
 # `--http3`
 
-Use HTTP/3 directly:
+Use only HTTP/3:
+
+    curl --http3-only https://nghttp2.org:4433/
+
+Use HTTP/3 with fallback to HTTP/2 or HTTP/1.1 (see "HTTPS eyeballing" below):
 
     curl --http3 https://nghttp2.org:4433/
 
@@ -248,6 +261,28 @@ Upgrade via Alt-Svc:
     curl --alt-svc altsvc.cache https://quic.aiortc.org/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
+
+### HTTPS eyeballing
+
+With option `--http3` curl will attempt earlier HTTP versions as well should the connect
+attempt via HTTP/3 not succeed "fast enough". This strategy is similar to IPv4/6 happy
+eyeballing where the alternate address family is used in parallel after a short delay.
+
+The IPv4/6 eyeballing has a default of 200ms and you may override that via `--happy-eyeballs-timeout-ms value`.
+Since HTTP/3 is still relatively new, we decided to use this timeout also for the HTTP eyeballing - with a slight twist.
+
+The `happy-eyeballs-timeout-ms` value is the **hard** timeout, meaning after that time expired, a TLS connection is opened in addition to negotiate HTTP/2 or HTTP/1.1. At half of that value - currently - is the **soft** timeout. The soft timeout fires, when there has been **no data at all** seen from the server on the HTTP/3 connection.
+
+So, without you specifying anything, the hard timeout is 200ms and the soft is 100ms:
+
+ * Ideally, the whole QUIC handshake happens and curl has an HTTP/3 connection in less than 100ms.
+ * When QUIC is not supported (or UDP does not work for this network path), no reply is seen and the HTTP/2 TLS+TCP connection starts 100ms later.
+ * In the worst case, UDP replies start before 100ms, but drag on. This will start the TLS+TCP connection after 200ms.
+ * When the QUIC handshake fails, the TLS+TCP connection is attempted right away. For example, when the QUIC server presents the wrong certificate.
+
+The whole transfer only fails, when **both** QUIC and TLS+TCP fail to handshake or time out.
+
+Note that all this happens in addition to IP version happy eyeballing. If the name resolution for the server gives more than one IP address, curl will try all those until one succeeds - just as with all other protocols. And if those IP addresses contain both IPv6 and IPv4, those attempts will happen, delayed, in parallel (the actual eyeballing).
 
 ## Known Bugs
 
@@ -265,8 +300,8 @@ ones. You can easily create huge local files like `truncate -s=8G 8GB` - they
 are huge but do not occupy that much space on disk since they are just big
 holes.
 
-In my Debian setup I just installed **apache2**. It runs on port 80 and has a
-document root in `/var/www/html`. I can get the 8GB file from it with `curl
+In a Debian setup you can install **apache2**. It runs on port 80 and has a
+document root in `/var/www/html`. Download the 8GB file from apache with `curl
 localhost/8GB -o dev/null`
 
 In this description we setup and run an HTTP/3 reverse-proxy in front of the

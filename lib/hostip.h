@@ -132,9 +132,6 @@ void Curl_init_dnscache(struct Curl_hash *hash, int hashsize);
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct Curl_easy *data);
 
-/* Return # of addresses in a Curl_addrinfo struct */
-int Curl_num_addresses(const struct Curl_addrinfo *addr);
-
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
@@ -178,21 +175,12 @@ Curl_fetch_addr(struct Curl_easy *data,
  */
 struct Curl_dns_entry *
 Curl_cache_addr(struct Curl_easy *data, struct Curl_addrinfo *addr,
-                const char *hostname, int port);
+                const char *hostname, size_t hostlen, int port);
 
 #ifndef INADDR_NONE
 #define CURL_INADDR_NONE (in_addr_t) ~0
 #else
 #define CURL_INADDR_NONE INADDR_NONE
-#endif
-
-#ifdef HAVE_SIGSETJMP
-/* Forward-declaration of variable defined in hostip.c. Beware this
- * is a global and unique instance. This is used to store the return
- * address that we can jump back to from inside a signal handler.
- * This is not thread-safe stuff.
- */
-extern sigjmp_buf curl_jmpenv;
 #endif
 
 /*

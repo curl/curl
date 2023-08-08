@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_CAPATH 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_CAPATH 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_CAPATH \- directory holding CA certificates
 .SH SYNOPSIS
@@ -61,7 +61,7 @@ if(curl) {
 .fi
 .SH AVAILABILITY
 This option is supported by the OpenSSL, GnuTLS and mbedTLS (since 7.56.0)
-backends. The NSS backend provides the option only for backward compatibility.
+backends.
 .SH RETURN VALUE
 CURLE_OK if supported; or an error such as:
 

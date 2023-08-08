@@ -45,12 +45,6 @@
 #include "rand.h"
 #include "vtls/vtls.h"
 
-/* SSL backend-specific #if branches in this file must be kept in the order
-   documented in curl_ntlm_core. */
-#if defined(NTLM_NEEDS_NSS_INIT)
-#include "vtls/nssg.h" /* for Curl_nss_force_init() */
-#endif
-
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "vauth/vauth.h"
 #include "vauth/ntlm.h"
@@ -274,12 +268,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   const unsigned char *type2 = Curl_bufref_ptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
-#if defined(NTLM_NEEDS_NSS_INIT)
-  /* Make sure the crypto backend is initialized */
-  result = Curl_nss_force_init(data);
-  if(result)
-    return result;
-#elif defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void)data;
 #endif
 
@@ -380,8 +369,8 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   (void)data;
   (void)userp;
   (void)passwdp;
-  (void)service,
-  (void)hostname,
+  (void)service;
+  (void)hostname;
 
   /* Clean up any former leftovers and initialise to defaults */
   Curl_auth_cleanup_ntlm(ntlm);
@@ -511,6 +500,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   size_t userlen = 0;
   size_t domlen = 0;
 
+  memset(lmresp, 0, sizeof(lmresp));
+  memset(ntresp, 0, sizeof(ntresp));
   user = strchr(userp, '\\');
   if(!user)
     user = strchr(userp, '/');

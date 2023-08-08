@@ -23,10 +23,10 @@ ftp
 FTP DL, file without C-D inside, using -o fname -i -D file
 </name>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o log/download%TESTNUMBER -i -D log/heads%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o %LOGDIR/download%TESTNUMBER -i -D %LOGDIR/heads%TESTNUMBER
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/file%TESTNUMBER
+perl %SRCDIR/libtest/notexists.pl %LOGDIR/file%TESTNUMBER
 </postcheck>
 </client>
 
@@ -44,12 +44,12 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/download%TESTNUMBER">
+<file1 name="%LOGDIR/download%TESTNUMBER">
 fooo
 mooo
 </file1>
 
-<file2 name="log/heads%TESTNUMBER">
+<file2 name="%LOGDIR/heads%TESTNUMBER">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    
@@ -69,7 +69,7 @@ mooo
 s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 </stripfile2>
 
-<file3 name="log/stdout%TESTNUMBER">
+<file3 name="%LOGDIR/stdout%TESTNUMBER">
 </file3>
 
 </verify>

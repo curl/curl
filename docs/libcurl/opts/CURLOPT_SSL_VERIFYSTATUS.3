@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSL_VERIFYSTATUS 3 "04 Dec 2014" "libcurl 7.40.0" "curl_easy_setopt options"
+.TH CURLOPT_SSL_VERIFYSTATUS 3 "04 Dec 2014" libcurl libcurl
 .SH NAME
 CURLOPT_SSL_VERIFYSTATUS \- verify the certificate's status
 .SH SYNOPSIS
@@ -55,8 +55,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.41.0. This option is currently only supported by the OpenSSL, GnuTLS
-and NSS TLS backends.
+Added in 7.41.0. This option is currently only supported by the OpenSSL and
+GnuTLS TLS backends.
 .SH RETURN VALUE
 Returns CURLE_OK if OCSP stapling is supported by the SSL backend, otherwise
 returns CURLE_NOT_BUILT_IN.

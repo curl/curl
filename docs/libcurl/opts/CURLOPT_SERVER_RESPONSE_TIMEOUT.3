@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SERVER_RESPONSE_TIMEOUT 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SERVER_RESPONSE_TIMEOUT 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_SERVER_RESPONSE_TIMEOUT \- time allowed to wait for server response
 .SH SYNOPSIS
@@ -45,7 +45,7 @@ This option was formerly known as \fBCURLOPT_FTP_RESPONSE_TIMEOUT\fP.
 .SH DEFAULT
 None
 .SH PROTOCOLS
-FTP, IMAP, POP3 and SMTP
+FTP, IMAP, POP3, SMTP, and SSH
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -60,6 +60,9 @@ if(curl) {
 .fi
 .SH AVAILABILITY
 Added in 7.10.8. Used under this name since 7.20.0
+
+Support for SSH is predicated on a new enough (1.11.0) version of libssh2
+being available when compiling libcurl.
 .SH RETURN VALUE
 Returns CURLE_OK if supported, and CURLE_UNKNOWN_OPTION if not. Returns
 CURLE_BAD_FUNCTION_ARGUMENT if set to a negative value or a value that when

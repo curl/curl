@@ -30,8 +30,12 @@ include Makefile.inc
 
 EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl $(OTHERPAGES) CMakeLists.txt
 
+GEN = $(GN_$(V))
+GN_0 = @echo "  GENERATE" $@;
+GN_1 =
+GN_ = $(GN_0)
+
 all: $(MANPAGE)
 
-$(MANPAGE): $(DPAGES) $(OTHERPAGES) Makefile.inc
-	@echo "generate $(MANPAGE)"
-	@(cd $(srcdir) && @PERL@ ./gen.pl mainpage $(DPAGES)) > $(MANPAGE)
+$(MANPAGE): $(DPAGES) $(OTHERPAGES) Makefile.inc gen.pl
+	$(GEN)(rm -f $(MANPAGE) && cd $(srcdir) && @PERL@ ./gen.pl mainpage $(DPAGES) > $(builddir)/manpage.tmp && mv $(builddir)/manpage.tmp $(MANPAGE))

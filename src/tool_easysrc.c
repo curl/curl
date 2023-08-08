@@ -186,7 +186,7 @@ void dumpeasysrc(struct GlobalConfig *config)
   else
     out = stdout;
   if(!out)
-    warnf(config, "Failed to open %s to write libcurl code!\n", o);
+    warnf(config, "Failed to open %s to write libcurl code", o);
   else {
     int i;
     const char *c;

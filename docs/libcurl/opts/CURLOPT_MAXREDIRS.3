@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_MAXREDIRS 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_MAXREDIRS 3 "17 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_MAXREDIRS \- maximum number of redirects allowed
 .SH SYNOPSIS
@@ -41,7 +41,7 @@ Setting the limit to 0 will make libcurl refuse any redirect.
 
 Set it to -1 for an infinite number of redirects.
 .SH DEFAULT
--1, unlimited
+30 (since 8.3.0), it was previously unlimited.
 .SH PROTOCOLS
 HTTP(S)
 .SH EXAMPLE

@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_SOCKOPTFUNCTION
+CURL_SOCKOPT_ALREADY_CONNECTED
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<precheck>
+./libtest/lib%TESTNUMBER check
+</precheck>
+<server>
+http
+</server>
+
+<name>
+application hands over already connected socket
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://%HOSTIP:%HTTPPORT/file %HOSTIP %HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /file HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

@@ -11,8 +11,9 @@
 
  Curl is a command line tool for doing all sorts of URL manipulations and
  transfers, but this particular document will focus on how to use it when
- doing HTTP requests for fun and profit. I will assume that you know how to
- invoke `curl --help` or `curl --manual` to get basic information about it.
+ doing HTTP requests for fun and profit. This documents assumes that you know
+ how to invoke `curl --help` or `curl --manual` to get basic information about
+ it.
 
  Curl is not written to do everything for you. It makes the requests, it gets
  the data, it sends data and it retrieves the information. You probably need
@@ -62,6 +63,17 @@
  is what you need. It will prepend the time to each trace output line:
 
     curl --trace-ascii d.txt --trace-time http://example.com/
+
+## See which Transfer
+
+ When doing parallel transfers, it is relevant to see which transfer is
+ doing what. When response headers are received (and logged) you need to
+ know which transfer these are for.
+ [`--trace-ids`](https://curl.se/docs/manpage.html#--trace-ids) option
+ is what you need. It will prepend the transfer and connection identifier
+ to each trace output line:
+
+    curl --trace-ascii d.txt --trace-ids http://example.com/
 
 ## See the Response
 
@@ -292,7 +304,7 @@
 
  Back in late 1995 they defined an additional way to post data over HTTP. It
  is documented in the RFC 1867, why this method sometimes is referred to as
- RFC1867-posting.
+ RFC 1867-posting.
 
  This method is mainly designed to better support file uploads. A form that
  allows a user to upload a file could be written like this in HTML:

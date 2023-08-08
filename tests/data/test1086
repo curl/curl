@@ -6,6 +6,7 @@ EPSV
 RETR
 timeout
 FAILURE
+SLOWDOWN
 flaky
 </keywords>
 </info>

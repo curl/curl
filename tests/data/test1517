@@ -9,7 +9,11 @@ early response
 </keywords>
 </info>
 #
-# This reproduces issue #657, fixed with PR #668 - on Windows
+# This test checks to make sure curl can call recv() without failing after a
+# send() fails on the same socket (#657). Most OSes should support this
+# natively. On Windows there were reported problems and a workaround via
+# define USE_RECV_BEFORE_SEND_WORKAROUND was added.
+# This proved problematic in other cases and was removed again.
 #
 # Server-side
 <reply>
@@ -39,6 +43,11 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
+# precheck is a command line to run before the test, to see if we can execute
+# the test or not
+<precheck>
+./libtest/lib%TESTNUMBER check
+</precheck>
 
  <name>
 HTTP POST, server responds before completed send

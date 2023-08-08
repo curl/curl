@@ -2,7 +2,7 @@
 <info>
 <keywords>
 HTTP
-HTTP GET
+HTTP PUT
 HTTP CONNECT
 HTTP proxy
 proxytunnel
@@ -71,7 +71,6 @@ Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Accept: */*
 User-Agent: Http Agent
 Content-Length: 13
-Expect: 100-continue
 
 Hello Cloud!
 </protocol>

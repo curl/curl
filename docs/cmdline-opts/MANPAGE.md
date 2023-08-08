@@ -31,10 +31,11 @@ Each file has a set of meta-data and a body of text.
     Help: (short text for the --help output for this option)
     Long: (long form name, without dashes)
     Magic: (description of "magic" options)
-    Multi: single/append/boolean/mutex (if used more than once)
+    Multi: single/append/boolean/mutex/custom (if used more than once)
     Mutexed: (space separated list of options this overrides, no dashes)
     Protocols: (space separated list for which protocols this option works)
     Requires: (space separated list of features this requires, no dashes)
+    Scope: global (if the option is global)
     See-also: (space separated list of related options, no dashes)
     Short: (single letter, without dash)
     SPDX-License-Identifier: curl

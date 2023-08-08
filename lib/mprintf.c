@@ -400,7 +400,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         /* out of allowed range */
         return 1;
 
-      switch (*fmt) {
+      switch(*fmt) {
       case 'S':
         flags |= FLAGS_ALT;
         /* FALLTHROUGH */
@@ -743,11 +743,11 @@ static int dprintf_formatf(
 
       goto number;
 
-      unsigned_number:
+unsigned_number:
       /* Unsigned number of base BASE.  */
       is_neg = 0;
 
-      number:
+number:
       /* Number of base BASE.  */
 
       /* Supply a default precision if none was given.  */

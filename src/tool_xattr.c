@@ -75,7 +75,7 @@ char *stripcredentials(const char *url)
 
     return nurl;
   }
-  error:
+error:
   curl_url_cleanup(u);
   return NULL;
 }

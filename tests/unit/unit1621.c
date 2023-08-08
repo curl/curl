@@ -41,9 +41,6 @@ static void unit_stop(void)
   (!defined(HAVE_FSETXATTR) && \
   (!defined(__FreeBSD_version) || (__FreeBSD_version < 500000)))
 UNITTEST_START
-{
-  return 0;
-}
 UNITTEST_STOP
 #else
 
@@ -68,7 +65,6 @@ static const struct checkthis tests[] = {
 UNITTEST_START
 {
   int i;
-  int rc = 0;
 
   for(i = 0; tests[i].input; i++) {
     const char *url = tests[i].input;
@@ -76,15 +72,10 @@ UNITTEST_START
     printf("Test %u got input \"%s\", output: \"%s\"\n",
            i, tests[i].input, stripped);
 
-    if(stripped && strcmp(tests[i].output, stripped)) {
-      fprintf(stderr, "Test %u got input \"%s\", expected output \"%s\"\n"
-              " Actual output: \"%s\"\n", i, tests[i].input, tests[i].output,
-              stripped);
-      rc++;
-    }
+    fail_if(stripped && strcmp(tests[i].output, stripped),
+            tests[i].output);
     curl_free(stripped);
   }
-  return rc;
 }
 UNITTEST_STOP
 #endif

@@ -76,7 +76,7 @@ static bool gtls_inited = FALSE;
 
 # include <gnutls/ocsp.h>
 
-struct ssl_backend_data {
+struct gtls_ssl_backend_data {
   struct gtls_instance gtls;
 };
 
@@ -91,7 +91,9 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, &result);
   if(nwritten < 0) {
-    gnutls_transport_set_errno(connssl->backend->gtls.session,
+    struct gtls_ssl_backend_data *backend =
+      (struct gtls_ssl_backend_data *)connssl->backend;
+    gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result)? EAGAIN : EINVAL);
     nwritten = -1;
   }
@@ -109,7 +111,9 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   DEBUGASSERT(data);
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
   if(nread < 0) {
-    gnutls_transport_set_errno(connssl->backend->gtls.session,
+    struct gtls_ssl_backend_data *backend =
+      (struct gtls_ssl_backend_data *)connssl->backend;
+    gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result)? EAGAIN : EINVAL);
     nread = -1;
   }
@@ -212,9 +216,10 @@ static CURLcode handshake(struct Curl_cfilter *cf,
                           bool nonblocking)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
   gnutls_session_t session;
-  curl_socket_t sockfd = cf->conn->sock[cf->sockindex];
+  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
 
   DEBUGASSERT(backend);
   session = backend->gtls.session;
@@ -679,7 +684,8 @@ static CURLcode
 gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   long * const pverifyresult = &ssl_config->certverifyresult;
@@ -698,37 +704,22 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(result)
     return result;
 
-  if(cf->conn->bits.tls_enable_alpn) {
-    int cur = 0;
-    gnutls_datum_t protocols[2];
+  if(connssl->alpn) {
+    struct alpn_proto_buf proto;
+    gnutls_datum_t alpn[ALPN_ENTRIES_MAX];
+    size_t i;
 
-    if(data->state.httpwant == CURL_HTTP_VERSION_1_0) {
-      protocols[cur].data = (unsigned char *)ALPN_HTTP_1_0;
-      protocols[cur++].size = ALPN_HTTP_1_0_LENGTH;
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_0);
+    for(i = 0; i < connssl->alpn->count; ++i) {
+      alpn[i].data = (unsigned char *)connssl->alpn->entries[i];
+      alpn[i].size = (unsigned)strlen(connssl->alpn->entries[i]);
     }
-    else {
-#ifdef USE_HTTP2
-      if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-         && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
-#endif
-        ) {
-        protocols[cur].data = (unsigned char *)ALPN_H2;
-        protocols[cur++].size = ALPN_H2_LENGTH;
-        infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
-      }
-#endif
-
-      protocols[cur].data = (unsigned char *)ALPN_HTTP_1_1;
-      protocols[cur++].size = ALPN_HTTP_1_1_LENGTH;
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
-    }
-
-    if(gnutls_alpn_set_protocols(backend->gtls.session, protocols, cur, 0)) {
+    if(gnutls_alpn_set_protocols(backend->gtls.session, alpn,
+                                 (unsigned)connssl->alpn->count, 0)) {
       failf(data, "failed setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
+    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
   /* This might be a reconnect, so we check for a session ID in the cache
@@ -1267,33 +1258,15 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-  if(cf->conn->bits.tls_enable_alpn) {
+  if(connssl->alpn) {
     gnutls_datum_t proto;
     int rc;
 
     rc = gnutls_alpn_get_selected_protocol(session, &proto);
-    if(rc == 0) {
-      infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, proto.size,
-            proto.data);
-
-#ifdef USE_HTTP2
-      if(proto.size == ALPN_H2_LENGTH &&
-         !memcmp(ALPN_H2, proto.data,
-                 ALPN_H2_LENGTH)) {
-        cf->conn->alpn = CURL_HTTP_VERSION_2;
-      }
-      else
-#endif
-      if(proto.size == ALPN_HTTP_1_1_LENGTH &&
-         !memcmp(ALPN_HTTP_1_1, proto.data, ALPN_HTTP_1_1_LENGTH)) {
-        cf->conn->alpn = CURL_HTTP_VERSION_1_1;
-      }
-    }
+    if(rc == 0)
+      Curl_alpn_set_negotiated(cf, data, proto.data, proto.size);
     else
-      infof(data, VTLS_INFOF_NO_ALPN);
-
-    Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+      Curl_alpn_set_negotiated(cf, data, NULL, 0);
   }
 
   if(ssl_config->primary.sessionid) {
@@ -1379,7 +1352,8 @@ gtls_connect_common(struct Curl_cfilter *cf,
 
   /* Finish connecting once the handshake is done */
   if(ssl_connect_1 == connssl->connecting_state) {
-    struct ssl_backend_data *backend = connssl->backend;
+    struct gtls_ssl_backend_data *backend =
+      (struct gtls_ssl_backend_data *)connssl->backend;
     gnutls_session_t session;
     DEBUGASSERT(backend);
     session = backend->gtls.session;
@@ -1423,11 +1397,13 @@ static bool gtls_data_pending(struct Curl_cfilter *cf,
                               const struct Curl_easy *data)
 {
   struct ssl_connect_data *ctx = cf->ctx;
+  struct gtls_ssl_backend_data *backend;
 
   (void)data;
   DEBUGASSERT(ctx && ctx->backend);
-  if(ctx->backend->gtls.session &&
-     0 != gnutls_record_check_pending(ctx->backend->gtls.session))
+  backend = (struct gtls_ssl_backend_data *)ctx->backend;
+  if(backend->gtls.session &&
+     0 != gnutls_record_check_pending(backend->gtls.session))
     return TRUE;
   return FALSE;
 }
@@ -1439,7 +1415,8 @@ static ssize_t gtls_send(struct Curl_cfilter *cf,
                          CURLcode *curlcode)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
   ssize_t rc;
 
   (void)data;
@@ -1461,7 +1438,8 @@ static void gtls_close(struct Curl_cfilter *cf,
                        struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
 
   (void) data;
   DEBUGASSERT(backend);
@@ -1496,7 +1474,8 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct ssl_backend_data *backend = connssl->backend;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
   int retval = 0;
 
   DEBUGASSERT(backend);
@@ -1517,7 +1496,7 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
     char buf[120];
 
     while(!done) {
-      int what = SOCKET_READABLE(cf->conn->sock[cf->sockindex],
+      int what = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data),
                                  SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {
         /* Something to read, let's do it and hope that it is the close
@@ -1574,7 +1553,8 @@ static ssize_t gtls_recv(struct Curl_cfilter *cf,
                          CURLcode *curlcode)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
   ssize_t ret;
 
   (void)data;
@@ -1653,7 +1633,8 @@ static bool gtls_cert_status_request(void)
 static void *gtls_get_internals(struct ssl_connect_data *connssl,
                                 CURLINFO info UNUSED_PARAM)
 {
-  struct ssl_backend_data *backend = connssl->backend;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
   (void)info;
   DEBUGASSERT(backend);
   return backend->gtls.session;
@@ -1667,7 +1648,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_HTTPS_PROXY,
 
-  sizeof(struct ssl_backend_data),
+  sizeof(struct gtls_ssl_backend_data),
 
   gtls_init,                     /* init */
   gtls_cleanup,                  /* cleanup */

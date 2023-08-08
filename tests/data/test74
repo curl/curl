@@ -43,7 +43,7 @@ http
 HTTP, urlglob {}-retrieval and -o #[num] usage
  </name>
  <command option="no-output">
-"http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER0001}" -o "log/dumpit#1.dump"
+"http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER0001}" -o "%LOGDIR/dumpit#1.dump"
 </command>
 </client>
 
@@ -62,7 +62,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="log/dumpit%TESTNUMBER0001.dump">
+<file name="%LOGDIR/dumpit%TESTNUMBER0001.dump">
 HTTP/1.0 200 OK
 Content-Type: text/html
 Funny-head: swsclose

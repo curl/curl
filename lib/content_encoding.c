@@ -33,7 +33,15 @@
 #endif
 
 #ifdef HAVE_BROTLI
+#if defined(__GNUC__)
+/* Ignore -Wvla warnings in brotli headers */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvla"
+#endif
 #include <brotli/decode.h>
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #endif
 
 #ifdef HAVE_ZSTD
@@ -45,6 +53,9 @@
 #include "content_encoding.h"
 #include "strdup.h"
 #include "strcase.h"
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -1047,7 +1058,6 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int is_transfer)
 {
   struct SingleRequest *k = &data->req;
-  int counter = 0;
   unsigned int order = is_transfer? 2: 1;
 
   do {
@@ -1070,8 +1080,12 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       Curl_httpchunk_init(data);   /* init our chunky engine. */
     }
     else if(namelen) {
-      const struct content_encoding *encoding = find_encoding(name, namelen);
+      const struct content_encoding *encoding;
       struct contenc_writer *writer;
+      if(is_transfer && !data->set.http_transfer_encoding)
+        /* not requested, ignore */
+        return CURLE_OK;
+      encoding = find_encoding(name, namelen);
 
       if(!k->writer_stack) {
         k->writer_stack = new_unencoding_writer(data, &client_encoding,
@@ -1084,9 +1098,9 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       if(!encoding)
         encoding = &error_encoding;  /* Defer error at stack use. */
 
-      if(++counter >= MAX_ENCODE_STACK) {
-        failf(data, "Reject response due to %u content encodings",
-              counter);
+      if(k->writer_stack_depth++ >= MAX_ENCODE_STACK) {
+        failf(data, "Reject response due to more than %u content encodings",
+              MAX_ENCODE_STACK);
         return CURLE_BAD_CONTENT_ENCODING;
       }
       /* Stack the unencoding stage. */

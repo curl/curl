@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_ALTSVC 3 "5 Feb 2019" "libcurl 7.64.1" "curl_easy_setopt options"
+.TH CURLOPT_ALTSVC 3 "5 Feb 2019" libcurl libcurl
 .SH NAME
 CURLOPT_ALTSVC \- alt-svc cache file name
 .SH SYNOPSIS
@@ -34,7 +34,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC, char *filename);
 .SH DESCRIPTION
 Pass in a pointer to a \fIfilename\fP to instruct libcurl to use that file as
 the Alt-Svc cache to read existing cache contents from and possibly also write
-it back to a after a transfer, unless \fBCURLALTSVC_READONLYFILE\fP is set in
+it back to after a transfer, unless \fBCURLALTSVC_READONLYFILE\fP is set in
 \fICURLOPT_ALTSVC_CTRL(3)\fP.
 
 Specify a blank file name ("") to make libcurl not load from a file at all.

@@ -21,6 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#define CURL_NO_FMT_CHECKS
+
 #include "curlcheck.h"
 
 #include "curl/mprintf.h"

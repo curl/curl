@@ -57,7 +57,7 @@
 /* to play well with debug builds, we can *set* a fixed time this will
    return */
 time_t deltatime; /* allow for "adjustments" for unit test purposes */
-static time_t debugtime(void *unused)
+static time_t hsts_debugtime(void *unused)
 {
   char *timestr = getenv("CURL_TIME");
   (void)unused;
@@ -70,7 +70,8 @@ static time_t debugtime(void *unused)
   }
   return time(NULL);
 }
-#define time(x) debugtime(x)
+#undef time
+#define time(x) hsts_debugtime(x)
 #endif
 
 struct hsts *Curl_hsts_init(void)
@@ -204,7 +205,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       p++;
     if(*p == ';')
       p++;
-  } while (*p);
+  } while(*p);
 
   if(!gotma)
     /* max-age is mandatory */
@@ -390,7 +391,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
       unlink(tempstore);
   }
   free(tempstore);
-  skipsave:
+skipsave:
   if(data->set.hsts_write) {
     /* if there's a write callback */
     struct curl_index i; /* count */
@@ -534,7 +535,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
   }
   return result;
 
-  fail:
+fail:
   Curl_safefree(h->filename);
   fclose(fp);
   return CURLE_OUT_OF_MEMORY;

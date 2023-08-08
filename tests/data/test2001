@@ -49,9 +49,9 @@ file
 HTTP GET followed by FTP RETR followed by FILE
  </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 file://localhost%FILE_PWD/log/test%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
-<file name="log/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
    bar
 bar

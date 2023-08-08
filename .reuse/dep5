@@ -23,6 +23,10 @@ Files: projects/Windows/*
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
+Files: libcurl.def
+Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
 # Single files we do not want to edit directly
 Files: CHANGES
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -49,15 +53,7 @@ Files: lib/libcurl.vers.in
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
-Files: mlc_config.json
-Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
-License: curl
-
 Files: packages/OS400/README.OS400
-Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
-License: curl
-
-Files: packages/README
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 

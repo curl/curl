@@ -28,11 +28,13 @@
 
 use Cwd;
 use Cwd 'abs_path';
+use File::Basename;
 
-my $pidfile = "log/nghttpx.pid";
-my $logfile = "log/http3.log";
+my $logdir = "log";
+my $pidfile = "$logdir/nghttpx.pid";
+my $logfile = "$logdir/http3.log";
 my $nghttpx = "nghttpx";
-my $listenport = 9015;
+my $listenport = 9017;
 my $connect = "127.0.0.1,8990";
 my $cert = "Server-localhost-sv";
 my $conf = "nghttpx.conf";
@@ -81,6 +83,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--logdir') {
+        if($ARGV[1]) {
+            $logdir = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--conf') {
         if($ARGV[1]) {
             $conf = $ARGV[1];
@@ -93,14 +101,14 @@ while(@ARGV) {
     shift @ARGV;
 }
 
-my $path   = getcwd();
-my $srcdir = $path;
+my $srcdir = dirname(__FILE__);
 $certfile = "$srcdir/certs/$cert.pem";
 $keyfile = "$srcdir/certs/$cert.key";
 $certfile = abs_path($certfile);
 $keyfile = abs_path($keyfile);
 
 my $cmdline="$nghttpx --http2-proxy --backend=$connect ".
+    "--frontend=\"*,$listenport\" ".
     "--frontend=\"*,$listenport;quic\" ".
     "--log-level=INFO ".
     "--pid-file=$pidfile ".

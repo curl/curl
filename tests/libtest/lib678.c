@@ -44,12 +44,12 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
       else
         datasize = (size_t)cert_tell;
       if(continue_reading)
-         continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
+        continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
       if(continue_reading)
-          data = malloc(datasize + 1);
+        data = malloc(datasize + 1);
       if((!data) ||
-          ((int)fread(data, datasize, 1, fInCert) != 1))
-          continue_reading = FALSE;
+         ((int)fread(data, datasize, 1, fInCert) != 1))
+        continue_reading = FALSE;
       fclose(fInCert);
       if(!continue_reading) {
         free(data);

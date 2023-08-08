@@ -75,8 +75,11 @@ http
 HTTP Location: following with command-line and server cookies
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -c log/jar%TESTNUMBER -b forcedcookie=yes
+http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -c %LOGDIR/jar%TESTNUMBER -b forcedcookie=yes
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

@@ -26,7 +26,7 @@ can `cd tests` and `make` and then invoke individual unit tests with
 ## Debug Unit Tests
 
 If a specific test fails you will get told. The test case then has output left
-in the log/ subdirectory, but most importantly you can re-run the test again
+in the %LOGDIR subdirectory, but most importantly you can re-run the test again
 using gdb by doing `./runtests.pl -g NNNN`. That is, add a `-g` to make it
 start up gdb and run the same case using that.
 

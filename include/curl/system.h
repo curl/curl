@@ -237,33 +237,28 @@
 #  define CURL_PULL_SYS_SOCKET_H     1
 
 #elif defined(__MVS__)
-#  if defined(__IBMC__) || defined(__IBMCPP__)
-#    if defined(_ILP32)
-#    elif defined(_LP64)
-#    endif
-#    if defined(_LONG_LONG)
-#      define CURL_TYPEOF_CURL_OFF_T     long long
-#      define CURL_FORMAT_CURL_OFF_T     "lld"
-#      define CURL_FORMAT_CURL_OFF_TU    "llu"
-#      define CURL_SUFFIX_CURL_OFF_T     LL
-#      define CURL_SUFFIX_CURL_OFF_TU    ULL
-#    elif defined(_LP64)
-#      define CURL_TYPEOF_CURL_OFF_T     long
-#      define CURL_FORMAT_CURL_OFF_T     "ld"
-#      define CURL_FORMAT_CURL_OFF_TU    "lu"
-#      define CURL_SUFFIX_CURL_OFF_T     L
-#      define CURL_SUFFIX_CURL_OFF_TU    UL
-#    else
-#      define CURL_TYPEOF_CURL_OFF_T     long
-#      define CURL_FORMAT_CURL_OFF_T     "ld"
-#      define CURL_FORMAT_CURL_OFF_TU    "lu"
-#      define CURL_SUFFIX_CURL_OFF_T     L
-#      define CURL_SUFFIX_CURL_OFF_TU    UL
-#    endif
-#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
-#    define CURL_PULL_SYS_TYPES_H      1
-#    define CURL_PULL_SYS_SOCKET_H     1
+#  if defined(_LONG_LONG)
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#  elif defined(_LP64)
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
 #  endif
+#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#  define CURL_PULL_SYS_TYPES_H      1
+#  define CURL_PULL_SYS_SOCKET_H     1
 
 #elif defined(__370__)
 #  if defined(__IBMC__) || defined(__IBMCPP__)

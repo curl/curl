@@ -50,6 +50,14 @@
 #endif
 
 #ifdef USE_WIN32_LDAP           /* Use Windows LDAP implementation. */
+# ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4201)
+# endif
+# include <subauth.h>  /* for [P]UNICODE_STRING */
+# ifdef _MSC_VER
+#  pragma warning(pop)
+# endif
 # include <winldap.h>
 # ifndef LDAP_VENDOR_NAME
 #  error Your Platform SDK is NOT sufficient for LDAP support! \
@@ -140,6 +148,14 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp);
 #define ldap_err2string ldap_err2stringA
 #endif
 
+#if defined(USE_WIN32_LDAP) && defined(_MSC_VER) && (_MSC_VER <= 1600)
+/* Workaround for warning:
+   'type cast' : conversion from 'int' to 'void *' of greater size */
+#undef LDAP_OPT_ON
+#undef LDAP_OPT_OFF
+#define LDAP_OPT_ON   ((void *)(size_t)1)
+#define LDAP_OPT_OFF  ((void *)(size_t)0)
+#endif
 
 static CURLcode ldap_do(struct Curl_easy *data, bool *done);
 
@@ -723,7 +739,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     }
 
     if(ber)
-       ber_free(ber, 0);
+      ber_free(ber, 0);
   }
 
 quit:
@@ -1061,7 +1077,7 @@ static int _ldap_url_parse(struct Curl_easy *data,
 
   *ludpp = NULL;
   if(!ludp)
-     return LDAP_NO_MEMORY;
+    return LDAP_NO_MEMORY;
 
   rc = _ldap_url_parse2(data, conn, ludp);
   if(rc != LDAP_SUCCESS) {

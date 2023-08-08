@@ -1,0 +1,24 @@
+<testcase>
+<info>
+<keywords>
+unittest
+cfilter
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+debug
+http
+</features>
+ <name>
+connection filter connect/destroy unit tests
+ </name>
+</client>
+</testcase>

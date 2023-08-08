@@ -21,7 +21,7 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_formadd 3 "24 June 2002" "libcurl 7.9.8" "libcurl Manual"
+.TH curl_formadd 3 "24 June 2002" "libcurl" "libcurl"
 .SH NAME
 curl_formadd - add a section to a multipart form POST
 .SH SYNOPSIS
@@ -176,8 +176,8 @@ for the curl handle.
 See example below.
 .SH EXAMPLE
 .nf
- struct curl_httppost* post = NULL;
- struct curl_httppost* last = NULL;
+ struct curl_httppost *post = NULL;
+ struct curl_httppost *last = NULL;
  char namebuffer[] = "name buffer";
  long namelength = strlen(namebuffer);
  char buffer[] = "test buffer";

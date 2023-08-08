@@ -11,11 +11,31 @@ on:
     - '*/ci'
     paths-ignore:
     - '**/*.md'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'docs/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'tests/data/**'
+    - 'winbuild/**'
   pull_request:
     branches:
     - master
     paths-ignore:
     - '**/*.md'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'docs/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'tests/data/**'
+    - 'winbuild/**'
   schedule:
     - cron: '0 0 * * 4'
 

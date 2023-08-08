@@ -24,7 +24,9 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "tool_cfgable.h"
 
-CURLcode create_dir_hierarchy(const char *outfile, FILE *errors);
+CURLcode create_dir_hierarchy(const char *outfile,
+                              struct GlobalConfig *global);
 
 #endif /* HEADER_CURL_TOOL_DIRHIE_H */

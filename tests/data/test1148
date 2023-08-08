@@ -35,7 +35,7 @@ http
 progress-bar
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -# --stderr log/stderrlog%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -# --stderr %LOGDIR/stderrlog%TESTNUMBER
 </command>
 <setenv>
 LC_ALL=
@@ -56,7 +56,7 @@ Accept: */*
 # Check that the progress finished at 100% and has the right bar width.
 # Note the dot in 100.0% is regex to match any character since different
 # locales use different separators.
-<file name="log/stderrlog%TESTNUMBER" mode="text">
+<file name="%LOGDIR/stderrlog%TESTNUMBER" mode="text">
 correct
 </file>
 <stripfile>

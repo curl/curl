@@ -40,7 +40,6 @@
 #define HAVE_NETINET_IN_H 1
 #define HAVE_NET_IF_H 1
 #define HAVE_PWD_H 1
-#define HAVE_RAND_EGD 1
 #define HAVE_SELECT 1
 #define HAVE_SETJMP_H 1
 #define HAVE_SIGNAL 1
@@ -87,7 +86,15 @@
 #define PACKAGE_STRING "curl -"
 #define PACKAGE_TARNAME "curl"
 #define PACKAGE_VERSION "-"
+
+#if defined(USE_AMISSL)
+#define CURL_CA_PATH "AmiSSL:Certs"
+#elif defined(__MORPHOS__)
+#define CURL_CA_BUNDLE "MOSSYS:Data/SSL/curl-ca-bundle.crt"
+#else
 #define CURL_CA_BUNDLE "s:curl-ca-bundle.crt"
+#endif
+
 #define STDC_HEADERS 1
 #define TIME_WITH_SYS_TIME 1
 

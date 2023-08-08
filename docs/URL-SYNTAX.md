@@ -52,7 +52,7 @@ security concerns:
 
 3. Such a URL might use other schemes than you thought of or planned for.
 
-## "RFC3986 plus"
+## "RFC 3986 plus"
 
 curl recognizes a URL syntax that we call "RFC 3986 plus". It is grounded on
 the well established RFC 3986 to make sure previously written command lines and
@@ -359,6 +359,9 @@ The path part of a SMB request specifies the file to retrieve and from what
 share and directory or the share to upload to and as such, may not be omitted.
 If the user name is embedded in the URL then it must contain the domain name
 and as such, the backslash must be URL encoded as %2f.
+
+When uploading to SMB, the size of the file needs to be known ahead of time,
+meaning that you can upload a file passed to curl over a pipe like stdin.
 
 curl supports SMB version 1 (only)
 

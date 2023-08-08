@@ -136,7 +136,7 @@ static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
   (void)multi; /* unused */
   if(timeout_ms != -1) {
     *timeout = tutil_tvnow();
-    timeout->tv_usec += timeout_ms * 1000;
+    timeout->tv_usec += (int)timeout_ms * 1000;
   }
   else {
     timeout->tv_sec = -1;
@@ -238,6 +238,8 @@ int test(char *URL)
   struct timeval timeout = {-1, 0};
   int success = 0;
 
+  assert(test_argc >= 5);
+
   start_test_timing();
 
   if(!libtest_arg3) {
@@ -286,8 +288,8 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_READDATA, hd_src);
 
   easy_setopt(curl, CURLOPT_USERPWD, libtest_arg3);
-  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, "curl_client_key.pub");
-  easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, "curl_client_key");
+  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, test_argv[4]);
+  easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, test_argv[5]);
   easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);

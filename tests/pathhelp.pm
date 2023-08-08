@@ -49,30 +49,24 @@
 #     interpreted incorrectly in Perl and Msys/Cygwin environment have low
 #     control on Win32 current drive and Win32 current path on specific drive.
 
-
 package pathhelp;
+
 use strict;
 use warnings;
 use Cwd 'abs_path';
 
 BEGIN {
-    require Exporter;
-
-    our @ISA    = qw(Exporter);
-
-    our @EXPORT = qw(
-      sys_native_abs_path
-      sys_native_path
-    );
+    use base qw(Exporter);
 
     our @EXPORT_OK = qw(
-      build_sys_abs_path
-      sys_native_current_path
-      normalize_path
-      os_is_win
-      $use_cygpath
-      should_use_cygpath
-      drives_mounted_on_cygdrive
+        os_is_win
+        exe_ext
+        sys_native_abs_path
+        sys_native_current_path
+        build_sys_abs_path
+        normalize_path
+        should_use_cygpath
+        drives_mounted_on_cygdrive
     );
 }
 
@@ -102,21 +96,19 @@ BEGIN {
     }
 }
 
-our $use_cygpath;    # Only for Win32:
+my $use_cygpath;     # Only for Win32:
                      #  undef - autodetect
-                     #      1 - use cygpath
                      #      0 - do not use cygpath
+                     #      1 - use cygpath
 
 # Returns boolean true if 'cygpath' utility should be used for path conversion.
 sub should_use_cygpath {
-    unless (os_is_win()) {
-        $use_cygpath = 0;
-        return 0;
-    }
     return $use_cygpath if defined $use_cygpath;
-
-    $use_cygpath = (qx{cygpath -u '.\\' 2>/dev/null} eq "./\n" && $? == 0);
-
+    if(os_is_win()) {
+        $use_cygpath = (qx{cygpath -u '.\\' 2>/dev/null} eq "./\n" && $? == 0);
+    } else {
+        $use_cygpath = 0;
+    }
     return $use_cygpath;
 }
 
@@ -134,7 +126,7 @@ sub normalize_path;
 # Returns current working directory in Win32 format on Windows.
 #
 sub sys_native_current_path {
-    return Cwd::getcwd() unless os_is_win();
+    return Cwd::getcwd() if !os_is_win();
 
     my $cur_dir;
     if($^O eq 'msys') {
@@ -203,7 +195,7 @@ sub sys_native_path {
     my ($path) = @_;
 
     # Return untouched on non-Windows platforms.
-    return $path unless (os_is_win());
+    return $path if (!os_is_win());
 
     # Do not process empty path.
     return $path if ($path eq '');
@@ -233,7 +225,7 @@ sub sys_native_path {
 
         # Convert leading slash back to forward slash to indicate
         # directory on Win32 current drive or capitalize drive letter.
-        substr($path, 0, 1) = $first_char;
+        substr($path, 0, 1, $first_char);
         return $path;
     }
     elsif(should_use_cygpath()) {
@@ -266,7 +258,7 @@ sub sys_native_path {
         # program parameters if program is not Msys-based.
 
         $path = do_msys_transform($path);
-        return undef unless defined $path;
+        return undef if !defined $path;
 
         # Capitalize drive letter for Win32 paths.
         $path =~ s{^([a-z]:)}{\u$1};
@@ -303,7 +295,7 @@ sub sys_native_path {
 sub sys_native_abs_path {
     my ($path) = @_;
 
-    unless(os_is_win()) {
+    if(!os_is_win()) {
         # Convert path to absolute form.
         $path = Cwd::abs_path($path);
 
@@ -362,7 +354,7 @@ sub sys_native_abs_path {
         # Path is directory or filename on Win32 current drive. ('\Windows')
 
         my $w32drive = get_win32_current_drive();
-        return undef unless defined $w32drive;
+        return undef if !defined $w32drive;
 
         # Combine drive and path.
         # Replace any possible back slashes with forward slashes,
@@ -370,7 +362,7 @@ sub sys_native_abs_path {
         return normalize_path($w32drive . $path);
     }
 
-    unless (substr($path, 0, 1) eq '/') {
+    if(substr($path, 0, 1) ne '/') {
         # Path is in relative form. Resolve relative directories in Unix form
         # *BEFORE* converting to Win32 form otherwise paths like
         # '../../../cygdrive/c/windows' will not be resolved.
@@ -400,7 +392,7 @@ sub sys_native_abs_path {
         # Msys transforms automatically path to Windows native form in staring
         # program parameters if program is not Msys-based.
         $path = do_msys_transform($path);
-        return undef unless defined $path;
+        return undef if !defined $path;
 
         # Replace any back and duplicated slashes with single forward slashes.
         $path =~ s{[\\/]+}{/}g;
@@ -423,7 +415,7 @@ sub simple_transform_win32_to_unix;
 sub build_sys_abs_path {
     my ($path) = @_;
 
-    unless(os_is_win()) {
+    if(!os_is_win()) {
         # Convert path to absolute form.
         $path = Cwd::abs_path($path);
 
@@ -442,7 +434,7 @@ sub build_sys_abs_path {
         # Replace any possible back slashes with forward slashes,
         # remove any duplicated slashes.
         $path = get_abs_path_on_win32_drive($1, $2);
-        return undef unless defined $path;
+        return undef if !defined $path;
 
         return simple_transform_win32_to_unix($path);
     }
@@ -475,7 +467,7 @@ sub build_sys_abs_path {
         # Unix-style paths.
         # Remove duplicated slashes, as they may be not processed.
         $path = normalize_path($path);
-        return undef unless defined $path;
+        return undef if !defined $path;
 
         # Use 'cygpath', '-u' means Unix-stile path,
         # '-a' means absolute path
@@ -500,7 +492,7 @@ sub build_sys_abs_path {
         # Replace any possible back slashes with forward slashes,
         # remove any duplicated slashes.
         $path = normalize_path($path);
-        return undef unless defined $path;
+        return undef if !defined $path;
 
         return simple_transform_win32_to_unix($path);
     }
@@ -508,7 +500,7 @@ sub build_sys_abs_path {
         # Path is directory or filename on Win32 current drive. ('\Windows')
 
         my $w32drive = get_win32_current_drive();
-        return undef unless defined $w32drive;
+        return undef if !defined $w32drive;
 
         # Combine drive and path.
         # Resolve relative dirs in Win32-style path or paths like 'D:/../c/'
@@ -516,13 +508,13 @@ sub build_sys_abs_path {
         # Replace any possible back slashes with forward slashes,
         # remove any duplicated slashes.
         $path = normalize_path($w32drive . $path);
-        return undef unless defined $path;
+        return undef if !defined $path;
 
         return simple_transform_win32_to_unix($path);
     }
 
     # Path is not in any Win32 form.
-    unless (substr($path, 0, 1) eq '/') {
+    if(substr($path, 0, 1) ne '/') {
         # Path in relative form. Resolve relative directories in Unix form
         # *BEFORE* converting to Win32 form otherwise paths like
         # '../../../cygdrive/c/windows' will not be resolved.
@@ -561,12 +553,12 @@ sub normalize_path {
     # Don't process empty paths.
     return $path if $path eq '';
 
-    unless($path =~ m{(?:^|\\|/)\.{1,2}(?:\\|/|$)}) {
+    if($path !~ m{(?:^|\\|/)\.{1,2}(?:\\|/|$)}) {
         # Speed up processing of simple paths.
         my $first_char = substr($path, 0, 1);
         $path =~ s{[\\/]+}{/}g;
         # Restore starting backslash if any.
-        substr($path, 0, 1) = $first_char;
+        substr($path, 0, 1, $first_char);
         return $path;
     }
 
@@ -581,7 +573,7 @@ sub normalize_path {
         # Process path separately from drive letter.
         @arr = split(m{\/|\\}, $3);
         # Replace backslash with forward slash if required.
-        substr($prefix, 2, 1) = '/' if $have_root;
+        substr($prefix, 2, 1, '/') if $have_root;
     }
     else {
         if($path =~ m{^(\/|\\)}) {
@@ -601,7 +593,7 @@ sub normalize_path {
         if(length($el) == 0 || $el eq '.') {
             next;
         }
-        elsif($el eq '..' && @res > 0 && $res[$#res] ne '..') {
+        elsif($el eq '..' && @res > 0 && $res[-1] ne '..') {
             pop @res;
             next;
         }
@@ -717,7 +709,7 @@ sub do_dumb_guessed_transform {
     # '/bin/' can be mapped to '/usr/bin/'.
     my $check_path = $path;
     my $path_tail = '';
-    do {
+    while(1) {
         if(-d $check_path) {
             my $res =
                 `(cd "$check_path" && cmd /c "echo %__CD__%") 2>/dev/null`;
@@ -732,7 +724,7 @@ sub do_dumb_guessed_transform {
                     return $res . $path_tail;
                 }
                 else {
-                    $res =~ s{/$}{} unless $check_path =~ m{/$};
+                    $res =~ s{/$}{} if $check_path !~ m{/$};
                     return $res;
                 }
             }
@@ -747,7 +739,7 @@ sub do_dumb_guessed_transform {
             warn "Can't determine Win32 directory for path \"$path\".\n";
             return undef;
         }
-    } while(1);
+    }
 }
 
 
@@ -772,7 +764,7 @@ sub simple_transform_win32_to_unix {
     }
 
     # 'cygpath' is not available, use guessed transformation.
-    unless($path =~ s{^([a-zA-Z]):(?:/|\\)}{/\l$1/}) {
+    if($path !~ s{^([a-zA-Z]):(?:/|\\)}{/\l$1/}) {
         warn "Can't determine Unix-style directory for Win32 " .
              "directory \"$path\".\n";
         return undef;
@@ -780,6 +772,23 @@ sub simple_transform_win32_to_unix {
 
     $path = '/cygdrive' . $path if(drives_mounted_on_cygdrive());
     return $path;
+}
+#
+#***************************************************************************
+# Return file extension for executable files on this operating system
+#
+sub exe_ext {
+    my ($component, @arr) = @_;
+    if ($ENV{'CURL_TEST_EXE_EXT'}) {
+        return $ENV{'CURL_TEST_EXE_EXT'};
+    }
+    if ($ENV{'CURL_TEST_EXE_EXT_'.$component}) {
+        return $ENV{'CURL_TEST_EXE_EXT_'.$component};
+    }
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
+        $^O eq 'dos' || $^O eq 'os2') {
+        return '.exe';
+    }
 }
 
 1;    # End of module

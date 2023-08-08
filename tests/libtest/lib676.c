@@ -45,7 +45,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_USERAGENT, "the-moo agent next generation");
-  test_setopt(curl, CURLOPT_COOKIEFILE, "log/cookies676");
+  test_setopt(curl, CURLOPT_COOKIEFILE, libtest_arg2);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   res = curl_easy_perform(curl);

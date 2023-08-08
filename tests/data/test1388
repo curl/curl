@@ -31,10 +31,10 @@ ftp
 FTP DL, file with C-D inside, using -o fname -D stdout
 </name>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o log/download%TESTNUMBER -D -
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o %LOGDIR/download%TESTNUMBER -D -
 </command>
 <postcheck>
-perl %SRCDIR/libtest/notexists.pl log/file%TESTNUMBER log/name%TESTNUMBER
+perl %SRCDIR/libtest/notexists.pl %LOGDIR/file%TESTNUMBER %LOGDIR/name%TESTNUMBER
 </postcheck>
 </client>
 
@@ -52,7 +52,7 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="log/download%TESTNUMBER">
+<file1 name="%LOGDIR/download%TESTNUMBER">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -64,7 +64,7 @@ Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 MOOOO
 </file1>
 
-<file2 name="log/stdout%TESTNUMBER">
+<file2 name="%LOGDIR/stdout%TESTNUMBER">
 220-        _   _ ____  _     
 220-    ___| | | |  _ \| |    
 220-   / __| | | | |_) | |    

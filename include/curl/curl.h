@@ -34,11 +34,12 @@
 #endif
 
 /* Compile-time deprecation macros. */
-#if defined(__GNUC__) && (__GNUC__ >= 6) &&                             \
+#if defined(__GNUC__) &&                                                \
+  ((__GNUC__ > 12) || ((__GNUC__ == 12) && (__GNUC_MINOR__ >= 1 ))) &&  \
   !defined(__INTEL_COMPILER) &&                                         \
   !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
-#define CURL_DEPRECATED(version, message) \
-    __attribute__((deprecated("since " # version ". " message)))
+#define CURL_DEPRECATED(version, message)                       \
+  __attribute__((deprecated("since " # version ". " message)))
 #define CURL_IGNORE_DEPRECATION(statements) \
       _Pragma("GCC diagnostic push") \
       _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") \
@@ -92,7 +93,7 @@
     defined(__CYGWIN__) || defined(AMIGA) || defined(__NuttX__) || \
    (defined(__FreeBSD_version) && (__FreeBSD_version < 800000)) || \
    (defined(__MidnightBSD_version) && (__MidnightBSD_version < 100000)) || \
-    defined(__sun__) || defined(__serenity__)
+    defined(__sun__) || defined(__serenity__) || defined(__vxworks__)
 #include <sys/select.h>
 #endif
 
@@ -160,7 +161,7 @@ typedef enum {
   CURLSSLBACKEND_GNUTLS = 2,
   CURLSSLBACKEND_NSS = 3,
   CURLSSLBACKEND_OBSOLETE4 = 4,  /* Was QSOSSL. */
-  CURLSSLBACKEND_GSKIT = 5,
+  CURLSSLBACKEND_GSKIT                  CURL_DEPRECATED(8.3.0, "") = 5,
   CURLSSLBACKEND_POLARSSL               CURL_DEPRECATED(7.69.0, "") = 6,
   CURLSSLBACKEND_WOLFSSL = 7,
   CURLSSLBACKEND_SCHANNEL = 8,
@@ -173,8 +174,9 @@ typedef enum {
 } curl_sslbackend;
 
 /* aliases for library clones and renames */
-#define CURLSSLBACKEND_LIBRESSL CURLSSLBACKEND_OPENSSL
+#define CURLSSLBACKEND_AWSLC CURLSSLBACKEND_OPENSSL
 #define CURLSSLBACKEND_BORINGSSL CURLSSLBACKEND_OPENSSL
+#define CURLSSLBACKEND_LIBRESSL CURLSSLBACKEND_OPENSSL
 
 /* deprecated names: */
 #define CURLSSLBACKEND_CYASSL CURLSSLBACKEND_WOLFSSL
@@ -330,7 +332,8 @@ struct curl_fileinfo {
 
   unsigned int flags;
 
-  /* used internally */
+  /* These are libcurl private struct fields. Previously used by libcurl, so
+     they must never be interfered with. */
   char *b_data;
   size_t b_size;
   size_t b_used;
@@ -777,7 +780,8 @@ typedef enum {
                            CONNECT HTTP/1.1 */
   CURLPROXY_HTTP_1_0 = 1,   /* added in 7.19.4, force to use CONNECT
                                HTTP/1.0  */
-  CURLPROXY_HTTPS = 2, /* added in 7.52.0 */
+  CURLPROXY_HTTPS = 2,  /* HTTPS but stick to HTTP/1 added in 7.52.0 */
+  CURLPROXY_HTTPS2 = 3, /* HTTPS and attempt HTTP/2 added in 8.2.0 */
   CURLPROXY_SOCKS4 = 4, /* support added in 7.15.2, enum existed already
                            in 7.10 */
   CURLPROXY_SOCKS5 = 5, /* added in 7.10 */
@@ -2109,7 +2113,7 @@ typedef enum {
   CURLOPT(CURLOPT_SASL_AUTHZID, CURLOPTTYPE_STRINGPOINT, 289),
 
   /* allow RCPT TO command to fail for some recipients */
-  CURLOPT(CURLOPT_MAIL_RCPT_ALLLOWFAILS, CURLOPTTYPE_LONG, 290),
+  CURLOPT(CURLOPT_MAIL_RCPT_ALLOWFAILS, CURLOPTTYPE_LONG, 290),
 
   /* the private SSL-certificate as a "blob" */
   CURLOPT(CURLOPT_SSLCERT_BLOB, CURLOPTTYPE_BLOB, 291),
@@ -2203,6 +2207,9 @@ typedef enum {
   /* Can leak things, gonna exit() soon */
   CURLOPT(CURLOPT_QUICK_EXIT, CURLOPTTYPE_LONG, 322),
 
+  /* set a specific client IP for HAProxy PROXY protocol header? */
+  CURLOPT(CURLOPT_HAPROXY_CLIENT_IP, CURLOPTTYPE_STRINGPOINT, 323),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2230,6 +2237,9 @@ typedef enum {
 
 /* */
 #define CURLOPT_FTP_RESPONSE_TIMEOUT CURLOPT_SERVER_RESPONSE_TIMEOUT
+
+/* Added in 8.2.0 */
+#define CURLOPT_MAIL_RCPT_ALLLOWFAILS CURLOPT_MAIL_RCPT_ALLOWFAILS
 
 #else
 /* This is set if CURL_NO_OLDIES is defined at compile-time */
@@ -2721,6 +2731,20 @@ CURL_EXTERN CURLcode curl_global_init_mem(long flags,
  */
 CURL_EXTERN void curl_global_cleanup(void);
 
+/*
+ * NAME curl_global_trace()
+ *
+ * DESCRIPTION
+ *
+ * curl_global_trace() can be invoked at application start to
+ * configure which components in curl should participate in tracing.
+
+ * This function is thread-safe if CURL_VERSION_THREADSAFE is set in the
+ * curl_version_info_data.features flag (fetch by curl_version_info()).
+
+ */
+CURL_EXTERN CURLcode curl_global_trace(const char *config);
+
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
   char *data;
@@ -2800,8 +2824,8 @@ CURL_EXTERN void curl_slist_free_all(struct curl_slist *list);
  */
 CURL_EXTERN time_t curl_getdate(const char *p, const time_t *unused);
 
-/* info about the certificate chain, only for OpenSSL, GnuTLS, Schannel, NSS
-   and GSKit builds. Asked for with CURLOPT_CERTINFO / CURLINFO_CERTINFO */
+/* info about the certificate chain, only for OpenSSL, GnuTLS, Schannel and
+   NSS builds. Asked for with CURLOPT_CERTINFO / CURLINFO_CERTINFO */
 struct curl_certinfo {
   int num_of_certs;             /* number of certificates with information */
   struct curl_slist **certinfo; /* for each index in this array, there's a
@@ -2914,7 +2938,9 @@ typedef enum {
   CURLINFO_REFERER          = CURLINFO_STRING + 60,
   CURLINFO_CAINFO           = CURLINFO_STRING + 61,
   CURLINFO_CAPATH           = CURLINFO_STRING + 62,
-  CURLINFO_LASTONE          = 62
+  CURLINFO_XFER_ID          = CURLINFO_OFF_T + 63,
+  CURLINFO_CONN_ID          = CURLINFO_OFF_T + 64,
+  CURLINFO_LASTONE          = 64
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

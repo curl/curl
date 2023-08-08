@@ -86,6 +86,7 @@ EXTRA_DIST =                                    \
  RELEASE-PROCEDURE.md                           \
  RUSTLS.md                                      \
  ROADMAP.md                                     \
+ SECURITY-ADVISORY.md                           \
  SECURITY-PROCESS.md                            \
  SSL-PROBLEMS.md                                \
  SSLCERTS.md                                    \

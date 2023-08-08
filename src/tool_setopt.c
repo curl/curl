@@ -294,9 +294,9 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
 
 #ifdef DEBUGBUILD
   if(ret)
-    warnf(config, "option %s returned error (%d)\n", name, (int)ret);
+    warnf(config, "option %s returned error (%d)", name, (int)ret);
 #endif
-  nomem:
+nomem:
   return ret;
 }
 
@@ -328,7 +328,8 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
         if(!rest)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */
-        msnprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
+        msnprintf(preamble, sizeof(preamble), "%*s", (int)strlen(preamble),
+                  "");
       }
     }
     /* If any bits have no definition, output an explicit value.
@@ -338,7 +339,7 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
       CODE2("%s%ldL);", preamble, rest);
   }
 
- nomem:
+nomem:
   return ret;
 }
 
@@ -371,7 +372,8 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
         if(!rest)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */
-        msnprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
+        msnprintf(preamble, sizeof(preamble), "%*s", (int)strlen(preamble),
+                  "");
       }
     }
     /* If any bits have no definition, output an explicit value.
@@ -381,7 +383,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
       CODE2("%s%luUL);", preamble, rest);
   }
 
- nomem:
+nomem:
   return ret;
 }
 
@@ -407,7 +409,7 @@ static CURLcode libcurl_generate_slist(struct curl_slist *slist, int *slistno)
                                        *slistno, *slistno, escaped);
   }
 
- nomem:
+nomem:
   Curl_safefree(escaped);
   return ret;
 }
@@ -590,7 +592,7 @@ CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
       CODE2("curl_easy_setopt(hnd, %s, slist%d);", name, i);
   }
 
- nomem:
+nomem:
   return ret;
 }
 
@@ -704,7 +706,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
     }
   }
 
- nomem:
+nomem:
   Curl_safefree(escaped);
   return ret;
 }

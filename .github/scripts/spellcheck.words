@@ -42,6 +42,8 @@ Automake
 Autotools
 autotools
 AVR
+AWS
+AWS-LC
 axTLS
 backend
 backends
@@ -65,6 +67,7 @@ boringssl
 Boukris
 Broadcom
 brotli
+bufq
 bufref
 bugfix
 bugfixes
@@ -74,6 +77,7 @@ buildconf
 Caddy
 calloc
 CAPA
+capath
 CCC
 CDN
 CentOS
@@ -147,6 +151,7 @@ cyassl
 Cygwin
 daniel
 datatracker
+Debian
 decrypt
 deepcode
 DELE
@@ -183,6 +188,7 @@ EBCDIC
 ECC
 ECDHE
 ECH
+ECONNREFUSED
 eCOS
 EFnet
 EGD
@@ -213,6 +219,7 @@ Falkeborn
 Fandrich
 Fastly
 fcpp
+Fedora
 Feltzing
 ffi
 filesize
@@ -240,6 +247,7 @@ gcc
 GCM
 gdb
 Genode
+Gentoo
 Gergely
 getaddrinfo
 getenv
@@ -253,6 +261,7 @@ ggcov
 Ghedini
 Gisle
 Glesys
+globbed
 globbing
 gmail
 GnuTLS
@@ -298,9 +307,9 @@ hsts
 HTC
 html
 http
+HTTPAUTH
 httpd
 HTTPD
-HTTPAUTH
 httpget
 HttpGet
 HTTPS
@@ -319,6 +328,7 @@ ifdef
 ifdefed
 Ifdefs
 ifdefs
+IIS
 ILE
 Illumos
 IMAP
@@ -329,12 +339,16 @@ impacket
 init
 initializer
 inlined
+interop
 interoperable
 interoperates
 IoT
 ipadOS
 IPCXN
 IPv
+IPv4
+IPv4/6
+IPv6
 IRIs
 IRIX
 Itanium
@@ -355,6 +369,7 @@ keepalive
 Keil
 kerberos
 Keychain
+keychain
 KiB
 kickstart
 Kirei
@@ -403,6 +418,7 @@ LineageOS
 linux
 ln
 localhost
+LOGDIR
 logfile
 lookups
 loopback
@@ -490,6 +506,7 @@ NEC
 Necko
 NetBSD
 netrc
+netstat
 Netware
 NFS
 nghttp
@@ -548,6 +565,7 @@ permafailing
 PINGs
 pipelining
 PKCS
+pkcs
 PKGBUILD
 PKI
 pluggable
@@ -580,6 +598,8 @@ pthreads
 PTR
 ptr
 punycode
+PWD
+pwd
 py
 pycurl
 pytest
@@ -597,6 +617,7 @@ RBS
 ReactOS
 README
 realloc
+Realtime
 rebase
 RECV
 recv
@@ -616,6 +637,7 @@ resending
 RETR
 retransmit
 retrigger
+RHEL
 RICS
 Rikard
 rmdir
@@ -769,6 +791,7 @@ toolset
 toplevel
 TPF
 TrackMemory
+transcode
 Tru
 Tse
 Tsujikawa
@@ -777,6 +800,7 @@ tvOS
 txt
 typedef
 typedefed
+Ubuntu
 ucLinux
 UDP
 UI
@@ -785,9 +809,12 @@ UIDL
 Ultrix
 Unary
 unassign
+UNC
 uncompress
+unencoded
 unencrypted
 unescape
+Unglobbed
 UNICOS
 unix
 UnixSockets
@@ -813,6 +840,7 @@ USD
 userdata
 Userinfo
 userinfo
+USERPROFILE
 UTF
 UX
 valgrind
@@ -836,6 +864,7 @@ watchOS
 WAV
 WB
 web page
+WebDAV
 WebOS
 WebSocket
 WEBSOCKET
@@ -859,6 +888,7 @@ WS
 WSS
 www
 Xbox
+XDG
 xdigit
 Xilinx
 XP

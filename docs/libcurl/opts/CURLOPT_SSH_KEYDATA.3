@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSH_KEYDATA 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SSH_KEYDATA 3 "19 Jun 2014" libcurl libcurl
 .SH NAME
 CURLOPT_SSH_KEYDATA \- pointer passed to the SSH key callback
 .SH SYNOPSIS
@@ -43,7 +43,7 @@ SFTP and SCP
 static int keycb(CURL *easy,
                  const struct curl_khkey *knownkey,
                  const struct curl_khkey *foundkey,
-                 enum curl_khmatch,
+                 enum curl_khmatch match,
                  void *clientp)
 {
   /* 'clientp' points to the callback_data struct */

@@ -31,6 +31,9 @@ HTTP with simple cookie send
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -b "name=contents;name2=content2" -b name3=content3
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

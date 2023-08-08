@@ -38,14 +38,14 @@ lib500
 simple libcurl HTTP GET tool
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER log/ip%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<file name="log/ip%TESTNUMBER">
+<file name="%LOGDIR/ip%TESTNUMBER">
 IP %HOSTIP
 </file>
 <protocol>

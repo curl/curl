@@ -21,25 +21,25 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH curl_escape 3 "6 March 2002" "libcurl 7.9" "libcurl Manual"
+.TH curl_escape 3 "6 March 2002" "libcurl" "libcurl"
 .SH NAME
 curl_escape - URL encodes the given string
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
-char *curl_escape(const char *url, int length);
+char *curl_escape(const char *string, int length);
 .fi
 .SH DESCRIPTION
 Obsolete function. Use \fIcurl_easy_escape(3)\fP instead!
 
-This function will convert the given input string to a URL encoded string and
-return that as a new allocated string. All input characters that are not a-z,
-A-Z or 0-9 will be converted to their "URL escaped" version (\fB%NN\fP where
-\fBNN\fP is a two-digit hexadecimal number).
+This function will convert the given input \fBstring\fP to a URL encoded string
+and return that as a new allocated string. All input characters that are not
+a-z, A-Z or 0-9 will be converted to their "URL escaped" version (\fB%NN\fP
+where \fBNN\fP is a two-digit hexadecimal number).
 
 If the \fBlength\fP argument is set to 0, \fIcurl_escape(3)\fP will use
-strlen() on the input \fBurl\fP string to find out the size.
+strlen() on \fBstring\fP to find out the size.
 
 You must \fIcurl_free(3)\fP the returned string when you are done with it.
 .SH EXAMPLE

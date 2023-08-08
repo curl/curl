@@ -251,7 +251,7 @@ int init_thread_sync_data(struct thread_data *td,
 
   return 1;
 
- err_exit:
+err_exit:
 #ifndef CURL_DISABLE_SOCKETPAIR
   if(tsd->sock_pair[0] != CURL_SOCKET_BAD) {
     sclose(tsd->sock_pair[0]);
@@ -469,10 +469,10 @@ static bool init_resolve_thread(struct Curl_easy *data,
 
   return TRUE;
 
- err_exit:
+err_exit:
   destroy_async_data(asp);
 
- errno_exit:
+errno_exit:
   errno = err;
   return FALSE;
 }
@@ -696,9 +696,13 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   *waitp = 0; /* default to synchronous response */
 
 #ifdef CURLRES_IPV6
-  if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data))
+  if((data->conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
     /* The stack seems to be IPv6-enabled */
-    pf = PF_UNSPEC;
+    if(data->conn->ip_version == CURL_IPRESOLVE_V6)
+      pf = PF_INET6;
+    else
+      pf = PF_UNSPEC;
+  }
 #endif /* CURLRES_IPV6 */
 
   memset(&hints, 0, sizeof(hints));

@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl_ws_meta 3 "12 Jun 2022" "libcurl 7.85.0" "libcurl Manual"
+.TH curl_ws_meta 3 "12 Jun 2022" "libcurl" "libcurl"
 .SH NAME
 curl_ws_meta - meta data WebSocket information
 .SH SYNOPSIS
@@ -36,7 +36,7 @@ struct curl_ws_frame {
   curl_off_t bytesleft; /* number of pending bytes left of the payload */
 };
 
-struct curl_ws_frame *curl_ws_meta(CURL *curl);
+const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 .fi
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
@@ -93,7 +93,7 @@ static size_t writecb(unsigned char *buffer,
                       size_t size, size_t nitems, void *p)
 {
   struct customdata *c = (struct customdata *)p;
-  struct curl_ws_frame *m = curl_ws_meta(c->easy);
+  const struct curl_ws_frame *m = curl_ws_meta(c->easy);
 
   /* m->flags tells us about the traffic */
 }
@@ -109,11 +109,10 @@ static size_t writecb(unsigned char *buffer,
 .SH AVAILABILITY
 Added in 7.86.0.
 .SH RETURN VALUE
-This function returns a pointer to a \fIcurl_ws_frame\fP struct with
+This function returns a pointer to a \fIcurl_ws_frame\fP struct with read-only
 information that is valid for this specific callback invocation. If it cannot
 return this information, or if the function is called in the wrong context, it
 returns NULL.
 .SH "SEE ALSO"
-.BR curl_easy_setopt "(3), "
-.BR curl_easy_getinfo "(3), "
-.BR curl_ws_send "(3), " curl_ws_recv "(3), "
+.BR curl_easy_setopt "(3), " curl_easy_getinfo "(3), "
+.BR curl_ws_send "(3), " curl_ws_recv "(3), " libcurl-ws "(3), "

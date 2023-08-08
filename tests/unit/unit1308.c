@@ -83,7 +83,7 @@ UNITTEST_START
 
   rc = curl_formadd(&post, &last,
                     CURLFORM_PTRNAME, "name of file field",
-                    CURLFORM_FILE, "log/test-1308",
+                    CURLFORM_FILE, arg,
                     CURLFORM_FILENAME, "custom named file",
                     CURLFORM_END);
 

@@ -49,11 +49,11 @@ static const char *payload_text =
   "Message-ID: "
   "<dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n"
   "Subject: IMAP example message\r\n"
-  "\r\n" /* empty line to divide headers from body, see RFC5322 */
+  "\r\n" /* empty line to divide headers from body, see RFC 5322 */
   "The body of the message starts here.\r\n"
   "\r\n"
   "It could be a lot of lines, could be MIME encoded, whatever.\r\n"
-  "Check RFC5322.\r\n";
+  "Check RFC 5322.\r\n";
 
 struct upload_status {
   size_t bytes_read;
@@ -99,10 +99,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will create a new message 100. Note that you should perform an
-     * EXAMINE command to obtain the UID of the next message to create and a
-     * SELECT to ensure you are creating the message in the OUTBOX. */
-    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/100");
+    /* This will create a new message in folder "Sent". */
+    curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/Sent");
 
     /* In this case, we are using a callback function to specify the data. You
      * could just use the CURLOPT_READDATA option to specify a FILE pointer to

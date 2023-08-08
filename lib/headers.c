@@ -38,14 +38,13 @@
 
 /* Generate the curl_header struct for the user. This function MUST assign all
    struct fields in the output struct. */
-static void copy_header_external(struct Curl_easy *data,
-                                 struct Curl_header_store *hs,
+static void copy_header_external(struct Curl_header_store *hs,
                                  size_t index,
                                  size_t amount,
                                  struct Curl_llist_element *e,
-                                 struct curl_header **hout)
+                                 struct curl_header *hout)
 {
-  struct curl_header *h = *hout = &data->state.headerout;
+  struct curl_header *h = hout;
   h->name = hs->name;
   h->value = hs->value;
   h->amount = amount;
@@ -118,7 +117,9 @@ CURLHcode curl_easy_header(CURL *easy,
       return CURLHE_MISSING;
   }
   /* this is the name we want */
-  copy_header_external(data, hs, nameindex, amount, e_pick, hout);
+  copy_header_external(hs, nameindex, amount, e_pick,
+                       &data->state.headerout[0]);
+  *hout = &data->state.headerout[0];
   return CURLHE_OK;
 }
 
@@ -132,7 +133,6 @@ struct curl_header *curl_easy_nextheader(CURL *easy,
   struct Curl_llist_element *pick;
   struct Curl_llist_element *e;
   struct Curl_header_store *hs;
-  struct curl_header *hout;
   size_t amount = 0;
   size_t index = 0;
 
@@ -179,8 +179,9 @@ struct curl_header *curl_easy_nextheader(CURL *easy,
       index = amount - 1;
   }
 
-  copy_header_external(data, hs, index, amount, pick, &hout);
-  return hout;
+  copy_header_external(hs, index, amount, pick,
+                       &data->state.headerout[1]);
+  return &data->state.headerout[1];
 }
 
 static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
@@ -299,9 +300,16 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
     if(data->state.prevhead)
       /* line folding, append value to the previous header's value */
       return unfold_value(data, header, hlen);
-    else
-      /* can't unfold without a previous header */
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+    else {
+      /* Can't unfold without a previous header. Instead of erroring, just
+         pass the leading blanks. */
+      while(hlen && ISBLANK(*header)) {
+        header++;
+        hlen--;
+      }
+      if(!hlen)
+        return CURLE_WEIRD_SERVER_REPLY;
+    }
   }
 
   hs = calloc(1, sizeof(*hs) + hlen);
@@ -324,7 +332,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
                          hs, &hs->node);
   data->state.prevhead = hs;
   return CURLE_OK;
-  fail:
+fail:
   free(hs);
   return result;
 }
@@ -335,6 +343,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
 static void headers_init(struct Curl_easy *data)
 {
   Curl_llist_init(&data->state.httphdrs, NULL);
+  data->state.prevhead = NULL;
 }
 
 /*

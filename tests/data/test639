@@ -23,18 +23,18 @@ Dummy test file for rename test
 sftp
 </server>
 <precheck>
-perl %SRCDIR/libtest/test610.pl mkdir %PWD/log/test%TESTNUMBER.dir
+perl %SRCDIR/libtest/test610.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
  <name>
 SFTP post-quote rename * asterisk accept-fail
  </name>
  <command>
---key curl_client_key --pubkey curl_client_key.pub -u %USER: -Q "-*rename %PWD/log/test%TESTNUMBER-not-exists-dir %PWD/log/test%TESTNUMBER.new" sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/file%TESTNUMBER.txt --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "-*rename %PWD/%LOGDIR/test%TESTNUMBER-not-exists-dir %PWD/%LOGDIR/test%TESTNUMBER.new" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
 <postcheck>
-perl %SRCDIR/libtest/test610.pl rmdir %PWD/log/test%TESTNUMBER.dir
+perl %SRCDIR/libtest/test610.pl rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </postcheck>
-<file name="log/file%TESTNUMBER.txt">
+<file name="%LOGDIR/file%TESTNUMBER.txt">
 Dummy test file for rename test
 </file>
 </client>

@@ -27,7 +27,6 @@
 
 struct connectdata;
 struct ssl_config_data;
-struct ssl_connect_data;
 struct ssl_primary_config;
 struct Curl_ssl_session;
 
@@ -44,7 +43,7 @@ struct Curl_ssl_session;
 #define VTLS_INFOF_NO_ALPN                                      \
   "ALPN: server did not agree on a protocol. Uses default."
 #define VTLS_INFOF_ALPN_OFFER_1STR              \
-  "ALPN: offers %s"
+  "ALPN: curl offers %s"
 #define VTLS_INFOF_ALPN_ACCEPTED_1STR           \
   ALPN_ACCEPTED "%s"
 #define VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR       \
@@ -65,15 +64,6 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 #ifndef CURL_SHA256_DIGEST_LENGTH
 #define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif
-
-/* see https://www.iana.org/assignments/tls-extensiontype-values/ */
-#define ALPN_HTTP_1_1_LENGTH 8
-#define ALPN_HTTP_1_1 "http/1.1"
-#define ALPN_HTTP_1_0_LENGTH 8
-#define ALPN_HTTP_1_0 "http/1.0"
-#define ALPN_H2_LENGTH 2
-#define ALPN_H2 "h2"
-
 
 char *Curl_ssl_snihost(struct Curl_easy *data, const char *host, size_t *olen);
 bool Curl_ssl_config_matches(struct ssl_primary_config *data,
@@ -165,9 +155,6 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
                                  int sockindex);
 
 #ifndef CURL_DISABLE_PROXY
-CURLcode Curl_ssl_cfilter_proxy_add(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    int sockindex);
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
                                         struct Curl_easy *data);
 #endif /* !CURL_DISABLE_PROXY */
@@ -183,20 +170,6 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
  */
 struct ssl_config_data *Curl_ssl_get_config(struct Curl_easy *data,
                                             int sockindex);
-
-/**
- * Get the primary SSL configuration from the connection.
- * This returns NULL if no SSL is configured.
- * Otherwise it returns the config of the first (highest) one that is
- * either connected, in handshake or about to start
- * (e.g. all filters below it are connected). If SSL filters are present,
- * but neither can start operating, return the config of the lowest one
- * that will first come into effect when connecting.
- */
-struct ssl_primary_config *
-Curl_ssl_get_primary_config(struct Curl_easy *data,
-                            struct connectdata *conn,
-                            int sockindex);
 
 /**
  * True iff the underlying SSL implementation supports the option.
@@ -236,7 +209,6 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_get_internals(a,b,c,d) NULL
 #define Curl_ssl_supports(a,b) FALSE
 #define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
-#define Curl_ssl_cfilter_proxy_add(a,b,c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_get_config(a,b) NULL
 #define Curl_ssl_cfilter_remove(a,b) CURLE_OK
 #endif

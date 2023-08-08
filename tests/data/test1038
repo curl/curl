@@ -23,9 +23,9 @@ ftp
 FTP PASV upload resume from end of file
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T log/upload%TESTNUMBER -C -
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -C -
 </command>
-<file name="log/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER">
 this is the *****cr@p******** that we're gonna upload
 
 worx?

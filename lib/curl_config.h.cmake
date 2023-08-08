@@ -50,6 +50,9 @@
 /* disables FILE */
 #cmakedefine CURL_DISABLE_FILE 1
 
+/* disables form api */
+#cmakedefine CURL_DISABLE_FORM_API 1
+
 /* disables FTP */
 #cmakedefine CURL_DISABLE_FTP 1
 
@@ -131,12 +134,6 @@
 
 /* Use Windows LDAP implementation */
 #cmakedefine USE_WIN32_LDAP 1
-
-/* when not building a shared library */
-#cmakedefine CURL_STATICLIB 1
-
-/* your Entropy Gathering Daemon socket pathname */
-#cmakedefine EGD_SOCKET ${EGD_SOCKET}
 
 /* Define if you want to enable IPv6 support */
 #cmakedefine ENABLE_IPV6 1
@@ -397,8 +394,8 @@
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine HAVE_PWD_H 1
 
-/* Define to 1 if you have the `RAND_egd' function. */
-#cmakedefine HAVE_RAND_EGD 1
+/* Define to 1 if OpenSSL has the `SSL_set0_wbio` function. */
+#cmakedefine HAVE_SSL_SET0_WBIO 1
 
 /* Define to 1 if you have the recv function. */
 #cmakedefine HAVE_RECV 1
@@ -448,6 +445,9 @@
 /* Define to 1 if you have the sigsetjmp function or macro. */
 #cmakedefine HAVE_SIGSETJMP 1
 
+/* Define to 1 if you have the `snprintf' function. */
+#cmakedefine HAVE_SNPRINTF
+
 /* Define to 1 if struct sockaddr_in6 has the sin6_scope_id member */
 #cmakedefine HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 
@@ -456,9 +456,6 @@
 
 /* Define to 1 if you have the socketpair function. */
 #cmakedefine HAVE_SOCKETPAIR 1
-
-/* Define to 1 if you have the <ssl.h> header file. */
-#cmakedefine HAVE_SSL_H 1
 
 /* Define to 1 if you have the <stdatomic.h> header file. */
 #cmakedefine HAVE_STDATOMIC_H 1
@@ -577,9 +574,6 @@
 /* Define to 1 if you have the windows.h header file. */
 #cmakedefine HAVE_WINDOWS_H 1
 
-/* Define to 1 if you have the winldap.h header file. */
-#cmakedefine HAVE_WINLDAP_H 1
-
 /* Define to 1 if you have the winsock2.h header file. */
 #cmakedefine HAVE_WINSOCK2_H 1
 
@@ -690,12 +684,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* If you want to build curl with the built-in manual */
 #cmakedefine USE_MANUAL 1
-
-/* if NSS is enabled */
-#cmakedefine USE_NSS 1
-
-/* if you have the PK11_CreateManagedGenericObject function */
-#cmakedefine HAVE_PK11_CREATEMANAGEDGENERICOBJECT 1
 
 /* if you want to use OpenLDAP code instead of legacy ldap implementation */
 #cmakedefine USE_OPENLDAP 1

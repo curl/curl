@@ -38,7 +38,7 @@ SRCPF="${LIBIFSNAME}/H.FILE"
 if action_needed "${SRCPF}"
 then    CMD="CRTSRCPF FILE(${TARGETLIB}/H) RCDLEN(112)"
         CMD="${CMD} CCSID(${TGTCCSID}) TEXT('curl: Header files')"
-        system "${CMD}"
+        CLcommand "${CMD}"
 fi
 
 
@@ -98,9 +98,9 @@ ln -s "${SRCPF}/CURL.INC.MBR" "${IFSINCLUDE}/curl.inc.rpgle"
 
 if action_needed "${LIBIFSNAME}/CURL.FILE"
 then    :
-else    system "DLTF FILE(${TARGETLIB}/CURL)"
+else    CLcommand "DLTF FILE(${TARGETLIB}/CURL)"
 fi
 
 CMD="CRTDUPOBJ OBJ(H) FROMLIB(${TARGETLIB}) OBJTYPE(*FILE) TOLIB(*FROMLIB)"
 CMD="${CMD} NEWOBJ(CURL) DATA(*YES)"
-system "${CMD}"
+CLcommand "${CMD}"

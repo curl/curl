@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+proxy
+haproxy
+IPv6
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+These data aren't actually sent to the client
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ipv6
+</features>
+<server>
+http-ipv6
+</server>
+ <name>
+HTTP-IPv6 GET with PROXY protocol with spoofed client IP
+ </name>
+ <command>
+-g "http://%HOST6IP:%HTTP6PORT/%TESTNUMBER" --haproxy-clientip "2001:db8::"
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# Strip off the (random) local port number. This test used to use a fixed
+# local port number that frequently causes the test to fail
+<strippart>
+s/^PROXY TCP6 2001:db8:: ::1 (\d*) %HTTP6PORT/proxy-line/
+</strippart>
+<protocol>
+proxy-line
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOST6IP:%HTTP6PORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

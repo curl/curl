@@ -56,13 +56,13 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   int fd = -1;
   *tempname = NULL;
 
-  if(stat(filename, &sb) == -1 || !S_ISREG(sb.st_mode)) {
-    /* a non-regular file, fallback to direct fopen() */
-    *fh = fopen(filename, FOPEN_WRITETEXT);
-    if(*fh)
-      return CURLE_OK;
+  *fh = fopen(filename, FOPEN_WRITETEXT);
+  if(!*fh)
     goto fail;
-  }
+  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode))
+    return CURLE_OK;
+  fclose(*fh);
+  *fh = NULL;
 
   result = Curl_rand_hex(data, randsuffix, sizeof(randsuffix));
   if(result)
@@ -85,7 +85,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     if((fstat(fd, &nsb) != -1) &&
        (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
       /* if the user and group are the same, clone the original mode */
-      if(fchmod(fd, sb.st_mode) == -1)
+      if(fchmod(fd, (mode_t)sb.st_mode) == -1)
         goto fail;
     }
   }
@@ -106,7 +106,6 @@ fail:
 
   free(tempstore);
 
-  *tempname = NULL;
   return result;
 }
 

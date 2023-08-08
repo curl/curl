@@ -21,7 +21,7 @@
 .\" * SPDX-License-Identifier: curl
 .\" *
 .\" **************************************************************************
-.TH CURLSHOPT_SHARE 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.TH CURLSHOPT_SHARE 3 "8 Aug 2003" libcurl libcurl
 .SH NAME
 CURLSHOPT_SHARE - add data to share
 .SH SYNOPSIS
@@ -56,8 +56,7 @@ implemented until 7.23.0.
 Put the connection cache in the share object and make all easy handles using
 this share object share the connection cache.
 
-Note that due to a known bug, it is not safe to share connections this way
-between multiple concurrent threads.
+It is not supported to share connections between multiple concurrent threads.
 
 Connections that are used for HTTP/1.1 Pipelining or HTTP/2 multiplexing only
 get additional transfers added to them if the existing connection is held by
@@ -80,6 +79,8 @@ Note that when you use the multi interface, all easy handles added to the same
 multi handle will share PSL cache by default without using this option.
 .IP CURL_LOCK_DATA_HSTS
 The in-memory HSTS cache.
+
+It is not supported to share the HSTS between multiple concurrent threads.
 
 Added in 7.88.0
 .SH PROTOCOLS

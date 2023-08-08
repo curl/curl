@@ -10,7 +10,7 @@ verbose logs
 
 # Server-side
 <reply>
-<data1 crlf=yes">
+<data1 crlf="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: server.example.com
@@ -91,7 +91,7 @@ Via: 3 nghttpx
 <strip>
 ^Host:.*
 </strip>
-<file name="log/stderr%TESTNUMBER" mode="text">
+<file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
 * Connection #0 to host localhost left intact
 * Connection #0 to host localhost left intact
 * Connection #0 to host localhost left intact

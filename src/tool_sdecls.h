@@ -57,6 +57,9 @@
  * 'init' member holds original file size or offset at which truncation is
  * taking place. Always zero unless appending to a non-empty regular file.
  *
+ * [Windows]
+ * 'utf8seq' member holds an incomplete UTF-8 sequence destined for the console
+ * until it can be completed (1-4 bytes) + NUL.
  */
 
 struct OutStruct {
@@ -68,25 +71,10 @@ struct OutStruct {
   FILE *stream;
   curl_off_t bytes;
   curl_off_t init;
+#ifdef WIN32
+  unsigned char utf8seq[5];
+#endif
 };
-
-
-/*
- * InStruct variables keep track of information relative to curl's
- * input reading, which may take place from stdin or from some file.
- *
- * 'fd' member is either 'stdin' file descriptor number STDIN_FILENO
- * or a file descriptor as returned from an 'open' call for some file.
- *
- * 'config' member is a pointer to associated 'OperationConfig' struct.
- */
-
-struct InStruct {
-  int fd;
-  struct OperationConfig *config;
-  struct per_transfer *per;
-};
-
 
 /*
  * A linked list of these 'getout' nodes contain URL's to fetch,

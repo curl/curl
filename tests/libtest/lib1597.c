@@ -107,7 +107,7 @@ int test(char *URL)
   printf("Tested %u strings\n", i);
   res = (int)result;
 
-  test_cleanup:
+test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

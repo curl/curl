@@ -22,15 +22,45 @@
 #
 ###########################################################################
 
-#use strict;
+package getpart;
 
-my @xml;
-my $xmlfile;
+use strict;
+use warnings;
+
+BEGIN {
+    use base qw(Exporter);
+
+    our @EXPORT = qw(
+        compareparts
+        fulltest
+        getpart
+        getpartattr
+        loadarray
+        loadtest
+        partexists
+        striparray
+        writearray
+    );
+}
+
+use Memoize;
+use MIME::Base64;
+
+my @xml;      # test data file contents
+my $xmlfile;  # test data file name
 
 my $warning=0;
 my $trace=0;
 
-use MIME::Base64;
+# Normalize the part function arguments for proper caching. This includes the
+# file name in the arguments since that is an implied parameter that affects the
+# return value.  Any error messages will only be displayed the first time, but
+# those are disabled by default anyway, so should never been seen outside
+# development.
+sub normalize_part {
+    push @_, $xmlfile;
+    return join("\t", @_);
+}
 
 sub decode_hex {
     my $s = $_;
@@ -95,6 +125,7 @@ sub getpartattr {
     }
     return %hash;
 }
+memoize('getpartattr', NORMALIZER => 'normalize_part');  # cache each result
 
 sub getpart {
     my ($section, $part)=@_;
@@ -173,6 +204,7 @@ sub getpart {
     }
     return @this;
 }
+memoize('getpart', NORMALIZER => 'normalize_part');  # cache each result
 
 sub partexists {
     my ($section, $part)=@_;
@@ -192,24 +224,27 @@ sub partexists {
     }
     return 0; # does not exist
 }
-
-# Return entire document as list of lines
-sub getall {
-    return @xml;
-}
+# The code currently never calls this more than once per part per file, so
+# caching a result that will never be used again just slows things down.
+# memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {
     my ($file)=@_;
 
-    undef @xml;
-    $xmlfile = $file;
+    if(defined $xmlfile && $file eq $xmlfile) {
+        # This test is already loaded
+        return
+    }
 
-    if(open(XML, "<$file")) {
-        binmode XML; # for crapage systems, use binary
-        while(<XML>) {
+    undef @xml;
+    $xmlfile = "";
+
+    if(open(my $xmlh, "<", "$file")) {
+        binmode $xmlh; # for crapage systems, use binary
+        while(<$xmlh>) {
             push @xml, $_;
         }
-        close(XML);
+        close($xmlh);
     }
     else {
         # failure
@@ -218,9 +253,12 @@ sub loadtest {
         }
         return 1;
     }
+    $xmlfile = $file;
     return 0;
 }
 
+
+# Return entire document as list of lines
 sub fulltest {
     return @xml;
 }
@@ -229,12 +267,12 @@ sub fulltest {
 sub savetest {
     my ($file)=@_;
 
-    if(open(XML, ">$file")) {
-        binmode XML; # for crapage systems, use binary
+    if(open(my $xmlh, ">", "$file")) {
+        binmode $xmlh; # for crapage systems, use binary
         for(@xml) {
-            print XML $_;
+            print $xmlh $_;
         }
-        close(XML);
+        close($xmlh);
     }
     else {
         # failure
@@ -293,12 +331,12 @@ sub compareparts {
 sub writearray {
     my ($filename, $arrayref)=@_;
 
-    open(TEMP, ">$filename");
-    binmode(TEMP,":raw"); # cygwin fix by Kevin Roth
+    open(my $temp, ">", "$filename") || die "Failure writing file";
+    binmode($temp,":raw"); # cygwin fix by Kevin Roth
     for(@$arrayref) {
-        print TEMP $_;
+        print $temp $_;
     }
-    close(TEMP);
+    close($temp) || die "Failure writing file";
 }
 
 #
@@ -308,51 +346,13 @@ sub loadarray {
     my ($filename)=@_;
     my @array;
 
-    open(TEMP, "<$filename");
-    while(<TEMP>) {
-        push @array, $_;
+    if (open(my $temp, "<", "$filename")) {
+        while(<$temp>) {
+            push @array, $_;
+        }
+        close($temp);
     }
-    close(TEMP);
     return @array;
-}
-
-# Given two array references, this function will store them in two temporary
-# files, run 'diff' on them, store the result and return the diff output!
-
-sub showdiff {
-    my ($logdir, $firstref, $secondref)=@_;
-
-    my $file1="$logdir/check-generated";
-    my $file2="$logdir/check-expected";
-
-    open(TEMP, ">$file1");
-    for(@$firstref) {
-        my $l = $_;
-        $l =~ s/\r/[CR]/g;
-        $l =~ s/\n/[LF]/g;
-        $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
-        print TEMP $l;
-        print TEMP "\n";
-    }
-    close(TEMP);
-
-    open(TEMP, ">$file2");
-    for(@$secondref) {
-        my $l = $_;
-        $l =~ s/\r/[CR]/g;
-        $l =~ s/\n/[LF]/g;
-        $l =~ s/([^\x20-\x7f])/sprintf "%%%02x", ord $1/eg;
-        print TEMP $l;
-        print TEMP "\n";
-    }
-    close(TEMP);
-    my @out = `diff -u $file2 $file1 2>/dev/null`;
-
-    if(!$out[0]) {
-        @out = `diff -c $file2 $file1 2>/dev/null`;
-    }
-
-    return @out;
 }
 
 

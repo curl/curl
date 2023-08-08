@@ -47,12 +47,9 @@ LIBS = $(BLANK_AT_MAKETIME)
 
 LDADD = $(top_builddir)/src/libcurltool.la   \
         $(top_builddir)/lib/libcurlu.la      \
-        @LDFLAGS@ @LIBCURL_LIBS@ @NSS_LIBS@
+        @LDFLAGS@ @LIBCURL_LIBS@
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
-
-# Makefile.inc provides neat definitions
-include Makefile.inc
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
@@ -61,6 +58,9 @@ CS_ = $(CS_0)
 
 checksrc:
 	$(CHECKSRC)@PERL@ $(top_srcdir)/scripts/checksrc.pl $(srcdir)/*.[ch]
+
+# Makefile.inc provides neat definitions
+include Makefile.inc
 
 if BUILD_UNITTESTS
 noinst_PROGRAMS = $(UNITPROGS)

@@ -62,9 +62,10 @@ http
 HTTP --proxy-anyauth and 407 with cookies
  </name>
  <command>
--U myname:mypassword -x %HOSTIP:%HTTPPORT http://z.x.com/%TESTNUMBER --proxy-anyauth -c log/dump%TESTNUMBER
+-U myname:mypassword -x %HOSTIP:%HTTPPORT http://z.x.com/%TESTNUMBER --proxy-anyauth -c %LOGDIR/dump%TESTNUMBER
 </command>
 <features>
+cookies
 proxy
 </features>
 </client>

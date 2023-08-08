@@ -24,6 +24,12 @@
 set(TARGET_LABEL_PREFIX "Test ")
 
 function(setup_test TEST_NAME)          # ARGN are the files in the test
+
+  if(LIB_SELECTED STREQUAL LIB_STATIC)
+    # These are part of the libcurl static lib. Do not compile/link them again.
+    list(REMOVE_ITEM ARGN ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
+  endif()
+
   add_executable(${TEST_NAME} EXCLUDE_FROM_ALL ${ARGN})
   add_dependencies(testdeps ${TEST_NAME})
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
@@ -38,7 +44,7 @@ function(setup_test TEST_NAME)          # ARGN are the files in the test
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
-  target_link_libraries(${TEST_NAME} libcurl ${CURL_LIBS})
+  target_link_libraries(${TEST_NAME} ${LIB_SELECTED} ${CURL_LIBS})
 
   set_target_properties(${TEST_NAME}
     PROPERTIES COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
@@ -80,6 +86,3 @@ add_custom_command(
     "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl"
     "${CURL_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
-
-set_property(TARGET chkdecimalpoint
-  APPEND PROPERTY COMPILE_DEFINITIONS "CURLX_NO_MEMORY_CALLBACKS;CURL_STATICLIB")

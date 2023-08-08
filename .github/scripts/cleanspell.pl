@@ -69,7 +69,8 @@ while(<F>) {
         $_ =~ s/curl_mime_(subparts|addpart|filedata|data_cb)//g;
         $_ =~ s/curl_ws_(send|recv|meta)//g;
         $_ =~ s/curl_url_(dup)//g;
-        $_ =~ s/libcurl-env//g;
+        $_ =~ s/curl_pushheader_by(name|num)//g;
+        $_ =~ s/libcurl-(env|ws)//g;
         $_ =~ s/(^|\W)((tftp|https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&'()*+,;=]+)//gi;
         print O $_;
     }

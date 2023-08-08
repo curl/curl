@@ -24,9 +24,9 @@ file
 basic file:// file with "127.0.0.1" hostname
  </name>
 <command option="no-include">
-file://127.0.0.1%FILE_PWD/log/test2070.txt
+file://127.0.0.1%FILE_PWD/%LOGDIR/test2070.txt
 </command>
-<file name="log/test2070.txt">
+<file name="%LOGDIR/test2070.txt">
 foo
    bar
 bar

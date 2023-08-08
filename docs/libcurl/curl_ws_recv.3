@@ -22,7 +22,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl_ws_recv 3 "12 Jun 2022" "libcurl 7.85.0" "libcurl Manual"
+.TH curl_ws_recv 3 "12 Jun 2022" "libcurl" "libcurl"
 .SH NAME
 curl_ws_recv - receive WebSocket data
 .SH SYNOPSIS
@@ -30,7 +30,7 @@ curl_ws_recv - receive WebSocket data
 #include <curl/easy.h>
 
 CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
-                      size_t *recv, struct curl_ws_frame **meta);
+                      size_t *recv, const struct curl_ws_frame **meta);
 .fi
 .SH DESCRIPTION
 This function call is EXPERIMENTAL.
@@ -43,13 +43,13 @@ If there is more fragment data to deliver than what fits in the provided
 \fIbuffer\fP, libcurl returns a full buffer and the application needs to call
 this function again to continue draining the buffer.
 
-The \fImeta\fP pointer gets set to point to a \fIstruct curl_ws_frame\fP that
-contains information about the received data. See the \fIcurl_ws_meta(3)\fP
-for details on that struct.
+The \fImeta\fP pointer gets set to point to a \fIconst struct curl_ws_frame\fP
+that contains information about the received data. See the
+\fIcurl_ws_meta(3)\fP for details on that struct.
 .SH EXAMPLE
 .nf
   size_t rlen;
-  struct curl_ws_frame *meta;
+  const struct curl_ws_frame *meta;
   char buffer[256];
   CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
 .fi
@@ -59,7 +59,11 @@ Added in 7.86.0.
 Returns \fBCURLE_OK\fP if everything is okay, and a non-zero number for
 errors. Returns \fBCURLE_GOT_NOTHING\fP if the associated connection is
 closed.
+
+Instead of blocking, the function returns \fBCURLE_AGAIN\fP. The correct
+behavior is then to wait for the socket to signal readability before calling
+this function again.
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3), " curl_easy_perform "(3), "
 .BR curl_easy_getinfo "(3), "
-.BR curl_ws_send "(3) "
+.BR curl_ws_send "(3), "  libcurl-ws "(3), "
