@@ -1551,11 +1551,9 @@ fail:
         UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
         UI_method_set_reader(ui_method, ssl_ui_reader);
         UI_method_set_writer(ui_method, ssl_ui_writer);
-        /* the typecast below was added to please mingw32 */
-        priv_key = (EVP_PKEY *)
-          ENGINE_load_private_key(data->state.engine, key_file,
-                                  ui_method,
-                                  key_passwd);
+        priv_key = ENGINE_load_private_key(data->state.engine, key_file,
+                                           ui_method,
+                                           key_passwd);
         UI_destroy_method(ui_method);
         if(!priv_key) {
           failf(data, "failed to load private key from crypto engine");
