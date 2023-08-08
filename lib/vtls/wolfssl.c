@@ -701,7 +701,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif /* HAVE_SECURE_RENEGOTIATION */
 
   /* Check if there's a cached ID we can/should use here! */
-  if(ssl_config->primary.sessionid && /* DISABLES CODE */0) {
+  if(ssl_config->primary.sessionid) {
     void *ssl_sessionid = NULL;
 
     Curl_ssl_sessionid_lock(data);
