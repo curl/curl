@@ -371,6 +371,11 @@ check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
 if(WIN32)
+  list(APPEND CURL_LIBS "ws2_32")
+  if(USE_LIBRTMP)
+    list(APPEND CURL_LIBS "winmm")
+  endif()
+
   # Matching logic used for Curl_win32_random()
   if(MINGW)
     check_c_source_compiles("
