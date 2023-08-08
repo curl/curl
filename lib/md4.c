@@ -522,7 +522,6 @@ CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
   MD4_Update(&ctx, input, curlx_uztoui(len));
   MD4_Final(output, &ctx);
   return CURLE_OK;
-#endif
 }
 
 #endif /* USE_CURL_NTLM_CORE */
