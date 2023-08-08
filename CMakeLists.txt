@@ -601,13 +601,6 @@ if(USE_OPENSSL OR USE_WOLFSSL)
   endif()
 endif()
 
-option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
-if(USE_NGHTTP2)
-  find_package(NGHTTP2 REQUIRED)
-  include_directories(${NGHTTP2_INCLUDE_DIRS})
-  list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
-endif()
-
 option(USE_NGTCP2 "Use ngtcp2 and nghttp3 libraries for HTTP/3 support" OFF)
 if(USE_NGTCP2)
   if(USE_OPENSSL OR USE_WOLFSSL)
