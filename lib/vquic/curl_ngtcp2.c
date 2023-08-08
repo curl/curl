@@ -1168,7 +1168,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   }
   CURL_TRC_CF(data, cf, "[%" PRId64 "] DATA len=%zu", stream->id, buflen);
   h3_drain_stream(cf, data);
-  return result? -1 : 0;
+  return 0;
 }
 
 static int cb_h3_deferred_consume(nghttp3_conn *conn, int64_t stream3_id,
