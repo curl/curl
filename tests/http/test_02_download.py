@@ -163,12 +163,12 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1'])
     def test_02_07b_download_reuse(self, env: Env,
                                    httpd, nghttpx, repeat, proto):
-        count = 6
+        count = 10
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto,
                                with_stats=True, extra_args=[
-            '--parallel'
+            '--parallel', '--trace-config', 'ssl,tcp'
         ])
         r.check_response(count=count, http_status=200)
         # http/1.1 should have used count connections
