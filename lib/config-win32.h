@@ -39,15 +39,13 @@
 #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#if defined(__MINGW32__) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 1800))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
 #define HAVE_INTTYPES_H 1
 #endif
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#if defined(__MINGW32__) || defined(__POCC__) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 1600)) || \
-    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x0582))
+#if (defined(_MSC_VER) && (_MSC_VER >= 1600)) || defined(__MINGW32__) || \
+    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x0582)) || defined(__POCC__)
 #define HAVE_STDINT_H 1
 #endif
 
@@ -203,7 +201,7 @@
 #define HAVE_SOCKET 1
 
 /* Define if you have the strcasecmp function. */
-#ifdef __MINGW32__
+#if defined(__MINGW32__)
 #define HAVE_STRCASECMP 1
 #endif
 
