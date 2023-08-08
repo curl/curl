@@ -108,16 +108,16 @@ if(WIN32 AND
   set(IMPORT_LIB_SUFFIX "_imp")
 endif()
 
-# On supported platforms, automatically do a single compilation pass for
-# libcurl sources and reuse these objects to generate both static and shared
-# target.
-# This is possible where PIC is the default for both shared and static and
-# there is a way to tell the linker which libcurl symbols it should export
-# (vs. marking these symbols exportable at compile-time).
+# Whether to do a single compilation pass for libcurl sources and reuse these
+# objects to generate both static and shared target.
 if(NOT DEFINED SHARE_LIB_OBJECT)
+  # Enable it by default on platforms where PIC is the default for both shared
+  # and static and there is a way to tell the linker which libcurl symbols it
+  # should export (vs. marking these symbols exportable at compile-time).
   if(WIN32)
     set(SHARE_LIB_OBJECT ON)
   else()
+    # On other platforms, make it an option disabled by default
     set(SHARE_LIB_OBJECT OFF)
   endif()
 endif()
