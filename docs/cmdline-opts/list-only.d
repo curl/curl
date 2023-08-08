@@ -10,6 +10,7 @@ Example: --list-only ftp://example.com/dir/
 See-also: quote request
 Multi: boolean
 ---
+(FTP)
 When listing an FTP directory, this switch forces a name-only view. This is
 especially useful if the user wants to machine-parse the contents of an FTP
 directory since the normal directory view does not use a standard look or
@@ -18,6 +19,12 @@ the server instead of LIST.
 
 Note: Some FTP servers list only files in their response to NLST; they do not
 include sub-directories and symbolic links.
+
+(SFTP)
+When listing an SFTP directory, this switch forces a name-only view, one per line.
+This is especially useful if the user wants to machine-parse the contents of an
+SFTP directory since the normal directory view provides more information than just
+file names.
 
 (POP3)
 When retrieving a specific email from POP3, this switch forces a LIST command
