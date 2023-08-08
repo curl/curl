@@ -86,12 +86,12 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
   if(data->set.str[STRING_HAPROXY_CLIENT_IP])
     client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
   else
-    client_ip = data->info.conn_primary_ip;
+    client_ip = data->info.conn_local_ip;
 
   result = Curl_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
                          tcp_version,
-                         data->info.conn_local_ip,
                          client_ip,
+                         data->info.conn_primary_ip,
                          data->info.conn_local_port,
                          data->info.conn_primary_port);
 

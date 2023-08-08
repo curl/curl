@@ -48,7 +48,7 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^PROXY TCP4 %CLIENTIP 192.168.1.1 (\d*) %HTTPPORT/proxy-line/
+s/^PROXY TCP4 192.168.1.1 %HOSTIP (\d*) %HTTPPORT/proxy-line/
 </strippart>
 <protocol>
 proxy-line
