@@ -2,15 +2,15 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: list-only
 Short: l
-Protocols: FTP POP3
+Protocols: FTP POP3 SFTP
 Help: List only mode
 Added: 4.0
-Category: ftp pop3
+Category: ftp pop3 sftp
 Example: --list-only ftp://example.com/dir/
 See-also: quote request
 Multi: boolean
 ---
-(FTP)
+(FTP SFTP)
 When listing an FTP directory, this switch forces a name-only view. This is
 especially useful if the user wants to machine-parse the contents of an FTP
 directory since the normal directory view does not use a standard look or
