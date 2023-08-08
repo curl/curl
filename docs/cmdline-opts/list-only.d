@@ -10,7 +10,6 @@ Example: --list-only ftp://example.com/dir/
 See-also: quote request
 Multi: boolean
 ---
-(FTP SFTP)
 When listing an FTP directory, this switch forces a name-only view. This is
 especially useful if the user wants to machine-parse the contents of an FTP
 directory since the normal directory view does not use a standard look or
