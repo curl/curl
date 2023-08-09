@@ -30,16 +30,10 @@ curl \- transfer a URL
 .SH SYNOPSIS
 .B curl [options / URLs]
 .SH DESCRIPTION
-**curl** is a tool for transferring data from or to a server. It supports these
-protocols: DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS,
-LDAP, LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP,
-SMTPS, TELNET, TFTP, WS and WSS. The command is designed to work without user
-interaction.
-
-curl offers a busload of useful tricks like proxy support, user
-authentication, FTP upload, HTTP post, SSL connections, cookies, file transfer
-resume and more. As you will see below, the number of features will make your
-head spin.
+**curl** is a tool for transferring data from or to a server using URLs. It
+supports these protocols: DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS,
+IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP,
+SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
 
 curl is powered by libcurl for all transfer-related features. See
 *libcurl(3)* for details.
@@ -47,8 +41,30 @@ curl is powered by libcurl for all transfer-related features. See
 The URL syntax is protocol-dependent. You find a detailed description in
 RFC 3986.
 
-You can specify multiple URLs or parts of URLs by writing part sets within
-braces and quoting the URL as in:
+If you provide a URL without a leading **protocol://** scheme, curl guesses
+what protocol you want. It then defaults to HTTP but assumes others based on
+often-used host name prefixes. For example, for host names starting with
+"ftp." curl assumes you want FTP.
+
+You can specify any amount of URLs on the command line. They will be fetched
+in a sequential manner in the specified order unless you use --parallel. You
+can specify command line options and URLs mixed and in any order on the
+command line.
+
+curl attempts to re-use connections when doing multiple transfers, so that
+getting many files from the same server do not use multiple connects and setup
+handshakes. This improves speed. Connection re-use can only be done for URLs
+specified for a single command line invocation and cannot be performed between
+separate curl runs.
+
+Provide an IPv6 zone id in the URL with an escaped percentage sign. Like in
+
+  "http://[fe80::3%25eth0]/"
+.SH GLOBBING
+You can specify multiple URLs or parts of URLs by writing lists within braces
+or ranges within brackets. We call this "globbing".
+
+Provide a list with three different names like this:
 
   "http://site.{one,two,three}.com"
 
@@ -65,11 +81,6 @@ other:
 
   "http://example.com/archive[1996-1999]/vol[1-4]/part{a,b,c}.html"
 
-You can specify any amount of URLs on the command line. They will be fetched
-in a sequential manner in the specified order unless you use --parallel. You
-can specify command line options and URLs mixed and in any order on the
-command line.
-
 You can specify a step counter for the ranges to get every Nth number or
 letter:
 
@@ -82,21 +93,7 @@ probably have to put the full URL within double quotes to avoid the shell from
 interfering with it. This also goes for other characters treated special, like
 for example '&', '?' and '*'.
 
-Provide the IPv6 zone index in the URL with an escaped percentage sign and the
-interface name. Like in
-
-  "http://[fe80::3%25eth0]/"
-
-If you specify a URL without a protocol:// scheme, curl guesses what protocol
-you want. It then defaults to HTTP but assumes others based on often-used host
-name prefixes. For example, for host names starting with "ftp." curl assumes
-you want FTP.
-
-curl attempts to re-use connections when doing multiple file transfers, so
-that getting many files from the same server do not use multiple connects /
-handshakes. This improves speed. Connection re-use can only be done for URLs
-specified for a single command line invocation and cannot be performed between
-separate curl runs.
+Switch off globbing with --globoff.
 .SH VARIABLES
 Starting in curl 8.3.0, curl supports command line variables. Set variables
 with --variable name=content or --variable name@file (where "file" can be
@@ -135,7 +132,7 @@ as POST data:
 
   --variable %HOME
   --expand-variable fix@{{HOME}}/.secret
-  --expand-data "{{fix:trim:urlencode}}"
+  --expand-data "{{fix:trim:url}}"
   https://example.com/
 
 Command line variables and expansions were added in in 8.3.0.
@@ -226,9 +223,11 @@ document tries to include version information about which specific version
 that introduced changes.
 
 You can always learn which the latest curl version is by running
-.nf
-curl https://curl.se/info
-.fi
+
+  curl https://curl.se/info
+
+The online version of this man page is always showing the latest incarnation:
+https://curl.se/docs/manpage.html
 .SH OPTIONS
 Options start with one or two dashes. Many of the options require an
 additional value next to them.

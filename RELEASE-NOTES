@@ -4,11 +4,12 @@ curl and libcurl 8.3.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2947
+ Contributors:                 2951
 
 This release includes the following changes:
 
  o curl: make %output{} in -w specify a file to write to [36]
+ o gskit: remove [71]
  o nss: remove support for this TLS library [10]
  o tool: add "variable" support [1]
  o trace: make tracing available in non-debug builds [41]
@@ -18,15 +19,20 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o bearssl: don't load CA certs when peer verification is disabled [33]
+ o c-hyper: adjust the hyper to curlcode conversion [52]
+ o cf-haproxy: make CURLOPT_HAPROXY_CLIENT_IP set the *source* IP [61]
  o cf-socket: log successful interface bind [39]
  o CI: add caching to many jobs [19]
  o cmake: add support for single libcurl compilation pass [21]
  o cmake: cache more config and delete unused ones [4]
  o cmake: detect `SSL_set0_wbio` in OpenSSL [22]
+ o cmake: drop `HAVE_LIBWINMM` and `HAVE_LIBWS2_32` feature checks [68]
  o cmake: fixup H2 duplicate symbols for unity builds [23]
  o cmake: support building static and shared libcurl in one go [17]
+ o cmdline-opts/page-header: reorder, clean up [51]
  o configure, cmake, lib: more form api deprecation [7]
  o configure: use the pkg-config --libs-only-l flag for libssh2 [16]
+ o crypto: ensure crypto initialization works [69]
  o CURLOPT_SSL_VERIFYPEER.3: mention it does not load CA certs when disabled [42]
  o docs/cmdline-opts: spellfixes, typos and polish [9]
  o docs/cmdline: add small "warning" to verbose options [59]
@@ -34,6 +40,7 @@ This release includes the following bugfixes:
  o docs: link to the website versions instead of markdowns [3]
  o easy: remove #ifdefs to make code easier on the eye [34]
  o egd: delete feature detection and related source code [5]
+ o gen.pl: escape all dashes (ascii minus) to avoid unicode hyphens [50]
  o GHA: adding quiche workflow [35]
  o headers: accept leading whitespaces on first response header [37]
  o http2: avoid too early connection re-use/multiplexing [20]
@@ -42,13 +49,20 @@ This release includes the following bugfixes:
  o http2: fix in h2 proxy tunnel: progress in ingress on sending [32]
  o http2: upgrade tests and add fix for non-existing stream [44]
  o http3/ngtcp2: shorten handshake, trace cleanup [13]
+ o http3: quiche, handshake optimization, trace cleanup [63]
  o http: return error when receiving too large header set [43]
  o include/curl/mprintf.h: add __attribute__ for the prototypes [38]
  o lib: fix a few *printf() flag mistakes [47]
+ o list-only.d: mention SFTP as supported protocol [55]
  o macOS: fix target detection more [11]
  o misc: fix various typos [18]
+ o openssl: auto-detect `SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED` [65]
  o openssl: make aws-lc version support OCSP [48]
  o openssl: Support async cert verify callback [24]
+ o openssl: switch to modern init for LibreSSL 2.7.0+ [70]
+ o openssl: use `SSL_CTX_set_ciphersuites` with LibreSSL 3.4.1 [66]
+ o openssl: use `SSL_CTX_set_keylog_callback` with LibreSSL 3.5.0 [67]
+ o page-footer: QLOGDIR works with ngtcp2 and quiche [62]
  o resolve: use PF_INET6 family lookups when CURL_IPRESOLVE_V6 is set [2]
  o Revert "schannel: reverse the order of certinfo insertions" [14]
  o schannel: fix user-set legacy algorithms in Windows 10 & 11 [53]
@@ -72,7 +86,6 @@ This release includes the following known bugs:
 
 Planned upcoming removals include:
 
- o gskit
  o support for space-separated NOPROXY patterns
  o support for the original legacy mingw version 1
 
@@ -81,16 +94,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexander Jaeger, Dan Fandrich, Daniel Stenberg, Derzsi Dániel,
-  Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre, Gabriel Corona,
-  Gisle Vanem, Goro FUJI, Graham Campbell, Guillaume Algis, Joseph Tharayil,
-  junsik on github, kyled-dell on github, Maksim Arhipov, Marcel Raad,
-  Maurício Meneghini Fauth, Nathan Moinvaziri, Niall McGee, Pablo Busse,
-  Patrick Monnerat, Ray Satiro, Richard W.M. Jones, Rutger Broekhoff,
-  Ryan Schmidt, Samuel Chiang, Sergey, Stefan Eissing, Thomas M. DuBuisson,
-  Viktor Szakats, wangzhikun, Wilhelm von Thiele, yushicheng7788 on github,
-  zhihaoy on github
-  (35 contributors)
+  Alexander Jaeger, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Derzsi Dániel, Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre, eppesuig,
+  FC Stegerman, Gabriel Corona, Gisle Vanem, Goro FUJI, Graham Campbell,
+  Guillaume Algis, Joseph Tharayil, junsik on github, kyled-dell on github,
+  Maksim Arhipov, Marcel Raad, Markus Sommer, Maurício Meneghini Fauth,
+  Nathan Moinvaziri, Niall McGee, Pablo Busse, Patrick Monnerat,
+  Philippe Antoine on HackerOne, Ray Satiro, Richard W.M. Jones,
+  Rutger Broekhoff, Ryan Schmidt, Samuel Chiang, Sergey, Stefan Eissing,
+  Thomas M. DuBuisson, Viktor Szakats, wangzhikun, Wilhelm von Thiele,
+  yushicheng7788 on github, zhihaoy on github
+  (40 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -143,8 +157,22 @@ References to bug reports and discussions on issues:
  [47] = https://curl.se/bug/?i=11579
  [48] = https://curl.se/bug/?i=11568
  [49] = https://curl.se/bug/?i=11578
+ [50] = https://curl.se/bug/?i=11635
+ [51] = https://curl.se/bug/?i=11638
+ [52] = https://curl.se/bug/?i=11621
  [53] = https://curl.se/bug/?i=10741
+ [55] = https://curl.se/bug/?i=11628
  [56] = https://curl.se/bug/?i=11592
  [57] = https://curl.se/bug/?i=11594
  [58] = https://curl.se/bug/?i=11597
  [59] = https://curl.se/bug/?i=11596
+ [61] = https://curl.se/bug/?i=11619
+ [62] = https://curl.se/bug/?i=11631
+ [63] = https://curl.se/bug/?i=11618
+ [65] = https://curl.se/bug/?i=11617
+ [66] = https://curl.se/bug/?i=11616
+ [67] = https://curl.se/bug/?i=11615
+ [68] = https://curl.se/bug/?i=11612
+ [69] = https://curl.se/bug/?i=11614
+ [70] = https://curl.se/bug/?i=11611
+ [71] = https://curl.se/bug/?i=11460

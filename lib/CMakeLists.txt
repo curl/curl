@@ -108,13 +108,18 @@ if(WIN32 AND
   set(IMPORT_LIB_SUFFIX "_imp")
 endif()
 
-# On supported platforms, do a single compilation pass for libcurl sources
-# and reuse these objects to generate both static and shared target.
-# This is possible where PIC is the default for both shared and static and
-# there is a way to tell the linker which libcurl symbols it should export
-# (vs. marking these symbols exportable at compile-time).
-if(WIN32 AND NOT DEFINED SHARE_LIB_OBJECT)
-  set(SHARE_LIB_OBJECT ON)
+# Whether to do a single compilation pass for libcurl sources and reuse these
+# objects to generate both static and shared target.
+if(NOT DEFINED SHARE_LIB_OBJECT)
+  # Enable it by default on platforms where PIC is the default for both shared
+  # and static and there is a way to tell the linker which libcurl symbols it
+  # should export (vs. marking these symbols exportable at compile-time).
+  if(WIN32)
+    set(SHARE_LIB_OBJECT ON)
+  else()
+    # On other platforms, make it an option disabled by default
+    set(SHARE_LIB_OBJECT OFF)
+  endif()
 endif()
 
 if(SHARE_LIB_OBJECT)
@@ -123,7 +128,8 @@ if(SHARE_LIB_OBJECT)
   target_link_libraries(${LIB_OBJECT} PRIVATE ${CURL_LIBS})
   set_target_properties(${LIB_OBJECT} PROPERTIES
     COMPILE_DEFINITIONS "BUILDING_LIBCURL"
-    INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB")
+    INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB"
+    POSITION_INDEPENDENT_CODE ON)
   if(HIDES_CURL_PRIVATE_SYMBOLS)
     set_target_properties(${LIB_OBJECT} PROPERTIES
       COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS"

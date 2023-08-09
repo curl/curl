@@ -38,13 +38,20 @@ comma-separated list that is evaluated in a left-to-right order. Variable
 content holding null bytes that are not encoded when expanded, will cause
 error.
 
-These are functions that can help you get the value inserted more
-conveniently.
+Available functions:
+.RS
+.TP 15
+**trim**
+removes all leading and trailing white space.
+.TP
+**json**
+outputs the content using JSON string quoting rules.
+.TP
+**url**
+shows the content URL (percent) encoded.
+.TP
+**b64**
+expands the variable base64 encoded
+.RE
+.IP
 
-"trim" removes all leading and trailing white space.
-
-"json" outputs the content using JSON string quoting rules.
-
-"url" shows the content URL (percent) encoded.
-
-"b64" expands the variable base64 encoded

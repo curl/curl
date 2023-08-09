@@ -68,11 +68,11 @@ sub manpageify {
     my $l;
     if($optlong{$k} ne "") {
         # both short + long
-        $l = "\\fI-".$optlong{$k}.", --$k\\fP";
+        $l = "\\fI-".$optlong{$k}.", \\-\\-$k\\fP";
     }
     else {
         # only long
-        $l = "\\fI--$k\\fP";
+        $l = "\\fI\\-\\-$k\\fP";
     }
     return $l;
 }
@@ -117,8 +117,7 @@ sub printdesc {
             }
         }
         # quote "bare" minuses in the output
-        $d =~ s/( |\\fI|^)--/$1\\-\\-/g;
-        $d =~ s/([ -]|\\fI|^)-/$1\\-/g;
+        $d =~ s/([^\\])-/$1\\-/g;
         # handle single quotes first on the line
         $d =~ s/^(\s*)\'/$1\\(aq/;
         # handle double quotes first on the line
@@ -450,6 +449,7 @@ sub single {
         print "\nExample$s:\n.nf\n";
         foreach my $e (@examples) {
             $e =~ s!\$URL!https://example.com!g;
+            $e =~ s/\-/\\-/g;
             print " curl $e\n";
         }
         print ".fi\n";
