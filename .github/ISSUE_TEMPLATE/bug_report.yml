@@ -34,7 +34,7 @@ body:
     validations: 
       required: false
   
-  - type: input
+  - type: textarea
     id: version
     attributes:
       label: curl/libcurl version
@@ -42,9 +42,9 @@ body:
         Please paste the output of `curl -V` here.
       placeholder: 'curl 8.2.0'
     validations:
-      required: false
+      required: true
 
-  - type: input
+  - type: textarea
     id: os
     attributes:
       label: operating system
@@ -52,4 +52,4 @@ body:
         On Unix please post the output of `uname -a` here.
       placeholder: 'Fedora Linux 38'
     validations:
-      required: false
+      required: true
