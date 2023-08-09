@@ -132,7 +132,7 @@ as POST data:
 
   --variable %HOME
   --expand-variable fix@{{HOME}}/.secret
-  --expand-data "{{fix:trim:urlencode}}"
+  --expand-data "{{fix:trim:url}}"
   https://example.com/
 
 Command line variables and expansions were added in in 8.3.0.
