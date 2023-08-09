@@ -118,8 +118,8 @@ sub printdesc {
         }
         # quote "bare" minuses in the output
         $d =~ s/([^\\])-/$1\\-/g;
-        # handle single quotes first on the line
-        $d =~ s/^(\s*)\'/$1\\(aq/;
+        # replace single quotes
+        $d =~ s/\'/\\(aq/g;
         # handle double quotes first on the line
         $d =~ s/^(\s*)\"/$1\\(dq/;
         print $d;
@@ -450,6 +450,7 @@ sub single {
         foreach my $e (@examples) {
             $e =~ s!\$URL!https://example.com!g;
             $e =~ s/\-/\\-/g;
+            $e =~ s/\'/\\(aq/g;
             print " curl $e\n";
         }
         print ".fi\n";
