@@ -219,6 +219,9 @@ endif()
 add_library(${LIB_NAME} ALIAS ${LIB_SELECTED})
 add_library(${PROJECT_NAME}::${LIB_NAME} ALIAS ${LIB_SELECTED})
 
+# export libcurl alias as target name
+set_property(TARGET ${LIB_SELECTED} PROPERTY EXPORT_NAME ${LIB_NAME})
+
 if(CURL_ENABLE_EXPORT_TARGET)
   if(BUILD_STATIC_LIBS)
     install(TARGETS ${LIB_STATIC}
