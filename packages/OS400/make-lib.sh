@@ -69,24 +69,6 @@ sed -e ':begin'                                                         \
 
 INCLUDES="'`pwd`'"
 
-# Create a small C program to check ccsidcurl.c is up to date
-if action_needed "${LIBIFSNAME}/CHKSTRINGS.PGM" "${SCRIPTDIR}/chkstrings.c"
-then    CMD="CRTBNDC PGM(${TARGETLIB}/CHKSTRINGS)"
-        CMD="${CMD} SRCSTMF('${SCRIPTDIR}/chkstrings.c')"
-        CMD="${CMD} INCDIR('${TOPDIR}/include/curl' '${TOPDIR}/include'"
-        CMD="${CMD} '${SRCDIR}' ${INCLUDES})"
-        CMD="${CMD} TGTCCSID(${TGTCCSID})"
-        if CLcommand -i "${CMD}"
-        then    if "${LIBIFSNAME}/CHKSTRINGS.PGM"
-                then    :
-                else    echo "ERROR: CHKSTRINGS failed!"
-                        exit 2
-                fi
-        else    echo "ERROR: Failed to build CHKSTRINGS *PGM object!"
-                exit 2
-        fi
-fi
-
 make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"
 make_module     CCSIDCURL       "${SCRIPTDIR}/ccsidcurl.c"
 
