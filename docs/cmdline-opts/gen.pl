@@ -169,8 +169,8 @@ sub too_old {
     elsif($version =~ /^(\d+)\.(\d+)/) {
         $a = $1 * 1000 + $2 * 10;
     }
-    if($a < 7300) {
-        # we consider everything before 7.30.0 to be too old to mention
+    if($a < 7500) {
+        # we consider everything before 7.50.0 to be too old to mention
         # specific changes for
         return 1;
     }
