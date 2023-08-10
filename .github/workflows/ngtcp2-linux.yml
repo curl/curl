@@ -52,7 +52,7 @@ env:
   nghttp2-version: v1.55.1
   gnutls-version: 3.8.0
   wolfssl-url: https://github.com/wolfSSL/wolfssl.git
-  wolfssl-version: master
+  wolfssl-version: v5.6.2-stable
   # this works
   #wolfssl-version: v5.6.0-stable
   # this fails test_02_07b
