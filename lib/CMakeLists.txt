@@ -60,7 +60,7 @@ if(ENABLE_CURLDEBUG)
   # being applied to memdebug.c itself.
   set_source_files_properties(memdebug.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
-target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+target_link_libraries(curlu PRIVATE ${CURL_LIBS} ${CURL_DEPS})
 
 transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)

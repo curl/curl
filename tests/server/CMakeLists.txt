@@ -42,7 +42,7 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
-  target_link_libraries(${TEST_NAME} ${CURL_LIBS})
+  target_link_libraries(${TEST_NAME} ${CURL_LIBS} ${CURL_DEPS})
 
   # Test servers simply are standalone programs that do not use libcurl
   # library.  For convenience and to ease portability of these servers,
