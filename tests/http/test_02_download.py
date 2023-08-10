@@ -163,7 +163,7 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1'])
     def test_02_07b_download_reuse(self, env: Env,
                                    httpd, nghttpx, repeat, proto):
-        count = 10
+        count = 11
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto,
