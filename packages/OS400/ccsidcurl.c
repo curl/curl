@@ -1076,7 +1076,11 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
 
   switch(tag) {
 
+  /* BEGIN TRANSLATABLE STRING OPTIONS */
+  /* Keep option symbols in alphanumeric order and retain the BEGIN/END
+     armor comments. */
   case CURLOPT_ABSTRACT_UNIX_SOCKET:
+  case CURLOPT_ACCEPT_ENCODING:
   case CURLOPT_ALTSVC:
   case CURLOPT_AWS_SIGV4:
   case CURLOPT_CAINFO:
@@ -1088,16 +1092,16 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   case CURLOPT_CRLFILE:
   case CURLOPT_CUSTOMREQUEST:
   case CURLOPT_DEFAULT_PROTOCOL:
-  case CURLOPT_DNS_SERVERS:
   case CURLOPT_DNS_INTERFACE:
   case CURLOPT_DNS_LOCAL_IP4:
   case CURLOPT_DNS_LOCAL_IP6:
+  case CURLOPT_DNS_SERVERS:
   case CURLOPT_DOH_URL:
   case CURLOPT_EGDSOCKET:
-  case CURLOPT_ENCODING:
   case CURLOPT_FTPPORT:
   case CURLOPT_FTP_ACCOUNT:
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
+  case CURLOPT_HAPROXY_CLIENT_IP:
   case CURLOPT_HSTS:
   case CURLOPT_INTERFACE:
   case CURLOPT_ISSUERCERT:
@@ -1119,6 +1123,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   case CURLOPT_PROXY_CAINFO:
   case CURLOPT_PROXY_CAPATH:
   case CURLOPT_PROXY_CRLFILE:
+  case CURLOPT_PROXY_ISSUERCERT:
   case CURLOPT_PROXY_KEYPASSWD:
   case CURLOPT_PROXY_PINNEDPUBLICKEY:
   case CURLOPT_PROXY_SERVICE_NAME:
@@ -1164,7 +1169,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   case CURLOPT_USERNAME:
   case CURLOPT_USERPWD:
   case CURLOPT_XOAUTH2_BEARER:
-  case CURLOPT_HAPROXY_CLIENT_IP:
+  /* END TRANSLATABLE STRING OPTIONS */
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 

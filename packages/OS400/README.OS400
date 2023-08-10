@@ -48,6 +48,7 @@ _ curl_easy_setopt_ccsid()
   Variable arguments are a string pointer and a CCSID (unsigned int) for
 options:
         CURLOPT_ABSTRACT_UNIX_SOCKET
+        CURLOPT_ACCEPT_ENCODING
         CURLOPT_ALTSVC
         CURLOPT_AWS_SIGV4
         CURLOPT_CAINFO
@@ -56,17 +57,19 @@ options:
         CURLOPT_COOKIEFILE
         CURLOPT_COOKIEJAR
         CURLOPT_COOKIELIST
-        CURLOPT_COPYPOSTFIELDS
         CURLOPT_CRLFILE
         CURLOPT_CUSTOMREQUEST
         CURLOPT_DEFAULT_PROTOCOL
+        CURLOPT_DNS_INTERFACE
+        CURLOPT_DNS_LOCAL_IP4
+        CURLOPT_DNS_LOCAL_IP6
         CURLOPT_DNS_SERVERS
         CURLOPT_DOH_URL
         CURLOPT_EGDSOCKET
-        CURLOPT_ENCODING
         CURLOPT_FTPPORT
         CURLOPT_FTP_ACCOUNT
         CURLOPT_FTP_ALTERNATIVE_TO_USER
+        CURLOPT_HAPROXY_CLIENT_IP
         CURLOPT_HSTS
         CURLOPT_INTERFACE
         CURLOPT_ISSUERCERT
@@ -88,6 +91,7 @@ options:
         CURLOPT_PROXY_CAINFO
         CURLOPT_PROXY_CAPATH
         CURLOPT_PROXY_CRLFILE
+        CURLOPT_PROXY_ISSUERCERT
         CURLOPT_PROXY_KEYPASSWD
         CURLOPT_PROXY_PINNEDPUBLICKEY
         CURLOPT_PROXY_SERVICE_NAME
@@ -105,7 +109,7 @@ options:
         CURLOPT_REDIR_PROTOCOLS_STR
         CURLOPT_REFERER
         CURLOPT_REQUEST_TARGET
-        CURLOPT_RTSP_SESSION_UID
+        CURLOPT_RTSP_SESSION_ID
         CURLOPT_RTSP_STREAM_URI
         CURLOPT_RTSP_TRANSPORT
         CURLOPT_SASL_AUTHZID
@@ -122,6 +126,7 @@ options:
         CURLOPT_SSLKEY
         CURLOPT_SSLKEYTYPE
         CURLOPT_SSL_CIPHER_LIST
+        CURLOPT_SSL_EC_CURVES
         CURLOPT_TLS13_CIPHERS
         CURLOPT_TLSAUTH_PASSWORD
         CURLOPT_TLSAUTH_TYPE
@@ -145,13 +150,13 @@ CCSID conversion result length.
 _ curl_formadd_ccsid()
   In the variable argument list, string pointers should be followed by a (long)
 CCSID for the following options:
-        CURLFORM_FILENAME
-        CURLFORM_CONTENTTYPE
         CURLFORM_BUFFER
-        CURLFORM_FILE
-        CURLFORM_FILECONTENT
+        CURLFORM_CONTENTTYPE
         CURLFORM_COPYCONTENTS
         CURLFORM_COPYNAME
+        CURLFORM_FILE
+        CURLFORM_FILECONTENT
+        CURLFORM_FILENAME
         CURLFORM_PTRNAME
   If taken from an argument array, an additional array entry must follow each
 entry containing one of the above option. This additional entry holds the CCSID
@@ -165,19 +170,19 @@ _ curl_easy_getinfo_ccsid()
   The following options are followed by a 'char * *' and a CCSID. Unlike
 curl_easy_getinfo(), the value returned in the pointer should be released with
 curl_free() after use:
-        CURLINFO_EFFECTIVE_URL
         CURLINFO_CONTENT_TYPE
+        CURLINFO_EFFECTIVE_URL
         CURLINFO_FTP_ENTRY_PATH
+        CURLINFO_LOCAL_IP
+        CURLINFO_PRIMARY_IP
         CURLINFO_REDIRECT_URL
         CURLINFO_REFERER
-        CURLINFO_PRIMARY_IP
         CURLINFO_RTSP_SESSION_ID
-        CURLINFO_LOCAL_IP
         CURLINFO_SCHEME
   Likewise, the following options are followed by a struct curl_slist * * and a
 CCSID.
-        CURLINFO_SSL_ENGINES
         CURLINFO_COOKIELIST
+        CURLINFO_SSL_ENGINES
 Lists returned should be released with curl_slist_free_all() after use.
   Option CURLINFO_CERTINFO is followed by a struct curl_certinfo * * and a
 CCSID. Returned structures should be freed with curl_certinfo_free_all()
