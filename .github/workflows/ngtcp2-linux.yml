@@ -51,7 +51,14 @@ env:
   ngtcp2-version: v0.18.0
   nghttp2-version: v1.55.1
   gnutls-version: 3.8.0
-  wolfssl-version: v5.6.0-stable
+  #wolfssl-url: https://github.com/wolfSSL/wolfssl.git
+  # this works
+  #wolfssl-version: v5.6.0-stable
+  # this fails test_02_07b
+  #wolfssl-version: v5.6.3-stable
+  # test PR from dgarske
+  wolfssl-url: https://github.com/dgarske/wolfssl.git
+  wolfssl-version: fix_cond
   mod_h2-version: v2.0.21
 
 jobs:
@@ -124,7 +131,7 @@ jobs:
 
     - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b ${{ env.wolfssl-version }} https://github.com/wolfSSL/wolfssl.git
+        git clone --quiet --depth=1 -b ${{ env.wolfssl-version }} ${{ env.wolfssl-url }}
         cd wolfssl
         ./autogen.sh
         ./configure --enable-all --enable-quic --prefix=$HOME/nghttpx
