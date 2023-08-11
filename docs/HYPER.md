@@ -18,16 +18,11 @@ The C API for Hyper is brand new and is still under development.
 
 ## build curl with hyper
 
-Since March 3 2022, hyper needs the nightly rustc to build, which you may need
-to install first with:
-
-     % rustup toolchain install nightly
-
-Then build hyper and enable its C API like this:
+Using Rust 1.64.0 or later, build hyper and enable its C API like this:
 
      % git clone https://github.com/hyperium/hyper
      % cd hyper
-     % RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib
+     % RUSTFLAGS="--cfg hyper_unstable_ffi" cargo rustc --features client,http1,http2,ffi --crate-type cdylib
 
 Also, `--release` can be added for a release (optimized) build.
 
