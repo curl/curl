@@ -51,8 +51,8 @@ env:
   ngtcp2-version: v0.18.0
   nghttp2-version: v1.55.1
   gnutls-version: 3.8.0
-  wolfssl-url: https://github.com/wolfSSL/wolfssl.git
-  wolfssl-version: v5.6.2-stable
+  #wolfssl-url: https://github.com/wolfSSL/wolfssl.git
+  #wolfssl-version: v5.6.2-stable
   # this works
   #wolfssl-version: v5.6.0-stable
   # this fails test_02_07b
@@ -60,6 +60,8 @@ env:
   # test PR from dgarske
   #wolfssl-url: https://github.com/dgarske/wolfssl.git
   #wolfssl-version: fix_cond
+  wolfssl-url: https://github.com/julek-wolfssl/wolfssl.git
+  wolfssl-version: refactor-cond-again
   mod_h2-version: v2.0.21
 
 jobs:
@@ -71,18 +73,6 @@ jobs:
       fail-fast: false
       matrix:
         build:
-        - name: quictls
-          configure: >-
-            PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
-            --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug
-            --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
-            --with-openssl=$HOME/nghttpx
-        - name: gnutls
-          configure: >-
-            PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
-            --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug
-            --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
-            --with-gnutls=$HOME/nghttpx
         - name: wolfssl
           configure: >-
             PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
@@ -216,7 +206,7 @@ jobs:
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
 
-    - run: pytest -v
+    - run: pytest -v -k test_02_07b --repeat=100 --maxfail=1
       name: 'run pytest'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"

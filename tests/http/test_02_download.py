@@ -168,7 +168,7 @@ class TestDownload:
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto,
                                with_stats=True, extra_args=[
-            '--parallel', '--trace-config', 'ssl,tcp'
+            '--parallel',
         ])
         r.check_response(count=count, http_status=200)
         # http/1.1 should have used count connections
