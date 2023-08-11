@@ -33,6 +33,7 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host);
 #define USE_IDN
 void Curl_free_idnconverted_hostname(struct hostname *host);
 char *Curl_idn_decode(const char *input);
+char *Curl_idn_encode(const char *input);
 #ifdef USE_LIBIDN2
 #define Curl_idn_free(x) idn2_free(x)
 #else
