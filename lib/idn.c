@@ -173,7 +173,7 @@ static char *idn_encode(const char *puny)
   if(rc != IDNA_SUCCESS)
     return NULL;
 #elif defined(USE_WIN32_IDN)
-  Curl_win32_ascii_to_idn(puny, &enc);
+  enc = Curl_win32_ascii_to_idn(puny);
 #endif
   return enc;
 }
