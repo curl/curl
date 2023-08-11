@@ -56,7 +56,7 @@
 /* #define DEBUG_QUICHE */
 
 #define QUIC_MAX_STREAMS              (100)
-#define QUIC_IDLE_TIMEOUT        (5 * 1000) /* milliseconds */
+#define QUIC_IDLE_TIMEOUT        (60 * 1000) /* milliseconds */
 
 #define H3_STREAM_WINDOW_SIZE  (128 * 1024)
 #define H3_STREAM_CHUNK_SIZE    (16 * 1024)
