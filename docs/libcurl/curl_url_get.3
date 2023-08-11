@@ -91,6 +91,16 @@ If libcurl is built without IDN capabilities, using this bit will make
 anything outside the ASCII range.
 
 (Added in curl 7.88.0)
+.IP CURLU_PUNY2IDN
+If set and asked to retrieve the \fBCURLUPART_HOST\fP or \fBCURLUPART_URL\fP
+parts, libcurl returns the host name in its IDN (International Domain Name)
+UTF-8 version if it otherwise is a punycode version.
+
+If libcurl is built without IDN capabilities, using this bit will make
+\fIcurl_url_get(3)\fP return \fICURLUE_LACKS_IDN\fP if the host name is using
+punycode.
+
+(Added in curl 8.3.0)
 .SH PARTS
 .IP CURLUPART_URL
 When asked to return the full URL, \fIcurl_url_get(3)\fP will return a

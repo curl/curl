@@ -1063,6 +1063,7 @@ CURLU_NO_AUTHORITY              7.67.0
 CURLU_NO_DEFAULT_PORT           7.62.0
 CURLU_NON_SUPPORT_SCHEME        7.62.0
 CURLU_PATH_AS_IS                7.62.0
+CURLU_PUNY2IDN                  8.3.0
 CURLU_PUNYCODE                  7.88.0
 CURLU_URLDECODE                 7.62.0
 CURLU_URLENCODE                 7.62.0

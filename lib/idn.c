@@ -75,7 +75,8 @@ bool Curl_win32_idn_to_ascii(const char *in, char **out)
   wchar_t *in_w = curlx_convert_UTF8_to_wchar(in);
   if(in_w) {
     wchar_t punycode[IDN_MAX_LENGTH];
-    int chars = IdnToAscii(0, in_w, -1, punycode, IDN_MAX_LENGTH);
+    int chars = IdnToAscii(0, in_w, (int)(wcslen(in_w) + 1), punycode,
+                           IDN_MAX_LENGTH);
     curlx_unicodefree(in_w);
     if(chars) {
       char *mstr = curlx_convert_wchar_to_UTF8(punycode);
@@ -89,6 +90,27 @@ bool Curl_win32_idn_to_ascii(const char *in, char **out)
   }
 
   return success;
+}
+
+char *Curl_win32_ascii_to_idn(const char *in)
+{
+  char *out = NULL;
+
+  wchar_t *in_w = curlx_convert_UTF8_to_wchar(in);
+  if(in_w) {
+    WCHAR idn[IDN_MAX_LENGTH]; /* stores a UTF-16 string */
+    int chars = IdnToUnicode(0, in_w, (int)(wcslen(in_w) + 1), idn,
+                             IDN_MAX_LENGTH);
+    if(chars) {
+      /* 'chars' is "the number of characters retrieved" */
+      char *mstr = curlx_convert_wchar_to_UTF8(idn);
+      if(mstr) {
+        out = strdup(mstr);
+        curlx_unicodefree(mstr);
+      }
+    }
+  }
+  return out;
 }
 
 #endif /* USE_WIN32_IDN */
@@ -144,9 +166,35 @@ static char *idn_decode(const char *input)
   return decoded;
 }
 
+static char *idn_encode(const char *puny)
+{
+  char *enc = NULL;
+#ifdef USE_LIBIDN2
+  int rc = idn2_to_unicode_8z8z(puny, &enc, 0);
+  if(rc != IDNA_SUCCESS)
+    return NULL;
+#elif defined(USE_WIN32_IDN)
+  enc = Curl_win32_ascii_to_idn(puny);
+#endif
+  return enc;
+}
+
 char *Curl_idn_decode(const char *input)
 {
   char *d = idn_decode(input);
+#ifdef USE_LIBIDN2
+  if(d) {
+    char *c = strdup(d);
+    idn2_free(d);
+    d = c;
+  }
+#endif
+  return d;
+}
+
+char *Curl_idn_encode(const char *puny)
+{
+  char *d = idn_encode(puny);
 #ifdef USE_LIBIDN2
   if(d) {
     char *c = strdup(d);
