@@ -54,7 +54,7 @@ jobs:
     - name: trim the curl.1 markdown file
       run: |
         perl -pi -e 's/^    .*//' docs/curl.md
-        perl -pi -e 's/--[a-z0-9-]*//ig' docs/curl.md
+        perl -pi -e 's/\-\-[\a-z0-9-]*//ig' docs/curl.md
         perl -pi -e 's!https://[a-z0-9%/.-]*!!ig' docs/curl.md
 
     - name: setup the custom wordlist

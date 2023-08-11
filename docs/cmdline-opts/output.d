@@ -28,13 +28,13 @@ You may use this option as many times as the number of URLs you have. For
 example, if you specify two URLs on the same command line, you can use it like
 this:
 
-  curl -o aa example.com -o bb example.net
+ curl -o aa example.com -o bb example.net
 
 and the order of the -o options and the URLs does not matter, just that the
 first -o is for the first URL and so on, so the above command line can also be
 written as
 
-  curl example.com example.net -o aa -o bb
+ curl example.com example.net -o aa -o bb
 
 See also the --create-dirs option to create the local directories
 dynamically. Specifying the output as '-' (a single dash) will force the
@@ -42,8 +42,8 @@ output to be done to stdout.
 
 To suppress response bodies, you can redirect output to /dev/null:
 
-  curl example.com -o /dev/null
+ curl example.com -o /dev/null
 
-Or for Windows use **nul**:
+Or for Windows:
 
-  curl example.com -o nul
+ curl example.com -o nul

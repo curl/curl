@@ -46,6 +46,6 @@ Specifies a custom POP3 command to use instead of *LIST* or *RETR*.
 Specifies a custom IMAP command to use instead of *LIST*. (Added in 7.30.0)
 .TP
 **SMTP**
-Specifies a custom SMTP command to use instead of *HELP* or *VRFY*. (Added in 7.34.0)
+Specifies a custom SMTP command to use instead of *HELP* or **VRFY**. (Added in 7.34.0)
 .RE
 .IP
