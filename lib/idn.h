@@ -26,6 +26,7 @@
 
 #ifdef USE_WIN32_IDN
 bool Curl_win32_idn_to_ascii(const char *in, char **out);
+char *Curl_win32_ascii_to_idn(const char *in);
 #endif /* USE_WIN32_IDN */
 bool Curl_is_ASCII_name(const char *hostname);
 CURLcode Curl_idnconvert_hostname(struct hostname *host);
