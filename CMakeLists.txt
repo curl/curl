@@ -1332,11 +1332,8 @@ if(WIN32)
   # Use the manifest embedded in the Windows Resource
   set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
 
-  # Check if crypto functions in wincrypt.h are actually available
-  if(HAVE_WINCRYPT_H)
-    check_symbol_exists(CryptAcquireContext "windows.h;wincrypt.h" USE_WINCRYPT)
-  endif()
-  if(USE_WINCRYPT)
+  # We use crypto functions that are not available for UWP apps
+  if(NOT WINDOWS_STORE)
     set(USE_WIN32_CRYPTO ON)
   endif()
 
