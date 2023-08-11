@@ -183,6 +183,7 @@ HTTP/3:
 - all: ['tests/nghttpx.conf']
 
 Hyper:
+- all: ['docs/HYPER.md']
 - all: ['lib/c-hyper.*']
 
 IMAP:
@@ -264,7 +265,6 @@ TFTP:
 - all: ['tests/server/tftp*']
 
 TLS:
-- all: ['docs/HYPER.md']
 - all: ['docs/SSL*']
 - all: ['docs/libcurl/opts/CURLINFO_CA*']
 - all: ['docs/libcurl/opts/CURLINFO_CERT*']
