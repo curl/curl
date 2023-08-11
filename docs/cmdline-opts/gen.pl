@@ -66,13 +66,16 @@ close(INC);
 sub manpageify {
     my ($k)=@_;
     my $l;
+    my $klong = $k;
+    # quote "bare" minuses in the long name
+    $klong =~ s/-/\\-/g;
     if($optlong{$k} ne "") {
         # both short + long
-        $l = "\\fI-".$optlong{$k}.", \\-\\-$k\\fP";
+        $l = "\\fI-".$optlong{$k}.", \\-\\-$klong\\fP";
     }
     else {
         # only long
-        $l = "\\fI\\-\\-$k\\fP";
+        $l = "\\fI\\-\\-$klong\\fP";
     }
     return $l;
 }
@@ -315,6 +318,9 @@ sub single {
     }
     close(F);
     my $opt;
+
+    # escape minus
+    $long =~ s/-/\\-/g;
     if(defined($short) && $long) {
         $opt = "-$short, --$long";
     }
