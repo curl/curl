@@ -751,6 +751,12 @@ static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
   struct read_ctx readx;
   size_t pkt_count, gsolen;
 
+  quiche_conn_on_timeout(ctx->qconn);
+  if(quiche_conn_is_closed(ctx->qconn)) {
+    failf(data, "quiche_conn_on_timeout closed the connection");
+    return CURLE_SEND_ERROR;
+  }
+
   result = vquic_flush(cf, data, &ctx->q);
   if(result) {
     if(result == CURLE_AGAIN) {
