@@ -1667,24 +1667,26 @@ AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports WIN32 crypto API])
   curl_win32_crypto_api="no"
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
+  if test "$curl_cv_header_windows_h" = "yes"; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
 #undef inline
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #include <wincrypt.h>
-    ]],[[
-      HCRYPTPROV hCryptProv;
-      if(CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                             CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
-        CryptReleaseContext(hCryptProv, 0);
-      }
-    ]])
-  ],[
-    curl_win32_crypto_api="yes"
-  ])
+      ]],[[
+        HCRYPTPROV hCryptProv;
+        if(CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                               CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
+          CryptReleaseContext(hCryptProv, 0);
+        }
+      ]])
+    ],[
+      curl_win32_crypto_api="yes"
+    ])
+  fi
   case "$curl_win32_crypto_api" in
     yes)
       AC_MSG_RESULT([yes])
