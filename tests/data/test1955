@@ -64,9 +64,10 @@ http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPP
 <protocol>
 GET /aws_sigv4/testapi/test HTTP/1.1
 Host: exam.ple.com:9000
-Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;tesmixcase;test0;test1;test2;test_space;x-xxx-date, Signature=779a8ff876528aece8bf03b1296702af0644a4745aa5feabb6ebb1a7bb0d907e
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;tesmixcase;test2;test3;test_space;x-xxx-date, Signature=dd39202e9fb7b836ebf2abb83b114cae11ff3b6a169f0c64b290a774a873db9d
 X-Xxx-Date: 19700101T000000Z
-test2: 1234
+test3: 1234
+test2:
 test_space: t	s  m	   end    
 tesMixCase: MixCase
 
