@@ -4,7 +4,7 @@ curl and libcurl 8.3.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2951
+ Contributors:                 2954
 
 This release includes the following changes:
 
@@ -14,6 +14,7 @@ This release includes the following changes:
  o tool: add "variable" support [1]
  o trace: make tracing available in non-debug builds [41]
  o url: change default value for CURLOPT_MAXREDIRS to 30 [46]
+ o urlapi: CURLU_PUNY2IDN - convert from punycode to IDN name [54]
  o wolfssl: support loading system CA certificates [8]
 
 This release includes the following bugfixes:
@@ -24,23 +25,30 @@ This release includes the following bugfixes:
  o cf-socket: log successful interface bind [39]
  o CI: add caching to many jobs [19]
  o cmake: add support for single libcurl compilation pass [21]
+ o cmake: allow `SHARE_LIB_OBJECT=ON` on all platforms [80]
+ o cmake: assume `wldap32` availability on Windows [81]
  o cmake: cache more config and delete unused ones [4]
  o cmake: detect `SSL_set0_wbio` in OpenSSL [22]
  o cmake: drop `HAVE_LIBWINMM` and `HAVE_LIBWS2_32` feature checks [68]
+ o cmake: fix to use variable for the curl namespace [79]
  o cmake: fixup H2 duplicate symbols for unity builds [23]
  o cmake: support building static and shared libcurl in one go [17]
  o cmdline-opts/page-header: reorder, clean up [51]
  o configure, cmake, lib: more form api deprecation [7]
  o configure: use the pkg-config --libs-only-l flag for libssh2 [16]
+ o cookie-jar.d: emphasize that this option is ONLY writing cookies [72]
  o crypto: ensure crypto initialization works [69]
  o CURLOPT_SSL_VERIFYPEER.3: mention it does not load CA certs when disabled [42]
+ o docs/cmdline-opts/gen.pl: hide "added in" before 7.50.0 [76]
  o docs/cmdline-opts: spellfixes, typos and polish [9]
  o docs/cmdline: add small "warning" to verbose options [59]
  o docs/cmdline: remove repeated working for negotiate + ntlm [58]
+ o docs/HYPER.md: document a workaround for a link error [73]
  o docs: link to the website versions instead of markdowns [3]
  o easy: remove #ifdefs to make code easier on the eye [34]
  o egd: delete feature detection and related source code [5]
  o gen.pl: escape all dashes (ascii minus) to avoid unicode hyphens [50]
+ o gen.pl: replace all single quotes with aq [78]
  o GHA: adding quiche workflow [35]
  o headers: accept leading whitespaces on first response header [37]
  o http2: avoid too early connection re-use/multiplexing [20]
@@ -63,9 +71,11 @@ This release includes the following bugfixes:
  o openssl: use `SSL_CTX_set_ciphersuites` with LibreSSL 3.4.1 [66]
  o openssl: use `SSL_CTX_set_keylog_callback` with LibreSSL 3.5.0 [67]
  o page-footer: QLOGDIR works with ngtcp2 and quiche [62]
+ o page-header: move up a URL paragraph from GLOBBING to URL
  o resolve: use PF_INET6 family lookups when CURL_IPRESOLVE_V6 is set [2]
  o Revert "schannel: reverse the order of certinfo insertions" [14]
  o schannel: fix user-set legacy algorithms in Windows 10 & 11 [53]
+ o schannel: verify hostname independent of verify cert [74]
  o sectransp: prevent CFRelease() of NULL [26]
  o tests/tftpd+mqttd: make variables static to silence picky warnings [57]
  o tests: ensure `libcurl.def` contains all exports [45]
@@ -94,17 +104,18 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexander Jaeger, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Derzsi Dániel, Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre, eppesuig,
-  FC Stegerman, Gabriel Corona, Gisle Vanem, Goro FUJI, Graham Campbell,
-  Guillaume Algis, Joseph Tharayil, junsik on github, kyled-dell on github,
-  Maksim Arhipov, Marcel Raad, Markus Sommer, Maurício Meneghini Fauth,
-  Nathan Moinvaziri, Niall McGee, Pablo Busse, Patrick Monnerat,
+  Alexander Jaeger, balikalina on Github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Dan Jacobson, Derzsi Dániel, Douglas R. Reno,
+  ed0d2b2ce19451f2, Emanuele Torre, eppesuig, FC Stegerman, Gabriel Corona,
+  Gisle Vanem, Goro FUJI, Graham Campbell, Guillaume Algis, Joseph Tharayil,
+  junsik on github, kyled-dell on github, Maksim Arhipov, Marcel Raad,
+  Markus Sommer, Martin Galvan, Maurício Meneghini Fauth, Nathan Moinvaziri,
+  Niall McGee, Nicholas Nethercote, Pablo Busse, Patrick Monnerat,
   Philippe Antoine on HackerOne, Ray Satiro, Richard W.M. Jones,
   Rutger Broekhoff, Ryan Schmidt, Samuel Chiang, Sergey, Stefan Eissing,
   Thomas M. DuBuisson, Viktor Szakats, wangzhikun, Wilhelm von Thiele,
   yushicheng7788 on github, zhihaoy on github
-  (40 contributors)
+  (44 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -161,6 +172,7 @@ References to bug reports and discussions on issues:
  [51] = https://curl.se/bug/?i=11638
  [52] = https://curl.se/bug/?i=11621
  [53] = https://curl.se/bug/?i=10741
+ [54] = https://curl.se/bug/?i=11655
  [55] = https://curl.se/bug/?i=11628
  [56] = https://curl.se/bug/?i=11592
  [57] = https://curl.se/bug/?i=11594
@@ -176,3 +188,11 @@ References to bug reports and discussions on issues:
  [69] = https://curl.se/bug/?i=11614
  [70] = https://curl.se/bug/?i=11611
  [71] = https://curl.se/bug/?i=11460
+ [72] = https://curl.se/bug/?i=11661
+ [73] = https://curl.se/bug/?i=11653
+ [74] = https://curl.haxx.se/mail/lib-2018-10/0113.html
+ [76] = https://curl.se/bug/?i=11651
+ [78] = https://curl.se/bug/?i=11645
+ [79] = https://curl.se/bug/?i=1199308
+ [80] = https://curl.se/bug/?i=11627
+ [81] = https://curl.se/bug/?i=11624
