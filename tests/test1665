@@ -1,0 +1,46 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+IMAP custom request
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP FETCH message with custom request
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/' -u user:secret -X 'FETCH 123 BODY[1]'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT %TESTNUMBER
+A004 FETCH 123 BODY[1]
+A005 LOGOUT
+</protocol>
+</verify>
+</testcase>
