@@ -1804,8 +1804,17 @@ static CURLcode imap_sendf(struct Curl_easy *data, const char *fmt, ...)
 static char *imap_atom(const char *str, bool escape_only)
 {
   struct dynbuf line;
+  size_t nclean;
+  size_t len;
+
   if(!str)
     return NULL;
+
+  len = strlen(str);
+  nclean = strcspn(str, "() {%*]\\\"");
+  if(len == nclean)
+    /* nothing to escape, return a strdup */
+    return strdup(str);
 
   Curl_dyn_init(&line, 2000);
 
