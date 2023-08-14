@@ -50,7 +50,6 @@ problems may have been fixed or changed somewhat since this was written.
  6.1 NTLM authentication and unicode
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
- 6.4 Negotiate and Kerberos V5 need a fake user name
  6.5 NTLM does not support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
@@ -316,18 +315,6 @@ problems may have been fixed or changed somewhat since this was written.
  NTLM authentication using SSPI (on Windows) when (lib)curl is running in
  "system context" will make it use wrong(?) user name - at least when compared
  to what winhttp does. See https://curl.se/bug/view.cgi?id=535
-
-6.4 Negotiate and Kerberos V5 need a fake user name
-
- In order to get Negotiate (SPNEGO) authentication to work in HTTP or Kerberos
- V5 in the email protocols, you need to  provide a (fake) user name (this
- concerns both curl and the lib) because the code wrongly only considers
- authentication if there's a user name provided by setting
- conn->bits.user_passwd in url.c  https://curl.se/bug/view.cgi?id=440 How?
- https://curl.se/mail/lib-2004-08/0182.html A possible solution is to
- either modify this variable to be set or introduce a variable such as
- new conn->bits.want_authentication which is set when any of the authentication
- options are set.
 
 6.5 NTLM does not support password with § character
 

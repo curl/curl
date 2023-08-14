@@ -866,7 +866,12 @@ Curl_http_output_auth(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
     (conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
 #endif
-     data->state.aptr.user || data->set.str[STRING_BEARER])
+     data->state.aptr.user ||
+#ifdef USE_SPNEGO
+     authhost->want & CURLAUTH_NEGOTIATE ||
+     authproxy->want & CURLAUTH_NEGOTIATE ||
+#endif
+     data->set.str[STRING_BEARER])
     /* continue please */;
   else {
     authhost->done = TRUE;
