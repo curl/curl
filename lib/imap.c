@@ -1094,7 +1094,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data, int imapcode,
     if(checkprefix("OK [UIDVALIDITY ", line + 2)) {
       size_t len = 0;
       const char *p = &line[2] + strlen("OK [UIDVALIDITY ");
-      while(p[len] && ISDIGIT(p[len]) && (len < 20))
+      while((len < 20) && p[len] && ISDIGIT(p[len]))
         len++;
       if(len && (p[len] == ']')) {
         struct dynbuf uid;
