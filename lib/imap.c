@@ -694,12 +694,10 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
           to get the list of emails
         */
         const char *positionColon   = strchr(imap->custom_params, ':');
-        const char *positionBracket = strchr(imap->custom_params, '(');
-
         if(positionColon) {
-          if(!positionBracket || positionBracket > positionColon) {
+          const char *paren = strchr(imap->custom_params, '(');
+          if(!paren || paren > positionColon)
             isFetch = FALSE;
-          }
         }
       }
 
