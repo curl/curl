@@ -824,9 +824,6 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
   bool sending_http_headers = FALSE;
   struct SingleRequest *k = &data->req;
 
-  if((k->bytecount == 0) && (k->writebytecount == 0))
-    Curl_pgrsTime(data, TIMER_STARTTRANSFER);
-
   *didwhat |= KEEP_SEND;
 
   do {
