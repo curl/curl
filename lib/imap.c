@@ -1809,8 +1809,7 @@ static char *imap_atom(const char *str, bool escape_only)
 
   Curl_dyn_init(&line, 2000);
 
-  if(!escape_only &&
-     Curl_dyn_addn(&line, "\"", 1))
+  if(!escape_only && Curl_dyn_addn(&line, "\"", 1))
     return NULL;
 
   while(*str) {
@@ -1822,8 +1821,7 @@ static char *imap_atom(const char *str, bool escape_only)
     str++;
   }
 
-  if(!escape_only &&
-     Curl_dyn_addn(&line, "\"", 1))
+  if(!escape_only && Curl_dyn_addn(&line, "\"", 1))
     return NULL;
 
   return Curl_dyn_ptr(&line);
