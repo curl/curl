@@ -671,7 +671,6 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
 
     if(imap->custom) {
       if(strncasecompare(imap->custom, "FETCH", 5)) {
-        imap_state(data, IMAP_FETCH);
         isFetch = true;
       }
 
@@ -680,14 +679,38 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
       if(!isFetch && imap->custom_params) {
         if(strncasecompare(imap->custom, "UID", 3)) {
           if(strncasecompare(imap->custom_params, " FETCH", 6)) {
-            imap_state(data, IMAP_FETCH);
             isFetch = true;
+          }
+        }
+      }
+
+      if(isFetch) {
+        /*
+          if we have FETCH with range, we need a LIST state,
+          otherwise FETCH state, e.g.
+          FETCH 175 BODY.PEEK[]
+          to get one email
+          vs.
+          UID FETCH 1:* (FLAGS INTERNALDATE RFC822.SIZE
+          BODY.PEEK[HEADER.FIELDS (Message-Id DATE FROM
+          SUBJECT TO SENDER REPLY-TO CC BCC)])
+          to get the list of emails
+        */
+        const char *positionColon   = strchr(imap->custom_params, ':');
+        const char *positionBracket = strchr(imap->custom_params, '(');
+
+        if(positionColon) {
+          if(!positionBracket || positionBracket > positionColon) {
+            isFetch = FALSE;
           }
         }
       }
 
       if(!isFetch) {
         imap_state(data, IMAP_LIST);
+      }
+      else {
+        imap_state(data, IMAP_FETCH);
       }
     }
   }
