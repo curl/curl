@@ -664,7 +664,7 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
   }
 
   if(!result) {
-    bool isFetch = false;
+    bool isFetch = FALSE;
 
     /* Switch state to be FETCH if custom command is a fetch command */
     /* so output is handled correctly. */
