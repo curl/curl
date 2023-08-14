@@ -671,7 +671,7 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
 
     if(imap->custom) {
       if(strncasecompare(imap->custom, "FETCH", 5) == 1) {
-        state(data, IMAP_FETCH);
+        imap_state(data, IMAP_FETCH);
         isFetch = true;
       }
 
@@ -680,14 +680,14 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
       if(!isFetch && imap->custom_params) {
         if(strncasecompare(imap->custom, "UID", 3) == 1) {
           if(strncasecompare(imap->custom_params, " FETCH", 6) == 1) {
-            state(data, IMAP_FETCH);
+            imap_state(data, IMAP_FETCH);
             isFetch = true;
           }
         }
       }
 
       if(!isFetch) {
-        state(data, IMAP_LIST);
+        imap_state(data, IMAP_LIST);
       }
     }
   }
