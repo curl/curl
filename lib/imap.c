@@ -1091,10 +1091,19 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data, int imapcode,
 
   if(imapcode == '*') {
     /* See if this is an UIDVALIDITY response */
-    char tmp[20];
-    if(sscanf(line + 2, "OK [UIDVALIDITY %19[0123456789]]", tmp) == 1) {
-      Curl_safefree(imapc->mailbox_uidvalidity);
-      imapc->mailbox_uidvalidity = strdup(tmp);
+    if(checkprefix("OK [UIDVALIDITY ", line + 2)) {
+      size_t len = 0;
+      const char *p = &line[2] + strlen("OK [UIDVALIDITY ");
+      while((len < 20) && p[len] && ISDIGIT(p[len]))
+        len++;
+      if(len && (p[len] == ']')) {
+        struct dynbuf uid;
+        Curl_dyn_init(&uid, 20);
+        if(Curl_dyn_addn(&uid, p, len))
+          return CURLE_OUT_OF_MEMORY;
+        Curl_safefree(imapc->mailbox_uidvalidity);
+        imapc->mailbox_uidvalidity = Curl_dyn_ptr(&uid);
+      }
     }
   }
   else if(imapcode == IMAP_RESP_OK) {
