@@ -663,8 +663,34 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
     free(mailbox);
   }
 
-  if(!result)
-    imap_state(data, IMAP_LIST);
+  if(!result) {
+    bool isFetch = false;
+
+    /* Switch state to be FETCH if custom command is a fetch command */
+    /* so output is handled correctly. */
+
+    if(imap->custom) {
+      if(strncasecompare(imap->custom, "FETCH", 5) == 1) {
+        state(data, IMAP_FETCH);
+        isFetch = true;
+      }
+
+      /* e.g. "UID FETCH 107 BODY.PEEK[]" */
+
+      if(!isFetch && imap->custom_params) {
+        if(strncasecompare(imap->custom, "UID", 3) == 1) {
+          if(strncasecompare(imap->custom_params, " FETCH", 6) == 1) {
+            state(data, IMAP_FETCH);
+            isFetch = true;
+          }
+        }
+      }
+
+      if(!isFetch) {
+        state(data, IMAP_LIST);
+      }
+    }
+  }
 
   return result;
 }
