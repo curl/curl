@@ -679,7 +679,7 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
 
       if(!isFetch && imap->custom_params) {
         if(strncasecompare(imap->custom, "UID", 3) == 1) {
-          if(strncasecompare(imap->custom_params, " FETCH", 6) == 1) {
+          if(strncasecompare(imap->custom_params, " FETCH", 6)) {
             imap_state(data, IMAP_FETCH);
             isFetch = true;
           }
