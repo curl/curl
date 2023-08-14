@@ -1115,7 +1115,10 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data, int imapcode,
     }
     else {
       /* Note the currently opened mailbox on this connection */
+      DEBUGASSERT(!imapc->mailbox);
       imapc->mailbox = strdup(imap->mailbox);
+      if(!imapc->mailbox)
+        return CURLE_OUT_OF_MEMORY;
 
       if(imap->custom)
         result = imap_perform_list(data);
