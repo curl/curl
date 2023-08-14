@@ -670,7 +670,7 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
     /* so output is handled correctly. */
 
     if(imap->custom) {
-      if(strncasecompare(imap->custom, "FETCH", 5) == 1) {
+      if(strncasecompare(imap->custom, "FETCH", 5)) {
         imap_state(data, IMAP_FETCH);
         isFetch = true;
       }
