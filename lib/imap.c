@@ -1812,7 +1812,7 @@ static char *imap_atom(const char *str, bool escape_only)
 
   len = strlen(str);
   nclean = strcspn(str, "() {%*]\\\"");
-  if(len == nclean)
+  if(escape_only && (len == nclean))
     /* nothing to escape, return a strdup */
     return strdup(str);
 
