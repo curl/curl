@@ -2711,7 +2711,7 @@ static void schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
-    if(!CryptHashData(hHash, (const BYTE*)input, (DWORD)inputlen, 0))
+    if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
       break; /* failed */
 
     /* get hash size */
