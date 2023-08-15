@@ -1545,9 +1545,10 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
 #ifndef USE_IDN
           return CURLUE_LACKS_IDN;
 #else
-          allochost = Curl_idn_decode(u->host);
-          if(!allochost)
-            return CURLUE_OUT_OF_MEMORY;
+          CURLcode result = Curl_idn_decode(u->host, &allochost);
+          if(result)
+            return (result == CURLE_OUT_OF_MEMORY) ?
+              CURLUE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
 #endif
         }
       }
@@ -1556,9 +1557,11 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
 #ifndef USE_IDN
           return CURLUE_LACKS_IDN;
 #else
-          allochost = Curl_idn_encode(u->host);
-          if(!allochost)
-            return CURLUE_OUT_OF_MEMORY;
+          CURLcode result = Curl_idn_encode(u->host, &allochost);
+          if(result)
+            /* this is the most likely error */
+            return (result == CURLE_OUT_OF_MEMORY) ?
+              CURLUE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
 #endif
         }
       }
@@ -1632,9 +1635,11 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
 #ifndef USE_IDN
         return CURLUE_LACKS_IDN;
 #else
-        char *allochost = Curl_idn_decode(*part);
-        if(!allochost)
-          return CURLUE_OUT_OF_MEMORY;
+        char *allochost;
+        CURLcode result = Curl_idn_decode(*part, &allochost);
+        if(result)
+          return (result == CURLE_OUT_OF_MEMORY) ?
+            CURLUE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
         free(*part);
         *part = allochost;
 #endif
@@ -1645,9 +1650,11 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
 #ifndef USE_IDN
         return CURLUE_LACKS_IDN;
 #else
-        char *allochost = Curl_idn_encode(*part);
-        if(!allochost)
-          return CURLUE_OUT_OF_MEMORY;
+        char *allochost;
+        CURLcode result = Curl_idn_encode(*part, &allochost);
+        if(result)
+          return (result == CURLE_OUT_OF_MEMORY) ?
+            CURLUE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
         free(*part);
         *part = allochost;
 #endif

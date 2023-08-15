@@ -68,11 +68,10 @@ WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
 
 #define IDN_MAX_LENGTH 255
 
-bool Curl_win32_idn_to_ascii(const char *in, char **out)
+static CURLcode win32_idn_to_ascii(const char *in, char **out)
 {
-  bool success = FALSE;
-
   wchar_t *in_w = curlx_convert_UTF8_to_wchar(in);
+  *out = NULL;
   if(in_w) {
     wchar_t punycode[IDN_MAX_LENGTH];
     int chars = IdnToAscii(0, in_w, (int)(wcslen(in_w) + 1), punycode,
@@ -83,16 +82,20 @@ bool Curl_win32_idn_to_ascii(const char *in, char **out)
       if(mstr) {
         *out = strdup(mstr);
         curlx_unicodefree(mstr);
-        if(*out)
-          success = TRUE;
+        if(!*out)
+          return CURLE_OUT_OF_MEMORY;
       }
+      else
+        return CURLE_OUT_OF_MEMORY;
     }
+    else
+      return CURLE_URL_MALFORMAT;
   }
 
-  return success;
+  return CURLE_OK;
 }
 
-char *Curl_win32_ascii_to_idn(const char *in)
+static CURLcode win32_ascii_to_idn(const char *in, char **output)
 {
   char *out = NULL;
 
@@ -107,10 +110,17 @@ char *Curl_win32_ascii_to_idn(const char *in)
       if(mstr) {
         out = strdup(mstr);
         curlx_unicodefree(mstr);
+        if(!out)
+          return CURLE_OUT_OF_MEMORY;
       }
     }
+    else
+      return CURLE_URL_MALFORMAT;
   }
-  return out;
+  else
+    return CURLE_URL_MALFORMAT;
+  *output = out;
+  return CURLE_OK;
 }
 
 #endif /* USE_WIN32_IDN */
@@ -137,10 +147,15 @@ bool Curl_is_ASCII_name(const char *hostname)
 /*
  * Curl_idn_decode() returns an allocated IDN decoded string if it was
  * possible. NULL on error.
+ *
+ * CURLE_URL_MALFORMAT - the host name could not be converted
+ * CURLE_OUT_OF_MEMORY - memory problem
+ *
  */
-static char *idn_decode(const char *input)
+static CURLcode idn_decode(const char *input, char **output)
 {
   char *decoded = NULL;
+  CURLcode result = CURLE_OK;
 #ifdef USE_LIBIDN2
   if(idn2_check_version(IDN2_VERSION)) {
     int flags = IDN2_NFC_INPUT
@@ -157,52 +172,68 @@ static char *idn_decode(const char *input)
          compatibility */
       rc = IDN2_LOOKUP(input, &decoded, IDN2_TRANSITIONAL);
     if(rc != IDN2_OK)
-      decoded = NULL;
+      result = CURLE_URL_MALFORMAT;
   }
 #elif defined(USE_WIN32_IDN)
-  if(!Curl_win32_idn_to_ascii(input, &decoded))
-    decoded = NULL;
+  result = win32_idn_to_ascii(input, &decoded);
 #endif
-  return decoded;
+  if(!result)
+    *output = decoded;
+  return result;
 }
 
-static char *idn_encode(const char *puny)
+static CURLcode idn_encode(const char *puny, char **output)
 {
   char *enc = NULL;
 #ifdef USE_LIBIDN2
   int rc = idn2_to_unicode_8z8z(puny, &enc, 0);
   if(rc != IDNA_SUCCESS)
-    return NULL;
+    return rc == IDNA_MALLOC_ERROR ? CURLE_OUT_OF_MEMORY : CURLE_URL_MALFORMAT;
 #elif defined(USE_WIN32_IDN)
-  enc = Curl_win32_ascii_to_idn(puny);
+  CURLcode result = win32_ascii_to_idn(puny, &enc);
+  if(result)
+    return result;
 #endif
-  return enc;
+  *output = enc;
+  return CURLE_OK;
 }
 
-char *Curl_idn_decode(const char *input)
+CURLcode Curl_idn_decode(const char *input, char **output)
 {
-  char *d = idn_decode(input);
+  char *d = NULL;
+  CURLcode result = idn_decode(input, &d);
 #ifdef USE_LIBIDN2
-  if(d) {
+  if(!result) {
     char *c = strdup(d);
     idn2_free(d);
-    d = c;
+    if(c)
+      d = c;
+    else
+      result = CURLE_OUT_OF_MEMORY;
   }
 #endif
-  return d;
+  if(!result)
+    *output = d;
+  return result;
 }
 
-char *Curl_idn_encode(const char *puny)
+CURLcode Curl_idn_encode(const char *puny, char **output)
 {
-  char *d = idn_encode(puny);
+  char *d = NULL;
+  CURLcode result = idn_encode(puny, &d);
 #ifdef USE_LIBIDN2
-  if(d) {
+  if(!result) {
     char *c = strdup(d);
     idn2_free(d);
-    d = c;
+    if(c)
+      d = c;
+    else
+      result = CURLE_OUT_OF_MEMORY;
   }
 #endif
-  return d;
+  if(!result)
+    *output = d;
+  return result;
 }
 
 /*
@@ -230,8 +261,9 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host)
 #ifdef USE_IDN
   /* Check name for non-ASCII and convert hostname if we can */
   if(!Curl_is_ASCII_name(host->name)) {
-    char *decoded = idn_decode(host->name);
-    if(decoded) {
+    char *decoded;
+    CURLcode result = idn_decode(host->name, &decoded);
+    if(!result) {
       if(!*decoded) {
         /* zero length is a bad host name */
         Curl_idn_free(decoded);
@@ -243,7 +275,7 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host)
       host->name = host->encalloc;
     }
     else
-      return CURLE_URL_MALFORMAT;
+      return result;
   }
 #endif
   return CURLE_OK;
