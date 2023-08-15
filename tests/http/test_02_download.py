@@ -163,6 +163,8 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1'])
     def test_02_07b_download_reuse(self, env: Env,
                                    httpd, nghttpx, repeat, proto):
+        if env.curl_uses_lib('wolfssl'):
+            pytest.skip("wolfssl session reuse borked")
         count = 6
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
@@ -365,6 +367,19 @@ class TestDownload:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[url])
         assert r.exit_code == 0, f'{client.dump_logs()}'
+
+    # Special client that tests TLS session reuse in parallel transfers
+    def test_02_26_session_shared_reuse(self, env: Env, httpd, repeat):
+        curl = CurlClient(env=env)
+        url = f'https://{env.domain1}:{env.https_port}/data-100k'
+        client = LocalClient(name='tls-session-reuse', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[url])
+        if env.curl_uses_lib('wolfssl'):
+            assert r.exit_code != 0, f'unexpected success for wolfSSL session share'
+        else:
+            r.check_exit_code(0)
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):

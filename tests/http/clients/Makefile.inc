@@ -28,4 +28,5 @@ check_PROGRAMS = \
   h2-download \
   ws-data \
   ws-pingpong \
-  h2-upgrade-extreme
+  h2-upgrade-extreme \
+  tls-session-reuse
