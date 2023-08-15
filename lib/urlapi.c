@@ -1648,7 +1648,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
 #else
         char *allochost = Curl_idn_encode(*part);
         if(!allochost)
-          return CURLUE_OUT_OF_MEMORY;
+          return CURLUE_BAD_HOSTNAME;
         free(*part);
         *part = allochost;
 #endif
