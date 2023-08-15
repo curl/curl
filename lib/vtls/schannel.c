@@ -68,10 +68,6 @@
 #  define HAS_ALPN 1
 #endif
 
-#ifndef UNISP_NAME_A
-#define UNISP_NAME_A "Microsoft Unified Security Protocol Provider"
-#endif
-
 #ifndef BCRYPT_CHACHA20_POLY1305_ALGORITHM
 #define BCRYPT_CHACHA20_POLY1305_ALGORITHM L"CHACHA20_POLY1305"
 #endif
