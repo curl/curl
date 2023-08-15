@@ -4270,7 +4270,18 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
               if((k->httpcode == 417) && data->state.expect100header) {
                 /* 417 Expectation Failed - try again without the Expect
                    header */
-                infof(data, "Got 417 while waiting for a 100");
+                if(!k->writebytecount &&
+                   k->exp100 == EXP100_AWAITING_CONTINUE) {
+                  infof(data, "Got HTTP failure 417 while waiting for a 100");
+                }
+                else {
+                  infof(data, "Got HTTP failure 417 while sending data");
+                  streamclose(conn,
+                              "Stop sending data before everything sent");
+                  result = http_perhapsrewind(data, conn);
+                  if(result)
+                    return result;
+                }
                 data->state.disableexpect = TRUE;
                 DEBUGASSERT(!data->req.newurl);
                 data->req.newurl = strdup(data->state.url);

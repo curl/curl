@@ -1,0 +1,111 @@
+<testcase>
+# This test is quite timing dependent and tricky to set up. The time line of
+# test operations looks like this:
+#
+# 1. curl sends a PUT request with Expect: 100-continue and waits only 1 msec
+#    for a 100 response.
+# 2. The HTTP server accepts the connection but waits 500 msec before acting
+#    on the request.
+# 3. curl doesn't receive the expected 100 response before its timeout expires,
+#    so it starts sending the body. It is throttled by a --limit-rate, so it
+#    sends the first 64 KiB then stops for 1000 msec due to this
+#    throttling.
+# 4. The server sends its 417 response while curl is throttled.
+# 5. curl responds to this 417 response by closing the connection (because it
+#    has a half-completed response outstanding) and starting a new one. This
+#    new request does not have an Expect: header so it is sent without delay.
+#    It's still throttled, however, so it takes about 16 seconds to finish
+#    sending.
+# 6. The server receives the response and this time acks it with 200.
+#
+# Because of the timing sensitivity (scheduling delays of 500 msec can cause
+# the test to fail), this test is marked flaky to avoid it being run in the CI
+# builds which are often run on overloaded servers.
+# Increasing the --limit-rate would decrease the test time, but at the cost of
+# becoming even more sensitive to delays (going from 500 msec to 250 msec or
+# less of accepted delay before failure).
+<info>
+<keywords>
+HTTP
+HTTP PUT
+Expect
+flaky
+</keywords>
+</info>
+# Server-side
+<reply>
+# 417 means the server didn't like the Expect header
+<data>
+HTTP/1.1 417 BAD swsbounce
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+
+</data>
+<data1>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 10
+
+blablabla
+</data1>
+<datacheck>
+HTTP/1.1 417 BAD swsbounce
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 10
+
+blablabla
+</datacheck>
+<servercmd>
+no-expect
+delay: 500
+connection-monitor
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP PUT with Expect: 100-continue and 417 response during upload
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt --limit-rate 64K --expect100-timeout 0.001
+</command>
+# Must be large enough to trigger curl's automatic 100-continue behaviour
+<file name="%LOGDIR/test%TESTNUMBER.txt">
+%repeat[132 x S]%%repeat[16462 x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx%0a]%
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+PUT /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 1053701
+Expect: 100-continue
+
+%repeat[132 x S]%%repeat[1021 x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx%0a]%%repeat[60 x x]%[DISCONNECT]
+PUT /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 1053701
+
+%repeat[132 x S]%%repeat[16462 x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx%0a]%
+[DISCONNECT]
+</protocol>
+</verify>
+</testcase>
