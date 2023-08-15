@@ -693,9 +693,11 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
           SUBJECT TO SENDER REPLY-TO CC BCC)])
           to get the list of emails
         */
-        const char *positionColon = strchr(imap->custom_params, ':');
+        const char *custom_params =
+          imap->custom_params ? imap->custom_params : "";
+        const char *positionColon = strchr(custom_params, ':');
         if(positionColon) {
-          const char *paren = strchr(imap->custom_params, '(');
+          const char *paren = strchr(custom_params, '(');
           if(!paren || paren > positionColon)
             isFetch = FALSE;
         }
