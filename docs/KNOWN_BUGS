@@ -84,6 +84,7 @@ problems may have been fixed or changed somewhat since this was written.
  12.1 OpenLDAP hangs after returning results
  12.2 LDAP on Windows does authentication wrong?
  12.3 LDAP on Windows does not work
+ 12.4 LDAPS requests to ActiveDirectory server hang
 
  13. TCP/IP
  13.2 Trying local ports fails on Windows
@@ -506,6 +507,10 @@ problems may have been fixed or changed somewhat since this was written.
  error that says "no memory" !
 
  https://github.com/curl/curl/issues/4261
+
+12.4 LDAPS requests to ActiveDirectory server hang
+
+ https://github.com/curl/curl/issues/9580
 
 13. TCP/IP
 
