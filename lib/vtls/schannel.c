@@ -104,12 +104,28 @@
 #endif
 #endif
 
+#ifndef SP_PROT_TLS1_0_CLIENT
+#define SP_PROT_TLS1_0_CLIENT           SP_PROT_TLS1_CLIENT
+#endif
+
+#ifndef SP_PROT_TLS1_1_CLIENT
+#define SP_PROT_TLS1_1_CLIENT           0x00000200
+#endif
+
+#ifndef SP_PROT_TLS1_2_CLIENT
+#define SP_PROT_TLS1_2_CLIENT           0x00000800
+#endif
+
 #ifndef SP_PROT_TLS1_3_CLIENT
 #define SP_PROT_TLS1_3_CLIENT           0x00002000
 #endif
 
 #ifndef SCH_USE_STRONG_CRYPTO
 #define SCH_USE_STRONG_CRYPTO           0x00400000
+#endif
+
+#ifndef SECBUFFER_ALERT
+#define SECBUFFER_ALERT                 17
 #endif
 
 /* Both schannel buffer sizes must be > 0 */
