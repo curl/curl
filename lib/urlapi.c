@@ -1548,7 +1548,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
           CURLcode result = Curl_idn_decode(u->host, &allochost);
           if(result)
             return (result == CURLE_OUT_OF_MEMORY) ?
-              CURLE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
+              CURLUE_OUT_OF_MEMORY : CURLUE_BAD_HOSTNAME;
 #endif
         }
       }
