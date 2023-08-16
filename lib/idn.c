@@ -201,10 +201,10 @@ static CURLcode idn_encode(const char *puny, char **output)
 
 CURLcode Curl_idn_decode(const char *input, char **output)
 {
-  char *d;
+  char *d = NULL;
   CURLcode result = idn_decode(input, &d);
 #ifdef USE_LIBIDN2
-  if(d) {
+  if(!result) {
     char *c = strdup(d);
     idn2_free(d);
     if(c)
@@ -220,10 +220,10 @@ CURLcode Curl_idn_decode(const char *input, char **output)
 
 CURLcode Curl_idn_encode(const char *puny, char **output)
 {
-  char *d;
+  char *d = NULL;
   CURLcode result = idn_encode(puny, &d);
 #ifdef USE_LIBIDN2
-  if(d) {
+  if(!result) {
     char *c = strdup(d);
     idn2_free(d);
     if(c)
