@@ -202,8 +202,6 @@ struct HTTP {
   curl_off_t postsize; /* off_t to handle large file sizes */
   const char *postdata;
 
-  const char *p_pragma;      /* Pragma: string */
-
   /* For FORM posting */
   curl_mimepart form;
 
