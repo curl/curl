@@ -54,60 +54,91 @@ jobs:
         build:
         - name: normal
           install: nghttp2
-          configure: --without-ssl
+          configure: --without-ssl --enable-websockets
           macosx-version-min: 10.9
         - name: debug
           install: nghttp2
-          configure: --enable-debug --without-ssl
+          configure: --enable-debug --without-ssl --enable-websockets
           macosx-version-min: 10.9
         - name: libssh2
           install: nghttp2 libssh2
-          configure: --enable-debug --with-libssh2 --without-ssl
+          configure: --enable-debug --with-libssh2 --without-ssl --enable-websockets
           macosx-version-min: 10.9
         - name: libssh-c-ares
           install: openssl nghttp2 libssh
-          configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl --enable-ares
+          configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl --enable-ares --enable-websockets
           macosx-version-min: 10.9
         - name: libssh
           install: openssl nghttp2 libssh
-          configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl
+          configure: --enable-debug --with-libssh --with-openssl=/usr/local/opt/openssl --enable-websockets
           macosx-version-min: 10.9
         - name: c-ares
           install: nghttp2
-          configure: --enable-debug --enable-ares --without-ssl
+          configure: --enable-debug --enable-ares --without-ssl --enable-websockets
           macosx-version-min: 10.9
         - name: HTTP only
           install: nghttp2
-          configure: --enable-debug --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+          configure: |
+            --enable-debug \
+            --enable-maintainer-mode \
+            --disable-alt-svc \
+            --disable-dict \
+            --disable-file \
+            --disable-ftp \
+            --disable-gopher \
+            --disable-imap \
+            --disable-ldap \
+            --disable-pop3 \
+            --disable-rtmp \
+            --disable-rtsp \
+            --disable-scp \
+            --disable-sftp \
+            --disable-shared \
+            --disable-smb \
+            --disable-smtp \
+            --disable-telnet \
+            --disable-tftp \
+            --disable-unix-sockets \
+            --without-brotli \
+            --without-gssapi \
+            --without-libidn2 \
+            --without-libpsl \
+            --without-librtmp \
+            --without-libssh2 \
+            --without-nghttp2 \
+            --without-ntlm-auth \
+            --without-ssl \
+            --without-zlib \
+            --without-zstd
           macosx-version-min: 10.15
         - name: SecureTransport http2
           install: nghttp2
-          configure: --enable-debug --with-secure-transport
+          configure: --enable-debug --with-secure-transport --enable-websockets
           macosx-version-min: 10.8
         - name: gcc SecureTransport
-          configure: CC=gcc-12 --enable-debug --with-secure-transport
+          configure: CC=gcc-12 --enable-debug --with-secure-transport --enable-websockets
           macosx-version-min: 10.8
         - name: OpenSSL http2
           install: nghttp2 openssl
-          configure: --enable-debug --with-openssl=/usr/local/opt/openssl
+          configure: --enable-debug --with-openssl=/usr/local/opt/openssl --enable-websockets
           macosx-version-min: 10.9
         - name: LibreSSL http2
           install: nghttp2 libressl
-          configure: --enable-debug --with-openssl=/usr/local/opt/libressl
+          configure: --enable-debug --with-openssl=/usr/local/opt/libressl --enable-websockets
           macosx-version-min: 10.9
         - name: torture
           install: nghttp2 openssl
-          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl
+          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl --enable-websockets
           tflags: -n -t --shallow=25 !FTP
           macosx-version-min: 10.9
         - name: torture-ftp
           install: nghttp2 openssl
-          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl
+          configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=/usr/local/opt/openssl --enable-websockets
           tflags: -n -t --shallow=20 FTP
           macosx-version-min: 10.9
         - name: macOS 10.15
           install: nghttp2 libssh2 openssl
-          configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl
+          configure: --enable-debug --disable-ldap --with-openssl=/usr/local/opt/openssl --enable-websockets
           macosx-version-min: 10.15
     steps:
     - run: echo libtool autoconf automake pkg-config ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
@@ -138,7 +169,7 @@ jobs:
     - run: autoreconf -fi
       name: 'autoreconf'
 
-    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}  --enable-websockets
+    - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
       name: 'configure'
       env:
         CFLAGS: "-mmacosx-version-min=${{ matrix.build.macosx-version-min }}"
