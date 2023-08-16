@@ -233,7 +233,6 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_mime_initpart(&http->form);
   data->req.p.http = http;
   connkeep(conn, "HTTP default");
 
@@ -1577,7 +1576,6 @@ CURLcode Curl_http_done(struct Curl_easy *data,
     return CURLE_OK;
 
   Curl_dyn_free(&http->send_buffer);
-  Curl_mime_cleanpart(&http->form);
   Curl_dyn_reset(&data->state.headerb);
   Curl_hyper_done(data);
   Curl_ws_done(data);
@@ -2375,47 +2373,53 @@ CURLcode Curl_http_body(struct Curl_easy *data, struct connectdata *conn,
 
   switch(httpreq) {
   case HTTPREQ_POST_MIME:
-    http->sendit = &data->set.mimepost;
+    data->state.mimepost = &data->set.mimepost;
     break;
 #ifndef CURL_DISABLE_FORM_API
   case HTTPREQ_POST_FORM:
-    /* Convert the form structure into a mime structure. */
-    Curl_mime_cleanpart(&http->form);
-    result = Curl_getformdata(data, &http->form, data->set.httppost,
-                              data->state.fread_func);
-    if(result)
-      return result;
-    http->sendit = &http->form;
+    /* Convert the form structure into a mime structure, then keep
+       the conversion */
+    if(!data->state.formp) {
+      data->state.formp = calloc(sizeof(curl_mimepart), 1);
+      if(!data->state.formp)
+        return CURLE_OUT_OF_MEMORY;
+      Curl_mime_cleanpart(data->state.formp);
+      result = Curl_getformdata(data, data->state.formp, data->set.httppost,
+                                data->state.fread_func);
+      if(result)
+        return result;
+      data->state.mimepost = data->state.formp;
+    }
     break;
 #endif
   default:
-    http->sendit = NULL;
+    data->state.mimepost = NULL;
   }
 
 #ifndef CURL_DISABLE_MIME
-  if(http->sendit) {
+  if(data->state.mimepost) {
     const char *cthdr = Curl_checkheaders(data, STRCONST("Content-Type"));
 
     /* Read and seek body only. */
-    http->sendit->flags |= MIME_BODY_ONLY;
+    data->state.mimepost->flags |= MIME_BODY_ONLY;
 
     /* Prepare the mime structure headers & set content type. */
 
     if(cthdr)
       for(cthdr += 13; *cthdr == ' '; cthdr++)
         ;
-    else if(http->sendit->kind == MIMEKIND_MULTIPART)
+    else if(data->state.mimepost->kind == MIMEKIND_MULTIPART)
       cthdr = "multipart/form-data";
 
-    curl_mime_headers(http->sendit, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(data, http->sendit, cthdr,
+    curl_mime_headers(data->state.mimepost, data->set.headers, 0);
+    result = Curl_mime_prepare_headers(data, data->state.mimepost, cthdr,
                                        NULL, MIMESTRATEGY_FORM);
-    curl_mime_headers(http->sendit, NULL, 0);
+    curl_mime_headers(data->state.mimepost, NULL, 0);
     if(!result)
-      result = Curl_mime_rewind(http->sendit);
+      result = Curl_mime_rewind(data->state.mimepost);
     if(result)
       return result;
-    http->postsize = Curl_mime_size(http->sendit);
+    http->postsize = Curl_mime_size(data->state.mimepost);
   }
 #endif
 
@@ -2571,7 +2575,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     {
       struct curl_slist *hdr;
 
-      for(hdr = http->sendit->curlheaders; hdr; hdr = hdr->next) {
+      for(hdr = data->state.mimepost->curlheaders; hdr; hdr = hdr->next) {
         result = Curl_dyn_addf(r, "%s\r\n", hdr->data);
         if(result)
           return result;
@@ -2606,7 +2610,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 
     /* Read from mime structure. */
     data->state.fread_func = (curl_read_callback) Curl_mime_read;
-    data->state.in = (void *) http->sendit;
+    data->state.in = (void *) data->state.mimepost;
     http->sending = HTTPSEND_BODY;
 
     /* this sends the buffer and frees all the buffer resources */

@@ -198,13 +198,8 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
  * HTTP unique setup
  ***************************************************************************/
 struct HTTP {
-  curl_mimepart *sendit;
   curl_off_t postsize; /* off_t to handle large file sizes */
   const char *postdata;
-
-  /* For FORM posting */
-  curl_mimepart form;
-
   struct back {
     curl_read_callback fread_func; /* backup storage for fread pointer */
     void *fread_in;           /* backup storage for fread_in pointer */

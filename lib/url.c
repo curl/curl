@@ -457,6 +457,11 @@ CURLcode Curl_close(struct Curl_easy **datap)
   }
 #endif
 
+  Curl_mime_cleanpart(data->state.formp);
+#ifndef CURL_DISABLE_HTTP
+  Curl_safefree(data->state.formp);
+#endif
+
   /* destruct wildcard structures if it is needed */
   Curl_wildcard_dtor(&data->wildcard);
   Curl_freeset(data);
