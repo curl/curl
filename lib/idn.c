@@ -70,9 +70,8 @@ WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
 
 static CURLcode win32_idn_to_ascii(const char *in, char **out)
 {
-  CURLcode result = CURLE_OK;
-
   wchar_t *in_w = curlx_convert_UTF8_to_wchar(in);
+  *out = NULL;
   if(in_w) {
     wchar_t punycode[IDN_MAX_LENGTH];
     int chars = IdnToAscii(0, in_w, (int)(wcslen(in_w) + 1), punycode,
