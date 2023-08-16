@@ -1815,10 +1815,8 @@ static CURLcode readrewind(struct Curl_easy *data)
      CURLOPT_HTTPPOST, call app to rewind
   */
   if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
-    struct HTTP *http = data->req.p.http;
-
-    if(http->sendit)
-      mimepart = http->sendit;
+    if(data->state.mimepost)
+      mimepart = data->state.mimepost;
   }
   if(data->set.postfields ||
      (data->state.httpreq == HTTPREQ_GET) ||

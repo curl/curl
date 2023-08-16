@@ -189,6 +189,9 @@ int test(char *URL)
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
+  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  test_setopt(curl, CURLOPT_POSTREDIR, (long)CURL_REDIR_POST_301);
+
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 

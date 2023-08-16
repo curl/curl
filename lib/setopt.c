@@ -669,11 +669,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifndef CURL_DISABLE_FORM_API
   case CURLOPT_HTTPPOST:
     /*
-     * Set to make us do HTTP POST
+     * Set to make us do HTTP POST. Legacy API-style.
      */
     data->set.httppost = va_arg(param, struct curl_httppost *);
     data->set.method = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
+    Curl_mime_cleanpart(data->state.formp);
+    Curl_safefree(data->state.formp);
     break;
 #endif
 

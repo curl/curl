@@ -10,14 +10,25 @@ FORM
 #
 # Server-side
 <reply>
-<data>
-HTTP/1.1 200 OK
+<data nocheck="yes">
+HTTP/1.1 301 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Connection: close
 Content-Type: text/html
+Location: /%TESTNUMBER0002
 
 hello
+</data>
+<data2 crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
 </data>
 </reply>
 
@@ -35,7 +46,7 @@ lib%TESTNUMBER
 </tool>
 
  <name>
-HTTP formpost using form API
+HTTP formpost using form API - with redirect and re-POST
  </name>
 <stdin>
  Some data from stdin
@@ -60,6 +71,90 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 # (5*12) == 60 bytes less
 <protocol>
 POST /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Transfer-Encoding: chunked
+Content-Type: multipart/form-data; boundary=----------------------------
+Expect: 100-continue
+
+361
+------------------------------
+Content-Disposition: form-data; name="fieldname"
+Content-Type: text/plain
+X-customheader-1: Header 1 data
+X-customheader-2: Header 2 data
+
+this is what we post to the silly web server
+------------------------------
+Content-Disposition: form-data; name="fieldnam"
+
+uhis is what we post to the silly web serve
+------------------------------
+Content-Disposition: form-data; name="multifile"
+Content-Type: multipart/mixed; boundary=----------------------------
+
+------------------------------
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
+Content-Type: application/octet-stream
+
+This is data from a file.
+
+------------------------------
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
+Content-Type: text/whatever
+
+
+%if hyper
+A5
+%else
+a5
+%endif
+This is data from a file.
+
+------------------------------
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
+Content-Type: text/whatever
+
+
+%if hyper
+AF
+%else
+af
+%endif
+This is data from a file.
+
+--------------------------------
+
+------------------------------
+Content-Disposition: form-data; name="filecontents"
+
+
+%if hyper
+10F
+%else
+10f
+%endif
+This is data from a file.
+
+------------------------------
+Content-Disposition: form-data; name="formlength"
+
+1367
+------------------------------
+Content-Disposition: form-data; name="standardinput"
+Content-Type: application/octet-stream
+
+
+16
+ Some data from stdin
+
+30
+
+--------------------------------
+
+0
+
+POST /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Transfer-Encoding: chunked
