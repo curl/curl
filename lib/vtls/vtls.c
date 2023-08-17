@@ -635,19 +635,16 @@ int Curl_ssl_get_select_socks(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct ssl_connect_data *connssl = cf->ctx;
   curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
 
-  if(sock != CURL_SOCKET_BAD) {
-    if(connssl->connecting_state == ssl_connect_2_writing) {
-      /* write mode */
-      socks[0] = sock;
-      return GETSOCK_WRITESOCK(0);
-    }
-    if(connssl->connecting_state == ssl_connect_2_reading) {
-      /* read mode */
-      socks[0] = sock;
-      return GETSOCK_READSOCK(0);
-    }
+  if(sock == CURL_SOCKET_BAD)
+    return GETSOCK_BLANK;
+
+  if(connssl->connecting_state == ssl_connect_2_writing) {
+    /* we are only interested in writing */
+    socks[0] = sock;
+    return GETSOCK_WRITESOCK(0);
   }
-  return GETSOCK_BLANK;
+  socks[0] = sock;
+  return GETSOCK_READSOCK(0);
 }
 
 /* Selects an SSL crypto engine
@@ -1512,6 +1509,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   }
 
   CF_DATA_SAVE(save, cf, data);
+  CURL_TRC_CF(data, cf, "cf_connect()");
   (void)connssl;
   DEBUGASSERT(data->conn);
   DEBUGASSERT(data->conn == cf->conn);
@@ -1541,6 +1539,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     DEBUGASSERT(connssl->state == ssl_connection_complete);
   }
 out:
+  CURL_TRC_CF(data, cf, "cf_connect() -> %d, done=%d", result, *done);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1601,12 +1600,17 @@ static int ssl_cf_get_select_socks(struct Curl_cfilter *cf,
                                    curl_socket_t *socks)
 {
   struct cf_call_data save;
-  int result;
+  int fds = GETSOCK_BLANK;
 
-  CF_DATA_SAVE(save, cf, data);
-  result = Curl_ssl->get_select_socks(cf, data, socks);
-  CF_DATA_RESTORE(cf, save);
-  return result;
+  if(!cf->next->connected) {
+    fds = cf->next->cft->get_select_socks(cf->next, data, socks);
+  }
+  else if(!cf->connected) {
+    CF_DATA_SAVE(save, cf, data);
+    fds = Curl_ssl->get_select_socks(cf, data, socks);
+    CF_DATA_RESTORE(cf, save);
+  }
+  return fds;
 }
 
 static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,

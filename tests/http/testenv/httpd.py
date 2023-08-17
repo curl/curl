@@ -48,6 +48,7 @@ class Httpd:
         'authz_user', 'authz_core', 'authz_host',
         'auth_basic', 'auth_digest',
         'env', 'filter', 'headers', 'mime',
+        'socache_shmcb',
         'rewrite', 'http2', 'ssl', 'proxy', 'proxy_http', 'proxy_connect',
         'mpm_event',
     ]
@@ -251,6 +252,7 @@ class Httpd:
                 f'Listen {self.env.proxy_port}',
                 f'Listen {self.env.proxys_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
+                f'SSLSessionCache "shmcb:ssl_gcache_data(32000)"',
             ]
             if 'base' in self._extra_configs:
                 conf.extend(self._extra_configs['base'])
