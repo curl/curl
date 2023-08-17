@@ -880,6 +880,9 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
   FILE *fp;
   unsigned char *buf = NULL, *pem_ptr = NULL;
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
+#endif
 
   /* if a path wasn't specified, don't pin */
   if(!pinnedpubkey)
