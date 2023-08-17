@@ -1814,10 +1814,12 @@ static CURLcode readrewind(struct Curl_easy *data)
   /* We have sent away data. If not using CURLOPT_POSTFIELDS or
      CURLOPT_HTTPPOST, call app to rewind
   */
+#ifndef CURL_DISABLE_HTTP
   if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
     if(data->state.mimepost)
       mimepart = data->state.mimepost;
   }
+#endif
   if(data->set.postfields ||
      (data->state.httpreq == HTTPREQ_GET) ||
      (data->state.httpreq == HTTPREQ_HEAD))
