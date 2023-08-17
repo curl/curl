@@ -987,6 +987,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(!result) {
       data->set.method = HTTPREQ_POST_MIME;
       data->set.opt_no_body = FALSE; /* this is implied */
+#ifndef CURL_DISABLE_FORM_API
+      Curl_mime_cleanpart(data->state.formp);
+      Curl_safefree(data->state.formp);
+#endif
     }
     break;
 
