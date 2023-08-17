@@ -1332,7 +1332,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   }
 
   data->state.prefer_ascii = data->set.prefer_ascii;
+#ifdef CURL_LIST_ONLY_PROTOCOL
   data->state.list_only = data->set.list_only;
+#endif
   data->state.httpreq = data->set.method;
   data->state.url = data->set.str[STRING_SET_URL];
 

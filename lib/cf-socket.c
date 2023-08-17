@@ -722,8 +722,6 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 static CURLcode socket_connect_result(struct Curl_easy *data,
                                       const char *ipaddress, int error)
 {
-  char buffer[STRERROR_LEN];
-
   switch(error) {
   case EINPROGRESS:
   case EWOULDBLOCK:
@@ -740,8 +738,15 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 
   default:
     /* unknown error, fallthrough and try another address! */
-    infof(data, "Immediate connect fail for %s: %s",
-          ipaddress, Curl_strerror(error, buffer, sizeof(buffer)));
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+    (void)ipaddress;
+#else
+    {
+      char buffer[STRERROR_LEN];
+      infof(data, "Immediate connect fail for %s: %s",
+            ipaddress, Curl_strerror(error, buffer, sizeof(buffer)));
+    }
+#endif
     data->state.os_errno = error;
     /* connect failed */
     return CURLE_COULDNT_CONNECT;
@@ -952,7 +957,6 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   bool isconnected = FALSE;
   CURLcode result = CURLE_COULDNT_CONNECT;
   bool is_tcp;
-  const char *ipmsg;
 
   (void)data;
   DEBUGASSERT(ctx->sock == CURL_SOCKET_BAD);
@@ -965,15 +969,20 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  {
+    const char *ipmsg;
 #ifdef ENABLE_IPV6
-  if(ctx->addr.family == AF_INET6) {
-    set_ipv6_v6only(ctx->sock, 0);
-    ipmsg = "  Trying [%s]:%d...";
-  }
-  else
+    if(ctx->addr.family == AF_INET6) {
+      set_ipv6_v6only(ctx->sock, 0);
+      ipmsg = "  Trying [%s]:%d...";
+    }
+    else
 #endif
-    ipmsg = "  Trying %s:%d...";
-  infof(data, ipmsg, ctx->r_ip, ctx->r_port);
+      ipmsg = "  Trying %s:%d...";
+    infof(data, ipmsg, ctx->r_ip, ctx->r_port);
+  }
+#endif
 
 #ifdef ENABLE_IPV6
   is_tcp = (ctx->addr.family == AF_INET
@@ -1917,4 +1926,3 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
   }
   return CURLE_FAILED_INIT;
 }
-

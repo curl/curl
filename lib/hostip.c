@@ -122,19 +122,6 @@
 static void freednsentry(void *freethis);
 
 /*
- * Return # of addresses in a Curl_addrinfo struct
- */
-static int num_addresses(const struct Curl_addrinfo *addr)
-{
-  int i = 0;
-  while(addr) {
-    addr = addr->ai_next;
-    i++;
-  }
-  return i;
-}
-
-/*
  * Curl_printable_address() stores a printable version of the 1st address
  * given in the 'ai' argument. The result will be stored in the buf that is
  * bufsize bytes big.
@@ -388,6 +375,19 @@ Curl_fetch_addr(struct Curl_easy *data,
 }
 
 #ifndef CURL_DISABLE_SHUFFLE_DNS
+/*
+ * Return # of addresses in a Curl_addrinfo struct
+ */
+static int num_addresses(const struct Curl_addrinfo *addr)
+{
+  int i = 0;
+  while(addr) {
+    addr = addr->ai_next;
+    i++;
+  }
+  return i;
+}
+
 UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                                     struct Curl_addrinfo **addr);
 /*
