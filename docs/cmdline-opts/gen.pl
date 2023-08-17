@@ -119,7 +119,7 @@ sub printdesc {
                 $d =~ s/\-\-$k([^a-z0-9-])/$l$1/g;
             }
         }
-        # quote "bare" minuses in the output
+        # quote minuses in the output
         $d =~ s/([^\\])-/$1\\-/g;
         # replace single quotes
         $d =~ s/\'/\\(aq/g;
@@ -319,8 +319,6 @@ sub single {
     close(F);
     my $opt;
 
-    # escape minus
-    $long =~ s/-/\\-/g;
     if(defined($short) && $long) {
         $opt = "-$short, --$long";
     }
@@ -336,8 +334,7 @@ sub single {
     }
 
     # quote "bare" minuses in opt
-    $opt =~ s/( |^)--/$1\\-\\-/g;
-    $opt =~ s/( |^)-/$1\\-/g;
+    $opt =~ s/-/\\-/g;
     if($standalone) {
         print ".TH curl 1 \"30 Nov 2016\" \"curl 7.52.0\" \"curl manual\"\n";
         print ".SH OPTION\n";
@@ -389,7 +386,7 @@ sub single {
         }
         push @extra,
             "\nProviding --$long multiple times has no extra effect.\n".
-            "Disable it again with --$rev.\n";
+            "Disable it again with \\-\\-$rev.\n";
     }
     elsif($multi eq "mutex") {
         push @extra,
@@ -455,7 +452,7 @@ sub single {
         print "\nExample$s:\n.nf\n";
         foreach my $e (@examples) {
             $e =~ s!\$URL!https://example.com!g;
-            $e =~ s/\-/\\-/g;
+            $e =~ s/-/\\-/g;
             $e =~ s/\'/\\(aq/g;
             print " curl $e\n";
         }
