@@ -2672,7 +2672,7 @@ sub displaylogcontent {
                     logmsg " $line\n";
                 }
                 $linecount++;
-                $truncate = $linecount > 1000;
+                $truncate = $linecount > 1200;
             }
         }
         close($single);
