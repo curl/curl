@@ -4,6 +4,10 @@
 
 Disable support for Alt-Svc: HTTP headers.
 
+## `CURL_DISABLE_BINDLOCAL`
+
+Disable support for binding the local end of connections.
+
 ## `CURL_DISABLE_COOKIES`
 
 Disable support for HTTP cookies.

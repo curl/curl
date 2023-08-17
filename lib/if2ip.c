@@ -92,6 +92,8 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 }
 #endif
 
+#ifndef CURL_DISABLE_BINDLOCAL
+
 #if defined(HAVE_GETIFADDRS)
 
 if2ip_result_t Curl_if2ip(int af,
@@ -254,3 +256,5 @@ if2ip_result_t Curl_if2ip(int af,
 }
 
 #endif
+
+#endif /* CURL_DISABLE_BINDLOCAL */

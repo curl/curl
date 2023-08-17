@@ -390,6 +390,7 @@ void Curl_sndbufset(curl_socket_t sockfd)
 }
 #endif
 
+#ifndef CURL_DISABLE_BINDLOCAL
 static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
                           curl_socket_t sockfd, int af, unsigned int scope)
 {
@@ -648,6 +649,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 
   return CURLE_INTERFACE_FAILED;
 }
+#endif
 
 /*
  * verifyconnect() returns TRUE if the connect really has happened.
@@ -1018,6 +1020,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
     }
   }
 
+#ifndef CURL_DISABLE_BINDLOCAL
   /* possibly bind the local end to an IP, interface or port */
   if(ctx->addr.family == AF_INET
 #ifdef ENABLE_IPV6
@@ -1035,6 +1038,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
       goto out;
     }
   }
+#endif
 
   /* set socket non-blocking */
   (void)curlx_nonblock(ctx->sock, TRUE);

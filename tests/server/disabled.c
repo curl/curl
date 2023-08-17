@@ -37,6 +37,9 @@
 #include <stdio.h>
 
 static const char *disabled[]={
+#ifdef CURL_DISABLE_BINDLOCAL
+  "bindlocal",
+#endif
 #ifdef CURL_DISABLE_COOKIES
   "cookies",
 #endif

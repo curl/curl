@@ -1886,6 +1886,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_DEVICE],
                             va_arg(param, char *));
     break;
+#ifndef CURL_DISABLE_BINDLOCAL
   case CURLOPT_LOCALPORT:
     /*
      * Set what local port to bind the socket to when performing an operation.
@@ -1904,6 +1905,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.localportrange = curlx_sltous(arg);
     break;
+#endif
   case CURLOPT_GSSAPI_DELEGATION:
     /*
      * GSS-API credential delegation bitmask
