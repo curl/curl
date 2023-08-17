@@ -459,7 +459,7 @@ struct Curl_multi *curl_multi_init(void)
                            CURL_DNS_HASH_SIZE);
 }
 
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 {
   if(!multi->warned) {
