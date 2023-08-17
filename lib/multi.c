@@ -1799,9 +1799,8 @@ static CURLcode protocol_connect(struct Curl_easy *data,
  */
 static CURLcode readrewind(struct Curl_easy *data)
 {
-  struct connectdata *conn = data->conn;
   curl_mimepart *mimepart = &data->set.mimepost;
-  DEBUGASSERT(conn);
+  DEBUGASSERT(data->conn);
 
   data->state.rewindbeforesend = FALSE; /* we rewind now */
 
@@ -1815,7 +1814,7 @@ static CURLcode readrewind(struct Curl_easy *data)
      CURLOPT_HTTPPOST, call app to rewind
   */
 #ifndef CURL_DISABLE_HTTP
-  if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
+  if(data->conn->handler->protocol & PROTO_FAMILY_HTTP) {
     if(data->state.mimepost)
       mimepart = data->state.mimepost;
   }
