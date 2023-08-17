@@ -681,7 +681,7 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
         isFetch = true;
       }
 
-      if(isFetch) {
+      if(isFetch && imap->custom_params) {
         /*
           if we have FETCH with range, we need a LIST state,
           otherwise FETCH state, e.g.
