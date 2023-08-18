@@ -100,13 +100,13 @@ fi
 #       Gather the list of symbols to export.
 #       First use awk to pull all CURL_EXTERN function prototypes from
 #       the header files, pass through to sed to strip CURL_DEPRECATED(..)
-#       then back to awk to pull the string immediately to the left of a
-#       bracket stripping any spaces or *'s.
+#       and CURL_TEMP_PRINTF(..) then back to awk to pull the string
+#       immediately to the left of a bracket stripping any spaces or *'s.
 
 EXPORTS=`awk '/^CURL_EXTERN/,/;/'                                       \
               "${TOPDIR}"/include/curl/*.h                              \
               "${SCRIPTDIR}/ccsidcurl.h"                                |
-         sed 's| CURL_DEPRECATED(.*)||g'                                |
+         sed 's/ CURL_DEPRECATED(.*)//g;s/ CURL_TEMP_PRINTF(.*)//g'     |
          awk '{br=index($0,"(");                                        \
               if (br) {                                                 \
                 for(c=br-1; ;c--) {                                     \
