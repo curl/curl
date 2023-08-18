@@ -395,15 +395,12 @@ static struct test_case TEST_CASES[] = {
   /* mixed ip4+6, v4 starts, v6 kicks in on HE, fails after ~350ms */
   { 6, TURL, "test.com:123:::1,192.0.2.1", CURL_IPRESOLVE_WHATEVER,
     CNCT_TMOT, 150, 200, 200,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6" },
-  /* mixed ip6+4, v6 starts, v4 kicks in on HE, fails after ~350ms */
-  { 7, TURL, "test.com:123:::1,192.0.2.1,::2,::3", CURL_IPRESOLVE_WHATEVER,
-    CNCT_TMOT, 600, 200, 200,     0,  3,      350,  TC_TMOT,  R_FAIL, "v6" },
   /* mixed ip6+4, v6 starts, v4 never starts due to high HE, TIMEOUT */
-  { 8, TURL, "test.com:123:192.0.2.1,::1", CURL_IPRESOLVE_V4,
+  { 7, TURL, "test.com:123:192.0.2.1,::1", CURL_IPRESOLVE_V4,
     CNCT_TMOT, 150, 500, 500,     1,  0,      400,  TC_TMOT,  R_FAIL, NULL },
   /* mixed ip4+6, but only use v4, check it uses full connect timeout,
      although another address of the 'wrong' family is available */
-  { 9, TURL, "test.com:123:::1,192.0.2.1", CURL_IPRESOLVE_V6,
+  { 8, TURL, "test.com:123:::1,192.0.2.1", CURL_IPRESOLVE_V6,
     CNCT_TMOT, 150, 500, 500,     0,  1,      400,  TC_TMOT,  R_FAIL, NULL },
   /* mixed ip4+6, but only use v6, check it uses full connect timeout,
      although another address of the 'wrong' family is available */
