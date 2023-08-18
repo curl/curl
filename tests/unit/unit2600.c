@@ -155,12 +155,13 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
   (void)blocking;
   *done = FALSE;
   duration_ms = Curl_timediff(Curl_now(), ctx->started);
-  if(duration_ms > ctx->fail_delay_ms) {
+  if(duration_ms >= ctx->fail_delay_ms) {
     infof(data, "%04dms: cf[%s] fail delay reached",
          (int)duration_ms, ctx->id);
     return CURLE_COULDNT_CONNECT;
   }
-  infof(data, "%04dms: cf[%s] continuing", (int)duration_ms, ctx->id);
+  if(duration_ms)
+    infof(data, "%04dms: cf[%s] continuing", (int)duration_ms, ctx->id);
   Curl_expire(data, ctx->fail_delay_ms - duration_ms, EXPIRE_RUN_NOW);
   return CURLE_OK;
 }
