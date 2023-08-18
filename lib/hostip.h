@@ -41,8 +41,8 @@
  */
 #define CURL_HOSTENT_SIZE 9000
 
-#define CURL_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
-                                    many seconds for a name resolve */
+#define CURL_TIMEOUT_RESOLVE 30 /* when using asynch methods, we allow this
+                                   many seconds for a name resolve */
 
 #define CURL_ASYNC_SUCCESS CURLE_OK
 

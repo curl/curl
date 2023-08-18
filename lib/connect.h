@@ -37,7 +37,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
                          struct curltime *nowp,
                          bool duringconnect);
 
-#define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
+#define DEFAULT_CONNECT_TIMEOUT 30000 /* milliseconds == 30 seconds */
 
 /*
  * Used to extract socket and connectdata struct for the most recent
