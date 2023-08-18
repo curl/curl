@@ -381,6 +381,11 @@ struct cf_he_ctx {
   struct curltime started;
 };
 
+/* when there are more than one IP address left to use, this macro returns how
+   much of the given timeout to spend on *this* attempt */
+#define TIMEOUT_LARGE 600
+#define USETIME(ms) ((ms > TIMEOUT_LARGE) ? (ms / 2) : ms)
+
 static CURLcode eyeballer_new(struct eyeballer **pballer,
                               cf_ip_connect_create *cf_create,
                               const struct Curl_addrinfo *addr,
@@ -408,7 +413,7 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
   baller->primary = primary;
   baller->delay_ms = delay_ms;
   baller->timeoutms = addr_next_match(baller->addr, baller->ai_family)?
-                        timeout_ms / 2 : timeout_ms;
+    USETIME(timeout_ms) : timeout_ms;
   baller->timeout_id = timeout_id;
   baller->result = CURLE_COULDNT_CONNECT;
 
@@ -501,7 +506,7 @@ static CURLcode baller_start(struct Curl_cfilter *cf,
   while(baller->addr) {
     baller->started = Curl_now();
     baller->timeoutms = addr_next_match(baller->addr, baller->ai_family) ?
-                         timeoutms / 2 : timeoutms;
+      USETIME(timeoutms) : timeoutms;
     baller_initiate(cf, data, baller);
     if(!baller->result)
       break;
