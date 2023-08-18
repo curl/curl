@@ -125,10 +125,10 @@ UNITTEST_START
   {BASE + 12, 0,     0, 0, FALSE, 0, "no timeout active"},
 
   /* no timeout set, connecting */
-  {BASE + 4, 0,      0, 0, TRUE, 296000, "no timeout active"},
-  {BASE + 4, 990000, 0, 0, TRUE, 295010, "no timeout active"},
-  {BASE + 10, 0,     0, 0, TRUE, 290000, "no timeout active"},
-  {BASE + 12, 0,     0, 0, TRUE, 288000, "no timeout active"},
+  {BASE + 4, 0,      0, 0, TRUE, 26000, "no timeout active"},
+  {BASE + 4, 990000, 0, 0, TRUE, 25010, "no timeout active"},
+  {BASE + 10, 0,     0, 0, TRUE, 20000, "no timeout active"},
+  {BASE + 12, 0,     0, 0, TRUE, 18000, "no timeout active"},
 
   /* both timeouts set, connecting, connect timeout the longer one */
   {BASE + 4, 0,      10000, 12000, TRUE, 6000, "6 seconds should be left"},
@@ -146,8 +146,11 @@ UNITTEST_START
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
     timeout =  Curl_timeleft(data, &now, run[i].connecting);
-    if(timeout != run[i].result)
+    if(timeout != run[i].result) {
+      fprintf(stderr, "Got %ld, expected %ld\n",
+              (long)timeout, (long)run[i].result);
       fail(run[i].comment);
+    }
   }
 }
 UNITTEST_STOP
