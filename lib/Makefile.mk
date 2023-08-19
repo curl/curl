@@ -118,7 +118,6 @@ endif
 ifdef WIN32
   ifneq ($(findstring -unicode,$(CFG)),)
     CPPFLAGS += -DUNICODE -D_UNICODE
-    RCFLAGS += -DUNICODE -D_UNICODE
     CURL_LDFLAGS_BIN += -municode
   endif
 endif
