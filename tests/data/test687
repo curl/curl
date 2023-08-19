@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+xattr
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: fake/data
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+debug
+xattr
+</features>
+# simulate the xattr operations
+<setenv>
+CURL_FAKE_XATTR=1
+</setenv>
+<name>
+basic --xattr with -o
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --xattr -o %LOGDIR/out%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout mode="text">
+user.mime_type => fake/data
+user.xdg.origin.url => http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</stdout>
+</verify>
+</testcase>
