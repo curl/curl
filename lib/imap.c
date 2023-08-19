@@ -695,7 +695,7 @@ static CURLcode imap_perform_list(struct Curl_easy *data)
         */
         const char *positionColon = strchr(imap->custom_params, ':');
         if(positionColon) {
-          const char *paren = strchr(custom_params, '(');
+          const char *paren = strchr(imap->custom_params, '(');
           if(!paren || paren > positionColon)
             isFetch = FALSE;
         }
