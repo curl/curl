@@ -428,6 +428,7 @@ Features testable here are:
 - `ipv6`
 - `Kerberos`
 - `large_file`
+- `large-time` (time_t is larger than 32 bit)
 - `ld_preload`
 - `libssh2`
 - `libssh`

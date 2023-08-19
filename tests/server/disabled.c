@@ -85,6 +85,9 @@ static const char *disabled[]={
 #ifdef CURL_DISABLE_FORM_API
   "form-api",
 #endif
+#if (SIZEOF_TIME_T < 5)
+  "large-time",
+#endif
   NULL
 };
 
