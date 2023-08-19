@@ -185,8 +185,9 @@ make_module()
         echo "#line 1" >> __tmpsrcf.c
         cat "${2}" >> __tmpsrcf.c
         CMD="CRTCMOD MODULE(${TARGETLIB}/${1}) SRCSTMF('__tmpsrcf.c')"
-#       CMD="${CMD} SYSIFCOPT(*IFS64IO) OPTION(*INCDIRFIRST *SHOWINC *SHOWSYS)"
-        CMD="${CMD} SYSIFCOPT(*IFS64IO) OPTION(*INCDIRFIRST)"
+        CMD="${CMD} SYSIFCOPT(*IFS64IO *ASYNCSIGNAL)"
+#       CMD="${CMD} OPTION(*INCDIRFIRST *SHOWINC *SHOWSYS)"
+        CMD="${CMD} OPTION(*INCDIRFIRST)"
         CMD="${CMD} LOCALETYPE(*LOCALE) FLAG(10)"
         CMD="${CMD} INCDIR('${QADRTDIR}/include'"
         CMD="${CMD} '${TOPDIR}/include/curl' '${TOPDIR}/include' '${SRCDIR}'"
@@ -265,6 +266,7 @@ versioned_copy()
 #       The `sed' statement works as follows:
 #       - Join \nl-separated lines.
 #       - Retain only lines that begins with "identifier =".
+#       - Replace @...@ sustitutions by shell variable references.
 #       - Turn these lines into shell variable assignments.
 
 get_make_vars()
@@ -277,6 +279,7 @@ get_make_vars()
                 -e 'b begin'                                            \
                 -e '}'                                                  \
                 -e '/^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=/!d'           \
+                -e 's/@\\([A-Za-z0-9_]*\\)@/${\\1}/g'                   \
                 -e 's/[[:space:]]*=[[:space:]]*/=/'                     \
                 -e 's/=\\(.*[^[:space:]]\\)[[:space:]]*$/=\\"\\1\\"/'   \
                 -e 's/\\\$(\\([^)]*\\))/\${\\1}/g'                      \
