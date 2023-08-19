@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+variables
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Variable output starting with null byte
+</name>
+<file name="%LOGDIR/junk">
+%hex[%00]hex%hello
+</file>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable what@%LOGDIR/junk --expand-data "{{what}}"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>

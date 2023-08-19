@@ -307,7 +307,7 @@ ParameterError varexpand(struct GlobalConfig *global,
             vlen = curlx_dyn_len(&buf);
           }
 
-          if(value && *value) {
+          if(value && vlen > 0) {
             /* A variable might contain null bytes. Such bytes cannot be shown
                using normal means, this is an error. */
             char *nb = memchr(value, '\0', vlen);
