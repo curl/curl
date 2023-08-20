@@ -431,12 +431,14 @@ ParameterError setvariable(struct GlobalConfig *global,
       file = stdin;
     else {
       file = fopen(line, "rb");
+      if(!file) {
+        errorf(global, "Failed to open %s", line);
+        return PARAM_READ_ERROR;
+      }
     }
-    if(file) {
-      err = file2memory(&content, &clen, file);
-      /* in case of out of memory, this should fail the entire operation */
-      contalloc = TRUE;
-    }
+    err = file2memory(&content, &clen, file);
+    /* in case of out of memory, this should fail the entire operation */
+    contalloc = TRUE;
     if(!use_stdin)
       fclose(file);
     if(err)
