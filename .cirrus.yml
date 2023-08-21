@@ -90,9 +90,7 @@ freebsd_task:
     # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
     # therefore the SFTP and SCP tests are disabled right away from the beginning.
     #
-    # PYTHON/RUST/CRYPTO FAIL
-    # disable test run
-    #- sudo -u nobody make V=1 TFLAGS="-n !SFTP !SCP" test-ci
+    - sudo -u nobody make V=1 TFLAGS="-n !SFTP !SCP" test-ci
   install_script:
     - make V=1 install
 
