@@ -61,7 +61,9 @@ freebsd_task:
     - pkg delete -y curl
     - python -m ensurepip --default-pip
     - python -m pip install --upgrade pip
-    - pip install "cryptography<3.2"
+    # - pip install "cryptography<3.2"
+    # try without version requirements
+    - pip install "cryptography"
     - pip install "pyOpenSSL<20.0"
     - pip install "impacket"
   configure_script:
