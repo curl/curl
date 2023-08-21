@@ -65,7 +65,7 @@ freebsd_task:
     # this currently fails with "error" in building rust crypto for python
     #- pip install "cryptography<3.2"
     #- pip install "pyOpenSSL<20.0"
-    - pip install "impacket"
+    #- pip install "impacket"
   configure_script:
     - autoreconf -fi
     # Building with the address sanitizer is causing unexplainable test issues due to timeouts
