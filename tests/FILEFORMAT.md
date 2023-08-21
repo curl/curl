@@ -332,6 +332,7 @@ about to issue.
 
 - `auth_required` if this is set and a POST/PUT is made without auth, the
   server will NOT wait for the full request body to get sent
+- `delay: [msecs]` - delay this amount after connection
 - `idle` - do nothing after receiving the request, just "sit idle"
 - `stream` - continuously send data to the client, never-ending
 - `writedelay: [msecs]` delay this amount between reply packets
