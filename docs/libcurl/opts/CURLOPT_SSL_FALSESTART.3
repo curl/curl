@@ -35,9 +35,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_FALSESTART, long enable);
 Pass a long as parameter set to 1L to enable or 0 to disable.
 
 This option determines whether libcurl should use false start during the TLS
-handshake. False start is a mode where a TLS client will start sending
-application data before verifying the server's Finished message, thus saving a
-round trip when performing a full handshake.
+handshake. False start is a mode where a TLS client starts sending application
+data before verifying the server's Finished message, thus saving a round trip
+when performing a full handshake.
 .SH DEFAULT
 0
 .SH PROTOCOLS

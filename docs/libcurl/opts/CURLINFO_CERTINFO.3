@@ -33,8 +33,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CERTINFO,
                            struct curl_certinfo **chainp);
 .fi
 .SH DESCRIPTION
-Pass a pointer to a \fIstruct curl_certinfo *\fP and it will be set to point to
-a struct that holds info about the server's certificate chain, assuming you had
+Pass a pointer to a \fIstruct curl_certinfo *\fP and it is set to point to a
+struct that holds info about the server's certificate chain, assuming you had
 \fICURLOPT_CERTINFO(3)\fP enabled when the request was made.
 
 .nf
@@ -45,11 +45,11 @@ struct curl_certinfo {
 .fi
 
 The \fIcertinfo\fP struct member is an array of linked lists of certificate
-information. The \fInum_of_certs\fP struct member is the number of certificates
-which is the number of elements in the array. Each certificate's list has items
-with textual information in the format "name:content" such as "Subject:Foo",
-"Issuer:Bar", etc. The items in each list will vary depending on the SSL
-backend and the certificate.
+information. The \fInum_of_certs\fP struct member is the number of
+certificates which is the number of elements in the array. Each certificate's
+list has items with textual information in the format "name:content" such as
+\&"Subject:Foo", "Issuer:Bar", etc. The items in each list varies depending on
+the SSL backend and the certificate.
 .SH PROTOCOLS
 All TLS-based
 .SH EXAMPLE

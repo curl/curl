@@ -32,9 +32,9 @@ CURLOPT_MAX_SEND_SPEED_LARGE \- rate limit data upload speed
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAX_SEND_SPEED_LARGE,
                           curl_off_t maxspeed);
 .SH DESCRIPTION
-Pass a curl_off_t as parameter with the \fImaxspeed\fP.  If an upload exceeds
-this speed (counted in bytes per second) the transfer will pause to keep the
-speed less than or equal to the parameter value.  Defaults to unlimited
+Pass a curl_off_t as parameter with the \fImaxspeed\fP. If an upload exceeds
+this speed (counted in bytes per second) the transfer pauses to keep the
+average speed less than or equal to the parameter value. Defaults to unlimited
 speed.
 
 This is not an exact science. libcurl attempts to keep the average speed below

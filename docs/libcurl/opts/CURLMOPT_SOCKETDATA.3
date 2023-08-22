@@ -34,8 +34,8 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_SOCKETDATA, void *pointer);
 A data \fIpointer\fP to pass to the socket callback set with the
 \fICURLMOPT_SOCKETFUNCTION(3)\fP option.
 
-This pointer will not be touched by libcurl but will only be passed in to the
-socket callbacks's \fBclientp\fP argument.
+This pointer is not touched by libcurl but is only passed in as the socket
+callbacks's \fBclientp\fP argument.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

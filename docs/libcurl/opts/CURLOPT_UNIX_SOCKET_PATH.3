@@ -32,14 +32,13 @@ CURLOPT_UNIX_SOCKET_PATH \- Unix domain socket
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UNIX_SOCKET_PATH, char *path);
 .fi
 .SH DESCRIPTION
-Enables the use of Unix domain sockets as connection endpoint and sets the path
-to \fIpath\fP. If \fIpath\fP is NULL, then Unix domain sockets are disabled. An
-empty string will result in an error at some point, it will not disable use of
-Unix domain sockets.
+Enables the use of Unix domain sockets as connection endpoint and sets the
+path to \fIpath\fP. If \fIpath\fP is NULL, then Unix domain sockets are
+disabled.
 
-When enabled, curl will connect to the Unix domain socket instead of
-establishing a TCP connection to a host. Since no TCP connection is created,
-curl does not need to resolve the DNS hostname in the URL.
+When enabled, curl connects to the Unix domain socket instead of establishing
+a TCP connection to the host. Since no network connection is created, curl
+does not resolve the DNS hostname in the URL.
 
 The maximum path length on Cygwin, Linux and Solaris is 107. On other platforms
 it might be even less.

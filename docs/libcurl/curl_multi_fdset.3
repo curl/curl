@@ -54,13 +54,13 @@ If the \fIexc_fd_set\fP argument is not a null pointer, it points to an object
 of type \fBfd_set\fP that on return specifies the file descriptors to be
 checked for error conditions pending.
 
-If no file descriptors are set by libcurl, \fImax_fd\fP will contain -1 when
-this function returns. Otherwise it will contain the highest descriptor number
-libcurl set. When libcurl returns -1 in \fImax_fd\fP, it is because libcurl
-currently does something that is not possible for your application to monitor
-with a socket and unfortunately you can then not know exactly when the current
-action is completed using select(). You then need to wait a while before you
-proceed and call \fIcurl_multi_perform(3)\fP anyway. How long to wait? Unless
+If no file descriptors are set by libcurl, \fImax_fd\fP contain -1 when this
+function returns. Otherwise it contains the highest descriptor number libcurl
+set. When libcurl returns -1 in \fImax_fd\fP, it is because libcurl currently
+does something that is not possible for your application to monitor with a
+socket and unfortunately you can then not know exactly when the current action
+is completed using select(). You then need to wait a while before you proceed
+and call \fIcurl_multi_perform(3)\fP anyway. How long to wait? Unless
 \fIcurl_multi_timeout(3)\fP gives you a lower number, we suggest 100
 milliseconds or so, but you may want to test it out in your own particular
 conditions to find a suitable value.
@@ -73,11 +73,11 @@ want.
 
 If one of the sockets used by libcurl happens to be larger than what can be
 set in an \fBfd_set\fP, which on POSIX systems means that the file descriptor
-is larger than \fBFD_SETSIZE\fP, then libcurl will try to not set it. Setting
-a too large file descriptor in an \fBfd_set\fP implies an out of bounds write
-which can cause crashes, or worse. The effect of NOT storing it will possibly
-save you from the crash, but will make your program NOT wait for sockets it
-should wait for...
+is larger than \fBFD_SETSIZE\fP, then libcurl tries to not set it. Setting a
+too large file descriptor in an \fBfd_set\fP implies an out of bounds write
+which can cause crashes, or worse. The effect of NOT storing it might possibly
+save you from the crash, but makes your program NOT wait for sockets it should
+wait for...
 .SH EXAMPLE
 .nf
  /* get file descriptors from the transfers */

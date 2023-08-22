@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * re-using handles to do HTTP persistent connections
+ * reusing handles to do HTTP persistent connections
  * </DESC>
  */
 #include <stdio.h>

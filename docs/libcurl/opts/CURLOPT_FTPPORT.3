@@ -33,19 +33,19 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTPPORT, char *spec);
 .fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter. It specifies that the
-FTP transfer will be made actively and the given string will be used to get
-the IP address to use for the FTP PORT instruction.
+FTP transfer should be made actively and the given string is used to get the
+IP address to use for the FTP PORT instruction.
 
-The PORT instruction tells the remote server to connect to our specified IP
-address. The string may be a plain IP address, a host name, a network
-interface name (under Unix) or just a '-' symbol to let the library use your
-system's default IP address. Default FTP operations are passive, and thus
-will not use PORT.
+The PORT instruction tells the remote server to do a TCP connect to our
+specified IP address. The string may be a plain IP address, a host name, a
+network interface name (under Unix) or just a '-' symbol to let the library
+use your system's default IP address. Default FTP operations are passive, and
+does not use the PORT command.
 
 The address can be followed by a ':' to specify a port, optionally followed by
 a '-' to specify a port range. If the port specified is 0, the operating
-system will pick a free port. If a range is provided and all ports in the
-range are not available, libcurl will report CURLE_FTP_PORT_FAILED for the
+system picks a free port. If a range is provided and all ports in the range
+are not available, libcurl reports CURLE_FTP_PORT_FAILED for the
 handle. Invalid port/range settings are ignored. IPv6 addresses followed by a
 port or port range have to be in brackets. IPv6 addresses without port/range
 specifier can be in brackets.
@@ -61,8 +61,11 @@ Examples with specified ports:
 
 We strongly advise against specifying the address with a name, as it causes
 libcurl to do a blocking name resolve call to retrieve the IP address. That
-name resolve operation will \fBnot\fP use DNS-over-HTTPS even if
+name resolve operation does \fBnot\fP use DNS-over-HTTPS even if
 \fICURLOPT_DOH_URL(3)\fP is set.
+
+Using anything else than "-" for this option should typically only be done if
+you have special knowledge and confirmation that it works.
 
 You disable PORT again and go back to using the passive version by setting
 this option to NULL.

@@ -32,10 +32,9 @@ CURLOPT_REFERER \- the HTTP referer header
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REFERER, char *where);
 .fi
 .SH DESCRIPTION
-Pass a pointer to a null-terminated string as parameter. It will be used to
-set the Referer: header in the http request sent to the remote server. This
-can be used to fool servers or scripts. You can also set any custom header
-with \fICURLOPT_HTTPHEADER(3)\fP.
+Pass a pointer to a null-terminated string as parameter. It is used to set the
+Referer: header field in the HTTP request sent to the remote server. You can
+set any custom header with \fICURLOPT_HTTPHEADER(3)\fP.
 
 The application does not have to keep the string around after setting this
 option.

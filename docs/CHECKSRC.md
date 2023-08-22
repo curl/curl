@@ -41,7 +41,7 @@ warnings are:
    more appropriate `char *name` style. The asterisk should sit right next to
    the name without a space in between.
 
-- `BADCOMMAND`: There's a bad `checksrc` instruction in the code. See the
+- `BADCOMMAND`: There is a bad `checksrc` instruction in the code. See the
    **Ignore certain warnings** section below for details.
 
 - `BANNEDFUNC`: A banned function was used. The functions sprintf, vsprintf,

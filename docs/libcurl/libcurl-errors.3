@@ -31,8 +31,8 @@ Why they occur and possibly what you can do to fix the problem are also included
 .SH "CURLcode"
 Almost all "easy" interface functions return a CURLcode error code. No matter
 what, using the \fIcurl_easy_setopt(3)\fP option \fICURLOPT_ERRORBUFFER(3)\fP
-is a good idea as it will give you a human readable error string that may
-offer more details about the cause of the error than just the error code.
+is a good idea as it gives you a human readable error string that may offer
+more details about the cause of the error than just the error code.
 \fIcurl_easy_strerror(3)\fP can be called to get an error string from a given
 CURLcode number.
 
@@ -228,7 +228,7 @@ Illegal TFTP operation.
 .IP "CURLE_TFTP_UNKNOWNID (72)"
 Unknown TFTP transfer ID.
 .IP "CURLE_REMOTE_FILE_EXISTS (73)"
-File already exists and will not be overwritten.
+File already exists and is not overwritten.
 .IP "CURLE_TFTP_NOSUCHUSER (74)"
 This error should never be returned by a properly functioning TFTP server.
 .IP "Obsolete error (75-76)"
@@ -252,8 +252,8 @@ Issuer check failed (Added in 7.19.0)
 .IP "CURLE_FTP_PRET_FAILED (84)"
 The FTP server does not understand the PRET command at all or does not support
 the given argument. Be careful when using \fICURLOPT_CUSTOMREQUEST(3)\fP, a
-custom LIST command will be sent with the PRET command before PASV as
-well. (Added in 7.20.0)
+custom LIST command is sent with the PRET command before PASV as well. (Added
+in 7.20.0)
 .IP "CURLE_RTSP_CSEQ_ERROR (85)"
 Mismatch of RTSP CSeq numbers.
 .IP "CURLE_RTSP_SESSION_ERROR (86)"
@@ -263,8 +263,8 @@ Unable to parse FTP file list (during FTP wildcard downloading).
 .IP "CURLE_CHUNK_FAILED (88)"
 Chunk callback reported error.
 .IP "CURLE_NO_CONNECTION_AVAILABLE (89)"
-(For internal use only, will never be returned by libcurl) No connection
-available, the session will be queued. (added in 7.30.0)
+(For internal use only, is never returned by libcurl) No connection available,
+the session is queued. (added in 7.30.0)
 .IP "CURLE_SSL_PINNEDPUBKEYNOTMATCH (90)"
 Failed to match the pinned key specified with \fICURLOPT_PINNEDPUBLICKEY(3)\fP.
 .IP "CURLE_SSL_INVALIDCERTSTATUS (91)"
@@ -289,8 +289,8 @@ SSL Client Certificate required.
 .IP "CURLE_UNRECOVERABLE_POLL (99)"
 An internal call to poll() or select() returned error that is not recoverable.
 .IP "CURLE_OBSOLETE*"
-These error codes will never be returned. They were used in an old libcurl
-version and are currently unused.
+These error codes are never returned. They were used in an old libcurl version
+and are currently unused.
 .SH "CURLMcode"
 This is the generic return code used by functions in the libcurl multi
 interface. Also consider \fIcurl_multi_strerror(3)\fP.
@@ -335,8 +335,8 @@ A multi handle callback returned error.
 .IP "CURLM_UNRECOVERABLE_POLL (12)"
 An internal call to poll() or select() returned error that is not recoverable.
 .SH "CURLSHcode"
-The "share" interface will return a \fBCURLSHcode\fP to indicate when an error
-has occurred. Also consider \fIcurl_share_strerror(3)\fP.
+The "share" interface returns a \fBCURLSHcode\fP to indicate when an error has
+occurred. Also consider \fIcurl_share_strerror(3)\fP.
 .IP "CURLSHE_OK (0)"
 All fine. Proceed as usual.
 .IP "CURLSHE_BAD_OPTION (1)"
@@ -352,7 +352,7 @@ Not enough memory was available.
 The requested sharing could not be done because the library you use do not have
 that particular feature enabled. (Added in 7.23.0)
 .SH "CURLUcode"
-The URL interface will return a \fICURLUcode\fP to indicate when an error has
+The URL interface returns a \fICURLUcode\fP to indicate when an error has
 occurred. Also consider \fIcurl_url_strerror(3)\fP.
 .IP "CURLUE_OK (0)"
 All fine. Proceed as usual.

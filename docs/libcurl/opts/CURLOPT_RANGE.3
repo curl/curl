@@ -37,8 +37,8 @@ to retrieve. It should be in the format "X-Y", where either X or Y may be left
 out and X and Y are byte indexes.
 
 HTTP transfers also support several intervals, separated with commas as in
-\fI"X-Y,N-M"\fP. Using this kind of multiple intervals will cause the HTTP
-server to send the response document in pieces (using standard MIME separation
+\fI"X-Y,N-M"\fP. Using this kind of multiple intervals causes the HTTP server
+to send the response document in pieces (using standard MIME separation
 techniques). Unfortunately, the HTTP standard (RFC 7233 section 3.1) allows
 servers to ignore range requests so even when you set \fICURLOPT_RANGE(3)\fP
 for a request, you may end up getting the full response sent back.

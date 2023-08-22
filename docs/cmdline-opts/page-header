@@ -51,9 +51,9 @@ in a sequential manner in the specified order unless you use --parallel. You
 can specify command line options and URLs mixed and in any order on the
 command line.
 
-curl attempts to re-use connections when doing multiple transfers, so that
+curl attempts to reuse connections when doing multiple transfers, so that
 getting many files from the same server do not use multiple connects and setup
-handshakes. This improves speed. Connection re-use can only be done for URLs
+handshakes. This improves speed. Connection reuse can only be done for URLs
 specified for a single command line invocation and cannot be performed between
 separate curl runs.
 

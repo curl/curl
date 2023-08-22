@@ -32,24 +32,25 @@ CURLOPT_COOKIEJAR \- file name to store cookies to
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEJAR, char *filename);
 .fi
 .SH DESCRIPTION
-Pass a \fIfilename\fP as char *, null-terminated. This will make libcurl write
+Pass a \fIfilename\fP as a char *, null-terminated. This makes libcurl write
 all internally known cookies to the specified file when
-\fIcurl_easy_cleanup(3)\fP is called. If no cookies are known, no file will be
-created. Specify "-" as filename to instead have the cookies written to
-stdout. Using this option also enables cookies for this session, so if you for
-example follow a location it will make matching cookies get sent accordingly.
+\fIcurl_easy_cleanup(3)\fP is called. If no cookies are kept in memory at that
+time, no file is created. Specify "-" as filename to instead have the cookies
+written to stdout. Using this option also enables cookies for this session, so
+if you for example follow a redirect it makes matching cookies get sent
+accordingly.
 
-Note that libcurl does not read any cookies from the cookie jar. If you want to
-read cookies from a file, use \fICURLOPT_COOKIEFILE(3)\fP.
+Note that libcurl does not read any cookies from the cookie jar specified with
+this option. To read cookies from a file, use \fICURLOPT_COOKIEFILE(3)\fP.
 
 If the cookie jar file cannot be created or written to (when the
-\fIcurl_easy_cleanup(3)\fP is called), libcurl will not and cannot report an
+\fIcurl_easy_cleanup(3)\fP is called), libcurl does not and cannot report an
 error for this. Using \fICURLOPT_VERBOSE(3)\fP or
-\fICURLOPT_DEBUGFUNCTION(3)\fP will get a warning to display, but that is the
-only visible feedback you get about this possibly lethal situation.
+\fICURLOPT_DEBUGFUNCTION(3)\fP displays a warning, but that is the only
+visible feedback you get about this possibly lethal situation.
 
-Since 7.43.0 cookies that were imported in the Set-Cookie format without a
-domain name are not exported by this option.
+Cookies are imported in the Set-Cookie format without a domain name are not
+exported by this option.
 
 The application does not have to keep the string around after setting this
 option.

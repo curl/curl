@@ -37,7 +37,7 @@ The share interface was added to enable sharing of data between curl
 .SH "ONE SET OF DATA - MANY TRANSFERS"
 You can have multiple easy handles share data between them. Have them update
 and use the \fBsame\fP cookie database, DNS cache, TLS session cache and/or
-connection cache! This way, each single transfer will take advantage from data
+connection cache! This way, each single transfer takes advantage from data
 updates made by the other transfer(s).
 .SH "SHARE OBJECT"
 You create a shared object with \fIcurl_share_init(3)\fP. It returns a handle

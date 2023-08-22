@@ -35,10 +35,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_VERBOSE, long onoff);
 Set the \fIonoff\fP parameter to 1 to make the library display a lot of
 verbose information about its operations on this \fIhandle\fP. Useful for
 libcurl and/or protocol debugging and understanding. The verbose information
-will be sent to stderr, or the stream set with \fICURLOPT_STDERR(3)\fP.
+is sent to stderr, or the stream set with \fICURLOPT_STDERR(3)\fP.
 
-You hardly ever want this set in production use, you will almost always want
-this when you debug/report problems.
+You hardly ever want this enabled in production use, you almost always want
+this used when you debug/report problems.
 
 To also get all the protocol data sent and received, consider using the
 \fICURLOPT_DEBUGFUNCTION(3)\fP.

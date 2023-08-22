@@ -37,8 +37,8 @@ Pass a long set to 1L to \fIenable\fP or 0 to disable.
 
 Adds a request for compressed Transfer Encoding in the outgoing HTTP
 request. If the server supports this and so desires, it can respond with the
-HTTP response sent using a compressed Transfer-Encoding that will be
-automatically uncompressed by libcurl on reception.
+HTTP response sent using a compressed Transfer-Encoding that is automatically
+uncompressed by libcurl on reception.
 
 Transfer-Encoding differs slightly from the Content-Encoding you ask for with
 \fICURLOPT_ACCEPT_ENCODING(3)\fP in that a Transfer-Encoding is strictly meant

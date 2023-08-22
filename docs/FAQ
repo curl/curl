@@ -1498,7 +1498,7 @@ FAQ
   unknown to me).
 
   After a transfer, you just set new options in the handle and make another
-  transfer. This will make libcurl re-use the same connection if it can.
+  transfer. This will make libcurl reuse the same connection if it can.
 
   7.4 Does PHP/CURL have dependencies?
 

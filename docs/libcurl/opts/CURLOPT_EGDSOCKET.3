@@ -35,7 +35,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_EGDSOCKET, char *path);
 Deprecated option. It serves no purpose anymore.
 
 Pass a char * to the null-terminated path name to the Entropy Gathering Daemon
-socket. It will be used to seed the random engine for TLS.
+socket. It is used to seed the random engine for TLS.
 
 The application does not have to keep the string around after setting this
 option.
@@ -54,8 +54,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-If built with TLS enabled. Only the OpenSSL backend will use this, and only
-with OpenSSL versions before 1.1.0.
+If built with TLS enabled. Only the OpenSSL backend uses this, and only with
+OpenSSL versions before 1.1.0.
 
 This option was deprecated in 7.84.0.
 .SH RETURN VALUE

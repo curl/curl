@@ -33,7 +33,7 @@ Dev notes:
 
 We open *input* files in :crlf translation (a no-op on many platforms) in
 case we have CRLF line endings in Windows but a perl that defaults to LF.
-Unfortunately it seems some perls like msysgit can't handle a global input-only
+Unfortunately it seems some perls like msysgit cannot handle a global input-only
 :crlf so it has to be specified on each file open for text input.
 
 =end comment
@@ -183,7 +183,7 @@ sub too_old {
 sub added {
     my ($standalone, $data)=@_;
     if(too_old($data)) {
-        # don't mention ancient additions
+        # do not mention ancient additions
         return "";
     }
     if($standalone) {

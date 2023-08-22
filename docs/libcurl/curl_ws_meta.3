@@ -69,12 +69,12 @@ complete.
 .SH FLAGS
 .IP CURLWS_TEXT
 The buffer contains text data. Note that this makes a difference to WebSocket
-but libcurl itself will not make any verification of the content or
+but libcurl itself does not make any verification of the content or
 precautions that you actually receive valid UTF-8 content.
 .IP CURLWS_BINARY
 This is binary data.
 .IP CURLWS_CONT
-This is not the final fragment of the message, it implies that there will be
+This is not the final fragment of the message, it implies that there is
 another fragment coming as part of the same message.
 .IP CURLWS_CLOSE
 This transfer is now closed.

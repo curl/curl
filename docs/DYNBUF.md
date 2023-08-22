@@ -27,7 +27,7 @@ void Curl_dyn_free(struct dynbuf *s);
 ```
 
 Free the associated memory and clean up. After a free, the `dynbuf` struct can
-be re-used to start appending new data to.
+be reused to start appending new data to.
 
 ## `Curl_dyn_addn`
 

@@ -685,7 +685,7 @@
 
 6.4 exit immediately upon connection if stdin is /dev/null
 
- If it did, curl could be used to probe if there's an server there listening
+ If it did, curl could be used to probe if there is an server there listening
  on a specific port. That is, the following command would exit immediately
  after the connection is established with exit code 0:
 
@@ -819,9 +819,9 @@
  request as well, when they should only be necessary once per SSL context (or
  once per handle)". The major improvement we can rather easily do is to make
  sure we do not create and kill a new SSL "context" for every request, but
- instead make one for every connection and re-use that SSL context in the same
- style connections are re-used. It will make us use slightly more memory but
- it will libcurl do less creations and deletions of SSL contexts.
+ instead make one for every connection and reuse that SSL context in the same
+ style connections are reused. It will make us use slightly more memory but it
+ will libcurl do less creations and deletions of SSL contexts.
 
  Technically, the "caching" is probably best implemented by getting added to
  the share interface so that easy handles who want to and can reuse the
@@ -841,7 +841,7 @@
 
  OpenSSL supports a callback for customised verification of the peer
  certificate, but this does not seem to be exposed in the libcurl APIs. Could
- it be? There's so much that could be done if it were.
+ it be? There is so much that could be done if it were.
 
 13.7 Less memory massaging with Schannel
 
@@ -1101,7 +1101,7 @@
 18.13 Ratelimit or wait between serial requests
 
  Consider a command line option that can make curl do multiple serial requests
- slow, potentially with a (random) wait between transfers. There's also a
+ slow, potentially with a (random) wait between transfers. There is also a
  proposed set of standard HTTP headers to let servers let the client adapt to
  its rate limits:
  https://www.ietf.org/id/draft-polli-ratelimit-headers-02.html
@@ -1139,7 +1139,7 @@
  URL, the file name is not extracted and used from the newly redirected-to URL
  even if the new URL may have a much more sensible file name.
 
- This is clearly documented and helps for security since there's no surprise
+ This is clearly documented and helps for security since there is no surprise
  to users which file name that might get overwritten. But maybe a new option
  could allow for this or maybe -J should imply such a treatment as well as -J
  already allows for the server to decide what file name to use so it already
@@ -1341,9 +1341,9 @@
 
 20.5 Add support for concurrent connections
 
- Tests 836, 882 and 938 were designed to verify that separate connections
- are not used when using different login credentials in protocols that
- should not re-use a connection under such circumstances.
+ Tests 836, 882 and 938 were designed to verify that separate connections are
+ not used when using different login credentials in protocols that should not
+ reuse a connection under such circumstances.
 
  Unfortunately, ftpserver.pl does not appear to support multiple concurrent
  connections. The read while() loop seems to loop until it receives a

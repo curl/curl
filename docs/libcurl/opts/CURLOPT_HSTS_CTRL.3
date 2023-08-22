@@ -37,9 +37,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTS_CTRL, long bitmask);
 .SH DESCRIPTION
 HSTS (HTTP Strict Transport Security) means that an HTTPS server can instruct
 the client to not contact it again over clear-text HTTP for a certain period
-into the future. libcurl will then automatically redirect HTTP attempts to
-such hosts to instead use HTTPS. This is done by libcurl retaining this
-knowledge in an in-memory cache.
+into the future. libcurl then automatically redirects HTTP attempts to such
+hosts to instead use HTTPS. This is done by libcurl retaining this knowledge
+in an in-memory cache.
 
 Populate the long \fIbitmask\fP with the correct set of features to instruct
 libcurl how to handle HSTS for the transfers using this handle.

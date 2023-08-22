@@ -37,9 +37,12 @@ object. This is the value read from the Content-Type: field. If you get NULL,
 it means that the server did not send a valid Content-Type header or that the
 protocol used does not support this.
 
-The \fBct\fP pointer will be NULL or pointing to private memory you MUST NOT
-free it - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the
+The \fBct\fP pointer is set to NULL or pointing to private memory. You MUST
+NOT free it - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the
 corresponding CURL handle.
+
+The modern way to get this header from a response is to instead use the
+\fIcurl_easy_header(3)\fP function.
 .SH PROTOCOLS
 HTTP(S)
 .SH EXAMPLE

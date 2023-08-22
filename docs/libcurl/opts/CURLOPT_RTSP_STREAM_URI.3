@@ -35,13 +35,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RTSP_STREAM_URI, char *URI);
 Set the stream \fIURI\fP to operate on by passing a char * . For example, a
 single session may be controlling \fIrtsp://foo/twister/audio\fP and
 \fIrtsp://foo/twister/video\fP and the application can switch to the
-appropriate stream using this option. If unset, libcurl will default to
-operating on generic server options by passing '*' in the place of the RTSP
-Stream URI. This option is distinct from \fICURLOPT_URL(3)\fP. When working
-with RTSP, the \fICURLOPT_RTSP_STREAM_URI(3)\fP indicates what URL to send to
-the server in the request header while the \fICURLOPT_URL(3)\fP indicates
-where to make the connection to.  (e.g. the \fICURLOPT_URL(3)\fP for the above
-examples might be set to \fIrtsp://foo/twister\fP
+appropriate stream using this option. If unset, libcurl defaults to operating
+on generic server options by passing '*' in the place of the RTSP Stream
+URI. This option is distinct from \fICURLOPT_URL(3)\fP. When working with
+RTSP, the \fICURLOPT_RTSP_STREAM_URI(3)\fP indicates what URL to send to the
+server in the request header while the \fICURLOPT_URL(3)\fP indicates where to
+make the connection to.  (e.g. the \fICURLOPT_URL(3)\fP for the above examples
+might be set to \fIrtsp://foo/twister\fP
 
 The application does not have to keep the string around after setting this
 option.

@@ -34,11 +34,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYAUTH, long bitmask);
 .SH DESCRIPTION
 Pass a long as parameter, which is set to a bitmask, to tell libcurl which
 HTTP authentication method(s) you want it to use for your proxy
-authentication.  If more than one bit is set, libcurl will first query the
-site to see what authentication methods it supports and then pick the best one
-you allow it to use. For some methods, this will induce an extra network
-round-trip. Set the actual name and password with the
-\fICURLOPT_PROXYUSERPWD(3)\fP option.
+authentication. If more than one bit is set, libcurl first queries the site to
+see what authentication methods it supports and then it picks the best one you
+allow it to use. For some methods, this induces an extra network round-trip.
+Set the actual name and password with the \fICURLOPT_PROXYUSERPWD(3)\fP
+option.
 
 The bitmask can be constructed by the bits listed and described in the
 \fICURLOPT_HTTPAUTH(3)\fP man page.

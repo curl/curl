@@ -34,9 +34,9 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_REFERER, char **hdrp);
 .SH DESCRIPTION
 Pass in a pointer to a char pointer and get the referrer header.
 
-The \fBhdrp\fP pointer will be NULL or pointing to private memory you MUST NOT
-free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the
-corresponding CURL handle.
+The \fBhdrp\fP pointer is NULL or points to private memory you MUST NOT free -
+it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the corresponding
+CURL handle.
 .SH PROTOCOLS
 HTTP(S)
 .SH EXAMPLE

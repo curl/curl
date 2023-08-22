@@ -34,8 +34,8 @@ void curl_slist_free_all(struct curl_slist *list);
 curl_slist_free_all() removes all traces of a previously built curl_slist
 linked list.
 
-Passing in a NULL pointer in \fIlist\fP will make this function return
-immediately with no action.
+Passing in a NULL pointer in \fIlist\fP makes this function return immediately
+with no action.
 .SH EXAMPLE
 .nf
 CURL *handle;

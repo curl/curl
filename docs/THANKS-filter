@@ -26,7 +26,7 @@
 # appropriately in THANKS. This list contains variations of their names and
 # their "canonical" name. This file is used for scripting purposes to avoid
 # duplicate entries and will not be included in release tarballs.
-# When removing dupes that aren't identical names from THANKS, add a line
+# When removing dupes that are not identical names from THANKS, add a line
 # here!
 #
 # Used-by: contributors.sh

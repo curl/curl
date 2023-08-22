@@ -37,15 +37,15 @@ code returned is equal to or larger than 400. The default action would be to
 return the page normally, ignoring that code.
 
 This method is not fail-safe and there are occasions where non-successful
-response codes will slip through, especially when authentication is involved
+response codes slip through, especially when authentication is involved
 (response codes 401 and 407).
 
 You might get some amounts of headers transferred before this situation is
 detected, like when a "100-continue" is received as a response to a POST/PUT
 and a 401 or 407 is received immediately afterwards.
 
-When this option is used and an error is detected, it will cause the
-connection to get closed and \fICURLE_HTTP_RETURNED_ERROR\fP is returned.
+When this option is used and an error is detected, it causes the connection to
+get closed and \fICURLE_HTTP_RETURNED_ERROR\fP is returned.
 .SH DEFAULT
 0, do not fail on error
 .SH PROTOCOLS

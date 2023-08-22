@@ -38,9 +38,9 @@ most recent RTSP Session ID.
 Applications wishing to resume an RTSP session on another connection should
 retrieve this info before closing the active connection.
 
-The \fBid\fP pointer will be NULL or pointing to private memory you MUST NOT
-free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the
-corresponding CURL handle.
+The \fBid\fP pointer is NULL or points to private memory. You MUST NOT free -
+it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the corresponding
+CURL handle.
 .SH PROTOCOLS
 RTSP
 .SH EXAMPLE

@@ -58,14 +58,13 @@ in all frames except the final one.
 .SH FLAGS
 .IP CURLWS_TEXT
 The buffer contains text data. Note that this makes a difference to WebSocket
-but libcurl itself will not make any verification of the content or
+but libcurl itself does not make any verification of the content or
 precautions that you actually send valid UTF-8 content.
 .IP CURLWS_BINARY
 This is binary data.
 .IP CURLWS_CONT
-This is not the final fragment of the message, which implies that there will
-be another fragment coming as part of the same message where this bit is not
-set.
+This is not the final fragment of the message, which implies that there is
+another fragment coming as part of the same message where this bit is not set.
 .IP CURLWS_CLOSE
 Close this transfer.
 .IP CURLWS_PING
@@ -73,7 +72,7 @@ This is a ping.
 .IP CURLWS_PONG
 This is a pong.
 .IP CURLWS_OFFSET
-The provided data is only a partial fragment and there will be more in a
+The provided data is only a partial fragment and there is more coming in a
 following call to \fIcurl_ws_send()\fP. When sending only a piece of the
 fragment like this, the \fIfragsize\fP must be provided with the total
 expected fragment size in the first call and it needs to be zero in subsequent

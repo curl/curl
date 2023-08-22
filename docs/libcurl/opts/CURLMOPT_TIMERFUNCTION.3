@@ -49,14 +49,13 @@ fires, call either \fIcurl_multi_socket_action(3)\fP or
 A \fBtimeout_ms\fP value of -1 passed to this callback means you should delete
 the timer. All other values are valid expire times in number of milliseconds.
 
-The \fBtimer_callback\fP will only be called when the timeout expire time is
-changed.
+The \fBtimer_callback\fP is called when the timeout expire time is changed.
 
 The \fBclientp\fP pointer is set with \fICURLMOPT_TIMERDATA(3)\fP.
 
 The timer callback should return 0 on success, and -1 on error. If this
 callback returns error, \fBall\fP transfers currently in progress in this
-multi handle will be aborted and fail.
+multi handle are aborted and made to fail.
 
 This callback can be used instead of, or in addition to,
 \fIcurl_multi_timeout(3)\fP.

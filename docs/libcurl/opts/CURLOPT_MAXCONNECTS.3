@@ -32,12 +32,11 @@ CURLOPT_MAXCONNECTS \- maximum connection cache size
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXCONNECTS, long amount);
 .fi
 .SH DESCRIPTION
-Pass a long. The set \fIamount\fP will be the maximum number of simultaneously
-open persistent connections that libcurl may cache in the pool associated with
-this handle. The default is 5, and there is not much point in changing this
-value unless you are perfectly aware of how this works and changes libcurl's
-behavior. This concerns connections using any of the protocols that support
-persistent connections.
+Pass a long. The set \fIamount\fP is the maximum number of simultaneously open
+persistent connections that libcurl may cache in the pool associated with this
+handle. The default is 5, and there is not much point in changing this value
+unless you are perfectly aware of how this works. This concerns connections
+using any of the protocols that support persistent connections.
 
 When reaching the maximum limit, curl closes the oldest one in the cache to
 prevent increasing the number of open connections.

@@ -51,8 +51,7 @@ A pointer to a null-terminated string or NULL if it failed to find the
 specified name.
 .SH NOTE
 Under unix operating systems, there is no point in returning an allocated
-memory, although other systems will not work properly if this is not done. The
-unix implementation thus has to suffer slightly from the drawbacks of other
-systems.
+memory, although other systems does not work properly if this is not done. The
+unix implementation thus suffers slightly from the drawbacks of other systems.
 .SH "SEE ALSO"
 .BR getenv "(3C), "

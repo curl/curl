@@ -34,19 +34,19 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SHARE, CURLSH *share);
 .SH DESCRIPTION
 Pass a \fIshare\fP handle as a parameter. The share handle must have been
 created by a previous call to \fIcurl_share_init(3)\fP. Setting this option,
-will make this curl handle use the data from the shared handle instead of
-keeping the data to itself. This enables several curl handles to share
-data. If the curl handles are used simultaneously in multiple threads, you
-\fBMUST\fP use the locking methods in the share handle. See
-\fIcurl_share_setopt(3)\fP for details.
+makes this curl handle use the data from the shared handle instead of keeping
+the data to itself. This enables several curl handles to share data. If the
+curl handles are used simultaneously in multiple threads, you \fBMUST\fP use
+the locking methods in the share handle. See \fIcurl_share_setopt(3)\fP for
+details.
 
-If you add a share that is set to share cookies, your easy handle will use
-that cookie cache and get the cookie engine enabled. If you stop sharing an
-object that was using cookies (or change to another object that does not share
-cookies), the easy handle will get its cookie engine disabled.
+If you add a share that is set to share cookies, your easy handle uses that
+cookie cache and get the cookie engine enabled. If you stop sharing an object
+that was using cookies (or change to another object that does not share
+cookies), the easy handle gets its cookie engine disabled.
 
-Data that the share object is not set to share will be dealt with the usual
-way, as if no share was used.
+Data that the share object is not set to share is dealt with the usual way, as
+if no share was used.
 
 Set this option to NULL again to stop using that share object.
 .SH DEFAULT

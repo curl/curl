@@ -36,20 +36,20 @@ CURLMcode curl_multi_poll(CURLM *multi_handle,
 .ad
 .SH DESCRIPTION
 \fIcurl_multi_poll(3)\fP polls all file descriptors used by the curl easy
-handles contained in the given multi handle set. It will block until activity
-is detected on at least one of the handles or \fItimeout_ms\fP has passed.
+handles contained in the given multi handle set. It blocks until activity is
+detected on at least one of the handles or \fItimeout_ms\fP has passed.
 Alternatively, if the multi handle has a pending internal timeout that has a
-shorter expiry time than \fItimeout_ms\fP, that shorter time will be used
-instead to make sure timeout accuracy is reasonably kept.
+shorter expiry time than \fItimeout_ms\fP, that shorter time is used instead
+to make sure timeout accuracy is reasonably kept.
 
 The calling application may pass additional curl_waitfd structures which are
 similar to \fIpoll(2)\fP's \fIpollfd\fP structure to be waited on in the same
 call.
 
-On completion, if \fInumfds\fP is non-NULL, it will be populated with the
-total number of file descriptors on which interesting events occurred. This
-number can include both libcurl internal descriptors as well as descriptors
-provided in \fIextra_fds\fP.
+On completion, if \fInumfds\fP is non-NULL, it gets populated with the total
+number of file descriptors on which interesting events occurred. This number
+can include both libcurl internal descriptors as well as descriptors provided
+in \fIextra_fds\fP.
 
 The \fIcurl_multi_wakeup(3)\fP function can be used from another thread to
 wake up this function and return faster. This is one of the details
@@ -57,10 +57,9 @@ that makes this function different than \fIcurl_multi_wait(3)\fP which cannot
 be woken up this way.
 
 If no extra file descriptors are provided and libcurl has no file descriptor
-to offer to wait for, this function will instead wait during \fItimeout_ms\fP
-milliseconds (or shorter if an internal timer indicates so). This is the
-other detail that makes this function different than
-\fIcurl_multi_wait(3)\fP.
+to offer to wait for, this function instead waits during \fItimeout_ms\fP
+milliseconds (or shorter if an internal timer indicates so). This is the other
+detail that makes this function different than \fIcurl_multi_wait(3)\fP.
 
 This function is encouraged to be used instead of select(3) when using the
 multi interface to allow applications to easier circumvent the common problem

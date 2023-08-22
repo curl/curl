@@ -36,12 +36,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_USE_GLOBAL_CACHE,
 Has no function since 7.62.0. Do not use!
 
 Pass a long. If the \fIenable\fP value is 1, it tells curl to use a global DNS
-cache that will survive between easy handle creations and deletions. This is
-not thread-safe and this will use a global variable.
+cache that survives between easy handle creations and deletions. This is not
+thread-safe and this uses a global variable.
 
-\fBWARNING:\fP this option is considered obsolete. Stop using it. Switch over
-to using the share interface instead! See \fICURLOPT_SHARE(3)\fP and
-\fIcurl_share_init(3)\fP.
+See \fICURLOPT_SHARE(3)\fP and \fIcurl_share_init(3)\fP for the correct way to
+share DNS cache between transfers.
 .SH DEFAULT
 0
 .SH PROTOCOLS

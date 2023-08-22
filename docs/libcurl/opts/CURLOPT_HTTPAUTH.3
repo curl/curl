@@ -34,9 +34,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPAUTH, long bitmask);
 Pass a long as parameter, which is set to a bitmask, to tell libcurl which
 authentication method(s) you want it to use speaking to the remote server.
 
-The available bits are listed below. If more than one bit is set, libcurl will
-first query the site to see which authentication methods it supports and then
-pick the best one you allow it to use. For some methods, this will induce an
+The available bits are listed below. If more than one bit is set, libcurl
+first queries the host to see which authentication methods it supports and
+then picks the best one you allow it to use. For some methods, this induces an
 extra network round-trip. Set the actual name and password with the
 \fICURLOPT_USERPWD(3)\fP option or with the \fICURLOPT_USERNAME(3)\fP and the
 \fICURLOPT_PASSWORD(3)\fP options.
@@ -56,7 +56,7 @@ regular old-fashioned Basic method.
 HTTP Digest authentication with an IE flavor.  Digest authentication is
 defined in RFC 2617 and is a more secure way to do authentication over public
 networks than the regular old-fashioned Basic method. The IE flavor is simply
-that libcurl will use a special "quirk" that IE is known to have used before
+that libcurl uses a special "quirk" that IE is known to have used before
 version 7 and that some servers require the client to use.
 .IP CURLAUTH_BEARER
 HTTP Bearer token authentication, used primarily in OAuth 2.0 protocol.
@@ -80,9 +80,9 @@ NTLM delegating to winbind helper. Authentication is performed by a separate
 binary application that is executed when needed. The name of the application
 is specified at compile time but is typically \fB/usr/bin/ntlm_auth\fP.
 
-Note that libcurl will fork when necessary to run the winbind application and
-kill it when complete, calling \fBwaitpid()\fP to await its exit when done. On
-POSIX operating systems, killing the process will cause a SIGCHLD signal to be
+Note that libcurl forks when necessary to run the winbind application and kill
+it when complete, calling \fBwaitpid()\fP to await its exit when done. On
+POSIX operating systems, killing the process causes a SIGCHLD signal to be
 raised (regardless of whether \fICURLOPT_NOSIGNAL(3)\fP is set), which must be
 handled intelligently by the application. In particular, the application must
 not unconditionally call wait() in its SIGCHLD signal handler to avoid being
@@ -90,12 +90,11 @@ subject to a race condition.  This behavior is subject to change in future
 versions of libcurl.
 .IP CURLAUTH_ANY
 This is a convenience macro that sets all bits and thus makes libcurl pick any
-it finds suitable. libcurl will automatically select the one it finds most
-secure.
+it finds suitable. libcurl automatically selects the one it finds most secure.
 .IP CURLAUTH_ANYSAFE
 This is a convenience macro that sets all bits except Basic and thus makes
-libcurl pick any it finds suitable. libcurl will automatically select the one
-it finds most secure.
+libcurl pick any it finds suitable. libcurl automatically selects the one it
+finds most secure.
 .IP CURLAUTH_ONLY
 This is a meta symbol. OR this value together with a single specific auth
 value to force libcurl to probe for unrestricted auth and if not, only that

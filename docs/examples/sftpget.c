@@ -77,7 +77,7 @@ int main(void)
      */
     curl_easy_setopt(curl, CURLOPT_URL,
                      "sftp://user@server/home/user/file.txt");
-    /* Define our callback to get called when there's data to be written */
+    /* Define our callback to get called when there is data to be written */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
     /* Set a pointer to our struct to pass to the callback */
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ftpfile);

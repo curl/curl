@@ -36,17 +36,16 @@ Pass a long that is a bitmask of options of how to deal with headers. The two
 mutually exclusive options are:
 
 \fBCURLHEADER_UNIFIED\fP - the headers specified in
-\fICURLOPT_HTTPHEADER(3)\fP will be used in requests both to servers and
-proxies. With this option enabled, \fICURLOPT_PROXYHEADER(3)\fP will not have
+\fICURLOPT_HTTPHEADER(3)\fP are used in requests both to servers and
+proxies. With this option enabled, \fICURLOPT_PROXYHEADER(3)\fP does not have
 any effect.
 
 \fBCURLHEADER_SEPARATE\fP - makes \fICURLOPT_HTTPHEADER(3)\fP headers only get
 sent to a server and not to a proxy. Proxy headers must be set with
 \fICURLOPT_PROXYHEADER(3)\fP to get used. Note that if a non-CONNECT request
-is sent to a proxy, libcurl will send both server headers and proxy
-headers. When doing CONNECT, libcurl will send \fICURLOPT_PROXYHEADER(3)\fP
-headers only to the proxy and then \fICURLOPT_HTTPHEADER(3)\fP headers only to
-the server.
+is sent to a proxy, libcurl sends both server headers and proxy headers. When
+doing CONNECT, libcurl sends \fICURLOPT_PROXYHEADER(3)\fP headers only to the
+proxy and then \fICURLOPT_HTTPHEADER(3)\fP headers only to the server.
 .SH DEFAULT
 CURLHEADER_SEPARATE (changed in 7.42.1, used CURLHEADER_UNIFIED before then)
 .SH PROTOCOLS

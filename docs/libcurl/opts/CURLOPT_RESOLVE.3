@@ -44,24 +44,24 @@ Each resolve rule to add should be written using the format
  [+]HOST:PORT:ADDRESS[,ADDRESS]
 .fi
 
-\&... where HOST is the name libcurl will try to resolve, PORT is the port
-number of the service where libcurl wants to connect to the HOST and ADDRESS
-is one or more numerical IP addresses. If you specify multiple IP addresses
-they need to be separated by comma. If libcurl is built to support IPv6, each
-of the ADDRESS entries can of course be either IPv4 or IPv6 style addressing.
+HOST is the name libcurl wants to resolve, PORT is the port number of the
+service where libcurl wants to connect to the HOST and ADDRESS is one or more
+numerical IP addresses. If you specify multiple IP addresses they need to be
+separated by comma. If libcurl is built to support IPv6, each of the ADDRESS
+entries can of course be either IPv4 or IPv6 style addressing.
 
-This option effectively pre-populates the DNS cache with entries for the
-host+port pair so redirects and everything that operations against the
-HOST+PORT will instead use your provided ADDRESS.
+This option effectively populates the DNS cache with entries for the host+port
+pair so redirects and everything that operations against the HOST+PORT instead
+use your provided ADDRESS.
 
 The optional leading "+" specifies that the new entry should time-out. Entries
-added without the leading plus character will never time-out whereas entries
-added with "+HOST:..." will time-out just like ordinary DNS cache entries.
+added without the leading plus character never times out whereas entries added
+with "+HOST:..." times out just like ordinary DNS cache entries.
 
 If the DNS cache already has an entry for the given host+port pair, the new
-entry will override the former one.
+entry overrides the former one.
 
-An ADDRESS provided by this option will only be used if not restricted by the
+An ADDRESS provided by this option is only used if not restricted by the
 setting of \fICURLOPT_IPRESOLVE(3)\fP to a different IP version.
 
 To remove names from the DNS cache again, to stop providing these fake

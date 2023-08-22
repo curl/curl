@@ -38,12 +38,11 @@ seconds, since the creation of the connection, that you allow an existing
 connection to have to be considered for reuse for this request.
 
 libcurl features a connection cache that holds previously used connections.
-When a new request is to be done, it will consider any connection that matches
-for reuse. The \fICURLOPT_MAXLIFETIME_CONN(3)\fP limit prevents libcurl from
-trying too old connections for reuse. This can be used for client-side load
-balancing. If a connection is found in the cache that is older than this set
-\fImaxlifetime\fP, it will instead be closed once any in-progress transfers
-complete.
+When a new request is to be done, libcurl considers any connection that
+matches for reuse. The \fICURLOPT_MAXLIFETIME_CONN(3)\fP limit prevents
+libcurl from trying too old connections for reuse. This can be used for
+client-side load balancing. If a connection is found in the cache that is
+older than this set \fImaxlifetime\fP, it is instead marked for closure.
 
 If set to 0, this behavior is disabled: all connections are eligible for reuse.
 .SH DEFAULT

@@ -32,15 +32,16 @@ CURLOPT_COOKIESESSION \- start a new cookie session
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIESESSION, long init);
 .fi
 .SH DESCRIPTION
-Pass a long set to 1 to mark this as a new cookie "session". It will force
-libcurl to ignore all cookies it is about to load that are "session cookies"
-from the previous session. By default, libcurl always stores and loads all
-cookies, independent if they are session cookies or not. Session cookies are
-cookies without expiry date and they are meant to be alive and existing for
-this "session" only.
+Pass a long set to 1 to mark this as a new cookie "session". It forces libcurl
+to ignore all cookies it is about to load that are "session cookies" from the
+previous session. By default, libcurl always loads all cookies, independent if
+they are session cookies or not. Session cookies are cookies without expiry
+date and they are meant to be alive and existing for this "session" only.
 
 A "session" is usually defined in browser land for as long as you have your
-browser up, more or less.
+browser up, more or less. libcurl needs the application to use this option to
+tell it when a new session starts, otherwise it assumes everything is still in
+the same session.
 .SH DEFAULT
 0
 .SH PROTOCOLS

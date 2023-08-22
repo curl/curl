@@ -49,7 +49,7 @@ the three ones above are all 'no'.
  - Is there a (decent) workaround?
  - Is it a regression? Is the bug introduced in this release?
  - Can the bug be fixed "easily" by applying a patch?
- - Does the bug break the build? Most users don't build curl themselves.
+ - Does the bug break the build? Most users do not build curl themselves.
  - How long is it until the already scheduled next release?
  - Can affected users safely rather revert to a former release until the next
    scheduled release?

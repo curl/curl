@@ -33,15 +33,14 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPROXY_CLIENT_IP,
                           char *client_ip);
 .fi
 .SH DESCRIPTION
-When this parameter is set to a valid IPv4 or IPv6, the library will
-not send this address in the HAProxy PROXY protocol
-v1 header at beginning of the connection.
+When this parameter is set to a valid IPv4 or IPv6 numerical address, the
+library sends this address as client address in the HAProxy PROXY protocol v1
+header at beginning of the connection.
 
-This option is primarily useful when sending test requests to verify that
-a service is working as intended.
-
+This option is an alternative to \fICURLOPT_HAPROXYPROTOCOL(3)\fP as that one
+cannot use a specified address.
 .SH DEFAULT
-no HAProxy header will be sent
+NULL, no HAProxy header is sent
 .SH PROTOCOLS
 HTTP, HAProxy PROTOCOL
 .SH EXAMPLE

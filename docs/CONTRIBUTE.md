@@ -206,11 +206,11 @@ A short guide to how to write git commit messages in the curl project.
     [Bug: URL to the source of the report or more related discussion; use Fixes
         for GitHub issues instead when that is appropriate]
     [Approved-by: John Doe - credit someone who approved the PR; if you are
-        committing this for someone else using --author=... you don't need this
+        committing this for someone else using --author=... you do not need this
         as you are implicitly approving it by committing]
     [Authored-by: John Doe - credit the original author of the code; only use
-        this if you can't use "git commit --author=..."]
-    [Signed-off-by: John Doe - we don't use this, but don't bother removing it]
+        this if you cannot use "git commit --author=..."]
+    [Signed-off-by: John Doe - we do not use this, but do not bother removing it]
     [whatever-else-by: credit all helpers, finders, doers; try to use one of
         the following keywords if at all possible, for consistency:
         Acked-by:, Assisted-by:, Co-authored-by:, Found-by:, Reported-by:,
@@ -232,7 +232,7 @@ The first line is a succinct description of the change:
  - no period (.) at the end
 
 The `[area]` in the first line can be `http2`, `cookies`, `openssl` or
-similar. There's no fixed list to select from but using the same "area" as
+similar. There is no fixed list to select from but using the same "area" as
 other related changes could make sense.
 
 Do not forget to use commit --author=... if you commit someone else's work, and
@@ -240,9 +240,9 @@ make sure that you have your own user and email setup correctly in git before
 you commit.
 
 Add whichever header lines as appropriate, with one line per person if more
-than one person was involved. There's no need to credit yourself unless you are
-using --author=... which hides your identity. Don't include people's e-mail
-addresses in headers to avoid spam, unless they're already public from a
+than one person was involved. There is no need to credit yourself unless you are
+using --author=... which hides your identity. Do not include people's e-mail
+addresses in headers to avoid spam, unless they are already public from a
 previous commit; saying `{userid} on github` is OK.
 
 ### Write Access to git Repository

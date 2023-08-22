@@ -47,7 +47,7 @@ This callback function gets called by libcurl repeatedly when it populates the
 in-memory HSTS cache.
 
 Set the \fIclientp\fP argument with the \fICURLOPT_HSTSREADDATA(3)\fP option
-or it will be NULL.
+or it is NULL.
 
 When this callback is invoked, the \fIsts\fP pointer points to a populated
 struct: Copy the host name to \fIname\fP (no longer than \fInamelen\fP
@@ -58,8 +58,8 @@ FALSE. Set \fIexpire\fP to a date stamp or a zero length string for *forever*
 The callback should return \fICURLSTS_OK\fP if it returns a name and is
 prepared to be called again (for another host) or \fICURLSTS_DONE\fP if it has
 no entry to return. It can also return \fICURLSTS_FAIL\fP to signal
-error. Returning \fICURLSTS_FAIL\fP will stop the transfer from being
-performed and make \fICURLE_ABORTED_BY_CALLBACK\fP get returned.
+error. Returning \fICURLSTS_FAIL\fP stops the transfer from being performed
+and make \fICURLE_ABORTED_BY_CALLBACK\fP get returned.
 
 This option does not enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
 do that.
@@ -82,7 +82,7 @@ This feature is only used for HTTP(S) transfer.
 .SH AVAILABILITY
 Added in 7.74.0
 .SH RETURN VALUE
-This will return CURLE_OK.
+This returns CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_HSTSREADDATA "(3), " CURLOPT_HSTSWRITEFUNCTION "(3), "
 .BR CURLOPT_HSTS "(3), " CURLOPT_HSTS_CTRL "(3), "

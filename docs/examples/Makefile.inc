@@ -129,7 +129,7 @@ check_PROGRAMS = \
   websocket-cb
 
 # These examples require external dependencies that may not be commonly
-# available on POSIX systems, so don't bother attempting to compile them here.
+# available on POSIX systems, so do not bother attempting to compile them here.
 COMPLICATED_EXAMPLES = \
   cacertinmem.c \
   crawler.c \

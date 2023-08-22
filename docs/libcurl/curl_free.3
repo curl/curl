@@ -35,8 +35,8 @@ curl_free reclaims memory that has been obtained through a libcurl call. Use
 \fIcurl_free(3)\fP instead of free() to avoid anomalies that can result from
 differences in memory management between your application and libcurl.
 
-Passing in a NULL pointer in \fIptr\fP will make this function return
-immediately with no action.
+Passing in a NULL pointer in \fIptr\fP makes this function return immediately
+with no action.
 .SH EXAMPLE
 .nf
   char *width = curl_getenv("COLUMNS");

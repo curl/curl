@@ -32,9 +32,8 @@ CURLOPT_PREREQDATA \- pointer passed to the pre-request callback
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PREREQDATA, void *pointer);
 .fi
 .SH DESCRIPTION
-Pass a \fIpointer\fP that will be untouched by libcurl and passed as the first
-argument in the pre-request callback set with
-\fICURLOPT_PREREQFUNCTION(3)\fP.
+Pass a \fIpointer\fP that is untouched by libcurl and passed as the first
+argument in the pre-request callback set with \fICURLOPT_PREREQFUNCTION(3)\fP.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

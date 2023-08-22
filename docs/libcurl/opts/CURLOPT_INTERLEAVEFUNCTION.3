@@ -45,7 +45,7 @@ writes the interleaved header as well as the included data for each call. The
 first byte is always an ASCII dollar sign. The dollar sign is followed by a
 one byte channel identifier and then a 2 byte integer length in network byte
 order. See RFC 2326 Section 10.12 for more information on how RTP interleaving
-behaves. If unset or set to NULL, curl will use the default write function.
+behaves. If unset or set to NULL, curl uses the default write function.
 
 Interleaved RTP poses some challenges for the client application. Since the
 stream data is sharing the RTSP control connection, it is critical to service
@@ -53,16 +53,16 @@ the RTP in a timely fashion. If the RTP data is not handled quickly,
 subsequent response processing may become unreasonably delayed and the
 connection may close. The application may use \fICURL_RTSPREQ_RECEIVE\fP to
 service RTP data when no requests are desired. If the application makes a
-request, (e.g.  \fICURL_RTSPREQ_PAUSE\fP) then the response handler will
-process any pending RTP data before marking the request as finished.
+request, (e.g. \fICURL_RTSPREQ_PAUSE\fP) then the response handler processes
+any pending RTP data before marking the request as finished.
 
 The \fICURLOPT_INTERLEAVEDATA(3)\fP is passed in the \fIuserdata\fP argument in
 the callback.
 
 Your callback should return the number of bytes actually taken care of. If
-that amount differs from the amount passed to your callback function, it will
-signal an error condition to the library. This will cause the transfer to get
-aborted and the libcurl function used will return \fICURLE_WRITE_ERROR\fP.
+that amount differs from the amount passed to your callback function, it
+signals an error condition to the library. This causes the transfer to abort
+and the libcurl function used returns \fICURLE_WRITE_ERROR\fP.
 
 You can also abort the transfer by returning CURL_WRITEFUNC_ERROR. (7.87.0)
 .SH DEFAULT

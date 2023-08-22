@@ -31,22 +31,22 @@ curl_easy_perform - perform a blocking file transfer
 CURLcode curl_easy_perform(CURL *easy_handle);
 .fi
 .SH DESCRIPTION
+\fIcurl_easy_perform(3)\fP performs a network transfer in a blocking manner
+and returns when done, or earlier if it fails. For non-blocking behavior, see
+\fIcurl_multi_perform(3)\fP.
+
 Invoke this function after \fIcurl_easy_init(3)\fP and all the
 \fIcurl_easy_setopt(3)\fP calls are made, and it performs the transfer as
 described in the options. It must be called with the same \fBeasy_handle\fP as
 input as the \fIcurl_easy_init(3)\fP call returned.
 
-\fIcurl_easy_perform(3)\fP performs the entire request in a blocking manner
-and returns when done, or earlier if it fails. For non-blocking behavior, see
-\fIcurl_multi_perform(3)\fP.
-
 You can do any amount of calls to \fIcurl_easy_perform(3)\fP while using the
 same \fBeasy_handle\fP. If you intend to transfer more than one file, you are
-even encouraged to do so. libcurl will then attempt to re-use the same
-connection for the following transfers, thus making the operations faster,
-less CPU intense and using less network resources. Just note that you will
-have to use \fIcurl_easy_setopt(3)\fP between the invokes to set options for
-the following curl_easy_perform.
+even encouraged to do so. libcurl attempts to reuse existing connections for
+the following transfers, thus making the operations faster, less CPU intense
+and using less network resources. You probably want to use
+\fIcurl_easy_setopt(3)\fP between the invokes to set options for the following
+curl_easy_perform call.
 
 You must never call this function simultaneously from two places using the
 same \fBeasy_handle\fP. Let the function return first before invoking it
@@ -77,7 +77,7 @@ Always
 CURLE_OK (0) means everything was OK, non-zero means an error occurred as
 .I <curl/curl.h>
 defines - see \fIlibcurl-errors(3)\fP. If the \fICURLOPT_ERRORBUFFER(3)\fP was
-set with \fIcurl_easy_setopt(3)\fP there will be a readable error message in
+set with \fIcurl_easy_setopt(3)\fP there is a readable error message stored in
 the error buffer when non-zero is returned.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_setopt "(3), "

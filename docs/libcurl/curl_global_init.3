@@ -87,18 +87,18 @@ Initialize the Win32 socket libraries.
 The implication here is that if this bit is not set, the initialization of
 winsock has to be done by the application or you risk getting undefined
 behaviors. This option exists for when the initialization is handled outside
-of libcurl so there's no need for libcurl to do it again.
+of libcurl so there is no need for libcurl to do it again.
 .IP CURL_GLOBAL_NOTHING
 Initialize nothing extra. This sets no bit.
 .IP CURL_GLOBAL_DEFAULT
-A sensible default. It will init both SSL and Win32. Right now, this equals
+A sensible default. It initializes both SSL and Win32. Right now, this equals
 the functionality of the \fBCURL_GLOBAL_ALL\fP mask.
 .IP CURL_GLOBAL_ACK_EINTR
 This bit has no point since 7.69.0 but its behavior is instead the default.
 
-Before 7.69.0: when this flag is set, curl will acknowledge EINTR condition
-when connecting or when waiting for data. Otherwise, curl waits until full
-timeout elapses. (Added in 7.30.0)
+Before 7.69.0: when this flag is set, curl acknowledges EINTR condition when
+connecting or when waiting for data. Otherwise, curl waits until full timeout
+elapses. (Added in 7.30.0)
 .SH EXAMPLE
 .nf
  curl_global_init(CURL_GLOBAL_DEFAULT);

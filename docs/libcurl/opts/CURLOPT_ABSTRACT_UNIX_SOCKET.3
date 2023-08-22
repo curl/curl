@@ -35,13 +35,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ABSTRACT_UNIX_SOCKET,
 .SH DESCRIPTION
 Enables the use of an abstract Unix domain socket instead of establishing a
 TCP connection to a host. The parameter should be a char * to a
-null-terminated string holding the path of the socket. The path will be set to
-\fIpath\fP prefixed by a NULL byte (this is the convention for abstract
+null-terminated string holding the path of the socket. The path is set to
+\fIpath\fP prefixed by a NULL byte. This is the convention for abstract
 sockets, however it should be stressed that the path passed to this function
-should not contain a leading NULL).
+should not contain a leading NULL byte.
 
-On non-supporting platforms, the abstract address will be interpreted as an
-empty string and fail gracefully, generating a runtime error.
+On non-supporting platforms, the abstract address is interpreted as an empty
+string and fails gracefully, generating a runtime error.
 
 This option shares the same semantics as \fICURLOPT_UNIX_SOCKET_PATH(3)\fP in
 which documentation more details can be found. Internally, these two options

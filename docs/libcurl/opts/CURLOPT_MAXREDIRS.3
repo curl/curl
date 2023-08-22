@@ -32,14 +32,15 @@ CURLOPT_MAXREDIRS \- maximum number of redirects allowed
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXREDIRS, long amount);
 .fi
 .SH DESCRIPTION
-Pass a long. The set number will be the redirection limit \fIamount\fP. If
-that many redirections have been followed, the next redirect will cause an
-error (\fICURLE_TOO_MANY_REDIRECTS\fP). This option only makes sense if the
+Pass a long. The set number is the redirection limit \fIamount\fP. If that
+many redirections have been followed, the next redirect triggers the error
+(\fICURLE_TOO_MANY_REDIRECTS\fP). This option only makes sense if the
 \fICURLOPT_FOLLOWLOCATION(3)\fP is used at the same time.
 
-Setting the limit to 0 will make libcurl refuse any redirect.
+Setting the limit to 0 makes libcurl refuse any redirect.
 
-Set it to -1 for an infinite number of redirects.
+Set it to -1 for an infinite number of redirects. This allows your application
+to get stuck in never-ending redirect loops.
 .SH DEFAULT
 30 (since 8.3.0), it was previously unlimited.
 .SH PROTOCOLS

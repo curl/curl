@@ -35,8 +35,8 @@ Given a \fICURLoption\fP \fBid\fP, this function returns a pointer to the
 \fIcurl_easyoption\fP struct, holding information about the
 \fIcurl_easy_setopt(3)\fP option using that id. The option id is the CURLOPT_
 prefix ones provided in the standard curl/curl.h header file. This function
-will return the non-aliases version for the cases where there is an alias
-function as well.
+returns the non-alias version of the cases where there is an alias function as
+well.
 
 If libcurl has no option with the given id, this function returns NULL.
 .SH EXAMPLE

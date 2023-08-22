@@ -37,9 +37,9 @@ CURLMcode curl_multi_socket_all(CURLM *multi_handle,
 These functions are deprecated. Do not use. See
 \fIcurl_multi_socket_action(3)\fP instead.
 
-At return, the integer \fBrunning_handles\fP points to will contain the number
-of still running easy handles within the multi handle. When this number
-reaches zero, all transfers are complete/done. Note that when you call
+At return, the integer \fBrunning_handles\fP points to contains the number of
+still running easy handles within the multi handle. When this number reaches
+zero, all transfers are complete/done. Note that when you call
 \fIcurl_multi_socket_action(3)\fP on a specific socket and the counter
 decreases by one, it DOES NOT necessarily mean that this exact socket/transfer
 is the one that completed. Use \fIcurl_multi_info_read(3)\fP to figure out
@@ -53,7 +53,7 @@ update the status with changes since the previous time the callback was
 called.
 
 Get the timeout time by setting the \fICURLMOPT_TIMERFUNCTION(3)\fP option
-with \fIcurl_multi_setopt(3)\fP. Your application will then get called with
+with \fIcurl_multi_setopt(3)\fP. Your application then gets called with
 information on how long to wait for socket actions at most before doing the
 timeout action: call the \fIcurl_multi_socket_action(3)\fP function with the
 \fBsockfd\fP argument set to CURL_SOCKET_TIMEOUT. You can also use the
