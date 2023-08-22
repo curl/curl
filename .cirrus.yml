@@ -281,7 +281,7 @@ linux_musl_task:
     MAKEFLAGS: -j 3
 
   pkginstall_script:
-    - apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo
+    - apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo rust
   configure_script:
     - autoreconf -fi
     - ./configure --enable-warnings --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
