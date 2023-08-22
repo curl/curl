@@ -4,12 +4,13 @@ curl and libcurl 8.3.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2957
+ Contributors:                 2961
 
 This release includes the following changes:
 
  o curl: make %output{} in -w specify a file to write to [36]
  o gskit: remove [71]
+ o lib: --disable-bindlocal builds curl without local binding support
  o nss: remove support for this TLS library [10]
  o tool: add "variable" support [1]
  o trace: make tracing available in non-debug builds [41]
@@ -20,11 +21,14 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o bearssl: don't load CA certs when peer verification is disabled [33]
+ o bearssl: handshake fix, provide proper get_select_socks() implementation [99]
  o build: streamline non-UWP wincrypt detections [87]
  o c-hyper: adjust the hyper to curlcode conversion [52]
  o cf-haproxy: make CURLOPT_HAPROXY_CLIENT_IP set the *source* IP [61]
  o cf-socket: log successful interface bind [39]
+ o CI/cirrus: disable python install on FreeBSD [83]
  o CI: add caching to many jobs [19]
+ o cmake: add GnuTLS option [103]
  o cmake: add support for single libcurl compilation pass [21]
  o cmake: allow `SHARE_LIB_OBJECT=ON` on all platforms [80]
  o cmake: assume `wldap32` availability on Windows [81]
@@ -34,6 +38,7 @@ This release includes the following bugfixes:
  o cmake: fix to use variable for the curl namespace [79]
  o cmake: fixup H2 duplicate symbols for unity builds [23]
  o cmake: support building static and shared libcurl in one go [17]
+ o cmdline-opts/docs: mention the negative option part [90]
  o cmdline-opts/page-header: reorder, clean up [51]
  o configure, cmake, lib: more form api deprecation [7]
  o configure: use the pkg-config --libs-only-l flag for libssh2 [16]
@@ -41,6 +46,7 @@ This release includes the following bugfixes:
  o crypto: ensure crypto initialization works [69]
  o CURLINFO_CERTINFO.3: better explain curl_certinfo struct [64]
  o CURLINFO_TLS_SSL_PTR.3: clarify a recommendation [75]
+ o CURLOPT_*TIMEOUT*: extend and clarify [101]
  o CURLOPT_SSL_VERIFYPEER.3: mention it does not load CA certs when disabled [42]
  o docs/cmdline-opts/gen.pl: hide "added in" before 7.50.0 [76]
  o docs/cmdline-opts: spellfixes, typos and polish [9]
@@ -67,7 +73,9 @@ This release includes the following bugfixes:
  o imap: add a check for failing strdup()
  o imap: remove the only sscanf() call in the IMAP code [84]
  o include/curl/mprintf.h: add __attribute__ for the prototypes [38]
+ o lib: build fixups when built with most things disabled [97]
  o lib: fix a few *printf() flag mistakes [47]
+ o lib: move mimepost data from ->req.p.http to ->state [94]
  o list-only.d: mention SFTP as supported protocol [55]
  o macOS: fix target detection more [11]
  o misc: fix various typos [18]
@@ -77,6 +85,7 @@ This release includes the following bugfixes:
  o openssl: switch to modern init for LibreSSL 2.7.0+ [70]
  o openssl: use `SSL_CTX_set_ciphersuites` with LibreSSL 3.4.1 [66]
  o openssl: use `SSL_CTX_set_keylog_callback` with LibreSSL 3.5.0 [67]
+ o os400: do not check translatable options at build time [95]
  o page-footer: QLOGDIR works with ngtcp2 and quiche [62]
  o page-header: move up a URL paragraph from GLOBBING to URL
  o quiche: adjust quiche `QUIC_IDLE_TIMEOUT` to 60s
@@ -86,19 +95,29 @@ This release includes the following bugfixes:
  o schannel: fix user-set legacy algorithms in Windows 10 & 11 [53]
  o schannel: verify hostname independent of verify cert [74]
  o sectransp: prevent CFRelease() of NULL [26]
+ o test1304: build and skip without netrc support
+ o test1554: check translatable string options in OS400 wrapper [96]
+ o test1608: make it build and get skipped without shuffle DNS support
+ o test687/688: two more basic --xattr tests [89]
  o tests/tftpd+mqttd: make variables static to silence picky warnings [57]
+ o tests: add 'large-time' as a testable feature [92]
  o tests: ensure `libcurl.def` contains all exports [45]
  o tests: fix h3 server check and parallel instances [6]
+ o tests: TLS session sharing test [100]
  o tool: make the length argument an int for printf()-.* flags [49]
  o tool_cb_wrt: fix invalid unicode for windows console [25]
  o tool_operate: allow both SSL_CERT_FILE and SSL_CERT_DIR [12]
+ o tool_urlglob: use the correct format specifier for curl_off_t in msnprintf [88]
  o transfer: don't set TIMER_STARTTRANSFER on first send [77]
+ o unit2600: fix build warning if built without verbose messages
  o url: remove infof() output for "still name resolving" [28]
  o urlapi: fix heap buffer overflow [30]
  o urlapi: make sure zoneid is also duplicated in curl_url_dup [29]
+ o urlapi: return CURLUE_BAD_HOSTNAME if puny2idn encoding fails [102]
  o vquic: show stringified messages for errno [40]
  o vtls: clarify "ALPN: offers" message [27]
  o winbuild: improve check for static zlib [15]
+ o workflows/macos.yml: disable zstd and alt-svc in the http-only build [98]
  o write-out.d: clarify %{time_starttransfer}
 
 This release includes the following known bugs:
@@ -119,15 +138,16 @@ advice from friends like these:
   Daniel Stenberg, Dan Jacobson, Derzsi Dániel, Douglas R. Reno,
   ed0d2b2ce19451f2, Emanuele Torre, Enrico Scholz, eppesuig, FC Stegerman,
   Gabriel Corona, Gisle Vanem, Goro FUJI, Graham Campbell, Guillaume Algis,
-  JazJas on github, Joseph Tharayil, junsik on github, kyled-dell on github,
-  Maksim Arhipov, Marcel Raad, Marin Hannache, Markus Sommer, Martin Galvan,
+  Jacob Mealey, JazJas on github, Joseph Tharayil, junsik on github,
+  kyled-dell on github, Lukas Tribus, Maksim Arhipov, Maksim Sciepanienka,
+  Marcel Raad, Marin Hannache, Markus Sommer, Martin Galvan, Mathew Benson,
   Maurício Meneghini Fauth, Nathan Moinvaziri, Niall McGee,
   Nicholas Nethercote, Pablo Busse, Patrick Monnerat,
   Philippe Antoine on HackerOne, Ray Satiro, Richard W.M. Jones,
   Rutger Broekhoff, Ryan Schmidt, Samuel Chiang, Sergey, Stefan Eissing,
   Thomas M. DuBuisson, trrui-huawei, Viktor Szakats, wangzhikun,
   Wilhelm von Thiele, yushicheng7788 on github, zhihaoy on github
-  (48 contributors)
+  (52 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -213,6 +233,21 @@ References to bug reports and discussions on issues:
  [80] = https://curl.se/bug/?i=11627
  [81] = https://curl.se/bug/?i=11624
  [82] = https://curl.se/bug/?i=11654
+ [83] = https://curl.se/bug/?i=11705
  [84] = https://curl.se/bug/?i=11673
  [86] = https://sourceforge.net/p/curl/bugs/440/
  [87] = https://curl.se/bug/?i=11657
+ [88] = https://curl.se/bug/?i=11698
+ [89] = https://curl.se/bug/?i=11697
+ [90] = https://curl.se/bug/?i=11695
+ [92] = https://curl.se/bug/?i=11696
+ [94] = https://curl.se/bug/?i=11680
+ [95] = https://curl.se/bug/?i=11650
+ [96] = https://curl.se/bug/?i=11650
+ [97] = https://curl.se/bug/?i=11687
+ [98] = https://curl.se/bug/?i=11683
+ [99] = https://curl.se/bug/?i=11675
+ [100] = https://curl.se/bug/?i=11675
+ [101] = https://curl.se/bug/?i=11686
+ [102] = https://curl.se/bug/?i=11674
+ [103] = https://curl.se/bug/?i=11685
