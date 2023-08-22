@@ -57,15 +57,8 @@ freebsd_task:
 
   pkginstall_script:
     - pkg update -f
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap24-client heimdal libpsl libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel py39-openssl py39-impacket py39-cryptography
     - pkg delete -y curl
-    - python -m ensurepip --default-pip
-    - python -m pip install --upgrade pip
-    # PYTHON/RUST/CRYPTO FAIL
-    # this currently fails with "error" in building rust crypto for python
-    #- pip install "cryptography<3.2"
-    #- pip install "pyOpenSSL<20.0"
-    #- pip install "impacket"
   configure_script:
     - autoreconf -fi
     # Building with the address sanitizer is causing unexplainable test issues due to timeouts
