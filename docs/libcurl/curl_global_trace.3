@@ -61,11 +61,11 @@ are case-insensitive and unknown names are ignored. The special name "all"
 applies to all components. Names may be prefixed with '+' or '-' to enable
 or disable detailed logging for a component.
 
-The list of component names is not part of curl's public API. Names may
-be added or disappear in future versions of libcurl. Since unknown names
-are silently ignored, outdated log configurations will not error when
-upgrading libcurl. Given that, some names can be expected to be fairly
-stable and are listed below for easy reference.
+The list of component names is not part of curl's public API. Names may be
+added or disappear in future versions of libcurl. Since unknown names are
+silently ignored, outdated log configurations does not cause errors when
+upgrading libcurl. Given that, some names can be expected to be fairly stable
+and are listed below for easy reference.
 
 Note that log configuration applies only to transfers where debug logging
 is enabled. See \fICURLOPT_VERBOSE(3)\fP or \fICURLOPT_DEBUGFUNCTION(3)\fP
@@ -85,9 +85,9 @@ Involved when transfers are tunneled through a HTTP proxy. "h1-proxy" or
 "h2-proxy" are also involved, depending on the HTTP version negotiated with
 the proxy.
 
-In order to find out all components involved in
-a transfer, run it with "all" configured. You will then see all names
-involved in your libcurl version in the trace.
+In order to find out all components involved in a transfer, run it with "all"
+configured. You can then see all names involved in your libcurl version in the
+trace.
 
 .SH EXAMPLE
 .nf

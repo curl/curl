@@ -43,7 +43,10 @@ Some server implementations are known to (erroneously) require the dot dot
 sequences to remain in the path and some clients want to pass these on in
 order to try out server implementations.
 
-By default libcurl will merge such sequences before using the path.
+By default libcurl normalizes such sequences before using the path.
+
+The corresponding flag for the \fIcurl_url_set(3)\fP function is called
+\fBCURLU_PATH_AS_IS\fP.
 .SH DEFAULT
 0
 .SH PROTOCOLS

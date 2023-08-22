@@ -33,11 +33,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TFTP_BLKSIZE, long blocksize);
 .fi
 .SH DESCRIPTION
 Specify \fIblocksize\fP to use for TFTP data transmission. Valid range as per
-RFC 2348 is 8-65464 bytes. The default of 512 bytes will be used if this option
-is not specified. The specified block size will only be used pending support
-by the remote server. If the server does not return an option acknowledgment
-or returns an option acknowledgment with no block size, the default of 512
-bytes will be used.
+RFC 2348 is 8-65464 bytes. The default of 512 bytes is used if this option is
+not specified. The specified block size is only used if supported by the
+remote server. If the server does not return an option acknowledgment or
+returns an option acknowledgment with no block size, the default of 512 bytes
+is used.
 .SH DEFAULT
 512
 .SH PROTOCOLS

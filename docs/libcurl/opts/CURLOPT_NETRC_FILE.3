@@ -35,8 +35,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NETRC_FILE, char *file);
 Pass a char * as parameter, pointing to a null-terminated string containing
 the full path name to the \fIfile\fP you want libcurl to use as .netrc
 file. If this option is omitted, and \fICURLOPT_NETRC(3)\fP is set, libcurl
-will attempt to find a .netrc file in the current user's home
-directory.
+checks for a .netrc file in the current user's home directory.
 
 The application does not have to keep the string around after setting this
 option.

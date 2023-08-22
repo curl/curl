@@ -43,12 +43,12 @@ This option is by default set to the system path where libcurl's CA
 certificate bundle is assumed to be stored, as established at build time.
 
 (iOS and macOS) When curl uses Secure Transport this option is supported. If
-the option is not set, then curl will use the certificates in the system and
-user Keychain to verify the peer.
+the option is not set, then curl uses the certificates in the system and user
+Keychain to verify the peer.
 
 (Schannel) This option is supported for Schannel in Windows 7 or later but we
 recommend not using it until Windows 8 since it works better starting then.
-If the option is not set, then curl will use the certificates in the Windows'
+If the option is not set, then curl uses the certificates in the Windows'
 store of root certificates (the default for Schannel).
 
 The application does not have to keep the string around after setting this

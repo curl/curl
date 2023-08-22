@@ -44,8 +44,9 @@ libcurl does a single CWD operation for each path part in the given URL. For
 deep hierarchies this means many commands. This is how RFC 1738 says it should
 be done. This is the default but the slowest behavior.
 .IP CURLFTPMETHOD_NOCWD
-libcurl does no CWD at all. libcurl will do SIZE, RETR, STOR etc and give a
-full path to the server for all these commands. This is the fastest behavior.
+libcurl makes no CWD at all. libcurl does SIZE, RETR, STOR etc and gives a
+full path to the server for all these commands. This is the fastest behavior
+since it skips having to change directories.
 .IP CURLFTPMETHOD_SINGLECWD
 libcurl does one CWD with the full target directory and then operates on the
 file \&"normally" (like in the multicwd case). This is somewhat more standards

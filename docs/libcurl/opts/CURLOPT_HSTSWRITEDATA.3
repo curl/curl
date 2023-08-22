@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTSWRITEDATA, void *pointer);
 .fi
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the HSTS write function. If you use the
-\fICURLOPT_HSTSWRITEFUNCTION(3)\fP option, this is the pointer you will get as
+\fICURLOPT_HSTSWRITEFUNCTION(3)\fP option, this is the pointer you get as
 input in the fourth argument to the callback.
 
 This option does not enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
@@ -59,7 +59,7 @@ if(curl) {
 .SH AVAILABILITY
 Added in 7.74.0
 .SH RETURN VALUE
-This will return CURLE_OK.
+This returns CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_HSTSWRITEFUNCTION "(3), " CURLOPT_HSTSREADDATA "(3), "
 .BR CURLOPT_HSTSREADFUNCTION "(3), "

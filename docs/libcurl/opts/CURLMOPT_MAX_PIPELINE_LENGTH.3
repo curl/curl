@@ -35,11 +35,11 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_PIPELINE_LENGTH,
 .SH DESCRIPTION
 No function since pipelining was removed in 7.62.0.
 
-Pass a long. The set \fBmax\fP number will be used as the maximum amount of
+Pass a long. The set \fBmax\fP number is used as the maximum amount of
 outstanding requests in an HTTP/1.1 pipeline. This option is only used for
 HTTP/1.1 pipelining, not for HTTP/2 multiplexing.
 
-When this limit is reached, libcurl will use another connection to the same
+When this limit is reached, libcurl creates another connection to the same
 host (see \fICURLMOPT_MAX_HOST_CONNECTIONS(3)\fP), or queue the request until
 one of the pipelines to the host is ready to accept a request.  Thus, the
 total number of requests in-flight is \fICURLMOPT_MAX_HOST_CONNECTIONS(3)\fP *

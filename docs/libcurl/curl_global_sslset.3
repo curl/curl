@@ -62,15 +62,15 @@ must be called \fBbefore\fP \fIcurl_global_init(3)\fP.
 The backend can be identified by the \fIid\fP
 (e.g. \fBCURLSSLBACKEND_OPENSSL\fP). The backend can also be specified via the
 \fIname\fP parameter for a case insensitive match (passing -1 as \fIid\fP). If
-both \fIid\fP and \fIname\fP are specified, the \fIname\fP will be ignored.
+both \fIid\fP and \fIname\fP are specified, the \fIname\fP is ignored.
 
-If neither \fIid\fP nor \fPname\fP are specified, the function will fail with
+If neither \fIid\fP nor \fPname\fP are specified, the function fails with
 \fBCURLSSLSET_UNKNOWN_BACKEND\fP and set the \fIavail\fP pointer to the
 NULL-terminated list of available backends. The available backends are those
 that this particular build of libcurl supports.
 
-Since libcurl 7.60.0, the \fIavail\fP pointer will always be set to the list
-of alternatives if non-NULL.
+Since libcurl 7.60.0, the \fIavail\fP pointer is always set to the list of
+alternatives if non-NULL.
 
 Upon success, the function returns \fBCURLSSLSET_OK\fP.
 
@@ -80,7 +80,7 @@ NULL-terminated list of available SSL backends. In this case, you may call the
 function again to try to select a different backend.
 
 The SSL backend can be set only once. If it has already been set, a subsequent
-attempt to change it will result in a \fBCURLSSLSET_TOO_LATE\fP.
+attempt to change it results in a \fBCURLSSLSET_TOO_LATE\fP getting returned.
 
 This function is thread-safe since libcurl 7.84.0 if
 \fIcurl_version_info(3)\fP has the CURL_VERSION_THREADSAFE feature bit set

@@ -32,14 +32,13 @@ CURLOPT_MAXFILESIZE \- maximum file size allowed to download
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXFILESIZE, long size);
 .fi
 .SH DESCRIPTION
-Pass a long as parameter. This allows you to specify the maximum \fIsize\fP
-(in bytes) of a file to download. If the file requested is found larger than
-this value, the transfer will not start and \fICURLE_FILESIZE_EXCEEDED\fP will
-be returned.
+Pass a long as parameter. This specifies the maximum accepted \fIsize\fP (in
+bytes) of a file to download. If the file requested is found larger than this
+value, the transfer is aborted and \fICURLE_FILESIZE_EXCEEDED\fP is returned.
 
-The file size is not always known prior to download, and for such files this
-option has no effect even if the file transfer ends up being larger than this
-given limit.
+The file size is not always known prior to the download start, and for such
+transfers this option has no effect - even if the file transfer eventually
+ends up being larger than this given limit.
 
 If you want a limit above 2GB, use \fICURLOPT_MAXFILESIZE_LARGE(3)\fP.
 .SH DEFAULT

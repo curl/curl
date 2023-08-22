@@ -33,11 +33,12 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE, long val);
 .fi
 .SH DESCRIPTION
 Pass a long \fIval\fP as parameter. This should be the time counted as seconds
-since 1 Jan 1970, and the time will be used in a condition as specified with
+since 1 Jan 1970, and the time is used in a condition as specified with
 \fICURLOPT_TIMECONDITION(3)\fP.
 
-On systems with 32 bit 'long' variables, this option cannot set dates beyond
-the year 2038. Consider \fICURLOPT_TIMEVALUE_LARGE(3)\fP instead.
+On systems with 32 bit 'long' variables (such as Windows), this option cannot
+set dates beyond the year 2038. Consider \fICURLOPT_TIMEVALUE_LARGE(3)\fP
+instead.
 .SH DEFAULT
 0
 .SH PROTOCOLS

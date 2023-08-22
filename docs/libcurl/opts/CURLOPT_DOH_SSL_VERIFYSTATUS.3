@@ -42,8 +42,8 @@ extension (aka. OCSP stapling).
 This option is the DoH equivalent of \fICURLOPT_SSL_VERIFYSTATUS(3)\fP and
 only affects requests to the DoH server.
 
-Note that if this option is enabled but the server does not support the TLS
-extension, the verification will fail.
+If this option is enabled and the server does not support the TLS extension,
+the verification fails.
 .SH DEFAULT
 0
 .SH PROTOCOLS

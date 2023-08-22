@@ -46,24 +46,24 @@ The linked list should be a fully valid list of \fBstruct curl_slist\fP
 structs properly filled in. Use \fIcurl_slist_append(3)\fP to create the list
 and \fIcurl_slist_free_all(3)\fP to clean up an entire list. If you add a
 header that is otherwise generated and used by libcurl internally, your added
-one will be used instead. If you add a header with no content as in 'Accept:'
-(no data on the right side of the colon), the internally used header will get
-disabled. With this option you can add new headers, replace internal headers
-and remove internal headers. To add a header with no content (nothing to the
-right side of the colon), use the form 'name;' (note the ending semicolon).
+header is used instead. If you add a header with no content as in 'Accept:'
+(no data on the right side of the colon), the internally used header is
+disabled/removed. With this option you can add new headers, replace internal
+headers and remove internal headers. To add a header with no content (nothing
+to the right side of the colon), use the form 'name;' (note the ending
+semicolon).
 
 The headers included in the linked list \fBmust not\fP be CRLF-terminated,
-because libcurl adds CRLF after each header item. Failure to comply with this
-will result in strange bugs because the server will most likely ignore part of
-the headers you specified.
+because libcurl adds CRLF after each header item itself. Failure to comply
+with this might result in strange behavior.
 
 The first line in an HTTP request (containing the method, usually a GET or
 POST) is not a header and cannot be replaced using this option. Only the lines
 following the request-line are headers. Adding this method line in this list
-of headers will only cause your request to send an invalid header. Use
+of headers only causes your request to send an invalid header. Use
 \fICURLOPT_CUSTOMREQUEST(3)\fP to change the method.
 
-When this option is passed to \fIcurl_easy_setopt(3)\fP, libcurl will not copy
+When this option is passed to \fIcurl_easy_setopt(3)\fP, libcurl does not copy
 the entire list so you \fBmust\fP keep it around until you no longer use this
 \fIhandle\fP for a transfer before you call \fIcurl_slist_free_all(3)\fP on
 the list.
@@ -74,16 +74,16 @@ The most commonly replaced HTTP headers have "shortcuts" in the options
 \fICURLOPT_COOKIE(3)\fP, \fICURLOPT_USERAGENT(3)\fP and
 \fICURLOPT_REFERER(3)\fP. We recommend using those.
 
-There's an alternative option that sets or replaces headers only for requests
+There is an alternative option that sets or replaces headers only for requests
 that are sent with CONNECT to a proxy: \fICURLOPT_PROXYHEADER(3)\fP. Use
 \fICURLOPT_HEADEROPT(3)\fP to control the behavior.
 .SH SPECIFIC HTTP HEADERS
-Setting some specific headers will cause libcurl to act differently.
+Setting some specific headers causes libcurl to act differently.
 .IP "Host:"
-The specified host name will be used for cookie matching if the cookie engine
-is also enabled for this transfer. If the request is done over HTTP/2 or
-HTTP/3, the custom host name will instead be used in the ":authority" header
-field and Host: will not be sent at all over the wire.
+The specified host name is used for cookie matching if the cookie engine is
+also enabled for this transfer. If the request is done over HTTP/2 or HTTP/3,
+the custom host name is instead used in the ":authority" header field and
+Host: is not sent at all over the wire.
 .IP "Transfer-Encoding: chunked"
 Tells libcurl the upload is to be done using this chunked encoding instead of
 providing the Content-Length: field in the request.
@@ -115,19 +115,19 @@ the headers. They may be private or otherwise sensitive to leak.
 Use \fICURLOPT_HEADEROPT(3)\fP to make the headers only get sent to where you
 intend them to get sent.
 
-Custom headers are sent in all requests done by the easy handles, which
-implies that if you tell libcurl to follow redirects
-(\fICURLOPT_FOLLOWLOCATION(3)\fP), the same set of custom headers will be sent
-in the subsequent request. Redirects can of course go to other hosts and thus
-those servers will get all the contents of your custom headers too.
+Custom headers are sent in all requests done by the easy handle, which implies
+that if you tell libcurl to follow redirects
+(\fICURLOPT_FOLLOWLOCATION(3)\fP), the same set of custom headers is sent in
+the subsequent request. Redirects can of course go to other hosts and thus
+those servers get all the contents of your custom headers too.
 
-Starting in 7.58.0, libcurl will specifically prevent "Authorization:" headers
+Starting in 7.58.0, libcurl specifically prevents "Authorization:" headers
 from being sent to other hosts than the first used one, unless specifically
 permitted with the \fICURLOPT_UNRESTRICTED_AUTH(3)\fP option.
 
-Starting in 7.64.0, libcurl will specifically prevent "Cookie:" headers
-from being sent to other hosts than the first used one, unless specifically
-permitted with the \fICURLOPT_UNRESTRICTED_AUTH(3)\fP option.
+Starting in 7.64.0, libcurl specifically prevents "Cookie:" headers from being
+sent to other hosts than the first used one, unless specifically permitted
+with the \fICURLOPT_UNRESTRICTED_AUTH(3)\fP option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

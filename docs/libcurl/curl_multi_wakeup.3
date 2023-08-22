@@ -31,17 +31,16 @@ curl_multi_wakeup - wakes up a sleeping curl_multi_poll call
 CURLMcode curl_multi_wakeup(CURLM *multi_handle);
 .fi
 .SH DESCRIPTION
-This function can be called from any thread and it wakes up a
-sleeping \fIcurl_multi_poll(3)\fP call that is currently (or will be)
-waiting for activity or a timeout.
+This function can be called from any thread and it wakes up a sleeping
+\fIcurl_multi_poll(3)\fP call that is currently (or is about to be) waiting
+for activity or a timeout.
 
-If the function is called when there is no \fIcurl_multi_poll(3)\fP call,
-it will cause the next call to return immediately.
+If the function is called when there is no \fIcurl_multi_poll(3)\fP call, it
+causes the next call to return immediately.
 
-Calling this function only guarantees to wake up the current (or the next
-if there is no current) \fIcurl_multi_poll(3)\fP call, which means it is
-possible that multiple calls to this function will wake up the same waiting
-operation.
+Calling this function only guarantees to wake up the current (or the next if
+there is no current) \fIcurl_multi_poll(3)\fP call, which means it is possible
+that multiple calls to this function wake up the same waiting operation.
 
 This function has no effect on \fIcurl_multi_wait(3)\fP calls.
 .SH EXAMPLE

@@ -45,7 +45,7 @@ callback to inform the application about updates in the socket (file
 descriptor) status by doing none, one, or multiple calls to the
 \fBsocket_callback\fP. The callback function gets status updates with changes
 since the previous time the callback was called. If the given callback pointer
-is set to NULL, no callback will be called.
+is set to NULL, no callback is called.
 
 libcurl then expects the application to monitor the sockets for the specific
 activities and tell libcurl again when something happens on one of them. Tell
@@ -61,11 +61,11 @@ for a socket that is already monitored.
 
 The socket callback should return 0 on success, and -1 on error. If this
 callback returns error, \fBall\fP transfers currently in progress in this
-multi handle will be aborted and fail.
+multi handle are aborted and made to fail.
 
 \fBclientp\fP is set with \fICURLMOPT_SOCKETDATA(3)\fP.
 
-\fBsocketp\fP is set with \fIcurl_multi_assign(3)\fP or will be NULL.
+\fBsocketp\fP is set with \fIcurl_multi_assign(3)\fP or NULL.
 
 The \fBwhat\fP parameter informs the callback on the status of the given
 socket. It can hold one of these values:

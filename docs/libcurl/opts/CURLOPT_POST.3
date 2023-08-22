@@ -32,9 +32,9 @@ CURLOPT_POST \- make an HTTP POST
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POST, long post);
 .fi
 .SH DESCRIPTION
-A parameter set to 1 tells libcurl to do a regular HTTP post. This will also
-make the library use a "Content-Type: application/x-www-form-urlencoded"
-header. (This is by far the most commonly used POST method).
+A parameter set to 1 tells libcurl to do a regular HTTP post. This also makes
+libcurl use a "Content-Type: application/x-www-form-urlencoded" header. This
+is the most commonly used POST method.
 
 Use one of \fICURLOPT_POSTFIELDS(3)\fP or \fICURLOPT_COPYPOSTFIELDS(3)\fP
 options to specify what data to post and \fICURLOPT_POSTFIELDSIZE(3)\fP or
@@ -59,14 +59,14 @@ If you use POST to an HTTP 1.1 server, you can send data without knowing the
 size before starting the POST if you use chunked encoding. You enable this by
 adding a header like "Transfer-Encoding: chunked" with
 \fICURLOPT_HTTPHEADER(3)\fP. With HTTP 1.0 or without chunked transfer, you
-must specify the size in the request. (Since 7.66.0, libcurl will
-automatically use chunked encoding for POSTs if the size is unknown.)
+must specify the size in the request. (Since 7.66.0, libcurl automatically
+uses chunked encoding for POSTs if the size is unknown.)
 
-When setting \fICURLOPT_POST(3)\fP to 1, libcurl will automatically set
+When setting \fICURLOPT_POST(3)\fP to 1, libcurl automatically sets
 \fICURLOPT_NOBODY(3)\fP and \fICURLOPT_HTTPGET(3)\fP to 0.
 
 If you issue a POST request and then want to make a HEAD or GET using the same
-re-used handle, you must explicitly set the new request type using
+reused handle, you must explicitly set the new request type using
 \fICURLOPT_NOBODY(3)\fP or \fICURLOPT_HTTPGET(3)\fP or similar.
 
 When setting \fICURLOPT_POST(3)\fP to 0, libcurl resets the request type to

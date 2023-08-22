@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CLOSESOCKETDATA,
                           void *pointer);
 .fi
 .SH DESCRIPTION
-Pass a \fIpointer\fP that will be untouched by libcurl and passed as the first
+Pass a \fIpointer\fP that remains untouched by libcurl and passed as the first
 argument in the closesocket callback set with
 \fICURLOPT_CLOSESOCKETFUNCTION(3)\fP.
 .SH DEFAULT

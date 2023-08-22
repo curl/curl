@@ -51,8 +51,8 @@ manner to allow huge files to get transferred without using much memory. It
 therefore requires that the file is kept intact during the entire request.
 
 If the file size cannot be determined before actually reading it (such as for
-a device or named pipe), the whole mime structure containing the part
-will be transferred as chunks by HTTP and rejected by IMAP.
+a character device or named pipe), the whole mime structure containing the
+part is transferred using chunks by HTTP but is rejected by IMAP.
 
 Setting a part's contents multiple times is valid: only the value set by the
 last call is retained.

@@ -33,19 +33,20 @@ int curl_formget(struct curl_httppost * form, void *userp,
 .SH DESCRIPTION
 curl_formget() is used to serialize data previously built/appended with
 \fIcurl_formadd(3)\fP. Accepts a void pointer as second argument named
-\fIuserp\fP which will be passed as the first argument to the
-curl_formget_callback function.
+\fIuserp\fP which is passed as the first argument to the curl_formget_callback
+function.
 
 .BI "typedef size_t (*curl_formget_callback)(void *" userp, " const char *" buf,
 .BI " size_t " len ");"
 
-The curl_formget_callback will be executed for each part of the HTTP POST
-chain. The character buffer passed to the callback must not be freed. The
-callback should return the buffer length passed to it on success.
+The curl_formget_callback is invoked for each part of the HTTP POST chain. The
+character buffer passed to the callback must not be freed. The callback should
+return the buffer length passed to it on success.
 
-If the \fBCURLFORM_STREAM\fP option is used in the formpost, it will prevent
+If the \fBCURLFORM_STREAM\fP option is used in the formpost, it prevents
 \fIcurl_formget(3)\fP from working until you have performed the actual HTTP
-request as only then will libcurl get the actual read callback to use!
+request. This, because first then does libcurl known which actual read
+callback to use!
 .SH EXAMPLE
 .nf
  size_t print_httppost_callback(void *arg, const char *buf, size_t len)

@@ -36,22 +36,22 @@ CURLcode curl_easy_send(CURL *curl, const void *buffer,
 This function sends arbitrary data over the established connection. You may
 use it together with \fIcurl_easy_recv(3)\fP to implement custom protocols
 using libcurl. This functionality can be particularly useful if you use
-proxies and/or SSL encryption: libcurl will take care of proxy negotiation and
+proxies and/or SSL encryption: libcurl takes care of proxy negotiation and
 connection setup.
 
-\fBbuffer\fP is a pointer to the data of length \fBbuflen\fP that you want sent.
-The variable \fBn\fP points to will receive the number of sent bytes.
+\fBbuffer\fP is a pointer to the data of length \fBbuflen\fP that you want
+sent. The variable \fBn\fP points to receives the number of sent bytes.
 
 To establish the connection, set \fICURLOPT_CONNECT_ONLY(3)\fP option before
 calling \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP. Note that
-\fIcurl_easy_send(3)\fP will not work on connections that were created without
+\fIcurl_easy_send(3)\fP does not work on connections that were created without
 this option.
 
-The call will return \fBCURLE_AGAIN\fP if it's not possible to send data right
-now - the socket is used in non-blocking mode internally. When
-\fBCURLE_AGAIN\fP is returned, use your operating system facilities like
-\fIselect(2)\fP to wait until the socket is writable. The socket may be
-obtained using \fIcurl_easy_getinfo(3)\fP with \fICURLINFO_ACTIVESOCKET(3)\fP.
+The call returns \fBCURLE_AGAIN\fP if it's not possible to send data right now
+- the socket is used in non-blocking mode internally. When \fBCURLE_AGAIN\fP
+is returned, use your operating system facilities like \fIselect(2)\fP to wait
+until the socket is writable. The socket may be obtained using
+\fIcurl_easy_getinfo(3)\fP with \fICURLINFO_ACTIVESOCKET(3)\fP.
 
 Furthermore if you wait on the socket and it tells you it's writable,
 \fIcurl_easy_send(3)\fP may return \fBCURLE_AGAIN\fP if the only data that was
@@ -64,8 +64,7 @@ sent was for internal SSL processing, and no other data could be sent.
  res = curl_easy_perform(curl);
 
  if(res == CURLE_OK) {
-   /* Extract the socket from the curl handle -
-      we will need it for waiting. */
+   /* Extract the socket from the curl handle - we need it for waiting. */
    res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
 
    /* send data */
@@ -84,7 +83,7 @@ On failure, returns the appropriate error code.
 This function may return \fBCURLE_AGAIN\fP. In this case, use your operating
 system facilities to wait until the socket is writable, and retry.
 
-If there's no socket available to use from the previous transfer, this function
+If there is no socket available to use from the previous transfer, this function
 returns \fBCURLE_UNSUPPORTED_PROTOCOL\fP.
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3), " curl_easy_perform "(3), " curl_easy_getinfo "(3), "

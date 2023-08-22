@@ -36,8 +36,8 @@ Pass a pointer to a char pointer to receive the pointer to a null-terminated
 string holding the URL scheme used for the most recent connection done with
 this CURL \fBhandle\fP.
 
-The \fBscheme\fP pointer will be NULL or pointing to private memory you MUST
-NOT free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the
+The \fBscheme\fP pointer is NULL or points to private memory. You MUST NOT
+free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the
 corresponding CURL handle.
 .SH PROTOCOLS
 All

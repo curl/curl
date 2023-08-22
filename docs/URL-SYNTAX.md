@@ -197,7 +197,7 @@ of Windows.
 
 ## Port number
 
-If there's a colon after the hostname, that should be followed by the port
+If there is a colon after the hostname, that should be followed by the port
 number to use. 1 - 65535. curl also supports a blank port number field - but
 only if the URL starts with a scheme.
 
@@ -379,7 +379,7 @@ The default smtp port is 25. Some servers use port 587 as an alternative.
 
 ## RTMP
 
-There's no official URL spec for RTMP so libcurl uses the URL syntax supported
+There is no official URL spec for RTMP so libcurl uses the URL syntax supported
 by the underlying librtmp library. It has a syntax where it wants a
 traditional URL, followed by a space and a series of space-separated
 `name=value` pairs.

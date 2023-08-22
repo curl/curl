@@ -42,28 +42,29 @@ subsequent requests with this handle.
 
 By passing the empty string ("") to this option, you enable the cookie engine
 without reading any initial cookies. If you tell libcurl the file name is "-"
-(just a single minus sign), libcurl will instead read from stdin.
+(just a single minus sign), libcurl instead reads from stdin.
 
 This option only \fBreads\fP cookies. To make libcurl write cookies to file,
 see \fICURLOPT_COOKIEJAR(3)\fP.
 
-If you use the Set-Cookie file format and do not specify a domain then the
-cookie is not sent since the domain will never match. To address this, set a
-domain in Set-Cookie line (doing that will include sub-domains) or preferably:
-use the Netscape format.
+If you read cookies from a plain HTTP headers file and it does not specify a
+domain in the Set-Cookie line, then the cookie is not sent since the cookie
+domain cannot match the target URL's. To address this, set a domain in
+Set-Cookie line (doing that includes sub-domains) or preferably: use the
+Netscape format.
 
-If you use this option multiple times, you just add more files to read.
-Subsequent files will add more cookies.
+If you use this option multiple times, you add more files to read cookies
+from.
 
 The application does not have to keep the string around after setting this
 option.
 
-Setting this option to NULL will (since 7.77.0) explicitly disable the cookie
-engine and clear the list of files to read cookies from.
+Setting this option to NULL (since 7.77.0) explicitly disables the cookie
+engine and clears the list of files to read cookies from.
 .SH SECURITY
 This document previously mentioned how specifying a non-existing file can also
 enable the cookie engine. While true, we strongly advise against using that
-method as it is too hard to be sure what files will stay that way in the long
+method as it is too hard to be sure that files that stay that way in the long
 run.
 .SH DEFAULT
 NULL

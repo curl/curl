@@ -340,7 +340,7 @@ should be either in your PATH or your current directory.
 Create a `Caddyfile` with the following content:
 ~~~
 localhost:7443 {
-	respond "Hello, world! You're using {http.request.proto}"
+	respond "Hello, world! you are using {http.request.proto}"
 }
 ~~~
 

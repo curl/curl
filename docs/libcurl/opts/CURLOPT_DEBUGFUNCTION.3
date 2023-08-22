@@ -55,8 +55,8 @@ shown above.
 \fICURLOPT_DEBUGFUNCTION(3)\fP replaces the standard debug function used when
 \fICURLOPT_VERBOSE(3)\fP is in effect. This callback receives debug
 information, as specified in the \fItype\fP argument. This function must
-return 0. The \fIdata\fP pointed to by the char * passed to this function WILL
-NOT be null-terminated, but will be exactly of the \fIsize\fP as told by the
+return 0. The \fIdata\fP pointed to by the char * passed to this function is
+not null-terminated, but is exactly of the \fIsize\fP as told by the
 \fIsize\fP argument.
 
 The \fIclientp\fP argument is the pointer set with \fICURLOPT_DEBUGDATA(3)\fP.
@@ -70,9 +70,9 @@ The data is header (or header-like) data received from the peer.
 The data is header (or header-like) data sent to the peer.
 .IP CURLINFO_DATA_IN
 The data is the unprocessed protocol data received from the peer. Even if the
-data is encoded or compressed, it will not be provided decoded nor
-decompressed to this callback. If you need the data in decoded and
-decompressed form, use \fICURLOPT_WRITEFUNCTION(3)\fP.
+data is encoded or compressed, it is not not provided decoded nor decompressed
+to this callback. If you need the data in decoded and decompressed form, use
+\fICURLOPT_WRITEFUNCTION(3)\fP.
 .IP CURLINFO_DATA_OUT
 The data is protocol data sent to the peer.
 .IP CURLINFO_SSL_DATA_OUT

@@ -36,8 +36,8 @@ Pass a FILE * as parameter. Tell libcurl to use this \fIstream\fP instead of
 stderr when showing the progress meter and displaying \fICURLOPT_VERBOSE(3)\fP
 data.
 
-If you are using libcurl as a win32 DLL, this option will cause an exception
-and crash in the library since it cannot access a FILE * passed on from the
+If you are using libcurl as a Windows DLL, this option causes an exception and
+a crash in the library since it cannot access a FILE * passed on from the
 application. A work-around is to instead use \fICURLOPT_DEBUGFUNCTION(3)\fP.
 .SH DEFAULT
 stderr

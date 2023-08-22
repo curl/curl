@@ -35,7 +35,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_SSL_CCC,
 .SH DESCRIPTION
 If enabled, this option makes libcurl use CCC (Clear Command Channel). It
 shuts down the SSL/TLS layer after authenticating. The rest of the control
-channel communication will be unencrypted. This allows NAT routers to follow
+channel communication remains unencrypted. This allows NAT routers to follow
 the FTP transaction. Pass a long using one of the values below
 .IP CURLFTPSSL_CCC_NONE
 do not attempt to use CCC.

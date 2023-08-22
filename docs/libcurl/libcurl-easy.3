@@ -32,13 +32,13 @@ interface functions you use. Use \fIcurl_easy_init(3)\fP to get the handle.
 You continue by setting all the options you want in the upcoming transfer, the
 most important among them is the URL itself (you cannot transfer anything
 without a specified URL as you may have figured out yourself). You might want
-to set some callbacks as well that will be called from the library when data
-is available etc. \fIcurl_easy_setopt(3)\fP is used for all this.
+to set some callbacks as well that are called from the library when data is
+available etc. \fIcurl_easy_setopt(3)\fP is used for all this.
 
 \fICURLOPT_URL(3)\fP is the only option you really must set, as otherwise
 there can be no transfer. Another commonly used option is
-\fICURLOPT_VERBOSE(3)\fP that will help you see what libcurl is doing under
-the hood, which is useful when debugging for example. The
+\fICURLOPT_VERBOSE(3)\fP that helps you see what libcurl is doing under the
+hood, which is useful when debugging for example. The
 \fIcurl_easy_setopt(3)\fP man page has a full index of the almost 300
 available options.
 
@@ -48,8 +48,8 @@ make a clone of an easy handle (with all its set options) using
 \fIcurl_easy_duphandle(3)\fP.
 
 When all is setup, you tell libcurl to perform the transfer using
-\fIcurl_easy_perform(3)\fP.  It will then do the entire operation and will not
-return until it is done (successfully or not).
+\fIcurl_easy_perform(3)\fP. It performs the entire transfer operation and does
+not return until it is done (successfully or not).
 
 After the transfer has been made, you can set new options and make another
 transfer, or if you are done, cleanup the session by calling

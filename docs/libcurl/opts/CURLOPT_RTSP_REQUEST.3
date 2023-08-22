@@ -42,9 +42,9 @@ for this method.
 .IP CURL_RTSPREQ_DESCRIBE
 Used to get the low level description of a stream. The application should note
 what formats it understands in the \fI'Accept:'\fP header. Unless set
-manually, libcurl will automatically fill in \fI'Accept: application/sdp'\fP.
-Time-condition headers will be added to Describe requests if the
-\fICURLOPT_TIMECONDITION(3)\fP option is active. \fB(The session ID is not
+manually, libcurl automatically adds in \fI'Accept: application/sdp'\fP.
+Time-condition headers are added to Describe requests if the
+\fICURLOPT_TIMECONDITION(3)\fP option is used. \fB(The session ID is not
 needed for this method)\fP
 .IP CURL_RTSPREQ_ANNOUNCE
 When sent by a client, this method changes the description of the session. For
@@ -56,9 +56,9 @@ session.  ANNOUNCE acts like an HTTP PUT or POST just like
 Setup is used to initialize the transport layer for the session. The
 application must set the desired Transport options for a session by using the
 \fICURLOPT_RTSP_TRANSPORT(3)\fP option prior to calling setup. If no session
-ID is currently set with \fICURLOPT_RTSP_SESSION_ID(3)\fP, libcurl will
-extract and use the session ID in the response to this request. The session ID
-is not needed for this method.
+ID is currently set with \fICURLOPT_RTSP_SESSION_ID(3)\fP, libcurl extracts
+and uses the session ID in the response to this request. The session ID is not
+needed for this method.
 .IP CURL_RTSPREQ_PLAY
 Send a Play command to the server. Use the \fICURLOPT_RANGE(3)\fP option to
 modify the playback time (e.g. \fInpt=10-15\fP).
@@ -71,29 +71,30 @@ This command terminates an RTSP session. Simply closing a connection does not
 terminate the RTSP session since it is valid to control an RTSP session over
 different connections.
 .IP CURL_RTSPREQ_GET_PARAMETER
-Retrieve a parameter from the server. By default, libcurl will automatically
-include a \fIContent-Type: text/parameters\fP header on all non-empty requests
-unless a custom one is set. GET_PARAMETER acts just like an HTTP PUT or POST
-(see \fICURL_RTSPREQ_SET_PARAMETER\fP).
-Applications wishing to send a heartbeat message (e.g. in the presence of a
-server-specified timeout) should send use an empty GET_PARAMETER request.
+Retrieve a parameter from the server. By default, libcurl adds a
+\fIContent-Type: text/parameters\fP header on all non-empty requests unless a
+custom one is set. GET_PARAMETER acts just like an HTTP PUT or POST (see
+\fICURL_RTSPREQ_SET_PARAMETER\fP).  Applications wishing to send a heartbeat
+message (e.g. in the presence of a server-specified timeout) should send use
+an empty GET_PARAMETER request.
 .IP CURL_RTSPREQ_SET_PARAMETER
-Set a parameter on the server. By default, libcurl will automatically include
-a \fIContent-Type: text/parameters\fP header unless a custom one is set. The
-interaction with SET_PARAMETER is much like an HTTP PUT or POST. An application
-may either use \fICURLOPT_UPLOAD(3)\fP with \fICURLOPT_READDATA(3)\fP like a
-HTTP PUT, or it may use \fICURLOPT_POSTFIELDS(3)\fP like an HTTP POST. No
-chunked transfers are allowed, so the application must set the
-\fICURLOPT_INFILESIZE(3)\fP in the former and \fICURLOPT_POSTFIELDSIZE(3)\fP
-in the latter. Also, there is no use of multi-part POSTs within RTSP.
+Set a parameter on the server. By default, libcurl uses a
+\fIContent-Type: text/parameters\fP header unless a custom one is set.
+The interaction with SET_PARAMETER is much like an HTTP PUT or POST. An
+application may either use \fICURLOPT_UPLOAD(3)\fP with
+\fICURLOPT_READDATA(3)\fP like a HTTP PUT, or it may use
+\fICURLOPT_POSTFIELDS(3)\fP like an HTTP POST. No chunked transfers are
+allowed, so the application must set the \fICURLOPT_INFILESIZE(3)\fP in the
+former and \fICURLOPT_POSTFIELDSIZE(3)\fP in the latter. Also, there is no use
+of multi-part POSTs within RTSP.
 .IP CURL_RTSPREQ_RECORD
 Used to tell the server to record a session. Use the \fICURLOPT_RANGE(3)\fP
 option to modify the record time.
 .IP CURL_RTSPREQ_RECEIVE
 This is a special request because it does not send any data to the server. The
 application may call this function in order to receive interleaved RTP
-data. It will return after processing one read buffer of data in order to give
-the application a chance to run.
+data. It returns after processing one read buffer of data in order to give the
+application a chance to run.
 .SH DEFAULT
 .SH PROTOCOLS
 RTSP

@@ -34,16 +34,17 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_RCPT_ALLOWFAILS,
 .SH DESCRIPTION
 If \fIallow\fP is set to 1L, allow RCPT TO command to fail for some recipients.
 
-When sending data to multiple recipients, by default curl will abort SMTP
-conversation if at least one of the recipients causes RCPT TO command to
+When sending data to multiple recipients, by default curl aborts the SMTP
+conversation if either one of the recipients causes the RCPT TO command to
 return an error.
 
-The default behavior can be changed by setting \fIignore\fP to 1L which will
-make curl ignore errors and proceed with the remaining valid recipients.
+The default behavior can be changed by setting \fIallow\fP to 1L which makes
+libcurl ignore errors for individual recipients and proceed with the remaining
+accepted recipients.
 
 If all recipients trigger RCPT TO failures and this flag is specified, curl
-will still abort the SMTP conversation and return the error received from to
-the last RCPT TO command.
+aborts the SMTP conversation and returns the error received from to the last
+RCPT TO command.
 .SH DEFAULT
 0
 .SH PROTOCOLS

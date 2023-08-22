@@ -37,7 +37,7 @@ Pass the address of a 'struct curl_slist *' to receive a linked-list of
 OpenSSL crypto-engines supported. Note that engines are normally implemented
 in separate dynamic libraries. Hence not all the returned engines may be
 available at runtime. \fBNOTE:\fP you must call \fIcurl_slist_free_all(3)\fP
-on the list pointer once you are done with it, as libcurl will not free the
+on the list pointer once you are done with it, as libcurl does not free this
 data for you.
 .SH PROTOCOLS
 All TLS based ones.

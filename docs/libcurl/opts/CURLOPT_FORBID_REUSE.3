@@ -35,10 +35,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FORBID_REUSE, long close);
 Pass a long. Set \fIclose\fP to 1 to make libcurl explicitly close the
 connection when done with the transfer. Normally, libcurl keeps all
 connections alive when done with one transfer in case a succeeding one follows
-that can re-use them.  This option should be used with caution and only if you
+that can reuse them. This option should be used with caution and only if you
 understand what it does as it can seriously impact performance.
 
-Set to 0 to have libcurl keep the connection open for possible later re-use
+Set to 0 to have libcurl keep the connection open for possible later reuse
 (default behavior).
 .SH DEFAULT
 0

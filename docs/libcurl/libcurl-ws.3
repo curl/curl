@@ -62,10 +62,10 @@ been received since only frames have set sizes.
 libcurl can be told to speak WebSocket in "raw mode" by setting the
 \fBCURLWS_RAW_MODE\fP bit to the \fICURLOPT_WS_OPTIONS(3)\fP option.
 
-Raw WebSocket means that libcurl will pass on the data from the network
-without parsing it leaving that entirely to the application. This mode assumes
-that the user of this knows WebSocket and can parse and figure out the data
-all by itself.
+Raw WebSocket means that libcurl passes on the data from the network without
+parsing it leaving that entirely to the application. This mode assumes that
+the user of this knows WebSocket and can parse and figure out the data all by
+itself.
 
 This mode is intended for applications that already have a WebSocket
 parser/engine that want to switch over to use libcurl for enabling WebSocket,
@@ -86,17 +86,17 @@ different API models to use it:
 downloads for when the traffic is download oriented.
 
 2. Using \fICURLOPT_CONNECT_ONLY(3)\fP and use the WebSocket recv/send
-functions at will.
+functions.
 .SH "Callback model"
 When a write callback is set and a WebSocket transfer is performed, the
-callback will be called to deliver all WebSocket data that arrives.
+callback is called to deliver all WebSocket data that arrives.
 
 The callback can then call \fIcurl_ws_meta(3)\fP to learn about the details of
 the incoming data fragment.
 .SH "CONNECT_ONLY model"
-By setting \fICURLOPT_CONNECT_ONLY(3)\fP to \fB2L\fP, the transfer will only
-establish and setup the WebSocket communication and then return control back
-to the application.
+By setting \fICURLOPT_CONNECT_ONLY(3)\fP to \fB2L\fP, the transfer only
+establishes and setups the WebSocket communication and then returns control
+back to the application.
 
 Once such a setup has been successfully performed, the application can proceed
 and use \fIcurl_ws_recv(3)\fP and \fIcurl_ws_send(3)\fP freely to exchange

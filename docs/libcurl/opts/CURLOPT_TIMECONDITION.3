@@ -37,10 +37,10 @@ value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
 or \fICURL_TIMECOND_IFUNMODSINCE\fP.
 
 The last modification time of a file is not always known and in such instances
-this feature will have no effect even if the given time condition would not
-have been met. \fIcurl_easy_getinfo(3)\fP with the
-\fICURLINFO_CONDITION_UNMET\fP option can be used after a transfer to learn if
-a zero-byte successful "transfer" was due to this condition not matching.
+this feature has no effect even if the given time condition would not have
+been met. \fIcurl_easy_getinfo(3)\fP with the \fICURLINFO_CONDITION_UNMET\fP
+option can be used after a transfer to learn if a zero-byte successful
+"transfer" was due to this condition not matching.
 .SH DEFAULT
 CURL_TIMECOND_NONE (0)
 .SH PROTOCOLS

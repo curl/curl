@@ -33,9 +33,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP_TRANSFER_DECODING,
                          long enabled);
 .SH DESCRIPTION
 Pass a long to tell libcurl how to act on transfer decoding. If set to zero,
-transfer decoding will be disabled, if set to 1 it is enabled
-(default). libcurl does chunked transfer decoding by default unless this
-option is set to zero.
+transfer decoding is disabled, if set to 1 it is enabled (default). libcurl
+does chunked transfer decoding by default unless this option is set to zero.
 .SH DEFAULT
 1
 .SH PROTOCOLS
@@ -51,8 +50,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.16.2 Does not work with the hyper backend (it will always have
-transfer decoding enabled).
+Added in 7.16.2 Does not work with the hyper backend (it always has transfer
+decoding enabled).
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

@@ -33,8 +33,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYUSERPWD, char *userpwd);
 .fi
 .SH DESCRIPTION
 Pass a char * as parameter, which should be [user name]:[password] to use for
-the connection to the HTTP proxy. Both the name and the password will be URL
-decoded before use, so to include for example a colon in the user name you
+the connection to the HTTP proxy. Both the name and the password are URL
+decoded before used, so to include for example a colon in the user name you
 should encode it as %3A. (This is different to how \fICURLOPT_USERPWD(3)\fP is
 used - beware.)
 

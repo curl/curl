@@ -42,7 +42,7 @@ passed to help in the verification process.
 When libcurl is built with OpenSSL support, X509_V_FLAG_CRL_CHECK and
 X509_V_FLAG_CRL_CHECK_ALL are both set, requiring CRL check against all the
 elements of the certificate chain if a CRL file is passed. Also note that
-\fICURLOPT_CRLFILE(3)\fP will imply \fBCURLSSLOPT_NO_PARTIALCHAIN\fP (see
+\fICURLOPT_CRLFILE(3)\fP implies \fBCURLSSLOPT_NO_PARTIALCHAIN\fP (see
 \fICURLOPT_SSL_OPTIONS(3)\fP) since curl 7.71.0 due to an OpenSSL bug.
 
 This option makes sense only when used in combination with the

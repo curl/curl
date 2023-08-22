@@ -29,15 +29,15 @@ CURLOPT_CUSTOMREQUEST \- custom request method
 .nf
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CUSTOMREQUEST, char *request);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CUSTOMREQUEST, char *method);
 .fi
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string as parameter.
 
-When you change the request method by setting \fICURLOPT_CUSTOMREQUEST(3)\fP
-to something, you do not actually change how libcurl behaves or acts in regards
-to the particular request method, it will only change the actual string sent
-in the request.
+When you change the request \fImethod\fP by setting
+\fICURLOPT_CUSTOMREQUEST(3)\fP to something, you do not actually change how
+libcurl behaves or acts in regards to the particular request method, it only
+changes the actual string sent in the request.
 
 Restore to the internal default by setting this to NULL.
 
@@ -49,14 +49,14 @@ particularly useful, for example, for performing an HTTP DELETE request.
 For example:
 
 When you tell libcurl to do a HEAD request, but then specify a GET though a
-custom request libcurl will still act as if it sent a HEAD. To switch to a
-proper HEAD use \fICURLOPT_NOBODY(3)\fP, to switch to a proper POST use
+custom request libcurl still acts as if it sent a HEAD. To switch to a proper
+HEAD use \fICURLOPT_NOBODY(3)\fP, to switch to a proper POST use
 \fICURLOPT_POST(3)\fP or \fICURLOPT_POSTFIELDS(3)\fP and to switch to a proper
 GET use \fICURLOPT_HTTPGET(3)\fP.
 
 Many people have wrongly used this option to replace the entire request with
 their own, including multiple headers and POST contents. While that might work
-in many cases, it will cause libcurl to send invalid requests and it could
+in many cases, it might cause libcurl to send invalid requests and it could
 possibly confuse the remote server badly. Use \fICURLOPT_POST(3)\fP and
 \fICURLOPT_POSTFIELDS(3)\fP to set POST data. Use \fICURLOPT_HTTPHEADER(3)\fP
 to replace or extend the set of headers sent by libcurl. Use
@@ -71,9 +71,9 @@ Instead of LIST and RETR when issuing POP3 based requests.
 
 For example:
 
-When you tell libcurl to use a custom request it will behave like a LIST or
-RETR command was sent where it expects data to be returned by the server. As
-such \fICURLOPT_NOBODY(3)\fP should be used when specifying commands such as
+When you tell libcurl to use a custom request it behaves like a LIST or RETR
+command was sent where it expects data to be returned by the server. As such
+\fICURLOPT_NOBODY(3)\fP should be used when specifying commands such as
 \fBDELE\fP and \fBNOOP\fP for example.
 .IP SMTP
 Instead of a \fBHELP\fP or \fBVRFY\fP when issuing SMTP based requests.

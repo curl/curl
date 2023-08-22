@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_DATA, void *pointer);
 .fi
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the ssl context callback set by the option
-\fICURLOPT_SSL_CTX_FUNCTION(3)\fP, this is the pointer you will get as third
+\fICURLOPT_SSL_CTX_FUNCTION(3)\fP, this is the pointer you get as third
 parameter.
 .SH DEFAULT
 NULL
@@ -99,10 +99,6 @@ int main(void)
   curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
   curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
 
-  /* Retrieve page using cacerts' certificate -> will succeed
-   * load the certificate by installing a function doing the necessary
-   * "modifications" to the SSL CONTEXT just before link init
-   */
   curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
   curl_easy_setopt(ch, CURLOPT_SSL_CTX_DATA, mypem);
   rv = curl_easy_perform(ch);

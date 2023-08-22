@@ -35,17 +35,20 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIELIST,
 Pass a char * to a \fIcookie\fP string.
 
 Such a cookie can be either a single line in Netscape / Mozilla format or just
-regular HTTP-style header (Set-Cookie: ...) format. This will also enable the
-cookie engine. This adds that single cookie to the internal cookie store.
+regular HTTP-style header (Set-Cookie: ...) format. This option also enables
+the cookie engine. This adds that single cookie to the internal cookie store.
 
-Exercise caution if you are using this option and multiple transfers may occur.
-If you use the Set-Cookie format and do not specify a domain then the cookie is
-sent for any domain (even after redirects are followed) and cannot be modified
-by a server-set cookie. If a server sets a cookie of the same name (or maybe
-you have imported one) then both will be sent on a future transfer to that
-server, likely not what you intended. To address these issues set a domain in
-Set-Cookie (doing that will include sub-domains) or use the Netscape format as
-shown in EXAMPLE.
+We strongly advice against loading cookies from a HTTP header file, as that is
+an inferior data exchange format.
+
+Exercise caution if you are using this option and multiple transfers may
+occur. If you use the Set-Cookie format and the string does not specify a
+domain, then the cookie is sent for any domain (even after redirects are
+followed) and cannot be modified by a server-set cookie. If a server sets a
+cookie of the same name (or maybe you have imported one) then both are sent on
+future transfers to that server, likely not what you intended. To address
+these issues set a domain in Set-Cookie (doing that includes sub-domains) or
+much better: use the Netscape file format.
 
 Additionally, there are commands available that perform actions if you pass in
 these exact strings:
@@ -67,11 +70,7 @@ NULL
 HTTP
 .SH EXAMPLE
 .nf
-/* This example shows an inline import of a cookie in Netscape format.
-You can set the cookie as HttpOnly to prevent XSS attacks by prepending
-#HttpOnly_ to the hostname. That may be useful if the cookie will later
-be imported by a browser.
-*/
+/* an inline import of a cookie in Netscape format. */
 
 #define SEP  "\\t"  /* Tab separates the fields */
 
@@ -84,21 +83,20 @@ char *my_cookie =
   SEP "foo"        /* Name */
   SEP "bar";       /* Value */
 
-/* my_cookie is imported immediately via CURLOPT_COOKIELIST.
-*/
+/* my_cookie is imported immediately via CURLOPT_COOKIELIST. */
 curl_easy_setopt(curl, CURLOPT_COOKIELIST, my_cookie);
 
-/* The list of cookies in cookies.txt will not be imported until right
-before a transfer is performed. Cookies in the list that have the same
-hostname, path and name as in my_cookie are skipped. That is because
-libcurl has already imported my_cookie and it's considered a "live"
-cookie. A live cookie will not be replaced by one read from a file.
+/* The list of cookies in cookies.txt are not be imported until right
+   before a transfer is performed. Cookies in the list that have the same
+   hostname, path and name as in my_cookie are skipped. That is because
+   libcurl has already imported my_cookie and it's considered a "live"
+   cookie. A live cookie is not replaced by one read from a file.
 */
 curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookies.txt");  /* import */
 
 /* Cookies are exported after curl_easy_cleanup is called. The server
-may have added, deleted or modified cookies by then. The cookies that
-were skipped on import are not exported.
+   may have added, deleted or modified cookies by then. The cookies that
+   were skipped on import are not exported.
 */
 curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
 

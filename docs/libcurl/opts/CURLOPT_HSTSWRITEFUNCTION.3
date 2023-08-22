@@ -54,8 +54,7 @@ application to store the in-memory HSTS cache when libcurl is about to discard
 it.
 
 Set the \fIclientp\fP argument with the \fICURLOPT_HSTSWRITEDATA(3)\fP option
-or it will be NULL.
-
+or it is NULL.
 When the callback is invoked, the \fIsts\fP pointer points to a populated
 struct: Read the host name to 'name' (it is \fInamelen\fP bytes long and null
 terminated. The \fIincludeSubDomains\fP field is non-zero if the entry matches
@@ -63,7 +62,7 @@ subdomains. The \fIexpire\fP string is a date stamp null-terminated string
 using the syntax YYYYMMDD HH:MM:SS.
 
 The callback should return \fICURLSTS_OK\fP if it succeeded and is prepared to
-be called again (for another host) or \fICURLSTS_DONE\fP if there's nothing
+be called again (for another host) or \fICURLSTS_DONE\fP if there is nothing
 more to do. It can also return \fICURLSTS_FAIL\fP to signal error.
 
 This option does not enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
@@ -87,7 +86,7 @@ This feature is only used for HTTP(S) transfer.
 .SH AVAILABILITY
 Added in 7.74.0
 .SH RETURN VALUE
-This will return CURLE_OK.
+This returns CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_HSTSWRITEDATA "(3), " CURLOPT_HSTSWRITEFUNCTION "(3), "
 .BR CURLOPT_HSTS "(3), " CURLOPT_HSTS_CTRL "(3), "

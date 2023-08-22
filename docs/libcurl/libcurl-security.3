@@ -56,8 +56,8 @@ this.
 automatically to frequently visited sites. The file contains passwords in
 clear text and is a real security risk. In some cases, your .netrc is also
 stored in a home directory that is NFS mounted or used on another network
-based file system, so the clear text password will fly through your network
-every time anyone reads that file.
+based file system, so the clear text password flies through your network every
+time anyone reads that file.
 
 For applications that enable .netrc use, a user who manage to set the right
 URL might then be possible to pass on passwords.
@@ -135,8 +135,8 @@ function in which addresses are sanitized before use.
 For all options in libcurl which specify headers, including but not limited to
 \fICURLOPT_HTTPHEADER(3)\fP, \fICURLOPT_PROXYHEADER(3)\fP,
 \fICURLOPT_COOKIE(3)\fP, \fICURLOPT_USERAGENT(3)\fP, \fICURLOPT_REFERER(3)\fP
-and \fICURLOPT_RANGE(3)\fP, libcurl will send the headers as-is and will not
-apply any special sanitation or normalization to them.
+and \fICURLOPT_RANGE(3)\fP, libcurl sends the headers as-is and does not apply
+any special sanitation or normalization to them.
 
 If you allow untrusted user input into these options without sanitizing CRLF
 sequences in them, someone malicious may be able to modify the request in a
@@ -180,18 +180,18 @@ idea because of the many different ways a numerical IPv4 address can be
 specified and libcurl accepts: one to four dot-separated fields using one of
 or a mix of decimal, octal or hexadecimal encoding.
 .SH "IPv6 Addresses"
-libcurl will normally handle IPv6 addresses transparently and just as easily
-as IPv4 addresses. That means that a sanitizing function that filters out
-addresses like 127.0.0.1 is not sufficient--the equivalent IPv6 addresses
-\fB::1\fP, \fB::\fP, \fB0:00::0:1\fP, \fB::127.0.0.1\fP and
-\fB::ffff:7f00:1\fP supplied somehow by an attacker would all bypass a naive
-filter and could allow access to undesired local resources. IPv6 also has
-special address blocks like link-local and site-local that generally should
-not be accessed by a server-side libcurl-using application. A poorly
-configured firewall installed in a data center, organization or server may
-also be configured to limit IPv4 connections but leave IPv6 connections wide
-open. In some cases, setting \fICURLOPT_IPRESOLVE(3)\fP to CURL_IPRESOLVE_V4
-can be used to limit resolved addresses to IPv4 only and bypass these issues.
+libcurl handles IPv6 addresses transparently and just as easily as IPv4
+addresses. That means that a sanitizing function that filters out addresses
+like 127.0.0.1 is not sufficient - the equivalent IPv6 addresses \fB::1\fP,
+\fB::\fP, \fB0:00::0:1\fP, \fB::127.0.0.1\fP and \fB::ffff:7f00:1\fP supplied
+somehow by an attacker would all bypass a naive filter and could allow access
+to undesired local resources. IPv6 also has special address blocks like
+link-local and site-local that generally should not be accessed by a
+server-side libcurl-using application. A poorly configured firewall installed
+in a data center, organization or server may also be configured to limit IPv4
+connections but leave IPv6 connections wide open. In some cases, setting
+\fICURLOPT_IPRESOLVE(3)\fP to CURL_IPRESOLVE_V4 can be used to limit resolved
+addresses to IPv4 only and bypass these issues.
 .SH Uploads
 When uploading, a redirect can cause a local (or remote) file to be
 overwritten. Applications must not allow any unsanitized URL to be passed in
@@ -236,10 +236,10 @@ using the protocol.
 By default, libcurl prohibits redirects to file:// URLs.
 
 .SH "Warning: file:// on Windows"
-The Windows operating system will automatically, and without any way for
-applications to disable it, try to establish a connection to another host over
-the network and access it (over SMB or other protocols), if only the correct
-file path is accessed.
+The Windows operating system tries automatically, and without any way for
+applications to disable it, to establish a connection to another host over the
+network and access it (over SMB or other protocols), if only the correct file
+path is accessed.
 
 When first realizing this, the curl team tried to filter out such attempts in
 order to protect applications for inadvertent probes of for example internal
@@ -253,13 +253,13 @@ system.
 The conclusion we have come to is that this is a weakness or feature in the
 Windows operating system itself, that we as an application cannot safely
 protect users against. It would just be a whack-a-mole race we do not want to
-participate in. There are too many ways to do it and there's no knob we can
+participate in. There are too many ways to do it and there is no knob we can
 use to turn off the practice.
 
 If you use curl or libcurl on Windows (any version), disable the use of the
 FILE protocol in curl or be prepared that accesses to a range of "magic paths"
-will potentially make your system try to access other hosts on your
-network. curl cannot protect you against this.
+potentially make your system access other hosts on your network. curl cannot
+protect you against this.
 .SH "What if the user can set the URL"
 Applications may find it tempting to let users set the URL that it can work
 on. That is probably fine, but opens up for mischief and trickery that you as
@@ -311,7 +311,7 @@ given IP+PORT, or with PASV/EPSV that makes the server setup a port to listen
 to and tells the client to connect to a given IP+PORT.
 
 Again, unauthenticated means that the connection might be meddled with by a
-man-in-the-middle or that there's a malicious server pretending to be the
+man-in-the-middle or that there is a malicious server pretending to be the
 right one.
 
 A malicious FTP server can respond to PASV commands with the IP+PORT of a
@@ -397,19 +397,19 @@ etc), it should be noted that libcurl still might understand proxy environment
 variables that allow the user to redirect libcurl operations to use a proxy
 controlled by the user.
 .SH "File descriptors, fork and NTLM"
-An application that uses libcurl and invokes \fIfork()\fP will get all file
+An application that uses libcurl and invokes \fIfork()\fP gets all file
 descriptors duplicated in the child process, including the ones libcurl
 created.
 
 libcurl itself uses \fIfork()\fP and \fIexecl()\fP if told to use the
-\fBCURLAUTH_NTLM_WB\fP authentication method which then will invoke the helper
+\fBCURLAUTH_NTLM_WB\fP authentication method which then invokes the helper
 command in a child process with file descriptors duplicated. Make sure that
 only the trusted and reliable helper program is invoked!
 .SH "Secrets in memory"
 When applications pass user names, passwords or other sensitive data to
-libcurl to be used for upcoming transfers, those secrets will be kept around
-as-is in memory. In many cases they will be stored in heap for as long as the
-handle itself for which the options are set.
+libcurl to be used for upcoming transfers, those secrets are kept around as-is
+in memory. In many cases they are stored in the heap for as long as the handle
+itself for which the options are set.
 
 If an attacker can access the heap, like maybe by reading swap space or via a
 core dump file, such data might be accessible.

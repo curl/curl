@@ -38,8 +38,8 @@ A connection can be paused by using this function or by letting the read or
 the write callbacks return the proper magic return code
 (\fICURL_READFUNC_PAUSE\fP and \fICURL_WRITEFUNC_PAUSE\fP). A write callback
 that returns pause signals to the library that it could not take care of any
-data at all, and that data will then be delivered again to the callback when
-the transfer is unpaused.
+data at all, and that data is then delivered again to the callback when the
+transfer is unpaused.
 
 While it may feel tempting, take care and notice that you cannot call this
 function from another thread. To unpause, you may for example call it from the
@@ -47,27 +47,27 @@ progress callback (\fICURLOPT_PROGRESSFUNCTION(3)\fP).
 
 When this function is called to unpause receiving, the write callback might
 get called before this function returns to deliver cached content. When
-libcurl delivers such cached data to the write callback, it will be delivered
-as fast as possible, which may overstep the boundary set in
+libcurl delivers such cached data to the write callback, it is delivered as
+fast as possible, which may overstep the boundary set in
 \fICURLOPT_MAX_RECV_SPEED_LARGE(3)\fP etc.
 
 The \fBhandle\fP argument identifies the transfer you want to pause or
 unpause.
 
 A paused transfer is excluded from low speed cancels via the
-\fICURLOPT_LOW_SPEED_LIMIT(3)\fP option and unpausing a transfer will reset
-the time period required for the low speed limit to be met.
+\fICURLOPT_LOW_SPEED_LIMIT(3)\fP option and unpausing a transfer resets the
+time period required for the low speed limit to be met.
 
 The \fBbitmask\fP argument is a set of bits that sets the new state of the
 connection. The following bits can be used:
 .IP CURLPAUSE_RECV
-Pause receiving data. There will be no data received on this connection until
-this function is called again without this bit set. Thus, the write callback
-(\fICURLOPT_WRITEFUNCTION(3)\fP) will not be called.
+Pause receiving data. There is no data received on this connection until this
+function is called again without this bit set. Thus, the write callback
+(\fICURLOPT_WRITEFUNCTION(3)\fP) is not called.
 .IP CURLPAUSE_SEND
-Pause sending data. There will be no data sent on this connection until this
+Pause sending data. There is no data sent on this connection until this
 function is called again without this bit set. Thus, the read callback
-(\fICURLOPT_READFUNCTION(3)\fP) will not be called.
+(\fICURLOPT_READFUNCTION(3)\fP) is not called.
 .IP CURLPAUSE_ALL
 Convenience define that pauses both directions.
 .IP CURLPAUSE_CONT
@@ -75,37 +75,37 @@ Convenience define that unpauses both directions.
 .SH LIMITATIONS
 The pausing of transfers does not work with protocols that work without
 network connectivity, like FILE://. Trying to pause such a transfer, in any
-direction, will cause problems in the worst case or an error in the best case.
+direction, might cause problems or error.
 .SH MULTIPLEXED
 When a connection is used multiplexed, like for HTTP/2, and one of the
 transfers over the connection is paused and the others continue flowing,
 libcurl might end up buffering contents for the paused transfer. It has to do
 this because it needs to drain the socket for the other transfers and the
-already announced window size for the paused transfer will allow the server to
+already announced window size for the paused transfer allows the server to
 continue sending data up to that window size amount. By default, libcurl
 announces a 32 megabyte window size, which thus can make libcurl end up
 buffering 32 megabyte of data for a paused stream.
 
-When such a paused stream is unpaused again, any buffered data will be
-delivered first.
+When such a paused stream is unpaused again, any buffered data is delivered
+first.
 .SH EXAMPLE
 .nf
 /* pause a transfer in both directions */
 curl_easy_pause(curl, CURL_READFUNC_PAUSE | CURL_WRITEFUNC_PAUSE);
 .fi
 .SH "MEMORY USE"
-When pausing a read by returning the magic return code from a write callback,
-the read data is already in libcurl's internal buffers so it will have to keep
-it in an allocated buffer until the receiving is again unpaused using this
-function.
+When pausing a download transfer by returning the magic return code from a
+write callback, the read data is already in libcurl's internal buffers so it
+has to keep it in an allocated buffer until the receiving is again unpaused
+using this function.
 
 If the downloaded data is compressed and is asked to get uncompressed
-automatically on download, libcurl will continue to uncompress the entire
-downloaded chunk and it will cache the data uncompressed. This has the side-
+automatically on download, libcurl continues to uncompress the entire
+downloaded chunk and it caches the data uncompressed. This has the side-
 effect that if you download something that is compressed a lot, it can result
 in a large data amount needing to be allocated to save the data during the
-pause. This said, you should probably consider not using paused receiving if
-you allow libcurl to uncompress data automatically.
+pause. consider not using paused receiving if you allow libcurl to uncompress
+data automatically.
 .SH AVAILABILITY
 Added in 7.18.0.
 .SH RETURN VALUE

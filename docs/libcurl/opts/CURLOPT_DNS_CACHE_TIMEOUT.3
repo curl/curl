@@ -32,10 +32,10 @@ CURLOPT_DNS_CACHE_TIMEOUT \- life-time for DNS cache entries
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_CACHE_TIMEOUT, long age);
 .fi
 .SH DESCRIPTION
-Pass a long, this sets the timeout in seconds. Name resolves will be kept in
-memory and used for this number of seconds. Set to zero to completely disable
-caching, or set to -1 to make the cached entries remain forever. By default,
-libcurl caches this info for 60 seconds.
+Pass a long, this sets the timeout in seconds. Name resolve results are kept
+in memory and used for this number of seconds. Set to zero to completely
+disable caching, or set to -1 to make the cached entries remain forever. By
+default, libcurl caches this info for 60 seconds.
 
 We recommend users not to tamper with this option unless strictly necessary.
 If you do, be careful of using large values that can make the cache size grow
@@ -49,8 +49,8 @@ if DHCP has updated the server info, and this may look like a DNS cache issue
 to the casual libcurl-app user.
 
 DNS entries have a "TTL" property but libcurl does not use that. This DNS
-cache timeout is entirely speculative that a name will resolve to the same
-address for a certain small amount of time into the future.
+cache timeout is entirely speculative that a name resolves to the same address
+for a small amount of time into the future.
 
 Since version 8.1.0, libcurl prunes entries from the DNS cache if it exceeds
 30,000 entries no matter which timeout value is used.
@@ -69,7 +69,7 @@ if(curl) {
 
   ret = curl_easy_perform(curl);
 
-  /* in this second request, the cache will not be used if more than
+  /* in this second request, the cache is not be used if more than
      two seconds have passed since the previous name resolve */
   ret = curl_easy_perform(curl);
 

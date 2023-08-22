@@ -39,14 +39,14 @@ below. You can set \fICURLSHOPT_UNSHARE(3)\fP multiple times with different
 data arguments to remove multiple types from the shared object. Add data to
 share again with \fICURLSHOPT_SHARE(3)\fP.
 .IP CURL_LOCK_DATA_COOKIE
-Cookie data will no longer be shared across the easy handles using this shared
+Cookie data is no longer shared across the easy handles using this shared
 object.
 .IP CURL_LOCK_DATA_DNS
-Cached DNS hosts will be no longer be shared across the easy handles using
-this shared object.
-.IP CURL_LOCK_DATA_SSL_SESSION
-SSL session IDs will no longer be shared across the easy handles using this
+Cached DNS hosts are no longer shared across the easy handles using this
 shared object.
+.IP CURL_LOCK_DATA_SSL_SESSION
+SSL session IDs are no longer shared across the easy handles using this shared
+object.
 .IP CURL_LOCK_DATA_CONNECT
 The connection cache is no longer shared.
 .IP CURL_LOCK_DATA_PSL

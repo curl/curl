@@ -28,7 +28,7 @@ libcurl-multi \- how to use the multi interface
 .SH DESCRIPTION
 This is an overview on how to use the libcurl multi interface in your C
 programs. There are specific man pages for each function mentioned in
-here. There's also the \fIlibcurl-tutorial(3)\fP man page for a complete
+here. There is also the \fIlibcurl-tutorial(3)\fP man page for a complete
 tutorial to programming with libcurl and the \fIlibcurl-easy(3)\fP man page
 for an overview of the libcurl easy interface.
 
@@ -59,8 +59,8 @@ handle. You create all the easy handles you need, and setup the appropriate
 options for each easy handle using \fIcurl_easy_setopt(3)\fP.
 
 There are two flavors of the multi interface, the select() oriented one and
-the event based one we call multi_socket. You will benefit from reading
-through the description of both versions to fully understand how they work and
+the event based one we call multi_socket. You benefit from reading through the
+description of both versions to fully understand how they work and
 differentiate. We start out with the select() oriented version.
 
 When an easy handle is setup and ready for transfer, then instead of using
@@ -78,17 +78,17 @@ necessary. You can remove handles at any point during transfers.
 Adding the easy handle to the multi handle does not start the transfer.
 Remember that one of the main ideas with this interface is to let your
 application drive. You drive the transfers by invoking
-\fIcurl_multi_perform(3)\fP. libcurl will then transfer data if there is
-anything available to transfer. it will use the callbacks and everything else
-you have setup in the individual easy handles. it will transfer data on all
-current transfers in the multi stack that are ready to transfer anything. It
-may be all, it may be none. When there's nothing more to do for now, it
-returns back to the calling application.
+\fIcurl_multi_perform(3)\fP. libcurl then transfers data if there is anything
+available to transfer. It uses the callbacks and everything else you have
+setup in the individual easy handles. It transfers data on all current
+transfers in the multi stack that are ready to transfer anything. It may be
+all, it may be none. When there is nothing more to do for now, it returns back
+to the calling application.
 
 Your application extracts info from libcurl about when it would like to get
 invoked to transfer data or do other work. The most convenient way is to use
-\fIcurl_multi_poll(3)\fP that will help you wait until the application should
-call libcurl again. The older API to accomplish the same thing is
+\fIcurl_multi_poll(3)\fP that helps you wait until the application should call
+libcurl again. The older API to accomplish the same thing is
 \fIcurl_multi_fdset(3)\fP that extracts \fIfd_sets\fP from libcurl to use in
 select() or poll() calls in order to get to know when the transfers in the
 multi stack might need attention. Both these APIs allow for your program to
@@ -119,13 +119,13 @@ When all transfers in the multi stack are done, close the multi handle with
 invoke separate \fIcurl_easy_cleanup(3)\fP calls for every single easy handle
 to clean them up properly.
 
-If you want to re-use an easy handle that was added to the multi handle for
+If you want to reuse an easy handle that was added to the multi handle for
 transfer, you must first remove it from the multi stack and then re-add it
 again (possibly after having altered some options at your own choice).
 .SH "MULTI_SOCKET"
 \fIcurl_multi_socket_action(3)\fP function offers a way for applications to
 not only avoid being forced to use select(), but it also offers a much more
-high-performance API that will make a significant difference for applications
+high-performance API that makes a significant difference for applications
 using large numbers of simultaneous connections.
 
 \fIcurl_multi_socket_action(3)\fP is then used instead of
@@ -135,9 +135,9 @@ When using this API, you add easy handles to the multi handle just as with the
 normal multi interface. Then you also set two callbacks with the
 \fICURLMOPT_SOCKETFUNCTION(3)\fP and \fICURLMOPT_TIMERFUNCTION(3)\fP options
 to \fIcurl_multi_setopt(3)\fP. They are two callback functions that libcurl
-will call with information about what sockets to wait for, and for what
-activity, and what the current timeout time is - if that expires libcurl
-should be notified.
+calls with information about what sockets to wait for, and for what activity,
+and what the current timeout time is - if that expires libcurl should be
+notified.
 
 The multi_socket API is designed to inform your application about which
 sockets libcurl is currently using and for what activities (read and/or write)
@@ -161,10 +161,10 @@ losing performance.
 
 When you have added your initial set of handles, you call
 \fIcurl_multi_socket_action(3)\fP with CURL_SOCKET_TIMEOUT set in the
-\fIsockfd\fP argument, and you will get callbacks call that sets you up and
-you then continue to call \fIcurl_multi_socket_action(3)\fP accordingly when
-you get activity on the sockets you have been asked to wait on, or if the
-timeout timer expires.
+\fIsockfd\fP argument, and you get callbacks invoked that set you up and you
+then continue to call \fIcurl_multi_socket_action(3)\fP accordingly when you
+get activity on the sockets you have been asked to wait on, or if the timeout
+timer expires.
 
 You can poll \fIcurl_multi_info_read(3)\fP to see if any transfer has
 completed, as it then has a message saying so.

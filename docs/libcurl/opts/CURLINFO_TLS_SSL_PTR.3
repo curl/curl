@@ -38,9 +38,9 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SSL_PTR,
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SESSION,
                            struct curl_tlssessioninfo **session);
 .SH DESCRIPTION
-Pass a pointer to a \fIstruct curl_tlssessioninfo *\fP.  The pointer will be
-initialized to refer to a \fIstruct curl_tlssessioninfo *\fP that will contain
-an enum indicating the SSL library used for the handshake and a pointer to the
+Pass a pointer to a \fIstruct curl_tlssessioninfo *\fP.  The pointer is
+initialized to refer to a \fIstruct curl_tlssessioninfo *\fP that contains an
+enum indicating the SSL library used for the handshake and a pointer to the
 respective internal TLS session structure of this underlying SSL library.
 
 This option may be useful for example to extract certificate information in a
@@ -61,8 +61,8 @@ CURLSSLBACKEND_MBEDTLS, CURLSSLBACKEND_NSS, CURLSSLBACKEND_OPENSSL,
 CURLSSLBACKEND_SCHANNEL or CURLSSLBACKEND_MESALINK. (Note that the OpenSSL
 forks are all reported as just OpenSSL here.)
 
-The \fIinternals\fP struct member will point to a TLS library specific pointer
-for the active ("in use") SSL connection, with the following underlying types:
+The \fIinternals\fP struct member points to a TLS library specific pointer for
+the active ("in use") SSL connection, with the following underlying types:
 .RS
 .IP GnuTLS
 \fBgnutls_session_t\fP
@@ -101,9 +101,9 @@ retrieve a second in-use SSL session associated with an easy handle.
 
 This option has not been thoroughly tested with clear text protocols that can
 be upgraded/downgraded to/from SSL: FTP, SMTP, POP3, IMAP when used with
-\fICURLOPT_USE_SSL(3)\fP. Though you will be able to retrieve the SSL pointer,
-it's possible that before you can do that data (including auth) may have
-already been sent over a connection after it was upgraded.
+\fICURLOPT_USE_SSL(3)\fP. Though you can to retrieve the SSL pointer, it's
+possible that before you can do that, data (including auth) may have already
+been sent over a connection after it was upgraded.
 
 Renegotiation. If unsafe renegotiation or renegotiation in a way that the
 certificate is allowed to change is allowed by your SSL library this may occur

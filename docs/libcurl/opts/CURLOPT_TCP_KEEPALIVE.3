@@ -32,7 +32,7 @@ CURLOPT_TCP_KEEPALIVE \- TCP keep-alive probing
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_KEEPALIVE, long probe);
 .fi
 .SH DESCRIPTION
-Pass a long. If set to 1, TCP keepalive probes will be sent. The delay and
+Pass a long. If set to 1, TCP keepalive probes are used. The delay and
 frequency of these probes can be controlled by the
 \fICURLOPT_TCP_KEEPIDLE(3)\fP and \fICURLOPT_TCP_KEEPINTVL(3)\fP options,
 provided the operating system supports them. Set to 0 (default behavior) to

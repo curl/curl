@@ -35,23 +35,22 @@ CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n);
 This function receives raw data from the established connection. You may use
 it together with \fIcurl_easy_send(3)\fP to implement custom protocols using
 libcurl. This functionality can be particularly useful if you use proxies
-and/or SSL encryption: libcurl will take care of proxy negotiation and
-connection setup.
+and/or SSL encryption: libcurl takes care of proxy negotiation and connection
+setup.
 
-\fBbuffer\fP is a pointer to your buffer that will get the received
-data. \fBbuflen\fP is the maximum amount of data you can get in that
-buffer. The variable \fBn\fP points to will receive the number of received
-bytes.
+\fBbuffer\fP is a pointer to your buffer memory that gets populated by the
+received data. \fBbuflen\fP is the maximum amount of data you can get in that
+buffer. The variable \fBn\fP points to receives the number of received bytes.
 
 To establish the connection, set \fICURLOPT_CONNECT_ONLY(3)\fP option before
 calling \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP. Note that
 \fIcurl_easy_recv(3)\fP does not work on connections that were created without
 this option.
 
-The call will return \fBCURLE_AGAIN\fP if there is no data to read - the
-socket is used in non-blocking mode internally. When \fBCURLE_AGAIN\fP is
-returned, use your operating system facilities like \fIselect(2)\fP to wait
-for data. The socket may be obtained using \fIcurl_easy_getinfo(3)\fP with
+The call returns \fBCURLE_AGAIN\fP if there is no data to read - the socket is
+used in non-blocking mode internally. When \fBCURLE_AGAIN\fP is returned, use
+your operating system facilities like \fIselect(2)\fP to wait for data. The
+socket may be obtained using \fIcurl_easy_getinfo(3)\fP with
 \fICURLINFO_ACTIVESOCKET(3)\fP.
 
 Wait on the socket only if \fIcurl_easy_recv(3)\fP returns \fBCURLE_AGAIN\fP.
@@ -70,8 +69,7 @@ read was for internal SSL processing, and no other data is available.
  res = curl_easy_perform(curl);
 
  if(res == CURLE_OK) {
-   /* Extract the socket from the curl handle -
-      we will need it for waiting. */
+   /* Extract the socket from the curl handle - we need it for waiting. */
    res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
 
    /* read data */
@@ -91,7 +89,7 @@ system facilities to wait until data can be read, and retry.
 
 Reading exactly 0 bytes indicates a closed connection.
 
-If there's no socket available to use from the previous transfer, this function
+If there is no socket available to use from the previous transfer, this function
 returns \fBCURLE_UNSUPPORTED_PROTOCOL\fP.
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3), " curl_easy_perform "(3), "

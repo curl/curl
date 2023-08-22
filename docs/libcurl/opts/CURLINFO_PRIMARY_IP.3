@@ -35,12 +35,12 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRIMARY_IP, char **ip);
 Pass a pointer to a char pointer to receive the pointer to a null-terminated
 string holding the IP address of the most recent connection done with this
 \fBcurl\fP handle. This string may be IPv6 when that is enabled. Note that you
-get a pointer to a memory area that will be re-used at next request so you
-need to copy the string if you want to keep the information.
+get a pointer to a memory area that is reused at next request so you need to
+copy the string if you want to keep the information.
 
-The \fBip\fP pointer will be NULL or pointing to private memory you MUST NOT
-free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the
-corresponding CURL handle.
+The \fBip\fP pointer is NULL or points to private memory. You MUST NOT free -
+it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the corresponding
+CURL handle.
 .SH PROTOCOLS
 All network based ones
 .SH EXAMPLE
@@ -50,7 +50,7 @@ All network based ones
 
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* Perform the request, res will get the return code */
+  /* Perform the transfer */
   res = curl_easy_perform(curl);
   /* Check for errors */
   if((res == CURLE_OK) &&

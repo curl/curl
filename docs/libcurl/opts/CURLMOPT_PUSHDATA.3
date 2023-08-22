@@ -32,9 +32,9 @@ CURLMOPT_PUSHDATA \- pointer to pass to push callback
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PUSHDATA, void *pointer);
 .fi
 .SH DESCRIPTION
-Set \fIpointer\fP to pass as the last argument to the
-\fICURLMOPT_PUSHFUNCTION(3)\fP callback. The pointer will not be touched or
-used by libcurl itself, only passed on to the callback function.
+Set a \fIpointer\fP to pass as the last argument to the
+\fICURLMOPT_PUSHFUNCTION(3)\fP callback. The pointer is not touched or used by
+libcurl itself, only passed on to the callback function.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

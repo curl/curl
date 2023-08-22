@@ -51,8 +51,8 @@ digits.  Examples: 06 Nov 1994, 06-Nov-94 and Nov-94 6.
 .TP
 .B time of the day items
 This string specifies the time on a given day. You must specify it with 6
-digits with two colons: HH:MM:SS. To not include the time in a date string,
-will make the function assume 00:00:00. Example: 18:19:21.
+digits with two colons: HH:MM:SS. If there is no time given in a provided date
+string, 00:00:00 is assumed. Example: 18:19:21.
 .TP
 .B time zone items
 Specifies international time zone. There are a few acronyms supported, but in
@@ -107,13 +107,13 @@ This function returns -1 when it fails to parse the date string. Otherwise it
 returns the number of seconds as described.
 
 On systems with a signed 32 bit time_t: if the year is larger than 2037 or
-less than 1903, this function will return -1.
+less than 1903, this function returns -1.
 
 On systems with an unsigned 32 bit time_t: if the year is larger than 2106 or
-less than 1970, this function will return -1.
+less than 1970, this function returns -1.
 
 On systems with 64 bit time_t: if the year is less than 1583, this function
-will return -1. (The Gregorian calendar was first introduced 1582 so no "real"
+returns -1. (The Gregorian calendar was first introduced 1582 so no "real"
 dates in this way of doing dates existed before then.)
 .SH "SEE ALSO"
 .BR curl_easy_escape "(3), " curl_easy_unescape "(3), "

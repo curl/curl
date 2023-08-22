@@ -37,8 +37,8 @@ No function since pipelining was removed in 7.62.0.
 
 Pass a long with a \fBsize\fP in bytes. If a transfer in a pipeline is
 currently processing a request with a Content-Length larger than this
-\fICURLMOPT_CONTENT_LENGTH_PENALTY_SIZE(3)\fP, that pipeline will then not be
-considered for additional requests, even if it is shorter than
+\fICURLMOPT_CONTENT_LENGTH_PENALTY_SIZE(3)\fP, that pipeline is not considered
+for additional requests, even if it is shorter than
 \fICURLMOPT_MAX_PIPELINE_LENGTH(3)\fP.
 .SH DEFAULT
 The default value is 0, which means that the size penalization is inactive.

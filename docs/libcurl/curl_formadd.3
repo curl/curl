@@ -44,9 +44,9 @@ allow repeated invokes to find the end of the list faster.
 After the \fIlastitem\fP pointer follow the real arguments.
 
 The pointers \fIfirstitem\fP and \fIlastitem\fP should both be pointing to
-NULL in the first call to this function. All list-data will be allocated by
-the function itself. You must call \fIcurl_formfree(3)\fP on the
-\fIfirstitem\fP after the form post has been done to free the resources.
+NULL in the first call to this function. All list-data is allocated by the
+function itself. You must call \fIcurl_formfree(3)\fP on the \fIfirstitem\fP
+after the form post has been done to free the resources.
 
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
@@ -54,8 +54,8 @@ You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 First, there are some basics you need to understand about multipart form
 posts. Each part consists of at least a NAME and a CONTENTS part. If the part
 is made for file upload, there are also a stored CONTENT-TYPE and a FILENAME.
-Below, we will discuss what options you use to set these properties in the
-parts you want to add to your post.
+Below, we discuss what options you use to set these properties in the parts
+you want to add to your post.
 
 The options listed first are for making normal parts. The options from
 \fICURLFORM_FILE\fP through \fICURLFORM_BUFFERLENGTH\fP are for file upload
@@ -66,34 +66,33 @@ followed by a string which provides the \fIname\fP of this part. libcurl
 copies the string so your application does not need to keep it around after
 this function call. If the name is not null-terminated, you must set its
 length with \fBCURLFORM_NAMELENGTH\fP. The \fIname\fP is not allowed to
-contain zero-valued bytes. The copied data will be freed by
-\fIcurl_formfree(3)\fP.
+contain zero-valued bytes. The copied data is freed by \fIcurl_formfree(3)\fP.
 .IP CURLFORM_PTRNAME
-followed by a string which provides the \fIname\fP of this part. libcurl
-will use the pointer and refer to the data in your application, so you
-must make sure it remains until curl no longer needs it. If the name
-is not null-terminated, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
-The \fIname\fP is not allowed to contain zero-valued bytes.
+followed by a string which provides the \fIname\fP of this part. libcurl uses
+the pointer and refer to the data in your application, so you must make sure
+it remains until curl no longer needs it. If the name is not null-terminated,
+you must set its length with \fBCURLFORM_NAMELENGTH\fP.  The \fIname\fP is not
+allowed to contain zero-valued bytes.
 .IP CURLFORM_COPYCONTENTS
-followed by a pointer to the contents of this part, the actual data
-to send away. libcurl copies the provided data, so your application does not
-need to keep it around after this function call. If the data is not null
-terminated, or if you would like it to contain zero bytes, you must
-set the length of the name with \fBCURLFORM_CONTENTSLENGTH\fP. The copied
-data will be freed by \fIcurl_formfree(3)\fP.
+followed by a pointer to the contents of this part, the actual data to send
+away. libcurl copies the provided data, so your application does not need to
+keep it around after this function call. If the data is not null terminated,
+or if you would like it to contain zero bytes, you must set the length of the
+name with \fBCURLFORM_CONTENTSLENGTH\fP. The copied data is freed by
+\fIcurl_formfree(3)\fP.
 .IP CURLFORM_PTRCONTENTS
 followed by a pointer to the contents of this part, the actual data to send
-away. libcurl will use the pointer and refer to the data in your application,
-so you must make sure it remains until curl no longer needs it.  If the data
-is not null-terminated, or if you would like it to contain zero bytes, you
-must set its length with \fBCURLFORM_CONTENTSLENGTH\fP.
+away. libcurl uses the pointer and refer to the data in your application, so
+you must make sure it remains until curl no longer needs it.  If the data is
+not null-terminated, or if you would like it to contain zero bytes, you must
+set its length with \fBCURLFORM_CONTENTSLENGTH\fP.
 .IP CURLFORM_CONTENTLEN
 followed by a curl_off_t value giving the length of the contents. Note that
 for \fICURLFORM_STREAM\fP contents, this option is mandatory.
 
-If you pass a 0 (zero) for this option, libcurl will instead do a strlen() on
-the contents to figure out the size. If you really want to send a zero byte
-content then you must make sure strlen() on the data pointer returns zero.
+If you pass a 0 (zero) for this option, libcurl calls strlen() on the contents
+to figure out the size. If you really want to send a zero byte content then
+you must make sure strlen() on the data pointer returns zero.
 
 (Option added in 7.46.0)
 .IP CURLFORM_CONTENTSLENGTH
@@ -102,9 +101,9 @@ content then you must make sure strlen() on the data pointer returns zero.
 followed by a long giving the length of the contents. Note that for
 \fICURLFORM_STREAM\fP contents, this option is mandatory.
 
-If you pass a 0 (zero) for this option, libcurl will instead do a strlen() on
-the contents to figure out the size. If you really want to send a zero byte
-content then you must make sure strlen() on the data pointer returns zero.
+If you pass a 0 (zero) for this option, libcurl calls strlen() on the contents
+to figure out the size. If you really want to send a zero byte content then
+you must make sure strlen() on the data pointer returns zero.
 .IP CURLFORM_FILECONTENT
 followed by a filename, causes that file to be read and its contents used
 as data in this part. This part does \fInot\fP automatically become a file

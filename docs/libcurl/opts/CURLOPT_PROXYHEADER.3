@@ -37,12 +37,12 @@ sent to a proxy. The rules for this list is identical to the
 \fICURLOPT_HTTPHEADER(3)\fP option's.
 
 The headers set with this option is only ever used in requests sent to a proxy
-- when there's also a request sent to a host.
+- when there is also a request sent to a host.
 
 The first line in a request (containing the method, usually a GET or POST) is
 NOT a header and cannot be replaced using this option. Only the lines
 following the request-line are headers. Adding this method line in this list
-of headers will only cause your request to send an invalid header.
+of headers causes your request to send an invalid header.
 
 Pass a NULL to this to reset back to no custom headers.
 .SH DEFAULT

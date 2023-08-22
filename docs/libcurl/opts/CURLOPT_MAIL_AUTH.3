@@ -32,7 +32,7 @@ CURLOPT_MAIL_AUTH \- SMTP authentication address
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_AUTH, char *auth);
 .fi
 .SH DESCRIPTION
-Pass a pointer to a null-terminated string as parameter. This will be used to
+Pass a pointer to a null-terminated string as parameter. This is used to
 specify the authentication address (identity) of a submitted message that is
 being relayed to another server.
 
@@ -45,8 +45,8 @@ be used for this parameter.
 
 Unlike \fICURLOPT_MAIL_FROM(3)\fP and \fICURLOPT_MAIL_RCPT(3)\fP, the address
 should not be specified within a pair of angled brackets (<>). However, if an
-empty string is used then a pair of brackets will be sent by libcurl as
-required by RFC 2554.
+empty string is used then a pair of brackets are sent by libcurl as required
+by RFC 2554.
 
 The application does not have to keep the string around after setting this
 option.

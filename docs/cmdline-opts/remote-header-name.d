@@ -23,7 +23,7 @@ in the destination directory, it will not be overwritten and an error will
 occur - unless you allow it by using the --clobber option. If the server does
 not specify a file name then this option has no effect.
 
-There's no attempt to decode %-sequences (yet) in the provided file name, so
+There is no attempt to decode %-sequences (yet) in the provided file name, so
 this option may provide you with rather unexpected file names.
 
 This feature uses the name from the "filename" field, it does not yet support

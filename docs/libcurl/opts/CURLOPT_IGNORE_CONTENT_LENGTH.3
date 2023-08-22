@@ -35,13 +35,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_IGNORE_CONTENT_LENGTH,
 If \fIignore\fP is set to 1L, ignore the Content-Length header in the HTTP
 response and ignore asking for or relying on it for FTP transfers.
 
-This is useful for HTTP with Apache 1.x (and similar servers) which will
-report incorrect content length for files over 2 gigabytes. If this option is
-used, curl will not be able to accurately report progress, and will simply
-stop the download when the server ends the connection.
+This is useful for doing HTTP transfers with ancient web servers which report
+incorrect content length for files over 2 gigabytes. If this option is used,
+curl cannot accurately report progress, and it instead stops the download when
+the server ends the connection.
 
 It is also useful with FTP when for example the file is growing while the
-transfer is in progress which otherwise will unconditionally cause libcurl to
+transfer is in progress which otherwise unconditionally causes libcurl to
 report error.
 
 Only use this option if strictly necessary.

@@ -49,12 +49,12 @@ library's \fISSL_CTX\fP for OpenSSL or wolfSSL, a pointer to
 \fImbedtls_ssl_config\fP for mbedTLS or a pointer to
 \fIbr_ssl_client_context\fP for BearSSL. If an error is returned from the
 callback no attempt to establish a connection is made and the perform
-operation will return the callback's error code. Set the \fIclientp\fP
-argument with the \fICURLOPT_SSL_CTX_DATA(3)\fP option.
+operation returns the callback's error code. Set the \fIclientp\fP argument
+with the \fICURLOPT_SSL_CTX_DATA(3)\fP option.
 
-This function will get called on all new connections made to a server, during
-the SSL negotiation. The \fIssl_ctx\fP will point to a newly initialized object
-each time, but note the pointer may be the same as from a prior call.
+This function gets called on all new connections made to a server, during the
+SSL negotiation. The \fIssl_ctx\fP points to a newly initialized object each
+time, but note the pointer may be the same as from a prior call.
 
 To use this properly, a non-trivial amount of knowledge of your SSL library is
 necessary. For example, you can use this function to call library-specific
@@ -71,8 +71,8 @@ unknowingly reusing SSL connections with different properties. To remedy this
 you may set \fICURLOPT_FORBID_REUSE(3)\fP from the callback function.
 
 WARNING: If you are using DNS-over-HTTPS (DoH) via \fICURLOPT_DOH_URL(3)\fP
-then this callback will also be called for those transfers and the curl handle
-is set to an internal handle. \fBThis behavior is subject to change.\fP We
+then this callback is also called for those transfers and the curl handle is
+set to an internal handle. \fBThis behavior is subject to change.\fP We
 recommend before performing your transfer set \fICURLOPT_PRIVATE(3)\fP on your
 curl handle so you can identify it in the context callback. If you have a
 reason to modify DoH SSL context please let us know on the curl-library
@@ -141,10 +141,6 @@ int main(void)
   curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
   curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
 
-  /* Retrieve page using cacerts' certificate -> will succeed
-   * load the certificate by installing a function doing the necessary
-   * "modifications" to the SSL CONTEXT just before link init
-   */
   curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
   curl_easy_setopt(ch, CURLOPT_SSL_CTX_DATA, mypem);
   rv = curl_easy_perform(ch);

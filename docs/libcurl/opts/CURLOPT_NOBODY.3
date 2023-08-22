@@ -38,16 +38,16 @@ libcurl do a HEAD request. For most other protocols it means just not asking
 to transfer the body data.
 
 For HTTP operations when \fICURLOPT_NOBODY(3)\fP has been set, disabling this
-option (with 0) will make it a GET again - only if the method is still set to
-be HEAD. The proper way to get back to a GET request is to set
+option (with 0) makes it a GET again - only if the method is still set to be
+HEAD. The proper way to get back to a GET request is to set
 \fICURLOPT_HTTPGET(3)\fP and for other methods, use the POST or UPLOAD
 options.
 
 Enabling \fICURLOPT_NOBODY(3)\fP means asking for a download without a body.
 
-If you do a transfer with HTTP that involves a method other than HEAD, you
-will get a body (unless the resource and server sends a zero byte body for the
-specific URL you request).
+If you do a transfer with HTTP that involves a method other than HEAD, you get
+a body (unless the resource and server sends a zero byte body for the specific
+URL you request).
 .SH DEFAULT
 0, the body is transferred
 .SH PROTOCOLS

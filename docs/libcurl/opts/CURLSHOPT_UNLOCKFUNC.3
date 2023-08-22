@@ -33,7 +33,7 @@ void unlockcb(CURL *handle, curl_lock_data data, void *clientp);
 CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_UNLOCKFUNC, unlockcb);
 .fi
 .SH DESCRIPTION
-Set a mutex unlock callback for the share object. There's a corresponding
+Set a mutex unlock callback for the share object. There is a corresponding
 \fICURLSHOPT_LOCKFUNC(3)\fP callback called when the mutex is first locked.
 
 The \fIunlockcb\fP argument must be a pointer to a function matching the

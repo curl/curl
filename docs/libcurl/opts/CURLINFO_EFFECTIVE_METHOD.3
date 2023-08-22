@@ -39,8 +39,8 @@ method.
 In cases when you have asked libcurl to follow redirects, the method may not be
 the same method the first request would use.
 
-The \fBmethodp\fP pointer will be NULL or pointing to private memory you MUST
-NOT free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the
+The \fBmethodp\fP pointer is NULL or points to private memory. You MUST NOT
+free - it gets freed when you call \fIcurl_easy_cleanup(3)\fP on the
 corresponding CURL handle.
 .SH PROTOCOLS
 HTTP(S)

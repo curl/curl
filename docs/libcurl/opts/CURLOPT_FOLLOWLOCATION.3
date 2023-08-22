@@ -33,32 +33,35 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FOLLOWLOCATION, long enable);
 .fi
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to follow any Location: header
-that the server sends as part of an HTTP header in a 3xx response. The
-Location: header can specify a relative or an absolute URL to follow.
+redirects that a HTTP server sends in a 30x response. The Location: header can
+specify a relative or an absolute URL to follow.
 
-libcurl will issue another request for the new URL and follow new Location:
-headers all the way until no more such headers are returned.
-\fICURLOPT_MAXREDIRS(3)\fP can be used to limit the number of redirects
-libcurl will follow.
+libcurl issues another request for the new URL and follows subsequent new
+Location: redirects all the way until no more such headers are returned or the
+maximum limit is reached. \fICURLOPT_MAXREDIRS(3)\fP is used to limit the
+number of redirects libcurl follows.
 
-libcurl limits what protocols it automatically follows to. The accepted
-protocols are set with \fICURLOPT_REDIR_PROTOCOLS(3)\fP. By default libcurl
-will allow HTTP, HTTPS, FTP and FTPS on redirect (7.65.2). Older versions of
-libcurl allowed all protocols on redirect except those disabled for security
-reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0 SMB and SMBS
-are also disabled.
+libcurl restricts what protocols it automatically follow redirects to. The
+accepted target protocols are set with \fICURLOPT_REDIR_PROTOCOLS(3)\fP. By
+default libcurl allows HTTP, HTTPS, FTP and FTPS on redirects.
 
-When following a Location:, the 3xx response code that redirected it also
-dictates which request method it will use in the subsequent request: For 301,
-302 and 303 responses libcurl will switch method from POST to GET unless
-\fICURLOPT_POSTREDIR(3)\fP instructs libcurl otherwise. All other 3xx codes
-will make libcurl send the same method again.
+When following a redirect, the specific 30x response code also dictates which
+request method libcurl uses in the subsequent request: For 301, 302 and 303
+responses libcurl switches method from POST to GET unless
+\fICURLOPT_POSTREDIR(3)\fP instructs libcurl otherwise. All other redirect
+response codes make libcurl use the same method again.
 
 For users who think the existing location following is too naive, too simple
 or just lacks features, it is easy to instead implement your own redirect
 follow logic with the use of \fIcurl_easy_getinfo(3)\fP's
 \fICURLINFO_REDIRECT_URL(3)\fP option instead of using
 \fICURLOPT_FOLLOWLOCATION(3)\fP.
+.SH NOTE
+Since libcurl changes method or not based on the specific HTTP response code,
+setting \fICURLOPT_CUSTOMREQUEST(3)\fP while following redirects may change
+what libcurl would otherwise do and if not that carefully may even make it
+misbehave since \fICURLOPT_CUSTOMREQUEST(3)\fP overrides the method libcurl
+would otherwise select internally.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS
