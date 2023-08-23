@@ -35,7 +35,7 @@ contents2
 http
 </server>
  <name>
-HTTP connection re-use with different credentials
+HTTP connection reuse with different credentials
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u user1:password1 --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u 2user:password2

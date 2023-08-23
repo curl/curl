@@ -4,7 +4,7 @@
 HTTP
 HTTP GET
 HTTP NTLM auth
-connection re-use
+connection reuse
 </keywords>
 </info>
 # Server-side
@@ -84,7 +84,7 @@ http
 crypto
 </features>
  <name>
-HTTP with --anyauth and connection re-use
+HTTP with --anyauth and connection reuse
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003

@@ -49,7 +49,7 @@ LC_CTYPE=en_US.UTF-8
 perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
 </precheck>
  <name>
-Connection re-use with IDN host name
+Connection reuse with IDN host name
  </name>
 
  <command>

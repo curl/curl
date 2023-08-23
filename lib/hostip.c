@@ -601,7 +601,7 @@ bool Curl_ipv6works(struct Curl_easy *data)
   if(data) {
     /* the nature of most system is that IPv6 status doesn't come and go
        during a program's lifetime so we only probe the first time and then we
-       have the info kept for fast re-use */
+       have the info kept for fast reuse */
     DEBUGASSERT(data);
     DEBUGASSERT(data->multi);
     if(data->multi->ipv6_up == IPV6_UNKNOWN) {

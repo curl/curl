@@ -30,7 +30,7 @@
 # CSOURCES = $(CSRC1) $(CSRC2)
 
 # libcurl has sources that provide functions named curlx_* that aren't part of
-# the official API, but we re-use the code here to avoid duplication.
+# the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \
   ../lib/base64.c \
   ../lib/curl_multibyte.c \

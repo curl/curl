@@ -4,7 +4,7 @@
 SMTP
 SASL
 SASL AUTH PLAIN
-connection re-use
+connection reuse
 RFC4616
 RFC4954
 </keywords>

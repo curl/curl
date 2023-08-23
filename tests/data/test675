@@ -24,7 +24,7 @@ the content would go here
 http
 </server>
  <name>
-HTTP connection re-use and different credentials
+HTTP connection reuse and different credentials
  </name>
 
 <command>

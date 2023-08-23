@@ -619,7 +619,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
         failf(data, "mbedtls_ssl_set_session returned -0x%x", -ret);
         return CURLE_SSL_CONNECT_ERROR;
       }
-      infof(data, "mbedTLS re-using session");
+      infof(data, "mbedTLS reusing session");
     }
     Curl_ssl_sessionid_unlock(data);
   }

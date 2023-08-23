@@ -862,7 +862,7 @@ static CURLcode ftp_state_cwd(struct Curl_easy *data,
     if(conn->bits.reuse && ftpc->entrypath &&
        /* no need to go to entrypath when we have an absolute path */
        !(ftpc->dirdepth && ftpc->dirs[0][0] == '/')) {
-      /* This is a re-used connection. Since we change directory to where the
+      /* This is a reused connection. Since we change directory to where the
          transfer is taking place, we must first get back to the original dir
          where we ended up after login: */
       ftpc->cwdcount = 0; /* we count this as the first path, then we add one
@@ -1897,7 +1897,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     if(data->set.ftp_skip_ip) {
       /* told to ignore the remotely given IP but instead use the host we used
          for the control connection */
-      infof(data, "Skip %u.%u.%u.%u for data connection, re-use %s instead",
+      infof(data, "Skip %u.%u.%u.%u for data connection, reuse %s instead",
             ip[0], ip[1], ip[2], ip[3],
             conn->host.name);
       ftpc->newhost = strdup(control_address(conn));

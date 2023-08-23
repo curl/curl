@@ -1531,7 +1531,7 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
 
   /* We default to persistent connections. We set this already in this connect
-     function to make the re-use checks properly be able to check this bit. */
+     function to make the reuse checks properly be able to check this bit. */
   connkeep(conn, "HTTP default");
 
   return Curl_conn_connect(data, FIRSTSOCKET, FALSE, done);
@@ -3035,7 +3035,7 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
       *done = TRUE;
       return CURLE_OK;
     }
-    /* We have a new url to load, but since we want to be able to re-use this
+    /* We have a new url to load, but since we want to be able to reuse this
        connection properly, we read the full response in "ignore more" */
     k->ignorebody = TRUE;
     infof(data, "Ignoring the response-body");
@@ -3075,7 +3075,7 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
       data->info.httpcode = 304;
       infof(data, "Simulate an HTTP 304 response");
       /* we abort the transfer before it is completed == we ruin the
-         re-use ability. Close the connection */
+         reuse ability. Close the connection */
       streamclose(conn, "Simulated 304 handling");
       return CURLE_OK;
     }
@@ -3319,8 +3319,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
                   altused ? altused : ""
       );
 
-  /* clear userpwd and proxyuserpwd to avoid re-using old credentials
-   * from re-used connections */
+  /* clear userpwd and proxyuserpwd to avoid reusing old credentials
+   * from reused connections */
   Curl_safefree(data->state.aptr.userpwd);
   Curl_safefree(data->state.aptr.proxyuserpwd);
   free(altused);

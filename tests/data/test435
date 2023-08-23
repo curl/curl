@@ -23,7 +23,7 @@ Content-Length: 0
 http
 </server>
 <name>
-verify -w local/remote port+ip after connection re-use
+verify -w local/remote port+ip after connection reuse
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w 'local port == %{local_port}\nlocal ip == %{local_ip}\nremote_ip == %{remote_ip}\nremote_port == %{remote_port}\n'

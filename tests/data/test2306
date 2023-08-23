@@ -44,7 +44,7 @@ lib%TESTNUMBER
 </tool>
 
  <name>
-HTTP GET re-used handle with first header folded
+HTTP GET reused handle with first header folded
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002

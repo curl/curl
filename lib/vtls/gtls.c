@@ -735,7 +735,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                               ssl_sessionid, ssl_idsize);
 
       /* Informational message */
-      infof(data, "SSL re-using session ID");
+      infof(data, "SSL reusing session ID");
     }
     Curl_ssl_sessionid_unlock(data);
   }

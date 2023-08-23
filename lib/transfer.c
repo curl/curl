@@ -1396,7 +1396,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     Curl_pgrsResetTransferSizes(data);
     Curl_pgrsStartNow(data);
 
-    /* In case the handle is re-used and an authentication method was picked
+    /* In case the handle is reused and an authentication method was picked
        in the session we need to make sure we only use the one(s) we now
        consider to be fine */
     data->state.authhost.picked &= data->state.authhost.want;
@@ -1786,7 +1786,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
      && (data->set.rtspreq != RTSPREQ_RECEIVE)
 #endif
     )
-    /* We got no data, we attempted to re-use a connection. For HTTP this
+    /* We got no data, we attempted to reuse a connection. For HTTP this
        can be a retry so we try again regardless if we expected a body.
        For other protocols we only try again only if we expected a body.
 

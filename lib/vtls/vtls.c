@@ -417,7 +417,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
   DEBUGASSERT(ssl_config->primary.sessionid);
 
   if(!ssl_config->primary.sessionid || !data->state.session)
-    /* session ID re-use is disabled or the session cache has not been
+    /* session ID reuse is disabled or the session cache has not been
        setup */
     return TRUE;
 
