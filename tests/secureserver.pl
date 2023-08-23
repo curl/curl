@@ -218,7 +218,7 @@ foreach my $veropt (('-version', '-V')) {
     }
     last if($ver_major);
 }
-if((!$ver_major) || (!$ver_minor)) {
+if((!$ver_major) || !defined($ver_minor)) {
     if(-x "$stunnel" && ! -d "$stunnel") {
         print "$ssltext Unknown stunnel version\n";
     }
