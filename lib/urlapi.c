@@ -1816,6 +1816,10 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     char *oldurl;
     char *redired_url;
 
+    if(!nalloc)
+      /* a blank URL is not a valid URL */
+      return CURLUE_MALFORMED_INPUT;
+
     /* if the new thing is absolute or the old one is not
      * (we could not get an absolute url in 'oldurl'),
      * then replace the existing with the new. */

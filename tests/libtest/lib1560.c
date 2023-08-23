@@ -151,6 +151,8 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"", "", 0, 0, CURLUE_MALFORMED_INPUT},
+  {" ", "", 0, 0, CURLUE_MALFORMED_INPUT},
   {"1h://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
   {"..://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
   {"-ht://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
