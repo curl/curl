@@ -629,7 +629,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       if(port == 0)
         break;
       infof(data, "Bind to local port %d failed, trying next", port - 1);
-      /* We re-use/clobber the port variable here below */
+      /* We reuse/clobber the port variable here below */
       if(sock->sa_family == AF_INET)
         si4->sin_port = ntohs(port);
 #ifdef ENABLE_IPV6

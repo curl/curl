@@ -1045,7 +1045,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
   if(data->info.httpproxycode/100 != 2) {
     /* a non-2xx response and we have no next url to try. */
     Curl_safefree(data->req.newurl);
-    /* failure, close this connection to avoid re-use */
+    /* failure, close this connection to avoid reuse */
     streamclose(conn, "proxy CONNECT failure");
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
     failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);

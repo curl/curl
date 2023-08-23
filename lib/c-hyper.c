@@ -1228,8 +1228,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
        the full request has been sent. */
     data->req.start100 = Curl_now();
 
-  /* clear userpwd and proxyuserpwd to avoid re-using old credentials
-   * from re-used connections */
+  /* clear userpwd and proxyuserpwd to avoid reusing old credentials
+   * from reused connections */
   Curl_safefree(data->state.aptr.userpwd);
   Curl_safefree(data->state.aptr.proxyuserpwd);
   return CURLE_OK;

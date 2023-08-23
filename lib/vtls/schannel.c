@@ -1174,7 +1174,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, (void **)&old_cred, NULL)) {
       backend->cred = old_cred;
-      DEBUGF(infof(data, "schannel: re-using existing credential handle"));
+      DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
       /* increment the reference counter of the credential/session handle */
       backend->cred->refcount++;
@@ -1776,7 +1776,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-  /* save the current session data for possible re-use */
+  /* save the current session data for possible reuse */
   if(ssl_config->primary.sessionid) {
     bool incache;
     bool added = FALSE;

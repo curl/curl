@@ -688,7 +688,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     if(!Curl_ssl_getsessionid(cf, data, &session, NULL)) {
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
-      infof(data, "BearSSL: re-using session ID");
+      infof(data, "BearSSL: reusing session ID");
     }
     Curl_ssl_sessionid_unlock(data);
   }

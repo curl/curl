@@ -4,7 +4,7 @@
 IMAP
 Clear Text
 FETCH
-connection re-use
+connection reuse
 </keywords>
 </info>
 
