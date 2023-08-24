@@ -300,8 +300,12 @@ sub prepro {
     my $show = 1;
     my @out;
     my $data_crlf;
+    my @pshow;
+    my $plvl;
+    my $line;
     for my $s (@entiretest) {
         my $f = $s;
+        $line++;
         if($s =~ /^ *%if (.*)/) {
             my $cond = $1;
             my $rev = 0;
@@ -311,15 +315,25 @@ sub prepro {
                 $rev = 1;
             }
             $rev ^= $feature{$cond} ? 1 : 0;
+            push @pshow, $show; # push the previous state
+            $plvl++;
             $show = $rev;
             next;
         }
         elsif($s =~ /^ *%else/) {
+            if(!$plvl) {
+                print STDERR "error: test$testnum:$line: %else no %if\n";
+                last;
+            }
             $show ^= 1;
             next;
         }
         elsif($s =~ /^ *%endif/) {
-            $show = 1;
+            if(!$plvl--) {
+                print STDERR "error: test$testnum:$line: %endif had no %if\n";
+                last;
+            }
+            $show = pop @pshow;
             next;
         }
         if($show) {
