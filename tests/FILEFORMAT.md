@@ -101,8 +101,7 @@ like:
     Accept-Encoding: nothing
     %endif
 
-**Note** that there can be no nested conditions. You can only do one
-conditional at a time and you can only check for a single feature in it.
+Nested conditions are supported.
 
 # Variables
 
