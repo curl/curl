@@ -1623,7 +1623,6 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
   DEBUGASSERT(conn->handler);
 
   if(conn->handler->do_it)
-    /* generic protocol-specific function pointer set in curl_connect() */
     result = conn->handler->do_it(data, done);
 
   return result;

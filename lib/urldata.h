@@ -754,7 +754,7 @@ struct Curl_handler {
    * after the connect() and everything is done, as a step in the connection.
    * The 'done' pointer points to a bool that should be set to TRUE if the
    * function completes before return. If it doesn't complete, the caller
-   * should call the curl_connecting() function until it is.
+   * should call the ->connecting() function until it is.
    */
   CURLcode (*connect_it)(struct Curl_easy *data, bool *done);
 
