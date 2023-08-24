@@ -42,7 +42,7 @@ my %skiplist = (
     "LICENSES/ISC.txt" => "<built-in>",
     "LICENSES/curl.txt" => "<built-in>",
     "COPYING" => "<built-in>",
-
+    "docs/GPLv3.txt" => "<built-in>",
     );
 
 sub scanfile {

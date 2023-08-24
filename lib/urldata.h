@@ -27,6 +27,7 @@
 /* This file is for lib internal stuff */
 
 #include "curl_setup.h"
+#include <curl/curl.h>
 
 #define PORT_FTP 21
 #define PORT_FTPS 990

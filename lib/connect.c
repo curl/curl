@@ -84,7 +84,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-
 /*
  * Curl_timeleft() returns the amount of milliseconds left allowed for the
  * transfer/connection. If the value is 0, there's no timeout (ie there's

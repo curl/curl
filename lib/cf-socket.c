@@ -90,7 +90,8 @@
  */
 static void set_ipv6_v6only(curl_socket_t sockfd, int on)
 {
-  (void)setsockopt(sockfd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&on, sizeof(on));
+  (void)curl_setsockopt(sockfd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&on,
+                        sizeof(on));
 }
 #else
 #define set_ipv6_v6only(x,y)
@@ -107,7 +108,7 @@ static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
   (void) data;
 #endif
 
-  if(setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,
+  if(curl_setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,
                 sizeof(onoff)) < 0)
     infof(data, "Could not set TCP_NODELAY: %s",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
@@ -126,7 +127,7 @@ static void nosigpipe(struct Curl_easy *data,
                       curl_socket_t sockfd)
 {
   int onoff = 1;
-  if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
+  if(curl_setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
                 sizeof(onoff)) < 0) {
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
     char buffer[STRERROR_LEN];
@@ -163,7 +164,7 @@ tcpkeepalive(struct Curl_easy *data,
   int optval = data->set.tcp_keepalive?1:0;
 
   /* only set IDLE and INTVL if setting KEEPALIVE is successful */
-  if(setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
+  if(curl_setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
         (void *)&optval, sizeof(optval)) < 0) {
     infof(data, "Failed to set SO_KEEPALIVE on fd %d", sockfd);
   }
@@ -187,7 +188,7 @@ tcpkeepalive(struct Curl_easy *data,
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
-    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
+    if(curl_setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPIDLE on fd %d", sockfd);
     }
@@ -195,7 +196,7 @@ tcpkeepalive(struct Curl_easy *data,
     /* Mac OS X style */
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
-    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
+    if(curl_setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
       (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPALIVE on fd %d", sockfd);
     }
@@ -203,7 +204,7 @@ tcpkeepalive(struct Curl_easy *data,
 #ifdef TCP_KEEPINTVL
     optval = curlx_sltosi(data->set.tcp_keepintvl);
     KEEPALIVE_FACTOR(optval);
-    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
+    if(curl_setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPINTVL on fd %d", sockfd);
     }
@@ -273,7 +274,7 @@ static CURLcode socket_open(struct Curl_easy *data,
   }
   else {
     /* opensocket callback not set, so simply create the socket now */
-    *sockfd = socket(addr->family, addr->socktype, addr->protocol);
+    *sockfd = curl_socket(addr->family, addr->socktype, addr->protocol);
   }
 
   if(*sockfd == CURL_SOCKET_BAD)
@@ -386,7 +387,8 @@ void Curl_sndbufset(curl_socket_t sockfd)
     if(curval > val)
       return;
 
-  setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val, sizeof(val));
+  curl_setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char *)&val,
+                  sizeof(val));
 }
 #endif
 
@@ -459,7 +461,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
        * converted to an IP address and would fail Curl_if2ip. Simply try
        * to use it straight away.
        */
-      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+      if(curl_setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
                     dev, (curl_socklen_t)strlen(dev) + 1) == 0) {
         /* This is typically "errno 1, error: Operation not permitted" if
          * you're not running as root or another suitable privileged
@@ -608,10 +610,11 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     }
   }
 #ifdef IP_BIND_ADDRESS_NO_PORT
-  (void)setsockopt(sockfd, SOL_IP, IP_BIND_ADDRESS_NO_PORT, &on, sizeof(on));
+  (void)curl_setsockopt(sockfd, SOL_IP, IP_BIND_ADDRESS_NO_PORT, &on,
+                        sizeof(on));
 #endif
   for(;;) {
-    if(bind(sockfd, sock, sizeof_sa) >= 0) {
+    if(curl_bind(sockfd, sock, sizeof_sa) >= 0) {
       /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
       curl_socklen_t size = sizeof(add);
@@ -1081,27 +1084,32 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
                     NULL, 0, NULL, NULL);
     }
     else {
-      rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+      rc = curl_connect(ctx->sock, data->conn->host.name,
+                        &ctx->addr.sa_addr, ctx->addr.addrlen);
     }
 #  else
-    rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+    rc = curl_connect(ctx->sock, data->conn->host.name,
+                      &ctx->addr.sa_addr, ctx->addr.addrlen);
 #  endif /* HAVE_BUILTIN_AVAILABLE */
 #elif defined(TCP_FASTOPEN_CONNECT) /* Linux >= 4.11 */
-    if(setsockopt(ctx->sock, IPPROTO_TCP, TCP_FASTOPEN_CONNECT,
+    if(curl_setsockopt(ctx->sock, IPPROTO_TCP, TCP_FASTOPEN_CONNECT,
                   (void *)&optval, sizeof(optval)) < 0)
       infof(data, "Failed to enable TCP Fast Open on fd %"
             CURL_FORMAT_SOCKET_T, ctx->sock);
 
-    rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+    rc = curl_connect(ctx->sock, data->conn->host.name,
+                      &ctx->addr.sa_addr, ctx->addr.addrlen);
 #elif defined(MSG_FASTOPEN) /* old Linux */
     if(cf->conn->given->flags & PROTOPT_SSL)
-      rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+      rc = curl_connect(ctx->sock, data->conn->host.name,
+                        &ctx->addr.sa_addr, ctx->addr.addrlen);
     else
       rc = 0; /* Do nothing */
 #endif
   }
   else {
-    rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+    rc = curl_connect(ctx->sock, data->conn->host.name,
+                      &ctx->addr.sa_addr, ctx->addr.addrlen);
   }
   return rc;
 }
@@ -1576,7 +1584,8 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   /* QUIC needs a connected socket, nonblocking */
   DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
 
-  rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+  rc = curl_connect(ctx->sock, data->conn->host.name,
+                    &ctx->addr.sa_addr, ctx->addr.addrlen);
   if(-1 == rc) {
     return socket_connect_result(data, ctx->r_ip, SOCKERRNO);
   }
@@ -1591,7 +1600,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 #if defined(__linux__) && defined(IP_MTU_DISCOVER)
   case AF_INET: {
     int val = IP_PMTUDISC_DO;
-    (void)setsockopt(ctx->sock, IPPROTO_IP, IP_MTU_DISCOVER, &val,
+    (void)curl_setsockopt(ctx->sock, IPPROTO_IP, IP_MTU_DISCOVER, &val,
                      sizeof(val));
     break;
   }
@@ -1599,7 +1608,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 #if defined(__linux__) && defined(IPV6_MTU_DISCOVER)
   case AF_INET6: {
     int val = IPV6_PMTUDISC_DO;
-    (void)setsockopt(ctx->sock, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
+    (void)curl_setsockopt(ctx->sock, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
                      sizeof(val));
     break;
   }

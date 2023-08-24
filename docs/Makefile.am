@@ -65,6 +65,7 @@ EXTRA_DIST =                                    \
  FAQ                                            \
  FEATURES.md                                    \
  GOVERNANCE.md                                  \
+ GPLv3.txt                                      \
  HELP-US.md                                     \
  HISTORY.md                                     \
  HSTS.md                                        \
@@ -91,6 +92,7 @@ EXTRA_DIST =                                    \
  SSL-PROBLEMS.md                                \
  SSLCERTS.md                                    \
  THANKS                                         \
+ TINY-CURL.md                                   \
  TODO                                           \
  TheArtOfHttpScripting.md                       \
  URL-SYNTAX.md                                  \

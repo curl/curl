@@ -88,7 +88,11 @@ int Curl_wait_ms(timediff_t timeout_ms);
    With Winsock the valid range is [0..INVALID_SOCKET-1] according to
    https://docs.microsoft.com/en-us/windows/win32/winsock/socket-data-type-2
 */
-#ifdef USE_WINSOCK
+#if defined(FreeRTOS)
+#define VALID_SOCK(x) 1
+#define VERIFY_SOCK(x) Curl_nop_stmt
+#define FDSET_SOCK(x) 1
+#elif defined(USE_WINSOCK)
 #define VALID_SOCK(s) ((s) < INVALID_SOCKET)
 #define FDSET_SOCK(x) 1
 #define VERIFY_SOCK(x) do { \

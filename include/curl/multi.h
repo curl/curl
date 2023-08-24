@@ -160,9 +160,9 @@ CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   * Returns: CURLMcode type, general multi error code.
   */
 CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
-                                       fd_set *read_fd_set,
-                                       fd_set *write_fd_set,
-                                       fd_set *exc_fd_set,
+                                       curl_fd_set *read_fd_set,
+                                       curl_fd_set *write_fd_set,
+                                       curl_fd_set *exc_fd_set,
                                        int *max_fd);
 
 /*

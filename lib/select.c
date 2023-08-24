@@ -122,9 +122,9 @@ int Curl_wait_ms(timediff_t timeout_ms)
  *    N = number of signalled file descriptors
  */
 static int our_select(curl_socket_t maxfd,   /* highest socket number */
-                      fd_set *fds_read,      /* sockets ready for reading */
-                      fd_set *fds_write,     /* sockets ready for writing */
-                      fd_set *fds_err,       /* sockets with errors */
+                      curl_fd_set *fds_read, /* sockets ready for reading */
+                      curl_fd_set *fds_write, /* sockets ready for writing */
+                      curl_fd_set *fds_err,  /* sockets with errors */
                       timediff_t timeout_ms) /* milliseconds to wait */
 {
   struct timeval pending_tv;
@@ -159,6 +159,13 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
                 fds_read && fds_read->fd_count ? fds_read : NULL,
                 fds_write && fds_write->fd_count ? fds_write : NULL,
                 fds_err && fds_err->fd_count ? fds_err : NULL, ptimeout);
+#elif defined(FreeRTOS)
+  {
+    /* convert the timeout to FreeRTOS ticks */
+    TickType_t ticks = ptimeout ? ptimeout->tv_sec * configTICK_RATE_HZ : +
+      (ptimeout->tv_usec * configTICK_RATE_HZ) / 1000000;
+    return FreeRTOS_select(fds_read, ticks);
+  }
 #else
   return select((int)maxfd + 1, fds_read, fds_write, fds_err, ptimeout);
 #endif
@@ -274,9 +281,9 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
 #ifdef HAVE_POLL_FINE
   int pending_ms;
 #else
-  fd_set fds_read;
-  fd_set fds_write;
-  fd_set fds_err;
+  curl_fd_set fds_read;
+  curl_fd_set fds_write;
+  curl_fd_set fds_err;
   curl_socket_t maxfd;
 #endif
   bool fds_none = TRUE;

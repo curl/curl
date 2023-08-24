@@ -347,6 +347,48 @@
 #  define CURL_PULL_SYS_TYPES_H      1
 #  define CURL_PULL_SYS_SOCKET_H     1
 
+#elif defined(FreeRTOS) /* Life on FreeRTOS */
+
+#if (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4)  ||      \
+  (defined(__LONG_MAX__) && __LONG_MAX__ == 2147483647L)
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
+#  define CURL_FREERTOS_SOCKETS_H 1
+#  define CURL_TYPEOF_CURL_SOCKLEN_T uint32_t
+#  define CURL_AVOID_SYS_TYPES_H 1
+#  define CURL_AVOID_SYS_SOCKET_H 1
+
+#elif defined(MICRIUM)
+
+#if (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4)  ||      \
+  (defined(__LONG_MAX__) && __LONG_MAX__ == 2147483647L)
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#else
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
+#  define CURL_TYPEOF_CURL_SOCKLEN_T CPU_INT32S
+#  define CURL_AVOID_SYS_TYPES_H 1
+#  define CURL_AVOID_SYS_SOCKET_H 1
+#  define CURL_AVOID_SYS_TIME_H 1
+
 /* ===================================== */
 /*    KEEP MSVC THE PENULTIMATE ENTRY    */
 /* ===================================== */
@@ -429,6 +471,40 @@
 #  include <sys/types.h>
 #endif
 
+#ifdef CURL_FREERTOS_SOCKETS_H
+#  include <FreeRTOS.h>
+#  include <FreeRTOS_Sockets.h>
+#include <stdint.h>
+#include <stddef.h>
+/* for the base type etc */
+#include "portmacro.h"
+#define curl_fd_set_typedefed
+typedef SocketSet_t curl_fd_set;
+#define curl_struct_sockaddr freertos_sockaddr
+#define curl_setsockopt(a,b,c,d,e) FreeRTOS_setsockopt(a,b,c,d,e)
+#define curl_connect(a,x,b,c) FreeRTOS_connect(a,b,c)
+#define curl_bind(a,b,c) FreeRTOS_bind(a,b,c)
+#define curl_recv(a,b,c,d) FreeRTOS_recv(a,b,c,d)
+#define curl_socket(a,b,c) FreeRTOS_socket(a,b,c)
+/* not quite socket-style API */
+#define CURL_FD_SET(a,b,c) FreeRTOS_FD_SET(a,b,c)
+/* struct sockaddr "fix" */
+#define sa_family sin_family
+/* use our private pollfd struct alternative */
+#define curl_pollfd curl_waitfd
+#elif defined(MICRIUM)
+#include <net/include/net_bsd.h>
+
+/* make use of the types from net_bsd.h */
+typedef _size_t size_t;
+typedef _time_t time_t;
+
+#define curl_fd_set_typedefed
+typedef struct fd_set curl_fd_set;
+
+#endif
+
+
 /* CURL_PULL_SYS_SOCKET_H is defined above when inclusion of header file  */
 /* sys/socket.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_SOCKET_H
@@ -476,6 +552,38 @@
 #else
   /* This compiler is believed NOT to have an ISO compatible preprocessor */
 #undef CURL_ISOCPP
+#endif
+
+/*
+ * For the standard systems
+ */
+#ifndef curl_struct_sockaddr
+#define curl_struct_sockaddr sockaddr
+#endif
+#ifndef curl_fd_set_typedefed
+#define curl_fd_set_typedefed
+typedef fd_set curl_fd_set;
+#endif
+#ifndef curl_pollfd
+#define curl_pollfd pollfd
+#endif
+#ifndef curl_setsockopt
+#define curl_setsockopt(a,b,c,d,e) setsockopt(a,b,c,d,e)
+#endif
+#ifndef curl_bind
+#define curl_bind(a,b,c) bind(a,b,c)
+#endif
+#ifndef curl_connect
+#define curl_connect(a,x,b,c) connect(a,b,c)
+#endif
+#ifndef curl_recv
+#define curl_recv(a,b,c,d) recv(a,b,c,d)
+#endif
+#ifndef curl_socket
+#define curl_socket(a,b,c) socket(a,b,c)
+#endif
+#ifndef CURL_FD_SET
+#define CURL_FD_SET(a,b,c) FD_SET(a,b)
 #endif
 
 /*
