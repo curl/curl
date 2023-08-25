@@ -38,7 +38,7 @@ CURLcode Curl_trc_init(void);
  *
  * Configuration format supported:
  * - comma-separated list of component names to enable logging on.
- *   E.g. 'http/2,ssl'. Unkown names are ignored. Names are compared
+ *   E.g. 'http/2,ssl'. Unknown names are ignored. Names are compared
  *   case-insensitive.
  * - component 'all' applies to all known log components
  * - prefixing a component with '+' or '-' will en-/disable logging for
