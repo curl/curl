@@ -1814,10 +1814,10 @@ out:
 }
 
 static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                           struct stream_ctx *stream,
                            char *buf, size_t len, CURLcode *err)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H2_STREAM_CTX(data);
   ssize_t nread = -1;
 
   *err = CURLE_AGAIN;
@@ -1937,7 +1937,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CF_DATA_SAVE(save, cf, data);
 
-  nread = stream_recv(cf, data, buf, len, err);
+  nread = stream_recv(cf, data, stream, buf, len, err);
   if(nread < 0 && *err != CURLE_AGAIN)
     goto out;
 
@@ -1946,7 +1946,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(*err)
       goto out;
 
-    nread = stream_recv(cf, data, buf, len, err);
+    nread = stream_recv(cf, data, stream, buf, len, err);
   }
 
   if(nread > 0) {

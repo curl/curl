@@ -2349,7 +2349,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   int rc;
   int rv;
   CURLcode result;
-  const struct Curl_sockaddr_ex *sockaddr;
+  const struct Curl_sockaddr_ex *sockaddr = NULL;
   int qfd;
 
   ctx->version = NGTCP2_PROTO_VER_MAX;
@@ -2395,6 +2395,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
   Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd,
                       &sockaddr, NULL, NULL, NULL, NULL);
+  if(!sockaddr)
+    return CURLE_QUIC_CONNECT_ERROR;
   ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
   rv = getsockname(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
                    &ctx->q.local_addrlen);
@@ -2525,8 +2527,8 @@ out:
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(result) {
-    const char *r_ip;
-    int r_port;
+    const char *r_ip = NULL;
+    int r_port = 0;
 
     Curl_cf_socket_peek(cf->next, data, NULL, NULL,
                         &r_ip, &r_port, NULL, NULL);
