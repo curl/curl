@@ -125,7 +125,7 @@ character or string.
 
 For example, this could look like:
 
-    http://user:password@www.example.com:80/index.hmtl?foo=bar#top
+    http://user:password@www.example.com:80/index.html?foo=bar#top
 
 ## Scheme
 

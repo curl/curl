@@ -1271,12 +1271,12 @@ static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
     goto out;
   }
   else if(ctx->tunnel.upload_blocked_len) {
-    /* the data in `buf` has alread been submitted or added to the
+    /* the data in `buf` has already been submitted or added to the
      * buffers, but have been EAGAINed on the last invocation. */
     DEBUGASSERT(len >= ctx->tunnel.upload_blocked_len);
     if(len < ctx->tunnel.upload_blocked_len) {
       /* Did we get called again with a smaller `len`? This should not
-       * happend. We are not prepared to handle that. */
+       * happen. We are not prepared to handle that. */
       failf(data, "HTTP/2 proxy, send again with decreased length");
       *err = CURLE_HTTP2;
       nwritten = -1;

@@ -1011,7 +1011,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
                         ctx->h2, stream->id);
       if(wsize > 0 && (uint32_t)wsize != stream->local_window_size) {
         /* H2 flow control is not absolute, as the server might not have the
-         * same view, yet. When we recieve more than we want, we enforce
+         * same view, yet. When we receive more than we want, we enforce
          * the local window size again to make nghttp2 send WINDOW_UPATEs
          * accordingly. */
         nghttp2_session_set_local_window_size(ctx->h2,
@@ -2167,14 +2167,14 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     }
     else if(stream->upload_blocked_len) {
-      /* the data in `buf` has alread been submitted or added to the
+      /* the data in `buf` has already been submitted or added to the
        * buffers, but have been EAGAINed on the last invocation. */
       /* TODO: this assertion triggers in OSSFuzz runs and it is not
        * clear why. Disable for now to let OSSFuzz continue its tests.
       DEBUGASSERT(len >= stream->upload_blocked_len); */
       if(len < stream->upload_blocked_len) {
         /* Did we get called again with a smaller `len`? This should not
-         * happend. We are not prepared to handle that. */
+         * happen. We are not prepared to handle that. */
         failf(data, "HTTP/2 send again with decreased length");
         *err = CURLE_HTTP2;
         nwritten = -1;

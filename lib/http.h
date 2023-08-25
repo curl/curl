@@ -294,7 +294,7 @@ void Curl_http_req_free(struct httpreq *req);
 
 /**
  * Create the list of HTTP/2 headers which represent the request,
- * using HTTP/2 pseudo headers preceeding the `req->headers`.
+ * using HTTP/2 pseudo headers preceding the `req->headers`.
  *
  * Applies the following transformations:
  * - if `authority` is set, any "Host" header is removed.
