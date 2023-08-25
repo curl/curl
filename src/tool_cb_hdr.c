@@ -349,6 +349,7 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
   char *copyloc = NULL, *locurl = NULL, *scheme = NULL, *finalurl = NULL;
   const char *loc = location;
   size_t llen = loclen;
+  int space_skipped = 0;
   char *vver = getenv("VTE_VERSION");
 
   if(vver) {
@@ -360,9 +361,10 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
   }
 
   /* Strip leading whitespace of the redirect URL */
-  while(llen && *loc == ' ') {
+  while(llen && (*loc == ' ' || *loc == '\t')) {
     ++loc;
     --llen;
+    ++space_skipped;
   }
 
   /* Strip the trailing end-of-line characters, normally "\r\n" */
@@ -401,8 +403,10 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
      !strcmp("https", scheme) ||
      !strcmp("ftp", scheme) ||
      !strcmp("ftps", scheme)) {
-    fprintf(stream, LINK "%s" LINKST "%.*s" LINKOFF,
-            finalurl, (int)loclen, location);
+    fprintf(stream, "%.*s" LINK "%s" LINKST "%.*s" LINKOFF,
+            space_skipped, location,
+            finalurl,
+            (int)loclen - space_skipped, loc);
     goto locdone;
   }
 
