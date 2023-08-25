@@ -301,6 +301,7 @@ sub prepro {
     my @out;
     my $data_crlf;
     my @pshow;
+    my @altshow;
     my $plvl;
     my $line;
     for my $s (@entiretest) {
@@ -317,7 +318,18 @@ sub prepro {
             $rev ^= $feature{$cond} ? 1 : 0;
             push @pshow, $show; # push the previous state
             $plvl++;
-            $show = $rev;
+            if($show) {
+                # only if this was showing before we can allow the alternative
+                # to go showing as well
+                push @altshow, $rev ^ 1; # push the reversed show state
+            }
+            else {
+                push @altshow, 0; # the alt should still hide
+            }
+            if($show) {
+                # we only allow show if already showing
+                $show = $rev;
+            }
             next;
         }
         elsif($s =~ /^ *%else/) {
@@ -325,7 +337,8 @@ sub prepro {
                 print STDERR "error: test$testnum:$line: %else no %if\n";
                 last;
             }
-            $show ^= 1;
+            $show = pop @altshow;
+            push @altshow, $show; # put it back for consistency
             next;
         }
         elsif($s =~ /^ *%endif/) {
@@ -334,6 +347,7 @@ sub prepro {
                 last;
             }
             $show = pop @pshow;
+            pop @altshow; # not used here but we must pop it
             next;
         }
         if($show) {
