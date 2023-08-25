@@ -163,7 +163,7 @@ static CURLcode start_req(struct h1_req_parser *parser,
       break;
     }
   }
-  /* no SPACE found or empty TARGET or empy HTTP_VERSION */
+  /* no SPACE found or empty TARGET or empty HTTP_VERSION */
   if(!target_len || !hv_len)
     goto out;
 

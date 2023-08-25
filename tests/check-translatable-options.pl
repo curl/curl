@@ -109,7 +109,7 @@ sub scan_wrapper_for_strings {
     return @stringopts;
 }
 
-# Get tranlatable string options from header file.
+# Get translatable string options from header file.
 my @stringdefs = scan_header("$incdir/curl.h");
 
 # Get translated string options.

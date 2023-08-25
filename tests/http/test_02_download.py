@@ -352,10 +352,10 @@ class TestDownload:
         assert r.duration > timedelta(seconds=4), \
             f'rate limited transfer should take more than 4s, not {r.duration}'
 
-    # make extreme paralllel h2 upgrades, check invalid conn reuse
+    # make extreme parallel h2 upgrades, check invalid conn reuse
     # before protocol switch has happened
     def test_02_25_h2_upgrade_x(self, env: Env, httpd, repeat):
-        # not locally reproducable timeouts with certain SSL libs
+        # not locally reproducible timeouts with certain SSL libs
         # Since this test is about connection reuse handling, we skip
         # it on these builds. Although we would certainly like to understand
         # why this happens.
