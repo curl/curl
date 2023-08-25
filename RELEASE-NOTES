@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o cf-socket: log successful interface bind [39]
  o CI/cirrus: disable python install on FreeBSD [83]
  o CI: add caching to many jobs [19]
+ o cirrus: install everthing with pkg, avoid pip [110]
  o cmake: add GnuTLS option [103]
  o cmake: add support for single libcurl compilation pass [21]
  o cmake: allow `SHARE_LIB_OBJECT=ON` on all platforms [80]
@@ -49,11 +50,13 @@ This release includes the following bugfixes:
  o CURLOPT_*TIMEOUT*: extend and clarify [101]
  o CURLOPT_SSL_VERIFYPEER.3: mention it does not load CA certs when disabled [42]
  o docs/cmdline-opts/gen.pl: hide "added in" before 7.50.0 [76]
+ o docs/cmdline-opts: match the current output [104]
  o docs/cmdline-opts: spellfixes, typos and polish [9]
  o docs/cmdline: add small "warning" to verbose options [59]
  o docs/cmdline: remove repeated working for negotiate + ntlm [58]
  o docs/HYPER.md: document a workaround for a link error [73]
  o docs: link to the website versions instead of markdowns [3]
+ o docs: rewrite to present tense [105]
  o easy: remove #ifdefs to make code easier on the eye [34]
  o egd: delete feature detection and related source code [5]
  o gen.pl: escape all dashes (ascii minus) to avoid unicode hyphens [50]
@@ -67,6 +70,7 @@ This release includes the following bugfixes:
  o http2: upgrade tests and add fix for non-existing stream [44]
  o http3/ngtcp2: shorten handshake, trace cleanup [13]
  o http3: quiche, handshake optimization, trace cleanup [63]
+ o http: close the connection after a late 417 is received [109]
  o http: do not require a user name when using CURLAUTH_NEGOTIATE [86]
  o http: remove the p_pragma struct field [60]
  o http: return error when receiving too large header set [43]
@@ -95,15 +99,19 @@ This release includes the following bugfixes:
  o schannel: fix user-set legacy algorithms in Windows 10 & 11 [53]
  o schannel: verify hostname independent of verify cert [74]
  o sectransp: prevent CFRelease() of NULL [26]
+ o system.h: add CURL_OFF_T definitions on HP-UX with HP aCC [108]
  o test1304: build and skip without netrc support
  o test1554: check translatable string options in OS400 wrapper [96]
  o test1608: make it build and get skipped without shuffle DNS support
  o test687/688: two more basic --xattr tests [89]
  o tests/tftpd+mqttd: make variables static to silence picky warnings [57]
  o tests: add 'large-time' as a testable feature [92]
+ o tests: add support for nested %if conditions [91]
+ o tests: don't call HTTP errors OK in test cases
  o tests: ensure `libcurl.def` contains all exports [45]
  o tests: fix h3 server check and parallel instances [6]
  o tests: TLS session sharing test [100]
+ o time-cond.d: mention what happens on a missing file [93]
  o tool: make the length argument an int for printf()-.* flags [49]
  o tool_cb_wrt: fix invalid unicode for windows console [25]
  o tool_operate: allow both SSL_CERT_FILE and SSL_CERT_DIR [12]
@@ -114,6 +122,7 @@ This release includes the following bugfixes:
  o urlapi: fix heap buffer overflow [30]
  o urlapi: make sure zoneid is also duplicated in curl_url_dup [29]
  o urlapi: return CURLUE_BAD_HOSTNAME if puny2idn encoding fails [102]
+ o urlapi: setting a blank URL ("") is not an ok URL [106]
  o vquic: show stringified messages for errno [40]
  o vtls: clarify "ALPN: offers" message [27]
  o winbuild: improve check for static zlib [15]
@@ -134,20 +143,21 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexander Jaeger, balikalina on Github, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Dan Jacobson, Derzsi Dániel, Douglas R. Reno,
-  ed0d2b2ce19451f2, Emanuele Torre, Enrico Scholz, eppesuig, FC Stegerman,
-  Gabriel Corona, Gisle Vanem, Goro FUJI, Graham Campbell, Guillaume Algis,
-  Jacob Mealey, JazJas on github, Joseph Tharayil, junsik on github,
-  kyled-dell on github, Lukas Tribus, Maksim Arhipov, Maksim Sciepanienka,
-  Marcel Raad, Marin Hannache, Markus Sommer, Martin Galvan, Mathew Benson,
-  Maurício Meneghini Fauth, Nathan Moinvaziri, Niall McGee,
+  ad0p on github, Alexander Jaeger, balikalina on Github, Christian Hesse,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Dan Jacobson,
+  Derzsi Dániel, Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre,
+  Enrico Scholz, eppesuig, FC Stegerman, Gabriel Corona, Gisle Vanem,
+  Goro FUJI, Graham Campbell, Guillaume Algis, Jacob Mealey, JazJas on github,
+  John Bampton, Joseph Tharayil, junsik on github, kyled-dell on github,
+  Lukas Tribus, Maksim Arhipov, Maksim Sciepanienka, Marcel Raad,
+  Marin Hannache, Markus Sommer, Martin Galvan, Mathew Benson,
+  Maurício Meneghini Fauth, Michael Osipov, Nathan Moinvaziri, Niall McGee,
   Nicholas Nethercote, Pablo Busse, Patrick Monnerat,
   Philippe Antoine on HackerOne, Ray Satiro, Richard W.M. Jones,
-  Rutger Broekhoff, Ryan Schmidt, Samuel Chiang, Sergey, Stefan Eissing,
-  Thomas M. DuBuisson, trrui-huawei, Viktor Szakats, wangzhikun,
-  Wilhelm von Thiele, yushicheng7788 on github, zhihaoy on github
-  (52 contributors)
+  Rutger Broekhoff, Ryan Schmidt, Samuel Chiang, Sergey, Sevan Janiyan,
+  Stefan Eissing, Thomas M. DuBuisson, trrui-huawei, Viktor Szakats,
+  wangzhikun, Wilhelm von Thiele, yushicheng7788 on github, zhihaoy on github
+  (57 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -240,7 +250,9 @@ References to bug reports and discussions on issues:
  [88] = https://curl.se/bug/?i=11698
  [89] = https://curl.se/bug/?i=11697
  [90] = https://curl.se/bug/?i=11695
+ [91] = https://curl.se/bug/?i=11728
  [92] = https://curl.se/bug/?i=11696
+ [93] = https://curl.se/bug/?i=11727
  [94] = https://curl.se/bug/?i=11680
  [95] = https://curl.se/bug/?i=11650
  [96] = https://curl.se/bug/?i=11650
@@ -251,3 +263,9 @@ References to bug reports and discussions on issues:
  [101] = https://curl.se/bug/?i=11686
  [102] = https://curl.se/bug/?i=11674
  [103] = https://curl.se/bug/?i=11685
+ [104] = https://curl.se/bug/?i=11723
+ [105] = https://curl.se/bug/?i=11713
+ [106] = https://curl.se/bug/?i=11714
+ [108] = https://curl.se/bug/?i=11718
+ [109] = https://curl.se/bug/?i=11678
+ [110] = https://curl.se/bug/?i=11711
