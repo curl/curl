@@ -1770,7 +1770,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     stream = H3_STREAM_CTX(data);
   }
   else if(stream->upload_blocked_len) {
-    /* the data in `buf` has alread been submitted or added to the
+    /* the data in `buf` has already been submitted or added to the
      * buffers, but have been EAGAINed on the last invocation. */
     DEBUGASSERT(len >= stream->upload_blocked_len);
     if(len < stream->upload_blocked_len) {
