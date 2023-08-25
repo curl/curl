@@ -1208,6 +1208,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  req = NULL;
 
   if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
     failf(data, "Couldn't hyper_executor_push the send");
@@ -1243,6 +1244,9 @@ error:
 
   if(handshake)
     hyper_task_free(handshake);
+
+  if(req)
+    hyper_request_free(req);
 
   return result;
 }
