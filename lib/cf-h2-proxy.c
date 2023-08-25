@@ -244,12 +244,17 @@ static ssize_t proxy_nw_in_reader(void *reader_ctx,
                                   CURLcode *err)
 {
   struct Curl_cfilter *cf = reader_ctx;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
 
-  nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, buflen, err);
-  CURL_TRC_CF(data, cf, "nw_in_reader(len=%zu) -> %zd, %d",
-              buflen, nread, *err);
+  if(cf) {
+    struct Curl_easy *data = CF_DATA_CURRENT(cf);
+    nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, buflen, err);
+    CURL_TRC_CF(data, cf, "nw_in_reader(len=%zu) -> %zd, %d",
+                buflen, nread, *err);
+  }
+  else {
+    nread = 0;
+  }
   return nread;
 }
 
@@ -258,12 +263,18 @@ static ssize_t proxy_h2_nw_out_writer(void *writer_ctx,
                                       CURLcode *err)
 {
   struct Curl_cfilter *cf = writer_ctx;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, buflen, err);
-  CURL_TRC_CF(data, cf, "nw_out_writer(len=%zu) -> %zd, %d",
-              buflen, nwritten, *err);
+  if(cf) {
+    struct Curl_easy *data = CF_DATA_CURRENT(cf);
+    nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, buflen,
+                                 err);
+    CURL_TRC_CF(data, cf, "nw_out_writer(len=%zu) -> %zd, %d",
+                buflen, nwritten, *err);
+  }
+  else {
+    nwritten = 0;
+  }
   return nwritten;
 }
 
