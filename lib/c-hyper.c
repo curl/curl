@@ -1217,6 +1217,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   hyper_clientconn_free(client);
+  client = NULL;
 
   if((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) {
     /* HTTP GET/HEAD download */
@@ -1244,6 +1245,9 @@ error:
 
   if(handshake)
     hyper_task_free(handshake);
+
+  if(client)
+    hyper_clientconn_free(client);
 
   if(req)
     hyper_request_free(req);
