@@ -119,12 +119,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 1. HTTP
 
-1.1 hyper memory-leaks
-
- Building curl with the hyper backend causes mysterious memory-leaks
-
- https://github.com/curl/curl/issues/10803
-
 1.2 hyper is slow
 
  When curl is built to use hyper for HTTP, it is unnecessary slow.
