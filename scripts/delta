@@ -53,7 +53,7 @@ $ncommitters = $acommitters - $bcommitters;
 
 # number of contributors right now
 $acontribs = `./scripts/contrithanks.sh | grep -c '^[^ ]'`;
-# number when the tag tag was set
+# number when the tag was set
 $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 # delta
 $contribs = $acontribs - $bcontribs;

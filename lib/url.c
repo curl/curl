@@ -953,7 +953,7 @@ static bool extract_if_dead(struct connectdata *conn,
          * that we expect - in general - no waiting input data. Input
          * waiting might be a TLS Notify Close, for example. We reject
          * that.
-         * For protocols where data from other other end may arrive at
+         * For protocols where data from other end may arrive at
          * any time (HTTP/2 PING for example), the protocol handler needs
          * to install its own `connection_check` callback.
          */
