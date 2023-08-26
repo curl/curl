@@ -1820,6 +1820,9 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct stream_ctx *stream = H2_STREAM_CTX(data);
   ssize_t nread = -1;
 
+  if(!stream)
+    return nread;
+
   *err = CURLE_AGAIN;
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
     nread = Curl_bufq_read(&stream->recvbuf,
