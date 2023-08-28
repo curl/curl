@@ -110,7 +110,7 @@ struct thread_data {
 };
 
 /* How long we are willing to wait for additional parallel responses after
-   obtaining a "definitive" one.
+   obtaining a "definitive" one. For old c-ares without getaddrinfo.
 
    This is intended to equal the c-ares default timeout.  cURL always uses that
    default value.  Unfortunately, c-ares doesn't expose its default timeout in
@@ -119,6 +119,8 @@ struct thread_data {
    See query_completed_cb() for an explanation of how this is used.
  */
 #define HAPPY_EYEBALLS_DNS_TIMEOUT 5000
+
+#define CARES_TIMEOUT_PER_ATTEMPT 2000
 
 /*
  * Curl_resolver_global_init() - the generic low-level asynchronous name
@@ -173,6 +175,9 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
   int optmask = ARES_OPT_SOCK_STATE_CB;
   options.sock_state_cb = sock_state_cb;
   options.sock_state_cb_data = easy;
+  options.timeout = CARES_TIMEOUT_PER_ATTEMPT;
+  optmask |= ARES_OPT_TIMEOUTMS;
+
   status = ares_init_options((ares_channel*)resolver, &options, optmask);
   if(status != ARES_SUCCESS) {
     if(status == ARES_ENOMEM)
