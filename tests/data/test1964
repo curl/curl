@@ -1,0 +1,68 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_AWS_SIGV4
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+Location: /%TESTNUMBER0002
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# this relies on the debug feature which allow to set the time
+<features>
+SSL
+crypto
+</features>
+
+<name>
+HTTP AWS_SIGV4 with one provider and auth cred via URL, but X-Xxx-Date header set manually
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+http://xxx:yyy@127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+^Content-Type:.*
+^Accept:.*
+</strip>
+<protocol>
+GET /%TESTNUMBER/testapi/test HTTP/1.1
+Host: 127.0.0.1:9000
+Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/0/127/xxx4_request, SignedHeaders=content-type;host;x-xxx-date, Signature=35da102c1df68f2ef85ade08ecc212fa663a66e3a973146f6578a5c5426e9669
+X-Xxx-Date: 19700101T000000Z
+
+</protocol>
+</verify>
+</testcase>

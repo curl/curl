@@ -214,14 +214,10 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(!tmp_head)
       goto fail;
     head = tmp_head;
-    *date_header = curl_maprintf("%s: %s", date_hdr_key, timestamp);
+    *date_header = curl_maprintf("%s: %s\r\n", date_hdr_key, timestamp);
   }
   else {
     char *value;
-
-    *date_header = strdup(*date_header);
-    if(!*date_header)
-      goto fail;
 
     value = strchr(*date_header, ':');
     if(!value)
@@ -231,6 +227,7 @@ static CURLcode make_headers(struct Curl_easy *data,
       ++value;
     strncpy(timestamp, value, TIMESTAMP_SIZE - 1);
     timestamp[TIMESTAMP_SIZE - 1] = 0;
+    *date_header = NULL;
   }
 
   /* alpha-sort in a case sensitive manner */
@@ -612,14 +609,19 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                                "Credential=%s/%s, "
                                "SignedHeaders=%s, "
                                "Signature=%s\r\n"
-                               "%s\r\n"
+                               /*
+                                * date_header is added here, only if it wasn't
+                                * user-specified (using CURLOPT_HTTPHEADER).
+                                * date_header includes \r\n
+                                */
+                               "%s"
                                "%s", /* optional sha256 header includes \r\n */
                                provider0,
                                user,
                                credential_scope,
                                Curl_dyn_ptr(&signed_headers),
                                sha_hex,
-                               date_header,
+                               date_header ? date_header : "",
                                content_sha256_hdr);
   if(!auth_headers) {
     goto fail;
