@@ -417,6 +417,9 @@ core dump file, such data might be accessible.
 Further, when eventually closing a handle and the secrets are no longer
 needed, libcurl does not explicitly clear memory before freeing it, so
 credentials may be left in freed data.
+.SH "Saving files"
+libcurl cannot protect against attacks where an attacker has write access to
+the same directory where libcurl is directed to save files.
 .SH "Report Security Problems"
 Should you detect or just suspect a security problem in libcurl or curl,
 contact the project curl security team immediately. See

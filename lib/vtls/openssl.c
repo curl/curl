@@ -1884,6 +1884,9 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
       (void)SSL_read(backend->handle, buf, (int)sizeof(buf));
 
       (void)SSL_shutdown(backend->handle);
+
+      ERR_clear_error();
+
       SSL_set_connect_state(backend->handle);
     }
 

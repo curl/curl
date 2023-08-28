@@ -808,15 +808,16 @@ static CURLcode bodysend(struct Curl_easy *data,
       hyper_body_set_data_func(body, uploadpostfields);
     else {
       result = Curl_get_upload_buffer(data);
-      if(result)
+      if(result) {
+        hyper_body_free(body);
         return result;
+      }
       /* init the "upload from here" pointer */
       data->req.upload_fromhere = data->state.ulbuf;
       hyper_body_set_data_func(body, uploadstreamed);
     }
     if(HYPERE_OK != hyper_request_set_body(hyperreq, body)) {
       /* fail */
-      hyper_body_free(body);
       result = CURLE_OUT_OF_MEMORY;
     }
   }
@@ -1215,6 +1216,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  sendtask = NULL; /* ownership passed on */
 
   hyper_clientconn_free(client);
   client = NULL;

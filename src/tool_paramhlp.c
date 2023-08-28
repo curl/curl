@@ -138,7 +138,7 @@ static ParameterError getnum(long *val, const char *str, int base)
     num = strtol(str, &endptr, base);
     if(errno == ERANGE)
       return PARAM_NUMBER_TOO_LARGE;
-    if((endptr != str) && (endptr == str + strlen(str))) {
+    if((endptr != str) && (*endptr == '\0')) {
       *val = num;
       return PARAM_OK;  /* Ok */
     }
