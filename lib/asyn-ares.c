@@ -173,6 +173,10 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
   int optmask = ARES_OPT_SOCK_STATE_CB;
   options.sock_state_cb = sock_state_cb;
   options.sock_state_cb_data = easy;
+  if (curl_to_ares_timeout_ms) {
+    options.timeout = curl_to_ares_timeout_ms;
+    optmask |= ARES_OPT_TIMEOUTMS;
+  }
   status = ares_init_options((ares_channel*)resolver, &options, optmask);
   if(status != ARES_SUCCESS) {
     if(status == ARES_ENOMEM)

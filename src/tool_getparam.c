@@ -64,6 +64,7 @@
       }                                         \
     }                                           \
   } while(0)
+long curl_to_ares_timeout_ms;
 
 struct LongShort {
   const char *letter; /* short name option */
@@ -2276,6 +2277,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'm':
       /* specified max time */
       err = secs2ms(&config->timeout_ms, nextarg);
+      curl_to_ares_timeout_ms = config->timeout_ms;
       break;
     case 'M': /* M for manual, huge help */
       if(toggle) { /* --no-manual shows no manual... */
