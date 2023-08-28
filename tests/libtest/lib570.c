@@ -63,7 +63,7 @@ int test(char *URL)
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
-  free(stream_uri);
+  curl_free(stream_uri);
   stream_uri = NULL;
 
   res = curl_easy_perform(curl);
@@ -84,7 +84,7 @@ int test(char *URL)
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
-  free(stream_uri);
+  curl_free(stream_uri);
   stream_uri = NULL;
 
   res = curl_easy_perform(curl);
@@ -99,7 +99,7 @@ int test(char *URL)
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
-  free(stream_uri);
+  curl_free(stream_uri);
   stream_uri = NULL;
 
   res = curl_easy_perform(curl);
@@ -112,7 +112,7 @@ int test(char *URL)
   }
 
 test_cleanup:
-  free(stream_uri);
+  curl_free(stream_uri);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
