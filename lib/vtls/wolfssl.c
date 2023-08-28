@@ -326,17 +326,17 @@ static WOLFSSL_BIO_METHOD *bio_cf_method = NULL;
 
 static void bio_cf_init_methods(void)
 {
-    bio_cf_method = wolfSSL_BIO_meth_new(BIO_TYPE_MEM, "wolfSSL CF BIO");
-    wolfSSL_BIO_meth_set_write(bio_cf_method, &bio_cf_out_write);
-    wolfSSL_BIO_meth_set_read(bio_cf_method, &bio_cf_in_read);
-    wolfSSL_BIO_meth_set_ctrl(bio_cf_method, &bio_cf_ctrl);
-    wolfSSL_BIO_meth_set_create(bio_cf_method, &bio_cf_create);
-    wolfSSL_BIO_meth_set_destroy(bio_cf_method, &bio_cf_destroy);
+  bio_cf_method = wolfSSL_BIO_meth_new(BIO_TYPE_MEM, "wolfSSL CF BIO");
+  wolfSSL_BIO_meth_set_write(bio_cf_method, &bio_cf_out_write);
+  wolfSSL_BIO_meth_set_read(bio_cf_method, &bio_cf_in_read);
+  wolfSSL_BIO_meth_set_ctrl(bio_cf_method, &bio_cf_ctrl);
+  wolfSSL_BIO_meth_set_create(bio_cf_method, &bio_cf_create);
+  wolfSSL_BIO_meth_set_destroy(bio_cf_method, &bio_cf_destroy);
 }
 
 static void bio_cf_free_methods(void)
 {
-    wolfSSL_BIO_meth_free(bio_cf_method);
+  wolfSSL_BIO_meth_free(bio_cf_method);
 }
 
 #else /* USE_BIO_CHAIN */
@@ -445,8 +445,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   if(backend->ctx)
-    SSL_CTX_free(backend->ctx);
-  backend->ctx = SSL_CTX_new(req_method);
+    wolfSSL_CTX_free(backend->ctx);
+  backend->ctx = wolfSSL_CTX_new(req_method);
 
   if(!backend->ctx) {
     failf(data, "SSL: couldn't create a context");
@@ -522,10 +522,9 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* load certificate blob */
   if(ca_info_blob) {
-    if(wolfSSL_CTX_load_verify_buffer(
-      backend->ctx, ca_info_blob->data, ca_info_blob->len,
-      SSL_FILETYPE_PEM
-    ) != SSL_SUCCESS) {
+    if(wolfSSL_CTX_load_verify_buffer(backend->ctx, ca_info_blob->data,
+                                      ca_info_blob->len,
+                                      SSL_FILETYPE_PEM) != SSL_SUCCESS) {
       if(imported_native_ca) {
         infof(data, "error importing CA certificate blob, continuing anyway");
       }
@@ -543,9 +542,9 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifndef NO_FILESYSTEM
   /* load trusted cacert */
   if(conn_config->CAfile) {
-    if(1 != SSL_CTX_load_verify_locations(backend->ctx,
-                                      conn_config->CAfile,
-                                      conn_config->CApath)) {
+    if(1 != wolfSSL_CTX_load_verify_locations(backend->ctx,
+                                              conn_config->CAfile,
+                                              conn_config->CApath)) {
       if(conn_config->verifypeer && !imported_ca_info_blob &&
          !imported_native_ca) {
         /* Fail if we insist on successfully verifying the server. */
@@ -578,17 +577,17 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ssl_config->primary.clientcert && ssl_config->key) {
     int file_type = do_file_type(ssl_config->cert_type);
 
-    if(SSL_CTX_use_certificate_file(backend->ctx,
-                                    ssl_config->primary.clientcert,
-                                    file_type) != 1) {
+    if(wolfSSL_CTX_use_certificate_file(backend->ctx,
+                                        ssl_config->primary.clientcert,
+                                        file_type) != 1) {
       failf(data, "unable to use client certificate (no key or wrong pass"
             " phrase?)");
       return CURLE_SSL_CONNECT_ERROR;
     }
 
     file_type = do_file_type(ssl_config->key_type);
-    if(SSL_CTX_use_PrivateKey_file(backend->ctx, ssl_config->key,
-                                    file_type) != 1) {
+    if(wolfSSL_CTX_use_PrivateKey_file(backend->ctx, ssl_config->key,
+                                       file_type) != 1) {
       failf(data, "unable to set private key");
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -599,10 +598,9 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
    * fail to connect if the verification fails, or if it should continue
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
-  SSL_CTX_set_verify(backend->ctx,
-                     conn_config->verifypeer?SSL_VERIFY_PEER:
-                                             SSL_VERIFY_NONE,
-                     NULL);
+  wolfSSL_CTX_set_verify(backend->ctx,
+                         conn_config->verifypeer?SSL_VERIFY_PEER:
+                         SSL_VERIFY_NONE, NULL);
 
 #ifdef HAVE_SNI
   if(sni) {
@@ -1058,7 +1056,7 @@ static void wolfssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     backend->handle = NULL;
   }
   if(backend->ctx) {
-    SSL_CTX_free(backend->ctx);
+    wolfSSL_CTX_free(backend->ctx);
     backend->ctx = NULL;
   }
 }
