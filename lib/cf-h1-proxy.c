@@ -715,14 +715,13 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   }
 
   options = hyper_clientconn_options_new();
-  hyper_clientconn_options_set_preserve_header_case(options, 1);
-  hyper_clientconn_options_set_preserve_header_order(options, 1);
-
   if(!options) {
     failf(data, "Couldn't create hyper client options");
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  hyper_clientconn_options_set_preserve_header_case(options, 1);
+  hyper_clientconn_options_set_preserve_header_order(options, 1);
 
   hyper_clientconn_options_exec(options, h->exec);
 
@@ -753,6 +752,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
 
   client = hyper_task_value(task);
   hyper_task_free(task);
+
   req = hyper_request_new();
   if(!req) {
     failf(data, "Couldn't hyper_request_new");
@@ -861,12 +861,17 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  req = NULL;
 
   if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
     failf(data, "Couldn't hyper_executor_push the send");
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  sendtask = NULL; /* ownership passed on */
+
+  hyper_clientconn_free(client);
+  client = NULL;
 
 error:
   free(host);
@@ -879,6 +884,9 @@ error:
     hyper_task_free(handshake);
   if(client)
     hyper_clientconn_free(client);
+  if(req)
+    hyper_request_free(req);
+
   return result;
 }
 
