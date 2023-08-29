@@ -47,6 +47,7 @@
 #include "curl_msh3.h"
 #include "curl_ngtcp2.h"
 #include "curl_quiche.h"
+#include "rand.h"
 #include "vquic.h"
 #include "vquic_int.h"
 #include "strerror.h"
@@ -88,6 +89,16 @@ CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
   qctx->no_gso = FALSE;
 #else
   qctx->no_gso = TRUE;
+#endif
+#ifdef DEBUGBUILD
+  {
+    char *p = getenv("CURL_DBG_QUIC_WBLOCK");
+    if(p) {
+      long l = strtol(p, NULL, 10);
+      if(l >= 0 && l <= 100)
+        qctx->wblock_percent = (int)l;
+    }
+  }
 #endif
 
   return CURLE_OK;
@@ -231,6 +242,17 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
                                    const uint8_t *pkt, size_t pktlen,
                                    size_t gsolen, size_t *psent)
 {
+#ifdef DEBUGBUILD
+  /* simulate network blocking/partial writes */
+  if(qctx->wblock_percent > 0) {
+    unsigned char c;
+    Curl_rand(data, &c, 1);
+    if(c >= ((100-qctx->wblock_percent)*256/100)) {
+      CURL_TRC_CF(data, cf, "vquic_flush() simulate EWOULDBLOCK");
+      return CURLE_AGAIN;
+    }
+  }
+#endif
   if(qctx->no_gso && pktlen > gsolen) {
     return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
   }

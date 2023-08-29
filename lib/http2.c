@@ -187,6 +187,7 @@ struct stream_ctx {
   int status_code; /* HTTP response status code */
   uint32_t error; /* stream error code */
   uint32_t local_window_size; /* the local recv window size */
+  bool resp_hds_complete; /* we have a complete, final response */
   bool closed; /* TRUE on stream close */
   bool reset;  /* TRUE on stream reset */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
@@ -1044,6 +1045,9 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     if(result)
       return result;
 
+    if(stream->status_code / 100 != 1) {
+      stream->resp_hds_complete = TRUE;
+    }
     drain_stream(cf, data, stream);
     break;
   case NGHTTP2_PUSH_PROMISE:
@@ -1064,7 +1068,9 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     break;
   case NGHTTP2_RST_STREAM:
     stream->closed = TRUE;
-    stream->reset = TRUE;
+    if(frame->rst_stream.error_code) {
+      stream->reset = TRUE;
+    }
     stream->send_closed = TRUE;
     data->req.keepon &= ~KEEP_SEND_HOLD;
     drain_stream(cf, data, stream);
@@ -1109,8 +1115,9 @@ static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
     }
     case NGHTTP2_RST_STREAM: {
       return msnprintf(buffer, blen,
-                       "FRAME[RST_STREAM, len=%d, flags=%d]",
-                       (int)frame->hd.length, frame->hd.flags);
+                       "FRAME[RST_STREAM, len=%d, flags=%d, error=%u]",
+                       (int)frame->hd.length, frame->hd.flags,
+                       frame->rst_stream.error_code);
     }
     case NGHTTP2_SETTINGS: {
       if(frame->hd.flags & NGHTTP2_FLAG_ACK) {
@@ -1166,7 +1173,7 @@ static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
   if(data && Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = fr_print(frame, buffer, (sizeof(buffer)/sizeof(buffer[0]))-1);
+    len = fr_print(frame, buffer, sizeof(buffer)-1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] -> %s", frame->hd.stream_id, buffer);
   }
@@ -1187,7 +1194,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   if(Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = fr_print(frame, buffer, (sizeof(buffer)/sizeof(buffer[0]))-1);
+    len = fr_print(frame, buffer, sizeof(buffer)-1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] <- %s",frame->hd.stream_id, buffer);
   }
@@ -1975,7 +1982,14 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   result = h2_progress_egress(cf, data);
-  if(result && result != CURLE_AGAIN) {
+  if(result == CURLE_AGAIN) {
+    /* pending data to send, need to be called again. Ideally, we'd
+     * monitor the socket for POLLOUT, but we might not be in SENDING
+     * transfer state any longer and are unable to make this happen.
+     */
+    drain_stream(cf, data, stream);
+  }
+  else if(result) {
     *err = result;
     nread = -1;
   }
@@ -2151,27 +2165,17 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   int rv;
   ssize_t nwritten;
   CURLcode result;
-  int blocked = 0;
+  int blocked = 0, was_blocked = 0;
 
   CF_DATA_SAVE(save, cf, data);
 
   if(stream && stream->id != -1) {
-    if(stream->close_handled) {
-      infof(data, "stream %u closed", stream->id);
-      *err = CURLE_HTTP2_STREAM;
-      nwritten = -1;
-      goto out;
-    }
-    else if(stream->closed) {
-      nwritten = http2_handle_stream_close(cf, data, stream, err);
-      goto out;
-    }
-    else if(stream->upload_blocked_len) {
+    if(stream->upload_blocked_len) {
       /* the data in `buf` has already been submitted or added to the
        * buffers, but have been EAGAINed on the last invocation. */
       /* TODO: this assertion triggers in OSSFuzz runs and it is not
-       * clear why. Disable for now to let OSSFuzz continue its tests.
-      DEBUGASSERT(len >= stream->upload_blocked_len); */
+       * clear why. Disable for now to let OSSFuzz continue its tests. */
+      DEBUGASSERT(len >= stream->upload_blocked_len);
       if(len < stream->upload_blocked_len) {
         /* Did we get called again with a smaller `len`? This should not
          * happen. We are not prepared to handle that. */
@@ -2182,6 +2186,25 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       nwritten = (ssize_t)stream->upload_blocked_len;
       stream->upload_blocked_len = 0;
+      was_blocked = 1;
+    }
+    else if(stream->closed) {
+      if(stream->resp_hds_complete) {
+        /* Server decided to close the stream after having sent us a findl
+         * response. This is valid if it is not interested in the request
+         * body. This happens on 30x or 40x responses.
+         * We silently discard the data sent, since this is not a transport
+         * error situation. */
+        CURL_TRC_CF(data, cf, "[%d] discarding data"
+                    "on closed stream with response", stream->id);
+        *err = CURLE_OK;
+        nwritten = (ssize_t)len;
+        goto out;
+      }
+      infof(data, "stream %u closed", stream->id);
+      *err = CURLE_SEND_ERROR;
+      nwritten = -1;
+      goto out;
     }
     else {
       /* If stream_id != -1, we have dispatched request HEADERS and
@@ -2218,8 +2241,10 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = h2_progress_egress(cf, data);
   /* if the stream has been closed in egress handling (nghttp2 does that
    * when it does not like the headers, for example */
-  if(stream && stream->closed) {
-    nwritten = http2_handle_stream_close(cf, data, stream, err);
+  if(stream && stream->closed && !was_blocked) {
+    infof(data, "stream %u closed", stream->id);
+    *err = CURLE_SEND_ERROR;
+    nwritten = -1;
     goto out;
   }
   else if(result == CURLE_AGAIN) {
@@ -2367,8 +2392,12 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
+  /* Send out our SETTINGS and ACKs and such. If that blocks, we
+   * have it buffered and  can count this filter as being connected */
   result = h2_progress_egress(cf, data);
-  if(result)
+  if(result == CURLE_AGAIN)
+    result = CURLE_OK;
+  else if(result)
     goto out;
 
   *done = TRUE;
@@ -2376,6 +2405,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   result = CURLE_OK;
 
 out:
+  CURL_TRC_CF(data, cf, "cf_connect() -> %d, %d, ", result, *done);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
