@@ -333,7 +333,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo{redir}?id=[0-0]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
-            '-L'
+            '-L', '--trace-config', 'http/2,http/3'
         ])
         r.check_response(count=1, http_status=200)
         respdata = open(curl.response_file(0)).readlines()
@@ -350,7 +350,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo307?id=[0-0]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
-            '-L'
+            '-L', '--trace-config', 'http/2,http/3'
         ])
         r.check_response(count=1, http_status=200)
         respdata = open(curl.response_file(0)).readlines()
