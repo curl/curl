@@ -34,6 +34,9 @@
 /* No OS/400 header file defines u_int32_t. */
 typedef unsigned long   u_int32_t;
 
+/* OS/400 has no idea of a tty! */
+#define isatty(fd)      0
+
 
 /* System API wrapper prototypes & definitions to support ASCII parameters. */
 

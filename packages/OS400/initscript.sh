@@ -80,7 +80,6 @@ setenv OUTPUT           '*NONE'                 # Compilation output option.
 setenv TGTRLS           '*CURRENT'              # Target OS release.
 setenv IFSDIR           '/curl'                 # Installation IFS directory.
 setenv QADRTDIR         '/QIBM/ProdData/qadrt'  # QADRT IFS directory.
-setenv QADRTLIB         'QADRT'                 # QADRT object library.
 
 #       Define ZLIB availability and locations.
 
@@ -236,7 +235,7 @@ make_module()
         CMD="${CMD} OPTIMIZE(${OPTIMIZE})"
         CMD="${CMD} DBGVIEW(${DEBUG})"
 
-        DEFINES="${3} BUILDING_LIBCURL 'qadrt_use_inline'"
+        DEFINES="${3} 'qadrt_use_inline'"
 
         if [ "${WITH_ZLIB}" != "0" ]
         then    DEFINES="${DEFINES} HAVE_LIBZ"
@@ -270,6 +269,7 @@ db2_name()
                 tr 'a-z-' 'A-Z_'                                        |
                 sed -e 's/\..*//'                                       \
                     -e 's/^CURL_*/C/'                                   \
+                    -e 's/^TOOL_*/T/'                                   \
                     -e 's/^\(.\).*\(.........\)$/\1\2/'
         fi
 }
@@ -287,4 +287,27 @@ versioned_copy()
             -e "s/@LIBCURL_VERSION_NUM@/${LIBCURL_VERSION_NUM}/g"       \
             -e "s/@LIBCURL_TIMESTAMP@/${LIBCURL_TIMESTAMP}/g"           \
                 < "${1}" > "${2}"
+}
+
+
+#       Get definitions from a make file.
+#       The `sed' statement works as follows:
+#       - Join \nl-separated lines.
+#       - Retain only lines that begins with "identifier =".
+#       - Turn these lines into shell variable assignments.
+
+get_make_vars()
+
+{
+        eval "`sed -e ': begin'                                         \
+                -e '/\\\\$/{'                                           \
+                -e 'N'                                                  \
+                -e 's/\\\\\\n/ /'                                       \
+                -e 'b begin'                                            \
+                -e '}'                                                  \
+                -e '/^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=/!d'           \
+                -e 's/[[:space:]]*=[[:space:]]*/=/'                     \
+                -e 's/=\\(.*[^[:space:]]\\)[[:space:]]*$/=\\"\\1\\"/'   \
+                -e 's/\\\$(\\([^)]*\\))/\${\\1}/g'                      \
+                < \"${1}\"`"
 }

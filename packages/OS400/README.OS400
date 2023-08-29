@@ -374,3 +374,16 @@ _ Since V7R4M0, procedure overloading is used to emulate limited "vararg-like"
 is provided for that purpose: this allows storing a long value in the
 curl_forms array. Please note the form API is deprecated and the MIME API
 should be used instead.
+
+
+CLI tool:
+
+  The build system provides it as a bound program, an IFS link to it and a
+simple CL command. The latter however is not able to provide a different
+parameter for each option since there are too many of those; instead,
+parameters are entered in a single field subject to quoting and escaping, in
+the same form as expected by the standard CLI program.
+  Care must be taken about the program output encoding: by default, it is sent
+to the standard output and is thus subject to transcoding. It is therefore
+recommended to use option "--output" to redirect output to a specific IFS file.
+Similar problems may occur about the standard input encoding.
