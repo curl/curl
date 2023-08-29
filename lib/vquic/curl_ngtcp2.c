@@ -1106,6 +1106,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   else {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] CLOSED", stream->id);
   }
+  data->req.keepon &= ~KEEP_SEND_HOLD;
   h3_drain_stream(cf, data);
   return 0;
 }
@@ -2245,9 +2246,16 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
     }
     break;
   }
-  case CF_CTRL_DATA_IDLE:
-    result = check_and_set_expiry(cf, data, NULL);
+  case CF_CTRL_DATA_IDLE: {
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
+    CURL_TRC_CF(data, cf, "data idle");
+    if(stream && !stream->closed) {
+      result = check_and_set_expiry(cf, data, NULL);
+      if(result)
+        CURL_TRC_CF(data, cf, "data idle, check_and_set_expiry -> %d", result);
+    }
     break;
+  }
   default:
     break;
   }
