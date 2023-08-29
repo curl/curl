@@ -320,6 +320,41 @@ class TestUpload:
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == indata
 
+    # upload to a 301,302,303 response
+    @pytest.mark.parametrize("redir", ['301', '302', '303'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_36_upload_302(self, env: Env, httpd, nghttpx, repeat, redir, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        data = '0123456789' * 10
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo{redir}?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
+            '-L'
+        ])
+        r.check_response(count=1, http_status=200)
+        respdata = open(curl.response_file(0)).readlines()
+        assert respdata == []  # was transformed to a GET
+
+    # upload to a 307 response
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_37_upload_302(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        data = '0123456789' * 100000
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo307?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
+            '-L'
+        ])
+        r.check_response(count=1, http_status=200)
+        respdata = open(curl.response_file(0)).readlines()
+        assert respdata == [data]  # was POST again
+
     def check_download(self, count, srcfile, curl):
         for i in range(count):
             dfile = curl.download_file(i)

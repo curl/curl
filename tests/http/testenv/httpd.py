@@ -47,7 +47,7 @@ class Httpd:
         'authn_core', 'authn_file',
         'authz_user', 'authz_core', 'authz_host',
         'auth_basic', 'auth_digest',
-        'env', 'filter', 'headers', 'mime',
+        'alias', 'env', 'filter', 'headers', 'mime',
         'socache_shmcb',
         'rewrite', 'http2', 'ssl', 'proxy', 'proxy_http', 'proxy_connect',
         'mpm_event',
@@ -372,6 +372,10 @@ class Httpd:
         lines = []
         if Httpd.MOD_CURLTEST is not None:
             lines.extend([
+                f'    Redirect 301 /curltest/echo301 /curltest/echo',
+                f'    Redirect 302 /curltest/echo302 /curltest/echo',
+                f'    Redirect 303 /curltest/echo303 /curltest/echo',
+                f'    Redirect 307 /curltest/echo307 /curltest/echo',
                 f'    <Location /curltest/echo>',
                 f'      SetHandler curltest-echo',
                 f'    </Location>',
