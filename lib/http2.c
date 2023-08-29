@@ -2151,27 +2151,17 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   int rv;
   ssize_t nwritten;
   CURLcode result;
-  int blocked = 0;
+  int blocked = 0, was_blocked = 0;
 
   CF_DATA_SAVE(save, cf, data);
 
   if(stream && stream->id != -1) {
-    if(stream->close_handled) {
-      infof(data, "stream %u closed", stream->id);
-      *err = CURLE_HTTP2_STREAM;
-      nwritten = -1;
-      goto out;
-    }
-    else if(stream->closed) {
-      nwritten = http2_handle_stream_close(cf, data, stream, err);
-      goto out;
-    }
-    else if(stream->upload_blocked_len) {
+    if(stream->upload_blocked_len) {
       /* the data in `buf` has already been submitted or added to the
        * buffers, but have been EAGAINed on the last invocation. */
       /* TODO: this assertion triggers in OSSFuzz runs and it is not
-       * clear why. Disable for now to let OSSFuzz continue its tests.
-      DEBUGASSERT(len >= stream->upload_blocked_len); */
+       * clear why. Disable for now to let OSSFuzz continue its tests. */
+      DEBUGASSERT(len >= stream->upload_blocked_len);
       if(len < stream->upload_blocked_len) {
         /* Did we get called again with a smaller `len`? This should not
          * happen. We are not prepared to handle that. */
@@ -2182,6 +2172,13 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       nwritten = (ssize_t)stream->upload_blocked_len;
       stream->upload_blocked_len = 0;
+      was_blocked = 1;
+    }
+    else if(stream->closed) {
+      infof(data, "stream %u closed", stream->id);
+      *err = CURLE_SEND_ERROR;
+      nwritten = -1;
+      goto out;
     }
     else {
       /* If stream_id != -1, we have dispatched request HEADERS and
@@ -2218,8 +2215,10 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = h2_progress_egress(cf, data);
   /* if the stream has been closed in egress handling (nghttp2 does that
    * when it does not like the headers, for example */
-  if(stream && stream->closed) {
-    nwritten = http2_handle_stream_close(cf, data, stream, err);
+  if(stream && stream->closed && !was_blocked) {
+    infof(data, "stream %u closed", stream->id);
+    *err = CURLE_SEND_ERROR;
+    nwritten = -1;
     goto out;
   }
   else if(result == CURLE_AGAIN) {

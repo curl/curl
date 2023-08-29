@@ -416,6 +416,28 @@ class CurlClient:
                          with_headers=with_headers,
                          with_trace=with_trace)
 
+    def http_form(self, urls: List[str], form: Dict[str, str],
+                  alpn_proto: Optional[str] = None,
+                  with_stats: bool = True,
+                  with_headers: bool = False,
+                  with_trace: bool = False,
+                  extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        for key, val in form.items():
+            extra_args.extend(['-F', f'{key}={val}'])
+        extra_args.extend([
+            '-o', 'download_#1.data',
+        ])
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=with_headers,
+                         with_trace=with_trace)
+
     def response_file(self, idx: int):
         return os.path.join(self._run_dir, f'download_{idx}.data')
 
