@@ -1240,7 +1240,7 @@ err:
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(dns) {
-        infof(data, "RESOLVE %.*s:%d is - old addresses discarded",
+        infof(data, "RESOLVE %.*s:%d - old addresses discarded",
               (int)hlen, host_begin, port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
