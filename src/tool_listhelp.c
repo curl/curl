@@ -685,7 +685,7 @@ const struct helptxt helptext[] = {
    "Require SSL/TLS",
    CURLHELP_TLS},
   {"    --ssl-revoke-best-effort",
-   "Ignore missing/offline cert CRL dist points",
+   "Ignore missing/offline cert CRL dist points (Schannel)",
    CURLHELP_TLS},
   {"-2, --sslv2",
    "Use SSLv2",
