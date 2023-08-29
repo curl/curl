@@ -565,6 +565,7 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
     }
     stream->closed = TRUE;
     streamclose(cf->conn, "End of stream");
+    data->req.keepon &= ~KEEP_SEND_HOLD;
     break;
 
   case QUICHE_H3_EVENT_GOAWAY:
@@ -1213,11 +1214,15 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
     }
     break;
   }
-  case CF_CTRL_DATA_IDLE:
-    result = cf_flush_egress(cf, data);
-    if(result)
-      CURL_TRC_CF(data, cf, "data idle, flush egress -> %d", result);
+  case CF_CTRL_DATA_IDLE: {
+    struct stream_ctx *stream = H3_STREAM_CTX(data);
+    if(stream && !stream->closed) {
+      result = cf_flush_egress(cf, data);
+      if(result)
+        CURL_TRC_CF(data, cf, "data idle, flush egress -> %d", result);
+    }
     break;
+  }
   default:
     break;
   }
