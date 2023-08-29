@@ -40,24 +40,8 @@ cd "${TOPDIR}/tests"
 cd libtest
 
 #       Get definitions from the Makefile.inc file.
-#       The `sed' statement works as follows:
-#       _ Join \nl-separated lines.
-#       _ Retain only lines that begins with "identifier =".
-#       _ Turn these lines into shell variable assignments.
 
-eval "`sed -e ': begin'                                                 \
-        -e '/\\\\$/{'                                                   \
-        -e 'N'                                                          \
-        -e 's/\\\\\\n/ /'                                               \
-        -e 'b begin'                                                    \
-        -e '}'                                                          \
-        -e '/^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[=]/b keep'             \
-        -e 'd'                                                          \
-        -e ': keep'                                                     \
-        -e 's/[[:space:]]*=[[:space:]]*/=/'                             \
-        -e 's/=\\(.*[^[:space:]]\\)[[:space:]]*$/=\\"\\1\\"/'           \
-        -e 's/\\$(\\([^)]*\\))/${\\1}/g'                                \
-        < Makefile.inc`"
+get_make_vars Makefile.inc
 
 #       Special case: redefine chkhostname compilation parameters.
 
@@ -128,7 +112,7 @@ do      DB2PGM=`db2_name "${PGM}"`
                 MODULES="`echo \"${MODULES}\" |
                     sed \"s/[^ ][^ ]*/${TARGETLIB}\/&/g\"`"
                 CMD="CRTPGM PGM(${TARGETLIB}/${DB2PGM})"
-                CMD="${CMD} ENTMOD(${QADRTLIB}/QADRTMAIN2)"
+                CMD="${CMD} ENTMOD(${TARGETLIB}/CURLMAIN)"
                 CMD="${CMD} MODULE(${MODULES})"
                 CMD="${CMD} BNDSRVPGM(${TARGETLIB}/${SRVPGM} QADRTTS)"
                 CMD="${CMD} TGTRLS(${TGTRLS})"
