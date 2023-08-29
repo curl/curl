@@ -274,3 +274,12 @@ do not consider it a security problem.
 
 curl cannot protect against attacks where an attacker has write access to the
 same directory where curl is directed to save files.
+
+## Tricking a user to run a command line
+
+A creative, misleading or funny looking command line is not a security
+problem. The curl command line tool takes options and URLs on the command line
+and if an attacker can trick the user to run a specifically crafted curl
+command line, all bets are off. Such an attacker can just as well have the
+user run a much worse command that can do something fatal (like
+`sudo rm -rf /`).
