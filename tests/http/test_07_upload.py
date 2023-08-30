@@ -287,7 +287,6 @@ class TestUpload:
 
     def test_07_34_issue_11194(self, env: Env, httpd, nghttpx, repeat):
         proto = 'h2'
-        fdata = os.path.join(env.gen_dir, 'data-10m')
         # tell our test PUT handler to read the upload more slowly, so
         # that the send buffering and transfer loop needs to wait
         fdata = os.path.join(env.gen_dir, 'data-100k')
@@ -299,7 +298,7 @@ class TestUpload:
             '--cacert', env.ca.cert_file,
             '--request', 'PUT',
             '--digest', '--user', 'test:test',
-            '--data-binary', f'@{fdata}'
+            '--data-binary', f'@{fdata}', 
             '--url', url,
         ])
         assert r.exit_code == 0, r.dump_logs()
