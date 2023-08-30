@@ -1787,7 +1787,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   else if(stream->closed) {
     if(stream->resp_hds_complete) {
-      /* Server decided to close the stream after having sent us a findl
+      /* Server decided to close the stream after having sent us a final
        * response. This is valid if it is not interested in the request
        * body. This happens on 30x or 40x responses.
        * We silently discard the data sent, since this is not a transport
