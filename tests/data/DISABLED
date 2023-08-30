@@ -63,6 +63,9 @@
 #
 # hyper support remains EXPERIMENTAL as long as there's a test number
 # listed below
+#
+# Several tests fail due to hyper's lack of trailers support: 266, 1417, 1540,
+# 1591, 1943. See https://github.com/hyperium/hyper/issues/2699 for details.
 %if hyper
 266
 579
