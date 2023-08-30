@@ -160,6 +160,10 @@ jobs:
           # Docker Hub image that `container-job` executes in
           container: 'andy5995/slackware-build-essential:15.0'
 
+        - name: Alpine MUSL
+          configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
+          container: 'alpine:3.18'
+
     steps:
     - if: matrix.build.container == null
       run: |
@@ -167,6 +171,11 @@ jobs:
         sudo apt-get install libtool autoconf automake pkg-config stunnel4 libpsl-dev libbrotli-dev libzstd-dev ${{ matrix.build.install_packages }}
         sudo python3 -m pip install impacket
       name: 'install prereqs and impacket'
+
+    - if: startsWith(matrix.build.container, 'alpine')
+      run: |
+        apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo
+      name: 'install dependencies'
 
     - uses: actions/checkout@v3
 
