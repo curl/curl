@@ -51,7 +51,7 @@ env:
   ngtcp2-version: v0.18.0
   nghttp2-version: v1.55.1
   gnutls-version: 3.8.0
-  wolfssl-version: v5.6.3-stable
+  wolfssl-version: master
   mod_h2-version: v2.0.21
 
 jobs:

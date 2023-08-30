@@ -376,10 +376,7 @@ class TestDownload:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[url])
-        if env.curl_uses_lib('wolfssl'):
-            assert r.exit_code != 0, f'unexpected success for wolfSSL session share'
-        else:
-            r.check_exit_code(0)
+        r.check_exit_code(0)
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
