@@ -1786,6 +1786,18 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     stream->upload_blocked_len = 0;
   }
   else if(stream->closed) {
+    if(stream->resp_hds_complete) {
+      /* Server decided to close the stream after having sent us a findl
+       * response. This is valid if it is not interested in the request
+       * body. This happens on 30x or 40x responses.
+       * We silently discard the data sent, since this is not a transport
+       * error situation. */
+      CURL_TRC_CF(data, cf, "[%d] discarding data"
+                  "on closed stream with response", stream->id);
+      *err = CURLE_OK;
+      sent = (ssize_t)len;
+      goto out;
+    }
     *err = CURLE_HTTP3;
     sent = -1;
     goto out;

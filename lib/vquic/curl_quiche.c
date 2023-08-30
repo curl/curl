@@ -1083,6 +1083,22 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       nwritten = -1;
       goto out;
     }
+    else if(nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE &&
+            stream->closed && stream->resp_hds_complete) {
+      /* sending request body on a stream that has been closed by the
+       * server. If the server has send us a final response, we should
+       * silently discard the send data.
+       * This happens for example on redirects where the server, instead
+       * of reading the full request body just closed the stream after
+       * sending the 30x response.
+       * This is sort of a race: had the transfer loop called recv first,
+       * it would see the response and stop/discard sending on its own- */
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] discarding data"
+                  "on closed stream with response", stream->id);
+      *err = CURLE_OK;
+      nwritten = (ssize_t)len;
+      goto out;
+    }
     else if(nwritten == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
       CURL_TRC_CF(data, cf, "[%" PRId64 "] send_body(len=%zu) "
                   "-> exceeds size", stream->id, len);

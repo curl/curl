@@ -187,6 +187,7 @@ struct stream_ctx {
   int status_code; /* HTTP response status code */
   uint32_t error; /* stream error code */
   uint32_t local_window_size; /* the local recv window size */
+  bool resp_hds_complete; /* we have a complete, final response */
   bool closed; /* TRUE on stream close */
   bool reset;  /* TRUE on stream reset */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
@@ -1044,6 +1045,9 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     if(result)
       return result;
 
+    if(stream->status_code / 100 != 1) {
+      stream->resp_hds_complete = TRUE;
+    }
     drain_stream(cf, data, stream);
     break;
   case NGHTTP2_PUSH_PROMISE:
@@ -2175,6 +2179,18 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       was_blocked = 1;
     }
     else if(stream->closed) {
+      if(stream->resp_hds_complete) {
+        /* Server decided to close the stream after having sent us a findl
+         * response. This is valid if it is not interested in the request
+         * body. This happens on 30x or 40x responses.
+         * We silently discard the data sent, since this is not a transport
+         * error situation. */
+        CURL_TRC_CF(data, cf, "[%d] discarding data"
+                    "on closed stream with response", stream->id);
+        *err = CURLE_OK;
+        nwritten = (ssize_t)len;
+        goto out;
+      }
       infof(data, "stream %u closed", stream->id);
       *err = CURLE_SEND_ERROR;
       nwritten = -1;
