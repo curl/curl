@@ -65,7 +65,6 @@ still need attention and verification include:
 
 - multiplexed HTTP/2
 - h2 Upgrade:
-- pausing transfers
 - receiving HTTP/1 trailers
 - sending HTTP/1 trailers
 
