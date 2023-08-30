@@ -1792,7 +1792,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
        * body. This happens on 30x or 40x responses.
        * We silently discard the data sent, since this is not a transport
        * error situation. */
-      CURL_TRC_CF(data, cf, "[%d] discarding data"
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] discarding data"
                   "on closed stream with response", stream->id);
       *err = CURLE_OK;
       sent = (ssize_t)len;
