@@ -117,8 +117,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            # --enable-debug is dropped due to unit test link problems
-            ./configure --enable-warnings --enable-websockets --with-openssl PKG_CONFIG_PATH="$(brew --prefix libressl)/lib/pkgconfig" CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+            ./configure --enable-warnings --enable-websockets --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix libressl)/lib/pkgconfig" CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
 
   configure-macos-torture:
     steps:
@@ -157,7 +156,8 @@ commands:
     steps:
       - run:
           command: |
-            echo libtool autoconf automake pkg-config nghttp2 libssh2 openssl libssh c-ares libressl | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+            # Drop libressl as long as we're not trying to build it
+            echo libtool autoconf automake pkg-config nghttp2 libssh2 openssl libssh c-ares | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
             while [ $? -eq 0 ]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
             sudo python3 -m pip install impacket
 
@@ -230,11 +230,6 @@ commands:
   test-macos:
     steps:
       - run: make -j5 V=1 test-ci
-
-  test-macos-libressl:
-    steps:
-      # These tests inexplicably cause "dyld[N]: missing symbol called" errors
-      - run: make -j5 V=1 test-ci TFLAGS="!405 !2402 !2403 !2404"
 
   test-torture:
     steps:
@@ -432,7 +427,7 @@ jobs:
       - install-deps-brew
       - configure-macos-libressl-http2
       - build-macos
-      - test-macos-libressl
+      - test-macos
 
   macos-arm-http-torture:
     macos:
@@ -525,9 +520,11 @@ workflows:
     jobs:
       - macos-arm-http-openssl-http2
 
-  macos-arm-http-libressl-http2:
-    jobs:
-      - macos-arm-http-libressl-http2
+  # There are problem linking with LibreSSL on the CI boxes that prevent this
+  # from working.
+  #macos-arm-http-libressl-http2:
+  #  jobs:
+  #    - macos-arm-http-libressl-http2
 
   macos-arm-http-torture:
     jobs:
