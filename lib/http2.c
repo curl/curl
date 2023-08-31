@@ -1170,7 +1170,7 @@ static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
   if(data && Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = fr_print(frame, buffer, (sizeof(buffer)/sizeof(buffer[0]))-1);
+    len = fr_print(frame, buffer, sizeof(buffer)-1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] -> %s", frame->hd.stream_id, buffer);
   }
@@ -1191,7 +1191,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   if(Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = fr_print(frame, buffer, (sizeof(buffer)/sizeof(buffer[0]))-1);
+    len = fr_print(frame, buffer, sizeof(buffer)-1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] <- %s",frame->hd.stream_id, buffer);
   }
@@ -1979,7 +1979,14 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   result = h2_progress_egress(cf, data);
-  if(result && result != CURLE_AGAIN) {
+  if(result == CURLE_AGAIN) {
+    /* pending data to send, need to be called again. Ideally, we'd
+     * monitor the socket for POLLOUT, but we might not be in SENDING
+     * transfer state any longer and are unable to make this happen.
+     */
+    drain_stream(cf, data, stream);
+  }
+  else if(result) {
     *err = result;
     nread = -1;
   }
@@ -2382,8 +2389,12 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
+  /* Send out our SETTINGS and ACKs and such. If that blocks, we
+   * have it buffered and  can count this filter as being connected */
   result = h2_progress_egress(cf, data);
-  if(result)
+  if(result == CURLE_AGAIN)
+    result = CURLE_OK;
+  else if(result)
     goto out;
 
   *done = TRUE;
@@ -2391,6 +2402,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   result = CURLE_OK;
 
 out:
+  CURL_TRC_CF(data, cf, "cf_connect() -> %d, %d, ", result, *done);
   CF_DATA_RESTORE(cf, save);
   return result;
 }

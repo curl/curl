@@ -41,6 +41,9 @@ struct cf_quic_ctx {
   size_t gsolen; /* length of individual packets in send buf */
   size_t split_len; /* if != 0, buffer length after which GSO differs */
   size_t split_gsolen; /* length of individual packets after split_len */
+#ifdef DEBUGBUILD
+  int wblock_percent; /* percent of writes doing EAGAIN */
+#endif
   bool no_gso; /* do not use gso on sending */
 };
 

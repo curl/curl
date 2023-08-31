@@ -25,6 +25,7 @@
 ###########################################################################
 #
 import logging
+import os
 from typing import Tuple, List, Dict
 import pytest
 
@@ -34,6 +35,7 @@ from testenv import Env, CurlClient
 log = logging.getLogger(__name__)
 
 
+@pytest.mark.skipif(condition=Env.slow_network, reason="not suitable for slow network tests")
 class TestStuttered:
 
     @pytest.fixture(autouse=True, scope='class')

@@ -667,8 +667,14 @@ static CURLcode multi_done(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   unsigned int i;
 
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  DEBUGF(infof(data, "multi_done[%s]: status: %d prem: %d done: %d",
+               multi_statename[data->mstate],
+               (int)status, (int)premature, data->state.done));
+#else
   DEBUGF(infof(data, "multi_done: status: %d prem: %d done: %d",
                (int)status, (int)premature, data->state.done));
+#endif
 
   if(data->state.done)
     /* Stop if multi_done() has already been called */
