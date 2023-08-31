@@ -199,7 +199,7 @@
 
 ## Not reproducible
 
- We may require further work from you who actually see or experience the 
+ We may require further work from you who actually see or experience the
  problem if we cannot reproduce it and cannot understand it even after having
  gotten all the info we need and having studied the source code over again.
 

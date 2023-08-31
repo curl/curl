@@ -391,7 +391,6 @@ if(WIN32)
 endif()
 
 # check SSL libraries
-# TODO support GnuTLS
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
 if(APPLE)

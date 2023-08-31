@@ -256,4 +256,3 @@ class NghttpxFwd(Nghttpx):
             time.sleep(.1)
         log.error(f"Server still not responding after {timeout}")
         return False
-

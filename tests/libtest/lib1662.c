@@ -88,4 +88,3 @@ int test(char *URL)
   curl_global_cleanup();
   return (int)res;
 }
-

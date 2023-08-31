@@ -46,4 +46,3 @@ curl will remove the support for space-separated names in July 2024.
  - Support for systems without 64 bit data types
  - NSS
  - gskit
-

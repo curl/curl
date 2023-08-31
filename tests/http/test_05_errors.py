@@ -108,4 +108,3 @@ class TestErrors:
         r.check_response(http_status=200, count=1)
         # check that we did a downgrade
         assert r.stats[0]['http_version'] == '1.1', r.dump_logs()
-

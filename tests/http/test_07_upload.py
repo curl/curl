@@ -298,7 +298,7 @@ class TestUpload:
             '--cacert', env.ca.cert_file,
             '--request', 'PUT',
             '--digest', '--user', 'test:test',
-            '--data-binary', f'@{fdata}', 
+            '--data-binary', f'@{fdata}',
             '--url', url,
         ])
         assert r.exit_code == 0, r.dump_logs()

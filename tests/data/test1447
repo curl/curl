@@ -21,7 +21,7 @@ http
 proxy
 </features>
  <name>
-Provide illegal proxy name 
+Provide illegal proxy name
  </name>
  <command>
 --proxy "http://a:b@/x" http://%HOSTIP:%NOLISTENPORT

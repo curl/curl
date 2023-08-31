@@ -45,4 +45,3 @@ ParameterError varexpand(struct GlobalConfig *global,
 void varcleanup(struct GlobalConfig *global);
 
 #endif /* HEADER_CURL_VAR_H */
-

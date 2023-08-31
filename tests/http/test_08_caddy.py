@@ -157,4 +157,3 @@ class TestCaddy:
             assert r.total_connects > 1, r.dump_logs()
         else:
             assert r.total_connects == 1, r.dump_logs()
-

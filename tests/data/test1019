@@ -24,7 +24,7 @@ file
 X- range on a file:// URL to stdout
  </name>
 <command option="no-include">
--r 7- file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt 
+-r 7- file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 1234567890

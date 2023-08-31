@@ -154,20 +154,20 @@ sub generate_c {
         elsif(! $seen_return) {
             if(/CURLOPT_URL/) {
                 # URL is passed in as argument or by global
-		my $var = shift @urlvars;
+                my $var = shift @urlvars;
                 s/\"[^\"]*\"/$var/;
             }
-	    s/\bhnd\b/curl/;
+            s/\bhnd\b/curl/;
             # Convert to macro wrapper
             s/curl_easy_setopt/test_setopt/;
-	    if(/curl_easy_perform/) {
-		s/\bret\b/res/;
-		push @code, $_;
-		push @code, "test_cleanup:\n";
-	    }
-	    else {
-		push @code, $_;
-	    }
+            if(/curl_easy_perform/) {
+                s/\bret\b/res/;
+                push @code, $_;
+                push @code, "test_cleanup:\n";
+            }
+            else {
+                push @code, $_;
+            }
         }
     }
 

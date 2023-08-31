@@ -31,9 +31,9 @@ body:
     id: expected-behaviour
     attributes:
       label: I expected the following
-    validations: 
+    validations:
       required: false
-  
+
   - type: textarea
     id: version
     attributes:
