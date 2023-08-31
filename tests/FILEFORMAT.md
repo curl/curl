@@ -241,7 +241,7 @@ which test file to load the list content.
 
 ### `<dataNUM [crlf="yes"]>`
 
-Send back this contents instead of the <data> one. The `NUM` is set by:
+Send back this contents instead of the `<data>` one. The `NUM` is set by:
 
  - The test number in the request line is >10000 and this is the remainder
    of [test case number]%10000.
@@ -643,7 +643,7 @@ compared with what is stored in the test file. This is pretty
 advanced. Example: "s/^EPRT .*/EPRT stripped/"
 
 ### `<stripfile1>`
-1 to 4 can be appended to `stripfile` to strip the corresponding <fileN>
+1 to 4 can be appended to `stripfile` to strip the corresponding `<fileN>`
 content
 
 ### `<stripfile2>`
