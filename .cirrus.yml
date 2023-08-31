@@ -50,7 +50,7 @@ freebsd_task:
   env:
     CIRRUS_CLONE_DEPTH: 10
     CRYPTOGRAPHY_DONT_BUILD_RUST: 1
-    MAKE_FLAGS: -j 3
+    MAKEFLAGS: -j 3
 
   pkginstall_script:
     - pkg update -f
