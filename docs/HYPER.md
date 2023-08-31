@@ -67,4 +67,3 @@ still need attention and verification include:
 - h2 Upgrade:
 - receiving HTTP/1 trailers
 - sending HTTP/1 trailers
-

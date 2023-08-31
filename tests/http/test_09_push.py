@@ -66,7 +66,7 @@ class TestPush:
         url = f'https://{env.domain1}:{env.https_port}/push/data1'
         r = curl.http_download(urls=[url], alpn_proto='h2', with_stats=False,
                                with_headers=True)
-        r.check_exit_code(0)  
+        r.check_exit_code(0)
         assert len(r.responses) == 2, f'{r.responses}'
         assert r.responses[0]['status'] == 103, f'{r.responses}'
         assert 'link' in r.responses[0]['header'], f'{r.responses[0]}'

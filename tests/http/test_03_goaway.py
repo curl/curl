@@ -140,5 +140,3 @@ class TestGoAway:
                 log.debug(f'request {idx} connected')
         # this should take `count` seconds to retrieve
         assert r.duration >= timedelta(seconds=count)
-
-

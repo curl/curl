@@ -646,4 +646,3 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                               &n, NULL) : CURLE_UNKNOWN_OPTION;
   return (result || n <= 0)? 1 : (size_t)n;
 }
-

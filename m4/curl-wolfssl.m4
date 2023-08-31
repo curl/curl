@@ -90,16 +90,16 @@ if test "x$OPT_WOLFSSL" != xno; then
 
       AC_MSG_CHECKING([for wolfSSL_Init in -lwolfssl])
       AC_LINK_IFELSE([
-	AC_LANG_PROGRAM([[
+        AC_LANG_PROGRAM([[
 /* These aren't needed for detection and confuse WolfSSL.
    They are set up properly later if it is detected.  */
 #undef SIZEOF_LONG
 #undef SIZEOF_LONG_LONG
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
-	]],[[
-	  return wolfSSL_Init();
-	]])
+        ]],[[
+          return wolfSSL_Init();
+        ]])
       ],[
          AC_MSG_RESULT(yes)
          AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
@@ -107,7 +107,7 @@ if test "x$OPT_WOLFSSL" != xno; then
          WOLFSSL_ENABLED=1
          USE_WOLFSSL="yes"
          ssl_msg="WolfSSL"
-	 test wolfssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+         test wolfssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
        [
          AC_MSG_RESULT(no)

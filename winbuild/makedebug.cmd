@@ -18,7 +18,7 @@ rem * furnished to do so, under the terms of the COPYING file.
 rem *
 rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
-rem * 
+rem *
 rem * SPDX-License-Identifier: curl
 rem *
 rem ***************************************************************************
@@ -29,7 +29,7 @@ IF %ERRORLEVEL% == 1 (
   ECHO Error: Can't find `nmake.exe` - be sure to run this script from within a Developer Command-Prompt
   ECHO.
 ) ELSE (
-  nmake /f Makefile.vc mode=static DEBUG=yes GEN_PDB=yes 
+  nmake /f Makefile.vc mode=static DEBUG=yes GEN_PDB=yes
   IF %ERRORLEVEL% NEQ 0 (
     ECHO "Error: Build Failed"
   )

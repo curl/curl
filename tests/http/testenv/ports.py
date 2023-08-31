@@ -45,5 +45,3 @@ def alloc_ports(port_specs: Dict[str, int]) -> Dict[str, int]:
     for s in socks:
         s.close()
     return ports
-
-

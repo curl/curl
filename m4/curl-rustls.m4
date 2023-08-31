@@ -57,7 +57,7 @@ if test "x$OPT_RUSTLS" != xno; then
          RUSTLS_ENABLED=1
          USE_RUSTLS="yes"
          ssl_msg="rustls"
-	 test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+         test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ], [], -lpthread -ldl -lm)
     fi
 

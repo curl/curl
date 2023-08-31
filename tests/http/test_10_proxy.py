@@ -248,4 +248,3 @@ class TestProxy:
             assert r.total_connects == 2
         else:
             assert r.total_connects == 2
-

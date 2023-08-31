@@ -18,7 +18,7 @@ rem * furnished to do so, under the terms of the COPYING file.
 rem *
 rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
-rem * 
+rem *
 rem * SPDX-License-Identifier: curl
 rem *
 rem ***************************************************************************
@@ -28,7 +28,7 @@ if exist %OUTFILE% (
 )
 
 echo %MACRO_NAME% = \> %OUTFILE%
-for %%i in (%*) do echo		%DIROBJ%/%%i \>>  %OUTFILE%
-echo. >>  %OUTFILE%
+for %%i in (%*) do echo		%DIROBJ%/%%i \>> %OUTFILE%
+echo. >> %OUTFILE%
 
 :END

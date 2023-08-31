@@ -266,7 +266,7 @@ versioned_copy()
 #       The `sed' statement works as follows:
 #       - Join \nl-separated lines.
 #       - Retain only lines that begins with "identifier =".
-#       - Replace @...@ sustitutions by shell variable references.
+#       - Replace @...@ substitutions by shell variable references.
 #       - Turn these lines into shell variable assignments.
 
 get_make_vars()

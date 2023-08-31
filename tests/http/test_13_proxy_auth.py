@@ -157,4 +157,3 @@ class TestProxyAuth:
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
         assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
             if tunnel == 'h2' else 'HTTP/1.1'
-

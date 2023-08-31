@@ -50,7 +50,7 @@ proxy
 FTP fetch with --proxy set to http:// and with --connect-to
  </name>
  <command>
-ftp://ftp.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com.%TESTNUMBER:%FTPPORT --proxytunnel --proxy http://%HOSTIP:%PROXYPORT 
+ftp://ftp.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com.%TESTNUMBER:%FTPPORT --proxytunnel --proxy http://%HOSTIP:%PROXYPORT
 </command>
 </client>
 

@@ -510,7 +510,7 @@ main() {
 int
 main() {
   _Atomic int i = 1;
-  i = 0;  // Force an atomic-write operation.
+  i = 0;  /* Force an atomic-write operation. */
   return i;
 }
 #endif

@@ -1446,4 +1446,3 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 out:
   return result;
 }
-
