@@ -1351,9 +1351,14 @@ else
     CURL_CHECK_PKGCONFIG(zlib)
 
     if test "$PKGCONFIG" != "no" ; then
-      LIBS="`$PKGCONFIG --libs-only-l zlib` $LIBS"
-      LDFLAGS="$LDFLAGS `$PKGCONFIG --libs-only-L zlib`"
-      CPPFLAGS="$CPPFLAGS `$PKGCONFIG --cflags-only-I zlib`"
+      ZLIB_LIBS="`$PKGCONFIG --libs-only-l zlib`"
+      if test -n "$ZLIB_LIBS"; then
+        LDFLAGS="$LDFLAGS `$PKGCONFIG --libs-only-L zlib`"
+      else
+        ZLIB_LIBS="`$PKGCONFIG --libs zlib`"
+      fi
+      LIBS="$ZLIB_LIBS $LIBS"
+      CPPFLAGS="$CPPFLAGS `$PKGCONFIG --cflags zlib`"
       OPT_ZLIB=""
       HAVE_LIBZ="1"
     fi
@@ -1366,7 +1371,8 @@ else
       AC_CHECK_LIB(z, inflateEnd,
                    dnl libz found, set the variable
                    [HAVE_LIBZ="1"
-                    LIBS="-lz $LIBS"],
+                    ZLIB_LIBS="-lz"
+                    LIBS="$ZLIB_LIBS $LIBS"],
                    dnl if no lib found, try /usr/local
                    [OPT_ZLIB="/usr/local"])
     fi
@@ -1388,7 +1394,8 @@ else
                    [
                    dnl the lib was found!
                    HAVE_LIBZ="1"
-                   LIBS="-lz $LIBS"
+                   ZLIB_LIBS="-lz"
+                   LIBS="$ZLIB_LIBS $LIBS"
                    ],
                    [ CPPFLAGS=$clean_CPPFLAGS
                    LDFLAGS=$clean_LDFLAGS])
@@ -1407,20 +1414,20 @@ else
     CPPFLAGS=$clean_CPPFLAGS
     LDFLAGS=$clean_LDFLAGS
     LIBS=$clean_LIBS
+    ZLIB_LIBS=""
   elif test "$HAVE_LIBZ" != "1" && test "$HAVE_ZLIB_H" = "1"
   then
     AC_MSG_WARN([configure found only the libz header file, not the lib!])
     CPPFLAGS=$clean_CPPFLAGS
     LDFLAGS=$clean_LDFLAGS
     LIBS=$clean_LIBS
+    ZLIB_LIBS=""
   elif test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" = "1"
   then
     dnl both header and lib were found!
     AC_SUBST(HAVE_LIBZ)
     AC_DEFINE(HAVE_LIBZ, 1, [if zlib is available])
-
-    ZLIB_LIBS="-lz"
-    LIBS="-lz $clean_LIBS"
+    LIBS="$ZLIB_LIBS $clean_LIBS"
 
     dnl replace 'HAVE_LIBZ' in the automake makefile.ams
     AMFIXLIB="1"
