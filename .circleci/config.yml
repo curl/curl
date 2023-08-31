@@ -49,6 +49,90 @@ commands:
             autoreconf -fi
             ./configure --disable-proxy --enable-werror --with-openssl
 
+  configure-macos-normal:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --without-ssl CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
+  configure-macos-debug:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --without-ssl --enable-debug CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
+  configure-macos-libssh2:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --without-ssl --with-libssh2=/opt/homebrew/opt/libssh2 --enable-debug CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
+  configure-macos-libssh-c-ares:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --with-openssl --with-libssh --enable-ares --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
+  configure-macos-libssh:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --with-openssl --with-libssh --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
+  configure-macos-c-ares:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --without-ssl --enable-ares --enable-debug CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
+  configure-macos-http-only:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib --enable-debug CFLAGS='-Wno-vla -mmacosx-version-min=10.15'
+
+  configure-macos-securetransport-http2:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --with-secure-transport CFLAGS='-Wno-vla -mmacosx-version-min=10.8'
+
+  configure-macos-openssl-http2:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
+  configure-macos-libressl-http2:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix libressl)/lib/pkgconfig" CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
+  configure-macos-torture:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
+  configure-macos-torture-ftp:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --enable-warnings --enable-websockets --disable-shared --disable-threaded-resolver --with-openssl --enable-debug PKG_CONFIG_PATH="$(brew --prefix openssl)/lib/pkgconfig" CFLAGS='-Wno-vla -mmacosx-version-min=10.9'
+
   install-cares:
     steps:
       - run:
@@ -66,6 +150,15 @@ commands:
       - run:
           command: |
             sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip
+            sudo python3 -m pip install impacket
+
+  install-deps-brew:
+    steps:
+      - run:
+          command: |
+            # Drop libressl as long as we're not trying to build it
+            echo libtool autoconf automake pkg-config nghttp2 libssh2 openssl libssh c-ares | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+            while [ $? -eq 0 ]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
             sudo python3 -m pip install impacket
 
   configure-libssh:
@@ -125,9 +218,26 @@ commands:
       - run: make -j3 V=1
       - run: make -j3 V=1 examples
 
+  build-macos:
+    steps:
+      - run: make -j5 V=1
+      - run: make -j5 V=1 examples
+
   test:
     steps:
       - run: make -j3 V=1 test-ci
+
+  test-macos:
+    steps:
+      - run: make -j5 V=1 test-ci
+
+  test-torture:
+    steps:
+      - run: make -j5 V=1 test-ci TFLAGS="-n -t --shallow=25 !FTP"
+
+  test-torture-ftp:
+    steps:
+      - run: make -j5 V=1 test-ci TFLAGS="-n -t --shallow=20 FTP"
 
 executors:
   ubuntu:
@@ -209,6 +319,138 @@ jobs:
       - build
       - test
 
+  macos-arm-normal:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-normal
+      - build-macos
+      - test-macos
+
+  macos-arm-debug:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-debug
+      - build-macos
+      - test-macos
+
+  macos-arm-libssh2:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-libssh2
+      - build-macos
+      - test-macos
+
+  macos-arm-libssh-c-ares:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-libssh-c-ares
+      - build-macos
+      - test-macos
+
+  macos-arm-libssh:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-libssh
+      - build-macos
+      - test-macos
+
+  macos-arm-c-ares:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-c-ares
+      - build-macos
+      - test-macos
+
+  macos-arm-http-only:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-http-only
+      - build-macos
+      - test-macos
+
+  macos-arm-http-securetransport-http2:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-securetransport-http2
+      - build-macos
+      - test-macos
+
+  macos-arm-http-openssl-http2:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-openssl-http2
+      - build-macos
+      - test-macos
+
+  macos-arm-http-libressl-http2:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-libressl-http2
+      - build-macos
+      - test-macos
+
+  macos-arm-http-torture:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-torture
+      - build-macos
+      - test-torture
+
+  macos-arm-http-torture-ftp:
+    macos:
+      xcode: 15.0.0
+    resource_class: macos.m1.medium.gen1
+    steps:
+      - checkout
+      - install-deps-brew
+      - configure-macos-torture-ftp
+      - build-macos
+      - test-torture-ftp
+
 workflows:
   x86-openssl:
     jobs:
@@ -241,3 +483,53 @@ workflows:
   arm-openssl-c-ares:
     jobs:
       - arm-cares
+
+  macos-arm-normal:
+    jobs:
+      - macos-arm-normal
+
+  macos-arm-debug:
+    jobs:
+      - macos-arm-debug
+
+  macos-arm-libssh2:
+    jobs:
+      - macos-arm-libssh2
+
+  macos-arm-libssh-c-ares:
+    jobs:
+      - macos-arm-libssh-c-ares
+
+  macos-arm-libssh:
+    jobs:
+      - macos-arm-libssh
+
+  macos-arm-c-ares:
+    jobs:
+      - macos-arm-c-ares
+
+  macos-arm-http-only:
+    jobs:
+      - macos-arm-http-only
+
+  macos-arm-http-securetransport-http2:
+    jobs:
+      - macos-arm-http-securetransport-http2
+
+  macos-arm-http-openssl-http2:
+    jobs:
+      - macos-arm-http-openssl-http2
+
+  # There are problem linking with LibreSSL on the CI boxes that prevent this
+  # from working.
+  #macos-arm-http-libressl-http2:
+  #  jobs:
+  #    - macos-arm-http-libressl-http2
+
+  macos-arm-http-torture:
+    jobs:
+      - macos-arm-http-torture
+
+  macos-arm-http-torture-ftp:
+    jobs:
+      - macos-arm-http-torture-ftp
