@@ -1556,6 +1556,9 @@ if(_items)
 endif()
 string(REPLACE ";" " " SSL_BACKENDS "${_items}")
 message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")
+if(CURL_DEFAULT_SSL_BACKEND)
+  message(STATUS "Default SSL backend: ${CURL_DEFAULT_SSL_BACKEND}")
+endif()
 
 # curl-config needs the following options to be set.
 set(CC                      "${CMAKE_C_COMPILER}")

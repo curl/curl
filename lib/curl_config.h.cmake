@@ -32,6 +32,9 @@
 /* Location of default ca path */
 #cmakedefine CURL_CA_PATH "${CURL_CA_PATH}"
 
+/* Default SSL backend */
+#cmakedefine CURL_DEFAULT_SSL_BACKEND "${CURL_DEFAULT_SSL_BACKEND}"
+
 /* disables alt-svc */
 #cmakedefine CURL_DISABLE_ALTSVC 1
 
