@@ -118,7 +118,7 @@ class TestUpload:
 
     # upload large data sequentially, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_20_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_12_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -137,7 +137,7 @@ class TestUpload:
 
     # upload very large data sequentially, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_12_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_13_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -380,7 +380,9 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-63k')
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
-        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
+            '--trace-config', 'http/2,http/3'
+        ])
         r.check_stats(count=1, http_status=200, exitcode=0)
         indata = open(fdata).readlines()
         respdata = open(curl.response_file(0)).readlines()
@@ -396,7 +398,9 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-64k')
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
-        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
+            '--trace-config', 'http/2,http/3'
+        ])
         r.check_stats(count=1, http_status=200, exitcode=0)
         indata = open(fdata).readlines()
         respdata = open(curl.response_file(0)).readlines()
