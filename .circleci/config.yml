@@ -525,10 +525,6 @@ workflows:
     jobs:
       - macos-arm-http-openssl-http2
 
-  macos-arm-http-openssl-http2:
-    jobs:
-      - macos-arm-http-openssl-http2
-
   macos-arm-http-libressl-http2:
     jobs:
       - macos-arm-http-libressl-http2
