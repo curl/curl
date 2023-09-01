@@ -60,7 +60,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     container:
       image: 'alpine:latest'
-      options: —platform linux/386
+      options: --platform linux/386
       volumes:
         - my_docker_volume:/volume_mount
     timeout-minutes: 60
