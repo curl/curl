@@ -84,4 +84,4 @@ jobs:
           uname -a
           pwd
           ls -la
-          docker ps -a
+          cat /etc/alpine-release
