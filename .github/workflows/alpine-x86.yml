@@ -84,7 +84,7 @@ jobs:
 
       - name: Chown user
         run: |
-          sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+          sudo chown -R root:root $GITHUB_WORKSPACE
 
       - name: Checkout
         uses: actions/checkout@v3
