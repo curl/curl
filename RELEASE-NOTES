@@ -4,7 +4,7 @@ curl and libcurl 8.3.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2967
+ Contributors:                 2969
 
 This release includes the following changes:
 
@@ -21,6 +21,8 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o altsvc: accept and parse IPv6 addresses in response headers [113]
+ o asyn-ares: reduce timeout to 2000ms [148]
+ o aws-sigv4: fix having date header twice in some cases [141]
  o bearssl: don't load CA certs when peer verification is disabled [33]
  o bearssl: handshake fix, provide proper get_select_socks() implementation [99]
  o build: streamline non-UWP wincrypt detections [87]
@@ -30,8 +32,14 @@ This release includes the following bugfixes:
  o cf-socket: log successful interface bind [39]
  o CI/cirrus: disable python install on FreeBSD [83]
  o CI: add caching to many jobs [19]
+ o CI: move the Alpine build from Cirrus to GHA
+ o CI: ngtcp2-linux: use separate caches for tls libraries [125]
+ o CI: remove Windows builds from Cirrus, without replacement [131]
+ o CI: switch macOS ARM build from Cirrus to Circle CI
+ o CI: use master again for wolfssl
  o cirrus: install everthing with pkg, avoid pip [110]
  o cmake: add GnuTLS option [103]
+ o cmake: add support for `CURL_DEFAULT_SSL_BACKEND` [128]
  o cmake: add support for single libcurl compilation pass [21]
  o cmake: allow `SHARE_LIB_OBJECT=ON` on all platforms [80]
  o cmake: assume `wldap32` availability on Windows [81]
@@ -46,6 +54,7 @@ This release includes the following bugfixes:
  o cmdline-opts/page-header: reorder, clean up [51]
  o configure, cmake, lib: more form api deprecation [7]
  o configure: use the pkg-config --libs-only-l flag for libssh2 [16]
+ o connect: stop halving the remaining timeout when less than 600 ms left [147]
  o cookie-jar.d: emphasize that this option is ONLY writing cookies [72]
  o crypto: ensure crypto initialization works [69]
  o CURLINFO_CERTINFO.3: better explain curl_certinfo struct [64]
@@ -61,9 +70,11 @@ This release includes the following bugfixes:
  o docs/HYPER.md: document a workaround for a link error [73]
  o docs: link to the website versions instead of markdowns [3]
  o docs: mention critical files in same directories as curl saves [119]
+ o docs: removing "pausing transfers" from HYPER.md. [134]
  o docs: rewrite to present tense [105]
  o easy: remove #ifdefs to make code easier on the eye [34]
  o egd: delete feature detection and related source code [5]
+ o ftp: fix temp write of ipv6 address [143]
  o gen.pl: escape all dashes (ascii minus) to avoid unicode hyphens [50]
  o gen.pl: replace all single quotes with aq [78]
  o GHA: adding quiche workflow [35]
@@ -79,6 +90,7 @@ This release includes the following bugfixes:
  o http: do not require a user name when using CURLAUTH_NEGOTIATE [86]
  o http: remove the p_pragma struct field [60]
  o http: return error when receiving too large header set [43]
+ o hyper: fix a progress upload counter bug [122]
  o hyper: fix ownership problems [116]
  o imap: add a check for failing strdup()
  o imap: remove the only sscanf() call in the IMAP code [84]
@@ -92,6 +104,7 @@ This release includes the following bugfixes:
  o macOS: fix target detection more [11]
  o misc: fix various typos [18]
  o multi.h: the 'revents' field of curl_waitfd is supported [117]
+ o multi: remove 'processing: <url>' debug message [142]
  o openssl: auto-detect `SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED` [65]
  o OpenSSL: clear error queue after SSL_shutdown [120]
  o openssl: make aws-lc version support OCSP [48]
@@ -99,7 +112,9 @@ This release includes the following bugfixes:
  o openssl: switch to modern init for LibreSSL 2.7.0+ [70]
  o openssl: use `SSL_CTX_set_ciphersuites` with LibreSSL 3.4.1 [66]
  o openssl: use `SSL_CTX_set_keylog_callback` with LibreSSL 3.5.0 [67]
+ o os400: build test servers [136]
  o os400: do not check translatable options at build time [95]
+ o os400: implement CLI tool [140]
  o page-footer: QLOGDIR works with ngtcp2 and quiche [62]
  o page-header: move up a URL paragraph from GLOBBING to URL
  o quiche: adjust quiche `QUIC_IDLE_TIMEOUT` to 60s
@@ -108,9 +123,11 @@ This release includes the following bugfixes:
  o Revert "schannel: reverse the order of certinfo insertions" [14]
  o schannel: fix user-set legacy algorithms in Windows 10 & 11 [53]
  o schannel: verify hostname independent of verify cert [74]
+ o sectransp: fix compiler warnings [129]
  o sectransp: prevent CFRelease() of NULL [26]
  o secureserver.pl: fix stunnel path quoting [112]
  o secureserver.pl: fix stunnel version parsing [111]
+ o SECURITY-PROCESS.md: not a sec issue: Tricking user to run a cmdline [146]
  o system.h: add CURL_OFF_T definitions on HP-UX with HP aCC [108]
  o test1304: build and skip without netrc support
  o test1554: check translatable string options in OS400 wrapper [96]
@@ -125,6 +142,8 @@ This release includes the following bugfixes:
  o tests: TLS session sharing test [100]
  o tests: update cookie expiry dates to far in the future [121]
  o time-cond.d: mention what happens on a missing file [93]
+ o tool: avoid including leading spaces in the Location hyperlink [145]
+ o tool: change some fopen failures from warnings to errors [144]
  o tool: make the length argument an int for printf()-.* flags [49]
  o tool_cb_wrt: fix invalid unicode for windows console [25]
  o tool_operate: allow both SSL_CERT_FILE and SSL_CERT_DIR [12]
@@ -158,15 +177,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  ad0p on github, Alexander Jaeger, Alexander Kanavin, balikalina on Github,
-  Christian Hesse, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Dan Jacobson, Derzsi Dániel, Douglas R. Reno, ed0d2b2ce19451f2,
-  Emanuele Torre, Enrico Scholz, eppesuig, FC Stegerman, Gabriel Corona,
-  Gerome Fournier, Gisle Vanem, Goro FUJI, Graham Campbell, Guillaume Algis,
-  Harry Sintonen, Jacob Mealey, JazJas on github, John Bampton, John Hawthorn,
-  Joseph Tharayil, junsik on github, kyled-dell on github, Lukas Tribus,
-  Maksim Arhipov, Maksim Sciepanienka, Marcel Raad, Marin Hannache,
-  Markus Sommer, Martin Galvan, Mathew Benson, Maurício Meneghini Fauth,
+  ad0p on github, Alexander Jaeger, Alexander Kanavin, apparentorder on github,
+  balikalina on Github, Christian Hesse, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Dan Jacobson, Davide Masserut, Derzsi Dániel,
+  Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre, Enrico Scholz, eppesuig,
+  FC Stegerman, Gabriel Corona, Gerome Fournier, Gisle Vanem, Goro FUJI,
+  Graham Campbell, Guillaume Algis, Harry Sintonen, Jacob Mealey,
+  JazJas on github, John Bampton, John Hawthorn, Joseph Tharayil,
+  junsik on github, kyled-dell on github, Lukas Tribus, Maksim Arhipov,
+  Maksim Sciepanienka, Marcel Raad, Marin Hannache, Markus Sommer,
+  Martin Galvan, Mathew Benson, Matthias Gatto, Maurício Meneghini Fauth,
   Michael Osipov, Nathan Moinvaziri, Niall McGee, Nicholas Nethercote,
   Nicolás Ojeda Bär, oliverpool on github, Pablo Busse, Patrick Monnerat,
   Philippe Antoine on HackerOne, pszlazak on github, Ray Satiro,
@@ -174,7 +194,7 @@ advice from friends like these:
   Satana de Sant'Ana, Sergey, Sevan Janiyan, Stefan Eissing,
   Thomas M. DuBuisson, trrui-huawei, Viktor Szakats, wangzhikun,
   Wilhelm von Thiele, yushicheng7788 on github, zhihaoy on github
-  (65 contributors)
+  (68 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -299,5 +319,21 @@ References to bug reports and discussions on issues:
  [119] = https://curl.se/bug/?i=11530
  [120] = https://curl.se/bug/?i=11736
  [121] = https://curl.se/bug/?i=11576
+ [122] = https://curl.se/bug/?i=11780
  [123] = https://curl.se/bug/?i=11734
+ [125] = https://curl.se/bug/?i=11766
  [126] = https://curl.se/bug/?i=11729
+ [128] = https://curl.se/bug/?i=11774
+ [129] = https://curl.se/bug/?i=11773
+ [131] = https://curl.se/bug/?i=11771
+ [134] = https://curl.se/bug/?i=11764
+ [136] = https://curl.se/bug/?i=11547
+ [140] = https://curl.se/bug/?i=11547
+ [141] = https://curl.se/bug/?i=11738
+ [142] = https://curl.se/bug/?i=11759
+ [143] = https://curl.se/bug/?i=11747
+ [144] = https://curl.se/bug/?i=11677
+ [145] = https://curl.se/bug/?i=11735
+ [146] = https://curl.se/bug/?i=11757
+ [147] = https://curl.se/bug/?i=11693
+ [148] = https://curl.se/bug/?i=11753
