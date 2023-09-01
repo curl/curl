@@ -75,7 +75,8 @@ jobs:
     steps:
       - name: who I am
         run: |
-          echo "I am $USER in workspace $GITHUB_WORKSPACE"
+          id
+          echo "in workspace $GITHUB_WORKSPACE"
 
       - name: install packages
         run: |
@@ -83,7 +84,7 @@ jobs:
 
       - name: Chown user
         run: |
-          doas chown -R $USER:$USER $GITHUB_WORKSPACE
+          sudo chown -R $USER:$USER $GITHUB_WORKSPACE
 
       - name: Checkout
         uses: actions/checkout@v3
