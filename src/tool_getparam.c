@@ -2648,11 +2648,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->condtime = (curl_off_t)curl_getdate(nextarg, &now);
       if(-1 == config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
-        curl_off_t filetime = getfiletime(nextarg, global);
-        if(filetime >= 0) {
+        curl_off_t filetime;
+        rc = getfiletime(nextarg, global, &filetime);
+        if(!rc)
           /* pull the time out from the file */
           config->condtime = filetime;
-        }
         else {
           /* failed, remove time condition */
           config->timecond = CURL_TIMECOND_NONE;
