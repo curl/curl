@@ -46,14 +46,12 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 3
-  openssl-version: 3.0.10+quic
+  quictls-version: 3.0.10+quic
+  gnutls-version: 3.8.0
+  wolfssl-version: master
   nghttp3-version: v0.14.0
   ngtcp2-version: v0.18.0
   nghttp2-version: v1.55.1
-  gnutls-version: 3.8.0
-  # wolfssl version from master, update to 5.6.4 once that is out
-  # we cannot use just `master` since that wrecks our caching
-  wolfssl-version: 70c362f680d06336267c0139f8fb2fd40790f9e4
   mod_h2-version: v2.0.21
 
 jobs:
@@ -95,25 +93,42 @@ jobs:
           apache2 apache2-dev libnghttp2-dev
       name: 'install prereqs and impacket, pytest, crypto, apache2'
 
-    - name: cache nghttpx
+    - name: cache quictls
       uses: actions/cache@v3
-      id: cache-nghttpx
+      id: cache-quictls
       env:
-        cache-name: cache-nghttpx
+        cache-name: cache-quictls
       with:
-        path: /home/runner/nghttpx
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-openssl-${{ env.openssl-version }}-nghttp3-${{ env.nghttp3-version }}-ngtcp2-${{ env.ngtcp2-version }}-nghttp2-${{ env.nghttp2-version }}-gnutls-${{ env.gnutls-version }}-wolfssl-${{ env.wolfssl-version }}
+        path: /home/runner/quictls
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}
 
-    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
+    - if: steps.cache-quictls.outputs.cache-hit != 'true'
       run: |
-        git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/quictls/openssl
-        cd openssl
+        cd $HOME
+        git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl quictls
+        cd quictls
         ./config --prefix=$HOME/nghttpx --libdir=$HOME/nghttpx/lib
+        make
+      name: 'build quictls'
+
+    - run: |
+        cd $HOME/quictls
         make -j1 install_sw
       name: 'install quictls'
 
-    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
+
+    - name: cache gnutls
+      uses: actions/cache@v3
+      id: cache-gnutls
+      env:
+        cache-name: cache-gnutls
+      with:
+        path: /home/runner/gnutls
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.gnutls-version }}
+
+    - if: steps.cache-gnutls.outputs.cache-hit != 'true'
       run: |
+        cd $HOME
         git clone --quiet --depth=1 -b ${{ env.gnutls-version }} https://github.com/gnutls/gnutls.git
         cd gnutls
         ./bootstrap
@@ -121,29 +136,66 @@ jobs:
           PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib -L$HOME/nghttpx/lib" \
           --with-included-libtasn1 --with-included-unistring \
           --disable-guile --disable-doc --disable-tests --disable-tools
+        make
+      name: 'build gnutls'
+
+    - run: |
+        cd $HOME/gnutls
         make install
       name: 'install gnutls'
 
-    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
+
+    - name: cache wolfssl
+      uses: actions/cache@v3
+      id: cache-wolfssl
+      env:
+        cache-name: cache-wolfssl
+      with:
+        path: /home/runner/wolfssl
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
+
+    - if: steps.cache-wolfssl.outputs.cache-hit != 'true' || ${{ env.wolfssl-version }} == 'master'
       run: |
+        cd $HOME
         git clone --quiet --depth=1 -b ${{ env.wolfssl-version }} https://github.com/wolfSSL/wolfssl.git
         cd wolfssl
         ./autogen.sh
         ./configure --enable-all --enable-quic --prefix=$HOME/nghttpx
+        make
+      name: 'build wolfssl'
+
+    - run: |
+        cd $HOME/wolfssl
         make install
       name: 'install wolfssl'
 
-    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
+
+    - name: cache nghttp3
+      uses: actions/cache@v3
+      id: cache-nghttp3
+      env:
+        cache-name: cache-nghttp3
+      with:
+        path: /home/runner/nghttp3
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.nghttp3-version }}
+
+    - if: steps.cache-nghttp3.outputs.cache-hit != 'true'
       run: |
+        cd $HOME
         git clone --quiet --depth=1 -b ${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
         cd nghttp3
         autoreconf -fi
         ./configure --prefix=$HOME/nghttpx PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" --enable-lib-only
+        make
+      name: 'build nghttp3'
+
+    - run: |
+        cd $HOME/nghttp3
         make install
       name: 'install nghttp3'
 
-    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
-      run: |
+    # depends on all other cached libs built so far
+    - run: |
         git clone --quiet --depth=1 -b ${{ env.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
         cd ngtcp2
         autoreconf -fi
@@ -151,8 +203,8 @@ jobs:
         make install
       name: 'install ngtcp2'
 
-    - if: steps.cache-nghttpx.outputs.cache-hit != 'true'
-      run: |
+    # depends on all other cached libs built so far
+    - run: |
         git clone --quiet --depth=1 -b ${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
         cd nghttp2
         autoreconf -fi
