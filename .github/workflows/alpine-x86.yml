@@ -76,8 +76,14 @@ jobs:
             --with-openssl=$HOME/nghttpx
 
     steps:
+      - uses: actions/checkout@v2
+
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
 
       - name: what are we
-        run: uname -a
+        run: |
+          uname -a
+          pwd
+          ls -la
+          docker ps -a
