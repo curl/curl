@@ -157,6 +157,7 @@ jobs:
     - if: steps.cache-wolfssl.outputs.cache-hit != 'true' || ${{ env.wolfssl-version }} == 'master'
       run: |
         cd $HOME
+        rm -rf wolfssl
         git clone --quiet --depth=1 -b ${{ env.wolfssl-version }} https://github.com/wolfSSL/wolfssl.git
         cd wolfssl
         ./autogen.sh
