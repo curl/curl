@@ -73,6 +73,14 @@ jobs:
             --with-openssl
 
     steps:
+      - name: who I am
+        run: |
+          echo "I am $USER in workspace $GITHUB_WORKSPACE"
+
+      - name: install packages
+        run: |
+          apk add sudo doas
+
       - name: Chown user
         run: |
           doas chown -R $USER:$USER $GITHUB_WORKSPACE
