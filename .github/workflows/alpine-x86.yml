@@ -75,7 +75,7 @@ jobs:
     steps:
       - name: Chown user
         run: |
-          sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+          doas chown -R $USER:$USER $GITHUB_WORKSPACE
 
       - name: Checkout
         uses: actions/checkout@v3
