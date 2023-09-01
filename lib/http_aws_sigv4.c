@@ -220,8 +220,10 @@ static CURLcode make_headers(struct Curl_easy *data,
     char *value;
 
     value = strchr(*date_header, ':');
-    if(!value)
+    if(!value) {
+      *date_header = NULL;
       goto fail;
+    }
     ++value;
     while(ISBLANK(*value))
       ++value;
