@@ -139,7 +139,6 @@ class TestProxy:
         url = f'https://localhost:{env.https_port}/data.json'
         xargs = curl.get_proxy_args(proxys=False, tunnel=True)
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
-                               with_headers=True,
                                extra_args=xargs)
         r.check_response(count=1, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
@@ -157,7 +156,7 @@ class TestProxy:
         url = f'https://localhost:{env.https_port}/data.json?[0-0]'
         xargs = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
-                               with_headers=True, extra_args=xargs)
+                               extra_args=xargs)
         r.check_response(count=1, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
         assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
@@ -185,7 +184,7 @@ class TestProxy:
         url = f'https://localhost:{env.https_port}/{fname}?[0-{count-1}]'
         xargs = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
-                               with_headers=True, extra_args=xargs)
+                               extra_args=xargs)
         r.check_response(count=count, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
         assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
@@ -237,7 +236,7 @@ class TestProxy:
         url2 = f'http://localhost:{env.http_port}/data.json'
         xargs = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r = curl.http_download(urls=[url1, url2], alpn_proto='http/1.1', with_stats=True,
-                               with_headers=True, extra_args=xargs)
+                               extra_args=xargs)
         r.check_response(count=2, http_status=200)
         assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
             if tunnel == 'h2' else 'HTTP/1.1'

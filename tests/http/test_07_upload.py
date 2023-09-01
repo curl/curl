@@ -274,6 +274,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?chunk_delay=2ms'
         curl = CurlClient(env=env)
         r = curl.run_direct(with_stats=True, args=[
+            '--verbose', '--trace-config', 'ids,time',
             '--resolve', f'{env.authority_for(env.domain1, proto)}:127.0.0.1',
             '--cacert', env.ca.cert_file,
             '--request', 'PUT',
@@ -295,7 +296,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put'
         curl = CurlClient(env=env)
         r = curl.run_direct(with_stats=True, args=[
-            '--verbose',
+            '--verbose', '--trace-config', 'ids,time',
             '--resolve', f'{env.authority_for(env.domain1, proto)}:127.0.0.1',
             '--cacert', env.ca.cert_file,
             '--request', 'PUT',

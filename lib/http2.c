@@ -1068,7 +1068,9 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     break;
   case NGHTTP2_RST_STREAM:
     stream->closed = TRUE;
-    stream->reset = TRUE;
+    if(frame->rst_stream.error_code) {
+      stream->reset = TRUE;
+    }
     stream->send_closed = TRUE;
     data->req.keepon &= ~KEEP_SEND_HOLD;
     drain_stream(cf, data, stream);
@@ -1113,8 +1115,9 @@ static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
     }
     case NGHTTP2_RST_STREAM: {
       return msnprintf(buffer, blen,
-                       "FRAME[RST_STREAM, len=%d, flags=%d]",
-                       (int)frame->hd.length, frame->hd.flags);
+                       "FRAME[RST_STREAM, len=%d, flags=%d, error=%u]",
+                       (int)frame->hd.length, frame->hd.flags,
+                       frame->rst_stream.error_code);
     }
     case NGHTTP2_SETTINGS: {
       if(frame->hd.flags & NGHTTP2_FLAG_ACK) {
