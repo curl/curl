@@ -1,0 +1,83 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: alpine-x86
+
+on:
+  push:
+    branches:
+    - master
+    - '*/ci'
+    paths-ignore:
+    - '**/*.md'
+    - '**/CMakeLists.txt'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'CMake/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**/*.md'
+    - '**/CMakeLists.txt'
+    - '.azure-pipelines.yml'
+    - '.circleci/**'
+    - '.cirrus.yml'
+    - 'appveyor.yml'
+    - 'CMake/**'
+    - 'packages/**'
+    - 'plan9/**'
+    - 'projects/**'
+    - 'winbuild/**'
+
+concurrency:
+  # Hardcoded workflow filename as workflow name above is just Linux again
+  group: alpine-x86-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  MAKEFLAGS: -j 3
+  openssl-version: 3.0.10+quic
+  nghttp3-version: v0.14.0
+  ngtcp2-version: v0.18.0
+  nghttp2-version: v1.55.1
+  gnutls-version: 3.8.0
+  wolfssl-version: v5.6.3-stable
+  mod_h2-version: v2.0.21
+
+jobs:
+  autotools:
+    name: ${{ matrix.build.name }}
+    runs-on: 'ubuntu-latest'
+    container:
+      image: 'alpine:latest'
+      options: —platform linux/386
+      volumes:
+        - my_docker_volume:/volume_mount
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: quictls
+          configure: >-
+            PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
+            --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug
+            --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
+            --with-openssl=$HOME/nghttpx
+
+    steps:
+      - name: Check for dockerenv file
+        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+
+      - name: what are we
+        run: uname -a
