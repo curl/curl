@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: alpine-x86
+name: alpine-x86-v2
 
 on:
   push:
@@ -85,11 +85,11 @@ jobs:
       - name: Run script inside Alpine chroot as root
         run: |
           cat /etc/alpine-release
+          uname -a
           apk add libtool autoconf automake
         shell: alpine.sh --root {0}
 
       - name: Run script inside Alpine chroot as the default user (unprivileged)
         run: |
           ls -la  # as you would expect, you're in your workspace directory
-          npm build
         shell: alpine.sh {0}
