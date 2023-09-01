@@ -82,13 +82,6 @@ jobs:
         run: |
           apk add sudo doas
 
-      - name: Chown user
-        run: |
-          sudo chown -R root:root $GITHUB_WORKSPACE
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
 
@@ -98,6 +91,7 @@ jobs:
           pwd
           ls -la
           cat /etc/alpine-release
+          file $(type cat)
 
 
       - run: autoreconf -fi
