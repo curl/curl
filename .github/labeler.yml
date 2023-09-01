@@ -58,7 +58,6 @@ CI:
 - any: ['appveyor.yml']
 - any: ['tests/azure.pm']
 - any: ['tests/appveyor.pm']
-- any: ['tests/CI.pm']
 
 cmake:
 - all: ['**/CMakeLists.txt']
@@ -166,7 +165,6 @@ HTTP:
 - all: ['tests/http-server.pl']
 - all: ['tests/http/*']
 - all: ['tests/nghttp*']
-- all: ['tests/tests-httpd/*']
 
 HTTP/2:
 - all: ['docs/HTTP2.md']
@@ -176,7 +174,7 @@ HTTP/2:
 
 HTTP/3:
 - all: ['.github/workflows/ngtcp2*']
-- all: ['.github/workflows/pytest.yml']
+- all: ['.github/workflows/quiche*']
 - all: ['docs/HTTP3.md']
 - all: ['lib/vquic/**']
 - all: ['tests/http3-server.pl']
@@ -286,8 +284,9 @@ URL:
 
 WebSocket:
 - all: ['docs/WEBSOCKET.md*']
-- all: ['docs/libcurl/opts/CURLOPT_WS_*']
 - all: ['docs/libcurl/curl_ws_*']
+- all: ['docs/libcurl/libcurl-ws.3']
+- all: ['docs/libcurl/opts/CURLOPT_WS_*']
 - all: ['include/curl/websockets.h']
 - all: ['lib/ws.*']
 
