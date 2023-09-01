@@ -38,7 +38,7 @@ static int ping(CURL *curl, const char *send_payload)
   return (int)result;
 }
 
-static int recv_pong(CURL *curl, const char *exected_payload)
+static int recv_pong(CURL *curl, const char *expected_payload)
 {
   size_t rlen;
   const struct curl_ws_frame *meta;
@@ -48,8 +48,8 @@ static int recv_pong(CURL *curl, const char *exected_payload)
     if(meta->flags & CURLWS_PONG) {
       int same = 0;
       fprintf(stderr, "ws: got PONG back\n");
-      if(rlen == strlen(exected_payload)) {
-        if(!memcmp(exected_payload, buffer, rlen)) {
+      if(rlen == strlen(expected_payload)) {
+        if(!memcmp(expected_payload, buffer, rlen)) {
           fprintf(stderr, "ws: got the same payload back\n");
           same = 1;
         }
