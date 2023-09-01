@@ -76,7 +76,7 @@ jobs:
       - name: Setup latest Alpine Linux
         uses: jirutka/setup-alpine@v1
         with:
-          arch: i386
+          arch: x86
           packages: >
             build-base
             libgit2-dev
