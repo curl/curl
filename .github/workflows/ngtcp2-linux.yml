@@ -51,7 +51,9 @@ env:
   ngtcp2-version: v0.18.0
   nghttp2-version: v1.55.1
   gnutls-version: 3.8.0
-  wolfssl-version: master
+  # wolfssl version from master, update to 5.6.4 once that is out
+  # we cannot use just `master` since that wrecks our caching
+  wolfssl-version: 70c362f680d06336267c0139f8fb2fd40790f9e4
   mod_h2-version: v2.0.21
 
 jobs:
