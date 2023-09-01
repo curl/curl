@@ -70,10 +70,7 @@ jobs:
         build:
         - name: quictls
           configure: >-
-            PKG_CONFIG_PATH="$HOME/nghttpx/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/nghttpx/lib"
-            --with-ngtcp2=$HOME/nghttpx --enable-warnings --enable-werror --enable-debug
-            --with-test-nghttpx="$HOME/nghttpx/bin/nghttpx"
-            --with-openssl=$HOME/nghttpx
+            --with-openssl
 
     steps:
       - name: Check for dockerenv file
@@ -85,3 +82,15 @@ jobs:
           pwd
           ls -la
           cat /etc/alpine-release
+
+      - uses: actions/checkout@v3
+
+      - run: autoreconf -fi
+        name: 'autoreconf'
+
+      - run: ./configure ${{ matrix.build.configure }}
+        name: 'configure'
+
+      - run: make V=1
+        name: 'make'
+
