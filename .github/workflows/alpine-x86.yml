@@ -73,7 +73,7 @@ jobs:
             --with-openssl
 
     steps:
-      - - name: Chown user
+      - name: Chown user
           run: |
             sudo chown -R $USER:$USER $GITHUB_WORKSPACE
 
