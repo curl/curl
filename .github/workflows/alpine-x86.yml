@@ -60,7 +60,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     container:
       image: 'alpine:latest'
-      options: --platform linux/386
+      options: --platform linux/386 --user root
       volumes:
         - my_docker_volume:/volume_mount
     timeout-minutes: 60
@@ -73,6 +73,13 @@ jobs:
             --with-openssl
 
     steps:
+      - - name: Chown user
+          run: |
+            sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
 
@@ -83,7 +90,6 @@ jobs:
           ls -la
           cat /etc/alpine-release
 
-      - uses: actions/checkout@v3
 
       - run: autoreconf -fi
         name: 'autoreconf'
