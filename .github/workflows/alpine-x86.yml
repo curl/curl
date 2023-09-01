@@ -87,7 +87,7 @@ jobs:
           sudo chown -R root:root $GITHUB_WORKSPACE
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
