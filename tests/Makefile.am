@@ -117,10 +117,10 @@ event-test: perlcheck all
 	echo "converted $< to $@")
 
 checksrc:
-	cd libtest && $(MAKE) checksrc
-	cd unit && $(MAKE) checksrc
-	cd server && $(MAKE) checksrc
-	cd http && $(MAKE) checksrc
+	(cd libtest && $(MAKE) checksrc)
+	(cd unit && $(MAKE) checksrc)
+	(cd server && $(MAKE) checksrc)
+	(cd http && $(MAKE) checksrc)
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes
