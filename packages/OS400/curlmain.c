@@ -50,16 +50,14 @@ int             ebcdic_argc;
 char **         ebcdic_argv;
 
 
-int
-main(int argc, char **argv)
-
+int main(int argc, char **argv)
 {
   int i;
   int j;
   iconv_t cd;
   size_t bytecount = 0;
-  char * inbuf;
-  char * outbuf;
+  char *inbuf;
+  char *outbuf;
   size_t inbytesleft;
   size_t outbytesleft;
   char dummybuf[128];
@@ -70,8 +68,8 @@ main(int argc, char **argv)
   ebcdic_argv = argv;
 
   /* Build the encoding converter. */
-  strncpy(tocode, "IBMCCSID01208", sizeof tocode);      /* Use UTF-8. */
-  strncpy(fromcode, "IBMCCSID000000000010", sizeof fromcode);
+  strncpy(tocode, "IBMCCSID01208", sizeof(tocode));      /* Use UTF-8. */
+  strncpy(fromcode, "IBMCCSID000000000010", sizeof(fromcode));
   cd = iconv_open(tocode, fromcode);
 
   /* Measure the arguments. */
@@ -80,7 +78,7 @@ main(int argc, char **argv)
     do {
       inbytesleft = 0;
       outbuf = dummybuf;
-      outbytesleft = sizeof dummybuf;
+      outbytesleft = sizeof(dummybuf);
       j = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
       bytecount += outbuf - dummybuf;
     } while(j == -1 && errno == E2BIG);
@@ -90,7 +88,7 @@ main(int argc, char **argv)
    }
 
   /* Allocate memory for the ASCII arguments and vector. */
-  argv = (char **) malloc((argc + 1) * sizeof *argv + bytecount);
+  argv = (char **) malloc((argc + 1) * sizeof(*argv) + bytecount);
 
   /* Build the vector and convert argument encoding. */
   outbuf = (char *) (argv + argc + 1);
