@@ -36,20 +36,17 @@
 #define CURLPGM "CURL"
 #endif
 
-
 /* Variable-length string, with 16-bit length. */
-typedef struct {
+struct vary2 {
   short len;
   char  string[5000];
-}  vary2;
-
+};
 
 /* Arguments from CL command. */
-typedef struct {
-  char *    pgm;            /* Program name. */
-  vary2 *   cmdargs;        /* Command line arguments. */
-}  arguments;
-
+struct arguments {
+  char         *pgm;            /* Program name. */
+  struct vary2 *cmdargs;        /* Command line arguments. */
+};
 
 static int
 is_ifs(char c)
@@ -130,7 +127,7 @@ parse_command_line(const char *cmdargs, size_t len,
 
 
 int
-main(int argsc, arguments *args)
+main(int argsc, struct arguments *args)
 {
   size_t argc;
   char **argv;
@@ -152,7 +149,7 @@ main(int argsc, arguments *args)
 
   /* Measure arguments size. */
   exitcode = parse_command_line(args->cmdargs->string, args->cmdargs->len,
-                   &argc, NULL, &argsize, NULL);
+                                &argc, NULL, &argsize, NULL);
 
   if(!exitcode) {
     /* Allocate space for parsed arguments. */
@@ -166,7 +163,7 @@ main(int argsc, arguments *args)
       _LU_Work_Area_T *luwrka = (_LU_Work_Area_T *) _LUWRKA();
 
       parse_command_line(args->cmdargs->string, args->cmdargs->len,
-                   &argc, argv, &argsize, (char *) (argv + argc + 1));
+                         &argc, argv, &argsize, (char *) (argv + argc + 1));
 
       /* Call program. */
       _CALLPGMV((void *) &pgmptr, argv, argc);
