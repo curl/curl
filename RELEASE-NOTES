@@ -4,7 +4,7 @@ curl and libcurl 8.3.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2969
+ Contributors:                 2972
 
 This release includes the following changes:
 
@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o aws-sigv4: fix having date header twice in some cases [141]
  o bearssl: don't load CA certs when peer verification is disabled [33]
  o bearssl: handshake fix, provide proper get_select_socks() implementation [99]
+ o build: fix portability of mancheck and checksrc targets
  o build: streamline non-UWP wincrypt detections [87]
  o c-hyper: adjust the hyper to curlcode conversion [52]
  o c-hyper: fix memory leaks in `Curl_http` [126]
@@ -53,6 +54,7 @@ This release includes the following bugfixes:
  o cmdline-opts/page-header: clarify stronger that !opt == URL [123]
  o cmdline-opts/page-header: reorder, clean up [51]
  o configure, cmake, lib: more form api deprecation [7]
+ o configure: trust pkg-config when it's used for zlib [149]
  o configure: use the pkg-config --libs-only-l flag for libssh2 [16]
  o connect: stop halving the remaining timeout when less than 600 ms left [147]
  o cookie-jar.d: emphasize that this option is ONLY writing cookies [72]
@@ -68,6 +70,7 @@ This release includes the following bugfixes:
  o docs/cmdline: add small "warning" to verbose options [59]
  o docs/cmdline: remove repeated working for negotiate + ntlm [58]
  o docs/HYPER.md: document a workaround for a link error [73]
+ o docs: add curl_global_trace to some SEE ALSO sections [133]
  o docs: link to the website versions instead of markdowns [3]
  o docs: mention critical files in same directories as curl saves [119]
  o docs: removing "pausing transfers" from HYPER.md. [134]
@@ -83,6 +86,7 @@ This release includes the following bugfixes:
  o http2: cleanup trace messages [56]
  o http2: disable asssertion blocking OSSFuzz testing [31]
  o http2: fix in h2 proxy tunnel: progress in ingress on sending [32]
+ o http2: polish things around POST [132]
  o http2: upgrade tests and add fix for non-existing stream [44]
  o http3/ngtcp2: shorten handshake, trace cleanup [13]
  o http3: quiche, handshake optimization, trace cleanup [63]
@@ -92,6 +96,7 @@ This release includes the following bugfixes:
  o http: return error when receiving too large header set [43]
  o hyper: fix a progress upload counter bug [122]
  o hyper: fix ownership problems [116]
+ o hyper: remove `hyptransfer->endtask` [137]
  o imap: add a check for failing strdup()
  o imap: remove the only sscanf() call in the IMAP code [84]
  o include/curl/mprintf.h: add __attribute__ for the prototypes [38]
@@ -104,6 +109,7 @@ This release includes the following bugfixes:
  o macOS: fix target detection more [11]
  o misc: fix various typos [18]
  o multi.h: the 'revents' field of curl_waitfd is supported [117]
+ o multi: more efficient pollfd count for poll [130]
  o multi: remove 'processing: <url>' debug message [142]
  o openssl: auto-detect `SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED` [65]
  o OpenSSL: clear error queue after SSL_shutdown [120]
@@ -146,9 +152,11 @@ This release includes the following bugfixes:
  o tool: change some fopen failures from warnings to errors [144]
  o tool: make the length argument an int for printf()-.* flags [49]
  o tool_cb_wrt: fix invalid unicode for windows console [25]
+ o tool_filetime: make -z work with file dates before 1970 [139]
  o tool_operate: allow both SSL_CERT_FILE and SSL_CERT_DIR [12]
  o tool_paramhlp: improve str2num(): avoid unnecessary call to strlen() [118]
  o tool_urlglob: use the correct format specifier for curl_off_t in msnprintf [88]
+ o transfer: also stop the sending on closed connection [124]
  o transfer: don't set TIMER_STARTTRANSFER on first send [77]
  o unit2600: fix build warning if built without verbose messages
  o url: remove infof() output for "still name resolving" [28]
@@ -162,6 +170,7 @@ This release includes the following bugfixes:
  o wolfSSL: avoid the OpenSSL compat API when not needed [85]
  o workflows/macos.yml: disable zstd and alt-svc in the http-only build [98]
  o write-out.d: clarify %{time_starttransfer}
+ o ws: fix spelling mistakes in examples and tests [138]
 
 This release includes the following known bugs:
 
@@ -179,22 +188,23 @@ advice from friends like these:
 
   ad0p on github, Alexander Jaeger, Alexander Kanavin, apparentorder on github,
   balikalina on Github, Christian Hesse, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Dan Jacobson, Davide Masserut, Derzsi Dániel,
-  Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre, Enrico Scholz, eppesuig,
-  FC Stegerman, Gabriel Corona, Gerome Fournier, Gisle Vanem, Goro FUJI,
-  Graham Campbell, Guillaume Algis, Harry Sintonen, Jacob Mealey,
-  JazJas on github, John Bampton, John Hawthorn, Joseph Tharayil,
+  Daniel Stenberg, Dan Jacobson, Dave Cottlehuber, Davide Masserut,
+  Derzsi Dániel, Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre,
+  Enrico Scholz, eppesuig, FC Stegerman, Gabriel Corona, Gerome Fournier,
+  Gisle Vanem, Goro FUJI, Graham Campbell, Guillaume Algis, Harry Sintonen,
+  Jacob Mealey, JazJas on github, John Bampton, John Hawthorn, Joseph Tharayil,
   junsik on github, kyled-dell on github, Lukas Tribus, Maksim Arhipov,
   Maksim Sciepanienka, Marcel Raad, Marin Hannache, Markus Sommer,
   Martin Galvan, Mathew Benson, Matthias Gatto, Maurício Meneghini Fauth,
-  Michael Osipov, Nathan Moinvaziri, Niall McGee, Nicholas Nethercote,
-  Nicolás Ojeda Bär, oliverpool on github, Pablo Busse, Patrick Monnerat,
-  Philippe Antoine on HackerOne, pszlazak on github, Ray Satiro,
-  Richard W.M. Jones, Rutger Broekhoff, Ryan Schmidt, Samuel Chiang,
-  Satana de Sant'Ana, Sergey, Sevan Janiyan, Stefan Eissing,
-  Thomas M. DuBuisson, trrui-huawei, Viktor Szakats, wangzhikun,
-  Wilhelm von Thiele, yushicheng7788 on github, zhihaoy on github
-  (68 contributors)
+  Michael Osipov, Mohamed Daahir, Nathan Moinvaziri, Niall McGee,
+  Nicholas Nethercote, Nicolás Ojeda Bär, Oleg Jukovec, oliverpool on github,
+  Pablo Busse, Patrick Monnerat, Philippe Antoine on HackerOne,
+  pszlazak on github, Randall, Ray Satiro, Richard W.M. Jones,
+  Rutger Broekhoff, Ryan Schmidt, Samuel Chiang, Satana de Sant'Ana, Sergey,
+  Sevan Janiyan, Stefan Eissing, Thomas M. DuBuisson, trrui-huawei,
+  Viktor Szakats, wangzhikun, Wilhelm von Thiele, yushicheng7788 on github,
+  zhihaoy on github
+  (72 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -321,13 +331,20 @@ References to bug reports and discussions on issues:
  [121] = https://curl.se/bug/?i=11576
  [122] = https://curl.se/bug/?i=11780
  [123] = https://curl.se/bug/?i=11734
+ [124] = https://curl.se/bug/?i=11769
  [125] = https://curl.se/bug/?i=11766
  [126] = https://curl.se/bug/?i=11729
  [128] = https://curl.se/bug/?i=11774
  [129] = https://curl.se/bug/?i=11773
+ [130] = https://curl.se/bug/?i=11792
  [131] = https://curl.se/bug/?i=11771
+ [132] = https://curl.se/bug/?i=11756
+ [133] = https://curl.se/bug/?i=11791
  [134] = https://curl.se/bug/?i=11764
  [136] = https://curl.se/bug/?i=11547
+ [137] = https://curl.se/bug/?i=11779
+ [138] = https://curl.se/bug/?i=11784
+ [139] = https://curl.se/bug/?i=11785
  [140] = https://curl.se/bug/?i=11547
  [141] = https://curl.se/bug/?i=11738
  [142] = https://curl.se/bug/?i=11759
@@ -337,3 +354,4 @@ References to bug reports and discussions on issues:
  [146] = https://curl.se/bug/?i=11757
  [147] = https://curl.se/bug/?i=11693
  [148] = https://curl.se/bug/?i=11753
+ [149] = https://curl.se/mail/lib-2023-08/0081.html
