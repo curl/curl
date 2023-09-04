@@ -1919,7 +1919,7 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
                    ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,
                    remote_addrlen);
-  pi.ecn = (uint32_t)ecn;
+  pi.ecn = (uint8_t)ecn;
 
   rv = ngtcp2_conn_read_pkt(ctx->qconn, &path, &pi, pkt, pktlen, pktx->ts);
   if(rv) {
