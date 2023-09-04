@@ -594,7 +594,7 @@ struct Curl_async {
  */
 struct easy_poll_set {
   curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
-  int num;
+  unsigned int num;
   unsigned char actions[MAX_SOCKSPEREASYHANDLE];
 };
 
