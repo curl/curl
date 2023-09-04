@@ -2895,7 +2895,6 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     unsigned char cur_action = cur_poll.actions[i];
     unsigned char last_action = 0;
     int comboaction;
-    bool sincebefore = FALSE;
 
     s = cur_poll.sockets[i];
 
@@ -2907,7 +2906,6 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       for(j = 0; j< data->last_poll.num; j++) {
         if(s == data->last_poll.sockets[j]) {
           last_action = data->last_poll.actions[j];
-          sincebefore = TRUE;
           break;
         }
       }
@@ -2919,7 +2917,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
         /* fatal */
         return CURLM_OUT_OF_MEMORY;
     }
-    if(sincebefore && (last_action != cur_action)) {
+    if(last_action && (last_action != cur_action)) {
       /* Socket was used already, but different action now */
       if(last_action & CURL_POLL_IN)
         entry->readers--;
@@ -2930,7 +2928,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       if(cur_action & CURL_POLL_OUT)
         entry->writers++;
     }
-    else if(!sincebefore) {
+    else if(!last_action) {
       /* a new transfer using this socket */
       entry->users++;
       if(cur_action & CURL_POLL_IN)
@@ -2950,7 +2948,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
                    (entry->readers ? CURL_POLL_IN : 0);
 
     /* socket existed before and has the same action set as before */
-    if(sincebefore && ((int)entry->action == comboaction))
+    if(last_action && ((int)entry->action == comboaction))
       /* same, continue */
       continue;
 
