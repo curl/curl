@@ -59,6 +59,9 @@ struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize,
 /* set the bit for the given sock number to make the bitmap for readable */
 #define GETSOCK_READSOCK(x) (1 << (x))
 
+/* mask for checking if read and/or write is set for index x */
+#define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
+
 #ifdef DEBUGBUILD
  /*
   * Curl_multi_dump is not a stable public function, this is only meant to
