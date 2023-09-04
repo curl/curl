@@ -796,7 +796,7 @@ such place might be: [RFC 2255, The LDAP URL
 Format](https://curl.se/rfc/rfc2255.txt)
 
 To show you an example, this is how to get all people from an LDAP server that
-has a certain sub-domain in their email address:
+has a certain subdomain in their email address:
 
     curl -B "ldap://ldap.frontec.se/o=frontec??sub?mail=*sth.frontec.se"
 
