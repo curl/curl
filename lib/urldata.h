@@ -589,6 +589,15 @@ struct Curl_async {
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
 
+/* Polling requested by an easy handle.
+ * `action` is CURL_POLL_IN, CURL_POLL_OUT or CURL_POLL_INOUT.
+ */
+struct easy_poll_set {
+  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
+  int num;
+  unsigned char actions[MAX_SOCKSPEREASYHANDLE];
+};
+
 enum expect100 {
   EXP100_SEND_DATA,           /* enough waiting, just send the body now */
   EXP100_AWAITING_CONTINUE,   /* waiting for the 100 Continue header */
@@ -1974,10 +1983,7 @@ struct Curl_easy {
      particular order. Note that all sockets are added to the sockhash, where
      the state etc are also kept. This array is mostly used to detect when a
      socket is to be removed from the hash. See singlesocket(). */
-  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
-  unsigned char actions[MAX_SOCKSPEREASYHANDLE]; /* action for each socket in
-                                                    sockets[] */
-  int numsocks;
+  struct easy_poll_set last_poll;
 
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle

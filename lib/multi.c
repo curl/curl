@@ -2879,21 +2879,18 @@ CURLMsg *curl_multi_info_read(struct Curl_multi *multi, int *msgs_in_queue)
 static CURLMcode singlesocket(struct Curl_multi *multi,
                               struct Curl_easy *data)
 {
-  curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
+  struct easy_poll_set cur_poll;
   int i;
   struct Curl_sh_entry *entry;
   curl_socket_t s;
-  int num;
   unsigned int curraction;
-  unsigned char actions[MAX_SOCKSPEREASYHANDLE];
   int rc;
 
-  for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++)
-    socks[i] = CURL_SOCKET_BAD;
+  memset(&cur_poll, 0, sizeof(cur_poll));
 
   /* Fill in the 'current' struct with the state as it is now: what sockets to
      supervise and for what actions */
-  curraction = multi_getsock(data, socks);
+  curraction = multi_getsock(data, cur_poll.sockets);
 
   /* We have 0 .. N sockets already and we get to know about the 0 .. M
      sockets we should have from now on. Detect the differences, remove no
@@ -2908,23 +2905,23 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     int comboaction;
     bool sincebefore = FALSE;
 
-    s = socks[i];
-
-    /* get it from the hash */
-    entry = sh_getentry(&multi->sockhash, s);
-
     if(curraction & GETSOCK_READSOCK(i))
       action |= CURL_POLL_IN;
     if(curraction & GETSOCK_WRITESOCK(i))
       action |= CURL_POLL_OUT;
 
-    actions[i] = action;
+    cur_poll.num = i;
+    cur_poll.actions[i] = action;
+    s = cur_poll.sockets[i];
+
+    /* get it from the hash */
+    entry = sh_getentry(&multi->sockhash, s);
     if(entry) {
       /* check if new for this transfer */
       int j;
-      for(j = 0; j< data->numsocks; j++) {
-        if(s == data->sockets[j]) {
-          prevaction = data->actions[j];
+      for(j = 0; j< data->last_poll.num; j++) {
+        if(s == data->last_poll.sockets[j]) {
+          prevaction = data->last_poll.actions[j];
           sincebefore = TRUE;
           break;
         }
@@ -2986,16 +2983,15 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     entry->action = comboaction; /* store the current action state */
   }
 
-  num = i; /* number of sockets */
-
-  /* when we've walked over all the sockets we should have right now, we must
-     make sure to detect sockets that are removed */
-  for(i = 0; i< data->numsocks; i++) {
+  /* Check for last_poll.sockets that no longer appear in cur_poll.sockets.
+   * Need to remove the easy handle from the multi->sockhash->transfers and
+   * remove multi->sockhash entry when this was the last transfer */
+  for(i = 0; i< data->last_poll.num; i++) {
     int j;
     bool stillused = FALSE;
-    s = data->sockets[i];
-    for(j = 0; j < num; j++) {
-      if(s == socks[j]) {
+    s = data->last_poll.sockets[i];
+    for(j = 0; j < cur_poll.num; j++) {
+      if(s == cur_poll.sockets[j]) {
         /* this is still supervised */
         stillused = TRUE;
         break;
@@ -3008,7 +3004,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     /* if this is NULL here, the socket has been closed and notified so
        already by Curl_multi_closed() */
     if(entry) {
-      unsigned char oldactions = data->actions[i];
+      unsigned char oldactions = data->last_poll.actions[i];
       /* this socket has been removed. Decrease user count */
       entry->users--;
       if(oldactions & CURL_POLL_OUT)
@@ -3036,11 +3032,10 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
         }
       }
     }
-  } /* for loop over numsocks */
+  } /* for loop over num */
 
-  memcpy(data->sockets, socks, num*sizeof(curl_socket_t));
-  memcpy(data->actions, actions, num*sizeof(char));
-  data->numsocks = num;
+  /* Remember for next time */
+  memcpy(&data->last_poll, &cur_poll, sizeof(data->last_poll));
   return CURLM_OK;
 }
 
