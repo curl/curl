@@ -46,7 +46,7 @@ started. Even if you set a crazy value here, \fIcurl_easy_setopt(3)\fP might
 still return \fICURLE_OK\fP.
 
 If the given URL is missing a scheme name (such as "http://" or "ftp://" etc)
-then libcurl guesses based on the host. If the outermost sub-domain name
+then libcurl guesses based on the host. If the outermost subdomain name
 matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that protocol gets used,
 otherwise HTTP is used. Since 7.45.0 guessing can be disabled by setting a
 default protocol, see \fICURLOPT_DEFAULT_PROTOCOL(3)\fP for details.

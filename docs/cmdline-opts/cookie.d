@@ -34,7 +34,7 @@ written to the file. To store cookies, use the --cookie-jar option.
 
 If you use the Set-Cookie file format and do not specify a domain then the
 cookie is not sent since the domain will never match. To address this, set a
-domain in Set-Cookie line (doing that will include sub-domains) or preferably:
+domain in Set-Cookie line (doing that will include subdomains) or preferably:
 use the Netscape format.
 
 Users often want to both read cookies from a file and write updated cookies
