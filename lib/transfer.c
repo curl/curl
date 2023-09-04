@@ -492,15 +492,16 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     if(0 < nread || is_empty_data) {
       buf[nread] = 0;
     }
-    else {
+    if(!nread) {
       /* if we receive 0 or less here, either the data transfer is done or the
          server closed the connection and we bail out from this! */
       if(data_eof_handled)
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
         DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
-      k->keepon &= ~KEEP_RECV;
-      break;
+      k->keepon = 0; /* stop sending as well */
+      if(!is_empty_data)
+        break;
     }
 
     /* Default buffer to use when we write the buffer, it may be changed
