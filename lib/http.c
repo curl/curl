@@ -1281,7 +1281,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
                           curl_off_t *bytes_written,
                           /* how much of the buffer contains body data */
                           curl_off_t included_body_bytes,
-                          int socketindex)
+                          int sockindex)
 {
   ssize_t amount;
   CURLcode result;
@@ -1289,12 +1289,9 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   size_t size;
   struct connectdata *conn = data->conn;
   size_t sendsize;
-  curl_socket_t sockfd;
   size_t headersize;
 
-  DEBUGASSERT(socketindex <= SECONDARYSOCKET);
-
-  sockfd = Curl_conn_get_socket(data, socketindex);
+  DEBUGASSERT(sockindex <= SECONDARYSOCKET && sockindex >= 0);
 
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */
@@ -1376,9 +1373,25 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
       else
         sendsize = size;
     }
+
+    /* We currently cannot send more that this for http here:
+     * - if sending blocks, it return 0 as amount
+     * - we then whisk aside the `in` into the `http` struct
+     *   and install our own `data->state.fread_func` that
+     *   on subsequent calls reads `in` empty.
+     * - when the whisked away `in` is empty, the `fread_func`
+     *   is restored ot its original state.
+     * The problem is that `fread_func` can only return
+     * `upload_buffer_size` lengths. If the send we do here
+     * is larger and blocks, we do re-sending with smaller
+     * amounts of data and connection filters do not like
+     * that.
+     */
+    if(http && (sendsize > (size_t)data->set.upload_buffer_size))
+      sendsize = (size_t)data->set.upload_buffer_size;
   }
 
-  result = Curl_write(data, sockfd, ptr, sendsize, &amount);
+  result = Curl_nwrite(data, sockindex, ptr, sendsize, &amount);
 
   if(!result) {
     /*

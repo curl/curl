@@ -204,8 +204,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CMD;
 #endif
-  result = Curl_write(data, conn->sock[FIRSTSOCKET], s, write_len,
-                      &bytes_written);
+  result = Curl_nwrite(data, FIRSTSOCKET, s, write_len, &bytes_written);
   if(result)
     return result;
 #ifdef HAVE_GSSAPI
@@ -467,11 +466,10 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
                            struct pingpong *pp)
 {
   /* we have a piece of a command still left to send */
-  struct connectdata *conn = data->conn;
   ssize_t written;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
-  CURLcode result = Curl_write(data, sock, pp->sendthis + pp->sendsize -
-                               pp->sendleft, pp->sendleft, &written);
+  CURLcode result = Curl_nwrite(data, FIRSTSOCKET,
+                                pp->sendthis + pp->sendsize - pp->sendleft,
+                                pp->sendleft, &written);
   if(result)
     return result;
 
