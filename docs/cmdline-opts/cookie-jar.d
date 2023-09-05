@@ -19,9 +19,12 @@ written. The file will be written using the Netscape cookie file format. If
 you set the file name to a single dash, "-", the cookies will be written to
 stdout.
 
+The file specified with --cookie-jar is only used for output. No cookies will
+be read from the file. To read cookies, use the --cookie option. Both options
+can specify the same file.
+
 This command line option will activate the cookie engine that makes curl
-record and use cookies. Another way to activate it is to use the --cookie
-option.
+record and use cookies. The --cookie option also activates it.
 
 If the cookie jar cannot be created or written to, the whole curl operation
 will not fail or even report an error clearly. Using --verbose will get a

@@ -20,7 +20,7 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes swsclose
-Set-Cookie: foobar=name; expires=Thu, 22 Nov 2037 10:54:11 GMT;
+Set-Cookie: foobar=name; expires=Thu, 22 Nov 2525 10:54:11 GMT;
 
 </data>
 <data2>

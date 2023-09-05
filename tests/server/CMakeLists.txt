@@ -50,10 +50,8 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   # to build the servers.  In order to achieve proper linkage of these
   # files on Win32 targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
-  if(BUILD_SHARED_LIBS)
-    set_target_properties(${TEST_NAME} PROPERTIES
-      COMPILE_DEFINITIONS CURL_STATICLIB)       # ${UPPER_TEST_NAME}
-  endif()
+  set_target_properties(${TEST_NAME} PROPERTIES
+    COMPILE_DEFINITIONS CURL_STATICLIB)       # ${UPPER_TEST_NAME}
   set_target_properties(${TEST_NAME} PROPERTIES
     PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
 endfunction()

@@ -233,35 +233,132 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
 #ifdef WIN32
   fhnd = _get_osfhandle(fileno(outs->stream));
+  /* if windows console then UTF-8 must be converted to UTF-16 */
   if(isatty(fileno(outs->stream)) &&
      GetConsoleScreenBufferInfo((HANDLE)fhnd, &console_info)) {
-    DWORD in_len = (DWORD)(sz * nmemb);
-    wchar_t* wc_buf;
+    wchar_t *wc_buf;
     DWORD wc_len;
+    unsigned char *rbuf = (unsigned char *)buffer;
+    DWORD rlen = (DWORD)bytes;
 
-    /* calculate buffer size for wide characters */
-    wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len,  NULL, 0);
-    wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
-    if(!wc_buf)
-      return CURL_WRITEFUNC_ERROR;
+#define IS_TRAILING_BYTE(x) (0x80 <= (x) && (x) < 0xC0)
 
-    /* calculate buffer size for multi-byte characters */
-    wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len, wc_buf, wc_len);
-    if(!wc_len) {
-      free(wc_buf);
-      return CURL_WRITEFUNC_ERROR;
+    /* attempt to complete an incomplete UTF-8 sequence from previous call.
+       the sequence does not have to be well-formed. */
+    if(outs->utf8seq[0] && rlen) {
+      bool complete = false;
+      /* two byte sequence (lead byte 110yyyyy) */
+      if(0xC0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xE0) {
+        outs->utf8seq[1] = *rbuf++;
+        --rlen;
+        complete = true;
+      }
+      /* three byte sequence (lead byte 1110zzzz) */
+      else if(0xE0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xF0) {
+        if(!outs->utf8seq[1]) {
+          outs->utf8seq[1] = *rbuf++;
+          --rlen;
+        }
+        if(rlen && !outs->utf8seq[2]) {
+          outs->utf8seq[2] = *rbuf++;
+          --rlen;
+          complete = true;
+        }
+      }
+      /* four byte sequence (lead byte 11110uuu) */
+      else if(0xF0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xF8) {
+        if(!outs->utf8seq[1]) {
+          outs->utf8seq[1] = *rbuf++;
+          --rlen;
+        }
+        if(rlen && !outs->utf8seq[2]) {
+          outs->utf8seq[2] = *rbuf++;
+          --rlen;
+        }
+        if(rlen && !outs->utf8seq[3]) {
+          outs->utf8seq[3] = *rbuf++;
+          --rlen;
+          complete = true;
+        }
+      }
+
+      if(complete) {
+        WCHAR prefix[3] = {0};  /* UTF-16 (1-2 WCHARs) + NUL */
+
+        if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)outs->utf8seq, -1,
+                               prefix, sizeof(prefix)/sizeof(prefix[0]))) {
+          DEBUGASSERT(prefix[3] == L'\0');
+          if(!WriteConsoleW(
+              (HANDLE) fhnd,
+              prefix,
+              prefix[1] ? 2 : 1,
+              NULL,
+              NULL)) {
+            return CURL_WRITEFUNC_ERROR;
+          }
+        }
+        /* else: UTF-8 input was not well formed and OS is pre-Vista which
+           drops invalid characters instead of writing U+FFFD to output.  */
+
+        memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
+      }
     }
 
-    if(!WriteConsoleW(
-        (HANDLE) fhnd,
-        wc_buf,
-        wc_len,
-        &wc_len,
-        NULL)) {
-      free(wc_buf);
-      return CURL_WRITEFUNC_ERROR;
+    /* suppress an incomplete utf-8 sequence at end of rbuf */
+    if(!outs->utf8seq[0] && rlen && (rbuf[rlen - 1] & 0x80)) {
+      /* check for lead byte from a two, three or four byte sequence */
+      if(0xC0 <= rbuf[rlen - 1] && rbuf[rlen - 1] < 0xF8) {
+        outs->utf8seq[0] = rbuf[rlen - 1];
+        rlen -= 1;
+      }
+      else if(rlen >= 2 && IS_TRAILING_BYTE(rbuf[rlen - 1])) {
+        /* check for lead byte from a three or four byte sequence */
+        if(0xE0 <= rbuf[rlen - 2] && rbuf[rlen - 2] < 0xF8) {
+          outs->utf8seq[0] = rbuf[rlen - 2];
+          outs->utf8seq[1] = rbuf[rlen - 1];
+          rlen -= 2;
+        }
+        else if(rlen >= 3 && IS_TRAILING_BYTE(rbuf[rlen - 2])) {
+          /* check for lead byte from a four byte sequence */
+          if(0xF0 <= rbuf[rlen - 3] && rbuf[rlen - 3] < 0xF8) {
+            outs->utf8seq[0] = rbuf[rlen - 3];
+            outs->utf8seq[1] = rbuf[rlen - 2];
+            outs->utf8seq[2] = rbuf[rlen - 1];
+            rlen -= 3;
+          }
+        }
+      }
     }
-    free(wc_buf);
+
+    if(rlen) {
+      /* calculate buffer size for wide characters */
+      wc_len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, rlen, NULL, 0);
+      if(!wc_len)
+        return CURL_WRITEFUNC_ERROR;
+
+      wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
+      if(!wc_buf)
+        return CURL_WRITEFUNC_ERROR;
+
+      wc_len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, rlen, wc_buf,
+                                   wc_len);
+      if(!wc_len) {
+        free(wc_buf);
+        return CURL_WRITEFUNC_ERROR;
+      }
+
+      if(!WriteConsoleW(
+          (HANDLE) fhnd,
+          wc_buf,
+          wc_len,
+          NULL,
+          NULL)) {
+        free(wc_buf);
+        return CURL_WRITEFUNC_ERROR;
+      }
+      free(wc_buf);
+    }
+
     rc = bytes;
   }
   else

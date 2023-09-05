@@ -119,4 +119,3 @@ fail:
   curl_global_cleanup();
   return 0;
 }
-

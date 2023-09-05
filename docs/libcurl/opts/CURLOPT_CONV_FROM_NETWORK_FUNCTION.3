@@ -37,7 +37,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONV_FROM_NETWORK_FUNCTION,
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-Applies to non-ASCII platforms. \fIcurl_version_info(3)\fP will return the
+Applies to non-ASCII platforms. \fIcurl_version_info(3)\fP returns the
 \fBCURL_VERSION_CONV\fP feature bit set if this option is provided.
 
 The data to be converted is in a buffer pointed to by the \fIptr\fP parameter.
@@ -52,24 +52,23 @@ network encoding.  It is used when commands or ASCII data are received over
 the network.
 
 If you set a callback pointer to NULL, or do not set it at all, the built-in
-libcurl iconv functions will be used.  If HAVE_ICONV was not defined when
-libcurl was built, and no callback has been established, conversion will
-return the \fBCURLE_CONV_REQD\fP error code.
+libcurl iconv functions are used. If HAVE_ICONV was not defined when libcurl
+was built, and no callback has been established, the conversion returns the
+\fBCURLE_CONV_REQD\fP error code.
 
 If \fBHAVE_ICONV\fP is defined, \fBCURL_ICONV_CODESET_OF_HOST\fP must also be
 defined. For example:
 
  \&#define CURL_ICONV_CODESET_OF_HOST "IBM-1047"
 
-The iconv code in libcurl will default the network and UTF8 codeset names as
+The iconv code in libcurl defaults the network and UTF8 codeset names as
 follows:
 
  \&#define CURL_ICONV_CODESET_OF_NETWORK "ISO8859-1"
 
  \&#define CURL_ICONV_CODESET_FOR_UTF8   "UTF-8"
 
-You will need to override these definitions if they are different on your
-system.
+You need to override these definitions if they are different on your system.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

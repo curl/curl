@@ -49,7 +49,7 @@ if test "x$OPT_BEARSSL" != xno; then
          BEARSSL_ENABLED=1
          USE_BEARSSL="yes"
          ssl_msg="BearSSL"
-	 test bearssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+         test bearssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ], [], -lbearssl)
     fi
 

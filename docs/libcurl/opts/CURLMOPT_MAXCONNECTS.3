@@ -32,10 +32,10 @@ CURLMOPT_MAXCONNECTS \- size of connection cache
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAXCONNECTS, long max);
 .fi
 .SH DESCRIPTION
-Pass a long indicating the \fBmax\fP. The set number will be used as the
-maximum amount of simultaneously open connections that libcurl may keep in its
-connection cache after completed use. By default libcurl will enlarge the size
-for each added easy handle to make it fit 4 times the number of added easy
+Pass a long indicating the \fBmax\fP. The set number is used as the maximum
+amount of simultaneously open connections that libcurl may keep in its
+connection cache after completed use. By default libcurl enlarges the size for
+each added easy handle to make it fit 4 times the number of added easy
 handles.
 
 By setting this option, you can prevent the cache size from growing beyond the

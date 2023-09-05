@@ -32,12 +32,12 @@ curl_easy_getinfo - extract information from a curl handle
 CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );
 .fi
 .SH DESCRIPTION
-Request internal information from the curl session with this function. The
-third argument \fBMUST\fP be pointing to the specific type of the used option
-which is documented in each man page of the option. The data pointed-to will
-be filled in accordingly and can be relied upon only if the function returns
-CURLE_OK. Use this function AFTER a performed transfer if you want to get
-transfer related data.
+Get the \fIinfo\fP kept in the \fIcurl\fP handle. The third argument
+\fBMUST\fP be pointing to the specific type of the used option which is
+documented in each man page of the \fIinfo\fP option. The data is stored
+accordingly and can be relied upon only if this function returns CURLE_OK. Use
+this function after a performed transfer if you want to get transfer related
+data.
 
 You should not free the memory returned by this function unless it is
 explicitly mentioned below.
@@ -233,10 +233,10 @@ See \fICURLINFO_CONDITION_UNMET(3)\fP
 RTSP session ID.
 See \fICURLINFO_RTSP_SESSION_ID(3)\fP
 .IP CURLINFO_RTSP_CLIENT_CSEQ
-RTSP CSeq that will next be used.
+The RTSP client CSeq that is expected next.
 See \fICURLINFO_RTSP_CLIENT_CSEQ(3)\fP
 .IP CURLINFO_RTSP_SERVER_CSEQ
-RTSP CSeq that will next be expected.
+The RTSP server CSeq that is expected next.
 See \fICURLINFO_RTSP_SERVER_CSEQ(3)\fP
 .IP CURLINFO_RTSP_CSEQ_RECV
 RTSP CSeq last received.
@@ -320,6 +320,6 @@ transaction was started. So, this is zero if no redirection took place.
 Added in 7.4.1
 .SH RETURN VALUE
 If the operation was successful, CURLE_OK is returned. Otherwise an
-appropriate error code will be returned.
+appropriate error code is returned.
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3)"

@@ -161,7 +161,7 @@ static int setup(CURL *hnd, const char *url)
   return 0; /* all is good */
 }
 
-/* called when there's an incoming push */
+/* called when there is an incoming push */
 static int server_push_callback(CURL *parent,
                                 CURL *easy,
                                 size_t num_headers,

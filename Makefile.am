@@ -43,7 +43,6 @@ CMAKE_DIST =                                    \
  CMake/FindNGHTTP2.cmake                        \
  CMake/FindNGHTTP3.cmake                        \
  CMake/FindNGTCP2.cmake                         \
- CMake/FindNSS.cmake                            \
  CMake/FindQUICHE.cmake                         \
  CMake/FindWolfSSL.cmake                        \
  CMake/FindZstd.cmake                           \
@@ -149,7 +148,8 @@ PLAN9_DIST = plan9/include/mkfile \
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in            \
  RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework $(CMAKE_DIST)        \
- $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat
+ $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat \
+ libcurl.def
 
 CLEANFILES = $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ) $(VC11_LIBVCXPROJ)        \
  $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ) $(VC14_LIBVCXPROJ) \

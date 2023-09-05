@@ -34,12 +34,18 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_USE_EPRT, long enabled);
 .SH DESCRIPTION
 Pass a long. If the value is 1, it tells curl to use the EPRT command when
 doing active FTP downloads (which is enabled by
-\fICURLOPT_FTPPORT(3)\fP). Using EPRT means that it will first attempt to use
-EPRT before using PORT, but if you pass zero to this option, it will not try
-using EPRT, only plain PORT.
+\fICURLOPT_FTPPORT(3)\fP). Using EPRT means that libcurl first attempts to use
+EPRT before using PORT, but if you pass zero to this option, it avoids using
+EPRT, only plain PORT.
 
-If the server is an IPv6 host, this option will have no effect as EPRT is
-necessary then.
+The EPRT command is a slightly newer addition to the FTP protocol than PORT
+and is the preferred command to use since it enables IPv6 to be used. Very old
+FTP servers might not support it, which is why libcurl has a fallback
+mechanism. Sometimes that fallback is not enough and then this option might
+come handy.
+
+If the server is an IPv6 host, this option has no effect as EPRT is necessary
+then.
 .SH DEFAULT
 .SH PROTOCOLS
 .SH EXAMPLE

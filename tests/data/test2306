@@ -17,17 +17,16 @@ Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Accept-Ranges: bytes
 Content-Length: 6
-Connection: close
 Content-Type: text/html
 Funny-head: yesyes
 
 -foo-
 </data>
 <data2 nocheck="yes">
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsclose
 	Access-Control-Allow-Origin: *
-	Connection: Keep-Alive
-	Content-Type: text/html; charset=utf-8
+Connection: Keep-Alive
+Content-Type: text/html; charset=utf-8
 Date: Wed, 10 May 2023 14:58:08 GMT
 
 -foo-
@@ -45,7 +44,7 @@ lib%TESTNUMBER
 </tool>
 
  <name>
-HTTP GET re-used handle but only folded headers
+HTTP GET reused handle with first header folded
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002

@@ -38,8 +38,8 @@ elsewhere and it has no function then.
 It returns the value for the given header field name (or NULL) for the
 incoming server push request. This is a shortcut so that the application does
 not have to loop through all headers to find the one it is interested in. The
-data this function points to will be freed when this callback returns. If more
-than one header field use the same name, this returns only the first one.
+data this function points to is freed when this callback returns. If more than
+one header field use the same name, this returns only the first one.
 
 .SH EXAMPLE
 .nf

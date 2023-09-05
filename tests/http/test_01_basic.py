@@ -81,6 +81,6 @@ class TestBasic:
     def test_01_05_h3_get(self, env: Env, httpd, nghttpx):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.h3_port}/data.json'
-        r = curl.http_get(url=url, extra_args=['--http3'])
+        r = curl.http_get(url=url, extra_args=['--http3-only'])
         r.check_response(http_status=200, protocol='HTTP/3')
         assert r.json['server'] == env.domain1

@@ -40,9 +40,6 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_UTSNAME_H
-#include <sys/utsname.h>
-#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -2186,7 +2183,7 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     myssh_setup_connection(data, conn);
 
   /* We default to persistent connections. We set this already in this connect
-     function to make the re-use checks properly be able to check this bit. */
+     function to make the reuse checks properly be able to check this bit. */
   connkeep(conn, "SSH default");
 
   if(conn->handler->protocol & CURLPROTO_SCP) {

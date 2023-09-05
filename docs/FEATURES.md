@@ -212,7 +212,7 @@
   6. requires c-ares
   7. requires libssh2, libssh or wolfSSH
   8. requires libssh2 or libssh
-  9. requires OpenSSL, GnuTLS, mbedTLS, NSS, Secure Transport or SSPI
+  9. requires OpenSSL, GnuTLS, mbedTLS, Secure Transport or SSPI
      (native Windows)
   10. requires libidn2 or Windows
   11. requires libz, brotli and/or zstd

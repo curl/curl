@@ -31,32 +31,30 @@ curl_multi_add_handle - add an easy handle to a multi session
 CURLMcode curl_multi_add_handle(CURLM *multi_handle, CURL *easy_handle);
 .fi
 .SH DESCRIPTION
-Adds a standard easy handle to the multi stack. This function call will make
-this \fImulti_handle\fP control the specified \fIeasy_handle\fP.
+Adds the \fIeasy handle\fP to the \fImulti_handle\fP.
 
 While an easy handle is added to a multi stack, you cannot and you must not
 use \fIcurl_easy_perform(3)\fP on that handle. After having removed the easy
 handle from the multi stack again, it is perfectly fine to use it with the
 easy interface again.
 
-If the easy handle is not set to use a shared (\fICURLOPT_SHARE(3)\fP) or
-global DNS cache (\fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP), it will be made to
-use the DNS cache that is shared between all easy handles within the multi
-handle when \fIcurl_multi_add_handle(3)\fP is called.
+If the easy handle is not set to use a shared (\fICURLOPT_SHARE(3)\fP) cache,
+it is made to use a DNS cache that is shared between all easy handles within
+the multi handle when \fIcurl_multi_add_handle(3)\fP is called.
 
-When an easy interface is added to a multi handle, it will use a shared
+When an easy interface is added to a multi handle, it is set to use a shared
 connection cache owned by the multi handle. Removing and adding new easy
-handles will not affect the pool of connections or the ability to do
-connection re-use.
+handles does not affect the pool of connections or the ability to do
+connection reuse.
 
-If you have \fICURLMOPT_TIMERFUNCTION(3)\fP set in the multi handle (and you
-really should if you are working event-based with
-\fIcurl_multi_socket_action(3)\fP and friends), that callback will be called
-from within this function to ask for an updated timer so that your main event
-loop will get the activity on this handle to get started.
+If you have \fICURLMOPT_TIMERFUNCTION(3)\fP set in the multi handle (as you
+should if you are working event-based with \fIcurl_multi_socket_action(3)\fP
+and friends), that callback is called from within this function to ask for an
+updated timer so that your main event loop gets the activity on this handle to
+get started.
 
-The easy handle will remain added to the multi handle until you remove it
-again with \fIcurl_multi_remove_handle(3)\fP - even when a transfer with that
+The easy handle remains added to the multi handle until you remove it again
+with \fIcurl_multi_remove_handle(3)\fP - even when a transfer with that
 specific easy handle is completed.
 
 You should remove the easy handle from the multi stack before you terminate

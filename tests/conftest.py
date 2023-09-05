@@ -58,5 +58,3 @@ def pytest_generate_tests(metafunc):
         count = int(metafunc.config.getoption("repeat"))
         metafunc.fixturenames.append('tmp_ct')
         metafunc.parametrize('repeat', range(count))
-
-

@@ -27,7 +27,8 @@
 
 struct GlobalConfig;
 
-curl_off_t getfiletime(const char *filename, struct GlobalConfig *global);
+int getfiletime(const char *filename, struct GlobalConfig *global,
+                curl_off_t *stamp);
 
 #if defined(HAVE_UTIME) || defined(HAVE_UTIMES) ||      \
   (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))

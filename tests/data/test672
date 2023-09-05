@@ -33,7 +33,7 @@ hello
 # Client-side
 <client>
 <features>
-Mime
+form-api
 </features>
 <server>
 http

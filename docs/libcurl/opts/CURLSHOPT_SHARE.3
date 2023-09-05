@@ -38,20 +38,19 @@ The given \fItype\fP must be be one of the values described below. You can set
 the share object share multiple types of data. Unset a type again by setting
 \fICURLSHOPT_UNSHARE(3)\fP.
 .IP CURL_LOCK_DATA_COOKIE
-Cookie data will be shared across the easy handles using this shared object.
-Note that this does not activate an easy handle's cookie handling. You can do
-that separately by using \fICURLOPT_COOKIEFILE(3)\fP for example.
+Cookie data is shared across the easy handles using this shared object. Note
+that this does not activate an easy handle's cookie handling. You can do that
+separately by using \fICURLOPT_COOKIEFILE(3)\fP for example.
 .IP CURL_LOCK_DATA_DNS
-Cached DNS hosts will be shared across the easy handles using this shared
+Cached DNS hosts are shared across the easy handles using this shared
 object. Note that when you use the multi interface, all easy handles added to
-the same multi handle will share DNS cache by default without using this
-option.
+the same multi handle share DNS cache by default without using this option.
 .IP CURL_LOCK_DATA_SSL_SESSION
-SSL session IDs will be shared across the easy handles using this shared
-object. This will reduce the time spent in the SSL handshake when reconnecting
-to the same server. Note SSL session IDs are reused within the same easy
-handle by default. Note this symbol was added in 7.10.3 but was not
-implemented until 7.23.0.
+SSL session IDs are shared across the easy handles using this shared
+object. This reduces the time spent in the SSL handshake when reconnecting to
+the same server. Note SSL session IDs are reused within the same easy handle
+by default. Note this symbol was added in 7.10.3 but was not implemented until
+7.23.0.
 .IP CURL_LOCK_DATA_CONNECT
 Put the connection cache in the share object and make all easy handles using
 this share object share the connection cache.
@@ -67,7 +66,7 @@ Support for \fBCURL_LOCK_DATA_CONNECT\fP was added in 7.57.0, but the symbol
 existed before this.
 
 Note that when you use the multi interface, all easy handles added to the same
-multi handle will share connection cache by default without using this option.
+multi handle shares connection cache by default without using this option.
 .IP CURL_LOCK_DATA_PSL
 The Public Suffix List stored in the share object is made available to all
 easy handle bound to the later. Since the Public Suffix List is periodically
@@ -76,7 +75,7 @@ refreshed, this avoids updates in too many different contexts.
 Added in 7.61.0.
 
 Note that when you use the multi interface, all easy handles added to the same
-multi handle will share PSL cache by default without using this option.
+multi handle shares PSL cache by default without using this option.
 .IP CURL_LOCK_DATA_HSTS
 The in-memory HSTS cache.
 

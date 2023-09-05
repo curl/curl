@@ -34,19 +34,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECTTIMEOUT_MS,
 .fi
 .SH DESCRIPTION
 Pass a long. It should contain the maximum time in milliseconds that you allow
-the connection phase to the server to take.  This only limits the connection
-phase, it has no impact once it has connected. Set to zero to switch to the
-default built-in connection timeout - 300 seconds. See also the
-\fICURLOPT_TIMEOUT_MS(3)\fP option.
+the connection phase to the server to take.
 
-In unix-like systems, this might cause signals to be used unless
-\fICURLOPT_NOSIGNAL(3)\fP is set.
-
-If both \fICURLOPT_CONNECTTIMEOUT(3)\fP and \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
-are set, the value set last will be used.
-
-The "connection phase" is considered complete when the requested TCP, TLS or
-QUIC handshakes are done.
+See \fICURLOPT_CONNECTTIMEOUT(3)\fP for details.
 .SH DEFAULT
 300000
 .SH PROTOCOLS

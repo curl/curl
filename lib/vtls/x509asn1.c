@@ -24,21 +24,15 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) ||    \
-  defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
+#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) ||      \
+  defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
 
-#if defined(USE_GSKIT) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
+#if defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
 #define WANT_PARSEX509 /* uses Curl_parseX509() */
 #endif
 
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) ||    \
-  defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
+#if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
 #define WANT_EXTRACT_CERTINFO /* uses Curl_extract_certinfo() */
-#define WANT_PARSEX509 /* ... uses Curl_parseX509() */
-#endif
-
-#if defined(USE_GSKIT)
-#define WANT_VERIFYHOST /* uses Curl_verifyhost () */
 #define WANT_PARSEX509 /* ... uses Curl_parseX509() */
 #endif
 
@@ -973,7 +967,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
       infof(data, "   ECC Public Key (%lu bits)", len);
     if(data->set.ssl.certinfo) {
       char q[sizeof(len) * 8 / 3 + 1];
-      (void)msnprintf(q, sizeof(q), "%lu", len);
+      (void)msnprintf(q, sizeof(q), "%zu", len);
       if(ssl_push_certinfo(data, certnum, "ECC Public Key", q))
         return 1;
     }
@@ -1007,7 +1001,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
       infof(data, "   RSA Public Key (%lu bits)", len);
     if(data->set.ssl.certinfo) {
       char r[sizeof(len) * 8 / 3 + 1];
-      msnprintf(r, sizeof(r), "%lu", len);
+      msnprintf(r, sizeof(r), "%zu", len);
       if(ssl_push_certinfo(data, certnum, "RSA Public Key", r))
         return 1;
     }
@@ -1261,8 +1255,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
 
 #endif /* WANT_EXTRACT_CERTINFO */
 
-#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL
-        * or USE_SECTRANSP */
+#endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_SECTRANSP */
 
 #ifdef WANT_VERIFYHOST
 

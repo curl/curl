@@ -127,26 +127,6 @@ certificate store, will cause SSL to report an error ("certificate verify
 failed") during the handshake and SSL will then refuse further communication
 with that server.
 
-Certificate Verification with NSS
----------------------------------
-
-If libcurl was built with NSS support, then depending on the OS distribution,
-it is probably required to take some additional steps to use the system-wide
-CA cert db. Red Hat ships with an additional module, libnsspem.so, which
-enables NSS to read the OpenSSL PEM CA bundle. On openSUSE you can install
-p11-kit-nss-trust which makes NSS use the system wide CA certificate
-store. NSS also has a new [database
-format](https://wiki.mozilla.org/NSS_Shared_DB).
-
-Starting with version 7.19.7, libcurl automatically adds the `sql:` prefix to
-the certificate database directory (either the set default `/etc/pki/nssdb` or
-the directory configured with the `SSL_DIR` environment variable). To check
-which certificate database format your distribution provides, examine the
-default certificate database location: `/etc/pki/nssdb`; the new certificate
-database format can be identified by the filenames `cert9.db`, `key4.db`,
-`pkcs11.txt`; filenames of older versions are `cert8.db`, `key3.db`,
-`secmod.db`.
-
 Certificate Verification with Schannel and Secure Transport
 -----------------------------------------------------------
 

@@ -29,56 +29,51 @@ curl_url_get - extract a part from a URL
 #include <curl/curl.h>
 
 CURLUcode curl_url_get(CURLU *url,
-                       CURLUPart what,
-                       char **part,
-                       unsigned int flags)
+                       CURLUPart part,
+                       char **content,
+                       unsigned int flags);
 .fi
 .SH DESCRIPTION
-Given the \fIurl\fP handle of an already parsed URL, this function lets the
-user extract individual pieces from it.
+Given a \fIurl\fP handle of a URL object, this function extracts an individual
+piece or the full URL from it.
 
-The \fIwhat\fP argument should be the particular part to extract (see list
-below) and \fIpart\fP points to a 'char *' to get updated to point to a newly
+The \fIpart\fP argument specifies which part to extract (see list below) and
+\fIcontent\fP points to a 'char *' to get updated to point to a newly
 allocated string with the contents.
-
-The URL API has no particular maximum length for URL fiends. In the real
-world, excessively long field in URLs will cause problems even if this API
-accepts them. This function can return very large ones.
 
 The \fIflags\fP argument is a bitmask with individual features.
 
-The returned part pointer must be freed with \fIcurl_free(3)\fP after use.
+The returned content pointer must be freed with \fIcurl_free(3)\fP after use.
 .SH FLAGS
 The flags argument is zero, one or more bits set in a bitmask.
 .IP CURLU_DEFAULT_PORT
-If the handle has no port stored, this option will make \fIcurl_url_get(3)\fP
+If the handle has no port stored, this option makes \fIcurl_url_get(3)\fP
 return the default port for the used scheme.
 .IP CURLU_DEFAULT_SCHEME
-If the handle has no scheme stored, this option will make
-\fIcurl_url_get(3)\fP return the default scheme instead of error.
+If the handle has no scheme stored, this option makes \fIcurl_url_get(3)\fP
+return the default scheme instead of error.
 .IP CURLU_NO_DEFAULT_PORT
 Instructs \fIcurl_url_get(3)\fP to not return a port number if it matches the
 default port for the scheme.
 .IP CURLU_URLDECODE
 Asks \fIcurl_url_get(3)\fP to URL decode the contents before returning it. It
-will not attempt to decode the scheme, the port number or the full URL.
+does not decode the scheme, the port number or the full URL.
 
-The query component will also get plus-to-space conversion as a bonus when
-this bit is set.
+The query component also gets plus-to-space conversion as a bonus when this
+bit is set.
 
-Note that this URL decoding is charset unaware and you will get a zero
-terminated string back with data that could be intended for a particular
-encoding.
+Note that this URL decoding is charset unaware and you get a zero terminated
+string back with data that could be intended for a particular encoding.
 
-If there's any byte values lower than 32 in the decoded string, the get
-operation will return an error instead.
+If there are byte values lower than 32 in the decoded string, the get
+operation returns an error instead.
 .IP CURLU_URLENCODE
-If set, will make \fIcurl_url_get(3)\fP URL encode the host name part when a
-full URL is retrieved. If not set (default), libcurl returns the URL with the
-host name "raw" to support IDN names to appear as-is. IDN host names are
-typically using non-ASCII bytes that otherwise will be percent-encoded.
+If set, \fIcurl_url_get(3)\fP URL encodes the host name part when a full URL
+is retrieved. If not set (default), libcurl returns the URL with the host name
+"raw" to support IDN names to appear as-is. IDN host names are typically using
+non-ASCII bytes that otherwise gets percent-encoded.
 
-Note that even when not asking for URL encoding, the '%' (byte 37) will be URL
+Note that even when not asking for URL encoding, the '%' (byte 37) is URL
 encoded to make sure the host name remains valid.
 .IP CURLU_PUNYCODE
 If set and \fICURLU_URLENCODE\fP is not set, and asked to retrieve the
@@ -86,15 +81,27 @@ If set and \fICURLU_URLENCODE\fP is not set, and asked to retrieve the
 name in its punycode version if it contains any non-ASCII octets (and is an
 IDN name).
 
-If libcurl is built without IDN capabilities, using this bit will make
+If libcurl is built without IDN capabilities, using this bit makes
 \fIcurl_url_get(3)\fP return \fICURLUE_LACKS_IDN\fP if the host name contains
 anything outside the ASCII range.
 
 (Added in curl 7.88.0)
+.IP CURLU_PUNY2IDN
+If set and asked to retrieve the \fBCURLUPART_HOST\fP or \fBCURLUPART_URL\fP
+parts, libcurl returns the host name in its IDN (International Domain Name)
+UTF-8 version if it otherwise is a punycode version. If the punycode name
+cannot be converted to IDN correctly, libcurl returns
+\fICURLUE_BAD_HOSTNAME\fP.
+
+If libcurl is built without IDN capabilities, using this bit makes
+\fIcurl_url_get(3)\fP return \fICURLUE_LACKS_IDN\fP if the host name is using
+punycode.
+
+(Added in curl 8.3.0)
 .SH PARTS
 .IP CURLUPART_URL
-When asked to return the full URL, \fIcurl_url_get(3)\fP will return a
-normalized and possibly cleaned up version of what was previously parsed.
+When asked to return the full URL, \fIcurl_url_get(3)\fP returns a normalized
+and possibly cleaned up version using all available URL parts.
 
 We advise using the \fICURLU_PUNYCODE\fP option to get the URL as "normalized"
 as possible since IDN allows host names to be written in many different ways
@@ -109,9 +116,9 @@ userinfo part. It is only recognized/used when parsing URLs for the following
 schemes: pop3, smtp and imap. The URL API still allows users to set and get
 this field independently of scheme when not parsing full URLs.
 .IP CURLUPART_HOST
-The host name. If it is an IPv6 numeric address, the zone id will not be part
-of it but is provided separately in \fICURLUPART_ZONEID\fP. IPv6 numerical
-addresses are returned within brackets ([]).
+The host name. If it is an IPv6 numeric address, the zone id is not part of it
+but is provided separately in \fICURLUPART_ZONEID\fP. IPv6 numerical addresses
+are returned within brackets ([]).
 
 IPv6 names are normalized when set, which should make them as short as
 possible while maintaining correct syntax.
@@ -122,17 +129,17 @@ A port cannot be URL decoded on get. This number is returned in a string just
 like all other parts. That string is guaranteed to hold a valid port number in
 ASCII using base 10.
 .IP CURLUPART_PATH
-The \fIpart\fP will be '/' even if no path is supplied in the URL. A URL path
-always starts with a slash.
+The \fIpart\fP is always at least a slash ('/') even if no path was supplied
+in the URL. A URL path always starts with a slash.
 .IP CURLUPART_QUERY
 The initial question mark that denotes the beginning of the query part is a
 delimiter only.  It is not part of the query contents.
 
-A not-present query will lead \fIpart\fP to be set to NULL.
-A zero-length query will lead \fIpart\fP to be set to a zero-length string.
+A not-present query returns \fIpart\fP set to NULL.
+A zero-length query returns \fIpart\fP as a zero-length string.
 
-The query part will also get pluses converted to space when asked to URL
-decode on get with the CURLU_URLDECODE bit.
+The query part gets pluses converted to space when asked to URL decode on get
+with the CURLU_URLDECODE bit.
 .IP CURLUPART_FRAGMENT
 The initial hash sign that denotes the beginning of the fragment is a
 delimiter only. It is not part of the fragment contents.

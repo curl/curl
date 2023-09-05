@@ -123,12 +123,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq '--stunnel') {
         if($ARGV[1]) {
-            if($ARGV[1] =~ /^([\w\/]+)$/) {
-                $stunnel = $ARGV[1];
-            }
-            else {
-                $stunnel = "\"". $ARGV[1] ."\"";
-            }
+            $stunnel = $ARGV[1];
             shift @ARGV;
         }
     }
@@ -210,7 +205,7 @@ my $ssltext = uc($proto) ." SSL/TLS:";
 # Find out version info for the given stunnel binary
 #
 foreach my $veropt (('-version', '-V')) {
-    foreach my $verstr (qx($stunnel $veropt 2>&1)) {
+    foreach my $verstr (qx("$stunnel" $veropt 2>&1)) {
         if($verstr =~ /^stunnel (\d+)\.(\d+) on /) {
             $ver_major = $1;
             $ver_minor = $2;
@@ -223,7 +218,7 @@ foreach my $veropt (('-version', '-V')) {
     }
     last if($ver_major);
 }
-if((!$ver_major) || (!$ver_minor)) {
+if((!$ver_major) || !defined($ver_minor)) {
     if(-x "$stunnel" && ! -d "$stunnel") {
         print "$ssltext Unknown stunnel version\n";
     }
@@ -245,7 +240,7 @@ if($stunnel_version < 310) {
 #***************************************************************************
 # Find out if we are running on Windows using the tstunnel binary
 #
-if($stunnel =~ /tstunnel(\.exe)?"?$/) {
+if($stunnel =~ /tstunnel(\.exe)?$/) {
     $tstunnel_windows = 1;
 
     # convert Cygwin/MinGW paths to Win32 format
@@ -260,7 +255,7 @@ if($stunnel_version < 400) {
     if($stunnel_version >= 319) {
         $socketopt = "-O a:SO_REUSEADDR=1";
     }
-    $cmd  = "$stunnel -p $certfile -P $pidfile ";
+    $cmd  = "\"$stunnel\" -p $certfile -P $pidfile ";
     $cmd .= "-d $accept_port -r $target_port -f -D $loglevel ";
     $cmd .= ($socketopt) ? "$socketopt " : "";
     $cmd .= ">$logfile 2>&1";
@@ -286,7 +281,7 @@ if($stunnel_version >= 400) {
         # but does not work together with SO_REUSEADDR being on.
         $socketopt .= "\nsocket = a:SO_EXCLUSIVEADDRUSE=0";
     }
-    $cmd  = "$stunnel $conffile ";
+    $cmd  = "\"$stunnel\" $conffile ";
     $cmd .= ">$logfile 2>&1";
     # setup signal handler
     $SIG{INT} = \&exit_signal_handler;

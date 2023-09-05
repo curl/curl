@@ -14,6 +14,6 @@ directories mentioned with the --output option, nothing else. If the --output
 file name uses no directory, or if the directories it mentions already exist,
 no directories will be created.
 
-Created dirs are made with mode 0750 on unix style file systems.
+Created directories are made with mode 0750 on unix style file systems.
 
 To create remote directories when using FTP or SFTP, try --ftp-create-dirs.

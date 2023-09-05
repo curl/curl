@@ -37,23 +37,23 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRAILERFUNCTION,
 .SH DESCRIPTION
 Pass a pointer to a callback function.
 
-This callback function will be called once right before sending the final
-CR LF in an HTTP chunked transfer to fill a list of trailing headers to be
-sent before finishing the HTTP transfer.
+This callback function is called once right before sending the final CR LF in
+an HTTP chunked transfer to fill a list of trailing headers to be sent before
+finishing the HTTP transfer.
 
 You can set the userdata argument with the \fICURLOPT_TRAILERDATA(3)\fP
 option.
 
 The trailing headers included in the linked list must not be CRLF-terminated,
-because libcurl will add the appropriate line termination characters after
-each header item.
+because libcurl adds the appropriate line termination characters after each
+header item.
 
 If you use curl_slist_append to add trailing headers to the curl_slist then
-libcurl will duplicate the strings, and will free the curl_slist and the
-duplicates once the trailers have been sent.
+libcurl duplicates the strings, and frees the curl_slist and the duplicates
+once the trailers have been sent.
 
-If one of the trailing header fields is not formatted correctly it will be
-ignored and an info message will be emitted.
+If one of the trailing header fields is not formatted correctly it is ignored
+and an info message is emitted.
 
 The return value can either be \fBCURL_TRAILERFUNC_OK\fP or
 \fBCURL_TRAILERFUNC_ABORT\fP which would respectively instruct libcurl to
@@ -70,7 +70,7 @@ HTTP
 
 static int trailer_cb(struct curl_slist **tr, void *data)
 {
-  /* libcurl will free the list */
+  /* libcurl frees the list */
   *tr = curl_slist_append(*tr, "My-super-awesome-trailer: trailer-stuff");
   return CURL_TRAILERFUNC_OK;
 }
@@ -82,7 +82,7 @@ if(curl) {
   /* Now set it as a put */
   curl_easy_setopt(curl, CURLOPT_PUT, 1L);
 
-  /* Assuming we have a function that will return the data to be pushed
+  /* Assuming we have a function that returns the data to be pushed
      Let that function be read_cb */
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
@@ -93,7 +93,7 @@ if(curl) {
   /* Set the trailers filling callback */
   curl_easy_setopt(curl, CURLOPT_TRAILERFUNCTION, trailer_cb);
 
-  /* Perform the request, res will get the return code */
+  /* Perform the transfer */
   res = curl_easy_perform(curl);
 
   curl_easy_cleanup(curl);

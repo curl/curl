@@ -42,9 +42,9 @@ many times and each invoke delivers another chunk of data. \fIptr\fP points to
 the delivered data, and the size of that data is \fInmemb\fP; \fIsize\fP is
 always 1.
 
-The callback function will be passed as much data as possible in all invokes,
-but you must not make any assumptions. It may be one byte, it may be
-thousands. The maximum amount of body data that will be passed to the write
+The callback function is passed as much data as possible in all invokes, but
+you must not make any assumptions. It may be one byte, it may be
+thousands. The maximum amount of body data that is be passed to the write
 callback is defined in the curl.h header file: \fICURL_MAX_WRITE_SIZE\fP (the
 usual default is 16K). If \fICURLOPT_HEADER(3)\fP is enabled, which makes
 header data get passed to the write callback, you can get up to
@@ -54,28 +54,28 @@ means 100K.
 This function may be called with zero bytes data if the transferred file is
 empty.
 
-The data passed to this function will not be null-terminated!
+The data passed to this function is not null-terminated!
 
 Set the \fIuserdata\fP argument with the \fICURLOPT_WRITEDATA(3)\fP option.
 
 Your callback should return the number of bytes actually taken care of. If
-that amount differs from the amount passed to your callback function, it will
-signal an error condition to the library. This will cause the transfer to get
-aborted and the libcurl function used will return \fICURLE_WRITE_ERROR\fP.
+that amount differs from the amount passed to your callback function, it
+signals an error condition to the library. This causes the transfer to get
+aborted and the libcurl function used returns \fICURLE_WRITE_ERROR\fP.
 
 You can also abort the transfer by returning CURL_WRITEFUNC_ERROR. (7.87.0)
 
-If your callback function returns CURL_WRITEFUNC_PAUSE it will cause this
-transfer to become paused.  See \fIcurl_easy_pause(3)\fP for further details.
+If the callback function returns CURL_WRITEFUNC_PAUSE it pauses this
+transfer. See \fIcurl_easy_pause(3)\fP for further details.
 
 Set this option to NULL to get the internal default function used instead of
-your callback. The internal default function will write the data to the FILE *
+your callback. The internal default function writes the data to the FILE *
 given with \fICURLOPT_WRITEDATA(3)\fP.
 
 This option does not enable HSTS, you need to use \fICURLOPT_HSTS_CTRL(3)\fP to
 do that.
 .SH DEFAULT
-libcurl will use 'fwrite' as a callback by default.
+libcurl uses 'fwrite' as a callback by default.
 .SH PROTOCOLS
 For all protocols
 .SH EXAMPLE
@@ -126,7 +126,7 @@ if (curl_handle)
 .SH AVAILABILITY
 Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
 .SH RETURN VALUE
-This will return CURLE_OK.
+This returns CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_WRITEDATA "(3), " CURLOPT_READFUNCTION "(3), "
 .BR CURLOPT_HEADERFUNCTION "(3), "

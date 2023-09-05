@@ -67,12 +67,11 @@ The \fIclientp\fP pointer contains whatever user-defined value set using the
 
 Return \fICURL_SOCKOPT_OK\fP from the callback on success. Return
 \fICURL_SOCKOPT_ERROR\fP from the callback function to signal an unrecoverable
-error to the library and it will close the socket and return
-\fICURLE_COULDNT_CONNECT\fP.
-Alternatively, the callback function can return
+error to the library and it closes the socket and returns
+\fICURLE_COULDNT_CONNECT\fP. Alternatively, the callback function can return
 \fICURL_SOCKOPT_ALREADY_CONNECTED\fP, to tell libcurl that the socket is
-already connected and then libcurl will not attempt to connect it. This allows
-an application to pass in an already connected socket with
+already connected and then libcurl does no attempt to connect. This allows an
+application to pass in an already connected socket with
 \fICURLOPT_OPENSOCKETFUNCTION(3)\fP and then have this function make libcurl
 not attempt to connect (again).
 .SH DEFAULT
@@ -103,7 +102,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
 
 curl = curl_easy_init();
 if(curl) {
-  /* libcurl will internally think that you connect to the host
+  /* libcurl thinks that you connect to the host
    * and port that you specify in the URL option. */
   curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
   /* call this function to get a socket */

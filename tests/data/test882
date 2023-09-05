@@ -4,7 +4,7 @@
 POP3
 Clear Text
 RETR
-connection re-use
+connection reuse
 </keywords>
 </info>
 

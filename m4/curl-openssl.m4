@@ -226,7 +226,7 @@ if test "x$OPT_OPENSSL" != xno; then
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
                        openssl/pem.h openssl/ssl.h openssl/err.h,
         ssl_msg="OpenSSL"
-	test openssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        test openssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         OPENSSL_ENABLED=1
         AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use]))
 
@@ -258,8 +258,6 @@ if test "x$OPT_OPENSSL" != xno; then
 
   if test X"$OPENSSL_ENABLED" = X"1"; then
     dnl These can only exist if OpenSSL exists
-
-    AC_CHECK_FUNCS( RAND_egd )
 
     AC_MSG_CHECKING([for BoringSSL])
     AC_COMPILE_IFELSE([
@@ -363,16 +361,6 @@ dnl Check for the random seed preferences
 dnl **********************************************************************
 
 if test X"$OPENSSL_ENABLED" = X"1"; then
-  AC_ARG_WITH(egd-socket,
-  AS_HELP_STRING([--with-egd-socket=FILE],
-                 [Entropy Gathering Daemon socket pathname]),
-      [ EGD_SOCKET="$withval" ]
-  )
-  if test -n "$EGD_SOCKET" ; then
-          AC_DEFINE_UNQUOTED(EGD_SOCKET, "$EGD_SOCKET",
-          [your Entropy Gathering Daemon socket pathname] )
-  fi
-
   dnl Check for user-specified random device
   AC_ARG_WITH(random,
   AS_HELP_STRING([--with-random=FILE],

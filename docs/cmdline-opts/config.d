@@ -21,12 +21,12 @@ if so, the colon or equals characters can be used as separators. If the option
 is specified with one or two dashes, there can be no colon or equals character
 between the option and its parameter.
 
-If the parameter contains whitespace (or starts with : or =), the parameter
-must be enclosed within quotes. Within double quotes, the following escape
-sequences are available: \\\\, \\", \\t, \\n, \\r and \\v. A backslash
-preceding any other letter is ignored.
+If the parameter contains whitespace or starts with a colon (:) or equals sign
+(=), it must be specified enclosed within double quotes (\&"). Within double
+quotes the following escape sequences are available: \\\\, \\", \\t, \\n, \\r
+and \\v. A backslash preceding any other letter is ignored.
 
-If the first column of a config line is a '#' character, the rest of the line
+If the first non-blank column of a config line is a '#' character, that line
 will be treated as a comment.
 
 Only write one option per physical line in the config file. A single line is
@@ -56,22 +56,22 @@ When curl is invoked, it (unless --disable is used) checks for a default
 config file and uses it if found, even when --config is used. The default
 config file is checked for in the following places in this order:
 
-1) "$CURL_HOME/.curlrc"
+1) **"$CURL_HOME/.curlrc"**
 
-2) "$XDG_CONFIG_HOME/curlrc" (Added in 7.73.0)
+2) **"$XDG_CONFIG_HOME/curlrc"** (Added in 7.73.0)
 
-3) "$HOME/.curlrc"
+3) **"$HOME/.curlrc"**
 
-4) Windows: "%USERPROFILE%\\.curlrc"
+4) Windows: **"%USERPROFILE%\\.curlrc"**
 
-5) Windows: "%APPDATA%\\.curlrc"
+5) Windows: **"%APPDATA%\\.curlrc"**
 
-6) Windows: "%USERPROFILE%\\Application Data\\.curlrc"
+6) Windows: **"%USERPROFILE%\\Application Data\\.curlrc"**
 
 7) Non-Windows: use getpwuid to find the home directory
 
-8) On Windows, if it finds no .curlrc file in the sequence described above, it
+8) On Windows, if it finds no *.curlrc* file in the sequence described above, it
 checks for one in the same dir the curl executable is placed.
 
-On Windows two filenames are checked per location: .curlrc and _curlrc,
-preferring the former. Older versions on Windows checked for _curlrc only.
+On Windows two filenames are checked per location: *.curlrc* and *_curlrc*,
+preferring the former. Older versions on Windows checked for *_curlrc* only.

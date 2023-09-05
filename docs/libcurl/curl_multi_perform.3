@@ -35,13 +35,13 @@ This function performs transfers on all the added handles that need attention
 in a non-blocking fashion. The easy handles have previously been added to the
 multi handle with \fIcurl_multi_add_handle(3)\fP.
 
-When an application has found out there's data available for the multi_handle
+When an application has found out there is data available for the multi_handle
 or a timeout has elapsed, the application should call this function to
 read/write whatever there is to read or write right now etc.
 \fIcurl_multi_perform(3)\fP returns as soon as the reads/writes are done. This
 function does not require that there actually is any data available for
-reading or that data can be written, it can be called just in case. It will
-store the number of handles that still transfer data in the second argument's
+reading or that data can be written, it can be called just in case. It stores
+the number of handles that still transfer data in the second argument's
 integer-pointer.
 
 If the amount of \fIrunning_handles\fP is changed from the previous call (or
@@ -88,7 +88,7 @@ individual transfers may have occurred even when this function returns
 \fICURLM_OK\fP. Use \fIcurl_multi_info_read(3)\fP to figure out how individual
 transfers did.
 .SH "TYPICAL USAGE"
-Most applications will use \fIcurl_multi_poll(3)\fP to make libcurl wait for
+Most applications use \fIcurl_multi_poll(3)\fP to make libcurl wait for
 activity on any of the ongoing transfers. As soon as one or more file
 descriptor has activity or the function times out, the application calls
 \fIcurl_multi_perform(3)\fP.

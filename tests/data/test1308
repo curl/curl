@@ -4,20 +4,21 @@
 unittest
 curl_formadd
 curl_formget
+FORM
 </keywords>
 </info>
 
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 http
-Mime
+form-api
 </features>
+<server>
+none
+</server>
  <name>
 formpost unit tests
  </name>

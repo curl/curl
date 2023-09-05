@@ -56,7 +56,8 @@ announcement.
   problem is, its impact, which versions it affects, solutions or workarounds,
   when the release is out and make sure to credit all contributors properly.
   Figure out the CWE (Common Weakness Enumeration) number for the flaw. See
-  [SECURITY-ADVISORY](SECURITY-ADVISORY.md) for help on creating the advisory.
+  [SECURITY-ADVISORY](https://curl.se/dev/advisory.html) for help on creating
+  the advisory.
 
 - Request a CVE number from
   [HackerOne](https://docs.hackerone.com/programs/cve-requests.html)
@@ -268,3 +269,17 @@ timeout value or otherwise) are not considered security problems. Applications
 are supposed to already handle situations when the transfer loop legitimately
 consumes 100% CPU time, so while a prolonged such busy-loop is a nasty bug, we
 do not consider it a security problem.
+
+## Saving files
+
+curl cannot protect against attacks where an attacker has write access to the
+same directory where curl is directed to save files.
+
+## Tricking a user to run a command line
+
+A creative, misleading or funny looking command line is not a security
+problem. The curl command line tool takes options and URLs on the command line
+and if an attacker can trick the user to run a specifically crafted curl
+command line, all bets are off. Such an attacker can just as well have the
+user run a much worse command that can do something fatal (like
+`sudo rm -rf /`).

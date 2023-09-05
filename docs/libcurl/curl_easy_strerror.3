@@ -38,7 +38,7 @@ Typically applications also appreciate \fICURLOPT_ERRORBUFFER(3)\fP for more
 specific error descriptions generated at runtime.
 .SH EXAMPLE
 .nf
-  /* Perform the request, res will get the return code */
+  /* Perform the entire transfer */
   res = curl_easy_perform(curl);
   /* Check for errors */
   if(res != CURLE_OK)

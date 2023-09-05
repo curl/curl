@@ -35,7 +35,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CA_CACHE_TIMEOUT, long age);
 Pass a long, this sets the timeout in seconds. This tells libcurl the maximum
 time any cached certificate store it has in memory may be kept and reused for
 new connections. Once the timeout has expired, a subsequent fetch requiring a
-certificate store will have to build a new one.
+certificate has to reload it.
 
 Building a certificate store from a \fICURLOPT_CAINFO\fP file is a slow
 operation so curl may cache the generated certificate store internally to speed
@@ -58,8 +58,8 @@ if(curl) {
 
   ret = curl_easy_perform(curl);
 
-  /* in this second request, the cache will not be used if more than
-     sixty seconds have passed since the previous connection */
+  /* in this second request, the cache is not used if more than
+     sixty seconds passed since the previous connection */
   ret = curl_easy_perform(curl);
 
   curl_easy_cleanup(curl);

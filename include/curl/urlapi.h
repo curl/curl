@@ -96,7 +96,8 @@ typedef enum {
 #define CURLU_NO_AUTHORITY (1<<10)      /* Allow empty authority when the
                                            scheme is unknown. */
 #define CURLU_ALLOW_SPACE (1<<11)       /* Allow spaces in the URL */
-#define CURLU_PUNYCODE (1<<12)          /* get the host name in pynycode */
+#define CURLU_PUNYCODE (1<<12)          /* get the host name in punycode */
+#define CURLU_PUNY2IDN (1<<13)          /* punycode => IDN conversion */
 
 typedef struct Curl_URL CURLU;
 

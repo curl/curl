@@ -30,7 +30,7 @@
 #include "timeval.h"
 #include "multiif.h"
 #include "sendf.h"
-#include "curl_log.h"
+#include "curl_trc.h"
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
@@ -173,7 +173,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   msh3_lock_initialize(&stream->recv_lock);
   Curl_bufq_init2(&stream->recvbuf, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
-  DEBUGF(LOG_CF(data, cf, "data setup"));
+  CURL_TRC_CF(data, cf, "data setup");
   return CURLE_OK;
 }
 
@@ -183,7 +183,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   (void)cf;
   if(stream) {
-    DEBUGF(LOG_CF(data, cf, "easy handle is done"));
+    CURL_TRC_CF(data, cf, "easy handle is done");
     Curl_bufq_free(&stream->recvbuf);
     free(stream);
     H3_STREAM_LCTX(data) = NULL;
@@ -235,7 +235,7 @@ static void MSH3_CALL msh3_conn_connected(MSH3_CONNECTION *Connection,
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   (void)Connection;
 
-  DEBUGF(LOG_CF(data, cf, "[MSH3] connected"));
+  CURL_TRC_CF(data, cf, "[MSH3] connected");
   ctx->handshake_succeeded = true;
   ctx->connected = true;
   ctx->handshake_complete = true;
@@ -249,7 +249,7 @@ static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
 
   (void)Connection;
-  DEBUGF(LOG_CF(data, cf, "[MSH3] shutdown complete"));
+  CURL_TRC_CF(data, cf, "[MSH3] shutdown complete");
   ctx->connected = false;
   ctx->handshake_complete = true;
 }
@@ -474,18 +474,18 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   if(stream->reset) {
     failf(data, "HTTP/3 stream reset by server");
     *err = CURLE_PARTIAL_FILE;
-    DEBUGF(LOG_CF(data, cf, "cf_recv, was reset -> %d", *err));
+    CURL_TRC_CF(data, cf, "cf_recv, was reset -> %d", *err);
     goto out;
   }
   else if(stream->error3) {
     failf(data, "HTTP/3 stream was not closed cleanly: (error %zd)",
           (ssize_t)stream->error3);
     *err = CURLE_HTTP3;
-    DEBUGF(LOG_CF(data, cf, "cf_recv, closed uncleanly -> %d", *err));
+    CURL_TRC_CF(data, cf, "cf_recv, closed uncleanly -> %d", *err);
     goto out;
   }
   else {
-    DEBUGF(LOG_CF(data, cf, "cf_recv, closed ok -> %d", *err));
+    CURL_TRC_CF(data, cf, "cf_recv, closed ok -> %d", *err);
   }
   *err = CURLE_OK;
   nread = 0;
@@ -523,7 +523,7 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     return -1;
   }
   CF_DATA_SAVE(save, cf, data);
-  DEBUGF(LOG_CF(data, cf, "req: recv with %zu byte buffer", len));
+  CURL_TRC_CF(data, cf, "req: recv with %zu byte buffer", len);
 
   msh3_lock_acquire(&stream->recv_lock);
 
@@ -538,8 +538,8 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
     nread = Curl_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
-    DEBUGF(LOG_CF(data, cf, "read recvbuf(len=%zu) -> %zd, %d",
-                  len, nread, *err));
+    CURL_TRC_CF(data, cf, "read recvbuf(len=%zu) -> %zd, %d",
+                len, nread, *err);
     if(nread < 0)
       goto out;
     if(stream->closed)
@@ -550,7 +550,7 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
   else {
-    DEBUGF(LOG_CF(data, cf, "req: nothing here, call again"));
+    CURL_TRC_CF(data, cf, "req: nothing here, call again");
     *err = CURLE_AGAIN;
   }
 
@@ -581,7 +581,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   /* Sizes must match for cast below to work" */
   DEBUGASSERT(stream);
-  DEBUGF(LOG_CF(data, cf, "req: send %zu bytes", len));
+  CURL_TRC_CF(data, cf, "req: send %zu bytes", len);
 
   if(!stream->req) {
     /* The first send on the request contains the headers and possibly some
@@ -630,7 +630,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       break;
     }
 
-    DEBUGF(LOG_CF(data, cf, "req: send %zu headers", nheader));
+    CURL_TRC_CF(data, cf, "req: send %zu headers", nheader);
     stream->req = MsH3RequestOpen(ctx->qconn, &msh3_request_if, data,
                                   nva, nheader,
                                   eos ? MSH3_REQUEST_FLAG_FIN :
@@ -646,7 +646,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   else {
     /* request is open */
-    DEBUGF(LOG_CF(data, cf, "req: send %zu body bytes", len));
+    CURL_TRC_CF(data, cf, "req: send %zu body bytes", len);
     if(len > 0xFFFFFFFF) {
       len = 0xFFFFFFFF;
     }
@@ -694,7 +694,7 @@ static int cf_msh3_get_select_socks(struct Curl_cfilter *cf,
       drain_stream(cf, data);
     }
   }
-  DEBUGF(LOG_CF(data, cf, "select_sock -> %d", bitmap));
+  CURL_TRC_CF(data, cf, "select_sock -> %d", bitmap);
   CF_DATA_RESTORE(cf, save);
   return bitmap;
 }
@@ -711,8 +711,8 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
   (void)cf;
   if(stream && stream->req) {
     msh3_lock_acquire(&stream->recv_lock);
-    DEBUGF(LOG_CF((struct Curl_easy *)data, cf, "data pending = %zu",
-                  Curl_bufq_len(&stream->recvbuf)));
+    CURL_TRC_CF((struct Curl_easy *)data, cf, "data pending = %zu",
+                Curl_bufq_len(&stream->recvbuf));
     pending = !Curl_bufq_is_empty(&stream->recvbuf);
     msh3_lock_release(&stream->recv_lock);
     if(pending)
@@ -774,7 +774,7 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
     h3_data_done(cf, data);
     break;
   case CF_CTRL_DATA_DONE_SEND:
-    DEBUGF(LOG_CF(data, cf, "req: send done"));
+    CURL_TRC_CF(data, cf, "req: send done");
     if(stream) {
       stream->upload_done = TRUE;
       if(stream->req) {
@@ -787,7 +787,7 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
     }
     break;
   case CF_CTRL_CONN_INFO_UPDATE:
-    DEBUGF(LOG_CF(data, cf, "req: update info"));
+    CURL_TRC_CF(data, cf, "req: update info");
     cf_msh3_active(cf, data);
     break;
   default:
@@ -813,17 +813,17 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     /* TODO: need a way to provide trust anchors to MSH3 */
 #ifdef DEBUGBUILD
     /* we need this for our test cases to run */
-    DEBUGF(LOG_CF(data, cf, "non-standard CA not supported, "
-                  "switching off verifypeer in DEBUG mode"));
+    CURL_TRC_CF(data, cf, "non-standard CA not supported, "
+                "switching off verifypeer in DEBUG mode");
     verify = 0;
 #else
-    DEBUGF(LOG_CF(data, cf, "non-standard CA not supported, "
-                  "attempting with built-in verification"));
+    CURL_TRC_CF(data, cf, "non-standard CA not supported, "
+                "attempting with built-in verification");
 #endif
   }
 
-  DEBUGF(LOG_CF(data, cf, "connecting to %s:%d (verify=%d)",
-                cf->conn->host.name, (int)cf->conn->remote_port, verify));
+  CURL_TRC_CF(data, cf, "connecting to %s:%d (verify=%d)",
+              cf->conn->host.name, (int)cf->conn->remote_port, verify);
 
   ctx->api = MsH3ApiOpen();
   if(!ctx->api) {
@@ -888,7 +888,7 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
   if(ctx->handshake_complete) {
     ctx->handshake_at = Curl_now();
     if(ctx->handshake_succeeded) {
-      DEBUGF(LOG_CF(data, cf, "handshake succeeded"));
+      CURL_TRC_CF(data, cf, "handshake succeeded");
       cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
       cf->conn->httpversion = 30;
       cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
@@ -918,7 +918,7 @@ static void cf_msh3_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   CF_DATA_SAVE(save, cf, data);
 
   if(ctx) {
-    DEBUGF(LOG_CF(data, cf, "destroying"));
+    CURL_TRC_CF(data, cf, "destroying");
     if(ctx->qconn) {
       MsH3ConnectionClose(ctx->qconn);
       ctx->qconn = NULL;
@@ -935,13 +935,13 @@ static void cf_msh3_close(struct Curl_cfilter *cf, struct Curl_easy *data)
        */
       ctx->active = FALSE;
       if(ctx->sock[SP_LOCAL] == cf->conn->sock[cf->sockindex]) {
-        DEBUGF(LOG_CF(data, cf, "cf_msh3_close(%d) active",
-                      (int)ctx->sock[SP_LOCAL]));
+        CURL_TRC_CF(data, cf, "cf_msh3_close(%d) active",
+                    (int)ctx->sock[SP_LOCAL]);
         cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
       }
       else {
-        DEBUGF(LOG_CF(data, cf, "cf_socket_close(%d) no longer at "
-                      "conn->sock[], discarding", (int)ctx->sock[SP_LOCAL]));
+        CURL_TRC_CF(data, cf, "cf_socket_close(%d) no longer at "
+                    "conn->sock[], discarding", (int)ctx->sock[SP_LOCAL]);
         ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
       }
       if(cf->sockindex == FIRSTSOCKET)

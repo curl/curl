@@ -34,8 +34,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE_LARGE,
 .fi
 .SH DESCRIPTION
 Pass a curl_off_t \fIval\fP as parameter. This should be the time counted as
-seconds since 1 Jan 1970, and the time will be used in a condition as
-specified with \fICURLOPT_TIMECONDITION(3)\fP.
+seconds since 1 Jan 1970, and the time is used in a condition as specified
+with \fICURLOPT_TIMECONDITION(3)\fP.
 
 The difference between this option and \fICURLOPT_TIMEVALUE(3)\fP is the type
 of the argument. On systems where 'long' is only 32 bit wide, this option has

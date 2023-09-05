@@ -44,55 +44,26 @@ echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")' > os400.c
 echo '#pragma comment(user, __DATE__)' >> os400.c
 echo '#pragma comment(user, __TIME__)' >> os400.c
 echo '#pragma comment(copyright, "Copyright (C) Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
-make_module     OS400           os400.c
+make_module     OS400           os400.c         BUILDING_LIBCURL
 LINK=                           # No need to rebuild service program yet.
 MODULES=
 
 
-#       Get source list.
+#       Get source list (CSOURCES variable).
 
-sed -e ':begin'                                                         \
-    -e '/\\$/{'                                                         \
-    -e 's/\\$/ /'                                                       \
-    -e 'N'                                                              \
-    -e 'bbegin'                                                         \
-    -e '}'                                                              \
-    -e 's/\n//g'                                                        \
-    -e 's/[[:space:]]*$//'                                              \
-    -e 's/^\([A-Za-z][A-Za-z0-9_]*\)[[:space:]]*=[[:space:]]*\(.*\)/\1="\2"/' \
-    -e 's/\$(\([A-Za-z][A-Za-z0-9_]*\))/${\1}/g'                        \
-        < Makefile.inc > tmpscript.sh
-. ./tmpscript.sh
+get_make_vars Makefile.inc
 
 
 #       Compile the sources into modules.
 
 INCLUDES="'`pwd`'"
 
-# Create a small C program to check ccsidcurl.c is up to date
-if action_needed "${LIBIFSNAME}/CHKSTRINGS.PGM" "${SCRIPTDIR}/chkstrings.c"
-then    CMD="CRTBNDC PGM(${TARGETLIB}/CHKSTRINGS)"
-        CMD="${CMD} SRCSTMF('${SCRIPTDIR}/chkstrings.c')"
-        CMD="${CMD} INCDIR('${TOPDIR}/include/curl' '${TOPDIR}/include'"
-        CMD="${CMD} '${SRCDIR}' ${INCLUDES})"
-        CMD="${CMD} TGTCCSID(${TGTCCSID})"
-        if CLcommand -i "${CMD}"
-        then    if "${LIBIFSNAME}/CHKSTRINGS.PGM"
-                then    :
-                else    echo "ERROR: CHKSTRINGS failed!"
-                        exit 2
-                fi
-        else    echo "ERROR: Failed to build CHKSTRINGS *PGM object!"
-                exit 2
-        fi
-fi
-
-make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"
-make_module     CCSIDCURL       "${SCRIPTDIR}/ccsidcurl.c"
+make_module     OS400SYS        "${SCRIPTDIR}/os400sys.c"       BUILDING_LIBCURL
+make_module     CCSIDCURL       "${SCRIPTDIR}/ccsidcurl.c"      BUILDING_LIBCURL
 
 for SRC in ${CSOURCES}
 do      MODULE=`db2_name "${SRC}"`
-        make_module "${MODULE}" "${SRC}"
+        make_module "${MODULE}" "${SRC}" BUILDING_LIBCURL
 done
 
 
@@ -129,13 +100,13 @@ fi
 #       Gather the list of symbols to export.
 #       First use awk to pull all CURL_EXTERN function prototypes from
 #       the header files, pass through to sed to strip CURL_DEPRECATED(..)
-#       then back to awk to pull the string immediately to the left of a
-#       bracket stripping any spaces or *'s.
+#       and CURL_TEMP_PRINTF(..) then back to awk to pull the string
+#       immediately to the left of a bracket stripping any spaces or *'s.
 
 EXPORTS=`awk '/^CURL_EXTERN/,/;/'                                       \
               "${TOPDIR}"/include/curl/*.h                              \
               "${SCRIPTDIR}/ccsidcurl.h"                                |
-         sed 's| CURL_DEPRECATED(.*)||g'                                |
+         sed 's/ CURL_DEPRECATED(.*)//g;s/ CURL_TEMP_PRINTF(.*)//g'     |
          awk '{br=index($0,"(");                                        \
               if (br) {                                                 \
                 for(c=br-1; ;c--) {                                     \

@@ -41,7 +41,7 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PUSHFUNCTION,
 .SH DESCRIPTION
 This callback gets called when a new HTTP/2 stream is being pushed by the
 server (using the PUSH_PROMISE frame). If no push callback is set, all offered
-pushes will be denied automatically.
+pushes are denied automatically.
 .SH CALLBACK DESCRIPTION
 The callback gets its arguments like this:
 
@@ -57,19 +57,19 @@ be accessed
 
 \fIheaders\fP is a handle used to access push headers using the accessor
 functions described below. This only accesses and provides the PUSH_PROMISE
-headers, the normal response headers will be provided in the header callback
-as usual.
+headers, the normal response headers are provided in the header callback as
+usual.
 
 \fIclientp\fP is the pointer set with \fICURLMOPT_PUSHDATA(3)\fP
 
-If the callback returns CURL_PUSH_OK, the 'easy' handle will be added to the
+If the callback returns CURL_PUSH_OK, the new easy handle is added to the
 multi handle, the callback must not do that by itself.
 
 The callback can access PUSH_PROMISE headers with two accessor
 functions. These functions can only be used from within this callback and they
 can only access the PUSH_PROMISE headers: \fIcurl_pushheader_byname(3)\fP and
-\fIcurl_pushheader_bynum(3)\fP. The normal response headers will be passed to
-the header callback for pushed streams just as for normal streams.
+\fIcurl_pushheader_bynum(3)\fP. The normal response headers are passed to the
+header callback for pushed streams just as for normal streams.
 
 The header fields can also be accessed with \fIcurl_easy_header(3)\fP,
 introduced in later libcurl versions.
@@ -78,10 +78,10 @@ introduced in later libcurl versions.
 The application has accepted the stream and it can now start receiving data,
 the ownership of the CURL handle has been taken over by the application.
 .IP "CURL_PUSH_DENY (1)"
-The callback denies the stream and no data for this will reach the
-application, the easy handle will be destroyed by libcurl.
+The callback denies the stream and no data reaches the application, the easy
+handle is destroyed by libcurl.
 .IP "CURL_PUSH_ERROROUT (2)"
-Returning this will reject the pushed stream and return an error back on the
+Returning this code rejects the pushed stream and returns an error back on the
 parent stream making it get closed with an error. (Added in 7.72.0)
 .IP *
 All other return codes are reserved for future use.

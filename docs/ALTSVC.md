@@ -33,6 +33,9 @@ space separated fields.
 8. Boolean (1 or 0) if "persist" was set for this entry
 9. Integer priority value (not currently used)
 
+If the host name is an IPv6 numerical address, it is stored with brackets such
+as `[::1]`.
+
 # TODO
 
 - handle multiple response headers, when one of them says `clear` (should

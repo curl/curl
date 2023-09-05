@@ -34,8 +34,8 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_TIMERDATA, void *pointer);
 A data \fBpointer\fP to pass to the timer callback set with the
 \fICURLMOPT_TIMERFUNCTION(3)\fP option.
 
-This pointer will not be touched by libcurl but will only be passed in to the
-timer callbacks's \fBclientp\fP argument.
+This pointer is not touched by libcurl but is only be passed in to the timer
+callbacks's \fBclientp\fP argument.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

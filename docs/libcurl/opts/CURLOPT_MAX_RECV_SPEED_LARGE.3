@@ -32,9 +32,9 @@ CURLOPT_MAX_RECV_SPEED_LARGE \- rate limit data download speed
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAX_RECV_SPEED_LARGE,
                           curl_off_t maxspeed);
 .SH DESCRIPTION
-Pass a curl_off_t as parameter.  If a download exceeds this \fImaxspeed\fP
-(counted in bytes per second) the transfer will pause to keep the speed less
-than or equal to the parameter value. Defaults to unlimited speed.
+Pass a curl_off_t as parameter. If a download exceeds this \fImaxspeed\fP
+(counted in bytes per second) the transfer pauses to keep the average speed
+less than or equal to the parameter value. Defaults to unlimited speed.
 
 This is not an exact science. libcurl attempts to keep the average speed below
 the given threshold over a period time.

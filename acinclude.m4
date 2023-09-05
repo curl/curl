@@ -312,39 +312,6 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
 ])
 
 
-dnl CURL_CHECK_HEADER_WINCRYPT
-dnl -------------------------------------------------
-dnl Check for compilable and valid wincrypt.h header
-
-AC_DEFUN([CURL_CHECK_HEADER_WINCRYPT], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
-  AC_CACHE_CHECK([for wincrypt.h], [curl_cv_header_wincrypt_h], [
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#undef inline
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <wincrypt.h>
-      ]],[[
-        int dummy=2*PROV_RSA_FULL;
-      ]])
-    ],[
-      curl_cv_header_wincrypt_h="yes"
-    ],[
-      curl_cv_header_wincrypt_h="no"
-    ])
-  ])
-  case "$curl_cv_header_wincrypt_h" in
-    yes)
-      AC_DEFINE_UNQUOTED(HAVE_WINCRYPT_H, 1,
-        [Define to 1 if you have the wincrypt.h header file.])
-      ;;
-  esac
-])
-
-
 dnl CURL_CHECK_HEADER_LBER
 dnl -------------------------------------------------
 dnl Check for compilable and valid lber.h header,
@@ -1697,10 +1664,10 @@ dnl -------------------------------------------------
 dnl Check if curl's WIN32 crypto lib can be used
 
 AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
-  AC_REQUIRE([CURL_CHECK_HEADER_WINCRYPT])dnl
+  AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports WIN32 crypto API])
   curl_win32_crypto_api="no"
-  if test "$curl_cv_header_wincrypt_h" = "yes"; then
+  if test "$curl_cv_header_windows_h" = "yes"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline

@@ -32,7 +32,7 @@ CURLOPT_INTERLEAVEDATA \- pointer passed to RTSP interleave callback
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INTERLEAVEDATA, void *pointer);
 .fi
 .SH DESCRIPTION
-This is the userdata \fIpointer\fP that will be passed to
+This is the userdata \fIpointer\fP that is passed to
 \fICURLOPT_INTERLEAVEFUNCTION(3)\fP when interleaved RTP data is received. If
 the interleave function callback is not set, this pointer is not used
 anywhere.

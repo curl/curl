@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#include "curl_log.h"
+#include "curl_trc.h"
 
 
 #define CLIENTWRITE_BODY    (1<<0)
@@ -50,5 +50,12 @@ CURLcode Curl_write(struct Curl_easy *data,
                     curl_socket_t sockfd,
                     const void *mem, size_t len,
                     ssize_t *written);
+
+/* internal write-function, using sockindex for connection destination */
+CURLcode Curl_nwrite(struct Curl_easy *data,
+                     int sockindex,
+                     const void *buf,
+                     size_t blen,
+                     ssize_t *pnwritten);
 
 #endif /* HEADER_CURL_SENDF_H */

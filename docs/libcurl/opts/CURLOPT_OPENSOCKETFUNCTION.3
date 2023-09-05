@@ -64,8 +64,8 @@ is allowed to modify the address or refuse to connect completely. The callback
 function should return the newly created socket or \fICURL_SOCKET_BAD\fP in
 case no connection could be established or another error was detected. Any
 additional \fIsetsockopt(2)\fP calls can of course be done on the socket at
-the user's discretion.  A \fICURL_SOCKET_BAD\fP return value from the callback
-function will signal an unrecoverable error to libcurl and it will return
+the user's discretion. A \fICURL_SOCKET_BAD\fP return value from the callback
+function signals an unrecoverable error to libcurl and it returns
 \fICURLE_COULDNT_CONNECT\fP from the function that triggered this callback.
 This return code can be used for IP address block listing.
 
@@ -103,7 +103,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
 
 curl = curl_easy_init();
 if(curl) {
-  /* libcurl will internally think that you connect to the host
+  /* libcurl thinks that you connect to the host
    * and port that you specify in the URL option. */
   curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
   /* call this function to get a socket */

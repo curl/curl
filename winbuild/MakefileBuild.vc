@@ -265,6 +265,8 @@ ZLIB        = dll
 !IF EXISTS("$(ZLIB_LIB_DIR)\zlibstat.lib")
 ZLIB_LIBS   = zlibstat.lib
 ADDITIONAL_ZLIB_CFLAGS = /DZLIB_WINAPI
+!ELSEIF EXISTS("$(ZLIB_LIB_DIR)\zlibstatic.lib")
+ZLIB_LIBS   = zlibstatic.lib
 !ELSEIF EXISTS("$(ZLIB_LIB_DIR)\zlib.lib")
 ZLIB_LIBS   = zlib.lib
 !ELSE
@@ -664,7 +666,8 @@ CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\warnless.obj \
  $(CURL_DIROBJ)\curl_multibyte.obj \
  $(CURL_DIROBJ)\version_win32.obj \
- $(CURL_DIROBJ)\dynbuf.obj
+ $(CURL_DIROBJ)\dynbuf.obj \
+ $(CURL_DIROBJ)\base64.obj
 
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
@@ -687,6 +690,8 @@ $(CURL_DIROBJ)\version_win32.obj: ../lib/version_win32.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/version_win32.c
 $(CURL_DIROBJ)\dynbuf.obj: ../lib/dynbuf.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/dynbuf.c
+$(CURL_DIROBJ)\base64.obj: ../lib/base64.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/base64.c
 $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
 	rc $(CURL_RC_FLAGS)
 

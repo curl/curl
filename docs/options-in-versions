@@ -252,6 +252,7 @@
 --tr-encoding                        7.21.6
 --trace                              7.9.7
 --trace-ascii                        7.9.7
+--trace-config                       8.3.0
 --trace-ids                          8.2.0
 --trace-time                         7.14.0
 --unix-socket                        7.40.0
@@ -261,6 +262,7 @@
 --use-ascii (-B)                     5.0
 --user (-u)                          4.0
 --user-agent (-A)                    4.5.1
+--variable                           8.3.0
 --verbose (-v)                       4.0
 --version (-V)                       4.0
 --write-out (-w)                     6.5

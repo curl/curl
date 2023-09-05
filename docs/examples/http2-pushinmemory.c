@@ -92,7 +92,7 @@ static void setup(CURL *hnd)
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
 }
 
-/* called when there's an incoming push */
+/* called when there is an incoming push */
 static int server_push_callback(CURL *parent,
                                 CURL *easy,
                                 size_t num_headers,

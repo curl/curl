@@ -300,8 +300,13 @@ sub prepro {
     my $show = 1;
     my @out;
     my $data_crlf;
+    my @pshow;
+    my @altshow;
+    my $plvl;
+    my $line;
     for my $s (@entiretest) {
         my $f = $s;
+        $line++;
         if($s =~ /^ *%if (.*)/) {
             my $cond = $1;
             my $rev = 0;
@@ -311,15 +316,38 @@ sub prepro {
                 $rev = 1;
             }
             $rev ^= $feature{$cond} ? 1 : 0;
-            $show = $rev;
+            push @pshow, $show; # push the previous state
+            $plvl++;
+            if($show) {
+                # only if this was showing before we can allow the alternative
+                # to go showing as well
+                push @altshow, $rev ^ 1; # push the reversed show state
+            }
+            else {
+                push @altshow, 0; # the alt should still hide
+            }
+            if($show) {
+                # we only allow show if already showing
+                $show = $rev;
+            }
             next;
         }
         elsif($s =~ /^ *%else/) {
-            $show ^= 1;
+            if(!$plvl) {
+                print STDERR "error: test$testnum:$line: %else no %if\n";
+                last;
+            }
+            $show = pop @altshow;
+            push @altshow, $show; # put it back for consistency
             next;
         }
         elsif($s =~ /^ *%endif/) {
-            $show = 1;
+            if(!$plvl--) {
+                print STDERR "error: test$testnum:$line: %endif had no %if\n";
+                last;
+            }
+            $show = pop @pshow;
+            pop @altshow; # not used here but we must pop it
             next;
         }
         if($show) {
@@ -1363,7 +1391,7 @@ sub ipcrecv {
     # Decode the function name and arguments
     my $argsarrayref = thaw $buf;
 
-    # The name of the function to call is the frist argument
+    # The name of the function to call is the first argument
     my $funcname = shift @$argsarrayref;
 
     # print "ipcrecv $funcname\n";

@@ -34,7 +34,7 @@ EXTRA_DIST = appveyor.pm azure.pm badsymbols.pl check-deprecated.pl CMakeLists.t
  pathhelp.pm README.md rtspserver.pl runner.pm runtests.1 runtests.pl secureserver.pl \
  serverhelp.pm servers.pm smbserver.py sshhelp.pm sshserver.pl stunnel.pem symbol-scan.pl \
  testcurl.1 testcurl.pl testutil.pm tftpserver.pl util.py valgrind.pm \
- valgrind.supp version-scan.pl
+ valgrind.supp version-scan.pl check-translatable-options.pl
 
 DISTCLEANFILES = configurehelp.pm
 
@@ -117,10 +117,10 @@ event-test: perlcheck all
 	echo "converted $< to $@")
 
 checksrc:
-	cd libtest && $(MAKE) checksrc
-	cd unit && $(MAKE) checksrc
-	cd server && $(MAKE) checksrc
-	cd http && $(MAKE) checksrc
+	(cd libtest && $(MAKE) checksrc)
+	(cd unit && $(MAKE) checksrc)
+	(cd server && $(MAKE) checksrc)
+	(cd http && $(MAKE) checksrc)
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes

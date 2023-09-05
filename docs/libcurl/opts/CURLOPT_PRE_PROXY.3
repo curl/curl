@@ -39,8 +39,8 @@ numerical IP address. A numerical IPv6 address must be written within
 
 To specify port number in this string, append :[port] to the end of the host
 name. The proxy's port number may optionally be specified with the separate
-option \fICURLOPT_PROXYPORT(3)\fP. If not specified, libcurl will default to
-using port 1080 for proxies.
+option \fICURLOPT_PROXYPORT(3)\fP. If not specified, libcurl defaults to using
+port 1080 for proxies.
 
 A pre proxy is a SOCKS proxy that curl connects to before it connects to the
 HTTP(S) proxy specified in the \fICURLOPT_PROXY\fP option. The pre proxy can
@@ -52,15 +52,15 @@ one to enable socks5 and asking the proxy to do the resolving, also known as
 \fICURLPROXY_SOCKS5_HOSTNAME\fP type) to request the specific SOCKS version to
 be used. Otherwise SOCKS4 is used as default.
 
-Setting the pre proxy string to "" (an empty string) will explicitly disable
-the use of a pre proxy.
+Setting the pre proxy string to "" (an empty string) explicitly disables the
+use of a pre proxy.
 
 The application does not have to keep the string around after setting this
 option.
 .SH DEFAULT
 Default is NULL, meaning no pre proxy is used.
 
-When you set a host name to use, do not assume that there's any particular
+When you set a host name to use, do not assume that there is any particular
 single port number used widely for proxies. Specify it!
 .SH PROTOCOLS
 All except file://. Note that some protocols do not work well over proxy.

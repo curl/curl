@@ -101,6 +101,12 @@ typedef unsigned int curl_prot_t;
 #define PROTO_FAMILY_SMTP (CURLPROTO_SMTP|CURLPROTO_SMTPS)
 #define PROTO_FAMILY_SSH  (CURLPROTO_SCP|CURLPROTO_SFTP)
 
+#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH) ||   \
+  !defined(CURL_DISABLE_POP3)
+/* these protocols support CURLOPT_DIRLISTONLY */
+#define CURL_LIST_ONLY_PROTOCOL 1
+#endif
+
 #define DEFAULT_CONNCACHE_SIZE 5
 
 /* length of longest IPv6 address string including the trailing null */
@@ -491,7 +497,7 @@ struct ConnectBits {
 #endif
   /* always modify bits.close with the connclose() and connkeep() macros! */
   BIT(close); /* if set, we close the connection after this request */
-  BIT(reuse); /* if set, this is a re-used connection */
+  BIT(reuse); /* if set, this is a reused connection */
   BIT(altused); /* this is an alt-svc "redirect" */
   BIT(conn_to_host); /* if set, this connection has a "connect to host"
                         that overrides the host in the URL */
@@ -631,17 +637,16 @@ struct SingleRequest {
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
 
-  curl_off_t headerbytecount;   /* only count received headers */
-  curl_off_t deductheadercount; /* this amount of bytes doesn't count when we
-                                   check if anything has been transferred at
-                                   the end of a connection. We use this
-                                   counter to make only a 100 reply (without a
-                                   following second response code) result in a
-                                   CURLE_GOT_NOTHING error code */
-
   curl_off_t pendingheader;      /* this many bytes left to send is actually
                                     header and not body */
   struct curltime start;         /* transfer started at this time */
+  unsigned int headerbytecount;  /* only count received headers */
+  unsigned int deductheadercount; /* this amount of bytes doesn't count when
+                                     we check if anything has been transferred
+                                     at the end of a connection. We use this
+                                     counter to make only a 100 reply (without
+                                     a following second response code) result
+                                     in a CURLE_GOT_NOTHING error code */
   enum {
     HEADER_NORMAL,              /* no bad header at all */
     HEADER_PARTHEADER,          /* part of the chunk is a bad header, the rest
@@ -703,7 +708,9 @@ struct SingleRequest {
   struct curltime last_sndbuf_update;  /* last time readwrite_upload called
                                           win_update_buffer_size */
 #endif
+#ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
+#endif
   unsigned char writer_stack_depth; /* Unencoding stack depth. */
   BIT(header);        /* incoming data has HTTP header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
@@ -749,7 +756,7 @@ struct Curl_handler {
    * after the connect() and everything is done, as a step in the connection.
    * The 'done' pointer points to a bool that should be set to TRUE if the
    * function completes before return. If it doesn't complete, the caller
-   * should call the curl_connecting() function until it is.
+   * should call the ->connecting() function until it is.
    */
   CURLcode (*connect_it)(struct Curl_easy *data, bool *done);
 
@@ -889,7 +896,7 @@ struct connectdata {
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
-     multi_done(). This entry will be NULL if the connection is re-used as then
+     multi_done(). This entry will be NULL if the connection is reused as then
      there is no name resolve done. */
   struct Curl_dns_entry *dns_entry;
 
@@ -1026,14 +1033,19 @@ struct connectdata {
 #ifndef CURL_DISABLE_SMB
     struct smb_conn smbc;
 #endif
+#ifdef USE_LIBRTMP
     void *rtmp;
+#endif
+#ifdef USE_OPENLDAP
     struct ldapconninfo *ldapc;
+#endif
 #ifndef CURL_DISABLE_MQTT
     struct mqtt_conn mqtt;
 #endif
 #ifdef USE_WEBSOCKETS
     struct websocket *ws;
 #endif
+    unsigned int unused:1; /* avoids empty union */
   } proto;
 
   struct connectbundle *bundle; /* The bundle we are member of */
@@ -1047,7 +1059,7 @@ struct connectdata {
   /* When this connection is created, store the conditions for the local end
      bind. This is stored before the actual bind and before any connection is
      made and will serve the purpose of being used for comparison reasons so
-     that subsequent bound-requested connections aren't accidentally re-using
+     that subsequent bound-requested connections aren't accidentally reusing
      wrong connections. */
   char *localdev;
   unsigned short localportrange;
@@ -1079,6 +1091,18 @@ struct connectdata {
   unsigned char gssapi_delegation; /* inherited from set.gssapi_delegation */
 };
 
+#ifndef CURL_DISABLE_PROXY
+#define CURL_CONN_HOST_DISPNAME(c) \
+          ((c)->bits.socksproxy ? (c)->socks_proxy.host.dispname : \
+            (c)->bits.httpproxy ? (c)->http_proxy.host.dispname : \
+              (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
+                (c)->host.dispname)
+#else
+#define CURL_CONN_HOST_DISPNAME(c) \
+          (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
+            (c)->host.dispname
+#endif
+
 /* The end of connectdata. */
 
 /*
@@ -1091,7 +1115,6 @@ struct PureInfo {
   int httpversion; /* the http version number X.Y = X*10+Y */
   time_t filetime; /* If requested, this is might get set. Set to -1 if the
                       time was unretrievable. */
-  curl_off_t header_size;  /* size of read header(s) in bytes */
   curl_off_t request_size; /* the amount of bytes sent in the request(s) */
   unsigned long proxyauthavail; /* what proxy auth types were announced */
   unsigned long httpauthavail;  /* what host auth types were announced */
@@ -1099,6 +1122,7 @@ struct PureInfo {
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would've been redirected to if asked to */
   curl_off_t retry_after; /* info from Retry-After: header */
+  unsigned int header_size;  /* size of read header(s) in bytes */
 
   /* PureInfo members 'conn_primary_ip', 'conn_primary_port', 'conn_local_ip'
      and, 'conn_local_port' are copied over from the connectdata struct in
@@ -1118,10 +1142,8 @@ struct PureInfo {
   int conn_local_port;
   const char *conn_scheme;
   unsigned int conn_protocol;
-  struct curl_certinfo certs; /* info about the certs, only populated in
-                                 OpenSSL, GnuTLS, Schannel, NSS and GSKit
-                                 builds. Asked for with CURLOPT_CERTINFO
-                                 / CURLINFO_CERTINFO */
+  struct curl_certinfo certs; /* info about the certs. Asked for with
+                                 CURLOPT_CERTINFO / CURLINFO_CERTINFO */
   CURLproxycode pxcode;
   BIT(timecond);  /* set to TRUE if the time condition didn't match, which
                      thus made the document NOT get fetched */
@@ -1385,6 +1407,9 @@ struct UrlState {
   struct curl_slist *resolve; /* set to point to the set.resolve list when
                                  this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP
+  curl_mimepart *mimepost;
+  curl_mimepart *formp; /* storage for old API form-posting, alloced on
+                           demand */
   size_t trailers_bytes_sent;
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
                                  headers */
@@ -1456,9 +1481,13 @@ struct UrlState {
                 when multi_done() is called, to prevent multi_done() to get
                 invoked twice when the multi interface is used. */
   BIT(previouslypending); /* this transfer WAS in the multi->pending queue */
+#ifndef CURL_DISABLE_COOKIES
   BIT(cookie_engine);
+#endif
   BIT(prefer_ascii);   /* ASCII rather than binary */
+#ifdef CURL_LIST_ONLY_PROTOCOL
   BIT(list_only);      /* list directory contents */
+#endif
   BIT(url_alloc);   /* URL string is malloc()'ed */
   BIT(referer_alloc); /* referer string is malloc()ed */
   BIT(wildcard_resolve); /* Set to true if any resolve change is a wildcard */
@@ -1615,10 +1644,12 @@ struct UserDefined {
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
                                of strlen(), and then the data *may* be binary
                                (contain zero bytes) */
+#ifndef CURL_DISABLE_BINDLOCAL
   unsigned short localport; /* local port number to bind to */
   unsigned short localportrange; /* number of additional port numbers to test
                                     in case the 'localport' one can't be
                                     bind()ed */
+#endif
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
@@ -1806,7 +1837,9 @@ struct UserDefined {
   BIT(tftp_no_options); /* do not send TFTP options requests */
 #endif
   BIT(sep_headers);     /* handle host and proxy headers separately */
+#ifndef CURL_DISABLE_COOKIES
   BIT(cookiesession);   /* new cookie session? */
+#endif
   BIT(crlf);            /* convert crlf on ftp upload(?) */
   BIT(ssh_compression);            /* enable SSH compression */
 
@@ -1821,7 +1854,9 @@ struct UserDefined {
   BIT(tunnel_thru_httpproxy); /* use CONNECT through an HTTP proxy */
   BIT(prefer_ascii);     /* ASCII rather than binary */
   BIT(remote_append);    /* append, not overwrite, on upload */
+#ifdef CURL_LIST_ONLY_PROTOCOL
   BIT(list_only);        /* list directory */
+#endif
 #ifndef CURL_DISABLE_FTP
   BIT(ftp_use_port);     /* use the FTP PORT command */
   BIT(ftp_use_epsv);     /* if EPSV is to be attempted or not */
@@ -1845,7 +1880,7 @@ struct UserDefined {
   BIT(verbose);        /* output verbosity */
   BIT(krb);            /* Kerberos connection requested */
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */
-  BIT(reuse_fresh);    /* do not re-use an existing connection  */
+  BIT(reuse_fresh);    /* do not reuse an existing connection  */
   BIT(no_signal);      /* do not use any signal/alarm handler */
   BIT(tcp_nodelay);    /* whether to enable TCP_NODELAY or not */
   BIT(ignorecl);       /* ignore content length */

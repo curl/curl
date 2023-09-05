@@ -27,4 +27,6 @@ check_PROGRAMS = \
   h2-serverpush \
   h2-download \
   ws-data \
-  ws-pingpong
+  ws-pingpong \
+  h2-upgrade-extreme \
+  tls-session-reuse

@@ -33,8 +33,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_HTTP_CONNECTCODE, long *p);
 .fi
 .SH DESCRIPTION
 Pass a pointer to a long to receive the last received HTTP proxy response code
-to a CONNECT request. The returned value will be zero if no such response code
-was available.
+to a CONNECT request. The returned value is zero if no such response code was
+available.
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE

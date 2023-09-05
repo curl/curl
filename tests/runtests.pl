@@ -314,7 +314,7 @@ if (!$ENV{"NGHTTPX"}) {
     $ENV{"NGHTTPX"} = checktestcmd("nghttpx");
 }
 if ($ENV{"NGHTTPX"}) {
-    my $nghttpx_version=join(' ', `"$ENV{'NGHTTPX'} -v 2>/dev/null"`);
+    my $nghttpx_version=join(' ', `"$ENV{'NGHTTPX'}" -v 2>/dev/null`);
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
     chomp $nghttpx_h3;
 }
@@ -540,10 +540,6 @@ sub checksystemfeatures {
            }
            elsif ($libcurl =~ /\srustls-ffi\b/i) {
                $feature{"rustls"} = 1;
-           }
-           elsif ($libcurl =~ /\snss\b/i) {
-               $feature{"NSS"} = 1;
-               $feature{"SSLpinning"} = 1;
            }
            elsif ($libcurl =~ /\swolfssl\b/i) {
                $feature{"wolfssl"} = 1;
@@ -787,6 +783,7 @@ sub checksystemfeatures {
     $feature{"DoH"} = 1;
     $feature{"HTTP-auth"} = 1;
     $feature{"Mime"} = 1;
+    $feature{"form-api"} = 1;
     $feature{"netrc"} = 1;
     $feature{"parsedate"} = 1;
     $feature{"proxy"} = 1;
@@ -796,6 +793,7 @@ sub checksystemfeatures {
     $feature{"wakeup"} = 1;
     $feature{"headers-api"} = 1;
     $feature{"xattr"} = 1;
+    $feature{"large-time"} = 1;
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
@@ -1198,6 +1196,19 @@ sub singletest_check {
     my @stripfile = getpart("verify", "stripfile");
 
     my @validstdout = getpart("verify", "stdout");
+    # get all attributes
+    my %hash = getpartattr("verify", "stdout");
+
+    my $loadfile = $hash{'loadfile'};
+    if ($loadfile) {
+        open(my $tmp, "<", "$loadfile") || die "Cannot open file $loadfile: $!";
+        @validstdout = <$tmp>;
+        close($tmp);
+
+        # Enforce LF newlines on load
+        s/\r\n/\n/g for @validstdout;
+    }
+
     if (@validstdout) {
         # verify redirected stdout
         my @actual = loadarray(stdoutfilename($logdir, $testnum));
@@ -1215,9 +1226,6 @@ sub singletest_check {
             # length) because of replacements
             @actual = @newgen;
         }
-
-        # get all attributes
-        my %hash = getpartattr("verify", "stdout");
 
         # get the mode attribute
         my $filemode=$hash{'mode'};
@@ -1559,6 +1567,12 @@ sub singletest_check {
                 # this is to get rid of array entries that vanished (zero
                 # length) because of replacements
                 @generated = @newgen;
+            }
+
+            if($hash{'nonewline'}) {
+                # cut off the final newline from the final line of the
+                # output data
+                chomp($outfile[-1]);
             }
 
             $res = compare($runnerid, $testnum, $testname, "output ($filename)",
@@ -2658,7 +2672,7 @@ sub displaylogcontent {
                     logmsg " $line\n";
                 }
                 $linecount++;
-                $truncate = $linecount > 1000;
+                $truncate = $linecount > 1200;
             }
         }
         close($single);

@@ -131,7 +131,6 @@ class TestProxyAuth:
         url = f'https://localhost:{env.https_port}/data.json'
         xargs = curl.get_proxy_args(proxys=True, tunnel=True, proto=tunnel)
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
-                               with_headers=True, with_trace=True,
                                extra_args=xargs)
         # expect "COULD_NOT_CONNECT"
         r.check_response(exitcode=56, http_status=None)
@@ -151,10 +150,8 @@ class TestProxyAuth:
         xargs = curl.get_proxy_args(proxys=True, tunnel=True, proto=tunnel)
         xargs.extend(['--proxy-user', 'proxy:proxy'])
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
-                               with_headers=True, with_trace=True,
                                extra_args=xargs)
         r.check_response(count=1, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
         assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
             if tunnel == 'h2' else 'HTTP/1.1'
-

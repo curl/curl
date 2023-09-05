@@ -1,0 +1,118 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.TH curl_global_trace 3 "01 August 2023" "libcurl" "libcurl"
+.SH NAME
+curl_global_trace - Global libcurl logging configuration
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_global_trace(const char *config);
+.fi
+.SH DESCRIPTION
+This function configures the logging behavior, allowing to make some
+parts of curl more verbose or silent than others.
+
+This function may be called during the initialization phase of a program. It
+does not have to be. It can be called several times even, possibly overwriting
+settings of previous calls.
+
+Calling this function after transfers have been started is undefined. On
+some platforms/architectures it might take effect, on others not.
+
+This function is thread-safe since libcurl 8.3.0 if
+\fIcurl_version_info(3)\fP has the CURL_VERSION_THREADSAFE feature bit set
+(most platforms).
+
+If this is not thread-safe, you must not call this function when any other
+thread in the program (i.e. a thread sharing the same memory) is running.
+This does not just mean no other thread that is using libcurl. Because
+\fIcurl_global_init(3)\fP may call functions of other libraries that are
+similarly thread unsafe, it could conflict with any other thread that uses
+these other libraries.
+
+If you are initializing libcurl from a Windows DLL you should not initialize
+it from \fIDllMain\fP or a static initializer because Windows holds the loader
+lock during that time and it could cause a deadlock.
+
+The \fIconfig\fP string is a list of comma-separated component names. Names
+are case-insensitive and unknown names are ignored. The special name "all"
+applies to all components. Names may be prefixed with '+' or '-' to enable
+or disable detailed logging for a component.
+
+The list of component names is not part of curl's public API. Names may be
+added or disappear in future versions of libcurl. Since unknown names are
+silently ignored, outdated log configurations does not cause errors when
+upgrading libcurl. Given that, some names can be expected to be fairly stable
+and are listed below for easy reference.
+
+Note that log configuration applies only to transfers where debug logging
+is enabled. See \fICURLOPT_VERBOSE(3)\fP or \fICURLOPT_DEBUGFUNCTION(3)\fP
+on how to control that.
+
+.SH TRACE COMPONENTS
+.IP tcp
+Tracing of TCP socket handling: connect, reads, writes.
+.IP ssl
+Tracing of SSL/TLS operations, whichever SSL backend is used in your build.
+.IP http/2
+Details about HTTP/2 handling: frames, events, I/O, etc.
+.IP http/3
+Details about HTTP/3 handling: connect, frames, events, I/O etc.
+.IP http-proxy
+Involved when transfers are tunneled through a HTTP proxy. "h1-proxy" or
+"h2-proxy" are also involved, depending on the HTTP version negotiated with
+the proxy.
+
+In order to find out all components involved in a transfer, run it with "all"
+configured. You can then see all names involved in your libcurl version in the
+trace.
+
+.SH EXAMPLE
+.nf
+ /* log details of HTTP/2 and SSL handling */
+ curl_global_trace("http/2,ssl");
+
+ /* log all details, except SSL handling */
+ curl_global_trace("all,-ssl");
+.fi
+
+Below is a trace sample where "http/2" was configured. The trace output
+of an enabled component appears at the beginning in brackets.
+.nf
+* [HTTP/2] [h2sid=1] cf_send(len=96) submit https://example.com/
+...
+* [HTTP/2] [h2sid=1] FRAME[HEADERS]
+* [HTTP/2] [h2sid=1] 249 header bytes
+...
+.fi
+
+.SH AVAILABILITY
+Added in 8.3
+.SH RETURN VALUE
+If this function returns non-zero, something went wrong and the configuration
+may not have any effects or may only been applied partially.
+.SH "SEE ALSO"
+.BR curl_global_init "(3), "
+.BR libcurl "(3) "

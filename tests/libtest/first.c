@@ -35,10 +35,6 @@
 #  include <fcntl.h> /* for setmode() */
 #endif
 
-#ifdef USE_NSS
-#include <nspr.h>
-#endif
-
 #ifdef CURLDEBUG
 #  define MEMDEBUG_NODEFINES
 #  include "memdebug.h"
@@ -176,12 +172,6 @@ int main(int argc, char **argv)
   fprintf(stderr, "URL: %s\n", URL);
 
   result = test(URL);
-
-#ifdef USE_NSS
-  if(PR_Initialized())
-    /* prevent valgrind from reporting possibly lost memory (fd cache, ...) */
-    PR_Cleanup();
-#endif
 
 #ifdef WIN32
   /* flush buffers of all streams regardless of mode */

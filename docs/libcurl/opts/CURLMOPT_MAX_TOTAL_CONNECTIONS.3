@@ -33,19 +33,19 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_TOTAL_CONNECTIONS,
                             long amount);
 .fi
 .SH DESCRIPTION
-Pass a long for the \fBamount\fP. The set number will be used as the maximum
-number of simultaneously open connections in total using this multi
-handle. For each new session, libcurl will open a new connection up to the
-limit set by \fICURLMOPT_MAX_TOTAL_CONNECTIONS(3)\fP. When the limit is
-reached, the sessions will be pending until there are available
-connections. If \fICURLMOPT_PIPELINING(3)\fP is enabled, libcurl will try to
-use multiplexing if the host is capable of it.
+Pass a long for the \fBamount\fP. The set number is used as the maximum number
+of simultaneously open connections in total using this multi handle. For each
+new session, libcurl might open a new connection up to the limit set by
+\fICURLMOPT_MAX_TOTAL_CONNECTIONS(3)\fP. When the limit is reached, new
+sessions are held pending until there are available connections. If
+\fICURLMOPT_PIPELINING(3)\fP is enabled, libcurl can try multiplexing if the
+host is capable of it.
 
 When more transfers are added to the multi handle than what can be performed
-due to the set limit, they will be queued up waiting for their chance. When
-that happens, the \fICURLOPT_TIMEOUT_MS(3)\fP timeout will be counted
-inclusive of the waiting time, meaning that if you set a too narrow timeout in
-such a case the transfer might never even start before it times out.
+due to the set limit, they get queued up waiting for their chance. When that
+happens, the \fICURLOPT_TIMEOUT_MS(3)\fP timeout is counted inclusive of the
+waiting time, meaning that if you set a too narrow timeout in such a case the
+transfer might never even start before it times out.
 
 Even in the queued up situation, the \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
 timeout is however treated as a per-connect timeout.

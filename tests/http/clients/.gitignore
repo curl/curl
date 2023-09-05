@@ -6,3 +6,5 @@ h2-serverpush
 h2-download
 ws-data
 ws-pingpong
+h2-upgrade-extreme
+tls-session-reuse

@@ -513,7 +513,7 @@ Maximum number of connections in the connection pool. See \fICURLOPT_MAXCONNECTS
 .IP CURLOPT_FRESH_CONNECT
 Use a new connection. \fICURLOPT_FRESH_CONNECT(3)\fP
 .IP CURLOPT_FORBID_REUSE
-Prevent subsequent connections from re-using this. See \fICURLOPT_FORBID_REUSE(3)\fP
+Prevent subsequent connections from reusing this. See \fICURLOPT_FORBID_REUSE(3)\fP
 .IP CURLOPT_MAXAGE_CONN
 Limit the age (idle time) of connections for reuse. See \fICURLOPT_MAXAGE_CONN(3)\fP
 .IP CURLOPT_MAXLIFETIME_CONN
@@ -733,9 +733,8 @@ is invalid, like perhaps out of range.
 
 If you try to set an option that libcurl does not know about, perhaps because
 the library is too old to support it or the option was removed in a recent
-version, this function will return \fICURLE_UNKNOWN_OPTION\fP. If support for
-the option was disabled at compile-time, it will return
-\fICURLE_NOT_BUILT_IN\fP.
+version, this function returns \fICURLE_UNKNOWN_OPTION\fP. If support for the
+option was disabled at compile-time, it returns \fICURLE_NOT_BUILT_IN\fP.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3), "
 .BR curl_easy_getinfo "(3), " curl_multi_setopt "(3), "

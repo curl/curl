@@ -31,9 +31,9 @@ curl_url_dup - duplicate a URL handle
 CURLU *curl_url_dup(CURLU *inhandle);
 .fi
 .SH DESCRIPTION
-Duplicates a given \fICURLU\fP \fIinhandle\fP and all its contents and returns
-a pointer to a new \fICURLU\fP handle. The new handle also needs to be freed
-with \fIcurl_url_cleanup(3)\fP.
+Duplicates the URL object the input \fICURLU\fP \fIinhandle\fP identifies and
+returns a pointer to the copy as a new \fICURLU\fP handle. The new handle also
+needs to be freed with \fIcurl_url_cleanup(3)\fP.
 .SH EXAMPLE
 .nf
   CURLUcode rc;

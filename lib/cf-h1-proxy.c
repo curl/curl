@@ -41,7 +41,7 @@
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "connect.h"
-#include "curl_log.h"
+#include "curl_trc.h"
 #include "curlx.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
@@ -175,36 +175,36 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
   /* entering this one */
   switch(new_state) {
   case H1_TUNNEL_INIT:
-    DEBUGF(LOG_CF(data, cf, "new tunnel state 'init'"));
+    CURL_TRC_CF(data, cf, "new tunnel state 'init'");
     tunnel_reinit(ts, cf->conn, data);
     break;
 
   case H1_TUNNEL_CONNECT:
-    DEBUGF(LOG_CF(data, cf, "new tunnel state 'connect'"));
+    CURL_TRC_CF(data, cf, "new tunnel state 'connect'");
     ts->tunnel_state = H1_TUNNEL_CONNECT;
     ts->keepon = KEEPON_CONNECT;
     Curl_dyn_reset(&ts->rcvbuf);
     break;
 
   case H1_TUNNEL_RECEIVE:
-    DEBUGF(LOG_CF(data, cf, "new tunnel state 'receive'"));
+    CURL_TRC_CF(data, cf, "new tunnel state 'receive'");
     ts->tunnel_state = H1_TUNNEL_RECEIVE;
     break;
 
   case H1_TUNNEL_RESPONSE:
-    DEBUGF(LOG_CF(data, cf, "new tunnel state 'response'"));
+    CURL_TRC_CF(data, cf, "new tunnel state 'response'");
     ts->tunnel_state = H1_TUNNEL_RESPONSE;
     break;
 
   case H1_TUNNEL_ESTABLISHED:
-    DEBUGF(LOG_CF(data, cf, "new tunnel state 'established'"));
+    CURL_TRC_CF(data, cf, "new tunnel state 'established'");
     infof(data, "CONNECT phase completed");
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     /* FALLTHROUGH */
   case H1_TUNNEL_FAILED:
     if(new_state == H1_TUNNEL_FAILED)
-      DEBUGF(LOG_CF(data, cf, "new tunnel state 'failed'"));
+      CURL_TRC_CF(data, cf, "new tunnel state 'failed'");
     ts->tunnel_state = new_state;
     Curl_dyn_reset(&ts->rcvbuf);
     Curl_dyn_reset(&ts->req);
@@ -416,7 +416,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
     if(!auth)
       return CURLE_OUT_OF_MEMORY;
 
-    DEBUGF(LOG_CF(data, cf, "CONNECT: fwd auth header '%s'", header));
+    CURL_TRC_CF(data, cf, "CONNECT: fwd auth header '%s'", header);
     result = Curl_http_input_auth(data, proxy, auth);
 
     free(auth);
@@ -587,7 +587,9 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         return result;
     }
 
-    data->info.header_size += (long)perline;
+    result = Curl_bump_headersize(data, perline, TRUE);
+    if(result)
+      return result;
 
     /* Newlines are CRLF, so the CR is ignored as the line isn't
        really terminated until the LF comes. Treat a following CR
@@ -636,7 +638,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
           /* without content-length or chunked encoding, we
              can't keep the connection alive since the close is
              the end signal so we bail out at once instead */
-          DEBUGF(LOG_CF(data, cf, "CONNECT: no content-length or chunked"));
+          CURL_TRC_CF(data, cf, "CONNECT: no content-length or chunked");
           ts->keepon = KEEPON_DONE;
         }
       }
@@ -713,14 +715,13 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   }
 
   options = hyper_clientconn_options_new();
-  hyper_clientconn_options_set_preserve_header_case(options, 1);
-  hyper_clientconn_options_set_preserve_header_order(options, 1);
-
   if(!options) {
     failf(data, "Couldn't create hyper client options");
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  hyper_clientconn_options_set_preserve_header_case(options, 1);
+  hyper_clientconn_options_set_preserve_header_order(options, 1);
 
   hyper_clientconn_options_exec(options, h->exec);
 
@@ -751,6 +752,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
 
   client = hyper_task_value(task);
   hyper_task_free(task);
+
   req = hyper_request_new();
   if(!req) {
     failf(data, "Couldn't hyper_request_new");
@@ -859,12 +861,17 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  req = NULL;
 
   if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
     failf(data, "Couldn't hyper_executor_push the send");
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  sendtask = NULL; /* ownership passed on */
+
+  hyper_clientconn_free(client);
+  client = NULL;
 
 error:
   free(host);
@@ -877,6 +884,9 @@ error:
     hyper_task_free(handshake);
   if(client)
     hyper_clientconn_free(client);
+  if(req)
+    hyper_request_free(req);
+
   return result;
 }
 
@@ -975,7 +985,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
     switch(ts->tunnel_state) {
     case H1_TUNNEL_INIT:
       /* Prepare the CONNECT request and make a first attempt to send. */
-      DEBUGF(LOG_CF(data, cf, "CONNECT start"));
+      CURL_TRC_CF(data, cf, "CONNECT start");
       result = start_CONNECT(cf, data, ts);
       if(result)
         goto out;
@@ -984,7 +994,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
 
     case H1_TUNNEL_CONNECT:
       /* see that the request is completely sent */
-      DEBUGF(LOG_CF(data, cf, "CONNECT send"));
+      CURL_TRC_CF(data, cf, "CONNECT send");
       result = send_CONNECT(data, cf->conn, ts, &done);
       if(result || !done)
         goto out;
@@ -993,7 +1003,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
 
     case H1_TUNNEL_RECEIVE:
       /* read what is there */
-      DEBUGF(LOG_CF(data, cf, "CONNECT receive"));
+      CURL_TRC_CF(data, cf, "CONNECT receive");
       result = recv_CONNECT_resp(cf, data, ts, &done);
       if(Curl_pgrsUpdate(data)) {
         result = CURLE_ABORTED_BY_CALLBACK;
@@ -1007,7 +1017,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
       /* FALLTHROUGH */
 
     case H1_TUNNEL_RESPONSE:
-      DEBUGF(LOG_CF(data, cf, "CONNECT response"));
+      CURL_TRC_CF(data, cf, "CONNECT response");
       if(data->req.newurl) {
         /* not the "final" response, we need to do a follow up request.
          * If the other side indicated a connection close, or if someone
@@ -1019,7 +1029,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
            * reset our tunnel state. To avoid recursion, we return
            * and expect to be called again.
            */
-          DEBUGF(LOG_CF(data, cf, "CONNECT need to close+open"));
+          CURL_TRC_CF(data, cf, "CONNECT need to close+open");
           infof(data, "Connect me again please");
           Curl_conn_cf_close(cf, data);
           connkeep(conn, "HTTP proxy CONNECT");
@@ -1043,7 +1053,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
   if(data->info.httpproxycode/100 != 2) {
     /* a non-2xx response and we have no next url to try. */
     Curl_safefree(data->req.newurl);
-    /* failure, close this connection to avoid re-use */
+    /* failure, close this connection to avoid reuse */
     streamclose(conn, "proxy CONNECT failure");
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
     failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
@@ -1073,8 +1083,8 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  DEBUGF(LOG_CF(data, cf, "connect"));
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  CURL_TRC_CF(data, cf, "connect");
+  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
@@ -1133,20 +1143,20 @@ static int cf_h1_proxy_get_select_socks(struct Curl_cfilter *cf,
 static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
-  DEBUGF(LOG_CF(data, cf, "destroy"));
+  CURL_TRC_CF(data, cf, "destroy");
   tunnel_free(cf, data);
 }
 
 static void cf_h1_proxy_close(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
-  DEBUGF(LOG_CF(data, cf, "close"));
+  CURL_TRC_CF(data, cf, "close");
   cf->connected = FALSE;
   if(cf->ctx) {
     h1_tunnel_go_state(cf, cf->ctx, H1_TUNNEL_INIT, data);
   }
   if(cf->next)
-    cf->next->cft->close(cf->next, data);
+    cf->next->cft->do_close(cf->next, data);
 }
 
 

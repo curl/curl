@@ -117,11 +117,9 @@ static CURLcode mqtt_send(struct Curl_easy *data,
                           char *buf, size_t len)
 {
   CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
-  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   struct MQTT *mq = data->req.p.mqtt;
   ssize_t n;
-  result = Curl_write(data, sockfd, buf, len, &n);
+  result = Curl_nwrite(data, FIRSTSOCKET, buf, len, &n);
   if(result)
     return result;
   Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)n);

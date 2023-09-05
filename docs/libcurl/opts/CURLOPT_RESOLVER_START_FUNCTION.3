@@ -51,8 +51,8 @@ socket callback options.
 \fIuserdata\fP is the user pointer set with the
 \fICURLOPT_RESOLVER_START_DATA(3)\fP option.
 
-The callback must return 0 on success. Returning a non-zero value will cause
-the resolve to fail.
+The callback must return 0 on success. Returning a non-zero value causes the
+resolve to fail.
 .SH DEFAULT
 NULL (No callback)
 .SH PROTOCOLS

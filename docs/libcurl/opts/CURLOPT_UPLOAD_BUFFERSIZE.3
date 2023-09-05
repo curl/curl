@@ -35,7 +35,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPLOAD_BUFFERSIZE, long size);
 Pass a long specifying your preferred \fIsize\fP (in bytes) for the upload
 buffer in libcurl. It makes libcurl uses a larger buffer that gets passed to
 the next layer in the stack to get sent off. In some setups and for some
-protocols, there's a huge performance benefit of having a larger upload
+protocols, there is a huge performance benefit of having a larger upload
 buffer.
 
 This is just treated as a request, not an order. You cannot be guaranteed to
@@ -45,8 +45,8 @@ The upload buffer size is by default 64 kilobytes. The maximum buffer size
 allowed to be set is 2 megabytes. The minimum buffer size allowed to be set is
 16 kilobytes.
 
-Since curl 7.61.1 the upload buffer is allocated on-demand - so if the handle
-is not used for upload, this buffer will not be allocated at all.
+The upload buffer is allocated on-demand - so if the handle is not used for
+upload, this buffer is not allocated at all.
 
 DO NOT set this option on a handle that is currently used for an active
 transfer as that may lead to unintended consequences.

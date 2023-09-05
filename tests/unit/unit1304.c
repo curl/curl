@@ -25,6 +25,8 @@
 #include "netrc.h"
 #include "memdebug.h" /* LAST include file */
 
+#ifndef CURL_DISABLE_NETRC
+
 static char *login;
 static char *password;
 
@@ -181,3 +183,16 @@ UNITTEST_START
   fail_unless(strncmp(login, "none", 4) == 0, "login should be 'none'");
 
 UNITTEST_STOP
+
+#else
+static CURLcode unit_setup(void)
+{
+  return CURLE_OK;
+}
+static void unit_stop(void)
+{
+}
+UNITTEST_START
+UNITTEST_STOP
+
+#endif

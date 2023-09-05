@@ -37,19 +37,20 @@ authentication (user+password) credentials when following locations, even when
 hostname changed. This option is meaningful only when setting
 \fICURLOPT_FOLLOWLOCATION(3)\fP.
 
-Further, when this option is not used or set to \fB0L\fP, libcurl will not
-send custom set nor internally generated Authentication: headers on requests
-done to other hosts than the one used for the initial URL.
+Further, when this option is not used or set to \fB0L\fP, libcurl does not
+send custom nor internally generated Authentication: headers on requests done
+to other hosts than the one used for the initial URL.
 
-By default, libcurl will only send credentials and Authentication headers to
-the initial host name as given in the original URL, to avoid leaking username
-+ password to other sites.
+By default, libcurl only sends credentials and Authentication headers to the
+initial host name as given in the original URL, to avoid leaking username +
+password to other sites.
 
 This option should be used with caution: when curl follows redirects it
 blindly fetches the next URL as instructed by the server. Setting
-\fICURLOPT_UNRESTRICTED_AUTH(3)\fP to 1L will therefore also make curl trust
-the server and send possibly sensitive credentials to a host the server points
-out.
+\fICURLOPT_UNRESTRICTED_AUTH(3)\fP to 1L therefore also makes curl trust the
+server and sends possibly sensitive credentials to any host the server points
+out. And then maybe again and again as the following hosts can keep
+redirecting to new hosts.
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -70,3 +71,5 @@ Along with HTTP
 Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_FOLLOWLOCATION "(3), " CURLOPT_USERPWD "(3), "
+.BR CURLOPT_MAXREDIRS "(3), "
+.BR CURLOPT_REDIR_PROTOCOLS_STR "(3), "

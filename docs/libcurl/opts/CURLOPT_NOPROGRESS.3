@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOPROGRESS, long onoff);
 .fi
 .SH DESCRIPTION
 If \fIonoff\fP is to 1, it tells the library to shut off the progress meter
-completely for requests done with this \fIhandle\fP. It will also prevent the
+completely for requests done with this \fIhandle\fP. It also prevents the
 \fICURLOPT_XFERINFOFUNCTION(3)\fP or \fICURLOPT_PROGRESSFUNCTION(3)\fP from
 getting called.
 .SH DEFAULT

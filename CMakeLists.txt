@@ -49,10 +49,9 @@
 # https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
 #
 # The following variables are available:
-#   HAVE_RAND_EGD: `RAND_egd` present in OpenSSL
+#   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL
 #   HAVE_AWSLC: OpenSSL is AWS-LC
 #   HAVE_BORINGSSL: OpenSSL is BoringSSL
-#   HAVE_PK11_CREATEMANAGEDGENERICOBJECTL: `PK11_CreateManagedGenericObject` present in NSS
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in QUICHE
 #   HAVE_ZSTD_CREATEDSTREAM: `ZSTD_createDStream` present in Zstd
@@ -103,6 +102,8 @@ option(CURL_WERROR "Turn compiler warnings into errors" OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
 option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_STATIC_LIBS "Build shared libraries" OFF)
+option(BUILD_STATIC_CURL "Build curl executable with static libcurl" OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
@@ -146,6 +147,32 @@ if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX "-d")
 endif()
 
+set(LIB_STATIC "libcurl_static")
+set(LIB_SHARED "libcurl_shared")
+
+if(NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
+  set(BUILD_STATIC_LIBS ON)
+endif()
+if(NOT BUILD_STATIC_CURL AND NOT BUILD_SHARED_LIBS)
+  set(BUILD_STATIC_CURL ON)
+elseif(BUILD_STATIC_CURL AND NOT BUILD_STATIC_LIBS)
+  set(BUILD_STATIC_CURL OFF)
+endif()
+
+# lib flavour selected for curl tool
+if(BUILD_STATIC_CURL)
+  set(LIB_SELECTED_FOR_EXE ${LIB_STATIC})
+else()
+  set(LIB_SELECTED_FOR_EXE ${LIB_SHARED})
+endif()
+
+# lib flavour selected for example and test programs.
+if(BUILD_SHARED_LIBS)
+  set(LIB_SELECTED ${LIB_SHARED})
+else()
+  set(LIB_SELECTED ${LIB_STATIC})
+endif()
+
 # initialize CURL_LIBS
 set(CURL_LIBS "")
 
@@ -172,6 +199,9 @@ option(CURL_DISABLE_DOH "disables DNS-over-HTTPS" OFF)
 mark_as_advanced(CURL_DISABLE_DOH)
 option(CURL_DISABLE_FILE "disables FILE" OFF)
 mark_as_advanced(CURL_DISABLE_FILE)
+cmake_dependent_option(CURL_DISABLE_FORM_API "disables form api" OFF
+                       "NOT CURL_DISABLE_MIME" ON)
+mark_as_advanced(CURL_DISABLE_FORM_API)
 option(CURL_DISABLE_FTP "disables FTP" OFF)
 mark_as_advanced(CURL_DISABLE_FTP)
 option(CURL_DISABLE_GETOPTIONS "disables curl_easy_options API for existing options to curl_easy_setopt" OFF)
@@ -341,8 +371,10 @@ check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
 if(WIN32)
-  check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
-  check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
+  list(APPEND CURL_LIBS "ws2_32")
+  if(USE_LIBRTMP)
+    list(APPEND CURL_LIBS "winmm")
+  endif()
 
   # Matching logic used for Curl_win32_random()
   if(MINGW)
@@ -359,24 +391,23 @@ if(WIN32)
 endif()
 
 # check SSL libraries
-# TODO support GnuTLS
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
 if(APPLE)
-  cmake_dependent_option(CURL_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+  cmake_dependent_option(CURL_USE_SECTRANSP "Enable Apple OS native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 endif()
 if(WIN32)
-  cmake_dependent_option(CURL_USE_SCHANNEL "enable Windows native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+  cmake_dependent_option(CURL_USE_SCHANNEL "Enable Windows native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
   cmake_dependent_option(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without OpenSSL" ON
     CURL_USE_SCHANNEL OFF)
 endif()
 cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_NSS "Enable NSS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_WOLFSSL "enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_GNUTLS "Enable GNUTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 set(openssl_default ON)
-if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_NSS OR CURL_USE_WOLFSSL)
+if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
   set(openssl_default OFF)
 endif()
 cmake_dependent_option(CURL_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default} CURL_ENABLE_SSL OFF)
@@ -388,7 +419,6 @@ count_true(enabled_ssl_options_count
   CURL_USE_OPENSSL
   CURL_USE_MBEDTLS
   CURL_USE_BEARSSL
-  CURL_USE_NSS
   CURL_USE_WOLFSSL
 )
 if(enabled_ssl_options_count GREATER "1")
@@ -449,9 +479,6 @@ if(CURL_USE_OPENSSL)
   endif()
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
-  if(NOT DEFINED HAVE_RAND_EGD)
-    check_symbol_exists(RAND_egd "${CURL_INCLUDES}" HAVE_RAND_EGD)
-  endif()
   if(NOT DEFINED HAVE_BORINGSSL)
     check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
   endif()
@@ -484,23 +511,13 @@ if(CURL_USE_WOLFSSL)
   include_directories(${WolfSSL_INCLUDE_DIRS})
 endif()
 
-if(CURL_USE_NSS)
-  find_package(NSS REQUIRED)
-  include_directories(${NSS_INCLUDE_DIRS})
-  list(APPEND CURL_LIBS ${NSS_LIBRARIES})
-  set(SSL_ENABLED ON)
-  set(USE_NSS ON)
-  if(NOT DEFINED HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
-    cmake_push_check_state()
-    set(CMAKE_REQUIRED_INCLUDES ${NSS_INCLUDE_DIRS})
-    set(CMAKE_REQUIRED_LIBRARIES ${NSS_LIBRARIES})
-    check_symbol_exists(PK11_CreateManagedGenericObject "pk11pub.h" HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
-    cmake_pop_check_state()
-  endif()
+if(CURL_USE_GNUTLS)
+   set(SSL_ENABLED ON)
+   set(USE_GNUTLS ON)
 endif()
 
 # Keep ZLIB detection after TLS detection,
-# and before calling CheckQuicSupportInOpenSSL.
+# and before calling openssl_check_symbol_exists().
 
 set(HAVE_LIBZ OFF)
 set(USE_ZLIB OFF)
@@ -552,49 +569,49 @@ if(CURL_ZSTD)
   endif()
 endif()
 
-option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
+# Check symbol in OpenSSL-like TLS backends.
+macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE)
+  cmake_push_check_state()
+  if(USE_OPENSSL)
+    set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
+    set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
+    if(HAVE_LIBZ)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
+    endif()
+    if(WIN32)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
+      if(NOT HAVE_MINGW_ORIGINAL)
+        list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
+      endif()
+    endif()
+  elseif(USE_WOLFSSL)
+    set(CMAKE_REQUIRED_INCLUDES   "${WolfSSL_INCLUDE_DIRS}")
+    set(CMAKE_REQUIRED_LIBRARIES  "${WolfSSL_LIBRARIES}")
+    if(HAVE_LIBZ)
+      list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")  # Public wolfSSL headers require zlib headers
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
+    endif()
+    if(WIN32)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")
+    endif()
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS -DHAVE_UINTPTR_T)  # to pull in stdint.h (as of wolfSSL v5.5.4)
+  endif()
+  check_symbol_exists("${SYMBOL}" "${FILES}" "${VARIABLE}")
+  cmake_pop_check_state()
+endmacro()
+
+if(USE_OPENSSL OR USE_WOLFSSL)
+  if(NOT DEFINED HAVE_SSL_SET0_WBIO)
+    openssl_check_symbol_exists(SSL_set0_wbio "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
+  endif()
+endif()
+
+option(USE_NGHTTP2 "Use nghttp2 library" OFF)
 if(USE_NGHTTP2)
   find_package(NGHTTP2 REQUIRED)
   include_directories(${NGHTTP2_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
 endif()
-
-function(CheckQuicSupportInOpenSSL)
-  # Be sure that the OpenSSL/wolfSSL library actually supports QUIC.
-  if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
-    cmake_push_check_state()
-    if(USE_WOLFSSL)
-      set(CMAKE_REQUIRED_INCLUDES   "${WolfSSL_INCLUDE_DIRS}")
-      set(CMAKE_REQUIRED_LIBRARIES  "${WolfSSL_LIBRARIES}")
-      if(HAVE_LIBZ)
-        list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")  # Public wolfSSL headers require zlib headers
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
-      endif()
-      if(WIN32)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")
-      endif()
-      list(APPEND CMAKE_REQUIRED_DEFINITIONS -DHAVE_UINTPTR_T)  # to pull in stdint.h (as of wolfSSL v5.5.4)
-      check_symbol_exists(wolfSSL_set_quic_method "wolfssl/options.h;wolfssl/openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
-    else()
-      set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
-      set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
-      if(HAVE_LIBZ)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
-      endif()
-      if(WIN32)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
-        if(NOT HAVE_MINGW_ORIGINAL)
-          list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
-        endif()
-      endif()
-      check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
-    endif()
-    cmake_pop_check_state()
-  endif()
-  if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
-    message(FATAL_ERROR "QUIC support is missing in OpenSSL/LibreSSL/BoringSSL/wolfSSL. Try setting -DOPENSSL_ROOT_DIR")
-  endif()
-endfunction()
 
 option(USE_NGTCP2 "Use ngtcp2 and nghttp3 libraries for HTTP/3 support" OFF)
 if(USE_NGTCP2)
@@ -604,9 +621,21 @@ if(USE_NGTCP2)
     elseif(HAVE_BORINGSSL)
       find_package(NGTCP2 REQUIRED BoringSSL)
     else()
-      find_package(NGTCP2 REQUIRED OpenSSL)
+      find_package(NGTCP2 REQUIRED quictls)
     endif()
-    CheckQuicSupportInOpenSSL()
+
+    # Be sure that the OpenSSL/wolfSSL library actually supports QUIC.
+    if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
+      if(USE_OPENSSL)
+        openssl_check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+      elseif(USE_WOLFSSL)
+        openssl_check_symbol_exists(wolfSSL_set_quic_method "wolfssl/options.h;wolfssl/openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+      endif()
+    endif()
+    if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
+      message(FATAL_ERROR "QUIC support is missing in OpenSSL/LibreSSL/BoringSSL/wolfSSL. Try setting -DOPENSSL_ROOT_DIR")
+    endif()
+
   elseif(USE_GNUTLS)
     # TODO add GnuTLS support as vtls library.
     find_package(NGTCP2 REQUIRED GnuTLS)
@@ -656,10 +685,8 @@ if(NOT CURL_DISABLE_LDAP)
   if(WIN32)
     option(USE_WIN32_LDAP "Use Windows LDAP implementation" ON)
     if(USE_WIN32_LDAP)
-      check_library_exists_concat("wldap32" cldap_open HAVE_WLDAP32)
-      if(NOT HAVE_WLDAP32)
-        set(USE_WIN32_LDAP OFF)
-      elseif(NOT CURL_DISABLE_LDAPS)
+      list(APPEND CURL_LIBS "wldap32")
+      if(NOT CURL_DISABLE_LDAPS)
         set(HAVE_LDAP_SSL ON)
       endif()
     endif()
@@ -922,7 +949,7 @@ elseif("${CURL_CA_PATH}" STREQUAL "none")
   unset(CURL_CA_PATH CACHE)
 elseif("${CURL_CA_PATH}" STREQUAL "auto")
   unset(CURL_CA_PATH CACHE)
-  if(NOT CMAKE_CROSSCOMPILING AND NOT USE_NSS)
+  if(NOT CMAKE_CROSSCOMPILING)
     set(CURL_CA_PATH_AUTODETECT TRUE)
   endif()
 else()
@@ -975,7 +1002,6 @@ if(NOT UNIX)
   check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
   check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
   check_include_file_concat("winsock2.h"     HAVE_WINSOCK2_H)
-  check_include_file_concat("wincrypt.h"     HAVE_WINCRYPT_H)
 endif()
 
 check_include_file_concat("inttypes.h"       HAVE_INTTYPES_H)
@@ -1011,7 +1037,6 @@ check_include_file_concat("poll.h"           HAVE_POLL_H)
 check_include_file_concat("pwd.h"            HAVE_PWD_H)
 check_include_file_concat("setjmp.h"         HAVE_SETJMP_H)
 check_include_file_concat("signal.h"         HAVE_SIGNAL_H)
-check_include_file_concat("ssl.h"            HAVE_SSL_H)
 check_include_file_concat("stdatomic.h"      HAVE_STDATOMIC_H)
 check_include_file_concat("stdbool.h"        HAVE_STDBOOL_H)
 check_include_file_concat("stdint.h"         HAVE_STDINT_H)
@@ -1026,7 +1051,6 @@ check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
 check_include_file_concat("utime.h"          HAVE_UTIME_H)
 
 check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
-check_include_file_concat("sys/utsname.h"   HAVE_SYS_UTSNAME_H)
 
 check_type_size(size_t  SIZEOF_SIZE_T)
 check_type_size(ssize_t  SIZEOF_SSIZE_T)
@@ -1055,7 +1079,7 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 
 # Check for some functions that are used
-if(HAVE_LIBWS2_32)
+if(WIN32)
   set(CMAKE_REQUIRED_LIBRARIES ws2_32)
 elseif(HAVE_LIBSOCKET)
   set(CMAKE_REQUIRED_LIBRARIES socket)
@@ -1312,11 +1336,8 @@ if(WIN32)
   # Use the manifest embedded in the Windows Resource
   set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
 
-  # Check if crypto functions in wincrypt.h are actually available
-  if(HAVE_WINCRYPT_H)
-    check_symbol_exists(CryptAcquireContext "windows.h;wincrypt.h" USE_WINCRYPT)
-  endif()
-  if(USE_WINCRYPT)
+  # We use crypto functions that are not available for UWP apps
+  if(NOT WINDOWS_STORE)
     set(USE_WIN32_CRYPTO ON)
   endif()
 
@@ -1428,7 +1449,7 @@ endmacro()
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
 if(NOT (CURL_DISABLE_CRYPTO_AUTH OR CURL_DISABLE_NTLM) AND
-    (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO))
+    (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO OR USE_GNUTLS))
   set(use_curl_ntlm_core ON)
 endif()
 
@@ -1469,7 +1490,7 @@ _add_if("HTTP2"         USE_NGHTTP2)
 _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 # TODO wolfSSL only support this from v5.0.0 onwards
-_add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS
+_add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS
                         OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
                         USE_MBEDTLS OR USE_SECTRANSP))
 _add_if("unicode"       ENABLE_UNICODE)
@@ -1527,20 +1548,22 @@ _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
 _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
 _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
 _add_if("BearSSL"          SSL_ENABLED AND USE_BEARSSL)
-_add_if("NSS"              SSL_ENABLED AND USE_NSS)
 _add_if("wolfSSL"          SSL_ENABLED AND USE_WOLFSSL)
+_add_if("GnuTLS"           SSL_ENABLED AND USE_GNUTLS)
+
 if(_items)
   list(SORT _items)
 endif()
 string(REPLACE ";" " " SSL_BACKENDS "${_items}")
 message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")
+if(CURL_DEFAULT_SSL_BACKEND)
+  message(STATUS "Default SSL backend: ${CURL_DEFAULT_SSL_BACKEND}")
+endif()
 
 # curl-config needs the following options to be set.
 set(CC                      "${CMAKE_C_COMPILER}")
 # TODO probably put a -D... options here?
 set(CONFIGURE_OPTIONS       "")
-# TODO when to set "-DCURL_STATICLIB" for CPPFLAG_CURL_STATICLIB?
-set(CPPFLAG_CURL_STATICLIB  "")
 set(CURLVERSION             "${CURL_VERSION}")
 set(exec_prefix             "\${prefix}")
 set(includedir              "\${prefix}/include")
@@ -1570,12 +1593,17 @@ foreach(_lib ${CMAKE_C_IMPLICIT_LINK_LIBRARIES} ${CURL_LIBS})
 endforeach()
 if(BUILD_SHARED_LIBS)
   set(ENABLE_SHARED         "yes")
-  set(ENABLE_STATIC         "no")
   set(LIBCURL_NO_SHARED     "")
+  set(CPPFLAG_CURL_STATICLIB "")
 else()
   set(ENABLE_SHARED         "no")
-  set(ENABLE_STATIC         "yes")
   set(LIBCURL_NO_SHARED     "${LIBCURL_LIBS}")
+  set(CPPFLAG_CURL_STATICLIB "-DCURL_STATICLIB")
+endif()
+if(BUILD_STATIC_LIBS)
+  set(ENABLE_STATIC         "yes")
+else()
+  set(ENABLE_STATIC         "no")
 endif()
 # "a" (Linux) or "lib" (Windows)
 string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")

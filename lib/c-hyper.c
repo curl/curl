@@ -61,6 +61,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+typedef enum {
+    USERDATA_NOT_SET = 0, /* for tasks with no userdata set; must be zero */
+    USERDATA_RESP_BODY
+} userdata_t;
+
 size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
                        uint8_t *buf, size_t buflen)
 {
@@ -182,8 +187,11 @@ static int hyper_each_header(void *userdata,
     }
   }
 
-  data->info.header_size += (curl_off_t)len;
-  data->req.headerbytecount += (curl_off_t)len;
+  result = Curl_bump_headersize(data, len, FALSE);
+  if(result) {
+    data->state.hresult = result;
+    return HYPER_ITER_BREAK;
+  }
   return HYPER_ITER_CONTINUE;
 }
 
@@ -313,9 +321,8 @@ static CURLcode status_line(struct Curl_easy *data,
     if(result)
       return result;
   }
-  data->info.header_size += (curl_off_t)len;
-  data->req.headerbytecount += (curl_off_t)len;
-  return CURLE_OK;
+  result = Curl_bump_headersize(data, len, FALSE);
+  return result;
 }
 
 /*
@@ -348,7 +355,6 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
   struct hyptransfer *h = &data->hyp;
   hyper_task *task;
   hyper_task *foreach;
-  hyper_error *hypererr = NULL;
   const uint8_t *reasonp;
   size_t reason_len;
   CURLcode result = CURLE_OK;
@@ -391,19 +397,9 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       break;
     }
     t = hyper_task_type(task);
-    switch(t) {
-    case HYPER_TASK_ERROR:
-      hypererr = hyper_task_value(task);
-      break;
-    case HYPER_TASK_RESPONSE:
-      resp = hyper_task_value(task);
-      break;
-    default:
-      break;
-    }
-    hyper_task_free(task);
-
     if(t == HYPER_TASK_ERROR) {
+      hyper_error *hypererr = hyper_task_value(task);
+      hyper_task_free(task);
       if(data->state.hresult) {
         /* override Hyper's view, might not even be an error */
         result = data->state.hresult;
@@ -414,36 +410,55 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         size_t errlen = hyper_error_print(hypererr, errbuf, sizeof(errbuf));
         hyper_code code = hyper_error_code(hypererr);
         failf(data, "Hyper: [%d] %.*s", (int)code, (int)errlen, errbuf);
-        if(code == HYPERE_ABORTED_BY_CALLBACK)
+        switch(code) {
+        case HYPERE_ABORTED_BY_CALLBACK:
           result = CURLE_OK;
-        else if((code == HYPERE_UNEXPECTED_EOF) && !data->req.bytecount)
-          result = CURLE_GOT_NOTHING;
-        else if(code == HYPERE_INVALID_PEER_MESSAGE)
+          break;
+        case HYPERE_UNEXPECTED_EOF:
+          if(!data->req.bytecount)
+            result = CURLE_GOT_NOTHING;
+          else
+            result = CURLE_RECV_ERROR;
+          break;
+        case HYPERE_INVALID_PEER_MESSAGE:
+          /* bump headerbytecount to avoid the count remaining at zero and
+             appearing to not having read anything from the peer at all */
+          data->req.headerbytecount++;
           result = CURLE_UNSUPPORTED_PROTOCOL; /* maybe */
-        else
+          break;
+        default:
           result = CURLE_RECV_ERROR;
+          break;
+        }
       }
       *done = TRUE;
       hyper_error_free(hypererr);
       break;
     }
-    else if(h->endtask == task) {
-      /* end of transfer, forget the task handled, we might get a
-       * new one with the same address in the future. */
-      *done = TRUE;
-      h->endtask = NULL;
-      infof(data, "hyperstream is done");
-      if(!k->bodywrites) {
-        /* hyper doesn't always call the body write callback */
-        bool stilldone;
-        result = Curl_http_firstwrite(data, data->conn, &stilldone);
+    else if(t == HYPER_TASK_EMPTY) {
+      void *userdata = hyper_task_userdata(task);
+      hyper_task_free(task);
+      if((userdata_t)userdata == USERDATA_RESP_BODY) {
+        /* end of transfer */
+        *done = TRUE;
+        infof(data, "hyperstream is done");
+        if(!k->bodywrites) {
+          /* hyper doesn't always call the body write callback */
+          bool stilldone;
+          result = Curl_http_firstwrite(data, data->conn, &stilldone);
+        }
+        break;
       }
-      break;
+      else {
+        /* A background task for hyper; ignore */
+        continue;
+      }
     }
-    else if(t != HYPER_TASK_RESPONSE) {
-      continue;
-    }
-    /* HYPER_TASK_RESPONSE */
+
+    DEBUGASSERT(HYPER_TASK_RESPONSE);
+
+    resp = hyper_task_value(task);
+    hyper_task_free(task);
 
     *didwhat = KEEP_RECV;
     if(!resp) {
@@ -523,13 +538,12 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
       break;
     }
-    DEBUGASSERT(hyper_task_type(foreach) == HYPER_TASK_EMPTY);
+    hyper_task_set_userdata(foreach, (void *)USERDATA_RESP_BODY);
     if(HYPERE_OK != hyper_executor_push(h->exec, foreach)) {
       failf(data, "Couldn't hyper_executor_push the body-foreach");
       result = CURLE_OUT_OF_MEMORY;
       break;
     }
-    h->endtask = foreach;
 
     hyper_response_free(resp);
     resp = NULL;
@@ -757,7 +771,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     /* increasing the writebytecount here is a little premature but we
        don't know exactly when the body is sent */
     data->req.writebytecount += fillcount;
-    Curl_pgrsSetUploadCounter(data, fillcount);
+    Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
   }
   return HYPER_POLL_READY;
 }
@@ -794,15 +808,16 @@ static CURLcode bodysend(struct Curl_easy *data,
       hyper_body_set_data_func(body, uploadpostfields);
     else {
       result = Curl_get_upload_buffer(data);
-      if(result)
+      if(result) {
+        hyper_body_free(body);
         return result;
+      }
       /* init the "upload from here" pointer */
       data->req.upload_fromhere = data->state.ulbuf;
       hyper_body_set_data_func(body, uploadstreamed);
     }
     if(HYPERE_OK != hyper_request_set_body(hyperreq, body)) {
       /* fail */
-      hyper_body_free(body);
       result = CURLE_OUT_OF_MEMORY;
     }
   }
@@ -1194,14 +1209,17 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  req = NULL;
 
   if(HYPERE_OK != hyper_executor_push(h->exec, sendtask)) {
     failf(data, "Couldn't hyper_executor_push the send");
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }
+  sendtask = NULL; /* ownership passed on */
 
   hyper_clientconn_free(client);
+  client = NULL;
 
   if((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) {
     /* HTTP GET/HEAD download */
@@ -1214,8 +1232,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
        the full request has been sent. */
     data->req.start100 = Curl_now();
 
-  /* clear userpwd and proxyuserpwd to avoid re-using old credentials
-   * from re-used connections */
+  /* clear userpwd and proxyuserpwd to avoid reusing old credentials
+   * from reused connections */
   Curl_safefree(data->state.aptr.userpwd);
   Curl_safefree(data->state.aptr.proxyuserpwd);
   return CURLE_OK;
@@ -1229,6 +1247,12 @@ error:
 
   if(handshake)
     hyper_task_free(handshake);
+
+  if(client)
+    hyper_clientconn_free(client);
+
+  if(req)
+    hyper_request_free(req);
 
   return result;
 }

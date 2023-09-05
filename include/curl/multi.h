@@ -118,7 +118,7 @@ typedef struct CURLMsg CURLMsg;
 struct curl_waitfd {
   curl_socket_t fd;
   short events;
-  short revents; /* not supported yet */
+  short revents;
 };
 
 /*

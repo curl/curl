@@ -178,6 +178,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #endif /* CURLRES_AMIGA */
 
 #ifdef USE_AMISSL
+#include <signal.h>
 int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
                       fd_set *errorfds, struct timeval *timeout)
 {

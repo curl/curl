@@ -23,5 +23,77 @@
 #
 ###########################################################################
 #
-#
-#       Not implemented yet on OS/400.
+#       Command line interface tool compilation script for the OS/400.
+
+SCRIPTDIR=`dirname "${0}"`
+. "${SCRIPTDIR}/initscript.sh"
+cd "${TOPDIR}/src"
+
+
+#       Get source lists.
+#       CURL_CFILES are in the current directory.
+#       CURLX_CFILES are in the lib directory and need to be recompiled because
+#               some function names change using macros.
+
+get_make_vars Makefile.inc
+
+
+#       Compile the sources into modules.
+
+LINK=
+MODULES=
+INCLUDES="'${TOPDIR}/lib'"
+
+for SRC in ${CURLX_CFILES}
+do      MODULE=`db2_name "${SRC}"`
+        MODULE=`db2_name "X${MODULE}"`
+        make_module "${MODULE}" "${SRC}"
+done
+
+for SRC in ${CURL_CFILES}
+do      MODULE=`db2_name "${SRC}"`
+        make_module "${MODULE}" "${SRC}"
+done
+
+
+#       Link modules into program.
+
+MODULES="`echo \"${MODULES}\" | sed \"s/[^ ][^ ]*/${TARGETLIB}\/&/g\"`"
+CMD="CRTPGM PGM(${TARGETLIB}/${CURLPGM})"
+CMD="${CMD} ENTMOD(${TARGETLIB}/CURLMAIN)"
+CMD="${CMD} MODULE(${MODULES})"
+CMD="${CMD} BNDSRVPGM(${TARGETLIB}/${SRVPGM} QADRTTS)"
+CMD="${CMD} TGTRLS(${TGTRLS})"
+CLcommand "${CMD}"
+
+
+#       Create the IFS command.
+
+IFSBIN="${IFSDIR}/bin"
+
+if action_needed "${IFSBIN}"
+then    mkdir -p "${IFSBIN}"
+fi
+
+rm -f "${IFSBIN}/curl"
+ln -s "/QSYS.LIB/${TARGETLIB}.LIB/${CURLPGM}.PGM" "${IFSBIN}/curl"
+
+
+#       Create the CL interface program.
+
+if action_needed "${LIBIFSNAME}/CURLCL.PGM" "${SCRIPTDIR}/curlcl.c"
+then    CMD="CRTBNDC PGM(${TARGETLIB}/${CURLCLI})"
+        CMD="${CMD} SRCSTMF('${SCRIPTDIR}/curlcl.c')"
+        CMD="${CMD} DEFINE('CURLPGM=\"${CURLPGM}\"')"
+        CMD="${CMD} TGTCCSID(${TGTCCSID})"
+        CLcommand "${CMD}"
+fi
+
+
+#       Create the CL command.
+
+if action_needed "${LIBIFSNAME}/${CURLCMD}.CMD" "${SCRIPTDIR}/curl.cmd"
+then    CMD="CRTCMD CMD(${TARGETLIB}/${CURLCMD}) PGM(${TARGETLIB}/${CURLCLI})"
+        CMD="${CMD} SRCSTMF('${SCRIPTDIR}/curl.cmd')"
+        CLcommand "${CMD}"
+fi

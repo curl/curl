@@ -10,7 +10,7 @@ Expect
 <reply>
 # 417 means the server didn't like the Expect header
 <data>
-HTTP/1.1 417 OK swsbounce
+HTTP/1.1 417 BAD swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 0
@@ -25,7 +25,7 @@ Content-Length: 10
 blablabla
 </data1>
 <datacheck>
-HTTP/1.1 417 OK swsbounce
+HTTP/1.1 417 BAD swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 0

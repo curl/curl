@@ -47,7 +47,8 @@ class Httpd:
         'authn_core', 'authn_file',
         'authz_user', 'authz_core', 'authz_host',
         'auth_basic', 'auth_digest',
-        'env', 'filter', 'headers', 'mime',
+        'alias', 'env', 'filter', 'headers', 'mime',
+        'socache_shmcb',
         'rewrite', 'http2', 'ssl', 'proxy', 'proxy_http', 'proxy_connect',
         'mpm_event',
     ]
@@ -242,14 +243,16 @@ class Httpd:
                 f'PidFile httpd.pid',
                 f'ErrorLog {self._error_log}',
                 f'LogLevel {self._get_log_level()}',
+                f'StartServers 4',
                 f'H2MinWorkers 16',
-                f'H2MaxWorkers 128',
+                f'H2MaxWorkers 256',
                 f'H2Direct on',
                 f'Listen {self.env.http_port}',
                 f'Listen {self.env.https_port}',
                 f'Listen {self.env.proxy_port}',
                 f'Listen {self.env.proxys_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
+                f'SSLSessionCache "shmcb:ssl_gcache_data(32000)"',
             ]
             if 'base' in self._extra_configs:
                 conf.extend(self._extra_configs['base'])
@@ -369,6 +372,10 @@ class Httpd:
         lines = []
         if Httpd.MOD_CURLTEST is not None:
             lines.extend([
+                f'    Redirect 301 /curltest/echo301 /curltest/echo',
+                f'    Redirect 302 /curltest/echo302 /curltest/echo',
+                f'    Redirect 303 /curltest/echo303 /curltest/echo',
+                f'    Redirect 307 /curltest/echo307 /curltest/echo',
                 f'    <Location /curltest/echo>',
                 f'      SetHandler curltest-echo',
                 f'    </Location>',

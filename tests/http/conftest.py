@@ -84,4 +84,3 @@ def nghttpx_fwd(env, httpd) -> Optional[Nghttpx]:
         assert nghttpx.start()
     yield nghttpx
     nghttpx.stop()
-

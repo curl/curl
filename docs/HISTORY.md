@@ -161,7 +161,7 @@ Starting with 7.10, curl verifies SSL server certificates by default.
 January: Started working on the distributed curl tests. The autobuilds.
 
 February: the curl site averages at 20000 visits weekly. At any given moment,
-there's an average of 3 people browsing the website.
+there is an average of 3 people browsing the website.
 
 Multiple new authentication schemes are supported: Digest (May), NTLM (June)
 and Negotiate (June).
@@ -430,3 +430,8 @@ April: added the cyassl backend (later renamed to WolfSSL)
 
  The curl.se website serves 16,500 GB/month over 462M requests, the
  official docker image has been pulled 4,098,015,431 times.
+
+2023
+----
+
+August: Dropped support for the NSS library

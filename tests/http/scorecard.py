@@ -33,7 +33,7 @@ import sys
 from statistics import mean
 from typing import Dict, Any, Optional, List
 
-from testenv import Env, Httpd, Nghttpx, CurlClient, Caddy, ExecResult
+from testenv import Env, Httpd, Nghttpx, CurlClient, Caddy, ExecResult, NghttpxFwd
 
 log = logging.getLogger(__name__)
 
@@ -67,33 +67,7 @@ class ScoreCard:
         sample_size = 5
         self.info(f'TLS Handshake\n')
         for authority in [
-            f'{self.env.authority_for(self.env.domain1, proto)}'
-        ]:
-            self.info('  localhost...')
-            c_samples = []
-            hs_samples = []
-            errors = []
-            for i in range(sample_size):
-                curl = CurlClient(env=self.env, silent=self._silent_curl)
-                url = f'https://{authority}/'
-                r = curl.http_download(urls=[url], alpn_proto=proto,
-                                       no_save=True)
-                if r.exit_code == 0 and len(r.stats) == 1:
-                    c_samples.append(r.stats[0]['time_connect'])
-                    hs_samples.append(r.stats[0]['time_appconnect'])
-                else:
-                    errors.append(f'exit={r.exit_code}')
-            props['localhost'] = {
-                'ipv4-connect': mean(c_samples),
-                'ipv4-handshake': mean(hs_samples),
-                'ipv4-errors': errors,
-                'ipv6-connect': 0,
-                'ipv6-handshake': 0,
-                'ipv6-errors': [],
-            }
-            self.info('ok.\n')
-        for authority in [
-            'curl.se', 'nghttp2.org',
+            'curl.se', 'google.com', 'cloudflare.com', 'nghttp2.org'
         ]:
             self.info(f'  {authority}...')
             props[authority] = {}
@@ -556,7 +530,7 @@ def main():
             httpd.clear_logs()
             assert httpd.start()
             if 'h3' == protocol:
-                nghttpx = Nghttpx(env=env)
+                nghttpx = NghttpxFwd(env=env)
                 nghttpx.clear_logs()
                 assert nghttpx.start()
         if test_caddy and env.caddy:

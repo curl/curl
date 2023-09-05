@@ -101,6 +101,20 @@ do      MEMBER="`basename \"${EXAMPLE}\"`"
 done
 
 
+#       Compile the QADRTMAIN2 replacement module.
+
+if action_needed "${LIBIFSNAME}/CURLMAIN.MODULE" "${SCRIPTDIR}/curlmain.c"
+then    CMD="CRTCMOD MODULE(${TARGETLIB}/CURLMAIN)"
+        CMD="${CMD} SRCSTMF('${SCRIPTDIR}/curlmain.c')"
+        CMD="${CMD} SYSIFCOPT(*IFS64IO) LOCALETYPE(*LOCALE) FLAG(10)"
+        CMD="${CMD} TGTCCSID(${TGTCCSID}) TGTRLS(${TGTRLS})"
+        CMD="${CMD} OUTPUT(${OUTPUT})"
+        CMD="${CMD} OPTIMIZE(${OPTIMIZE})"
+        CMD="${CMD} DBGVIEW(${DEBUG})"
+        CLcommand "${CMD}"
+fi
+
+
 #       Build in each directory.
 
 # for SUBDIR in include lib src tests

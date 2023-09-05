@@ -24,6 +24,9 @@
 #include "curlcheck.h"
 #include "curl_get_line.h"
 
+#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
+  !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
+
 /* The test XML does not supply a way to write files without newlines
  * so we write our own
  */
@@ -94,7 +97,7 @@ UNITTEST_START
     fp = fopen(arg, "rb");
     abort_unless(fp != NULL, "Cannot open testfile");
 
-    fprintf(stderr, "Test %d...", i);
+    fprintf(stderr, "Test %zd...", i);
     switch(i) {
       case 0:
         line = Curl_get_line(buf, len, fp);
@@ -157,3 +160,16 @@ UNITTEST_START
     fprintf(stderr, "OK\n");
   }
 UNITTEST_STOP
+
+#else
+static CURLcode unit_setup(void)
+{
+  return CURLE_OK;
+}
+static void unit_stop(void)
+{
+}
+UNITTEST_START
+UNITTEST_STOP
+
+#endif

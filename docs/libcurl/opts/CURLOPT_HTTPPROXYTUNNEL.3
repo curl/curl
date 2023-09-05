@@ -47,7 +47,7 @@ To suppress proxy CONNECT response headers from user callbacks use
 HTTP proxies can generally only speak HTTP (for obvious reasons), which makes
 libcurl convert non-HTTP requests to HTTP when using an HTTP proxy without
 this tunnel option set. For example, asking for an FTP URL and specifying an
-HTTP proxy will make libcurl send an FTP URL in an HTTP GET request to the
+HTTP proxy makes libcurl send an FTP URL in an HTTP GET request to the
 proxy. By instead tunneling through the proxy, you avoid that conversion (that
 rarely works through the proxy anyway).
 .SH DEFAULT

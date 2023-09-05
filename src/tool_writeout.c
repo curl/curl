@@ -517,6 +517,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
   bool done = FALSE;
   struct curl_certinfo *certinfo;
   CURLcode res = curl_easy_getinfo(per->curl, CURLINFO_CERTINFO, &certinfo);
+  bool fclose_stream = FALSE;
 
   if(!writeinfo)
     return;
@@ -556,9 +557,15 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                   done = TRUE;
                 break;
               case VAR_STDOUT:
+                if(fclose_stream)
+                  fclose(stream);
+                fclose_stream = FALSE;
                 stream = stdout;
                 break;
               case VAR_STDERR:
+                if(fclose_stream)
+                  fclose(stream);
+                fclose_stream = FALSE;
                 stream = stderr;
                 break;
               case VAR_JSON:
@@ -600,6 +607,36 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           else
             fputs("%header{", stream);
         }
+        else if(!strncmp("output{", &ptr[1], 7)) {
+          bool append = FALSE;
+          ptr += 8;
+          if((ptr[0] == '>') && (ptr[1] == '>')) {
+            append = TRUE;
+            ptr += 2;
+          }
+          end = strchr(ptr, '}');
+          if(end) {
+            char fname[512]; /* holds the longest file name */
+            size_t flen = end - ptr;
+            if(flen < sizeof(fname)) {
+              FILE *stream2;
+              memcpy(fname, ptr, flen);
+              fname[flen] = 0;
+              stream2 = fopen(fname, append? FOPEN_APPENDTEXT :
+                              FOPEN_WRITETEXT);
+              if(stream2) {
+                /* only change if the open worked */
+                if(fclose_stream)
+                  fclose(stream);
+                stream = stream2;
+                fclose_stream = TRUE;
+              }
+            }
+            ptr = end + 1;
+          }
+          else
+            fputs("%output{", stream);
+        }
         else {
           /* illegal syntax, then just output the characters that are used */
           fputc('%', stream);
@@ -632,4 +669,6 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
       ptr++;
     }
   }
+  if(fclose_stream)
+    fclose(stream);
 }

@@ -33,13 +33,23 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CERTINFO,
                            struct curl_certinfo **chainp);
 .fi
 .SH DESCRIPTION
-Pass a pointer to a \fIstruct curl_certinfo *\fP and you will get it set to
-point to a struct that holds a number of linked lists with info about the
-certificate chain, assuming you had \fICURLOPT_CERTINFO(3)\fP enabled when the
-request was made. The struct reports how many certs it found and then you can
-extract info for each of those certs by following the linked lists. The info
-chain is provided in a series of data in the format "name:content" where the
-content is for the specific named data. See also the \fIcertinfo.c\fP example.
+Pass a pointer to a \fIstruct curl_certinfo *\fP and it is set to point to a
+struct that holds info about the server's certificate chain, assuming you had
+\fICURLOPT_CERTINFO(3)\fP enabled when the request was made.
+
+.nf
+struct curl_certinfo {
+  int num_of_certs;
+  struct curl_slist **certinfo;
+};
+.fi
+
+The \fIcertinfo\fP struct member is an array of linked lists of certificate
+information. The \fInum_of_certs\fP struct member is the number of
+certificates which is the number of elements in the array. Each certificate's
+list has items with textual information in the format "name:content" such as
+\&"Subject:Foo", "Issuer:Bar", etc. The items in each list varies depending on
+the SSL backend and the certificate.
 .SH PROTOCOLS
 All TLS-based
 .SH EXAMPLE
@@ -74,10 +84,12 @@ if(curl) {
   curl_easy_cleanup(curl);
 }
 .fi
+
+See also the \fIcertinfo.c\fP example.
 .SH AVAILABILITY
-This option is only working in libcurl built with OpenSSL, NSS, Schannel, GSKit
-or Secure Transport support. Schannel support added in 7.50.0. Secure Transport
-support added in 7.79.0.
+This option is only working in libcurl built with OpenSSL, GnuTLS, Schannel or
+Secure Transport. GnuTLS support added in 7.42.0. Schannel support added in
+7.50.0. Secure Transport support added in 7.79.0.
 
 Added in 7.19.1
 .SH RETURN VALUE

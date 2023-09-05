@@ -532,7 +532,7 @@ sub scanfile {
             }
             elsif(($first eq "*") && ($word !~ /(for|if|while|switch)/)) {
                 # A "(*" beginning makes the space OK because it wants to
-                # allow funcion pointer declared
+                # allow function pointer declared
             }
             elsif($1 =~ / *typedef/) {
                 # typedefs can use space-paren

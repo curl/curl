@@ -110,7 +110,10 @@ static CURLcode my_sha256_init(my_sha256_ctx *ctx)
   if(!ctx->openssl_ctx)
     return CURLE_OUT_OF_MEMORY;
 
-  EVP_DigestInit_ex(ctx->openssl_ctx, EVP_sha256(), NULL);
+  if(!EVP_DigestInit_ex(ctx->openssl_ctx, EVP_sha256(), NULL)) {
+    EVP_MD_CTX_destroy(ctx->openssl_ctx);
+    return CURLE_FAILED_INIT;
+  }
   return CURLE_OK;
 }
 
@@ -218,9 +221,14 @@ typedef struct sha256_ctx my_sha256_ctx;
 
 static CURLcode my_sha256_init(my_sha256_ctx *ctx)
 {
-  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
-                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
-    CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash);
+  if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
+                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    return CURLE_OUT_OF_MEMORY;
+
+  if(!CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash)) {
+    CryptReleaseContext(ctx->hCryptProv, 0);
+    ctx->hCryptProv = 0;
+    return CURLE_FAILED_INIT;
   }
 
   return CURLE_OK;

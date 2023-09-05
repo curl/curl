@@ -49,7 +49,7 @@ ftp
 https-proxy
 </server>
  <name>
-FTP through HTTPS-proxy, with connection re-use
+FTP through HTTPS-proxy, with connection reuse
  </name>
  <command>
 -p -x https://%HOSTIP:%HTTPSPROXYPORT ftp://ftp.site.thru.https.proxy:%FTPPORT/%TESTNUMBER --proxy-insecure ftp://ftp.site.thru.https.proxy:%FTPPORT/%TESTNUMBER0002

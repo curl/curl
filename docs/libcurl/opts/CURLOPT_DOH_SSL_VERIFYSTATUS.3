@@ -42,8 +42,8 @@ extension (aka. OCSP stapling).
 This option is the DoH equivalent of \fICURLOPT_SSL_VERIFYSTATUS(3)\fP and
 only affects requests to the DoH server.
 
-Note that if this option is enabled but the server does not support the TLS
-extension, the verification will fail.
+If this option is enabled and the server does not support the TLS extension,
+the verification fails.
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -63,8 +63,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Added in 7.76.0. This option is currently only supported by the OpenSSL, GnuTLS
-and NSS TLS backends.
+Added in 7.76.0. This option is currently only supported by the OpenSSL, and
+GnuTLS TLS backends.
 .SH RETURN VALUE
 Returns CURLE_OK if OCSP stapling is supported by the SSL backend, otherwise
 returns CURLE_NOT_BUILT_IN.

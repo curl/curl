@@ -41,7 +41,7 @@ socks5
 HTTP GET with IPv4 numerical via SOCKS5h
  </name>
  <command>
-http://12.34.56.78:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT 
+http://12.34.56.78:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT
 </command>
 </client>
 

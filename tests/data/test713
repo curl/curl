@@ -31,7 +31,7 @@ socks5
 FTP fetch with --proxy set to socks5:// and with --connect-to
  </name>
  <command>
-ftp://ftp.example.com/%TESTNUMBER --connect-to ::%HOSTIP:%FTPPORT --proxy socks5://%HOSTIP:%SOCKSPORT 
+ftp://ftp.example.com/%TESTNUMBER --connect-to ::%HOSTIP:%FTPPORT --proxy socks5://%HOSTIP:%SOCKSPORT
 </command>
 </client>
 

@@ -48,6 +48,7 @@ build:
 - all: ['plan9/**']
 - all: ['projects/**']
 - all: ['winbuild/**']
+- all: ['libcurl.def']
 
 CI:
 - any: ['.azure-pipelines.yml']
@@ -57,7 +58,6 @@ CI:
 - any: ['appveyor.yml']
 - any: ['tests/azure.pm']
 - any: ['tests/appveyor.pm']
-- any: ['tests/CI.pm']
 
 cmake:
 - all: ['**/CMakeLists.txt']
@@ -165,7 +165,6 @@ HTTP:
 - all: ['tests/http-server.pl']
 - all: ['tests/http/*']
 - all: ['tests/nghttp*']
-- all: ['tests/tests-httpd/*']
 
 HTTP/2:
 - all: ['docs/HTTP2.md']
@@ -175,13 +174,14 @@ HTTP/2:
 
 HTTP/3:
 - all: ['.github/workflows/ngtcp2*']
-- all: ['.github/workflows/pytest.yml']
+- all: ['.github/workflows/quiche*']
 - all: ['docs/HTTP3.md']
 - all: ['lib/vquic/**']
 - all: ['tests/http3-server.pl']
 - all: ['tests/nghttpx.conf']
 
 Hyper:
+- all: ['docs/HYPER.md']
 - all: ['lib/c-hyper.*']
 
 IMAP:
@@ -263,7 +263,6 @@ TFTP:
 - all: ['tests/server/tftp*']
 
 TLS:
-- all: ['docs/HYPER.md']
 - all: ['docs/SSL*']
 - all: ['docs/libcurl/opts/CURLINFO_CA*']
 - all: ['docs/libcurl/opts/CURLINFO_CERT*']
@@ -285,8 +284,9 @@ URL:
 
 WebSocket:
 - all: ['docs/WEBSOCKET.md*']
-- all: ['docs/libcurl/opts/CURLOPT_WS_*']
 - all: ['docs/libcurl/curl_ws_*']
+- all: ['docs/libcurl/libcurl-ws.3']
+- all: ['docs/libcurl/opts/CURLOPT_WS_*']
 - all: ['include/curl/websockets.h']
 - all: ['lib/ws.*']
 
@@ -300,3 +300,4 @@ Windows:
 - all: ['projects/**']
 - all: ['src/tool_doswin.c']
 - all: ['winbuild/**']
+- all: ['libcurl.def']

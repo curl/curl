@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 
-#include "curl_log.h"
+#include "curl_trc.h"
 #include "urldata.h"
 #include "easyif.h"
 #include "cfilters.h"
@@ -124,13 +124,13 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-#ifdef DEBUGBUILD
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 
-void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
-  if(data && Curl_log_cf_is_debug(cf, data)) {
+  if(data && Curl_trc_cf_is_verbose(cf, data)) {
     va_list ap;
     int len;
     char buffer[MAXINFO + 2];
@@ -179,44 +179,67 @@ static struct Curl_cftype *cf_types[] = {
   NULL,
 };
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
-CURLcode Curl_log_init(void)
+CURLcode Curl_trc_opt(const char *config)
 {
-  const char *setting = getenv("CURL_DEBUG");
-  if(setting) {
-    char *token, *tok_buf, *tmp;
-    size_t i;
+  char *token, *tok_buf, *tmp;
+  size_t i;
+  int lvl;
 
-    tmp = strdup(setting);
-    if(!tmp)
-      return CURLE_OUT_OF_MEMORY;
+  tmp = strdup(config);
+  if(!tmp)
+    return CURLE_OUT_OF_MEMORY;
 
-    token = strtok_r(tmp, ", ", &tok_buf);
-    while(token) {
-      for(i = 0; cf_types[i]; ++i) {
-        if(strcasecompare(token, cf_types[i]->name)) {
-          cf_types[i]->log_level = CURL_LOG_DEBUG;
-          break;
-        }
-      }
-      token = strtok_r(NULL, ", ", &tok_buf);
+  token = strtok_r(tmp, ", ", &tok_buf);
+  while(token) {
+    switch(*token) {
+      case '-':
+        lvl = CURL_LOG_LVL_NONE;
+        ++token;
+        break;
+      case '+':
+        lvl = CURL_LOG_LVL_INFO;
+        ++token;
+        break;
+      default:
+        lvl = CURL_LOG_LVL_INFO;
+        break;
     }
-    free(tmp);
+    for(i = 0; cf_types[i]; ++i) {
+      if(strcasecompare(token, "all")) {
+        cf_types[i]->log_level = lvl;
+      }
+      else if(strcasecompare(token, cf_types[i]->name)) {
+        cf_types[i]->log_level = lvl;
+        break;
+      }
+    }
+    token = strtok_r(NULL, ", ", &tok_buf);
   }
+  free(tmp);
   return CURLE_OK;
 }
-#else /* DEBUGBUILD */
 
-CURLcode Curl_log_init(void)
+CURLcode Curl_trc_init(void)
+{
+#ifdef DEBUGBUILD
+  /* WIP: we use the auto-init from an env var only in DEBUG builds for
+   * convenience. */
+  const char *config = getenv("CURL_DEBUG");
+  if(config) {
+    return Curl_trc_opt(config);
+  }
+#endif
+  return CURLE_OK;
+}
+#else /* !CURL_DISABLE_VERBOSE_STRINGS) */
+
+CURLcode Curl_trc_init(void)
 {
   return CURLE_OK;
 }
 
 #if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
-void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   (void)data;

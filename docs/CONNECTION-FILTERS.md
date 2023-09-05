@@ -1,6 +1,6 @@
 # curl connection filters
 
-Connection filters is a design in the internals of curl, not visible in its public API. They were added 
+Connection filters is a design in the internals of curl, not visible in its public API. They were added
 in curl v7.xx.x. This document describes the concepts, its high level implementation and the motivations.
 
 ## Filters
@@ -34,13 +34,13 @@ Direct:
   http://localhost/      conn -> cf-socket
   https://curl.se/       conn -> cf-ssl -> cf-socket
 Via http proxy tunnel:
-  http://localhost/      conn -> cf-http-proxy -> cf-socket 
+  http://localhost/      conn -> cf-http-proxy -> cf-socket
   https://curl.se/       conn -> cf-ssl -> cf-http-proxy -> cf-socket
 Via https proxy tunnel:
-  http://localhost/      conn -> cf-http-proxy -> cf-ssl -> cf-socket 
+  http://localhost/      conn -> cf-http-proxy -> cf-ssl -> cf-socket
   https://curl.se/       conn -> cf-ssl -> cf-http-proxy -> cf-ssl -> cf-socket
 Via http proxy tunnel via SOCKS proxy:
-  http://localhost/      conn -> cf-http-proxy -> cf-socks -> cf-socket 
+  http://localhost/      conn -> cf-http-proxy -> cf-socks -> cf-socket
 ```
 
 ### Connecting/Closing
@@ -50,7 +50,7 @@ Before `Curl_easy` can send the request, the connection needs to be established.
 Each filter does in principle the following:
 
 ```
-static CURLcode 
+static CURLcode
 myfilter_cf_connect(struct Curl_cfilter *cf,
                     struct Curl_easy *data,
                     bool *done)
@@ -63,7 +63,7 @@ myfilter_cf_connect(struct Curl_cfilter *cf,
   }
                                  /* Let the filters below connect */
   result = cf->next->cft->connect(cf->next, data, blocking, done);
-  if(result || !*done)    
+  if(result || !*done)
     return result;               /* below errored/not finished yet */
 
   /* MYFILTER CONNECT THINGS */  /* below connected, do out thing */

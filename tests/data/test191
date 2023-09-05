@@ -18,7 +18,7 @@ data in file
 ftp
 </server>
  <name>
-FTP URL with ?-letters in username and password 
+FTP URL with ?-letters in username and password
  </name>
  <command>
 "ftp://use%3fr:pass%3fword@%HOSTIP:%FTPPORT/%TESTNUMBER"

@@ -33,16 +33,16 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXAGE_CONN, long age);
 .fi
 .SH DESCRIPTION
 Pass a long as parameter containing \fIage\fP - the maximum time in seconds
-that you allow an existing connection to have been idle to be considered for
+allowed for an existing connection to have been idle to be considered for
 reuse for this request.
 
-The "connection cache" that holds previously used connections. When a new
-request is to be done, it will consider any connection that matches for
-reuse. The \fICURLOPT_MAXAGE_CONN(3)\fP limit prevents libcurl from trying too
-old connections for reuse, since old connections have a high risk of not
-working and thus trying them is a performance loss and sometimes service loss
-due to the difficulties to figure out the situation. If a connection is found
-in the cache that is older than this set \fIage\fP, it will instead be closed.
+The "connection cache" holds previously used connections. When a new request
+is to be done, libcurl considers any connection that matches for reuse. The
+\fICURLOPT_MAXAGE_CONN(3)\fP limit prevents libcurl from trying too old
+connections for reuse, since old connections have a higher risk of not working
+and thus trying them is a performance loss and sometimes service loss due to
+the difficulties to figure out the situation. If a connection is found in the
+cache that is older than this set \fIage\fP, it is closed instead.
 .SH DEFAULT
 Default maximum age is set to 118 seconds.
 .SH PROTOCOLS

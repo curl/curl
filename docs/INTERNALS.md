@@ -27,8 +27,6 @@ versions of libs and build tools.
  - wolfSSL      2.0.0
  - OpenLDAP     2.0
  - MIT Kerberos 1.2.4
- - GSKit        V5R3M0
- - NSS          3.14.x
  - Heimdal      ?
  - nghttp2      1.15.0
  - WinSock      2.2 (on Windows 95+ and Windows CE .NET 4.1+)

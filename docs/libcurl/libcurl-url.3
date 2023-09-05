@@ -45,8 +45,8 @@ When you need a copy of a handle, just duplicate it with \fIcurl_url_dup(3)\fP:
 .fi
 .SH PARSING
 By setting a URL to the handle with \fIcurl_url_set(3)\fP, the URL is parsed
-and stored in the handle. If the URL is not syntactically correct it will
-return an error instead.
+and stored in the handle. If the URL is not syntactically correct it returns
+an error instead.
 .nf
   rc = curl_url_set(h, CURLUPART_URL,
                     "https://example.com:449/foo/bar?name=moo", 0);
@@ -56,8 +56,8 @@ The zero in the fourth argument is a bitmask for changing specific features.
 
 If successful, this stores the URL in its individual parts within the handle.
 .SH REDIRECT
-When a handle already contains info about a URL, setting a relative URL will
-make it "redirect" to adapt to it.
+When a handle already contains info about a URL, setting a relative URL makes
+it "redirect" to that.
 .nf
   rc = curl_url_set(h, CURLUPART_URL, "../test?another", 0);
 .fi
@@ -120,13 +120,12 @@ application can then add the string "hat=1" to the query part like this:
   rc = curl_url_set(urlp, CURLUPART_QUERY, "hat=1", CURLU_APPENDQUERY);
 .fi
 
-It will even notice the lack of an ampersand (&) separator so it will inject
-one too, and the handle's full URL will then equal
-"https://example.com/?shoes=2&hat=1".
+It notices the lack of an ampersand (&) separator and injects one, and the
+handle's full URL then equals "https://example.com/?shoes=2&hat=1".
 
 The appended string can of course also get URL encoded on add, and if asked to
-URL encode, the encoding process will skip the '=' character. For example,
-append "candy=N&N" to what we already have, and URL encode it to deal with the
+URL encode, the encoding process skips the '=' character. For example, append
+"candy=N&N" to what we already have, and URL encode it to deal with the
 ampersand in the data:
 .nf
   rc = curl_url_set(urlp, CURLUPART_QUERY, "candy=N&N",

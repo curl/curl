@@ -58,8 +58,8 @@ makes libcurl not send an Accept-Encoding: header and not decompress received
 contents automatically.
 
 You can also opt to just include the Accept-Encoding: header in your request
-with \fICURLOPT_HTTPHEADER(3)\fP but then there will be no automatic
-decompressing when receiving data.
+with \fICURLOPT_HTTPHEADER(3)\fP but then there is no automatic decompressing
+when receiving data.
 
 This is a request, not an order; the server may or may not do it.  This option
 must be set (to any non-NULL value) or else any unsolicited encoding done by

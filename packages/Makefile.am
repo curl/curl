@@ -28,16 +28,19 @@ EXTRA_DIST = README.md \
   OS400/rpg-examples \
   OS400/ccsidcurl.c \
   OS400/ccsidcurl.h \
-  OS400/chkstrings.c \
+  OS400/curlcl.c \
+  OS400/curlmain.c \
   OS400/curl.inc.in \
   OS400/initscript.sh \
+  OS400/config400.default \
   OS400/make-include.sh \
   OS400/make-lib.sh \
   OS400/make-src.sh \
   OS400/make-tests.sh \
   OS400/makefile.sh \
   OS400/os400sys.c \
-  OS400/os400sys.h
+  OS400/os400sys.h \
+  OS400/curl.cmd
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;

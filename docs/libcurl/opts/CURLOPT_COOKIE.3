@@ -32,31 +32,31 @@ CURLOPT_COOKIE \- HTTP Cookie header
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIE, char *cookie);
 .fi
 .SH DESCRIPTION
-Pass a pointer to a null-terminated string as parameter. It will be used to
-set a cookie in the HTTP request. The format of the string should be
+Pass a pointer to a null-terminated string as parameter. It is used to set one
+or more cookies in the HTTP request. The format of the string should be
 NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie
 should contain.
 
-If you need to set multiple cookies, set them all using a single option
-concatenated like this: "name1=content1; name2=content2;" etc.
+To set multiple cookies, set them all using a single option concatenated like
+this: "name1=content1; name2=content2;" etc.
 
 This option sets the cookie header explicitly in the outgoing request(s). If
 multiple requests are done due to authentication, followed redirections or
-similar, they will all get this cookie passed on.
+similar, they all get this cookie passed on.
 
 The cookies set by this option are separate from the internal cookie storage
-held by the cookie engine and will not be modified by it. If you enable the
-cookie engine and either you have imported a cookie of the same name (e.g. 'foo')
-or the server has set one, it will have no effect on the cookies you set here.
-A request to the server will send both the 'foo' held by the cookie engine and
-the 'foo' held by this option. To set a cookie that is instead held by the
-cookie engine and can be modified by the server use
+held by the cookie engine and they are not be modified by it. If you enable
+the cookie engine and either you have imported a cookie of the same name
+(e.g. 'foo') or the server has set one, it has no effect on the cookies you
+set here.  A request to the server sends both the 'foo' held by the cookie
+engine and the 'foo' held by this option. To set a cookie that is instead held
+by the cookie engine and can be modified by the server use
 \fICURLOPT_COOKIELIST(3)\fP.
 
-Using this option multiple times will only make the latest string override the
+Using this option multiple times makes the last set string override the
 previous ones.
 
-This option will not enable the cookie engine. Use \fICURLOPT_COOKIEFILE(3)\fP
+This option does not enable the cookie engine. Use \fICURLOPT_COOKIEFILE(3)\fP
 or \fICURLOPT_COOKIEJAR(3)\fP to enable parsing and sending cookies
 automatically.
 

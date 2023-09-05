@@ -54,7 +54,7 @@ pdf: $(PDFPAGES)
 	echo "converted $< to $@")
 
 mancheck:
-	@cd $(top_srcdir)/docs/libcurl/opts && ls `awk -F, '!/OBSOLETE/ && /^  CINIT/ { a=substr($$1, 9); print "CURLOPT_" a ".3"}' $(top_srcdir)/include/curl/curl.h`
+	@(cd $(top_srcdir)/docs/libcurl/opts && ls `awk -F, '!/OBSOLETE/ && /^  CINIT/ { a=substr($$1, 9); print "CURLOPT_" a ".3"}' $(top_srcdir)/include/curl/curl.h`)
 	rm -f in_temp
 	@(for a in $(man_MANS); do echo $$a >>in_temp; done)
 	sort in_temp > in_makefile

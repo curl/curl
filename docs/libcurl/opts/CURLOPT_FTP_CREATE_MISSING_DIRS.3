@@ -39,16 +39,16 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_CREATE_MISSING_DIRS,
                           long create);
 .SH DESCRIPTION
 Pass a long telling libcurl to \fIcreate\fP the dir. If the value is
-\fICURLFTP_CREATE_DIR\fP (1), libcurl will attempt to create any remote
-directory that it fails to "move" into.
+\fICURLFTP_CREATE_DIR\fP (1), libcurl may create any remote directory that it
+fails to "move" into.
 
 For FTP requests, that means a CWD command fails. CWD being the command that
 changes working directory.
 
-For SFTP requests, libcurl will attempt to create the remote directory if it
-cannot obtain a handle to the target-location. The creation will fail if a file
-of the same name as the directory to create already exists or lack of
-permissions prevents creation.
+For SFTP requests, libcurl may create the remote directory if it cannot obtain
+a handle to the target-location. The creation fails if a file of the same name
+as the directory to create already exists or lack of permissions prevents
+creation.
 
 Setting \fIcreate\fP to \fICURLFTP_CREATE_DIR_RETRY\fP (2), tells libcurl to
 retry the CWD command again if the subsequent \fBMKD\fP command fails. This is

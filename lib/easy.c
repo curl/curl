@@ -158,8 +158,8 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
   }
 
-  if(Curl_log_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_log_init failed\n"));
+  if(Curl_trc_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_trc_init failed\n"));
     goto fail;
   }
 
@@ -168,19 +168,15 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
-#ifdef WIN32
   if(Curl_win32_init(flags)) {
     DEBUGF(fprintf(stderr, "Error: win32_init failed\n"));
     goto fail;
   }
-#endif
 
-#ifdef __AMIGA__
   if(Curl_amiga_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_amiga_init failed\n"));
     goto fail;
   }
-#endif
 
   if(Curl_macos_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_macos_init failed\n"));
@@ -317,6 +313,26 @@ void curl_global_cleanup(void)
   easy_init_flags = 0;
 
   global_init_unlock();
+}
+
+/**
+ * curl_global_trace() globally initializes curl logging.
+ */
+CURLcode curl_global_trace(const char *config)
+{
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  CURLcode result;
+  global_init_lock();
+
+  result = Curl_trc_opt(config);
+
+  global_init_unlock();
+
+  return result;
+#else
+  (void)config;
+  return CURLE_OK;
+#endif
 }
 
 /*
@@ -699,7 +715,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
  *
  * REALITY: it can't just create and destroy the multi handle that easily. It
  * needs to keep it around since if this easy handle is used again by this
- * function, the same multi handle must be re-used so that the same pools and
+ * function, the same multi handle must be reused so that the same pools and
  * caches can be used.
  *
  * DEBUG: if 'events' is set TRUE, this function will use a replacement engine

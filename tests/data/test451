@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+variables
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Variable from file that is JSON and URL encoded (with null byte)
+</name>
+<file name="%LOGDIR/junk">
+%hex[%01%02%03%00%04%05%06]hex%
+</file>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable what@%LOGDIR/junk --variable second=hello --variable second=again --expand-data "--{{what:trim:json}}22{{none}}--{{second}}{{what:trim:url}}"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes" nonewline="yes">
+POST /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 74
+Content-Type: application/x-www-form-urlencoded
+
+--\u0001\u0002\u0003\u0000\u0004\u0005\u000622--again%01%02%03%00%04%05%06
+</protocol>
+</verify>
+</testcase>

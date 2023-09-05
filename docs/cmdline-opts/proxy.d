@@ -21,7 +21,7 @@ Unix domain sockets are supported for socks proxy. Set localhost for the host
 part. e.g. socks5h://localhost/path/to/socket.sock
 
 HTTPS proxy support via https:// protocol prefix was added in 7.52.0 for
-OpenSSL, GnuTLS and NSS. Since 7.87.0, it also works for BearSSL, mbedTLS,
+OpenSSL and GnuTLS. Since 7.87.0, it also works for BearSSL, mbedTLS,
 rustls, Schannel, Secure Transport and wolfSSL.
 
 Unrecognized and unsupported proxy protocols cause an error since 7.52.0.
@@ -31,7 +31,7 @@ If the port number is not specified in the proxy string, it is assumed to be
 1080.
 
 This option overrides existing environment variables that set the proxy to
-use. If there's an environment variable setting a proxy, you can set proxy to
+use. If there is an environment variable setting a proxy, you can set proxy to
 "" to override it.
 
 All operations that are performed over an HTTP proxy will transparently be

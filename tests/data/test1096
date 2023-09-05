@@ -21,7 +21,7 @@ REPLY SIZE 500 command not understood
 ftp
 </server>
  <name>
-Two FTP downloads, with failed RETR but re-used control connection
+Two FTP downloads, with failed RETR but reused control connection
  </name>
  <command>
 ftp://%HOSTIP:%FTPPORT/dir/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/dir/%TESTNUMBER

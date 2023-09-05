@@ -14,3 +14,6 @@ Multi: boolean
 Disable the ALPN TLS extension. ALPN is enabled by default if libcurl was built
 with an SSL library that supports ALPN. ALPN is used by a libcurl that supports
 HTTP/2 to negotiate HTTP/2 support with the server during https sessions.
+
+Note that this is the negated option name documented. You can use --alpn to
+enable ALPN.

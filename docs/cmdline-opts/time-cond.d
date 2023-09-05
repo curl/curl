@@ -22,3 +22,6 @@ instead. See the *curl_getdate(3)* man pages for date expression details.
 Start the date expression with a dash (-) to make it request for a document
 that is older than the given date/time, default is a document that is newer
 than the specified date/time.
+
+If provided a non-existing file, curl outputs a warning about that fact and
+proceeds to do the transfer without a time condition.

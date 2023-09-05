@@ -40,10 +40,10 @@ etc) and the time of the document is unknown.
 
 You must tell libcurl to collect this information before the transfer is made,
 by using the \fICURLOPT_FILETIME(3)\fP option to \fIcurl_easy_setopt(3)\fP or
-you will unconditionally get a -1 back.
+you this unconditionally gets a -1 back.
 
 Consider using \fICURLINFO_FILETIME_T(3)\fP to be able to extract dates beyond
-the year 2038 on systems using 32 bit longs.
+the year 2038 on systems using 32 bit longs (Windows).
 .SH PROTOCOLS
 HTTP(S), FTP(S), SFTP
 .SH EXAMPLE

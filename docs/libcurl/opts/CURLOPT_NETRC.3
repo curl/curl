@@ -36,8 +36,8 @@ This parameter controls the preference \fIlevel\fP of libcurl between using
 user names and passwords from your \fI~/.netrc\fP file, relative to user names
 and passwords in the URL supplied with \fICURLOPT_URL(3)\fP.
 
-On Windows, libcurl will use the file as \fI%HOME%/_netrc\fP. If \fI%HOME%\fP
-is not set on Windows, libcurl falls back to \fI%USERPROFILE%\fP.
+On Windows, libcurl uses the file as \fI%HOME%/_netrc\fP. If \fI%HOME%\fP is
+not set on Windows, libcurl falls back to \fI%USERPROFILE%\fP.
 
 You can also tell libcurl a different file name to use with
 \fICURLOPT_NETRC_FILE(3)\fP.
@@ -54,17 +54,17 @@ standard Unix ftp client does). It should only be readable by user.
 
 \fIlevel\fP is a long that should be set to one of the values described below.
 .IP "CURL_NETRC_IGNORED (0)"
-The library will ignore the \fI.netrc\fP file. This is the default.
+libcurl ignores the \fI.netrc\fP file. This is the default.
 .IP "CURL_NETRC_OPTIONAL (1)"
 The use of the \fI.netrc\fP file is optional, and information in the URL is to
-be preferred.  The file will be scanned for the host and user name (to find
-the password only) or for the host only, to find the first user name and
-password after that \fImachine\fP, which ever information is not specified.
+be preferred. The file is scanned for the host and user name (to find the
+password only) or for the host only, to find the first user name and password
+after that \fImachine\fP, which ever information is not specified.
 .IP "CURL_NETRC_REQUIRED (2)"
 The use of the \fI.netrc\fP file is required, and any credential information
-present in the URL is ignored.  The file will be scanned for the host and user
-name (to find the password only) or for the host only, to find the first user
-name and password after that \fImachine\fP, which ever information is not
+present in the URL is ignored. The file is scanned for the host and user name
+(to find the password only) or for the host only, to find the first user name
+and password after that \fImachine\fP, which ever information is not
 specified.
 .SH FILE FORMAT
 The \fB.netrc\fP file format is simple: you specify lines with a machine name
@@ -91,14 +91,14 @@ add a line similar to this in the end:
 .IP "login <name>"
 The user name string for the remote machine.
 .IP "password <secret>"
-Supply a password. If this token is present, curl will supply the specified
+Supply a password. If this token is present, curl supplies the specified
 string if the remote server requires a password as part of the login process.
 Note that if this token is present in the .netrc file you really should make
 sure the file is not readable by anyone besides the user.
 .IP "macdef <name>"
 Define a macro. This feature is not supported by libcurl. In order for the
-rest of the .netrc to still work fine, libcurl will properly skip every
-definition done with "macdef" that it finds.
+rest of the .netrc to still work fine, libcurl properly skips every definition
+done with "macdef" that it finds.
 .SH DEFAULT
 CURL_NETRC_IGNORED
 .SH PROTOCOLS

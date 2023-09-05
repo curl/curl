@@ -151,6 +151,8 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"", "", 0, 0, CURLUE_MALFORMED_INPUT},
+  {" ", "", 0, 0, CURLUE_MALFORMED_INPUT},
   {"1h://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
   {"..://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
   {"-ht://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
@@ -179,6 +181,9 @@ static const struct testcase get_parts_list[] ={
   {"https://räksmörgås.se",
    "https | [11] | [12] | [13] | xn--rksmrgs-5wao1o.se | "
    "[15] | / | [16] | [17]", 0, CURLU_PUNYCODE, CURLUE_OK},
+  {"https://xn--rksmrgs-5wao1o.se",
+   "https | [11] | [12] | [13] | räksmörgås.se | "
+   "[15] | / | [16] | [17]", 0, CURLU_PUNY2IDN, CURLUE_OK},
 #else
   {"https://räksmörgås.se",
    "https | [11] | [12] | [13] | [30] | [15] | / | [16] | [17]",
@@ -1672,9 +1677,76 @@ static int huge(void)
   return error;
 }
 
+static int urldup(void)
+{
+  const char *url[] = {
+    "http://"
+    "user:pwd@"
+    "[2a04:4e42:e00::347%25eth0]"
+    ":80"
+    "/path"
+    "?query"
+    "#fraggie",
+    "https://example.com",
+    "https://user@example.com",
+    "https://user.pwd@example.com",
+    "https://user.pwd@example.com:1234",
+    "https://example.com:1234",
+    "example.com:1234",
+    "https://user.pwd@example.com:1234/path?query#frag",
+    NULL
+  };
+  CURLU *copy = NULL;
+  char *h_str = NULL, *copy_str = NULL;
+  CURLU *h = curl_url();
+  int i;
+
+  if(!h)
+    goto err;
+
+  for(i = 0; url[i]; i++) {
+    CURLUcode rc = curl_url_set(h, CURLUPART_URL, url[i],
+                                CURLU_GUESS_SCHEME);
+    if(rc)
+      goto err;
+    copy = curl_url_dup(h);
+
+    rc = curl_url_get(h, CURLUPART_URL, &h_str, 0);
+    if(rc)
+      goto err;
+
+    rc = curl_url_get(copy, CURLUPART_URL, &copy_str, 0);
+    if(rc)
+      goto err;
+
+    if(strcmp(h_str, copy_str)) {
+      printf("Original:  %s\nParsed:    %s\nCopy:      %s\n",
+             url[i], h_str, copy_str);
+      goto err;
+    }
+    curl_free(copy_str);
+    curl_free(h_str);
+    curl_url_cleanup(copy);
+    copy_str = NULL;
+    h_str = NULL;
+    copy = NULL;
+  }
+  curl_url_cleanup(h);
+  return 0;
+err:
+  curl_free(copy_str);
+  curl_free(h_str);
+  curl_url_cleanup(copy);
+  curl_url_cleanup(h);
+  return 1;
+}
+
 int test(char *URL)
 {
   (void)URL; /* not used */
+
+  if(urldup())
+    return 11;
 
   if(setget_parts())
     return 10;

@@ -47,7 +47,7 @@ LD_PRELOAD=%PWD/libtest/.libs/libstubgss.so
 CURL_STUB_GSS_CREDS="KRB5_Alice"
 </setenv>
 <command>
--u: --negotiate http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--negotiate http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

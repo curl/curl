@@ -4,6 +4,10 @@
 
 Disable support for Alt-Svc: HTTP headers.
 
+## `CURL_DISABLE_BINDLOCAL`
+
+Disable support for binding the local end of connections.
+
 ## `CURL_DISABLE_COOKIES`
 
 Disable support for HTTP cookies.
@@ -43,6 +47,10 @@ Disable DNS-over-HTTPS
 ## `CURL_DISABLE_FILE`
 
 Disable the FILE protocol
+
+## `CURL_DISABLE_FORM_API`
+
+Disable the form API
 
 ## `CURL_DISABLE_FTP`
 

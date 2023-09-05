@@ -14,10 +14,12 @@ Displays information about curl and the libcurl version it uses.
 The first line includes the full version of curl, libcurl and other 3rd party
 libraries linked with the executable.
 
-The second line (starts with "Protocols:") shows all protocols that libcurl
+The second line (starts with "Release-Date:") shows the release date.
+
+The third line (starts with "Protocols:") shows all protocols that libcurl
 reports to support.
 
-The third line (starts with "Features:") shows specific features libcurl
+The fourth line (starts with "Features:") shows specific features libcurl
 reports to offer. Available features include:
 .RS
 .IP "alt-svc"

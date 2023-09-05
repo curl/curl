@@ -793,8 +793,11 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   backend->cred->client_cert_store = client_cert_store;
 #endif
 
-  /* Windows 10, 1809 (a.k.a. Windows 10 build 17763) */
-  if(curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
+  /* We support TLS 1.3 starting in Windows 10 version 1809 (OS build 17763) as
+     long as the user did not set a legacy algorithm list
+     (CURLOPT_SSL_CIPHER_LIST). */
+  if(!conn_config->cipher_list &&
+     curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL)) {
 
     char *ciphers13 = 0;
@@ -807,9 +810,9 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
     SCH_CREDENTIALS credentials = { 0 };
     TLS_PARAMETERS tls_parameters = { 0 };
-    CRYPTO_SETTINGS crypto_settings[4] = { 0 };
-    UNICODE_STRING blocked_ccm_modes[1] = { 0 };
-    UNICODE_STRING blocked_gcm_modes[1] = { 0 };
+    CRYPTO_SETTINGS crypto_settings[4] = { { 0 } };
+    UNICODE_STRING blocked_ccm_modes[1] = { { 0 } };
+    UNICODE_STRING blocked_gcm_modes[1] = { { 0 } };
 
     int crypto_settings_idx = 0;
 
@@ -844,7 +847,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
         /* reject too-long cipher names */
         if(n > (LONGEST_ALG_ID - 1)) {
-          failf(data, "Cipher name too long, not checked.");
+          failf(data, "schannel: Cipher name too long, not checked");
           return CURLE_SSL_CIPHER;
         }
 
@@ -872,7 +875,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
           disable_aes_ccm_sha256 = FALSE;
         }
         else {
-          failf(data, "Passed in an unknown TLS 1.3 cipher.");
+          failf(data, "schannel: Unknown TLS 1.3 cipher: %s", tmp);
           return CURLE_SSL_CIPHER;
         }
 
@@ -887,7 +890,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     if(disable_aes_gcm_sha384 && disable_aes_gcm_sha256
        && disable_chacha_poly && disable_aes_ccm_8_sha256
        && disable_aes_ccm_sha256) {
-      failf(data, "All available TLS 1.3 ciphers were disabled.");
+      failf(data, "schannel: All available TLS 1.3 ciphers were disabled");
       return CURLE_SSL_CIPHER;
     }
 
@@ -1010,7 +1013,9 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                          &backend->cred->time_stamp);
   }
   else {
-    /* Pre-Windows 10 1809 */
+    /* Pre-Windows 10 1809 or the user set a legacy algorithm list. Although MS
+       doesn't document it, currently Schannel will not negotiate TLS 1.3 when
+       SCHANNEL_CRED is used. */
     ALG_ID algIds[NUM_CIPHERS];
     char *ciphers = conn_config->cipher_list;
     SCHANNEL_CRED schannel_cred = { 0 };
@@ -1019,9 +1024,20 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     schannel_cred.grbitEnabledProtocols = enabled_protocols;
 
     if(ciphers) {
+      if((enabled_protocols & SP_PROT_TLS1_3_CLIENT)) {
+        infof(data, "schannel: WARNING: This version of Schannel may "
+              "negotiate a less-secure TLS version than TLS 1.3 because the "
+              "user set an algorithm cipher list.");
+      }
+      if(conn_config->cipher_list13) {
+        failf(data, "schannel: This version of Schannel does not support "
+              "setting an algorithm cipher list and TLS 1.3 cipher list at "
+              "the same time");
+        return CURLE_SSL_CIPHER;
+      }
       result = set_ssl_ciphers(&schannel_cred, ciphers, algIds);
       if(CURLE_OK != result) {
-        failf(data, "Unable to set ciphers to from connection ssl config");
+        failf(data, "schannel: Failed setting algorithm cipher list");
         return result;
       }
     }
@@ -1158,7 +1174,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, (void **)&old_cred, NULL)) {
       backend->cred = old_cred;
-      DEBUGF(infof(data, "schannel: re-using existing credential handle"));
+      DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
       /* increment the reference counter of the credential/session handle */
       backend->cred->refcount++;
@@ -1618,9 +1634,15 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 #ifdef HAS_MANUAL_VERIFY_API
   if(conn_config->verifypeer && backend->use_manual_cred_validation) {
+    /* Certificate verification also verifies the hostname if verifyhost */
     return Curl_verify_certificate(cf, data);
   }
 #endif
+
+  /* Verify the hostname manually when certificate verification is disabled,
+     because in that case Schannel won't verify it. */
+  if(!conn_config->verifypeer && conn_config->verifyhost)
+    return Curl_verify_host(cf, data);
 
   return CURLE_OK;
 }
@@ -1665,7 +1687,6 @@ struct Adder_args
   struct Curl_easy *data;
   CURLcode result;
   int idx;
-  int certs_count;
 };
 
 static bool
@@ -1676,10 +1697,7 @@ add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, void *raw_arg)
   if(valid_cert_encoding(ccert_context)) {
     const char *beg = (const char *) ccert_context->pbCertEncoded;
     const char *end = beg + ccert_context->cbCertEncoded;
-    int insert_index = (args->certs_count - 1) - args->idx;
-    args->result = Curl_extract_certinfo(args->data, insert_index,
-                                         beg, end);
-    args->idx++;
+    args->result = Curl_extract_certinfo(args->data, (args->idx)++, beg, end);
   }
   return args->result == CURLE_OK;
 }
@@ -1758,7 +1776,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-  /* save the current session data for possible re-use */
+  /* save the current session data for possible reuse */
   if(ssl_config->primary.sessionid) {
     bool incache;
     bool added = FALSE;
@@ -1813,7 +1831,6 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       struct Adder_args args;
       args.data = data;
       args.idx = 0;
-      args.certs_count = certs_count;
       traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
       result = args.result;
     }

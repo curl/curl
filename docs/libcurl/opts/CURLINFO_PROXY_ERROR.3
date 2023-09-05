@@ -71,11 +71,10 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROXY_ERROR, long *detail);
 .fi
 .SH DESCRIPTION
 Pass a pointer to a long to receive a detailed error code when the most recent
-transfer returned a \fBCURLE_PROXY\fP error. That error code will match the
+transfer returned a \fBCURLE_PROXY\fP error. That error code matches the
 \fBCURLproxycode\fP set.
 
-The error code will be zero (\fBCURLPX_OK\fP) if no response code was
-available.
+The error code is zero (\fBCURLPX_OK\fP) if no response code was available.
 .SH PROTOCOLS
 All that can be done over SOCKS
 .SH EXAMPLE

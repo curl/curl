@@ -464,6 +464,12 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     }
   }
 
+#ifdef WIN32
+  /* Discard incomplete UTF-8 sequence buffered from body */
+  if(outs->utf8seq[0])
+    memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
+#endif
+
   /* if retry-max-time is non-zero, make sure we haven't exceeded the
      time */
   if(per->retry_numretries &&
@@ -2593,18 +2599,19 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
             errorf(global, "out of memory");
             return CURLE_OUT_OF_MEMORY;
           }
+          curl_free(env);
           capath_from_env = true;
         }
-        else {
-          env = curlx_getenv("SSL_CERT_FILE");
-          if(env) {
-            config->cacert = strdup(env);
-            if(!config->cacert) {
-              curl_free(env);
-              curl_easy_cleanup(curltls);
-              errorf(global, "out of memory");
-              return CURLE_OUT_OF_MEMORY;
-            }
+        env = curlx_getenv("SSL_CERT_FILE");
+        if(env) {
+          config->cacert = strdup(env);
+          if(!config->cacert) {
+            curl_free(env);
+            if(capath_from_env)
+              free(config->capath);
+            curl_easy_cleanup(curltls);
+            errorf(global, "out of memory");
+            return CURLE_OUT_OF_MEMORY;
           }
         }
       }
@@ -2756,42 +2763,47 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
             /* Cleanup the libcurl source output */
             easysrc_cleanup();
           }
-          return CURLE_OUT_OF_MEMORY;
+          result = CURLE_OUT_OF_MEMORY;
         }
 
-        curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
-        curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
-        curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
-        curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-        curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
-        curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
+        if(!result) {
+          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+          curl_share_setopt(share, CURLSHOPT_SHARE,
+                            CURL_LOCK_DATA_SSL_SESSION);
+          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
+          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-        /* Get the required arguments for each operation */
-        do {
-          result = get_args(operation, count++);
+          /* Get the required arguments for each operation */
+          do {
+            result = get_args(operation, count++);
 
-          operation = operation->next;
-        } while(!result && operation);
+            operation = operation->next;
+          } while(!result && operation);
 
-        /* Set the current operation pointer */
-        global->current = global->first;
+          /* Set the current operation pointer */
+          global->current = global->first;
 
-        /* now run! */
-        result = run_all_transfers(global, share, result);
+          /* now run! */
+          result = run_all_transfers(global, share, result);
 
-        curl_share_cleanup(share);
-        if(global->libcurl) {
-          /* Cleanup the libcurl source output */
-          easysrc_cleanup();
+          curl_share_cleanup(share);
+          if(global->libcurl) {
+            /* Cleanup the libcurl source output */
+            easysrc_cleanup();
 
-          /* Dump the libcurl code if previously enabled */
-          dumpeasysrc(global);
+            /* Dump the libcurl code if previously enabled */
+            dumpeasysrc(global);
+          }
         }
       }
       else
         errorf(global, "out of memory");
     }
   }
+
+  varcleanup(global);
 
   return result;
 }

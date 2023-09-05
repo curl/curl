@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP_CONTENT_DECODING,
                           long enabled);
 .SH DESCRIPTION
 Pass a long to tell libcurl how to act on content decoding. If set to zero,
-content decoding will be disabled. If set to 1 it is enabled. Libcurl has no
+content decoding is disabled. If set to 1 it is enabled. Libcurl has no
 default content decoding but requires you to use
 \fICURLOPT_ACCEPT_ENCODING(3)\fP for that.
 .SH DEFAULT

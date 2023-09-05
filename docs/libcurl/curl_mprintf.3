@@ -136,7 +136,7 @@ overrides a space if both are used.
 .SH "Field width"
 An optional decimal digit string (with nonzero first digit) specifying a
 minimum field width. If the converted value has fewer characters than the
-field width, it will be padded with spaces on the left (or right, if the
+field width, it gets padded with spaces on the left (or right, if the
 left-adjustment flag has been given). Instead of a decimal digit string one
 may write "*" or "*m$" (for some decimal integer m) to specify that the field
 width is given in the next argument, or in the \fIm-th\fP argument,
@@ -241,7 +241,7 @@ A '%' is written. No argument is converted.
   curl_mprintf("Pi is almost %f\\n", 25/8);
 .fi
 .SH AVAILABILITY
-These functions will be removed from the public libcurl API in the future. Do
+These functions might be removed from the public libcurl API in the future. Do
 not use them in new programs or projects.
 .SH RETURN VALUE
 The \fBcurl_maprintf\fP and \fBcurl_mvaprintf\fP functions return a pointer to

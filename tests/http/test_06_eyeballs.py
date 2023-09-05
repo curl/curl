@@ -112,4 +112,3 @@ class TestEyeballs:
         r.check_response(count=1, http_status=None, exitcode=False)
         assert r.stats[0]['time_connect'] == 0     # no one should have listened
         assert r.stats[0]['time_appconnect'] == 0  # did not happen either
-

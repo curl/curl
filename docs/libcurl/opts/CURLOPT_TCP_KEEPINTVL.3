@@ -32,12 +32,11 @@ CURLOPT_TCP_KEEPINTVL \- TCP keep-alive interval
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_KEEPINTVL, long interval);
 .fi
 .SH DESCRIPTION
-Pass a long. Sets the interval, in seconds, that the operating system will
-wait between sending keepalive probes. Not all operating systems support this
-option. (Added in 7.25.0)
+Pass a long. Sets the interval, in seconds, to wait between sending keepalive
+probes. Not all operating systems support this option. (Added in 7.25.0)
 
-The maximum value this accepts is 2147483648. Any larger value will be capped
-to this amount.
+The maximum value this accepts is 2147483648. Any larger value is capped to
+this amount.
 .SH DEFAULT
 60
 .SH PROTOCOLS

@@ -36,14 +36,14 @@ Pass a \fIpointer\fP to be used to write the header part of the received data
 to.
 
 If \fICURLOPT_WRITEFUNCTION(3)\fP or \fICURLOPT_HEADERFUNCTION(3)\fP is used,
-\fIpointer\fP will be passed in to the respective callback.
+\fIpointer\fP is passed in to the respective callback.
 
 If neither of those options are set, \fIpointer\fP must be a valid FILE * and
-it will be used by a plain fwrite() to write headers to.
+it is used by a plain fwrite() to write headers to.
 
 If you are using libcurl as a win32 DLL, you \fBMUST\fP use a
 \fICURLOPT_WRITEFUNCTION(3)\fP or \fICURLOPT_HEADERFUNCTION(3)\fP if you set
-this option or you will experience crashes.
+this option or you might experience crashes.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

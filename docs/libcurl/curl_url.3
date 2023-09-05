@@ -31,8 +31,13 @@ curl_url - returns a new URL handle
 CURLU *curl_url();
 .fi
 .SH DESCRIPTION
-This function will allocates and returns a pointer to a fresh \fICURLU\fP
-handle, to be used for further use of the URL API.
+This function allocates a URL object and returns a \fICURLU\fP handle for it,
+to be used as input to all other URL API functions.
+
+This is a handle to a URL object that holds or can hold URL components for a
+single URL. When the object is first created, there is of course no components
+stored. They are then set in the object with the \fIcurl_url_set(3)\fP
+function.
 .SH EXAMPLE
 .nf
   CURLUcode rc;

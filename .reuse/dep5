@@ -23,6 +23,10 @@ Files: projects/Windows/*
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
 License: curl
 
+Files: libcurl.def
+Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.
+License: curl
+
 # Single files we do not want to edit directly
 Files: CHANGES
 Copyright: Daniel Stenberg, <daniel@haxx.se>, et al.

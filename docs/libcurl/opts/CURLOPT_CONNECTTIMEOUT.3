@@ -33,19 +33,33 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECTTIMEOUT, long timeout);
 .fi
 .SH DESCRIPTION
 Pass a long. It should contain the maximum time in seconds that you allow the
-connection phase to the server to take.  This only limits the connection
-phase, it has no impact once it has connected. Set to zero to switch to the
-default built-in connection timeout - 300 seconds. See also the
+connection phase to the server to take. This timeout only limits the
+connection phase, it has no impact once it has connected. Set to zero to
+switch to the default built-in connection timeout - 300 seconds. See also the
 \fICURLOPT_TIMEOUT(3)\fP option.
 
-In unix-like systems, this might cause signals to be used unless
-\fICURLOPT_NOSIGNAL(3)\fP is set.
+\fICURLOPT_CONNECTTIMEOUT_MS(3)\fP is the same function but set in milliseconds.
 
 If both \fICURLOPT_CONNECTTIMEOUT(3)\fP and \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
-are set, the value set last will be used.
+are set, the value set last is used.
 
 The "connection phase" is considered complete when the requested TCP, TLS or
 QUIC handshakes are done.
+
+The connection timeout set with \fICURLOPT_CONNECTTIMEOUT(3)\fP is included in
+the general all-covering \fICURLOPT_TIMEOUT(3)\fP.
+
+With \fICURLOPT_CONNECTTIMEOUT(3)\fP set to 3 and \fICURLOPT_TIMEOUT(3)\fP set
+to 5, the operation can never last longer than 5 seconds, and the connection
+phase cannot last longer than 3 seconds.
+
+With \fICURLOPT_CONNECTTIMEOUT(3)\fP set to 4 and \fICURLOPT_TIMEOUT(3)\fP set
+to 2, the operation can never last longer than 2 seconds. Including the
+connection phase.
+
+This option may cause libcurl to use the SIGALRM signal to timeout system
+calls on builds not using asynch DNS. In unix-like systems, this might cause
+signals to be used unless \fICURLOPT_NOSIGNAL(3)\fP is set.
 .SH DEFAULT
 300
 .SH PROTOCOLS

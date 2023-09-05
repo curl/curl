@@ -13,6 +13,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  1. HTTP
  1.1 hyper memory-leaks
+ 1.2 hyper is slow
  1.5 Expect-100 meets 417
 
  2. TLS
@@ -20,7 +21,6 @@ problems may have been fixed or changed somewhat since this was written.
  2.4 Secure Transport will not import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
- 2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.12 FTPS with Schannel times out file list operation
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
@@ -30,13 +30,16 @@ problems may have been fixed or changed somewhat since this was written.
  3.2 No disconnect command
  3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
  3.4 AUTH PLAIN for SMTP is not working on all servers
+ 3.5 APOP authentication fails on POP3
 
  4. Command line
 
  5. Build and portability issues
  5.1 OS400 port requires deprecated IBM library
  5.2 curl-config --libs contains private details
+ 5.3 building for old macOS fails with gcc
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
+ 5.6 cygwin: make install installs curl-config.1 twice
  5.9 Utilize Requires.private directives in libcurl.pc
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky CI builds
@@ -47,7 +50,6 @@ problems may have been fixed or changed somewhat since this was written.
  6.1 NTLM authentication and unicode
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
- 6.4 Negotiate and Kerberos V5 need a fake user name
  6.5 NTLM does not support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
@@ -68,6 +70,7 @@ problems may have been fixed or changed somewhat since this was written.
  9.2 wolfssh: publickey auth does not work
  9.3 Remote recursive folder creation with SFTP
  9.4 libssh blocking and infinite loop problem
+ 9.5 cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
  10. SOCKS
  10.3 FTPS over SOCKS
@@ -81,12 +84,13 @@ problems may have been fixed or changed somewhat since this was written.
  12.1 OpenLDAP hangs after returning results
  12.2 LDAP on Windows does authentication wrong?
  12.3 LDAP on Windows does not work
- 12.4 LDAPS with NSS is slow
+ 12.4 LDAPS requests to ActiveDirectory server hang
 
  13. TCP/IP
  13.2 Trying local ports fails on Windows
 
  15. CMake
+ 15.1 cmake outputs: no version information available
  15.2 support build with GnuTLS
  15.3 unusable tool_hugehelp.c with MinGW
  15.4 build docs/curl.1
@@ -96,7 +100,13 @@ problems may have been fixed or changed somewhat since this was written.
  15.11 ExternalProject_Add does not set CURL_CA_PATH
  15.13 CMake build with MIT Kerberos does not work
 
- 16. Applications
+ 16. aws-sigv4
+ 16.1 aws-sigv4 does not sign requests with * correctly
+ 16.2 aws-sigv4 does not sign requests with valueless queries correctly
+ 16.3 aws-sigv4 is missing the amz-content-sha256 header
+ 16.4 aws-sigv4 does not sort query string parameters before signing
+ 16.5 aws-sigv4 does not sign requests with empty URL query correctly
+ 16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 
  17. HTTP/2
  17.2 HTTP/2 frames while in the connection pool kill reuse
@@ -109,11 +119,11 @@ problems may have been fixed or changed somewhat since this was written.
 
 1. HTTP
 
-1.1 hyper memory-leaks
+1.2 hyper is slow
 
- Building curl with the hyper backend causes mysterious memory-leaks
+ When curl is built to use hyper for HTTP, it is unnecessary slow.
 
- https://github.com/curl/curl/issues/10803
+ https://github.com/curl/curl/issues/11203
 
 1.5 Expect-100 meets 417
 
@@ -145,12 +155,6 @@ problems may have been fixed or changed somewhat since this was written.
 2.7 Client cert (MTLS) issues with Schannel
 
  See https://github.com/curl/curl/issues/3145
-
-2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
-
- This seems to be a limitation in the underlying Schannel API.
-
- https://github.com/curl/curl/issues/3284
 
 2.11 Schannel TLS 1.2 handshake bug in old Windows versions
 
@@ -197,6 +201,10 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/4080
 
+3.5 APOP authentication fails on POP3
+
+ See https://github.com/curl/curl/issues/10073
+
 4. Command line
 
 5. Build and portability issues
@@ -215,6 +223,13 @@ problems may have been fixed or changed somewhat since this was written.
  run that might be needed only for building libcurl. Further, curl-config
  --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
 
+5.3 building for old macOS fails with gcc
+
+ Building curl for certain old macOS versions fails when gcc is used. We
+ command using clang in those cases.
+
+ See https://github.com/curl/curl/issues/11441
+
 5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
 
  If a URL or filename cannot be encoded using the user's current codepage then
@@ -227,6 +242,10 @@ problems may have been fixed or changed somewhat since this was written.
   https://curl.se/bug/?i=345
   https://curl.se/bug/?i=731
   https://curl.se/bug/?i=3747
+
+5.6 cygwin: make install installs curl-config.1 twice
+
+ https://github.com/curl/curl/issues/8839
 
 5.9 Utilize Requires.private directives in libcurl.pc
 
@@ -291,18 +310,6 @@ problems may have been fixed or changed somewhat since this was written.
  NTLM authentication using SSPI (on Windows) when (lib)curl is running in
  "system context" will make it use wrong(?) user name - at least when compared
  to what winhttp does. See https://curl.se/bug/view.cgi?id=535
-
-6.4 Negotiate and Kerberos V5 need a fake user name
-
- In order to get Negotiate (SPNEGO) authentication to work in HTTP or Kerberos
- V5 in the email protocols, you need to  provide a (fake) user name (this
- concerns both curl and the lib) because the code wrongly only considers
- authentication if there's a user name provided by setting
- conn->bits.user_passwd in url.c  https://curl.se/bug/view.cgi?id=440 How?
- https://curl.se/mail/lib-2004-08/0182.html A possible solution is to
- either modify this variable to be set or introduce a variable such as
- new conn->bits.want_authentication which is set when any of the authentication
- options are set.
 
 6.5 NTLM does not support password with § character
 
@@ -426,6 +433,11 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/8632
 
+9.5 cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
+
+ Running SCP and SFTP tests on cygwin makes this warning message appear.
+
+ https://github.com/curl/curl/issues/11244
 
 10. SOCKS
 
@@ -490,21 +502,27 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/4261
 
-12.4 LDAPS with NSS is slow
+12.4 LDAPS requests to ActiveDirectory server hang
 
- See https://github.com/curl/curl/issues/5874
+ https://github.com/curl/curl/issues/9580
 
 13. TCP/IP
 
 13.2 Trying local ports fails on Windows
 
- This makes '--local-port [range]' to not work since curl can't properly
- detect if a port is already in use, so it'll try the first port, use that and
+ This makes '--local-port [range]' to not work since curl cannot properly
+ detect if a port is already in use, so it will try the first port, use that and
  then subsequently fail anyway if that was actually in use.
 
  https://github.com/curl/curl/issues/8112
 
 15. CMake
+
+15.1 cmake outputs: no version information available
+
+ Something in the SONAME generation seems to be wrong in the cmake build.
+
+ https://github.com/curl/curl/issues/11158
 
 15.2 support build with GnuTLS
 
@@ -555,7 +573,31 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/6904
 
-16. Applications
+16. aws-sigv4
+
+16.1 aws-sigv4 does not sign requests with * correctly
+
+ https://github.com/curl/curl/issues/7559
+
+16.2 aws-sigv4 does not sign requests with valueless queries correctly
+
+ https://github.com/curl/curl/issues/8107
+
+16.3 aws-sigv4 is missing the amz-content-sha256 header
+
+ https://github.com/curl/curl/issues/8810
+
+16.4 aws-sigv4 does not sort query string parameters before signing
+
+ https://github.com/curl/curl/issues/9717
+
+16.5 aws-sigv4 does not sign requests with empty URL query correctly
+
+ https://github.com/curl/curl/issues/10129
+
+16.6 aws-sigv4 does not behave well with AWS VPC Lattice
+
+ https://github.com/curl/curl/issues/11007
 
 17. HTTP/2
 

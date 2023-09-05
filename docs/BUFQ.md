@@ -28,9 +28,8 @@ To pass data into a `bufq` without an extra copy, read callbacks can be used.
 typedef ssize_t Curl_bufq_reader(void *reader_ctx, unsigned char *buf, size_t len,
                                  CURLcode *err);
 
-ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader, void *reader_ctx, 
+ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader, void *reader_ctx,
                         CURLcode *err);
-
 ```
 
 `Curl_bufq_slurp()` will invoke the given `reader` callback, passing it its own internal
@@ -44,7 +43,7 @@ The analog mechanism for write out buffer data is:
 typedef ssize_t Curl_bufq_writer(void *writer_ctx, const unsigned char *buf, size_t len,
                                  CURLcode *err);
 
-ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer, void *writer_ctx, 
+ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer, void *writer_ctx,
                        CURLcode *err);
 ```
 
@@ -106,10 +105,10 @@ If a `bufq` is created with a `bufc_pool`, the no longer used chunks are returne
 
 ## empty, full and overflow
 
-One can ask about the state of a `bufq` with methods such as `Curl_bufq_is_empty(q)`, 
+One can ask about the state of a `bufq` with methods such as `Curl_bufq_is_empty(q)`,
 `Curl_bufq_is_full(q)`, etc. The amount of data held by a `bufq` is the sum of the data in all its chunks. This is what is reported by `Curl_bufq_len(q)`.
 
-Note that a `bufq` length and it being "full" are only loosely related. A simple example: 
+Note that a `bufq` length and it being "full" are only loosely related. A simple example:
 
 * create a `bufq` with chunk_size=1000 and max_chunks=4.
 * write 4000 bytes to it, it will report "full"
@@ -140,5 +139,3 @@ A pool can be shared between many `bufq`s, as long as all of them operate in the
 
 * when all `bufq`s are empty, only memory for `max_spare` chunks in the pool is used. Empty `bufq`s will hold no memory.
 * the latest spare chunk is the first to be handed out again, no matter which `bufq` needs it. This keeps the footprint of "recently used" memory smaller.
-
-

@@ -52,13 +52,13 @@ NOTE: This call set \fICURLOPT_HTTPAUTH(3)\fP to CURLAUTH_AWS_SIGV4.
 Calling \fICURLOPT_HTTPAUTH(3)\fP with CURLAUTH_AWS_SIGV4 is the same
 as calling this with \fB"aws:amz"\fP in parameter.
 .PP
-Example with "Test:Try", when curl will do the algorithm, it will generate
+Example with "Test:Try", when curl uses the algorithm, it generates
 \fB"TEST-HMAC-SHA256"\fP for "Algorithm", \fB"x-try-date"\fP and
 \fB"X-Try-Date"\fP for "date", \fB"test4_request"\fP for "request type",
 \fB"SignedHeaders=content-type;host;x-try-date"\fP for "signed headers"
 .PP
-If you use just "test", instead of "test:try",
-test will be use for every strings generated
+If you use just "test", instead of "test:try", test is used for every
+generated string.
 .SH DEFAULT
 By default, the value of this parameter is NULL.
 Calling \fICURLOPT_HTTPAUTH(3)\fP with CURLAUTH_AWS_SIGV4 is the same

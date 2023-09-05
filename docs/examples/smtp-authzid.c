@@ -148,7 +148,7 @@ int main(void)
     curl_slist_free_all(recipients);
 
     /* curl will not send the QUIT command until you call cleanup, so you
-     * should be able to re-use this connection for additional messages
+     * should be able to reuse this connection for additional messages
      * (setting CURLOPT_MAIL_FROM and CURLOPT_MAIL_RCPT as required, and
      * calling curl_easy_perform() again. It may not be a good idea to keep
      * the connection open for a very long time though (more than a few

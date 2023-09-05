@@ -258,8 +258,9 @@
 #if defined(__APPLE__) && !defined(USE_ARES)
 #include <TargetConditionals.h>
 #define USE_RESOLVE_ON_IPS 1
-#  if !defined(TARGET_OS_OSX) || TARGET_OS_OSX
-#    define CURL_OSX_CALL_COPYPROXIES 1
+#  if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) && \
+     defined(ENABLE_IPV6)
+#    define CURL_MACOS_CALL_COPYPROXIES 1
 #  endif
 #endif
 
@@ -298,6 +299,7 @@
 #  if defined(HAVE_PROTO_BSDSOCKET_H) && \
     (!defined(__amigaos4__) || defined(USE_AMISSL))
      /* use bsdsocket.library directly, instead of libc networking functions */
+#    define _SYS_MBUF_H /* m_len define clashes with curl */
 #    include <proto/bsdsocket.h>
 #    ifdef __amigaos4__
        int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
@@ -643,11 +645,9 @@
 
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
 
-#if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_NSS) || \
-    defined(USE_MBEDTLS) || \
-    defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
-    defined(USE_SECTRANSP) || defined(USE_GSKIT) || \
-    defined(USE_BEARSSL) || defined(USE_RUSTLS)
+#if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_MBEDTLS) || \
+  defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
+  defined(USE_BEARSSL) || defined(USE_RUSTLS)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
@@ -666,10 +666,10 @@
 
 /* Single point where USE_NTLM definition might be defined */
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(CURL_DISABLE_NTLM)
-#  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                       \
-      defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) ||  \
-      defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
-      (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
+#  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                   \
+  defined(USE_GNUTLS) || defined(USE_SECTRANSP) ||                      \
+  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
+  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
 #    define USE_CURL_NTLM_CORE
 #  endif
 #  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)

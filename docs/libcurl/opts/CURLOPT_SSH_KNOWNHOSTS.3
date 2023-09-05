@@ -34,8 +34,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_KNOWNHOSTS, char *fname);
 .SH DESCRIPTION
 Pass a pointer to a null-terminated string holding the file name of the
 known_host file to use.  The known_hosts file should use the OpenSSH file
-format as supported by libssh2. If this file is specified, libcurl will only
-accept connections with hosts that are known and present in that file, with a
+format as supported by libssh2. If this file is specified, libcurl only
+accepts connections with hosts that are known and present in that file, with a
 matching public key. Use \fICURLOPT_SSH_KEYFUNCTION(3)\fP to alter the default
 behavior on host and key matches and mismatches.
 

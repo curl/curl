@@ -30,10 +30,10 @@ case $host_os in
       AC_LANG_PROGRAM([[
 #include <TargetConditionals.h>
       ]],[[
-#if (TARGET_OS_OSX)
+#if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE)
       return 0;
 #else
-#error Not a macOS
+#error Not macOS
 #endif
       ]])
     ],[

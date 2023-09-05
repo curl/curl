@@ -38,7 +38,7 @@ even maybe not a terribly experienced developer, here's our advice:
 
 In the issue tracker we occasionally mark bugs with [help
 wanted](https://github.com/curl/curl/labels/help%20wanted), as a sign that the
-bug is acknowledged to exist and that there's nobody known to work on this
+bug is acknowledged to exist and that there is nobody known to work on this
 issue for the moment. Those are bugs that are fine to "grab" and provide a
 pull request for. The complexity level of these will of course vary, so pick
 one that piques your interest.

@@ -300,9 +300,16 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
     if(data->state.prevhead)
       /* line folding, append value to the previous header's value */
       return unfold_value(data, header, hlen);
-    else
-      /* can't unfold without a previous header */
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+    else {
+      /* Can't unfold without a previous header. Instead of erroring, just
+         pass the leading blanks. */
+      while(hlen && ISBLANK(*header)) {
+        header++;
+        hlen--;
+      }
+      if(!hlen)
+        return CURLE_WEIRD_SERVER_REPLY;
+    }
   }
 
   hs = calloc(1, sizeof(*hs) + hlen);

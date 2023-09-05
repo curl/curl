@@ -10,5 +10,3 @@ See-also: negotiate proxy-service-name
 Multi: single
 ---
 This option allows you to change the service name for SPNEGO.
-
-Examples: --negotiate --service-name sockd would use sockd/server-name.

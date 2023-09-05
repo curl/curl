@@ -32,7 +32,7 @@ CURLOPT_CHUNK_DATA \- pointer passed to the FTP chunk callbacks
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CHUNK_DATA, void *pointer);
 .fi
 .SH DESCRIPTION
-Pass a \fIpointer\fP that will be untouched by libcurl and passed as the ptr
+Pass a \fIpointer\fP that is untouched by libcurl and passed as the ptr
 argument to the \fICURLOPT_CHUNK_BGN_FUNCTION(3)\fP and
 \fICURLOPT_CHUNK_END_FUNCTION(3)\fP.
 .SH DEFAULT

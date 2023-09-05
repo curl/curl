@@ -873,7 +873,7 @@ sub RCPT_smtp {
               /^<([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})>$/) ||
             ($smtputf8 && $to =~
               /^<([a-zA-Z0-9\x{80}-\x{ff}._%+-]+)\@(([a-zA-Z0-9\x{80}-\x{ff}-]+)\.)+([a-zA-Z]{2,4})>$/)) {
-            sendcontrol "250 Recipient OK\r\n";      
+            sendcontrol "250 Recipient OK\r\n";
         }
         else {
             sendcontrol "501 Invalid address\r\n";
@@ -1820,7 +1820,7 @@ sub LIST_pop3 {
     # This is a built-in fake-message list
     my @data = (
         "1 100\r\n",
-        "2 4294967400\r\n",	# > 4 GB
+        "2 4294967400\r\n",  # > 4 GB
         "3 200\r\n",
     );
 
