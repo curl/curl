@@ -35,7 +35,7 @@ from testenv import Env, CurlClient
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=Env.slow_network, reason="not suitable for slow network tests")
+@pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
 class TestStuttered:
 
     @pytest.fixture(autouse=True, scope='class')
