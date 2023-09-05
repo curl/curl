@@ -877,6 +877,27 @@ static int cf_he_get_select_socks(struct Curl_cfilter *cf,
   return rc;
 }
 
+static void cf_he_adjust_poll_set(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct easy_poll_set *ps)
+{
+  struct cf_he_ctx *ctx = cf->ctx;
+  size_t i;
+
+  if(!cf->connected) {
+    for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+      struct eyeballer *baller = ctx->baller[i];
+      if(!baller || !baller->cf)
+        continue;
+
+      baller->cf->cft->adjust_poll_set(baller->cf, data, ps);
+    }
+    CURL_TRC_CF(data, cf, "adjust_poll_set -> %d socks", ps->num);
+  }
+  if(cf->next)
+    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+}
+
 static CURLcode cf_he_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool blocking, bool *done)
@@ -1056,6 +1077,7 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   cf_he_close,
   Curl_cf_def_get_host,
   cf_he_get_select_socks,
+  cf_he_adjust_poll_set,
   cf_he_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
@@ -1320,6 +1342,7 @@ struct Curl_cftype Curl_cft_setup = {
   cf_setup_close,
   Curl_cf_def_get_host,
   Curl_cf_def_get_select_socks,
+  Curl_cf_def_adjust_poll_set,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,

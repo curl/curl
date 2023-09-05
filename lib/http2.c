@@ -2602,6 +2602,7 @@ struct Curl_cftype Curl_cft_nghttp2 = {
   cf_h2_close,
   Curl_cf_def_get_host,
   cf_h2_get_select_socks,
+  Curl_cf_def_adjust_poll_set,
   cf_h2_data_pending,
   cf_h2_send,
   cf_h2_recv,

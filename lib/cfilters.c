@@ -78,6 +78,14 @@ int Curl_cf_def_get_select_socks(struct Curl_cfilter *cf,
     cf->next->cft->get_select_socks(cf->next, data, socks) : 0;
 }
 
+void Curl_cf_def_adjust_poll_set(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct easy_poll_set *ps)
+{
+  if(cf->next)
+    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+}
+
 bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
                               const struct Curl_easy *data)
 {
@@ -451,6 +459,22 @@ int Curl_conn_get_select_socks(struct Curl_easy *data, int sockindex,
   return GETSOCK_BLANK;
 }
 
+void Curl_conn_adjust_poll_set(struct Curl_easy *data,
+                               struct easy_poll_set *ps)
+{
+  struct Curl_cfilter *cf;
+  int i;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+  for(i = 0; i < 2; ++i) {
+    cf = data->conn->cfilter[i];
+    if(cf) {
+      cf->cft->adjust_poll_set(cf, data, ps);
+    }
+  }
+}
+
 void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
                         const char **phost, const char **pdisplay_host,
                         int *pport)
@@ -645,4 +669,42 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
   result = cf? cf->cft->query(cf, data, CF_QUERY_MAX_CONCURRENT,
                               &n, NULL) : CURLE_UNKNOWN_OPTION;
   return (result || n <= 0)? 1 : (size_t)n;
+}
+
+
+void Curl_poll_set_change(struct Curl_easy *data,
+                       struct easy_poll_set *ps, curl_socket_t sock,
+                       unsigned char add_flags, unsigned char remove_flags)
+{
+  unsigned int i;
+
+  (void)data;
+  for(i = 0; i < ps->num; ++i) {
+    if(ps->sockets[i] == sock) {
+      if(remove_flags) {
+        ps->actions[i] &= ~remove_flags;
+      }
+      if(add_flags) {
+        ps->actions[i] |= add_flags;
+      }
+      /* all gone? remove socket */
+      if(!ps->actions[i]) {
+        if((i + 1) < ps->num) {
+          memmove(&ps->sockets[i], &ps->sockets[i + 1], ps->num - (i + 1));
+          memmove(&ps->actions[i], &ps->actions[i + 1], ps->num - (i + 1));
+        }
+        --ps->num;
+      }
+      return;
+    }
+  }
+  /* not present */
+  if(add_flags) {
+    DEBUGASSERT(i < MAX_SOCKSPEREASYHANDLE);
+    if(i < MAX_SOCKSPEREASYHANDLE) {
+      ps->sockets[i] = sock;
+      ps->actions[i] = add_flags;
+      ps->num = i + 1;
+    }
+  }
 }

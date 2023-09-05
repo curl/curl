@@ -1065,6 +1065,33 @@ static int cf_h1_proxy_get_select_socks(struct Curl_cfilter *cf,
   return fds;
 }
 
+static void cf_h1_proxy_adjust_poll_set(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        struct easy_poll_set *ps)
+{
+  struct h1_tunnel_state *ts = cf->ctx;
+
+  if(!cf->connected) {
+    /* If we are not connected, but the filter "below" is
+     * and not waiting on something, we are tunneling. */
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    if(ts) {
+      /* when we've sent a CONNECT to a proxy, we should rather either
+         wait for the socket to become readable to be able to get the
+         response headers or if we're still sending the request, wait
+         for write. */
+      if(ts->CONNECT.sending == HTTPSEND_REQUEST)
+        Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN);
+      else
+        Curl_poll_set_change(data, ps, sock, CURL_POLL_IN, CURL_POLL_OUT);
+    }
+    else
+      Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN);
+  }
+  if(cf->next)
+    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+}
+
 static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
@@ -1094,6 +1121,7 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   cf_h1_proxy_close,
   Curl_cf_http_proxy_get_host,
   cf_h1_proxy_get_select_socks,
+  cf_h1_proxy_adjust_poll_set,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,

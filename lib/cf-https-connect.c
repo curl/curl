@@ -363,6 +363,29 @@ static int cf_hc_get_select_socks(struct Curl_cfilter *cf,
   return rc;
 }
 
+static void cf_hc_adjust_poll_set(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct easy_poll_set *ps)
+{
+  if(!cf->connected) {
+    struct cf_hc_ctx *ctx = cf->ctx;
+    struct cf_hc_baller *ballers[2];
+    size_t i;
+
+    ballers[0] = &ctx->h3_baller;
+    ballers[1] = &ctx->h21_baller;
+    for(i = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
+      struct cf_hc_baller *b = ballers[i];
+      if(!cf_hc_baller_is_active(b))
+        continue;
+      b->cf->cft->adjust_poll_set(b->cf, data, ps);
+    }
+    CURL_TRC_CF(data, cf, "adjust_poll_set -> %d socks", ps->num);
+  }
+  if(cf->next)
+    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+}
+
 static bool cf_hc_data_pending(struct Curl_cfilter *cf,
                                const struct Curl_easy *data)
 {
@@ -456,6 +479,7 @@ struct Curl_cftype Curl_cft_http_connect = {
   cf_hc_close,
   Curl_cf_def_get_host,
   cf_hc_get_select_socks,
+  cf_hc_adjust_poll_set,
   cf_hc_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,

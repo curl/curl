@@ -1268,6 +1268,21 @@ static int cf_socket_get_select_socks(struct Curl_cfilter *cf,
   return rc;
 }
 
+static void cf_socket_adjust_poll_set(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      struct easy_poll_set *ps)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+
+  if(ctx->sock != CURL_SOCKET_BAD) {
+    if(!cf->connected)
+      Curl_poll_set_change(data, ps, ctx->sock, CURL_POLL_OUT, CURL_POLL_IN);
+    else
+      Curl_poll_set_change(data, ps, ctx->sock, CURL_POLL_IN, 0);
+    CURL_TRC_CF(data, cf, "adjust_poll_set -> %d socks", ps->num);
+  }
+}
+
 static bool cf_socket_data_pending(struct Curl_cfilter *cf,
                                    const struct Curl_easy *data)
 {
@@ -1613,6 +1628,7 @@ struct Curl_cftype Curl_cft_tcp = {
   cf_socket_close,
   cf_socket_get_host,
   cf_socket_get_select_socks,
+  cf_socket_adjust_poll_set,
   cf_socket_data_pending,
   cf_socket_send,
   cf_socket_recv,
@@ -1743,6 +1759,7 @@ struct Curl_cftype Curl_cft_udp = {
   cf_socket_close,
   cf_socket_get_host,
   cf_socket_get_select_socks,
+  cf_socket_adjust_poll_set,
   cf_socket_data_pending,
   cf_socket_send,
   cf_socket_recv,
@@ -1794,6 +1811,7 @@ struct Curl_cftype Curl_cft_unix = {
   cf_socket_close,
   cf_socket_get_host,
   cf_socket_get_select_socks,
+  cf_socket_adjust_poll_set,
   cf_socket_data_pending,
   cf_socket_send,
   cf_socket_recv,
@@ -1858,6 +1876,7 @@ struct Curl_cftype Curl_cft_tcp_accept = {
   cf_socket_close,
   cf_socket_get_host,              /* TODO: not accurate */
   cf_socket_get_select_socks,
+  cf_socket_adjust_poll_set,
   cf_socket_data_pending,
   cf_socket_send,
   cf_socket_recv,

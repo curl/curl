@@ -1104,6 +1104,32 @@ static int cf_ngtcp2_get_select_socks(struct Curl_cfilter *cf,
   return rv;
 }
 
+static void cf_ngtcp2_adjust_poll_set(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      struct easy_poll_set *ps)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct SingleRequest *k = &data->req;
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
+  struct cf_call_data save;
+
+  CF_DATA_SAVE(save, cf, data);
+
+  /* in HTTP/3 we can always get a frame, so check read */
+  Curl_poll_set_change(data, ps, ctx->q.sockfd, CURL_POLL_IN, 0);
+
+  /* we're still uploading or the HTTP/2 layer wants to send data */
+  if((k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
+     ngtcp2_conn_get_cwnd_left(ctx->qconn) &&
+     ngtcp2_conn_get_max_data_left(ctx->qconn) &&
+     stream && nghttp3_conn_is_stream_writable(ctx->h3conn, stream->id))
+    Curl_poll_set_change(data, ps, ctx->q.sockfd, CURL_POLL_OUT, 0);
+
+  CF_DATA_RESTORE(cf, save);
+  if(cf->next)
+    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+}
+
 static void h3_drain_stream(struct Curl_cfilter *cf,
                             struct Curl_easy *data)
 {
@@ -2715,6 +2741,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_ngtcp2_close,
   Curl_cf_def_get_host,
   cf_ngtcp2_get_select_socks,
+  cf_ngtcp2_adjust_poll_set,
   cf_ngtcp2_data_pending,
   cf_ngtcp2_send,
   cf_ngtcp2_recv,

@@ -647,6 +647,25 @@ int Curl_ssl_get_select_socks(struct Curl_cfilter *cf, struct Curl_easy *data,
   return GETSOCK_READSOCK(0);
 }
 
+void Curl_ssl_adjust_poll_set(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              struct easy_poll_set *ps)
+{
+  if(!cf->connected) {
+    struct ssl_connect_data *connssl = cf->ctx;
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
+    if(sock != CURL_SOCKET_BAD) {
+      if(connssl->connecting_state == ssl_connect_2_writing) {
+        Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN);
+      }
+      else {
+        Curl_poll_set_change(data, ps, sock, CURL_POLL_IN, CURL_POLL_OUT);
+      }
+    }
+  }
+  if(cf->next)
+    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+}
+
 /* Selects an SSL crypto engine
  */
 CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine)
@@ -1165,6 +1184,15 @@ static int multissl_get_select_socks(struct Curl_cfilter *cf,
   return Curl_ssl->get_select_socks(cf, data, socks);
 }
 
+static void multissl_adjust_poll_set(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_poll_set *ps)
+{
+  if(multissl_setup(NULL))
+    return;
+  Curl_ssl->adjust_poll_set(cf, data, ps);
+}
+
 static void *multissl_get_internals(struct ssl_connect_data *connssl,
                                     CURLINFO info)
 {
@@ -1215,6 +1243,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_connect,                  /* connect */
   multissl_connect_nonblocking,      /* connect_nonblocking */
   multissl_get_select_socks,         /* getsock */
+  multissl_adjust_poll_set,          /* adjust_poll_set */
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
   Curl_none_close_all,               /* close_all */
@@ -1617,6 +1646,19 @@ static int ssl_cf_get_select_socks(struct Curl_cfilter *cf,
   return fds;
 }
 
+static void ssl_cf_adjust_poll_set(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct easy_poll_set *ps)
+{
+  struct cf_call_data save;
+
+  if(!cf->connected) {
+    CF_DATA_SAVE(save, cf, data);
+    Curl_ssl->adjust_poll_set(cf, data, ps);
+    CF_DATA_RESTORE(cf, save);
+  }
+}
+
 static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              int event, int arg1, void *arg2)
@@ -1706,6 +1748,7 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_close,
   Curl_cf_def_get_host,
   ssl_cf_get_select_socks,
+  ssl_cf_adjust_poll_set,
   ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
@@ -1724,6 +1767,7 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_close,
   Curl_cf_def_get_host,
   ssl_cf_get_select_socks,
+  ssl_cf_adjust_poll_set,
   ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,

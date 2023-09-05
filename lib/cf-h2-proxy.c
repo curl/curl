@@ -1197,6 +1197,28 @@ static int cf_h2_proxy_get_select_socks(struct Curl_cfilter *cf,
   return bitmap;
 }
 
+static void cf_h2_proxy_adjust_poll_set(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        struct easy_poll_set *ps)
+{
+  struct cf_h2_proxy_ctx *ctx = cf->ctx;
+  struct cf_call_data save;
+  curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+
+  CF_DATA_SAVE(save, cf, data);
+
+  /* HTTP/2 layer wants to send data) AND there's a window to send data in */
+  if(nghttp2_session_want_read(ctx->h2))
+    Curl_poll_set_change(data, ps, sock, CURL_POLL_IN, 0);
+  if(nghttp2_session_want_write(ctx->h2) &&
+     nghttp2_session_get_remote_window_size(ctx->h2))
+    Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, 0);
+
+  CF_DATA_RESTORE(cf, save);
+  if(cf->next)
+    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+}
+
 static ssize_t h2_handle_tunnel_close(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       CURLcode *err)
@@ -1532,6 +1554,7 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   cf_h2_proxy_close,
   Curl_cf_http_proxy_get_host,
   cf_h2_proxy_get_select_socks,
+  cf_h2_proxy_adjust_poll_set,
   cf_h2_proxy_data_pending,
   cf_h2_proxy_send,
   cf_h2_proxy_recv,

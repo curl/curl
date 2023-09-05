@@ -1061,8 +1061,9 @@ static void multi_getsock(struct Curl_easy *data,
 
   case MSTATE_TUNNELING:
   case MSTATE_CONNECTING:
-    actions = Curl_conn_get_select_socks(data, FIRSTSOCKET, poll_set->sockets);
-    break;
+    Curl_conn_adjust_poll_set(data, poll_set);
+    infof(data, "multi_getsock() -> %d sockets", poll_set->num);
+    return;
 
   case MSTATE_DOING_MORE:
     actions = domore_getsock(data, conn, poll_set->sockets);

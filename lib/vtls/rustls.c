@@ -678,6 +678,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   cr_connect,                      /* connect */
   cr_connect_nonblocking,          /* connect_nonblocking */
   cr_get_select_socks,             /* get_select_socks */
+  Curl_ssl_adjust_poll_set,        /* adjust_poll_set */
   cr_get_internals,                /* get_internals */
   cr_close,                        /* close_one */
   Curl_none_close_all,             /* close_all */

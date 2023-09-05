@@ -1198,6 +1198,33 @@ static int socks_cf_get_select_socks(struct Curl_cfilter *cf,
   return fds;
 }
 
+static void socks_cf_adjust_poll_set(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_poll_set *ps)
+{
+  struct socks_state *sx = cf->ctx;
+
+  if(!cf->connected && sx) {
+    /* If we are not connected, the filter below is and has nothing
+     * to wait on, we determine what to wait for. */
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    switch(sx->state) {
+    case CONNECT_RESOLVING:
+    case CONNECT_SOCKS_READ:
+    case CONNECT_AUTH_READ:
+    case CONNECT_REQ_READ:
+    case CONNECT_REQ_READ_MORE:
+      Curl_poll_set_change(data, ps, sock, CURL_POLL_IN, CURL_POLL_OUT);
+      break;
+    default:
+      Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN);
+      break;
+    }
+  }
+  if(cf->next)
+    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+}
+
 static void socks_proxy_cf_close(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
@@ -1241,6 +1268,7 @@ struct Curl_cftype Curl_cft_socks_proxy = {
   socks_proxy_cf_close,
   socks_cf_get_host,
   socks_cf_get_select_socks,
+  socks_cf_adjust_poll_set,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
