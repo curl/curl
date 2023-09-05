@@ -2567,6 +2567,12 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
   struct connectdata *conn = data->conn;
   (void)sockindex;
 
+  /* limit the writes to the maximum specified in Section 3 of
+   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
+   */
+  if(len > 32768)
+    len = 32768;
+
   nwrite = sftp_write(conn->proto.sshc.sftp_file, mem, len);
 
   myssh_block2waitfor(conn, FALSE);
