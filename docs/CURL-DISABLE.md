@@ -34,7 +34,7 @@ Disable support for the negotiate authentication methods.
 
 ## `CURL_DISABLE_AWS`
 
-Disable AWS-SIG4 support.
+Disable **AWS-SIG4** support.
 
 ## `CURL_DISABLE_DICT`
 
