@@ -407,6 +407,32 @@ class TestUpload:
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == indata
 
+    # POST data urlencoded, small enough to be sent with request headers
+    # and request headers are so large that the first send is larger
+    # than our default upload buffer length (64KB).
+    # Unfixed, this will fail when run with CURL_DBG_SOCK_WBLOCK=80 most
+    # of the time
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_41_post_urlenc_small(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
+            pytest.skip("quiche has CWND issues with large requests")
+        fdata = os.path.join(env.gen_dir, 'data-63k')
+        curl = CurlClient(env=env)
+        extra_args = ['--trace-config', 'http/2,http/3']
+        # add enough headers so that the first send chunk is > 64KB
+        for i in range(63):
+            extra_args.extend(['-H', f'x{i:02d}: {"y"*1019}'])
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=extra_args)
+        r.check_stats(count=1, http_status=200, exitcode=0)
+        indata = open(fdata).readlines()
+        respdata = open(curl.response_file(0)).readlines()
+        assert respdata == indata
+
     def check_download(self, count, srcfile, curl):
         for i in range(count):
             dfile = curl.download_file(i)

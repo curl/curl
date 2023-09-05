@@ -1266,10 +1266,10 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
         break;
       default:                    /* write! */
         bytes_written = 0;
-        result = Curl_write(data, conn->sock[FIRSTSOCKET],
-                            outbuf + total_written,
-                            outlen - total_written,
-                            &bytes_written);
+        result = Curl_nwrite(data, FIRSTSOCKET,
+                             outbuf + total_written,
+                             outlen - total_written,
+                             &bytes_written);
         total_written += bytes_written;
         break;
     }

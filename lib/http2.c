@@ -41,6 +41,7 @@
 #include "urlapi-int.h"
 #include "cfilters.h"
 #include "connect.h"
+#include "rand.h"
 #include "strtoofft.h"
 #include "strdup.h"
 #include "transfer.h"
@@ -175,6 +176,7 @@ struct stream_ctx {
   int32_t id; /* HTTP/2 protocol identifier for stream */
   struct bufq recvbuf; /* response buffer */
   struct bufq sendbuf; /* request buffer */
+  struct h1_req_parser h1; /* parsing the request */
   struct dynhds resp_trailers; /* response trailer fields */
   size_t resp_hds_len; /* amount of response header bytes in recvbuf */
   size_t upload_blocked_len;
@@ -253,6 +255,7 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
                   H2_STREAM_SEND_CHUNKS, BUFQ_OPT_NONE);
   Curl_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
                   H2_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
+  Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
   Curl_dynhds_init(&stream->resp_trailers, 0, DYN_HTTP_REQUEST);
   stream->resp_hds_len = 0;
   stream->bodystarted = FALSE;
@@ -313,6 +316,7 @@ static void http2_data_done(struct Curl_cfilter *cf,
 
   Curl_bufq_free(&stream->sendbuf);
   Curl_bufq_free(&stream->recvbuf);
+  Curl_h1_req_parse_free(&stream->h1);
   Curl_dynhds_free(&stream->resp_trailers);
   if(stream->push_headers) {
     /* if they weren't used and then freed before */
@@ -2014,7 +2018,6 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = NULL;
-  struct h1_req_parser h1;
   struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
   const void *body = NULL;
@@ -2024,7 +2027,6 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
   nghttp2_priority_spec pri_spec;
   ssize_t nwritten;
 
-  Curl_h1_req_parse_init(&h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   *err = http2_data_setup(cf, data, &stream);
@@ -2033,17 +2035,22 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
     goto out;
   }
 
-  nwritten = Curl_h1_req_parse_read(&h1, buf, len, NULL, 0, err);
+  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
   if(nwritten < 0)
     goto out;
-  DEBUGASSERT(h1.done);
-  DEBUGASSERT(h1.req);
+  if(!stream->h1.done) {
+    /* need more data */
+    goto out;
+  }
+  DEBUGASSERT(stream->h1.req);
 
-  *err = Curl_http_req_to_h2(&h2_headers, h1.req, data);
+  *err = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
   if(*err) {
     nwritten = -1;
     goto out;
   }
+  /* no longer needed */
+  Curl_h1_req_parse_free(&stream->h1);
 
   nheader = Curl_dynhds_count(&h2_headers);
   nva = malloc(sizeof(nghttp2_nv) * nheader);
@@ -2151,7 +2158,6 @@ out:
               stream? stream->id : -1, nwritten, *err);
   Curl_safefree(nva);
   *pstream = stream;
-  Curl_h1_req_parse_free(&h1);
   Curl_dynhds_free(&h2_headers);
   return nwritten;
 }
@@ -2179,7 +2185,8 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       if(len < stream->upload_blocked_len) {
         /* Did we get called again with a smaller `len`? This should not
          * happen. We are not prepared to handle that. */
-        failf(data, "HTTP/2 send again with decreased length");
+        failf(data, "HTTP/2 send again with decreased length (%zd vs %zd)",
+              len, stream->upload_blocked_len);
         *err = CURLE_HTTP2;
         nwritten = -1;
         goto out;
@@ -2211,11 +2218,8 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
        * optionally request body, and now are going to send or sending
        * more request body in DATA frame */
       nwritten = Curl_bufq_write(&stream->sendbuf, buf, len, err);
-      if(nwritten < 0) {
-        if(*err != CURLE_AGAIN)
-          goto out;
-        nwritten = 0;
-      }
+      if(nwritten < 0 && *err != CURLE_AGAIN)
+        goto out;
     }
 
     if(!Curl_bufq_is_empty(&stream->sendbuf)) {
@@ -2262,7 +2266,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     blocked = 1;
   }
 
-  if(stream && blocked) {
+  if(stream && blocked && nwritten > 0) {
     /* Unable to send all data, due to connection blocked or H2 window
      * exhaustion. Data is left in our stream buffer, or nghttp2's internal
      * frame buffer or our network out buffer. */

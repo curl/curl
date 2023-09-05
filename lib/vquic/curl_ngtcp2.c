@@ -179,6 +179,7 @@ struct h3_stream_ctx {
   int64_t id; /* HTTP/3 protocol identifier */
   struct bufq sendbuf;   /* h3 request body */
   struct bufq recvbuf;   /* h3 response body */
+  struct h1_req_parser h1; /* h1 request parsing */
   size_t sendbuf_len_in_flight; /* sendbuf amount "in flight" */
   size_t upload_blocked_len; /* the amount written last and EGAINed */
   size_t recv_buf_nonflow; /* buffered bytes, not counting for flow control */
@@ -226,6 +227,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   Curl_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   stream->recv_buf_nonflow = 0;
+  Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
   H3_STREAM_LCTX(data) = stream;
   return CURLE_OK;
@@ -240,6 +242,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
     CURL_TRC_CF(data, cf, "[%"PRId64"] easy handle is done", stream->id);
     Curl_bufq_free(&stream->sendbuf);
     Curl_bufq_free(&stream->recvbuf);
+    Curl_h1_req_parse_free(&stream->h1);
     free(stream);
     H3_STREAM_LCTX(data) = NULL;
   }
@@ -1625,7 +1628,6 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = NULL;
-  struct h1_req_parser h1;
   struct dynhds h2_headers;
   size_t nheader;
   nghttp3_nv *nva = NULL;
@@ -1635,7 +1637,6 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   nghttp3_data_reader reader;
   nghttp3_data_reader *preader = NULL;
 
-  Curl_h1_req_parse_init(&h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   *err = h3_data_setup(cf, data);
@@ -1651,17 +1652,22 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
-  nwritten = Curl_h1_req_parse_read(&h1, buf, len, NULL, 0, err);
+  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
   if(nwritten < 0)
     goto out;
-  DEBUGASSERT(h1.done);
-  DEBUGASSERT(h1.req);
+  if(!stream->h1.done) {
+    /* need more data */
+    goto out;
+  }
+  DEBUGASSERT(stream->h1.req);
 
-  *err = Curl_http_req_to_h2(&h2_headers, h1.req, data);
+  *err = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
   if(*err) {
     nwritten = -1;
     goto out;
   }
+  /* no longer needed */
+  Curl_h1_req_parse_free(&stream->h1);
 
   nheader = Curl_dynhds_count(&h2_headers);
   nva = malloc(sizeof(nghttp3_nv) * nheader);
@@ -1734,7 +1740,6 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
 
 out:
   free(nva);
-  Curl_h1_req_parse_free(&h1);
   Curl_dynhds_free(&h2_headers);
   return nwritten;
 }
