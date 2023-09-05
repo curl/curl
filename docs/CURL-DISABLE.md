@@ -12,10 +12,6 @@ Disable support for binding the local end of connections.
 
 Disable support for HTTP cookies.
 
-## `CURL_DISABLE_CRYPTO_AUTH`
-
-Disable support for authentication methods using crypto.
-
 ## `CURL_DISABLE_BASIC_AUTH`
 
 Disable support for the Basic authentication methods.

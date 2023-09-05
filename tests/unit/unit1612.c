@@ -38,7 +38,9 @@ static void unit_stop(void)
 
 UNITTEST_START
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
+    || !defined(CURL_DISABLE_DIGEST_AUTH)
+
   const char password[] = "Pa55worD";
   const char string1[] = "1";
   const char string2[] = "hello-you-fool";
