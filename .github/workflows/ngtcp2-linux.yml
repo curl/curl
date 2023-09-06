@@ -263,15 +263,17 @@ jobs:
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
 
-    - run: pytest -v
+    - run: pytest tests
       name: 'run pytest'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
+        CURL_CI: github
 
-    - run: pytest
+    - run: pytest tests
       name: 'run pytest with slowed network'
       env:
         # 33% of sends are EAGAINed
         CURL_DBG_SOCK_WBLOCK: 33
         # only 80% of data > 10 bytes is send
         CURL_DBG_SOCK_WPARTIAL: 80
+        CURL_CI: github

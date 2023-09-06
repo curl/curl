@@ -2707,7 +2707,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 
         if(!data->req.upload_chunky) {
           /* We're not sending it 'chunked', append it to the request
-             already now to reduce the number if send() calls */
+             already now to reduce the number of send() calls */
           result = Curl_dyn_addn(r, data->set.postfields,
                                  (size_t)http->postsize);
           included_body = http->postsize;
