@@ -344,6 +344,8 @@ size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name)
   return Curl_dynhds_remove(dynhds, name, strlen(name));
 }
 
+#endif
+
 CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
 {
   CURLcode result = CURLE_OK;
@@ -363,4 +365,3 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
   return result;
 }
 
-#endif
