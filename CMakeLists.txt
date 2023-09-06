@@ -191,8 +191,18 @@ option(CURL_DISABLE_ALTSVC "disables alt-svc support" OFF)
 mark_as_advanced(CURL_DISABLE_ALTSVC)
 option(CURL_DISABLE_COOKIES "disables cookies support" OFF)
 mark_as_advanced(CURL_DISABLE_COOKIES)
-option(CURL_DISABLE_CRYPTO_AUTH "disables cryptographic authentication" OFF)
-mark_as_advanced(CURL_DISABLE_CRYPTO_AUTH)
+option(CURL_DISABLE_BASIC_AUTH "disables Basic authentication" OFF)
+mark_as_advanced(CURL_DISABLE_BASIC_AUTH)
+option(CURL_DISABLE_BEARER_AUTH "disables Bearer authentication" OFF)
+mark_as_advanced(CURL_DISABLE_BEARER_AUTH)
+option(CURL_DISABLE_DIGEST_AUTH "disables Digest authentication" OFF)
+mark_as_advanced(CURL_DISABLE_DIGEST_AUTH)
+option(CURL_DISABLE_KERBEROS_AUTH "disables Kerberos authentication" OFF)
+mark_as_advanced(CURL_DISABLE_KERBEROS_AUTH)
+option(CURL_DISABLE_NEGOTIATE_AUTH "disables negotiate authentication" OFF)
+mark_as_advanced(CURL_DISABLE_NEGOTIATE_AUTH)
+option(CURL_DISABLE_AWS "disables AWS-SIG4" OFF)
+mark_as_advanced(CURL_DISABLE_AWS)
 option(CURL_DISABLE_DICT "disables DICT" OFF)
 mark_as_advanced(CURL_DISABLE_DICT)
 option(CURL_DISABLE_DOH "disables DNS-over-HTTPS" OFF)
@@ -1448,7 +1458,7 @@ endmacro()
 
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT (CURL_DISABLE_CRYPTO_AUTH OR CURL_DISABLE_NTLM) AND
+if(NOT (CURL_DISABLE_NTLM) AND
     (USE_OPENSSL OR USE_MBEDTLS OR USE_DARWINSSL OR USE_WIN32_CRYPTO OR USE_GNUTLS))
   set(use_curl_ntlm_core ON)
 endif()
@@ -1471,16 +1481,16 @@ _add_if("GSS-API"       HAVE_GSSAPI)
 _add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
 _add_if("HSTS"          NOT CURL_DISABLE_HSTS)
 # TODO SSP1 missing for SPNEGO
-_add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
+_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-_add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
+_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-_add_if("NTLM"          NOT (CURL_DISABLE_CRYPTO_AUTH OR CURL_DISABLE_NTLM) AND
+_add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
                         (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 # TODO missing option (autoconf: --enable-ntlm-wb)
-_add_if("NTLM_WB"       NOT (CURL_DISABLE_CRYPTO_AUTH OR CURL_DISABLE_NTLM) AND
+_add_if("NTLM_WB"       NOT (CURL_DISABLE_NTLM) AND
                         (use_curl_ntlm_core OR USE_WINDOWS_SSPI) AND
                         NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
 # TODO missing option (--enable-tls-srp), depends on GNUTLS_SRP/OPENSSL_SRP
