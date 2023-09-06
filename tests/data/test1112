@@ -16,6 +16,7 @@ SLOWDOWN
 # to avoid wasting time waiting for the data phase to start
 <servercmd>
 SLOWDOWN
+REPLY welcome 220 Hey
 REPLY USER 331 OK
 REPLY PASS 230 OK
 REPLY PWD 257 "/"
