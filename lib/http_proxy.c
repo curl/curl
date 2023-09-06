@@ -52,6 +52,113 @@
 #include "memdebug.h"
 
 
+CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
+                                         const char **phostname,
+                                         int *pport, bool *pipv6_ip)
+{
+  DEBUGASSERT(cf);
+  DEBUGASSERT(cf->conn);
+
+  if(cf->conn->bits.conn_to_host)
+    *phostname = cf->conn->conn_to_host.name;
+  else if(cf->sockindex == SECONDARYSOCKET)
+    *phostname = cf->conn->secondaryhostname;
+  else
+    *phostname = cf->conn->host.name;
+
+  if(cf->sockindex == SECONDARYSOCKET)
+    *pport = cf->conn->secondary_port;
+  else if(cf->conn->bits.conn_to_port)
+    *pport = cf->conn->conn_to_port;
+  else
+    *pport = cf->conn->remote_port;
+
+  if(*phostname != cf->conn->host.name)
+    *pipv6_ip = (strchr(*phostname, ':') != NULL);
+  else
+    *pipv6_ip = cf->conn->bits.ipv6_ip;
+
+  return CURLE_OK;
+}
+
+CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
+                                        struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        int http_version_major)
+{
+  const char *hostname = NULL;
+  char *authority = NULL;
+  int port;
+  bool ipv6_ip;
+  CURLcode result;
+  struct httpreq *req = NULL;
+
+  result = Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
+  if(result)
+    goto out;
+
+  authority = aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname,
+                      ipv6_ip?"]":"", port);
+  if(!authority) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT")-1,
+                              NULL, 0, authority, strlen(authority),
+                              NULL, 0);
+  if(result)
+    goto out;
+
+  /* Setup the proxy-authorization header, if any */
+  result = Curl_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
+                                 req->authority, TRUE);
+  if(result)
+    goto out;
+
+  /* If user is not overriding Host: header, we add for HTTP/1.x */
+  if(http_version_major == 1 &&
+     !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
+    result = Curl_dynhds_cadd(&req->headers, "Host", authority);
+    if(result)
+      goto out;
+  }
+
+  if(data->state.aptr.proxyuserpwd) {
+    result = Curl_dynhds_h1_cadd_line(&req->headers,
+                                      data->state.aptr.proxyuserpwd);
+    if(result)
+      goto out;
+  }
+
+  if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent"))
+     && data->set.str[STRING_USERAGENT]) {
+    result = Curl_dynhds_cadd(&req->headers, "User-Agent",
+                              data->set.str[STRING_USERAGENT]);
+    if(result)
+      goto out;
+  }
+
+  if(http_version_major == 1 &&
+    !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
+    result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
+    if(result)
+      goto out;
+  }
+
+  result = Curl_dynhds_add_custom(data, TRUE, &req->headers);
+
+out:
+  if(result && req) {
+    Curl_http_req_free(req);
+    req = NULL;
+  }
+  free(authority);
+  *preq = req;
+  return result;
+}
+
+
 struct cf_proxy_ctx {
   /* the protocol specific sub-filter we install during connect */
   struct Curl_cfilter *cf_protocol;
@@ -105,7 +212,6 @@ connect_sub:
       break;
 #endif
     default:
-      CURL_TRC_CF(data, cf, "installing subfilter for default HTTP/1.1");
       infof(data, "CONNECT tunnel: unsupported ALPN(%d) negotiated", alpn);
       result = CURLE_COULDNT_CONNECT;
       goto out;
