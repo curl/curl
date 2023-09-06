@@ -197,20 +197,19 @@ CURLcode get_url_file_name(char **filename, const char *url)
     uerr = curl_url_get(uh, CURLUPART_PATH, &path, 0);
     if(!uerr) {
       curl_url_cleanup(uh);
-
-      pc = strrchr(path, '/');
-      pc2 = strrchr(pc ? pc + 1 : path, '\\');
-      if(pc2)
-        pc = pc2;
-
-      if(pc)
-        /* duplicate the string beyond the slash */
-        pc++;
-      else
-        /* no slash => empty string */
-        pc = "";
-
-      *filename = strdup(pc);
+      
+      char *base;
+      CURLcode result;
+      result = get_path_base(path, &base);
+      if(result) {
+        return result;
+      }
+      
+      /* no slash => empty string */
+      if(base == path)
+        base = "";
+      
+      *filename = strdup(base);
       curl_free(path);
       if(!*filename)
         return CURLE_OUT_OF_MEMORY;
@@ -252,3 +251,23 @@ CURLcode get_url_file_name(char **filename, const char *url)
   curl_url_cleanup(uh);
   return urlerr_cvt(uerr);
 }
+
+/* Returns a pointer into `path` that is after all pathname and
+ * pathname separator characters.
+ * If no pathname information was present, returns `path`.
+ */
+CURLcode get_path_base(char *path, char **base) {
+  char *sep, *sep2;
+  sep = strrchr(path, '/');
+  sep2 = strrchr(sep ? sep + 1 : path, '\\'); 
+  if(sep2)
+    sep = sep2;
+    
+  if(sep)
+    *base = sep + 1;
+  else
+    *base = path;
+  
+  return CURLE_OK;
+}
+ 

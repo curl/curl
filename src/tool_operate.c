@@ -1091,6 +1091,30 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               break;
             }
           }
+          
+          if(config->decode_remote_name) {
+            /* gamache */
+            char *escaped = curl_easy_unescape(NULL, per->outfile, 0, NULL);
+            if(!escaped) {
+              warnf(global, "could not decode filename");
+              result = CURLE_WRITE_ERROR;
+              break;
+            }
+            
+            char *base;
+            result = get_path_base(escaped, &base);
+            if(result)
+              break;
+            
+            free(per->outfile);
+            per->outfile = strdup(base);
+            free(escaped);
+            
+            if(!per->outfile) {
+              result = CURLE_OUT_OF_MEMORY;
+              break;
+            }
+          }
 
           if(config->output_dir && *config->output_dir) {
             char *d = aprintf("%s/%s", config->output_dir, per->outfile);

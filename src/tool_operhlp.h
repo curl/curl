@@ -39,4 +39,6 @@ CURLcode get_url_file_name(char **filename, const char *url);
 
 CURLcode urlerr_cvt(CURLUcode ucode);
 
+CURLcode get_path_base(char *path, char **base);
+
 #endif /* HEADER_CURL_TOOL_OPERHLP_H */
