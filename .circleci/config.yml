@@ -220,8 +220,8 @@ commands:
 
   build-macos:
     steps:
-      - run: make -j5 V=1
-      - run: make -j5 V=1 examples
+      - run: make -j7 V=1
+      - run: make -j7 V=1 examples
 
   test:
     steps:
@@ -229,7 +229,7 @@ commands:
 
   test-macos:
     steps:
-      - run: make -j5 V=1 test-ci
+      - run: make -j7 V=1 test-ci
 
   test-torture:
     steps:
@@ -319,10 +319,15 @@ jobs:
       - build
       - test
 
-  macos-arm-normal:
+  # TODO: All builds with "macos.x86.medium.gen2" must be changed to
+  # "macos.m1.medium.gen1" in January 2024 because the former will be removed
+  # (the names should also be changed from macos-x86-* to macos-arm-*).  We
+  # want the M1 (ARM) machines anyway, for platform diversity.
+  # See https://circleci.com/docs/configuration-reference/#macos-execution-environment
+  macos-x86-normal:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -330,10 +335,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-debug:
+  macos-x86-debug:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -341,10 +346,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-libssh2:
+  macos-x86-libssh2:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -352,10 +357,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-libssh-c-ares:
+  macos-x86-libssh-c-ares:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -363,10 +368,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-libssh:
+  macos-x86-libssh:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -374,10 +379,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-c-ares:
+  macos-x86-c-ares:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -385,10 +390,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-http-only:
+  macos-x86-http-only:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -396,10 +401,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-http-securetransport-http2:
+  macos-x86-http-securetransport-http2:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -407,10 +412,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-http-openssl-http2:
+  macos-x86-http-openssl-http2:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -418,10 +423,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-http-libressl-http2:
+  macos-x86-http-libressl-http2:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -429,10 +434,10 @@ jobs:
       - build-macos
       - test-macos
 
-  macos-arm-http-torture:
+  macos-x86-http-torture:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -440,10 +445,10 @@ jobs:
       - build-macos
       - test-torture
 
-  macos-arm-http-torture-ftp:
+  macos-x86-http-torture-ftp:
     macos:
       xcode: 15.0.0
-    resource_class: macos.m1.medium.gen1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - install-deps-brew
@@ -484,52 +489,52 @@ workflows:
     jobs:
       - arm-cares
 
-  macos-arm-normal:
+  macos-x86-normal:
     jobs:
-      - macos-arm-normal
+      - macos-x86-normal
 
-  macos-arm-debug:
+  macos-x86-debug:
     jobs:
-      - macos-arm-debug
+      - macos-x86-debug
 
-  macos-arm-libssh2:
+  macos-x86-libssh2:
     jobs:
-      - macos-arm-libssh2
+      - macos-x86-libssh2
 
-  macos-arm-libssh-c-ares:
+  macos-x86-libssh-c-ares:
     jobs:
-      - macos-arm-libssh-c-ares
+      - macos-x86-libssh-c-ares
 
-  macos-arm-libssh:
+  macos-x86-libssh:
     jobs:
-      - macos-arm-libssh
+      - macos-x86-libssh
 
-  macos-arm-c-ares:
+  macos-x86-c-ares:
     jobs:
-      - macos-arm-c-ares
+      - macos-x86-c-ares
 
-  macos-arm-http-only:
+  macos-x86-http-only:
     jobs:
-      - macos-arm-http-only
+      - macos-x86-http-only
 
-  macos-arm-http-securetransport-http2:
+  macos-x86-http-securetransport-http2:
     jobs:
-      - macos-arm-http-securetransport-http2
+      - macos-x86-http-securetransport-http2
 
-  macos-arm-http-openssl-http2:
+  macos-x86-http-openssl-http2:
     jobs:
-      - macos-arm-http-openssl-http2
+      - macos-x86-http-openssl-http2
 
   # There are problem linking with LibreSSL on the CI boxes that prevent this
   # from working.
-  #macos-arm-http-libressl-http2:
+  #macos-x86-http-libressl-http2:
   #  jobs:
-  #    - macos-arm-http-libressl-http2
+  #    - macos-x86-http-libressl-http2
 
-  macos-arm-http-torture:
+  macos-x86-http-torture:
     jobs:
-      - macos-arm-http-torture
+      - macos-x86-http-torture
 
-  macos-arm-http-torture-ftp:
+  macos-x86-http-torture-ftp:
     jobs:
-      - macos-arm-http-torture-ftp
+      - macos-x86-http-torture-ftp
