@@ -24,7 +24,6 @@
 #
 ###########################################################################
 #
-import pytest
 import json
 import logging
 import os
@@ -199,15 +198,15 @@ class ExecResult:
             if self.with_stats:
                 for idx, x in enumerate(self.stats):
                     assert 'http_code' in x, \
-                        f'response #{idx} reports no http_code\n{self.dump_logs()}'
+                        f'response #{idx} reports no http_code\n{self.dump_stat(x)}'
                     assert x['http_code'] == http_status, \
                         f'response #{idx} http_code: expected {http_status}, '\
-                        f'got {x["http_code"]}\n{self.dump_logs()}'
+                        f'got {x["http_code"]}\n{self.dump_stat(x)}'
             else:
                 for idx, x in enumerate(self.responses):
                     assert x['status'] == http_status, \
                         f'response #{idx} status: expected {http_status},'\
-                        f'got {x["status"]}\n{self.dump_logs()}'
+                        f'got {x["status"]}\n{self.dump_stat(x)}'
         if protocol is not None:
             if self.with_stats:
                 http_version = None
@@ -221,7 +220,7 @@ class ExecResult:
                     for idx, x in enumerate(self.stats):
                         assert x['http_version'] == http_version, \
                             f'response #{idx} protocol: expected http/{http_version},' \
-                            f'got version {x["http_version"]}\n{self.dump_logs()}'
+                            f'got version {x["http_version"]}\n{self.dump_stat(x)}'
             else:
                 for idx, x in enumerate(self.responses):
                     assert x['protocol'] == protocol, \
@@ -241,25 +240,43 @@ class ExecResult:
         if http_status is not None:
             for idx, x in enumerate(self.stats):
                 assert 'http_code' in x, \
-                    f'status #{idx} reports no http_code\n{self.dump_logs()}'
+                    f'status #{idx} reports no http_code\n{self.dump_stat(x)}'
                 assert x['http_code'] == http_status, \
                     f'status #{idx} http_code: expected {http_status}, '\
-                    f'got {x["http_code"]}\n{self.dump_logs()}'
+                    f'got {x["http_code"]}\n{self.dump_stat(x)}'
         if exitcode is not None:
             for idx, x in enumerate(self.stats):
                 if 'exitcode' in x:
                     assert x['exitcode'] == 0, \
                         f'status #{idx} exitcode: expected {exitcode}, '\
-                        f'got {x["exitcode"]}\n{self.dump_logs()}'
+                        f'got {x["exitcode"]}\n{self.dump_stat(x)}'
 
     def dump_logs(self):
-        lines = []
-        lines.append('>>--stdout ----------------------------------------------\n')
+        lines = ['>>--stdout ----------------------------------------------\n']
         lines.extend(self._stdout)
         lines.append('>>--stderr ----------------------------------------------\n')
         lines.extend(self._stderr)
         lines.append('<<-------------------------------------------------------\n')
         return ''.join(lines)
+
+    def dump_stat(self, x):
+        lines = [
+            'json stat from curl:',
+            json.JSONEncoder(indent=2).encode(x),
+        ]
+        if 'xfer_id' in x:
+            xfer_id = x['xfer_id']
+            lines.append(f'>>--xfer {xfer_id} trace:\n')
+            lines.extend(self.xfer_trace_for(xfer_id))
+        else:
+            lines.append('>>--full trace-------------------------------------------\n')
+            lines.extend(self._stderr)
+            lines.append('<<-------------------------------------------------------\n')
+        return ''.join(lines)
+
+    def xfer_trace_for(self, xfer_id) -> List[str]:
+            pat = re.compile(f'^[^[]* \\[{xfer_id}-.*$')
+            return [line for line in self._stderr if pat.match(line)]
 
 
 class CurlClient:

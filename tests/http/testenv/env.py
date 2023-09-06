@@ -444,6 +444,10 @@ class Env:
         return "CURL_DBG_SOCK_WBLOCK" in os.environ or \
                "CURL_DBG_SOCK_WPARTIAL" in os.environ
 
+    @property
+    def ci_run(self) -> bool:
+        return "CURL_CI" in os.environ
+
     def authority_for(self, domain: str, alpn_proto: Optional[str] = None):
         if alpn_proto is None or \
                 alpn_proto in ['h2', 'http/1.1', 'http/1.0', 'http/0.9']:

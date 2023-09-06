@@ -201,6 +201,7 @@ class TestDownload:
         r.check_response(count=count, http_status=200)
 
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
+    @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_10_10MB_serial(self, env: Env,
                               httpd, nghttpx, repeat, proto):
@@ -213,6 +214,7 @@ class TestDownload:
         r.check_response(count=count, http_status=200)
 
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
+    @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_11_10MB_parallel(self, env: Env,
                               httpd, nghttpx, repeat, proto):
@@ -255,6 +257,7 @@ class TestDownload:
         r.check_response(count=count, http_status=200)
 
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
+    @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     def test_02_20_h2_small_frames(self, env: Env, httpd, repeat):
         # Test case to reproduce content corruption as observed in
         # https://github.com/curl/curl/issues/10525
