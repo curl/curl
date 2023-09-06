@@ -44,16 +44,16 @@
 
 #include "slist.h"
 
-#define HMAC_SHA256(k, kl, d, dl, o)        \
-  do {                                      \
-    ret = Curl_hmacit(Curl_HMAC_SHA256,     \
-                      (unsigned char *)k,   \
-                      kl,                   \
-                      (unsigned char *)d,   \
-                      dl, o);               \
-    if(ret) {                               \
-      goto fail;                            \
-    }                                       \
+#define HMAC_SHA256(k, kl, d, dl, o)           \
+  do {                                         \
+    result = Curl_hmacit(Curl_HMAC_SHA256,     \
+                         (unsigned char *)k,   \
+                         kl,                   \
+                         (unsigned char *)d,   \
+                         dl, o);               \
+    if(result) {                               \
+      goto fail;                               \
+    }                                          \
   } while(0)
 
 #define TIMESTAMP_SIZE 17
@@ -369,9 +369,109 @@ fail:
   return ret;
 }
 
+struct pair {
+  const char *p;
+  size_t len;
+};
+
+static int compare_func(const void *a, const void *b)
+{
+  const struct pair *aa = a;
+  const struct pair *bb = b;
+  return strncmp(aa->p, bb->p, aa->len < bb->len ? aa->len : bb->len);
+}
+
+#define MAX_QUERYPAIRS 64
+
+static CURLcode canon_query(struct Curl_easy *data,
+                            const char *query, struct dynbuf *dq)
+{
+  CURLcode result = CURLE_OK;
+  int entry = 0;
+  int i;
+  const char *p = query;
+  struct pair array[MAX_QUERYPAIRS];
+  struct pair *ap = &array[0];
+  if(!query)
+    return result;
+
+  /* sort the name=value pairs first */
+  do {
+    char *amp;
+    entry++;
+    ap->p = p;
+    amp = strchr(p, '&');
+    if(amp)
+      ap->len = amp - p; /* excluding the ampersand */
+    else {
+      ap->len = strlen(p);
+      break;
+    }
+    ap++;
+    p = amp + 1;
+  } while(entry < MAX_QUERYPAIRS);
+  if(entry == MAX_QUERYPAIRS) {
+    /* too many query pairs for us */
+    failf(data, "aws-sigv4: too many query pairs in URL");
+    return CURLE_URL_MALFORMAT;
+  }
+
+  qsort(&array[0], entry, sizeof(struct pair), compare_func);
+
+  ap = &array[0];
+  for(i = 0; !result && (i < entry); i++, ap++) {
+    size_t len;
+    const char *q = ap->p;
+    for(len = ap->len; len && !result; q++, len--) {
+      if(ISALNUM(*q))
+        result = Curl_dyn_addn(dq, q, 1);
+      else {
+        switch(*q) {
+        case '-':
+        case '.':
+        case '_':
+        case '~':
+        case '=':
+          /* allowed as-is */
+          result = Curl_dyn_addn(dq, q, 1);
+          break;
+        case '%':
+          /* uppercase the following if hexadecimal */
+          if(ISXDIGIT(q[1]) && ISXDIGIT(q[2])) {
+            char tmp[3]="%";
+            tmp[1] = Curl_raw_toupper(q[1]);
+            tmp[2] = Curl_raw_toupper(q[2]);
+            result = Curl_dyn_addn(dq, tmp, 3);
+            q += 2;
+          }
+          else
+            /* '%' without a following two-digit hex, encode it */
+            result = Curl_dyn_addn(dq, "%25", 3);
+          break;
+        default: {
+          /* URL encode */
+          const char hex[] = "0123456789ABCDEF";
+          char out[3]={'%'};
+          out[1] = hex[((unsigned char)*q)>>4];
+          out[2] = hex[*q & 0xf];
+          result = Curl_dyn_addn(dq, out, 3);
+          break;
+        }
+        }
+      }
+    }
+    if(i < entry - 1) {
+      /* insert ampersands between query pairs */
+      result = Curl_dyn_addn(dq, "&", 1);
+    }
+  }
+  return result;
+}
+
+
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 {
-  CURLcode ret = CURLE_OUT_OF_MEMORY;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   struct connectdata *conn = data->conn;
   size_t len;
   const char *arg;
@@ -387,6 +487,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char date[9];
   struct dynbuf canonical_headers;
   struct dynbuf signed_headers;
+  struct dynbuf canonical_query;
   char *date_header = NULL;
   Curl_HttpReq httpreq;
   const char *method = NULL;
@@ -415,6 +516,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   /* we init those buffers here, so goto fail will free initialized dynbuf */
   Curl_dyn_init(&canonical_headers, CURL_MAX_HTTP_HEADER);
+  Curl_dyn_init(&canonical_query, CURL_MAX_HTTP_HEADER);
   Curl_dyn_init(&signed_headers, CURL_MAX_HTTP_HEADER);
 
   /*
@@ -430,15 +532,15 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   /* provider1[:provider2[:region[:service]]]
 
      No string can be longer than N bytes of non-whitespace
-   */
+  */
   (void)sscanf(arg, "%" MAX_SIGV4_LEN_TXT "[^:]"
                ":%" MAX_SIGV4_LEN_TXT "[^:]"
                ":%" MAX_SIGV4_LEN_TXT "[^:]"
                ":%" MAX_SIGV4_LEN_TXT "s",
                provider0, provider1, region, service);
   if(!provider0[0]) {
-    failf(data, "first provider can't be empty");
-    ret = CURLE_BAD_FUNCTION_ARGUMENT;
+    failf(data, "first aws-sigv4 provider can't be empty");
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto fail;
   }
   else if(!provider1[0])
@@ -447,35 +549,38 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   if(!service[0]) {
     char *hostdot = strchr(hostname, '.');
     if(!hostdot) {
-      failf(data, "service missing in parameters and hostname");
-      ret = CURLE_URL_MALFORMAT;
+      failf(data, "aws-sigv4: service missing in parameters and hostname");
+      result = CURLE_URL_MALFORMAT;
       goto fail;
     }
     len = hostdot - hostname;
     if(len > MAX_SIGV4_LEN) {
-      failf(data, "service too long in hostname");
-      ret = CURLE_URL_MALFORMAT;
+      failf(data, "aws-sigv4: service too long in hostname");
+      result = CURLE_URL_MALFORMAT;
       goto fail;
     }
     strncpy(service, hostname, len);
     service[len] = '\0';
 
+    infof(data, "aws_sigv4: picked service %s from host", service);
+
     if(!region[0]) {
       const char *reg = hostdot + 1;
       const char *hostreg = strchr(reg, '.');
       if(!hostreg) {
-        failf(data, "region missing in parameters and hostname");
-        ret = CURLE_URL_MALFORMAT;
+        failf(data, "aws-sigv4: region missing in parameters and hostname");
+        result = CURLE_URL_MALFORMAT;
         goto fail;
       }
       len = hostreg - reg;
       if(len > MAX_SIGV4_LEN) {
-        failf(data, "region too long in hostname");
-        ret = CURLE_URL_MALFORMAT;
+        failf(data, "aws-sigv4: region too long in hostname");
+        result = CURLE_URL_MALFORMAT;
         goto fail;
       }
       strncpy(region, reg, len);
       region[len] = '\0';
+      infof(data, "aws_sigv4: picked region %s from host", region);
     }
   }
 
@@ -490,11 +595,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   if(!payload_hash) {
     if(sign_as_s3)
-      ret = calc_s3_payload_hash(data, httpreq, provider1, sha_hash,
-                                 sha_hex, content_sha256_hdr);
+      result = calc_s3_payload_hash(data, httpreq, provider1, sha_hash,
+                                    sha_hex, content_sha256_hdr);
     else
-      ret = calc_payload_hash(data, sha_hash, sha_hex);
-    if(ret)
+      result = calc_payload_hash(data, sha_hash, sha_hex);
+    if(result)
       goto fail;
 
     payload_hash = sha_hex;
@@ -513,21 +618,20 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 #else
   time(&clock);
 #endif
-  ret = Curl_gmtime(clock, &tm);
-  if(ret) {
+  result = Curl_gmtime(clock, &tm);
+  if(result) {
     goto fail;
   }
   if(!strftime(timestamp, sizeof(timestamp), "%Y%m%dT%H%M%SZ", &tm)) {
-    ret = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto fail;
   }
 
-  ret = make_headers(data, hostname, timestamp, provider1,
-                     &date_header, content_sha256_hdr,
-                     &canonical_headers, &signed_headers);
-  if(ret)
+  result = make_headers(data, hostname, timestamp, provider1,
+                        &date_header, content_sha256_hdr,
+                        &canonical_headers, &signed_headers);
+  if(result)
     goto fail;
-  ret = CURLE_OUT_OF_MEMORY;
 
   if(*content_sha256_hdr) {
     /* make_headers() needed this without the \r\n for canonicalization */
@@ -539,6 +643,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
 
+  result = canon_query(data, data->state.up.query, &canonical_query);
+  if(result)
+    goto fail;
+  result = CURLE_OUT_OF_MEMORY;
+
   canonical_request =
     curl_maprintf("%s\n" /* HTTPRequestMethod */
                   "%s\n" /* CanonicalURI */
@@ -548,7 +657,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                   "%.*s",  /* HashedRequestPayload in hex */
                   method,
                   data->state.up.path,
-                  data->state.up.query ? data->state.up.query : "",
+                  Curl_dyn_ptr(&canonical_query) ?
+                  Curl_dyn_ptr(&canonical_query) : "",
                   Curl_dyn_ptr(&canonical_headers),
                   Curl_dyn_ptr(&signed_headers),
                   (int)payload_hash_len, payload_hash);
@@ -632,9 +742,10 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   Curl_safefree(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
   data->state.authhost.done = TRUE;
-  ret = CURLE_OK;
+  result = CURLE_OK;
 
 fail:
+  Curl_dyn_free(&canonical_query);
   Curl_dyn_free(&canonical_headers);
   Curl_dyn_free(&signed_headers);
   free(canonical_request);
@@ -643,7 +754,7 @@ fail:
   free(str_to_sign);
   free(secret);
   free(date_header);
-  return ret;
+  return result;
 }
 
 #endif /* !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_AWS) */
