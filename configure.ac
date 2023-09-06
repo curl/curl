@@ -4011,6 +4011,25 @@ AS_HELP_STRING([--disable-digest-auth],[Disable digest authentication]),
 )
 
 dnl ************************************************************
+dnl disable kerberos authentication
+dnl
+AC_MSG_CHECKING([whether to enable kerberos authentication method])
+AC_ARG_ENABLE(kerberos-auth,
+AS_HELP_STRING([--enable-kerberos-auth],[Enable kerberos authentication (default)])
+AS_HELP_STRING([--disable-kerberos-auth],[Disable kerberos authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_KERBEROS_AUTH, 1, [to disable kerberos authentication])
+       CURL_DISABLE_KERBEROS_AUTH=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl disable negotiate authentication
 dnl
 AC_MSG_CHECKING([whether to enable negotiate authentication method])

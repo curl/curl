@@ -24,6 +24,10 @@ Disable support for the Bearer authentication methods.
 
 Disable support for the Digest authentication methods.
 
+## `CURL_DISABLE_KERBEROS_AUTH`
+
+Disable support for the Kerberos authentication methods.
+
 ## `CURL_DISABLE_NEGOTIATE_AUTH`
 
 Disable support for the negotiate authentication methods.
