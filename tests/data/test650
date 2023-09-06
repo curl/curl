@@ -29,7 +29,7 @@ Connection: close
 Content-Type: text/html
 
 -foo-
-</data>
+</data2>
 </reply>
 
 # Client-side
