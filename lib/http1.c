@@ -318,5 +318,29 @@ out:
   return nread;
 }
 
+CURLcode Curl_h1_req_write_head(struct httpreq *req, int http_minor,
+                                struct dynbuf *dbuf)
+{
+  CURLcode result;
+
+  result = Curl_dyn_addf(dbuf, "%s %s%s%s%s HTTP/1.%d\r\n",
+                         req->method,
+                         req->scheme? req->scheme : "",
+                         req->scheme? "://" : "",
+                         req->authority? req->authority : "",
+                         req->path? req->path : "",
+                         http_minor);
+  if(result)
+    goto out;
+
+  result = Curl_dynhds_h1_dprint(&req->headers, dbuf);
+  if(result)
+    goto out;
+
+  result = Curl_dyn_addn(dbuf, STRCONST("\r\n"));
+
+out:
+  return result;
+}
 
 #endif /* !CURL_DISABLE_HTTP */

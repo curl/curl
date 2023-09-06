@@ -84,7 +84,8 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
 {
   const char *hostname;
   int port;
-  bool ipv6_ip = cf->conn->bits.ipv6_ip;
+  bool ipv6_ip;
+  CURLcode result;
 
   ts->state = H2_TUNNEL_INIT;
   ts->stream_id = -1;
@@ -92,22 +93,9 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
                   BUFQ_OPT_SOFT_LIMIT);
   Curl_bufq_init(&ts->sendbuf, PROXY_H2_CHUNK_SIZE, H2_TUNNEL_SEND_CHUNKS);
 
-  if(cf->conn->bits.conn_to_host)
-    hostname = cf->conn->conn_to_host.name;
-  else if(cf->sockindex == SECONDARYSOCKET)
-    hostname = cf->conn->secondaryhostname;
-  else
-    hostname = cf->conn->host.name;
-
-  if(cf->sockindex == SECONDARYSOCKET)
-    port = cf->conn->secondary_port;
-  else if(cf->conn->bits.conn_to_port)
-    port = cf->conn->conn_to_port;
-  else
-    port = cf->conn->remote_port;
-
-  if(hostname != cf->conn->host.name)
-    ipv6_ip = (strchr(hostname, ':') != NULL);
+  result = Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
+  if(result)
+    return result;
 
   ts->authority = /* host:port with IPv6 support */
     aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"", port);
@@ -980,38 +968,11 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
   CURLcode result;
   struct httpreq *req = NULL;
 
-  infof(data, "Establish HTTP/2 proxy tunnel to %s", ts->authority);
-
-  result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT")-1,
-                              NULL, 0, ts->authority, strlen(ts->authority),
-                              NULL, 0);
+  result = Curl_http_proxy_create_CONNECT(&req, cf, data, 2);
   if(result)
     goto out;
 
-  /* Setup the proxy-authorization header, if any */
-  result = Curl_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
-                                 req->authority, TRUE);
-  if(result)
-    goto out;
-
-  if(data->state.aptr.proxyuserpwd) {
-    result = Curl_dynhds_h1_cadd_line(&req->headers,
-                                      data->state.aptr.proxyuserpwd);
-    if(result)
-      goto out;
-  }
-
-  if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent"))
-     && data->set.str[STRING_USERAGENT]) {
-    result = Curl_dynhds_cadd(&req->headers, "User-Agent",
-                              data->set.str[STRING_USERAGENT]);
-    if(result)
-      goto out;
-  }
-
-  result = Curl_dynhds_add_custom(data, TRUE, &req->headers);
-  if(result)
-    goto out;
+  infof(data, "Establish HTTP/2 proxy tunnel to %s", req->authority);
 
   result = proxy_h2_submit(&ts->stream_id, cf, data, ctx->h2, req,
                            NULL, ts, tunnel_send_callback, cf);
