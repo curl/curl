@@ -160,33 +160,33 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       /* filename*= is only supported when --decode-remote-name is given */
       bool found_star = (0 == memcmp(p, "filename*=", 10) &&
                           per->config->decode_remote_name);
-      
+
       /* if filename*= was present already, filename= should not override it */
       bool found_nostar = (0 == memcmp(p, "filename=", 9) &&
                             !outs->is_cd_filename);
-      
+
       if(!found_star && !found_nostar) {
         /* no match, find next parameter */
         while((p < end) && (*p != ';'))
           p++;
         continue;
       }
-      
+
       if(found_star)
         p += 10;
       else if(found_nostar)
         p += 9;
-        
+
       /* this expression below typecasts 'cb' only to avoid
          warning: signed and unsigned type in conditional expression
       */
       len = (ssize_t)cb - (p - str);
-      
+
       if(found_star)
         filename = parse_filename_star(p, len);
       else if(found_nostar)
         filename = parse_filename(p, len);
-      
+
       if(filename) {
         if(outs->stream) {
           /* indication of problem, get out! */
@@ -295,7 +295,7 @@ static char *parse_filename_star(const char *ptr, size_t len)
   char *copy;
   char *p;
   char *q;
-  
+
   /* simple implementation of strndup() */
   copy = malloc(len + 1);
   if(!copy)
@@ -309,7 +309,7 @@ static char *parse_filename_star(const char *ptr, size_t len)
    * The text encoding and language are ignored here, so we skip past the
    * second ' to get to the URL-encoded filename.
    */
-   
+
   p = strchr(ptr, '\'');
   if(!p)
     return NULL;
@@ -317,45 +317,45 @@ static char *parse_filename_star(const char *ptr, size_t len)
   if(!q)
     return NULL;
   q++;
-  
+
   p = copy;
   copy = curl_easy_unescape(NULL, q, 0, NULL);
   Curl_safefree(p);
   if(!copy)
     return NULL;
-  
+
   return parse_filename_post_process(copy);
 }
 
 static char *parse_filename_post_process(char *copy) {
   char *p;
   char *q;
-  
+
   /* if the filename contains a path, only use filename portion */
   p = copy;
   q = strrchr(p, '/');
   if(q)
     p = q + 1;
-  
+
   /* If the filename contains a backslash, only use filename portion. The idea
      is that even systems that don't handle backslashes as path separators
      probably want the path removed for convenience. */
   q = strrchr(p, '\\');
   if(q)
     p = q + 1;
-  
+
   /* make sure the file name doesn't end in \r or \n */
   q = strchr(p, '\r');
   if(q)
     *q = '\0';
-  
+
   q = strchr(p, '\n');
   if(q)
     *q = '\0';
-  
+
   if(copy != p)
     memmove(copy, p, strlen(p) + 1);
-  
+
 #if defined(MSDOS) || defined(WIN32)
   {
     char *sanitized;

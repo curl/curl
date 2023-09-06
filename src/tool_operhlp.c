@@ -197,18 +197,18 @@ CURLcode get_url_file_name(char **filename, const char *url)
     uerr = curl_url_get(uh, CURLUPART_PATH, &path, 0);
     if(!uerr) {
       curl_url_cleanup(uh);
-      
+
       char *base;
       CURLcode result;
       result = get_path_base(path, &base);
       if(result) {
         return result;
       }
-      
+
       /* no slash => empty string */
       if(base == path)
         base = "";
-      
+
       *filename = strdup(base);
       curl_free(path);
       if(!*filename)
@@ -259,15 +259,14 @@ CURLcode get_url_file_name(char **filename, const char *url)
 CURLcode get_path_base(char *path, char **base) {
   char *sep, *sep2;
   sep = strrchr(path, '/');
-  sep2 = strrchr(sep ? sep + 1 : path, '\\'); 
+  sep2 = strrchr(sep ? sep + 1 : path, '\\');
   if(sep2)
     sep = sep2;
-    
+
   if(sep)
     *base = sep + 1;
   else
     *base = path;
-  
+
   return CURLE_OK;
 }
- 
