@@ -1655,13 +1655,6 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   stream = H3_STREAM_CTX(data);
   DEBUGASSERT(stream);
 
-  rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &stream->id, NULL);
-  if(rc) {
-    failf(data, "can get bidi streams");
-    *err = CURLE_SEND_ERROR;
-    goto out;
-  }
-
   nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
   if(nwritten < 0)
     goto out;
@@ -1694,6 +1687,13 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
     nva[i].value = (unsigned char *)e->value;
     nva[i].valuelen = e->valuelen;
     nva[i].flags = NGHTTP3_NV_FLAG_NONE;
+  }
+
+  rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &stream->id, NULL);
+  if(rc) {
+    failf(data, "can get bidi streams");
+    *err = CURLE_SEND_ERROR;
+    goto out;
   }
 
   switch(data->state.httpreq) {
