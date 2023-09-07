@@ -148,8 +148,9 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-    /* Since the traffic will be encrypted, it is very useful to turn on debug
-     * information within libcurl to see what is happening during the transfer.
+    /* Since the traffic will be encrypted, it is useful to turn on debug
+     * information within libcurl to see what is happening during the
+     * transfer.
      */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 

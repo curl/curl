@@ -51,12 +51,11 @@
 # Users may override the detected values by doing something like:
 # LIBCURL="-lcurl" LIBCURL_CPPFLAGS="-I/usr/myinclude" ./configure
 #
-# For the sake of sanity, this macro assumes that any libcurl that is
-# found is after version 7.7.2, the first version that included the
-# curl-config script.  Note that it is very important for people
-# packaging binary versions of libcurl to include this script!
-# Without curl-config, we can only guess what protocols are available,
-# or use curl_version_info to figure it out at runtime.
+# For the sake of sanity, this macro assumes that any libcurl that is found is
+# after version 7.7.2, the first version that included the curl-config script.
+# Note that it is important for people packaging binary versions of libcurl to
+# include this script!  Without curl-config, we can only guess what protocols
+# are available, or use curl_version_info to figure it out at runtime.
 
 AC_DEFUN([LIBCURL_CHECK_CONFIG],
 [

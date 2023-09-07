@@ -21,7 +21,7 @@ This option allows a user to avoid using the Alt-Svc method of upgrading to
 HTTP/3 when you know that the target speaks HTTP/3 on the given host and port.
 
 When asked to use HTTP/3, curl will issue a separate attempt to use older HTTP
-versions with a slight delay, so if the HTTP/3 transfer fails or is very slow,
-curl will still try to proceed with an older HTTP version.
+versions with a slight delay, so if the HTTP/3 transfer fails or is slow, curl
+will still try to proceed with an older HTTP version.
 
 Use --http3-only for similar functionality *without* a fallback.

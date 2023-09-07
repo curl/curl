@@ -36,7 +36,7 @@
  */
 
 /* The libcurl options want plain addresses, the viewable headers in the mail
- * can very well get a full name as well.
+ * can get a full name as well.
  */
 #define FROM_ADDR    "<sender@example.org>"
 #define TO_ADDR      "<addressee@example.net>"
@@ -139,9 +139,9 @@ int main(void)
      * should be able to reuse this connection for additional messages
      * (setting CURLOPT_MAIL_FROM and CURLOPT_MAIL_RCPT as required, and
      * calling curl_easy_perform() again. It may not be a good idea to keep
-     * the connection open for a very long time though (more than a few
-     * minutes may result in the server timing out the connection), and you do
-     * want to clean up in the end.
+     * the connection open for a long time though (more than a few minutes may
+     * result in the server timing out the connection), and you do want to
+     * clean up in the end.
      */
     curl_easy_cleanup(curl);
   }
