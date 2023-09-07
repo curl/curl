@@ -18,6 +18,7 @@ A size modifier may be used. For example, Appending 'k' or 'K' will count the
 number as kilobytes, 'm' or 'M' makes it megabytes, while 'g' or 'G' makes it
 gigabytes. Examples: 200K, 3m and 1G. (Added in 7.58.0)
 
-**NOTE**: The file size is not always known prior to download, and for such
-files this option has no effect even if the file transfer ends up being larger
-than this given limit.
+**NOTE**: The file size is not always known prior to download. In this case,
+curl will start the download and if the received data exceeds the maximum size
+then curl will terminate the transfer prematurely and return error 63. Prior to
+curl 8.4.0 the option would have no effect in this case.

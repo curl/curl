@@ -231,6 +231,9 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
+  if(config->max_filesize && (outs->bytes + bytes > config->max_filesize))
+    return CURLE_FILESIZE_EXCEEDED;
+
 #ifdef WIN32
   fhnd = _get_osfhandle(fileno(outs->stream));
   /* if windows console then UTF-8 must be converted to UTF-16 */
