@@ -1459,7 +1459,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                     config->followlocation?1L:0L);
           my_setopt(curl, CURLOPT_UNRESTRICTED_AUTH,
                     config->unrestricted_auth?1L:0L);
-
+          my_setopt_str(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
           my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer?1L:0L);
 
           /* new in libcurl 7.36.0 */
@@ -1722,9 +1722,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
           my_setopt_str(curl, CURLOPT_PROXY_SSLKEYTYPE,
                         config->proxy_key_type);
-          my_setopt_str(curl, CURLOPT_AWS_SIGV4,
-                        config->aws_sigv4);
-
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
