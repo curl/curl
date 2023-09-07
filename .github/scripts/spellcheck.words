@@ -14,6 +14,7 @@ allocator
 alnum
 ALPN
 Altera
+AltSvc
 ALTSVC
 amiga
 AmigaOS
@@ -139,6 +140,7 @@ cURL
 CURLcode
 CURLE
 CURLH
+CURLINFO
 curlimages
 curlrc
 curltest
@@ -151,7 +153,9 @@ cyassl
 Cygwin
 daniel
 datatracker
+dbg
 Debian
+DEBUGBUILD
 decrypt
 deepcode
 DELE
