@@ -33,6 +33,7 @@
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
 #include "progress.h"
+#include "select.h"
 #include "warnless.h"
 
 /* The last 3 #include files should be in this order */
@@ -441,24 +442,6 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
-int Curl_conn_get_select_socks(struct Curl_easy *data, int sockindex,
-                               curl_socket_t *socks)
-{
-  struct Curl_cfilter *cf;
-
-  DEBUGASSERT(data);
-  DEBUGASSERT(data->conn);
-  cf = data->conn->cfilter[sockindex];
-
-  /* if the next one is not yet connected, that's the one we want */
-  while(cf && cf->next && !cf->next->connected)
-    cf = cf->next;
-  if(cf) {
-    return cf->cft->get_select_socks(cf, data, socks);
-  }
-  return GETSOCK_BLANK;
-}
-
 void Curl_conn_adjust_pollset(struct Curl_easy *data,
                                struct easy_pollset *ps)
 {
@@ -672,6 +655,13 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
 }
 
 
+void Curl_pollset_reset(struct Curl_easy *data,
+                        struct easy_pollset *ps)
+{
+  (void)data;
+  ps->num = 0;
+}
+
 void Curl_pollset_change(struct Curl_easy *data,
                        struct easy_pollset *ps, curl_socket_t sock,
                        unsigned char add_flags, unsigned char remove_flags)
@@ -679,6 +669,10 @@ void Curl_pollset_change(struct Curl_easy *data,
   unsigned int i;
 
   (void)data;
+  DEBUGASSERT(VALID_SOCK(sock));
+  if(!VALID_SOCK(sock))
+    return;
+
   for(i = 0; i < ps->num; ++i) {
     if(ps->sockets[i] == sock) {
       if(remove_flags) {
@@ -707,5 +701,52 @@ void Curl_pollset_change(struct Curl_easy *data,
       ps->num = i + 1;
     }
   }
+}
+
+static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
+                   int bitmap, curl_socket_t *socks)
+{
+  if(bitmap) {
+    int i;
+    for(i = 0; i < MAX_SOCKSPEREASYHANDLE; ++i) {
+      if(!(bitmap & GETSOCK_MASK_RW(i)) || !VALID_SOCK((socks[i]))) {
+        break;
+      }
+      if(bitmap & GETSOCK_READSOCK(i)) {
+        if(bitmap & GETSOCK_WRITESOCK(i))
+          Curl_pollset_add_inout(data, ps, socks[i]);
+        else
+          Curl_pollset_add_in(data, ps, socks[i]);
+      }
+      else
+        Curl_pollset_add_out(data, ps, socks[i]);
+    }
+  }
+}
+
+void Curl_pollset_add_socks(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            int (*get_socks_cb)(struct Curl_easy *data,
+                                                struct connectdata *conn,
+                                                curl_socket_t *socks))
+{
+  curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
+  int bitmap;
+
+  DEBUGASSERT(data->conn);
+  bitmap = get_socks_cb(data, data->conn, socks);
+  ps_add(data, ps, bitmap, socks);
+}
+
+void Curl_pollset_add_socks2(struct Curl_easy *data,
+                             struct easy_pollset *ps,
+                             int (*get_socks_cb)(struct Curl_easy *data,
+                                                 curl_socket_t *socks))
+{
+  curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
+  int bitmap;
+
+  bitmap = get_socks_cb(data, socks);
+  ps_add(data, ps, bitmap, socks);
 }
 

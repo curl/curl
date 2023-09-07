@@ -1071,7 +1071,7 @@ static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
 {
   struct h1_tunnel_state *ts = cf->ctx;
 
-  if(!cf->connected) {
+  if(!cf->connected && cf->next && cf->next->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are tunneling. */
     curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);

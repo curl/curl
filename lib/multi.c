@@ -1024,7 +1024,7 @@ static int protocol_getsock(struct Curl_easy *data,
 {
   if(conn->handler->proto_getsock)
     return conn->handler->proto_getsock(data, conn, socks);
-  return Curl_conn_get_select_socks(data, FIRSTSOCKET, socks);
+  return GETSOCK_BLANK;
 }
 
 /* Initializes `poll_set` with the current socket poll actions needed
@@ -1032,65 +1032,49 @@ static int protocol_getsock(struct Curl_easy *data,
 static void multi_getsock(struct Curl_easy *data,
                           struct easy_pollset *ps)
 {
-  struct connectdata *conn = data->conn;
-  int actions;
   /* The no connection case can happen when this is called from
      curl_multi_remove_handle() => singlesocket() => multi_getsock().
   */
-  ps->num = 0;
-  if(!conn)
+  Curl_pollset_reset(data, ps);
+  if(!data->conn)
     return;
 
   switch(data->mstate) {
   default:
-    return;
+    break;
 
   case MSTATE_RESOLVING:
-    actions = Curl_resolv_getsock(data, ps->sockets);
-    break;
+    Curl_pollset_add_socks2(data, ps, Curl_resolv_getsock);
+    /* connection filters are not involved in this phase */
+    return;
 
   case MSTATE_PROTOCONNECTING:
   case MSTATE_PROTOCONNECT:
-    actions = protocol_getsock(data, conn, ps->sockets);
+    Curl_pollset_add_socks(data, ps, protocol_getsock);
     break;
 
   case MSTATE_DO:
   case MSTATE_DOING:
-    actions = doing_getsock(data, conn, ps->sockets);
+    Curl_pollset_add_socks(data, ps, doing_getsock);
     break;
 
   case MSTATE_TUNNELING:
   case MSTATE_CONNECTING:
-    Curl_conn_adjust_pollset(data, ps);
-    infof(data, "multi_getsock() -> %d sockets", ps->num);
-    return;
+    break;
 
   case MSTATE_DOING_MORE:
-    actions = domore_getsock(data, conn, ps->sockets);
+    Curl_pollset_add_socks(data, ps, domore_getsock);
     break;
 
   case MSTATE_DID: /* since is set after DO is completed, we switch to
                         waiting for the same as the PERFORMING state */
   case MSTATE_PERFORMING:
-    actions = Curl_single_getsock(data, conn, ps->sockets);
+    Curl_pollset_add_socks(data, ps, Curl_single_getsock);
     break;
   }
 
-  if(actions) {
-    int i;
-    for(i = 0; i < MAX_SOCKSPEREASYHANDLE; ++i) {
-      if(!(actions & GETSOCK_MASK_RW(i)) ||
-         !VALID_SOCK((ps->sockets[i]))) {
-        break;
-      }
-      ps->actions[i] = 0;
-      if(actions & GETSOCK_READSOCK(i))
-        ps->actions[i] |= CURL_POLL_IN;
-      if(actions & GETSOCK_WRITESOCK(i))
-        ps->actions[i] |= CURL_POLL_OUT;
-    }
-    ps->num = i;
-  }
+  /* Let connection filters add/remove as needed */
+  Curl_conn_adjust_pollset(data, ps);
 }
 
 CURLMcode curl_multi_fdset(struct Curl_multi *multi,

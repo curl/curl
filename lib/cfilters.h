@@ -395,13 +395,6 @@ bool Curl_conn_data_pending(struct Curl_easy *data,
 curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex);
 
 /**
- * Get any select fd flags and the socket filters at chain `sockindex`
- * at connection `conn` might be waiting for.
- */
-int Curl_conn_get_select_socks(struct Curl_easy *data, int sockindex,
-                               curl_socket_t *socks);
-
-/**
  * Adjust poll set from filters installed at transfer's connection.
  */
 void Curl_conn_adjust_pollset(struct Curl_easy *data,
@@ -505,6 +498,9 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                     int sockindex);
 
 
+void Curl_pollset_reset(struct Curl_easy *data,
+                        struct easy_pollset *ps);
+
 /* Change the poll flags (CURL_POLL_IN/CURL_POLL_OUT) to the poll set for
  * socket `sock`. If the socket is not already part of the poll set, it
  * will be added.
@@ -527,6 +523,16 @@ void Curl_pollset_change(struct Curl_easy *data,
 #define Curl_pollset_set_out_only(data, ps, sock) \
           Curl_pollset_change((data), (ps), (sock), \
                                CURL_POLL_OUT, CURL_POLL_IN)
+
+void Curl_pollset_add_socks(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            int (*get_socks_cb)(struct Curl_easy *data,
+                                                struct connectdata *conn,
+                                                curl_socket_t *socks));
+void Curl_pollset_add_socks2(struct Curl_easy *data,
+                             struct easy_pollset *ps,
+                             int (*get_socks_cb)(struct Curl_easy *data,
+                                                 curl_socket_t *socks));
 
 /**
  * Types and macros used to keep the current easy handle in filter calls,
