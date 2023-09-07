@@ -1214,10 +1214,10 @@ static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
     case CONNECT_AUTH_READ:
     case CONNECT_REQ_READ:
     case CONNECT_REQ_READ_MORE:
-      Curl_poll_set_change(data, ps, sock, CURL_POLL_IN, CURL_POLL_OUT);
+      Curl_pollset_set_in_only(data, ps, sock);
       break;
     default:
-      Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN);
+      Curl_pollset_set_out_only(data, ps, sock);
       break;
     }
   }

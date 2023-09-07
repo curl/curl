@@ -510,10 +510,23 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
  * will be added.
  * If the socket is present and all poll flags are cleared, it will be removed.
  */
-void Curl_poll_set_change(struct Curl_easy *data,
-                       struct easy_pollset *ps, curl_socket_t sock,
-                       unsigned char add_flags, unsigned char remove_flags);
+void Curl_pollset_change(struct Curl_easy *data,
+                         struct easy_pollset *ps, curl_socket_t sock,
+                         unsigned char add_flags, unsigned char remove_flags);
 
+#define Curl_pollset_add_in(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), CURL_POLL_IN, 0)
+#define Curl_pollset_add_out(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), CURL_POLL_OUT, 0)
+#define Curl_pollset_add_inout(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), \
+                               CURL_POLL_IN|CURL_POLL_OUT, 0)
+#define Curl_pollset_set_in_only(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), \
+                               CURL_POLL_IN, CURL_POLL_OUT)
+#define Curl_pollset_set_out_only(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), \
+                               CURL_POLL_OUT, CURL_POLL_IN)
 
 /**
  * Types and macros used to keep the current easy handle in filter calls,

@@ -1116,14 +1116,14 @@ static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
 
   /* in HTTP/3 we can always get a frame, so check read */
-  Curl_poll_set_change(data, ps, ctx->q.sockfd, CURL_POLL_IN, 0);
+  Curl_pollset_add_in(data, ps, ctx->q.sockfd);
 
   /* we're still uploading or the HTTP/2 layer wants to send data */
   if((k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
      ngtcp2_conn_get_cwnd_left(ctx->qconn) &&
      ngtcp2_conn_get_max_data_left(ctx->qconn) &&
      stream && nghttp3_conn_is_stream_writable(ctx->h3conn, stream->id))
-    Curl_poll_set_change(data, ps, ctx->q.sockfd, CURL_POLL_OUT, 0);
+    Curl_pollset_add_out(data, ps, ctx->q.sockfd);
 
   CF_DATA_RESTORE(cf, save);
   if(cf->next)

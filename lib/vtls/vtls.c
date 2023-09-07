@@ -655,10 +655,10 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
     curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
     if(sock != CURL_SOCKET_BAD) {
       if(connssl->connecting_state == ssl_connect_2_writing) {
-        Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN);
+        Curl_pollset_set_out_only(data, ps, sock);
       }
       else {
-        Curl_poll_set_change(data, ps, sock, CURL_POLL_IN, CURL_POLL_OUT);
+        Curl_pollset_set_in_only(data, ps, sock);
       }
     }
   }

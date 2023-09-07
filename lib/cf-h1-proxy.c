@@ -1081,12 +1081,12 @@ static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
          response headers or if we're still sending the request, wait
          for write. */
       if(ts->CONNECT.sending == HTTPSEND_REQUEST)
-        Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN);
+        Curl_pollset_set_out_only(data, ps, sock);
       else
-        Curl_poll_set_change(data, ps, sock, CURL_POLL_IN, CURL_POLL_OUT);
+        Curl_pollset_set_in_only(data, ps, sock);
     }
     else
-      Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN);
+      Curl_pollset_set_out_only(data, ps, sock);
   }
   if(cf->next)
     cf->next->cft->adjust_pollset(cf->next, data, ps);

@@ -1209,10 +1209,10 @@ static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
 
   /* HTTP/2 layer wants to send data) AND there's a window to send data in */
   if(nghttp2_session_want_read(ctx->h2))
-    Curl_poll_set_change(data, ps, sock, CURL_POLL_IN, 0);
+    Curl_pollset_add_in(data, ps, sock);
   if(nghttp2_session_want_write(ctx->h2) &&
      nghttp2_session_get_remote_window_size(ctx->h2))
-    Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, 0);
+    Curl_pollset_add_out(data, ps, sock);
 
   CF_DATA_RESTORE(cf, save);
   if(cf->next)

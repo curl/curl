@@ -672,7 +672,7 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
 }
 
 
-void Curl_poll_set_change(struct Curl_easy *data,
+void Curl_pollset_change(struct Curl_easy *data,
                        struct easy_pollset *ps, curl_socket_t sock,
                        unsigned char add_flags, unsigned char remove_flags)
 {
@@ -708,3 +708,4 @@ void Curl_poll_set_change(struct Curl_easy *data,
     }
   }
 }
+
