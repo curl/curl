@@ -29,6 +29,7 @@ libcurl reads and understands a set of environment variables that if set
 controls and changes behaviors. This is the full list of variables to set and
 description of what they do. Also note that curl, the command line tool,
 supports a set of additional environment variables independently of this.
+.RS
 .IP "[scheme]_proxy"
 When libcurl is given a URL to use in a transfer, it first extracts the scheme
 part from the URL and checks if there is a given proxy set for that in its
@@ -83,21 +84,9 @@ precautions so that they are not stolen or otherwise inadvertently revealed.
 .IP USER
 User name to use when invoking the \fIntlm-wb\fP tool, if \fINTLMUSER\fP and
 \fILOGNAME\fP were not set.
+.RE
 .SH "Debug Variables"
-There is a set of variables only recognized and used if libcurl was built
-"debug enabled", which should never be true for a library used in production.
-.IP "CURL_GETHOSTNAME"
-Debug-only variable.
-.IP "CURL_FORCETIME"
-Debug-only variable.
-.IP "CURL_ENTROPY"
-Debug-only variable. Used to set a fixed faked value to use instead of a
-proper random number so that functions in libcurl that are otherwise getting
-random outputs can be tested for what they generate.
-.IP "CURL_TRACE"
-Debug-only variable. Used for debugging the lib/ldap implementation.
-.IP "CURL_NTLM_WB_FILE"
-Debug-only variable. Used to set to a debug-version of the \fIntlm-wb\fP
-executable.
-.IP "CURL_OPENLDAP_TRACE"
-Debug-only variable. Used for debugging the OpenLDAP implementation.
+Debug variables are intended for internal use and are documented in
+\fIlibcurl-env-dbg(3)\fP.
+.SH "SEE ALSO"
+.BR libcurl-env-dbg (3)

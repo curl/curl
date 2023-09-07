@@ -111,6 +111,7 @@ man_MANS = \
  curl_ws_send.3 \
  libcurl-easy.3 \
  libcurl-env.3 \
+ libcurl-env-dbg.3 \
  libcurl-errors.3 \
  libcurl-multi.3 \
  libcurl-security.3 \
