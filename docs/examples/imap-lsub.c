@@ -50,7 +50,7 @@ int main(void)
     /* This is just the server URL */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com");
 
-    /* Set the LSUB command. Note the syntax is very similar to that of a LIST
+    /* Set the LSUB command. Note the syntax is similar to that of a LIST
        command. */
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "LSUB \"\" *");
 
