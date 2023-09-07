@@ -1197,9 +1197,9 @@ static int cf_h2_proxy_get_select_socks(struct Curl_cfilter *cf,
   return bitmap;
 }
 
-static void cf_h2_proxy_adjust_poll_set(struct Curl_cfilter *cf,
+static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
-                                        struct easy_poll_set *ps)
+                                        struct easy_pollset *ps)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
@@ -1216,7 +1216,7 @@ static void cf_h2_proxy_adjust_poll_set(struct Curl_cfilter *cf,
 
   CF_DATA_RESTORE(cf, save);
   if(cf->next)
-    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 static ssize_t h2_handle_tunnel_close(struct Curl_cfilter *cf,
@@ -1554,7 +1554,7 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   cf_h2_proxy_close,
   Curl_cf_http_proxy_get_host,
   cf_h2_proxy_get_select_socks,
-  cf_h2_proxy_adjust_poll_set,
+  cf_h2_proxy_adjust_pollset,
   cf_h2_proxy_data_pending,
   cf_h2_proxy_send,
   cf_h2_proxy_recv,

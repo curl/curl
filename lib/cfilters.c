@@ -78,12 +78,12 @@ int Curl_cf_def_get_select_socks(struct Curl_cfilter *cf,
     cf->next->cft->get_select_socks(cf->next, data, socks) : 0;
 }
 
-void Curl_cf_def_adjust_poll_set(struct Curl_cfilter *cf,
+void Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
-                                 struct easy_poll_set *ps)
+                                 struct easy_pollset *ps)
 {
   if(cf->next)
-    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
@@ -459,8 +459,8 @@ int Curl_conn_get_select_socks(struct Curl_easy *data, int sockindex,
   return GETSOCK_BLANK;
 }
 
-void Curl_conn_adjust_poll_set(struct Curl_easy *data,
-                               struct easy_poll_set *ps)
+void Curl_conn_adjust_pollset(struct Curl_easy *data,
+                               struct easy_pollset *ps)
 {
   struct Curl_cfilter *cf;
   int i;
@@ -470,7 +470,7 @@ void Curl_conn_adjust_poll_set(struct Curl_easy *data,
   for(i = 0; i < 2; ++i) {
     cf = data->conn->cfilter[i];
     if(cf) {
-      cf->cft->adjust_poll_set(cf, data, ps);
+      cf->cft->adjust_pollset(cf, data, ps);
     }
   }
 }
@@ -673,7 +673,7 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
 
 
 void Curl_poll_set_change(struct Curl_easy *data,
-                       struct easy_poll_set *ps, curl_socket_t sock,
+                       struct easy_pollset *ps, curl_socket_t sock,
                        unsigned char add_flags, unsigned char remove_flags)
 {
   unsigned int i;

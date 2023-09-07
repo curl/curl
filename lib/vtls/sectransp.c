@@ -3484,7 +3484,7 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   sectransp_connect,                  /* connect */
   sectransp_connect_nonblocking,      /* connect_nonblocking */
   Curl_ssl_get_select_socks,          /* getsock */
-  Curl_ssl_adjust_poll_set,           /* adjust_poll_set */
+  Curl_ssl_adjust_pollset,           /* adjust_pollset */
   sectransp_get_internals,            /* get_internals */
   sectransp_close,                    /* close_one */
   Curl_none_close_all,                /* close_all */

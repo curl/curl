@@ -163,6 +163,7 @@ static struct Curl_cftype cft_test = {
   Curl_cf_def_close,
   Curl_cf_def_get_host,
   Curl_cf_def_get_select_socks,
+  Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,

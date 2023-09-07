@@ -1198,9 +1198,9 @@ static int socks_cf_get_select_socks(struct Curl_cfilter *cf,
   return fds;
 }
 
-static void socks_cf_adjust_poll_set(struct Curl_cfilter *cf,
+static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
-                                     struct easy_poll_set *ps)
+                                     struct easy_pollset *ps)
 {
   struct socks_state *sx = cf->ctx;
 
@@ -1222,7 +1222,7 @@ static void socks_cf_adjust_poll_set(struct Curl_cfilter *cf,
     }
   }
   if(cf->next)
-    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 static void socks_proxy_cf_close(struct Curl_cfilter *cf,
@@ -1268,7 +1268,7 @@ struct Curl_cftype Curl_cft_socks_proxy = {
   socks_proxy_cf_close,
   socks_cf_get_host,
   socks_cf_get_select_socks,
-  socks_cf_adjust_poll_set,
+  socks_cf_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,

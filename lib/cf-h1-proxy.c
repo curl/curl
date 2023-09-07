@@ -1065,9 +1065,9 @@ static int cf_h1_proxy_get_select_socks(struct Curl_cfilter *cf,
   return fds;
 }
 
-static void cf_h1_proxy_adjust_poll_set(struct Curl_cfilter *cf,
+static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
-                                        struct easy_poll_set *ps)
+                                        struct easy_pollset *ps)
 {
   struct h1_tunnel_state *ts = cf->ctx;
 
@@ -1089,7 +1089,7 @@ static void cf_h1_proxy_adjust_poll_set(struct Curl_cfilter *cf,
       Curl_poll_set_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN);
   }
   if(cf->next)
-    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
@@ -1121,7 +1121,7 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   cf_h1_proxy_close,
   Curl_cf_http_proxy_get_host,
   cf_h1_proxy_get_select_socks,
-  cf_h1_proxy_adjust_poll_set,
+  cf_h1_proxy_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,

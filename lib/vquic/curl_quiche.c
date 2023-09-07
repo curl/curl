@@ -1675,7 +1675,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_close,
   Curl_cf_def_get_host,
   cf_quiche_get_select_socks,
-  Curl_cf_def_adjust_poll_set,
+  Curl_cf_def_adjust_pollset,
   cf_quiche_data_pending,
   cf_quiche_send,
   cf_quiche_recv,

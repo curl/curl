@@ -125,8 +125,8 @@ struct Curl_ssl {
      Mandatory. */
   int (*get_select_socks)(struct Curl_cfilter *cf, struct Curl_easy *data,
                           curl_socket_t *socks);
-  void (*adjust_poll_set)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          struct easy_poll_set *ps);
+  void (*adjust_pollset)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          struct easy_pollset *ps);
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
   void (*close)(struct Curl_cfilter *cf, struct Curl_easy *data);
   void (*close_all)(struct Curl_easy *data);
@@ -172,8 +172,8 @@ struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
 bool Curl_none_false_start(void);
 int Curl_ssl_get_select_socks(struct Curl_cfilter *cf, struct Curl_easy *data,
                               curl_socket_t *socks);
-void Curl_ssl_adjust_poll_set(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              struct easy_poll_set *ps);
+void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              struct easy_pollset *ps);
 
 /**
  * Get the ssl_config_data in `data` that is relevant for cfilter `cf`.

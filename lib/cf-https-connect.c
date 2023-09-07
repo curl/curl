@@ -363,9 +363,9 @@ static int cf_hc_get_select_socks(struct Curl_cfilter *cf,
   return rc;
 }
 
-static void cf_hc_adjust_poll_set(struct Curl_cfilter *cf,
+static void cf_hc_adjust_pollset(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  struct easy_poll_set *ps)
+                                  struct easy_pollset *ps)
 {
   if(!cf->connected) {
     struct cf_hc_ctx *ctx = cf->ctx;
@@ -378,12 +378,12 @@ static void cf_hc_adjust_poll_set(struct Curl_cfilter *cf,
       struct cf_hc_baller *b = ballers[i];
       if(!cf_hc_baller_is_active(b))
         continue;
-      b->cf->cft->adjust_poll_set(b->cf, data, ps);
+      b->cf->cft->adjust_pollset(b->cf, data, ps);
     }
-    CURL_TRC_CF(data, cf, "adjust_poll_set -> %d socks", ps->num);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
   }
   if(cf->next)
-    cf->next->cft->adjust_poll_set(cf->next, data, ps);
+    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 static bool cf_hc_data_pending(struct Curl_cfilter *cf,
@@ -479,7 +479,7 @@ struct Curl_cftype Curl_cft_http_connect = {
   cf_hc_close,
   Curl_cf_def_get_host,
   cf_hc_get_select_socks,
-  cf_hc_adjust_poll_set,
+  cf_hc_adjust_pollset,
   cf_hc_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,

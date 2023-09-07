@@ -1026,7 +1026,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_msh3_close,
   Curl_cf_def_get_host,
   cf_msh3_get_select_socks,
-  Curl_cf_def_adjust_poll_set,
+  Curl_cf_def_adjust_pollset,
   cf_msh3_data_pending,
   cf_msh3_send,
   cf_msh3_recv,

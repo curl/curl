@@ -1275,7 +1275,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_connect,                  /* connect */
   mbedtls_connect_nonblocking,      /* connect_nonblocking */
   Curl_ssl_get_select_socks,        /* getsock */
-  Curl_ssl_adjust_poll_set,         /* adjust_poll_set */
+  Curl_ssl_adjust_pollset,         /* adjust_pollset */
   mbedtls_get_internals,            /* get_internals */
   mbedtls_close,                    /* close_one */
   mbedtls_close_all,                /* close_all */
