@@ -1176,27 +1176,6 @@ static bool cf_h2_proxy_data_pending(struct Curl_cfilter *cf,
   return cf->next? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
 
-static int cf_h2_proxy_get_select_socks(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        curl_socket_t *sock)
-{
-  struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  int bitmap = GETSOCK_BLANK;
-  struct cf_call_data save;
-
-  CF_DATA_SAVE(save, cf, data);
-  sock[0] = Curl_conn_cf_get_socket(cf, data);
-  bitmap |= GETSOCK_READSOCK(0);
-
-  /* HTTP/2 layer wants to send data) AND there's a window to send data in */
-  if(nghttp2_session_want_write(ctx->h2) &&
-     nghttp2_session_get_remote_window_size(ctx->h2))
-    bitmap |= GETSOCK_WRITESOCK(0);
-
-  CF_DATA_RESTORE(cf, save);
-  return bitmap;
-}
-
 static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         struct easy_pollset *ps)
@@ -1204,19 +1183,25 @@ static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
   curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+  bool window_exhausted;
 
   CF_DATA_SAVE(save, cf, data);
 
+  window_exhausted = !nghttp2_session_get_remote_window_size(ctx->h2) ||
+      (ctx->tunnel.stream_id >= 0 &&
+       !nghttp2_session_get_stream_remote_window_size(ctx->h2,
+                                                      ctx->tunnel.stream_id));
   /* HTTP/2 layer wants to send data) AND there's a window to send data in */
-  if(nghttp2_session_want_read(ctx->h2))
-    Curl_pollset_add_in(data, ps, sock);
-  if(nghttp2_session_want_write(ctx->h2) &&
-     nghttp2_session_get_remote_window_size(ctx->h2))
+  if(nghttp2_session_want_read(ctx->h2)) {
+    if(window_exhausted)
+      Curl_pollset_set_in_only(data, ps, sock);
+    else
+      Curl_pollset_add_in(data, ps, sock);
+  }
+  if(!window_exhausted && nghttp2_session_want_write(ctx->h2))
     Curl_pollset_add_out(data, ps, sock);
 
   CF_DATA_RESTORE(cf, save);
-  if(cf->next)
-    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 static ssize_t h2_handle_tunnel_close(struct Curl_cfilter *cf,
@@ -1553,7 +1538,6 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   cf_h2_proxy_connect,
   cf_h2_proxy_close,
   Curl_cf_http_proxy_get_host,
-  cf_h2_proxy_get_select_socks,
   cf_h2_proxy_adjust_pollset,
   cf_h2_proxy_data_pending,
   cf_h2_proxy_send,

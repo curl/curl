@@ -171,22 +171,6 @@ static void cf_haproxy_close(struct Curl_cfilter *cf,
     cf->next->cft->do_close(cf->next, data);
 }
 
-static int cf_haproxy_get_select_socks(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
-                                       curl_socket_t *socks)
-{
-  int fds;
-
-  fds = cf->next->cft->get_select_socks(cf->next, data, socks);
-  if(!fds && cf->next->connected && !cf->connected) {
-    /* If we are not connected, but the filter "below" is
-     * and not waiting on something, we are sending. */
-    socks[0] = Curl_conn_cf_get_socket(cf, data);
-    return GETSOCK_WRITESOCK(0);
-  }
-  return fds;
-}
-
 static void cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct easy_pollset *ps)
@@ -196,8 +180,6 @@ static void cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
      * and not waiting on something, we are sending. */
     Curl_pollset_set_out_only(data, ps, Curl_conn_cf_get_socket(cf, data));
   }
-  if(cf->next)
-    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 struct Curl_cftype Curl_cft_haproxy = {
@@ -208,7 +190,6 @@ struct Curl_cftype Curl_cft_haproxy = {
   cf_haproxy_connect,
   cf_haproxy_close,
   Curl_cf_def_get_host,
-  cf_haproxy_get_select_socks,
   cf_haproxy_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,

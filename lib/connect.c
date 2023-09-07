@@ -846,37 +846,6 @@ static void cf_he_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
   ctx->winner = NULL;
 }
 
-static int cf_he_get_select_socks(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  curl_socket_t *socks)
-{
-  struct cf_he_ctx *ctx = cf->ctx;
-  size_t i, s;
-  int wrc, rc = GETSOCK_BLANK;
-  curl_socket_t wsocks[MAX_SOCKSPEREASYHANDLE];
-
-  if(cf->connected)
-    return cf->next->cft->get_select_socks(cf->next, data, socks);
-
-  for(i = s = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
-    struct eyeballer *baller = ctx->baller[i];
-    if(!baller || !baller->cf)
-      continue;
-
-    wrc = Curl_conn_cf_get_select_socks(baller->cf, data, wsocks);
-    if(wrc) {
-      /* TODO: we assume we get at most one socket back */
-      socks[s] = wsocks[0];
-      if(wrc & GETSOCK_WRITESOCK(0))
-        rc |= GETSOCK_WRITESOCK(s);
-      if(wrc & GETSOCK_READSOCK(0))
-        rc |= GETSOCK_READSOCK(s);
-      s++;
-    }
-  }
-  return rc;
-}
-
 static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct easy_pollset *ps)
@@ -889,13 +858,10 @@ static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
       struct eyeballer *baller = ctx->baller[i];
       if(!baller || !baller->cf)
         continue;
-
-      baller->cf->cft->adjust_pollset(baller->cf, data, ps);
+      Curl_conn_cf_adjust_pollset(baller->cf, data, ps);
     }
     CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
   }
-  if(cf->next)
-    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 static CURLcode cf_he_connect(struct Curl_cfilter *cf,
@@ -1076,7 +1042,6 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   cf_he_connect,
   cf_he_close,
   Curl_cf_def_get_host,
-  cf_he_get_select_socks,
   cf_he_adjust_pollset,
   cf_he_data_pending,
   Curl_cf_def_send,
@@ -1341,7 +1306,6 @@ struct Curl_cftype Curl_cft_setup = {
   cf_setup_connect,
   cf_setup_close,
   Curl_cf_def_get_host,
-  Curl_cf_def_get_select_socks,
   Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,

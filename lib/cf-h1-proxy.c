@@ -1038,40 +1038,13 @@ out:
   return result;
 }
 
-static int cf_h1_proxy_get_select_socks(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        curl_socket_t *socks)
-{
-  struct h1_tunnel_state *ts = cf->ctx;
-  int fds;
-
-  fds = cf->next->cft->get_select_socks(cf->next, data, socks);
-  if(!fds && cf->next->connected && !cf->connected) {
-    /* If we are not connected, but the filter "below" is
-     * and not waiting on something, we are tunneling. */
-    socks[0] = Curl_conn_cf_get_socket(cf, data);
-    if(ts) {
-      /* when we've sent a CONNECT to a proxy, we should rather either
-         wait for the socket to become readable to be able to get the
-         response headers or if we're still sending the request, wait
-         for write. */
-      if(ts->CONNECT.sending == HTTPSEND_REQUEST) {
-        return GETSOCK_WRITESOCK(0);
-      }
-      return GETSOCK_READSOCK(0);
-    }
-    return GETSOCK_WRITESOCK(0);
-  }
-  return fds;
-}
-
 static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         struct easy_pollset *ps)
 {
   struct h1_tunnel_state *ts = cf->ctx;
 
-  if(!cf->connected && cf->next && cf->next->connected) {
+  if(!cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are tunneling. */
     curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
@@ -1088,8 +1061,6 @@ static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
     else
       Curl_pollset_set_out_only(data, ps, sock);
   }
-  if(cf->next)
-    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
@@ -1120,7 +1091,6 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   cf_h1_proxy_connect,
   cf_h1_proxy_close,
   Curl_cf_http_proxy_get_host,
-  cf_h1_proxy_get_select_socks,
   cf_h1_proxy_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,

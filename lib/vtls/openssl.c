@@ -4842,8 +4842,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_cert_status_request, /* cert_status_request */
   ossl_connect,             /* connect */
   ossl_connect_nonblocking, /* connect_nonblocking */
-  Curl_ssl_get_select_socks,/* getsock */
-  Curl_ssl_adjust_pollset, /* adjust_pollset */
+  Curl_ssl_adjust_pollset,  /* adjust_pollset */
   ossl_get_internals,       /* get_internals */
   ossl_close,               /* close_one */
   ossl_close_all,           /* close_all */

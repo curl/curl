@@ -629,24 +629,6 @@ void Curl_ssl_close_all(struct Curl_easy *data)
   Curl_ssl->close_all(data);
 }
 
-int Curl_ssl_get_select_socks(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              curl_socket_t *socks)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
-
-  if(sock == CURL_SOCKET_BAD)
-    return GETSOCK_BLANK;
-
-  if(connssl->connecting_state == ssl_connect_2_writing) {
-    /* we are only interested in writing */
-    socks[0] = sock;
-    return GETSOCK_WRITESOCK(0);
-  }
-  socks[0] = sock;
-  return GETSOCK_READSOCK(0);
-}
-
 void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
                               struct easy_pollset *ps)
 {
@@ -662,8 +644,6 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
     }
   }
-  if(cf->next)
-    cf->next->cft->adjust_pollset(cf->next, data, ps);
 }
 
 /* Selects an SSL crypto engine
@@ -1175,15 +1155,6 @@ static CURLcode multissl_connect_nonblocking(struct Curl_cfilter *cf,
   return Curl_ssl->connect_nonblocking(cf, data, done);
 }
 
-static int multissl_get_select_socks(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     curl_socket_t *socks)
-{
-  if(multissl_setup(NULL))
-    return 0;
-  return Curl_ssl->get_select_socks(cf, data, socks);
-}
-
 static void multissl_adjust_pollset(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
                                      struct easy_pollset *ps)
@@ -1242,7 +1213,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_cert_status_request,     /* cert_status_request */
   multissl_connect,                  /* connect */
   multissl_connect_nonblocking,      /* connect_nonblocking */
-  multissl_get_select_socks,         /* getsock */
   multissl_adjust_pollset,          /* adjust_pollset */
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
@@ -1628,24 +1598,6 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
   return nread;
 }
 
-static int ssl_cf_get_select_socks(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   curl_socket_t *socks)
-{
-  struct cf_call_data save;
-  int fds = GETSOCK_BLANK;
-
-  if(!cf->next->connected) {
-    fds = cf->next->cft->get_select_socks(cf->next, data, socks);
-  }
-  else if(!cf->connected) {
-    CF_DATA_SAVE(save, cf, data);
-    fds = Curl_ssl->get_select_socks(cf, data, socks);
-    CF_DATA_RESTORE(cf, save);
-  }
-  return fds;
-}
-
 static void ssl_cf_adjust_pollset(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    struct easy_pollset *ps)
@@ -1747,7 +1699,6 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_connect,
   ssl_cf_close,
   Curl_cf_def_get_host,
-  ssl_cf_get_select_socks,
   ssl_cf_adjust_pollset,
   ssl_cf_data_pending,
   ssl_cf_send,
@@ -1766,7 +1717,6 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_connect,
   ssl_cf_close,
   Curl_cf_def_get_host,
-  ssl_cf_get_select_socks,
   ssl_cf_adjust_pollset,
   ssl_cf_data_pending,
   ssl_cf_send,

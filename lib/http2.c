@@ -2326,37 +2326,41 @@ out:
   return nwritten;
 }
 
-static int cf_h2_get_select_socks(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  curl_socket_t *sock)
+static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct SingleRequest *k = &data->req;
   struct stream_ctx *stream = H2_STREAM_CTX(data);
-  int bitmap = GETSOCK_BLANK;
+  curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
   struct cf_call_data save;
+  bool window_exhausted;
 
   CF_DATA_SAVE(save, cf, data);
-  sock[0] = Curl_conn_cf_get_socket(cf, data);
 
-  if(!(k->keepon & (KEEP_RECV_PAUSE|KEEP_RECV_HOLD)))
+  window_exhausted = !nghttp2_session_get_remote_window_size(ctx->h2) ||
+      (stream && stream->id >= 0 &&
+       !nghttp2_session_get_stream_remote_window_size(ctx->h2,
+                                                      stream->id));
+
+  if(!(k->keepon & (KEEP_RECV_PAUSE|KEEP_RECV_HOLD))) {
     /* Unless paused - in an HTTP/2 connection we can basically always get a
        frame so we should always be ready for one */
-    bitmap |= GETSOCK_READSOCK(0);
+    if(window_exhausted)
+      Curl_pollset_set_in_only(data, ps, sock);
+    else
+      Curl_pollset_add_in(data, ps, sock);
+  }
 
   /* we're (still uploading OR the HTTP/2 layer wants to send data) AND
      there's a window to send data in */
-  if((((k->keepon & KEEP_SENDBITS) == KEEP_SEND) ||
-      nghttp2_session_want_write(ctx->h2)) &&
-     (nghttp2_session_get_remote_window_size(ctx->h2) &&
-      nghttp2_session_get_stream_remote_window_size(ctx->h2,
-                                                    stream->id)))
-    bitmap |= GETSOCK_WRITESOCK(0);
+  if(!window_exhausted && (((k->keepon & KEEP_SENDBITS) == KEEP_SEND) ||
+      nghttp2_session_want_write(ctx->h2)))
+    Curl_pollset_add_out(data, ps, sock);
 
   CF_DATA_RESTORE(cf, save);
-  return bitmap;
 }
-
 
 static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -2601,8 +2605,7 @@ struct Curl_cftype Curl_cft_nghttp2 = {
   cf_h2_connect,
   cf_h2_close,
   Curl_cf_def_get_host,
-  cf_h2_get_select_socks,
-  Curl_cf_def_adjust_pollset,
+  cf_h2_adjust_pollset,
   cf_h2_data_pending,
   cf_h2_send,
   cf_h2_recv,

@@ -1181,26 +1181,21 @@ static bool stream_is_writeable(struct Curl_cfilter *cf,
          quiche_conn_stream_writable(ctx->qconn, (uint64_t)stream->id, 1);
 }
 
-static int cf_quiche_get_select_socks(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data,
-                                      curl_socket_t *socks)
+static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct SingleRequest *k = &data->req;
-  int rv = GETSOCK_BLANK;
-
-  socks[0] = ctx->q.sockfd;
 
   /* in an HTTP/3 connection we can basically always get a frame so we should
      always be ready for one */
-  rv |= GETSOCK_READSOCK(0);
+  Curl_pollset_add_in(data, ps, ctx->q.sockfd);
 
   /* we're still uploading or the HTTP/3 layer wants to send data */
   if(((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
      && stream_is_writeable(cf, data))
-    rv |= GETSOCK_WRITESOCK(0);
-
-  return rv;
+    Curl_pollset_add_out(data, ps, ctx->q.sockfd);
 }
 
 /*
@@ -1674,8 +1669,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_connect,
   cf_quiche_close,
   Curl_cf_def_get_host,
-  cf_quiche_get_select_socks,
-  Curl_cf_def_adjust_pollset,
+  cf_quiche_adjust_pollset,
   cf_quiche_data_pending,
   cf_quiche_send,
   cf_quiche_recv,

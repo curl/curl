@@ -71,20 +71,14 @@ void Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 }
 
-int Curl_cf_def_get_select_socks(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 curl_socket_t *socks)
-{
-  return cf->next?
-    cf->next->cft->get_select_socks(cf->next, data, socks) : 0;
-}
-
 void Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct easy_pollset *ps)
 {
-  if(cf->next)
-    cf->next->cft->adjust_pollset(cf->next, data, ps);
+  /* NOP */
+  (void)cf;
+  (void)data;
+  (void)ps;
 }
 
 bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
@@ -312,15 +306,6 @@ void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf->cft->do_close(cf, data);
 }
 
-int Curl_conn_cf_get_select_socks(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  curl_socket_t *socks)
-{
-  if(cf)
-    return cf->cft->get_select_socks(cf, data, socks);
-  return 0;
-}
-
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, CURLcode *err)
 {
@@ -442,19 +427,30 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
+void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps)
+{
+  /* Get the lowest not-connected filter, if there are any */
+  while(cf && !cf->connected && cf->next && !cf->next->connected)
+    cf = cf->next;
+  /* From there on, give all filters a chance to adjust the pollset.
+   * Lower filters called later, so they may override */
+  while(cf) {
+    cf->cft->adjust_pollset(cf, data, ps);
+    cf = cf->next;
+  }
+}
+
 void Curl_conn_adjust_pollset(struct Curl_easy *data,
                                struct easy_pollset *ps)
 {
-  struct Curl_cfilter *cf;
   int i;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   for(i = 0; i < 2; ++i) {
-    cf = data->conn->cfilter[i];
-    if(cf) {
-      cf->cft->adjust_pollset(cf, data, ps);
-    }
+    Curl_conn_cf_adjust_pollset(data->conn->cfilter[i], data, ps);
   }
 }
 

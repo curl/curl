@@ -1077,33 +1077,6 @@ static CURLcode check_and_set_expiry(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static int cf_ngtcp2_get_select_socks(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data,
-                                      curl_socket_t *socks)
-{
-  struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct SingleRequest *k = &data->req;
-  int rv = GETSOCK_BLANK;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
-  struct cf_call_data save;
-
-  CF_DATA_SAVE(save, cf, data);
-  socks[0] = ctx->q.sockfd;
-
-  /* in HTTP/3 we can always get a frame, so check read */
-  rv |= GETSOCK_READSOCK(0);
-
-  /* we're still uploading or the HTTP/2 layer wants to send data */
-  if((k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
-     ngtcp2_conn_get_cwnd_left(ctx->qconn) &&
-     ngtcp2_conn_get_max_data_left(ctx->qconn) &&
-     stream && nghttp3_conn_is_stream_writable(ctx->h3conn, stream->id))
-    rv |= GETSOCK_WRITESOCK(0);
-
-  CF_DATA_RESTORE(cf, save);
-  return rv;
-}
-
 static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct easy_pollset *ps)
@@ -1112,22 +1085,32 @@ static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
   struct SingleRequest *k = &data->req;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
   struct cf_call_data save;
+  int win_exhausted;
 
-  CF_DATA_SAVE(save, cf, data);
+  if(ctx->qconn) {
+    CF_DATA_SAVE(save, cf, data);
 
-  /* in HTTP/3 we can always get a frame, so check read */
-  Curl_pollset_add_in(data, ps, ctx->q.sockfd);
+    win_exhausted = !ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
+                    !ngtcp2_conn_get_max_data_left(ctx->qconn);
 
-  /* we're still uploading or the HTTP/2 layer wants to send data */
-  if((k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
-     ngtcp2_conn_get_cwnd_left(ctx->qconn) &&
-     ngtcp2_conn_get_max_data_left(ctx->qconn) &&
-     stream && nghttp3_conn_is_stream_writable(ctx->h3conn, stream->id))
-    Curl_pollset_add_out(data, ps, ctx->q.sockfd);
+    /* in HTTP/3 we can always get a frame, so check read */
+    if(win_exhausted) {
+      Curl_pollset_set_in_only(data, ps, ctx->q.sockfd);
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] pollset: send win exhausted",
+                  stream? stream->id : -1);
+    }
+    else
+      Curl_pollset_add_in(data, ps, ctx->q.sockfd);
 
-  CF_DATA_RESTORE(cf, save);
-  if(cf->next)
-    cf->next->cft->adjust_pollset(cf->next, data, ps);
+    /* we're still uploading and the HTTP/3 stream is writable */
+    if(!win_exhausted && (k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
+       ctx->h3conn && stream && stream->id >= 0 &&
+       nghttp3_conn_is_stream_writable(ctx->h3conn, stream->id)) {
+      Curl_pollset_add_out(data, ps, ctx->q.sockfd);
+    }
+
+    CF_DATA_RESTORE(cf, save);
+  }
 }
 
 static void h3_drain_stream(struct Curl_cfilter *cf,
@@ -2740,7 +2723,6 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_ngtcp2_connect,
   cf_ngtcp2_close,
   Curl_cf_def_get_host,
-  cf_ngtcp2_get_select_socks,
   cf_ngtcp2_adjust_pollset,
   cf_ngtcp2_data_pending,
   cf_ngtcp2_send,
