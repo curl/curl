@@ -22,9 +22,9 @@ directory, just before the file transfer command(s), prefix the command with a
 
 You may specify any number of commands.
 
-By default curl will stop at first failure. To make curl continue even if the
+By default curl stops at first failure. To make curl continue even if the
 command fails, prefix the command with an asterisk (*). Otherwise, if the
-server returns failure for one of the commands, the entire operation will be
+server returns failure for one of the commands, the entire operation is
 aborted.
 
 You must send syntactically correct FTP commands as RFC 959 defines to FTP

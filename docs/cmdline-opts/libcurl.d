@@ -10,6 +10,6 @@ See-also: verbose
 Multi: single
 Scope: global
 ---
-Append this option to any ordinary curl command line, and you will get
-libcurl-using C source code written to the file that does the equivalent
-of what your command-line operation does!
+Append this option to any ordinary curl command line, and you get
+libcurl-using C source code written to the file that does the equivalent of
+what your command-line operation does!

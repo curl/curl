@@ -14,4 +14,4 @@ This option is similar to --netrc, except that you provide the path (absolute
 or relative) to the netrc file that curl should use. You can only specify one
 netrc file per invocation.
 
-It will abide by --netrc-optional if specified.
+It abides by --netrc-optional if specified.

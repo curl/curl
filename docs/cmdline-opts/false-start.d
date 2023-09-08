@@ -10,7 +10,7 @@ See-also: tcp-fastopen
 Multi: boolean
 ---
 Tells curl to use false start during the TLS handshake. False start is a mode
-where a TLS client will start sending application data before verifying the
+where a TLS client starts sending application data before verifying the
 server's Finished message, thus saving a round trip when performing a full
 handshake.
 

@@ -371,7 +371,7 @@ sub single {
     my @extra;
     if($multi eq "single") {
         push @extra, "\nIf --$long is provided several times, the last set ".
-            "value will be used.\n";
+            "value is used.\n";
     }
     elsif($multi eq "append") {
         push @extra, "\n--$long can be used several times in a command line\n";

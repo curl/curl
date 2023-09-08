@@ -12,8 +12,8 @@ Multi: single
 ---
 Maximum time in seconds that you allow curl to wait for a 100-continue
 response when curl emits an Expects: 100-continue header in its request. By
-default curl will wait one second. This option accepts decimal values! When
-curl stops waiting, it will continue as if the response has been received.
+default curl waits one second. This option accepts decimal values! When
+curl stops waiting, it continues as if the response has been received.
 
 The decimal value needs to provided using a dot (.) as decimal separator - not
 the local version even if it might be using another separator.

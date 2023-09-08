@@ -13,9 +13,9 @@ Multi: single
 Use the specified proxy.
 
 The proxy string can be specified with a protocol:// prefix. No protocol
-specified or http:// will be treated as HTTP proxy. Use socks4://, socks4a://,
-socks5:// or socks5h:// to request a specific SOCKS version to be used.
-(Added in 7.21.7)
+specified or http:// it is treated as an HTTP proxy. Use socks4://,
+socks4a://, socks5:// or socks5h:// to request a specific SOCKS version to be
+used.  (Added in 7.21.7)
 
 Unix domain sockets are supported for socks proxy. Set localhost for the host
 part. e.g. socks5h://localhost/path/to/socket.sock
@@ -34,7 +34,7 @@ This option overrides existing environment variables that set the proxy to
 use. If there is an environment variable setting a proxy, you can set proxy to
 "" to override it.
 
-All operations that are performed over an HTTP proxy will transparently be
+All operations that are performed over an HTTP proxy are transparently
 converted to HTTP. It means that certain protocol specific operations might
 not be available. This is not the case if you can tunnel through the proxy, as
 one with the --proxytunnel option.

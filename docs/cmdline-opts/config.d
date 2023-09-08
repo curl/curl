@@ -11,7 +11,7 @@ See-also: disable
 Multi: append
 ---
 Specify a text file to read curl arguments from. The command line arguments
-found in the text file will be used as if they were provided on the command
+found in the text file are used as if they were provided on the command
 line.
 
 Options and their parameters must be specified on the same line in the file,
@@ -27,7 +27,7 @@ quotes the following escape sequences are available: \\\\, \\", \\t, \\n, \\r
 and \\v. A backslash preceding any other letter is ignored.
 
 If the first non-blank column of a config line is a '#' character, that line
-will be treated as a comment.
+is treated as a comment.
 
 Only write one option per physical line in the config file. A single line is
 required to be no more than 10 megabytes (since 8.2.0).
