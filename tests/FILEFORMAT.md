@@ -190,7 +190,9 @@ tests. Try to use already used keywords. These keywords will be used for
 statistical/informational purposes and for choosing or skipping classes of
 tests. Keywords must begin with an alphabetic character, `-`, `[` or `{` and
 may actually consist of multiple words separated by spaces which are treated
-together as a single identifier.
+together as a single identifier. Most keywords are only there to provide a way
+for users to skip certain classes of tests, if desired, but a few are treated
+specially by the test harness or build system.
 
 When using curl built with Hyper, the keywords must include `HTTP` or `HTTPS`
 for 'hyper mode' to kick in and make line ending checks work for tests.
@@ -198,6 +200,12 @@ for 'hyper mode' to kick in and make line ending checks work for tests.
 When running a unit test and the keywords include `unittest`, the `<tool>`
 section can be left empty to use the standard unit test tool name `unitN` where
 `N` is the test number.
+
+The `text-ci` make target automatically skips test with the `flaky` keyword.
+
+Tests that have strict timing dependencies have the `timing-dependent` keyword.
+These are intended to eventually be treated specially on CI builds which are
+often run on overloaded machines with unpredictable timing.
 
 ## `<reply>`
 

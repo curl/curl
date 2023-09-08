@@ -5,9 +5,10 @@ FTP
 PORT
 RETR
 NODATACONN150
-flaky
 timeout
 FAILURE
+flaky
+timing-dependent
 </keywords>
 </info>
 # Server-side
@@ -53,6 +54,7 @@ TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
 </protocol>
+# 28 is CURLE_OPERATION_TIMEDOUT
 <errorcode>
 28
 </errorcode>
