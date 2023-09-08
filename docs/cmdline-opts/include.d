@@ -14,3 +14,6 @@ include things like server name, cookies, date of the document, HTTP version
 and more...
 
 To view the request headers, consider the --verbose option.
+
+Prior to 7.75.0 curl was not able to print headers if *fail* option was used and
+there was error reported by server.
