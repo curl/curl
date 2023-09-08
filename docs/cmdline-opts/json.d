@@ -30,6 +30,6 @@ from stdin. Posting data from a file named 'foobar' would thus be done with
 --json @foobar and to instead read the data from stdin, use --json @-.
 
 If this option is used more than once on the same command line, the additional
-data pieces will be concatenated to the previous before sending.
+data pieces are concatenated to the previous before sending.
 
 The headers this option sets can be overridden with --header as usual.

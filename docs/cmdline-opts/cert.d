@@ -14,7 +14,7 @@ Multi: single
 Tells curl to use the specified client certificate file when getting a file
 with HTTPS, FTPS or another SSL-based protocol. The certificate must be in
 PKCS#12 format if using Secure Transport, or PEM format if using any other
-engine. If the optional password is not specified, it will be queried for on
+engine. If the optional password is not specified, it is queried for on
 the terminal. Note that this option assumes a certificate file that is the
 private key and the client certificate concatenated. See --cert and --key to
 specify them independently.
@@ -26,10 +26,10 @@ escape character.
 
 If curl is built against OpenSSL library, and the engine pkcs11 is available,
 then a PKCS#11 URI (RFC 7512) can be used to specify a certificate located in
-a PKCS#11 device. A string beginning with "pkcs11:" will be interpreted as a
-PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine option will be set
-as "pkcs11" if none was provided and the --cert-type option will be set as
-"ENG" if none was provided.
+a PKCS#11 device. A string beginning with "pkcs11:" is interpreted as a
+PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine option is set as
+"pkcs11" if none was provided and the --cert-type option is set as "ENG" if
+none was provided.
 
 (iOS and macOS only) If curl is built against Secure Transport, then the
 certificate string can either be the name of a certificate/private key in the

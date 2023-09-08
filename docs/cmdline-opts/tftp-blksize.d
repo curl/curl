@@ -11,5 +11,5 @@ See-also: tftp-no-options
 Multi: single
 ---
 Set the TFTP **BLKSIZE** option (must be >512). This is the block size that
-curl will try to use when transferring data to or from a TFTP server. By
-default 512 bytes will be used.
+curl tries to use when transferring data to or from a TFTP server. By
+default 512 bytes are used.

@@ -12,12 +12,13 @@ Added: 4.0
 See-also: get head
 Multi: append
 ---
-This transfers the specified local file to the remote URL. If there is no file
-part in the specified URL, curl will append the local file name. NOTE that you
-must use a trailing / on the last directory to really prove to Curl that there
-is no file name or curl will think that your last directory name is the remote
-file name to use. That will most likely cause the upload operation to fail. If
-this is used on an HTTP(S) server, the PUT command will be used.
+This transfers the specified local file to the remote URL.
+
+If there is no file part in the specified URL, curl appends the local file
+name to the end of the URL before the operation starts. You must use a
+trailing slash (/) on the last directory to prove to curl that there is no
+file name or curl thinks that your last directory name is the remote file name
+to use. If this is used on an HTTP(S) server, the PUT command is used.
 
 Use the file name "-" (a single dash) to use stdin instead of a given file.
 Alternately, the file name "." (a single period) may be specified instead of
@@ -32,5 +33,5 @@ in the URL.
 
 When uploading to an SMTP server: the uploaded data is assumed to be RFC 5322
 formatted. It has to feature the necessary set of headers and mail body
-formatted correctly by the user as curl will not transcode nor encode it
+formatted correctly by the user as curl does not transcode nor encode it
 further in any way.

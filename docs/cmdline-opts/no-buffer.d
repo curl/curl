@@ -10,9 +10,9 @@ See-also: progress-bar
 Multi: boolean
 ---
 Disables the buffering of the output stream. In normal work situations, curl
-will use a standard buffered output stream that will have the effect that it
-will output the data in chunks, not necessarily exactly when the data arrives.
-Using this option will disable that buffering.
+uses a standard buffered output stream that has the effect that it outputs the
+data in chunks, not necessarily exactly when the data arrives. Using this
+option disables that buffering.
 
 Note that this is the negated option name documented. You can use --buffer to
 enable buffering again.

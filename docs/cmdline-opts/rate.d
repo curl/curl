@@ -14,10 +14,10 @@ Scope: global
 ---
 Specify the maximum transfer frequency you allow curl to use - in number of
 transfer starts per time unit (sometimes called request rate). Without this
-option, curl will start the next transfer as fast as possible.
+option, curl starts the next transfer as fast as possible.
 
 If given several URLs and a transfer completes faster than the allowed rate,
-curl will wait until the next transfer is started to maintain the requested
+curl waits until the next transfer is started to maintain the requested
 rate. This option has no effect when --parallel is used.
 
 The request rate is provided as "N/U" where N is an integer number and U is a
@@ -25,11 +25,11 @@ time unit. Supported units are 's' (second), 'm' (minute), 'h' (hour) and 'd'
 /(day, as in a 24 hour unit). The default time unit, if no "/U" is provided,
 is number of transfers per hour.
 
-If curl is told to allow 10 requests per minute, it will not start the next
+If curl is told to allow 10 requests per minute, it does not start the next
 request until 6 seconds have elapsed since the previous transfer was started.
 
 This function uses millisecond resolution. If the allowed frequency is set
-more than 1000 per second, it will instead run unrestricted.
+more than 1000 per second, it instead runs unrestricted.
 
 When retrying transfers, enabled with --retry, the separate retry delay logic
 is used and not this setting.

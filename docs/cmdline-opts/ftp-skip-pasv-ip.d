@@ -10,8 +10,8 @@ Example: --ftp-skip-pasv-ip ftp://example.com/
 Multi: boolean
 ---
 Tell curl to not use the IP address the server suggests in its response to
-curl's PASV command when curl connects the data connection. Instead curl will
-reuse the same IP address it already uses for the control connection.
+curl's PASV command when curl connects the data connection. Instead curl
+reuses the same IP address it already uses for the control connection.
 
 This option is enabled by default (added in 7.74.0).
 

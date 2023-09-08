@@ -18,6 +18,6 @@ required.
 
 This option is unnecessary if you use a URL scheme that in itself implies
 immediate and implicit use of TLS, like for FTPS, IMAPS, POP3S, SMTPS and
-LDAPS. Such transfers will always fail if the TLS handshake does not work.
+LDAPS. Such a transfer always fails if the TLS handshake does not work.
 
 This option was formerly known as --ftp-ssl-reqd.

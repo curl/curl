@@ -14,11 +14,11 @@ Multi: mutex
 ---
 Tells curl to use HTTP version 2.
 
-For HTTPS, this means curl will attempt to negotiate HTTP/2 in the TLS
-handshake. curl does this by default.
+For HTTPS, this means curl negotiates HTTP/2 in the TLS handshake. curl does
+this by default.
 
-For HTTP, this means curl will attempt to upgrade the request to HTTP/2 using
-the Upgrade: request header.
+For HTTP, this means curl attempts to upgrade the request to HTTP/2 using the
+Upgrade: request header.
 
 When curl uses HTTP/2 over HTTPS, it does not itself insist on TLS 1.2 or
 higher even though that is required by the specification. A user can add this

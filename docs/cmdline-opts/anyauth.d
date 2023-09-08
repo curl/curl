@@ -17,7 +17,6 @@ method, which you can do with --basic, --digest, --ntlm, and --negotiate.
 
 Using --anyauth is not recommended if you do uploads from stdin, since it may
 require data to be sent twice and then the client must be able to rewind. If
-the need should arise when uploading from stdin, the upload operation will
-fail.
+the need should arise when uploading from stdin, the upload operation fails.
 
 Used together with --user.

@@ -11,10 +11,10 @@ Added: 7.8.1
 See-also: data request
 Multi: boolean
 ---
-When used, this option will make all data specified with --data, --data-binary
+When used, this option makes all data specified with --data, --data-binary
 or --data-urlencode to be used in an HTTP GET request instead of the POST
-request that otherwise would be used. The data will be appended to the URL
+request that otherwise would be used. The data is appended to the URL
 with a '?' separator.
 
-If used in combination with --head, the POST data will instead be appended to
-the URL with a HEAD request.
+If used in combination with --head, the POST data is instead appended to the
+URL with a HEAD request.

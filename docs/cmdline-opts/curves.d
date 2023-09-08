@@ -19,5 +19,4 @@ in the "openssl s_client/s_server" utilities.
 the (EC) curve requested by the client, avoiding nontransparent client/server
 negotiations.
 
-If this option is set, the default curves list built into OpenSSL will be
-ignored.
+If this option is set, the default curves list built into OpenSSL are ignored.

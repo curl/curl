@@ -16,14 +16,14 @@ variables. The format can be specified as a literal "string", or you can have
 curl read the format from a file with "@filename" and to tell curl to read the
 format from stdin you write "@-".
 
-The variables present in the output format will be substituted by the value or
+The variables present in the output format are substituted by the value or
 text that curl thinks fit, as described below. All variables are specified as
 %{variable_name} and to output a normal % you just write them as %%. You can
 output a newline by using \\n, a carriage return with \\r and a tab space with
 \\t.
 
-The output will be written to standard output, but this can be switched to
-standard error by using %{stderr}.
+The output is by default written to standard output, but can be changed with
+%{stderr} and %output{}.
 
 Output HTTP headers from the most recent request by using *%header{name}*
 where *name* is the case insensitive name of the header (without the trailing
@@ -128,7 +128,7 @@ requested. 0 means the verification was successful. (Added in 7.52.0)
 .TP
 **redirect_url**
 When an HTTP request was made without --location to follow redirects (or when
---max-redirs is met), this variable will show the actual URL a redirect
+--max-redirs is met), this variable shows the actual URL a redirect
 *would* have gone to. (Added in 7.18.2)
 .TP
 **referer**
@@ -175,11 +175,11 @@ The result of the SSL peer certificate verification that was requested. 0
 means the verification was successful. (Added in 7.19.0)
 .TP
 **stderr**
-From this point on, the --write-out output will be written to standard
+From this point on, the --write-out output is written to standard
 error. (Added in 7.63.0)
 .TP
 **stdout**
-From this point on, the --write-out output will be written to standard output.
+From this point on, the --write-out output is written to standard output.
 This is the default, but can be used to switch back after switching to stderr.
 (Added in 7.63.0)
 .TP
