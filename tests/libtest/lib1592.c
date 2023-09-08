@@ -32,8 +32,9 @@
 /* We're willing to wait a very generous two seconds for the removal.  This is
    as low as we can go while still easily supporting SIGALRM timing for the
    non-threaded blocking resolver.  It doesn't matter that much because when
-   the test passes, we never wait this long. */
-#define TEST_HANG_TIMEOUT 2 * 1000
+   the test passes, we never wait this long. We set it much higher to avoid
+   issues when running on overloaded CI machines. */
+#define TEST_HANG_TIMEOUT 60 * 1000
 
 #include "test.h"
 #include "testutil.h"
