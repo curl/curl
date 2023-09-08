@@ -9,7 +9,6 @@ Example: --ssl-auto-client-cert $URL
 Multi: boolean
 ---
 (Schannel) Tell libcurl to automatically locate and use a client certificate
-for authentication, when requested by the server. Prior to 7.77.0 this was the
-default behavior in libcurl with Schannel. Since the server can request any
-certificate that supports client authentication in the OS certificate store it
-could be a privacy violation and unexpected.
+for authentication, when requested by the server. Since the server can request
+any certificate that supports client authentication in the OS certificate
+store it could be a privacy violation and unexpected.

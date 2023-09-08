@@ -16,11 +16,12 @@ either a domain which contains the hostname, or the hostname itself. For
 example, local.com would match local.com, local.com:80, and www.local.com, but
 not www.notlocal.com.
 
-Since 7.53.0, This option overrides the environment variables that disable the
-proxy ('no_proxy' and 'NO_PROXY'). If there is an environment variable
-disabling a proxy, you can set the no proxy list to "" to override it.
+This option overrides the environment variables that disable the proxy
+('no_proxy' and 'NO_PROXY') (added in 7.53.0). If there is an environment
+variable disabling a proxy, you can set the no proxy list to "" to override
+it.
 
-Since 7.86.0, IP addresses specified to this option can be provided using CIDR
-notation: an appended slash and number specifies the number of "network bits"
-out of the address to use in the comparison. For example "192.168.0.0/16"
-would match all addresses starting with "192.168".
+IP addresses specified to this option can be provided using CIDR notation
+(added in 7.86.0): an appended slash and number specifies the number of
+"network bits" out of the address to use in the comparison. For example
+"192.168.0.0/16" would match all addresses starting with "192.168".

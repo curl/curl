@@ -12,9 +12,9 @@ Multi: boolean
 Require SSL/TLS for the connection. Terminates the connection if the transfer
 cannot be upgraded to use SSL/TLS.
 
-This option is handled in LDAP since version 7.81.0. It is fully supported
-by the OpenLDAP backend and rejected by the generic ldap backend if explicit
-TLS is required.
+This option is handled in LDAP (added in 7.81.0). It is fully supported by the
+OpenLDAP backend and rejected by the generic ldap backend if explicit TLS is
+required.
 
 This option is unnecessary if you use a URL scheme that in itself implies
 immediate and implicit use of TLS, like for FTPS, IMAPS, POP3S, SMTPS and

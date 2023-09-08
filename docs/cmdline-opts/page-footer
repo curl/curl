@@ -37,10 +37,10 @@ accesses the target URL through the proxy.
 The list of host names can also be include numerical IP addresses, and IPv6
 versions should then be given without enclosing brackets.
 
-Since 7.86.0, IP addresses can be specified using CIDR notation: an appended
-slash and number specifies the number of "network bits" out of the address to
-use in the comparison. For example "192.168.0.0/16" would match all addresses
-starting with "192.168".
+IP addresses can be specified using CIDR notation: an appended slash and
+number specifies the number of "network bits" out of the address to use in the
+comparison (added in 7.86.0). For example "192.168.0.0/16" would match all
+addresses starting with "192.168".
 .IP "APPDATA <dir>"
 On Windows, this variable is used when trying to find the home directory. If
 the primary home variable are all unset.

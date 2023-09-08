@@ -11,11 +11,9 @@ Example: --max-time 2.92 $URL
 Added: 4.0
 Multi: single
 ---
-Maximum time in seconds that you allow each transfer to take.  This is
-useful for preventing your batch jobs from hanging for hours due to slow
-networks or links going down.  Since 7.32.0, this option accepts decimal
-values, but the actual timeout will decrease in accuracy as the specified
-timeout increases in decimal precision.
+Maximum time in seconds that you allow each transfer to take.  This is useful
+for preventing your batch jobs from hanging for hours due to slow networks or
+links going down. This option accepts decimal values (added in 7.32.0).
 
 If you enable retrying the transfer (--retry) then the maximum time counter is
 reset each time the transfer is retried. You can use --retry-max-time to limit
