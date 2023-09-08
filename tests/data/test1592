@@ -6,6 +6,7 @@ multi
 resolve
 speedcheck
 flaky
+timing-dependent
 </keywords>
 </info>
 

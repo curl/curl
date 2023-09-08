@@ -5,8 +5,9 @@ HTTP
 HTTP GET
 HTTP Basic auth
 HTTP NTLM auth
-flaky
 NTLM
+flaky
+timing-dependent
 </keywords>
 </info>
 # Server-side

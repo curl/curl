@@ -46,6 +46,7 @@ SIZE %TESTNUMBER
 RETR %TESTNUMBER
 QUIT
 </protocol>
+10 is CURLE_FTP_ACCEPT_FAILED
 <errorcode>
 10
 </errorcode>

@@ -1,4 +1,5 @@
 <testcase>
+# This is the ftps equivalent of test1086
 <info>
 <keywords>
 FTPS
@@ -7,6 +8,7 @@ RETR
 timeout
 FAILURE
 SLOWDOWN
+timing-dependent
 </keywords>
 </info>
 
