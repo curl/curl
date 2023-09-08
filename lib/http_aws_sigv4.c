@@ -422,6 +422,8 @@ static CURLcode canon_query(struct Curl_easy *data,
   for(i = 0; !result && (i < entry); i++, ap++) {
     size_t len;
     const char *q = ap->p;
+    if(!ap->len)
+      continue;
     for(len = ap->len; len && !result; q++, len--) {
       if(ISALNUM(*q))
         result = Curl_dyn_addn(dq, q, 1);
