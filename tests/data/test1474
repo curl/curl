@@ -23,7 +23,9 @@
 # builds which are often run on overloaded servers.
 # Increasing the --limit-rate would decrease the test time, but at the cost of
 # becoming even more sensitive to delays (going from 500 msec to 250 msec or
-# less of accepted delay before failure).
+# less of accepted delay before failure).  Adding a --speed-time would increase
+# the 1 second delay between writes to longer, but it would also increase the
+# total time needed by the test, which is already quite high.
 <info>
 <keywords>
 HTTP
