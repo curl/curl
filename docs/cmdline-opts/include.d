@@ -15,5 +15,5 @@ and more...
 
 To view the request headers, consider the --verbose option.
 
-Prior to 7.75.0 curl was not able to print headers if *fail* option was used and
+Prior to 7.75.0 curl did not print the headers if --fail was used in combination with this option and
 there was error reported by server.
