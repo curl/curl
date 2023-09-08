@@ -23,16 +23,10 @@ abort the connection before sending or receiving any data.
 
 PEM/DER support:
 
-7.39.0: OpenSSL and GnuTLS
-
-7.43.0: wolfSSL
-
-7.47.0: mbedTLS
+OpenSSL and GnuTLS (added in 7.39.0), wolfSSL (added in 7.43.0), mbedTLS (added in 7.47.0)
 
 sha256 support:
 
-7.44.0: OpenSSL, GnuTLS and wolfSSL
-
-7.47.0: mbedTLS
+OpenSSL, GnuTLS and wolfSSL (added in 7.44.0), mbedTLS (added in 7.47.0)
 
 Other SSL backends not supported.

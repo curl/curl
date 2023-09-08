@@ -17,5 +17,5 @@ name lookups take place over SSL. However, the certificate verification
 settings are not inherited and can be controlled separately via
 --doh-insecure and --doh-cert-status.
 
-This option is unset if an empty string "" is used as the URL. (Added in
-7.85.0)
+This option is unset if an empty string "" is used as the URL.
+(Added in 7.85.0)

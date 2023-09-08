@@ -9,4 +9,4 @@ See-also: parallel
 Multi: single
 ---
 This option was previously used to specify a Metalink resource. Metalink
-support has been disabled in curl since 7.78.0 for security reasons.
+support is disabled in curl for security reasons (added in 7.78.0).

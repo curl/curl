@@ -25,8 +25,8 @@ up for you.
 Headers specified with this option will not be included in requests that curl
 knows will not be sent to a proxy.
 
-Starting in 7.55.0, this option can take an argument in @filename style, which
-then adds a header for each line in the input file. Using @- will make curl
+This option can take an argument in @filename style, which then adds a header
+for each line in the input file (added in 7.55.0). Using @- will make curl
 read the header file from stdin.
 
 This option can be used multiple times to add/replace/remove multiple headers.

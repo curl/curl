@@ -11,5 +11,5 @@ Multi: boolean
 Turn on the TCP_NODELAY option. See the *curl_easy_setopt(3)* man page for
 details about this option.
 
-Since 7.50.2, curl sets this option by default and you need to explicitly
-switch it off if you do not want it on.
+curl sets this option by default and you need to explicitly switch it off if
+you do not want it on (added in 7.50.2).

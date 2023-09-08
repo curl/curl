@@ -16,4 +16,4 @@ HTTP/0.9 is a response without headers and therefore you can also connect with
 this to non-HTTP servers and still get a response since curl will simply
 transparently downgrade - if allowed.
 
-Since curl 7.66.0, HTTP/0.9 is disabled by default.
+HTTP/0.9 is disabled by default (added in 7.66.0)

@@ -20,12 +20,12 @@ socks5:// or socks5h:// to request a specific SOCKS version to be used.
 Unix domain sockets are supported for socks proxy. Set localhost for the host
 part. e.g. socks5h://localhost/path/to/socket.sock
 
-HTTPS proxy support via https:// protocol prefix was added in 7.52.0 for
-OpenSSL and GnuTLS. Since 7.87.0, it also works for BearSSL, mbedTLS,
-rustls, Schannel, Secure Transport and wolfSSL.
+HTTPS proxy support works set with the https:// protocol prefix for OpenSSL
+and GnuTLS (added in 7.52.0). It also works for BearSSL, mbedTLS, rustls,
+Schannel, Secure Transport and wolfSSL (added in 7.87.0).
 
-Unrecognized and unsupported proxy protocols cause an error since 7.52.0.
-Prior versions may ignore the protocol and use http:// instead.
+Unrecognized and unsupported proxy protocols cause an error (added in 7.52.0).
+Ancient curl versions ignored unknown schemes and used http:// instead.
 
 If the port number is not specified in the proxy string, it is assumed to be
 1080.
