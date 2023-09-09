@@ -180,7 +180,7 @@ fail:
  * Returns a pointer to a heap-allocated string or NULL if
  * no name part, at location indicated by first argument.
  */
-CURLcode get_url_file_name(char **filename, const char *url)
+CURLcode get_url_file_name(char **filename, const char *url, bool decode)
 {
   CURLU *uh = curl_url();
   char *path = NULL;
@@ -212,6 +212,14 @@ CURLcode get_url_file_name(char **filename, const char *url)
       curl_free(path);
       if(!*filename)
         return CURLE_OUT_OF_MEMORY;
+
+      if(decode) {
+        char *decoded = curl_easy_unescape(NULL, *filename, 0, NULL);
+        free(*filename);
+        if(!decoded)
+          return CURLE_OUT_OF_MEMORY;
+        *filename = decoded;
+      }
 
 #if defined(MSDOS) || defined(WIN32)
       {

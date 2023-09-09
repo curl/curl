@@ -1064,7 +1064,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           if(!per->outfile) {
             /* extract the file name from the URL */
-            result = get_url_file_name(&per->outfile, per->this_url);
+            result = get_url_file_name(&per->outfile, per->this_url,
+                                       config->decode_remote_name);
             if(result) {
               errorf(global, "Failed to extract a sensible file name"
                      " from the URL to use for storage");
@@ -1089,29 +1090,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             if(!*per->outfile) {
               warnf(global, "output glob produces empty string");
               result = CURLE_WRITE_ERROR;
-              break;
-            }
-          }
-
-          if(config->decode_remote_name) {
-            /* gamache */
-            char *escaped = curl_easy_unescape(NULL, per->outfile, 0, NULL);
-            if(!escaped) {
-              warnf(global, "could not decode filename");
-              result = CURLE_WRITE_ERROR;
-              break;
-            }
-
-            result = get_path_base(escaped, &base);
-            if(result)
-              break;
-
-            free(per->outfile);
-            per->outfile = strdup(base);
-            free(escaped);
-
-            if(!per->outfile) {
-              result = CURLE_OUT_OF_MEMORY;
               break;
             }
           }

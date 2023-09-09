@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 -J
+--decode-remote-name
 </keywords>
 </info>
 
@@ -16,8 +17,7 @@ Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name%TESTNUMBER; filename*=UTF-8''name%20%TESTNUMBER; charset=funny; option=strange
-ZZZ-Content-Disposition: filename*=UTF-8''name%20%TESTNUMBER; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; filename*="UTF-8''name%20%TESTNUMBER"; charset=funny; option=strange
 
 12345
 </data>
@@ -35,7 +35,7 @@ debug
 http
 </server>
 <name>
--J with --decode-remote-name decodes the Content-Disposition filename*
+-J and --decode-remote-name decodes the Content-Disposition filename* (quoted)
 </name>
 <setenv>
 CURL_TESTDIR=%LOGDIR
