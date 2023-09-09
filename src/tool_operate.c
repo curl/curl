@@ -738,7 +738,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
   bool orig_isatty = global->isatty;
   struct State *state = &config->state;
   char *httpgetfields = state->httpgetfields;
-  char *base;
   *added = FALSE; /* not yet */
 
   if(config->postfields) {
