@@ -127,7 +127,7 @@ const struct helptxt helptext[] = {
    "HTTP POST data URL encoded",
    CURLHELP_HTTP | CURLHELP_POST | CURLHELP_UPLOAD},
   {"    --decode-remote-name",
-   "URL-decode filename when saving using -O or -J",
+   "URL-decode remote filename when saving files with -J and/or -O",
    CURLHELP_OUTPUT},
   {"    --delegation <LEVEL>",
    "GSS-API delegation permission",

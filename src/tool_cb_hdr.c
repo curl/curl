@@ -274,12 +274,7 @@ static char *get_cd_field(const char *cd, const char *fieldname,
       last = *end;
     }
 
-    printf("p ->%s<-\n", p);
-    printf("end ->%s<-\n", end);
-
     if(strncmp(p, fieldname, namelen) == 0 && p[namelen] == '=') {
-      printf("yeah\n");
-
       p += namelen + 1;
       if(*p == '"') {
         p++;
@@ -297,7 +292,6 @@ static char *get_cd_field(const char *cd, const char *fieldname,
       memcpy(out, p, end - p);
       out[end - p] = '\0';
 
-      printf("value: ->%s<-\n", out);
       return out;
     }
 
@@ -417,7 +411,6 @@ static char *parse_filename_post_process(char *copy)
   if(copy != p)
     memmove(copy, p, strlen(p) + 1);
 
-  printf("Before: %s", copy);
 #if defined(MSDOS) || defined(WIN32)
   {
     char *sanitized;
@@ -449,7 +442,6 @@ static char *parse_filename_post_process(char *copy)
   }
 #endif
 
-  printf("After: %s", copy);
   return copy;
 }
 
