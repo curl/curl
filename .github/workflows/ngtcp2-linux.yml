@@ -263,13 +263,13 @@ jobs:
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
 
-    - run: pytest tests
+    - run: pytest -v tests
       name: 'run pytest'
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
         CURL_CI: github
 
-    - run: pytest tests
+    - run: pytest -v tests
       name: 'run pytest with slowed network'
       env:
         # 33% of sends are EAGAINed
