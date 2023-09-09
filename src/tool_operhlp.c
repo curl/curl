@@ -182,10 +182,11 @@ fail:
  */
 CURLcode get_url_file_name(char **filename, const char *url)
 {
-  const char *pc, *pc2;
   CURLU *uh = curl_url();
   char *path = NULL;
   CURLUcode uerr;
+  char *base;
+  CURLcode result;
 
   if(!uh)
     return CURLE_OUT_OF_MEMORY;
@@ -198,8 +199,6 @@ CURLcode get_url_file_name(char **filename, const char *url)
     if(!uerr) {
       curl_url_cleanup(uh);
 
-      char *base;
-      CURLcode result;
       result = get_path_base(path, &base);
       if(result) {
         return result;
@@ -207,7 +206,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
 
       /* no slash => empty string */
       if(base == path)
-        base = "";
+        base = (char *)"";
 
       *filename = strdup(base);
       curl_free(path);
@@ -256,7 +255,8 @@ CURLcode get_url_file_name(char **filename, const char *url)
  * pathname separator characters.
  * If no pathname information was present, returns `path`.
  */
-CURLcode get_path_base(char *path, char **base) {
+CURLcode get_path_base(char *path, char **base)
+{
   char *sep, *sep2;
   sep = strrchr(path, '/');
   sep2 = strrchr(sep ? sep + 1 : path, '\\');

@@ -738,6 +738,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
   bool orig_isatty = global->isatty;
   struct State *state = &config->state;
   char *httpgetfields = state->httpgetfields;
+  char *base;
   *added = FALSE; /* not yet */
 
   if(config->postfields) {
@@ -1101,7 +1102,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               break;
             }
 
-            char *base;
             result = get_path_base(escaped, &base);
             if(result)
               break;
