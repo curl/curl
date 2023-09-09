@@ -157,7 +157,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       if(filename_star)
         filename = parse_filename_star(filename_star, 0);
     }
-    /* fall back to filename= header */
+    /* fall back to filename= header, which should not get url-decoded */
     if(!filename_star) {
       filename_nostar = get_cd_field(p, "filename", 8);
       if(filename_nostar)

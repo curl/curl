@@ -17,7 +17,7 @@ Server: test-server/fake
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name%TESTNUMBER; filename*="UTF-8''name%20%TESTNUMBER"; charset=funny; option=strange
+Content-Disposition: filename=name%TESTNUMBER; filename*="UTF-8''name%20%TESTNUMBER"
 
 12345
 </data>
