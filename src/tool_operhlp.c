@@ -199,26 +199,30 @@ CURLcode get_url_file_name(char **filename, const char *url, bool decode)
     if(!uerr) {
       curl_url_cleanup(uh);
 
+      if(decode) {
+        char *decoded = curl_easy_unescape(NULL, path, 0, NULL);
+        free(path);
+        if(!decoded)
+          return CURLE_OUT_OF_MEMORY;
+        path = decoded;
+      }
+
       result = get_path_base(path, &base);
       if(result) {
         return result;
       }
 
-      /* no slash => empty string */
-      if(base == path)
-        base = (char *)"";
-
-      *filename = strdup(base);
-      curl_free(path);
-      if(!*filename)
-        return CURLE_OUT_OF_MEMORY;
-
-      if(decode) {
-        char *decoded = curl_easy_unescape(NULL, *filename, 0, NULL);
-        free(*filename);
-        if(!decoded)
+      /* if no slashes are present, return "" */
+      if(base == path) {
+        *filename = (char *)"";
+        free(path);
+        return CURLE_OK;
+      }
+      else {
+        *filename = strdup(base);
+        free(path);
+        if(!*filename)
           return CURLE_OUT_OF_MEMORY;
-        *filename = decoded;
       }
 
 #if defined(MSDOS) || defined(WIN32)
@@ -260,17 +264,17 @@ CURLcode get_url_file_name(char **filename, const char *url, bool decode)
 }
 
 /* Returns a pointer into `path` that is after all pathname and
- * pathname separator characters.
+ * pathname separator characters. Does not allocate.
  * If no pathname information was present, returns `path`.
  */
 CURLcode get_path_base(char *path, char **base)
 {
   char *sep, *sep2;
+
   sep = strrchr(path, '/');
   sep2 = strrchr(sep ? sep + 1 : path, '\\');
   if(sep2)
     sep = sep2;
-
   if(sep)
     *base = sep + 1;
   else

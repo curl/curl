@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
--J
+-O
 --decode-remote-name
 </keywords>
 </info>
@@ -26,7 +26,7 @@ Content-Type: text/html
 # Client-side
 <client>
 # this relies on the debug feature to allow us to set directory to store the
-# -J output in
+# -O output in
 <features>
 debug
 </features>
@@ -34,13 +34,13 @@ debug
 http
 </server>
 <name>
--J and --decode-remote-name falls back to decoded filename from URL
+-O and --decode-remote-name decodes filename from URL
 </name>
 <setenv>
 CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/name%20%TESTNUMBER -J -O --decode-remote-name
+http://%HOSTIP:%HTTPPORT/name%20%TESTNUMBER -O --decode-remote-name
 </command>
 </client>
 
