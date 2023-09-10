@@ -331,7 +331,7 @@ static const struct LongShort aliases[]= {
   {"Oa", "remote-name-all",          ARG_BOOL},
   {"Ob", "output-dir",               ARG_STRING},
   {"Oc", "clobber",                  ARG_BOOL},
-  {"Od", "decode-remote-name",       ARG_BOOL},
+  {"Od", "decode-remote-name",       ARG_NONE},
   {"p",  "proxytunnel",              ARG_BOOL},
   {"P",  "ftp-port",                 ARG_STRING},
   {"q",  "disable",                  ARG_BOOL},
@@ -2327,7 +2327,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       else if(subletter == 'd') { /* --decode-remote-name */
-        config->decode_remote_name = toggle;
+        config->decode_remote_name = TRUE;
         break;
       }
       /* FALLTHROUGH */

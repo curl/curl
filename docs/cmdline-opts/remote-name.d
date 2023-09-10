@@ -6,7 +6,7 @@ Help: Write output to a file named as the remote file
 Category: important output
 Example: -O https://example.com/filename
 Added: 4.0
-See-also: remote-name-all output-dir remote-header-name
+See-also: remote-name-all output-dir remote-header-name decode-remote-name
 Multi: append
 ---
 Write output to a local file named like the remote file we get. (Only the file

@@ -55,6 +55,7 @@ DPAGES = \
   data-raw.d \
   data-urlencode.d \
   data.d \
+  decode-remote-name.d \
   delegation.d \
   digest.d \
   disable-eprt.d \

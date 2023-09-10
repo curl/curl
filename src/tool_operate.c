@@ -1063,10 +1063,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           if(!per->outfile) {
             /* extract the file name from the URL */
-            printf("config %x\n", config);
-            printf("g->c %x\n", global->current);
-            printf("decode_remote_name %x\n",
-                   global->current->decode_remote_name);
             result = get_url_file_name(&per->outfile, per->this_url,
                                        global->current->decode_remote_name);
             if(result) {
