@@ -4,7 +4,7 @@ curl and libcurl 8.3.0
  Command line options:         257
  curl_easy_setopt() options:   303
  Public functions in libcurl:  92
- Contributors:                 2974
+ Contributors:                 2976
 
 This release includes the following changes:
 
@@ -52,10 +52,13 @@ This release includes the following bugfixes:
  o cmake: fix to use variable for the curl namespace [79]
  o cmake: fixup H2 duplicate symbols for unity builds [23]
  o cmake: support building static and shared libcurl in one go [17]
+ o cmdline-docs: make sure to phrase it as "added in ...." [161]
+ o cmdline-docs: use present tense, not future [160]
  o cmdline-opts/docs: mention the negative option part [90]
  o cmdline-opts/page-header: clarify stronger that !opt == URL [123]
  o cmdline-opts/page-header: reorder, clean up [51]
  o configure, cmake, lib: more form api deprecation [7]
+ o configure: fix `HAVE_TIME_T_UNSIGNED` check [153]
  o configure: trust pkg-config when it's used for zlib [149]
  o configure: use the pkg-config --libs-only-l flag for libssh2 [16]
  o connect: stop halving the remaining timeout when less than 600 ms left [147]
@@ -68,6 +71,7 @@ This release includes the following bugfixes:
  o CURLOPT_SSL_VERIFYPEER.3: mention it does not load CA certs when disabled [42]
  o CURLOPT_URL.3: add two URL API calls in the see-also section
  o CURLOPT_URL.3: explain curl_url_set() uses the same parser
+ o digest: Use hostname to generate spn instead of realm [164]
  o disable.d: explain --disable not implemented prior to 7.50.0 [115]
  o docs/cmdline-opts/gen.pl: hide "added in" before 7.50.0 [76]
  o docs/cmdline-opts: match the current output [104]
@@ -77,6 +81,7 @@ This release includes the following bugfixes:
  o docs/HYPER.md: document a workaround for a link error [73]
  o docs: add curl_global_trace to some SEE ALSO sections [133]
  o docs: link to the website versions instead of markdowns [3]
+ o docs: mark --ssl-revoke-best-effort as Schannel specific [162]
  o docs: mention critical files in same directories as curl saves [119]
  o docs: removing "pausing transfers" from HYPER.md. [134]
  o docs: rewrite to present tense [105]
@@ -106,6 +111,7 @@ This release includes the following bugfixes:
  o hyper: remove `hyptransfer->endtask` [137]
  o imap: add a check for failing strdup()
  o imap: remove the only sscanf() call in the IMAP code [84]
+ o include.d: explain headers not printed with --fail before 7.75.0 [155]
  o include/curl/mprintf.h: add __attribute__ for the prototypes [38]
  o krb5: fix "implicit conversion loses integer precision" warnings [152]
  o lib: add ability to disable auths individually [135]
@@ -139,6 +145,7 @@ This release includes the following bugfixes:
  o quiche: enable quiche to handle timeout events [82]
  o resolve: use PF_INET6 family lookups when CURL_IPRESOLVE_V6 is set [2]
  o revert "schannel: reverse the order of certinfo insertions" [14]
+ o schannel: fix ordering of cert chain info [163]
  o schannel: fix user-set legacy algorithms in Windows 10 & 11 [53]
  o schannel: verify hostname independent of verify cert [74]
  o sectransp: fix compiler warnings [129]
@@ -200,24 +207,25 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   ad0p on github, Alexander Jaeger, Alexander Kanavin, apparentorder on github,
-  balikalina on Github, Christian Hesse, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Dan Jacobson, Dave Cottlehuber, Davide Masserut,
-  Derzsi Dániel, Douglas R. Reno, ed0d2b2ce19451f2, Emanuele Torre,
-  Enrico Scholz, eppesuig, FC Stegerman, Gabriel Corona, Gerome Fournier,
-  Gisle Vanem, Goro FUJI, Graham Campbell, Guillaume Algis,
-  guoxinvmware on github, Harry Sintonen, Jacob Mealey, JazJas on github,
-  John Bampton, John Hawthorn, John Walker, Joseph Tharayil, junsik on github,
-  kyled-dell on github, Lukas Tribus, Maksim Arhipov, Maksim Sciepanienka,
-  Marcel Raad, Marin Hannache, Markus Sommer, Martin Galvan, Mathew Benson,
-  Matthias Gatto, Maurício Meneghini Fauth, Michael Osipov, Mohamed Daahir,
-  Nathan Moinvaziri, Niall McGee, Nicholas Nethercote, Nicolás Ojeda Bär,
-  Oleg Jukovec, oliverpool on github, Pablo Busse, Patrick Monnerat,
+  balikalina on Github, Benoit Pierre, Chris Talbot, Christian Hesse,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Dan Jacobson,
+  Dave Cottlehuber, Davide Masserut, Derzsi Dániel, Douglas R. Reno,
+  ed0d2b2ce19451f2, Emanuele Torre, Enrico Scholz, eppesuig, FC Stegerman,
+  Gabriel Corona, Gerome Fournier, Gisle Vanem, Goro FUJI, Graham Campbell,
+  Guillaume Algis, guoxinvmware on github, Harry Sintonen, Jacob Mealey,
+  JazJas on github, John Bampton, John Hawthorn, John Walker, Joseph Tharayil,
+  junsik on github, kyled-dell on github, Lukas Tribus, Maksim Arhipov,
+  Maksim Sciepanienka, Marcel Raad, Marin Hannache, Markus Sommer,
+  Martin Galvan, Mathew Benson, Matthias Gatto, Maurício Meneghini Fauth,
+  Michael Osipov, Mohamed Daahir, Nathan Moinvaziri, Niall McGee,
+  Nicholas Nethercote, Nicolas Noben, Nicolás Ojeda Bär, Oleg Jukovec,
+  oliverpool on github, Pablo Busse, Patrick Monnerat,
   Philippe Antoine on HackerOne, pszlazak on github, Randall, Ray Satiro,
   Richard W.M. Jones, Rutger Broekhoff, Ryan Schmidt, Samuel Chiang,
   Satana de Sant'Ana, Sergey, Sevan Janiyan, Stefan Eissing,
   Thomas M. DuBuisson, trrui-huawei, Viktor Szakats, wangzhikun,
   Wilhelm von Thiele, Wyatt O'Day, yushicheng7788 on github, zhihaoy on github
-  (75 contributors)
+  (78 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -373,7 +381,14 @@ References to bug reports and discussions on issues:
  [150] = https://curl.se/bug/?i=11815
  [151] = https://curl.se/bug/?i=11800
  [152] = https://curl.se/bug/?i=11814
+ [153] = https://curl.se/bug/?i=11825
  [154] = https://curl.se/bug/?i=11809
+ [155] = https://curl.se/bug/?i=11822
  [156] = https://curl.se/bug/?i=11342
  [157] = https://curl.se/bug/?i=11801
  [158] = https://curl.se/bug/?i=11799
+ [160] = https://curl.se/bug/?i=11821
+ [161] = https://curl.se/bug/?i=11821
+ [162] = https://curl.se/bug/?i=11760
+ [163] = https://curl.se/bug/?i=11632
+ [164] = https://curl.se/bug/?i=11395
