@@ -445,6 +445,7 @@ static CURLcode canon_query(struct Curl_easy *data,
             tmp[2] = Curl_raw_toupper(q[2]);
             result = Curl_dyn_addn(dq, tmp, 3);
             q += 2;
+            len -= 2;
           }
           else
             /* '%' without a following two-digit hex, encode it */
@@ -666,6 +667,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
                   (int)payload_hash_len, payload_hash);
   if(!canonical_request)
     goto fail;
+
+  DEBUGF(infof(data, "Canonical request: %s", canonical_request));
 
   /* provider 0 lowercase */
   Curl_strntolower(provider0, provider0, strlen(provider0));
