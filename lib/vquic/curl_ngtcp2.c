@@ -58,6 +58,7 @@
 #include "dynbuf.h"
 #include "http1.h"
 #include "select.h"
+#include "inet_pton.h"
 #include "vquic.h"
 #include "vquic_int.h"
 #include "vtls/keylog.h"
@@ -511,8 +512,8 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   const uint8_t *alpn = NULL;
   size_t alpnlen = 0;
+  unsigned char checkip[16];
 
-  (void)data;
   DEBUGASSERT(!ctx->ssl);
   ctx->ssl = SSL_new(ctx->sslctx);
 
@@ -526,7 +527,19 @@ static CURLcode quic_init_ssl(struct Curl_cfilter *cf,
     SSL_set_alpn_protos(ctx->ssl, alpn, (int)alpnlen);
 
   /* set SNI */
-  SSL_set_tlsext_host_name(ctx->ssl, cf->conn->host.name);
+  if((0 == Curl_inet_pton(AF_INET, cf->conn->host.name, checkip))
+#ifdef ENABLE_IPV6
+     && (0 == Curl_inet_pton(AF_INET6, cf->conn->host.name, checkip))
+#endif
+     ) {
+    char *snihost = Curl_ssl_snihost(data, cf->conn->host.name, NULL);
+    if(!snihost || !SSL_set_tlsext_host_name(ctx->ssl, snihost)) {
+      failf(data, "Failed set SNI");
+      SSL_free(ctx->ssl);
+      ctx->ssl = NULL;
+      return CURLE_QUIC_CONNECT_ERROR;
+    }
+  }
   return CURLE_OK;
 }
 #elif defined(USE_GNUTLS)

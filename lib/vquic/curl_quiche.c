@@ -45,8 +45,10 @@
 #include "vquic_int.h"
 #include "curl_quiche.h"
 #include "transfer.h"
+#include "inet_pton.h"
 #include "vtls/openssl.h"
 #include "vtls/keylog.h"
+#include "vtls/vtls.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -175,8 +177,8 @@ static CURLcode quic_x509_store_setup(struct Curl_cfilter *cf,
 static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
+  unsigned char checkip[16];
 
-  (void)data;
   DEBUGASSERT(!ctx->sslctx);
   ctx->sslctx = SSL_CTX_new(TLS_method());
   if(!ctx->sslctx)
@@ -199,7 +201,20 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_QUIC_CONNECT_ERROR;
 
   SSL_set_app_data(ctx->ssl, cf);
-  SSL_set_tlsext_host_name(ctx->ssl, cf->conn->host.name);
+
+  if((0 == Curl_inet_pton(AF_INET, cf->conn->host.name, checkip))
+#ifdef ENABLE_IPV6
+     && (0 == Curl_inet_pton(AF_INET6, cf->conn->host.name, checkip))
+#endif
+     ) {
+    char *snihost = Curl_ssl_snihost(data, cf->conn->host.name, NULL);
+    if(!snihost || !SSL_set_tlsext_host_name(ctx->ssl, snihost)) {
+      failf(data, "Failed set SNI");
+      SSL_free(ctx->ssl);
+      ctx->ssl = NULL;
+      return CURLE_QUIC_CONNECT_ERROR;
+    }
+  }
 
   return CURLE_OK;
 }
