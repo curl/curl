@@ -3569,8 +3569,10 @@ CURL_RUN_IFELSE(
   [
   #include <time.h>
   #include <limits.h>
-  time_t t = -1;
-  return (t > 0);
+  int main(void) {
+    time_t t = -1;
+    return (t < 0);
+  }
   ],[
   AC_MSG_RESULT([yes])
   AC_DEFINE(HAVE_TIME_T_UNSIGNED, 1, [Define this if time_t is unsigned])
