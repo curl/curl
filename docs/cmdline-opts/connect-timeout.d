@@ -12,11 +12,11 @@ Multi: single
 ---
 Maximum time in seconds that you allow curl's connection to take.  This only
 limits the connection phase, so if curl connects within the given period it
-will continue - if not it will exit.  Since version 7.32.0, this option
-accepts decimal values.
+continues - if not it exits.
 
-The "connection phase" is considered complete when the DNS lookup and
-requested TCP, TLS or QUIC handshakes are done.
+This option accepts decimal values (added in 7.32.0). The decimal value needs
+to be provided using a dot (.) as decimal separator - not the local version
+even if it might be using another separator.
 
-The decimal value needs to provided using a dot (.) as decimal separator - not
-the local version even if it might be using another separator.
+The connection phase is considered complete when the DNS lookup and requested
+TCP, TLS or QUIC handshakes are done.

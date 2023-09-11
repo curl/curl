@@ -43,6 +43,13 @@ handles and transfers remain unaffected.
 
 It is fine to remove a handle at any time during a transfer, just not from
 within any libcurl callback function.
+
+Removing an easy handle from the multi handle before the corresponding
+transfer is complete might cause libcurl to close the connection - if the
+state of it and the internal protocol handler deem it necessary. Otherwise
+libcurl keeps the connection alive in the connection pool associated with the
+multi handle, ready to get reused for a future transfer using this multi
+handle.
 .SH EXAMPLE
 .nf
 /* when an easy handle has completed, remove it */

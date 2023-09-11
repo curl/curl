@@ -12,10 +12,10 @@ Multi: single
 Specifies which DNS-over-HTTPS (DoH) server to use to resolve hostnames,
 instead of using the default name resolver mechanism. The URL must be HTTPS.
 
-Some SSL options that you set for your transfer will apply to DoH since the
+Some SSL options that you set for your transfer also applies to DoH since the
 name lookups take place over SSL. However, the certificate verification
-settings are not inherited and can be controlled separately via
---doh-insecure and --doh-cert-status.
+settings are not inherited but are controlled separately via --doh-insecure
+and --doh-cert-status.
 
-This option is unset if an empty string "" is used as the URL. (Added in
-7.85.0)
+This option is unset if an empty string "" is used as the URL.
+(Added in 7.85.0)

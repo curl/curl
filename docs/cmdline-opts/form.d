@@ -29,14 +29,13 @@ file.
 Tell curl to read content from stdin instead of a file by using - as
 filename. This goes for both @ and < constructs. When stdin is used, the
 contents is buffered in memory first by curl to determine its size and allow a
-possible resend. Defining a part's data from a named non-regular file (such
-as a named pipe or similar) is unfortunately not subject to buffering and will
-be effectively read at transmission time; since the full size is unknown
-before the transfer starts, such data is sent as chunks by HTTP and rejected
-by IMAP.
+possible resend. Defining a part's data from a named non-regular file (such as
+a named pipe or similar) is not subject to buffering and is instead read at
+transmission time; since the full size is unknown before the transfer starts,
+such data is sent as chunks by HTTP and rejected by IMAP.
 
 Example: send an image to an HTTP server, where 'profile' is the name of the
-form-field to which the file **portrait.jpg** will be the input:
+form-field to which the file **portrait.jpg** is the input:
 
  curl -F profile=@portrait.jpg https://example.com/upload.cgi
 

@@ -37,19 +37,19 @@ accesses the target URL through the proxy.
 The list of host names can also be include numerical IP addresses, and IPv6
 versions should then be given without enclosing brackets.
 
-Since 7.86.0, IP addresses can be specified using CIDR notation: an appended
-slash and number specifies the number of "network bits" out of the address to
-use in the comparison. For example "192.168.0.0/16" would match all addresses
-starting with "192.168".
+IP addresses can be specified using CIDR notation: an appended slash and
+number specifies the number of "network bits" out of the address to use in the
+comparison (added in 7.86.0). For example "192.168.0.0/16" would match all
+addresses starting with "192.168".
 .IP "APPDATA <dir>"
 On Windows, this variable is used when trying to find the home directory. If
 the primary home variable are all unset.
 .IP "COLUMNS <terminal width>"
-If set, the specified number of characters will be used as the terminal width
-when the alternative progress-bar is shown. If not set, curl will try to
-figure it out using other ways.
+If set, the specified number of characters is used as the terminal width when
+the alternative progress-bar is shown. If not set, curl tries to figure it out
+using other ways.
 .IP "CURL_CA_BUNDLE <file>"
-If set, will be used as the --cacert value.
+If set, it is used as the --cacert value.
 .IP "CURL_HOME <dir>"
 If set, is the first variable curl checks when trying to find its home
 directory. If not set, it continues to check *XDG_CONFIG_HOME*
@@ -57,8 +57,8 @@ directory. If not set, it continues to check *XDG_CONFIG_HOME*
 If curl was built with support for "MultiSSL", meaning that it has built-in
 support for more than one TLS backend, this environment variable can be set to
 the case insensitive name of the particular backend to use when curl is
-invoked. Setting a name that is not a built-in alternative will make curl
-stay with the default.
+invoked. Setting a name that is not a built-in alternative makes curl stay
+with the default.
 
 SSL backend names (case-insensitive): **bearssl**, **gnutls**, **mbedtls**,
 **openssl**, **rustls**, **schannel**, **secure-transport**, **wolfssl**
@@ -68,24 +68,24 @@ looking for the default .curlrc. *CURL_HOME* and *XDG_CONFIG_HOME*
 have preference.
 .IP "QLOGDIR <directory name>"
 If curl was built with HTTP/3 support, setting this environment variable to a
-local directory will make curl produce **qlogs** in that directory, using file
+local directory makes curl produce **qlogs** in that directory, using file
 names named after the destination connection id (in hex). Do note that these
 files can become rather large. Works with the ngtcp2 and quiche QUIC backends.
 .IP SHELL
 Used on VMS when trying to detect if using a **DCL** or a **unix** shell.
 .IP "SSL_CERT_DIR <dir>"
-If set, will be used as the --capath value.
+If set, it is used as the --capath value.
 .IP "SSL_CERT_FILE <path>"
-If set, will be used as the --cacert value.
+If set, it is used as the --cacert value.
 .IP "SSLKEYLOGFILE <file name>"
-If you set this environment variable to a file name, curl will store TLS
-secrets from its connections in that file when invoked to enable you to
-analyze the TLS traffic in real time using network analyzing tools such as
-Wireshark. This works with the following TLS backends: OpenSSL, libressl,
-BoringSSL, GnuTLS and wolfSSL.
+If you set this environment variable to a file name, curl stores TLS secrets
+from its connections in that file when invoked to enable you to analyze the
+TLS traffic in real time using network analyzing tools such as Wireshark. This
+works with the following TLS backends: OpenSSL, libressl, BoringSSL, GnuTLS
+and wolfSSL.
 .IP "USERPROFILE <dir>"
 On Windows, this variable is used when trying to find the home directory. If
-the other, primary, variable are all unset. If set, curl will use the path
+the other, primary, variable are all unset. If set, curl uses the path
 **"$USERPROFILE\\Application Data"**.
 .IP "XDG_CONFIG_HOME <dir>"
 If *CURL_HOME* is not set, this variable is checked when looking for a
@@ -94,8 +94,8 @@ default .curlrc file.
 The proxy string may be specified with a protocol:// prefix to specify
 alternative proxy protocols. (Added in 7.21.7)
 
-If no protocol is specified in the proxy string or if the string does not match
-a supported one, the proxy will be treated as an HTTP proxy.
+If no protocol is specified in the proxy string or if the string does not
+match a supported one, the proxy is treated as an HTTP proxy.
 
 The supported proxy protocol prefixes are as follows:
 .IP "http://"
@@ -283,7 +283,7 @@ Unable to parse FTP file list.
 .IP 88
 FTP chunk callback reported error.
 .IP 89
-No connection available, the session will be queued.
+No connection available, the session is queued.
 .IP 90
 SSL public key does not matched pinned public key.
 .IP 91
@@ -307,8 +307,8 @@ A client-side certificate is required to complete the TLS handshake.
 .IP 99
 Poll or select returned fatal error.
 .IP XX
-More error codes will appear here in future releases. The existing ones
-are meant to never change.
+More error codes might appear here in future releases. The existing ones are
+meant to never change.
 .SH BUGS
 If you experience any problems with curl, submit an issue in the project's bug
 tracker on GitHub: https://github.com/curl/curl/issues

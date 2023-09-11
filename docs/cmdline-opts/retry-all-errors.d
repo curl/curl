@@ -25,10 +25,10 @@ file, which are not reset. We strongly suggest you do not parse or record
 output via redirect in combination with this option, since you may receive
 duplicate data.
 
-By default curl will not error on an HTTP response code that indicates an HTTP
-error, if the transfer was successful. For example, if a server replies 404
-Not Found and the reply is fully received then that is not an error. When
---retry is used then curl will retry on some HTTP response codes that indicate
-transient HTTP errors, but that does not include most 4xx response codes such
-as 404. If you want to retry on all response codes that indicate HTTP errors
-(4xx and 5xx) then combine with --fail.
+By default curl does not return error for transfers with an HTTP response code
+that indicates an HTTP error, if the transfer was successful. For example, if
+a server replies 404 Not Found and the reply is fully received then that is
+not an error. When --retry is used then curl retries on some HTTP response
+codes that indicate transient HTTP errors, but that does not include most 4xx
+response codes such as 404. If you want to retry on all response codes that
+indicate HTTP errors (4xx and 5xx) then combine with --fail.

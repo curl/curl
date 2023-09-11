@@ -41,8 +41,23 @@
 /* disables cookies support */
 #cmakedefine CURL_DISABLE_COOKIES 1
 
-/* disables cryptographic authentication */
-#cmakedefine CURL_DISABLE_CRYPTO_AUTH 1
+/* disables Basic authentication */
+#cmakedefine CURL_DISABLE_BASIC_AUTH 1
+
+/* disables Bearer authentication */
+#cmakedefine CURL_DISABLE_BEARER_AUTH 1
+
+/* disables Digest authentication */
+#cmakedefine CURL_DISABLE_DIGEST_AUTH 1
+
+/* disables Kerberos authentication */
+#cmakedefine CURL_DISABLE_KERBEROS_AUTH 1
+
+/* disables negotiate authentication */
+#cmakedefine CURL_DISABLE_NEGOTIATE_AUTH 1
+
+/* disables AWS-SIG4 */
+#cmakedefine CURL_DISABLE_AWS 1
 
 /* disables DICT */
 #cmakedefine CURL_DISABLE_DICT 1

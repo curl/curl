@@ -18,21 +18,15 @@ or DER format, or any number of base64 encoded sha256 hashes preceded by
 
 When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity. A public key is extracted from this certificate and
-if it does not exactly match the public key provided to this option, curl will
-abort the connection before sending or receiving any data.
+if it does not exactly match the public key provided to this option, curl
+aborts the connection before sending or receiving any data.
 
 PEM/DER support:
 
-7.39.0: OpenSSL and GnuTLS
-
-7.43.0: wolfSSL
-
-7.47.0: mbedTLS
+OpenSSL and GnuTLS (added in 7.39.0), wolfSSL (added in 7.43.0), mbedTLS (added in 7.47.0)
 
 sha256 support:
 
-7.44.0: OpenSSL, GnuTLS and wolfSSL
-
-7.47.0: mbedTLS
+OpenSSL, GnuTLS and wolfSSL (added in 7.44.0), mbedTLS (added in 7.47.0)
 
 Other SSL backends not supported.

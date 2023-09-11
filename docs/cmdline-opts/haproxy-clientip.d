@@ -21,7 +21,7 @@ digits (upper or lower case) delimited by colons between each other, with the
 acceptance of one double colon sequence to replace the largest acceptable range
 of consecutive zeroes. The total number of decoded bits must exactly be 128.
 
-Otherwise, any string can be accepted for the client IP and will be sent.
+Otherwise, any string can be accepted for the client IP and get sent.
 
 It replaces --haproxy-protocol if used, it is not necessary to specify both flags.
 

@@ -11,10 +11,10 @@ Added: 7.10.8
 Multi: single
 ---
 Specify the maximum size (in bytes) of a file to download. If the file
-requested is larger than this value, the transfer will not start and curl will
-return with exit code 63.
+requested is larger than this value, the transfer does not start and curl
+returns with exit code 63.
 
-A size modifier may be used. For example, Appending 'k' or 'K' will count the
+A size modifier may be used. For example, Appending 'k' or 'K' counts the
 number as kilobytes, 'm' or 'M' makes it megabytes, while 'g' or 'G' makes it
 gigabytes. Examples: 200K, 3m and 1G. (Added in 7.58.0)
 

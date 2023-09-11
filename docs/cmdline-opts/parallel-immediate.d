@@ -9,7 +9,7 @@ Example: --parallel-immediate -Z $URL -o file1 $URL -o file2
 Multi: boolean
 Scope: global
 ---
-When doing parallel transfers, this option will instruct curl that it should
+When doing parallel transfers, this option instructs curl that it should
 rather prefer opening up more connections in parallel at once rather than
 waiting to see if new transfers can be added as multiplexed streams on another
 connection.

@@ -431,6 +431,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   curl_off_t max_recv = data->set.max_recv_speed?
                         data->set.max_recv_speed : CURL_OFF_T_MAX;
   char *buf = data->state.buffer;
+  bool data_eof_handled = FALSE;
   DEBUGASSERT(buf);
 
   *done = FALSE;
@@ -448,8 +449,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
        to ensure that http2_handle_stream_close is called when we read all
        incoming bytes for a particular stream. */
     bool is_http3 = Curl_conn_is_http3(data, conn, FIRSTSOCKET);
-    bool data_eof_handled = is_http3
-                            || Curl_conn_is_http2(data, conn, FIRSTSOCKET);
+    data_eof_handled = is_http3 || Curl_conn_is_http2(data, conn, FIRSTSOCKET);
 
     if(!data_eof_handled && k->size != -1 && !k->header) {
       /* make sure we don't read too much */
@@ -492,15 +492,16 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     if(0 < nread || is_empty_data) {
       buf[nread] = 0;
     }
-    else {
+    if(!nread) {
       /* if we receive 0 or less here, either the data transfer is done or the
          server closed the connection and we bail out from this! */
       if(data_eof_handled)
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
         DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
-      k->keepon &= ~KEEP_RECV;
-      break;
+      k->keepon = 0; /* stop sending as well */
+      if(!is_empty_data)
+        break;
     }
 
     /* Default buffer to use when we write the buffer, it may be changed
@@ -761,7 +762,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   }
 
   if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
-     conn->bits.close) {
+     (conn->bits.close || data_eof_handled)) {
     /* When we've read the entire thing and the close bit is set, the server
        may now close the connection. If there's now any kind of sending going
        on from our side, we need to stop that immediately. */

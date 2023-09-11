@@ -51,4 +51,11 @@ CURLcode Curl_write(struct Curl_easy *data,
                     const void *mem, size_t len,
                     ssize_t *written);
 
+/* internal write-function, using sockindex for connection destination */
+CURLcode Curl_nwrite(struct Curl_easy *data,
+                     int sockindex,
+                     const void *buf,
+                     size_t blen,
+                     ssize_t *pnwritten);
+
 #endif /* HEADER_CURL_SENDF_H */

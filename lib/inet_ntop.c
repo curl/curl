@@ -117,8 +117,9 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
 
   for(i = 0; i < (IN6ADDRSZ / INT16SZ); i++) {
     if(words[i] == 0) {
-      if(cur.base == -1)
-        cur.base = i, cur.len = 1;
+      if(cur.base == -1) {
+        cur.base = i; cur.len = 1;
+      }
       else
         cur.len++;
     }

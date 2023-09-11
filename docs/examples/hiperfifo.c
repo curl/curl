@@ -358,8 +358,8 @@ static void new_conn(char *url, GlobalInfo *g)
   rc = curl_multi_add_handle(g->multi, conn->easy);
   mcode_or_die("new_conn: curl_multi_add_handle", rc);
 
-  /* note that the add_handle() will set a time-out to trigger very soon so
-     that the necessary socket_action() call will be called by this app */
+  /* note that the add_handle() will set a time-out to trigger soon so that
+     the necessary socket_action() call will be called by this app */
 }
 
 /* This gets called whenever data is received from the fifo */

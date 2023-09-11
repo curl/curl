@@ -72,7 +72,7 @@ static CURLcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
   char *sptr = s;
   CURLcode result = CURLE_OK;
 #ifdef HAVE_GSSAPI
-  enum protection_level data_sec = conn->data_prot;
+  unsigned char data_sec = conn->data_prot;
 #endif
 
   if(!cmd)
@@ -91,7 +91,7 @@ static CURLcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
 #ifdef HAVE_GSSAPI
     conn->data_prot = PROT_CMD;
 #endif
-    result = Curl_write(data, conn->sock[FIRSTSOCKET], sptr, write_len,
+    result = Curl_nwrite(data, FIRSTSOCKET, sptr, write_len,
                         &bytes_written);
 #ifdef HAVE_GSSAPI
     DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
@@ -385,7 +385,7 @@ static const struct Curl_sec_client_mech Curl_krb5_client_mech = {
 };
 
 static const struct {
-  enum protection_level level;
+  unsigned char level;
   const char *name;
 } level_names[] = {
   { PROT_CLEAR, "clear" },
@@ -394,8 +394,7 @@ static const struct {
   { PROT_PRIVATE, "private" }
 };
 
-static enum protection_level
-name_to_level(const char *name)
+static unsigned char name_to_level(const char *name)
 {
   int i;
   for(i = 0; i < (int)sizeof(level_names)/(int)sizeof(level_names[0]); i++)
@@ -734,7 +733,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
 {
   int code;
   struct connectdata *conn = data->conn;
-  enum protection_level level = conn->request_data_prot;
+  unsigned char level = conn->request_data_prot;
 
   DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
 
@@ -793,7 +792,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
 int
 Curl_sec_request_prot(struct connectdata *conn, const char *level)
 {
-  enum protection_level l = name_to_level(level);
+  unsigned char l = name_to_level(level);
   if(l == PROT_NONE)
     return -1;
   DEBUGASSERT(l > PROT_NONE && l < PROT_LAST);

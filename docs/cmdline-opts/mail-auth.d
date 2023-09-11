@@ -10,6 +10,5 @@ Category: smtp
 Example: --mail-auth user@example.come -T mail smtp://example.com/
 Multi: single
 ---
-Specify a single address. This will be used to specify the authentication
-address (identity) of a submitted message that is being relayed to another
-server.
+Specify a single address. This is used to specify the authentication address
+(identity) of a submitted message that is being relayed to another server.

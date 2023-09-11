@@ -652,19 +652,19 @@
 #endif
 
 /* Single point where USE_SPNEGO definition might be defined */
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) && \
+#if !defined(CURL_DISABLE_NEGOTIATE_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_SPNEGO
 #endif
 
 /* Single point where USE_KERBEROS5 definition might be defined */
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) && \
+#if !defined(CURL_DISABLE_KERBEROS_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_KERBEROS5
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(CURL_DISABLE_NTLM)
+#if !defined(CURL_DISABLE_NTLM)
 #  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                   \
   defined(USE_GNUTLS) || defined(USE_SECTRANSP) ||                      \
   defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \

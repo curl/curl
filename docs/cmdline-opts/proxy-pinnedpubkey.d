@@ -18,5 +18,5 @@ or DER format, or any number of base64 encoded sha256 hashes preceded by
 
 When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity. A public key is extracted from this certificate and
-if it does not exactly match the public key provided to this option, curl will
-abort the connection before sending or receiving any data.
+if it does not exactly match the public key provided to this option, curl
+aborts the connection before sending or receiving any data.

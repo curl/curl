@@ -11,8 +11,8 @@ See-also: verbose trace
 Multi: append
 Scope: global
 ---
-Set configuration for trace output. A comma-separated list of components
-where detailed output will be made available from. Names are case-insensitive.
+Set configuration for trace output. A comma-separated list of components where
+detailed output can be made available from. Names are case-insensitive.
 Specify 'all' to enable all trace components.
 
 In addition to trace component names, specify "ids" and "time" to

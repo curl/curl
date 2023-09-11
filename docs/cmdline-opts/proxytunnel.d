@@ -9,10 +9,10 @@ Example: --proxytunnel -x http://proxy $URL
 Added: 7.3
 Multi: boolean
 ---
-When an HTTP proxy is used --proxy, this option will make curl tunnel through
-the proxy. The tunnel approach is made with the HTTP proxy CONNECT request and
-requires that the proxy allows direct connect to the remote port number curl
-wants to tunnel through to.
+When an HTTP proxy is used --proxy, this option makes curl tunnel the traffic
+through the proxy. The tunnel approach is made with the HTTP proxy CONNECT
+request and requires that the proxy allows direct connect to the remote port
+number curl wants to tunnel through to.
 
 To suppress proxy CONNECT response headers when curl is set to output headers
 use --suppress-connect-headers.

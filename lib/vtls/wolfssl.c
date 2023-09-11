@@ -295,7 +295,7 @@ static int bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
               blen, nwritten, result);
   wolfSSL_BIO_clear_retry_flags(bio);
   if(nwritten < 0 && CURLE_AGAIN == result)
-    BIO_set_retry_read(bio);
+    BIO_set_retry_write(bio);
   return (int)nwritten;
 }
 

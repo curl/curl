@@ -341,6 +341,8 @@ char *Curl_copy_header_value(const char *header)
 }
 
 #ifndef CURL_DISABLE_HTTP_AUTH
+
+#ifndef CURL_DISABLE_BASIC_AUTH
 /*
  * http_output_basic() sets up an Authorization: header (or the proxy version)
  * for HTTP Basic authentication.
@@ -402,6 +404,9 @@ fail:
   return result;
 }
 
+#endif
+
+#ifndef CURL_DISABLE_BEARER_AUTH
 /*
  * http_output_bearer() sets up an Authorization: header
  * for HTTP Bearer authentication.
@@ -429,6 +434,8 @@ fail:
 
 #endif
 
+#endif
+
 /* pickoneauth() selects the most favourable authentication method from the
  * ones available and the ones we want.
  *
@@ -445,18 +452,26 @@ static bool pickoneauth(struct auth *pick, unsigned long mask)
      of preference in case of the existence of multiple accepted types. */
   if(avail & CURLAUTH_NEGOTIATE)
     pick->picked = CURLAUTH_NEGOTIATE;
+#ifndef CURL_DISABLE_BEARER_AUTH
   else if(avail & CURLAUTH_BEARER)
     pick->picked = CURLAUTH_BEARER;
+#endif
+#ifndef CURL_DISABLE_DIGEST_AUTH
   else if(avail & CURLAUTH_DIGEST)
     pick->picked = CURLAUTH_DIGEST;
+#endif
   else if(avail & CURLAUTH_NTLM)
     pick->picked = CURLAUTH_NTLM;
   else if(avail & CURLAUTH_NTLM_WB)
     pick->picked = CURLAUTH_NTLM_WB;
+#ifndef CURL_DISABLE_BASIC_AUTH
   else if(avail & CURLAUTH_BASIC)
     pick->picked = CURLAUTH_BASIC;
+#endif
+#ifndef CURL_DISABLE_AWS
   else if(avail & CURLAUTH_AWS_SIGV4)
     pick->picked = CURLAUTH_AWS_SIGV4;
+#endif
   else {
     pick->picked = CURLAUTH_PICKNONE; /* we select to use nothing */
     picked = FALSE;
@@ -722,11 +737,11 @@ output_auth_headers(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   (void)conn;
 
-#ifdef CURL_DISABLE_CRYPTO_AUTH
+#ifdef CURL_DISABLE_DIGEST_AUTH
   (void)request;
   (void)path;
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_AWS
   if(authstatus->picked == CURLAUTH_AWS_SIGV4) {
     auth = "AWS_SIGV4";
     result = Curl_output_aws_sigv4(data, proxy);
@@ -762,7 +777,7 @@ output_auth_headers(struct Curl_easy *data,
   }
   else
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
   if(authstatus->picked == CURLAUTH_DIGEST) {
     auth = "Digest";
     result = Curl_output_digest(data,
@@ -774,6 +789,7 @@ output_auth_headers(struct Curl_easy *data,
   }
   else
 #endif
+#ifndef CURL_DISABLE_BASIC_AUTH
   if(authstatus->picked == CURLAUTH_BASIC) {
     /* Basic */
     if(
@@ -793,6 +809,8 @@ output_auth_headers(struct Curl_easy *data,
        functions work that way */
     authstatus->done = TRUE;
   }
+#endif
+#ifndef CURL_DISABLE_BEARER_AUTH
   if(authstatus->picked == CURLAUTH_BEARER) {
     /* Bearer */
     if((!proxy && data->set.str[STRING_BEARER] &&
@@ -807,6 +825,7 @@ output_auth_headers(struct Curl_easy *data,
        functions work that way */
     authstatus->done = TRUE;
   }
+#endif
 
   if(auth) {
 #ifndef CURL_DISABLE_PROXY
@@ -1068,7 +1087,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       }
       else
 #endif
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
         if(checkprefix("Digest", auth) && is_valid_auth_separator(auth[6])) {
           if((authp->avail & CURLAUTH_DIGEST) != 0)
             infof(data, "Ignoring duplicate digest auth header.");
@@ -1091,6 +1110,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
         }
         else
 #endif
+#ifndef CURL_DISABLE_BASIC_AUTH
           if(checkprefix("Basic", auth) &&
              is_valid_auth_separator(auth[5])) {
             *availp |= CURLAUTH_BASIC;
@@ -1105,6 +1125,8 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
             }
           }
           else
+#endif
+#ifndef CURL_DISABLE_BEARER_AUTH
             if(checkprefix("Bearer", auth) &&
                is_valid_auth_separator(auth[6])) {
               *availp |= CURLAUTH_BEARER;
@@ -1117,6 +1139,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                 data->state.authproblem = TRUE;
               }
             }
+#endif
 
     /* there may be multiple methods on one line, so keep reading */
     while(*auth && *auth != ',') /* read up to the next comma */
@@ -1281,7 +1304,7 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
                           curl_off_t *bytes_written,
                           /* how much of the buffer contains body data */
                           curl_off_t included_body_bytes,
-                          int socketindex)
+                          int sockindex)
 {
   ssize_t amount;
   CURLcode result;
@@ -1289,12 +1312,9 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   size_t size;
   struct connectdata *conn = data->conn;
   size_t sendsize;
-  curl_socket_t sockfd;
   size_t headersize;
 
-  DEBUGASSERT(socketindex <= SECONDARYSOCKET);
-
-  sockfd = Curl_conn_get_socket(data, socketindex);
+  DEBUGASSERT(sockindex <= SECONDARYSOCKET && sockindex >= 0);
 
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */
@@ -1376,9 +1396,25 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
       else
         sendsize = size;
     }
+
+    /* We currently cannot send more that this for http here:
+     * - if sending blocks, it return 0 as amount
+     * - we then whisk aside the `in` into the `http` struct
+     *   and install our own `data->state.fread_func` that
+     *   on subsequent calls reads `in` empty.
+     * - when the whisked away `in` is empty, the `fread_func`
+     *   is restored ot its original state.
+     * The problem is that `fread_func` can only return
+     * `upload_buffer_size` lengths. If the send we do here
+     * is larger and blocks, we do re-sending with smaller
+     * amounts of data and connection filters do not like
+     * that.
+     */
+    if(http && (sendsize > (size_t)data->set.upload_buffer_size))
+      sendsize = (size_t)data->set.upload_buffer_size;
   }
 
-  result = Curl_write(data, sockfd, ptr, sendsize, &amount);
+  result = Curl_nwrite(data, sockindex, ptr, sendsize, &amount);
 
   if(!result) {
     /*
@@ -2694,7 +2730,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 
         if(!data->req.upload_chunky) {
           /* We're not sending it 'chunked', append it to the request
-             already now to reduce the number if send() calls */
+             already now to reduce the number of send() calls */
           result = Curl_dyn_addn(r, data->set.postfields,
                                  (size_t)http->postsize);
           included_body = http->postsize;

@@ -13,6 +13,6 @@ Example: --proxy-http2 -x proxy $URL
 Multi: boolean
 ---
 Tells curl to try negotiate HTTP version 2 with an HTTPS proxy. The proxy might
-still only offer HTTP/1 and then curl will stick to using that version.
+still only offer HTTP/1 and then curl sticks to using that version.
 
 This has no effect for any other kinds of proxies.

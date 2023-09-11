@@ -72,7 +72,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 #endif
 
-    /* Since the traffic will be encrypted, it is very useful to turn on debug
+    /* Since the traffic will be encrypted, it is useful to turn on debug
      * information within libcurl to see what is happening during the
      * transfer */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);

@@ -46,7 +46,7 @@ started. Even if you set a crazy value here, \fIcurl_easy_setopt(3)\fP might
 still return \fICURLE_OK\fP.
 
 If the given URL is missing a scheme name (such as "http://" or "ftp://" etc)
-then libcurl guesses based on the host. If the outermost sub-domain name
+then libcurl guesses based on the host. If the outermost subdomain name
 matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that protocol gets used,
 otherwise HTTP is used. Since 7.45.0 guessing can be disabled by setting a
 default protocol, see \fICURLOPT_DEFAULT_PROTOCOL(3)\fP for details.
@@ -70,6 +70,9 @@ transfer is started.
 
 The application does not have to keep the string around after setting this
 option.
+
+The parser used for handling the URL set with \fICURLOPT_URL(3)\fP is the same
+that \fIcurl_url_set(3)\fP uses.
 .SH ENCODING
 The string pointed to in the \fICURLOPT_URL(3)\fP argument is generally
 expected to be a sequence of characters using an ASCII compatible encoding.
@@ -131,3 +134,5 @@ called.
 .BR CURLOPT_FORBID_REUSE "(3), " CURLOPT_FRESH_CONNECT "(3), "
 .BR curl_easy_perform "(3), "
 .BR CURLINFO_REDIRECT_URL "(3), " CURLOPT_PATH_AS_IS "(3), " CURLOPT_CURLU "(3), "
+.BR curl_url_set "(3), "
+.BR curl_url_get "(3), "

@@ -16,11 +16,11 @@ Try to use SSL/TLS for the connection. Reverts to a non-secure connection if
 the server does not support SSL/TLS. See also --ftp-ssl-control and --ssl-reqd
 for different levels of encryption required.
 
-This option is handled in LDAP since version 7.81.0. It is fully supported
-by the OpenLDAP backend and ignored by the generic ldap backend.
+This option is handled in LDAP (added in 7.81.0). It is fully supported by the
+OpenLDAP backend and ignored by the generic ldap backend.
 
 Please note that a server may close the connection if the negotiation does
 not succeed.
 
-This option was formerly known as --ftp-ssl (Added in 7.11.0). That option
-name can still be used but will be removed in a future version.
+This option was formerly known as --ftp-ssl (added in 7.11.0). That option
+name can still be used but might be removed in a future version.

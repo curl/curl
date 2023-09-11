@@ -12,16 +12,16 @@ Multi: boolean
 ---
 This option tells the --remote-name option to use the server-specified
 Content-Disposition filename instead of extracting a filename from the URL. If
-the server-provided file name contains a path, that will be stripped off
-before the file name is used.
+the server-provided file name contains a path, that is stripped off before the
+file name is used.
 
 The file is saved in the current directory, or in the directory specified with
 --output-dir.
 
 If the server specifies a file name and a file with that name already exists
-in the destination directory, it will not be overwritten and an error will
-occur - unless you allow it by using the --clobber option. If the server does
-not specify a file name then this option has no effect.
+in the destination directory, it is not overwritten and an error occurs -
+unless you allow it by using the --clobber option. If the server does not
+specify a file name then this option has no effect.
 
 There is no attempt to decode %-sequences (yet) in the provided file name, so
 this option may provide you with rather unexpected file names.

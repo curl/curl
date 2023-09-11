@@ -31,7 +31,7 @@ curl_url_set - set a URL part
 CURLUcode curl_url_set(CURLU *url,
                        CURLUPart part,
                        const char *content,
-                       unsigned int flags)
+                       unsigned int flags);
 .fi
 .SH DESCRIPTION
 The \fIurl\fP handle to work on, passed in as the first argument, must be a
@@ -151,7 +151,7 @@ are set.
 .IP CURLU_GUESS_SCHEME
 If set, allows the URL to be set without a scheme and it instead "guesses"
 which scheme that was intended based on the host name. If the outermost
-sub-domain name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that scheme
+subdomain name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that scheme
 is used, otherwise it picks HTTP. Conflicts with the
 \fICURLU_DEFAULT_SCHEME\fP option which takes precedence if both are set.
 .IP CURLU_NO_AUTHORITY

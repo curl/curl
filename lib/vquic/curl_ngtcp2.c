@@ -179,6 +179,7 @@ struct h3_stream_ctx {
   int64_t id; /* HTTP/3 protocol identifier */
   struct bufq sendbuf;   /* h3 request body */
   struct bufq recvbuf;   /* h3 response body */
+  struct h1_req_parser h1; /* h1 request parsing */
   size_t sendbuf_len_in_flight; /* sendbuf amount "in flight" */
   size_t upload_blocked_len; /* the amount written last and EGAINed */
   size_t recv_buf_nonflow; /* buffered bytes, not counting for flow control */
@@ -226,6 +227,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   Curl_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   stream->recv_buf_nonflow = 0;
+  Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
   H3_STREAM_LCTX(data) = stream;
   return CURLE_OK;
@@ -240,6 +242,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
     CURL_TRC_CF(data, cf, "[%"PRId64"] easy handle is done", stream->id);
     Curl_bufq_free(&stream->sendbuf);
     Curl_bufq_free(&stream->recvbuf);
+    Curl_h1_req_parse_free(&stream->h1);
     free(stream);
     H3_STREAM_LCTX(data) = NULL;
   }
@@ -393,6 +396,7 @@ static int init_ngh3_conn(struct Curl_cfilter *cf);
 static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
                              struct Curl_cfilter *cf, struct Curl_easy *data)
 {
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct connectdata *conn = cf->conn;
   CURLcode result = CURLE_FAILED_INIT;
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
@@ -450,6 +454,15 @@ static CURLcode quic_ssl_ctx(SSL_CTX **pssl_ctx,
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
+    /* When a user callback is installed to modify the SSL_CTX,
+     * we need to do the full initialization before calling it.
+     * See: #11800 */
+    if(!ctx->x509_store_setup) {
+      result = Curl_ssl_setup_x509_store(cf, data, ssl_ctx);
+      if(result)
+        goto out;
+      ctx->x509_store_setup = TRUE;
+    }
     Curl_set_in_callback(data, true);
     result = (*data->set.ssl.fsslctx)(data, ssl_ctx,
                                       data->set.ssl.fsslctxp);
@@ -1106,6 +1119,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   else {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] CLOSED", stream->id);
   }
+  data->req.keepon &= ~KEEP_SEND_HOLD;
   h3_drain_stream(cf, data);
   return 0;
 }
@@ -1624,7 +1638,6 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = NULL;
-  struct h1_req_parser h1;
   struct dynhds h2_headers;
   size_t nheader;
   nghttp3_nv *nva = NULL;
@@ -1634,7 +1647,6 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   nghttp3_data_reader reader;
   nghttp3_data_reader *preader = NULL;
 
-  Curl_h1_req_parse_init(&h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   *err = h3_data_setup(cf, data);
@@ -1643,24 +1655,22 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   stream = H3_STREAM_CTX(data);
   DEBUGASSERT(stream);
 
-  rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &stream->id, NULL);
-  if(rc) {
-    failf(data, "can get bidi streams");
-    *err = CURLE_SEND_ERROR;
-    goto out;
-  }
-
-  nwritten = Curl_h1_req_parse_read(&h1, buf, len, NULL, 0, err);
+  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
   if(nwritten < 0)
     goto out;
-  DEBUGASSERT(h1.done);
-  DEBUGASSERT(h1.req);
+  if(!stream->h1.done) {
+    /* need more data */
+    goto out;
+  }
+  DEBUGASSERT(stream->h1.req);
 
-  *err = Curl_http_req_to_h2(&h2_headers, h1.req, data);
+  *err = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
   if(*err) {
     nwritten = -1;
     goto out;
   }
+  /* no longer needed */
+  Curl_h1_req_parse_free(&stream->h1);
 
   nheader = Curl_dynhds_count(&h2_headers);
   nva = malloc(sizeof(nghttp3_nv) * nheader);
@@ -1677,6 +1687,13 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
     nva[i].value = (unsigned char *)e->value;
     nva[i].valuelen = e->valuelen;
     nva[i].flags = NGHTTP3_NV_FLAG_NONE;
+  }
+
+  rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &stream->id, NULL);
+  if(rc) {
+    failf(data, "can get bidi streams");
+    *err = CURLE_SEND_ERROR;
+    goto out;
   }
 
   switch(data->state.httpreq) {
@@ -1733,7 +1750,6 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
 
 out:
   free(nva);
-  Curl_h1_req_parse_free(&h1);
   Curl_dynhds_free(&h2_headers);
   return nwritten;
 }
@@ -1785,6 +1801,18 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     stream->upload_blocked_len = 0;
   }
   else if(stream->closed) {
+    if(stream->resp_hds_complete) {
+      /* Server decided to close the stream after having sent us a final
+       * response. This is valid if it is not interested in the request
+       * body. This happens on 30x or 40x responses.
+       * We silently discard the data sent, since this is not a transport
+       * error situation. */
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] discarding data"
+                  "on closed stream with response", stream->id);
+      *err = CURLE_OK;
+      sent = (ssize_t)len;
+      goto out;
+    }
     *err = CURLE_HTTP3;
     sent = -1;
     goto out;
@@ -1901,7 +1929,7 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
                    ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,
                    remote_addrlen);
-  pi.ecn = (uint32_t)ecn;
+  pi.ecn = (uint8_t)ecn;
 
   rv = ngtcp2_conn_read_pkt(ctx->qconn, &path, &pi, pkt, pktlen, pktx->ts);
   if(rv) {
@@ -2245,9 +2273,16 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
     }
     break;
   }
-  case CF_CTRL_DATA_IDLE:
-    result = check_and_set_expiry(cf, data, NULL);
+  case CF_CTRL_DATA_IDLE: {
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
+    CURL_TRC_CF(data, cf, "data idle");
+    if(stream && !stream->closed) {
+      result = check_and_set_expiry(cf, data, NULL);
+      if(result)
+        CURL_TRC_CF(data, cf, "data idle, check_and_set_expiry -> %d", result);
+    }
     break;
+  }
   default:
     break;
   }

@@ -110,6 +110,8 @@ class TestCaddy:
             assert r.total_connects == 1, r.dump_logs()
 
     # download 5MB files sequentially
+    @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
+    @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_08_04a_download_10mb_sequential(self, env: Env, caddy: Caddy,
                                            repeat, proto):
@@ -124,6 +126,8 @@ class TestCaddy:
         r.check_response(count=count, http_status=200, connect_count=1)
 
     # download 10MB files sequentially
+    @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
+    @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_08_04b_download_10mb_sequential(self, env: Env, caddy: Caddy,
                                            repeat, proto):
@@ -138,7 +142,9 @@ class TestCaddy:
         r.check_response(count=count, http_status=200, connect_count=1)
 
     # download 10MB files parallel
+    @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     def test_08_05_download_1mb_parallel(self, env: Env, caddy: Caddy,
                                          repeat, proto):
         if proto == 'h3' and not env.have_h3_curl():

@@ -91,7 +91,8 @@ class TestAuth:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
-            '--digest', '--user', f'test:{password}'
+            '--digest', '--user', f'test:{password}',
+            '--trace-config', 'http/2,http/3'
         ])
         # digest does not submit the password, but a hash of it, so all
         # works and, since the pw is not correct, we get a 401
@@ -111,7 +112,8 @@ class TestAuth:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
-            '--basic', '--user', f'test:{password}'
+            '--basic', '--user', f'test:{password}',
+            '--trace-config', 'http/2,http/3'
         ])
         # but apache denies on length limit
         r.check_response(http_status=431)

@@ -13,10 +13,11 @@ Specify a URL to fetch. This option is mostly handy when you want to specify
 URL(s) in a config file.
 
 If the given URL is missing a scheme name (such as "http://" or "ftp://" etc)
-then curl will make a guess based on the host. If the outermost sub-domain
-name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that protocol will be
-used, otherwise HTTP will be used. Since 7.45.0 guessing can be disabled by
-setting a default protocol, see --proto-default for details.
+then curl makes a guess based on the host. If the outermost subdomain name
+matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that protocol is used,
+otherwise HTTP is used. Guessing can be avoided by providing a full URL
+including the scheme, or disabled by setting a default protocol (added in
+7.45.0), see --proto-default for details.
 
 To control where this URL is written, use the --output or the --remote-name
 options.

@@ -71,6 +71,7 @@
 #include "warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
+#include "rand.h"
 #include "share.h"
 #include "version_win32.h"
 
@@ -777,6 +778,10 @@ struct cf_socket_ctx {
   struct curltime connected_at;      /* when socket connected/got first byte */
   struct curltime first_byte_at;     /* when first byte was recvd */
   int error;                         /* errno of last failure or 0 */
+#ifdef DEBUGBUILD
+  int wblock_percent;                /* percent of writes doing EAGAIN */
+  int wpartial_percent;              /* percent of bytes written in send */
+#endif
   BIT(got_first_byte);               /* if first byte was received */
   BIT(accepted);                     /* socket was accepted, not connected */
   BIT(active);
@@ -792,6 +797,22 @@ static void cf_socket_ctx_init(struct cf_socket_ctx *ctx,
   ctx->transport = transport;
   Curl_sock_assign_addr(&ctx->addr, ai, transport);
   Curl_bufq_init(&ctx->recvbuf, NW_RECV_CHUNK_SIZE, NW_RECV_CHUNKS);
+#ifdef DEBUGBUILD
+  {
+    char *p = getenv("CURL_DBG_SOCK_WBLOCK");
+    if(p) {
+      long l = strtol(p, NULL, 10);
+      if(l >= 0 && l <= 100)
+        ctx->wblock_percent = (int)l;
+    }
+    p = getenv("CURL_DBG_SOCK_WPARTIAL");
+    if(p) {
+      long l = strtol(p, NULL, 10);
+      if(l >= 0 && l <= 100)
+        ctx->wpartial_percent = (int)l;
+    }
+  }
+#endif
 }
 
 struct reader_ctx {
@@ -1253,10 +1274,33 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_socket_ctx *ctx = cf->ctx;
   curl_socket_t fdsave;
   ssize_t nwritten;
+  size_t orig_len = len;
 
   *err = CURLE_OK;
   fdsave = cf->conn->sock[cf->sockindex];
   cf->conn->sock[cf->sockindex] = ctx->sock;
+
+#ifdef DEBUGBUILD
+  /* simulate network blocking/partial writes */
+  if(ctx->wblock_percent > 0) {
+    unsigned char c;
+    Curl_rand(data, &c, 1);
+    if(c >= ((100-ctx->wblock_percent)*256/100)) {
+      CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE EWOULDBLOCK", orig_len);
+      *err = CURLE_AGAIN;
+      nwritten = -1;
+      cf->conn->sock[cf->sockindex] = fdsave;
+      return nwritten;
+    }
+  }
+  if(cf->cft != &Curl_cft_udp && ctx->wpartial_percent > 0 && len > 8) {
+    len = len * ctx->wpartial_percent / 100;
+    if(!len)
+      len = 1;
+    CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE partial write of %zu bytes",
+                orig_len, len);
+  }
+#endif
 
 #if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(cf->conn->bits.tcp_fastopen) {
@@ -1297,7 +1341,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, err=%d",
-              len, (int)nwritten, *err);
+              orig_len, (int)nwritten, *err);
   cf->conn->sock[cf->sockindex] = fdsave;
   return nwritten;
 }

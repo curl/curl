@@ -41,7 +41,7 @@
  *
  * Synchronising your computer clock via Internet time server usually relies
  * on DAYTIME, TIME, or NTP protocols. These protocols provide good accurate
- * time synchronization but it does not work very well through a
+ * time synchronization but it does not work well through a
  * firewall/proxy. Some adjustment has to be made to the firewall/proxy for
  * these protocols to work properly.
  *
@@ -54,7 +54,7 @@
  * 2. Webserver system time must in sync with the NTP time server,
  *    or at least provide an accurate time keeping.
  * 3. Webserver HTTP header does not provide the milliseconds units,
- *    so there is no way to get very accurate time.
+ *    so there is no way to get an accurate time.
  * 4. This software could only provide an accuracy of +- a few seconds,
  *    as Round-Trip delay time is not taken into consideration.
  *    Compensation of network, firewall/proxy delay cannot be simply divide

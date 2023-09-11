@@ -16,7 +16,7 @@ SOCKS) to the HTTP or HTTPS proxy. Hence pre proxy.
 The pre proxy string should be specified with a protocol:// prefix to specify
 alternative proxy protocols. Use socks4://, socks4a://, socks5:// or
 socks5h:// to request the specific SOCKS version to be used. No protocol
-specified will make curl default to SOCKS4.
+specified makes curl default to SOCKS4.
 
 If the port number is not specified in the proxy string, it is assumed to be
 1080.

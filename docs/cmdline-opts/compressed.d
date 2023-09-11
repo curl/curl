@@ -16,6 +16,6 @@ Response headers are not modified when saved, so if they are "interpreted"
 separately again at a later point they might appear to be saying that the
 content is (still) compressed; while in fact it has already been decompressed.
 
-If this option is used and the server sends an unsupported encoding, curl will
-report an error. This is a request, not an order; the server may or may not
+If this option is used and the server sends an unsupported encoding, curl
+reports an error. This is a request, not an order; the server may or may not
 deliver data compressed.

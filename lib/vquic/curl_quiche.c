@@ -210,6 +210,7 @@ static CURLcode quic_ssl_setup(struct Curl_cfilter *cf, struct Curl_easy *data)
 struct stream_ctx {
   int64_t id; /* HTTP/3 protocol stream identifier */
   struct bufq recvbuf; /* h3 response */
+  struct h1_req_parser h1; /* h1 request parsing */
   uint64_t error3; /* HTTP/3 stream error code */
   curl_off_t upload_left; /* number of request bytes left to upload */
   bool closed; /* TRUE on stream close */
@@ -298,6 +299,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   stream->id = -1;
   Curl_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
+  Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
   return CURLE_OK;
 }
 
@@ -314,6 +316,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       --ctx->sends_on_hold;
     }
     Curl_bufq_free(&stream->recvbuf);
+    Curl_h1_req_parse_free(&stream->h1);
     free(stream);
     H3_STREAM_LCTX(data) = NULL;
   }
@@ -565,6 +568,7 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
     }
     stream->closed = TRUE;
     streamclose(cf->conn, "End of stream");
+    data->req.keepon &= ~KEEP_SEND_HOLD;
     break;
 
   case QUICHE_H3_EVENT_GOAWAY:
@@ -935,7 +939,6 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
   struct stream_ctx *stream = H3_STREAM_CTX(data);
   size_t nheader, i;
   int64_t stream3_id;
-  struct h1_req_parser h1;
   struct dynhds h2_headers;
   quiche_h3_header *nva = NULL;
   ssize_t nwritten;
@@ -949,21 +952,25 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
     DEBUGASSERT(stream);
   }
 
-  Curl_h1_req_parse_init(&h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   DEBUGASSERT(stream);
-  nwritten = Curl_h1_req_parse_read(&h1, buf, len, NULL, 0, err);
+  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
   if(nwritten < 0)
     goto out;
-  DEBUGASSERT(h1.done);
-  DEBUGASSERT(h1.req);
+  if(!stream->h1.done) {
+    /* need more data */
+    goto out;
+  }
+  DEBUGASSERT(stream->h1.req);
 
-  *err = Curl_http_req_to_h2(&h2_headers, h1.req, data);
+  *err = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
   if(*err) {
     nwritten = -1;
     goto out;
   }
+  /* no longer needed */
+  Curl_h1_req_parse_free(&stream->h1);
 
   nheader = Curl_dynhds_count(&h2_headers);
   nva = malloc(sizeof(quiche_h3_header) * nheader);
@@ -1040,7 +1047,6 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
 
 out:
   free(nva);
-  Curl_h1_req_parse_free(&h1);
   Curl_dynhds_free(&h2_headers);
   return nwritten;
 }
@@ -1080,6 +1086,22 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       *err = CURLE_AGAIN;
       nwritten = -1;
+      goto out;
+    }
+    else if(nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE &&
+            stream->closed && stream->resp_hds_complete) {
+      /* sending request body on a stream that has been closed by the
+       * server. If the server has send us a final response, we should
+       * silently discard the send data.
+       * This happens for example on redirects where the server, instead
+       * of reading the full request body just closed the stream after
+       * sending the 30x response.
+       * This is sort of a race: had the transfer loop called recv first,
+       * it would see the response and stop/discard sending on its own- */
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] discarding data"
+                  "on closed stream with response", stream->id);
+      *err = CURLE_OK;
+      nwritten = (ssize_t)len;
       goto out;
     }
     else if(nwritten == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
@@ -1213,11 +1235,15 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
     }
     break;
   }
-  case CF_CTRL_DATA_IDLE:
-    result = cf_flush_egress(cf, data);
-    if(result)
-      CURL_TRC_CF(data, cf, "data idle, flush egress -> %d", result);
+  case CF_CTRL_DATA_IDLE: {
+    struct stream_ctx *stream = H3_STREAM_CTX(data);
+    if(stream && !stream->closed) {
+      result = cf_flush_egress(cf, data);
+      if(result)
+        CURL_TRC_CF(data, cf, "data idle, flush egress -> %d", result);
+    }
     break;
+  }
   default:
     break;
   }

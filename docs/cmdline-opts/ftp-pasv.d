@@ -16,5 +16,5 @@ option.
 Reversing an enforced passive really is not doable but you must then instead
 enforce the correct --ftp-port again.
 
-Passive mode means that curl will try the EPSV command first and then PASV,
+Passive mode means that curl tries the EPSV command first and then PASV,
 unless --disable-epsv is used.

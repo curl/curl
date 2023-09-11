@@ -42,8 +42,8 @@ the input \fIstring\fP to find out the size. This function does not accept
 input strings longer than \fBCURL_MAX_INPUT_LENGTH\fP (8 MB).
 
 Since 7.82.0, the \fBcurl\fP parameter is ignored. Prior to that there was
-per-handle character conversion support for some very old operating systems
-such as TPF, but it was otherwise ignored.
+per-handle character conversion support for some old operating systems such as
+TPF, but it was otherwise ignored.
 
 You must \fIcurl_free(3)\fP the returned string when you are done with it.
 .SH ENCODING

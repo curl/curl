@@ -19,17 +19,17 @@ curl recognizes the environment variable named 'CURL_CA_BUNDLE' if it is
 set, and uses the given path as a path to a CA cert bundle. This option
 overrides that variable.
 
-The windows version of curl will automatically look for a CA certs file named
+The windows version of curl automatically looks for a CA certs file named
 'curl-ca-bundle.crt', either in the same directory as curl.exe, or in the
 Current Working Directory, or in any folder along your PATH.
 
 (iOS and macOS only) If curl is built against Secure Transport, then this
 option is supported for backward compatibility with other SSL engines, but it
-should not be set. If the option is not set, then curl will use the
-certificates in the system and user Keychain to verify the peer, which is the
-preferred method of verifying the peer's certificate chain.
+should not be set. If the option is not set, then curl uses the certificates
+in the system and user Keychain to verify the peer, which is the preferred
+method of verifying the peer's certificate chain.
 
 (Schannel only) This option is supported for Schannel in Windows 7 or later
-with libcurl 7.60 or later. This option is supported for backward
-compatibility with other SSL engines; instead it is recommended to use
-Windows' store of root certificates (the default for Schannel).
+(added in 7.60.0). This option is supported for backward compatibility with
+other SSL engines; instead it is recommended to use Windows' store of root
+certificates (the default for Schannel).

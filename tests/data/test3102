@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+# SSL with libraries supporting CURLOPT_CERTINFO
+<features>
+SSL
+!bearssl
+!mbedtls
+!rustls
+!wolfssl
+</features>
+<server>
+https
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+ <name>
+verify certificate chain order with simple HTTPS GET
+ </name>
+ <command>
+https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPSPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

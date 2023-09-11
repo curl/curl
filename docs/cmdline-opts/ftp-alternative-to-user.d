@@ -12,5 +12,5 @@ Multi: single
 ---
 If authenticating with the USER and PASS commands fails, send this command.
 When connecting to Tumbleweed's Secure Transport server over FTPS using a
-client certificate, using "SITE AUTH" will tell the server to retrieve the
+client certificate, using "SITE AUTH" tells the server to retrieve the
 username from the certificate.

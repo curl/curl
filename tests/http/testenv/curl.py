@@ -24,7 +24,6 @@
 #
 ###########################################################################
 #
-import pytest
 import json
 import logging
 import os
@@ -45,7 +44,6 @@ class ExecResult:
 
     def __init__(self, args: List[str], exit_code: int,
                  stdout: List[str], stderr: List[str],
-                 trace: Optional[List[str]] = None,
                  duration: Optional[timedelta] = None,
                  with_stats: bool = False,
                  exception: Optional[str] = None):
@@ -54,7 +52,6 @@ class ExecResult:
         self._exception = exception
         self._stdout = stdout
         self._stderr = stderr
-        self._trace = trace
         self._duration = duration if duration is not None else timedelta()
         self._response = None
         self._responses = []
@@ -113,7 +110,7 @@ class ExecResult:
 
     @property
     def trace_lines(self) -> List[str]:
-        return self._trace if self._trace else self._stderr
+        return self._stderr
 
     @property
     def duration(self) -> timedelta:
@@ -201,15 +198,15 @@ class ExecResult:
             if self.with_stats:
                 for idx, x in enumerate(self.stats):
                     assert 'http_code' in x, \
-                        f'response #{idx} reports no http_code\n{self.dump_logs()}'
+                        f'response #{idx} reports no http_code\n{self.dump_stat(x)}'
                     assert x['http_code'] == http_status, \
                         f'response #{idx} http_code: expected {http_status}, '\
-                        f'got {x["http_code"]}\n{self.dump_logs()}'
+                        f'got {x["http_code"]}\n{self.dump_stat(x)}'
             else:
                 for idx, x in enumerate(self.responses):
                     assert x['status'] == http_status, \
                         f'response #{idx} status: expected {http_status},'\
-                        f'got {x["status"]}\n{self.dump_logs()}'
+                        f'got {x["status"]}\n{self.dump_stat(x)}'
         if protocol is not None:
             if self.with_stats:
                 http_version = None
@@ -223,7 +220,7 @@ class ExecResult:
                     for idx, x in enumerate(self.stats):
                         assert x['http_version'] == http_version, \
                             f'response #{idx} protocol: expected http/{http_version},' \
-                            f'got version {x["http_version"]}\n{self.dump_logs()}'
+                            f'got version {x["http_version"]}\n{self.dump_stat(x)}'
             else:
                 for idx, x in enumerate(self.responses):
                     assert x['protocol'] == protocol, \
@@ -243,29 +240,43 @@ class ExecResult:
         if http_status is not None:
             for idx, x in enumerate(self.stats):
                 assert 'http_code' in x, \
-                    f'status #{idx} reports no http_code\n{self.dump_logs()}'
+                    f'status #{idx} reports no http_code\n{self.dump_stat(x)}'
                 assert x['http_code'] == http_status, \
                     f'status #{idx} http_code: expected {http_status}, '\
-                    f'got {x["http_code"]}\n{self.dump_logs()}'
+                    f'got {x["http_code"]}\n{self.dump_stat(x)}'
         if exitcode is not None:
             for idx, x in enumerate(self.stats):
                 if 'exitcode' in x:
                     assert x['exitcode'] == 0, \
                         f'status #{idx} exitcode: expected {exitcode}, '\
-                        f'got {x["exitcode"]}\n{self.dump_logs()}'
+                        f'got {x["exitcode"]}\n{self.dump_stat(x)}'
 
     def dump_logs(self):
-        lines = []
-        lines.append('>>--stdout ----------------------------------------------\n')
+        lines = ['>>--stdout ----------------------------------------------\n']
         lines.extend(self._stdout)
-        if self._trace:
-            lines.append('>>--trace ----------------------------------------------\n')
-            lines.extend(self._trace)
-        else:
-            lines.append('>>--stderr ----------------------------------------------\n')
-            lines.extend(self._stderr)
+        lines.append('>>--stderr ----------------------------------------------\n')
+        lines.extend(self._stderr)
         lines.append('<<-------------------------------------------------------\n')
         return ''.join(lines)
+
+    def dump_stat(self, x):
+        lines = [
+            'json stat from curl:',
+            json.JSONEncoder(indent=2).encode(x),
+        ]
+        if 'xfer_id' in x:
+            xfer_id = x['xfer_id']
+            lines.append(f'>>--xfer {xfer_id} trace:\n')
+            lines.extend(self.xfer_trace_for(xfer_id))
+        else:
+            lines.append('>>--full trace-------------------------------------------\n')
+            lines.extend(self._stderr)
+            lines.append('<<-------------------------------------------------------\n')
+        return ''.join(lines)
+
+    def xfer_trace_for(self, xfer_id) -> List[str]:
+            pat = re.compile(f'^[^[]* \\[{xfer_id}-.*$')
+            return [line for line in self._stderr if pat.match(line)]
 
 
 class CurlClient:
@@ -288,7 +299,6 @@ class CurlClient:
         self._stdoutfile = f'{self._run_dir}/curl.stdout'
         self._stderrfile = f'{self._run_dir}/curl.stderr'
         self._headerfile = f'{self._run_dir}/curl.headers'
-        self._tracefile = f'{self._run_dir}/curl.trace'
         self._log_path = f'{self._run_dir}/curl.log'
         self._silent = silent
         self._rmrf(self._run_dir)
@@ -300,10 +310,6 @@ class CurlClient:
 
     def download_file(self, i: int) -> str:
         return os.path.join(self.run_dir, f'download_{i}.data')
-
-    @property
-    def trace_file(self) -> str:
-        return self._tracefile
 
     def _rmf(self, path):
         if os.path.exists(path):
@@ -347,7 +353,6 @@ class CurlClient:
                       with_stats: bool = True,
                       with_headers: bool = False,
                       no_save: bool = False,
-                      with_trace: bool = False,
                       extra_args: List[str] = None):
         if extra_args is None:
             extra_args = []
@@ -368,14 +373,12 @@ class CurlClient:
             ])
         return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
                          with_stats=with_stats,
-                         with_headers=with_headers,
-                         with_trace=with_trace)
+                         with_headers=with_headers)
 
     def http_upload(self, urls: List[str], data: str,
                     alpn_proto: Optional[str] = None,
                     with_stats: bool = True,
                     with_headers: bool = False,
-                    with_trace: bool = False,
                     extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
@@ -388,14 +391,12 @@ class CurlClient:
             ])
         return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
                          with_stats=with_stats,
-                         with_headers=with_headers,
-                         with_trace=with_trace)
+                         with_headers=with_headers)
 
     def http_put(self, urls: List[str], data=None, fdata=None,
                  alpn_proto: Optional[str] = None,
                  with_stats: bool = True,
                  with_headers: bool = False,
-                 with_trace: bool = False,
                  extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
@@ -413,8 +414,27 @@ class CurlClient:
         return self._raw(urls, intext=data,
                          alpn_proto=alpn_proto, options=extra_args,
                          with_stats=with_stats,
-                         with_headers=with_headers,
-                         with_trace=with_trace)
+                         with_headers=with_headers)
+
+    def http_form(self, urls: List[str], form: Dict[str, str],
+                  alpn_proto: Optional[str] = None,
+                  with_stats: bool = True,
+                  with_headers: bool = False,
+                  extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        for key, val in form.items():
+            extra_args.extend(['-F', f'{key}={val}'])
+        extra_args.extend([
+            '-o', 'download_#1.data',
+        ])
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=with_headers)
 
     def response_file(self, idx: int):
         return os.path.join(self._run_dir, f'download_{idx}.data')
@@ -435,7 +455,6 @@ class CurlClient:
         self._rmf(self._stdoutfile)
         self._rmf(self._stderrfile)
         self._rmf(self._headerfile)
-        self._rmf(self._tracefile)
         start = datetime.now()
         exception = None
         try:
@@ -452,11 +471,8 @@ class CurlClient:
             exception = 'TimeoutExpired'
         coutput = open(self._stdoutfile).readlines()
         cerrput = open(self._stderrfile).readlines()
-        ctrace = None
-        if os.path.exists(self._tracefile):
-            ctrace = open(self._tracefile).readlines()
         return ExecResult(args=args, exit_code=exitcode, exception=exception,
-                          stdout=coutput, stderr=cerrput, trace=ctrace,
+                          stdout=coutput, stderr=cerrput,
                           duration=datetime.now() - start,
                           with_stats=with_stats)
 
@@ -465,13 +481,11 @@ class CurlClient:
              force_resolve=True,
              with_stats=False,
              with_headers=True,
-             with_trace=False,
              def_tracing=True):
         args = self._complete_args(
             urls=urls, timeout=timeout, options=options, insecure=insecure,
             alpn_proto=alpn_proto, force_resolve=force_resolve,
-            with_headers=with_headers, with_trace=with_trace,
-            def_tracing=def_tracing)
+            with_headers=with_headers, def_tracing=def_tracing)
         r = self._run(args, intext=intext, with_stats=with_stats)
         if r.exit_code == 0 and with_headers:
             self._parse_headerfile(self._headerfile, r=r)
@@ -483,24 +497,18 @@ class CurlClient:
                        insecure=False, force_resolve=True,
                        alpn_proto: Optional[str] = None,
                        with_headers: bool = True,
-                       with_trace: bool = False,
                        def_tracing: bool = True):
         if not isinstance(urls, list):
             urls = [urls]
 
         args = [self._curl, "-s", "--path-as-is"]
-        if def_tracing:
-            args.extend(['--trace-time', '--trace-ids'])
         if with_headers:
             args.extend(["-D", self._headerfile])
-        if with_trace or self.env.verbose > 2:
-            args.extend(['--trace', self._tracefile])
-        elif def_tracing is False:
-            pass
-        elif self.env.verbose > 1:
-            args.extend(['--trace-ascii', self._tracefile])
-        elif not self._silent:
-            args.extend(['-v'])
+        if def_tracing is not False:
+            args.extend(['-v', '--trace-config', 'ids,time'])
+            if self.env.verbose > 1:
+                args.extend(['--trace-config', 'http/2,http/3,h2-proxy,h1-proxy'])
+                pass
 
         for url in urls:
             u = urlparse(urls[0])

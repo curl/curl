@@ -46,10 +46,10 @@ what protocol you want. It then defaults to HTTP but assumes others based on
 often-used host name prefixes. For example, for host names starting with
 "ftp." curl assumes you want FTP.
 
-You can specify any amount of URLs on the command line. They will be fetched
-in a sequential manner in the specified order unless you use --parallel. You
-can specify command line options and URLs mixed and in any order on the
-command line.
+You can specify any amount of URLs on the command line. They are fetched in a
+sequential manner in the specified order unless you use --parallel. You can
+specify command line options and URLs mixed and in any order on the command
+line.
 
 curl attempts to reuse connections when doing multiple transfers, so that
 getting many files from the same server do not use multiple connects and setup
@@ -98,9 +98,9 @@ for example '&', '?' and '*'.
 
 Switch off globbing with --globoff.
 .SH VARIABLES
-Starting in curl 8.3.0, curl supports command line variables. Set variables
-with --variable name=content or --variable name@file (where "file" can be
-stdin if set to a single dash (-)).
+curl supports command line variables (added in 8.3.0). Set variables with
+--variable name=content or --variable name@file (where "file" can be stdin if
+set to a single dash (-)).
 
 Variable contents can expanded in option parameters using "{{name}}" (without
 the quotes) if the option name is prefixed with "--expand-". This gets the
@@ -127,7 +127,7 @@ white space with *trim*, it can output the contents as a JSON quoted string
 with *json*, URL encode the string with *url* or base64 encode it with
 *b64*. You apply function to a variable expansion, add them colon separated to
 the right side of the variable. Variable content holding null bytes that are
-not encoded when expanded, will cause error.
+not encoded when expanded cause error.
 
 Example: get the contents of a file called $HOME/.secret into a variable
 called "fix". Make sure that the content is trimmed and percent-encoded sent
@@ -156,7 +156,7 @@ Lets you lookup words using online dictionaries.
 .IP FILE
 Read or write local files. curl does not support accessing file:// URL
 remotely, but when running on Microsoft Windows using the native UNC approach
-will work.
+works.
 .IP FTP(S)
 curl supports the File Transfer Protocol with a lot of tweaks and levers. With
 or without using TLS.
@@ -252,7 +252,7 @@ prefix it with "no-". However, in this list we mostly only list and show the
 
 When --next is used, it resets the parser state and you start again with a
 clean option state, except for the options that are "global". Global options
-will retain their values and meaning even after --next.
+retain their values and meaning even after --next.
 
 The following options are global:
 %GLOBALS.

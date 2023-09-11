@@ -23,10 +23,10 @@
 #
 ###########################################################################
 #
-# Experience has shown that the symbols-in-versions file is very useful to
-# applications that want to build with a wide range of libcurl versions.
-# It is however easy to get it wrong and the source gets a bit messy with all
-# the fixed numerical comparisons.
+# Experience has shown that the symbols-in-versions file is useful to
+# applications that want to build with a wide range of libcurl versions.  It
+# is however easy to get it wrong and the source gets a bit messy with all the
+# fixed numerical comparisons.
 #
 # The point of this script is to provide an easy-to-use macro for libcurl-
 # using applications to do preprocessor checks for specific libcurl defines,

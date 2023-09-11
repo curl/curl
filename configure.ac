@@ -3569,8 +3569,10 @@ CURL_RUN_IFELSE(
   [
   #include <time.h>
   #include <limits.h>
-  time_t t = -1;
-  return (t > 0);
+  int main(void) {
+    time_t t = -1;
+    return (t < 0);
+  }
   ],[
   AC_MSG_RESULT([yes])
   AC_DEFINE(HAVE_TIME_T_UNSIGNED, 1, [Define this if time_t is unsigned])
@@ -3935,17 +3937,113 @@ AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
 )
 
 dnl ************************************************************
-dnl disable cryptographic authentication
+dnl disable basic authentication
 dnl
-AC_MSG_CHECKING([whether to enable cryptographic authentication methods])
-AC_ARG_ENABLE(crypto-auth,
-AS_HELP_STRING([--enable-crypto-auth],[Enable cryptographic authentication])
-AS_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
+AC_MSG_CHECKING([whether to enable basic authentication method])
+AC_ARG_ENABLE(basic-auth,
+AS_HELP_STRING([--enable-basic-auth],[Enable basic authentication (default)])
+AS_HELP_STRING([--disable-basic-auth],[Disable basic authentication]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_CRYPTO_AUTH, 1, [to disable cryptographic authentication])
-       CURL_DISABLE_CRYPTO_AUTH=1
+       AC_DEFINE(CURL_DISABLE_BASIC_AUTH, 1, [to disable basic authentication])
+       CURL_DISABLE_BASIC_AUTH=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable bearer authentication
+dnl
+AC_MSG_CHECKING([whether to enable bearer authentication method])
+AC_ARG_ENABLE(bearer-auth,
+AS_HELP_STRING([--enable-bearer-auth],[Enable bearer authentication (default)])
+AS_HELP_STRING([--disable-bearer-auth],[Disable bearer authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_BEARER_AUTH, 1, [to disable bearer authentication])
+       CURL_DISABLE_BEARER_AUTH=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable digest authentication
+dnl
+AC_MSG_CHECKING([whether to enable digest authentication method])
+AC_ARG_ENABLE(digest-auth,
+AS_HELP_STRING([--enable-digest-auth],[Enable digest authentication (default)])
+AS_HELP_STRING([--disable-digest-auth],[Disable digest authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_DIGEST_AUTH, 1, [to disable digest authentication])
+       CURL_DISABLE_DIGEST_AUTH=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable kerberos authentication
+dnl
+AC_MSG_CHECKING([whether to enable kerberos authentication method])
+AC_ARG_ENABLE(kerberos-auth,
+AS_HELP_STRING([--enable-kerberos-auth],[Enable kerberos authentication (default)])
+AS_HELP_STRING([--disable-kerberos-auth],[Disable kerberos authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_KERBEROS_AUTH, 1, [to disable kerberos authentication])
+       CURL_DISABLE_KERBEROS_AUTH=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable negotiate authentication
+dnl
+AC_MSG_CHECKING([whether to enable negotiate authentication method])
+AC_ARG_ENABLE(negotiate-auth,
+AS_HELP_STRING([--enable-negotiate-auth],[Enable negotiate authentication (default)])
+AS_HELP_STRING([--disable-negotiate-auth],[Disable negotiate authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_NEGOTIATE_AUTH, 1, [to disable negotiate authentication])
+       CURL_DISABLE_NEGOTIATE_AUTH=1
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+
+dnl ************************************************************
+dnl disable aws
+dnl
+AC_MSG_CHECKING([whether to enable aws sig methods])
+AC_ARG_ENABLE(aws,
+AS_HELP_STRING([--enable-aws],[Enable AWS sig support (default)])
+AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable AWS sig support])
+       CURL_DISABLE_AWS=1
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -4498,20 +4596,19 @@ if test "x$hsts" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HSTS"
 fi
 
-if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
+if test "x$CURL_DISABLE_NEGOTIATE_AUTH" != "x1" -a \
     \( "x$HAVE_GSSAPI" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
 fi
 
-if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
+if test "x$CURL_DISABLE_KERBEROS_AUTH" != "x1" -a \
     \( "x$HAVE_GSSAPI" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Kerberos"
 fi
 
 use_curl_ntlm_core=no
 
-if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
-    "x$CURL_DISABLE_NTLM" != "x1"; then
+if test "x$CURL_DISABLE_NTLM" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \

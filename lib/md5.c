@@ -24,7 +24,8 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
+    || !defined(CURL_DISABLE_DIGEST_AUTH)
 
 #include <string.h>
 #include <curl/curl.h>
@@ -652,4 +653,4 @@ CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_CRYPTO_AUTH */
+#endif /* Using NTLM (without SSPI) || Digest */

@@ -69,9 +69,9 @@ int main(void)
     curl_slist_free_all(recipients);
 
     /* curl will not send the QUIT command until you call cleanup, so you
-     * should be able to reuse this connection for additional requests. It
-     * may not be a good idea to keep the connection open for a very long time
-     * though (more than a few minutes may result in the server timing out the
+     * should be able to reuse this connection for additional requests. It may
+     * not be a good idea to keep the connection open for a long time though
+     * (more than a few minutes may result in the server timing out the
      * connection) and you do want to clean up in the end.
      */
     curl_easy_cleanup(curl);

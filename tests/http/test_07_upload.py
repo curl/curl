@@ -42,6 +42,8 @@ class TestUpload:
     def _class_scope(self, env, httpd, nghttpx):
         if env.have_h3():
             nghttpx.start_if_needed()
+        env.make_data_file(indir=env.gen_dir, fname="data-63k", fsize=63*1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-64k", fsize=64*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
         httpd.clear_extra_configs()
@@ -58,7 +60,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto)
-        r.check_response(count=1, http_status=200)
+        r.check_stats(count=1, http_status=200, exitcode=0)
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == [data]
 
@@ -73,7 +75,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
-        r.check_response(count=1, http_status=200)
+        r.check_stats(count=1, http_status=200, exitcode=0)
         indata = open(fdata).readlines()
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == indata
@@ -90,7 +92,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto)
-        r.check_response(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == [data]
@@ -109,14 +111,14 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
-        r.check_response(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == [data]
 
     # upload large data sequentially, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_20_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_12_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -128,14 +130,14 @@ class TestUpload:
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
         r.check_response(count=count, http_status=200)
         indata = open(fdata).readlines()
-        r.check_response(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == indata
 
     # upload very large data sequentially, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_12_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_13_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -145,7 +147,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
-        r.check_response(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         indata = open(fdata).readlines()
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
@@ -165,7 +167,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
-        r.check_response(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == [data]
@@ -200,7 +202,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                              extra_args=['--parallel'])
-        r.check_response(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_response(count=count, http_status=200)
         for i in range(count):
@@ -220,7 +222,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]&chunk_delay=10ms'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                              extra_args=['--parallel'])
-        r.check_response(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_response(count=count, http_status=200)
         for i in range(count):
@@ -239,7 +241,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto)
-        r.check_response(count=count, http_status=200)
+        r.check_stats(count=count, http_status=200, exitcode=0)
 
     # issue #11157, upload that is 404'ed by server, needs to terminate
     # correctly and not time out on sending
@@ -272,6 +274,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?chunk_delay=2ms'
         curl = CurlClient(env=env)
         r = curl.run_direct(with_stats=True, args=[
+            '--verbose', '--trace-config', 'ids,time',
             '--resolve', f'{env.authority_for(env.domain1, proto)}:127.0.0.1',
             '--cacert', env.ca.cert_file,
             '--request', 'PUT',
@@ -293,7 +296,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put'
         curl = CurlClient(env=env)
         r = curl.run_direct(with_stats=True, args=[
-            '--verbose',
+            '--verbose', '--trace-config', 'ids,time',
             '--resolve', f'{env.authority_for(env.domain1, proto)}:127.0.0.1',
             '--cacert', env.ca.cert_file,
             '--request', 'PUT',
@@ -315,6 +318,117 @@ class TestUpload:
         r.check_response(count=1, http_status=200)
         # apache does not Upgrade on request with a body
         assert r.stats[0]['http_version'] == '1.1', f'{r}'
+        indata = open(fdata).readlines()
+        respdata = open(curl.response_file(0)).readlines()
+        assert respdata == indata
+
+    # upload to a 301,302,303 response
+    @pytest.mark.parametrize("redir", ['301', '302', '303'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_36_upload_30x(self, env: Env, httpd, nghttpx, repeat, redir, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        data = '0123456789' * 10
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo{redir}?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
+            '-L', '--trace-config', 'http/2,http/3'
+        ])
+        r.check_response(count=1, http_status=200)
+        respdata = open(curl.response_file(0)).readlines()
+        assert respdata == []  # was transformed to a GET
+
+    # upload to a 307 response
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_37_upload_307(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        data = '0123456789' * 10
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo307?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
+            '-L', '--trace-config', 'http/2,http/3'
+        ])
+        r.check_response(count=1, http_status=200)
+        respdata = open(curl.response_file(0)).readlines()
+        assert respdata == [data]  # was POST again
+
+    # POST form data, yet another code path in transfer
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_38_form_small(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
+        r = curl.http_form(urls=[url], alpn_proto=proto, form={
+            'name1': 'value1',
+        })
+        r.check_stats(count=1, http_status=200, exitcode=0)
+
+    # POST data urlencoded, small enough to be sent with request headers
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_39_post_urlenc_small(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        fdata = os.path.join(env.gen_dir, 'data-63k')
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
+            '--trace-config', 'http/2,http/3'
+        ])
+        r.check_stats(count=1, http_status=200, exitcode=0)
+        indata = open(fdata).readlines()
+        respdata = open(curl.response_file(0)).readlines()
+        assert respdata == indata
+
+    # POST data urlencoded, large enough to be sent separate from request headers
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_40_post_urlenc_large(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        fdata = os.path.join(env.gen_dir, 'data-64k')
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
+            '--trace-config', 'http/2,http/3'
+        ])
+        r.check_stats(count=1, http_status=200, exitcode=0)
+        indata = open(fdata).readlines()
+        respdata = open(curl.response_file(0)).readlines()
+        assert respdata == indata
+
+    # POST data urlencoded, small enough to be sent with request headers
+    # and request headers are so large that the first send is larger
+    # than our default upload buffer length (64KB).
+    # Unfixed, this will fail when run with CURL_DBG_SOCK_WBLOCK=80 most
+    # of the time
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_41_post_urlenc_small(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
+            pytest.skip("quiche has CWND issues with large requests")
+        fdata = os.path.join(env.gen_dir, 'data-63k')
+        curl = CurlClient(env=env)
+        extra_args = ['--trace-config', 'http/2,http/3']
+        # add enough headers so that the first send chunk is > 64KB
+        for i in range(63):
+            extra_args.extend(['-H', f'x{i:02d}: {"y"*1019}'])
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
+        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=extra_args)
+        r.check_stats(count=1, http_status=200, exitcode=0)
         indata = open(fdata).readlines()
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == indata

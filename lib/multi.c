@@ -667,8 +667,14 @@ static CURLcode multi_done(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   unsigned int i;
 
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  DEBUGF(infof(data, "multi_done[%s]: status: %d prem: %d done: %d",
+               multi_statename[data->mstate],
+               (int)status, (int)premature, data->state.done));
+#else
   DEBUGF(infof(data, "multi_done: status: %d prem: %d done: %d",
                (int)status, (int)premature, data->state.done));
+#endif
 
   if(data->state.done)
     /* Stop if multi_done() has already been called */
@@ -1104,8 +1110,7 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
-  data = multi->easyp;
-  while(data) {
+  for(data = multi->easyp; data; data = data->next) {
     int bitmap;
 #ifdef __clang_analyzer_
     /* to prevent "The left operand of '>=' is a garbage value" warnings */
@@ -1114,30 +1119,21 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
     bitmap = multi_getsock(data, sockbunch);
 
     for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++) {
-      curl_socket_t s = CURL_SOCKET_BAD;
-
-      if((bitmap & GETSOCK_READSOCK(i)) && VALID_SOCK(sockbunch[i])) {
+      if((bitmap & GETSOCK_MASK_RW(i)) && VALID_SOCK((sockbunch[i]))) {
         if(!FDSET_SOCK(sockbunch[i]))
           /* pretend it doesn't exist */
           continue;
-        FD_SET(sockbunch[i], read_fd_set);
-        s = sockbunch[i];
+        if(bitmap & GETSOCK_READSOCK(i))
+          FD_SET(sockbunch[i], read_fd_set);
+        if(bitmap & GETSOCK_WRITESOCK(i))
+          FD_SET(sockbunch[i], write_fd_set);
+        if((int)sockbunch[i] > this_max_fd)
+          this_max_fd = (int)sockbunch[i];
       }
-      if((bitmap & GETSOCK_WRITESOCK(i)) && VALID_SOCK(sockbunch[i])) {
-        if(!FDSET_SOCK(sockbunch[i]))
-          /* pretend it doesn't exist */
-          continue;
-        FD_SET(sockbunch[i], write_fd_set);
-        s = sockbunch[i];
-      }
-      if(s == CURL_SOCKET_BAD)
-        /* this socket is unused, break out of loop */
+      else {
         break;
-      if((int)s > this_max_fd)
-        this_max_fd = (int)s;
+      }
     }
-
-    data = data->next; /* check next handle */
   }
 
   *max_fd = this_max_fd;
@@ -1200,27 +1196,17 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     return CURLM_BAD_FUNCTION_ARGUMENT;
 
   /* Count up how many fds we have from the multi handle */
-  data = multi->easyp;
-  while(data) {
+  for(data = multi->easyp; data; data = data->next) {
     bitmap = multi_getsock(data, sockbunch);
 
-    for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++) {
-      curl_socket_t s = CURL_SOCKET_BAD;
-
-      if((bitmap & GETSOCK_READSOCK(i)) && VALID_SOCK((sockbunch[i]))) {
+    for(i = 0; i < MAX_SOCKSPEREASYHANDLE; i++) {
+      if((bitmap & GETSOCK_MASK_RW(i)) && VALID_SOCK((sockbunch[i]))) {
         ++nfds;
-        s = sockbunch[i];
       }
-      if((bitmap & GETSOCK_WRITESOCK(i)) && VALID_SOCK((sockbunch[i]))) {
-        ++nfds;
-        s = sockbunch[i];
-      }
-      if(s == CURL_SOCKET_BAD) {
+      else {
         break;
       }
     }
-
-    data = data->next; /* check next handle */
   }
 
   /* If the internally desired timeout is actually shorter than requested from
@@ -1260,49 +1246,42 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 
   if(curlfds) {
     /* Add the curl handles to our pollfds first */
-    data = multi->easyp;
-    while(data) {
+    for(data = multi->easyp; data; data = data->next) {
       bitmap = multi_getsock(data, sockbunch);
 
       for(i = 0; i < MAX_SOCKSPEREASYHANDLE; i++) {
-        curl_socket_t s = CURL_SOCKET_BAD;
+        if((bitmap & GETSOCK_MASK_RW(i)) && VALID_SOCK((sockbunch[i]))) {
+          struct pollfd *ufd = &ufds[nfds++];
 #ifdef USE_WINSOCK
-        long mask = 0;
+          long mask = 0;
 #endif
-        if((bitmap & GETSOCK_READSOCK(i)) && VALID_SOCK((sockbunch[i]))) {
-          s = sockbunch[i];
+          ufd->fd = sockbunch[i];
+          ufd->events = 0;
+          if(bitmap & GETSOCK_READSOCK(i)) {
 #ifdef USE_WINSOCK
-          mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
+            mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
 #endif
-          ufds[nfds].fd = s;
-          ufds[nfds].events = POLLIN;
-          ++nfds;
+            ufd->events |= POLLIN;
+          }
+          if(bitmap & GETSOCK_WRITESOCK(i)) {
+#ifdef USE_WINSOCK
+            mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
+            reset_socket_fdwrite(sockbunch[i]);
+#endif
+            ufd->events |= POLLOUT;
+          }
+#ifdef USE_WINSOCK
+          if(WSAEventSelect(sockbunch[i], multi->wsa_event, mask) != 0) {
+            if(ufds_malloc)
+              free(ufds);
+            return CURLM_INTERNAL_ERROR;
+          }
+#endif
         }
-        if((bitmap & GETSOCK_WRITESOCK(i)) && VALID_SOCK((sockbunch[i]))) {
-          s = sockbunch[i];
-#ifdef USE_WINSOCK
-          mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-          reset_socket_fdwrite(s);
-#endif
-          ufds[nfds].fd = s;
-          ufds[nfds].events = POLLOUT;
-          ++nfds;
-        }
-        /* s is only set if either being readable or writable is checked */
-        if(s == CURL_SOCKET_BAD) {
-          /* break on entry not checked for being readable or writable */
+        else {
           break;
         }
-#ifdef USE_WINSOCK
-        if(WSAEventSelect(s, multi->wsa_event, mask) != 0) {
-          if(ufds_malloc)
-            free(ufds);
-          return CURLM_INTERNAL_ERROR;
-        }
-#endif
       }
-
-      data = data->next; /* check next handle */
     }
   }
 
@@ -1411,8 +1390,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       /* Count up all our own sockets that had activity,
          and remove them from the event. */
       if(curlfds) {
-        data = multi->easyp;
-        while(data) {
+
+        for(data = multi->easyp; data; data = data->next) {
           bitmap = multi_getsock(data, sockbunch);
 
           for(i = 0; i < MAX_SOCKSPEREASYHANDLE; i++) {
@@ -1429,8 +1408,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
               break;
             }
           }
-
-          data = data->next;
         }
       }
 
@@ -2942,7 +2919,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
 
   /* walk over the sockets we got right now */
   for(i = 0; (i< MAX_SOCKSPEREASYHANDLE) &&
-        (curraction & (GETSOCK_READSOCK(i) | GETSOCK_WRITESOCK(i)));
+      (curraction & GETSOCK_MASK_RW(i));
       i++) {
     unsigned char action = CURL_POLL_NONE;
     unsigned char prevaction = 0;

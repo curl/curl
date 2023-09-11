@@ -34,18 +34,16 @@ specifies the first and last byte only(*)(HTTP)
 specifies two separate 100-byte ranges(*) (HTTP)
 .RE
 .IP
-(*) = NOTE that this will cause the server to reply with a multipart
-response, which will be returned as-is by curl! Parsing or otherwise
-transforming this response is the responsibility of the caller.
+(*) = NOTE that this causes the server to reply with a multipart response,
+which is returned as-is by curl! Parsing or otherwise transforming this
+response is the responsibility of the caller.
 
 Only digit characters (0-9) are valid in the 'start' and 'stop' fields of the
-'start-stop' range syntax. If a non-digit character is given in the range,
-the server's response will be unspecified, depending on the server's
-configuration.
+'start-stop' range syntax. If a non-digit character is given in the range, the
+server's response is unspecified, depending on the server's configuration.
 
-You should also be aware that many HTTP/1.1 servers do not have this feature
-enabled, so that when you attempt to get a range, you will instead get the
-whole document.
+Many HTTP/1.1 servers do not have this feature enabled, so that when you
+attempt to get a range, curl instead gets the whole document.
 
 FTP and SFTP range downloads only support the simple 'start-stop' syntax
 (optionally with one of the numbers omitted). FTP use depends on the extended
