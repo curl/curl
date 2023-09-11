@@ -51,7 +51,7 @@ http
 HTTP PUT with Expect: 100-continue and 417 response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt --expect100-timeout 999
 </command>
 # 1053700 x 'x', large enough to invoke the 100-continue behaviour
 <file name="%LOGDIR/test%TESTNUMBER.txt">
