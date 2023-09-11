@@ -174,6 +174,8 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->aws_sigv4);
   Curl_safefree(config->proto_str);
   Curl_safefree(config->proto_redir_str);
+
+  curl_slist_free_all(config->blocked_domains);
 }
 
 void config_free(struct OperationConfig *config)

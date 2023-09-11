@@ -462,6 +462,8 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.formp);
 #endif
 
+  curl_slist_free_all(data->set.blocked_domains);
+
   /* destruct wildcard structures if it is needed */
   Curl_wildcard_dtor(&data->wildcard);
   Curl_freeset(data);
