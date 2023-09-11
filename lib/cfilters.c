@@ -672,7 +672,7 @@ void Curl_pollset_change(struct Curl_easy *data,
   for(i = 0; i < ps->num; ++i) {
     if(ps->sockets[i] == sock) {
       if(remove_flags) {
-        ps->actions[i] &= ~remove_flags;
+        ps->actions[i] &= (unsigned char)(~remove_flags);
       }
       if(add_flags) {
         ps->actions[i] |= add_flags;
