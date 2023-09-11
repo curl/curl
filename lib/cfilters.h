@@ -501,7 +501,7 @@ void Curl_pollset_reset(struct Curl_easy *data,
  */
 void Curl_pollset_change(struct Curl_easy *data,
                          struct easy_pollset *ps, curl_socket_t sock,
-                         unsigned char add_flags, unsigned char remove_flags);
+                         int add_flags, int remove_flags);
 
 void Curl_pollset_set(struct Curl_easy *data,
                       struct easy_pollset *ps, curl_socket_t sock,

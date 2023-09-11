@@ -660,7 +660,7 @@ void Curl_pollset_reset(struct Curl_easy *data,
 
 void Curl_pollset_change(struct Curl_easy *data,
                        struct easy_pollset *ps, curl_socket_t sock,
-                       unsigned char add_flags, unsigned char remove_flags)
+                       int add_flags, int remove_flags)
 {
   unsigned int i;
 
@@ -669,13 +669,15 @@ void Curl_pollset_change(struct Curl_easy *data,
   if(!VALID_SOCK(sock))
     return;
 
+  DEBUGASSERT(add_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
+  DEBUGASSERT(remove_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
   for(i = 0; i < ps->num; ++i) {
     if(ps->sockets[i] == sock) {
       if(remove_flags) {
         ps->actions[i] &= (unsigned char)(~remove_flags);
       }
       if(add_flags) {
-        ps->actions[i] |= add_flags;
+        ps->actions[i] |= (unsigned char)add_flags;
       }
       /* all gone? remove socket */
       if(!ps->actions[i]) {
@@ -693,7 +695,7 @@ void Curl_pollset_change(struct Curl_easy *data,
     DEBUGASSERT(i < MAX_SOCKSPEREASYHANDLE);
     if(i < MAX_SOCKSPEREASYHANDLE) {
       ps->sockets[i] = sock;
-      ps->actions[i] = add_flags;
+      ps->actions[i] = (unsigned char)add_flags;
       ps->num = i + 1;
     }
   }
