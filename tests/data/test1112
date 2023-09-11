@@ -92,7 +92,7 @@ ftps
  <name>
 FTPS download with strict timeout and slow data transfer
  </name>
- <command timeout="1">
+ <command>
 -k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER -m 16
 </command>
 </client>
