@@ -1342,9 +1342,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           break;
         }
 
-	for (item = config->blocked_domains; item != NULL; item = item->next) {
-		my_setopt(curl, CURLOPT_BLOCK_DOMAIN, item->data);
-	}
+        for (item = config->blocked_domains; item != NULL; item = item->next) {
+          my_setopt(curl, CURLOPT_BLOCK_DOMAIN, item->data);
+        }
 
         /* new in libcurl 7.5 */
         if(config->proxy)

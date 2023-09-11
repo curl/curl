@@ -123,19 +123,19 @@ static void freednsentry(void *freethis);
 
 int Curl_add_blocked_domain(struct Curl_easy *data, const char *name)
 {
-	size_t i;
+  size_t i;
 
-	if (data == NULL || name == NULL) {
-		return CURLE_OUT_OF_MEMORY;
-	}
+  if (data == NULL || name == NULL) {
+    return CURLE_OUT_OF_MEMORY;
+  }
 
-	data->set.blocked_domains = curl_slist_append(
-	    data->set.blocked_domains, name);
-	if (data->set.blocked_domains == NULL) {
-		return CURLE_OUT_OF_MEMORY;
-	}
+  data->set.blocked_domains = curl_slist_append(
+  data->set.blocked_domains, name);
+  if (data->set.blocked_domains == NULL) {
+    return CURLE_OUT_OF_MEMORY;
+  }
 
-	return 0;
+  return 0;
 }
 
 /*
@@ -675,26 +675,26 @@ static bool tailmatch(const char *full, const char *part)
 
 static bool is_hostname_blocked(struct Curl_easy *data, const char *hostname)
 {
-	size_t i, lenblocked, lenhostname, offset;
-	struct curl_slist *item;
+  size_t lenblocked, lenhostname, offset;
+  struct curl_slist *item;
 
-	if (data == NULL || hostname == NULL) {
-		return (false);
-	}
+  if (data == NULL || hostname == NULL) {
+    return (false);
+  }
 
-	lenhostname = strlen(hostname);
-	for (item = data->set.blocked_domains; item != NULL; item = item->next) {
-		lenblocked = strlen(item->data);
-		if (lenblocked > lenhostname) {
-			continue;
-		}
-		offset = lenhostname - lenblocked;
-		if (curl_strequal(&hostname[offset], item->data)) {
-			return (true);
-		}
-	}
+  lenhostname = strlen(hostname);
+  for (item = data->set.blocked_domains; item != NULL; item = item->next) {
+    lenblocked = strlen(item->data);
+    if (lenblocked > lenhostname) {
+      continue;
+    }
+    offset = lenhostname - lenblocked;
+    if (curl_strequal(&hostname[offset], item->data)) {
+      return (true);
+    }
+  }
 
-	return (false);
+  return (false);
 }
 
 /*
@@ -726,7 +726,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
 
   if (is_hostname_blocked(data, hostname)) {
-	  return CURLRESOLV_ERROR;
+    return CURLRESOLV_ERROR;
   }
 
   *entry = NULL;

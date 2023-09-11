@@ -1667,8 +1667,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           GetStr(&config->hsts, nextarg);
         break;
       case 'd': /* --block-domain */
-	err = add2list(&config->blocked_domains, nextarg);
-	break;
+        err = add2list(&config->blocked_domains, nextarg);
+        break;
       default:  /* --cookie string coming up: */
         if(nextarg[0] == '@') {
           nextarg++;
