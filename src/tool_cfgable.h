@@ -297,6 +297,7 @@ struct OperationConfig {
   struct State state;             /* for create_transfer() */
   bool rm_partial;                /* on error, remove partially written output
                                      files */
+  struct curl_slist *blocked_domains;
 };
 
 struct GlobalConfig {

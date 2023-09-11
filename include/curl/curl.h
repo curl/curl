@@ -2210,6 +2210,9 @@ typedef enum {
   /* set a specific client IP for HAProxy PROXY protocol header? */
   CURLOPT(CURLOPT_HAPROXY_CLIENT_IP, CURLOPTTYPE_STRINGPOINT, 323),
 
+  /* block a domain resolution attempt */
+  CURLOPT(CURLOPT_BLOCK_DOMAIN, CURLOPTTYPE_STRINGPOINT, 324),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -3198,6 +3201,8 @@ CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
  *
  */
 CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
+
+CURL_EXTERN int Curl_add_blocked_domain(struct Curl_easy *, const char *);
 
 #define CURLPAUSE_RECV      (1<<0)
 #define CURLPAUSE_RECV_CONT (0)

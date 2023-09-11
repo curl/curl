@@ -121,6 +121,23 @@
 
 static void freednsentry(void *freethis);
 
+int Curl_add_blocked_domain(struct Curl_easy *data, const char *name)
+{
+	size_t i;
+
+	if (data == NULL || name == NULL) {
+		return CURLE_OUT_OF_MEMORY;
+	}
+
+	data->set.blocked_domains = curl_slist_append(
+	    data->set.blocked_domains, name);
+	if (data->set.blocked_domains == NULL) {
+		return CURLE_OUT_OF_MEMORY;
+	}
+
+	return 0;
+}
+
 /*
  * Curl_printable_address() stores a printable version of the 1st address
  * given in the 'ai' argument. The result will be stored in the buf that is
@@ -656,6 +673,30 @@ static bool tailmatch(const char *full, const char *part)
   return strncasecompare(part, &full[flen - plen], plen);
 }
 
+static bool is_hostname_blocked(struct Curl_easy *data, const char *hostname)
+{
+	size_t i, lenblocked, lenhostname, offset;
+	struct curl_slist *item;
+
+	if (data == NULL || hostname == NULL) {
+		return (false);
+	}
+
+	lenhostname = strlen(hostname);
+	for (item = data->set.blocked_domains; item != NULL; item = item->next) {
+		lenblocked = strlen(item->data);
+		if (lenblocked > lenhostname) {
+			continue;
+		}
+		offset = lenhostname - lenblocked;
+		if (curl_strequal(&hostname[offset], item->data)) {
+			return (true);
+		}
+	}
+
+	return (false);
+}
+
 /*
  * Curl_resolv() is the main name resolve function within libcurl. It resolves
  * a name and returns a pointer to the entry in the 'entry' argument (if one
@@ -683,14 +724,11 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   CURLcode result;
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
   struct connectdata *conn = data->conn;
-  /* We should intentionally error and not resolve .onion TLDs */
-  size_t hostname_len = strlen(hostname);
-  if(hostname_len >= 7 &&
-     (curl_strequal(&hostname[hostname_len - 6], ".onion") ||
-      curl_strequal(&hostname[hostname_len - 7], ".onion."))) {
-    failf(data, "Not resolving .onion address (RFC 7686)");
-    return CURLRESOLV_ERROR;
+
+  if (is_hostname_blocked(data, hostname)) {
+	  return CURLRESOLV_ERROR;
   }
+
   *entry = NULL;
 #ifndef CURL_DISABLE_DOH
   conn->bits.doh = FALSE; /* default is not */

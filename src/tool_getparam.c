@@ -234,6 +234,7 @@ static const struct LongShort aliases[]= {
   {"b",  "cookie",                   ARG_STRING},
   {"ba", "alt-svc",                  ARG_STRING},
   {"bb", "hsts",                     ARG_STRING},
+  {"bd", "block-domain",             ARG_STRING},
   {"B",  "use-ascii",                ARG_BOOL},
   {"c",  "cookie-jar",               ARG_STRING},
   {"C",  "continue-at",              ARG_STRING},
@@ -1665,6 +1666,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         else
           GetStr(&config->hsts, nextarg);
         break;
+      case 'd': /* --block-domain */
+	err = add2list(&config->blocked_domains, nextarg);
+	break;
       default:  /* --cookie string coming up: */
         if(nextarg[0] == '@') {
           nextarg++;

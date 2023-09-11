@@ -3168,6 +3168,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_QUICK_EXIT:
     data->set.quick_exit = (0 != va_arg(param, long)) ? 1L:0L;
     break;
+  case CURLOPT_BLOCK_DOMAIN:
+    /*
+     * A string that defines a domain to block
+     */
+    argptr = va_arg(param, char *);
+    result = Curl_add_blocked_domain(data, argptr);
+    if (result) {
+	    return result;
+    }
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

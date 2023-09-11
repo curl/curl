@@ -119,7 +119,6 @@ typedef unsigned int curl_prot_t;
    input easier and better. */
 #define CURL_MAX_INPUT_LENGTH 8000000
 
-
 #include "cookie.h"
 #include "psl.h"
 #include "formdata.h"
@@ -1915,6 +1914,7 @@ struct UserDefined {
 #ifdef USE_WEBSOCKETS
   BIT(ws_raw_mode);
 #endif
+  struct curl_slist *blocked_domains;
 };
 
 struct Names {
@@ -2008,6 +2008,7 @@ struct Curl_easy {
 #ifdef USE_HYPER
   struct hyptransfer hyp;
 #endif
+
 };
 
 #define LIBCURL_NAME "libcurl"
