@@ -273,7 +273,7 @@ similar to IPv4/6 happy eyeballing where the alternate address family is used
 in parallel after a short delay.
 
 The IPv4/6 eyeballing has a default of 200ms and you may override that via
-`--happy-eyeballs-timeout-ms value`.  Since HTTP/3 is still relatively new, we
+`--happy-eyeballs-timeout-ms value`. Since HTTP/3 is still relatively new, we
 decided to use this timeout also for the HTTP eyeballing - with a slight
 twist.
 
