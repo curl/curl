@@ -60,6 +60,8 @@ typedef void     Curl_cft_get_host(struct Curl_cfilter *cf,
                                   const char **pdisplay_host,
                                   int *pport);
 
+struct easy_pollset;
+
 /* Passing in an easy_pollset for monitoring of sockets, let
  * filters add or remove sockets actions (CURL_POLL_OUT, CURL_POLL_IN).
  * This may add a socket or, in case no actions remain, remove
