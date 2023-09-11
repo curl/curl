@@ -699,6 +699,15 @@ void Curl_pollset_change(struct Curl_easy *data,
   }
 }
 
+void Curl_pollset_set(struct Curl_easy *data,
+                      struct easy_pollset *ps, curl_socket_t sock,
+                      bool do_in, bool do_out)
+{
+  Curl_pollset_change(data, ps, sock,
+                      (do_in?CURL_POLL_IN:0)|(do_out?CURL_POLL_OUT:0),
+                      (!do_in?CURL_POLL_IN:0)|(!do_out?CURL_POLL_OUT:0));
+}
+
 static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
                    int bitmap, curl_socket_t *socks)
 {

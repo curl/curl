@@ -105,7 +105,6 @@ struct cf_quiche_ctx {
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   curl_off_t data_recvd;
   uint64_t max_idle_ms;              /* max idle time for QUIC conn */
-  size_t sends_on_hold;              /* # of streams with SEND_HOLD set */
   BIT(goaway);                       /* got GOAWAY from server */
   BIT(got_first_byte);               /* if first byte was received */
   BIT(x509_store_setup);             /* if x509 store has been set up */
@@ -240,6 +239,7 @@ struct stream_ctx {
   bool send_closed; /* stream is locally closed */
   bool resp_hds_complete;  /* complete, final response has been received */
   bool resp_got_header; /* TRUE when h3 stream has recvd some HEADER */
+  BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
 };
 
 #define H3_STREAM_CTX(d)    ((struct stream_ctx *)(((d) && (d)->req.p.http)? \
@@ -249,56 +249,20 @@ struct stream_ctx {
 #define H3_STREAM_ID(d)     (H3_STREAM_CTX(d)? \
                              H3_STREAM_CTX(d)->id : -2)
 
-static bool stream_send_is_suspended(struct Curl_easy *data)
-{
-  return (data->req.keepon & KEEP_SEND_HOLD);
-}
-
-static void stream_send_suspend(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
-{
-  struct cf_quiche_ctx *ctx = cf->ctx;
-
-  if((data->req.keepon & KEEP_SENDBITS) == KEEP_SEND) {
-    data->req.keepon |= KEEP_SEND_HOLD;
-    ++ctx->sends_on_hold;
-    if(H3_STREAM_ID(data) >= 0)
-      CURL_TRC_CF(data, cf, "[%"PRId64"] suspend sending",
-                  H3_STREAM_ID(data));
-    else
-      CURL_TRC_CF(data, cf, "[%s] suspend sending", data->state.url);
-  }
-}
-
-static void stream_send_resume(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
-{
-  struct cf_quiche_ctx *ctx = cf->ctx;
-
-  if(stream_send_is_suspended(data)) {
-    data->req.keepon &= ~KEEP_SEND_HOLD;
-    --ctx->sends_on_hold;
-    if(H3_STREAM_ID(data) >= 0)
-      CURL_TRC_CF(data, cf, "[%"PRId64"] resume sending",
-                  H3_STREAM_ID(data));
-    else
-      CURL_TRC_CF(data, cf, "[%s] resume sending", data->state.url);
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
-  }
-}
-
 static void check_resumes(struct Curl_cfilter *cf,
                           struct Curl_easy *data)
 {
-  struct cf_quiche_ctx *ctx = cf->ctx;
   struct Curl_easy *sdata;
+  struct stream_ctx *stream;
 
-  if(ctx->sends_on_hold) {
-    DEBUGASSERT(data->multi);
-    for(sdata = data->multi->easyp;
-        sdata && ctx->sends_on_hold; sdata = sdata->next) {
-      if(stream_send_is_suspended(sdata)) {
-        stream_send_resume(cf, sdata);
+  DEBUGASSERT(data->multi);
+  for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+    if(sdata->conn == data->conn) {
+      stream = H3_STREAM_CTX(sdata);
+      if(stream && stream->quic_flow_blocked) {
+        stream->quic_flow_blocked = FALSE;
+        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+        CURL_TRC_CF(data, cf, "[%"PRId64"] unblock", stream->id);
       }
     }
   }
@@ -327,16 +291,11 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
 
 static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
 
   (void)cf;
   if(stream) {
     CURL_TRC_CF(data, cf, "[%"PRId64"] easy handle is done", stream->id);
-    if(stream_send_is_suspended(data)) {
-      data->req.keepon &= ~KEEP_SEND_HOLD;
-      --ctx->sends_on_hold;
-    }
     Curl_bufq_free(&stream->recvbuf);
     Curl_h1_req_parse_free(&stream->h1);
     free(stream);
@@ -590,7 +549,6 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
     }
     stream->closed = TRUE;
     streamclose(cf->conn, "End of stream");
-    data->req.keepon &= ~KEEP_SEND_HOLD;
     break;
 
   case QUICHE_H3_EVENT_GOAWAY:
@@ -1037,9 +995,8 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
     if(QUICHE_H3_ERR_STREAM_BLOCKED == stream3_id) {
       /* quiche seems to report this error if the connection window is
        * exhausted. Which happens frequently and intermittent. */
-      CURL_TRC_CF(data, cf, "send_request(%s) rejected with BLOCKED",
-                  data->state.url);
-      stream_send_suspend(cf, data);
+      CURL_TRC_CF(data, cf, "[%"PRId64"] blocked", stream->id);
+      stream->quic_flow_blocked = TRUE;
       *err = CURLE_AGAIN;
       nwritten = -1;
       goto out;
@@ -1108,7 +1065,7 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       if(!quiche_conn_stream_writable(ctx->qconn, stream->id, len)) {
         CURL_TRC_CF(data, cf, "[%" PRId64 "] send_body(len=%zu) "
                     "-> window exhausted", stream->id, len);
-        stream_send_suspend(cf, data);
+        stream->quic_flow_blocked = TRUE;
       }
       *err = CURLE_AGAIN;
       nwritten = -1;
@@ -1177,8 +1134,8 @@ static bool stream_is_writeable(struct Curl_cfilter *cf,
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(data);
 
-  return stream &&
-         quiche_conn_stream_writable(ctx->qconn, (uint64_t)stream->id, 1);
+  return stream && (quiche_conn_stream_writable(ctx->qconn,
+                                                (uint64_t)stream->id, 1) > 0);
 }
 
 static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
@@ -1186,16 +1143,23 @@ static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
                                      struct easy_pollset *ps)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct SingleRequest *k = &data->req;
+  bool want_recv = CURL_WANT_RECV(data);
+  bool want_send = CURL_WANT_SEND(data);
 
-  /* in an HTTP/3 connection we can basically always get a frame so we should
-     always be ready for one */
-  Curl_pollset_add_in(data, ps, ctx->q.sockfd);
+  if(ctx->qconn && (want_recv || want_send)) {
+    struct stream_ctx *stream = H3_STREAM_CTX(data);
+    bool c_exhaust, s_exhaust;
 
-  /* we're still uploading or the HTTP/3 layer wants to send data */
-  if(((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
-     && stream_is_writeable(cf, data))
-    Curl_pollset_add_out(data, ps, ctx->q.sockfd);
+    c_exhaust = FALSE; /* Have not found any call in quiche that tells
+                          us if the connection itself is blocked */
+    s_exhaust = stream && stream->id >= 0 &&
+                (stream->quic_flow_blocked || !stream_is_writeable(cf, data));
+    want_recv = (want_recv || c_exhaust || s_exhaust);
+    want_send = (!s_exhaust && want_send) ||
+                 !Curl_bufq_is_empty(&ctx->q.sendbuf);
+
+    Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
+  }
 }
 
 /*

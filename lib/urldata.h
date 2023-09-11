@@ -571,6 +571,13 @@ struct hostname {
 #define KEEP_RECVBITS (KEEP_RECV | KEEP_RECV_HOLD | KEEP_RECV_PAUSE)
 #define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
+/* transfer wants to send is not PAUSE or HOLD */
+#define CURL_WANT_SEND(data) \
+  (((data)->req.keepon & KEEP_SENDBITS) == KEEP_SEND)
+/* transfer receive is not on PAUSE or HOLD */
+#define CURL_WANT_RECV(data) \
+  (!((data)->req.keepon & (KEEP_RECV_PAUSE|KEEP_RECV_HOLD)))
+
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
 #define USE_CURL_ASYNC
 struct Curl_async {

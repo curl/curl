@@ -191,6 +191,7 @@ struct h3_stream_ctx {
   bool closed; /* TRUE on stream close */
   bool reset;  /* TRUE on stream reset */
   bool send_closed; /* stream is local closed */
+  BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
 };
 
 #define H3_STREAM_CTX(d)  ((struct h3_stream_ctx *)(((d) && (d)->req.p.http)? \
@@ -246,6 +247,43 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_h1_req_parse_free(&stream->h1);
     free(stream);
     H3_STREAM_LCTX(data) = NULL;
+  }
+}
+
+static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         int64_t stream_id)
+{
+  struct Curl_easy *sdata;
+
+  (void)cf;
+  if(H3_STREAM_ID(data) == stream_id) {
+    return data;
+  }
+  else {
+    DEBUGASSERT(data->multi);
+    for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+      if((sdata->conn == data->conn) && H3_STREAM_ID(sdata) == stream_id) {
+        return sdata;
+      }
+    }
+  }
+  return NULL;
+}
+
+static void h3_drain_stream(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
+{
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
+  unsigned char bits;
+
+  (void)cf;
+  bits = CURL_CSELECT_IN;
+  if(stream && stream->upload_left && !stream->send_closed)
+    bits |= CURL_CSELECT_OUT;
+  if(data->state.dselect_bits != bits) {
+    data->state.dselect_bits = bits;
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
 
@@ -915,6 +953,9 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
+  struct Curl_easy *s_data;
+  struct h3_stream_ctx *stream;
   int rv;
   (void)tconn;
   (void)max_data;
@@ -924,7 +965,13 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   if(rv) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
-
+  s_data = get_stream_easy(cf, data, stream_id);
+  stream = H3_STREAM_CTX(s_data);
+  if(stream && stream->quic_flow_blocked) {
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] unblock quic flow", stream_id);
+    stream->quic_flow_blocked = FALSE;
+    h3_drain_stream(cf, data);
+  }
   return 0;
 }
 
@@ -1082,50 +1129,24 @@ static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
                                       struct easy_pollset *ps)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct SingleRequest *k = &data->req;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
-  struct cf_call_data save;
-  int win_exhausted;
+  bool want_recv = CURL_WANT_RECV(data);
+  bool want_send = CURL_WANT_SEND(data);
 
-  if(ctx->qconn) {
+  if(ctx->qconn && (want_recv || want_send)) {
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
+    struct cf_call_data save;
+    bool c_exhaust, s_exhaust;
+
     CF_DATA_SAVE(save, cf, data);
+    c_exhaust = !ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
+                !ngtcp2_conn_get_max_data_left(ctx->qconn);
+    s_exhaust = stream && stream->id >= 0 && stream->quic_flow_blocked;
+    want_recv = (want_recv || c_exhaust || s_exhaust);
+    want_send = (!s_exhaust && want_send) ||
+                 !Curl_bufq_is_empty(&ctx->q.sendbuf);
 
-    win_exhausted = !ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
-                    !ngtcp2_conn_get_max_data_left(ctx->qconn);
-
-    /* in HTTP/3 we can always get a frame, so check read */
-    if(win_exhausted) {
-      Curl_pollset_set_in_only(data, ps, ctx->q.sockfd);
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] pollset: send win exhausted",
-                  stream? stream->id : -1);
-    }
-    else
-      Curl_pollset_add_in(data, ps, ctx->q.sockfd);
-
-    /* we're still uploading and the HTTP/3 stream is writable */
-    if(!win_exhausted && (k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
-       ctx->h3conn && stream && stream->id >= 0 &&
-       nghttp3_conn_is_stream_writable(ctx->h3conn, stream->id)) {
-      Curl_pollset_add_out(data, ps, ctx->q.sockfd);
-    }
-
+    Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
-  }
-}
-
-static void h3_drain_stream(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
-{
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(data);
-  unsigned char bits;
-
-  (void)cf;
-  bits = CURL_CSELECT_IN;
-  if(stream && stream->upload_left && !stream->send_closed)
-    bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits) {
-    data->state.dselect_bits = bits;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
 
@@ -1154,7 +1175,6 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   else {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] CLOSED", stream->id);
   }
-  data->req.keepon &= ~KEEP_SEND_HOLD;
   h3_drain_stream(cf, data);
   return 0;
 }
@@ -1586,12 +1606,6 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
     if(rv) {
       return NGTCP2_ERR_CALLBACK_FAILURE;
     }
-    if((data->req.keepon & KEEP_SEND_HOLD) &&
-       (data->req.keepon & KEEP_SEND)) {
-      data->req.keepon &= ~KEEP_SEND_HOLD;
-      h3_drain_stream(cf, data);
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] unpausing acks", stream_id);
-    }
   }
   return 0;
 }
@@ -1873,15 +1887,13 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(stream && sent > 0 && stream->sendbuf_len_in_flight) {
     /* We have unacknowledged DATA and cannot report success to our
      * caller. Instead we EAGAIN and remember how much we have already
-     * "written" into our various internal connection buffers.
-     * We put the stream upload on HOLD, until this gets ACKed. */
+     * "written" into our various internal connection buffers. */
     stream->upload_blocked_len = sent;
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(len=%zu), "
                 "%zu bytes in flight -> EGAIN", stream->id, len,
                 stream->sendbuf_len_in_flight);
     *err = CURLE_AGAIN;
     sent = -1;
-    data->req.keepon |= KEEP_SEND_HOLD;
   }
 
 out:
@@ -2094,11 +2106,18 @@ static ssize_t read_pkt_to_send(void *userp,
     }
     else if(n < 0) {
       switch(n) {
-      case NGTCP2_ERR_STREAM_DATA_BLOCKED:
+      case NGTCP2_ERR_STREAM_DATA_BLOCKED: {
+        struct h3_stream_ctx *stream = H3_STREAM_CTX(x->data);
         DEBUGASSERT(ndatalen == -1);
         nghttp3_conn_block_stream(ctx->h3conn, stream_id);
+        CURL_TRC_CF(x->data, x->cf, "[%" PRId64 "] block quic flow",
+                    stream_id);
+        DEBUGASSERT(stream);
+        if(stream)
+          stream->quic_flow_blocked = TRUE;
         n = 0;
         break;
+      }
       case NGTCP2_ERR_STREAM_SHUT_WR:
         DEBUGASSERT(ndatalen == -1);
         nghttp3_conn_shutdown_stream_write(ctx->h3conn, stream_id);

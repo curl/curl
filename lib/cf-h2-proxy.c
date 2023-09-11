@@ -688,12 +688,8 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
        * window and *assume* that we treat this like a WINDOW_UPDATE. Some
        * servers send an explicit WINDOW_UPDATE, but not all seem to do that.
        * To be safe, we UNHOLD a stream in order not to stall. */
-      if((data->req.keepon & KEEP_SEND_HOLD) &&
-         (data->req.keepon & KEEP_SEND)) {
-        data->req.keepon &= ~KEEP_SEND_HOLD;
+      if(CURL_WANT_SEND(data)) {
         drain_tunnel(cf, data, &ctx->tunnel);
-        CURL_TRC_CF(data, cf, "[%d] un-holding after SETTINGS",
-                    stream_id);
       }
       break;
     case NGHTTP2_GOAWAY:
@@ -727,12 +723,8 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
     }
     break;
   case NGHTTP2_WINDOW_UPDATE:
-    if((data->req.keepon & KEEP_SEND_HOLD) &&
-       (data->req.keepon & KEEP_SEND)) {
-      data->req.keepon &= ~KEEP_SEND_HOLD;
-      Curl_expire(data, 0, EXPIRE_RUN_NOW);
-      CURL_TRC_CF(data, cf, "[%d] unpausing after win update",
-                  stream_id);
+    if(CURL_WANT_SEND(data)) {
+      drain_tunnel(cf, data, &ctx->tunnel);
     }
     break;
   default:
@@ -1177,31 +1169,30 @@ static bool cf_h2_proxy_data_pending(struct Curl_cfilter *cf,
 }
 
 static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        struct easy_pollset *ps)
+                                       struct Curl_easy *data,
+                                       struct easy_pollset *ps)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  struct cf_call_data save;
-  curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
-  bool window_exhausted;
+  bool want_recv = CURL_WANT_RECV(data);
+  bool want_send = CURL_WANT_SEND(data);
 
-  CF_DATA_SAVE(save, cf, data);
+  if(ctx->h2 && (want_recv || want_send)) {
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    struct cf_call_data save;
+    bool c_exhaust, s_exhaust;
 
-  window_exhausted = !nghttp2_session_get_remote_window_size(ctx->h2) ||
-      (ctx->tunnel.stream_id >= 0 &&
-       !nghttp2_session_get_stream_remote_window_size(ctx->h2,
-                                                      ctx->tunnel.stream_id));
-  /* HTTP/2 layer wants to send data) AND there's a window to send data in */
-  if(nghttp2_session_want_read(ctx->h2)) {
-    if(window_exhausted)
-      Curl_pollset_set_in_only(data, ps, sock);
-    else
-      Curl_pollset_add_in(data, ps, sock);
+    CF_DATA_SAVE(save, cf, data);
+    c_exhaust = !nghttp2_session_get_remote_window_size(ctx->h2);
+    s_exhaust = ctx->tunnel.stream_id >= 0 &&
+                !nghttp2_session_get_stream_remote_window_size(
+                   ctx->h2, ctx->tunnel.stream_id);
+    want_recv = (want_recv || c_exhaust || s_exhaust);
+    want_send = (!s_exhaust && want_send) ||
+                (!c_exhaust && nghttp2_session_want_write(ctx->h2));
+
+    Curl_pollset_set(data, ps, sock, want_recv, want_send);
+    CF_DATA_RESTORE(cf, save);
   }
-  if(!window_exhausted && nghttp2_session_want_write(ctx->h2))
-    Curl_pollset_add_out(data, ps, sock);
-
-  CF_DATA_RESTORE(cf, save);
 }
 
 static ssize_t h2_handle_tunnel_close(struct Curl_cfilter *cf,
