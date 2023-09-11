@@ -30,8 +30,9 @@ Content-Type: text/html
 -foo-
 </data1>
 
-# we use skip to make the test server never read the full payload off
-# the socket and instead return the response at once
+# We use skip to make the test server never read the full payload off
+# the socket and instead return the response at once. In actuality, the
+# long --expect100-timeout means that it will never get a chance to read this.
 <servercmd>
 skip: 100
 </servercmd>
@@ -51,7 +52,7 @@ http
 HTTP POST forced expect 100-continue with a 404
  </name>
  <command option="no-output">
--d @%LOGDIR/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -H "Expect: 100-continue"
+-d @%LOGDIR/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -H "Expect: 100-continue" --expect100-timeout 999
 </command>
 </client>
 
