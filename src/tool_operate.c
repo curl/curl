@@ -1063,7 +1063,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           if(!per->outfile) {
             /* extract the file name from the URL */
-            result = get_url_file_name(&per->outfile, per->this_url);
+            result = get_url_file_name(&per->outfile, per->this_url,
+                                       config->decode_remote_name);
             if(result) {
               errorf(global, "Failed to extract a sensible file name"
                      " from the URL to use for storage");

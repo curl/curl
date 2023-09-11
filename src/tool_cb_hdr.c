@@ -39,7 +39,11 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-static char *parse_filename(const char *ptr, size_t len);
+static char *get_cd_field(const char *cd, const char *fieldname,
+                          size_t namelen);
+static char *parse_filename_nostar(const char *ptr, size_t len);
+static char *parse_filename_star(const char *ptr, size_t len);
+static char *parse_filename_post_process(char *copy);
 
 #ifdef WIN32
 #define BOLD
@@ -143,49 +147,43 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
      (cb > 20) && checkprefix("Content-disposition:", str) &&
      (scheme == proto_http || scheme == proto_https)) {
     const char *p = str + 20;
+    char *filename = NULL;
+    char *filename_star = NULL;
+    char *filename_nostar = NULL;
 
-    /* look for the 'filename=' parameter
-       (encoded filenames (*=) are not supported) */
-    for(;;) {
-      char *filename;
-      size_t len;
-
-      while(*p && (p < end) && !ISALPHA(*p))
-        p++;
-      if(p > end - 9)
-        break;
-
-      if(memcmp(p, "filename=", 9)) {
-        /* no match, find next parameter */
-        while((p < end) && (*p != ';'))
-          p++;
-        continue;
-      }
-      p += 9;
-
-      /* this expression below typecasts 'cb' only to avoid
-         warning: signed and unsigned type in conditional expression
-      */
-      len = (ssize_t)cb - (p - str);
-      filename = parse_filename(p, len);
-      if(filename) {
-        if(outs->stream) {
-          /* indication of problem, get out! */
-          free(filename);
-          return CURL_WRITEFUNC_ERROR;
-        }
-
-        outs->is_cd_filename = TRUE;
-        outs->s_isreg = TRUE;
-        outs->fopened = FALSE;
-        outs->filename = filename;
-        outs->alloc_filename = TRUE;
-        hdrcbdata->honor_cd_filename = FALSE; /* done now! */
-        if(!tool_create_output_file(outs, per->config))
-          return CURL_WRITEFUNC_ERROR;
-      }
-      break;
+    /* filename*= is only supported when --decode-remote-name is given */
+    if(per->config->decode_remote_name) {
+      filename_star = get_cd_field(p, "filename*", 9);
+      if(filename_star)
+        filename = parse_filename_star(filename_star, 0);
     }
+    /* fall back to filename= header, which should not get url-decoded */
+    if(!filename_star) {
+      filename_nostar = get_cd_field(p, "filename", 8);
+      if(filename_nostar)
+        filename = parse_filename_nostar(filename_nostar, 0);
+    }
+
+    free(filename_star);
+    free(filename_nostar);
+
+    if(filename) {
+      if(outs->stream) {
+        /* indication of problem, get out! */
+        free(filename);
+        return CURL_WRITEFUNC_ERROR;
+      }
+
+      outs->is_cd_filename = TRUE;
+      outs->s_isreg = TRUE;
+      outs->fopened = FALSE;
+      outs->filename = filename;
+      outs->alloc_filename = TRUE;
+      hdrcbdata->honor_cd_filename = FALSE; /* done now! */
+      if(!tool_create_output_file(outs, per->config))
+        return CURL_WRITEFUNC_ERROR;
+    }
+
     if(!outs->stream && !tool_create_output_file(outs, per->config))
       return CURL_WRITEFUNC_ERROR;
   }
@@ -232,15 +230,94 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   return cb;
 }
 
-/*
- * Copies a file name part and returns an ALLOCATED data buffer.
+/* Returns an ALLOCATED value for a given field (e.g., "filename*") in a
+ * Content-Disposition header, or NULL if not found.
+ * Double quotes around the value, if any, are removed.
  */
-static char *parse_filename(const char *ptr, size_t len)
+static char *get_cd_field(const char *cd, const char *fieldname,
+                          size_t namelen) {
+  const char *p = cd;
+  const char *q;
+  const char *end;
+  char *out;
+  char last = '\0';
+  char quote = '"';
+  bool in_quotes = FALSE;
+
+  if(0 == namelen)
+    namelen = strlen(fieldname);
+
+  for(;;) {
+    if(!*p || *p == '\r' || *p == '\n')
+      return NULL;
+
+    /* point p to the beginning of a fieldname */
+    while(!ISALPHA(*p))
+      p++;
+
+    /* point end to the character after the field ends, e.g. ';' or '\0' */
+    end = p;
+    for(;;) {
+      end++;
+
+      if(*end == '\0' || *end == '\r' || *end == '\n') {
+        break;
+      }
+      else if(in_quotes) {
+        if(*end == quote) {
+          if(last != '\\') {
+            /* this is not a backslashed quote inside a string */
+            in_quotes = FALSE;
+          }
+        }
+      }
+      else if(*end == '"' || *end == '\'') {
+        in_quotes = TRUE;
+        quote = *end;
+      }
+      else if(*end == ';') {
+        break;
+      }
+
+      last = *end;
+    }
+
+    if(strncmp(p, fieldname, namelen) == 0 && p[namelen] == '=') {
+      p += namelen + 1;
+      if(*p == '"' || *p == '\'') {
+        quote = *p;
+        p++;
+        q = strrchr(p, quote);
+
+        /* the second quote may be missing -- tolerate it */
+        if(q)
+          end = q;
+      }
+
+      /* simple implementation of strndup() */
+      out = malloc(end - p + 1);
+      if(!out)
+        return NULL;
+      memcpy(out, p, end - p);
+      out[end - p] = '\0';
+
+      return out;
+    }
+
+    p = end;
+  }
+}
+
+/*
+ * Copies a file name part from a filename= field and returns an ALLOCATED
+ * data buffer.
+ */
+static char *parse_filename_nostar(const char *ptr, size_t len)
 {
   char *copy;
-  char *p;
-  char *q;
-  char  stop = '\0';
+
+  if(0 == len)
+    len = strlen(ptr);
 
   /* simple implementation of strndup() */
   copy = malloc(len + 1);
@@ -249,41 +326,70 @@ static char *parse_filename(const char *ptr, size_t len)
   memcpy(copy, ptr, len);
   copy[len] = '\0';
 
-  p = copy;
-  if(*p == '\'' || *p == '"') {
-    /* store the starting quote */
-    stop = *p;
-    p++;
-  }
-  else
-    stop = ';';
+  return parse_filename_post_process(copy);
+}
 
-  /* scan for the end letter and stop there */
-  q = strchr(p, stop);
-  if(q)
-    *q = '\0';
+/*
+ * Copies a file name part from a filename*= field, decodes it, and returns
+ * an ALLOCATED data buffer.
+ */
+static char *parse_filename_star(const char *ptr, size_t len)
+{
+  char *copy;
+  char *p;
+  char *q;
+
+  if(0 == len)
+    len = strlen(ptr);
+
+  /* simple implementation of strndup() */
+  copy = malloc(len + 1);
+  if(!copy)
+    return NULL;
+  memcpy(copy, ptr, len);
+  copy[len] = '\0';
+
+  /* The filename* field observes the 'ext-value' format specified in RFC 5987,
+   * Section 3.2, e.g.:
+   *   filename*=UTF-8'somelang'My%20cool%20filename.html
+   * The text encoding and language are ignored here, so we skip past the
+   * second ' to get to the URL-encoded filename.
+   */
+
+  p = strchr(copy, '\'');
+  if(!p)
+    return NULL;
+  q = strchr(p + 1, '\'');
+  if(!q)
+    return NULL;
+  q++;
+
+  p = copy;
+  copy = curl_easy_unescape(NULL, q, 0, NULL);
+  Curl_safefree(p);
+  if(!copy)
+    return NULL;
+
+  return parse_filename_post_process(copy);
+}
+
+static char *parse_filename_post_process(char *copy)
+{
+  char *p;
+  char *q;
 
   /* if the filename contains a path, only use filename portion */
+  p = copy;
   q = strrchr(p, '/');
-  if(q) {
+  if(q)
     p = q + 1;
-    if(!*p) {
-      Curl_safefree(copy);
-      return NULL;
-    }
-  }
 
   /* If the filename contains a backslash, only use filename portion. The idea
      is that even systems that don't handle backslashes as path separators
      probably want the path removed for convenience. */
   q = strrchr(p, '\\');
-  if(q) {
+  if(q)
     p = q + 1;
-    if(!*p) {
-      Curl_safefree(copy);
-      return NULL;
-    }
-  }
 
   /* make sure the file name doesn't end in \r or \n */
   q = strchr(p, '\r');

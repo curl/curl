@@ -180,12 +180,13 @@ fail:
  * Returns a pointer to a heap-allocated string or NULL if
  * no name part, at location indicated by first argument.
  */
-CURLcode get_url_file_name(char **filename, const char *url)
+CURLcode get_url_file_name(char **filename, const char *url, bool decode)
 {
-  const char *pc, *pc2;
   CURLU *uh = curl_url();
   char *path = NULL;
   CURLUcode uerr;
+  char *base;
+  CURLcode result;
 
   if(!uh)
     return CURLE_OUT_OF_MEMORY;
@@ -198,22 +199,31 @@ CURLcode get_url_file_name(char **filename, const char *url)
     if(!uerr) {
       curl_url_cleanup(uh);
 
-      pc = strrchr(path, '/');
-      pc2 = strrchr(pc ? pc + 1 : path, '\\');
-      if(pc2)
-        pc = pc2;
+      if(decode) {
+        char *decoded = curl_easy_unescape(NULL, path, 0, NULL);
+        free(path);
+        if(!decoded)
+          return CURLE_OUT_OF_MEMORY;
+        path = decoded;
+      }
 
-      if(pc)
-        /* duplicate the string beyond the slash */
-        pc++;
-      else
-        /* no slash => empty string */
-        pc = "";
+      result = get_path_base(path, &base);
+      if(result) {
+        return result;
+      }
 
-      *filename = strdup(pc);
-      curl_free(path);
-      if(!*filename)
-        return CURLE_OUT_OF_MEMORY;
+      /* if no slashes are present, return "" */
+      if(base == path) {
+        *filename = (char *)"";
+        free(path);
+        return CURLE_OK;
+      }
+      else {
+        *filename = strdup(base);
+        free(path);
+        if(!*filename)
+          return CURLE_OUT_OF_MEMORY;
+      }
 
 #if defined(MSDOS) || defined(WIN32)
       {
@@ -251,4 +261,24 @@ CURLcode get_url_file_name(char **filename, const char *url)
   }
   curl_url_cleanup(uh);
   return urlerr_cvt(uerr);
+}
+
+/* Returns a pointer into `path` that is after all pathname and
+ * pathname separator characters. Does not allocate.
+ * If no pathname information was present, returns `path`.
+ */
+CURLcode get_path_base(char *path, char **base)
+{
+  char *sep, *sep2;
+
+  sep = strrchr(path, '/');
+  sep2 = strrchr(sep ? sep + 1 : path, '\\');
+  if(sep2)
+    sep = sep2;
+  if(sep)
+    *base = sep + 1;
+  else
+    *base = path;
+
+  return CURLE_OK;
 }

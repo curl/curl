@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-O
+--decode-remote-name
+</keywords>
+</info>
+
+#
+<reply>
+<data nocheck="yes" crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 13:12:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+12345
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+# this relies on the debug feature to allow us to set directory to store the
+# -O output in
+<features>
+debug
+</features>
+<server>
+http
+</server>
+<name>
+-O and --decode-remote-name removes pathname (encoded \)
+</name>
+<setenv>
+CURL_TESTDIR=%LOGDIR
+</setenv>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/somedir%5Cname%20%TESTNUMBER -O --decode-remote-name
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /somedir%5Cname%20%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<file name="%LOGDIR/name %TESTNUMBER">
+12345
+</file>
+
+</verify>
+</testcase>

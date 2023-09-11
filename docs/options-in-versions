@@ -41,6 +41,7 @@
 --data-binary                        7.2
 --data-raw                           7.43.0
 --data-urlencode                     7.18.0
+--decode-remote-name                 9.9
 --delegation                         7.22.0
 --digest                             7.10.6
 --disable (-q)                       5.0

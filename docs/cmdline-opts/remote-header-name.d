@@ -7,7 +7,7 @@ Help: Use the header-provided filename
 Category: output
 Example: -OJ https://example.com/file
 Added: 7.20.0
-See-also: remote-name
+See-also: remote-name decode-remote-name
 Multi: boolean
 ---
 This option tells the --remote-name option to use the server-specified
