@@ -435,7 +435,7 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
   while(cf && !cf->connected && cf->next && !cf->next->connected)
     cf = cf->next;
   /* From there on, give all filters a chance to adjust the pollset.
-   * Lower filters called later, so they may override */
+   * Lower filters are called later, so they may override */
   while(cf) {
     cf->cft->adjust_pollset(cf, data, ps);
     cf = cf->next;
@@ -654,8 +654,11 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
 void Curl_pollset_reset(struct Curl_easy *data,
                         struct easy_pollset *ps)
 {
+  size_t i;
   (void)data;
-  ps->num = 0;
+  memset(ps, 0, sizeof(*ps));
+  for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++)
+    ps->sockets[i] = CURL_SOCKET_BAD;
 }
 
 void Curl_pollset_change(struct Curl_easy *data,
@@ -671,6 +674,7 @@ void Curl_pollset_change(struct Curl_easy *data,
 
   DEBUGASSERT(add_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
   DEBUGASSERT(remove_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
+  DEBUGASSERT((add_flags&remove_flags) == 0); /* no overlap */
   for(i = 0; i < ps->num; ++i) {
     if(ps->sockets[i] == sock) {
       if(remove_flags) {
@@ -682,8 +686,10 @@ void Curl_pollset_change(struct Curl_easy *data,
       /* all gone? remove socket */
       if(!ps->actions[i]) {
         if((i + 1) < ps->num) {
-          memmove(&ps->sockets[i], &ps->sockets[i + 1], ps->num - (i + 1));
-          memmove(&ps->actions[i], &ps->actions[i + 1], ps->num - (i + 1));
+          memmove(&ps->sockets[i], &ps->sockets[i + 1],
+                  (ps->num - (i + 1)) * sizeof(ps->sockets[0]));
+          memmove(&ps->actions[i], &ps->actions[i + 1],
+                  (ps->num - (i + 1)) * sizeof(ps->actions[0]));
         }
         --ps->num;
       }
@@ -692,6 +698,14 @@ void Curl_pollset_change(struct Curl_easy *data,
   }
   /* not present */
   if(add_flags) {
+    /* Having more SOCKETS per easy handle than what is defined
+     * is a programming error. This indicates that we need
+     * to raise this limit, making easy_pollset larger.
+     * Since we use this in tight loops, we do not want to make
+     * the pollset dynamic unnecessarily.
+     * The current maximum in practise is HTTP/3 eyeballing where
+     * we have up to 4 sockets involved in connection setup.
+     */
     DEBUGASSERT(i < MAX_SOCKSPEREASYHANDLE);
     if(i < MAX_SOCKSPEREASYHANDLE) {
       ps->sockets[i] = sock;
@@ -723,6 +737,7 @@ static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
         if(bitmap & GETSOCK_WRITESOCK(i))
           Curl_pollset_add_inout(data, ps, socks[i]);
         else
+          /* is READ, since we checked MASK_RW above */
           Curl_pollset_add_in(data, ps, socks[i]);
       }
       else

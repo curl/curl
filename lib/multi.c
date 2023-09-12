@@ -2868,7 +2868,6 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
 
   /* Fill in the 'current' struct with the state as it is now: what sockets to
      supervise and for what actions */
-  memset(&cur_poll, 0, sizeof(cur_poll));
   multi_getsock(data, &cur_poll);
 
   /* We have 0 .. N sockets already and we get to know about the 0 .. M

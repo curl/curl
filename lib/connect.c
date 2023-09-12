@@ -84,6 +84,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
 
 /*
  * Curl_timeleft() returns the amount of milliseconds left allowed for the
@@ -595,7 +598,7 @@ evaluate:
   *connected = FALSE; /* a very negative world view is best */
   now = Curl_now();
   ongoing = not_started = 0;
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
 
     if(!baller || baller->is_done)
@@ -656,7 +659,7 @@ evaluate:
   if(not_started > 0) {
     int added = 0;
 
-    for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+    for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
       struct eyeballer *baller = ctx->baller[i];
 
       if(!baller || baller->has_started)
@@ -691,7 +694,7 @@ evaluate:
   /* all ballers have failed to connect. */
   CURL_TRC_CF(data, cf, "all eyeballers failed");
   result = CURLE_COULDNT_CONNECT;
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
     if(!baller)
       continue;
@@ -838,7 +841,7 @@ static void cf_he_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGASSERT(ctx);
   DEBUGASSERT(data);
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     baller_free(ctx->baller[i], data);
     ctx->baller[i] = NULL;
   }
@@ -854,7 +857,7 @@ static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
   size_t i;
 
   if(!cf->connected) {
-    for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+    for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
       struct eyeballer *baller = ctx->baller[i];
       if(!baller || !baller->cf)
         continue;
@@ -943,7 +946,7 @@ static bool cf_he_data_pending(struct Curl_cfilter *cf,
   if(cf->connected)
     return cf->next->cft->has_data_pending(cf->next, data);
 
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
     if(!baller || !baller->cf)
       continue;
@@ -962,7 +965,7 @@ static struct curltime get_max_baller_time(struct Curl_cfilter *cf,
   size_t i;
 
   memset(&tmax, 0, sizeof(tmax));
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
 
     memset(&t, 0, sizeof(t));
@@ -987,7 +990,7 @@ static CURLcode cf_he_query(struct Curl_cfilter *cf,
       int reply_ms = -1;
       size_t i;
 
-      for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+      for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
         struct eyeballer *baller = ctx->baller[i];
         int breply_ms;
 
@@ -1112,10 +1115,6 @@ struct transport_provider transport_providers[] = {
   { TRNSPRT_UDP, Curl_cf_udp_create },
   { TRNSPRT_UNIX, Curl_cf_unix_create },
 };
-
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
 
 static cf_ip_connect_create *get_cf_create(int transport)
 {
